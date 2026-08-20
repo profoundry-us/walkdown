@@ -9,7 +9,7 @@ import { getThread, listThreads } from '../lib/threads.js';
 const HELP = `walkdown — verify that what you built is what you designed
 
 Usage:
-  walkdown status [--dir <blueprint>] [--target <name>] [--json]
+  walkdown status [<rule-id>] [--dir <blueprint>] [--target <name>] [--json]
   walkdown lint [--dir <blueprint>] [--no-checks] [--json]
   walkdown hash [--dir <blueprint>] [--write]
   walkdown threads [--dir <blueprint>] [--rule <id>] [--all] [--json]
@@ -17,7 +17,8 @@ Usage:
 
 Commands:
   status  Derived per-rule verification from the runs ledger: latest checks
-          per target, latest agent/human walkdowns, open threads.
+          per target, latest agent/human walkdowns, open threads. With a
+          rule id: that rule in full (statement, evidence, threads).
   lint    Validate the blueprint: schema, ids, storyboard refs, staleness,
           check coverage (via runner.list), threads, and runs.
   hash    Report statement_hash status for every rule; --write updates
@@ -110,31 +111,80 @@ function formatThreads(threads) {
   return threads.length > 2 ? `${shown} +${threads.length - 2}` : shown;
 }
 
+const paint = { pass: green, fail: red, stale: yellow, blocked: yellow, never: dim, skipped: dim, na: dim };
+const cellText = (cell, withActor = false) => {
+  if (cell.state === 'na') return '·';
+  if (cell.state === 'never') return 'never';
+  const glyph = { pass: '✓', fail: '✗', stale: '~', skipped: '–', blocked: '⊘' }[cell.state] ?? '?';
+  const label = withActor && cell.actor ? cell.actor : cell.state;
+  return `${glyph} ${label}`;
+};
+const truncate = (s, n) => {
+  const text = String(s ?? '').trim().replace(/\s+/g, ' ');
+  return [...text].length > n ? [...text].slice(0, n - 1).join('') + '…' : text;
+};
+
+function renderRuleDetail(blueprint, derived, ruleId, json) {
+  const row = derived.rows.find((r) => r.rule === ruleId);
+  if (!row) {
+    console.error(`No rule "${ruleId}". \`walkdown status\` lists all rules.`);
+    process.exit(2);
+  }
+  const exitCode = row.verdict === 'fail' ? 1 : 0;
+  if (json) {
+    console.log(JSON.stringify(row, null, 2));
+    process.exit(exitCode);
+  }
+
+  const verdictWord = { pass: green('verified'), fail: red('failing'), pending: yellow('pending') }[row.verdict];
+  console.log(`${row.rule} · ${verdictWord}`);
+  console.log(`  ${row.statement ?? dim('(no statement)')}`);
+  console.log(dim(`  story ${row.story} · verify ${row.verify.join(', ')} · screens ${row.screens.join(', ') || '—'}`));
+
+  console.log(`\n  ${dim('EVIDENCE')}`);
+  const sources = [
+    ...derived.targets.map((t) => [`checks/${t}`, row.cells[t]]),
+    ['agent', row.agent],
+    ['human', row.human],
+  ].filter(([, cell]) => cell.state !== 'na');
+  for (const [label, cell] of sources) {
+    const state = (paint[cell.state] ?? ((s) => s))(cellText(cell, label === 'human'));
+    const provenance = cell.runId ? dim(`  ${cell.runId}${cell.created ? ` · ${cell.created}` : ''}`) : '';
+    console.log(`    ${label.padEnd(15)}${state}${provenance}`);
+    if (cell.detail) console.log(dim(`                   ${truncate(cell.detail, 90)}`));
+    if (cell.evidence?.length) console.log(dim(`                   evidence: ${cell.evidence.join(', ')}`));
+  }
+
+  const threads = listThreads(blueprint, { rule: ruleId, all: true });
+  if (threads.length) {
+    console.log(`\n  ${dim('THREADS')}`);
+    for (const t of threads)
+      console.log(`    ${t.id} ${paintStatus(t.status)} — ${truncate(t.body, 70)}`);
+  }
+  process.exit(exitCode);
+}
+
 function cmdStatus(args) {
-  const { values } = parseArgs({
+  const { values, positionals } = parseArgs({
     args,
     options: {
       dir: { type: 'string' },
       target: { type: 'string' },
       json: { type: 'boolean', default: false },
     },
+    allowPositionals: true,
   });
   const blueprint = loadOrExit(values.dir);
-  const { targets, rows } = deriveStatus(blueprint, { target: values.target });
+  const derived = deriveStatus(blueprint, { target: values.target });
+  const { targets, rows } = derived;
+
+  if (positionals[0]) return renderRuleDetail(blueprint, derived, positionals[0], values.json);
 
   if (values.json) {
-    console.log(JSON.stringify({ targets, rows }, null, 2));
+    console.log(JSON.stringify({ targets, rows, activeThreads: listThreads(blueprint) }, null, 2));
     process.exit(rows.some((r) => r.verdict === 'fail') ? 1 : 0);
   }
 
-  const paint = { pass: green, fail: red, stale: yellow, blocked: yellow, never: dim, skipped: dim, na: dim };
-  const cellText = (cell, withActor = false) => {
-    if (cell.state === 'na') return '·';
-    if (cell.state === 'never') return 'never';
-    const glyph = { pass: '✓', fail: '✗', stale: '~', skipped: '–', blocked: '⊘' }[cell.state] ?? '?';
-    const label = withActor && cell.actor ? cell.actor : cell.state;
-    return `${glyph} ${label}`;
-  };
   const verdictMark = { pass: green('✓'), fail: red('✗'), pending: dim('○') };
 
   const headers = ['', 'RULE', ...targets.map((t) => t.toUpperCase()), 'AGENT', 'HUMAN', 'THREADS'];
@@ -165,6 +215,16 @@ function cmdStatus(args) {
   console.log(
     `\n${counts.pass ?? 0} verified, ${counts.pending ?? 0} pending, ${counts.fail ?? 0} failing`
   );
+
+  const active = listThreads(blueprint);
+  if (active.length) {
+    console.log(`\n  ${dim('ACTIVE THREADS')}`);
+    for (const t of active.slice(0, 6))
+      console.log(
+        `  ${t.id} ${paintStatus(t.status)} ${dim(`(${t.anchor?.rule ?? 'unanchored'})`)} — ${truncate(t.body, 60)}`
+      );
+    if (active.length > 6) console.log(dim(`  +${active.length - 6} more — walkdown threads`));
+  }
   process.exit(counts.fail ? 1 : 0);
 }
 

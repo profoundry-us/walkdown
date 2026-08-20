@@ -90,6 +90,20 @@ test('environments scope targets; agent pass does not satisfy human', () => {
   assert.equal(done.rows[0].verdict, 'pass');
 });
 
+test('rows carry statement/screens; cells carry run provenance for detail views', () => {
+  const run = checksRun('2026-01-01', 'local', 'fail');
+  run.results[0].evidence = ['runs/evidence/x.png'];
+  run.results[0].message = 'expected error to be visible';
+  const { rows } = deriveStatus(blueprint({ runs: [run] }));
+  assert.equal(rows[0].statement, STATEMENT);
+  assert.deepEqual(rows[0].screens, []);
+  const cell = rows[0].cells.local;
+  assert.equal(cell.runId, '2026-01-01');
+  assert.equal(cell.created, '2026-01-01');
+  assert.deepEqual(cell.evidence, ['runs/evidence/x.png']);
+  assert.equal(cell.detail, 'expected error to be visible');
+});
+
 test('open threads listed; terminal ones excluded', () => {
   const { rows } = deriveStatus(
     blueprint({

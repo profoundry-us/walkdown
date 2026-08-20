@@ -44,7 +44,7 @@ pane) that renders those same files.
 The first tooling slice — the two commands the hand-run milestone showed matter most:
 
 ```
-walkdown status [--dir <blueprint>] [--target <name>] [--json]
+walkdown status [<rule-id>] [--dir <blueprint>] [--target <name>] [--json]
 walkdown lint [--dir <blueprint>] [--no-checks] [--json]
 walkdown hash [--dir <blueprint>] [--write]
 walkdown threads [--rule <id>] [--all] [--json]
@@ -60,7 +60,10 @@ truncates with `+N`; `threads --rule <id>` is the full list.
 latest checks per target, latest agent and human walkdown verdicts, open threads, and a
 per-rule verdict (verified / pending / failing — exit 1 on any failure). A pass recorded
 against an older statement (per-result `statement_hash`) renders as `~ stale`, never as
-passing. `--json` is the agent-facing form.
+passing. The table is followed by an active-threads digest (truncated bodies, capped at
+six). With a rule id (`walkdown status waitlist.join.visual-match`), shows that rule in
+full: statement, each evidence source's latest result with run provenance and evidence
+paths, and every thread anchored to it. `--json` is the agent-facing form.
 
 `lint` validates the blueprint end to end: schema and duplicate IDs, storyboard
 screen/anchor references (including anchors mentioned in steps), statement-hash staleness,
