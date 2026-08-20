@@ -1,0 +1,11 @@
+{
+  "name": "walkdown-example",
+  "private": true,
+  "description": "First-milestone hand-run of the Walkdown blueprint schema",
+  "scripts": {
+    "checks": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1"
+  }
+}

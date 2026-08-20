@@ -1,0 +1,13 @@
+id: n-0001
+kind: note
+author: agent
+created: 2026-08-20T20:12:00Z
+anchor:
+  rule: waitlist.join.visual-match
+  screen: waitlist-join
+  element: waitlist.submit
+status: open
+body: >
+  Button copy does not match the prototype: prototype reads "Join the waitlist",
+  app reads "Join waitlist". Evidence: runs/evidence/2026-08-20T20-09Z/
+  proto-join.png vs app-join.png (agent walkdown 2026-08-20T20-12-00Z-local-02).

@@ -1,0 +1,16 @@
+screens:
+  - id: waitlist-join
+    title: Join the waitlist
+    prototype: /screens/waitlist-join.html
+    app: { path: /index.html }
+    anchors:
+      - waitlist.email
+      - waitlist.email-error
+      - waitlist.submit
+
+  - id: waitlist-confirm
+    title: Confirmation
+    prototype: /screens/waitlist-confirm.html
+    app: { path: /confirm.html }
+    anchors:
+      - waitlist.confirmed-email

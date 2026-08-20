@@ -1,0 +1,24 @@
+{
+  "run_id": "2026-08-20T20-12-00Z-local-02",
+  "created": "2026-08-20T20:12:00Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4310",
+  "git_sha": "b8a2d81",
+  "blueprint_sha": "uncommitted",
+  "results": [
+    {
+      "rule": "waitlist.join.visual-match",
+      "status": "fail",
+      "threads": ["n-0001"],
+      "evidence": [
+        "runs/evidence/2026-08-20T20-09Z/proto-join.png",
+        "runs/evidence/2026-08-20T20-09Z/app-join.png",
+        "runs/evidence/2026-08-20T20-09Z/proto-confirm.png",
+        "runs/evidence/2026-08-20T20-09Z/app-confirm.png"
+      ],
+      "reasoning": "waitlist-confirm corresponds fully (layout, hierarchy, copy; email value is dynamic data, expected to differ). waitlist-join matches on layout and hierarchy, but submit button copy diverges: prototype 'Join the waitlist' vs app 'Join waitlist'."
+    }
+  ]
+}

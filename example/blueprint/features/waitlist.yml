@@ -1,0 +1,52 @@
+feature: waitlist
+title: Launch waitlist signup
+source:
+  prd: (hand-written for milestone — no PRD)
+  prototype: example/prototype
+stories:
+  - id: waitlist.join
+    title: Visitor joins the waitlist
+    statement: As a visitor, I can join the launch waitlist with my email.
+    rules:
+      - id: waitlist.join.email-required
+        statement: A visitor must provide a valid email address before joining the waitlist.
+        verify: [checks]
+        screens: [waitlist-join]
+        steps:
+          statement_hash: "sha256:2fd5ce31a84c"
+          given:
+            - A visitor on screen `waitlist-join`
+          when:
+            - Leave anchor `waitlist.email` blank (or enter text without "@")
+            - Click anchor `waitlist.submit`
+          then:
+            - An error is visible at anchor `waitlist.email-error`
+            - The visitor remains on screen `waitlist-join`
+
+      - id: waitlist.join.confirmation
+        statement: After submitting a valid email, the visitor sees a confirmation showing the email they joined with.
+        verify: [checks]
+        screens: [waitlist-join, waitlist-confirm]
+        steps:
+          statement_hash: "sha256:8f7e3fe03fdf"
+          given:
+            - A visitor on screen `waitlist-join`
+          when:
+            - Enter a valid email into anchor `waitlist.email`
+            - Click anchor `waitlist.submit`
+          then:
+            - The visitor is on screen `waitlist-confirm`
+            - Anchor `waitlist.confirmed-email` shows the submitted email
+
+      - id: waitlist.join.visual-match
+        statement: The join and confirmation screens match the prototype's layout, hierarchy, and copy.
+        verify: [agent, human]
+        screens: [waitlist-join, waitlist-confirm]
+        steps:
+          statement_hash: "sha256:837d34b83fb1"
+          given:
+            - The prototype and app screens for `waitlist-join` and `waitlist-confirm`, side by side
+          when:
+            - Compare card layout, heading hierarchy, field/button placement, and copy
+          then:
+            - Structure, hierarchy, and copy correspond; minor rendering differences are acceptable

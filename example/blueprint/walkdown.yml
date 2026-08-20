@@ -1,0 +1,20 @@
+project: walkdown-example
+runner:
+  run_all: "npx playwright test"
+  run_for_rule: "npx playwright test --grep '@rule:{id}'"
+  list: "npx playwright test --list"
+  results: junit
+  targets:
+    local:
+      base_url: http://localhost:4310
+      env: { APP_HOST: "http://localhost:4310" }
+prototype:
+  root: prototype/     # storyboard `prototype:` paths resolve against this
+  port: 4311           # where `walkdown serve` hosts it for walkdowns/side-by-side
+embed:
+  anchor_attribute: data-testid
+authoring:
+  location: checks/
+  style: >
+    Playwright TS. Tag each test with @rule:<id>. Select elements by anchor
+    (getByTestId), never by CSS path. One rule per test.

@@ -44,6 +44,9 @@ flag checks written against an older wording.
 ```yaml
 # blueprint/walkdown.yml
 project: acme-store
+prototype:
+  root: prototype/          # storyboard `prototype:` paths resolve against this
+  port: 4311                # where `walkdown serve` hosts it for walkdowns/side-by-side
 runner:
   run_all:  "bundle exec rspec spec/workflows --format progress --format Walkdown::Formatter --out {results}"
   run_for_rule: "bundle exec rspec spec/workflows --tag 'rule:{id}' --format Walkdown::Formatter --out {results}"
