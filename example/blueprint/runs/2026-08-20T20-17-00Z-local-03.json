@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-08-20T20-17-00Z-local-03",
+  "created": "2026-08-20T20:17:00Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4310",
+  "git_sha": "2c95f37",
+  "blueprint_sha": "2c95f37",
+  "results": [
+    {
+      "rule": "waitlist.join.visual-match",
+      "status": "pass",
+      "threads": ["n-0001"],
+      "evidence": [
+        "runs/evidence/2026-08-20T20-16Z/app-join.png",
+        "runs/evidence/2026-08-20T20-09Z/proto-join.png"
+      ],
+      "reasoning": "Button copy now reads 'Join the waitlist', matching the prototype. Layout, hierarchy, and remaining copy unchanged and corresponding on both screens. Note n-0001 addressed; human confirmation still required (verify: [agent, human])."
+    }
+  ]
+}
