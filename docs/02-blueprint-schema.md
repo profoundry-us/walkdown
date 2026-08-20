@@ -101,6 +101,12 @@ stories:
 - Steps reference **screens and anchors by ID only** — never URLs, never CSS selectors.
   This is what makes them portable across prototype and app, and what makes generated
   checks resilient.
+- **`screens` is ordered by relevance, not by flow.** The first entry is the screen the
+  rule is *about* — where its outcome is observable and where the viewer deep-links when
+  the rule is selected. Remaining entries are traversed or supporting screens. The
+  journey through them already lives in the steps, so the list never needs to repeat it.
+  (Example: a "visitor sees a confirmation" rule lists the confirmation screen first,
+  even though the flow starts on the form.)
 
 ## Storyboard
 

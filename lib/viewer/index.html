@@ -125,7 +125,7 @@ function renderRules() {
       el.innerHTML = `<span class="glyph ${cls}">${session?.verdicts[row.rule]
         ? (session.verdicts[row.rule] === 'pass' ? '✓' : '✗') : g}</span><span>${short}</span>` +
         (nThr ? `<span class="thr">${nThr} ⚑</span>` : '');
-      el.onclick = () => { selected = row; renderRules(); renderDetail(); gotoScreen(row.screens[0] ?? screen); };
+      el.onclick = () => { selected = row; gotoScreen(row.screens[0] ?? screen); renderRules(); renderDetail(); };
       nav.appendChild(el);
     }
   }
