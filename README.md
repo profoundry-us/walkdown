@@ -47,7 +47,14 @@ The first tooling slice — the two commands the hand-run milestone showed matte
 walkdown status [--dir <blueprint>] [--target <name>] [--json]
 walkdown lint [--dir <blueprint>] [--no-checks] [--json]
 walkdown hash [--dir <blueprint>] [--write]
+walkdown threads [--rule <id>] [--all] [--json]
+walkdown thread <id> [--json]
 ```
+
+`threads` lists active questions and notes (newest first, with anchors and a body
+preview); `--all` includes resolved ones. `thread <id>` shows one in full — anchor,
+body, and replies. The status table shows at most two thread refs per rule and
+truncates with `+N`; `threads --rule <id>` is the full list.
 
 `status` renders the derived per-rule verification table straight from the runs ledger:
 latest checks per target, latest agent and human walkdown verdicts, open threads, and a

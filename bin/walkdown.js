@@ -4,6 +4,7 @@ import { findBlueprintDir, loadBlueprint } from '../lib/blueprint.js';
 import { runHashCommand } from '../lib/hash-cmd.js';
 import { lint } from '../lib/lint.js';
 import { deriveStatus } from '../lib/status.js';
+import { getThread, listThreads } from '../lib/threads.js';
 
 const HELP = `walkdown — verify that what you built is what you designed
 
@@ -11,21 +12,28 @@ Usage:
   walkdown status [--dir <blueprint>] [--target <name>] [--json]
   walkdown lint [--dir <blueprint>] [--no-checks] [--json]
   walkdown hash [--dir <blueprint>] [--write]
+  walkdown threads [--dir <blueprint>] [--rule <id>] [--all] [--json]
+  walkdown thread <id> [--dir <blueprint>] [--json]
 
 Commands:
-  status Derived per-rule verification from the runs ledger: latest checks
-         per target, latest agent/human walkdowns, open threads.
-  lint   Validate the blueprint: schema, ids, storyboard refs, staleness,
-         check coverage (via runner.list), threads, and runs.
-  hash   Report statement_hash status for every rule; --write updates
-         missing/stale hashes in place (formatting preserved).
+  status  Derived per-rule verification from the runs ledger: latest checks
+          per target, latest agent/human walkdowns, open threads.
+  lint    Validate the blueprint: schema, ids, storyboard refs, staleness,
+          check coverage (via runner.list), threads, and runs.
+  hash    Report statement_hash status for every rule; --write updates
+          missing/stale hashes in place (formatting preserved).
+  threads List active threads (questions & notes); --all includes
+          incorporated/verified/waived, --rule filters by anchored rule.
+  thread  Show one thread in full: anchor, body, and replies.
 
 Options:
   --dir <path>     Blueprint directory (default: found from cwd upward)
   --target <name>  status: only this target's checks column
+  --rule <id>      threads: only threads anchored to this rule
+  --all            threads: include terminal (incorporated/verified/waived)
   --no-checks      lint: skip running the runner.list command
   --write          hash: write missing/stale hashes back to feature files
-  --json           status/lint: machine-readable output on stdout
+  --json           status/lint/threads/thread: machine-readable output
 `;
 
 const tty = process.stdout.isTTY;
@@ -94,6 +102,14 @@ function cmdHash(args) {
   process.exit(exitCode);
 }
 
+/** "n-0001 addressed, q-0002 open" up to two threads; beyond that "n-0001 addressed +2".
+ *  `walkdown threads --rule <id>` shows the full list. */
+function formatThreads(threads) {
+  if (!threads.length) return '—';
+  const shown = threads.slice(0, 2).map((t) => `${t.id} ${t.status}`).join(', ');
+  return threads.length > 2 ? `${shown} +${threads.length - 2}` : shown;
+}
+
 function cmdStatus(args) {
   const { values } = parseArgs({
     args,
@@ -128,7 +144,7 @@ function cmdStatus(args) {
     ...targets.map((t) => ({ text: cellText(r.cells[t]), state: r.cells[t].state })),
     { text: cellText(r.agent), state: r.agent.state },
     { text: cellText(r.human, true), state: r.human.state },
-    r.threads.map((t) => `${t.id} ${t.status}`).join(', ') || '—',
+    formatThreads(r.threads),
   ]);
 
   const plain = (c) => (typeof c === 'string' ? c : c.text);
@@ -152,10 +168,84 @@ function cmdStatus(args) {
   process.exit(counts.fail ? 1 : 0);
 }
 
+const STATUS_COLOR = { open: yellow, answered: yellow, addressed: green, incorporated: green, verified: green, waived: dim };
+const paintStatus = (s) => (STATUS_COLOR[s] ?? ((x) => x))(s);
+
+function anchorText(a = {}) {
+  return [a.rule && `rule ${a.rule}`, a.screen && `screen ${a.screen}`, a.element && `element ${a.element}`]
+    .filter(Boolean)
+    .join(' · ') || '(unanchored)';
+}
+
+function cmdThreads(args) {
+  const { values } = parseArgs({
+    args,
+    options: {
+      dir: { type: 'string' },
+      rule: { type: 'string' },
+      all: { type: 'boolean', default: false },
+      json: { type: 'boolean', default: false },
+    },
+  });
+  const blueprint = loadOrExit(values.dir);
+  const threads = listThreads(blueprint, { rule: values.rule, all: values.all });
+
+  if (values.json) {
+    console.log(JSON.stringify(threads, null, 2));
+    process.exit(0);
+  }
+  if (!threads.length) {
+    console.log(values.all ? 'No threads.' : 'No active threads. (--all includes resolved ones.)');
+    process.exit(0);
+  }
+  console.log(dim(`walkdown threads — ${threads.length} ${values.all ? 'total' : 'active'}\n`));
+  for (const t of threads) {
+    const firstLine = String(t.body ?? '').trim().split('\n')[0];
+    console.log(`  ${t.id}  ${t.kind.padEnd(8)} ${paintStatus(String(t.status).padEnd(12))} ${dim(anchorText(t.anchor))}`);
+    console.log(`      ${firstLine.length > 100 ? firstLine.slice(0, 97) + '…' : firstLine}\n`);
+  }
+  console.log(dim('  walkdown thread <id> shows a thread in full'));
+  process.exit(0);
+}
+
+function cmdThread(args) {
+  const { values, positionals } = parseArgs({
+    args,
+    options: { dir: { type: 'string' }, json: { type: 'boolean', default: false } },
+    allowPositionals: true,
+  });
+  const id = positionals[0];
+  if (!id) {
+    console.error('Usage: walkdown thread <id>');
+    process.exit(2);
+  }
+  const blueprint = loadOrExit(values.dir);
+  const t = getThread(blueprint, id);
+  if (!t) {
+    console.error(`No thread "${id}". \`walkdown threads --all\` lists every thread.`);
+    process.exit(2);
+  }
+  if (values.json) {
+    console.log(JSON.stringify(t, null, 2));
+    process.exit(0);
+  }
+  console.log(`${t.id} · ${t.kind} · ${paintStatus(t.status)}${t.status === 'waived' && t.waived_by ? dim(` by ${t.waived_by}`) : ''}`);
+  console.log(dim(`  ${anchorText(t.anchor)}`));
+  console.log(dim(`  ${t.author ?? 'unknown'} · ${t.created ?? 'undated'}`));
+  console.log(`\n  ${String(t.body ?? '').trim().replace(/\n/g, '\n  ')}`);
+  for (const r of t.replies ?? []) {
+    console.log(dim(`\n  ↳ ${r.author ?? 'unknown'} · ${r.created ?? 'undated'}`));
+    console.log(`    ${String(r.body ?? '').trim().replace(/\n/g, '\n    ')}`);
+  }
+  process.exit(0);
+}
+
 const [cmd, ...rest] = process.argv.slice(2);
 if (cmd === 'lint') cmdLint(rest);
 else if (cmd === 'status') cmdStatus(rest);
 else if (cmd === 'hash') cmdHash(rest);
+else if (cmd === 'threads') cmdThreads(rest);
+else if (cmd === 'thread') cmdThread(rest);
 else {
   console.log(HELP);
   process.exit(cmd && cmd !== 'help' && cmd !== '--help' ? 2 : 0);
