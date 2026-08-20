@@ -14,6 +14,7 @@ Usage:
   walkdown hash [--dir <blueprint>] [--write]
   walkdown threads [--dir <blueprint>] [--rule <id>] [--all] [--json]
   walkdown thread <id> [--dir <blueprint>] [--json]
+  walkdown serve [--dir <blueprint>] [--port <n>]
 
 Commands:
   status  Derived per-rule verification from the runs ledger: latest checks
@@ -26,6 +27,9 @@ Commands:
   threads List active threads (questions & notes); --all includes
           incorporated/verified/waived, --rule filters by anchored rule.
   thread  Show one thread in full: anchor, body, and replies.
+  serve   Start the local viewer: status board, side-by-side prototype/app
+          with the embed (pinning), and human walkdown recording. Also
+          serves /embed.js and the pin/walkdown API.
 
 Options:
   --dir <path>     Blueprint directory (default: found from cwd upward)
@@ -300,12 +304,29 @@ function cmdThread(args) {
   process.exit(0);
 }
 
+async function cmdServe(args) {
+  const { values } = parseArgs({
+    args,
+    options: { dir: { type: 'string' }, port: { type: 'string' } },
+  });
+  const blueprint = loadOrExit(values.dir);
+  const { startServe } = await import('../lib/serve.js');
+  const { port } = await startServe(blueprint.dir, {
+    port: values.port ? Number(values.port) : undefined,
+  });
+  console.log(`walkdown serve — ${blueprint.dir}`);
+  console.log(`  viewer:  http://localhost:${port}/`);
+  console.log(`  embed:   <script src="http://localhost:${port}/embed.js" data-walkdown></script>`);
+  console.log(dim('  Ctrl-C to stop'));
+}
+
 const [cmd, ...rest] = process.argv.slice(2);
 if (cmd === 'lint') cmdLint(rest);
 else if (cmd === 'status') cmdStatus(rest);
 else if (cmd === 'hash') cmdHash(rest);
 else if (cmd === 'threads') cmdThreads(rest);
 else if (cmd === 'thread') cmdThread(rest);
+else if (cmd === 'serve') cmdServe(rest);
 else {
   console.log(HELP);
   process.exit(cmd && cmd !== 'help' && cmd !== '--help' ? 2 : 0);

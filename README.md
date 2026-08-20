@@ -75,6 +75,23 @@ records. Errors exit 1; warnings don't.
 in place, preserving YAML formatting. Hashes are sha256 of the whitespace-normalized
 statement, stored truncated (`sha256:` + 12 hex).
 
+## walkdown serve — the viewer
+
+`walkdown serve` starts the local server (default port 4700, `127.0.0.1` only):
+
+- **Viewer** at `/` — the status board, rule detail, and prototype/app **side by side**
+  (the prototype is mounted at `/prototype/`; the app iframe points at the local
+  target's `base_url`). Clicking a rule navigates both surfaces via the storyboard.
+- **Pin mode** — with the embed snippet in a page (`<script
+  src="http://localhost:4700/embed.js" data-walkdown>`), clicking a real element pins a
+  note or question to its anchor; the thread lands in `blueprint/threads/` with rule,
+  screen, element, and author attached. Standalone pages (opened outside the viewer)
+  resolve their screen from the URL and post to the same server — including HTTPS
+  staging pages, via the Private-Network-Access preflight.
+- **Human walkdowns** — enter your name, Start walkdown, judge rules Pass/Fail, Finish:
+  the session is appended to `blueprint/runs/` as a hash-stamped `kind: walkdown`
+  record, satisfying `human` verify requirements.
+
 ## Playwright reporter
 
 The write side of the loop: add `['walkdown/reporter']` to a project's Playwright
@@ -93,5 +110,8 @@ integration fixture: `node bin/walkdown.js lint --dir example/blueprint`.
 Design docs + first milestone (a hand-run of the schema in [example/](example/)) +
 `lint`/`hash`/`status`/`threads` tooling + run-record emitters for both ecosystems:
 the Playwright reporter (`walkdown/reporter`) and the RSpec formatter
-([adapters/rspec/](adapters/rspec/), with its own fixture suite). Next slice:
-`serve` (viewer + embed).
+([adapters/rspec/](adapters/rspec/), with its own fixture suite) + `walkdown serve`
+(viewer, embed, pins, human walkdowns). The v1 scope from
+[00-vision.md](docs/00-vision.md) is complete except `extract` (PRD/prototype →
+blueprint merge). Publishing (npm `walkdown` + `@profoundry` scope, RubyGems
+`walkdown-rspec`) is the next step before sharing.

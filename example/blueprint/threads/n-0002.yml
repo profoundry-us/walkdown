@@ -1,0 +1,10 @@
+id: n-0002
+kind: note
+author: topher
+created: 2026-08-20T21:17:38Z
+anchor:
+  rule: waitlist.join.visual-match
+  screen: waitlist-join
+  element: waitlist.submit
+status: open
+body: Button should show a loading spinner while submitting.

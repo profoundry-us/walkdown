@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Walkdown</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --panel: #fff; --ink: #16181d; --muted: #6b7280; --line: #e5e7eb;
+    --blue: #2563eb; --green: #16a34a; --red: #dc2626; --amber: #d97706;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body { font: 14px/1.45 -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink);
+         height: 100vh; display: flex; flex-direction: column; }
+  header { display: flex; align-items: center; gap: 14px; padding: 10px 16px; background: var(--panel);
+           border-bottom: 1px solid var(--line); }
+  header h1 { font-size: 15px; }
+  header .counts { color: var(--muted); font-size: 13px; }
+  header .spacer { flex: 1; }
+  input[type=text] { font: inherit; padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; width: 120px; }
+  button { font: inherit; padding: 5px 12px; border: 1px solid var(--line); border-radius: 6px;
+           background: var(--panel); cursor: pointer; }
+  button.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+  button.on { background: var(--amber); border-color: var(--amber); color: #fff; }
+  main { flex: 1; display: grid; grid-template-columns: 300px 340px 1fr; min-height: 0; }
+  #rules { overflow-y: auto; border-right: 1px solid var(--line); background: var(--panel); padding: 8px 0; }
+  .story-h { padding: 8px 14px 4px; font-size: 11px; font-weight: 700; letter-spacing: .04em;
+             text-transform: uppercase; color: var(--muted); }
+  .rule { display: flex; gap: 8px; align-items: baseline; padding: 7px 14px; cursor: pointer; font-size: 13px; }
+  .rule:hover { background: var(--bg); }
+  .rule.sel { background: #e8effd; }
+  .rule .glyph { width: 14px; text-align: center; }
+  .v-pass { color: var(--green); } .v-fail { color: var(--red); } .v-pending { color: var(--muted); }
+  .rule .thr { margin-left: auto; font-size: 11px; color: var(--amber); }
+  #detail { overflow-y: auto; border-right: 1px solid var(--line); background: var(--panel); padding: 16px; }
+  #detail h2 { font-size: 14px; word-break: break-all; }
+  #detail .stmt { margin: 8px 0 10px; }
+  #detail .meta { color: var(--muted); font-size: 12px; margin-bottom: 12px; }
+  .sect { margin-top: 14px; font-size: 11px; font-weight: 700; letter-spacing: .04em; color: var(--muted);
+          text-transform: uppercase; }
+  .evrow { display: flex; gap: 8px; padding: 5px 0; font-size: 13px; border-bottom: 1px solid var(--line); }
+  .evrow .src { width: 100px; color: var(--muted); }
+  .thread { padding: 8px 10px; margin: 8px 0; background: var(--bg); border-radius: 8px; font-size: 13px; }
+  .thread .th-h { font-weight: 600; margin-bottom: 3px; }
+  .thread .st-open, .thread .st-answered { color: var(--amber); }
+  .thread .st-addressed, .thread .st-verified, .thread .st-incorporated { color: var(--green); }
+  .steps li { margin: 3px 0 3px 16px; font-size: 13px; }
+  .steps code { background: var(--bg); padding: 1px 4px; border-radius: 4px; font-size: 12px; }
+  .wd-verdict { display: flex; gap: 8px; margin: 10px 0; }
+  .wd-verdict button { flex: 1; }
+  .wd-verdict .picked-pass { background: var(--green); color: #fff; border-color: var(--green); }
+  .wd-verdict .picked-fail { background: var(--red); color: #fff; border-color: var(--red); }
+  #surfaces { display: flex; flex-direction: column; min-width: 0; }
+  #screenbar { display: flex; gap: 6px; align-items: center; padding: 8px 12px; background: var(--panel);
+               border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  #screenbar .sb { font-size: 12px; padding: 4px 10px; }
+  #screenbar .sb.cur { background: var(--blue); color: #fff; border-color: var(--blue); }
+  #frames { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); min-height: 0; }
+  .frame { display: flex; flex-direction: column; background: var(--panel); min-width: 0; }
+  .frame .fh { padding: 5px 10px; font-size: 11px; font-weight: 700; letter-spacing: .04em;
+               text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line); }
+  .frame iframe { flex: 1; border: 0; width: 100%; }
+  .frame .none { flex: 1; display: grid; place-items: center; color: var(--muted); font-size: 13px; }
+  .empty { color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Walkdown</h1>
+  <span class="counts" id="counts"></span>
+  <span class="spacer"></span>
+  <button id="pinbtn" title="Click elements in either surface to pin feedback">📌 Pin mode</button>
+  <input type="text" id="actor" placeholder="your name">
+  <button class="primary" id="wdbtn">Start walkdown</button>
+</header>
+<main>
+  <nav id="rules"></nav>
+  <section id="detail"><p class="empty">Select a rule.</p></section>
+  <section id="surfaces">
+    <div id="screenbar"></div>
+    <div id="frames">
+      <div class="frame"><div class="fh">Prototype</div><iframe id="proto"></iframe></div>
+      <div class="frame"><div class="fh">App</div><iframe id="app"></iframe></div>
+    </div>
+  </section>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+let data = null, selected = null, screen = null, pinMode = false, session = null;
+
+const GLYPH = { pass: ['✓', 'v-pass'], fail: ['✗', 'v-fail'], pending: ['○', 'v-pending'] };
+const CELL = { pass: '✓ pass', fail: '✗ fail', stale: '~ stale', skipped: '– skipped', blocked: '⊘ blocked',
+               never: 'never', na: '·' };
+const CELLCLASS = { pass: 'v-pass', fail: 'v-fail', stale: 'st-open', never: 'v-pending', na: 'v-pending', skipped: 'v-pending' };
+
+async function load() {
+  data = await (await fetch('/api/blueprint')).json();
+  $('counts').textContent = data.rows.filter(r => r.verdict === 'pass').length + ' verified · ' +
+    data.rows.filter(r => r.verdict === 'pending').length + ' pending · ' +
+    data.rows.filter(r => r.verdict === 'fail').length + ' failing';
+  renderRules();
+  renderScreenbar();
+  if (selected) { selected = data.rows.find(r => r.rule === selected.rule) ?? null; renderDetail(); }
+  pushContext();
+}
+
+function activeThreadsFor(rule) {
+  return data.threads.filter(t => t.anchor?.rule === rule &&
+    !['incorporated', 'verified', 'waived'].includes(t.status));
+}
+
+function renderRules() {
+  const nav = $('rules'); nav.innerHTML = '';
+  const stories = [...new Set(data.rows.map(r => r.story))];
+  for (const story of stories) {
+    const h = document.createElement('div'); h.className = 'story-h'; h.textContent = story; nav.appendChild(h);
+    for (const row of data.rows.filter(r => r.story === story)) {
+      const el = document.createElement('div');
+      el.className = 'rule' + (selected?.rule === row.rule ? ' sel' : '');
+      const [g, cls] = GLYPH[row.verdict];
+      const short = row.rule.startsWith(story + '.') ? row.rule.slice(story.length + 1) : row.rule;
+      const nThr = activeThreadsFor(row.rule).length;
+      el.innerHTML = `<span class="glyph ${cls}">${session?.verdicts[row.rule]
+        ? (session.verdicts[row.rule] === 'pass' ? '✓' : '✗') : g}</span><span>${short}</span>` +
+        (nThr ? `<span class="thr">${nThr} ⚑</span>` : '');
+      el.onclick = () => { selected = row; renderRules(); renderDetail(); gotoScreen(row.screens[0] ?? screen); };
+      nav.appendChild(el);
+    }
+  }
+}
+
+function renderDetail() {
+  const d = $('detail');
+  if (!selected) { d.innerHTML = '<p class="empty">Select a rule.</p>'; return; }
+  const r = selected;
+  const ev = [];
+  for (const t of data.targets) if (r.cells[t].state !== 'na') ev.push([`checks/${t}`, r.cells[t]]);
+  if (r.agent.state !== 'na') ev.push(['agent', r.agent]);
+  if (r.human.state !== 'na') ev.push(['human', r.human]);
+  const threads = data.threads.filter(t => t.anchor?.rule === r.rule);
+  d.innerHTML = `
+    <h2>${r.rule}</h2>
+    <p class="stmt">${r.statement ?? ''}</p>
+    <p class="meta">verify: ${r.verify.join(', ')} · screens: ${r.screens.join(', ') || '—'}</p>
+    ${session ? `<div class="wd-verdict">
+        <button id="wd-pass" class="${session.verdicts[r.rule] === 'pass' ? 'picked-pass' : ''}">✓ Pass</button>
+        <button id="wd-fail" class="${session.verdicts[r.rule] === 'fail' ? 'picked-fail' : ''}">✗ Fail</button>
+      </div>` : ''}
+    <div class="sect">Evidence</div>
+    ${ev.map(([src, c]) => `<div class="evrow"><span class="src">${src}</span>
+      <span class="${CELLCLASS[c.state] ?? ''}">${CELL[c.state] ?? c.state}${src === 'human' && c.actor ? ' (' + c.actor + ')' : ''}</span></div>`).join('') || '<p class="empty">none required</p>'}
+    <div class="sect">Threads</div>
+    ${threads.map(t => `<div class="thread"><div class="th-h">${t.id} · ${t.kind} ·
+        <span class="st-${t.status}">${t.status}</span></div>${t.body ?? ''}</div>`).join('') || '<p class="empty">none</p>'}`;
+  if (session) {
+    $('wd-pass').onclick = () => { session.verdicts[r.rule] = 'pass'; renderRules(); renderDetail(); };
+    $('wd-fail').onclick = () => { session.verdicts[r.rule] = 'fail'; renderRules(); renderDetail(); };
+  }
+}
+
+function renderScreenbar() {
+  const bar = $('screenbar'); bar.innerHTML = '';
+  for (const s of data.storyboard) {
+    const b = document.createElement('button');
+    b.className = 'sb' + (screen === s.id ? ' cur' : '');
+    b.textContent = s.id;
+    b.onclick = () => gotoScreen(s.id);
+    bar.appendChild(b);
+  }
+}
+
+function gotoScreen(id) {
+  const s = data.storyboard.find(x => x.id === id);
+  if (!s) return;
+  screen = id;
+  renderScreenbar();
+  $('proto').src = s.prototype && data.hasPrototype ? '/prototype' + s.prototype : 'about:blank';
+  $('app').src = s.app?.path && data.appBase ? data.appBase + s.app.path : 'about:blank';
+}
+
+function pinsForScreen(id) {
+  return data.threads.filter(t => t.anchor?.screen === id &&
+      !['incorporated', 'verified', 'waived'].includes(t.status))
+    .map(t => ({ id: t.id, kind: t.kind, status: t.status, element: t.anchor?.element, body: t.body }));
+}
+
+function pushContext() {
+  for (const [fid, surface] of [['proto', 'prototype'], ['app', 'app']]) {
+    $(fid).contentWindow?.postMessage(
+      { type: 'walkdown:context', screen, surface, pinMode, pins: screen ? pinsForScreen(screen) : [] }, '*');
+  }
+}
+$('proto').addEventListener('load', pushContext);
+$('app').addEventListener('load', pushContext);
+
+window.addEventListener('message', async (e) => {
+  const msg = e.data;
+  if (!msg || typeof msg !== 'object') return;
+  if (msg.type === 'walkdown:ready') pushContext();
+  if (msg.type === 'walkdown:new-pin') {
+    await fetch('/api/threads', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ kind: msg.kind, body: msg.body, author: $('actor').value || undefined,
+        anchor: { element: msg.element, screen, ...(selected && { rule: selected.rule }) } }) });
+    await load();
+  }
+});
+
+$('pinbtn').onclick = () => { pinMode = !pinMode; $('pinbtn').classList.toggle('on', pinMode); pushContext(); };
+
+$('wdbtn').onclick = async () => {
+  if (!session) {
+    const actor = $('actor').value.trim();
+    if (!actor) return alert('Enter your name first — walkdowns are attributed.');
+    session = { actor, verdicts: {} };
+    $('wdbtn').textContent = 'Finish walkdown';
+    renderRules(); renderDetail();
+    return;
+  }
+  const results = Object.entries(session.verdicts).map(([rule, status]) => ({ rule, status }));
+  if (!results.length) { session = null; $('wdbtn').textContent = 'Start walkdown'; renderRules(); renderDetail(); return; }
+  const res = await (await fetch('/api/walkdowns', { method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ actor: session.actor, target: 'local', results }) })).json();
+  alert(res.run_id ? `Recorded ${results.length} verdict(s) as ${res.run_id}` : `Error: ${res.error}`);
+  session = null; $('wdbtn').textContent = 'Start walkdown';
+  await load();
+};
+
+$('actor').value = localStorage.getItem('walkdown-actor') ?? '';
+$('actor').addEventListener('change', () => localStorage.setItem('walkdown-actor', $('actor').value));
+
+load().then(() => { if (data.storyboard[0]) gotoScreen(data.storyboard[0].id); });
+</script>
+</body>
+</html>

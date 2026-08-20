@@ -9,8 +9,8 @@ runner:
       base_url: http://localhost:4310
       env: { APP_HOST: "http://localhost:4310" }
 prototype:
-  root: prototype/     # storyboard `prototype:` paths resolve against this
-  port: 4311           # where `walkdown serve` hosts it for walkdowns/side-by-side
+  root: prototype/     # storyboard `prototype:` paths resolve against this;
+                       # `walkdown serve` mounts it at /prototype/
 embed:
   anchor_attribute: data-testid
 authoring:
