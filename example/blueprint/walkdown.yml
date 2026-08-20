@@ -3,7 +3,7 @@ runner:
   run_all: "npx playwright test"
   run_for_rule: "npx playwright test --grep '@rule:{id}'"
   list: "npx playwright test --list --reporter=json"
-  results: junit
+  results: native   # walkdown/reporter in playwright.config.ts emits run records
   targets:
     local:
       base_url: http://localhost:4310

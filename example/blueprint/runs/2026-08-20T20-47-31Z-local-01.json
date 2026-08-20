@@ -1,0 +1,30 @@
+{
+  "run_id": "2026-08-20T20-47-31Z-local-01",
+  "created": "2026-08-20T20:47:31Z",
+  "actor": "agent",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4310",
+  "git_sha": "4a27457-dirty",
+  "blueprint_sha": "4a27457-dirty",
+  "results": [
+    {
+      "rule": "waitlist.join.email-required",
+      "status": "pass",
+      "statement_hash": "sha256:2fd5ce31a84c",
+      "duration_ms": 358,
+      "checks": [
+        "checks/waitlist.spec.ts:7"
+      ]
+    },
+    {
+      "rule": "waitlist.join.confirmation",
+      "status": "pass",
+      "statement_hash": "sha256:8f7e3fe03fdf",
+      "duration_ms": 89,
+      "checks": [
+        "checks/waitlist.spec.ts:26"
+      ]
+    }
+  ]
+}

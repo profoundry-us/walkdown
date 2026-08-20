@@ -59,7 +59,8 @@ Fields of note:
   verification runs against different URLs" a first-class concept rather than a web-app
   feature.
 - **`git_sha`** and **`blueprint_sha`**: what code and what version of the spec were
-  verified — provenance for humans digging into a run.
+  verified — provenance for humans digging into a run. An unclean working tree records
+  `<sha>-dirty`; formatters omit the fields entirely outside a git repo.
 - **`statement_hash`** per result: the hash of the rule statement *as it was when
   verified* (formatters emit it automatically). This is what powers staleness: a pass
   whose recorded hash no longer matches the rule's current statement is displayed as

@@ -75,11 +75,21 @@ records. Errors exit 1; warnings don't.
 in place, preserving YAML formatting. Hashes are sha256 of the whitespace-normalized
 statement, stored truncated (`sha256:` + 12 hex).
 
+## Playwright reporter
+
+The write side of the loop: add `['walkdown/reporter']` to a project's Playwright
+`reporter` array and every `npx playwright test` run appends a run record to
+`blueprint/runs/` — per-rule results aggregated from `@rule:` tags, current
+`statement_hash` stamped (so future staleness is detectable), failure screenshots as
+evidence, and git provenance (`<sha>-dirty` on an unclean tree). `WALKDOWN_TARGET` and
+`WALKDOWN_ACTOR` set the target/actor (defaults: `local`, and `ci` under CI or the OS
+username otherwise). The reporter never fails a test run.
+
 Run `npm test` for the suite. The [example](example/) is both the schema demo and the
 integration fixture: `node bin/walkdown.js lint --dir example/blueprint`.
 
 ## Status
 
 Design docs + first milestone (a hand-run of the schema in [example/](example/)) +
-`lint`/`hash`/`status` tooling. Next slices: run-record emission (native
-RSpec/Playwright formatters), `serve` (viewer + embed).
+`lint`/`hash`/`status`/`threads` tooling + the Playwright run-record reporter.
+Next slices: the RSpec formatter (`walkdown-rspec` gem), `serve` (viewer + embed).

@@ -86,10 +86,17 @@ the tag embedded in the test name or a sidecar produced by `list`. Lowest fideli
 integration cost.
 
 **Tier 2 (native): a tiny formatter per framework** that emits per-rule result entries
-directly — status, failure message, duration, screenshot/trace paths as evidence. An RSpec
-custom formatter is ~50 lines; this is the first adapter we ship
-(`@profoundry/walkdown-rspec` as a gem: `walkdown-rspec`). Adapters are small enough that
-an agent can write a new one on demand for a new ecosystem.
+directly — status, failure message, duration, screenshot/trace paths as evidence.
+
+- **Playwright** ships inside the `walkdown` package: add `['walkdown/reporter']` to the
+  config's `reporter` array and every run appends a run record — rule results aggregated
+  from `@rule:` tags, current `statement_hash` stamped, failure screenshots/error context
+  attached as evidence, `git_sha` recorded (with a `-dirty` suffix for an unclean tree).
+  Target/actor come from options or `WALKDOWN_TARGET`/`WALKDOWN_ACTOR` (defaulting to
+  `ci` under CI, else the OS username). It never fails the test run; with no blueprint
+  or no tagged tests it prints a warning and records nothing.
+- **RSpec** is the next adapter (`walkdown-rspec` gem, ~50 lines as a custom formatter).
+  Adapters are small enough that an agent can write a new one on demand.
 
 Either tier ends the same way: Walkdown appends a run record to `blueprint/runs/`
 (schema in [05-runs-ledger.md](05-runs-ledger.md)).

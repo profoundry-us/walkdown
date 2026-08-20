@@ -2,9 +2,10 @@ import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
   testDir: './checks',
-  reporter: [['list'], ['junit', { outputFile: 'test-results/junit.xml' }]],
+  reporter: [['list'], ['walkdown/reporter']],
   use: {
     baseURL: process.env.APP_HOST ?? 'http://localhost:4310',
+    screenshot: 'only-on-failure', // failing checks carry evidence into the run record
     // testIdAttribute defaults to 'data-testid' — matches blueprint/walkdown.yml
   },
   webServer: {

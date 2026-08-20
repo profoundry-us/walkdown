@@ -4,6 +4,9 @@
   "description": "Verify that what you built is what you designed — blueprint lint & hashing for the Walkdown spec format",
   "type": "module",
   "bin": { "walkdown": "bin/walkdown.js" },
+  "exports": {
+    "./reporter": "./lib/playwright-reporter.js"
+  },
   "files": ["bin", "lib", "README.md", "docs"],
   "engines": { "node": ">=20" },
   "scripts": {
