@@ -2,7 +2,7 @@ project: walkdown-example
 runner:
   run_all: "npx playwright test"
   run_for_rule: "npx playwright test --grep '@rule:{id}'"
-  list: "npx playwright test --list"
+  list: "npx playwright test --list --reporter=json"
   results: junit
   targets:
     local:

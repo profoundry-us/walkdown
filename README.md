@@ -39,8 +39,30 @@ pane) that renders those same files.
 | [04-embed-and-anchors.md](docs/04-embed-and-anchors.md) | The anchor convention (test-id reuse), embed script, side-by-side viewer |
 | [05-runs-ledger.md](docs/05-runs-ledger.md) | Verification runs, walkdowns, derived status |
 
+## CLI
+
+The first tooling slice — the two commands the hand-run milestone showed matter most:
+
+```
+walkdown lint [--dir <blueprint>] [--no-checks] [--json]
+walkdown hash [--dir <blueprint>] [--write]
+```
+
+`lint` validates the blueprint end to end: schema and duplicate IDs, storyboard
+screen/anchor references (including anchors mentioned in steps), statement-hash staleness,
+check coverage via the project's own `runner.list` command, stale check comments, thread
+lifecycles (`answered`-but-not-incorporated, `waived` without `waived_by`), and run
+records. Errors exit 1; warnings don't.
+
+`hash` reports `statement_hash` status per rule; `--write` repairs missing/stale hashes
+in place, preserving YAML formatting. Hashes are sha256 of the whitespace-normalized
+statement, stored truncated (`sha256:` + 12 hex).
+
+Run `npm test` for the suite. The [example](example/) is both the schema demo and the
+integration fixture: `node bin/walkdown.js lint --dir example/blueprint`.
+
 ## Status
 
-Pre-implementation. These docs are the design. The first milestone is a manual end-to-end
-exercise of the schema on one small feature before any tooling is built
-(see [00-vision.md](docs/00-vision.md), "First milestone").
+Design docs + first milestone (a hand-run of the schema in [example/](example/)) +
+`lint`/`hash` tooling. Next slices: run-record emission (native RSpec/Playwright
+formatters), `status` (derived per-rule verification), `serve` (viewer + embed).
