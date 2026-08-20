@@ -90,7 +90,16 @@ statement, stored truncated (`sha256:` + 12 hex).
   staging pages, via the Private-Network-Access preflight.
 - **Human walkdowns** — enter your name, Start walkdown, judge rules Pass/Fail, Finish:
   the session is appended to `blueprint/runs/` as a hash-stamped `kind: walkdown`
-  record, satisfying `human` verify requirements.
+  record, satisfying `human` verify requirements. Failing a rule switches pin mode on
+  so the note lands while you're looking at the problem, and pins dropped on a failed
+  rule are linked into that run's result.
+- **Thread lifecycle** — clicking a pin or a thread opens it: body, replies, and the
+  actions its state allows (Reply / Mark addressed / ✓ Verify / Reopen / Waive; Answer
+  and Mark incorporated for questions). Transitions are validated server-side; `verified`
+  and `waived` require a named human — agents claim work (`addressed`), never accept it.
+  The same mutations are available from the terminal:
+  `walkdown thread n-0002 --actor agent --reply "fixed in run …" --status addressed`,
+  then `walkdown thread n-0002 --verify` as yourself.
 
 ## Playwright reporter
 

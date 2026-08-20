@@ -99,6 +99,28 @@ test('invalid writes are rejected with 400', async () => {
   assert.equal(noBody.status, 400);
 });
 
+test('thread reply and status endpoints mutate through the validated path', async () => {
+  const post = (path, body) => fetch(`${base}${path}`, {
+    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+
+  const reply = await (await post('/api/threads/n-0001/replies', { author: 'agent', body: 'Done in run 7.' })).json();
+  assert.equal(reply.thread.replies.at(-1).body, 'Done in run 7.');
+
+  const addressed = await (await post('/api/threads/n-0001/status', { status: 'addressed', actor: 'agent' })).json();
+  assert.equal(addressed.thread.status, 'addressed');
+
+  // an agent may not self-accept
+  const agentVerify = await post('/api/threads/n-0001/status', { status: 'verified', actor: 'agent' });
+  assert.equal(agentVerify.status, 400);
+  assert.match((await agentVerify.json()).error, /named human/);
+
+  const verified = await (await post('/api/threads/n-0001/status', { status: 'verified', actor: 'topher' })).json();
+  assert.equal(verified.thread.status, 'verified');
+
+  const unknown = await post('/api/threads/zzz/replies', { body: 'x' });
+  assert.equal(unknown.status, 400);
+});
+
 test('OPTIONS preflight answers CORS and Private Network Access', async () => {
   const res = await fetch(`${base}/api/threads`, {
     method: 'OPTIONS',

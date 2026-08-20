@@ -1,0 +1,10 @@
+id: n-0003
+kind: note
+author: topher
+created: 2026-08-20T21:45:45Z
+anchor:
+  rule: waitlist.join.visual-match
+  screen: waitlist-confirm
+  element: waitlist.confirmed-email
+status: open
+body: The email is missing from here; we need a rule to capture this.

@@ -6,5 +6,11 @@ anchor:
   rule: waitlist.join.visual-match
   screen: waitlist-join
   element: waitlist.submit
-status: open
+status: verified
 body: Button should show a loading spinner while submitting.
+replies:
+  - author: agent
+    created: 2026-08-20T21:53:21Z
+    body: "Added a submitting state: the button disables and reads 'Joining…' while
+      the join request runs (app/index.html). Checks re-passed in run
+      2026-08-20T21-53-13Z-local-01."

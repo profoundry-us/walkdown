@@ -42,7 +42,12 @@
         return;
       }
       error.textContent = '';
-      location.href = 'confirm.html?email=' + encodeURIComponent(email);
+      const button = document.querySelector('[data-testid="waitlist.submit"]');
+      button.disabled = true;
+      button.textContent = 'Joining…';
+      setTimeout(() => {
+        location.href = 'confirm.html?email=' + encodeURIComponent(email);
+      }, 400);
     });
   </script>
   <script src="http://localhost:4700/embed.js" data-walkdown></script>

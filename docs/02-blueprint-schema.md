@@ -172,6 +172,15 @@ replies:
   decision, not neglect: it requires `waived_by: <person>` and a reply stating the reason
   (agents may *propose* a waive but never set it). Waived threads stop rendering as pins
   and stop counting against lint, but remain as provenance.
+- **Transitions are validated, and mutation goes through one path** (the `walkdown
+  thread` CLI, the serve API, and the viewer all use it): notes move
+  `open → addressed → verified | reopen | waived`, questions
+  `open → answered → incorporated | reopen | waived`. Reopening (back to `open`) and
+  waiving require a reason, recorded as a reply. The governance rule that keeps the
+  ledger trustworthy: **agents may set `addressed`, `answered`, and `incorporated` —
+  the states that mean work was done. Only a named human may set `verified` or
+  `waived` — the states that mean a person judged it.** An agent can claim, never
+  self-accept.
 
 ## Extraction is a merge
 

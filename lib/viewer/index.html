@@ -65,6 +65,20 @@
   .frame iframe { flex: 1; border: 0; width: 100%; }
   .frame .none { flex: 1; display: grid; place-items: center; color: var(--muted); font-size: 13px; }
   .empty { color: var(--muted); font-size: 13px; }
+  .thread { cursor: pointer; }
+  .thread:hover { outline: 1px solid var(--line); }
+  #threadpanel { position: fixed; top: 52px; left: 310px; width: 380px; max-height: calc(100vh - 80px);
+    overflow-y: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.18); padding: 14px; z-index: 50; display: none; }
+  #threadpanel.show { display: block; }
+  #threadpanel .tp-close { float: right; border: 0; background: none; font-size: 16px; cursor: pointer; }
+  #threadpanel textarea { width: 100%; height: 64px; font: inherit; margin: 8px 0 6px;
+    border: 1px solid var(--line); border-radius: 6px; padding: 6px; box-sizing: border-box; }
+  #threadpanel .tp-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+  #threadpanel .reply { margin: 8px 0 0 10px; padding: 6px 8px; border-left: 2px solid var(--line); font-size: 13px; }
+  #threadpanel .reply .rh { color: var(--muted); font-size: 11px; }
+  .pinhint { background: #fef3c7; border: 1px solid var(--amber); border-radius: 8px; padding: 8px 10px;
+    font-size: 12px; margin: 8px 0; }
 </style>
 </head>
 <body>
@@ -87,6 +101,7 @@
     </div>
   </section>
 </main>
+<div id="threadpanel"></div>
 <script>
 const $ = (id) => document.getElementById(id);
 let data = null, selected = null, screen = null, pinMode = false, session = null;
@@ -161,16 +176,102 @@ function renderDetail() {
     <div class="sect">Evidence</div>
     ${ev.map(([src, c]) => `<div class="evrow"><span class="src">${src}</span>
       <span class="${CELLCLASS[c.state] ?? ''}">${CELL[c.state] ?? c.state}${src === 'human' && c.actor ? ' (' + c.actor + ')' : ''}</span></div>`).join('') || '<p class="empty">none required</p>'}
+    ${session?.verdicts[r.rule] === 'fail' ? `<div class="pinhint">📌 Pin mode is on — click the
+      broken element in either surface to attach a note to this fail.</div>` : ''}
     <div class="sect">Threads</div>
-    ${threads.map(t => `<div class="thread"><div class="th-h">${t.id} · ${t.kind} ·
+    ${threads.map(t => `<div class="thread" data-t="${t.id}"><div class="th-h">${t.id} · ${t.kind} ·
         <span class="st-${t.status}">${t.status}</span></div>${t.body ?? ''}</div>`).join('') || '<p class="empty">none</p>'}`;
   if (session) {
     $('wd-pass').onclick = () => { session.verdicts[r.rule] = 'pass'; renderRules(); renderDetail(); };
-    $('wd-fail').onclick = () => { session.verdicts[r.rule] = 'fail'; renderRules(); renderDetail(); };
+    $('wd-fail').onclick = () => {
+      session.verdicts[r.rule] = 'fail';
+      if (!pinMode) { pinMode = true; $('pinbtn').classList.add('on'); pushContext(); }
+      renderRules(); renderDetail();
+    };
   }
   d.querySelectorAll('.rsc').forEach((b) => {
     b.onclick = () => { gotoScreen(b.dataset.s); renderDetail(); };
   });
+  d.querySelectorAll('.thread').forEach((el) => {
+    el.onclick = () => openThread(el.dataset.t);
+  });
+}
+
+// --- thread panel: reply and lifecycle actions --------------------------------
+let panelThread = null;
+
+function threadActions(t) {
+  if (t.kind === 'note') {
+    if (t.status === 'open') return [['Mark addressed', 'addressed'], ['Waive', 'waived']];
+    if (t.status === 'addressed') return [['✓ Verify', 'verified'], ['Reopen', 'open'], ['Waive', 'waived']];
+  } else {
+    if (t.status === 'open') return [['Answer', '__answer'], ['Waive', 'waived']];
+    if (t.status === 'answered') return [['Mark incorporated', 'incorporated'], ['Reopen', 'open'], ['Waive', 'waived']];
+  }
+  return [];
+}
+
+function openThread(id) {
+  const t = data.threads.find(x => x.id === id);
+  if (!t) return;
+  panelThread = id;
+  const p = $('threadpanel');
+  p.className = 'show';
+  p.innerHTML = `
+    <button class="tp-close">×</button>
+    <div class="th-h">${t.id} · ${t.kind} · <span class="st-${t.status}">${t.status}</span>
+      ${t.waived_by ? `<span class="empty">by ${t.waived_by}</span>` : ''}</div>
+    <p class="meta">${[t.anchor?.rule && 'rule ' + t.anchor.rule, t.anchor?.screen && 'screen ' + t.anchor.screen,
+      t.anchor?.element && 'element ' + t.anchor.element].filter(Boolean).join(' · ')}</p>
+    <p class="meta">${t.author ?? ''} · ${t.created ?? ''}</p>
+    <p>${t.body ?? ''}</p>
+    ${(t.replies ?? []).map(r => `<div class="reply"><div class="rh">${r.author} · ${r.created}</div>${r.body}</div>`).join('')}
+    <textarea id="tp-text" placeholder="Reply — also used as the reason when waiving or reopening"></textarea>
+    <div class="tp-actions">
+      <button id="tp-reply">Reply</button>
+      ${threadActions(t).map(([label, s]) => `<button class="tp-act" data-s="${s}">${label}</button>`).join('')}
+    </div>`;
+  p.querySelector('.tp-close').onclick = closeThread;
+  p.querySelector('#tp-reply').onclick = () => threadReply(id);
+  p.querySelectorAll('.tp-act').forEach(b => b.onclick = () => threadAct(id, b.dataset.s));
+}
+
+function closeThread() { panelThread = null; $('threadpanel').className = ''; }
+
+async function threadPost(path, body) {
+  const res = await fetch(path, { method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body) });
+  const out = await res.json();
+  if (!res.ok) { alert(out.error ?? 'request failed'); return false; }
+  return true;
+}
+
+async function threadReply(id) {
+  const body = $('tp-text').value.trim();
+  if (!body) return alert('Write the reply first.');
+  if (await threadPost(`/api/threads/${id}/replies`, { author: $('actor').value.trim() || undefined, body })) {
+    await load(); openThread(id);
+  }
+}
+
+async function threadAct(id, status) {
+  const actor = $('actor').value.trim();
+  const text = $('tp-text').value.trim();
+  if (status === '__answer') {
+    if (!text) return alert('Write the answer in the text box first.');
+    if (await threadPost(`/api/threads/${id}/replies`, { author: actor || undefined, body: text }) &&
+        await threadPost(`/api/threads/${id}/status`, { status: 'answered', actor })) {
+      await load(); openThread(id);
+    }
+    return;
+  }
+  const needsReason = status === 'waived' || status === 'open';
+  if (needsReason && !text)
+    return alert(`${status === 'waived' ? 'Waiving' : 'Reopening'} requires a reason — write it in the text box.`);
+  if (await threadPost(`/api/threads/${id}/status`, { status, actor, reason: needsReason ? text : undefined })) {
+    await load();
+    ['verified', 'waived', 'incorporated'].includes(status) ? closeThread() : openThread(id);
+  }
 }
 
 function renderScreenbar() {
@@ -196,7 +297,8 @@ function gotoScreen(id) {
 function pinsForScreen(id) {
   return data.threads.filter(t => t.anchor?.screen === id &&
       !['incorporated', 'verified', 'waived'].includes(t.status))
-    .map(t => ({ id: t.id, kind: t.kind, status: t.status, element: t.anchor?.element, body: t.body }));
+    .map(t => ({ id: t.id, kind: t.kind, status: t.status, element: t.anchor?.element, body: t.body,
+      replies: t.replies ?? [] }));
 }
 
 function pushContext() {
@@ -212,10 +314,21 @@ window.addEventListener('message', async (e) => {
   const msg = e.data;
   if (!msg || typeof msg !== 'object') return;
   if (msg.type === 'walkdown:ready') pushContext();
+  if (msg.type === 'walkdown:open-thread') {
+    const t = data.threads.find(x => x.id === msg.id);
+    if (t?.anchor?.rule) {
+      const row = data.rows.find(r => r.rule === t.anchor.rule);
+      if (row) { selected = row; renderRules(); renderDetail(); }
+    }
+    openThread(msg.id);
+  }
   if (msg.type === 'walkdown:new-pin') {
-    await fetch('/api/threads', { method: 'POST', headers: { 'content-type': 'application/json' },
+    const res = await fetch('/api/threads', { method: 'POST', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ kind: msg.kind, body: msg.body, author: $('actor').value || undefined,
         anchor: { element: msg.element, screen, ...(selected && { rule: selected.rule }) } }) });
+    const out = await res.json();
+    if (session && selected && session.verdicts[selected.rule] === 'fail' && out.id)
+      (session.pinned[selected.rule] ??= []).push(out.id);
     await load();
   }
 });
@@ -226,12 +339,13 @@ $('wdbtn').onclick = async () => {
   if (!session) {
     const actor = $('actor').value.trim();
     if (!actor) return alert('Enter your name first — walkdowns are attributed.');
-    session = { actor, verdicts: {} };
+    session = { actor, verdicts: {}, pinned: {} };
     $('wdbtn').textContent = 'Finish walkdown';
     renderRules(); renderDetail();
     return;
   }
-  const results = Object.entries(session.verdicts).map(([rule, status]) => ({ rule, status }));
+  const results = Object.entries(session.verdicts).map(([rule, status]) =>
+    ({ rule, status, ...(session.pinned[rule]?.length && { threads: session.pinned[rule] }) }));
   if (!results.length) { session = null; $('wdbtn').textContent = 'Start walkdown'; renderRules(); renderDetail(); return; }
   const res = await (await fetch('/api/walkdowns', { method: 'POST',
     headers: { 'content-type': 'application/json' },

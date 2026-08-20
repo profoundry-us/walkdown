@@ -1,10 +1,11 @@
 #!/usr/bin/env node
+import { userInfo } from 'node:os';
 import { parseArgs } from 'node:util';
 import { findBlueprintDir, loadBlueprint } from '../lib/blueprint.js';
 import { runHashCommand } from '../lib/hash-cmd.js';
 import { lint } from '../lib/lint.js';
 import { deriveStatus } from '../lib/status.js';
-import { getThread, listThreads } from '../lib/threads.js';
+import { getThread, listThreads, replyToThread, transitionThread } from '../lib/threads.js';
 
 const HELP = `walkdown — verify that what you built is what you designed
 
@@ -13,7 +14,8 @@ Usage:
   walkdown lint [--dir <blueprint>] [--no-checks] [--json]
   walkdown hash [--dir <blueprint>] [--write]
   walkdown threads [--dir <blueprint>] [--rule <id>] [--all] [--json]
-  walkdown thread <id> [--dir <blueprint>] [--json]
+  walkdown thread <id> [--reply <text>] [--status <s>|--verify|--reopen|--waive]
+                       [--reason <text>] [--actor <name>] [--dir <blueprint>] [--json]
   walkdown serve [--dir <blueprint>] [--port <n>]
 
 Commands:
@@ -26,7 +28,13 @@ Commands:
           missing/stale hashes in place (formatting preserved).
   threads List active threads (questions & notes); --all includes
           incorporated/verified/waived, --rule filters by anchored rule.
-  thread  Show one thread in full: anchor, body, and replies.
+  thread  Show one thread in full: anchor, body, and replies. With --reply
+          and/or a status flag, mutate it first: transitions are validated
+          (notes: open → addressed → verified | reopen | waived; questions:
+          open → answered → incorporated | reopen | waived). "verified" and
+          "waived" require a named human actor — never "agent". Waiving and
+          reopening require --reason (recorded as a reply). Actor defaults
+          to WALKDOWN_ACTOR or the OS username.
   serve   Start the local viewer: status board, side-by-side prototype/app
           with the embed (pinning), and human walkdown recording. Also
           serves /embed.js and the pin/walkdown API.
@@ -275,15 +283,39 @@ function cmdThreads(args) {
 function cmdThread(args) {
   const { values, positionals } = parseArgs({
     args,
-    options: { dir: { type: 'string' }, json: { type: 'boolean', default: false } },
+    options: {
+      dir: { type: 'string' },
+      json: { type: 'boolean', default: false },
+      reply: { type: 'string' },
+      status: { type: 'string' },
+      verify: { type: 'boolean', default: false },
+      reopen: { type: 'boolean', default: false },
+      waive: { type: 'boolean', default: false },
+      reason: { type: 'string' },
+      actor: { type: 'string' },
+    },
     allowPositionals: true,
   });
   const id = positionals[0];
   if (!id) {
-    console.error('Usage: walkdown thread <id>');
+    console.error('Usage: walkdown thread <id> [--reply <text>] [--status <s>|--verify|--reopen|--waive] [--reason <text>] [--actor <name>]');
     process.exit(2);
   }
-  const blueprint = loadOrExit(values.dir);
+  let blueprint = loadOrExit(values.dir);
+
+  const actor = values.actor ?? process.env.WALKDOWN_ACTOR ?? userInfo().username;
+  const status = values.verify ? 'verified' : values.reopen ? 'open' : values.waive ? 'waived' : values.status;
+  if (values.reply || status) {
+    try {
+      if (values.reply) replyToThread(blueprint, id, { author: actor, body: values.reply });
+      if (status) transitionThread(blueprint, id, { status, actor, reason: values.reason });
+    } catch (err) {
+      console.error(err.message);
+      process.exit(2);
+    }
+    blueprint = loadBlueprint(blueprint.dir);
+  }
+
   const t = getThread(blueprint, id);
   if (!t) {
     console.error(`No thread "${id}". \`walkdown threads --all\` lists every thread.`);
