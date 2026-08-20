@@ -11,19 +11,25 @@
     {
       "rule": "waitlist.join.email-required",
       "status": "pass",
+      "statement_hash": "sha256:2fd5ce31a84c",
       "duration_ms": 1200,
-      "checks": ["checks/waitlist.spec.ts:7"]
+      "checks": [
+        "checks/waitlist.spec.ts:7"
+      ]
     },
     {
       "rule": "waitlist.join.confirmation",
       "status": "pass",
+      "statement_hash": "sha256:8f7e3fe03fdf",
       "duration_ms": 103,
-      "checks": ["checks/waitlist.spec.ts:26"]
+      "checks": [
+        "checks/waitlist.spec.ts:26"
+      ]
     },
     {
       "rule": "waitlist.join.visual-match",
       "status": "skipped",
-      "reason": "verify: [agent, human] — not satisfiable by checks"
+      "reason": "verify: [agent, human] \u2014 not satisfiable by checks"
     }
   ]
 }

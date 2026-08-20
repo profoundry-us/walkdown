@@ -44,9 +44,16 @@ pane) that renders those same files.
 The first tooling slice — the two commands the hand-run milestone showed matter most:
 
 ```
+walkdown status [--dir <blueprint>] [--target <name>] [--json]
 walkdown lint [--dir <blueprint>] [--no-checks] [--json]
 walkdown hash [--dir <blueprint>] [--write]
 ```
+
+`status` renders the derived per-rule verification table straight from the runs ledger:
+latest checks per target, latest agent and human walkdown verdicts, open threads, and a
+per-rule verdict (verified / pending / failing — exit 1 on any failure). A pass recorded
+against an older statement (per-result `statement_hash`) renders as `~ stale`, never as
+passing. `--json` is the agent-facing form.
 
 `lint` validates the blueprint end to end: schema and duplicate IDs, storyboard
 screen/anchor references (including anchors mentioned in steps), statement-hash staleness,
@@ -64,5 +71,5 @@ integration fixture: `node bin/walkdown.js lint --dir example/blueprint`.
 ## Status
 
 Design docs + first milestone (a hand-run of the schema in [example/](example/)) +
-`lint`/`hash` tooling. Next slices: run-record emission (native RSpec/Playwright
-formatters), `status` (derived per-rule verification), `serve` (viewer + embed).
+`lint`/`hash`/`status` tooling. Next slices: run-record emission (native
+RSpec/Playwright formatters), `serve` (viewer + embed).

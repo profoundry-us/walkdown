@@ -11,7 +11,10 @@
     {
       "rule": "waitlist.join.visual-match",
       "status": "fail",
-      "threads": ["n-0001"],
+      "statement_hash": "sha256:837d34b83fb1",
+      "threads": [
+        "n-0001"
+      ],
       "evidence": [
         "runs/evidence/2026-08-20T20-09Z/proto-join.png",
         "runs/evidence/2026-08-20T20-09Z/app-join.png",
