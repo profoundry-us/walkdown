@@ -45,8 +45,14 @@
       const button = document.querySelector('[data-testid="waitlist.submit"]');
       button.disabled = true;
       button.textContent = 'Joining…';
+      const joined = JSON.parse(localStorage.getItem('waitlist-joined') ?? '[]');
+      const already = joined.includes(email);
+      if (!already) {
+        joined.push(email);
+        localStorage.setItem('waitlist-joined', JSON.stringify(joined));
+      }
       setTimeout(() => {
-        location.href = 'confirm.html?email=' + encodeURIComponent(email);
+        location.href = 'confirm.html?email=' + encodeURIComponent(email) + (already ? '&already=1' : '');
       }, 400);
     });
   </script>

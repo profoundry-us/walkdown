@@ -11,7 +11,7 @@ and Playwright — no Walkdown CLI.
 |---|---|
 | `prototype/` | A Claude Design export — two screens, anchors as `data-testid` |
 | `app/` | The built product (vanilla HTML/JS), anchors carried over |
-| `blueprint/` | The hand-written blueprint: config, storyboard, one feature (3 rules), runs, threads |
+| `blueprint/` | The hand-written blueprint: config, storyboard, one feature (5 rules), runs, threads |
 | `checks/` | The project's "own" test suite — Playwright tests tagged `@rule:<id>` |
 
 Run the checks: `npm install && npx playwright test` (the config serves `app/` itself).

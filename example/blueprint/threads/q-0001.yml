@@ -6,7 +6,7 @@ anchor:
   rule: waitlist.join.confirmation
   screen: waitlist-join
   element: waitlist.submit
-status: answered
+status: incorporated
 body: >
   The prototype doesn't show what happens when an email that is already on the
   waitlist is submitted again. Should re-submission show the same confirmation,
@@ -16,3 +16,10 @@ replies:
   - author: topherfangio
     created: 2026-08-20T23:45:50Z
     body: make it say, "you're already on the list"
+  - author: agent
+    created: 2026-08-20T23:56:31Z
+    body: "Incorporated: new rule waitlist.join.already-joined ('you're already on
+      the list' message per your answer), new screen waitlist-already in the
+      storyboard, prototype screens/waitlist-already.html, app implementation
+      (localStorage-backed), and a tagged check — passing in run
+      2026-08-20T23-56-21Z-local-01."

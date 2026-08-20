@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>You're on the list</title>
+<title>Prototype — Already on the list</title>
 <style>
   :root { --ink: #1a1d23; --muted: #6b7280; --brand: #2563eb; --bg: #f4f5f7; }
   * { box-sizing: border-box; margin: 0; }
@@ -20,27 +20,11 @@
 </head>
 <body>
   <main class="card">
-    <div class="check" id="icon">✅</div>
-    <h1 id="heading">You're on the list!</h1>
-    <p class="sub" id="sub">We'll email you the moment we launch.</p>
-    <span class="email" data-testid="waitlist.confirmed-email"></span>
+    <div class="check">👋</div>
+    <h1 data-testid="waitlist.already-message">You're already on the list!</h1>
+    <p class="sub">We saved your spot the first time.</p>
+    <span class="email" data-testid="waitlist.confirmed-email">you@example.com</span>
   </main>
-  <script>
-    const params = new URLSearchParams(location.search);
-    const email = params.get('email');
-    if (!email) {
-      location.replace('index.html');
-    } else {
-      document.querySelector('[data-testid="waitlist.confirmed-email"]').textContent = email;
-      if (params.get('already')) {
-        document.getElementById('icon').textContent = '👋';
-        const heading = document.getElementById('heading');
-        heading.textContent = "You're already on the list!";
-        heading.setAttribute('data-testid', 'waitlist.already-message');
-        document.getElementById('sub').textContent = 'We saved your spot the first time.';
-      }
-    }
-  </script>
   <script src="http://localhost:4700/embed.js" data-walkdown></script>
 </body>
 </html>

@@ -11,6 +11,14 @@ screens:
   - id: waitlist-confirm
     title: Confirmation
     prototype: /screens/waitlist-confirm.html
-    app: { path: /confirm.html }
+    app: { path: /confirm.html?email=you@example.com }
     anchors:
+      - waitlist.confirmed-email
+
+  - id: waitlist-already
+    title: Already on the list
+    prototype: /screens/waitlist-already.html
+    app: { path: /confirm.html?email=you@example.com&already=1 }
+    anchors:
+      - waitlist.already-message
       - waitlist.confirmed-email

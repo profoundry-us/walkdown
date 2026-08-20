@@ -38,6 +38,38 @@ stories:
             - The visitor is on screen `waitlist-confirm`
             - Anchor `waitlist.confirmed-email` shows the submitted email
 
+      - id: waitlist.join.already-joined
+        # incorporated from q-0001: re-submission shows a distinct state, not the standard confirmation
+        statement: Submitting an email that is already on the waitlist shows a distinct "you're already on the list" message instead of the standard confirmation.
+        verify: [checks]
+        screens: [waitlist-already, waitlist-join]
+        steps:
+          given:
+            - A visitor who has already joined with a given email
+          when:
+            - Visit screen `waitlist-join`
+            - Enter the same email into anchor `waitlist.email`
+            - Click anchor `waitlist.submit`
+          then:
+            - The visitor is on screen `waitlist-already`
+            - Anchor `waitlist.already-message` reads "you're already on the list"
+            - Anchor `waitlist.confirmed-email` shows the submitted email
+          statement_hash: sha256:1857ab02c7c3
+
+      - id: waitlist.join.confirm-requires-email
+        # from n-0003: direct navigation must not show an empty confirmation
+        statement: Opening the confirmation screen without having submitted an email redirects the visitor to the join screen.
+        verify: [checks]
+        screens: [waitlist-confirm, waitlist-join]
+        steps:
+          given:
+            - A visitor who has not submitted an email
+          when:
+            - Navigate directly to screen `waitlist-confirm` without an email
+          then:
+            - The visitor is redirected to screen `waitlist-join`
+          statement_hash: sha256:09cacb110a8f
+
       - id: waitlist.join.visual-match
         statement: The join and confirmation screens match the prototype's layout, hierarchy, and copy.
         verify: [agent, human]

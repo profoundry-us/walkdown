@@ -6,5 +6,15 @@ anchor:
   rule: waitlist.join.visual-match
   screen: waitlist-confirm
   element: waitlist.confirmed-email
-status: open
+status: addressed
 body: The email is missing from here; we need a rule to capture this.
+replies:
+  - author: agent
+    created: 2026-08-20T23:56:31Z
+    body: "Root cause: navigating to confirm.html without ?email= rendered an empty
+      chip (the viewer's deep-link did exactly that). Fixed two ways: new rule
+      waitlist.join.confirm-requires-email — the app now redirects to the join
+      screen when no email is present (check passing in run
+      2026-08-20T23-56-21Z-local-01) — and the storyboard's confirm deep-link
+      now carries the prototype's sample email so the surfaces match. Awaiting
+      your verification."
