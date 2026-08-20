@@ -95,7 +95,12 @@ directly — status, failure message, duration, screenshot/trace paths as eviden
   Target/actor come from options or `WALKDOWN_TARGET`/`WALKDOWN_ACTOR` (defaulting to
   `ci` under CI, else the OS username). It never fails the test run; with no blueprint
   or no tagged tests it prints a warning and records nothing.
-- **RSpec** is the next adapter (`walkdown-rspec` gem, ~50 lines as a custom formatter).
+- **RSpec** ships as the `walkdown-rspec` gem (in-repo: `adapters/rspec/`):
+  `--format Walkdown::Formatter` appends the identical record shape — statuses mapped
+  (pending → skipped), first failure message captured, `evidence:` metadata attached,
+  same hashing, git provenance, and env vars as the Playwright reporter. Its companion
+  `Walkdown::ListFormatter` is the `runner.list` command (RSpec's JSON formatter omits
+  custom metadata, so the lister prints `rule:<id> <file>:<line>` per tagged example).
   Adapters are small enough that an agent can write a new one on demand.
 
 Either tier ends the same way: Walkdown appends a run record to `blueprint/runs/`

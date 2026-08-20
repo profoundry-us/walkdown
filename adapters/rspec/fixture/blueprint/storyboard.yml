@@ -1,0 +1,5 @@
+screens:
+  - id: join
+    title: Join the waitlist
+    prototype: /screens/join.html
+    app: { path: / }

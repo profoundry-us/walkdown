@@ -1,0 +1,12 @@
+project: walkdown-rspec-fixture
+runner:
+  run_all: "rspec"
+  run_for_rule: "rspec --tag 'rule:{id}'"
+  list: "rspec --dry-run --format Walkdown::ListFormatter"
+  results: native
+  targets:
+    local: {}
+authoring:
+  location: spec/
+  style: >
+    Plain RSpec. Tag each example with rule: metadata. One rule per example.

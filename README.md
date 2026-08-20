@@ -91,5 +91,7 @@ integration fixture: `node bin/walkdown.js lint --dir example/blueprint`.
 ## Status
 
 Design docs + first milestone (a hand-run of the schema in [example/](example/)) +
-`lint`/`hash`/`status`/`threads` tooling + the Playwright run-record reporter.
-Next slices: the RSpec formatter (`walkdown-rspec` gem), `serve` (viewer + embed).
+`lint`/`hash`/`status`/`threads` tooling + run-record emitters for both ecosystems:
+the Playwright reporter (`walkdown/reporter`) and the RSpec formatter
+([adapters/rspec/](adapters/rspec/), with its own fixture suite). Next slice:
+`serve` (viewer + embed).

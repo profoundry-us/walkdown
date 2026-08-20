@@ -1,0 +1,21 @@
+feature: waitlist
+title: Waitlist signup (formatter fixture)
+stories:
+  - id: fixture.join
+    title: Visitor joins the waitlist
+    statement: As a visitor, I can join the waitlist with my email.
+    rules:
+      - id: fixture.join.rejects-invalid
+        statement: A blank or @-less email is rejected with a validation error.
+        verify: [checks]
+        screens: [join]
+
+      - id: fixture.join.confirms-with-email
+        statement: A valid email gets a confirmation that includes the submitted address.
+        verify: [checks]
+        screens: [join]
+
+      - id: fixture.join.rate-limit
+        statement: Repeated joins from the same email are rate limited.
+        verify: [checks]
+        screens: [join]
