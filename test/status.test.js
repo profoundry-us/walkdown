@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { formatHash } from '../lib/hash.js';
-import { deriveStatus } from '../lib/status.js';
+import { deriveStatus, screenFlow } from '../lib/status.js';
 
 const STATEMENT = 'The visitor can do the thing.';
 
@@ -102,6 +102,26 @@ test('rows carry statement/screens; cells carry run provenance for detail views'
   assert.equal(cell.created, '2026-01-01');
   assert.deepEqual(cell.evidence, ['runs/evidence/x.png']);
   assert.equal(cell.detail, 'expected error to be visible');
+});
+
+test('screenFlow: step order wins, consecutive repeats collapse, revisits show', () => {
+  const screens = new Set(['join', 'confirm']);
+  const rule = (steps) => ({ steps });
+  assert.deepEqual(
+    screenFlow(rule({ given: ['On `join`'], then: ['Now on `confirm` showing `x.y`'] }), screens),
+    ['join', 'confirm']
+  );
+  // "remains on" shape: same screen mentioned in given and then
+  assert.deepEqual(
+    screenFlow(rule({ given: ['On `join`'], then: ['Still on `join`'] }), screens),
+    ['join']
+  );
+  // a genuine revisit is preserved
+  assert.deepEqual(
+    screenFlow(rule({ given: ['On `join`'], when: ['Go to `confirm`'], then: ['Back on `join`'] }), screens),
+    ['join', 'confirm', 'join']
+  );
+  assert.deepEqual(screenFlow({ }, screens), []);
 });
 
 test('open threads listed; terminal ones excluded', () => {

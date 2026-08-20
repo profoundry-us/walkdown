@@ -101,12 +101,14 @@ stories:
 - Steps reference **screens and anchors by ID only** — never URLs, never CSS selectors.
   This is what makes them portable across prototype and app, and what makes generated
   checks resilient.
-- **`screens` is ordered by relevance, not by flow.** The first entry is the screen the
-  rule is *about* — where its outcome is observable and where the viewer deep-links when
-  the rule is selected. Remaining entries are traversed or supporting screens. The
-  journey through them already lives in the steps, so the list never needs to repeat it.
-  (Example: a "visitor sees a confirmation" rule lists the confirmation screen first,
-  even though the flow starts on the form.)
+- **The screen progression is derived from the steps, never declared twice.** `screens:`
+  is an unordered set used for linting and coverage; the steps mention screens in
+  traversal order, and tooling reads that progression directly. The viewer renders the
+  flow (`waitlist-join → waitlist-confirm`) and deep-links to the **last** screen the
+  steps mention — where the flow ends is where the outcome is observable (a
+  "visitor sees a confirmation" rule ends on the confirmation screen; a "visitor
+  *remains* on the form" rule ends on the form — both correct with no authoring
+  convention). Rules without steps fall back to the first listed screen.
 
 ## Storyboard
 

@@ -26,8 +26,7 @@ stories:
       - id: waitlist.join.confirmation
         statement: After submitting a valid email, the visitor sees a confirmation showing the email they joined with.
         verify: [checks]
-        # first screen = where the rule's outcome is observable; the flow itself lives in steps
-        screens: [waitlist-confirm, waitlist-join]
+        screens: [waitlist-join, waitlist-confirm]
         steps:
           statement_hash: "sha256:8f7e3fe03fdf"
           given:

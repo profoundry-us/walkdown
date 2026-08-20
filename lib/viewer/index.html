@@ -57,6 +57,7 @@
   #screenbar .sb.cur { background: var(--blue); color: #fff; border-color: var(--blue); }
   .rsc { font-size: 12px; padding: 3px 9px; }
   .rsc.cur { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .arrow { color: var(--muted); }
   #frames { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); min-height: 0; }
   .frame { display: flex; flex-direction: column; background: var(--panel); min-width: 0; }
   .frame .fh { padding: 5px 10px; font-size: 11px; font-weight: 700; letter-spacing: .04em;
@@ -125,7 +126,8 @@ function renderRules() {
       el.innerHTML = `<span class="glyph ${cls}">${session?.verdicts[row.rule]
         ? (session.verdicts[row.rule] === 'pass' ? '✓' : '✗') : g}</span><span>${short}</span>` +
         (nThr ? `<span class="thr">${nThr} ⚑</span>` : '');
-      el.onclick = () => { selected = row; gotoScreen(row.screens[0] ?? screen); renderRules(); renderDetail(); };
+      el.onclick = () => { selected = row;
+        gotoScreen(row.flow?.at(-1) ?? row.screens[0] ?? screen); renderRules(); renderDetail(); };
       nav.appendChild(el);
     }
   }
@@ -144,8 +146,14 @@ function renderDetail() {
     <h2>${r.rule}</h2>
     <p class="stmt">${r.statement ?? ''}</p>
     <p class="meta">verify: ${r.verify.join(', ')}</p>
-    <div class="meta">screens: ${r.screens.map(s =>
-      `<button class="sb rsc ${screen === s ? 'cur' : ''}" data-s="${s}">${s}</button>`).join(' ') || '—'}</div>
+    <div class="meta">${(() => {
+      const chip = (s) => `<button class="sb rsc ${screen === s ? 'cur' : ''}" data-s="${s}">${s}</button>`;
+      const flow = r.flow?.length ? r.flow : r.screens;
+      const extras = r.screens.filter((s) => !flow.includes(s));
+      const label = r.flow?.length ? 'flow' : 'screens';
+      return `${label}: ${flow.map(chip).join(' <span class="arrow">→</span> ') || '—'}` +
+        (extras.length ? ` <span class="arrow">·</span> ${extras.map(chip).join(' ')}` : '');
+    })()}</div>
     ${session ? `<div class="wd-verdict">
         <button id="wd-pass" class="${session.verdicts[r.rule] === 'pass' ? 'picked-pass' : ''}">✓ Pass</button>
         <button id="wd-fail" class="${session.verdicts[r.rule] === 'fail' ? 'picked-fail' : ''}">✗ Fail</button>
