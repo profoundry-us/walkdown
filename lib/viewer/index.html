@@ -228,12 +228,33 @@ function openThread(id) {
     ${(t.replies ?? []).map(r => `<div class="reply"><div class="rh">${r.author} · ${r.created}</div>${r.body}</div>`).join('')}
     <textarea id="tp-text" placeholder="Reply — also used as the reason when waiving or reopening"></textarea>
     <div class="tp-actions">
+      <span class="empty" style="align-self:center">as</span>
+      <input type="text" id="tp-actor" placeholder="your name" style="width:110px">
       <button id="tp-reply">Reply</button>
       ${threadActions(t).map(([label, s]) => `<button class="tp-act" data-s="${s}">${label}</button>`).join('')}
     </div>`;
+  const tpActor = p.querySelector('#tp-actor');
+  tpActor.value = $('actor').value;
+  tpActor.addEventListener('input', () => {
+    $('actor').value = tpActor.value;
+    localStorage.setItem('walkdown-actor', tpActor.value);
+    tpActor.style.borderColor = '';
+  });
   p.querySelector('.tp-close').onclick = closeThread;
   p.querySelector('#tp-reply').onclick = () => threadReply(id);
   p.querySelectorAll('.tp-act').forEach(b => b.onclick = () => threadAct(id, b.dataset.s));
+}
+
+function requireActor() {
+  const tpActor = $('threadpanel').querySelector('#tp-actor');
+  const actor = tpActor?.value.trim();
+  if (actor && actor !== 'agent') return actor;
+  if (tpActor) {
+    tpActor.style.borderColor = 'var(--red)';
+    tpActor.focus();
+  }
+  alert('This action is attributed to a person — enter your name in the "as" box first.');
+  return null;
 }
 
 function closeThread() { panelThread = null; $('threadpanel').className = ''; }
@@ -249,13 +270,18 @@ async function threadPost(path, body) {
 async function threadReply(id) {
   const body = $('tp-text').value.trim();
   if (!body) return alert('Write the reply first.');
-  if (await threadPost(`/api/threads/${id}/replies`, { author: $('actor').value.trim() || undefined, body })) {
+  const author = $('threadpanel').querySelector('#tp-actor')?.value.trim();
+  if (await threadPost(`/api/threads/${id}/replies`, { author: author || undefined, body })) {
     await load(); openThread(id);
   }
 }
 
 async function threadAct(id, status) {
-  const actor = $('actor').value.trim();
+  const humanOnly = status === 'verified' || status === 'waived';
+  const actor = humanOnly
+    ? requireActor()
+    : $('threadpanel').querySelector('#tp-actor')?.value.trim();
+  if (humanOnly && !actor) return;
   const text = $('tp-text').value.trim();
   if (status === '__answer') {
     if (!text) return alert('Write the answer in the text box first.');

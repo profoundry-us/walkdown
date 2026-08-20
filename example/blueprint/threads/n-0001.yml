@@ -6,7 +6,7 @@ anchor:
   rule: waitlist.join.visual-match
   screen: waitlist-join
   element: waitlist.submit
-status: addressed
+status: verified
 body: >
   Button copy does not match the prototype: prototype reads "Join the waitlist",
   app reads "Join waitlist". Evidence: runs/evidence/2026-08-20T20-09Z/

@@ -6,9 +6,13 @@ anchor:
   rule: waitlist.join.confirmation
   screen: waitlist-join
   element: waitlist.submit
-status: open
+status: answered
 body: >
   The prototype doesn't show what happens when an email that is already on the
   waitlist is submitted again. Should re-submission show the same confirmation,
   or a distinct "you're already on the list" state? If the latter, it needs a
   screen (or state) in the storyboard and likely a new rule.
+replies:
+  - author: topherfangio
+    created: 2026-08-20T23:45:50Z
+    body: make it say, "you're already on the list"
