@@ -1,0 +1,32 @@
+feature: status-derivation
+title: Verification status is derived, never stored
+source:
+  prd: docs/05-runs-ledger.md
+stories:
+  - id: status.derived
+    title: Status is a query over the append-only runs ledger
+    statement: As a team, we read verification state that is always derived from run history, never a field someone forgot to update.
+    rules:
+      - id: status.derived.latest-wins
+        origin: prd
+        statement: A rule's status per target is its latest relevant run result; later runs supersede earlier ones and targets never bleed into each other.
+        verify: [checks]
+
+      - id: status.derived.stale-never-passes
+        origin: prd
+        statement: A pass recorded against an older wording of the rule renders as stale, never as passing.
+        verify: [checks]
+
+      - id: status.derived.human-tier-distinct
+        origin: prd
+        statement: An agent verdict never satisfies a human verify requirement; only a human walkdown does.
+        verify: [checks]
+
+  - id: status.attention
+    title: The board says who is blocking what
+    statement: As a team, we each see the queue of items waiting on us specifically.
+    rules:
+      - id: status.attention.blocked-queues
+        origin: prd
+        statement: Attention items are split by who is blocked - humans get judge/verify/answer items, agents get address/incorporate items.
+        verify: [checks]

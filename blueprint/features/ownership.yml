@@ -1,0 +1,13 @@
+feature: ownership
+title: Surface ownership boundaries
+source:
+  prd: docs/02-blueprint-schema.md (Headless rules, ownership)
+stories:
+  - id: ownership.drift
+    title: Spec ahead of its sources is routed, never silent
+    statement: As a design team, we get a request in our queue whenever the spec needs something we haven't drawn.
+    rules:
+      - id: ownership.drift.design-requests-required
+        origin: prd
+        statement: An undesigned screen with no open design-request thread is flagged by lint; filing the request clears it.
+        verify: [checks]

@@ -1,0 +1,22 @@
+feature: viewer
+title: The walkdown viewer
+source:
+  prd: (viewer behaviors requested in working sessions; docs lag - see origin)
+stories:
+  - id: viewer.detail
+    title: A rule's detail carries its whole chain of trust
+    statement: As a reviewer, one pane shows me a rule's intent, evidence, conversation, and the technicals behind a disclosure.
+    rules:
+      - id: viewer.detail.technical-disclosure
+        origin: walkdown
+        statement: A rule's technical detail - its given/when/then steps and the source of its recorded checks - sits behind a single collapsed disclosure under the verify line.
+        verify: [human]
+
+  - id: viewer.board
+    title: One viewer, many blueprints
+    statement: As a user with several projects, I switch between their boards without restarting anything.
+    rules:
+      - id: viewer.board.project-switcher
+        origin: walkdown
+        statement: When more than one blueprint exists under the served root, a header dropdown between the logo and the counts switches projects; single-project setups see no dropdown.
+        verify: [human]

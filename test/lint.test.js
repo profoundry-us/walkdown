@@ -81,7 +81,7 @@ test('hash --write repairs a stale hash and lint then passes', () => {
   assert.equal(exitCode, 0);
 });
 
-test('an undesigned screen without a design-request thread warns; with one it passes', () => {
+test('an undesigned screen without a design-request thread warns; with one it passes @rule:ownership.drift.design-requests-required', () => {
   const bp = writeFixture(join(root, 'drift'));
   const sb = readFileSync(join(bp, 'storyboard.yml'), 'utf8');
   writeFileSync(join(bp, 'storyboard.yml'), sb + '\n  - id: specborn\n    prototype: null\n    app: { path: /x }\n');

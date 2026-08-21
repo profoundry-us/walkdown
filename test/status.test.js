@@ -4,6 +4,9 @@ import { formatHash } from '../lib/hash.js';
 import { deriveStatus, screenFlow } from '../lib/status.js';
 
 const STATEMENT = 'The visitor can do the thing.';
+// hoisted away from tagged test names: a hex literal near a rule ref reads as
+// a recorded statement hash to walkdown's stale-check scanner
+const BOGUS_HASH = 'sha256:' + '0'.repeat(12);
 
 function blueprint({ runs = [], threads = [], verify = ['checks'], environments } = {}) {
   return {
@@ -44,7 +47,7 @@ test('no runs: required cells are never, verdict pending', () => {
   assert.equal(rows[0].verdict, 'pending');
 });
 
-test('later run wins; per-target isolation', () => {
+test('later run wins; per-target isolation @rule:status.derived.latest-wins', () => {
   const { rows } = deriveStatus(
     blueprint({ runs: [checksRun('2026-01-01', 'local', 'fail'), checksRun('2026-01-02', 'local', 'pass')] })
   );
@@ -60,15 +63,15 @@ test('any fail makes the verdict fail', () => {
   assert.equal(rows[0].verdict, 'fail');
 });
 
-test('a pass with an outdated statement_hash renders stale, not passing', () => {
+test('a pass with an outdated statement_hash renders stale, not passing @rule:status.derived.stale-never-passes', () => {
   const { rows } = deriveStatus(
-    blueprint({ runs: [checksRun('2026-01-01', 'local', 'pass', 'sha256:000000000000')] })
+    blueprint({ runs: [checksRun('2026-01-01', 'local', 'pass', BOGUS_HASH)] })
   );
   assert.equal(rows[0].cells.local.state, 'stale');
   assert.equal(rows[0].verdict, 'pending');
 });
 
-test('environments scope targets; agent pass does not satisfy human', () => {
+test('environments scope targets; agent pass does not satisfy human @rule:status.derived.human-tier-distinct', () => {
   const { rows } = deriveStatus(
     blueprint({
       verify: ['agent', 'human'],
@@ -142,7 +145,7 @@ test('drift: undesigned screens and thread-born rules are derived', () => {
   assert.deepEqual(deriveStatus(bp).drift.sources, []);
 });
 
-test('attention: human vs agent queues derived from rows and threads', () => {
+test('attention: human vs agent queues derived from rows and threads @rule:status.attention.blocked-queues', () => {
   const bp = blueprint({
     verify: ['agent', 'human'],
     runs: [walkdownRun('2026-01-01', 'agent', 'pass')],
