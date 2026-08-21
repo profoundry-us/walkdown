@@ -28,7 +28,10 @@
   .frames { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .frame { display: grid; place-items: center; color: #b6bcc6; font-size: 12px; }
   /* the drawer, open: title line + three reading columns */
-  .drawer { border-top: 1.5px dashed #b6bcc6; background: #fff; flex: 0 0 185px; display: flex; flex-direction: column; }
+  .drawer { border-top: 1.5px dashed #b6bcc6; background: #fff; flex: 0 0 205px; display: flex; flex-direction: column; }
+  /* drag-to-resize grip along the drawer's top edge */
+  .rz { height: 6px; cursor: ns-resize; display: flex; align-items: center; justify-content: center; }
+  .rz::after { content: ''; width: 42px; height: 3px; border-radius: 2px; background: #d7dbe1; }
   .dtitle { display: flex; align-items: center; gap: 10px; padding: 8px 14px; font-size: 12px; }
   .dtitle b { color: #333; }
   .badge { font-size: 10px; padding: 1px 8px; border-radius: 10px; background: #dcfce7; color: #15803d; }
@@ -75,6 +78,7 @@
     </div>
   </main>
   <div class="drawer">
+    <div class="rz" data-testid="detail.resize-handle" title="drag to resize the drawer"></div>
     <div class="dtitle">
       <b data-testid="detail.rule-id">waitlist.join.confirmation</b>
       <span class="badge">verified</span>
@@ -87,13 +91,21 @@
         <div class="h">Statement</div>
         <p class="stmt" data-testid="detail.statement">After submitting a valid email, the visitor sees a
           confirmation showing the email they joined with.</p>
-        <div class="wire disc" data-testid="detail.technical-disclosure">▸ <b>steps · checks/waitlist.spec.ts:52</b>
-          — collapsed; expands to given/when/then + source</div>
-      </div>
-      <div class="dcol">
-        <div class="h">Evidence</div>
+        <div class="h" style="margin-top:10px">Evidence</div>
         <div class="ev" data-testid="detail.evidence"><span class="src">checks/local</span><span class="ok">✓ pass</span></div>
         <div class="ev"><span class="src">human</span><span class="ok">✓ pass (topher)</span></div>
+      </div>
+      <div class="dcol">
+        <div class="h">Flow</div>
+        <div style="font-size:11px;color:#777" data-testid="detail.flow">waitlist-join → waitlist-confirm</div>
+        <div class="h" style="margin-top:10px">Steps</div>
+        <div style="font-size:11px;color:#666;line-height:1.5" data-testid="detail.steps">
+          <b>given</b> a visitor on waitlist-join<br>
+          <b>when</b> they submit a valid email<br>
+          <b>then</b> the confirmation shows it
+        </div>
+        <div class="wire disc" data-testid="detail.technical-disclosure">▸ <b>checks/waitlist.spec.ts:52</b>
+          — source stays collapsed</div>
       </div>
       <div class="dcol">
         <div class="h">Threads</div>

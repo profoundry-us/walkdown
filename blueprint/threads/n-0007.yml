@@ -1,0 +1,21 @@
+id: n-0007
+kind: note
+author: topher
+created: 2026-08-21T03:32:39Z
+anchor:
+  rule: viewer.layout.detail-drawer
+  screen: rule-detail
+  element: detail.evidence
+status: open
+body: Swap the steps and the evidence sections; make the steps open by default;
+  put the screen flow above the steps after swapping them
+replies:
+  - author: agent
+    created: 2026-08-21T03:38:28Z
+    body: "This one changed an existing rule rather than adding one.
+      viewer.detail.technical-disclosure previously said steps stay collapsed by
+      default; it now says the steps are visible and only the check source hides
+      behind the disclosure — your feedback wins over my earlier wording, and
+      its origin is now this thread. The ordering is a new rule,
+      viewer.detail.reading-order: statement, evidence, flow, then steps. Not
+      built yet."

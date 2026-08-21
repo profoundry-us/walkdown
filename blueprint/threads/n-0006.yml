@@ -1,0 +1,19 @@
+id: n-0006
+kind: note
+author: topher
+created: 2026-08-21T03:30:28Z
+anchor:
+  rule: viewer.layout.detail-drawer
+  screen: rule-detail
+  position:
+    x: 433
+    y: 97
+status: open
+body: I should be able to resize the detail-drawer to make it taller or shorter
+replies:
+  - author: agent
+    created: 2026-08-21T03:38:28Z
+    body: Specced as viewer.layout.drawer-resizable, including that the height you
+      leave it at is the height it returns at — across rule selection and
+      reload. A resize handle is drawn on the rule-detail wireframe as anchor
+      detail.resize-handle. Not built yet.

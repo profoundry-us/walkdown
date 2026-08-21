@@ -28,7 +28,7 @@
   .flag { margin-left: auto; color: #d97706; font-size: 10px; }
   /* stage: surfaces get everything else */
   .stage { flex: 1; display: flex; flex-direction: column; min-width: 0; gap: 8px; }
-  .screenbar { display: flex; gap: 6px; }
+  .screenbar { display: flex; gap: 6px; align-items: center; }
   .chip { padding: 3px 10px; font-size: 11px; color: #666; }
   .chip.cur { background: #e2e8f0; }
   .frames { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -43,7 +43,7 @@
   <header>
     <span class="logo">Walkdown</span>
     <span class="wire dd" data-testid="board.project-switcher">project ▾</span>
-    <span class="counts">8 verified · 2 pending · 0 failing · <b>needs you: 2</b></span>
+    <span class="wire counts" data-testid="board.counts">8 of 10 rules verified · <b>2 need you</b></span>
     <span class="spacer"></span>
     <span class="wire seg" data-testid="board.mode-switcher"><span>Prototype</span><span class="on">Split</span><span>App</span></span>
     <span class="wire btn">📌 Pin mode</span>
@@ -62,10 +62,12 @@
       <div class="screenbar">
         <span class="wire chip cur">board</span>
         <span class="wire chip">rule-detail</span>
+        <span class="wire chip" data-testid="board.viewport-toggle" style="margin-left:auto">🖥 desktop 1440 ▾ | 📱 mobile 390</span>
+        <span class="wire chip" data-testid="board.zoom">fit 62%</span>
       </div>
       <div class="frames">
-        <div class="wire frame">PROTOTYPE — full height, ~half the window</div>
-        <div class="wire frame">APP — full height, ~half the window</div>
+        <div class="wire frame">PROTOTYPE — rendered at 1440 wide, scaled to fit</div>
+        <div class="wire frame">APP — same viewport, same scale, pinnable too</div>
       </div>
     </div>
   </main>

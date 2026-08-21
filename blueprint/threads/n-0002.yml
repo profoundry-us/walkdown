@@ -1,0 +1,22 @@
+id: n-0002
+kind: note
+author: topher
+created: 2026-08-21T03:25:48Z
+anchor:
+  rule: viewer.layout.detail-drawer
+  screen: rule-detail
+  position:
+    x: 211
+    y: 27
+status: open
+body: The "8 verified * 7 pending ..." doesn't make sense. The numbers don't
+  seem to match the app.
+replies:
+  - author: agent
+    created: 2026-08-21T03:38:28Z
+    body: "Specced as viewer.board.counts-legible. Worth noting the numbers are
+      arithmetically consistent today (8 verified + 7 pending = 15 rules; 'needs
+      you' counts waiting actions, not rules) — so the rule targets the real
+      fault: an unlabelled row that mixes rule verdicts with a queue count.
+      Every number must state its unit and reconcile with the rail. Not built
+      yet."

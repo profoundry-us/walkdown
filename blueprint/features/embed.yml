@@ -22,6 +22,52 @@ stories:
             - Later visitors see the pin on that element wherever it renders
           statement_hash: sha256:8fcd9522614c
 
+      - id: embed.pin.both-surfaces
+        origin: thread:n-0003
+        statement: Pins can be placed on the app exactly as on the prototype - the same anchors exist in both - and a pin records which surface it was placed on.
+        verify: [checks, human]
+        screens: [board]
+        steps:
+          given:
+            - Pin mode on, both surfaces showing the same screen on `board`
+          when:
+            - Pin an anchored element in the app surface
+          then:
+            - The pin form opens and the note is anchored to that element id
+            - The saved note records surface app; a prototype pin records surface prototype
+            - Both pins show on the rule, distinguished by the surface they came from
+          statement_hash: sha256:77fdab028ac1
+
+      - id: embed.pin.viewport-recorded
+        origin: thread:n-0005
+        statement: A pin records the viewport it was placed at, so feedback about a layout is never read against the wrong width.
+        verify: [checks, human]
+        screens: [board]
+        steps:
+          given:
+            - Pin mode on, the surfaces set to a mobile viewport
+          when:
+            - Place a pin
+          then:
+            - The saved note records the viewport name and width in use
+            - The panel shows that viewport alongside the note's other provenance
+          statement_hash: sha256:6971846eb2cc
+
+      - id: embed.pin.form-is-chrome
+        origin: thread:n-0004
+        statement: The pin form is ordinary UI - inside it the cursor and clicks behave normally, and pin mode does not reach through it to the surface underneath.
+        verify: [human]
+        screens: [board]
+        steps:
+          given:
+            - Pin mode on, with the pin form open on screen `board`
+          when:
+            - Moving over the form's checkbox and buttons
+          then:
+            - The cursor is a pointer over controls and a caret over text, never the crosshair
+            - Clicking a control acts on the form and never places another pin
+          statement_hash: sha256:cac6da4be24f
+
       - id: embed.pin.coordinate-fallback
         origin: thread:n-0001
         statement: A pin dropped where no anchored element sits is still placed, recorded by its x/y position on the screen - feedback is never blocked by a missing anchor.

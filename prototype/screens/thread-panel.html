@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mockup — Thread panel</title>
+<style>
+  * { box-sizing: border-box; margin: 0; font-family: -apple-system, sans-serif; }
+  body { background: #fafafa; color: #444; padding: 20px; }
+  .wire { border: 1.5px dashed #b6bcc6; border-radius: 8px; background: #fff; }
+  .panel { width: 340px; padding: 12px; }
+  /* One provenance line, not four stacked sentences. */
+  .prov { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #999; }
+  .prov .id { font-weight: 700; color: #555; }
+  .prov .st { color: #d97706; }
+  .prov .x { margin-left: auto; color: #bbb; }
+  .where { font-size: 11px; color: #aaa; margin-top: 2px; }
+  /* The note itself leads: biggest text on the panel. */
+  .body { font-size: 13.5px; line-height: 1.45; color: #222; margin: 10px 0; }
+  .replies { font-size: 11.5px; color: #666; border-left: 2px solid #e3e6ea; padding-left: 8px; margin-bottom: 10px; }
+  .more { font-size: 11px; color: #6b7db8; }
+  .reply { padding: 7px 9px; font-size: 12px; color: #aaa; }
+  /* Actions: short verbs on one row; the destructive ones are quieter. */
+  .acts { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+  .btn { padding: 4px 11px; font-size: 12px; color: #555; }
+  .btn.pri { background: #e2e8f0; color: #333; }
+  .btn.quiet { color: #aaa; margin-left: auto; }
+  .as { width: 86px; padding: 4px 7px; font-size: 12px; color: #666; }
+  .note { margin-top: 14px; font-size: 11px; color: #b9b9b9; max-width: 340px; line-height: 1.4; }
+</style>
+</head>
+<body>
+  <div class="wire panel" data-testid="thread.panel">
+    <div class="prov" data-testid="thread.provenance">
+      <span class="id">n-0005</span> · note · <span class="st">open</span>
+      <span class="x" data-testid="thread.close">✕</span>
+    </div>
+    <div class="where">surfaces-first · board · board.surfaces · desktop 1440 · topher, 2h ago</div>
+
+    <p class="body" data-testid="thread.body">The prototype and app views should zoom their contents so that
+      you can see what it would look like at a desktop resolution.</p>
+
+    <div class="replies" data-testid="thread.replies">
+      agent, 1h ago — Split into three rules: zoom-to-fit, viewport-toggle…
+      <div class="more">2 earlier replies ▾</div>
+    </div>
+
+    <div class="wire reply" data-testid="thread.reply">Reply…</div>
+
+    <div class="acts" data-testid="thread.actions">
+      <span class="wire as">topher</span>
+      <span class="wire btn pri">Reply</span>
+      <span class="wire btn">Addressed</span>
+      <span class="wire btn quiet">Waive</span>
+    </div>
+  </div>
+
+  <p class="note">Reason-required actions (waive, reopen) ask for the reason when chosen —
+    the reply box carries no standing instructions.</p>
+  <script src="http://localhost:4700/embed.js" data-walkdown></script>
+</body>
+</html>

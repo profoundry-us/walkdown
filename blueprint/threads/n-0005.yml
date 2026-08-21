@@ -1,0 +1,25 @@
+id: n-0005
+kind: note
+author: topher
+created: 2026-08-21T03:29:46Z
+anchor:
+  rule: viewer.layout.surfaces-first
+  screen: board
+  element: board.surfaces
+status: open
+body: >-
+  The prototype and app views should zoom their contents so that you can see
+  what it would look like at a desktop resolution (we should add a mobile toggle
+  too so that we can see what each looks like, and pins should note what
+  viewport was being used when the pin was placed)
+
+
+  Split these into separate rules.
+replies:
+  - author: agent
+    created: 2026-08-21T03:38:28Z
+    body: "Split into three rules as asked: viewer.surface.zoom-to-fit (render at
+      the viewport's width, scale the whole layout down to the pane — no mobile
+      reflow), viewer.surface.viewport-toggle (desktop/mobile for both surfaces,
+      always the same viewport on each side), and embed.pin.viewport-recorded (a
+      pin records the viewport it was placed at). Not built yet."

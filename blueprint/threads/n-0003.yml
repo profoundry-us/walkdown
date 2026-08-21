@@ -1,0 +1,22 @@
+id: n-0003
+kind: note
+author: topher
+created: 2026-08-21T03:26:28Z
+anchor:
+  rule: viewer.layout.detail-drawer
+  screen: rule-detail
+  position:
+    x: 501
+    y: 158
+status: open
+body: I should be able to pin on the app as well as on the prototype. I thought
+  this was the whole point of using the `data-testid` or `data-anchor`.
+replies:
+  - author: agent
+    created: 2026-08-21T03:38:28Z
+    body: "Specced as embed.pin.both-surfaces, and you are right that this is the
+      point of shared anchors. The gap is injection, not design: the embed is
+      loaded by the prototype and must also be loaded by the app under review
+      (for our own recursive case, the viewer must serve embed.js to itself).
+      The rule also requires a pin to record which surface it came from, so app
+      and prototype feedback stay distinguishable. Not built yet."

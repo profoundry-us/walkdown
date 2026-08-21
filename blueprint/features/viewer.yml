@@ -8,19 +8,34 @@ stories:
     statement: As a reviewer, one pane shows me a rule's intent, evidence, conversation, and the technicals behind a disclosure.
     rules:
       - id: viewer.detail.technical-disclosure
-        origin: walkdown
-        statement: A rule's technical detail - its given/when/then steps and the source of its recorded checks - sits behind a single collapsed disclosure under the verify line.
+        origin: thread:n-0007
+        statement: A rule's given/when/then steps are visible without being asked for; only the recorded check source sits behind a collapsed disclosure.
         verify: [human]
         screens: [rule-detail]
         steps:
           given:
             - A rule selected on screen `board`
           when:
-            - Open anchor `detail.technical-disclosure` on screen `rule-detail`
+            - Reading anchor `detail.steps` on screen `rule-detail`
           then:
-            - Given/when/then steps render immediately; the recorded check source loads beneath them
-            - Collapsed by default, so the pane stays PM-scannable
-          statement_hash: sha256:b9dbeb44b184
+            - The steps are already expanded - they are the rule, not an appendix
+            - The check source stays behind anchor `detail.technical-disclosure` until opened
+          statement_hash: sha256:0609e516526f
+
+      - id: viewer.detail.reading-order
+        origin: thread:n-0007
+        statement: The detail reads in the order a reviewer judges - statement, then evidence, then the screen flow, then the steps - with threads alongside.
+        verify: [human]
+        screens: [rule-detail]
+        steps:
+          given:
+            - A rule selected, its drawer open on screen `rule-detail`
+          when:
+            - Reading the drawer top to bottom, left to right
+          then:
+            - Anchor `detail.evidence` sits directly under `detail.statement`, not in a far column
+            - Anchor `detail.flow` sits above `detail.steps`
+          statement_hash: sha256:cd98cfe2ff07
 
   - id: viewer.layout
     title: The surfaces come first
@@ -56,6 +71,21 @@ stories:
             - Reopening restores statement, evidence, and threads exactly as they were
           statement_hash: sha256:403cfb964b01
 
+      - id: viewer.layout.drawer-resizable
+        origin: thread:n-0006
+        statement: The drawer can be dragged taller or shorter, and the height it is left at is the height it returns at.
+        verify: [human]
+        screens: [rule-detail]
+        steps:
+          given:
+            - A rule selected, its drawer open on screen `rule-detail`
+          when:
+            - Drag anchor `detail.resize-handle` up, then down
+          then:
+            - The drawer grows and shrinks with the drag; the surfaces take the remaining height
+            - The chosen height survives selecting another rule and reloading the viewer
+          statement_hash: sha256:b1c20e0a7ef4
+
       - id: viewer.layout.stage-modes
         origin: walkdown
         statement: A header control switches the stage between Prototype, Split, and App - Split shows both surfaces side by side and is the default; the other two give one surface the whole stage.
@@ -71,9 +101,79 @@ stories:
             - The chosen screen and selected rule survive every mode change
           statement_hash: sha256:bb0f30eb189e
 
+  - id: viewer.surface
+    title: The surfaces render at real device sizes
+    statement: As a reviewer, I judge what the user will actually see - a desktop layout at desktop width, a mobile layout at phone width - not a layout squeezed into whatever the pane happens to be.
+    rules:
+      - id: viewer.surface.zoom-to-fit
+        origin: thread:n-0005
+        statement: Each surface renders its contents at the chosen viewport's width and scales the result down to fit its pane, so a desktop layout is seen as a desktop layout rather than reflowed to a narrow column.
+        verify: [human]
+        screens: [board]
+        steps:
+          given:
+            - A desktop-width app open on screen `board` in Split mode
+          when:
+            - Reading the panes with the rail open, so neither pane is full width
+          then:
+            - The app lays out as it would on a desktop, scaled down whole - no mobile reflow
+            - The current scale is shown in anchor `board.zoom`
+          statement_hash: sha256:7ebf7965b27c
+
+      - id: viewer.surface.viewport-toggle
+        origin: thread:n-0005
+        statement: A control switches both surfaces between desktop and mobile viewports, and they always render at the same viewport as each other so the comparison stays honest.
+        verify: [human]
+        screens: [board]
+        steps:
+          given:
+            - The viewer open on screen `board`
+          when:
+            - Choose mobile from anchor `board.viewport-toggle`
+          then:
+            - Both surfaces re-render narrow, and a responsive app shows its mobile layout
+            - Switching back to desktop restores both; the surfaces never disagree on viewport
+          statement_hash: sha256:ac6270d5dde7
+
+  - id: viewer.threads
+    title: A thread panel you can read at a glance
+    statement: As a reviewer opening a pin, I want the note itself - not a wall of provenance and instructions I have to read past.
+    rules:
+      - id: viewer.threads.note-first
+        origin: walkdown
+        statement: The thread panel leads with the note's own words; its provenance - id, kind, status, rule, screen, element, author, age - is condensed to a compact line rather than stacked sentences.
+        verify: [human]
+        screens: [thread-panel]
+        steps:
+          given:
+            - A pinned note open on screen `thread-panel`
+          when:
+            - Reading anchor `thread.panel`
+          then:
+            - Anchor `thread.body` is the most prominent text in the panel
+            - Anchor `thread.provenance` fits on one line and never pushes the note below the fold
+            - A long reply history collapses behind a count rather than growing the panel
+          statement_hash: sha256:204328920b33
+
+      - id: viewer.threads.actions-in-context
+        origin: walkdown
+        statement: The panel's actions are short verbs on one row, and an action that needs a reason asks for it when chosen - the reply box carries no standing instructions.
+        verify: [human]
+        screens: [thread-panel]
+        steps:
+          given:
+            - A pinned note open on screen `thread-panel`
+          when:
+            - Reading anchor `thread.actions`, then choosing an action that requires a reason
+          then:
+            - The reply box in anchor `thread.reply` reads simply as a reply box
+            - Choosing waive or reopen asks for the reason then; other actions never mention it
+            - Actions a person may not take are absent, not shown and refused
+          statement_hash: sha256:f92eb6cfe6b3
+
   - id: viewer.board
     title: One viewer, many blueprints
-    statement: As a user with several projects, I switch between their boards without restarting anything.
+    statement: As a user with several projects, I switch between their boards without restarting anything, and I can trust what the header tells me.
     rules:
       - id: viewer.board.project-switcher
         origin: walkdown
@@ -88,3 +188,18 @@ stories:
           then:
             - The whole board (rules, counts, surfaces) reflects the chosen blueprint
           statement_hash: sha256:da8dfb28123d
+
+      - id: viewer.board.counts-legible
+        origin: thread:n-0002
+        statement: The header counts say what they count and reconcile with the rail - rule verdicts are named as rules, and a queue count is named as work waiting, never mixed into one unlabelled row of numbers.
+        verify: [human]
+        screens: [board]
+        steps:
+          given:
+            - A blueprint whose rules are partly verified, with threads waiting on a person
+          when:
+            - Reading anchor `board.counts` on screen `board`
+          then:
+            - Every number states its unit, so a reader can tell rules from pending actions
+            - The counts add up against the rules visible in anchor `board.rules`
+          statement_hash: sha256:4f0408073c23

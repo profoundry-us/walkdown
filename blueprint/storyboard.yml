@@ -7,11 +7,14 @@ screens:
     app: { path: / }
     anchors:
       - board.project-switcher
+      - board.counts
       - board.mode-switcher
       - board.rules
       - board.rail-toggle
       - board.surfaces
       - board.drawer
+      - board.viewport-toggle
+      - board.zoom
 
   - id: rule-detail
     title: Rule detail (state — select a rule on the board)
@@ -20,7 +23,23 @@ screens:
     anchors:
       - detail.rule-id
       - detail.statement
-      - detail.technical-disclosure
       - detail.evidence
+      - detail.flow
+      - detail.steps
+      - detail.technical-disclosure
       - detail.threads
       - detail.drawer-toggle
+      - detail.resize-handle
+
+  - id: thread-panel
+    title: Thread panel (state — open a pin or a thread)
+    prototype: /screens/thread-panel.html
+    app: { path: / }
+    anchors:
+      - thread.panel
+      - thread.provenance
+      - thread.body
+      - thread.replies
+      - thread.reply
+      - thread.actions
+      - thread.close
