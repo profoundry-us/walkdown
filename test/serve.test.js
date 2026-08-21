@@ -121,6 +121,25 @@ test('thread reply and status endpoints mutate through the validated path', asyn
   assert.equal(unknown.status, 400);
 });
 
+test('multi-project: sibling blueprints are discovered and ?bp= switches, membership-validated', async () => {
+  mkdirSync(join(root, 'sibling', 'blueprint', 'features'), { recursive: true });
+  writeFileSync(join(root, 'sibling', 'blueprint', 'walkdown.yml'), 'project: sibling-app\n');
+  writeFileSync(join(root, 'sibling', 'blueprint', 'features', 'f.yml'),
+    'feature: f\nstories:\n  - id: f.s\n    rules:\n      - id: f.s.one\n        statement: One.\n        verify: [checks]\n');
+
+  const home = await (await fetch(`${base}/api/blueprint`)).json();
+  const ids = home.projects.map((p) => p.id).sort();
+  assert.deepEqual(ids, ['blueprint', 'sibling/blueprint']);
+  assert.ok(home.projects.find((p) => p.id === 'blueprint').current);
+
+  const sibling = await (await fetch(`${base}/api/blueprint?bp=${encodeURIComponent('sibling/blueprint')}`)).json();
+  assert.equal(sibling.project, 'sibling-app');
+  assert.equal(sibling.rows[0].rule, 'f.s.one');
+  assert.ok(sibling.projects.find((p) => p.id === 'sibling/blueprint').current);
+
+  assert.equal((await fetch(`${base}/api/blueprint?bp=../../etc`)).status, 404);
+});
+
 test('OPTIONS preflight answers CORS and Private Network Access', async () => {
   const res = await fetch(`${base}/api/threads`, {
     method: 'OPTIONS',

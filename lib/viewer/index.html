@@ -90,6 +90,7 @@
 <body>
 <header>
   <h1>Walkdown</h1>
+  <select id="bpsel" style="display:none; font: inherit; padding: 4px 6px; border: 1px solid var(--line); border-radius: 6px; max-width: 220px;"></select>
   <span class="counts" id="counts"></span>
   <span class="spacer"></span>
   <button id="pinbtn" title="Click elements in either surface to pin feedback">📌 Pin mode</button>
@@ -110,6 +111,8 @@
 <div id="threadpanel"></div>
 <script>
 const $ = (id) => document.getElementById(id);
+const BP = new URLSearchParams(location.search).get('bp');
+const withBp = (path) => (BP ? path + (path.includes('?') ? '&' : '?') + 'bp=' + encodeURIComponent(BP) : path);
 let data = null, selected = null, screen = null, pinMode = false, session = null;
 let attnByThread = {};
 
@@ -128,7 +131,14 @@ const CELL = { pass: '✓ pass', fail: '✗ fail', stale: '~ stale', skipped: '�
 const CELLCLASS = { pass: 'v-pass', fail: 'v-fail', stale: 'st-open', never: 'v-pending', na: 'v-pending', skipped: 'v-pending' };
 
 async function load() {
-  data = await (await fetch('/api/blueprint')).json();
+  data = await (await fetch(withBp('/api/blueprint'))).json();
+  const sel = $('bpsel');
+  if ((data.projects ?? []).length > 1) {
+    sel.style.display = '';
+    sel.innerHTML = data.projects.map(p =>
+      `<option value="${p.id}" ${p.current ? 'selected' : ''}>${p.name}</option>`).join('');
+    sel.onchange = () => { location.href = '?bp=' + encodeURIComponent(sel.value); };
+  }
   attnByThread = Object.fromEntries(
     (data.attention ?? []).filter(i => i.thread).map(i => [i.thread, i.who]));
   const needsYou = (data.attention ?? []).filter(i => i.who === 'human').length;
@@ -286,7 +296,7 @@ function requireActor() {
 function closeThread() { panelThread = null; $('threadpanel').className = ''; }
 
 async function threadPost(path, body) {
-  const res = await fetch(path, { method: 'POST', headers: { 'content-type': 'application/json' },
+  const res = await fetch(withBp(path), { method: 'POST', headers: { 'content-type': 'application/json' },
     body: JSON.stringify(body) });
   const out = await res.json();
   if (!res.ok) { alert(out.error ?? 'request failed'); return false; }
@@ -348,11 +358,11 @@ function gotoScreen(id) {
   if (s.prototype && data.hasPrototype) {
     header.textContent = 'Prototype';
     header.style.cssText = '';
-    proto.src = '/prototype' + s.prototype;
+    proto.src = withBp('/prototype' + s.prototype);
   } else if (s.proposal) {
     header.textContent = '⚠ Proposed — not from design';
     header.style.cssText = 'color:var(--amber)';
-    proto.src = '/proposals' + s.proposal;
+    proto.src = withBp('/proposals' + s.proposal);
   } else {
     header.textContent = 'Prototype — none yet';
     header.style.cssText = 'color:var(--amber)';
@@ -392,7 +402,7 @@ window.addEventListener('message', async (e) => {
     openThread(msg.id);
   }
   if (msg.type === 'walkdown:new-pin') {
-    const res = await fetch('/api/threads', { method: 'POST', headers: { 'content-type': 'application/json' },
+    const res = await fetch(withBp('/api/threads'), { method: 'POST', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ kind: msg.kind, body: msg.body, author: $('actor').value || undefined,
         anchor: { element: msg.element, screen, ...(selected && { rule: selected.rule }) } }) });
     const out = await res.json();
@@ -416,7 +426,7 @@ $('wdbtn').onclick = async () => {
   const results = Object.entries(session.verdicts).map(([rule, status]) =>
     ({ rule, status, ...(session.pinned[rule]?.length && { threads: session.pinned[rule] }) }));
   if (!results.length) { session = null; $('wdbtn').textContent = 'Start walkdown'; renderRules(); renderDetail(); return; }
-  const res = await (await fetch('/api/walkdowns', { method: 'POST',
+  const res = await (await fetch(withBp('/api/walkdowns'), { method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ actor: session.actor, target: 'local', results }) })).json();
   alert(res.run_id ? `Recorded ${results.length} verdict(s) as ${res.run_id}` : `Error: ${res.error}`);
