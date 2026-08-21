@@ -225,15 +225,17 @@ stories:
 
       - id: viewer.board.counts-legible
         origin: thread:n-0002
-        statement: The header counts say what they count and reconcile with the rail - rule verdicts are named as rules, and a queue count is named as work waiting, never mixed into one unlabelled row of numbers.
+        statement: The header counts say what they count and reconcile with the rail - rule verdicts are named as rules, a queue count is broken into the kinds of work it contains, and every queued action is marked on the rule it belongs to so the total can be counted back.
         verify: [human]
         screens: [board]
         steps:
           given:
             - A blueprint whose rules are partly verified, with threads waiting on a person
           when:
-            - Reading anchor `board.counts` on screen `board`
+            - Reading anchor `board.counts` on screen `board`, then counting the marks in anchor `board.rules`
           then:
             - Every number states its unit, so a reader can tell rules from pending actions
-            - The counts add up against the rules visible in anchor `board.rules`
-          statement_hash: sha256:4f0408073c23
+            - The queue splits into walkdowns owed and threads awaiting verification
+            - Each queued action carries a mark on its rule in the rail, and the marks sum to the header total
+            - Choosing the queue count filters the rail to only what is waiting on you
+          statement_hash: sha256:90df474e0ef0

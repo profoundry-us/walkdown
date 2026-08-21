@@ -8,7 +8,7 @@ anchor:
   position:
     x: 569
     y: 25
-status: addressed
+status: verified
 body: It would be great if we could just pull the git username or something so
   people don't have to type who they are.
 replies:

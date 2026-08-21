@@ -31,3 +31,23 @@ replies:
       '<N> actions need you' — each number states its unit, and the rules figure
       reconciles with the rail. Rule viewer.board.counts-legible. Awaiting your
       walkdown.
+  - author: agent
+    created: 2026-08-21T21:27:22Z
+    body: "Reopening — my fix was incomplete. Labelling the units was not enough:
+      the header counts 26 human actions (20 walkdown verdicts + 6 thread
+      verifications) but the rail only flags the 6 thread-backed ones, so the
+      number cannot be reconciled against the list, which is the rule's second
+      criterion. The 20 rules awaiting your verdict render as plain grey circles
+      with nothing marking them as yours."
+  - author: agent
+    created: 2026-08-21T21:29:38Z
+    body: "Fixed properly this time. The header now splits the queue into its two
+      kinds — '20 to walk down · 5 threads to verify' — and every queued action
+      is marked on its own rule in the rail: an amber ◆ with a 'walk' tag for a
+      rule awaiting your verdict, alongside the existing ⚑ thread flags. Counted
+      live: 20 walk markers + 5 thread flags = 25, matching the header exactly.
+      The queue count is also a filter — click it to show only what is waiting
+      on you (28 rules to 20). I tightened viewer.board.counts-legible to
+      require the marks to sum to the header total, so this cannot silently
+      regress. Also fixed the pill wrapping into a vertical column in the
+      header."

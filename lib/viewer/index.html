@@ -15,7 +15,8 @@
   header { display: flex; align-items: center; gap: 14px; padding: 10px 16px; background: var(--panel);
            border-bottom: 1px solid var(--line); }
   header h1 { font-size: 15px; }
-  header .counts { color: var(--muted); font-size: 13px; }
+  header .counts { color: var(--muted); font-size: 13px; white-space: nowrap; flex: 0 0 auto; }
+  header h1 { flex: 0 0 auto; }
   header .spacer { flex: 1; }
   input[type=text] { font: inherit; padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; width: 120px; }
   button { font: inherit; padding: 5px 12px; border: 1px solid var(--line); border-radius: 6px;
@@ -51,6 +52,11 @@
   .rule .thrs { margin-left: auto; display: flex; gap: 6px; }
   .rule .thr { font-size: 11px; }
   .rule .thr-h { color: var(--amber); font-weight: 600; }
+  .rule .glyph.v-mine { color: var(--amber); }
+  .mine { font: inherit; font-size: 12.5px; padding: 2px 9px; border-radius: 999px; cursor: pointer;
+          border: 1px solid var(--amber); background: #fdf6e8; color: var(--amber); font-weight: 600;
+          white-space: nowrap; }
+  .mine.on { background: var(--amber); color: #fff; }
   .rule .thr-a { color: var(--muted); }
   /* The drawer: a title line always, columns when open. */
   #drawer { flex: 0 0 auto; background: var(--panel); border-top: 1px solid var(--line);
@@ -218,6 +224,12 @@ const attnCounts = (rule) => {
     agent: items.filter(i => i.who === 'agent').length,
   };
 };
+/* A rule needs YOUR verdict when a human action is queued against it that is
+   not thread-backed — a walkdown. These outnumber thread flags, so the rail
+   must show them or the header count cannot be reconciled. */
+const needsYourVerdict = (rule) =>
+  (data.attention ?? []).some(i => i.who === 'human' && !i.thread && i.rule === rule);
+let onlyMine = false;
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -242,11 +254,23 @@ async function load() {
   const total = data.rows.length;
   const verified = data.rows.filter(r => r.verdict === 'pass').length;
   const failing = data.rows.filter(r => r.verdict === 'fail').length;
+  // Break the queue into the two things it actually contains, so the number
+  // can be reconciled against the rail rather than taken on faith.
+  const walkdowns = (data.attention ?? []).filter(i => i.who === 'human' && !i.thread).length;
+  const threadsWaiting = needsYou - walkdowns;
+  const parts = [walkdowns && `${walkdowns} to walk down`, threadsWaiting && `${threadsWaiting} thread${
+    threadsWaiting === 1 ? '' : 's'} to verify`].filter(Boolean).join(' · ');
   $('counts').innerHTML = `<span data-testid="board.counts" title="${verified} of ${total} rules have every required verification recorded">` +
     `<b>${verified} of ${total} rules</b> verified` +
     (failing ? ` · <span class="v-fail">${failing} failing</span>` : '') +
-    (needsYou ? ` · <span style="color:var(--amber);font-weight:600">${needsYou} ${
-      needsYou === 1 ? 'action needs' : 'actions need'} you</span>` : '') + '</span>';
+    (needsYou ? ` · <button id="minebtn" class="mine${onlyMine ? ' on' : ''}" title="Show only what needs you">${
+      parts}</button>` : '') + '</span>';
+  $('minebtn')?.addEventListener('click', () => {
+    onlyMine = !onlyMine;
+    renderRules();
+    load.lastCounts?.();
+    $('minebtn').classList.toggle('on', onlyMine);
+  });
   renderRules();
   renderScreenbar();
   if (selected) selected = data.rows.find(r => r.rule === selected.rule) ?? null;
@@ -273,16 +297,20 @@ function renderRules() {
   const stories = [...new Set(data.rows.map(r => r.story))];
   for (const story of stories) {
     const h = document.createElement('div'); h.className = 'story-h'; h.textContent = story; nav.appendChild(h);
+    const before = nav.childElementCount;
     for (const row of data.rows.filter(r => r.story === story)) {
+      if (onlyMine && !needsYourVerdict(row.rule) && !attnCounts(row.rule).human) continue;
       const el = document.createElement('div');
       el.className = 'rule' + (selected?.rule === row.rule ? ' sel' : '');
       const [g, cls] = GLYPH[row.verdict];
       const short = row.rule.startsWith(story + '.') ? row.rule.slice(story.length + 1) : row.rule;
       const { human, agent } = attnCounts(row.rule);
-      el.innerHTML = `<span class="glyph ${cls}">${session?.verdicts[row.rule]
-        ? (session.verdicts[row.rule] === 'pass' ? '✓' : '✗') : g}</span><span class="name">${short}</span>` +
-        (human || agent ? `<span class="thrs">` +
-          (human ? `<span class="thr thr-h" title="waiting on you">${human} ⚑</span>` : '') +
+      const mine = needsYourVerdict(row.rule);
+      el.innerHTML = `<span class="glyph ${mine ? 'v-mine' : cls}">${session?.verdicts[row.rule]
+        ? (session.verdicts[row.rule] === 'pass' ? '✓' : '✗') : mine ? '◆' : g}</span><span class="name">${short}</span>` +
+        (mine || human || agent ? `<span class="thrs">` +
+          (mine ? `<span class="thr thr-h" title="needs your walkdown verdict">walk</span>` : '') +
+          (human ? `<span class="thr thr-h" title="${human} thread(s) waiting on you">${human} ⚑</span>` : '') +
           (agent ? `<span class="thr thr-a" title="waiting on the agent">${agent} ⚑</span>` : '') +
           `</span>` : '');
       el.title = row.rule;
@@ -291,7 +319,10 @@ function renderRules() {
         gotoScreen(row.flow?.at(-1) ?? row.screens[0] ?? screen); renderRules(); renderDetail(); };
       nav.appendChild(el);
     }
+    if (nav.childElementCount === before) h.remove();   // filtered to nothing
   }
+  if (onlyMine && !nav.querySelector('.rule'))
+    nav.insertAdjacentHTML('beforeend', '<p class="empty" style="padding:10px 14px">Nothing waiting on you.</p>');
 }
 
 const BADGE = { pass: ['verified', ''], fail: ['failing', 'b-fail'], pending: ['pending', 'b-pending'] };
