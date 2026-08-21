@@ -10,7 +10,7 @@ stories:
       - id: embed.pin.anchored-target
         origin: walkdown
         statement: In pin mode, hovering highlights any element that carries an anchor, and a pin placed on one is recorded against that anchor - the note follows the element, not the pixel.
-        verify: [human]
+        verify: [checks, human]
         screens: [board]
         steps:
           given:

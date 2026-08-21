@@ -67,7 +67,7 @@ test('viewer, embed.js, and prototype static files are served', async () => {
   assert.equal((await fetch(`${base}/prototype/../walkdown.yml`)).status, 404);
 });
 
-test('POST /api/threads writes a thread file; screen resolved from URL', async () => {
+test('POST /api/threads writes a thread file; screen resolved from URL @rule:embed.pin.anchored-target', async () => {
   const res = await (await fetch(`${base}/api/threads`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
