@@ -6,7 +6,7 @@ anchor:
   rule: waitlist.join.visual-match
   screen: waitlist-confirm
   element: waitlist.confirmed-email
-status: addressed
+status: verified
 body: The email is missing from here; we need a rule to capture this.
 replies:
   - author: agent

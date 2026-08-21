@@ -31,7 +31,10 @@
   .rule.sel { background: #e8effd; }
   .rule .glyph { width: 14px; text-align: center; }
   .v-pass { color: var(--green); } .v-fail { color: var(--red); } .v-pending { color: var(--muted); }
-  .rule .thr { margin-left: auto; font-size: 11px; color: var(--amber); }
+  .rule .thrs { margin-left: auto; display: flex; gap: 6px; }
+  .rule .thr { font-size: 11px; }
+  .rule .thr-h { color: var(--amber); font-weight: 600; }
+  .rule .thr-a { color: var(--muted); }
   #detail { overflow-y: auto; border-right: 1px solid var(--line); background: var(--panel); padding: 16px; }
   #detail h2 { font-size: 14px; word-break: break-all; }
   #detail .stmt { margin: 8px 0 10px; }
@@ -40,7 +43,10 @@
           text-transform: uppercase; }
   .evrow { display: flex; gap: 8px; padding: 5px 0; font-size: 13px; border-bottom: 1px solid var(--line); }
   .evrow .src { width: 100px; color: var(--muted); }
-  .thread { padding: 8px 10px; margin: 8px 0; background: var(--bg); border-radius: 8px; font-size: 13px; }
+  .thread { padding: 8px 10px; margin: 8px 0; background: var(--bg); border-radius: 8px; font-size: 13px;
+            border-left: 3px solid transparent; }
+  .thread.needs-you { border-left-color: var(--amber); background: #fdf6e8; }
+  .thread.needs-agent { border-left-color: var(--line); }
   .thread .th-h { font-weight: 600; margin-bottom: 3px; }
   .thread .st-open, .thread .st-answered, .thread .st-addressed { color: var(--amber); }
   .thread .st-verified, .thread .st-incorporated { color: var(--green); }
@@ -105,6 +111,16 @@
 <script>
 const $ = (id) => document.getElementById(id);
 let data = null, selected = null, screen = null, pinMode = false, session = null;
+let attnByThread = {};
+
+const threadAttn = (id) => attnByThread[id] ?? null;
+const attnCounts = (rule) => {
+  const items = (data.attention ?? []).filter(i => i.thread && i.rule === rule);
+  return {
+    human: items.filter(i => i.who === 'human').length,
+    agent: items.filter(i => i.who === 'agent').length,
+  };
+};
 
 const GLYPH = { pass: ['✓', 'v-pass'], fail: ['✗', 'v-fail'], pending: ['○', 'v-pending'] };
 const CELL = { pass: '✓ pass', fail: '✗ fail', stale: '~ stale', skipped: '– skipped', blocked: '⊘ blocked',
@@ -113,6 +129,8 @@ const CELLCLASS = { pass: 'v-pass', fail: 'v-fail', stale: 'st-open', never: 'v-
 
 async function load() {
   data = await (await fetch('/api/blueprint')).json();
+  attnByThread = Object.fromEntries(
+    (data.attention ?? []).filter(i => i.thread).map(i => [i.thread, i.who]));
   const needsYou = (data.attention ?? []).filter(i => i.who === 'human').length;
   $('counts').innerHTML = data.rows.filter(r => r.verdict === 'pass').length + ' verified · ' +
     data.rows.filter(r => r.verdict === 'pending').length + ' pending · ' +
@@ -139,10 +157,13 @@ function renderRules() {
       el.className = 'rule' + (selected?.rule === row.rule ? ' sel' : '');
       const [g, cls] = GLYPH[row.verdict];
       const short = row.rule.startsWith(story + '.') ? row.rule.slice(story.length + 1) : row.rule;
-      const nThr = activeThreadsFor(row.rule).length;
+      const { human, agent } = attnCounts(row.rule);
       el.innerHTML = `<span class="glyph ${cls}">${session?.verdicts[row.rule]
         ? (session.verdicts[row.rule] === 'pass' ? '✓' : '✗') : g}</span><span>${short}</span>` +
-        (nThr ? `<span class="thr">${nThr} ⚑</span>` : '');
+        (human || agent ? `<span class="thrs">` +
+          (human ? `<span class="thr thr-h" title="waiting on you">${human} ⚑</span>` : '') +
+          (agent ? `<span class="thr thr-a" title="waiting on the agent">${agent} ⚑</span>` : '') +
+          `</span>` : '');
       el.onclick = () => { selected = row;
         gotoScreen(row.flow?.at(-1) ?? row.screens[0] ?? screen); renderRules(); renderDetail(); };
       nav.appendChild(el);
@@ -158,7 +179,8 @@ function renderDetail() {
   for (const t of data.targets) if (r.cells[t].state !== 'na') ev.push([`checks/${t}`, r.cells[t]]);
   if (r.agent.state !== 'na') ev.push(['agent', r.agent]);
   if (r.human.state !== 'na') ev.push(['human', r.human]);
-  const threads = data.threads.filter(t => t.anchor?.rule === r.rule);
+  const threads = data.threads.filter(t => t.anchor?.rule === r.rule)
+    .sort((a, b) => String(b.created ?? '').localeCompare(String(a.created ?? '')));
   d.innerHTML = `
     <h2>${r.rule}</h2>
     <p class="stmt">${r.statement ?? ''}</p>
@@ -181,7 +203,9 @@ function renderDetail() {
     ${session?.verdicts[r.rule] === 'fail' ? `<div class="pinhint">📌 Pin mode is on — click the
       broken element in either surface to attach a note to this fail.</div>` : ''}
     <div class="sect">Threads</div>
-    ${threads.map(t => `<div class="thread" data-t="${t.id}"><div class="th-h">${t.id} · ${t.kind} ·
+    ${threads.map(t => `<div class="thread ${threadAttn(t.id) === 'human' ? 'needs-you'
+        : threadAttn(t.id) === 'agent' ? 'needs-agent' : ''}" data-t="${t.id}">
+        <div class="th-h">${t.id} · ${t.kind} ·
         <span class="st-${t.status}">${t.status}</span></div>${t.body ?? ''}</div>`).join('') || '<p class="empty">none</p>'}`;
   if (session) {
     $('wd-pass').onclick = () => { session.verdicts[r.rule] = 'pass'; renderRules(); renderDetail(); };
