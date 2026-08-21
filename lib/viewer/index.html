@@ -377,6 +377,11 @@ async function threadAct(id, status) {
 
 function renderScreenbar() {
   const bar = $('screenbar'); bar.innerHTML = '';
+  if (!data.storyboard.length) {
+    bar.innerHTML = `<span class="empty">No screens in this blueprint — headless rules only${
+      (data.projects ?? []).length > 1 ? '; pick another project from the dropdown to see surfaces' : ''}.</span>`;
+    return;
+  }
   for (const s of data.storyboard) {
     const b = document.createElement('button');
     b.className = 'sb' + (screen === s.id ? ' cur' : '');

@@ -1,7 +1,22 @@
-# The screen registry: rules reference screens by id, never by URL.
-screens: []
-#  - id: home
-#    title: Home
-#    prototype: /screens/home.html   # null if not yet designed — then file a design-request thread
-#    app: { path: / }
-#    anchors: [home.cta]
+# The viewer's own screens. The "app" is the running viewer itself
+# (walkdown serve), so the side-by-side compares mockup against live tool.
+screens:
+  - id: board
+    title: The board
+    prototype: /screens/board.html
+    app: { path: / }
+    anchors:
+      - board.project-switcher
+      - board.rules
+      - board.surfaces
+
+  - id: rule-detail
+    title: Rule detail (state — select a rule on the board)
+    prototype: /screens/rule-detail.html
+    app: { path: / }
+    anchors:
+      - detail.rule-id
+      - detail.statement
+      - detail.technical-disclosure
+      - detail.evidence
+      - detail.threads

@@ -11,6 +11,16 @@ stories:
         origin: walkdown
         statement: A rule's technical detail - its given/when/then steps and the source of its recorded checks - sits behind a single collapsed disclosure under the verify line.
         verify: [human]
+        screens: [rule-detail]
+        steps:
+          given:
+            - A rule selected on screen `board`
+          when:
+            - Open anchor `detail.technical-disclosure` on screen `rule-detail`
+          then:
+            - Given/when/then steps render immediately; the recorded check source loads beneath them
+            - Collapsed by default, so the pane stays PM-scannable
+          statement_hash: sha256:b9dbeb44b184
 
   - id: viewer.board
     title: One viewer, many blueprints
@@ -20,3 +30,12 @@ stories:
         origin: walkdown
         statement: When more than one blueprint exists under the served root, a header dropdown between the logo and the counts switches projects; single-project setups see no dropdown.
         verify: [human]
+        screens: [board]
+        steps:
+          given:
+            - Serving a root with multiple blueprints
+          when:
+            - Choose a project from anchor `board.project-switcher` on screen `board`
+          then:
+            - The whole board (rules, counts, surfaces) reflects the chosen blueprint
+          statement_hash: sha256:da8dfb28123d

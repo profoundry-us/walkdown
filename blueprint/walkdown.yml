@@ -9,7 +9,11 @@ runner:
   list: "grep -rn '@rule:' test/"
   results: native
   targets:
-    local: {}
+    local:
+      base_url: http://localhost:4700   # the viewer is walkdown's own UI
+
+prototype:
+  root: prototype/                      # wireframe mockups of the viewer
 
 embed:
   anchor_attribute: data-testid

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mockup — Rule detail</title>
+<style>
+  * { box-sizing: border-box; margin: 0; font-family: -apple-system, sans-serif; }
+  body { background: #fafafa; color: #444; padding: 14px; }
+  .wire { border: 1.5px dashed #b6bcc6; border-radius: 8px; background: #fff; }
+  .panel { max-width: 360px; padding: 14px; }
+  h2 { font-size: 13px; color: #333; }
+  .stmt { font-size: 13px; margin: 8px 0; }
+  .meta { font-size: 11px; color: #999; margin: 4px 0; }
+  .disclosure { font-size: 11px; color: #777; padding: 6px 8px; margin: 8px 0; }
+  .disclosure b { color: #555; }
+  .h { font-size: 10px; letter-spacing: .05em; text-transform: uppercase; color: #999; margin: 12px 0 6px; }
+  .ev { display: flex; gap: 10px; font-size: 12px; padding: 4px 0; border-bottom: 1px dashed #dfe3e8; }
+  .ev .src { width: 90px; color: #999; }
+  .ok { color: #16a34a; }
+  .thread { padding: 8px; margin-top: 8px; font-size: 12px; border-left: 3px solid #d97706; }
+</style>
+</head>
+<body>
+  <div class="wire panel">
+    <h2 data-testid="detail.rule-id">waitlist.join.confirmation · verified</h2>
+    <p class="stmt" data-testid="detail.statement">After submitting a valid email, the visitor sees a
+      confirmation showing the email they joined with.</p>
+    <p class="meta">verify: checks</p>
+    <div class="wire disclosure" data-testid="detail.technical-disclosure">▸ <b>steps · checks/waitlist.spec.ts:52</b>
+      — collapsed by default; expands to given/when/then + test source</div>
+    <p class="meta">flow: [waitlist-join] → [waitlist-confirm]</p>
+    <div class="h">Evidence</div>
+    <div class="ev" data-testid="detail.evidence"><span class="src">checks/local</span><span class="ok">✓ pass</span></div>
+    <div class="ev"><span class="src">human</span><span class="ok">✓ pass (topher)</span></div>
+    <div class="h">Threads</div>
+    <div class="wire thread" data-testid="detail.threads">q-0001 · question · open — amber border = waiting on you</div>
+  </div>
+  <script src="http://localhost:4700/embed.js" data-walkdown></script>
+</body>
+</html>
