@@ -57,7 +57,13 @@ walkdown thread <id> [--json]
 feature template, and **`blueprint/AGENTS.md`**: the conventions any AI agent working
 in the repo follows (read the blueprint first, carry anchors, tag checks with rule
 ids, work the agent queue, claim-never-accept, never touch `prototype/`), with a
-pointer added to CLAUDE.md. `run` executes the project's checks through the runner
+pointer added to CLAUDE.md. It also installs three **Claude Code skills** into
+`.claude/skills/` (skip-if-exists, so customized copies survive re-runs):
+`walkdown-judge` (the agent-walkdown ritual — evidence screenshots, judgment,
+run record, fail threads), `walkdown-incorporate` (fold answered questions into
+the blueprint; address notes), and `walkdown-formulate` (turn a design/PRD into
+storyboard + rules + checks). AGENTS.md carries the knowledge; skills carry the
+procedures. `run` executes the project's checks through the runner
 contract — `run_all`, or `run_for_rule` with `--rule` — injecting the target's env
 and `WALKDOWN_TARGET`, and confirms which run record the reporter appended.
 
