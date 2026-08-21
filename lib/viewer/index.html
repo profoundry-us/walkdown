@@ -208,12 +208,21 @@ function renderDetail() {
     <p class="stmt">${r.statement ?? ''}</p>
     <p class="meta">verify: ${r.verify.join(', ')}</p>
     ${(() => {
-      if (!r.verify.includes('checks')) return '';
-      const refs = [...new Set(data.targets.flatMap(t => r.cells[t]?.checks ?? []))];
-      return `<details class="checksbox" id="checksbox"><summary>checks: ${refs.length
-        ? refs.map(esc).join(' · ') : 'none recorded yet'}</summary><div id="checksrc">${refs.length
-        ? '<p class="empty">loading…</p>'
-        : '<p class="empty">No recorded checks — run \`walkdown run\` to link tests to this rule.</p>'}</div></details>`;
+      const hasChecks = r.verify.includes('checks');
+      const refs = hasChecks ? [...new Set(data.targets.flatMap(t => r.cells[t]?.checks ?? []))] : [];
+      if (!r.steps && !hasChecks) return '';
+      const label = [
+        r.steps && 'steps',
+        hasChecks && (refs.length ? refs.map(esc).join(' · ') : 'checks: none recorded yet'),
+      ].filter(Boolean).join(' · ');
+      const stepsHtml = r.steps ? `<div class="ph" style="margin-top:8px">Steps</div><div class="steps">${
+        Object.entries(r.steps).map(([ph, items]) =>
+          `<div class="ph">${ph}</div><ul>${items.map(s =>
+            `<li>${esc(s).replace(/\`([^\`]+)\`/g, '<code>$1</code>')}</li>`).join('')}</ul>`).join('')}</div>` : '';
+      const checksHtml = hasChecks ? `<div class="ph" style="margin-top:8px">Checks</div><div id="checksrc">${
+        refs.length ? '<p class="empty">loading…</p>'
+          : '<p class="empty">No recorded checks — run \`walkdown run\` to link tests to this rule.</p>'}</div>` : '';
+      return `<details class="checksbox" id="checksbox" data-refs="${refs.length}"><summary>${label}</summary>${stepsHtml}${checksHtml}</details>`;
     })()}
     <div class="meta">${(() => {
       const chip = (s) => `<button class="sb rsc ${screen === s ? 'cur' : ''}" data-s="${s}">${s}</button>`;
@@ -230,9 +239,6 @@ function renderDetail() {
     <div class="sect">Evidence</div>
     ${ev.map(([src, c]) => `<div class="evrow"><span class="src">${src}</span>
       <span class="${CELLCLASS[c.state] ?? ''}">${CELL[c.state] ?? c.state}${src === 'human' && c.actor ? ' (' + c.actor + ')' : ''}</span></div>`).join('') || '<p class="empty">none required</p>'}
-    ${r.steps ? `<div class="sect">Steps</div><div class="steps">${Object.entries(r.steps).map(([ph, items]) =>
-      `<div class="ph">${ph}</div><ul>${items.map(s =>
-        `<li>${esc(s).replace(/\`([^\`]+)\`/g, '<code>$1</code>')}</li>`).join('')}</ul>`).join('')}</div>` : ''}
     ${session?.verdicts[r.rule] === 'fail' ? `<div class="pinhint">📌 Pin mode is on — click the
       broken element in either surface to attach a note to this fail.</div>` : ''}
     <div class="sect">Threads</div>
@@ -256,7 +262,7 @@ function renderDetail() {
   });
   const box = d.querySelector('#checksbox');
   if (box) box.addEventListener('toggle', async () => {
-    if (!box.open || box.dataset.loaded) return;
+    if (!box.open || box.dataset.loaded || !Number(box.dataset.refs)) return;
     box.dataset.loaded = '1';
     const res = await (await fetch(withBp(`/api/checks?rule=${encodeURIComponent(r.rule)}`))).json();
     d.querySelector('#checksrc').innerHTML = (res.checks ?? []).map(c =>
