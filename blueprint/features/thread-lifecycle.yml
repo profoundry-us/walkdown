@@ -1,0 +1,47 @@
+feature: thread-lifecycle
+title: Thread lifecycle governance
+source:
+  prd: docs/02-blueprint-schema.md (Threads section)
+stories:
+  - id: threads.lifecycle
+    title: Feedback and questions move through validated, attributable states
+    statement: As a team, we can trust a thread's status because every transition is validated and attributed.
+    rules:
+      - id: threads.lifecycle.validated-transitions
+        origin: prd
+        statement: A thread status change outside its kind's lifecycle is rejected.
+        verify: [checks]
+        steps:
+          given:
+            - A note (open > addressed > verified | reopen | waived) or a question (open > answered > incorporated | reopen | waived)
+          when:
+            - A transition not in that flow is attempted (e.g. open straight to verified)
+          then:
+            - The mutation is rejected with the illegal transition named, and the file is unchanged
+          statement_hash: sha256:102a0b235d5a
+
+      - id: threads.lifecycle.claim-never-accept
+        origin: prd
+        statement: Setting a thread to verified or waived requires a named human actor; the agent actor is rejected.
+        verify: [checks]
+        steps:
+          given:
+            - A thread in a state from which verified or waived is legal
+          when:
+            - The transition is attempted with actor "agent" or no actor
+          then:
+            - The mutation is rejected - agents claim work, only a person accepts it
+          statement_hash: sha256:dbc5f4be5809
+
+      - id: threads.lifecycle.reasoned-endings
+        origin: prd
+        statement: Waiving records who waived and why, and reopening requires a reason; both reasons land as replies.
+        verify: [checks]
+        steps:
+          given:
+            - A thread being waived, or an addressed/answered thread being reopened
+          when:
+            - The transition is attempted without a reason
+          then:
+            - It is rejected; with a reason, the reason is appended as a reply and waived_by records the person
+          statement_hash: sha256:24591753abaa

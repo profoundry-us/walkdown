@@ -40,7 +40,7 @@ test('legal note lifecycle: open → addressed → verified', () => {
   assert.equal(onDisk('n-1').status, 'verified');
 });
 
-test('illegal transitions are rejected', () => {
+test('illegal transitions are rejected @rule:threads.lifecycle.validated-transitions', () => {
   assert.throws(() => transitionThread(load(), 'n-1', { status: 'verified', actor: 'topher' }),
     /illegal transition open → verified/);
   assert.throws(() => transitionThread(load(), 'q-1', { status: 'addressed', actor: 'x' }),
@@ -49,14 +49,14 @@ test('illegal transitions are rejected', () => {
     /illegal transition open → open|already open/);
 });
 
-test('agents may claim, never accept: verified/waived need a named human', () => {
+test('agents may claim, never accept: verified/waived need a named human @rule:threads.lifecycle.claim-never-accept', () => {
   transitionThread(load(), 'n-1', { status: 'addressed', actor: 'agent' });
   assert.throws(() => transitionThread(load(), 'n-1', { status: 'verified', actor: 'agent' }),
     /named human actor/);
   assert.throws(() => transitionThread(load(), 'n-1', { status: 'waived' }), /named human actor/);
 });
 
-test('waiving records waived_by and the reason as a reply', () => {
+test('waiving records waived_by and the reason as a reply @rule:threads.lifecycle.reasoned-endings', () => {
   assert.throws(() => transitionThread(load(), 'n-1', { status: 'waived', actor: 'topher' }),
     /requires a reason/);
   transitionThread(load(), 'n-1', { status: 'waived', actor: 'topher', reason: 'By design.' });
@@ -66,7 +66,7 @@ test('waiving records waived_by and the reason as a reply', () => {
   assert.equal(t.replies.at(-1).body, 'By design.');
 });
 
-test('reopening requires a reason; question answer/incorporate flow works', () => {
+test('reopening requires a reason; question answer/incorporate flow works @rule:threads.lifecycle.reasoned-endings', () => {
   transitionThread(load(), 'n-1', { status: 'addressed', actor: 'agent' });
   assert.throws(() => transitionThread(load(), 'n-1', { status: 'open', actor: 'topher' }),
     /reopening requires a reason/);

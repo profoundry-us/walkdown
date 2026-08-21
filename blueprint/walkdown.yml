@@ -1,0 +1,21 @@
+project: walkdown
+
+# Walkdown's own blueprint — the tool specified with itself. docs/ holds the
+# design (why); this holds the verifiable what. Checks are the node:test suite,
+# tagged @rule:<id> in test names, recorded by our own node:test reporter.
+runner:
+  run_all: "node --test --test-reporter=./lib/node-test-reporter.js --test-reporter-destination=stdout"
+  run_for_rule: "node --test --test-name-pattern='{id}' --test-reporter=./lib/node-test-reporter.js --test-reporter-destination=stdout"
+  list: "grep -rn '@rule:' test/"
+  results: native
+  targets:
+    local: {}
+
+embed:
+  anchor_attribute: data-testid
+
+authoring:
+  location: test/
+  style: >
+    node:test. Tag an example by appending " @rule:<id>" to the test name.
+    One rule per test where practical.

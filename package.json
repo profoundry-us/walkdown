@@ -5,7 +5,8 @@
   "type": "module",
   "bin": { "walkdown": "bin/walkdown.js" },
   "exports": {
-    "./reporter": "./lib/playwright-reporter.js"
+    "./reporter": "./lib/playwright-reporter.js",
+    "./node-reporter": "./lib/node-test-reporter.js"
   },
   "files": ["bin", "lib", "README.md", "docs"],
   "engines": { "node": ">=20" },

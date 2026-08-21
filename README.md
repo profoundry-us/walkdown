@@ -117,6 +117,15 @@ statement, stored truncated (`sha256:` + 12 hex).
   `walkdown thread n-0002 --actor agent --reply "fixed in run …" --status addressed`,
   then `walkdown thread n-0002 --verify` as yourself.
 
+## Walkdown's own blueprint
+
+Walkdown is specified with itself: [blueprint/](blueprint/) holds the tool's own
+rules (starting with thread-lifecycle governance), verified by the repo's node:test
+suite — tests tagged by name (`... @rule:<id>`), recorded by the **node:test
+reporter** (`walkdown/node-reporter`, the third emitter alongside Playwright and
+RSpec). `walkdown run` here runs the tool's checks through its own runner contract.
+`docs/` remains the design (why); `blueprint/` is the verifiable what.
+
 ## Playwright reporter
 
 The write side of the loop: add `['walkdown/reporter']` to a project's Playwright

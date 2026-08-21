@@ -1,0 +1,38 @@
+{
+  "run_id": "2026-08-21T01-20-43Z-local-01",
+  "created": "2026-08-21T01:20:43Z",
+  "actor": "agent",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "b89c3f5-dirty",
+  "blueprint_sha": "b89c3f5-dirty",
+  "results": [
+    {
+      "rule": "threads.lifecycle.validated-transitions",
+      "status": "pass",
+      "statement_hash": "sha256:102a0b235d5a",
+      "duration_ms": 2,
+      "checks": [
+        "test/thread-mutations.test.js"
+      ]
+    },
+    {
+      "rule": "threads.lifecycle.claim-never-accept",
+      "status": "pass",
+      "statement_hash": "sha256:dbc5f4be5809",
+      "duration_ms": 2,
+      "checks": [
+        "test/thread-mutations.test.js"
+      ]
+    },
+    {
+      "rule": "threads.lifecycle.reasoned-endings",
+      "status": "pass",
+      "statement_hash": "sha256:24591753abaa",
+      "duration_ms": 10,
+      "checks": [
+        "test/thread-mutations.test.js"
+      ]
+    }
+  ]
+}
