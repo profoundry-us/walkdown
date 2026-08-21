@@ -22,6 +22,55 @@ stories:
             - Collapsed by default, so the pane stays PM-scannable
           statement_hash: sha256:b9dbeb44b184
 
+  - id: viewer.layout
+    title: The surfaces come first
+    statement: As a reviewer of desktop-width apps, the prototype and app get most of the window; reading about a rule never crowds out looking at it.
+    rules:
+      - id: viewer.layout.surfaces-first
+        origin: walkdown
+        statement: The rules list is a slim rail that collapses to a sliver, and the surfaces receive all remaining width - there is no fixed detail column.
+        verify: [human]
+        screens: [board]
+        steps:
+          given:
+            - The viewer open on screen `board`
+          when:
+            - Collapse the rail via anchor `board.rail-toggle`
+          then:
+            - The surfaces in anchor `board.surfaces` span nearly the full window width
+            - The rail reopens from the same control without losing scroll or selection
+          statement_hash: sha256:d95b90a74c22
+
+      - id: viewer.layout.detail-drawer
+        origin: walkdown
+        statement: Selecting a rule opens its detail as a bottom drawer - statement, evidence, and threads side by side - and the drawer collapses to a single title line without losing the selection.
+        verify: [human]
+        screens: [board, rule-detail]
+        steps:
+          given:
+            - A rule selected on screen `board`
+          when:
+            - The drawer opens on screen `rule-detail`; collapse it via anchor `detail.drawer-toggle`
+          then:
+            - Collapsed, only the rule id and verdict line remain; the surfaces gain the freed height
+            - Reopening restores statement, evidence, and threads exactly as they were
+          statement_hash: sha256:403cfb964b01
+
+      - id: viewer.layout.stage-modes
+        origin: walkdown
+        statement: A header control switches the stage between Prototype, Split, and App - Split shows both surfaces side by side and is the default; the other two give one surface the whole stage.
+        verify: [human]
+        screens: [board]
+        steps:
+          given:
+            - The viewer open on screen `board` in Split mode
+          when:
+            - Choose App from anchor `board.mode-switcher`, then Prototype, then Split
+          then:
+            - Each single mode fills the stage with that surface alone; Split restores the pair
+            - The chosen screen and selected rule survive every mode change
+          statement_hash: sha256:bb0f30eb189e
+
   - id: viewer.board
     title: One viewer, many blueprints
     statement: As a user with several projects, I switch between their boards without restarting anything.

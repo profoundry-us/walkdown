@@ -7,7 +7,9 @@ screens:
     app: { path: / }
     anchors:
       - board.project-switcher
+      - board.mode-switcher
       - board.rules
+      - board.rail-toggle
       - board.surfaces
 
   - id: rule-detail
@@ -20,3 +22,4 @@ screens:
       - detail.technical-disclosure
       - detail.evidence
       - detail.threads
+      - detail.drawer-toggle

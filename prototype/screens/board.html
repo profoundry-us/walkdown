@@ -13,19 +13,30 @@
   .counts { font-size: 12px; color: #999; }
   .counts b { color: #d97706; }
   .spacer { flex: 1; }
+  .seg { display: flex; padding: 2px; gap: 2px; font-size: 11px; color: #888; }
+  .seg span { padding: 3px 10px; border-radius: 6px; }
+  .seg .on { background: #e2e8f0; color: #444; }
   .btn { padding: 4px 12px; font-size: 12px; color: #666; }
   .btn.primary { background: #e2e8f0; }
-  main { flex: 1; display: grid; grid-template-columns: 200px 220px 1fr; gap: 10px; padding: 10px; min-height: 0; }
-  .col { padding: 10px; overflow: hidden; }
-  .h { font-size: 10px; letter-spacing: .05em; text-transform: uppercase; color: #999; margin-bottom: 8px; }
+  main { flex: 1; display: flex; gap: 10px; padding: 10px; min-height: 0; }
+  .h { font-size: 10px; letter-spacing: .05em; text-transform: uppercase; color: #999; }
+  /* slim rules rail */
+  .rail { flex: 0 0 190px; padding: 10px; }
+  .railtop { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .collapse { font-size: 11px; color: #999; padding: 1px 7px; }
   .rule { display: flex; gap: 6px; font-size: 12px; padding: 5px 2px; color: #555; }
   .flag { margin-left: auto; color: #d97706; font-size: 10px; }
-  .muted { color: #aaa; font-size: 12px; }
-  .frames { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; height: calc(100% - 40px); }
-  .frame { display: grid; place-items: center; color: #b6bcc6; font-size: 12px; }
-  .screenbar { display: flex; gap: 6px; margin-bottom: 8px; }
+  /* stage: surfaces get everything else */
+  .stage { flex: 1; display: flex; flex-direction: column; min-width: 0; gap: 8px; }
+  .screenbar { display: flex; gap: 6px; }
   .chip { padding: 3px 10px; font-size: 11px; color: #666; }
   .chip.cur { background: #e2e8f0; }
+  .frames { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .frame { display: grid; place-items: center; color: #b6bcc6; font-size: 12px; }
+  /* bottom drawer, collapsed on the board */
+  .drawer { border-top: 1.5px dashed #b6bcc6; background: #fff; padding: 8px 14px;
+            display: flex; align-items: center; gap: 10px; font-size: 12px; color: #999; }
+  .drawer .grip { margin-left: auto; color: #b6bcc6; }
 </style>
 </head>
 <body>
@@ -34,33 +45,31 @@
     <span class="wire dd" data-testid="board.project-switcher">project ▾</span>
     <span class="counts">8 verified · 2 pending · 0 failing · <b>needs you: 2</b></span>
     <span class="spacer"></span>
+    <span class="wire seg" data-testid="board.mode-switcher"><span>Prototype</span><span class="on">Split</span><span>App</span></span>
     <span class="wire btn">📌 Pin mode</span>
     <span class="wire btn">your name</span>
     <span class="wire btn primary">Start walkdown</span>
   </header>
   <main>
-    <div class="wire col" data-testid="board.rules">
-      <div class="h">Rules</div>
+    <div class="wire rail" data-testid="board.rules">
+      <div class="railtop"><span class="h">Rules</span><span class="wire collapse" data-testid="board.rail-toggle">⇤</span></div>
       <div class="rule">✓ <span>latest-wins</span></div>
       <div class="rule">✓ <span>stale-never-passes</span></div>
       <div class="rule">○ <span>technical-disclosure</span><span class="flag">1 ⚑</span></div>
       <div class="rule">○ <span>project-switcher</span></div>
     </div>
-    <div class="wire col">
-      <div class="h">Detail</div>
-      <p class="muted">Select a rule.</p>
-    </div>
-    <div class="col" data-testid="board.surfaces" style="padding:0">
+    <div class="stage" data-testid="board.surfaces">
       <div class="screenbar">
         <span class="wire chip cur">board</span>
         <span class="wire chip">rule-detail</span>
       </div>
       <div class="frames">
-        <div class="wire frame">PROTOTYPE</div>
-        <div class="wire frame">APP</div>
+        <div class="wire frame">PROTOTYPE — full height, ~half the window</div>
+        <div class="wire frame">APP — full height, ~half the window</div>
       </div>
     </div>
   </main>
+  <div class="drawer">Select a rule — its detail opens here as a drawer<span class="grip">▴</span></div>
   <script src="http://localhost:4700/embed.js" data-walkdown></script>
 </body>
 </html>

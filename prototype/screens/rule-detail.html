@@ -2,38 +2,104 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Mockup — Rule detail</title>
+<title>Mockup — Rule detail drawer</title>
 <style>
   * { box-sizing: border-box; margin: 0; font-family: -apple-system, sans-serif; }
-  body { background: #fafafa; color: #444; padding: 14px; }
+  body { background: #fafafa; color: #444; height: 100vh; display: flex; flex-direction: column; }
   .wire { border: 1.5px dashed #b6bcc6; border-radius: 8px; background: #fff; }
-  .panel { max-width: 360px; padding: 14px; }
-  h2 { font-size: 13px; color: #333; }
-  .stmt { font-size: 13px; margin: 8px 0; }
-  .meta { font-size: 11px; color: #999; margin: 4px 0; }
-  .disclosure { font-size: 11px; color: #777; padding: 6px 8px; margin: 8px 0; }
-  .disclosure b { color: #555; }
-  .h { font-size: 10px; letter-spacing: .05em; text-transform: uppercase; color: #999; margin: 12px 0 6px; }
-  .ev { display: flex; gap: 10px; font-size: 12px; padding: 4px 0; border-bottom: 1px dashed #dfe3e8; }
-  .ev .src { width: 90px; color: #999; }
+  header { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1.5px dashed #b6bcc6; background: #fff; }
+  .logo { font-weight: 800; font-size: 14px; }
+  .dd { padding: 4px 10px; font-size: 12px; color: #666; }
+  .counts { font-size: 12px; color: #999; }
+  .spacer { flex: 1; }
+  .seg { display: flex; padding: 2px; gap: 2px; font-size: 11px; color: #888; }
+  .seg span { padding: 3px 10px; border-radius: 6px; }
+  .seg .on { background: #e2e8f0; color: #444; }
+  .btn { padding: 4px 12px; font-size: 12px; color: #666; }
+  main { flex: 1; display: flex; gap: 10px; padding: 10px; min-height: 0; }
+  .h { font-size: 10px; letter-spacing: .05em; text-transform: uppercase; color: #999; margin-bottom: 6px; }
+  .rail { flex: 0 0 190px; padding: 10px; }
+  .rule { display: flex; gap: 6px; font-size: 12px; padding: 5px 2px; color: #555; }
+  .rule.sel { background: #e8effd; border-radius: 6px; padding-left: 6px; }
+  .stage { flex: 1; display: flex; flex-direction: column; min-width: 0; gap: 8px; }
+  .screenbar { display: flex; gap: 6px; }
+  .chip { padding: 3px 10px; font-size: 11px; color: #666; }
+  .chip.cur { background: #e2e8f0; }
+  .frames { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .frame { display: grid; place-items: center; color: #b6bcc6; font-size: 12px; }
+  /* the drawer, open: title line + three reading columns */
+  .drawer { border-top: 1.5px dashed #b6bcc6; background: #fff; flex: 0 0 185px; display: flex; flex-direction: column; }
+  .dtitle { display: flex; align-items: center; gap: 10px; padding: 8px 14px; font-size: 12px; }
+  .dtitle b { color: #333; }
+  .badge { font-size: 10px; padding: 1px 8px; border-radius: 10px; background: #dcfce7; color: #15803d; }
+  .meta { color: #999; font-size: 11px; }
+  .grip { margin-left: auto; color: #999; font-size: 11px; padding: 1px 7px; }
+  .dcols { flex: 1; display: flex; padding: 0 14px 10px; gap: 14px; min-height: 0; }
+  .dcol { flex: 1; font-size: 12px; overflow: hidden; }
+  .dcol.wide { flex: 1.5; }
+  .stmt { line-height: 1.4; color: #444; }
+  .disc { font-size: 11px; color: #777; padding: 5px 8px; margin-top: 6px; }
+  .disc b { color: #555; }
+  .ev { display: flex; gap: 8px; font-size: 11px; padding: 3px 0; border-bottom: 1px dashed #dfe3e8; }
+  .ev .src { width: 84px; color: #999; }
   .ok { color: #16a34a; }
-  .thread { padding: 8px; margin-top: 8px; font-size: 12px; border-left: 3px solid #d97706; }
+  .thread { padding: 6px 8px; margin-top: 6px; font-size: 11px; border-left: 3px solid #d97706; }
 </style>
 </head>
 <body>
-  <div class="wire panel">
-    <h2 data-testid="detail.rule-id">waitlist.join.confirmation · verified</h2>
-    <p class="stmt" data-testid="detail.statement">After submitting a valid email, the visitor sees a
-      confirmation showing the email they joined with.</p>
-    <p class="meta">verify: checks</p>
-    <div class="wire disclosure" data-testid="detail.technical-disclosure">▸ <b>steps · checks/waitlist.spec.ts:52</b>
-      — collapsed by default; expands to given/when/then + test source</div>
-    <p class="meta">flow: [waitlist-join] → [waitlist-confirm]</p>
-    <div class="h">Evidence</div>
-    <div class="ev" data-testid="detail.evidence"><span class="src">checks/local</span><span class="ok">✓ pass</span></div>
-    <div class="ev"><span class="src">human</span><span class="ok">✓ pass (topher)</span></div>
-    <div class="h">Threads</div>
-    <div class="wire thread" data-testid="detail.threads">q-0001 · question · open — amber border = waiting on you</div>
+  <header>
+    <span class="logo">Walkdown</span>
+    <span class="wire dd">project ▾</span>
+    <span class="counts">8 verified · 2 pending · 0 failing</span>
+    <span class="spacer"></span>
+    <span class="wire seg"><span>Prototype</span><span class="on">Split</span><span>App</span></span>
+    <span class="wire btn">📌 Pin mode</span>
+    <span class="wire btn">your name</span>
+  </header>
+  <main>
+    <div class="wire rail">
+      <div class="h">Rules</div>
+      <div class="rule">✓ <span>email-required</span></div>
+      <div class="rule sel">✓ <span>confirmation</span></div>
+      <div class="rule">○ <span>already-joined</span></div>
+    </div>
+    <div class="stage">
+      <div class="screenbar">
+        <span class="wire chip">waitlist-join</span>
+        <span class="wire chip cur">waitlist-confirm</span>
+      </div>
+      <div class="frames">
+        <div class="wire frame">PROTOTYPE — still full height above the drawer</div>
+        <div class="wire frame">APP</div>
+      </div>
+    </div>
+  </main>
+  <div class="drawer">
+    <div class="dtitle">
+      <b data-testid="detail.rule-id">waitlist.join.confirmation</b>
+      <span class="badge">verified</span>
+      <span class="meta">verify: checks</span>
+      <span class="meta">flow: waitlist-join → waitlist-confirm</span>
+      <span class="wire grip" data-testid="detail.drawer-toggle">collapse ▾</span>
+    </div>
+    <div class="dcols">
+      <div class="dcol wide">
+        <div class="h">Statement</div>
+        <p class="stmt" data-testid="detail.statement">After submitting a valid email, the visitor sees a
+          confirmation showing the email they joined with.</p>
+        <div class="wire disc" data-testid="detail.technical-disclosure">▸ <b>steps · checks/waitlist.spec.ts:52</b>
+          — collapsed; expands to given/when/then + source</div>
+      </div>
+      <div class="dcol">
+        <div class="h">Evidence</div>
+        <div class="ev" data-testid="detail.evidence"><span class="src">checks/local</span><span class="ok">✓ pass</span></div>
+        <div class="ev"><span class="src">human</span><span class="ok">✓ pass (topher)</span></div>
+      </div>
+      <div class="dcol">
+        <div class="h">Threads</div>
+        <div class="wire thread" data-testid="detail.threads">q-0001 · question · open — amber border = waiting on you</div>
+      </div>
+    </div>
   </div>
   <script src="http://localhost:4700/embed.js" data-walkdown></script>
 </body>
