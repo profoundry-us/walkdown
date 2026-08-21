@@ -8,7 +8,7 @@ anchor:
   position:
     x: 433
     y: 97
-status: open
+status: addressed
 body: I should be able to resize the detail-drawer to make it taller or shorter
 replies:
   - author: agent
@@ -17,3 +17,9 @@ replies:
       leave it at is the height it returns at — across rule selection and
       reload. A resize handle is drawn on the rule-detail wireframe as anchor
       detail.resize-handle. Not built yet.
+  - author: agent
+    created: 2026-08-21T19:18:01Z
+    body: "Built. Drag the grip on the drawer's top edge; height is clamped between
+      90px and three quarters of the window and persists across rule selection
+      and reload. Verified live: 190px to 270px by drag, and 270 written to
+      storage. Rule viewer.layout.drawer-resizable."

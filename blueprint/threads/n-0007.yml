@@ -6,7 +6,7 @@ anchor:
   rule: viewer.layout.detail-drawer
   screen: rule-detail
   element: detail.evidence
-status: open
+status: addressed
 body: Swap the steps and the evidence sections; make the steps open by default;
   put the screen flow above the steps after swapping them
 replies:
@@ -19,3 +19,9 @@ replies:
       its origin is now this thread. The ordering is a new rule,
       viewer.detail.reading-order: statement, evidence, flow, then steps. Not
       built yet."
+  - author: agent
+    created: 2026-08-21T19:18:01Z
+    body: Built. The drawer now reads statement, evidence, flow, steps — verified
+      live in that order — and the steps render expanded, with only the recorded
+      check source left behind the disclosure. Rules viewer.detail.reading-order
+      and the amended viewer.detail.technical-disclosure.

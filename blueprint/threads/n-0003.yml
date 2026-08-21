@@ -8,7 +8,7 @@ anchor:
   position:
     x: 501
     y: 158
-status: open
+status: addressed
 body: I should be able to pin on the app as well as on the prototype. I thought
   this was the whole point of using the `data-testid` or `data-anchor`.
 replies:
@@ -20,3 +20,12 @@ replies:
       (for our own recursive case, the viewer must serve embed.js to itself).
       The rule also requires a pin to record which surface it came from, so app
       and prototype feedback stay distinguishable. Not built yet."
+  - author: agent
+    created: 2026-08-21T19:18:01Z
+    body: Built. The viewer now injects the embed into itself when it is the app
+      under review, so the app pane is pinnable exactly like the prototype, and
+      every pin records anchor.surface (app or prototype). A positioned pin only
+      renders on the surface it came from, since the same coordinates mean
+      something else in the other one. Covered by check test/serve.test.js
+      @rule:embed.pin.both-surfaces, passing in run
+      2026-08-21T19-17-06Z-local-01.

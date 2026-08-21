@@ -123,6 +123,74 @@ test('a pin with no anchored element is kept by position @rule:embed.pin.coordin
   assert.equal(junkDisk.anchor.position, undefined);
 });
 
+test('a pin records the surface it was placed on @rule:embed.pin.both-surfaces', async () => {
+  const pin = (anchor) => fetch(`${base}/api/threads`, {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ kind: 'note', body: 'On this surface.', author: 'tester', anchor }),
+  }).then((r) => r.json());
+  const onDisk = async (id) => parse(readFileSync(join(bp, 'threads', `${id}.yml`), 'utf8'));
+
+  const fromApp = await pin({ screen: 'home', element: 'home.cta', surface: 'app' });
+  assert.equal((await onDisk(fromApp.id)).anchor.surface, 'app');
+
+  const fromProto = await pin({ screen: 'home', element: 'home.cta', surface: 'prototype' });
+  assert.equal((await onDisk(fromProto.id)).anchor.surface, 'prototype');
+
+  // Anything that is not one of the two surfaces is dropped, not stored.
+  const bogus = await pin({ screen: 'home', element: 'home.cta', surface: 'staging-ish' });
+  assert.equal((await onDisk(bogus.id)).anchor.surface, undefined);
+});
+
+test('a pin records the viewport it was placed at @rule:embed.pin.viewport-recorded', async () => {
+  const res = await (await fetch(`${base}/api/threads`, {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      kind: 'note', body: 'Cramped on a phone.', author: 'tester',
+      anchor: { screen: 'home', element: 'home.cta', surface: 'app', viewport: { name: 'mobile', width: 390 } },
+    }),
+  })).json();
+  const onDisk = parse(readFileSync(join(bp, 'threads', `${res.id}.yml`), 'utf8'));
+  assert.deepEqual(onDisk.anchor.viewport, { name: 'mobile', width: 390 });
+
+  const noWidth = await (await fetch(`${base}/api/threads`, {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ kind: 'note', body: 'x', author: 'tester',
+      anchor: { screen: 'home', element: 'home.cta', viewport: { name: 'mobile' } } }),
+  })).json();
+  assert.equal(parse(readFileSync(join(bp, 'threads', `${noWidth.id}.yml`), 'utf8')).anchor.viewport, undefined);
+});
+
+test('positions are stored in the surface coordinate space given @rule:embed.pin.surface-coordinates', async () => {
+  // The server persists exactly the surface-space point it was handed; nothing
+  // about the viewer's panes, zoom, or window may enter the stored value.
+  const place = (position, viewport) => fetch(`${base}/api/threads`, {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ kind: 'note', body: 'Spot.', author: 'tester',
+      anchor: { screen: 'home', surface: 'app', position, viewport } }),
+  }).then((r) => r.json());
+  const at = { x: 980, y: 1420 };   // beyond any pane size: document space, not screen space
+
+  const wide = await place(at, { name: 'desktop', width: 1440 });
+  const narrow = await place(at, { name: 'mobile', width: 390 });
+  const w = parse(readFileSync(join(bp, 'threads', `${wide.id}.yml`), 'utf8')).anchor;
+  const n = parse(readFileSync(join(bp, 'threads', `${narrow.id}.yml`), 'utf8')).anchor;
+  assert.deepEqual(w.position, at);
+  assert.deepEqual(n.position, at, 'the viewport must not rescale a recorded position');
+  assert.equal(w.viewport.width, 1440);
+  assert.equal(n.viewport.width, 390);
+});
+
+test('the blueprint payload carries a default actor @rule:viewer.identity.default-actor', async () => {
+  const payload = await (await fetch(`${base}/api/blueprint`)).json();
+  assert.ok(payload.identity?.actor, 'an identity must always be offered');
+  assert.match(payload.identity.source, /^(git|os)$/);
+  // In this repo git config user.name is set, so git wins over the OS username.
+  const { defaultActor } = await import('../lib/serve.js');
+  const here = defaultActor(process.cwd());
+  assert.equal(here.source, 'git');
+  assert.ok(here.actor.length > 0);
+});
+
 test('POST /api/walkdowns writes a hash-stamped human run record', async () => {
   const res = await (await fetch(`${base}/api/walkdowns`, {
     method: 'POST',

@@ -8,7 +8,7 @@ anchor:
   position:
     x: 569
     y: 25
-status: open
+status: addressed
 body: It would be great if we could just pull the git username or something so
   people don't have to type who they are.
 replies:
@@ -23,3 +23,13 @@ replies:
       (walkdown verdict, verification, waive), so a shared or misconfigured
       machine can never attribute someone silently. Anchor board.actor is on the
       board wireframe. Not built yet."
+  - author: agent
+    created: 2026-08-21T19:18:01Z
+    body: "Built. The actor field now arrives filled from git user.name (falling
+      back to the OS username) — it read 'Topher Fangio' on first load with no
+      stored value — and an edit still wins and persists. The thread panel's
+      actor box picks up the same default, so lifecycle actions no longer stall
+      on an empty name. Check: @rule:viewer.identity.default-actor, passing in
+      run 2026-08-21T19-17-06Z-local-01. The attribution-visible guardrail is
+      satisfied by the name being on screen in both the header and the panel at
+      the moment you act."

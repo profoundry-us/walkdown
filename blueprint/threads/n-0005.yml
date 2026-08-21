@@ -6,7 +6,7 @@ anchor:
   rule: viewer.layout.surfaces-first
   screen: board
   element: board.surfaces
-status: open
+status: addressed
 body: >-
   The prototype and app views should zoom their contents so that you can see
   what it would look like at a desktop resolution (we should add a mobile toggle
@@ -31,3 +31,13 @@ replies:
       across zoom, stage-mode, and window changes. I also reworded
       coordinate-fallback from 'position on the screen' to 'position within the
       surface' — 'screen' meant the storyboard screen but read as the display."
+  - author: agent
+    created: 2026-08-21T19:18:01Z
+    body: "Built, all three parts. Each surface now renders at the chosen viewport's
+      width (desktop 1440 / mobile 390) and is scaled down whole to fit its
+      pane, with the scale shown in the screen bar — measured 1440px fit 25% and
+      390px fit 92% in a 950px window. The viewport control drives both surfaces
+      together. Pins record their viewport, and positions stay in the surface's
+      own CSS-pixel space. Checks: @rule:embed.pin.viewport-recorded and
+      @rule:embed.pin.surface-coordinates, passing in run
+      2026-08-21T19-17-06Z-local-01."

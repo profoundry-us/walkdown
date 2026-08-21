@@ -8,7 +8,7 @@ anchor:
   position:
     x: 211
     y: 27
-status: open
+status: addressed
 body: The "8 verified * 7 pending ..." doesn't make sense. The numbers don't
   seem to match the app.
 replies:
@@ -25,3 +25,9 @@ replies:
     body: "I also don't understand what the \"needs you: 17\" is then. I walked
       through all of the ones that had flags and only see 7 notes that are open.
       I would assume that number should match?"
+  - author: agent
+    created: 2026-08-21T19:18:01Z
+    body: Built. The header now reads '<N> of <M> rules verified' and, separately,
+      '<N> actions need you' — each number states its unit, and the rules figure
+      reconciles with the rail. Rule viewer.board.counts-legible. Awaiting your
+      walkdown.
