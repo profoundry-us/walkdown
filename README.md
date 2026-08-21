@@ -44,12 +44,22 @@ pane) that renders those same files.
 The first tooling slice — the two commands the hand-run milestone showed matter most:
 
 ```
+walkdown init [--dir <project-root>]
+walkdown run [--target <name>] [--rule <id>]
 walkdown status [<rule-id>] [--dir <blueprint>] [--target <name>] [--json]
 walkdown lint [--dir <blueprint>] [--no-checks] [--json]
 walkdown hash [--dir <blueprint>] [--write]
 walkdown threads [--rule <id>] [--all] [--json]
 walkdown thread <id> [--json]
 ```
+
+`init` scaffolds `blueprint/` in a project — config and storyboard templates, a
+feature template, and **`blueprint/AGENTS.md`**: the conventions any AI agent working
+in the repo follows (read the blueprint first, carry anchors, tag checks with rule
+ids, work the agent queue, claim-never-accept, never touch `prototype/`), with a
+pointer added to CLAUDE.md. `run` executes the project's checks through the runner
+contract — `run_all`, or `run_for_rule` with `--rule` — injecting the target's env
+and `WALKDOWN_TARGET`, and confirms which run record the reporter appended.
 
 `threads` lists active questions and notes (newest first, with anchors and a body
 preview); `--all` includes resolved ones. `thread <id>` shows one in full — anchor,

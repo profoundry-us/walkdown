@@ -1,0 +1,21 @@
+{
+  "run_id": "2026-08-21T00-52-19Z-local-01",
+  "created": "2026-08-21T00:52:19Z",
+  "actor": "agent",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4310",
+  "git_sha": "7d94fec-dirty",
+  "blueprint_sha": "7d94fec-dirty",
+  "results": [
+    {
+      "rule": "waitlist.join.confirm-requires-email",
+      "status": "pass",
+      "statement_hash": "sha256:09cacb110a8f",
+      "duration_ms": 189,
+      "checks": [
+        "checks/waitlist.spec.ts:43"
+      ]
+    }
+  ]
+}

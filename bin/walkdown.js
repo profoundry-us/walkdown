@@ -1,5 +1,7 @@
 #!/usr/bin/env node
+import { existsSync, readdirSync } from 'node:fs';
 import { userInfo } from 'node:os';
+import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 import { findBlueprintDir, loadBlueprint } from '../lib/blueprint.js';
 import { runHashCommand } from '../lib/hash-cmd.js';
@@ -10,6 +12,8 @@ import { getThread, listThreads, replyToThread, transitionThread } from '../lib/
 const HELP = `walkdown — verify that what you built is what you designed
 
 Usage:
+  walkdown init [--dir <project-root>]
+  walkdown run [--target <name>] [--rule <id>] [--dir <blueprint>]
   walkdown status [<rule-id>] [--dir <blueprint>] [--target <name>] [--json]
   walkdown lint [--dir <blueprint>] [--no-checks] [--json]
   walkdown hash [--dir <blueprint>] [--write]
@@ -19,6 +23,12 @@ Usage:
   walkdown serve [--dir <blueprint>] [--port <n>]
 
 Commands:
+  init    Scaffold blueprint/ in a project: config, storyboard, feature
+          template, and blueprint/AGENTS.md (the conventions AI agents follow),
+          plus a pointer in CLAUDE.md.
+  run     Run the project's checks via the runner contract (run_all, or
+          run_for_rule with --rule), injecting the target's env and
+          WALKDOWN_TARGET. The reporter/formatter records the run.
   status  Derived per-rule verification from the runs ledger: latest checks
           per target, latest agent/human walkdowns, open threads. With a
           rule id: that rule in full (statement, evidence, threads).
@@ -360,6 +370,47 @@ function cmdThread(args) {
   process.exit(0);
 }
 
+async function cmdInit(args) {
+  const { values } = parseArgs({ args, options: { dir: { type: 'string' } } });
+  const { scaffold } = await import('../lib/init.js');
+  try {
+    const created = scaffold(values.dir ?? process.cwd());
+    console.log('Scaffolded:');
+    for (const f of created) console.log(`  ${green('+')} ${f}`);
+    console.log(`\nNext: fill in ${dim('blueprint/walkdown.yml')} (runner commands, targets), sketch your`);
+    console.log(`first feature from ${dim('blueprint/features/_template.yml')}, then \`walkdown lint\`.`);
+  } catch (err) {
+    console.error(err.message);
+    process.exit(2);
+  }
+}
+
+async function cmdRun(args) {
+  const { values } = parseArgs({
+    args,
+    options: { dir: { type: 'string' }, target: { type: 'string' }, rule: { type: 'string' } },
+  });
+  const blueprint = loadOrExit(values.dir);
+  const { runChecks } = await import('../lib/run-cmd.js');
+  const before = new Set(
+    existsSync(join(blueprint.dir, 'runs')) ? readdirSync(join(blueprint.dir, 'runs')) : []
+  );
+  let result;
+  try {
+    result = runChecks(blueprint, { target: values.target ?? 'local', rule: values.rule });
+  } catch (err) {
+    console.error(err.message);
+    process.exit(2);
+  }
+  const after = existsSync(join(blueprint.dir, 'runs')) ? readdirSync(join(blueprint.dir, 'runs')) : [];
+  const recorded = after.filter((f) => !before.has(f) && f.endsWith('.json'));
+  if (recorded.length)
+    console.log(`\n${green('recorded')}: ${recorded.join(', ')} — \`walkdown status\` for the picture`);
+  else
+    console.log(`\n${yellow('no run record was written')} — is the walkdown reporter/formatter wired into the test config?`);
+  process.exit(result.code);
+}
+
 async function cmdServe(args) {
   const { values } = parseArgs({
     args,
@@ -377,7 +428,9 @@ async function cmdServe(args) {
 }
 
 const [cmd, ...rest] = process.argv.slice(2);
-if (cmd === 'lint') cmdLint(rest);
+if (cmd === 'init') cmdInit(rest);
+else if (cmd === 'run') cmdRun(rest);
+else if (cmd === 'lint') cmdLint(rest);
 else if (cmd === 'status') cmdStatus(rest);
 else if (cmd === 'hash') cmdHash(rest);
 else if (cmd === 'threads') cmdThreads(rest);
