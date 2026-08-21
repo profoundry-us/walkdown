@@ -15,6 +15,7 @@ screens:
       - board.drawer
       - board.viewport-toggle
       - board.zoom
+      - board.actor
 
   - id: rule-detail
     title: Rule detail (state — select a rule on the board)

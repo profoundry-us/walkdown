@@ -68,9 +68,24 @@ stories:
             - Clicking a control acts on the form and never places another pin
           statement_hash: sha256:cac6da4be24f
 
+      - id: embed.pin.surface-coordinates
+        origin: thread:n-0005
+        statement: A pin's position is recorded in the surface's own coordinate space - CSS pixels of the document as rendered at its viewport - never in the viewer's screen pixels, so pins stay on their spot when the pane is resized, the stage mode changes, or the surface is zoomed.
+        verify: [checks, human]
+        screens: [board]
+        steps:
+          given:
+            - A pin placed by position while a surface is scaled to fit its pane
+          when:
+            - Change the zoom, switch stage modes, or resize the window
+          then:
+            - The pin stays on the same spot of the surface it was placed on
+            - The recorded position is unchanged by any of those actions
+          statement_hash: sha256:024baa513c63
+
       - id: embed.pin.coordinate-fallback
         origin: thread:n-0001
-        statement: A pin dropped where no anchored element sits is still placed, recorded by its x/y position on the screen - feedback is never blocked by a missing anchor.
+        statement: A pin dropped where no anchored element sits is still placed, recorded by its x/y position within the surface - feedback is never blocked by a missing anchor.
         verify: [checks, human]
         screens: [board]
         steps:
@@ -81,4 +96,4 @@ stories:
           then:
             - The pin form opens at the click point
             - The saved note records the screen and position; later visitors see the pin at that spot
-          statement_hash: sha256:70323ef1224f
+          statement_hash: sha256:3c6fb006c94b

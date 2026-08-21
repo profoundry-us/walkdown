@@ -171,6 +171,40 @@ stories:
             - Actions a person may not take are absent, not shown and refused
           statement_hash: sha256:f92eb6cfe6b3
 
+  - id: viewer.identity
+    title: The viewer already knows who you are
+    statement: As a reviewer, I should not have to type my name to do attributed work - the tool knows it from the machine I am working on.
+    rules:
+      - id: viewer.identity.default-actor
+        origin: thread:n-0008
+        statement: The actor field arrives filled in from the repository's git identity, falling back to the operating system username; it stays editable and an edit is remembered.
+        verify: [checks, human]
+        screens: [board]
+        steps:
+          given:
+            - A viewer opened for the first time in a git repository with user.name set
+          when:
+            - Reading anchor `board.actor` on screen `board`
+          then:
+            - The field already holds that name; no attributed action prompts for it
+            - Editing it replaces the default and the edit survives a reload
+          statement_hash: sha256:1575065d9ddc
+
+      - id: viewer.identity.attribution-visible
+        origin: thread:n-0008
+        statement: A defaulted identity is always visible before it is used - a walkdown verdict, verification, or waive shows the name it will be recorded under, so nobody is attributed silently.
+        verify: [human]
+        screens: [board, thread-panel]
+        steps:
+          given:
+            - An actor defaulted from git identity
+          when:
+            - Starting a walkdown, or taking a thread action in anchor `thread.actions`
+          then:
+            - The name being recorded is on screen at the moment of the action
+            - Correcting it before acting records the corrected name
+          statement_hash: sha256:d679808373fd
+
   - id: viewer.board
     title: One viewer, many blueprints
     statement: As a user with several projects, I switch between their boards without restarting anything, and I can trust what the header tells me.

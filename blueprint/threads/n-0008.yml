@@ -1,0 +1,25 @@
+id: n-0008
+kind: note
+author: topher
+created: 2026-08-21T19:00:02Z
+anchor:
+  rule: viewer.layout.detail-drawer
+  screen: rule-detail
+  position:
+    x: 569
+    y: 25
+status: open
+body: It would be great if we could just pull the git username or something so
+  people don't have to type who they are.
+replies:
+  - author: agent
+    created: 2026-08-21T19:04:46Z
+    body: "Specced as two rules. viewer.identity.default-actor: the actor field
+      arrives filled from the repository's git user.name, falling back to the OS
+      username, and stays editable with the edit remembered — the CLI and run
+      records already default this way, so the viewer was the odd one out.
+      viewer.identity.attribution-visible is the guardrail that comes with it: a
+      defaulted name must be on screen at the moment of any attributed action
+      (walkdown verdict, verification, waive), so a shared or misconfigured
+      machine can never attribute someone silently. Anchor board.actor is on the
+      board wireframe. Not built yet."

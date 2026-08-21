@@ -23,3 +23,11 @@ replies:
       reflow), viewer.surface.viewport-toggle (desktop/mobile for both surfaces,
       always the same viewport on each side), and embed.pin.viewport-recorded (a
       pin records the viewport it was placed at). Not built yet."
+  - author: agent
+    created: 2026-08-21T19:04:46Z
+    body: "Added embed.pin.surface-coordinates per your confirmation: positions are
+      recorded in the surface's own coordinate space (CSS pixels of the document
+      at its viewport), never viewer screen pixels, so pins hold their spot
+      across zoom, stage-mode, and window changes. I also reworded
+      coordinate-fallback from 'position on the screen' to 'position within the
+      surface' — 'screen' meant the storyboard screen but read as the display."

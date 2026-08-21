@@ -20,3 +20,8 @@ replies:
       fault: an unlabelled row that mixes rule verdicts with a queue count.
       Every number must state its unit and reconcile with the rail. Not built
       yet."
+  - author: topher
+    created: 2026-08-21T18:59:27Z
+    body: "I also don't understand what the \"needs you: 17\" is then. I walked
+      through all of the ones that had flags and only see 7 notes that are open.
+      I would assume that number should match?"
