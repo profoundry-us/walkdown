@@ -11,6 +11,7 @@ screens:
       - board.rules
       - board.rail-toggle
       - board.surfaces
+      - board.drawer
 
   - id: rule-detail
     title: Rule detail (state — select a rule on the board)

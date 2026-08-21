@@ -1,0 +1,38 @@
+feature: embed
+title: The feedback layer
+source:
+  prd: (pin behaviors; docs lag - see origin)
+stories:
+  - id: embed.pin
+    title: A pin lands wherever feedback strikes
+    statement: As a reviewer in pin mode, I can attach a note to whatever I am looking at - anchored when the element is known, by position when it is not.
+    rules:
+      - id: embed.pin.anchored-target
+        origin: walkdown
+        statement: In pin mode, hovering highlights any element that carries an anchor, and a pin placed on one is recorded against that anchor - the note follows the element, not the pixel.
+        verify: [human]
+        screens: [board]
+        steps:
+          given:
+            - Pin mode on, viewing screen `board`
+          when:
+            - Click an anchored element such as `board.drawer`
+          then:
+            - The pin form opens; the saved note is anchored to that element id
+            - Later visitors see the pin on that element wherever it renders
+          statement_hash: sha256:8fcd9522614c
+
+      - id: embed.pin.coordinate-fallback
+        origin: thread:n-0001
+        statement: A pin dropped where no anchored element sits is still placed, recorded by its x/y position on the screen - feedback is never blocked by a missing anchor.
+        verify: [checks, human]
+        screens: [board]
+        steps:
+          given:
+            - Pin mode on, viewing screen `board`
+          when:
+            - Click a spot with no anchored element under it
+          then:
+            - The pin form opens at the click point
+            - The saved note records the screen and position; later visitors see the pin at that spot
+          statement_hash: sha256:70323ef1224f

@@ -1,0 +1,14 @@
+id: n-0001
+kind: note
+author: topher
+created: 2026-08-21T03:01:51Z
+anchor:
+  rule: viewer.layout.surfaces-first
+  screen: board
+  element: board.drawer
+status: open
+body: Tried to pin the drawer hint ("Select a rule — its detail opens here as
+  a drawer") while walking surfaces-first, but nothing there was selectable.
+  The drawer should be a selectable region — and when no selectable region
+  sits under the cursor, a pin should still be placeable, recorded by its
+  x/y position instead.
