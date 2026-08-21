@@ -205,6 +205,42 @@ stories:
             - Correcting it before acting records the corrected name
           statement_hash: sha256:d679808373fd
 
+  - id: viewer.walkdown
+    title: A walkdown you can actually run
+    statement: As a reviewer judging many rules in one sitting, the session tells me where I am and keeps the verdict a click away, never behind a scroll.
+    rules:
+      - id: viewer.walkdown.verdicts-always-reachable
+        origin: walkdown
+        statement: While a walkdown is running, the pass and fail controls stay visible on screen for the selected rule without scrolling, alongside a count of how far through the session you are.
+        verify: [human]
+        screens: [rule-detail]
+        steps:
+          given:
+            - A walkdown session started on screen `board`
+          when:
+            - Selecting any rule that owes a verdict
+          then:
+            - Anchor `detail.verdict` is on screen without scrolling any pane
+            - It shows how many rules have been judged out of how many are owed
+            - Choosing a verdict never collapses the drawer
+          statement_hash: sha256:d28cd12cff65
+
+      - id: viewer.walkdown.session-advances
+        origin: walkdown
+        statement: Starting a walkdown lands on the first rule that owes a verdict, and passing one moves to the next - a fail stays put, because a fail wants a note pinned to it.
+        verify: [human]
+        screens: [board, rule-detail]
+        steps:
+          given:
+            - Rules owing a human verdict
+          when:
+            - Start a walkdown, pass the first rule, then fail the next
+          then:
+            - Starting selects the first owed rule and opens its drawer; the surfaces follow it
+            - A pass advances to the next owed rule and the judged count rises
+            - A fail keeps the rule selected and turns pin mode on
+          statement_hash: sha256:cbf303630e34
+
   - id: viewer.board
     title: One viewer, many blueprints
     statement: As a user with several projects, I switch between their boards without restarting anything, and I can trust what the header tells me.

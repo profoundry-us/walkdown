@@ -31,6 +31,7 @@ screens:
       - detail.threads
       - detail.drawer-toggle
       - detail.resize-handle
+      - detail.verdict
 
   - id: thread-panel
     title: Thread panel (state — open a pin or a thread)
