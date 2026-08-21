@@ -115,6 +115,23 @@ stories:
   *remains* on the form" rule ends on the form — both correct with no authoring
   convention). Rules without steps fall back to the first listed screen.
 
+### Headless rules
+
+Rules don't require screens. A rule with no `screens` is a **headless rule** — an API
+behavior, CLI contract, background job, or policy. For these, Walkdown is deliberately
+"BDD with a ledger": the statement stays authoritative and product-readable, coverage
+lint still finds untested requirements, runs still track per-target history and
+staleness, and threads anchor at the rule level. The storyboard, anchors, and embed are
+the *UI extension* of that core, not the core itself; one blueprint freely mixes both
+kinds. `verify: [human]` remains meaningful headless (a person exercising a staging API
+is a walkdown), as does `agent` (judging output quality is judgment work).
+
+The guardrail: **not every test deserves to be a rule.** A rule is a behavior product
+would recognize as a requirement ("repeated joins are rate limited" — yes; "the YAML
+loader tolerates aliases" — that's just a test). Checks should stay a small, meaningful
+subset of the project's test suite; a blueprint that mirrors the whole suite has
+stopped being a spec.
+
 ## Storyboard
 
 ```yaml

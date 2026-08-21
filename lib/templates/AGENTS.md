@@ -31,6 +31,10 @@ notes), and the runs ledger. The blueprint is the single source of truth for
   `embed.anchor_attribute` in `blueprint/walkdown.yml` (default
   `data-testid`). Every element the spec references keeps its anchor.
 - Reference screens and anchors by id — never URLs, never CSS selectors.
+- Rules don't require screens: headless rules (API, CLI, jobs, policies) get the
+  full ledger without the UI layer. But not every test deserves a rule — a rule
+  is a behavior product would recognize as a requirement. Keep checks a small,
+  meaningful subset of the test suite.
 
 ## Checks
 

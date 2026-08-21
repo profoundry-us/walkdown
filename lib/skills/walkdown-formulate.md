@@ -53,6 +53,11 @@ derives from it.
    (`agent`/`human` rules), what questions are open, and any drift (screens
    awaiting design).
 
+Rules without screens are fine — headless rules (API behavior, CLI contracts,
+jobs, policies) get the full ledger without the UI layer. The guardrail: a
+rule is a behavior product would recognize as a requirement, never a mirror
+of the unit-test suite.
+
 Quality bar for a rule: a fresh session reading only the blueprint should
 build the right thing, and a PM reading only the statement should recognize
 their intent.
