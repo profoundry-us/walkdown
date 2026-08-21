@@ -141,6 +141,24 @@ test('drift: undesigned screens and thread-born rules are derived', () => {
   assert.deepEqual(deriveStatus(bp).drift.sources, []);
 });
 
+test('attention: human vs agent queues derived from rows and threads', () => {
+  const bp = blueprint({
+    verify: ['agent', 'human'],
+    runs: [walkdownRun('2026-01-01', 'agent', 'pass')],
+    threads: [
+      { id: 'n-1', kind: 'note', status: 'addressed', anchor: { rule: 'demo.main.thing' } },
+      { id: 'n-2', kind: 'note', status: 'open', anchor: { rule: 'demo.main.thing' } },
+      { id: 'q-1', kind: 'question', status: 'open', anchor: {} },
+      { id: 'q-2', kind: 'question', status: 'answered', anchor: {} },
+      { id: 'q-3', kind: 'question', status: 'waived', anchor: {} },
+    ],
+  });
+  const { attention } = deriveStatus(bp);
+  const byWho = (who) => attention.filter((i) => i.who === who).map((i) => `${i.action}:${i.thread ?? i.rule}`);
+  assert.deepEqual(byWho('human'), ['judge:demo.main.thing', 'verify:n-1', 'answer:q-1']);
+  assert.deepEqual(byWho('agent'), ['address:n-2', 'incorporate:q-2']);
+});
+
 test('open threads listed; terminal ones excluded', () => {
   const { rows } = deriveStatus(
     blueprint({

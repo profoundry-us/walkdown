@@ -42,8 +42,8 @@
   .evrow .src { width: 100px; color: var(--muted); }
   .thread { padding: 8px 10px; margin: 8px 0; background: var(--bg); border-radius: 8px; font-size: 13px; }
   .thread .th-h { font-weight: 600; margin-bottom: 3px; }
-  .thread .st-open, .thread .st-answered { color: var(--amber); }
-  .thread .st-addressed, .thread .st-verified, .thread .st-incorporated { color: var(--green); }
+  .thread .st-open, .thread .st-answered, .thread .st-addressed { color: var(--amber); }
+  .thread .st-verified, .thread .st-incorporated { color: var(--green); }
   .steps li { margin: 3px 0 3px 16px; font-size: 13px; }
   .steps code { background: var(--bg); padding: 1px 4px; border-radius: 4px; font-size: 12px; }
   .wd-verdict { display: flex; gap: 8px; margin: 10px 0; }
@@ -113,9 +113,11 @@ const CELLCLASS = { pass: 'v-pass', fail: 'v-fail', stale: 'st-open', never: 'v-
 
 async function load() {
   data = await (await fetch('/api/blueprint')).json();
-  $('counts').textContent = data.rows.filter(r => r.verdict === 'pass').length + ' verified · ' +
+  const needsYou = (data.attention ?? []).filter(i => i.who === 'human').length;
+  $('counts').innerHTML = data.rows.filter(r => r.verdict === 'pass').length + ' verified · ' +
     data.rows.filter(r => r.verdict === 'pending').length + ' pending · ' +
-    data.rows.filter(r => r.verdict === 'fail').length + ' failing';
+    data.rows.filter(r => r.verdict === 'fail').length + ' failing' +
+    (needsYou ? ` · <span style="color:var(--amber);font-weight:600">needs you: ${needsYou}</span>` : '');
   renderRules();
   renderScreenbar();
   if (selected) { selected = data.rows.find(r => r.rule === selected.rule) ?? null; renderDetail(); }

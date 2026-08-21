@@ -193,7 +193,7 @@ function cmdStatus(args) {
   if (positionals[0]) return renderRuleDetail(blueprint, derived, positionals[0], values.json);
 
   if (values.json) {
-    console.log(JSON.stringify({ targets, rows, drift: derived.drift, activeThreads: listThreads(blueprint) }, null, 2));
+    console.log(JSON.stringify({ targets, rows, drift: derived.drift, attention: derived.attention, activeThreads: listThreads(blueprint) }, null, 2));
     process.exit(rows.some((r) => r.verdict === 'fail') ? 1 : 0);
   }
 
@@ -227,6 +227,20 @@ function cmdStatus(args) {
   console.log(
     `\n${counts.pass ?? 0} verified, ${counts.pending ?? 0} pending, ${counts.fail ?? 0} failing`
   );
+
+  const HOWTO = {
+    judge: (i) => `walk down ${i.rule} — human verification not yet recorded`,
+    verify: (i) => `verify ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — fix claimed, awaiting your judgment`,
+    answer: (i) => `answer ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''}`,
+    address: (i) => `address ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — open note`,
+    incorporate: (i) => `incorporate ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — answered, fold it into the rule`,
+  };
+  for (const [who, title] of [['human', 'NEEDS A HUMAN'], ['agent', 'AGENT QUEUE']]) {
+    const items = derived.attention.filter((i) => i.who === who);
+    if (!items.length) continue;
+    console.log(`\n  ${dim(title)}`);
+    for (const i of items) console.log(`  ${yellow('◆')} ${HOWTO[i.action](i)}`);
+  }
 
   const { drift } = derived;
   if (drift.design.length || drift.sources.length) {
