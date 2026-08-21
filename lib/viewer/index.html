@@ -85,6 +85,12 @@
   #threadpanel .reply .rh { color: var(--muted); font-size: 11px; }
   .pinhint { background: #fef3c7; border: 1px solid var(--amber); border-radius: 8px; padding: 8px 10px;
     font-size: 12px; margin: 8px 0; }
+  .checksbox { margin: 4px 0 10px; }
+  .checksbox summary { font-size: 12px; color: var(--muted); cursor: pointer; }
+  .checksbox .chkref { font-size: 11px; color: var(--muted); margin: 8px 0 3px; }
+  .checksbox pre { background: var(--bg); border: 1px solid var(--line); border-radius: 6px;
+    padding: 8px 10px; font: 11.5px/1.5 ui-monospace, "SF Mono", Menlo, monospace;
+    overflow: auto; max-height: 260px; white-space: pre; }
 </style>
 </head>
 <body>
@@ -124,6 +130,8 @@ const attnCounts = (rule) => {
     agent: items.filter(i => i.who === 'agent').length,
   };
 };
+
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 const GLYPH = { pass: ['✓', 'v-pass'], fail: ['✗', 'v-fail'], pending: ['○', 'v-pending'] };
 const CELL = { pass: '✓ pass', fail: '✗ fail', stale: '~ stale', skipped: '– skipped', blocked: '⊘ blocked',
@@ -195,6 +203,14 @@ function renderDetail() {
     <h2>${r.rule}</h2>
     <p class="stmt">${r.statement ?? ''}</p>
     <p class="meta">verify: ${r.verify.join(', ')}</p>
+    ${(() => {
+      if (!r.verify.includes('checks')) return '';
+      const refs = [...new Set(data.targets.flatMap(t => r.cells[t]?.checks ?? []))];
+      return `<details class="checksbox" id="checksbox"><summary>checks: ${refs.length
+        ? refs.map(esc).join(' · ') : 'none recorded yet'}</summary><div id="checksrc">${refs.length
+        ? '<p class="empty">loading…</p>'
+        : '<p class="empty">No recorded checks — run \`walkdown run\` to link tests to this rule.</p>'}</div></details>`;
+    })()}
     <div class="meta">${(() => {
       const chip = (s) => `<button class="sb rsc ${screen === s ? 'cur' : ''}" data-s="${s}">${s}</button>`;
       const flow = r.flow?.length ? r.flow : r.screens;
@@ -230,6 +246,16 @@ function renderDetail() {
   });
   d.querySelectorAll('.thread').forEach((el) => {
     el.onclick = () => openThread(el.dataset.t);
+  });
+  const box = d.querySelector('#checksbox');
+  if (box) box.addEventListener('toggle', async () => {
+    if (!box.open || box.dataset.loaded) return;
+    box.dataset.loaded = '1';
+    const res = await (await fetch(withBp(`/api/checks?rule=${encodeURIComponent(r.rule)}`))).json();
+    d.querySelector('#checksrc').innerHTML = (res.checks ?? []).map(c =>
+      c.missing ? `<div class="chkref">${esc(c.ref)} <span class="v-fail">(file not found)</span></div>`
+        : `<div class="chkref">${esc(c.ref)}</div><pre>${esc(c.source)}</pre>`
+    ).join('') || '<p class="empty">none</p>';
   });
 }
 

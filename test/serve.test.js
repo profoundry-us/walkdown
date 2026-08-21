@@ -25,9 +25,20 @@ before(async () => {
     join(bp, 'features', 'demo.yml'),
     ['feature: demo', 'stories:', '  - id: demo.main', '    rules:',
       '      - id: demo.main.thing', '        statement: The visitor can do the thing.',
-      '        verify: [human]', '        screens: [home]'].join('\n')
+      '        verify: [checks, human]', '        screens: [home]'].join('\n')
   );
   writeFileSync(join(root, 'proto', 'home.html'), '<h1 data-testid="home.cta">hi</h1>');
+  mkdirSync(join(root, 'tests'), { recursive: true });
+  writeFileSync(join(root, 'tests', 'demo.test.js'),
+    ["// helpers", "", "test('does the thing', () => {", "  expect(1).toBe(1);", "});", "",
+      "test('unrelated', () => {});"].join('\n'));
+  mkdirSync(join(bp, 'runs'), { recursive: true });
+  writeFileSync(join(bp, 'runs', '2026-01-01T00-00-00Z-local-01.json'), JSON.stringify({
+    run_id: '2026-01-01T00-00-00Z-local-01', created: '2026-01-01T00:00:00Z',
+    actor: 'agent', kind: 'checks', target: 'local',
+    results: [{ rule: 'demo.main.thing', status: 'pass',
+      checks: ['tests/demo.test.js:3', '../../outside.js:1'] }],
+  }));
 
   server = createWalkdownServer(bp);
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
@@ -119,6 +130,17 @@ test('thread reply and status endpoints mutate through the validated path', asyn
 
   const unknown = await post('/api/threads/zzz/replies', { body: 'x' });
   assert.equal(unknown.status, 400);
+});
+
+test('GET /api/checks returns source snippets from ledger refs; traversal refs are dropped', async () => {
+  const data = await (await fetch(`${base}/api/checks?rule=demo.main.thing`)).json();
+  assert.equal(data.checks.length, 1); // the ../../ ref was filtered out
+  assert.equal(data.checks[0].ref, 'tests/demo.test.js:3');
+  assert.equal(data.checks[0].startLine, 3);
+  assert.match(data.checks[0].source, /does the thing/);
+  assert.doesNotMatch(data.checks[0].source, /unrelated/); // cut at the next test opener
+
+  assert.equal((await fetch(`${base}/api/checks?rule=nope`)).status, 400);
 });
 
 test('multi-project: sibling blueprints are discovered and ?bp= switches, membership-validated', async () => {
