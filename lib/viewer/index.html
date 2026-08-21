@@ -316,7 +316,24 @@ function gotoScreen(id) {
   if (!s) return;
   screen = id;
   renderScreenbar();
-  $('proto').src = s.prototype && data.hasPrototype ? '/prototype' + s.prototype : 'about:blank';
+  const proto = $('proto');
+  const header = document.querySelector('#frames .frame .fh');
+  proto.removeAttribute('srcdoc');
+  if (s.prototype && data.hasPrototype) {
+    header.textContent = 'Prototype';
+    header.style.cssText = '';
+    proto.src = '/prototype' + s.prototype;
+  } else if (s.proposal) {
+    header.textContent = '⚠ Proposed — not from design';
+    header.style.cssText = 'color:var(--amber)';
+    proto.src = '/proposals' + s.proposal;
+  } else {
+    header.textContent = 'Prototype — none yet';
+    header.style.cssText = 'color:var(--amber)';
+    proto.srcdoc = '<body style="display:grid;place-items:center;height:95vh;margin:0;' +
+      'font:14px -apple-system,sans-serif;color:#6b7280;text-align:center">' +
+      '<div>No design yet.<br>This screen was born in the spec — see its design-request thread.</div></body>';
+  }
   $('app').src = s.app?.path && data.appBase ? data.appBase + s.app.path : 'about:blank';
 }
 

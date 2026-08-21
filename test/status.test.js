@@ -124,6 +124,23 @@ test('screenFlow: step order wins, consecutive repeats collapse, revisits show',
   assert.deepEqual(screenFlow({ }, screens), []);
 });
 
+test('drift: undesigned screens and thread-born rules are derived', () => {
+  const bp = blueprint({
+    threads: [{ id: 'q-9', kind: 'question', status: 'open', anchor: { screen: 'extra' } }],
+  });
+  bp.storyboard = { screens: [
+    { id: 'home', prototype: '/home.html' },
+    { id: 'extra', prototype: null, proposal: '/extra.html' },
+  ] };
+  bp.features[0].data.stories[0].rules[0].origin = 'thread:q-9';
+  const { drift } = deriveStatus(bp);
+  assert.deepEqual(drift.design, [{ screen: 'extra', proposal: '/extra.html', requests: ['q-9'] }]);
+  assert.deepEqual(drift.sources, [{ rule: 'demo.main.thing', origin: 'thread:q-9' }]);
+
+  bp.features[0].data.stories[0].rules[0].origin = 'prototype';
+  assert.deepEqual(deriveStatus(bp).drift.sources, []);
+});
+
 test('open threads listed; terminal ones excluded', () => {
   const { rows } = deriveStatus(
     blueprint({

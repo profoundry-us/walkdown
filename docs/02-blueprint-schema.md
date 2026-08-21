@@ -74,6 +74,11 @@ stories:
 
 ### Rules about rules
 
+- **`origin`** records where a rule came from: `prd`, `prototype`, `thread:<id>`
+  (incorporated from a question or note), or `walkdown`. Any origin other than the
+  source documents means the spec is *ahead of its sources* — surfaced in the drift
+  report (`walkdown status`), never silently.
+
 - **IDs are dot-path slugs** (`feature.story.rule-slug`), assigned once, **never
   regenerated**. Rewording a statement keeps the ID. Splitting a rule creates new IDs and
   retires the old one (`superseded_by:`) rather than reusing it. Everything downstream —
@@ -136,6 +141,18 @@ screens:
   deep-linking to URL-reachable screens and leaves `setup` unexecuted.
 - The storyboard is the *only* place per-surface URLs live. When a route changes, one line
   changes.
+- **Each surface has one owner, and nobody writes into another's.** Design owns
+  `prototype/`; product owns the PRD; engineering owns the app and checks. When the spec
+  gets ahead of a source — a rule incorporated from a thread needs a screen design
+  doesn't have — the screen is declared with **`prototype: null`** (spec'd, not yet
+  designed) and a **design-request thread** is filed, anchored to that screen. Builders
+  may sketch a **`proposal:`** (an HTML file under `proposals/`, rendered in the viewer
+  with a "proposed — not from design" badge) as a communication artifact — the shop
+  drawing the contractor submits, never a change to the architect's plans. When design
+  ships the real screen, `prototype:` gets its path, the proposal is superseded, and the
+  request thread is incorporated. Lint flags an undesigned screen with no open request
+  (a proposal alone is not a request); `walkdown status` reports all drift — undesigned
+  screens and thread-born rules — until the sources catch up.
 
 ## Threads
 

@@ -81,6 +81,24 @@ test('hash --write repairs a stale hash and lint then passes', () => {
   assert.equal(exitCode, 0);
 });
 
+test('an undesigned screen without a design-request thread warns; with one it passes', () => {
+  const bp = writeFixture(join(root, 'drift'));
+  const sb = readFileSync(join(bp, 'storyboard.yml'), 'utf8');
+  writeFileSync(join(bp, 'storyboard.yml'), sb + '\n  - id: specborn\n    prototype: null\n    app: { path: /x }\n');
+  let { findings } = lint(loadBlueprint(bp), { checks: false });
+  assert.ok(findings.some((f) => f.category === 'drift' && f.subject === 'specborn' && /no open design-request/.test(f.message)));
+
+  writeFileSync(join(bp, 'threads', 'req.yml'),
+    'id: q-9\nkind: question\nstatus: open\nanchor: { rule: demo.main.thing, screen: specborn }\nbody: design this\n');
+  ({ findings } = lint(loadBlueprint(bp), { checks: false }));
+  assert.deepEqual(findings.filter((f) => f.category === 'drift'), []);
+
+  const feat = readFileSync(join(bp, 'features', 'demo.yml'), 'utf8');
+  writeFileSync(join(bp, 'features', 'demo.yml'), feat.replace('        statement:', '        origin: thread:nope\n        statement:'));
+  ({ findings } = lint(loadBlueprint(bp), { checks: false }));
+  assert.ok(findings.some((f) => f.category === 'drift' && /unknown thread "nope"/.test(f.message)));
+});
+
 test('the in-repo example blueprint lints clean (without runner)', () => {
   const bp = new URL('../example/blueprint', import.meta.url).pathname;
   const { findings, exitCode } = lint(loadBlueprint(bp), { checks: false });

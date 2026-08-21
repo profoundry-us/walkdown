@@ -56,6 +56,13 @@ notes are first-class threads anchored to rules/screens/elements, but their life
 at *incorporated* — the answer gets folded into the rule's statement or steps. The thread
 remains as provenance; the rule is where the knowledge lives.
 
+**Every projection has one owner.** Design owns the prototype, product owns the PRD,
+engineering owns the app and its checks — and nobody writes into another's surface.
+When the spec outruns a source, the gap is recorded (drift report), routed (a request
+thread in the owner's queue), and optionally illustrated (a clearly-badged proposal) —
+never silently patched by whoever noticed. This is what keeps the blueprint politically
+viable: it coordinates the owners without overruling them.
+
 **Stay inside Claude Code.** Every workflow — authoring, building, running checks,
 reviewing feedback, performing a walkdown — must be possible without leaving Claude
 Code/Desktop: file edits and CLI for agents, the browser pane for humans.

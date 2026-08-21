@@ -193,7 +193,7 @@ function cmdStatus(args) {
   if (positionals[0]) return renderRuleDetail(blueprint, derived, positionals[0], values.json);
 
   if (values.json) {
-    console.log(JSON.stringify({ targets, rows, activeThreads: listThreads(blueprint) }, null, 2));
+    console.log(JSON.stringify({ targets, rows, drift: derived.drift, activeThreads: listThreads(blueprint) }, null, 2));
     process.exit(rows.some((r) => r.verdict === 'fail') ? 1 : 0);
   }
 
@@ -227,6 +227,16 @@ function cmdStatus(args) {
   console.log(
     `\n${counts.pass ?? 0} verified, ${counts.pending ?? 0} pending, ${counts.fail ?? 0} failing`
   );
+
+  const { drift } = derived;
+  if (drift.design.length || drift.sources.length) {
+    console.log(`\n  ${dim('DRIFT — spec ahead of its sources')}`);
+    for (const d of drift.design)
+      console.log(`  ${yellow(d.screen)}: no design yet${d.proposal ? ' (proposal on file)' : ''}` +
+        `${d.requests.length ? dim(` — request ${d.requests.join(', ')} open`) : red(' — no design request filed')}`);
+    for (const s of drift.sources)
+      console.log(`  ${yellow(s.rule)} ← ${s.origin} ${dim('(source docs not yet updated)')}`);
+  }
 
   const active = listThreads(blueprint);
   if (active.length) {

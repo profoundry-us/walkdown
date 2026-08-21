@@ -9,6 +9,7 @@ stories:
     statement: As a visitor, I can join the launch waitlist with my email.
     rules:
       - id: waitlist.join.email-required
+        origin: prototype
         statement: A visitor must provide a valid email address before joining the waitlist.
         verify: [checks]
         screens: [waitlist-join]
@@ -24,6 +25,7 @@ stories:
             - The visitor remains on screen `waitlist-join`
 
       - id: waitlist.join.confirmation
+        origin: prototype
         statement: After submitting a valid email, the visitor sees a confirmation showing the email they joined with.
         verify: [checks]
         screens: [waitlist-join, waitlist-confirm]
@@ -39,7 +41,7 @@ stories:
             - Anchor `waitlist.confirmed-email` shows the submitted email
 
       - id: waitlist.join.already-joined
-        # incorporated from q-0001: re-submission shows a distinct state, not the standard confirmation
+        origin: thread:q-0001
         statement: Submitting an email that is already on the waitlist shows a distinct "you're already on the list" message instead of the standard confirmation.
         verify: [checks]
         screens: [waitlist-already, waitlist-join]
@@ -57,7 +59,7 @@ stories:
           statement_hash: sha256:1857ab02c7c3
 
       - id: waitlist.join.confirm-requires-email
-        # from n-0003: direct navigation must not show an empty confirmation
+        origin: thread:n-0003
         statement: Opening the confirmation screen without having submitted an email redirects the visitor to the join screen.
         verify: [checks]
         screens: [waitlist-confirm, waitlist-join]
@@ -71,6 +73,7 @@ stories:
           statement_hash: sha256:09cacb110a8f
 
       - id: waitlist.join.visual-match
+        origin: prototype
         statement: The join and confirmation screens match the prototype's layout, hierarchy, and copy.
         verify: [agent, human]
         screens: [waitlist-join, waitlist-confirm]
