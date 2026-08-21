@@ -17,12 +17,15 @@ test('node:test reporter records tagged tests as a hash-stamped run', () => {
     ['feature: demo', 'stories:', '  - id: demo.main', '    rules:',
       '      - id: demo.main.adds', '        statement: Adding works.', '        verify: [checks]'].join('\n')
   );
+  // The tag is assembled so this file's source never contains a literal
+  // rule ref — walkdown's own coverage lint greps test/ for them.
+  const tag = '@rule' + ':demo.main.adds';
   writeFileSync(
     join(root, 'demo.test.mjs'),
     [
       "import assert from 'node:assert/strict';",
       "import { test } from 'node:test';",
-      "test('adds @rule:demo.main.adds', () => assert.equal(1 + 1, 2));",
+      `test('adds ${tag}', () => assert.equal(1 + 1, 2));`,
       "test('untagged', () => assert.ok(true));",
     ].join('\n')
   );
