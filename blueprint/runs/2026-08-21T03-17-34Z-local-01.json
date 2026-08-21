@@ -1,0 +1,102 @@
+{
+  "run_id": "2026-08-21T03-17-34Z-local-01",
+  "created": "2026-08-21T03:17:34Z",
+  "actor": "agent",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "0e957a9-dirty",
+  "blueprint_sha": "0e957a9-dirty",
+  "results": [
+    {
+      "rule": "ownership.drift.design-requests-required",
+      "status": "pass",
+      "statement_hash": "sha256:1d8bdc7a98b6",
+      "duration_ms": 5,
+      "checks": [
+        "test/lint.test.js:84"
+      ]
+    },
+    {
+      "rule": "embed.pin.anchored-target",
+      "status": "pass",
+      "statement_hash": "sha256:8fcd9522614c",
+      "duration_ms": 9,
+      "checks": [
+        "test/serve.test.js:70"
+      ]
+    },
+    {
+      "rule": "embed.pin.coordinate-fallback",
+      "status": "pass",
+      "statement_hash": "sha256:70323ef1224f",
+      "duration_ms": 13,
+      "checks": [
+        "test/serve.test.js:86"
+      ]
+    },
+    {
+      "rule": "status.derived.latest-wins",
+      "status": "pass",
+      "statement_hash": "sha256:fa42dccb0338",
+      "duration_ms": 25,
+      "checks": [
+        "test/status.test.js:50"
+      ]
+    },
+    {
+      "rule": "status.derived.stale-never-passes",
+      "status": "pass",
+      "statement_hash": "sha256:9b16ab78cd04",
+      "duration_ms": 0,
+      "checks": [
+        "test/status.test.js:66"
+      ]
+    },
+    {
+      "rule": "status.derived.human-tier-distinct",
+      "status": "pass",
+      "statement_hash": "sha256:256a23b14336",
+      "duration_ms": 0,
+      "checks": [
+        "test/status.test.js:74"
+      ]
+    },
+    {
+      "rule": "status.attention.blocked-queues",
+      "status": "pass",
+      "statement_hash": "sha256:1c926a596c4b",
+      "duration_ms": 0,
+      "checks": [
+        "test/status.test.js:148"
+      ]
+    },
+    {
+      "rule": "threads.lifecycle.validated-transitions",
+      "status": "pass",
+      "statement_hash": "sha256:102a0b235d5a",
+      "duration_ms": 4,
+      "checks": [
+        "test/thread-mutations.test.js:43"
+      ]
+    },
+    {
+      "rule": "threads.lifecycle.claim-never-accept",
+      "status": "pass",
+      "statement_hash": "sha256:dbc5f4be5809",
+      "duration_ms": 3,
+      "checks": [
+        "test/thread-mutations.test.js:52"
+      ]
+    },
+    {
+      "rule": "threads.lifecycle.reasoned-endings",
+      "status": "pass",
+      "statement_hash": "sha256:24591753abaa",
+      "duration_ms": 11,
+      "checks": [
+        "test/thread-mutations.test.js:59",
+        "test/thread-mutations.test.js:69"
+      ]
+    }
+  ]
+}

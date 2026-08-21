@@ -56,5 +56,6 @@ test('node:test reporter records tagged tests as a hash-stamped run', () => {
   assert.equal(record.results[0].rule, 'demo.main.adds');
   assert.equal(record.results[0].status, 'pass');
   assert.equal(record.results[0].statement_hash, formatHash('Adding works.'));
-  assert.deepEqual(record.results[0].checks, ['demo.test.mjs']);
+  // file:line — the tagged test sits on line 3 of the fixture above
+  assert.deepEqual(record.results[0].checks, ['demo.test.mjs:3']);
 });
