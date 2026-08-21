@@ -1,0 +1,1 @@
+../../../lib/skills/walkdown-judge.md

@@ -371,17 +371,24 @@ function cmdThread(args) {
 }
 
 async function cmdInit(args) {
-  const { values } = parseArgs({ args, options: { dir: { type: 'string' } } });
+  const { values } = parseArgs({
+    args,
+    options: { dir: { type: 'string' }, force: { type: 'boolean', default: false } },
+  });
   const { scaffold } = await import('../lib/init.js');
-  try {
-    const created = scaffold(values.dir ?? process.cwd());
-    console.log('Scaffolded:');
-    for (const f of created) console.log(`  ${green('+')} ${f}`);
+  const results = scaffold(values.dir ?? process.cwd(), { force: values.force });
+  const MARK = {
+    created: green('+ created'),
+    updated: green('~ updated'),
+    'pointer-appended': green('+ appended'),
+    'up-to-date': dim('· up to date'),
+    kept: dim('· kept'),
+    'kept-differs': yellow('! kept (differs from packaged — --force to update)'),
+  };
+  for (const r of results) console.log(`  ${MARK[r.action] ?? r.action}  ${r.path}`);
+  if (results.every((r) => r.action === 'created' || r.action === 'pointer-appended')) {
     console.log(`\nNext: fill in ${dim('blueprint/walkdown.yml')} (runner commands, targets), sketch your`);
     console.log(`first feature from ${dim('blueprint/features/_template.yml')}, then \`walkdown lint\`.`);
-  } catch (err) {
-    console.error(err.message);
-    process.exit(2);
   }
 }
 

@@ -14,12 +14,12 @@ after(() => rmSync(root, { recursive: true, force: true }));
 test('init scaffolds a lint-clean blueprint with agent conventions', () => {
   const proj = join(root, 'fresh');
   mkdirSync(proj);
-  const created = scaffold(proj);
-  assert.ok(created.includes('blueprint/walkdown.yml'));
-  assert.ok(created.includes('blueprint/AGENTS.md'));
-  assert.ok(created.includes('CLAUDE.md'));
+  const results = scaffold(proj);
+  const actionOf = (rs, path) => rs.find((r) => r.path === path)?.action;
+  for (const path of ['blueprint/walkdown.yml', 'blueprint/AGENTS.md', 'CLAUDE.md'])
+    assert.equal(actionOf(results, path), 'created', path);
   for (const skill of ['walkdown-judge', 'walkdown-incorporate', 'walkdown-formulate']) {
-    assert.ok(created.includes(`.claude/skills/${skill}/SKILL.md`), `missing ${skill}`);
+    assert.equal(actionOf(results, `.claude/skills/${skill}/SKILL.md`), 'created', skill);
     const content = readFileSync(join(proj, '.claude', 'skills', skill, 'SKILL.md'), 'utf8');
     assert.match(content, new RegExp(`^---\\nname: ${skill}\\ndescription: .+`));
   }
@@ -29,19 +29,35 @@ test('init scaffolds a lint-clean blueprint with agent conventions', () => {
   const { findings, exitCode } = lint(loadBlueprint(join(proj, 'blueprint')), { checks: false });
   assert.deepEqual(findings, [], JSON.stringify(findings));
   assert.equal(exitCode, 0);
-
-  assert.throws(() => scaffold(proj), /already exists/);
 });
 
-test('init appends a pointer to an existing CLAUDE.md exactly once and keeps existing skills', () => {
-  const proj = join(root, 'existing');
-  mkdirSync(join(proj, '.claude', 'skills', 'walkdown-judge'), { recursive: true });
+test('init is idempotent: rerun no-ops, customizations kept, --force updates owned docs only', () => {
+  const proj = join(root, 'fresh'); // scaffolded by the previous test
+  const actionOf = (rs, path) => rs.find((r) => r.path === path)?.action;
+  const rerun = scaffold(proj);
+  assert.ok(rerun.every((r) => r.action === 'up-to-date'), JSON.stringify(rerun));
+
+  writeFileSync(join(proj, 'blueprint', 'walkdown.yml'), 'project: customized\n');
   writeFileSync(join(proj, '.claude', 'skills', 'walkdown-judge', 'SKILL.md'), 'customized');
-  writeFileSync(join(proj, 'CLAUDE.md'), '# My project\n');
-  const created = scaffold(proj);
-  assert.ok(created.includes('.claude/skills/walkdown-judge/SKILL.md (kept existing)'));
+  const third = scaffold(proj);
+  assert.equal(actionOf(third, 'blueprint/walkdown.yml'), 'kept');
+  assert.equal(actionOf(third, '.claude/skills/walkdown-judge/SKILL.md'), 'kept-differs');
   assert.equal(readFileSync(join(proj, '.claude', 'skills', 'walkdown-judge', 'SKILL.md'), 'utf8'), 'customized');
-  assert.ok(created.includes('CLAUDE.md (appended pointer)'));
+
+  const forced = scaffold(proj, { force: true });
+  assert.equal(actionOf(forced, 'blueprint/walkdown.yml'), 'kept'); // user-owned: --force never touches it
+  assert.equal(actionOf(forced, '.claude/skills/walkdown-judge/SKILL.md'), 'updated');
+  assert.match(readFileSync(join(proj, '.claude', 'skills', 'walkdown-judge', 'SKILL.md'), 'utf8'), /^---\nname: walkdown-judge/);
+  assert.equal(readFileSync(join(proj, 'blueprint', 'walkdown.yml'), 'utf8'), 'project: customized\n');
+});
+
+test('init appends a pointer to an existing CLAUDE.md exactly once', () => {
+  const proj = join(root, 'existing');
+  mkdirSync(proj);
+  writeFileSync(join(proj, 'CLAUDE.md'), '# My project\n');
+  const actionOf = (rs, path) => rs.find((r) => r.path === path)?.action;
+  assert.equal(actionOf(scaffold(proj), 'CLAUDE.md'), 'pointer-appended');
+  assert.equal(actionOf(scaffold(proj), 'CLAUDE.md'), 'up-to-date');
   const content = readFileSync(join(proj, 'CLAUDE.md'), 'utf8');
   assert.match(content, /^# My project/);
   assert.equal(content.match(/walkdown:begin/g).length, 1);
