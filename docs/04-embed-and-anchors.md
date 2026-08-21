@@ -46,6 +46,10 @@ carry them over) and it buys:
 
 - **Element-precise feedback** — pins attach to `checkout.submit`, not to coordinates on a
   screenshot, so they survive layout changes and mean the same thing in both surfaces.
+  When no anchored element sits under the click, the pin is still placed and recorded by
+  its `{x, y}` — feedback is never blocked by a missing anchor. Positioned pins are the
+  fallback, not the norm: they render as squared markers and are a standing hint that the
+  spot deserves an anchor.
 - **Resilient checks** — generated tests select `getByTestId('checkout.submit')` (or the
   Capybara equivalent) instead of brittle CSS paths.
 - **Cheap coverage checking** — "does every anchor referenced by the blueprint exist in
@@ -67,8 +71,10 @@ A small, dependency-free script injected into the prototype and dev/staging buil
 Responsibilities:
 
 1. **Element picking** — hover-highlight anchored elements; click to attach a note or
-   question to `{screen, anchor, position}`.
-2. **Pin rendering** — draw open threads at their anchors so feedback is seen in place.
+   question to `{screen, element}`, falling back to `{screen, position}` where nothing
+   anchored sits under the cursor.
+2. **Pin rendering** — draw open threads at their anchors (or their recorded positions) so
+   feedback is seen in place.
 3. **Screen reporting** — announce the current screen (URL + anchor fingerprint) so the
    viewer can track where the user is.
 4. **Navigation duty** — respond to "go to screen X" commands using the storyboard's

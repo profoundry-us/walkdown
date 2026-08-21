@@ -6,9 +6,23 @@ anchor:
   rule: viewer.layout.surfaces-first
   screen: board
   element: board.drawer
-status: open
-body: Tried to pin the drawer hint ("Select a rule — its detail opens here as
-  a drawer") while walking surfaces-first, but nothing there was selectable.
-  The drawer should be a selectable region — and when no selectable region
-  sits under the cursor, a pin should still be placeable, recorded by its
-  x/y position instead.
+status: addressed
+body: Tried to pin the drawer hint ("Select a rule — its detail opens here as a
+  drawer") while walking surfaces-first, but nothing there was selectable. The
+  drawer should be a selectable region — and when no selectable region sits
+  under the cursor, a pin should still be placeable, recorded by its x/y
+  position instead.
+replies:
+  - author: agent
+    created: 2026-08-21T03:14:36Z
+    body: 'Both parts are built. (1) The drawer is now a real selectable region: the
+      board wireframe and the live viewer both carry data-testid="board.drawer",
+      and the storyboard lists the anchor. (2) Pin mode no longer requires an
+      anchor — clicking a spot with no anchored element under it opens the pin
+      form there and records anchor.position {x,y}; such pins render as squared
+      markers so they read as positioned rather than anchored. An anchored
+      element still wins when present, and non-numeric coordinates are dropped.
+      Covered by check test/serve.test.js @rule:embed.pin.coordinate-fallback,
+      passing in run 2026-08-21T03-14-09Z-local-01. The whole surfaces-first
+      layout it was filed against is also built (rail collapse, bottom drawer,
+      stage modes) and awaits your walkdown.'

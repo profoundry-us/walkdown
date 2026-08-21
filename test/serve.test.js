@@ -83,6 +83,46 @@ test('POST /api/threads writes a thread file; screen resolved from URL', async (
   assert.equal(onDisk.anchor.element, 'home.cta');
 });
 
+test('a pin with no anchored element is kept by position @rule:embed.pin.coordinate-fallback', async () => {
+  const res = await (await fetch(`${base}/api/threads`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      kind: 'note', body: 'Nothing selectable here.', author: 'tester',
+      anchor: { screen: 'home', position: { x: 412.4, y: 218.7 } },
+    }),
+  })).json();
+  const onDisk = parse(readFileSync(join(bp, 'threads', `${res.id}.yml`), 'utf8'));
+  assert.equal(onDisk.anchor.element, undefined);
+  assert.deepEqual(onDisk.anchor.position, { x: 412, y: 219 });
+  assert.equal(onDisk.anchor.screen, 'home');
+
+  // An anchored pin still wins: position is the fallback, not a competitor.
+  const anchored = await (await fetch(`${base}/api/threads`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      kind: 'note', body: 'On the CTA.', author: 'tester',
+      anchor: { screen: 'home', element: 'home.cta', position: { x: 5, y: 5 } },
+    }),
+  })).json();
+  const anchoredDisk = parse(readFileSync(join(bp, 'threads', `${anchored.id}.yml`), 'utf8'));
+  assert.equal(anchoredDisk.anchor.element, 'home.cta');
+  assert.equal(anchoredDisk.anchor.position, undefined);
+
+  // Garbage coordinates are dropped rather than persisted.
+  const junk = await (await fetch(`${base}/api/threads`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      kind: 'note', body: 'Bad point.', author: 'tester',
+      anchor: { screen: 'home', position: { x: 'left', y: null } },
+    }),
+  })).json();
+  const junkDisk = parse(readFileSync(join(bp, 'threads', `${junk.id}.yml`), 'utf8'));
+  assert.equal(junkDisk.anchor.position, undefined);
+});
+
 test('POST /api/walkdowns writes a hash-stamped human run record', async () => {
   const res = await (await fetch(`${base}/api/walkdowns`, {
     method: 'POST',

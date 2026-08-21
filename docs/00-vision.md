@@ -92,7 +92,10 @@ Code/Desktop: file edits and CLI for agents, the browser pane for humans.
   ([03](03-runner-contract.md))
 - Embed script + anchor convention (test-id reuse); feedback/questions written to the local server
   ([04](04-embed-and-anchors.md))
-- Viewer with rule list, derived status, storyboard navigation, side-by-side mode
+- Viewer with rule list, derived status, storyboard navigation, and a surfaces-first
+  layout: a collapsible rules rail, a rule-detail drawer along the bottom, and a stage
+  that shows prototype, app, or both — because the surfaces under review deserve the
+  window, not a quarter of it
 - Run ledger with multi-target runs and human walkdowns ([05](05-runs-ledger.md))
 
 ## Explicit non-goals for v1
