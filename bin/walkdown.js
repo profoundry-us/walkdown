@@ -163,6 +163,13 @@ function renderRuleDetail(blueprint, derived, ruleId, json) {
   console.log(`  ${row.statement ?? dim('(no statement)')}`);
   console.log(dim(`  story ${row.story} · verify ${row.verify.join(', ')} · screens ${row.screens.join(', ') || '—'}`));
 
+  if (row.steps) {
+    console.log(`\n  ${dim('STEPS')}`);
+    for (const [phase, items] of Object.entries(row.steps))
+      for (const [i, step] of items.entries())
+        console.log(`    ${dim((i === 0 ? phase : '').padEnd(6))}${step}`);
+  }
+
   console.log(`\n  ${dim('EVIDENCE')}`);
   const sources = [
     ...derived.targets.map((t) => [`checks/${t}`, row.cells[t]]),

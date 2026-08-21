@@ -97,6 +97,7 @@ test('rows carry statement/screens; cells carry run provenance for detail views'
   const { rows } = deriveStatus(blueprint({ runs: [run] }));
   assert.equal(rows[0].statement, STATEMENT);
   assert.deepEqual(rows[0].screens, []);
+  assert.equal(rows[0].steps, null); // fixture rule has none
   const cell = rows[0].cells.local;
   assert.equal(cell.runId, '2026-01-01');
   assert.equal(cell.created, '2026-01-01');
