@@ -1,9 +1,9 @@
-# Walkdown first milestone — hand-run
+# walkdown first milestone — hand-run
 
 This directory is the milestone from [00-vision.md](../docs/00-vision.md): the schema
 exercised end to end **by hand** on one small feature (a launch-waitlist signup), before
-any Walkdown tooling exists. Every artifact here was produced with file tools, a browser,
-and Playwright — no Walkdown CLI.
+any walkdown tooling exists. Every artifact here was produced with file tools, a browser,
+and Playwright — no walkdown CLI.
 
 ## What's here
 

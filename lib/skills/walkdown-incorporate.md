@@ -1,6 +1,6 @@
 ---
 name: walkdown-incorporate
-description: Work the Walkdown agent queue - incorporate an answered question into the blueprint (fold the answer into rules and steps, route storyboard and design changes, add checks) or address an open note (fix, verify, reply). Use when status shows agent-queue items (incorporate or address), when a thread is answered awaiting incorporation, or when asked to handle a specific thread id.
+description: Work the walkdown agent queue - incorporate an answered question into the blueprint (fold the answer into rules and steps, route storyboard and design changes, add checks) or address an open note (fix, verify, reply). Use when status shows agent-queue items (incorporate or address), when a thread is answered awaiting incorporation, or when asked to handle a specific thread id.
 ---
 
 # Incorporate & address

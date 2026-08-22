@@ -118,7 +118,7 @@ stories:
 ### Headless rules
 
 Rules don't require screens. A rule with no `screens` is a **headless rule** — an API
-behavior, CLI contract, background job, or policy. For these, Walkdown is deliberately
+behavior, CLI contract, background job, or policy. For these, walkdown is deliberately
 "BDD with a ledger": the statement stays authoritative and product-readable, coverage
 lint still finds untested requirements, runs still track per-target history and
 staleness, and threads anchor at the rule level. The storyboard, anchors, and embed are

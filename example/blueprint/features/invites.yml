@@ -1,0 +1,57 @@
+feature: invites
+title: Inviting people off the waitlist
+source:
+  prd: (hand-written for the panel proof of concept — no PRD)
+  prototype: example/prototype
+stories:
+  - id: invites.batch
+    title: An operator invites a batch of people
+    statement: As an operator, I can invite a batch of people off the waitlist without fear of emailing the wrong number of them.
+    rules:
+      - id: invites.batch.confirm-count
+        origin: prototype
+        statement: Inviting a batch asks for confirmation naming how many people will be emailed, and that number matches what was selected.
+        verify: [human]
+        screens: [waitlist-admin]
+        steps:
+          given:
+            - An operator on screen `waitlist-admin` with rows selected
+          when:
+            - Click anchor `waitlist.invite-batch`
+          then:
+            - Anchor `waitlist.confirm-batch` names the exact number of people
+            - Nothing is sent until the confirmation is accepted
+          statement_hash: sha256:b53232b37a56
+
+      - id: invites.batch.cancel-sends-nothing
+        origin: prototype
+        statement: Cancelling the confirmation sends no invitations and leaves the selection exactly as it was.
+        verify: [human]
+        screens: [waitlist-admin]
+        steps:
+          given:
+            - The confirmation open at anchor `waitlist.confirm-batch`
+          when:
+            - Dismiss it without accepting
+          then:
+            - No invitation is sent and no row changes status
+            - The same rows remain selected in anchor `waitlist.table`
+          statement_hash: sha256:e59dd55de17c
+
+  - id: invites.list
+    title: An operator sees who has been invited
+    statement: As an operator, I can tell at a glance who has already been invited and who is still waiting.
+    rules:
+      - id: invites.list.status-per-row
+        origin: prototype
+        statement: Every row in the waitlist shows whether that person has been invited yet, distinguishable without reading the text.
+        verify: [human]
+        screens: [waitlist-admin]
+        steps:
+          given:
+            - An operator on screen `waitlist-admin`
+          when:
+            - Scanning anchor `waitlist.table`
+          then:
+            - Invited and waiting rows are told apart by more than wording alone
+          statement_hash: sha256:03471c770657

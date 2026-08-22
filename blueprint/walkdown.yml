@@ -1,6 +1,6 @@
 project: walkdown
 
-# Walkdown's own blueprint — the tool specified with itself. docs/ holds the
+# walkdown's own blueprint — the tool specified with itself. docs/ holds the
 # design (why); this holds the verifiable what. Checks are the node:test suite,
 # tagged @rule:<id> in test names, recorded by our own node:test reporter.
 runner:

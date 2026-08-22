@@ -1,8 +1,8 @@
-# Walkdown
+# walkdown
 
 **Verify that what you built is what you designed.**
 
-Walkdown is the integration layer between design prototypes (Claude Design, Figma) and
+walkdown is the integration layer between design prototypes (Claude Design, Figma) and
 AI-built applications (Claude Code). It extracts a product's intent into a **blueprint** —
 a versioned, file-based specification of features, stories, and rules — then tracks whether
 the built application actually satisfies that intent, through the project's *own* test suite
@@ -117,9 +117,9 @@ statement, stored truncated (`sha256:` + 12 hex).
   `walkdown thread n-0002 --actor agent --reply "fixed in run …" --status addressed`,
   then `walkdown thread n-0002 --verify` as yourself.
 
-## Walkdown's own blueprint
+## walkdown's own blueprint
 
-Walkdown is specified with itself: [blueprint/](blueprint/) holds the tool's own
+walkdown is specified with itself: [blueprint/](blueprint/) holds the tool's own
 rules (starting with thread-lifecycle governance), verified by the repo's node:test
 suite — tests tagged by name (`... @rule:<id>`), recorded by the **node:test
 reporter** (`walkdown/node-reporter`, the third emitter alongside Playwright and

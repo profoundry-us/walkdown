@@ -1,9 +1,9 @@
 # 03 — Runner contract
 
-**Criteria are the interface; tests are a pluggable implementation.** Walkdown never owns
+**Criteria are the interface; tests are a pluggable implementation.** walkdown never owns
 test authorship or execution. Checks are the team's own integration tests — RSpec workflow
 specs driving Playwright, Playwright TS, Cypress, minitest system tests, anything — written
-the way the team's engineers would have written them anyway. Walkdown defines only a
+the way the team's engineers would have written them anyway. walkdown defines only a
 three-part contract any project can satisfy in its config.
 
 Framework-agnosticism lives in **configuration and per-project instructions, not codegen**:
@@ -69,7 +69,7 @@ authoring:
     One rule per example.
 ```
 
-- Walkdown shells out; it does not know what RSpec is. `{id}`, `{results}`, and target
+- walkdown shells out; it does not know what RSpec is. `{id}`, `{results}`, and target
   `env` are the only substitutions.
 - **Targets** reuse whatever base-URL mechanism the project already has (Capybara
   `APP_HOST`, Playwright `baseURL` env). The target name flows into the run record, which
@@ -81,7 +81,7 @@ authoring:
 ## Part 3 — Results ingestion: two tiers
 
 **Tier 1 (universal): JUnit XML.** Every framework emits it (`rspec_junit_formatter`,
-Playwright's junit reporter, pytest, minitest). Walkdown maps test cases to rule IDs via
+Playwright's junit reporter, pytest, minitest). walkdown maps test cases to rule IDs via
 the tag embedded in the test name or a sidecar produced by `list`. Lowest fidelity, zero
 integration cost.
 
@@ -103,7 +103,7 @@ directly — status, failure message, duration, screenshot/trace paths as eviden
   custom metadata, so the lister prints `rule:<id> <file>:<line>` per tagged example).
   Adapters are small enough that an agent can write a new one on demand.
 
-Either tier ends the same way: Walkdown appends a run record to `blueprint/runs/`
+Either tier ends the same way: walkdown appends a run record to `blueprint/runs/`
 (schema in [05-runs-ledger.md](05-runs-ledger.md)).
 
 ## Lint rules (`walkdown lint`)

@@ -7,9 +7,9 @@ Gem::Specification.new do |spec|
   spec.version = Walkdown::Rspec::VERSION
   spec.authors = ['Topher Fangio']
   spec.email = ['topher@profoundry.us']
-  spec.summary = 'RSpec formatter that emits Walkdown run records'
+  spec.summary = 'RSpec formatter that emits walkdown run records'
   spec.description = 'Tag RSpec examples with rule: metadata and this formatter appends a ' \
-                     'Walkdown run record (per-rule results, statement hashes, evidence) after each run.'
+                     'walkdown run record (per-rule results, statement hashes, evidence) after each run.'
   spec.homepage = 'https://walkdown.dev'
   spec.license = 'MIT'
   spec.required_ruby_version = '>= 3.0'

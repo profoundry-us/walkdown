@@ -1,4 +1,4 @@
-# Walkdown — agent conventions
+# walkdown — agent conventions
 
 This project's spec lives in `blueprint/`: features, stories, and **rules**
 (acceptance criteria), plus the storyboard (screens), threads (questions &

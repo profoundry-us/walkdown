@@ -1,6 +1,6 @@
 ---
 name: walkdown-judge
-description: Perform an agent walkdown - visually judge Walkdown rules whose verify list includes "agent" by comparing the built app against the prototype screen by screen, then record a hash-stamped walkdown run and spawn note threads for failures. Use when asked to judge, visually verify, run an agent walkdown, or when status shows agent-verify rules pending or stale.
+description: Perform an agent walkdown - visually judge walkdown rules whose verify list includes "agent" by comparing the built app against the prototype screen by screen, then record a hash-stamped walkdown run and spawn note threads for failures. Use when asked to judge, visually verify, run an agent walkdown, or when status shows agent-verify rules pending or stale.
 ---
 
 # Agent walkdown

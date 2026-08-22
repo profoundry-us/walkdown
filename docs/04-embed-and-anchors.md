@@ -32,7 +32,7 @@ embed:
 ```
 
 Reuse cuts both ways, so the rule that keeps it honest: **anchor values must follow
-Walkdown's rules regardless of attribute** — dot-namespaced, globally stable, declared in
+walkdown's rules regardless of attribute** — dot-namespaced, globally stable, declared in
 the storyboard. A legacy codebase with a pile of local, non-namespaced test ids
 (`"submit-button"` on five screens) has two options: migrate those values to namespaced
 ones (usually the right call — it improves their tests too), or set
@@ -63,7 +63,7 @@ screen in the storyboard for linting.
 Production builds ship without the embed, but **anchors can stay in production markup** —
 they are inert data attributes, and stripping them is an optional build step, not a
 requirement. (Teams that already strip `data-testid` from production bundles can keep
-doing so; nothing in Walkdown runs in production.)
+doing so; nothing in walkdown runs in production.)
 
 ## The embed script
 
@@ -84,7 +84,7 @@ It auto-detects its transport:
 
 - **Framed** (inside the viewer's side-by-side mode): a `postMessage` handshake with the
   parent; all traffic flows through the viewer.
-- **Standalone** (opened directly): HTTP to the local Walkdown server
+- **Standalone** (opened directly): HTTP to the local walkdown server
   (`http://localhost:4700`), which writes threads straight into `blueprint/threads/`.
 
 ## Injection per surface — boring on purpose

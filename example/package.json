@@ -1,7 +1,7 @@
 {
   "name": "walkdown-example",
   "private": true,
-  "description": "First-milestone hand-run of the Walkdown blueprint schema",
+  "description": "First-milestone hand-run of the walkdown blueprint schema",
   "scripts": {
     "checks": "playwright test"
   },

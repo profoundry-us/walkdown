@@ -69,9 +69,9 @@ Fields of note:
   message; evidence paths (screenshots, traces) live under `runs/evidence/` (git-ignored
   or LFS, per project taste).
 
-## Walkdown sessions (judgment runs)
+## walkdown sessions (judgment runs)
 
-Walkdown sessions come in two flavors, producing the same record shape:
+walkdown sessions come in two flavors, producing the same record shape:
 
 - **Human** (`actor: <person>`): stepping through rules in the viewer. The only evidence
   that satisfies a `human` verify requirement.

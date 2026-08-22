@@ -1,6 +1,6 @@
 ---
 name: walkdown-formulate
-description: Formulate a Walkdown feature - derive storyboard screens, stories, and rules with steps from a design artifact (prototype export, mockups) or PRD notes, then wire rule-tagged checks. Use when starting a new feature, adding something to the blueprint, or turning a design or PRD into acceptance criteria.
+description: Formulate a walkdown feature - derive storyboard screens, stories, and rules with steps from a design artifact (prototype export, mockups) or PRD notes, then wire rule-tagged checks. Use when starting a new feature, adding something to the blueprint, or turning a design or PRD into acceptance criteria.
 ---
 
 # Formulate a feature

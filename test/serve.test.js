@@ -59,7 +59,7 @@ test('GET /api/blueprint returns rows, storyboard, and config bits', async () =>
 });
 
 test('viewer, embed.js, and prototype static files are served', async () => {
-  assert.match(await (await fetch(`${base}/`)).text(), /<title>Walkdown<\/title>/);
+  assert.match(await (await fetch(`${base}/`)).text(), /<title>walkdown<\/title>/);
   const embed = await (await fetch(`${base}/embed.js`)).text();
   assert.match(embed, /data-testid/); // __ANCHOR_ATTR__ substituted
   assert.doesNotMatch(embed, /__ANCHOR_ATTR__/);

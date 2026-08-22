@@ -10,12 +10,12 @@ require 'shellwords'
 require 'time'
 require 'yaml'
 
-# Walkdown adapters for RSpec.
+# walkdown adapters for RSpec.
 #
 #   it "requires a guest email", rule: "checkout.guest.email-required" do ... end
 #
 #   rspec --format progress --format Walkdown::Formatter
-#     appends a Walkdown run record to <blueprint>/runs/ after the run.
+#     appends a walkdown run record to <blueprint>/runs/ after the run.
 #   rspec --dry-run --format Walkdown::ListFormatter
 #     prints "rule:<id> <file>:<line>" per tagged example — the `runner.list`
 #     command for walkdown lint's coverage check (RSpec's JSON formatter does

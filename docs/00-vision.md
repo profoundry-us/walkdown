@@ -22,7 +22,7 @@ surfaces in sync with that hub:
    for walkdowns.
 3. **The built application** — verified against the blueprint, in dev and staging.
 4. **The test suite** — the project's own integration tests, linked to blueprint rules by
-   tags. Walkdown never owns tests; see [03-runner-contract.md](03-runner-contract.md).
+   tags. walkdown never owns tests; see [03-runner-contract.md](03-runner-contract.md).
 
 ## Principles
 
@@ -34,7 +34,7 @@ layer is an explicit *later*, built on top of the file format, never a replaceme
 
 **Criteria are the interface; tests are a pluggable implementation.** Rules are written in
 the blueprint; checks are the team's own tests in the team's own framework, tagged with
-rule IDs. Walkdown shells out to run them and ingests results. The builder agent writes
+rule IDs. walkdown shells out to run them and ingests results. The builder agent writes
 tests in the project's native dialect (RSpec workflow specs, Playwright TS, …) following
 per-project instructions, so there is no shadow test suite to drift.
 

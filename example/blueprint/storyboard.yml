@@ -23,3 +23,15 @@ screens:
     anchors:
       - waitlist.already-message
       - waitlist.confirmed-email
+
+  - id: waitlist-admin
+    title: Waitlist admin
+    prototype: /screens/waitlist-admin.html
+    app: { path: /admin.html }
+    anchors:
+      - waitlist.heading
+      - waitlist.count
+      - waitlist.export
+      - waitlist.invite-batch
+      - waitlist.table
+      - waitlist.confirm-batch

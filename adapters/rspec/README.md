@@ -1,6 +1,6 @@
 # walkdown-rspec
 
-The RSpec adapter for [Walkdown](../../README.md): a formatter that appends a Walkdown
+The RSpec adapter for [walkdown](../../README.md): a formatter that appends a walkdown
 run record after every spec run, byte-compatible with the records the Playwright
 reporter emits — so `walkdown status`, `lint`, and staleness detection work identically
 whether checks are RSpec workflow specs or Playwright tests.

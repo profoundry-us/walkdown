@@ -1,0 +1,37 @@
+{
+  "run_id": "2026-08-22T04-03-31Z-local-01",
+  "created": "2026-08-22T04:03:31Z",
+  "actor": "root",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "f24640c-dirty",
+  "blueprint_sha": "f24640c-dirty",
+  "results": [
+    {
+      "rule": "fixture.join.rejects-invalid",
+      "status": "pass",
+      "statement_hash": "sha256:a5b66877c604",
+      "duration_ms": 0,
+      "checks": [
+        "spec/waitlist_spec.rb:4"
+      ]
+    },
+    {
+      "rule": "fixture.join.confirms-with-email",
+      "status": "pass",
+      "statement_hash": "sha256:3a22e9e6edd7",
+      "duration_ms": 0,
+      "checks": [
+        "spec/waitlist_spec.rb:10"
+      ]
+    },
+    {
+      "rule": "fixture.join.rate-limit",
+      "status": "skipped",
+      "duration_ms": 0,
+      "checks": [
+        "spec/waitlist_spec.rb:15"
+      ]
+    }
+  ]
+}
