@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-08-22T16-47-26Z-local-01",
+  "created": "2026-08-22T16:47:26Z",
+  "actor": "Topher Fangio",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4310",
+  "git_sha": "509012f-dirty",
+  "blueprint_sha": "509012f-dirty",
+  "results": [
+    {
+      "rule": "invites.batch.confirm-count",
+      "status": "pass",
+      "statement_hash": "sha256:b53232b37a56"
+    },
+    {
+      "rule": "invites.batch.cancel-sends-nothing",
+      "status": "pass",
+      "statement_hash": "sha256:e59dd55de17c"
+    },
+    {
+      "rule": "invites.list.status-per-row",
+      "status": "pass",
+      "statement_hash": "sha256:03471c770657"
+    }
+  ]
+}
