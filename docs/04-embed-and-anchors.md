@@ -72,7 +72,9 @@ Responsibilities:
 
 1. **Element picking** — hover-highlight anchored elements; click to attach a note or
    question to `{screen, element}`, falling back to `{screen, position}` where nothing
-   anchored sits under the cursor.
+   anchored sits under the cursor. Escape leaves pin mode. walkdown's own chrome —
+   the badge, an open form, an existing pin, the docked panel — is never a pin target,
+   so the way out is never swallowed by the mode you are trying to leave.
 2. **Pin rendering** — draw open threads at their anchors (or their recorded positions) so
    feedback is seen in place.
 3. **Screen reporting** — announce the current screen (URL + anchor fingerprint) so the
@@ -92,7 +94,7 @@ It auto-detects its transport:
 | Surface | Mechanism |
 |---|---|
 | Prototype | Claude Design emits the tag in every export. |
-| Dev app | Documented one-liner, gated on env: `<script src="http://localhost:4700/embed.js" data-walkdown></script>` — served by `walkdown serve`, so the version always matches; fails silently when the server isn't running. |
+| Dev app | Documented one-liner, gated on env: `<script src="http://localhost:4700/embed.js" data-walkdown data-bp="<project>"></script>` — served by `walkdown serve`, so the version always matches; fails silently when the server isn't running. `data-bp` is required whenever one server hosts sibling blueprints, or pins file against the server's default project. |
 | Staging | Same snippet baked in behind an env flag (`WALKDOWN_EMBED=1`), loading `embed.js` from the app's own assets (bundled at build) since localhost may not be serving. |
 | Production | Never. |
 

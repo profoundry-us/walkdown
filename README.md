@@ -99,11 +99,14 @@ statement, stored truncated (`sha256:` + 12 hex).
   (the prototype is mounted at `/prototype/`; the app iframe points at the local
   target's `base_url`). Clicking a rule navigates both surfaces via the storyboard.
 - **Pin mode** — with the embed snippet in a page (`<script
-  src="http://localhost:4700/embed.js" data-walkdown>`), clicking a real element pins a
-  note or question to its anchor; the thread lands in `blueprint/threads/` with rule,
-  screen, element, and author attached. Standalone pages (opened outside the viewer)
-  resolve their screen from the URL and post to the same server — including HTTPS
-  staging pages, via the Private-Network-Access preflight.
+  src="http://localhost:4700/embed.js" data-walkdown data-bp="example/blueprint">`),
+  clicking a real element pins a note or question to its anchor; the thread lands in
+  `blueprint/threads/` with rule, screen, element, and author attached. **Escape** leaves
+  pin mode (closing an open form first), as does clicking the badge again. Standalone
+  pages (opened outside the viewer) resolve their screen from the URL and post to the
+  same server — including HTTPS staging pages, via the Private-Network-Access preflight.
+  `data-bp` names the project when one server hosts sibling blueprints; omit it and pins
+  file against whichever blueprint `walkdown serve` started in.
 - **Human walkdowns** — enter your name, Start walkdown, judge rules Pass/Fail, Finish:
   the session is appended to `blueprint/runs/` as a hash-stamped `kind: walkdown`
   record, satisfying `human` verify requirements. Failing a rule switches pin mode on

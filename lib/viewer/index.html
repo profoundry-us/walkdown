@@ -577,6 +577,14 @@ window.addEventListener('message', async (e) => {
   const msg = e.data;
   if (!msg || typeof msg !== 'object') return;
   if (msg.type === 'walkdown:ready') pushContext();
+  // A surface can leave pin mode too (Escape). The viewer owns the flag, so it
+  // updates the button and re-broadcasts — otherwise the other surface would
+  // still think pinning is on.
+  if (msg.type === 'walkdown:pin-mode' && msg.on === false && pinMode) {
+    pinMode = false;
+    $('pinbtn').classList.remove('btn-warning');
+    pushContext();
+  }
   if (msg.type === 'walkdown:open-thread') {
     const t = data.threads.find(x => x.id === msg.id);
     if (t?.anchor?.rule) {
