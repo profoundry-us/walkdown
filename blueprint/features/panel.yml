@@ -132,6 +132,8 @@ stories:
             - The proposal is drawn over the app the way a prototype ghost is
             - It is labelled as a proposal that did not come from design
             - Screens with a real prototype still ghost the prototype
+            - Looking at it is a detour - which screen the panel thinks this page is does not change, and the picker still swaps screens
+            - The detour is named while it lasts, and turning the ghost off ends it
           statement_hash: sha256:8244263349d7
 
   - id: panel.walkdown

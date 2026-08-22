@@ -1,0 +1,22 @@
+id: n-0014
+kind: note
+author: topher
+created: 2026-08-22T23:23:19Z
+anchor:
+  rule: panel.threads.show-the-sketch
+status: addressed
+body: After clicking "View the proposed sketch" I could no longer swap screens
+  with the dropdown at the bottom of the panel, or by selecting a rule.
+replies:
+  - author: agent
+    created: 2026-08-22T23:23:19Z
+    body: "Fixed. The sketch button was writing pickedScreen — the panel's answer to
+      \"which screen is this page?\" — so a glance at another screen's artwork
+      permanently repointed the panel, and neither the picker nor rule selection
+      appeared to do anything afterwards. The ghost now has its own short-lived
+      override: the picker is untouched, an amber badge names the detour while
+      it lasts, and turning the ghost off or changing the picker ends it. Two
+      things that made it worse also fixed: render() was resetting each pane's
+      scroll, so clicking a control near the bottom of a long thread threw you
+      to the top; and a rule on another screen now says so and offers the trip,
+      since the panel deliberately does not move the page under it."
