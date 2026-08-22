@@ -1,0 +1,15 @@
+id: n-0011
+kind: note
+author: topher
+created: 2026-08-22T16:54:56Z
+anchor: {}
+status: addressed
+body: "Pin mode had no way out: escape did nothing, and clicking the badge or
+  the docked panel just tried to place another pin."
+replies:
+  - author: agent
+    created: 2026-08-22T16:59:27Z
+    body: "Fixed in 7d396ca: walkdown's own chrome — badge, open form, existing pin,
+      docked panel — is excluded from pin targeting via a shared marker, and
+      Escape closes an open form then leaves pin mode. Specified as
+      panel.dock.chrome-not-a-pin-target."

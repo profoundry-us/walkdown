@@ -1,0 +1,15 @@
+id: n-0012
+kind: note
+author: topher
+created: 2026-08-22T16:54:56Z
+anchor: {}
+status: addressed
+body: The embed posted pins without a project, so feedback left on the example
+  app filed into walkdown's own blueprint instead of the example's.
+replies:
+  - author: agent
+    created: 2026-08-22T16:59:27Z
+    body: "Fixed in 7d396ca: the embed takes data-bp and sends it on every write,
+      falling back to a sibling walkdown tag. Verified end-to-end — a pin from
+      the example app lands in example/blueprint. Specified as
+      embed.pin.right-project."

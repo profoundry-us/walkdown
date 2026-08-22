@@ -22,6 +22,20 @@ stories:
             - Later visitors see the pin on that element wherever it renders
           statement_hash: sha256:8fcd9522614c
 
+      - id: embed.pin.right-project
+        origin: thread:n-0012
+        statement: A pin files against the project the page belongs to, not whichever blueprint the server happens to be serving by default, so feedback never lands in a sibling project's threads.
+        verify: [human]
+        steps:
+          given:
+            - One server hosting sibling blueprints, and a page that declares its project
+          when:
+            - Pin an element on that page
+          then:
+            - The thread is written to that project's threads/, not the server's default
+            - A page that declares no project still files against the default, unchanged
+          statement_hash: sha256:399853aef960
+
       - id: embed.pin.both-surfaces
         origin: thread:n-0003
         statement: Pins can be placed on the app exactly as on the prototype - the same anchors exist in both - and a pin records which surface it was placed on.

@@ -1,0 +1,17 @@
+id: n-0010
+kind: note
+author: topher
+created: 2026-08-22T16:54:56Z
+anchor: {}
+status: addressed
+body: q-0002 points at a proposal sketch (proposals/waitlist-already.html) but
+  nothing in the UI can open it. A thread that names a sketch should be able to
+  show it.
+replies:
+  - author: agent
+    created: 2026-08-22T16:59:27Z
+    body: "Built: when a thread's screen has a proposal on file and no prototype,
+      the panel offers 'View the proposed sketch', which ghosts it over the
+      running app under an amber 'Proposed sketch — not from design' banner.
+      Verified against q-0002 in the example. Specified as
+      panel.threads.show-the-sketch."

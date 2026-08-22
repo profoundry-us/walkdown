@@ -1,0 +1,154 @@
+feature: panel
+title: The docked panel
+source:
+  prd: (design exploration, 2026-08-21; see docs/04-embed-and-anchors.md)
+stories:
+  - id: panel.dock
+    title: walkdown rides beside the real app
+    statement: As a reviewer, I can judge the running application in its own tab at its own viewport, with walkdown docked alongside it instead of framing it.
+    rules:
+      - id: panel.dock.no-framing
+        origin: walkdown
+        statement: The panel renders beside the page it reviews rather than framing it, so an app that refuses to be framed is still reviewable, and it pushes the page aside rather than covering it.
+        verify: [human]
+        steps:
+          given:
+            - A dev page loading panel.js
+          when:
+            - The page loads
+          then:
+            - The panel occupies the right edge and the document is inset by its width
+            - No part of the application is hidden behind the panel
+            - Undocking restores the page's own margin and leaves a tab to redock
+          statement_hash: sha256:908e4e7b2953
+
+      - id: panel.dock.host-isolation
+        origin: walkdown
+        statement: The panel is injected into somebody else's application, so its styles never reach the host page and the host's styles never reach it.
+        verify: [human]
+        steps:
+          given:
+            - A page that has its own stylesheet, loading panel.js
+          when:
+            - The panel renders
+          then:
+            - Everything the panel draws lives inside a shadow root
+            - The host document gains no rule that paints anything
+            - The host's own buttons, headings and form controls are unchanged
+          statement_hash: sha256:116d1940d94f
+
+      - id: panel.dock.chrome-not-a-pin-target
+        origin: thread:n-0011
+        statement: In pin mode, walkdown's own chrome - the badge, an open form, an existing pin, the docked panel - is never treated as a place to put a pin, and Escape leaves pin mode.
+        verify: [human]
+        steps:
+          given:
+            - A page with the embed and the panel, pin mode on
+          when:
+            - Click the badge, or anywhere in the panel
+          then:
+            - No pin form opens; the click does what the control says
+            - The badge toggles pin mode back off
+            - Escape closes an open pin form, and leaves pin mode when none is open
+          statement_hash: sha256:97fb50134c58
+
+  - id: panel.rules
+    title: The rules are one tap away, and so is the way back
+    statement: As a reviewer, I can see every rule, open one for detail, and move between them without losing my place.
+    rules:
+      - id: panel.rules.detail-slide
+        origin: walkdown
+        statement: Opening a rule slides the panel from the list to that rule's detail, and one control comes back - only one of the two panes is ever visible.
+        verify: [human]
+        steps:
+          given:
+            - The panel showing the rule list
+          when:
+            - Click a rule
+          then:
+            - The detail pane slides in and the list slides out
+            - Exactly one pane occupies the panel's full width
+            - "\"All rules\" slides back to the list"
+          statement_hash: sha256:493a83d3f0bd
+
+      - id: panel.rules.step-between
+        origin: walkdown
+        statement: From a rule's detail I can step to the previous or next rule in list order without returning to the list, and each control says where it lands.
+        verify: [human]
+        steps:
+          given:
+            - A rule open in the detail pane
+          when:
+            - Use the previous/next controls beside the back link
+          then:
+            - The detail pane shows the adjacent rule in the order the list shows them
+            - Each control's tooltip names the rule it will open
+            - At either end the control is disabled and says there is nothing further
+          statement_hash: sha256:56a26420e1f3
+
+  - id: panel.threads
+    title: Feedback is answered where it is read
+    statement: As a reviewer, I can reply to a thread and move its lifecycle on from the panel, without leaving the app I am reviewing.
+    rules:
+      - id: panel.threads.reply-in-place
+        origin: thread:n-0009
+        statement: A thread on a rule opens in the panel showing its replies, and I can add a reply and take the lifecycle actions its current state allows.
+        verify: [human]
+        steps:
+          given:
+            - A rule with an open thread, shown in the panel's detail pane
+          when:
+            - Open the thread
+          then:
+            - Its replies are shown, oldest context first, with author and age
+            - A reply can be written and posted, and appears without a page reload
+            - Only the transitions legal for that kind and status are offered
+          statement_hash: sha256:a0dd8bb2f5b9
+
+      - id: panel.threads.claim-never-accept
+        origin: walkdown
+        statement: The panel obeys the same governance as everywhere else - it will not record verified or waived without a named person, and it asks for the reason the transition requires.
+        verify: [human]
+        steps:
+          given:
+            - A thread the panel offers Verify or Waive on
+          when:
+            - Take that action with no name, or with the name agent
+          then:
+            - Nothing is recorded and the panel asks for a person's name
+            - Waiving or reopening without a reason is refused until one is written
+          statement_hash: sha256:7c4e1e2d1562
+
+      - id: panel.threads.show-the-sketch
+        origin: thread:n-0010
+        statement: When a thread's screen has a proposal on file, the panel can show it over the running app, badged as a proposal so a sketch is never mistaken for the design.
+        verify: [human]
+        steps:
+          given:
+            - A thread anchored to a screen whose storyboard entry has a proposal and no prototype
+          when:
+            - Choose to view the sketch from the thread
+          then:
+            - The proposal is drawn over the app the way a prototype ghost is
+            - It is labelled as a proposal that did not come from design
+            - Screens with a real prototype still ghost the prototype
+          statement_hash: sha256:8244263349d7
+
+  - id: panel.walkdown
+    title: A walkdown from the panel is a walkdown
+    statement: As a reviewer, verdicts I give beside the running app land in the same ledger as verdicts given anywhere else.
+    rules:
+      - id: panel.walkdown.records-to-ledger
+        origin: walkdown
+        statement: Finishing a walkdown in the panel appends a run record under a named person, exactly as the viewer does; discarding one records nothing.
+        verify: [human]
+        steps:
+          given:
+            - A walkdown session in the panel with at least one verdict
+          when:
+            - Finish it
+          then:
+            - A walkdown run record is appended with those verdicts and that actor
+            - An unnamed or agent actor is refused before anything is written
+            - Discarding instead of finishing writes nothing
+          statement_hash: sha256:f4e6e6b66380

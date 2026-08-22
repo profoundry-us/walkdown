@@ -1,0 +1,28 @@
+id: q-0013
+kind: question
+author: topher
+created: 2026-08-22T16:54:56Z
+anchor: {}
+status: incorporated
+body: Are the discussions and changes from our working sessions actually landing
+  in walkdown's own blueprint? Five commits of behaviour shipped without a
+  single blueprint entry, and the docked panel has no rules at all.
+replies:
+  - author: agent
+    created: 2026-08-22T16:59:27Z
+    body: "No, they were not. Five commits shipped between 8282f2d and 509012f with
+      no blueprint entry, and the docked panel — by then a major surface — had
+      no rules at all. Closed now: this session's feedback is filed as n-0009
+      through n-0012, a panel feature adds nine rules covering docking, host
+      isolation, pin-target exclusion, the detail slide and stepper, thread
+      replies, governance, proposal viewing and the ledger write, and
+      embed.pin.right-project covers the routing fix. All are verify: [human] —
+      this repo drives node:test over lib/, not a browser, so a checks claim
+      would be one the ledger could never satisfy. They are in your walkdown
+      queue."
+  - author: agent
+    created: 2026-08-22T16:59:52Z
+    body: "Folded into the blueprint: blueprint/features/panel.yml (nine rules
+      across panel.dock, panel.rules, panel.threads, panel.walkdown) and
+      embed.pin.right-project. Reopen if the verify tiers are wrong — I chose
+      human-only because there is no browser harness here."

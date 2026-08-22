@@ -1,0 +1,16 @@
+id: n-0009
+kind: note
+author: topher
+created: 2026-08-22T16:54:56Z
+anchor: {}
+status: addressed
+body: Threads are read-only in the docked panel. I need to be able to respond to
+  them there — q-0002 is sitting in front of me with no way to answer it.
+replies:
+  - author: agent
+    created: 2026-08-22T16:59:27Z
+    body: "Built: threads in the panel's detail pane now expand to show their
+      replies, take a reply, and offer the transitions their kind and status
+      allow. Governance is unchanged — verified/waived need a person's name,
+      waive/reopen need a reason. Specified as panel.threads.reply-in-place and
+      panel.threads.claim-never-accept."
