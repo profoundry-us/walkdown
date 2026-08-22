@@ -1,22 +1,45 @@
 {
   "name": "walkdown",
   "version": "0.1.0",
-  "description": "Verify that what you built is what you designed — blueprint lint & hashing for the walkdown spec format",
+  "description": "Verify that what you built is what you designed \u2014 blueprint lint & hashing for the walkdown spec format",
   "type": "module",
-  "bin": { "walkdown": "bin/walkdown.js" },
+  "bin": {
+    "walkdown": "bin/walkdown.js"
+  },
   "exports": {
     "./reporter": "./lib/playwright-reporter.js",
     "./node-reporter": "./lib/node-test-reporter.js"
   },
-  "files": ["bin", "lib", "README.md", "docs"],
-  "engines": { "node": ">=20" },
+  "files": [
+    "bin",
+    "lib",
+    "README.md",
+    "docs"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "build:css": "tailwindcss -i styles/walkdown.css -o lib/viewer/walkdown.css --minify && cp lib/viewer/walkdown.css example/app/walkdown.css",
+    "watch:css": "tailwindcss -i styles/walkdown.css -o lib/viewer/walkdown.css --watch",
+    "prepack": "npm run build:css"
   },
   "dependencies": {
     "yaml": "^2.6.0"
   },
-  "keywords": ["bdd", "spec", "acceptance-criteria", "verification", "playwright"],
+  "keywords": [
+    "bdd",
+    "spec",
+    "acceptance-criteria",
+    "verification",
+    "playwright"
+  ],
   "author": "Topher Fangio <topher@profoundry.us>",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "daisyui": "^5.7.20",
+    "tailwindcss": "^4.3.3"
+  }
 }

@@ -1,205 +1,80 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>walkdown</title>
+<link rel="stylesheet" href="walkdown.css">
 <style>
-  :root {
-    --bg: #f5f6f8; --panel: #fff; --ink: #16181d; --muted: #6b7280; --line: #e5e7eb;
-    --blue: #2563eb; --green: #16a34a; --red: #dc2626; --amber: #d97706;
-  }
-  * { box-sizing: border-box; margin: 0; }
-  body { font: 14px/1.45 -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink);
-         height: 100vh; display: flex; flex-direction: column; }
-  header { display: flex; align-items: center; gap: 14px; padding: 10px 16px; background: var(--panel);
-           border-bottom: 1px solid var(--line); }
-  header h1 { font-size: 15px; }
-  header .counts { color: var(--muted); font-size: 13px; white-space: nowrap; flex: 0 0 auto; }
-  header h1 { flex: 0 0 auto; }
-  header .spacer { flex: 1; }
-  input[type=text] { font: inherit; padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; width: 120px; }
-  button { font: inherit; padding: 5px 12px; border: 1px solid var(--line); border-radius: 6px;
-           background: var(--panel); cursor: pointer; }
-  button.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
-  button.on { background: var(--amber); border-color: var(--amber); color: #fff; }
-  /* Layout: a slim rules rail, then the surfaces take everything left.
-     Rule detail lives in a bottom drawer so reading never crowds out looking. */
-  main { flex: 1; display: flex; min-height: 0; }
-  #rules { flex: 0 0 230px; overflow-y: auto; border-right: 1px solid var(--line);
-           background: var(--panel); padding: 8px 0; transition: flex-basis .12s ease; }
+  /* Page mechanics only — everything with an opinion about how walkdown LOOKS
+     lives in the Tailwind + daisyUI stylesheet. What is left here is the
+     handful of rules driven by state classes on <body>, plus the iframe
+     scaling, which is arithmetic rather than design. */
   body.rail-closed #rules { flex-basis: 34px; overflow: hidden; }
-  body.rail-closed #rules .story-h, body.rail-closed #rules .rule .name,
-  body.rail-closed #rules .rule .thrs { display: none; }
-  .railtop { display: flex; align-items: center; justify-content: space-between; padding: 2px 10px 6px; }
-  .railtop .lbl { font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
-                  color: var(--muted); }
+  body.rail-closed #rules .story-h,
+  body.rail-closed #rules .rule .name,
+  body.rail-closed #rules .rule .thrs,
   body.rail-closed .railtop .lbl { display: none; }
-  #railtoggle { padding: 1px 7px; font-size: 11px; color: var(--muted); line-height: 1.4; }
-  /* Mode switcher: Prototype | Split | App */
-  .seg { display: flex; gap: 2px; padding: 2px; background: var(--bg); border: 1px solid var(--line);
-         border-radius: 8px; }
-  .seg button { border: 0; background: none; padding: 3px 11px; font-size: 12px; color: var(--muted);
-                border-radius: 6px; }
-  .seg button.on { background: var(--blue); color: #fff; }
-  .story-h { padding: 8px 14px 4px; font-size: 11px; font-weight: 700; letter-spacing: .04em;
-             text-transform: uppercase; color: var(--muted); }
-  .rule { display: flex; gap: 8px; align-items: baseline; padding: 7px 14px; cursor: pointer; font-size: 13px; }
-  .rule:hover { background: var(--bg); }
-  .rule.sel { background: #e8effd; }
-  .rule .glyph { width: 14px; text-align: center; }
-  .v-pass { color: var(--green); } .v-fail { color: var(--red); } .v-pending { color: var(--muted); }
-  .rule .thrs { margin-left: auto; display: flex; gap: 6px; }
-  .rule .thr { font-size: 11px; }
-  .rule .thr-h { color: var(--amber); font-weight: 600; }
-  .rule .glyph.v-mine { color: var(--amber); }
-  .mine { font: inherit; font-size: 12.5px; padding: 2px 9px; border-radius: 999px; cursor: pointer;
-          border: 1px solid var(--amber); background: #fdf6e8; color: var(--amber); font-weight: 600;
-          white-space: nowrap; }
-  .mine.on { background: var(--amber); color: #fff; }
-  .rule .thr-a { color: var(--muted); }
-  /* The drawer: a title line always, columns when open. */
-  #drawer { flex: 0 0 auto; background: var(--panel); border-top: 1px solid var(--line);
-            display: flex; flex-direction: column; }
-  /* Drag the top edge to resize; the height sticks. */
-  #dresize { height: 7px; cursor: ns-resize; display: flex; align-items: center; justify-content: center;
-             background: var(--panel); border-bottom: 1px solid var(--line); }
-  #dresize::after { content: ''; width: 44px; height: 3px; border-radius: 2px; background: var(--line); }
-  #dresize:hover::after { background: var(--muted); }
-  body.drawer-closed #dresize { display: none; }
-  #drawer .dtitle { display: flex; align-items: center; gap: 10px; padding: 7px 14px; font-size: 12.5px;
-                    cursor: pointer; }
-  #drawer .dtitle .rid { font-weight: 600; word-break: break-all; }
-  #drawer .dtitle .meta { color: var(--muted); font-size: 11.5px; }
-  #drawer .dtitle .grip { margin-left: auto; color: var(--muted); font-size: 11px; }
-  #drawer .badge { font-size: 10.5px; padding: 1px 8px; border-radius: 10px; background: #dcfce7; color: #15803d; }
-  #drawer .badge.b-fail { background: #fee2e2; color: var(--red); }
-  #drawer .badge.b-pending { background: var(--bg); color: var(--muted); }
-  #detail { display: flex; gap: 18px; padding: 0 14px 12px; overflow: hidden; min-height: 0; }
+  body.drawer-closed #dresize,
   body.drawer-closed #detail { display: none; }
-  #detail .dcol { flex: 1 1 0; overflow-y: auto; min-width: 0; }
-  #detail .dcol.wide { flex: 1.7 1 0; }
-  #detail .stmt { margin-bottom: 8px; }
-  #detail .meta { color: var(--muted); font-size: 12px; }
-  .sect { margin-top: 14px; font-size: 11px; font-weight: 700; letter-spacing: .04em; color: var(--muted);
-          text-transform: uppercase; }
-  .evrow { display: flex; gap: 8px; padding: 5px 0; font-size: 13px; border-bottom: 1px solid var(--line); }
-  .evrow .src { width: 100px; color: var(--muted); }
-  .thread { padding: 8px 10px; margin: 8px 0; background: var(--bg); border-radius: 8px; font-size: 13px;
-            border-left: 3px solid transparent; }
-  .thread.needs-you { border-left-color: var(--amber); background: #fdf6e8; }
-  .thread.needs-agent { border-left-color: var(--line); }
-  .thread .th-h { font-weight: 600; margin-bottom: 3px; }
-  .thread .st-open, .thread .st-answered, .thread .st-addressed { color: var(--amber); }
-  .thread .st-verified, .thread .st-incorporated { color: var(--green); }
-  .steps li { margin: 3px 0 3px 16px; font-size: 13px; list-style: none; position: relative; }
-  .steps li::before { content: '–'; position: absolute; left: -14px; color: var(--muted); }
-  .steps code { background: var(--bg); padding: 1px 4px; border-radius: 4px; font-size: 12px; }
-  .steps .ph { font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
-               color: var(--muted); margin-top: 6px; }
-  .steps ul { margin: 2px 0; padding: 0 0 0 16px; }
-  .wd-verdict { display: inline-flex; gap: 6px; align-items: center; margin-left: 6px; }
-  .wd-verdict button { padding: 3px 12px; font-size: 12.5px; }
-  .wd-verdict .wd-prog { font-size: 11.5px; }
-  .wd-verdict .picked-pass { background: var(--green); color: #fff; border-color: var(--green); }
-  .wd-verdict .picked-fail { background: var(--red); color: #fff; border-color: var(--red); }
-  /* flex: 1 1 0 (not auto) — otherwise the iframes' intrinsic 300px width,
-     not the window, decides how much room the surfaces get. */
-  #surfaces { flex: 1 1 0; display: flex; flex-direction: column; min-width: 0; }
-  #screenbar { display: flex; gap: 6px; align-items: center; padding: 8px 12px; background: var(--panel);
-               border-bottom: 1px solid var(--line); flex-wrap: wrap; }
-  #screenbar .sb { font-size: 12px; padding: 4px 10px; }
-  #screenbar .sb.cur { background: var(--blue); color: #fff; border-color: var(--blue); }
-  .rsc { font-size: 12px; padding: 3px 9px; }
-  .rsc.cur { background: var(--blue); color: #fff; border-color: var(--blue); }
-  .arrow { color: var(--muted); }
-  #frames { flex: 1; display: flex; gap: 1px; background: var(--line); min-height: 0; }
-  .frame { flex: 1 1 50%; display: flex; flex-direction: column; background: var(--panel); min-width: 0; }
   /* Stage modes: one surface takes the whole stage, or both share it. */
   body[data-mode="prototype"] .frame.f-app { display: none; }
   body[data-mode="prototype"] .frame.f-proto { flex-basis: 100%; }
   body[data-mode="app"] .frame.f-proto { display: none; }
   body[data-mode="app"] .frame.f-app { flex-basis: 100%; }
-  .frame .fh { padding: 5px 10px; font-size: 11px; font-weight: 700; letter-spacing: .04em;
-               text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line); }
   /* Each surface lays out at the chosen viewport width, then the whole thing is
      scaled down to fit its pane — so a desktop app is judged as a desktop app.
      The iframe keeps its own CSS-pixel space, which is what pins record. */
-  .frame .vp { flex: 1; overflow: hidden; position: relative; background: var(--bg); }
   .frame iframe { border: 0; position: absolute; top: 0; left: 0;
                   transform-origin: top left; background: #fff; }
-  .frame .none { flex: 1; display: grid; place-items: center; color: var(--muted); font-size: 13px; }
-  .empty { color: var(--muted); font-size: 13px; }
-  .thread { cursor: pointer; }
-  .thread:hover { outline: 1px solid var(--line); }
-  #threadpanel { position: fixed; top: 52px; left: 246px; width: 380px; max-height: calc(100vh - 80px);
-    overflow-y: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
-    box-shadow: 0 12px 40px rgba(0,0,0,.18); padding: 14px; z-index: 50; display: none; }
-  #threadpanel.show { display: block; }
-  /* Note first: the body is the biggest thing here; provenance is one quiet
-     line; actions are short verbs on one row. */
-  #threadpanel .tp-prov { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
-  #threadpanel .tp-prov .tid { font-weight: 700; color: var(--ink); }
-  #threadpanel .tp-where { font-size: 11px; color: var(--muted); margin-top: 1px;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  #threadpanel .tp-body { font-size: 14px; line-height: 1.45; margin: 9px 0; }
-  #threadpanel .tp-close { margin-left: auto; border: 0; background: none; font-size: 15px;
-    cursor: pointer; color: var(--muted); padding: 0 2px; }
-  #threadpanel textarea { width: 100%; height: 54px; font: inherit; margin: 6px 0;
-    border: 1px solid var(--line); border-radius: 6px; padding: 6px; box-sizing: border-box; }
-  #threadpanel .tp-actions { display: flex; gap: 6px; align-items: center; }
-  #threadpanel .tp-actions button { padding: 4px 10px; font-size: 12.5px; }
-  #threadpanel .tp-actions .quiet { margin-left: auto; color: var(--muted); }
-  #threadpanel #tp-actor { width: 92px; padding: 4px 7px; font-size: 12.5px; }
-  #threadpanel .replies { border-left: 2px solid var(--line); padding-left: 8px; margin-bottom: 8px; }
-  #threadpanel .reply { padding: 3px 0; font-size: 12.5px; color: #444; }
-  #threadpanel .reply .rh { color: var(--muted); font-size: 11px; }
-  #threadpanel .tp-more { font-size: 11.5px; color: var(--blue); cursor: pointer; }
-  #threadpanel .tp-reason { font-size: 11.5px; color: var(--amber); margin-top: 4px; }
-  .pinhint { background: #fef3c7; border: 1px solid var(--amber); border-radius: 8px; padding: 8px 10px;
-    font-size: 12px; margin: 8px 0; }
-  .checksbox { margin: 4px 0 10px; }
-  .checksbox summary { font-size: 12px; color: var(--muted); cursor: pointer; }
-  .checksbox .chkref { font-size: 11px; color: var(--muted); margin: 8px 0 3px; }
-  .checksbox pre { background: var(--bg); border: 1px solid var(--line); border-radius: 6px;
-    padding: 8px 10px; font: 11.5px/1.5 ui-monospace, "SF Mono", Menlo, monospace;
-    overflow: auto; max-height: 260px; white-space: pre; }
+  #dresize::after { content: ''; width: 44px; height: 3px; border-radius: 2px;
+                    background: var(--color-base-300); }
+  #dresize:hover::after { filter: brightness(.85); }
 </style>
 </head>
-<body data-mode="split">
-<header>
-  <h1>walkdown</h1>
-  <select id="bpsel" data-testid="board.project-switcher" style="display:none; font: inherit; padding: 4px 6px; border: 1px solid var(--line); border-radius: 6px; max-width: 220px;"></select>
-  <span class="counts" id="counts"></span>
-  <span class="spacer"></span>
-  <span class="seg" id="modeseg" data-testid="board.mode-switcher">
-    <button data-m="prototype">Prototype</button>
-    <button data-m="split">Split</button>
-    <button data-m="app">App</button>
+<body data-mode="split" class="flex h-screen flex-col bg-base-200 text-sm">
+<header class="navbar min-h-0 gap-3.5 border-b border-base-300 bg-base-100 px-4 py-2">
+  <h1 class="shrink-0 font-semibold">walkdown</h1>
+  <select id="bpsel" data-testid="board.project-switcher" class="select select-sm max-w-55" style="display:none"></select>
+  <span class="shrink-0 whitespace-nowrap text-[13px] opacity-70" id="counts"></span>
+  <span class="flex-1"></span>
+  <span class="join" id="modeseg" data-testid="board.mode-switcher">
+    <button class="btn btn-sm join-item" data-m="prototype">Prototype</button>
+    <button class="btn btn-sm join-item" data-m="split">Split</button>
+    <button class="btn btn-sm join-item" data-m="app">App</button>
   </span>
-  <button id="pinbtn" title="Click anywhere in either surface to pin feedback">📌 Pin mode</button>
-  <input type="text" id="actor" data-testid="board.actor" placeholder="your name"
+  <button class="btn btn-sm" id="pinbtn" title="Click anywhere in either surface to pin feedback">📌 Pin mode</button>
+  <input type="text" id="actor" data-testid="board.actor" class="input input-sm w-30" placeholder="your name"
          title="Recorded as the author of your walkdowns and verifications">
-  <button class="primary" id="wdbtn">Start walkdown</button>
+  <button class="btn btn-sm btn-primary" id="wdbtn">Start walkdown</button>
 </header>
-<main>
-  <nav id="rules" data-testid="board.rules"></nav>
-  <section id="surfaces" data-testid="board.surfaces">
-    <div id="screenbar"></div>
-    <div id="frames">
-      <div class="frame f-proto"><div class="fh">Prototype</div>
-        <div class="vp"><iframe id="proto"></iframe></div></div>
-      <div class="frame f-app"><div class="fh">App</div>
-        <div class="vp"><iframe id="app"></iframe></div></div>
+<main class="flex min-h-0 flex-1">
+  <nav id="rules" data-testid="board.rules"
+       class="w-58 shrink-0 overflow-y-auto border-r border-base-300 bg-base-100 py-2 transition-[flex-basis] duration-100"></nav>
+  <!-- flex: 1 1 0 (not auto) — otherwise the iframes' intrinsic 300px width,
+       not the window, decides how much room the surfaces get. -->
+  <section id="surfaces" data-testid="board.surfaces" class="flex min-w-0 flex-[1_1_0] flex-col">
+    <div id="screenbar" class="flex flex-wrap items-center gap-1.5 border-b border-base-300 bg-base-100 px-3 py-2"></div>
+    <div id="frames" class="flex min-h-0 flex-1 gap-px bg-base-300">
+      <div class="frame f-proto flex min-w-0 flex-[1_1_50%] flex-col bg-base-100">
+        <div class="fh border-b border-base-300 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider opacity-50">Prototype</div>
+        <div class="vp relative flex-1 overflow-hidden bg-base-200"><iframe id="proto"></iframe></div></div>
+      <div class="frame f-app flex min-w-0 flex-[1_1_50%] flex-col bg-base-100">
+        <div class="fh border-b border-base-300 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider opacity-50">App</div>
+        <div class="vp relative flex-1 overflow-hidden bg-base-200"><iframe id="app"></iframe></div></div>
     </div>
   </section>
 </main>
-<section id="drawer" data-testid="board.drawer">
-  <div id="dresize" data-testid="detail.resize-handle" title="Drag to resize"></div>
-  <div class="dtitle" id="dtitle"></div>
-  <div id="detail"></div>
+<!-- The drawer: a title line always, columns when open. -->
+<section id="drawer" data-testid="board.drawer" class="flex shrink-0 flex-col border-t border-base-300 bg-base-100">
+  <!-- Drag the top edge to resize; the height sticks. -->
+  <div id="dresize" data-testid="detail.resize-handle" title="Drag to resize"
+       class="flex h-[7px] cursor-ns-resize items-center justify-center border-b border-base-300"></div>
+  <div class="dtitle flex cursor-pointer items-center gap-2.5 px-3.5 py-1.5 text-[12.5px]" id="dtitle"></div>
+  <div id="detail" class="flex min-h-0 gap-4.5 overflow-hidden px-3.5 pb-3"></div>
 </section>
-<div id="threadpanel"></div>
+<div id="threadpanel"
+     class="fixed left-62 top-13 z-50 hidden max-h-[calc(100vh-80px)] w-95 overflow-y-auto rounded-box border border-base-300 bg-base-100 p-3.5 shadow-2xl"></div>
 <script>
   // walkdown's own app surface is this viewer. Load the embed when we are the
   // app being reviewed (framed), so the app pane is pinnable like the prototype.
@@ -264,13 +139,13 @@ async function load() {
   $('counts').innerHTML = `<span data-testid="board.counts" title="${verified} of ${total} rules have every required verification recorded">` +
     `<b>${verified} of ${total} rules</b> verified` +
     (failing ? ` · <span class="v-fail">${failing} failing</span>` : '') +
-    (needsYou ? ` · <button id="minebtn" class="mine${onlyMine ? ' on' : ''}" title="Show only what needs you">${
-      parts}</button>` : '') + '</span>';
+    (needsYou ? ` · <button id="minebtn" class="btn btn-xs btn-warning${
+      onlyMine ? '' : ' btn-outline'}" title="Show only what needs you">${parts}</button>` : '') + '</span>';
   $('minebtn')?.addEventListener('click', () => {
     onlyMine = !onlyMine;
     renderRules();
     load.lastCounts?.();
-    $('minebtn').classList.toggle('on', onlyMine);
+    $('minebtn').classList.toggle('btn-outline', !onlyMine);
   });
   renderRules();
   renderScreenbar();
@@ -286,8 +161,9 @@ function activeThreadsFor(rule) {
 
 function renderRules() {
   const nav = $('rules');
-  nav.innerHTML = `<div class="railtop"><span class="lbl">Rules</span>
-    <button id="railtoggle" data-testid="board.rail-toggle"
+  nav.innerHTML = `<div class="railtop flex items-center justify-between px-2.5 pb-1.5 pt-0.5">
+    <span class="lbl text-[11px] font-bold uppercase tracking-wider opacity-50">Rules</span>
+    <button id="railtoggle" data-testid="board.rail-toggle" class="btn btn-xs btn-ghost"
       title="Collapse the rail — the surfaces take the width">⇤</button></div>`;
   nav.querySelector('#railtoggle').onclick = () => {
     const closed = document.body.classList.toggle('rail-closed');
@@ -297,7 +173,7 @@ function renderRules() {
   if (document.body.classList.contains('rail-closed')) nav.querySelector('#railtoggle').textContent = '⇥';
   const stories = [...new Set(data.rows.map(r => r.story))];
   for (const story of stories) {
-    const h = document.createElement('div'); h.className = 'story-h'; h.textContent = story; nav.appendChild(h);
+    const h = document.createElement('div'); h.className = 'story-h px-3.5 pb-1 pt-2 text-[11px] font-bold uppercase tracking-wider opacity-50'; h.textContent = story; nav.appendChild(h);
     const before = nav.childElementCount;
     for (const row of data.rows.filter(r => r.story === story)) {
       if (onlyMine && !needsYourVerdict(row.rule) && !attnCounts(row.rule).human) continue;
@@ -323,16 +199,17 @@ function renderRules() {
     if (nav.childElementCount === before) h.remove();   // filtered to nothing
   }
   if (onlyMine && !nav.querySelector('.rule'))
-    nav.insertAdjacentHTML('beforeend', '<p class="empty" style="padding:10px 14px">Nothing waiting on you.</p>');
+    nav.insertAdjacentHTML('beforeend', '<p class="empty px-3.5 py-2.5">Nothing waiting on you.</p>');
 }
 
-const BADGE = { pass: ['verified', ''], fail: ['failing', 'b-fail'], pending: ['pending', 'b-pending'] };
+const BADGE = { pass: ['verified', 'badge-success'], fail: ['failing', 'badge-error'],
+                pending: ['pending', 'badge-ghost'] };
 
 function renderDetail() {
   const d = $('detail'), title = $('dtitle');
   if (!selected) {
     document.body.classList.add('drawer-closed');
-    title.innerHTML = '<span class="meta">Select a rule — its detail opens here as a drawer</span>';
+    title.innerHTML = '<span class="opacity-50">Select a rule — its detail opens here as a drawer</span>';
     title.onclick = null;
     d.innerHTML = '';
     return;
@@ -346,25 +223,28 @@ function renderDetail() {
     .sort((a, b) => String(b.created ?? '').localeCompare(String(a.created ?? '')));
   const [badge, badgeCls] = BADGE[r.verdict] ?? ['', ''];
   const flowLine = (() => {
-    const chip = (s) => `<button class="sb rsc ${screen === s ? 'cur' : ''}" data-s="${s}">${s}</button>`;
+    const chip = (s) => `<button class="rsc btn btn-xs${screen === s ? ' btn-primary' : ''}" data-s="${s}">${s}</button>`;
     const flow = r.flow?.length ? r.flow : r.screens;
     const extras = r.screens.filter((s) => !flow.includes(s));
     const label = r.flow?.length ? 'flow' : 'screens';
     if (!flow.length && !extras.length) return '';
-    return `${label}: ${flow.map(chip).join(' <span class="arrow">→</span> ') || '—'}` +
-      (extras.length ? ` <span class="arrow">·</span> ${extras.map(chip).join(' ')}` : '');
+    return `${label}: ${flow.map(chip).join(' <span class="opacity-50">→</span> ') || '—'}` +
+      (extras.length ? ` <span class="opacity-50">·</span> ${extras.map(chip).join(' ')}` : '');
   })();
-  title.innerHTML = `<span class="rid" data-testid="detail.rule-id">${r.rule}</span>
-    <span class="badge ${badgeCls}">${badge}</span>
-    <span class="meta">verify: ${r.verify.join(', ')}</span>
-    ${session ? `<span class="wd-verdict" data-testid="detail.verdict">
-        <button id="wd-pass" class="${session.verdicts[r.rule] === 'pass' ? 'picked-pass' : ''}">✓ Pass</button>
-        <button id="wd-fail" class="${session.verdicts[r.rule] === 'fail' ? 'picked-fail' : ''}">✗ Fail</button>
-        <span class="meta wd-prog">${Object.keys(session.verdicts).length} of ${
+  title.innerHTML = `<span class="break-all font-semibold" data-testid="detail.rule-id">${r.rule}</span>
+    <span class="badge badge-sm ${badgeCls}">${badge}</span>
+    <span class="text-[11.5px] opacity-50">verify: ${r.verify.join(', ')}</span>
+    ${session ? `<span class="wd-verdict join" data-testid="detail.verdict">
+        <button id="wd-pass" class="btn btn-xs join-item${
+          session.verdicts[r.rule] === 'pass' ? ' btn-success' : ''}">✓ Pass</button>
+        <button id="wd-fail" class="btn btn-xs join-item${
+          session.verdicts[r.rule] === 'fail' ? ' btn-error' : ''}">✗ Fail</button>
+        <span class="join-item flex items-center px-2 text-[11.5px] opacity-50">${
+          Object.keys(session.verdicts).length} of ${
           data.rows.filter(x => needsYourVerdict(x.rule)).length} judged</span>
       </span>` : ''}
-    <span class="grip" data-testid="detail.drawer-toggle">${
-      document.body.classList.contains('drawer-closed') ? 'expand ▴' : 'collapse ▾'}</span>`;
+    <button class="grip btn btn-xs btn-ghost ml-auto" data-testid="detail.drawer-toggle">${
+      document.body.classList.contains('drawer-closed') ? 'expand ▴' : 'collapse ▾'}</button>`;
   title.onclick = (e) => {
     if (e.target.closest('.wd-verdict')) return;   // verdicts are not a collapse
     document.body.classList.toggle('drawer-closed');
@@ -373,31 +253,31 @@ function renderDetail() {
   };
   // Reading order (n-0007): statement, then evidence, then flow, then steps.
   d.innerHTML = `
-    <div class="dcol wide">
-      <p class="stmt" data-testid="detail.statement">${r.statement ?? ''}</p>
-      <div class="sect" style="margin-top:10px">Evidence</div>
+    <div class="dcol min-w-0 flex-[1.7_1_0] overflow-y-auto">
+      <p class="mb-2" data-testid="detail.statement">${r.statement ?? ''}</p>
+      <div class="sect">Evidence</div>
       <div data-testid="detail.evidence">
       ${ev.map(([src, c]) => `<div class="evrow"><span class="src">${src}</span>
         <span class="${CELLCLASS[c.state] ?? ''}">${CELL[c.state] ?? c.state}${src === 'human' && c.actor ? ' (' + c.actor + ')' : ''}</span></div>`).join('') || '<p class="empty">none required</p>'}
       </div>
-      ${session?.verdicts[r.rule] === 'fail' ? `<div class="pinhint">📌 Pin mode is on — click the
+      ${session?.verdicts[r.rule] === 'fail' ? `<div class="alert alert-warning my-2 py-2 text-xs">📌 Pin mode is on — click the
         broken element (or any spot) in either surface to attach a note to this fail.</div>` : ''}
     </div>
-    <div class="dcol">
-      ${flowLine ? `<div class="sect" style="margin-top:0">Flow</div>
-        <div class="meta" data-testid="detail.flow">${flowLine}</div>` : ''}
+    <div class="dcol min-w-0 flex-[1_1_0] overflow-y-auto">
+      ${flowLine ? `<div class="sect mt-0">Flow</div>
+        <div class="text-xs opacity-70" data-testid="detail.flow">${flowLine}</div>` : ''}
       ${(() => {
         const hasChecks = r.verify.includes('checks');
         const refs = hasChecks ? [...new Set(data.targets.flatMap(t => r.cells[t]?.checks ?? []))] : [];
         // Steps are the rule, not an appendix — they render open. Only the
         // recorded check source stays behind a disclosure.
-        const stepsHtml = r.steps ? `<div class="sect" style="margin-top:10px">Steps</div>
+        const stepsHtml = r.steps ? `<div class="sect">Steps</div>
           <div class="steps" data-testid="detail.steps">${
           Object.entries(r.steps).map(([ph, items]) =>
             `<div class="ph">${ph}</div><ul>${items.map(s =>
               `<li>${esc(s).replace(/\`([^\`]+)\`/g, '<code>$1</code>')}</li>`).join('')}</ul>`).join('')}</div>` : '';
-        const checksBox = hasChecks ? `<details class="checksbox" id="checksbox" data-refs="${refs.length}"
-          data-testid="detail.technical-disclosure"><summary>${
+        const checksBox = hasChecks ? `<details class="my-1 mb-2.5" id="checksbox" data-refs="${refs.length}"
+          data-testid="detail.technical-disclosure"><summary class="cursor-pointer text-xs opacity-50">${
             refs.length ? refs.map(esc).join(' · ') : 'checks: none recorded yet'}</summary>
           <div id="checksrc">${refs.length ? '<p class="empty">loading…</p>'
             : '<p class="empty">No recorded checks — run \`walkdown run\` to link tests to this rule.</p>'}</div>
@@ -405,8 +285,8 @@ function renderDetail() {
         return stepsHtml + checksBox;
       })()}
     </div>
-    <div class="dcol" data-testid="detail.threads">
-      <div class="sect" style="margin-top:0">Threads</div>
+    <div class="dcol min-w-0 flex-[1_1_0] overflow-y-auto" data-testid="detail.threads">
+      <div class="sect mt-0">Threads</div>
       ${threads.map(t => `<div class="thread ${threadAttn(t.id) === 'human' ? 'needs-you'
           : threadAttn(t.id) === 'agent' ? 'needs-agent' : ''}" data-t="${t.id}">
           <div class="th-h">${t.id} · ${t.kind} ·
@@ -421,7 +301,7 @@ function renderDetail() {
     };
     $('wd-fail').onclick = () => {
       session.verdicts[r.rule] = 'fail';
-      if (!pinMode) { pinMode = true; $('pinbtn').classList.add('on'); pushContext(); }
+      if (!pinMode) { pinMode = true; $('pinbtn').classList.add('btn-warning'); pushContext(); }
       renderRules(); renderDetail();
     };
   }
@@ -437,8 +317,9 @@ function renderDetail() {
     box.dataset.loaded = '1';
     const res = await (await fetch(withBp(`/api/checks?rule=${encodeURIComponent(r.rule)}`))).json();
     d.querySelector('#checksrc').innerHTML = (res.checks ?? []).map(c =>
-      c.missing ? `<div class="chkref">${esc(c.ref)} <span class="v-fail">(file not found)</span></div>`
-        : `<div class="chkref">${esc(c.ref)}</div><pre>${esc(c.source)}</pre>`
+      c.missing ? `<div class="mb-1 mt-2 text-[11px] opacity-50">${esc(c.ref)} <span class="v-fail">(file not found)</span></div>`
+        : `<div class="mb-1 mt-2 text-[11px] opacity-50">${esc(c.ref)}</div>` +
+          `<pre class="max-h-65 overflow-auto rounded-box bg-base-200 p-2.5 text-[11.5px] leading-relaxed whitespace-pre">${esc(c.source)}</pre>`
     ).join('') || '<p class="empty">none</p>';
   });
 }
@@ -473,46 +354,48 @@ function openThread(id) {
   if (!t) return;
   panelThread = id;
   const p = $('threadpanel');
-  p.className = 'show';
+  p.classList.remove('hidden');
   const replies = t.replies ?? [];
   const shown = replies.slice(-2), hidden = replies.length - shown.length;
   // Provenance condensed to two quiet lines; the note itself leads.
   const where = [t.anchor?.rule?.split('.').at(-1), t.anchor?.screen, t.anchor?.element,
     t.anchor?.surface, t.anchor?.viewport && `${t.anchor.viewport.name} ${t.anchor.viewport.width}`,
     t.author, ago(t.created)].filter(Boolean).join(' · ');
+  const reply = (r) => `<div class="py-0.5 text-[12.5px]">
+    <div class="text-[11px] opacity-50">${r.author} · ${ago(r.created)}</div>${r.body}</div>`;
   p.innerHTML = `
-    <div class="tp-prov" data-testid="thread.provenance">
-      <span class="tid">${t.id}</span> · ${t.kind} · <span class="st-${t.status}">${t.status}</span>
+    <div class="flex items-center gap-1.5 text-[11px] opacity-60" data-testid="thread.provenance">
+      <span class="font-bold opacity-100">${t.id}</span> · ${t.kind} · <span class="st-${t.status}">${t.status}</span>
       ${t.waived_by ? `<span class="empty">by ${t.waived_by}</span>` : ''}
-      <button class="tp-close" data-testid="thread.close" title="Close">×</button>
+      <button class="tp-close btn btn-xs btn-ghost ml-auto" data-testid="thread.close" title="Close">×</button>
     </div>
-    <div class="tp-where" title="${esc(where)}">${where}</div>
-    <p class="tp-body" data-testid="thread.body">${t.body ?? ''}</p>
-    ${replies.length ? `<div class="replies" data-testid="thread.replies">
-      ${hidden ? `<div class="tp-more" id="tp-more">${hidden} earlier ${hidden === 1 ? 'reply' : 'replies'} ▾</div>` : ''}
-      ${shown.map(r => `<div class="reply"><div class="rh">${r.author} · ${ago(r.created)}</div>${r.body}</div>`).join('')}
+    <div class="truncate text-[11px] opacity-50" title="${esc(where)}">${where}</div>
+    <p class="my-2.5 text-sm leading-relaxed" data-testid="thread.body">${t.body ?? ''}</p>
+    ${replies.length ? `<div class="replies mb-2 border-l-2 border-base-300 pl-2" data-testid="thread.replies">
+      ${hidden ? `<div class="link link-primary text-[11.5px]" id="tp-more">${hidden} earlier ${
+        hidden === 1 ? 'reply' : 'replies'} ▾</div>` : ''}
+      ${shown.map(reply).join('')}
     </div>` : ''}
-    <textarea id="tp-text" data-testid="thread.reply" placeholder="Reply…"></textarea>
-    <div class="tp-actions" data-testid="thread.actions">
-      <input type="text" id="tp-actor" placeholder="your name">
-      <button id="tp-reply">Reply</button>
+    <textarea id="tp-text" data-testid="thread.reply" class="textarea my-1.5 h-14 w-full" placeholder="Reply…"></textarea>
+    <div class="flex items-center gap-1.5" data-testid="thread.actions">
+      <input type="text" id="tp-actor" class="input input-xs w-23" placeholder="your name">
+      <button id="tp-reply" class="btn btn-xs">Reply</button>
       ${threadActions(t).map(([label, s, quiet]) =>
-        `<button class="tp-act${quiet ? ' quiet' : ''}" data-s="${s}">${label}</button>`).join('')}
+        `<button class="tp-act btn btn-xs${quiet ? ' btn-ghost ml-auto opacity-60' : ''}" data-s="${s}">${label}</button>`).join('')}
     </div>
-    <div class="tp-reason" id="tp-reason" style="display:none"></div>`;
+    <div class="mt-1 text-[11.5px] text-warning" id="tp-reason" style="display:none"></div>`;
   const tpActor = p.querySelector('#tp-actor');
   tpActor.value = $('actor').value;
   tpActor.addEventListener('input', () => {
     $('actor').value = tpActor.value;
     localStorage.setItem('walkdown-actor', tpActor.value);
-    tpActor.style.borderColor = '';
+    tpActor.classList.remove('input-error');
   });
   p.querySelector('.tp-close').onclick = closeThread;
   p.querySelector('#tp-reply').onclick = () => threadReply(id);
   p.querySelectorAll('.tp-act').forEach(b => b.onclick = () => threadAct(id, b.dataset.s));
   p.querySelector('#tp-more')?.addEventListener('click', () => {
-    p.querySelector('.replies').innerHTML = replies.map(r =>
-      `<div class="reply"><div class="rh">${r.author} · ${ago(r.created)}</div>${r.body}</div>`).join('');
+    p.querySelector('.replies').innerHTML = replies.map(reply).join('');
   });
 }
 
@@ -522,7 +405,7 @@ function askReason(status) {
   if (box.value.trim()) return box.value.trim();
   hint.style.display = '';
   hint.textContent = `${status === 'waived' ? 'Waiving' : 'Reopening'} is recorded with a reason — write it above, then press again.`;
-  box.style.borderColor = 'var(--amber)';
+  box.classList.add('textarea-warning');
   box.focus();
   return null;
 }
@@ -532,14 +415,14 @@ function requireActor() {
   const actor = tpActor?.value.trim();
   if (actor && actor !== 'agent') return actor;
   if (tpActor) {
-    tpActor.style.borderColor = 'var(--red)';
+    tpActor.classList.add('input-error');
     tpActor.focus();
   }
   alert('This action is recorded under your name — enter it first.');
   return null;
 }
 
-function closeThread() { panelThread = null; $('threadpanel').className = ''; }
+function closeThread() { panelThread = null; $('threadpanel').classList.add('hidden'); }
 
 async function threadPost(path, body) {
   const res = await fetch(withBp(path), { method: 'POST', headers: { 'content-type': 'application/json' },
@@ -590,7 +473,7 @@ function renderScreenbar() {
   }
   for (const s of data.storyboard) {
     const b = document.createElement('button');
-    b.className = 'sb' + (screen === s.id ? ' cur' : '');
+    b.className = 'sb btn btn-xs' + (screen === s.id ? ' btn-primary' : '');
     b.textContent = s.id;
     b.onclick = () => gotoScreen(s.id);
     bar.appendChild(b);
@@ -598,9 +481,9 @@ function renderScreenbar() {
   // Viewport + zoom live at the right of the screen bar: both surfaces always
   // share one viewport, so the comparison stays honest.
   const right = document.createElement('span');
-  right.style.cssText = 'margin-left:auto; display:flex; gap:8px; align-items:center';
-  right.innerHTML = `<span class="seg" id="vpseg" data-testid="board.viewport-toggle">${
-    VIEWPORTS.map(v => `<button data-v="${v.name}" title="${v.width}px wide">${v.label}</button>`).join('')
+  right.className = 'ml-auto flex items-center gap-2';
+  right.innerHTML = `<span class="join" id="vpseg" data-testid="board.viewport-toggle">${
+    VIEWPORTS.map(v => `<button class="btn btn-xs join-item" data-v="${v.name}" title="${v.width}px wide">${v.label}</button>`).join('')
   }</span><span class="empty" id="zoomlbl" data-testid="board.zoom"></span>`;
   bar.appendChild(right);
   for (const b of right.querySelectorAll('#vpseg button'))
@@ -626,7 +509,7 @@ function setViewport(name) {
 
 function syncViewportUI() {
   for (const b of document.querySelectorAll('#vpseg button'))
-    b.classList.toggle('on', b.dataset.v === viewport.name);
+    b.classList.toggle('btn-active', b.dataset.v === viewport.name);
 }
 
 /** Lay each surface out at the viewport width, then scale it to fit its pane. */
@@ -656,15 +539,15 @@ function gotoScreen(id) {
   proto.removeAttribute('srcdoc');
   if (s.prototype && data.hasPrototype) {
     header.textContent = 'Prototype';
-    header.style.cssText = '';
+    header.classList.remove('text-warning');
     proto.src = withBp('/prototype' + s.prototype);
   } else if (s.proposal) {
     header.textContent = '⚠ Proposed — not from design';
-    header.style.cssText = 'color:var(--amber)';
+    header.classList.add('text-warning');
     proto.src = withBp('/proposals' + s.proposal);
   } else {
     header.textContent = 'Prototype — none yet';
-    header.style.cssText = 'color:var(--amber)';
+    header.classList.add('text-warning');
     proto.srcdoc = '<body style="display:grid;place-items:center;height:95vh;margin:0;' +
       'font:14px -apple-system,sans-serif;color:#6b7280;text-align:center">' +
       '<div>No design yet.<br>This screen was born in the spec — see its design-request thread.</div></body>';
@@ -715,13 +598,13 @@ window.addEventListener('message', async (e) => {
   }
 });
 
-$('pinbtn').onclick = () => { pinMode = !pinMode; $('pinbtn').classList.toggle('on', pinMode); pushContext(); };
+$('pinbtn').onclick = () => { pinMode = !pinMode; $('pinbtn').classList.toggle('btn-warning', pinMode); pushContext(); };
 
 // --- stage modes: prototype | split | app -------------------------------------
 function setMode(m) {
   document.body.dataset.mode = m;
   localStorage.setItem('walkdown-mode', m);
-  for (const b of $('modeseg').querySelectorAll('button')) b.classList.toggle('on', b.dataset.m === m);
+  for (const b of $('modeseg').querySelectorAll('button')) b.classList.toggle('btn-active', b.dataset.m === m);
   applyZoom();   // the panes changed size; the surfaces must refit
 }
 $('modeseg').querySelectorAll('button').forEach(b => { b.onclick = () => setMode(b.dataset.m); });

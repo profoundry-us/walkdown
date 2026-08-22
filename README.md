@@ -117,6 +117,40 @@ statement, stored truncated (`sha256:` + 12 hex).
   `walkdown thread n-0002 --actor agent --reply "fixed in run …" --status addressed`,
   then `walkdown thread n-0002 --verify` as yourself.
 
+## Styling — Tailwind CSS + daisyUI
+
+Every surface walkdown draws (the viewer, the docked panel, the prototype wireframes,
+the example app) is styled with **Tailwind CSS 4 + daisyUI 5**, built ahead of time
+into a single `lib/viewer/walkdown.css` that is committed and shipped in the package.
+Installing walkdown still runs no build and pulls no CSS toolchain: `tailwindcss` and
+`daisyui` are **devDependencies**, and `yaml` remains the only runtime dependency.
+
+```bash
+npm run build:css     # rebuild lib/viewer/walkdown.css from styles/walkdown.css
+npm run watch:css     # …and keep rebuilding while you work on the UI
+```
+
+`build:css` also drops a copy at `example/app/walkdown.css`: the example is meant to
+behave like a real application, and a real application ships its own stylesheet rather
+than fetching one from a dev tool. Prototype screens do borrow walkdown's copy over
+`http://localhost:4700/walkdown.css`, right beside the `embed.js` tag they already
+depend on.
+
+Two themes ship in that stylesheet. `light` is the default and dresses the viewer, the
+panel, and example apps. **`wireframe`** dresses the prototype screens — a mockup wears
+`<html data-theme="wireframe">` so it reads as a drawing rather than as a build, which
+is exactly the distinction a walkdown is judging. Any element can pin either theme with
+`data-theme`, so a prototype can be previewed in the real skin without editing it.
+
+The docked panel is the one surface that needed care: it is injected into somebody
+else's running application, where Tailwind's preflight would restyle *their* buttons
+and their stylesheet would restyle ours. So the panel renders inside a **shadow root**
+with the stylesheet scoped to it. The single exception is the sheet's `@property`
+rules, which the CSS Properties API only registers at document level; the panel copies
+just those into the host page, where they declare custom-property types and paint
+nothing. `embed.js` keeps its own dozen lines of scoped CSS — pin markers are
+positioned against host elements and have no business carrying a design system.
+
 ## walkdown's own blueprint
 
 walkdown is specified with itself: [blueprint/](blueprint/) holds the tool's own

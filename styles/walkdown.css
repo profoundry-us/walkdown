@@ -1,0 +1,81 @@
+/*
+ * walkdown's stylesheet source. Built with the Tailwind CLI into
+ * lib/viewer/walkdown.css, which is committed and shipped in the npm package —
+ * users never run a build. See `npm run build:css`.
+ *
+ * Three themes, on purpose:
+ *   light      the default — walkdown's own chrome: the viewer and the panel
+ *   nord       the example app, so a demo app never reads as walkdown's UI
+ *   wireframe  prototype screens, so a mockup reads as a mockup
+ * Any of them can be pinned on any element with data-theme="…".
+ */
+@import "tailwindcss" source(none);
+
+@plugin "daisyui" {
+  themes: light --default, nord, wireframe;
+}
+
+/* Every surface whose markup we scan for class names. source(none) above turns
+   off auto-detection so the blueprint's YAML and run records can't invent
+   utilities out of stray words. */
+@source "../lib/viewer/index.html";
+@source "../lib/viewer/panel.js";
+@source "../lib/viewer/embed.js";
+@source "../prototype/screens/*.html";
+@source "../example/prototype/screens/*.html";
+@source "../example/app/*.html";
+@source "../sketches/*.html";
+
+/*
+ * The handful of composites daisyUI has no component for. These are walkdown's
+ * own vocabulary — a rule row, a thread card, an evidence row — and they exist
+ * as classes rather than utility strings because the viewer builds most of its
+ * markup inside JS template literals, where a 90-character class attribute
+ * costs more than it explains.
+ */
+@layer components {
+  .rule {
+    @apply flex cursor-pointer items-baseline gap-2 px-3.5 py-1.5 text-[13px] hover:bg-base-200;
+  }
+  .rule.sel { @apply bg-primary/10; }
+  .rule .glyph { @apply w-3.5 text-center; }
+  .rule .thrs { @apply ml-auto flex gap-1.5 text-[11px]; }
+
+  /* Verdict colour, one vocabulary everywhere: rail glyphs, evidence cells,
+     thread statuses. Amber always means "waiting on a person". */
+  .v-pass { @apply text-success; }
+  .v-fail { @apply text-error; }
+  .v-pending { @apply opacity-50; }
+  .v-mine, .thr-h { @apply font-semibold text-warning; }
+  .thr-a { @apply opacity-50; }
+
+  .sect { @apply mt-3.5 text-[11px] font-bold uppercase tracking-wider opacity-50; }
+  .empty { @apply text-[13px] opacity-50; }
+
+  .evrow { @apply flex gap-2 border-b border-base-200 py-1 text-[13px]; }
+  .evrow .src { @apply w-25 opacity-50; }
+
+  .thread {
+    @apply my-2 cursor-pointer rounded-box border-l-3 border-transparent
+           bg-base-200 px-2.5 py-2 text-[13px] hover:outline hover:outline-base-300;
+  }
+  .thread.needs-you { @apply border-l-warning bg-warning/10; }
+  .thread.needs-agent { @apply border-l-base-300; }
+  .thread .th-h { @apply mb-0.5 font-semibold; }
+  .st-open, .st-answered, .st-addressed { @apply text-warning; }
+  .st-verified, .st-incorporated { @apply text-success; }
+
+  /* Steps read as prose, not as a nested list widget. */
+  .steps ul { @apply my-0.5 pl-4; }
+  .steps li { @apply relative my-0.5 list-none text-[13px] before:absolute before:-left-3.5 before:opacity-50 before:content-['–']; }
+  .steps code { @apply rounded bg-base-200 px-1 py-px text-xs; }
+  .steps .ph { @apply mt-1.5 text-[11px] font-bold uppercase tracking-wider opacity-50; }
+}
+
+@layer components {
+  /* Prototype screens only: a dashed edge that says "designed, not built".
+     Pair it with data-theme="wireframe" on the page. */
+  .wire {
+    @apply rounded-box border-[1.5px] border-dashed border-base-content/25 bg-base-100;
+  }
+}

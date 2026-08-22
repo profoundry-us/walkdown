@@ -1,44 +1,26 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="wireframe">
 <head>
 <meta charset="utf-8">
 <title>Mockup — Waitlist admin</title>
-<style>
-  * { box-sizing: border-box; margin: 0; font-family: -apple-system, sans-serif; }
-  body { background: #fafafa; color: #444; }
-  .wire { border: 1.5px dashed #b6bcc6; border-radius: 8px; background: #fff; }
-  header { display: flex; align-items: center; gap: 14px; padding: 14px 34px; border-bottom: 1.5px dashed #b6bcc6; }
-  .brand { font-weight: 800; }
-  nav { display: flex; gap: 18px; font-size: 13px; color: #99a; }
-  main { padding: 26px 34px; }
-  .title { display: flex; align-items: baseline; gap: 12px; margin-bottom: 20px; }
-  h1 { font-size: 22px; }
-  .count { font-size: 13px; color: #999; }
-  .actions { margin-left: auto; display: flex; gap: 8px; }
-  .btn { padding: 6px 13px; font-size: 13px; color: #666; }
-  .btn.primary { background: #e2e8f0; }
-  table { width: 100%; border-collapse: collapse; }
-  th { text-align: left; padding: 9px 14px; font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: .04em; border-bottom: 1.5px dashed #b6bcc6; }
-  td { padding: 11px 14px; font-size: 13px; color: #666; border-bottom: 1px dashed #dfe3e8; }
-  .note { margin-top: 22px; font-size: 12px; color: #b6bcc6; }
-</style>
+<link rel="stylesheet" href="http://localhost:4700/walkdown.css">
 </head>
-<body>
-  <header>
-    <span class="brand">Acme</span>
-    <nav><span>Overview</span><span>Waitlist</span><span>Settings</span></nav>
+<body class="bg-base-200 text-sm">
+  <header class="flex items-center gap-4 border-b border-dashed border-base-content/25 px-8 py-3">
+    <span class="font-extrabold">Acme</span>
+    <nav class="flex gap-4 text-xs opacity-60"><span>Overview</span><span>Waitlist</span><span>Settings</span></nav>
   </header>
-  <main>
-    <div class="title">
-      <h1 data-testid="waitlist.heading">Waitlist</h1>
-      <span class="count" data-testid="waitlist.count">1,284 signups</span>
-      <span class="actions">
-        <span class="wire btn" data-testid="waitlist.export">Export</span>
-        <span class="wire btn primary" data-testid="waitlist.invite-batch">Invite batch</span>
+  <main class="px-8 py-6">
+    <div class="mb-5 flex items-baseline gap-3">
+      <h1 class="text-xl font-semibold" data-testid="waitlist.heading">Waitlist</h1>
+      <span class="text-xs opacity-60" data-testid="waitlist.count">1,284 signups</span>
+      <span class="ml-auto flex gap-2">
+        <button class="btn btn-sm btn-ghost border-[1.5px] border-dashed border-base-content/25" data-testid="waitlist.export">Export</button>
+        <button class="btn btn-sm btn-neutral" data-testid="waitlist.invite-batch">Invite batch</button>
       </span>
     </div>
-    <div class="wire" style="overflow:hidden">
-      <table data-testid="waitlist.table">
+    <div class="overflow-hidden wire">
+      <table class="table table-sm" data-testid="waitlist.table">
         <thead><tr><th>Email</th><th>Joined</th><th>Source</th><th>Status</th></tr></thead>
         <tbody>
           <tr><td>person@example.com</td><td>2h ago</td><td>landing</td><td>invited</td></tr>
@@ -47,7 +29,7 @@
         </tbody>
       </table>
     </div>
-    <p class="note">Confirmation dialog (anchor waitlist.confirm-batch) opens over this screen —
+    <p class="mt-6 text-xs opacity-40">Confirmation dialog (anchor waitlist.confirm-batch) opens over this screen —
       it names the exact number of people who will be emailed.</p>
   </main>
   <script src="http://localhost:4700/embed.js" data-walkdown></script>
