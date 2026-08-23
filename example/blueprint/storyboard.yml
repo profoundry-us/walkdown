@@ -17,8 +17,7 @@ screens:
 
   - id: waitlist-already
     title: Already on the list
-    prototype: null                       # spec-born (q-0001) — awaiting design; see q-0002
-    proposal: /waitlist-already.html      # agent sketch, served from proposals/
+    prototype: /screens/waitlist-already.html   # spec-born (q-0001); design adopted the sketch, q-0002
     app: { path: /confirm.html?email=you@example.com&already=1 }
     anchors:
       - waitlist.already-message

@@ -5,11 +5,24 @@ created: 2026-08-21T00:14:00Z
 anchor:
   rule: waitlist.join.already-joined
   screen: waitlist-already
-status: open
+status: incorporated
 body: >
-  Design request: the spec now requires an "already on the list" state
-  (rule waitlist.join.already-joined, incorporated from q-0001), but the
-  prototype has no screen for it. A proposal sketch is on file at
-  proposals/waitlist-already.html — adopt, redraw, or replace it in the
-  design tool. When the designed screen ships, set this screen's
-  `prototype:` path in the storyboard and mark this thread incorporated.
+  Design request: the spec now requires an "already on the list" state (rule
+  waitlist.join.already-joined, incorporated from q-0001), but the prototype has
+  no screen for it. A proposal sketch is on file at
+  proposals/waitlist-already.html — adopt, redraw, or replace it in the design
+  tool. When the designed screen ships, set this screen's `prototype:` path in
+  the storyboard and mark this thread incorporated.
+replies:
+  - author: Topher Fangio
+    created: 2026-08-23T04:08:58Z
+    body: Adopt the design, it looks good.
+  - author: agent
+    created: 2026-08-23T04:11:41Z
+    body: "Adopted. proposals/waitlist-already.html is now
+      prototype/screens/waitlist-already.html, restyled to match the other
+      example screens (wireframe theme), and the storyboard's waitlist-already
+      screen points at it — the proposal field and the proposals/ directory are
+      gone. Anchors carried verbatim: waitlist.already-message,
+      waitlist.confirmed-email. The screen is no longer undesigned, so it drops
+      out of the drift report."
