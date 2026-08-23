@@ -1,0 +1,29 @@
+id: n-0015
+kind: note
+author: topher
+created: 2026-08-23T23:33:27Z
+anchor:
+  rule: panel.dock.no-framing
+status: addressed
+body: "Make the panel feel like it really wraps the page: margin, drop shadow
+  and rounded corners so the app sits above the walkdown controls; a header bar
+  across the top for session-level tools (project switcher, pin mode,
+  Prototype/App); and reskin walkdown so it is visibly not the app under test."
+replies:
+  - author: agent
+    created: 2026-08-23T23:33:37Z
+    body: "Built. The page is now a sheet on walkdown's desk: the document is inset
+      (44px bar, 384px panel, 12px of desk all round), body carries a 10px
+      radius and a shadow, and undocking restores the exact inline styles the
+      page had before. The mechanism is one CSS rule — the canvas takes its
+      background from <html> and only falls through to <body> when <html> has
+      none, so painting the desk on <html> stops <body> propagating and lets it
+      paint its own box for the first time. A bar across the top carries the
+      project switcher, Prototype/App, pin mode and undock; Prototype is the
+      ghost at full strength, so it is one idea rather than two, and there is no
+      Split because the app is already at its real size. Pin mode gained a
+      single owner: the embed exposes window.walkdownEmbed, and the bar mirrors
+      it, so badge, bar and Escape cannot disagree. Skin is a daisyUI theme
+      named blueprint, all standard theme variables, worn by the panel and the
+      viewer. Specified as panel.dock.wraps-the-page, .toolbar, .one-pin-mode
+      and .own-skin."

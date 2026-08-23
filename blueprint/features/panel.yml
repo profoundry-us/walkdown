@@ -22,6 +22,66 @@ stories:
             - Undocking restores the page's own margin and leaves a tab to redock
           statement_hash: sha256:908e4e7b2953
 
+      - id: panel.dock.wraps-the-page
+        origin: thread:n-0015
+        statement: The page under review is presented as a sheet lying on walkdown's desk - inset on every side, with rounded corners and a shadow - so it reads as the thing being examined rather than as part of the tool.
+        verify: [human]
+        steps:
+          given:
+            - A dev page loading panel.js
+          when:
+            - walkdown docks
+          then:
+            - The document is inset to leave the chrome its room and a margin of desk all round
+            - The page carries rounded corners and a shadow against that desk
+            - A page with no background of its own is still drawn as a page, not as a hole
+            - Undocking restores every one of those styles to what the page had before
+          statement_hash: sha256:3b454ec97134
+
+      - id: panel.dock.toolbar
+        origin: thread:n-0015
+        statement: A bar across the top carries the controls that are about the session rather than the rule in hand - which project, which surface, and pin mode.
+        verify: [human]
+        steps:
+          given:
+            - walkdown docked beside a page, with sibling projects on the server
+          when:
+            - Read the bar
+          then:
+            - The project can be changed there, and the panel reloads against it
+            - Prototype and App switch which of the two the page area shows
+            - Pin mode can be turned on and off there
+          statement_hash: sha256:41dff56f44c2
+
+      - id: panel.dock.one-pin-mode
+        origin: thread:n-0015
+        statement: Pin mode has a single owner - the embed - so the bar's control, the badge and Escape always agree about whether it is on.
+        verify: [human]
+        steps:
+          given:
+            - A page with both the embed and the panel
+          when:
+            - Toggle pin mode from the bar, then from the badge, then press Escape
+          then:
+            - Every control reflects the change, whichever one made it
+            - No control keeps its own copy of the state to fall out of step
+          statement_hash: sha256:bd8cc989367f
+
+      - id: panel.dock.own-skin
+        origin: thread:n-0015
+        statement: walkdown's chrome wears its own theme - drafting blue, pale ink, flat surfaces - so it is never mistaken for the application it is inspecting, whatever that application looks like.
+        verify: [human]
+        steps:
+          given:
+            - The panel beside any application
+          when:
+            - Look at the chrome and the page together
+          then:
+            - The chrome is visibly a different surface from the app
+            - The skin is a theme definition, so retuning it is one block and no component knows about it
+            - Prototype screens keep their own wireframe skin, distinct from both
+          statement_hash: sha256:93bfd901cfcd
+
       - id: panel.dock.host-isolation
         origin: walkdown
         statement: The panel is injected into somebody else's application, so its styles never reach the host page and the host's styles never reach it.
