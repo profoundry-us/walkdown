@@ -5,14 +5,14 @@
  *
  * Three themes, on purpose:
  *   light      the default — walkdown's own chrome: the viewer and the panel
- *   nord       the example app, so a demo app never reads as walkdown's UI
+ *   emerald    the example app - green, so it cannot be read as walkdown's blue
  *   wireframe  prototype screens, so a mockup reads as a mockup
  * Any of them can be pinned on any element with data-theme="…".
  */
 @import "tailwindcss" source(none);
 
 @plugin "daisyui" {
-  themes: light --default, nord, wireframe;
+  themes: light --default, emerald, wireframe;
 }
 
 /*

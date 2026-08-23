@@ -1,0 +1,12 @@
+id: q-0016
+kind: question
+author: topher
+created: 2026-08-23T23:52:32Z
+anchor:
+  rule: panel.dock.no-framing
+status: open
+body: Should walkdown stop living inside Claude and ship as a wrapper app (Tauri
+  v2 or similar)? The draw is walking down any page, not just ones we can put a
+  script tag in. Open question, not a decision — the answer changes the Stay
+  inside Claude Code principle in docs/00-vision.md, so it needs recording
+  either way.
