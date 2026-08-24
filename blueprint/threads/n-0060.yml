@@ -1,0 +1,29 @@
+id: n-0060
+kind: note
+author: topher
+created: 2026-08-24T17:30:08Z
+anchor:
+  rule: panel.start.open-a-folder
+  screen: review
+status: addressed
+body: Reviewing panel.start.open-a-folder, the prototype does not show that
+  state - opening the rule takes me nowhere. Build the missing mockups (the
+  start/connect state, the blueprint chooser, the docked layout, the Settings
+  popover) and audit every rule so each one points at the proper prototype
+  screen. Deep-linking rules to screens is literally the point of this app.
+replies:
+  - author: agent
+    created: 2026-08-24T17:34:06Z
+    body: "Audited all 63 rules. 22 already pointed at valid screens; 11 are
+      legitimately headless (thread lifecycle, status derivation,
+      screen-matching logic, lint policy - CLI/server behavior with no
+      reviewable surface); 3 stay headless deliberately (extension lifecycle
+      rules - one-implementation, absent-until-asked, one-switch - have no
+      designed surface to point at); the remaining 27 UI rules now deep-link.
+      Four screens were missing entirely and are now mocked, storyboarded, and
+      anchored: start (the connect state you hit - names the walkdown serve
+      command, labels the server as a server), choose-blueprint (names +
+      descriptions, folder named), docked (the script-tag layout, which
+      review.html - the framed layout - never showed), and settings (the gear
+      popover). Opening panel.start.open-a-folder now takes the surface to
+      /screens/start.html."

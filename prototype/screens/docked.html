@@ -1,0 +1,69 @@
+<!doctype html>
+<!-- The DOCKED delivery: a script tag inside the app's own document. The app
+     keeps its tab and full viewport; walkdown pushes it aside as a sheet on
+     the desk rather than framing it. Compare review.html, the framed layout. -->
+<html lang="en" data-theme="wireframe">
+<head>
+<meta charset="utf-8">
+<title>Mockup — walkdown docked</title>
+<link rel="stylesheet" href="http://localhost:4700/walkdown.css">
+</head>
+<body class="h-screen overflow-hidden bg-base-200 text-sm">
+  <header class="navbar min-h-0 gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5"
+          data-testid="panel.bar">
+    <button class="btn btn-xs btn-ghost btn-square" title="Settings">⚙</button>
+    <span class="font-extrabold tracking-tight">walkdown</span>
+    <span class="text-xs opacity-50">acme/blueprint</span>
+    <span class="absolute left-1/2 flex -translate-x-1/2 items-center gap-2">
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25">Prototype</button>
+      <input type="range" min="0" max="100" value="100" class="range range-xs w-28">
+      <button class="btn btn-xs btn-active">App</button>
+    </span>
+    <span class="ml-auto flex items-center gap-2">
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25">📌 Pin mode</button>
+      <button class="btn btn-xs btn-neutral">Start walkdown</button>
+      <button class="btn btn-xs btn-ghost" title="Put walkdown away">✕</button>
+    </span>
+  </header>
+
+  <main class="flex h-[calc(100vh-2.5rem)] gap-3 p-3">
+    <!-- The application's own document, inset to a sheet: rounded, shadowed,
+         margin of desk all round. NOT an iframe - the panel lives inside the
+         app's page and pushes it aside; what the app positions against the
+         viewport is beyond this layout's reach (that is what framing is for). -->
+    <section class="flex-1 wire rounded-xl bg-base-100 p-6 shadow-lg" data-testid="docked.page">
+      <div class="mb-3 text-base font-bold">The application's own page</div>
+      <div class="mb-2 h-2 w-3/4 rounded bg-base-300"></div>
+      <div class="mb-2 h-2 w-2/3 rounded bg-base-300"></div>
+      <div class="mb-4 h-2 w-1/2 rounded bg-base-300"></div>
+      <div class="flex gap-2">
+        <div class="h-8 w-24 rounded border border-dashed border-base-content/25"></div>
+        <div class="h-8 w-24 rounded border border-dashed border-base-content/25"></div>
+      </div>
+      <p class="mt-6 text-xs leading-relaxed opacity-50">Same tab, same URL bar, same
+        viewport — the page is inset, never framed. Undocking hands every
+        borrowed style back.</p>
+    </section>
+
+    <aside class="flex w-72 shrink-0 flex-col wire rounded-xl bg-base-100 shadow-lg">
+      <div class="m-2 flex items-center justify-center gap-1 self-center rounded-lg border border-dashed border-base-content/25 p-1 text-xs"
+           data-testid="panel.tabs">
+        <button class="btn btn-xs btn-ghost gap-1">▦ Blueprints</button>
+        <button class="btn btn-xs btn-active gap-1">✓ Rules</button>
+        <button class="btn btn-xs btn-ghost gap-1">⛶ Screens</button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-2 text-xs" data-testid="panel.rules-list">
+        <div class="px-2 pb-0.5 pt-1.5 text-[10px] font-bold uppercase tracking-widest opacity-40">checkout.guest</div>
+        <button class="flex w-full items-center gap-2 rounded px-2 py-1 text-left hover:bg-base-200">
+          <span class="w-3.5 shrink-0 text-center text-success">✓</span><span class="truncate">email-required</span>
+        </button>
+        <button class="flex w-full items-center gap-2 rounded px-2 py-1 text-left hover:bg-base-200">
+          <span class="w-3.5 shrink-0 text-center text-warning">○</span><span class="truncate">saved-cards</span>
+          <span class="badge badge-xs ml-auto shrink-0 border-dashed text-warning">walk</span>
+        </button>
+      </div>
+    </aside>
+  </main>
+  <script src="http://localhost:4700/embed.js" data-walkdown></script>
+</body>
+</html>

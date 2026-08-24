@@ -8,7 +8,7 @@ anchor:
   position:
     x: 487
     y: 28
-status: addressed
+status: verified
 body: When in pin mode, the cursor is currently always the crosshair, even if
   you are in the note modal that pops up (so clicking on the "question (not a
   note)" checkbox or either of the buttons feels weird

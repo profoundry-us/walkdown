@@ -1,0 +1,38 @@
+<!doctype html>
+<!-- Connected, and the folder holds more than one blueprint: the panel asks
+     which one this site is - each by name and its own description. -->
+<html lang="en" data-theme="wireframe">
+<head>
+<meta charset="utf-8">
+<title>Mockup — Choose a blueprint</title>
+<link rel="stylesheet" href="http://localhost:4700/walkdown.css">
+</head>
+<body class="h-screen overflow-hidden bg-base-200 text-sm">
+  <header class="navbar min-h-0 gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5">
+    <button class="btn btn-xs btn-ghost btn-square" title="Settings">⚙</button>
+    <span class="font-extrabold tracking-tight">walkdown</span>
+  </header>
+
+  <main class="grid h-[calc(100vh-2.5rem)] place-items-center p-6">
+    <div class="card w-96 wire bg-base-100 shadow-lg">
+      <div class="card-body gap-3 p-5">
+        <p class="text-sm" data-testid="start.folder">Serving
+          <b class="font-mono text-xs">~/Development/acme-shop</b> — which blueprint is this site?</p>
+        <div class="flex flex-col gap-1.5" data-testid="start.options">
+          <button class="wire flex flex-col items-start gap-0.5 rounded-lg p-2.5 text-left hover:bg-base-200">
+            <span class="text-sm font-semibold">○ checkout</span>
+            <span class="text-[11px] opacity-60">The storefront checkout flow — carts, payment, receipts.</span>
+          </button>
+          <button class="wire flex flex-col items-start gap-0.5 rounded-lg bg-base-200 p-2.5 text-left">
+            <span class="text-sm font-semibold">● admin</span>
+            <span class="text-[11px] opacity-60">The back-office: orders, refunds, the waitlist.</span>
+          </button>
+        </div>
+        <p class="text-[11px] leading-relaxed opacity-40">Chosen once, remembered for this
+          site. Fixtures are never offered; a page that declares its blueprint is never asked.</p>
+      </div>
+    </div>
+  </main>
+  <script src="http://localhost:4700/embed.js" data-walkdown></script>
+</body>
+</html>

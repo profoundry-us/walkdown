@@ -26,6 +26,7 @@ stories:
         origin: thread:n-0012
         statement: A pin files against the project the page belongs to, not whichever blueprint the server happens to be serving by default, so feedback never lands in a sibling project's threads.
         verify: [human]
+        screens: [review]
         steps:
           given:
             - One server hosting sibling blueprints, and a page that declares its project
@@ -56,6 +57,7 @@ stories:
         origin: thread:n-0025
         statement: A pin lands on the surface you are actually looking at - so when the design is fully covering the app, the pin goes on the design, and whichever surface is in front is the one taking the click.
         verify: [human]
+        screens: [review]
         steps:
           given:
             - A screen with a design on file, the panel docked, pin mode on
@@ -73,6 +75,7 @@ stories:
         origin: thread:n-0027
         statement: Everything walkdown draws into somebody else's application wears walkdown's own skin and reaches nothing outside itself - one theme across the panel and the feedback layer alike, and not a stroke of it applied to the host page.
         verify: [human]
+        screens: [review, thread-panel]
         steps:
           given:
             - Any application, with the embed running in it

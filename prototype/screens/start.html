@@ -1,0 +1,36 @@
+<!doctype html>
+<!-- The panel's first-run state: no server to read blueprints from. Stated as
+     a first step, never as an error - and the thing you type is a server. -->
+<html lang="en" data-theme="wireframe">
+<head>
+<meta charset="utf-8">
+<title>Mockup — walkdown start</title>
+<link rel="stylesheet" href="http://localhost:4700/walkdown.css">
+</head>
+<body class="h-screen overflow-hidden bg-base-200 text-sm">
+  <header class="navbar min-h-0 gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5">
+    <button class="btn btn-xs btn-ghost btn-square" title="Settings">⚙</button>
+    <span class="font-extrabold tracking-tight">walkdown</span>
+  </header>
+
+  <main class="grid h-[calc(100vh-2.5rem)] place-items-center p-6">
+    <div class="card w-96 wire bg-base-100 shadow-lg">
+      <div class="card-body gap-3 p-5">
+        <p class="text-sm leading-relaxed" data-testid="start.message">
+          <b>No blueprints are open yet.</b><br>
+          Start walkdown's server in the project you want to review:</p>
+        <code class="rounded bg-base-200 px-2 py-1 text-xs">walkdown serve</code>
+        <label class="mt-2 flex items-center gap-2 text-xs">
+          <span class="shrink-0 opacity-60">Server</span>
+          <input class="input input-xs flex-1 border-dashed" value="http://localhost:4700"
+                 data-testid="start.server" title="Where walkdown serve is listening — a server, not a folder">
+        </label>
+        <button class="btn btn-sm btn-neutral" data-testid="start.connect">Connect</button>
+        <p class="text-[11px] leading-relaxed opacity-40">A first step, not an error —
+          the browser cannot open a folder; the server holds one open for it.</p>
+      </div>
+    </div>
+  </main>
+  <script src="http://localhost:4700/embed.js" data-walkdown></script>
+</body>
+</html>

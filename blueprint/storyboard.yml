@@ -49,3 +49,33 @@ screens:
       - thread.reply
       - thread.actions
       - thread.close
+
+  - id: start
+    title: First run (state — no server connected)
+    prototype: /screens/start.html
+    anchors:
+      - start.message
+      - start.server
+      - start.connect
+
+  - id: choose-blueprint
+    title: Choose a blueprint (state — folder holds several)
+    prototype: /screens/choose-blueprint.html
+    anchors:
+      - start.folder
+      - start.options
+
+  - id: docked
+    title: The docked layout (script-tag delivery)
+    prototype: /screens/docked.html
+    anchors:
+      - docked.page
+
+  - id: settings
+    title: Settings (state — open the gear)
+    prototype: /screens/settings.html
+    anchors:
+      - settings.panel
+      - settings.actor
+      - settings.dials
+      - settings.hide

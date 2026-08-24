@@ -1,0 +1,54 @@
+<!doctype html>
+<!-- The gear's Settings popover: who you record as, then the desk ruling.
+     Opened by the gear in the bar; shown here alone, like thread-panel.html. -->
+<html lang="en" data-theme="wireframe">
+<head>
+<meta charset="utf-8">
+<title>Mockup — Settings</title>
+<link rel="stylesheet" href="http://localhost:4700/walkdown.css">
+</head>
+<body class="bg-base-200 p-5 text-sm">
+  <div class="card w-72 wire bg-base-100" data-testid="settings.panel">
+    <div class="card-body gap-0 p-3 text-xs">
+      <div class="mb-2 flex items-center gap-2" data-testid="settings.actor">
+        <span class="text-[12px] font-semibold">Record as</span>
+        <input class="input input-xs ml-auto w-36 border-dashed" value="Topher Fangio"
+               title="Walkdown verdicts, sign-offs and thread actions are recorded under this name">
+      </div>
+      <div class="mb-2 mt-2 flex items-center gap-2 border-t border-dashed border-base-content/25 pt-2">
+        <span class="text-[12px] font-semibold">Desk ruling</span>
+        <button class="btn btn-xs btn-ghost ml-auto">Reset</button>
+      </div>
+      <div data-testid="settings.dials">
+        <label class="mb-1.5 flex items-center gap-2">
+          <span class="w-14 shrink-0 opacity-60">Tilt</span>
+          <input type="range" class="range range-xs" value="35"><span class="w-12 text-right font-mono text-[10.5px] opacity-60">35°</span>
+        </label>
+        <label class="mb-1.5 flex items-center gap-2">
+          <span class="w-14 shrink-0 opacity-60">Tip</span>
+          <input type="range" class="range range-xs" value="35"><span class="w-12 text-right font-mono text-[10.5px] opacity-60">35°</span>
+        </label>
+        <label class="mb-1.5 flex items-center gap-2">
+          <span class="w-14 shrink-0 opacity-60">Depth</span>
+          <input type="range" class="range range-xs" value="20"><span class="w-12 text-right font-mono text-[10.5px] opacity-60">600px</span>
+        </label>
+        <label class="mb-1.5 flex items-center gap-2">
+          <span class="w-14 shrink-0 opacity-60">Spacing</span>
+          <input type="range" class="range range-xs" value="90"><span class="w-12 text-right font-mono text-[10.5px] opacity-60">60px</span>
+        </label>
+        <label class="mb-1.5 flex items-center gap-2">
+          <span class="w-14 shrink-0 opacity-60">Ink</span>
+          <input type="range" class="range range-xs" value="36"><span class="w-12 text-right font-mono text-[10.5px] opacity-60">10%</span>
+        </label>
+      </div>
+      <label class="mt-1 flex items-center gap-2" data-testid="settings.hide">
+        <input type="checkbox" class="checkbox checkbox-xs">
+        <span>Hide app temporarily</span>
+      </label>
+      <p class="mt-2 text-[10.5px] leading-relaxed opacity-40">Yours alone — how the paper
+        lies changes nothing about what gets verified.</p>
+    </div>
+  </div>
+  <script src="http://localhost:4700/embed.js" data-walkdown></script>
+</body>
+</html>

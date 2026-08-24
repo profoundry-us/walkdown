@@ -11,6 +11,7 @@ stories:
         origin: walkdown
         statement: Docked into a page's own document, the panel renders beside what it reviews rather than framing it - a script tag cannot put its own page in a frame, so the docked delivery works within the application's document and pushes it aside instead of covering it.
         verify: [human]
+        screens: [docked]
         steps:
           given:
             - A dev page loading panel.js
@@ -27,6 +28,7 @@ stories:
         origin: thread:n-0015
         statement: The page under review is presented as a sheet lying on walkdown's desk - inset on every side, with rounded corners and a shadow - so it reads as the thing being examined rather than as part of the tool.
         verify: [human]
+        screens: [docked]
         steps:
           given:
             - A dev page loading panel.js
@@ -44,6 +46,7 @@ stories:
         origin: thread:n-0015
         statement: A bar across the top carries the controls that are about the session rather than the rule in hand - which project, which surface, and pin mode.
         verify: [human]
+        screens: [review]
         steps:
           given:
             - walkdown docked beside a page, with sibling projects on the server
@@ -59,6 +62,7 @@ stories:
         origin: thread:n-0022
         statement: A control in the bar survives being used - the fade slider can be grabbed and dragged the whole way, because nothing rebuilds the element the pointer is holding until the pointer lets go.
         verify: [human]
+        screens: [review]
         steps:
           given:
             - The panel docked on a screen that has a design on file
@@ -75,6 +79,7 @@ stories:
         origin: thread:n-0028
         statement: Nothing the application draws paints over walkdown's own chrome, because the tool has to stay readable exactly when the app is showing the state you came to judge - and a z-index cannot promise that, since a modal joins a layer painted above every z-index there is.
         verify: [human]
+        screens: [docked]
         steps:
           given:
             - An application whose modal is promoted to the browser's top layer
@@ -91,6 +96,7 @@ stories:
         origin: thread:n-0015
         statement: Pin mode has a single owner - the embed - and with the panel up there is a single control for it, so the bar and Escape can never disagree about whether it is on.
         verify: [human]
+        screens: [review]
         steps:
           given:
             - A page with both the embed and the panel
@@ -99,14 +105,15 @@ stories:
           then:
             - Every control reflects the change, whichever one made it
             - No control keeps its own copy of the state to fall out of step
-            - With the panel up the bar is the only pin-mode control - the embed's own badge is not a second one saying the same thing
-            - Without a panel the badge stays, because then it is the only way in
+            - With the panel up, pin mode has exactly one control - the bar's; the embed's own floating badge stays hidden rather than echoing it
+            - On a page carrying only the embed tag and no panel, that badge appears, because there it is the only way into pin mode
           statement_hash: sha256:855c16516e9a
 
       - id: panel.dock.no-pin-mid-fade
         origin: thread:n-0023
         statement: While the fade sits between the two surfaces, pinning is closed - both are on screen at once, so a pin has no honest answer to which one it is about.
         verify: [human]
+        screens: [review]
         steps:
           given:
             - A screen with a design on file, the panel docked
@@ -122,6 +129,7 @@ stories:
         origin: thread:n-0015
         statement: walkdown's chrome wears its own theme - drafting blue, pale ink, flat surfaces - so it is never mistaken for the application it is inspecting, whatever that application looks like.
         verify: [human]
+        screens: [review, settings]
         steps:
           given:
             - The panel beside any application
@@ -132,7 +140,7 @@ stories:
             - The desk under the page reads as drafting paper rather than as a spreadsheet - ruled faintly, and lying at an angle
             - How the paper lies is the reviewer's own taste - a gear in the bar tunes it live, the choice persists across sessions, and none of it changes what gets verified
             - Each dial's number can be typed directly, not only dragged to
-            - A checkbox dims the app AND the aside to a peek rather than hiding them outright, so the ruling is judged against everything that would otherwise sit on top of it - and it is a way of looking, not a preference: it always starts unchecked, and closing the tuner ends the peek
+            - A checkbox dims the app AND the aside to a peek rather than hiding them outright, so the ruling is judged against everything that would otherwise sit on top of it - and it is a way of looking, not a preference - it always starts unchecked, and closing the tuner ends the peek
             - The bar stays at full strength through the peek - its buttons, including the tuner's own gear, have to keep working while you are looking
             - The peek survives adjusting a dial - repainting the desk never undoes it
             - The tuner closes on Escape or on a click anywhere outside it - the gear excluded, since its own click already opens and closes it
@@ -145,6 +153,7 @@ stories:
         origin: walkdown
         statement: The panel is injected into somebody else's application, so its styles never reach the host page and the host's styles never reach it.
         verify: [human]
+        screens: [docked]
         steps:
           given:
             - A page that has its own stylesheet, loading panel.js
@@ -160,6 +169,7 @@ stories:
         origin: thread:n-0011
         statement: In pin mode, walkdown's own chrome - the bar, an open form, an existing pin, the docked panel - is never treated as a place to put a pin, and Escape leaves pin mode.
         verify: [human]
+        screens: [review]
         steps:
           given:
             - A page with the embed and the panel, pin mode on
@@ -211,6 +221,7 @@ stories:
         origin: thread:n-0030
         statement: The extension reviews an application by giving it a viewport of its own - the app is framed inside walkdown's page - because that is the only arrangement in which what the app draws cannot reach walkdown, and the one thing only an extension can arrange.
         verify: [human]
+        screens: [review]
         steps:
           given:
             - An application whose modal covers the window, and one that refuses to be framed at all
@@ -220,7 +231,7 @@ stories:
             - The app's modals, overlays and sticky chrome are laid out against the sheet rather than the whole window
             - Nothing the app draws paints over walkdown, and nothing it opens makes walkdown unusable
             - A page that refuses framing is reviewed anyway, by removing the header that refuses - for that tab only, and only while it is being reviewed
-            - The application is the frame's business and walkdown is not inside it: the panel learns which screen it is on because the copy of walkdown in the frame says so, including when the app moves without reloading
+            - The application is the frame's business and walkdown is not inside it - the panel learns which screen it is on because the copy of walkdown in the frame says so, including when the app moves without reloading
           statement_hash: sha256:064bb8c0f0a4
 
       - id: panel.delivery.one-switch
@@ -242,6 +253,7 @@ stories:
         origin: thread:q-0016
         statement: Reaching a page is not the same as anchoring to it - on a page with no anchors, feedback still lands by position, and the missing anchors are the reason it cannot do better.
         verify: [human]
+        screens: [review]
         steps:
           given:
             - A page walkdown reaches but which carries no anchor attributes
@@ -261,6 +273,7 @@ stories:
         origin: thread:n-0017
         statement: With no walkdown server to read blueprints from, the panel says so plainly and tells you how to open one, rather than rendering an empty or broken review surface - and it calls that server a server, while naming the folder the server is holding open.
         verify: [human]
+        screens: [start]
         steps:
           given:
             - The extension on for a site, and no server running
@@ -278,6 +291,7 @@ stories:
         origin: thread:n-0017
         statement: When the folder holds more than one blueprint, the panel asks which one this site is, showing each by name and by a description the blueprint itself carries.
         verify: [human]
+        screens: [choose-blueprint]
         steps:
           given:
             - A server whose folder holds several blueprints
@@ -299,6 +313,7 @@ stories:
         origin: walkdown
         statement: Opening a rule slides the panel from the list to that rule's detail, and one control comes back - only one of the two panes is ever visible.
         verify: [agent, human]
+        screens: [review, rule-detail]
         steps:
           given:
             - The panel showing the rule list
@@ -316,6 +331,7 @@ stories:
         origin: thread:n-0031
         statement: Asking for something in the panel moves the surface to it - opening a rule goes to the screen that rule is about, picking a screen goes to that screen, and choosing a blueprint that says nothing about this page goes to one it does.
         verify: [human]
+        screens: [review]
         steps:
           given:
             - A blueprint whose screens have URLs on the app, the design, or both
@@ -334,6 +350,7 @@ stories:
         origin: thread:n-0032
         statement: A rule's detail belongs to the tab that lists rules - leaving that tab shows the tab you asked for, not the rule you left open on another one.
         verify: [human]
+        screens: [review]
         steps:
           given:
             - A rule open in the detail pane
@@ -348,6 +365,7 @@ stories:
         origin: walkdown
         statement: From a rule's detail I can step to the previous or next rule in list order without returning to the list, and each control says where it lands.
         verify: [agent, human]
+        screens: [rule-detail]
         steps:
           given:
             - A rule open in the detail pane
@@ -432,6 +450,7 @@ stories:
         origin: thread:n-0009
         statement: A thread on a rule opens in the panel showing its replies, and I can add a reply and take the lifecycle actions its current state allows.
         verify: [human]
+        screens: [rule-detail]
         steps:
           given:
             - A rule with an open thread, shown in the panel's detail pane
@@ -447,6 +466,7 @@ stories:
         origin: walkdown
         statement: The panel obeys the same governance as everywhere else - it will not record verified or waived without a named person, and it asks for the reason the transition requires.
         verify: [human]
+        screens: [rule-detail]
         steps:
           given:
             - A thread the panel offers Verify or Waive on
@@ -461,6 +481,7 @@ stories:
         origin: thread:n-0010
         statement: When a thread's screen has a proposal on file, the panel can show it over the running app, badged as a proposal so a sketch is never mistaken for the design.
         verify: [human]
+        screens: [rule-detail]
         steps:
           given:
             - A thread anchored to a screen whose storyboard entry has a proposal and no prototype
@@ -482,6 +503,7 @@ stories:
         origin: walkdown
         statement: Finishing a walkdown in the panel appends a run record under a named person; discarding one records nothing.
         verify: [agent, human]
+        screens: [review, rule-detail]
         steps:
           given:
             - A walkdown session in the panel with at least one verdict
@@ -566,7 +588,7 @@ stories:
         origin: thread:n-0008
         statement: The actor field arrives filled in from the repository's git identity, falling back to the operating system username; it stays editable.
         verify: [checks, agent, human]
-        screens: [review]
+        screens: [review, settings]
         steps:
           given:
             - A walkdown session started in a git repository with user.name set

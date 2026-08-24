@@ -1,0 +1,20 @@
+id: n-0059
+kind: note
+author: Topher Fangio
+created: 2026-08-24T17:25:21Z
+anchor:
+  rule: panel.delivery.framed-isolation
+status: addressed
+body: The THEN clause has a random "[object Object]" text at the end. If we
+  really need to see that, we should show JSON or something else, but I'm
+  guessing it can just be removed?
+replies:
+  - author: agent
+    created: 2026-08-24T17:34:06Z
+    body: "Found and removed - it was not display data but a YAML landmine: the
+      step's mid-sentence ': ' made the unquoted scalar parse as a map, which
+      the panel renders as [object Object]. Reworded the colon to a dash (same
+      fix applied to a second instance hiding in panel.dock.own-skin's peek
+      step), and walkdown lint now errors on any step that parses as a
+      non-string, so this class of mistake can never sit silently in the spec
+      again."
