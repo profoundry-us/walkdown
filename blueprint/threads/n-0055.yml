@@ -1,0 +1,9 @@
+id: n-0055
+kind: note
+author: Topher Fangio
+created: 2026-08-24T16:04:37Z
+anchor:
+  rule: embed.pin.viewport-recorded
+status: open
+body: I failed this because we have not built different viewports yet, so I
+  could not test it.

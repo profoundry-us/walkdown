@@ -36,7 +36,10 @@
     {
       "rule": "embed.pin.viewport-recorded",
       "status": "fail",
-      "statement_hash": "sha256:6971846eb2cc"
+      "statement_hash": "sha256:6971846eb2cc",
+      "threads": [
+        "n-0055"
+      ]
     },
     {
       "rule": "embed.pin.form-is-chrome",
