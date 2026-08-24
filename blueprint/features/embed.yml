@@ -11,12 +11,12 @@ stories:
         origin: walkdown
         statement: In pin mode, hovering highlights any element that carries an anchor, and a pin placed on one is recorded against that anchor - the note follows the element, not the pixel.
         verify: [checks, human]
-        screens: [board]
+        screens: [review]
         steps:
           given:
-            - Pin mode on, viewing screen `board`
+            - Pin mode on, viewing screen `review`
           when:
-            - Click an anchored element such as `board.drawer`
+            - Click an anchored element such as `panel.counts`
           then:
             - The pin form opens; the saved note is anchored to that element id
             - Later visitors see the pin on that element wherever it renders
@@ -40,10 +40,10 @@ stories:
         origin: thread:n-0003
         statement: Pins can be placed on the app exactly as on the prototype - the same anchors exist in both - and a pin records which surface it was placed on.
         verify: [checks, human]
-        screens: [board]
+        screens: [review]
         steps:
           given:
-            - Pin mode on, both surfaces showing the same screen on `board`
+            - Pin mode on, both surfaces showing the same screen on `review`
           when:
             - Pin an anchored element in the app surface
           then:
@@ -88,7 +88,7 @@ stories:
         origin: thread:n-0005
         statement: A pin records the viewport it was placed at, so feedback about a layout is never read against the wrong width.
         verify: [checks, human]
-        screens: [board]
+        screens: [review]
         steps:
           given:
             - Pin mode on, the surfaces set to a mobile viewport
@@ -103,10 +103,10 @@ stories:
         origin: thread:n-0004
         statement: The pin form is ordinary UI - inside it the cursor and clicks behave normally, and pin mode does not reach through it to the surface underneath.
         verify: [human]
-        screens: [board]
+        screens: [review]
         steps:
           given:
-            - Pin mode on, with the pin form open on screen `board`
+            - Pin mode on, with the pin form open on screen `review`
           when:
             - Moving over the form's checkbox and buttons
           then:
@@ -116,30 +116,66 @@ stories:
 
       - id: embed.pin.surface-coordinates
         origin: thread:n-0005
-        statement: A pin's position is recorded in the surface's own coordinate space - CSS pixels of the document as rendered at its viewport - never in the viewer's screen pixels, so pins stay on their spot when the pane is resized, the stage mode changes, or the surface is zoomed.
+        statement: A pin's position is recorded in the surface's own coordinate space - CSS pixels of the document as rendered at its viewport - never in the panel's screen pixels, so pins stay on their spot when the frame is resized, the fade moves, or the surface is zoomed.
         verify: [checks, human]
-        screens: [board]
+        screens: [review]
         steps:
           given:
             - A pin placed by position while a surface is scaled to fit its pane
           when:
-            - Change the zoom, switch stage modes, or resize the window
+            - Change the zoom, move the fade, or resize the window
           then:
             - The pin stays on the same spot of the surface it was placed on
             - The recorded position is unchanged by any of those actions
-          statement_hash: sha256:024baa513c63
+          statement_hash: sha256:7d33bd0c80b2
 
       - id: embed.pin.coordinate-fallback
         origin: thread:n-0001
         statement: A pin dropped where no anchored element sits is still placed, recorded by its x/y position within the surface - feedback is never blocked by a missing anchor.
         verify: [checks, human]
-        screens: [board]
+        screens: [review]
         steps:
           given:
-            - Pin mode on, viewing screen `board`
+            - Pin mode on, viewing screen `review`
           when:
             - Click a spot with no anchored element under it
           then:
             - The pin form opens at the click point
             - The saved note records the screen and position; later visitors see the pin at that spot
           statement_hash: sha256:3c6fb006c94b
+
+  - id: embed.threads
+    title: A thread you can read at a glance
+    statement: As a reviewer opening a pin, I want the note itself - not a wall of provenance and instructions I have to read past.
+    rules:
+      - id: embed.threads.note-first
+        origin: walkdown
+        statement: The thread popover leads with the note's own words; its provenance - id, kind, status, rule, screen, element, author, age - is condensed to a compact line rather than stacked sentences.
+        verify: [human]
+        screens: [thread-panel]
+        steps:
+          given:
+            - A pinned note open on screen `thread-panel`
+          when:
+            - Reading anchor `thread.panel`
+          then:
+            - Anchor `thread.body` is the most prominent text in the popover
+            - Anchor `thread.provenance` fits on one line and never pushes the note below the fold
+            - A long reply history collapses behind a count rather than growing the popover
+          statement_hash: sha256:870249ed1a7a
+
+      - id: embed.threads.actions-in-context
+        origin: walkdown
+        statement: The popover's actions are short verbs on one row, and an action that needs a reason asks for it when chosen - the reply box carries no standing instructions.
+        verify: [human]
+        screens: [thread-panel]
+        steps:
+          given:
+            - A pinned note open on screen `thread-panel`
+          when:
+            - Reading anchor `thread.actions`, then choosing an action that requires a reason
+          then:
+            - The reply box in anchor `thread.reply` reads simply as a reply box
+            - Choosing waive or reopen asks for the reason then; other actions never mention it
+            - Actions a person may not take are absent, not shown and refused
+          statement_hash: sha256:9878eb8459f2

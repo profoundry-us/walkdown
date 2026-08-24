@@ -1,97 +1,91 @@
 <!doctype html>
+<!-- The rule detail is the aside's second pane: the list slides left and the
+     detail slides in, inside the same column. There is no bottom drawer — the
+     app never gives up height to reading. -->
 <html lang="en" data-theme="wireframe">
 <head>
 <meta charset="utf-8">
-<title>Mockup — Rule detail drawer</title>
+<title>Mockup — Rule detail</title>
 <link rel="stylesheet" href="http://localhost:4700/walkdown.css">
 </head>
-<body class="h-screen flex flex-col bg-base-200 text-sm">
-  <header class="navbar min-h-0 gap-3 border-b border-dashed border-base-content/25 bg-base-100 px-4 py-2">
-    <span class="font-extrabold">walkdown</span>
-    <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25">project ▾</button>
-    <span class="text-xs opacity-60">8 verified · 2 pending · 0 failing</span>
-    <span class="flex-1"></span>
-    <div class="join border-[1.5px] border-dashed border-base-content/25">
-      <button class="btn btn-xs join-item btn-ghost">Prototype</button>
-      <button class="btn btn-xs join-item btn-active">Split</button>
-      <button class="btn btn-xs join-item btn-ghost">App</button>
-    </div>
-    <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25">📌 Pin mode</button>
-    <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25">your name</button>
+<body class="h-screen overflow-hidden bg-base-200 text-sm">
+  <header class="navbar min-h-0 gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5">
+    <button class="btn btn-xs btn-ghost btn-square">⚙</button>
+    <span class="font-extrabold tracking-tight">walkdown</span>
+    <span class="text-xs opacity-50">example/blueprint</span>
+    <span class="absolute left-1/2 flex -translate-x-1/2 items-center gap-2">
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25">Prototype</button>
+      <input type="range" min="0" max="100" value="100" class="range range-xs w-28">
+      <button class="btn btn-xs btn-active">App</button>
+    </span>
+    <span class="ml-auto flex items-center gap-2">
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25">📌 Pin mode</button>
+      <button class="btn btn-xs btn-neutral">Finish walkdown</button>
+    </span>
   </header>
 
-  <main class="flex flex-1 min-h-0 gap-3 p-3">
-    <aside class="w-48 shrink-0 wire p-3">
-      <div class="mb-2 text-xs uppercase tracking-wide opacity-50">Rules</div>
-      <ul class="menu menu-xs w-full p-0">
-        <li><a>✓ email-required</a></li>
-        <li><a class="menu-active">✓ confirmation</a></li>
-        <li><a>○ already-joined</a></li>
-      </ul>
-    </aside>
-
-    <section class="flex flex-1 min-w-0 flex-col gap-2">
-      <div class="flex items-center gap-2">
-        <span class="badge badge-sm badge-ghost border-[1.5px] border-dashed border-base-content/25">waitlist-join</span>
-        <span class="badge badge-sm badge-neutral">waitlist-confirm</span>
-      </div>
-      <div class="grid flex-1 grid-cols-2 gap-3">
-        <div class="grid place-items-center wire p-4 text-center text-xs opacity-50">
-          PROTOTYPE — still full height above the drawer</div>
-        <div class="grid place-items-center wire p-4 text-xs opacity-50">APP</div>
-      </div>
+  <main class="flex h-[calc(100vh-2.5rem)] gap-3 p-3">
+    <section class="grid flex-1 place-items-center wire rounded-xl bg-base-100 text-center text-xs opacity-50 shadow-lg">
+      THE APP — opening a rule navigated this frame to the rule's screen,<br>
+      so what the detail describes is what is on the desk
     </section>
-  </main>
 
-  <!-- The drawer, open: one title line that always stays visible, then three
-       reading columns. The verdict buttons live on the title line on purpose —
-       they must never be the thing you have to scroll to find. -->
-  <section class="flex h-52 flex-col border-t border-dashed border-base-content/25 bg-base-100">
-    <div class="flex h-1.5 cursor-ns-resize items-center justify-center" data-testid="detail.resize-handle" title="drag to resize the drawer">
-      <span class="h-0.5 w-10 rounded-full bg-base-300"></span>
-    </div>
-    <div class="flex items-center gap-3 px-4 py-2 text-xs">
-      <b data-testid="detail.rule-id">waitlist.join.confirmation</b>
-      <span class="badge badge-xs badge-success">verified</span>
-      <span class="opacity-50">verify: checks</span>
-      <span class="opacity-50">flow: waitlist-join → waitlist-confirm</span>
-      <span class="join border-[1.5px] border-dashed border-base-content/25" data-testid="detail.verdict">
-        <button class="btn btn-xs join-item btn-ghost">✓ Pass</button>
-        <button class="btn btn-xs join-item btn-ghost">✗ Fail</button>
-        <span class="join-item flex items-center px-2 opacity-50">3 of 20 judged</span>
-      </span>
-      <button class="btn btn-xs btn-ghost ml-auto" data-testid="detail.drawer-toggle">collapse ▾</button>
-    </div>
-    <div class="flex min-h-0 flex-1 gap-4 overflow-hidden px-4 pb-3 text-xs">
-      <div class="flex-[1.5]">
-        <div class="mb-1 text-xs uppercase tracking-wide opacity-50">Statement</div>
-        <p class="leading-relaxed" data-testid="detail.statement">After submitting a valid email, the visitor sees a
-          confirmation showing the email they joined with.</p>
-        <div class="mt-3 mb-1 text-xs uppercase tracking-wide opacity-50">Evidence</div>
-        <div class="flex gap-2 border-b border-dashed border-base-content/25 py-1" data-testid="detail.evidence">
-          <span class="w-20 opacity-50">checks/local</span><span class="text-success">✓ pass</span></div>
-        <div class="flex gap-2 border-b border-dashed border-base-content/25 py-1">
-          <span class="w-20 opacity-50">human</span><span class="text-success">✓ pass (topher)</span></div>
+    <aside class="flex w-72 shrink-0 flex-col wire rounded-xl bg-base-100 shadow-lg">
+      <div class="flex items-center px-2 pt-2 text-xs">
+        <button class="btn btn-xs btn-ghost" data-testid="detail.back">← All rules</button>
+        <span class="ml-auto flex gap-0.5" data-testid="detail.stepper" title="step through rules without going back">
+          <button class="btn btn-xs btn-ghost">←</button>
+          <button class="btn btn-xs btn-ghost">→</button>
+        </span>
       </div>
-      <div class="flex-1">
-        <div class="mb-1 text-xs uppercase tracking-wide opacity-50">Flow</div>
-        <div class="opacity-70" data-testid="detail.flow">waitlist-join → waitlist-confirm</div>
-        <div class="mt-3 mb-1 text-xs uppercase tracking-wide opacity-50">Steps</div>
-        <div class="leading-relaxed opacity-80" data-testid="detail.steps">
-          <b>given</b> a visitor on waitlist-join<br>
-          <b>when</b> they submit a valid email<br>
-          <b>then</b> the confirmation shows it
+
+      <div class="flex flex-1 flex-col gap-3 overflow-y-auto px-3 pb-3 pt-1 text-xs">
+        <div>
+          <div class="font-mono text-[10px] opacity-40" data-testid="detail.rule-id">waitlist.join.confirmation</div>
+          <p class="text-sm leading-relaxed" data-testid="detail.statement">After submitting a valid email, the visitor sees a
+            confirmation showing the email they joined with.</p>
         </div>
-        <div class="mt-2 wire px-2 py-1 opacity-70" data-testid="detail.technical-disclosure">
-          ▸ <b>checks/waitlist.spec.ts:52</b> — source stays collapsed</div>
+
+        <div class="flex gap-2" data-testid="detail.verdict">
+          <button class="btn btn-xs flex-1 border-[1.5px] border-dashed border-base-content/25">✓ Pass</button>
+          <button class="btn btn-xs flex-1 border-[1.5px] border-dashed border-base-content/25">✗ Fail</button>
+        </div>
+        <div class="opacity-50" data-testid="detail.judged">3 judged this session</div>
+
+        <div>
+          <div class="mb-1 text-[10px] uppercase tracking-widest opacity-40">Evidence</div>
+          <div data-testid="detail.evidence">
+            <div class="flex gap-2 border-b border-dashed border-base-content/25 py-1">
+              <span class="w-20 opacity-50">checks/local</span><span>✓ pass</span></div>
+            <div class="flex gap-2 border-b border-dashed border-base-content/25 py-1">
+              <span class="w-20 opacity-50">human</span><span>✓ pass (topher)</span></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="mb-1 text-[10px] uppercase tracking-widest opacity-40">Steps</div>
+          <div class="leading-relaxed opacity-80" data-testid="detail.steps">
+            <b>given</b> a visitor on waitlist-join<br>
+            <b>when</b> they submit a valid email<br>
+            <b>then</b> the confirmation shows it
+          </div>
+          <div class="mt-2 wire px-2 py-1 opacity-70" data-testid="detail.technical-disclosure">
+            ▸ <b>checks/waitlist.spec.ts:52</b> — source stays collapsed</div>
+        </div>
+
+        <div>
+          <div class="mb-1 text-[10px] uppercase tracking-widest opacity-40">Verify</div>
+          <div class="opacity-80" data-testid="detail.verify">checks, human</div>
+        </div>
+
+        <div>
+          <div class="mb-1 text-[10px] uppercase tracking-widest opacity-40">Threads</div>
+          <div class="wire border-l-4 border-l-warning px-2 py-1" data-testid="detail.threads">
+            q-0001 · question · open — amber border = waiting on you</div>
+        </div>
       </div>
-      <div class="flex-1">
-        <div class="mb-1 text-xs uppercase tracking-wide opacity-50">Threads</div>
-        <div class="wire border-l-4 border-l-warning px-2 py-1" data-testid="detail.threads">
-          q-0001 · question · open — amber border = waiting on you</div>
-      </div>
-    </div>
-  </section>
+    </aside>
+  </main>
   <script src="http://localhost:4700/embed.js" data-walkdown></script>
 </body>
 </html>

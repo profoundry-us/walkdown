@@ -3,7 +3,7 @@ kind: note
 author: topher
 created: 2026-08-21T03:25:48Z
 anchor:
-  rule: viewer.layout.detail-drawer
+  rule: panel.rules.counts-legible
   screen: rule-detail
   position:
     x: 211

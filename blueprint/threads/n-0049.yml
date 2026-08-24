@@ -1,0 +1,34 @@
+id: n-0049
+kind: note
+author: topher
+created: 2026-08-24T06:23:48Z
+anchor:
+  screen: review
+status: addressed
+body: "Retire the dual-pane viewer from the spec: the docs, storyboard, and
+  mockups should describe the panel (docked and framed) and the ghost, not the
+  old side-by-side layout with the bottom drawer. Keep the old viewer code for
+  now, but nothing in the spec or prototype should reference it. Bring over the
+  pieces the panel still owes: evidence in the rule detail, the check-source
+  disclosure, viewport presets with zoom-to-fit, legible counts, and the
+  identity/session rules."
+replies:
+  - author: agent
+    created: 2026-08-24T06:24:00Z
+    body: "Done across every spec surface. Docs 00-05 plus README and the AGENTS
+      template now describe the panel's two deliveries (docked script tag,
+      framed extension) and the ghost; the framing story in 00-vision was
+      inverted to match reality (the extension strips frame-refusal headers -
+      framing is how isolation works now, not what was retired). The
+      storyboard's board screen and its mockup are gone, replaced by review.html
+      mirroring the built layout (bar, desk, framed app, aside with tabs);
+      rule-detail.html is redrawn as the aside's detail slide with no bottom
+      drawer; thread-panel.html carried over as the popover. viewer.yml is
+      deleted: its obsolete layout rules (drawer, rail, stage modes) died with
+      the design, and the living ones migrated with their thread origins intact
+      - identity and session rules into panel.identity/panel.walkdown, detail
+      reading and counts into panel.rules, viewport presets and zoom-to-fit into
+      panel.viewport (to build), the thread popover rules into embed.threads.
+      The serve test was retagged to panel.identity.default-actor and a fresh
+      local run recorded its pass. Threads n-0001 through n-0008 were
+      re-anchored to their successor rules so provenance survives lint."

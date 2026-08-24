@@ -360,6 +360,51 @@ stories:
             - At either end the control is disabled and says there is nothing further
           statement_hash: sha256:56a26420e1f3
 
+      - id: panel.rules.steps-not-an-appendix
+        origin: thread:n-0007
+        statement: A rule's given/when/then steps are visible without being asked for; only the recorded check source sits behind a collapsed disclosure.
+        verify: [human]
+        screens: [rule-detail]
+        steps:
+          given:
+            - A rule open in the detail pane on screen `rule-detail`
+          when:
+            - Reading anchor `detail.steps`
+          then:
+            - The steps are already expanded - they are the rule, not an appendix
+            - The check source stays behind anchor `detail.technical-disclosure` until opened
+          statement_hash: sha256:0609e516526f
+
+      - id: panel.rules.evidence-visible
+        origin: walkdown
+        statement: A rule's detail shows the evidence behind its standing - the latest ledger result for each of its verify types - so the chain of trust is read where the rule is judged.
+        verify: [human]
+        screens: [rule-detail]
+        steps:
+          given:
+            - A rule with recorded runs, open in the detail pane
+          when:
+            - Reading anchor `detail.evidence` on screen `rule-detail`
+          then:
+            - Each verify type shows its latest result, who or what produced it, and staleness
+            - A rule with no runs says so rather than showing nothing
+          statement_hash: sha256:65b84178c291
+
+      - id: panel.rules.counts-legible
+        origin: thread:n-0002
+        statement: The list's footer counts say what they count and reconcile with the list - verified is a count of rules, the work owed to a person is named, and each owed rule carries a mark so the total can be counted back.
+        verify: [human]
+        screens: [review]
+        steps:
+          given:
+            - A blueprint whose rules are partly verified, with work owed to a person
+          when:
+            - Reading anchor `panel.counts` on screen `review`, then the marks in anchor `panel.rules-list`
+          then:
+            - Every number states its unit, so a reader can tell rules from pending actions
+            - Each rule owing human work carries a mark, and the marks sum to the footer's count
+          statement_hash: sha256:cc7b6d687101
+
   - id: panel.threads
     title: Feedback is answered where it is read
     statement: As a reviewer, I can reply to a thread and move its lifecycle on from the panel, without leaving the app I am reviewing.
@@ -416,7 +461,7 @@ stories:
     rules:
       - id: panel.walkdown.records-to-ledger
         origin: walkdown
-        statement: Finishing a walkdown in the panel appends a run record under a named person, exactly as the viewer does; discarding one records nothing.
+        statement: Finishing a walkdown in the panel appends a run record under a named person; discarding one records nothing.
         verify: [human]
         steps:
           given:
@@ -427,4 +472,105 @@ stories:
             - A walkdown run record is appended with those verdicts and that actor
             - An unnamed or agent actor is refused before anything is written
             - Discarding instead of finishing writes nothing
-          statement_hash: sha256:f4e6e6b66380
+          statement_hash: sha256:6cc28278f4a6
+
+      - id: panel.walkdown.verdicts-at-hand
+        origin: walkdown
+        statement: While a walkdown is running, pass and fail sit directly under the selected rule's statement - on screen without scrolling - beside a count of how many rules the session has judged.
+        verify: [human]
+        screens: [rule-detail]
+        steps:
+          given:
+            - A walkdown session running, a rule open in the detail pane
+          when:
+            - Reading anchor `detail.verdict` on screen `rule-detail`
+          then:
+            - Both verdict buttons are visible without scrolling any pane
+            - Anchor `detail.judged` says how many rules this session has judged
+            - The chosen verdict stays visibly chosen when the rule is revisited
+          statement_hash: sha256:10b43c02479d
+
+      - id: panel.walkdown.pass-advances
+        origin: walkdown
+        statement: A pass moves the session to the next rule owing a verdict; a fail stays put and turns pin mode on, because a fail wants a note pinned to what is wrong.
+        verify: [human]
+        screens: [rule-detail]
+        steps:
+          given:
+            - A walkdown session with several rules owing a human verdict
+          when:
+            - Pass the open rule, then fail the next
+          then:
+            - The pass opens the next owed rule and the judged count rises
+            - The fail keeps the rule open and switches pin mode on
+            - Judging the last owed rule returns to the list rather than a dead end
+          statement_hash: sha256:39a3512969c6
+
+  - id: panel.identity
+    title: The panel already knows who you are
+    statement: As a reviewer, I should not have to type my name to do attributed work - the tool knows it from the machine I am working on.
+    rules:
+      - id: panel.identity.default-actor
+        origin: thread:n-0008
+        statement: The actor field arrives filled in from the repository's git identity, falling back to the operating system username; it stays editable.
+        verify: [checks, human]
+        screens: [review]
+        steps:
+          given:
+            - A walkdown session started in a git repository with user.name set
+          when:
+            - Reading anchor `panel.actor` on screen `review`
+          then:
+            - The field already holds that name; no attributed action prompts for it
+            - Editing it records the corrected name on the session's verdicts
+          statement_hash: sha256:d251c7d97967
+
+      - id: panel.identity.attribution-visible
+        origin: thread:n-0008
+        statement: A defaulted identity is always visible before it is used - a walkdown verdict or a thread action shows the name it will be recorded under, so nobody is attributed silently.
+        verify: [human]
+        screens: [review, rule-detail]
+        steps:
+          given:
+            - An actor defaulted from git identity
+          when:
+            - Starting a walkdown, or taking a thread action from a rule's detail
+          then:
+            - The name being recorded is on screen at the moment of the action
+            - Correcting it before acting records the corrected name
+          statement_hash: sha256:1b6a789fde73
+
+  - id: panel.viewport
+    title: The frame renders at real device sizes
+    statement: As a reviewer, I judge what the user will actually see - a desktop layout at desktop width, a mobile layout at phone width - and the ghost always agrees with the frame about which.
+    rules:
+      - id: panel.viewport.device-presets
+        origin: thread:n-0005
+        statement: Framed, a bar control sizes the app's frame like a real device - desktop or mobile - and the ghost renders at the same viewport, so the comparison stays honest.
+        verify: [human]
+        screens: [review]
+        steps:
+          given:
+            - The framed layout open on screen `review`
+          when:
+            - Choose mobile from anchor `panel.viewport-toggle`
+          then:
+            - The frame re-renders narrow and a responsive app shows its mobile layout
+            - The ghost renders at that same viewport; the two never disagree
+            - Switching back to desktop restores both
+          statement_hash: sha256:2ded288a785a
+
+      - id: panel.viewport.zoom-to-fit
+        origin: thread:n-0005
+        statement: A viewport wider than the space the frame has scales down whole to fit, so a desktop layout is seen as a desktop layout rather than reflowed to a narrow column - and the current scale is visible.
+        verify: [human]
+        screens: [review]
+        steps:
+          given:
+            - A desktop viewport chosen while the frame's space is narrower than it
+          when:
+            - Reading the frame and anchor `panel.zoom` on screen `review`
+          then:
+            - The app lays out at the chosen width and is scaled down whole - no reflow
+            - The current scale is shown in anchor `panel.zoom`
+          statement_hash: sha256:8beb5dbadbe0

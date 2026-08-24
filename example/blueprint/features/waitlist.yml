@@ -80,7 +80,7 @@ stories:
         steps:
           statement_hash: "sha256:837d34b83fb1"
           given:
-            - The prototype and app screens for `waitlist-join` and `waitlist-confirm`, side by side
+            - The app on screens `waitlist-join` and `waitlist-confirm`, with the prototype ghost faded over each
           when:
             - Compare card layout, heading hierarchy, field/button placement, and copy
           then:

@@ -3,7 +3,7 @@ kind: note
 author: topher
 created: 2026-08-21T03:26:28Z
 anchor:
-  rule: viewer.layout.detail-drawer
+  rule: embed.pin.both-surfaces
   screen: rule-detail
   position:
     x: 501

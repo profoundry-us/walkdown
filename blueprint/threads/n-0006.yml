@@ -3,7 +3,7 @@ kind: note
 author: topher
 created: 2026-08-21T03:30:28Z
 anchor:
-  rule: viewer.layout.detail-drawer
+  rule: panel.rules.detail-slide
   screen: rule-detail
   position:
     x: 433

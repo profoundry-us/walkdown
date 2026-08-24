@@ -28,9 +28,10 @@ surfaces in sync with that hub:
 
 **Files are the source of truth; the web app is a lens.** The blueprint lives as YAML/JSON
 files in the project repo. Agents interact with it via file tools and a CLI — no API, no
-auth, no export step. The viewer is a local server (`walkdown serve`) rendering those same
-files in the Claude Desktop browser pane, writing edits back to them. A hosted multi-user
-layer is an explicit *later*, built on top of the file format, never a replacement for it.
+auth, no export step. The panel is served by a local server (`walkdown serve`) and renders
+those same files in the browser beside the page under review, writing edits back to them.
+A hosted multi-user layer is an explicit *later*, built on top of the file format, never a
+replacement for it.
 
 **Criteria are the interface; tests are a pluggable implementation.** Rules are written in
 the blueprint; checks are the team's own tests in the team's own framework, tagged with
@@ -65,19 +66,22 @@ viable: it coordinates the owners without overruling them.
 
 **Meet the work where it runs.** Agents author, build, and run checks from file edits
 and the CLI — that half never needed a UI. Humans review in **the browser, beside the
-running application**: a docked panel delivered by a browser extension, so walkdown can
-be pointed at a page whether or not anyone can edit its markup.
+running application**: one panel, delivered two ways. A script tag docks it into a page
+you control, pushing the app aside so it keeps its own tab and viewport. The browser
+extension goes further and **frames the page inside walkdown's own document** — because
+only a frame boundary is real isolation. The app's modals lay out against the frame
+instead of covering walkdown, the `inert` a native `<dialog>` imposes stops at the
+frame's edge, and the extension strips the frame-refusal headers (session-scoped, per
+reviewed tab) so even pages that forbid framing render.
 
-This principle used to read "stay inside Claude Code", and the viewer was built to honour
-it — walkdown framed the app in an iframe so a reviewer never left the desktop app. Two
-things retired that. Framing is refused by any app that sets `X-Frame-Options`, and the
-script-tag delivery only reaches apps whose source you control; between them they exclude
-most of what a PM actually needs to review. An extension has neither limit.
-
-Nothing about this is a move away from Claude — the panel is a web page like any other,
-and the browser pane renders it (Chromium, verified). If Claude gains extension support,
-the same extension loads there and the two stories become one again. The tool's own
-surfaces stay web pages precisely so that stays possible.
+This principle used to read "stay inside Claude Code", and an earlier viewer honoured it
+by framing prototype and app side by side inside one local page. What retired it was the
+layout, not the frame: two half-width panes shortchange both surfaces, and a page that
+could be neither framed nor injected into was out of reach entirely. The extension
+resolves both — and nothing about it is a move away from Claude. The panel is a web page
+like any other, and the browser pane renders it (Chromium, verified). If Claude gains
+extension support, the same extension loads there and the two stories become one again.
+The tool's own surfaces stay web pages precisely so that stays possible.
 
 ## The core loop
 
@@ -89,10 +93,10 @@ surfaces stay web pages precisely so that stays possible.
 3. **Run.** `walkdown run --target local|staging` executes linked checks and appends a run
    record. CI can do the same.
 4. **Walk down.** An agent walkdown pre-screens judgment rules (comparing app against
-   prototype via the storyboard); then a human steps through rules in the viewer, with
-   prototype and app deep-linked side by side and the embed pinning notes to real
-   elements. Both sessions land as walkdowns in the same ledger; only the human's verdict
-   satisfies a `human` verify requirement.
+   prototype via the storyboard); then a human steps through rules in the panel beside
+   the live app, fading the prototype ghost over it to compare, with the embed pinning
+   notes to real elements. Both sessions land as walkdowns in the same ledger; only the
+   human's verdict satisfies a `human` verify requirement.
 5. **Close the loop.** Agents consume notes and questions (anchored to exact elements),
    fix, re-run, and fold answers back into rules.
 
@@ -104,13 +108,12 @@ surfaces stay web pages precisely so that stays possible.
   ([03](03-runner-contract.md))
 - Embed script + anchor convention (test-id reuse); feedback/questions written to the local server
   ([04](04-embed-and-anchors.md))
-- **The docked panel**: walkdown's chrome riding beside the running app in its own tab,
-  wearing its own skin so it is never mistaken for the thing under review. The app keeps
-  its real viewport; the prototype ghosts over it on demand rather than taking half the
-  window. Delivered two ways from one implementation — a script tag for apps you control,
-  and an unpacked browser extension for every other page.
-- The framing viewer, kept for what only it can do: a project with a prototype and no app
-  yet, and surfaces that cannot be injected into at all
+- **The panel**: walkdown's chrome riding beside the running app, wearing its own skin
+  so it is never mistaken for the thing under review. The app keeps a real viewport; the
+  prototype ghosts over it on demand rather than taking half the window. Delivered two
+  ways from one implementation — a script tag docks it into an app you control, and the
+  browser extension frames any other page inside walkdown's own document, the app lying
+  as a sheet on walkdown's desk with the panel alongside.
 - Run ledger with multi-target runs and human walkdowns ([05](05-runs-ledger.md))
 
 ## Delivery
@@ -147,7 +150,7 @@ Exercise the schema end-to-end **by hand** on one small feature:
 4. Record one run and one fake note thread as raw files.
 5. Read it all back and ask: does the loop feel right in raw files?
 
-If yes, the viewer and CLI are progressive enhancement on something already working.
+If yes, the panel and CLI are progressive enhancement on something already working.
 
 ## Release
 

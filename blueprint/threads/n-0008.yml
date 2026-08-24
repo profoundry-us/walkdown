@@ -3,7 +3,7 @@ kind: note
 author: topher
 created: 2026-08-21T19:00:02Z
 anchor:
-  rule: viewer.layout.detail-drawer
+  rule: panel.identity.default-actor
   screen: rule-detail
   position:
     x: 569

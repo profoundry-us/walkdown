@@ -1,42 +1,45 @@
-# The viewer's own screens. The "app" is the running viewer itself
-# (walkdown serve), so the side-by-side compares mockup against live tool.
+# walkdown's own screens. The page under review is whatever the panel rides
+# beside, so these are prototype-only: the panel's design surface, letting
+# rules about the panel anchor pins to the mockups.
 screens:
-  - id: board
-    title: The board
-    prototype: /screens/board.html
-    app: { path: / }
+  - id: review
+    title: The review page
+    prototype: /screens/review.html
     anchors:
-      - board.project-switcher
-      - board.counts
-      - board.mode-switcher
-      - board.rules
-      - board.rail-toggle
-      - board.surfaces
-      - board.drawer
-      - board.viewport-toggle
-      - board.zoom
-      - board.actor
+      - panel.bar
+      - panel.desk
+      - panel.desk-tuner
+      - panel.blueprint
+      - panel.fade
+      - panel.viewport-toggle
+      - panel.pin-mode
+      - panel.walk
+      - panel.actor
+      - panel.app-frame
+      - panel.zoom
+      - panel.tabs
+      - panel.rules-list
+      - panel.counts
 
   - id: rule-detail
-    title: Rule detail (state — select a rule on the board)
+    title: Rule detail (state — open a rule on the Rules tab)
     prototype: /screens/rule-detail.html
-    app: { path: / }
     anchors:
+      - detail.back
+      - detail.stepper
       - detail.rule-id
       - detail.statement
+      - detail.verdict
+      - detail.judged
       - detail.evidence
-      - detail.flow
       - detail.steps
       - detail.technical-disclosure
+      - detail.verify
       - detail.threads
-      - detail.drawer-toggle
-      - detail.resize-handle
-      - detail.verdict
 
   - id: thread-panel
-    title: Thread panel (state — open a pin or a thread)
+    title: Thread popover (state — open a pin)
     prototype: /screens/thread-panel.html
-    app: { path: / }
     anchors:
       - thread.panel
       - thread.provenance

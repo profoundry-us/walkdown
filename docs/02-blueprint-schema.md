@@ -108,7 +108,7 @@ stories:
   checks resilient.
 - **The screen progression is derived from the steps, never declared twice.** `screens:`
   is an unordered set used for linting and coverage; the steps mention screens in
-  traversal order, and tooling reads that progression directly. The viewer renders the
+  traversal order, and tooling reads that progression directly. The panel renders the
   flow (`waitlist-join → waitlist-confirm`) and deep-links to the **last** screen the
   steps mention — where the flow ends is where the outcome is observable (a
   "visitor sees a confirmation" rule ends on the confirmation screen; a "visitor
@@ -143,7 +143,7 @@ screens:
     app:
       path: /checkout/payment                    # relative to target base_url
       setup: cart_with_item      # OPTIONAL fixture/recipe name; v1 may leave empty
-    anchors:                     # optional: declared anchors for lint & viewer
+    anchors:                     # optional: declared anchors for lint & the panel
       - checkout.email
       - checkout.email-error
       - checkout.submit
@@ -163,7 +163,7 @@ screens:
   gets ahead of a source — a rule incorporated from a thread needs a screen design
   doesn't have — the screen is declared with **`prototype: null`** (spec'd, not yet
   designed) and a **design-request thread** is filed, anchored to that screen. Builders
-  may sketch a **`proposal:`** (an HTML file under `proposals/`, rendered in the viewer
+  may sketch a **`proposal:`** (an HTML file under `proposals/`, shown by the panel
   with a "proposed — not from design" badge) as a communication artifact — the shop
   drawing the contractor submits, never a change to the architect's plans. When design
   ships the real screen, `prototype:` gets its path, the proposal is superseded, and the
@@ -207,7 +207,7 @@ replies:
   (agents may *propose* a waive but never set it). Waived threads stop rendering as pins
   and stop counting against lint, but remain as provenance.
 - **Transitions are validated, and mutation goes through one path** (the `walkdown
-  thread` CLI, the serve API, and the viewer all use it): notes move
+  thread` CLI, the serve API, and the panel all use it): notes move
   `open → addressed → verified | reopen | waived`, questions
   `open → answered → incorporated | reopen | waived`. Reopening (back to `open`) and
   waiving require a reason, recorded as a reply. The governance rule that keeps the

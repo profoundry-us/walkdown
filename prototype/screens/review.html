@@ -1,0 +1,94 @@
+<!doctype html>
+<!-- daisyUI's wireframe theme does the mockup look for us: no brand colour, no
+     type personality, just structure. Swap data-theme to "light" to preview the
+     same markup in the real skin. -->
+<html lang="en" data-theme="wireframe">
+<head>
+<meta charset="utf-8">
+<title>Mockup — walkdown review</title>
+<link rel="stylesheet" href="http://localhost:4700/walkdown.css">
+<style>
+  /* The desk: ruled drafting paper, tilted, lying under everything. The build
+     renders it with a real 3D perspective transform; the mockup only needs to
+     say "there is a desk and the app is a sheet on it". */
+  .desk {
+    position: fixed; inset: -60vmax; z-index: 0; pointer-events: none;
+    background:
+      repeating-linear-gradient(0deg, transparent 0 59px, currentColor 59px 60px),
+      repeating-linear-gradient(90deg, transparent 0 59px, currentColor 59px 60px);
+    opacity: .08; transform: rotate(35deg);
+  }
+</style>
+</head>
+<body class="h-screen overflow-hidden bg-base-200 text-sm">
+  <div class="desk" data-testid="panel.desk"></div>
+
+  <header class="navbar relative z-10 min-h-0 gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5"
+          data-testid="panel.bar">
+    <button class="btn btn-xs btn-ghost btn-square" title="Tune the desk" data-testid="panel.desk-tuner">⚙</button>
+    <span class="font-extrabold tracking-tight">walkdown</span>
+    <span class="text-xs opacity-50" data-testid="panel.blueprint">example/blueprint</span>
+
+    <span class="absolute left-1/2 flex -translate-x-1/2 items-center gap-2" data-testid="panel.fade">
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25">Prototype</button>
+      <input type="range" min="0" max="100" value="100" class="range range-xs w-28">
+      <button class="btn btn-xs btn-active">App</button>
+    </span>
+
+    <span class="ml-auto flex items-center gap-2">
+      <span class="join border-[1.5px] border-dashed border-base-content/25" data-testid="panel.viewport-toggle"
+            title="Size the frame like a real device; the ghost always agrees">
+        <button class="btn btn-xs join-item btn-active">🖥 1440</button>
+        <button class="btn btn-xs join-item btn-ghost">📱 390</button>
+      </span>
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25" data-testid="panel.pin-mode">📌 Pin mode</button>
+      <button class="btn btn-xs btn-neutral" data-testid="panel.walk">Finish walkdown</button>
+      <button class="btn btn-xs btn-ghost" title="Put walkdown away">✕</button>
+    </span>
+  </header>
+
+  <main class="relative z-10 flex h-[calc(100vh-2.5rem)] gap-3 p-3">
+    <!-- The application: a sheet lying on the desk, framed so it keeps a real,
+         isolated viewport of its own — its modals center HERE, not over walkdown. -->
+    <section class="relative flex-1 wire rounded-xl bg-base-100 shadow-lg" data-testid="panel.app-frame">
+      <div class="grid h-full place-items-center text-center text-xs leading-relaxed opacity-50">
+        THE APP — framed at the chosen viewport, headers stripped by the extension<br>
+        so even pages that refuse framing render. The prototype ghosts over this<br>
+        same box when the fade slider moves toward Prototype.
+      </div>
+      <span class="badge badge-sm badge-ghost absolute bottom-2 right-2 border-dashed"
+            data-testid="panel.zoom" title="Wider than the space? Scaled down whole, never reflowed">fit 74%</span>
+    </section>
+
+    <aside class="flex w-72 shrink-0 flex-col wire rounded-xl bg-base-100 shadow-lg">
+      <div class="m-2 flex items-center justify-center gap-1 self-center rounded-lg border border-dashed border-base-content/25 p-1 text-xs"
+           data-testid="panel.tabs">
+        <button class="btn btn-xs btn-ghost gap-1">▦ Blueprints</button>
+        <button class="btn btn-xs btn-active gap-1">✓ Rules</button>
+        <button class="btn btn-xs btn-ghost gap-1">⛶ Screens</button>
+      </div>
+
+      <div class="flex items-center gap-2 border-b border-dashed border-base-content/25 px-3 py-1.5 text-xs"
+           data-testid="panel.actor">
+        <span>Walkdown recording as</span>
+        <input class="input input-xs w-24 border-dashed" value="topher" title="from git identity — editable">
+        <span class="opacity-60">3 judged</span>
+      </div>
+
+      <ul class="menu menu-xs flex-1 overflow-y-auto p-2" data-testid="panel.rules-list">
+        <li><a>✓ email-required</a></li>
+        <li><a class="menu-active">✓ confirmation</a></li>
+        <li><a>○ already-joined <span class="badge badge-xs ml-auto border-dashed" title="owes a human verdict">you</span></a></li>
+        <li><a>○ visual-match <span class="badge badge-xs ml-auto">1 ⚑</span></a></li>
+      </ul>
+
+      <footer class="flex items-center gap-2 border-t border-dashed border-base-content/25 px-3 py-2 text-xs opacity-70"
+              data-testid="panel.counts">
+        <span><b>8 of 10</b> rules verified</span>
+        <span class="badge badge-xs badge-ghost ml-auto border-dashed">2 need you</span>
+      </footer>
+    </aside>
+  </main>
+  <script src="http://localhost:4700/embed.js" data-walkdown></script>
+</body>
+</html>

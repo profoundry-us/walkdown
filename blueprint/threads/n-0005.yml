@@ -3,9 +3,9 @@ kind: note
 author: topher
 created: 2026-08-21T03:29:46Z
 anchor:
-  rule: viewer.layout.surfaces-first
-  screen: board
-  element: board.surfaces
+  rule: panel.viewport.zoom-to-fit
+  screen: review
+  element: panel.app-frame
 status: addressed
 body: >-
   The prototype and app views should zoom their contents so that you can see

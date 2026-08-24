@@ -3,7 +3,7 @@ kind: note
 author: topher
 created: 2026-08-21T03:32:39Z
 anchor:
-  rule: viewer.layout.detail-drawer
+  rule: panel.rules.steps-not-an-appendix
   screen: rule-detail
   element: detail.evidence
 status: addressed

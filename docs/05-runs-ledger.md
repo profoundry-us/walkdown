@@ -73,7 +73,7 @@ Fields of note:
 
 walkdown sessions come in two flavors, producing the same record shape:
 
-- **Human** (`actor: <person>`): stepping through rules in the viewer. The only evidence
+- **Human** (`actor: <person>`): stepping through rules in the panel. The only evidence
   that satisfies a `human` verify requirement.
 - **Agent** (`actor: agent`): an AI agent runs the same ritual headlessly — navigates
   both surfaces via the storyboard, compares app against prototype per rule (screenshots,
@@ -97,8 +97,10 @@ walkdown sessions come in two flavors, producing the same record shape:
 }
 ```
 
-- The viewer drives the session: it walks the rule list, deep-links both surfaces per
-  step ([04-embed-and-anchors.md](04-embed-and-anchors.md)), and records verdicts.
+- The panel drives the session: it walks the rule list, takes the surface under review
+  to each rule's screen ([04-embed-and-anchors.md](04-embed-and-anchors.md)), and
+  records verdicts — a pass advances to the next rule owing one, a fail stays put so a
+  note can be pinned where it failed.
 - A human "fail" usually spawns a **note thread** at the offending element; the run result
   links to it, so the agent fixing the note can see exactly which walkdown rejected what.
 - Partial sessions are fine — un-visited rules simply don't appear in `results`.
@@ -128,8 +130,8 @@ Query semantics:
   than the current branch renders as `~ stale`, prompting a re-run.
 - `*` marks threads stuck at `answered` (knowledge not yet incorporated —
   see [02-blueprint-schema.md](02-blueprint-schema.md)).
-- `--json` output is the agent-facing form; the human-facing table and the viewer's
-  dashboard are renderings of the same query.
+- `--json` output is the agent-facing form; the human-facing table and the panel's
+  counts are renderings of the same query.
 
 ## Retention
 

@@ -180,7 +180,7 @@ test('positions are stored in the surface coordinate space given @rule:embed.pin
   assert.equal(n.viewport.width, 390);
 });
 
-test('the blueprint payload carries a default actor @rule:viewer.identity.default-actor', async () => {
+test('the blueprint payload carries a default actor @rule:panel.identity.default-actor', async () => {
   const payload = await (await fetch(`${base}/api/blueprint`)).json();
   assert.ok(payload.identity?.actor, 'an identity must always be offered');
   assert.match(payload.identity.source, /^(git|os)$/);

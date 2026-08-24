@@ -3,9 +3,8 @@ kind: note
 author: topher
 created: 2026-08-21T03:01:51Z
 anchor:
-  rule: viewer.layout.surfaces-first
-  screen: board
-  element: board.drawer
+  rule: panel.dock.chrome-not-a-pin-target
+  screen: review
 status: verified
 body: Tried to pin the drawer hint ("Select a rule — its detail opens here as a
   drawer") while walking surfaces-first, but nothing there was selectable. The

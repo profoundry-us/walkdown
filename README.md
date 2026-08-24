@@ -21,12 +21,12 @@ The blueprint is the hub. Everything else is a projection of it:
 - The **built app** is verified *against* it.
 - The **test suite** (the project's own — RSpec workflow specs, Playwright, anything) is
   linked *to* it via lightweight tags.
-- The **viewer** renders it, and the **embed** lets humans and agents pin feedback and
-  questions to real elements on real screens.
+- The **panel** renders it beside the page under review, and the **embed** lets humans
+  and agents pin feedback and questions to real elements on real screens.
 
-Both audiences work in the same place: agents read and write blueprint files with ordinary
-file tools inside Claude Code; humans use a local web viewer (in the Claude Desktop browser
-pane) that renders those same files.
+Both audiences work in the same place: agents read and write blueprint files with
+ordinary file tools inside Claude Code; humans review in the browser, with walkdown's
+panel riding beside the running app and rendering those same files.
 
 ## Documentation
 
@@ -36,7 +36,7 @@ pane) that renders those same files.
 | [01-glossary.md](docs/01-glossary.md) | The vocabulary — every term, one meaning |
 | [02-blueprint-schema.md](docs/02-blueprint-schema.md) | Entities, file layout, IDs, dual representation |
 | [03-runner-contract.md](docs/03-runner-contract.md) | How any test framework plugs in (linkage, execution, results) |
-| [04-embed-and-anchors.md](docs/04-embed-and-anchors.md) | The anchor convention (test-id reuse), embed script, side-by-side viewer |
+| [04-embed-and-anchors.md](docs/04-embed-and-anchors.md) | The anchor convention (test-id reuse), embed script, the docked and framed panel layouts |
 | [05-runs-ledger.md](docs/05-runs-ledger.md) | Verification runs, walkdowns, derived status |
 
 ## CLI
@@ -91,19 +91,21 @@ records. Errors exit 1; warnings don't.
 in place, preserving YAML formatting. Hashes are sha256 of the whitespace-normalized
 statement, stored truncated (`sha256:` + 12 hex).
 
-## walkdown serve — the viewer
+## walkdown serve — the panel and its APIs
 
 `walkdown serve` starts the local server (default port 4700, `127.0.0.1` only):
 
-- **Viewer** at `/` — the status board, rule detail, and prototype/app **side by side**
-  (the prototype is mounted at `/prototype/`; the app iframe points at the local
-  target's `base_url`). Clicking a rule navigates both surfaces via the storyboard.
+- **The panel** — served as `/panel.js` (with `/embed.js` and `/walkdown.css` beside
+  it). A script tag docks it into a dev page you control; the browser extension
+  ([extension/](extension/)) loads the same files and frames any other page inside
+  walkdown's own document. The prototype is mounted at `/prototype/`, and picking a
+  rule takes the surface under review to that rule's screen via the storyboard.
 - **Pin mode** — with the embed snippet in a page (`<script
   src="http://localhost:4700/embed.js" data-walkdown data-bp="example/blueprint">`),
   clicking a real element pins a note or question to its anchor; the thread lands in
   `blueprint/threads/` with rule, screen, element, and author attached. **Escape** leaves
   pin mode (closing an open form first), as does clicking the badge again. Standalone
-  pages (opened outside the viewer) resolve their screen from the URL and post to the
+  pages (opened without the panel) resolve their screen from the URL and post to the
   same server — including HTTPS staging pages, via the Private-Network-Access preflight.
   `data-bp` names the project when one server hosts sibling blueprints; omit it and pins
   file against whichever blueprint `walkdown serve` started in.
@@ -122,8 +124,8 @@ statement, stored truncated (`sha256:` + 12 hex).
 
 ## Styling — Tailwind CSS + daisyUI
 
-Every surface walkdown draws (the viewer, the docked panel, the prototype wireframes,
-the example app) is styled with **Tailwind CSS 4 + daisyUI 5**, built ahead of time
+Every surface walkdown draws (the panel, the embed's pins and ghost, the prototype
+wireframes, the example app) is styled with **Tailwind CSS 4 + daisyUI 5**, built ahead of time
 into a single `lib/viewer/walkdown.css` that is committed and shipped in the package.
 Installing walkdown still runs no build and pulls no CSS toolchain: `tailwindcss` and
 `daisyui` are **devDependencies**, and `yaml` remains the only runtime dependency.
@@ -139,8 +141,8 @@ than fetching one from a dev tool. Prototype screens do borrow walkdown's copy o
 `http://localhost:4700/walkdown.css`, right beside the `embed.js` tag they already
 depend on.
 
-Two themes ship in that stylesheet. `light` is the default and dresses the viewer, the
-panel, and example apps. **`wireframe`** dresses the prototype screens — a mockup wears
+Two themes ship in that stylesheet. `light` is the default and dresses the panel and
+example apps. **`wireframe`** dresses the prototype screens — a mockup wears
 `<html data-theme="wireframe">` so it reads as a drawing rather than as a build, which
 is exactly the distinction a walkdown is judging. Any element can pin either theme with
 `data-theme`, so a prototype can be previewed in the real skin without editing it.
@@ -182,7 +184,7 @@ Design docs + first milestone (a hand-run of the schema in [example/](example/))
 `lint`/`hash`/`status`/`threads` tooling + run-record emitters for both ecosystems:
 the Playwright reporter (`walkdown/reporter`) and the RSpec formatter
 ([adapters/rspec/](adapters/rspec/), with its own fixture suite) + `walkdown serve`
-(viewer, embed, pins, human walkdowns). The v1 scope from
+(panel, embed, pins, human walkdowns). The v1 scope from
 [00-vision.md](docs/00-vision.md) is complete except `extract` (PRD/prototype →
 blueprint merge). Publishing (npm `walkdown` + `@profoundry` scope, RubyGems
 `walkdown-rspec`) is the next step before sharing.

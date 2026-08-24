@@ -20,13 +20,15 @@ know Gherkin, and mapping to it measurably helps them.
 | **Headless rule** | A rule with no screens — API behavior, CLI contract, job, or policy. Gets the full ledger (statements, coverage, runs, staleness, threads) without the UI layer (storyboard, anchors, embed). | Executable specification |
 | **Anchor** | A stable, dot-namespaced element identity shared by prototype and app (e.g. `checkout.submit`), carried by a configurable attribute — `data-testid` by default, reusing the Playwright/Testing Library/Capybara test-id convention. Pins, steps, and checks all anchor to anchors. | *(no BDD analogue — ours)* |
 | **Run** | One append-only record of verification: who/what verified, against which target, at which commit, with per-rule results. | Test run |
-| **walkdown** (session) | A judgment-based run: a human (in the viewer) or an AI agent steps through rules, comparing app against prototype, and records verdicts. Named for the engineering practice of walking a site to verify construction matches drawings. Only human sessions satisfy a `human` verify requirement. | Walkthrough |
+| **walkdown** (session) | A judgment-based run: a human (in the panel) or an AI agent steps through rules, comparing app against prototype, and records verdicts. Named for the engineering practice of walking a site to verify construction matches drawings. Only human sessions satisfy a `human` verify requirement. | Walkthrough |
 | **Target** | A named environment a run executed against (`local`, `staging`), defined in project config. | — |
 | **Note** | Human feedback pinned to a rule/screen/element via the embed. | — |
 | **Question** | A clarification request — from an agent *or* a human — anchored the same way as a note. Lifecycle ends at **incorporated**: the answer must land in the rule's statement/steps; the thread remains as provenance. | Example Mapping red card |
 | **Thread** | The container for a note or question and its replies. | — |
 | **Waived** | Terminal thread status: reviewed and deliberately not acted on — the construction term for a punch-list item accepted as-is. Requires a person and a reason; agents may propose but never waive. | — |
-| **Viewer** | The local web app (`walkdown serve`) that renders the blueprint, storyboard, ledger, and threads in the Claude Desktop browser pane. | Living documentation browser |
+| **Panel** | walkdown's chrome riding beside the page under review — the rules list, detail, threads, and walkdown session controls, served by `walkdown serve`. Delivered *docked* (a script tag injects it into the app's own document and pushes the app aside) or *framed* (the browser extension frames the app inside walkdown's own page). | Living documentation browser |
+| **Ghost** | The other surface — usually the prototype — rendered translucently over the page under review and faded in and out with a slider. The comparison mechanism; there are no side-by-side panes. | — |
+| **Desk** | The drafting-table backdrop of the framed layout: the app lies on it as a sheet, so it reads as the thing being examined rather than as part of the tool. | — |
 | **Embed** | The small script injected into prototype and dev/staging app that does element picking, pin rendering, and screen reporting. | — |
 
 ## Process vocabulary

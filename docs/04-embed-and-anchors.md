@@ -78,16 +78,18 @@ Responsibilities:
 2. **Pin rendering** — draw open threads at their anchors (or their recorded positions) so
    feedback is seen in place.
 3. **Screen reporting** — announce the current screen (URL + anchor fingerprint) so the
-   viewer can track where the user is.
+   panel can track where the user is.
 4. **Navigation duty** — respond to "go to screen X" commands using the storyboard's
    locator for its surface.
 
 It auto-detects its transport:
 
-- **Framed** (inside the viewer's side-by-side mode): a `postMessage` handshake with the
-  parent; all traffic flows through the viewer.
-- **Standalone** (opened directly): HTTP to the local walkdown server
-  (`http://localhost:4700`), which writes threads straight into `blueprint/threads/`.
+- **Framed** (inside walkdown's own page — the extension's review document, or the ghost
+  overlay in either layout): a `postMessage` handshake with the parent; all traffic flows
+  through the panel.
+- **Standalone** (opened directly, or docked beside the panel in the app's own document):
+  HTTP to the local walkdown server (`http://localhost:4700`), which writes threads
+  straight into `blueprint/threads/`.
 
 ## Injection per surface — boring on purpose
 
@@ -132,32 +134,36 @@ Failure mode: if no local server is reachable, the embed queues writes in
 `localStorage` and shows an "offline — start `walkdown serve` and retry" badge, so
 feedback given before the server starts isn't lost.
 
-## Iframes are a view, not the mechanism
+## Two layouts, one panel
 
 A cross-origin iframe seals its DOM off from the parent — a wrapper alone cannot pick
 elements, read the current URL, or render pins. So the embed script is the one true
-mechanism, and the viewer's **side-by-side mode** is just a layout:
+mechanism; where the panel stands relative to the page is just layout, and there are two:
 
-```
-┌───────────────┬──────────────────────┬──────────────────────┐
-│ Rules         │  Prototype (iframe)  │  App (iframe)        │
-│ ▸ checkout.…  │  [embed inside]      │  [embed inside]      │
-│   ● rule      │                      │                      │
-│   steps…      │   pins, highlights   │   pins, highlights   │
-└───────────────┴──────────────────────┴──────────────────────┘
-```
+**Docked** — the script-tag delivery. The panel is injected into the application's own
+document and pushes it aside: the app keeps its tab, its URL bar, its full width. The
+prototype appears as the **ghost** — the storyboard screen's design rendered in a frame
+over the app and faded with a slider — so comparing never costs the app half the window.
+What the app positions against the viewport (native dialogs, full-screen overlays) is
+beyond this layout's reach, which is why the second layout exists.
 
-- Clicking a rule navigates **both frames** via the storyboard's per-surface locators and
-  highlights the rule's anchors in each.
-- Stepping through a rule's steps advances a human walkdown session
+**Framed** — the extension delivery. walkdown owns the document: the application renders
+inside an iframe lying as a sheet on walkdown's desk, panel alongside. A frame boundary
+is real isolation — the app's modals center against the frame, and the `inert` a native
+`<dialog showModal()>` imposes stops at the frame's edge instead of freezing walkdown's
+own chrome. Pages that refuse framing render anyway: the extension strips
+`X-Frame-Options`/`frame-ancestors` from sub-frame responses with session-scoped rules,
+added when a review starts on that tab and removed when it ends. The ghost works the
+same way, fading over the frame.
+
+In both layouts:
+
+- Picking a rule takes the surface under review to that rule's screen via the
+  storyboard's locators.
+- Stepping through rules advances a human walkdown session
   ([05-runs-ledger.md](05-runs-ledger.md)).
-- Both embeds talk to the viewer over `postMessage`; the viewer persists through the local
-  server.
-- **Degradation:** locally we control both targets, so framing works. When a staging app
-  sends `frame-ancestors`/`X-Frame-Options` denials or its auth breaks under third-party
-  cookie rules, the viewer opens that surface in a separate tab instead — nothing breaks,
-  because the embed never depended on being framed (it falls back to the localhost HTTP
-  transport).
+- The ghost and the framed app talk to the panel over `postMessage`; the panel persists
+  through the local server.
 
 ## Security posture
 

@@ -124,7 +124,7 @@ walkdown init                      # scaffold blueprint/ in a project
 walkdown status [--target X]       # derived per-rule status table (see 05)
 walkdown lint                      # the checks above
 walkdown run [--target X] [--rule ID]
-walkdown serve                     # viewer + embed endpoint + feedback receiver
+walkdown serve                     # panel + embed + blueprint API + feedback receiver
 walkdown extract [--source prd|prototype]   # propose a merge diff
 ```
 

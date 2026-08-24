@@ -68,7 +68,7 @@ notes), and the runs ledger. The blueprint is the single source of truth for
     walkdown run [--target] [--rule]  run checks, record the run
     walkdown threads [--rule <id>]  active questions & notes
     walkdown thread <id> [...]      view / reply / transition
-    walkdown serve                  viewer + embed + pin/walkdown APIs
+    walkdown serve                  panel + embed + pin/walkdown APIs
 
 ## Procedures
 
