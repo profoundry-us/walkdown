@@ -1,10 +1,18 @@
-# walkdown's own screens. The page under review is whatever the panel rides
-# beside, so these are prototype-only: the panel's design surface, letting
-# rules about the panel anchor pins to the mockups.
+# walkdown's own screens.
+#
+# walkdown has no running page to point the App surface at: the running build
+# IS the panel you are holding, which lives beside whatever page it rides. That
+# left the app side of every comparison empty - no fade, no ghost, no pin on
+# the app. So each screen's app path is a STAND-IN: the server serves the
+# screen's own design back under /stand-in/<id>, in a different theme and
+# marked as such (see lib/serve.js). It makes the comparison machinery usable
+# for judging the panel; it is not the build, and never evidence that one
+# exists.
 screens:
   - id: review
     title: The review page
     prototype: /screens/review.html
+    app: { path: /stand-in/review }
     anchors:
       - panel.bar
       - panel.desk
@@ -24,6 +32,7 @@ screens:
   - id: rule-detail
     title: Rule detail (state — open a rule on the Rules tab)
     prototype: /screens/rule-detail.html
+    app: { path: /stand-in/rule-detail }
     anchors:
       - detail.back
       - detail.stepper
@@ -41,6 +50,7 @@ screens:
   - id: thread-panel
     title: Thread popover (state — open a pin)
     prototype: /screens/thread-panel.html
+    app: { path: /stand-in/thread-panel }
     anchors:
       - thread.panel
       - thread.provenance
@@ -53,6 +63,7 @@ screens:
   - id: start
     title: First run (state — no server connected)
     prototype: /screens/start.html
+    app: { path: /stand-in/start }
     anchors:
       - start.message
       - start.server
@@ -61,6 +72,7 @@ screens:
   - id: choose-blueprint
     title: Choose a blueprint (state — folder holds several)
     prototype: /screens/choose-blueprint.html
+    app: { path: /stand-in/choose-blueprint }
     anchors:
       - start.folder
       - start.options
@@ -68,12 +80,14 @@ screens:
   - id: docked
     title: The docked layout (script-tag delivery)
     prototype: /screens/docked.html
+    app: { path: /stand-in/docked }
     anchors:
       - docked.page
 
   - id: settings
     title: Settings (state — open the gear)
     prototype: /screens/settings.html
+    app: { path: /stand-in/settings }
     anchors:
       - settings.panel
       - settings.actor

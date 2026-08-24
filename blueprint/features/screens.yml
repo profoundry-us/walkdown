@@ -67,3 +67,24 @@ stories:
             - An answer a person gave about the previous page - which screen it was, whose art to ghost - does not carry across the navigation
             - pushState announces nothing and the extension cannot patch the page's own History, so that case is caught by watching rather than left to pretend it was heard
           statement_hash: sha256:e8763cbea8b6
+
+  - id: screens.surfaces
+    title: Both surfaces, even when one of them is not a page
+    statement: As a reviewer, I can compare a design against the app on every screen - including screens whose app is chrome rather than a URL, or is not built yet.
+    rules:
+      - id: screens.surfaces.stand-in-app
+        origin: walkdown
+        statement: A screen whose app is not a page - because the thing being built is chrome, or is not built yet - can declare a stand-in, and walkdown serves that screen's own design back as the app, visibly marked as a stand-in, so fading, ghosting and pinning on the app surface all work while nobody can mistake it for the build.
+        verify: [checks, human]
+        screens: [review]
+        steps:
+          given:
+            - A screen whose storyboard app path points at the server's stand-in for it
+          when:
+            - Switch the surface to App
+          then:
+            - The app pane shows that screen's design, and the comparison controls come alive - fade, ghost, and pin mode on the app side
+            - It announces itself on its own face - a marked edge and a corner label - and wears a theme of neither the mockups nor walkdown's chrome
+            - The anchors are the design's own, so a pin lands on the same element on either surface, and is recorded against the app
+            - It is not evidence - what it shows is the design, so a verdict given against it is a verdict about the design
+          statement_hash: sha256:8c976257c8c0

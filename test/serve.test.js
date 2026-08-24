@@ -285,6 +285,21 @@ test('a session drafts to disk and finishing seals it into one run @rule:panel.w
   assert.equal(readDraft(bp), null);
 });
 
+test('a stand-in serves the design as the app, marked as one @rule:screens.surfaces.stand-in-app', async () => {
+  const res = await fetch(`${base}/stand-in/home`);
+  assert.equal(res.status, 200);
+  const html = await res.text();
+  // The design's own markup and anchors, so a pin lands on the same element
+  // on either surface — and the embed still rides along.
+  assert.match(html, /data-testid="home\.cta"/);
+  // Neither the mockups' theme nor walkdown's chrome, and it says what it is.
+  assert.match(html, /data-theme="emerald"/);
+  assert.match(html, /walkdown-stand-in-ring/);
+  assert.match(html, /stand-in app/);
+  // A screen with no design has no stand-in to serve.
+  assert.equal((await fetch(`${base}/stand-in/nope`)).status, 404);
+});
+
 test('invalid writes are rejected with 400', async () => {
   const bad = await fetch(`${base}/api/walkdowns`, {
     method: 'POST',

@@ -100,6 +100,11 @@ statement, stored truncated (`sha256:` + 12 hex).
   ([extension/](extension/)) loads the same files and frames any other page inside
   walkdown's own document. The prototype is mounted at `/prototype/`, and picking a
   rule takes the surface under review to that rule's screen via the storyboard.
+- **The stand-in app** — for screens with no running page to point at (the thing being
+  built is chrome, or is not built yet), an app path of `/stand-in/<screen-id>` serves
+  that screen's own design back as the app — different theme, ringed edge, corner label
+  — so fading, ghosting and pinning on the app surface all work. It is not evidence:
+  what it shows is the design.
 - **Pin mode** — with the embed snippet in a page (`<script
   src="http://localhost:4700/embed.js" data-walkdown data-bp="example/blueprint">`),
   clicking a real element pins a note or question to its anchor; the thread lands in

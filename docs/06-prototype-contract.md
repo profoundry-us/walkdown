@@ -159,6 +159,30 @@ wrap the page in a viewer chrome usually intercept history navigation, which tak
 linking and fragment states with it — and those are two of the five things above.
 A plain static export avoids the whole class of problem.
 
+## The stand-in app
+
+Some screens have no running page to point the App surface at: the thing being built is
+chrome rather than a page (walkdown's own panel is the clearest case), or it simply is
+not built yet. Left alone that empties half the tool — no fade, no ghost, and no way to
+pin a note *on the app*.
+
+Declare a stand-in instead, and `walkdown serve` serves that screen's own design back as
+the app:
+
+```yaml
+  - id: review
+    prototype: /screens/review.html
+    app: { path: /stand-in/review }    # served from the design, marked as a stand-in
+```
+
+It ships with a different theme, a ringed edge and a corner label, so it can never be
+mistaken for the build. The markup is the design's own, anchors included, so a pin lands
+on the same element on either surface and is recorded against `surface: app`.
+
+What it is not is evidence. What you are looking at is the design, so a verdict given
+against a stand-in is a verdict about the design — which is what the sign-off pair
+(Approve / Refine, [05-runs-ledger.md](05-runs-ledger.md)) is for.
+
 ## What this contract does not ask for
 
 - **No walkdown-specific markup** beyond the anchor attribute. No wrapper elements, no
