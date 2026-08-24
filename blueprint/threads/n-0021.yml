@@ -4,7 +4,7 @@ author: agent
 created: 2026-08-24T02:53:17Z
 anchor:
   rule: panel.dock.no-framing
-status: open
+status: addressed
 body: >-
   An app's own <dialog showModal()> renders in the browser's top layer, which
   sits above every z-index there is - including the prototype ghost. So on
@@ -19,3 +19,17 @@ body: >-
   without trapping focus - or the panel would need a way to hide the host page
   while ghosting. Neither is obviously right yet; the ghost is deliberately
   non-interactive and must not take focus.
+replies:
+  - author: agent
+    created: 2026-08-24T04:13:01Z
+    body: >-
+      Fixed as part of n-0028. The ghost joins the top layer too, so an app's
+      native modal no longer paints over the design it is being compared with.
+      Order inside the top layer is promotion order, so the ghost is promoted
+      first and the panel after it, and both are re-promoted whenever the app
+      promotes something - a dialog gaining its open attribute, or a popover
+      firing toggle.
+
+
+      Verified: fully ghosted on the example admin with the app's dialog open,
+      the wireframe covers the app and its modal, and the panel sits above both.

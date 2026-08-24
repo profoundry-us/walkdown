@@ -1,0 +1,43 @@
+id: n-0028
+kind: note
+author: topher
+created: 2026-08-24T04:12:48Z
+anchor:
+  rule: panel.dock.wraps-the-page
+status: addressed
+body: Clicking Invite batch opens a modal that is centred against the entire
+  screen, and its overlay blocks the walkdown UI. The whole point of this is to
+  isolate the app inside the frame.
+replies:
+  - author: agent
+    created: 2026-08-24T04:13:12Z
+    body: >-
+      Half of this is fixed, and the other half is a wall I want you to decide
+      about.
+
+
+      Diagnosed: the panel insets the page by putting a margin on <html>. A
+      margin is not a containing block. The app's dialog is position:fixed and
+      promoted to the browser's TOP LAYER, and both of those resolve against the
+      viewport, so it was laid out 1200x760 - the whole window - and centred at
+      x=600 rather than 390, the centre of the sheet. The top layer is painted
+      above every z-index there is, which is why walkdown's 2147483000 lost.
+
+
+      Fixed: walkdown's chrome now joins the top layer itself (manual popovers),
+      ghost first and panel after, re-promoted whenever the app promotes
+      something. The panel and the ghosted design both stay above an app modal
+      and its backdrop. Specced as panel.dock.above-the-app.
+
+
+      Not fixed, and not fixable from inside the document: showModal() makes
+      everything outside the dialog inert, and being in the top layer does not
+      exempt us - filed as n-0029 with the measurement. And the modal still
+      centres on the window rather than on the sheet, because that is genuinely
+      what the app does at this window size; distorting it would mean judging an
+      app that behaves differently from the real one.
+
+
+      Real isolation needs the app to own a viewport, which means framing it.
+      That reverses panel.dock.no-framing, so it is yours to call - raised with
+      you directly.

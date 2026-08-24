@@ -70,6 +70,22 @@ stories:
             - What the drag settles on is what the bar shows once it ends
           statement_hash: sha256:e55758ff63da
 
+      - id: panel.dock.above-the-app
+        origin: thread:n-0028
+        statement: Nothing the application draws paints over walkdown's own chrome, because the tool has to stay readable exactly when the app is showing the state you came to judge - and a z-index cannot promise that, since a modal joins a layer painted above every z-index there is.
+        verify: [human]
+        steps:
+          given:
+            - An application whose modal is promoted to the browser's top layer
+          when:
+            - It opens while walkdown is docked
+          then:
+            - The bar and the panel stay drawn above it, and undimmed by its backdrop
+            - The ghosted design stays above it too, so a modal state can still be compared against its design - and the panel stays above the ghost
+            - Closing and reopening the modal does not put it back on top
+            - A browser without that layer falls back to the ordering it does have rather than failing
+          statement_hash: sha256:a2640eb509a6
+
       - id: panel.dock.one-pin-mode
         origin: thread:n-0015
         statement: Pin mode has a single owner - the embed - and with the panel up there is a single control for it, so the bar and Escape can never disagree about whether it is on.

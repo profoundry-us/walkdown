@@ -118,9 +118,52 @@
   // One shadow root over the whole viewport now that chrome runs along the top
   // as well as down the side. It is transparent and click-through; only the bar
   // and the panel take pointer events, so the page under it stays live.
-  shell.style.cssText = `position:fixed; inset:0; z-index:2147483000; pointer-events:none;`;
+  /*
+   * z-index is not enough, and this is the one thing a docked tool cannot do
+   * without: an application's own <dialog showModal()> (or any popover) is
+   * promoted to the browser's TOP LAYER, which is painted above every
+   * z-index there is — so the app's modal, and the backdrop that dims the
+   * whole viewport with it, would cover walkdown's chrome. The only way to be
+   * above the top layer is to be in it, so the shell is a manual popover.
+   *
+   * The UA stylesheet gives popovers a size, border, padding and background of
+   * their own; every one of those is overridden back to the transparent
+   * full-viewport sheet this has always been.
+   */
+  shell.style.cssText = `position:fixed; inset:0; z-index:2147483000; pointer-events:none;
+    width:100%; height:100%; max-width:none; max-height:none; margin:0; border:0; padding:0;
+    background:transparent; overflow:visible;`;
   const sr = shell.attachShadow({ mode: 'open' });
   document.body.appendChild(shell);
+
+  /*
+   * Order in the top layer is the order things were promoted, so the app
+   * opening a modal after us puts it back on top. Re-promoting is how you get
+   * the top of the stack again, and the two ways in are both observable: a
+   * <dialog> gets an `open` attribute, and a popover fires `toggle` (which
+   * does not bubble, hence the capture phase).
+   */
+  const promote = (el) => {
+    if (!el?.isConnected || typeof el.showPopover !== 'function') return;
+    if (!el.hasAttribute('popover')) el.setAttribute('popover', 'manual');
+    try { el.hidePopover(); } catch { /* not showing yet */ }
+    try { el.showPopover(); } catch { /* refused: the z-index still applies */ }
+  };
+  /*
+   * The ghost goes up first and the shell after it, because within the top
+   * layer the last one promoted is the one on top — and the panel must stay
+   * above the design it is ghosting.
+   */
+  const raise = () => { promote(ghost); promote(shell); };
+  if (typeof shell.showPopover === 'function') {
+    raise();
+    document.addEventListener('toggle', (e) => { if (e.target !== shell) raise(); }, true);
+    new MutationObserver((records) => {
+      // Only a dialog that just became open can have jumped over us; anything
+      // else in the page is below the top layer and cannot.
+      if (records.some((r) => r.target !== shell && r.target.matches?.('dialog[open]'))) raise();
+    }).observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ['open'] });
+  }
 
   // A transparent frame over the viewport. It must NOT carry data-theme:
   // daisyUI paints background-color on every [data-theme] element, so a
@@ -1098,8 +1141,11 @@
     // so an uncovered strip never reads as design. Inline styles: this element
     // is in the host document, where our stylesheet has no reach.
     ghost = document.createElement('div');
+    // width/height stay auto so the four insets keep sizing it — the UA gives a
+    // popover fit-content, which would collapse it to nothing.
     ghost.style.cssText = `position:fixed; top:${HEAD}px; left:${GAP}px; bottom:${GAP}px;
       right:${W + GAP * 2}px; z-index:2147482000; border-radius:10px; overflow:hidden;
+      width:auto; height:auto; max-width:none; max-height:none; margin:0; border:0; padding:0;
       pointer-events:none; display:flex; align-items:center; justify-content:center;
       background-color:#e9ecf0;
       background-image:
@@ -1139,6 +1185,9 @@
       ghost.appendChild(flag);
     }
     document.body.appendChild(ghost);
+    // The app's own modals live in the top layer, so a ghost that is only
+    // z-indexed gets painted over by exactly the states worth comparing.
+    raise();
     paintGhostReach();
     render();
   }

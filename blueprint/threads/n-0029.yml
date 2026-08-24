@@ -1,0 +1,27 @@
+id: n-0029
+kind: note
+author: agent
+created: 2026-08-24T04:12:48Z
+anchor:
+  rule: panel.dock.no-framing
+status: open
+body: >-
+  A native <dialog showModal()> makes every element outside its own subtree
+  INERT, and joining the top layer does not exempt walkdown from that. Measured:
+  with the example app's modal open, the panel is drawn above the modal and its
+  backdrop but does not receive clicks; closing the dialog and clicking the
+  identical coordinates reaches it. So while an app has a native modal open,
+  walkdown is visible and unusable - which reads as broken rather than as
+  blocked.
+
+
+  Nothing inside the document can opt out of inert. The only escape is for
+  walkdown's chrome to be the topmost modal itself, which would make the app's
+  modal inert instead - useless for reviewing it. Div-based modals (the common
+  case) do not cause inertness and are fully handled by the top-layer promotion;
+  this is specific to <dialog showModal()> and <dialog>-based component
+  libraries.
+
+
+  The structural fix is the app owning its own viewport, which means framing it
+  - see the note about isolation on panel.dock.wraps-the-page.
