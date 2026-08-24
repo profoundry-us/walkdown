@@ -1,0 +1,24 @@
+id: n-0018
+kind: note
+author: topher
+created: 2026-08-24T01:38:13Z
+anchor:
+  rule: panel.delivery.one-switch
+status: addressed
+body: Now that choosing the server and the blueprint lives in the panel, get rid
+  of the extension popup. The toolbar button should only show or hide the
+  walkdown UI.
+replies:
+  - author: agent
+    created: 2026-08-24T01:38:28Z
+    body: Done. popup.html and popup.js are deleted and default_popup is gone from
+      the manifest; a background service worker handles chrome.action.onClicked,
+      flips the origin on or off, and reloads the tab. Since there is now
+      nowhere else to see the state, the button carries an 'on' badge and a
+      title naming the origin and what a click will do. Off is stored as absence
+      rather than a false, so a site never turned on and one turned off are the
+      same state. boot.js also stopped reading site.server — the panel's
+      Blueprints tab owns that now, the same way it owns the blueprint choice.
+      Specified as panel.delivery.one-switch, and
+      panel.delivery.absent-until-asked was reworded, since 'until a person has
+      said which blueprint' is no longer how it gets turned on.

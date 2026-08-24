@@ -134,18 +134,33 @@ stories:
 
       - id: panel.delivery.absent-until-asked
         origin: thread:q-0016
-        statement: The extension does nothing on a page until a person has said which blueprint that origin belongs to - it never guesses what you are looking at.
+        statement: The extension does nothing on a page until a person turns it on for that origin - it never guesses what you are looking at.
         verify: [human]
         steps:
           given:
-            - The extension installed, and an origin never configured
+            - The extension installed, and an origin never turned on
           when:
             - Visit any page on it
           then:
             - No panel, no badge, nothing added to the page
-            - Choosing a blueprint for that origin turns it on, and the choice is remembered
-            - The choice can be turned off again
-          statement_hash: sha256:c21b0b3b523a
+            - The toolbar button turns it on for that origin, and that is remembered
+            - The same button turns it off again
+          statement_hash: sha256:709f3ece3176
+
+      - id: panel.delivery.one-switch
+        origin: thread:n-0018
+        statement: The extension's only control is the toolbar button - on or off for this site - and it shows which of those it is. Everything else is asked in the panel, where there is room to explain it.
+        verify: [human]
+        steps:
+          given:
+            - The extension installed
+          when:
+            - Click its toolbar button on a site
+          then:
+            - Clicking starts it, clicking again stops it - there is no second place to look
+            - The button says which state the current site is in
+            - Server and blueprint are chosen in the panel, not in browser chrome
+          statement_hash: sha256:84bda3b30c1d
 
       - id: panel.delivery.anchors-still-required
         origin: thread:q-0016

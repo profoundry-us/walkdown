@@ -25,7 +25,10 @@ const SITES = 'walkdown:sites';
   if (!site?.on) return;
 
   window.__walkdownConfig = {
-    server: site.server || 'http://localhost:4700',
+    // Only a starting point. Which server to use is settled in the panel's
+    // Blueprints tab and remembered there, so nothing outside the panel needs
+    // to know or store it.
+    server: 'http://localhost:4700',
     // Deliberately empty. Which blueprint a site is gets asked once, in the
     // panel, where the descriptions are readable — the popup only decides
     // whether walkdown runs at all. Not read from `site` on purpose: an early
