@@ -22,6 +22,9 @@ separate. Highball witnesses that the agent followed this repo's rules while
 building; walkdown witnesses that the built thing matches its spec. Verdicts
 belong in walkdown's runs ledger, never in a Highball run.
 
-    npx @profoundry-us/highball run --fast   # what the edit hook runs
-    npx @profoundry-us/highball run          # what the turn-end hook runs
-    npx @profoundry-us/highball runs [n]     # local run history
+    node_modules/.bin/highball run --fast   # what the edit hook runs
+    node_modules/.bin/highball run          # what the turn-end hook runs
+    node_modules/.bin/highball runs [n]     # local run history
+
+The hooks call the local binary directly — npx resolves the same package
+but intermittently stalls for minutes, which a per-edit hook cannot afford.

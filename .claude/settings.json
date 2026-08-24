@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "npx @profoundry-us/highball run --fast"
+            "command": "node_modules/.bin/highball run --fast"
           }
         ]
       }
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "npx @profoundry-us/highball run",
+            "command": "node_modules/.bin/highball run",
             "timeout": 900
           }
         ]
