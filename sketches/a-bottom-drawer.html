@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mockup A — Rail + bottom drawer</title>
+<style>
+  * { box-sizing: border-box; margin: 0; font-family: -apple-system, "Segoe UI", sans-serif; }
+  html, body { height: 100%; }
+  body { display: flex; flex-direction: column; background: #f4f5f7; color: #333; overflow: hidden; }
+
+  /* ── header ─────────────────────────────── */
+  header { display: flex; align-items: center; gap: 14px; padding: 8px 14px; background: #1e2430; color: #e7eaf0; flex: 0 0 auto; }
+  .logo { font-weight: 700; letter-spacing: .02em; }
+  .logo span { color: #6ee7b7; }
+  select { background: #2b3342; color: #e7eaf0; border: 1px solid #3c4658; border-radius: 6px; padding: 3px 8px; font-size: 12px; }
+  .counts { font-size: 12px; color: #9aa5b5; }
+  .counts b { color: #6ee7b7; }
+  .actor { margin-left: auto; font-size: 12px; color: #9aa5b5; }
+
+  main { display: flex; flex: 1 1 auto; min-height: 0; }
+
+  /* ── rules rail ──────────────────────────── */
+  #rail { flex: 0 0 232px; background: #fff; border-right: 1px solid #e2e5ea; overflow-y: auto; transition: flex-basis .15s; }
+  body.rail-closed #rail { flex-basis: 40px; }
+  body.rail-closed #rail .rule .txt, body.rail-closed #rail .grp { display: none; }
+  #rail .railtop { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: #98a1af; }
+  #railbtn { cursor: pointer; border: none; background: #eef0f3; border-radius: 5px; width: 22px; height: 22px; font-size: 11px; color: #667; }
+  .grp { padding: 8px 12px 2px; font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: #b3bac4; }
+  .rule { display: flex; gap: 8px; align-items: center; padding: 6px 10px; font-size: 12px; cursor: pointer; border-left: 3px solid transparent; }
+  .rule.sel { background: #eef6ff; border-left-color: #3b82f6; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; }
+  .ok { background: #16a34a; } .warn { background: #d97706; } .gray { background: #c6ccd4; }
+  .rule .txt { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ── surfaces ────────────────────────────── */
+  #surfaces { flex: 1 1 auto; display: flex; min-width: 0; gap: 1px; background: #e2e5ea; }
+  .frame { flex: 1 1 50%; min-width: 0; background: #fff; display: flex; flex-direction: column; }
+  .framebar { display: flex; align-items: center; gap: 8px; padding: 5px 10px; font-size: 11px; color: #98a1af; background: #fafbfc; border-bottom: 1px solid #eceef1; }
+  .framebar b { color: #556; font-weight: 600; }
+  .screenchips { margin-left: auto; display: flex; gap: 4px; }
+  .chip { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: #eef0f3; color: #667; }
+  .chip.cur { background: #dbeafe; color: #1d4ed8; }
+  .app { flex: 1 1 auto; overflow: auto; }
+
+  /* fake app content — wireframe (left) vs live (right) */
+  .wireapp { padding: 26px; }
+  .wire { border: 1.5px dashed #b6bcc6; border-radius: 8px; background: #fdfdfd; }
+  .wnav { display: flex; gap: 18px; padding: 12px 18px; margin-bottom: 18px; font-size: 12px; color: #99a; }
+  .wgrid { display: grid; grid-template-columns: 220px 1fr 1fr; gap: 14px; }
+  .wcard { height: 120px; display: flex; align-items: center; justify-content: center; color: #b6bcc6; font-size: 11px; }
+  .wside { grid-row: span 2; height: 254px; }
+  .liveapp { padding: 26px; }
+  .lnav { display: flex; gap: 18px; padding: 12px 18px; margin-bottom: 18px; font-size: 12px; color: #fff; background: #1e2430; border-radius: 8px; }
+  .lgrid { display: grid; grid-template-columns: 220px 1fr 1fr; gap: 14px; }
+  .lcard { height: 120px; border-radius: 8px; background: #fff; border: 1px solid #e2e5ea; box-shadow: 0 1px 2px rgba(0,0,0,.04); padding: 12px; font-size: 11px; color: #667; }
+  .lside { grid-row: span 2; height: 254px; }
+
+  /* ── bottom drawer: rule detail ──────────── */
+  #drawer { flex: 0 0 190px; background: #fff; border-top: 2px solid #d7dbe1; display: flex; flex-direction: column; transition: flex-basis .15s; }
+  body.drawer-closed #drawer { flex-basis: 34px; }
+  body.drawer-closed #drawer .dbody { display: none; }
+  .dhead { display: flex; align-items: center; gap: 12px; padding: 7px 14px; cursor: pointer; font-size: 12px; background: #fafbfc; }
+  .dhead .rid { font-weight: 600; color: #334; }
+  .badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: #dcfce7; color: #15803d; }
+  .dhead .hint { margin-left: auto; color: #b3bac4; font-size: 11px; }
+  .dbody { display: flex; gap: 0; flex: 1 1 auto; min-height: 0; overflow: hidden; }
+  .dcol { flex: 1 1 0; padding: 10px 14px; overflow-y: auto; border-right: 1px solid #eceef1; font-size: 12px; }
+  .dcol:last-child { border-right: none; }
+  .dcol h4 { font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: #98a1af; margin-bottom: 6px; }
+  .stmt { line-height: 1.45; color: #333; }
+  .meta { color: #98a1af; font-size: 11px; margin-top: 6px; }
+  details { margin-top: 6px; font-size: 11px; color: #667; }
+  summary { cursor: pointer; color: #3b82f6; }
+  .ev { display: flex; gap: 8px; padding: 3px 0; font-size: 11px; }
+  .ev .src { width: 84px; color: #98a1af; }
+  .pass { color: #16a34a; }
+  .thr { border-left: 3px solid #d97706; padding: 5px 8px; margin-bottom: 6px; background: #fffbf3; font-size: 11px; border-radius: 0 5px 5px 0; }
+</style>
+</head>
+<body>
+  <header>
+    <div class="logo">walk<span>down</span></div>
+    <select><option>waitlist-example</option><option>walkdown</option></select>
+    <div class="counts"><b>5 verified</b> · 2 need a human · 1 drift</div>
+    <div class="actor">as: topher</div>
+  </header>
+
+  <main>
+    <nav id="rail">
+      <div class="railtop"><span>Rules</span><button id="railbtn" onclick="document.body.classList.toggle('rail-closed')">⇤</button></div>
+      <div class="grp">waitlist.join</div>
+      <div class="rule"><span class="dot ok"></span><span class="txt">email-required</span></div>
+      <div class="rule sel"><span class="dot ok"></span><span class="txt">confirmation</span></div>
+      <div class="rule"><span class="dot warn"></span><span class="txt">already-joined</span></div>
+      <div class="grp">waitlist.confirm</div>
+      <div class="rule"><span class="dot ok"></span><span class="txt">confirm-requires-email</span></div>
+      <div class="rule"><span class="dot gray"></span><span class="txt">visual-match</span></div>
+    </nav>
+
+    <section id="surfaces">
+      <div class="frame">
+        <div class="framebar"><b>Mockup</b> · waitlist-confirm
+          <div class="screenchips"><span class="chip">waitlist-join</span><span class="chip cur">waitlist-confirm</span><span class="chip">already</span></div>
+        </div>
+        <div class="app wireapp">
+          <div class="wire wnav">Logo · · · Nav Nav Nav</div>
+          <div class="wgrid">
+            <div class="wire wcard wside">sidebar</div>
+            <div class="wire wcard">hero / confirmation</div>
+            <div class="wire wcard">email echo</div>
+            <div class="wire wcard">next steps</div>
+            <div class="wire wcard">footer cta</div>
+          </div>
+        </div>
+      </div>
+      <div class="frame">
+        <div class="framebar"><b>App</b> · local · waitlist-confirm</div>
+        <div class="app liveapp">
+          <div class="lnav">Acme · Product · Pricing · Docs</div>
+          <div class="lgrid">
+            <div class="lcard lside">Sidebar<br><br>— Dashboard<br>— Waitlist<br>— Settings</div>
+            <div class="lcard">🎉 You're on the list!</div>
+            <div class="lcard">We'll email <b>topher@…</b></div>
+            <div class="lcard">Invite a friend</div>
+            <div class="lcard">Follow along →</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <section id="drawer">
+    <div class="dhead" onclick="document.body.classList.toggle('drawer-closed')">
+      <span class="rid">waitlist.join.confirmation</span>
+      <span class="badge">verified</span>
+      <span style="font-size:11px;color:#98a1af">verify: checks</span>
+      <span class="hint">click to collapse ▾</span>
+    </div>
+    <div class="dbody">
+      <div class="dcol" style="flex:1.4">
+        <h4>Statement</h4>
+        <div class="stmt">After submitting a valid email, the visitor sees a confirmation showing the email they joined with.</div>
+        <div class="meta">flow: waitlist-join → waitlist-confirm</div>
+        <details><summary>steps · checks/waitlist.spec.ts:52</summary>given/when/then + source…</details>
+      </div>
+      <div class="dcol">
+        <h4>Evidence</h4>
+        <div class="ev"><span class="src">checks/local</span><span class="pass">✓ pass</span><span style="color:#b3bac4">r-0007</span></div>
+        <div class="ev"><span class="src">human</span><span class="pass">✓ pass (topher)</span></div>
+      </div>
+      <div class="dcol">
+        <h4>Threads</h4>
+        <div class="thr">q-0001 · open — should the email be masked?</div>
+      </div>
+    </div>
+  </section>
+</body>
+</html>
