@@ -1,0 +1,45 @@
+id: n-0031
+kind: note
+author: topher
+created: 2026-08-24T04:36:56Z
+anchor:
+  rule: panel.rules.detail-slide
+status: addressed
+body: Nothing in the panel moves the surface. Changing the blueprint does not
+  change the URL that is loaded; selecting a rule does not navigate to its page
+  in the prototype or the app; selecting a screen on the Screens tab does
+  nothing at all. It feels like we just didn't build something here.
+replies:
+  - author: agent
+    created: 2026-08-24T04:37:22Z
+    body: >-
+      Built. It was a real gap, and a deliberate one that outlived its reason:
+      the docked layout could not move the page it was injected into without
+      reloading itself, so the panel only ever offered the trip. Framed,
+      walkdown owns the surface and can just go.
+
+
+      There is now one goTo(screen, surface) behind all three. It stays on the
+      surface you are on and crosses over only when that surface has no URL for
+      the screen; framed it navigates the frame, docked it is a real navigation.
+
+
+      Wired to: opening a rule (to the end of its flow, or the screen it names),
+      picking a screen on the Screens tab, the Go there link on a rule that is
+      elsewhere, and choosing a blueprint - that last one only when the
+      blueprint you picked says nothing about the page you are on, since if it
+      covers this page you are already where the choice meant to put you.
+
+
+      Two restraints worth naming. A screen you are already on is never
+      re-navigated to. And opening a rule only moves the surface when framed:
+      docked, every move is a real page load that takes the panel down with it,
+      so browsing the rule list would reload the application on every click -
+      there the trip stays the explicit Go there.
+
+
+      Verified in the framed harness: picking waitlist-join moved the frame to
+      its prototype screen and detection followed; opening
+      invites.batch.confirm-count moved it to waitlist-admin; switching from the
+      example blueprint to walkdown's own moved the frame to that blueprint's
+      first screen. Specced as panel.rules.takes-you-there.

@@ -1,0 +1,18 @@
+id: n-0032
+kind: note
+author: topher
+created: 2026-08-24T04:36:56Z
+anchor:
+  rule: panel.rules.detail-slide
+status: addressed
+body: "Select a rule, then click the Blueprints or Screens tab: the rule detail
+  still shows. It is as if the rule pane sits on top of the tabs instead of
+  inside the Rules tab."
+replies:
+  - author: agent
+    created: 2026-08-24T04:37:22Z
+    body: Fixed. The two panes ride one track that slides sideways, and switching
+      tabs changed which list was underneath without sliding the track back - so
+      the open rule stayed sitting over whichever tab you picked. Switching tabs
+      now returns to the list pane as well as to the tab. Specced as
+      panel.rules.one-pane-per-tab.

@@ -302,6 +302,38 @@ stories:
             - "\"All rules\" slides back to the list"
           statement_hash: sha256:493a83d3f0bd
 
+      - id: panel.rules.takes-you-there
+        origin: thread:n-0031
+        statement: Asking for something in the panel moves the surface to it - opening a rule goes to the screen that rule is about, picking a screen goes to that screen, and choosing a blueprint that says nothing about this page goes to one it does.
+        verify: [human]
+        steps:
+          given:
+            - A blueprint whose screens have URLs on the app, the design, or both
+          when:
+            - Open a rule, pick a screen, change the blueprint
+          then:
+            - Each of those arrives at the screen asked for, and the panel then reports that screen as where you are
+            - The trip stays on the surface you were on - asking for a screen while looking at the design shows the design of it - and crosses over only when that surface has no URL for it
+            - A screen you are already on is not re-navigated to, because that would throw away the page's state for nothing
+            - A blueprint that does cover the page you are on leaves you there; only one that does not moves you
+            - A screen with no URL on either surface still does the one thing it can - record that this page is that screen
+            - Where a move means a real page load rather than a frame, it stays something you ask for on the rule rather than something opening a rule does to you
+          statement_hash: sha256:bc2cef92cdd3
+
+      - id: panel.rules.one-pane-per-tab
+        origin: thread:n-0032
+        statement: A rule's detail belongs to the tab that lists rules - leaving that tab shows the tab you asked for, not the rule you left open on another one.
+        verify: [human]
+        steps:
+          given:
+            - A rule open in the detail pane
+          when:
+            - Switch to the Blueprints or Screens tab
+          then:
+            - That tab's own content is what shows
+            - Returning to Rules shows the list, from which the rule can be opened again
+          statement_hash: sha256:5b742db34a44
+
       - id: panel.rules.step-between
         origin: walkdown
         statement: From a rule's detail I can step to the previous or next rule in list order without returning to the list, and each control says where it lands.

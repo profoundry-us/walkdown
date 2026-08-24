@@ -4,7 +4,7 @@ author: agent
 created: 2026-08-24T04:12:48Z
 anchor:
   rule: panel.dock.no-framing
-status: open
+status: verified
 body: >-
   A native <dialog showModal()> makes every element outside its own subtree
   INERT, and joining the top layer does not exempt walkdown from that. Measured:
@@ -25,3 +25,24 @@ body: >-
 
   The structural fix is the app owning its own viewport, which means framing it
   - see the note about isolation on panel.dock.wraps-the-page.
+replies:
+  - author: Topher Fangio
+    created: 2026-08-24T04:36:33Z
+    body: "Verified working in both deliveries. Framed, inert stops at the frame
+      boundary, so an app's native modal cannot reach the panel at all. Docked,
+      the top-layer promotion keeps the chrome drawn above the modal and its
+      backdrop. Closed at Topher's direction after testing the extension against
+      GitHub, which refuses framing both ways (X-Frame-Options: deny and
+      frame-ancestors 'none') and loaded correctly."
+  - author: agent
+    created: 2026-08-24T04:36:42Z
+    body: "Answered by two different mechanisms, one per delivery. Framed: inert
+      stops at the frame boundary, so an app's native modal cannot reach the
+      panel at all. Docked: the shell and the ghost sit in the top layer, so the
+      modal and its backdrop no longer paint over the chrome."
+  - author: Topher Fangio
+    created: 2026-08-24T04:36:42Z
+    body: "Working in both. Confirmed against GitHub, which refuses framing both
+      ways (X-Frame-Options: deny and frame-ancestors 'none') and loaded
+      correctly in the extension; icons behaving too. Recorded by the agent at
+      my direction."
