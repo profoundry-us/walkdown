@@ -66,10 +66,21 @@ const MARKS = {
   tick: (x, y, size) =>
     sdPath(x, y, [[0.255, 0.520], [0.435, 0.700], [0.760, 0.300]]) - (size <= 16 ? 0.078 : 0.066),
 
-  // The verb: stepping down through the rules, one tread at a time.
+  /*
+   * The verb: stepping down through the rules, one tread at a time.
+   * Every tread is 0.20 wide and every riser 0.20 tall — a staircase with one
+   * short step reads as a mistake rather than as a rhythm. The whole flight is
+   * 0.60 x 0.40 and centred, so the round caps sit evenly inside the tile.
+   */
   steps: (x, y, size) =>
-    sdPath(x, y, [[0.20, 0.32], [0.46, 0.32], [0.46, 0.54], [0.72, 0.54], [0.72, 0.76], [0.84, 0.76]])
+    sdPath(x, y, [[0.20, 0.30], [0.40, 0.30], [0.40, 0.50], [0.60, 0.50], [0.60, 0.70], [0.80, 0.70]])
       - (size <= 16 ? 0.070 : 0.058),
+
+  // The same flight redrawn for small sizes: two treads instead of three, each
+  // half again as wide. Scaling a three-step flight to 16px turns it into a
+  // diagonal smudge - at that size the mark has to be redrawn, not resized.
+  steps2: (x, y, size) =>
+    sdPath(x, y, [[0.18, 0.32], [0.48, 0.32], [0.48, 0.62], [0.78, 0.62]]) - 0.082,
 
   // A plumb line: the drafting instrument for "is this true against a reference".
   plumb: (x, y, size) => Math.min(
