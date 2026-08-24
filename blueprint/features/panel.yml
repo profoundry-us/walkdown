@@ -168,7 +168,7 @@ stories:
     rules:
       - id: panel.start.open-a-folder
         origin: thread:n-0017
-        statement: With no walkdown server to read blueprints from, the panel says so plainly and tells you how to open one, rather than rendering an empty or broken review surface.
+        statement: With no walkdown server to read blueprints from, the panel says so plainly and tells you how to open one, rather than rendering an empty or broken review surface - and it calls that server a server, while naming the folder the server is holding open.
         verify: [human]
         steps:
           given:
@@ -179,7 +179,9 @@ stories:
             - It says no blueprints are open and names the command that opens them
             - The address it looks at can be changed and retried without a reload
             - It is stated as a first step, not as an error
-          statement_hash: sha256:35f53b5b5604
+            - What you type is labelled as the server it is, never as a folder
+            - Once connected, the folder that server is serving is named, so "which folder is this?" is answered without pretending the browser opened one
+          statement_hash: sha256:6e9246fa7579
 
       - id: panel.start.choose-a-blueprint
         origin: thread:n-0017
