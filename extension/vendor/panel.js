@@ -1435,6 +1435,12 @@
   function elsewhere(r) {
     const here = currentScreen();
     const want = ruleScreen(r);
+    // A headless rule must say so - otherwise whatever is on the desk reads
+    // as the rule's screen, and it is not.
+    if (!want && !r.screens?.length && !r.flow?.length)
+      return `<div class="mt-1.5 text-[11.5px] opacity-60">Headless — no screen belongs to
+        this rule, so what is on the desk is beside the point. It is judged by its
+        checks and recorded behavior, not by looking.</div>`;
     if (!want || !here || want.id === here.id) return '';
     const can = Boolean(screenUrl(want, pageSurface()) ?? screenUrl(want, 'app') ?? screenUrl(want, 'prototype'));
     return `<div class="mt-1.5 text-[11.5px] opacity-60">This rule is on

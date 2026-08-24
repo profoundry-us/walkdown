@@ -1,0 +1,21 @@
+{
+  "run_id": "2026-08-24T18-13-48Z-local-01",
+  "created": "2026-08-24T18:13:48Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "3208934-dirty",
+  "blueprint_sha": "3208934-dirty",
+  "results": [
+    {
+      "rule": "panel.rules.headless-says-so",
+      "status": "pass",
+      "statement_hash": "sha256:413989cb9c9a",
+      "evidence": [
+        "runs/evidence/2026-08-24T18-13-27Z/app-headless-notice.png"
+      ],
+      "reasoning": "Opening threads.lifecycle.validated-transitions (headless: checks-only, no screens) rendered \"Headless — no screen belongs to this rule, so what is on the desk is beside the point. It is judged by its checks and recorded behavior, not by looking.\" under the statement, and the surface did not navigate. Opening panel.dock.no-framing immediately after showed no such notice, so the marker clears on screened rules."
+    }
+  ]
+}
