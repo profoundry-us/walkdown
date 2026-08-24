@@ -4,6 +4,19 @@ author: Topher Fangio
 created: 2026-08-24T16:04:37Z
 anchor:
   rule: embed.pin.viewport-recorded
-status: open
+status: addressed
 body: I failed this because we have not built different viewports yet, so I
   could not test it.
+replies:
+  - author: agent
+    created: 2026-08-24T19:06:13Z
+    body: "Viewport presets are built, so this can now be tested. Framed, the bar
+      carries Fit / 1440 / 390: a preset sizes the frame like a real device (390
+      renders at true mobile width, centered; 1440 lays the app out at desktop
+      width and scales down whole when the stage is narrower, with the scale
+      named in a corner badge), and the ghost renders at the same viewport so
+      the comparison stays honest. The embed inside the frame sees the preset as
+      its real window width, which is exactly what embed.pin.viewport-recorded
+      records - set the mobile preset, drop a pin, and the thread should carry
+      the 390 viewport. Re-judge the rule in your next walkdown and this note is
+      yours to verify."

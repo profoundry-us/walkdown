@@ -655,7 +655,7 @@ stories:
       - id: panel.viewport.device-presets
         origin: thread:n-0005
         statement: Framed, a bar control sizes the app's frame like a real device - desktop or mobile - and the ghost renders at the same viewport, so the comparison stays honest.
-        verify: [human]
+        verify: [agent, human]
         screens: [review]
         steps:
           given:
@@ -671,7 +671,7 @@ stories:
       - id: panel.viewport.zoom-to-fit
         origin: thread:n-0005
         statement: A viewport wider than the space the frame has scales down whole to fit, so a desktop layout is seen as a desktop layout rather than reflowed to a narrow column - and the current scale is visible.
-        verify: [human]
+        verify: [agent, human]
         screens: [review]
         steps:
           given:

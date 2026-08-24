@@ -1,0 +1,31 @@
+{
+  "run_id": "2026-08-24T19-06-13Z-local-01",
+  "created": "2026-08-24T19:06:13Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "99cecec-dirty",
+  "blueprint_sha": "99cecec-dirty",
+  "results": [
+    {
+      "rule": "panel.viewport.device-presets",
+      "status": "pass",
+      "statement_hash": "sha256:2ded288a785a",
+      "evidence": [
+        "runs/evidence/2026-08-24T19-03-22Z/app-viewport-390.png",
+        "runs/evidence/2026-08-24T19-03-22Z/app-viewport-1440.png"
+      ],
+      "reasoning": "Framed, the bar now carries Fit / 1440 / 390. Choosing 390 sized the frame to exactly 390 CSS px, unscaled and centered on the desk; choosing 1440 laid the app out at 1440. The ghost follows the preset: probed against the example project mid-fade, the ghost frame rendered 390px unscaled at the mobile preset and 1440px at scale(0.597) at the desktop preset - the same scale the app frame carried, so the two surfaces never disagree on viewport. Fit restores the fluid frame. The control does not render docked, where the host page owns its own viewport."
+    },
+    {
+      "rule": "panel.viewport.zoom-to-fit",
+      "status": "pass",
+      "statement_hash": "sha256:8beb5dbadbe0",
+      "evidence": [
+        "runs/evidence/2026-08-24T19-03-22Z/app-viewport-1440.png"
+      ],
+      "reasoning": "With 1440 chosen in a stage 860px wide, the frame kept width:1440px and scaled down whole via transform scale(0.597) - the app laid out at desktop width with no reflow - and the badge at the frame corner read \"1440px · fit 60%\". At 390 (narrower than the stage) no scaling applied and the badge named the bare preset."
+    }
+  ]
+}

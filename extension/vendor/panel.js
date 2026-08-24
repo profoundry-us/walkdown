@@ -115,6 +115,7 @@
   let actorOverride = null; // a name set in Settings outlives the git default
   let lastView = 'list';
   let ghostWidth = 0;   // 0 = fill the stage; otherwise a fixed CSS width
+  let viewportW = 0;    // framed viewport preset: 0 = fit the space, else CSS px
 
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -128,6 +129,8 @@
   const PHOSPHOR = {
     'bounding-box': '<path d="M208,96a16,16,0,0,0,16-16V48a16,16,0,0,0-16-16H176a16,16,0,0,0-16,16v8H96V48A16,16,0,0,0,80,32H48A16,16,0,0,0,32,48V80A16,16,0,0,0,48,96h8v64H48a16,16,0,0,0-16,16v32a16,16,0,0,0,16,16H80a16,16,0,0,0,16-16v-8h64v8a16,16,0,0,0,16,16h32a16,16,0,0,0,16-16V176a16,16,0,0,0-16-16h-8V96ZM176,48h32V80H176ZM48,48H80V63.9a.51.51,0,0,0,0,.2V80H48ZM80,208H48V176H80v15.9a.51.51,0,0,0,0,.2V208Zm128,0H176V176h32Zm-24-48h-8a16,16,0,0,0-16,16v8H96v-8a16,16,0,0,0-16-16H72V96h8A16,16,0,0,0,96,80V72h64v8a16,16,0,0,0,16,16h8Z"/>',
     'checks': '<path d="M149.61,85.71l-89.6,88a8,8,0,0,1-11.22,0L10.39,136a8,8,0,1,1,11.22-11.41L54.4,156.79l84-82.5a8,8,0,1,1,11.22,11.42Zm96.1-11.32a8,8,0,0,0-11.32-.1l-84,82.5-18.83-18.5a8,8,0,0,0-11.21,11.42l24.43,24a8,8,0,0,0,11.22,0l89.6-88A8,8,0,0,0,245.71,74.39Z"/>',
+    'desktop': '<path d="M208,40H48A24,24,0,0,0,24,64V176a24,24,0,0,0,24,24h72v16H96a8,8,0,0,0,0,16h64a8,8,0,0,0,0-16H136V200h72a24,24,0,0,0,24-24V64A24,24,0,0,0,208,40ZM48,56H208a8,8,0,0,1,8,8v80H40V64A8,8,0,0,1,48,56ZM208,184H48a8,8,0,0,1-8-8V160H216v16A8,8,0,0,1,208,184Z"/>',
+    'device-mobile': '<path d="M176,16H80A24,24,0,0,0,56,40V216a24,24,0,0,0,24,24h96a24,24,0,0,0,24-24V40A24,24,0,0,0,176,16ZM72,64H184V192H72Zm8-32h96a8,8,0,0,1,8,8v8H72V40A8,8,0,0,1,80,32Zm96,192H80a8,8,0,0,1-8-8v-8H184v8A8,8,0,0,1,176,224Z"/>',
     'frame-corners': '<path d="M200,80v32a8,8,0,0,1-16,0V88H160a8,8,0,0,1,0-16h32A8,8,0,0,1,200,80ZM96,168H72V144a8,8,0,0,0-16,0v32a8,8,0,0,0,8,8H96a8,8,0,0,0,0-16ZM232,56V200a16,16,0,0,1-16,16H40a16,16,0,0,1-16-16V56A16,16,0,0,1,40,40H216A16,16,0,0,1,232,56ZM216,200V56H40V200H216Z"/>',
     'gear': '<path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm88-29.84q.06-2.16,0-4.32l14.92-18.64a8,8,0,0,0,1.48-7.06,107.21,107.21,0,0,0-10.88-26.25,8,8,0,0,0-6-3.93l-23.72-2.64q-1.48-1.56-3-3L186,40.54a8,8,0,0,0-3.94-6,107.71,107.71,0,0,0-26.25-10.87,8,8,0,0,0-7.06,1.49L130.16,40Q128,40,125.84,40L107.2,25.11a8,8,0,0,0-7.06-1.48A107.6,107.6,0,0,0,73.89,34.51a8,8,0,0,0-3.93,6L67.32,64.27q-1.56,1.49-3,3L40.54,70a8,8,0,0,0-6,3.94,107.71,107.71,0,0,0-10.87,26.25,8,8,0,0,0,1.49,7.06L40,125.84Q40,128,40,130.16L25.11,148.8a8,8,0,0,0-1.48,7.06,107.21,107.21,0,0,0,10.88,26.25,8,8,0,0,0,6,3.93l23.72,2.64q1.49,1.56,3,3L70,215.46a8,8,0,0,0,3.94,6,107.71,107.71,0,0,0,26.25,10.87,8,8,0,0,0,7.06-1.49L125.84,216q2.16.06,4.32,0l18.64,14.92a8,8,0,0,0,7.06,1.48,107.21,107.21,0,0,0,26.25-10.88,8,8,0,0,0,3.93-6l2.64-23.72q1.56-1.48,3-3L215.46,186a8,8,0,0,0,6-3.94,107.71,107.71,0,0,0,10.87-26.25,8,8,0,0,0-1.49-7.06Zm-16.1-6.5a73.93,73.93,0,0,1,0,8.68,8,8,0,0,0,1.74,5.48l14.19,17.73a91.57,91.57,0,0,1-6.23,15L187,173.11a8,8,0,0,0-5.1,2.64,74.11,74.11,0,0,1-6.14,6.14,8,8,0,0,0-2.64,5.1l-2.51,22.58a91.32,91.32,0,0,1-15,6.23l-17.74-14.19a8,8,0,0,0-5-1.75h-.48a73.93,73.93,0,0,1-8.68,0,8,8,0,0,0-5.48,1.74L100.45,215.8a91.57,91.57,0,0,1-15-6.23L82.89,187a8,8,0,0,0-2.64-5.1,74.11,74.11,0,0,1-6.14-6.14,8,8,0,0,0-5.1-2.64L46.43,170.6a91.32,91.32,0,0,1-6.23-15l14.19-17.74a8,8,0,0,0,1.74-5.48,73.93,73.93,0,0,1,0-8.68,8,8,0,0,0-1.74-5.48L40.2,100.45a91.57,91.57,0,0,1,6.23-15L69,82.89a8,8,0,0,0,5.1-2.64,74.11,74.11,0,0,1,6.14-6.14A8,8,0,0,0,82.89,69L85.4,46.43a91.32,91.32,0,0,1,15-6.23l17.74,14.19a8,8,0,0,0,5.48,1.74,73.93,73.93,0,0,1,8.68,0,8,8,0,0,0,5.48-1.74L155.55,40.2a91.57,91.57,0,0,1,15,6.23L173.11,69a8,8,0,0,0,2.64,5.1,74.11,74.11,0,0,1,6.14,6.14,8,8,0,0,0,5.1,2.64l22.58,2.51a91.32,91.32,0,0,1,6.23,15l-14.19,17.74A8,8,0,0,0,199.87,123.66Z"/>',
     'map-pin': '<path d="M128,64a40,40,0,1,0,40,40A40,40,0,0,0,128,64Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,128Zm0-112a88.1,88.1,0,0,0-88,88c0,31.4,14.51,64.68,42,96.25a254.19,254.19,0,0,0,41.45,38.3,8,8,0,0,0,9.18,0A254.19,254.19,0,0,0,174,200.25c27.45-31.57,42-64.85,42-96.25A88.1,88.1,0,0,0,128,16Zm0,206c-16.53-13-72-60.75-72-118a72,72,0,0,1,144,0C200,161.23,144.53,209,128,222Z"/>',
@@ -455,20 +458,78 @@
     document.body.appendChild(appFrame);
   }
 
+  /** The desk space the frame may occupy, and the scale a preset needs. */
+  function frameSpace() {
+    const availW = innerWidth - (W + GAP * 3);
+    const availH = innerHeight - (HEAD + GAP);
+    const scale = viewportW ? Math.min(1, availW / viewportW) : 1;
+    return { availW, availH, scale };
+  }
+
   function placeAppFrame(on) {
     if (!appFrame) return;
+    const { availW, availH, scale } = frameSpace();
     // An iframe is a replaced element: four insets alone leave it at its
-    // intrinsic 300x150, so the size has to be said outright.
+    // intrinsic 300x150, so the size has to be said outright. A viewport
+    // preset sizes the frame like a real device: the app lays out at that
+    // width, and a viewport wider than the space scales down WHOLE - a
+    // desktop layout seen as a desktop layout, never reflowed to a column.
     appFrame.style.cssText = on
-      ? `position:fixed; top:${HEAD}px; left:${GAP}px;
-         width:calc(100vw - ${W + GAP * 3}px); height:calc(100vh - ${HEAD + GAP}px);
-         border:0; border-radius:10px; background:#fff;
-         box-shadow:0 1px 2px rgba(0,0,0,.28), 0 12px 32px rgba(0,0,0,.34);
-         transition:width .22s ease, height .22s ease, top .22s ease, left .22s ease;`
+      ? (viewportW
+        ? `position:fixed; top:${HEAD}px;
+           left:${GAP + Math.max(0, (availW - viewportW * scale) / 2)}px;
+           width:${viewportW}px; height:${availH / scale}px;
+           transform:scale(${scale}); transform-origin:top left;
+           border:0; border-radius:${10 / scale}px; background:#fff;
+           box-shadow:0 1px 2px rgba(0,0,0,.28), 0 12px 32px rgba(0,0,0,.34);
+           transition:width .22s ease, height .22s ease, top .22s ease, left .22s ease;`
+        : `position:fixed; top:${HEAD}px; left:${GAP}px;
+           width:calc(100vw - ${W + GAP * 3}px); height:calc(100vh - ${HEAD + GAP}px);
+           border:0; border-radius:10px; background:#fff; transform:none;
+           box-shadow:0 1px 2px rgba(0,0,0,.28), 0 12px 32px rgba(0,0,0,.34);
+           transition:width .22s ease, height .22s ease, top .22s ease, left .22s ease;`)
       : `position:fixed; top:0; left:0; width:100vw; height:100vh;
          border:0; border-radius:0; background:#fff;
          transition:width .22s ease, height .22s ease, top .22s ease, left .22s ease;`;
   }
+
+  /** The little pill naming the preset and, when the frame is scaled, by how much. */
+  let zoomBadge = null;
+  function syncZoomBadge() {
+    const show = docked && FRAMED && viewportW;
+    if (!show) { zoomBadge?.remove(); zoomBadge = null; return; }
+    if (!zoomBadge) {
+      zoomBadge = document.createElement('div');
+      document.body.appendChild(zoomBadge);
+    }
+    const { scale } = frameSpace();
+    zoomBadge.textContent = scale < 1
+      ? `${viewportW}px · fit ${Math.round(scale * 100)}%`
+      : `${viewportW}px`;
+    zoomBadge.style.cssText = `position:fixed; right:${W + GAP * 2 + 10}px; bottom:${GAP + 10}px;
+      z-index:2147482001; padding:4px 9px; border-radius:99px;
+      font:600 10.5px/1 -apple-system, system-ui, sans-serif;
+      background:rgba(20,25,40,.75); color:#fff; pointer-events:none;`;
+  }
+
+  /** Size the frame like a real device; the ghost always follows. */
+  function setViewport(w) {
+    viewportW = w;
+    ghostWidth = w;
+    if (docked) paintDesk(true);
+    syncZoomBadge();
+    // The ghost renders at the same viewport or the comparison lies.
+    if (ghost) { setGhost(false); setFade(ghostOpacity || 1); }
+    renderBar();
+  }
+
+  addEventListener('resize', () => {
+    if (!docked || !FRAMED) return;
+    placeAppFrame(true);
+    if (hideAppOn) hideApp(true);
+    syncHeadlessCover();
+    syncZoomBadge();
+  });
 
   /*
    * The desk: drafting paper, ruled faintly enough to read as texture rather
@@ -1106,6 +1167,11 @@
       </span>
 
       <span class="ml-auto flex items-center gap-2">
+        ${FRAMED ? `<span class="join" title="Size the frame like a real device — the ghost always agrees">
+          <button class="btn btn-xs join-item ${viewportW === 0 ? 'btn-primary' : 'btn-outline btn-primary'}" data-vp="0">Fit</button>
+          <button class="btn btn-xs join-item gap-1 ${viewportW === 1440 ? 'btn-primary' : 'btn-outline btn-primary'}" data-vp="1440">${icon('desktop', 'size-3.5')}1440</button>
+          <button class="btn btn-xs join-item gap-1 ${viewportW === 390 ? 'btn-primary' : 'btn-outline btn-primary'}" data-vp="390">${icon('device-mobile', 'size-3.5')}390</button>
+        </span>` : ''}
         <button class="btn btn-xs gap-1 ${pinning ? 'btn-warning' : 'btn-outline btn-primary'}" id="wdp-pin"
           ${pinSurface() ? '' : 'disabled'}
           title="${esc(pinHint())}">${icon('map-pin', 'size-3.5')}Pin mode</button>
@@ -1118,6 +1184,9 @@
     bar.querySelector('#wdp-pin').onclick = () =>
       PIN.set(!PIN.isOn());
     bar.querySelector('#wdp-walk').onclick = () => (session ? finishWalkdown() : startWalkdown());
+    bar.querySelectorAll('[data-vp]').forEach((b) => {
+      b.onclick = () => setViewport(Number(b.dataset.vp));
+    });
     bar.querySelectorAll('[data-surface]').forEach((b) => {
       b.onclick = () => setFade(b.dataset.surface === 'prototype' ? 1 : 0);
     });
@@ -1750,8 +1819,16 @@
     // An iframe is a replaced element: insets alone leave it at its intrinsic
     // 300x150, so the size is explicit.
     const frame = document.createElement('iframe');
-    frame.style.cssText = `width:${ghostWidth ? ghostWidth + 'px' : '100%'}; height:100%;
-      max-width:100%; max-height:100%; border:0; background:#fff;
+    // At a preset the ghost lays out at that width too, scaling down whole
+    // when the stage is narrower - the same rule the app frame follows.
+    const stageW = innerWidth - (W + GAP * 3);
+    const gs = ghostWidth ? Math.min(1, stageW / ghostWidth) : 1;
+    if (ghostWidth) ghost.style.alignItems = 'flex-start';
+    frame.style.cssText = `width:${ghostWidth ? ghostWidth + 'px' : '100%'};
+      height:${gs < 1 ? 100 / gs + '%' : '100%'};
+      ${gs < 1 ? `transform:scale(${gs}); transform-origin:top center;` : ''}
+      max-width:${ghostWidth ? 'none' : '100%'}; max-height:${gs < 1 ? 'none' : '100%'};
+      border:0; background:#fff;
       box-shadow:0 0 0 1px rgba(20,25,40,.14), 0 10px 40px rgba(20,25,40,.18);`;
     frame.src = src.url ?? api(src.path);
     /*
