@@ -1,0 +1,25 @@
+id: n-0023
+kind: note
+author: topher
+created: 2026-08-24T03:25:56Z
+anchor:
+  rule: panel.dock.one-pin-mode
+status: addressed
+body: Pinning should be disabled while the slider sits between the prototype and
+  the app. Half-faded, both surfaces are on screen at once and we would not know
+  which one the pin is meant to be about.
+replies:
+  - author: agent
+    created: 2026-08-24T03:26:32Z
+    body: >-
+      Done. Moving the fade off either end now closes pinning: the Pin mode
+      control is disabled and its tooltip says why ('Slide fully to the
+      prototype or the app first - half-faded, a pin has no surface to belong
+      to'), and pin mode already running is turned off rather than left armed
+      over a view that is half one surface and half the other. Landing fully on
+      either end opens it again.
+
+
+      Verified in the browser: with pin mode on, a drag off the end turned it
+      off, dropped the crosshair and disabled the control; a drag back to the
+      end re-enabled it. Specced as panel.dock.no-pin-mid-fade.

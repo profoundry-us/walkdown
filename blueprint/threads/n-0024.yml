@@ -1,0 +1,27 @@
+id: n-0024
+kind: note
+author: topher
+created: 2026-08-24T03:25:56Z
+anchor:
+  rule: panel.dock.chrome-not-a-pin-target
+status: addressed
+body: What does the "W pin" badge actually do? It appears to do the same thing
+  as the Pin mode button in the bar, so perhaps we can get rid of it.
+replies:
+  - author: agent
+    created: 2026-08-24T03:26:32Z
+    body: >-
+      It toggled pin mode - the same thing the bar's Pin mode button does. Once
+      the panel demoted it, it was a hint that only showed while pin mode was
+      already on, so it had stopped being a control and become a second thing to
+      keep in step.
+
+
+      Gone when the panel is present: demoteBadge() is now dismissBadge() and
+      removes the element outright; the crosshair cursor is the indicator that
+      pin mode is armed. Standalone the badge stays exactly as it was, because
+      with no panel it is the only way in.
+
+
+      Verified: with the panel injected, no .wd-badge in the page. Specced into
+      panel.dock.one-pin-mode and panel.dock.chrome-not-a-pin-target.

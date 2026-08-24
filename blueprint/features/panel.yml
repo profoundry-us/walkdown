@@ -54,19 +54,52 @@ stories:
             - Pin mode can be turned on and off there
           statement_hash: sha256:41dff56f44c2
 
+      - id: panel.dock.controls-survive-use
+        origin: thread:n-0022
+        statement: A control in the bar survives being used - the fade slider can be grabbed and dragged the whole way, because nothing rebuilds the element the pointer is holding until the pointer lets go.
+        verify: [human]
+        steps:
+          given:
+            - The panel docked on a screen that has a design on file
+          when:
+            - Grab the slider's handle and drag it across the track
+          then:
+            - The surfaces cross-fade continuously under the pointer, all the way
+            - The drag is not dropped after the first movement
+            - Clicking a spot on the track still jumps there, and the arrow keys still step
+            - What the drag settles on is what the bar shows once it ends
+          statement_hash: sha256:e55758ff63da
+
       - id: panel.dock.one-pin-mode
         origin: thread:n-0015
-        statement: Pin mode has a single owner - the embed - so the bar's control, the badge and Escape always agree about whether it is on.
+        statement: Pin mode has a single owner - the embed - and with the panel up there is a single control for it, so the bar and Escape can never disagree about whether it is on.
         verify: [human]
         steps:
           given:
             - A page with both the embed and the panel
           when:
-            - Toggle pin mode from the bar, then from the badge, then press Escape
+            - Toggle pin mode from the bar, then press Escape
           then:
             - Every control reflects the change, whichever one made it
             - No control keeps its own copy of the state to fall out of step
-          statement_hash: sha256:bd8cc989367f
+            - With the panel up the bar is the only pin-mode control - the embed's own badge is not a second one saying the same thing
+            - Without a panel the badge stays, because then it is the only way in
+          statement_hash: sha256:855c16516e9a
+
+      - id: panel.dock.no-pin-mid-fade
+        origin: thread:n-0023
+        statement: While the fade sits between the two surfaces, pinning is closed - both are on screen at once, so a pin has no honest answer to which one it is about.
+        verify: [human]
+        steps:
+          given:
+            - A screen with a design on file, the panel docked
+          when:
+            - Move the fade off either end
+          then:
+            - Pin mode cannot be entered, and the control says why rather than simply refusing
+            - Pin mode already running is turned off, not left armed over an ambiguous view
+            - Landing fully on either end opens pinning again
+          statement_hash: sha256:a25c933fc24f
 
       - id: panel.dock.own-skin
         origin: thread:n-0015
@@ -100,18 +133,18 @@ stories:
 
       - id: panel.dock.chrome-not-a-pin-target
         origin: thread:n-0011
-        statement: In pin mode, walkdown's own chrome - the badge, an open form, an existing pin, the docked panel - is never treated as a place to put a pin, and Escape leaves pin mode.
+        statement: In pin mode, walkdown's own chrome - the bar, an open form, an existing pin, the docked panel - is never treated as a place to put a pin, and Escape leaves pin mode.
         verify: [human]
         steps:
           given:
             - A page with the embed and the panel, pin mode on
           when:
-            - Click the badge, or anywhere in the panel
+            - Use a control in the bar, or click anywhere in the panel
           then:
             - No pin form opens; the click does what the control says
-            - The badge toggles pin mode back off
+            - Controls stay usable in pin mode - the slider still drags, buttons still fire
             - Escape closes an open pin form, and leaves pin mode when none is open
-          statement_hash: sha256:97fb50134c58
+          statement_hash: sha256:466c5e212ed7
 
   - id: panel.delivery
     title: walkdown reaches the page, however the page was built

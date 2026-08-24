@@ -276,11 +276,6 @@
   });
 
   const pinWatchers = new Set();
-  let badgeIsHint = false;
-  const syncBadge = () => {
-    if (badge) badge.style.display = !badgeIsHint || ctx.pinMode ? '' : 'none';
-  };
-
   function setPinMode(on) {
     ctx.pinMode = on;
     badge?.classList.toggle('wd-on', on);
@@ -291,7 +286,6 @@
       overlay?.remove();
       overlay = null;
     }
-    syncBadge();
     for (const fn of pinWatchers) fn(on);
   }
 
@@ -306,14 +300,15 @@
     setPinMode,
     watchPinMode(fn) { pinWatchers.add(fn); return () => pinWatchers.delete(fn); },
     /*
-     * Once the panel is up it owns the pin-mode control, so the badge stops
-     * being a button you need and becomes a reminder of the mode you are in —
-     * shown only while pin mode is on. Without a panel it stays put, because
-     * then it is the only way in.
+     * Once the panel is up it owns the pin-mode control, and the badge goes.
+     * It was a second control saying the same thing as the one in the bar —
+     * another place to look, and another thing to keep in step. The crosshair
+     * cursor already says pin mode is on. Without a panel the badge stays put,
+     * because then it is the only way in.
      */
-    demoteBadge() {
-      badgeIsHint = true;
-      syncBadge();
+    dismissBadge() {
+      badge?.remove();
+      badge = null;
     },
   };
 
@@ -473,7 +468,6 @@
     badge.title = 'walkdown: toggle pin mode';
     badge.onclick = () => setPinMode(!ctx.pinMode);
     document.body.appendChild(badge);
-    syncBadge();
     // After the document is parsed: the pins need the anchored elements to
     // position against, and blueprintId() needs to be able to see a sibling
     // walkdown tag further down the page.

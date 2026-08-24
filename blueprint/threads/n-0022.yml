@@ -1,0 +1,31 @@
+id: n-0022
+kind: note
+author: topher
+created: 2026-08-24T03:25:56Z
+anchor:
+  rule: panel.dock.toolbar
+status: addressed
+body: The prototype/app slider cannot be dragged. Clicking a spot on the track
+  moves it, but grabbing the thumb and dragging does nothing.
+replies:
+  - author: agent
+    created: 2026-08-24T03:26:32Z
+    body: >-
+      Fixed, and it was not DaisyUI. The input is a real <input type="range">
+      and drags natively; the panel was destroying it. setFade() called
+      renderBar(), and renderBar() rebuilds the bar with innerHTML - so the
+      first input event of a drag replaced the very element the pointer was
+      holding, and the drag died on its first movement. Clicking the track still
+      worked because that needs only one event.
+
+
+      renderBar() now paints in place while a drag is live rather than
+      rebuilding, and the ghost is kept alive at zero opacity until the drag
+      ends, because tearing it down calls render(). input drives the live fade,
+      change settles it.
+
+
+      Verified with real pointer drags in the browser: pointerdown lands on
+      wdp-fade, every input event fires on the same element, the value moves
+      continuously, and the surfaces cross-fade under the pointer. Specced as
+      panel.dock.controls-survive-use.
