@@ -1,0 +1,23 @@
+id: n-0063
+kind: note
+author: topher
+created: 2026-08-24T18:43:22Z
+anchor:
+  rule: panel.dock.own-skin
+  screen: settings
+  element: settings.hide
+status: addressed
+body: The Hide-app-temporarily checkbox does not affect the new headless cover -
+  with a headless rule open, the peek dims the frame underneath and the aside
+  but the opaque cover stays, so the desk ruling still cannot be seen.
+replies:
+  - author: agent
+    created: 2026-08-24T18:44:31Z
+    body: "Fixed. The headless cover now joins the peek: hideApp dims it with the
+      app and the aside (bar untouched), and because the cover's styling is
+      re-said wholesale on every desk repaint, the dimming is re-asserted there
+      too - the same wholesale-cssText trap that once broke the peek on dial
+      edits, guarded against this time. Probed live: with a headless rule open,
+      checking Hide app temporarily takes the cover to 0.1 opacity, a dial drag
+      mid-peek leaves it dimmed, and unchecking restores it. The own-skin peek
+      step now names covers over the desk explicitly."
