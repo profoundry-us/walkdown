@@ -309,23 +309,60 @@
    * square and only its orientation changes.
    */
   const DESK_TILT = 22;    // degrees clockwise
-  const DESK_SKEW = 7;     // how far the two rulings fall short of a right angle
+  const DESK_SKEW = 7;     // fallback only: how far the rulings fall short of a right angle
   const DESK_GAP = 26;     // a touch wider than upright: a tilted grid reads busier
-  const deskLines = (ink) => {
-    const line = `color-mix(in oklch, ${ink} 9%, transparent)`;
-    const ruling = (deg, gap) =>
-      `repeating-linear-gradient(${deg}deg, ${line} 0 1px, transparent 1px ${gap}px)`;
-    /*
-     * Not quite a right angle, and not quite the same spacing: a square grid
-     * seen flat is a spreadsheet, but sheared a few degrees with one axis
-     * breathing wider it reads as a sheet lying on the desk at an angle. An
-     * affine skew is the most a background can do — gradients repeat at a
-     * fixed pitch, so true perspective (lines converging) is out of reach, and
-     * a transform on the root is not an option in the docked layout, where
-     * this element is the host application's own <html>.
-     */
-    return `${ruling(DESK_TILT, DESK_GAP)}, ${ruling(DESK_TILT + 90 - DESK_SKEW, DESK_GAP + 4)}`;
-  };
+  const line = (ink) => `color-mix(in oklch, ${ink} 9%, transparent)`;
+  const ruling = (ink, deg, gap) =>
+    `repeating-linear-gradient(${deg}deg, ${line(ink)} 0 1px, transparent 1px ${gap}px)`;
+
+  /*
+   * The fallback ruling: an affine skew painted straight onto the root. Not
+   * quite a right angle, one axis breathing wider — the most a background can
+   * do on its own, since gradients repeat at a fixed pitch and parallel stays
+   * parallel.
+   */
+  const deskLines = (ink) =>
+    `${ruling(ink, DESK_TILT, DESK_GAP)}, ${ruling(ink, DESK_TILT + 90 - DESK_SKEW, DESK_GAP + 4)}`;
+
+  /*
+   * The real thing: a square grid on its own plane, tipped away from the
+   * viewer in actual 3D, so the lines converge toward the horizon the way a
+   * sheet on a desk does. This was never possible on the root itself — in the
+   * docked layout that is the host application's own <html>, and a transform
+   * there hands every fixed element in the app a new containing block — but a
+   * dedicated layer transforms nothing but itself.
+   *
+   * The layer sits at z-index -1 as a child of the root: painted above the
+   * root's own background, below the body's — so the page sheet still covers
+   * it and only the desk margins show it. Oversized because a tipped plane's
+   * corners pull inward; the excess keeps its edges out of the viewport.
+   */
+  const HAS_3D = typeof CSS !== 'undefined' &&
+    CSS.supports?.('transform', 'perspective(1px) rotateX(1deg)');
+  let deskEl = null;
+
+  function drawDesk(on, ink) {
+    const root = document.documentElement;
+    if (!on || !HAS_3D) {
+      deskEl?.remove();
+      deskEl = null;
+      if (on) {
+        root.style.backgroundImage = deskLines(ink);
+        root.style.backgroundAttachment = 'fixed';
+      }
+      return;
+    }
+    root.style.backgroundImage = 'none';
+    if (!deskEl) {
+      deskEl = document.createElement('div');
+      deskEl.dataset.walkdownChrome = '';
+      root.appendChild(deskEl);
+    }
+    deskEl.style.cssText = `position:fixed; left:50%; top:50%; width:320vmax; height:320vmax;
+      margin:-160vmax 0 0 -160vmax; z-index:-1; pointer-events:none;
+      background-image:${ruling(ink, 0, DESK_GAP + 8)}, ${ruling(ink, 90, DESK_GAP + 8)};
+      transform:perspective(1400px) rotateX(16deg) rotate(${DESK_TILT}deg);`;
+  }
 
   function paintDesk(on) {
     const root = document.documentElement, page = document.body;
@@ -336,13 +373,14 @@
       const token = (n, fallback) => cs.getPropertyValue(n).trim() || fallback;
       const ink = token('--color-base-content', '#dbe7f3');
       root.style.background = token('--color-base-200', '#12283f');
-      root.style.backgroundImage = deskLines(ink);
+      drawDesk(on, ink);
       // Whatever the page painted on <body> to avoid a white flash would sit
       // on top of the desk, so it stands down now that the desk is real.
       page.style.background = 'transparent';
       return placeAppFrame(on);
     }
     if (!on) {
+      drawDesk(false);
       priorRoot === null ? root.removeAttribute('style') : root.setAttribute('style', priorRoot);
       priorBody === null ? page.removeAttribute('style') : page.setAttribute('style', priorBody);
       return;
@@ -354,8 +392,7 @@
     root.style.margin = `${HEAD}px ${W + GAP * 2}px ${GAP}px ${GAP}px`;
     root.style.transition = 'margin .22s ease';
     root.style.background = desk;
-    root.style.backgroundImage = deskLines(ink);
-    root.style.backgroundAttachment = 'fixed';
+    drawDesk(true, ink);
     page.style.borderRadius = '10px';
     page.style.boxShadow = '0 1px 2px rgba(0,0,0,.28), 0 12px 32px rgba(0,0,0,.34)';
     // Exactly the space the page's own margins leave it, so a short page ends

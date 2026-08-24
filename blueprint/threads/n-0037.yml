@@ -1,0 +1,37 @@
+id: n-0037
+kind: note
+author: topher
+created: 2026-08-24T05:07:33Z
+anchor:
+  rule: panel.dock.own-skin
+status: addressed
+body: Use a 3D transform for the desk ruling instead of the affine skew, falling
+  back to what we have where the 3D transform is not available.
+replies:
+  - author: agent
+    created: 2026-08-24T05:07:58Z
+    body: >-
+      Done. The grid is now a square ruling on its own plane, tipped away from
+      the viewer with perspective(1400px) rotateX(16deg) rotate(22deg) - so the
+      lines genuinely converge toward the horizon the way a sheet on a desk
+      does, instead of staying parallel the way the affine skew had to.
+
+
+      What made this possible when it was ruled out before: the transform is no
+      longer asked of the root. Docked, the root is the host application own
+      <html>, and a transform there would hand every fixed element in the app a
+      new containing block. The ruling instead lives on a dedicated fixed layer
+      that transforms nothing but itself: a child of the root at z-index -1,
+      which paints above the root background but below the body sheet, so only
+      the desk margins show it. Oversized (320vmax square) because a tipped
+      plane pulls its corners inward, and the excess keeps its edges out of the
+      viewport.
+
+
+      Fallback: where CSS.supports finds no 3D transform support, the
+      affine-skew ruling paints straight onto the root exactly as before.
+
+
+      Verified in both layouts - framed harness and docked example admin - plus
+      undocking, which removes the layer and restores the host page byte for
+      byte.
