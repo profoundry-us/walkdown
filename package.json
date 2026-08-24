@@ -1,7 +1,7 @@
 {
   "name": "walkdown",
   "version": "0.1.0",
-  "description": "Verify that what you built is what you designed \u2014 blueprint lint & hashing for the walkdown spec format",
+  "description": "Verify that what you built is what you designed — blueprint lint & hashing for the walkdown spec format",
   "type": "module",
   "bin": {
     "walkdown": "bin/walkdown.js"
@@ -26,7 +26,7 @@
     "prepack": "npm run build:css",
     "build:ext": "cp lib/viewer/embed.js lib/viewer/panel.js extension/vendor/",
     "build": "npm run build:css && npm run build:ext",
-    "build:icons": "node tools/make-icons.mjs"
+    "build:icons": "node tools/make-icons.mjs steps --size 128"
   },
   "dependencies": {
     "yaml": "^2.6.0"

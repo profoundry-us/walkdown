@@ -186,8 +186,13 @@ if ((process.argv[1] ?? '').endsWith('make-icons.mjs')) {
     console.error(`unknown mark "${mark}" — try: ${CANDIDATES.join(', ')}`);
     process.exit(1);
   }
+  // --size may be repeated. Chrome will downscale a single large icon itself,
+  // so shipping only the 128 is a real option — and worth looking at before
+  // committing to hand-drawn small sizes.
+  const only = args.reduce((acc, a, i) => (a === '--size' ? [...acc, Number(args[i + 1])] : acc), []);
+  const sizes = only.length ? only : SIZES;
   mkdirSync(out, { recursive: true });
-  for (const size of SIZES) {
+  for (const size of sizes) {
     writeFileSync(join(out, `icon-${size}.png`), build(mark, size));
     console.log(`${mark}  icon-${size}.png`);
   }
