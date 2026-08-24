@@ -1,0 +1,63 @@
+id: n-0030
+kind: note
+author: topher
+created: 2026-08-24T04:23:06Z
+anchor:
+  rule: panel.delivery.one-implementation
+status: addressed
+body: "Decision, taken after n-0028: the extension should frame the application
+  rather than dock beside it, stripping the headers that refuse framing. Real
+  isolation means the app owning its own viewport, and that is the one thing
+  only an extension can arrange. This reverses panel.dock.no-framing for the
+  extension delivery."
+replies:
+  - author: agent
+    created: 2026-08-24T04:24:23Z
+    body: >-
+      Built. The extension now reviews a page by framing it.
+
+
+      Clicking the toolbar button navigates the tab to walkdown's own page
+      (extension/review.html) with the app's URL in the fragment; boot-host.js
+      hands the panel a frame: { url } and the panel renders the app in an
+      iframe laid on the desk exactly where the docked layout lays the host
+      page. Clicking again goes back to the app at whatever URL it has reached.
+
+
+      Framing refusals are handled by a declarativeNetRequest SESSION rule that
+      removes x-frame-options and the CSP from sub_frame responses - scoped to
+      the reviewing tab by tabIds, added when a review starts and dropped when
+      it ends, so the rule exists to let walkdown frame a page rather than to
+      leave a hole open. Static rules cannot take a tab id, which is why these
+      are dynamic.
+
+
+      The embed moved into the frame: the content script now runs in all frames,
+      asks the background whether this tab is reviewing, and loads embed.js
+      there and nowhere else. Panel and embed talk by postMessage - the same
+      framed conversation the ghost already uses, so the plumbing generalised
+      rather than doubled: pushContexts tells both surfaces, only the one in
+      front is armed, and a message is only believed if it came from one of our
+      own frames.
+
+
+      Because the panel cannot read the frame's URL across origins, the frame
+      reports it - on load and on every navigation, including hash and
+      pushState. So screen detection works through the boundary.
+
+
+      Verified against a stand-in for review.html (the extension itself cannot
+      be loaded in this browser): the framed prototype fills the sheet, the
+      panel detects waitlist-admin from the frame's URL, pin mode reports it
+      would land on the prototype, and opening the modal centres it on the sheet
+      with its overlay stopping at the sheet's edge while the panel stays
+      untouched - and the panel re-detected the screen as waitlist-invite-batch
+      from the fragment the frame navigated to.
+
+
+      Untested by me and needing your machine: the toolbar flow, the DNR rule
+      against a site that actually refuses framing, and the background/boot
+      handshake. Specced as panel.delivery.framed-isolation, with
+      panel.dock.no-framing narrowed to the docked delivery and
+      absent-until-asked rewritten around reviews rather than remembered
+      origins.

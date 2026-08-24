@@ -48,6 +48,24 @@
   const CHOICE = `walkdown:blueprint:${location.origin}`;
   // The extension ships the stylesheet itself; served, it comes off the server.
   const STYLESHEET = cfg.stylesheet ?? SERVER + '/walkdown.css';
+
+  /*
+   * Two layouts, one panel.
+   *
+   * DOCKED: injected into the application's own document, which is inset by a
+   * margin to leave room for the chrome. Cheap, works from a script tag — and
+   * bounded by the fact that the application owns the viewport. Anything it
+   * positions against that viewport ignores the margin, and a native
+   * <dialog showModal()> makes everything outside it inert.
+   *
+   * FRAMED: walkdown owns the document and the application is a frame inside
+   * it. A frame is a viewport of its own, so the app's modals are laid out
+   * against the sheet, nothing it draws can paint over the tool, and inert
+   * stops at the frame boundary. The extension delivers this one, because
+   * putting a page in a frame it refuses is something only an extension can do.
+   */
+  const FRAMED = Boolean(cfg.frame?.url);
+  let frameUrl = cfg.frame?.url ?? null;   // where the app frame actually is
   /*
    * The blueprint rides along as a query parameter — and it has to go BEFORE
    * any fragment, or the fragment swallows it: "#invite-batch?bp=..." is one
@@ -249,8 +267,49 @@
   const priorRoot = document.documentElement.getAttribute('style');
   const priorBody = document.body.getAttribute('style');
 
+  /*
+   * Framed: the application is a frame of ours, laid on the desk exactly where
+   * the docked layout lays the host page. Everything downstream — the ghost's
+   * geometry, the fade, the pin plumbing — measures the same rectangle either
+   * way, so only this differs.
+   */
+  const appFrame = FRAMED ? document.createElement('iframe') : null;
+  if (appFrame) {
+    appFrame.src = frameUrl;
+    appFrame.setAttribute('title', 'the application under review');
+    document.body.appendChild(appFrame);
+  }
+
+  function placeAppFrame(on) {
+    if (!appFrame) return;
+    // An iframe is a replaced element: four insets alone leave it at its
+    // intrinsic 300x150, so the size has to be said outright.
+    appFrame.style.cssText = on
+      ? `position:fixed; top:${HEAD}px; left:${GAP}px;
+         width:calc(100vw - ${W + GAP * 3}px); height:calc(100vh - ${HEAD + GAP}px);
+         border:0; border-radius:10px; background:#fff;
+         box-shadow:0 1px 2px rgba(0,0,0,.28), 0 12px 32px rgba(0,0,0,.34);
+         transition:width .22s ease, height .22s ease, top .22s ease, left .22s ease;`
+      : `position:fixed; top:0; left:0; width:100vw; height:100vh;
+         border:0; border-radius:0; background:#fff;
+         transition:width .22s ease, height .22s ease, top .22s ease, left .22s ease;`;
+  }
+
   function paintDesk(on) {
     const root = document.documentElement, page = document.body;
+    if (FRAMED) {
+      // Our own document: there is no host page to inset or to put back, only
+      // a desk to paint and a frame to place on it.
+      const cs = getComputedStyle(side);
+      const token = (n, fallback) => cs.getPropertyValue(n).trim() || fallback;
+      const ink = token('--color-base-content', '#dbe7f3');
+      root.style.background = token('--color-base-200', '#12283f');
+      root.style.backgroundImage =
+        `linear-gradient(color-mix(in oklch, ${ink} 8%, transparent) 1px, transparent 1px),` +
+        `linear-gradient(90deg, color-mix(in oklch, ${ink} 8%, transparent) 1px, transparent 1px)`;
+      root.style.backgroundSize = '24px 24px';
+      return placeAppFrame(on);
+    }
     if (!on) {
       priorRoot === null ? root.removeAttribute('style') : root.setAttribute('style', priorRoot);
       priorBody === null ? page.removeAttribute('style') : page.setAttribute('style', priorBody);
@@ -280,6 +339,24 @@
     if (own === 'rgba(0, 0, 0, 0)' || own === 'transparent') page.style.background = '#fff';
   }
 
+  /*
+   * Pin mode has one owner. Docked, that is the embed sharing this document.
+   * Framed, there is no embed here — it is inside the frames — so the panel
+   * owns the flag and tells them, which is the arrangement the viewer had.
+   */
+  let framedPinMode = false;
+  const PIN = FRAMED
+    ? {
+        isOn: () => framedPinMode,
+        set(on) { framedPinMode = on; pushContexts(); paintGhostReach(); renderBar(); },
+        watch() { /* the panel is the owner; there is nobody to hear from */ },
+      }
+    : {
+        isOn: () => window.walkdownEmbed?.isPinMode() ?? false,
+        set(on) { window.walkdownEmbed?.setPinMode(on); },
+        watch(fn) { window.walkdownEmbed?.watchPinMode(fn); },
+      };
+
   let docked = false;
 
   function setDocked(on) {
@@ -290,7 +367,10 @@
     paintDesk(on);
     // How much of the right edge the panel is occupying. The embed's badge
     // reads this so it comes to rest beside the panel instead of under it.
-    document.documentElement.style.setProperty('--walkdown-dock', on ? `${W + GAP * 2}px` : '0px');
+    // Docked, the embed's badge reads this so it comes to rest beside the panel
+    // rather than under it. Framed, the embed is in another document and the
+    // panel is not over it at all.
+    if (!FRAMED) document.documentElement.style.setProperty('--walkdown-dock', on ? `${W + GAP * 2}px` : '0px');
     if (!on) setGhost(false);
   }
 
@@ -415,17 +495,24 @@
    * asymmetric: on a prototype page, "show me the prototype" would ghost the
    * prototype over itself and do nothing visible.
    */
+  /*
+   * Where the surface under review is. Docked that is this document's own URL;
+   * framed it is the frame's, which we cannot read across origins — the copy
+   * of walkdown inside it says so instead, as it loads and whenever it moves.
+   */
+  const hereLocation = () => (FRAMED ? locationOfUrl(frameUrl) ?? {} : location);
+
   function pageSurface() {
     const sc = currentScreen();
     if (!sc) return 'app';
-    return matchScreen([sc], location)?.surface ?? 'app';
+    return matchScreen([sc], hereLocation())?.surface ?? 'app';
   }
 
   /** Which storyboard screen this page is, by URL — same trick the embed uses. */
   function currentScreen() {
     const screens = data?.storyboard ?? [];
     if (pickedScreen) return screens.find((s) => s.id === pickedScreen) ?? null;
-    return matchScreen(screens, location)?.screen ?? null;
+    return matchScreen(screens, hereLocation())?.screen ?? null;
   }
 
   /*
@@ -439,23 +526,30 @@
    * instant, and a slow poll catches the rest rather than pretending pushState
    * is covered.
    */
+  /*
+   * Both overrides answered a question about the page you were on — "this page
+   * is that screen", "show me that screen's art". Carrying them across a
+   * navigation would have the panel describing somewhere you have left.
+   */
+  function hereChanged() {
+    pickedScreen = null;
+    ghostOverride = null;
+    if (phase !== 'ready') return;
+    if (protoShare === null) setGhost(false);
+    else setFade(protoShare);
+    render();
+  }
+
   let hereUrl = location.pathname + normalizeFragment(location.hash);
   function watchLocation() {
+    // Framed, this document never moves — the frame does, and the copy of
+    // walkdown inside it reports that itself.
+    if (FRAMED) return;
     const check = () => {
       const now = location.pathname + normalizeFragment(location.hash);
       if (now === hereUrl) return;
       hereUrl = now;
-      /*
-       * Both overrides answered a question about the page you were on — "this
-       * page is that screen", "show me that screen's art". Carrying them across
-       * a navigation would have the panel describing somewhere you have left.
-       */
-      pickedScreen = null;
-      ghostOverride = null;
-      if (phase !== 'ready') return;
-      if (protoShare === null) setGhost(false);
-      else setFade(protoShare);
-      render();
+      hereChanged();
     };
     addEventListener('hashchange', check);
     addEventListener('popstate', check);
@@ -674,7 +768,7 @@
     });
     const pin = bar.querySelector('#wdp-pin');
     if (!pin) return;
-    const pinning = window.walkdownEmbed?.isPinMode() ?? false;
+    const pinning = PIN.isOn();
     pin.disabled = !pinSurface();
     pin.title = pinHint();
     pin.classList.toggle('btn-warning', pinning);
@@ -693,7 +787,7 @@
     // so the slider reads 100 at the App end and the value is inverted here.
     const share = protoShare ?? (pageSurface() === 'prototype' ? 1 : 0);
     const value = Math.round((1 - share) * 100);
-    const pinning = window.walkdownEmbed?.isPinMode() ?? false;
+    const pinning = PIN.isOn();
     bar.innerHTML = `
       <span class="font-bold tracking-tight">walk<span class="text-primary">down</span></span>
       <span class="truncate text-[11.5px] opacity-50">${esc(data.project)}</span>
@@ -719,7 +813,7 @@
 
     bar.querySelector('#wdp-undock').onclick = () => setDocked(false);
     bar.querySelector('#wdp-pin').onclick = () =>
-      window.walkdownEmbed?.setPinMode(!window.walkdownEmbed.isPinMode());
+      PIN.set(!PIN.isOn());
     bar.querySelector('#wdp-walk').onclick = () => (session ? finishWalkdown() : startWalkdown());
     bar.querySelectorAll('[data-surface]').forEach((b) => {
       b.onclick = () => setFade(b.dataset.surface === 'prototype' ? 1 : 0);
@@ -746,8 +840,7 @@
     // Mid-fade, both surfaces are on screen at once and a pin cannot say which
     // it belongs to. Closing pin mode is the honest move; leaving it open and
     // recording a guess is not.
-    if (wanted > 0 && wanted < 1 && window.walkdownEmbed?.isPinMode())
-      window.walkdownEmbed.setPinMode(false);
+    if (wanted > 0 && wanted < 1 && PIN.isOn()) PIN.set(false);
     if (wanted === 0) {
       // Mid-drag the ghost stays, emptied: tearing it down calls render(), and
       // sliding back off the end would then have nothing to fade up.
@@ -757,7 +850,7 @@
     if (ghost) {
       ghost.style.opacity = wanted;
       paintGhostReach();
-      pushGhostContext();
+      pushContexts();
       renderBar();
     } else setGhost(true);
   }
@@ -1170,7 +1263,7 @@
      */
     frame.addEventListener('load', () => {
       if (ghostReady) return;
-      if (ghostOpacity === 1) window.walkdownEmbed?.setPinMode(false);
+      if (ghostOpacity === 1) PIN.set(false);
       renderBar();
     });
     ghost.appendChild(frame);
@@ -1214,7 +1307,7 @@
 
   /** Whether the ghost currently takes the pointer instead of passing it through. */
   const ghostHasReach = () =>
-    Boolean(ghost) && ghostOpacity === 1 && ghostReady && (window.walkdownEmbed?.isPinMode() ?? false);
+    Boolean(ghost) && ghostOpacity === 1 && ghostReady && PIN.isOn();
 
   function paintGhostReach() {
     if (ghost) ghost.style.pointerEvents = ghostHasReach() ? 'auto' : 'none';
@@ -1225,38 +1318,69 @@
    * is showing, which surface it counts as, whether pinning is live, and the
    * pins already on that screen. Same message the viewer sent its panes.
    */
-  function pushGhostContext() {
+  function pushContext(frame, surface, pinMode) {
     const sc = screenById(ghostOverride) ?? currentScreen();
-    ghostFrame()?.contentWindow?.postMessage({
+    frame?.contentWindow?.postMessage({
       type: 'walkdown:context',
       screen: sc?.id ?? null,
-      surface: ghostSurface(),
-      pinMode: ghostHasReach(),
+      surface,
+      pinMode,
       pins: pinsForScreen(sc?.id),
     }, '*');
   }
 
   /*
+   * Both surfaces are told, and only one of them is armed: whichever is in
+   * front. Two live pin modes would mean a click landing twice, or landing on
+   * the one you are not looking at.
+   */
+  function pushContexts() {
+    pushContext(ghostFrame(), ghostSurface(), ghostHasReach());
+    if (appFrame) pushContext(appFrame, pageSurface(), PIN.isOn() && !ghostHasReach());
+  }
+
+  /** Which surface a message came from, or null if it is not one of ours. */
+  function surfaceOfSource(src) {
+    if (!src) return null;
+    if (src === ghostFrame()?.contentWindow) return ghostSurface();
+    if (appFrame && src === appFrame.contentWindow) return pageSurface();
+    return null;
+  }
+
+  /*
    * Only the ghost gets to speak. This script runs inside somebody else's
    * application, which may have iframes of its own, and a message is not
-   * evidence of who sent it — so anything not from the ghost's own window is
+   * evidence of who sent it — so anything that is not one of our own frames is
    * not walkdown talking.
    */
   addEventListener('message', async (e) => {
     const msg = e.data;
-    if (!msg || typeof msg !== 'object' || !ghost) return;
-    if (e.source !== ghostFrame()?.contentWindow) return;
+    if (!msg || typeof msg !== 'object') return;
+    const surface = surfaceOfSource(e.source);
+    if (!surface) return;
+    const fromGhost = e.source === ghostFrame()?.contentWindow;
 
     if (msg.type === 'walkdown:ready') {
-      ghostReady = true;
-      paintGhostReach();
-      pushGhostContext();
-      return renderBar();
+      if (fromGhost) {
+        ghostReady = true;
+        paintGhostReach();
+        pushContexts();
+        return renderBar();
+      }
+      /*
+       * The application saying where it is. Framed we cannot read that across
+       * origins, and this is also how an SPA reports moving — so a hash route
+       * or a pushState inside the frame re-answers which screen this is.
+       */
+      const moved = msg.href && msg.href !== frameUrl;
+      frameUrl = msg.href ?? frameUrl;
+      pushContexts();
+      return moved ? hereChanged() : render();
     }
     // The ghosted surface can leave pin mode too (Escape). Pin mode has one
     // owner, so it is told rather than each side keeping its own answer.
     if (msg.type === 'walkdown:pin-mode' && msg.on === false)
-      return window.walkdownEmbed?.setPinMode(false);
+      return PIN.set(false);
 
     if (msg.type === 'walkdown:open-thread') {
       openThread = msg.id;
@@ -1277,13 +1401,13 @@
             ...(msg.element && { element: msg.element }),
             ...(msg.position && { position: msg.position }),
             ...(msg.viewport && { viewport: msg.viewport }),
-            surface: ghostSurface(),
+            surface,
             ...(sc && { screen: sc.id }),
           },
         }),
       }).catch(() => {});
       await load();
-      pushGhostContext();
+      pushContexts();
     }
   });
 
@@ -1374,9 +1498,9 @@
   window.walkdownEmbed?.dismissBadge();
   // Pin mode has one owner — the embed. The bar mirrors it rather than keeping
   // a second copy that Escape and the badge would have to remember to update.
-  window.walkdownEmbed?.watchPinMode(() => {
+  PIN.watch(() => {
     paintGhostReach();
-    pushGhostContext();
+    pushContexts();
     if (phase === 'ready') renderBar();
   });
 

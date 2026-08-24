@@ -1,8 +1,15 @@
 # walkdown — browser extension (unpacked)
 
-walkdown's panel, delivered by the browser instead of by the page. The point is
-reach: a script tag only works on apps whose markup you can edit, and framing is
-refused by anything that sets `X-Frame-Options`. An extension has neither limit.
+walkdown, delivered by the browser instead of by the page — and, more than that,
+the only delivery that can isolate the application it is reviewing.
+
+A script tag reaches only apps whose markup you can edit, and it has to live in
+the application's own document, where the application owns the viewport:
+anything it positions against that viewport ignores the inset the panel gives
+it, and a native `<dialog showModal()>` makes everything outside it inert. The
+extension frames the app instead, giving it a viewport of its own — and takes
+off the headers that would refuse the frame. Both are things only an extension
+can do.
 
 Not published anywhere, and not meant to be yet — load it unpacked.
 
@@ -15,17 +22,18 @@ as it stands — no build needed first.
 2. Open `chrome://extensions`, turn on **Developer mode** (top right).
 3. **Load unpacked**, and pick this `extension/` directory.
 4. Visit the app you want to review and click the walkdown toolbar icon. The tab
-   reloads, the panel docks, and it asks which blueprint this site is.
+   opens walkdown's own page with that app framed inside it, and asks which
+   blueprint this site is.
 
-The button is the whole interface: click to start, click again to stop. It wears
-an **on** badge for sites walkdown is running on, since without a popup there is
+The button is the whole interface: click to review this page, click again to go
+back to it — at whatever URL the app has reached, not the one you started from.
+The icon says which of the two states it is in, since without a popup there is
 nowhere else to see that. Which server and which blueprint are asked in the
 panel's **Blueprints** tab, where the descriptions are readable and you can see
-what you are choosing between — and both answers are remembered per origin.
+what you are choosing between; both answers are remembered per origin.
 
-Until you turn it on for a site, the extension does nothing at all on any page —
-a tool that guesses what you are looking at is not one you want running
-everywhere.
+Until you click it, the extension does nothing at all on any page — a tool that
+guesses what you are looking at is not one you want running everywhere.
 
 ## Rebuilding
 
@@ -42,15 +50,26 @@ card afterwards and reload the page.
 
 ## How it fits together
 
-`background.js` owns one piece of state — whether walkdown is on for an origin —
-and paints the button to match. `boot.js` reads that, answers the questions a
-`<script>` tag used to answer on `window.__walkdownConfig`, and imports the same
-`embed.js` and `panel.js` that the server delivers. One implementation, two
-deliveries; forking it would guarantee the two drift.
+`background.js` owns one piece of state — which tabs are reviewing, and what
+they are reviewing — and paints the button to match. Starting a review it also
+adds a **session** rule that removes `X-Frame-Options` and the CSP from framed
+responses. Scoped to that one tab, and dropped the moment the review ends: the
+rule exists to let walkdown frame a page, not to leave a hole open.
 
-Both run in the extension's **isolated world**. They see the page's DOM and each
-other, but nothing they define is reachable from the page's own scripts and the
-page cannot reach in — stronger isolation than the script tag gets.
+`review.html` is walkdown's page. `boot-host.js` answers the questions a
+`<script>` tag used to answer on `window.__walkdownConfig`, adds the URL to
+frame, and loads `panel.js`. `boot.js` runs in the framed application, asks the
+background whether this tab is reviewing, and loads `embed.js` there — the
+embed belongs with the anchors, the panel belongs outside where the app cannot
+reach it. The two talk by `postMessage`: the frame reports where it is and what
+was pinned, the panel answers with the screen, the surface and pin mode.
+
+It is the same `embed.js` and `panel.js` the server delivers to a script tag.
+One implementation, two deliveries; forking it would guarantee the two drift.
+
+Everything the extension loads runs in its **isolated world**: it sees the
+page's DOM but nothing it defines is reachable from the page's own scripts, and
+the page cannot reach in.
 
 ## Known limits
 
@@ -60,5 +79,11 @@ page cannot reach in — stronger isolation than the script tag gets.
 - **The server must be reachable.** The panel reads and writes through
   `walkdown serve` on localhost. Chrome treats localhost as trustworthy, so an
   HTTPS page can reach it, but the server has to be running.
+- **The frame is the app's viewport.** Framed, the application is laid out at
+  the size of the sheet rather than the whole window — which is what makes its
+  modals behave, and also means you are judging it at that width. Say what
+  viewport you reviewed at.
+- **Frame-busting scripts are not headers.** A page whose own JavaScript checks
+  `top !== self` and navigates away is not stopped by removing a header.
 - **Chrome/Chromium only** so far. The manifest is MV3 and mostly portable;
   Firefox and Safari have not been tried.

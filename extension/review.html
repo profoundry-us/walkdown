@@ -1,0 +1,23 @@
+<!doctype html>
+<!--
+  walkdown's own page. The application under review lives in a frame inside it,
+  which is the whole point: a frame is a viewport of its own, so the app's
+  modals, overlays and sticky chrome are laid out against the sheet rather than
+  against the whole window, and nothing it draws can paint over the tool or
+  make it inert.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>walkdown</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; }
+  /* Painted before the stylesheet lands so the page never flashes white. The
+     panel repaints it in the real theme colours once the tokens resolve. */
+  body { background: #10161f; }
+</style>
+</head>
+<body>
+<script type="module" src="boot-host.js"></script>
+</body>
+</html>

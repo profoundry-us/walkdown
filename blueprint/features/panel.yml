@@ -9,7 +9,7 @@ stories:
     rules:
       - id: panel.dock.no-framing
         origin: walkdown
-        statement: The panel renders beside the page it reviews rather than framing it, so an app that refuses to be framed is still reviewable, and it pushes the page aside rather than covering it.
+        statement: Docked into a page's own document, the panel renders beside what it reviews rather than framing it - a script tag cannot put its own page in a frame, so the docked delivery works within the application's document and pushes it aside instead of covering it.
         verify: [human]
         steps:
           given:
@@ -20,7 +20,8 @@ stories:
             - The panel occupies the right edge and the document is inset by its width
             - No part of the application is hidden behind the panel
             - Undocking restores the page's own margin and leaves a tab to redock
-          statement_hash: sha256:908e4e7b2953
+            - What the application positions against the viewport is beyond this layout's reach, which is the reason the framed delivery exists
+          statement_hash: sha256:45e629ff8e85
 
       - id: panel.dock.wraps-the-page
         origin: thread:n-0015
@@ -184,18 +185,35 @@ stories:
 
       - id: panel.delivery.absent-until-asked
         origin: thread:q-0016
-        statement: The extension does nothing on a page until a person turns it on for that origin - it never guesses what you are looking at.
+        statement: The extension does nothing on a page until a person asks for it - it never guesses what you are looking at, and it never leaves itself running on a page you have stopped reviewing.
         verify: [human]
         steps:
           given:
-            - The extension installed, and an origin never turned on
+            - The extension installed, on any page
           when:
-            - Visit any page on it
+            - Visit it, then click the toolbar button, then click it again
           then:
-            - No panel, no badge, nothing added to the page
-            - The toolbar button turns it on for that origin, and that is remembered
-            - The same button turns it off again
-          statement_hash: sha256:709f3ece3176
+            - Before the click, nothing is added to the page at all
+            - The click begins a review of that page, and the button says which of the two states it is in
+            - Clicking again returns to the page itself, at the URL it had reached rather than the one the review started from
+            - Nothing about the review outlives it - not the framing, not the headers it needed removed
+          statement_hash: sha256:ac63902255cd
+
+      - id: panel.delivery.framed-isolation
+        origin: thread:n-0030
+        statement: The extension reviews an application by giving it a viewport of its own - the app is framed inside walkdown's page - because that is the only arrangement in which what the app draws cannot reach walkdown, and the one thing only an extension can arrange.
+        verify: [human]
+        steps:
+          given:
+            - An application whose modal covers the window, and one that refuses to be framed at all
+          when:
+            - Review each of them through the extension
+          then:
+            - The app's modals, overlays and sticky chrome are laid out against the sheet rather than the whole window
+            - Nothing the app draws paints over walkdown, and nothing it opens makes walkdown unusable
+            - A page that refuses framing is reviewed anyway, by removing the header that refuses - for that tab only, and only while it is being reviewed
+            - The application is the frame's business and walkdown is not inside it: the panel learns which screen it is on because the copy of walkdown in the frame says so, including when the app moves without reloading
+          statement_hash: sha256:064bb8c0f0a4
 
       - id: panel.delivery.one-switch
         origin: thread:n-0018
