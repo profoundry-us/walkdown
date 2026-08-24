@@ -238,6 +238,46 @@
     { k: 'ink', label: 'Ink', min: 2, max: 24, unit: '%' },
   ];
 
+  /*
+   * "See the full effect" means seeing the app out of the way without it
+   * being gone — 10%, not 0, so the ruling is judged against the thing it
+   * actually sits behind rather than against nothing. Deliberately not saved:
+   * the checkbox is a way of looking, not a preference, and it always starts
+   * unchecked because leaving it on would mean a reviewer opening the tuner
+   * to a half-invisible application without having asked for that.
+   */
+  let hideAppOn = false;
+  function hideApp(on) {
+    hideAppOn = on;
+    const el = FRAMED ? appFrame : document.body;
+    if (el) el.style.opacity = on ? '0.1' : '';
+  }
+
+  /** A dial's number, click-to-edit: text until clicked, then a real input. */
+  function editDialValue(dial) {
+    const cell = deskPanel.querySelector(`#wdp-desk-${dial.k}`);
+    if (!cell || cell.querySelector('input')) return;
+    const range = deskPanel.querySelector(`input[type=range][data-k="${dial.k}"]`);
+    cell.innerHTML = `<input type="number" class="input input-xs w-12 px-1 text-right font-mono text-[10.5px]"
+      min="${dial.min}" max="${dial.max}" value="${desk[dial.k]}">`;
+    const inp = cell.querySelector('input');
+    inp.focus();
+    inp.select();
+    const commit = () => {
+      const v = Math.min(dial.max, Math.max(dial.min, Number(inp.value) || 0));
+      desk[dial.k] = v;
+      range.value = v;
+      store.set(DESK_KEY, { ...desk });
+      if (docked) paintDesk(true);
+      cell.textContent = `${v}${dial.unit}`;
+    };
+    inp.onblur = commit;
+    inp.onkeydown = (e) => {
+      if (e.key === 'Enter') inp.blur();
+      if (e.key === 'Escape') { cell.textContent = `${desk[dial.k]}${dial.unit}`; }
+    };
+  }
+
   function buildDeskPanel() {
     deskPanel.innerHTML = `
       <div class="mb-2 flex items-center gap-2">
@@ -249,9 +289,13 @@
           <span class="w-14 shrink-0 opacity-60">${d.label}</span>
           <input type="range" class="range range-xs range-primary" data-k="${d.k}"
             min="${d.min}" max="${d.max}" value="${desk[d.k]}" aria-label="${d.label}">
-          <span class="w-12 shrink-0 text-right font-mono text-[10.5px] opacity-60"
-            id="wdp-desk-${d.k}">${desk[d.k]}${d.unit}</span>
+          <span class="w-12 shrink-0 cursor-text text-right font-mono text-[10.5px] opacity-60 hover:opacity-100"
+            id="wdp-desk-${d.k}" title="Click to type a value">${desk[d.k]}${d.unit}</span>
         </label>`).join('')}
+      <label class="mt-1 flex items-center gap-2 text-[11.5px]">
+        <input type="checkbox" class="checkbox checkbox-xs" id="wdp-desk-hide" ${hideAppOn ? 'checked' : ''}>
+        <span>Hide app temporarily</span>
+      </label>
       <p class="mt-2 text-[10.5px] leading-relaxed opacity-40">Yours alone — how the paper
         lies changes nothing about what gets verified.</p>`;
     deskPanel.querySelectorAll('input[type=range]').forEach((inp) => {
@@ -264,16 +308,21 @@
       };
       inp.onchange = () => store.set(DESK_KEY, { ...desk });
     });
+    DESK_DIALS.forEach((d) => {
+      deskPanel.querySelector(`#wdp-desk-${d.k}`).onclick = () => editDialValue(d);
+    });
     deskPanel.querySelector('#wdp-desk-reset').onclick = () => {
       desk = { ...DESK_DEFAULTS };
       store.set(DESK_KEY, { ...desk });
       buildDeskPanel();
       if (docked) paintDesk(true);
     };
+    deskPanel.querySelector('#wdp-desk-hide').onchange = (e) => hideApp(e.target.checked);
   }
 
   function syncDeskPanel() {
     if (deskOpen) buildDeskPanel();
+    else hideApp(false);   // closing the tuner ends the peek, not just hides the checkbox
     deskPanel.style.display = deskOpen ? '' : 'none';
   }
 
@@ -376,11 +425,11 @@
    */
   const DESK_KEY = 'walkdown:desk';
   const DESK_DEFAULTS = {
-    tilt: 22,     // degrees clockwise, spun within the paper's own plane
-    tip: 16,      // degrees the plane leans away from the viewer
-    depth: 1400,  // the camera's distance; nearer converges harder
-    gap: 34,      // ruling pitch on the tipped plane
-    ink: 9,       // line strength, % of the theme's ink
+    tilt: 35,     // degrees clockwise, spun within the paper's own plane
+    tip: 35,      // degrees the plane leans away from the viewer
+    depth: 600,   // the camera's distance; nearer converges harder
+    gap: 60,      // ruling pitch on the tipped plane
+    ink: 10,      // line strength, % of the theme's ink
   };
   let desk = { ...DESK_DEFAULTS };
   const DESK_SKEW = 7;     // fallback only: how far the rulings fall short of a right angle
@@ -502,6 +551,7 @@
     bar.style.transform = on ? 'none' : `translateY(-${TOP}px)`;
     side.style.transform = on ? 'none' : `translateX(calc(100% + ${GAP}px))`;
     tab.style.display = on ? 'none' : 'block';
+    if (!on) { deskOpen = false; syncDeskPanel(); }   // no tuner over a put-away panel
     paintDesk(on);
     // How much of the right edge the panel is occupying. The embed's badge
     // reads this so it comes to rest beside the panel instead of under it.

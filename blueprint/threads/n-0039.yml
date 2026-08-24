@@ -1,0 +1,48 @@
+id: n-0039
+kind: note
+author: topher
+created: 2026-08-24T05:30:02Z
+anchor:
+  rule: panel.dock.own-skin
+status: addressed
+body: "Add a left-aligned checkbox at the bottom of the desk tuner, \"Hide app
+  temporarily\", label to the right of the box, that dims the app to 10% opacity
+  so the ruling can be judged against it rather than against nothing. It should
+  uncheck and restore the app when the tuner closes. Also: clicking a dial's
+  number should let me type a value directly. And change the shipped defaults to
+  Tilt 35, Tip 35, Depth 600px, Spacing 60px, Ink 10%."
+replies:
+  - author: agent
+    created: 2026-08-24T05:30:19Z
+    body: >-
+      Built.
+
+
+      Hide app temporarily: a checkbox at the bottom of the tuner, left-aligned
+      box with the label to its right. Checked, it sets opacity 0.1 on whichever
+      element is actually the app - the framed iframe, or document.body in the
+      docked layout, since there the app IS body. Deliberately not saved: it
+      always starts unchecked, and closing the tuner (the gear, or undocking)
+      restores full opacity - a way of looking rather than a preference, so
+      nobody opens the tuner later to find the application half invisible
+      without having asked for that.
+
+
+      Click-to-edit: clicking a dials number swaps it for a real number input,
+      clamped to the dials own min/max, committing on blur or Enter and
+      reverting the display on Escape. Same store write and repaint as the
+      slider.
+
+
+      New defaults: Tilt 35, Tip 35, Depth 600px, Spacing 60px, Ink 10% -
+      confirmed by clearing the persisted value and reloading.
+
+
+      Verified in both layouts: framed (checkbox dims the iframe, unchecked and
+      restored on close, reopening shows it unchecked again) and docked
+      (checkbox dims document.body, restored on close).
+
+
+      Folded into panel.dock.own-skin as two more steps rather than a new rule -
+      both are about the same thing the existing steps already cover, how the
+      reviewer tunes their own desk.

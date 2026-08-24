@@ -131,6 +131,8 @@ stories:
             - The chrome is visibly a different surface from the app
             - The desk under the page reads as drafting paper rather than as a spreadsheet - ruled faintly, and lying at an angle
             - How the paper lies is the reviewer's own taste - a gear in the bar tunes it live, the choice persists across sessions, and none of it changes what gets verified
+            - Each dial's number can be typed directly, not only dragged to
+            - A checkbox dims the app to a peek rather than hiding it outright, so the ruling is judged against the thing it sits behind - and it is a way of looking, not a preference: it always starts unchecked, and closing the tuner ends the peek
             - The skin is a theme definition, so retuning it is one block and no component knows about it
             - Prototype screens keep their own wireframe skin, distinct from both
           statement_hash: sha256:93bfd901cfcd
