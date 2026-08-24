@@ -158,7 +158,7 @@ stories:
             - Click its toolbar button on a site
           then:
             - Clicking starts it, clicking again stops it - there is no second place to look
-            - The button says which state the current site is in
+            - The button wears the state as its own icon, colour for on and drained for off, rather than a badge pinned to it
             - Server and blueprint are chosen in the panel, not in browser chrome
           statement_hash: sha256:84bda3b30c1d
 

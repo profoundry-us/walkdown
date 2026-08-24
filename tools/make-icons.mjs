@@ -102,6 +102,20 @@ const MARKS = {
   },
 };
 
+/*
+ * The off state. Chrome gives an extension button no "inactive" styling of its
+ * own, so walkdown draws its own: the same mark drained of colour and sunk into
+ * the toolbar, which reads as dormant rather than as a different tool.
+ */
+function dim(rgba) {
+  for (let i = 0; i < rgba.length; i += 4) {
+    const grey = Math.round(0.2126 * rgba[i] + 0.7152 * rgba[i + 1] + 0.0722 * rgba[i + 2]);
+    rgba[i] = rgba[i + 1] = rgba[i + 2] = grey;
+    rgba[i + 3] = Math.round(rgba[i + 3] * 0.55);
+  }
+  return rgba;
+}
+
 function render(markName, size) {
   const mark = MARKS[markName];
   const rgba = Buffer.alloc(size * size * 4);
@@ -174,7 +188,10 @@ export function png(size, rgba) {
 }
 
 export const CANDIDATES = Object.keys(MARKS);
-export const build = (mark, size) => png(size, render(mark, size));
+export const build = (mark, size, off = false) => {
+  const rgba = render(mark, size);
+  return png(size, off ? dim(rgba) : rgba);
+};
 
 // Only act as a CLI when run directly — importing it must not write files.
 const args = process.argv.slice(2);
@@ -194,6 +211,7 @@ if ((process.argv[1] ?? '').endsWith('make-icons.mjs')) {
   mkdirSync(out, { recursive: true });
   for (const size of sizes) {
     writeFileSync(join(out, `icon-${size}.png`), build(mark, size));
-    console.log(`${mark}  icon-${size}.png`);
+    writeFileSync(join(out, `icon-${size}-off.png`), build(mark, size, true));
+    console.log(`${mark}  icon-${size}.png  icon-${size}-off.png`);
   }
 }

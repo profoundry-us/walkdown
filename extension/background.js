@@ -22,14 +22,18 @@ const readSites = async () => (await chrome.storage.local.get(SITES))[SITES] ?? 
 
 /*
  * Without a popup there is no other place to see whether walkdown is on, so
- * the button says so itself — per tab, because the answer is per origin.
+ * the button says so itself — per tab, because the answer is per origin. The
+ * icon carries it rather than a badge: a badge is a notice pinned to a button,
+ * and this is a state the button is in.
  */
 async function paint(tabId, origin) {
   const sites = await readSites();
   const on = Boolean(origin && sites[origin]?.on);
   try {
-    await chrome.action.setBadgeText({ tabId, text: on ? 'on' : '' });
-    await chrome.action.setBadgeBackgroundColor({ tabId, color: '#1b4f70' });
+    await chrome.action.setIcon({
+      tabId,
+      path: { 128: on ? 'icons/icon-128.png' : 'icons/icon-128-off.png' },
+    });
     await chrome.action.setTitle({
       tabId,
       title: origin

@@ -25,8 +25,8 @@
     "watch:css": "tailwindcss -i styles/walkdown.css -o lib/viewer/walkdown.css --watch",
     "prepack": "npm run build:css",
     "build:ext": "cp lib/viewer/embed.js lib/viewer/panel.js extension/vendor/",
-    "build": "npm run build:css && npm run build:ext",
-    "build:icons": "node tools/make-icons.mjs steps --size 128"
+    "build": "npm run build:css && npm run build:ext && npm run build:icons",
+    "build:icons": "node tools/make-icons.mjs steps --size 128 && node tools/sync-phosphor.mjs"
   },
   "dependencies": {
     "yaml": "^2.6.0"
@@ -41,6 +41,7 @@
   "author": "Topher Fangio <topher@profoundry.us>",
   "license": "MIT",
   "devDependencies": {
+    "@phosphor-icons/core": "^2.1.1",
     "@tailwindcss/cli": "^4.3.3",
     "daisyui": "^5.7.20",
     "tailwindcss": "^4.3.3"
