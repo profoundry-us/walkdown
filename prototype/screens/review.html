@@ -68,11 +68,12 @@
         <button class="btn btn-xs btn-ghost gap-1">⛶ Screens</button>
       </div>
 
+      <!-- The name stays visible during a session (nobody is attributed
+           silently); editing it lives in the gear's Settings panel. -->
       <div class="flex items-center gap-2 border-b border-dashed border-base-content/25 px-3 py-1.5 text-xs"
            data-testid="panel.actor">
-        <span>Walkdown recording as</span>
-        <input class="input input-xs w-24 border-dashed" value="topher" title="from git identity — editable">
-        <span class="opacity-60">3 judged</span>
+        <span>Recording as <b title="change in Settings (the gear)">Topher Fangio</b></span>
+        <span class="ml-auto opacity-60">3 judged</span>
       </div>
 
       <!-- The list glyph carries the LIFECYCLE (shape) and the OWNERSHIP
