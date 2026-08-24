@@ -8,6 +8,9 @@ Not published anywhere, and not meant to be yet — load it unpacked.
 
 ## Install
 
+`vendor/` and `walkdown.css` are committed, so this directory is ready to load
+as it stands — no build needed first.
+
 1. Run the server in your project: `walkdown serve` (defaults to `localhost:4700`).
 2. Open `chrome://extensions`, turn on **Developer mode** (top right).
 3. **Load unpacked**, and pick this `extension/` directory.
@@ -22,10 +25,11 @@ are looking at is not one you want running everywhere.
 ## Rebuilding
 
 `vendor/` and `walkdown.css` are copies, not sources. After changing
-`lib/viewer/*`:
+`lib/viewer/*`, rebuild them **from the repository root** — `walkdown/`, the
+directory holding `package.json`, not its parent:
 
 ```bash
-npm run build
+cd path/to/walkdown && npm run build
 ```
 
 Chrome caches an unpacked extension's files, so hit **Reload** on the extension
