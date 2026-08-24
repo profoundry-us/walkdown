@@ -309,12 +309,22 @@
    * square and only its orientation changes.
    */
   const DESK_TILT = 22;    // degrees clockwise
+  const DESK_SKEW = 7;     // how far the two rulings fall short of a right angle
   const DESK_GAP = 26;     // a touch wider than upright: a tilted grid reads busier
   const deskLines = (ink) => {
     const line = `color-mix(in oklch, ${ink} 9%, transparent)`;
-    const ruling = (deg) =>
-      `repeating-linear-gradient(${deg}deg, ${line} 0 1px, transparent 1px ${DESK_GAP}px)`;
-    return `${ruling(DESK_TILT)}, ${ruling(DESK_TILT + 90)}`;
+    const ruling = (deg, gap) =>
+      `repeating-linear-gradient(${deg}deg, ${line} 0 1px, transparent 1px ${gap}px)`;
+    /*
+     * Not quite a right angle, and not quite the same spacing: a square grid
+     * seen flat is a spreadsheet, but sheared a few degrees with one axis
+     * breathing wider it reads as a sheet lying on the desk at an angle. An
+     * affine skew is the most a background can do — gradients repeat at a
+     * fixed pitch, so true perspective (lines converging) is out of reach, and
+     * a transform on the root is not an option in the docked layout, where
+     * this element is the host application's own <html>.
+     */
+    return `${ruling(DESK_TILT, DESK_GAP)}, ${ruling(DESK_TILT + 90 - DESK_SKEW, DESK_GAP + 4)}`;
   };
 
   function paintDesk(on) {

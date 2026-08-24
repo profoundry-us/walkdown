@@ -1,0 +1,31 @@
+id: n-0036
+kind: note
+author: topher
+created: 2026-08-24T04:57:23Z
+anchor:
+  rule: panel.dock.own-skin
+status: addressed
+body: Skew the desk ruling slightly so it looks like actual paper lying
+  underneath, not just a rotated grid.
+replies:
+  - author: agent
+    created: 2026-08-24T04:57:44Z
+    body: >-
+      Done, as an affine skew: the two rulings now meet at 83 degrees instead of
+      90 (DESK_SKEW = 7), and the cross axis breathes 4px wider than the main
+      one. A square grid seen flat is a spreadsheet; sheared a few degrees with
+      one axis slightly looser, the cells go parallelogram and it reads as a
+      sheet lying on the desk at an angle.
+
+
+      Two limits worth recording. True perspective - lines converging toward a
+      vanishing point - is out of reach for a background: gradients repeat at a
+      fixed pitch, so parallel stays parallel. And a transform on the element is
+      not an option either, because in the docked layout the desk is painted on
+      the host application own <html>, where a transform would give every fixed
+      element inside the app a new containing block and break its sticky headers
+      and modals. The skew therefore lives entirely in the gradient angles,
+      which is safe on any page.
+
+
+      Both knobs are named constants next to DESK_TILT.
