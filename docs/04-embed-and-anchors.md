@@ -96,7 +96,22 @@ It auto-detects its transport:
 | Prototype | Claude Design emits the tag in every export. |
 | Dev app | Documented one-liner, gated on env: `<script src="http://localhost:4700/embed.js" data-walkdown data-bp="<project>"></script>` — served by `walkdown serve`, so the version always matches; fails silently when the server isn't running. `data-bp` is required whenever one server hosts sibling blueprints, or pins file against the server's default project. |
 | Staging | Same snippet baked in behind an env flag (`WALKDOWN_EMBED=1`), loading `embed.js` from the app's own assets (bundled at build) since localhost may not be serving. |
+| **Any page at all** | **The browser extension** ([extension/](../extension/)) — no markup change, so it reaches applications nobody can edit. Installed once; the reviewer chooses a blueprint per origin. |
 | Production | Never. |
+
+The two mechanisms are one implementation. A `<script>` tag answers *which server, which
+blueprint, which anchor attribute* through its own attributes; the extension's bootstrap
+leaves the same answers on `window.__walkdownConfig` before loading the very same files.
+A page carrying both gets one instance, not two — the guard lives on the DOM rather than
+on `window`, because a content script and a page script do not share a global.
+
+They are not interchangeable, and the difference is who has to do something. The tag
+costs the *application* one line and the reviewer nothing; the extension costs the
+application nothing and every reviewer an install. Which is cheaper depends on whether
+you control the app or the reviewer's browser — rarely both.
+
+**The example app carries no tags at all**, on purpose: it is reviewed through the
+extension, the way an application nobody can edit would be.
 
 ## The staging trick (why v1 needs no backend)
 
