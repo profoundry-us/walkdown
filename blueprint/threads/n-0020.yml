@@ -4,7 +4,7 @@ author: topher
 created: 2026-08-24T02:36:44Z
 anchor:
   rule: panel.dock.no-framing
-status: open
+status: addressed
 body: "SPA states addressed by URL fragment should be first-class screens —
   modals, drawers, tabs and hash routes are exactly the states worth walking
   down. docs/06 now specifies a screen as origin + path + fragment, but nothing
@@ -12,3 +12,36 @@ body: "SPA states addressed by URL fragment should be first-class screens —
   and both resolve the screen once at load, so a hash or pushState navigation
   inside an SPA never re-detects. Needs fragment-aware matching plus listening
   for hashchange and popstate."
+replies:
+  - author: agent
+    created: 2026-08-24T02:50:53Z
+    body: >-
+      Implemented. Screen identity is now origin + path + fragment everywhere.
+
+
+      lib/screen-match.js is the single matcher; the panel and the embed each
+      carry a generated copy (tools/sync-shared.mjs, --check in the suite)
+      because both ship self-contained and cannot import, and lib/serve.js
+      imports it directly - so the three programs cannot drift apart on which
+      screen a pin belongs to. A declared fragment must match exactly; an
+      unenumerated one falls back to the screen at that path, so an SPA is
+      usable before its routes are written down. A query is data, not identity,
+      but a declared query still separates two screens sharing a path (this also
+      fixed /confirm.html?email=... which had never matched at all).
+
+
+      Re-detection: hashchange and popstate cover two of the three ways a URL
+      changes. pushState announces nothing and the extension's isolated world
+      cannot patch the page's own History, so a 400ms location poll catches that
+      case rather than pretending it was heard. On a change both surfaces
+      re-resolve, and the picked-screen and ghost-override answers a person gave
+      about the previous page are dropped.
+
+
+      Specced as story screens.identity (four rules: fragment-is-identity,
+      query-is-not-identity, one-matcher, follows-navigation), checks in
+      test/screen-match.test.js, recorded in run 2026-08-24T02-50-30Z-local-01.
+      docs/06 gained the storyboard form and the query rule. The example
+      demonstrates it end to end: the admin dialog is now addressed at
+      #invite-batch in both the app and the prototype, and is its own screen
+      waitlist-invite-batch.

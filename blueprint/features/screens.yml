@@ -1,0 +1,69 @@
+feature: screens
+title: Which screen is this?
+source:
+  prd: (docs/06-prototype-contract.md §2; thread n-0020)
+stories:
+  - id: screens.identity
+    title: A screen is a URL, and the URL can change without a reload
+    statement: As a reviewer, walkdown knows which screen I am looking at - including the modal, drawer or route the fragment opened - and keeps knowing it as I move around a single-page app.
+    rules:
+      - id: screens.identity.fragment-is-identity
+        origin: thread:n-0020
+        statement: A screen is identified by origin, path and fragment, so a state the URL fragment expresses - a modal, a drawer, a tab, an SPA route - is a screen in its own right and not a footnote on the page behind it.
+        verify: [checks, human]
+        steps:
+          given:
+            - A storyboard holding both a page and a fragment state of that page
+          when:
+            - Standing on each of the two URLs in turn
+          then:
+            - The bare path resolves to the page, and the path with the fragment resolves to the fragment state
+            - A declared fragment must match exactly - a different fragment is a different screen, never a near miss
+            - A fragment nobody has enumerated still resolves to the screen at that path, so an app is usable before every route is written down
+            - The state is reachable by its URL on load, not only by clicking - a state you can only click your way to cannot be walked down
+          statement_hash: sha256:ac30c2879d52
+
+      - id: screens.identity.query-is-not-identity
+        origin: thread:n-0020
+        statement: A query string is data, not identity - the same screen showing page two is the same screen - but a query written into the storyboard still tells two screens sharing a path apart.
+        verify: [checks]
+        steps:
+          given:
+            - Two screens declared at one path, distinguished by a query
+          when:
+            - Resolving a URL at that path
+          then:
+            - An undeclared query changes nothing about which screen you are on
+            - A declared query is honoured, and the more specific of the two wins
+            - The constraint that a page belongs to exactly one blueprint is still read on path and fragment alone
+          statement_hash: sha256:9b8b3c9e5881
+
+      - id: screens.identity.one-matcher
+        origin: thread:n-0020
+        statement: The panel, the embed and the server answer "which screen is this?" with one implementation rather than three lookalikes, because a pin filed under one screen here and another there is worse than no pin at all.
+        verify: [checks]
+        steps:
+          given:
+            - The two browser files, which ship self-contained and cannot import
+          when:
+            - The shared matcher changes
+          then:
+            - Each browser file carries a generated copy, not a hand-written one
+            - A copy that has drifted from the source fails the build rather than shipping
+          statement_hash: sha256:c7d51f5c89d3
+
+      - id: screens.identity.follows-navigation
+        origin: thread:n-0020
+        statement: When the URL changes without the page reloading, walkdown notices and re-answers which screen this is - and it says so honestly for the one kind of navigation it cannot be told about.
+        verify: [human]
+        steps:
+          given:
+            - walkdown on a single-page app, on a screen the storyboard knows
+          when:
+            - Open a drawer, follow a hash route, press Back
+          then:
+            - The panel re-resolves the screen and redraws against it
+            - The embed re-resolves too, so a pin placed after the navigation files against the screen you are actually on
+            - An answer a person gave about the previous page - which screen it was, whose art to ghost - does not carry across the navigation
+            - pushState announces nothing and the extension cannot patch the page's own History, so that case is caught by watching rather than left to pretend it was heard
+          statement_hash: sha256:e8763cbea8b6

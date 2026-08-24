@@ -1,0 +1,21 @@
+id: n-0021
+kind: note
+author: agent
+created: 2026-08-24T02:53:17Z
+anchor:
+  rule: panel.dock.no-framing
+status: open
+body: >-
+  An app's own <dialog showModal()> renders in the browser's top layer, which
+  sits above every z-index there is - including the prototype ghost. So on
+  exactly the screens where comparing design against build matters most - the
+  modal states - the app's modal covers the ghost and the comparison cannot be
+  made. Seen on the example admin at #invite-batch: the ghost loads the right
+  prototype screen with the right fragment underneath, and the app's dialog
+  floats over it.
+
+
+  The ghost would have to join the top layer too - a manual popover shows one
+  without trapping focus - or the panel would need a way to hide the host page
+  while ghosting. Neither is obviously right yet; the ghost is deliberately
+  non-interactive and must not take focus.

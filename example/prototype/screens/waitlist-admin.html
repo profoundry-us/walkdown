@@ -29,9 +29,31 @@
         </tbody>
       </table>
     </div>
-    <p class="mt-6 text-xs opacity-40">Confirmation dialog (anchor waitlist.confirm-batch) opens over this screen —
-      it names the exact number of people who will be emailed.</p>
   </main>
+
+  <!-- The open dialog is its own screen at #invite-batch, drawn here rather
+       than described in a caption: a state you can only reach by clicking is
+       not a screen (docs/06 s2). -->
+  <div id="invite-batch" class="fixed inset-0 items-center justify-center bg-base-content/25 p-8" style="display:none">
+    <div class="wire max-w-sm bg-base-100 p-5" data-testid="waitlist.confirm-batch">
+      <h3 class="font-semibold">Invite 4 people?</h3>
+      <p class="mt-2 text-xs opacity-60">They will each get an email within a few minutes.
+        The count is exact - it names how many are actually being emailed.</p>
+      <div class="mt-4 flex justify-end gap-2">
+        <button class="btn btn-sm btn-ghost border-[1.5px] border-dashed border-base-content/25">Cancel</button>
+        <button class="btn btn-sm btn-neutral">Send invites</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    const modal = document.getElementById('invite-batch');
+    const sync = () => { modal.style.display = location.hash === '#invite-batch' ? 'flex' : 'none'; };
+    document.querySelector('[data-testid="waitlist.invite-batch"]')
+      .addEventListener('click', () => { location.hash = '#invite-batch'; });
+    modal.addEventListener('click', () => { location.hash = ''; });
+    addEventListener('hashchange', sync);
+    sync();
+  </script>
   <script src="http://localhost:4700/embed.js" data-walkdown data-bp="example/blueprint"></script>
 </body>
 </html>

@@ -48,8 +48,21 @@
   </dialog>
 
   <script>
+    // The open dialog is its own screen, so it is its own URL (docs/06 §2):
+    // #invite-batch renders it on load, not only after a click. That is what
+    // makes it deep-linkable, and therefore walkable.
+    const dialog = document.querySelector('dialog');
+    const sync = () => {
+      if (location.hash === '#invite-batch') dialog.showModal();
+      else dialog.close();
+    };
     document.querySelector('[data-testid="waitlist.invite-batch"]')
-      .addEventListener('click', () => document.querySelector('dialog').showModal());
+      .addEventListener('click', () => { location.hash = '#invite-batch'; });
+    dialog.addEventListener('close', () => {
+      if (location.hash === '#invite-batch') history.replaceState(null, '', location.pathname);
+    });
+    addEventListener('hashchange', sync);
+    sync();
   </script>
   <!-- walkdown, docked beside this page. Dev only. data-bp names the project
        so pins file against this blueprint and not the server's default. -->

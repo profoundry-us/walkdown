@@ -63,9 +63,16 @@ fragment:
 ```
 
 So **a screen is identified by origin + path + fragment**, and the fragment is
-significant. Query strings are *not*: two screens may share a path with different
-queries within one blueprint, but a page belongs to exactly one blueprint, and that
-constraint is checked on origin + path.
+significant. Query strings are *not*: `?page=2` is the same screen holding different
+data, and forking the storyboard on every filter would be absurd. A query written into
+the storyboard still does one job — it tells apart two screens that share a path, as
+`/confirm.html` and `/confirm.html?already=1` do — but the constraint that a page belongs
+to exactly one blueprint is read on origin + path + fragment alone.
+
+A fragment nobody has enumerated yet resolves to the screen at that path. At
+`/orders#/order/1234` with only `/orders` in the storyboard you are, correctly, on the
+orders screen; writing the route down later sharpens the answer without breaking the one
+you had.
 
 The consequence for a prototype: reaching a fragment state must actually render it on
 load, not only after a click. If `#invite-batch` is only reachable by pressing the
@@ -95,6 +102,19 @@ screens:
         title: Confirm a batch invite
         fragment: "#invite-batch"
         anchors: [waitlist.confirm-batch]
+```
+
+A state's nested `fragment:` is a convenience for the generator, which knows the
+states as belonging to their page. `walkdown extract` flattens each one into a screen of
+its own, written the way a URL is written:
+
+```yaml
+# blueprint/storyboard.yml, after the merge
+  - id: waitlist-invite-batch
+    title: Confirm a batch invite
+    prototype: /screens/waitlist-admin.html#invite-batch
+    app: { path: /admin.html#invite-batch }
+    anchors: [waitlist.confirm-batch]
 ```
 
 Nothing in it is inferred from the markup by walkdown. The generator knows which

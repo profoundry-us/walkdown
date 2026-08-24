@@ -33,4 +33,14 @@ screens:
       - waitlist.export
       - waitlist.invite-batch
       - waitlist.table
+
+  # The open dialog is a screen, not a footnote on the one behind it: it is
+  # reachable by URL, so it can be deep-linked, pinned and walked down like
+  # anything else. A screen is origin + path + fragment (docs/06 s2), and the
+  # storyboard writes that the way a URL is written.
+  - id: waitlist-invite-batch
+    title: Confirm a batch invite
+    prototype: /screens/waitlist-admin.html#invite-batch
+    app: { path: /admin.html#invite-batch }
+    anchors:
       - waitlist.confirm-batch
