@@ -129,6 +129,7 @@ stories:
             - Look at the chrome and the page together
           then:
             - The chrome is visibly a different surface from the app
+            - The desk under the page reads as drafting paper rather than as a spreadsheet - ruled faintly, and off square
             - The skin is a theme definition, so retuning it is one block and no component knows about it
             - Prototype screens keep their own wireframe skin, distinct from both
           statement_hash: sha256:93bfd901cfcd

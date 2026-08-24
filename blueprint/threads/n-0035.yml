@@ -1,0 +1,35 @@
+id: n-0035
+kind: note
+author: topher
+created: 2026-08-24T04:49:10Z
+anchor:
+  rule: panel.dock.own-skin
+status: addressed
+body: Rotate the background blueprint lines a bit - a 20 to 30 degree tilt
+  clockwise would look nice.
+replies:
+  - author: agent
+    created: 2026-08-24T04:49:28Z
+    body: >-
+      Tilted 22 degrees clockwise, and easier than it sounds because the ruling
+      changed tool rather than gaining a transform.
+
+
+      It was two linear-gradients tiled by a 24px background-size. That cannot
+      be rotated: the repetition is a square tile, so at any angle other than a
+      multiple of 90 the tiles stop lining up with their neighbours and the grid
+      breaks into steps. repeating-linear-gradient repeats along the gradient
+      own axis instead, so it seams correctly at any angle and needs no
+      background-size at all. The two rulings are one right angle apart, so the
+      grid stays square and only its orientation changes.
+
+
+      Two knobs at the top of the helper: DESK_TILT (22) and DESK_GAP (26, up
+      from 24 - a tilted grid reads busier than an upright one, so the lines
+      want slightly more room). The helper also collapses the copy of this that
+      the framed and docked branches each had.
+
+
+      Folded into panel.dock.own-skin as a step rather than given a rule of its
+      own: the angle is a detail, but the desk reading as drafting paper rather
+      than as a spreadsheet is what the skin is for.
