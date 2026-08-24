@@ -1,0 +1,35 @@
+id: n-0040
+kind: note
+author: topher
+created: 2026-08-24T05:34:41Z
+anchor:
+  rule: panel.dock.own-skin
+status: addressed
+body: Make the Tip dial go up to 60deg. And make Hide app temporarily also hide
+  the aside (the rule list), but not the buttons in the header.
+replies:
+  - author: agent
+    created: 2026-08-24T05:34:57Z
+    body: >-
+      Done.
+
+
+      Tip now goes to 60deg (up from 40).
+
+
+      Hide app temporarily now dims the aside along with the app - it sits on
+      the desk over the page, so leaving it at full strength would have hidden
+      most of the ruling behind it regardless of the app. The bar is
+      deliberately left alone: it draws no surface of its own to cover the desk
+      with, and its buttons - including the tuner gear itself - have to keep
+      working while peeking, so you can turn the peek back off without hunting
+      for a faded control.
+
+
+      Verified in both layouts: framed (aside and iframe both drop to 0.1
+      opacity, header stays at 1, gear remains clickable) and docked (aside and
+      document.body both drop, header stays at 1) - and restored in both on
+      closing the tuner.
+
+
+      Folded into panel.dock.own-skin as two more steps.

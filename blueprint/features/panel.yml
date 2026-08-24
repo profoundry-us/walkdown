@@ -132,7 +132,8 @@ stories:
             - The desk under the page reads as drafting paper rather than as a spreadsheet - ruled faintly, and lying at an angle
             - How the paper lies is the reviewer's own taste - a gear in the bar tunes it live, the choice persists across sessions, and none of it changes what gets verified
             - Each dial's number can be typed directly, not only dragged to
-            - A checkbox dims the app to a peek rather than hiding it outright, so the ruling is judged against the thing it sits behind - and it is a way of looking, not a preference: it always starts unchecked, and closing the tuner ends the peek
+            - A checkbox dims the app AND the aside to a peek rather than hiding them outright, so the ruling is judged against everything that would otherwise sit on top of it - and it is a way of looking, not a preference: it always starts unchecked, and closing the tuner ends the peek
+            - The bar stays at full strength through the peek - its buttons, including the tuner's own gear, have to keep working while you are looking
             - The skin is a theme definition, so retuning it is one block and no component knows about it
             - Prototype screens keep their own wireframe skin, distinct from both
           statement_hash: sha256:93bfd901cfcd
