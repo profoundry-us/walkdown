@@ -1,0 +1,14 @@
+id: n-0020
+kind: note
+author: topher
+created: 2026-08-24T02:36:44Z
+anchor:
+  rule: panel.dock.no-framing
+status: open
+body: "SPA states addressed by URL fragment should be first-class screens —
+  modals, drawers, tabs and hash routes are exactly the states worth walking
+  down. docs/06 now specifies a screen as origin + path + fragment, but nothing
+  implements it: the panel and the embed both match on location.pathname alone,
+  and both resolve the screen once at load, so a hash or pushState navigation
+  inside an SPA never re-detects. Needs fragment-aware matching plus listening
+  for hashchange and popstate."

@@ -57,6 +57,7 @@
   // padding does that job — a second 12px gap on top of it read as a gutter.
   const HEAD = TOP;
   let data = null, view = 'list', selected = null, session = null, ghost = null, ghostOpacity = 0.5;
+  let protoShare = null;   // 0 = all app, 1 = all prototype; null = follow the page
   let pickedScreen = cfg.screen ?? script?.dataset.screen ?? null;
   let openThread = null;   // the thread expanded in the detail pane, by id
   /*
@@ -244,6 +245,18 @@
   const threadsFor = (rule) => (data?.threads ?? []).filter((t) => t.anchor?.rule === rule &&
     !['incorporated', 'verified', 'waived'].includes(t.status));
 
+  /**
+   * Which of the two surfaces this page already is. Without it the control is
+   * asymmetric: on a prototype page, "show me the prototype" would ghost the
+   * prototype over itself and do nothing visible.
+   */
+  function pageSurface() {
+    const sc = currentScreen();
+    if (!sc) return 'app';
+    const here = (path) => path && (location.pathname === path || location.pathname.endsWith(path));
+    return here(sc.prototype) ? 'prototype' : 'app';
+  }
+
   /** Which storyboard screen this page is, by URL — same trick the embed uses. */
   function currentScreen() {
     const screens = data?.storyboard ?? [];
@@ -269,6 +282,13 @@
    * design is exactly the confusion the ownership rules exist to prevent.
    */
   function ghostSource(screen) {
+    if (pageSurface() === 'prototype') {
+      // Standing on the design, the other surface is the running app — and it
+      // lives at its own origin, so the ghost takes an absolute URL.
+      return screen?.app?.path && data.appBase
+        ? { url: data.appBase + screen.app.path, proposed: false }
+        : null;
+    }
     if (screen?.prototype && data.hasPrototype) return { path: '/prototype' + screen.prototype, proposed: false };
     if (screen?.proposal) return { path: '/proposals' + screen.proposal, proposed: true };
     return null;
@@ -405,7 +425,10 @@
       return;
     }
     const canGhost = Boolean(ghostSource(screenById(ghostOverride) ?? currentScreen()));
-    const strength = ghost ? Math.round(ghostOpacity * 100) : 0;
+    // Left is Prototype and right is App, matching the buttons on either side —
+    // so the slider reads 100 at the App end and the value is inverted here.
+    const share = protoShare ?? (pageSurface() === 'prototype' ? 1 : 0);
+    const value = Math.round((1 - share) * 100);
     const pinning = window.walkdownEmbed?.isPinMode() ?? false;
     bar.innerHTML = `
       <span class="font-bold tracking-tight">walk<span class="text-primary">down</span></span>
@@ -413,12 +436,13 @@
 
       <span class="absolute left-1/2 flex -translate-x-1/2 items-center gap-2"
         title="${canGhost ? 'Fade between the design and what shipped' : 'No design on file for this screen'}">
-        <button class="btn btn-xs btn-primary${strength === 100 ? '' : ' btn-outline'}" data-surface="prototype"
-          ${canGhost ? '' : 'disabled'}>Prototype</button>
-        <input type="range" min="0" max="100" value="${strength}" id="wdp-fade"
+        <button class="btn btn-xs btn-primary${share === 1 ? '' : ' btn-outline'}" data-surface="prototype"
+          ${canGhost || pageSurface() === 'prototype' ? '' : 'disabled'}>Prototype</button>
+        <input type="range" min="0" max="100" value="${value}" id="wdp-fade"
           class="range range-xs range-primary w-28" ${canGhost ? '' : 'disabled'}
-          aria-label="How much of the design to show">
-        <button class="btn btn-xs btn-primary${strength === 0 ? '' : ' btn-outline'}" data-surface="app">App</button>
+          aria-label="Fade between the design and the running app">
+        <button class="btn btn-xs btn-primary${share === 0 ? '' : ' btn-outline'}" data-surface="app"
+          ${canGhost || pageSurface() === 'app' ? '' : 'disabled'}>App</button>
       </span>
 
       <span class="ml-auto flex items-center gap-2">
@@ -436,14 +460,20 @@
       b.onclick = () => setFade(b.dataset.surface === 'prototype' ? 1 : 0);
     });
     const fade = bar.querySelector('#wdp-fade');
-    if (fade) fade.oninput = () => setFade(fade.value / 100);
+    if (fade) fade.oninput = () => setFade(1 - fade.value / 100);
   }
 
-  /** One dial from "what shipped" to "what was designed". 0 puts the ghost away. */
-  function setFade(v) {
-    ghostOpacity = Math.max(0, Math.min(1, v));
-    if (ghostOpacity === 0) return setGhost(false);
-    if (ghost) { ghost.style.opacity = ghostOpacity; renderBar(); }
+  /**
+   * One dial, expressed as how much PROTOTYPE is on screen. The ghost carries
+   * whichever surface the page is not, so the same 1 means "ghost fully on"
+   * standing on the app and "ghost fully off" standing on the prototype.
+   */
+  function setFade(share) {
+    protoShare = Math.max(0, Math.min(1, share));
+    const wanted = pageSurface() === 'prototype' ? 1 - protoShare : protoShare;
+    ghostOpacity = wanted;
+    if (wanted === 0) return setGhost(false);
+    if (ghost) { ghost.style.opacity = wanted; renderBar(); }
     else setGhost(true);
   }
 
@@ -811,6 +841,7 @@
       ghost?.remove();
       ghost = null;
       ghostOverride = null;   // the detour ends with the overlay
+      protoShare = null;      // and the dial goes back to following the page
       render();
       return;
     }
@@ -840,7 +871,7 @@
     frame.style.cssText = `width:${ghostWidth ? ghostWidth + 'px' : '100%'}; height:100%;
       max-width:100%; max-height:100%; border:0; background:#fff;
       box-shadow:0 0 0 1px rgba(20,25,40,.14), 0 10px 40px rgba(20,25,40,.18);`;
-    frame.src = api(src.path);
+    frame.src = src.url ?? api(src.path);
     ghost.appendChild(frame);
     // A proposal is an agent's sketch, not design's work. It says so on its
     // face, so nobody walks a screen down against a drawing we made up.
