@@ -4,7 +4,7 @@
  * users never run a build. See `npm run build:css`.
  *
  * Three themes, on purpose:
- *   light      the default — walkdown's own chrome: the viewer and the panel
+ *   light      the default — walkdown's own chrome beside the page under review
  *   emerald    the example app - green, so it cannot be read as walkdown's blue
  *   wireframe  prototype screens, so a mockup reads as a mockup
  * Any of them can be pinned on any element with data-theme="…".
