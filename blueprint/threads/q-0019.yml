@@ -1,0 +1,48 @@
+id: q-0019
+kind: question
+author: topher
+created: 2026-08-24T02:25:00Z
+anchor:
+  rule: panel.start.choose-a-blueprint
+status: open
+body: "Five decisions from designing the authoring flow, recorded together
+  because they interlock. (1) Naming: walkdown new <path> creates an empty
+  blueprint; walkdown extract merges a source into one, as docs/00-vision.md
+  already specifies. Init stays the one-per-repo scaffold it is. (2) Write
+  allowlist: the server may write specification, never implementation - threads,
+  runs, and blueprint creation yes; features/, prototype/, source and tests no,
+  because the browser captures intent and the agent structures it. (3) Routing
+  key: with dozens of blueprints per repo the panel must route by page, not by
+  origin, which needs a light projects index rather than loading every
+  blueprint. (4) Prototype as a URL: prototype.root is a filesystem path and a
+  hosted prototype is not. (5) Skill distribution: skills only land if someone
+  runs init, so an adopter on an existing repo gets an agent that knows none of
+  this."
+replies:
+  - author: topher
+    created: 2026-08-24T02:25:14Z
+    body: "Two of these are settled. Routing: a page belongs to exactly one
+      blueprint — a hard constraint, not a preference. The same page covered by
+      two blueprints is a case we do not want, so the picker never has to
+      disambiguate and a pin never has to ask which project it belongs to.
+      Prototype hosting: Claude Design's own share URLs wrap the page in a way
+      that breaks history navigation and deep linking, so the working method is
+      to export the HTML or zip and serve the contents at a URL. That is the
+      prototype URL to design around; pointing at a live Claude Design URL stays
+      a nice-to-have if the wrapper problem is ever solved. Prototypes will also
+      carry anchors from the start, since we are the ones generating them."
+  - author: agent
+    created: 2026-08-24T02:25:14Z
+    body: "Consequences of the one-page-one-blueprint constraint worth building
+      around. It is a CROSS-blueprint invariant, and every check we have today
+      validates one blueprint in isolation — so enforcing it needs a check that
+      loads all of them from the served root, which is something only the server
+      currently does. Second: app.path carries query strings in practice (the
+      example has /confirm.html?email=... and /confirm.html?email=...&already=1
+      as two screens), so collision detection has to decide whether a page is
+      identified by path or by path plus query. Within one blueprint those are
+      legitimately different screens; across blueprints, two projects each
+      claiming /confirm.html under different queries would satisfy a naive check
+      while violating the intent. Third: base_url scopes it — the same path on
+      two origins is not a collision, so the comparison is origin plus path, and
+      a blueprint with several targets claims several origins."
