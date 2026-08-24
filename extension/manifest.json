@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "walkdown (dev)",
+  "version": "0.1.0",
+  "description": "Walk a running app down against its blueprint — on any page, not just ones you can edit.",
+  "permissions": ["storage", "tabs"],
+  "host_permissions": ["<all_urls>"],
+  "action": { "default_popup": "popup.html", "default_title": "walkdown" },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["boot.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["vendor/embed.js", "vendor/panel.js", "walkdown.css"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

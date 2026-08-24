@@ -21,9 +21,11 @@
   },
   "scripts": {
     "test": "node --test",
-    "build:css": "tailwindcss -i styles/walkdown.css -o lib/viewer/walkdown.css --minify && cp lib/viewer/walkdown.css example/app/walkdown.css",
+    "build:css": "tailwindcss -i styles/walkdown.css -o lib/viewer/walkdown.css --minify && cp lib/viewer/walkdown.css example/app/walkdown.css && cp lib/viewer/walkdown.css extension/walkdown.css",
     "watch:css": "tailwindcss -i styles/walkdown.css -o lib/viewer/walkdown.css --watch",
-    "prepack": "npm run build:css"
+    "prepack": "npm run build:css",
+    "build:ext": "cp lib/viewer/embed.js lib/viewer/panel.js extension/vendor/",
+    "build": "npm run build:css && npm run build:ext"
   },
   "dependencies": {
     "yaml": "^2.6.0"

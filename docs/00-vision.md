@@ -63,9 +63,21 @@ thread in the owner's queue), and optionally illustrated (a clearly-badged propo
 never silently patched by whoever noticed. This is what keeps the blueprint politically
 viable: it coordinates the owners without overruling them.
 
-**Stay inside Claude Code.** Every workflow — authoring, building, running checks,
-reviewing feedback, performing a walkdown — must be possible without leaving Claude
-Code/Desktop: file edits and CLI for agents, the browser pane for humans.
+**Meet the work where it runs.** Agents author, build, and run checks from file edits
+and the CLI — that half never needed a UI. Humans review in **the browser, beside the
+running application**: a docked panel delivered by a browser extension, so walkdown can
+be pointed at a page whether or not anyone can edit its markup.
+
+This principle used to read "stay inside Claude Code", and the viewer was built to honour
+it — walkdown framed the app in an iframe so a reviewer never left the desktop app. Two
+things retired that. Framing is refused by any app that sets `X-Frame-Options`, and the
+script-tag delivery only reaches apps whose source you control; between them they exclude
+most of what a PM actually needs to review. An extension has neither limit.
+
+Nothing about this is a move away from Claude — the panel is a web page like any other,
+and the browser pane renders it (Chromium, verified). If Claude gains extension support,
+the same extension loads there and the two stories become one again. The tool's own
+surfaces stay web pages precisely so that stays possible.
 
 ## The core loop
 
@@ -92,11 +104,27 @@ Code/Desktop: file edits and CLI for agents, the browser pane for humans.
   ([03](03-runner-contract.md))
 - Embed script + anchor convention (test-id reuse); feedback/questions written to the local server
   ([04](04-embed-and-anchors.md))
-- Viewer with rule list, derived status, storyboard navigation, and a surfaces-first
-  layout: a collapsible rules rail, a rule-detail drawer along the bottom, and a stage
-  that shows prototype, app, or both — because the surfaces under review deserve the
-  window, not a quarter of it
+- **The docked panel**: walkdown's chrome riding beside the running app in its own tab,
+  wearing its own skin so it is never mistaken for the thing under review. The app keeps
+  its real viewport; the prototype ghosts over it on demand rather than taking half the
+  window. Delivered two ways from one implementation — a script tag for apps you control,
+  and an unpacked browser extension for every other page.
+- The framing viewer, kept for what only it can do: a project with a prototype and no app
+  yet, and surfaces that cannot be injected into at all
 - Run ledger with multi-target runs and human walkdowns ([05](05-runs-ledger.md))
+
+## Delivery
+
+| Surface | How walkdown gets there |
+|---|---|
+| Your own dev app | A script tag, gated on env — the version always matches the server's. |
+| Any other page | The browser extension: same panel, same embed, no markup changes. |
+| Prototype screens | The design tool emits the tag in every export. |
+| Production | Never. |
+
+The extension removes the *injection* barrier, not the *anchor* barrier: on a page that
+carries no anchors, pins fall back to coordinates and feedback still lands, but element
+-precise anchoring always needs the application to carry the anchors.
 
 ## Explicit non-goals for v1
 

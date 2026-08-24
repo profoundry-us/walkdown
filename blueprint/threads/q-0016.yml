@@ -4,9 +4,30 @@ author: topher
 created: 2026-08-23T23:52:32Z
 anchor:
   rule: panel.dock.no-framing
-status: open
+status: incorporated
 body: Should walkdown stop living inside Claude and ship as a wrapper app (Tauri
   v2 or similar)? The draw is walking down any page, not just ones we can put a
   script tag in. Open question, not a decision — the answer changes the Stay
   inside Claude Code principle in docs/00-vision.md, so it needs recording
   either way.
+replies:
+  - author: agent
+    created: 2026-08-24T00:28:24Z
+    body: "Answered by measurement rather than assumption: the Claude browser pane
+      reports Claude/1.34493.1 Chrome/148.0.7778.280 Electron/42.9.2 — Electron,
+      so bundled Chromium, not WebKit. That removes the objection I had raised
+      against a wrapper app (judging pixels in the wrong engine), because the
+      pane is already Chrome-equivalent, and it points at the extension rather
+      than at Tauri: same engine, no Rust toolchain, no code signing, no
+      remote-IPC allowlist, and none of the origin-confusion exposure that comes
+      with giving arbitrary pages an IPC bridge. Built as extension/ — MV3, load
+      unpacked, no store. The principle in docs/00-vision.md is rewritten from
+      'stay inside Claude Code' to 'meet the work where it runs', and says
+      plainly that the same extension re-integrates if Claude gains extension
+      support. Specified as panel.delivery.one-implementation,
+      .absent-until-asked and .anchors-still-required."
+  - author: agent
+    created: 2026-08-24T00:28:39Z
+    body: "Folded into the blueprint: panel.delivery (three rules) plus the
+      rewritten principle and Delivery table in docs/00-vision.md. Reopen if you
+      want the wrapper-app route kept alive as an option rather than closed."

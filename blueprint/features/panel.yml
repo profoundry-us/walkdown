@@ -112,6 +112,55 @@ stories:
             - Escape closes an open pin form, and leaves pin mode when none is open
           statement_hash: sha256:97fb50134c58
 
+  - id: panel.delivery
+    title: walkdown reaches the page, however the page was built
+    statement: As a reviewer, I can walk down an application whether or not anyone can add a script tag to it.
+    rules:
+      - id: panel.delivery.one-implementation
+        origin: thread:q-0016
+        statement: The panel and the embed are one implementation with two deliveries - a script tag for apps you control, and a browser extension for every other page - and neither delivery has a copy of the other's code.
+        verify: [human]
+        steps:
+          given:
+            - A page carrying the script tags, and a page carrying nothing
+          when:
+            - walkdown starts on each
+          then:
+            - Both run the same embed.js and panel.js
+            - The tag supplies server, project and anchor attribute from its own attributes
+            - The extension supplies the same answers before loading them, and nothing is forked
+          statement_hash: sha256:cb78287f2077
+
+      - id: panel.delivery.absent-until-asked
+        origin: thread:q-0016
+        statement: The extension does nothing on a page until a person has said which blueprint that origin belongs to - it never guesses what you are looking at.
+        verify: [human]
+        steps:
+          given:
+            - The extension installed, and an origin never configured
+          when:
+            - Visit any page on it
+          then:
+            - No panel, no badge, nothing added to the page
+            - Choosing a blueprint for that origin turns it on, and the choice is remembered
+            - The choice can be turned off again
+          statement_hash: sha256:c21b0b3b523a
+
+      - id: panel.delivery.anchors-still-required
+        origin: thread:q-0016
+        statement: Reaching a page is not the same as anchoring to it - on a page with no anchors, feedback still lands by position, and the missing anchors are the reason it cannot do better.
+        verify: [human]
+        steps:
+          given:
+            - A page walkdown reaches but which carries no anchor attributes
+          when:
+            - Place a pin
+          then:
+            - The pin is recorded against its coordinates and the thread is written
+            - It renders as a positioned pin, not an anchored one
+            - Anchored pins keep working wherever anchors do exist
+          statement_hash: sha256:9699e8d0df4d
+
   - id: panel.rules
     title: The rules are one tap away, and so is the way back
     statement: As a reviewer, I can see every rule, open one for detail, and move between them without losing my place.
