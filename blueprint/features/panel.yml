@@ -129,6 +129,7 @@ stories:
             - Both run the same embed.js and panel.js
             - The tag supplies server, project and anchor attribute from its own attributes
             - The extension supplies the same answers before loading them, and nothing is forked
+            - A page carrying both gets one panel and one badge, not two - the tag wins, because it runs first and its project is the app's own answer
           statement_hash: sha256:cb78287f2077
 
       - id: panel.delivery.absent-until-asked
