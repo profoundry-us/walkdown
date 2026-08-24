@@ -222,6 +222,15 @@ test('a sign-off records approved with its hash and threads @rule:panel.signoff.
   assert.deepEqual(record.results[0].threads, ['n-0001']);
 });
 
+test('the blueprint payload names the panel build it ships @rule:panel.delivery.stale-copy-says-so', async () => {
+  const { createHash } = await import('node:crypto');
+  const payload = await (await fetch(`${base}/api/blueprint`)).json();
+  const shipped = createHash('sha256')
+    .update(readFileSync(new URL('../lib/viewer/panel.js', import.meta.url)))
+    .digest('hex').slice(0, 12);
+  assert.equal(payload.panelHash, shipped);
+});
+
 test('invalid writes are rejected with 400', async () => {
   const bad = await fetch(`${base}/api/walkdowns`, {
     method: 'POST',

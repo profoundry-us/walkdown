@@ -249,6 +249,22 @@ stories:
             - Server and blueprint are chosen in the panel, not in browser chrome
           statement_hash: sha256:84bda3b30c1d
 
+      - id: panel.delivery.stale-copy-says-so
+        origin: thread:n-0062
+        statement: The extension's vendored copy of walkdown only updates when the extension is reloaded - so the panel compares the copy it is running against what the server ships, and says plainly when it has gone stale, because an outdated walkdown reviewing a moving spec quietly undermines every verdict.
+        verify: [checks, human]
+        screens: [review]
+        steps:
+          given:
+            - The extension reviewing a page after walkdown's panel changed on disk
+          when:
+            - The panel loads the blueprint
+          then:
+            - A banner states the extension is running an older walkdown and names the fix - reload the extension, then the page
+            - A current copy shows nothing
+            - The docked delivery never shows it, because a script tag always runs what the server ships
+          statement_hash: sha256:124fa1fddaac
+
       - id: panel.delivery.anchors-still-required
         origin: thread:q-0016
         statement: Reaching a page is not the same as anchoring to it - on a page with no anchors, feedback still lands by position, and the missing anchors are the reason it cannot do better.
