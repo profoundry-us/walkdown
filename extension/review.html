@@ -12,9 +12,11 @@
 <title>walkdown</title>
 <style>
   html, body { margin: 0; height: 100%; overflow: hidden; }
-  /* Painted before the stylesheet lands so the page never flashes white. The
-     panel repaints it in the real theme colours once the tokens resolve. */
-  body { background: #10161f; }
+  /* Painted before the stylesheet lands so the page never flashes white — on
+     <html>, because that is where the panel draws the drafting grid once the
+     tokens resolve, and a background on <body> would cover it. */
+  html { background: #10161f; }
+  body { background: transparent; }
 </style>
 </head>
 <body>

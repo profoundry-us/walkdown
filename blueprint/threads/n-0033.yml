@@ -1,0 +1,24 @@
+id: n-0033
+kind: note
+author: topher
+created: 2026-08-24T04:39:34Z
+anchor:
+  rule: panel.dock.own-skin
+status: addressed
+body: At some point we lost the fun blueprint background behind the page. Add it
+  back.
+replies:
+  - author: agent
+    created: 2026-08-24T04:39:44Z
+    body: >-
+      Back. It was never missing, only covered: review.html painted its own
+      pre-load colour on <body> so the page would not flash white, and the desk
+      - grid and all - is painted on <html>. A background on <body> is only
+      propagated to the canvas when <html> has none, so as soon as the panel
+      painted the desk, body's flat colour sat on top of it.
+
+
+      The pre-load colour moved to <html>, where the desk lands, and body is
+      transparent; paintDesk also clears whatever a host page put on body, so
+      nothing else can cover it the same way later. The docked layout was never
+      affected - there the page IS body, and it is meant to cover the desk.
