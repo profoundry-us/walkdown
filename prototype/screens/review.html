@@ -75,17 +75,68 @@
         <span class="opacity-60">3 judged</span>
       </div>
 
-      <ul class="menu menu-xs flex-1 overflow-y-auto p-2" data-testid="panel.rules-list">
-        <li><a>✓ email-required</a></li>
-        <li><a class="menu-active">✓ confirmation</a></li>
-        <li><a>○ already-joined <span class="badge badge-xs ml-auto border-dashed" title="owes a human verdict">you</span></a></li>
-        <li><a>○ visual-match <span class="badge badge-xs ml-auto">1 ⚑</span></a></li>
-      </ul>
+      <!-- The list glyph carries the LIFECYCLE (shape) and the OWNERSHIP
+           (color): □ designed · ✍︎ approved, awaiting build · ✎︎ refining ·
+           ○ built, awaiting verification · ✓ verified · ✗ failing. Warning
+           tint + a right-edge badge mean the rule waits on you — "sign" for
+           a sign-off, "walk" for a walkdown. Rules group under their story,
+           exactly as the panel draws them. -->
+      <div class="flex-1 overflow-y-auto p-2 text-xs" data-testid="panel.rules-list">
+        <div class="px-2 pb-0.5 pt-1.5 text-[10px] font-bold uppercase tracking-widest opacity-40">checkout.guest</div>
+        <button class="flex w-full items-center gap-2 rounded px-2 py-1 text-left hover:bg-base-200" title="verified">
+          <span class="w-3.5 shrink-0 text-center text-success">✓</span><span class="truncate">email-required</span>
+        </button>
+        <button class="flex w-full items-center gap-2 rounded px-2 py-1 text-left hover:bg-base-200"
+                title="built — awaiting your walkdown">
+          <span class="w-3.5 shrink-0 text-center text-warning">○</span><span class="truncate">saved-cards</span>
+          <span class="badge badge-xs ml-auto shrink-0 border-dashed text-warning">walk</span>
+        </button>
+        <button class="flex w-full items-center gap-2 rounded px-2 py-1 text-left hover:bg-base-200"
+                title="failing — the build was rejected">
+          <span class="w-3.5 shrink-0 text-center text-error">✗</span><span class="truncate">visual-summary</span>
+          <span class="badge badge-xs ml-auto shrink-0">1 ⚑</span>
+        </button>
+
+        <div class="px-2 pb-0.5 pt-2.5 text-[10px] font-bold uppercase tracking-widest opacity-40">checkout.receipt</div>
+        <button class="flex w-full items-center gap-2 rounded px-2 py-1 text-left hover:bg-base-200"
+                title="approved — spec signed off, awaiting build">
+          <span class="w-3.5 shrink-0 text-center opacity-60">✍︎</span><span class="truncate">emails-a-copy</span>
+        </button>
+        <button class="flex w-full items-center gap-2 rounded bg-base-200 px-2 py-1 text-left"
+                title="designed — awaiting your sign-off">
+          <span class="w-3.5 shrink-0 text-center text-warning">□</span><span class="truncate">printable-view</span>
+          <span class="badge badge-xs ml-auto shrink-0 border-dashed text-warning">sign</span>
+        </button>
+        <button class="flex w-full items-center gap-2 rounded px-2 py-1 text-left hover:bg-base-200"
+                title="refining — sent back for spec rework">
+          <span class="w-3.5 shrink-0 text-center text-warning">✎︎</span><span class="truncate">line-item-detail</span>
+          <span class="badge badge-xs ml-auto shrink-0">1 ⚑</span>
+        </button>
+
+        <div class="px-2 pb-0.5 pt-2.5 text-[10px] font-bold uppercase tracking-widest opacity-40">onboarding.invite</div>
+        <button class="flex w-full items-center gap-2 rounded px-2 py-1 text-left hover:bg-base-200"
+                title="built — awaiting verification (checks still pending)">
+          <span class="w-3.5 shrink-0 text-center opacity-30">○</span><span class="truncate">resend</span>
+        </button>
+        <button class="flex w-full items-center gap-2 rounded px-2 py-1 text-left hover:bg-base-200"
+                title="designed — awaiting sign-off (not yours to give)">
+          <span class="w-3.5 shrink-0 text-center opacity-30">□</span><span class="truncate">expires-after-week</span>
+        </button>
+
+        <!-- Explanatory row; in the build this lives in each row's tooltip. -->
+        <div class="mt-3 border-t border-dashed border-base-content/25 px-2 pt-2 text-[10px] leading-relaxed opacity-40">
+          shape = lifecycle (□ designed · ✍︎ approved · ✎︎ refining · ○ built · ✓ ✗ verdict)<br>
+          color = waiting on you (badge says which: sign or walk)
+        </div>
+      </div>
 
       <footer class="flex items-center gap-2 border-t border-dashed border-base-content/25 px-3 py-2 text-xs opacity-70"
               data-testid="panel.counts">
-        <span><b>8 of 10</b> rules verified</span>
-        <span class="badge badge-xs badge-ghost ml-auto border-dashed">2 need you</span>
+        <span><b>2 of 8</b> rules verified</span>
+        <span class="ml-auto flex gap-1">
+          <span class="badge badge-xs badge-ghost border-dashed" title="rules owing your sign-off">1 to sign</span>
+          <span class="badge badge-xs badge-ghost border-dashed" title="rules owing your walkdown">1 to walk</span>
+        </span>
       </footer>
     </aside>
   </main>
