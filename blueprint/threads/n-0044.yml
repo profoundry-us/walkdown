@@ -1,0 +1,16 @@
+id: n-0044
+kind: note
+author: topher
+created: 2026-08-24T05:45:51Z
+anchor:
+  rule: panel.dock.own-skin
+status: addressed
+body: Drop the tuner's left offset to 24px instead of 36 so it stands off the
+  app frame by the same distance on both axes.
+replies:
+  - author: agent
+    created: 2026-08-24T05:46:01Z
+    body: "Done - left dropped from GAP*3 (36px) to GAP*2 (24px), matching the top
+      offset (TOP + GAP), so the tuner now stands off the app's corner by GAP
+      (12px) on both axes rather than more on one side than the other. Verified:
+      12px on both x and y between the app frame's edge and the tuner's."
