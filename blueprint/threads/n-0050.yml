@@ -1,0 +1,25 @@
+id: n-0050
+kind: note
+author: topher
+created: 2026-08-24T12:28:35Z
+anchor:
+  rule: panel.walkdown.records-to-ledger
+  screen: rule-detail
+  element: detail.feedback
+status: addressed
+body: I need to provide feedback when failing a rule - and when passing one too.
+  Make it a form (above the verdict buttons, so it reads as write-first) that
+  files a new note thread on the rule if any text is provided, linked into the
+  run result.
+replies:
+  - author: agent
+    created: 2026-08-24T14:55:07Z
+    body: "Built and verified in the live panel. A feedback textarea now rides above
+      the verdict buttons in the detail pane (anchor detail.feedback in the
+      mockup and storyboard); anything written is filed as a note thread
+      anchored to the rule under the session actor at verdict-click, and
+      finishWalkdown links every such note - plus any pins dropped on the rule
+      during the session - into that result's threads field, which POST
+      /api/walkdowns already persisted. An empty box files nothing. Verified
+      live: a written Refine filed its note and the finished run carried the
+      thread id; a note-free Approve filed nothing."

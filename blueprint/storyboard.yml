@@ -31,6 +31,7 @@ screens:
       - detail.statement
       - detail.verdict
       - detail.judged
+      - detail.feedback
       - detail.evidence
       - detail.steps
       - detail.technical-disclosure

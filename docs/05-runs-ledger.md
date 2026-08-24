@@ -65,9 +65,11 @@ Fields of note:
   verified* (formatters emit it automatically). This is what powers staleness: a pass
   whose recorded hash no longer matches the rule's current statement is displayed as
   *stale*, not *passing*. Results without it are taken at face value.
-- **`status`** per rule: `pass | fail | skipped | blocked`. Failures carry the failure
-  message; evidence paths (screenshots, traces) live under `runs/evidence/` (git-ignored
-  or LFS, per project taste).
+- **`status`** per rule: `pass | fail | skipped | blocked`, plus two that only walkdown
+  sessions record — `approved | refining`, the **sign-off** verdicts for rules with no
+  build evidence yet (see below). Failures carry the failure message; evidence paths
+  (screenshots, traces) live under `runs/evidence/` (git-ignored or LFS, per project
+  taste).
 
 ## walkdown sessions (judgment runs)
 
@@ -101,6 +103,19 @@ walkdown sessions come in two flavors, producing the same record shape:
   to each rule's screen ([04-embed-and-anchors.md](04-embed-and-anchors.md)), and
   records verdicts — a pass advances to the next rule owing one, a fail stays put so a
   note can be pinned where it failed.
+- **Every verdict can carry a why, and a fail must.** A feedback box rides above the
+  verdict buttons; anything written is filed as a note thread on the rule and linked
+  into the run result's `threads`, along with any pins dropped on the rule during the
+  session. A fail is refused until it has one or the other — a fail with no why is work
+  nobody can act on.
+- **Unbuilt rules are signed off, not judged.** A rule the ledger holds no build
+  verdict for (no pass or fail from checks or judgment) offers **Approve / Refine**
+  instead of Pass / Fail — a verdict on the *spec*, not the build. Approve records
+  `approved`, hash-stamped like a pass so it goes stale when the statement is reworded;
+  Refine requires the feedback text (that text *is* the refinement) and records
+  `refining` with the thread linked. Neither counts as build evidence, neither
+  satisfies any verify requirement, and the rule stays in the human queue for a real
+  walkdown once built.
 - A human "fail" usually spawns a **note thread** at the offending element; the run result
   links to it, so the agent fixing the note can see exactly which walkdown rejected what.
 - Partial sessions are fine — un-visited rules simply don't appear in `results`.

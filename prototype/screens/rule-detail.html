@@ -46,6 +46,11 @@
             confirmation showing the email they joined with.</p>
         </div>
 
+        <!-- The box rides ABOVE the buttons: write the why, then judge. Any
+             text is filed as a note thread on the rule with the verdict.
+             Unbuilt rules show Approve / Refine here instead — sign-off. -->
+        <textarea class="textarea textarea-xs w-full border-dashed border-base-content/25"
+          placeholder="Why? Filed as a note with your verdict." data-testid="detail.feedback"></textarea>
         <div class="flex gap-2" data-testid="detail.verdict">
           <button class="btn btn-xs flex-1 border-[1.5px] border-dashed border-base-content/25">✓ Pass</button>
           <button class="btn btn-xs flex-1 border-[1.5px] border-dashed border-base-content/25">✗ Fail</button>

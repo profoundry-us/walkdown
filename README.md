@@ -109,11 +109,15 @@ statement, stored truncated (`sha256:` + 12 hex).
   same server — including HTTPS staging pages, via the Private-Network-Access preflight.
   `data-bp` names the project when one server hosts sibling blueprints; omit it and pins
   file against whichever blueprint `walkdown serve` started in.
-- **Human walkdowns** — enter your name, Start walkdown, judge rules Pass/Fail, Finish:
-  the session is appended to `blueprint/runs/` as a hash-stamped `kind: walkdown`
-  record, satisfying `human` verify requirements. Failing a rule switches pin mode on
-  so the note lands while you're looking at the problem, and pins dropped on a failed
-  rule are linked into that run's result.
+- **Human walkdowns** — Start walkdown (your name arrives from git identity), judge
+  rules, Finish: the session is appended to `blueprint/runs/` as a hash-stamped
+  `kind: walkdown` record, satisfying `human` verify requirements. A feedback box rides
+  above the verdict buttons — anything written is filed as a note thread on the rule
+  and linked into the run result, and a **fail is refused until it has a why** (the
+  note, or a pin dropped during the session; failing arms pin mode so the note lands
+  where the problem is). Rules with no build evidence show **Approve / Refine** instead
+  of Pass / Fail — sign-off on the spec, recorded as `approved`/`refining`, never
+  counted as verification.
 - **Thread lifecycle** — clicking a pin or a thread opens it: body, replies, and the
   actions its state allows (Reply / Mark addressed / ✓ Verify / Reopen / Waive; Answer
   and Mark incorporated for questions). Transitions are validated server-side; `verified`

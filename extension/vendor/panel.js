@@ -110,6 +110,7 @@
   let servedRoot = null;   // the folder the server reports it is serving
   let listTab = 'rules';   // rules | screens — the two things the side lists
   let threadNote = '';     // what the reply box says, kept across re-renders
+  let verdictNote = '';    // the verdict feedback box, kept across re-renders
   let lastView = 'list';
   let ghostWidth = 0;   // 0 = fill the stage; otherwise a fixed CSS width
 
@@ -1124,7 +1125,13 @@
   }
 
   function startWalkdown() {
-    session = { verdicts: {}, actor: data.identity?.actor ?? '' };
+    // `started` marks the session so pins dropped during it can count as a
+    // fail's why and ride into the run record; `threads` collects the notes
+    // the feedback box files, per rule.
+    session = {
+      verdicts: {}, threads: {}, actor: data.identity?.actor ?? '',
+      started: new Date().toISOString(),
+    };
     render();
   }
 
@@ -1139,10 +1146,10 @@
       }
       const mine = needsYou(row.rule);
       const glyph = session?.verdicts[row.rule]
-        ? (session.verdicts[row.rule] === 'pass' ? '✓' : '✗')
+        ? { pass: '✓', fail: '✗', approved: '✍', refining: '✎' }[session.verdicts[row.rule]]
         : mine ? '◆' : { pass: '✓', fail: '✗', pending: '○' }[row.verdict];
       const cls = session?.verdicts[row.rule]
-        ? (session.verdicts[row.rule] === 'pass' ? 'text-success' : 'text-error')
+        ? { pass: 'text-success', fail: 'text-error', approved: 'text-success', refining: 'text-warning' }[session.verdicts[row.rule]]
         : mine ? 'text-warning'
         : { pass: 'text-success', fail: 'text-error', pending: 'opacity-30' }[row.verdict];
       const short = shortName(row);
@@ -1190,11 +1197,22 @@
           <p class="text-[15px] leading-relaxed">${esc(r.statement)}</p>
           ${elsewhere(r)}
         </div>
-        ${session ? `<div class="flex gap-2">
-          <button class="btn btn-sm flex-1 ${picked === 'pass' ? 'btn-success' : 'btn-outline btn-success'}" data-v="pass">✓ Pass</button>
-          <button class="btn btn-sm flex-1 ${picked === 'fail' ? 'btn-error' : 'btn-outline btn-error'}" data-v="fail">✗ Fail</button>
-        </div>
-        <div class="text-[11.5px] opacity-50">${Object.keys(session.verdicts).length} judged this session</div>` : ''}
+        ${session ? `<div class="flex flex-col gap-1.5">
+          <!-- The box rides ABOVE the buttons: write the why, then judge. -->
+          <textarea id="wdp-vnote" class="textarea textarea-xs h-14 w-full" placeholder="${r.built
+            ? 'Why? Anything written here is filed as a note with your verdict.'
+            : 'What should change? Refine files this as the rule’s feedback.'}">${esc(verdictNote)}</textarea>
+          ${r.built ? `<div class="flex gap-2">
+            <button class="btn btn-sm flex-1 ${picked === 'pass' ? 'btn-success' : 'btn-outline btn-success'}" data-v="pass">✓ Pass</button>
+            <button class="btn btn-sm flex-1 ${picked === 'fail' ? 'btn-error' : 'btn-outline btn-error'}" data-v="fail">✗ Fail</button>
+          </div>` : `<div class="flex gap-2">
+            <button class="btn btn-sm flex-1 ${picked === 'approved' ? 'btn-success' : 'btn-outline btn-success'}" data-v="approved">✍ Approve</button>
+            <button class="btn btn-sm flex-1 ${picked === 'refining' ? 'btn-warning' : 'btn-outline btn-warning'}" data-v="refining">✎ Refine</button>
+          </div>
+          <div class="text-[11px] opacity-50">No build evidence yet — you are signing off the rule, not judging a build.</div>`}
+          <div id="wdp-vsay" class="hidden text-[11px] text-warning"></div>
+          <div class="text-[11.5px] opacity-50">${Object.keys(session.verdicts).length} judged this session</div>
+        </div>` : ''}
         ${steps ? `<div><div class="${LBL} mb-1.5">Steps</div>
           <div class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-[13px] leading-relaxed">${steps}</div></div>` : ''}
         <div>
@@ -1466,17 +1484,66 @@
       }).join('')}`;
   }
 
+  function sayVerdict(msg) {
+    const el = host.querySelector('#wdp-vsay');
+    if (!el) return toast(msg);
+    el.textContent = msg;
+    el.classList.remove('hidden');
+  }
+
+  /** File the feedback box's text as a note on the rule; null on refusal. */
+  async function postRuleNote(rule, body) {
+    const author = (session.actor ?? '').trim() || undefined;
+    const res = await fetch(api('/api/threads'), {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ kind: 'note', author, body, anchor: { rule } }),
+    });
+    const out = await res.json().catch(() => ({}));
+    if (!res.ok) { sayVerdict(out.error ?? 'note not filed'); return null; }
+    return out.id;
+  }
+
+  /** A pin dropped on this rule since the session began — the other way to say why. */
+  const pinnedThisSession = (rule) =>
+    (data?.threads ?? []).some((t) => t.anchor?.rule === rule &&
+      session?.started && String(t.created ?? '') >= session.started);
+
   function wireVerdict() {
+    const note = host.querySelector('#wdp-vnote');
+    if (note) note.oninput = () => { verdictNote = note.value; };
     host.querySelectorAll('[data-v]').forEach((b) => {
-      b.onclick = () => {
-        session.verdicts[selected.rule] = b.dataset.v;
-        // A pass moves you on; a fail keeps you here to pin what is wrong.
-        if (b.dataset.v === 'pass') {
+      b.onclick = async () => {
+        const status = b.dataset.v;
+        const rule = selected.rule;
+        const text = (host.querySelector('#wdp-vnote')?.value ?? '').trim();
+        // A refusal is work nobody can act on until it says why. Refine's why
+        // is the text itself; a fail's may also be a pin on the page.
+        if (status === 'refining' && !text)
+          return sayVerdict('Refine is the feedback — write what should change first.');
+        if (status === 'fail' && !text) {
+          await load(); // a pin may have landed since the last paint
+          if (!pinnedThisSession(rule)) {
+            PIN.set(true);
+            sayVerdict('A fail needs a why — write it above, or pin it on the page.');
+            return;
+          }
+        }
+        if (text) {
+          const tid = await postRuleNote(rule, text);
+          if (!tid) return; // the refusal is on screen; verdict stays unrecorded
+          (session.threads[rule] ??= []).push(tid);
+        }
+        session.verdicts[rule] = status;
+        verdictNote = '';
+        // A pass or approval moves you on; fail and refine keep you here —
+        // fail with pin mode armed so the note lands where the problem is.
+        if (status === 'fail') PIN.set(true);
+        if (status === 'pass' || status === 'approved') {
           const next = data.rows.find((x) => needsYou(x.rule) && !session.verdicts[x.rule]);
-          if (next) { selected = next; render(); return; }
+          if (next) { open(next.rule); load(); return; }
           view = 'list';
         }
-        render();
+        await load(); // pull the new thread into the lists and repaint
       };
     });
   }
@@ -1493,7 +1560,18 @@
 
   /** Append the session to the runs ledger — the same write the viewer makes. */
   async function finishWalkdown() {
-    const results = Object.entries(session.verdicts).map(([rule, status]) => ({ rule, status }));
+    // A double-click on Finish must not append the same record twice.
+    if (session.posting) return;
+    session.posting = true;
+    // Each verdict carries its why: the notes the feedback box filed, plus
+    // any pins dropped on the rule during this session.
+    const results = Object.entries(session.verdicts).map(([rule, status]) => {
+      const pins = (data?.threads ?? [])
+        .filter((t) => t.anchor?.rule === rule && String(t.created ?? '') >= session.started)
+        .map((t) => t.id);
+      const threads = [...new Set([...(session.threads?.[rule] ?? []), ...pins])];
+      return { rule, status, ...(threads.length && { threads }) };
+    });
     if (!results.length) { session = null; render(); return; }
     const actor = (session.actor ?? '').trim();
     if (!actor || actor === 'agent') {

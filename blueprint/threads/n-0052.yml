@@ -1,0 +1,31 @@
+id: n-0052
+kind: note
+author: topher
+created: 2026-08-24T12:28:35Z
+anchor:
+  rule: panel.walkdown.records-to-ledger
+  screen: rule-detail
+  element: detail.verdict
+status: addressed
+body: "Rules that are not built yet should not be judged Pass/Fail - that
+  poisons the ledger. Show Approve / Refine instead (spec sign-off): Approve
+  records that the rule should be built as written; Refine requires the feedback
+  text and files it as a thread. Derive which pair to show from the ledger (no
+  build evidence = sign-off), record approved/refining as new walkdown result
+  statuses, and never let sign-off satisfy a human verify requirement."
+replies:
+  - author: agent
+    created: 2026-08-24T14:55:07Z
+    body: Built and verified end to end. deriveStatus now derives built per rule
+      (any pass/fail/stale cell across checks, agent and human - sign-offs,
+      skips and blocks never count) and unbuilt rules show Approve/Refine with a
+      caption saying you are signing off the rule, not judging a build. Approve
+      records approved (hash-stamped like a pass, so rewording the statement
+      stales it - covered by a new status test) and advances; Refine is refused
+      without feedback text, files it as the rule's note, records refining, and
+      stays put. Both render as pencil glyphs in the list, the panel, and
+      walkdown status; neither satisfies any verify requirement and the rule
+      stays in the human judge queue. New statuses accepted by serve and lint;
+      covered by checks tagged panel.signoff.spec-pair-derived and
+      panel.signoff.approved-recorded plus a live browser walkthrough recording
+      refining/approved/fail in one run with threads linked.

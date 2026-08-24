@@ -506,6 +506,39 @@ stories:
             - Judging the last owed rule returns to the list rather than a dead end
           statement_hash: sha256:39a3512969c6
 
+      - id: panel.walkdown.note-with-any-verdict
+        origin: thread:n-0050
+        statement: A feedback box rides above the verdict buttons - write first, then judge - and anything written is filed as a note thread on the rule and linked into the run result; an empty box files nothing.
+        verify: [human]
+        screens: [rule-detail]
+        steps:
+          given:
+            - A walkdown session running, a rule open in the detail pane
+          when:
+            - Write in anchor `detail.feedback`, then choose either verdict
+          then:
+            - A note thread anchored to the rule is filed with the text, under the session's actor
+            - The finished run's result for the rule carries the thread id
+            - Judging with the box empty files no thread
+            - The box sits above anchor `detail.verdict`, so the why is asked for before the verdict
+          statement_hash: sha256:f9043305838b
+
+      - id: panel.walkdown.fail-requires-why
+        origin: thread:n-0051
+        statement: A fail is refused until it has a why - feedback text or a pin dropped on the rule during the session - because a fail with no why is work nobody can act on.
+        verify: [human]
+        screens: [rule-detail]
+        steps:
+          given:
+            - A walkdown session running, a rule open with the feedback box empty and nothing pinned
+          when:
+            - Choose Fail
+          then:
+            - No verdict is recorded; the panel says why and arms pin mode
+            - Writing feedback or dropping a pin on the rule, then failing again, records it
+            - The fail still leaves pin mode on afterwards, so more pins can land where the problems are
+          statement_hash: sha256:9644c16756d8
+
   - id: panel.identity
     title: The panel already knows who you are
     statement: As a reviewer, I should not have to type my name to do attributed work - the tool knows it from the machine I am working on.
@@ -574,3 +607,56 @@ stories:
             - The app lays out at the chosen width and is scaled down whole - no reflow
             - The current scale is shown in anchor `panel.zoom`
           statement_hash: sha256:8beb5dbadbe0
+
+  - id: panel.signoff
+    title: Unbuilt rules are signed off, not judged
+    statement: As a reviewer walking rules that are not built yet, I approve the spec or send it back for rework - Pass and Fail belong to builds, and recording them against nothing poisons the ledger.
+    rules:
+      - id: panel.signoff.spec-pair-derived
+        origin: thread:n-0052
+        statement: Which verdict pair a rule shows is derived from the ledger - a rule with no build evidence (no pass or fail from checks or judgment) offers Approve and Refine, and sign-off records, skips and blocks never count as build evidence.
+        verify: [checks, human]
+        screens: [rule-detail]
+        steps:
+          given:
+            - A walkdown session running
+          when:
+            - Open a rule the ledger holds no pass or fail for, then one it does
+          then:
+            - The first shows Approve and Refine, labelled as signing off the rule rather than judging a build
+            - The second shows Pass and Fail
+            - Approving a rule does not flip it to the Pass/Fail pair - only build evidence does
+          statement_hash: sha256:d195df6ea5d8
+
+      - id: panel.signoff.refine-requires-feedback
+        origin: thread:n-0052
+        statement: Refine is the feedback - it is refused until the box says what should change, and the text is filed as a note thread on the rule while the session stays put.
+        verify: [human]
+        screens: [rule-detail]
+        steps:
+          given:
+            - A walkdown session running, an unbuilt rule open
+          when:
+            - Choose Refine with the box empty, then with feedback written
+          then:
+            - The empty refine is refused with the reason; nothing is recorded
+            - The written refine files the note, records `refining`, and stays on the rule
+            - The refine and its note arrive linked in the finished run record
+          statement_hash: sha256:cc9c4f5148e1
+
+      - id: panel.signoff.approved-recorded
+        origin: thread:n-0052
+        statement: Approve appends an `approved` result to the ledger, hash-stamped like a pass so it goes stale when the statement moves - and it never satisfies a human verify requirement, because approving a spec is not judging a build.
+        verify: [checks, human]
+        screens: [rule-detail]
+        steps:
+          given:
+            - A walkdown session running, an unbuilt rule open
+          when:
+            - Approve it and finish the session
+          then:
+            - The run record carries `approved` with the statement hash as it was signed off
+            - The rule still shows as pending and still owes a human verdict once built
+            - Rewording the statement renders the approval as stale, asking for a fresh sign-off
+            - Approving moves the session on to the next rule owing a verdict
+          statement_hash: sha256:3debe377856e

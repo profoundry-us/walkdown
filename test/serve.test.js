@@ -205,6 +205,23 @@ test('POST /api/walkdowns writes a hash-stamped human run record', async () => {
   assert.equal(record.results[0].statement_hash, formatHash('The visitor can do the thing.'));
 });
 
+test('a sign-off records approved with its hash and threads @rule:panel.signoff.approved-recorded', async () => {
+  const res = await (await fetch(`${base}/api/walkdowns`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ actor: 'topher', results: [
+      { rule: 'demo.main.thing', status: 'approved', threads: ['n-0001'] },
+    ] }),
+  })).json();
+  assert.ok(res.run_id, JSON.stringify(res));
+  const file = readdirSync(join(bp, 'runs')).find((f) => f.includes(res.run_id));
+  const record = JSON.parse(readFileSync(join(bp, 'runs', file), 'utf8'));
+  assert.equal(record.results[0].status, 'approved');
+  // An approval is of the statement as written, so it is hash-stamped like a pass.
+  assert.equal(record.results[0].statement_hash, formatHash('The visitor can do the thing.'));
+  assert.deepEqual(record.results[0].threads, ['n-0001']);
+});
+
 test('invalid writes are rejected with 400', async () => {
   const bad = await fetch(`${base}/api/walkdowns`, {
     method: 'POST',

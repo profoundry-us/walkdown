@@ -174,3 +174,25 @@ test('open threads listed; terminal ones excluded', () => {
   );
   assert.deepEqual(rows[0].threads, [{ id: 'n-1', status: 'addressed' }]);
 });
+
+test('sign-off is not build evidence: approved stays unbuilt, pending, and owed @rule:panel.signoff.spec-pair-derived', () => {
+  const { rows, attention } = deriveStatus(blueprint({
+    verify: ['human'],
+    runs: [walkdownRun('2026-01-02T00:00:00Z', 'topher', 'approved')],
+  }));
+  assert.equal(rows[0].built, false);
+  assert.equal(rows[0].human.state, 'approved');
+  assert.equal(rows[0].verdict, 'pending');
+  assert.ok(attention.some((a) => a.who === 'human' && a.action === 'judge' && a.rule === 'demo.main.thing'));
+});
+
+test('a build verdict flips built; an approval goes stale when the statement moves @rule:panel.signoff.spec-pair-derived', () => {
+  const built = deriveStatus(blueprint({ runs: [checksRun('2026-01-02T00:00:00Z', 'local', 'fail')] }));
+  assert.equal(built.rows[0].built, true);
+  const stale = deriveStatus(blueprint({
+    verify: ['human'],
+    runs: [{ created: '2026-01-02T00:00:00Z', kind: 'walkdown', target: 'local', actor: 'topher',
+      run_id: 'r-stale', results: [{ rule: 'demo.main.thing', status: 'approved', statement_hash: BOGUS_HASH }] }],
+  }));
+  assert.equal(stale.rows[0].human.state, 'stale');
+});
