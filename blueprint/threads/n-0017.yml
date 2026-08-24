@@ -1,0 +1,36 @@
+id: n-0017
+kind: note
+author: topher
+created: 2026-08-24T01:09:52Z
+anchor:
+  rule: panel.dock.toolbar
+status: addressed
+body: "Panel interface pass: drop the broken project selector for a first-run
+  interstitial that opens a folder of blueprints and then lets you pick one by
+  name and description; Start walkdown next to Pin mode at top right;
+  Prototype/App centred with an opacity slider between them; drop the Ghost
+  controls and the screen selector from the bottom; Screens/Rules tabs at the
+  top of the sidebar; the W pin hint only while pin mode is on; no background or
+  bottom border on the header so the blueprint lines run through; and the
+  sidebar as a card whose margins match the app."
+replies:
+  - author: agent
+    created: 2026-08-24T01:10:13Z
+    body: "All nine done. Initialization: the project selector is gone, replaced by
+      two first-run screens — 'no blueprints open' (which names the walkdown
+      serve command and lets you point at a different address) and a picker
+      listing every blueprint the server found, each with the name and a new
+      description field read from its own walkdown.yml. The choice is remembered
+      per origin in the extension's own storage, and a page that declares its
+      blueprint by script tag skips the picker entirely. UI: Start walkdown sits
+      beside Pin mode top-right; Prototype and App are centred with the fade
+      slider between them, and that slider IS the ghost, so the old Ghost button
+      and slider are gone rather than duplicated; the screen selector became a
+      Screens tab beside Rules, which also shows which screens have a design to
+      compare against; the pin badge only shows while pin mode is on, and only
+      once the panel is there to own the control; the header has no background
+      and no bottom border, so the drafting grid runs unbroken; and the sidebar
+      is a card inset by the same 12px as the page, verified symmetrical — page
+      12..992, panel 1004..1388, 12px top, bottom and both sides, 10px radius on
+      each. Specified as panel.start.open-a-folder and
+      panel.start.choose-a-blueprint."

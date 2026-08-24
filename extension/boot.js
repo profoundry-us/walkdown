@@ -26,9 +26,18 @@ const SITES = 'walkdown:sites';
 
   window.__walkdownConfig = {
     server: site.server || 'http://localhost:4700',
+    // Deliberately not chosen here. Which blueprint a site is gets asked once,
+    // in the panel, where the descriptions are readable — the popup only
+    // decides whether walkdown runs at all.
     bp: site.bp || '',
     stylesheet: chrome.runtime.getURL('walkdown.css'),
     anchorAttribute: site.anchorAttribute || 'data-testid',
+    // The panel remembers its choices in the extension's own storage, so they
+    // survive a site clearing its data and never touch the page's localStorage.
+    store: {
+      get: async (k) => (await chrome.storage.local.get(k))[k] ?? null,
+      set: async (k, v) => chrome.storage.local.set({ [k]: v }),
+    },
   };
 
   try {

@@ -1,4 +1,5 @@
 project: walkdown-example
+description: A waitlist app and its admin — the schema demo, and the fixture the integration tests run against.
 runner:
   run_all: "npx playwright test"
   run_for_rule: "npx playwright test --grep '@rule:{id}'"

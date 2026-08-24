@@ -162,6 +162,40 @@ stories:
             - Anchored pins keep working wherever anchors do exist
           statement_hash: sha256:9699e8d0df4d
 
+  - id: panel.start
+    title: A fresh install knows nothing, and says so
+    statement: As a reviewer opening walkdown for the first time, I am asked what to open and which blueprint this site is - once - rather than shown an empty tool.
+    rules:
+      - id: panel.start.open-a-folder
+        origin: thread:n-0017
+        statement: With no walkdown server to read blueprints from, the panel says so plainly and tells you how to open one, rather than rendering an empty or broken review surface.
+        verify: [human]
+        steps:
+          given:
+            - The extension on for a site, and no server running
+          when:
+            - The panel starts
+          then:
+            - It says no blueprints are open and names the command that opens them
+            - The address it looks at can be changed and retried without a reload
+            - It is stated as a first step, not as an error
+          statement_hash: sha256:35f53b5b5604
+
+      - id: panel.start.choose-a-blueprint
+        origin: thread:n-0017
+        statement: When the folder holds more than one blueprint, the panel asks which one this site is, showing each by name and by a description the blueprint itself carries.
+        verify: [human]
+        steps:
+          given:
+            - A server whose folder holds several blueprints
+          when:
+            - The panel starts with no choice recorded for this origin
+          then:
+            - Every blueprint is listed with its name and its own description
+            - Choosing one loads it and remembers the choice for that origin
+            - A page that declares its blueprint is never asked
+          statement_hash: sha256:9f0ded825795
+
   - id: panel.rules
     title: The rules are one tap away, and so is the way back
     statement: As a reviewer, I can see every rule, open one for detail, and move between them without losing my place.

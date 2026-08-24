@@ -31,44 +31,31 @@ async function main() {
   const site = sites[origin] ?? {};
   const server = site.server || DEFAULT_SERVER;
 
-  let payload;
-  try {
-    payload = await (await fetch(server + '/api/blueprint')).json();
-  } catch {
-    $('body').innerHTML = `<p class="mb-2">No walkdown server at <code>${esc(server)}</code>.</p>
-      <p class="opacity-70">Run <code>walkdown serve</code> in the project, then open this again.</p>`;
-    return;
-  }
-
-  const projects = payload.projects?.length
-    ? payload.projects
-    : [{ id: '', name: payload.project ?? 'this project', current: true }];
-
   $('body').innerHTML = `
-    <label class="mb-2 block">
-      <span class="mb-1 block text-[11px] font-bold uppercase tracking-wider opacity-50">Blueprint</span>
-      <select id="bp" class="select select-sm w-full">
-        ${projects.map((p) => `<option value="${esc(p.id)}" ${p.id === (site.bp ?? '') ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}
-      </select>
-    </label>
     <label class="flex cursor-pointer items-center gap-2 py-1">
       <input type="checkbox" id="on" class="toggle toggle-sm toggle-primary" ${site.on ? 'checked' : ''}>
       <span>Walk this site down</span>
     </label>
-    <p class="mt-2 text-[11px] leading-relaxed opacity-50">Applies to every page on
-      <b>${esc(origin)}</b>. The tab reloads so the panel can start before the page does.</p>`;
+    <label class="mt-3 block">
+      <span class="mb-1 block text-[11px] font-bold uppercase tracking-wider opacity-50">walkdown server</span>
+      <input id="server" class="input input-sm w-full" value="${esc(server)}">
+    </label>
+    <p class="mt-3 text-[11px] leading-relaxed opacity-50">Applies to every page on
+      <b>${esc(origin)}</b>. Which blueprint it is gets asked once in the panel itself, where
+      there is room to describe them.</p>`;
 
   const save = async () => {
     const next = { ...sites };
     const on = $('on').checked;
-    if (!on && !site.bp) delete next[origin];
-    else next[origin] = { on, bp: $('bp').value, server };
+    const at = $('server').value.trim() || DEFAULT_SERVER;
+    if (!on) delete next[origin];
+    else next[origin] = { ...site, on, server: at.replace(/\/+$/, '') };
     await chrome.storage.local.set({ [SITES]: next });
     await chrome.tabs.reload(tab.id);
     window.close();
   };
   $('on').onchange = save;
-  $('bp').onchange = () => { if ($('on').checked) save(); };
+  $('server').onchange = () => { if ($('on').checked) save(); };
 }
 
 main();

@@ -1,4 +1,5 @@
 project: walkdown
+description: The tool itself — the viewer, the docked panel, the embed, and the governance that keeps a verdict honest.
 
 # walkdown's own blueprint — the tool specified with itself. docs/ holds the
 # design (why); this holds the verifiable what. Checks are the node:test suite,
