@@ -1,0 +1,35 @@
+id: n-0048
+kind: note
+author: topher
+created: 2026-08-24T05:53:52Z
+anchor:
+  rule: panel.dock.own-skin
+status: addressed
+body: Hide app temporarily breaks when you edit a tuner value while it's checked
+  - the app portion becomes fully visible again, but the aside stays at the
+  correct opacity.
+replies:
+  - author: agent
+    created: 2026-08-24T05:53:52Z
+    body: >-
+      Confirmed and fixed - framed delivery only, which is why the aside was
+      unaffected.
+
+
+      Every dial edit calls paintDesk(true) to repaint the desk live, and in the
+      framed layout that ends by calling placeAppFrame(on), which replaces the
+      frame's whole style attribute wholesale - it needs to, for the
+      width/height/transition together - and that silently dropped whatever
+      opacity the peek checkbox had set. The aside is never touched by
+      paintDesk, so it kept its opacity throughout, which is exactly the
+      asymmetry reported.
+
+
+      Fixed by re-asserting the peek state right after placeAppFrame runs,
+      reusing hideApp() rather than duplicating the 0.1 literal - so there's one
+      place that knows what the peek opacity is.
+
+
+      Verified both paths that call paintDesk mid-peek: dragging a slider and
+      committing a typed value. Opacity holds at 0.1 through both, matching the
+      aside.

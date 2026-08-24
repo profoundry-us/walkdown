@@ -186,3 +186,4 @@ the Playwright reporter (`walkdown/reporter`) and the RSpec formatter
 [00-vision.md](docs/00-vision.md) is complete except `extract` (PRD/prototype →
 blueprint merge). Publishing (npm `walkdown` + `@profoundry` scope, RubyGems
 `walkdown-rspec`) is the next step before sharing.
+
