@@ -22,3 +22,15 @@ replies:
       a screened rule opens. Specified as panel.rules.headless-says-so (verify
       agent+human), probed live both ways, and the agent pass is on the ledger
       with a screenshot."
+  - author: agent
+    created: 2026-08-24T18:35:45Z
+    body: "Clarified ask built: the note alone was not enough - the surface itself
+      now changes. Opening a headless rule covers the app pane edge to edge with
+      an opaque card in walkdown's own colors ('No screen belongs to this
+      rule... The page you were reviewing is untouched underneath'), so the
+      previous screen can no longer masquerade as the rule's. It covers rather
+      than navigates - the application keeps its state - and lifts on returning
+      to the list or opening a screened rule. Rule statement reworded to say so
+      (which staled the earlier agent pass, as it should); fresh agent pass
+      recorded with a screenshot. Reload the extension once more to pick it up -
+      the new staleness banner will remind you from now on."

@@ -460,7 +460,7 @@ stories:
 
       - id: panel.rules.headless-says-so
         origin: thread:n-0061
-        statement: Opening a rule that has no screen says so plainly in its detail - otherwise whatever is on the desk reads as the rule's screen, and the reviewer cannot tell a right screen from a rule that has none.
+        statement: Opening a rule that has no screen clears the surface under review - an unmistakable cover in walkdown's own voice takes the sheet's place - because a lingering page reads as the rule's screen, and the reviewer cannot tell a right screen from a rule that has none.
         verify: [agent, human]
         screens: [rule-detail]
         steps:
@@ -469,10 +469,11 @@ stories:
           when:
             - Open one from the list while any page sits on the desk
           then:
-            - The detail states that no screen belongs to this rule and that it is judged by checks and recorded behavior, not by looking
-            - The surface under review stays where it was - there is nowhere to take it
-            - Opening a screened rule again clears the notice
-          statement_hash: sha256:413989cb9c9a
+            - The surface is covered where the page sheet was, stating that no screen belongs to this rule and that it is judged by checks and recorded behavior, not by looking
+            - The cover says the page underneath is untouched - it covers, never navigates, so the application keeps its state
+            - The detail pane carries the same note beside the statement
+            - Opening a screened rule or returning to the list lifts the cover
+          statement_hash: sha256:5bb6c7d6142a
 
   - id: panel.threads
     title: Feedback is answered where it is read

@@ -1,0 +1,21 @@
+{
+  "run_id": "2026-08-24T18-35-45Z-local-01",
+  "created": "2026-08-24T18:35:45Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "a78d6a7-dirty",
+  "blueprint_sha": "a78d6a7-dirty",
+  "results": [
+    {
+      "rule": "panel.rules.headless-says-so",
+      "status": "pass",
+      "statement_hash": "sha256:5bb6c7d6142a",
+      "evidence": [
+        "runs/evidence/2026-08-24T18-34-58Z/app-headless-cover.png"
+      ],
+      "reasoning": "Opening threads.lifecycle.reasoned-endings covered the app pane edge to edge (860x744 measured) with walkdown-voiced copy: \"No screen belongs to this rule / It is judged by its checks and recorded behavior, not by looking / The page you were reviewing is untouched underneath\" - the previous screen fully hidden, no navigation issued so the page keeps its state. The detail pane carries the matching note. Returning to the list lifted the cover, as did opening the screened rule panel.dock.no-framing."
+    }
+  ]
+}

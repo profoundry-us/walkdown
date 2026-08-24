@@ -570,6 +570,7 @@
       // Re-asserting is cheap and idempotent, unlike trying to make the two
       // writers share one attribute.
       if (hideAppOn) hideApp(true);
+      syncHeadlessCover();
       return;
     }
     if (!on) {
@@ -984,6 +985,7 @@
     });
     wireVerdict();
     wireThreads();
+    syncHeadlessCover();
   }
 
   /*
@@ -1437,12 +1439,42 @@
    * that walkdown can move the surface, offer the trip as something it will
    * actually make rather than as a link out of the tool.
    */
+  const isHeadless = (r) => Boolean(r) && !r.screens?.length && !r.flow?.length;
+
+  /*
+   * Opening a headless rule clears the desk: an opaque cover in walkdown's
+   * own colors takes the sheet's place, so the previous screen cannot keep
+   * masquerading as the rule's. Covering rather than navigating keeps the
+   * application's state intact underneath.
+   */
+  let headlessCover = null;
+  function syncHeadlessCover() {
+    const show = docked && view === 'detail' && isHeadless(selected);
+    if (!show) { headlessCover?.remove(); headlessCover = null; return; }
+    if (!headlessCover) {
+      headlessCover = document.createElement('div');
+      document.body.appendChild(headlessCover);
+    }
+    const cs = getComputedStyle(side);
+    headlessCover.style.cssText = `position:fixed; top:${HEAD}px; left:${GAP}px;
+      width:calc(100vw - ${W + GAP * 3}px); height:calc(100vh - ${HEAD + GAP}px);
+      z-index:2147482000; border-radius:10px; overflow:hidden;
+      background:${cs.backgroundColor}; color:${cs.color};
+      box-shadow:0 1px 2px rgba(0,0,0,.28), 0 12px 32px rgba(0,0,0,.34);
+      display:flex; align-items:center; justify-content:center; text-align:center;
+      font:13px/1.6 system-ui, sans-serif;`;
+    headlessCover.innerHTML = `<div style="max-width:26rem; padding:2rem; opacity:.9">
+      <div style="font-size:15px; font-weight:700; margin-bottom:.5rem">No screen belongs to this rule</div>
+      It is judged by its checks and recorded behavior, not by looking.<br>
+      The page you were reviewing is untouched underneath.</div>`;
+  }
+
   function elsewhere(r) {
     const here = currentScreen();
     const want = ruleScreen(r);
     // A headless rule must say so - otherwise whatever is on the desk reads
     // as the rule's screen, and it is not.
-    if (!want && !r.screens?.length && !r.flow?.length)
+    if (!want && isHeadless(r))
       return `<div class="mt-1.5 text-[11.5px] opacity-60">Headless — no screen belongs to
         this rule, so what is on the desk is beside the point. It is judged by its
         checks and recorded behavior, not by looking.</div>`;
