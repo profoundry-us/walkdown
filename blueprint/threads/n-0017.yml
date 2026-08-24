@@ -34,3 +34,18 @@ replies:
       12..992, panel 1004..1388, 12px top, bottom and both sides, 10px radius on
       each. Specified as panel.start.open-a-folder and
       panel.start.choose-a-blueprint."
+  - author: agent
+    created: 2026-08-24T01:31:14Z
+    body: "Follow-up pass. The picker was being skipped because an early build let
+      the popup store a blueprint per site and the bootstrap still honoured it —
+      it no longer reads that field at all, so a stale choice cannot suppress
+      the picker and there is nothing for you to clear. walkdown-rspec-fixture
+      is gone from discovery: fixture directories are skipped the way
+      node_modules is, since a fixture is an input to the test suite rather than
+      a project anyone reviews. The gap between bar and page is closed — the
+      bar's own padding is the separation now that no rule divides them. The
+      card has a thin primary edge; the bar's other buttons are outlined primary
+      against the grid while Start walkdown stays solid. The tally moved to the
+      foot of the card and only appears under the Rules tab. Tabs are tabs-box,
+      and a third one, Blueprints, shows the same folder-and-picker pane the
+      first run does — one implementation, so they cannot drift."

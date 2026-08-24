@@ -194,6 +194,8 @@ stories:
             - Every blueprint is listed with its name and its own description
             - Choosing one loads it and remembers the choice for that origin
             - A page that declares its blueprint is never asked
+            - Test fixtures are not offered - a fixture is an input to the suite, not a project anyone reviews
+            - The same list stays reachable later, so the folder or the blueprint can be changed without reinstalling anything
           statement_hash: sha256:9f0ded825795
 
   - id: panel.rules
