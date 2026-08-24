@@ -1,0 +1,37 @@
+id: n-0041
+kind: note
+author: topher
+created: 2026-08-24T05:40:55Z
+anchor:
+  rule: panel.dock.own-skin
+status: addressed
+body: Clicking outside of the tuner or hitting escape should close the tuner.
+  Also position the tuner further down and to the right - it currently lines up
+  exactly with the app's own corner and looks like it belongs to the app rather
+  than to the desk.
+replies:
+  - author: agent
+    created: 2026-08-24T05:42:20Z
+    body: >-
+      Both done.
+
+
+      Escape and an outside click both close the tuner now. The outside-click
+      check uses composedPath rather than e.target - crossing into the panels
+      shadow root retargets e.target to the shadow host, which would make every
+      click inside the panel read as "the tuner", tuner included. The gear is
+      excluded explicitly: its own onclick already toggles the tuner, and
+      closing it here first would just have that click reopen it a moment later.
+      A dials own Escape (cancelling an in-progress typed edit) stops the
+      keydown from also bubbling up and closing the whole tuner in the same
+      press.
+
+
+      Position: moved from flush with the app corner (top:44px, left:12px -
+      exactly HEAD and GAP) to top:56px, left:36px, so it reads as something
+      sitting on the desk rather than as part of the apps own layout.
+
+
+      Verified in both layouts: opening, clicking a dial (stays open), clicking
+      the checkbox (stays open), clicking outside on the app or the desk
+      (closes), Escape (closes), and the gear toggling normally throughout.

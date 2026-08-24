@@ -1,0 +1,16 @@
+id: n-0043
+kind: note
+author: topher
+created: 2026-08-24T05:42:00Z
+anchor:
+  rule: panel.rules.detail-slide
+status: addressed
+body: Give each of the Blueprints / Rules / Screens tabs its own icon.
+replies:
+  - author: agent
+    created: 2026-08-24T05:42:20Z
+    body: Done - folders for Blueprints, checks for Rules (the same mark a verified
+      rule already wears, so the tab and the checkmark read as one vocabulary),
+      browser for Screens. Synced through tools/sync-phosphor.mjs like the rest
+      of the panel's icons, so there's one source rather than three hand-pasted
+      svgs.

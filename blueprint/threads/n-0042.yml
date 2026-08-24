@@ -1,0 +1,17 @@
+id: n-0042
+kind: note
+author: topher
+created: 2026-08-24T05:40:55Z
+anchor:
+  rule: panel.rules.detail-slide
+status: addressed
+body: Make the Blueprints / Rules / Screens tabs not take up the full width of
+  the aside; centre them horizontally instead.
+replies:
+  - author: agent
+    created: 2026-08-24T05:42:20Z
+    body: "Done - self-center on the tabs div, which overrides the sidebars
+      align-items: stretch for just that one flex item so it sizes to its own
+      content and centres in the cross axis instead of filling it. Verified:
+      equal margin on both sides (88px each at the sidebars 384px width) in both
+      layouts."

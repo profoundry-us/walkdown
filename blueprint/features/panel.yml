@@ -134,6 +134,8 @@ stories:
             - Each dial's number can be typed directly, not only dragged to
             - A checkbox dims the app AND the aside to a peek rather than hiding them outright, so the ruling is judged against everything that would otherwise sit on top of it - and it is a way of looking, not a preference: it always starts unchecked, and closing the tuner ends the peek
             - The bar stays at full strength through the peek - its buttons, including the tuner's own gear, have to keep working while you are looking
+            - The tuner closes on Escape or on a click anywhere outside it - the gear excluded, since its own click already opens and closes it
+            - The tuner sits clear of the app's own corner rather than flush against it, so it reads as something on the desk rather than as part of the app's layout
             - The skin is a theme definition, so retuning it is one block and no component knows about it
             - Prototype screens keep their own wireframe skin, distinct from both
           statement_hash: sha256:93bfd901cfcd
@@ -305,6 +307,8 @@ stories:
             - The detail pane slides in and the list slides out
             - Exactly one pane occupies the panel's full width
             - "\"All rules\" slides back to the list"
+            - The Blueprints / Rules / Screens tabs are sized to their labels and centred in the sidebar, not stretched to its full width
+            - Each of the three tabs carries its own icon, from the same Phosphor set as the rest of the panel's chrome
           statement_hash: sha256:493a83d3f0bd
 
       - id: panel.rules.takes-you-there
