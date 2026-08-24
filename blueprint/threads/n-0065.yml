@@ -1,0 +1,30 @@
+id: n-0065
+kind: note
+author: topher
+created: 2026-08-24T19:21:58Z
+anchor:
+  rule: embed.pin.both-surfaces
+  screen: review
+status: addressed
+body: Pinned n-0064 through the framed panel and could not open it afterwards -
+  clicking the pin makes the scrollbar jump but nothing appears. Also the pin
+  did not attach to the rule I had open. Framed pins must carry the open rule
+  like docked ones do, and clicking any pin - rule-attached or not - must open
+  its thread somewhere visible.
+replies:
+  - author: agent
+    created: 2026-08-24T19:27:57Z
+    body: "Both fixed, both probed end to end through the real framed flow. (1)
+      Opening: clicking n-0064's pin dot inside the frame now opens its thread
+      in the aside - body, provenance, reply box, and lifecycle actions - via a
+      new thread-only pane in the detail slot, captioned 'Pinned to panel.tabs
+      on The review page - not attached to a rule'. The old handler only opened
+      threads that had a rule; a rule-less pin set state, re-rendered (your
+      scrollbar jump) and had nowhere to appear. (2) Attaching: the framed
+      new-pin handler was dropping the open rule and the author; a pin dropped
+      with a rule open now carries anchor.rule (verified live: a form-submitted
+      pin with embed.pin.viewport-recorded open recorded that rule, plus screen,
+      element, surface and viewport) - which also makes the fail gate's
+      pin-instead-of-note path work framed. Your n-0064 recorded perfectly
+      viewport-wise (mobile 390) and stays as-is; drop the next one with the
+      rule open and it will thread into the rule's list too."

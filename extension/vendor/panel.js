@@ -1291,9 +1291,31 @@
     return html;
   }
 
+  /** A pin with no rule opens here: the thread alone in the detail slot. */
+  function threadOnlyPane(t) {
+    const sc = screenById(t.anchor?.screen);
+    const where = t.anchor?.element ? `to <b>${esc(t.anchor.element)}</b>`
+      : t.anchor?.position ? 'by position' : '';
+    return `
+      <div class="flex items-center px-2 pt-2">
+        <button class="wdp-back btn btn-ghost btn-xs text-primary">← All rules</button>
+      </div>
+      <div class="flex flex-col gap-3 px-3.5 pb-3.5 pt-1">
+        <div>
+          <div class="${LBL} mb-1.5">Thread</div>
+          ${threadCard(t)}
+          <div class="mt-1.5 text-[11.5px] opacity-60">Pinned ${where} on
+            <b>${esc(sc?.title ?? t.anchor?.screen ?? 'an unknown screen')}</b> — not attached to a rule.</div>
+        </div>
+      </div>`;
+  }
+
   function detailPane() {
     const r = selected;
-    if (!r) return '';
+    if (!r) {
+      const t = openThread && (data?.threads ?? []).find((x) => x.id === openThread);
+      return t ? threadOnlyPane(t) : '';
+    }
     const threads = threadsFor(r.rule);
     const steps = r.steps
       ? Object.entries(r.steps).map(([ph, items]) =>
@@ -1962,7 +1984,10 @@
       openThread = msg.id;
       const t = (data?.threads ?? []).find((x) => x.id === msg.id);
       const row = t?.anchor?.rule ? data.rows.find((r) => r.rule === t.anchor.rule) : null;
-      if (row) { selected = row; view = 'detail'; }
+      // A pin with no rule still opens: the detail slot shows the thread
+      // alone rather than swallowing the click.
+      selected = row ?? null;
+      view = 'detail';
       return render();
     }
 
@@ -1973,12 +1998,16 @@
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
           kind: msg.kind, body: msg.body,
+          ...(msg.author && { author: msg.author }),
           anchor: {
             ...(msg.element && { element: msg.element }),
             ...(msg.position && { position: msg.position }),
             ...(msg.viewport && { viewport: msg.viewport }),
             surface,
             ...(sc && { screen: sc.id }),
+            // A pin dropped while a rule is open is feedback on that rule -
+            // the linkage the fail gate and the rule's thread list live on.
+            ...(view === 'detail' && selected && { rule: selected.rule }),
           },
         }),
       }).catch(() => {});
