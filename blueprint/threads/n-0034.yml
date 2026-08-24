@@ -1,0 +1,35 @@
+id: n-0034
+kind: note
+author: topher
+created: 2026-08-24T04:45:43Z
+anchor:
+  rule: panel.rules.step-between
+status: addressed
+body: After selecting a rule, the next and previous buttons do not change the
+  page, though going back to All rules and selecting that same rule does. It
+  just needs to be wired up to select the rule.
+replies:
+  - author: agent
+    created: 2026-08-24T04:45:58Z
+    body: >-
+      Wired. There were two ways into a rule and only one of them was opening
+      it: the list called open(), while next and previous assigned  directly and
+      re-rendered. So stepping changed the pane and left you on whatever page
+      you happened to be on - which is worse than not navigating, because the
+      panel then describes a rule against a screen you are not looking at.
+
+
+      Both go through open() now, so stepping takes the surface to the rule's
+      screen the same way opening from the list does.
+
+
+      Verified in the framed harness: opening waitlist.join.email-required went
+      to the join screen, then stepping forward moved the frame to confirm, to
+      already, and back to join, each following its own rule's screen. Folded
+      into panel.rules.step-between rather than given a rule of its own - it is
+      what that rule already meant by opening.
+  - author: agent
+    created: 2026-08-24T04:46:32Z
+    body: 'Correction to the reply above: a word was eaten writing it. The sentence
+      should read "next and previous assigned the selected row directly and
+      re-rendered".'

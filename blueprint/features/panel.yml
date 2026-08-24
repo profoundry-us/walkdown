@@ -345,6 +345,7 @@ stories:
             - Use the previous/next controls beside the back link
           then:
             - The detail pane shows the adjacent rule in the order the list shows them
+            - Stepping to a rule is opening it, so it takes the surface to that rule's screen exactly as opening it from the list does
             - Each control's tooltip names the rule it will open
             - At either end the control is disabled and says there is nothing further
           statement_hash: sha256:56a26420e1f3
