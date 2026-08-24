@@ -548,6 +548,22 @@ stories:
             - Discarding instead of finishing writes nothing
           statement_hash: sha256:6cc28278f4a6
 
+      - id: panel.walkdown.session-survives-reload
+        origin: thread:n-0066
+        statement: An unfinished session is real judging work - it is saved from the first verdict and restored after a page or extension reload, and a refused or failed Finish hands the button back instead of silently bricking the session.
+        verify: [human]
+        screens: [review]
+        steps:
+          given:
+            - A session with verdicts recorded and not yet finished
+          when:
+            - Reload the page or the extension, then return
+          then:
+            - The session comes back - verdicts, judged count, and actor - exactly as left
+            - Finishing then records once; a refused attempt, nameless or offline, can be retried after fixing the cause
+            - Finishing or discarding clears the saved draft
+          statement_hash: sha256:05503923167c
+
       - id: panel.walkdown.verdicts-at-hand
         origin: walkdown
         statement: While a walkdown is running, pass and fail sit directly under the selected rule's statement - on screen without scrolling - beside a count of how many rules the session has judged.

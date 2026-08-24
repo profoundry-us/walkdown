@@ -1,0 +1,30 @@
+id: n-0066
+kind: note
+author: topher
+created: 2026-08-24T19:35:16Z
+anchor:
+  rule: panel.walkdown.records-to-ledger
+  screen: review
+status: addressed
+body: "I judged panel.dock.own-skin, panel.dock.no-pin-mid-fade and others -
+  approvals included - and none of it saved: the ledger holds nothing for them.
+  A session must not lose verdicts silently: Finish must never brick after a
+  refused attempt, and an unfinished session must survive a page or extension
+  reload."
+replies:
+  - author: agent
+    created: 2026-08-24T19:41:45Z
+    body: "Root-caused and fixed - and first, the honest part: your approvals on
+      panel.dock.own-skin, no-pin-mid-fade and the rest never reached disk, so
+      there is nothing to recover; they will need one re-judging. Two bugs ate
+      them. (1) The double-submit guard I added to Finish never reset on
+      failure: any refused attempt - a nameless actor, a server hiccup - left
+      the button silently dead for the rest of the session, so later Finish
+      clicks did nothing while the session looked fine. Every non-success path
+      now hands the button back. (2) Sessions lived only in memory, and the
+      extension reloads I kept prescribing (including via the staleness banner)
+      destroyed them wordlessly. A session is now saved from its first verdict
+      and restored on boot - probed live: approve, reload, and the session
+      returns with its judged count, verdicts and actor intact; finishing or
+      discarding clears the draft. Specified as
+      panel.walkdown.session-survives-reload."

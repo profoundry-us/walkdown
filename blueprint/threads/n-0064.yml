@@ -9,5 +9,5 @@ anchor:
   viewport:
     name: mobile
     width: 390
-status: open
+status: verified
 body: This is just a test to see if the pinning works at a specific viewpoert.
