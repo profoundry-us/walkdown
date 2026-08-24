@@ -1,0 +1,39 @@
+id: n-0038
+kind: note
+author: topher
+created: 2026-08-24T05:16:20Z
+anchor:
+  rule: panel.dock.own-skin
+status: addressed
+body: Add a settings icon at the top left, left of the walkdown logo, with a
+  popup for playing with the desk-ruling controls. I want to fine-tune the look
+  in the browser and report back defaults, and people should be able to
+  customize it to their liking. Save the values so they persist on a reset.
+replies:
+  - author: agent
+    created: 2026-08-24T05:16:46Z
+    body: >-
+      Built. A gear sits at the far left of the bar, before the logo, in every
+      phase - the desk is there even before a blueprint is chosen. It opens a
+      small card with five dials, each repainting the desk live as you drag:
+      Tilt (rotation in the paper plane), Tip (how far the plane leans away),
+      Depth (camera distance - nearer converges harder), Spacing (ruling pitch),
+      Ink (line strength).
+
+
+      Values persist through the same store as every other panel choice -
+      chrome.storage in the extension, localStorage from a script tag - and load
+      on start, so the desk comes back the way you left it. Reset restores the
+      shipped defaults (22 / 16 / 1400 / 34 / 9).
+
+
+      One structural point: the tuner is its own element, not part of the bar
+      innerHTML, for exactly the reason the fade slider once could not be
+      dragged - the bar is rebuilt wholesale, and rebuilding an input mid-drag
+      kills the drag. Built once, only shown or hidden, its sliders survive
+      anything.
+
+
+      Folded into panel.dock.own-skin: how the paper lies is the reviewer own
+      taste, persists across sessions, and changes nothing about what gets
+      verified.
