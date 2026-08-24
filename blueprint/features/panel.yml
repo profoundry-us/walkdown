@@ -34,6 +34,7 @@ stories:
           then:
             - The document is inset to leave the chrome its room and a margin of desk all round
             - The page carries rounded corners and a shadow against that desk
+            - Page and panel share every edge - same top, same bottom, same margin - including on a page too short to fill the window
             - A page with no background of its own is still drawn as a page, not as a hole
             - Undocking restores every one of those styles to what the page had before
           statement_hash: sha256:3b454ec97134
