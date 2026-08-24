@@ -1,0 +1,13 @@
+id: n-0047
+kind: note
+author: topher
+created: 2026-08-24T05:49:58Z
+anchor:
+  rule: panel.rules.detail-slide
+status: addressed
+body: Try bounding-box for the Blueprints icon instead of blueprint.
+replies:
+  - author: agent
+    created: 2026-08-24T05:49:58Z
+    body: Done - Blueprints now wears bounding-box (corner brackets) instead of the
+      blueprint glyph.
