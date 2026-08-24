@@ -117,7 +117,11 @@ statement, stored truncated (`sha256:` + 12 hex).
   note, or a pin dropped during the session; failing arms pin mode so the note lands
   where the problem is). Rules with no build evidence show **Approve / Refine** instead
   of Pass / Fail — sign-off on the spec, recorded as `approved`/`refining`, never
-  counted as verification.
+  counted as verification. Each verdict is written to `blueprint/drafts/` the moment it
+  is given, so an unfinished sitting survives a reload or a closed browser and shows up
+  in `walkdown status` as in progress; the ledger still gains exactly one record, at
+  Finish, which deletes the draft. Drafts are working state — the directory ignores its
+  own contents.
 - **Thread lifecycle** — clicking a pin or a thread opens it: body, replies, and the
   actions its state allows (Reply / Mark addressed / ✓ Verify / Reopen / Waive; Answer
   and Mark incorporated for questions). Transitions are validated server-side; `verified`

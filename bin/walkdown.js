@@ -4,6 +4,7 @@ import { userInfo } from 'node:os';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 import { findBlueprintDir, loadBlueprint } from '../lib/blueprint.js';
+import { listDrafts } from '../lib/draft.js';
 import { runHashCommand } from '../lib/hash-cmd.js';
 import { lint } from '../lib/lint.js';
 import { deriveStatus } from '../lib/status.js';
@@ -209,8 +210,13 @@ function cmdStatus(args) {
 
   if (positionals[0]) return renderRuleDetail(blueprint, derived, positionals[0], values.json);
 
+  // Sittings that are underway but not yet sealed. They are not verdicts and
+  // never count as any, but a queue that hides them tells you to go judge what
+  // someone is judging right now.
+  const drafts = listDrafts(blueprint.dir);
+
   if (values.json) {
-    console.log(JSON.stringify({ targets, rows, drift: derived.drift, attention: derived.attention, activeThreads: listThreads(blueprint) }, null, 2));
+    console.log(JSON.stringify({ targets, rows, drift: derived.drift, attention: derived.attention, drafts, activeThreads: listThreads(blueprint) }, null, 2));
     process.exit(rows.some((r) => r.verdict === 'fail') ? 1 : 0);
   }
 
@@ -257,6 +263,15 @@ function cmdStatus(args) {
     if (!items.length) continue;
     console.log(`\n  ${dim(title)}`);
     for (const i of items) console.log(`  ${yellow('◆')} ${HOWTO[i.action](i)}`);
+  }
+
+  for (const d of drafts) {
+    const n = Object.keys(d.verdicts).length;
+    console.log(
+      `\n  ${yellow('◐')} walkdown in progress — ${n} rule${n === 1 ? '' : 's'} judged by ` +
+      `${d.actor ?? 'someone'}${dim(`, unsealed since ${d.started}`)}`
+    );
+    console.log(dim('    Not in the ledger until the session is finished in the panel.'));
   }
 
   const { drift } = derived;

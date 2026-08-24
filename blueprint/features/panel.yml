@@ -564,6 +564,24 @@ stories:
             - Finishing or discarding clears the saved draft
           statement_hash: sha256:05503923167c
 
+      - id: panel.walkdown.draft-on-disk
+        origin: walkdown
+        statement: Every verdict is written to the project as it is given - a draft session on disk, outside the runs ledger - so an unfinished sitting survives the browser and is visible to the tools, while the ledger still gains exactly one record, at Finish, that is never edited.
+        verify: [agent, human]
+        screens: [review, rule-detail]
+        steps:
+          given:
+            - A walkdown session in the panel
+          when:
+            - Give a verdict, then look at the project without finishing
+          then:
+            - A draft session file holds the verdicts given so far, and is rewritten as more arrive
+            - The draft is not a run - it carries no run id, sits outside runs/, and no rule counts as verified from it
+            - walkdown status reports the sitting as in progress rather than as verdicts
+            - Finishing appends the one run record and deletes the draft; discarding deletes it and writes nothing
+            - A draft is never committed by accident - the directory ignores its own contents
+          statement_hash: sha256:cfb0ee61cad3
+
       - id: panel.walkdown.verdicts-at-hand
         origin: walkdown
         statement: While a walkdown is running, pass and fail sit directly under the selected rule's statement - on screen without scrolling - beside a count of how many rules the session has judged.

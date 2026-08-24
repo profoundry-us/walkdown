@@ -119,6 +119,16 @@ walkdown sessions come in two flavors, producing the same record shape:
 - A human "fail" usually spawns a **note thread** at the offending element; the run result
   links to it, so the agent fixing the note can see exactly which walkdown rejected what.
 - Partial sessions are fine — un-visited rules simply don't appear in `results`.
+- **The sitting is drafted; only the finish is a run.** A run record is appended once,
+  at Finish, and never edited — but the judging that leads to one takes a sitting, so
+  each verdict is written immediately to `blueprint/drafts/<target>.json` (and mirrored
+  into browser storage, which still works when the server is not there). A draft is
+  explicitly *not* a run: no `run_id`, outside `runs/`, and no status is ever derived
+  from it — `walkdown status` reports it as a sitting in progress, never as verdicts.
+  Finishing appends the record and deletes the draft; discarding deletes it and writes
+  nothing. The directory ignores its own contents, so half-judged sittings are never
+  committed. (API: `GET`/`POST /api/draft`; the blueprint payload carries the current
+  draft so a panel that just booted resumes where it was.)
 - A rule is **verified** only when every evidence type in its `verify` list has a passing,
   non-stale latest result: `checks` from automated runs, `agent` from agent walkdowns,
   `human` from human walkdowns. Higher tiers never substitute downward or upward — an

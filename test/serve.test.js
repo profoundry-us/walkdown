@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, before, test } from 'node:test';
 import { parse } from 'yaml';
+import { readDraft } from '../lib/draft.js';
 import { formatHash } from '../lib/hash.js';
 import { createWalkdownServer } from '../lib/serve.js';
 
@@ -229,6 +230,59 @@ test('the blueprint payload names the panel build it ships @rule:panel.delivery.
     .update(readFileSync(new URL('../lib/viewer/panel.js', import.meta.url)))
     .digest('hex').slice(0, 12);
   assert.equal(payload.panelHash, shipped);
+});
+
+test('a session drafts to disk and finishing seals it into one run @rule:panel.walkdown.draft-on-disk', async () => {
+  const draftFile = join(bp, 'drafts', 'local.json');
+  const post = (body) => fetch(`${base}/api/draft`, {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+  }).then((r) => r.json());
+
+  // A verdict, then a second one: the draft is rewritten, never appended to.
+  await post({ actor: 'topher', started: '2026-08-24T00:00:00Z', verdicts: { 'demo.main.thing': 'approved' } });
+  let draft = JSON.parse(readFileSync(draftFile, 'utf8'));
+  assert.equal(draft.draft, true);
+  assert.equal(draft.actor, 'topher');
+  assert.deepEqual(draft.verdicts, { 'demo.main.thing': 'approved' });
+  // Not a run: no run id, and it is nowhere near runs/.
+  assert.equal(draft.run_id, undefined);
+  assert.ok(!readdirSync(join(bp, 'runs')).some((f) => f.includes('local.json')));
+  // And never committed by accident.
+  assert.equal(readFileSync(join(bp, 'drafts', '.gitignore'), 'utf8'), '*\n!.gitignore\n');
+
+  await post({ actor: 'topher', started: '2026-08-24T00:00:00Z', verdicts: { 'demo.main.thing': 'pass' }, threads: { 'demo.main.thing': ['n-0002'] } });
+  draft = JSON.parse(readFileSync(draftFile, 'utf8'));
+  assert.deepEqual(draft.verdicts, { 'demo.main.thing': 'pass' });
+  assert.deepEqual(draft.threads, { 'demo.main.thing': ['n-0002'] });
+
+  // The panel that just booted gets the sitting back with the blueprint.
+  const payload = await (await fetch(`${base}/api/blueprint`)).json();
+  assert.deepEqual(payload.draft.verdicts, { 'demo.main.thing': 'pass' });
+  assert.deepEqual((await (await fetch(`${base}/api/draft`)).json()).draft.verdicts, { 'demo.main.thing': 'pass' });
+
+  // Junk never accumulates: an unknown rule or status is refused.
+  const bad = await fetch(`${base}/api/draft`, {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ verdicts: { 'nope.not.a.rule': 'pass' } }),
+  });
+  assert.equal(bad.status, 400);
+
+  // Finish: one run appended, draft gone.
+  const before = readdirSync(join(bp, 'runs')).length;
+  const sealed = await (await fetch(`${base}/api/walkdowns`, {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ actor: 'topher', results: [{ rule: 'demo.main.thing', status: 'pass' }] }),
+  })).json();
+  assert.ok(sealed.run_id);
+  assert.equal(readdirSync(join(bp, 'runs')).length, before + 1);
+  assert.equal(readDraft(bp), null);
+
+  // Discarding writes nothing and leaves nothing.
+  await post({ actor: 'topher', verdicts: { 'demo.main.thing': 'fail' } });
+  assert.ok(readDraft(bp));
+  assert.deepEqual(await post({ discard: true }), { draft: null });
+  assert.equal(readDraft(bp), null);
 });
 
 test('invalid writes are rejected with 400', async () => {
