@@ -1,0 +1,33 @@
+id: n-0054
+kind: note
+author: topher
+created: 2026-08-24T15:47:34Z
+anchor:
+  rule: panel.rules.counts-legible
+  screen: review
+  element: panel.rules-list
+status: addressed
+body: "In the list I cannot tell a rule that is designed-but-not-approved from
+  one that is built-but-not-passed. Build the lifecycle glyphs as mocked up in
+  review.html: shape carries the lifecycle (designed, approved-awaiting-build,
+  refining, built-awaiting-verification, verified, failing), color carries
+  ownership, the right-edge badge names the work owed (sign or walk), tooltips
+  spell the state out, and the footer splits counts by kind of work."
+replies:
+  - author: agent
+    created: 2026-08-24T15:54:53Z
+    body: "Built as mocked up and verified against the live blueprint. deriveStatus
+      now exposes per-rule signoff (read past the verify gate; a hash-stale
+      approval yields null so rewording asks for a fresh sign-off) and the
+      owed-queue distinguishes the work: unbuilt+unsigned owes a sign-off,
+      built+unjudged owes a walkdown, and a given sign-off discharges the queue
+      until build evidence lands. The list draws shape-for-lifecycle (square
+      designed, signing-hand approved, pencil refining, circle built,
+      check/cross verdicts), warning tint plus a sign/walk badge for ownership,
+      and a tooltip spelling each state out; the footer splits into N to sign /
+      N to walk. All pencils carry U+FE0E in the panel, the CLI table, and the
+      mockup so they render as text and the color channel keeps speaking.
+      Verified live: 63 rules rendered 25 check / 1 cross / 33 square (all
+      badged sign) / 4 circle (badged walk), footer summing kind for kind -
+      against a ledger that includes the real human walkdown recorded at
+      15:18Z."

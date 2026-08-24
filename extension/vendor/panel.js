@@ -860,7 +860,9 @@
     const wasAt = [...host.querySelectorAll('.wdp-pane')].map((p) => p.scrollTop);
     const total = data.rows.length;
     const verified = data.rows.filter((r) => r.verdict === 'pass').length;
-    const owed = data.rows.filter((r) => needsYou(r.rule)).length;
+    // The footer names the kind of work owed, matching the list's badges.
+    const toSign = data.rows.filter((r) => needsYou(r.rule) && !r.built).length;
+    const toWalk = data.rows.filter((r) => needsYou(r.rule) && r.built).length;
     renderBar();
     const TAB_ICON = { blueprints: 'bounding-box', rules: 'checks', screens: 'frame-corners' };
     const tab = (id, label) =>
@@ -892,7 +894,10 @@
       </div>
       ${listTab === 'rules' ? `<div class="flex shrink-0 items-center gap-2 border-t border-base-300 px-3.5 py-2 text-xs opacity-70">
         <span><b>${verified} of ${total}</b> rules verified</span>
-        ${owed ? `<span class="badge badge-sm badge-warning badge-outline ml-auto">${owed} need you</span>` : ''}
+        <span class="ml-auto flex gap-1">
+          ${toSign ? `<span class="badge badge-sm badge-warning badge-outline" title="rules owing your sign-off">${toSign} to sign</span>` : ''}
+          ${toWalk ? `<span class="badge badge-sm badge-warning badge-outline" title="rules owing your walkdown">${toWalk} to walk</span>` : ''}
+        </span>
       </div>` : ''}`;
 
     const track = host.querySelector('.wdp-track');
@@ -1135,6 +1140,29 @@
     render();
   }
 
+  /**
+   * The list glyph: SHAPE carries the lifecycle, COLOR carries ownership.
+   * □ designed · ✍︎ approved, awaiting build · ✎︎ refining · ○ built,
+   * awaiting verification · ✓ verified · ✗ failing. Warning tint plus the
+   * right-edge badge mean the rule waits on you, and the badge names the
+   * work: sign for a sign-off, walk for a walkdown. The pencils carry
+   * U+FE0E - as emoji they take their own colors and the ownership channel
+   * goes silent.
+   */
+  function ruleState(row, mine) {
+    if (row.verdict === 'pass') return { glyph: '✓', cls: 'text-success', why: 'verified' };
+    if (row.verdict === 'fail') return { glyph: '✗', cls: 'text-error', why: 'failing — the build was rejected' };
+    const tint = mine ? 'text-warning' : 'opacity-30';
+    if (!row.built) {
+      if (row.signoff === 'refining')
+        return { glyph: '✎︎', cls: 'text-warning', why: 'refining — sent back for spec rework' };
+      if (row.signoff === 'approved')
+        return { glyph: '✍︎', cls: 'opacity-60', why: 'approved — spec signed off, awaiting build' };
+      return { glyph: '□', cls: tint, why: `designed — awaiting ${mine ? 'your ' : ''}sign-off` };
+    }
+    return { glyph: '○', cls: tint, why: mine ? 'built — awaiting your walkdown' : 'built — awaiting verification' };
+  }
+
   function listPane() {
     if (!data.rows.length) return '<p class="p-3.5 text-[12.5px] opacity-40">No rules in this blueprint.</p>';
     let html = '';
@@ -1145,21 +1173,21 @@
         html += `<div class="px-3.5 pb-1 pt-2.5 ${LBL}">${esc(story)}</div>`;
       }
       const mine = needsYou(row.rule);
-      const glyph = session?.verdicts[row.rule]
-        ? { pass: '✓', fail: '✗', approved: '✍', refining: '✎' }[session.verdicts[row.rule]]
-        : mine ? '◆' : { pass: '✓', fail: '✗', pending: '○' }[row.verdict];
-      const cls = session?.verdicts[row.rule]
-        ? { pass: 'text-success', fail: 'text-error', approved: 'text-success', refining: 'text-warning' }[session.verdicts[row.rule]]
-        : mine ? 'text-warning'
-        : { pass: 'text-success', fail: 'text-error', pending: 'opacity-30' }[row.verdict];
+      const picked = session?.verdicts[row.rule];
+      const state = picked
+        ? { glyph: { pass: '✓', fail: '✗', approved: '✍︎', refining: '✎︎' }[picked],
+            cls: { pass: 'text-success', fail: 'text-error', approved: 'text-success', refining: 'text-warning' }[picked],
+            why: 'judged this session' }
+        : ruleState(row, mine);
+      const owes = mine && !picked ? (row.built ? 'walk' : 'sign') : '';
       const short = shortName(row);
       const thr = threadsFor(row.rule).length;
       html += `<button class="flex w-full cursor-pointer items-center gap-2 px-3.5 py-1.5 text-left text-[13px] hover:bg-base-200"
-        data-rule="${esc(row.rule)}" title="${esc(row.rule)}">
-        <span class="w-3.5 shrink-0 text-center ${cls}">${glyph}</span>
+        data-rule="${esc(row.rule)}" title="${esc(row.rule)} — ${esc(state.why)}">
+        <span class="w-3.5 shrink-0 text-center ${state.cls}">${state.glyph}</span>
         <span class="truncate">${esc(short)}</span>
-        ${mine || thr ? `<span class="ml-auto shrink-0 text-[10.5px] font-semibold text-warning">${
-          mine ? 'walk' : ''}${thr ? ` ${thr}⚑` : ''}</span>` : ''}
+        ${owes || thr ? `<span class="ml-auto shrink-0 text-[10.5px] font-semibold text-warning">${
+          owes}${thr ? ` ${thr}⚑` : ''}</span>` : ''}
       </button>`;
     }
     return html;
@@ -1206,8 +1234,8 @@
             <button class="btn btn-sm flex-1 ${picked === 'pass' ? 'btn-success' : 'btn-outline btn-success'}" data-v="pass">✓ Pass</button>
             <button class="btn btn-sm flex-1 ${picked === 'fail' ? 'btn-error' : 'btn-outline btn-error'}" data-v="fail">✗ Fail</button>
           </div>` : `<div class="flex gap-2">
-            <button class="btn btn-sm flex-1 ${picked === 'approved' ? 'btn-success' : 'btn-outline btn-success'}" data-v="approved">✍ Approve</button>
-            <button class="btn btn-sm flex-1 ${picked === 'refining' ? 'btn-warning' : 'btn-outline btn-warning'}" data-v="refining">✎ Refine</button>
+            <button class="btn btn-sm flex-1 ${picked === 'approved' ? 'btn-success' : 'btn-outline btn-success'}" data-v="approved">✍︎ Approve</button>
+            <button class="btn btn-sm flex-1 ${picked === 'refining' ? 'btn-warning' : 'btn-outline btn-warning'}" data-v="refining">✎︎ Refine</button>
           </div>
           <div class="text-[11px] opacity-50">No build evidence yet — you are signing off the rule, not judging a build.</div>`}
           <div id="wdp-vsay" class="hidden text-[11px] text-warning"></div>

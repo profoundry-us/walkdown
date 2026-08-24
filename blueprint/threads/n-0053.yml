@@ -1,0 +1,14 @@
+id: n-0053
+kind: note
+author: topherfangio
+created: 2026-08-24T15:18:01Z
+anchor:
+  screen: review
+  element: panel.viewport-toggle
+  surface: prototype
+  viewport:
+    name: desktop
+    width: 1050
+status: open
+body: Let's use icons here instead of emoji and just show the icons instead of
+  the pixel sizes (especially since 1440 is not necessarily accurate).

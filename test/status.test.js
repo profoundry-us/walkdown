@@ -175,15 +175,32 @@ test('open threads listed; terminal ones excluded', () => {
   assert.deepEqual(rows[0].threads, [{ id: 'n-1', status: 'addressed' }]);
 });
 
-test('sign-off is not build evidence: approved stays unbuilt, pending, and owed @rule:panel.signoff.spec-pair-derived', () => {
-  const { rows, attention } = deriveStatus(blueprint({
+test('sign-off is not build evidence: approved stays unbuilt and pending, and discharges the queue until built @rule:panel.signoff.spec-pair-derived', () => {
+  const owed = (attention) =>
+    attention.some((a) => a.who === 'human' && a.action === 'judge' && a.rule === 'demo.main.thing');
+  const unbuilt = deriveStatus(blueprint({
     verify: ['human'],
     runs: [walkdownRun('2026-01-02T00:00:00Z', 'topher', 'approved')],
   }));
-  assert.equal(rows[0].built, false);
-  assert.equal(rows[0].human.state, 'approved');
-  assert.equal(rows[0].verdict, 'pending');
-  assert.ok(attention.some((a) => a.who === 'human' && a.action === 'judge' && a.rule === 'demo.main.thing'));
+  assert.equal(unbuilt.rows[0].built, false);
+  assert.equal(unbuilt.rows[0].human.state, 'approved');
+  assert.equal(unbuilt.rows[0].signoff, 'approved');
+  assert.equal(unbuilt.rows[0].verdict, 'pending');
+  // The sign-off is given: nothing is owed until the build lands.
+  assert.equal(owed(unbuilt.attention), false);
+  // Unsigned and unbuilt: the sign-off itself is owed.
+  const unsigned = deriveStatus(blueprint({ verify: ['human'] }));
+  assert.equal(owed(unsigned.attention), true);
+  // Built with only a stale-free approval on file: a real walkdown is owed.
+  const built = deriveStatus(blueprint({
+    verify: ['checks', 'human'],
+    runs: [
+      walkdownRun('2026-01-02T00:00:00Z', 'topher', 'approved'),
+      checksRun('2026-01-03T00:00:00Z', 'local', 'pass'),
+    ],
+  }));
+  assert.equal(built.rows[0].built, true);
+  assert.equal(owed(built.attention), true);
 });
 
 test('a build verdict flips built; an approval goes stale when the statement moves @rule:panel.signoff.spec-pair-derived', () => {

@@ -402,8 +402,27 @@ stories:
             - Reading anchor `panel.counts` on screen `review`, then the marks in anchor `panel.rules-list`
           then:
             - Every number states its unit, so a reader can tell rules from pending actions
-            - Each rule owing human work carries a mark, and the marks sum to the footer's count
+            - The footer splits the owed work by kind - to sign and to walk - and each owed rule's badge says the same word
+            - The badges owed sum to the footer's counts, kind for kind
           statement_hash: sha256:cc7b6d687101
+
+      - id: panel.rules.lifecycle-legible
+        origin: thread:n-0054
+        statement: The list glyph's shape carries a rule's lifecycle - designed, approved awaiting build, refining, built awaiting verification, verified, failing - and its color carries ownership, so designed-but-unsigned and built-but-unpassed are never the same mark.
+        verify: [human]
+        screens: [review]
+        steps:
+          given:
+            - A blueprint holding rules in every lifecycle state, the Rules tab open
+          when:
+            - Reading the glyphs in anchor `panel.rules-list`
+          then:
+            - An unbuilt, unsigned rule shows the empty square; a built, unverified rule shows the empty circle - distinct shapes, not shades
+            - An approved rule shows the signing hand until build evidence lands; a refining rule shows the pencil
+            - A rule waiting on the reviewer is warning-tinted and its badge names the work - sign or walk
+            - Each row's tooltip spells the state out in words
+            - The pencils render as text, never as colored emoji, so the color channel keeps speaking
+          statement_hash: sha256:817b59a5a95a
 
   - id: panel.threads
     title: Feedback is answered where it is read

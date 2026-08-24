@@ -137,7 +137,7 @@ const paint = { pass: green, fail: red, stale: yellow, blocked: yellow, never: d
 const cellText = (cell, withActor = false) => {
   if (cell.state === 'na') return '·';
   if (cell.state === 'never') return 'never';
-  const glyph = { pass: '✓', fail: '✗', stale: '~', skipped: '–', blocked: '⊘', approved: '✍', refining: '✎' }[cell.state] ?? '?';
+  const glyph = { pass: '✓', fail: '✗', stale: '~', skipped: '–', blocked: '⊘', approved: '✍︎', refining: '✎︎' }[cell.state] ?? '?';
   const label = withActor && cell.actor ? cell.actor : cell.state;
   return `${glyph} ${label}`;
 };

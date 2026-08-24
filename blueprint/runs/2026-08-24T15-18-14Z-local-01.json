@@ -1,0 +1,92 @@
+{
+  "run_id": "2026-08-24T15-18-14Z-local-01",
+  "created": "2026-08-24T15:18:14Z",
+  "actor": "Topher Fangio",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "3495ea3-dirty",
+  "blueprint_sha": "3495ea3-dirty",
+  "results": [
+    {
+      "rule": "embed.pin.anchored-target",
+      "status": "pass",
+      "statement_hash": "sha256:8fcd9522614c"
+    },
+    {
+      "rule": "embed.pin.right-project",
+      "status": "pass",
+      "statement_hash": "sha256:399853aef960"
+    },
+    {
+      "rule": "embed.pin.both-surfaces",
+      "status": "pass",
+      "statement_hash": "sha256:77fdab028ac1"
+    },
+    {
+      "rule": "embed.pin.follows-the-visible-surface",
+      "status": "pass",
+      "statement_hash": "sha256:7c9b1c0e3da1"
+    },
+    {
+      "rule": "embed.pin.own-skin",
+      "status": "pass",
+      "statement_hash": "sha256:1f3400a09629"
+    },
+    {
+      "rule": "embed.pin.viewport-recorded",
+      "status": "fail",
+      "statement_hash": "sha256:6971846eb2cc"
+    },
+    {
+      "rule": "embed.pin.form-is-chrome",
+      "status": "pass",
+      "statement_hash": "sha256:cac6da4be24f"
+    },
+    {
+      "rule": "embed.pin.surface-coordinates",
+      "status": "pass",
+      "statement_hash": "sha256:7d33bd0c80b2"
+    },
+    {
+      "rule": "embed.pin.coordinate-fallback",
+      "status": "pass",
+      "statement_hash": "sha256:3c6fb006c94b"
+    },
+    {
+      "rule": "embed.threads.note-first",
+      "status": "pass",
+      "statement_hash": "sha256:870249ed1a7a"
+    },
+    {
+      "rule": "embed.threads.actions-in-context",
+      "status": "pass",
+      "statement_hash": "sha256:9878eb8459f2"
+    },
+    {
+      "rule": "panel.dock.no-framing",
+      "status": "pass",
+      "statement_hash": "sha256:45e629ff8e85"
+    },
+    {
+      "rule": "panel.dock.wraps-the-page",
+      "status": "pass",
+      "statement_hash": "sha256:3b454ec97134"
+    },
+    {
+      "rule": "panel.dock.toolbar",
+      "status": "pass",
+      "statement_hash": "sha256:41dff56f44c2"
+    },
+    {
+      "rule": "panel.dock.controls-survive-use",
+      "status": "pass",
+      "statement_hash": "sha256:e55758ff63da"
+    },
+    {
+      "rule": "panel.dock.above-the-app",
+      "status": "pass",
+      "statement_hash": "sha256:a2640eb509a6"
+    }
+  ]
+}
