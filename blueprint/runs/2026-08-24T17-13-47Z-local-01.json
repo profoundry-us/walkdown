@@ -1,0 +1,155 @@
+{
+  "run_id": "2026-08-24T17-13-47Z-local-01",
+  "created": "2026-08-24T17:13:47Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6bbaa65-dirty",
+  "blueprint_sha": "6bbaa65-dirty",
+  "results": [
+    {
+      "rule": "panel.rules.detail-slide",
+      "status": "pass",
+      "statement_hash": "sha256:493a83d3f0bd",
+      "evidence": [
+        "runs/evidence/2026-08-24T17-08-32Z/proto-rule-detail.png",
+        "runs/evidence/2026-08-24T17-08-32Z/app-rule-detail.png"
+      ],
+      "reasoning": "Opening panel.dock.no-framing from the list slid the detail pane in within the aside (back link, stepper, statement all present - app-rule-detail vs the design in proto-rule-detail); the app frame kept its full height, no bottom drawer."
+    },
+    {
+      "rule": "panel.rules.step-between",
+      "status": "pass",
+      "statement_hash": "sha256:56a26420e1f3",
+      "evidence": [
+        "runs/evidence/2026-08-24T17-08-32Z/proto-rule-detail.png",
+        "runs/evidence/2026-08-24T17-08-32Z/app-rule-detail.png"
+      ],
+      "reasoning": "From the open detail, the next control stepped panel.dock.no-framing to panel.dock.wraps-the-page without returning to the list, matching list order."
+    },
+    {
+      "rule": "panel.rules.steps-not-an-appendix",
+      "status": "fail",
+      "statement_hash": "sha256:0609e516526f",
+      "evidence": [
+        "runs/evidence/2026-08-24T17-08-32Z/proto-rule-detail.png",
+        "runs/evidence/2026-08-24T17-08-32Z/app-rule-detail.png"
+      ],
+      "reasoning": "Half built. The given/when/then steps are expanded in the detail pane without being asked for, but no check-source disclosure exists anywhere in the pane - the design shows it at detail.technical-disclosure (proto-rule-detail); the probe found no source reference in the app pane. Thread n-0057 carries the specifics.",
+      "threads": [
+        "n-0057"
+      ]
+    },
+    {
+      "rule": "panel.rules.lifecycle-legible",
+      "status": "pass",
+      "statement_hash": "sha256:817b59a5a95a",
+      "evidence": [
+        "runs/evidence/2026-08-24T17-08-32Z/proto-review.png",
+        "runs/evidence/2026-08-24T17-08-32Z/app-review.png"
+      ],
+      "reasoning": "The live list rendered 63 rules as 25 check, 1 cross, 33 empty squares (designed) and 4 empty circles (built, unverified) - distinct shapes matching the design; every warning-tinted row carried a sign or walk badge naming the work, all 63 rows carried a state tooltip, and the pencils render as text (U+FE0E), not colored emoji."
+    },
+    {
+      "rule": "panel.rules.counts-legible",
+      "status": "pass",
+      "statement_hash": "sha256:cc7b6d687101",
+      "evidence": [
+        "runs/evidence/2026-08-24T17-08-32Z/proto-review.png",
+        "runs/evidence/2026-08-24T17-08-32Z/app-review.png"
+      ],
+      "reasoning": "Footer read \"25 of 63 rules verified\" with badges \"33 to sign\" and \"4 to walk\"; the 37 badged rows in the list sum to the footer counts kind for kind."
+    },
+    {
+      "rule": "panel.walkdown.records-to-ledger",
+      "status": "pass",
+      "statement_hash": "sha256:6cc28278f4a6",
+      "evidence": [
+        "runs/evidence/2026-08-24T17-08-32Z/proto-rule-detail.png",
+        "runs/evidence/2026-08-24T17-08-32Z/app-rule-detail.png"
+      ],
+      "reasoning": "The human walkdown finished at 2026-08-24T15:18:14Z from the panel landed in the ledger as a well-formed hash-stamped record under a named person (verified in blueprint/runs/). The client refuses an unnamed or agent actor before posting, and Finish is guarded against double-submit."
+    },
+    {
+      "rule": "panel.walkdown.verdicts-at-hand",
+      "status": "pass",
+      "statement_hash": "sha256:10b43c02479d",
+      "evidence": [
+        "runs/evidence/2026-08-24T17-08-32Z/proto-rule-detail.png",
+        "runs/evidence/2026-08-24T17-08-32Z/app-rule-detail.png"
+      ],
+      "reasoning": "With a session running and a rule open, both verdict buttons sat fully inside the viewport without scrolling (bounding box checked), beside the judged-this-session count."
+    },
+    {
+      "rule": "panel.walkdown.pass-advances",
+      "status": "pass",
+      "statement_hash": "sha256:39a3512969c6",
+      "evidence": [
+        "runs/evidence/2026-08-24T17-08-32Z/proto-rule-detail.png",
+        "runs/evidence/2026-08-24T17-08-32Z/app-rule-detail.png"
+      ],
+      "reasoning": "Verified interactively during the build: a pass/approve opened the next rule owing a verdict and the judged count rose; a fail kept the rule open with pin mode armed; judging the last owed rule returned to the list. The probe re-confirmed the fail path refuses and stays."
+    },
+    {
+      "rule": "panel.walkdown.note-with-any-verdict",
+      "status": "pass",
+      "statement_hash": "sha256:f9043305838b",
+      "evidence": [
+        "runs/evidence/2026-08-24T17-08-32Z/proto-rule-detail.png",
+        "runs/evidence/2026-08-24T17-08-32Z/app-rule-detail.png"
+      ],
+      "reasoning": "The feedback box renders above the verdict buttons (DOM order checked). Filing verified interactively during the build: text at verdict-click filed a rule-anchored note under the session actor and the finished run result carried the thread id; an empty box filed nothing."
+    },
+    {
+      "rule": "panel.walkdown.fail-requires-why",
+      "status": "pass",
+      "statement_hash": "sha256:9644c16756d8",
+      "evidence": [
+        "runs/evidence/2026-08-24T17-08-32Z/proto-rule-detail.png",
+        "runs/evidence/2026-08-24T17-08-32Z/app-rule-detail.png"
+      ],
+      "reasoning": "Fail with an empty box and no session pin was refused: nothing recorded (0 judged), the pane said \"A fail needs a why - write it above, or pin it on the page\", and pin mode armed. The with-why path recorded and linked its thread when verified interactively during the build."
+    },
+    {
+      "rule": "panel.signoff.spec-pair-derived",
+      "status": "pass",
+      "statement_hash": "sha256:d195df6ea5d8",
+      "evidence": [
+        "runs/evidence/2026-08-24T17-08-32Z/proto-rule-detail.png",
+        "runs/evidence/2026-08-24T17-08-32Z/app-rule-detail.png"
+      ],
+      "reasoning": "A rule with no build evidence (panel.viewport.device-presets) offered Approve/Refine with the signing-off caption; a built rule (panel.dock.no-framing) offered Pass/Fail. Unit checks cover the derivation: sign-offs, skips and blocks never count as build evidence."
+    },
+    {
+      "rule": "panel.signoff.refine-requires-feedback",
+      "status": "pass",
+      "statement_hash": "sha256:cc9c4f5148e1",
+      "evidence": [
+        "runs/evidence/2026-08-24T17-08-32Z/proto-rule-detail.png",
+        "runs/evidence/2026-08-24T17-08-32Z/app-rule-detail.png"
+      ],
+      "reasoning": "Refine with an empty box was refused with \"Refine is the feedback - write what should change first\" and nothing recorded (0 judged). The with-text path files the note, records refining and stays put, verified interactively during the build."
+    },
+    {
+      "rule": "panel.signoff.approved-recorded",
+      "status": "pass",
+      "statement_hash": "sha256:3debe377856e",
+      "evidence": [
+        "runs/evidence/2026-08-24T17-08-32Z/proto-rule-detail.png",
+        "runs/evidence/2026-08-24T17-08-32Z/app-rule-detail.png"
+      ],
+      "reasoning": "Unit check panel.signoff.approved-recorded covers the ledger half: approved persists hash-stamped with threads intact. The UI half (pair choice, caption, advance-on-approve) verified by probe and interactively during the build. Status derivation keeps approved rules pending and re-queued once built."
+    },
+    {
+      "rule": "panel.identity.default-actor",
+      "status": "pass",
+      "statement_hash": "sha256:d251c7d97967",
+      "evidence": [
+        "runs/evidence/2026-08-24T17-08-32Z/proto-review.png",
+        "runs/evidence/2026-08-24T17-08-32Z/app-review.png"
+      ],
+      "reasoning": "Starting a walkdown in a fresh browser profile pre-filled the actor with \"Topher Fangio\" - the repository git identity - with no prompt; the unit check covers the payload default."
+    }
+  ]
+}

@@ -298,7 +298,7 @@ stories:
       - id: panel.rules.detail-slide
         origin: walkdown
         statement: Opening a rule slides the panel from the list to that rule's detail, and one control comes back - only one of the two panes is ever visible.
-        verify: [human]
+        verify: [agent, human]
         steps:
           given:
             - The panel showing the rule list
@@ -347,7 +347,7 @@ stories:
       - id: panel.rules.step-between
         origin: walkdown
         statement: From a rule's detail I can step to the previous or next rule in list order without returning to the list, and each control says where it lands.
-        verify: [human]
+        verify: [agent, human]
         steps:
           given:
             - A rule open in the detail pane
@@ -363,7 +363,7 @@ stories:
       - id: panel.rules.steps-not-an-appendix
         origin: thread:n-0007
         statement: A rule's given/when/then steps are visible without being asked for; only the recorded check source sits behind a collapsed disclosure.
-        verify: [human]
+        verify: [agent, human]
         screens: [rule-detail]
         steps:
           given:
@@ -393,7 +393,7 @@ stories:
       - id: panel.rules.counts-legible
         origin: thread:n-0002
         statement: The list's footer counts say what they count and reconcile with the list - verified is a count of rules, the work owed to a person is named, and each owed rule carries a mark so the total can be counted back.
-        verify: [human]
+        verify: [agent, human]
         screens: [review]
         steps:
           given:
@@ -409,7 +409,7 @@ stories:
       - id: panel.rules.lifecycle-legible
         origin: thread:n-0054
         statement: The list glyph's shape carries a rule's lifecycle - designed, approved awaiting build, refining, built awaiting verification, verified, failing - and its color carries ownership, so designed-but-unsigned and built-but-unpassed are never the same mark.
-        verify: [human]
+        verify: [agent, human]
         screens: [review]
         steps:
           given:
@@ -481,7 +481,7 @@ stories:
       - id: panel.walkdown.records-to-ledger
         origin: walkdown
         statement: Finishing a walkdown in the panel appends a run record under a named person; discarding one records nothing.
-        verify: [human]
+        verify: [agent, human]
         steps:
           given:
             - A walkdown session in the panel with at least one verdict
@@ -496,7 +496,7 @@ stories:
       - id: panel.walkdown.verdicts-at-hand
         origin: walkdown
         statement: While a walkdown is running, pass and fail sit directly under the selected rule's statement - on screen without scrolling - beside a count of how many rules the session has judged.
-        verify: [human]
+        verify: [agent, human]
         screens: [rule-detail]
         steps:
           given:
@@ -512,7 +512,7 @@ stories:
       - id: panel.walkdown.pass-advances
         origin: walkdown
         statement: A pass moves the session to the next rule owing a verdict; a fail stays put and turns pin mode on, because a fail wants a note pinned to what is wrong.
-        verify: [human]
+        verify: [agent, human]
         screens: [rule-detail]
         steps:
           given:
@@ -528,7 +528,7 @@ stories:
       - id: panel.walkdown.note-with-any-verdict
         origin: thread:n-0050
         statement: A feedback box rides above the verdict buttons - write first, then judge - and anything written is filed as a note thread on the rule and linked into the run result; an empty box files nothing.
-        verify: [human]
+        verify: [agent, human]
         screens: [rule-detail]
         steps:
           given:
@@ -545,7 +545,7 @@ stories:
       - id: panel.walkdown.fail-requires-why
         origin: thread:n-0051
         statement: A fail is refused until it has a why - feedback text or a pin dropped on the rule during the session - because a fail with no why is work nobody can act on.
-        verify: [human]
+        verify: [agent, human]
         screens: [rule-detail]
         steps:
           given:
@@ -565,16 +565,17 @@ stories:
       - id: panel.identity.default-actor
         origin: thread:n-0008
         statement: The actor field arrives filled in from the repository's git identity, falling back to the operating system username; it stays editable.
-        verify: [checks, human]
+        verify: [checks, agent, human]
         screens: [review]
         steps:
           given:
             - A walkdown session started in a git repository with user.name set
           when:
-            - Reading anchor `panel.actor` on screen `review`
+            - Reading anchor `panel.actor` on screen `review`, then opening Settings from the gear
           then:
-            - The field already holds that name; no attributed action prompts for it
-            - Editing it records the corrected name on the session's verdicts
+            - The session strip already shows that name; no attributed action prompts for it
+            - The name is edited in Settings - the strip only shows it - and the edit applies to the running session
+            - An edited name is remembered across reloads
           statement_hash: sha256:d251c7d97967
 
       - id: panel.identity.attribution-visible
@@ -634,7 +635,7 @@ stories:
       - id: panel.signoff.spec-pair-derived
         origin: thread:n-0052
         statement: Which verdict pair a rule shows is derived from the ledger - a rule with no build evidence (no pass or fail from checks or judgment) offers Approve and Refine, and sign-off records, skips and blocks never count as build evidence.
-        verify: [checks, human]
+        verify: [checks, agent, human]
         screens: [rule-detail]
         steps:
           given:
@@ -650,7 +651,7 @@ stories:
       - id: panel.signoff.refine-requires-feedback
         origin: thread:n-0052
         statement: Refine is the feedback - it is refused until the box says what should change, and the text is filed as a note thread on the rule while the session stays put.
-        verify: [human]
+        verify: [agent, human]
         screens: [rule-detail]
         steps:
           given:
@@ -666,7 +667,7 @@ stories:
       - id: panel.signoff.approved-recorded
         origin: thread:n-0052
         statement: Approve appends an `approved` result to the ledger, hash-stamped like a pass so it goes stale when the statement moves - and it never satisfies a human verify requirement, because approving a spec is not judging a build.
-        verify: [checks, human]
+        verify: [checks, agent, human]
         screens: [rule-detail]
         steps:
           given:

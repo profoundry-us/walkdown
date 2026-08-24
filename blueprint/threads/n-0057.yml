@@ -1,0 +1,16 @@
+id: n-0057
+kind: note
+author: agent
+created: 2026-08-24T17:12:59Z
+anchor:
+  rule: panel.rules.steps-not-an-appendix
+  screen: rule-detail
+  element: detail.technical-disclosure
+status: open
+body: "Agent walkdown: the given/when/then steps are expanded in the detail pane
+  as the rule asks, but the second half is unbuilt - nothing renders the
+  recorded check source behind a collapsed disclosure. The probe found no source
+  reference anywhere in the open detail pane, while the design shows it at
+  detail.technical-disclosure (see evidence pair proto-rule-detail vs
+  app-rule-detail). Needs the disclosure built: collapsed by default, opening to
+  the check source the ledger recorded."

@@ -1,0 +1,27 @@
+id: n-0056
+kind: note
+author: topherfangio
+created: 2026-08-24T16:15:14Z
+anchor:
+  screen: review
+  element: panel.actor
+  surface: prototype
+  viewport:
+    name: desktop
+    width: 1019
+status: addressed
+body: I don't like having the actor inside this space. Let's move it into the
+  Settings panel that currently shows the background desk settings.
+replies:
+  - author: agent
+    created: 2026-08-24T17:17:09Z
+    body: "Moved. The gear popover is now Settings: a 'Record as' field sits above
+      the desk dials, prefilled from git identity, and an edit there applies to
+      the running session and is remembered across reloads (stored beside the
+      desk choices). The session strip no longer holds an input - it shows the
+      recording name as text (attribution stays visible at the moment of action,
+      per panel.identity.attribution-visible), and clicking the name opens
+      Settings with the field focused, as does trying to finish a nameless
+      walkdown. Mockup and the default-actor rule's steps updated to match.
+      Verified headless: prefill from git, strip shows the edited name as text
+      with no input, click-through reopens Settings focused."
