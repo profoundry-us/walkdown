@@ -1,0 +1,76 @@
+# walkdown's Highball rules — the file `highball run` reads and reports from.
+#
+# The division of labour is worth stating once, because the two tools look
+# similar and are not: Highball witnesses that the agent followed this repo's
+# rules while building. walkdown witnesses that the built thing matches its
+# spec. Process gate, then product verification — and walkdown's own verdicts
+# live in its runs ledger, never here.
+#
+# `fast: true` runs on every agent edit; the rest join at turn end. `todo: true`
+# declares a rule we mean to have and haven't built — tracked, never a failure.
+version: 1
+project: walkdown
+
+# The URL is per-team and not a secret, so it is committed; the token never
+# enters the repo — `highball login` once per machine, or HIGHBALL_TOKEN in CI.
+reporting:
+  url: http://localhost:3600
+
+# No container: this repo is Node and its only runtime dependency is `yaml`.
+# Every rule runs on the host.
+
+checks:
+  # The one Topher asked for. The blueprint is this project's spec, and an
+  # agent that edits a rule's statement without re-stamping its hash, or writes
+  # a check referencing a rule that does not exist, or leaves an answered
+  # thread unincorporated, has broken the spec while the code still runs.
+  # Nothing else in the repo would say so.
+  - id: blueprint-lint
+    name: The blueprint lints
+    run: node bin/walkdown.js lint
+    fast: true
+
+  # The example is not a demo we can let rot — it is the fixture the
+  # integration tests run against, so its blueprint drifting is a real failure.
+  - id: example-blueprint-lint
+    name: The example blueprint lints
+    run: node bin/walkdown.js lint --dir example/blueprint
+    fast: true
+
+  # The panel and the embed ship self-contained down two delivery paths, so
+  # parts of them are generated: the shared screen matcher and the Phosphor
+  # icon paths. A hand-edited copy passes every other check in this file.
+  - id: generated-copies
+    name: Generated copies match their source
+    run: node tools/sync-shared.mjs --check && node tools/sync-phosphor.mjs --check
+    fast: true
+
+  # And the extension carries its own copy of the two viewer files. Editing
+  # lib/viewer without rebuilding leaves the extension a version behind, which
+  # shows up as behaviour that works in one delivery and not the other — the
+  # single hardest thing to notice by hand.
+  - id: extension-current
+    name: The extension's vendored copies are current
+    run: diff -q lib/viewer/panel.js extension/vendor/panel.js && diff -q lib/viewer/embed.js extension/vendor/embed.js && diff -q lib/viewer/walkdown.css extension/walkdown.css
+    fast: true
+
+  # Neither browser file is imported by the test suite — they are delivered as
+  # text — so a syntax error in one is invisible until a page loads it.
+  - id: viewer-parses
+    name: The viewer files parse
+    run: node --check lib/viewer/panel.js && node --check lib/viewer/embed.js
+    fast: true
+
+  - id: unit-tests
+    name: Unit tests
+    run: npm test
+    fast: true      # the whole suite is well under a second; there is no
+                    # reason to make an agent wait for turn end to learn it
+
+  # A page belongs to exactly one blueprint (docs/06 §2). Nothing enforces it:
+  # `walkdown lint` validates one blueprint in isolation, and this constraint
+  # is only visible across all the blueprints a server holds open. Declared
+  # here so it is tracked rather than remembered.
+  - id: one-page-one-blueprint
+    name: No two blueprints claim the same page
+    todo: true

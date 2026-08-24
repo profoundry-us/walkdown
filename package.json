@@ -43,6 +43,7 @@
   "license": "MIT",
   "devDependencies": {
     "@phosphor-icons/core": "^2.1.1",
+    "@profoundry-us/highball": "file:../highball-runner/profoundry-us-highball-0.3.0.tgz",
     "@tailwindcss/cli": "^4.3.3",
     "daisyui": "^5.7.20",
     "tailwindcss": "^4.3.3"
