@@ -489,7 +489,7 @@
     const tab = (id, label) =>
       `<button role="tab" class="tab${listTab === id ? ' tab-active' : ''}" data-tab="${id}">${label}</button>`;
     side.innerHTML = `
-      <div role="tablist" class="tabs tabs-box m-2 shrink-0">
+      <div role="tablist" class="tabs tabs-box tabs-sm m-2 shrink-0">
         ${tab('blueprints', 'Blueprints')}${tab('rules', 'Rules')}${tab('screens', 'Screens')}
       </div>
       ${session ? `<div class="flex items-center gap-2 border-b border-base-300 bg-warning/10 px-3.5 py-2 text-xs">
@@ -582,8 +582,13 @@
    */
   let dragging = false;
 
-  const PIN_HINT = 'Click anything on the page to attach a note';
   const PIN_MID = 'Slide fully to the prototype or the app first — half-faded, a pin has no surface to belong to';
+  const PIN_UNREACHABLE = 'walkdown is not running inside this surface, so a pin here would land on the page underneath it';
+  const pinHint = () => {
+    const where = pinSurface();
+    if (!where) return midFade() ? PIN_MID : PIN_UNREACHABLE;
+    return `Click anything to attach a note — it lands on the ${where}`;
+  };
 
   /**
    * Half-way through the fade you are looking at both surfaces at once, so a
@@ -591,6 +596,31 @@
    * control closes until you commit to an end.
    */
   const midFade = () => protoShare !== null && ghostOpacity > 0 && ghostOpacity < 1;
+
+  /** The surface the ghost carries: always the one the page itself is not. */
+  const ghostSurface = () => (pageSurface() === 'prototype' ? 'app' : 'prototype');
+
+  /**
+   * Which surface a pin would land on right now, or null if it has no honest
+   * answer. Fully ghosted, you are looking at the OTHER surface, so that is
+   * where a pin belongs — which means the ghost has to stop being scenery and
+   * take the click. It can only do that if walkdown is running inside it,
+   * which is what `ghostReady` records.
+   */
+  function pinSurface() {
+    if (midFade()) return null;
+    if (ghost && ghostOpacity === 1) return ghostReady ? ghostSurface() : null;
+    return pageSurface();
+  }
+
+  /*
+   * Set when the copy of walkdown inside the ghost announces itself. A
+   * prototype carries the embed by contract (docs/06 §4); an app being ghosted
+   * from a prototype page may not, and then the ghosted surface simply cannot
+   * be pinned. Saying so is the point — the alternative is a pin that lands on
+   * the page hidden underneath the one you are looking at.
+   */
+  let ghostReady = false;
 
   /** Repaint the bar's state without rebuilding it — see `dragging`. */
   function paintBar() {
@@ -602,8 +632,8 @@
     const pin = bar.querySelector('#wdp-pin');
     if (!pin) return;
     const pinning = window.walkdownEmbed?.isPinMode() ?? false;
-    pin.disabled = midFade();
-    pin.title = midFade() ? PIN_MID : PIN_HINT;
+    pin.disabled = !pinSurface();
+    pin.title = pinHint();
     pin.classList.toggle('btn-warning', pinning);
     pin.classList.toggle('btn-outline', !pinning);
     pin.classList.toggle('btn-primary', !pinning);
@@ -638,8 +668,8 @@
 
       <span class="ml-auto flex items-center gap-2">
         <button class="btn btn-xs gap-1 ${pinning ? 'btn-warning' : 'btn-outline btn-primary'}" id="wdp-pin"
-          ${midFade() ? 'disabled' : ''}
-          title="${esc(midFade() ? PIN_MID : PIN_HINT)}">${icon('map-pin', 'size-3.5')}Pin mode</button>
+          ${pinSurface() ? '' : 'disabled'}
+          title="${esc(pinHint())}">${icon('map-pin', 'size-3.5')}Pin mode</button>
         <button class="btn btn-xs btn-primary" id="wdp-walk">${session ? 'Finish walkdown' : 'Start walkdown'}</button>
         <button class="btn btn-xs btn-ghost" id="wdp-undock" title="Put walkdown away">\u00d7</button>
       </span>`;
@@ -678,11 +708,15 @@
     if (wanted === 0) {
       // Mid-drag the ghost stays, emptied: tearing it down calls render(), and
       // sliding back off the end would then have nothing to fade up.
-      if (dragging && ghost) { ghost.style.opacity = 0; return paintBar(); }
+      if (dragging && ghost) { ghost.style.opacity = 0; paintGhostReach(); return paintBar(); }
       return setGhost(false);
     }
-    if (ghost) { ghost.style.opacity = wanted; renderBar(); }
-    else setGhost(true);
+    if (ghost) {
+      ghost.style.opacity = wanted;
+      paintGhostReach();
+      pushGhostContext();
+      renderBar();
+    } else setGhost(true);
   }
 
   function startWalkdown() {
@@ -1048,11 +1082,13 @@
     if (!on) {
       ghost?.remove();
       ghost = null;
+      ghostReady = false;     // whatever was in there is gone with it
       ghostOverride = null;   // the detour ends with the overlay
       protoShare = null;      // and the dial goes back to following the page
       render();
       return;
     }
+    ghostReady = false;
     const screen = screenById(ghostOverride) ?? currentScreen();
     const src = ghostSource(screen);
     if (!src) return;
@@ -1080,6 +1116,17 @@
       max-width:100%; max-height:100%; border:0; background:#fff;
       box-shadow:0 0 0 1px rgba(20,25,40,.14), 0 10px 40px rgba(20,25,40,.18);`;
     frame.src = src.url ?? api(src.path);
+    /*
+     * A surface carrying walkdown announces itself while it parses, so by the
+     * time the frame has loaded the answer is in. Nobody there means the ghost
+     * cannot be pinned, and pin mode must not stay armed over it — a pin would
+     * land on the page hidden underneath the one being looked at.
+     */
+    frame.addEventListener('load', () => {
+      if (ghostReady) return;
+      if (ghostOpacity === 1) window.walkdownEmbed?.setPinMode(false);
+      renderBar();
+    });
     ghost.appendChild(frame);
     // A proposal is an agent's sketch, not design's work. It says so on its
     // face, so nobody walks a screen down against a drawing we made up.
@@ -1092,8 +1139,104 @@
       ghost.appendChild(flag);
     }
     document.body.appendChild(ghost);
+    paintGhostReach();
     render();
   }
+
+  /*
+   * ---- the ghosted surface, when it is the one you are looking at ---------
+   *
+   * A ghost at full strength is not an overlay any more, it is the view. So
+   * when pin mode is on and the fade has landed there, the ghost stops being
+   * click-through and the copy of walkdown inside it does the pinning — the
+   * same framed conversation the old viewer had with its two panes, which is
+   * why the embed already speaks it and nothing in there needed changing.
+   */
+  const ghostFrame = () => ghost?.querySelector('iframe') ?? null;
+
+  function pinsForScreen(id) {
+    if (!id) return [];
+    return (data?.threads ?? [])
+      .filter((t) => t.anchor?.screen === id && !['incorporated', 'verified', 'waived'].includes(t.status))
+      .map((t) => ({ id: t.id, kind: t.kind, status: t.status, element: t.anchor?.element,
+        position: t.anchor?.position, surface: t.anchor?.surface, viewport: t.anchor?.viewport,
+        body: t.body, replies: t.replies ?? [] }));
+  }
+
+  /** Whether the ghost currently takes the pointer instead of passing it through. */
+  const ghostHasReach = () =>
+    Boolean(ghost) && ghostOpacity === 1 && ghostReady && (window.walkdownEmbed?.isPinMode() ?? false);
+
+  function paintGhostReach() {
+    if (ghost) ghost.style.pointerEvents = ghostHasReach() ? 'auto' : 'none';
+  }
+
+  /*
+   * What the copy inside the ghost needs in order to behave: which screen it
+   * is showing, which surface it counts as, whether pinning is live, and the
+   * pins already on that screen. Same message the viewer sent its panes.
+   */
+  function pushGhostContext() {
+    const sc = screenById(ghostOverride) ?? currentScreen();
+    ghostFrame()?.contentWindow?.postMessage({
+      type: 'walkdown:context',
+      screen: sc?.id ?? null,
+      surface: ghostSurface(),
+      pinMode: ghostHasReach(),
+      pins: pinsForScreen(sc?.id),
+    }, '*');
+  }
+
+  /*
+   * Only the ghost gets to speak. This script runs inside somebody else's
+   * application, which may have iframes of its own, and a message is not
+   * evidence of who sent it — so anything not from the ghost's own window is
+   * not walkdown talking.
+   */
+  addEventListener('message', async (e) => {
+    const msg = e.data;
+    if (!msg || typeof msg !== 'object' || !ghost) return;
+    if (e.source !== ghostFrame()?.contentWindow) return;
+
+    if (msg.type === 'walkdown:ready') {
+      ghostReady = true;
+      paintGhostReach();
+      pushGhostContext();
+      return renderBar();
+    }
+    // The ghosted surface can leave pin mode too (Escape). Pin mode has one
+    // owner, so it is told rather than each side keeping its own answer.
+    if (msg.type === 'walkdown:pin-mode' && msg.on === false)
+      return window.walkdownEmbed?.setPinMode(false);
+
+    if (msg.type === 'walkdown:open-thread') {
+      openThread = msg.id;
+      const t = (data?.threads ?? []).find((x) => x.id === msg.id);
+      const row = t?.anchor?.rule ? data.rows.find((r) => r.rule === t.anchor.rule) : null;
+      if (row) { selected = row; view = 'detail'; }
+      return render();
+    }
+
+    if (msg.type === 'walkdown:new-pin') {
+      const sc = screenById(ghostOverride) ?? currentScreen();
+      await fetch(api('/api/threads'), {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          kind: msg.kind, body: msg.body,
+          anchor: {
+            ...(msg.element && { element: msg.element }),
+            ...(msg.position && { position: msg.position }),
+            ...(msg.viewport && { viewport: msg.viewport }),
+            surface: ghostSurface(),
+            ...(sc && { screen: sc.id }),
+          },
+        }),
+      }).catch(() => {});
+      await load();
+      pushGhostContext();
+    }
+  });
 
   /*
    * Is the keystroke going somewhere that wants letters? e.target is retargeted
@@ -1182,7 +1325,11 @@
   window.walkdownEmbed?.dismissBadge();
   // Pin mode has one owner — the embed. The bar mirrors it rather than keeping
   // a second copy that Escape and the badge would have to remember to update.
-  window.walkdownEmbed?.watchPinMode(() => { if (phase === 'ready') renderBar(); });
+  window.walkdownEmbed?.watchPinMode(() => {
+    paintGhostReach();
+    pushGhostContext();
+    if (phase === 'ready') renderBar();
+  });
 
   store.get(CHOICE + ':server').then((at) => { if (at) SERVER = at; }).finally(start);
 })();

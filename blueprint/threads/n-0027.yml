@@ -1,0 +1,39 @@
+id: n-0027
+kind: note
+author: topher
+created: 2026-08-24T03:59:03Z
+anchor:
+  rule: panel.dock.own-skin
+status: addressed
+body: Can we make the pinning system use our same blueprint theme? Is it
+  different because it's injected in the app?
+replies:
+  - author: agent
+    created: 2026-08-24T03:59:35Z
+    body: >-
+      Yes, and it is now. It was different because it was hand-rolled CSS in the
+      host document — deliberately, but for a reason that had a better answer:
+      the embed draws into somebody else's page, and loading our stylesheet
+      there would restyle their buttons and headings through Tailwind's
+      preflight, which panel.dock.host-isolation forbids. So the pin form, the
+      pins and the badge had their own little stylesheet with hardcoded colours,
+      and it drifted from the panel.
+
+
+      The fix is what the panel already does: everything with a surface of its
+      own moved into a shadow root, with walkdown.css inside it and
+      data-theme="blueprint" on a zero-size carrier (daisyUI paints a background
+      on every [data-theme] element, so the carrier must have no size — the
+      tokens still inherit down to the chrome). The pin form is now a real card
+      with the panel's border and buttons, pins are bg-warning / bg-success, and
+      the badge is a btn.
+
+
+      What stays in the host page is only what must style the host's own
+      elements — the hover outline and the crosshair cursor — plus the @property
+      registrations, which only register at document level and paint nothing.
+      Whichever of the panel and the embed loads first adds them.
+
+
+      Verified in both deliveries: docked beside the app, and standalone on a
+      prototype. Specced as embed.pin.own-skin.

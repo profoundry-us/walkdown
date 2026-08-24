@@ -52,6 +52,38 @@ stories:
             - Both pins show on the rule, distinguished by the surface they came from
           statement_hash: sha256:77fdab028ac1
 
+      - id: embed.pin.follows-the-visible-surface
+        origin: thread:n-0025
+        statement: A pin lands on the surface you are actually looking at - so when the design is fully covering the app, the pin goes on the design, and whichever surface is in front is the one taking the click.
+        verify: [human]
+        steps:
+          given:
+            - A screen with a design on file, the panel docked, pin mode on
+          when:
+            - Take the fade all the way to one surface and pin something
+          then:
+            - The pin is recorded against the surface in front, not the one hidden behind it
+            - It anchors to that surface's own anchors, and its position is in that surface's coordinates
+            - The control says which surface a pin would land on before you place one
+            - Pins already on that screen show on the surface they were placed on
+            - A surface with no walkdown running inside it cannot be pinned, and says so rather than letting the pin fall through to the page underneath
+          statement_hash: sha256:7c9b1c0e3da1
+
+      - id: embed.pin.own-skin
+        origin: thread:n-0027
+        statement: Everything walkdown draws into somebody else's application wears walkdown's own skin and reaches nothing outside itself - one theme across the panel and the feedback layer alike, and not a stroke of it applied to the host page.
+        verify: [human]
+        steps:
+          given:
+            - Any application, with the embed running in it
+          when:
+            - Open a pin form, look at a pin, look at the badge
+          then:
+            - They wear the same blueprint theme as the panel, from the same stylesheet, not a hand-rolled lookalike
+            - The host page's own buttons, headings and form controls are untouched
+            - Everything with a surface of its own lives in a shadow root; only what must style the host's own elements - what a pinnable thing looks like under the cursor - is added to the page
+          statement_hash: sha256:1f3400a09629
+
       - id: embed.pin.viewport-recorded
         origin: thread:n-0005
         statement: A pin records the viewport it was placed at, so feedback about a layout is never read against the wrong width.

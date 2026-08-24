@@ -1,0 +1,41 @@
+id: n-0025
+kind: note
+author: topher
+created: 2026-08-24T03:59:03Z
+anchor:
+  rule: embed.pin.both-surfaces
+status: addressed
+body: If the prototype is fully visible, then pinning should pin on the
+  prototype; if the app is fully visible, then pinning should happen on the app.
+  We need to find a way to swap which one is in the foreground so that it can
+  work like this.
+replies:
+  - author: agent
+    created: 2026-08-24T03:59:35Z
+    body: >-
+      Done. Fully ghosted, the ghost stops being scenery: it takes the pointer,
+      and the copy of walkdown inside it does the pinning — the same framed
+      conversation the old viewer had with its two panes, which is why the embed
+      already spoke it and nothing in there needed changing. The panel now plays
+      the viewer's half: it pushes screen, surface, pin mode and existing pins
+      into the ghost, and turns walkdown:new-pin into a thread.
+
+
+      It is symmetric rather than prototype-specific: the ghost always carries
+      whichever surface the page is not, so standing on a prototype the same
+      move pins the app.
+
+
+      The ghost only takes the pointer while pin mode is on, so it stays a
+      comparison overlay the rest of the time. And it only takes it if walkdown
+      is actually running in there — a surface that never announced itself
+      cannot be pinned, and the control says so instead of letting the pin fall
+      through to the page hidden underneath. Prototypes carry the embed by
+      contract (docs/06 §4); an app being ghosted from a prototype page may not.
+
+
+      Verified end to end: fully faded to the prototype, pin mode on, clicking
+      the wireframe opened its form against waitlist.table, and submitting wrote
+      a thread with surface: prototype, screen: waitlist-admin, and a position
+      in the prototype's own coordinates. Pinning back on the app records
+      surface: app. Specced as embed.pin.follows-the-visible-surface.
