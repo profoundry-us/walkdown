@@ -1,0 +1,17 @@
+id: n-0046
+kind: note
+author: topher
+created: 2026-08-24T05:47:05Z
+anchor:
+  rule: panel.rules.detail-slide
+status: addressed
+body: Size the tab icons up to 4 and give each tab a bit more x-padding.
+replies:
+  - author: agent
+    created: 2026-08-24T05:47:05Z
+    body: n/a
+  - author: agent
+    created: 2026-08-24T05:47:18Z
+    body: "Done - icons up from size-3.5 to size-4, and each tab gained px-4 (16px
+      each side, up from tabs-sm's default). Verified: computed
+      padding-left/right read 16px on all three tabs, icons at size-4."

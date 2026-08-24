@@ -308,7 +308,7 @@ stories:
             - Exactly one pane occupies the panel's full width
             - "\"All rules\" slides back to the list"
             - The Blueprints / Rules / Screens tabs are sized to their labels and centred in the sidebar, not stretched to its full width
-            - Each of the three tabs carries its own icon, from the same Phosphor set as the rest of the panel's chrome, a touch larger than an inline glyph elsewhere in the panel so they read clearly at tab size
+            - Each of the three tabs carries its own icon, from the same Phosphor set as the rest of the panel's chrome, sized and padded to read clearly at tab size rather than as an inline glyph shrunk to fit
           statement_hash: sha256:493a83d3f0bd
 
       - id: panel.rules.takes-you-there
