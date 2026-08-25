@@ -1138,6 +1138,10 @@
     await loadSeen();
     await restoreSession();
     render();
+    // The surfaces carry the pins, so they have to hear about a thread that
+    // has just ended - a verified note leaves the page it was pinned to,
+    // rather than sitting there until something else happens to refresh it.
+    if (phase === 'ready') pushContexts();
   }
 
   /**
@@ -2454,6 +2458,9 @@
       .filter((t) => t.anchor?.screen === id && !['incorporated', 'verified', 'waived'].includes(t.status))
       .map((t) => ({ id: t.id, kind: t.kind, status: t.status, element: t.anchor?.element,
         position: t.anchor?.position, surface: t.anchor?.surface, viewport: t.anchor?.viewport,
+        // What it is about, for the tooltip: a pin should say where it belongs
+        // before you spend a click finding out.
+        rule: t.anchor?.rule ?? null, screen: t.anchor?.screen ?? null,
         body: t.body, replies: t.replies ?? [] }));
   }
 
@@ -2540,10 +2547,10 @@
       view = 'thread';
       const t = (data?.threads ?? []).find((x) => x.id === msg.id);
       const row = t?.anchor?.rule ? data.rows.find((r) => r.rule === t.anchor.rule) : null;
-      // A pin with no rule still opens: the detail slot shows the thread
-      // alone rather than swallowing the click.
+      // The rule behind it, when it has one, so going back from the thread
+      // lands on it. A pin with no rule still opens - the thread screen is
+      // about the thread, not about what it happens to be attached to.
       selected = row ?? null;
-      view = 'detail';
       return render();
     }
 

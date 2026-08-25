@@ -183,7 +183,7 @@
         place-items-center text-[11px] font-bold shadow ${el ? 'rounded-full' : 'rounded-[3px]'}
         ${settled ? 'bg-success text-success-content' : 'bg-warning text-warning-content'}`;
       dot.textContent = pin.kind === 'question' ? '?' : '!';
-      dot.title = `${pin.id} (${pin.status}): ${pin.body ?? ''}`;
+      dot.title = pinTip(pin);
       dot.style.left = `${left}px`;
       dot.style.top = `${top}px`;
       dot.onclick = (e) => {
@@ -193,6 +193,19 @@
       };
       root.appendChild(dot);
     }
+  }
+
+  /*
+   * What a pin says under the cursor: which thread, what state it is in, what
+   * it is about, and enough of the text to recognise it. Three short lines -
+   * a tooltip that has to be read is a tooltip nobody reads.
+   */
+  function pinTip(pin) {
+    const where = [pin.rule ? `rule ${pin.rule}` : 'no rule',
+      pin.screen, pin.element].filter(Boolean).join(' · ');
+    const text = String(pin.body ?? '').replace(/\s+/g, ' ').trim();
+    return `${pin.id} · ${pin.kind} · ${pin.status}\n${where}${
+      text ? `\n“${text.length > 90 ? text.slice(0, 89) + '…' : text}”` : ''}`;
   }
 
   // --- standalone thread popover: read + reply (lifecycle actions live in the
@@ -846,6 +859,7 @@
         position: t.anchor?.position, surface: t.anchor?.surface, viewport: t.anchor?.viewport,
         // Who wrote the note and when: the opening message is a message, and a
         // message without an author reads as nobody having said it.
+        rule: t.anchor?.rule ?? null, screen: t.anchor?.screen ?? null,
         author: t.author, created: t.created, body: t.body, replies: t.replies ?? [] }));
       renderPins();
     };

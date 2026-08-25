@@ -102,6 +102,39 @@ stories:
             - The panel shows that viewport alongside the note's other provenance
           statement_hash: sha256:6971846eb2cc
 
+      - id: embed.pin.settled-pins-leave
+        origin: walkdown
+        statement: A pin stands on the page only while its thread is unsettled - verifying, waiving or incorporating it takes the pin off the surface there and then, without waiting for a reload - because a page still carrying pins for finished conversations reads as work that is still owed.
+        verify: [agent, human]
+        screens: [review, thread-panel]
+        steps:
+          given:
+            - A surface showing a pin whose thread is still open or addressed
+          when:
+            - End that thread from the panel
+          then:
+            - The pin leaves the surface immediately, on both the page and the ghosted copy of the other one
+            - Nothing else about the page moves, and the other pins stay where they are
+            - The thread itself is not gone - it is in the ledger and reachable, just no longer standing on the page
+          statement_hash: sha256:c82607d3ac2e
+
+      - id: embed.pin.tooltip-says-what-it-is
+        origin: walkdown
+        statement: Hovering a pin says what it is in three short lines - which thread and what state, the rule and screen it belongs to (or that it belongs to no rule), and enough of the note to recognise it - so a page of pins can be read without spending a click on each one.
+        verify: [agent, human]
+        screens: [review]
+        steps:
+          given:
+            - A surface carrying several pins
+          when:
+            - Rest the pointer on one
+          then:
+            - It names the thread, its kind and its status
+            - It names the rule it is anchored to, or says plainly that it has none, along with the screen and the element
+            - It shows the start of the note, truncated - a tooltip that has to be read is one nobody reads
+            - Clicking it still opens the thread's own screen, wherever you were
+          statement_hash: sha256:50dfb40b9f83
+
       - id: embed.pin.form-is-chrome
         origin: thread:n-0004
         statement: The pin form is ordinary UI - inside it the cursor and clicks behave normally, and pin mode does not reach through it to the surface underneath.
