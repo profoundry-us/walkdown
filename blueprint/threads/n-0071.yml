@@ -1,0 +1,16 @@
+id: n-0071
+kind: note
+author: topher
+created: 2026-08-25T22:20:00Z
+anchor:
+  rule: panel.rules.takes-you-there
+  screen: review
+  element: panel.app-frame
+status: open
+body: "When the app viewer changes its URL, the frame needs to show that it is
+  doing something - some kind of loading indicator. Right now the old screen
+  stays on display until the new one has finished loading, so a slow app looks
+  like a walkdown that went to the wrong place rather than one still on its way.
+  The app I am working on at work takes a long time to load, and that is exactly
+  where this bites: I ask for a screen, nothing appears to happen, and the
+  screen I am looking at is the one I just left."
