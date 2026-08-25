@@ -10,7 +10,7 @@ stories:
       - id: screens.identity.fragment-is-identity
         origin: thread:n-0020
         statement: A screen is identified by origin, path and fragment, so a state the URL fragment expresses - a modal, a drawer, a tab, an SPA route - is a screen in its own right and not a footnote on the page behind it.
-        verify: [checks, human]
+        verify: [checks, agent, human]
         steps:
           given:
             - A storyboard holding both a page and a fragment state of that page
@@ -55,7 +55,7 @@ stories:
       - id: screens.identity.follows-navigation
         origin: thread:n-0020
         statement: When the URL changes without the page reloading, walkdown notices and re-answers which screen this is - and it says so honestly for the one kind of navigation it cannot be told about.
-        verify: [human]
+        verify: [agent, human]
         steps:
           given:
             - walkdown on a single-page app, on a screen the storyboard knows
@@ -75,7 +75,7 @@ stories:
       - id: screens.surfaces.stand-in-app
         origin: walkdown
         statement: A screen whose app is not a page - because the thing being built is chrome, or is not built yet - can declare a stand-in, and walkdown serves that screen's own design back as the app, visibly marked as a stand-in, so fading, ghosting and pinning on the app surface all work while nobody can mistake it for the build.
-        verify: [checks, human]
+        verify: [checks, agent, human]
         screens: [review]
         steps:
           given:

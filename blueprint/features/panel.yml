@@ -10,7 +10,7 @@ stories:
       - id: panel.dock.no-framing
         origin: walkdown
         statement: Docked into a page's own document, the panel renders beside what it reviews rather than framing it - a script tag cannot put its own page in a frame, so the docked delivery works within the application's document and pushes it aside instead of covering it.
-        verify: [human]
+        verify: [agent, human]
         screens: [docked]
         steps:
           given:
@@ -27,7 +27,7 @@ stories:
       - id: panel.dock.wraps-the-page
         origin: thread:n-0015
         statement: The page under review is presented as a sheet lying on walkdown's desk - inset on every side, with rounded corners and a shadow - so it reads as the thing being examined rather than as part of the tool.
-        verify: [human]
+        verify: [agent, human]
         screens: [docked]
         steps:
           given:
@@ -45,7 +45,7 @@ stories:
       - id: panel.dock.toolbar
         origin: thread:n-0015
         statement: A bar across the top carries the controls that are about the session rather than the rule in hand - which project, which surface, and pin mode.
-        verify: [human]
+        verify: [agent, human]
         screens: [review]
         steps:
           given:
@@ -79,7 +79,7 @@ stories:
       - id: panel.dock.controls-survive-use
         origin: thread:n-0022
         statement: A control in the bar survives being used - the fade slider can be grabbed and dragged the whole way, because nothing rebuilds the element the pointer is holding until the pointer lets go.
-        verify: [human]
+        verify: [agent, human]
         screens: [review]
         steps:
           given:
@@ -96,7 +96,7 @@ stories:
       - id: panel.dock.above-the-app
         origin: thread:n-0028
         statement: Nothing the application draws paints over walkdown's own chrome, because the tool has to stay readable exactly when the app is showing the state you came to judge - and a z-index cannot promise that, since a modal joins a layer painted above every z-index there is.
-        verify: [human]
+        verify: [agent, human]
         screens: [docked]
         steps:
           given:
@@ -113,7 +113,7 @@ stories:
       - id: panel.dock.one-pin-mode
         origin: thread:n-0015
         statement: Pin mode has a single owner - the embed - and with the panel up there is a single control for it, so the bar and Escape can never disagree about whether it is on.
-        verify: [human]
+        verify: [agent, human]
         screens: [review]
         steps:
           given:
@@ -130,7 +130,7 @@ stories:
       - id: panel.dock.no-pin-mid-fade
         origin: thread:n-0023
         statement: While the fade sits between the two surfaces, pinning is closed - both are on screen at once, so a pin has no honest answer to which one it is about.
-        verify: [human]
+        verify: [agent, human]
         screens: [review]
         steps:
           given:
@@ -146,7 +146,7 @@ stories:
       - id: panel.dock.own-skin
         origin: thread:n-0015
         statement: walkdown's chrome wears its own theme - drafting blue, pale ink, flat surfaces - so it is never mistaken for the application it is inspecting, whatever that application looks like.
-        verify: [human]
+        verify: [agent, human]
         screens: [review, settings]
         steps:
           given:
@@ -170,7 +170,7 @@ stories:
       - id: panel.dock.host-isolation
         origin: walkdown
         statement: The panel is injected into somebody else's application, so its styles never reach the host page and the host's styles never reach it.
-        verify: [human]
+        verify: [agent, human]
         screens: [docked]
         steps:
           given:
@@ -186,7 +186,7 @@ stories:
       - id: panel.dock.chrome-not-a-pin-target
         origin: thread:n-0011
         statement: In pin mode, walkdown's own chrome - the bar, an open form, an existing pin, the docked panel - is never treated as a place to put a pin, and Escape leaves pin mode.
-        verify: [human]
+        verify: [agent, human]
         screens: [review]
         steps:
           given:
@@ -206,7 +206,7 @@ stories:
       - id: panel.delivery.one-implementation
         origin: thread:q-0016
         statement: The panel and the embed are one implementation with two deliveries - a script tag for apps you control, and a browser extension for every other page - and neither delivery has a copy of the other's code.
-        verify: [human]
+        verify: [checks, human]
         steps:
           given:
             - A page carrying the script tags, and a page carrying nothing
@@ -238,7 +238,7 @@ stories:
       - id: panel.delivery.framed-isolation
         origin: thread:n-0030
         statement: The extension reviews an application by giving it a viewport of its own - the app is framed inside walkdown's page - because that is the only arrangement in which what the app draws cannot reach walkdown, and the one thing only an extension can arrange.
-        verify: [human]
+        verify: [agent, human]
         screens: [review]
         steps:
           given:
@@ -270,7 +270,7 @@ stories:
       - id: panel.delivery.stale-copy-says-so
         origin: thread:n-0062
         statement: The extension's vendored copy of walkdown only updates when the extension is reloaded - so the panel compares the copy it is running against what the server ships, and says plainly when it has gone stale, because an outdated walkdown reviewing a moving spec quietly undermines every verdict.
-        verify: [checks, human]
+        verify: [checks, agent, human]
         screens: [review]
         steps:
           given:
@@ -286,7 +286,7 @@ stories:
       - id: panel.delivery.anchors-still-required
         origin: thread:q-0016
         statement: Reaching a page is not the same as anchoring to it - on a page with no anchors, feedback still lands by position, and the missing anchors are the reason it cannot do better.
-        verify: [human]
+        verify: [agent, human]
         screens: [review]
         steps:
           given:
@@ -306,7 +306,7 @@ stories:
       - id: panel.start.open-a-folder
         origin: thread:n-0017
         statement: With no walkdown server to read blueprints from, the panel says so plainly and tells you how to open one, rather than rendering an empty or broken review surface - and it calls that server a server, while naming the folder the server is holding open.
-        verify: [human]
+        verify: [agent, human]
         screens: [start]
         steps:
           given:
@@ -324,7 +324,7 @@ stories:
       - id: panel.start.choose-a-blueprint
         origin: thread:n-0017
         statement: When the folder holds more than one blueprint, the panel asks which one this site is, showing each by name and by a description the blueprint itself carries.
-        verify: [human]
+        verify: [agent, human]
         screens: [choose-blueprint]
         steps:
           given:
@@ -364,7 +364,7 @@ stories:
       - id: panel.rules.takes-you-there
         origin: thread:n-0031
         statement: Asking for something in the panel moves the surface to it - opening a rule goes to the screen that rule is about, picking a screen goes to that screen, and choosing a blueprint that says nothing about this page goes to one it does.
-        verify: [human]
+        verify: [agent, human]
         screens: [review]
         steps:
           given:
@@ -383,7 +383,7 @@ stories:
       - id: panel.rules.one-pane-per-tab
         origin: thread:n-0032
         statement: A rule's detail belongs to the tab that lists rules - leaving that tab shows the tab you asked for, not the rule you left open on another one.
-        verify: [human]
+        verify: [agent, human]
         screens: [review]
         steps:
           given:
@@ -430,7 +430,7 @@ stories:
       - id: panel.rules.evidence-visible
         origin: walkdown
         statement: A rule's detail shows the evidence behind its standing - the latest ledger result for each of its verify types - so the chain of trust is read where the rule is judged.
-        verify: [human]
+        verify: [agent, human]
         screens: [rule-detail]
         steps:
           given:
@@ -500,7 +500,7 @@ stories:
       - id: panel.threads.reply-in-place
         origin: thread:n-0009
         statement: A thread on a rule opens in the panel showing its replies, and I can add a reply and take the lifecycle actions its current state allows.
-        verify: [human]
+        verify: [agent, human]
         screens: [rule-detail]
         steps:
           given:
@@ -516,7 +516,7 @@ stories:
       - id: panel.threads.claim-never-accept
         origin: walkdown
         statement: The panel obeys the same governance as everywhere else - it will not record verified or waived without a named person, and it asks for the reason the transition requires.
-        verify: [human]
+        verify: [checks, agent, human]
         screens: [rule-detail]
         steps:
           given:
@@ -531,7 +531,7 @@ stories:
       - id: panel.threads.show-the-sketch
         origin: thread:n-0010
         statement: When a thread's screen has a proposal on file, the panel can show it over the running app, badged as a proposal so a sketch is never mistaken for the design.
-        verify: [human]
+        verify: [agent, human]
         screens: [rule-detail]
         steps:
           given:
@@ -553,7 +553,7 @@ stories:
       - id: panel.walkdown.records-to-ledger
         origin: walkdown
         statement: Finishing a walkdown in the panel appends a run record under a named person; discarding one records nothing.
-        verify: [agent, human]
+        verify: [checks, agent, human]
         screens: [review, rule-detail]
         steps:
           given:
@@ -569,7 +569,7 @@ stories:
       - id: panel.walkdown.session-survives-reload
         origin: thread:n-0066
         statement: An unfinished session is real judging work - it is saved from the first verdict and restored after a page or extension reload, and a refused or failed Finish hands the button back instead of silently bricking the session.
-        verify: [human]
+        verify: [agent, human]
         screens: [review]
         steps:
           given:
@@ -585,7 +585,7 @@ stories:
       - id: panel.walkdown.draft-on-disk
         origin: walkdown
         statement: Every verdict is written to the project as it is given - a draft session on disk, outside the runs ledger - so an unfinished sitting survives the browser and is visible to the tools, while the ledger still gains exactly one record, at Finish, that is never edited.
-        verify: [agent, human]
+        verify: [checks, agent, human]
         screens: [review, rule-detail]
         steps:
           given:
@@ -688,7 +688,7 @@ stories:
       - id: panel.identity.attribution-visible
         origin: thread:n-0008
         statement: A defaulted identity is always visible before it is used - a walkdown verdict or a thread action shows the name it will be recorded under, so nobody is attributed silently.
-        verify: [human]
+        verify: [agent, human]
         screens: [review, rule-detail]
         steps:
           given:

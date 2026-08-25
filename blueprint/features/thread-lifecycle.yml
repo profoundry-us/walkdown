@@ -88,7 +88,7 @@ stories:
       - id: threads.conversation.new-since-you-looked
         origin: walkdown
         statement: A thread remembers where your reading stopped, marking what arrived since as new, so returning to a conversation the agent has added to shows what to read rather than asking you to find it.
-        verify: [human]
+        verify: [agent, human]
         screens: [rule-detail]
         steps:
           given:
@@ -104,7 +104,7 @@ stories:
       - id: threads.conversation.append-only
         origin: walkdown
         statement: A conversation is append-only - messages cannot be edited or deleted, there are no reactions standing in for a verdict, and a thread that reached a terminal state offers no way back - because a thread is the record of what was said, and the ledger is where judgment is recorded.
-        verify: [human]
+        verify: [agent, human]
         screens: [thread-panel]
         steps:
           given:

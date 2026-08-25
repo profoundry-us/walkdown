@@ -10,7 +10,7 @@ stories:
       - id: embed.pin.anchored-target
         origin: walkdown
         statement: In pin mode, hovering highlights any element that carries an anchor, and a pin placed on one is recorded against that anchor - the note follows the element, not the pixel - while the spot it was placed at is recorded too, so the pin draws where the reviewer was pointing rather than at a corner of the element.
-        verify: [checks, human]
+        verify: [checks, agent, human]
         screens: [review]
         steps:
           given:
@@ -28,7 +28,7 @@ stories:
       - id: embed.pin.right-project
         origin: thread:n-0012
         statement: A pin files against the project the page belongs to, not whichever blueprint the server happens to be serving by default, so feedback never lands in a sibling project's threads.
-        verify: [human]
+        verify: [checks, agent, human]
         screens: [review]
         steps:
           given:
@@ -43,7 +43,7 @@ stories:
       - id: embed.pin.both-surfaces
         origin: thread:n-0003
         statement: Pins can be placed on the app exactly as on the prototype - the same anchors exist in both - and a pin records which surface it was placed on.
-        verify: [checks, human]
+        verify: [checks, agent, human]
         screens: [review]
         steps:
           given:
@@ -59,7 +59,7 @@ stories:
       - id: embed.pin.follows-the-visible-surface
         origin: thread:n-0025
         statement: A pin lands on the surface you are actually looking at - so when the design is fully covering the app, the pin goes on the design, and whichever surface is in front is the one taking the click.
-        verify: [human]
+        verify: [agent, human]
         screens: [review]
         steps:
           given:
@@ -77,7 +77,7 @@ stories:
       - id: embed.pin.own-skin
         origin: thread:n-0027
         statement: Everything walkdown draws into somebody else's application wears walkdown's own skin and reaches nothing outside itself - one theme across the panel and the feedback layer alike, and not a stroke of it applied to the host page.
-        verify: [human]
+        verify: [agent, human]
         screens: [review, thread-panel]
         steps:
           given:
@@ -94,7 +94,7 @@ stories:
       - id: embed.pin.viewport-recorded
         origin: thread:n-0005
         statement: A pin records the viewport it was placed at, so feedback about a layout is never read against the wrong width.
-        verify: [checks, human]
+        verify: [checks, agent, human]
         screens: [review]
         steps:
           given:
@@ -161,7 +161,7 @@ stories:
       - id: embed.pin.form-is-chrome
         origin: thread:n-0004
         statement: The pin form is ordinary UI - inside it the cursor and clicks behave normally, and pin mode does not reach through it to the surface underneath.
-        verify: [human]
+        verify: [agent, human]
         screens: [review]
         steps:
           given:
@@ -176,7 +176,7 @@ stories:
       - id: embed.pin.surface-coordinates
         origin: thread:n-0005
         statement: A pin's position is recorded in the surface's own coordinate space - CSS pixels of the document as rendered at its viewport - never in the panel's screen pixels, so pins stay on their spot when the frame is resized, the fade moves, or the surface is zoomed.
-        verify: [checks, human]
+        verify: [checks, agent, human]
         screens: [review]
         steps:
           given:
@@ -191,7 +191,7 @@ stories:
       - id: embed.pin.coordinate-fallback
         origin: thread:n-0001
         statement: A pin dropped where no anchored element sits is still placed, recorded by its x/y position within the surface - feedback is never blocked by a missing anchor.
-        verify: [checks, human]
+        verify: [checks, agent, human]
         screens: [review]
         steps:
           given:
@@ -210,7 +210,7 @@ stories:
       - id: embed.threads.note-first
         origin: walkdown
         statement: The thread popover leads with the note's own words; its provenance - id, kind, status, rule, screen, element, author, age - is condensed to a compact line rather than stacked sentences.
-        verify: [human]
+        verify: [agent, human]
         screens: [thread-panel]
         steps:
           given:
@@ -226,7 +226,7 @@ stories:
       - id: embed.threads.actions-in-context
         origin: walkdown
         statement: The popover's actions are short verbs on one row, and an action that needs a reason asks for it when chosen - the reply box carries no standing instructions.
-        verify: [human]
+        verify: [agent, human]
         screens: [thread-panel]
         steps:
           given:

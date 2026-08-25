@@ -1,4 +1,6 @@
 import { spawnSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { locationOfUrl, matchScreen, screenKey, splitScreenRef } from '../lib/screen-match.js';
@@ -68,4 +70,23 @@ test('the browser copies of the matcher have not drifted @rule:screens.identity.
     encoding: 'utf8',
   });
   assert.equal(sync.status, 0, sync.stderr || sync.stdout);
+});
+
+/*
+ * One implementation, two deliveries. The panel and the embed each ship as a
+ * single self-contained file down two paths - a script tag from the server and
+ * a vendored copy inside the extension - and the copy is the half that can
+ * silently rot: an extension running yesterday's build looks exactly like the
+ * build working.
+ */
+test('the extension ships the same panel and embed the server does @rule:panel.delivery.one-implementation', () => {
+  const root = new URL('../', import.meta.url).pathname;
+  for (const file of ['panel.js', 'embed.js']) {
+    const shipped = readFileSync(join(root, 'lib', 'viewer', file), 'utf8');
+    const vendored = readFileSync(join(root, 'extension', 'vendor', file), 'utf8');
+    assert.equal(vendored, shipped, `extension/vendor/${file} has drifted from lib/viewer/${file}`);
+  }
+  // And the delivery-specific bootstrap is the only thing the extension adds.
+  const boot = readFileSync(join(root, 'extension', 'boot-host.js'), 'utf8');
+  assert.match(boot, /__walkdownConfig/);
 });

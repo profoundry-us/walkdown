@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, before, test } from 'node:test';
@@ -206,7 +206,7 @@ test('the blueprint payload carries a default actor @rule:panel.identity.default
   assert.ok(here.actor.length > 0);
 });
 
-test('POST /api/walkdowns writes a hash-stamped human run record', async () => {
+test('POST /api/walkdowns writes a hash-stamped human run record @rule:panel.walkdown.records-to-ledger', async () => {
   const res = await (await fetch(`${base}/api/walkdowns`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
@@ -377,6 +377,52 @@ test('multi-project: sibling blueprints are discovered and ?bp= switches, member
   assert.ok(sibling.projects.find((p) => p.id === 'sibling/blueprint').current);
 
   assert.equal((await fetch(`${base}/api/blueprint?bp=../../etc`)).status, 404);
+});
+
+test('a pin files against the page\u2019s own project, not the server\u2019s default @rule:embed.pin.right-project', async () => {
+  // The sibling project is created by the multi-project test above; this one
+  // is about where a WRITE lands, which is the part a mis-routed pin gets wrong.
+  mkdirSync(join(root, 'sibling', 'blueprint', 'threads'), { recursive: true });
+  const res = await (await fetch(`${base}/api/threads?bp=${encodeURIComponent('sibling/blueprint')}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ kind: 'note', body: 'Belongs to the sibling.', author: 'tester' }),
+  })).json();
+  assert.ok(res.id, JSON.stringify(res));
+  // In the sibling's threads/, carrying this note. Ids are only unique within
+  // a blueprint - each has its own ledger - so the check is what the file
+  // says, not whether the name happens to be taken in the default project.
+  const filed = parse(readFileSync(join(root, 'sibling', 'blueprint', 'threads', `${res.id}.yml`), 'utf8'));
+  assert.equal(filed.body, 'Belongs to the sibling.');
+  const inDefault = join(bp, 'threads', `${res.id}.yml`);
+  if (existsSync(inDefault))
+    assert.notEqual(parse(readFileSync(inDefault, 'utf8')).body, 'Belongs to the sibling.');
+});
+
+test('the panel refuses to accept work under the agent\u2019s name @rule:panel.threads.claim-never-accept', async () => {
+  const note = await (await fetch(`${base}/api/threads`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ kind: 'note', body: 'Needs a person to accept it.', author: 'agent', anchor: { screen: 'home' } }),
+  })).json();
+  await fetch(`${base}/api/threads/${note.id}/status`, {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ status: 'addressed', actor: 'agent' }),
+  });
+  // The same endpoint the panel's buttons post to: an agent may claim work,
+  // never accept it, and the refusal happens server-side so no client can
+  // talk its way past it.
+  const refused = await fetch(`${base}/api/threads/${note.id}/status`, {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ status: 'verified', actor: 'agent' }),
+  });
+  assert.equal(refused.status, 400);
+  assert.match((await refused.json()).error, /named human/);
+  const nameless = await fetch(`${base}/api/threads/${note.id}/status`, {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ status: 'verified' }),
+  });
+  assert.equal(nameless.status, 400);
 });
 
 test('OPTIONS preflight answers CORS and Private Network Access', async () => {
