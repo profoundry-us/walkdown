@@ -89,3 +89,40 @@ replies:
       human] now; and whether a code-change expiry applies to human verdicts too,
       which risks burying him unless it is scoped to code that plausibly touches
       the rule - a harder problem than it sounds."
+  - author: topher
+    created: 2026-08-25T20:45:00Z
+    body: "Settling the environments question, and deliberately smaller than
+      where the discussion went. Rules are verified per environment - I want to
+      read 'the walkdown worked on dev' and '34 of 36 rules on review app
+      12345'. Old runs are never deleted, so we need to track that a run is
+      valid for one URL. If the review app changes, force a fresh walkdown of
+      all the rules. We considered letting a new address inherit part of an
+      older one's results - features X, Y and Z carried from review-app-1 while
+      only B, C and D are retested on review-app-2 - and we are NOT building
+      that. In general there is one review app per blueprint; work different
+      enough to need another gets its own blueprint. Keep it simple: invalidate
+      previous runs when the URL changes."
+  - author: agent
+    created: 2026-08-25T20:50:00Z
+    body: "Built, and it needed no schema change - docs/05-runs-ledger.md already
+      promised this ('target + base_url: which system was verified ... what makes
+      multiple verification runs against different URLs a first-class concept'),
+      and every run header already carried base_url. Derivation was throwing it
+      away. Two fixes in lib/status.js: cells are now filled only by runs made
+      against the address their target currently points at, and walkdown verdicts
+      are keyed by rule AND target instead of by rule alone. That second one was
+      a real bug - a walkdown on staging silently overwrote the verdict from a
+      walkdown on dev, so status.derived.latest-wins was claiming 'targets never
+      bleed into each other' while they did. Recorded as two new rules,
+      status.derived.verdict-belongs-to-a-place and
+      status.derived.addressless-runs-count, both check-verified. Verified live:
+      pointing the local target at a new URL turns 63 agent passes and 14 human
+      passes into never, with no run file touched; pointing it back restores them
+      exactly. A run with NO base_url is taken at face value - it cannot be shown
+      to belong elsewhere, the same courtesy the ledger extends to a result with
+      no statement_hash - which is what keeps unit-test runners working, since
+      the node:test reporter records no address while the Playwright one does.
+      Still open from earlier in this thread and untouched by this change: the
+      fourteen false-green checks claims, and whether a code change (git_sha,
+      written but still unread) should expire a verdict at an address that has
+      not moved."

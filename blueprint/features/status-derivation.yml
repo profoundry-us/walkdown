@@ -17,6 +17,34 @@ stories:
         statement: A pass recorded against an older wording of the rule renders as stale, never as passing.
         verify: [checks]
 
+      - id: status.derived.verdict-belongs-to-a-place
+        origin: thread:q-0070
+        statement: A verdict counts only for the address it was made against - every run records the base_url it ran on, and a target fills its cells only from runs made against where that target currently points, so aiming a target at a new system empties its evidence and asks for the walkdown again rather than inheriting a pass earned somewhere that no longer exists.
+        verify: [checks]
+        steps:
+          given:
+            - A ledger holding passes recorded against the address https://pr-1.review.app
+          when:
+            - The target is pointed at https://pr-2.review.app instead
+          then:
+            - Every rule verified only at the old address reads as never verified, not as passing
+            - No run file is edited or deleted - the ledger stays append-only
+            - Pointing the target back restores the earlier evidence unchanged
+          statement_hash: sha256:0a32ad4665d0
+
+      - id: status.derived.addressless-runs-count
+        origin: thread:q-0070
+        statement: A run that recorded no base_url is taken at face value, because it cannot be shown to belong to a system other than this one - the same courtesy already extended to a result carrying no statement_hash.
+        verify: [checks]
+        steps:
+          given:
+            - A run record carrying no address, such as a unit-test runner's
+          when:
+            - Status is derived for a target that has an address configured
+          then:
+            - That run still fills its cells rather than being discarded
+          statement_hash: sha256:f14146c27ed9
+
       - id: status.derived.human-tier-distinct
         origin: prd
         statement: An agent verdict never satisfies a human verify requirement; only a human walkdown does.

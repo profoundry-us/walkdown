@@ -8,9 +8,9 @@ const STATEMENT = 'The visitor can do the thing.';
 // a recorded statement hash to walkdown's stale-check scanner
 const BOGUS_HASH = 'sha256:' + '0'.repeat(12);
 
-function blueprint({ runs = [], threads = [], verify = ['checks'], environments } = {}) {
+function blueprint({ runs = [], threads = [], verify = ['checks'], environments, targets } = {}) {
   return {
-    config: { runner: { targets: { local: {}, staging: {} } } },
+    config: { runner: { targets: targets ?? { local: {}, staging: {} } } },
     features: [
       {
         file: 'features/demo.yml',
@@ -212,4 +212,54 @@ test('a build verdict flips built; an approval goes stale when the statement mov
       run_id: 'r-stale', results: [{ rule: 'demo.main.thing', status: 'approved', statement_hash: BOGUS_HASH }] }],
   }));
   assert.equal(stale.rows[0].human.state, 'stale');
+});
+
+
+/*
+ * A verdict is about a place. These fix the rule that a pass earned against one
+ * address is not evidence about a different one - the case that matters is a
+ * review app being replaced, where inheriting the old verdicts would quietly
+ * report a system nobody has looked at as verified.
+ */
+const at = (run, baseUrl) => ({ ...run, base_url: baseUrl });
+
+test('a verdict counts only at the address it was made against @rule:status.derived.verdict-belongs-to-a-place', () => {
+  const runs = [
+    at(walkdownRun('2026-01-01T00:00:00Z', 'agent', 'pass'), 'https://pr-1.review.app'),
+    at(checksRun('2026-01-01T00:00:00Z', 'local', 'pass'), 'https://pr-1.review.app'),
+  ];
+  const here = { local: { base_url: 'https://pr-1.review.app' } };
+  const moved = { local: { base_url: 'https://pr-2.review.app' } };
+
+  const before = deriveStatus(blueprint({ runs, verify: ['checks', 'agent'], targets: here })).rows[0];
+  assert.equal(before.cells.local.state, 'pass');
+  assert.equal(before.agent.state, 'pass');
+
+  // Same ledger, same files - only the address the target points at moved.
+  const after = deriveStatus(blueprint({ runs, verify: ['checks', 'agent'], targets: moved })).rows[0];
+  assert.equal(after.cells.local.state, 'never', 'checks earned elsewhere must not fill this target');
+  assert.equal(after.agent.state, 'never', 'a walkdown of another system is not a walkdown of this one');
+
+  // Nothing was consumed: aiming back restores it, because the ledger is history.
+  const back = deriveStatus(blueprint({ runs, verify: ['checks', 'agent'], targets: here })).rows[0];
+  assert.equal(back.agent.state, 'pass');
+});
+
+test('a run with no recorded address is taken at face value @rule:status.derived.addressless-runs-count', () => {
+  const runs = [walkdownRun('2026-01-01T00:00:00Z', 'agent', 'pass')]; // no base_url, as a unit-test runner writes
+  const row = deriveStatus(
+    blueprint({ runs, verify: ['agent'], targets: { local: { base_url: 'https://pr-2.review.app' } } })
+  ).rows[0];
+  assert.equal(row.agent.state, 'pass');
+});
+
+test('a walkdown on one target does not answer for another @rule:status.derived.latest-wins', () => {
+  const runs = [
+    { ...walkdownRun('2026-01-02T00:00:00Z', 'agent', 'pass'), target: 'staging' },
+  ];
+  // The verdict was made on staging; local has never been judged.
+  const local = deriveStatus(blueprint({ runs, verify: ['agent'] }), { target: 'local' }).rows[0];
+  const staging = deriveStatus(blueprint({ runs, verify: ['agent'] }), { target: 'staging' }).rows[0];
+  assert.equal(local.agent.state, 'never');
+  assert.equal(staging.agent.state, 'pass');
 });
