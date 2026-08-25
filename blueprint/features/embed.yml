@@ -85,6 +85,7 @@ stories:
           when:
             - Open a pin form, look at a pin, look at the badge
           then:
+            - A pin is drawn as a map marker - a filled pin whose tip is on the spot it marks - carrying its state in its colour and its kind in the disc at its head
             - They wear the same blueprint theme as the panel, from the same stylesheet, not a hand-rolled lookalike
             - The host page's own buttons, headings and form controls are untouched
             - Everything with a surface of its own lives in a shadow root; only what must style the host's own elements - what a pinnable thing looks like under the cursor - is added to the page
@@ -139,6 +140,23 @@ stories:
             - It opens away from whatever edge the pin is near - down near the top, up near the bottom, and towards the side with the room - so it is never half off the surface
             - Clicking it still opens the thread's own screen, wherever you were
           statement_hash: sha256:50dfb40b9f83
+
+      - id: embed.pin.form-at-the-spot
+        origin: walkdown
+        statement: The pin form opens at the spot that was clicked - just below it, or just above when the spot is near the bottom of the surface - and a placeholder pin stands on that spot while the form is open, so what you are writing about stays in view and where the pin will land is never in doubt.
+        verify: [agent, human]
+        screens: [review]
+        steps:
+          given:
+            - Pin mode on, over an element tall enough that its foot is far from its head
+          when:
+            - Click a spot near the top of it, and then a spot near the bottom of the surface
+          then:
+            - The form opens just under the first spot, not at the foot of the element it landed on
+            - Near the bottom it opens above the spot instead, so it is never half off the surface, and it never runs off the side
+            - A placeholder pin marks the spot the whole time the form is open, and changes its mark when the form switches between note and question
+            - Cancelling or pressing Escape takes the placeholder with the form; filing replaces it with the real pin in the same place
+          statement_hash: sha256:5bb13509dc3b
 
       - id: embed.pin.form-is-chrome
         origin: thread:n-0004
