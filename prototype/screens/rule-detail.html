@@ -103,8 +103,10 @@
           <div class="mb-1 text-[10px] uppercase tracking-widest opacity-40">Threads</div>
           <!-- A thread reads as a message with replies under it: face, name,
                time, what was said, then the people in it and the way in. The
-               reply count is the door - it opens the thread's own screen. -->
-          <div class="wire border-l-4 border-l-warning px-2 py-2" data-testid="detail.threads">
+               reply count is the door - it opens the thread's own screen.
+               Threads share the pane's own surface, divided by a hairline: no
+               cards, no coloured rails. What waits on you is said in words. -->
+          <div class="-mx-3" data-testid="detail.threads"><div class="border-t border-dashed border-base-content/15 px-3 py-2">
             <div class="msg">
               <div class="ava" style="background:#7c6f9b">TF</div>
               <div>
@@ -126,7 +128,7 @@
                 </button>
               </div>
             </div>
-          </div>
+          </div></div>
         </div>
       </div>
     </aside>

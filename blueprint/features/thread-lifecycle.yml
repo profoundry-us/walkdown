@@ -62,6 +62,7 @@ stories:
             - Open it in the panel, and beside its pin
           then:
             - Collapsed, a thread is that first message - face, name, time, what was said - with the people in it, the number of replies and when it was last touched underneath
+            - The threads on a rule share one surface, divided by hairlines rather than boxed into cards or tinted with coloured rails - what waits on you is said in words, in the status and the unread count
             - Every message carries the same shape - who, when, what - and the opening note is not treated as a different kind of thing
             - A second message from the same author minutes later drops the repeated name and tile, and its time appears on hover
             - Line breaks written into a message survive, and a day boundary is drawn between messages
@@ -130,6 +131,8 @@ stories:
           then:
             - The panel slides one screen to the right, and the thread has the whole column - stream, and a composer pinned at the foot
             - Back slides the same way it came and names its destination - the rule, or the rules list for a pin attached to none
+            - Ending a thread from its screen - verifying, waiving, incorporating - slides back to the rule and says what happened, rather than emptying the screen and stranding the reader on a blank one
+            - The screen is never a dead end - a thread that is gone still leaves the way back
             - The surface under review does not move - reading a conversation is not a walkdown step
             - A pin clicked on the page opens the same screen, wherever you were
           statement_hash: sha256:9971d7aaef65

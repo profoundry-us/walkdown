@@ -992,6 +992,10 @@
       .wd-msg.pending { opacity: .55; }
       .wd-msg.failed .wd-at { opacity: 1; color: oklch(72% 0.17 22); }
       .wd-ref { font-size: inherit; }
+      /* Threads share one surface, like messages in a channel: no card, no rail,
+         just a hairline between them and a lift under the cursor. */
+      .wd-row + .wd-row { border-top: 1px solid color-mix(in oklch, currentColor 10%, transparent); }
+      .wd-row:hover { background: color-mix(in oklch, currentColor 5%, transparent); }
       /* The collapsed thread: one message, then the way into the rest of it. */
       .wd-preview { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
       .wd-replies { display: flex; align-items: center; gap: .35rem; margin-top: .2rem;
@@ -1148,6 +1152,8 @@
   // ---- render ---------------------------------------------------------------
   function render() {
     if (!data) return;
+    // The thread screen without a thread is not a screen.
+    if (view === 'thread' && !openThread) view = selected ? 'detail' : 'list';
     // render() rebuilds the panel wholesale, which resets scroll. Clicking a
     // control near the bottom of a long thread would otherwise throw you back
     // to the top — so note where each pane was and put it back.
@@ -1601,7 +1607,8 @@
           <div class="${LBL} mb-1.5">Verify</div>
           <div class="text-[13px]">${esc(r.verify.join(', '))}</div>
         </div>
-        ${threads.length ? `<div><div class="${LBL} mb-1.5">Threads</div>
+        ${threads.length ? `<div class="-mx-3.5">
+          <div class="${LBL} mb-0.5 px-3.5">Threads</div>
           ${threads.map(threadCard).join('')}</div>` : ''}
       </div>`;
   }
@@ -1629,11 +1636,12 @@
    * slides the whole conversation in beside the rule.
    */
   function threadCard(t) {
-    const waiting = t.status === 'addressed' || t.status === 'answered';
     const who = t.author || 'someone';
     const unread = unreadCount(t);
-    return `<div class="mb-1.5 rounded-r-box border-l-3 px-2.5 py-2 ${
-      waiting ? 'border-l-warning bg-warning/10' : 'border-l-base-300 bg-base-200'}">
+    // No card, no rail: threads share one surface with the pane, the way
+    // messages share a channel. What is waiting on you is said in words - the
+    // status chip and the unread count - rather than by tinting a box.
+    return `<div class="wd-row px-3.5 py-2">
       <div class="wd-msg">
         ${MSG.avatar(who)}
         <div class="wd-col min-w-0">
@@ -1663,7 +1671,14 @@
    */
   function threadPane() {
     const t = (data?.threads ?? []).find((x) => x.id === openThread);
-    if (!t) return '';
+    // Whatever became of the thread — ended, reloaded away, never there — this
+    // screen is never a dead end.
+    if (!t) return `
+      <div class="flex items-center px-2 pt-2">
+        <button class="wdp-thread-back btn btn-ghost btn-xs text-primary">← ${
+          esc(selected ? shortName(selected) : 'All rules')}</button>
+      </div>
+      <div class="px-3.5 pt-1 text-[12.5px] opacity-60">That thread is no longer open here.</div>`;
     const row = t.anchor?.rule ? data.rows.find((r) => r.rule === t.anchor.rule) : null;
     const sc = screenById(t.anchor?.screen);
     const where = [
@@ -1819,7 +1834,14 @@
     if (await threadPost(`/api/threads/${id}/status`,
         { status, actor, reason: needsReason ? text : undefined })) {
       threadNote = '';
-      if (['verified', 'waived', 'incorporated'].includes(status)) openThread = null;
+      // A thread that ends leaves the active list, so its screen has nothing
+      // left to show — slide back to where it came from rather than emptying
+      // the pane and stranding the reader on a blank one.
+      if (TERMINAL.includes(status)) {
+        openThread = null;
+        if (view === 'thread') view = selected ? 'detail' : 'list';
+        toast(`<b>${esc(id)}</b> ${esc(status)} — it leaves the rule’s active threads.`);
+      }
       await load();
     }
   }
