@@ -1,0 +1,27 @@
+id: n-0073
+kind: note
+author: topher
+created: 2026-08-25T23:05:00Z
+anchor:
+  rule: panel.rules.takes-you-there
+  screen: review
+status: addressed
+body: "If the prototype page does not change, it should not reload. I just
+  loaded a new rule that has the same page and it changed the prototype, which
+  forced a reload."
+replies:
+  - author: agent
+    created: 2026-08-25T23:20:00Z
+    body: "Real, and the cause was walkdown's own bookkeeping. The panel appends
+      a `bp` parameter to a prototype address so the page can tell which
+      blueprint it belongs to. goTo then compared the address it wanted against
+      the one the frame was showing as raw strings - and the first time it
+      asked for a screen, the copy with `bp` did not match the copy without it,
+      so the same page read as a different one and the frame reloaded. The step
+      under this rule has always said a screen you are already on is not
+      re-navigated to; it was true of the screen-id check on the rule-opening
+      path and not true of the address check underneath it. Addresses are now
+      compared as page identity, with `bp` stripped, so every caller benefits -
+      the screens picker had no screen-id guard at all and was reloading on
+      every pick. Covered by a browser check that counts real frame
+      navigations, which I verified fails without the fix before recording it."

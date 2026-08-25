@@ -294,3 +294,38 @@ test(
     expect(page.url(), 'a script tag delivery must stay put').toContain('extension.html');
   }
 );
+
+test(
+  'a screen you are already on is not navigated to again',
+  { tag: '@rule:panel.rules.takes-you-there' },
+  async ({ page }) => {
+    const framed = `${WD_ORIGIN}/prototype/screens/review.html`;
+    const url = FIXTURE.replace('docked.html', 'extension.html') +
+      `&build=stale&frame=${encodeURIComponent(framed)}`;
+
+    // Count real loads of the framed page. A reload IS a navigation, so this
+    // is the only thing that tells "moved" apart from "re-fetched".
+    let loads = 0;
+    page.on('framenavigated', (f) => {
+      if (f !== page.mainFrame() && f.url().includes('review.html')) loads++;
+    });
+
+    await page.goto(url);
+    await expect(page.getByTestId('panel.bar')).toBeVisible();
+    await expect.poll(() => loads).toBeGreaterThan(0);   // the first load
+    const settled = loads;
+
+    // Ask for the screen the frame is already showing. The panel should
+    // recognise it is already there and do nothing: re-navigating throws away
+    // scroll position and form state, and on a slow app you watch it rebuild
+    // for nothing.
+    await page.getByTestId('panel.tabs').getByText(/Screens/i).click();
+    const row = page.locator('[data-screen="review"]').first();
+    await expect(row).toBeVisible();
+    await row.click();
+
+    // Give a stray navigation time to appear before declaring there was none.
+    await page.waitForTimeout(800);
+    expect(loads, 'the frame reloaded for a screen it was already on').toBe(settled);
+  }
+);

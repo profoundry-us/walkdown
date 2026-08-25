@@ -16,6 +16,9 @@
       // The extension's content script runs on every page, so walkdown comes
       // back after a navigation. `reinjects=0` pretends to be a script tag.
       reinjects: q.get('reinjects') !== '0',
+      // With a frame url the panel is the FRAMED delivery: it owns the frame
+      // and the application under review lives inside it.
+      ...(q.get('frame') ? { frame: { url: q.get('frame') } } : {}),
     };
     const s = document.createElement('script');
     s.src = `${WD}/panel.js`;
