@@ -66,6 +66,14 @@ const yellow = (s) => (tty ? `\x1b[33m${s}\x1b[0m` : s);
 const green = (s) => (tty ? `\x1b[32m${s}\x1b[0m` : s);
 const dim = (s) => (tty ? `\x1b[2m${s}\x1b[0m` : s);
 
+/*
+ * How a command finishes. process.exit() tears the process down before Node
+ * has flushed stdout, so a large `--json` payload down a pipe is truncated at
+ * the pipe's buffer - 128KB, which a real blueprint passes without warning.
+ * Setting the code lets the write drain and the process end on its own.
+ */
+const end = (code) => { process.exitCode = code; };
+
 function loadOrExit(dirOpt) {
   const dir = dirOpt ?? findBlueprintDir();
   if (!dir) {
@@ -90,7 +98,7 @@ function cmdLint(args) {
 
   if (values.json) {
     console.log(JSON.stringify({ findings, summary }, null, 2));
-    process.exit(exitCode);
+    return end(exitCode);
   }
 
   console.log(dim(`walkdown lint — ${blueprint.dir}\n`));
@@ -108,7 +116,7 @@ function cmdLint(args) {
   const counts = `${s.rules} rules, ${s.screens} screens, ${s.anchors} anchors, ${s.threads} threads, ${s.runs} runs`;
   const verdict = s.errors ? red(`${s.errors} error(s)`) : green('0 errors');
   console.log(`${s.errors ? red('✗') : green('✓')} ${counts} — ${verdict}, ${s.warnings} warning(s)`);
-  process.exit(exitCode);
+  return end(exitCode);
 }
 
 function cmdHash(args) {
@@ -123,7 +131,7 @@ function cmdHash(args) {
   for (const r of rows) console.log(`  ${mark[r.status]} ${r.status.padEnd(8)} ${r.rule} ${dim(r.expected)}`);
   if (values.write) console.log(`\n${changedFiles} file(s) updated`);
   else if (exitCode) console.log(`\n${red('stale/missing hashes')} — run \`walkdown hash --write\``);
-  process.exit(exitCode);
+  return end(exitCode);
 }
 
 /** "n-0001 addressed, q-0002 open" up to two threads; beyond that "n-0001 addressed +2".
@@ -217,7 +225,7 @@ function cmdStatus(args) {
 
   if (values.json) {
     console.log(JSON.stringify({ targets, rows, drift: derived.drift, attention: derived.attention, drafts, activeThreads: listThreads(blueprint) }, null, 2));
-    process.exit(rows.some((r) => r.verdict === 'fail') ? 1 : 0);
+    return end(rows.some((r) => r.verdict === 'fail') ? 1 : 0);
   }
 
   const verdictMark = { pass: green('✓'), fail: red('✗'), pending: dim('○') };
@@ -293,7 +301,7 @@ function cmdStatus(args) {
       );
     if (active.length > 6) console.log(dim(`  +${active.length - 6} more — walkdown threads`));
   }
-  process.exit(counts.fail ? 1 : 0);
+  return end(counts.fail ? 1 : 0);
 }
 
 const STATUS_COLOR = { open: yellow, answered: yellow, addressed: green, incorporated: green, verified: green, waived: dim };
