@@ -126,3 +126,39 @@ replies:
       fourteen false-green checks claims, and whether a code change (git_sha,
       written but still unread) should expire a verdict at an address that has
       not moved."
+  - author: topher
+    created: 2026-08-25T20:55:00Z
+    body: "Decided on the false greens: fail them loudly. Do not quietly re-tier
+      them to agent and human - leave the checks demand standing so the gap is
+      visible until a browser harness covers it."
+  - author: agent
+    created: 2026-08-25T21:00:00Z
+    body: "Done, judged rule by rule rather than stripped wholesale, against the
+      test that a check may only claim a rule whose surface it actually
+      exercises. Twelve tags removed, two kept. KEPT:
+      panel.delivery.one-implementation, whose check compares lib/viewer against
+      extension/vendor byte for byte - that IS the rule, and the surface is the
+      repository; and panel.signoff.approved-recorded, whose substance is the
+      shape of the record the ledger gains. The most instructive strip was
+      embed.pin.right-project: the rule says a pin files against the project the
+      page belongs to, and the check passed ?bp= explicitly, telling the server
+      the answer. The resolution it claimed to verify does not exist anywhere -
+      it is the same missing page-to-blueprint routing that makes the panel open
+      the wrong blueprint on localhost:4310. A false green was standing in for an
+      unbuilt feature. Removing the tags was not enough on its own: the ledger is
+      append-only, so the old passes still won and status still read verified. I
+      appended a checks run recording all twelve as blocked, each with the reason
+      its former check was not evidence, which is what a checks run honestly
+      finds today. They now read blocked with the reason beside the agent verdict
+      rather than passing. walkdown lint independently reports all twelve under
+      coverage. Recorded the governing principle as
+      ownership.evidence.same-surface. Two things left undone and deliberately
+      not smuggled in: the attention queue routes these to Topher as judge, when
+      what they need is an agent writing the check - there is no agent-facing
+      item for a rule that demands checks and has none; and the ledger cannot yet
+      notice on its own that the check behind a pass is gone, though every result
+      records the refs that would make that possible - embed.pin.anchored-target's
+      old pass still cites test/serve.test.js:71, which no longer tags it. That
+      staleness rule is the durable fix and would have made the blocked run
+      unnecessary."
+

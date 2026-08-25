@@ -1,3 +1,17 @@
+/*
+ * Server tests. Deliberately NOT tagged with panel.* or embed.* rule ids.
+ *
+ * They exercise the HTTP surface the panel and the embed talk to, which is a
+ * real thing worth testing - but a rule whose statement is about hovering,
+ * placing, drawing or displaying is not verified by handing the server an
+ * answer already filled in and checking the filing. Those tags were removed on
+ * 2026-08-25 (see thread q-0070): a check must exercise the same surface the
+ * rule describes, and until a browser harness exists those rules read as
+ * unverified, which is the honest state.
+ *
+ * If you are here to make a red rule green, write the browser check. Do not
+ * re-tag one of these.
+ */
 import assert from 'node:assert/strict';
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -68,7 +82,7 @@ test('viewer, embed.js, and prototype static files are served', async () => {
   assert.equal((await fetch(`${base}/prototype/../walkdown.yml`)).status, 404);
 });
 
-test('POST /api/threads writes a thread file; screen resolved from URL @rule:embed.pin.anchored-target', async () => {
+test('POST /api/threads writes a thread file; screen resolved from URL', async () => {
   const res = await (await fetch(`${base}/api/threads`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
@@ -84,7 +98,7 @@ test('POST /api/threads writes a thread file; screen resolved from URL @rule:emb
   assert.equal(onDisk.anchor.element, 'home.cta');
 });
 
-test('a pin with no anchored element is kept by position @rule:embed.pin.coordinate-fallback', async () => {
+test('a pin with no anchored element is kept by position', async () => {
   const res = await (await fetch(`${base}/api/threads`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
@@ -138,7 +152,7 @@ test('a pin with no anchored element is kept by position @rule:embed.pin.coordin
   assert.equal(junkDisk.anchor.position, undefined);
 });
 
-test('a pin records the surface it was placed on @rule:embed.pin.both-surfaces', async () => {
+test('a pin records the surface it was placed on', async () => {
   const pin = (anchor) => fetch(`${base}/api/threads`, {
     method: 'POST', headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ kind: 'note', body: 'On this surface.', author: 'tester', anchor }),
@@ -156,7 +170,7 @@ test('a pin records the surface it was placed on @rule:embed.pin.both-surfaces',
   assert.equal((await onDisk(bogus.id)).anchor.surface, undefined);
 });
 
-test('a pin records the viewport it was placed at @rule:embed.pin.viewport-recorded', async () => {
+test('a pin records the viewport it was placed at', async () => {
   const res = await (await fetch(`${base}/api/threads`, {
     method: 'POST', headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
@@ -175,7 +189,7 @@ test('a pin records the viewport it was placed at @rule:embed.pin.viewport-recor
   assert.equal(parse(readFileSync(join(bp, 'threads', `${noWidth.id}.yml`), 'utf8')).anchor.viewport, undefined);
 });
 
-test('positions are stored in the surface coordinate space given @rule:embed.pin.surface-coordinates', async () => {
+test('positions are stored in the surface coordinate space given', async () => {
   // The server persists exactly the surface-space point it was handed; nothing
   // about the viewer's panes, zoom, or window may enter the stored value.
   const place = (position, viewport) => fetch(`${base}/api/threads`, {
@@ -195,7 +209,7 @@ test('positions are stored in the surface coordinate space given @rule:embed.pin
   assert.equal(n.viewport.width, 390);
 });
 
-test('the blueprint payload carries a default actor @rule:panel.identity.default-actor', async () => {
+test('the blueprint payload carries a default actor', async () => {
   const payload = await (await fetch(`${base}/api/blueprint`)).json();
   assert.ok(payload.identity?.actor, 'an identity must always be offered');
   assert.match(payload.identity.source, /^(git|os)$/);
@@ -206,7 +220,7 @@ test('the blueprint payload carries a default actor @rule:panel.identity.default
   assert.ok(here.actor.length > 0);
 });
 
-test('POST /api/walkdowns writes a hash-stamped human run record @rule:panel.walkdown.records-to-ledger', async () => {
+test('POST /api/walkdowns writes a hash-stamped human run record', async () => {
   const res = await (await fetch(`${base}/api/walkdowns`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
@@ -237,7 +251,7 @@ test('a sign-off records approved with its hash and threads @rule:panel.signoff.
   assert.deepEqual(record.results[0].threads, ['n-0001']);
 });
 
-test('the blueprint payload names the panel build it ships @rule:panel.delivery.stale-copy-says-so', async () => {
+test('the blueprint payload names the panel build it ships', async () => {
   const { createHash } = await import('node:crypto');
   const payload = await (await fetch(`${base}/api/blueprint`)).json();
   const shipped = createHash('sha256')
@@ -246,7 +260,7 @@ test('the blueprint payload names the panel build it ships @rule:panel.delivery.
   assert.equal(payload.panelHash, shipped);
 });
 
-test('a session drafts to disk and finishing seals it into one run @rule:panel.walkdown.draft-on-disk', async () => {
+test('a session drafts to disk and finishing seals it into one run', async () => {
   const draftFile = join(bp, 'drafts', 'local.json');
   const post = (body) => fetch(`${base}/api/draft`, {
     method: 'POST', headers: { 'content-type': 'application/json' },
@@ -379,7 +393,7 @@ test('multi-project: sibling blueprints are discovered and ?bp= switches, member
   assert.equal((await fetch(`${base}/api/blueprint?bp=../../etc`)).status, 404);
 });
 
-test('a pin files against the page\u2019s own project, not the server\u2019s default @rule:embed.pin.right-project', async () => {
+test('a pin files against the page\u2019s own project, not the server\u2019s default', async () => {
   // The sibling project is created by the multi-project test above; this one
   // is about where a WRITE lands, which is the part a mis-routed pin gets wrong.
   mkdirSync(join(root, 'sibling', 'blueprint', 'threads'), { recursive: true });
@@ -399,7 +413,7 @@ test('a pin files against the page\u2019s own project, not the server\u2019s def
     assert.notEqual(parse(readFileSync(inDefault, 'utf8')).body, 'Belongs to the sibling.');
 });
 
-test('the panel refuses to accept work under the agent\u2019s name @rule:panel.threads.claim-never-accept', async () => {
+test('the panel refuses to accept work under the agent\u2019s name', async () => {
   const note = await (await fetch(`${base}/api/threads`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },

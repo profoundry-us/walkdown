@@ -1,0 +1,83 @@
+{
+  "run_id": "2026-08-25T20-59-24Z-local-01",
+  "created": "2026-08-25T20:59:24Z",
+  "actor": "agent",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "84bdbd0-dirty",
+  "blueprint_sha": "84bdbd0-dirty",
+  "results": [
+    {
+      "rule": "embed.pin.anchored-target",
+      "status": "blocked",
+      "statement_hash": "sha256:6feaf28d3505",
+      "reason": "The claimed check POSTed a ready-made anchor to /api/threads and asserted the file appeared. Hovering, placing, drawing at the spot and following the element are the rule, and none were exercised. Untagged 2026-08-25 per q-0070; awaiting the browser harness."
+    },
+    {
+      "rule": "embed.pin.right-project",
+      "status": "blocked",
+      "statement_hash": "sha256:399853aef960",
+      "reason": "The claimed check passed ?bp= explicitly, telling the server the answer. Resolving which project a page belongs to is the rule, and that routing is not implemented at all. Untagged 2026-08-25 per q-0070; awaiting the browser harness."
+    },
+    {
+      "rule": "embed.pin.both-surfaces",
+      "status": "blocked",
+      "statement_hash": "sha256:77fdab028ac1",
+      "reason": "The claimed check asserted a surface value the caller supplied. That the same anchors exist in both surfaces, and that a pin can be placed on either, was never exercised. Untagged 2026-08-25 per q-0070; awaiting the browser harness."
+    },
+    {
+      "rule": "embed.pin.viewport-recorded",
+      "status": "blocked",
+      "statement_hash": "sha256:6971846eb2cc",
+      "reason": "The claimed check stored a viewport handed to it. Whether the embed measures the viewport it was placed at is the rule. Untagged 2026-08-25 per q-0070; awaiting the browser harness."
+    },
+    {
+      "rule": "embed.pin.surface-coordinates",
+      "status": "blocked",
+      "statement_hash": "sha256:7d33bd0c80b2",
+      "reason": "The claimed check stored coordinates given to it. Computing them in the surface space, and pins holding their spot across resize, fade and swap, is the rule. Untagged 2026-08-25 per q-0070; awaiting the browser harness."
+    },
+    {
+      "rule": "embed.pin.coordinate-fallback",
+      "status": "blocked",
+      "statement_hash": "sha256:3c6fb006c94b",
+      "reason": "The claimed check stored a position-only pin. That a pin can be dropped where no anchor sits, without being blocked, is the rule. Untagged 2026-08-25 per q-0070; awaiting the browser harness."
+    },
+    {
+      "rule": "panel.delivery.stale-copy-says-so",
+      "status": "blocked",
+      "statement_hash": "sha256:124fa1fddaac",
+      "reason": "The claimed check asserted the server publishes a build hash. The panel comparing it and saying plainly that it has gone stale is the rule. Untagged 2026-08-25 per q-0070; awaiting the browser harness."
+    },
+    {
+      "rule": "panel.threads.claim-never-accept",
+      "status": "blocked",
+      "statement_hash": "sha256:7c4e1e2d1562",
+      "reason": "The claimed check exercised the server endpoint, which is already covered honestly by threads.lifecycle.claim-never-accept. The panel obeying, and asking for the reason, is this rule. Untagged 2026-08-25 per q-0070; awaiting the browser harness."
+    },
+    {
+      "rule": "panel.walkdown.records-to-ledger",
+      "status": "blocked",
+      "statement_hash": "sha256:6cc28278f4a6",
+      "reason": "The claimed check POSTed to /api/walkdowns directly. Finishing from the panel, and discarding recording nothing, is the rule. Untagged 2026-08-25 per q-0070; awaiting the browser harness."
+    },
+    {
+      "rule": "panel.walkdown.draft-on-disk",
+      "status": "blocked",
+      "statement_hash": "sha256:cfb0ee61cad3",
+      "reason": "The claimed check drove the draft API. Verdicts being written as they are given, and a sitting surviving the browser, is the rule. Untagged 2026-08-25 per q-0070; awaiting the browser harness."
+    },
+    {
+      "rule": "panel.identity.default-actor",
+      "status": "blocked",
+      "statement_hash": "sha256:d251c7d97967",
+      "reason": "The claimed check asserted the payload carries a default actor. The field arriving filled in and staying editable is the rule. Untagged 2026-08-25 per q-0070; awaiting the browser harness."
+    },
+    {
+      "rule": "panel.signoff.spec-pair-derived",
+      "status": "blocked",
+      "statement_hash": "sha256:d195df6ea5d8",
+      "reason": "The claimed checks exercised derivation in lib/status.js. Deriving the right pair is not drawing it; which pair the panel shows is the rule. Untagged 2026-08-25 per q-0070; awaiting the browser harness."
+    }
+  ]
+}

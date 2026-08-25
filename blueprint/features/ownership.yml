@@ -11,3 +11,21 @@ stories:
         origin: prd
         statement: An undesigned screen with no open design-request thread is flagged by lint; filing the request clears it.
         verify: [checks]
+
+  - id: ownership.evidence
+    title: A check is evidence only for what it actually exercises
+    statement: As a team, we trust the checks column because a green cell means the described behaviour was exercised, not that something adjacent to it was.
+    rules:
+      - id: ownership.evidence.same-surface
+        origin: thread:q-0070
+        statement: A check may only claim a rule whose behaviour it actually exercises - a rule describing what the panel or the embed does is not verified by a test that drives the server they talk to, because such a test passes in full while the described surface is broken, which makes the cheapest and most-trusted tier the one most able to lie.
+        verify: [human]
+        steps:
+          given:
+            - A rule whose statement describes something a person sees or does
+          when:
+            - A check is written and tagged with that rule id
+          then:
+            - The check drives the surface the statement describes, not a layer beneath it
+            - If it cannot, the rule keeps demanding checks and reads as unverified rather than borrowing a neighbour's pass
+          statement_hash: sha256:a77756271587

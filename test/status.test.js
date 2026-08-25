@@ -1,3 +1,13 @@
+/*
+ * Derivation tests over lib/status.js. These legitimately carry status.* and
+ * threads.* rule tags - the ledger's own laws are exactly what they exercise.
+ *
+ * What they must NOT carry is a panel.* tag. The verdict pair a rule offers is
+ * derived here, but "which pair the panel shows" is a claim about the panel,
+ * and deriving the right answer is not the same as drawing it. Those tags were
+ * removed on 2026-08-25 (thread q-0070): a check must exercise the same surface
+ * the rule describes.
+ */
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { formatHash } from '../lib/hash.js';
@@ -175,7 +185,7 @@ test('open threads listed; terminal ones excluded', () => {
   assert.deepEqual(rows[0].threads, [{ id: 'n-1', status: 'addressed' }]);
 });
 
-test('sign-off is not build evidence: approved stays unbuilt and pending, and discharges the queue until built @rule:panel.signoff.spec-pair-derived', () => {
+test('sign-off is not build evidence: approved stays unbuilt and pending, and discharges the queue until built', () => {
   const owed = (attention) =>
     attention.some((a) => a.who === 'human' && a.action === 'judge' && a.rule === 'demo.main.thing');
   const unbuilt = deriveStatus(blueprint({
@@ -203,7 +213,7 @@ test('sign-off is not build evidence: approved stays unbuilt and pending, and di
   assert.equal(owed(built.attention), true);
 });
 
-test('a build verdict flips built; an approval goes stale when the statement moves @rule:panel.signoff.spec-pair-derived', () => {
+test('a build verdict flips built; an approval goes stale when the statement moves', () => {
   const built = deriveStatus(blueprint({ runs: [checksRun('2026-01-02T00:00:00Z', 'local', 'fail')] }));
   assert.equal(built.rows[0].built, true);
   const stale = deriveStatus(blueprint({
