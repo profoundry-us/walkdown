@@ -1,0 +1,91 @@
+id: q-0070
+kind: question
+author: topher
+created: 2026-08-25T16:40:00Z
+anchor: {}
+status: open
+body: "Three things about the verify model, recorded together because they turn
+  out to be one subject. (1) The checks tier is for browser checks. Almost
+  everything walkdown specifies is a user scenario, so a rule about the panel or
+  the embed should be attached to an integration test that drives a browser -
+  that attachment is the whole point of the project. Unit tests over lib/ are
+  separate work and do not belong in the ledger at all. (2) What does walking
+  down a staging or a review app look like, and what are we capturing there? The
+  loop I want is: see what passes and fails, fix, re-judge the failures; have an
+  agent pre-screen everything before I look; and after a change, have an agent
+  re-judge everything that passed the first time to be sure nothing broke. (3)
+  The long-term goal is humans only occasionally in the process - as much of this
+  as possible moves to agents."
+replies:
+  - author: agent
+    created: 2026-08-25T16:40:00Z
+    body: "Confirmed, and it is worse than a misfiling. Fourteen panel.* and
+      embed.* rules currently PASS their checks tier, and every one of them is
+      satisfied by test/serve.test.js or test/status.test.js - server and
+      derivation tests, no browser. embed.pin.anchored-target is the clearest:
+      the statement is about hovering to highlight an anchored element, placing a
+      pin on it, and the pin drawing at the spot and following the element; the
+      check POSTs {anchor: {element: home.cta}} to the API and asserts a YAML
+      file appeared. It hands the server an answer already filled in and verifies
+      the filing. None of the described behaviour is exercised. These are false
+      greens on the cheapest and most-trusted tier. The origin is my own reply on
+      q-0013: I read the missing browser harness as a fact to route around rather
+      than a gap to fill, marked those rules verify: [human], and later sessions
+      claimed checks on them anyway against the wrong tests. The governing
+      principle should be stated once and enforced: A CHECK MUST EXERCISE THE
+      SAME SURFACE THE RULE DESCRIBES."
+  - author: agent
+    created: 2026-08-25T16:40:01Z
+    body: "One qualification on scope. Twelve of the 26 checks-verified rules are
+      neither browser scenarios nor unit tests of internals -
+      threads.lifecycle.claim-never-accept, status.derived.stale-never-passes,
+      status.derived.latest-wins, ownership.drift.design-requests-required and
+      their neighbours. These are the ledger's own laws: an agent may claim work
+      but never accept it; a stale pass is not a pass. They are product behaviour,
+      they are exactly what must not break silently, and no browser will ever
+      reach them. So the split is three ways, not two: browser checks for what a
+      person does, harness checks for what the ledger guarantees, and nothing
+      tracked at all for lib/ internals. The twelve honour the principle above;
+      the fourteen violate it."
+  - author: agent
+    created: 2026-08-25T16:40:02Z
+    body: "Consequence for the staging and review-app question, which is why
+      these are one subject: once UI rules are Playwright checks, walking down a
+      review app is mostly not a walkdown. Point the harness at the URL and most
+      rules judge themselves in a minute. The agent tier then stops being a cheap
+      stand-in for automation we never wrote and becomes what it should be -
+      judgment about what an assertion cannot express, does this look right, does
+      this feel finished. The human sees only the residue. That is the path to
+      humans-only-occasionally, and it runs entirely through the checks fix.
+      Mapping the three scenarios: pass/fail then fix then re-judge is a checks
+      run against that base_url; pre-screening is an agent walkdown scoped to
+      rules Playwright cannot express; the regression sweep is the one that does
+      not work today."
+  - author: agent
+    created: 2026-08-25T16:40:03Z
+    body: "The structural gap behind the regression sweep: git_sha is written
+      into every run record (lib/run-record.js) and never read by anything.
+      Staleness keys on statement_hash alone, so rewording a rule expires its
+      verdict but changing forty commits of code does not. 'Re-judge everything
+      that passed the first time' therefore has nothing to select on - the ledger
+      cannot say that a pass is about a build that no longer exists. Tolerable
+      while a human reviews occasionally and remembers; fatal for agents running
+      the loop unattended, where without it there is no regression sweep at all,
+      only re-judging everything forever. A verdict is a claim about (rule,
+      statement, code, address) and should expire when any of them moves."
+  - author: agent
+    created: 2026-08-25T16:40:04Z
+    body: "Settles the multiple-URLs question from the same session. Targets stay
+      what they are - the small stable set of environments a pass is demanded in
+      (local, staging), each a real column every rule owes, since status.js
+      passes a rule's checks only when every applicable target passes. A REVIEW
+      APP IS AN ADDRESS, NOT A TARGET: a run against one records its environment
+      class plus its actual base_url, which run records already carry. The
+      ephemeral URL never becomes a standing obligation, the evidence outlives
+      the branch, and the App control lists addresses - including ad-hoc ones the
+      panel can hold without editing the blueprint. Two decisions still open for
+      Topher: whether the fourteen false greens fail loudly until the harness
+      covers them (agent recommends yes) or are quietly re-tiered to [agent,
+      human] now; and whether a code-change expiry applies to human verdicts too,
+      which risks burying him unless it is scoped to code that plausibly touches
+      the rule - a harder problem than it sounds."
