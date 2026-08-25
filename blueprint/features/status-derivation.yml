@@ -45,6 +45,21 @@ stories:
             - That run still fills its cells rather than being discarded
           statement_hash: sha256:f14146c27ed9
 
+      - id: status.derived.unbacked-pass-goes-stale
+        origin: thread:q-0070
+        statement: A checks pass survives only while a check still claims the rule - if the suite no longer references it, whether the check was deleted, renamed, or untagged because it never exercised the rule it claimed, the pass renders as stale rather than passing, because an append-only ledger otherwise keeps reporting green long after anything tests it.
+        verify: [checks]
+        steps:
+          given:
+            - A ledger holding a checks pass for a rule
+          when:
+            - The check suite no longer references that rule id
+          then:
+            - The cell reads stale, not passing
+            - Matching is by rule id, so a check moving down its file changes nothing
+            - A caller that supplies no inventory of checks sees the older behaviour, since silence is not proof the suite is empty
+          statement_hash: sha256:ed0482e00322
+
       - id: status.derived.human-tier-distinct
         origin: prd
         statement: An agent verdict never satisfies a human verify requirement; only a human walkdown does.
@@ -56,5 +71,5 @@ stories:
     rules:
       - id: status.attention.blocked-queues
         origin: prd
-        statement: Attention items are split by who is blocked - humans get judge/verify/answer items, agents get address/incorporate items.
+        statement: Attention items are split by who is blocked - humans get judge, verify and answer items; agents get address, incorporate and cover items, cover being a rule that demands checks while no check claims it, which is an agent's work to write and never a person's to judge.
         verify: [checks]

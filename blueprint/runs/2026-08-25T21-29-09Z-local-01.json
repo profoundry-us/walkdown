@@ -1,0 +1,66 @@
+{
+  "run_id": "2026-08-25T21-29-09Z-local-01",
+  "created": "2026-08-25T21:29:09Z",
+  "actor": "topherfangio",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "7b411c0-dirty",
+  "blueprint_sha": "7b411c0-dirty",
+  "results": [
+    {
+      "rule": "embed.pin.anchored-target",
+      "status": "pass",
+      "statement_hash": "sha256:6feaf28d3505",
+      "duration_ms": 1165,
+      "checks": [
+        "checks/embed.spec.js:40"
+      ]
+    },
+    {
+      "rule": "embed.pin.viewport-recorded",
+      "status": "pass",
+      "statement_hash": "sha256:6971846eb2cc",
+      "duration_ms": 555,
+      "checks": [
+        "checks/embed.spec.js:68"
+      ]
+    },
+    {
+      "rule": "embed.pin.coordinate-fallback",
+      "status": "pass",
+      "statement_hash": "sha256:3c6fb006c94b",
+      "duration_ms": 412,
+      "checks": [
+        "checks/embed.spec.js:83"
+      ]
+    },
+    {
+      "rule": "embed.pin.surface-coordinates",
+      "status": "pass",
+      "statement_hash": "sha256:7d33bd0c80b2",
+      "duration_ms": 446,
+      "checks": [
+        "checks/embed.spec.js:99"
+      ]
+    },
+    {
+      "rule": "panel.identity.default-actor",
+      "status": "pass",
+      "statement_hash": "sha256:d251c7d97967",
+      "duration_ms": 566,
+      "checks": [
+        "checks/panel.spec.js:19"
+      ]
+    },
+    {
+      "rule": "panel.walkdown.draft-on-disk",
+      "status": "pass",
+      "statement_hash": "sha256:cfb0ee61cad3",
+      "duration_ms": 1210,
+      "checks": [
+        "checks/panel.spec.js:55"
+      ]
+    }
+  ]
+}

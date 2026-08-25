@@ -7,6 +7,7 @@ import { findBlueprintDir, loadBlueprint } from '../lib/blueprint.js';
 import { listDrafts } from '../lib/draft.js';
 import { runHashCommand } from '../lib/hash-cmd.js';
 import { lint } from '../lib/lint.js';
+import { checkedRuleIds } from '../lib/checks.js';
 import { deriveStatus } from '../lib/status.js';
 import { getThread, listThreads, replyToThread, transitionThread } from '../lib/threads.js';
 
@@ -213,7 +214,10 @@ function cmdStatus(args) {
     allowPositionals: true,
   });
   const blueprint = loadOrExit(values.dir);
-  const derived = deriveStatus(blueprint, { target: values.target });
+  const derived = deriveStatus(blueprint, {
+    target: values.target,
+    checkRefs: checkedRuleIds(blueprint.config, blueprint.projectRoot),
+  });
   const { targets, rows } = derived;
 
   if (positionals[0]) return renderRuleDetail(blueprint, derived, positionals[0], values.json);
@@ -265,6 +269,7 @@ function cmdStatus(args) {
     answer: (i) => `answer ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''}`,
     address: (i) => `address ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — open note`,
     incorporate: (i) => `incorporate ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — answered, fold it into the rule`,
+    cover: (i) => `cover ${i.rule} — demands checks, and no check claims it`,
   };
   for (const [who, title] of [['human', 'NEEDS A HUMAN'], ['agent', 'AGENT QUEUE']]) {
     const items = derived.attention.filter((i) => i.who === who);

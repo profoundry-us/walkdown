@@ -237,6 +237,7 @@
   // the one daisyUI paints on every [data-theme] element — so the drafting
   // grid runs unbroken behind the controls and under the panel beside them.
   const bar = document.createElement('header');
+  bar.dataset.testid = 'panel.bar';
   bar.dataset.theme = 'blueprint';   // walkdown's own skin — see styles/walkdown.css
   bar.style.cssText = `position:absolute; top:0; left:0; right:0; height:${TOP}px;
     pointer-events:auto; transition:transform .2s ease; background:transparent;`;
@@ -259,6 +260,7 @@
    * built once and only shown or hidden, so its sliders survive anything.
    */
   const deskPanel = document.createElement('div');
+  deskPanel.dataset.testid = 'settings.panel';
   deskPanel.dataset.theme = 'blueprint';
   deskPanel.className = 'w-64 rounded-box border border-primary/45 bg-base-100 p-3 text-base-content shadow-xl';
   // Offset past the app's own top-left corner on purpose — flush against it
@@ -338,7 +340,7 @@
     deskPanel.innerHTML = `
       <div class="mb-2 flex items-center gap-2">
         <span class="text-[12px] font-semibold">Record as</span>
-        <input id="wdp-set-actor" class="input input-xs ml-auto w-36" value="${esc(session?.actor ?? actorOverride ?? data?.identity?.actor ?? '')}"
+        <input id="wdp-set-actor" data-testid="settings.actor" class="input input-xs ml-auto w-36" value="${esc(session?.actor ?? actorOverride ?? data?.identity?.actor ?? '')}"
           title="Walkdown verdicts, sign-offs and thread actions are recorded under this name">
       </div>
       <div class="mb-2 mt-3 flex items-center gap-2 border-t border-base-300 pt-2">
@@ -348,13 +350,13 @@
       ${DESK_DIALS.map((d) => `
         <label class="mb-1.5 flex items-center gap-2 text-[11.5px]">
           <span class="w-14 shrink-0 opacity-60">${d.label}</span>
-          <input type="range" class="range range-xs range-primary" data-k="${d.k}"
+          <input type="range" class="range range-xs range-primary" data-testid="settings.dials" data-k="${d.k}"
             min="${d.min}" max="${d.max}" value="${desk[d.k]}" aria-label="${d.label}">
           <span class="w-12 shrink-0 cursor-text text-right font-mono text-[10.5px] opacity-60 hover:opacity-100"
             id="wdp-desk-${d.k}" title="Click to type a value">${desk[d.k]}${d.unit}</span>
         </label>`).join('')}
       <label class="mt-1 flex items-center gap-2 text-[11.5px]">
-        <input type="checkbox" class="checkbox checkbox-xs" id="wdp-desk-hide" ${hideAppOn ? 'checked' : ''}>
+        <input type="checkbox" class="checkbox checkbox-xs" data-testid="settings.hide" id="wdp-desk-hide" ${hideAppOn ? 'checked' : ''}>
         <span>Hide app temporarily</span>
       </label>
       <p class="mt-2 text-[10.5px] leading-relaxed opacity-40">Yours alone — how the paper
@@ -645,6 +647,7 @@
     root.style.backgroundImage = 'none';
     if (!deskEl) {
       deskEl = document.createElement('div');
+      deskEl.dataset.testid = 'panel.desk';
       deskEl.dataset.walkdownChrome = '';
       root.appendChild(deskEl);
     }
@@ -1265,14 +1268,14 @@
             walkdown was updated — <b>reload the extension</b> (chrome://extensions),
             then this page, to run the current build.</div>`
         : ''}
-      <div role="tablist" class="tabs tabs-box tabs-sm m-2 shrink-0 self-center">
+      <div role="tablist" class="tabs tabs-box tabs-sm m-2 shrink-0 self-center" data-testid="panel.tabs">
         ${tab('blueprints', 'Blueprints')}${tab('rules', 'Rules')}${tab('screens', 'Screens')}
       </div>
       <!-- The name stays on screen while a session runs (nobody is attributed
            silently) but editing it lives in Settings - the strip only shows it. -->
-      ${session ? `<div class="flex items-center gap-2 border-b border-base-300 bg-warning/10 px-3.5 py-2 text-xs">
+      ${session ? `<div class="flex items-center gap-2 border-b border-base-300 bg-warning/10 px-3.5 py-2 text-xs" data-testid="panel.actor">
         <span>Recording as
-          <button id="wdp-actor" class="link font-semibold" title="Change the name in Settings (the gear)">${
+          <button id="wdp-actor" data-testid="panel.actor-name" class="link font-semibold" title="Change the name in Settings (the gear)">${
             esc(session.actor || 'set your name…')}</button></span>
         <span class="ml-auto">${Object.keys(session.verdicts).length} judged</span>
         <button class="btn btn-xs btn-warning" id="wdp-finish">Finish</button>
@@ -1285,7 +1288,8 @@
            own scrolling, so its composer can stay pinned to the foot. -->
       <div class="flex min-h-0 flex-1 overflow-hidden">
         <div class="wdp-track flex min-h-0 flex-[0_0_300%] transition-transform duration-300 ease-out">
-          <div class="wdp-pane flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col overflow-y-auto">${
+          <div class="wdp-pane flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col overflow-y-auto"
+               data-testid="${listTab === 'rules' ? 'panel.rules-list' : listTab === 'screens' ? 'panel.screens-list' : 'panel.blueprints-list'}">${
             listTab === 'screens' ? screensPane()
             : listTab === 'blueprints' ? blueprintsPane()
             : listPane()}</div>
@@ -1293,7 +1297,7 @@
           <div class="flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col overflow-hidden">${threadPane()}</div>
         </div>
       </div>
-      ${listTab === 'rules' ? `<div class="flex shrink-0 items-center gap-2 border-t border-base-300 px-3.5 py-2 text-xs opacity-70">
+      ${listTab === 'rules' ? `<div class="flex shrink-0 items-center gap-2 border-t border-base-300 px-3.5 py-2 text-xs opacity-70" data-testid="panel.counts">
         <span><b>${verified} of ${total}</b> rules verified</span>
         <span class="ml-auto flex gap-1">
           ${toSign ? `<span class="badge badge-sm badge-warning badge-outline" title="rules owing your sign-off">${toSign} to sign</span>` : ''}
@@ -1460,7 +1464,7 @@
   }
 
   const GEAR = () =>
-    `<button class="btn btn-xs btn-ghost" id="wdp-desk-btn" title="Settings">${icon('gear', 'size-3.5')}</button>`;
+    `<button class="btn btn-xs btn-ghost" id="wdp-desk-btn" data-testid="panel.desk-tuner" title="Settings">${icon('gear', 'size-3.5')}</button>`;
   const wireGear = () => {
     const gear = bar.querySelector('#wdp-desk-btn');
     if (gear) gear.onclick = () => { deskOpen = !deskOpen; syncDeskPanel(); };
@@ -1487,7 +1491,7 @@
         title="${canGhost ? 'Fade between the design and what shipped' : 'No design on file for this screen'}">
         <button class="btn btn-xs btn-primary${share === 1 ? '' : ' btn-outline'}" data-surface="prototype"
           ${canGhost || pageSurface() === 'prototype' ? '' : 'disabled'}>Prototype</button>
-        <input type="range" min="0" max="100" value="${value}" id="wdp-fade"
+        <input type="range" min="0" max="100" value="${value}" id="wdp-fade" data-testid="panel.fade"
           class="range range-xs range-primary w-28" ${canGhost ? '' : 'disabled'}
           aria-label="Fade between the design and the running app">
         <button class="btn btn-xs btn-primary${share === 0 ? '' : ' btn-outline'}" data-surface="app"
@@ -1499,7 +1503,7 @@
              the pixels on screen, and the frame is usually scaled to fit. The
              tooltip names the layout width, and the zoom pill says what the
              scale actually is while a preset is on. -->
-        ${FRAMED ? `<span class="join">
+        ${FRAMED ? `<span class="join" data-testid="panel.viewport-toggle">
           <button class="btn btn-xs join-item ${viewportW === 0 ? 'btn-primary' : 'btn-outline btn-primary'}"
             data-vp="0" title="Fit the frame to the space">Fit</button>
           <button class="btn btn-xs join-item ${viewportW === 1440 ? 'btn-primary' : 'btn-outline btn-primary'}"
@@ -1507,10 +1511,10 @@
           <button class="btn btn-xs join-item ${viewportW === 390 ? 'btn-primary' : 'btn-outline btn-primary'}"
             data-vp="390" title="Mobile — lay the page out at 390px">${icon('device-mobile', 'size-3.5')}</button>
         </span>` : ''}
-        <button class="btn btn-xs gap-1 ${pinning ? 'btn-warning' : 'btn-outline btn-primary'}" id="wdp-pin"
+        <button class="btn btn-xs gap-1 ${pinning ? 'btn-warning' : 'btn-outline btn-primary'}" id="wdp-pin" data-testid="panel.pin-mode"
           ${pinSurface() ? '' : 'disabled'}
           title="${esc(pinHint())}">${icon('map-pin', 'size-3.5')}Pin mode</button>
-        <button class="btn btn-xs btn-primary" id="wdp-walk">${session ? 'Finish walkdown' : 'Start walkdown'}</button>
+        <button class="btn btn-xs btn-primary" id="wdp-walk" data-testid="panel.walk">${session ? 'Finish walkdown' : 'Start walkdown'}</button>
         <button class="btn btn-xs btn-ghost" id="wdp-undock" title="Put walkdown away">\u00d7</button>
       </span>`;
 
@@ -1637,7 +1641,8 @@
   }
 
   function listPane() {
-    if (!data.rows.length) return '<p class="p-3.5 text-[12.5px] opacity-40">No rules in this blueprint.</p>';
+    if (!data.rows.length)
+      return '<p class="p-3.5 text-[12.5px] opacity-40">No rules in this blueprint.</p>';
     let html = '';
     let story = null;
     for (const row of data.rows) {
@@ -1731,11 +1736,11 @@
     const at = data.rows.findIndex((x) => x.rule === r.rule);
     const step = (row, cls, glyph, label) =>
       `<div class="tooltip tooltip-left" data-tip="${esc(row ? `${label} rule: ${shortName(row)}` : `No ${label.toLowerCase()} rule`)}">
-        <button class="${cls} btn btn-ghost btn-xs" ${row ? `data-goto="${esc(row.rule)}"` : 'disabled'}>${glyph}</button>
+        <button class="${cls} btn btn-ghost btn-xs" data-testid="detail.stepper" ${row ? `data-goto="${esc(row.rule)}"` : 'disabled'}>${glyph}</button>
       </div>`;
     return `
       <div class="flex items-center px-2 pt-2">
-        <button class="wdp-back btn btn-ghost btn-xs text-primary">← All rules</button>
+        <button class="wdp-back btn btn-ghost btn-xs text-primary" data-testid="detail.back">← All rules</button>
         <div class="ml-auto flex gap-0.5">
           ${step(at > 0 ? data.rows[at - 1] : null, 'wdp-prev', '←', 'Previous')}
           ${step(at >= 0 && at < data.rows.length - 1 ? data.rows[at + 1] : null, 'wdp-next', '→', 'Next')}
@@ -1743,25 +1748,25 @@
       </div>
       <div class="flex flex-col gap-3 px-3.5 pb-3.5 pt-1">
         <div>
-          <div class="break-all font-mono text-[11px] opacity-40">${esc(r.rule)}</div>
-          <p class="text-[15px] leading-relaxed">${esc(r.statement)}</p>
+          <div class="break-all font-mono text-[11px] opacity-40" data-testid="detail.rule-id">${esc(r.rule)}</div>
+          <p class="text-[15px] leading-relaxed" data-testid="detail.statement">${esc(r.statement)}</p>
           ${elsewhere(r)}
         </div>
         ${session ? `<div class="flex flex-col gap-1.5">
           <!-- The box rides ABOVE the buttons: write the why, then judge. -->
-          <textarea id="wdp-vnote" class="textarea textarea-xs h-14 w-full" placeholder="${r.built
+          <textarea id="wdp-vnote" data-testid="detail.feedback" class="textarea textarea-xs h-14 w-full" placeholder="${r.built
             ? 'Why? Anything written here is filed as a note with your verdict.'
             : 'What should change? Refine files this as the rule’s feedback.'}">${esc(verdictNote)}</textarea>
-          ${r.built ? `<div class="flex gap-2">
+          ${r.built ? `<div class="flex gap-2" data-testid="detail.verdict">
             <button class="btn btn-sm flex-1 ${picked === 'pass' ? 'btn-success' : 'btn-outline btn-success'}" data-v="pass">✓ Pass</button>
             <button class="btn btn-sm flex-1 ${picked === 'fail' ? 'btn-error' : 'btn-outline btn-error'}" data-v="fail">✗ Fail</button>
-          </div>` : `<div class="flex gap-2">
+          </div>` : `<div class="flex gap-2" data-testid="detail.verdict">
             <button class="btn btn-sm flex-1 ${picked === 'approved' ? 'btn-success' : 'btn-outline btn-success'}" data-v="approved">✍︎ Approve</button>
             <button class="btn btn-sm flex-1 ${picked === 'refining' ? 'btn-warning' : 'btn-outline btn-warning'}" data-v="refining">✎︎ Refine</button>
           </div>
           <div class="text-[11px] opacity-50">No build evidence yet — you are signing off the rule, not judging a build.</div>`}
-          <div id="wdp-vsay" class="hidden text-[11px] text-warning"></div>
-          <div class="text-[11.5px] opacity-50">${Object.keys(session.verdicts).length} judged this session</div>
+          <div id="wdp-vsay" data-testid="detail.say" class="hidden text-[11px] text-warning"></div>
+          <div class="text-[11.5px] opacity-50" data-testid="detail.judged">${Object.keys(session.verdicts).length} judged this session</div>
         </div>` : ''}
         ${steps ? `<div><div class="${LBL} mb-1.5">Steps</div>
           <div class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-[13px] leading-relaxed">${steps}</div>

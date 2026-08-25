@@ -1,0 +1,90 @@
+{
+  "run_id": "2026-08-25T21-27-47Z-local-01",
+  "created": "2026-08-25T21:27:47Z",
+  "actor": "topherfangio",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "7b411c0-dirty",
+  "blueprint_sha": "7b411c0-dirty",
+  "results": [
+    {
+      "rule": "embed.pin.anchored-target",
+      "status": "fail",
+      "statement_hash": "sha256:6feaf28d3505",
+      "duration_ms": 5136,
+      "checks": [
+        "checks/embed.spec.js:36"
+      ],
+      "evidence": [
+        "test-results/embed-a-pin-lands-on-the-a-805bd--pointer-and-keeps-the-spot/test-failed-1.png",
+        "test-results/embed-a-pin-lands-on-the-a-805bd--pointer-and-keeps-the-spot/error-context.md"
+      ]
+    },
+    {
+      "rule": "embed.pin.viewport-recorded",
+      "status": "fail",
+      "statement_hash": "sha256:6971846eb2cc",
+      "duration_ms": 5142,
+      "checks": [
+        "checks/embed.spec.js:64"
+      ],
+      "evidence": [
+        "test-results/embed-a-pin-records-the-viewport-it-was-placed-at/test-failed-1.png",
+        "test-results/embed-a-pin-records-the-viewport-it-was-placed-at/error-context.md"
+      ]
+    },
+    {
+      "rule": "embed.pin.coordinate-fallback",
+      "status": "fail",
+      "statement_hash": "sha256:3c6fb006c94b",
+      "duration_ms": 5119,
+      "checks": [
+        "checks/embed.spec.js:79"
+      ],
+      "evidence": [
+        "test-results/embed-a-pin-dropped-where--2c258-ill-placed-kept-by-position/test-failed-1.png",
+        "test-results/embed-a-pin-dropped-where--2c258-ill-placed-kept-by-position/error-context.md"
+      ]
+    },
+    {
+      "rule": "embed.pin.surface-coordinates",
+      "status": "fail",
+      "statement_hash": "sha256:7d33bd0c80b2",
+      "duration_ms": 5124,
+      "checks": [
+        "checks/embed.spec.js:95"
+      ],
+      "evidence": [
+        "test-results/embed-positions-are-record-df402-dinate-space-not-the-screen/test-failed-1.png",
+        "test-results/embed-positions-are-record-df402-dinate-space-not-the-screen/error-context.md"
+      ]
+    },
+    {
+      "rule": "panel.identity.default-actor",
+      "status": "fail",
+      "statement_hash": "sha256:d251c7d97967",
+      "duration_ms": 5146,
+      "checks": [
+        "checks/panel.spec.js:15"
+      ],
+      "evidence": [
+        "test-results/panel-the-actor-arrives-fi-ddc6b-identity-and-stays-editable/test-failed-1.png",
+        "test-results/panel-the-actor-arrives-fi-ddc6b-identity-and-stays-editable/error-context.md"
+      ]
+    },
+    {
+      "rule": "panel.walkdown.draft-on-disk",
+      "status": "fail",
+      "statement_hash": "sha256:cfb0ee61cad3",
+      "duration_ms": 5129,
+      "checks": [
+        "checks/panel.spec.js:51"
+      ],
+      "evidence": [
+        "test-results/panel-a-verdict-is-written-10102-en-and-survives-the-browser/test-failed-1.png",
+        "test-results/panel-a-verdict-is-written-10102-en-and-survives-the-browser/error-context.md"
+      ]
+    }
+  ]
+}

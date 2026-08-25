@@ -273,3 +273,24 @@ test('a walkdown on one target does not answer for another @rule:status.derived.
   assert.equal(local.agent.state, 'never');
   assert.equal(staging.agent.state, 'pass');
 });
+
+test('a pass whose check no longer claims the rule goes stale @rule:status.derived.unbacked-pass-goes-stale', () => {
+  const runs = [checksRun('2026-01-01T00:00:00Z', 'local', 'pass')];
+  const bp = blueprint({ runs });
+
+  // Suite still claims it: a live pass.
+  assert.equal(deriveStatus(bp, { checkRefs: new Set(['demo.main.thing']) }).rows[0].cells.local.state, 'pass');
+
+  // Suite no longer mentions it - deleted, renamed, or untagged as false evidence.
+  assert.equal(deriveStatus(bp, { checkRefs: new Set(['something.else']) }).rows[0].cells.local.state, 'stale');
+
+  // No inventory supplied is not evidence of an empty suite.
+  assert.equal(deriveStatus(bp).rows[0].cells.local.state, 'pass');
+});
+
+test('coverage staleness does not touch judgment tiers @rule:status.derived.unbacked-pass-goes-stale', () => {
+  const runs = [walkdownRun('2026-01-01T00:00:00Z', 'agent', 'pass')];
+  const row = deriveStatus(blueprint({ runs, verify: ['agent'] }), { checkRefs: new Set() }).rows[0];
+  // An agent looked at it; no check ever claimed to. That is not staleness.
+  assert.equal(row.agent.state, 'pass');
+});

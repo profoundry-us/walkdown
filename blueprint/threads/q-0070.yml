@@ -161,4 +161,54 @@ replies:
       old pass still cites test/serve.test.js:71, which no longer tags it. That
       staleness rule is the durable fix and would have made the blocked run
       unnecessary."
+  - author: topher
+    created: 2026-08-25T21:05:00Z
+    body: "Fix all of those and do the browser harness."
+  - author: agent
+    created: 2026-08-25T21:30:00Z
+    body: "All three gaps closed and the harness exists. (1) Coverage staleness:
+      deriveStatus now takes the inventory of rule ids the check suite
+      references, and a checks pass for a rule nothing references any more
+      renders stale - matched on rule id, not the recorded refs, because those
+      carry line numbers that move whenever anyone edits above them. Recorded as
+      status.derived.unbacked-pass-goes-stale. (2) The attention queue gained a
+      cover item, routed to the agent: a rule demanding checks that nothing
+      checks is work for whoever writes checks, never for the person waiting to
+      judge one. (3) The harness: Playwright at checks/, a fixture host page the
+      panel docks into, and a global setup that copies the blueprint to
+      .walkdown/checkspace so a check run cannot write threads or verdicts into
+      the real ledger. runner.run_all now runs both suites and
+      authoring.location takes a list, since the two suites answer different
+      kinds of rule.
+
+      Building it turned up something the spec had promised and the build never
+      delivered: the panel shipped ZERO anchors. The storyboard registers 43 and
+      the prototype mockups carry them, but lib/viewer/panel.js had none, so no
+      check could be written the way this repo's own authoring rule demands -
+      by anchor, never by CSS path. Added them across the bar, the sidebar, the
+      detail pane, Settings, and the embed's pin form and markers.
+
+      Six of the twelve now pass on real browser evidence: anchored-target,
+      viewport-recorded, surface-coordinates, coordinate-fallback,
+      identity.default-actor and walkdown.draft-on-disk. The anchored-target
+      check clicks at three-quarters across a real element and asserts the embed
+      worked out the element, the offset within it AND the spot, then that the
+      marker draws within 14px of where the pointer was - the whole claim the
+      old server test never touched.
+
+      Six remain blocked and in the cover queue, honestly: right-project needs
+      the page-to-blueprint routing that does not exist; both-surfaces,
+      stale-copy-says-so, threads.claim-never-accept and
+      walkdown.records-to-ledger are not written yet; and
+      signoff.spec-pair-derived had a first attempt that drove the rule stepper
+      and hung - shipping it would have put the rule back to green on evidence
+      nobody trusts, which is the exact failure this work exists to undo.
+
+      One incident worth recording: the first browser run recorded and then did
+      NOT count, because the checks served walkdown on 4711 while the blueprint
+      declares local as 4700. The address rule from earlier today rejected its
+      own harness's evidence, correctly. The config was wrong, not the rule. The
+      checks now run on the declared port and refuse to reuse an existing server
+      there, since one already on 4700 is serving the real blueprint and these
+      checks write."
 

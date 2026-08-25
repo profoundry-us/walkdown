@@ -43,6 +43,7 @@
   "license": "MIT",
   "devDependencies": {
     "@phosphor-icons/core": "^2.1.1",
+    "@playwright/test": "^1.62.1",
     "@profoundry-us/highball": "^0.4.1",
     "@tailwindcss/cli": "^4.3.3",
     "daisyui": "^5.7.20",

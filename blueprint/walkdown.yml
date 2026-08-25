@@ -4,10 +4,15 @@ description: The tool itself — the viewer, the docked panel, the embed, and th
 # walkdown's own blueprint — the tool specified with itself. docs/ holds the
 # design (why); this holds the verifiable what. Checks are the node:test suite,
 # tagged @rule:<id> in test names, recorded by our own node:test reporter.
+# Two check suites, because walkdown's rules are not all checkable the same
+# way (ownership.evidence.same-surface). checks/ drives a real browser at the
+# panel and the embed - the surface those rules describe. test/ covers the
+# ledger's own laws, which no browser can reach. Each reporter appends its own
+# run record; they cover disjoint rules, so the ledger reads them as one.
 runner:
-  run_all: "node --test --test-reporter=./lib/node-test-reporter.js --test-reporter-destination=stdout"
-  run_for_rule: "node --test --test-name-pattern='{id}' --test-reporter=./lib/node-test-reporter.js --test-reporter-destination=stdout"
-  list: "grep -rn '@rule:' test/"
+  run_all: "node --test --test-reporter=./lib/node-test-reporter.js --test-reporter-destination=stdout && npx playwright test"
+  run_for_rule: "node --test --test-name-pattern='{id}' --test-reporter=./lib/node-test-reporter.js --test-reporter-destination=stdout && npx playwright test --grep '@rule:{id}'"
+  list: "grep -rn '@rule:' test/ checks/"
   results: native
   targets:
     local:
@@ -20,7 +25,14 @@ embed:
   anchor_attribute: data-testid
 
 authoring:
-  location: test/
+  location: [checks/, test/]
   style: >
-    node:test. Tag an example by appending " @rule:<id>" to the test name.
-    One rule per test where practical.
+    Two suites, and which one a rule belongs in is not a preference. A rule
+    describing what a person sees or does goes in checks/ as a Playwright test
+    driving the real panel or embed, selected by anchor, never by CSS path. A
+    rule describing what the ledger guarantees goes in test/ as node:test over
+    lib/. Nothing else is tracked - unit tests of internals are their own work
+    and do not belong in the ledger. Tag by appending " @rule:<id>" to a
+    node:test name, or `{ tag: '@rule:<id>' }` in Playwright. One rule per
+    test. A check may only claim a rule whose surface it actually exercises
+    (ownership.evidence.same-surface).
