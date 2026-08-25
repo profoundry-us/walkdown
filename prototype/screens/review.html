@@ -36,10 +36,13 @@
     </span>
 
     <span class="ml-auto flex items-center gap-2">
-      <span class="join border-[1.5px] border-dashed border-base-content/25" data-testid="panel.viewport-toggle"
-            title="Size the frame like a real device; the ghost always agrees">
-        <button class="btn btn-xs join-item btn-active">🖥 1440</button>
-        <button class="btn btn-xs join-item btn-ghost">📱 390</button>
+      <!-- Devices, not numbers: the frame is usually scaled to fit, so a width
+           printed on the button promises pixels the screen does not have. The
+           layout width lives in the tooltip; the zoom pill says the real one. -->
+      <span class="join border-[1.5px] border-dashed border-base-content/25" data-testid="panel.viewport-toggle">
+        <button class="btn btn-xs join-item btn-ghost" title="Fit the frame to the space">Fit</button>
+        <button class="btn btn-xs join-item btn-active" title="Desktop — lay the page out at 1440px">▭</button>
+        <button class="btn btn-xs join-item btn-ghost" title="Mobile — lay the page out at 390px">▯</button>
       </span>
       <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25" data-testid="panel.pin-mode">📌 Pin mode</button>
       <button class="btn btn-xs btn-neutral" data-testid="panel.walk">Finish walkdown</button>
