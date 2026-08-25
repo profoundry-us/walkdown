@@ -45,3 +45,73 @@ stories:
           then:
             - It is rejected; with a reason, the reason is appended as a reply and waived_by records the person
           statement_hash: sha256:24591753abaa
+
+  - id: threads.conversation
+    title: A thread reads as a conversation
+    statement: As a reviewer, reading and answering feedback feels like talking - I can see who said what and when, catch up on what is new, and reply without leaving the page under review.
+    rules:
+      - id: threads.conversation.one-stream
+        origin: walkdown
+        statement: A thread is one stream of messages - the opening note is simply the first, by a person, at a time - and consecutive messages from one author collapse under a single name, so a long exchange reads as talking rather than as filing.
+        verify: [agent, human]
+        screens: [thread-panel, rule-detail]
+        steps:
+          given:
+            - A thread with an opening note and several replies
+          when:
+            - Open it in the panel, and beside its pin
+          then:
+            - Every message carries the same shape - who, when, what - and the opening note is not treated as a different kind of thing
+            - A second message from the same author minutes later drops the repeated name and tile, and its time appears on hover
+            - Line breaks written into a message survive, and a day boundary is drawn between messages
+            - The two deliveries render a thread the same way, from one shared implementation rather than two lookalikes
+            - Thread and rule ids written inside a message are links to the thing they name
+          statement_hash: sha256:e58134b3796f
+      - id: threads.conversation.composer-stays
+        origin: walkdown
+        statement: The reply box stands at the bottom of an open thread and never moves - Enter sends and Shift-Enter breaks the line, the message appears before the server answers, and the reply is attributed to whoever you are recording as rather than to a name typed again.
+        verify: [agent, human]
+        screens: [thread-panel, rule-detail]
+        steps:
+          given:
+            - An open thread and a name set in Settings
+          when:
+            - Type a reply and press Enter
+          then:
+            - The message is on screen immediately, marked as sending, and settles when the server confirms it
+            - A refused reply is marked as not sent and the text comes back, so nothing written is lost
+            - The box asks for no name - it says who you are recording as, and that link leads to Settings
+            - Typing survives a repaint - the caret is where it was
+          statement_hash: sha256:fc8772c1687a
+      - id: threads.conversation.new-since-you-looked
+        origin: walkdown
+        statement: A thread remembers where your reading stopped, marking what arrived since as new, so returning to a conversation the agent has added to shows what to read rather than asking you to find it.
+        verify: [human]
+        screens: [rule-detail]
+        steps:
+          given:
+            - A thread you have read, which has since gained replies
+          when:
+            - Look at the rule, then open the thread
+          then:
+            - The collapsed thread says how many messages are new
+            - Opening it draws a line above the first message you have not seen, and the line stays put while you read
+            - Your own reply is never marked new to you
+            - The mark is remembered per blueprint, and survives a reload
+          statement_hash: sha256:e3e890cf2091
+      - id: threads.conversation.append-only
+        origin: walkdown
+        statement: A conversation is append-only - messages cannot be edited or deleted, there are no reactions standing in for a verdict, and a thread that reached a terminal state offers no way back - because a thread is the record of what was said, and the ledger is where judgment is recorded.
+        verify: [human]
+        screens: [thread-panel]
+        steps:
+          given:
+            - A thread with replies, and one that has been verified or waived
+          when:
+            - Look for a way to change what was said
+          then:
+            - No message offers editing or deletion
+            - Nothing offers a reaction that would mean addressed or approved without recording it
+            - The ended thread shows how it ended and by whom, and offers no reopen, because the lifecycle has none
+            - Replying to an ended thread is still possible - the record continues, the state does not
+          statement_hash: sha256:06a879b1032c

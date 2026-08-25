@@ -55,7 +55,6 @@ screens:
       - thread.panel
       - thread.provenance
       - thread.body
-      - thread.replies
       - thread.reply
       - thread.actions
       - thread.close

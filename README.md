@@ -127,6 +127,11 @@ statement, stored truncated (`sha256:` + 12 hex).
   in `walkdown status` as in progress; the ledger still gains exactly one record, at
   Finish, which deletes the draft. Drafts are working state — the directory ignores its
   own contents.
+- **Threads read as conversations** — a thread is one stream of messages (the opening
+  note is simply the first), with initials, times, consecutive messages grouped under
+  one name, a line marking what arrived since you last looked, and a standing composer
+  where **Enter** sends and the reply appears before the server answers. Append-only by
+  design: no editing, no deleting, and no reactions standing in for a verdict.
 - **Thread lifecycle** — clicking a pin or a thread opens it: body, replies, and the
   actions its state allows (Reply / Mark addressed / ✓ Verify / Reopen / Waive; Answer
   and Mark incorporated for questions). Transitions are validated server-side; `verified`
