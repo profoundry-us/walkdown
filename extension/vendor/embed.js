@@ -632,6 +632,50 @@
       }).join('');
     },
 
+    /** Who has spoken in this thread, in the order they first did. */
+    participants(thread) {
+      const seen = [];
+      for (const m of this.messages(thread)) {
+        const who = m.author || 'someone';
+        if (!seen.includes(who)) seen.push(who);
+      }
+      return seen;
+    },
+
+    /** One initials tile. The same face for the same person, everywhere. */
+    avatar(name, cls = 'wd-ava') {
+      const who = name || 'someone';
+      return `<div class="${cls}" style="background:${this.tint(who)}" title="${
+        this.esc(who)}">${this.esc(this.initials(who))}</div>`;
+    },
+
+    /** "today at 1:09 PM" - when the conversation was last touched. */
+    lastReply(iso) {
+      const at = new Date(iso ?? '');
+      if (!Number.isFinite(at.getTime())) return '';
+      const clock = at.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+      const day = this.day(iso);
+      return `${day === 'Today' ? 'today' : day === 'Yesterday' ? 'yesterday' : day} at ${clock}`;
+    },
+
+    /**
+     * The replies line under a message: the faces of everyone in the thread, the
+     * count as the way in, and when it was last touched. This is the affordance
+     * that makes a list of threads read as a channel rather than as a table.
+     */
+    repliesLine(thread) {
+      const replies = thread?.replies ?? [];
+      const faces = this.participants(thread).slice(0, 3)
+        .map((who) => this.avatar(who, 'wd-face')).join('');
+      if (!replies.length)
+        return `<button class="wd-replies empty" data-open-thread="${this.esc(thread?.id)}">Reply</button>`;
+      return `<button class="wd-replies" data-open-thread="${this.esc(thread?.id)}">
+        <span class="wd-faces">${faces}</span>
+        <span class="wd-count">${replies.length} ${replies.length === 1 ? 'reply' : 'replies'}</span>
+        <span class="wd-last">Last reply ${this.esc(this.lastReply(replies.at(-1)?.created))}</span>
+      </button>`;
+    },
+
     /** One stylesheet for both deliveries, injected into each shadow root. */
     css: `
       .wd-msg { display: grid; grid-template-columns: 1.6rem 1fr; gap: .45rem; padding: .18rem 0; }
@@ -648,6 +692,19 @@
       .wd-msg.pending { opacity: .55; }
       .wd-msg.failed .wd-at { opacity: 1; color: oklch(72% 0.17 22); }
       .wd-ref { font-size: inherit; }
+      /* The collapsed thread: one message, then the way into the rest of it. */
+      .wd-preview { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+      .wd-replies { display: flex; align-items: center; gap: .35rem; margin-top: .2rem;
+        padding: .12rem .3rem .12rem .12rem; border-radius: .3rem; max-width: 100%; }
+      .wd-replies:hover { background: color-mix(in oklch, currentColor 8%, transparent);
+        outline: 1px solid color-mix(in oklch, currentColor 15%, transparent); }
+      .wd-faces { display: flex; }
+      .wd-face { width: 1.05rem; height: 1.05rem; border-radius: .22rem; display: grid; place-items: center;
+        font-size: 7.5px; font-weight: 700; color: #fff; margin-right: -.2rem;
+        box-shadow: 0 0 0 1.5px color-mix(in oklch, currentColor 12%, transparent); }
+      .wd-count { font-size: 11.5px; font-weight: 600; color: var(--color-primary, currentColor); }
+      .wd-last { font-size: 10.5px; opacity: .45; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .wd-replies.empty { font-size: 11px; opacity: .4; padding-left: .3rem; }
       .wd-day, .wd-new { display: flex; align-items: center; gap: .5rem; margin: .45rem 0 .3rem;
         font-size: 9.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; opacity: .45; }
       .wd-day span, .wd-new span { flex: 1; height: 1px; background: currentColor; opacity: .25; }

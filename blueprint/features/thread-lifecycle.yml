@@ -61,6 +61,7 @@ stories:
           when:
             - Open it in the panel, and beside its pin
           then:
+            - Collapsed, a thread is that first message - face, name, time, what was said - with the people in it, the number of replies and when it was last touched underneath
             - Every message carries the same shape - who, when, what - and the opening note is not treated as a different kind of thing
             - A second message from the same author minutes later drops the repeated name and tile, and its time appears on hover
             - Line breaks written into a message survive, and a day boundary is drawn between messages
@@ -115,3 +116,20 @@ stories:
             - The ended thread shows how it ended and by whom, and offers no reopen, because the lifecycle has none
             - Replying to an ended thread is still possible - the record continues, the state does not
           statement_hash: sha256:06a879b1032c
+
+      - id: threads.conversation.thread-is-a-screen
+        origin: walkdown
+        statement: Opening a thread slides to a screen of its own, one step to the right of the rule it belongs to, and the way back names where it goes - because a conversation deserves the width, and reading one should never cost you your place.
+        verify: [agent, human]
+        screens: [rule-detail, thread-panel]
+        steps:
+          given:
+            - A rule with threads on it
+          when:
+            - Click the reply count under a thread
+          then:
+            - The panel slides one screen to the right, and the thread has the whole column - stream, and a composer pinned at the foot
+            - Back slides the same way it came and names its destination - the rule, or the rules list for a pin attached to none
+            - The surface under review does not move - reading a conversation is not a walkdown step
+            - A pin clicked on the page opens the same screen, wherever you were
+          statement_hash: sha256:9971d7aaef65

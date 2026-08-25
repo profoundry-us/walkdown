@@ -48,13 +48,14 @@ screens:
       - detail.threads
 
   - id: thread-panel
-    title: Thread popover (state — open a pin)
+    title: The thread screen (state — open a thread, or a pin)
     prototype: /screens/thread-panel.html
     app: { path: /stand-in/thread-panel }
     anchors:
       - thread.panel
       - thread.provenance
       - thread.body
+      - thread.replies
       - thread.reply
       - thread.actions
       - thread.close

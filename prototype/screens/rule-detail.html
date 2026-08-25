@@ -7,6 +7,22 @@
 <meta charset="utf-8">
 <title>Mockup — Rule detail</title>
 <link rel="stylesheet" href="http://localhost:4700/walkdown.css">
+<style>
+  /* The message vocabulary, as the build renders it (lib/message-stream.js). */
+  .msg { display: grid; grid-template-columns: 1.6rem 1fr; gap: .45rem; }
+  .ava { width: 1.6rem; height: 1.6rem; border-radius: .3rem; display: grid; place-items: center;
+    font-size: 10px; font-weight: 700; color: #fff; }
+  .who { font-weight: 600; font-size: 12px; }
+  .at { font-size: 10px; opacity: .45; }
+  .text { font-size: 12.5px; line-height: 1.45; }
+  .replies { display: flex; align-items: center; gap: .35rem; margin-top: .2rem; padding: .12rem .3rem .12rem .12rem;
+    border-radius: .3rem; }
+  .replies:hover { background: #0001; }
+  .face { width: 1.05rem; height: 1.05rem; border-radius: .22rem; display: grid; place-items: center;
+    font-size: 7.5px; font-weight: 700; color: #fff; margin-right: -.2rem; box-shadow: 0 0 0 1.5px #fff; }
+  .count { font-size: 11.5px; font-weight: 600; color: #2563eb; }
+  .last { font-size: 10.5px; opacity: .45; }
+</style>
 </head>
 <body class="h-screen overflow-hidden bg-base-200 text-sm">
   <header class="navbar min-h-0 gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5">
@@ -85,8 +101,32 @@
 
         <div>
           <div class="mb-1 text-[10px] uppercase tracking-widest opacity-40">Threads</div>
-          <div class="wire border-l-4 border-l-warning px-2 py-1" data-testid="detail.threads">
-            q-0001 · question · open — amber border = waiting on you</div>
+          <!-- A thread reads as a message with replies under it: face, name,
+               time, what was said, then the people in it and the way in. The
+               reply count is the door - it opens the thread's own screen. -->
+          <div class="wire border-l-4 border-l-warning px-2 py-2" data-testid="detail.threads">
+            <div class="msg">
+              <div class="ava" style="background:#7c6f9b">TF</div>
+              <div>
+                <div class="flex items-baseline gap-1.5">
+                  <span class="who">Topher</span>
+                  <span class="at">2h ago</span>
+                  <span class="at font-mono">q-0001</span>
+                  <span class="badge badge-xs badge-warning ml-auto">open</span>
+                </div>
+                <div class="text line-clamp-3">Should the confirmation screen keep the email visible after
+                  submitting, or is the toast enough on its own?</div>
+                <button class="replies" data-testid="thread.replies">
+                  <span class="flex">
+                    <span class="face" style="background:#7c6f9b">TF</span>
+                    <span class="face" style="background:#4f7a6f">AG</span>
+                  </span>
+                  <span class="count">2 replies</span>
+                  <span class="last">Last reply today at 1:09 PM</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </aside>
