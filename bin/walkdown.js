@@ -164,7 +164,7 @@ function renderRuleDetail(blueprint, derived, ruleId, json) {
   const exitCode = row.verdict === 'fail' ? 1 : 0;
   if (json) {
     console.log(JSON.stringify(row, null, 2));
-    process.exit(exitCode);
+    return end(exitCode);
   }
 
   const verdictWord = { pass: green('verified'), fail: red('failing'), pending: yellow('pending') }[row.verdict];
@@ -199,7 +199,7 @@ function renderRuleDetail(blueprint, derived, ruleId, json) {
     for (const t of threads)
       console.log(`    ${t.id} ${paintStatus(t.status)} — ${truncate(t.body, 70)}`);
   }
-  process.exit(exitCode);
+  return end(exitCode);
 }
 
 function cmdStatus(args) {
@@ -328,11 +328,11 @@ function cmdThreads(args) {
 
   if (values.json) {
     console.log(JSON.stringify(threads, null, 2));
-    process.exit(0);
+    return end(0);
   }
   if (!threads.length) {
     console.log(values.all ? 'No threads.' : 'No active threads. (--all includes resolved ones.)');
-    process.exit(0);
+    return end(0);
   }
   console.log(dim(`walkdown threads — ${threads.length} ${values.all ? 'total' : 'active'}\n`));
   for (const t of threads) {
@@ -341,7 +341,7 @@ function cmdThreads(args) {
     console.log(`      ${firstLine.length > 100 ? firstLine.slice(0, 97) + '…' : firstLine}\n`);
   }
   console.log(dim('  walkdown thread <id> shows a thread in full'));
-  process.exit(0);
+  return end(0);
 }
 
 function cmdThread(args) {
@@ -387,7 +387,7 @@ function cmdThread(args) {
   }
   if (values.json) {
     console.log(JSON.stringify(t, null, 2));
-    process.exit(0);
+    return end(0);
   }
   console.log(`${t.id} · ${t.kind} · ${paintStatus(t.status)}${t.status === 'waived' && t.waived_by ? dim(` by ${t.waived_by}`) : ''}`);
   console.log(dim(`  ${anchorText(t.anchor)}`));
@@ -397,7 +397,7 @@ function cmdThread(args) {
     console.log(dim(`\n  ↳ ${r.author ?? 'unknown'} · ${r.created ?? 'undated'}`));
     console.log(`    ${String(r.body ?? '').trim().replace(/\n/g, '\n    ')}`);
   }
-  process.exit(0);
+  return end(0);
 }
 
 async function cmdInit(args) {

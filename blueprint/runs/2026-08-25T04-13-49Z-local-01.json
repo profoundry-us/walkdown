@@ -1,0 +1,231 @@
+{
+  "run_id": "2026-08-25T04-13-49Z-local-01",
+  "created": "2026-08-25T04:13:49Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6528324-dirty",
+  "blueprint_sha": "6528324-dirty",
+  "results": [
+    {
+      "rule": "embed.pin.settled-pins-leave",
+      "status": "pass",
+      "statement_hash": "sha256:c82607d3ac2e",
+      "evidence": [
+        "runs/evidence/2026-08-25T04-13-49Z/panel-verified-pin-left.png",
+        "runs/evidence/2026-08-25T04-13-49Z/embed-pins.png"
+      ],
+      "reasoning": "Drove it live in the framed panel: the review surface carried pins n-0005, n-0053, n-0054 and n-0056; opening n-0054 from its pin and verifying it from the thread screen left the surface carrying exactly the other three, with no reload and nothing else moved, while the panel slid back to the rule. The thread itself is untouched in the ledger - I restored n-0054 to addressed afterwards, since the verdict was mine and not a person's."
+    },
+    {
+      "rule": "embed.pin.tooltip-says-what-it-is",
+      "status": "pass",
+      "statement_hash": "sha256:50dfb40b9f83",
+      "evidence": [
+        "runs/evidence/2026-08-25T04-13-49Z/embed-pins.png"
+      ],
+      "reasoning": "Every pin is a .tooltip wrapper with a .tooltip-content child, so the card is markup rather than a title attribute and paints on contact. Read off the live surface, each carried three lines: 'n-0054 - note - addressed', 'rule panel.rules.counts-legible - review - panel.rules-list', and the note truncated at 90 characters. n-0053 and n-0056, which have no rule, said 'no rule' in that position rather than dropping the line. Sides were chosen against the edges: the two pins near the top opened downward, the two near the right edge opened left. Clicking a pin opened its thread screen (probed separately: n-0054 opened with back link 'counts-legible')."
+    },
+    {
+      "rule": "embed.pin.form-at-the-spot",
+      "status": "pass",
+      "statement_hash": "sha256:5bb13509dc3b",
+      "evidence": [
+        "runs/evidence/2026-08-25T04-13-49Z/embed-pin-form.png",
+        "runs/evidence/2026-08-25T04-13-49Z/embed-pin-form-bottom.png"
+      ],
+      "reasoning": "Clicking at (300,200) inside a tall anchored element put the form at y=218 - eighteen pixels under the spot, not at the element's foot - and the placeholder pin's tip measured exactly (300,200). Clicking at (300,800) in an 860px-tall surface flipped the form above the spot, occupying 595-782. Ticking 'question' changed the placeholder's mark from ! to ?, and Escape removed form and placeholder together."
+    },
+    {
+      "rule": "panel.dock.surface-swap-is-instant",
+      "status": "pass",
+      "statement_hash": "sha256:c74a4c999299",
+      "reasoning": "Counted iframe navigations while crossing between surfaces on one screen: the first look loaded the stand-in once, and four crossings after it loaded nothing at all. The hidden copy sits at opacity 0 with pointer-events none and cannot be pinned, since pin reach requires full opacity. A window resize from 1500x1000 to 1300x800 re-measured both frames to 880x764 without a reload, and a viewport preset reloaded it as the rule requires. I fixed a defect here during this walkdown: restoring the fade after a preset read the ghost's opacity instead of the dial's own value, which on a prototype-backed page tore the rebuilt ghost straight back down."
+    },
+    {
+      "rule": "panel.rules.detail-slide",
+      "status": "pass",
+      "statement_hash": "sha256:493a83d3f0bd",
+      "evidence": [
+        "runs/evidence/2026-08-25T04-13-49Z/panel-list.png",
+        "runs/evidence/2026-08-25T04-13-49Z/panel-rule-detail.png"
+      ],
+      "reasoning": "The track sits at translateX(0%) on the list and translateX(-33.3333%) with a rule open, each pane a third of a 300%-wide track, so exactly one occupies the panel. 'All rules' returns it. The three tabs render centred in the sidebar at their label widths with their own Phosphor icons (bounding-box, checks, frame-corners), not stretched edge to edge."
+    },
+    {
+      "rule": "panel.rules.step-between",
+      "status": "pass",
+      "statement_hash": "sha256:56a26420e1f3",
+      "reasoning": "From panel.start.open-a-folder the next control opened panel.start.choose-a-blueprint and took the surface with it - the frame moved from start.html to choose-blueprint.html - which is the step that distinguishes stepping from merely re-rendering. Tooltips named their destinations ('Previous rule: default-actor', 'Next rule: device-presets'). Between two rules that share a screen the surface correctly stays put."
+    },
+    {
+      "rule": "panel.rules.steps-not-an-appendix",
+      "status": "pass",
+      "statement_hash": "sha256:0609e516526f",
+      "evidence": [
+        "runs/evidence/2026-08-25T04-13-49Z/panel-rule-detail.png"
+      ],
+      "reasoning": "Now true, and it was not this morning: the steps render expanded under a STEPS label, and the recorded check source sits behind a collapsed disclosure beneath them, fetching from /api/checks only when opened. Read live on screens.identity.fragment-is-identity: summary 'Check source - test/screen-match.test.js:20, test/screen-match.test.js:25', closed by default, and opening it produced the two test bodies. This is the half of the rule that n-0057 has been failing on; I built it during this walkdown."
+    },
+    {
+      "rule": "panel.rules.counts-legible",
+      "status": "pass",
+      "statement_hash": "sha256:cc7b6d687101",
+      "evidence": [
+        "runs/evidence/2026-08-25T04-13-49Z/panel-list.png"
+      ],
+      "reasoning": "The footer reads '24 of 77 rules verified' - the unit stated - with '33 to sign' and '19 to walk' as separate outlined badges. Rows owing work carry the same word: read off the live list, the three unbuilt pin rules showed 'sign' and embed.pin.anchored-target showed 'walk'. Footer and badges are derived from one predicate (owed and unbuilt = sign, owed and built = walk), so they reconcile kind for kind by construction."
+    },
+    {
+      "rule": "panel.rules.lifecycle-legible",
+      "status": "pass",
+      "statement_hash": "sha256:817b59a5a95a",
+      "evidence": [
+        "runs/evidence/2026-08-25T04-13-49Z/panel-list.png"
+      ],
+      "reasoning": "Read the glyph column live: the empty square for designed-not-approved (settled-pins-leave, tooltip-says-what-it-is, form-at-the-spot, each with a 'sign' badge), the empty circle for built-not-verified (anchored-target, badge 'walk'), the tick for verified, the cross for failing (viewport-recorded). Distinct shapes rather than shades, and each row's title spelled the state in words - 'designed', 'built', 'verified', 'failing'. The pencils carry U+FE0E and render as text, so the colour channel keeps speaking."
+    },
+    {
+      "rule": "panel.rules.headless-says-so",
+      "status": "pass",
+      "statement_hash": "sha256:5bb6c7d6142a",
+      "evidence": [
+        "runs/evidence/2026-08-25T04-13-49Z/panel-headless.png"
+      ],
+      "reasoning": "Opening screens.identity.one-matcher, which has no screens, covered the app pane with walkdown's own notice - 'No screen belongs to this rule ... It is judged by its checks and recorded behavior, not by looking' - while the frame's own URL never changed, so the page underneath keeps its state. The detail pane carries the same note beside the statement, and returning to the list lifts the cover."
+    },
+    {
+      "rule": "panel.walkdown.records-to-ledger",
+      "status": "pass",
+      "statement_hash": "sha256:6cc28278f4a6",
+      "evidence": [
+        "runs/evidence/2026-08-25T04-13-49Z/panel-verdicts.png"
+      ],
+      "reasoning": "Both halves observed. With the actor cleared in Settings, Finish refused before writing anything, toasted that a walkdown is recorded under a person's name, opened Settings, and left the session running. With a name set, Finish wrote a well-formed record - I saw this because one of my own probes finished a session by accident and appended a run under Topher's name; I deleted that record rather than leave a verdict attributed to a person who did not give it, and treat its shape, not its content, as the evidence."
+    },
+    {
+      "rule": "panel.walkdown.draft-on-disk",
+      "status": "pass",
+      "statement_hash": "sha256:cfb0ee61cad3",
+      "reasoning": "Approving one rule in a running session wrote blueprint/drafts/local.json holding draft:true, the target, actor, started and updated stamps, and verdicts {panel.rules.evidence-visible: approved} - no run_id, outside runs/, and no rule's standing changed. Finishing deleted it and appended a single run; discarding deletes it and writes nothing. The directory ignores its own contents, which is why none of today's probe drafts could be committed by accident."
+    },
+    {
+      "rule": "panel.walkdown.verdicts-at-hand",
+      "status": "pass",
+      "statement_hash": "sha256:10b43c02479d",
+      "evidence": [
+        "runs/evidence/2026-08-25T04-13-49Z/panel-verdicts.png"
+      ],
+      "reasoning": "With a session running and a rule open, both verdict buttons render inside the detail pane's first screenful - present without scrolling any pane - beside '0 judged this session', which rose to '1 judged' after a verdict. Revisiting a rule already judged showed its chosen verdict still filled in: approved solid, refining outlined."
+    },
+    {
+      "rule": "panel.walkdown.pass-advances",
+      "status": "pass",
+      "statement_hash": "sha256:39a3512969c6",
+      "evidence": [
+        "runs/evidence/2026-08-25T04-13-49Z/panel-signoff.png"
+      ],
+      "reasoning": "Approving panel.rules.evidence-visible advanced the session to the next rule owing a verdict, embed.pin.anchored-target, and the judged count rose. Failing a built rule with nothing written kept the rule open and switched pin mode on - the pin control carried its armed styling in the same tick."
+    },
+    {
+      "rule": "panel.walkdown.note-with-any-verdict",
+      "status": "pass",
+      "statement_hash": "sha256:f9043305838b",
+      "evidence": [
+        "runs/evidence/2026-08-25T04-13-49Z/panel-verdicts.png"
+      ],
+      "reasoning": "The feedback box precedes the verdict buttons in DOM order, so the why is asked for first. Writing 'probe: agent walkdown feedback check' and then approving filed note thread n-0067 anchored to the rule under the session's actor; judging with the box empty filed nothing. I deleted that probe thread afterwards."
+    },
+    {
+      "rule": "panel.walkdown.fail-requires-why",
+      "status": "pass",
+      "statement_hash": "sha256:9644c16756d8",
+      "evidence": [
+        "runs/evidence/2026-08-25T04-13-49Z/panel-verdicts.png"
+      ],
+      "reasoning": "Choosing Fail with an empty box and no pin recorded no verdict, said 'A fail needs a why - write it above, or pin it on the page.' and armed pin mode in the same tick. The judged count did not move."
+    },
+    {
+      "rule": "panel.identity.default-actor",
+      "status": "pass",
+      "statement_hash": "sha256:d251c7d97967",
+      "evidence": [
+        "runs/evidence/2026-08-25T04-13-49Z/panel-settings.png"
+      ],
+      "reasoning": "With no stored override, starting a session showed 'Topher Fangio' in the strip straight away - the repository's git user.name, arriving through the blueprint payload's identity field - and Settings carried the same value in its editable field. The strip is a button that opens Settings rather than an input, so the name is edited in one place, and an edited name persists across reloads in the panel's store."
+    },
+    {
+      "rule": "panel.viewport.device-presets",
+      "status": "pass",
+      "statement_hash": "sha256:2ded288a785a",
+      "evidence": [
+        "runs/evidence/2026-08-25T04-13-49Z/panel-viewport-390.png",
+        "runs/evidence/2026-08-25T04-13-49Z/panel-viewport-1440.png"
+      ],
+      "reasoning": "Choosing 390 laid the frame out at width 390px, and with the ghost up both iframes measured 390px - the two never disagreeing is the point of the rule, and it holds only because of the fade-restore fix described under surface-swap-is-instant, which had been leaving the ghost torn down after a preset change. Fit restored the frame to the pane's full width."
+    },
+    {
+      "rule": "panel.viewport.zoom-to-fit",
+      "status": "pass",
+      "statement_hash": "sha256:8beb5dbadbe0",
+      "evidence": [
+        "runs/evidence/2026-08-25T04-13-49Z/panel-viewport-1440.png"
+      ],
+      "reasoning": "1440 in a 1500px window laid the page out at 1440px and scaled it down whole - style width 1440px, height 1258.67px, transform scale(0.75), measuring 1080x944 on screen - so the desktop layout is seen as a desktop layout rather than reflowed. The badge read '1440px - fit 75%'."
+    },
+    {
+      "rule": "panel.signoff.spec-pair-derived",
+      "status": "pass",
+      "statement_hash": "sha256:d195df6ea5d8",
+      "evidence": [
+        "runs/evidence/2026-08-25T04-13-49Z/panel-signoff.png"
+      ],
+      "reasoning": "A rule the ledger holds no pass or fail for (panel.rules.evidence-visible) offered Approve and Refine with the line 'No build evidence yet - you are signing off the rule, not judging a build'. A rule with build evidence (panel.walkdown.records-to-ledger) offered Pass and Fail. Approving did not flip the pair."
+    },
+    {
+      "rule": "panel.signoff.refine-requires-feedback",
+      "status": "pass",
+      "statement_hash": "sha256:cc9c4f5148e1",
+      "evidence": [
+        "runs/evidence/2026-08-25T04-13-49Z/panel-signoff.png"
+      ],
+      "reasoning": "Refine with an empty box was refused with 'Refine is the feedback - write what should change first.' and nothing was recorded. The written path files the note and records refining, which the check suite also covers."
+    },
+    {
+      "rule": "panel.signoff.approved-recorded",
+      "status": "pass",
+      "statement_hash": "sha256:3debe377856e",
+      "reasoning": "The record my accidental probe finish produced carried the rule, status approved and statement_hash sha256:65b84178c291 - hash-stamped as the rule stood - and the rule remained pending afterwards, still owing a human verdict. Staleness on reword, and the sign-off's refusal to satisfy a human requirement, are covered by the check suite in test/status.test.js. I deleted that record; its shape is the evidence, not its verdict."
+    },
+    {
+      "rule": "threads.conversation.one-stream",
+      "status": "pass",
+      "statement_hash": "sha256:e58134b3796f",
+      "evidence": [
+        "runs/evidence/2026-08-25T04-13-49Z/panel-threads-collapsed.png",
+        "runs/evidence/2026-08-25T04-13-49Z/panel-thread-screen.png"
+      ],
+      "reasoning": "Collapsed, a thread is its first message - 'Topher Fangio', '16h ago', the note - then two participant faces, '1 reply' and 'Last reply today at 9:55 AM'. The threads on a rule share the pane's surface, divided by hairlines, with no cards or coloured rails. Open, the stream carried 'Topher Fangio 16h ago' and 'Agent 13h ago' in one list under a TODAY divider; consecutive same-author messages drop the repeated name; ids inside message text render as links. Both deliveries render from the one shared block in lib/message-stream.js, which tools/sync-shared.mjs keeps identical in both browser files."
+    },
+    {
+      "rule": "threads.conversation.composer-stays",
+      "status": "pass",
+      "statement_hash": "sha256:fc8772c1687a",
+      "evidence": [
+        "runs/evidence/2026-08-25T04-13-49Z/panel-thread-screen.png"
+      ],
+      "reasoning": "The composer sits at the foot of the thread screen with Verify, Reopen and Waive beside it and 'as Topher Fangio - Enter sends' - no name field. Typing and pressing Enter put the message on screen before the server answered. Forcing the reply endpoint to 500 marked that message 'not sent' and returned the text to the box, so nothing written was lost."
+    },
+    {
+      "rule": "threads.conversation.thread-is-a-screen",
+      "status": "pass",
+      "statement_hash": "sha256:9971d7aaef65",
+      "evidence": [
+        "runs/evidence/2026-08-25T04-13-49Z/panel-thread-screen.png",
+        "runs/evidence/2026-08-25T04-13-49Z/panel-thread-ended-toast.png"
+      ],
+      "reasoning": "Clicking the reply count slid the track from -33.3333% to -66.6667%, giving the conversation the whole column with its composer pinned at the foot and 'records-to-ledger' naming the way back. Verifying from that screen slid back to the rule and toasted that the thread was verified and leaves the rule's active threads - which is only true as of a fix made during this walkdown: toasts were appended into the panel's own markup, which render() rewrites, so the message vanished in the same tick it appeared. A pin clicked on the page opens the same screen, and a thread that is gone still leaves the way back."
+    }
+  ]
+}

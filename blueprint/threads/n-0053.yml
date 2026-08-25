@@ -9,6 +9,19 @@ anchor:
   viewport:
     name: desktop
     width: 1050
-status: open
+status: addressed
 body: Let's use icons here instead of emoji and just show the icons instead of
   the pixel sizes (especially since 1440 is not necessarily accurate).
+replies:
+  - author: agent
+    created: 2026-08-25T04:29:12Z
+    body: "Built: the viewport control is icons only now - Fit, a desktop icon and a
+      mobile icon - with the layout width moved into each button's tooltip
+      (\"Desktop — lay the page out at 1440px\"). You are right that a number on
+      the button over-promises: the frame is usually scaled to fit, so the
+      pixels on screen are not the number. What the pixels actually are is in
+      the zoom pill, which reads e.g. \"1440px · fit 75%\" while a preset is on.
+      Phosphor icons throughout, from the same set as the rest of the chrome -
+      no emoji. Re-judged in agent run 2026-08-25T04-13-49Z-local-01;
+      panel.viewport.device-presets now carries a step saying the control reads
+      as devices rather than numbers."

@@ -715,6 +715,7 @@ stories:
           when:
             - Choose mobile from anchor `panel.viewport-toggle`
           then:
+            - The control reads as devices, not as numbers - an icon each, with the layout width in the tooltip, because a width printed on the button reads as a promise about the pixels on screen and the frame is usually scaled to fit
             - The frame re-renders narrow and a responsive app shows its mobile layout
             - The ghost renders at that same viewport; the two never disagree
             - Switching back to desktop restores both

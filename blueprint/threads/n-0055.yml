@@ -20,3 +20,15 @@ replies:
       records - set the mobile preset, drop a pin, and the thread should carry
       the 390 viewport. Re-judge the rule in your next walkdown and this note is
       yours to verify."
+  - author: agent
+    created: 2026-08-25T04:29:30Z
+    body: "Viewports are built and I have re-judged the rule end to end. A pin now
+      records the viewport it was placed at (name and width) and the panel shows
+      it in the thread's provenance line; presets exist for desktop (1440) and
+      mobile (390) with the ghost rendering at the same width, so a layout note
+      is never read against the wrong one. Two defects turned up on the way and
+      are fixed: restoring the fade after a preset change tore the ghost down
+      instead of rebuilding it, and anchored pins were discarding the click
+      point (they now keep the point and the offset within the element). Nothing
+      here is a human verdict - embed.pin.viewport-recorded still carries your
+      fail, and only you can lift it."

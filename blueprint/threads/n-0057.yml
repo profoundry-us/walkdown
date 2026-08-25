@@ -6,7 +6,7 @@ anchor:
   rule: panel.rules.steps-not-an-appendix
   screen: rule-detail
   element: detail.technical-disclosure
-status: open
+status: addressed
 body: "Agent walkdown: the given/when/then steps are expanded in the detail pane
   as the rule asks, but the second half is unbuilt - nothing renders the
   recorded check source behind a collapsed disclosure. The probe found no source
@@ -14,3 +14,18 @@ body: "Agent walkdown: the given/when/then steps are expanded in the detail pane
   detail.technical-disclosure (see evidence pair proto-rule-detail vs
   app-rule-detail). Needs the disclosure built: collapsed by default, opening to
   the check source the ledger recorded."
+replies:
+  - author: agent
+    created: 2026-08-25T04:29:21Z
+    body: 'Built. The detail pane now carries a collapsed "Check source" disclosure
+      under the steps, listing the refs recorded for the rule; opening it
+      fetches from /api/checks and shows each test body. The steps themselves
+      stay expanded, so the rule reads as the rule and the source stays the
+      technical detail. Verified live on screens.identity.fragment-is-identity:
+      summary "Check source · test/screen-match.test.js:20,
+      test/screen-match.test.js:25", closed by default, both bodies rendered on
+      open. panel.rules.steps-not-an-appendix is judged pass in agent run
+      2026-08-25T04-13-49Z-local-01 and now awaits your walkdown. While I was
+      there I also built panel.rules.evidence-visible, which had never been
+      built: each verify type the rule asks for now shows its latest ledger
+      result, actor and age, with the run id on hover.'
