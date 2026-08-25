@@ -1,0 +1,18 @@
+id: n-0068
+kind: note
+author: agent
+created: 2026-08-25T15:16:10Z
+anchor:
+  rule: panel.dock.controls-survive-use
+  screen: review
+status: addressed
+body: "Agent walkdown: the fade slider stopped tracking one step into a drag -
+  the value went 100 -> 97 and froze there for the rest of the sweep, which is
+  exactly the failure this rule was written about, arrived at by a new route.
+  Not a rebuild this time: the ghost that the first movement summons is promoted
+  into the browser top layer, and promoting means hidePopover + showPopover on
+  the shell - which cancels whatever the pointer was doing inside it. So the
+  drag killed itself by working. Fixed by deferring the raise while a control is
+  held: raise() records that it wanted the top layer and does it when the
+  pointer lets go. Re-judged: 100, 97, 85, 73, 62, 50, 38, 27, 15, 3, 0 - the
+  whole way, settling where the drag ended."

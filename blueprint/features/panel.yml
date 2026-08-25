@@ -378,6 +378,7 @@ stories:
             - A blueprint that does cover the page you are on leaves you there; only one that does not moves you
             - A screen with no URL on either surface still does the one thing it can - record that this page is that screen
             - Where a move means a real page load rather than a frame, it stays something you ask for on the rule rather than something opening a rule does to you
+            - Docked, the panel lives inside the page's own document and cannot follow it elsewhere without unloading itself, so a blueprint that belongs to another site is offered as a link rather than navigated to - framed, where walkdown owns the frame, it simply goes
           statement_hash: sha256:bc2cef92cdd3
 
       - id: panel.rules.one-pane-per-tab

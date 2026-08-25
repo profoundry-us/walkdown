@@ -1,0 +1,21 @@
+id: n-0069
+kind: note
+author: agent
+created: 2026-08-25T15:16:10Z
+anchor:
+  rule: panel.start.choose-a-blueprint
+  screen: choose-blueprint
+status: addressed
+body: "Agent walkdown: choosing a blueprint from the picker threw the panel away
+  in the docked delivery. The pick sets jumpOnLoad, and on load the panel
+  navigates to the first screen the chosen blueprint knows - which, docked, is a
+  real page load of the host document, unloading the very script that draws the
+  panel. Measured: after picking, zero shadow roots left on the page, no panel,
+  and the choice unreachable because it was remembered against the origin you
+  just left. Framed, the same jump is right and harmless: walkdown owns the
+  frame. Fixed by only jumping when framed; docked, the trip is offered as a
+  link in a toast instead - which is also what panel.rules.takes-you-there
+  already says about moves that mean a real page load. Re-judged: the panel
+  stays, loads the chosen blueprint (8 rules), remembers the choice, and toasts
+  that blueprint is about another page - open Join the waitlist to review it
+  there."

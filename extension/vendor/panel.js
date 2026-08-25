@@ -184,7 +184,24 @@
    * layer the last one promoted is the one on top — and the panel must stay
    * above the design it is ghosting.
    */
-  const raise = () => { promote(ghost); promote(shell); };
+  /*
+   * Whether the pointer is currently holding one of our own controls. Declared
+   * up here because raise() below has to consult it and runs at boot.
+   */
+  let dragging = false;
+  let raisePending = false;
+  /*
+   * Re-promoting means hidePopover + showPopover on the shell, and that cancels
+   * whatever the pointer was doing inside it - so a ghost appearing mid-drag
+   * used to kill the drag that summoned it, which is the same failure
+   * controls-survive-use was written about. While a control is held, the raise
+   * is remembered and done when the pointer lets go.
+   */
+  const raise = () => {
+    if (dragging) { raisePending = true; return; }
+    promote(ghost);
+    promote(shell);
+  };
   if (typeof shell.showPopover === 'function') {
     raise();
     document.addEventListener('toggle', (e) => { if (e.target !== shell) raise(); }, true);
@@ -202,6 +219,15 @@
   // background belongs anyway.
   const host = document.createElement('div');
   host.className = 'h-full w-full text-sm';
+  /*
+   * The one thing a shadow root does NOT keep out: inheritance. A host page
+   * with `* { letter-spacing: 3px }` - or a text-transform, or a word-spacing -
+   * sets it on our shell element like any other, and it flows down into every
+   * word walkdown draws. Styling `:host` cannot fix it either: for the host
+   * element, the document's own rules win. So the reset lives here, on our
+   * first element INSIDE the boundary, where the host page has no reach.
+   */
+  host.style.cssText = 'letter-spacing:normal; word-spacing:normal; text-transform:none; font-variant:normal; font-style:normal; text-indent:0; text-shadow:none; white-space:normal; word-break:normal; text-align:left; direction:ltr; text-decoration:none;';
   sr.appendChild(host);
 
   // The two pieces of chrome are built once and filled by render(): the docking
@@ -1364,9 +1390,9 @@
    * replaces the very input the pointer is on, and the drag dies on its first
    * move — which is the whole of the "the slider will not drag" bug. So while
    * a drag is live the bar is painted in place instead of rebuilt, and rebuilt
-   * once when the drag ends.
+   * once when the drag ends. (`dragging` itself is declared up with raise(),
+   * which has to consult it.)
    */
-  let dragging = false;
 
   const PIN_MID = 'Slide fully to the prototype or the app first — half-faded, a pin has no surface to belong to';
   const PIN_UNREACHABLE = 'walkdown is not running inside this surface, so a pin here would land on the page underneath it';
@@ -1505,7 +1531,12 @@
       // `change` fires when the pointer (or the keyboard) lets go, and that is
       // where the bar is rebuilt and a ghost at zero is finally torn down.
       fade.oninput = () => { dragging = true; setFade(1 - fade.value / 100); };
-      fade.onchange = () => { dragging = false; setFade(1 - fade.value / 100); };
+      fade.onchange = () => {
+        dragging = false;
+        setFade(1 - fade.value / 100);
+        // Anything that wanted the top layer while the pointer was down gets it now.
+        if (raisePending) { raisePending = false; raise(); }
+      };
     }
   }
 
@@ -2732,7 +2763,25 @@
        * choice meant to put you, and moving would be the panel overruling you.
        */
       const first = (data.storyboard ?? []).find((sc) => screenUrl(sc, 'app') ?? screenUrl(sc, 'prototype'));
-      if (first && !currentScreen() && goTo(first)) return;
+      if (first && !currentScreen()) {
+        /*
+         * Framed, walkdown owns the frame and can simply take you there.
+         * Docked, it lives INSIDE the page's own document: navigating would
+         * unload the very script drawing this panel, and you would arrive at
+         * the other site with no walkdown at all - which is what used to
+         * happen. So the trip is offered rather than taken, which is also
+         * what this rule says about moves that mean a real page load.
+         */
+        if (FRAMED) {
+          if (goTo(first)) return;
+        } else {
+          const url = screenUrl(first, 'app') ?? screenUrl(first, 'prototype');
+          render();
+          if (url) toast(`That blueprint is about another page — <a class="link" href="${
+            esc(url)}">open ${esc(first.title ?? first.id)}</a> to review it there.`);
+          return;
+        }
+      }
     }
     render();
   }

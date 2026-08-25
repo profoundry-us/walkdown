@@ -1,0 +1,22 @@
+id: n-0067
+kind: note
+author: agent
+created: 2026-08-25T15:16:10Z
+anchor:
+  rule: panel.dock.host-isolation
+  screen: docked
+status: addressed
+body: "Agent walkdown: the host page reached inside walkdown after all. A shadow
+  root keeps selectors out, but not inheritance - a host page with `* {
+  letter-spacing: 3px }` (or text-transform, word-spacing, font-style) sets it
+  on our shell element like any other element, and it flows down into every word
+  the panel and the embed draw. Judged against a deliberately hostile page: the
+  whole panel rendered l e t t e r - s p a c e d, and with
+  text-transform:uppercase it SHOUTED. Styling :host cannot fix it either - for
+  the host element, the document own rules win. Fixed by resetting the
+  inheritable properties on our first element INSIDE the boundary, where the
+  host page has no reach: panel.js host div and embed.js root div. Re-judged
+  against the same hostile page: letter-spacing normal, text-transform none,
+  word-spacing 0, font-style normal, our own font. The other half of the rule
+  was already true - the host page own buttons kept their hotpink Comic Sans
+  through all of it."

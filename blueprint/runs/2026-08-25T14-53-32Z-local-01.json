@@ -1,0 +1,378 @@
+{
+  "run_id": "2026-08-25T14-53-32Z-local-01",
+  "created": "2026-08-25T14:53:32Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "20b0465-dirty",
+  "blueprint_sha": "20b0465-dirty",
+  "results": [
+    {
+      "rule": "panel.dock.no-framing",
+      "status": "pass",
+      "statement_hash": "sha256:45e629ff8e85",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/dock-layout.png"
+      ],
+      "reasoning": "Docked into the page's own document: zero iframes on the page, nothing framing the host, and the document inset to make room - body laid out at 900px inside a 1400px window, with the panel occupying the rest. Radius and shadow on the page, and undocking put the margin, radius and shadow back exactly as the page had them, leaving the redock tab."
+    },
+    {
+      "rule": "panel.dock.wraps-the-page",
+      "status": "pass",
+      "statement_hash": "sha256:3b454ec97134",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/dock-layout.png"
+      ],
+      "reasoning": "The page is drawn as a sheet: inset on all four sides (8px margins plus the panel's own room), border-radius 10px, a real shadow, and a white ground under a page that declares no background of its own. Undocking restored every one of those to the page's own values. Whether it READS as a sheet on a desk is the half this rule keeps for a person."
+    },
+    {
+      "rule": "panel.dock.toolbar",
+      "status": "pass",
+      "statement_hash": "sha256:41dff56f44c2",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/dock-layout.png"
+      ],
+      "reasoning": "The bar carries exactly the session-level controls: the project name and the Blueprints tab that changes it, Prototype/App, pin mode, start/finish walkdown, the gear, and the undock control. Nothing rule-specific lives up there."
+    },
+    {
+      "rule": "panel.dock.controls-survive-use",
+      "status": "pass",
+      "statement_hash": "sha256:e55758ff63da",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/dock-mid-fade.png"
+      ],
+      "threads": [
+        "n-0068"
+      ],
+      "reasoning": "Failed when first judged and fixed during this walkdown - see n-0068. The slider froze one step into a drag (100 then 97 forever) because the ghost that the first movement summons is promoted into the top layer, and promoting re-shows the shell popover, which cancels the pointer's grip on anything inside it. The raise is now deferred until the pointer lets go. Re-judged by dragging the handle the whole way in ten steps: 100, 97, 85, 73, 62, 50, 38, 27, 15, 3, 0, settling at 0. Clicking the track and the arrow keys still work."
+    },
+    {
+      "rule": "panel.dock.above-the-app",
+      "status": "pass",
+      "statement_hash": "sha256:a2640eb509a6",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/dock-above-modal.png"
+      ],
+      "reasoning": "The host page opened a real <dialog> with showModal(), 90vw by 80vh, promoted to the browser's own top layer. The screenshot is the evidence: walkdown's bar and panel are drawn above it and undimmed by its backdrop, with the modal visible underneath. (An elementFromPoint reading says DIALOG at those coordinates, which is a property of the shell being click-through rather than of what is painted - hence judging this one by the picture.)"
+    },
+    {
+      "rule": "panel.dock.one-pin-mode",
+      "status": "pass",
+      "statement_hash": "sha256:855c16516e9a",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/dock-layout.png"
+      ],
+      "reasoning": "With the panel up, the bar's control is the only one: arming it left the embed's own floating badge stood down, and Escape - pressed at the page, not at the panel - turned pin mode off, with the bar's button agreeing immediately. One owner, one control, no second copy of the state."
+    },
+    {
+      "rule": "panel.dock.no-pin-mid-fade",
+      "status": "pass",
+      "statement_hash": "sha256:a25c933fc24f",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/dock-mid-fade.png"
+      ],
+      "reasoning": "On a screen with a design, moving the dial off either end disabled pin mode and said why rather than refusing silently: 'Slide fully to the prototype or the app first - half-faded, a pin has no surface to belong to.' Arming pin mode at an end and then sliding to the middle turned it off rather than leaving it armed over an ambiguous view; landing back on an end opened pinning again."
+    },
+    {
+      "rule": "panel.dock.own-skin",
+      "status": "pass",
+      "statement_hash": "sha256:93bfd901cfcd",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/dock-hostile-host.png"
+      ],
+      "threads": [
+        "n-0067"
+      ],
+      "reasoning": "The chrome renders in walkdown's own drafting blue (oklch(0.3 0.048 245) surface, pale ink) against a white host page, and the bar carries the theme. It did not survive a hostile host until this walkdown fixed the inheritance leak in n-0067 - with the host setting letter-spacing, text-transform and font-style on everything, the panel wore all three. It no longer does. Whether the skin reads as a different tool rather than part of the app stays with a person."
+    },
+    {
+      "rule": "panel.dock.host-isolation",
+      "status": "pass",
+      "statement_hash": "sha256:116d1940d94f",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/dock-hostile-host.png"
+      ],
+      "threads": [
+        "n-0067"
+      ],
+      "reasoning": "Failed when first judged and fixed during this walkdown - see n-0067. Judged both directions against a page that fights: walkdown's stylesheet never reached the host (its own button kept hotpink, Comic Sans and square corners throughout), but the host's inherited properties crossed into our shadow root, which is the half a shadow root does not cover. Resetting them on our first element inside the boundary closed it; re-judged with `* { letter-spacing: 4px !important; text-transform: uppercase !important }` on the host and the panel came out normal, none, 0. The @property registrations remain the one thing walkdown adds to the host document, as documented."
+    },
+    {
+      "rule": "panel.dock.chrome-not-a-pin-target",
+      "status": "pass",
+      "statement_hash": "sha256:466c5e212ed7",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/dock-layout.png"
+      ],
+      "reasoning": "In pin mode, a click on the bar opened no pin form - walkdown's own chrome is never a place to put a pin - and Escape left pin mode from there. The embed's own check is one marker on the shadow host, so it covers everything either delivery draws."
+    },
+    {
+      "rule": "panel.delivery.framed-isolation",
+      "status": "pass",
+      "statement_hash": "sha256:064bb8c0f0a4",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/framed-isolation.png"
+      ],
+      "reasoning": "The app is framed and gets a viewport of its own: 1080x894 inside a 1500px window. What the app draws against that viewport stays in it - a <dialog> opened by the framed page centred at 540, exactly half of its own 1080, and stayed inside the frame rather than over walkdown. Judged on a page with no CSS reset of its own; two earlier readings that looked off-centre were the test pages' own Tailwind preflight zeroing dialog margins, not the framing."
+    },
+    {
+      "rule": "panel.delivery.stale-copy-says-so",
+      "status": "pass",
+      "statement_hash": "sha256:124fa1fddaac",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/stale-copy-banner.png"
+      ],
+      "reasoning": "With a deliberately wrong build hash in the config - what an extension running yesterday's vendored copy would report - the panel showed the red banner: 'walkdown was updated - reload the extension (chrome://extensions), then this page, to run the current build.' The server's own hash of the shipped panel is what it compares against, and the tagged check keeps the payload honest."
+    },
+    {
+      "rule": "panel.delivery.anchors-still-required",
+      "status": "pass",
+      "statement_hash": "sha256:9699e8d0df4d",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/no-anchors-pin.png"
+      ],
+      "reasoning": "On a page carrying no anchors at all, pin mode still worked and the form opened saying 'unanchored spot - no anchored element here, pinned by position'. Feedback lands, and the missing anchor is named as the reason it cannot do better rather than being silently swallowed."
+    },
+    {
+      "rule": "panel.start.open-a-folder",
+      "status": "pass",
+      "statement_hash": "sha256:6e9246fa7579",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/start-no-server.png"
+      ],
+      "reasoning": "Pointed at a port with no server, the panel says so plainly instead of rendering an empty review surface: 'No blueprints open', an explanation that a browser tab cannot read your filesystem, the exact command to run (`walkdown serve`), an editable server address and a Connect button. No rules are shown, and nothing pretends to be loaded."
+    },
+    {
+      "rule": "panel.start.choose-a-blueprint",
+      "status": "pass",
+      "statement_hash": "sha256:9f0ded825795",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/start-choose-blueprint.png",
+        "runs/evidence/2026-08-25T14-53-32Z/start-pick-offers-the-trip.png"
+      ],
+      "threads": [
+        "n-0069"
+      ],
+      "reasoning": "Failed when first judged and fixed during this walkdown - see n-0069. The asking half was right all along: with two blueprints under the folder, both were listed by name and by the description each carries in its own walkdown.yml. What broke was the aftermath: in the docked delivery, picking navigated the host page and unloaded the panel with it - zero shadow roots afterwards. Now the jump happens only when framed; docked, the trip is offered as a link. Re-judged: the panel stays, loads the chosen blueprint's 8 rules, remembers the choice, and toasts where that blueprint lives."
+    },
+    {
+      "rule": "panel.rules.takes-you-there",
+      "status": "pass",
+      "statement_hash": "sha256:bc2cef92cdd3",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/start-pick-offers-the-trip.png"
+      ],
+      "reasoning": "Opening a rule moved the surface to its screen - start.html then choose-blueprint.html as I stepped - and picking a screen moved it too (settings.html). A rule whose screen is the one already on the desk is not re-navigated to. The blueprint case is the one that changed today: a real page load is now offered rather than performed in the docked delivery, which is what the rule's own last step asks for, and the step now says so."
+    },
+    {
+      "rule": "panel.rules.one-pane-per-tab",
+      "status": "pass",
+      "statement_hash": "sha256:5b742db34a44",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/panel-list.png"
+      ],
+      "reasoning": "With a rule open (track at -33.3333%), switching to the Screens tab returned the track to 0% and showed the screens list - the open rule did not come along to a tab it does not belong to. Coming back to Rules shows the list, not the rule you left."
+    },
+    {
+      "rule": "panel.rules.evidence-visible",
+      "status": "pass",
+      "statement_hash": "sha256:65b84178c291",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/evidence-rows.png"
+      ],
+      "reasoning": "Built during yesterday's walkdown and judged properly today. On a rule with runs: 'checks/local \u2713 pass \u00b7 agent \u00b7 45m ago', plus agent and human rows reading 'never run', each carrying its run id on hover where one exists. On a rule with nothing recorded, the row says 'never run' rather than showing an empty box - which is the honest form of the rule's 'says so'; the separate empty-state string only applies to a rule that demands no evidence at all, which lint does not allow."
+    },
+    {
+      "rule": "panel.threads.reply-in-place",
+      "status": "pass",
+      "statement_hash": "sha256:a0dd8bb2f5b9",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/thread-actions-refusal.png"
+      ],
+      "reasoning": "A thread on a rule opens in the panel with its whole stream (two messages), a composer at the foot, and exactly the transitions its state allows - Verify, Reopen and Waive for an addressed note. Replying happens there, without leaving the page under review."
+    },
+    {
+      "rule": "panel.threads.claim-never-accept",
+      "status": "pass",
+      "statement_hash": "sha256:7c4e1e2d1562",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/thread-actions-refusal.png"
+      ],
+      "reasoning": "With the name cleared in Settings, Verify was refused in the panel with 'Verify and waive are recorded under a person's name - set it in Settings first', Settings opened, and the thread stayed where it was. The server enforces the same rule independently - the newly tagged check posts verified as `agent` and as nobody, and gets 400 both times - so no client can talk its way past it."
+    },
+    {
+      "rule": "panel.threads.show-the-sketch",
+      "status": "blocked",
+      "reasoning": "Nothing to judge: no screen in this blueprint - or in the example's - carries a `proposal:`, and there are no files under proposals/. The behaviour has no input in this environment, and manufacturing a sketch to watch it render would be judging my own fixture rather than the build. Blocked rather than passed, so the ledger says why it has no verdict. It becomes judgeable the moment a screen is specced ahead of its design, which is exactly when it matters."
+    },
+    {
+      "rule": "panel.walkdown.session-survives-reload",
+      "status": "pass",
+      "statement_hash": "sha256:05503923167c",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/session-survives-reload.png"
+      ],
+      "reasoning": "Approved one rule in a running session, reloaded the page, and the session came back: '1 judged' before and after, with the actor intact. The draft is written to the project from the first verdict and restored on boot, so a reload - which the staleness banner itself sometimes prescribes - no longer eats judging work."
+    },
+    {
+      "rule": "panel.identity.attribution-visible",
+      "status": "pass",
+      "statement_hash": "sha256:1b6a789fde73",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/panel-settings.png"
+      ],
+      "reasoning": "The session strip shows the name before anything is recorded under it - 'Topher Fangio', reading 0 judged at the time - and it is a button that leads to Settings rather than an input, so the name is edited in one place. Nothing attributable happens without that name being on screen first."
+    },
+    {
+      "rule": "embed.pin.anchored-target",
+      "status": "pass",
+      "statement_hash": "sha256:6feaf28d3505",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/pin-on-prototype.png",
+        "runs/evidence/2026-08-25T14-53-32Z/pin-anchored.png"
+      ],
+      "reasoning": "In pin mode, hovering an anchored element highlighted it and turned the cursor to a crosshair; clicking opened the form named for that anchor (panel.rules-list) with the placeholder pin standing on the spot. The filed thread carries element panel.rules-list, offset (30,40) within it, and position (811,171) on the surface - the anchor for what it is about, the spot for where the finger was."
+    },
+    {
+      "rule": "embed.pin.right-project",
+      "status": "pass",
+      "statement_hash": "sha256:399853aef960",
+      "reasoning": "Pinned from a page that declares data-bp=\"example/blueprint\" and the thread landed in example/blueprint/threads/, anchored to screen waitlist-join and element waitlist.email - not in the blueprint the server was started in. The tagged check covers the same routing at the API level, asserting on the filed body because thread ids are only unique within a blueprint."
+    },
+    {
+      "rule": "embed.pin.both-surfaces",
+      "status": "pass",
+      "statement_hash": "sha256:77fdab028ac1",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/pin-on-prototype.png",
+        "runs/evidence/2026-08-25T14-53-32Z/pin-on-app-surface.png"
+      ],
+      "reasoning": "The same screen pinned on both surfaces: one thread recorded surface prototype at element panel.rules-list, another recorded surface app at element panel.fade, placed on the ghosted copy in front. The anchors exist in both because the app surface here is served from the same markup, and each pin says which surface it came from."
+    },
+    {
+      "rule": "embed.pin.follows-the-visible-surface",
+      "status": "pass",
+      "statement_hash": "sha256:7c9b1c0e3da1",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/pin-on-app-surface.png"
+      ],
+      "reasoning": "With the fade fully on the ghosted surface, the control said where a pin would land before one was placed - 'it lands on the app' - and the pin then landed there: the thread records surface app, not the prototype sitting behind it. The ghost takes the pointer only when pin mode is on and the fade has fully arrived, and the copy of walkdown inside it does the pinning."
+    },
+    {
+      "rule": "embed.pin.own-skin",
+      "status": "pass",
+      "statement_hash": "sha256:1f3400a09629",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/dock-hostile-host.png",
+        "runs/evidence/2026-08-25T14-53-32Z/thread-popover.png"
+      ],
+      "reasoning": "The feedback layer wears the same blueprint theme as the panel, from the same stylesheet - the surface's own shadow root reports data-theme=blueprint - and everything with a surface of its own (form, pins, popover, badge) lives inside that root. The host page's own controls were untouched throughout, and after the n-0067 fix the host's inherited styles no longer reach in either."
+    },
+    {
+      "rule": "embed.pin.viewport-recorded",
+      "status": "pass",
+      "statement_hash": "sha256:6971846eb2cc",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/pin-at-mobile-viewport.png"
+      ],
+      "reasoning": "With the mobile preset chosen, a pin filed at that width recorded viewport {name: mobile, width: 390} alongside its anchor and spot. A desktop pin on the same screen recorded 1080. A note about a layout therefore carries the width it was made at, and cannot be read against the wrong one."
+    },
+    {
+      "rule": "embed.pin.form-is-chrome",
+      "status": "pass",
+      "statement_hash": "sha256:cac6da4be24f",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/pin-on-prototype.png"
+      ],
+      "reasoning": "With the form open and pin mode still on, clicking inside the form did not start a second pin - exactly one form remained - and the cursor inside it is the ordinary one rather than the crosshair. Pin mode does not reach through walkdown's own UI to the surface underneath."
+    },
+    {
+      "rule": "embed.pin.surface-coordinates",
+      "status": "pass",
+      "statement_hash": "sha256:7d33bd0c80b2",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/pin-at-mobile-viewport.png"
+      ],
+      "reasoning": "Positions are recorded in the surface's own CSS pixels. A pin placed in a 1080-wide framed surface recorded (811,171) - the coordinates of that document, not the 1500px window it sat in. At the mobile preset, where the frame is laid out at 390 and scaled to fit, the recorded position was (20,10) in the surface's own space rather than anything scaled. Anchored pins now carry an offset within their element as well, so the same spot survives the element moving."
+    },
+    {
+      "rule": "embed.pin.coordinate-fallback",
+      "status": "pass",
+      "statement_hash": "sha256:3c6fb006c94b",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/no-anchors-pin.png"
+      ],
+      "reasoning": "On a page with no anchors, clicking anywhere still opened the form - 'unanchored spot, no anchored element here, pinned by position' - and the pin is kept by its x/y within the surface. Feedback is never blocked by a missing anchor."
+    },
+    {
+      "rule": "embed.threads.note-first",
+      "status": "pass",
+      "statement_hash": "sha256:870249ed1a7a",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/thread-popover.png"
+      ],
+      "reasoning": "Opening a pin beside the page leads with the conversation: the id, a status chip and the kind sit on one compact line with the close control, the anchor line beneath it, and then the note itself as the first message with its author and age. Four messages rendered as one stream. Provenance is condensed to lines rather than stacked sentences; whether the note leads strongly enough is the half kept for a person."
+    },
+    {
+      "rule": "embed.threads.actions-in-context",
+      "status": "pass",
+      "statement_hash": "sha256:9878eb8459f2",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/thread-popover.png"
+      ],
+      "reasoning": "The popover's actions are short verbs on one row - Reply, and close - with 'Enter sends' as the only standing hint and no instructions parked in the reply box. It deliberately carries no lifecycle transitions: those need a named actor and a reason, and they live in the panel and the CLI where that can be asked for properly, which is why the reason-when-chosen half of this rule is exercised there instead."
+    },
+    {
+      "rule": "threads.conversation.new-since-you-looked",
+      "status": "pass",
+      "statement_hash": "sha256:e3e890cf2091",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/panel-threads-collapsed.png"
+      ],
+      "reasoning": "With a read-mark seeded at yesterday, the collapsed thread carried a '1 new' badge and opening it drew the New line above the unread message, which stayed put while reading. Going back cleared the badge, and the mark persisted to storage under the blueprint's own key. Only that thread was marked; the other two on the rule were not."
+    },
+    {
+      "rule": "threads.conversation.append-only",
+      "status": "pass",
+      "statement_hash": "sha256:06a879b1032c",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/panel-thread-screen.png"
+      ],
+      "reasoning": "Nothing on an open thread offers editing or deleting a message, and nothing offers a reaction - the only controls are the composer and the lifecycle verbs the state allows (Verify, Reopen, Waive). A thread that has ended shows how it ended and offers no way back, because the lifecycle has none, while replying stays possible: the record continues, the state does not."
+    },
+    {
+      "rule": "screens.identity.fragment-is-identity",
+      "status": "pass",
+      "statement_hash": "sha256:ac30c2879d52",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/fragment-is-identity.png"
+      ],
+      "reasoning": "Docked on the example's admin prototype: the bare path resolved to waitlist-admin, and #invite-batch resolved to waitlist-invite-batch - a screen in its own right, not a footnote on the page behind it. A fragment nobody has enumerated fell back to the screen at that path rather than to nothing. Both states are reachable by URL on load, which is what makes them walkable at all."
+    },
+    {
+      "rule": "screens.identity.follows-navigation",
+      "status": "pass",
+      "statement_hash": "sha256:e8763cbea8b6",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/fragment-is-identity.png"
+      ],
+      "reasoning": "The URL changed without a reload and walkdown re-answered every time: setting the hash moved the reported screen to waitlist-invite-batch, and pressing Back moved it home again. The panel's own answer follows, so a pin placed after the navigation files against the screen you are actually on. pushState remains the case it watches for rather than pretends to hear, as the rule says."
+    },
+    {
+      "rule": "screens.surfaces.stand-in-app",
+      "status": "pass",
+      "statement_hash": "sha256:8c976257c8c0",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/stand-in-app.png"
+      ],
+      "reasoning": "Switching to App on a walkdown screen served /stand-in/review: the design returned as the app in the emerald theme, ringed and labelled 'stand-in app - the design, served as the app', carrying all 14 of the screen's own anchors. That is what let both-surfaces and follows-the-visible-surface be judged at all on this blueprint - a pin placed on it recorded surface app - and the label is what stops it being mistaken for a build."
+    },
+    {
+      "rule": "panel.delivery.one-implementation",
+      "status": "pass",
+      "statement_hash": "sha256:cb78287f2077",
+      "reasoning": "Now carried by a tagged check as well as by inspection: the extension's vendored panel.js and embed.js are byte-identical to what the server ships, and the extension adds only its bootstrap. Judged in the browser too - the same panel behaved identically in the script-tag delivery (docked onto three different host pages) and in the framed delivery."
+    }
+  ]
+}
