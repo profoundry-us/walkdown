@@ -251,3 +251,46 @@ test(
     expect(after.status).toBe('addressed');
   }
 );
+
+test(
+  'a trip that means a real page load is taken when walkdown survives it, offered when it does not',
+  { tag: '@rule:panel.rules.takes-you-there' },
+  async ({ page }) => {
+    // The example blueprint's first screen lives on a host we do not run here.
+    // Standing in for it keeps the check about the decision, not the server.
+    await page.route('**/index.html', (r) =>
+      r.fulfill({ contentType: 'text/html', body: '<h1>The other project</h1>' }));
+
+    const start = async (reinjects) => {
+      const url = FIXTURE.replace('docked.html', 'extension.html') +
+        `&build=stale&bp=&reinjects=${reinjects}`;
+      // Land on the fixture's own origin first, then forget any remembered
+      // choice THERE — the panel remembers per origin, and clearing it from
+      // whatever page the last trip ended on clears the wrong one.
+      await page.goto(url);
+      await page.evaluate(() => localStorage.clear());
+      await page.reload();
+      // No blueprint declared and two on the server: the panel must ask.
+      await expect(page.getByText(/Which blueprint/i)).toBeVisible();
+      await page.getByText(/walkdown-example/i).first().click();
+    };
+
+    /*
+     * Carried by the extension: its content script runs on the next page too,
+     * so walkdown is waiting on the other side and simply goes.
+     */
+    await start('1');
+    await page.waitForURL(/index\.html/, { timeout: 10000 });
+    expect(page.url()).toContain('index.html');
+
+    /*
+     * Carried by a script tag: navigating would unload the very script drawing
+     * the panel, so the trip is offered rather than taken.
+     */
+    await start('0');
+    const link = page.locator('a.link', { hasText: /open/i }).first();
+    await expect(link).toBeVisible();
+    await expect(link).toHaveAttribute('href', /index\.html/);
+    expect(page.url(), 'a script tag delivery must stay put').toContain('extension.html');
+  }
+);

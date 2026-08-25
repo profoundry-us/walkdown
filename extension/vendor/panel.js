@@ -35,6 +35,13 @@
   let SERVER = cfg.server ?? new URL(script?.src ?? 'http://localhost:4700').origin;
   let BP = cfg.bp ?? script?.dataset.bp ?? '';
   /*
+   * Whether this delivery comes back after a real page load. The extension
+   * says so, because its content script runs on every page; a script tag
+   * cannot, because the navigation unloads it. It decides whether a trip the
+   * panel wants to make is taken or merely offered.
+   */
+  const REINJECTS = cfg.reinjects === true;
+  /*
    * Where the choice of blueprint is remembered. The extension hands us
    * chrome.storage — its own, per-profile, and untouched by a site clearing
    * its data. A page that loaded us from a script tag has already said which
@@ -2770,15 +2777,20 @@
       const first = (data.storyboard ?? []).find((sc) => screenUrl(sc, 'app') ?? screenUrl(sc, 'prototype'));
       if (first && !currentScreen()) {
         /*
-         * Framed, walkdown owns the frame and can simply take you there.
-         * Docked, it lives INSIDE the page's own document: navigating would
-         * unload the very script drawing this panel, and you would arrive at
-         * the other site with no walkdown at all - which is what used to
-         * happen. So the trip is offered rather than taken, which is also
-         * what this rule says about moves that mean a real page load.
+         * Three deliveries, two answers. Framed, walkdown owns the frame and
+         * can simply take you there. Docked BY THE EXTENSION it can go too:
+         * the content script matches every URL, so walkdown is waiting on the
+         * other side. Docked by a script tag it cannot - navigating unloads
+         * the very script drawing this panel, and you would arrive at the
+         * other site with no walkdown at all, which is what used to happen.
+         * Only that last case offers the trip instead of taking it.
          */
         if (FRAMED) {
           if (goTo(first)) return;
+        } else if (REINJECTS) {
+          const url = screenUrl(first, 'app') ?? screenUrl(first, 'prototype');
+          if (url) { location.href = url; return; }
+          render();
         } else {
           const url = screenUrl(first, 'app') ?? screenUrl(first, 'prototype');
           render();

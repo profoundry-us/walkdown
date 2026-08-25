@@ -23,6 +23,14 @@ if (!target) {
     // Asked once in the panel, where the descriptions are readable.
     bp: '',
     stylesheet: chrome.runtime.getURL('walkdown.css'),
+    /*
+     * The extension re-injects itself into whatever page loads next — its
+     * content script matches every URL — so unlike a script tag, walkdown
+     * survives a real navigation and can simply take you where you asked to
+     * go. A page carrying walkdown by <script> cannot: navigating unloads the
+     * very script drawing the panel, so it offers the trip instead.
+     */
+    reinjects: true,
     anchorAttribute: 'data-testid',
     // The panel's choices live in the extension's own storage, so they survive
     // a site clearing its data and never touch any page's localStorage.
