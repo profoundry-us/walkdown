@@ -58,6 +58,24 @@ stories:
             - Pin mode can be turned on and off there
           statement_hash: sha256:41dff56f44c2
 
+      - id: panel.dock.surface-swap-is-instant
+        origin: walkdown
+        statement: Swapping between the design and the app costs no page load - the ghosted copy is kept between looks and only reloaded when what it should show has actually changed - because comparing two surfaces means going back and forth, and a reload on every crossing flashes the thing you are trying to compare.
+        verify: [agent, human]
+        screens: [review]
+        steps:
+          given:
+            - A screen with both surfaces, the ghost showing one of them
+          when:
+            - Swap to the other surface and back, several times
+          then:
+            - Only the first look loads the page; every crossing after it is instant, with nothing reloading
+            - The hidden copy takes no clicks and cannot be pinned while it is hidden
+            - Resizing the window re-measures the copy rather than reloading it
+            - What does reload it - a different screen, a different surface, a viewport preset, the end of a sketch detour - reloads it, so what you compare is never the wrong page
+            - The copy is as old as its last load, and reloading walkdown refreshes it
+          statement_hash: sha256:c74a4c999299
+
       - id: panel.dock.controls-survive-use
         origin: thread:n-0022
         statement: A control in the bar survives being used - the fade slider can be grabbed and dragged the whole way, because nothing rebuilds the element the pointer is holding until the pointer lets go.

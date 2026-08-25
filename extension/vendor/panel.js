@@ -520,8 +520,10 @@
     ghostWidth = w;
     if (docked) paintDesk(true);
     syncZoomBadge();
-    // The ghost renders at the same viewport or the comparison lies.
-    if (ghost) { setGhost(false); setFade(ghostOpacity || 1); }
+    // The ghost renders at the same viewport or the comparison lies. A preset
+    // changes how the page lays out, not just how big its box is, so this is
+    // one of the few things that genuinely reloads it.
+    if (ghost) { const back = ghostOpacity; setGhost(false); setFade(back || 1); }
     renderBar();
   }
 
@@ -529,8 +531,9 @@
     if (!docked || !FRAMED) return;
     placeAppFrame(true);
     // The ghost states its size in pixels, so it has to be told about a resize
-    // rather than being carried along by percentages.
-    if (ghost) { setGhost(false); setFade(ghostOpacity || 1); }
+    // rather than being carried along by percentages - re-measured, not
+    // rebuilt, or every drag of the window edge reloads the page inside it.
+    sizeGhost();
     if (hideAppOn) hideApp(true);
     syncHeadlessCover();
     syncZoomBadge();
@@ -1366,6 +1369,12 @@
    */
   const midFade = () => protoShare !== null && ghostOpacity > 0 && ghostOpacity < 1;
 
+  /** Where the ghost's surface lives right now, as a URL — or null if nowhere. */
+  function ghostUrlNow() {
+    const src = ghostSource(screenById(ghostOverride) ?? currentScreen());
+    return src ? (src.url ?? api(src.path)) : null;
+  }
+
   /** The surface the ghost carries: always the one the page itself is not. */
   const ghostSurface = () => (pageSurface() === 'prototype' ? 'app' : 'prototype');
 
@@ -1390,6 +1399,8 @@
    * the page hidden underneath the one you are looking at.
    */
   let ghostReady = false;
+  /** What the kept copy is showing, so a toggle can reuse it and a change cannot. */
+  let ghostSrc = null;
 
   /** Repaint the bar's state without rebuilding it — see `dragging`. */
   function paintBar() {
@@ -1494,9 +1505,22 @@
       // Mid-drag the ghost stays, emptied: tearing it down calls render(), and
       // sliding back off the end would then have nothing to fade up.
       if (dragging && ghost) { ghost.style.opacity = 0; paintGhostReach(); return paintBar(); }
-      return setGhost(false);
+      /*
+       * Landing on the page's own surface hides the copy rather than throwing
+       * it away, so coming back is instant. The one thing that must still end
+       * here is a detour to a proposal sketch: looking at a sketch is
+       * temporary by rule, and a kept one would quietly return.
+       */
+      if (!ghost || ghostOverride) return setGhost(false);
+      ghost.style.opacity = 0;
+      paintGhostReach();
+      pushContexts();
+      return render();
     }
-    if (ghost) {
+    // The kept copy is only reusable while it is showing what the ghost should
+    // be showing. When the screen moved under it, this falls through to a
+    // rebuild rather than fading up yesterday's page.
+    if (ghost && ghostSrc === ghostUrlNow()) {
       ghost.style.opacity = wanted;
       paintGhostReach();
       pushContexts();
@@ -2288,20 +2312,65 @@
   }
 
   /** The prototype for this screen, laid over the running app. */
+  /**
+   * The ghost's geometry, said outright in pixels — the stage and the framed
+   * copy inside it. Kept apart from building the ghost so a window resize
+   * re-measures rather than reloading the page in there.
+   */
+  function sizeGhost() {
+    const frame = ghostFrame();
+    if (!ghost || !frame) return;
+    const { availW, availH } = frameSpace();
+    // At a preset the ghost lays out at that width too, scaling down whole
+    // when the stage is narrower - the same rule the app frame follows.
+    const gs = ghostWidth ? Math.min(1, availW / ghostWidth) : 1;
+    ghost.style.width = `${availW}px`;
+    ghost.style.height = `${availH}px`;
+    ghost.style.alignItems = ghostWidth ? 'flex-start' : 'center';
+    frame.style.width = `${ghostWidth || availW}px`;
+    frame.style.height = `${gs < 1 ? availH / gs : availH}px`;
+    frame.style.transform = gs < 1 ? `scale(${gs})` : '';
+    frame.style.transformOrigin = 'top center';
+    frame.style.maxWidth = 'none';
+    frame.style.maxHeight = 'none';
+    frame.style.flex = 'none';
+  }
+
   function setGhost(on) {
     if (!on) {
       ghost?.remove();
       ghost = null;
+      ghostSrc = null;
       ghostReady = false;     // whatever was in there is gone with it
       ghostOverride = null;   // the detour ends with the overlay
       protoShare = null;      // and the dial goes back to following the page
       render();
       return;
     }
-    ghostReady = false;
     const screen = screenById(ghostOverride) ?? currentScreen();
     const src = ghostSource(screen);
     if (!src) return;
+    const url = src.url ?? api(src.path);
+    /*
+     * The copy is kept between looks. Swapping surfaces used to tear the ghost
+     * down and load it again on the way back, which is a fresh page load - and
+     * a visible flash - every time you compare. What actually invalidates it is
+     * the source changing: another screen, another surface, a viewport preset
+     * that lays the page out differently. Those all arrive here as a different
+     * url or through a deliberate teardown; a plain toggle does not, so a
+     * plain toggle is now instant. The page in there is as old as the last
+     * load, which is the trade: a reload of walkdown refreshes it.
+     */
+    if (ghost && ghostSrc === url) {
+      sizeGhost();
+      ghost.style.opacity = ghostOpacity;
+      paintGhostReach();
+      render();
+      return;
+    }
+    ghost?.remove();
+    ghostReady = false;
+    ghostSrc = url;
     // The stage owns the opacity so the backdrop fades with the prototype: at
     // full strength the app is properly covered, not blended into. The
     // checkerboard says "nothing is here" where the prototype does not reach,
@@ -2334,19 +2403,9 @@
     // An iframe is a replaced element: insets alone leave it at its intrinsic
     // 300x150, so the size is explicit.
     const frame = document.createElement('iframe');
-    // At a preset the ghost lays out at that width too, scaling down whole
-    // when the stage is narrower - the same rule the app frame follows.
-    const stageW = innerWidth - (W + GAP * 3);
-    const gs = ghostWidth ? Math.min(1, stageW / ghostWidth) : 1;
-    if (ghostWidth) ghost.style.alignItems = 'flex-start';
-    // Pixels here too: a percentage of a box that failed to size is nothing.
-    frame.style.cssText = `width:${ghostWidth ? ghostWidth + 'px' : box.availW + 'px'};
-      height:${gs < 1 ? box.availH / gs : box.availH}px;
-      ${gs < 1 ? `transform:scale(${gs}); transform-origin:top center;` : ''}
-      max-width:none; max-height:none; flex:none;
-      border:0; background:#fff;
+    frame.style.cssText = `border:0; background:#fff;
       box-shadow:0 0 0 1px rgba(20,25,40,.14), 0 10px 40px rgba(20,25,40,.18);`;
-    frame.src = src.url ?? api(src.path);
+    frame.src = url;
     /*
      * A surface carrying walkdown announces itself while it parses, so by the
      * time the frame has loaded the answer is in. Nobody there means the ghost
@@ -2359,6 +2418,7 @@
       renderBar();
     });
     ghost.appendChild(frame);
+    sizeGhost();
     // A proposal is an agent's sketch, not design's work. It says so on its
     // face, so nobody walks a screen down against a drawing we made up.
     if (src.proposed) {
