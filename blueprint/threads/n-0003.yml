@@ -8,7 +8,7 @@ anchor:
   position:
     x: 501
     y: 158
-status: addressed
+status: verified
 body: I should be able to pin on the app as well as on the prototype. I thought
   this was the whole point of using the `data-testid` or `data-anchor`.
 replies:
