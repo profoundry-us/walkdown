@@ -29,7 +29,18 @@
        pixels shows up here and nowhere else.</p>
   </div>
   <div style="height: 90vh"></div>
-  <script src="http://localhost:4700/panel.js" data-bp="blueprint"></script>
-  <script src="http://localhost:4700/embed.js" data-walkdown></script>
+  <!-- Which walkdown to carry is a parameter, not a constant. Recording runs
+       bind the address the blueprint declares; a developer iterating binds a
+       throwaway port so their own `walkdown serve` can keep running. -->
+  <script>
+    const WD = new URLSearchParams(location.search).get('wd') || 'http://localhost:4700';
+    for (const [file, attr, value] of [['panel.js', 'data-bp', 'blueprint'],
+                                       ['embed.js', 'data-walkdown', '']]) {
+      const s = document.createElement('script');
+      s.src = `${WD}/${file}`;
+      s.setAttribute(attr, value);
+      document.body.appendChild(s);
+    }
+  </script>
 </body>
 </html>

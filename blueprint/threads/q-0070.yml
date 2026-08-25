@@ -211,4 +211,46 @@ replies:
       checks now run on the declared port and refuse to reuse an existing server
       there, since one already on 4700 is serving the real blueprint and these
       checks write."
+  - author: topher
+    created: 2026-08-25T21:40:00Z
+    body: "Write the remaining five checks. And on running them independently: a
+      developer or an agent will run the checks themselves while building, and
+      then we run them for the walkdown. Does that break here?"
+  - author: agent
+    created: 2026-08-25T22:05:00Z
+    body: "It broke, in two ways, both now fixed. First, the suite bound the
+      address the blueprint declares and refused to start when anything else
+      held it - so a developer with `walkdown serve` running could not run the
+      checks at all. Second, every ad-hoc run appended a run record, so a red
+      mid-build run flipped rules to fail in the project's own status. The split
+      follows Topher's own distinction: iterating while building is not
+      of-record, so `npm run checks:dev` binds a throwaway port and records
+      nothing, while `walkdown run` and CI bind the declared address and append.
+      Verified both: dev mode passes 11 checks beside a running server and
+      leaves the ledger at 35 runs untouched. The fixture takes the walkdown
+      origin as a parameter rather than hard-coding it, and the prototype pages
+      now load their embed origin-relative, which also stops a dev-mode run from
+      reaching across to a real server on 4700.
+
+      All five written, so eleven browser checks now cover twelve of the
+      fourteen rules that were falsely green. Only embed.pin.right-project is
+      still uncovered, and honestly: it describes resolving which project a page
+      belongs to, and that routing does not exist.
+
+      Three defects in my own checks, worth recording because each was the
+      check lying rather than the build: (1) tests raced each other - they drive
+      one server over one blueprint and several WRITE to it, so the suite is now
+      single-worker; (2) a sitting left open by the draft check was inherited by
+      the next one, whose Start-walkdown click actually FINISHED it, so sittings
+      are now explicit through ensureSession and endSession; (3) the
+      both-surfaces check was flaky, then wrong: it scanned for a pin-free spot
+      with elementFromPoint, which cannot see markers inside the embed's shadow
+      root, so it kept clicking an existing pin and opening that conversation
+      instead. It now reads marker geometry through the locator API. Stable
+      across three consecutive runs before being recorded.
+
+      Anchors added along the way, since checks must select by anchor: the
+      replies line, thread actions, the stale-copy banner, the pin badge, the
+      pin form and markers, the detail pane's verdict pair, feedback box and
+      stepper. The storyboard's 43 promised anchors are now largely real."
 

@@ -5,9 +5,10 @@
  */
 import { expect, test } from '@playwright/test';
 
-// The host page the panel docks into. Absolute, because baseURL names the
-// system under test — walkdown itself — not the fixture that hosts it.
-const FIXTURE = 'http://localhost:4712/docked.html';
+// The host page the panel docks into — absolute, because baseURL names the
+// system under test (walkdown itself), not the fixture that hosts it. Both
+// come from the config so the two run modes address the same pair of servers.
+import { FIXTURE, WD_ORIGIN } from '../playwright.config.js';
 
 /** Open the fixture and wait for the panel to have drawn its chrome. */
 async function docked(page) {
@@ -21,7 +22,7 @@ test(
   { tag: '@rule:panel.identity.default-actor' },
   async ({ page }) => {
     await docked(page);
-    await page.getByTestId('panel.walk').click();          // start a walkdown
+    await ensureSession(page);                              // a walkdown is running
     // The name is on screen without anyone typing it: nobody is attributed silently.
     const name = page.getByTestId('panel.actor-name');
     await expect(name).toBeVisible();
@@ -35,22 +36,48 @@ test(
   }
 );
 
+/*
+ * Make sure a sitting is running. The button toggles, and the panel restores an
+ * unfinished sitting from the server on load — so a bare click can END one that
+ * a previous check left open rather than starting a new one.
+ */
+async function ensureSession(page) {
+  if ((await page.getByTestId('panel.actor').count()) === 0)
+    await page.getByTestId('panel.walk').click();
+  await expect(page.getByTestId('panel.actor')).toBeVisible();
+}
+
+/** End whatever sitting is running, so the next check starts from nothing. */
+async function endSession(page) {
+  if (await page.getByTestId('panel.actor').count()) {
+    await page.getByTestId('panel.finish').click();
+    await expect(page.getByTestId('panel.actor')).toBeHidden();
+  }
+}
+
 /** Start a session and open the first rule in the list. */
 async function session(page) {
   await docked(page);
-  await page.getByTestId('panel.walk').click();
-  await expect(page.getByTestId('panel.actor')).toBeVisible();
+  await ensureSession(page);
   await page.getByTestId('panel.rules-list').locator('button').first().click();
   await expect(page.getByTestId('detail.rule-id')).toBeVisible();
   return page.getByTestId('detail.rule-id').textContent();
 }
 
+/** What the ledger currently says about one rule's human tier. */
+const humanState = (page, rule) =>
+  page.evaluate(async ([origin, id]) => {
+    const r = await fetch(`${origin}/api/blueprint`);
+    const row = (await r.json()).rows.find((x) => x.rule === id);
+    return row ? row.human.state : null;
+  }, [WD_ORIGIN, rule]);
+
 /** What the server currently holds as the unfinished sitting. */
 const draft = (page) =>
-  page.evaluate(async () => {
-    const r = await fetch('http://localhost:4700/api/draft');
+  page.evaluate(async (origin) => {
+    const r = await fetch(`${origin}/api/draft`);
     return r.ok ? r.json() : null;
-  });
+  }, WD_ORIGIN);
 
 test(
   'a verdict is written to the project as it is given, and survives the browser',
@@ -72,12 +99,155 @@ test(
     await page.reload();
     await expect(page.getByTestId('panel.actor')).toBeVisible();
     expect((await draft(page)).draft.verdicts[rule.trim()]).toBeTruthy();
+
+    // Put the server back: an unfinished sitting is exactly what the next
+    // check would otherwise inherit.
+    await endSession(page);
   }
 );
 
+/** The ledger's own view, straight from the server. */
+const payload = (page) =>
+  page.evaluate(async (origin) => (await fetch(`${origin}/api/blueprint`)).json(), WD_ORIGIN);
+
+/** Open one rule by id, from the list. */
+async function openRule(page, rule) {
+  // Scoped to the list: rule ids also appear on cross-references inside an
+  // open rule, and those are off-screen in a slid-away pane.
+  const row = page.getByTestId('panel.rules-list').locator(`[data-rule="${rule}"]`).first();
+  await row.scrollIntoViewIfNeeded();
+  await row.click();
+  await expect(page.getByTestId('detail.rule-id')).toHaveText(rule);
+  await expect(page.getByTestId('detail.statement')).toBeVisible();
+}
+
 /*
- * panel.signoff.spec-pair-derived is deliberately NOT covered here yet. A first
- * attempt drove the rule stepper and hung; shipping a flaky check would put the
- * rule back to green on evidence nobody trusts, which is the exact failure this
- * whole suite exists to undo. It stays in the agent's cover queue.
+ * The verdict pair only exists while a sitting is running, and the pane
+ * re-renders once the session is in hand — so callers that read the pair wait
+ * for it rather than the render that arrives a tick earlier without it.
  */
+async function openRuleForVerdict(page, rule) {
+  await openRule(page, rule);
+  await expect(page.getByTestId('detail.verdict').locator('button').first()).toBeVisible();
+}
+
+test(
+  'which verdict pair a rule shows is derived from the ledger, not fixed chrome',
+  { tag: '@rule:panel.signoff.spec-pair-derived' },
+  async ({ page }) => {
+    await docked(page);
+    await endSession(page);
+    const { rows } = await payload(page);
+    const built = rows.find((r) => r.built && r.verify.includes('human'));
+    const unbuilt = rows.find((r) => !r.built && r.verify.includes('human'));
+    expect(built, 'the blueprint needs a built rule to compare').toBeTruthy();
+    expect(unbuilt, 'and one with no build evidence').toBeTruthy();
+
+    await ensureSession(page);
+
+    // Evidence in the ledger: a build verdict.
+    await openRuleForVerdict(page, built.rule);
+    const withEvidence = (await page.getByTestId('detail.verdict').locator('button').allTextContents()).join(' ');
+    expect(withEvidence).toMatch(/Pass/);
+    expect(withEvidence).not.toMatch(/Approve/);
+
+    // None: sign-off, and the panel says why it is offering that instead.
+    await page.getByTestId('detail.back').click();
+    await openRuleForVerdict(page, unbuilt.rule);
+    const without = (await page.getByTestId('detail.verdict').locator('button').allTextContents()).join(' ');
+    expect(without).toMatch(/Approve/);
+    expect(without).toMatch(/Refine/);
+    await expect(page.getByText(/No build evidence yet/)).toBeVisible();
+  }
+);
+
+test(
+  'finishing appends a verdict under a named person; discarding records nothing',
+  { tag: '@rule:panel.walkdown.records-to-ledger' },
+  async ({ page }) => {
+    await docked(page);
+    await endSession(page);
+    const { rows } = await payload(page);
+    const rule = rows.find((r) => r.built && r.verify.includes('human')).rule;
+    const before = (await payload(page)).rows.find((r) => r.rule === rule).human.state;
+
+    // Discarded: a sitting with nothing judged leaves the ledger as it was.
+    await ensureSession(page);
+    await page.getByTestId('panel.finish').click();
+    await expect(page.getByTestId('panel.actor')).toBeHidden();
+    expect((await payload(page)).rows.find((r) => r.rule === rule).human.state).toBe(before);
+
+    // Finished: the verdict given in the panel is what the ledger gains.
+    await ensureSession(page);
+    await openRuleForVerdict(page, rule);
+    await page.getByTestId('detail.verdict').locator('button').first().click();
+    await expect(page.getByTestId('detail.judged')).toHaveText(/1 judged/);
+    await page.getByTestId('panel.finish').click();
+    await expect(page.getByTestId('panel.actor')).toBeHidden();
+
+    await expect
+      .poll(async () => (await payload(page)).rows.find((r) => r.rule === rule).human.state)
+      .toBe('pass');
+    // And attributed to the person who gave it, never to an agent.
+    const cell = (await payload(page)).rows.find((r) => r.rule === rule).human;
+    expect(cell.actor).toBeTruthy();
+    expect(cell.actor).not.toBe('agent');
+  }
+);
+
+const EXT_FIXTURE = (build) =>
+  FIXTURE.replace('docked.html', 'extension.html') + `&build=${encodeURIComponent(build)}`;
+
+test(
+  'the panel says plainly when the copy it is running has gone stale',
+  { tag: '@rule:panel.delivery.stale-copy-says-so' },
+  async ({ page }) => {
+    // The extension's vendored copy only updates when the extension is
+    // reloaded, so the panel compares what it is running against what the
+    // server ships. A build that does not match must say so.
+    await page.goto(EXT_FIXTURE('a-build-that-is-not-current'));
+    await expect(page.getByTestId('panel.bar')).toBeVisible();
+    const notice = page.getByTestId('panel.stale');
+    await expect(notice).toBeVisible();
+    await expect(notice).toContainText(/reload the extension/i);
+
+    // And a copy that matches says nothing — a warning that is always on is
+    // a warning nobody reads.
+    const { panelHash } = await payload(page);
+    expect(panelHash, 'the server must publish the build it ships').toBeTruthy();
+    await page.goto(EXT_FIXTURE(panelHash));
+    await expect(page.getByTestId('panel.bar')).toBeVisible();
+    await expect(page.getByTestId('panel.stale')).toHaveCount(0);
+  }
+);
+
+test(
+  'the panel will not accept work without a named person, and asks for the reason',
+  { tag: '@rule:panel.threads.claim-never-accept' },
+  async ({ page }) => {
+    await docked(page);
+    await endSession(page);
+    const { rows, threads } = await payload(page);
+    const addressed = (threads ?? []).find((t) => t.status === 'addressed' && t.anchor?.rule);
+    expect(addressed, 'the blueprint needs an addressed thread to accept').toBeTruthy();
+
+    await openRule(page, addressed.anchor.rule);
+    // Open the conversation: the thread is a screen of its own.
+    await page.locator(`[data-open-thread="${addressed.id}"]`).first().click();
+    const verify = page.getByTestId('thread.actions').filter({ hasText: /Verify/ }).first();
+    await expect(verify).toBeVisible();
+
+    // Clear the name, then try to accept: agents may claim work, only a person
+    // accepts it, and the panel obeys that rather than trusting the server to.
+    await page.getByTestId('panel.desk-tuner').click();
+    await page.getByTestId('settings.actor').fill('');
+    await page.getByTestId('panel.desk-tuner').click();
+    await verify.click();
+    await expect(page.getByTestId('thread.say')).toBeVisible();
+    await expect(page.getByTestId('thread.say')).toContainText(/name/i);
+
+    // The thread is untouched: nothing was accepted under nobody's name.
+    const after = (await payload(page)).threads.find((t) => t.id === addressed.id);
+    expect(after.status).toBe('addressed');
+  }
+);

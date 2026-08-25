@@ -1,0 +1,20 @@
+<!doctype html>
+<!-- The EXTENSION delivery's shape: its bootstrap publishes the build it is
+     running on window.__walkdownConfig before the panel loads. A vendored copy
+     goes stale when the extension is not reloaded, and that is the only way the
+     panel can tell — so this fixture can pretend to be any build. -->
+<html lang="en">
+<head><meta charset="utf-8"><title>Fixture — extension delivery</title></head>
+<body>
+  <h1 data-testid="host.title">Carried by the extension</h1>
+  <script>
+    const q = new URLSearchParams(location.search);
+    const WD = q.get('wd') || 'http://localhost:4700';
+    window.__walkdownConfig = { server: WD, buildHash: q.get('build') || 'stale-build-hash' };
+    const s = document.createElement('script');
+    s.src = `${WD}/panel.js`;
+    s.setAttribute('data-bp', 'blueprint');
+    document.body.appendChild(s);
+  </script>
+</body>
+</html>

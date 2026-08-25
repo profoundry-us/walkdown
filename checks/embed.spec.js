@@ -7,9 +7,10 @@
  */
 import { expect, test } from '@playwright/test';
 
-// The host page the panel docks into. Absolute, because baseURL names the
-// system under test — walkdown itself — not the fixture that hosts it.
-const FIXTURE = 'http://localhost:4712/docked.html';
+// The host page the panel docks into — absolute, because baseURL names the
+// system under test (walkdown itself), not the fixture that hosts it. Both
+// come from the config so the two run modes address the same pair of servers.
+import { FIXTURE, WD_ORIGIN } from '../playwright.config.js';
 
 /** The fixture with pin mode armed, ready to receive a click. */
 async function pinning(page) {
@@ -115,5 +116,65 @@ test(
     // pixels it would equal y, and the pin would drift the moment anyone
     // scrolled - which is the failure this rule exists to prevent.
     expect(t.anchor.position.y).toBeCloseTo(y + scrolled, -1);
+  }
+);
+
+test(
+  'the same anchors exist on both surfaces, and a pin records which it was placed on',
+  { tag: '@rule:embed.pin.both-surfaces' },
+  async ({ page }) => {
+    const ANCHOR = 'panel.counts';   // declared on the review screen, in both surfaces
+
+    /* Place a pin on one surface of the review screen and return the record. */
+    const pinOnSurface = async (url) => {
+      await page.goto(url);
+      // The embed fetches the project's threads and draws their pins after
+      // load. Scanning for a free spot before that has settled picks a point a
+      // marker then covers — which is what made this check flaky.
+      await page.waitForLoadState('networkidle');
+      const target = page.getByTestId(ANCHOR);
+      await expect(target, `${ANCHOR} must exist on ${url}`).toBeVisible();
+      await page.getByTestId('pin.badge').click();   // no panel here; the badge is the way in
+      await expect(page.locator('html')).toHaveClass(/wd-pinning/);
+      const box = await target.boundingBox();
+      /*
+       * The review screen already carries pins from the project's own threads,
+       * and a marker sitting on this anchor would swallow the click and open
+       * that conversation instead. Markers live in the embed's shadow root, so
+       * elementFromPoint cannot see them — their geometry can.
+       */
+      const markers = await page.getByTestId('pin.marker').all();
+      const taken = (await Promise.all(markers.map((m) => m.boundingBox()))).filter(Boolean);
+      const clear = (px, py) =>
+        !taken.some((b) => px >= b.x - 4 && px <= b.x + b.width + 4 &&
+                           py >= b.y - 4 && py <= b.y + b.height + 4);
+      let spot = { x: Math.round(box.x + box.width / 2), y: Math.round(box.y + box.height / 2) };
+      outer: for (let fx = 0.1; fx <= 0.9; fx += 0.08)
+        for (let fy = 0.2; fy <= 0.8; fy += 0.3) {
+          const px = Math.round(box.x + box.width * fx), py = Math.round(box.y + box.height * fy);
+          if (clear(px, py)) { spot = { x: px, y: py }; break outer; }
+        }
+
+      const posted = page.waitForResponse(
+        (r) => r.url().includes('/api/threads') && r.request().method() === 'POST'
+      );
+      await page.mouse.click(spot.x, spot.y);
+      await expect(page.getByTestId('pin.form')).toBeVisible();
+      await page.getByTestId('pin.note').fill(`Pinned on ${url}`);
+      await page.getByTestId('pin.save').click();
+      return (await (await posted).json()).thread;
+    };
+
+    // The design, and the running thing. The same anchor carries a pin on both
+    // — which is what makes a note about the design answerable in the build.
+    const onProto = await pinOnSurface(`${WD_ORIGIN}/prototype/screens/review.html`);
+    const onApp = await pinOnSurface(`${WD_ORIGIN}/stand-in/review`);
+
+    expect(onProto.anchor.element).toBe(ANCHOR);
+    expect(onApp.anchor.element).toBe(ANCHOR);
+    expect(onProto.anchor.surface).toBe('prototype');
+    expect(onApp.anchor.surface).toBe('app');
+    // Same screen, both times — the surface is what differs, not the screen.
+    expect(onApp.anchor.screen).toBe(onProto.anchor.screen);
   }
 );

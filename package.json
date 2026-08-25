@@ -1,7 +1,7 @@
 {
   "name": "walkdown",
   "version": "0.1.0",
-  "description": "Verify that what you built is what you designed — blueprint lint & hashing for the walkdown spec format",
+  "description": "Verify that what you built is what you designed \u2014 blueprint lint & hashing for the walkdown spec format",
   "type": "module",
   "bin": {
     "walkdown": "bin/walkdown.js"
@@ -27,7 +27,9 @@
     "build:ext": "cp lib/viewer/embed.js lib/viewer/panel.js extension/vendor/",
     "build": "npm run build:sync && npm run build:icons && npm run build:css && npm run build:ext",
     "build:sync": "node tools/sync-shared.mjs && node tools/sync-phosphor.mjs",
-    "build:icons": "node tools/make-icons.mjs steps --size 128"
+    "build:icons": "node tools/make-icons.mjs steps --size 128",
+    "checks": "playwright test",
+    "checks:dev": "WALKDOWN_RECORD=0 playwright test"
   },
   "dependencies": {
     "yaml": "^2.6.0"
