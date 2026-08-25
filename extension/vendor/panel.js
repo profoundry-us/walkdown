@@ -528,6 +528,9 @@
   addEventListener('resize', () => {
     if (!docked || !FRAMED) return;
     placeAppFrame(true);
+    // The ghost states its size in pixels, so it has to be told about a resize
+    // rather than being carried along by percentages.
+    if (ghost) { setGhost(false); setFade(ghostOpacity || 1); }
     if (hideAppOn) hideApp(true);
     syncHeadlessCover();
     syncZoomBadge();
@@ -2305,11 +2308,20 @@
     // so an uncovered strip never reads as design. Inline styles: this element
     // is in the host document, where our stylesheet has no reach.
     ghost = document.createElement('div');
-    // width/height stay auto so the four insets keep sizing it — the UA gives a
-    // popover fit-content, which would collapse it to nothing.
+    /*
+     * The box is stated in pixels, not left to the four insets to work out.
+     * This element is promoted into the top layer, where the UA's own popover
+     * rules give it fit-content sizing, and it lives in a page we know nothing
+     * about — either can leave an inset-sized box collapsed, and a collapsed
+     * ghost shows a corner of the design over a full-size app, which reads as
+     * the design being cut off. The app frame has always said its size
+     * outright for the same reason; so does this now.
+     */
+    const box = frameSpace();
     ghost.style.cssText = `position:fixed; top:${HEAD}px; left:${GAP}px; bottom:${GAP}px;
       right:${W + GAP * 2}px; z-index:2147482000; border-radius:10px; overflow:hidden;
-      width:auto; height:auto; max-width:none; max-height:none; margin:0; border:0; padding:0;
+      width:${box.availW}px; height:${box.availH}px; max-width:none; max-height:none;
+      min-width:0; min-height:0; margin:0; border:0; padding:0;
       pointer-events:none; display:flex; align-items:center; justify-content:center;
       background-color:#e9ecf0;
       background-image:
@@ -2327,10 +2339,11 @@
     const stageW = innerWidth - (W + GAP * 3);
     const gs = ghostWidth ? Math.min(1, stageW / ghostWidth) : 1;
     if (ghostWidth) ghost.style.alignItems = 'flex-start';
-    frame.style.cssText = `width:${ghostWidth ? ghostWidth + 'px' : '100%'};
-      height:${gs < 1 ? 100 / gs + '%' : '100%'};
+    // Pixels here too: a percentage of a box that failed to size is nothing.
+    frame.style.cssText = `width:${ghostWidth ? ghostWidth + 'px' : box.availW + 'px'};
+      height:${gs < 1 ? box.availH / gs : box.availH}px;
       ${gs < 1 ? `transform:scale(${gs}); transform-origin:top center;` : ''}
-      max-width:${ghostWidth ? 'none' : '100%'}; max-height:${gs < 1 ? 'none' : '100%'};
+      max-width:none; max-height:none; flex:none;
       border:0; background:#fff;
       box-shadow:0 0 0 1px rgba(20,25,40,.14), 0 10px 40px rgba(20,25,40,.18);`;
     frame.src = src.url ?? api(src.path);
