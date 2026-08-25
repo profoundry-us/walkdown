@@ -98,18 +98,32 @@ test('a pin with no anchored element is kept by position @rule:embed.pin.coordin
   assert.deepEqual(onDisk.anchor.position, { x: 412, y: 219 });
   assert.equal(onDisk.anchor.screen, 'home');
 
-  // An anchored pin still wins: position is the fallback, not a competitor.
+  // An anchored pin keeps its spot too: the element says what it is about, the
+  // point says where the reviewer was pointing, and the offset ties the two
+  // together so the spot survives the element moving.
   const anchored = await (await fetch(`${base}/api/threads`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
       kind: 'note', body: 'On the CTA.', author: 'tester',
-      anchor: { screen: 'home', element: 'home.cta', position: { x: 5, y: 5 } },
+      anchor: { screen: 'home', element: 'home.cta', position: { x: 205, y: 190 }, offset: { x: 5, y: 5 } },
     }),
   })).json();
   const anchoredDisk = parse(readFileSync(join(bp, 'threads', `${anchored.id}.yml`), 'utf8'));
   assert.equal(anchoredDisk.anchor.element, 'home.cta');
-  assert.equal(anchoredDisk.anchor.position, undefined);
+  assert.deepEqual(anchoredDisk.anchor.position, { x: 205, y: 190 });
+  assert.deepEqual(anchoredDisk.anchor.offset, { x: 5, y: 5 });
+
+  // An offset without an element means nothing, and is not kept.
+  const stray = await (await fetch(`${base}/api/threads`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      kind: 'note', body: 'Loose offset.', author: 'tester',
+      anchor: { screen: 'home', position: { x: 9, y: 9 }, offset: { x: 3, y: 3 } },
+    }),
+  })).json();
+  assert.equal(parse(readFileSync(join(bp, 'threads', `${stray.id}.yml`), 'utf8')).anchor.offset, undefined);
 
   // Garbage coordinates are dropped rather than persisted.
   const junk = await (await fetch(`${base}/api/threads`, {

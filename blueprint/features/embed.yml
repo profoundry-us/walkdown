@@ -9,7 +9,7 @@ stories:
     rules:
       - id: embed.pin.anchored-target
         origin: walkdown
-        statement: In pin mode, hovering highlights any element that carries an anchor, and a pin placed on one is recorded against that anchor - the note follows the element, not the pixel.
+        statement: In pin mode, hovering highlights any element that carries an anchor, and a pin placed on one is recorded against that anchor - the note follows the element, not the pixel - while the spot it was placed at is recorded too, so the pin draws where the reviewer was pointing rather than at a corner of the element.
         verify: [checks, human]
         screens: [review]
         steps:
@@ -19,8 +19,11 @@ stories:
             - Click an anchored element such as `panel.counts`
           then:
             - The pin form opens; the saved note is anchored to that element id
+            - The exact spot is saved with it - the point on the surface, and where within the element that point was
+            - The pin draws at that spot, and follows the element when the element moves, because the spot is replayed against wherever the element is now
+            - The anchor is the optional part - a spot with no anchored element under it is still a pin, kept by position alone
             - Later visitors see the pin on that element wherever it renders
-          statement_hash: sha256:8fcd9522614c
+          statement_hash: sha256:6feaf28d3505
 
       - id: embed.pin.right-project
         origin: thread:n-0012
@@ -129,9 +132,11 @@ stories:
           when:
             - Rest the pointer on one
           then:
+            - It appears on contact, because it is walkdown's own markup rather than the browser's title attribute and its second of waiting
             - It names the thread, its kind and its status
             - It names the rule it is anchored to, or says plainly that it has none, along with the screen and the element
             - It shows the start of the note, truncated - a tooltip that has to be read is one nobody reads
+            - It opens away from whatever edge the pin is near - down near the top, up near the bottom, and towards the side with the room - so it is never half off the surface
             - Clicking it still opens the thread's own screen, wherever you were
           statement_hash: sha256:50dfb40b9f83
 

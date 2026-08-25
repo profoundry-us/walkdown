@@ -158,13 +158,49 @@
     border-primary/45 bg-base-100 p-3 text-[13px] text-base-content shadow-xl`;
 
   // --- pins -------------------------------------------------------------------
+  /*
+   * Which way a tooltip should open. It has to be visible, so it opens away
+   * from whichever edge the pin is near: down when the pin is near the top,
+   * up when it is near the bottom, and otherwise towards the side with the
+   * room. Written as whole class names - a `tooltip-${dir}` the stylesheet
+   * has never seen is a class that does not exist.
+   */
+  const TIP_SIDE = { top: 'tooltip-top', bottom: 'tooltip-bottom', left: 'tooltip-left', right: 'tooltip-right' };
+  function tipSide(left, top) {
+    const x = left - window.scrollX, y = top - window.scrollY;
+    const W = window.innerWidth, H = window.innerHeight;
+    // A tooltip is centred on its pin along the other axis, so a side is only
+    // usable when there is room for the card AND for half of it either way.
+    const room = { right: W - x, left: x, bottom: H - y, top: y };
+    const vRoom = y > 60 && H - y > 60;     // left/right are centred vertically
+    const hRoom = x > 150 && W - x > 150;   // top/bottom are centred horizontally
+    if (vRoom && room.right > 300) return TIP_SIDE.right;
+    if (vRoom && room.left > 300) return TIP_SIDE.left;
+    if (hRoom && room.bottom > 130) return TIP_SIDE.bottom;
+    if (hRoom && room.top > 130) return TIP_SIDE.top;
+    // Cornered: nothing fits properly, so take the most room going.
+    const best = Object.keys(room).reduce((a, k) => (room[k] > room[a] ? k : a), 'right');
+    return TIP_SIDE[best];
+  }
+
   function renderPins() {
     root.querySelectorAll('.wd-pin').forEach((p) => p.remove());
     for (const pin of ctx.pins) {
       const el = pin.element && document.querySelector(`[${ANCHOR_ATTR}="${CSS.escape(pin.element)}"]`);
-      // An anchored pin tracks its element; a positioned one keeps its spot.
+      /*
+       * Where a pin sits. The spot it was placed at is the truth - it is where
+       * the person was pointing - and the anchor is what keeps that spot
+       * meaningful when the element moves: the offset within the element is
+       * replayed against wherever the element is now. Without an offset (pins
+       * placed before this was recorded) an anchored pin still rides the
+       * element's corner, and an unanchored one keeps its absolute spot.
+       */
       let left, top;
-      if (el) {
+      if (el && pin.offset) {
+        const rect = el.getBoundingClientRect();
+        left = window.scrollX + rect.left + pin.offset.x - 9;
+        top = window.scrollY + rect.top + pin.offset.y - 9;
+      } else if (el) {
         const rect = el.getBoundingClientRect();
         left = window.scrollX + rect.right - 6;
         top = window.scrollY + rect.top - 6;
@@ -175,23 +211,33 @@
         left = pin.position.x - 9;
         top = pin.position.y - 9;
       } else continue;
+      /*
+       * The tooltip is ours, not the browser's: a title attribute waits a
+       * second or so before it shows, which is a second per pin spent hovering
+       * and hoping. This one is markup, so it is there on contact.
+       */
+      const wrap = document.createElement('div');
+      wrap.className = `wd-pin pointer-events-auto absolute z-[99998] ${tipSide(left, top)} tooltip`;
+      wrap.style.left = `${left}px`;
+      wrap.style.top = `${top}px`;
+      const tip = document.createElement('div');
+      tip.className = 'tooltip-content max-w-70 whitespace-normal text-left';
+      tip.innerHTML = pinTip(pin);
       const dot = document.createElement('div');
       // Round = anchored to an element, square = placed at a spot. A pin that
       // is no longer open reads as settled rather than outstanding.
       const settled = pin.status !== 'open';
-      dot.className = `wd-pin pointer-events-auto absolute z-[99998] grid size-[18px] cursor-pointer
+      dot.className = `pointer-events-auto grid size-[18px] cursor-pointer
         place-items-center text-[11px] font-bold shadow ${el ? 'rounded-full' : 'rounded-[3px]'}
         ${settled ? 'bg-success text-success-content' : 'bg-warning text-warning-content'}`;
       dot.textContent = pin.kind === 'question' ? '?' : '!';
-      dot.title = pinTip(pin);
-      dot.style.left = `${left}px`;
-      dot.style.top = `${top}px`;
       dot.onclick = (e) => {
         e.stopPropagation();
         if (framed) window.parent.postMessage({ type: 'walkdown:open-thread', id: pin.id }, '*');
-        else openThreadPopover(pin, dot);
+        else openThreadPopover(pin, wrap);
       };
-      root.appendChild(dot);
+      wrap.append(tip, dot);
+      root.appendChild(wrap);
     }
   }
 
@@ -201,11 +247,14 @@
    * a tooltip that has to be read is a tooltip nobody reads.
    */
   function pinTip(pin) {
+    const esc = (v) => String(v ?? '').replace(/[&<>"]/g, (c) =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     const where = [pin.rule ? `rule ${pin.rule}` : 'no rule',
       pin.screen, pin.element].filter(Boolean).join(' · ');
     const text = String(pin.body ?? '').replace(/\s+/g, ' ').trim();
-    return `${pin.id} · ${pin.kind} · ${pin.status}\n${where}${
-      text ? `\n“${text.length > 90 ? text.slice(0, 89) + '…' : text}”` : ''}`;
+    return `<div class="font-semibold">${esc(pin.id)} · ${esc(pin.kind)} · ${esc(pin.status)}</div>
+      <div class="opacity-70">${esc(where)}</div>${
+      text ? `<div class="mt-0.5">“${esc(text.length > 90 ? text.slice(0, 89) + '…' : text)}”</div>` : ''}`;
   }
 
   // --- standalone thread popover: read + reply (lifecycle actions live in the
@@ -313,8 +362,21 @@
       const body = overlay.querySelector('textarea').value.trim();
       const kind = overlay.querySelector('.wd-q').checked ? 'question' : 'note';
       if (!body) return;
+      /*
+       * The click point is recorded either way: it is where the person was
+       * actually pointing, and an anchored pin that forgets it can only be
+       * drawn at a corner of its element. The anchor rides alongside as the
+       * durable part - element plus the offset within it, so the same spot
+       * survives the element moving.
+       */
+      const rect = el?.getBoundingClientRect();
       submitPin({
-        ...(el ? { element: anchorId(el) } : { position: point }),
+        ...(el && {
+          element: anchorId(el),
+          offset: { x: Math.round(point.x - (window.scrollX + rect.left)),
+            y: Math.round(point.y - (window.scrollY + rect.top)) },
+        }),
+        position: point,
         body, kind, surface: ctx.surface, viewport: currentViewport(),
       });
       overlay.remove();
@@ -329,7 +391,8 @@
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ ...pin,
-          anchor: { ...(pin.element && { element: pin.element }), ...(pin.position && { position: pin.position }),
+          anchor: { ...(pin.element && { element: pin.element }), ...(pin.offset && { offset: pin.offset }),
+            ...(pin.position && { position: pin.position }),
             ...(pin.surface && { surface: pin.surface }), ...(pin.viewport && { viewport: pin.viewport }) },
           url: location.href }),
       })
@@ -859,7 +922,7 @@
         position: t.anchor?.position, surface: t.anchor?.surface, viewport: t.anchor?.viewport,
         // Who wrote the note and when: the opening message is a message, and a
         // message without an author reads as nobody having said it.
-        rule: t.anchor?.rule ?? null, screen: t.anchor?.screen ?? null,
+        offset: t.anchor?.offset, rule: t.anchor?.rule ?? null, screen: t.anchor?.screen ?? null,
         author: t.author, created: t.created, body: t.body, replies: t.replies ?? [] }));
       renderPins();
     };

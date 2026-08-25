@@ -2457,6 +2457,7 @@
     return (data?.threads ?? [])
       .filter((t) => t.anchor?.screen === id && !['incorporated', 'verified', 'waived'].includes(t.status))
       .map((t) => ({ id: t.id, kind: t.kind, status: t.status, element: t.anchor?.element,
+        offset: t.anchor?.offset,
         position: t.anchor?.position, surface: t.anchor?.surface, viewport: t.anchor?.viewport,
         // What it is about, for the tooltip: a pin should say where it belongs
         // before you spend a click finding out.
@@ -2564,6 +2565,9 @@
           ...(msg.author && { author: msg.author }),
           anchor: {
             ...(msg.element && { element: msg.element }),
+            // The spot within the element, and the spot on the surface: both
+            // travel, so an anchored pin still draws where it was put.
+            ...(msg.offset && { offset: msg.offset }),
             ...(msg.position && { position: msg.position }),
             ...(msg.viewport && { viewport: msg.viewport }),
             surface,
