@@ -432,3 +432,43 @@ test(
     await expect(page.locator('.wd-badge')).toHaveCount(0);
   }
 );
+
+test(
+  'a rule whose fixes all landed can be verified in one pass, under a name',
+  { tag: '@rule:panel.threads.claim-never-accept' },
+  async ({ page }) => {
+    await docked(page);
+    await endSession(page);
+    const { rows, threads } = await payload(page);
+    // A rule carrying more than one addressed thread — the pile the sweep is for.
+    const counts = {};
+    for (const t of threads ?? [])
+      if (t.status === 'addressed' && t.anchor?.rule) counts[t.anchor.rule] = (counts[t.anchor.rule] ?? 0) + 1;
+    const rule = Object.keys(counts).find((r) => counts[r] > 1);
+    expect(rule, 'need a rule with several addressed threads').toBeTruthy();
+    const before = counts[rule];
+
+    await openRule(page, rule);
+    const sweep = page.getByTestId('detail.threads').getByRole('button', { name: /Verify all/i });
+    await expect(sweep).toBeVisible();
+
+    // With no name set it must refuse, exactly as verifying one does: an agent
+    // may claim work and never accept it.
+    await page.getByTestId('panel.desk-tuner').click();
+    await page.getByTestId('settings.actor').fill('');
+    await page.getByTestId('panel.desk-tuner').click();
+    await sweep.click();
+    await expect(page.getByTestId('settings.panel')).toBeVisible();
+    expect((await payload(page)).threads.filter(
+      (t) => t.anchor?.rule === rule && t.status === 'addressed').length).toBe(before);
+
+    // With a name, the whole pile goes at once — and under that name.
+    await page.getByTestId('settings.actor').fill('Test Reviewer');
+    await page.getByTestId('panel.desk-tuner').click();
+    await sweep.click();
+    await expect
+      .poll(async () => (await payload(page)).threads.filter(
+        (t) => t.anchor?.rule === rule && t.status === 'addressed').length)
+      .toBe(0);
+  }
+);

@@ -1999,8 +1999,21 @@
           <div class="${LBL} mb-1.5">Verify</div>
           <div class="text-[13px]">${esc(r.verify.join(', '))}</div>
         </div>
-        ${threads.length ? `<div class="-mx-3.5">
-          <div class="${LBL} mb-0.5 px-3.5">Threads</div>
+        ${threads.length ? `<div class="-mx-3.5" data-testid="detail.threads">
+          <div class="${LBL} mb-0.5 flex items-center gap-2 px-3.5">Threads
+            ${threads.filter((t) => t.status === 'addressed').length > 1
+              /*
+               * A rule whose fixes all landed together is verified together.
+               * Going through a dozen threads one at a time is the same
+               * judgment repeated, and the repetition is what makes people
+               * stop reading them - so the sweep is offered where the pile is,
+               * and it is still a person pressing it.
+               */
+              ? `<button class="btn btn-xs btn-outline btn-success ml-auto" data-verify-all="${esc(r.rule)}"
+                   title="Verify every addressed thread on this rule, under your name">
+                   Verify all ${threads.filter((t) => t.status === 'addressed').length}</button>`
+              : ''}
+          </div>
           ${threads.map(threadCard).join('')}</div>` : ''}
       </div>`;
   }
@@ -2242,6 +2255,28 @@
     }
   }
 
+  /*
+   * Verify every addressed thread on one rule. Same governance as verifying
+   * one: it is recorded under the person pressing it, and refused outright
+   * without a name, because an agent may claim work and never accept it.
+   */
+  async function verifyAll(rule) {
+    const actor = whoAmI();
+    if (!actor || actor === 'agent') {
+      toast('Verifying is recorded under a person\u2019s name \u2014 set it in Settings (the gear).');
+      return openActorSettings();
+    }
+    const pending = threadsFor(rule).filter((t) => t.status === 'addressed');
+    if (!pending.length) return;
+    let done = 0;
+    for (const t of pending)
+      if (await threadPost(`/api/threads/${t.id}/status`, { status: 'verified', actor })) done += 1;
+    await load();
+    toast(done === pending.length
+      ? `<b>${done}</b> thread${done === 1 ? '' : 's'} verified on ${esc(rule)}.`
+      : `<b>${done}</b> of ${pending.length} verified \u2014 the rest are still open.`);
+  }
+
   /** Open a thread on its own screen, landing where the reading resumes. */
   function openThreadView(id) {
     if (!(data?.threads ?? []).some((x) => x.id === id)) return toast(`No thread ${esc(id)} here.`);
@@ -2304,6 +2339,9 @@
     if (tactor) tactor.onclick = () => openActorSettings();
     host.querySelectorAll('[data-act]').forEach((el) => {
       el.onclick = () => threadAct(el.dataset.tid, el.dataset.act);
+    });
+    host.querySelectorAll('[data-verify-all]').forEach((el) => {
+      el.onclick = () => verifyAll(el.dataset.verifyAll);
     });
     host.querySelectorAll('[data-checks]').forEach((el) => {
       el.ontoggle = async () => {
