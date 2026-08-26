@@ -31,3 +31,20 @@ replies:
       real navigation unloads the panel itself, so there is nothing left to draw
       the veil - which is the same reason that trip is offered rather than taken
       unless the extension is carrying us."
+  - author: agent
+    created: 2026-08-26T04:35:00Z
+    body: "Follow-up from Topher: crossing between the app and the prototype was
+      breaking his ability to scroll the rules list, and he wondered whether the
+      loading veil was the cause. It is not - the veil is pointer-events none
+      and never draws in the docked delivery at all. The cause is next door to
+      it: render() photographed each pane's scroll position at the top and put
+      it back at the bottom, and with a ghost up renders arrive in bursts as the
+      copy loads, its reach repaints and pin mode mirrors. A wheel scroll landing
+      between the photograph and the restore was overwritten by the older value,
+      which reads exactly as a list that refuses to scroll - and only just after
+      a crossing, which is when those bursts happen. Panes now record where they
+      are as they are scrolled, and a repaint restores the place the reader is
+      actually at. I could not confirm the fix end to end: a CDP wheel does not
+      drive this shadow-root scroller in the harness, with or without a ghost, so
+      the control test is inconclusive rather than green. The race is real and
+      the reasoning holds; it wants his eyes on the actual gesture."

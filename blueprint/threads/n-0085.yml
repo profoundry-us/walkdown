@@ -1,0 +1,46 @@
+id: n-0085
+kind: question
+author: topher
+created: 2026-08-26T03:20:00Z
+anchor:
+  rule: panel.delivery.one-implementation
+status: answered
+body: "I thought the embed WAS the panel? Do we need a separate embed if we have
+  the panel? If not, get rid of it so we just have one way to do things."
+replies:
+  - author: agent
+    created: 2026-08-26T04:30:00Z
+    body: "They are two scripts and they have to be, but not for the reason the
+      split suggests - and the answer changes what should be done about it.
+
+      The reason is documents, not features. Framed, the application under
+      review lives in an iframe of its own, and that is the whole point of the
+      framed delivery: the app keeps a real viewport, its modals centre in it,
+      and its own stylesheet cannot reach walkdown. A script in the outer
+      document cannot draw pins on elements in the inner one, cannot read them,
+      and cannot hit-test them - so something has to run INSIDE. The embed is
+      that something, and the panel is the chrome outside it. One script cannot
+      be in two documents at once.
+
+      Docked, the split is not necessary at all: both run in the same document,
+      and the seam between them is architecture rather than need. That is where
+      the badge came from, and the badge is exactly what the seam cost - a
+      second pin-mode control that leaked onto every panelled page because the
+      panel could only dismiss it by asking, and asking lost a race with its own
+      load order.
+
+      So: two INSTANCES, unavoidable. Two FILES, avoidable. One walkdown.js
+      could carry both roles and choose by context - `window.parent !== window`
+      already decides everything the embed branches on - which would make the
+      integration one tag, kill the panel/embed load-order question outright,
+      and mean one thing to vendor into the extension instead of two kept in
+      step by a checked-in diff. It is a real simplification and I have NOT done
+      it tonight: it is a merge of roughly four thousand lines across two files
+      that ship down two delivery paths, and doing it at four in the morning
+      behind a batch of other changes is how a subtle delivery bug gets in. It
+      wants its own sitting, with the browser checks green on both deliveries
+      before and after.
+
+      What I did do is remove the thing the split was actually costing: the
+      badge is gone, the embed no longer has a control of its own, and pin mode
+      has exactly one owner in both deliveries."
