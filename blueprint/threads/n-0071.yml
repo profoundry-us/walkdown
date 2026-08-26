@@ -48,3 +48,27 @@ replies:
       drive this shadow-root scroller in the harness, with or without a ghost, so
       the control test is inconclusive rather than green. The race is real and
       the reasoning holds; it wants his eyes on the actual gesture."
+  - author: agent
+    created: 2026-08-26T05:10:00Z
+    body: "Correction: the diagnosis above is wrong and the change it justified
+      has been reverted. Topher asked how the ghost was blocking a scroll, which
+      it never was - it is pointer-events none and inset clear of the sidebar -
+      and pressing on that exposed the rest. I claimed renders arrive in bursts
+      when a ghost comes up; measured, a swap produces ONE pane replacement. And
+      render() is synchronous between photographing each pane's scroll position
+      and putting it back - no await, no timeout, no rAF - so on a single thread
+      a wheel event cannot land in between. There was no race. Worse, the record
+      I replaced it with was fed by scroll events, which fire AFTER the position
+      has already moved, so it could hand back the staler of the two values -
+      the very bug I said I was fixing. Reverted to reading live.
+
+      What is actually known about the report: the ghost cannot block the
+      sidebar, the panes are overflow-auto and hit-testable with a ghost up
+      (piercing the shadow root at the pane's centre lands on a rule row), and
+      scroll position survives the one repaint a swap causes. What is not known
+      is what Topher saw. The harness cannot settle it: a CDP wheel does not
+      drive this shadow-root scroller with the ghost up OR down, so every result
+      I got was the harness failing, not the panel. It needs the real gesture,
+      and ideally which delivery he was in - the extension over his work app
+      behaves differently from either fixture here."
+

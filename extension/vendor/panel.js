@@ -114,9 +114,6 @@
   let projects = [];
   // Set when a blueprint is chosen by hand, spent once the new one has loaded.
   let jumpOnLoad = false;
-  /* Where each pane is scrolled to, kept current so a repaint restores the
-     place the reader is actually at rather than the one it last photographed. */
-  const paneScroll = [];
   let servedRoot = null;   // the folder the server reports it is serving
   let listTab = 'rules';   // rules | screens — the two things the side lists
   let threadNote = '';     // what the reply box says, kept across re-renders
@@ -1402,20 +1399,12 @@
     if (!data) return;
     // The thread screen without a thread is not a screen.
     if (view === 'thread' && !openThread) view = selected ? 'detail' : 'list';
-    /*
-     * render() rebuilds the panel wholesale, which resets scroll. Clicking a
-     * control near the bottom of a long thread would otherwise throw you back
-     * to the top, so each pane's place is put back afterwards.
-     *
-     * Read from a running record rather than snapshotted here. A snapshot taken
-     * at the top of render is already stale by the time it is restored, and
-     * with a ghost up renders arrive in bursts - the copy loading, its reach
-     * repainting, pin mode mirroring - so every wheel scroll was being undone
-     * by a render that had photographed the list before it moved. It read as
-     * the panel refusing to scroll at all, and only ever just after crossing
-     * between the surfaces, which is when those bursts happen.
-     */
-    const wasAt = [...host.querySelectorAll('.wdp-pane')].map((p, i) => paneScroll[i] ?? p.scrollTop);
+    // render() rebuilds the panel wholesale, which resets scroll. Clicking a
+    // control near the bottom of a long thread would otherwise throw you back
+    // to the top — so note where each pane was and put it back. Read live, not
+    // from a record kept by scroll events: those fire AFTER the position has
+    // already moved, so a record would sometimes be the staler of the two.
+    const wasAt = [...host.querySelectorAll('.wdp-pane')].map((p) => p.scrollTop);
     // Typing must survive a repaint: a composer that loses the caret mid-reply
     // is the difference between a conversation and a form.
     const typing = sr.activeElement;
@@ -1496,11 +1485,7 @@
       track.style.transform = `translateX(${AT[view] ?? '0%'})`;
       lastView = view;
     }
-    host.querySelectorAll('.wdp-pane').forEach((p, i) => {
-      p.scrollTop = wasAt[i] ?? 0;
-      // The panes are new elements every render, so the record follows them.
-      p.addEventListener('scroll', () => { paneScroll[i] = p.scrollTop; }, { passive: true });
-    });
+    host.querySelectorAll('.wdp-pane').forEach((p, i) => { p.scrollTop = wasAt[i] ?? 0; });
     if (caret) {
       const note = host.querySelector('#wdp-note');
       if (note) {
