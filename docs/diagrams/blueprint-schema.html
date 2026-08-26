@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>What a blueprint is made of</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f5f5f5;
+      --color-ink:     #2d3142;
+      --color-muted:   #4f5d75;
+      --color-accent:  #eb6c36;
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+    .frame { max-width: 1200px; width: 100%; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+    svg { width: 100%; min-width: 900px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Data model · walkdown</p>
+    <h1>What a blueprint is made of</h1>
+
+    <svg viewBox="0 0 1000 616" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+        <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+      <!-- ================= relationships (before the entities) ================= -->
+
+      <!-- Screen —— Rule -->
+      <line x1="272" y1="152" x2="392" y2="152" stroke="#4f5d75" stroke-width="1"/>
+      <rect x="304" y="132" width="56" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="332" y="141" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">ABOUT</text>
+      <text x="284" y="164" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace">N</text>
+      <text x="380" y="164" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">N</text>
+
+      <!-- Rule —— Thread -->
+      <line x1="616" y1="152" x2="736" y2="152" stroke="#4f5d75" stroke-width="1"/>
+      <rect x="644" y="132" width="64" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="676" y="141" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">ANCHORS TO</text>
+      <text x="628" y="164" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace">1</text>
+      <text x="724" y="164" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">N</text>
+
+      <!-- Thread —— Screen : how a design request is filed -->
+      <path d="M 800 88 V 64 Q 800 56 792 56 H 184 Q 176 56 176 64 V 84"
+            fill="none" stroke="#4f5d75" stroke-width="1"/>
+      <rect x="452" y="36" width="88" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="496" y="45" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">OR TO A SCREEN</text>
+      <text x="812" y="80" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace">N</text>
+      <text x="164" y="80" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">1</text>
+
+      <!-- Rule —— Thread, a second time: the decision that left a source behind -->
+      <line x1="616" y1="200" x2="736" y2="200" stroke="rgba(235,108,54,0.60)" stroke-width="1" stroke-dasharray="4,3"/>
+      <rect x="632" y="180" width="88" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="676" y="189" fill="#eb6c36" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">SUPERSEDED BY</text>
+      <text x="628" y="212" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace">N</text>
+      <text x="724" y="212" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">1</text>
+
+      <!-- Rule —— Result -->
+      <line x1="504" y1="224" x2="504" y2="392" stroke="#4f5d75" stroke-width="1"/>
+      <rect x="512" y="302" width="72" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="548" y="311" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">VERDICT ON</text>
+      <text x="492" y="248" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">1</text>
+      <text x="492" y="380" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">N</text>
+
+      <!-- Run —— Result -->
+      <line x1="616" y1="440" x2="736" y2="440" stroke="#4f5d75" stroke-width="1"/>
+      <rect x="648" y="420" width="56" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="676" y="429" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">HOLDS</text>
+      <text x="628" y="452" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace">N</text>
+      <text x="724" y="452" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">1</text>
+
+      <!-- Rule —— Sources : the one relationship that leaves the blueprint -->
+      <path d="M 160 392 V 352 Q 160 344 168 344 H 432 Q 440 344 440 336 V 228"
+            fill="none" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+      <rect x="264" y="324" width="72" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="300" y="333" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">DERIVED FROM</text>
+      <text x="172" y="372" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace">1</text>
+      <text x="452" y="332" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace">N</text>
+
+      <!-- ================= entities ================= -->
+
+      <!-- Screen -->
+      <rect x="48" y="88" width="224" height="120" rx="6" fill="#f5f5f5"/>
+      <rect x="48" y="88" width="224" height="120" rx="6" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+      <line x1="48" y1="116" x2="272" y2="116" stroke="rgba(45,49,66,0.20)" stroke-width="0.8"/>
+      <text x="60" y="108" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Screen</text>
+      <text x="260" y="108" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">storyboard.yml</text>
+      <text x="60" y="136" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace"># id</text>
+      <text x="60" y="152" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">prototype</text>
+      <text x="60" y="168" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">app.path</text>
+      <text x="60" y="184" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">app.setup</text>
+      <text x="60" y="200" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">anchors[]</text>
+
+      <!-- Rule — the spec of record, focal -->
+      <rect x="392" y="88" width="224" height="136" rx="6" fill="#f5f5f5"/>
+      <rect x="392" y="88" width="224" height="136" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1.5"/>
+      <line x1="392" y1="116" x2="616" y2="116" stroke="rgba(45,49,66,0.25)" stroke-width="0.8"/>
+      <text x="404" y="108" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Rule</text>
+      <text x="604" y="108" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">features/*.yml</text>
+      <text x="404" y="136" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace"># id</text>
+      <text x="404" y="152" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">statement</text>
+      <text x="404" y="168" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">statement_hash</text>
+      <text x="404" y="184" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">origin</text>
+      <text x="404" y="200" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">verify[]</text>
+      <text x="404" y="216" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">&#8594; screens[]</text>
+
+      <!-- Thread -->
+      <rect x="736" y="88" width="224" height="136" rx="6" fill="#f5f5f5"/>
+      <rect x="736" y="88" width="224" height="136" rx="6" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+      <line x1="736" y1="116" x2="960" y2="116" stroke="rgba(45,49,66,0.20)" stroke-width="0.8"/>
+      <text x="748" y="108" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Thread</text>
+      <text x="948" y="108" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">threads/*.yml</text>
+      <text x="748" y="136" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace"># id</text>
+      <text x="748" y="152" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">kind: note | question</text>
+      <text x="748" y="168" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">status</text>
+      <text x="748" y="184" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">&#8594; anchor.rule</text>
+      <text x="748" y="200" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">&#8594; anchor.screen</text>
+      <text x="748" y="216" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">replies[]</text>
+
+      <!-- Sources — outside the blueprint, which is the whole point of drift -->
+      <rect x="48" y="392" width="224" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="48" y="392" width="224" height="72" rx="6" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+      <line x1="48" y1="420" x2="272" y2="420" stroke="rgba(45,49,66,0.15)" stroke-width="0.8"/>
+      <text x="60" y="412" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Sources</text>
+      <text x="260" y="412" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">not in the blueprint</text>
+      <text x="60" y="440" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">prd &#8212; product&#8217;s document</text>
+      <text x="60" y="456" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">prototype/ &#8212; design&#8217;s files</text>
+
+      <!-- Result -->
+      <rect x="392" y="392" width="224" height="120" rx="6" fill="#f5f5f5"/>
+      <rect x="392" y="392" width="224" height="120" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <line x1="392" y1="420" x2="616" y2="420" stroke="rgba(45,49,66,0.20)" stroke-width="0.8"/>
+      <text x="404" y="412" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Result</text>
+      <text x="604" y="412" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">inside a run</text>
+      <text x="404" y="440" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">&#8594; rule</text>
+      <text x="404" y="456" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">status</text>
+      <text x="404" y="472" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">statement_hash</text>
+      <text x="404" y="488" fill="#eb6c36" font-size="8" font-family="'Geist Mono', monospace">check_hash</text>
+      <text x="404" y="504" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">&#8594; threads[]</text>
+
+      <!-- Run -->
+      <rect x="736" y="392" width="224" height="120" rx="6" fill="#f5f5f5"/>
+      <rect x="736" y="392" width="224" height="120" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <line x1="736" y1="420" x2="960" y2="420" stroke="rgba(45,49,66,0.20)" stroke-width="0.8"/>
+      <text x="748" y="412" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Run</text>
+      <text x="948" y="412" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">runs/*.json</text>
+      <text x="748" y="440" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace"># run_id</text>
+      <text x="748" y="456" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">kind: checks | walkdown</text>
+      <text x="748" y="472" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">actor</text>
+      <text x="748" y="488" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">target</text>
+      <text x="748" y="504" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">created</text>
+
+      <!-- ================= editorial callout ================= -->
+      <text x="960" y="292" fill="#2d3142" font-size="14" font-style="italic" font-family="'Instrument Serif', serif" text-anchor="end">a decision is the conversation that made it, pointed at</text>
+      <path d="M 900 300 Q 804 272 708 210" fill="none" stroke="rgba(45,49,66,0.40)" stroke-width="1" stroke-dasharray="4,3"/>
+      <circle cx="704" cy="207" r="2" fill="#2d3142"/>
+
+      <!-- ================= legend ================= -->
+      <line x1="32" y1="560" x2="968" y2="560" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+      <text x="32" y="580" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+
+      <rect x="120" y="570" width="24" height="12" rx="2" fill="#f5f5f5" stroke="#eb6c36" stroke-width="0.8" stroke-dasharray="4,3"/>
+      <text x="152" y="580" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">PROPOSED — NOT BUILT YET</text>
+
+      <rect x="356" y="570" width="24" height="12" rx="2" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="0.8"/>
+      <text x="388" y="580" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">OUTSIDE THE BLUEPRINT</text>
+
+      <text x="792" y="580" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em"># PRIMARY KEY &#8594; REFERENCE</text>
+    </svg>
+  </div>
+</body>
+</html>
