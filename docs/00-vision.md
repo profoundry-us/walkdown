@@ -11,6 +11,39 @@ statement of **what we're actually supposed to build**. Without it:
   enumerates "all the pieces."
 - Verification is ad-hoc: screenshots, eyeballing, and tribal memory.
 
+## The problems
+
+Those three bullets are the symptom. Underneath them are nine problems a team actually
+has. Every feature in this repo exists to serve one of them, and they are written as
+problems rather than as features so the list survives the tool changing shape.
+
+1. **Remembering what we agreed to build.** A developer is handed a PRD and a prototype,
+   both usually vague, and then builds for weeks. What was agreed and what is left lives
+   in memory and in a ticketing system detached from the code — so nothing can answer
+   "does the application have the features we asked for, and do they work?"
+2. **Noticing when the PRD or the prototype moves.** Sources change mid-build. Without a
+   record of what changed, the spec and the sources part company quietly.
+3. **Giving an agent something deterministic to build against.** Agents work well from an
+   enumerated set of well-formed criteria and badly from a Notion page and a screenshot.
+4. **Remembering why a decision was made.** Months later, "why doesn't this match the
+   prototype?" has an answer that lives only in whoever was in the room.
+5. **Seeing how closely the build matches the design.** Comparison wants the two surfaces
+   in the same place at the same viewport, with feedback that lands on an element rather
+   than in a document.
+6. **Letting design record changes and have them made.** A designer pairing with someone
+   should be able to record what should change and hand it off — before any application
+   exists.
+7. **A QA pass at the end that is more than eyeballing.** Every rule checked, by the
+   cheapest tier that can honestly check it, with a person accepting the result.
+8. **Feeding the work-tracking the team already has.** Tickets and technical design
+   documents are downstream artifacts; they should be derivable rather than re-typed.
+9. **Saying what is in this phase and what is not.** A blueprint covering a year is not a
+   plan for a quarter.
+
+Which of these are solved, half-solved, or deliberately left alone is a moving target and
+lives in [07-roadmap.md](07-roadmap.md) — kept out of this document on purpose, because a
+status that goes stale inside a vision document is what stops the vision from being read.
+
 ## The thesis
 
 **The blueprint is the single source of truth for "what are we building," and everything

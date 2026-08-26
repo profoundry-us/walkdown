@@ -32,12 +32,14 @@ panel riding beside the running app and rendering those same files.
 
 | Doc | Contents |
 |---|---|
-| [00-vision.md](docs/00-vision.md) | Problem, thesis, principles, v1 scope and non-goals |
+| [00-vision.md](docs/00-vision.md) | The problems walkdown takes on, thesis, principles, v1 scope and non-goals |
 | [01-glossary.md](docs/01-glossary.md) | The vocabulary — every term, one meaning |
 | [02-blueprint-schema.md](docs/02-blueprint-schema.md) | Entities, file layout, IDs, dual representation |
 | [03-runner-contract.md](docs/03-runner-contract.md) | How any test framework plugs in (linkage, execution, results) |
 | [04-embed-and-anchors.md](docs/04-embed-and-anchors.md) | The anchor convention (test-id reuse), embed script, the docked and framed panel layouts |
 | [05-runs-ledger.md](docs/05-runs-ledger.md) | Verification runs, walkdowns, derived status |
+| [06-prototype-contract.md](docs/06-prototype-contract.md) | What a prototype must carry, and who owns it |
+| [07-roadmap.md](docs/07-roadmap.md) | Which problems are solved, what is next, what we decided not to do — a dated snapshot |
 
 ## CLI
 
