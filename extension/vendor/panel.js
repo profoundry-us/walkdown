@@ -207,7 +207,8 @@
    */
   const raise = () => {
     if (dragging) { raisePending = true; return; }
-    promote(ghost);
+    // One top-layer element, not two. The ghost lives inside the shell now, so
+    // lifting the shell lifts both — see the note in setGhost.
     promote(shell);
   };
   if (typeof shell.showPopover === 'function') {
@@ -2897,9 +2898,22 @@
         letter-spacing:.06em; padding:6px 8px;`;
       ghost.appendChild(flag);
     }
-    document.body.appendChild(ghost);
-    // The app's own modals live in the top layer, so a ghost that is only
-    // z-indexed gets painted over by exactly the states worth comparing.
+    /*
+     * Into the panel's own shadow root, ahead of the chrome, rather than into
+     * the page beside it. The ghost still has to clear the app's modals, which
+     * live in the top layer - but the shell is already up there, so riding
+     * inside it gets the same height for free, and DOM order keeps the chrome
+     * above the design it is ghosting.
+     *
+     * The reason it is not a second top-layer element: promoting two of them in
+     * sequence - the ghost, then the shell again to put it back on top - leaves
+     * the panel's rule list unable to receive a wheel event at all, until the
+     * page is reloaded. Neither promotion does it alone; the pair does. That is
+     * what Topher hit as "swapping breaks my ability to scroll" (n-0086), and
+     * it is the same family as the fade slider dying mid-drag (n-0068): the
+     * cost of re-promotion is paid by whatever the pointer was doing.
+     */
+    sr.insertBefore(ghost, host);
     raise();
     paintGhostReach();
     render();

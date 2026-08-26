@@ -5,7 +5,7 @@ created: 2026-08-26T05:40:00Z
 anchor:
   rule: panel.dock.controls-survive-use
   screen: review
-status: open
+status: addressed
 body: "Reproduced, not fixed. Once a ghost has been raised, the rules list stops
   scrolling to the wheel and stays that way until the page is reloaded - which
   is what Topher reported as 'swapping between the app and the prototype is
@@ -40,3 +40,35 @@ body: "Reproduced, not fixed. Once a ghost has been raised, the rules list stops
   implicated and its properties are not, which means the cause is in what the
   crossing does rather than in what the ghost is. That is where a fresh session
   should start."
+replies:
+  - author: agent
+    created: 2026-08-26T06:10:00Z
+    body: "Found and fixed. The cause is raise(), which promoted the ghost into
+      the top layer and then re-promoted the shell to put the panel back above
+      it. Two promotions in sequence leave the panel's rule list unable to
+      receive a wheel event at all until reload. Bisected at the code: with
+      raise() disabled the whole cycle scrolls; with only promote(ghost) it
+      scrolls; with only promote(shell) it scrolls; with both, dead. That is why
+      nothing built by hand reproduced it - a fixed div of the same box, with
+      the same same-origin iframe, promoted or not, is harmless, and so is
+      re-promoting the shell on its own. It takes the pair.
+
+      Same family as n-0068, where the fade slider died one step into a drag
+      because re-promotion cancelled the pointer's grip. The cost of
+      re-promotion is paid by whatever the pointer was doing - there a drag,
+      here the wheel.
+
+      The fix removes the second top-layer element rather than working around
+      it: the ghost is now inserted into the panel's own shadow root ahead of
+      the chrome, so lifting the shell lifts both. It still clears the app's
+      modals, because the shell is already up there; DOM order keeps the chrome
+      above the design it is ghosting. Verified: the whole swap cycle scrolls,
+      and the ghost still renders at the right box with its stand-in and pins.
+      16 browser checks and 82 unit tests green.
+
+      Worth saying plainly: my first two explanations of this were wrong, and
+      both were reasoned rather than measured. What settled it was bisecting the
+      code path instead of the DOM - and the reason an earlier control looked
+      clean is that the browser tool I was using cannot drive a shadow-root
+      scroller at all."
+
