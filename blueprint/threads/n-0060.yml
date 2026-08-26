@@ -5,7 +5,7 @@ created: 2026-08-24T17:30:08Z
 anchor:
   rule: panel.start.open-a-folder
   screen: review
-status: addressed
+status: verified
 body: Reviewing panel.start.open-a-folder, the prototype does not show that
   state - opening the rule takes me nowhere. Build the missing mockups (the
   start/connect state, the blueprint chooser, the docked layout, the Settings

@@ -12,6 +12,39 @@ import { expect, test } from '@playwright/test';
 // come from the config so the two run modes address the same pair of servers.
 import { FIXTURE, WD_ORIGIN } from '../playwright.config.js';
 
+/*
+ * Carry walkdown onto a page that has no tag of its own, the way the extension
+ * does: the panel and the embed together, the panel owning the pin-mode
+ * control. There is no badge to fall back on — an embed with no panel had one,
+ * and it was removed once the only page that could reach it turned out to be
+ * one nobody opens (n-0058).
+ */
+async function carryWalkdown(page, url, bp) {
+  await page.goto(url);
+  await page.evaluate(([server, project]) => {
+    window.__walkdownConfig = { server, bp: project };
+  }, [WD_ORIGIN, bp ?? '']);
+  await page.addScriptTag({ url: `${WD_ORIGIN}/panel.js` });
+  await page.addScriptTag({ url: `${WD_ORIGIN}/embed.js` });
+  await expect(realPanel(page).getByTestId('panel.bar')).toBeVisible();
+}
+
+/*
+ * The panel walkdown is RUNNING, as opposed to the one drawn on the page.
+ * Reviewing walkdown with walkdown means the prototype screens are mockups of
+ * this very panel and carry the same anchors — so on those pages a bare
+ * getByTestId matches both. The running one marks itself as walkdown's own
+ * chrome; a drawing of it does not.
+ */
+const realPanel = (page) =>
+  page.locator('[data-walkdown-chrome]').filter({ has: page.getByTestId('panel.bar') }).first();
+
+/** Arm pin mode from the panel — the one control that owns it. */
+async function armPinMode(page) {
+  await realPanel(page).getByTestId('panel.pin-mode').click();
+  await expect(page.locator('html')).toHaveClass(/wd-pinning/);
+}
+
 /** The fixture with pin mode armed, ready to receive a click. */
 async function pinning(page) {
   await page.goto(FIXTURE);
@@ -123,19 +156,24 @@ test(
   'the same anchors exist on both surfaces, and a pin records which it was placed on',
   { tag: '@rule:embed.pin.both-surfaces' },
   async ({ page }) => {
-    const ANCHOR = 'panel.counts';   // declared on the review screen, in both surfaces
+    /*
+     * Reviewing walkdown with walkdown: the review screen is a DRAWING of this
+     * panel, so most of its anchors also exist in the running panel injected
+     * over it. This one is in the design and not in the build, which keeps the
+     * check about the two surfaces rather than about that coincidence.
+     */
+    const ANCHOR = 'panel.app-frame';
 
     /* Place a pin on one surface of the review screen and return the record. */
     const pinOnSurface = async (url) => {
-      await page.goto(url);
+      await carryWalkdown(page, url, 'blueprint');
       // The embed fetches the project's threads and draws their pins after
       // load. Scanning for a free spot before that has settled picks a point a
       // marker then covers — which is what made this check flaky.
       await page.waitForLoadState('networkidle');
       const target = page.getByTestId(ANCHOR);
       await expect(target, `${ANCHOR} must exist on ${url}`).toBeVisible();
-      await page.getByTestId('pin.badge').click();   // no panel here; the badge is the way in
-      await expect(page.locator('html')).toHaveClass(/wd-pinning/);
+      await armPinMode(page);
       const box = await target.boundingBox();
       /*
        * The review screen already carries pins from the project's own threads,
@@ -189,12 +227,8 @@ test(
      * nothing to declare its project, the address it reports is the only thing
      * that can say where a pin belongs.
      */
-    await page.goto('http://localhost:4310/index.html');
-    await page.addScriptTag({ url: `${WD_ORIGIN}/embed.js` });   // no data-bp
-    await expect(page.getByTestId('pin.badge')).toBeVisible();
-
-    await page.getByTestId('pin.badge').click();
-    await expect(page.locator('html')).toHaveClass(/wd-pinning/);
+    await carryWalkdown(page, 'http://localhost:4310/index.html');   // no project named
+    await armPinMode(page);
     const target = page.getByTestId('waitlist.email');
     await expect(target).toBeVisible();
     const box = await target.boundingBox();

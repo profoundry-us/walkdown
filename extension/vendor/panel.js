@@ -502,7 +502,7 @@
     if (!docked) {
       const tabH = tab.getBoundingClientRect().height || 96;
       tab.style.transform = `translateY(calc(-50% - ${Math.round(tabH / 2) + 4}px))`;
-      const canGhost = Boolean(ghostSource(screenById(ghostOverride) ?? currentScreen()));
+      const canGhost = Boolean(ghostSource(screenInHand()));
       swap.style.display = canGhost ? 'block' : 'none';
       const share = protoShare ?? (pageSurface() === 'prototype' ? 1 : 0);
       const goingTo = share === 1 ? 'APP' : 'PROTOTYPE';
@@ -1346,6 +1346,19 @@
 
   const screenById = (id) => (data?.storyboard ?? []).find((s) => s.id === id) ?? null;
 
+  /*
+   * Where a surface goes when the page is not a screen. Without this the fade
+   * control was dead everywhere except the handful of pages walkdown happens to
+   * recognise - so crossing between the design and the build, the single most
+   * frequent thing a reviewer does, depended on where you already were.
+   */
+  const defaultScreen = () =>
+    screenById(data?.defaultScreen) ??
+    (data?.storyboard ?? []).find((sc) => screenUrl(sc, 'app') ?? screenUrl(sc, 'prototype')) ?? null;
+
+  /** The screen a surface control should act on: this page, or the front door. */
+  const screenInHand = () => screenById(ghostOverride) ?? currentScreen() ?? defaultScreen();
+
   /**
    * What the ghost should draw for a screen: the design if there is one, and
    * otherwise a proposal sketch — flagged, because a sketch that reads as the
@@ -1397,9 +1410,21 @@
       ? { start: typing.selectionStart, end: typing.selectionEnd } : null;
     const total = data.rows.length;
     const verified = data.rows.filter((r) => r.verdict === 'pass').length;
-    // The footer names the kind of work owed, matching the list's badges.
-    const toSign = data.rows.filter((r) => needsYou(r.rule) && !r.built).length;
-    const toWalk = data.rows.filter((r) => needsYou(r.rule) && r.built).length;
+    /*
+     * A sitting's verdicts are not in the ledger until Finish, so the footer
+     * used to sit frozen through the very work it is meant to be counting -
+     * "23 of 83 verified" three inches under "34 judged", which reads as a
+     * broken number rather than as two different facts. The work in hand is
+     * now counted separately and marked as not yet recorded, and a rule judged
+     * this sitting stops being listed as owed, because it is not.
+     */
+    const judged = new Set(Object.keys(session?.verdicts ?? {}));
+    const owes = (r) => needsYou(r.rule) && !judged.has(r.rule);
+    const toSign = data.rows.filter((r) => owes(r) && !r.built).length;
+    const toWalk = data.rows.filter((r) => owes(r) && r.built).length;
+    // Threads waiting on a person. Verifying one is the most common thing a
+    // reviewer does, and until now it moved nothing on screen at all.
+    const toVerify = (data.threads ?? []).filter((t) => t.status === 'addressed').length;
     renderBar();
     const TAB_ICON = { blueprints: 'bounding-box', rules: 'checks', screens: 'frame-corners' };
     const tab = (id, label) =>
@@ -1436,10 +1461,12 @@
         </div>
       </div>
       ${listTab === 'rules' ? `<div class="flex shrink-0 items-center gap-2 border-t border-base-300 px-3.5 py-2 text-xs opacity-70" data-testid="panel.counts">
-        <span><b>${verified} of ${total}</b> rules verified</span>
-        <span class="ml-auto flex gap-1">
-          ${toSign ? `<span class="badge badge-sm badge-warning badge-outline" title="rules owing your sign-off">${toSign} to sign</span>` : ''}
-          ${toWalk ? `<span class="badge badge-sm badge-warning badge-outline" title="rules owing your walkdown">${toWalk} to walk</span>` : ''}
+        <span class="shrink-0 whitespace-nowrap"><b>${verified}/${total}</b> verified${
+          judged.size ? `<b class="text-primary" title="Judged in this sitting. Nothing reaches the ledger until you press Finish."> +${judged.size}</b>` : ''}</span>
+        <span class="ml-auto flex shrink-0 gap-1">
+          ${toSign ? `<span class="badge badge-xs badge-warning badge-outline" title="rules owing your sign-off">${toSign} sign</span>` : ''}
+          ${toWalk ? `<span class="badge badge-xs badge-warning badge-outline" title="rules owing your walkdown">${toWalk} walk</span>` : ''}
+          ${toVerify ? `<span class="badge badge-xs badge-info badge-outline" title="threads whose fix is claimed, awaiting your judgment">${toVerify} verify</span>` : ''}
         </span>
       </div>` : ''}`;
 
@@ -1553,7 +1580,7 @@
 
   /** Where the ghost's surface lives right now, as a URL — or null if nowhere. */
   function ghostUrlNow() {
-    const src = ghostSource(screenById(ghostOverride) ?? currentScreen());
+    const src = ghostSource(screenInHand());
     return src ? (src.url ?? api(src.path)) : null;
   }
 
@@ -1614,7 +1641,7 @@
       bar.innerHTML = `${GEAR()}<span class="font-bold tracking-tight">walk<span class="text-primary">down</span></span>`;
       return wireGear();
     }
-    const canGhost = Boolean(ghostSource(screenById(ghostOverride) ?? currentScreen()));
+    const canGhost = Boolean(ghostSource(screenInHand()));
     // Left is Prototype and right is App, matching the buttons on either side —
     // so the slider reads 100 at the App end and the value is inverted here.
     const share = protoShare ?? (pageSurface() === 'prototype' ? 1 : 0);
@@ -1665,7 +1692,9 @@
         <button class="btn btn-xs gap-1 ${pinning ? 'btn-warning' : 'btn-outline btn-primary'}" id="wdp-pin" data-testid="panel.pin-mode"
           ${pinSurface() ? '' : 'disabled'}
           title="${esc(pinHint())}">${icon('map-pin', 'size-3.5')}Pin mode</button>
-        <button class="btn btn-xs btn-primary" id="wdp-walk" data-testid="panel.walk">${session ? 'Finish walkdown' : 'Start walkdown'}</button>
+        <button class="btn btn-xs btn-primary" id="wdp-walk" data-testid="panel.walk"
+          title="${session ? 'Go to the next rule still owing you a verdict' : 'Begin a sitting on this blueprint'}">${
+          session ? 'Continue walkdown' : 'Start walkdown'}</button>
         <button class="btn btn-xs btn-ghost" id="wdp-undock" title="Put walkdown away">\u00d7</button>
       </span>`;
 
@@ -1673,12 +1702,28 @@
     bar.querySelector('#wdp-undock').onclick = () => setDocked(false);
     bar.querySelector('#wdp-pin').onclick = () =>
       PIN.set(!PIN.isOn());
-    bar.querySelector('#wdp-walk').onclick = () => (session ? finishWalkdown() : startWalkdown());
+    // Start, or carry on. Ending a sitting is Finish, which sits in the strip
+    // beside the name and is on screen the whole time a sitting runs — two
+    // buttons that both ended it was one too many.
+    bar.querySelector('#wdp-walk').onclick = () => (session ? continueWalkdown() : startWalkdown());
     bar.querySelectorAll('[data-vp]').forEach((b) => {
       b.onclick = () => setViewport(Number(b.dataset.vp));
     });
     bar.querySelectorAll('[data-surface]').forEach((b) => {
-      b.onclick = () => setFade(b.dataset.surface === 'prototype' ? 1 : 0);
+      b.onclick = () => {
+        /*
+         * Off a screen entirely, fading is meaningless - there is no design of
+         * THIS page to fade to. So the control takes you to the blueprint's
+         * front door on the surface you asked for, which is what someone
+         * pressing Prototype from nowhere in particular actually wants.
+         */
+        const want = b.dataset.surface;
+        if (!currentScreen() && !ghostOverride) {
+          const home = defaultScreen();
+          if (home && goTo(home, want)) return;
+        }
+        setFade(want === 'prototype' ? 1 : 0);
+      };
     });
     const fade = bar.querySelector('#wdp-fade');
     if (fade) {
@@ -2445,6 +2490,47 @@
   }
 
   /** Server address and blueprint choice, wired the same wherever they appear. */
+  /*
+   * Offered rather than decided: a sitting is somebody's work in progress, and
+   * a picker that silently discarded it - or silently carried it - would be
+   * making that call for them.
+   */
+  function askAboutSitting(nextBp) {
+    const name = projects.find((p) => p.id === nextBp)?.name ?? nextBp;
+    toast(
+      `A walkdown is running on <b>${esc(data.project)}</b>, with <b>${
+        Object.keys(session.verdicts).length} judged</b>. It cannot come with you to ${esc(name)}.` +
+      ` <button class="link" data-sitting="keep">Keep it as a draft</button>` +
+      ` · <button class="link" data-sitting="discard">Discard it</button>`,
+      { sticky: true, on: {
+        keep: () => crossTo(nextBp),        // the draft is already on disk
+        discard: async () => { await discardSitting(); crossTo(nextBp); },
+      } }
+    );
+  }
+
+  /** End the sitting and take nothing with it. */
+  async function discardSitting() {
+    session = null;
+    saveSession();
+    await fetch(api('/api/draft'), {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ discard: true }),
+    }).catch(() => {});
+  }
+
+  function crossTo(nextBp) {
+    session = null;          // left behind, on disk, waiting to be resumed
+    BP = nextBp;
+    store.set(CHOICE, BP);
+    listTab = 'rules';
+    view = 'list';
+    selected = null;
+    phase = 'loading';
+    jumpOnLoad = true;
+    start();
+  }
+
   function wireBlueprints(root) {
     const retry = root.querySelector('#wdp-retry');
     if (retry) retry.onclick = () => {
@@ -2455,6 +2541,15 @@
     };
     root.querySelectorAll('[data-pick]').forEach((b) => {
       b.onclick = async () => {
+        /*
+         * A walkdown belongs to the blueprint it was started in - its verdicts
+         * name that blueprint's rules and nothing else. Carrying a sitting
+         * across would either write those verdicts into a project they do not
+         * describe or drop them on the floor, so the crossing has to be
+         * settled first. The draft is already on disk, which is what makes
+         * "keep it and come back" a real offer rather than a promise.
+         */
+        if (session && b.dataset.pick !== BP) return askAboutSitting(b.dataset.pick);
         BP = b.dataset.pick;
         await store.set(CHOICE, BP);
         listTab = 'rules';
@@ -2566,18 +2661,46 @@
     });
   }
 
-  function toast(html) {
+  /*
+   * `sticky` for a toast that asks something: a question that disappears after
+   * four seconds is worse than no question. `on` wires its buttons by their
+   * data-sitting name, so the caller says what each choice does rather than
+   * reaching back into the DOM for it.
+   */
+  function toast(html, { sticky = false, on = null } = {}) {
     const t = document.createElement('div');
     t.className = 'toast toast-end pointer-events-auto';
     t.dataset.theme = 'blueprint';
     t.style.right = `${W + 18}px`;
     t.innerHTML = `<div class="alert alert-neutral text-[13px]">${html}</div>`;
+    if (on)
+      for (const [name, fn] of Object.entries(on))
+        t.querySelector(`[data-sitting="${name}"]`)?.addEventListener('click', () => {
+          t.remove();
+          fn();
+        });
     // Onto the shell, not into the panel: render() rewrites the panel's markup
     // wholesale, and the things worth toasting - a verdict recorded, a thread
     // ended - are exactly the things that trigger a repaint, so a toast living
     // in there was swept away in the same tick it appeared.
     host.appendChild(t);
-    setTimeout(() => t.remove(), 4200);
+    if (!sticky) setTimeout(() => t.remove(), 4200);
+  }
+
+  /*
+   * Carry on where the sitting left off: the next rule still owing a verdict.
+   * A sitting resumed from disk lands here too - the draft survives crossing to
+   * another blueprint and back, so "continue" is a real offer rather than a
+   * word for "start over".
+   */
+  function continueWalkdown() {
+    const next = data.rows.find((x) => needsYou(x.rule) && !session.verdicts[x.rule]);
+    if (!next) {
+      view = 'list';
+      render();
+      return toast('Nothing left owing a verdict in this blueprint — <b>Finish</b> records the sitting.');
+    }
+    open(next.rule);
   }
 
   /** Append the session to the runs ledger — the same write the viewer makes. */
@@ -3051,9 +3174,8 @@
 
   setDocked(true);
   watchLocation();
-  window.walkdownEmbed?.dismissBadge();
   // Pin mode has one owner — the embed. The bar mirrors it rather than keeping
-  // a second copy that Escape and the badge would have to remember to update.
+  // a second copy that Escape would have to remember to update.
   PIN.watch(() => {
     paintGhostReach();
     pushContexts();

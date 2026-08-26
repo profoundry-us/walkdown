@@ -504,7 +504,7 @@
     'click',
     (e) => {
       if (!ctx.pinMode || overlay?.contains(e.target)) return;
-      // walkdown's own chrome is never a pin target: the badge has to be able
+      // walkdown's own chrome is never a pin target: the panel has to be able
       // to turn pin mode back off, a pin has to be able to open its thread, and
       // the docked panel has to keep working while you pin. A click inside the
       // panel's shadow root retargets to its host element, which carries the
@@ -520,7 +520,7 @@
   );
 
   // Escape is the way out of any mode: it closes the open form first, then
-  // leaves pin mode. Without it the only exit was the badge, which pin mode
+  // leaves pin mode. Without it the only exit was the bar's control, which
   // itself was swallowing.
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape' || !ctx.pinMode) return;
@@ -532,8 +532,6 @@
   const pinWatchers = new Set();
   function setPinMode(on) {
     ctx.pinMode = on;
-    badge?.classList.toggle('btn-warning', on);
-    badge?.classList.toggle('btn-neutral', !on);
     // Anywhere is pinnable, so the whole surface reads as targetable.
     document.documentElement.classList.toggle('wd-pinning', on);
     if (!on) {
@@ -548,23 +546,12 @@
    * The one seam other walkdown chrome may use. The panel puts a pin-mode
    * control in its header, and pin mode has exactly one owner - this script -
    * so the panel asks rather than keeping a second copy of the state that
-   * Escape and the badge would then have to remember to update.
+   * Escape would then have to remember to update.
    */
   window.walkdownEmbed = {
     isPinMode: () => ctx.pinMode,
     setPinMode,
     watchPinMode(fn) { pinWatchers.add(fn); return () => pinWatchers.delete(fn); },
-    /*
-     * Once the panel is up it owns the pin-mode control, and the badge goes.
-     * It was a second control saying the same thing as the one in the bar —
-     * another place to look, and another thing to keep in step. The crosshair
-     * cursor already says pin mode is on. Without a panel the badge stays put,
-     * because then it is the only way in.
-     */
-    dismissBadge() {
-      badge?.remove();
-      badge = null;
-    },
   };
 
   /*
@@ -953,8 +940,16 @@
     }
   });
 
-  // --- standalone mode: floating toggle + pins from server --------------------
-  let badge = null;
+  /*
+   * Two contexts, and pin mode has an owner in both. Framed, the embed reports
+   * what it is looking at and the panel outside drives it. Top level, the panel
+   * is in this same document and owns the control outright.
+   *
+   * There was a third: an embed with no panel anywhere carried a floating badge
+   * of its own. It went when the only page that could reach it turned out to be
+   * one nobody opens (n-0058) - and it had been leaking onto panelled pages
+   * besides, which is two controls for a thing that must have exactly one.
+   */
   if (framed) {
     const announce = () => window.parent.postMessage(
       { type: 'walkdown:ready', anchors: $anchors().map(anchorId), href: location.href },
@@ -972,17 +967,6 @@
      */
     watchLocation(announce);
   } else {
-    badge = document.createElement('button');
-    // --walkdown-dock is how wide the docked panel is, published by panel.js;
-    // custom properties cross the shadow boundary, so the badge still gets out
-    // from under a panel it cannot see.
-    badge.className = 'wd-badge btn btn-xs btn-neutral pointer-events-auto fixed bottom-2.5 z-[99999]';
-    badge.style.cssText = 'right: calc(10px + var(--walkdown-dock, 0px)); transition: right .22s ease;';
-    badge.dataset.testid = 'pin.badge';
-    badge.textContent = 'W pin';
-    badge.title = 'walkdown: toggle pin mode';
-    badge.onclick = () => setPinMode(!ctx.pinMode);
-    root.appendChild(badge);
     // After the document is parsed: the pins need the anchored elements to
     // position against, and blueprintId() needs to be able to see a sibling
     // walkdown tag further down the page.

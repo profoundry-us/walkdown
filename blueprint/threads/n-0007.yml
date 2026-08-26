@@ -6,7 +6,7 @@ anchor:
   rule: panel.rules.steps-not-an-appendix
   screen: rule-detail
   element: detail.evidence
-status: addressed
+status: verified
 body: Swap the steps and the evidence sections; make the steps open by default;
   put the screen flow above the steps after swapping them
 replies:

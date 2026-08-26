@@ -6,7 +6,7 @@ anchor:
   rule: panel.rules.steps-not-an-appendix
   screen: rule-detail
   element: detail.technical-disclosure
-status: addressed
+status: open
 body: "Agent walkdown: the given/when/then steps are expanded in the detail pane
   as the rule asks, but the second half is unbuilt - nothing renders the
   recorded check source behind a collapsed disclosure. The probe found no source
@@ -29,3 +29,6 @@ replies:
       there I also built panel.rules.evidence-visible, which had never been
       built: each verify type the rule asks for now shows its latest ledger
       result, actor and age, with the run id on hover.'
+  - author: Topher Fangio
+    created: 2026-08-26T03:36:00Z
+    body: I don't actually see the checks on any of these.

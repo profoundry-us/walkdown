@@ -1,0 +1,9 @@
+id: n-0081
+kind: note
+author: Topher Fangio
+created: 2026-08-26T03:26:33Z
+anchor:
+  rule: panel.delivery.anchors-still-required
+status: open
+body: Again, this works fine but the rule description needs to be rewritten; too
+  confusing.

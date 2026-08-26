@@ -4,7 +4,34 @@ author: Topher Fangio
 created: 2026-08-26T03:09:34Z
 anchor:
   rule: panel.dock.own-skin
-status: open
+status: addressed
 body: See my comment in the agent about the THEN condition being too long here;
   this needs to be broken up into multiple rules; but I think the functionality
   is working perfectly.
+replies:
+  - author: agent
+    created: 2026-08-26T03:57:05Z
+    body: Split into four rules
+  - author: agent
+    created: 2026-08-26T03:58:00Z
+    body: "Done. The THEN carried thirteen separate claims about three different
+      things - what the chrome looks like, how the desk is drawn, and what the
+      tuner does - which is why neither a person nor an agent could hold it in
+      view long enough to judge it. Now four rules. panel.dock.own-skin keeps
+      only the identity claim: walkdown's chrome is visibly not the app, the
+      skin is one theme block, and prototypes keep their wireframe. The rest
+      became a story of its own, panel.desk: reads-as-paper (faint ruling, real
+      perspective), tuner (live, typable, persists, touches nothing verified,
+      closes on Escape or outside click, stands clear of the app's corner) and
+      peek (dims everything on the desk including the headless cover, bar stays
+      lit, survives a dial move, always starts unchecked). Each is now a thing
+      you can look at once and answer.
+
+      One thing I did NOT do, deliberately: close the twelve addressed threads
+      on this rule. Verifying is accepting, and an agent may claim work but
+      never accept it - threads.lifecycle.claim-never-accept, which the server
+      enforces too. Recording twelve acceptances under Topher's name because he
+      asked me to would be the one forgery this whole ledger exists to prevent.
+      They are all addressed and sitting together in his queue, which is a
+      single pass through them rather than a hunt."
+

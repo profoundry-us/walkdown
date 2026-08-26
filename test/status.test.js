@@ -294,3 +294,11 @@ test('coverage staleness does not touch judgment tiers @rule:status.derived.unba
   // An agent looked at it; no check ever claimed to. That is not staleness.
   assert.equal(row.agent.state, 'pass');
 });
+
+test('an empty inventory is not proof the suite is empty @rule:status.derived.unbacked-pass-goes-stale', () => {
+  const runs = [checksRun('2026-01-01T00:00:00Z', 'local', 'pass')];
+  // A blueprint served from a copy finds no check files at all. Reading that as
+  // "nothing checks this rule" turned every checks pass stale at once.
+  const row = deriveStatus(blueprint({ runs }), { checkRefs: new Set() }).rows[0];
+  assert.equal(row.cells.local.state, 'pass');
+});

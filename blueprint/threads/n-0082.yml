@@ -1,0 +1,10 @@
+id: n-0082
+kind: note
+author: Topher Fangio
+created: 2026-08-26T03:31:58Z
+anchor:
+  rule: panel.start.open-a-folder
+status: open
+body: I think this is working, but I don't know what it means by "while naming
+  the folder the server is holding open". I don't think we name any folders
+  anywhere in the app, and I don't think we need to.

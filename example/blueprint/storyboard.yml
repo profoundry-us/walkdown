@@ -1,3 +1,8 @@
+# Where a surface goes when nothing else says. A blueprint is about a product,
+# and a product has a front door — so crossing between the design and the build
+# is possible from anywhere, not only from a page walkdown already recognises.
+default_screen: waitlist-join
+
 screens:
   - id: waitlist-join
     title: Join the waitlist

@@ -8,6 +8,11 @@
 # marked as such (see lib/serve.js). It makes the comparison machinery usable
 # for judging the panel; it is not the build, and never evidence that one
 # exists.
+# Where a surface goes when nothing else says. A blueprint is about a product,
+# and a product has a front door — so crossing between the design and the build
+# is possible from anywhere, not only from a page walkdown already recognises.
+default_screen: review
+
 screens:
   - id: review
     title: The review page
