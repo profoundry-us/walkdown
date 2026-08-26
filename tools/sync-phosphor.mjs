@@ -25,7 +25,7 @@ const EMBED = join(ROOT, 'lib', 'viewer', 'embed.js');
  */
 const TARGETS = [
   { file: PANEL, icons: [['bounding-box', 'regular'], ['checks', 'regular'], ['desktop', 'regular'],
-    ['device-mobile', 'regular'], ['frame-corners', 'regular'], ['gear', 'regular'], ['map-pin', 'regular']] },
+    ['device-mobile', 'regular'], ['frame-corners', 'regular'], ['gear', 'regular'], ['map-pin', 'regular'], ['warning', 'fill']] },
   { file: EMBED, icons: [['map-pin', 'fill']] },
 ];
 
