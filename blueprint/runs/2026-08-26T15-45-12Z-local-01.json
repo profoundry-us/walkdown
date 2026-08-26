@@ -1,0 +1,352 @@
+{
+  "run_id": "2026-08-26T15-45-12Z-local-01",
+  "created": "2026-08-26T15:45:12Z",
+  "actor": "Topher Fangio",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "fcbc3ec-dirty",
+  "blueprint_sha": "fcbc3ec-dirty",
+  "results": [
+    {
+      "rule": "embed.pin.anchored-target",
+      "status": "pass",
+      "statement_hash": "sha256:6feaf28d3505"
+    },
+    {
+      "rule": "embed.pin.settled-pins-leave",
+      "status": "pass",
+      "statement_hash": "sha256:c82607d3ac2e"
+    },
+    {
+      "rule": "embed.pin.tooltip-says-what-it-is",
+      "status": "pass",
+      "statement_hash": "sha256:50dfb40b9f83"
+    },
+    {
+      "rule": "embed.pin.form-at-the-spot",
+      "status": "pass",
+      "statement_hash": "sha256:5bb13509dc3b"
+    },
+    {
+      "rule": "ownership.evidence.same-surface",
+      "status": "refining",
+      "threads": [
+        "n-0074"
+      ]
+    },
+    {
+      "rule": "panel.dock.no-framing",
+      "status": "pass",
+      "statement_hash": "sha256:45e629ff8e85"
+    },
+    {
+      "rule": "embed.pin.viewport-recorded",
+      "status": "pass",
+      "statement_hash": "sha256:6971846eb2cc"
+    },
+    {
+      "rule": "panel.dock.surface-swap-is-instant",
+      "status": "pass",
+      "statement_hash": "sha256:c74a4c999299"
+    },
+    {
+      "rule": "panel.dock.no-pin-mid-fade",
+      "status": "pass",
+      "statement_hash": "sha256:a25c933fc24f"
+    },
+    {
+      "rule": "panel.dock.one-pin-mode",
+      "status": "fail",
+      "statement_hash": "sha256:855c16516e9a",
+      "threads": [
+        "n-0075"
+      ]
+    },
+    {
+      "rule": "panel.dock.own-skin",
+      "status": "fail",
+      "statement_hash": "sha256:93bfd901cfcd",
+      "threads": [
+        "n-0076"
+      ]
+    },
+    {
+      "rule": "panel.dock.host-isolation",
+      "status": "pass",
+      "statement_hash": "sha256:116d1940d94f"
+    },
+    {
+      "rule": "panel.dock.chrome-not-a-pin-target",
+      "status": "fail",
+      "statement_hash": "sha256:466c5e212ed7",
+      "threads": [
+        "n-0077"
+      ]
+    },
+    {
+      "rule": "panel.delivery.one-implementation",
+      "status": "fail",
+      "statement_hash": "sha256:cb78287f2077",
+      "threads": [
+        "n-0078",
+        "n-0085"
+      ]
+    },
+    {
+      "rule": "panel.delivery.absent-until-asked",
+      "status": "refining",
+      "threads": [
+        "n-0079"
+      ]
+    },
+    {
+      "rule": "panel.delivery.framed-isolation",
+      "status": "fail",
+      "statement_hash": "sha256:064bb8c0f0a4",
+      "threads": [
+        "n-0080"
+      ]
+    },
+    {
+      "rule": "panel.delivery.one-switch",
+      "status": "approved",
+      "statement_hash": "sha256:84bda3b30c1d"
+    },
+    {
+      "rule": "panel.delivery.stale-copy-says-so",
+      "status": "pass",
+      "statement_hash": "sha256:124fa1fddaac"
+    },
+    {
+      "rule": "panel.delivery.anchors-still-required",
+      "status": "fail",
+      "statement_hash": "sha256:9699e8d0df4d",
+      "threads": [
+        "n-0081"
+      ]
+    },
+    {
+      "rule": "panel.start.open-a-folder",
+      "status": "fail",
+      "statement_hash": "sha256:6e9246fa7579",
+      "threads": [
+        "n-0082"
+      ]
+    },
+    {
+      "rule": "panel.start.choose-a-blueprint",
+      "status": "pass",
+      "statement_hash": "sha256:9f0ded825795"
+    },
+    {
+      "rule": "panel.rules.detail-slide",
+      "status": "pass",
+      "statement_hash": "sha256:493a83d3f0bd"
+    },
+    {
+      "rule": "panel.rules.takes-you-there",
+      "status": "pass",
+      "statement_hash": "sha256:bc2cef92cdd3"
+    },
+    {
+      "rule": "panel.rules.one-pane-per-tab",
+      "status": "pass",
+      "statement_hash": "sha256:5b742db34a44",
+      "threads": [
+        "n-0083"
+      ]
+    },
+    {
+      "rule": "panel.rules.step-between",
+      "status": "pass",
+      "statement_hash": "sha256:56a26420e1f3"
+    },
+    {
+      "rule": "panel.rules.steps-not-an-appendix",
+      "status": "fail",
+      "statement_hash": "sha256:0609e516526f",
+      "threads": [
+        "n-0084",
+        "n-0087"
+      ]
+    },
+    {
+      "rule": "panel.rules.evidence-visible",
+      "status": "pass",
+      "statement_hash": "sha256:65b84178c291"
+    },
+    {
+      "rule": "panel.rules.counts-legible",
+      "status": "pass",
+      "statement_hash": "sha256:cc7b6d687101"
+    },
+    {
+      "rule": "panel.rules.lifecycle-legible",
+      "status": "pass",
+      "statement_hash": "sha256:817b59a5a95a"
+    },
+    {
+      "rule": "panel.rules.headless-says-so",
+      "status": "pass",
+      "statement_hash": "sha256:5bb6c7d6142a"
+    },
+    {
+      "rule": "panel.threads.reply-in-place",
+      "status": "pass",
+      "statement_hash": "sha256:a0dd8bb2f5b9"
+    },
+    {
+      "rule": "panel.threads.claim-never-accept",
+      "status": "pass",
+      "statement_hash": "sha256:7c4e1e2d1562"
+    },
+    {
+      "rule": "panel.threads.show-the-sketch",
+      "status": "approved",
+      "statement_hash": "sha256:8244263349d7"
+    },
+    {
+      "rule": "panel.walkdown.records-to-ledger",
+      "status": "pass",
+      "statement_hash": "sha256:6cc28278f4a6"
+    },
+    {
+      "rule": "panel.desk.reads-as-paper",
+      "status": "approved",
+      "statement_hash": "sha256:60871d489f4d",
+      "threads": [
+        "n-0088"
+      ]
+    },
+    {
+      "rule": "panel.desk.tuner",
+      "status": "approved",
+      "statement_hash": "sha256:09636342aada",
+      "threads": [
+        "n-0089"
+      ]
+    },
+    {
+      "rule": "panel.desk.peek",
+      "status": "approved",
+      "statement_hash": "sha256:9b19ad4a2f80",
+      "threads": [
+        "n-0090"
+      ]
+    },
+    {
+      "rule": "panel.walkdown.session-survives-reload",
+      "status": "pass",
+      "statement_hash": "sha256:05503923167c"
+    },
+    {
+      "rule": "panel.walkdown.draft-on-disk",
+      "status": "pass",
+      "statement_hash": "sha256:cfb0ee61cad3",
+      "threads": [
+        "n-0091"
+      ]
+    },
+    {
+      "rule": "panel.walkdown.verdicts-at-hand",
+      "status": "pass",
+      "statement_hash": "sha256:10b43c02479d"
+    },
+    {
+      "rule": "panel.walkdown.pass-advances",
+      "status": "pass",
+      "statement_hash": "sha256:39a3512969c6"
+    },
+    {
+      "rule": "panel.walkdown.note-with-any-verdict",
+      "status": "pass",
+      "statement_hash": "sha256:f9043305838b"
+    },
+    {
+      "rule": "panel.walkdown.fail-requires-why",
+      "status": "pass",
+      "statement_hash": "sha256:9644c16756d8"
+    },
+    {
+      "rule": "panel.identity.default-actor",
+      "status": "pass",
+      "statement_hash": "sha256:d251c7d97967"
+    },
+    {
+      "rule": "panel.identity.attribution-visible",
+      "status": "pass",
+      "statement_hash": "sha256:1b6a789fde73"
+    },
+    {
+      "rule": "panel.viewport.device-presets",
+      "status": "pass",
+      "statement_hash": "sha256:2ded288a785a"
+    },
+    {
+      "rule": "panel.viewport.zoom-to-fit",
+      "status": "pass",
+      "statement_hash": "sha256:8beb5dbadbe0"
+    },
+    {
+      "rule": "panel.signoff.spec-pair-derived",
+      "status": "pass",
+      "statement_hash": "sha256:d195df6ea5d8"
+    },
+    {
+      "rule": "panel.signoff.refine-requires-feedback",
+      "status": "pass",
+      "statement_hash": "sha256:cc9c4f5148e1"
+    },
+    {
+      "rule": "panel.signoff.approved-recorded",
+      "status": "pass",
+      "statement_hash": "sha256:3debe377856e"
+    },
+    {
+      "rule": "screens.identity.fragment-is-identity",
+      "status": "pass",
+      "statement_hash": "sha256:ac30c2879d52"
+    },
+    {
+      "rule": "screens.identity.follows-navigation",
+      "status": "pass",
+      "statement_hash": "sha256:e8763cbea8b6"
+    },
+    {
+      "rule": "screens.ownership.routes-by-page",
+      "status": "pass",
+      "statement_hash": "sha256:5ad49373b1d0"
+    },
+    {
+      "rule": "screens.surfaces.stand-in-app",
+      "status": "pass",
+      "statement_hash": "sha256:8c976257c8c0"
+    },
+    {
+      "rule": "threads.conversation.one-stream",
+      "status": "pass",
+      "statement_hash": "sha256:e58134b3796f"
+    },
+    {
+      "rule": "threads.conversation.composer-stays",
+      "status": "pass",
+      "statement_hash": "sha256:fc8772c1687a"
+    },
+    {
+      "rule": "threads.conversation.new-since-you-looked",
+      "status": "pass",
+      "statement_hash": "sha256:e3e890cf2091"
+    },
+    {
+      "rule": "threads.conversation.append-only",
+      "status": "pass",
+      "statement_hash": "sha256:06a879b1032c"
+    },
+    {
+      "rule": "threads.conversation.thread-is-a-screen",
+      "status": "pass",
+      "statement_hash": "sha256:9971d7aaef65"
+    }
+  ]
+}

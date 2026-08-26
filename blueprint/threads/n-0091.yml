@@ -1,0 +1,22 @@
+id: n-0091
+kind: note
+author: topherfangio
+created: 2026-08-26T15:07:41Z
+anchor:
+  rule: panel.walkdown.draft-on-disk
+  screen: review
+  element: panel.counts
+  offset:
+    x: 101
+    y: 13
+  position:
+    x: 852
+    y: 676
+  surface: app
+  viewport:
+    name: desktop
+    width: 1050
+status: open
+body: Let's add some daisy tooltips when you hover these numbers so we can see
+  how it is calculating those or working; just seeing the numbers doesn't give a
+  new user enough context about what work is left to do.
