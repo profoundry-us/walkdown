@@ -6,7 +6,7 @@ anchor:
   rule: panel.rules.takes-you-there
   screen: review
   element: panel.app-frame
-status: open
+status: addressed
 body: "When the app viewer changes its URL, the frame needs to show that it is
   doing something - some kind of loading indicator. Right now the old screen
   stays on display until the new one has finished loading, so a slow app looks
@@ -14,3 +14,20 @@ body: "When the app viewer changes its URL, the frame needs to show that it is
   The app I am working on at work takes a long time to load, and that is exactly
   where this bites: I ask for a screen, nothing appears to happen, and the
   screen I am looking at is the one I just left."
+replies:
+  - author: agent
+    created: 2026-08-25T23:40:00Z
+    body: "Built. When the frame is sent somewhere it now carries a veil naming
+      the screen it is fetching - 'Loading Rule detail…' - over a dimmed copy of
+      whatever was there, so a slow page reads as one still on its way rather
+      than as a walkdown that went somewhere wrong. Held back 180ms, because a
+      veil that flashes on every quick load is its own kind of noise, and
+      cleared by the frame's own load event, so it lifts whether walkdown sent
+      the page there or the app navigated itself. It follows the frame's box, so
+      a viewport preset or a window resize does not leave it stranded. A frame
+      that never arrives keeps the veil, which is the honest report. Covered by
+      a browser check that holds a screen's response open and watches the veil
+      appear and then lift when it is released. Framed delivery only: docked, a
+      real navigation unloads the panel itself, so there is nothing left to draw
+      the veil - which is the same reason that trip is offered rather than taken
+      unless the extension is carrying us."

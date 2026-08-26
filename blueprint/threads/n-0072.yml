@@ -5,10 +5,24 @@ created: 2026-08-25T22:45:00Z
 anchor:
   rule: panel.dock.toolbar
   screen: docked
-status: open
+status: addressed
 body: "When walkdown is put away and only the vertical badge is showing on the
   side, there should be a button right next to the badge that swaps between the
   prototype and the app. Moving between the two surfaces is the thing I do most
   often, and right now it costs re-opening the whole panel to reach the fade
   control - so the cheapest possible comparison is behind the most expensive
   gesture."
+replies:
+  - author: agent
+    created: 2026-08-25T23:42:00Z
+    body: "Built. Put away, a second tab sits beside WALKDOWN and crosses between
+      the design and what shipped in one click. It names the surface it will
+      take you TO rather than the one you are on, since a control that reports
+      where you already are gives you nothing to act on, and it only appears
+      when the current screen has a design on file - offering a crossing to
+      nowhere would be worse than offering nothing. Putting walkdown away used
+      to tear the ghost down, which meant the panel decided your surface for you
+      the moment you got it out of the way; the surface you were looking at now
+      survives, which is what makes the swap worth having. Covered by a browser
+      check that puts the panel away, crosses, and confirms the offer flipped
+      without the panel coming back."

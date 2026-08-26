@@ -329,3 +329,68 @@ test(
     expect(loads, 'the frame reloaded for a screen it was already on').toBe(settled);
   }
 );
+
+test(
+  'the frame says it is loading rather than showing the screen you just left',
+  { tag: '@rule:panel.rules.takes-you-there' },
+  async ({ page }) => {
+    const framed = `${WD_ORIGIN}/prototype/screens/review.html`;
+    const url = FIXTURE.replace('docked.html', 'extension.html') +
+      `&build=stale&frame=${encodeURIComponent(framed)}`;
+    await page.goto(url);
+    await expect(page.getByTestId('panel.bar')).toBeVisible();
+
+    // A screen that takes its time. Without a veil the PREVIOUS screen stays on
+    // display, which reads as a walkdown that went somewhere wrong.
+    let release;
+    const held = new Promise((r) => { release = r; });
+    // Matched by regex: the panel appends its own bp parameter, and a glob
+    // ending at .html misses the URL that actually goes out.
+    await page.route(/screens\/rule-detail\.html/, async (route) => {
+      await held;
+      await route.fulfill({ contentType: 'text/html', body: '<h1>Arrived</h1>' });
+    });
+
+    await page.getByTestId('panel.tabs').getByText(/Screens/i).click();
+    await page.locator('[data-screen="rule-detail"]').first().click();
+
+    const veil = page.getByTestId('panel.frame-loading');
+    await expect(veil).toBeVisible();
+    await expect(veil).toContainText(/loading/i);
+
+    // And it gets out of the way the moment the page arrives.
+    release();
+    await expect(veil).toHaveCount(0);
+  }
+);
+
+test(
+  'put away, the badge still crosses between the design and what shipped',
+  { tag: '@rule:panel.dock.toolbar' },
+  async ({ page }) => {
+    // A framed review of a screen that HAS a design on file — there has to be
+    // something to cross to for the offer to mean anything.
+    const framed = `${WD_ORIGIN}/prototype/screens/review.html`;
+    await page.goto(FIXTURE.replace('docked.html', 'extension.html') +
+      `&build=stale&frame=${encodeURIComponent(framed)}`);
+    await expect(page.getByTestId('panel.bar')).toBeVisible();
+    // Put walkdown away: only the tab is left.
+    await page.getByTestId('panel.bar').getByTitle(/Put walkdown away/i).click();
+    // The panel slides off rather than being removed, so the tab appearing is
+    // what says it is away.
+    await expect(page.getByText('WALKDOWN', { exact: true })).toBeVisible();
+
+    // The swap is there, and it names where it will take you rather than where
+    // you already are.
+    const swap = page.getByTestId('panel.tab-swap');
+    await expect(swap).toBeVisible();
+    const first = (await swap.textContent()).trim();
+    expect(['APP', 'PROTOTYPE']).toContain(first);
+
+    await swap.click();
+    await expect(swap).not.toHaveText(first);   // it crossed; the offer flipped
+
+    // Crossing did not cost re-opening the panel.
+    await expect(page.getByText('WALKDOWN', { exact: true })).toBeVisible();
+  }
+);
