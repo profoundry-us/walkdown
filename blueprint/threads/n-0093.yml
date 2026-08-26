@@ -1,0 +1,23 @@
+id: n-0093
+kind: note
+author: agent
+created: 2026-08-26T18:10:58Z
+anchor:
+  screen: rule-detail
+status: open
+body: "Design request — the rule detail needs somewhere to say how to reach a
+  screen that has no address of its own. A storyboard screen may be a STATE (a
+  filtered list, an open drawer, the second time you submit a form), and those
+  share a URL with the page they are a state of. Walking to such a rule
+  navigates to the shared address and then says nothing, so the reviewer is
+  judging the wrong state or guessing. The storyboard already reserves
+  `app.setup` for \"how to get the app into this state\" and nothing has ever
+  read it. Asked for: a short block in the rule detail, near the top where it is
+  read before the steps rather than after them, shown only when the rule's
+  screen carries a setup, saying what to do on arrival. Anchor detail.setup.
+  Filed per AGENTS.md rather than drawn: prototype/ is design's. Building it
+  meanwhile against the plainest thing that could work (a labelled line above
+  Steps, same visual weight as the Verify block) so the behaviour can be judged;
+  the drawing replaces it. Source: GitHub issue #1, which asks for exactly this
+  as the half that makes a shared app path an honest spelling rather than a
+  tolerated one."

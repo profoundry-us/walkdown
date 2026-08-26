@@ -23,7 +23,11 @@ screens:
   - id: waitlist-already
     title: Already on the list
     prototype: /screens/waitlist-already.html   # spec-born (q-0001); design adopted the sketch, q-0002
-    app: { path: /confirm.html?email=you@example.com&already=1 }
+    app:
+      path: /confirm.html?email=you@example.com&already=1
+      # A state, not an address: the query is not identity, so this shares the
+      # confirmation page's address and the walk lands one step short of it.
+      setup: Join with an email already on the list — the same page comes back saying so.
     anchors:
       - waitlist.already-message
       - waitlist.confirmed-email

@@ -353,7 +353,7 @@ function cmdStatus(args) {
     console.log(`\n  ${dim('ACTIVE THREADS')}`);
     for (const t of active.slice(0, 6))
       console.log(
-        `  ${t.id} ${paintStatus(t.status)} ${dim(`(${t.anchor?.rule ?? 'unanchored'})`)} — ${truncate(t.body, 60)}`
+        `  ${t.id} ${paintStatus(t.status)} ${dim(`(${anchorLabel(t.anchor)})`)} — ${truncate(t.body, 60)}`
       );
     if (active.length > 6) console.log(dim(`  +${active.length - 6} more — walkdown threads`));
   }
@@ -362,6 +362,19 @@ function cmdStatus(args) {
 
 const STATUS_COLOR = { open: yellow, answered: yellow, addressed: green, incorporated: green, verified: green, waived: dim };
 const paintStatus = (s) => (STATUS_COLOR[s] ?? ((x) => x))(s);
+
+/*
+ * The shortest true thing about where a thread is anchored, for a digest line.
+ * A rule is the usual answer, but the ownership rules ask for design requests
+ * anchored to a SCREEN and nothing else - and reading those back as
+ * "unanchored" said the opposite of what filing one means.
+ */
+function anchorLabel(a = {}) {
+  if (a.rule) return a.rule;
+  if (a.element) return a.element;
+  if (a.screen) return `screen ${a.screen}`;
+  return 'unanchored';
+}
 
 function anchorText(a = {}) {
   return [a.rule && `rule ${a.rule}`, a.screen && `screen ${a.screen}`, a.element && `element ${a.element}`]

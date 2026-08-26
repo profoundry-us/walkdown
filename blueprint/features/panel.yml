@@ -475,6 +475,21 @@ stories:
             - The check source stays behind anchor `detail.technical-disclosure` until opened
           statement_hash: sha256:0609e516526f
 
+      - id: panel.rules.setup-says-how-to-arrive
+        origin: thread:n-0093
+        statement: When a rule's screen is a state rather than an address - it carries a setup - the panel says what to do on arrival, above the steps, because an address alone cannot always put the app into the state it names.
+        verify: [checks, agent, human]
+        screens: [rule-detail]
+        steps:
+          given:
+            - A rule whose screen declares a setup, open in the detail pane
+          when:
+            - Reading the detail above anchor `detail.steps`
+          then:
+            - Anchor `detail.setup` says how to get the app into that state
+            - A rule whose screen has no setup shows nothing there - an empty instruction is worse than none
+          statement_hash: sha256:e41b088d8143
+
       - id: panel.rules.evidence-visible
         origin: walkdown
         statement: A rule's detail shows the evidence behind its standing - the latest ledger result for each of its verify types - so the chain of trust is read where the rule is judged.

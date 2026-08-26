@@ -472,3 +472,49 @@ test(
       .toBe(0);
   }
 );
+
+test(
+  'a screen that is a state, not an address, says how to get there',
+  { tag: '@rule:panel.rules.setup-says-how-to-arrive' },
+  async ({ page }) => {
+    /*
+     * The example blueprint has the real case: waitlist-already is the
+     * confirmation page told apart by a query, so it shares that page's
+     * address and the walk lands one step short of the state.
+     */
+    await page.route('**/index.html', (r) =>
+      r.fulfill({ contentType: 'text/html', body: '<h1>The other project</h1>' }));
+    await page.goto(FIXTURE.replace('docked.html', 'extension.html') + '&bp=&reinjects=0');
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
+    await expect(page.getByText(/Which blueprint/i)).toBeVisible();
+    await page.getByText(/walkdown-example/i).first().click();
+
+    const openRule = async (name) => {
+      // The panes slide; the list is off screen while a rule is open.
+      const back = page.getByTestId('detail.back');
+      // The pane is slid out of the way rather than removed, so waiting on the
+      // slide (300ms, panel.js) is what makes the list clickable again.
+      if (await back.count()) { await back.click(); await page.waitForTimeout(400); }
+      await page.getByTestId('panel.rules-list').locator('button', { hasText: name }).first().click();
+      await expect(page.getByTestId('detail.rule-id')).toBeVisible();
+    };
+
+    await openRule('already-joined');
+    const setup = page.getByTestId('detail.setup');
+    await expect(setup).toBeVisible();
+    await expect(setup).toContainText(/already on the list/i);
+
+    // Above the steps, because arriving comes before doing.
+    const order = await page.getByTestId('detail.steps').evaluate(
+      (steps, s) => steps.compareDocumentPosition(s) & Node.DOCUMENT_POSITION_PRECEDING,
+      await setup.elementHandle()
+    );
+    expect(order, 'the setup must be read before the steps').toBeTruthy();
+
+    // And nothing is said where there is nothing to say: an empty instruction
+    // is worse than none.
+    await openRule('email-required');
+    await expect(page.getByTestId('detail.setup')).toHaveCount(0);
+  }
+);

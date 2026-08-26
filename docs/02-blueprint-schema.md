@@ -153,9 +153,15 @@ screens:
     app: { path: /checkout/confirmation }
 ```
 
-- Screens may be **states**, not just pages (a modal, wizard step 3). The `setup` field is
-  the reserved hook for "how to get the app into this state"; v1 only guarantees
-  deep-linking to URL-reachable screens and leaves `setup` unexecuted.
+- Screens may be **states**, not just pages (a modal, wizard step 3). The `setup` field
+  says "how to get the app into this state". v1 only guarantees deep-linking to
+  URL-reachable screens and does not *execute* `setup` — but the panel shows it with any
+  rule whose screen carries one, above the steps, so a walk that can only reach the page
+  tells the reviewer the rest. Write it for a person to read.
+- Two screens that are states of one page share that page's `app.path`, and a query does
+  not tell them apart (`screens.identity.query-is-not-identity`). Matching skips a tie, so
+  the second screen can only be reached by picking it by hand; lint warns and names which
+  one loses. A `setup` is what makes that spelling honest rather than merely tolerated.
 - The storyboard is the *only* place per-surface URLs live. When a route changes, one line
   changes.
 - **Each surface has one owner, and nobody writes into another's.** Design owns

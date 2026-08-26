@@ -1985,6 +1985,23 @@
           <div id="wdp-vsay" data-testid="detail.say" class="hidden text-[11px] text-warning"></div>
           <div class="text-[11.5px] opacity-50" data-testid="detail.judged">${Object.keys(session.verdicts).length} judged this session</div>
         </div>` : ''}
+        ${(() => {
+          /*
+           * A screen can be a STATE rather than an address - a filtered list,
+           * an open drawer, the second time you submit the same form - and a
+           * state shares its URL with the page it is a state of. Walking to a
+           * rule about one navigates to that shared address and lands you on
+           * the page, not in the state, so the storyboard's setup is the rest
+           * of the sentence: it says what to do on arrival. Above the steps,
+           * because it happens before them.
+           */
+          const setup = ruleScreen(r)?.app?.setup;
+          return setup ? `<div>
+            <div class="${LBL} mb-1.5">To get here</div>
+            <div class="rounded border border-warning/40 bg-warning/10 px-2 py-1.5 text-[13px] leading-relaxed"
+              data-testid="detail.setup">${esc(setup)}</div>
+          </div>` : '';
+        })()}
         ${steps ? `<div><div class="${LBL} mb-1.5">Steps</div>
           <div class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-[13px] leading-relaxed"
             data-testid="detail.steps">${steps}</div>
