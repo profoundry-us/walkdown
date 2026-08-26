@@ -1,0 +1,14 @@
+id: n-0087
+kind: note
+author: topher
+created: 2026-08-26T12:30:00Z
+anchor:
+  rule: panel.rules.steps-not-an-appendix
+  screen: rule-detail
+status: open
+body: "When I hover an anchor reference in the panel's STEPS area, and I am
+  looking at the prototype, the element that anchor names should highlight on
+  the surface - the same highlight pin hovering already draws. Reading a step
+  that says to click some anchor and then hunting the page for what it means is
+  the slow part of judging a rule; the step should be able to point at the thing
+  it is talking about."
