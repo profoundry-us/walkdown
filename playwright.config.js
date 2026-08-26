@@ -70,5 +70,15 @@ export default defineConfig({
       url: `http://localhost:${FIXTURE_PORT}/docked.html`,
       reuseExistingServer: false,
     },
+    /*
+     * The example project's own app, at the address its blueprint declares.
+     * Some rules are only visible when a page belongs to a project that is NOT
+     * the one this server serves by default.
+     */
+    {
+      command: 'python3 -m http.server 4310 --directory example/app',
+      url: 'http://localhost:4310/index.html',
+      reuseExistingServer: true,
+    },
   ],
 });

@@ -67,10 +67,12 @@ checks:
     fast: true      # the whole suite is well under a second; there is no
                     # reason to make an agent wait for turn end to learn it
 
-  # A page belongs to exactly one blueprint (docs/06 §2). Nothing enforces it:
-  # `walkdown lint` validates one blueprint in isolation, and this constraint
-  # is only visible across all the blueprints a server holds open. Declared
-  # here so it is tracked rather than remembered.
+  # A page belongs to exactly one blueprint (docs/06 §2). `walkdown lint`
+  # validates one blueprint in isolation, so this constraint is only visible
+  # across the whole set — which is what `walkdown claims` looks at. It is the
+  # thing that makes "which project is this page" answerable at all, so it is
+  # checked rather than remembered.
   - id: one-page-one-blueprint
     name: No two blueprints claim the same page
-    todo: true
+    run: node bin/walkdown.js claims
+    fast: true    # reads config and storyboards; no test framework involved

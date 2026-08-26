@@ -46,3 +46,26 @@ replies:
       while violating the intent. Third: base_url scopes it — the same path on
       two origins is not a collision, so the comparison is origin plus path, and
       a blueprint with several targets claims several origins."
+  - author: agent
+    created: 2026-08-26T02:45:00Z
+    body: "Routing built, and it closes the loop this thread opened. lib/claims.js
+      holds the index: a claim is an origin from a target's base_url plus a path
+      compared on path and fragment alone, exactly as the consequences above set
+      out - so a blueprint with several targets claims several origins, the same
+      path on two origins is not a collision, and two projects declaring
+      /confirm.html under different queries still is. `walkdown claims` reports
+      collisions and answers --url; the Highball rule one-page-one-blueprint,
+      declared todo since this thread, now runs it, so the constraint is checked
+      rather than remembered. The panel asks GET /api/whose before falling back
+      to a remembered choice - a blueprint that claims this address is a fact
+      about where you are, a remembered choice is a fact about what you picked
+      last somewhere else, and preferring memory is what made walkdown open its
+      own rules on the example app and stay there. The write path routes too: a
+      pin arriving with a url and no bp is filed against the project claiming
+      that address, which is what embed.pin.right-project always described and
+      never had - a page nobody can edit has no script tag to name its project,
+      so its address is the only thing that can. Recorded as
+      screens.ownership.one-claimant and screens.ownership.routes-by-page.
+      Verified the browser check has teeth by removing the routing and watching
+      it fail before recording it."
+

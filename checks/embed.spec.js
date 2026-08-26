@@ -178,3 +178,39 @@ test(
     expect(onApp.anchor.screen).toBe(onProto.anchor.screen);
   }
 );
+
+test(
+  'a pin files against the project the page belongs to, not the server default',
+  { tag: '@rule:embed.pin.right-project' },
+  async ({ page }) => {
+    /*
+     * The example project's own app, which carries no walkdown tag at all —
+     * the case of a page nobody can edit, reviewed through the extension. With
+     * nothing to declare its project, the address it reports is the only thing
+     * that can say where a pin belongs.
+     */
+    await page.goto('http://localhost:4310/index.html');
+    await page.addScriptTag({ url: `${WD_ORIGIN}/embed.js` });   // no data-bp
+    await expect(page.getByTestId('pin.badge')).toBeVisible();
+
+    await page.getByTestId('pin.badge').click();
+    await expect(page.locator('html')).toHaveClass(/wd-pinning/);
+    const target = page.getByTestId('waitlist.email');
+    await expect(target).toBeVisible();
+    const box = await target.boundingBox();
+
+    const posted = page.waitForResponse(
+      (r) => r.url().includes('/api/threads') && r.request().method() === 'POST'
+    );
+    await page.mouse.click(Math.round(box.x + box.width / 2), Math.round(box.y + box.height / 2));
+    await expect(page.getByTestId('pin.form')).toBeVisible();
+    await page.getByTestId('pin.note').fill('Filed from the example app.');
+    await page.getByTestId('pin.save').click();
+    const { thread } = await (await posted).json();
+
+    // Resolved from the address: a screen of the EXAMPLE blueprint, which is
+    // not the project this server serves by default.
+    expect(thread.anchor.screen).toBe('waitlist-join');
+    expect(thread.anchor.element).toBe('waitlist.email');
+  }
+);

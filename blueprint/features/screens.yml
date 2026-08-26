@@ -68,6 +68,41 @@ stories:
             - pushState announces nothing and the extension cannot patch the page's own History, so that case is caught by watching rather than left to pretend it was heard
           statement_hash: sha256:e8763cbea8b6
 
+  - id: screens.ownership
+    title: A page belongs to exactly one blueprint
+    statement: As a team, we can point walkdown at a folder of projects and have it know which one any given page is, without anyone being asked to disambiguate.
+    rules:
+      - id: screens.ownership.one-claimant
+        origin: thread:q-0019
+        statement: No two blueprints claim the same page - a claim being an origin from a target's base_url plus a path, compared on path and fragment alone, so that two projects declaring the same path under different queries is still a collision while the same path on two different origins is not.
+        verify: [checks]
+        steps:
+          given:
+            - A folder holding several blueprints
+          when:
+            - The set is examined as a whole, which no single blueprint lint can do
+          then:
+            - A page claimed by two blueprints is reported, naming both and the screens involved
+            - One blueprint claiming a page under several queries is not a collision - that is a page in two states
+            - The same path on two origins is not a collision, because a target's base_url is part of the claim
+          statement_hash: sha256:b7fa784715cc
+
+      - id: screens.ownership.routes-by-page
+        origin: thread:q-0019
+        statement: Which blueprint a page belongs to is answered from the page's own address rather than from whatever was chosen last - so the panel opens the project the page is part of, and a pin filed from a page that carries no walkdown tag at all still lands in that project's threads rather than in whichever blueprint the server happens to serve by default.
+        verify: [checks, agent, human]
+        screens: [choose-blueprint]
+        steps:
+          given:
+            - A server holding several blueprints, and a page belonging to one of them
+          when:
+            - The panel starts there, or a pin is filed from there with no project named
+          then:
+            - The blueprint claiming that address is the one used, without asking
+            - A caller that names a project explicitly is never overridden by this
+            - An address no blueprint claims is not guessed at - the picker still asks
+          statement_hash: sha256:5ad49373b1d0
+
   - id: screens.surfaces
     title: Both surfaces, even when one of them is not a page
     statement: As a reviewer, I can compare a design against the app on every screen - including screens whose app is chrome rather than a URL, or is not built yet.
