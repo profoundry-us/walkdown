@@ -1,5 +1,5 @@
 project: walkdown
-description: The tool itself — the viewer, the docked panel, the embed, and the governance that keeps a verdict honest.
+description: The tool itself — the panel, the embed, and the governance that keeps a verdict honest.
 
 # walkdown's own blueprint — the tool specified with itself. docs/ holds the
 # design (why); this holds the verifiable what. Checks are the node:test suite,
@@ -16,10 +16,10 @@ runner:
   results: native
   targets:
     local:
-      base_url: http://localhost:4700   # the viewer is walkdown's own UI
+      base_url: http://localhost:4700   # the review page is walkdown's own UI
 
 prototype:
-  root: prototype/                      # wireframe mockups of the viewer
+  root: prototype/                      # wireframe mockups of the panel
 
 embed:
   anchor_attribute: data-testid

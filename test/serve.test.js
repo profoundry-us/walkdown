@@ -73,13 +73,24 @@ test('GET /api/blueprint returns rows, storyboard, and config bits', async () =>
   assert.equal(data.hasPrototype, true);
 });
 
-test('viewer, embed.js, and prototype static files are served', async () => {
+test('the review page, embed.js, and prototype static files are served', async () => {
   assert.match(await (await fetch(`${base}/`)).text(), /<title>walkdown<\/title>/);
   const embed = await (await fetch(`${base}/embed.js`)).text();
   assert.match(embed, /data-testid/); // __ANCHOR_ATTR__ substituted
   assert.doesNotMatch(embed, /__ANCHOR_ATTR__/);
   assert.match(await (await fetch(`${base}/prototype/home.html`)).text(), /home\.cta/);
   assert.equal((await fetch(`${base}/prototype/../walkdown.yml`)).status, 404);
+});
+
+test('the review page is handed its front door and its blueprint', async () => {
+  const html = await (await fetch(`${base}/`)).text();
+  // Whatever the page has to know before it can load the panel is baked in on
+  // the way out: it cannot ask the blueprint, because asking is what the panel
+  // it is about to load does.
+  assert.doesNotMatch(html, /__FRONT_DOOR__|__BLUEPRINT__/);
+  // No app base declared in this fixture, so the front door is the design.
+  assert.match(html, /'\/prototype\/home\.html'/);
+  assert.match(html, /'blueprint'/);
 });
 
 test('POST /api/threads writes a thread file; screen resolved from URL', async () => {

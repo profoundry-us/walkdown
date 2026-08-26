@@ -1,0 +1,24 @@
+id: q-0092
+kind: question
+author: agent
+created: 2026-08-26T16:59:38Z
+anchor:
+  rule: panel.dock.wraps-the-page
+  screen: docked
+status: open
+body: "Should `docked.page` be an anchor at all? Every other storyboard anchor
+  names something walkdown draws, so the implementation can carry it verbatim.
+  This one names the application's OWN page: docked, walkdown insets the host
+  body and paints the desk behind it, but it never wraps it in an element of its
+  own. The only way to carry the anchor would be to write
+  data-testid=\"docked.page\" onto somebody else's <body> - which collides with
+  whatever the app already uses that attribute for, and worse, makes the host
+  body an anchored element the embed will happily highlight and pin against. I
+  carried the other nine missing anchors (panel.blueprint, panel.app-frame,
+  panel.zoom, thread.panel, start.message, start.server, start.connect,
+  start.folder, start.options) and left this one uncarried on that reasoning.
+  Two ways out I can see: drop it from the storyboard as a thing the design
+  draws to depict the app rather than a control walkdown owns, or have the
+  docked layout wrap the page in a walkdown element that can hold it - which is
+  a real change to how docking works, and one I would not make without you
+  saying so."
