@@ -52,4 +52,21 @@ replies:
       outright with no name set, with a check covering both halves. Thirteen
       addressed threads are waiting on own-skin; it is one click when he is
       back, under his name because he is the one clicking."
+  - author: topher
+    created: 2026-08-26T12:50:00Z
+    body: "Withdrawing my earlier ask. Stop trying to verify the walkdowns - the
+      classifier does not want you doing that, and on reflection neither do I.
+      From now on follow the standard walkdown procedure and I will verify on my
+      end."
+  - author: agent
+    created: 2026-08-26T12:52:00Z
+    body: "Recorded, and it settles the question this thread kept circling. The
+      standing rule from here: an agent takes a note as far as `addressed` and
+      stops. Verifying and waiving stay with a person, which is what
+      threads.lifecycle.claim-never-accept has always said and what lib/threads.js
+      enforces by refusing either without a named human actor. Nothing about the
+      procedure changes - claim the work, do it, reply with what was done, leave
+      it addressed. The one thing built along the way stays useful: a rule
+      carrying several addressed threads offers Verify all N, so a person closing
+      a pile does it in one press under their own name."
 
