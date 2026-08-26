@@ -97,11 +97,12 @@ statement, stored truncated (`sha256:` + 12 hex).
 
 `walkdown serve` starts the local server (default port 4700, `127.0.0.1` only):
 
-- **The panel** — served as `/panel.js` (with `/embed.js` and `/walkdown.css` beside
-  it). A script tag docks it into a dev page you control; the browser extension
-  ([extension/](extension/)) loads the same files and frames any other page inside
-  walkdown's own document. The prototype is mounted at `/prototype/`, and picking a
-  rule takes the surface under review to that rule's screen via the storyboard.
+- **The review page** — `/` is walkdown's own page: the panel, with the blueprint's front
+  door framed inside it. Put a URL in the fragment (`/#http://localhost:3000/`) to review
+  a page the storyboard has never heard of. The browser extension
+  ([extension/](extension/)) opens the same page over any tab, loading the same
+  `/panel.js`. The prototype is mounted at `/prototype/`, and picking a rule takes the
+  frame to that rule's screen via the storyboard.
 - **The stand-in app** — for screens with no running page to point at (the thing being
   built is chrome, or is not built yet), an app path of `/stand-in/<screen-id>` serves
   that screen's own design back as the app — different theme, ringed edge, corner label

@@ -79,6 +79,14 @@ stories:
   source documents means the spec is *ahead of its sources* — surfaced in the drift
   report (`walkdown status`), never silently.
 
+- **`retired`** withdraws a rule without deleting it: a sentence saying why, and the rule
+  leaves every derived report — status, counts, queues, drift, coverage, hashing — while
+  its id keeps resolving. That last part is the point. Run records are append-only and
+  name the rules they judged; delete a rule and every verdict ever recorded against it
+  becomes a lint warning about a rule nobody can look up. Retire it and the ledger keeps
+  its meaning. Threads anchored to a retired rule still resolve too, and still want
+  ending by a person.
+
 - **IDs are dot-path slugs** (`feature.story.rule-slug`), assigned once, **never
   regenerated**. Rewording a statement keeps the ID. Splitting a rule creates new IDs and
   retires the old one (`superseded_by:`) rather than reusing it. Everything downstream —

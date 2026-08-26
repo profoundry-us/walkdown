@@ -529,9 +529,9 @@ async function cmdServe(args) {
   });
   console.log(`walkdown serve — ${blueprint.dir}`);
   console.log(`  review:  http://localhost:${port}/`);
-  // One tag, both halves. The embed alone gives pins with no chrome to drive
-  // them, which is why it is no longer what we tell people to paste.
-  console.log(`  in your app:  <script src="http://localhost:${port}/walkdown.js" data-bp="blueprint"></script>`);
+  // The embed, not the panel. The panel needs a page to frame and a page cannot
+  // frame itself, so it arrives by extension or from the review page above.
+  console.log(`  in your app:  <script src="http://localhost:${port}/embed.js" data-walkdown data-bp="blueprint"></script>`);
   console.log(dim('  Ctrl-C to stop'));
 }
 

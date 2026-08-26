@@ -99,13 +99,19 @@ viable: it coordinates the owners without overruling them.
 
 **Meet the work where it runs.** Agents author, build, and run checks from file edits
 and the CLI — that half never needed a UI. Humans review in **the browser, beside the
-running application**: one panel, delivered two ways. A script tag docks it into a page
-you control, pushing the app aside so it keeps its own tab and viewport. The browser
-extension goes further and **frames the page inside walkdown's own document** — because
+running application**, and walkdown **frames the page inside its own document** — because
 only a frame boundary is real isolation. The app's modals lay out against the frame
 instead of covering walkdown, the `inert` a native `<dialog>` imposes stops at the
 frame's edge, and the extension strips the frame-refusal headers (session-scoped, per
 reviewed tab) so even pages that forbid framing render.
+
+There was a second layout, docked into the application's own document and delivered by a
+script tag. It cost one line and no install, which is a real advantage — and it was
+withdrawn anyway, because everything the frame boundary gives you it had to fight for:
+climbing into the browser's top layer to stay above the app's modals, resetting the
+inheritable CSS the host bled into our shell, insetting somebody else's body and putting
+it back. One layout is not a compromise here; it is the one that does not have to
+defend itself.
 
 This principle used to read "stay inside Claude Code", and an earlier viewer honoured it
 by framing prototype and app side by side inside one local page. What retired it was the
@@ -141,22 +147,28 @@ The tool's own surfaces stay web pages precisely so that stays possible.
   ([03](03-runner-contract.md))
 - Embed script + anchor convention (test-id reuse); feedback/questions written to the local server
   ([04](04-embed-and-anchors.md))
-- **The panel**: walkdown's chrome riding beside the running app, wearing its own skin
-  so it is never mistaken for the thing under review. The app keeps a real viewport; the
-  prototype ghosts over it on demand rather than taking half the window. Delivered two
-  ways from one implementation — a script tag docks it into an app you control, and the
-  browser extension frames any other page inside walkdown's own document, the app lying
-  as a sheet on walkdown's desk with the panel alongside.
+- **The panel**: walkdown's chrome around the running app, wearing its own skin so it is
+  never mistaken for the thing under review. The app lies as a sheet on walkdown's desk,
+  framed so it keeps a real viewport of its own; the prototype ghosts over it on demand
+  rather than taking half the window.
 - Run ledger with multi-target runs and human walkdowns ([05](05-runs-ledger.md))
 
 ## Delivery
 
 | Surface | How walkdown gets there |
 |---|---|
-| Your own dev app | A script tag, gated on env — the version always matches the server's. |
-| Any other page | The browser extension: same panel, same embed, no markup changes. |
-| Prototype screens | The design tool emits the tag in every export. |
+| Any page at all | The browser extension: it frames the page inside walkdown's own document. The one supported way to get the panel. |
+| Prototype screens | The design tool emits the embed tag in every export, so a design page is pinnable on its own. |
+| Your own dev app | The embed tag, gated on env, when you want pins anchored to your own elements inside the frame. |
 | Production | Never. |
+
+**One panel delivery, as of 2026-08-26.** A second one docked the panel *into* the
+application's document — one script tag, no install for the reviewer. It was withdrawn
+because the two layouts were not equal: framed, the app cannot paint over the tool, its
+modals lay out against the frame rather than the window, and `inert` stops at the frame's
+edge. Docked spent eleven rules and the most defensive code in the project on surviving
+inside somebody else's document, and the reviewers who would have benefited never
+arrived. The embed still travels by script tag; only the panel's second layout is gone.
 
 The extension removes the *injection* barrier, not the *anchor* barrier: on a page that
 carries no anchors, pins fall back to coordinates and feedback still lands, but element

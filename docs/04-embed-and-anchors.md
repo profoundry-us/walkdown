@@ -96,21 +96,25 @@ It auto-detects its transport:
 | Surface | Mechanism |
 |---|---|
 | Prototype | Claude Design emits the tag in every export. |
-| Dev app | Documented one-liner, gated on env: `<script src="http://localhost:4700/walkdown.js" data-bp="<project>"></script>` — one tag carrying both the panel and the embed, served by `walkdown serve`, so the version always matches; fails silently when the server isn't running. `data-bp` is required whenever one server hosts sibling blueprints, or pins file against the server's default project. The two halves stay separate FILES because the extension needs them in two documents — the embed in every page it visits, the panel only in walkdown's own — but an app carrying walkdown itself should never have to paste two tags in a fixed order (n-0085). |
+| Dev app | Documented one-liner, gated on env: `<script src="http://localhost:4700/embed.js" data-walkdown></script>` — the embed only, served by `walkdown serve`, so the version always matches; fails silently when the server isn't running. It gives the page anchored pins when walkdown frames it. The panel does not travel this way: it needs a frame to review, and a page cannot frame itself. |
 | Staging | Same snippet baked in behind an env flag (`WALKDOWN_EMBED=1`), loading `embed.js` from the app's own assets (bundled at build) since localhost may not be serving. |
 | **Any page at all** | **The browser extension** ([extension/](../extension/)) — no markup change, so it reaches applications nobody can edit. Installed once; the reviewer chooses a blueprint per origin. |
 | Production | Never. |
 
-The two mechanisms are one implementation. A `<script>` tag answers *which server, which
-blueprint, which anchor attribute* through its own attributes; the extension's bootstrap
-leaves the same answers on `window.__walkdownConfig` before loading the very same files.
-A page carrying both gets one instance, not two — the guard lives on the DOM rather than
-on `window`, because a content script and a page script do not share a global.
+The embed answers *which server, which blueprint, which anchor attribute* through its own
+tag attributes; the extension's bootstrap leaves the same answers on
+`window.__walkdownConfig` before loading the very same file. A page carrying both gets one
+instance, not two — the guard lives on the DOM rather than on `window`, because a content
+script and a page script do not share a global.
 
-They are not interchangeable, and the difference is who has to do something. The tag
-costs the *application* one line and the reviewer nothing; the extension costs the
-application nothing and every reviewer an install. Which is cheaper depends on whether
-you control the app or the reviewer's browser — rarely both.
+**Until 2026-08-26 the panel travelled by script tag too**, docking into the application's
+own document rather than framing it. That cost the application one line and the reviewer
+no install, which is genuinely cheaper — and it was withdrawn anyway. Everything the frame
+boundary gives for free, docking had to fight for: the browser's top layer to stay above
+the app's modals, a reset for the inheritable CSS the host bled through our shadow root,
+insetting the host's body and restoring it exactly on the way out. Eleven rules and the
+most defensive code in the project, for an audience that never arrived. The panel is now
+the extension's alone; the embed still travels either way.
 
 **The example app carries no tags at all**, on purpose: it is reviewed through the
 extension, the way an application nobody can edit would be.

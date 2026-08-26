@@ -13,7 +13,7 @@ file disagrees with the code, the code is right and this file is out of date.
 | 2 | Noticing when the PRD or prototype moves | **weakest** | Threads, `origin`, statement hashing. Nothing watches either source. |
 | 3 | A deterministic spec for agents | **solid** | `status --json`, `AGENTS.md`, the three skills, the attention queues. |
 | 4 | Why a decision was made | **partial** | Threads + `origin: thread:<id>` + the runs ledger. No way to say a source was superseded on purpose. |
-| 5 | How closely the build matches the design | **solid** | The panel: fade dial, ghosted design, viewport presets, element-anchored pins, stand-in app. |
+| 5 | How closely the build matches the design | **solid** | The panel: fade dial, ghosted design, viewport presets, element-anchored pins, stand-in app. One delivery since 2026-08-26 — the extension, framing the page. |
 | 6 | Design records changes, an agent makes them | **blocked** | Half works (screen-anchored threads, `proposals/`, lint routing). The other half is forbidden — see below. |
 | 7 | A QA pass that is more than eyeballing | **solid** | `verify: [checks, agent, human]`, `walkdown-judge`, an agent may never write `verified`. |
 | 8 | Feeding tickets and design docs | **not ours** | An agent reads the spec and drafts them. No feature. |
@@ -35,6 +35,15 @@ file disagrees with the code, the code is right and this file is out of date.
 - **The blueprint says *what*, never *how*.** Technical design documents are generated
   *from* it, never stored *in* it — a rule that specified the implementation could not be
   verified against a different implementation of the same behaviour.
+
+- **One panel delivery (2026-08-26).** The docked layout — the panel injected into the
+  application's own document by a script tag — is withdrawn. It was the cheaper path on
+  paper (one line for the app, no install for the reviewer) and the more expensive one in
+  practice: eleven rules and the most defensive code in the project spent on surviving
+  inside somebody else's document, for reviewers who never arrived. Four rules are marked
+  `retired`; the other seven were always about the review screen and only needed the story
+  reworded. The embed still travels by script tag — that is how a prototype page is
+  pinnable — and only the panel's second layout is gone.
 
 ## Candidates, roughly in order of what they cost us
 

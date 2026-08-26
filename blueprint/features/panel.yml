@@ -4,10 +4,16 @@ source:
   prd: (design exploration, 2026-08-21; see docs/04-embed-and-anchors.md)
 stories:
   - id: panel.dock
-    title: walkdown rides beside the real app
-    statement: As a reviewer, I can judge the running application in its own tab at its own viewport, with walkdown docked alongside it instead of framing it.
+    title: The chrome around the page under review
+    statement: As a reviewer, I get one set of controls around the application - the bar, the fade between design and build, pin mode - and they behave the same however walkdown arrived.
+    # The id stays `panel.dock` because ids are assigned once and every run
+    # record, thread and check keys off it. What it names changed on
+    # 2026-08-26: the docked layout was withdrawn, and the four rules that were
+    # actually about docking are marked retired. The rest were always about the
+    # review screen and are untouched.
     rules:
       - id: panel.dock.no-framing
+        retired: The docked delivery is withdrawn (2026-08-26). walkdown frames the page it reviews; there is no longer a layout that renders beside it.
         origin: walkdown
         statement: Docked into a page's own document, the panel renders beside what it reviews rather than framing it - a script tag cannot put its own page in a frame, so the docked delivery works within the application's document and pushes it aside instead of covering it.
         verify: [agent, human]
@@ -25,6 +31,7 @@ stories:
           statement_hash: sha256:45e629ff8e85
 
       - id: panel.dock.wraps-the-page
+        retired: The docked delivery is withdrawn (2026-08-26). Nothing insets the host document any more - the page under review is a frame on walkdown’s own desk.
         origin: thread:n-0015
         statement: The page under review is presented as a sheet lying on walkdown's desk - inset on every side, with rounded corners and a shadow - so it reads as the thing being examined rather than as part of the tool.
         verify: [agent, human]
@@ -94,6 +101,7 @@ stories:
           statement_hash: sha256:e55758ff63da
 
       - id: panel.dock.above-the-app
+        retired: The docked delivery is withdrawn (2026-08-26). Framed, the application cannot paint outside its own frame, so nothing has to climb into the top layer to stay above it.
         origin: thread:n-0028
         statement: Nothing the application draws paints over walkdown's own chrome, because the tool has to stay readable exactly when the app is showing the state you came to judge - and a z-index cannot promise that, since a modal joins a layer painted above every z-index there is.
         verify: [agent, human]
@@ -159,6 +167,7 @@ stories:
             - Prototype screens keep their own wireframe skin, distinct from both
           statement_hash: sha256:93bfd901cfcd
       - id: panel.dock.host-isolation
+        retired: The docked delivery is withdrawn (2026-08-26). The panel no longer runs inside anybody else’s document. The embed still does, and embed.pin.own-skin still governs that.
         origin: walkdown
         statement: The panel is injected into somebody else's application, so its styles never reach the host page and the host's styles never reach it.
         verify: [agent, human]
@@ -727,6 +736,21 @@ stories:
             - Writing feedback or dropping a pin on the rule, then failing again, records it
             - The fail still leaves pin mode on afterwards, so more pins can land where the problems are
           statement_hash: sha256:9644c16756d8
+
+  - id: panel.identity.retired
+    title: The viewer already knew who you are
+    statement: As a reviewer, I should not have to type my name to do attributed work - the tool knows it from the machine I am working on.
+    rules:
+      # Recovered from dabe094, where the dual-pane viewer was retired by
+      # deleting its rules. Two run records still name this id, and until it was
+      # restored `walkdown lint` reported them as verdicts against a rule
+      # nobody could look up. The behaviour itself lives on as
+      # panel.identity.default-actor.
+      - id: viewer.identity.default-actor
+        retired: The dual-pane viewer was withdrawn (2026-08-24). The same behaviour is specified for the panel as panel.identity.default-actor.
+        origin: thread:n-0008
+        statement: The actor field arrives filled in from the repository's git identity, falling back to the operating system username; it stays editable and an edit is remembered.
+        verify: [checks, human]
 
   - id: panel.identity
     title: The panel already knows who you are
