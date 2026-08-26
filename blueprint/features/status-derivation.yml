@@ -19,7 +19,7 @@ stories:
 
       - id: status.derived.verdict-belongs-to-a-place
         origin: thread:q-0070
-        statement: A verdict counts only for the address it was made against - every run records the base_url it ran on, and a target fills its cells only from runs made against where that target currently points, so aiming a target at a new system empties its evidence and asks for the walkdown again rather than inheriting a pass earned somewhere that no longer exists.
+        statement: A verdict counts only for the address it was made against - every run records the base_url of the system it verified, and a target fills its cells only from runs made against where that target currently points, so aiming a target at a new system empties its evidence and asks for the walkdown again rather than inheriting a pass earned somewhere that no longer exists. The address is the deployment under review as the run declares it, never the port a harness happened to bind to stand one up.
         verify: [checks]
         steps:
           given:
@@ -30,7 +30,7 @@ stories:
             - Every rule verified only at the old address reads as never verified, not as passing
             - No run file is edited or deleted - the ledger stays append-only
             - Pointing the target back restores the earlier evidence unchanged
-          statement_hash: sha256:0a32ad4665d0
+          statement_hash: sha256:da085af63ed8
 
       - id: status.derived.addressless-runs-count
         origin: thread:q-0070

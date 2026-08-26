@@ -3,27 +3,40 @@
  * sees and does. The node:test suite next door verifies the ledger's own laws;
  * neither can stand in for the other (see ownership.evidence.same-surface).
  */
+import { readFileSync } from 'node:fs';
 import { defineConfig } from '@playwright/test';
+import { parse } from 'yaml';
 
 /*
  * Two ways to run these, because they are used two ways.
  *
- * OF RECORD (`walkdown run`, or CI): binds the address blueprint/walkdown.yml
- * declares for the local target and appends a run record. Evidence has to be
- * about the declared address or the ledger will not count it, so this refuses
- * to start when something else holds the port — the something else is serving
- * the REAL blueprint, and these checks write.
+ * OF RECORD (`walkdown run`, or CI): appends a run record.
+ * WHILE BUILDING (`npm run checks:dev`): records nothing, so a developer or an
+ * agent can run the suite as often as they like without appending
+ * half-finished verdicts to the project's history.
  *
- * WHILE BUILDING (`npm run checks:dev`): binds a throwaway port and records
- * nothing, so a developer or agent can run the suite as often as they like
- * beside their own running server without appending half-finished verdicts to
- * the project's history.
+ * NEITHER binds 4700. That port is where a person keeps `walkdown serve`
+ * running to review with, and these checks WRITE - threads, drafts, run
+ * records - so they must never be pointed at the server holding the real
+ * blueprint. They bring their own, on their own port, over a throwaway copy.
+ *
+ * The address they RECORD is a different thing from the port they bind, and
+ * deliberately so: a run record names the system that was verified, and for
+ * walkdown that is the address its own blueprint declares for the local
+ * target. The human path already works this way - finishing a walkdown records
+ * the configured base_url whatever port the server happens to be on - so
+ * declaring it here keeps one meaning of "where" across both tiers, and keeps
+ * a harness detail from invalidating a person's verdicts.
  */
 const RECORD = process.env.WALKDOWN_RECORD !== '0';
-const WD_PORT = Number(process.env.WALKDOWN_CHECK_PORT ?? (RECORD ? 4700 : 4713));
+const WD_PORT = Number(process.env.WALKDOWN_CHECK_PORT ?? (RECORD ? 4701 : 4713));
 const FIXTURE_PORT = WD_PORT + 12;
 export const WD_ORIGIN = `http://localhost:${WD_PORT}`;
 export const FIXTURE = `http://localhost:${FIXTURE_PORT}/docked.html?wd=${encodeURIComponent(WD_ORIGIN)}`;
+
+/* The address the blueprint declares — one source of truth, read from it. */
+const DECLARED = parse(readFileSync(new URL('./blueprint/walkdown.yml', import.meta.url), 'utf8'))
+  ?.runner?.targets?.local?.base_url ?? WD_ORIGIN;
 
 export default defineConfig({
   testDir: './checks',
@@ -39,7 +52,7 @@ export default defineConfig({
   globalSetup: './checks/global-setup.mjs',
   // Adopters write ['walkdown/reporter']; inside the package itself that alias
   // cannot self-resolve from Playwright's own module scope, so point at the file.
-  reporter: RECORD ? [['list'], ['./lib/playwright-reporter.js']] : [['list']],
+  reporter: RECORD ? [['list'], ['./lib/playwright-reporter.js', { baseUrl: DECLARED }]] : [['list']],
   use: {
     /*
      * The system under test is walkdown itself, so this is walkdown's own
@@ -57,9 +70,9 @@ export default defineConfig({
   // plain static host for the fixture pages that carry the panel.
   webServer: [
     {
-      // The declared port, serving the disposable copy. Never reuse an existing
-      // server: one already on 4700 is serving the REAL blueprint, and these
-      // checks write. Failing to start beats writing verdicts into the project.
+      // Our own server, on our own port, over the disposable copy. Never reuse
+      // an existing one: whatever is already listening is somebody else's, and
+      // these checks write.
       command: `node bin/walkdown.js serve --dir .walkdown/checkspace/blueprint --port ${WD_PORT}`,
       url: `${WD_ORIGIN}/api/blueprint`,
       reuseExistingServer: false,

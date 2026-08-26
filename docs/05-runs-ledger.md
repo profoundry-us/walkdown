@@ -57,7 +57,12 @@ Fields of note:
   (human session).
 - **`target`** + **`base_url`**: which system was verified. This is what makes "multiple
   verification runs against different URLs" a first-class concept rather than a web-app
-  feature.
+  feature. It is a **declaration, not an observation**: a walkdown records the target's
+  configured `base_url` whatever port the server it was driven through happened to bind,
+  and a check suite should record the same. The address names the deployment under
+  review; the port a harness binds to stand one up is not part of that. Where the two
+  genuinely differ — a review app at an address the blueprint does not carry — the run
+  says so by recording that address explicitly.
 - **`git_sha`** and **`blueprint_sha`**: what code and what version of the spec were
   verified — provenance for humans digging into a run. An unclean working tree records
   `<sha>-dirty`; formatters omit the fields entirely outside a git repo.
