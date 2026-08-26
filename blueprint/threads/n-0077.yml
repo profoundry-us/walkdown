@@ -1,0 +1,9 @@
+id: n-0077
+kind: note
+author: Topher Fangio
+created: 2026-08-26T03:10:49Z
+anchor:
+  rule: panel.dock.chrome-not-a-pin-target
+status: open
+body: The placement of the pins works, but I can't hit escape to get out of pin
+  mode anymore.

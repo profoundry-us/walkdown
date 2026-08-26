@@ -4,7 +4,7 @@ author: Topher Fangio
 created: 2026-08-24T17:22:26Z
 anchor:
   rule: panel.dock.one-pin-mode
-status: addressed
+status: open
 body: We don't really have a badge anymore, so the THEN condition feels a bit off.
 replies:
   - author: agent
@@ -18,3 +18,7 @@ replies:
       stays hidden rather than echoing it' and 'On a page carrying only the
       embed tag and no panel, that badge appears, because there it is the only
       way into pin mode.'"
+  - author: Topher Fangio
+    created: 2026-08-26T03:05:57Z
+    body: Why would we ever have a page that has the embed but no panel? I don't
+      think we need this part of the rule.

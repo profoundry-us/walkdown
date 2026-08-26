@@ -5,7 +5,7 @@ created: 2026-08-24T18:22:51Z
 anchor:
   rule: panel.delivery.one-implementation
   screen: review
-status: addressed
+status: verified
 body: Walked the headless rules and none showed the new no-screen notice - the
   unpacked extension was still running its cached vendored panel, and nothing
   said so. A stale copy of walkdown reviewing a moving spec silently undermines

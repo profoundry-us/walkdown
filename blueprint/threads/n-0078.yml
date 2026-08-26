@@ -1,0 +1,9 @@
+id: n-0078
+kind: note
+author: Topher Fangio
+created: 2026-08-26T03:12:56Z
+anchor:
+  rule: panel.delivery.one-implementation
+status: open
+body: This is an implementation detail, not a behavior that "product" cares
+  about. This should be a unit test or something similar.

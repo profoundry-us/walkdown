@@ -1,0 +1,11 @@
+id: n-0079
+kind: note
+author: Topher Fangio
+created: 2026-08-26T03:14:38Z
+anchor:
+  rule: panel.delivery.absent-until-asked
+status: open
+body: "I think this is working exactly as desired, but the phrasing of this
+  description is weird: \"and it never leaves itself running\" doesn't make
+  sense to me. I think we just need to reword this to be more about how the
+  extension works."

@@ -1,0 +1,11 @@
+id: n-0080
+kind: note
+author: Topher Fangio
+created: 2026-08-26T03:15:59Z
+anchor:
+  rule: panel.delivery.framed-isolation
+status: open
+body: "This is working fine, but again the rule verbiage doesn't make a lot of
+  sense; needs rewording: \"because that is the only arrangement in which what
+  the app draws cannot reach walkdown, and the one thing only an extension can
+  arrange\""

@@ -4,7 +4,7 @@ author: Topher Fangio
 created: 2026-08-24T17:25:21Z
 anchor:
   rule: panel.delivery.framed-isolation
-status: addressed
+status: verified
 body: The THEN clause has a random "[object Object]" text at the end. If we
   really need to see that, we should show JSON or something else, but I'm
   guessing it can just be removed?

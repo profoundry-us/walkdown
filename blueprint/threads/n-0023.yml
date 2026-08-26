@@ -4,7 +4,7 @@ author: topher
 created: 2026-08-24T03:25:56Z
 anchor:
   rule: panel.dock.one-pin-mode
-status: addressed
+status: verified
 body: Pinning should be disabled while the slider sits between the prototype and
   the app. Half-faded, both surfaces are on screen at once and we would not know
   which one the pin is meant to be about.

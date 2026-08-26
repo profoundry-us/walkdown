@@ -4,7 +4,7 @@ author: topher
 created: 2026-08-24T04:23:06Z
 anchor:
   rule: panel.delivery.one-implementation
-status: addressed
+status: verified
 body: "Decision, taken after n-0028: the extension should frame the application
   rather than dock beside it, stripping the headers that refuse framing. Real
   isolation means the app owning its own viewport, and that is the one thing
