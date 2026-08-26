@@ -13,6 +13,32 @@ import { expect, test } from '@playwright/test';
 import { FIXTURE, WD_ORIGIN } from '../playwright.config.js';
 
 /*
+ * The application under review is a FRAME inside walkdown's page - that is the
+ * only delivery there is since 2026-08-26. So the embed's own markup (the pin,
+ * its form, the hover highlight) is in the frame, and the panel that arms pin
+ * mode is outside it. `app(page)` is the inside; bare page locators are the
+ * outside.
+ */
+const APP = (params = {}) => {
+  const u = new URL(FIXTURE);
+  const inner = new URL(u.searchParams.get('frame'));
+  inner.pathname = '/app.html';
+  inner.host = u.host;                       // the fixture server, not walkdown's
+  inner.searchParams.set('wd', WD_ORIGIN);
+  for (const [k, v] of Object.entries(params)) inner.searchParams.set(k, v);
+  u.searchParams.set('frame', inner.href);
+  return u.href;
+};
+const app = (page) => page.frameLocator('iframe[title="the application under review"]');
+/*
+ * The framed document itself, for the handful of assertions that need to run
+ * inside it. Explicitly not the main frame: the fixture's own URL carries
+ * "app.html" in its `frame=` parameter, so a bare url match finds the wrong one.
+ */
+const appFrame = (page) =>
+  page.frames().find((f) => f !== page.mainFrame() && f.url().includes('/app.html'));
+
+/*
  * Carry walkdown onto a page that has no tag of its own, the way the extension
  * does: the panel and the embed together, the panel owning the pin-mode
  * control. There is no badge to fall back on — an embed with no panel had one,
@@ -20,13 +46,30 @@ import { FIXTURE, WD_ORIGIN } from '../playwright.config.js';
  * one nobody opens (n-0058).
  */
 async function carryWalkdown(page, url, bp) {
-  await page.goto(url);
-  await page.evaluate(([server, project]) => {
-    window.__walkdownConfig = { server, bp: project };
-  }, [WD_ORIGIN, bp ?? '']);
-  await page.addScriptTag({ url: `${WD_ORIGIN}/panel.js` });
-  await page.addScriptTag({ url: `${WD_ORIGIN}/embed.js` });
-  await expect(realPanel(page).getByTestId('panel.bar')).toBeVisible();
+  /*
+   * A page that carries no walkdown tag at all — an application nobody can
+   * edit. The extension puts the embed there itself (extension/boot.js runs in
+   * the framed document and does exactly this); an init script is how a check
+   * stands in for a content script. Deliberately no `data-bp`: with nothing
+   * declaring a project, the address the page reports is the only thing that
+   * can say where a pin belongs, which is the whole point of the rule.
+   */
+  await page.addInitScript((server) => {
+    if (window.parent === window) return;                        // walkdown's own page
+    if (document.querySelector('script[data-walkdown]')) return; // already carries it
+    window.__walkdownConfig = { server, bp: '', anchorAttribute: 'data-testid' };
+    const tag = document.createElement('script');
+    tag.src = `${server}/embed.js`;
+    tag.setAttribute('data-walkdown', '');
+    const put = () => document.body.appendChild(tag);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', put);
+    else put();
+  }, WD_ORIGIN);
+  const u = new URL(FIXTURE);
+  u.searchParams.set('frame', url);
+  u.searchParams.set('bp', bp ?? '');
+  await page.goto(u.href);
+  await expect(page.getByTestId('panel.bar')).toBeVisible();
 }
 
 /*
@@ -42,15 +85,17 @@ const realPanel = (page) =>
 /** Arm pin mode from the panel — the one control that owns it. */
 async function armPinMode(page) {
   await realPanel(page).getByTestId('panel.pin-mode').click();
-  await expect(page.locator('html')).toHaveClass(/wd-pinning/);
+  await expect(app(page).locator('html')).toHaveClass(/wd-pinning/);
 }
 
 /** The fixture with pin mode armed, ready to receive a click. */
-async function pinning(page) {
-  await page.goto(FIXTURE);
+async function pinning(page, params) {
+  await page.goto(APP(params));
   await expect(page.getByTestId('panel.bar')).toBeVisible();
+  await expect(app(page).getByTestId('host.cta')).toBeVisible();
   await page.getByTestId('panel.pin-mode').click();
-  await expect(page.locator('html')).toHaveClass(/wd-pinning/);
+  // The class lands in the framed document: that is the surface being pinned.
+  await expect(app(page).locator('html')).toHaveClass(/wd-pinning/);
   return page;
 }
 
@@ -61,12 +106,12 @@ async function pinning(page) {
  */
 async function pinAt(page, x, y, note = 'Placed by a browser check.') {
   await page.mouse.click(x, y);
-  await expect(page.getByTestId('pin.form')).toBeVisible();
-  await page.getByTestId('pin.note').fill(note);
+  await expect(app(page).getByTestId('pin.form')).toBeVisible();
+  await app(page).getByTestId('pin.note').fill(note);
   const posted = page.waitForResponse(
     (r) => r.url().includes('/api/threads') && r.request().method() === 'POST'
   );
-  await page.getByTestId('pin.save').click();
+  await app(page).getByTestId('pin.save').click();
   const { id, thread } = await (await posted).json();
   return { id, thread };
 }
@@ -76,7 +121,7 @@ test(
   { tag: '@rule:embed.pin.anchored-target' },
   async ({ page }) => {
     await pinning(page);
-    const box = await page.getByTestId('host.cta').boundingBox();
+    const box = await app(page).getByTestId('host.cta').boundingBox();
     // Deliberately off-centre: a pin that records the element but forgets the
     // point would still pass a centre-of-element assertion.
     const x = Math.round(box.x + box.width * 0.75);
@@ -92,7 +137,7 @@ test(
     expect(t.anchor.offset.x).toBeGreaterThan(box.width * 0.5);
 
     // The pin draws where it was put, not at a corner of the element.
-    const marker = page.locator('[data-testid="pin.marker"][data-thread="' + id + '"]');
+    const marker = app(page).locator('[data-testid="pin.marker"][data-thread="' + id + '"]');
     await expect(marker).toBeVisible();
     const m = await marker.boundingBox();
     expect(Math.abs(m.x + m.width / 2 - x)).toBeLessThan(14);
@@ -105,11 +150,17 @@ test(
   async ({ page }) => {
     await page.setViewportSize({ width: 812, height: 700 });
     await pinning(page);
-    const box = await page.getByTestId('host.card').boundingBox();
+    const box = await app(page).getByTestId('host.card').boundingBox();
     const { thread: t } = await pinAt(page, Math.round(box.x + 40), Math.round(box.y + 20));
-    // Measured by the embed from the surface it was placed on, and named.
+
+    // The viewport a pin records is the SURFACE's, not the window's. Framed,
+    // those genuinely differ - the frame is the window minus the panel - and
+    // that difference is the point: feedback about a layout has to be read
+    // against the width the layout actually had.
+    const inner = await appFrame(page).evaluate(() => window.innerWidth);
     expect(t.anchor.viewport).toBeTruthy();
-    expect(t.anchor.viewport.width).toBe(812);
+    expect(t.anchor.viewport.width).toBe(inner);
+    expect(inner).toBeLessThan(812);
     expect(typeof t.anchor.viewport.name).toBe('string');
   }
 );
@@ -125,7 +176,7 @@ test(
     expect(t.anchor.position).toBeTruthy();
     expect(typeof t.anchor.position.x).toBe('number');
     await expect(
-      page.locator('[data-testid="pin.marker"][data-thread="' + id + '"]')
+      app(page).locator('[data-testid="pin.marker"][data-thread="' + id + '"]')
     ).toBeVisible();
   }
 );
@@ -135,20 +186,24 @@ test(
   { tag: '@rule:embed.pin.surface-coordinates' },
   async ({ page }) => {
     await pinning(page);
-    // Scroll first: a pin recorded in screen pixels would lose this offset,
-    // which is exactly what makes a pin drift when the page moves.
-    await page.evaluate(() => window.scrollTo(0, 400));
-    const scrolled = await page.evaluate(() => window.scrollY);
+    // Scroll the SURFACE first — the framed document, not the page holding the
+    // panel. A pin recorded in screen pixels would lose this offset, which is
+    // exactly what makes a pin drift when the page moves.
+    await appFrame(page).evaluate(() => window.scrollTo(0, 400));
+    const scrolled = await appFrame(page).evaluate(() => window.scrollY);
     expect(scrolled).toBeGreaterThan(0); // the fixture must really scroll
 
-    const box = await page.getByTestId('host.second').boundingBox();
+    const box = await app(page).getByTestId('host.second').boundingBox();
     const y = Math.round(box.y + 24);
     const { thread: t } = await pinAt(page, Math.round(box.x + 30), y);
+    // Where the frame sits in the window: the click is in window pixels, the
+    // record is in the surface's own, and this is the whole of the difference.
+    const frame = await page.locator('iframe[title="the application under review"]').boundingBox();
 
     // Document space, so the recorded point carries the scroll. In screen
     // pixels it would equal y, and the pin would drift the moment anyone
     // scrolled - which is the failure this rule exists to prevent.
-    expect(t.anchor.position.y).toBeCloseTo(y + scrolled, -1);
+    expect(t.anchor.position.y).toBeCloseTo(y - frame.y + scrolled, -1);
   }
 );
 
@@ -171,7 +226,7 @@ test(
       // load. Scanning for a free spot before that has settled picks a point a
       // marker then covers — which is what made this check flaky.
       await page.waitForLoadState('networkidle');
-      const target = page.getByTestId(ANCHOR);
+      const target = app(page).getByTestId(ANCHOR);
       await expect(target, `${ANCHOR} must exist on ${url}`).toBeVisible();
       await armPinMode(page);
       const box = await target.boundingBox();
@@ -181,7 +236,7 @@ test(
        * that conversation instead. Markers live in the embed's shadow root, so
        * elementFromPoint cannot see them — their geometry can.
        */
-      const markers = await page.getByTestId('pin.marker').all();
+      const markers = await app(page).getByTestId('pin.marker').all();
       const taken = (await Promise.all(markers.map((m) => m.boundingBox()))).filter(Boolean);
       const clear = (px, py) =>
         !taken.some((b) => px >= b.x - 4 && px <= b.x + b.width + 4 &&
@@ -197,9 +252,9 @@ test(
         (r) => r.url().includes('/api/threads') && r.request().method() === 'POST'
       );
       await page.mouse.click(spot.x, spot.y);
-      await expect(page.getByTestId('pin.form')).toBeVisible();
-      await page.getByTestId('pin.note').fill(`Pinned on ${url}`);
-      await page.getByTestId('pin.save').click();
+      await expect(app(page).getByTestId('pin.form')).toBeVisible();
+      await app(page).getByTestId('pin.note').fill(`Pinned on ${url}`);
+      await app(page).getByTestId('pin.save').click();
       return (await (await posted).json()).thread;
     };
 
@@ -229,7 +284,7 @@ test(
      */
     await carryWalkdown(page, 'http://localhost:4310/index.html');   // no project named
     await armPinMode(page);
-    const target = page.getByTestId('waitlist.email');
+    const target = app(page).getByTestId('waitlist.email');
     await expect(target).toBeVisible();
     const box = await target.boundingBox();
 
@@ -237,9 +292,9 @@ test(
       (r) => r.url().includes('/api/threads') && r.request().method() === 'POST'
     );
     await page.mouse.click(Math.round(box.x + box.width / 2), Math.round(box.y + box.height / 2));
-    await expect(page.getByTestId('pin.form')).toBeVisible();
-    await page.getByTestId('pin.note').fill('Filed from the example app.');
-    await page.getByTestId('pin.save').click();
+    await expect(app(page).getByTestId('pin.form')).toBeVisible();
+    await app(page).getByTestId('pin.note').fill('Filed from the example app.');
+    await app(page).getByTestId('pin.save').click();
     const { thread } = await (await posted).json();
 
     // Resolved from the address: a screen of the EXAMPLE blueprint, which is

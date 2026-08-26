@@ -261,7 +261,7 @@ stories:
     rules:
       - id: panel.delivery.one-implementation
         origin: thread:q-0016
-        statement: The panel and the embed are one implementation with two deliveries - a script tag for apps you control, and a browser extension for every other page - and neither delivery has a copy of the other's code.
+        statement: The panel and the embed stay two files because they load into two documents - the embed into the application being reviewed, the panel only into walkdown's own page above it - and neither carries a copy of the other.
         verify: [checks, human]
         steps:
           given:
@@ -273,7 +273,7 @@ stories:
             - The tag supplies server, project and anchor attribute from its own attributes
             - The extension supplies the same answers before loading them, and nothing is forked
             - A page carrying both gets one panel and one badge, not two - the tag wins, because it runs first and its project is the app's own answer
-          statement_hash: sha256:cb78287f2077
+          statement_hash: sha256:4477bced1c62
 
       - id: panel.delivery.absent-until-asked
         origin: thread:q-0016

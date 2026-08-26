@@ -1,0 +1,42 @@
+<!doctype html>
+<!-- The application under review: a plain page carrying the EMBED and nothing
+     else. walkdown frames it; the panel lives in the framing document, not in
+     here. Deliberately a little opinionated in its styling — the embed is
+     supposed to survive a host that styles things, and a neutral fixture would
+     let bleed defects pass unnoticed. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Fixture — the application under review</title>
+<style>
+  body { font: 16px/1.5 Georgia, serif; margin: 0; padding: 2rem; background: #fbf7ef; color: #2c2416; }
+  h1 { letter-spacing: .04em; }
+  button { font: inherit; padding: .4rem .9rem; }
+  .card { border: 1px solid #d8cdb8; padding: 1rem; margin: 1rem 0; max-width: 40rem; }
+</style>
+</head>
+<body>
+  <h1 data-testid="host.title">A host application</h1>
+  <div class="card" data-testid="host.card">
+    <p>Content walkdown frames. Anchors here exist so pins have something real
+       to attach to.</p>
+    <button data-testid="host.cta">Primary action</button>
+  </div>
+  <div style="height: 60vh"></div>
+  <div class="card" data-testid="host.second">
+    <p>A second anchored region, far enough down the page that the document
+       really scrolls — a pin recorded in screen pixels rather than document
+       pixels shows up here and nowhere else.</p>
+  </div>
+  <div style="height: 90vh"></div>
+  <script>
+    const q = new URLSearchParams(location.search);
+    const WD = q.get('wd') || 'http://localhost:4700';
+    const s = document.createElement('script');
+    s.src = `${WD}/embed.js`;
+    s.setAttribute('data-walkdown', '');
+    if (q.get('bp')) s.setAttribute('data-bp', q.get('bp'));
+    document.body.appendChild(s);
+  </script>
+</body>
+</html>

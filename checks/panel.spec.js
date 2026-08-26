@@ -1,5 +1,5 @@
 /*
- * Browser checks for the docked panel. These drive the real panel in a real
+ * Browser checks for the panel. These drive the real panel over a real framed
  * page — the surface the rules describe. Selection is by anchor
  * (getByTestId), never by CSS path, per blueprint/AGENTS.md.
  */
@@ -10,8 +10,19 @@ import { expect, test } from '@playwright/test';
 // come from the config so the two run modes address the same pair of servers.
 import { FIXTURE, WD_ORIGIN } from '../playwright.config.js';
 
+/**
+ * The fixture URL with parameters overridden rather than appended — a second
+ * `frame=` would be shadowed by the first, which is a silent way to test the
+ * wrong page.
+ */
+function fixtureFor(params = {}) {
+  const u = new URL(FIXTURE);
+  for (const [k, v] of Object.entries(params)) u.searchParams.set(k, v);
+  return u.href;
+}
+
 /** Open the fixture and wait for the panel to have drawn its chrome. */
-async function docked(page) {
+async function review(page) {
   await page.goto(FIXTURE);
   await expect(page.getByTestId('panel.bar')).toBeVisible();
   return page;
@@ -21,7 +32,7 @@ test(
   'the actor arrives filled in from the repository identity, and stays editable',
   { tag: '@rule:panel.identity.default-actor' },
   async ({ page }) => {
-    await docked(page);
+    await review(page);
     await ensureSession(page);                              // a walkdown is running
     // The name is on screen without anyone typing it: nobody is attributed silently.
     const name = page.getByTestId('panel.actor-name');
@@ -57,7 +68,7 @@ async function endSession(page) {
 
 /** Start a session and open the first rule in the list. */
 async function session(page) {
-  await docked(page);
+  await review(page);
   await ensureSession(page);
   await page.getByTestId('panel.rules-list').locator('button').first().click();
   await expect(page.getByTestId('detail.rule-id')).toBeVisible();
@@ -135,7 +146,7 @@ test(
   'which verdict pair a rule shows is derived from the ledger, not fixed chrome',
   { tag: '@rule:panel.signoff.spec-pair-derived' },
   async ({ page }) => {
-    await docked(page);
+    await review(page);
     await endSession(page);
     const { rows } = await payload(page);
     const built = rows.find((r) => r.built && r.verify.includes('human'));
@@ -165,7 +176,7 @@ test(
   'finishing appends a verdict under a named person; discarding records nothing',
   { tag: '@rule:panel.walkdown.records-to-ledger' },
   async ({ page }) => {
-    await docked(page);
+    await review(page);
     await endSession(page);
     const { rows } = await payload(page);
     const rule = rows.find((r) => r.built && r.verify.includes('human')).rule;
@@ -196,7 +207,7 @@ test(
 );
 
 const EXT_FIXTURE = (build) =>
-  FIXTURE.replace('docked.html', 'extension.html') + `&build=${encodeURIComponent(build)}`;
+  FIXTURE + `&build=${encodeURIComponent(build)}`;
 
 test(
   'the panel says plainly when the copy it is running has gone stale',
@@ -225,7 +236,7 @@ test(
   'the panel will not accept work without a named person, and asks for the reason',
   { tag: '@rule:panel.threads.claim-never-accept' },
   async ({ page }) => {
-    await docked(page);
+    await review(page);
     await endSession(page);
     const { rows, threads } = await payload(page);
     const addressed = (threads ?? []).find((t) => t.status === 'addressed' && t.anchor?.rule);
@@ -253,7 +264,7 @@ test(
 );
 
 test(
-  'a trip that means a real page load is taken when walkdown survives it, offered when it does not',
+  'choosing a blueprint about another page takes you there',
   { tag: '@rule:panel.rules.takes-you-there' },
   async ({ page }) => {
     // The example blueprint's first screen lives on a host we do not run here.
@@ -261,47 +272,30 @@ test(
     await page.route('**/index.html', (r) =>
       r.fulfill({ contentType: 'text/html', body: '<h1>The other project</h1>' }));
 
-    const start = async (reinjects) => {
-      const url = FIXTURE.replace('docked.html', 'extension.html') +
-        `&build=stale&bp=&reinjects=${reinjects}`;
-      // Land on the fixture's own origin first, then forget any remembered
-      // choice THERE — the panel remembers per origin, and clearing it from
-      // whatever page the last trip ended on clears the wrong one.
-      await page.goto(url);
-      await page.evaluate(() => localStorage.clear());
-      await page.reload();
-      // No blueprint declared and two on the server: the panel must ask.
-      await expect(page.getByText(/Which blueprint/i)).toBeVisible();
-      await page.getByText(/walkdown-example/i).first().click();
-    };
+    await page.goto(fixtureFor({ build: 'stale', bp: '' }));
+    // The panel remembers a choice per origin; clear it where it was made.
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
+    // No blueprint declared and two on the server: the panel must ask.
+    await expect(page.getByText(/Which blueprint/i)).toBeVisible();
+    await page.getByText(/walkdown-example/i).first().click();
 
     /*
-     * Carried by the extension: its content script runs on the next page too,
-     * so walkdown is waiting on the other side and simply goes.
+     * walkdown owns the frame, so it simply goes. There is no longer a delivery
+     * that has to offer the trip instead: that was the docked panel, which
+     * navigating would have unloaded, and it went on 2026-08-26.
      */
-    await start('1');
-    await page.waitForURL(/index\.html/, { timeout: 10000 });
-    expect(page.url()).toContain('index.html');
-
-    /*
-     * Carried by a script tag: navigating would unload the very script drawing
-     * the panel, so the trip is offered rather than taken.
-     */
-    await start('0');
-    const link = page.locator('a.link', { hasText: /open/i }).first();
-    await expect(link).toBeVisible();
-    await expect(link).toHaveAttribute('href', /index\.html/);
-    expect(page.url(), 'a script tag delivery must stay put').toContain('extension.html');
+    await expect
+      .poll(() => page.frames().some((f) => f.url().includes('index.html')), { timeout: 10000 })
+      .toBe(true);
   }
 );
-
 test(
   'a screen you are already on is not navigated to again',
   { tag: '@rule:panel.rules.takes-you-there' },
   async ({ page }) => {
     const framed = `${WD_ORIGIN}/prototype/screens/review.html`;
-    const url = FIXTURE.replace('docked.html', 'extension.html') +
-      `&build=stale&frame=${encodeURIComponent(framed)}`;
+    const url = fixtureFor({ build: 'stale', frame: framed });
 
     // Count real loads of the framed page. A reload IS a navigation, so this
     // is the only thing that tells "moved" apart from "re-fetched".
@@ -335,8 +329,7 @@ test(
   { tag: '@rule:panel.rules.takes-you-there' },
   async ({ page }) => {
     const framed = `${WD_ORIGIN}/prototype/screens/review.html`;
-    const url = FIXTURE.replace('docked.html', 'extension.html') +
-      `&build=stale&frame=${encodeURIComponent(framed)}`;
+    const url = fixtureFor({ build: 'stale', frame: framed });
     await page.goto(url);
     await expect(page.getByTestId('panel.bar')).toBeVisible();
 
@@ -371,7 +364,7 @@ test(
     // A framed review of a screen that HAS a design on file — there has to be
     // something to cross to for the offer to mean anything.
     const framed = `${WD_ORIGIN}/prototype/screens/review.html`;
-    await page.goto(FIXTURE.replace('docked.html', 'extension.html') +
+    await page.goto(FIXTURE +
       `&build=stale&frame=${encodeURIComponent(framed)}`);
     await expect(page.getByTestId('panel.bar')).toBeVisible();
     // Put walkdown away: only the tab is left.
@@ -396,48 +389,10 @@ test(
 );
 
 test(
-  'one tag carries both halves: the panel draws and pins can be placed',
-  { tag: '@rule:panel.delivery.one-implementation' },
-  async ({ page }) => {
-    /*
-     * The integration an adopter is told to write. The panel and the embed stay
-     * two files because the extension needs them in two documents, but an app
-     * carrying walkdown itself should not have to paste two tags in the right
-     * order — getting that order wrong is what left two pin-mode controls on
-     * every docked page (n-0058, n-0085).
-     */
-    const url = FIXTURE.replace('docked.html', 'one-tag.html');
-    await page.goto(url);
-
-    // The chrome is there…
-    await expect(page.getByTestId('panel.bar')).toBeVisible();
-    await expect(page.getByTestId('panel.rules-list')).toBeVisible();
-
-    // …and so is the embed, which is what makes pin mode reach the page.
-    await page.getByTestId('panel.pin-mode').click();
-    await expect(page.locator('html')).toHaveClass(/wd-pinning/);
-
-    const box = await page.getByTestId('host.cta').boundingBox();
-    const posted = page.waitForResponse(
-      (r) => r.url().includes('/api/threads') && r.request().method() === 'POST'
-    );
-    await page.mouse.click(Math.round(box.x + box.width / 2), Math.round(box.y + box.height / 2));
-    await expect(page.getByTestId('pin.form')).toBeVisible();
-    await page.getByTestId('pin.note').fill('Placed through the one-tag delivery.');
-    await page.getByTestId('pin.save').click();
-    const { thread } = await (await posted).json();
-    expect(thread.anchor.element).toBe('host.cta');
-
-    // Exactly one pin-mode control, whatever order the halves loaded in.
-    await expect(page.locator('.wd-badge')).toHaveCount(0);
-  }
-);
-
-test(
   'a rule whose fixes all landed can be verified in one pass, under a name',
   { tag: '@rule:panel.threads.claim-never-accept' },
   async ({ page }) => {
-    await docked(page);
+    await review(page);
     await endSession(page);
     const { rows, threads } = await payload(page);
     // A rule carrying more than one addressed thread — the pile the sweep is for.
@@ -484,7 +439,7 @@ test(
      */
     await page.route('**/index.html', (r) =>
       r.fulfill({ contentType: 'text/html', body: '<h1>The other project</h1>' }));
-    await page.goto(FIXTURE.replace('docked.html', 'extension.html') + '&bp=&reinjects=0');
+    await page.goto(FIXTURE + '&bp=&reinjects=0');
     await page.evaluate(() => localStorage.clear());
     await page.reload();
     await expect(page.getByText(/Which blueprint/i)).toBeVisible();

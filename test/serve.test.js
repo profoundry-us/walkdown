@@ -82,6 +82,20 @@ test('the review page, embed.js, and prototype static files are served', async (
   assert.equal((await fetch(`${base}/prototype/../walkdown.yml`)).status, 404);
 });
 
+test('the panel and the embed are served as two files, neither carrying the other', async () => {
+  const panel = await (await fetch(`${base}/panel.js`)).text();
+  const embed = await (await fetch(`${base}/embed.js`)).text();
+  // Two documents need two files: the embed goes into every page the extension
+  // visits, the panel only into walkdown's own. A single file could not tell
+  // those apart without drawing a panel on every site you browse.
+  assert.ok(panel.includes('__walkdownPanel'), 'panel.js is the panel');
+  assert.ok(embed.includes('walkdownEmbed'), 'embed.js is the embed');
+  assert.doesNotMatch(panel, /walkdownEmbed\s*=/, 'panel.js does not carry the embed');
+  assert.doesNotMatch(embed, /__walkdownPanel\s*=/, 'embed.js does not carry the panel');
+  // And the one-tag route that concatenated them is gone with the docked layout.
+  assert.equal((await fetch(`${base}/walkdown.js`)).status, 404);
+});
+
 test('the review page is handed its front door and its blueprint', async () => {
   const html = await (await fetch(`${base}/`)).text();
   // Whatever the page has to know before it can load the panel is baked in on

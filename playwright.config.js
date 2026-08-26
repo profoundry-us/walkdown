@@ -32,7 +32,14 @@ const RECORD = process.env.WALKDOWN_RECORD !== '0';
 const WD_PORT = Number(process.env.WALKDOWN_CHECK_PORT ?? (RECORD ? 4701 : 4713));
 const FIXTURE_PORT = WD_PORT + 12;
 export const WD_ORIGIN = `http://localhost:${WD_PORT}`;
-export const FIXTURE = `http://localhost:${FIXTURE_PORT}/docked.html?wd=${encodeURIComponent(WD_ORIGIN)}`;
+/*
+ * The panel has one delivery: it frames the page it reviews. The fixture is the
+ * extension's shape - a host page that publishes __walkdownConfig and loads
+ * panel.js - pointed at the blueprint's own review screen. `docked.html` was the
+ * other delivery's fixture and went with it on 2026-08-26.
+ */
+export const FIXTURE = `http://localhost:${FIXTURE_PORT}/extension.html?wd=${
+  encodeURIComponent(WD_ORIGIN)}&frame=${encodeURIComponent(WD_ORIGIN + '/stand-in/review')}`;
 
 /* The address the blueprint declares — one source of truth, read from it. */
 const DECLARED = parse(readFileSync(new URL('./blueprint/walkdown.yml', import.meta.url), 'utf8'))
@@ -59,8 +66,8 @@ export default defineConfig({
      * address — the one blueprint/walkdown.yml declares for the local target.
      * The reporter stamps it onto every run, and a run made against some other
      * address is evidence about some other system (verdict-belongs-to-a-place).
-     * Fixture pages are navigated to by absolute URL; they are the host the
-     * panel docks into, not the thing being verified.
+     * Fixture pages are navigated to by absolute URL; they are the host that
+     * carries the panel, not the thing being verified.
      */
     baseURL: process.env.APP_HOST ?? WD_ORIGIN,
     screenshot: 'only-on-failure',
@@ -80,7 +87,7 @@ export default defineConfig({
     },
     {
       command: `python3 -m http.server ${FIXTURE_PORT} --directory checks/fixtures`,
-      url: `http://localhost:${FIXTURE_PORT}/docked.html`,
+      url: `http://localhost:${FIXTURE_PORT}/extension.html`,
       reuseExistingServer: false,
     },
     /*

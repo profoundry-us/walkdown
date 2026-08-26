@@ -9,7 +9,7 @@
  * beside it, because `prototype.root` resolves against the blueprint's parent.
  * Anything the checks write lands there and is thrown away next run.
  */
-import { cpSync, existsSync, mkdirSync, rmSync, symlinkSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -31,4 +31,17 @@ export default function globalSetup() {
   rmSync(join(CHECKSPACE, 'blueprint', 'drafts'), { recursive: true, force: true });
   if (!existsSync(join(CHECKSPACE, 'prototype')))
     symlinkSync(join(root, 'prototype'), join(CHECKSPACE, 'prototype'), 'dir');
+  /*
+   * The embed checks need what an adopter has and walkdown itself does not: an
+   * application page that is a storyboard screen, carrying anchors, long enough
+   * to scroll. checks/fixtures/app.html is that page, and this is what makes it
+   * a screen - without which the panel has no pins to push into the frame and
+   * a pin placed there would vanish the moment it was filed.
+   */
+  const sb = join(CHECKSPACE, 'blueprint', 'storyboard.yml');
+  writeFileSync(sb, readFileSync(sb, 'utf8') +
+    ['', '  - id: fixture-app', '    title: The application under review (browser checks only)',
+     '    prototype: /screens/review.html', '    app: { path: /app.html }',
+     '    anchors:', '      - host.title', '      - host.cta', '      - host.card',
+     '      - host.second', ''].join('\n'));
 }
