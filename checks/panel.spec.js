@@ -394,3 +394,41 @@ test(
     await expect(page.getByText('WALKDOWN', { exact: true })).toBeVisible();
   }
 );
+
+test(
+  'one tag carries both halves: the panel draws and pins can be placed',
+  { tag: '@rule:panel.delivery.one-implementation' },
+  async ({ page }) => {
+    /*
+     * The integration an adopter is told to write. The panel and the embed stay
+     * two files because the extension needs them in two documents, but an app
+     * carrying walkdown itself should not have to paste two tags in the right
+     * order — getting that order wrong is what left two pin-mode controls on
+     * every docked page (n-0058, n-0085).
+     */
+    const url = FIXTURE.replace('docked.html', 'one-tag.html');
+    await page.goto(url);
+
+    // The chrome is there…
+    await expect(page.getByTestId('panel.bar')).toBeVisible();
+    await expect(page.getByTestId('panel.rules-list')).toBeVisible();
+
+    // …and so is the embed, which is what makes pin mode reach the page.
+    await page.getByTestId('panel.pin-mode').click();
+    await expect(page.locator('html')).toHaveClass(/wd-pinning/);
+
+    const box = await page.getByTestId('host.cta').boundingBox();
+    const posted = page.waitForResponse(
+      (r) => r.url().includes('/api/threads') && r.request().method() === 'POST'
+    );
+    await page.mouse.click(Math.round(box.x + box.width / 2), Math.round(box.y + box.height / 2));
+    await expect(page.getByTestId('pin.form')).toBeVisible();
+    await page.getByTestId('pin.note').fill('Placed through the one-tag delivery.');
+    await page.getByTestId('pin.save').click();
+    const { thread } = await (await posted).json();
+    expect(thread.anchor.element).toBe('host.cta');
+
+    // Exactly one pin-mode control, whatever order the halves loaded in.
+    await expect(page.locator('.wd-badge')).toHaveCount(0);
+  }
+);

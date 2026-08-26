@@ -516,7 +516,9 @@ async function cmdServe(args) {
   });
   console.log(`walkdown serve — ${blueprint.dir}`);
   console.log(`  viewer:  http://localhost:${port}/`);
-  console.log(`  embed:   <script src="http://localhost:${port}/embed.js" data-walkdown></script>`);
+  // One tag, both halves. The embed alone gives pins with no chrome to drive
+  // them, which is why it is no longer what we tell people to paste.
+  console.log(`  in your app:  <script src="http://localhost:${port}/walkdown.js" data-bp="blueprint"></script>`);
   console.log(dim('  Ctrl-C to stop'));
 }
 

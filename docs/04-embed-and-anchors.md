@@ -96,7 +96,7 @@ It auto-detects its transport:
 | Surface | Mechanism |
 |---|---|
 | Prototype | Claude Design emits the tag in every export. |
-| Dev app | Documented one-liner, gated on env: `<script src="http://localhost:4700/embed.js" data-walkdown data-bp="<project>"></script>` — served by `walkdown serve`, so the version always matches; fails silently when the server isn't running. `data-bp` is required whenever one server hosts sibling blueprints, or pins file against the server's default project. |
+| Dev app | Documented one-liner, gated on env: `<script src="http://localhost:4700/walkdown.js" data-bp="<project>"></script>` — one tag carrying both the panel and the embed, served by `walkdown serve`, so the version always matches; fails silently when the server isn't running. `data-bp` is required whenever one server hosts sibling blueprints, or pins file against the server's default project. The two halves stay separate FILES because the extension needs them in two documents — the embed in every page it visits, the panel only in walkdown's own — but an app carrying walkdown itself should never have to paste two tags in a fixed order (n-0085). |
 | Staging | Same snippet baked in behind an env flag (`WALKDOWN_EMBED=1`), loading `embed.js` from the app's own assets (bundled at build) since localhost may not be serving. |
 | **Any page at all** | **The browser extension** ([extension/](../extension/)) — no markup change, so it reaches applications nobody can edit. Installed once; the reviewer chooses a blueprint per origin. |
 | Production | Never. |

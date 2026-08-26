@@ -4,7 +4,7 @@ author: topher
 created: 2026-08-26T03:20:00Z
 anchor:
   rule: panel.delivery.one-implementation
-status: answered
+status: incorporated
 body: "I thought the embed WAS the panel? Do we need a separate embed if we have
   the panel? If not, get rid of it so we just have one way to do things."
 replies:
@@ -44,3 +44,27 @@ replies:
       What I did do is remove the thing the split was actually costing: the
       badge is gone, the embed no longer has a control of its own, and pin mode
       has exactly one owner in both deliveries."
+  - author: agent
+    created: 2026-08-26T06:40:00Z
+    body: "Revisited, and the earlier answer was right for a better reason than
+      the one I gave. I said the embed should stay a separate file because it is
+      injected into someone else's application and ought to be small - true, but
+      soft, and it read as a reason to avoid the work. The real reason is in the
+      extension's delivery matrix: boot.js is a content script on every http(s)
+      page and loads the EMBED only; boot-host.js runs in walkdown's own
+      review.html and loads the PANEL only. The two never share a document
+      there. So the role cannot be inferred from window.parent !== window - every
+      site you visit is top level, and a merged file keyed on that would draw a
+      panel over every page you browse. Merging is not conservative, it is
+      wrong.
+
+      What Topher actually wanted - one way to do things - was real, and it was
+      about the INTEGRATION, not the files. A script-tag app had to paste two
+      tags in a fixed order, and getting that order wrong is precisely what left
+      two pin-mode controls on every docked page. There is now GET /walkdown.js,
+      which serves both halves together; `walkdown serve` advertises that single
+      tag instead of the embed one, docs/04 says so, and a browser check drives a
+      page carrying only that tag - the panel draws, pin mode reaches the page, a
+      pin lands on the right anchor, and there is exactly one pin-mode control
+      whatever order the halves arrived in."
+
