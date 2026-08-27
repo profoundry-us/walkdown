@@ -16,6 +16,102 @@ anchor:
   viewport:
     name: mobile
     width: 510
-status: open
+status: addressed
 body: The tabs need a bit more x padding to make them wider. They feel a bit too
   squished right now and just increaing this should help.
+replies:
+  - author: agent
+    created: 2026-08-27T05:47:47Z
+    body: >-
+      Widened - and the reason they felt squished turned out to be more than
+      taste.
+
+
+      What changed
+
+      - lib/viewer/panel.js: the tab buttons now carry px-6 instead of px-4.
+      Worth knowing: the px-4 that was already there had never reached the built
+      stylesheet at all. Tailwind scans this file as text, and the class sat
+      flush against a \${…} interpolation ("px-4\${listTab === id ? …"), which
+      is not a candidate its extractor can see - so the tabs were running on
+      daisyUI's own default padding the whole time. The class is now written
+      mid-list, with a space on both sides, and the built sheet has a .px-6 rule
+      in it for the first time.
+
+      - npm run build re-ran, so lib/viewer/walkdown.css and the two copies of
+      it carry the change.
+
+
+      Verified
+
+      - Grepped the built sheet before and after: no .px-4 rule existed, .px-6
+      does now.
+
+      - By eye in the panel at the fixture: the three tabs are visibly roomier
+      and the row still centres without wrapping at 384px.
+
+      - Full suite: node --test 93/93, WALKDOWN_RECORD=0 npm run checks:dev
+      28/28, walkdown lint 0 errors 0 warnings.
+
+
+      No check: tab padding is cosmetic, and a check on a pixel measurement
+      would break the next time anything near it moves.
+  - author: Topher Fangio
+    created: 2026-08-27T13:19:38Z
+    body: Drop the padding to px-2; the tabs now take up too much space and are
+      wapping.
+  - author: agent
+    created: 2026-08-27T13:24:16Z
+    body: >-
+      Dropped to px-2. You were right that px-6 overshot - with the badge counts
+      on two of the three tabs the row was wrapping at the panel's 384px, which
+      is worse than squished. px-2 plus daisyUI's own tab padding sits between
+      the two. Rebuilt, and .px-2 is in the sheet.
+
+
+      Still no check: it is a pixel measurement, and one that would break the
+      next time anything near it moves.
+  - author: agent
+    created: 2026-08-27T13:28:22Z
+    body: >-
+      Set to px-4.
+
+
+      Worth recording, because it is the whole story of this note: px-4 is what
+      the tabs already said, and had said for months. The class sat flush
+      against a ${…} interpolation, so Tailwind's extractor never saw it as a
+      candidate and never wrote the rule - the tabs were running on daisyUI's
+      own default padding the entire time. The value was right; only the
+      position in the string was wrong. Moving it mid-list is what made it real,
+      and px-6 then overshot into wrapping because it was the first padding that
+      had ever actually applied.
+
+
+      The comment above it now says that, so the next person who reads px-4 and
+      wonders why it was ever a question has the answer.
+  - author: agent
+    created: 2026-08-27T13:31:41Z
+    body: >-
+      px-3, and this time measured rather than eyeballed.
+
+
+      On the live panel at 384px: three tabs on one row, 12px padding confirmed
+      applied, tabs totalling 343.1px inside a 351.1px container. Eight pixels
+      of headroom.
+
+
+      That number is the thing worth knowing. The tab widths are not fixed -
+      they grow with the count badges, which are data. Today Rules reads 7 and
+      Threads reads 77. A second digit on Rules eats most of the remaining eight
+      pixels; a third digit on either wraps the row again, and no padding value
+      prevents that, because the padding is not what varies.
+
+
+      So px-3 is right, but the wrapping is only settled until the numbers grow.
+      The structural fix is to stop the row wrapping at all - let the tabs
+      shrink or the labels truncate instead - which would make the padding a
+      matter of taste again rather than something load-bearing. Not doing it
+      unasked; filing the observation here so the next wrap is not a surprise.
+
+
+      Verified: node --test 93/93, checks:dev 28/28, lint 0 errors 0 warnings.

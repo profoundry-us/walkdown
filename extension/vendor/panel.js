@@ -1571,7 +1571,13 @@
      * the eye that turns out to be about nothing.
      */
     const tab = (id, label, badge = 0, why = '', tone = 'badge-warning') =>
-      `<button role="tab" class="tab gap-1 px-4${listTab === id ? ' tab-active' : ''}" data-tab="${id}">
+      // px-3 sits mid-list on purpose. Tailwind scans this file as text, and a
+      // utility written flush against a \${…} is not a candidate it can see -
+      // a px-4 sat here for months and never reached the built sheet at all,
+      // so the tabs ran on daisyUI's own padding and read as squished
+      // (n-0102). Once the class was real, px-4 turned out to be too much:
+      // three tabs, two of them carrying a count badge, wrap at 384px.
+      `<button role="tab" class="tab px-3 gap-1${listTab === id ? ' tab-active' : ''}" data-tab="${id}">
         ${icon(TAB_ICON[id], 'size-4')}${label}${badge
           ? `<span class="badge badge-xs ${tone}" title="${esc(why)}">${badge}</span>`
           : ''}</button>`;
