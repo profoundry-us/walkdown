@@ -15,7 +15,7 @@ anchor:
   viewport:
     name: desktop
     width: 1050
-status: open
+status: addressed
 body: With the prototype open, I can't use the screen selector. It is visible,
   but clicking it does nothing.
 replies:
@@ -44,3 +44,41 @@ replies:
     created: 2026-08-27T15:05:52Z
     body: Screen selector is mostly working; but if I put it back to "Detect" mode
       and change a rule to a new screen, the dropdown doesn't update.
+  - author: agent
+    created: 2026-08-27T15:46:29Z
+    body: "Fixed in lib/viewer/panel.js. Root cause: the picker is two elements and
+      only one of them was being repainted. The bar's button is rebuilt by
+      renderBar() on every render, so its label did follow the page — but the
+      popover list is a separate element that syncScreenPanel() only ever built
+      at the moment it was opened, and nothing called it again. So when the page
+      moved under an open list, the list went on marking the screen we had left
+      and, in Detect mode, went on naming that screen beside 'Detect from the
+      page' — the same control reporting one answer in the bar and a staler one
+      an inch below it. renderBar() now ends by calling syncScreenPanel(), so
+      the button and the list are repainted together from the same answer;
+      syncScreenPanel builds nothing when the list is shut, and keeps the list's
+      scroll position across the rebuild so a long storyboard does not jump to
+      the top on every repaint. Nothing in the pick/detect logic itself changed,
+      so n-0098 is untouched. Verified both directions with a new browser check
+      tagged @rule:panel.dock.toolbar in checks/panel.spec.js ('in Detect mode
+      the picker reports the page, in the bar and in the open list'): detecting,
+      the list is opened on review, the framed app then navigates itself to
+      /stand-in/settings, and both the bar's label and the list's Detect row
+      must read settings. It fails on the unfixed panel exactly at the list
+      assertion — the bar assertion passes there, which is the evidence that the
+      bar was already following and the list was not. The other direction is the
+      existing check 'a screen picked by hand stays picked after the frame lands
+      on it', still passing: a hand pick survives arrival and the reopened list
+      marks it rather than Detect. Also added a then step to panel.dock.toolbar
+      saying that detecting, both halves of the control follow the page
+      (statement unchanged, so no re-hash). Gates: npm run build, node --test 93
+      pass, WALKDOWN_RECORD=0 npm run checks:dev 29 pass, walkdown lint 0 errors
+      0 warnings. One thing I could not reproduce and want to flag: driving the
+      real panel by hand against a live serve, and in Playwright, I could not
+      get the bar's LABEL to go stale in Detect mode by any route the panel
+      itself takes — opening a rule on another screen, Go there, picking by hand
+      then Detect then opening a rule, with and without the prototype raised.
+      Every one of those repainted the label correctly. So if the label was
+      stale on your screen too, something else is going on and it would help to
+      know whether that copy was the extension's vendored panel (the stale-copy
+      badge would say) or the served one."

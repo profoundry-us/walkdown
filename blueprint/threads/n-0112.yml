@@ -4,17 +4,74 @@ author: agent
 created: 2026-08-27T07:10:00Z
 anchor:
   rule: panel.dock.toolbar
-status: open
-body: >-
-  Two browser checks for this rule only pass when a `walkdown serve` happens to
-  be running on port 4700. They swap to the app surface, and that URL resolves
-  against the blueprint's declared `local` base_url — which is port 4700 — even
-  though the suite binds its own port on purpose so it never touches the ledger
-  a person is reviewing with. playwright.config.js says plainly that neither
-  mode binds 4700; two checks now depend on it anyway, so the suite passes or
-  fails according to whether someone left a server up. Found while fixing
-  n-0110; reproduced with those changes stashed, so it predates that work.
-  The fix is probably to resolve the app surface against the port the suite
-  actually bound rather than the declared address — but the declared address is
-  deliberate (a run record must name the system that was verified), so the two
-  meanings of "where" need separating rather than merging.
+status: addressed
+body: Two browser checks for this rule only pass when a `walkdown serve` happens
+  to be running on port 4700. They swap to the app surface, and that URL
+  resolves against the blueprint's declared `local` base_url — which is port
+  4700 — even though the suite binds its own port on purpose so it never touches
+  the ledger a person is reviewing with. playwright.config.js says plainly that
+  neither mode binds 4700; two checks now depend on it anyway, so the suite
+  passes or fails according to whether someone left a server up. Found while
+  fixing n-0110; reproduced with those changes stashed, so it predates that
+  work. The fix is probably to resolve the app surface against the port the
+  suite actually bound rather than the declared address — but the declared
+  address is deliberate (a run record must name the system that was verified),
+  so the two meanings of "where" need separating rather than merging.
+replies:
+  - author: agent
+    created: 2026-08-27T15:44:39Z
+    body: >-
+      Confirmed and fixed in the harness; no lib/ change was needed.
+
+
+      The mechanism: a screen's app surface is `appBase + screen.app.path`, and
+      `appBase` is the served target's declared base_url (lib/serve.js:277,
+      consumed at lib/viewer/panel.js:1480 and screenUrl). For
+      walkdown-on-itself that is http://localhost:4700 — the port the suite
+      deliberately never binds — so every swap to the app surface was fetched
+      from whatever `walkdown serve` a person had left running there. Three
+      checks were affected, not two: 'put away, the badge still crosses...',
+      'the screen picker opens over the design...', and 'a screen picked by hand
+      stays picked...' all reached 4700 and were satisfied by a path-only match.
+
+
+      What I did NOT do, and why it matters: my first attempt rewrote
+      runner.targets.local.base_url in the disposable checkspace copy to the
+      port the suite bound. That collapses the two meanings in the other
+      direction — a verdict is a claim about a place (lib/status.js inPlace), so
+      relocating the copy's target invalidates every run record it inherited and
+      five tier/evidence checks went dark. Recorded and reached have to stay
+      separate; the declared address stays declared.
+
+
+      The fix (checks/panel.spec.js, playwright.config.js only): the suite now
+      resolves the declared address to the server this run started, as a
+      browser-level alias. A test.beforeEach registers page.route on the
+      declared origin and answers with a 302 to WD_ORIGIN, so nothing on 4700 is
+      ever contacted and the frame lands at the address that really served it. A
+      redirect rather than a proxy precisely so the landing URL is assertable —
+      the three checks now match on origin (startsWith
+      `${WD_ORIGIN}/stand-in/...`) instead of on path, which is what stops this
+      drifting back unnoticed. DECLARED is now exported from
+      playwright.config.js for that one purpose, with the reasoning written
+      beside it.
+
+
+      Proof: 4700 was occupied (Topher's review server) and could not be freed,
+      so I proved it the other way. Temporarily pointing the blueprint's
+      declared local base_url at 4899 — a port nothing serves — and running with
+      the alias removed, exactly two checks fail and the third fails only on the
+      tightened origin assertion; with the alias in place all three pass against
+      the dead declared port. blueprint/walkdown.yml was restored to 4700
+      immediately (git checkout; verified).
+
+
+      Gates: node --test 93/93. WALKDOWN_RECORD=0 npm run checks:dev green on my
+      changes. node bin/walkdown.js lint 0 errors, 0 warnings. No run record
+      appended; nothing committed.
+
+
+      One thing nobody filed, noted only: the checkspace's synthetic fixture-app
+      screen declares `app: { path: /app.html }`, which resolves against appBase
+      to an address that serves no such page on either side of this fix. Nothing
+      navigates it today, so it is latent.

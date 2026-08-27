@@ -41,8 +41,19 @@ export const WD_ORIGIN = `http://localhost:${WD_PORT}`;
 export const FIXTURE = `http://localhost:${FIXTURE_PORT}/extension.html?wd=${
   encodeURIComponent(WD_ORIGIN)}&frame=${encodeURIComponent(WD_ORIGIN + '/stand-in/review')}`;
 
-/* The address the blueprint declares — one source of truth, read from it. */
-const DECLARED = parse(readFileSync(new URL('./blueprint/walkdown.yml', import.meta.url), 'utf8'))
+/*
+ * The address the blueprint declares — one source of truth, read from it.
+ *
+ * It is what a run RECORDS, and it is also what the panel NAVIGATES to when it
+ * swaps to the app surface: an app screen lives at `base_url + app.path`
+ * (lib/serve.js `appBase`). Recording it is right; reaching for it over the
+ * network is not, because nothing this suite starts is listening there — so
+ * checks that swapped surfaces were quietly served by whatever `walkdown serve`
+ * a person had left up, and passed or failed on whether anyone had (n-0112).
+ * The checks resolve this address to the server the run actually started; see
+ * `declaredResolvesHere` in checks/panel.spec.js. It is exported for that.
+ */
+export const DECLARED = parse(readFileSync(new URL('./blueprint/walkdown.yml', import.meta.url), 'utf8'))
   ?.runner?.targets?.local?.base_url ?? WD_ORIGIN;
 
 export default defineConfig({

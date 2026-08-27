@@ -8,7 +8,39 @@ import { expect, test } from '@playwright/test';
 // The host page the panel docks into — absolute, because baseURL names the
 // system under test (walkdown itself), not the fixture that hosts it. Both
 // come from the config so the two run modes address the same pair of servers.
-import { FIXTURE, WD_ORIGIN } from '../playwright.config.js';
+import { DECLARED, FIXTURE, WD_ORIGIN } from '../playwright.config.js';
+
+/*
+ * Where a verdict is RECORDED and where a check NAVIGATES are two different
+ * things (playwright.config.js says so at length), and the app surface is the
+ * one place they had been collapsed into one. A screen's app URL is
+ * `base_url + app.path` — walkdown's own blueprint declares 4700 for that, the
+ * port a person keeps `walkdown serve` on to review with, and the port this
+ * suite deliberately never binds. So a check that swapped to the app was
+ * reaching a server this run never started: green on the machine that happened
+ * to have one up, red on the machine that did not (n-0112).
+ *
+ * Rewriting the declared address in the disposable copy is NOT the fix: a
+ * verdict is a claim about a place (lib/status.js), so relocating the copy's
+ * target empties out every run record it inherited and the tier checks go dark.
+ * The declared address stays declared. What changes is only that this run
+ * resolves it to the server it brought up — an alias, applied in the browser,
+ * so the navigation lands on this suite's own walkdown and nothing on 4700 is
+ * ever contacted. A redirect rather than a proxy, so the frame ends up at the
+ * address that really served it and can be asserted.
+ */
+const DECLARED_ORIGIN = new URL(DECLARED).origin;
+async function declaredResolvesHere(page) {
+  if (DECLARED_ORIGIN === WD_ORIGIN) return;
+  await page.route(`${DECLARED_ORIGIN}/**`, (route) => {
+    const u = new URL(route.request().url());
+    return route.fulfill({
+      status: 302,
+      headers: { location: `${WD_ORIGIN}${u.pathname}${u.search}` },
+    });
+  });
+}
+test.beforeEach(async ({ page }) => { await declaredResolvesHere(page); });
 
 /**
  * The fixture URL with parameters overridden rather than appended — a second
@@ -382,6 +414,23 @@ test(
     await swap.click();
     await expect(swap).not.toHaveText(first);   // it crossed; the offer flipped
 
+    /*
+     * And it crossed to the app THIS run brought up. The app surface is
+     * `appBase + screen.app.path`, and appBase is the served target's declared
+     * base_url — so while the disposable copy still declared 4700, the swap
+     * reached whatever `walkdown serve` a person had left running there, and
+     * this check passed or failed on whether anyone had (n-0112). The declared
+     * address now resolves to the server this run started, and asserting the
+     * origin is what keeps that from drifting back unnoticed.
+     */
+    await expect
+      .poll(() => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/stand-in/`)),
+        { message: 'the app surface is the walkdown this run started', timeout: 10000 })
+      .toBe(true);
+    for (const f of page.frames())
+      if (f !== page.mainFrame() && /^https?:/.test(f.url()))
+        expect(f.url().startsWith(WD_ORIGIN), `a surface off this run's server: ${f.url()}`).toBe(true);
+
     // Crossing did not cost re-opening the panel.
     await expect(page.getByText('WALKDOWN', { exact: true })).toBeVisible();
 
@@ -587,8 +636,12 @@ test(
     await page.goto(fixtureFor({ frame: `${WD_ORIGIN}/prototype/screens/review.html` }));
     await expect(page.getByTestId('panel.bar')).toBeVisible();
     await page.locator('[data-surface="app"]').click();
+    // The app this run started, by origin and not merely by path: the app
+    // surface resolves against the served target's base_url, and matching on
+    // the path alone was satisfied by a stranger's server on 4700 (n-0112).
     await expect
-      .poll(() => page.frames().some((f) => f.url().includes('/stand-in/review')), { timeout: 10000 })
+      .poll(() => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/stand-in/review`)),
+        { timeout: 10000 })
       .toBe(true);
     await page.waitForLoadState('networkidle');
 
@@ -630,7 +683,8 @@ test(
     // It takes you there — and arriving is not the same as leaving, so the
     // choice survives the landing rather than being reset by it (n-0098).
     await expect
-      .poll(() => page.frames().some((f) => f.url().includes('/stand-in/rule-detail')), { timeout: 10000 })
+      .poll(() => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/stand-in/rule-detail`)),
+        { timeout: 10000 })
       .toBe(true);
     await expect(picker).toHaveAttribute('title', /picked by hand/i);
 
@@ -936,3 +990,48 @@ test(
   }
 );
 
+
+/* ---- appended for n-0107 (screen picker in Detect mode) ------------------ */
+
+test(
+  'in Detect mode the picker reports the page, in the bar and in the open list',
+  { tag: '@rule:panel.dock.toolbar' },
+  async ({ page }) => {
+    await review(page);
+    const picker = page.getByTestId('panel.screen-picker');
+    const list = page.getByTestId('panel.screens-list');
+
+    // Nothing picked by hand: the control is reporting, not remembering.
+    await expect(picker).toHaveAttribute('title', /detected from its address/i);
+    await expect(picker).toContainText('The review page');
+    await picker.click();
+    await expect(list).toBeVisible();
+    const detect = list.locator('[data-screen=""]');
+    await expect(detect).toContainText('◉');
+    await expect(detect).toContainText('review');
+
+    /*
+     * Now the page moves under the open list — the application navigating
+     * itself, which is the one way the answer changes without anyone touching
+     * the panel. Detect means the picker is reporting which screen this page
+     * IS, so both halves of the control have to follow it: the label in the bar
+     * and the row the list marks. Before n-0107 only the bar was repainted, and
+     * the list went on naming the screen we had left.
+     */
+    // Matched on the whole origin, not just the path: a path-only match is
+    // satisfied by any stranger's server that happens to be listening on the
+    // declared address, which is the ambient dependency n-0112 removed.
+    const app = page.frames().find((f) => f.url().startsWith(`${WD_ORIGIN}/stand-in/review`));
+    await app.evaluate(() => { location.href = '/stand-in/settings'; });
+    await expect
+      .poll(() => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/stand-in/settings`)),
+        { timeout: 10000 })
+      .toBe(true);
+
+    await expect(picker).toContainText('Settings');
+    await expect(list).toBeVisible();
+    await expect(detect).toContainText('◉');
+    await expect(detect).toContainText('settings');
+    await expect(detect).not.toContainText('review');
+  }
+);

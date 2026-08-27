@@ -430,11 +430,21 @@
    * the top. It is placed under its own button because the bar's left side is
    * as wide as the project's name, and clamped to the stage so a long
    * storyboard cannot run the list off the right edge.
+   *
+   * Called on every repaint of the bar as well as on opening, because the list
+   * is an answer and not a snapshot: in Detect mode both the button's label and
+   * the row the list marks are reporting which screen the page IS, and a page
+   * that moves under an open list has to move the list with it (n-0107).
    */
   function syncScreenPanel() {
     if (screensOpen) {
+      // Rebuilt in place, so a long storyboard keeps its scroll: this now runs
+      // on every repaint, and a list that jumped back to the top whenever the
+      // panel drew would be worse than one that lagged.
+      const wasAt = screenPanel.scrollTop;
       screenPanel.innerHTML = screensPane();
       wireScreens(screenPanel);
+      screenPanel.scrollTop = wasAt;
       const btn = bar.querySelector('#wdp-screen-btn');
       if (btn) {
         const at = btn.getBoundingClientRect();
@@ -1946,6 +1956,16 @@
       screensOpen = !screensOpen;
       syncScreenPanel();
     };
+    /*
+     * The button and the list are one control saying one thing, so they are
+     * repainted together. The label above was rebuilt from the page just now;
+     * an open list drawn before the page moved would still be marking the
+     * screen we left, and in Detect mode still naming it beside "Detect from
+     * the page" - the control reporting one answer in the bar and a staler one
+     * an inch below it (n-0107). Cheap when it is shut: syncScreenPanel builds
+     * nothing unless the list is open.
+     */
+    syncScreenPanel();
     bar.querySelector('#wdp-undock').onclick = () => setDocked(false);
     bar.querySelector('#wdp-pin').onclick = () =>
       PIN.set(!PIN.isOn());
