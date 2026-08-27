@@ -1,0 +1,82 @@
+<!doctype html>
+<!-- Green on purpose: walkdown's chrome is blue, and a demo app must
+     never be mistaken for the tool docked around it. -->
+<html lang="en" data-theme="emerald">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Waitlist export</title>
+<!-- The example app carries its own build, the way a real app would. -->
+<link rel="stylesheet" href="walkdown.css">
+</head>
+<body class="bg-base-100">
+  <header class="flex items-center gap-4 border-b border-base-300 px-8 py-3">
+    <span class="font-bold tracking-tight">Acme</span>
+    <nav class="flex gap-4 text-sm opacity-60"><span>Overview</span><span>Waitlist</span><span>Settings</span></nav>
+  </header>
+  <main class="px-8 py-6">
+    <h1 class="text-xl font-semibold tracking-tight">Waitlist export</h1>
+
+    <!-- Said before the wait, not after it: a page nobody can read for three
+         seconds is indistinguishable from a page that has broken, and this one
+         is slow on purpose. -->
+    <div class="alert alert-warning mt-4 max-w-2xl" data-testid="waitlist.export-note">
+      <div>
+        <p class="font-semibold">This screen is slow on purpose.</p>
+        <p class="text-sm">
+          Nothing here is broken. The export takes about three seconds to assemble,
+          and it is the page's own <code>load</code> event that waits — which is what
+          walkdown's loading veil watches. Frame this screen from the review page and
+          you will see the veil name it, hold, and then lift as the report lands.
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-5 max-w-2xl" data-testid="waitlist.export-report"></div>
+  </main>
+
+  <script>
+    /*
+     * How this stays slow under a plain static file server.
+     *
+     * The obvious trick — an inline script that busy-waits before the parser
+     * continues — does delay `load`, and destroys the very thing this screen
+     * exists to show. http://localhost:4310 and the walkdown server on 4700 are
+     * the same SITE (ports do not separate sites), so the framed app and the
+     * page framing it share one renderer main thread. A busy-wait here starves
+     * the panel's own timers: measured, the veil's 180ms timer did not fire
+     * until 2518ms, two milliseconds AFTER the load event that dismisses it.
+     * The veil never appeared.
+     *
+     * So the wait has to be one the main thread sits out. A same-origin
+     * about:blank child document, opened and left open, keeps this document
+     * from being "completely loaded" while every timer keeps running. Measured
+     * the same way: veil at 183ms, load at 2511ms. That is the shape a slow app
+     * really has — a page still on its way, not a page hogging the thread.
+     */
+    const ASSEMBLING_MS = 2800;
+    const hold = document.createElement('iframe');
+    hold.hidden = true;
+    hold.src = 'about:blank';
+    document.body.appendChild(hold);
+    const held = hold.contentDocument;
+    held.open();
+
+    setTimeout(() => {
+      document.querySelector('[data-testid="waitlist.export-report"]').innerHTML = `
+        <div class="rounded-box border border-base-300 p-5">
+          <p class="font-semibold">Export ready</p>
+          <p class="mt-1 text-sm opacity-70">1,284 rows · CSV · assembled just now</p>
+          <a class="btn btn-sm btn-primary mt-4" href="#">Download waitlist.csv</a>
+        </div>`;
+      // Closing the held document releases this page's load event. The report
+      // and the release are the same moment on purpose: what a reviewer waits
+      // for and what walkdown waits for are the same thing.
+      held.write('<p>export assembled</p>');
+      held.close();
+    }, ASSEMBLING_MS);
+  </script>
+  <!-- No walkdown tags on purpose: this app is reviewed through the browser
+       extension, the way an app nobody can edit would be. -->
+</body>
+</html>

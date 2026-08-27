@@ -17,6 +17,30 @@ and Playwright — no walkdown CLI.
 Run the checks: `npm install && npx playwright test` (the config serves `app/` itself).
 Per-rule: `npx playwright test --grep '@rule:waitlist.join.email-required'`.
 
+## Seeing walkdown's loading veil, by hand
+
+When walkdown sends the framed app somewhere, it draws a veil naming the screen
+it is fetching over a dimmed copy of what was there, held back 180ms so quick
+loads do not flash, and lifted by the frame's own `load` event. On a fast fixture
+that is over before you can look at it. `waitlist-export` exists so you can look
+at it: `app/export.html` holds its own load event open for about three seconds.
+
+Two servers, from the repository root:
+
+    python3 -m http.server 4310 --directory example/app
+    node bin/walkdown.js serve --dir example/blueprint --port 4700
+
+Then open <http://localhost:4700/>, go to the Rules tab, and open
+**waitlist.export.says-why-it-waits**. The frame heads for the export screen and
+the veil comes up reading "Loading Waitlist export…", holds for about three
+seconds, and lifts as the report lands. Clicking **Export** on the admin screen
+does the same trip, the way an operator would take it.
+
+How it stays slow under a plain static file server, and why it is not the obvious
+busy-wait, is written at the bottom of `app/export.html`. Short version: the app
+and the panel are the same *site*, so they share a renderer main thread, and a
+busy-wait starves the very timer that draws the veil.
+
 ## What happened (read the ledger)
 
 1. **Run 01** (`kind: checks`): both automated rules pass; `visual-match` skipped —

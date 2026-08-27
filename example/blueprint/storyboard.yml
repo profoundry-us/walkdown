@@ -43,6 +43,18 @@ screens:
       - waitlist.invite-batch
       - waitlist.table
 
+  # Undesigned on purpose, and it is the only screen here that is. This one
+  # exists so a slow page can be watched arriving: it takes about three seconds
+  # to finish loading, which is long enough to read walkdown's own loading veil
+  # and watch it lift. Design has never drawn it — the request is n-0004.
+  - id: waitlist-export
+    title: Waitlist export (slow on purpose)
+    prototype: null
+    app: { path: /export.html }
+    anchors:
+      - waitlist.export-note
+      - waitlist.export-report
+
   # The open dialog is a screen, not a footnote on the one behind it: it is
   # reachable by URL, so it can be deep-linked, pinned and walked down like
   # anything else. A screen is origin + path + fragment (docs/06 s2), and the

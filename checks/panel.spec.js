@@ -367,6 +367,13 @@ test(
 
     // A screen that takes its time. Without a veil the PREVIOUS screen stays on
     // display, which reads as a walkdown that went somewhere wrong.
+    //
+    // The wait is manufactured here, because this suite owns both ends of it and
+    // a held response is the shortest way to hold one open. To see the same
+    // thing BY HAND against a page that is genuinely slow, open the example
+    // project's `waitlist-export` screen — example/app/export.html holds its own
+    // load event for about three seconds, so the veil can be watched arriving
+    // and lifting rather than only asserted. example/README.md says how.
     let release;
     const held = new Promise((r) => { release = r; });
     // Matched by regex: the panel appends its own bp parameter, and a glob
@@ -381,7 +388,11 @@ test(
 
     const veil = page.getByTestId('panel.frame-loading');
     await expect(veil).toBeVisible();
+    // Not just "something is happening" — WHICH screen is being fetched. A veil
+    // that only said "Loading…" would leave the same doubt the previous screen
+    // did: you would still not know walkdown had heard you ask for this one.
     await expect(veil).toContainText(/loading/i);
+    await expect(veil).toContainText('Rule detail');
 
     // And it gets out of the way the moment the page arrives.
     release();

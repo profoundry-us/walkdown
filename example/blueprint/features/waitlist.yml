@@ -85,3 +85,24 @@ stories:
             - Compare card layout, heading hierarchy, field/button placement, and copy
           then:
             - Structure, hierarchy, and copy correspond; minor rendering differences are acceptable
+
+  - id: waitlist.export
+    title: An operator exports the waitlist
+    statement: As an operator, I can export the whole waitlist, and the wait while it is assembled never looks like a page that has broken.
+    rules:
+      - id: waitlist.export.says-why-it-waits
+        origin: walkdown
+        statement: The export screen takes seconds to finish loading, and it says so on arrival rather than after the wait, so a slow page reads as one still on its way.
+        verify: [checks]
+        screens: [waitlist-admin, waitlist-export]
+        steps:
+          given:
+            - An operator on screen `waitlist-admin`
+          when:
+            - Click anchor `waitlist.export`
+          then:
+            - The operator is on screen `waitlist-export`
+            - Anchor `waitlist.export-note` is readable immediately, saying what the screen is and that the wait is deliberate
+            - The page's own browser load event is what waits - seconds, not milliseconds - so anything watching the frame sees the wait, walkdown's loading veil included
+            - Anchor `waitlist.export-report` arrives with that load event, not before it
+          statement_hash: sha256:cc8894566f6f

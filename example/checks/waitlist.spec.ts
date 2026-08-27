@@ -61,3 +61,28 @@ test(
     await expect(page.getByTestId('waitlist.confirmed-email')).toHaveText('topher@profoundry.us');
   }
 );
+
+test(
+  'the export screen says why it waits, and the wait is the load event itself',
+  { tag: '@rule:waitlist.export.says-why-it-waits' },
+  async ({ page }) => {
+    await page.goto('/admin.html');
+
+    // Nothing is waited for here: the click starts the navigation, and the note
+    // has to be readable while the page is still loading — that is the whole
+    // point of it. `domcontentloaded` is the parser finishing; `load` is what
+    // this screen deliberately holds open, and what walkdown's veil watches.
+    const started = Date.now();
+    await page.getByTestId('waitlist.export').click();
+    await page.waitForLoadState('domcontentloaded');
+    await expect(page).toHaveURL(/export\.html/);
+    await expect(page.getByTestId('waitlist.export-note')).toContainText(/slow on purpose/i);
+    // The report is not here yet — it arrives with the load event.
+    await expect(page.getByTestId('waitlist.export-report')).toBeEmpty();
+
+    await page.waitForLoadState('load');
+    const waited = Date.now() - started;
+    expect(waited, 'the export screen finished loading too fast to demonstrate a wait').toBeGreaterThan(1500);
+    await expect(page.getByTestId('waitlist.export-report')).toContainText(/export ready/i);
+  }
+);

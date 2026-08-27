@@ -6,7 +6,7 @@ anchor:
   rule: panel.rules.takes-you-there
   screen: review
   element: panel.app-frame
-status: open
+status: addressed
 body: "When the app viewer changes its URL, the frame needs to show that it is
   doing something - some kind of loading indicator. Right now the old screen
   stays on display until the new one has finished loading, so a slow app looks
@@ -78,3 +78,66 @@ replies:
     body: I still have never seen this actually working; let's put together a test
       in the walkdown-example that forces this to appear, and I need some way to
       see what it would look like. Do we have any screens that show this?
+  - author: agent
+    created: 2026-08-27T15:59:31Z
+    body: >-
+      No — nothing in the storyboard draws it. I looked: no prototype screen, no
+      state, no proposal sketch mentions a loading veil anywhere, and the veil
+      has no anchor in any screen's anchor list. It was built straight from your
+      note and has never had a drawn state. That is a real design gap and I have
+      deliberately not closed it by drawing one myself; it wants design's hand,
+      not mine.
+
+
+      What it does have now is a place to be watched. The example project gained
+      a screen that is genuinely slow: 'waitlist-export'
+      (example/app/export.html), reached by the Export button on the admin
+      screen, holding its own load event open for about three seconds. The rule
+      waitlist.export.says-why-it-waits takes you to it, so opening that rule is
+      the trip that shows the veil. The page says on arrival that it is slow on
+      purpose, so nobody reads it as a broken example.
+
+
+      One thing worth knowing, because it nearly wrecked this: the obvious way
+      to make a static page slow — a blocking inline script that busy-waits —
+      destroys the very thing it is meant to show. localhost:4310 and
+      localhost:4700 are the same SITE (ports do not separate sites), so the
+      framed app and the panel framing it share one renderer main thread.
+      Measured: with a busy-wait the veil's 180ms timer did not fire until
+      2518ms, two milliseconds AFTER the load event that dismisses it — the veil
+      never appeared at all. The wait has to be one the main thread sits out, so
+      the page holds a same-origin about:blank child document open instead.
+      Measured the same way: veil at 183ms, load at 2511ms. That is also the
+      honest shape of a slow app.
+
+
+      On checks: there was already one, in checks/panel.spec.js under this rule,
+      holding a screen's response open and watching the veil appear and lift. A
+      second one there would have been the same trick twice, so I extended it
+      instead — it now asserts the veil NAMES the screen ('Rule detail'), not
+      merely that something is loading, since a veil that only said 'Loading…'
+      leaves the same doubt the old screen did. The example side gained its own
+      check for the slow page itself: the note readable while loading, the
+      report arriving only with the load event, and the wait over 1.5s. All
+      green.
+
+
+      To see it yourself, thirty seconds, from the repo root — two terminals:
+
+          python3 -m http.server 4310 --directory example/app
+          node bin/walkdown.js serve --dir example/blueprint --port 4700
+
+      Open http://localhost:4700/, Rules tab, click
+      'waitlist.export.says-why-it-waits'. Watch the middle of the frame: a
+      spinner and 'Loading Waitlist export…' over the dimmed old page, held
+      about three seconds, then it lifts and the export report is there.
+      Clicking Export on the waitlist admin screen takes the same trip the way
+      an operator would. (I drove exactly this and captured it; it reads as
+      intended.) Note 4700 was already occupied on this machine when I checked,
+      so use another port if serve refuses to start — any port works, the review
+      page is just http://localhost:<port>/.
+
+
+      Filed alongside: n-0004 in the example blueprint, a design request for the
+      undrawn export screen. And the same gap in the MAIN blueprint — the veil
+      with no drawn state — is what I am flagging above rather than fixing.

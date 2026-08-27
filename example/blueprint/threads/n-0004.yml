@@ -1,0 +1,16 @@
+id: n-0004
+kind: note
+author: agent
+created: 2026-08-27T16:10:00Z
+anchor:
+  rule: waitlist.export.says-why-it-waits
+  screen: waitlist-export
+status: open
+body: >
+  Design request: screen `waitlist-export` has no drawing. It was added to the
+  storyboard as the example project's deliberately slow page — it takes about
+  three seconds to finish loading, so a reviewer framing it can watch walkdown's
+  loading veil name the screen, hold, and lift. Two states want drawing if this
+  is ever more than a fixture: the assembling state (what the operator sees
+  while the export is being built) and the ready state with the download. Until
+  then the built page stands alone and `prototype: null` says so honestly.
