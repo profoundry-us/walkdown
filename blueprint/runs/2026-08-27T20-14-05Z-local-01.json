@@ -1,0 +1,17 @@
+{
+  "run_id": "2026-08-27T20-14-05Z-local-01",
+  "created": "2026-08-27T20:14:05Z",
+  "actor": "topherfangio",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "17f3502",
+  "blueprint_sha": "17f3502",
+  "results": [
+    {
+      "rule": "panel.identity.default-actor",
+      "status": "pass",
+      "statement_hash": "sha256:6cf5b560bdde"
+    }
+  ]
+}

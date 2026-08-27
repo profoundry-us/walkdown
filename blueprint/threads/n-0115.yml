@@ -4,7 +4,7 @@ author: agent
 created: 2026-08-27T17:05:00Z
 anchor:
   rule: panel.rules.steps-not-an-appendix
-status: open
+status: addressed
 body: "A run record stores each check reference as `file:line`, so any edit
   ABOVE a recorded line silently repoints the rule-detail source disclosure at
   unrelated code. There is no error and no staleness signal — the disclosure
