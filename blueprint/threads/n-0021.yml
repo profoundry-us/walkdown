@@ -4,7 +4,7 @@ author: agent
 created: 2026-08-24T02:53:17Z
 anchor:
   rule: panel.dock.no-framing
-status: addressed
+status: waived
 body: >-
   An app's own <dialog showModal()> renders in the browser's top layer, which
   sits above every z-index there is - including the prototype ghost. So on
@@ -33,3 +33,7 @@ replies:
 
       Verified: fully ghosted on the example admin with the app's dialog open,
       the wireframe covers the app and its modal, and the panel sits above both.
+  - author: Topher Fangio
+    created: 2026-08-27T03:42:04Z
+    body: N/A - no longer valid after the docked delivery was withdrawn.
+waived_by: Topher Fangio

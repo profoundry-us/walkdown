@@ -8,7 +8,7 @@ anchor:
   position:
     x: 433
     y: 97
-status: addressed
+status: waived
 body: I should be able to resize the detail-drawer to make it taller or shorter
 replies:
   - author: agent
@@ -23,3 +23,7 @@ replies:
       90px and three quarters of the window and persists across rule selection
       and reload. Verified live: 190px to 270px by drag, and 270 written to
       storage. Rule viewer.layout.drawer-resizable."
+  - author: Topher Fangio
+    created: 2026-08-27T03:33:40Z
+    body: No longer applicable since the old view is gone.
+waived_by: Topher Fangio

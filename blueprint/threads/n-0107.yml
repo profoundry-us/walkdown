@@ -1,0 +1,20 @@
+id: n-0107
+kind: note
+author: topherfangio
+created: 2026-08-27T03:29:39Z
+anchor:
+  screen: review
+  element: panel.bar
+  offset:
+    x: 293
+    y: 18
+  position:
+    x: 293
+    y: 18
+  surface: app
+  viewport:
+    name: desktop
+    width: 1050
+status: open
+body: With the prototype open, I can't use the screen selector. It is visible,
+  but clicking it does nothing.

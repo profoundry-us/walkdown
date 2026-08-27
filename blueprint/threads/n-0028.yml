@@ -4,7 +4,7 @@ author: topher
 created: 2026-08-24T04:12:48Z
 anchor:
   rule: panel.dock.wraps-the-page
-status: addressed
+status: waived
 body: Clicking Invite batch opens a modal that is centred against the entire
   screen, and its overlay blocks the walkdown UI. The whole point of this is to
   isolate the app inside the frame.
@@ -41,3 +41,7 @@ replies:
       Real isolation needs the app to own a viewport, which means framing it.
       That reverses panel.dock.no-framing, so it is yours to call - raised with
       you directly.
+  - author: Topher Fangio
+    created: 2026-08-27T03:42:04Z
+    body: N/A - no longer valid after the docked delivery was withdrawn.
+waived_by: Topher Fangio

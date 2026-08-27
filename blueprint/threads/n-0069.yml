@@ -5,7 +5,7 @@ created: 2026-08-25T15:16:10Z
 anchor:
   rule: panel.start.choose-a-blueprint
   screen: choose-blueprint
-status: addressed
+status: waived
 body: "Agent walkdown: choosing a blueprint from the picker threw the panel away
   in the docked delivery. The pick sets jumpOnLoad, and on load the panel
   navigates to the first screen the chosen blueprint knows - which, docked, is a
@@ -19,3 +19,8 @@ body: "Agent walkdown: choosing a blueprint from the picker threw the panel away
   stays, loads the chosen blueprint (8 rules), remembers the choice, and toasts
   that blueprint is about another page - open Join the waitlist to review it
   there."
+replies:
+  - author: Topher Fangio
+    created: 2026-08-27T03:42:04Z
+    body: N/A - no longer valid after the docked delivery was withdrawn.
+waived_by: Topher Fangio

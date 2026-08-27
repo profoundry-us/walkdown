@@ -1,0 +1,24 @@
+id: n-0108
+kind: note
+author: topherfangio
+created: 2026-08-27T03:32:42Z
+anchor:
+  screen: review
+  element: panel.rules-list
+  offset:
+    x: 135
+    y: 8
+  position:
+    x: 886
+    y: 140
+  surface: app
+  viewport:
+    name: desktop
+    width: 1050
+status: open
+body: We need a search box at the top of the rules that let's people search for
+  a rule. It should be stuck to the top. If a search matches a feature, all
+  rules in that feature should show. If a search matches just a rule, all other
+  rules should be hidden. The feature a matching rule is in should always be
+  shown so you can see the hierarchy as you search. This needs to be very fast,
+  so client-side as you type.

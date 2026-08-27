@@ -6,7 +6,7 @@ anchor:
   rule: panel.viewport.zoom-to-fit
   screen: review
   element: panel.app-frame
-status: addressed
+status: verified
 body: >-
   The prototype and app views should zoom their contents so that you can see
   what it would look like at a desktop resolution (we should add a mobile toggle

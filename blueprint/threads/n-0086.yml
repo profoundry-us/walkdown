@@ -5,8 +5,9 @@ created: 2026-08-26T05:40:00Z
 anchor:
   rule: panel.dock.controls-survive-use
   screen: review
-status: addressed
-body: "Reproduced, not fixed. Once a ghost has been raised, the rules list stops
+status: waived
+body: >-
+  Reproduced, not fixed. Once a ghost has been raised, the rules list stops
   scrolling to the wheel and stays that way until the page is reloaded - which
   is what Topher reported as 'swapping between the app and the prototype is
   breaking my ability to scroll'. Evidence and both probe scripts are in
@@ -25,33 +26,33 @@ body: "Reproduced, not fixed. Once a ghost has been raised, the rules list stops
   [12,44,992,888] against the pane's [1005,142,1387,854], and it carries
   pointer-events none. The wheel event does arrive, on the right element - a
   capture listener records target BUTTON>DIV>DIV inside the pane, cancelable
-  false, defaultPrevented false - so nothing is swallowing it. There is no
-  wheel listener anywhere in the panel or the embed. The pane stays scrollable
-  across the crossing, 3237 over 712 both before and after. render() is
-  synchronous between saving each pane's scroll position and restoring it, so
-  no repaint can be racing the reader.
+  false, defaultPrevented false - so nothing is swallowing it. There is no wheel
+  listener anywhere in the panel or the embed. The pane stays scrollable across
+  the crossing, 3237 over 712 both before and after. render() is synchronous
+  between saving each pane's scroll position and restoring it, so no repaint can
+  be racing the reader.
 
   What is odd, and where I ran out. Removing the ghost element restores
-  scrolling immediately; display:none, visibility:hidden, height 1px,
-  z-index auto, position absolute, dropping it out of the top layer, and
-  removing its iframe all leave it dead. But a hand-built fixed div of the same
-  box - with a same-origin iframe loading the same stand-in, promoted into the
-  top layer or not - does not break scrolling at all. So the element is
-  implicated and its properties are not, which means the cause is in what the
-  crossing does rather than in what the ghost is. That is where a fresh session
-  should start."
+  scrolling immediately; display:none, visibility:hidden, height 1px, z-index
+  auto, position absolute, dropping it out of the top layer, and removing its
+  iframe all leave it dead. But a hand-built fixed div of the same box - with a
+  same-origin iframe loading the same stand-in, promoted into the top layer or
+  not - does not break scrolling at all. So the element is implicated and its
+  properties are not, which means the cause is in what the crossing does rather
+  than in what the ghost is. That is where a fresh session should start.
 replies:
   - author: agent
     created: 2026-08-26T06:10:00Z
-    body: "Found and fixed. The cause is raise(), which promoted the ghost into
-      the top layer and then re-promoted the shell to put the panel back above
-      it. Two promotions in sequence leave the panel's rule list unable to
-      receive a wheel event at all until reload. Bisected at the code: with
-      raise() disabled the whole cycle scrolls; with only promote(ghost) it
-      scrolls; with only promote(shell) it scrolls; with both, dead. That is why
-      nothing built by hand reproduced it - a fixed div of the same box, with
-      the same same-origin iframe, promoted or not, is harmless, and so is
-      re-promoting the shell on its own. It takes the pair.
+    body: >-
+      Found and fixed. The cause is raise(), which promoted the ghost into the
+      top layer and then re-promoted the shell to put the panel back above it.
+      Two promotions in sequence leave the panel's rule list unable to receive a
+      wheel event at all until reload. Bisected at the code: with raise()
+      disabled the whole cycle scrolls; with only promote(ghost) it scrolls;
+      with only promote(shell) it scrolls; with both, dead. That is why nothing
+      built by hand reproduced it - a fixed div of the same box, with the same
+      same-origin iframe, promoted or not, is harmless, and so is re-promoting
+      the shell on its own. It takes the pair.
 
       Same family as n-0068, where the fade slider died one step into a drag
       because re-promotion cancelled the pointer's grip. The cost of
@@ -70,5 +71,8 @@ replies:
       both were reasoned rather than measured. What settled it was bisecting the
       code path instead of the DOM - and the reason an earlier control looked
       clean is that the browser tool I was using cannot drive a shadow-root
-      scroller at all."
-
+      scroller at all.
+  - author: Topher Fangio
+    created: 2026-08-27T03:42:04Z
+    body: N/A - no longer valid after the docked delivery was withdrawn.
+waived_by: Topher Fangio

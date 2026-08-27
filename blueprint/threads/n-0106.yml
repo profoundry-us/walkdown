@@ -1,0 +1,18 @@
+id: n-0106
+kind: note
+author: topherfangio
+created: 2026-08-27T03:26:05Z
+anchor:
+  screen: rule-detail
+  position:
+    x: 901
+    y: 20
+  surface: prototype
+  viewport:
+    name: desktop
+    width: 1050
+status: open
+body: There is still a bug where any pins on a page have their tooltips appear
+  and then fade away very quickly when the page first loads. This appears to be
+  from any load, whether a rule change, or the first load of the app /
+  extension.

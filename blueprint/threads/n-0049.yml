@@ -4,7 +4,7 @@ author: topher
 created: 2026-08-24T06:23:48Z
 anchor:
   screen: review
-status: addressed
+status: verified
 body: "Retire the dual-pane viewer from the spec: the docs, storyboard, and
   mockups should describe the panel (docked and framed) and the ghost, not the
   old side-by-side layout with the bottom drawer. Keep the old viewer code for
@@ -32,3 +32,7 @@ replies:
       The serve test was retagged to panel.identity.default-actor and a fresh
       local run recorded its pass. Threads n-0001 through n-0008 were
       re-anchored to their successor rules so provenance survives lint."
+  - author: Topher Fangio
+    created: 2026-08-27T03:48:14Z
+    body: "Done on 2026-08-24 and confirmed since: the spec describes the panel and
+      the ghost throughout, and the viewer's own code went on 2026-08-26."
