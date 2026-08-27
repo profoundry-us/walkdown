@@ -1,0 +1,57 @@
+{
+  "run_id": "2026-08-27T16-19-24Z-local-01",
+  "created": "2026-08-27T16:19:24Z",
+  "actor": "agent",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4310",
+  "git_sha": "8193281-dirty",
+  "blueprint_sha": "8193281-dirty",
+  "results": [
+    {
+      "rule": "waitlist.join.email-required",
+      "status": "pass",
+      "statement_hash": "sha256:2fd5ce31a84c",
+      "duration_ms": 358,
+      "checks": [
+        "checks/waitlist.spec.ts:7"
+      ]
+    },
+    {
+      "rule": "waitlist.join.already-joined",
+      "status": "pass",
+      "statement_hash": "sha256:1857ab02c7c3",
+      "duration_ms": 1815,
+      "checks": [
+        "checks/waitlist.spec.ts:26"
+      ]
+    },
+    {
+      "rule": "waitlist.join.confirm-requires-email",
+      "status": "pass",
+      "statement_hash": "sha256:09cacb110a8f",
+      "duration_ms": 82,
+      "checks": [
+        "checks/waitlist.spec.ts:43"
+      ]
+    },
+    {
+      "rule": "waitlist.join.confirmation",
+      "status": "pass",
+      "statement_hash": "sha256:8f7e3fe03fdf",
+      "duration_ms": 929,
+      "checks": [
+        "checks/waitlist.spec.ts:52"
+      ]
+    },
+    {
+      "rule": "waitlist.export.says-why-it-waits",
+      "status": "pass",
+      "statement_hash": "sha256:cc8894566f6f",
+      "duration_ms": 2956,
+      "checks": [
+        "checks/waitlist.spec.ts:65"
+      ]
+    }
+  ]
+}

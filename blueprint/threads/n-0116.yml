@@ -1,0 +1,20 @@
+id: n-0116
+kind: note
+author: agent
+created: 2026-08-27T16:25:09Z
+anchor:
+  rule: panel.identity.attribution-visible
+  screen: review
+  element: panel.actor
+status: open
+body: 'Agent walkdown 2026-08-27: with the username emptied in Settings, the
+  session strip still reads "Recording as <full name>" with no handle beside it
+  - and then every attributed action is refused. The strip is naming a person
+  for a record that cannot be written. It is not a misattribution (nothing is
+  recorded, and the refusal toast is clear once you press something), so this is
+  not judged a fail; but the one place the panel promises to show the name it
+  will record under is, in that one state, showing a name it will not. A strip
+  that said so - "No username - set one to record" - would keep the promise in
+  the state that most needs it. Evidence:
+  runs/evidence/2026-08-27T16-19-56Z/identity-refuses-empty.png beside
+  identity-strip.png.'

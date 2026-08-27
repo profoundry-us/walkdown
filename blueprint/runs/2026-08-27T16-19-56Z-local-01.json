@@ -1,0 +1,61 @@
+{
+  "run_id": "2026-08-27T16-19-56Z-local-01",
+  "created": "2026-08-27T16:19:56Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "8193281-dirty",
+  "blueprint_sha": "8193281-dirty",
+  "results": [
+    {
+      "rule": "panel.identity.default-actor",
+      "status": "pass",
+      "statement_hash": "sha256:6cf5b560bdde",
+      "evidence": [
+        "runs/evidence/2026-08-27T16-19-56Z/identity-strip.png",
+        "runs/evidence/2026-08-27T16-19-56Z/identity-settings.png",
+        "runs/evidence/2026-08-27T16-19-56Z/identity-edited-persisted.png",
+        "runs/evidence/2026-08-27T16-19-56Z/identity-username-alone.png",
+        "runs/evidence/2026-08-27T16-19-56Z/identity-refuses-empty.png",
+        "runs/evidence/2026-08-27T16-19-56Z/identity-refuses-agent.png",
+        "runs/evidence/2026-08-27T16-19-56Z/proto-settings.png"
+      ],
+      "reasoning": "Re-judged after the statement was rewritten today for the username/display-name split. Nothing was typed in: starting a sitting in this repo raised the strip already reading 'Recording as Topher Fangio topher' - the full name git knows, and beside it in panel.actor-handle the username the record will actually carry, derived from the git identity. Settings, opened from the name, showed both fields and said which is which: settings.actor held 'topher', settings.display-name held 'Topher Fangio'. Editing each moved the right thing - a new display name moved only the strip's name, a new username moved only the handle - and both survived a reload of the host page. Emptying the full name left 'Recording as judge-bot-user' with no handle element at all, which is the honest rendering when the shown name and the recorded name have become one string. Emptying the username made the panel refuse attributed work: pressing Finish walkdown on a sitting holding a verdict produced 'A walkdown is recorded under a person's name - set it in Settings (the gear).', reopened Settings, and appended nothing to the ledger; the same happened with the username set to 'agent'. Judged against the statement rather than the drawing: prototype/screens/settings.html still shows one 'Record as' field holding a full name, which the build no longer matches - that disagreement is already routed to design as n-0114 and is not a defect in this rule. The surface judged was walkdown's own panel on a throwaway copy of this blueprint, the way the checks do it, so nothing this judgment pressed could write to the real ledger."
+    },
+    {
+      "rule": "panel.identity.attribution-visible",
+      "status": "pass",
+      "statement_hash": "sha256:1b6a789fde73",
+      "evidence": [
+        "runs/evidence/2026-08-27T16-19-56Z/identity-strip.png",
+        "runs/evidence/2026-08-27T16-19-56Z/identity-corrected-before-acting.png"
+      ],
+      "threads": ["n-0116"],
+      "reasoning": "Re-judged because today's identity change added a then-step here without moving the statement, so the standing agent pass of 2026-08-25 was taken before the behaviour it now describes existed. The strip carries both names at the moment of the action - 'Recording as Topher Fangio topher' - so the handle being written down is legible and not hidden behind Settings. Correcting before acting records the correction: with the strip changed to 'Recording as Corrected Person corrected-handle' and then Finish pressed, the appended walkdown record carried actor 'corrected-handle' - the username, not the display name - so what is shown as the record is what the record says. Nobody is attributed silently. One wrinkle worth a human's eye, not a fail: with the username emptied the strip still reads 'Recording as <full name>' with no handle, which reads as an identity that will be recorded when in fact nothing can be - the panel then refuses. Noted as n-0116."
+    },
+    {
+      "rule": "panel.dock.toolbar",
+      "status": "pass",
+      "statement_hash": "sha256:aaf28fbb5e0a",
+      "evidence": [
+        "runs/evidence/2026-08-27T16-19-56Z/toolbar-bar.png",
+        "runs/evidence/2026-08-27T16-19-56Z/app-review.png",
+        "runs/evidence/2026-08-27T16-19-56Z/toolbar-screens-list-open.png",
+        "runs/evidence/2026-08-27T16-19-56Z/toolbar-picked-by-hand.png",
+        "runs/evidence/2026-08-27T16-19-56Z/toolbar-detect-follows-page.png",
+        "runs/evidence/2026-08-27T16-19-56Z/toolbar-prototype-surface.png",
+        "runs/evidence/2026-08-27T16-19-56Z/toolbar-pin-mode-on.png",
+        "runs/evidence/2026-08-27T16-19-56Z/proto-review.png"
+      ],
+      "threads": ["n-0117"],
+      "reasoning": "Re-judged with the panel running its current build, against a server holding two projects. Every then-step held. panel.blueprint reads 'walkdown', the project this session is against; it is a plain span with no handler, so it says which one without being how you change it, and the Blueprints tab beside it is where a different one is chosen. panel.screen-picker reads 'The review page' with nothing opened, and opening it shows panel.screens-list with 'Detect from the page' selected and every screen listed. Picking Settings by hand relabelled the button and outlined it (btn-outline btn-primary), which is the readable difference the step asks for; choosing 'Detect from the page' dropped it back to ghost. Detecting really reports the page rather than remembering an answer: with the framed surface navigated from /stand-in/review to /stand-in/thread-panel the bar's label followed to 'The thread screen', and the open list's Detect row named thread-panel. Prototype and App swapped which surface the page area showed - the fade slider ran to the Prototype end and the settings design appeared under it. Pin mode toggled on to btn-warning and back off. Against the drawing the bar has gained the screen picker, which prototype/screens/review.html does not show; the statement and steps are authoritative and name that anchor, so this is spec ahead of design, not build behind it. One caveat recorded rather than failed: when the panel is a stale copy the stale badge takes panel.blueprint's place in the bar, so in that state the bar does not name the project at all - see n-0117."
+    },
+    {
+      "rule": "panel.threads.show-the-sketch",
+      "status": "blocked",
+      "statement_hash": "sha256:8244263349d7",
+      "reasoning": "Still nothing to judge, and for the same reason as 2026-08-25. No screen in this blueprint or in the example's carries a `proposal:` - the served storyboard reports none for either project - and there is no proposals/ directory in the tree. The only undesigned screen anywhere is the example's waitlist-export, which has `prototype: null` and no sketch on file, so it is exactly the case this rule is for and still has no input. Manufacturing a proposal to watch the panel draw it would be judging my own fixture. Blocked, so the ledger says why the cell is empty rather than leaving it looking un-walked."
+    }
+  ]
+}

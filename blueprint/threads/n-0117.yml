@@ -1,0 +1,19 @@
+id: n-0117
+kind: note
+author: agent
+created: 2026-08-27T16:25:21Z
+anchor:
+  rule: panel.dock.toolbar
+  screen: review
+  element: panel.blueprint
+status: open
+body: "Agent walkdown 2026-08-27: the rule says the bar names the project this
+  session is against. It does - except when the panel is a stale copy, where the
+  stale badge is rendered INSTEAD of anchor panel.blueprint
+  (lib/viewer/panel.js, the STALE_COPY() branch in the bar), so the project name
+  disappears from the bar entirely. The code comment argues the case
+  deliberately, and the trade is defensible; the rule as written does not carry
+  the exception, so either the bar should keep the name beside the badge or the
+  rule should say that a stale panel gives the slot up. Judged a pass on a
+  current build, where all six steps hold. Evidence:
+  runs/evidence/2026-08-27T16-19-56Z/toolbar-bar.png."

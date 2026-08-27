@@ -5,9 +5,8 @@ created: 2026-08-27T17:05:00Z
 anchor:
   rule: panel.rules.steps-not-an-appendix
 status: open
-body: >-
-  A run record stores each check reference as `file:line`, so any edit ABOVE a
-  recorded line silently repoints the rule-detail source disclosure at
+body: "A run record stores each check reference as `file:line`, so any edit
+  ABOVE a recorded line silently repoints the rule-detail source disclosure at
   unrelated code. There is no error and no staleness signal — the disclosure
   simply shows the wrong snippet, confidently. Two agents working the backlog
   today each added tests to `checks/panel.spec.js`, one of them mid-file, and
@@ -15,12 +14,37 @@ body: >-
   for its own source and got somebody else's. It will recur every time a spec
   file grows anywhere other than the end, and re-recording a run is the only
   thing that clears it, which means the ledger's oldest records are its least
-  trustworthy ones.
-  This is the reverse-direction staleness `docs/07-roadmap.md` already names
-  under "Staleness in both directions": a verdict should be current only when
-  both the statement AND the check are unchanged. That entry proposes hashing
-  the check into the run record. This note is the concrete failure mode that
-  argues for it, and adds a cheaper near-term option: record the test's TITLE
-  beside the line and locate by title when the line no longer matches, since
-  the title is already in the run record's own result and survives edits that a
-  line number cannot.
+  trustworthy ones. This is the reverse-direction staleness `docs/07-roadmap.md`
+  already names under \"Staleness in both directions\": a verdict should be
+  current only when both the statement AND the check are unchanged. That entry
+  proposes hashing the check into the run record. This note is the concrete
+  failure mode that argues for it, and adds a cheaper near-term option: record
+  the test's TITLE beside the line and locate by title when the line no longer
+  matches, since the title is already in the run record's own result and
+  survives edits that a line number cannot."
+replies:
+  - author: agent
+    created: 2026-08-27T16:26:59Z
+    body: "Run of record 2026-08-27T16-13-52Z-local-01 is the failure this note
+      describes, recorded rather than hidden: the disclosure asked for its own
+      source and the recorded file:line handed it ownRule(), a helper two
+      hundred lines away. The very next run of record,
+      2026-08-27T16-14-33Z-local-01, re-recorded the refs and the same check
+      passed with nothing else changed - so the diagnosis holds exactly: the red
+      was stale line numbers, not a broken disclosure. Two consecutive runs, one
+      fail then one pass, are now in the ledger as evidence of the failure mode.
+      Left open: nothing was fixed. The refs are still line-only, and the next
+      mid-file edit to checks/panel.spec.js will do this again."
+  - author: agent
+    created: 2026-08-27T16:27:41Z
+    body: One more thing that surfaced while recording those two runs, same family
+      as this note. The fail record 2026-08-27T16-13-52Z-local-01 cites its
+      evidence as
+      test-results/panel-the-steps-are-read-o-b123b-e-waits-behind-a-disclosure/test-failed-1.png
+      and error-context.md - the Playwright artifacts. Playwright clears
+      test-results/ at the start of every run, so the very next run of record
+      deleted them, forty seconds later. The ledger now holds a recorded failure
+      whose evidence paths resolve to nothing, and it will do that for every
+      fail it ever records. Agent walkdown evidence does not have this problem
+      because it is written under blueprint/runs/evidence/<ts>/. The reporter
+      could copy the artifacts it cites into that directory as it records them.
