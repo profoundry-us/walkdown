@@ -764,3 +764,152 @@ test(
   }
 );
 
+test(
+  'the rule list is filtered from a box that stays above it',
+  { tag: '@rule:panel.rules.search-the-list' },
+  async ({ page }) => {
+    await review(page);
+    // What the ledger holds, before the panel says anything — a filter is a
+    // claim about which rules there are, and it needs a second opinion.
+    const bp = await (await page.request.get(`${WD_ORIGIN}/api/blueprint`)).json();
+    const storyOf = new Map(bp.rows.map((r) => [r.rule, r.story]));
+
+    const list = page.getByTestId('panel.rules-list');
+    const rows = list.locator('[data-rule]');
+    await expect(rows).toHaveCount(bp.rows.length);
+
+    const box = page.getByTestId('panel.rules-search');
+    await expect(box).toBeVisible();
+
+    /*
+     * Stuck to the top: scrolling the list to its far end leaves the box
+     * exactly where it was. This is the assertion that fails if the box is
+     * ever moved back inside the scrolling wrapper — there it rides up and
+     * out with everything else.
+     */
+    const before = await box.boundingBox();
+    await rows.last().scrollIntoViewIfNeeded();
+    await expect(box).toBeInViewport();
+    expect(Math.round((await box.boundingBox()).y)).toBe(Math.round(before.y));
+
+    /*
+     * A query naming a group keeps that group whole. Typed a letter at a time,
+     * and the list is expected to have settled inside a second — the filter
+     * runs in the browser on each keystroke, so there is nothing to wait for.
+     */
+    const group = 'panel.rules';
+    const inGroup = bp.rows.filter((r) => r.story === group);
+    expect(inGroup.length, 'the blueprint has a group to filter to').toBeGreaterThan(1);
+    await box.pressSequentially(group, { delay: 20 });
+    await expect(rows).toHaveCount(inGroup.length, { timeout: 1000 });
+    const shown = await rows.evaluateAll((els) => els.map((e) => e.dataset.rule));
+    expect(new Set(shown), 'every rule in the group survives, and only those')
+      .toEqual(new Set(inGroup.map((r) => r.rule)));
+
+    // A query naming one rule hides the rest — but not the heading it lives
+    // under, or a filtered list would stop saying where anything belongs.
+    const one = inGroup[0].rule;
+    const leaf = one.slice(group.length + 1);
+    await box.fill(leaf);
+    await expect(rows).toHaveCount(1, { timeout: 1000 });
+    await expect(rows.first()).toHaveAttribute('data-rule', one);
+    await expect(list, 'the group heading is still drawn above it')
+      .toContainText(storyOf.get(one));
+
+    // A query matching nothing says so rather than showing an empty pane.
+    await box.fill('zzz-no-such-rule');
+    await expect(rows).toHaveCount(0, { timeout: 1000 });
+    await expect(list.getByTestId('panel.rules-empty')).toBeVisible();
+
+    // And emptying the box gives the whole list back.
+    await box.fill('');
+    await expect(rows).toHaveCount(bp.rows.length, { timeout: 1000 });
+  }
+);
+
+test(
+  'a built rule wears one mark per tier, checks then agent then human',
+  { tag: '@rule:panel.rules.tiers-at-a-glance' },
+  async ({ page }) => {
+    await review(page);
+    const bp = await (await page.request.get(`${WD_ORIGIN}/api/blueprint`)).json();
+    const list = page.getByTestId('panel.rules-list');
+
+    /*
+     * The ledger's own answer for each tier, worked out here rather than read
+     * off the panel - a row of marks is a claim about the ledger, and a check
+     * that read it only from the panel could not tell a right answer from a
+     * consistent wrong one. The checks tier is per target, so it comes down to
+     * one state worst-news-first, the way the verdict itself aggregates.
+     */
+    const checksTier = (row) => {
+      const states = (bp.targets ?? Object.keys(row.cells ?? {}))
+        .map((t) => row.cells?.[t]?.state)
+        .filter((state) => state && state !== 'na');
+      if (!states.length) return 'na';
+      for (const worse of ['fail', 'blocked', 'never', 'stale', 'skipped'])
+        if (states.includes(worse)) return worse;
+      return states.every((state) => state === 'pass') ? 'pass' : 'never';
+    };
+    const tiersOf = (row) => [
+      ['checks', checksTier(row)],
+      ['agent', row.agent.state],
+      ['human', row.human.state],
+    ];
+    // Shape carries what happened, with one deliberate exception: a tier the
+    // rule never asked for is the same check hollowed out rather than a glyph
+    // of its own, so the three marks line up down the list (n-0109). Colour
+    // separates it from a real pass. This is the whole vocabulary; a state the
+    // panel could draw and this map does not know would fail loudly.
+    const GLYPH = {
+      pass: '✓', fail: '✗', stale: '~', never: '○', skipped: '–', blocked: '⊘', na: '✓',
+    };
+
+    const built = bp.rows.filter((r) => r.built);
+    expect(built.length, 'the blueprint has built rules to read').toBeGreaterThan(0);
+    const verified = built.filter((r) => r.verdict === 'pass');
+    /*
+     * Four shapes of the same row, and the last is the point of it: a rule
+     * only reaches 'verified' when every tier it asks for holds a current
+     * pass, so on a verified rule these marks can be nothing but green or
+     * grey. A rule with a tier that failed, never ran or went stale is the one
+     * carrying news, and until this row was drawn on unverified rules too
+     * there was nowhere to see it.
+     */
+    const all3 = verified.find((r) => ['checks', 'agent', 'human'].every((v) => r.verify.includes(v)));
+    const partial = verified.find((r) => !r.verify.includes('checks'));
+    const missing = built.find((r) =>
+      tiersOf(r).some(([, state]) => ['fail', 'never', 'stale'].includes(state)));
+    expect(Boolean(all3 && partial), 'the blueprint holds both verified shapes').toBe(true);
+    expect(Boolean(missing), 'the blueprint holds a built rule with a tier still owed').toBe(true);
+
+    for (const row of [all3, partial, missing]) {
+      const marks = list.locator(`[data-rule="${row.rule}"]`).getByTestId('panel.rule-tiers');
+      await expect(marks, `${row.rule} shows its tiers`).toHaveCount(1);
+      await expect(marks.locator('span'), 'always three, never fewer').toHaveCount(3);
+      // Always in that order, and each mark is the ledger's own answer for
+      // that tier rather than a second reading of it.
+      const tiers = tiersOf(row);
+      await expect(marks).toHaveAttribute('data-tiers', tiers.map((t) => t.join(':')).join(' '));
+      for (const [i, [kind, state]] of tiers.entries()) {
+        const mark = marks.locator('span').nth(i);
+        await expect(mark).toHaveAttribute('title', new RegExp(`^${kind} `));
+        await expect(mark, `${row.rule} ${kind} draws its own shape`)
+          .toHaveText(GLYPH[state]);
+        // Passed reads green; a tier the rule does not ask for is greyed out.
+        // A tier still owed is neither - it is the news this row exists for.
+        if (state === 'pass') await expect(mark).toHaveClass(/text-success/);
+        if (state === 'na') await expect(mark).toHaveClass(/opacity-20/);
+        if (['fail', 'never', 'stale'].includes(state))
+          await expect(mark).not.toHaveClass(/text-success/);
+      }
+    }
+
+    // And a rule that is not built keeps the single lifecycle shape it had:
+    // an unbuilt rule has no evidence tiers to report on.
+    const unbuilt = bp.rows.find((r) => !r.built);
+    await expect(list.locator(`[data-rule="${unbuilt.rule}"]`).getByTestId('panel.rule-tiers'))
+      .toHaveCount(0);
+  }
+);
+

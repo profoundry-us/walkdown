@@ -1,0 +1,204 @@
+id: n-0109
+kind: note
+author: topherfangio
+created: 2026-08-27T03:59:35Z
+anchor:
+  screen: review
+  element: panel.rules-list
+  offset:
+    x: 169
+    y: 38
+  position:
+    x: 920
+    y: 170
+  surface: app
+  viewport:
+    name: desktop
+    width: 1050
+status: addressed
+body: "If a rule would currently show a checkmark (as opposed to one of the
+  other shapes denoting a status) I want it to show a list of 3 check marks: one
+  for checks, agent, and human. It should always show 3 checkmarks and grey out
+  the ones that are not applicable. It should show a red X if that particular
+  check failed; and it should show green checkmark if that particular check
+  passed. I basically want an easy way to visually see how many of our rules
+  have all three or are missing some."
+replies:
+  - author: agent
+    created: 2026-08-27T05:16:13Z
+    body: >-
+      Built. A rule that used to show a single checkmark now shows three marks -
+      checks, agent, human, in that order, always all three.
+
+
+      What I built
+
+      - Anchor `panel.rule-tiers` on each verified rule's row, carrying three
+      marks plus a data-tiers attribute naming each tier and its state. Per
+      tier: green check for passed, red cross for failed, grey middle dot for a
+      tier the rule does not ask for. Each mark's tooltip names the tier and
+      spells the state out.
+
+      - The checks tier is per target in the ledger, so it is brought down to
+      one mark worst-news-first, the same way the verdict itself aggregates.
+
+      - The two in-between states you asked about keep marks of their own,
+      distinct from both grey and green: a required tier that has never run is a
+      warning-yellow open circle, and a pass whose statement has since moved is
+      a warning-yellow tilde. Same vocabulary the rule detail's own evidence
+      rows already use, so the panel says one thing in one language: shape
+      carries what happened, colour carries whether it is still owed.
+
+      - Rules showing any other lifecycle shape are untouched, and a verdict you
+      gave in the current sitting still shows as the single mark it always did -
+      that judgment is not in the ledger yet, so it has no tiers to report.
+
+
+      One thing worth your call
+
+      Today a rule only reaches 'verified' when EVERY tier it asks for holds a
+      current pass - so on a verified rule the three marks can only ever be
+      green or grey. Red, the open circle and the tilde are implemented and
+      correct, but nothing can currently display them, because a rule with a
+      failed, unrun or stale tier is not verified and so keeps its old single
+      shape. If what you want is to see the missing tiers on the rules that are
+      missing them, say the word and I will show the three marks on every built
+      rule rather than only the verified ones - that is the change that makes
+      the yellow and the red visible. I did not do it unasked because it goes
+      past what this note says.
+
+
+      Spec
+
+      - New rule panel.rules.tiers-at-a-glance, origin thread:n-0109, with steps
+      and a written hash. Anchor panel.rule-tiers declared on screen review. Its
+      steps only claim what is observable today, for the reason above.
+
+
+      Verified
+
+      - New browser check '@rule:panel.rules.tiers-at-a-glance' in
+      checks/panel.spec.js: it reads the ledger, then asserts on two shapes of
+      verified rule - one resting on all three tiers, one that never asked for
+      checks - that exactly three marks are drawn, in the order
+      checks/agent/human, that each mark's state is the ledger's own answer for
+      that tier, that a passed tier reads green and an inapplicable one greyed
+      out, and that an unverified rule still shows its single lifecycle shape.
+      Confirmed it FAILS against the build before this change and passes after.
+
+      - Full suite: node --test 93/93, WALKDOWN_RECORD=0 npm run checks:dev
+      28/28, walkdown lint 0 errors 0 warnings. Also read by eye in the panel at
+      localhost:4705, and the mark slot widened so three marks never crowd the
+      rule name.
+
+
+      Nothing recorded to the ledger by me - a run of record is yours to take.
+  - author: agent
+    created: 2026-08-27T05:48:42Z
+    body: >-
+      Follow-on, and it goes past what this note literally asks - so here it is
+      plainly, and it is one line to reverse.
+
+
+      The change
+
+      The tier row now renders on EVERY BUILT rule, not only on the verified
+      ones. In listPane the condition went from row.verdict === 'pass' to
+      row.built. Rules that are not built at all are untouched and keep their
+      single lifecycle shape.
+
+
+      Why I did it anyway
+
+      This note says 'if a rule would currently show a checkmark'. Taken
+      literally that is what I built first - and, as I flagged, it made the red
+      X, the yellow open circle and the yellow tilde unreachable, because a rule
+      only reaches verified when every tier it asks for holds a current pass. So
+      the row could only ever say 'all green' or 'green and grey'. That is not
+      the thing the note asks for: 'an easy way to visually see how many of our
+      rules have all three or are missing some'. The rules that are MISSING a
+      tier are exactly the ones that were not showing the row. On the rule list
+      now, panel.dock.toolbar reads ~ ✗ · at a glance - a stale agent pass and a
+      failing checks tier - which is the news the row exists to carry.
+
+
+      One consequence worth your eye
+
+      Colour still carries ownership, as panel.rules.lifecycle-legible requires:
+      a tier that is required and unrun, or a pass gone stale, is warning yellow
+      when the rule is waiting on YOU and quiet otherwise. Shape carries what
+      happened either way, so an unrun tier (○) is never read as one the rule
+      never asked for (·). A built rule awaiting your walkdown therefore reads
+      as warning-yellow open circles rather than as one warning-yellow open
+      circle - same vocabulary, three slots.
+
+
+      Spec
+
+      - panel.rules.tiers-at-a-glance's statement now says 'a built rule' rather
+      than 'a verified rule', and names the missing tiers as the thing it makes
+      legible. Re-hashed with walkdown hash --write.
+
+      - Its steps now cover the failed / never-run / stale marks, and the last
+      step says a rule that is not BUILT keeps its single lifecycle shape.
+
+      - panel.rules.lifecycle-legible's first step amended to match: an unbuilt
+      unsigned rule is still the empty square, a built rule shows the three tier
+      marks in the glyph's place, where an unrun tier is the empty circle. Its
+      statement was still true as written, so no re-hash there.
+
+
+      Verified
+
+      - The rule's browser check was extended to a third shape of row: a built
+      rule with a tier that failed, never ran, or went stale. It asserts three
+      marks in the order checks/agent/human, each state the ledger's own answer,
+      each glyph the right shape, pass green, not-asked-for greyed, and a tier
+      still owed neither of those. The unbuilt case replaces the old unverified
+      one. Confirmed it FAILS against a build with the old row-on-verified-only
+      condition (it picked panel.dock.toolbar and found no tier row) and passes
+      now.
+
+      - Full suite: node --test 93/93, WALKDOWN_RECORD=0 npm run checks:dev
+      28/28, walkdown lint 0 errors 0 warnings.
+
+
+      To reverse: put row.verdict === 'pass' back in listPane, put the two
+      statements and steps back, and re-hash. I have left this thread's status
+      where you set it.
+  - author: Topher Fangio
+    created: 2026-08-27T13:20:33Z
+    body: We're currently showing dots for the ones without checks; but that makes
+      the check marks not line up. I want to use greyed out check marks so they
+      are either filled or not filled and everything is the same size.
+  - author: agent
+    created: 2026-08-27T13:24:16Z
+    body: >-
+      Changed: a tier the rule does not ask for is now the same checkmark,
+      hollowed out to 20% rather than a middle dot.
+
+
+      You are right that the dot was the problem and not just the look of it. A
+      dot, a check, a cross and a circle are four different widths, so the three
+      marks never formed a column down a list of ninety rules - and a row you
+      cannot read as a column is not scannable at all, which is the whole point
+      of the row. Two changes:
+
+
+      - 'not applicable' draws the check glyph at opacity-20, so every mark is
+      now the same shape family: filled means it holds, hollow means the rule
+      never asked for it.
+
+      - Each mark is an inline-block of fixed width, centred, so the cross, the
+      tilde and the open circle line up in the same column too - not only the
+      checks.
+
+
+      Colour still separates a real pass from an inapplicable tier, which is
+      what the browser check now asserts (glyph plus class, rather than glyph
+      alone). Its comment records why the shape vocabulary has this one
+      deliberate exception.
+
+
+      Verified: node --test 93/93, checks:dev 28/28, lint 0 errors 0 warnings,
+      and the three new utilities confirmed present in the built sheet.

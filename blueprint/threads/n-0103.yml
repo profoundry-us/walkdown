@@ -4,7 +4,54 @@ author: Topher Fangio
 created: 2026-08-27T03:03:39Z
 anchor:
   rule: panel.threads.own-view
-status: open
+status: addressed
 body: Looks pretty good, but the subtabs filtering should be docked to the top
   (maybe we just make it sticky; or change the wrapper element so it isn't part
   of the scroll).
+replies:
+  - author: agent
+    created: 2026-08-27T05:47:58Z
+    body: >-
+      Docked, built the same way the rule list's search box was just built.
+
+
+      What changed
+
+      - lib/viewer/panel.js: the filter came out of threadsPane() into a
+      threadFilterBar() of its own, and the thread list's seat is now a
+      fixed-head / growing-body column - the filter is a sibling ABOVE the
+      scrolling wrapper rather than the first thing inside it. Sticky was the
+      reflex and is the wrong tool here for the same reason it was wrong for the
+      search box: the pane itself is what scrolls, so a sticky child sticks to a
+      scrollport that is already moving with it. Taking it out of the scroller
+      costs nothing and has nothing to go wrong when the list is short.
+
+      - It sits in the same head shape as panel.rules-search: shrink-0, a bottom
+      hairline, centred.
+
+
+      Spec
+
+      - panel.threads.own-view gains a step saying the filter stays put at the
+      top of the list however far it is scrolled - a fixed head above what
+      scrolls, rather than the first thing to scroll away. The statement was
+      already true as written, so no re-hash.
+
+
+      Verified
+
+      - The rule's own browser check now asserts it: with All selected (109
+      threads), it takes the filter's box, scrolls the list to its last card,
+      and asserts the filter is still in the viewport at exactly the same y.
+      Confirmed it FAILS against a build with the filter put back inside the
+      scrolling wrapper, and passes now.
+
+      - By eye on the Threads tab with a sitting running: Active / Awaiting you
+      / All stay pinned under the tabs while the conversations run past
+      underneath.
+
+      - Full suite: node --test 93/93, WALKDOWN_RECORD=0 npm run checks:dev
+      28/28, walkdown lint 0 errors 0 warnings.
+
+
+      Nothing recorded to the ledger by me - a run of record is yours to take.

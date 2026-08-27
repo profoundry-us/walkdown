@@ -1533,8 +1533,8 @@
     // Typing must survive a repaint: a composer that loses the caret mid-reply
     // is the difference between a conversation and a form.
     const typing = sr.activeElement;
-    const caret = typing?.id === 'wdp-note'
-      ? { start: typing.selectionStart, end: typing.selectionEnd } : null;
+    const caret = ['wdp-note', 'wdp-search'].includes(typing?.id)
+      ? { id: typing.id, start: typing.selectionStart, end: typing.selectionEnd } : null;
     const total = data.rows.length;
     const verified = data.rows.filter((r) => r.verdict === 'pass').length;
     /*
@@ -1628,11 +1628,21 @@
            own scrolling, so its composer can stay pinned to the foot. -->
       <div class="flex min-h-0 flex-1 overflow-hidden">
         <div class="wdp-track flex min-h-0 flex-[0_0_300%] transition-transform duration-300 ease-out">
-          <div class="wdp-pane flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col overflow-y-auto"
-               data-testid="${onThreads ? 'panel.threads-list' : listTab === 'rules' ? 'panel.rules-list' : 'panel.blueprints-list'}">${
-            onThreads ? threadsPane()
-            : listTab === 'blueprints' ? blueprintsPane()
-            : listPane()}</div>
+          <!-- The first seat is a column, not a scroller: the search box sits
+               ABOVE the scrolling part rather than inside it. Sticky was tried
+               and is the wrong tool here - the pane itself is what scrolls, so
+               a sticky child sticks to a viewport that is already moving with
+               it. Taking the box out of the scrolling wrapper is the whole
+               trick, and it costs nothing. One .wdp-pane in this seat either
+               way, so scroll restoration still lines up by index. -->
+          <div class="flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col overflow-hidden"
+               data-testid="${onThreads ? 'panel.threads-list' : listTab === 'rules' ? 'panel.rules-list' : 'panel.blueprints-list'}">
+            ${onThreads ? threadFilterBar() : listTab === 'rules' ? searchBox() : ''}
+            <div class="wdp-pane wdp-list flex min-h-0 flex-1 flex-col overflow-y-auto">${
+              onThreads ? threadsPane()
+              : listTab === 'blueprints' ? blueprintsPane()
+              : listPane()}</div>
+          </div>
           <!-- The second pane is whatever THIS tab opens: a rule from the rule
                list, a conversation from the thread list. A tab's detail belongs
                to that tab (panel.rules.one-pane-per-tab), so the thread list
@@ -1672,15 +1682,14 @@
     }
     host.querySelectorAll('.wdp-pane').forEach((p, i) => { p.scrollTop = wasAt[i] ?? 0; });
     if (caret) {
-      const note = host.querySelector('#wdp-note');
-      if (note) {
-        note.focus();
-        note.setSelectionRange(caret.start, caret.end);
+      const box = host.querySelector('#' + caret.id);
+      if (box) {
+        box.focus();
+        box.setSelectionRange(caret.start, caret.end);
       }
     }
-    host.querySelectorAll('[data-rule]').forEach((el) => {
-      el.onclick = () => open(el.dataset.rule);
-    });
+    wireRuleRows();
+    wireSearch();
     const back = host.querySelector('.wdp-back');
     if (back) back.onclick = () => { view = 'list'; render(); };
     host.querySelectorAll('[data-goto]').forEach((el) => {
@@ -2057,12 +2066,136 @@
     return { glyph: '○', cls: tint, why: mine ? 'built — awaiting your walkdown' : 'built — awaiting verification' };
   }
 
+  /*
+   * The search box over the rule list.
+   *
+   * It is drawn OUTSIDE the scrolling wrapper, as a sibling above it, which is
+   * the whole of the trick. `position: sticky` is the reflex here and it is
+   * the wrong tool: the pane itself is what scrolls, so a sticky child sticks
+   * to a scrollport that is moving with it, and the box either rides away or
+   * needs a second scroller underneath it to have something to stick to. A
+   * column with a fixed head and a growing body says the same thing with no
+   * stacking, no offsets, and nothing to go wrong when the list is short.
+   */
+  function searchBox() {
+    return `<div class="shrink-0 border-b border-base-300 px-3.5 py-2">
+      <input id="wdp-search" type="search" data-testid="panel.rules-search"
+        class="input input-xs w-full" spellcheck="false" autocomplete="off"
+        aria-label="Search rules" placeholder="Search rules…" value="${esc(ruleQuery)}">
+    </div>`;
+  }
+
+  /*
+   * Which rules a query leaves standing.
+   *
+   * Matching is over three fields, and the choice is deliberate: the group
+   * heading (the story id, which carries its feature as its first segment), the
+   * rule id, and the rule's statement. So "panel" reaches every rule in the
+   * panel feature because every story under it is named for it; "panel.rules"
+   * reaches that story alone; and words nobody put in an id - "scroll",
+   * "ghost" - still find the rule, because the statement is the part of a rule
+   * written for people to read.
+   *
+   * A heading matching takes its whole group with it. A rule matching brings
+   * only itself, but its heading is drawn anyway by the grouping below, because
+   * a filtered list that loses the hierarchy stops saying where anything lives.
+   */
+  const matchesQuery = (s, q) => String(s ?? '').toLowerCase().includes(q);
+  function matchingRows() {
+    const q = ruleQuery.trim().toLowerCase();
+    if (!q) return data.rows;
+    const groups = new Set(
+      data.rows.map((r) => r.story).filter((story) => matchesQuery(story, q))
+    );
+    return data.rows.filter((row) =>
+      groups.has(row.story) || matchesQuery(row.rule, q) || matchesQuery(row.statement, q));
+  }
+
+  /*
+   * The three marks a BUILT rule wears: checks, agent, human, in that order,
+   * always all three. A rule verified by one tier and a rule verified by all
+   * three both used to read as a single ✓, which hid the thing worth seeing -
+   * how much of the ledger is actually standing behind a green rule.
+   *
+   * Every built rule, not only the verified ones. A rule reaches 'verified'
+   * only when every tier it asks for holds a current pass, so on a verified
+   * rule these marks can be nothing but green or grey - the red, the open
+   * circle and the tilde were unreachable, and they are the ones that answer
+   * the question the row is here to answer: which tiers is this rule missing.
+   * A rule that is not built at all has no tiers to report and keeps its
+   * lifecycle shape.
+   *
+   * Same vocabulary as the detail pane's evidence rows, so the panel says one
+   * thing in one language: shape carries what happened, colour carries whether
+   * it is owed. Grey · is "this rule never asked for that tier". The two
+   * in-between states keep their own shapes rather than borrowing either end -
+   * ○ for a tier that is required and has never run, ~ for a pass whose
+   * statement has since moved - both in warning yellow when the rule is
+   * waiting on YOU, quiet otherwise. Colour carries ownership here exactly as
+   * it does for the single lifecycle glyph (panel.rules.lifecycle-legible),
+   * and the shape carries what happened either way, so a tier nobody has run
+   * is never read as one the rule never asked for.
+   */
+  const TIER_MARK = {
+    pass: ['✓', 'text-success', 'passed'],
+    fail: ['✗', 'text-error', 'failed'],
+    stale: ['~', 'text-warning', 'stale — it passed, then the statement moved'],
+    never: ['○', 'text-warning', 'required, but no run has touched it'],
+    skipped: ['–', 'opacity-40', 'skipped'],
+    blocked: ['⊘', 'text-warning', 'blocked'],
+    /*
+     * A tier the rule never asked for is a hollowed-out version of the same
+     * check, not a different glyph. Three marks of three different widths do
+     * not line up down a list of ninety rules, and a row you cannot scan in a
+     * column is not a row you can scan at all (n-0109).
+     */
+    na: ['✓', 'opacity-20', 'not applicable — this rule does not ask for it'],
+  };
+
+  /*
+   * The checks tier is per target, and the marks are per rule, so the targets
+   * have to come down to one state. Worst-news-first, the way the verdict
+   * itself aggregates: a rule that fails anywhere has not passed.
+   */
+  function checksTier(row) {
+    const states = (data?.targets ?? Object.keys(row.cells ?? {}))
+      .map((t) => row.cells?.[t]?.state)
+      .filter((state) => state && state !== 'na');
+    if (!states.length) return 'na';
+    for (const worse of ['fail', 'blocked', 'never', 'stale', 'skipped'])
+      if (states.includes(worse)) return worse;
+    return states.every((state) => state === 'pass') ? 'pass' : 'never';
+  }
+
+  /** Tier states that are work somebody still owes, rather than settled news. */
+  const TIER_OWED = new Set(['never', 'stale', 'blocked']);
+
+  function tierMarks(row, mine = false) {
+    const tiers = [
+      ['checks', checksTier(row)],
+      ['agent', row.agent?.state ?? 'na'],
+      ['human', row.human?.state ?? 'na'],
+    ];
+    return `<span class="flex w-8 shrink-0 items-center justify-center gap-px text-[10px] leading-none"
+      data-testid="panel.rule-tiers" data-tiers="${esc(tiers.map((t) => t.join(':')).join(' '))}"
+      >${tiers.map(([kind, state]) => {
+        const [glyph, cls, why] = TIER_MARK[state] ?? TIER_MARK.na;
+        return `<span class="inline-block w-3 text-center ${
+          TIER_OWED.has(state) && !mine ? 'opacity-60' : cls}"
+          title="${esc(kind)} — ${esc(why)}">${glyph}</span>`;
+      }).join('')}</span>`;
+  }
+
   function listPane() {
     if (!data.rows.length)
       return '<p class="p-3.5 text-[12.5px] opacity-40">No rules in this blueprint.</p>';
+    const rows = matchingRows();
+    if (!rows.length)
+      return `<p class="p-3.5 text-[12.5px] opacity-40" data-testid="panel.rules-empty">No rule matches ${
+        esc(ruleQuery.trim())}.</p>`;
     let html = '';
     let story = null;
-    for (const row of data.rows) {
+    for (const row of rows) {
       if (row.story !== story) {
         story = row.story;
         html += `<div class="px-3.5 pb-1 pt-2.5 ${LBL}">${esc(story)}</div>`;
@@ -2079,7 +2212,8 @@
       const thr = threadsFor(row.rule).length;
       html += `<button class="flex w-full cursor-pointer items-center gap-2 px-3.5 py-1.5 text-left text-[13px] hover:bg-base-200"
         data-rule="${esc(row.rule)}" title="${esc(row.rule)} — ${esc(state.why)}">
-        <span class="w-3.5 shrink-0 text-center ${state.cls}">${state.glyph}</span>
+        ${!picked && row.built ? tierMarks(row, mine)
+          : `<span class="w-8 shrink-0 text-center ${state.cls}">${state.glyph}</span>`}
         <span class="truncate">${esc(short)}</span>
         ${owes || thr ? `<span class="ml-auto shrink-0 text-[10.5px] font-semibold text-warning">${
           owes}${thr ? ` ${thr}⚑` : ''}</span>` : ''}
@@ -3077,31 +3211,44 @@
     ].filter(Boolean).join(' · ') || 'not attached to anything';
   }
 
-  function threadsPane() {
+  /*
+   * The three questions over the thread list, drawn OUTSIDE the scrolling
+   * wrapper as a sibling above it - the same shape as the rule list's search
+   * box, and for the same reason. `position: sticky` is the reflex and the
+   * wrong tool: the pane itself is what scrolls, so a sticky child sticks to a
+   * scrollport that is already moving with it. A column with a fixed head and
+   * a growing body needs no stacking, no offsets, and nothing to go wrong when
+   * the list is short (n-0103).
+   */
+  function threadFilterBar() {
     const counts = {
       active: threadsMatching('active').length,
       you: threadsMatching('you').length,
       all: (data?.threads ?? []).length,
     };
-    const list = [...threadsMatching(threadFilter)]
-      .sort((a, b) => threadTouched(b).localeCompare(threadTouched(a)));
     const pick = (id, label, hint) =>
       `<button class="btn btn-xs join-item gap-1 ${threadFilter === id ? 'btn-primary' : 'btn-outline btn-primary'}"
         data-tfilter="${id}" title="${esc(hint)}">${label}<span class="opacity-60">${counts[id]}</span></button>`;
+    return `<div class="flex shrink-0 justify-center border-b border-base-300 px-3.5 py-2">
+      <div class="join" data-testid="panel.thread-filter">
+        ${pick('active', 'Active', 'Questions and notes still in play')}
+        ${pick('you', 'Awaiting you', 'A fix claimed and unverified, or a question unanswered — the same queue walkdown status shows')}
+        ${pick('all', 'All', 'Every thread ever filed on this blueprint, ended ones included')}
+      </div>
+    </div>`;
+  }
+
+  function threadsPane() {
+    const list = [...threadsMatching(threadFilter)]
+      .sort((a, b) => threadTouched(b).localeCompare(threadTouched(a)));
     const EMPTY = {
       active: 'No live threads. Everything said here has been answered — <b>All</b> has them.',
       you: 'Nothing is waiting on you.',
       all: 'No threads yet. Drop a pin on the page, or leave a note on a rule, to start one.',
     };
-    return `
-      <div class="join m-2 shrink-0 self-center" data-testid="panel.thread-filter">
-        ${pick('active', 'Active', 'Questions and notes still in play')}
-        ${pick('you', 'Awaiting you', 'A fix claimed and unverified, or a question unanswered — the same queue walkdown status shows')}
-        ${pick('all', 'All', 'Every thread ever filed on this blueprint, ended ones included')}
-      </div>
-      ${list.length
-        ? list.map((t) => threadCard(t, threadWhere(t))).join('')
-        : `<p class="p-3.5 text-[12.5px] opacity-40">${EMPTY[threadFilter]}</p>`}`;
+    return list.length
+      ? list.map((t) => threadCard(t, threadWhere(t))).join('')
+      : `<p class="p-3.5 text-[12.5px] opacity-40">${EMPTY[threadFilter]}</p>`;
   }
 
   /**

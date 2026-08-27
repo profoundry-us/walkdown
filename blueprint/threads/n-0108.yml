@@ -15,10 +15,67 @@ anchor:
   viewport:
     name: desktop
     width: 1050
-status: open
+status: addressed
 body: We need a search box at the top of the rules that let's people search for
   a rule. It should be stuck to the top. If a search matches a feature, all
   rules in that feature should show. If a search matches just a rule, all other
   rules should be hidden. The feature a matching rule is in should always be
   shown so you can see the hierarchy as you search. This needs to be very fast,
   so client-side as you type.
+replies:
+  - author: agent
+    created: 2026-08-27T05:15:56Z
+    body: >-
+      Built. A search box now sits above the rules list, and the list filters as
+      you type.
+
+
+      What I built
+
+      - Anchor `panel.rules-search`, drawn OUTSIDE the scrolling wrapper rather
+      than sticky inside it. The first pane is now a column - fixed head,
+      growing body - so the box cannot ride away when the list scrolls. (sticky
+      would have had to stick to a scrollport that was itself moving.)
+
+      - Filtering is pure client-side over data already in the panel, on each
+      keystroke, and it repaints only the list element rather than re-rendering
+      the whole panel, so the caret is never disturbed and there is nothing to
+      wait for.
+
+      - Fields searched, my call: the group heading (the story id), the rule id,
+      and the rule's statement. Because a story id carries its feature as its
+      first segment, typing 'panel' matches every story under the panel feature
+      and so keeps every rule in it - your 'matching a feature shows all its
+      rules'. Typing 'panel.rules' narrows to that group. A query matching only
+      a rule's id or statement hides the others, and its group heading is still
+      drawn above it, so the hierarchy stays readable. Steps are deliberately
+      NOT searched: they are long and mention anchors, and matching them made
+      almost every query match almost everything.
+
+      - Escape clears the box (and does not fall through to pin mode). A query
+      matching nothing says so rather than showing an empty pane. Emptying the
+      box restores the full list.
+
+
+      Spec
+
+      - New rule panel.rules.search-the-list, origin thread:n-0108, with steps
+      and a written hash. Anchor panel.rules-search declared on screen review.
+
+
+      Verified
+
+      - New browser check '@rule:panel.rules.search-the-list' in
+      checks/panel.spec.js: it reads the ledger for the real rule/group
+      membership, asserts the box holds its position after the list is scrolled
+      to its end, that a group query keeps exactly that group, that a rule query
+      leaves one rule with its heading still drawn, the empty-result note, and
+      that clearing restores the full count. Confirmed it FAILS against the
+      build before this change and passes after.
+
+      - Full suite: node --test 93/93, WALKDOWN_RECORD=0 npm run checks:dev
+      28/28, walkdown lint 0 errors 0 warnings. Also driven by hand in the panel
+      at localhost:4705.
+
+
+      Nothing recorded to the ledger by me - a run of record is yours to take.

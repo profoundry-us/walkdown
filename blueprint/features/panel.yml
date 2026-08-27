@@ -552,13 +552,49 @@ stories:
           when:
             - Reading the glyphs in anchor `panel.rules-list`
           then:
-            - An unbuilt, unsigned rule shows the empty square; a built, unverified rule shows the empty circle - distinct shapes, not shades
+            - An unbuilt, unsigned rule shows the empty square; a built rule shows the three tier marks of anchor `panel.rule-tiers` in the glyph's place, where a tier nothing has run yet is the empty circle - distinct shapes, not shades
             - An approved rule shows the signing hand until build evidence lands; a refining rule shows the pencil
             - A rule waiting on the reviewer is warning-tinted and its badge names the work - sign or walk
             - Each row's tooltip spells the state out in words
             - The pencils render as text, never as colored emoji, so the color channel keeps speaking
           statement_hash: sha256:817b59a5a95a
 
+      - id: panel.rules.search-the-list
+        origin: thread:n-0108
+        statement: The rule list carries a search box fixed above it, and typing in it filters the list as you type - a query naming a group keeps every rule in that group, a query naming one rule keeps that rule alone, and the group heading a surviving rule sits under is always drawn, so the hierarchy stays readable while the list is filtered.
+        verify: [checks, agent, human]
+        screens: [review]
+        steps:
+          given:
+            - The Rules tab open on a blueprint with several groups of rules
+          when:
+            - Type into anchor `panel.rules-search` on screen `review`
+          then:
+            - The box stays put at the top of anchor `panel.rules-list` however far the list is scrolled - it is not part of what scrolls
+            - Filtering happens on each keystroke, in the browser, with nothing fetched
+            - A query matching a group's name leaves every rule in that group standing
+            - A query matching only a rule's own id or statement hides the other rules
+            - Every rule still listed is drawn under its own group heading
+            - Emptying the box brings the whole list back
+          statement_hash: sha256:87d61dee919f
+      - id: panel.rules.tiers-at-a-glance
+        origin: thread:n-0109
+        statement: A built rule shows one mark per evidence tier - checks, agent, human, in that order and always all three - so which tiers a rule rests on, and which it is still missing, can be read off the list rather than opened one rule at a time.
+        verify: [checks, agent, human]
+        screens: [review]
+        steps:
+          given:
+            - The Rules tab open on a blueprint holding built rules in several states - some verified, some with a tier that failed, never ran, or has gone stale
+          when:
+            - Reading anchor `panel.rule-tiers` on a built rule in anchor `panel.rules-list`
+          then:
+            - Three marks are drawn, always, in the order checks, agent, human
+            - A tier that passed is a green check, and one that failed is a red cross
+            - A tier the rule asks for that no run has touched, and a pass whose statement has since moved, each keep a shape of their own - so a missing tier is legible as missing rather than as absent
+            - A tier the rule does not ask for is greyed out
+            - Each mark says in words which tier it is and what state it is in
+            - A rule that is not built keeps the single lifecycle shape it had
+          statement_hash: sha256:3e8240139040
       - id: panel.rules.headless-says-so
         origin: thread:n-0061
         statement: Opening a rule that has no screen clears the surface under review - an unmistakable cover in walkdown's own voice takes the sheet's place - because a lingering page reads as the rule's screen, and the reviewer cannot tell a right screen from a rule that has none.
