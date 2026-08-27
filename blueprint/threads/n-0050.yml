@@ -6,7 +6,7 @@ anchor:
   rule: panel.walkdown.records-to-ledger
   screen: rule-detail
   element: detail.feedback
-status: addressed
+status: verified
 body: I need to provide feedback when failing a rule - and when passing one too.
   Make it a form (above the verdict buttons, so it reads as write-first) that
   files a new note thread on the rule if any text is provided, linked into the

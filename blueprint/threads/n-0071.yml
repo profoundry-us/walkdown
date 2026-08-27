@@ -6,7 +6,7 @@ anchor:
   rule: panel.rules.takes-you-there
   screen: review
   element: panel.app-frame
-status: addressed
+status: open
 body: "When the app viewer changes its URL, the frame needs to show that it is
   doing something - some kind of loading indicator. Right now the old screen
   stays on display until the new one has finished loading, so a slow app looks
@@ -17,8 +17,8 @@ body: "When the app viewer changes its URL, the frame needs to show that it is
 replies:
   - author: agent
     created: 2026-08-25T23:40:00Z
-    body: "Built. When the frame is sent somewhere it now carries a veil naming
-      the screen it is fetching - 'Loading Rule detail…' - over a dimmed copy of
+    body: "Built. When the frame is sent somewhere it now carries a veil naming the
+      screen it is fetching - 'Loading Rule detail…' - over a dimmed copy of
       whatever was there, so a slow page reads as one still on its way rather
       than as a walkdown that went somewhere wrong. Held back 180ms, because a
       veil that flashes on every quick load is its own kind of noise, and
@@ -39,22 +39,24 @@ replies:
       and never draws in the docked delivery at all. The cause is next door to
       it: render() photographed each pane's scroll position at the top and put
       it back at the bottom, and with a ghost up renders arrive in bursts as the
-      copy loads, its reach repaints and pin mode mirrors. A wheel scroll landing
-      between the photograph and the restore was overwritten by the older value,
-      which reads exactly as a list that refuses to scroll - and only just after
-      a crossing, which is when those bursts happen. Panes now record where they
-      are as they are scrolled, and a repaint restores the place the reader is
-      actually at. I could not confirm the fix end to end: a CDP wheel does not
-      drive this shadow-root scroller in the harness, with or without a ghost, so
-      the control test is inconclusive rather than green. The race is real and
-      the reasoning holds; it wants his eyes on the actual gesture."
+      copy loads, its reach repaints and pin mode mirrors. A wheel scroll
+      landing between the photograph and the restore was overwritten by the
+      older value, which reads exactly as a list that refuses to scroll - and
+      only just after a crossing, which is when those bursts happen. Panes now
+      record where they are as they are scrolled, and a repaint restores the
+      place the reader is actually at. I could not confirm the fix end to end: a
+      CDP wheel does not drive this shadow-root scroller in the harness, with or
+      without a ghost, so the control test is inconclusive rather than green.
+      The race is real and the reasoning holds; it wants his eyes on the actual
+      gesture."
   - author: agent
     created: 2026-08-26T05:10:00Z
-    body: "Correction: the diagnosis above is wrong and the change it justified
-      has been reverted. Topher asked how the ghost was blocking a scroll, which
-      it never was - it is pointer-events none and inset clear of the sidebar -
-      and pressing on that exposed the rest. I claimed renders arrive in bursts
-      when a ghost comes up; measured, a swap produces ONE pane replacement. And
+    body: >-
+      Correction: the diagnosis above is wrong and the change it justified has
+      been reverted. Topher asked how the ghost was blocking a scroll, which it
+      never was - it is pointer-events none and inset clear of the sidebar - and
+      pressing on that exposed the rest. I claimed renders arrive in bursts when
+      a ghost comes up; measured, a swap produces ONE pane replacement. And
       render() is synchronous between photographing each pane's scroll position
       and putting it back - no await, no timeout, no rAF - so on a single thread
       a wheel event cannot land in between. There was no race. Worse, the record
@@ -70,5 +72,9 @@ replies:
       drive this shadow-root scroller with the ghost up OR down, so every result
       I got was the harness failing, not the panel. It needs the real gesture,
       and ideally which delivery he was in - the extension over his work app
-      behaves differently from either fixture here."
-
+      behaves differently from either fixture here.
+  - author: Topher Fangio
+    created: 2026-08-27T15:07:26Z
+    body: I still have never seen this actually working; let's put together a test
+      in the walkdown-example that forces this to appear, and I need some way to
+      see what it would look like. Do we have any screens that show this?

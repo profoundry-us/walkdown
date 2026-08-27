@@ -16,7 +16,7 @@ anchor:
   viewport:
     name: desktop
     width: 1050
-status: addressed
+status: verified
 body: Let's add some daisy tooltips when you hover these numbers so we can see
   how it is calculating those or working; just seeing the numbers doesn't give a
   new user enough context about what work is left to do.

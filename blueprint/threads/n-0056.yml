@@ -9,7 +9,7 @@ anchor:
   viewport:
     name: desktop
     width: 1019
-status: addressed
+status: verified
 body: I don't like having the actor inside this space. Let's move it into the
   Settings panel that currently shows the background desk settings.
 replies:

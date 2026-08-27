@@ -6,7 +6,7 @@ anchor:
   rule: panel.rules.steps-not-an-appendix
   screen: rule-detail
   element: detail.technical-disclosure
-status: addressed
+status: verified
 body: "Agent walkdown: the given/when/then steps are expanded in the detail pane
   as the rule asks, but the second half is unbuilt - nothing renders the
   recorded check source behind a collapsed disclosure. The probe found no source

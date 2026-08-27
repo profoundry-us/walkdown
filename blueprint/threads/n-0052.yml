@@ -6,7 +6,7 @@ anchor:
   rule: panel.walkdown.records-to-ledger
   screen: rule-detail
   element: detail.verdict
-status: addressed
+status: verified
 body: "Rules that are not built yet should not be judged Pass/Fail - that
   poisons the ledger. Show Approve / Refine instead (spec sign-off): Approve
   records that the rule should be built as written; Refine requires the feedback

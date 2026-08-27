@@ -6,7 +6,7 @@ anchor:
   rule: panel.dock.toolbar
   screen: review
   element: panel.blueprint
-status: addressed
+status: verified
 body: "Agent walkdown 2026-08-27: the bar has no way to change the project.
   `panel.blueprint` is rendered as a plain, non-interactive <span> carrying
   `data.project` (lib/viewer/panel.js ~1874); changing the project is only

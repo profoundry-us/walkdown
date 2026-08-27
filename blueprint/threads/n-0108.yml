@@ -15,7 +15,7 @@ anchor:
   viewport:
     name: desktop
     width: 1050
-status: addressed
+status: verified
 body: We need a search box at the top of the rules that let's people search for
   a rule. It should be stuck to the top. If a search matches a feature, all
   rules in that feature should show. If a search matches just a rule, all other

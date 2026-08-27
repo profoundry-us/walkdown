@@ -15,7 +15,7 @@ anchor:
   viewport:
     name: mobile
     width: 510
-status: addressed
+status: verified
 body: This should only appear on the Rules tab; it's currently showing on all
   tabs which is wrong.
 replies:

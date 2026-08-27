@@ -6,7 +6,7 @@ anchor:
   rule: panel.walkdown.pass-advances
   screen: rule-detail
   element: detail.verdict
-status: addressed
+status: verified
 body: A fail with no why is work nobody can act on. Failing should be refused
   until the reviewer has written a note or pinned the problem on the page;
   failing also flips pin mode on.

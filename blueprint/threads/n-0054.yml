@@ -6,7 +6,7 @@ anchor:
   rule: panel.rules.counts-legible
   screen: review
   element: panel.rules-list
-status: addressed
+status: verified
 body: "In the list I cannot tell a rule that is designed-but-not-approved from
   one that is built-but-not-passed. Build the lifecycle glyphs as mocked up in
   review.html: shape carries the lifecycle (designed, approved-awaiting-build,

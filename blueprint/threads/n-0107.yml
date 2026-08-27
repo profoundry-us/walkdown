@@ -15,7 +15,7 @@ anchor:
   viewport:
     name: desktop
     width: 1050
-status: addressed
+status: open
 body: With the prototype open, I can't use the screen selector. It is visible,
   but clicking it does nothing.
 replies:
@@ -40,3 +40,7 @@ replies:
       fixed one (WALKDOWN_RECORD=0 npm run checks:dev, 23 passed). Also
       eyeballed: the tuner and the picker now both draw over the ghosted
       surface, and the ghost still covers the app frame."
+  - author: Topher Fangio
+    created: 2026-08-27T15:05:52Z
+    body: Screen selector is mostly working; but if I put it back to "Detect" mode
+      and change a rule to a new screen, the dropdown doesn't update.

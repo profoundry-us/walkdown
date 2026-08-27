@@ -16,7 +16,7 @@ anchor:
   viewport:
     name: mobile
     width: 510
-status: addressed
+status: verified
 body: The tabs need a bit more x padding to make them wider. They feel a bit too
   squished right now and just increaing this should help.
 replies:

@@ -6,7 +6,7 @@ anchor:
   rule: panel.dock.own-skin
   screen: settings
   element: settings.hide
-status: addressed
+status: verified
 body: The Hide-app-temporarily checkbox does not affect the new headless cover -
   with a headless rule open, the peek dims the frame underneath and the aside
   but the opaque cover stays, so the desk ruling still cannot be seen.

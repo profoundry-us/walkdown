@@ -15,7 +15,7 @@ anchor:
   viewport:
     name: desktop
     width: 1050
-status: addressed
+status: verified
 body: "If a rule would currently show a checkmark (as opposed to one of the
   other shapes denoting a status) I want it to show a list of 3 check marks: one
   for checks, agent, and human. It should always show 3 checkmarks and grey out

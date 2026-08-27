@@ -25,3 +25,10 @@ body: >-
   small ghost button with the frame-corners glyph and a caret; the Threads tab
   carries a chats glyph and a count badge when conversations are waiting on a
   person.
+replies:
+  - author: Topher Fangio
+    created: 2026-08-27T15:11:19Z
+    body: For this; don't update the prototype; let's duplicate the prototype and
+      use it as the application and update our fake application so we can see
+      how the prototype differs from the "real" app (which is actually fake but
+      based on the prototype).

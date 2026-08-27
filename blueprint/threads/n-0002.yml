@@ -8,7 +8,7 @@ anchor:
   position:
     x: 211
     y: 27
-status: addressed
+status: verified
 body: The "8 verified * 7 pending ..." doesn't make sense. The numbers don't
   seem to match the app.
 replies:

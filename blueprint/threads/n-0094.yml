@@ -6,7 +6,7 @@ anchor:
   rule: panel.rules.one-pane-per-tab
   screen: review
   element: panel.tabs
-status: addressed
+status: verified
 body: >-
   Threads want a view of their own. Right now a conversation is only reachable
   through the rule it is anchored to, and once it ends it is not reachable at

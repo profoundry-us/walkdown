@@ -6,7 +6,7 @@ anchor:
   rule: panel.rules.takes-you-there
   screen: rule-detail
   element: detail.statement
-status: addressed
+status: verified
 body: For rules that have no UI screen, the panel should say so instead of
   silently staying on the existing screen - otherwise the reviewer cannot tell
   whether they are on the correct screen or on one that has none.

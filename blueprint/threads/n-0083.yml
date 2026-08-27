@@ -4,7 +4,7 @@ author: Topher Fangio
 created: 2026-08-26T03:34:49Z
 anchor:
   rule: panel.rules.one-pane-per-tab
-status: addressed
+status: verified
 body: This is working fine but this part of the rule is probably unnecessary or
   needs to be reworded ", not the rule you left open on another one"
 replies:

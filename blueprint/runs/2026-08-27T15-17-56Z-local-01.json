@@ -1,0 +1,55 @@
+{
+  "run_id": "2026-08-27T15-17-56Z-local-01",
+  "created": "2026-08-27T15:17:56Z",
+  "actor": "Topher Fangio",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "498d63e-dirty",
+  "blueprint_sha": "498d63e-dirty",
+  "results": [
+    {
+      "rule": "panel.desk.reads-as-paper",
+      "status": "pass",
+      "statement_hash": "sha256:60871d489f4d",
+      "threads": [
+        "n-0113"
+      ]
+    },
+    {
+      "rule": "panel.dock.own-skin",
+      "status": "pass",
+      "statement_hash": "sha256:93bfd901cfcd"
+    },
+    {
+      "rule": "panel.desk.tuner",
+      "status": "pass",
+      "statement_hash": "sha256:09636342aada"
+    },
+    {
+      "rule": "panel.desk.peek",
+      "status": "pass",
+      "statement_hash": "sha256:9b19ad4a2f80"
+    },
+    {
+      "rule": "panel.rules.one-pane-per-tab",
+      "status": "pass",
+      "statement_hash": "sha256:7cbb341f16bd"
+    },
+    {
+      "rule": "panel.rules.search-the-list",
+      "status": "pass",
+      "statement_hash": "sha256:87d61dee919f"
+    },
+    {
+      "rule": "panel.rules.tiers-at-a-glance",
+      "status": "pass",
+      "statement_hash": "sha256:3e8240139040"
+    },
+    {
+      "rule": "panel.walkdown.one-control-owns-the-sitting",
+      "status": "pass",
+      "statement_hash": "sha256:c74a54acc395"
+    }
+  ]
+}

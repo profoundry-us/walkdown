@@ -6,7 +6,7 @@ anchor:
   rule: panel.desk.tuner
   screen: settings
   element: settings.panel
-status: addressed
+status: verified
 body: 'Agent walkdown 2026-08-27: the tuner does not close on a click inside the
   application under review, which is most of "anywhere outside it". Measured on
   the real panel: a click on the sidebar closes it, a click on the bare desk

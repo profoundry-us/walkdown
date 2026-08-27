@@ -419,11 +419,17 @@ test(
     await endSession(page);
     const { rows, threads } = await payload(page);
     // A rule carrying more than one addressed thread — the pile the sweep is for.
+    // It also has to be a rule the list still DRAWS: a retired rule keeps its id
+    // so the threads anchored to it stay valid, and can therefore collect a pile
+    // like any other, but it has left the report and has no row to open. Which
+    // rule qualifies depends on the day's thread statuses, so this picked a
+    // retired one the first time a walkdown left one holding two.
+    const listed = new Set((rows ?? []).map((r) => r.rule));
     const counts = {};
     for (const t of threads ?? [])
       if (t.status === 'addressed' && t.anchor?.rule) counts[t.anchor.rule] = (counts[t.anchor.rule] ?? 0) + 1;
-    const rule = Object.keys(counts).find((r) => counts[r] > 1);
-    expect(rule, 'need a rule with several addressed threads').toBeTruthy();
+    const rule = Object.keys(counts).find((r) => counts[r] > 1 && listed.has(r));
+    expect(rule, 'need a listed rule with several addressed threads').toBeTruthy();
     const before = counts[rule];
 
     await openRule(page, rule);
