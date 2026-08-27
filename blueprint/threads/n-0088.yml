@@ -4,5 +4,24 @@ author: Topher Fangio
 created: 2026-08-26T15:04:26Z
 anchor:
   rule: panel.desk.reads-as-paper
-status: open
+status: addressed
 body: I believe this is done; nothing even to build.
+replies:
+  - author: agent
+    created: 2026-08-27T06:17:53Z
+    body: "Confirmed against the built panel, and I agree — nothing to build.
+      Recorded an agent pass on panel.desk.reads-as-paper in run
+      2026-08-27T06-16-01Z-local-01. What I saw: `panel.desk` is a dedicated
+      layer at z-index -1 under the page sheet, ruled by two
+      repeating-linear-gradients at 0 and 90 degrees whose ink is
+      color-mix(base-content 10%, transparent) — faint, not a grid of hard
+      lines. It lies at an angle and the perspective is real rather than a flat
+      skew: the inline transform is perspective(600px) rotateX(35deg)
+      rotate(35deg) and the computed value is a matrix3d, so the ruling
+      converges toward a horizon. The flat fallback is reached only when
+      CSS.supports('transform','perspective(1px) rotateX(1deg)') is false, which
+      is exactly what the rule allows. Evidence:
+      runs/evidence/2026-08-27T05-52-04Z/desk-reads-as-paper.png,
+      desk-margins-mobile.png, desk-peek-on.png — the last one is the clearest,
+      since peek dims what sits on the desk and the convergence reads across the
+      whole surface."

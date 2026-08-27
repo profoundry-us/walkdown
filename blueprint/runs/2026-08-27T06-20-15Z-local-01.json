@@ -1,0 +1,34 @@
+{
+  "run_id": "2026-08-27T06-20-15Z-local-01",
+  "created": "2026-08-27T06:20:15Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "1e532ca-dirty",
+  "blueprint_sha": "1e532ca-dirty",
+  "results": [
+    {
+      "rule": "panel.rules.search-the-list",
+      "status": "pass",
+      "statement_hash": "sha256:87d61dee919f",
+      "evidence": [
+        "runs/evidence/2026-08-27T05-52-04Z/search-box-fixed.png",
+        "runs/evidence/2026-08-27T05-52-04Z/search-group-query.png",
+        "runs/evidence/2026-08-27T05-52-04Z/search-single-query.png",
+        "runs/evidence/2026-08-27T05-52-04Z/search-emptied.png"
+      ],
+      "reasoning": "Picked up as well, because its agent tier read never once the checks tier was filled. `panel.rules-search` sits outside the list's scroller entirely - its top stayed at 141px with the list scrolled to 1800px, so it is a fixed head rather than the first thing to scroll away. Filtering happens on each keystroke and nothing is fetched: wrapping window.fetch across a full typed query counted zero calls, and the list redrew inside 400ms. A query naming a group, `panel.desk`, left all three of that group's rules standing under the PANEL.DESK heading. A query naming one rule, `tiers-at-a-glance`, left that rule alone - still drawn under its own PANEL.RULES heading. Statements are searched too, not just ids: `drafting paper` and `spreadsheet` each found panel.desk.reads-as-paper, whose statement is where those words live. Emptying the box brought all 86 rules and all eight group headings back."
+    },
+    {
+      "rule": "panel.rules.tiers-at-a-glance",
+      "status": "pass",
+      "statement_hash": "sha256:3e8240139040",
+      "evidence": [
+        "runs/evidence/2026-08-27T05-52-04Z/tiers-at-a-glance.png",
+        "runs/evidence/2026-08-27T05-52-04Z/counts-reconcile.png"
+      ],
+      "reasoning": "Also picked up for the same reason. Every built rule draws exactly three marks in `panel.rule-tiers`, always all three and always checks then agent then human. Sweeping the whole list turned up five distinct shapes, each carrying its tier and its state in words on the mark itself: green check \"checks — passed\" / \"agent — passed\" / \"human — passed\"; red cross \"agent — failed\" / \"human — failed\"; a warning circle \"required, but no run has touched it\"; a warning tilde \"stale — it passed, then the statement moved\"; and a greyed dot \"not applicable — this rule does not ask for it\". A missing tier is therefore legible as missing rather than as absent, and a tier the rule does not ask for is visibly out of play. Rules that are not built keep their single lifecycle glyph instead - panel.delivery.absent-until-asked drew ✎︎ \"refining — sent back for spec rework\", panel.delivery.one-switch and panel.threads.show-the-sketch drew ✍︎ \"approved — spec signed off, awaiting build\" - and no tier row at all."
+    }
+  ]
+}

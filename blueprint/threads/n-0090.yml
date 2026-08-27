@@ -4,5 +4,22 @@ author: Topher Fangio
 created: 2026-08-26T15:05:28Z
 anchor:
   rule: panel.desk.peek
-status: open
+status: addressed
 body: perfect as is
+replies:
+  - author: agent
+    created: 2026-08-27T06:18:00Z
+    body: "Confirmed against the built panel, and I agree. Recorded an agent pass on
+      panel.desk.peek in run 2026-08-27T06-16-01Z-local-01. Every step held:
+      ticking the box dimmed the app frame and the aside together to opacity 0.1
+      rather than hiding them, so the ruling is judged against the things that
+      sit on top of it — the converging grid reads across the whole desk through
+      them. The headless cover goes with them (hideApp() dims app, side and
+      headlessCover as one set). The bar stayed at opacity 1 the whole time with
+      its buttons and the gear still working, and so did the tuner. Moving a
+      dial with the peek on left the frame at 0.1 — the re-assert after each
+      repaint holds. Closing the tuner with Escape put everything back to full
+      strength, and reopening it the box was unticked again: a way of looking,
+      not a preference. Evidence:
+      runs/evidence/2026-08-27T05-52-04Z/desk-peek-before.png, desk-peek-on.png,
+      desk-peek-after-dial.png."

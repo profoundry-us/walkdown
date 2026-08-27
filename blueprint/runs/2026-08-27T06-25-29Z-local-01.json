@@ -1,0 +1,46 @@
+{
+  "run_id": "2026-08-27T06-25-29Z-local-01",
+  "created": "2026-08-27T06:25:29Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "1e532ca-dirty",
+  "blueprint_sha": "1e532ca-dirty",
+  "results": [
+    {
+      "rule": "panel.dock.toolbar",
+      "status": "pass",
+      "statement_hash": "sha256:aaf28fbb5e0a",
+      "evidence": [
+        "runs/evidence/2026-08-27T06-25-29Z/toolbar-bar.png",
+        "runs/evidence/2026-08-27T06-25-29Z/blueprints-tab.png",
+        "runs/evidence/2026-08-27T06-25-29Z/screens-list-open.png",
+        "runs/evidence/2026-08-27T06-25-29Z/screens-list-closed-by-app-click.png"
+      ],
+      "reasoning": "Re-judged against the reworded statement. The step that failed on 2026-08-27T06-16-01Z asked the bar to change the project; n-0017 shows that control was deliberately removed for the first-run interstitial and the Blueprints tab, so the statement had outlived its build and was reworded rather than the selector rebuilt (n-0110). As it now reads, all five steps hold. `panel.blueprint` is a plain <span> reading \"walkdown\" beside the logo - it names the project this session is against and is not a control (tagName SPAN, no button/select ancestor or descendant); the Blueprints tab carries the actual choice: the server address with a Connect button, the served root, and a radio list of the two blueprints the server found, each with its name and description. `panel.screen-picker` is labelled \"The review page\" without being opened and opens `panel.screens-list`; a hand-picked screen is marked btn-outline btn-primary; Prototype and App swap the page area with the fade between them; Pin mode toggles from the bar (btn-warning while on, and a click on the page opens the pin form).",
+      "threads": [
+        "n-0110"
+      ]
+    },
+    {
+      "rule": "panel.desk.tuner",
+      "status": "pass",
+      "statement_hash": "sha256:09636342aada",
+      "evidence": [
+        "runs/evidence/2026-08-27T06-25-29Z/tuner-open.png",
+        "runs/evidence/2026-08-27T06-25-29Z/tuner-closed-by-app-click.png",
+        "runs/evidence/2026-08-27T06-25-29Z/screens-list-closed-by-app-click.png",
+        "runs/evidence/2026-08-27T06-25-29Z/desk-after-dial.png",
+        "runs/evidence/2026-08-27T06-25-29Z/desk-typed.png",
+        "runs/evidence/2026-08-27T06-25-29Z/desk-persisted.png",
+        "runs/evidence/2026-08-27T06-25-29Z/pin-mode-form.png"
+      ],
+      "reasoning": "All six steps hold now. The step that failed on 2026-08-27T06-16-01Z - 'closes on a click anywhere outside it' - was structural: the outside-click handler is a capturing pointerdown on the panel's document, and a pointerdown inside the frame never reaches it, so the application under review, which is most of 'outside', could not dismiss the tuner (n-0111). The embed now posts `walkdown:page-click` to the parent on a capturing, passive pointerdown, and the panel routes it through the same dismissal its own pointerdown uses. Measured on the real panel at 1400x900: gear opens the tuner, a click at (502,466) inside the app frame closes it; the screen picker, which had the identical hole, closes the same way through that one path; a click on the panel's own chrome and Escape both still close it. Escape ordering is intact - with the picker open and pin mode on, the first Escape closed the picker and the second left pin mode. Pin mode is untouched by the relay: pinning stays on across a page click and the pin form still opens (pin.form present). The other five steps re-checked clean: moving Tilt repainted the desk live and stored {tilt:10,...}; clicking a dial's value produced a real number input, and typing 28 + Enter committed; a reload came back at tilt 28 from localStorage `walkdown:desk`; and nothing reached the ledger - the blueprint payload held 86 rows before and after and blueprint/runs was unchanged. The tuner sits one GAP clear of the app frame's corner on both axes (tuner 24,56 against frame 12,44 - dx=12, dy=12).",
+      "threads": [
+        "n-0111",
+        "n-0089"
+      ]
+    }
+  ]
+}
