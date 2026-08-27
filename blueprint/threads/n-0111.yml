@@ -1,0 +1,71 @@
+id: n-0111
+kind: note
+author: agent
+created: 2026-08-27T06:15:44Z
+anchor:
+  rule: panel.desk.tuner
+  screen: settings
+  element: settings.panel
+status: addressed
+body: 'Agent walkdown 2026-08-27: the tuner does not close on a click inside the
+  application under review, which is most of "anywhere outside it". Measured on
+  the real panel: a click on the sidebar closes it, a click on the bare desk
+  margin closes it, Escape closes it, the gear toggles it — but a click at
+  (700,500), inside the framed app, leaves it open. The cause is structural
+  rather than a missed case: the outside-click handler is a capturing
+  `pointerdown` on the panel document (lib/viewer/panel.js ~486), and a
+  pointerdown inside a frame never reaches the parent document. The channel to
+  fix it already exists — the embed posts `walkdown:pin-mode` to the parent on
+  Escape (lib/viewer/embed.js:547) — so the embed could post a
+  `walkdown:page-click` the panel treats as an outside click. Every other step
+  of this rule holds: the desk changes live under a dial, a dial number can be
+  typed by clicking its value (it becomes a real number input, Enter commits,
+  the desk follows), the choice persists across a reload via localStorage
+  `walkdown:desk`, nothing about it touches the ledger, and the tuner sits one
+  GAP clear of the app frame corner on both axes (measured dx=12, dy=12).
+  Evidence: runs/evidence/2026-08-27T05-52-04Z/desk-tuner-open.png,
+  desk-tuner-dial-moved.png, desk-tuner-typed.png, desk-tuner-persisted.png.'
+replies:
+  - author: agent
+    created: 2026-08-27T06:30:00Z
+    body: >-
+      Fixed. The outside-click handler was a capturing pointerdown on the
+      panel's own document, and a pointerdown inside the frame never reaches the
+      parent — so the application under review, which is most of 'anywhere
+      outside it', could not dismiss the tuner.
+
+
+      The embed now says so out loud. Framed, it adds a capturing, passive
+      pointerdown on its own document that posts { type: 'walkdown:page-click' }
+      to the parent, the same channel it already uses to report leaving pin mode
+      (lib/viewer/embed.js, beside the Escape handler). Passive and never
+      cancelled: it only tells, it does not take the gesture from the
+      application.
+
+
+      The panel treats that as an outside click, and — per your note that the
+      screen picker has the identical hole — both popovers now dismiss through
+      ONE function rather than two listeners. lib/viewer/panel.js has a single
+      dismissPopovers(path) that closes the screen picker and the desk tuner,
+      each excluding its own button since that button's onclick already toggles
+      it; one capturing pointerdown feeds it the composedPath, and the
+      walkdown:page-click message calls it with no path at all — nothing in the
+      panel document is on that path, which is exactly right for a click in the
+      app.
+
+
+      Escape ordering is untouched: the keydown handler still does shots, then
+      picker, then tuner, then pin mode. Measured at 1400x900 on the real panel:
+      gear open, click at (502,466) inside the app frame — tuner gone; screen
+      picker open, same click — picker gone; clicks on the panel's own chrome
+      and Escape both still close it; with the picker open and pin mode on, the
+      first Escape closed the picker and the second left pin mode. Pin mode is
+      not disturbed by the relay — pinning stays on across a page click and the
+      pin form still opens.
+
+
+      Re-judged in run 2026-08-27T06-25-29Z-local-01: agent PASS, all six steps,
+      with the other five re-checked clean (live repaint, typed dial value,
+      localStorage persistence, ledger untouched at 86 rows before and after,
+      dx=12/dy=12 clear of the frame corner). Evidence under
+      runs/evidence/2026-08-27T06-25-29Z/.

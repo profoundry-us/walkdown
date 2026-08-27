@@ -4,6 +4,29 @@ author: Topher Fangio
 created: 2026-08-26T03:10:49Z
 anchor:
   rule: panel.dock.chrome-not-a-pin-target
-status: open
+status: addressed
 body: The placement of the pins works, but I can't hit escape to get out of pin
   mode anymore.
+replies:
+  - author: agent
+    created: 2026-08-27T04:30:33Z
+    body: "Fixed in lib/viewer/panel.js. Root cause: Escape belonged to the embed,
+      which owned pin mode while it shared the application's document. Framed,
+      the embed lives inside the frame and only hears Escape when the frame has
+      focus — and after arming pin mode from the bar, focus is on walkdown's own
+      document, where nothing answered for that key. The panel had Escape
+      handlers for the screens popover and the desk tuner and none for the mode
+      it now owns. Those three are now one handler doing the most local thing
+      first: the screen picker, then the desk tuner, then pin mode. One handler
+      rather than three side by side, because three would all fire on the same
+      keystroke and close everything at once; a dial being edited still cancels
+      itself first by stopping the event, and Escape typed inside the frame is
+      still the embed's (it closes an open pin form first and tells the panel
+      when it leaves the mode). Verified with a new browser check tagged
+      @rule:panel.dock.chrome-not-a-pin-target in checks/panel.spec.js ('Escape
+      leaves pin mode, after whatever is more local than pin mode'): arm pin
+      mode, confirm the framed surface is armed too, open the screen picker and
+      press Escape — the picker closes and pin mode stays lit — then press it
+      again and both the bar's button and the page's crosshair drop. The check
+      fails on the unfixed panel. node --test 93 pass, WALKDOWN_RECORD=0 npm run
+      checks:dev 23 pass, walkdown lint 0 errors."

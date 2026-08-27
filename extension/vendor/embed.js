@@ -537,6 +537,24 @@
     true
   );
 
+  /*
+   * A pointer going down on the page, reported outward.
+   *
+   * The panel's popovers — the screen picker and the desk tuner — close on a
+   * click anywhere outside them, and the panel listens for that with a
+   * capturing pointerdown on its own document. Framed, this page is a document
+   * of its own: a pointerdown here never reaches the parent, so a click in the
+   * application under review left them open, which is most of "anywhere
+   * outside" (n-0111). So the frame says so out loud, the same way it already
+   * reports leaving pin mode. Passive and never cancelled — this only tells,
+   * it does not take the gesture from the application.
+   */
+  if (framed) document.addEventListener(
+    'pointerdown',
+    () => window.parent.postMessage({ type: 'walkdown:page-click' }, '*'),
+    { capture: true, passive: true }
+  );
+
   // Escape is the way out of any mode: it closes the open form first, then
   // leaves pin mode. Without it the only exit was the bar's control, which
   // itself was swallowing.

@@ -623,3 +623,55 @@ test(
   }
 );
 
+test(
+  'Escape leaves pin mode, after whatever is more local than pin mode',
+  { tag: '@rule:panel.dock.chrome-not-a-pin-target' },
+  async ({ page }) => {
+    await review(page);
+    const pin = page.getByTestId('panel.pin-mode');
+    await pin.click();
+    await expect(pin).toHaveClass(/btn-warning/);
+    // The framed surface is armed too — one pin mode, and this is what it means
+    // on the page being pinned.
+    const framed = page.frameLocator('iframe[title="the application under review"]');
+    await expect(framed.locator('html')).toHaveClass(/wd-pinning/);
+
+    /*
+     * Escape does the most local thing first. With the screen picker open it
+     * closes the picker and leaves pin mode alone: a key that closed both would
+     * make the picker's own dismissal cost the mode you were working in.
+     */
+    await page.getByTestId('panel.screen-picker').click();
+    await expect(page.getByTestId('panel.screens-list')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.getByTestId('panel.screens-list')).toBeHidden();
+    await expect(pin).toHaveClass(/btn-warning/);
+
+    // With nothing more local open, the same key ends pin mode — the panel owns
+    // the flag now, so it has to answer for Escape typed at its own chrome.
+    await page.keyboard.press('Escape');
+    await expect(pin).not.toHaveClass(/btn-warning/);
+    await expect(framed.locator('html')).not.toHaveClass(/wd-pinning/);
+  }
+);
+
+/*
+ * walkdown's own blueprint, and one of its rules open in the detail pane.
+ *
+ * The fixture defaults to the example project, which is the right default for
+ * rules about reviewing somebody else's app - but these three are about the
+ * panel itself, so they are read against walkdown's own storyboard. `frame`
+ * puts a chosen surface under the panel; without it the fixture's own does.
+ */
+async function ownRule(page, name, frame = null) {
+  await page.goto(fixtureFor({ bp: 'blueprint', ...(frame ? { frame } : {}) }));
+  await expect(page.getByTestId('panel.bar')).toBeVisible();
+  // The framed surface announces itself when it lands, and the panel repaints
+  // on hearing it - so a pane opened before then is one that will be rebuilt
+  // out from under whatever was clicked on it.
+  await page.waitForLoadState('networkidle');
+  await page.getByTestId('panel.rules-list').locator('button', { hasText: name }).first().click();
+  await expect(page.getByTestId('detail.rule-id')).toBeVisible();
+  return page;
+}
+

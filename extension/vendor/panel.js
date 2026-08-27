@@ -427,17 +427,56 @@
 
   const closeScreenPanel = () => { screensOpen = false; syncScreenPanel(); };
 
-  document.addEventListener('pointerdown', (e) => {
-    if (!screensOpen) return;
-    const path = e.composedPath();
-    if (path.includes(screenPanel)) return;
-    const btn = bar.querySelector('#wdp-screen-btn');
-    if (btn && path.includes(btn)) return;   // its own onclick toggles
-    closeScreenPanel();
-  }, true);
+  /*
+   * The two popovers the bar opens — the screen picker and the desk tuner —
+   * dismiss on the same gesture, so they dismiss through the same function.
+   * `path` is the event's composedPath rather than e.target, because e.target
+   * of an event crossing into a shadow root is retargeted to the shadow's host
+   * and would see every click in the panel as "the panel", popover included.
+   * Each popover's own button is excluded on purpose: its onclick already
+   * toggles the flag, and closing here first would just have that reopen it a
+   * moment later.
+   *
+   * A click on the page under review arrives with no path at all — a
+   * pointerdown inside the frame never reaches this document, so the embed
+   * posts `walkdown:page-click` instead (see the message handler). Nothing in
+   * this document is on that path, which is exactly right: a click in the
+   * application is outside both popovers.
+   */
+  function dismissPopovers(path = []) {
+    if (screensOpen) {
+      const btn = bar.querySelector('#wdp-screen-btn');
+      const mine = path.includes(screenPanel) || (btn && path.includes(btn));
+      if (!mine) closeScreenPanel();
+    }
+    if (deskOpen) {
+      const gear = bar.querySelector('#wdp-desk-btn');
+      const mine = path.includes(deskPanel) || (gear && path.includes(gear));
+      if (!mine) closeDeskPanel();
+    }
+  }
 
+  document.addEventListener(
+    'pointerdown',
+    (e) => { if (screensOpen || deskOpen) dismissPopovers(e.composedPath()); },
+    true
+  );
+
+  /*
+   * One Escape handler, doing the most local thing first: the screen picker,
+   * then the desk tuner, then pin mode. Three of them side by side would each
+   * fire on the same keystroke and close everything at once - and pin mode had
+   * no handler here at all, which is why Escape stopped leaving it (n-0077).
+   * Docked, the embed shared this document and owned that key; framed, the
+   * embed is inside the frame and only hears Escape when the frame has focus,
+   * so the panel has to answer for the keystrokes typed at its own chrome.
+   * (A dial being edited cancels itself first - it stops the event, see above.)
+   */
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && screensOpen) closeScreenPanel();
+    if (e.key !== 'Escape') return;
+    if (screensOpen) return closeScreenPanel();
+    if (deskOpen) return closeDeskPanel();
+    if (PIN.isOn()) PIN.set(false);
   });
 
   /*
@@ -456,12 +495,6 @@
     if (gear && path.includes(gear)) return;
     closeDeskPanel();
   }, true);
-
-  // Escape closes the tuner — but only once whatever is being typed into it
-  // has had its own turn (a dial's own edit box reverts first, see below).
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && deskOpen) closeDeskPanel();
-  });
 
   /*
    * The stylesheet, split in two on purpose:
@@ -3363,6 +3396,15 @@
     // owner, so it is told rather than each side keeping its own answer.
     if (msg.type === 'walkdown:pin-mode' && msg.on === false)
       return PIN.set(false);
+
+    /*
+     * A pointer went down on the page under review. That event is the frame's
+     * and never reaches this document, so the embed relays it; from here it is
+     * an outside click like any other, and goes through the same dismissal.
+     * Pin mode is deliberately untouched: it is a mode you work in, and every
+     * click while pinning happens on the page.
+     */
+    if (msg.type === 'walkdown:page-click') return dismissPopovers();
 
     if (msg.type === 'walkdown:open-thread') {
       openThread = msg.id;
