@@ -12,6 +12,7 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { EXAMPLE_DECLARED, EXAMPLE_ORIGIN } from '../playwright.config.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export const CHECKSPACE = join(root, '.walkdown', 'checkspace');
@@ -27,6 +28,18 @@ export default function globalSetup() {
    */
   cpSync(join(root, 'example', 'blueprint'), join(CHECKSPACE, 'example', 'blueprint'), { recursive: true });
   rmSync(join(CHECKSPACE, 'example', 'blueprint', 'drafts'), { recursive: true, force: true });
+  /*
+   * And point the copy's declared address at the port this run serves the
+   * example app on. A pin filed on a page that names no project is routed to
+   * one BY ITS ADDRESS, so the address the copy declares has to be the address
+   * the page is really at. The real blueprint keeps saying 4310 — that is a
+   * person's review server and this suite must neither adopt nor kill it. Safe
+   * to rewrite here and nowhere else: the checkspace is thrown away every run,
+   * and no check in it reads an example verdict, which is the thing moving a
+   * target would invalidate (lib/status.js `inPlace`).
+   */
+  const exCfg = join(CHECKSPACE, 'example', 'blueprint', 'walkdown.yml');
+  writeFileSync(exCfg, readFileSync(exCfg, 'utf8').replaceAll(EXAMPLE_DECLARED, EXAMPLE_ORIGIN));
   // Drafts are working state; a copied half-finished sitting would confuse a check.
   rmSync(join(CHECKSPACE, 'blueprint', 'drafts'), { recursive: true, force: true });
   if (!existsSync(join(CHECKSPACE, 'prototype')))

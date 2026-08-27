@@ -5,7 +5,7 @@ created: 2026-08-27T16:10:00Z
 anchor:
   rule: waitlist.export.says-why-it-waits
   screen: waitlist-export
-status: open
+status: addressed
 body: >
   Design request: screen `waitlist-export` has no drawing. It was added to the
   storyboard as the example project's deliberately slow page — it takes about

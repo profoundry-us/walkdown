@@ -10,7 +10,8 @@ import { expect, test } from '@playwright/test';
 // The host page the panel docks into — absolute, because baseURL names the
 // system under test (walkdown itself), not the fixture that hosts it. Both
 // come from the config so the two run modes address the same pair of servers.
-import { FIXTURE, WD_ORIGIN } from '../playwright.config.js';
+import { EXAMPLE_ORIGIN, FIXTURE, WD_ORIGIN } from '../playwright.config.js';
+
 
 /*
  * The application under review is a FRAME inside walkdown's page - that is the
@@ -282,7 +283,7 @@ test(
      * nothing to declare its project, the address it reports is the only thing
      * that can say where a pin belongs.
      */
-    await carryWalkdown(page, 'http://localhost:4310/index.html');   // no project named
+    await carryWalkdown(page, `${EXAMPLE_ORIGIN}/index.html`);   // no project named
     await armPinMode(page);
     const target = app(page).getByTestId('waitlist.email');
     await expect(target).toBeVisible();

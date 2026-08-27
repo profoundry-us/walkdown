@@ -31,6 +31,20 @@ import { parse } from 'yaml';
 const RECORD = process.env.WALKDOWN_RECORD !== '0';
 const WD_PORT = Number(process.env.WALKDOWN_CHECK_PORT ?? (RECORD ? 4701 : 4713));
 const FIXTURE_PORT = WD_PORT + 12;
+const EXAMPLE_PORT = WD_PORT + 24;
+/*
+ * Where this run actually serves the example project's app. Its blueprint
+ * declares 4310, and that address matters to the checks — a pin filed on a page
+ * carrying no walkdown tag is routed to a project BY ITS ADDRESS, so the
+ * browser has to go on seeing 4310. But binding it would mean either killing a
+ * server the person is using or, worse, silently adopting one: Playwright's
+ * reuseExistingServer left this entry attached to whatever was already there,
+ * and tore it down at the end of a run it had started itself. So the suite
+ * binds its own port and the checks serve 4310's bytes from here — a proxy, not
+ * a redirect, because the whole point is that the document keeps the declared
+ * address (see `exampleServedHere` in checks/embed.spec.js).
+ */
+export const EXAMPLE_ORIGIN = `http://localhost:${EXAMPLE_PORT}`;
 export const WD_ORIGIN = `http://localhost:${WD_PORT}`;
 /*
  * The panel has one delivery: it frames the page it reviews. The fixture is the
@@ -55,6 +69,11 @@ export const FIXTURE = `http://localhost:${FIXTURE_PORT}/extension.html?wd=${
  */
 export const DECLARED = parse(readFileSync(new URL('./blueprint/walkdown.yml', import.meta.url), 'utf8'))
   ?.runner?.targets?.local?.base_url ?? WD_ORIGIN;
+
+/* The same, for the example project — read from its blueprint, never hardcoded. */
+export const EXAMPLE_DECLARED = parse(
+  readFileSync(new URL('./example/blueprint/walkdown.yml', import.meta.url), 'utf8'),
+)?.runner?.targets?.local?.base_url ?? EXAMPLE_ORIGIN;
 
 export default defineConfig({
   testDir: './checks',
@@ -102,14 +121,17 @@ export default defineConfig({
       reuseExistingServer: false,
     },
     /*
-     * The example project's own app, at the address its blueprint declares.
-     * Some rules are only visible when a page belongs to a project that is NOT
-     * the one this server serves by default.
+     * The example project's own app. On a port of this run's own, like the
+     * other two — never the 4310 its blueprint declares, because a person keeps
+     * that one up to review with and a suite that adopts somebody's server also
+     * kills it. The checks map the declared address onto this one. Some rules
+     * are only visible when a page belongs to a project that is NOT the one
+     * this server serves by default.
      */
     {
-      command: 'python3 -m http.server 4310 --directory example/app',
-      url: 'http://localhost:4310/index.html',
-      reuseExistingServer: true,
+      command: `python3 -m http.server ${EXAMPLE_PORT} --directory example/app`,
+      url: `${EXAMPLE_ORIGIN}/index.html`,
+      reuseExistingServer: false,
     },
   ],
 });
