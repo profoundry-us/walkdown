@@ -46,6 +46,22 @@ stories:
             - It is rejected; with a reason, the reason is appended as a reply and waived_by records the person
           statement_hash: sha256:24591753abaa
 
+      - id: threads.lifecycle.says-what-it-did
+        origin: walkdown
+        statement: A command that changes a thread reports the change - the status it left, the status it reached, who it was recorded under, and how many replies landed - rather than printing the thread back, because output that looks the same whether or not anything happened is output nobody can act on.
+        verify: [checks]
+        steps:
+          given:
+            - A thread, and a command that will reply to it, transition it, or both
+          when:
+            - The command is run
+          then:
+            - One line names the thread and both ends of the move, and waiving names the person it was recorded under
+            - A reply with no transition says the status did not move, rather than staying silent and letting a reader assume it did
+            - Reading a thread with no flags still prints the whole conversation - reading is a different ask from changing
+            - A refused change says why on the error stream and exits non-zero, so a loop over several threads can stop on the first one rather than plunging on
+          statement_hash: sha256:224b3a652a3a
+
   - id: threads.conversation
     title: A thread reads as a conversation
     statement: As a reviewer, reading and answering feedback feels like talking - I can see who said what and when, catch up on what is new, and reply without leaving the page under review.
