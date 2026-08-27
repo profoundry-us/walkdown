@@ -51,8 +51,6 @@
     "@playwright/test": "^1.62.1",
     "@profoundry-us/highball": "^0.4.1",
     "@tailwindcss/cli": "^4.3.3",
-    "acorn": "^8.18.0",
-    "acorn-walk": "^8.3.5",
     "daisyui": "^5.7.20",
     "rollup": "^4.63.0",
     "tailwindcss": "^4.3.3"
