@@ -146,6 +146,29 @@
 
     headlessCover: null,     // the opaque cover a headless rule lays over the desk
   };
+
+  /*
+   * The chrome itself, on a holder for the same reason S exists: these are
+   * written once, at build time, from whichever shard ends up owning each
+   * element, and an imported binding cannot be assigned.
+   *
+   * Every field is null until buildChrome() runs. Nothing above the boot
+   * sequence at the foot of this file may touch them at module level — that
+   * is the property that keeps the shards order-independent, because an
+   * import graph decides evaluation order and no shard should care.
+   */
+  const D = {
+    shell: null,        // the popover over the whole viewport, host of the shadow root
+    sr: null,           // that shadow root
+    host: null,         // the transparent carrier inside it
+    bar: null,          // the tool bar across the top
+    side: null,         // the side panel
+    deskPanel: null,    // the desk tuner behind the gear
+    screenPanel: null,  // the screen picker's list
+    tab: null,          // the WALKDOWN pull tab, shown when the chrome is put away
+    swap: null,         // the prototype/app cross beside it
+    appFrame: null,     // the application under review
+  };
   /*
    * Whether this delivery comes back after a real page load. The extension
    * says so, because its content script runs on every page; a script tag
@@ -267,110 +290,112 @@
     `<svg class="${cls}" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">${PHOSPHOR[name] ?? ''}</svg>`;
 
   // ---- chrome ---------------------------------------------------------------
-  const shell = document.createElement('div');
-  // The embed reads this to know the panel is walkdown's own chrome and not a
-  // place to drop a pin. A click inside the shadow root retargets to this host
-  // element, so marking the shell covers everything the panel draws.
-  shell.dataset.walkdownChrome = '';
-  // One shadow root over the whole viewport now that chrome runs along the top
-  // as well as down the side. It is transparent and click-through; only the bar
-  // and the panel take pointer events, so the page under it stays live.
-  /*
-   * z-index is not enough, and this is the one thing a docked tool cannot do
-   * without: an application's own <dialog showModal()> (or any popover) is
-   * promoted to the browser's TOP LAYER, which is painted above every
-   * z-index there is — so the app's modal, and the backdrop that dims the
-   * whole viewport with it, would cover walkdown's chrome. The only way to be
-   * above the top layer is to be in it, so the shell is a manual popover.
-   *
-   * The UA stylesheet gives popovers a size, border, padding and background of
-   * their own; every one of those is overridden back to the transparent
-   * full-viewport sheet this has always been.
-   */
-  shell.style.cssText = `position:fixed; inset:0; z-index:2147483000; pointer-events:none;
-    width:100%; height:100%; max-width:none; max-height:none; margin:0; border:0; padding:0;
-    background:transparent; overflow:visible;`;
-  const sr = shell.attachShadow({ mode: 'open' });
-  document.body.appendChild(shell);
+  function buildChrome() {
+    D.shell = document.createElement('div');
+    // The embed reads this to know the panel is walkdown's own chrome and not a
+    // place to drop a pin. A click inside the shadow root retargets to this host
+    // element, so marking the shell covers everything the panel draws.
+    D.shell.dataset.walkdownChrome = '';
+    // One shadow root over the whole viewport now that chrome runs along the top
+    // as well as down the side. It is transparent and click-through; only the bar
+    // and the panel take pointer events, so the page under it stays live.
+    /*
+     * z-index is not enough, and this is the one thing a docked tool cannot do
+     * without: an application's own <dialog showModal()> (or any popover) is
+     * promoted to the browser's TOP LAYER, which is painted above every
+     * z-index there is — so the app's modal, and the backdrop that dims the
+     * whole viewport with it, would cover walkdown's chrome. The only way to be
+     * above the top layer is to be in it, so the shell is a manual popover.
+     *
+     * The UA stylesheet gives popovers a size, border, padding and background of
+     * their own; every one of those is overridden back to the transparent
+     * full-viewport sheet this has always been.
+     */
+    D.shell.style.cssText = `position:fixed; inset:0; z-index:2147483000; pointer-events:none;
+      width:100%; height:100%; max-width:none; max-height:none; margin:0; border:0; padding:0;
+      background:transparent; overflow:visible;`;
+    D.sr = D.shell.attachShadow({ mode: 'open' });
+    document.body.appendChild(D.shell);
 
 
-  // A transparent frame over the viewport. It must NOT carry data-theme:
-  // daisyUI paints background-color on every [data-theme] element, so a
-  // full-viewport carrier would cover the page it is supposed to be framing.
-  // The theme goes on the two opaque surfaces instead, which is where the
-  // background belongs anyway.
-  const host = document.createElement('div');
-  host.className = 'h-full w-full text-sm';
-  /*
-   * The one thing a shadow root does NOT keep out: inheritance. A host page
-   * with `* { letter-spacing: 3px }` - or a text-transform, or a word-spacing -
-   * sets it on our shell element like any other, and it flows down into every
-   * word walkdown draws. Styling `:host` cannot fix it either: for the host
-   * element, the document's own rules win. So the reset lives here, on our
-   * first element INSIDE the boundary, where the host page has no reach.
-   */
-  host.style.cssText = 'letter-spacing:normal; word-spacing:normal; text-transform:none; font-variant:normal; font-style:normal; text-indent:0; text-shadow:none; white-space:normal; word-break:normal; text-align:left; direction:ltr; text-decoration:none;';
-  sr.appendChild(host);
+    // A transparent frame over the viewport. It must NOT carry data-theme:
+    // daisyUI paints background-color on every [data-theme] element, so a
+    // full-viewport carrier would cover the page it is supposed to be framing.
+    // The theme goes on the two opaque surfaces instead, which is where the
+    // background belongs anyway.
+    D.host = document.createElement('div');
+    D.host.className = 'h-full w-full text-sm';
+    /*
+     * The one thing a shadow root does NOT keep out: inheritance. A host page
+     * with `* { letter-spacing: 3px }` - or a text-transform, or a word-spacing -
+     * sets it on our shell element like any other, and it flows down into every
+     * word walkdown draws. Styling `:host` cannot fix it either: for the host
+     * element, the document's own rules win. So the reset lives here, on our
+     * first element INSIDE the boundary, where the host page has no reach.
+     */
+    D.host.style.cssText = 'letter-spacing:normal; word-spacing:normal; text-transform:none; font-variant:normal; font-style:normal; text-indent:0; text-shadow:none; white-space:normal; word-break:normal; text-align:left; direction:ltr; text-decoration:none;';
+    D.sr.appendChild(D.host);
 
-  // The two pieces of chrome are built once and filled by render(): the docking
-  // transforms live on them, and a rebuild must never throw the panel back on
-  // screen after you have put it away.
-  // The bar carries no surface of its own — background:transparent overrides
-  // the one daisyUI paints on every [data-theme] element — so the drafting
-  // grid runs unbroken behind the controls and under the panel beside them.
-  const bar = document.createElement('header');
-  bar.dataset.testid = 'panel.bar';
-  bar.dataset.theme = 'blueprint';   // walkdown's own skin — see styles/walkdown.css
-  bar.style.cssText = `position:absolute; top:0; left:0; right:0; height:${TOP}px;
-    pointer-events:auto; transition:transform .2s ease; background:transparent;`;
-  bar.className = 'flex items-center gap-2 px-3 text-base-content';
+    // The two pieces of chrome are built once and filled by render(): the docking
+    // transforms live on them, and a rebuild must never throw the panel back on
+    // screen after you have put it away.
+    // The bar carries no surface of its own — background:transparent overrides
+    // the one daisyUI paints on every [data-theme] element — so the drafting
+    // grid runs unbroken behind the controls and under the panel beside them.
+    D.bar = document.createElement('header');
+    D.bar.dataset.testid = 'panel.bar';
+    D.bar.dataset.theme = 'blueprint';   // walkdown's own skin — see styles/walkdown.css
+    D.bar.style.cssText = `position:absolute; top:0; left:0; right:0; height:${TOP}px;
+      pointer-events:auto; transition:transform .2s ease; background:transparent;`;
+    D.bar.className = 'flex items-center gap-2 px-3 text-base-content';
 
-  // The panel is a card lying on the same desk as the page, inset by the same
-  // margin — two sheets side by side rather than a sheet and a wall.
-  const side = document.createElement('aside');
-  side.dataset.theme = 'blueprint';
-  side.style.cssText = `position:absolute; top:${HEAD}px; right:${GAP}px; bottom:${GAP}px;
-    width:${W}px; pointer-events:auto; transition:transform .22s ease; border-radius:10px;
-    box-shadow:0 1px 2px rgba(0,0,0,.28), 0 12px 32px rgba(0,0,0,.34);`;
-  side.className = 'flex flex-col overflow-hidden border border-primary/45 bg-base-100 text-base-content';
-  host.append(bar, side);
+    // The panel is a card lying on the same desk as the page, inset by the same
+    // margin — two sheets side by side rather than a sheet and a wall.
+    D.side = document.createElement('aside');
+    D.side.dataset.theme = 'blueprint';
+    D.side.style.cssText = `position:absolute; top:${HEAD}px; right:${GAP}px; bottom:${GAP}px;
+      width:${W}px; pointer-events:auto; transition:transform .22s ease; border-radius:10px;
+      box-shadow:0 1px 2px rgba(0,0,0,.28), 0 12px 32px rgba(0,0,0,.34);`;
+    D.side.className = 'flex flex-col overflow-hidden border border-primary/45 bg-base-100 text-base-content';
+    D.host.append(D.bar, D.side);
 
-  /*
-   * The desk tuner. A separate element rather than part of the bar's innerHTML
-   * for the same reason the fade slider needed `dragging`: the bar is rebuilt
-   * wholesale, and rebuilding an input mid-drag kills the drag. This panel is
-   * built once and only shown or hidden, so its sliders survive anything.
-   */
-  const deskPanel = document.createElement('div');
-  deskPanel.dataset.testid = 'settings.panel';
-  deskPanel.dataset.theme = 'blueprint';
-  deskPanel.className = 'w-64 rounded-box border border-primary/45 bg-base-100 p-3 text-base-content shadow-xl';
-  // Offset past the app's own top-left corner on purpose — flush against it
-  // read as though the tuner belonged to the app's layout rather than to the
-  // desk it sits on. One GAP beyond the corner on each axis, so it stands off
-  // evenly rather than drifting further from one side than the other.
-  deskPanel.style.cssText = `position:absolute; top:${TOP + GAP}px; left:${GAP * 2}px; display:none; pointer-events:auto;`;
-  host.appendChild(deskPanel);
+    /*
+     * The desk tuner. A separate element rather than part of the bar's innerHTML
+     * for the same reason the fade slider needed `dragging`: the bar is rebuilt
+     * wholesale, and rebuilding an input mid-drag kills the drag. This panel is
+     * built once and only shown or hidden, so its sliders survive anything.
+     */
+    D.deskPanel = document.createElement('div');
+    D.deskPanel.dataset.testid = 'settings.panel';
+    D.deskPanel.dataset.theme = 'blueprint';
+    D.deskPanel.className = 'w-64 rounded-box border border-primary/45 bg-base-100 p-3 text-base-content shadow-xl';
+    // Offset past the app's own top-left corner on purpose — flush against it
+    // read as though the tuner belonged to the app's layout rather than to the
+    // desk it sits on. One GAP beyond the corner on each axis, so it stands off
+    // evenly rather than drifting further from one side than the other.
+    D.deskPanel.style.cssText = `position:absolute; top:${TOP + GAP}px; left:${GAP * 2}px; display:none; pointer-events:auto;`;
+    D.host.appendChild(D.deskPanel);
 
-  /*
-   * Which screen this page is. It used to be a third tab in the sidebar and it
-   * was never at home there: Blueprints and Rules answer "what did we agree to
-   * build", and this answers "where am I standing", which is a session control
-   * with a current value - the same kind of thing as the surface dial and the
-   * viewport, which live in the bar. Moved there it also stops hiding its own
-   * answer: the control is labelled with the screen you are on, so reading it
-   * no longer costs a tab switch and a trip back.
-   *
-   * Built once and shown or hidden, like the tuner beside it, and positioned
-   * under its own button at open time rather than at a guessed offset - the
-   * bar's left side changes width with the project's name.
-   */
-  const screenPanel = document.createElement('div');
-  screenPanel.dataset.testid = 'panel.screens-list';
-  screenPanel.dataset.theme = 'blueprint';
-  screenPanel.className = 'w-72 overflow-hidden rounded-box border border-primary/45 bg-base-100 py-1 text-base-content shadow-xl';
-  screenPanel.style.cssText = `position:absolute; top:${TOP + GAP}px; left:${GAP * 2}px; display:none; pointer-events:auto; max-height:60vh; overflow-y:auto;`;
-  host.appendChild(screenPanel);
+    /*
+     * Which screen this page is. It used to be a third tab in the sidebar and it
+     * was never at home there: Blueprints and Rules answer "what did we agree to
+     * build", and this answers "where am I standing", which is a session control
+     * with a current value - the same kind of thing as the surface dial and the
+     * viewport, which live in the bar. Moved there it also stops hiding its own
+     * answer: the control is labelled with the screen you are on, so reading it
+     * no longer costs a tab switch and a trip back.
+     *
+     * Built once and shown or hidden, like the tuner beside it, and positioned
+     * under its own button at open time rather than at a guessed offset - the
+     * bar's left side changes width with the project's name.
+     */
+    D.screenPanel = document.createElement('div');
+    D.screenPanel.dataset.testid = 'panel.screens-list';
+    D.screenPanel.dataset.theme = 'blueprint';
+    D.screenPanel.className = 'w-72 overflow-hidden rounded-box border border-primary/45 bg-base-100 py-1 text-base-content shadow-xl';
+    D.screenPanel.style.cssText = `position:absolute; top:${TOP + GAP}px; left:${GAP * 2}px; display:none; pointer-events:auto; max-height:60vh; overflow-y:auto;`;
+    D.host.appendChild(D.screenPanel);
+  }
 
   const DESK_DIALS = [
     { k: 'tilt', label: 'Tilt', min: 0, max: 45, unit: '°' },
@@ -390,20 +415,20 @@
    */
   function hideApp(on) {
     S.hideAppOn = on;
-    const app = appFrame;
+    const app = D.appFrame;
     // The aside goes with the app rather than staying — it sits on the desk
     // over the page, so leaving it at full strength would still hide most of
     // the ruling behind it. So does the headless cover, which is opaque by
     // design. The bar stays: its buttons have to keep working while you're
     // peeking, and it draws no surface of its own to cover the desk with.
-    for (const el of [app, side, S.headlessCover]) if (el) el.style.opacity = on ? '0.1' : '';
+    for (const el of [app, D.side, S.headlessCover]) if (el) el.style.opacity = on ? '0.1' : '';
   }
 
   /** A dial's number, click-to-edit: text until clicked, then a real input. */
   function editDialValue(dial) {
-    const cell = deskPanel.querySelector(`#wdp-desk-${dial.k}`);
+    const cell = D.deskPanel.querySelector(`#wdp-desk-${dial.k}`);
     if (!cell || cell.querySelector('input')) return;
-    const range = deskPanel.querySelector(`input[type=range][data-k="${dial.k}"]`);
+    const range = D.deskPanel.querySelector(`input[type=range][data-k="${dial.k}"]`);
     cell.innerHTML = `<input type="number" class="input input-xs w-12 px-1 text-right font-mono text-[10.5px]"
       min="${dial.min}" max="${dial.max}" value="${S.desk[dial.k]}">`;
     const inp = cell.querySelector('input');
@@ -433,11 +458,11 @@
   function openActorSettings() {
     S.deskOpen = true;
     syncDeskPanel();
-    deskPanel.querySelector('#wdp-set-actor')?.focus();
+    D.deskPanel.querySelector('#wdp-set-actor')?.focus();
   }
 
   function buildDeskPanel() {
-    deskPanel.innerHTML = `
+    D.deskPanel.innerHTML = `
       <div class="mb-2 flex items-center gap-2">
         <span class="text-[12px] font-semibold">Record as</span>
         <input id="wdp-set-actor" data-testid="settings.actor" class="input input-xs ml-auto w-36" placeholder="username"
@@ -475,27 +500,27 @@
       </label>
       <p class="mt-2 text-[10.5px] leading-relaxed opacity-40">Yours alone — how the paper
         lies changes nothing about what gets verified.</p>`;
-    deskPanel.querySelectorAll('input[type=range]').forEach((inp) => {
+    D.deskPanel.querySelectorAll('input[type=range]').forEach((inp) => {
       const dial = DESK_DIALS.find((d) => d.k === inp.dataset.k);
       // input repaints live under the drag; change is when the value is kept.
       inp.oninput = () => {
         S.desk[dial.k] = Number(inp.value);
-        deskPanel.querySelector(`#wdp-desk-${dial.k}`).textContent = `${S.desk[dial.k]}${dial.unit}`;
+        D.deskPanel.querySelector(`#wdp-desk-${dial.k}`).textContent = `${S.desk[dial.k]}${dial.unit}`;
         if (S.docked) paintDesk(true);
       };
       inp.onchange = () => store.set(DESK_KEY, { ...S.desk });
     });
     DESK_DIALS.forEach((d) => {
-      deskPanel.querySelector(`#wdp-desk-${d.k}`).onclick = () => editDialValue(d);
+      D.deskPanel.querySelector(`#wdp-desk-${d.k}`).onclick = () => editDialValue(d);
     });
-    deskPanel.querySelector('#wdp-desk-reset').onclick = () => {
+    D.deskPanel.querySelector('#wdp-desk-reset').onclick = () => {
       S.desk = { ...DESK_DEFAULTS };
       store.set(DESK_KEY, { ...S.desk });
       buildDeskPanel();
       if (S.docked) paintDesk(true);
     };
-    deskPanel.querySelector('#wdp-desk-hide').onchange = (e) => hideApp(e.target.checked);
-    const act = deskPanel.querySelector('#wdp-set-actor');
+    D.deskPanel.querySelector('#wdp-desk-hide').onchange = (e) => hideApp(e.target.checked);
+    const act = D.deskPanel.querySelector('#wdp-set-actor');
     act.onchange = () => {
       /*
        * An emptied field is an explicit answer, not the absence of one: it
@@ -511,7 +536,7 @@
       if (S.session) { S.session.actor = whoAmI(); saveSession(); }
       render();
     };
-    const nam = deskPanel.querySelector('#wdp-set-name');
+    const nam = D.deskPanel.querySelector('#wdp-set-name');
     nam.onchange = () => {
       // Emptied here means "show me by my username" - the honest answer for
       // someone who does not want a full name on screen.
@@ -524,7 +549,7 @@
   function syncDeskPanel() {
     if (S.deskOpen) buildDeskPanel();
     else hideApp(false);   // closing the tuner ends the peek, not just hides the checkbox
-    deskPanel.style.display = S.deskOpen ? '' : 'none';
+    D.deskPanel.style.display = S.deskOpen ? '' : 'none';
   }
 
   const closeDeskPanel = () => { S.deskOpen = false; syncDeskPanel(); };
@@ -546,18 +571,18 @@
       // Rebuilt in place, so a long storyboard keeps its scroll: this now runs
       // on every repaint, and a list that jumped back to the top whenever the
       // panel drew would be worse than one that lagged.
-      const wasAt = screenPanel.scrollTop;
-      screenPanel.innerHTML = screensPane();
-      wireScreens(screenPanel);
-      screenPanel.scrollTop = wasAt;
-      const btn = bar.querySelector('#wdp-screen-btn');
+      const wasAt = D.screenPanel.scrollTop;
+      D.screenPanel.innerHTML = screensPane();
+      wireScreens(D.screenPanel);
+      D.screenPanel.scrollTop = wasAt;
+      const btn = D.bar.querySelector('#wdp-screen-btn');
       if (btn) {
         const at = btn.getBoundingClientRect();
-        const wide = screenPanel.offsetWidth || 288;
-        screenPanel.style.left = `${Math.max(GAP * 2, Math.min(at.left, innerWidth - wide - GAP * 2))}px`;
+        const wide = D.screenPanel.offsetWidth || 288;
+        D.screenPanel.style.left = `${Math.max(GAP * 2, Math.min(at.left, innerWidth - wide - GAP * 2))}px`;
       }
     }
-    screenPanel.style.display = S.screensOpen ? '' : 'none';
+    D.screenPanel.style.display = S.screensOpen ? '' : 'none';
   }
 
   const closeScreenPanel = () => { S.screensOpen = false; syncScreenPanel(); };
@@ -580,13 +605,13 @@
    */
   function dismissPopovers(path = []) {
     if (S.screensOpen) {
-      const btn = bar.querySelector('#wdp-screen-btn');
-      const mine = path.includes(screenPanel) || (btn && path.includes(btn));
+      const btn = D.bar.querySelector('#wdp-screen-btn');
+      const mine = path.includes(D.screenPanel) || (btn && path.includes(btn));
       if (!mine) closeScreenPanel();
     }
     if (S.deskOpen) {
-      const gear = bar.querySelector('#wdp-desk-btn');
-      const mine = path.includes(deskPanel) || (gear && path.includes(gear));
+      const gear = D.bar.querySelector('#wdp-desk-btn');
+      const mine = path.includes(D.deskPanel) || (gear && path.includes(gear));
       if (!mine) closeDeskPanel();
     }
   }
@@ -626,56 +651,64 @@
    *     copy declares custom-property types and paints nothing, so it is the
    *     one thing we add to the host page.
    */
-  fetch(STYLESHEET)
-    .then((r) => r.text())
-    .then((css) => {
-      const sheet = document.createElement('style');
-      // The conversation's own rules ride with the stylesheet: one shared
-      // block, so a thread looks the same in the panel and in the embed.
-      sheet.textContent = css + MSG.css;
-      sr.insertBefore(sheet, host);
-      // The desk was painted from fallbacks before the theme existed; now that
-      // the tokens resolve, paint it in walkdown's actual colours.
-      if (S.docked) paintDesk(true);
-      const props = css.match(/@property\s+--[\w-]+\s*\{[^}]*\}/g);
-      if (props) {
-        const doc = document.createElement('style');
-        doc.setAttribute('data-walkdown-property-registrations', '');
-        doc.textContent = props.join('');
-        document.head.appendChild(doc);
-      }
-    })
-    .catch(() => { /* unstyled beats absent; the panel still works */ });
-
-  const tab = document.createElement('button');
-  tab.dataset.walkdownChrome = '';
-  tab.textContent = 'WALKDOWN';
-  tab.style.cssText = `position:fixed; right:0; top:50%; z-index:2147483000; transform:translateY(-50%);
-    background:#16181d; color:#fff; border:0; border-radius:8px 0 0 8px; padding:11px 7px; cursor:pointer;
-    font:600 11px/1 -apple-system, sans-serif; writing-mode:vertical-rl; letter-spacing:.08em; display:none;`;
-  tab.onclick = () => setDocked(true);
-  document.body.appendChild(tab);
+  function loadStylesheet() {
+    fetch(STYLESHEET)
+      .then((r) => r.text())
+      .then((css) => {
+        const sheet = document.createElement('style');
+        // The conversation's own rules ride with the stylesheet: one shared
+        // block, so a thread looks the same in the panel and in the embed.
+        sheet.textContent = css + MSG.css;
+        D.sr.insertBefore(sheet, D.host);
+        // The desk was painted from fallbacks before the theme existed; now that
+        // the tokens resolve, paint it in walkdown's actual colours.
+        if (S.docked) paintDesk(true);
+        const props = css.match(/@property\s+--[\w-]+\s*\{[^}]*\}/g);
+        if (props) {
+          const doc = document.createElement('style');
+          doc.setAttribute('data-walkdown-property-registrations', '');
+          doc.textContent = props.join('');
+          document.head.appendChild(doc);
+        }
+      })
+      .catch(() => { /* unstyled beats absent; the panel still works */ });
+  }
 
   /*
-   * Beside the tab, a way to cross between the design and what shipped without
-   * opening anything (n-0072). Comparing the two is the most frequent gesture
-   * there is, and with the panel put away it otherwise costs re-opening the
-   * whole thing to reach the fade control - the cheapest comparison behind the
-   * most expensive move. It says the surface it will take you TO, because a
-   * control that names where you already are gives you nothing to act on.
+   * The two controls that survive the chrome being put away: the pull tab
+   * that brings it back, and the prototype/app cross beside it.
    */
-  const swap = document.createElement('button');
-  swap.dataset.walkdownChrome = '';
-  swap.dataset.testid = 'panel.tab-swap';
-  swap.style.cssText = `position:fixed; right:0; top:50%; z-index:2147483000;
-    background:#2b303a; color:#fff; border:0; border-radius:8px 0 0 8px; padding:9px 7px; cursor:pointer;
-    font:600 10px/1 -apple-system, sans-serif; writing-mode:vertical-rl; letter-spacing:.08em; display:none;`;
-  swap.onclick = () => {
-    const share = S.protoShare ?? (pageSurface() === 'prototype' ? 1 : 0);
-    setFade(share === 1 ? 0 : 1);
-    paintTabs();
-  };
-  document.body.appendChild(swap);
+  function buildPutAwayControls() {
+    D.tab = document.createElement('button');
+    D.tab.dataset.walkdownChrome = '';
+    D.tab.textContent = 'WALKDOWN';
+    D.tab.style.cssText = `position:fixed; right:0; top:50%; z-index:2147483000; transform:translateY(-50%);
+      background:#16181d; color:#fff; border:0; border-radius:8px 0 0 8px; padding:11px 7px; cursor:pointer;
+      font:600 11px/1 -apple-system, sans-serif; writing-mode:vertical-rl; letter-spacing:.08em; display:none;`;
+    D.tab.onclick = () => setDocked(true);
+    document.body.appendChild(D.tab);
+
+    /*
+     * Beside the tab, a way to cross between the design and what shipped without
+     * opening anything (n-0072). Comparing the two is the most frequent gesture
+     * there is, and with the panel put away it otherwise costs re-opening the
+     * whole thing to reach the fade control - the cheapest comparison behind the
+     * most expensive move. It says the surface it will take you TO, because a
+     * control that names where you already are gives you nothing to act on.
+     */
+    D.swap = document.createElement('button');
+    D.swap.dataset.walkdownChrome = '';
+    D.swap.dataset.testid = 'panel.tab-swap';
+    D.swap.style.cssText = `position:fixed; right:0; top:50%; z-index:2147483000;
+      background:#2b303a; color:#fff; border:0; border-radius:8px 0 0 8px; padding:9px 7px; cursor:pointer;
+      font:600 10px/1 -apple-system, sans-serif; writing-mode:vertical-rl; letter-spacing:.08em; display:none;`;
+    D.swap.onclick = () => {
+      const share = S.protoShare ?? (pageSurface() === 'prototype' ? 1 : 0);
+      setFade(share === 1 ? 0 : 1);
+      paintTabs();
+    };
+    document.body.appendChild(D.swap);
+  }
 
   /*
    * The put-away controls, kept in step: the swap only appears when there is a
@@ -685,21 +718,21 @@
   function paintTabs() {
     // Called from setDocked, which runs at boot before any blueprint is in
     // hand. Nothing here is worth an exception on the way up.
-    if (!S.data) { swap.style.display = 'none'; return; }
+    if (!S.data) { D.swap.style.display = 'none'; return; }
     if (!S.docked) {
-      const tabH = tab.getBoundingClientRect().height || 96;
-      tab.style.transform = `translateY(calc(-50% - ${Math.round(tabH / 2) + 4}px))`;
+      const tabH = D.tab.getBoundingClientRect().height || 96;
+      D.tab.style.transform = `translateY(calc(-50% - ${Math.round(tabH / 2) + 4}px))`;
       const canGhost = Boolean(ghostSource(screenInHand()));
-      swap.style.display = canGhost ? 'block' : 'none';
+      D.swap.style.display = canGhost ? 'block' : 'none';
       const share = S.protoShare ?? (pageSurface() === 'prototype' ? 1 : 0);
       const goingTo = share === 1 ? 'APP' : 'PROTOTYPE';
-      swap.textContent = goingTo;
-      swap.title = `Show the ${goingTo.toLowerCase()} instead`;
-      const swapH = swap.getBoundingClientRect().height || 80;
-      swap.style.transform = `translateY(calc(-50% + ${Math.round(swapH / 2) + 4}px))`;
+      D.swap.textContent = goingTo;
+      D.swap.title = `Show the ${goingTo.toLowerCase()} instead`;
+      const swapH = D.swap.getBoundingClientRect().height || 80;
+      D.swap.style.transform = `translateY(calc(-50% + ${Math.round(swapH / 2) + 4}px))`;
     } else {
-      tab.style.transform = 'translateY(-50%)';
-      swap.style.display = 'none';
+      D.tab.style.transform = 'translateY(-50%)';
+      D.swap.style.display = 'none';
     }
   }
 
@@ -709,12 +742,16 @@
    * geometry, the fade, the pin plumbing — measures the same rectangle either
    * way, so only this differs.
    */
-  const appFrame = document.createElement('iframe');
-  if (appFrame) {
-    appFrame.src = S.frameUrl;
-    appFrame.dataset.testid = 'panel.app-frame';
-    appFrame.setAttribute('title', 'the application under review');
-    document.body.appendChild(appFrame);
+  function buildAppFrame() {
+    D.appFrame = document.createElement('iframe');
+    D.appFrame.src = S.frameUrl;
+    D.appFrame.dataset.testid = 'panel.app-frame';
+    D.appFrame.setAttribute('title', 'the application under review');
+    // Whatever the frame lands on - our navigation or the app's own - the wait
+    // is over. Errors never fire load, and a frame that never arrives is still
+    // loading, which is what the veil should keep saying.
+    D.appFrame.addEventListener('load', hideVeil);
+    document.body.appendChild(D.appFrame);
   }
 
   /*
@@ -734,8 +771,8 @@
   let veilFor = null;
 
   function placeVeil() {
-    if (!veil || !appFrame) return;
-    const r = appFrame.getBoundingClientRect();
+    if (!veil || !D.appFrame) return;
+    const r = D.appFrame.getBoundingClientRect();
     veil.style.top = `${r.top}px`;
     veil.style.left = `${r.left}px`;
     veil.style.width = `${r.width}px`;
@@ -743,7 +780,7 @@
   }
 
   function showVeil(label) {
-    if (!appFrame) return;
+    if (!D.appFrame) return;
     if (!veil) {
       veil = document.createElement('div');
       veil.dataset.walkdownChrome = '';
@@ -784,17 +821,10 @@
   }
 
   function frameLoading(url, label) {
-    if (!appFrame) return;
+    if (!D.appFrame) return;
     hideVeil();
     veilFor = url;
     veilTimer = setTimeout(() => showVeil(label), VEIL_DELAY);
-  }
-
-  if (appFrame) {
-    // Whatever the frame lands on - our navigation or the app's own - the wait
-    // is over. Errors never fire load, and a frame that never arrives is still
-    // loading, which is what the veil should keep saying.
-    appFrame.addEventListener('load', hideVeil);
   }
 
   /** The desk space the frame may occupy, and the scale a preset needs. */
@@ -828,7 +858,7 @@
   }
 
   function placeAppFrame(on) {
-    if (!appFrame) return;
+    if (!D.appFrame) return;
     // The veil is pinned to the frame's box, so it follows every move of it.
     if (veil) requestAnimationFrame(placeVeil);
     const { availW, availH, scale } = frameSpace();
@@ -837,7 +867,7 @@
     // preset sizes the frame like a real device: the app lays out at that
     // width, and a viewport wider than the space scales down WHOLE - a
     // desktop layout seen as a desktop layout, never reflowed to a column.
-    appFrame.style.cssText = on
+    D.appFrame.style.cssText = on
       ? (S.viewportW
         ? `position:fixed; top:${HEAD}px;
            left:${GAP + Math.max(0, (availW - S.viewportW * scale) / 2)}px;
@@ -1003,7 +1033,7 @@
    */
   function paintDesk(on) {
     const root = document.documentElement, page = document.body;
-    const cs = getComputedStyle(side);
+    const cs = getComputedStyle(D.side);
     const token = (n, fallback) => cs.getPropertyValue(n).trim() || fallback;
     const ink = token('--color-base-content', '#dbe7f3');
     root.style.background = token('--color-base-200', '#12283f');
@@ -1043,9 +1073,9 @@
 
   function setDocked(on) {
     S.docked = on;
-    bar.style.transform = on ? 'none' : `translateY(-${TOP}px)`;
-    side.style.transform = on ? 'none' : `translateX(calc(100% + ${GAP}px))`;
-    tab.style.display = on ? 'none' : 'block';
+    D.bar.style.transform = on ? 'none' : `translateY(-${TOP}px)`;
+    D.side.style.transform = on ? 'none' : `translateX(calc(100% + ${GAP}px))`;
+    D.tab.style.display = on ? 'none' : 'block';
     // Nothing the bar opens outlives the bar: put away, neither the tuner nor
     // the screen picker has anything left to hang off.
     if (!on) { S.deskOpen = false; syncDeskPanel(); closeScreenPanel(); }
@@ -1607,10 +1637,10 @@
     // to the top — so note where each pane was and put it back. Read live, not
     // from a record kept by scroll events: those fire AFTER the position has
     // already moved, so a record would sometimes be the staler of the two.
-    const wasAt = [...host.querySelectorAll('.wdp-pane')].map((p) => p.scrollTop);
+    const wasAt = [...D.host.querySelectorAll('.wdp-pane')].map((p) => p.scrollTop);
     // Typing must survive a repaint: a composer that loses the caret mid-reply
     // is the difference between a conversation and a form.
-    const typing = sr.activeElement;
+    const typing = D.sr.activeElement;
     const caret = ['wdp-note', 'wdp-search'].includes(typing?.id)
       ? { id: typing.id, start: typing.selectionStart, end: typing.selectionEnd } : null;
     const total = S.data.rows.length;
@@ -1659,7 +1689,7 @@
         ${icon(TAB_ICON[id], 'size-4')}${label}${badge
           ? `<span class="badge badge-xs ${tone}" title="${esc(why)}">${badge}</span>`
           : ''}</button>`;
-    side.innerHTML = `
+    D.side.innerHTML = `
       <div role="tablist" class="tabs tabs-box tabs-sm m-2 shrink-0 self-center" data-testid="panel.tabs">
         ${tab('blueprints', 'Blueprints')}${
           /*
@@ -1800,7 +1830,7 @@
         </span>
       </div>` : ''}`;
 
-    const track = host.querySelector('.wdp-track');
+    const track = D.host.querySelector('.wdp-track');
     if (track) {
       // A rebuilt element has no state to transition from, so paint where we
       // were, flush that, then move. A rAF is not enough — the browser
@@ -1813,9 +1843,9 @@
       track.style.transform = `translateX(${AT[S.view] ?? '0%'})`;
       S.lastView = S.view;
     }
-    host.querySelectorAll('.wdp-pane').forEach((p, i) => { p.scrollTop = wasAt[i] ?? 0; });
+    D.host.querySelectorAll('.wdp-pane').forEach((p, i) => { p.scrollTop = wasAt[i] ?? 0; });
     if (caret) {
-      const box = host.querySelector('#' + caret.id);
+      const box = D.host.querySelector('#' + caret.id);
       if (box) {
         box.focus();
         box.setSelectionRange(caret.start, caret.end);
@@ -1823,32 +1853,32 @@
     }
     wireRuleRows();
     wireSearch();
-    const back = host.querySelector('.wdp-back');
+    const back = D.host.querySelector('.wdp-back');
     if (back) back.onclick = () => { S.view = 'list'; render(); };
-    host.querySelectorAll('[data-goto]').forEach((el) => {
+    D.host.querySelectorAll('[data-goto]').forEach((el) => {
       // Through open(), not by assigning `selected`: stepping to a rule is
       // opening it, and a second way in that skipped the trip to its screen
       // meant next/previous quietly judged whatever page you were left on.
       el.onclick = () => open(el.dataset.goto);
     });
-    const actorName = host.querySelector('#wdp-actor');
+    const actorName = D.host.querySelector('#wdp-actor');
     if (actorName) actorName.onclick = openActorSettings;
-    const carryOn = host.querySelector('#wdp-continue');
+    const carryOn = D.host.querySelector('#wdp-continue');
     if (carryOn) carryOn.onclick = continueWalkdown;
-    side.querySelectorAll('[data-tab]').forEach((b) => {
+    D.side.querySelectorAll('[data-tab]').forEach((b) => {
       // Back to the list as well as to the tab: the detail pane is a rule's,
       // and a rule is a thing on the Rules tab. Leaving the track slid over
       // showed the open rule sitting on top of whichever tab you picked.
       b.onclick = () => { S.listTab = b.dataset.tab; S.view = 'list'; render(); };
     });
-    side.querySelectorAll('[data-tfilter]').forEach((b) => {
+    D.side.querySelectorAll('[data-tfilter]').forEach((b) => {
       // Changing which threads are listed is not opening one: back to the list,
       // or the filter would quietly re-answer a question about the thread you
       // are reading rather than about the list behind it.
       b.onclick = () => { S.threadFilter = b.dataset.tfilter; S.view = 'list'; render(); };
     });
-    wireBlueprints(side);
-    host.querySelectorAll('[data-goscreen]').forEach((el) => {
+    wireBlueprints(D.side);
+    D.host.querySelectorAll('[data-goscreen]').forEach((el) => {
       el.onclick = () => goTo(screenById(el.dataset.goscreen));
     });
     wireVerdict();
@@ -1921,11 +1951,11 @@
   /** Repaint the bar's state without rebuilding it — see `dragging`. */
   function paintBar() {
     const share = S.protoShare ?? (pageSurface() === 'prototype' ? 1 : 0);
-    bar.querySelectorAll('[data-surface]').forEach((b) => {
+    D.bar.querySelectorAll('[data-surface]').forEach((b) => {
       const on = b.dataset.surface === 'prototype' ? share === 1 : share === 0;
       b.classList.toggle('btn-outline', !on);
     });
-    const pin = bar.querySelector('#wdp-pin');
+    const pin = D.bar.querySelector('#wdp-pin');
     if (!pin) return;
     const pinning = PIN.isOn();
     pin.disabled = !pinSurface();
@@ -1938,14 +1968,14 @@
   const GEAR = () =>
     `<button class="btn btn-xs btn-ghost" id="wdp-desk-btn" data-testid="panel.desk-tuner" title="Settings">${icon('gear', 'size-3.5')}</button>`;
   const wireGear = () => {
-    const gear = bar.querySelector('#wdp-desk-btn');
+    const gear = D.bar.querySelector('#wdp-desk-btn');
     if (gear) gear.onclick = () => { S.deskOpen = !S.deskOpen; syncDeskPanel(); };
   };
 
   function renderBar() {
     if (S.dragging) return paintBar();
     if (S.phase !== 'ready') {
-      bar.innerHTML = `${GEAR()}<span class="font-bold tracking-tight">walk<span class="text-primary">down</span></span>`;
+      D.bar.innerHTML = `${GEAR()}<span class="font-bold tracking-tight">walk<span class="text-primary">down</span></span>`;
       return wireGear();
     }
     const canGhost = Boolean(ghostSource(screenInHand()));
@@ -1962,7 +1992,7 @@
      * because a control that is always loud says nothing.
      */
     const owedNow = owedRows().length;
-    bar.innerHTML = `
+    D.bar.innerHTML = `
       ${GEAR()}
       <span class="font-bold tracking-tight">walk<span class="text-primary">down</span></span>
       ${STALE_COPY()
@@ -2038,7 +2068,7 @@
       </span>`;
 
     wireGear();
-    bar.querySelector('#wdp-screen-btn').onclick = () => {
+    D.bar.querySelector('#wdp-screen-btn').onclick = () => {
       S.screensOpen = !S.screensOpen;
       syncScreenPanel();
     };
@@ -2052,15 +2082,15 @@
      * nothing unless the list is open.
      */
     syncScreenPanel();
-    bar.querySelector('#wdp-undock').onclick = () => setDocked(false);
-    bar.querySelector('#wdp-pin').onclick = () =>
+    D.bar.querySelector('#wdp-undock').onclick = () => setDocked(false);
+    D.bar.querySelector('#wdp-pin').onclick = () =>
       PIN.set(!PIN.isOn());
     // Start it, or end it: the same button, because it is the same sitting.
-    bar.querySelector('#wdp-walk').onclick = () => (S.session ? finishWalkdown() : startWalkdown());
-    bar.querySelectorAll('[data-vp]').forEach((b) => {
+    D.bar.querySelector('#wdp-walk').onclick = () => (S.session ? finishWalkdown() : startWalkdown());
+    D.bar.querySelectorAll('[data-vp]').forEach((b) => {
       b.onclick = () => setViewport(Number(b.dataset.vp));
     });
-    bar.querySelectorAll('[data-surface]').forEach((b) => {
+    D.bar.querySelectorAll('[data-surface]').forEach((b) => {
       b.onclick = () => {
         /*
          * Off a screen entirely, fading is meaningless - there is no design of
@@ -2087,7 +2117,7 @@
         setFade(want === 'prototype' ? 1 : 0);
       };
     });
-    const fade = bar.querySelector('#wdp-fade');
+    const fade = D.bar.querySelector('#wdp-fade');
     if (fade) {
       // `input` fires all through the drag and must not disturb the element;
       // `change` fires when the pointer (or the keyboard) lets go, and that is
@@ -2357,7 +2387,7 @@
 
   /** Opening a rule is a click on its row, wherever the row was just drawn. */
   function wireRuleRows() {
-    host.querySelectorAll('[data-rule]').forEach((el) => {
+    D.host.querySelectorAll('[data-rule]').forEach((el) => {
       el.onclick = () => open(el.dataset.rule);
     });
   }
@@ -2371,7 +2401,7 @@
    * no chance of restoring it a frame late.
    */
   function paintRules() {
-    const list = host.querySelector('.wdp-list');
+    const list = D.host.querySelector('.wdp-list');
     if (!list) return;
     list.innerHTML = listPane();
     list.scrollTop = 0;   // a filtered list is a new list; showing its middle is not helpful
@@ -2379,7 +2409,7 @@
   }
 
   function wireSearch() {
-    const box = host.querySelector('#wdp-search');
+    const box = D.host.querySelector('#wdp-search');
     if (!box) return;
     box.oninput = () => { S.ruleQuery = box.value; paintRules(); };
     box.onkeydown = (e) => {
@@ -2528,7 +2558,7 @@
     // must not close the thing it is looking at.
     shotLayer.onclick = (e) => { if (e.target === shotLayer) closeShots(); };
     shotLayer.querySelector('[data-testid="detail.screenshots-close"]').onclick = closeShots;
-    sr.appendChild(shotLayer);
+    D.sr.appendChild(shotLayer);
   }
 
   function detailPane() {
@@ -2843,7 +2873,7 @@
   }
 
   function say(msg) {
-    const el = host.querySelector('#wdp-tsay');
+    const el = D.host.querySelector('#wdp-tsay');
     if (!el) return toast(msg, { tone: 'error' });
     el.textContent = msg;
     el.classList.remove('hidden');
@@ -2889,7 +2919,7 @@
   async function threadAct(id, status) {
     const t = (S.data.threads ?? []).find((x) => x.id === id);
     if (!t) return;
-    const text = (host.querySelector('#wdp-note')?.value ?? '').trim();
+    const text = (D.host.querySelector('#wdp-note')?.value ?? '').trim();
     const actor = whoAmI();
     const humanOnly = status === 'verified' || status === 'waived';
     // Agents claim work; a person accepts it. The server refuses this too —
@@ -2967,7 +2997,7 @@
     render();
     // The first unread message if there is one, and otherwise the newest -
     // never the top of an exchange you have already read.
-    const pane = host.querySelectorAll('.wdp-track > div')[S.listTab === 'threads' ? 1 : 2];
+    const pane = D.host.querySelectorAll('.wdp-track > div')[S.listTab === 'threads' ? 1 : 2];
     const stream = pane?.querySelector('.overflow-y-auto');
     const mark = pane?.querySelector('.wd-new');
     if (mark) mark.scrollIntoView({ block: 'start' });
@@ -2975,10 +3005,10 @@
   }
 
   function wireThreads() {
-    host.querySelectorAll('[data-open-thread]').forEach((el) => {
+    D.host.querySelectorAll('[data-open-thread]').forEach((el) => {
       el.onclick = (e) => { e.stopPropagation(); openThreadView(el.dataset.openThread); };
     });
-    const tback = host.querySelector('.wdp-thread-back');
+    const tback = D.host.querySelector('.wdp-thread-back');
     if (tback) tback.onclick = () => {
       const t = (S.data?.threads ?? []).find((x) => x.id === S.openThread);
       // Back where you came from: the rule, or the list for a pin that has
@@ -2988,7 +3018,7 @@
       S.openThread = null;
       render();
     };
-    const note = host.querySelector('#wdp-note');
+    const note = D.host.querySelector('#wdp-note');
     if (note) {
       note.oninput = () => { S.threadNote = note.value; };
       // Enter sends, Shift+Enter breaks the line - the muscle memory everyone
@@ -3003,7 +3033,7 @@
     }
     // An id written in a message is a link: thread ids open that thread, rule
     // ids open that rule, so a conversation can point at things.
-    host.querySelectorAll('[data-thread-ref]').forEach((el) => {
+    D.host.querySelectorAll('[data-thread-ref]').forEach((el) => {
       el.onclick = (e) => {
         e.stopPropagation();
         const id = el.dataset.threadRef;
@@ -3014,18 +3044,18 @@
         openThreadView(id);
       };
     });
-    host.querySelectorAll('[data-rule-ref]').forEach((el) => {
+    D.host.querySelectorAll('[data-rule-ref]').forEach((el) => {
       el.onclick = (e) => { e.stopPropagation(); open(el.dataset.ruleRef); };
     });
-    const tactor = host.querySelector('#wdp-tactor');
+    const tactor = D.host.querySelector('#wdp-tactor');
     if (tactor) tactor.onclick = () => openActorSettings();
-    host.querySelectorAll('[data-act]').forEach((el) => {
+    D.host.querySelectorAll('[data-act]').forEach((el) => {
       el.onclick = () => threadAct(el.dataset.tid, el.dataset.act);
     });
-    host.querySelectorAll('[data-verify-all]').forEach((el) => {
+    D.host.querySelectorAll('[data-verify-all]').forEach((el) => {
       el.onclick = () => verifyAll(el.dataset.verifyAll);
     });
-    host.querySelectorAll('[data-checks]').forEach((el) => {
+    D.host.querySelectorAll('[data-checks]').forEach((el) => {
       el.ontoggle = () => {
         const rule = el.dataset.checks;
         // A pane rebuilt with the disclosure already open fires this too; only
@@ -3041,14 +3071,14 @@
      * gets the mouseleave that would have put the surface back.
      */
     highlightAnchor(null);
-    host.querySelectorAll('[data-anchor]').forEach((el) => {
+    D.host.querySelectorAll('[data-anchor]').forEach((el) => {
       el.onmouseenter = () => highlightAnchor(el.dataset.anchor);
       el.onmouseleave = () => highlightAnchor(null);
     });
-    host.querySelectorAll('[data-shots]').forEach((el) => {
+    D.host.querySelectorAll('[data-shots]').forEach((el) => {
       el.onclick = () => { try { openShots(JSON.parse(el.dataset.shots)); } catch { /* nothing to show */ } };
     });
-    host.querySelectorAll('[data-sketch]').forEach((el) => {
+    D.host.querySelectorAll('[data-sketch]').forEach((el) => {
       el.onclick = () => { S.ghostOverride = el.dataset.sketch; setGhost(false); S.ghostOverride = el.dataset.sketch; setGhost(true); };
     });
   }
@@ -3078,7 +3108,7 @@
   function highlightAnchor(element) {
     const msg = { type: 'walkdown:highlight', element: element ?? null };
     ghostFrame()?.contentWindow?.postMessage(msg, '*');
-    appFrame?.contentWindow?.postMessage(msg, '*');
+    D.appFrame?.contentWindow?.postMessage(msg, '*');
   }
 
   /**
@@ -3145,7 +3175,7 @@
     if (!sameAddress(S.frameUrl, url)) {
       S.frameUrl = url;
       frameLoading(url, `Loading ${screenLabel(screen)}…`);
-      appFrame.src = url;
+      D.appFrame.src = url;
     }
     /*
      * The screen override describes where we are going, not where we have
@@ -3181,7 +3211,7 @@
       S.headlessCover = document.createElement('div');
       document.body.appendChild(S.headlessCover);
     }
-    const cs = getComputedStyle(side);
+    const cs = getComputedStyle(D.side);
     S.headlessCover.style.cssText = `position:fixed; top:${HEAD}px; left:${GAP}px;
       width:calc(100vw - ${W + GAP * 3}px); height:calc(100vh - ${HEAD + GAP}px);
       z-index:2147482000; border-radius:10px; overflow:hidden;
@@ -3469,7 +3499,7 @@
   }
 
   function sayVerdict(msg) {
-    const el = host.querySelector('#wdp-vsay');
+    const el = D.host.querySelector('#wdp-vsay');
     if (!el) return toast(msg, { tone: 'error' });
     el.textContent = msg;
     el.classList.remove('hidden');
@@ -3493,13 +3523,13 @@
       S.session?.started && String(t.created ?? '') >= S.session.started);
 
   function wireVerdict() {
-    const note = host.querySelector('#wdp-vnote');
+    const note = D.host.querySelector('#wdp-vnote');
     if (note) note.oninput = () => { S.verdictNote = note.value; };
-    host.querySelectorAll('[data-v]').forEach((b) => {
+    D.host.querySelectorAll('[data-v]').forEach((b) => {
       b.onclick = async () => {
         const status = b.dataset.v;
         const rule = S.selected.rule;
-        const text = (host.querySelector('#wdp-vnote')?.value ?? '').trim();
+        const text = (D.host.querySelector('#wdp-vnote')?.value ?? '').trim();
         // A refusal is work nobody can act on until it says why. Refine's why
         // is the text itself; a fail's may also be a pin on the page.
         if (status === 'refining' && !text)
@@ -3580,7 +3610,7 @@
     // wholesale, and the things worth toasting - a verdict recorded, a thread
     // ended - are exactly the things that trigger a repaint, so a toast living
     // in there was swept away in the same tick it appeared.
-    host.appendChild(t);
+    D.host.appendChild(t);
     if (!sticky) setTimeout(() => t.remove(), 4200);
   }
 
@@ -3813,7 +3843,7 @@
      * panel's rule list unable to receive a wheel event at all until a reload
      * (n-0086), and a fade slider dying mid-drag was the same failure (n-0068).
      */
-    sr.insertBefore(S.ghost, host);
+    D.sr.insertBefore(S.ghost, D.host);
     paintGhostReach();
     render();
   }
@@ -3873,14 +3903,14 @@
    */
   function pushContexts() {
     pushContext(ghostFrame(), ghostSurface(), ghostHasReach());
-    if (appFrame) pushContext(appFrame, pageSurface(), PIN.isOn() && !ghostHasReach());
+    if (D.appFrame) pushContext(D.appFrame, pageSurface(), PIN.isOn() && !ghostHasReach());
   }
 
   /** Which surface a message came from, or null if it is not one of ours. */
   function surfaceOfSource(src) {
     if (!src) return null;
     if (src === ghostFrame()?.contentWindow) return ghostSurface();
-    if (appFrame && src === appFrame.contentWindow) return pageSurface();
+    if (D.appFrame && src === D.appFrame.contentWindow) return pageSurface();
     return null;
   }
 
@@ -4074,7 +4104,7 @@
   function renderGate() {
     renderBar();
     if (S.phase === 'connect') {
-      side.innerHTML = `
+      D.side.innerHTML = `
         <div class="flex flex-1 flex-col justify-center gap-3 p-5">
           <div class="flex flex-col gap-3" data-testid="start.message">
             <div class="text-[15px] font-semibold">No blueprints open</div>
@@ -4093,19 +4123,37 @@
           </div>
           <p class="text-[11.5px] opacity-40">Then every blueprint under that folder is listed here.</p>
         </div>`;
-      wireBlueprints(side);
+      wireBlueprints(D.side);
       return;
     }
-    side.innerHTML = `
+    D.side.innerHTML = `
       <div class="p-4 pb-2">
         <div class="text-[15px] font-semibold">Which blueprint?</div>
         <p class="mt-1 text-[12.5px] leading-relaxed opacity-60">Remembered for
           <b>${esc(location.origin)}</b>, and changeable later from the Blueprints tab.</p>
       </div>
       <div class="flex-1 overflow-y-auto">${blueprintsPane()}</div>`;
-    wireBlueprints(side);
+    wireBlueprints(D.side);
   }
 
+  /*
+   * Boot, in the one order that works: the chrome exists, then the stylesheet
+   * is asked for (it lands in the shadow root whenever it arrives), then the
+   * frame, then the panel is put out.
+   *
+   * This sequence is the reason nothing above it may READ D at module level.
+   * Writing D from a builder is fine and is the point of the holder; reading
+   * it while the file is still evaluating is not, because after the split an
+   * import graph decides who evaluates first and no shard should have to know
+   * the answer. (One statement did read it — the frame's load listener, which
+   * asked `if (D.appFrame)` at module level and would have quietly registered
+   * nothing once the frame stopped existing that early. It moved into
+   * buildAppFrame, which is where it belongs.)
+   */
+  buildChrome();
+  loadStylesheet();
+  buildPutAwayControls();
+  buildAppFrame();
   setDocked(true);
   // Pin mode has one owner — the embed. The bar mirrors it rather than keeping
   // a second copy that Escape would have to remember to update.
