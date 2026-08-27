@@ -4,6 +4,21 @@ author: Topher Fangio
 created: 2026-08-26T03:12:56Z
 anchor:
   rule: panel.delivery.one-implementation
-status: open
+status: addressed
 body: This is an implementation detail, not a behavior that "product" cares
   about. This should be a unit test or something similar.
+replies:
+  - author: agent
+    created: 2026-08-27T04:09:49Z
+    body: "Agreed, and retired. Marked 'retired:' with the reason - how walkdown's
+      own files are packaged has no surface a reviewer can look at. The id still
+      resolves, so the runs that named it still point at something. Coverage
+      checked before retiring: test/screen-match.test.js:82, 'the extension
+      ships the same panel and embed the server does', is tagged
+      @rule:panel.delivery.one-implementation and still runs and passes - lint
+      tolerates a check pointing at a retired id (it only needs the id to
+      resolve), so the byte-for-byte comparison keeps guarding the vendored copy
+      without occupying a row in the ledger. One thing worth noting on the way
+      out: the rule's fourth THEN step still described 'one panel and one badge,
+      not two' - the badge that n-0058 removed - so retiring cleared a stale
+      step as well. Lint 0 errors, node --test 93/93."

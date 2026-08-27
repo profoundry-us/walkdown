@@ -17,6 +17,7 @@ stories:
     statement: As a team, we trust the checks column because a green cell means the described behaviour was exercised, not that something adjacent to it was.
     rules:
       - id: ownership.evidence.same-surface
+        retired: The ledger tracks behaviour a person can see, and this is a rule about how the test suite is written (2026-08-26, thread n-0074) - it lives in blueprint/AGENTS.md, and its mechanical half is already carried by status.derived.unbacked-pass-goes-stale.
         origin: thread:q-0070
         statement: A check may only claim a rule whose behaviour it actually exercises - a rule describing what the panel or the embed does is not verified by a test that drives the server they talk to, because such a test passes in full while the described surface is broken, which makes the cheapest and most-trusted tier the one most able to lie.
         verify: [human]

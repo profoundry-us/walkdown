@@ -4,6 +4,17 @@ author: Topher Fangio
 created: 2026-08-26T03:26:33Z
 anchor:
   rule: panel.delivery.anchors-still-required
-status: open
+status: addressed
 body: Again, this works fine but the rule description needs to be rewritten; too
   confusing.
+replies:
+  - author: agent
+    created: 2026-08-27T04:09:13Z
+    body: "Statement reworded, behaviour untouched. It now reads: 'A page that
+      carries no anchors can still be reviewed - a pin dropped on it is recorded
+      by where it sits on the screen rather than against an element, and pages
+      that do carry anchors are unaffected.' The old 'reaching a page is not the
+      same as anchoring to it... the missing anchors are the reason it cannot do
+      better' was arguing about anchors rather than saying what happens. Steps
+      left as they were; they already described this correctly. Statement
+      rehashed; verdict awaits your re-judgement."

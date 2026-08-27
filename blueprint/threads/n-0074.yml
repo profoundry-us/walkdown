@@ -4,6 +4,23 @@ author: Topher Fangio
 created: 2026-08-26T02:53:39Z
 anchor:
   rule: ownership.evidence.same-surface
-status: open
+status: addressed
 body: This rule doesn't make sense to me and has no UI; so it likely shouldn't
   be a rule here. Perhaps this is a unit test or something else?
+replies:
+  - author: agent
+    created: 2026-08-27T04:09:49Z
+    body: "Agreed, and retired. q-0070 reply (1) had already settled the principle
+      behind your objection - unit tests over lib/ are separate work and do not
+      belong in the ledger at all - and this rule is that principle wearing a
+      rule's clothes: it is about how a check must be written, not about
+      anything a person can see. Marked 'retired:' with the reason, so the id
+      keeps resolving for the runs that named it while the rule leaves the
+      report. Where it lives now: the wording is in blueprint/AGENTS.md as an
+      authoring convention, test/status.test.js and test/serve.test.js both
+      carry it in their headers as the reason twelve rule tags were stripped,
+      and its enforceable half is already a live rule with a passing check -
+      status.derived.unbacked-pass-goes-stale, covered by three tests in
+      test/status.test.js, which makes a pass go stale once no check claims the
+      rule any more. Retiring cost nothing: no check was tagged with this id,
+      lint is at 0 errors, and node --test is 93/93."

@@ -4,6 +4,14 @@ author: Topher Fangio
 created: 2026-08-26T03:34:49Z
 anchor:
   rule: panel.rules.one-pane-per-tab
-status: open
+status: addressed
 body: This is working fine but this part of the rule is probably unnecessary or
   needs to be reworded ", not the rule you left open on another one"
+replies:
+  - author: agent
+    created: 2026-08-27T04:09:28Z
+    body: "Trimmed. The statement now reads: 'A rule's detail belongs to the tab
+      that lists rules - switching to another tab shows that tab's own content.'
+      The ', not the rule you left open on another one' clause is gone; it was
+      restating the first half backwards. Steps unchanged. Statement rehashed;
+      verdict awaits your re-judgement."

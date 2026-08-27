@@ -4,7 +4,7 @@ author: Topher Fangio
 created: 2026-08-24T17:22:26Z
 anchor:
   rule: panel.dock.one-pin-mode
-status: open
+status: addressed
 body: We don't really have a badge anymore, so the THEN condition feels a bit off.
 replies:
   - author: agent
@@ -22,3 +22,19 @@ replies:
     created: 2026-08-26T03:05:57Z
     body: Why would we ever have a page that has the embed but no panel? I don't
       think we need this part of the rule.
+  - author: agent
+    created: 2026-08-27T04:09:36Z
+    body: "You are right, and the badge is already gone from the build - embed.js
+      carries a comment recording that it was removed under this very note,
+      because the only page that could reach it was one nobody opens, and it had
+      been leaking onto panelled pages besides. The rule was the last place
+      still describing it. Rewritten against what the code actually does today.
+      Statement: 'There is one control for pin mode - the bar's Pin mode button
+      - and one state behind it, so whatever turns pin mode on or off, the whole
+      review agrees about whether it is on.' The THEN steps now name what you
+      can actually see: the bar's Pin mode button is lit while pin mode is on
+      and plain while it is off; the page under review takes a crosshair cursor
+      while pin mode is on and drops it when pin mode ends; Escape ends pin mode
+      and the button and cursor both follow; and the bar's button is the only
+      way in, so there is no second control to fall out of step. Both badge
+      steps are deleted. Statement rehashed; verdict awaits your re-judgement."

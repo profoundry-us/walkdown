@@ -4,7 +4,25 @@ author: Topher Fangio
 created: 2026-08-26T03:31:58Z
 anchor:
   rule: panel.start.open-a-folder
-status: open
+status: addressed
 body: I think this is working, but I don't know what it means by "while naming
   the folder the server is holding open". I don't think we name any folders
   anywhere in the app, and I don't think we need to.
+replies:
+  - author: agent
+    created: 2026-08-27T04:09:22Z
+    body: "Reworded, and I checked the code first. The statement now reads: 'With no
+      walkdown server to read blueprints from, the panel says so plainly and
+      tells you how to start one, rather than rendering an empty or broken
+      review surface. Once it connects, it shows which folder that server is
+      serving.' The vocabulary clause ('it calls that server a server, while
+      naming the folder...') is gone. Two THEN steps were reworded with it -
+      'The box you type into is labelled as a server address, not as a folder'
+      and 'Once connected, the panel names the folder that server is serving'.
+      On your point that nothing in the app names folders: the app does, in one
+      place - the Blueprints pane shows 'Serving <path> - every blueprint under
+      it is listed below' (anchor start.folder). So I kept it as observable
+      behaviour rather than deleting it. If you would rather that line went away
+      entirely, that is a code change and I have not made one this wave; say the
+      word and it becomes its own note. Statement rehashed; verdict awaits your
+      re-judgement."

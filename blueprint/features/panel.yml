@@ -122,20 +122,20 @@ stories:
 
       - id: panel.dock.one-pin-mode
         origin: thread:n-0015
-        statement: Pin mode has a single owner - the embed - and with the panel up there is a single control for it, so the bar and Escape can never disagree about whether it is on.
+        statement: There is one control for pin mode - the bar's Pin mode button - and one state behind it, so whatever turns pin mode on or off, the whole review agrees about whether it is on.
         verify: [agent, human]
         screens: [review]
         steps:
           given:
             - A page with both the embed and the panel
           when:
-            - Toggle pin mode from the bar, then press Escape
+            - Turn pin mode on from the bar, then press Escape
           then:
-            - Every control reflects the change, whichever one made it
-            - No control keeps its own copy of the state to fall out of step
-            - With the panel up, pin mode has exactly one control - the bar's; the embed's own floating badge stays hidden rather than echoing it
-            - On a page carrying only the embed tag and no panel, that badge appears, because there it is the only way into pin mode
-          statement_hash: sha256:855c16516e9a
+            - The bar's Pin mode button is lit while pin mode is on and plain while it is off
+            - The page under review takes a crosshair cursor while pin mode is on, and drops it when pin mode ends
+            - Escape ends pin mode, and the button and the cursor both follow
+            - The bar's button is the only way to turn pin mode on, so there is no second control to fall out of step
+          statement_hash: sha256:a66c41a78d23
 
       - id: panel.dock.no-pin-mid-fade
         origin: thread:n-0023
@@ -262,6 +262,7 @@ stories:
     statement: As a reviewer, I can walk down an application whether or not anyone can add a script tag to it.
     rules:
       - id: panel.delivery.one-implementation
+        retired: How walkdown's own files are packaged is an implementation detail with no surface a reviewer can see (2026-08-26, thread n-0078); the byte-for-byte comparison stays as a node test.
         origin: thread:q-0016
         statement: The panel and the embed stay two files because they load into two documents - the embed into the application being reviewed, the panel only into walkdown's own page above it - and neither carries a copy of the other.
         verify: [checks, human]
@@ -279,7 +280,7 @@ stories:
 
       - id: panel.delivery.absent-until-asked
         origin: thread:q-0016
-        statement: The extension does nothing on a page until a person asks for it - it never guesses what you are looking at, and it never leaves itself running on a page you have stopped reviewing.
+        statement: The extension adds nothing to a page until you click its toolbar button, and clicking the button again ends the review and hands the page back exactly as it was.
         verify: [human]
         steps:
           given:
@@ -291,11 +292,11 @@ stories:
             - The click begins a review of that page, and the button says which of the two states it is in
             - Clicking again returns to the page itself, at the URL it had reached rather than the one the review started from
             - Nothing about the review outlives it - not the framing, not the headers it needed removed
-          statement_hash: sha256:ac63902255cd
+          statement_hash: sha256:f7a1627079f4
 
       - id: panel.delivery.framed-isolation
         origin: thread:n-0030
-        statement: The extension reviews an application by giving it a viewport of its own - the app is framed inside walkdown's page - because that is the only arrangement in which what the app draws cannot reach walkdown, and the one thing only an extension can arrange.
+        statement: The extension reviews an application by giving it a viewport of its own inside walkdown's page, so the application lays itself out against that viewport and nothing it draws can paint over walkdown's chrome.
         verify: [agent, human]
         screens: [review]
         steps:
@@ -307,8 +308,8 @@ stories:
             - The app's modals, overlays and sticky chrome are laid out against the sheet rather than the whole window
             - Nothing the app draws paints over walkdown, and nothing it opens makes walkdown unusable
             - A page that refuses framing is reviewed anyway, by removing the header that refuses - for that tab only, and only while it is being reviewed
-            - The application is the frame's business and walkdown is not inside it - the panel learns which screen it is on because the copy of walkdown in the frame says so, including when the app moves without reloading
-          statement_hash: sha256:064bb8c0f0a4
+            - The panel keeps up with the application - navigating inside it moves the panel to the screen the app landed on, including when the app moves without a page load
+          statement_hash: sha256:967abb13513f
 
       - id: panel.delivery.one-switch
         origin: thread:n-0018
@@ -343,7 +344,7 @@ stories:
 
       - id: panel.delivery.anchors-still-required
         origin: thread:q-0016
-        statement: Reaching a page is not the same as anchoring to it - on a page with no anchors, feedback still lands by position, and the missing anchors are the reason it cannot do better.
+        statement: A page that carries no anchors can still be reviewed - a pin dropped on it is recorded by where it sits on the screen rather than against an element, and pages that do carry anchors are unaffected.
         verify: [agent, human]
         screens: [review]
         steps:
@@ -355,7 +356,7 @@ stories:
             - The pin is recorded against its coordinates and the thread is written
             - It renders as a positioned pin, not an anchored one
             - Anchored pins keep working wherever anchors do exist
-          statement_hash: sha256:9699e8d0df4d
+          statement_hash: sha256:6cbc4017880c
 
   - id: panel.start
     title: A fresh install knows nothing, and says so
@@ -363,7 +364,7 @@ stories:
     rules:
       - id: panel.start.open-a-folder
         origin: thread:n-0017
-        statement: With no walkdown server to read blueprints from, the panel says so plainly and tells you how to open one, rather than rendering an empty or broken review surface - and it calls that server a server, while naming the folder the server is holding open.
+        statement: With no walkdown server to read blueprints from, the panel says so plainly and tells you how to start one, rather than rendering an empty or broken review surface. Once it connects, it shows which folder that server is serving.
         verify: [agent, human]
         screens: [start]
         steps:
@@ -375,9 +376,9 @@ stories:
             - It says no blueprints are open and names the command that opens them
             - The address it looks at can be changed and retried without a reload
             - It is stated as a first step, not as an error
-            - What you type is labelled as the server it is, never as a folder
-            - Once connected, the folder that server is serving is named, so "which folder is this?" is answered without pretending the browser opened one
-          statement_hash: sha256:6e9246fa7579
+            - The box you type into is labelled as a server address, not as a folder
+            - Once connected, the panel names the folder that server is serving
+          statement_hash: sha256:2a5e9a0925a7
 
       - id: panel.start.choose-a-blueprint
         origin: thread:n-0017
@@ -441,7 +442,7 @@ stories:
 
       - id: panel.rules.one-pane-per-tab
         origin: thread:n-0032
-        statement: A rule's detail belongs to the tab that lists rules - leaving that tab shows the tab you asked for, not the rule you left open on another one.
+        statement: A rule's detail belongs to the tab that lists rules - switching to another tab shows that tab's own content.
         verify: [agent, human]
         screens: [review]
         steps:
@@ -453,7 +454,7 @@ stories:
             - That tab's own content is what shows
             - Returning to Rules shows the list, from which the rule can be opened again
             - A tab that opens something of its own opens it into the same seat the rule detail uses, so no tab slides past another tab's detail to reach its own
-          statement_hash: sha256:5b742db34a44
+          statement_hash: sha256:7cbb341f16bd
 
       - id: panel.rules.step-between
         origin: walkdown
@@ -900,7 +901,7 @@ stories:
             - Choose Refine with the box empty, then with feedback written
           then:
             - The empty refine is refused with the reason; nothing is recorded
-            - The written refine files the note, records `refining`, and stays on the rule
+            - The written refine files the note, records a refining result, and stays on the rule
             - The refine and its note arrive linked in the finished run record
           statement_hash: sha256:cc9c4f5148e1
 
@@ -915,7 +916,7 @@ stories:
           when:
             - Approve it and finish the session
           then:
-            - The run record carries `approved` with the statement hash as it was signed off
+            - The run record carries an approved result with the statement hash as it was signed off
             - The rule still shows as pending and still owes a human verdict once built
             - Rewording the statement renders the approval as stale, asking for a fresh sign-off
             - Approving moves the session on to the next rule owing a verdict

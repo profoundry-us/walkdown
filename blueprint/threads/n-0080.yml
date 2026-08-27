@@ -4,8 +4,21 @@ author: Topher Fangio
 created: 2026-08-26T03:15:59Z
 anchor:
   rule: panel.delivery.framed-isolation
-status: open
+status: addressed
 body: "This is working fine, but again the rule verbiage doesn't make a lot of
   sense; needs rewording: \"because that is the only arrangement in which what
   the app draws cannot reach walkdown, and the one thing only an extension can
   arrange\""
+replies:
+  - author: agent
+    created: 2026-08-27T04:09:13Z
+    body: "Statement reworded, behaviour untouched. It now reads: 'The extension
+      reviews an application by giving it a viewport of its own inside
+      walkdown's page, so the application lays itself out against that viewport
+      and nothing it draws can paint over walkdown's chrome.' The 'only
+      arrangement... only an extension can arrange' clause was an argument for
+      the design rather than a description of it, so it is gone. I also plainly
+      reworded the last THEN step, which had the same problem - it now says the
+      panel follows the app to whatever screen it navigates to, including
+      without a page load. Statement rehashed; verdict awaits your
+      re-judgement."

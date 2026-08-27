@@ -4,8 +4,19 @@ author: Topher Fangio
 created: 2026-08-26T03:14:38Z
 anchor:
   rule: panel.delivery.absent-until-asked
-status: open
+status: addressed
 body: "I think this is working exactly as desired, but the phrasing of this
   description is weird: \"and it never leaves itself running\" doesn't make
   sense to me. I think we just need to reword this to be more about how the
   extension works."
+replies:
+  - author: agent
+    created: 2026-08-27T04:09:04Z
+    body: "Reworded the statement, no behaviour touched. It now reads: 'The
+      extension adds nothing to a page until you click its toolbar button, and
+      clicking the button again ends the review and hands the page back exactly
+      as it was.' The 'never leaves itself running' clause is gone - it was
+      trying to say that the second click really does undo the review, which the
+      THEN steps already say plainly (nothing outlives the review, and you are
+      left at the URL the page had reached). Statement rehashed, so the recorded
+      verdict is stale and awaits your re-judgement."
