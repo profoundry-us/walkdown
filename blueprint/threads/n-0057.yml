@@ -6,7 +6,7 @@ anchor:
   rule: panel.rules.steps-not-an-appendix
   screen: rule-detail
   element: detail.technical-disclosure
-status: open
+status: addressed
 body: "Agent walkdown: the given/when/then steps are expanded in the detail pane
   as the rule asks, but the second half is unbuilt - nothing renders the
   recorded check source behind a collapsed disclosure. The probe found no source
@@ -32,3 +32,25 @@ replies:
   - author: Topher Fangio
     created: 2026-08-26T03:36:00Z
     body: I don't actually see the checks on any of these.
+  - author: agent
+    created: 2026-08-27T05:01:03Z
+    body: >-
+      Closing this out with n-0084, which is the same complaint after my last
+      reply claimed it was built. It was built, and it was still not there to
+      see, for two reasons: it only drew for rules whose ledger had recorded
+      check refs (this rule had none — it verified by [agent, human]), and when
+      it did draw, opening it said "Loading…" forever because the pane is
+      rebuilt on every render and the fetched source landed on a node that had
+      already been discarded.
+
+
+      Both fixed: the panel falls back to the check source the suite carries
+      when the ledger has none, and the disclosure's open state and its fetched
+      source now live outside the markup, keyed by rule, so a rebuild cannot
+      lose either. Collapsed by default, one click shows the source /api/checks
+      returns.
+
+
+      Verified by a browser check on this rule (checks/panel.spec.js) that fails
+      against the old build and passes now, in recorded run
+      2026-08-27T05-00-07Z-local-01.

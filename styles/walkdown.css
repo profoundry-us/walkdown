@@ -101,6 +101,11 @@
 
   .evrow { @apply flex gap-2 border-b border-base-200 py-1 text-[13px]; }
   .evrow .src { @apply w-25 opacity-50; }
+  /* The screenshots an agent's run attached belong TO that run, so they hang
+     under its row as a bullet rather than standing beside it as a tier of
+     their own (n-0100) - which means the rule between the two comes off. */
+  .evrow.evshot { @apply border-b-0 py-0 text-[12px]; }
+  .evrow:has(+ .evshot) { @apply border-b-0; }
 
   .thread {
     @apply my-2 cursor-pointer rounded-box border-l-3 border-transparent

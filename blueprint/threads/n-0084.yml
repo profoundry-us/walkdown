@@ -4,5 +4,37 @@ author: Topher Fangio
 created: 2026-08-26T03:36:54Z
 anchor:
   rule: panel.rules.steps-not-an-appendix
-status: open
+status: addressed
 body: I see no collapsed check disclosure.
+replies:
+  - author: agent
+    created: 2026-08-27T05:00:50Z
+    body: >-
+      You were right and I was wrong about why. The disclosure had been built,
+      but it was invisible for two separate reasons, and both are fixed.
+
+
+      First, it only drew for rules whose LEDGER had recorded check refs.
+      panel.rules.steps-not-an-appendix verified by [agent, human] — no checks,
+      no refs, no disclosure — so on the rules you were reading there was
+      nothing there at all. The panel now falls back to the check source the
+      suite currently carries (the server reports it per rule), so a rule whose
+      checks exist but have never been run still shows its source. This rule
+      also verifies by checks now, so it has recorded refs of its own.
+
+
+      Second — the real defect — opening it said "Loading…" forever. The pane is
+      rebuilt wholesale on every render, and renders arrive unbidden (the framed
+      surface announcing itself is enough). The disclosure's only record of
+      being open was the DOM, so a rebuild closed it again, and the source
+      fetched meanwhile was written into a node that had already been thrown
+      away. Both the asking and the answer now live outside the markup, keyed by
+      rule: the disclosure stays open across rebuilds, the fetched source is
+      kept and repainted, and moving to another rule collapses it again.
+
+
+      Verified by a browser check tagged
+      @rule:panel.rules.steps-not-an-appendix: the steps are visible outright,
+      the disclosure is present and CLOSED with no source in it, and one click
+      on it renders the recorded check source. It fails against the old build
+      and passes now, in recorded run 2026-08-27T05-00-07Z-local-01.

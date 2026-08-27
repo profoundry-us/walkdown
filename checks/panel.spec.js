@@ -675,3 +675,92 @@ async function ownRule(page, name, frame = null) {
   return page;
 }
 
+test(
+  'the evidence names every tier, and a run\'s screenshots hang under the run that took them',
+  { tag: '@rule:panel.rules.evidence-visible' },
+  async ({ page }) => {
+    await ownRule(page, 'evidence-visible');
+    const ev = page.getByTestId('detail.evidence');
+    // One line per verify type the rule asks for — the chain of trust, in full.
+    await expect(ev).toContainText('checks/local');
+    await expect(ev).toContainText('agent');
+    await expect(ev).toContainText('human');
+
+    /*
+     * The screenshots belong TO the agent's run, so they read as a line under
+     * it rather than as a tier of their own standing beside it (n-0100). The
+     * link is found by its anchor; only the question "what is the row above
+     * this one" needs the DOM.
+     */
+    const shots = page.getByTestId('detail.screenshots');
+    await expect(shots).toBeVisible();
+    const above = await shots.evaluate((el) =>
+      (el.closest('.evrow')?.previousElementSibling?.textContent ?? '').trim());
+    expect(above, 'the screenshots hang under the agent row').toMatch(/^agent/);
+
+    // And they open to be looked at: a count of pictures nobody can see is not
+    // evidence, so the check insists the picture actually loaded.
+    await shots.click();
+    const modal = page.getByTestId('detail.screenshots-modal');
+    await expect(modal).toBeVisible();
+    await expect
+      .poll(() => modal.locator('img').first().evaluate((img) => img.naturalWidth), { timeout: 10000 })
+      .toBeGreaterThan(0);
+
+    // Escape puts it away — the most local thing open is the first to close.
+    await page.keyboard.press('Escape');
+    await expect(modal).toHaveCount(0);
+  }
+);
+
+test(
+  'the steps are read outright and the check source waits behind a disclosure',
+  { tag: '@rule:panel.rules.steps-not-an-appendix' },
+  async ({ page }) => {
+    await ownRule(page, 'steps-not-an-appendix');
+    // The steps are the rule: nothing is clicked to read them.
+    await expect(page.getByTestId('detail.steps')).toBeVisible();
+
+    const src = page.getByTestId('detail.technical-disclosure');
+    await expect(src).toBeVisible();
+    await expect(src).toContainText('Check source');
+    await expect(src, 'the source is a technical detail, closed until asked for')
+      .not.toHaveAttribute('open', /.*/);
+    // Closed, it is a summary line and nothing else: the source is not merely
+    // scrolled past, it has not been fetched.
+    await expect(src).not.toContainText('await ownRule(page,');
+
+    // Opened, it is the source itself — this very check, fetched from the
+    // server by the ref the suite carries for this rule.
+    await src.locator('summary').click();
+    // Generous: opening it is a round trip to the server, which re-derives the
+    // whole ledger to answer.
+    await expect(src).toContainText('await ownRule(page,', { timeout: 15000 });
+  }
+);
+
+test(
+  'hovering an anchor a step names points at it on the surface',
+  { tag: '@rule:panel.rules.steps-not-an-appendix' },
+  async ({ page }) => {
+    // Framed on the design of the screen the rule is about, so the anchor its
+    // steps name is really there on the surface underneath.
+    await ownRule(page, 'steps-not-an-appendix', `${WD_ORIGIN}/prototype/screens/rule-detail.html`);
+    const surface = page
+      .frameLocator('iframe[title="the application under review"]')
+      .getByTestId('detail.steps');
+    await expect(surface).toBeVisible();
+    await expect(surface).not.toHaveClass(/wd-hover/);
+
+    // The same token the lint scanner keys off, in the panel's own steps.
+    const token = page.getByTestId('detail.steps').getByText('detail.steps', { exact: true });
+    await token.hover();
+    await expect(surface, 'the element the step names lights up').toHaveClass(/wd-hover/);
+
+    // And it lets go. A highlight that never clears leaves the page pointing
+    // at the last thing anyone read.
+    await page.getByTestId('detail.statement').hover();
+    await expect(surface).not.toHaveClass(/wd-hover/);
+  }
+);
+

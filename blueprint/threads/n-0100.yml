@@ -4,7 +4,37 @@ author: Topher Fangio
 created: 2026-08-27T02:41:04Z
 anchor:
   rule: panel.rules.evidence-visible
-status: open
+status: addressed
 body: The "Screens" row needs to be a bullet line under the agent evidence row.
   Name it "Screenshots" and give me a link with a way to open them (in a modal).
   Also, add a "checks" evidence to this rule.
+replies:
+  - author: agent
+    created: 2026-08-27T05:00:40Z
+    body: >-
+      Both parts done.
+
+
+      The "Screens" row is gone. The screenshots an agent's run attached now
+      hang under that run's own row as a bullet — "• Screenshots — open N" at
+      anchor `detail.screenshots` — with the rule between the two rows removed,
+      so they read as belonging to the agent's run rather than as a fourth tier
+      standing beside it. The link opens them full size in a modal at
+      `detail.screenshots-modal` (backdrop click, a Close button, or Escape puts
+      it away). Serving them needed an address they never had: GET
+      /evidence/<path> hands back a file under the blueprint's runs/evidence/
+      and nothing else. Deliberately not a native <dialog showModal()> — the
+      panel's shell is already a manual popover in the top layer, and a second
+      promotion inside the first is the pairing that broke the rule list's
+      scrolling once (n-0086); a plain layer in the same shadow root behaves
+      like a modal in every way that matters here.
+
+
+      And the rule now verifies by checks: verify is [checks, agent, human],
+      with a browser check that opens this rule, reads every tier off
+      `detail.evidence`, asserts the screenshots line sits under the agent row,
+      opens the modal and insists the picture actually loaded — a count of
+      screenshots nobody can look at is not evidence. Two steps were added to
+      the rule saying both of these; the statement is unchanged. Verified: the
+      check fails against the old build and passes now, in recorded run
+      2026-08-27T05-00-07Z-local-01.

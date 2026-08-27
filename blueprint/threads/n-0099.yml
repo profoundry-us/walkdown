@@ -4,5 +4,15 @@ author: Topher Fangio
 created: 2026-08-27T02:25:48Z
 anchor:
   rule: panel.rules.setup-says-how-to-arrive
-status: open
+status: addressed
 body: Instead of "To Get Here" let's just name it "Setup"
+replies:
+  - author: agent
+    created: 2026-08-27T05:00:29Z
+    body: "Renamed. The block above the steps is labelled \"Setup\" now — the
+      storyboard's own word for the field, so the panel and the blueprint say
+      the same thing. The rule's steps gained a line saying so, and the browser
+      check that already owned this rule now reads the label back as well as the
+      text (checks/panel.spec.js, @rule:panel.rules.setup-says-how-to-arrive).
+      Verified: it fails against the old \"To get here\" and passes now, in
+      recorded run 2026-08-27T05-00-07Z-local-01."

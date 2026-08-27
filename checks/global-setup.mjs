@@ -32,6 +32,17 @@ export default function globalSetup() {
   if (!existsSync(join(CHECKSPACE, 'prototype')))
     symlinkSync(join(root, 'prototype'), join(CHECKSPACE, 'prototype'), 'dir');
   /*
+   * And the two check suites, for the same reason: `authoring.location`
+   * resolves against the blueprint's parent, so without them the copy is a
+   * project whose rules have no checks anywhere. That makes the panel's
+   * check-source disclosure unverifiable here - it would have no source to
+   * show - and it quietly disables the coverage staleness the real project
+   * has. Linked, not copied: they are what the run is testing.
+   */
+  for (const dir of ['checks', 'test'])
+    if (!existsSync(join(CHECKSPACE, dir)))
+      symlinkSync(join(root, dir), join(CHECKSPACE, dir), 'dir');
+  /*
    * The embed checks need what an adopter has and walkdown itself does not: an
    * application page that is a storyboard screen, carrying anchors, long enough
    * to scroll. checks/fixtures/app.html is that page, and this is what makes it

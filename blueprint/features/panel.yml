@@ -476,7 +476,7 @@ stories:
       - id: panel.rules.steps-not-an-appendix
         origin: thread:n-0007
         statement: A rule's given/when/then steps are visible without being asked for; only the recorded check source sits behind a collapsed disclosure.
-        verify: [agent, human]
+        verify: [checks, agent, human]
         screens: [rule-detail]
         steps:
           given:
@@ -486,6 +486,7 @@ stories:
           then:
             - The steps are already expanded - they are the rule, not an appendix
             - The check source stays behind anchor `detail.technical-disclosure` until opened
+            - Hovering an anchor a step names highlights that element on the surface under review, so a step points at what it is talking about
           statement_hash: sha256:0609e516526f
 
       - id: panel.rules.setup-says-how-to-arrive
@@ -500,13 +501,14 @@ stories:
             - Reading the detail above anchor `detail.steps`
           then:
             - Anchor `detail.setup` says how to get the app into that state
+            - The block is labelled Setup, the storyboard's own word for the field
             - A rule whose screen has no setup shows nothing there - an empty instruction is worse than none
           statement_hash: sha256:e41b088d8143
 
       - id: panel.rules.evidence-visible
         origin: walkdown
         statement: A rule's detail shows the evidence behind its standing - the latest ledger result for each of its verify types - so the chain of trust is read where the rule is judged.
-        verify: [agent, human]
+        verify: [checks, agent, human]
         screens: [rule-detail]
         steps:
           given:
@@ -515,6 +517,8 @@ stories:
             - Reading anchor `detail.evidence` on screen `rule-detail`
           then:
             - Each verify type shows its latest result, who or what produced it, and staleness
+            - Screenshots an agent's run attached hang under that run's row as `detail.screenshots`, not as a tier of their own
+            - "Anchor `detail.screenshots` opens them to look at, in `detail.screenshots-modal`"
             - A rule with no runs says so rather than showing nothing
           statement_hash: sha256:65b84178c291
 

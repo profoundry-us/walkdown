@@ -55,6 +55,8 @@ screens:
       - detail.setup
       - detail.steps
       - detail.technical-disclosure
+      - detail.screenshots
+      - detail.screenshots-modal
       - detail.verify
       - detail.threads
 
