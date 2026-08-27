@@ -1592,8 +1592,15 @@
           `${toVerify} thread${toVerify === 1 ? '' : 's'} awaiting your judgment`, 'badge-info')}
       </div>
       <!-- The name stays on screen while a session runs (nobody is attributed
-           silently) but editing it lives in Settings - the strip only shows it. -->
-      ${session ? `<div class="flex items-center gap-2 border-b border-base-300 bg-warning/10 px-3.5 py-2 text-xs" data-testid="panel.actor">
+           silently) but editing it lives in Settings - the strip only shows it.
+
+           Only over the Rules tab, because everything in the strip is about
+           the rules: whose name the verdicts go under, how many of them are
+           judged, and which rule is next. Over the thread list or the
+           blueprint picker it was a header describing a list you were not
+           looking at, and Continue would have walked you off the tab you had
+           just opened (n-0101). -->
+      ${session && listTab === 'rules' ? `<div class="flex items-center gap-2 border-b border-base-300 bg-warning/10 px-3.5 py-2 text-xs" data-testid="panel.actor">
         <span>Recording as
           <button id="wdp-actor" data-testid="panel.actor-name" class="link font-semibold" title="Change the name in Settings (the gear)">${
             esc(session.actor || 'set your name…')}</button></span>
@@ -1658,12 +1665,43 @@
                onThreads ? '' : ' data-testid="thread.panel"'}>${onThreads ? '' : threadPane()}</div>
         </div>
       </div>
-      ${listTab === 'rules' ? `<div class="flex shrink-0 items-center gap-2 border-t border-base-300 px-3.5 py-2 text-xs opacity-70" data-testid="panel.counts">
-        <span class="shrink-0 whitespace-nowrap"><b>${verified}/${total}</b> verified${
-          judged.size ? `<b class="text-primary" title="Judged in this sitting. Nothing reaches the ledger until you press Finish walkdown."> +${judged.size}</b>` : ''}</span>
+      <!-- Every number here is derived from something, and a bare number told a
+           newcomer nothing about how it got there or what is left (n-0091). So
+           each one carries a tooltip saying what it counts, in the same words
+           the rule detail uses. daisyUI tooltips rather than a title attribute:
+           the footer is the last row in the panel and a native tooltip opens
+           below the window edge, where nobody can read it.
+
+           Upwards, and aligned to its label rather than centred on it: this is
+           the last row in the panel, so a bubble opening downwards or sideways
+           is cut off by the bottom of the window, and a bubble centred on a
+           short label at either end of a 384px panel hangs off the side.
+           daisyUI's own tooltip-start / tooltip-end do the aligning; the
+           --tt-trans they leave at -50% has to be zeroed with them, or the
+           bubble is pinned to the edge and then dragged half its width back
+           over it.
+
+           The row no longer dims as a whole - opacity on the container dimmed
+           the tooltips it opens with it, and opacity cannot be undone by a
+           child. The label carries its own. -->
+      ${listTab === 'rules' ? `<div class="flex shrink-0 items-center gap-2 border-t border-base-300 px-3.5 py-2 text-xs" data-testid="panel.counts">
+        <span class="tooltip tooltip-top tooltip-start [--tt-trans:0] shrink-0 whitespace-nowrap">
+          <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug"
+            >Rules holding a current pass on every tier they ask for. The rest are the work counted at the right.</span>
+          <span class="opacity-70"><b>${verified}/${total}</b> verified</span></span>${
+          judged.size ? `<span class="tooltip tooltip-top tooltip-start [--tt-trans:0] shrink-0 text-primary">
+          <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug"
+            >Judged by you in this sitting. Nothing reaches the ledger until you press Finish walkdown.</span>
+          <b>+${judged.size}</b></span>` : ''}
         <span class="ml-auto flex shrink-0 gap-1">
-          ${toSign ? `<span class="badge badge-xs badge-warning badge-outline" title="rules owing your sign-off">${toSign} sign</span>` : ''}
-          ${toWalk ? `<span class="badge badge-xs badge-warning badge-outline" title="rules owing your walkdown">${toWalk} walk</span>` : ''}
+          ${toSign ? `<span class="tooltip tooltip-top tooltip-end [--tt-trans:0]">
+            <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug"
+              >${toSign} rule${toSign === 1 ? '' : 's'} designed but not built. Your sign-off on the spec is what they wait for.</span>
+            <span class="badge badge-xs badge-warning badge-outline">${toSign} sign</span></span>` : ''}
+          ${toWalk ? `<span class="tooltip tooltip-top tooltip-end [--tt-trans:0]">
+            <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug"
+              >${toWalk} rule${toWalk === 1 ? '' : 's'} built and unjudged by you. Open one and give it a pass or a fail.</span>
+            <span class="badge badge-xs badge-warning badge-outline">${toWalk} walk</span></span>` : ''}
         </span>
       </div>` : ''}`;
 
@@ -1948,7 +1986,7 @@
           if (url) { goTo(home, want); return; }
           if (url) {
             return toast(`Nothing here is a screen — <a class="link" href="${esc(url)}">open ${
-              esc(home.title ?? home.id)}</a> to compare the ${esc(want)}.`);
+              esc(home.title ?? home.id)}</a> to compare the ${esc(want)}.`, { tone: 'warning' });
           }
         }
         setFade(want === 'prototype' ? 1 : 0);
@@ -2692,7 +2730,7 @@
 
   function say(msg) {
     const el = host.querySelector('#wdp-tsay');
-    if (!el) return toast(msg);
+    if (!el) return toast(msg, { tone: 'error' });
     el.textContent = msg;
     el.classList.remove('hidden');
   }
@@ -2769,7 +2807,10 @@
       if (TERMINAL.includes(status)) {
         openThread = null;
         if (view === 'thread') view = selected ? 'detail' : 'list';
-        toast(`<b>${esc(id)}</b> ${esc(status)} — it leaves the rule’s active threads.`);
+        // An ended conversation is a finished piece of work, whichever way it
+        // ended - verified, waived or incorporated - so it reads as one.
+        toast(`<b>${esc(id)}</b> ${esc(status)} — it leaves the rule’s active threads.`,
+          { tone: 'success' });
       }
       await load();
     }
@@ -2783,7 +2824,8 @@
   async function verifyAll(rule) {
     const actor = whoAmI();
     if (!actor || actor === 'agent') {
-      toast('Verifying is recorded under a person\u2019s name \u2014 set it in Settings (the gear).');
+      toast('Verifying is recorded under a person\u2019s name \u2014 set it in Settings (the gear).',
+        { tone: 'error' });
       return openActorSettings();
     }
     const pending = threadsFor(rule).filter((t) => t.status === 'addressed');
@@ -2792,14 +2834,18 @@
     for (const t of pending)
       if (await threadPost(`/api/threads/${t.id}/status`, { status: 'verified', actor })) done += 1;
     await load();
+    // All of them is the result asked for; a partial pass is not a failure but
+    // it is unfinished, and the colour is the difference.
     toast(done === pending.length
       ? `<b>${done}</b> thread${done === 1 ? '' : 's'} verified on ${esc(rule)}.`
-      : `<b>${done}</b> of ${pending.length} verified \u2014 the rest are still open.`);
+      : `<b>${done}</b> of ${pending.length} verified \u2014 the rest are still open.`,
+      { tone: done === pending.length ? 'success' : 'warning' });
   }
 
   /** Open a thread on its own screen, landing where the reading resumes. */
   function openThreadView(id) {
-    if (!(data?.threads ?? []).some((x) => x.id === id)) return toast(`No thread ${esc(id)} here.`);
+    if (!(data?.threads ?? []).some((x) => x.id === id))
+      return toast(`No thread ${esc(id)} here.`, { tone: 'error' });
     openThread = id;
     threadNote = '';
     markSeen(id);
@@ -3104,7 +3150,7 @@
         Object.keys(session.verdicts).length} judged</b>. It cannot come with you to ${esc(name)}.` +
       ` <button class="link" data-sitting="keep">Keep it as a draft</button>` +
       ` · <button class="link" data-sitting="discard">Discard it</button>`,
-      { sticky: true, on: {
+      { sticky: true, tone: 'warning', on: {
         keep: () => crossTo(nextBp),        // the draft is already on disk
         discard: async () => { await discardSitting(); crossTo(nextBp); },
       } }
@@ -3311,7 +3357,7 @@
 
   function sayVerdict(msg) {
     const el = host.querySelector('#wdp-vsay');
-    if (!el) return toast(msg);
+    if (!el) return toast(msg, { tone: 'error' });
     el.textContent = msg;
     el.classList.remove('hidden');
   }
@@ -3388,12 +3434,29 @@
    * data-sitting name, so the caller says what each choice does rather than
    * reaching back into the DOM for it.
    */
-  function toast(html, { sticky = false, on = null } = {}) {
+  /*
+   * What a toast is telling you, in colour. Written as whole class names - a
+   * template-built `alert-${tone}` is a class Tailwind's scanner never sees,
+   * and the rule would be missing from the built sheet.
+   *
+   * The mapping is the panel's existing one: green for something recorded,
+   * red for a refusal or a write that did not land, yellow for a question the
+   * toast is asking, and neutral for a plain statement of fact. Nothing here
+   * invents a fifth voice.
+   */
+  const TOAST_TONE = {
+    neutral: 'alert-neutral',
+    success: 'alert-success',
+    warning: 'alert-warning',
+    error: 'alert-error',
+  };
+
+  function toast(html, { sticky = false, on = null, tone = 'neutral' } = {}) {
     const t = document.createElement('div');
     t.className = 'toast toast-end pointer-events-auto';
     t.dataset.theme = 'blueprint';
     t.style.right = `${W + 18}px`;
-    t.innerHTML = `<div class="alert alert-neutral text-[13px]">${html}</div>`;
+    t.innerHTML = `<div class="alert ${TOAST_TONE[tone] ?? TOAST_TONE.neutral} text-[13px]">${html}</div>`;
     if (on)
       for (const [name, fn] of Object.entries(on))
         t.querySelector(`[data-sitting="${name}"]`)?.addEventListener('click', () => {
@@ -3419,7 +3482,9 @@
     if (!next) {
       view = 'list';
       render();
-      return toast('Nothing left owing a verdict in this blueprint — <b>Finish walkdown</b> records the sitting.');
+      // Nothing owed is the good end of a walk, not an error.
+      return toast('Nothing left owing a verdict in this blueprint — <b>Finish walkdown</b> records the sitting.',
+        { tone: 'success' });
     }
     open(next.rule);
   }
@@ -3444,7 +3509,8 @@
     const actor = (session.actor ?? '').trim();
     if (!actor || actor === 'agent') {
       session.posting = false;
-      toast('A walkdown is recorded under a person’s name — set it in Settings (the gear).');
+      toast('A walkdown is recorded under a person’s name — set it in Settings (the gear).',
+        { tone: 'error' });
       openActorSettings();
       return;
     }
@@ -3455,16 +3521,20 @@
         body: JSON.stringify({ actor, target: 'local', results }),
       });
       const out = await res.json();
-      if (!res.ok) { session.posting = false; return toast(`Not recorded: ${esc(out.error ?? 'request failed')}`); }
+      if (!res.ok) {
+        session.posting = false;
+        return toast(`Not recorded: ${esc(out.error ?? 'request failed')}`, { tone: 'error' });
+      }
       session = null;
       saveSession();
       view = 'list';
       selected = null;
       await load();
-      toast(`Recorded ${results.length} verdict${results.length === 1 ? '' : 's'} as <b>${esc(out.run_id)}</b>`);
+      toast(`Recorded ${results.length} verdict${results.length === 1 ? '' : 's'} as <b>${esc(out.run_id)}</b>`,
+        { tone: 'success' });
     } catch {
       session.posting = false;
-      toast('walkdown server unreachable — nothing recorded.');
+      toast('walkdown server unreachable — nothing recorded.', { tone: 'error' });
     }
   }
 

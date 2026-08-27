@@ -11,6 +11,56 @@ anchor:
   viewport:
     name: desktop
     width: 1050
-status: open
+status: addressed
 body: The toasts that appear in the bottom of the screen should utilize the
   warn, success, and danger colors where relevant.
+replies:
+  - author: agent
+    created: 2026-08-27T05:48:11Z
+    body: >-
+      Toasts now carry the colour of the news they bring.
+
+
+      What changed
+
+      - lib/viewer/panel.js: toast() takes a tone - neutral (unchanged),
+      success, warning, error - mapped to whole daisyUI class names in a
+      TOAST_TONE table. Written out in full rather than built as alert-\${tone},
+      because a template-built class is one Tailwind's scanner never sees and
+      the rule would be missing from the built sheet. npm run build re-ran; the
+      sheet now carries alert-success, alert-warning and alert-error.
+
+
+      What I chose, and why
+
+      - SUCCESS - something landed: 'Recorded N verdicts as <run id>'; a thread
+      reaching a terminal status and leaving the rule's active threads; all of a
+      rule's addressed threads verified in one press; and 'Nothing left owing a
+      verdict' - the good end of a walk, not an error.
+
+      - DANGER - a refusal, or a write that did not land: recording a walkdown
+      or a verification under no name (or under 'agent'); 'Not recorded: …' from
+      a rejected POST; 'walkdown server unreachable — nothing recorded'; 'No
+      thread <id> here'; and the inline validation messages when they have no
+      slot to appear in and fall back to a toast.
+
+      - WARN - a question, or a partial result: the sticky 'a walkdown is
+      running on <blueprint>, keep it as a draft or discard it' when you switch
+      blueprints; 'N of M verified — the rest are still open'; and 'nothing here
+      is a screen, open <screen> to compare'.
+
+      - NEUTRAL - kept for plain statements of fact, and it looks exactly as it
+      did (daisyUI's alert-neutral is the base alert).
+
+
+      Verified
+
+      - By eye at the fixture: finishing a sitting with one verdict paints the
+      green 'Recorded 1 verdict as …' toast beside the panel.
+
+      - Full suite: node --test 93/93, WALKDOWN_RECORD=0 npm run checks:dev
+      28/28, walkdown lint 0 errors 0 warnings.
+
+
+      No new rule and no check: which colour a transient message wears is
+      cosmetic, and asserting on it would be brittle.

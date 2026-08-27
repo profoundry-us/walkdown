@@ -15,6 +15,40 @@ anchor:
   viewport:
     name: mobile
     width: 510
-status: open
+status: addressed
 body: This should only appear on the Rules tab; it's currently showing on all
   tabs which is wrong.
+replies:
+  - author: agent
+    created: 2026-08-27T05:47:36Z
+    body: >-
+      The strip is drawn only over the Rules tab now.
+
+
+      What changed
+
+      - lib/viewer/panel.js: the actor strip renders on `session && listTab ===
+      'rules'` rather than on `session` alone. Everything in it is about the
+      rules - whose name the verdicts go under, the judged tally, and Continue,
+      which opens the next rule owing you a verdict. Over the thread list or the
+      blueprint picker it was a header describing a list you were not looking
+      at, and pressing Continue there would have walked you off the tab you had
+      just opened.
+
+
+      Verified
+
+      - By eye in the panel: with a sitting running, Rules shows 'Recording as …
+      0/3 judged … Continue'; switching to Threads or Blueprints leaves the tabs
+      sitting directly on the list, and coming back brings it straight back.
+
+      - The existing checks that use the strip as their proof a sitting is
+      running still pass - they read it on the Rules tab, which is where it now
+      lives.
+
+      - Full suite: node --test 93/93, WALKDOWN_RECORD=0 npm run checks:dev
+      28/28, walkdown lint 0 errors 0 warnings.
+
+
+      No new rule and no new check: which tab a status strip appears on is not a
+      behaviour the spec states, and a check on it would be brittle.

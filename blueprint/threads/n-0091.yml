@@ -16,7 +16,52 @@ anchor:
   viewport:
     name: desktop
     width: 1050
-status: open
+status: addressed
 body: Let's add some daisy tooltips when you hover these numbers so we can see
   how it is calculating those or working; just seeing the numbers doesn't give a
   new user enough context about what work is left to do.
+replies:
+  - author: agent
+    created: 2026-08-27T05:48:23Z
+    body: >-
+      Every number in the footer now says what it counts.
+
+
+      What changed
+
+      - lib/viewer/panel.js, anchor panel.counts: daisyUI tooltips on all four
+      numbers, short and concrete.
+        - 62/86 verified — 'Rules holding a current pass on every tier they ask for. The rest are the work counted at the right.'
+        - +N judged — 'Judged by you in this sitting. Nothing reaches the ledger until you press Finish walkdown.'
+        - N sign — 'N rules designed but not built. Your sign-off on the spec is what they wait for.'
+        - N walk — 'N rules built and unjudged by you. Open one and give it a pass or a fail.'
+
+      Two things that took a second pass
+
+      - They open UPWARD and aligned to the label, not centred on it. This is
+      the last row in the panel, so a bubble opening downwards or sideways is
+      cut off by the bottom of the window; and a bubble centred on a short label
+      at either end of a 384px panel hangs off the side. daisyUI's own
+      tooltip-start / tooltip-end do the aligning - but the --tt-trans they
+      leave at -50% has to be zeroed alongside them, or the bubble is pinned to
+      the edge and then dragged half its own width back over it.
+
+      - The row no longer dims as a whole. opacity-70 on the container
+      composited the tooltips it opens along with it, and a child cannot undo an
+      ancestor's opacity - so the label carries its own now and the bubbles are
+      opaque.
+
+
+      Verified
+
+      - By eye at the fixture, hovering each number in turn: each bubble opens
+      above the row, fully inside the panel, wrapping to three lines at most.
+
+      - Full suite: node --test 93/93, WALKDOWN_RECORD=0 npm run checks:dev
+      28/28, walkdown lint 0 errors 0 warnings.
+
+
+      No new rule and no check. panel.rules.counts-legible already governs what
+      these numbers say and is verified by agent and human; a hover affordance
+      is explanatory rather than behaviour, and adding a checks tier to that
+      rule for it would be inventing coverage for a tooltip.

@@ -678,6 +678,7 @@ stories:
           then:
             - Every thread is listed with what it is anchored to, including one anchored to no rule at all
             - Anchor `panel.thread-filter` asks the three questions the command line asks - active, awaiting you, all - and answers them the same way, because a second definition of "active" is a second thing to get wrong
+            - The filter stays put at the top of the list however far the list is scrolled - it is a fixed head above what scrolls rather than the first thing to scroll away
             - Asking for all of them reaches a thread that has ended, which nothing else in the panel can do
             - Opening one shows the conversation beside the list, and the way back from it is the list of threads rather than a rule nobody opened
             - How many threads are waiting on a person is carried on the tab itself, so it is legible from whichever tab is open
