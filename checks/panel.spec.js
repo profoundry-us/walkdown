@@ -490,6 +490,12 @@ test(
     );
     expect(order, 'the setup must be read before the steps').toBeTruthy();
 
+    // And it wears the storyboard's own word for the field. The panel used to
+    // call it "To get here", which left a reviewer translating between the
+    // blueprint and the tool reading it (n-0099).
+    const label = await setup.evaluate((el) => el.parentElement.firstElementChild.textContent.trim());
+    expect(label, 'the setup block is labelled Setup').toBe('Setup');
+
     // And nothing is said where there is nothing to say: an empty instruction
     // is worse than none.
     await openRule('email-required');
@@ -528,6 +534,17 @@ test(
     const filter = page.getByTestId('panel.thread-filter');
     await filter.getByText('All', { exact: false }).click();
     await expect(list).toContainText(gone);
+
+    /*
+     * Docked to the top: with every thread listed, scrolling to the far end
+     * leaves the filter exactly where it was. This is the assertion that fails
+     * if the filter is ever put back inside the scrolling wrapper - there it
+     * is the first thing to ride up and out.
+     */
+    const filterAt = await filter.boundingBox();
+    await list.locator('[data-open-thread]').last().scrollIntoViewIfNeeded();
+    await expect(filter).toBeInViewport();
+    expect(Math.round((await filter.boundingBox()).y)).toBe(Math.round(filterAt.y));
 
     // Awaiting you is the ledger's own queue, not a second definition of it.
     await filter.getByText(/Awaiting you/).click();
