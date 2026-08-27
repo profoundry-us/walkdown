@@ -1,0 +1,21 @@
+{
+  "run_id": "2026-08-27T00-14-48Z-local-01",
+  "created": "2026-08-27T00:14:48Z",
+  "actor": "agent",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "b233af3-dirty",
+  "blueprint_sha": "b233af3-dirty",
+  "results": [
+    {
+      "rule": "panel.dock.toolbar",
+      "status": "pass",
+      "statement_hash": "sha256:41dff56f44c2",
+      "duration_ms": 1061,
+      "checks": [
+        "checks/panel.spec.js:360"
+      ]
+    }
+  ]
+}

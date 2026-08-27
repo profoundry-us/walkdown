@@ -364,8 +364,7 @@ test(
     // A framed review of a screen that HAS a design on file — there has to be
     // something to cross to for the offer to mean anything.
     const framed = `${WD_ORIGIN}/prototype/screens/review.html`;
-    await page.goto(FIXTURE +
-      `&build=stale&frame=${encodeURIComponent(framed)}`);
+    await page.goto(fixtureFor({ build: 'stale', frame: framed }));
     await expect(page.getByTestId('panel.bar')).toBeVisible();
     // Put walkdown away: only the tab is left.
     await page.getByTestId('panel.bar').getByTitle(/Put walkdown away/i).click();
@@ -385,6 +384,30 @@ test(
 
     // Crossing did not cost re-opening the panel.
     await expect(page.getByText('WALKDOWN', { exact: true })).toBeVisible();
+
+    /*
+     * And whichever surface you land on fills the window. Put away, the panel
+     * occupies nothing — so a surface still inset by its width sits in a box
+     * the size of the old stage with the other one showing along the edges,
+     * which is what Topher saw (n-0072). Both surfaces, because the swap moves
+     * between them and either can be the one in front.
+     */
+    for (const surface of [0, 1]) {
+      if (surface) await swap.click();
+      // The box eases over ~220ms, so this is what it settles at, not what it
+      // was passing through. Every surface, not the front one: the swap moves
+      // between them and the one behind is the one you cross back to.
+      await expect
+        .poll(async () => {
+          const win = page.viewportSize();
+          const boxes = await Promise.all(
+            (await page.locator('iframe').all()).map((f) => f.boundingBox())
+          );
+          return boxes.length > 0 && boxes.every((b) => b && b.x < 4 && b.y < 4 &&
+            b.width > win.width - 4 && b.height > win.height - 4);
+        }, { message: 'every surface fills the window the panel gave back' })
+        .toBe(true);
+    }
   }
 );
 

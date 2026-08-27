@@ -1,0 +1,26 @@
+id: n-0096
+kind: note
+author: Topher Fangio
+created: 2026-08-27T00:15:09Z
+anchor:
+  rule: embed.threads.note-first
+  screen: thread-panel
+status: open
+body: >-
+  A pin should be able to carry a screenshot. Some feedback is a picture: this
+  overlaps awkwardly, this is cut off, this is the wrong shade — and describing
+  it in a sentence is slower and less exact than showing it. n-0072 is the case
+  in point; the geometry bug in it was obvious in one image and would have taken
+  a paragraph to write down.
+
+
+  Two halves worth separating. A person pinning on a page should be able to
+  attach an image, probably by paste from the clipboard, since that is where a
+  screenshot already is. And an agent walkdown already captures evidence images
+  into runs/evidence/ — those should be reachable from the thread they belong to
+  rather than only from the run record.
+
+
+  Open: where the bytes live (runs/evidence/ is the only precedent), whether a
+  thread references an image or embeds it, and what the panel shows in the
+  stream — a thumbnail that opens, most likely. Not designed.
