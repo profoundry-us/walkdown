@@ -77,9 +77,10 @@
   let overlay = null;
   /** The pin drawn at the spot while its form is open, and gone with it. */
   let placeholder = null;
-  // Whose machine this is, so a handle recorded in a thread can be shown as
-  // the name that person goes by.
-  let identity = '';
+  // Whose machine this is - the whole identity, username and full name both,
+  // so a handle recorded in a thread can be shown as the name that person goes
+  // by, whichever of their handles the record happens to carry.
+  let identity = null;
 
   const $anchors = () => [...document.querySelectorAll(`[${ANCHOR_ATTR}]`)];
   const anchorId = (el) => el.getAttribute(ANCHOR_ATTR);
@@ -842,15 +843,29 @@
      * by the identity the server reports, and the agent is always the agent -
      * beyond those two, a name is whatever it says it is, because guessing that
      * two handles are one person is how a message ends up over the wrong face.
+     *
+     * Identity and display name are two fields now (n-0104): records carry the
+     * username, the UI shows the full name. That makes this the seam where the
+     * ledger's history stays legible - every handle the server says belongs to
+     * this person, including the full name records were written under before the
+     * split, maps onto the one name shown today. Nothing is rewritten; the old
+     * messages simply stop looking like a second person.
+     *
+     * Takes the identity object; a bare string is still accepted and read as the
+     * one name it used to be.
      */
-    nameMap(actor) {
+    nameMap(identity) {
       const names = { agent: 'Agent' };
-      const full = String(actor ?? '').trim();
-      if (!full) return names;
-      const key = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
-      names[key(full)] = full;
-      const first = full.split(/\s+/)[0];
-      if (first && first.length > 2) names[key(first)] = full;
+      const id = typeof identity === 'string' ? { name: identity } : (identity ?? {});
+      const name = String(id.name ?? '').trim();
+      const username = String(id.username ?? '').trim();
+      const display = name || username;
+      if (!display) return names;
+      const key = (s) => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
+      for (const handle of [username, name, ...(id.handles ?? [])])
+        if (String(handle ?? '').trim()) names[key(handle)] = display;
+      const first = name.split(/\s+/)[0];
+      if (first && first.length > 2) names[key(first)] = display;
       return names;
     },
 
@@ -1048,7 +1063,7 @@
     };
     const start = () => fetch(api('/api/blueprint'))
       .then((r) => r.json())
-      .then((data) => { blueprint = data; identity = data.identity?.actor ?? ''; resolve(); })
+      .then((data) => { blueprint = data; identity = data.identity ?? null; resolve(); })
       .catch(() => {}); // server not running — embed stays dormant
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
     else start();

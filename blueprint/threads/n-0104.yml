@@ -4,9 +4,81 @@ author: Topher Fangio
 created: 2026-08-27T03:20:48Z
 anchor:
   rule: viewer.identity.default-actor
-status: open
+status: addressed
 body: We should track only the git username on all actions, and we should show
   this in the settings panel; but if the user also has a full name from git, we
   should show that in the UI. A user who has no username or full name should be
   able to enter both in the settings. A user who has both should be able to
   override it in the settings (we work on the honor system).
+replies:
+  - author: agent
+    created: 2026-08-27T16:06:28Z
+    body: >-
+      Built. Identity and display name are two things now, and only one of them
+      is a record.
+
+
+      IDENTITY (username) — derived server-side in lib/serve.js defaultActor():
+      git user.username, else github.user, else the local part of git
+      user.email, else the OS username. There is always one. It is the only
+      thing written down: walkdown verdicts, thread replies, transitions, the
+      session draft.
+
+
+      DISPLAY NAME (full name) — git user.name, or nothing. Shown, never stored.
+      The session strip reads 'Recording as <full name> <username>' - the handle
+      stays on screen beside the name (new anchor panel.actor-handle) because
+      attribution-visible needs the name being RECORDED visible at the moment of
+      the action, and a strip showing only a display name would quietly stop
+      satisfying that. No full name anywhere and the two are the same string, so
+      only one is drawn.
+
+
+      SETTINGS — two fields: settings.actor is the username records carry,
+      settings.display-name is the name the panel shows. Both editable, both
+      from empty, so someone whose git knows neither can type both in and
+      someone with both can override either. Emptying a field is an answer
+      rather than an undo: no full name leaves the username standing alone; no
+      username makes the panel refuse attributed work, exactly as the single
+      field always did (that is what panel.threads.claim-never-accept relies
+      on).
+
+
+      HISTORICAL RECORDS — not rewritten, not orphaned. The ledger holds 5 runs
+      signed 'Topher Fangio', 34 signed 'topherfangio' and 24 signed 'agent'.
+      All still read exactly as written, and 'walkdown status' still attributes
+      them: the human verdict on panel.identity.default-actor still says Topher
+      Fangio. What changed is that the server now also reports 'handles' - every
+      name this machine could have signed with (username, OS name, full name) -
+      and MSG.nameMap folds all of them onto one display name and one avatar
+      tint, so an old verdict and a new one are one person rather than two. The
+      one stored value that did get migrated is the browser's old single
+      'walkdown:actor' field: it becomes the DISPLAY NAME, because it was seeded
+      from git user.name and in practice held a person's name. Nothing on disk
+      was touched.
+
+
+      BLUEPRINT — panel.identity.default-actor's statement and steps now state
+      the split (re-hashed; it reads stale and pending, which is honest - it
+      wants a person's eyes again). attribution-visible's steps say the username
+      shows beside the name. New rule status.attribution.username-is-the-record,
+      origin thread:n-0104, for the ledger half. New anchors panel.actor-handle
+      and settings.display-name declared in the storyboard and carried as
+      data-testid.
+
+
+      VERIFIED — npm run build; node --test 96/96; walkdown lint 0 errors 0
+      warnings; WALKDOWN_RECORD=0 npm run checks:dev 29 passed. New browser
+      check appended to checks/panel.spec.js drives the whole thing live: strip
+      shows both, Settings holds both, editing the full name moves only what is
+      shown, editing the username moves what the sitting is filed under,
+      emptying either behaves as above, and both survive a reload. New
+      test/identity.test.js proves the three historical handles resolve to one
+      person and one colour. The single remaining check failure
+      (panel.rules.steps-not-an-appendix) is not from this work - another agent
+      inserted ~35 lines mid-file in checks/panel.spec.js, which shifted the
+      check-source line numbers recorded in the ledger.
+
+
+      DESIGN — prototype/screens/settings.html draws one 'Record as' row, so the
+      build now disagrees with the drawing. Filed as n-0114 rather than edited.

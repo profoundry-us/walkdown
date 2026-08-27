@@ -73,3 +73,22 @@ stories:
         origin: prd
         statement: Attention items are split by who is blocked - humans get judge, verify and answer items; agents get address, incorporate and cover items, cover being a rule that demands checks while no check claims it, which is an agent's work to write and never a person's to judge.
         verify: [checks]
+
+  - id: status.attribution
+    title: A record says whose judgment it was, and keeps saying so
+    statement: As a team, we can always tell whose judgment a verdict was - including verdicts recorded before we changed our minds about what a name is.
+    rules:
+      - id: status.attribution.username-is-the-record
+        origin: thread:n-0104
+        statement: A record is written under the actor's username, never the display name shown for it - and every handle a person's machine has signed with resolves to that one person, so records made before identity and display name were told apart stay attributed without being rewritten.
+        verify: [checks]
+        steps:
+          given:
+            - A machine whose git knows a username and, perhaps, a full name
+          when:
+            - A verdict, a reply or a transition is recorded, and older records are read back beside it
+          then:
+            - What is written down is the username; the full name is shown and never stored
+            - The identity offered names every handle that machine has signed with - the username, the operating system name, and the full name
+            - A record already written under a full name is still attributed to that person, and is never edited to match the newer shape
+          statement_hash: sha256:14fb4e39b993

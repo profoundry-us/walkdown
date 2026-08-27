@@ -1046,3 +1046,94 @@ test(
     await expect(detect).not.toContainText('review');
   }
 );
+
+/* ==========================================================================
+ * APPENDED BLOCK — added for thread n-0104 (identity vs display name).
+ * Kept together at the end of the file so it is easy to move or reconcile
+ * with concurrent edits elsewhere in this spec.
+ * ========================================================================== */
+
+test(
+  'the identity is a username to record under and a full name to show, both editable',
+  { tag: '@rule:panel.identity.default-actor' },
+  async ({ page }) => {
+    await review(page);
+    await ensureSession(page);
+
+    /*
+     * This repo's git knows both facts, so the strip carries both: the name a
+     * person reads, and - beside it - the username the verdicts will actually
+     * be filed under. The handle is on screen and not only in Settings because
+     * panel.identity.attribution-visible says the name being RECORDED has to be
+     * visible at the moment of the action, and showing only a full name while
+     * writing down a handle would quietly stop being true.
+     */
+    const shown = page.getByTestId('panel.actor-name');
+    const handle = page.getByTestId('panel.actor-handle');
+    await expect(shown).toBeVisible();
+    await expect(handle).toBeVisible();
+    const fullName = (await shown.textContent()).trim();
+    const username = (await handle.textContent()).trim();
+    expect(fullName).not.toBe('set your name…');
+    expect(username.length).toBeGreaterThan(0);
+    expect(username).not.toContain(' ');       // a handle, not a full name
+    expect(username).not.toBe(fullName);
+
+    // Settings shows the same two, in two fields, saying which is which.
+    await shown.click();
+    const actorField = page.getByTestId('settings.actor');
+    const nameField = page.getByTestId('settings.display-name');
+    await expect(actorField).toHaveValue(username);
+    await expect(nameField).toHaveValue(fullName);
+
+    // The display name is only ever shown: editing it moves the strip's name
+    // and leaves the recorded handle exactly where it was.
+    await nameField.fill('Someone Else');
+    await nameField.blur();
+    await expect(shown).toHaveText('Someone Else');
+    await expect(handle).toHaveText(username);
+
+    // The username is the record: editing it moves what the sitting is filed
+    // under, live, the way the single field always did.
+    await shown.click();
+    await page.getByTestId('settings.actor').fill('someone');
+    await page.getByTestId('settings.actor').blur();
+    await expect(handle).toHaveText('someone');
+    await expect(shown).toHaveText('Someone Else');
+
+    /*
+     * Both fields take an edit from empty, which is the case the split exists
+     * for: somebody whose git knows neither has to be able to type both in.
+     * Emptying the full name is an answer too - \"show me by my username\" - and
+     * then there is one name on the strip rather than two, because the name
+     * shown and the name recorded have become the same string.
+     */
+    await shown.click();
+    await page.getByTestId('settings.display-name').fill('');
+    await page.getByTestId('settings.display-name').blur();
+    await expect(shown).toHaveText('someone');
+    await expect(page.getByTestId('panel.actor-handle')).toHaveCount(0);
+
+    // Put a full name back, from empty, and the two are told apart again.
+    await shown.click();
+    await page.getByTestId('settings.display-name').fill('Someone Else');
+    await page.getByTestId('settings.display-name').blur();
+    await expect(shown).toHaveText('Someone Else');
+    await expect(page.getByTestId('panel.actor-handle')).toHaveText('someone');
+
+    /*
+     * And both edits outlive the page. A sitting with no verdicts in it is not
+     * restored (that is panel.walkdown.session-survives-reload's business, and
+     * it needs a verdict to have something to survive), so the strip is brought
+     * back the same way it was raised the first time - what is being checked
+     * here is that the identity it comes back under is the edited one.
+     */
+    await page.reload();
+    await expect(page.getByTestId('panel.bar')).toBeVisible();
+    await ensureSession(page);
+    await expect(page.getByTestId('panel.actor-name')).toHaveText('Someone Else');
+    await expect(page.getByTestId('panel.actor-handle')).toHaveText('someone');
+
+    await endSession(page);
+  }
+);

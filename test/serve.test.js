@@ -234,15 +234,30 @@ test('positions are stored in the surface coordinate space given', async () => {
   assert.equal(n.viewport.width, 390);
 });
 
-test('the blueprint payload carries a default actor', async () => {
+test('the blueprint payload carries a default actor @rule:status.attribution.username-is-the-record', async () => {
   const payload = await (await fetch(`${base}/api/blueprint`)).json();
   assert.ok(payload.identity?.actor, 'an identity must always be offered');
   assert.match(payload.identity.source, /^(git|os)$/);
-  // In this repo git config user.name is set, so git wins over the OS username.
+  // In this repo git config user.email is set, so git wins over the OS username.
   const { defaultActor } = await import('../lib/serve.js');
   const here = defaultActor(process.cwd());
   assert.equal(here.source, 'git');
   assert.ok(here.actor.length > 0);
+
+  // Identity and display name are two fields. `actor` - the one thing records
+  // are written under - is the username, never the full name.
+  assert.equal(here.actor, here.username, 'records carry the username');
+  assert.ok(here.username.length > 0, 'there is always a username to record under');
+  assert.ok(!/\s/.test(here.username), 'a username is a handle, not a full name');
+  assert.equal(typeof here.name, 'string', 'the full name is offered, even as empty');
+
+  // And every handle this machine could have signed with is reported, so a
+  // ledger holding both the old full name and the new username still reads as
+  // one person. Nothing rewrites the records themselves.
+  assert.ok(Array.isArray(here.handles));
+  assert.ok(here.handles.includes(here.username));
+  if (here.name) assert.ok(here.handles.includes(here.name),
+    'the full name records were written under before the split is still claimed');
 });
 
 test('POST /api/walkdowns writes a hash-stamped human run record', async () => {

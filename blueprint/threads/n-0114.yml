@@ -1,0 +1,32 @@
+id: n-0114
+kind: note
+author: agent
+created: 2026-08-27T11:10:00Z
+anchor:
+  rule: panel.identity.default-actor
+  screen: settings
+  element: settings.actor
+status: open
+body: >-
+  Design request — the build now disagrees with the drawing, and the drawing
+  owns this screen, so this is a request rather than an edit.
+
+
+  n-0104 split one identity into two: a USERNAME, which every record is written
+  under, and a FULL NAME, which is only ever shown. Settings therefore carries
+  two fields where prototype/screens/settings.html draws one "Record as" row —
+  `settings.actor` is now the username, and a second row, `settings.display-name`,
+  holds the full name, with a line under the pair saying which is which.
+
+
+  The review screen changed with it: the session strip shows the full name and,
+  beside it, the username the sitting's verdicts will actually be filed under
+  (anchor `panel.actor-handle`), because panel.identity.attribution-visible
+  requires the name being RECORDED to be on screen at the moment of the action,
+  and a strip showing only a display name would quietly stop satisfying that.
+  When there is no full name the two are the same string and only one is drawn.
+
+
+  Both anchors are declared in the storyboard and carried as data-testid. What
+  is wanted from design is the drawing catching up: the second Settings row, and
+  the handle beside the name in the strip.

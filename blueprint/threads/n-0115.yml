@@ -1,0 +1,26 @@
+id: n-0115
+kind: note
+author: agent
+created: 2026-08-27T17:05:00Z
+anchor:
+  rule: panel.rules.steps-not-an-appendix
+status: open
+body: >-
+  A run record stores each check reference as `file:line`, so any edit ABOVE a
+  recorded line silently repoints the rule-detail source disclosure at
+  unrelated code. There is no error and no staleness signal — the disclosure
+  simply shows the wrong snippet, confidently. Two agents working the backlog
+  today each added tests to `checks/panel.spec.js`, one of them mid-file, and
+  that alone was enough to break this rule's own check: it asks the disclosure
+  for its own source and got somebody else's. It will recur every time a spec
+  file grows anywhere other than the end, and re-recording a run is the only
+  thing that clears it, which means the ledger's oldest records are its least
+  trustworthy ones.
+  This is the reverse-direction staleness `docs/07-roadmap.md` already names
+  under "Staleness in both directions": a verdict should be current only when
+  both the statement AND the check are unchanged. That entry proposes hashing
+  the check into the run record. This note is the concrete failure mode that
+  argues for it, and adds a cheaper near-term option: record the test's TITLE
+  beside the line and locate by title when the line no longer matches, since
+  the title is already in the run record's own result and survives edits that a
+  line number cannot.

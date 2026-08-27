@@ -846,19 +846,19 @@ stories:
     rules:
       - id: panel.identity.default-actor
         origin: thread:n-0008
-        statement: The actor field arrives filled in from the repository's git identity, falling back to the operating system username; it stays editable.
+        statement: The identity arrives filled in from the repository's git identity - a username to record under, and the full name to show wherever git knows one - falling back to the operating system username; both stay editable, including by someone whose git knows neither.
         verify: [checks, agent, human]
         screens: [review, settings]
         steps:
           given:
-            - A walkdown session started in a git repository with user.name set
+            - A walkdown session started in a git repository
           when:
             - Reading anchor `panel.actor` on screen `review`, then opening Settings from the gear
           then:
-            - The session strip already shows that name; no attributed action prompts for it
-            - The name is edited in Settings - the strip only shows it - and the edit applies to the running session
-            - An edited name is remembered across reloads
-          statement_hash: sha256:d251c7d97967
+            - The session strip already shows the full name where git knows one, with the username it records under beside it in anchor `panel.actor-handle`; no attributed action prompts for either
+            - Settings shows both - anchor `settings.actor` for the username records carry, anchor `settings.display-name` for the name the panel shows - and both are editable, from empty if git knows neither
+            - An edit applies to the running session and is remembered across reloads; emptying a field is an answer too - no full name leaves the username standing alone, and no username makes the panel refuse attributed work
+          statement_hash: sha256:6cf5b560bdde
 
       - id: panel.identity.attribution-visible
         origin: thread:n-0008
@@ -871,7 +871,7 @@ stories:
           when:
             - Starting a walkdown, or taking a thread action from a rule's detail
           then:
-            - The name being recorded is on screen at the moment of the action
+            - The name being recorded is on screen at the moment of the action - the username itself, beside the full name shown for it
             - Correcting it before acting records the corrected name
           statement_hash: sha256:1b6a789fde73
 
