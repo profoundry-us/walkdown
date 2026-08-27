@@ -64,6 +64,15 @@ checks:
     run: diff -q lib/viewer/panel.js extension/vendor/panel.js && diff -q lib/viewer/embed.js extension/vendor/embed.js && diff -q lib/viewer/walkdown.css extension/walkdown.css
     fast: true
 
+  # Splitting the panel turns a working reference into a ReferenceError the
+  # moment its name moves to another file and one caller stays behind. The
+  # syntax stays perfect, so `node --check` and the unit tests both pass and
+  # only a browser finds it. One rule, no style gate: see eslint.config.mjs.
+  - id: panel-names-resolve
+    name: Every name in the panel resolves
+    run: npm run --silent lint
+    fast: true
+
   # Neither browser file is imported by the test suite — they are delivered as
   # text — so a syntax error in one is invisible until a page loads it.
   - id: viewer-parses

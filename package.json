@@ -1,7 +1,7 @@
 {
   "name": "walkdown",
   "version": "0.1.0",
-  "description": "Verify that what you built is what you designed — blueprint lint & hashing for the walkdown spec format",
+  "description": "Verify that what you built is what you designed \u2014 blueprint lint & hashing for the walkdown spec format",
   "type": "module",
   "bin": {
     "walkdown": "bin/walkdown.js"
@@ -21,6 +21,7 @@
   },
   "scripts": {
     "test": "node --test",
+    "lint": "eslint src/panel",
     "build:js": "rollup -c",
     "check:js": "mkdir -p .walkdown/tmp && rollup -c --silent -o .walkdown/tmp/panel.built.js && diff -q .walkdown/tmp/panel.built.js lib/viewer/panel.js",
     "build:css": "tailwindcss -i styles/walkdown.css -o lib/viewer/walkdown.css --minify && cp lib/viewer/walkdown.css example/app/walkdown.css && cp lib/viewer/walkdown.css extension/walkdown.css",
@@ -52,6 +53,8 @@
     "@profoundry-us/highball": "^0.4.1",
     "@tailwindcss/cli": "^4.3.3",
     "daisyui": "^5.7.20",
+    "eslint": "^10.9.1",
+    "globals": "^17.11.0",
     "rollup": "^4.63.0",
     "tailwindcss": "^4.3.3"
   }
