@@ -171,3 +171,11 @@ export const store = cfg.store ?? {
 export const CHOICE = `walkdown:blueprint:${location.origin}`;
 // The extension ships the stylesheet itself; served, it comes off the server.
 export const STYLESHEET = cfg.stylesheet ?? S.SERVER + '/walkdown.css';
+
+/* The panel's geometry, in pixels. */
+export const W = 384;    // the side panel
+export const TOP = 44;   // the tool bar across the top
+export const GAP = 12;   // how much desk shows around the wrapped page
+// Nothing separates the bar from the page any more, so the bar's own bottom
+// padding does that job — a second 12px gap on top of it read as a gutter.
+export const HEAD = TOP;

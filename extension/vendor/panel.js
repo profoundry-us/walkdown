@@ -593,6 +593,125 @@ const CHOICE = `walkdown:blueprint:${location.origin}`;
 // The extension ships the stylesheet itself; served, it comes off the server.
 const STYLESHEET = cfg.stylesheet ?? S.SERVER + '/walkdown.css';
 
+/* The panel's geometry, in pixels. */
+const W = 384;    // the side panel
+const TOP = 44;   // the tool bar across the top
+const GAP = 12;   // how much desk shows around the wrapped page
+// Nothing separates the bar from the page any more, so the bar's own bottom
+// padding does that job — a second 12px gap on top of it read as a gutter.
+const HEAD = TOP;
+
+/*
+ * The two helpers everything else needs: escaping, and where the server is.
+ *
+ * They are here rather than in state.js because state has no dependencies and
+ * these have one — api reads S — and because a module named for what it holds
+ * beats a module named for where things happened to end up.
+ */
+
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/*
+ * The blueprint rides along as a query parameter — and it has to go BEFORE any
+ * fragment, or the fragment swallows it: "#invite-batch?bp=..." is one
+ * fragment named that, not a query, so the server never sees the blueprint and
+ * the screen never sees its own fragment.
+ */
+const api = (path) => {
+  const h = path.indexOf('#');
+  const head = h < 0 ? path : path.slice(0, h);
+  const frag = h < 0 ? '' : path.slice(h);
+  const q = S.BP ? (head.includes('?') ? '&' : '?') + 'bp=' + encodeURIComponent(S.BP) : '';
+  return S.SERVER + head + q + frag;
+};
+
+/*
+ * The screenshots an agent walkdown left behind, shown over the whole desk.
+ */
+
+/*
+ * The screenshots themselves, over the whole desk.
+ *
+ * Deliberately NOT a native <dialog showModal()>: the shell is already a
+ * manual popover in the browser's top layer, and promoting a second element
+ * into it from inside the first is exactly the pairing that left the rule
+ * list unable to take a wheel event at all (n-0086). A plain layer inside
+ * the same shadow root is a modal by every behaviour that matters here -
+ * it covers the surface, it takes the pointer, and Escape closes it.
+ */
+let shotLayer = null;
+const shotsOpen = () => Boolean(shotLayer);
+function closeShots() {
+  shotLayer?.remove();
+  shotLayer = null;
+}
+function openShots(paths) {
+  closeShots();
+  shotLayer = document.createElement('div');
+  shotLayer.dataset.theme = 'blueprint';
+  shotLayer.dataset.testid = 'detail.screenshots-modal';
+  shotLayer.style.cssText = `position:fixed; inset:0; z-index:10; pointer-events:auto;
+    background:rgba(16,20,30,.72); display:flex; flex-direction:column; gap:10px;
+    align-items:center; justify-content:flex-start; overflow:auto; padding:20px;`;
+  shotLayer.innerHTML = `
+    <div class="flex w-full max-w-4xl items-center gap-2 text-base-100">
+      <span class="text-[12px] font-semibold uppercase tracking-widest opacity-80">Screenshots</span>
+      <button class="btn btn-xs ml-auto" data-testid="detail.screenshots-close">Close</button>
+    </div>
+    ${paths.map((p) => `<figure class="w-full max-w-4xl">
+      <img src="${esc(api('/evidence/' + p))}" alt="${esc(p)}"
+        class="w-full rounded border border-base-300 bg-base-100">
+      <figcaption class="mt-1 font-mono text-[10.5px] text-base-100 opacity-70">${esc(p)}</figcaption>
+    </figure>`).join('')}`;
+  // The backdrop dismisses, the pictures do not: a click meant for an image
+  // must not close the thing it is looking at.
+  shotLayer.onclick = (e) => { if (e.target === shotLayer) closeShots(); };
+  shotLayer.querySelector('[data-testid="detail.screenshots-close"]').onclick = closeShots;
+  D.sr.appendChild(shotLayer);
+}
+
+/*
+ * The panel's transient word to the reviewer.
+ */
+
+/*
+ * What a toast is telling you, in colour. Written as whole class names - a
+ * template-built `alert-${tone}` is a class Tailwind's scanner never sees,
+ * and the rule would be missing from the built sheet.
+ *
+ * The mapping is the panel's existing one: green for something recorded,
+ * red for a refusal or a write that did not land, yellow for a question the
+ * toast is asking, and neutral for a plain statement of fact. Nothing here
+ * invents a fifth voice.
+ */
+const TOAST_TONE = {
+  neutral: 'alert-neutral',
+  success: 'alert-success',
+  warning: 'alert-warning',
+  error: 'alert-error',
+};
+
+function toast(html, { sticky = false, on = null, tone = 'neutral' } = {}) {
+  const t = document.createElement('div');
+  t.className = 'toast toast-end pointer-events-auto';
+  t.dataset.theme = 'blueprint';
+  t.style.right = `${W + 18}px`;
+  t.innerHTML = `<div class="alert ${TOAST_TONE[tone] ?? TOAST_TONE.neutral} text-[13px]">${html}</div>`;
+  if (on)
+    for (const [name, fn] of Object.entries(on))
+      t.querySelector(`[data-sitting="${name}"]`)?.addEventListener('click', () => {
+        t.remove();
+        fn();
+      });
+  // Onto the shell, not into the panel: render() rewrites the panel's markup
+  // wholesale, and the things worth toasting - a verdict recorded, a thread
+  // ended - are exactly the things that trigger a repaint, so a toast living
+  // in there was swept away in the same tick it appeared.
+  D.host.appendChild(t);
+  if (!sticky) setTimeout(() => t.remove(), 4200);
+}
+
 /*
  * How the desk is drawn — the ruled plane the page sheet lies on.
  *
@@ -832,20 +951,7 @@ function frameLoading(url, label) {
    * fragment named that, not a query, so the server never sees the blueprint
    * and the screen never sees its own fragment.
    */
-  const api = (path) => {
-    const h = path.indexOf('#');
-    const head = h < 0 ? path : path.slice(0, h);
-    const frag = h < 0 ? '' : path.slice(h);
-    const q = S.BP ? (head.includes('?') ? '&' : '?') + 'bp=' + encodeURIComponent(S.BP) : '';
-    return S.SERVER + head + q + frag;
-  };
 
-  const W = 384;    // the side panel
-  const TOP = 44;   // the tool bar across the top
-  const GAP = 12;   // how much desk shows around the wrapped page
-  // Nothing separates the bar from the page any more, so the bar's own bottom
-  // padding does that job — a second 12px gap on top of it read as a gutter.
-  const HEAD = TOP;
   /*
    * Identity is two fields, not one (n-0104). Each holds null for "nothing
    * said" - fall back to what the server derived - or the string the person
@@ -875,8 +981,6 @@ function frameLoading(url, label) {
   const saveIdentity = () => store.set(IDENTITY_KEY,
     { username: identityOverride.username, name: identityOverride.name });
 
-  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) =>
-    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
   // ---- chrome ---------------------------------------------------------------
   function buildChrome() {
@@ -2590,47 +2694,6 @@ function frameLoading(url, label) {
       : '<div class="text-[13px] opacity-50">Nothing recorded yet.</div>';
   }
 
-  /*
-   * The screenshots themselves, over the whole desk.
-   *
-   * Deliberately NOT a native <dialog showModal()>: the shell is already a
-   * manual popover in the browser's top layer, and promoting a second element
-   * into it from inside the first is exactly the pairing that left the rule
-   * list unable to take a wheel event at all (n-0086). A plain layer inside
-   * the same shadow root is a modal by every behaviour that matters here -
-   * it covers the surface, it takes the pointer, and Escape closes it.
-   */
-  let shotLayer = null;
-  const shotsOpen = () => Boolean(shotLayer);
-  function closeShots() {
-    shotLayer?.remove();
-    shotLayer = null;
-  }
-  function openShots(paths) {
-    closeShots();
-    shotLayer = document.createElement('div');
-    shotLayer.dataset.theme = 'blueprint';
-    shotLayer.dataset.testid = 'detail.screenshots-modal';
-    shotLayer.style.cssText = `position:fixed; inset:0; z-index:10; pointer-events:auto;
-      background:rgba(16,20,30,.72); display:flex; flex-direction:column; gap:10px;
-      align-items:center; justify-content:flex-start; overflow:auto; padding:20px;`;
-    shotLayer.innerHTML = `
-      <div class="flex w-full max-w-4xl items-center gap-2 text-base-100">
-        <span class="text-[12px] font-semibold uppercase tracking-widest opacity-80">Screenshots</span>
-        <button class="btn btn-xs ml-auto" data-testid="detail.screenshots-close">Close</button>
-      </div>
-      ${paths.map((p) => `<figure class="w-full max-w-4xl">
-        <img src="${esc(api('/evidence/' + p))}" alt="${esc(p)}"
-          class="w-full rounded border border-base-300 bg-base-100">
-        <figcaption class="mt-1 font-mono text-[10.5px] text-base-100 opacity-70">${esc(p)}</figcaption>
-      </figure>`).join('')}`;
-    // The backdrop dismisses, the pictures do not: a click meant for an image
-    // must not close the thing it is looking at.
-    shotLayer.onclick = (e) => { if (e.target === shotLayer) closeShots(); };
-    shotLayer.querySelector('[data-testid="detail.screenshots-close"]').onclick = closeShots;
-    D.sr.appendChild(shotLayer);
-  }
-
   function detailPane() {
     const r = S.selected;
     // A pin with no rule has no rule screen: it opens on the thread screen
@@ -3647,43 +3710,6 @@ function frameLoading(url, label) {
    * data-sitting name, so the caller says what each choice does rather than
    * reaching back into the DOM for it.
    */
-  /*
-   * What a toast is telling you, in colour. Written as whole class names - a
-   * template-built `alert-${tone}` is a class Tailwind's scanner never sees,
-   * and the rule would be missing from the built sheet.
-   *
-   * The mapping is the panel's existing one: green for something recorded,
-   * red for a refusal or a write that did not land, yellow for a question the
-   * toast is asking, and neutral for a plain statement of fact. Nothing here
-   * invents a fifth voice.
-   */
-  const TOAST_TONE = {
-    neutral: 'alert-neutral',
-    success: 'alert-success',
-    warning: 'alert-warning',
-    error: 'alert-error',
-  };
-
-  function toast(html, { sticky = false, on = null, tone = 'neutral' } = {}) {
-    const t = document.createElement('div');
-    t.className = 'toast toast-end pointer-events-auto';
-    t.dataset.theme = 'blueprint';
-    t.style.right = `${W + 18}px`;
-    t.innerHTML = `<div class="alert ${TOAST_TONE[tone] ?? TOAST_TONE.neutral} text-[13px]">${html}</div>`;
-    if (on)
-      for (const [name, fn] of Object.entries(on))
-        t.querySelector(`[data-sitting="${name}"]`)?.addEventListener('click', () => {
-          t.remove();
-          fn();
-        });
-    // Onto the shell, not into the panel: render() rewrites the panel's markup
-    // wholesale, and the things worth toasting - a verdict recorded, a thread
-    // ended - are exactly the things that trigger a repaint, so a toast living
-    // in there was swept away in the same tick it appeared.
-    D.host.appendChild(t);
-    if (!sticky) setTimeout(() => t.remove(), 4200);
-  }
-
   /*
    * Carry on where the sitting left off: the next rule still owing a verdict.
    * A sitting resumed from disk lands here too - the draft survives crossing to
