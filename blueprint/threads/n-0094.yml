@@ -1,0 +1,22 @@
+id: n-0094
+kind: note
+author: Topher Fangio
+created: 2026-08-27T00:01:06Z
+anchor:
+  rule: panel.rules.one-pane-per-tab
+  screen: review
+  element: panel.tabs
+status: open
+body: >-
+  Threads want a view of their own. Right now a conversation is only reachable
+  through the rule it is anchored to, and once it ends it is not reachable at
+  all - the panel filters verified, waived and incorporated out of the rule
+  list, the pins and the counts, with no way to ask for them. `walkdown threads
+  --all` can show them; the panel cannot. So: a dedicated Threads view,
+  alongside Blueprints and Rules.
+
+
+  Which raises what the tabs are for. Three is already a lot for that strip and
+  I hardly ever open Screens - a dropdown or a popover might serve it better
+  than a permanent tab, which would leave room for Threads where it belongs. Not
+  decided; the placement is the open part, not whether Threads deserves a view.

@@ -49,6 +49,24 @@ test('a retired rule leaves the report but keeps its id resolvable', () => {
   assert.deepEqual(findings.filter((f) => f.subject === 'demo.main.gone'), []);
 });
 
+test('the CLI answers for a retired rule instead of calling it unknown', async () => {
+  const bp = fixture();
+  const { execFileSync } = await import('node:child_process');
+  const cli = new URL('../bin/walkdown.js', import.meta.url).pathname;
+  const run = (args) => execFileSync(process.execPath, [cli, ...args, '--dir', bp], { encoding: 'utf8' });
+
+  // Retiring and deleting must not look the same from the command line.
+  const one = run(['status', 'demo.main.gone', '--json']);
+  assert.equal(JSON.parse(one).state, 'retired');
+  assert.match(JSON.parse(one).retired, /withdrawn/);
+
+  const all = JSON.parse(run(['status', '--retired', '--json']));
+  assert.deepEqual(all.map((r) => r.rule), ['demo.main.gone']);
+
+  // A rule that never existed is still an error, not a shrug.
+  assert.throws(() => run(['status', 'demo.main.never']), /status/);
+});
+
 test('retired must say why', () => {
   const bp = fixture();
   const path = join(bp, 'features', 'demo.yml');

@@ -63,6 +63,8 @@ notes), and the runs ledger. The blueprint is the single source of truth for
 
     walkdown status [--json]        derived verification + queues + drift
     walkdown status <rule-id>       one rule in full
+    walkdown status --retired       rules withdrawn from the report, and why
+    walkdown status --retired       rules withdrawn from the report, and why
     walkdown lint                   validate everything
     walkdown hash --write           re-stamp statement hashes
     walkdown run [--target] [--rule]  run checks, record the run

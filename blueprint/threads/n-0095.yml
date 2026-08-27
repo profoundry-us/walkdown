@@ -1,0 +1,16 @@
+id: n-0095
+kind: note
+author: Topher Fangio
+created: 2026-08-27T00:01:06Z
+anchor:
+  screen: review
+  element: panel.tabs
+status: open
+body: 'Idea, not yet fleshed out: a storyboard view of the screens - small
+  compressed screenshots laid out so you can take in the whole product at a
+  glance and see how the screens relate, rather than reading a list of ids. That
+  is a different thing from the current Screens tab, which answers "which screen
+  is this page?"; this one answers "what is there?". Filed to keep it somewhere
+  better than a chat log. If it happens it probably replaces the Screens tab
+  rather than joining it, which is the other half of the tabs question in the
+  note beside this one.'

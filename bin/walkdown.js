@@ -3,7 +3,7 @@ import { existsSync, readdirSync } from 'node:fs';
 import { userInfo } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
-import { findBlueprintDir, loadBlueprint } from '../lib/blueprint.js';
+import { collectRules, findBlueprintDir, loadBlueprint } from '../lib/blueprint.js';
 import { blueprintForUrl, claimsOf, findCollisions } from '../lib/claims.js';
 import { listDrafts } from '../lib/draft.js';
 import { runHashCommand } from '../lib/hash-cmd.js';
@@ -207,9 +207,30 @@ const truncate = (s, n) => {
   return [...text].length > n ? [...text].slice(0, n - 1).join('') + '…' : text;
 };
 
+/** The rules withdrawn from the report but kept in the file, and why. */
+const retiredRules = (blueprint) =>
+  collectRules(blueprint.features)
+    .filter(({ rule }) => rule?.retired)
+    .map(({ rule }) => ({ rule: rule.id, statement: rule.statement, retired: rule.retired }));
+
 function renderRuleDetail(blueprint, derived, ruleId, json) {
   const row = derived.rows.find((r) => r.rule === ruleId);
   if (!row) {
+    /*
+     * A retired rule is not an unknown one. It answers here rather than sending
+     * you to a list it is deliberately absent from - otherwise retiring a rule
+     * and deleting it look identical from the command line, which is the whole
+     * distinction the marker exists to make.
+     */
+    const gone = retiredRules(blueprint).find((r) => r.rule === ruleId);
+    if (gone) {
+      if (json) { console.log(JSON.stringify({ ...gone, state: 'retired' }, null, 2)); return end(0); }
+      console.log(`${gone.rule} · ${dim('retired')}`);
+      console.log(`  ${dim(gone.statement)}`);
+      console.log(`\n  ${yellow('RETIRED')}\n  ${gone.retired}`);
+      console.log(dim('\n  Its verdicts stay in the ledger; nothing is owed against it.'));
+      return end(0);
+    }
     console.error(`No rule "${ruleId}". \`walkdown status\` lists all rules.`);
     process.exit(2);
   }
@@ -261,10 +282,20 @@ function cmdStatus(args) {
       dir: { type: 'string' },
       target: { type: 'string' },
       json: { type: 'boolean', default: false },
+      retired: { type: 'boolean', default: false },
     },
     allowPositionals: true,
   });
   const blueprint = loadOrExit(values.dir);
+  if (values.retired) {
+    const gone = retiredRules(blueprint);
+    if (values.json) { console.log(JSON.stringify(gone, null, 2)); return end(0); }
+    if (!gone.length) { console.log('No retired rules.'); return end(0); }
+    console.log(dim(`retired rules — ${blueprint.dir}\n`));
+    for (const r of gone) console.log(`  ${yellow(r.rule)}\n    ${r.retired}\n`);
+    console.log(dim(`${gone.length} rule(s) withdrawn. Their verdicts stay in the ledger.`));
+    return end(0);
+  }
   const derived = deriveStatus(blueprint, {
     target: values.target,
     checkRefs: checkedRuleIds(blueprint.config, blueprint.projectRoot),

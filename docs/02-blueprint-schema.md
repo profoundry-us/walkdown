@@ -85,7 +85,10 @@ stories:
   name the rules they judged; delete a rule and every verdict ever recorded against it
   becomes a lint warning about a rule nobody can look up. Retire it and the ledger keeps
   its meaning. Threads anchored to a retired rule still resolve too, and still want
-  ending by a person.
+  ending by a person. `walkdown status --retired` lists them with their reasons, and
+  `walkdown status <id>` answers for a retired rule rather than calling it unknown —
+  otherwise retiring and deleting would look identical from the command line, which is
+  the distinction the marker exists to make.
 
 - **IDs are dot-path slugs** (`feature.story.rule-slug`), assigned once, **never
   regenerated**. Rewording a statement keeps the ID. Splitting a rule creates new IDs and
