@@ -1,11 +1,15 @@
 /*
- * Copy the shared screen-matching logic into the two browser files.
+ * Copy the shared screen-matching logic into embed.js.
  *
- * The panel and the embed each ship as one self-contained script down two
- * delivery paths (a <script> tag and an extension import), so neither can
- * import lib/screen-match.js — and three hand-maintained copies of "which
- * screen is this?" is exactly the drift walkdown exists to catch. The module
- * is the source; this pastes it in between markers.
+ * The embed ships as one self-contained script and cannot import
+ * lib/screen-match.js — and three hand-maintained copies of "which screen is
+ * this?" is exactly the drift walkdown exists to catch. The module is the
+ * source; this pastes it in between markers.
+ *
+ * The panel used to be a target too. It has a bundler now, so it imports both
+ * modules for real and Rollup inlines them; the delivery is just as
+ * self-contained and there is one fewer copy to keep honest. When the embed
+ * gets the same treatment this tool retires.
  *
  *   node tools/sync-shared.mjs            # rewrite the blocks
  *   node tools/sync-shared.mjs --check    # fail if they are out of date
@@ -15,15 +19,12 @@ import { dirname, join, relative } from 'node:path';
 
 const HERE = dirname(new URL(import.meta.url).pathname);
 const ROOT = join(HERE, '..');
-// The panel's source moved under src/ when the bundler arrived; lib/viewer
-// is where the built copy lands, and writing generated blocks there would
-// be undone by the very next `npm run build:js`.
-const TARGETS = [join(ROOT, 'src', 'panel', 'index.js'), join(ROOT, 'lib', 'viewer', 'embed.js')];
+const TARGETS = [join(ROOT, 'lib', 'viewer', 'embed.js')];
 
 /*
- * Each shared block: one source module, one marker name. Both browser files
- * carry every block, so a change to a source lands on both deliveries or the
- * --check run fails the build.
+ * Each shared block: one source module, one marker name. The embed carries
+ * every block, so a change to a source lands there or the --check run fails
+ * the build. The panel gets the same change through its import.
  */
 const BLOCKS = [
   { name: 'screen-match', source: join(ROOT, 'lib', 'screen-match.js') },
