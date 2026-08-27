@@ -1,0 +1,62 @@
+{
+  "run_id": "2026-08-27T03-05-47Z-local-01",
+  "created": "2026-08-27T03:05:47Z",
+  "actor": "Topher Fangio",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "221c0a8-dirty",
+  "blueprint_sha": "221c0a8-dirty",
+  "results": [
+    {
+      "rule": "panel.dock.toolbar",
+      "status": "fail",
+      "statement_hash": "sha256:f27580616b45",
+      "threads": [
+        "n-0098"
+      ]
+    },
+    {
+      "rule": "panel.dock.surface-swap-is-instant",
+      "status": "pass",
+      "statement_hash": "sha256:c74a4c999299"
+    },
+    {
+      "rule": "panel.rules.setup-says-how-to-arrive",
+      "status": "fail",
+      "statement_hash": "sha256:e41b088d8143",
+      "threads": [
+        "n-0099"
+      ]
+    },
+    {
+      "rule": "panel.rules.evidence-visible",
+      "status": "fail",
+      "statement_hash": "sha256:65b84178c291",
+      "threads": [
+        "n-0100"
+      ]
+    },
+    {
+      "rule": "panel.rules.counts-legible",
+      "status": "pass",
+      "statement_hash": "sha256:669dfeb91eee",
+      "threads": [
+        "n-0102"
+      ]
+    },
+    {
+      "rule": "panel.threads.own-view",
+      "status": "fail",
+      "statement_hash": "sha256:faade3b887d1",
+      "threads": [
+        "n-0103"
+      ]
+    },
+    {
+      "rule": "panel.walkdown.one-control-owns-the-sitting",
+      "status": "approved",
+      "statement_hash": "sha256:c74a54acc395"
+    }
+  ]
+}

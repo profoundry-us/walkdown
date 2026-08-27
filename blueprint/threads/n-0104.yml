@@ -1,0 +1,12 @@
+id: n-0104
+kind: note
+author: Topher Fangio
+created: 2026-08-27T03:20:48Z
+anchor:
+  rule: viewer.identity.default-actor
+status: open
+body: We should track only the git username on all actions, and we should show
+  this in the settings panel; but if the user also has a full name from git, we
+  should show that in the UI. A user who has no username or full name should be
+  able to enter both in the settings. A user who has both should be able to
+  override it in the settings (we work on the honor system).

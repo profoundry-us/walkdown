@@ -1,0 +1,10 @@
+id: n-0098
+kind: note
+author: Topher Fangio
+created: 2026-08-27T02:16:50Z
+anchor:
+  rule: panel.dock.toolbar
+status: open
+body: I can select a different screen, and it changes; but when I open the panel
+  again, it's still showing the "Detect" option as selected no matter what
+  screen I select.

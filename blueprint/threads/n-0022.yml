@@ -4,7 +4,7 @@ author: topher
 created: 2026-08-24T03:25:56Z
 anchor:
   rule: panel.dock.toolbar
-status: addressed
+status: verified
 body: The prototype/app slider cannot be dragged. Clicking a spot on the track
   moves it, but grabbing the thumb and dragging does nothing.
 replies:

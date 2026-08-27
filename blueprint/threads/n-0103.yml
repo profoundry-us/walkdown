@@ -1,0 +1,10 @@
+id: n-0103
+kind: note
+author: Topher Fangio
+created: 2026-08-27T03:03:39Z
+anchor:
+  rule: panel.threads.own-view
+status: open
+body: Looks pretty good, but the subtabs filtering should be docked to the top
+  (maybe we just make it sticky; or change the wrapper element so it isn't part
+  of the scroll).

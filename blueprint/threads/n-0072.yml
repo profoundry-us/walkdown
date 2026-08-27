@@ -5,7 +5,7 @@ created: 2026-08-25T22:45:00Z
 anchor:
   rule: panel.dock.toolbar
   screen: docked
-status: addressed
+status: verified
 body: When walkdown is put away and only the vertical badge is showing on the
   side, there should be a button right next to the badge that swaps between the
   prototype and the app. Moving between the two surfaces is the thing I do most

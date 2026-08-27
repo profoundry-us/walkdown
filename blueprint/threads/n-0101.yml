@@ -1,0 +1,20 @@
+id: n-0101
+kind: note
+author: topherfangio
+created: 2026-08-27T02:58:15Z
+anchor:
+  screen: review
+  element: panel.actor
+  offset:
+    x: 234
+    y: 12
+  position:
+    x: 445
+    y: 115
+  surface: app
+  viewport:
+    name: mobile
+    width: 510
+status: open
+body: This should only appear on the Rules tab; it's currently showing on all
+  tabs which is wrong.

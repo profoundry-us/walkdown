@@ -4,7 +4,7 @@ author: topher
 created: 2026-08-24T01:09:52Z
 anchor:
   rule: panel.dock.toolbar
-status: addressed
+status: verified
 body: "Panel interface pass: drop the broken project selector for a first-run
   interstitial that opens a folder of blueprints and then lets you pick one by
   name and description; Start walkdown next to Pin mode at top right;

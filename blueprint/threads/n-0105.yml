@@ -1,0 +1,16 @@
+id: n-0105
+kind: note
+author: topherfangio
+created: 2026-08-27T03:23:12Z
+anchor:
+  screen: rule-detail
+  position:
+    x: 724
+    y: 679
+  surface: app
+  viewport:
+    name: desktop
+    width: 1050
+status: open
+body: The toasts that appear in the bottom of the screen should utilize the
+  warn, success, and danger colors where relevant.
