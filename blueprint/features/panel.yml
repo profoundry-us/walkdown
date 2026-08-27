@@ -519,19 +519,22 @@ stories:
 
       - id: panel.rules.counts-legible
         origin: thread:n-0002
-        statement: The list's footer counts say what they count and reconcile with the list - verified is a count of rules, the work owed to a person is named, and each owed rule carries a mark so the total can be counted back.
+        statement: The counts say what they count and reconcile with the list - verified is a count of rules, the work owed to a person is named, each owed rule carries a mark so the total can be counted back, and the tab carries that total so it is legible from whichever tab is open.
         verify: [agent, human]
         screens: [review]
         steps:
           given:
             - A blueprint whose rules are partly verified, with work owed to a person
           when:
-            - Reading anchor `panel.counts` on screen `review`, then the marks in anchor `panel.rules-list`
+            - Reading anchor `panel.counts` on screen `review`, then the marks in anchor `panel.rules-list`, then the Rules tab in anchor `panel.tabs`
           then:
             - Every number states its unit, so a reader can tell rules from pending actions
             - The footer splits the owed work by kind - to sign and to walk - and each owed rule's badge says the same word
             - The badges owed sum to the footer's counts, kind for kind
-          statement_hash: sha256:cc7b6d687101
+            - The Rules tab carries how many rules a walkdown would take you through - the footer's two kinds together, counted the way the walkdown itself picks the next rule, so it empties as the sitting goes on
+            - A tab holding nothing for you draws no badge at all, because a badge saying none is a claim on the eye about nothing
+            - The Rules badge is the same warning colour the rule glyphs and their badges use, because it is the same claim they make - this is waiting on you - and it is the loudest thing in the strip, since walking the rules is the work the tool exists for. Other tabs count their own work in their own colour rather than a second yellow beside it
+          statement_hash: sha256:669dfeb91eee
 
       - id: panel.rules.lifecycle-legible
         origin: thread:n-0054

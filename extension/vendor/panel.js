@@ -1486,14 +1486,37 @@
     renderBar();
     const onThreads = listTab === 'threads';
     const TAB_ICON = { blueprints: 'bounding-box', rules: 'checks', threads: 'chats-circle' };
-    const tab = (id, label, badge = 0) =>
+    /*
+     * A tab's badge is what that tab is holding for you, and the colour ranks
+     * it. Warning yellow is this panel's "waiting on you" - the rule glyphs,
+     * their badges and the footer all say it in that colour
+     * (panel.rules.lifecycle-legible) - and it belongs to the rules a walkdown
+     * would take you through, which is the work the whole tool exists to get
+     * done. Threads are blue: real work, answered when you get to it, and a
+     * second yellow beside the first would flatten the two into one call on
+     * the eye. Nothing is drawn at zero - a badge saying none is a claim on
+     * the eye that turns out to be about nothing.
+     */
+    const tab = (id, label, badge = 0, why = '', tone = 'badge-warning') =>
       `<button role="tab" class="tab gap-1 px-4${listTab === id ? ' tab-active' : ''}" data-tab="${id}">
         ${icon(TAB_ICON[id], 'size-4')}${label}${badge
-          ? `<span class="badge badge-xs badge-info" title="${badge} thread${badge === 1 ? '' : 's'} awaiting your judgment">${badge}</span>`
+          ? `<span class="badge badge-xs ${tone}" title="${esc(why)}">${badge}</span>`
           : ''}</button>`;
     side.innerHTML = `
       <div role="tablist" class="tabs tabs-box tabs-sm m-2 shrink-0 self-center" data-testid="panel.tabs">
-        ${tab('blueprints', 'Blueprints')}${tab('rules', 'Rules')}${tab('threads', 'Threads', toVerify)}
+        ${tab('blueprints', 'Blueprints')}${
+          /*
+           * What a walkdown would take you through, counted the same way
+           * Continue walkdown picks the next one - rules owing you a verdict,
+           * less the ones you have already judged this sitting. So the badge
+           * empties as you walk, and reaching zero and the button saying there
+           * is nothing left are the same fact rather than two.
+           */
+          tab('rules', 'Rules', toSign + toWalk,
+            `${toSign + toWalk} rule${toSign + toWalk === 1 ? '' : 's'} a walkdown would take you through`
+            + `${toSign ? ` — ${toSign} to sign` : ''}${toWalk ? ` — ${toWalk} to walk` : ''}`)
+        }${tab('threads', 'Threads', toVerify,
+          `${toVerify} thread${toVerify === 1 ? '' : 's'} awaiting your judgment`, 'badge-info')}
       </div>
       <!-- The name stays on screen while a session runs (nobody is attributed
            silently) but editing it lives in Settings - the strip only shows it. -->
