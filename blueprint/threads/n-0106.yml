@@ -11,8 +11,34 @@ anchor:
   viewport:
     name: desktop
     width: 1050
-status: open
+status: addressed
 body: There is still a bug where any pins on a page have their tooltips appear
   and then fade away very quickly when the page first loads. This appears to be
   from any load, whether a rule change, or the first load of the app /
   extension.
+replies:
+  - author: agent
+    created: 2026-08-27T04:30:23Z
+    body: "Fixed in lib/viewer/embed.js. Root cause: the pin layer is drawn into a
+      shadow root whose stylesheet is FETCHED, and the pins were drawn before it
+      landed. Until it arrives a .tooltip-content is an ordinary, entirely
+      visible box of text; when the sheet applied, daisyUI's resting opacity:0
+      took effect WITH its 200ms transition, so every tooltip on the page faded
+      out. Measured on a fresh load before the fix: 12 tooltips at opacity 1
+      from ~220ms, fading to 0 between ~380 and ~550ms — exactly the flash you
+      saw, on every load, because every load re-fetches that sheet. The embed's
+      own synchronous stylesheet now hides what it draws until the fetched one
+      has landed (root carries wd-unstyled; the rule is display:none, and the
+      class is dropped as the sheet is inserted). Deliberately display and not
+      opacity: an opacity rule there is unlayered CSS and beats daisyUI's hover
+      rule, which lives in a cascade layer and loses to anything outside one
+      however specific — I tried that first and it produced a tooltip that never
+      showed at all. Verified with a new browser check tagged
+      @rule:embed.pin.tooltip-says-what-it-is in checks/embed.spec.js: it
+      watches the framed document from its first frame and counts any tooltip
+      the browser reports as painted (checkVisibility) while no pointer is near
+      a pin — 240 such frames before the fix, 0 after — then hovers a pin and
+      asserts the tooltip names its thread and comes up to full strength. The
+      pin tooltip also gained an anchor, pin.tip, so the check selects it by
+      anchor rather than by class. node --test 93 pass, WALKDOWN_RECORD=0 npm
+      run checks:dev 23 pass, walkdown lint 0 errors."

@@ -15,6 +15,28 @@ anchor:
   viewport:
     name: desktop
     width: 1050
-status: open
+status: addressed
 body: With the prototype open, I can't use the screen selector. It is visible,
   but clicking it does nothing.
+replies:
+  - author: agent
+    created: 2026-08-27T04:30:00Z
+    body: "Fixed in lib/viewer/panel.js. Root cause: the ghost stage carried
+      z-index:2147482000 — left over from when it was an overlay in the host
+      document. Since the ghost moved inside the panel's shadow root (with the
+      shell in the top layer above the app frame), that number no longer meant
+      'above the app'; it meant 'above walkdown's own chrome'. The bar's
+      popovers hang off an unpositioned wrapper, so they paint at z-index auto:
+      the screen picker opened correctly and was drawn UNDER the design, which
+      reads as a button that does nothing. The desk tuner was buried the same
+      way. The ghost now carries no z-index of its own, so painting follows DOM
+      order inside the shadow root (ghost first, chrome after) — which is the
+      ordering the insert was already written for. Verified with a new browser
+      check tagged @rule:panel.dock.toolbar in checks/panel.spec.js ('the screen
+      picker opens over the design, not underneath it'): with the design raised
+      over the page it opens the list, screenshots the pixels where the list
+      lies, dismisses it and screenshots the same rectangle — buried, the two
+      are identical. The check fails on the unfixed panel and passes on the
+      fixed one (WALKDOWN_RECORD=0 npm run checks:dev, 23 passed). Also
+      eyeballed: the tuner and the picker now both draw over the ghosted
+      surface, and the ghost still covers the app frame."

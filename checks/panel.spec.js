@@ -552,3 +552,74 @@ test(
     await expect(list).toBeVisible();
   }
 );
+
+test(
+  'the screen picker opens over the design, not underneath it',
+  { tag: '@rule:panel.dock.toolbar' },
+  async ({ page }) => {
+    // A screen with a design on file, so there is a prototype to raise over
+    // the page: the picker's list hangs in exactly the area the ghosted
+    // surface covers, and a list painted under it reads as a button that does
+    // nothing at all (n-0107).
+    await page.goto(fixtureFor({ frame: `${WD_ORIGIN}/prototype/screens/review.html` }));
+    await expect(page.getByTestId('panel.bar')).toBeVisible();
+    await page.locator('[data-surface="app"]').click();
+    await expect
+      .poll(() => page.frames().some((f) => f.url().includes('/stand-in/review')), { timeout: 10000 })
+      .toBe(true);
+    await page.waitForLoadState('networkidle');
+
+    await page.getByTestId('panel.screen-picker').click();
+    const list = page.getByTestId('panel.screens-list');
+    await expect(list).toBeVisible();
+    await expect(list).toContainText('Detect from the page');
+
+    /*
+     * And it is on screen, not merely in the DOM: a list painted under the
+     * ghosted surface is visible by every measure except the only one that
+     * matters. So the pixels where the list lies are compared with the same
+     * pixels once it is dismissed - if the design is covering it, opening and
+     * closing the list look exactly alike.
+     */
+    const clip = await list.boundingBox();
+    const shown = await page.screenshot({ clip });
+    await page.keyboard.press('Escape');
+    await expect(list).toBeHidden();
+    const hidden = await page.screenshot({ clip });
+    expect(Buffer.compare(shown, hidden), 'the list opened behind the design').not.toBe(0);
+  }
+);
+
+test(
+  'a screen picked by hand stays picked after the frame lands on it',
+  { tag: '@rule:panel.dock.toolbar' },
+  async ({ page }) => {
+    await review(page);
+    // Nothing picked yet: the bar says it is detecting, and the list agrees.
+    const picker = page.getByTestId('panel.screen-picker');
+    await expect(picker).toHaveAttribute('title', /detected from its address/i);
+
+    await picker.click();
+    const list = page.getByTestId('panel.screens-list');
+    await expect(list).toBeVisible();
+    await list.locator('[data-screen="rule-detail"]').click();
+
+    // It takes you there — and arriving is not the same as leaving, so the
+    // choice survives the landing rather than being reset by it (n-0098).
+    await expect
+      .poll(() => page.frames().some((f) => f.url().includes('/stand-in/rule-detail')), { timeout: 10000 })
+      .toBe(true);
+    await expect(picker).toHaveAttribute('title', /picked by hand/i);
+
+    // Reopened, the list marks the picked screen rather than Detect.
+    await picker.click();
+    await expect(list).toBeVisible();
+    await expect(list.locator('[data-screen="rule-detail"]')).toContainText('◉');
+    await expect(list.locator('[data-screen=""]')).toContainText('○');
+
+    // And Detect is the way back: picking it hands the answer to the page again.
+    await list.locator('[data-screen=""]').click();
+    await expect(picker).toHaveAttribute('title', /detected from its address/i);
+  }
+);
+

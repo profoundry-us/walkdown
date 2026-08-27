@@ -303,3 +303,61 @@ test(
     expect(thread.anchor.element).toBe('waitlist.email');
   }
 );
+
+test(
+  'a pin says what it is on contact, and says nothing until then',
+  { tag: '@rule:embed.pin.tooltip-says-what-it-is' },
+  async ({ page }) => {
+    /*
+     * The tooltip is walkdown's own markup rather than a title attribute, which
+     * is what makes it appear on contact - and what made it appear without any
+     * contact at all. Its resting state used to come only from the stylesheet
+     * the embed FETCHES, so between the pins being drawn and the sheet landing
+     * every tooltip on the page was simply a visible box of text, faded away
+     * again on arrival: a flash on every load (n-0106). So the load is watched
+     * from the framed document's first frame, not merely inspected once it has
+     * settled - by then the flash is over.
+     */
+    await page.addInitScript(() => {
+      if (window.parent === window) return;          // walkdown's own page
+      window.__tipShown = 0;
+      const tick = () => {
+        const sr = document.querySelector('[data-walkdown-chrome]')?.shadowRoot;
+        for (const t of sr?.querySelectorAll('[data-testid="pin.tip"]') ?? [])
+          // Painted, by the browser's own reckoning: not hidden, not
+          // transparent, not collapsed out of the layout.
+          if (t.checkVisibility({ opacityProperty: true, visibilityProperty: true }))
+            window.__tipShown++;
+        if (performance.now() < 4000) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+
+    // The review screen as the app: the surface the project's own pins were
+    // placed on, so there are several of them to draw.
+    await page.goto(FIXTURE);
+    await expect(page.getByTestId('panel.bar')).toBeVisible();
+    await page.waitForLoadState('networkidle');
+    const pins = app(page).getByTestId('pin.marker');
+    await expect(pins.first()).toBeVisible();
+    const drawn = await pins.count();
+    expect(drawn, 'the screen needs pins for this to be about anything').toBeGreaterThan(0);
+
+    // Nothing was ever painted while the pointer was nowhere near a pin.
+    await page.waitForTimeout(1500);
+    const reviewed = page.frames().find((f) => f !== page.mainFrame() && f.url().includes('/stand-in/review'));
+    const shown = await reviewed.evaluate(() => window.__tipShown);
+    expect(shown, 'a pin showed its tooltip with no pointer on it').toBe(0);
+
+    // On contact it is there, and it says which thread and what state.
+    const marker = pins.first();
+    const thread = await marker.getAttribute('data-thread');
+    await marker.hover();
+    const tip = app(page).getByTestId('pin.tip').first();
+    await expect(tip).toContainText(thread);
+    await expect
+      .poll(async () => Number(await tip.evaluate((el) => getComputedStyle(el).opacity)))
+      .toBeGreaterThan(0.9);
+  }
+);
+

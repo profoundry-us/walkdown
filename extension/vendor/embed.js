@@ -110,6 +110,8 @@
    */
   const root = document.createElement('div');
   root.dataset.theme = 'blueprint';
+  // Undressed until the fetched stylesheet lands — see the rule that reads it.
+  root.className = 'wd-unstyled';
   // Inheritance is the one thing a shadow root does not keep out, so what the
   // host page sets on our layer stops here - see the same reset in panel.js.
   root.style.cssText = 'position:absolute; top:0; left:0; width:0; height:0; letter-spacing:normal; word-spacing:normal; text-transform:none; font-variant:normal; font-style:normal; text-indent:0; text-shadow:none; white-space:normal; word-break:normal; text-align:left; direction:ltr; text-decoration:none;';
@@ -133,6 +135,11 @@
       // looks the same here as it does in the panel.
       sheet.textContent = css + MSG.css;
       lr.insertBefore(sheet, root);
+      // Dressed now, so what is drawn may be shown. Only on success: with no
+      // stylesheet at all, pinning still works (see the catch below) and a
+      // page of tooltips unfurled into the layout is not the fallback anyone
+      // wants.
+      root.classList.remove('wd-unstyled');
       if (document.querySelector('[data-walkdown-property-registrations]')) return;
       const props = css.match(/@property\s+--[\w-]+\s*\{[^}]*\}/g);
       if (!props) return;
@@ -172,6 +179,16 @@
     /* The tooltip is for reading, never for clicking: it hovers over the page
        around its pin, and a click meant for the pin must reach the pin. */
     .wd-pin .tooltip-content { pointer-events: none; }
+    /* Nothing walkdown draws is shown before the sheet that dresses it has
+       landed. This stylesheet is in the shadow root synchronously; the big one
+       is FETCHED, and until it arrives a tooltip is simply a visible box of
+       text - so every pin on the page showed its tooltip unprompted and then
+       transitioned it away as the sheet applied, a fade-out nobody asked for on
+       every load (n-0106). Hidden rather than transparent on purpose: opacity
+       here would be unlayered CSS and would beat daisyUI's own hover rule,
+       which lives in a cascade layer and loses to anything outside one however
+       specific it is - a tooltip that never shows at all. */
+    .wd-unstyled .tooltip-content { display: none; }
     .wd-ghost-pin { opacity: .55; animation: wd-bob 1.4s ease-in-out infinite; }
     @keyframes wd-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }`;
   document.head.appendChild(style);
@@ -268,6 +285,7 @@
       wrap.style.left = `${left}px`;
       wrap.style.top = `${top}px`;
       const tip = document.createElement('div');
+      tip.dataset.testid = 'pin.tip';
       tip.className = 'tooltip-content max-w-70 whitespace-normal text-left';
       tip.innerHTML = pinTip(pin);
       const dot = document.createElement('div');

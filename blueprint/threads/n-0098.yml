@@ -4,7 +4,28 @@ author: Topher Fangio
 created: 2026-08-27T02:16:50Z
 anchor:
   rule: panel.dock.toolbar
-status: open
+status: addressed
 body: I can select a different screen, and it changes; but when I open the panel
   again, it's still showing the "Detect" option as selected no matter what
   screen I select.
+replies:
+  - author: agent
+    created: 2026-08-27T04:30:10Z
+    body: "Fixed in lib/viewer/panel.js. Two places threw the choice away. goTo()
+      cleared pickedScreen unconditionally ('the screen we are leaving'), and
+      then the frame announcing its landing ran hereChanged(), which cleared it
+      again — so the arrival at the very screen you picked looked exactly like
+      navigating away from it, and detection re-derived the screen from the URL
+      with the radio back on Detect. goTo() now takes what the override should
+      say once it arrives: null for trips walkdown decides on (a rule's screen,
+      the blueprint's front door), and the picked id when a person named it in
+      the picker. hereChanged() keeps a pick only while the page still matches
+      that screen, so leaving it for anywhere else still hands the answer back
+      to detection. Verified with a new browser check tagged
+      @rule:panel.dock.toolbar in checks/panel.spec.js ('a screen picked by hand
+      stays picked after the frame lands on it'): pick rule-detail, wait for the
+      frame to land on /stand-in/rule-detail, and the bar's picker reads 'picked
+      by hand' while the reopened list marks rule-detail rather than Detect;
+      picking Detect again hands it back. The check fails on the unfixed panel.
+      Full suite: node --test 93 pass, WALKDOWN_RECORD=0 npm run checks:dev 23
+      pass, walkdown lint 0 errors."
