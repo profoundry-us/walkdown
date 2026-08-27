@@ -43,3 +43,20 @@ belong in walkdown's runs ledger, never in a Highball run.
 
 The hooks call the local binary directly — npx resolves the same package
 but intermittently stalls for minutes, which a per-edit hook cannot afford.
+
+## The panel is built, not edited in place
+
+`lib/viewer/panel.js` is Rollup's output. Edit `src/panel/index.js` — an edit
+to the built file survives until the next `npm run build:js` and then vanishes,
+which reads exactly like the change never worked.
+
+    npm run build:js     # src/panel -> lib/viewer/panel.js
+    npm run check:js     # the build is current (Highball runs this)
+
+The build is committed because both deliveries read it: the classic `<script>`
+`walkdown serve` hands out, and `extension/vendor/panel.js`, which `build:ext`
+copies. Rollup runs with `treeshake: false` and `format: 'es'`; the reasons are
+in `rollup.config.mjs` and both are load-bearing.
+
+`tools/sync-shared.mjs` and `tools/sync-phosphor.mjs` write their generated
+blocks into the source, not the build, for the same reason.

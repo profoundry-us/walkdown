@@ -14,7 +14,7 @@ import { dirname, join } from 'node:path';
 
 const HERE = dirname(new URL(import.meta.url).pathname);
 const ROOT = join(HERE, '..');
-const PANEL = join(ROOT, 'lib', 'viewer', 'panel.js');
+const PANEL = join(ROOT, 'src', 'panel', 'index.js');   // the source, not the build
 const EMBED = join(ROOT, 'lib', 'viewer', 'embed.js');
 
 /*

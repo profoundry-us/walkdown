@@ -15,7 +15,10 @@ import { dirname, join, relative } from 'node:path';
 
 const HERE = dirname(new URL(import.meta.url).pathname);
 const ROOT = join(HERE, '..');
-const TARGETS = [join(ROOT, 'lib', 'viewer', 'panel.js'), join(ROOT, 'lib', 'viewer', 'embed.js')];
+// The panel's source moved under src/ when the bundler arrived; lib/viewer
+// is where the built copy lands, and writing generated blocks there would
+// be undone by the very next `npm run build:js`.
+const TARGETS = [join(ROOT, 'src', 'panel', 'index.js'), join(ROOT, 'lib', 'viewer', 'embed.js')];
 
 /*
  * Each shared block: one source module, one marker name. Both browser files

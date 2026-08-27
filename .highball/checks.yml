@@ -45,6 +45,16 @@ checks:
     run: node tools/sync-shared.mjs --check && node tools/sync-phosphor.mjs --check
     fast: true
 
+  # The panel is assembled from src/panel by Rollup; lib/viewer/panel.js is
+  # the build, and it is committed because both deliveries read it — the
+  # served <script> and the extension's vendored copy. Editing the build by
+  # hand, or editing the source and not rebuilding, leaves the two disagreeing
+  # and every other check in this file still green.
+  - id: panel-built
+    name: The built panel matches its source
+    run: npm run --silent check:js
+    fast: true
+
   # And the extension carries its own copy of the two viewer files. Editing
   # lib/viewer without rebuilding leaves the extension a version behind, which
   # shows up as behaviour that works in one delivery and not the other — the

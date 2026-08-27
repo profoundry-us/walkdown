@@ -66,7 +66,7 @@
    off auto-detection so the blueprint's YAML and run records can't invent
    utilities out of stray words. */
 @source "../lib/viewer/review.html";
-@source "../lib/viewer/panel.js";
+@source "../src/panel";
 @source "../lib/viewer/embed.js";
 @source "../prototype/screens/*.html";
 @source "../example/prototype/screens/*.html";
