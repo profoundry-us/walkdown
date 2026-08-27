@@ -313,7 +313,7 @@ test(
     // recognise it is already there and do nothing: re-navigating throws away
     // scroll position and form state, and on a slow app you watch it rebuild
     // for nothing.
-    await page.getByTestId('panel.tabs').getByText(/Screens/i).click();
+    await page.getByTestId('panel.screen-picker').click();
     const row = page.locator('[data-screen="review"]').first();
     await expect(row).toBeVisible();
     await row.click();
@@ -344,7 +344,7 @@ test(
       await route.fulfill({ contentType: 'text/html', body: '<h1>Arrived</h1>' });
     });
 
-    await page.getByTestId('panel.tabs').getByText(/Screens/i).click();
+    await page.getByTestId('panel.screen-picker').click();
     await page.locator('[data-screen="rule-detail"]').first().click();
 
     const veil = page.getByTestId('panel.frame-loading');
@@ -494,5 +494,61 @@ test(
     // is worse than none.
     await openRule('email-required');
     await expect(page.getByTestId('detail.setup')).toHaveCount(0);
+  }
+);
+
+test(
+  'threads have a view of their own, ended ones included',
+  { tag: '@rule:panel.threads.own-view' },
+  async ({ page }) => {
+    await review(page);
+
+    /*
+     * What the ledger says, before the panel says anything. The count on the
+     * tab and the "Awaiting you" filter are both claims about the attention
+     * queue, and a check that read them only from the panel could not tell a
+     * right answer from a consistent wrong one.
+     */
+    const bp = await (await page.request.get(`${WD_ORIGIN}/api/blueprint`)).json();
+    const owed = new Set((bp.attention ?? [])
+      .filter((i) => i.who === 'human' && i.thread).map((i) => i.thread));
+    const TERMINAL = ['verified', 'incorporated', 'waived'];
+    const ended = bp.threads.filter((t) => TERMINAL.includes(t.status));
+    expect(ended.length, 'the fixture blueprint has no ended threads to go back to').toBeGreaterThan(0);
+
+    await page.getByTestId('panel.tabs').getByText(/Threads/).click();
+    const list = page.getByTestId('panel.threads-list');
+    await expect(list).toBeVisible();
+
+    // Active is what is live — an ended conversation is not in it.
+    const gone = ended[0].id;
+    await expect(list).not.toContainText(gone);
+
+    // ...and All reaches it, which nothing else in the panel can do.
+    const filter = page.getByTestId('panel.thread-filter');
+    await filter.getByText('All', { exact: false }).click();
+    await expect(list).toContainText(gone);
+
+    // Awaiting you is the ledger's own queue, not a second definition of it.
+    await filter.getByText(/Awaiting you/).click();
+    const shownIds = (await list.locator('[data-open-thread]').evaluateAll(
+      (els) => els.map((e) => e.dataset.openThread)));
+    expect(new Set(shownIds)).toEqual(owed);
+
+    // The same number rides on the tab, so it is legible from any tab.
+    await expect(page.getByTestId('panel.tabs')).toContainText(String(owed.size));
+
+    // A thread opens beside the list, and the way back is the list of threads —
+    // not a rule nobody opened.
+    const first = list.locator('[data-open-thread]').first();
+    const openedId = await first.getAttribute('data-open-thread');
+    await first.click();
+    const pane = page.getByTestId('thread.panel');
+    await expect(pane).toBeVisible();
+    await expect(pane.getByTestId('thread.provenance')).toContainText(openedId);
+    const back = pane.getByTestId('thread.close');
+    await expect(back).toContainText('All threads');
+    await back.click();
+    await expect(list).toBeVisible();
   }
 );

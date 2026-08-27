@@ -51,19 +51,21 @@ stories:
 
       - id: panel.dock.toolbar
         origin: thread:n-0015
-        statement: A bar across the top carries the controls that are about the session rather than the rule in hand - which project, which surface, and pin mode.
+        statement: A bar across the top carries the controls that are about the session rather than the rule in hand - which project, which screen, which surface, and pin mode.
         verify: [agent, human]
         screens: [review]
         steps:
           given:
-            - walkdown docked beside a page, with sibling projects on the server
+            - walkdown framing a page, with sibling projects on the server
           when:
             - Read the bar
           then:
             - The project can be changed there, and the panel reloads against it
+            - Anchor `panel.screen-picker` says which screen this page is without being opened, and opens anchor `panel.screens-list` to pick a different one or to go back to detecting it
+            - A screen picked by hand is marked as picked, because it outranks detection and the difference has to be readable from the bar
             - Prototype and App switch which of the two the page area shows
             - Pin mode can be turned on and off there
-          statement_hash: sha256:41dff56f44c2
+          statement_hash: sha256:f27580616b45
 
       - id: panel.dock.surface-swap-is-instant
         origin: walkdown
@@ -413,7 +415,7 @@ stories:
             - The detail pane slides in and the list slides out
             - Exactly one pane occupies the panel's full width
             - "\"All rules\" slides back to the list"
-            - The Blueprints / Rules / Screens tabs are sized to their labels and centred in the sidebar, not stretched to its full width
+            - The Blueprints / Rules / Threads tabs are sized to their labels and centred in the sidebar, not stretched to its full width
             - Each of the three tabs carries its own icon, from the same Phosphor set as the rest of the panel's chrome, sized and padded to read clearly at tab size rather than as an inline glyph shrunk to fit
           statement_hash: sha256:493a83d3f0bd
 
@@ -446,10 +448,11 @@ stories:
           given:
             - A rule open in the detail pane
           when:
-            - Switch to the Blueprints or Screens tab
+            - Switch to the Blueprints or Threads tab
           then:
             - That tab's own content is what shows
             - Returning to Rules shows the list, from which the rule can be opened again
+            - A tab that opens something of its own opens it into the same seat the rule detail uses, so no tab slides past another tab's detail to reach its own
           statement_hash: sha256:5b742db34a44
 
       - id: panel.rules.step-between
@@ -617,6 +620,24 @@ stories:
             - Looking at it is a detour - which screen the panel thinks this page is does not change, and the picker still swaps screens
             - The detour is named while it lasts, and turning the ghost off ends it
           statement_hash: sha256:8244263349d7
+
+      - id: panel.threads.own-view
+        origin: thread:n-0094
+        statement: Threads are a view of their own and not only something hanging off a rule - the panel lists every thread on the blueprint, filtered to what is live, what is waiting on me, or all of it, including the conversations that have ended.
+        verify: [checks, agent, human]
+        screens: [review, thread-panel]
+        steps:
+          given:
+            - A blueprint holding threads in every state, some of them ended
+          when:
+            - Open the Threads tab and read anchor `panel.threads-list`
+          then:
+            - Every thread is listed with what it is anchored to, including one anchored to no rule at all
+            - Anchor `panel.thread-filter` asks the three questions the command line asks - active, awaiting you, all - and answers them the same way, because a second definition of "active" is a second thing to get wrong
+            - Asking for all of them reaches a thread that has ended, which nothing else in the panel can do
+            - Opening one shows the conversation beside the list, and the way back from it is the list of threads rather than a rule nobody opened
+            - How many threads are waiting on a person is carried on the tab itself, so it is legible from whichever tab is open
+          statement_hash: sha256:faade3b887d1
 
   - id: panel.walkdown
     title: A walkdown from the panel is a walkdown

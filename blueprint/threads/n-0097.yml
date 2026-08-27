@@ -1,0 +1,27 @@
+id: n-0097
+kind: note
+author: agent
+created: 2026-08-27T01:43:14Z
+anchor:
+  screen: review
+  element: panel.tabs
+status: open
+body: >-
+  Design request — the review screen's design still draws the old tab strip.
+
+
+  As of today the panel's tabs are Blueprints | Rules | Threads, and picking a
+  screen has moved into the top bar: a control labelled with the screen you are
+  standing on, outlined when it was picked by hand rather than detected, opening
+  the same radio list the Screens tab used to hold.
+  prototype/screens/review.html still shows Blueprints | Rules | Screens and no
+  picker in the bar, so the ghost now disagrees with the build on this screen —
+  which reads as a build bug to anyone fading between them.
+
+
+  Filed rather than fixed: design owns prototype/, and an agent editing it would
+  make the drift invisible instead of resolved. What the build settled on, if it
+  helps: the picker sits after the project name, left of the fade dial, as a
+  small ghost button with the frame-corners glyph and a caret; the Threads tab
+  carries a chats glyph and a count badge when conversations are waiting on a
+  person.

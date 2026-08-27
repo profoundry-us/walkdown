@@ -31,7 +31,11 @@ screens:
       - panel.app-frame
       - panel.zoom
       - panel.tabs
+      - panel.screen-picker
+      - panel.screens-list
       - panel.rules-list
+      - panel.threads-list
+      - panel.thread-filter
       - panel.counts
 
   - id: rule-detail

@@ -14,3 +14,12 @@ body: 'Idea, not yet fleshed out: a storyboard view of the screens - small
   better than a chat log. If it happens it probably replaces the Screens tab
   rather than joining it, which is the other half of the tabs question in the
   note beside this one.'
+replies:
+  - author: agent
+    created: 2026-08-27T01:42:49Z
+    body: 'Related, from the note beside this one: the Screens tab is gone as of
+      today — the picker moved into the top bar, where "which screen is this
+      page" reads as an answer rather than a place to go ask. So a storyboard
+      view no longer has to displace anything to exist; the strip has three tabs
+      and the room this idea needed is not the constraint any more. Left open —
+      the idea itself is still unfleshed.'

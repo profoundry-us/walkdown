@@ -24,8 +24,9 @@ const EMBED = join(ROOT, 'lib', 'viewer', 'embed.js');
  * it, so `map-pin` and `map-pin-fill` can both exist.
  */
 const TARGETS = [
-  { file: PANEL, icons: [['bounding-box', 'regular'], ['checks', 'regular'], ['desktop', 'regular'],
-    ['device-mobile', 'regular'], ['frame-corners', 'regular'], ['gear', 'regular'], ['map-pin', 'regular'], ['warning', 'fill']] },
+  { file: PANEL, icons: [['bounding-box', 'regular'], ['caret-down', 'regular'], ['chats-circle', 'regular'],
+    ['checks', 'regular'], ['desktop', 'regular'], ['device-mobile', 'regular'], ['frame-corners', 'regular'],
+    ['gear', 'regular'], ['map-pin', 'regular'], ['warning', 'fill']] },
   { file: EMBED, icons: [['map-pin', 'fill']] },
 ];
 

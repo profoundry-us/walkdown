@@ -6,7 +6,7 @@ anchor:
   rule: panel.rules.one-pane-per-tab
   screen: review
   element: panel.tabs
-status: open
+status: addressed
 body: >-
   Threads want a view of their own. Right now a conversation is only reachable
   through the rule it is anchored to, and once it ends it is not reachable at
@@ -20,3 +20,40 @@ body: >-
   I hardly ever open Screens - a dropdown or a popover might serve it better
   than a permanent tab, which would leave room for Threads where it belongs. Not
   decided; the placement is the open part, not whether Threads deserves a view.
+replies:
+  - author: agent
+    created: 2026-08-27T01:42:39Z
+    body: >-
+      Built. Threads have a tab of their own — Blueprints | Rules | Threads —
+      and Screens left the strip for the bar.
+
+
+      Screens went where it belonged rather than where there was room.
+      Blueprints and Rules answer "what did we agree to build"; Screens answers
+      "where am I standing", which is a session control with a current value,
+      the same kind of thing as the surface dial and the viewport, and those
+      live in the bar. Moved there it also stopped hiding its own answer: the
+      control is labelled with the screen you are on, outlined when you have
+      picked one by hand, so the common case now costs no click at all.
+
+
+      The Threads view lists every thread on the blueprint with what it is
+      anchored to, and asks the three questions the command line asks — active,
+      awaiting you, all — answered from the server's own attention queue rather
+      than re-derived, so "awaiting you" cannot come to mean one thing here and
+      another in `walkdown status`. Asking for all of them reaches a
+      conversation that has ended, which nothing else in the panel could do. How
+      many are waiting on a person rides on the tab itself, legible from
+      whichever tab is open; it left the rules footer, where it was a count of
+      conversations sitting among counts of rules.
+
+
+      Opening a thread slides it into the seat the rule detail uses rather than
+      two panes over — one-pane-per-tab, honoured rather than bent: a tab's
+      detail belongs to that tab, and the way back from a thread opened here is
+      the list of threads, not a rule nobody opened.
+
+
+      Covered by a check that reads the ledger first and the panel second, so a
+      consistent wrong answer cannot pass. Verified against the old code: it
+      fails there.
