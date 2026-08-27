@@ -1,0 +1,65 @@
+id: n-0110
+kind: note
+author: agent
+created: 2026-08-27T06:15:33Z
+anchor:
+  rule: panel.dock.toolbar
+  screen: review
+  element: panel.blueprint
+status: addressed
+body: "Agent walkdown 2026-08-27: the bar has no way to change the project.
+  `panel.blueprint` is rendered as a plain, non-interactive <span> carrying
+  `data.project` (lib/viewer/panel.js ~1874); changing the project is only
+  possible from the Blueprints tab, which does offer a radio list plus the
+  server address (evidence:
+  runs/evidence/2026-08-27T05-52-04Z/panes-blueprints-tab.png). Every other step
+  of this rule holds — the screen picker says which screen the page is without
+  being opened and opens `panel.screens-list`, a hand-picked screen is marked
+  outlined/primary with the matching title, Prototype/App swap the page area,
+  and Pin mode toggles from the bar (evidence: toolbar-bar.png,
+  toolbar-screens-list.png, toolbar-screen-picked.png). Either the bar needs the
+  project control back, or the first step should move to the Blueprints tab
+  where the control actually lives — n-0017 dropped a broken project selector
+  from the bar, so the statement may simply be behind the build."
+replies:
+  - author: agent
+    created: 2026-08-27T06:30:21Z
+    body: >-
+      Reworded the rule rather than rebuilding the control, because n-0017 says
+      the control was removed on purpose.
+
+
+      Read in full, n-0017 is the panel interface pass: 'drop the broken project
+      selector for a first-run interstitial that opens a folder of blueprints
+      and then lets you pick one by name and description', and the follow-up
+      adds a third tab, Blueprints, showing 'the same folder-and-picker pane the
+      first run does — one implementation, so they cannot drift'. So the bar has
+      no project control by design, and the step asking for one was a statement
+      that had outlived its build. Re-adding a selector would put back the thing
+      that pass deliberately took out, and would give the project two controls
+      where n-0017 was explicit about wanting one.
+
+
+      What changed, in blueprint/features/panel.yml:
+
+        statement — was '...which project, which screen, which surface, and pin mode.'
+        now '...which screen, which surface, and pin mode - and it names the project all of them are about, without being where the project is chosen.'
+
+        first step — was 'The project can be changed there, and the panel reloads against it'
+        now 'Anchor panel.blueprint names the project this session is against; it says which one, and is not a control - choosing a different one is the Blueprints tab's job, since n-0017 took the selector off the bar on purpose'
+
+      The other four steps are untouched. Ran walkdown hash --write
+      (statement_hash now sha256:aaf28fbb5e0a) and lint is clean.
+
+
+      Re-judged in run 2026-08-27T06-25-29Z-local-01: agent PASS.
+      panel.blueprint is a plain SPAN reading 'walkdown', with no button/select
+      ancestor or descendant; the Blueprints tab carries the real choice —
+      server address with Connect, the served root, and a radio list of both
+      blueprints with name and description. Screen picker, hand-picked marking,
+      Prototype/App and Pin mode all hold as before. Evidence:
+      runs/evidence/2026-08-27T06-25-29Z/toolbar-bar.png and blueprints-tab.png.
+
+
+      Note the human tier still reads fail against the old statement — that
+      verdict is yours to revisit now that the statement has moved.

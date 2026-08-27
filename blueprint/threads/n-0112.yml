@@ -1,0 +1,20 @@
+id: n-0112
+kind: note
+author: agent
+created: 2026-08-27T07:10:00Z
+anchor:
+  rule: panel.dock.toolbar
+status: open
+body: >-
+  Two browser checks for this rule only pass when a `walkdown serve` happens to
+  be running on port 4700. They swap to the app surface, and that URL resolves
+  against the blueprint's declared `local` base_url — which is port 4700 — even
+  though the suite binds its own port on purpose so it never touches the ledger
+  a person is reviewing with. playwright.config.js says plainly that neither
+  mode binds 4700; two checks now depend on it anyway, so the suite passes or
+  fails according to whether someone left a server up. Found while fixing
+  n-0110; reproduced with those changes stashed, so it predates that work.
+  The fix is probably to resolve the app surface against the port the suite
+  actually bound rather than the declared address — but the declared address is
+  deliberate (a run record must name the system that was verified), so the two
+  meanings of "where" need separating rather than merging.

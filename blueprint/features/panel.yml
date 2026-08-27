@@ -51,7 +51,7 @@ stories:
 
       - id: panel.dock.toolbar
         origin: thread:n-0015
-        statement: A bar across the top carries the controls that are about the session rather than the rule in hand - which project, which screen, which surface, and pin mode.
+        statement: A bar across the top carries the controls that are about the session rather than the rule in hand - which screen, which surface, and pin mode - and it names the project all of them are about, without being where the project is chosen.
         verify: [agent, human]
         screens: [review]
         steps:
@@ -60,12 +60,12 @@ stories:
           when:
             - Read the bar
           then:
-            - The project can be changed there, and the panel reloads against it
+            - Anchor `panel.blueprint` names the project this session is against; it says which one, and is not a control - choosing a different one is the Blueprints tab's job, since n-0017 took the selector off the bar on purpose
             - Anchor `panel.screen-picker` says which screen this page is without being opened, and opens anchor `panel.screens-list` to pick a different one or to go back to detecting it
             - A screen picked by hand is marked as picked, because it outranks detection and the difference has to be readable from the bar
             - Prototype and App switch which of the two the page area shows
             - Pin mode can be turned on and off there
-          statement_hash: sha256:f27580616b45
+          statement_hash: sha256:aaf28fbb5e0a
 
       - id: panel.dock.surface-swap-is-instant
         origin: walkdown
