@@ -662,6 +662,27 @@ stories:
             - Discarding instead of finishing writes nothing
           statement_hash: sha256:6cc28278f4a6
 
+      - id: panel.walkdown.one-control-owns-the-sitting
+        origin: walkdown
+        statement: One control starts a sitting and ends it - the same button in the bar, because they are two halves of one act - while carrying on to the next rule sits beside the count of the rules already judged.
+        verify: [agent, human]
+        screens: [review]
+        steps:
+          given:
+            - The panel with no sitting running, then one running
+          when:
+            - Read anchor `panel.walk` in the bar, and anchor `panel.continue` beside the tally in anchor `panel.actor`
+          then:
+            - With nothing running the bar's control begins a sitting; while one runs, the same control is how it is recorded, and it says so
+            - Carrying on is a different question from ending - it is about the next rule rather than the sitting as a whole - so it sits with the count of the ones already judged rather than in the bar
+            - Carrying on opens the next rule still owing a verdict, which is not always the next rule in the list
+            - The tally beside it reads as a fraction - judged over judged plus still owed - so how far through the sitting is, and how much is left, are one glance rather than two
+            - A pass or an approval carries you on by itself; a fail or a refine keeps you on the rule so the reason can be pinned, and this is the way onward from there
+            - Both controls wear the panel's warning colour, the one it already uses for work owed to you, so the sitting reads as one thing from the tab's count through to the record - the ending filled and carrying on outlined, since two solid yellows would argue about which is the act
+            - Beginning wears it too when rules are owed, so the blueprint says there is work before being asked; with nothing owed it drops back to the ordinary action colour, because a control that is always loud says nothing
+            - Every one of these counts comes from a single list - the rules owing you a verdict, less the ones judged this sitting - so the tab's number, the footer's kinds, the tally's denominator and the rule Continue opens cannot drift apart
+          statement_hash: sha256:c74a54acc395
+
       - id: panel.walkdown.session-survives-reload
         origin: thread:n-0066
         statement: An unfinished session is real judging work - it is saved from the first verdict and restored after a page or extension reload, and a refused or failed Finish hands the button back instead of silently bricking the session.
@@ -714,7 +735,7 @@ stories:
 
       - id: panel.walkdown.pass-advances
         origin: walkdown
-        statement: A pass moves the session to the next rule owing a verdict; a fail stays put and turns pin mode on, because a fail wants a note pinned to what is wrong.
+        statement: A pass moves the session to the next rule owing a verdict; a fail stays put, so the reason can be given where the rule is - and no verdict switches a mode on by itself.
         verify: [agent, human]
         screens: [rule-detail]
         steps:
@@ -724,9 +745,10 @@ stories:
             - Pass the open rule, then fail the next
           then:
             - The pass opens the next owed rule and the judged count rises
-            - The fail keeps the rule open and switches pin mode on
+            - The fail keeps the rule open, and pin mode is left exactly as it was found
             - Judging the last owed rule returns to the list rather than a dead end
-          statement_hash: sha256:39a3512969c6
+            - Carrying on from a rule you stayed on is asked for rather than done to you - the sitting's own next step sits beside the tally
+          statement_hash: sha256:017026c31543
 
       - id: panel.walkdown.note-with-any-verdict
         origin: thread:n-0050
@@ -756,9 +778,8 @@ stories:
           when:
             - Choose Fail
           then:
-            - No verdict is recorded; the panel says why and arms pin mode
+            - No verdict is recorded, and the panel names both ways to give a why - write it, or pin it - without turning either on
             - Writing feedback or dropping a pin on the rule, then failing again, records it
-            - The fail still leaves pin mode on afterwards, so more pins can land where the problems are
           statement_hash: sha256:9644c16756d8
 
   - id: panel.identity.retired

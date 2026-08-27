@@ -61,7 +61,7 @@ async function ensureSession(page) {
 /** End whatever sitting is running, so the next check starts from nothing. */
 async function endSession(page) {
   if (await page.getByTestId('panel.actor').count()) {
-    await page.getByTestId('panel.finish').click();
+    await page.getByTestId('panel.walk').click();   // the same control that started it
     await expect(page.getByTestId('panel.actor')).toBeHidden();
   }
 }
@@ -184,7 +184,7 @@ test(
 
     // Discarded: a sitting with nothing judged leaves the ledger as it was.
     await ensureSession(page);
-    await page.getByTestId('panel.finish').click();
+    await page.getByTestId('panel.walk').click();   // the same control that started it
     await expect(page.getByTestId('panel.actor')).toBeHidden();
     expect((await payload(page)).rows.find((r) => r.rule === rule).human.state).toBe(before);
 
@@ -193,7 +193,7 @@ test(
     await openRuleForVerdict(page, rule);
     await page.getByTestId('detail.verdict').locator('button').first().click();
     await expect(page.getByTestId('detail.judged')).toHaveText(/1 judged/);
-    await page.getByTestId('panel.finish').click();
+    await page.getByTestId('panel.walk').click();   // the same control that started it
     await expect(page.getByTestId('panel.actor')).toBeHidden();
 
     await expect

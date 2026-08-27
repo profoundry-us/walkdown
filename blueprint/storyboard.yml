@@ -27,6 +27,7 @@ screens:
       - panel.viewport-toggle
       - panel.pin-mode
       - panel.walk
+      - panel.continue
       - panel.actor
       - panel.app-frame
       - panel.zoom
