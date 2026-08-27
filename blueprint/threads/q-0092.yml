@@ -5,7 +5,7 @@ created: 2026-08-26T16:59:38Z
 anchor:
   rule: panel.dock.wraps-the-page
   screen: docked
-status: open
+status: waived
 body: "Should `docked.page` be an anchor at all? Every other storyboard anchor
   names something walkdown draws, so the implementation can carry it verbatim.
   This one names the application's OWN page: docked, walkdown insets the host
@@ -22,3 +22,9 @@ body: "Should `docked.page` be an anchor at all? Every other storyboard anchor
   docked layout wrap the page in a walkdown element that can hold it - which is
   a real change to how docking works, and one I would not make without you
   saying so."
+replies:
+  - author: Topher Fangio
+    created: 2026-08-27T00:36:40Z
+    body: "Answered by deletion: there is no docked layout, so no host body for
+      docked.page to anchor to."
+waived_by: Topher Fangio

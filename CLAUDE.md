@@ -5,6 +5,20 @@ This project's spec is the walkdown blueprint in `blueprint/`. Before building,
 testing, or reviewing, read and follow `blueprint/AGENTS.md`.
 <!-- walkdown:end -->
 
+## Running walkdown's own CLI
+
+walkdown is not a dependency of itself, so `npx walkdown` and a bare `walkdown`
+reach whatever is on PATH — often a stale npx cache, which is how a server from
+this morning ends up serving files this working tree has deleted. Inside this
+repo, run the working tree:
+
+    node bin/walkdown.js status
+    node_modules/.bin/walkdown status   # same thing; a symlink `postinstall` keeps
+
+The second form exists because it is what everything else here uses (highball
+below), and reaching for it and getting "no such file or directory" is a paper
+cut we have both hit more than once.
+
 ## Highball
 
 This repo's rules are enforced locally by Highball: `.highball/checks.yml`,

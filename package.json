@@ -29,7 +29,8 @@
     "build:sync": "node tools/sync-shared.mjs && node tools/sync-phosphor.mjs",
     "build:icons": "node tools/make-icons.mjs steps --size 128",
     "checks": "playwright test",
-    "checks:dev": "WALKDOWN_RECORD=0 playwright test"
+    "checks:dev": "WALKDOWN_RECORD=0 playwright test",
+    "postinstall": "ln -sf ../../bin/walkdown.js node_modules/.bin/walkdown 2>/dev/null || true"
   },
   "dependencies": {
     "yaml": "^2.6.0"

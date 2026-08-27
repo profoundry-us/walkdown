@@ -5,7 +5,7 @@ created: 2026-08-25T15:16:10Z
 anchor:
   rule: panel.dock.host-isolation
   screen: docked
-status: addressed
+status: waived
 body: "Agent walkdown: the host page reached inside walkdown after all. A shadow
   root keeps selectors out, but not inheritance - a host page with `* {
   letter-spacing: 3px }` (or text-transform, word-spacing, font-style) sets it
@@ -20,3 +20,10 @@ body: "Agent walkdown: the host page reached inside walkdown after all. A shadow
   word-spacing 0, font-style normal, our own font. The other half of the rule
   was already true - the host page own buttons kept their hotpink Comic Sans
   through all of it."
+replies:
+  - author: Topher Fangio
+    created: 2026-08-27T00:36:32Z
+    body: The panel no longer runs inside a host document — docked was withdrawn.
+      The inheritance reset it asked for lives on in the embed, where
+      embed.pin.own-skin governs it.
+waived_by: Topher Fangio

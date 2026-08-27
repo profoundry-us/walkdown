@@ -83,11 +83,8 @@ screens:
       - start.folder
       - start.options
 
-  # RETIRED 2026-08-26 along with the docked delivery, and still here because
-  # three threads are anchored to it (n-0067, n-0072, q-0092) and a thread
-  # pointing at a screen that does not exist is a lint error. It goes when they
-  # close - which is a person's move, not an agent's.
   - id: docked
+    retired: The docked delivery was withdrawn on 2026-08-26. walkdown frames the page it reviews; nothing renders beside it any more.
     title: The docked layout (withdrawn 2026-08-26)
     prototype: /screens/docked.html
     app: { path: /stand-in/docked }

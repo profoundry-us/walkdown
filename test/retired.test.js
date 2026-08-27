@@ -67,6 +67,29 @@ test('the CLI answers for a retired rule instead of calling it unknown', async (
   assert.throws(() => run(['status', 'demo.main.never']), /status/);
 });
 
+test('a retired screen leaves the surfaces but keeps the threads anchored to it valid', () => {
+  const bp = fixture();
+  writeFileSync(join(bp, 'storyboard.yml'),
+    ['screens:', '  - id: live', '    prototype: /live.html', '    app: { path: /live }',
+     '  - id: gone', '    retired: The layout it described was withdrawn.',
+     '    prototype: /gone.html'].join('\n'));
+  // A thread saying something about a screen we later stopped meaning. The
+  // record is still true; only the screen is gone.
+  mkdirSync(join(bp, 'threads'), { recursive: true });
+  writeFileSync(join(bp, 'threads', 'n-1.yml'),
+    'id: n-1\nkind: note\nstatus: open\nanchor: { screen: gone }\nbody: said about it at the time\n');
+
+  const { findings, exitCode } = lint(loadBlueprint(bp), { checks: false });
+  assert.equal(exitCode, 0);
+  // Not "anchored to unknown screen" — the id still resolves.
+  assert.deepEqual(findings.filter((f) => /unknown screen/.test(f.message)), []);
+  // And a retired screen with no design is not a missing design request.
+  assert.deepEqual(findings.filter((f) => f.subject === 'gone'), []);
+
+  const { drift } = deriveStatus(loadBlueprint(bp));
+  assert.deepEqual(drift.design.map((d) => d.screen), []);
+});
+
 test('retired must say why', () => {
   const bp = fixture();
   const path = join(bp, 'features', 'demo.yml');

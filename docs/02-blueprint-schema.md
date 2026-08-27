@@ -173,6 +173,13 @@ screens:
   not tell them apart (`screens.identity.query-is-not-identity`). Matching skips a tie, so
   the second screen can only be reached by picking it by hand; lint warns and names which
   one loses. A `setup` is what makes that spelling honest rather than merely tolerated.
+- **`retired`** withdraws a screen the same way it withdraws a rule, and for the same
+  reason: threads anchored to it must keep resolving. A retired screen leaves the picker,
+  the matcher, the ghost and the drift report; its id still answers, so a note somebody
+  wrote about it is still a note about something. Retiring a screen means retiring the
+  rules that named it first — a live rule pointing at a screen nobody can reach is a
+  different problem.
+
 - The storyboard is the *only* place per-surface URLs live. When a route changes, one line
   changes.
 - **Each surface has one owner, and nobody writes into another's.** Design owns
