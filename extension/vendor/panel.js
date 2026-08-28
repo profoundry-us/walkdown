@@ -602,6 +602,35 @@ const GAP = 12;   // how much desk shows around the wrapped page
 const HEAD = TOP;
 
 /*
+ * Identity is two fields, not one (n-0104). Each holds null for "nothing
+ * said" - fall back to what the server derived - or the string the person
+ * typed, the empty string very much included.
+ *
+ * `username` is what every record is written under - verdicts, replies,
+ * transitions, the draft. It is a handle, it is stable, and it is the only
+ * thing the ledger ever sees. `name` is the full name git may or may not
+ * know; it is what the panel SHOWS, because "Topher Fangio" reads better
+ * than "topher", and it is never what gets recorded, because plenty of
+ * people do not have one.
+ *
+ * Either can be set in Settings, including by someone whose git knows
+ * neither - honour system, as asked. Empty means "no override": the field
+ * falls back to what the server derived, so clearing a box is how you undo.
+ *
+ * ACTOR_KEY is the single free-text field this replaces. It is read once, at
+ * boot, and migrated into the display name - which is the field it actually
+ * held, since it was seeded from `git config user.name`. The username goes
+ * back to being derived. Nothing in the ledger is touched: records written
+ * under the old value stay exactly as written, and nameMap keeps showing
+ * them under one face (see `handles` in the identity payload).
+ */
+const ACTOR_KEY = 'walkdown:actor';           // legacy: one free-text name
+const IDENTITY_KEY = 'walkdown:identity';     // { username, name }
+const identityOverride = { username: null, name: null };
+const saveIdentity = () => store.set(IDENTITY_KEY,
+  { username: identityOverride.username, name: identityOverride.name });
+
+/*
  * The two helpers everything else needs: escaping, and where the server is.
  *
  * They are here rather than in state.js because state has no dependencies and
@@ -711,6 +740,68 @@ function toast(html, { sticky = false, on = null, tone = 'neutral' } = {}) {
   D.host.appendChild(t);
   if (!sticky) setTimeout(() => t.remove(), 4200);
 }
+
+/*
+ * The panel's shared vocabulary: the small questions every pane asks of the
+ * data, and the two class strings they all label with.
+ *
+ * None of it decides anything or draws anything — each is a plain reading of
+ * S — which is why it can sit below every pane in the import graph and be
+ * reached from all of them without a cycle. When one pane needed a helper the
+ * next pane also needed, this is where it went.
+ */
+
+// ---- data -----------------------------------------------------------------
+/*
+ * The walk's own work list: rules owing you a verdict, less the ones you
+ * have already judged this sitting. Four copies of this predicate had grown
+ * up - the footer's counts, the tab badge, the pass-advance, Continue - and
+ * they only agreed by hand. One definition, and the number on the tab is by
+ * construction the list Continue walks.
+ */
+const owedRows = () => (S.data?.rows ?? []).filter(
+  (r) => needsYou(r.rule) && !(S.session?.verdicts ?? {})[r.rule]);
+
+const needsYou = (rule) =>
+  (S.data?.attention ?? []).some((i) => i.who === 'human' && !i.thread && i.rule === rule);
+const threadsFor = (rule) => (S.data?.threads ?? []).filter((t) => t.anchor?.rule === rule &&
+  !['incorporated', 'verified', 'waived'].includes(t.status));
+
+const screenById = (id) => (S.data?.storyboard ?? []).find((s) => s.id === id) ?? null;
+
+const LBL = 'text-[10.5px] font-bold uppercase tracking-widest opacity-40';
+/** A rule id with its story prefix dropped — what the rail calls it. */
+const shortName = (row) =>
+  row.rule.startsWith(row.story + '.') ? row.rule.slice(row.story.length + 1) : row.rule;
+
+/**
+ * A thread in the detail pane. Collapsed it is a line of provenance and the
+ * note; open it carries its replies, a reply box and the transitions its
+ * state allows — feedback gets answered where it is read, without leaving
+ * the app under review.
+ */
+const CHIP = {
+  open: 'badge-warning', answered: 'badge-warning', addressed: 'badge-info',
+  verified: 'badge-success', incorporated: 'badge-success', waived: 'badge-ghost',
+};
+const TERMINAL = ['verified', 'incorporated', 'waived'];
+
+/** Who a reply and a transition are recorded as - one answer, as everywhere. */
+const whoAmI = () =>
+  (identityOverride.username ?? S.session?.actor ?? S.data?.identity?.username ?? '').trim();
+
+/** The screen a rule is about: the end of its flow, or the one it names. */
+const ruleScreen = (r) => screenById(r?.flow?.at(-1) ?? r?.screens?.[0]);
+
+/*
+ * When a rule lives on a screen you are not looking at, say so — and, now
+ * that walkdown can move the surface, offer the trip as something it will
+ * actually make rather than as a link out of the tool.
+ */
+const isHeadless = (r) => Boolean(r) && !r.screens?.length && !r.flow?.length;
+
+/** Last time anything was said - what a list of conversations sorts by. */
+const threadTouched = (t) => String((t?.replies ?? []).at(-1)?.created ?? t?.created ?? '');
 
 /*
  * How the desk is drawn — the ruled plane the page sheet lies on.
@@ -951,36 +1042,6 @@ function frameLoading(url, label) {
    * fragment named that, not a query, so the server never sees the blueprint
    * and the screen never sees its own fragment.
    */
-
-  /*
-   * Identity is two fields, not one (n-0104). Each holds null for "nothing
-   * said" - fall back to what the server derived - or the string the person
-   * typed, the empty string very much included.
-   *
-   * `username` is what every record is written under - verdicts, replies,
-   * transitions, the draft. It is a handle, it is stable, and it is the only
-   * thing the ledger ever sees. `name` is the full name git may or may not
-   * know; it is what the panel SHOWS, because "Topher Fangio" reads better
-   * than "topher", and it is never what gets recorded, because plenty of
-   * people do not have one.
-   *
-   * Either can be set in Settings, including by someone whose git knows
-   * neither - honour system, as asked. Empty means "no override": the field
-   * falls back to what the server derived, so clearing a box is how you undo.
-   *
-   * ACTOR_KEY is the single free-text field this replaces. It is read once, at
-   * boot, and migrated into the display name - which is the field it actually
-   * held, since it was seeded from `git config user.name`. The username goes
-   * back to being derived. Nothing in the ledger is touched: records written
-   * under the old value stay exactly as written, and nameMap keeps showing
-   * them under one face (see `handles` in the identity payload).
-   */
-  const ACTOR_KEY = 'walkdown:actor';           // legacy: one free-text name
-  const IDENTITY_KEY = 'walkdown:identity';     // { username, name }
-  const identityOverride = { username: null, name: null };
-  const saveIdentity = () => store.set(IDENTITY_KEY,
-    { username: identityOverride.username, name: identityOverride.name });
-
 
   // ---- chrome ---------------------------------------------------------------
   function buildChrome() {
@@ -1632,22 +1693,6 @@ function frameLoading(url, label) {
     paintTabs();
   }
 
-  // ---- data -----------------------------------------------------------------
-  /*
-   * The walk's own work list: rules owing you a verdict, less the ones you
-   * have already judged this sitting. Four copies of this predicate had grown
-   * up - the footer's counts, the tab badge, the pass-advance, Continue - and
-   * they only agreed by hand. One definition, and the number on the tab is by
-   * construction the list Continue walks.
-   */
-  const owedRows = () => (S.data?.rows ?? []).filter(
-    (r) => needsYou(r.rule) && !(S.session?.verdicts ?? {})[r.rule]);
-
-  const needsYou = (rule) =>
-    (S.data?.attention ?? []).some((i) => i.who === 'human' && !i.thread && i.rule === rule);
-  const threadsFor = (rule) => (S.data?.threads ?? []).filter((t) => t.anchor?.rule === rule &&
-    !['incorporated', 'verified', 'waived'].includes(t.status));
-
   /*
    * Screen identity, shared verbatim with the embed and the server so a pin
    * cannot land on one screen here and a different one there.
@@ -1751,8 +1796,6 @@ function frameLoading(url, label) {
       };
   }
 
-  const screenById = (id) => (S.data?.storyboard ?? []).find((s) => s.id === id) ?? null;
-
   /*
    * Where a surface goes when the page is not a screen. Without this the fade
    * control was dead everywhere except the handful of pages walkdown happens to
@@ -1795,11 +1838,6 @@ function frameLoading(url, label) {
     }
     return [];
   }
-
-  const LBL = 'text-[10.5px] font-bold uppercase tracking-widest opacity-40';
-  /** A rule id with its story prefix dropped — what the rail calls it. */
-  const shortName = (row) =>
-    row.rule.startsWith(row.story + '.') ? row.rule.slice(row.story.length + 1) : row.rule;
 
   // ---- render ---------------------------------------------------------------
   function render() {
@@ -2819,21 +2857,6 @@ function frameLoading(url, label) {
       </div>`;
   }
 
-  /**
-   * A thread in the detail pane. Collapsed it is a line of provenance and the
-   * note; open it carries its replies, a reply box and the transitions its
-   * state allows — feedback gets answered where it is read, without leaving
-   * the app under review.
-   */
-  const CHIP = {
-    open: 'badge-warning', answered: 'badge-warning', addressed: 'badge-info',
-    verified: 'badge-success', incorporated: 'badge-success', waived: 'badge-ghost',
-  };
-  const TERMINAL = ['verified', 'incorporated', 'waived'];
-
-  /** Who a reply and a transition are recorded as - one answer, as everywhere. */
-  const whoAmI = () =>
-    (identityOverride.username ?? S.session?.actor ?? S.data?.identity?.username ?? '').trim();
   /** The username a sitting's records will carry: the one it was started under. */
   const recordingHandle = () => (S.session?.actor ?? '').trim() || whoAmI();
   /** And how to read that handle - the same fallback, one place. */
@@ -3224,9 +3247,6 @@ function frameLoading(url, label) {
     return screen.app?.path && S.data?.appBase ? S.data.appBase + screen.app.path : null;
   }
 
-  /** The screen a rule is about: the end of its flow, or the one it names. */
-  const ruleScreen = (r) => screenById(r?.flow?.at(-1) ?? r?.screens?.[0]);
-
   /** Every anchor the storyboard declares, on any screen. */
   const declaredAnchors = () =>
     new Set((S.data?.storyboard ?? []).flatMap((s) => s.anchors ?? []));
@@ -3323,13 +3343,6 @@ function frameLoading(url, label) {
     render();
     return true;
   }
-
-  /*
-   * When a rule lives on a screen you are not looking at, say so — and, now
-   * that walkdown can move the surface, offer the trip as something it will
-   * actually make rather than as a link out of the tool.
-   */
-  const isHeadless = (r) => Boolean(r) && !r.screens?.length && !r.flow?.length;
 
   /*
    * Opening a headless rule clears the desk: an opaque cover in walkdown's
@@ -3519,9 +3532,6 @@ function frameLoading(url, label) {
     }
     return all.filter((t) => !TERMINAL.includes(t.status));
   }
-
-  /** Last time anything was said - what a list of conversations sorts by. */
-  const threadTouched = (t) => String((t?.replies ?? []).at(-1)?.created ?? t?.created ?? '');
 
   /** Where a thread is anchored, in words, for a list that is not scoped to one rule. */
   function threadWhere(t) {

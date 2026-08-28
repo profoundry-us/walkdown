@@ -179,3 +179,32 @@ export const GAP = 12;   // how much desk shows around the wrapped page
 // Nothing separates the bar from the page any more, so the bar's own bottom
 // padding does that job — a second 12px gap on top of it read as a gutter.
 export const HEAD = TOP;
+
+/*
+ * Identity is two fields, not one (n-0104). Each holds null for "nothing
+ * said" - fall back to what the server derived - or the string the person
+ * typed, the empty string very much included.
+ *
+ * `username` is what every record is written under - verdicts, replies,
+ * transitions, the draft. It is a handle, it is stable, and it is the only
+ * thing the ledger ever sees. `name` is the full name git may or may not
+ * know; it is what the panel SHOWS, because "Topher Fangio" reads better
+ * than "topher", and it is never what gets recorded, because plenty of
+ * people do not have one.
+ *
+ * Either can be set in Settings, including by someone whose git knows
+ * neither - honour system, as asked. Empty means "no override": the field
+ * falls back to what the server derived, so clearing a box is how you undo.
+ *
+ * ACTOR_KEY is the single free-text field this replaces. It is read once, at
+ * boot, and migrated into the display name - which is the field it actually
+ * held, since it was seeded from `git config user.name`. The username goes
+ * back to being derived. Nothing in the ledger is touched: records written
+ * under the old value stay exactly as written, and nameMap keeps showing
+ * them under one face (see `handles` in the identity payload).
+ */
+export const ACTOR_KEY = 'walkdown:actor';           // legacy: one free-text name
+export const IDENTITY_KEY = 'walkdown:identity';     // { username, name }
+export const identityOverride = { username: null, name: null };
+export const saveIdentity = () => store.set(IDENTITY_KEY,
+  { username: identityOverride.username, name: identityOverride.name });
