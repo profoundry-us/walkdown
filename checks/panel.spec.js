@@ -1205,9 +1205,19 @@ test(
 
 /* ---- a card says where it belongs only where that is not obvious --------- */
 
+/*
+ * UNTAGGED, deliberately. This guards against one specific defect and claims
+ * no rule, because there is no rule here to claim: nobody decided that a card
+ * under a rule omits its anchor as a product commitment - it simply never
+ * printed one until an argument arrived where the anchor goes. A rule written
+ * to mark where a bug happened is a rule nobody would ever meaningfully sign,
+ * and the board is not a bug log.
+ *
+ * What it is instead is a regression check: cheap, fast, and it fails loudly
+ * if the arity mistake comes back.
+ */
 test(
   'threads name their anchor on the Threads tab and never under the rule itself',
-  { tag: '@rule:panel.threads.context-not-repeated' },
   async ({ page }) => {
     await review(page);
     await endSession(page);
@@ -1246,5 +1256,95 @@ test(
     await expect(
       page.getByTestId('panel.threads-list').getByTestId('thread.where').first()
     ).toBeVisible();
+  }
+);
+
+test(
+  'no two signature states are drawn the same way',
+  { tag: '@rule:panel.rules.tiers-at-a-glance' },
+  async ({ page }) => {
+    await review(page);
+    const list = page.getByTestId('panel.rules-list');
+    await expect(list).toBeVisible();
+
+    /*
+     * The claim, stated as the thing that can actually go wrong: a reader has
+     * to be able to tell one signature state from another. Asserting the
+     * SHAPES by name would restate the panel to itself and would need editing
+     * every time the design moves; asserting that distinct states render
+     * distinctly survives the design moving and still catches the defect.
+     *
+     * There are two claims, and the second is the one with teeth. Distinctness
+     * alone would have passed the defect this was written for: `stale` was a
+     * smaller filled dot beside `signed`'s larger filled dot, which IS
+     * distinct - structurally, at least. It was unreadable for a different
+     * reason, that size only means anything next to a neighbour, and the
+     * common case is one slot with nothing beside it.
+     *
+     * A test reading the DOM cannot perceive that. What it can do is hold the
+     * design to the rule that follows from it: size may accompany a
+     * distinction but never carry one alone. Strip the size utilities and the
+     * states must STILL be distinct - which fails on the smaller dot and
+     * passes on the ring that replaced it.
+     */
+    const seen = await list.getByTestId('panel.rule-signoff').evaluateAll((els) => els.map((el) => ({
+      states: (el.getAttribute('data-signoff') ?? '').split(' ').filter(Boolean)
+        .map((s) => s.split(':')[1]),
+      marks: [...el.children].map((slot) => {
+        const dot = slot.firstElementChild;
+        return dot ? `${dot.className}|${dot.getAttribute('style') ?? ''}` : '';
+      }),
+    })));
+
+    /*
+     * Role tint and dimming are stripped before comparing, and that is the
+     * point rather than a convenience. One slot's colour says WHOSE signature
+     * it is, and its opacity says whether the rule is waiting on you - both
+     * vary while the state stays put, so a comparison that kept them would
+     * call two identical rings different marks and prove nothing. What is
+     * left is shape, which is the only channel carrying state, and it has to
+     * carry it alone.
+     */
+    const shape = (mark) => {
+      const [cls, style = ''] = mark.split('|');
+      const kept = cls.split(' ')
+        .filter((tok) => !/^(text-(blue|purple)-\d+|text-base-content|opacity-\d+)$/.test(tok));
+      return `${kept.join(' ')}|${style}`;
+    };
+
+    const drawing = new Map();
+    for (const { states, marks } of seen) {
+      // The stack collapses its middle to a +N past three roles, so the slots
+      // stop lining up with the states one for one. Nothing on this board does
+      // that yet; skip rather than assert against a shape nobody is drawing.
+      if (states.length !== marks.length) continue;
+      states.forEach((state, i) => {
+        if (!drawing.has(state)) drawing.set(state, new Set());
+        drawing.get(state).add(shape(marks[i]));
+      });
+    }
+    expect(drawing.size, 'the board offers more than one signature state to tell apart')
+      .toBeGreaterThan(1);
+
+    for (const [state, shapes] of drawing)
+      expect([...shapes], `${state} is drawn one way, whoever is signing`).toHaveLength(1);
+
+    const byShape = new Map();
+    for (const [state, shapes] of drawing) {
+      const only = [...shapes][0];
+      expect(byShape.get(only), `${state} and ${byShape.get(only)} are drawn identically`)
+        .toBeUndefined();
+      byShape.set(only, state);
+    }
+
+    // And distinct by more than their size, which is the claim that has teeth.
+    const sizeless = new Map();
+    for (const [state, shapes] of drawing) {
+      const bare = [...shapes][0].split(' ').filter((t) => !/^size-\[/.test(t)).join(' ');
+      expect(sizeless.get(bare),
+        `${state} and ${sizeless.get(bare)} differ only in size - a slot is usually read alone, `
+        + 'with no neighbour to judge it against').toBeUndefined();
+      sizeless.set(bare, state);
+    }
   }
 );

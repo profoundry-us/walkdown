@@ -778,23 +778,6 @@ stories:
             - How many threads are waiting on a person is carried on the tab itself, so it is legible from whichever tab is open
           statement_hash: sha256:faade3b887d1
 
-      - id: panel.threads.context-not-repeated
-        origin: walkdown
-        statement: A conversation says where it belongs only where that is not already obvious - on the Threads tab, which is scoped to nothing, every card names its anchor; under the rule it is anchored to, none of them does, because the rule is on the screen directly above and a line repeating it is a line saying nothing.
-        verify: [checks]
-        signoff: [eng, product]
-        screens: [rule-detail, review]
-        steps:
-          given:
-            - A rule carrying several threads, and the Threads tab listing those same threads
-          when:
-            - Reading the cards in both places
-          then:
-            - On the Threads tab every card carries a line naming what it is anchored to
-            - Under the rule no card carries that line - not the first and not the rest
-            - Both places draw the same card, so neither can grow a line the other does not have
-          statement_hash: sha256:1659b198cb3d
-
   - id: panel.walkdown
     title: A walkdown from the panel is a walkdown
     statement: As a reviewer, verdicts I give beside the running app land in the same ledger as verdicts given anywhere else.
