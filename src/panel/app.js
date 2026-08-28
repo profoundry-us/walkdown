@@ -2648,8 +2648,24 @@ function boot() {
   store.get(IDENTITY_KEY).then(async (v) => {
     const saved = typeof v === 'string' ? (() => { try { return JSON.parse(v); } catch { return null; } })() : v;
     if (saved && typeof saved === 'object') {
-      if (typeof saved.username === 'string' && saved.username.trim()) identityOverride.username = saved.username.trim();
-      if (typeof saved.name === 'string' && saved.name.trim()) identityOverride.name = saved.name.trim();
+      /*
+       * An emptied field is an answer, and it has to survive the reload.
+       *
+       * These two lines used to require a NON-EMPTY string, so the empty pair
+       * the panel had just written was read back and thrown away: whoAmI fell
+       * through to git, and somebody who had deliberately removed their name
+       * got it silently reinstated by the next refresh - along with the
+       * ability to attribute work under it, which the emptied state exists to
+       * refuse. The comment on this feature already said "clearing a box is
+       * how you undo"; the code only honoured that until the tab closed.
+       *
+       * The distinction the null-coalescing in whoAmI relies on is between
+       * ABSENT (no override, fall through to what the server derived) and
+       * EMPTY (an override that says nobody), so an empty string has to be
+       * restored as an empty string rather than skipped.
+       */
+      if (typeof saved.username === 'string') identityOverride.username = saved.username.trim();
+      if (typeof saved.name === 'string') identityOverride.name = saved.name.trim();
       return;
     }
     /*

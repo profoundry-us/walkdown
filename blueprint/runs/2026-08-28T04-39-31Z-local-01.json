@@ -1,0 +1,49 @@
+{
+  "run_id": "2026-08-28T04-39-31Z-local-01",
+  "created": "2026-08-28T04:39:31Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "8435702-dirty",
+  "blueprint_sha": "8435702-dirty",
+  "note": "fourth round",
+  "results": [
+    {
+      "rule": "panel.identity.attribution-visible",
+      "status": "pass",
+      "statement_hash": "sha256:1b6a789fde73",
+      "evidence": [
+        "runs/evidence/2026-08-28T04-26-21Z/r4-identity-emptied.png",
+        "runs/evidence/2026-08-28T04-26-21Z/r4-fail-refused.png",
+        "runs/evidence/2026-08-28T04-26-21Z/r4-reply-refused.png",
+        "runs/evidence/2026-08-28T04-26-21Z/r4-answer-refused.png",
+        "runs/evidence/2026-08-28T04-26-21Z/r4-incorporated-refused.png",
+        "runs/evidence/2026-08-28T04-26-21Z/r4-verifyall-refused.png",
+        "runs/evidence/2026-08-28T04-26-21Z/r4-finish-refused.png",
+        "runs/evidence/2026-08-28T04-26-21Z/r4-pin-refused.png",
+        "runs/evidence/2026-08-28T04-26-21Z/r4-corrected-on-screen.png",
+        "runs/evidence/2026-08-28T04-26-21Z/r4-note-under-corrected-name.png",
+        "runs/evidence/2026-08-28T04-26-21Z/r4-panel-paths.txt",
+        "runs/evidence/2026-08-28T04-26-21Z/r4-rest.txt"
+      ],
+      "reasoning": "Earned by trying to break it on a disposable copy of the blueprint on my own port, with every non-GET to /api/ intercepted by RegExp (so the ?bp= query could not slip past) and counted; the real ledger took nothing but this evidence folder. With the username emptied in Settings I drove every panel path that reaches /api/ with a body: the note a rule's Fail files and the one Refine files, a reply sent with Enter in the thread composer, Answer on an open question, Addressed on an open note, Reopen and Verify and Waive on an addressed note, Incorporated on an answered question, Verify all on a rule carrying eight addressed threads, Finish walkdown with two verdicts already in the sitting, and the pin relayed from the framed embed. Every one refused with zero writes attempted and said so on screen. Those refusals are not the whole of it, so I ran positive controls through the same rig with a name set - Incorporated wrote actor r4-ctrl, Verify all wrote eight status transitions, the pin relay wrote author r4-ctrl - which proves the rig actually reached the code that refused. The rest of the statement holds too: the strip reads 'Recording as R Four r4-typed', full name with the username it records under beside it, and correcting the username to r4-typed before pressing Fail produced POST /api/threads with author r4-typed, so the corrected name is what gets recorded. The one path that still hands an author to the server without one is lib/viewer/embed.js:376, the reply inside a pin's own popover, which sends only { body } and lets lib/serve.js:516 fill the name from userInfo().username - but embed.js:303 shows that popover only opens when the embed is UNFRAMED, and the docked panel layout was removed on 2026-08-26, so that is the standalone embed on a page with no panel, which has no identity to send and is out of scope for this rule. I did find one thing worth naming here even though it does not break this statement: after a reload the panel can show a full name it will not record under (the strip reads 'Recording as Topher Fangio' with no handle while a stale session actor is empty and every attributed action is refused). That is a misleading label, not a silent attribution - the inverse of what this rule forbids - and the write it belongs to is judged under panel.identity.default-actor. Nothing was attributed to a name the panel had not displayed, on any panel path, so this one is kept."
+    },
+    {
+      "rule": "panel.identity.default-actor",
+      "status": "fail",
+      "statement_hash": "sha256:6cf5b560bdde",
+      "evidence": [
+        "runs/evidence/2026-08-28T04-26-21Z/r4b-1-settings-from-git.png",
+        "runs/evidence/2026-08-28T04-26-21Z/r4b-2-settings-emptied.png",
+        "runs/evidence/2026-08-28T04-26-21Z/r4b-3-reply-refused-before-reload.png",
+        "runs/evidence/2026-08-28T04-26-21Z/r4b-4-settings-after-reload.png",
+        "runs/evidence/2026-08-28T04-26-21Z/r4b-5-reply-lands-after-reload.png",
+        "runs/evidence/2026-08-28T04-26-21Z/r4-name-emptied-after-reload.png",
+        "runs/evidence/2026-08-28T04-26-21Z/r4-strip-defaulted.png",
+        "runs/evidence/2026-08-28T04-26-21Z/r4-rest.txt"
+      ],
+      "reasoning": "Most of this statement is now solid and one clause is not. The identity does arrive filled in from git - the strip reads 'Recording as Topher Fangio topher' with the username in anchor panel.actor-handle beside the full name, Settings shows settings.actor 'topher' and settings.display-name 'Topher Fangio', both editable and neither disabled, and no attributed action prompts for either. Typing a correction applies to the running sitting: setting the username to r4-typed re-signed the session and the very next note went out as author r4-typed. And the clause the last three rounds broke on is fixed - with the username emptied the panel now refuses attributed work everywhere I could reach, twelve paths, zero writes. What fails is the clause immediately before it: 'An edit applies to the running session and is remembered across reloads; emptying a field is an answer too'. Emptying is not remembered. src/panel/app.js:2651-2652 restores a saved override only when it is non-empty - 'if (typeof saved.username === 'string' && saved.username.trim())', and the same line for the name - so the empty string the panel itself wrote to walkdown:identity is read back and thrown away, and whoAmI() falls through to the git username again. Measured end to end in one pass: emptied both fields, localStorage holds {\"username\":\"\",\"name\":\"\"}, a reply is refused with the composer saying 'set your name...'; reload; Settings is back to 'topher' and 'Topher Fangio' with that same empty pair still sitting in storage; the identical reply then goes out as POST /api/threads/q-0070/replies {\"author\":\"topher\"}. So a person who deliberately removed their name gets it silently reinstated by the next refresh, and the refusal the last clause promises lasts only as long as the tab does. The full name behaves the same way - emptied it stands the username alone while the page lives, and comes back as 'Topher Fangio' after a reload. This is the fifth instance of the pattern n-0121 is about: an emptied value expressed as something falsy, dropped on the way through, and completed from the machine. It belongs to this rule rather than to attribution-visible, because the name the panel then uses is the one it is also showing - it is the persistence promise that is broken, not the visibility one."
+    }
+  ]
+}
