@@ -622,6 +622,88 @@ stories:
             - Opening a screened rule or returning to the list lifts the cover
           statement_hash: sha256:5bb6c7d6142a
 
+      - id: panel.rules.legend-on-demand
+        origin: walkdown
+        statement: The rail's whole vocabulary is explained in one place, reachable from the list itself - every evidence mark, every signature shape, and what colour means - because a mark a reader cannot decode is worse than no mark, and six tooltips read one at a time never assemble into a picture of how the rail works.
+        signoff: [eng, product]
+        screens: [review]
+        steps:
+          given:
+            - The Rules tab open on any blueprint
+          when:
+            - Reaching for the legend beside the counts
+          then:
+            - Every state the evidence marks can take is listed with the mark that draws it
+            - Every state a signature slot can take is listed with the shape that draws it
+            - What warning colour means, and what the sign, walk and thread badges mean, are said in the same place
+            - It is built from the same vocabulary the rail draws from, so it cannot describe marks the rail no longer uses
+          statement_hash: sha256:58cbf78e318c
+
+      - id: panel.rules.owed-apart-from-said
+        origin: walkdown
+        statement: What a rule owes you and how much is being said about it are two columns, never one string - a count of conversations is context and a badge naming work is a claim on your time, and run together in one colour they read as a single quantity.
+        signoff: [eng, product]
+        screens: [review]
+        steps:
+          given:
+            - A list holding rules that owe work, rules carrying threads, and rules with both
+          when:
+            - Reading down the right-hand edge of anchor `panel.rules-list`
+          then:
+            - The work badge and the thread count occupy their own columns, each aligned down the list
+            - The thread count is drawn in plain ink rather than in the colour that means work is owed
+            - A rule with only one of the two leaves the other column empty rather than shifting the row
+          statement_hash: sha256:a59ee3d3b67c
+
+      - id: panel.rules.marks-carry-over
+        origin: walkdown
+        statement: Opening a rule keeps the marks you opened it for - the detail leads with the same evidence and signature strip the list drew, in the same order - so the row and the page it opens never have to be compared from memory.
+        signoff: [eng, product]
+        screens: [rule-detail]
+        steps:
+          given:
+            - A rule in the list showing some mixture of tier marks and signature slots
+          when:
+            - Opening it
+          then:
+            - The detail draws the same strip, in the same order, saying the same thing
+            - It is the list's own drawing rather than a second one, so the two cannot disagree
+          statement_hash: sha256:53b22fd6a5a4
+
+      - id: panel.rules.names-its-screen
+        origin: walkdown
+        statement: A rule's detail says which screen it is about, above its steps and in the storyboard's own words - because a rule pointed at the wrong screen is a quiet and common error, and it cannot be corrected by somebody who cannot see what was chosen.
+        signoff: [eng, product]
+        screens: [rule-detail]
+        steps:
+          given:
+            - Rules naming one screen, naming a flow of several, and naming none
+          when:
+            - Opening each
+          then:
+            - A single screen is named by its title, with its id beside it
+            - A flow is drawn as the chain it is, ending on the screen the rule is judged against
+            - A rule naming no screen says so rather than leaving the section out
+            - A screen id the storyboard does not know is marked as unknown rather than printed as though it resolved
+          statement_hash: sha256:4a90d439391b
+
+      - id: panel.rules.talk-without-a-sitting
+        origin: walkdown
+        statement: A conversation can be started on any rule at any time, not only during a walkdown - a rule read on an ordinary afternoon deserves the same record as one judged in a sitting - and the note is filed under the same name the panel already shows as you, never one it has not displayed.
+        signoff: [eng, product]
+        screens: [rule-detail]
+        steps:
+          given:
+            - A rule open with no walkdown in progress
+          when:
+            - Writing in the rule's own composer and starting a thread
+          then:
+            - A note is filed against that rule and appears in its conversations without a reload
+            - It is attributed to whoever the panel is recording as, shown above the composer before it is used
+            - An empty identity refuses the filing and offers the place to set one, rather than letting the server choose a name
+            - Starting a thread records no verdict and begins no sitting
+          statement_hash: sha256:d66e49c63ed9
+
   - id: panel.threads
     title: Feedback is answered where it is read
     statement: As a reviewer, I can reply to a thread and move its lifecycle on from the panel, without leaving the app I am reviewing.

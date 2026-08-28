@@ -53,7 +53,7 @@ import { backFromThread, threadCard, threadPane } from './thread-pane.js';
 import { checkRefs, detailPane, evidenceRows, loadCheckSource } from './rule-detail.js';
 import { screensPane, wireScreens } from './screens.js';
 import {
-  listPane, paintRules, searchBox, tierMarks, wireRuleRows, wireSearch,
+  legendControl, listPane, paintRules, searchBox, tierMarks, wireRuleRows, wireSearch,
 } from './rules-list.js';
 import { threadFilterBar, threadsMatching, threadsPane } from './threads-list.js';
 import { frameLoading, hideVeil, placeVeil, screenLabel, veilIsUp } from './veil.js';
@@ -1077,7 +1077,8 @@ export function render() {
          The row no longer dims as a whole - opacity on the container dimmed
          the tooltips it opens with it, and opacity cannot be undone by a
          child. The label carries its own. -->
-    ${S.listTab === 'rules' ? `<div class="flex shrink-0 items-center gap-2 border-t border-base-300 px-3.5 py-2 text-xs" data-testid="panel.counts">
+    ${S.listTab === 'rules' ? `<div class="grid shrink-0 grid-cols-3 items-center border-t border-base-300 px-3.5 py-2 text-xs" data-testid="panel.counts">
+      <span class="flex items-center gap-2 justify-self-start">
       <span class="tooltip tooltip-top tooltip-start [--tt-trans:0] shrink-0 whitespace-nowrap">
         <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug"
           >Rules holding a current pass on every tier they ask for. The rest are the work counted at the right.</span>
@@ -1085,8 +1086,13 @@ export function render() {
         judged.size ? `<span class="tooltip tooltip-top tooltip-start [--tt-trans:0] shrink-0 text-primary">
         <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug"
           >Judged by you in this sitting. Nothing reaches the ledger until you press Finish walkdown.</span>
-        <b>+${judged.size}</b></span>` : ''}
-      <span class="ml-auto flex shrink-0 gap-1">
+        <b>+${judged.size}</b></span>` : ''}</span>
+      <!-- Centred, and in its own grid column so it stays centred whether or
+           not the two badges at the right are drawn. Every mark the rail uses
+           is explained here rather than in six tooltips nobody assembles into
+           a picture. -->
+      <span class="justify-self-center">${legendControl()}</span>
+      <span class="flex shrink-0 gap-1 justify-self-end">
         ${toSign ? `<span class="tooltip tooltip-top tooltip-end [--tt-trans:0]">
           <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug"
             >${toSign} rule${toSign === 1 ? '' : 's'} designed but not built. Your sign-off on the spec is what they wait for.</span>
@@ -1150,6 +1156,7 @@ export function render() {
     el.onclick = () => goTo(screenById(el.dataset.goscreen));
   });
   wireVerdict();
+  wireRuleNote();
   wireThreads();
   syncHeadlessCover();
 }
@@ -1948,6 +1955,20 @@ function sayVerdict(msg) {
   el.classList.remove('hidden');
 }
 
+/*
+ * A refusal, put where the person who triggered it is looking. Two composers
+ * can file a note now, each with its own line to say why one was refused, and
+ * a message printed into the box you are not looking at is a message nobody
+ * reads. Falls through to a toast when neither box is on screen.
+ */
+function sayFiling(msg) {
+  for (const id of ['#wdp-nsay', '#wdp-vsay']) {
+    const el = D.host.querySelector(id);
+    if (el) { el.textContent = msg; el.classList.remove('hidden'); return; }
+  }
+  toast(msg, { tone: 'error' });
+}
+
 /** File the feedback box's text as a note on the rule; null on refusal. */
 async function postRuleNote(rule, body) {
   /*
@@ -1967,9 +1988,17 @@ async function postRuleNote(rule, body) {
    * belief that every attributed action was refused; that belief was true of
    * every path but this one.
    */
-  const author = (S.session.actor ?? '').trim();
+  /*
+   * whoAmI() rather than the sitting's actor, because a rule is now a place
+   * to talk WITHOUT a sitting - and outside one, S.session is null, which
+   * this line used to read straight through. It keeps the guard it was
+   * written for: whoAmI is precisely the name the panel puts on screen as
+   * you, in the bar, in Settings and above both composers, so a note can
+   * still never be filed under a name nobody was shown (n-0116, n-0121).
+   */
+  const author = whoAmI();
   if (!author || author === 'agent') {
-    sayVerdict('A note is recorded under a person\u2019s name \u2014 set it in Settings (the gear).');
+    sayFiling('A note is recorded under a person\u2019s name \u2014 set it in Settings (the gear).');
     openActorSettings();
     return null;
   }
@@ -1978,8 +2007,35 @@ async function postRuleNote(rule, body) {
     body: JSON.stringify({ kind: 'note', author, body, anchor: { rule } }),
   });
   const out = await res.json().catch(() => ({}));
-  if (!res.ok) { sayVerdict(out.error ?? 'note not filed'); return null; }
+  if (!res.ok) { sayFiling(out.error ?? 'note not filed'); return null; }
   return out.id;
+}
+
+/*
+ * Starting a conversation on a rule, outside a walkdown.
+ *
+ * The same POST the sitting's feedback box makes, and deliberately so: a note
+ * is a note, and a rule read on a Tuesday deserves the same record as one
+ * judged in a sitting. What it does NOT do is touch S.session - there may not
+ * be one, and a thread is not a verdict.
+ */
+function wireRuleNote() {
+  const box = D.host.querySelector('#wdp-rulenote');
+  if (box) box.oninput = () => { S.ruleNote = box.value; };
+  const who = D.host.querySelector('#wdp-nactor');
+  if (who) who.onclick = () => openActorSettings();
+  const post = D.host.querySelector('[data-note-rule]');
+  if (!post) return;
+  post.onclick = async () => {
+    const text = (D.host.querySelector('#wdp-rulenote')?.value ?? '').trim();
+    if (!text) return sayFiling('Write something first — a thread opens with what you have to say.');
+    post.disabled = true;
+    const tid = await postRuleNote(post.dataset.noteRule, text);
+    post.disabled = false;
+    if (!tid) return;             // the refusal is on screen
+    S.ruleNote = '';
+    await load();                 // pull the new thread into the lists and repaint
+  };
 }
 
 /** A pin dropped on this rule since the session began — the other way to say why. */

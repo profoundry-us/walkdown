@@ -90,6 +90,7 @@ export const S = {
   ruleQuery: '',
   threadNote: '',          // what the reply box says, kept across re-renders
   verdictNote: '',         // the verdict feedback box, kept across re-renders
+  ruleNote: '',            // the rule's own new-thread box, kept the same way
 
   /*
    * The check-source disclosure, kept OUTSIDE the markup that draws it.

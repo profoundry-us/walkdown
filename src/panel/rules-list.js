@@ -114,24 +114,27 @@ export const TIER_MARK = {
   fail: ['✗', 'text-error', 'failed'],
   stale: ['~', 'text-warning', 'stale — it passed, then the statement moved'],
   never: ['○', 'text-warning', 'required, but no run has touched it'],
+  /*
+   * `skipped` shares the dash with `na` on purpose: a run that skipped this
+   * rule and a rule that never asked for the tier are the same news to
+   * somebody scanning the rail - no verdict, none owed. The tooltip is where
+   * they differ, and it is on every row.
+   */
   skipped: ['–', 'opacity-40', 'skipped'],
   blocked: ['⊘', 'text-warning', 'blocked'],
   /*
-   * The two ways a tier can have no verdict coming, sharing one mark.
+   * The two ways a tier can have no verdict coming. They were one dot for a
+   * while and that was too quiet to be worth drawing: at 12px a dot says
+   * nothing at all, and it said the same nothing for both states.
    *
-   * `na` is a tier the rule never asks for - excused, with a reason somebody
-   * wrote. `unbuilt` is a tier that has nothing to judge because the rule has
-   * not been built. Neither is work owed and neither is news, so both draw the
-   * quietest thing on the strip; which one it is, and why, is a line in the
-   * tooltip, and the tooltip is now on every row.
-   *
-   * `na` was a faded ✓ to keep the columns aligned. A dot aligns just as well
-   * and does not spend the panel's most emphatic glyph on the absence of a
-   * claim - a hollowed-out tick still reads tick-shaped at a glance, and on
-   * an excused rule that is exactly the wrong first impression.
+   * `unbuilt` is a tier with nothing to judge yet, and it wears a grey tick:
+   * the rule is not waiting on this tier, and the shape it will eventually
+   * wear is already the shape it wears now. `na` is a tier the rule has
+   * declared it cannot honestly have, and it wears a dash: a line through
+   * where a verdict would go, which is what an excuse is.
    */
-  na: ['·', 'opacity-25', 'not applicable — this rule does not ask for it'],
-  unbuilt: ['·', 'opacity-25', 'nothing to judge yet — the rule is not built'],
+  unbuilt: ['✓', 'opacity-25', 'nothing to judge yet — the rule is not built'],
+  na: ['–', 'opacity-30', 'not applicable — this rule does not ask for it'],
 };
 
 /*
@@ -288,11 +291,7 @@ function stripTip(tiers, acceptance) {
   ]);
   const line = ([label, said]) =>
     `<span class="opacity-60">${esc(label)}</span><span>${esc(said)}</span>`;
-  // z-50 is load-bearing: daisyUI leaves the bubble at z-index 2, and every
-  // rule below this one in the list paints after it, so an opaque tooltip on
-  // any row but the last was being overdrawn by its neighbours and read as
-  // transparent - the text of four rules stacked on top of each other.
-  return `<span class="tooltip-content z-50 w-60 whitespace-normal text-left text-[11px] leading-snug"
+  return `<span class="tooltip-content w-60 whitespace-normal text-left text-[11px] leading-snug"
     data-testid="panel.rule-tiers-tip"><span class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5">${
       cells.map(line).join('')}${signs.length
         ? `<span class="col-span-2 mt-0.5 opacity-40">accepted by</span>${signs.map(line).join('')}`
@@ -306,9 +305,19 @@ export function tierMarks(row, mine = false) {
    * absent - they are owed by the BUILD, which does not exist, and saying so
    * in the same three positions is what lets the eye run down the column.
    */
-  const tiers = row.built
-    ? [['checks', checksTier(row), null], ['agent', row.agent?.state ?? 'na', row.agent]]
-    : [['checks', 'unbuilt', null], ['agent', 'unbuilt', null]];
+  /*
+   * `unbuilt` stands in only for a tier that has NEVER run. Blanketing both
+   * tiers with it the moment a rule was unbuilt threw away real news: a rule
+   * can be unbuilt and still carry an agent run that came back blocked, and
+   * that run is the reason it is not built. What the strip owes an unbuilt
+   * rule is "nothing has judged this, and nothing could have" - which is what
+   * `never` means here - not silence about what did happen.
+   */
+  const quiet = (state) => (!row.built && state === 'never' ? 'unbuilt' : state);
+  const tiers = [
+    ['checks', quiet(checksTier(row)), null],
+    ['agent', quiet(row.agent?.state ?? 'na'), row.agent],
+  ];
   // title="" is not a leftover: the row around this is a button carrying its
   // own native title, and a native tooltip is inherited from the nearest
   // ancestor that has one. An empty title stops that here, so hovering the
@@ -410,4 +419,50 @@ export function wireSearch() {
     box.value = '';
     paintRules();
   };
+}
+
+/*
+ * The legend: what every mark on the rail means, in one hover.
+ *
+ * Built FROM the same maps the rail draws from - TIER_MARK for the glyphs,
+ * signoffDot for the dots - rather than from a hand-written copy of them.
+ * A legend that is a second description of the vocabulary is a legend that
+ * goes quietly wrong the first time the vocabulary moves, and this one has
+ * already moved twice this week.
+ *
+ * The role passed to signoffDot is deliberately one nobody has tinted, so the
+ * shapes draw in the panel's own ink: the legend is teaching SHAPE, and a
+ * blue dot beside "signed" would read as though blue were part of the answer.
+ * Colour is explained in its own line instead.
+ */
+const LEGEND_TIERS = ['pass', 'fail', 'stale', 'never', 'blocked', 'unbuilt', 'na'];
+const LEGEND_SIGNS = ['signed', 'approved', 'stale', 'none', 'sent-back'];
+
+export function legendControl() {
+  const head = (t) => `<span class="col-span-2 pt-1 text-[10px] font-bold uppercase tracking-widest opacity-40">${t}</span>`;
+  const tierLine = (state) => {
+    const [glyph, cls, why] = TIER_MARK[state];
+    return `<span class="text-center ${cls}">${glyph}</span><span>${esc(why)}</span>`;
+  };
+  const signLine = (state) =>
+    `<span class="flex justify-center">${signoffDot({ role: '_', state }, true)}</span>
+     <span>${esc(SIGN_SAY[state])}</span>`;
+  return `<span class="tooltip tooltip-top shrink-0" data-testid="panel.legend">
+    <!-- z-50 here is load-bearing, and unlike the rule strip's bubble it was
+         measured rather than assumed: this one opens UPWARD across the whole
+         scrolling list from the last row in the panel, and at daisyUI's own
+         z-index of 2 the rules paint over it. The rule strip opens sideways
+         within the list and needs nothing. -->
+    <span class="tooltip-content z-50 w-72 whitespace-normal text-left text-[11.5px] leading-snug"
+      data-testid="panel.legend-tip"
+      ><span class="grid grid-cols-[1.25rem_1fr] items-center gap-x-2 gap-y-0.5">
+      ${head('Evidence — checks, then agent')}${LEGEND_TIERS.map(tierLine).join('')}
+      ${head('Signatures — one slot per role')}${LEGEND_SIGNS.map(signLine).join('')}
+      ${head('And around them')}
+      <span class="text-center text-warning">◆</span><span>Warning yellow anywhere means the rule is waiting on <b>you</b>.</span>
+      <span class="text-center text-warning">▪</span><span><b>sign</b> is a spec to accept; <b>walk</b> is a build to judge.</span>
+      <span class="text-center opacity-45">⚑</span><span>Open conversations on the rule.</span>
+    </span></span>
+    <span class="flex cursor-help items-center gap-1 opacity-50">${icon('info', 'size-3.5')}Legend</span>
+  </span>`;
 }

@@ -29,7 +29,7 @@ const EMBED = join(ROOT, 'lib', 'viewer', 'embed.js');
 const TARGETS = [
   { file: PANEL, indent: '', icons: [['bounding-box', 'regular'], ['caret-down', 'regular'], ['chats-circle', 'regular'],
     ['checks', 'regular'], ['desktop', 'regular'], ['device-mobile', 'regular'], ['frame-corners', 'regular'],
-    ['gear', 'regular'], ['map-pin', 'regular'], ['warning', 'fill']] },
+    ['gear', 'regular'], ['info', 'regular'], ['map-pin', 'regular'], ['warning', 'fill']] },
   { file: EMBED, indent: '  ', icons: [['map-pin', 'fill']] },
 ];
 

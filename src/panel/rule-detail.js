@@ -9,7 +9,8 @@ import { threadCard } from './thread-pane.js';
 import { openShots } from './shots.js';
 import { S } from './state.js';
 import { api, esc } from './util.js';
-import { LBL, ruleScreen, shortName, threadsFor } from './vocab.js';
+import { tierMarks } from './rules-list.js';
+import { LBL, isHeadless, needsYou, ruleScreen, screenById, shortName, threadsFor, whoAmI } from './vocab.js';
 
 /*
  * Where this rule's check source lives.
@@ -165,7 +166,14 @@ export function detailPane() {
     </div>
     <div class="flex flex-col gap-3 px-3.5 pb-3.5 pt-1">
       <div>
-        <div class="break-all font-mono text-[11px] opacity-40" data-testid="detail.rule-id">${esc(r.rule)}</div>
+        <!-- The same strip the list drew, in the same order, so opening a
+             rule does not cost you the marks you opened it for. It is the
+             list's own function, not a copy: two drawings of one vocabulary
+             is how the CLI and the panel came to disagree about ✍︎ (n-0118). -->
+        <div class="flex items-center gap-2">
+          ${tierMarks(r, needsYou(r.rule))}
+          <div class="break-all font-mono text-[11px] opacity-40" data-testid="detail.rule-id">${esc(r.rule)}</div>
+        </div>
         <p class="text-[15px] leading-relaxed" data-testid="detail.statement">${esc(r.statement)}</p>
         ${elsewhere(r)}
       </div>
@@ -205,6 +213,37 @@ export function detailPane() {
             data-testid="detail.setup">${esc(setup)}</div>
         </div>` : '';
       })()}
+      ${(() => {
+        /*
+         * Which screen this rule is about, said plainly and above the steps.
+         *
+         * It was only ever implicit before - the surface moved when you opened
+         * the rule, and if it moved somewhere wrong the rule looked wrong
+         * instead. A rule pointed at the wrong screen is a common and quiet
+         * error in a blueprint this size, and it cannot be corrected by
+         * somebody who cannot see what was chosen.
+         *
+         * A flow is drawn as the chain it is, because the LAST screen of a
+         * flow is the one the rule is judged on (ruleScreen) and a chain that
+         * did not show its end would answer a different question.
+         */
+        const ids = r.flow?.length ? r.flow : (r.screens ?? []);
+        const sep = r.flow?.length ? ' → ' : ', ';
+        const name = (id) => {
+          const sc = screenById(id);
+          return `<span class="${sc ? '' : 'text-warning'}">${esc(sc?.title ?? id)}</span>${
+            sc?.title ? ` <code class="rounded bg-base-200 px-1 text-[11px] opacity-70">${esc(id)}</code>` : ''}`;
+        };
+        return `<div>
+          <div class="${LBL} mb-1.5">Screen</div>
+          <div class="text-[13px] leading-relaxed" data-testid="detail.screen">${
+            ids.length
+              ? ids.map(name).join(sep)
+              : `<span class="opacity-50">${isHeadless(r)
+                  ? 'No screen — this rule is judged without one.'
+                  : 'No screen named.'}</span>`}</div>
+        </div>`;
+      })()}
       ${steps ? `<div><div class="${LBL} mb-1.5">Steps</div>
         <div class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-[13px] leading-relaxed"
           data-testid="detail.steps">${steps}</div>
@@ -242,5 +281,29 @@ export function detailPane() {
             : ''}
         </div>
         ${threads.map(threadCard).join('')}</div>` : ''}
+      <!--
+        A rule is a place to have a conversation, and until now it was only
+        that DURING a walkdown - the feedback box belongs to the sitting, and
+        outside one there was nowhere on a rule to say anything. So a note
+        about a rule you were only reading had to be filed as a pin on a page,
+        or not at all.
+
+        Deliberately below the threads rather than above them: this is how you
+        add to the conversation, and a composer that sits above what it
+        answers reads as a headline. Same shape and same words as the thread
+        composer, because it does the same thing.
+      -->
+      <div class="-mx-3.5 border-t border-base-300 px-3.5 pt-2" data-testid="detail.new-thread">
+        <textarea id="wdp-rulenote" data-testid="detail.new-thread-box" rows="2"
+          class="textarea textarea-xs w-full resize-none"
+          placeholder="Start a conversation about this rule…">${esc(S.ruleNote)}</textarea>
+        <div class="mt-1 flex items-center gap-2">
+          <span class="text-[10px] opacity-40">as <button id="wdp-nactor" class="link">${
+            esc(whoAmI() || 'set your name…')}</button></span>
+          <button class="btn btn-xs btn-outline ml-auto" data-testid="detail.new-thread-post"
+            data-note-rule="${esc(r.rule)}">Start thread</button>
+        </div>
+        <div class="mt-1 hidden text-[11px] text-warning" data-testid="detail.new-thread-say" id="wdp-nsay"></div>
+      </div>
     </div>`;
 }

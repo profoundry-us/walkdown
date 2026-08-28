@@ -1048,7 +1048,17 @@ test(
     expect(unbuilt, 'the blueprint has an unbuilt rule to read').toBeTruthy();
     const unbuiltStrip = list.locator(`[data-rule="${unbuilt.rule}"]`).getByTestId('panel.rule-tiers');
     await expect(unbuiltStrip, 'an unbuilt rule wears the strip too').toHaveCount(1);
-    await expect(unbuiltStrip).toHaveAttribute('data-tiers', 'checks:unbuilt agent:unbuilt');
+    /*
+     * Derived, not spelled out. `unbuilt` stands in only for a tier that has
+     * NEVER run - an unbuilt rule can still carry an agent run that came back
+     * blocked, and that run is usually the reason the rule is not built. An
+     * expectation of "both tiers read unbuilt" passed only while the first
+     * unbuilt rule in the ledger happened to have nothing recorded, and would
+     * have demanded the panel throw that news away.
+     */
+    const expected = tiersOf(unbuilt)
+      .map(([kind, st]) => `${kind}:${st === 'never' ? 'unbuilt' : st}`).join(' ');
+    await expect(unbuiltStrip).toHaveAttribute('data-tiers', expected);
     const unbuiltSigns = list.locator(`[data-rule="${unbuilt.rule}"]`).getByTestId('panel.rule-signoff');
     expect(((await unbuiltSigns.getAttribute('data-signoff')) ?? '').split(' ').sort())
       .toEqual((unbuilt.acceptance ?? []).map((a) => `${a.role}:${a.state}`).sort());

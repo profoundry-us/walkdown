@@ -412,6 +412,7 @@ const PHOSPHOR = {
   'device-mobile': '<path d="M176,16H80A24,24,0,0,0,56,40V216a24,24,0,0,0,24,24h96a24,24,0,0,0,24-24V40A24,24,0,0,0,176,16ZM72,64H184V192H72Zm8-32h96a8,8,0,0,1,8,8v8H72V40A8,8,0,0,1,80,32Zm96,192H80a8,8,0,0,1-8-8v-8H184v8A8,8,0,0,1,176,224Z"/>',
   'frame-corners': '<path d="M200,80v32a8,8,0,0,1-16,0V88H160a8,8,0,0,1,0-16h32A8,8,0,0,1,200,80ZM96,168H72V144a8,8,0,0,0-16,0v32a8,8,0,0,0,8,8H96a8,8,0,0,0,0-16ZM232,56V200a16,16,0,0,1-16,16H40a16,16,0,0,1-16-16V56A16,16,0,0,1,40,40H216A16,16,0,0,1,232,56ZM216,200V56H40V200H216Z"/>',
   'gear': '<path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm88-29.84q.06-2.16,0-4.32l14.92-18.64a8,8,0,0,0,1.48-7.06,107.21,107.21,0,0,0-10.88-26.25,8,8,0,0,0-6-3.93l-23.72-2.64q-1.48-1.56-3-3L186,40.54a8,8,0,0,0-3.94-6,107.71,107.71,0,0,0-26.25-10.87,8,8,0,0,0-7.06,1.49L130.16,40Q128,40,125.84,40L107.2,25.11a8,8,0,0,0-7.06-1.48A107.6,107.6,0,0,0,73.89,34.51a8,8,0,0,0-3.93,6L67.32,64.27q-1.56,1.49-3,3L40.54,70a8,8,0,0,0-6,3.94,107.71,107.71,0,0,0-10.87,26.25,8,8,0,0,0,1.49,7.06L40,125.84Q40,128,40,130.16L25.11,148.8a8,8,0,0,0-1.48,7.06,107.21,107.21,0,0,0,10.88,26.25,8,8,0,0,0,6,3.93l23.72,2.64q1.49,1.56,3,3L70,215.46a8,8,0,0,0,3.94,6,107.71,107.71,0,0,0,26.25,10.87,8,8,0,0,0,7.06-1.49L125.84,216q2.16.06,4.32,0l18.64,14.92a8,8,0,0,0,7.06,1.48,107.21,107.21,0,0,0,26.25-10.88,8,8,0,0,0,3.93-6l2.64-23.72q1.56-1.48,3-3L215.46,186a8,8,0,0,0,6-3.94,107.71,107.71,0,0,0,10.87-26.25,8,8,0,0,0-1.49-7.06Zm-16.1-6.5a73.93,73.93,0,0,1,0,8.68,8,8,0,0,0,1.74,5.48l14.19,17.73a91.57,91.57,0,0,1-6.23,15L187,173.11a8,8,0,0,0-5.1,2.64,74.11,74.11,0,0,1-6.14,6.14,8,8,0,0,0-2.64,5.1l-2.51,22.58a91.32,91.32,0,0,1-15,6.23l-17.74-14.19a8,8,0,0,0-5-1.75h-.48a73.93,73.93,0,0,1-8.68,0,8,8,0,0,0-5.48,1.74L100.45,215.8a91.57,91.57,0,0,1-15-6.23L82.89,187a8,8,0,0,0-2.64-5.1,74.11,74.11,0,0,1-6.14-6.14,8,8,0,0,0-5.1-2.64L46.43,170.6a91.32,91.32,0,0,1-6.23-15l14.19-17.74a8,8,0,0,0,1.74-5.48,73.93,73.93,0,0,1,0-8.68,8,8,0,0,0-1.74-5.48L40.2,100.45a91.57,91.57,0,0,1,6.23-15L69,82.89a8,8,0,0,0,5.1-2.64,74.11,74.11,0,0,1,6.14-6.14A8,8,0,0,0,82.89,69L85.4,46.43a91.32,91.32,0,0,1,15-6.23l17.74,14.19a8,8,0,0,0,5.48,1.74,73.93,73.93,0,0,1,8.68,0,8,8,0,0,0,5.48-1.74L155.55,40.2a91.57,91.57,0,0,1,15,6.23L173.11,69a8,8,0,0,0,2.64,5.1,74.11,74.11,0,0,1,6.14,6.14,8,8,0,0,0,5.1,2.64l22.58,2.51a91.32,91.32,0,0,1,6.23,15l-14.19,17.74A8,8,0,0,0,199.87,123.66Z"/>',
+  'info': '<path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"/>',
   'map-pin': '<path d="M128,64a40,40,0,1,0,40,40A40,40,0,0,0,128,64Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,128Zm0-112a88.1,88.1,0,0,0-88,88c0,31.4,14.51,64.68,42,96.25a254.19,254.19,0,0,0,41.45,38.3,8,8,0,0,0,9.18,0A254.19,254.19,0,0,0,174,200.25c27.45-31.57,42-64.85,42-96.25A88.1,88.1,0,0,0,128,16Zm0,206c-16.53-13-72-60.75-72-118a72,72,0,0,1,144,0C200,161.23,144.53,209,128,222Z"/>',
   'warning-fill': '<path d="M236.8,188.09,149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM120,104a8,8,0,0,1,16,0v40a8,8,0,0,1-16,0Zm8,88a12,12,0,1,1,12-12A12,12,0,0,1,128,192Z"/>',
 };
@@ -511,6 +512,7 @@ const S = {
   ruleQuery: '',
   threadNote: '',          // what the reply box says, kept across re-renders
   verdictNote: '',         // the verdict feedback box, kept across re-renders
+  ruleNote: '',            // the rule's own new-thread box, kept the same way
 
   /*
    * The check-source disclosure, kept OUTSIDE the markup that draws it.
@@ -1144,6 +1146,469 @@ function threadPane() {
 }
 
 /*
+ * The Rules tab: the rail of rules, the box that filters it, and the marks
+ * that say where each rule stands.
+ */
+
+/**
+ * Where a rule stands, in a sentence, for the row's own title.
+ *
+ * This used to also pick a GLYPH - □ designed, ✍︎ approved, ✎︎ refining, ○
+ * built-unverified - drawn alone in the space a built rule fills with three
+ * marks. That second display mode was the whole trouble: a lone yellow □ in a
+ * column of ✓✓● read as an alarm about a rule whose only sin was not being
+ * built yet, and the two pencils were indistinguishable at 12px anyway.
+ *
+ * There is one language now (see tierMarks). Lifecycle is not a mark of its
+ * own; it is what the strip already says - nothing filled is designed, half a
+ * dot is approved, owed glyphs are built-but-unwalked, all filled is verified.
+ * So this returns only the words, and the shapes are somebody else's job.
+ */
+function ruleWhy(row, mine) {
+  if (row.verdict === 'pass') return 'verified';
+  if (row.verdict === 'fail') return 'failing — the build was rejected';
+  if (!row.built) {
+    if (row.signoff === 'refining') return 'refining — sent back for spec rework';
+    if (row.signoff === 'approved') return 'approved — spec signed off, awaiting build';
+    return `designed — awaiting ${mine ? 'your ' : ''}sign-off`;
+  }
+  return mine ? 'built — awaiting your walkdown' : 'built — awaiting verification';
+}
+
+/*
+ * The search box over the rule list.
+ *
+ * It is drawn OUTSIDE the scrolling wrapper, as a sibling above it, which is
+ * the whole of the trick. `position: sticky` is the reflex here and it is
+ * the wrong tool: the pane itself is what scrolls, so a sticky child sticks
+ * to a scrollport that is moving with it, and the box either rides away or
+ * needs a second scroller underneath it to have something to stick to. A
+ * column with a fixed head and a growing body says the same thing with no
+ * stacking, no offsets, and nothing to go wrong when the list is short.
+ */
+function searchBox() {
+  return `<div class="shrink-0 border-b border-base-300 px-3.5 py-2">
+    <input id="wdp-search" type="search" data-testid="panel.rules-search"
+      class="input input-xs w-full" spellcheck="false" autocomplete="off"
+      aria-label="Search rules" placeholder="Search rules…" value="${esc(S.ruleQuery)}">
+  </div>`;
+}
+
+/*
+ * Which rules a query leaves standing.
+ *
+ * Matching is over three fields, and the choice is deliberate: the group
+ * heading (the story id, which carries its feature as its first segment), the
+ * rule id, and the rule's statement. So "panel" reaches every rule in the
+ * panel feature because every story under it is named for it; "panel.rules"
+ * reaches that story alone; and words nobody put in an id - "scroll",
+ * "ghost" - still find the rule, because the statement is the part of a rule
+ * written for people to read.
+ *
+ * A heading matching takes its whole group with it. A rule matching brings
+ * only itself, but its heading is drawn anyway by the grouping below, because
+ * a filtered list that loses the hierarchy stops saying where anything lives.
+ */
+const matchesQuery = (s, q) => String(s ?? '').toLowerCase().includes(q);
+function matchingRows() {
+  const q = S.ruleQuery.trim().toLowerCase();
+  if (!q) return S.data.rows;
+  const groups = new Set(
+    S.data.rows.map((r) => r.story).filter((story) => matchesQuery(story, q))
+  );
+  return S.data.rows.filter((row) =>
+    groups.has(row.story) || matchesQuery(row.rule, q) || matchesQuery(row.statement, q));
+}
+
+/*
+ * The marks a BUILT rule wears: checks, then agent, then who has accepted it.
+ * A rule verified by one tier and a rule verified by all of them both used to
+ * read as a single ✓, which hid the thing worth seeing - how much of the
+ * ledger is actually standing behind a green rule.
+ *
+ * The first two are machine results and stay glyphs. The third used to be a
+ * glyph too - the human TIER - and is now a stack of dots, one per role,
+ * because acceptance is a set of PEOPLE and "somebody signed" was never the
+ * question. See signoffStack below.
+ *
+ * Every built rule, not only the verified ones. A rule reaches 'verified'
+ * only when every tier it asks for holds a current pass, so on a verified
+ * rule these marks can be nothing but green or grey - the red, the open
+ * circle and the tilde were unreachable, and they are the ones that answer
+ * the question the row is here to answer: which tiers is this rule missing.
+ * A rule that is not built at all has no tiers to report and keeps its
+ * lifecycle shape.
+ *
+ * Same vocabulary as the detail pane's evidence rows, so the panel says one
+ * thing in one language: shape carries what happened, colour carries whether
+ * it is owed. Grey · is "this rule never asked for that tier". The two
+ * in-between states keep their own shapes rather than borrowing either end -
+ * ○ for a tier that is required and has never run, ~ for a pass whose
+ * statement has since moved - both in warning yellow when the rule is
+ * waiting on YOU, quiet otherwise. Colour carries ownership here exactly as
+ * it does for the single lifecycle glyph (panel.rules.lifecycle-legible),
+ * and the shape carries what happened either way, so a tier nobody has run
+ * is never read as one the rule never asked for.
+ */
+const TIER_MARK = {
+  pass: ['✓', 'text-success', 'passed'],
+  fail: ['✗', 'text-error', 'failed'],
+  stale: ['~', 'text-warning', 'stale — it passed, then the statement moved'],
+  never: ['○', 'text-warning', 'required, but no run has touched it'],
+  /*
+   * `skipped` shares the dash with `na` on purpose: a run that skipped this
+   * rule and a rule that never asked for the tier are the same news to
+   * somebody scanning the rail - no verdict, none owed. The tooltip is where
+   * they differ, and it is on every row.
+   */
+  skipped: ['–', 'opacity-40', 'skipped'],
+  blocked: ['⊘', 'text-warning', 'blocked'],
+  /*
+   * The two ways a tier can have no verdict coming. They were one dot for a
+   * while and that was too quiet to be worth drawing: at 12px a dot says
+   * nothing at all, and it said the same nothing for both states.
+   *
+   * `unbuilt` is a tier with nothing to judge yet, and it wears a grey tick:
+   * the rule is not waiting on this tier, and the shape it will eventually
+   * wear is already the shape it wears now. `na` is a tier the rule has
+   * declared it cannot honestly have, and it wears a dash: a line through
+   * where a verdict would go, which is what an excuse is.
+   */
+  unbuilt: ['✓', 'opacity-25', 'nothing to judge yet — the rule is not built'],
+  na: ['–', 'opacity-30', 'not applicable — this rule does not ask for it'],
+};
+
+/*
+ * The checks tier is per target, and the marks are per rule, so the targets
+ * have to come down to one state. Worst-news-first, the way the verdict
+ * itself aggregates: a rule that fails anywhere has not passed.
+ */
+function checksTier(row) {
+  const states = (S.data?.targets ?? Object.keys(row.cells ?? {}))
+    .map((t) => row.cells?.[t]?.state)
+    .filter((state) => state && state !== 'na');
+  if (!states.length) return 'na';
+  for (const worse of ['fail', 'blocked', 'never', 'stale', 'skipped'])
+    if (states.includes(worse)) return worse;
+  return states.every((state) => state === 'pass') ? 'pass' : 'never';
+}
+
+/** Tier states that are work somebody still owes, rather than settled news. */
+const TIER_OWED = new Set(['never', 'stale', 'blocked']);
+
+/*
+ * A stale mark has two causes now, and saying the wrong one is worse than
+ * saying nothing: a verdict goes stale when the rule's wording moves under it,
+ * and it goes stale when a sweep asks for the whole tier to be earned again.
+ * The cell says which - a swept cell carries the marker's id - so the mark can
+ * name the reason instead of guessing at the commoner one.
+ */
+const whyStale = (cell) =>
+  cell?.sweptBy
+    ? `stale — a sweep asked for this tier again (${cell.sweptBy})`
+    : TIER_MARK.stale[2];
+
+/*
+ * Who has to accept a rule, and where each of them sits.
+ *
+ * A fixed slot per role, top to bottom, so the stack reads by POSITION and
+ * colour is only a confirmation: product on top because it is the more final
+ * signature, eng at the bottom because it is the one everything else stands
+ * on, and any other role a team names in between - which is also the order
+ * signoffList declares them in, eng last. Sorting is stable, so two middle
+ * roles keep the order the rule wrote them in.
+ *
+ * The tints are a map keyed by role rather than a branch, because custom
+ * roles are coming and a team adding "design" should be a line of data. A
+ * role nobody has tinted draws in the panel's own ink instead of failing.
+ */
+const ROLE_TINT = { eng: 'text-blue-400', product: 'text-purple-400' };
+const ROLE_RANK = { product: 0, eng: 2 };
+const stackOrder = (acceptance) =>
+  [...(acceptance ?? [])].sort((a, b) => (ROLE_RANK[a.role] ?? 1) - (ROLE_RANK[b.role] ?? 1));
+
+/*
+ * What each acceptance state says, in the tooltip's words. `signed` is the
+ * built thing; `approved` is the wording only, which is a real answer to a
+ * question nobody has built yet and not a half-hearted signature.
+ */
+const SIGN_SAY = {
+  signed: 'signed the build',
+  approved: 'approved the wording, not the build',
+  'sent-back': 'sent it back — not yet',
+  stale: 'signed an older wording',
+  none: 'has not signed',
+};
+
+/*
+ * One role's slot. Every shape is legible at 5px, which rules out most of
+ * the obvious ideas - a dashed ring is mush at this size and a faded disc is
+ * hard to tell from a ring - so the four states differ by FILL and SIZE:
+ *
+ *   signed    a solid disc: their name is on the built thing
+ *   approved  half a disc, filled from the bottom: half a signature, because
+ *             approving the wording is not accepting the build
+ *   stale     a hollow ring around a point: the signature is still there but
+ *             no longer covers what the rule says, so it has pulled back from
+ *             the edge without vanishing
+ *   none      an outline ring: the slot is there and empty
+ *   sent-back a red ✗, not a dot - somebody looked and disagreed, which is
+ *             the one thing on this strip that is not an absence
+ *
+ * Stale was a smaller solid disc first, and that was wrong. Size alone needs
+ * a neighbour to be read against, and the common case is one dot with nothing
+ * beside it - so a stale signature read as a signature, which is the exact lie
+ * `status.derived.stale-never-passes` exists to forbid. The ring differs from
+ * a solid disc in kind, not degree, and needs no reference to be seen.
+ *
+ * The half fill and the ring's centre are inline gradients rather than
+ * classes: each is one declaration used in one place, and a two-tone 5px box
+ * is not something the utility vocabulary has a name for.
+ */
+function signoffDot(a, mine) {
+  const tint = ROLE_TINT[a.role] ?? 'text-base-content';
+  if (a.state === 'sent-back')
+    return `<span class="text-[8px] leading-none text-error">✗</span>`;
+  const shape = {
+    signed: 'size-[6px] bg-current',
+    approved: 'size-[6px] border border-current',
+    stale: 'size-[6px] border border-current',
+  }[a.state] ?? 'size-[6px] border border-current';
+  const fill = {
+    approved: ' style="background:linear-gradient(to top, currentColor 50%, transparent 50%)"',
+    stale: ' style="background:radial-gradient(currentColor 0 1.25px, transparent 1.25px)"',
+  }[a.state] ?? '';
+  // Owed slots dim when the rule is not waiting on you, exactly as the tier
+  // glyphs beside them do — the strip has one language for "your turn".
+  const dim = a.state !== 'signed' && !mine ? ' opacity-60' : '';
+  return `<span class="block rounded-full ${shape} ${tint}${dim}"${fill}></span>`;
+}
+
+/*
+ * Three slots is what fits beside a 12px glyph. A rule naming more roles than
+ * that keeps the two that carry the most - product on top, eng at the bottom -
+ * and collapses everything between them into a +N, which the tooltip then
+ * spells out in full. Dropping from the middle rather than the end keeps the
+ * two fixed slots fixed, which is the whole reason the stack reads.
+ */
+const MAX_SLOTS = 3;
+function signoffStack(acceptance, mine) {
+  const all = stackOrder(acceptance);
+  if (!all.length) return '';
+  const slots = all.length > MAX_SLOTS
+    ? [all[0], { role: '+', state: 'more', n: all.length - 2 }, all.at(-1)]
+    : all;
+  return `<span class="flex w-4 shrink-0 flex-col items-center justify-center"
+    data-testid="panel.rule-signoff" data-signoff="${esc(all.map((a) => `${a.role}:${a.state}`).join(' '))}"
+    >${slots.map((a) => `<span class="flex h-[9px] items-center justify-center">${
+      a.state === 'more'
+        ? `<span class="text-[8px] leading-none opacity-60">+${a.n}</span>`
+        : signoffDot(a, mine)}</span>`).join('')}</span>`;
+}
+
+/*
+ * ONE tooltip for the whole strip, not one per mark.
+ *
+ * Six little native tooltips said six unrelated things and never the sentence
+ * a reader actually wants — where does this rule stand. So the strip is the
+ * hover target and the bubble answers for every tier and every role at once,
+ * naming the signer where the ledger knows it.
+ *
+ * daisyUI rather than a title attribute, for the reason the footer counts use
+ * one (n-0091): a native tooltip cannot hold four lines of explanation, and
+ * the panel already says these words this way. It opens to the RIGHT because
+ * the strip sits on the left edge of a pane as wide as the whole panel -
+ * there is 340px of room that way and 14px the other, and a bubble opening up
+ * or down would be centred on that same 14px. Kept to short lines anyway:
+ * this one is read at a glance, on the way past.
+ */
+function stripTip(tiers, acceptance) {
+  const cells = tiers.map(([kind, state, cell]) =>
+    [kind, state === 'stale' ? whyStale(cell) : (TIER_MARK[state] ?? TIER_MARK.na)[2]]);
+  const signs = stackOrder(acceptance).map((a) => [
+    a.role,
+    `${SIGN_SAY[a.state] ?? a.state}${a.actor ? ` · ${a.actor}` : ''}${
+      a.created ? ` · ${MSG.ago(a.created)}` : ''}`,
+  ]);
+  const line = ([label, said]) =>
+    `<span class="opacity-60">${esc(label)}</span><span>${esc(said)}</span>`;
+  return `<span class="tooltip-content w-60 whitespace-normal text-left text-[11px] leading-snug"
+    data-testid="panel.rule-tiers-tip"><span class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5">${
+      cells.map(line).join('')}${signs.length
+        ? `<span class="col-span-2 mt-0.5 opacity-40">accepted by</span>${signs.map(line).join('')}`
+        : ''}</span></span>`;
+}
+
+function tierMarks(row, mine = false) {
+  /*
+   * An unbuilt rule has the same three slots as any other, both evidence
+   * tiers reading "nothing to judge yet". It is not that the tiers are
+   * absent - they are owed by the BUILD, which does not exist, and saying so
+   * in the same three positions is what lets the eye run down the column.
+   */
+  /*
+   * `unbuilt` stands in only for a tier that has NEVER run. Blanketing both
+   * tiers with it the moment a rule was unbuilt threw away real news: a rule
+   * can be unbuilt and still carry an agent run that came back blocked, and
+   * that run is the reason it is not built. What the strip owes an unbuilt
+   * rule is "nothing has judged this, and nothing could have" - which is what
+   * `never` means here - not silence about what did happen.
+   */
+  const quiet = (state) => (!row.built && state === 'never' ? 'unbuilt' : state);
+  const tiers = [
+    ['checks', quiet(checksTier(row)), null],
+    ['agent', quiet(row.agent?.state ?? 'na'), row.agent],
+  ];
+  // title="" is not a leftover: the row around this is a button carrying its
+  // own native title, and a native tooltip is inherited from the nearest
+  // ancestor that has one. An empty title stops that here, so hovering the
+  // strip opens the strip's bubble and nothing else.
+  return `<span class="tooltip tooltip-right flex w-11 shrink-0 items-center justify-center gap-0.5 text-[12px] leading-none"
+    title="" data-testid="panel.rule-tiers" data-tiers="${esc(tiers.map((t) => `${t[0]}:${t[1]}`).join(' '))}"
+    >${stripTip(tiers, row.acceptance)}${tiers.map(([, state, cell]) => {
+      const [glyph, cls] = TIER_MARK[state] ?? TIER_MARK.na;
+      return `<span class="inline-block w-4 text-center ${
+        TIER_OWED.has(state) && !mine ? 'opacity-60' : cls}">${glyph}</span>`;
+    }).join('')}${signoffStack(row.acceptance, mine)}</span>`;
+}
+
+function listPane() {
+  if (!S.data.rows.length)
+    return '<p class="p-3.5 text-[13.5px] opacity-40">No rules in this blueprint.</p>';
+  const rows = matchingRows();
+  if (!rows.length)
+    return `<p class="p-3.5 text-[13.5px] opacity-40" data-testid="panel.rules-empty">No rule matches ${
+      esc(S.ruleQuery.trim())}.</p>`;
+  let html = '';
+  let story = null;
+  for (const row of rows) {
+    if (row.story !== story) {
+      story = row.story;
+      html += `<div class="px-3.5 pb-1 pt-2.5 ${LBL}">${esc(story)}</div>`;
+    }
+    const mine = needsYou(row.rule);
+    /*
+     * A verdict picked this sitting is the one thing that still draws its own
+     * mark instead of the strip, and deliberately: it is not in the ledger
+     * yet. Standing outside the strip's vocabulary is how the row says the
+     * judgment is yours and unfiled.
+     */
+    const picked = S.session?.verdicts[row.rule];
+    const why = picked ? 'judged this session' : ruleWhy(row, mine);
+    const owes = mine && !picked ? (row.built ? 'walk' : 'sign') : '';
+    const short = shortName(row);
+    const thr = threadsFor(row.rule).length;
+    /*
+     * Two right-hand columns, always drawn, even when empty. What you owe and
+     * how much is being said about a rule are different questions, and run
+     * together in one warning-yellow string they read as one word - "walk 2"
+     * looked like a quantity of walking. Fixed widths so both answers stack
+     * into columns you can run an eye down; the thread count in plain ink at
+     * half strength, because it is context rather than a claim on you.
+     */
+    html += `<button class="flex w-full cursor-pointer items-center gap-2.5 px-3.5 py-2 text-left text-[14px] hover:bg-base-200"
+      data-rule="${esc(row.rule)}" title="${esc(row.rule)} — ${esc(why)}">
+      ${picked
+        ? `<span class="w-11 shrink-0 text-center ${
+            { pass: 'text-success', fail: 'text-error', approved: 'text-success',
+              refining: 'text-warning' }[picked]}">${
+            { pass: '✓', fail: '✗', approved: '✍︎', refining: '✎︎' }[picked]}</span>`
+        : tierMarks(row, mine)}
+      <span class="truncate">${esc(short)}</span>
+      <span class="ml-auto flex shrink-0 items-center gap-2 text-[11.5px] font-semibold">
+        <span class="w-7 text-right text-warning">${owes}</span>
+        <span class="w-7 text-right font-normal text-base-content/45">${thr ? `${thr}⚑` : ''}</span>
+      </span>
+    </button>`;
+  }
+  return html;
+}
+
+/** Opening a rule is a click on its row, wherever the row was just drawn. */
+function wireRuleRows() {
+  D.host.querySelectorAll('[data-rule]').forEach((el) => {
+    el.onclick = () => open(el.dataset.rule);
+  });
+}
+
+/*
+ * Filtering repaints the LIST and nothing else. A full render() would work -
+ * the caret is put back either way - but the filter has to feel like the
+ * letters are doing the work, and rebuilding the bar, the tabs and two other
+ * panes on every keystroke is a lot of work to do behind a caret. Repainting
+ * one element never touches the input, so there is no caret to restore and
+ * no chance of restoring it a frame late.
+ */
+function paintRules() {
+  const list = D.host.querySelector('.wdp-list');
+  if (!list) return;
+  list.innerHTML = listPane();
+  list.scrollTop = 0;   // a filtered list is a new list; showing its middle is not helpful
+  wireRuleRows();
+}
+
+function wireSearch() {
+  const box = D.host.querySelector('#wdp-search');
+  if (!box) return;
+  box.oninput = () => { S.ruleQuery = box.value; paintRules(); };
+  box.onkeydown = (e) => {
+    // Escape clears the box rather than reaching the page behind it, where it
+    // would end pin mode and leave the list still filtered.
+    if (e.key !== 'Escape' || !S.ruleQuery) return;
+    e.stopPropagation();
+    S.ruleQuery = '';
+    box.value = '';
+    paintRules();
+  };
+}
+
+/*
+ * The legend: what every mark on the rail means, in one hover.
+ *
+ * Built FROM the same maps the rail draws from - TIER_MARK for the glyphs,
+ * signoffDot for the dots - rather than from a hand-written copy of them.
+ * A legend that is a second description of the vocabulary is a legend that
+ * goes quietly wrong the first time the vocabulary moves, and this one has
+ * already moved twice this week.
+ *
+ * The role passed to signoffDot is deliberately one nobody has tinted, so the
+ * shapes draw in the panel's own ink: the legend is teaching SHAPE, and a
+ * blue dot beside "signed" would read as though blue were part of the answer.
+ * Colour is explained in its own line instead.
+ */
+const LEGEND_TIERS = ['pass', 'fail', 'stale', 'never', 'blocked', 'unbuilt', 'na'];
+const LEGEND_SIGNS = ['signed', 'approved', 'stale', 'none', 'sent-back'];
+
+function legendControl() {
+  const head = (t) => `<span class="col-span-2 pt-1 text-[10px] font-bold uppercase tracking-widest opacity-40">${t}</span>`;
+  const tierLine = (state) => {
+    const [glyph, cls, why] = TIER_MARK[state];
+    return `<span class="text-center ${cls}">${glyph}</span><span>${esc(why)}</span>`;
+  };
+  const signLine = (state) =>
+    `<span class="flex justify-center">${signoffDot({ role: '_', state }, true)}</span>
+     <span>${esc(SIGN_SAY[state])}</span>`;
+  return `<span class="tooltip tooltip-top shrink-0" data-testid="panel.legend">
+    <!-- z-50 here is load-bearing, and unlike the rule strip's bubble it was
+         measured rather than assumed: this one opens UPWARD across the whole
+         scrolling list from the last row in the panel, and at daisyUI's own
+         z-index of 2 the rules paint over it. The rule strip opens sideways
+         within the list and needs nothing. -->
+    <span class="tooltip-content z-50 w-72 whitespace-normal text-left text-[11.5px] leading-snug"
+      data-testid="panel.legend-tip"
+      ><span class="grid grid-cols-[1.25rem_1fr] items-center gap-x-2 gap-y-0.5">
+      ${head('Evidence — checks, then agent')}${LEGEND_TIERS.map(tierLine).join('')}
+      ${head('Signatures — one slot per role')}${LEGEND_SIGNS.map(signLine).join('')}
+      ${head('And around them')}
+      <span class="text-center text-warning">◆</span><span>Warning yellow anywhere means the rule is waiting on <b>you</b>.</span>
+      <span class="text-center text-warning">▪</span><span><b>sign</b> is a spec to accept; <b>walk</b> is a build to judge.</span>
+      <span class="text-center opacity-45">⚑</span><span>Open conversations on the rule.</span>
+    </span></span>
+    <span class="flex cursor-help items-center gap-1 opacity-50">${icon('info', 'size-3.5')}Legend</span>
+  </span>`;
+}
+
+/*
  * The rule detail: the whole of one rule — its statement, its steps, what each
  * tier has recorded, the check's own source behind a disclosure, and the
  * conversations anchored to it.
@@ -1303,7 +1768,14 @@ function detailPane() {
     </div>
     <div class="flex flex-col gap-3 px-3.5 pb-3.5 pt-1">
       <div>
-        <div class="break-all font-mono text-[11px] opacity-40" data-testid="detail.rule-id">${esc(r.rule)}</div>
+        <!-- The same strip the list drew, in the same order, so opening a
+             rule does not cost you the marks you opened it for. It is the
+             list's own function, not a copy: two drawings of one vocabulary
+             is how the CLI and the panel came to disagree about ✍︎ (n-0118). -->
+        <div class="flex items-center gap-2">
+          ${tierMarks(r, needsYou(r.rule))}
+          <div class="break-all font-mono text-[11px] opacity-40" data-testid="detail.rule-id">${esc(r.rule)}</div>
+        </div>
         <p class="text-[15px] leading-relaxed" data-testid="detail.statement">${esc(r.statement)}</p>
         ${elsewhere(r)}
       </div>
@@ -1343,6 +1815,37 @@ function detailPane() {
             data-testid="detail.setup">${esc(setup)}</div>
         </div>` : '';
       })()}
+      ${(() => {
+        /*
+         * Which screen this rule is about, said plainly and above the steps.
+         *
+         * It was only ever implicit before - the surface moved when you opened
+         * the rule, and if it moved somewhere wrong the rule looked wrong
+         * instead. A rule pointed at the wrong screen is a common and quiet
+         * error in a blueprint this size, and it cannot be corrected by
+         * somebody who cannot see what was chosen.
+         *
+         * A flow is drawn as the chain it is, because the LAST screen of a
+         * flow is the one the rule is judged on (ruleScreen) and a chain that
+         * did not show its end would answer a different question.
+         */
+        const ids = r.flow?.length ? r.flow : (r.screens ?? []);
+        const sep = r.flow?.length ? ' → ' : ', ';
+        const name = (id) => {
+          const sc = screenById(id);
+          return `<span class="${sc ? '' : 'text-warning'}">${esc(sc?.title ?? id)}</span>${
+            sc?.title ? ` <code class="rounded bg-base-200 px-1 text-[11px] opacity-70">${esc(id)}</code>` : ''}`;
+        };
+        return `<div>
+          <div class="${LBL} mb-1.5">Screen</div>
+          <div class="text-[13px] leading-relaxed" data-testid="detail.screen">${
+            ids.length
+              ? ids.map(name).join(sep)
+              : `<span class="opacity-50">${isHeadless(r)
+                  ? 'No screen — this rule is judged without one.'
+                  : 'No screen named.'}</span>`}</div>
+        </div>`;
+      })()}
       ${steps ? `<div><div class="${LBL} mb-1.5">Steps</div>
         <div class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-[13px] leading-relaxed"
           data-testid="detail.steps">${steps}</div>
@@ -1380,6 +1883,30 @@ function detailPane() {
             : ''}
         </div>
         ${threads.map(threadCard).join('')}</div>` : ''}
+      <!--
+        A rule is a place to have a conversation, and until now it was only
+        that DURING a walkdown - the feedback box belongs to the sitting, and
+        outside one there was nowhere on a rule to say anything. So a note
+        about a rule you were only reading had to be filed as a pin on a page,
+        or not at all.
+
+        Deliberately below the threads rather than above them: this is how you
+        add to the conversation, and a composer that sits above what it
+        answers reads as a headline. Same shape and same words as the thread
+        composer, because it does the same thing.
+      -->
+      <div class="-mx-3.5 border-t border-base-300 px-3.5 pt-2" data-testid="detail.new-thread">
+        <textarea id="wdp-rulenote" data-testid="detail.new-thread-box" rows="2"
+          class="textarea textarea-xs w-full resize-none"
+          placeholder="Start a conversation about this rule…">${esc(S.ruleNote)}</textarea>
+        <div class="mt-1 flex items-center gap-2">
+          <span class="text-[10px] opacity-40">as <button id="wdp-nactor" class="link">${
+            esc(whoAmI() || 'set your name…')}</button></span>
+          <button class="btn btn-xs btn-outline ml-auto" data-testid="detail.new-thread-post"
+            data-note-rule="${esc(r.rule)}">Start thread</button>
+        </div>
+        <div class="mt-1 hidden text-[11px] text-warning" data-testid="detail.new-thread-say" id="wdp-nsay"></div>
+      </div>
     </div>`;
 }
 
@@ -1444,414 +1971,6 @@ function screensPane() {
           design ? (design.proposed ? 'sketch' : 'design') : 'no design'}</span>
       </button>`;
     }).join('')}`;
-}
-
-/*
- * The Rules tab: the rail of rules, the box that filters it, and the marks
- * that say where each rule stands.
- */
-
-/**
- * Where a rule stands, in a sentence, for the row's own title.
- *
- * This used to also pick a GLYPH - □ designed, ✍︎ approved, ✎︎ refining, ○
- * built-unverified - drawn alone in the space a built rule fills with three
- * marks. That second display mode was the whole trouble: a lone yellow □ in a
- * column of ✓✓● read as an alarm about a rule whose only sin was not being
- * built yet, and the two pencils were indistinguishable at 12px anyway.
- *
- * There is one language now (see tierMarks). Lifecycle is not a mark of its
- * own; it is what the strip already says - nothing filled is designed, half a
- * dot is approved, owed glyphs are built-but-unwalked, all filled is verified.
- * So this returns only the words, and the shapes are somebody else's job.
- */
-function ruleWhy(row, mine) {
-  if (row.verdict === 'pass') return 'verified';
-  if (row.verdict === 'fail') return 'failing — the build was rejected';
-  if (!row.built) {
-    if (row.signoff === 'refining') return 'refining — sent back for spec rework';
-    if (row.signoff === 'approved') return 'approved — spec signed off, awaiting build';
-    return `designed — awaiting ${mine ? 'your ' : ''}sign-off`;
-  }
-  return mine ? 'built — awaiting your walkdown' : 'built — awaiting verification';
-}
-
-/*
- * The search box over the rule list.
- *
- * It is drawn OUTSIDE the scrolling wrapper, as a sibling above it, which is
- * the whole of the trick. `position: sticky` is the reflex here and it is
- * the wrong tool: the pane itself is what scrolls, so a sticky child sticks
- * to a scrollport that is moving with it, and the box either rides away or
- * needs a second scroller underneath it to have something to stick to. A
- * column with a fixed head and a growing body says the same thing with no
- * stacking, no offsets, and nothing to go wrong when the list is short.
- */
-function searchBox() {
-  return `<div class="shrink-0 border-b border-base-300 px-3.5 py-2">
-    <input id="wdp-search" type="search" data-testid="panel.rules-search"
-      class="input input-xs w-full" spellcheck="false" autocomplete="off"
-      aria-label="Search rules" placeholder="Search rules…" value="${esc(S.ruleQuery)}">
-  </div>`;
-}
-
-/*
- * Which rules a query leaves standing.
- *
- * Matching is over three fields, and the choice is deliberate: the group
- * heading (the story id, which carries its feature as its first segment), the
- * rule id, and the rule's statement. So "panel" reaches every rule in the
- * panel feature because every story under it is named for it; "panel.rules"
- * reaches that story alone; and words nobody put in an id - "scroll",
- * "ghost" - still find the rule, because the statement is the part of a rule
- * written for people to read.
- *
- * A heading matching takes its whole group with it. A rule matching brings
- * only itself, but its heading is drawn anyway by the grouping below, because
- * a filtered list that loses the hierarchy stops saying where anything lives.
- */
-const matchesQuery = (s, q) => String(s ?? '').toLowerCase().includes(q);
-function matchingRows() {
-  const q = S.ruleQuery.trim().toLowerCase();
-  if (!q) return S.data.rows;
-  const groups = new Set(
-    S.data.rows.map((r) => r.story).filter((story) => matchesQuery(story, q))
-  );
-  return S.data.rows.filter((row) =>
-    groups.has(row.story) || matchesQuery(row.rule, q) || matchesQuery(row.statement, q));
-}
-
-/*
- * The marks a BUILT rule wears: checks, then agent, then who has accepted it.
- * A rule verified by one tier and a rule verified by all of them both used to
- * read as a single ✓, which hid the thing worth seeing - how much of the
- * ledger is actually standing behind a green rule.
- *
- * The first two are machine results and stay glyphs. The third used to be a
- * glyph too - the human TIER - and is now a stack of dots, one per role,
- * because acceptance is a set of PEOPLE and "somebody signed" was never the
- * question. See signoffStack below.
- *
- * Every built rule, not only the verified ones. A rule reaches 'verified'
- * only when every tier it asks for holds a current pass, so on a verified
- * rule these marks can be nothing but green or grey - the red, the open
- * circle and the tilde were unreachable, and they are the ones that answer
- * the question the row is here to answer: which tiers is this rule missing.
- * A rule that is not built at all has no tiers to report and keeps its
- * lifecycle shape.
- *
- * Same vocabulary as the detail pane's evidence rows, so the panel says one
- * thing in one language: shape carries what happened, colour carries whether
- * it is owed. Grey · is "this rule never asked for that tier". The two
- * in-between states keep their own shapes rather than borrowing either end -
- * ○ for a tier that is required and has never run, ~ for a pass whose
- * statement has since moved - both in warning yellow when the rule is
- * waiting on YOU, quiet otherwise. Colour carries ownership here exactly as
- * it does for the single lifecycle glyph (panel.rules.lifecycle-legible),
- * and the shape carries what happened either way, so a tier nobody has run
- * is never read as one the rule never asked for.
- */
-const TIER_MARK = {
-  pass: ['✓', 'text-success', 'passed'],
-  fail: ['✗', 'text-error', 'failed'],
-  stale: ['~', 'text-warning', 'stale — it passed, then the statement moved'],
-  never: ['○', 'text-warning', 'required, but no run has touched it'],
-  skipped: ['–', 'opacity-40', 'skipped'],
-  blocked: ['⊘', 'text-warning', 'blocked'],
-  /*
-   * The two ways a tier can have no verdict coming, sharing one mark.
-   *
-   * `na` is a tier the rule never asks for - excused, with a reason somebody
-   * wrote. `unbuilt` is a tier that has nothing to judge because the rule has
-   * not been built. Neither is work owed and neither is news, so both draw the
-   * quietest thing on the strip; which one it is, and why, is a line in the
-   * tooltip, and the tooltip is now on every row.
-   *
-   * `na` was a faded ✓ to keep the columns aligned. A dot aligns just as well
-   * and does not spend the panel's most emphatic glyph on the absence of a
-   * claim - a hollowed-out tick still reads tick-shaped at a glance, and on
-   * an excused rule that is exactly the wrong first impression.
-   */
-  na: ['·', 'opacity-25', 'not applicable — this rule does not ask for it'],
-  unbuilt: ['·', 'opacity-25', 'nothing to judge yet — the rule is not built'],
-};
-
-/*
- * The checks tier is per target, and the marks are per rule, so the targets
- * have to come down to one state. Worst-news-first, the way the verdict
- * itself aggregates: a rule that fails anywhere has not passed.
- */
-function checksTier(row) {
-  const states = (S.data?.targets ?? Object.keys(row.cells ?? {}))
-    .map((t) => row.cells?.[t]?.state)
-    .filter((state) => state && state !== 'na');
-  if (!states.length) return 'na';
-  for (const worse of ['fail', 'blocked', 'never', 'stale', 'skipped'])
-    if (states.includes(worse)) return worse;
-  return states.every((state) => state === 'pass') ? 'pass' : 'never';
-}
-
-/** Tier states that are work somebody still owes, rather than settled news. */
-const TIER_OWED = new Set(['never', 'stale', 'blocked']);
-
-/*
- * A stale mark has two causes now, and saying the wrong one is worse than
- * saying nothing: a verdict goes stale when the rule's wording moves under it,
- * and it goes stale when a sweep asks for the whole tier to be earned again.
- * The cell says which - a swept cell carries the marker's id - so the mark can
- * name the reason instead of guessing at the commoner one.
- */
-const whyStale = (cell) =>
-  cell?.sweptBy
-    ? `stale — a sweep asked for this tier again (${cell.sweptBy})`
-    : TIER_MARK.stale[2];
-
-/*
- * Who has to accept a rule, and where each of them sits.
- *
- * A fixed slot per role, top to bottom, so the stack reads by POSITION and
- * colour is only a confirmation: product on top because it is the more final
- * signature, eng at the bottom because it is the one everything else stands
- * on, and any other role a team names in between - which is also the order
- * signoffList declares them in, eng last. Sorting is stable, so two middle
- * roles keep the order the rule wrote them in.
- *
- * The tints are a map keyed by role rather than a branch, because custom
- * roles are coming and a team adding "design" should be a line of data. A
- * role nobody has tinted draws in the panel's own ink instead of failing.
- */
-const ROLE_TINT = { eng: 'text-blue-400', product: 'text-purple-400' };
-const ROLE_RANK = { product: 0, eng: 2 };
-const stackOrder = (acceptance) =>
-  [...(acceptance ?? [])].sort((a, b) => (ROLE_RANK[a.role] ?? 1) - (ROLE_RANK[b.role] ?? 1));
-
-/*
- * What each acceptance state says, in the tooltip's words. `signed` is the
- * built thing; `approved` is the wording only, which is a real answer to a
- * question nobody has built yet and not a half-hearted signature.
- */
-const SIGN_SAY = {
-  signed: 'signed the build',
-  approved: 'approved the wording, not the build',
-  'sent-back': 'sent it back — not yet',
-  stale: 'signed an older wording',
-  none: 'has not signed',
-};
-
-/*
- * One role's slot. Every shape is legible at 5px, which rules out most of
- * the obvious ideas - a dashed ring is mush at this size and a faded disc is
- * hard to tell from a ring - so the four states differ by FILL and SIZE:
- *
- *   signed    a solid disc: their name is on the built thing
- *   approved  half a disc, filled from the bottom: half a signature, because
- *             approving the wording is not accepting the build
- *   stale     a hollow ring around a point: the signature is still there but
- *             no longer covers what the rule says, so it has pulled back from
- *             the edge without vanishing
- *   none      an outline ring: the slot is there and empty
- *   sent-back a red ✗, not a dot - somebody looked and disagreed, which is
- *             the one thing on this strip that is not an absence
- *
- * Stale was a smaller solid disc first, and that was wrong. Size alone needs
- * a neighbour to be read against, and the common case is one dot with nothing
- * beside it - so a stale signature read as a signature, which is the exact lie
- * `status.derived.stale-never-passes` exists to forbid. The ring differs from
- * a solid disc in kind, not degree, and needs no reference to be seen.
- *
- * The half fill and the ring's centre are inline gradients rather than
- * classes: each is one declaration used in one place, and a two-tone 5px box
- * is not something the utility vocabulary has a name for.
- */
-function signoffDot(a, mine) {
-  const tint = ROLE_TINT[a.role] ?? 'text-base-content';
-  if (a.state === 'sent-back')
-    return `<span class="text-[8px] leading-none text-error">✗</span>`;
-  const shape = {
-    signed: 'size-[6px] bg-current',
-    approved: 'size-[6px] border border-current',
-    stale: 'size-[6px] border border-current',
-  }[a.state] ?? 'size-[6px] border border-current';
-  const fill = {
-    approved: ' style="background:linear-gradient(to top, currentColor 50%, transparent 50%)"',
-    stale: ' style="background:radial-gradient(currentColor 0 1.25px, transparent 1.25px)"',
-  }[a.state] ?? '';
-  // Owed slots dim when the rule is not waiting on you, exactly as the tier
-  // glyphs beside them do — the strip has one language for "your turn".
-  const dim = a.state !== 'signed' && !mine ? ' opacity-60' : '';
-  return `<span class="block rounded-full ${shape} ${tint}${dim}"${fill}></span>`;
-}
-
-/*
- * Three slots is what fits beside a 12px glyph. A rule naming more roles than
- * that keeps the two that carry the most - product on top, eng at the bottom -
- * and collapses everything between them into a +N, which the tooltip then
- * spells out in full. Dropping from the middle rather than the end keeps the
- * two fixed slots fixed, which is the whole reason the stack reads.
- */
-const MAX_SLOTS = 3;
-function signoffStack(acceptance, mine) {
-  const all = stackOrder(acceptance);
-  if (!all.length) return '';
-  const slots = all.length > MAX_SLOTS
-    ? [all[0], { role: '+', state: 'more', n: all.length - 2 }, all.at(-1)]
-    : all;
-  return `<span class="flex w-4 shrink-0 flex-col items-center justify-center"
-    data-testid="panel.rule-signoff" data-signoff="${esc(all.map((a) => `${a.role}:${a.state}`).join(' '))}"
-    >${slots.map((a) => `<span class="flex h-[9px] items-center justify-center">${
-      a.state === 'more'
-        ? `<span class="text-[8px] leading-none opacity-60">+${a.n}</span>`
-        : signoffDot(a, mine)}</span>`).join('')}</span>`;
-}
-
-/*
- * ONE tooltip for the whole strip, not one per mark.
- *
- * Six little native tooltips said six unrelated things and never the sentence
- * a reader actually wants — where does this rule stand. So the strip is the
- * hover target and the bubble answers for every tier and every role at once,
- * naming the signer where the ledger knows it.
- *
- * daisyUI rather than a title attribute, for the reason the footer counts use
- * one (n-0091): a native tooltip cannot hold four lines of explanation, and
- * the panel already says these words this way. It opens to the RIGHT because
- * the strip sits on the left edge of a pane as wide as the whole panel -
- * there is 340px of room that way and 14px the other, and a bubble opening up
- * or down would be centred on that same 14px. Kept to short lines anyway:
- * this one is read at a glance, on the way past.
- */
-function stripTip(tiers, acceptance) {
-  const cells = tiers.map(([kind, state, cell]) =>
-    [kind, state === 'stale' ? whyStale(cell) : (TIER_MARK[state] ?? TIER_MARK.na)[2]]);
-  const signs = stackOrder(acceptance).map((a) => [
-    a.role,
-    `${SIGN_SAY[a.state] ?? a.state}${a.actor ? ` · ${a.actor}` : ''}${
-      a.created ? ` · ${MSG.ago(a.created)}` : ''}`,
-  ]);
-  const line = ([label, said]) =>
-    `<span class="opacity-60">${esc(label)}</span><span>${esc(said)}</span>`;
-  // z-50 is load-bearing: daisyUI leaves the bubble at z-index 2, and every
-  // rule below this one in the list paints after it, so an opaque tooltip on
-  // any row but the last was being overdrawn by its neighbours and read as
-  // transparent - the text of four rules stacked on top of each other.
-  return `<span class="tooltip-content z-50 w-60 whitespace-normal text-left text-[11px] leading-snug"
-    data-testid="panel.rule-tiers-tip"><span class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5">${
-      cells.map(line).join('')}${signs.length
-        ? `<span class="col-span-2 mt-0.5 opacity-40">accepted by</span>${signs.map(line).join('')}`
-        : ''}</span></span>`;
-}
-
-function tierMarks(row, mine = false) {
-  /*
-   * An unbuilt rule has the same three slots as any other, both evidence
-   * tiers reading "nothing to judge yet". It is not that the tiers are
-   * absent - they are owed by the BUILD, which does not exist, and saying so
-   * in the same three positions is what lets the eye run down the column.
-   */
-  const tiers = row.built
-    ? [['checks', checksTier(row), null], ['agent', row.agent?.state ?? 'na', row.agent]]
-    : [['checks', 'unbuilt', null], ['agent', 'unbuilt', null]];
-  // title="" is not a leftover: the row around this is a button carrying its
-  // own native title, and a native tooltip is inherited from the nearest
-  // ancestor that has one. An empty title stops that here, so hovering the
-  // strip opens the strip's bubble and nothing else.
-  return `<span class="tooltip tooltip-right flex w-11 shrink-0 items-center justify-center gap-0.5 text-[12px] leading-none"
-    title="" data-testid="panel.rule-tiers" data-tiers="${esc(tiers.map((t) => `${t[0]}:${t[1]}`).join(' '))}"
-    >${stripTip(tiers, row.acceptance)}${tiers.map(([, state, cell]) => {
-      const [glyph, cls] = TIER_MARK[state] ?? TIER_MARK.na;
-      return `<span class="inline-block w-4 text-center ${
-        TIER_OWED.has(state) && !mine ? 'opacity-60' : cls}">${glyph}</span>`;
-    }).join('')}${signoffStack(row.acceptance, mine)}</span>`;
-}
-
-function listPane() {
-  if (!S.data.rows.length)
-    return '<p class="p-3.5 text-[13.5px] opacity-40">No rules in this blueprint.</p>';
-  const rows = matchingRows();
-  if (!rows.length)
-    return `<p class="p-3.5 text-[13.5px] opacity-40" data-testid="panel.rules-empty">No rule matches ${
-      esc(S.ruleQuery.trim())}.</p>`;
-  let html = '';
-  let story = null;
-  for (const row of rows) {
-    if (row.story !== story) {
-      story = row.story;
-      html += `<div class="px-3.5 pb-1 pt-2.5 ${LBL}">${esc(story)}</div>`;
-    }
-    const mine = needsYou(row.rule);
-    /*
-     * A verdict picked this sitting is the one thing that still draws its own
-     * mark instead of the strip, and deliberately: it is not in the ledger
-     * yet. Standing outside the strip's vocabulary is how the row says the
-     * judgment is yours and unfiled.
-     */
-    const picked = S.session?.verdicts[row.rule];
-    const why = picked ? 'judged this session' : ruleWhy(row, mine);
-    const owes = mine && !picked ? (row.built ? 'walk' : 'sign') : '';
-    const short = shortName(row);
-    const thr = threadsFor(row.rule).length;
-    /*
-     * Two right-hand columns, always drawn, even when empty. What you owe and
-     * how much is being said about a rule are different questions, and run
-     * together in one warning-yellow string they read as one word - "walk 2"
-     * looked like a quantity of walking. Fixed widths so both answers stack
-     * into columns you can run an eye down; the thread count in plain ink at
-     * half strength, because it is context rather than a claim on you.
-     */
-    html += `<button class="flex w-full cursor-pointer items-center gap-2.5 px-3.5 py-2 text-left text-[14px] hover:bg-base-200"
-      data-rule="${esc(row.rule)}" title="${esc(row.rule)} — ${esc(why)}">
-      ${picked
-        ? `<span class="w-11 shrink-0 text-center ${
-            { pass: 'text-success', fail: 'text-error', approved: 'text-success',
-              refining: 'text-warning' }[picked]}">${
-            { pass: '✓', fail: '✗', approved: '✍︎', refining: '✎︎' }[picked]}</span>`
-        : tierMarks(row, mine)}
-      <span class="truncate">${esc(short)}</span>
-      <span class="ml-auto flex shrink-0 items-center gap-2 text-[11.5px] font-semibold">
-        <span class="w-7 text-right text-warning">${owes}</span>
-        <span class="w-7 text-right font-normal text-base-content/45">${thr ? `${thr}⚑` : ''}</span>
-      </span>
-    </button>`;
-  }
-  return html;
-}
-
-/** Opening a rule is a click on its row, wherever the row was just drawn. */
-function wireRuleRows() {
-  D.host.querySelectorAll('[data-rule]').forEach((el) => {
-    el.onclick = () => open(el.dataset.rule);
-  });
-}
-
-/*
- * Filtering repaints the LIST and nothing else. A full render() would work -
- * the caret is put back either way - but the filter has to feel like the
- * letters are doing the work, and rebuilding the bar, the tabs and two other
- * panes on every keystroke is a lot of work to do behind a caret. Repainting
- * one element never touches the input, so there is no caret to restore and
- * no chance of restoring it a frame late.
- */
-function paintRules() {
-  const list = D.host.querySelector('.wdp-list');
-  if (!list) return;
-  list.innerHTML = listPane();
-  list.scrollTop = 0;   // a filtered list is a new list; showing its middle is not helpful
-  wireRuleRows();
-}
-
-function wireSearch() {
-  const box = D.host.querySelector('#wdp-search');
-  if (!box) return;
-  box.oninput = () => { S.ruleQuery = box.value; paintRules(); };
-  box.onkeydown = (e) => {
-    // Escape clears the box rather than reaching the page behind it, where it
-    // would end pin mode and leave the list still filtered.
-    if (e.key !== 'Escape' || !S.ruleQuery) return;
-    e.stopPropagation();
-    S.ruleQuery = '';
-    box.value = '';
-    paintRules();
-  };
 }
 
 /*
@@ -3065,7 +3184,8 @@ function render() {
          The row no longer dims as a whole - opacity on the container dimmed
          the tooltips it opens with it, and opacity cannot be undone by a
          child. The label carries its own. -->
-    ${S.listTab === 'rules' ? `<div class="flex shrink-0 items-center gap-2 border-t border-base-300 px-3.5 py-2 text-xs" data-testid="panel.counts">
+    ${S.listTab === 'rules' ? `<div class="grid shrink-0 grid-cols-3 items-center border-t border-base-300 px-3.5 py-2 text-xs" data-testid="panel.counts">
+      <span class="flex items-center gap-2 justify-self-start">
       <span class="tooltip tooltip-top tooltip-start [--tt-trans:0] shrink-0 whitespace-nowrap">
         <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug"
           >Rules holding a current pass on every tier they ask for. The rest are the work counted at the right.</span>
@@ -3073,8 +3193,13 @@ function render() {
         judged.size ? `<span class="tooltip tooltip-top tooltip-start [--tt-trans:0] shrink-0 text-primary">
         <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug"
           >Judged by you in this sitting. Nothing reaches the ledger until you press Finish walkdown.</span>
-        <b>+${judged.size}</b></span>` : ''}
-      <span class="ml-auto flex shrink-0 gap-1">
+        <b>+${judged.size}</b></span>` : ''}</span>
+      <!-- Centred, and in its own grid column so it stays centred whether or
+           not the two badges at the right are drawn. Every mark the rail uses
+           is explained here rather than in six tooltips nobody assembles into
+           a picture. -->
+      <span class="justify-self-center">${legendControl()}</span>
+      <span class="flex shrink-0 gap-1 justify-self-end">
         ${toSign ? `<span class="tooltip tooltip-top tooltip-end [--tt-trans:0]">
           <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug"
             >${toSign} rule${toSign === 1 ? '' : 's'} designed but not built. Your sign-off on the spec is what they wait for.</span>
@@ -3138,6 +3263,7 @@ function render() {
     el.onclick = () => goTo(screenById(el.dataset.goscreen));
   });
   wireVerdict();
+  wireRuleNote();
   wireThreads();
   syncHeadlessCover();
 }
@@ -3936,6 +4062,20 @@ function sayVerdict(msg) {
   el.classList.remove('hidden');
 }
 
+/*
+ * A refusal, put where the person who triggered it is looking. Two composers
+ * can file a note now, each with its own line to say why one was refused, and
+ * a message printed into the box you are not looking at is a message nobody
+ * reads. Falls through to a toast when neither box is on screen.
+ */
+function sayFiling(msg) {
+  for (const id of ['#wdp-nsay', '#wdp-vsay']) {
+    const el = D.host.querySelector(id);
+    if (el) { el.textContent = msg; el.classList.remove('hidden'); return; }
+  }
+  toast(msg, { tone: 'error' });
+}
+
 /** File the feedback box's text as a note on the rule; null on refusal. */
 async function postRuleNote(rule, body) {
   /*
@@ -3955,9 +4095,17 @@ async function postRuleNote(rule, body) {
    * belief that every attributed action was refused; that belief was true of
    * every path but this one.
    */
-  const author = (S.session.actor ?? '').trim();
+  /*
+   * whoAmI() rather than the sitting's actor, because a rule is now a place
+   * to talk WITHOUT a sitting - and outside one, S.session is null, which
+   * this line used to read straight through. It keeps the guard it was
+   * written for: whoAmI is precisely the name the panel puts on screen as
+   * you, in the bar, in Settings and above both composers, so a note can
+   * still never be filed under a name nobody was shown (n-0116, n-0121).
+   */
+  const author = whoAmI();
   if (!author || author === 'agent') {
-    sayVerdict('A note is recorded under a person\u2019s name \u2014 set it in Settings (the gear).');
+    sayFiling('A note is recorded under a person\u2019s name \u2014 set it in Settings (the gear).');
     openActorSettings();
     return null;
   }
@@ -3966,8 +4114,35 @@ async function postRuleNote(rule, body) {
     body: JSON.stringify({ kind: 'note', author, body, anchor: { rule } }),
   });
   const out = await res.json().catch(() => ({}));
-  if (!res.ok) { sayVerdict(out.error ?? 'note not filed'); return null; }
+  if (!res.ok) { sayFiling(out.error ?? 'note not filed'); return null; }
   return out.id;
+}
+
+/*
+ * Starting a conversation on a rule, outside a walkdown.
+ *
+ * The same POST the sitting's feedback box makes, and deliberately so: a note
+ * is a note, and a rule read on a Tuesday deserves the same record as one
+ * judged in a sitting. What it does NOT do is touch S.session - there may not
+ * be one, and a thread is not a verdict.
+ */
+function wireRuleNote() {
+  const box = D.host.querySelector('#wdp-rulenote');
+  if (box) box.oninput = () => { S.ruleNote = box.value; };
+  const who = D.host.querySelector('#wdp-nactor');
+  if (who) who.onclick = () => openActorSettings();
+  const post = D.host.querySelector('[data-note-rule]');
+  if (!post) return;
+  post.onclick = async () => {
+    const text = (D.host.querySelector('#wdp-rulenote')?.value ?? '').trim();
+    if (!text) return sayFiling('Write something first — a thread opens with what you have to say.');
+    post.disabled = true;
+    const tid = await postRuleNote(post.dataset.noteRule, text);
+    post.disabled = false;
+    if (!tid) return;             // the refusal is on screen
+    S.ruleNote = '';
+    await load();                 // pull the new thread into the lists and repaint
+  };
 }
 
 /** A pin dropped on this rule since the session began — the other way to say why. */
