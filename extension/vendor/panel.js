@@ -1532,6 +1532,21 @@ const TIER_MARK = {
   skipped: ['–', 'opacity-40', 'skipped'],
   blocked: ['⊘', 'text-warning', 'blocked'],
   /*
+   * Sign-off is not a verdict. A human can approve the wording of a rule, or
+   * send it back for refining, without ever walking the built thing - and when
+   * that is the latest human run, the human TIER still owes a verdict. Both
+   * states were missing here, so they fell through to `na` and a rule somebody
+   * had signed drew as one nobody had to: the mark said "this rule does not
+   * ask for a human" about a rule a human had just put their name to.
+   *
+   * One glyph for the pair on purpose. The distinction between approved and
+   * refining is about the wording and belongs in the detail; what the rail
+   * needs to say is that the human tier is still owed. Which glyph it should
+   * be is a design question - n-0118 asks it.
+   */
+  approved: ['✎', 'text-warning', 'the wording is signed off — no walkdown verdict yet'],
+  refining: ['✎', 'text-warning', 'sent back for refining — no walkdown verdict yet'],
+  /*
    * A tier the rule never asked for is a hollowed-out version of the same
    * check, not a different glyph. Three marks of three different widths do
    * not line up down a list of ninety rules, and a row you cannot scan in a
@@ -1556,7 +1571,7 @@ function checksTier(row) {
 }
 
 /** Tier states that are work somebody still owes, rather than settled news. */
-const TIER_OWED = new Set(['never', 'stale', 'blocked']);
+const TIER_OWED = new Set(['never', 'stale', 'blocked', 'approved', 'refining']);
 
 /*
  * A stale mark has two causes now, and saying the wrong one is worse than

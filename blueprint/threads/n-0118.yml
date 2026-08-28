@@ -1,0 +1,28 @@
+id: n-0118
+kind: note
+author: agent
+created: 2026-08-28T03:40:00Z
+anchor:
+  rule: panel.rules.tiers-at-a-glance
+status: open
+body: "A design question left open by a fix. The human tier's latest run can be
+  a SIGN-OFF rather than a verdict - `approved` when somebody accepted the
+  wording, `refining` when they sent it back - and the panel's mark map knew
+  neither. Both fell through to the `na` mark, so a rule a human had just put
+  their name to drew as a greyed-out check meaning \"this rule does not ask for
+  a human\": the one reading that is certainly wrong. The CLI has known these
+  two states all along and draws them as ✍︎ and ✎︎, which is how the
+  divergence went unnoticed.
+
+  Fixed tonight to stop it lying - both now draw ✎ in warning colour and count
+  as owed, because what the rail needs to say is that the human tier still
+  owes a verdict. But ✎ is a guess, and two states sharing one glyph is a
+  judgement about what the rail is for rather than a fact about the ledger.
+  The single-width constraint from n-0109 is real: three marks of three widths
+  do not line up down a list of ninety rules, so whatever replaces it has to
+  be one cell wide.
+
+  Worth knowing how it surfaced, because the machinery worked exactly as
+  intended: tonight's sweep changed which rows the check for this rule sampled,
+  the check hit a state its glyph map did not know, and it failed loudly - which
+  is what its own comment says it exists to do."
