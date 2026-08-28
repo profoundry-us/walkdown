@@ -36,12 +36,40 @@ notes), and the runs ledger. The blueprint is the single source of truth for
   is a behavior product would recognize as a requirement. Keep checks a small,
   meaningful subset of the test suite.
 
+## Bugs, rules and checks
+
+**Default to bug. A rule needs a reason.**
+
+- A rule is a claim someone could have decided differently and would sign. If
+  the answer to "who would have wanted this another way?" is nobody, it is a
+  bug — write the check, skip the rule.
+- A bug is the code failing something already decided. Its check goes under
+  the rule it broke. A bug that fits no rule is usually still just a bug: a
+  rule written to mark where a defect happened is one nobody will ever
+  meaningfully sign, and the board is not a bug log.
+- Write the rule only when the fix changed what the product *claims*. Leave it
+  alone when the fix changed whether the product delivers a claim it had
+  already made.
+- Taste — sizes, spacing, the exact grey — is neither. Spec it and the spec
+  fails every time somebody nudges padding.
+- A fixed bug with a check needs no thread. Threads are for what is unfixed or
+  contested: a bug you are not fixing, or a fix that was a judgement call
+  somebody else should get a say in.
+- Engineering invariants nobody outside the codebase could notice — the build
+  is current, the bundle has no top-level imports, every name resolves — are
+  Highball's, not walkdown's.
+
 ## Checks
 
 - Write tests in this project's own framework and house style. Tag each with
-  its rule id — Playwright: `{ tag: '@rule:<id>' }`; RSpec: `rule: "<id>"`
-  metadata. One rule per test. Select by anchor (`getByTestId`), never CSS
-  paths.
+  the rule id it claims — Playwright: `{ tag: '@rule:<id>' }`; RSpec:
+  `rule: "<id>"` metadata. One rule per test. Select by anchor
+  (`getByTestId`), never CSS paths.
+- A regression guard for a bug that fits no rule stays **untagged**, with a
+  comment saying why it claims none. Enforcement only ever runs rule → check:
+  lint errors on a check naming a rule that does not exist, and warns on a
+  rule asking for checks that nothing claims. An untagged check is never a
+  finding.
 - Run with `WALKDOWN_ACTOR=agent walkdown run [--target <t>] [--rule <id>]` —
   the reporter/formatter appends the run record automatically.
 - `walkdown lint` before you finish: coverage, staleness, storyboard refs,

@@ -61,3 +61,16 @@ of the unit-test suite.
 Quality bar for a rule: a fresh session reading only the blueprint should
 build the right thing, and a PM reading only the statement should recognize
 their intent.
+
+**When the thing in front of you is a bug, default to bug.** A rule is a claim
+somebody could have decided differently and would sign; if the answer to "who
+would have wanted this another way?" is nobody, write the check and skip the
+rule. A defect that fits no existing rule is usually still just a defect — the
+absence of a rule is not evidence of a gap, and a rule written to mark where a
+bug happened is one nobody will ever meaningfully sign. Write the rule only
+when the fix changed what the product *claims*, not when it changed whether
+the product delivers a claim it had already made.
+
+The failure here runs one way. Formulating after a fix inflates: it turns
+defects into requirements and makes the board longer without making it truer.
+Nobody has ever come back from this skill with too few rules.
