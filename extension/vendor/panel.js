@@ -3374,6 +3374,19 @@ async function threadAct(id, status) {
     say('Verify and waive are recorded under a person\u2019s name \u2014 set it in Settings first.');
     return openActorSettings();
   }
+  /*
+   * And every OTHER transition needs a name too, which this guard used to
+   * leave to the two human-only ones. Reopening posted `actor: ''`, went
+   * through, and lib/threads.js filed the reason as a reply authored
+   * "unknown" - a transition recorded under nobody, in a ledger whose whole
+   * claim is that a verdict says whose judgment it was. Answering was the
+   * same. Not the human-only refusal, which is about WHICH person may act;
+   * this one is about there being a person at all.
+   */
+  if (!actor) {
+    say('A thread action is recorded under a person\u2019s name \u2014 set it in Settings first.');
+    return openActorSettings();
+  }
   if (status === '__reply') {
     if (!text) return say('Write the reply first.');
     await postReply(id, text, actor);
@@ -4337,12 +4350,32 @@ function wireGlobals() {
 
     if (msg.type === 'walkdown:new-pin') {
       const sc = screenById(S.ghostOverride) ?? currentScreen();
+      /*
+       * A pin is a thread, so it is attributed work, so it needs a name that
+       * has been on screen. The embed sends none - it has no identity of its
+       * own - and this spread let the key fall out of the JSON, after which
+       * lib/serve.js filled it from the machine's username. Third path
+       * tonight with the same shape after postRuleNote and postReply, and the
+       * one that mattered most: the panel drew the resulting thread under a
+       * name an inch above its own composer offering "set your name...".
+       *
+       * The panel is the thing that knows who you are, so the panel names the
+       * pin. Refusing here rather than in the embed keeps the embed free of
+       * an identity it has no way to ask for.
+       */
+      const pinAuthor = (msg.author ?? '').trim() || whoAmI();
+      if (!pinAuthor || pinAuthor === 'agent') {
+        toast('A pin is recorded under a person\u2019s name \u2014 set it in Settings (the gear).',
+          { tone: 'error' });
+        openActorSettings();
+        return;
+      }
       await fetch(api('/api/threads'), {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
           kind: msg.kind, body: msg.body,
-          ...(msg.author && { author: msg.author }),
+          author: pinAuthor,
           anchor: {
             ...(msg.element && { element: msg.element }),
             // The spot within the element, and the spot on the surface: both

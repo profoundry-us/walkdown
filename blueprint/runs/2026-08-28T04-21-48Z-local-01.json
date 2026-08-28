@@ -1,0 +1,41 @@
+{
+  "run_id": "2026-08-28T04-21-48Z-local-01",
+  "created": "2026-08-28T04:21:48Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "7c58059-dirty",
+  "blueprint_sha": "7c58059-dirty",
+  "note": "third round, after postReply was fixed",
+  "results": [
+    {
+      "rule": "panel.identity.attribution-visible",
+      "status": "fail",
+      "statement_hash": "sha256:1b6a789fde73",
+      "evidence": [
+        "runs/evidence/2026-08-28T04-12-39Z/r3-identity-emptied.png",
+        "runs/evidence/2026-08-28T04-12-39Z/r3-fail-refused.png",
+        "runs/evidence/2026-08-28T04-12-39Z/r3-reply-refused.png",
+        "runs/evidence/2026-08-28T04-12-39Z/r3-pin-form-no-name.png",
+        "runs/evidence/2026-08-28T04-12-39Z/r3-pin-attributed-to-a-stranger.png",
+        "runs/evidence/2026-08-28T04-12-39Z/r3-identity-third-path.txt"
+      ],
+      "reasoning": "There is a third path, and it is the pin. Driving a disposable copy of the blueprint on 4781 with both Settings fields emptied, the two paths fixed in rounds one and two genuinely hold: pressing Fail with feedback typed attempted zero writes and said 'A note is recorded under a person's name - set it in Settings (the gear).', and sending a reply from a thread's composer attempted zero writes and said the same thing for a reply; Verify and Waive were refused too, and Finish posted only a draft discard. But dropping a pin on the surface under review is also filing a thread, and it is not refused. The embed's submitPin (lib/viewer/embed.js:388) sends no author at all; the panel's relay (src/panel/app.js:2535) spreads it in as `...(msg.author && { author: msg.author })`, so with nothing there the key falls out of the JSON exactly as `actor || undefined` did twice tonight; and lib/serve.js:368 fills it with `author || userInfo().username`. Measured end to end against the disposable copy: the pin landed as thread n-0120 authored `topherfangio`, and the panel then draws that thread as 'Topherfangio' one inch above its own composer line reading 'as set your name...' - a name the panel never showed, used to attribute work, which is the whole of what this rule forbids. Two smaller things measured alongside: Reopen on a thread goes through with `actor: \"\"` and the server files its reason as a reply authored 'unknown' (lib/threads.js:52), and the unframed embed's pin popover replies with `{ body }` and no author (lib/viewer/embed.js:376-379), which lib/serve.js:516 fills the same way. Every non-GET to /api/ was intercepted by RegExp and counted in every run bar the one deliberate end-to-end write into the throwaway copy; the real ledger took nothing."
+    },
+    {
+      "rule": "panel.identity.default-actor",
+      "status": "fail",
+      "statement_hash": "sha256:6cf5b560bdde",
+      "evidence": [
+        "runs/evidence/2026-08-28T04-12-39Z/r3-strip-defaulted.png",
+        "runs/evidence/2026-08-28T04-12-39Z/r3-settings-both-fields.png",
+        "runs/evidence/2026-08-28T04-12-39Z/r3-corrected-survives-reload.png",
+        "runs/evidence/2026-08-28T04-12-39Z/r3-name-emptied-live.png",
+        "runs/evidence/2026-08-28T04-12-39Z/r3-pin-attributed-to-a-stranger.png",
+        "runs/evidence/2026-08-28T04-12-39Z/r3-identity-rest.txt"
+      ],
+      "reasoning": "Most of this rule holds and its last clause still does not. With localStorage cleared the strip arrives already filled in - 'Recording as Topher Fangio' with `panel.actor-handle` reading 'topher' beside it at 0.6 opacity, both measured visible with real boxes - and Settings shows both fields, `settings.actor` = 'topher' and `settings.display-name` = 'Topher Fangio', neither disabled nor readonly. Typing 'r3-typed' into the username re-signs the running sitting and the strip repaints to 'Topher Fangio r3-typed'; it is in localStorage as {\"username\":\"r3-typed\"} after a reload. Emptying the full name alone leaves the username standing alone in the strip, as the clause asks. What fails is 'no username makes the panel refuse attributed work'. With the username emptied the panel refuses a rule note, a thread reply, Verify, Waive and Finish - but it does not refuse a pin. A pin dropped on the reviewed surface is relayed by the panel to POST /api/threads with the author key absent (src/panel/app.js:2535, from lib/viewer/embed.js:388) and the server supplies the machine's username, so the note is filed under `topherfangio` with no username set anywhere in the panel. Measured, not read: thread n-0120 in the disposable copy carries `author: topherfangio`. One lesser observation on the persistence clause: an emptied field is stored as an empty string but src/panel/app.js:2618-2619 only restores non-empty strings, so the emptying is not what comes back after a reload - git's answer is. I did not make that part of the verdict; the pin is enough."
+    }
+  ]
+}

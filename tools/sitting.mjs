@@ -255,6 +255,279 @@ const STATES = [
     ],
   },
 
+  /* ---- the bar: the fade, the picker, the tuner ------------------------- */
+
+  /*
+   * The fade is a drag, and these two drive it as one: press the handle, move
+   * across the track, photograph part way, and only then let go. Setting
+   * `#wdp-fade.value` from a script exercises the handler; it says nothing
+   * about whether the handle can be taken hold of at all.
+   *
+   * The press lands five pixels inside the right edge. On the edge itself it
+   * misses the input entirely and the drag does nothing at all, which reads
+   * as a broken fade rather than as a missed grab - it cost a whole run once.
+   *
+   * `aim` only works out where; the pointer is not there until a `hover`, and
+   * a `down` before it presses at the corner of the window and drags nothing.
+   */
+  {
+    name: 'dock-fade-drag-midway',
+    steps: [
+      ['aim', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-fade').getBoundingClientRect(); return { x: b.right - 5, y: b.y + b.height / 2 }; }"],
+      ['hover'], ['down'],
+      ['aim', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-fade').getBoundingClientRect(); return { x: b.x + b.width * 0.75, y: b.y + b.height / 2 }; }"],
+      ['hover'], ['wait', 300],
+      ['aim', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-fade').getBoundingClientRect(); return { x: b.x + b.width * 0.5, y: b.y + b.height / 2 }; }"],
+      ['hover'], ['wait', 800],
+      ['probe', "(d, fr, fd, fsr, gh) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'still held', fade: r.querySelector('#wdp-fade').value, ghost: !!gh, ghostSrc: gh && gh.src, ghostOpacity: gh && getComputedStyle(gh).opacity, appOpacity: fr && getComputedStyle(fr).opacity }; }"],
+    ],
+  },
+  {
+    name: 'dock-fade-drag-settled',
+    steps: [
+      ['aim', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-fade').getBoundingClientRect(); return { x: b.right - 5, y: b.y + b.height / 2 }; }"],
+      ['hover'], ['down'],
+      ['aim', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-fade').getBoundingClientRect(); return { x: b.x + b.width * 0.75, y: b.y + b.height / 2 }; }"],
+      ['hover'], ['wait', 200],
+      ['aim', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-fade').getBoundingClientRect(); return { x: b.x + b.width * 0.5, y: b.y + b.height / 2 }; }"],
+      ['hover'], ['wait', 400], ['up'], ['wait', 1200],
+      ['probe', "(d, fr, fd, fsr, gh) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'let go', fade: r.querySelector('#wdp-fade').value, ghost: !!gh, ghostOpacity: gh && getComputedStyle(gh).opacity, surfaceButtons: [...r.querySelectorAll('[data-surface]')].map((b) => b.dataset.surface + ' ' + b.className) }; }"],
+    ],
+  },
+  /* A screen chosen by hand, which outranks detection: the picker closes, the
+   * frame travels, and the bar's button says the chosen screen. */
+  {
+    name: 'dock-screen-picked-by-hand',
+    steps: [
+      ['sr', "r => r.querySelector('#wdp-screen-btn').click()"], ['wait', 500],
+      ['sr', "r => r.querySelector('[data-screen=\"rule-detail\"]').click()"], ['wait', 2500],
+      ['probe', "(d, fr) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const list = r.querySelector('[data-screen]').parentElement; return { button: r.querySelector('#wdp-screen-btn').textContent.replace(/\\s+/g, ' ').trim(), buttonClass: r.querySelector('#wdp-screen-btn').className, pickerShowing: getComputedStyle(list).display, frameSrc: fr.src }; }"],
+    ],
+  },
+  /* The picker open while the page underneath changes: the list is about the
+   * page, so it has to follow it rather than keep answering for the page it
+   * was opened on. */
+  {
+    name: 'dock-list-follows-the-page',
+    steps: [
+      ['sr', "r => r.querySelector('#wdp-screen-btn').click()"], ['wait', 500],
+      ['top', "(d, fr) => { fr.src = new URL('/stand-in/rule-detail', location.href).href; }"],
+      ['wait', 2500],
+      ['probe', "(d, fr) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { frameSrc: fr.src, open: !!r.querySelector('[data-screen]'), button: r.querySelector('#wdp-screen-btn').textContent.replace(/\\s+/g, ' ').trim(), marked: [...r.querySelectorAll('[data-screen]')].map((b) => b.textContent.replace(/\\s+/g, ' ').trim()).filter((t) => /\\u25c9/.test(t)) }; }"],
+    ],
+  },
+  /*
+   * Pin mode on, and then the panel's own gear pressed with a real pointer.
+   * The bar is walkdown's, not the page's, so it must open the tuner and not
+   * take a pin - and the click has to be a real one for the same reason the
+   * Escape below it does: a synthetic click on the panel never tells you
+   * whether the embed would have swallowed the pointer first.
+   */
+  {
+    name: 'dock-chrome-gear-in-pin-mode',
+    steps: [
+      ['sr', "r => r.querySelector('#wdp-pin').click()"], ['wait', 700],
+      ['aim', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-desk-btn').getBoundingClientRect(); return { x: b.x + b.width / 2, y: b.y + b.height / 2 }; }"],
+      ['click'], ['wait', 800],
+      ['probe', "(d, fr, fd, fsr) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { tuner: !!r.querySelector('#wdp-desk-hide'), pinLit: r.querySelector('#wdp-pin').className, formsInTheApp: fsr ? fsr.querySelectorAll('[data-testid=\"pin.form\"]').length : null, placeholders: fsr ? fsr.querySelectorAll('[data-testid=\"pin.placeholder\"]').length : null }; }"],
+    ],
+  },
+  /* Peeking at the desk: the app, the aside and the headless cover all go
+   * faint together, so a headless rule is selected first - the cover only
+   * exists while one is open, and peeking past a rule that never drew one
+   * proves nothing about the rule that did. */
+  {
+    name: 'desk-peek-on',
+    steps: [
+      ['tab', 'rules'],
+      ['sr', "r => [...r.querySelectorAll('[data-rule]')].find(e => e.dataset.rule === 'screens.identity.fragment-is-identity')?.click()"],
+      ['wait', 1000],
+      ['sr', "r => r.querySelector('#wdp-desk-btn').click()"], ['wait', 500],
+      ['sr', "r => r.querySelector('#wdp-desk-hide').click()"], ['wait', 900],
+      ['probe', "(d, fr) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const faint = (e) => e && { opacity: getComputedStyle(e).opacity, box: e.getBoundingClientRect().toJSON() }; return { hideOn: r.querySelector('#wdp-desk-hide').checked, app: faint(fr), aside: faint(r.querySelector('aside')), bar: faint(r.querySelector('#wdp-pin')) }; }"],
+    ],
+  },
+  /*
+   * A dial's number, typed. The cell only becomes an input under a real
+   * pointer click, so this is one of the few states that cannot be driven
+   * through `sr` at all - and the gear above it is opened by pointer too,
+   * because Escape goes wherever focus is and focus opened by script is
+   * still inside the app frame.
+   */
+  {
+    name: 'desk-tuner-typed',
+    steps: [
+      ['aim', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-desk-btn').getBoundingClientRect(); return { x: b.x + b.width / 2, y: b.y + b.height / 2 }; }"],
+      ['click'], ['wait', 700],
+      ['aim', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-desk-gap').getBoundingClientRect(); return { x: b.x + b.width / 2, y: b.y + b.height / 2 }; }"],
+      ['click'], ['wait', 500],
+      ['probe', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const cell = r.querySelector('#wdp-desk-gap'); const i = cell.querySelector('input'); return { at: 'clicked', editing: !!i, type: i && i.type, value: i && i.value }; }"],
+      // Selected by hand: a number input has no text selection to `select()`,
+      // so typing over an opened dial appends to the number already there and
+      // the dial's own clamp quietly answers with its maximum.
+      ['key', 'ControlOrMeta+a'], ['type', '24'], ['key', 'Enter'], ['wait', 700],
+      ['probe', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'entered', cell: r.querySelector('#wdp-desk-gap').textContent.trim(), stillEditing: !!r.querySelector('#wdp-desk-gap input'), slider: r.querySelector('input[type=range][data-k=\"gap\"]')?.value }; }"],
+    ],
+  },
+  /* The presets. The window is narrower than 1440, which is what gives
+   * zoom-to-fit anything to say: the frame is laid out at the preset and
+   * scaled down, and the pill has to say what the scale is. */
+  {
+    name: 'vp-desktop-1440',
+    steps: [
+      ['sr', "r => r.querySelector('[data-vp=\"1440\"]').click()"], ['wait', 2000],
+      ['probe', "(d, fr, fd) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { laidOutAt: fd.defaultView.innerWidth, scale: new DOMMatrix(getComputedStyle(fr).transform).a, frameBox: fr.getBoundingClientRect().toJSON(), zoomPill: d.body.querySelector('[data-testid=\"panel.zoom\"]')?.textContent.trim() ?? null, toggle: [...r.querySelectorAll('[data-vp]')].map((b) => b.dataset.vp + ' ' + b.className) }; }"],
+    ],
+  },
+  /*
+   * Mobile with the design over it. The slider is inverted - `setFade(1 -
+   * value/100)` - so 0 is the design fully on and 100 tears the ghost down
+   * altogether. Sliding it to 100 to "show the prototype" leaves nothing to
+   * measure and reports, honestly and uselessly, that there is no ghost.
+   */
+  {
+    name: 'vp-mobile-390-ghost',
+    steps: [
+      ['sr', "r => r.querySelector('[data-vp=\"390\"]').click()"], ['wait', 2000],
+      ['sr', "r => { const f = r.querySelector('#wdp-fade'); f.value = 0; f.dispatchEvent(new Event('input', { bubbles: true })); f.dispatchEvent(new Event('change', { bubbles: true })); }"],
+      ['wait', 2500],
+      ['probe', "(d, fr, fd, fsr, gh, gd) => ({ laidOutAt: fd.defaultView.innerWidth, ghost: !!gh, ghostSrc: gh && gh.src, ghostOpacity: gh && getComputedStyle(gh).opacity, ghostBox: gh && gh.getBoundingClientRect().toJSON(), ghostLaidOutAt: gd && gd.defaultView.innerWidth, appBox: fr.getBoundingClientRect().toJSON() })"],
+    ],
+  },
+
+  /* ---- how the panel was delivered -------------------------------------- */
+
+  /*
+   * The extension's delivery, imitated: the panel booted from answers on the
+   * window rather than from the page it was served by. `config` patches what
+   * walkdown's own review page writes, which is the only seam here - there is
+   * no docked-by-script-tag delivery to reach for any more. panel.js returns
+   * early with "no page to review — the panel needs a frame url", so every
+   * state that wants the panel beside a page has to hand it a `frame`.
+   */
+  {
+    /*
+     * A server that is not there. Supply the stylesheet: it defaults to
+     * `server + '/walkdown.css'`, so pointing the panel at a dead port kills
+     * its skin as well as its data, and the first run of this looked like a
+     * catastrophic failure when it was only an unstyled page. The extension
+     * ships its own copy, so handing one over is the honest simulation.
+     */
+    name: 'start-no-server',
+    config: { server: 'http://localhost:4999', stylesheet: `${BASE}/walkdown.css` },
+    steps: [
+      ['wait', 2500],
+      ['probe', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const said = [...r.children].filter((e) => e.tagName !== 'STYLE').map((e) => e.textContent.replace(/\\s+/g, ' ').trim()).join(' ').trim(); return { server: d.defaultView.__walkdownConfig.server, stylesheet: d.defaultView.__walkdownConfig.stylesheet, sheets: r.querySelectorAll('style, link[rel=stylesheet]').length, said: said.slice(0, 400) }; }"],
+    ],
+  },
+  {
+    /*
+     * The gate: two projects on disk and nothing saying which. `bp` alone is
+     * not enough to raise it - the panel asks the server whose blueprint the
+     * framed page belongs to and that answer outranks an empty choice - so
+     * the frame points at an address neither project claims, which is the
+     * situation the gate is actually for.
+     */
+    name: 'start-choose-blueprint',
+    config: { bp: '', frame: { url: `${BASE}/nothing-declares-this` } },
+    steps: [
+      ['wait', 2500],
+      // Read past the stylesheet: it lives in the shadow root too, and the
+      // root's own textContent is a few thousand characters of Tailwind
+      // before a word the gate actually says.
+      ['probe', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const said = [...r.children].filter((e) => e.tagName !== 'STYLE').map((e) => e.textContent.replace(/\\s+/g, ' ').trim()).join(' ').trim(); return { offers: [...r.querySelectorAll('[data-pick]')].map((b) => b.dataset.pick), said: said.slice(0, 300) }; }"],
+    ],
+  },
+  {
+    /* Only a delivery that publishes a build hash can be stale: a served
+       panel is fetched fresh every load and never claims either way. */
+    name: 'delivery-stale-copy-banner',
+    config: { buildHash: 'deadbeef0000' },
+    steps: [
+      ['wait', 2500],
+      ['probe', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('[data-testid=\"panel.blueprint\"]'); return { carries: d.defaultView.__walkdownConfig.buildHash, blueprintSlot: b && b.textContent.replace(/\\s+/g, ' ').trim(), bar: r.querySelector('#wdp-pin').closest('div').textContent.replace(/\\s+/g, ' ').trim().slice(0, 200) }; }"],
+    ],
+  },
+
+  /* ---- conversations ----------------------------------------------------- */
+
+  /* `All` is the only filter that reaches a thread which has ended - the
+   * other two are about what is still owed. */
+  {
+    name: 'threads-filter-all',
+    steps: [
+      ['tab', 'threads'],
+      ['sr', "r => r.querySelector('[data-tfilter=\"all\"]').click()"], ['wait', 700],
+      // Counted on the rows, not on `[data-open-thread]`: every reply line in
+      // the list carries that attribute too, and counting both reports twice
+      // as many conversations as the blueprint has.
+      ['probe', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { filters: [...r.querySelectorAll('[data-tfilter]')].map((b) => b.textContent.replace(/\\s+/g, ' ').trim()), showing: r.querySelectorAll('.wd-row[data-open-thread]').length, statuses: [...r.querySelectorAll('.wd-row[data-open-thread] .badge')].map((b) => b.textContent.trim()) }; }"],
+    ],
+  },
+  /* A long conversation, for the shape of the stream rather than its words:
+   * day dividers, a run of messages from one author collapsed into one, and
+   * the composer still at the foot with the stream scrolled to the end. */
+  {
+    name: 'thread-stream-grouped',
+    steps: [
+      ['tab', 'threads'],
+      ['sr', "r => r.querySelector('[data-tfilter=\"all\"]').click()"], ['wait', 500],
+      ['sr', "r => (r.querySelector('[data-open-thread=\"q-0070\"]') ?? r.querySelector('[data-open-thread]')).click()"],
+      ['wait', 1200],
+      ['sr', "r => { const b = r.querySelector('[data-testid=\"thread.body\"]'); b.scrollTop = b.scrollHeight; }"],
+      ['wait', 500],
+      ['probe', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const body = r.querySelector('[data-testid=\"thread.body\"]'); const reply = r.querySelector('[data-testid=\"thread.reply\"]'); return { thread: r.querySelector('[data-testid=\"thread.provenance\"]').textContent.replace(/\\s+/g, ' ').trim(), messages: body.querySelectorAll('.wd-msg').length, continuations: body.querySelectorAll('.wd-msg.cont').length, days: [...body.querySelectorAll('.wd-day')].map((e) => e.textContent.trim()), authors: [...body.querySelectorAll('.wd-who')].map((e) => e.textContent.trim()), scrolled: body.scrollTop + ' of ' + body.scrollHeight, composerBox: reply.getBoundingClientRect().toJSON() }; }"],
+    ],
+  },
+  /*
+   * A thread that has ended, opened but not touched. Nothing here may set a
+   * status - the point is what the panel offers once one is set: no action
+   * buttons at all, a footer saying who ended it, and the composer still
+   * there, because a finished conversation can still be talked about.
+   */
+  {
+    name: 'thread-terminal-verified',
+    steps: [
+      ['tab', 'threads'],
+      ['sr', "r => r.querySelector('[data-tfilter=\"all\"]').click()"], ['wait', 500],
+      ['sr', "r => [...r.querySelectorAll('.wd-row[data-open-thread]')].find(e => /verified|waived/.test(e.querySelector('.badge:last-of-type')?.textContent ?? ''))?.click()"],
+      ['wait', 1200],
+      ['probe', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const body = r.querySelector('[data-testid=\"thread.body\"]'); return { thread: r.querySelector('[data-testid=\"thread.provenance\"]').textContent.replace(/\\s+/g, ' ').trim(), actions: [...r.querySelectorAll('[data-testid=\"thread.actions\"]')].map((a) => a.dataset.act), footer: body.lastElementChild.textContent.replace(/\\s+/g, ' ').trim(), composer: !!r.querySelector('[data-testid=\"thread.reply\"]'), otherButtonsInThePane: [...r.querySelector('[data-testid=\"thread.panel\"]').querySelectorAll('button')].map((b) => b.textContent.replace(/\\s+/g, ' ').trim()).filter(Boolean) }; }"],
+    ],
+  },
+  /* Shift-Enter breaks the line where Enter would send. Typed rather than
+   * assigned: the whole rule is about which keystroke does what. */
+  {
+    name: 'composer-shift-enter',
+    steps: [
+      ['no-writes'],
+      ['tab', 'threads'],
+      ['sr', "r => r.querySelector('[data-open-thread]').click()"], ['wait', 1200],
+      ['sr', "r => r.querySelector('#wdp-note').focus()"],
+      ['type', 'first line'], ['key', 'Shift+Enter'], ['type', 'second line'], ['wait', 500],
+      ['probe', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const n = r.querySelector('#wdp-note'); return { value: n.value, lines: n.value.split('\\n').length, caret: n.selectionStart, sent: d.defaultView.__held, messages: r.querySelectorAll('[data-testid=\"thread.body\"] .wd-msg').length }; }"],
+    ],
+  },
+  /*
+   * A reply the server refuses. It goes up optimistically, so what has to be
+   * shown is the recovery: the message marked rather than vanishing, and the
+   * words back in the composer to be sent again. Held at 500 - nothing is
+   * written, and the record of what would have been sent is beside the
+   * picture.
+   */
+  {
+    name: 'composer-refused',
+    steps: [
+      ['no-writes', 500],
+      ['tab', 'threads'],
+      ['sr', "r => r.querySelector('[data-open-thread]').click()"], ['wait', 1200],
+      ['sr', "r => r.querySelector('#wdp-note').focus()"],
+      ['type', 'sitting probe — a reply the server will refuse'],
+      ['key', 'Enter'], ['wait', 1200],
+      ['probe', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const body = r.querySelector('[data-testid=\"thread.body\"]'); const failed = body.querySelector('.wd-msg.failed'); return { attempted: d.defaultView.__held, failedMessage: failed && failed.textContent.replace(/\\s+/g, ' ').trim(), marks: failed && failed.className, textIsBack: r.querySelector('#wdp-note').value, said: r.querySelector('[data-testid=\"thread.say\"]').textContent.trim() }; }"],
+    ],
+  },
+
   /* ---- the page under review, and the pins on it ------------------------ */
 
   /*
@@ -585,13 +858,28 @@ async function capture(only = []) {
      * is how an application under the browser extension is reviewed - and
      * `config` is what that delivery leaves on the window instead of a script
      * tag, so a state can be a page that declares which project it belongs to.
+     *
+     * It is a PATCH, not a replacement: walkdown's own review page assigns
+     * `__walkdownConfig` itself on the way to loading the panel, so a plain
+     * assignment here is overwritten a moment later and the state captures
+     * the ordinary front door. Held behind an accessor, the page's answers
+     * arrive and the state's few overrides survive them - which is the only
+     * way to boot the panel here the way the extension boots it, pointed at
+     * a server that is not this one or carrying a build hash of its own.
      */
     if (state.config) {
       // Its own tab, and thrown away after: an init script cannot be taken
       // back, and one state's config leaking into every state after it would
       // be the hardest kind of wrong answer to notice.
       page = watch(await browser.newPage({ viewportSize: { width: 1280, height: 760 } }));
-      await page.addInitScript((c) => { window.__walkdownConfig = c; }, state.config);
+      await page.addInitScript((c) => {
+        let held = c;
+        Object.defineProperty(window, '__walkdownConfig', {
+          configurable: true,
+          get: () => held,
+          set: (v) => { held = { ...v, ...c }; },
+        });
+      }, state.config);
     }
     await page.goto(state.url ? BASE + state.url : BASE, { waitUntil: 'load' });
     await page.waitForTimeout(2500);
@@ -607,23 +895,43 @@ async function capture(only = []) {
       else if (op === 'aim') spot = await inTop(arg);
       else if (op === 'hover') await page.mouse.move(spot.x, spot.y);
       else if (op === 'click') await page.mouse.click(spot.x, spot.y);
+      /*
+       * A press held across several `aim`/`hover` pairs is a drag. Kept as
+       * three ops rather than one `drag` because what a drag has to prove is
+       * what happens PART WAY through it, and a state can only photograph
+       * that if it can stop in the middle.
+       */
+      else if (op === 'down') await page.mouse.down();
+      else if (op === 'up') await page.mouse.up();
+      // Typing where focus already is - the panel's dial editors and the
+      // composer both care that a real keystroke arrived, not that a value
+      // was assigned.
+      else if (op === 'type') await page.keyboard.type(arg);
       else if (op === 'size') await page.setViewportSize({ width: arg[0], height: arg[1] });
       /*
        * Hold every thread this state would file, and remember what it asked
        * for. These rules are about what a pin RECORDS, and a sitting that
        * answered that by filing a dozen throwaway threads would be writing
        * junk into the ledger it exists to keep honest.
+       *
+       * `['no-writes', 500]` answers refused instead of held, which is the
+       * only way to photograph what the panel does with a reply the server
+       * would not take. Matched on a substring rather than a route glob on
+       * purpose: every call the panel makes carries `?bp=`, and a glob ending
+       * in `/api/threads` matches none of them - a miss that filed real junk
+       * threads twice in one night before it was noticed.
        */
-      else if (op === 'no-writes') await page.evaluate(() => {
+      else if (op === 'no-writes') await page.evaluate((status) => {
         window.__held = [];
         const real = window.fetch;
         window.fetch = (u, o) => {
           if (o?.method !== 'POST' || !String(u).includes('/api/threads')) return real(u, o);
           window.__held.push({ url: String(u), body: JSON.parse(o.body) });
-          return Promise.resolve(new Response(JSON.stringify({ id: 'n-HELD', thread: {} }),
-            { headers: { 'content-type': 'application/json' } }));
+          const body = status ? { error: 'held by the sitting harness' } : { id: 'n-HELD', thread: {} };
+          return Promise.resolve(new Response(JSON.stringify(body),
+            { status: status ?? 200, headers: { 'content-type': 'application/json' } }));
         };
-      });
+      }, arg ?? null);
       if (op === 'tab') await page.waitForTimeout(500);
     }
     await page.screenshot({ path: join(dir, `${state.name}.png`) });
