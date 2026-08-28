@@ -53,8 +53,13 @@ test('no runs: required cells are never, verdict pending', () => {
   const { rows, targets } = deriveStatus(blueprint());
   assert.deepEqual(targets, ['local', 'staging']);
   assert.equal(rows[0].cells.local.state, 'never');
-  assert.equal(rows[0].agent.state, 'na');
+  // The agent tier is assumed rather than asked for, so a rule that named only
+  // `checks` still owes an agent walkdown - which is the point of inverting it.
+  assert.equal(rows[0].agent.state, 'never');
   assert.equal(rows[0].verdict, 'pending');
+  // And engineering signs everything, so an unsigned rule is short a signature
+  // even before any evidence lands.
+  assert.deepEqual(rows[0].acceptance.map((a) => [a.role, a.state]), [['eng', 'none']]);
 });
 
 test('later run wins; per-target isolation @rule:status.derived.latest-wins', () => {
@@ -195,6 +200,9 @@ test('sign-off is not build evidence: approved stays unbuilt and pending, and di
   assert.equal(unbuilt.rows[0].built, false);
   assert.equal(unbuilt.rows[0].human.state, 'approved');
   assert.equal(unbuilt.rows[0].signoff, 'approved');
+  // The role that approved reads as approved, not as signed: the wording is
+  // accepted and the build is not judged.
+  assert.deepEqual(unbuilt.rows[0].acceptance.map((a) => [a.role, a.state]), [['eng', 'approved']]);
   assert.equal(unbuilt.rows[0].verdict, 'pending');
   // The sign-off is given: nothing is owed until the build lands.
   assert.equal(owed(unbuilt.attention), false);
