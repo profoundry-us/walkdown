@@ -40,6 +40,30 @@ problems rather than as features so the list survives the tool changing shape.
 9. **Saying what is in this phase and what is not.** A blueprint covering a year is not a
    plan for a quarter.
 
+### The tiers are a ladder, and each rung buys the next one's attention
+
+Problem 7 says "the cheapest tier that can honestly check it", which is half of it. The
+other half is why anyone would run three tiers instead of one: **each tier exists to earn
+the right to spend the next tier's attention.**
+
+- **Checks** run constantly and cost nothing per run. They answer one question — *did we
+  break something we already knew about?* — and they answer it in seconds.
+- **The agent walkdown** is QA, and it is what earns a person's time. Nobody should open
+  a board where ten of fifteen rules are failing; a developer wants a mostly-green agent
+  pass first, and an agent that finds otherwise should go back and work until it is close.
+  Crucially the agent is a stranger to the app, using what a person would use: it reads
+  the rule, opens the application, and tries. **If it gets confused, that is the finding.**
+  A QA pass whose failures only ever mean "the script broke" is not QA.
+- **A person** accepts the result. That is the scarcest thing in the process, which is the
+  whole reason the first two rungs exist.
+
+The ladder is also why the agent tier must not become a second check suite. Checks walk
+the DOM by anchors, deterministically, because that is what catches regressions. An agent
+that did the same thing would cost more and learn less. It gets the rule in plain language
+and a browser, and it does not save a script to replay next time — a memorised path is not
+a walkthrough, and a stranger who already knows the way cannot tell you the way is hard to
+find.
+
 Which of these are solved, half-solved, or deliberately left alone is a moving target and
 lives in [07-roadmap.md](07-roadmap.md) — kept out of this document on purpose, because a
 status that goes stale inside a vision document is what stops the vision from being read.
