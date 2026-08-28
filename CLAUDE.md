@@ -60,3 +60,25 @@ in `rollup.config.mjs` and both are load-bearing.
 
 `tools/sync-shared.mjs` and `tools/sync-phosphor.mjs` write their generated
 blocks into the source, not the build, for the same reason.
+
+## Judging the whole board
+
+`walkdown-judge` is for a rule or the handful a change touched. For everything
+at once — after a big refactor, or on a cadence of days — there is
+`walkdown-sitting`, and a harness for the mechanical half:
+
+    node tools/sitting.mjs owed       what the agent tier still owes
+    node tools/sitting.mjs capture    drive every panel state, save both surfaces
+    node tools/sitting.mjs record f   append the run (refuses thin reasoning)
+
+The state list inside `sitting.mjs` is data. A rule needing a state nobody has
+captured belongs in that list, not in a throwaway script.
+
+To make "did we skip any?" answerable, declare a sweep first:
+
+    node bin/walkdown.js sweep --tiers agent --why "..."
+
+Every verdict older than the marker then reads as stale, so an unjudged rule is
+visibly unjudged. Nothing is deleted — the ledger is append-only, which is why
+a sweep supersedes rather than clears. It is deliberate on purpose: nothing
+else in walkdown ever writes one, and it is the human's call to ask for it.
