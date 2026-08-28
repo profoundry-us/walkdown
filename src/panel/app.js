@@ -49,6 +49,13 @@ import {
   askAboutSitting, blueprintsPane, crossTo, wireBlueprints,
 } from './blueprints.js';
 import { DESK_DEFAULTS, DESK_KEY, drawDesk } from './desk.js';
+import { backFromThread, threadCard, threadPane } from './thread-pane.js';
+import { checkRefs, detailPane, evidenceRows, loadCheckSource } from './rule-detail.js';
+import { screensPane, wireScreens } from './screens.js';
+import {
+  listPane, paintRules, ruleState, searchBox, tierMarks, wireRuleRows, wireSearch,
+} from './rules-list.js';
+import { threadFilterBar, threadsMatching, threadsPane } from './threads-list.js';
 import { frameLoading, hideVeil, placeVeil, screenLabel, veilIsUp } from './veil.js';
 
 /*
@@ -369,7 +376,7 @@ function syncScreenPanel() {
   D.screenPanel.style.display = S.screensOpen ? '' : 'none';
 }
 
-const closeScreenPanel = () => { S.screensOpen = false; syncScreenPanel(); };
+export const closeScreenPanel = () => { S.screensOpen = false; syncScreenPanel(); };
 
 /*
  * The two popovers the bar opens — the screen picker and the desk tuner —
@@ -705,14 +712,14 @@ function setDocked(on) {
  */
 const hereLocation = () => locationOfUrl(S.frameUrl) ?? {};
 
-function pageSurface() {
+export function pageSurface() {
   const sc = currentScreen();
   if (!sc) return 'app';
   return matchScreen([sc], hereLocation())?.surface ?? 'app';
 }
 
 /** Which storyboard screen this page is, by URL — same trick the embed uses. */
-function currentScreen() {
+export function currentScreen() {
   const screens = S.data?.storyboard ?? [];
   if (S.pickedScreen) return screens.find((s) => s.id === S.pickedScreen) ?? null;
   return matchScreen(screens, hereLocation())?.screen ?? null;
@@ -810,7 +817,7 @@ const screenInHand = () => screenById(S.ghostOverride) ?? currentScreen() ?? def
  * otherwise a proposal sketch — flagged, because a sketch that reads as the
  * design is exactly the confusion the ownership rules exist to prevent.
  */
-function ghostSource(screen) {
+export function ghostSource(screen) {
   if (pageSurface() === 'prototype') {
     // Standing on the design, the other surface is the running app — and it
     // lives at its own origin, so the ghost takes an absolute URL.
@@ -824,7 +831,7 @@ function ghostSource(screen) {
 }
 
 /** Short verbs, and only the transitions this kind and status allow. */
-function threadActions(t) {
+export function threadActions(t) {
   if (t.kind === 'note') {
     if (t.status === 'open') return [['Addressed', 'addressed'], ['Waive', 'waived', true]];
     if (t.status === 'addressed') return [['\u2713 Verify', 'verified'], ['Reopen', 'open'], ['Waive', 'waived', true]];
@@ -836,7 +843,7 @@ function threadActions(t) {
 }
 
 // ---- render ---------------------------------------------------------------
-function render() {
+export function render() {
   if (!S.data) return;
   // The thread screen without a thread is not a screen.
   if (S.view === 'thread' && !S.openThread) S.view = S.selected ? 'detail' : 'list';
@@ -1343,7 +1350,7 @@ function renderBar() {
  * whichever surface the page is not, so the same 1 means "ghost fully on"
  * standing on the app and "ghost fully off" standing on the prototype.
  */
-function setFade(share) {
+export function setFade(share) {
   S.protoShare = Math.max(0, Math.min(1, share));
   // The put-away swap names the surface it will take you to, so it follows
   // every crossing however it was made.
@@ -1414,445 +1421,6 @@ function startWalkdown() {
   render();
 }
 
-/**
- * The list glyph: SHAPE carries the lifecycle, COLOR carries ownership.
- * □ designed · ✍︎ approved, awaiting build · ✎︎ refining · ○ built,
- * awaiting verification · ✓ verified · ✗ failing. Warning tint plus the
- * right-edge badge mean the rule waits on you, and the badge names the
- * work: sign for a sign-off, walk for a walkdown. The pencils carry
- * U+FE0E - as emoji they take their own colors and the ownership channel
- * goes silent.
- */
-function ruleState(row, mine) {
-  if (row.verdict === 'pass') return { glyph: '✓', cls: 'text-success', why: 'verified' };
-  if (row.verdict === 'fail') return { glyph: '✗', cls: 'text-error', why: 'failing — the build was rejected' };
-  const tint = mine ? 'text-warning' : 'opacity-30';
-  if (!row.built) {
-    if (row.signoff === 'refining')
-      return { glyph: '✎︎', cls: 'text-warning', why: 'refining — sent back for spec rework' };
-    if (row.signoff === 'approved')
-      return { glyph: '✍︎', cls: 'opacity-60', why: 'approved — spec signed off, awaiting build' };
-    return { glyph: '□', cls: tint, why: `designed — awaiting ${mine ? 'your ' : ''}sign-off` };
-  }
-  return { glyph: '○', cls: tint, why: mine ? 'built — awaiting your walkdown' : 'built — awaiting verification' };
-}
-
-/*
- * The search box over the rule list.
- *
- * It is drawn OUTSIDE the scrolling wrapper, as a sibling above it, which is
- * the whole of the trick. `position: sticky` is the reflex here and it is
- * the wrong tool: the pane itself is what scrolls, so a sticky child sticks
- * to a scrollport that is moving with it, and the box either rides away or
- * needs a second scroller underneath it to have something to stick to. A
- * column with a fixed head and a growing body says the same thing with no
- * stacking, no offsets, and nothing to go wrong when the list is short.
- */
-function searchBox() {
-  return `<div class="shrink-0 border-b border-base-300 px-3.5 py-2">
-    <input id="wdp-search" type="search" data-testid="panel.rules-search"
-      class="input input-xs w-full" spellcheck="false" autocomplete="off"
-      aria-label="Search rules" placeholder="Search rules…" value="${esc(S.ruleQuery)}">
-  </div>`;
-}
-
-/*
- * Which rules a query leaves standing.
- *
- * Matching is over three fields, and the choice is deliberate: the group
- * heading (the story id, which carries its feature as its first segment), the
- * rule id, and the rule's statement. So "panel" reaches every rule in the
- * panel feature because every story under it is named for it; "panel.rules"
- * reaches that story alone; and words nobody put in an id - "scroll",
- * "ghost" - still find the rule, because the statement is the part of a rule
- * written for people to read.
- *
- * A heading matching takes its whole group with it. A rule matching brings
- * only itself, but its heading is drawn anyway by the grouping below, because
- * a filtered list that loses the hierarchy stops saying where anything lives.
- */
-const matchesQuery = (s, q) => String(s ?? '').toLowerCase().includes(q);
-function matchingRows() {
-  const q = S.ruleQuery.trim().toLowerCase();
-  if (!q) return S.data.rows;
-  const groups = new Set(
-    S.data.rows.map((r) => r.story).filter((story) => matchesQuery(story, q))
-  );
-  return S.data.rows.filter((row) =>
-    groups.has(row.story) || matchesQuery(row.rule, q) || matchesQuery(row.statement, q));
-}
-
-/*
- * The three marks a BUILT rule wears: checks, agent, human, in that order,
- * always all three. A rule verified by one tier and a rule verified by all
- * three both used to read as a single ✓, which hid the thing worth seeing -
- * how much of the ledger is actually standing behind a green rule.
- *
- * Every built rule, not only the verified ones. A rule reaches 'verified'
- * only when every tier it asks for holds a current pass, so on a verified
- * rule these marks can be nothing but green or grey - the red, the open
- * circle and the tilde were unreachable, and they are the ones that answer
- * the question the row is here to answer: which tiers is this rule missing.
- * A rule that is not built at all has no tiers to report and keeps its
- * lifecycle shape.
- *
- * Same vocabulary as the detail pane's evidence rows, so the panel says one
- * thing in one language: shape carries what happened, colour carries whether
- * it is owed. Grey · is "this rule never asked for that tier". The two
- * in-between states keep their own shapes rather than borrowing either end -
- * ○ for a tier that is required and has never run, ~ for a pass whose
- * statement has since moved - both in warning yellow when the rule is
- * waiting on YOU, quiet otherwise. Colour carries ownership here exactly as
- * it does for the single lifecycle glyph (panel.rules.lifecycle-legible),
- * and the shape carries what happened either way, so a tier nobody has run
- * is never read as one the rule never asked for.
- */
-const TIER_MARK = {
-  pass: ['✓', 'text-success', 'passed'],
-  fail: ['✗', 'text-error', 'failed'],
-  stale: ['~', 'text-warning', 'stale — it passed, then the statement moved'],
-  never: ['○', 'text-warning', 'required, but no run has touched it'],
-  skipped: ['–', 'opacity-40', 'skipped'],
-  blocked: ['⊘', 'text-warning', 'blocked'],
-  /*
-   * A tier the rule never asked for is a hollowed-out version of the same
-   * check, not a different glyph. Three marks of three different widths do
-   * not line up down a list of ninety rules, and a row you cannot scan in a
-   * column is not a row you can scan at all (n-0109).
-   */
-  na: ['✓', 'opacity-20', 'not applicable — this rule does not ask for it'],
-};
-
-/*
- * The checks tier is per target, and the marks are per rule, so the targets
- * have to come down to one state. Worst-news-first, the way the verdict
- * itself aggregates: a rule that fails anywhere has not passed.
- */
-function checksTier(row) {
-  const states = (S.data?.targets ?? Object.keys(row.cells ?? {}))
-    .map((t) => row.cells?.[t]?.state)
-    .filter((state) => state && state !== 'na');
-  if (!states.length) return 'na';
-  for (const worse of ['fail', 'blocked', 'never', 'stale', 'skipped'])
-    if (states.includes(worse)) return worse;
-  return states.every((state) => state === 'pass') ? 'pass' : 'never';
-}
-
-/** Tier states that are work somebody still owes, rather than settled news. */
-const TIER_OWED = new Set(['never', 'stale', 'blocked']);
-
-function tierMarks(row, mine = false) {
-  const tiers = [
-    ['checks', checksTier(row)],
-    ['agent', row.agent?.state ?? 'na'],
-    ['human', row.human?.state ?? 'na'],
-  ];
-  return `<span class="flex w-8 shrink-0 items-center justify-center gap-px text-[10px] leading-none"
-    data-testid="panel.rule-tiers" data-tiers="${esc(tiers.map((t) => t.join(':')).join(' '))}"
-    >${tiers.map(([kind, state]) => {
-      const [glyph, cls, why] = TIER_MARK[state] ?? TIER_MARK.na;
-      return `<span class="inline-block w-3 text-center ${
-        TIER_OWED.has(state) && !mine ? 'opacity-60' : cls}"
-        title="${esc(kind)} — ${esc(why)}">${glyph}</span>`;
-    }).join('')}</span>`;
-}
-
-function listPane() {
-  if (!S.data.rows.length)
-    return '<p class="p-3.5 text-[12.5px] opacity-40">No rules in this blueprint.</p>';
-  const rows = matchingRows();
-  if (!rows.length)
-    return `<p class="p-3.5 text-[12.5px] opacity-40" data-testid="panel.rules-empty">No rule matches ${
-      esc(S.ruleQuery.trim())}.</p>`;
-  let html = '';
-  let story = null;
-  for (const row of rows) {
-    if (row.story !== story) {
-      story = row.story;
-      html += `<div class="px-3.5 pb-1 pt-2.5 ${LBL}">${esc(story)}</div>`;
-    }
-    const mine = needsYou(row.rule);
-    const picked = S.session?.verdicts[row.rule];
-    const state = picked
-      ? { glyph: { pass: '✓', fail: '✗', approved: '✍︎', refining: '✎︎' }[picked],
-          cls: { pass: 'text-success', fail: 'text-error', approved: 'text-success', refining: 'text-warning' }[picked],
-          why: 'judged this session' }
-      : ruleState(row, mine);
-    const owes = mine && !picked ? (row.built ? 'walk' : 'sign') : '';
-    const short = shortName(row);
-    const thr = threadsFor(row.rule).length;
-    html += `<button class="flex w-full cursor-pointer items-center gap-2 px-3.5 py-1.5 text-left text-[13px] hover:bg-base-200"
-      data-rule="${esc(row.rule)}" title="${esc(row.rule)} — ${esc(state.why)}">
-      ${!picked && row.built ? tierMarks(row, mine)
-        : `<span class="w-8 shrink-0 text-center ${state.cls}">${state.glyph}</span>`}
-      <span class="truncate">${esc(short)}</span>
-      ${owes || thr ? `<span class="ml-auto shrink-0 text-[10.5px] font-semibold text-warning">${
-        owes}${thr ? ` ${thr}⚑` : ''}</span>` : ''}
-    </button>`;
-  }
-  return html;
-}
-
-/** Opening a rule is a click on its row, wherever the row was just drawn. */
-function wireRuleRows() {
-  D.host.querySelectorAll('[data-rule]').forEach((el) => {
-    el.onclick = () => open(el.dataset.rule);
-  });
-}
-
-/*
- * Filtering repaints the LIST and nothing else. A full render() would work -
- * the caret is put back either way - but the filter has to feel like the
- * letters are doing the work, and rebuilding the bar, the tabs and two other
- * panes on every keystroke is a lot of work to do behind a caret. Repainting
- * one element never touches the input, so there is no caret to restore and
- * no chance of restoring it a frame late.
- */
-function paintRules() {
-  const list = D.host.querySelector('.wdp-list');
-  if (!list) return;
-  list.innerHTML = listPane();
-  list.scrollTop = 0;   // a filtered list is a new list; showing its middle is not helpful
-  wireRuleRows();
-}
-
-function wireSearch() {
-  const box = D.host.querySelector('#wdp-search');
-  if (!box) return;
-  box.oninput = () => { S.ruleQuery = box.value; paintRules(); };
-  box.onkeydown = (e) => {
-    // Escape clears the box rather than reaching the page behind it, where it
-    // would end pin mode and leave the list still filtered.
-    if (e.key !== 'Escape' || !S.ruleQuery) return;
-    e.stopPropagation();
-    S.ruleQuery = '';
-    box.value = '';
-    paintRules();
-  };
-}
-
-/*
- * Where this rule's check source lives.
- *
- * The ledger is asked first, because a recorded ref is the truth about what
- * a run actually went through. But a rule whose checks have never been run
- * still HAS check source, and a disclosure that stays empty until the first
- * recorded run is a disclosure nobody ever finds - which is exactly what was
- * reported (n-0084). So the suite's own scan is the fallback.
- */
-const checkRefs = (row) => {
-  const recorded = [...new Set((S.data?.targets ?? []).flatMap((t) => row.cells?.[t]?.checks ?? []))];
-  return recorded.length ? recorded : (S.data?.checkSource?.[row.rule] ?? []);
-};
-
-/*
- * Fetch the source behind a rule's checks, keep it, and repaint.
- *
- * Kept rather than written straight into the disclosure: the answer outlives
- * several rebuilds of the pane that asked for it. A request the reader has
- * moved on from is dropped on arrival rather than painted over whatever they
- * are reading now.
- */
-async function loadCheckSource(rule) {
-  if (S.srcCache.rule === rule && S.srcCache.html) return;
-  S.srcCache = { rule, html: null };
-  let html;
-  try {
-    const res = await fetch(api(`/api/checks?rule=${encodeURIComponent(rule)}`));
-    const out = await res.json();
-    html = (out.checks ?? []).map((c) => c.missing
-      ? `<div class="text-warning">${esc(c.ref)} — no longer in the tree</div>`
-      : `<div class="mb-1"><div class="font-mono text-[10.5px] opacity-60">${esc(c.ref)}</div>
-          <pre class="overflow-x-auto whitespace-pre rounded bg-base-300/40 p-1.5 text-[10.5px] leading-snug">${
-            esc(c.source)}</pre></div>`).join('') || 'No source recorded.';
-  } catch {
-    html = 'walkdown server unreachable.';
-  }
-  if (S.srcCache.rule !== rule) return;
-  S.srcCache.html = html;
-  render();
-}
-
-/*
- * What the rule's standing rests on: the latest ledger result for each kind
- * of evidence it asks for, who or what produced it, and when. The chain of
- * trust belongs where the rule is judged - a verdict you cannot see the
- * basis of is a verdict you have to take on faith.
- */
-function evidenceRows(row) {
-  const STATE = {
-    pass: ['✓', 'text-success'], fail: ['✗', 'text-error'], stale: ['~', 'text-warning'],
-    approved: ['✍︎', 'text-warning'], refining: ['✎︎', 'text-warning'],
-    skipped: ['–', 'opacity-50'], blocked: ['⊘', 'text-warning'], never: ['○', 'opacity-50'],
-    na: ['·', 'opacity-40'],
-  };
-  const line = (label, cell) => {
-    const [glyph, cls] = STATE[cell?.state] ?? STATE.na;
-    const who = cell?.actor ? ` · ${esc(cell.actor)}` : '';
-    const when = cell?.created ? ` · ${esc(MSG.ago(cell.created))}` : '';
-    const said = cell?.state === 'never' ? 'never run'
-      : cell?.state === 'na' ? 'not required'
-      : `${esc(cell.state)}${who}${when}`;
-    return `<div class="evrow" title="${esc(cell?.runId ?? '')}">
-      <span class="src">${esc(label)}</span>
-      <span class="${cls}">${glyph} ${said}</span></div>`;
-  };
-  /*
-   * The screenshots an agent's run attached. They are that run's evidence,
-   * not a tier of their own, so they hang under the agent's row as a bullet
-   * rather than standing beside it as a fourth kind of verdict (n-0100) -
-   * and they are a link, because a count of pictures nobody can look at is
-   * not evidence.
-   */
-  const shots = (cell) => {
-    const shot = cell?.evidence ?? [];
-    if (!shot.length) return '';
-    return `<div class="evrow evshot">
-      <span class="src"></span>
-      <span class="opacity-70">• Screenshots —
-        <button class="link link-hover text-primary" data-testid="detail.screenshots"
-          data-shots="${esc(JSON.stringify(shot))}"
-          title="Open the ${shot.length} screenshot${shot.length > 1 ? 's' : ''} this run attached"
-          >open ${shot.length}</button></span></div>`;
-  };
-  const rows = [
-    ...(row.verify.includes('checks')
-      ? (S.data?.targets ?? []).map((t) => line(`checks/${t}`, row.cells?.[t]))
-      : []),
-    ...(row.verify.includes('agent') ? [line('agent', row.agent), shots(row.agent)] : []),
-    ...(row.verify.includes('human') ? [line('human', row.human)] : []),
-  ].filter(Boolean);
-  // A rule with nothing recorded says so, rather than showing an empty box.
-  return rows.length
-    ? rows.join('')
-    : '<div class="text-[13px] opacity-50">Nothing recorded yet.</div>';
-}
-
-function detailPane() {
-  const r = S.selected;
-  // A pin with no rule has no rule screen: it opens on the thread screen
-  // itself, and this slot is only what slides past on the way there.
-  if (!r) return `
-    <div class="flex items-center px-2 pt-2">
-      <button class="wdp-back btn btn-ghost btn-xs text-primary" data-testid="detail.back">← All rules</button>
-    </div>
-    <div class="px-3.5 pt-1 text-[12.5px] opacity-60">This thread is not attached to a rule.</div>`;
-  const threads = threadsFor(r.rule);
-  /*
-   * A step writes the things it is about in backticks - anchors and screen
-   * ids, the same tokens lint scans for. An anchor among them is a pointer:
-   * hovering it lights the element up on the surface under review, so
-   * reading a step and finding what it means are one act rather than a hunt
-   * (n-0087). Only DECLARED anchors get the treatment; anything else in
-   * backticks is a screen id or prose and stays plain type.
-   */
-  const anchors = declaredAnchors();
-  const steps = r.steps
-    ? Object.entries(r.steps).map(([ph, items]) =>
-        `<span class="${LBL} pt-1">${esc(ph)}</span><span>${items.map((s) =>
-          esc(s).replace(/`([^`]+)`/g, (_m, tok) => (anchors.has(tok)
-            ? `<code class="wdp-anchor cursor-help rounded bg-base-200 px-1 text-xs underline decoration-dotted underline-offset-2" data-anchor="${tok}" title="Show this on the surface">${tok}</code>`
-            : `<code class="rounded bg-base-200 px-1 text-xs">${tok}</code>`))).join('<br>')}</span>`).join('')
-    : '';
-  const picked = S.session?.verdicts[r.rule];
-  // Step through the rules in the order the list shows them, without going
-  // back to it. The back link keeps its word ("All rules") so the bare
-  // arrows beside it read as the stepper rather than as a second way out.
-  const at = S.data.rows.findIndex((x) => x.rule === r.rule);
-  const step = (row, cls, glyph, label) =>
-    `<div class="tooltip tooltip-left" data-tip="${esc(row ? `${label} rule: ${shortName(row)}` : `No ${label.toLowerCase()} rule`)}">
-      <button class="${cls} btn btn-ghost btn-xs" data-testid="detail.stepper" ${row ? `data-goto="${esc(row.rule)}"` : 'disabled'}>${glyph}</button>
-    </div>`;
-  return `
-    <div class="flex items-center px-2 pt-2">
-      <button class="wdp-back btn btn-ghost btn-xs text-primary" data-testid="detail.back">← All rules</button>
-      <div class="ml-auto flex gap-0.5">
-        ${step(at > 0 ? S.data.rows[at - 1] : null, 'wdp-prev', '←', 'Previous')}
-        ${step(at >= 0 && at < S.data.rows.length - 1 ? S.data.rows[at + 1] : null, 'wdp-next', '→', 'Next')}
-      </div>
-    </div>
-    <div class="flex flex-col gap-3 px-3.5 pb-3.5 pt-1">
-      <div>
-        <div class="break-all font-mono text-[11px] opacity-40" data-testid="detail.rule-id">${esc(r.rule)}</div>
-        <p class="text-[15px] leading-relaxed" data-testid="detail.statement">${esc(r.statement)}</p>
-        ${elsewhere(r)}
-      </div>
-      ${S.session ? `<div class="flex flex-col gap-1.5">
-        <!-- The box rides ABOVE the buttons: write the why, then judge. -->
-        <textarea id="wdp-vnote" data-testid="detail.feedback" class="textarea textarea-xs h-14 w-full" placeholder="${r.built
-          ? 'Why? Anything written here is filed as a note with your verdict.'
-          : 'What should change? Refine files this as the rule’s feedback.'}">${esc(S.verdictNote)}</textarea>
-        ${r.built ? `<div class="flex gap-2" data-testid="detail.verdict">
-          <button class="btn btn-sm flex-1 ${picked === 'pass' ? 'btn-success' : 'btn-outline btn-success'}" data-v="pass">✓ Pass</button>
-          <button class="btn btn-sm flex-1 ${picked === 'fail' ? 'btn-error' : 'btn-outline btn-error'}" data-v="fail">✗ Fail</button>
-        </div>` : `<div class="flex gap-2" data-testid="detail.verdict">
-          <button class="btn btn-sm flex-1 ${picked === 'approved' ? 'btn-success' : 'btn-outline btn-success'}" data-v="approved">✍︎ Approve</button>
-          <button class="btn btn-sm flex-1 ${picked === 'refining' ? 'btn-warning' : 'btn-outline btn-warning'}" data-v="refining">✎︎ Refine</button>
-        </div>
-        <div class="text-[11px] opacity-50">No build evidence yet — you are signing off the rule, not judging a build.</div>`}
-        <div id="wdp-vsay" data-testid="detail.say" class="hidden text-[11px] text-warning"></div>
-        <div class="text-[11.5px] opacity-50" data-testid="detail.judged">${Object.keys(S.session.verdicts).length} judged this session</div>
-      </div>` : ''}
-      ${(() => {
-        /*
-         * A screen can be a STATE rather than an address - a filtered list,
-         * an open drawer, the second time you submit the same form - and a
-         * state shares its URL with the page it is a state of. Walking to a
-         * rule about one navigates to that shared address and lands you on
-         * the page, not in the state, so the storyboard's setup is the rest
-         * of the sentence: it says what to do on arrival. Above the steps,
-         * because it happens before them.
-         */
-        const setup = ruleScreen(r)?.app?.setup;
-        return setup ? `<div>
-          <!-- "Setup" is the storyboard's own word for this field, and the
-               panel calling it something else made a reviewer translate
-               between the two (n-0099). -->
-          <div class="${LBL} mb-1.5">Setup</div>
-          <div class="rounded border border-warning/40 bg-warning/10 px-2 py-1.5 text-[13px] leading-relaxed"
-            data-testid="detail.setup">${esc(setup)}</div>
-        </div>` : '';
-      })()}
-      ${steps ? `<div><div class="${LBL} mb-1.5">Steps</div>
-        <div class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-[13px] leading-relaxed"
-          data-testid="detail.steps">${steps}</div>
-        ${checkRefs(r).length ? `<!-- The steps are the rule; the source that checks them is a
-             technical detail, so it waits behind a disclosure until asked for. -->
-          <details class="mt-2 rounded border border-base-300 bg-base-200/60 px-2 py-1 text-[11.5px]"
-            data-testid="detail.technical-disclosure" data-checks="${esc(r.rule)}"${
-              S.srcOpenFor === r.rule ? ' open' : ''}>
-            <summary class="cursor-pointer opacity-60">Check source · ${
-              checkRefs(r).map((c) => esc(c)).join(', ')}</summary>
-            <div class="wdp-check-src mt-1 opacity-70">${
-              S.srcCache.rule === r.rule && S.srcCache.html ? S.srcCache.html : 'Loading…'}</div>
-          </details>` : ''}</div>` : ''}
-      <div>
-        <div class="${LBL} mb-1.5">Evidence</div>
-        <div data-testid="detail.evidence">${evidenceRows(r)}</div>
-      </div>
-      <div>
-        <div class="${LBL} mb-1.5">Verify</div>
-        <div class="text-[13px]" data-testid="detail.verify">${esc(r.verify.join(', '))}</div>
-      </div>
-      ${threads.length ? `<div class="-mx-3.5" data-testid="detail.threads">
-        <div class="${LBL} mb-0.5 flex items-center gap-2 px-3.5">Threads
-          ${threads.filter((t) => t.status === 'addressed').length > 1
-            /*
-             * A rule whose fixes all landed together is verified together.
-             * Going through a dozen threads one at a time is the same
-             * judgment repeated, and the repetition is what makes people
-             * stop reading them - so the sweep is offered where the pile is,
-             * and it is still a person pressing it.
-             */
-            ? `<button class="btn btn-xs btn-outline btn-success ml-auto" data-verify-all="${esc(r.rule)}"
-                 title="Verify every addressed thread on this rule, under your name">
-                 Verify all ${threads.filter((t) => t.status === 'addressed').length}</button>`
-            : ''}
-        </div>
-        ${threads.map(threadCard).join('')}</div>` : ''}
-    </div>`;
-}
-
 /** The username a sitting's records will carry: the one it was started under. */
 const recordingHandle = () => (S.session?.actor ?? '').trim() || whoAmI();
 /** And how to read that handle - the same fallback, one place. */
@@ -1868,130 +1436,11 @@ const recordingDisplay = () => {
  * display name were told apart. Old records are never rewritten; this is
  * what stops them reading as somebody else.
  */
-const names = () => MSG.nameMap({
+export const names = () => MSG.nameMap({
   username: whoAmI(),
   name: (identityOverride.name ?? S.data?.identity?.name ?? '').trim(),
   handles: [...(S.data?.identity?.handles ?? []), S.session?.actor].filter(Boolean),
 });
-
-/*
- * A thread, collapsed: the opening message and the way into the rest of it.
- * It reads the way a message with replies reads anywhere - a face, a name, a
- * time, what was said, and under it the people in the thread, the number of
- * replies, and when it was last touched. The count is the door; opening it
- * slides the whole conversation in beside the rule.
- */
-function threadCard(t, where = null) {
-  const who = MSG.displayName(t.author, names());
-  const unread = unreadCount(t);
-  // No card, no rail: threads share one surface with the pane, the way
-  // messages share a channel. What is waiting on you is said in words - the
-  // status chip and the unread count - rather than by tinting a box.
-  //
-  // `where` is passed only by the Threads tab, which is not scoped to a rule
-  // and so has to say what each conversation is about. It also makes the
-  // whole row the way in: under a rule the reply line is enough, because the
-  // rule above it is already the context.
-  return `<div class="wd-row px-3.5 py-2${where ? ' cursor-pointer' : ''}"${
-    where ? ` data-open-thread="${esc(t.id)}"` : ''}>
-    ${where ? `<div class="mb-1 truncate text-[11px] opacity-45">${esc(where)}</div>` : ''}
-    <div class="wd-msg">
-      ${MSG.avatar(who)}
-      <div class="wd-col min-w-0">
-        <div class="wd-head">
-          <span class="wd-who">${esc(who)}</span>
-          <span class="wd-at" title="${esc(MSG.stamp(t.created))}">${esc(MSG.ago(t.created))}</span>
-          <!-- The id stays visible, quietly: a conversation you can name is a
-               conversation you can point at from a run record or a commit. -->
-          <span class="wd-at font-mono">${esc(t.id)}</span>
-          <span class="ml-auto flex shrink-0 items-center gap-1">
-            ${unread ? `<span class="badge badge-xs badge-error">${unread} new</span>` : ''}
-            <span class="badge badge-xs ${CHIP[t.status] ?? 'badge-ghost'}">${esc(t.status)}</span>
-          </span>
-        </div>
-        <div class="wd-text wd-preview">${MSG.body(t.body, { rules: (S.data?.rows ?? []).map((r) => r.rule) })}</div>
-        ${MSG.repliesLine(t, names())}
-      </div>
-    </div>
-  </div>`;
-}
-
-/*
- * The thread itself: its own screen, one slide to the right of the rule it
- * belongs to. A conversation deserves the width - reading and answering
- * should not happen in a card wedged between a rule's steps and its verify
- * list - and the way back is where you came from.
- */
-/**
- * What the way out of a thread is called. On the Threads tab the thread is
- * the tab's own detail, so the way back is the list of threads - naming a
- * rule there would offer a trip nobody took.
- */
-const backFromThread = (row) =>
-  (S.listTab === 'threads' ? 'All threads' : row ? shortName(row) : 'All rules');
-
-function threadPane() {
-  const t = (S.data?.threads ?? []).find((x) => x.id === S.openThread);
-  // Whatever became of the thread — ended, reloaded away, never there — this
-  // screen is never a dead end.
-  if (!t) return `
-    <div class="flex items-center px-2 pt-2">
-      <button class="wdp-thread-back btn btn-ghost btn-xs text-primary">← ${
-        esc(backFromThread(S.selected))}</button>
-    </div>
-    <div class="px-3.5 pt-1 text-[12.5px] opacity-60">That thread is no longer open here.</div>`;
-  const row = t.anchor?.rule ? S.data.rows.find((r) => r.rule === t.anchor.rule) : null;
-  const sc = screenById(t.anchor?.screen);
-  const where = [
-    t.anchor?.rule ? '' : 'not attached to a rule',
-    sc?.title ?? t.anchor?.screen,
-    t.anchor?.element ? `<span class="font-mono">${esc(t.anchor.element)}</span>` : (t.anchor?.position ? 'by position' : ''),
-    t.anchor?.viewport ? `${esc(t.anchor.viewport.name)} ${esc(String(t.anchor.viewport.width))}` : '',
-  ].filter(Boolean).join(' · ');
-  const sketch = ghostSource(sc);
-  const acts = threadActions(t);
-  const me = whoAmI();
-  const ended = TERMINAL.includes(t.status) ? (t.replies ?? []).at(-1) : null;
-  return `
-    <div class="flex items-center gap-1 px-2 pt-2">
-      <button class="wdp-thread-back btn btn-ghost btn-xs text-primary" data-testid="thread.close">← ${
-        esc(backFromThread(row))}</button>
-      <span class="ml-auto flex items-center gap-1 pr-1.5 text-[11px]" data-testid="thread.provenance">
-        <b class="opacity-60">${esc(t.id)}</b>
-        <span class="badge badge-xs ${CHIP[t.status] ?? 'badge-ghost'}">${esc(t.status)}</span>
-      </span>
-    </div>
-    ${where ? `<div class="px-3.5 pb-1 text-[11px] opacity-45">${where}</div>` : ''}
-    <div class="min-h-0 flex-1 overflow-y-auto px-3.5 pb-2" data-testid="thread.body">
-      ${MSG.stream(t, {
-        seenAt: seenAtOpen[t.id] ?? null,
-        rules: (S.data?.rows ?? []).map((r) => r.rule),
-        pending: pendingReplies.get(t.id) ?? [],
-        names: names(),
-      })}
-      ${ended ? `<div class="mt-2 flex items-center gap-1.5 rounded border border-success/40 px-2 py-1 text-[11px]">
-        <span class="text-success">✓</span> ${esc(t.status === 'waived' ? 'Waived' : t.status)}${
-          ended.author ? ` by <b>${esc(MSG.displayName(ended.author, names()))}</b>` : ''
-        } · ${esc(MSG.ago(ended.created))}</div>` : ''}
-      ${sketch?.proposed ? `<button class="btn btn-xs btn-outline mt-2 w-full" data-sketch="${esc(t.anchor.screen)}">
-        ⚠ View the proposed sketch</button>` : ''}
-    </div>
-    <!-- The composer stays put at the foot of the screen: type, press Enter,
-         the message is there. The name is not asked for again — it is
-         whoever you are recording as, changed in Settings like everywhere. -->
-    <div class="shrink-0 border-t border-base-300 p-2">
-      <textarea id="wdp-note" data-testid="thread.reply" rows="2" class="textarea textarea-xs w-full resize-none"
-        placeholder="Reply…">${esc(S.threadNote)}</textarea>
-      <div class="mt-1 flex flex-wrap items-center gap-1">
-        <span class="text-[10px] opacity-40">as <button id="wdp-tactor" class="link">${
-          esc(me || 'set your name…')}</button> · <b>Enter</b> sends</span>
-        ${acts.map(([label, st, quiet], i) =>
-          `<button class="btn btn-xs${quiet ? ' btn-ghost opacity-60' : ''}${i === 0 ? ' ml-auto' : ''}"
-            data-testid="thread.actions" data-act="${esc(st)}" data-tid="${esc(t.id)}">${label}</button>`).join('')}
-      </div>
-      <div class="mt-1 hidden text-[11px] text-warning" data-testid="thread.say" id="wdp-tsay"></div>
-    </div>`;
-}
 
 /*
  * Threads remember where your reading stopped, so opening one the agent has
@@ -2008,11 +1457,11 @@ async function loadSeen() {
   seenFor = S.BP;
   seen = (await store.get(SEEN_KEY()).catch(() => null)) ?? {};
 }
-const seenAtOpen = {};
+export const seenAtOpen = {};
 /** Replies on screen before the server has answered, by thread id. */
-const pendingReplies = new Map();
+export const pendingReplies = new Map();
 
-const unreadCount = (t) => {
+export const unreadCount = (t) => {
   const at = seen[t.id];
   if (!at) return 0;
   return (t.replies ?? []).filter((r) => String(r.created ?? '') > String(at)).length;
@@ -2024,7 +1473,7 @@ function markSeen(id) {
   store.set(SEEN_KEY(), { ...seen });
 }
 
-function say(msg) {
+export function say(msg) {
   const el = D.host.querySelector('#wdp-tsay');
   if (!el) return toast(msg, { tone: 'error' });
   el.textContent = msg;
@@ -2244,7 +1693,7 @@ function screenUrl(screen, surface) {
 }
 
 /** Every anchor the storyboard declares, on any screen. */
-const declaredAnchors = () =>
+export const declaredAnchors = () =>
   new Set((S.data?.storyboard ?? []).flatMap((s) => s.anchors ?? []));
 
 /*
@@ -2306,7 +1755,7 @@ const STALE_COPY = () =>
  * or the radio list snaps back to "Detect from the page" the moment the
  * frame lands (n-0098).
  */
-function goTo(screen, surface = pageSurface(), pick = null) {
+export function goTo(screen, surface = pageSurface(), pick = null) {
   const url = screenUrl(screen, surface)
     ?? screenUrl(screen, surface === 'app' ? 'prototype' : 'app');
   if (!url) return false;
@@ -2370,7 +1819,7 @@ function syncHeadlessCover() {
     The page you were reviewing is untouched underneath.</div>`;
 }
 
-function elsewhere(r) {
+export function elsewhere(r) {
   const here = currentScreen();
   const want = ruleScreen(r);
   // A headless rule must say so - otherwise whatever is on the desk reads
@@ -2384,145 +1833,6 @@ function elsewhere(r) {
   return `<div class="mt-1.5 text-[11.5px] opacity-60">This rule is on
     <b>${esc(want.id)}</b>; you are on <b>${esc(here.id)}</b>.
     ${can ? `<button class="link link-primary" data-goscreen="${esc(want.id)}">Go there</button>` : ''}</div>`;
-}
-
-/*
- * ---- the Threads tab -------------------------------------------------
- *
- * A conversation used to be reachable only through the rule it was anchored
- * to, and once it ended it was reachable nowhere at all - the panel filters
- * terminal threads out of the rule list, the pins and the counts, and gave
- * nobody a way to ask for them back. `walkdown threads --all` could show
- * them; the panel could not. This is that view (n-0094).
- *
- * The three filters are the three questions the command line already
- * answers, in the same words, so the two never disagree about what "active"
- * means.
- */
-function threadsMatching(filter) {
-  const all = S.data?.threads ?? [];
-  if (filter === 'all') return all;
-  if (filter === 'you') {
-    /*
-     * Whose turn it is, taken from the server's attention queue rather than
-     * re-derived here. A note awaiting verification and a question awaiting
-     * an answer are both work for a person, and the rules for that live in
-     * status.js beside every other queue - a second copy in the panel is a
-     * second thing to get wrong.
-     */
-    const owed = new Set((S.data?.attention ?? [])
-      .filter((i) => i.who === 'human' && i.thread).map((i) => i.thread));
-    return all.filter((t) => owed.has(t.id));
-  }
-  return all.filter((t) => !TERMINAL.includes(t.status));
-}
-
-/** Where a thread is anchored, in words, for a list that is not scoped to one rule. */
-function threadWhere(t) {
-  const a = t?.anchor ?? {};
-  const sc = screenById(a.screen);
-  return [
-    a.rule,
-    a.element ?? (sc ? (sc.title ?? sc.id) : a.screen),
-  ].filter(Boolean).join(' · ') || 'not attached to anything';
-}
-
-/*
- * The three questions over the thread list, drawn OUTSIDE the scrolling
- * wrapper as a sibling above it - the same shape as the rule list's search
- * box, and for the same reason. `position: sticky` is the reflex and the
- * wrong tool: the pane itself is what scrolls, so a sticky child sticks to a
- * scrollport that is already moving with it. A column with a fixed head and
- * a growing body needs no stacking, no offsets, and nothing to go wrong when
- * the list is short (n-0103).
- */
-function threadFilterBar() {
-  const counts = {
-    active: threadsMatching('active').length,
-    you: threadsMatching('you').length,
-    all: (S.data?.threads ?? []).length,
-  };
-  const pick = (id, label, hint) =>
-    `<button class="btn btn-xs join-item gap-1 ${S.threadFilter === id ? 'btn-primary' : 'btn-outline btn-primary'}"
-      data-tfilter="${id}" title="${esc(hint)}">${label}<span class="opacity-60">${counts[id]}</span></button>`;
-  return `<div class="flex shrink-0 justify-center border-b border-base-300 px-3.5 py-2">
-    <div class="join" data-testid="panel.thread-filter">
-      ${pick('active', 'Active', 'Questions and notes still in play')}
-      ${pick('you', 'Awaiting you', 'A fix claimed and unverified, or a question unanswered — the same queue walkdown status shows')}
-      ${pick('all', 'All', 'Every thread ever filed on this blueprint, ended ones included')}
-    </div>
-  </div>`;
-}
-
-function threadsPane() {
-  const list = [...threadsMatching(S.threadFilter)]
-    .sort((a, b) => threadTouched(b).localeCompare(threadTouched(a)));
-  const EMPTY = {
-    active: 'No live threads. Everything said here has been answered — <b>All</b> has them.',
-    you: 'Nothing is waiting on you.',
-    all: 'No threads yet. Drop a pin on the page, or leave a note on a rule, to start one.',
-  };
-  return list.length
-    ? list.map((t) => threadCard(t, threadWhere(t))).join('')
-    : `<p class="p-3.5 text-[12.5px] opacity-40">${EMPTY[S.threadFilter]}</p>`;
-}
-
-/**
- * Wire a rendered screen list. Lives apart from the list itself because the
- * two are now in different places: the rows are drawn into the bar's picker,
- * and picking one closes it - a chooser that stayed open over the screen it
- * just took you to would be covering its own result.
- */
-function wireScreens(root) {
-  root.querySelectorAll('[data-screen]').forEach((b) => {
-    b.onclick = () => {
-      const id = b.dataset.screen || null;
-      S.ghostOverride = null;
-      closeScreenPanel();
-      const reghost = () => {
-        if (S.ghost) { setGhost(false); setFade(S.ghostOpacity || 1); } else render();
-      };
-      // "Detect from the page" is a reset, not a destination.
-      if (!id) { S.pickedScreen = null; return reghost(); }
-      // Picked by hand, so the pick rides along and survives the arrival.
-      if (goTo(screenById(id), pageSurface(), id)) return;
-      // Nowhere to go: a screen with no URL on either surface. Then the only
-      // thing the picker can do is what it always did — record that this
-      // page is that screen.
-      S.pickedScreen = id;
-      reghost();
-    };
-  });
-}
-
-function screensPane() {
-  const screens = S.data.storyboard ?? [];
-  if (!screens.length)
-    return '<p class="p-3.5 text-[12.5px] opacity-40">No screens in this blueprint — headless rules only.</p>';
-  const here = currentScreen();
-  const auto = !S.pickedScreen;
-  return `
-    <button class="flex w-full items-center gap-2 px-3.5 py-2 text-left text-[12.5px] hover:bg-base-200"
-      data-screen="">
-      <span class="w-3.5 shrink-0 text-center ${auto ? 'text-primary' : 'opacity-30'}">${auto ? '\u25c9' : '\u25cb'}</span>
-      <span>Detect from the page</span>
-      ${auto && here ? `<span class="ml-auto text-[11px] opacity-50">${esc(here.id)}</span>` : ''}
-    </button>
-    <div class="mx-3.5 my-1 border-t border-base-300"></div>
-    ${screens.map((sc) => {
-      const on = S.pickedScreen === sc.id;
-      const design = ghostSource(sc);
-      return `<button class="flex w-full items-start gap-2 px-3.5 py-2 text-left hover:bg-base-200"
-        data-screen="${esc(sc.id)}">
-        <span class="w-3.5 shrink-0 pt-0.5 text-center ${on ? 'text-primary' : 'opacity-30'}">${on ? '\u25c9' : '\u25cb'}</span>
-        <span class="min-w-0">
-          <span class="block truncate text-[13px]">${esc(sc.title ?? sc.id)}</span>
-          <span class="block truncate font-mono text-[10.5px] opacity-40">${esc(sc.id)}</span>
-        </span>
-        <span class="ml-auto shrink-0 pt-0.5 text-[10.5px] ${design ? 'opacity-50' : 'text-warning'}">${
-          design ? (design.proposed ? 'sketch' : 'design') : 'no design'}</span>
-      </button>`;
-    }).join('')}`;
 }
 
 function sayVerdict(msg) {
@@ -2671,7 +1981,7 @@ async function finishWalkdown() {
   }
 }
 
-function open(ruleId) {
+export function open(ruleId) {
   S.selected = S.data.rows.find((r) => r.rule === ruleId) ?? S.selected;
   S.view = 'detail';
   /*
@@ -2715,7 +2025,7 @@ function sizeGhost() {
   frame.style.flex = 'none';
 }
 
-function setGhost(on) {
+export function setGhost(on) {
   if (!on) {
     S.ghost?.remove();
     S.ghost = null;
