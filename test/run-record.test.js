@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
 import { formatHash } from '../lib/hash.js';
-import { aggregateResults, nextRunId, writeRunRecord } from '../lib/run-record.js';
+import { aggregateResults, nextRunId, writeRunRecord, writeSweep } from '../lib/run-record.js';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-runrec-'));
 after(() => rmSync(root, { recursive: true, force: true }));
@@ -69,4 +69,35 @@ test('writeRunRecord emits a well-formed record', () => {
   assert.equal(record.target, 'staging');
   assert.equal(record.created, '2026-08-20T22:05:00Z');
   assert.equal(record.results[0].statement_hash, formatHash(STATEMENT));
+});
+
+/*
+ * The sweep writer. Its two refusals are the rule (status.sweep.deliberate):
+ * a sweep without a reason, and a sweep naming no tier, are both mistakes
+ * worth catching before they reach the ledger.
+ */
+test('a sweep refuses to be written without a reason @rule:status.sweep.deliberate', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'wd-sweep-'));
+  assert.throws(
+    () => writeSweep({ blueprintDir: dir, target: 'local', tiers: ['agent'], why: '  ' }),
+    /needs a reason/
+  );
+  assert.throws(
+    () => writeSweep({ blueprintDir: dir, target: 'local', tiers: [], why: 'because' }),
+    /at least one tier/
+  );
+});
+
+test('a written sweep carries its reason and no results @rule:status.sweep.deliberate', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'wd-sweep-'));
+  const { record } = writeSweep({
+    blueprintDir: dir, target: 'local', tiers: ['checks', 'agent'],
+    why: 'the panel was split into sixteen modules', actor: 'topher',
+  });
+  assert.equal(record.kind, 'sweep');
+  assert.deepEqual(record.tiers, ['checks', 'agent']);
+  assert.equal(record.why, 'the panel was split into sixteen modules');
+  // It is not evidence about any rule - it is a statement about when we
+  // stopped trusting the evidence we had.
+  assert.deepEqual(record.results, []);
 });

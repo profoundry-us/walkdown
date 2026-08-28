@@ -65,6 +65,57 @@ stories:
         statement: An agent verdict never satisfies a human verify requirement; only a human walkdown does.
         verify: [checks]
 
+  - id: status.sweep
+    title: Asking for the whole thing to be judged again
+    statement: >
+      As a reviewer, after something large has changed I can ask for every verdict to be earned again, and see which rules I have not got to yet.
+    rules:
+      - id: status.sweep.declares-a-floor
+        origin: walkdown
+        statement: A sweep is a dated marker in the ledger saying that from here the tiers it names must earn their verdicts again - every verdict recorded before it reads as stale, so a rule nobody has got back to is legible as unfinished rather than as passing, and the runs it supersedes are neither edited nor deleted.
+        verify: [checks, agent]
+        steps:
+          given:
+            - A ledger where every rule's agent tier passes, from runs recorded last week
+          when:
+            - A sweep is declared over the agent tier
+          then:
+            - Every one of those passes now reads stale, not passing and not never
+            - A rule judged again after the sweep reads pass once more
+            - The superseded run files are untouched - the ledger stays append-only
+            - Tiers the sweep does not name are unaffected
+          statement_hash: sha256:b0073c10a38b
+
+      - id: status.sweep.deliberate
+        origin: walkdown
+        statement: A sweep is never a side effect - it is written only when somebody asks for one outright and says why, because it puts work back on the queue for every rule at once and that is a decision, not a consequence of running the suite.
+        verify: [checks]
+        steps:
+          given:
+            - A project with a sweep command available
+          when:
+            - Checks are run, a walkdown is recorded, or the blueprint is edited
+          then:
+            - No sweep is written by any of them
+            - Declaring one requires the command, and the command requires a reason
+            - The reason is kept with the marker, so a later reader knows what prompted it
+          statement_hash: sha256:5b9d65fba614
+
+      - id: status.sweep.says-what-is-left
+        origin: walkdown
+        statement: While a sweep is open the report says how much of it is done - how many rules in each named tier have been judged since it was declared and how many have not - so the question "did we miss any?" is answered by reading, never by remembering.
+        verify: [checks, agent]
+        steps:
+          given:
+            - An open sweep over the agent tier, partly worked
+          when:
+            - Status is read
+          then:
+            - The report names the sweep, when it was declared and why
+            - It gives the count judged since, and the count still owed
+            - The owed rules are listed as work, not merely counted
+          statement_hash: sha256:108b3015acc9
+
   - id: status.attention
     title: The board says who is blocking what
     statement: As a team, we each see the queue of items waiting on us specifically.

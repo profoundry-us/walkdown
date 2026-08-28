@@ -302,3 +302,88 @@ test('an empty inventory is not proof the suite is empty @rule:status.derived.un
   const row = deriveStatus(blueprint({ runs }), { checkRefs: new Set() }).rows[0];
   assert.equal(row.cells.local.state, 'pass');
 });
+
+/*
+ * Sweeps. A sweep is a marker saying "from here, earn it again" - it makes
+ * every verdict older than itself read as stale, without a single run file
+ * being edited or deleted, which is the law that made supersession the only
+ * available shape (status.derived.latest-wins).
+ */
+const sweep = (created, tiers, target = 'local') => ({
+  created, kind: 'sweep', target, actor: 'topher', run_id: created,
+  tiers, why: 'the thing was rebuilt', results: [],
+});
+
+test('a sweep makes earlier verdicts stale, and the runs survive it @rule:status.sweep.declares-a-floor', () => {
+  const runs = [walkdownRun('2026-01-01T00:00:00Z', 'agent', 'pass')];
+  const before = deriveStatus(blueprint({ runs, verify: ['checks', 'agent'] }));
+  assert.equal(before.rows[0].agent.state, 'pass');
+
+  const swept = deriveStatus(blueprint({
+    runs: [...runs, sweep('2026-02-01T00:00:00Z', ['agent'])],
+    verify: ['checks', 'agent'],
+  }));
+  // Stale, not never: it did pass once, and saying so is the difference
+  // between "we have not got to it" and "nothing ever tested this".
+  assert.equal(swept.rows[0].agent.state, 'stale');
+  assert.equal(swept.rows[0].agent.sweptBy, '2026-02-01T00:00:00Z');
+  // The superseded run is still in the ledger, unedited.
+  assert.equal(swept.rows[0].agent.runId, '2026-01-01T00:00:00Z');
+});
+
+test('judging again after a sweep clears it @rule:status.sweep.declares-a-floor', () => {
+  const derived = deriveStatus(blueprint({
+    runs: [
+      walkdownRun('2026-01-01T00:00:00Z', 'agent', 'pass'),
+      sweep('2026-02-01T00:00:00Z', ['agent']),
+      walkdownRun('2026-03-01T00:00:00Z', 'agent', 'pass'),
+    ],
+    verify: ['checks', 'agent'],
+  }));
+  assert.equal(derived.rows[0].agent.state, 'pass');
+  assert.equal(derived.rows[0].agent.sweptBy, undefined);
+});
+
+test('a sweep touches only the tiers it names @rule:status.sweep.declares-a-floor', () => {
+  const derived = deriveStatus(blueprint({
+    runs: [
+      checksRun('2026-01-01T00:00:00Z', 'local', 'pass'),
+      walkdownRun('2026-01-01T00:00:01Z', 'agent', 'pass'),
+      sweep('2026-02-01T00:00:00Z', ['agent']),
+    ],
+    verify: ['checks', 'agent'],
+  }));
+  assert.equal(derived.rows[0].cells.local.state, 'pass', 'checks were not swept');
+  assert.equal(derived.rows[0].agent.state, 'stale', 'agent was');
+});
+
+test('a sweep counts what is still owed, never-judged rules included @rule:status.sweep.says-what-is-left', () => {
+  const derived = deriveStatus(blueprint({
+    runs: [
+      walkdownRun('2026-01-01T00:00:00Z', 'agent', 'pass'),
+      sweep('2026-02-01T00:00:00Z', ['agent']),
+    ],
+    verify: ['checks', 'agent'],
+  }));
+  const [s] = derived.sweeps;
+  assert.equal(s.tier, 'agent');
+  assert.equal(s.of, 1);
+  assert.equal(s.done, 0);
+  assert.deepEqual(s.owed, ['demo.main.thing']);
+  assert.equal(s.why, 'the thing was rebuilt');
+});
+
+test('nothing but the sweep command writes a sweep @rule:status.sweep.deliberate', () => {
+  // The shape of the guarantee: no checks run and no walkdown carries the kind,
+  // so deriving over a ledger of ordinary runs finds no sweep to report.
+  const derived = deriveStatus(blueprint({
+    runs: [
+      checksRun('2026-01-01T00:00:00Z', 'local', 'pass'),
+      walkdownRun('2026-01-02T00:00:00Z', 'agent', 'pass'),
+      walkdownRun('2026-01-03T00:00:00Z', 'topher', 'pass'),
+    ],
+    verify: ['checks', 'agent', 'human'],
+  }));
+  assert.deepEqual(derived.sweeps, []);
+  assert.equal(derived.rows[0].agent.state, 'pass');
+});

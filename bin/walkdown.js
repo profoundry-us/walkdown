@@ -7,6 +7,7 @@ import { collectRules, findBlueprintDir, loadBlueprint } from '../lib/blueprint.
 import { blueprintForUrl, claimsOf, findCollisions } from '../lib/claims.js';
 import { listDrafts } from '../lib/draft.js';
 import { runHashCommand } from '../lib/hash-cmd.js';
+import { writeSweep } from '../lib/run-record.js';
 import { lint } from '../lib/lint.js';
 import { checkedRuleIds } from '../lib/checks.js';
 import { deriveStatus } from '../lib/status.js';
@@ -21,6 +22,7 @@ Usage:
   walkdown status [<rule-id>] [--dir <blueprint>] [--target <name>] [--json]
   walkdown lint [--dir <blueprint>] [--no-checks] [--json]
   walkdown hash [--dir <blueprint>] [--write]
+  walkdown sweep --why <reason> [--tiers checks,agent,human] [--dir <blueprint>] [--target <name>]
   walkdown threads [--dir <blueprint>] [--rule <id>] [--all] [--json]
   walkdown thread <id> [--reply <text>] [--status <s>|--verify|--reopen|--waive]
                        [--reason <text>] [--actor <name>] [--dir <blueprint>] [--json]
@@ -41,6 +43,12 @@ Commands:
           check coverage (via runner.list), threads, and runs.
   hash    Report statement_hash status for every rule; --write updates
           missing/stale hashes in place (formatting preserved).
+
+  sweep   Ask for the named tiers to be judged again from scratch. Verdicts
+          recorded before the sweep read as stale, so a rule nobody gets back
+          to is legible as unfinished rather than as passing. Nothing is
+          deleted - the ledger stays append-only and the marker says why.
+          Deliberate on purpose: nothing else in walkdown ever writes one.
   threads List active threads (questions & notes); --all includes
           incorporated/verified/waived, --rule filters by anchored rule.
   thread  Show one thread in full: anchor, body, and replies. With --reply
@@ -61,6 +69,8 @@ Options:
   --all            threads: include terminal (incorporated/verified/waived)
   --no-checks      lint: skip running the runner.list command
   --write          hash: write missing/stale hashes back to feature files
+  --why <reason>   sweep: why the whole thing is being asked for again (required)
+  --tiers <list>   sweep: comma-separated tiers to sweep (default: checks,agent)
   --json           status/lint/threads/thread: machine-readable output
 `;
 
@@ -341,9 +351,30 @@ function cmdStatus(args) {
   for (const row of table) console.log('  ' + row.map(renderCell).join('  '));
 
   const counts = rows.reduce((acc, r) => ((acc[r.verdict] = (acc[r.verdict] ?? 0) + 1), acc), {});
+  const open = (derived.sweeps ?? []).filter((s) => s.done < s.of);
   console.log(
-    `\n${counts.pass ?? 0} verified, ${counts.pending ?? 0} pending, ${counts.fail ?? 0} failing`
+    `\n${counts.pass ?? 0} verified, ${counts.pending ?? 0} pending, ${counts.fail ?? 0} failing` +
+      (open.length
+        ? dim(` — ${open.map((s) => `${s.of - s.done} awaiting the ${s.tier} sweep`).join(', ')}`)
+        : '')
   );
+
+  /*
+   * An open sweep is the loudest thing on the board while it lasts, because
+   * the whole point of declaring one is to stop a rule nobody got back to from
+   * reading green. It names itself, says why it was asked for, and lists what
+   * is left - counted, not remembered.
+   */
+  for (const s of derived.sweeps ?? []) {
+    const left = s.of - s.done;
+    const head = left
+      ? `${yellow('SWEEP')} ${s.tier} on ${s.target} — ${s.done}/${s.of} judged, ${yellow(String(left))} to go`
+      : `${green('SWEEP')} ${s.tier} on ${s.target} — ${s.done}/${s.of}, complete`;
+    console.log(`\n  ${head}`);
+    console.log(dim(`  ${s.runId}${s.actor ? ` by ${s.actor}` : ''} — ${s.why ?? 'no reason recorded'}`));
+    for (const rule of s.owed.slice(0, 12)) console.log(`  ◇ ${rule}`);
+    if (s.owed.length > 12) console.log(dim(`  +${s.owed.length - 12} more`));
+  }
 
   const HOWTO = {
     judge: (i) => `walk down ${i.rule} — human verification not yet recorded`,
@@ -594,11 +625,59 @@ async function cmdServe(args) {
 }
 
 const [cmd, ...rest] = process.argv.slice(2);
+
+/*
+ * Declare a sweep. The only thing in walkdown that writes one - checks runs,
+ * walkdowns and blueprint edits never do, because putting every rule back on
+ * the queue is a decision and not a consequence.
+ */
+function cmdSweep(args) {
+  const { values } = parseArgs({
+    args,
+    options: {
+      dir: { type: 'string' },
+      target: { type: 'string' },
+      tiers: { type: 'string' },
+      why: { type: 'string' },
+    },
+  });
+  const blueprint = loadOrExit(values.dir);
+  const tiers = (values.tiers ?? 'checks,agent')
+    .split(',').map((t) => t.trim()).filter(Boolean);
+  const bad = tiers.filter((t) => !['checks', 'agent', 'human'].includes(t));
+  if (bad.length) {
+    console.error(`${red('unknown tier')}: ${bad.join(', ')} — expected checks, agent or human`);
+    return end(1);
+  }
+  if (!values.why?.trim()) {
+    console.error(`${red('a sweep needs a reason')} — pass --why "…"`);
+    console.error(dim('  It puts every rule back on the queue; the marker is what tells a'));
+    console.error(dim('  later reader whether that was warranted.'));
+    return end(1);
+  }
+  const targets = Object.keys(blueprint.config?.runner?.targets ?? {});
+  const target = values.target ?? targets[0] ?? 'local';
+  const { file, record } = writeSweep({
+    blueprintDir: blueprint.dir,
+    target,
+    tiers,
+    why: values.why,
+    actor: process.env.WALKDOWN_ACTOR ?? userInfo().username,
+  });
+  console.log(`${green('swept')} ${record.run_id} — ${tiers.join(', ')} on ${target}`);
+  console.log(dim(`  ${record.why}`));
+  console.log(dim(`  ${file}`));
+  console.log(`\nEvery ${tiers.join('/')} verdict recorded before now reads as stale.`);
+  console.log(dim('Nothing was deleted. `walkdown status` says what is still owed.'));
+  return end(0);
+}
+
 if (cmd === 'init') cmdInit(rest);
 else if (cmd === 'run') cmdRun(rest);
 else if (cmd === 'lint') cmdLint(rest);
 else if (cmd === 'status') cmdStatus(rest);
 else if (cmd === 'hash') cmdHash(rest);
+else if (cmd === 'sweep') cmdSweep(rest);
 else if (cmd === 'threads') cmdThreads(rest);
 else if (cmd === 'thread') cmdThread(rest);
 else if (cmd === 'serve') cmdServe(rest);
