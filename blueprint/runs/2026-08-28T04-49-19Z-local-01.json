@@ -1,0 +1,42 @@
+{
+  "run_id": "2026-08-28T04-49-19Z-local-01",
+  "created": "2026-08-28T04:49:19Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "f7225f3-dirty",
+  "blueprint_sha": "f7225f3-dirty",
+  "note": "fifth round, after the persistence fix",
+  "results": [
+    {
+      "rule": "panel.identity.default-actor",
+      "status": "pass",
+      "statement_hash": "sha256:6cf5b560bdde",
+      "evidence": [
+        "runs/evidence/2026-08-28T04-41-49Z/a1-strip-from-git.png",
+        "runs/evidence/2026-08-28T04-41-49Z/a2-settings-from-git.png",
+        "runs/evidence/2026-08-28T04-41-49Z/a3-attributed-work-allowed.png",
+        "runs/evidence/2026-08-28T04-41-49Z/a4-corrected-live.png",
+        "runs/evidence/2026-08-28T04-41-49Z/a5-corrected-after-reload.png",
+        "runs/evidence/2026-08-28T04-41-49Z/b1-refused-before-reload.png",
+        "runs/evidence/2026-08-28T04-41-49Z/b2-strip-after-reload.png",
+        "runs/evidence/2026-08-28T04-41-49Z/b3-settings-empty-after-reload.png",
+        "runs/evidence/2026-08-28T04-41-49Z/b4-refused-after-reload.png",
+        "runs/evidence/2026-08-28T04-41-49Z/c1-username-emptied-after-reload.png",
+        "runs/evidence/2026-08-28T04-41-49Z/c2-username-emptied-refused.png",
+        "runs/evidence/2026-08-28T04-41-49Z/d1-name-emptied-after-reload.png",
+        "runs/evidence/2026-08-28T04-41-49Z/d2-name-emptied-work-allowed.png",
+        "runs/evidence/2026-08-28T04-41-49Z/f1-os-fallback-strip.png",
+        "runs/evidence/2026-08-28T04-41-49Z/f2-os-fallback-settings.png",
+        "runs/evidence/2026-08-28T04-41-49Z/f3-os-fallback-edited-reload.png",
+        "runs/evidence/2026-08-28T04-41-49Z/g1-legacy-json-migrated.png",
+        "runs/evidence/2026-08-28T04-41-49Z/g3-default-path-no-prompt.png",
+        "runs/evidence/2026-08-28T04-41-49Z/h1-emptied-with-a-verdict-on-the-books.png",
+        "runs/evidence/2026-08-28T04-41-49Z/h2-after-reload-with-restored-session.png",
+        "runs/evidence/2026-08-28T04-41-49Z/h4-refusal-after-restore.png"
+      ],
+      "reasoning": "Judged from scratch against two disposable copies of the blueprint (4795 with this repo's git identity, 4797 served with GIT_CONFIG_GLOBAL/SYSTEM=/dev/null so git genuinely knows neither name nor email), every non-GET to /api/ intercepted with a RegExp and counted; 31 writes were seen at the wire and only three draft POSTs to the disposable copy were ever let through, so the real ledger took nothing (git status shows only this evidence directory). Normal path: the strip arrives \"Recording as Topher Fangio topher\" - panel.actor-name the full name, panel.actor-handle the username, both hit-tested visible - Settings shows topher and Topher Fangio in editable boxes, and a Fail with feedback posts a note authored \"topher\" with no prompt (the desk panel is not even in the DOM before or after). With git knowing neither, the identity falls back to the OS username topherfangio with no full name, both boxes still editable from empty, and typed values survive a reload. A typed correction re-signs the running sitting live (the draft re-POSTs under round5-user) and comes back after a reload. The persistence clause, which is what round four failed: emptying both fields writes {\"username\":\"\",\"name\":\"\"} and it now READS BACK as empty - the strip says \"set your name…\" with no handle, Settings shows two empty boxes, and Fail is refused with \"A note is recorded under a person's name\" and zero writes attempted, identically before and after the reload. Emptying only the username leaves {\"username\":\"\",\"name\":null}: after reload the display name still comes from git while the handle is gone and attributed work is refused. Emptying only the full name leaves {\"username\":null,\"name\":\"\"}: after reload the username stands alone in the strip and a note lands authored \"topher\". ABSENT and EMPTY are now genuinely distinct in both directions. The legacy migration still works when seeded the way the panel's own store writes it (store.set JSON-encodes, and always has - checked back to c49af08): walkdown:actor \"Legacy Freetext Person\" with no identity object migrates into the DISPLAY NAME, the username goes back to being derived (topher), and the migration persists itself. A bare unquoted string in that key is not migrated, but no version of walkdown ever wrote one, so that is not a finding. Finally I drove the one path none of the four earlier rounds touched: restoreSession() only revives a sitting that has verdicts and takes its actor from the SERVER draft, so I judged a rule, emptied the identity, let the draft actually land on the disposable server (actor \"\"), and reloaded - the restored session still reads as nobody, both boxes empty, and Fail is still refused with zero writes. No page errors in any of the six scenarios. Every clause of the statement holds."
+    }
+  ]
+}
