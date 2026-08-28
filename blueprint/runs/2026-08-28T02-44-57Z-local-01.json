@@ -1,0 +1,195 @@
+{
+  "run_id": "2026-08-28T02-44-57Z-local-01",
+  "created": "2026-08-28T02:44:57Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "357fe44",
+  "blueprint_sha": "357fe44",
+  "note": "Re-judged after the panel was split from a single 4146-line file into sixteen modules (Phases 0-4). No rule statement changed; the question was purely whether the split broke anything. Scope is deliberately partial: these nineteen rules are the ones whose surfaces this sitting actually drove. The other fifty agent-tier rules were NOT re-judged and keep their standing verdicts - the regression evidence for those is the checks run of record taken at the same commit, the pre-split evidence of 2026-08-27T16-19-56Z rendering identically, and no page error in any state captured here.",
+  "results": [
+    {
+      "rule": "panel.dock.toolbar",
+      "status": "pass",
+      "statement_hash": "sha256:aaf28fbb5e0a",
+      "evidence": [
+        "runs/evidence/2026-08-28T02-44-57Z/panel-review.png",
+        "runs/evidence/2026-08-28T02-44-57Z/panel-screens-list.png",
+        "runs/evidence/2026-08-28T02-44-57Z/proto-review.png"
+      ],
+      "reasoning": "Re-judged after the panel was split from one 4146-line file into sixteen modules. The bar carries exactly the session-level controls the statement asks for: the screen picker (labelled 'The review page', opening to Detect from the page plus all six live screens with their design/review tags), the Prototype-fade-App surface control, the viewport presets, Pin mode, Start walkdown. It names the project - 'walkdown' beside the wordmark - and that name is not a control; the project is chosen on the Blueprints tab, which is what the second half of the statement requires. Side by side with the pre-split capture of 2026-08-27T16-19-56Z the bar is identical but for data (74/87 against 73/87). n-0117 remains open against this rule and is untouched by the refactor."
+    },
+    {
+      "rule": "panel.dock.one-pin-mode",
+      "status": "pass",
+      "statement_hash": "sha256:a66c41a78d23",
+      "evidence": [
+        "runs/evidence/2026-08-28T02-44-57Z/panel-review.png",
+        "runs/evidence/2026-08-28T02-44-57Z/panel-pin-mode.png"
+      ],
+      "reasoning": "Pin mode has one control in the bar and one state behind it. Off, the button is quiet; clicking it fills it amber and the panel pushes the mode into the framed surface rather than keeping a second copy, which is the arrangement PIN.watch has owned since the docked layout was withdrawn. That plumbing stayed in app.js through the split and its one caller in boot() is unchanged. Toggling on and off returned the bar to its resting state with no second control appearing."
+    },
+    {
+      "rule": "panel.dock.own-skin",
+      "status": "pass",
+      "statement_hash": "sha256:93bfd901cfcd",
+      "evidence": [
+        "runs/evidence/2026-08-28T02-44-57Z/panel-review.png",
+        "runs/evidence/2026-08-28T02-44-57Z/proto-review.png"
+      ],
+      "reasoning": "The review capture is the evidence: walkdown's chrome is drafting blue with pale ink and flat surfaces, and the application inside the frame is the stand-in in its own light theme. The two are never confusable and the boundary is exactly the frame's edge. This is the rule most at risk from the split, because the shadow root and its stylesheet are now built by buildChrome() and loadStylesheet() called from boot() rather than at module top level; the theme resolves, the desk paints in walkdown's own tokens, and nothing of the host page reaches inside."
+    },
+    {
+      "rule": "panel.desk.reads-as-paper",
+      "status": "pass",
+      "statement_hash": "sha256:60871d489f4d",
+      "evidence": [
+        "runs/evidence/2026-08-28T02-44-57Z/panel-review.png",
+        "runs/evidence/2026-08-28T02-44-57Z/panel-put-away.png"
+      ],
+      "reasoning": "The desk moved to a module of its own (src/panel/desk.js) and draws as it did. The ruling is faint, lies at an angle, and converges toward the horizon rather than shearing flatly - the 3D path, not the fallback skew, which is what the statement distinguishes. Put away, the desk goes with the chrome and the frame takes the whole viewport, so the paper is a property of the review and not of the page."
+    },
+    {
+      "rule": "panel.desk.tuner",
+      "status": "pass",
+      "statement_hash": "sha256:09636342aada",
+      "evidence": [
+        "runs/evidence/2026-08-28T02-44-57Z/panel-settings.png",
+        "runs/evidence/2026-08-28T02-44-57Z/proto-settings.png"
+      ],
+      "reasoning": "The gear opens Settings: identity above, then Desk ruling with five dials - Tilt 35, Tip 35, Depth 600px, Spacing 60px, Ink 10% - a Reset, and the temporary peek checkbox. It says in words what the statement claims in principle: 'Yours alone - how the paper lies changes nothing about what gets verified.' The values shown are the ones restored from the store at boot, so the persistence path survived too; store.get(DESK_KEY) now runs inside boot() rather than at module top level and still lands before the desk is painted."
+    },
+    {
+      "rule": "panel.rules.search-the-list",
+      "status": "pass",
+      "statement_hash": "sha256:87d61dee919f",
+      "evidence": [
+        "runs/evidence/2026-08-28T02-44-57Z/rules-search-filtered.png"
+      ],
+      "reasoning": "The strongest single piece of evidence in this run, because it drives the pane module that moved (rules-list.js) end to end. The box sits fixed above the rail. Typing 'ghost' filtered 87 rules to 3 - panel.dock.surface-swap-is-instant, panel.viewport.device-presets, screens.surfaces.stand-in-app - and every survivor is still drawn under its own group heading (PANEL.DOCK, PANEL.VIEWPORT, SCREENS.SURFACES), the clause the statement is most specific about and the one a naive filter drops."
+    },
+    {
+      "rule": "panel.rules.tiers-at-a-glance",
+      "status": "pass",
+      "statement_hash": "sha256:3e8240139040",
+      "evidence": [
+        "runs/evidence/2026-08-28T02-44-57Z/panel-review.png",
+        "runs/evidence/2026-08-28T02-44-57Z/rules-search-filtered.png"
+      ],
+      "reasoning": "Every built row carries three marks in the order checks, agent, human, and they line up down the rail because a tier the rule never asked for is the same glyph greyed out rather than a different one - the fix n-0109 asked for, still holding after the marks moved into rules-list.js. Rows with no run behind a required tier keep a shape of their own rather than showing nothing."
+    },
+    {
+      "rule": "panel.rules.steps-not-an-appendix",
+      "status": "pass",
+      "statement_hash": "sha256:0609e516526f",
+      "evidence": [
+        "runs/evidence/2026-08-28T02-44-57Z/panel-rule-detail.png",
+        "runs/evidence/2026-08-28T02-44-57Z/detail-check-source.png"
+      ],
+      "reasoning": "Opening a rule shows the statement and then GIVEN/WHEN/THEN outright, with no disclosure over them. The only collapsed thing is the check source, and opening it fetched and rendered the right code: checks/panel.spec.js:918, the test named 'a built rule wears one mark per tier'. That matters beyond this rule - it is the disclosure n-0115 is about, and it shows the refs recorded by today's checks run resolve correctly, because checks/panel.spec.js did not move in the split."
+    },
+    {
+      "rule": "panel.rules.evidence-visible",
+      "status": "pass",
+      "statement_hash": "sha256:65b84178c291",
+      "evidence": [
+        "runs/evidence/2026-08-28T02-44-57Z/detail-screenshots-modal.png"
+      ],
+      "reasoning": "The detail carries the latest ledger result per verify type, and the screenshots an agent run left behind open over the whole desk from the row that names them - the modal drew the identity evidence from 2026-08-27T16-19-56Z with each file's path as its caption and a Close control. The shots layer is its own module now (shots.js) and still renders inside the same shadow root rather than promoting itself into the top layer, which is the arrangement n-0086 forced."
+    },
+    {
+      "rule": "panel.rules.detail-slide",
+      "status": "pass",
+      "statement_hash": "sha256:493a83d3f0bd",
+      "evidence": [
+        "runs/evidence/2026-08-28T02-44-57Z/panel-rule-detail.png",
+        "runs/evidence/2026-08-28T02-44-57Z/one-pane-per-tab-back-to-rules.png"
+      ],
+      "reasoning": "Opening a rule slides the pane from the rail to that rule's detail and one control comes back - 'All rules'. Only one pane is visible at a time: measured rather than eyeballed, the detail sits at x=899 with the rail gone when the detail is open, and the previous/next arrows sit beside the back control."
+    },
+    {
+      "rule": "panel.rules.one-pane-per-tab",
+      "status": "pass",
+      "statement_hash": "sha256:7cbb341f16bd",
+      "evidence": [
+        "runs/evidence/2026-08-28T02-44-57Z/one-pane-per-tab-threads.png",
+        "runs/evidence/2026-08-28T02-44-57Z/one-pane-per-tab-back-to-rules.png"
+      ],
+      "reasoning": "Worth saying how this was checked, because a naive probe gets it wrong. With a rule open, switching to Threads shows the thread list and the rule detail leaves the DOM entirely; switching to Blueprints shows the server and blueprint list, and the detail node still EXISTS - which reads as a failure until you measure it. It sits at x=1281, one pixel past the panel's right edge, held off-screen by the slide track so that returning to Rules restores the rule you had open, which it did. Only the active tab's content is ever visible, which is what the statement asks."
+    },
+    {
+      "rule": "panel.threads.own-view",
+      "status": "pass",
+      "statement_hash": "sha256:faade3b887d1",
+      "evidence": [
+        "runs/evidence/2026-08-28T02-44-57Z/panel-tab-threads.png"
+      ],
+      "reasoning": "The Threads tab lists every thread on the blueprint with the three filters the command line uses, in the same words and with counts: Active 69, Awaiting you 61, All 117. Ended conversations are reachable through All. Each card carries its anchor, author, age, id, status chip and reply count. This pane is threads-list.js now and draws as it did inside the monolith."
+    },
+    {
+      "rule": "panel.threads.claim-never-accept",
+      "status": "pass",
+      "statement_hash": "sha256:7c4e1e2d1562",
+      "evidence": [
+        "runs/evidence/2026-08-28T02-44-57Z/toast-refuses-without-a-name.png"
+      ],
+      "reasoning": "Tested by trying to break it. With both identity fields emptied in Settings, pressing Verify on n-0115 refused: the panel said 'Verify and waive are recorded under a person's name - set it in Settings first' in amber under the actions, opened Settings with the username field focused, and wrote nothing. n-0115 is still 'addressed' on disk. The governance survived identity moving into state.js and the thread pane into thread-pane.js."
+    },
+    {
+      "rule": "panel.threads.reply-in-place",
+      "status": "pass",
+      "statement_hash": "sha256:a0dd8bb2f5b9",
+      "evidence": [
+        "runs/evidence/2026-08-28T02-44-57Z/panel-thread-panel.png"
+      ],
+      "reasoning": "A thread opens in the panel with its replies in order and the composer beneath them, and the lifecycle actions its state allows - Verify, Reopen, Waive for an addressed note. The byline under the box names who the reply will be recorded as."
+    },
+    {
+      "rule": "panel.identity.attribution-visible",
+      "status": "pass",
+      "statement_hash": "sha256:1b6a789fde73",
+      "evidence": [
+        "runs/evidence/2026-08-28T02-44-57Z/toast-refuses-without-a-name.png",
+        "runs/evidence/2026-08-28T02-44-57Z/panel-settings.png"
+      ],
+      "reasoning": "The identity is visible before it is used, and visibly absent when it is absent: with the fields cleared, the composer's byline changed from a handle to 'as set your name...', so the panel never let an action reach the ledger without first showing what it would be attributed to. n-0116 is open against this rule for the session strip's wording in the same state, and is unaffected by the refactor."
+    },
+    {
+      "rule": "panel.identity.default-actor",
+      "status": "pass",
+      "statement_hash": "sha256:6cf5b560bdde",
+      "evidence": [
+        "runs/evidence/2026-08-28T02-44-57Z/panel-settings.png"
+      ],
+      "reasoning": "Settings arrives filled in from git: 'topher' to record under, 'Topher Fangio' to show, with the note that records carry the username and the full name is only how you are shown. Both are editable and clearing either falls back to what git says. The keys, the override and the save moved into state.js in the split, and the migration from the legacy single field still runs from boot()."
+    },
+    {
+      "rule": "panel.start.choose-a-blueprint",
+      "status": "pass",
+      "statement_hash": "sha256:9f0ded825795",
+      "evidence": [
+        "runs/evidence/2026-08-28T02-44-57Z/tab-blueprints.png"
+      ],
+      "reasoning": "The Blueprints tab names the server, says which folder it is serving, and lists both blueprints under it by name with the description each carries - walkdown ('The tool itself...') and walkdown-example ('A waitlist app and its admin...') - with the current one selected. This is blueprints.js, the first pane to leave app.js and the first to import behaviour back out of it; it renders and selects as before."
+    },
+    {
+      "rule": "panel.delivery.framed-isolation",
+      "status": "pass",
+      "statement_hash": "sha256:967abb13513f",
+      "evidence": [
+        "runs/evidence/2026-08-28T02-44-57Z/panel-review.png"
+      ],
+      "reasoning": "The application under review has a viewport of its own inside walkdown's page - the stand-in lays itself out against the frame, its banner sits at the bottom of that frame rather than of the window, and nothing it draws reaches walkdown's chrome. The frame is built by buildAppFrame() from boot() now rather than at module top level, and is placed on the desk in the same rectangle as before."
+    },
+    {
+      "rule": "threads.conversation.thread-is-a-screen",
+      "status": "pass",
+      "statement_hash": "sha256:9971d7aaef65",
+      "evidence": [
+        "runs/evidence/2026-08-28T02-44-57Z/panel-thread-panel.png"
+      ],
+      "reasoning": "Opening a thread slides to a screen of its own with the full width of the panel, and the way back names where it goes - 'All threads' when the thread was opened from the thread list. Reading it did not cost the place it was opened from."
+    }
+  ]
+}
