@@ -1650,15 +1650,22 @@ const SIGN_SAY = {
  *   signed    a solid disc: their name is on the built thing
  *   approved  half a disc, filled from the bottom: half a signature, because
  *             approving the wording is not accepting the build
- *   stale     a small solid disc: the signature is still there but no longer
- *             covers what the rule now says, so it has shrunk back to a point
+ *   stale     a hollow ring around a point: the signature is still there but
+ *             no longer covers what the rule says, so it has pulled back from
+ *             the edge without vanishing
  *   none      an outline ring: the slot is there and empty
  *   sent-back a red ✗, not a dot - somebody looked and disagreed, which is
  *             the one thing on this strip that is not an absence
  *
- * The half fill is an inline gradient rather than a class: it is one
- * declaration used in one place, and a two-tone 5px box is not something the
- * utility vocabulary has a name for.
+ * Stale was a smaller solid disc first, and that was wrong. Size alone needs
+ * a neighbour to be read against, and the common case is one dot with nothing
+ * beside it - so a stale signature read as a signature, which is the exact lie
+ * `status.derived.stale-never-passes` exists to forbid. The ring differs from
+ * a solid disc in kind, not degree, and needs no reference to be seen.
+ *
+ * The half fill and the ring's centre are inline gradients rather than
+ * classes: each is one declaration used in one place, and a two-tone 5px box
+ * is not something the utility vocabulary has a name for.
  */
 function signoffDot(a, mine) {
   const tint = ROLE_TINT[a.role] ?? 'text-base-content';
@@ -1667,15 +1674,16 @@ function signoffDot(a, mine) {
   const shape = {
     signed: 'size-[5px] bg-current',
     approved: 'size-[5px] border border-current',
-    stale: 'size-[3px] bg-current',
+    stale: 'size-[5px] border border-current',
   }[a.state] ?? 'size-[5px] border border-current';
-  const half = a.state === 'approved'
-    ? ' style="background:linear-gradient(to top, currentColor 50%, transparent 50%)"'
-    : '';
+  const fill = {
+    approved: ' style="background:linear-gradient(to top, currentColor 50%, transparent 50%)"',
+    stale: ' style="background:radial-gradient(currentColor 0 1px, transparent 1px)"',
+  }[a.state] ?? '';
   // Owed slots dim when the rule is not waiting on you, exactly as the tier
   // glyphs beside them do — the strip has one language for "your turn".
   const dim = a.state !== 'signed' && !mine ? ' opacity-60' : '';
-  return `<span class="block rounded-full ${shape} ${tint}${dim}"${half}></span>`;
+  return `<span class="block rounded-full ${shape} ${tint}${dim}"${fill}></span>`;
 }
 
 /*
@@ -1726,7 +1734,11 @@ function stripTip(tiers, acceptance) {
   ]);
   const line = ([label, said]) =>
     `<span class="opacity-60">${esc(label)}</span><span>${esc(said)}</span>`;
-  return `<span class="tooltip-content w-60 whitespace-normal text-left text-[11px] leading-snug"
+  // z-50 is load-bearing: daisyUI leaves the bubble at z-index 2, and every
+  // rule below this one in the list paints after it, so an opaque tooltip on
+  // any row but the last was being overdrawn by its neighbours and read as
+  // transparent - the text of four rules stacked on top of each other.
+  return `<span class="tooltip-content z-50 w-60 whitespace-normal text-left text-[11px] leading-snug"
     data-testid="panel.rule-tiers-tip"><span class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5">${
       cells.map(line).join('')}${signs.length
         ? `<span class="col-span-2 mt-0.5 opacity-40">accepted by</span>${signs.map(line).join('')}`
