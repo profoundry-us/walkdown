@@ -4,25 +4,69 @@ author: agent
 created: 2026-08-28T03:40:00Z
 anchor:
   rule: panel.rules.tiers-at-a-glance
-status: open
-body: "A design question left open by a fix. The human tier's latest run can be
-  a SIGN-OFF rather than a verdict - `approved` when somebody accepted the
+status: addressed
+body: >-
+  A design question left open by a fix. The human tier's latest run can be a
+  SIGN-OFF rather than a verdict - `approved` when somebody accepted the
   wording, `refining` when they sent it back - and the panel's mark map knew
   neither. Both fell through to the `na` mark, so a rule a human had just put
-  their name to drew as a greyed-out check meaning \"this rule does not ask for
-  a human\": the one reading that is certainly wrong. The CLI has known these
-  two states all along and draws them as ✍︎ and ✎︎, which is how the
-  divergence went unnoticed.
+  their name to drew as a greyed-out check meaning "this rule does not ask for a
+  human": the one reading that is certainly wrong. The CLI has known these two
+  states all along and draws them as ✍︎ and ✎︎, which is how the divergence went
+  unnoticed.
 
   Fixed tonight to stop it lying - both now draw ✎ in warning colour and count
-  as owed, because what the rail needs to say is that the human tier still
-  owes a verdict. But ✎ is a guess, and two states sharing one glyph is a
-  judgement about what the rail is for rather than a fact about the ledger.
-  The single-width constraint from n-0109 is real: three marks of three widths
-  do not line up down a list of ninety rules, so whatever replaces it has to
-  be one cell wide.
+  as owed, because what the rail needs to say is that the human tier still owes
+  a verdict. But ✎ is a guess, and two states sharing one glyph is a judgement
+  about what the rail is for rather than a fact about the ledger. The
+  single-width constraint from n-0109 is real: three marks of three widths do
+  not line up down a list of ninety rules, so whatever replaces it has to be one
+  cell wide.
 
   Worth knowing how it surfaced, because the machinery worked exactly as
   intended: tonight's sweep changed which rows the check for this rule sampled,
   the check hit a state its glyph map did not know, and it failed loudly - which
-  is what its own comment says it exists to do."
+  is what its own comment says it exists to do.
+replies:
+  - author: agent
+    created: 2026-08-28T20:30:48Z
+    body: >-
+      Answered, and by deletion rather than by picking a glyph.
+
+
+      The question assumed a human TIER that still owed a verdict. There is no
+      human tier now - acceptance is a set of roles, each with its own slot - so
+      the two states this thread was about, approved and refining, are no longer
+      things the tier strip has to say. They are states of a signature, and they
+      are drawn in the signature's own slot: a ring filled from the bottom for
+      approved, a red cross for sent-back. No pencil, no shared glyph, no guess.
+
+
+      The n-0109 single-width constraint held and drove the rest. Topher chose
+      one language for the whole rail: every rule now wears the same three slots
+      - checks, agent, then one dot per role that must sign - built or not. The
+      lifecycle glyphs are gone outright: the square for designed, both pencils,
+      and the lone circle for built-but-unwalked. Lifecycle is read off how much
+      of the strip is filled instead. That removes the second display mode which
+      was the real defect here - a lone mark sitting where every neighbouring
+      row had three.
+
+
+      Two marks also changed meaning. A tier the rule does not ask for was a
+      faded check; it is now the quietest dot on the strip, because a
+      hollowed-out tick still reads tick-shaped at a glance and on an excused
+      rule that is the wrong first impression. And a stale signature was drawn
+      as a smaller filled dot, which needed a neighbour to be read against - it
+      is now a ring around a point, different in kind rather than in degree.
+
+
+      The rule's own statement is rewritten to match, as is
+      panel.rules.lifecycle-legible, and the check now asserts that an unbuilt
+      rule wears the strip rather than that it does not.
+
+
+      One thing this leaves for design, which I cannot touch:
+      prototype/screens/review.html:132 still prints the old legend - 'shape =
+      lifecycle (square designed, hand approved, pencil refining, circle built,
+      check/cross verdict)'. Every glyph named there is now gone from the build.
+      The prototype is design's to change.

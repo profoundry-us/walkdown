@@ -1034,11 +1034,24 @@ test(
         .toEqual(acceptance.map((a) => `${a.role}:${a.state}`).sort());
     }
 
-    // And a rule that is not built keeps the single lifecycle shape it had:
-    // an unbuilt rule has no evidence tiers to report on.
+    /*
+     * And an UNBUILT rule wears the same strip. It used to wear a lifecycle
+     * glyph of its own instead, which is what this check asserted - one lone
+     * mark where every neighbouring row had three. That was the defect, not
+     * the design: the column stopped being a column exactly on the rows that
+     * most needed scanning past. So the claim inverts. Both evidence tiers
+     * read `unbuilt` (nothing to judge until there is a build), and the
+     * signature slots are drawn as they are anywhere else, because a rule can
+     * be approved before it is built and that is worth seeing.
+     */
     const unbuilt = bp.rows.find((r) => !r.built);
-    await expect(list.locator(`[data-rule="${unbuilt.rule}"]`).getByTestId('panel.rule-tiers'))
-      .toHaveCount(0);
+    expect(unbuilt, 'the blueprint has an unbuilt rule to read').toBeTruthy();
+    const unbuiltStrip = list.locator(`[data-rule="${unbuilt.rule}"]`).getByTestId('panel.rule-tiers');
+    await expect(unbuiltStrip, 'an unbuilt rule wears the strip too').toHaveCount(1);
+    await expect(unbuiltStrip).toHaveAttribute('data-tiers', 'checks:unbuilt agent:unbuilt');
+    const unbuiltSigns = list.locator(`[data-rule="${unbuilt.rule}"]`).getByTestId('panel.rule-signoff');
+    expect(((await unbuiltSigns.getAttribute('data-signoff')) ?? '').split(' ').sort())
+      .toEqual((unbuilt.acceptance ?? []).map((a) => `${a.role}:${a.state}`).sort());
   }
 );
 

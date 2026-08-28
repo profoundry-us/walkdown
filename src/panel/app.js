@@ -53,7 +53,7 @@ import { backFromThread, threadCard, threadPane } from './thread-pane.js';
 import { checkRefs, detailPane, evidenceRows, loadCheckSource } from './rule-detail.js';
 import { screensPane, wireScreens } from './screens.js';
 import {
-  listPane, paintRules, ruleState, searchBox, tierMarks, wireRuleRows, wireSearch,
+  listPane, paintRules, searchBox, tierMarks, wireRuleRows, wireSearch,
 } from './rules-list.js';
 import { threadFilterBar, threadsMatching, threadsPane } from './threads-list.js';
 import { frameLoading, hideVeil, placeVeil, screenLabel, veilIsUp } from './veil.js';

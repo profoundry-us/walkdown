@@ -1452,26 +1452,28 @@ function screensPane() {
  */
 
 /**
- * The list glyph: SHAPE carries the lifecycle, COLOR carries ownership.
- * □ designed · ✍︎ approved, awaiting build · ✎︎ refining · ○ built,
- * awaiting verification · ✓ verified · ✗ failing. Warning tint plus the
- * right-edge badge mean the rule waits on you, and the badge names the
- * work: sign for a sign-off, walk for a walkdown. The pencils carry
- * U+FE0E - as emoji they take their own colors and the ownership channel
- * goes silent.
+ * Where a rule stands, in a sentence, for the row's own title.
+ *
+ * This used to also pick a GLYPH - □ designed, ✍︎ approved, ✎︎ refining, ○
+ * built-unverified - drawn alone in the space a built rule fills with three
+ * marks. That second display mode was the whole trouble: a lone yellow □ in a
+ * column of ✓✓● read as an alarm about a rule whose only sin was not being
+ * built yet, and the two pencils were indistinguishable at 12px anyway.
+ *
+ * There is one language now (see tierMarks). Lifecycle is not a mark of its
+ * own; it is what the strip already says - nothing filled is designed, half a
+ * dot is approved, owed glyphs are built-but-unwalked, all filled is verified.
+ * So this returns only the words, and the shapes are somebody else's job.
  */
-function ruleState(row, mine) {
-  if (row.verdict === 'pass') return { glyph: '✓', cls: 'text-success', why: 'verified' };
-  if (row.verdict === 'fail') return { glyph: '✗', cls: 'text-error', why: 'failing — the build was rejected' };
-  const tint = mine ? 'text-warning' : 'opacity-30';
+function ruleWhy(row, mine) {
+  if (row.verdict === 'pass') return 'verified';
+  if (row.verdict === 'fail') return 'failing — the build was rejected';
   if (!row.built) {
-    if (row.signoff === 'refining')
-      return { glyph: '✎︎', cls: 'text-warning', why: 'refining — sent back for spec rework' };
-    if (row.signoff === 'approved')
-      return { glyph: '✍︎', cls: 'opacity-60', why: 'approved — spec signed off, awaiting build' };
-    return { glyph: '□', cls: tint, why: `designed — awaiting ${mine ? 'your ' : ''}sign-off` };
+    if (row.signoff === 'refining') return 'refining — sent back for spec rework';
+    if (row.signoff === 'approved') return 'approved — spec signed off, awaiting build';
+    return `designed — awaiting ${mine ? 'your ' : ''}sign-off`;
   }
-  return { glyph: '○', cls: tint, why: mine ? 'built — awaiting your walkdown' : 'built — awaiting verification' };
+  return mine ? 'built — awaiting your walkdown' : 'built — awaiting verification';
 }
 
 /*
@@ -1557,27 +1559,21 @@ const TIER_MARK = {
   skipped: ['–', 'opacity-40', 'skipped'],
   blocked: ['⊘', 'text-warning', 'blocked'],
   /*
-   * Sign-off is not a verdict. A human can approve the wording of a rule, or
-   * send it back for refining, without ever walking the built thing - and when
-   * that is the latest human run, the human TIER still owes a verdict. Both
-   * states were missing here, so they fell through to `na` and a rule somebody
-   * had signed drew as one nobody had to: the mark said "this rule does not
-   * ask for a human" about a rule a human had just put their name to.
+   * The two ways a tier can have no verdict coming, sharing one mark.
    *
-   * One glyph for the pair on purpose. The distinction between approved and
-   * refining is about the wording and belongs in the detail; what the rail
-   * needs to say is that the human tier is still owed. Which glyph it should
-   * be is a design question - n-0118 asks it.
+   * `na` is a tier the rule never asks for - excused, with a reason somebody
+   * wrote. `unbuilt` is a tier that has nothing to judge because the rule has
+   * not been built. Neither is work owed and neither is news, so both draw the
+   * quietest thing on the strip; which one it is, and why, is a line in the
+   * tooltip, and the tooltip is now on every row.
+   *
+   * `na` was a faded ✓ to keep the columns aligned. A dot aligns just as well
+   * and does not spend the panel's most emphatic glyph on the absence of a
+   * claim - a hollowed-out tick still reads tick-shaped at a glance, and on
+   * an excused rule that is exactly the wrong first impression.
    */
-  approved: ['✎︎', 'text-warning', 'the wording is signed off — no walkdown verdict yet'],
-  refining: ['✎︎', 'text-warning', 'sent back for refining — no walkdown verdict yet'],
-  /*
-   * A tier the rule never asked for is a hollowed-out version of the same
-   * check, not a different glyph. Three marks of three different widths do
-   * not line up down a list of ninety rules, and a row you cannot scan in a
-   * column is not a row you can scan at all (n-0109).
-   */
-  na: ['✓', 'opacity-20', 'not applicable — this rule does not ask for it'],
+  na: ['·', 'opacity-25', 'not applicable — this rule does not ask for it'],
+  unbuilt: ['·', 'opacity-25', 'nothing to judge yet — the rule is not built'],
 };
 
 /*
@@ -1596,7 +1592,7 @@ function checksTier(row) {
 }
 
 /** Tier states that are work somebody still owes, rather than settled news. */
-const TIER_OWED = new Set(['never', 'stale', 'blocked', 'approved', 'refining']);
+const TIER_OWED = new Set(['never', 'stale', 'blocked']);
 
 /*
  * A stale mark has two causes now, and saying the wrong one is worse than
@@ -1672,13 +1668,13 @@ function signoffDot(a, mine) {
   if (a.state === 'sent-back')
     return `<span class="text-[8px] leading-none text-error">✗</span>`;
   const shape = {
-    signed: 'size-[5px] bg-current',
-    approved: 'size-[5px] border border-current',
-    stale: 'size-[5px] border border-current',
-  }[a.state] ?? 'size-[5px] border border-current';
+    signed: 'size-[6px] bg-current',
+    approved: 'size-[6px] border border-current',
+    stale: 'size-[6px] border border-current',
+  }[a.state] ?? 'size-[6px] border border-current';
   const fill = {
     approved: ' style="background:linear-gradient(to top, currentColor 50%, transparent 50%)"',
-    stale: ' style="background:radial-gradient(currentColor 0 1px, transparent 1px)"',
+    stale: ' style="background:radial-gradient(currentColor 0 1.25px, transparent 1.25px)"',
   }[a.state] ?? '';
   // Owed slots dim when the rule is not waiting on you, exactly as the tier
   // glyphs beside them do — the strip has one language for "your turn".
@@ -1700,11 +1696,11 @@ function signoffStack(acceptance, mine) {
   const slots = all.length > MAX_SLOTS
     ? [all[0], { role: '+', state: 'more', n: all.length - 2 }, all.at(-1)]
     : all;
-  return `<span class="flex w-3 shrink-0 flex-col items-center justify-center"
+  return `<span class="flex w-4 shrink-0 flex-col items-center justify-center"
     data-testid="panel.rule-signoff" data-signoff="${esc(all.map((a) => `${a.role}:${a.state}`).join(' '))}"
-    >${slots.map((a) => `<span class="flex h-[7px] items-center justify-center">${
+    >${slots.map((a) => `<span class="flex h-[9px] items-center justify-center">${
       a.state === 'more'
-        ? `<span class="text-[7px] leading-none opacity-60">+${a.n}</span>`
+        ? `<span class="text-[8px] leading-none opacity-60">+${a.n}</span>`
         : signoffDot(a, mine)}</span>`).join('')}</span>`;
 }
 
@@ -1746,29 +1742,34 @@ function stripTip(tiers, acceptance) {
 }
 
 function tierMarks(row, mine = false) {
-  const tiers = [
-    ['checks', checksTier(row), null],
-    ['agent', row.agent?.state ?? 'na', row.agent],
-  ];
+  /*
+   * An unbuilt rule has the same three slots as any other, both evidence
+   * tiers reading "nothing to judge yet". It is not that the tiers are
+   * absent - they are owed by the BUILD, which does not exist, and saying so
+   * in the same three positions is what lets the eye run down the column.
+   */
+  const tiers = row.built
+    ? [['checks', checksTier(row), null], ['agent', row.agent?.state ?? 'na', row.agent]]
+    : [['checks', 'unbuilt', null], ['agent', 'unbuilt', null]];
   // title="" is not a leftover: the row around this is a button carrying its
   // own native title, and a native tooltip is inherited from the nearest
   // ancestor that has one. An empty title stops that here, so hovering the
   // strip opens the strip's bubble and nothing else.
-  return `<span class="tooltip tooltip-right flex w-8 shrink-0 items-center justify-center gap-px text-[10px] leading-none"
+  return `<span class="tooltip tooltip-right flex w-11 shrink-0 items-center justify-center gap-0.5 text-[12px] leading-none"
     title="" data-testid="panel.rule-tiers" data-tiers="${esc(tiers.map((t) => `${t[0]}:${t[1]}`).join(' '))}"
     >${stripTip(tiers, row.acceptance)}${tiers.map(([, state, cell]) => {
       const [glyph, cls] = TIER_MARK[state] ?? TIER_MARK.na;
-      return `<span class="inline-block w-3 text-center ${
+      return `<span class="inline-block w-4 text-center ${
         TIER_OWED.has(state) && !mine ? 'opacity-60' : cls}">${glyph}</span>`;
     }).join('')}${signoffStack(row.acceptance, mine)}</span>`;
 }
 
 function listPane() {
   if (!S.data.rows.length)
-    return '<p class="p-3.5 text-[12.5px] opacity-40">No rules in this blueprint.</p>';
+    return '<p class="p-3.5 text-[13.5px] opacity-40">No rules in this blueprint.</p>';
   const rows = matchingRows();
   if (!rows.length)
-    return `<p class="p-3.5 text-[12.5px] opacity-40" data-testid="panel.rules-empty">No rule matches ${
+    return `<p class="p-3.5 text-[13.5px] opacity-40" data-testid="panel.rules-empty">No rule matches ${
       esc(S.ruleQuery.trim())}.</p>`;
   let html = '';
   let story = null;
@@ -1778,22 +1779,38 @@ function listPane() {
       html += `<div class="px-3.5 pb-1 pt-2.5 ${LBL}">${esc(story)}</div>`;
     }
     const mine = needsYou(row.rule);
+    /*
+     * A verdict picked this sitting is the one thing that still draws its own
+     * mark instead of the strip, and deliberately: it is not in the ledger
+     * yet. Standing outside the strip's vocabulary is how the row says the
+     * judgment is yours and unfiled.
+     */
     const picked = S.session?.verdicts[row.rule];
-    const state = picked
-      ? { glyph: { pass: '✓', fail: '✗', approved: '✍︎', refining: '✎︎' }[picked],
-          cls: { pass: 'text-success', fail: 'text-error', approved: 'text-success', refining: 'text-warning' }[picked],
-          why: 'judged this session' }
-      : ruleState(row, mine);
+    const why = picked ? 'judged this session' : ruleWhy(row, mine);
     const owes = mine && !picked ? (row.built ? 'walk' : 'sign') : '';
     const short = shortName(row);
     const thr = threadsFor(row.rule).length;
-    html += `<button class="flex w-full cursor-pointer items-center gap-2 px-3.5 py-1.5 text-left text-[13px] hover:bg-base-200"
-      data-rule="${esc(row.rule)}" title="${esc(row.rule)} — ${esc(state.why)}">
-      ${!picked && row.built ? tierMarks(row, mine)
-        : `<span class="w-8 shrink-0 text-center ${state.cls}">${state.glyph}</span>`}
+    /*
+     * Two right-hand columns, always drawn, even when empty. What you owe and
+     * how much is being said about a rule are different questions, and run
+     * together in one warning-yellow string they read as one word - "walk 2"
+     * looked like a quantity of walking. Fixed widths so both answers stack
+     * into columns you can run an eye down; the thread count in plain ink at
+     * half strength, because it is context rather than a claim on you.
+     */
+    html += `<button class="flex w-full cursor-pointer items-center gap-2.5 px-3.5 py-2 text-left text-[14px] hover:bg-base-200"
+      data-rule="${esc(row.rule)}" title="${esc(row.rule)} — ${esc(why)}">
+      ${picked
+        ? `<span class="w-11 shrink-0 text-center ${
+            { pass: 'text-success', fail: 'text-error', approved: 'text-success',
+              refining: 'text-warning' }[picked]}">${
+            { pass: '✓', fail: '✗', approved: '✍︎', refining: '✎︎' }[picked]}</span>`
+        : tierMarks(row, mine)}
       <span class="truncate">${esc(short)}</span>
-      ${owes || thr ? `<span class="ml-auto shrink-0 text-[10.5px] font-semibold text-warning">${
-        owes}${thr ? ` ${thr}⚑` : ''}</span>` : ''}
+      <span class="ml-auto flex shrink-0 items-center gap-2 text-[11.5px] font-semibold">
+        <span class="w-7 text-right text-warning">${owes}</span>
+        <span class="w-7 text-right font-normal text-base-content/45">${thr ? `${thr}⚑` : ''}</span>
+      </span>
     </button>`;
   }
   return html;

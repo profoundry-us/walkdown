@@ -551,21 +551,21 @@ stories:
 
       - id: panel.rules.lifecycle-legible
         origin: thread:n-0054
-        statement: The list glyph's shape carries a rule's lifecycle - designed, approved awaiting build, refining, built awaiting verification, verified, failing - and its color carries ownership, so designed-but-unsigned and built-but-unpassed are never the same mark.
+        statement: A rule's lifecycle is read off the same marks every other rule wears, never off a shape of its own - designed, approved, built-but-unwalked, verified and failing are all legible from how much of the strip is filled - because a lifecycle drawn in its own vocabulary put a lone mark where every neighbouring row had three, and a rule whose only fault was not being built yet read as an alarm.
         signoff: [eng, product]
         screens: [review]
         steps:
           given:
             - A blueprint holding rules in every lifecycle state, the Rules tab open
           when:
-            - Reading the glyphs in anchor `panel.rules-list`
+            - Reading anchor `panel.rules-list`
           then:
-            - An unbuilt, unsigned rule shows the empty square; a built rule shows the three tier marks of anchor `panel.rule-tiers` in the glyph's place, where a tier nothing has run yet is the empty circle - distinct shapes, not shades
-            - An approved rule shows the signing hand until build evidence lands; a refining rule shows the pencil
+            - Every rule draws the marks of anchor `panel.rule-tiers`, built or not, in the same positions
+            - An unbuilt rule's evidence tiers read as having nothing to judge yet, rather than as failing or as absent
+            - An approved rule is legible from its signature marks alone, with no separate glyph for it
             - A rule waiting on the reviewer is warning-tinted and its badge names the work - sign or walk
             - Each row's tooltip spells the state out in words
-            - The pencils render as text, never as colored emoji, so the color channel keeps speaking
-          statement_hash: sha256:817b59a5a95a
+          statement_hash: sha256:64336fe46850
 
       - id: panel.rules.search-the-list
         origin: thread:n-0108
@@ -588,7 +588,7 @@ stories:
           statement_hash: sha256:87d61dee919f
       - id: panel.rules.tiers-at-a-glance
         origin: thread:n-0109
-        statement: A built rule shows one mark per evidence tier - checks, agent, human, in that order and always all three - so which tiers a rule rests on, and which it is still missing, can be read off the list rather than opened one rule at a time.
+        statement: Every rule shows one mark per evidence tier - checks then agent - and beside them one dot per role that must sign, so which evidence a rule rests on, and whose signature it is still waiting for, can be read off the list rather than opened one rule at a time.
         verify: [checks]
         signoff: [eng, product]
         screens: [review]
@@ -598,13 +598,13 @@ stories:
           when:
             - Reading anchor `panel.rule-tiers` on a built rule in anchor `panel.rules-list`
           then:
-            - Three marks are drawn, always, in the order checks, agent, human
+            - Two tier marks are drawn, always, in the order checks then agent
             - A tier that passed is a green check, and one that failed is a red cross
             - A tier the rule asks for that no run has touched, and a pass whose statement has since moved, each keep a shape of their own - so a missing tier is legible as missing rather than as absent
-            - A tier the rule does not ask for is greyed out
-            - Each mark says in words which tier it is and what state it is in
-            - A rule that is not built keeps the single lifecycle shape it had
-          statement_hash: sha256:3e8240139040
+            - A tier the rule does not ask for, and a tier with nothing to judge because the rule is unbuilt, are the quietest mark on the strip - and the tooltip says which of the two it is
+            - Beside the tiers, one slot per role the rule names, in a fixed order, filled to the extent that role has signed
+            - One tooltip covers the whole strip and names every tier and every role in words
+          statement_hash: sha256:cac7a0be0702
       - id: panel.rules.headless-says-so
         origin: thread:n-0061
         statement: Opening a rule that has no screen clears the surface under review - an unmistakable cover in walkdown's own voice takes the sheet's place - because a lingering page reads as the rule's screen, and the reviewer cannot tell a right screen from a rule that has none.
