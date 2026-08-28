@@ -280,7 +280,13 @@ export function detailPane() {
                  Verify all ${threads.filter((t) => t.status === 'addressed').length}</button>`
             : ''}
         </div>
-        ${threads.map(threadCard).join('')}</div>` : ''}
+        <!-- Wrapped in an arrow, never passed bare: map hands its callback the
+             array INDEX as a second argument, and threadCard's second
+             parameter is the provenance line. Passed bare, every card after
+             the first printed its own position there and the whole row
+             silently became a click target - a one-based counter nobody asked
+             for, starting at the second thread because index 0 is falsy. -->
+        ${threads.map((t) => threadCard(t)).join('')}</div>` : ''}
       <!--
         A rule is a place to have a conversation, and until now it was only
         that DURING a walkdown - the feedback box belongs to the sitting, and

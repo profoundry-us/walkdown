@@ -1201,3 +1201,50 @@ test(
     await endSession(page);
   }
 );
+
+
+/* ---- a card says where it belongs only where that is not obvious --------- */
+
+test(
+  'threads name their anchor on the Threads tab and never under the rule itself',
+  { tag: '@rule:panel.threads.context-not-repeated' },
+  async ({ page }) => {
+    await review(page);
+    await endSession(page);
+    const { rows, threads } = await payload(page);
+
+    /*
+     * A rule carrying MORE THAN ONE thread, because the defect this check
+     * exists for skipped the first card. `threads.map(threadCard)` handed the
+     * callback the array index as its second argument - which is the card's
+     * `where` - so every card after the first printed its own position as a
+     * provenance line. Index 0 is falsy, so the first card looked right and
+     * the list grew a one-based counter starting at the second thread.
+     */
+    const TERMINAL = ['verified', 'incorporated', 'waived'];
+    const listed = new Set((rows ?? []).map((r) => r.rule));
+    const counts = {};
+    for (const t of threads ?? [])
+      if (!TERMINAL.includes(t.status) && t.anchor?.rule)
+        counts[t.anchor.rule] = (counts[t.anchor.rule] ?? 0) + 1;
+    const rule = Object.keys(counts).find((r) => counts[r] > 1 && listed.has(r));
+    expect(rule, 'need a listed rule carrying several live threads').toBeTruthy();
+
+    await openRule(page, rule);
+    const under = page.getByTestId('detail.threads');
+    await expect(under.locator('.wd-row').first(), 'the rule draws its threads').toBeVisible();
+    await expect(
+      under.getByTestId('thread.where'),
+      'under a rule, no card repeats the rule it is anchored to'
+    ).toHaveCount(0);
+
+    // And the same card on the Threads tab, which is scoped to nothing, does
+    // carry it - otherwise this check would pass on a card that never draws
+    // the line at all.
+    await page.getByTestId('detail.back').click();
+    await page.getByTestId('panel.tabs').getByText(/Threads/).click();
+    await expect(
+      page.getByTestId('panel.threads-list').getByTestId('thread.where').first()
+    ).toBeVisible();
+  }
+);

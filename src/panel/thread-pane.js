@@ -31,7 +31,7 @@ export function threadCard(t, where = null) {
   // rule above it is already the context.
   return `<div class="wd-row px-3.5 py-2${where ? ' cursor-pointer' : ''}"${
     where ? ` data-open-thread="${esc(t.id)}"` : ''}>
-    ${where ? `<div class="mb-1 truncate text-[11px] opacity-45">${esc(where)}</div>` : ''}
+    ${where ? `<div class="mb-1 truncate text-[11px] opacity-45" data-testid="thread.where">${esc(where)}</div>` : ''}
     <div class="wd-msg">
       ${MSG.avatar(who)}
       <div class="wd-col min-w-0">

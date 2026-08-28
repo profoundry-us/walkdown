@@ -1046,7 +1046,7 @@ function threadCard(t, where = null) {
   // rule above it is already the context.
   return `<div class="wd-row px-3.5 py-2${where ? ' cursor-pointer' : ''}"${
     where ? ` data-open-thread="${esc(t.id)}"` : ''}>
-    ${where ? `<div class="mb-1 truncate text-[11px] opacity-45">${esc(where)}</div>` : ''}
+    ${where ? `<div class="mb-1 truncate text-[11px] opacity-45" data-testid="thread.where">${esc(where)}</div>` : ''}
     <div class="wd-msg">
       ${MSG.avatar(who)}
       <div class="wd-col min-w-0">
@@ -1882,7 +1882,13 @@ function detailPane() {
                  Verify all ${threads.filter((t) => t.status === 'addressed').length}</button>`
             : ''}
         </div>
-        ${threads.map(threadCard).join('')}</div>` : ''}
+        <!-- Wrapped in an arrow, never passed bare: map hands its callback the
+             array INDEX as a second argument, and threadCard's second
+             parameter is the provenance line. Passed bare, every card after
+             the first printed its own position there and the whole row
+             silently became a click target - a one-based counter nobody asked
+             for, starting at the second thread because index 0 is falsy. -->
+        ${threads.map((t) => threadCard(t)).join('')}</div>` : ''}
       <!--
         A rule is a place to have a conversation, and until now it was only
         that DURING a walkdown - the feedback box belongs to the sitting, and
