@@ -320,7 +320,10 @@ function cmdStatus(args) {
   const drafts = listDrafts(blueprint.dir);
 
   if (values.json) {
-    console.log(JSON.stringify({ targets, rows, drift: derived.drift, attention: derived.attention, drafts, activeThreads: listThreads(blueprint) }, null, 2));
+    // `sweeps` rides along because the JSON is the surface agents read
+    // (blueprint/AGENTS.md), and it was the one place an open sweep - its
+    // date, its reason, what it still owes - could not be seen at all.
+    console.log(JSON.stringify({ targets, rows, drift: derived.drift, attention: derived.attention, sweeps: derived.sweeps, drafts, activeThreads: listThreads(blueprint) }, null, 2));
     return end(rows.some((r) => r.verdict === 'fail') ? 1 : 0);
   }
 
@@ -372,8 +375,16 @@ function cmdStatus(args) {
       : `${green('SWEEP')} ${s.tier} on ${s.target} — ${s.done}/${s.of}, complete`;
     console.log(`\n  ${head}`);
     console.log(dim(`  ${s.runId}${s.actor ? ` by ${s.actor}` : ''} — ${s.why ?? 'no reason recorded'}`));
-    for (const rule of s.owed.slice(0, 12)) console.log(`  ◇ ${rule}`);
-    if (s.owed.length > 12) console.log(dim(`  +${s.owed.length - 12} more`));
+    /*
+     * Every one of them, uncapped. A sweep's owed list IS the work - the rule
+     * it answers says they are "listed as work, not merely counted" - and the
+     * first version printed twelve and `+59 more`, which put fifty-nine rules
+     * beyond reach of anyone reading the report. Nothing else in the report
+     * carries them either: the attention queue has no action for a rule a
+     * sweep put back on the board. A long list during a sweep is the honest
+     * shape of a sweep.
+     */
+    for (const rule of s.owed) console.log(`  ◇ ${rule}`);
   }
 
   const HOWTO = {

@@ -121,8 +121,8 @@ export const TIER_MARK = {
    * needs to say is that the human tier is still owed. Which glyph it should
    * be is a design question - n-0118 asks it.
    */
-  approved: ['✎', 'text-warning', 'the wording is signed off — no walkdown verdict yet'],
-  refining: ['✎', 'text-warning', 'sent back for refining — no walkdown verdict yet'],
+  approved: ['✎︎', 'text-warning', 'the wording is signed off — no walkdown verdict yet'],
+  refining: ['✎︎', 'text-warning', 'sent back for refining — no walkdown verdict yet'],
   /*
    * A tier the rule never asked for is a hollowed-out version of the same
    * check, not a different glyph. Three marks of three different widths do

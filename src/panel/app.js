@@ -1844,7 +1844,29 @@ function sayVerdict(msg) {
 
 /** File the feedback box's text as a note on the rule; null on refusal. */
 async function postRuleNote(rule, body) {
-  const author = (S.session.actor ?? '').trim() || undefined;
+  /*
+   * Refuse rather than let the server choose a name for us.
+   *
+   * This sent `author: undefined` when the sitting had no actor, the field
+   * dropped out of the JSON, and the server filled it in from the machine's
+   * own username - so a note went into the ledger under a name the panel had
+   * never put on screen. `panel.identity.attribution-visible` says a defaulted
+   * identity is always visible BEFORE it is used, and this was the one path
+   * that used one nobody had seen. Finish already refused; the note-filing
+   * half did not, so a fail could be recorded, and its reason attributed,
+   * under a stranger.
+   *
+   * Found by an agent walkdown on 2026-08-28 emptying Settings and pressing
+   * Fail. n-0116 had looked at the same screen and judged it harmless on the
+   * belief that every attributed action was refused; that belief was true of
+   * every path but this one.
+   */
+  const author = (S.session.actor ?? '').trim();
+  if (!author || author === 'agent') {
+    sayVerdict('A note is recorded under a person\u2019s name \u2014 set it in Settings (the gear).');
+    openActorSettings();
+    return null;
+  }
   const res = await fetch(api('/api/threads'), {
     method: 'POST', headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ kind: 'note', author, body, anchor: { rule } }),

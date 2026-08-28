@@ -953,7 +953,7 @@ test(
       pass: '✓', fail: '✗', stale: '~', never: '○', skipped: '–', blocked: '⊘', na: '✓',
       // Sign-off states: the human tier's latest run can be an approval of the
       // wording rather than a verdict on the build, and the tier still owes one.
-      approved: '✎', refining: '✎',
+      approved: '✎︎', refining: '✎︎',
     };
 
     const built = bp.rows.filter((r) => r.built);
