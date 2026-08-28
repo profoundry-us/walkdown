@@ -75,7 +75,9 @@ stories:
       - id: waitlist.join.visual-match
         origin: prototype
         statement: The join and confirmation screens match the prototype's layout, hierarchy, and copy.
-        verify: [agent, human]
+        signoff: [eng, product]
+        unverifiable:
+          checks: Whether one screen resembles another is a judgment about how it looks. A check can assert that every element is present and still pass on a page nobody would call a match, so the cheapest tier here is the one most able to lie. The agent looks, and a person signs.
         screens: [waitlist-join, waitlist-confirm]
         steps:
           statement_hash: "sha256:837d34b83fb1"

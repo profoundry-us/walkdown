@@ -131,3 +131,121 @@ test('the in-repo example blueprint lints clean (without runner)', () => {
   assert.equal(findings.filter(known).length, 1);
   assert.equal(exitCode, 0);
 });
+
+/*
+ * The schema lint for the inverted evidence model. Each of these writes a rule
+ * with one thing wrong with it and asks what lint says - a fixture per case,
+ * because a rule carrying three mistakes at once cannot show which finding
+ * belongs to which.
+ */
+function ruleFixture(dir, body) {
+  const bp = join(dir, 'blueprint');
+  mkdirSync(join(bp, 'features'), { recursive: true });
+  writeFileSync(join(bp, 'walkdown.yml'), 'project: fixture\n');
+  writeFileSync(
+    join(bp, 'features', 'demo.yml'),
+    ['feature: demo', 'stories:', '  - id: demo.main', '    rules:',
+      '      - id: demo.main.thing', '        statement: The visitor can do the thing.',
+      ...body].join('\n')
+  );
+  return lint(loadBlueprint(bp), { checks: false }).findings;
+}
+const REAL_EXCUSE = 'The control is the browser toolbar, which no tool an agent drives can reach.';
+
+test('a signoff list that omits eng is flagged as a file that lies @rule:status.acceptance.signoff-defaults-to-eng', () => {
+  // signoffList adds eng regardless, so the rule is fine and the FILE is not:
+  // it describes a rule that engineering does not sign, and no such rule can
+  // exist. The reader is the one misled, which is why lint says so rather
+  // than repairing it quietly.
+  const findings = ruleFixture(join(root, 'signoff-no-eng'), ['        signoff: [product]']);
+  const f = findings.filter((x) => x.category === 'signoff');
+  assert.equal(f.length, 1, JSON.stringify(findings));
+  assert.equal(f[0].level, 'warn');
+  assert.match(f[0].message, /omits eng/);
+
+  // A list that names eng is silent, in either order.
+  assert.deepEqual(
+    ruleFixture(join(root, 'signoff-ok'), ['        signoff: [eng, product]'])
+      .filter((x) => x.category === 'signoff'), []);
+
+  // A role no run can be recorded under can never be satisfied - the rule
+  // would wait forever for a signature the ledger cannot accept.
+  const bogus = ruleFixture(join(root, 'signoff-bogus'), ['        signoff: [eng, marketing]'])
+    .filter((x) => x.category === 'signoff');
+  assert.equal(bogus.length, 1);
+  assert.match(bogus[0].message, /not a role a run can be recorded under/);
+});
+
+test('a thin excuse is worse than none @rule:status.evidence.excuse-must-argue', () => {
+  // "n/a" is the silence the old schema allowed, wearing a key. An excuse
+  // exists to be argued with, and nobody can argue with a shrug.
+  const thin = ruleFixture(join(root, 'excuse-thin'),
+    ['        unverifiable:', '          agent: n/a']).filter((x) => x.category === 'evidence');
+  assert.equal(thin.length, 1, JSON.stringify(thin));
+  assert.equal(thin[0].level, 'warn');
+  assert.match(thin[0].message, /too thin to argue with/);
+
+  // A sentence passes.
+  assert.deepEqual(
+    ruleFixture(join(root, 'excuse-real'),
+      ['        unverifiable:', `          agent: ${REAL_EXCUSE}`]).filter((x) => x.category === 'evidence'),
+    []);
+
+  // An excuse filed against something that is not a tier removes nothing, so
+  // the rule silently still owes the evidence it thinks it has been let off.
+  const wrongTier = ruleFixture(join(root, 'excuse-tier'),
+    ['        unverifiable:', `          human: ${REAL_EXCUSE}`]).filter((x) => x.category === 'evidence');
+  assert.equal(wrongTier.length, 1);
+  assert.match(wrongTier[0].message, /which is not a tier/);
+  // And it says where acceptance went, because that is the mistake being made.
+  assert.match(wrongTier[0].message, /signoff/);
+});
+
+test('a rule excusing both tiers is flagged, legitimately @rule:status.evidence.excuse-must-argue', () => {
+  // Nothing verifies this rule but a signature. That is sometimes the honest
+  // answer - walkdown's own two extension rules are exactly this - and it
+  // should stay a decision somebody made rather than one that accumulated.
+  const findings = ruleFixture(join(root, 'excuse-both'), [
+    '        unverifiable:',
+    `          checks: ${REAL_EXCUSE}`,
+    `          agent: ${REAL_EXCUSE}`,
+  ]).filter((x) => x.category === 'evidence');
+  assert.equal(findings.length, 1, JSON.stringify(findings));
+  assert.equal(findings[0].level, 'warn');
+  assert.match(findings[0].message, /both tiers are excused/);
+});
+
+test('verify no longer knows the word human @rule:status.acceptance.signoff-defaults-to-eng', () => {
+  // It used to mean "a person accepts this". It now means nothing at all, and
+  // a rule carrying it reads as asking for a signature it is not asking for.
+  const findings = ruleFixture(join(root, 'verify-human'), ['        verify: [checks, human]'])
+    .filter((x) => x.category === 'schema');
+  assert.equal(findings.length, 1, JSON.stringify(findings));
+  assert.equal(findings[0].level, 'warn');
+  assert.match(findings[0].message, /acceptance is `signoff/);
+
+  // A word that was never a tier is still an error, not a nudge.
+  const junk = ruleFixture(join(root, 'verify-junk'), ['        verify: [vibes]'])
+    .filter((x) => x.category === 'schema');
+  assert.equal(junk.length, 1);
+  assert.equal(junk[0].level, 'error');
+});
+
+test('a run signed under a role that does not exist is named @rule:status.acceptance.roles-recorded-on-the-run', () => {
+  const bp = join(root, 'run-roles', 'blueprint');
+  mkdirSync(join(bp, 'runs'), { recursive: true });
+  ruleFixture(join(root, 'run-roles'), []);
+  writeFileSync(join(bp, 'runs', 'r.json'), JSON.stringify({
+    run_id: 'r', created: '2026-01-01T00:00:00Z', actor: 'topher', roles: ['eng', 'marketing'],
+    kind: 'walkdown', target: 'local', results: [{ rule: 'demo.main.thing', status: 'pass' }],
+  }));
+  const findings = lint(loadBlueprint(bp), { checks: false }).findings.filter((f) => f.category === 'runs');
+  // The write paths refuse this, so a record carrying it was hand-edited or
+  // came from a walkdown that knew a role this one does not - either way the
+  // rule it meant to accept is silently still waiting, and only lint can say
+  // so. A warning, never an error: history is not corrected by refusing to
+  // read it.
+  assert.equal(findings.length, 1, JSON.stringify(findings));
+  assert.equal(findings[0].level, 'warn');
+  assert.match(findings[0].message, /signed under "marketing"/);
+});

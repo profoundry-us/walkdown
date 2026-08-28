@@ -245,6 +245,15 @@ function editDialValue(dial) {
   };
 }
 
+/*
+ * The roles somebody could sign in. eng and product are always offered - they
+ * are the two the ledger itself knows about - and anything else this
+ * blueprint's rules ask for joins them, so a team that names a third role
+ * sees it here rather than in a patch to this file.
+ */
+const knownRoles = () => [...new Set(['eng', 'product',
+  ...(S.data?.rows ?? []).flatMap((r) => (r.acceptance ?? []).map((a) => a.role))])];
+
 /** The gear panel is Settings: who you record as, then the desk ruling. */
 function openActorSettings() {
   S.deskOpen = true;
@@ -270,9 +279,25 @@ function buildDeskPanel() {
         value="${esc(identityOverride.name ?? S.data?.identity?.name ?? '')}"
         title="How you are shown in the panel. Records still carry the username.">
     </div>
+    <!-- Which hats you sign in. Checkboxes rather than a picker because
+         plenty of people are more than one thing - Topher signs as both eng
+         and product - and a control that made you choose would make the
+         board wrong about who has accepted what. The list is the roles this
+         blueprint's rules actually name, so a team that invents one gets it
+         here without anybody editing this file. -->
+    <div class="mb-2 flex items-start gap-2">
+      <span class="shrink-0 text-[12px] font-semibold">Signs as</span>
+      <span class="ml-auto flex w-36 flex-wrap gap-x-3 gap-y-1">
+        ${knownRoles().map((r) => `<label class="flex cursor-pointer items-center gap-1 text-[11.5px]">
+          <input type="checkbox" class="checkbox checkbox-xs" data-testid="settings.roles"
+            data-role="${esc(r)}" ${(identityOverride.roles ?? []).includes(r) ? 'checked' : ''}>
+          <span>${esc(r)}</span></label>`).join('')}
+      </span>
+    </div>
     <p class="mb-1 text-[10.5px] leading-relaxed opacity-40">Records carry the
       username; the full name is only how you are shown. Clear either to go
-      back to what git says.</p>
+      back to what git says. A sign-off recorded without a role is read as
+      eng.</p>
     <div class="mb-2 mt-3 flex items-center gap-2 border-t border-base-300 pt-2">
       <span class="text-[12px] font-semibold">Desk ruling</span>
       <button class="btn btn-xs btn-ghost ml-auto" id="wdp-desk-reset">Reset</button>
@@ -327,6 +352,19 @@ function buildDeskPanel() {
     if (S.session) { S.session.actor = whoAmI(); saveSession(); }
     render();
   };
+  /*
+   * The roles are kept as a set, so unticking the last one leaves an empty
+   * array rather than nothing said - "I sign as none of these" is an answer.
+   * Nothing repaints: no run record reads this yet, and a panel that redrew
+   * itself would only be claiming otherwise.
+   */
+  const boxes = [...D.deskPanel.querySelectorAll('input[data-testid="settings.roles"]')];
+  boxes.forEach((box) => {
+    box.onchange = () => {
+      identityOverride.roles = boxes.filter((b) => b.checked).map((b) => b.dataset.role);
+      saveIdentity();
+    };
+  });
   const nam = D.deskPanel.querySelector('#wdp-set-name');
   nam.onchange = () => {
     // Emptied here means "show me by my username" - the honest answer for
@@ -2666,6 +2704,10 @@ function boot() {
        */
       if (typeof saved.username === 'string') identityOverride.username = saved.username.trim();
       if (typeof saved.name === 'string') identityOverride.name = saved.name.trim();
+      // Same distinction one field over: an empty array is "none of these",
+      // and only a missing key means nothing was ever said.
+      if (Array.isArray(saved.roles))
+        identityOverride.roles = saved.roles.map((r) => String(r).trim()).filter(Boolean);
       return;
     }
     /*

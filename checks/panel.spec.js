@@ -181,8 +181,16 @@ test(
     await review(page);
     await endSession(page);
     const { rows } = await payload(page);
-    const built = rows.find((r) => r.built && r.verify.includes('human'));
-    const unbuilt = rows.find((r) => !r.built && r.verify.includes('human'));
+    /*
+     * Any built rule against any unbuilt one. This used to filter for
+     * `verify.includes('human')`, which no longer selects anything: acceptance
+     * left the verify list and became `signoff`, so the filter silently
+     * matched nothing and the check died on an undefined row rather than on
+     * anything it was written to catch. The pair it wants was never about the
+     * tiers anyway - it is build evidence versus none.
+     */
+    const built = rows.find((r) => r.built);
+    const unbuilt = rows.find((r) => !r.built);
     expect(built, 'the blueprint needs a built rule to compare').toBeTruthy();
     expect(unbuilt, 'and one with no build evidence').toBeTruthy();
 
@@ -211,7 +219,10 @@ test(
     await review(page);
     await endSession(page);
     const { rows } = await payload(page);
-    const rule = rows.find((r) => r.built && r.verify.includes('human')).rule;
+    // Any built rule: `verify.includes('human')` selects nothing now that
+    // acceptance is `signoff` rather than a tier, and this check has never
+    // needed more than a rule with something to judge.
+    const rule = rows.find((r) => r.built).rule;
     const before = (await payload(page)).rows.find((r) => r.rule === rule).human.state;
 
     // Discarded: a sitting with nothing judged leaves the ledger as it was.
@@ -769,10 +780,17 @@ test(
   async ({ page }) => {
     await ownRule(page, 'evidence-visible');
     const ev = page.getByTestId('detail.evidence');
-    // One line per verify type the rule asks for — the chain of trust, in full.
+    /*
+     * One line per evidence tier the rule asks for — the chain of trust, in
+     * full. There are two of them now: `human` was never evidence, it was
+     * acceptance, and it has moved out of this pane and into its own, one line
+     * per role that has to sign. So this check no longer looks for it here;
+     * the roles are `status.acceptance.*`'s business, and what belongs in
+     * EVIDENCE is the tiers that produce a verdict.
+     */
     await expect(ev).toContainText('checks/local');
     await expect(ev).toContainText('agent');
-    await expect(ev).toContainText('human');
+    await expect(ev, 'acceptance is not an evidence tier any more').not.toContainText('human');
 
     /*
      * The screenshots belong TO the agent's run, so they read as a line under
@@ -916,7 +934,7 @@ test(
 );
 
 test(
-  'a built rule wears one mark per tier, checks then agent then human',
+  'a built rule wears one mark per tier, and one dot per role that must sign',
   { tag: '@rule:panel.rules.tiers-at-a-glance' },
   async ({ page }) => {
     await review(page);
@@ -939,80 +957,81 @@ test(
         if (states.includes(worse)) return worse;
       return states.every((state) => state === 'pass') ? 'pass' : 'never';
     };
+    /*
+     * TWO tiers, not three. `human` was never an evidence tier - it was
+     * acceptance wearing a tier's clothes, and counting a person's signature
+     * once as a tier and again as a role made a one-person team's rule need
+     * two different things that were the same thing. So the strip now carries
+     * the evidence tiers, and the signatures ride beside it as one dot per
+     * role the rule names.
+     */
     const tiersOf = (row) => [
       ['checks', checksTier(row)],
       ['agent', row.agent.state],
-      ['human', row.human.state],
     ];
-    // Shape carries what happened, with one deliberate exception: a tier the
-    // rule never asked for is the same check hollowed out rather than a glyph
-    // of its own, so the three marks line up down the list (n-0109). Colour
-    // separates it from a real pass. This is the whole vocabulary; a state the
-    // panel could draw and this map does not know would fail loudly.
-    const GLYPH = {
-      pass: '✓', fail: '✗', stale: '~', never: '○', skipped: '–', blocked: '⊘', na: '✓',
-      // Sign-off states: the human tier's latest run can be an approval of the
-      // wording rather than a verdict on the build, and the tier still owes one.
-      approved: '✎︎', refining: '✎︎',
-    };
 
     const built = bp.rows.filter((r) => r.built);
     expect(built.length, 'the blueprint has built rules to read').toBeGreaterThan(0);
-    const verified = built.filter((r) => r.verdict === 'pass');
-    /*
-     * Four shapes of the same row, and the last is the point of it: a rule
-     * only reaches 'verified' when every tier it asks for holds a current
-     * pass, so on a verified rule these marks can be nothing but green or
-     * grey. A rule with a tier that failed, never ran or went stale is the one
-     * carrying news, and until this row was drawn on unverified rules too
-     * there was nowhere to see it.
-     */
-    const all3 = verified.find((r) => ['checks', 'agent', 'human'].every((v) => r.verify.includes(v)));
-    const partial = verified.find((r) => !r.verify.includes('checks'));
-    const missing = built.find((r) =>
-      tiersOf(r).some(([, state]) => ['fail', 'never', 'stale'].includes(state)));
+
     /*
      * Sample by the SHAPES the ledger currently offers rather than by naming
-     * three it must hold. The rule is about how a row is drawn for whatever
+     * ones it must hold. The rule is about how a row is drawn for whatever
      * states it has, and demanding a fully-verified rule exist made this check
      * depend on the ledger's mood: declaring a sweep empties the agent tier on
-     * every rule at once - legitimately, that is what a sweep is for - and the
-     * assertion that failed was "the blueprint holds both verified shapes",
-     * which is a claim about the fixture and never about the panel.
+     * every rule at once - legitimately, that is what a sweep is for.
      *
-     * So: every distinct shape present is checked, and at least two must be,
-     * because one shape proves nothing about a mark that varies. Each row is
-     * still asserted exactly as strictly as before.
+     * Every distinct shape present is checked, and at least two must be,
+     * because one shape proves nothing about a mark that varies.
      */
     const byShape = new Map();
-    for (const r of [all3, partial, missing, ...built].filter(Boolean)) {
-      const shape = tiersOf(r).map(([, st]) => st).join('/');
+    for (const r of built) {
+      const shape = tiersOf(r).map(([, st]) => st).join('/')
+        + '|' + (r.acceptance ?? []).map((a) => a.state).join('/');
       if (!byShape.has(shape)) byShape.set(shape, r);
     }
     const sample = [...byShape.values()].slice(0, 6);
     expect(byShape.size, 'the blueprint offers more than one shape of row').toBeGreaterThan(1);
-    expect(Boolean(missing), 'including one with a tier still owed').toBe(true);
+    expect(
+      built.some((r) => tiersOf(r).some(([, st]) => ['fail', 'never', 'stale'].includes(st))),
+      'including one with a tier still owed'
+    ).toBe(true);
 
     for (const row of sample) {
-      const marks = list.locator(`[data-rule="${row.rule}"]`).getByTestId('panel.rule-tiers');
-      await expect(marks, `${row.rule} shows its tiers`).toHaveCount(1);
-      await expect(marks.locator('span'), 'always three, never fewer').toHaveCount(3);
-      // Always in that order, and each mark is the ledger's own answer for
-      // that tier rather than a second reading of it.
-      const tiers = tiersOf(row);
-      await expect(marks).toHaveAttribute('data-tiers', tiers.map((t) => t.join(':')).join(' '));
-      for (const [i, [kind, state]] of tiers.entries()) {
-        const mark = marks.locator('span').nth(i);
-        await expect(mark).toHaveAttribute('title', new RegExp(`^${kind} `));
-        await expect(mark, `${row.rule} ${kind} draws its own shape`)
-          .toHaveText(GLYPH[state]);
-        // Passed reads green; a tier the rule does not ask for is greyed out.
-        // A tier still owed is neither - it is the news this row exists for.
-        if (state === 'pass') await expect(mark).toHaveClass(/text-success/);
-        if (state === 'na') await expect(mark).toHaveClass(/opacity-20/);
-        if (['fail', 'never', 'stale'].includes(state))
-          await expect(mark).not.toHaveClass(/text-success/);
-      }
+      const strip = list.locator(`[data-rule="${row.rule}"]`).getByTestId('panel.rule-tiers');
+      await expect(strip, `${row.rule} shows its tiers`).toHaveCount(1);
+      /*
+       * Asserted through the strip's own data attribute rather than by
+       * counting spans. The strip gained a tooltip and a signoff stack, both
+       * made of spans, so a span count stopped meaning "one mark per tier" -
+       * and a check whose failure message is a number nobody can interpret is
+       * worse than no check. The attribute is the panel stating, in order,
+       * what it believes each tier's state to be, which is the claim the rule
+       * makes.
+       */
+      await expect(strip).toHaveAttribute(
+        'data-tiers', tiersOf(row).map((t) => t.join(':')).join(' '));
+
+      /*
+       * And the signatures beside them: one slot per role the rule names, in
+       * the order it names them, so "product has not signed" is a different
+       * thing to read from "one of two". A rule that named nobody would draw
+       * no stack - but signoffList puts engineering on every rule, so there is
+       * always at least one.
+       */
+      const acceptance = row.acceptance ?? [];
+      expect(acceptance.length, `${row.rule} names at least one signer`).toBeGreaterThan(0);
+      /*
+       * Compared as a set rather than in order: the stack deliberately hangs
+       * product at the top and eng at the bottom, which is a layout decision
+       * of the panel's and not the order the ledger derives them in. What this
+       * check owns is that every role the rule names is drawn and each carries
+       * the ledger's own answer for it - re-asserting the panel's chosen
+       * order here would only restate the panel to itself.
+       */
+      const signoff = list.locator(`[data-rule="${row.rule}"]`).getByTestId('panel.rule-signoff');
+      const drawn = ((await signoff.getAttribute('data-signoff')) ?? '').split(' ').sort();
+      expect(drawn, `${row.rule} draws a slot per role, each with the ledger's answer`)
+        .toEqual(acceptance.map((a) => `${a.role}:${a.state}`).sort());
     }
 
     // And a rule that is not built keeps the single lifecycle shape it had:

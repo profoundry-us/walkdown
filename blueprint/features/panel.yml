@@ -16,7 +16,6 @@ stories:
         retired: The docked delivery is withdrawn (2026-08-26). walkdown frames the page it reviews; there is no longer a layout that renders beside it.
         origin: walkdown
         statement: Docked into a page's own document, the panel renders beside what it reviews rather than framing it - a script tag cannot put its own page in a frame, so the docked delivery works within the application's document and pushes it aside instead of covering it.
-        verify: [agent, human]
         screens: [docked]
         steps:
           given:
@@ -34,7 +33,6 @@ stories:
         retired: The docked delivery is withdrawn (2026-08-26). Nothing insets the host document any more - the page under review is a frame on walkdown’s own desk.
         origin: thread:n-0015
         statement: The page under review is presented as a sheet lying on walkdown's desk - inset on every side, with rounded corners and a shadow - so it reads as the thing being examined rather than as part of the tool.
-        verify: [agent, human]
         screens: [docked]
         steps:
           given:
@@ -52,7 +50,7 @@ stories:
       - id: panel.dock.toolbar
         origin: thread:n-0015
         statement: A bar across the top carries the controls that are about the session rather than the rule in hand - which screen, which surface, and pin mode - and it names the project all of them are about, without being where the project is chosen.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [review]
         steps:
           given:
@@ -71,7 +69,7 @@ stories:
       - id: panel.dock.surface-swap-is-instant
         origin: walkdown
         statement: Swapping between the design and the app costs no page load - the ghosted copy is kept between looks and only reloaded when what it should show has actually changed - because comparing two surfaces means going back and forth, and a reload on every crossing flashes the thing you are trying to compare.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [review]
         steps:
           given:
@@ -89,7 +87,7 @@ stories:
       - id: panel.dock.controls-survive-use
         origin: thread:n-0022
         statement: A control in the bar survives being used - the fade slider can be grabbed and dragged the whole way, because nothing rebuilds the element the pointer is holding until the pointer lets go.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [review]
         steps:
           given:
@@ -107,7 +105,6 @@ stories:
         retired: The docked delivery is withdrawn (2026-08-26). Framed, the application cannot paint outside its own frame, so nothing has to climb into the top layer to stay above it.
         origin: thread:n-0028
         statement: Nothing the application draws paints over walkdown's own chrome, because the tool has to stay readable exactly when the app is showing the state you came to judge - and a z-index cannot promise that, since a modal joins a layer painted above every z-index there is.
-        verify: [agent, human]
         screens: [docked]
         steps:
           given:
@@ -124,7 +121,7 @@ stories:
       - id: panel.dock.one-pin-mode
         origin: thread:n-0015
         statement: There is one control for pin mode - the bar's Pin mode button - and one state behind it, so whatever turns pin mode on or off, the whole review agrees about whether it is on.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [review]
         steps:
           given:
@@ -141,7 +138,7 @@ stories:
       - id: panel.dock.no-pin-mid-fade
         origin: thread:n-0023
         statement: While the fade sits between the two surfaces, pinning is closed - both are on screen at once, so a pin has no honest answer to which one it is about.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [review]
         steps:
           given:
@@ -157,7 +154,7 @@ stories:
       - id: panel.dock.own-skin
         origin: thread:n-0015
         statement: walkdown's chrome wears its own theme - drafting blue, pale ink, flat surfaces - so it is never mistaken for the application it is inspecting, whatever that application looks like.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [review, settings]
         steps:
           given:
@@ -173,7 +170,6 @@ stories:
         retired: The docked delivery is withdrawn (2026-08-26). The panel no longer runs inside anybody else’s document. The embed still does, and embed.pin.own-skin still governs that.
         origin: walkdown
         statement: The panel is injected into somebody else's application, so its styles never reach the host page and the host's styles never reach it.
-        verify: [agent, human]
         screens: [docked]
         steps:
           given:
@@ -189,7 +185,7 @@ stories:
       - id: panel.dock.chrome-not-a-pin-target
         origin: thread:n-0011
         statement: In pin mode, walkdown's own chrome - the bar, an open form, an existing pin, the docked panel - is never treated as a place to put a pin, and Escape leaves pin mode.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [review]
         steps:
           given:
@@ -209,7 +205,7 @@ stories:
       - id: panel.desk.reads-as-paper
         origin: thread:n-0076
         statement: The desk under the page reads as drafting paper rather than as a spreadsheet - ruled faintly and lying at an angle, drawn with a real perspective rather than a flat skew.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [review]
         steps:
           given:
@@ -225,7 +221,7 @@ stories:
       - id: panel.desk.tuner
         origin: thread:n-0076
         statement: How the paper lies is the reviewer's own taste - a gear in the bar tunes it live, the choice persists across sessions, and none of it changes what gets verified.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [settings]
         steps:
           given:
@@ -244,7 +240,7 @@ stories:
       - id: panel.desk.peek
         origin: thread:n-0076
         statement: A checkbox dims everything lying on the desk to a peek rather than hiding it outright, so the ruling can be judged against everything that would otherwise sit on top of it - a way of looking, not a preference.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [settings]
         steps:
           given:
@@ -266,7 +262,7 @@ stories:
         retired: How walkdown's own files are packaged is an implementation detail with no surface a reviewer can see (2026-08-26, thread n-0078); the byte-for-byte comparison stays as a node test.
         origin: thread:q-0016
         statement: The panel and the embed stay two files because they load into two documents - the embed into the application being reviewed, the panel only into walkdown's own page above it - and neither carries a copy of the other.
-        verify: [checks, human]
+        verify: [checks]
         steps:
           given:
             - A page carrying the script tags, and a page carrying nothing
@@ -282,7 +278,10 @@ stories:
       - id: panel.delivery.absent-until-asked
         origin: thread:q-0016
         statement: The extension adds nothing to a page until you click its toolbar button, and clicking the button again ends the review and hands the page back exactly as it was.
-        verify: [human]
+        unverifiable:
+          agent: The control is the browser's own toolbar button, which is browser chrome rather than part of the page - no tool an agent drives reaches it.
+          checks: The same button, for the same reason - a test that drives a page cannot click something that is not in the page.
+        signoff: [eng, product]
         steps:
           given:
             - The extension installed, on any page
@@ -298,7 +297,7 @@ stories:
       - id: panel.delivery.framed-isolation
         origin: thread:n-0030
         statement: The extension reviews an application by giving it a viewport of its own inside walkdown's page, so the application lays itself out against that viewport and nothing it draws can paint over walkdown's chrome.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [review]
         steps:
           given:
@@ -315,7 +314,10 @@ stories:
       - id: panel.delivery.one-switch
         origin: thread:n-0018
         statement: The extension's only control is the toolbar button - on or off for this site - and it shows which of those it is. Everything else is asked in the panel, where there is room to explain it.
-        verify: [human]
+        unverifiable:
+          agent: The control is the browser's own toolbar button, which is browser chrome rather than part of the page - no tool an agent drives reaches it, and its icon is not something an agent can see.
+          checks: The same button, for the same reason - a test that drives a page cannot click something that is not in the page.
+        signoff: [eng, product]
         steps:
           given:
             - The extension installed
@@ -330,7 +332,8 @@ stories:
       - id: panel.delivery.stale-copy-says-so
         origin: thread:n-0062
         statement: The extension's vendored copy of walkdown only updates when the extension is reloaded - so the panel compares the copy it is running against what the server ships, and says plainly when it has gone stale, because an outdated walkdown reviewing a moving spec quietly undermines every verdict.
-        verify: [checks, agent, human]
+        verify: [checks]
+        signoff: [eng, product]
         screens: [review]
         steps:
           given:
@@ -346,7 +349,7 @@ stories:
       - id: panel.delivery.anchors-still-required
         origin: thread:q-0016
         statement: A page that carries no anchors can still be reviewed - a pin dropped on it is recorded by where it sits on the screen rather than against an element, and pages that do carry anchors are unaffected.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [review]
         steps:
           given:
@@ -366,7 +369,7 @@ stories:
       - id: panel.start.open-a-folder
         origin: thread:n-0017
         statement: With no walkdown server to read blueprints from, the panel says so plainly and tells you how to start one, rather than rendering an empty or broken review surface. Once it connects, it shows which folder that server is serving.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [start]
         steps:
           given:
@@ -384,7 +387,7 @@ stories:
       - id: panel.start.choose-a-blueprint
         origin: thread:n-0017
         statement: When the folder holds more than one blueprint, the panel asks which one this site is, showing each by name and by a description the blueprint itself carries.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [choose-blueprint]
         steps:
           given:
@@ -406,7 +409,7 @@ stories:
       - id: panel.rules.detail-slide
         origin: walkdown
         statement: Opening a rule slides the panel from the list to that rule's detail, and one control comes back - only one of the two panes is ever visible.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [review, rule-detail]
         steps:
           given:
@@ -424,7 +427,8 @@ stories:
       - id: panel.rules.takes-you-there
         origin: thread:n-0031
         statement: Asking for something in the panel moves the surface to it - opening a rule goes to the screen that rule is about, picking a screen goes to that screen, and choosing a blueprint that says nothing about this page goes to one it does.
-        verify: [checks, agent, human]
+        verify: [checks]
+        signoff: [eng, product]
         screens: [review]
         steps:
           given:
@@ -444,7 +448,7 @@ stories:
       - id: panel.rules.one-pane-per-tab
         origin: thread:n-0032
         statement: A rule's detail belongs to the tab that lists rules - switching to another tab shows that tab's own content.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [review]
         steps:
           given:
@@ -460,7 +464,7 @@ stories:
       - id: panel.rules.step-between
         origin: walkdown
         statement: From a rule's detail I can step to the previous or next rule in list order without returning to the list, and each control says where it lands.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [rule-detail]
         steps:
           given:
@@ -477,7 +481,8 @@ stories:
       - id: panel.rules.steps-not-an-appendix
         origin: thread:n-0007
         statement: A rule's given/when/then steps are visible without being asked for; only the recorded check source sits behind a collapsed disclosure.
-        verify: [checks, agent, human]
+        verify: [checks]
+        signoff: [eng, product]
         screens: [rule-detail]
         steps:
           given:
@@ -493,7 +498,8 @@ stories:
       - id: panel.rules.setup-says-how-to-arrive
         origin: thread:n-0093
         statement: When a rule's screen is a state rather than an address - it carries a setup - the panel says what to do on arrival, above the steps, because an address alone cannot always put the app into the state it names.
-        verify: [checks, agent, human]
+        verify: [checks]
+        signoff: [eng, product]
         screens: [rule-detail]
         steps:
           given:
@@ -509,7 +515,8 @@ stories:
       - id: panel.rules.evidence-visible
         origin: walkdown
         statement: A rule's detail shows the evidence behind its standing - the latest ledger result for each of its verify types - so the chain of trust is read where the rule is judged.
-        verify: [checks, agent, human]
+        verify: [checks]
+        signoff: [eng, product]
         screens: [rule-detail]
         steps:
           given:
@@ -526,7 +533,7 @@ stories:
       - id: panel.rules.counts-legible
         origin: thread:n-0002
         statement: The counts say what they count and reconcile with the list - verified is a count of rules, the work owed to a person is named, each owed rule carries a mark so the total can be counted back, and the tab carries that total so it is legible from whichever tab is open.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [review]
         steps:
           given:
@@ -545,7 +552,7 @@ stories:
       - id: panel.rules.lifecycle-legible
         origin: thread:n-0054
         statement: The list glyph's shape carries a rule's lifecycle - designed, approved awaiting build, refining, built awaiting verification, verified, failing - and its color carries ownership, so designed-but-unsigned and built-but-unpassed are never the same mark.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [review]
         steps:
           given:
@@ -563,7 +570,8 @@ stories:
       - id: panel.rules.search-the-list
         origin: thread:n-0108
         statement: The rule list carries a search box fixed above it, and typing in it filters the list as you type - a query naming a group keeps every rule in that group, a query naming one rule keeps that rule alone, and the group heading a surviving rule sits under is always drawn, so the hierarchy stays readable while the list is filtered.
-        verify: [checks, agent, human]
+        verify: [checks]
+        signoff: [eng, product]
         screens: [review]
         steps:
           given:
@@ -581,7 +589,8 @@ stories:
       - id: panel.rules.tiers-at-a-glance
         origin: thread:n-0109
         statement: A built rule shows one mark per evidence tier - checks, agent, human, in that order and always all three - so which tiers a rule rests on, and which it is still missing, can be read off the list rather than opened one rule at a time.
-        verify: [checks, agent, human]
+        verify: [checks]
+        signoff: [eng, product]
         screens: [review]
         steps:
           given:
@@ -599,7 +608,7 @@ stories:
       - id: panel.rules.headless-says-so
         origin: thread:n-0061
         statement: Opening a rule that has no screen clears the surface under review - an unmistakable cover in walkdown's own voice takes the sheet's place - because a lingering page reads as the rule's screen, and the reviewer cannot tell a right screen from a rule that has none.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [rule-detail]
         steps:
           given:
@@ -620,7 +629,7 @@ stories:
       - id: panel.threads.reply-in-place
         origin: thread:n-0009
         statement: A thread on a rule opens in the panel showing its replies, and I can add a reply and take the lifecycle actions its current state allows.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [rule-detail]
         steps:
           given:
@@ -636,7 +645,8 @@ stories:
       - id: panel.threads.claim-never-accept
         origin: walkdown
         statement: The panel obeys the same governance as everywhere else - it will not record verified or waived without a named person, and it asks for the reason the transition requires.
-        verify: [checks, agent, human]
+        verify: [checks]
+        signoff: [eng, product]
         screens: [rule-detail]
         steps:
           given:
@@ -651,7 +661,7 @@ stories:
       - id: panel.threads.show-the-sketch
         origin: thread:n-0010
         statement: When a thread's screen has a proposal on file, the panel can show it over the running app, badged as a proposal so a sketch is never mistaken for the design.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [rule-detail]
         steps:
           given:
@@ -669,7 +679,8 @@ stories:
       - id: panel.threads.own-view
         origin: thread:n-0094
         statement: Threads are a view of their own and not only something hanging off a rule - the panel lists every thread on the blueprint, filtered to what is live, what is waiting on me, or all of it, including the conversations that have ended.
-        verify: [checks, agent, human]
+        verify: [checks]
+        signoff: [eng, product]
         screens: [review, thread-panel]
         steps:
           given:
@@ -692,7 +703,8 @@ stories:
       - id: panel.walkdown.records-to-ledger
         origin: walkdown
         statement: Finishing a walkdown in the panel appends a run record under a named person; discarding one records nothing.
-        verify: [checks, agent, human]
+        verify: [checks]
+        signoff: [eng, product]
         screens: [review, rule-detail]
         steps:
           given:
@@ -708,7 +720,7 @@ stories:
       - id: panel.walkdown.one-control-owns-the-sitting
         origin: walkdown
         statement: One control starts a sitting and ends it - the same button in the bar, because they are two halves of one act - while carrying on to the next rule sits beside the count of the rules already judged.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [review]
         steps:
           given:
@@ -729,7 +741,7 @@ stories:
       - id: panel.walkdown.session-survives-reload
         origin: thread:n-0066
         statement: An unfinished session is real judging work - it is saved from the first verdict and restored after a page or extension reload, and a refused or failed Finish hands the button back instead of silently bricking the session.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [review]
         steps:
           given:
@@ -745,7 +757,8 @@ stories:
       - id: panel.walkdown.draft-on-disk
         origin: walkdown
         statement: Every verdict is written to the project as it is given - a draft session on disk, outside the runs ledger - so an unfinished sitting survives the browser and is visible to the tools, while the ledger still gains exactly one record, at Finish, that is never edited.
-        verify: [checks, agent, human]
+        verify: [checks]
+        signoff: [eng, product]
         screens: [review, rule-detail]
         steps:
           given:
@@ -763,7 +776,7 @@ stories:
       - id: panel.walkdown.verdicts-at-hand
         origin: walkdown
         statement: While a walkdown is running, pass and fail sit directly under the selected rule's statement - on screen without scrolling - beside a count of how many rules the session has judged.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [rule-detail]
         steps:
           given:
@@ -779,7 +792,7 @@ stories:
       - id: panel.walkdown.pass-advances
         origin: walkdown
         statement: A pass moves the session to the next rule owing a verdict; a fail stays put, so the reason can be given where the rule is - and no verdict switches a mode on by itself.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [rule-detail]
         steps:
           given:
@@ -796,7 +809,7 @@ stories:
       - id: panel.walkdown.note-with-any-verdict
         origin: thread:n-0050
         statement: A feedback box rides above the verdict buttons - write first, then judge - and anything written is filed as a note thread on the rule and linked into the run result; an empty box files nothing.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [rule-detail]
         steps:
           given:
@@ -813,7 +826,7 @@ stories:
       - id: panel.walkdown.fail-requires-why
         origin: thread:n-0051
         statement: A fail is refused until it has a why - feedback text or a pin dropped on the rule during the session - because a fail with no why is work nobody can act on.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [rule-detail]
         steps:
           given:
@@ -838,7 +851,7 @@ stories:
         retired: The dual-pane viewer was withdrawn (2026-08-24). The same behaviour is specified for the panel as panel.identity.default-actor.
         origin: thread:n-0008
         statement: The actor field arrives filled in from the repository's git identity, falling back to the operating system username; it stays editable and an edit is remembered.
-        verify: [checks, human]
+        verify: [checks]
 
   - id: panel.identity
     title: The panel already knows who you are
@@ -847,7 +860,8 @@ stories:
       - id: panel.identity.default-actor
         origin: thread:n-0008
         statement: The identity arrives filled in from the repository's git identity - a username to record under, and the full name to show wherever git knows one - falling back to the operating system username; both stay editable, including by someone whose git knows neither.
-        verify: [checks, agent, human]
+        verify: [checks]
+        signoff: [eng, product]
         screens: [review, settings]
         steps:
           given:
@@ -863,7 +877,7 @@ stories:
       - id: panel.identity.attribution-visible
         origin: thread:n-0008
         statement: A defaulted identity is always visible before it is used - a walkdown verdict or a thread action shows the name it will be recorded under, so nobody is attributed silently.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [review, rule-detail]
         steps:
           given:
@@ -882,7 +896,7 @@ stories:
       - id: panel.viewport.device-presets
         origin: thread:n-0005
         statement: Framed, a bar control sizes the app's frame like a real device - desktop or mobile - and the ghost renders at the same viewport, so the comparison stays honest.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [review]
         steps:
           given:
@@ -899,7 +913,7 @@ stories:
       - id: panel.viewport.zoom-to-fit
         origin: thread:n-0005
         statement: A viewport wider than the space the frame has scales down whole to fit, so a desktop layout is seen as a desktop layout rather than reflowed to a narrow column - and the current scale is visible.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [review]
         steps:
           given:
@@ -918,7 +932,8 @@ stories:
       - id: panel.signoff.spec-pair-derived
         origin: thread:n-0052
         statement: Which verdict pair a rule shows is derived from the ledger - a rule with no build evidence (no pass or fail from checks or judgment) offers Approve and Refine, and sign-off records, skips and blocks never count as build evidence.
-        verify: [checks, agent, human]
+        verify: [checks]
+        signoff: [eng, product]
         screens: [rule-detail]
         steps:
           given:
@@ -934,7 +949,7 @@ stories:
       - id: panel.signoff.refine-requires-feedback
         origin: thread:n-0052
         statement: Refine is the feedback - it is refused until the box says what should change, and the text is filed as a note thread on the rule while the session stays put.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [rule-detail]
         steps:
           given:
@@ -949,8 +964,9 @@ stories:
 
       - id: panel.signoff.approved-recorded
         origin: thread:n-0052
-        statement: Approve appends an `approved` result to the ledger, hash-stamped like a pass so it goes stale when the statement moves - and it never satisfies a human verify requirement, because approving a spec is not judging a build.
-        verify: [checks, agent, human]
+        statement: Approve appends an `approved` result to the ledger, hash-stamped like a pass so it goes stale when the statement moves - and it never stands in for a role's signature, because approving a spec is not judging a build.
+        verify: [checks]
+        signoff: [eng, product]
         screens: [rule-detail]
         steps:
           given:
@@ -962,4 +978,4 @@ stories:
             - The rule still shows as pending and still owes a human verdict once built
             - Rewording the statement renders the approval as stale, asking for a fresh sign-off
             - Approving moves the session on to the next rule owing a verdict
-          statement_hash: sha256:3debe377856e
+          statement_hash: sha256:9dc2fa81ced5

@@ -2,6 +2,7 @@
  * The Rules tab: the rail of rules, the box that filters it, and the marks
  * that say where each rule stands.
  */
+import { MSG } from '../../lib/message-stream.js';
 import { open, render } from './app.js';
 import { icon } from './icons.js';
 import { D, S } from './state.js';
@@ -77,10 +78,15 @@ export function matchingRows() {
 }
 
 /*
- * The three marks a BUILT rule wears: checks, agent, human, in that order,
- * always all three. A rule verified by one tier and a rule verified by all
- * three both used to read as a single ✓, which hid the thing worth seeing -
- * how much of the ledger is actually standing behind a green rule.
+ * The marks a BUILT rule wears: checks, then agent, then who has accepted it.
+ * A rule verified by one tier and a rule verified by all of them both used to
+ * read as a single ✓, which hid the thing worth seeing - how much of the
+ * ledger is actually standing behind a green rule.
+ *
+ * The first two are machine results and stay glyphs. The third used to be a
+ * glyph too - the human TIER - and is now a stack of dots, one per role,
+ * because acceptance is a set of PEOPLE and "somebody signed" was never the
+ * question. See signoffStack below.
  *
  * Every built rule, not only the verified ones. A rule reaches 'verified'
  * only when every tier it asks for holds a current pass, so on a verified
@@ -162,21 +168,145 @@ const whyStale = (cell) =>
     ? `stale — a sweep asked for this tier again (${cell.sweptBy})`
     : TIER_MARK.stale[2];
 
+/*
+ * Who has to accept a rule, and where each of them sits.
+ *
+ * A fixed slot per role, top to bottom, so the stack reads by POSITION and
+ * colour is only a confirmation: product on top because it is the more final
+ * signature, eng at the bottom because it is the one everything else stands
+ * on, and any other role a team names in between - which is also the order
+ * signoffList declares them in, eng last. Sorting is stable, so two middle
+ * roles keep the order the rule wrote them in.
+ *
+ * The tints are a map keyed by role rather than a branch, because custom
+ * roles are coming and a team adding "design" should be a line of data. A
+ * role nobody has tinted draws in the panel's own ink instead of failing.
+ */
+export const ROLE_TINT = { eng: 'text-blue-400', product: 'text-purple-400' };
+const ROLE_RANK = { product: 0, eng: 2 };
+export const stackOrder = (acceptance) =>
+  [...(acceptance ?? [])].sort((a, b) => (ROLE_RANK[a.role] ?? 1) - (ROLE_RANK[b.role] ?? 1));
+
+/*
+ * What each acceptance state says, in the tooltip's words. `signed` is the
+ * built thing; `approved` is the wording only, which is a real answer to a
+ * question nobody has built yet and not a half-hearted signature.
+ */
+export const SIGN_SAY = {
+  signed: 'signed the build',
+  approved: 'approved the wording, not the build',
+  'sent-back': 'sent it back — not yet',
+  stale: 'signed an older wording',
+  none: 'has not signed',
+};
+
+/*
+ * One role's slot. Every shape is legible at 5px, which rules out most of
+ * the obvious ideas - a dashed ring is mush at this size and a faded disc is
+ * hard to tell from a ring - so the four states differ by FILL and SIZE:
+ *
+ *   signed    a solid disc: their name is on the built thing
+ *   approved  half a disc, filled from the bottom: half a signature, because
+ *             approving the wording is not accepting the build
+ *   stale     a small solid disc: the signature is still there but no longer
+ *             covers what the rule now says, so it has shrunk back to a point
+ *   none      an outline ring: the slot is there and empty
+ *   sent-back a red ✗, not a dot - somebody looked and disagreed, which is
+ *             the one thing on this strip that is not an absence
+ *
+ * The half fill is an inline gradient rather than a class: it is one
+ * declaration used in one place, and a two-tone 5px box is not something the
+ * utility vocabulary has a name for.
+ */
+function signoffDot(a, mine) {
+  const tint = ROLE_TINT[a.role] ?? 'text-base-content';
+  if (a.state === 'sent-back')
+    return `<span class="text-[8px] leading-none text-error">✗</span>`;
+  const shape = {
+    signed: 'size-[5px] bg-current',
+    approved: 'size-[5px] border border-current',
+    stale: 'size-[3px] bg-current',
+  }[a.state] ?? 'size-[5px] border border-current';
+  const half = a.state === 'approved'
+    ? ' style="background:linear-gradient(to top, currentColor 50%, transparent 50%)"'
+    : '';
+  // Owed slots dim when the rule is not waiting on you, exactly as the tier
+  // glyphs beside them do — the strip has one language for "your turn".
+  const dim = a.state !== 'signed' && !mine ? ' opacity-60' : '';
+  return `<span class="block rounded-full ${shape} ${tint}${dim}"${half}></span>`;
+}
+
+/*
+ * Three slots is what fits beside a 12px glyph. A rule naming more roles than
+ * that keeps the two that carry the most - product on top, eng at the bottom -
+ * and collapses everything between them into a +N, which the tooltip then
+ * spells out in full. Dropping from the middle rather than the end keeps the
+ * two fixed slots fixed, which is the whole reason the stack reads.
+ */
+const MAX_SLOTS = 3;
+function signoffStack(acceptance, mine) {
+  const all = stackOrder(acceptance);
+  if (!all.length) return '';
+  const slots = all.length > MAX_SLOTS
+    ? [all[0], { role: '+', state: 'more', n: all.length - 2 }, all.at(-1)]
+    : all;
+  return `<span class="flex w-3 shrink-0 flex-col items-center justify-center"
+    data-testid="panel.rule-signoff" data-signoff="${esc(all.map((a) => `${a.role}:${a.state}`).join(' '))}"
+    >${slots.map((a) => `<span class="flex h-[7px] items-center justify-center">${
+      a.state === 'more'
+        ? `<span class="text-[7px] leading-none opacity-60">+${a.n}</span>`
+        : signoffDot(a, mine)}</span>`).join('')}</span>`;
+}
+
+/*
+ * ONE tooltip for the whole strip, not one per mark.
+ *
+ * Six little native tooltips said six unrelated things and never the sentence
+ * a reader actually wants — where does this rule stand. So the strip is the
+ * hover target and the bubble answers for every tier and every role at once,
+ * naming the signer where the ledger knows it.
+ *
+ * daisyUI rather than a title attribute, for the reason the footer counts use
+ * one (n-0091): a native tooltip cannot hold four lines of explanation, and
+ * the panel already says these words this way. It opens to the RIGHT because
+ * the strip sits on the left edge of a pane as wide as the whole panel -
+ * there is 340px of room that way and 14px the other, and a bubble opening up
+ * or down would be centred on that same 14px. Kept to short lines anyway:
+ * this one is read at a glance, on the way past.
+ */
+function stripTip(tiers, acceptance) {
+  const cells = tiers.map(([kind, state, cell]) =>
+    [kind, state === 'stale' ? whyStale(cell) : (TIER_MARK[state] ?? TIER_MARK.na)[2]]);
+  const signs = stackOrder(acceptance).map((a) => [
+    a.role,
+    `${SIGN_SAY[a.state] ?? a.state}${a.actor ? ` · ${a.actor}` : ''}${
+      a.created ? ` · ${MSG.ago(a.created)}` : ''}`,
+  ]);
+  const line = ([label, said]) =>
+    `<span class="opacity-60">${esc(label)}</span><span>${esc(said)}</span>`;
+  return `<span class="tooltip-content w-60 whitespace-normal text-left text-[11px] leading-snug"
+    data-testid="panel.rule-tiers-tip"><span class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5">${
+      cells.map(line).join('')}${signs.length
+        ? `<span class="col-span-2 mt-0.5 opacity-40">accepted by</span>${signs.map(line).join('')}`
+        : ''}</span></span>`;
+}
+
 export function tierMarks(row, mine = false) {
   const tiers = [
     ['checks', checksTier(row), null],
     ['agent', row.agent?.state ?? 'na', row.agent],
-    ['human', row.human?.state ?? 'na', row.human],
   ];
-  return `<span class="flex w-8 shrink-0 items-center justify-center gap-px text-[10px] leading-none"
-    data-testid="panel.rule-tiers" data-tiers="${esc(tiers.map((t) => `${t[0]}:${t[1]}`).join(' '))}"
-    >${tiers.map(([kind, state, cell]) => {
-      const [glyph, cls, why] = TIER_MARK[state] ?? TIER_MARK.na;
-      const label = state === 'stale' ? whyStale(cell) : why;
+  // title="" is not a leftover: the row around this is a button carrying its
+  // own native title, and a native tooltip is inherited from the nearest
+  // ancestor that has one. An empty title stops that here, so hovering the
+  // strip opens the strip's bubble and nothing else.
+  return `<span class="tooltip tooltip-right flex w-8 shrink-0 items-center justify-center gap-px text-[10px] leading-none"
+    title="" data-testid="panel.rule-tiers" data-tiers="${esc(tiers.map((t) => `${t[0]}:${t[1]}`).join(' '))}"
+    >${stripTip(tiers, row.acceptance)}${tiers.map(([, state, cell]) => {
+      const [glyph, cls] = TIER_MARK[state] ?? TIER_MARK.na;
       return `<span class="inline-block w-3 text-center ${
-        TIER_OWED.has(state) && !mine ? 'opacity-60' : cls}"
-        title="${esc(kind)} — ${esc(label)}">${glyph}</span>`;
-    }).join('')}</span>`;
+        TIER_OWED.has(state) && !mine ? 'opacity-60' : cls}">${glyph}</span>`;
+    }).join('')}${signoffStack(row.acceptance, mine)}</span>`;
 }
 
 export function listPane() {

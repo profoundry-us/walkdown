@@ -62,8 +62,102 @@ stories:
 
       - id: status.derived.human-tier-distinct
         origin: prd
-        statement: An agent verdict never satisfies a human verify requirement; only a human walkdown does.
+        statement: An agent's verdict is evidence, never acceptance - a role's signature can only be given by a person signing for that role, and no amount of green from the checks or the agent tier supplies it.
         verify: [checks]
+
+  - id: status.evidence
+    title: Every tier is assumed, and skipping one is a written decision
+    statement: As a team, we get the cheapest honest evidence on every rule by default, and when a rule cannot have it we get a sentence saying why instead of a silence.
+    rules:
+      - id: status.evidence.agent-assumed
+        origin: walkdown
+        statement: The agent tier is assumed on every rule rather than declared - a rule is judged by the agent unless it carries an excuse saying why it cannot be - because a tier that must be authored is opt-in while a tier that costs only a run is an obligation, and skipping the walkdown that earns a person's attention should be a decision somebody wrote down rather than a line somebody forgot to type.
+        verify: [checks]
+        steps:
+          given:
+            - A rule declaring nothing at all about verification
+          when:
+            - Its evidence tiers are derived
+          then:
+            - The agent tier is required of it
+            - The checks tier is not, because a check must be authored
+            - An excuse filed against the agent tier removes it, and nothing else does
+          statement_hash: sha256:21038677e83f
+      - id: status.evidence.excuse-says-why
+        origin: walkdown
+        statement: An excused tier shows its reason where its verdict would have been, in every report - never as an empty cell - because a tier nobody asked for and a tier somebody decided against look identical otherwise, and only one of them is a decision anyone can argue with.
+        verify: [checks]
+        steps:
+          given:
+            - A rule excusing a tier, with a reason
+          when:
+            - The rule is read from the CLI or opened in the panel
+          then:
+            - The reason stands in the row that tier's evidence would have filled
+            - It is legible as a decision, not as an absence
+          statement_hash: sha256:6023a6db07cd
+      - id: status.evidence.excuse-must-argue
+        origin: walkdown
+        statement: An excuse is refused as thin when it is a shrug - lint warns on a reason shorter than a sentence, on one filed against something that is not a tier, and on a rule that excuses both tiers at once, the last being legitimate but never accidental.
+        verify: [checks]
+
+  - id: status.acceptance
+    title: Acceptance is a set of people, not a kind of evidence
+    statement: As a team, we can see which roles have accepted a rule and which have not, so "somebody should look at this" becomes "product should look at this".
+    rules:
+      - id: status.acceptance.signoff-defaults-to-eng
+        origin: walkdown
+        statement: A rule's sign-off list defaults to engineering and always contains it - somebody has to own that the thing was built right, and a rule nobody accepts is a rule nobody owns - so a list that omits eng is corrected in the report and flagged by lint as a file saying something the report will not do.
+        verify: [checks]
+      - id: status.acceptance.role-comes-from-the-run
+        origin: walkdown
+        statement: Acceptance is derived per role from the roles the run was recorded under, never from whoever the signer is today - people change teams and a signature does not stop meaning what it meant - and a run recorded before roles existed reads as engineering's, because the person signing a walkdown was historically the developer who built it.
+        verify: [checks]
+        steps:
+          given:
+            - A ledger holding a walkdown recorded under one role and another recorded before roles existed
+          when:
+            - Acceptance is derived
+          then:
+            - The first counts only for the role it named
+            - The second counts for engineering
+            - Changing the signer's roles today moves neither
+          statement_hash: sha256:4841808f1a8b
+      - id: status.acceptance.approval-covers-only-the-unbuilt
+        origin: walkdown
+        statement: A role's approval of the wording discharges its queue while the rule is unbuilt, and stops covering it the moment the ledger holds a build to judge - approving a spec is not judging a build.
+        verify: [checks]
+      - id: status.acceptance.sent-back-is-a-fail
+        origin: walkdown
+        statement: A signer who looked and said not yet fails the rule's verdict rather than leaving it pending, and is not queued back to themselves - what the rule owes them is a fix, not another look.
+        verify: [checks]
+      - id: status.acceptance.verdict-needs-every-role
+        origin: walkdown
+        statement: A rule passes only when every evidence tier it asks for holds a current pass and every role it names has signed - one role's signature never speaks for another's, and the human walkdown is not counted a second time as a tier.
+        verify: [checks]
+        steps:
+          given:
+            - A rule naming two roles, with every evidence tier passing
+          when:
+            - Only one of the two has signed
+          then:
+            - The verdict is pending, not pass
+            - It turns pass when the second signs, and nothing else supplies that signature
+          statement_hash: sha256:1a9be6432a5b
+      - id: status.acceptance.roles-recorded-on-the-run
+        origin: walkdown
+        statement: A recorded walkdown carries the roles its signer was acting in; a role outside the vocabulary is refused rather than filed, because a role nothing recognises is a signature that satisfies nothing while looking exactly like one - and an emptied list is recorded as none stated rather than as a distinction the ledger does not honour.
+        verify: [checks]
+        steps:
+          given:
+            - A walkdown being recorded by somebody signing in a role
+          when:
+            - The run is written
+          then:
+            - The run carries the roles, not the signer's current profile
+            - A role the vocabulary does not know is refused
+            - An empty list is recorded as stated, not dropped
+          statement_hash: sha256:e0e862978414
 
   - id: status.sweep
     title: Asking for the whole thing to be judged again
@@ -73,7 +167,7 @@ stories:
       - id: status.sweep.declares-a-floor
         origin: walkdown
         statement: A sweep is a dated marker in the ledger saying that from here the tiers it names must earn their verdicts again - every verdict recorded before it reads as stale, so a rule nobody has got back to is legible as unfinished rather than as passing, and the runs it supersedes are neither edited nor deleted.
-        verify: [checks, agent]
+        verify: [checks]
         steps:
           given:
             - A ledger where every rule's agent tier passes, from runs recorded last week
@@ -104,7 +198,7 @@ stories:
       - id: status.sweep.says-what-is-left
         origin: walkdown
         statement: While a sweep is open the report says how much of it is done - how many rules in each named tier have been judged since it was declared and how many have not - so the question "did we miss any?" is answered by reading, never by remembering.
-        verify: [checks, agent]
+        verify: [checks]
         steps:
           given:
             - An open sweep over the agent tier, partly worked
@@ -122,7 +216,12 @@ stories:
     rules:
       - id: status.attention.blocked-queues
         origin: prd
-        statement: Attention items are split by who is blocked - humans get judge, verify and answer items; agents get address, incorporate and cover items, cover being a rule that demands checks while no check claims it, which is an agent's work to write and never a person's to judge.
+        statement: Attention items are split by who is blocked - people get judge items, one for each role a rule is still waiting on a signature from, plus verify and answer items; agents get address, incorporate and cover items, cover being a rule that demands checks while no check claims it, which is an agent's work to write and never a person's to judge.
+        verify: [checks]
+
+      - id: status.attention.names-the-role
+        origin: walkdown
+        statement: A judge item says which role a rule is waiting on rather than merely that it waits on a person - a queue two people both scroll past is a queue nobody works.
         verify: [checks]
 
   - id: status.attribution

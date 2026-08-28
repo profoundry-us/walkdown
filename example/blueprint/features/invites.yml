@@ -11,7 +11,7 @@ stories:
       - id: invites.batch.confirm-count
         origin: prototype
         statement: Inviting a batch asks for confirmation naming how many people will be emailed, and that number matches what was selected.
-        verify: [human]
+        signoff: [eng, product]
         screens: [waitlist-admin]
         steps:
           given:
@@ -26,7 +26,7 @@ stories:
       - id: invites.batch.cancel-sends-nothing
         origin: prototype
         statement: Cancelling the confirmation sends no invitations and leaves the selection exactly as it was.
-        verify: [human]
+        signoff: [eng, product]
         screens: [waitlist-admin]
         steps:
           given:
@@ -45,7 +45,7 @@ stories:
       - id: invites.list.status-per-row
         origin: prototype
         statement: Every row in the waitlist shows whether that person has been invited yet, distinguishable without reading the text.
-        verify: [human]
+        signoff: [eng, product]
         screens: [waitlist-admin]
         steps:
           given:

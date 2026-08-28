@@ -203,8 +203,16 @@ export const HEAD = TOP;
  * under the old value stay exactly as written, and nameMap keeps showing
  * them under one face (see `handles` in the identity payload).
  */
+/*
+ * `roles` is the third field and the odd one out: it is not a name, it is
+ * which hats this person signs in. It lives here because it is the same kind
+ * of setting - per person, per machine, said once and remembered - and
+ * because a signature's role has to be known before the signature is written.
+ * null means nothing said; an empty array means "none of these", which is a
+ * different answer and survives the reload the same way an emptied name does.
+ */
 export const ACTOR_KEY = 'walkdown:actor';           // legacy: one free-text name
-export const IDENTITY_KEY = 'walkdown:identity';     // { username, name }
-export const identityOverride = { username: null, name: null };
+export const IDENTITY_KEY = 'walkdown:identity';     // { username, name, roles }
+export const identityOverride = { username: null, name: null, roles: null };
 export const saveIdentity = () => store.set(IDENTITY_KEY,
-  { username: identityOverride.username, name: identityOverride.name });
+  { username: identityOverride.username, name: identityOverride.name, roles: identityOverride.roles });

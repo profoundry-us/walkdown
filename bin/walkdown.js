@@ -22,7 +22,7 @@ Usage:
   walkdown status [<rule-id>] [--dir <blueprint>] [--target <name>] [--json]
   walkdown lint [--dir <blueprint>] [--no-checks] [--json]
   walkdown hash [--dir <blueprint>] [--write]
-  walkdown sweep --why <reason> [--tiers checks,agent,human] [--dir <blueprint>] [--target <name>]
+  walkdown sweep --why <reason> [--tiers checks,agent] [--dir <blueprint>] [--target <name>]
   walkdown threads [--dir <blueprint>] [--rule <id>] [--all] [--json]
   walkdown thread <id> [--reply <text>] [--status <s>|--verify|--reopen|--waive]
                        [--reason <text>] [--actor <name>] [--dir <blueprint>] [--json]
@@ -37,8 +37,10 @@ Commands:
           run_for_rule with --rule), injecting the target's env and
           WALKDOWN_TARGET. The reporter/formatter records the run.
   status  Derived per-rule verification from the runs ledger: latest checks
-          per target, latest agent/human walkdowns, open threads. With a
-          rule id: that rule in full (statement, evidence, threads).
+          per target, the latest agent walkdown, which roles have accepted the
+          rule, and open threads. With a rule id: that rule in full
+          (statement, evidence, the excuses for any tier it does not ask for,
+          who has signed and who has not, threads).
   lint    Validate the blueprint: schema, ids, storyboard refs, staleness,
           check coverage (via runner.list), threads, and runs.
   hash    Report statement_hash status for every rule; --write updates
@@ -212,6 +214,44 @@ const cellText = (cell, withActor = false) => {
   const label = withActor && cell.actor ? cell.actor : cell.state;
   return `${glyph} ${label}`;
 };
+
+/*
+ * A tier a rule has excused reads as EXCUSED, not as a dot.
+ *
+ * Both are `na` to the deriver, and they mean opposite things to a reader: a
+ * dot is "this does not apply here", an excuse is "we decided this cannot
+ * honestly be verified, and there is a sentence saying why". Collapsing them
+ * hid the decision the whole `unverifiable` block exists to make visible - the
+ * report would have looked exactly the same if somebody had simply forgotten.
+ */
+const tierText = (row, tier, cell) =>
+  cell.state === 'na' && row.excuses?.[tier] ? 'excused' : cellText(cell);
+
+/*
+ * How each role has answered, in one cell.
+ *
+ * Named rather than counted, because "1/2 signed" is the one thing nobody can
+ * act on: the question is always WHICH signature is missing, and whose day it
+ * is going to take. The panel draws this as a row of dots; the terminal has no
+ * dots to spare, so it spells the roles out.
+ */
+const ACCEPT_MARK = {
+  signed: ['✓', green],
+  approved: ['✍︎', yellow],
+  'sent-back': ['✗', red],
+  stale: ['~', yellow],
+  none: ['○', dim],
+};
+const acceptanceCell = (acceptance) => {
+  if (!acceptance?.length) return { text: '·', state: 'na' };
+  const parts = [];
+  for (const a of acceptance) {
+    const [glyph, colour] = ACCEPT_MARK[a.state] ?? ['?', yellow];
+    if (parts.length) parts.push([' ', (s) => s]);
+    parts.push([`${glyph} ${a.role}`, colour]);
+  }
+  return { text: parts.map(([s]) => s).join(''), parts };
+};
 const truncate = (s, n) => {
   const text = String(s ?? '').trim().replace(/\s+/g, ' ');
   return [...text].length > n ? [...text].slice(0, n - 1).join('') + '…' : text;
@@ -253,7 +293,9 @@ function renderRuleDetail(blueprint, derived, ruleId, json) {
   const verdictWord = { pass: green('verified'), fail: red('failing'), pending: yellow('pending') }[row.verdict];
   console.log(`${row.rule} · ${verdictWord}`);
   console.log(`  ${row.statement ?? dim('(no statement)')}`);
-  console.log(dim(`  story ${row.story} · verify ${row.verify.join(', ')} · screens ${row.screens.join(', ') || '—'}`));
+  console.log(dim(`  story ${row.story} · verify ${row.verify.join(', ') || 'nothing'}`
+    + ` · signed by ${row.acceptance.map((a) => a.role).join(', ')}`
+    + ` · screens ${row.screens.join(', ') || '—'}`));
 
   if (row.steps) {
     console.log(`\n  ${dim('STEPS')}`);
@@ -266,14 +308,40 @@ function renderRuleDetail(blueprint, derived, ruleId, json) {
   const sources = [
     ...derived.targets.map((t) => [`checks/${t}`, row.cells[t]]),
     ['agent', row.agent],
-    ['human', row.human],
   ].filter(([, cell]) => cell.state !== 'na');
   for (const [label, cell] of sources) {
-    const state = (paint[cell.state] ?? ((s) => s))(cellText(cell, label === 'human'));
+    const state = (paint[cell.state] ?? ((s) => s))(cellText(cell));
     const provenance = cell.runId ? dim(`  ${cell.runId}${cell.created ? ` · ${cell.created}` : ''}`) : '';
     console.log(`    ${label.padEnd(15)}${state}${provenance}`);
     if (cell.detail) console.log(dim(`                   ${truncate(cell.detail, 90)}`));
     if (cell.evidence?.length) console.log(dim(`                   evidence: ${cell.evidence.join(', ')}`));
+  }
+  /*
+   * The excuses, in full, under the evidence that is missing because of them.
+   * A tier is absent for one of two reasons and only one of them is a
+   * decision - so the reason is printed where the verdict would have been,
+   * whole rather than truncated. An excuse nobody can read is one nobody can
+   * argue with, which is the entire point of writing it down.
+   */
+  for (const [tier, why] of Object.entries(row.excuses ?? {})) {
+    console.log(`    ${tier.padEnd(15)}${dim('· excused')}`);
+    console.log(dim(`                   ${why}`));
+  }
+
+  /*
+   * Acceptance, one line per role. Both halves matter: who has signed, and who
+   * has not - a rule waiting on product and a rule waiting on nobody look
+   * identical if only the signatures are listed.
+   */
+  console.log(`\n  ${dim('ACCEPTANCE')}`);
+  for (const a of row.acceptance) {
+    const [glyph, colour] = ACCEPT_MARK[a.state] ?? ['?', yellow];
+    const label = { signed: 'signed', approved: 'approved the wording', 'sent-back': 'sent back',
+      stale: 'signed an older wording', none: 'not yet' }[a.state] ?? a.state;
+    const by = a.actor ? ` by ${a.actor}` : '';
+    const provenance = a.runId ? dim(`  ${a.runId}${a.created ? ` · ${a.created}` : ''}`) : '';
+    console.log(`    ${a.role.padEnd(15)}${colour(`${glyph} ${label}${by}`)}${provenance}`);
+    if (a.detail) console.log(dim(`                   ${truncate(a.detail, 90)}`));
   }
 
   const threads = listThreads(blueprint, { rule: ruleId, all: true });
@@ -329,13 +397,19 @@ function cmdStatus(args) {
 
   const verdictMark = { pass: green('✓'), fail: red('✗'), pending: dim('○') };
 
-  const headers = ['', 'RULE', ...targets.map((t) => t.toUpperCase()), 'AGENT', 'HUMAN', 'THREADS'];
+  /*
+   * ACCEPTED rather than HUMAN, because the column no longer holds a person's
+   * walkdown - it holds every role the rule names and what each has said. The
+   * header changed with the meaning on purpose: a column called HUMAN that had
+   * quietly become something else is how a report starts being misread.
+   */
+  const headers = ['', 'RULE', ...targets.map((t) => t.toUpperCase()), 'AGENT', 'ACCEPTED', 'THREADS'];
   const table = rows.map((r) => [
     verdictMark[r.verdict],
     r.rule,
-    ...targets.map((t) => ({ text: cellText(r.cells[t]), state: r.cells[t].state })),
-    { text: cellText(r.agent), state: r.agent.state },
-    { text: cellText(r.human, true), state: r.human.state },
+    ...targets.map((t) => ({ text: tierText(r, 'checks', r.cells[t]), state: r.cells[t].state })),
+    { text: tierText(r, 'agent', r.agent), state: r.agent.state },
+    acceptanceCell(r.acceptance),
     formatThreads(r.threads),
   ]);
 
@@ -345,8 +419,12 @@ function cmdStatus(args) {
   );
   const renderCell = (c, i) => {
     const text = plain(c);
-    const padded = text + ' '.repeat(Math.max(0, widths[i] - [...text].length));
-    return typeof c === 'string' ? padded : (paint[c.state] ?? ((s) => s))(padded);
+    const pad = ' '.repeat(Math.max(0, widths[i] - [...text].length));
+    if (typeof c === 'string') return text + pad;
+    // A cell can be painted as a whole (one state) or piecewise (the roles,
+    // which disagree with each other by design).
+    if (c.parts) return c.parts.map(([s, colour]) => colour(s)).join('') + pad;
+    return (paint[c.state] ?? ((s) => s))(text + pad);
   };
 
   console.log(dim(`walkdown status — ${blueprint.dir}\n`));
@@ -388,7 +466,10 @@ function cmdStatus(args) {
   }
 
   const HOWTO = {
-    judge: (i) => `walk down ${i.rule} — human verification not yet recorded`,
+    // Named, because "needs a human" was never the question - the question is
+    // whether it needs PRODUCT or engineering, and a queue that cannot say
+    // which is a queue two people both scroll past.
+    judge: (i) => `walk down ${i.rule} — ${i.role ?? 'nobody'} has not accepted it yet`,
     verify: (i) => `verify ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — fix claimed, awaiting your judgment`,
     answer: (i) => `answer ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''}`,
     address: (i) => `address ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — open note`,

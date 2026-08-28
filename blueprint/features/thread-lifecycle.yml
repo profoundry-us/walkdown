@@ -37,6 +37,8 @@ stories:
         origin: prd
         statement: Waiving records who waived and why, and reopening requires a reason; both reasons land as replies.
         verify: [checks]
+        unverifiable:
+          agent: The passing case needs a completed waive, and waiving is a human-only transition an agent may never perform (blueprint/AGENTS.md). The reopen half could be walked; the waive half cannot, so the tier cannot honestly hold.
         steps:
           given:
             - A thread being waived, or an addressed/answered thread being reopened
@@ -69,7 +71,7 @@ stories:
       - id: threads.conversation.one-stream
         origin: walkdown
         statement: A thread is one stream of messages - the opening note is simply the first, by a person, at a time - and consecutive messages from one author collapse under a single name, so a long exchange reads as talking rather than as filing.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [thread-panel, rule-detail]
         steps:
           given:
@@ -88,7 +90,7 @@ stories:
       - id: threads.conversation.composer-stays
         origin: walkdown
         statement: The reply box stands at the bottom of an open thread and never moves - Enter sends and Shift-Enter breaks the line, the message appears before the server answers, and the reply is attributed to whoever you are recording as rather than to a name typed again.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [thread-panel, rule-detail]
         steps:
           given:
@@ -104,7 +106,7 @@ stories:
       - id: threads.conversation.new-since-you-looked
         origin: walkdown
         statement: A thread remembers where your reading stopped, marking what arrived since as new, so returning to a conversation the agent has added to shows what to read rather than asking you to find it.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [rule-detail]
         steps:
           given:
@@ -120,7 +122,7 @@ stories:
       - id: threads.conversation.append-only
         origin: walkdown
         statement: A conversation is append-only - messages cannot be edited or deleted, there are no reactions standing in for a verdict, and a thread that reached a terminal state offers no way back - because a thread is the record of what was said, and the ledger is where judgment is recorded.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [thread-panel]
         steps:
           given:
@@ -137,7 +139,7 @@ stories:
       - id: threads.conversation.thread-is-a-screen
         origin: walkdown
         statement: Opening a thread slides to a screen of its own, one step to the right of the rule it belongs to, and the way back names where it goes - because a conversation deserves the width, and reading one should never cost you your place.
-        verify: [agent, human]
+        signoff: [eng, product]
         screens: [rule-detail, thread-panel]
         steps:
           given:

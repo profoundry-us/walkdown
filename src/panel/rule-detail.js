@@ -95,11 +95,23 @@ export function evidenceRows(row) {
           title="Open the ${shot.length} screenshot${shot.length > 1 ? 's' : ''} this run attached"
           >open ${shot.length}</button></span></div>`;
   };
+  /*
+   * A tier the rule declares it cannot honestly have, said in the row that
+   * tier's evidence would have occupied. An excuse nobody can read is one
+   * nobody can argue with, which is the whole reason it is written down
+   * rather than left as an omission - so it is a line on the page, not a
+   * tooltip and not a silence where a row used to be.
+   */
+  const excuse = (label, why) => `<div class="evrow" data-testid="detail.excuse">
+    <span class="src">${esc(label)}</span>
+    <span class="opacity-70">— not checkable here: ${esc(why)}</span></div>`;
   const rows = [
     ...(row.verify.includes('checks')
       ? (S.data?.targets ?? []).map((t) => line(`checks/${t}`, row.cells?.[t]))
       : []),
+    row.excuses?.checks ? excuse('checks', row.excuses.checks) : '',
     ...(row.verify.includes('agent') ? [line('agent', row.agent), shots(row.agent)] : []),
+    row.excuses?.agent ? excuse('agent', row.excuses.agent) : '',
     ...(row.verify.includes('human') ? [line('human', row.human)] : []),
   ].filter(Boolean);
   // A rule with nothing recorded says so, rather than showing an empty box.
