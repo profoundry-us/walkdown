@@ -3321,12 +3321,32 @@ async function threadPost(path, body) {
  * marked, and the text comes back to the composer so it can be sent again.
  */
 async function postReply(id, text, actor) {
-  const msg = { author: actor || 'you', created: new Date().toISOString(), body: text, pending: true };
+  /*
+   * The same refusal postRuleNote makes, for the same reason.
+   *
+   * This sent `author: actor || undefined`, the key fell out of the JSON, and
+   * the server filled it from the machine's username - so a reply landed in a
+   * conversation under a name the panel had never shown, while the composer
+   * said only "set your name...". A reply is attributed work.
+   *
+   * Fixing the note path alone left the rule half-kept, which is what an
+   * independent re-judge found an hour after the first fix: one path over,
+   * identical line, same server fallback. Worth remembering that the bug was
+   * never in either function - it was in the shape `actor || undefined`,
+   * which reads as a default and is a handoff.
+   */
+  const who = (actor ?? '').trim();
+  if (!who || who === 'agent') {
+    say('A reply is recorded under a person\u2019s name \u2014 set it in Settings (the gear).');
+    openActorSettings();
+    return false;
+  }
+  const msg = { author: who, created: new Date().toISOString(), body: text, pending: true };
   const list = pendingReplies.get(id) ?? [];
   pendingReplies.set(id, [...list, msg]);
   S.threadNote = '';
   render();
-  const ok = await threadPost(`/api/threads/${id}/replies`, { author: actor || undefined, body: text });
+  const ok = await threadPost(`/api/threads/${id}/replies`, { author: who, body: text });
   if (ok) {
     pendingReplies.set(id, (pendingReplies.get(id) ?? []).filter((m) => m !== msg));
     // The reply is yours and you have just read it: do not mark it new.

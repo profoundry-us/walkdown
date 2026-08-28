@@ -1,0 +1,82 @@
+{
+  "run_id": "2026-08-28T04-09-30Z-local-01",
+  "created": "2026-08-28T04:09:30Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "eeedc5a-dirty",
+  "blueprint_sha": "eeedc5a-dirty",
+  "note": "re-judged after tonight's fixes",
+  "results": [
+    {
+      "rule": "panel.identity.attribution-visible",
+      "status": "fail",
+      "statement_hash": "sha256:1b6a789fde73",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-58-33Z/identity-fail-refused.png",
+        "runs/evidence/2026-08-28T03-58-33Z/identity-strip-defaulted.png",
+        "runs/evidence/2026-08-28T03-58-33Z/identity-corrected-recorded.png",
+        "runs/evidence/2026-08-28T03-58-33Z/reply-composer-no-name.png",
+        "runs/evidence/2026-08-28T03-58-33Z/reply-filed-under-a-stranger.png",
+        "runs/evidence/2026-08-28T03-58-33Z/identity-reply-path.txt",
+        "runs/evidence/2026-08-28T03-58-33Z/identity.txt"
+      ],
+      "reasoning": "The reported hole is genuinely shut and a neighbouring one is still open, so this cannot pass. Driven on a disposable copy of the blueprint served on 4791, with every non-GET to /api/ intercepted: with the git identity in place the strip reads 'Recording as Topher Fangio topher', the full name beside the username the ledger carries, both measured visible at 1:1 opacity. Emptying settings.actor and pressing Fail with feedback typed is now refused - '#wdp-vsay' shows 'A note is recorded under a person's name - set it in Settings (the gear).' at 353x31 opacity 1, Settings opens with the empty username focused, zero POSTs are attempted, and the session draft still carries no verdict for the rule. Correcting the identity first and pressing Fail then sends author 'refix-probe-user', the name the strip had just shown. But the same emptied identity taken to a thread instead of a rule still attributes silently: the composer says 'as set your name...' - no name at all - and pressing Enter posts {\"body\":\"...\"} with NO author, because postReply sends 'author: actor || undefined' (src/panel/app.js:1519) and the server fills the gap with userInfo().username (lib/serve.js:516). Let through to the disposable copy, the reply landed in n-0118.yml as 'author: topherfangio' - the machine username, a name the panel never displayed. That is the same bug postRuleNote was just fixed for, one path over, and the statement covers it outright: 'a walkdown verdict OR A THREAD ACTION shows the name it will be recorded under, so nobody is attributed silently.'"
+    },
+    {
+      "rule": "panel.identity.default-actor",
+      "status": "fail",
+      "statement_hash": "sha256:6cf5b560bdde",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-58-33Z/identity-settings-open.png",
+        "runs/evidence/2026-08-28T03-58-33Z/identity-username-emptied.png",
+        "runs/evidence/2026-08-28T03-58-33Z/identity-corrected.png",
+        "runs/evidence/2026-08-28T03-58-33Z/identity-survives-reload.png",
+        "runs/evidence/2026-08-28T03-58-33Z/identity-name-emptied.png",
+        "runs/evidence/2026-08-28T03-58-33Z/identity-reply-path.txt",
+        "runs/evidence/2026-08-28T03-58-33Z/identity.txt"
+      ],
+      "reasoning": "Most of this rule holds and its last clause does not. With nothing in localStorage the server answers username 'topher', name 'Topher Fangio', source git, and the panel arrives filled in from that - no attributed action prompted for either. Settings shows both fields, settings.actor and settings.display-name, each 144x24, neither disabled nor readonly; typing 'refix-probe-user' and 'Refix Probe' re-signs the running sitting immediately (the strip repaints to 'Recording as Refix Probe refix-probe-user') and both values are still there after a reload, in the fields and in the strip. Emptying the full name leaves the username standing alone in the strip, which is what the rule asks. The clause that fails is the last one: 'no username makes the panel refuse attributed work'. With settings.actor emptied, filing a note from a rule is now refused - that is the fix, and it works - but replying to a thread is not: the composer offers 'set your name...', Enter posts with no author, and the copy's n-0118.yml gained 'author: topherfangio' from the server's fallback. A reply is attributed work; it was recorded, not refused, under a name this panel never showed. Fixing postRuleNote without the identical 'author: actor || undefined' in postReply leaves the rule half-kept."
+    },
+    {
+      "rule": "panel.desk.peek",
+      "status": "pass",
+      "statement_hash": "sha256:9b19ad4a2f80",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-58-33Z/peek-1-on.png",
+        "runs/evidence/2026-08-28T03-58-33Z/peek-3-screen-picked.png",
+        "runs/evidence/2026-08-28T03-58-33Z/peek-4-vp390.png",
+        "runs/evidence/2026-08-28T03-58-33Z/peek-5-vp1440.png",
+        "runs/evidence/2026-08-28T03-58-33Z/peek-7-fade.png",
+        "runs/evidence/2026-08-28T03-58-33Z/peek-13-unticked.png",
+        "runs/evidence/2026-08-28T03-58-33Z/peek-16-reopened.png",
+        "runs/evidence/2026-08-28T03-58-33Z/desk-peek.txt"
+      ],
+      "reasoning": "The peek now survives everything the bar can do to it. With a headless rule open (screens.identity.fragment-is-identity) so the headless cover is on the desk too, ticking 'Hide app temporarily' takes the app frame, the aside and the cover to computed opacity 0.1 together while the bar stays at 1 with every button still pointer-events auto. Seventeen measurements were taken along one run, reading computed opacity and boxes rather than asking whether an element exists: open the screen picker, pick the 'review' screen out of the list, 390, 1440, Fit, drag the fade to 40 and back to 100, pin mode on and off, drag a desk dial, resize the window - after every one of them the checkbox reads checked, the tuner is still open, and app/aside/cover are all still 0.1 with the bar at 1. The 1440 screenshot shows it plainly: a scaled frame at 74%, the ruling and the grid readable straight through app, aside and headless cover, the tuner and bar at full strength. Unticking puts app and aside back to 1 and drops the inline opacity entirely; Escape closing the tuner ends the peek the same way; reopening the tuner shows the checkbox unchecked again, so it is still a way of looking and not a saved preference. No page errors in the whole run."
+    },
+    {
+      "rule": "threads.conversation.new-since-you-looked",
+      "status": "pass",
+      "statement_hash": "sha256:e3e890cf2091",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-58-33Z/thread-opened-at-the-new-line.png",
+        "runs/evidence/2026-08-28T03-58-33Z/thread-collapsed-on-the-rule.png",
+        "runs/evidence/2026-08-28T03-58-33Z/thread-from-the-list.png",
+        "runs/evidence/2026-08-28T03-58-33Z/thread-no-unread-at-the-newest.png",
+        "runs/evidence/2026-08-28T03-58-33Z/thread-own-reply-not-new.png",
+        "runs/evidence/2026-08-28T03-58-33Z/threads-new-since.txt"
+      ],
+      "reasoning": "The blank column is gone and the landing is right. Seeding walkdown:seen:blueprint with n-0071 read at 2026-08-26T06:00:00Z - two replies after it - the collapsed card under its own rule, panel.rules.takes-you-there, carries a red '2 new' badge at 46x16 beside the status chip. Opening it leaves the pane wrapper at scrollLeft 0 (this is the number that was 368 and slid the panes off the edge); the track sits at translate -764, which puts the thread pane at x 885-1267, exactly over the aside, and its text measures out as the conversation rather than an empty pane. The stream itself is scrolled by hand to scrollTop 1619 of 3113, and the New line's box top equals the stream's box top to the pixel - the divider is the first thing under the header, with the two unread messages below it, which the screenshot confirms in words. The same thread opened from the Threads list lands identically. A thread with nothing unread (n-0076, mark seeded to now) opens with no New line and scrollHeight - clientHeight - scrollTop = 0, the newest message. Scrolling the stream 60px leaves the line drawn at the same offsetTop, and it survives a repaint. Marks are keyed per blueprint (walkdown:seen:blueprint) and both badges are still there after a reload. Replying updates the mark, so your own message is not new to you: the badge is gone from the card afterwards. Judged on the disposable copy; the one reply the probe made was held at the wire."
+    },
+    {
+      "rule": "status.sweep.says-what-is-left",
+      "status": "pass",
+      "statement_hash": "sha256:108b3015acc9",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-58-33Z/sweep-says-what-is-left.txt"
+      ],
+      "reasoning": "Both halves of the earlier fail are repaired. Judged on a scratch copy at .walkdown/tmp/refix-sweep-bp with the open agent sweep's created backdated to 2026-08-28T03:53:20Z, so four of tonight's six sitting runs fall after it and two before it - a partly worked sweep, which is the state the rule's GIVEN names. No sweep was declared against the real blueprint/ and nothing there was written. The report names the sweep by its run id, its actor and its reason, gives both counts in one line ('SWEEP agent on local - 45/71 judged, 26 to go') and repeats the outstanding count in the summary line above it, then lists every one of the 26 owed rules as a diamond. Counted from the output: 26 diamonds for 26 owed, and no '+N more' anywhere in the sweep block - the only truncation left in the report is the unrelated ACTIVE THREADS listing. status --json now carries a sweeps block at the top level alongside targets/rows/drift/attention, with runId, tier, target, created, why, actor, of, done and the full owed array; of - done equals the length of owed, so the counted and the listed answers agree by construction. The real blueprint's own sweeps block reads 71/71 with owed [], which is the same code path answering a complete sweep."
+    }
+  ]
+}
