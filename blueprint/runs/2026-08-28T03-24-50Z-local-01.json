@@ -1,0 +1,14 @@
+{
+  "run_id": "2026-08-28T03-24-50Z-local-01",
+  "created": "2026-08-28T03:24:50Z",
+  "actor": "topherfangio",
+  "kind": "sweep",
+  "target": "local",
+  "tiers": [
+    "agent"
+  ],
+  "why": "the panel was split from one 4146-line file into sixteen modules (Phases 0-4); every agent verdict on the books predates it",
+  "git_sha": "a505f0b",
+  "blueprint_sha": "a505f0b",
+  "results": []
+}
