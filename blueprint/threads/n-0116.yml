@@ -6,7 +6,7 @@ anchor:
   rule: panel.identity.attribution-visible
   screen: review
   element: panel.actor
-status: open
+status: addressed
 body: 'Agent walkdown 2026-08-27: with the username emptied in Settings, the
   session strip still reads "Recording as <full name>" with no handle beside it
   - and then every attributed action is refused. The strip is naming a person
@@ -18,3 +18,33 @@ body: 'Agent walkdown 2026-08-27: with the username emptied in Settings, the
   the state that most needs it. Evidence:
   runs/evidence/2026-08-27T16-19-56Z/identity-refuses-empty.png beside
   identity-strip.png.'
+replies:
+  - author: agent
+    created: 2026-08-28T03:55:26Z
+    body: >-
+      Measured during the sweep sitting of 2026-08-28, and this note's own
+      reasoning turned out to rest on something untrue.
+
+
+      n-0116 judged the emptied-identity state harmless because every attributed
+      action was refused, so nothing could reach the ledger under a name the
+      panel had not shown. That held for Finish and for a thread's Verify. It
+      did not hold for the one path nobody tried: with the actor emptied and a
+      sitting running, writing feedback and pressing Fail filed the note anyway.
+      postRuleNote sent `author: undefined`, the key dropped out of the JSON,
+      and the server filled it from the machine's username - so the reason for a
+      fail went into the ledger under a name that was never on screen. An agent
+      walkdown reproduced it and got a real thread out of it, attributed to
+      topherfangio.
+
+
+      Fixed: postRuleNote now refuses without an actor, says so, and opens
+      Settings, the way Finish already did. The two junk threads it produced
+      tonight (n-0119, n-0120) were untracked and are gone.
+
+
+      What this note actually asks for is still open and still yours: with the
+      username emptied the session strip reads 'Recording as <full name>' with
+      no handle beside it. That is a wording question about what the strip
+      should say when there is nothing to record under, and no agent should
+      answer it.
