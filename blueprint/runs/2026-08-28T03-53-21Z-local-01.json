@@ -1,0 +1,177 @@
+{
+  "run_id": "2026-08-28T03-53-21Z-local-01",
+  "created": "2026-08-28T03:53:21Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "cd41329-dirty",
+  "blueprint_sha": "cd41329-dirty",
+  "note": "Agent sitting 2026-08-28, slice panel.dock.* / panel.desk.* / panel.delivery.* / panel.start.* — 15 agent-tier rules re-judged against the sixteen-module panel, driven with a real pointer at 1440x900 and measured (bounding boxes, computed opacity, subframe navigation counts) rather than queried.",
+  "results": [
+    {
+      "rule": "panel.dock.toolbar",
+      "status": "pass",
+      "statement_hash": "sha256:aaf28fbb5e0a",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-54Z/dock-toolbar.png",
+        "runs/evidence/2026-08-28T03-29-54Z/dock-screens-list.png",
+        "runs/evidence/2026-08-28T03-29-54Z/dock-screen-picked-by-hand.png",
+        "runs/evidence/2026-08-28T03-29-54Z/dock-list-follows-the-page.png"
+      ],
+      "reasoning": "Measured every control in the bar rather than reading the markup. The bar runs the full width at y=0..44. `panel.blueprint` is a plain span reading \"walkdown\" — no button, no select anywhere under that anchor, so choosing a project is still only the Blueprints tab's job (n-0017 holds). `panel.screen-picker` reads \"The review page\" with the page closed and carries the title \"Which screen this page is, detected from its address\"; it opens `panel.screens-list`, whose first row is \"Detect from the page\" marked with a filled dot and annotated with the detected id. Picking \"Rule detail\" by hand relabels the button and swaps its class from btn-ghost to btn-outline btn-primary with the title \"Screen picked by hand\" — the difference is readable from the bar. Back in Detect mode I navigated the app frame out from under an OPEN list (stand-in/rule-detail then stand-in/thread-panel): both the bar's label and the row the list marks followed to \"The thread screen\", so the control reports the page instead of remembering an answer (n-0107 stays fixed). Prototype/App swap which surface the page area shows (six crossings, the ghost's opacity toggling 1/0), and Pin mode toggles from the bar."
+    },
+    {
+      "rule": "panel.dock.surface-swap-is-instant",
+      "status": "pass",
+      "statement_hash": "sha256:c74a4c999299",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-54Z/dock-surface-swap.png",
+        "runs/evidence/2026-08-28T03-29-54Z/dock-fade-at-prototype.png"
+      ],
+      "reasoning": "Counted subframe navigations with a framenavigated listener while crossing between the two surfaces six times on one screen. Exactly ONE navigation happened — the ghost's first load of /prototype/screens/review.html — and the cumulative count stayed at 1 through all six crossings; the ghost element was kept and only its opacity moved between 1 and 0. Hidden, it computes pointer-events:none, so it takes no clicks and cannot be pinned. Resizing the window from 1440x900 to 1200x820 added no navigation, so the copy is re-measured rather than reloaded. What SHOULD invalidate it does: switching the viewport preset to 390 forced a reload (nav count 1 -> 2) and going back to Fit forced another, so the copy is never the wrong layout of the page."
+    },
+    {
+      "rule": "panel.dock.controls-survive-use",
+      "status": "pass",
+      "statement_hash": "sha256:e55758ff63da",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-54Z/dock-fade-drag-midway.png",
+        "runs/evidence/2026-08-28T03-29-54Z/dock-fade-drag-settled.png",
+        "runs/evidence/2026-08-28T03-29-54Z/dock-fade-mid.png"
+      ],
+      "reasoning": "This is the rule the old bug (n-0068) killed, so I drove the actual gesture: pointer down on the handle at the right end of the track and twenty moves across it without releasing. Before the drag I stamped a property on the slider element; it was still there at every sample, so the element under the pointer was never rebuilt. The value stepped through 20 distinct positions (100, 98, 92, 87 ... 11, 6, 0) and the ghost's computed opacity ramped monotonically with it (0.02, 0.08, 0.13 ... 0.94, 1) — a continuous cross-fade the whole way, not a drag dropped after the first movement. On mouse-up the bar settled on what the drag ended on: value 0, Prototype lit and App outlined, pin hint \"it lands on the prototype\". Separately, a click at 50% of the track jumped straight there (value 50, ghost 0.5) and two ArrowLeft presses stepped it to 49 with the ghost at 0.51, so the click and keyboard paths still work."
+    },
+    {
+      "rule": "panel.dock.one-pin-mode",
+      "status": "pass",
+      "statement_hash": "sha256:a66c41a78d23",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-54Z/dock-one-pin-mode-on.png",
+        "runs/evidence/2026-08-28T03-29-54Z/dock-one-pin-mode-after-escape.png",
+        "runs/evidence/2026-08-28T03-29-54Z/dock-after-escape.png"
+      ],
+      "reasoning": "Off, `panel.pin-mode` carries btn-outline btn-primary and the app document inside the frame computes cursor:auto on both html and body. Clicking it once turns the class to btn-warning AND the app's html and body both compute cursor:crosshair — one gesture, one state, and the page under review takes the crosshair. Escape from the host put the button back to btn-outline btn-primary and the app's cursor back to auto in the same beat, so the button and the cursor follow the one state rather than each other. There is exactly one control: the only element in the panel's shadow root under `panel.pin-mode` is the bar's button (the other matches my scan turned up are rule rows in the sidebar named \"one-pin-mode\", not controls). Escape pressed with a pin form open closed only the form and left pin mode armed (button still btn-warning, html still wd-pinning); a second Escape left pin mode — the two-stage exit, with the button and the cursor both following."
+    },
+    {
+      "rule": "panel.dock.no-pin-mid-fade",
+      "status": "pass",
+      "statement_hash": "sha256:a25c933fc24f",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-54Z/dock-no-pin-mid-fade.png",
+        "runs/evidence/2026-08-28T03-29-54Z/dock-fade-at-prototype.png"
+      ],
+      "reasoning": "Turned pin mode ON at an end first (button btn-warning), then clicked the fade track at 45%. Pin mode did not merely refuse to be entered — it turned ITSELF off: the button dropped from btn-warning back to btn-outline btn-primary and went disabled in the same repaint, so nothing was left armed over a view where both surfaces are on screen at 0.56 opacity. It says why rather than simply refusing: title \"Slide fully to the prototype or the app first — half-faded, a pin has no surface to belong to\". The same disabled+reason state held at every mid-track sample of the twenty-step drag. Clicking the track back at its right end re-enabled the control and the title returned to \"Click anything to attach a note — it lands on the app\", so landing fully on either end opens pinning again."
+    },
+    {
+      "rule": "panel.dock.own-skin",
+      "status": "pass",
+      "statement_hash": "sha256:93bfd901cfcd",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-54Z/dock-toolbar.png",
+        "runs/evidence/2026-08-28T03-24-56Z/proto-review.png"
+      ],
+      "reasoning": "Three surfaces in one frame and no two of them look alike. walkdown's chrome — bar, sidebar, tuner — is the drafting-blue theme: a dark cyan-blue ground with pale ink, hairline borders, tight radii, over a faint ruled desk. The application in the sheet is the stand-in wearing daisyUI's emerald with its own green \"STAND-IN APP\" band; nobody could take one for the other. The skin is genuinely a theme definition: styles/walkdown.css declares one `@plugin \"daisyui/theme\" { name: \"blueprint\" }` block of standard daisyUI variables, and the chrome elements simply carry data-theme=\"blueprint\" (D.bar, D.side, D.deskPanel) — no component names a colour. Retuning it is that one block. The prototype keeps a third skin: proto-review.png is the light greyscale wireframe theme, distinct from both the built chrome and the stand-in."
+    },
+    {
+      "rule": "panel.dock.chrome-not-a-pin-target",
+      "status": "pass",
+      "statement_hash": "sha256:466c5e212ed7",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-54Z/dock-chrome-gear-in-pin-mode.png",
+        "runs/evidence/2026-08-28T03-29-54Z/dock-chrome-panel-in-pin-mode.png",
+        "runs/evidence/2026-08-28T03-29-54Z/dock-pin-form-on-app.png",
+        "runs/evidence/2026-08-28T03-29-54Z/dock-after-escape.png"
+      ],
+      "reasoning": "Judged by trying to break it rather than by reading the guard. First the control: with pin mode on, a real pointer click inside the app frame DOES open a pin form in the embed's shadow root (headed `panel.app-frame`, with a placeholder pin drawn at the spot) — so the mechanism was live for every negative below. Then, with pin mode still on, a pointer click on the bar's gear opened the desk tuner (256x365, display block) and no pin form appeared anywhere in the frame; the pin button stayed lit. A pointer click on a rule row in the sidebar opened that rule's detail pane and again produced no pin form, pin mode still on. The slider still drags in pin mode — I dragged it from 100 to 73 with the button lit. Escape behaved in two stages: with a form open it closed only the form and left pin mode armed; pressed again with nothing open it left pin mode, button back to btn-outline (n-0077 stays fixed)."
+    },
+    {
+      "rule": "panel.desk.reads-as-paper",
+      "status": "pass",
+      "statement_hash": "sha256:60871d489f4d",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-54Z/desk-reads-as-paper.png",
+        "runs/evidence/2026-08-28T03-29-54Z/dock-toolbar.png"
+      ],
+      "reasoning": "The desk survived the split into src/panel/desk.js intact. `panel.desk` is a fixed layer at z-index -1, pointer-events none, oversized to 9072x2281 so its corners stay out of the viewport. Its transform is a real 3D one — inline `perspective(600px) rotateX(35deg) rotate(35deg)`, resolving to a matrix3d with non-zero third-column terms, so the rulings genuinely converge toward a horizon rather than being sheared in the plane. The ruling itself is two repeating-linear-gradients one right angle apart (0deg and 90deg) at a 60px pitch, drawn in `color-mix(in oklch, <ink> 10%, transparent)` — texture, not a grid of hard lines, and legible as such in the capture. The affine-skew fallback is only reached when CSS.supports('transform','perspective(1px) rotateX(1deg)') is false; here it is true and documentElement's own background-image is 'none', confirming the layer is doing the work rather than the root."
+    },
+    {
+      "rule": "panel.desk.tuner",
+      "status": "pass",
+      "statement_hash": "sha256:09636342aada",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-54Z/desk-tuner-open.png",
+        "runs/evidence/2026-08-28T03-29-54Z/desk-tuner-dial-moved.png",
+        "runs/evidence/2026-08-28T03-29-54Z/desk-tuner-typed.png",
+        "runs/evidence/2026-08-28T03-29-54Z/desk-tuner-persisted.png"
+      ],
+      "reasoning": "The gear opens Settings (256x365 at x=24,y=56): identity above, then Desk ruling with five dials — Tilt 35, Tip 35, Depth 600px, Spacing 60px, Ink 10% — a Reset, the peek checkbox, and \"Yours alone — how the paper lies changes nothing about what gets verified.\" Dragging the Tilt dial repainted the desk continuously under the pointer (rotate 28 -> 33 -> 38 -> 44deg across four samples) with no navigation, and the number beside it tracked to 44deg. A real pointer click on the Spacing number replaced the cell with a number input, focused and selected; typing 42 and pressing Enter set the cell to 42px, the range to 42, and the ruling's gradient pitch to 42px — so a dial can be typed, not only dragged to. The choice persists: after setting Tip to 55 the panel wrote {\"tilt\":44,\"tip\":55,\"depth\":600,\"gap\":60,\"ink\":20} to walkdown:desk, and a full reload came back with perspective(600px) rotateX(55deg) rotate(44deg). It sits clear of the app's corner by the same distance on both axes — 12px left and 12px top of the frame's box. It closes on Escape and on a click inside the app under review, and the gear's own click toggles rather than double-firing. Nothing about any of this reaches the ledger: no run, no verdict, no thread was written by the tuner. (Two earlier readings that looked like failures — Escape not closing it, and a dial number refusing to become an input — were both artifacts of driving it with a synthetic .click() while focus was inside the app frame. With a real pointer both behave.)"
+    },
+    {
+      "rule": "panel.desk.peek",
+      "status": "fail",
+      "statement_hash": "sha256:9b19ad4a2f80",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-54Z/desk-peek-before.png",
+        "runs/evidence/2026-08-28T03-29-54Z/desk-peek-on.png",
+        "runs/evidence/2026-08-28T03-29-54Z/desk-peek-after-dial.png",
+        "runs/evidence/2026-08-28T03-29-54Z/desk-peek-after-bar-click.png"
+      ],
+      "reasoning": "The peek itself is right and the picture is exactly what the rule asks for: with a headless rule selected so the cover exists, ticking the checkbox took the app frame, the aside and the headless cover all to computed opacity 0.1 together — dimmed, not gone, with the ruling readable straight through them — while the bar stayed at 1. Dragging a dial mid-peek left all three at 0.1, so a repaint no longer undoes it (n-0048's fix holds for that path). It fails on the other half of the same step. Using ANY bar control while peeking silently ends the peek and leaves the checkbox lying about it: a pointer click on the screen picker put app, aside and cover back to computed opacity 1 with #wdp-desk-hide still reporting checked, and the viewport preset buttons do the same (inline opacity goes from \"0.1\" to \"\" on both the frame and the aside). The mechanism is the one the code already anticipated for the cover — placeAppFrame and the aside's placement write style.cssText wholesale, and unlike syncHeadlessCover they do not re-say the peek's dimming afterwards, so the first repaint from the bar wipes it. The rule requires the bar to stay at full strength with its buttons and the gear still working THROUGHOUT the peek; here using one of those buttons is what kills it, and the control that says \"a way of looking\" is left checked over an undimmed desk. The step \"closing the tuner ends it\" therefore also cannot be reached honestly from any state where a bar control was touched."
+    },
+    {
+      "rule": "panel.delivery.framed-isolation",
+      "status": "pass",
+      "statement_hash": "sha256:967abb13513f",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-54Z/delivery-framed-isolation-modal.png",
+        "runs/evidence/2026-08-28T03-29-54Z/delivery-framed-chrome-over-modal.png",
+        "runs/evidence/2026-08-28T03-29-54Z/delivery-panel-follows-app.png",
+        "runs/evidence/2026-08-28T03-29-54Z/delivery-panel-follows-pushstate.png"
+      ],
+      "reasoning": "The statement is about the viewport, and that is what I measured. In a 1440x900 window the application sits in `panel.app-frame` at 12,44 sized 1020x844, and inside it window.innerWidth/innerHeight report 1020x844 — the app genuinely lays itself out against the sheet, 420px narrower than the window. I then gave the app the worst case from the GIVEN: a native `<dialog>` opened with showModal() and styled `position:fixed; inset:0; width:100vw; height:100vh; z-index:2147483647`. It measured 986x810 against the frame's own 1020x844 viewport and painted no further; walkdown's bar and sidebar are untouched in the capture, document.elementFromPoint over the bar still returns walkdown's own chrome, and the gear still opened the tuner with the app's modal up — so nothing the app draws paints over walkdown or makes it inert. The panel keeps up with the application: driving the frame to /stand-in/rule-detail moved the bar's screen label to \"Rule detail\", and a history.pushState to /stand-in/thread-panel — a move with no page load at all — moved it to \"The thread screen\". CAVEAT, stated plainly: the third step, reviewing a page that refuses framing by removing the refusing header for that tab, is the extension's declarativeNetRequest path and I did not load the unpacked extension, so that elaboration is unevidenced. This verdict rests on the statement and on three of the four steps."
+    },
+    {
+      "rule": "panel.delivery.stale-copy-says-so",
+      "status": "pass",
+      "statement_hash": "sha256:124fa1fddaac",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-54Z/delivery-stale-copy-banner.png",
+        "runs/evidence/2026-08-28T03-29-54Z/delivery-current-copy.png"
+      ],
+      "reasoning": "Booted the panel three ways from one server to get all three of the rule's cases. (1) A deliberately wrong build hash in the config — what an extension running yesterday's vendored copy actually has — and the bar draws a red badge-error reading \"Stale — reload the extension\" (205x20) in the blueprint label's place, beside the logo where it is about walkdown rather than about the project; the blueprint span is gone while it shows. It names the fix: \"walkdown was updated — reload the extension at chrome://extensions, then reload this page, to run the current build.\" (2) The same host with buildHash set to the real panelHash the server reports (37bbc82562b0) draws nothing at all. (3) The docked script-tag delivery at localhost:4700 publishes no buildHash (window.__walkdownConfig.buildHash is null) and never shows the badge, which is right — a script tag fetches the panel afresh every load and can never be stale."
+    },
+    {
+      "rule": "panel.delivery.anchors-still-required",
+      "status": "pass",
+      "statement_hash": "sha256:6cbc4017880c",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-54Z/delivery-bare-pin-form.png",
+        "runs/evidence/2026-08-28T03-29-54Z/delivery-anchored-pin-form.png",
+        "runs/evidence/2026-08-28T03-29-54Z/delivery-anchorless-thread-records.txt"
+      ],
+      "reasoning": "Built the GIVEN properly: two pages identical but for their anchors, reviewed one after the other through the same framed delivery. On the page carrying zero anchor attributes (verified: document.querySelectorAll('[data-testid]') is 0 inside the frame) pin mode still armed and a pointer click opened the form headed \"unanchored spot\", saying in so many words \"no anchored element here — pinned by position\", with the placeholder pin drawn at the click point (249,181). Saving it recorded exactly what the rule asks: anchor.position {x:260,y:200}, surface app, viewport {name: desktop, width: 1020} and NO element key — a positioned pin, not an anchored one. The same click on the page that does carry anchors headed the form \"bare.card\" and recorded element: bare.card plus offset {x:196,y:136} alongside the same position, so anchored pins keep working wherever anchors exist. Both records are in the .txt evidence. Housekeeping: those two pins really were filed (the embed posts to /api/threads?bp=..., which my interception glob missed), so I copied them into the evidence directory and deleted n-0119 and n-0120 from blueprint/threads — nothing junk is left in the ledger."
+    },
+    {
+      "rule": "panel.start.open-a-folder",
+      "status": "pass",
+      "statement_hash": "sha256:2a5e9a0925a7",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-54Z/start-no-server.png",
+        "runs/evidence/2026-08-28T03-29-54Z/start-choose-blueprint.png"
+      ],
+      "reasoning": "Booted the panel pointed at localhost:4999 with nothing listening, giving it a stylesheet the way the extension does so the gate renders as a reviewer would see it. It says so plainly: a 342x147 block headed \"No blueprints open\", explaining that a browser tab cannot read your filesystem and that walkdown reads blueprints and writes threads and runs back to them, then \"In the directory holding your blueprints, run:\" above a code block reading exactly `walkdown serve`. Nothing in the whole gate matches /error|failed|could not|unable/ — it is stated as a first step, not as a failure, and the page under review renders normally beside it rather than as an empty or broken surface. The address is editable and retryable in place: I typed the live address into the box and pressed Connect with the pointer, and the panel moved to the blueprint gate in the same document, no reload. Once connected it names the folder — `start.folder` reads \"Serving ~/Development/profoundry/walkdown — every blueprint under it is listed below.\" DISCREPANCY worth a human's eye, not enough to fail the statement: the box carries only an accessible name, aria-label=\"walkdown server address\", where the design (proto-start.png) shows a visible \"Server\" label beside it. It is labelled as an address and never as a folder, and its value is a URL, so the step's intent holds; but a sighted reviewer sees an unlabelled box, and the design's version of the gate is a centred card rather than a sidebar."
+    },
+    {
+      "rule": "panel.start.choose-a-blueprint",
+      "status": "pass",
+      "statement_hash": "sha256:9f0ded825795",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-54Z/start-choose-blueprint.png",
+        "runs/evidence/2026-08-28T03-29-54Z/start-after-choosing.png",
+        "runs/evidence/2026-08-28T03-29-54Z/start-blueprints-tab.png"
+      ],
+      "reasoning": "Reached the gate honestly, by booting the panel with no blueprint recorded against a server whose folder holds two. It asks \"Which blueprint?\", says it is \"Remembered for http://localhost:4700, and changeable later from the Blueprints tab\", names the folder it is serving, and lists both by name AND by the description each blueprint carries in its own config: \"walkdown — The tool itself: the panel, the embed, and the governance that keeps a verdict honest\" and \"walkdown-example — A waitlist app and its admin: the schema demo, and the fixture the integration tests run against\". Clicking the first loaded it (bar comes up naming \"walkdown\") and remembered the choice for the origin — localStorage holds walkdown:blueprint:http://localhost:4700 = \"blueprint\". A page that declares its blueprint is never asked: localhost:4700's own review page bakes bp=blueprint and goes straight to ready with the same two projects on the server. Test fixtures are not offered — adapters/rspec/fixture/blueprint/walkdown.yml exists on disk and appears in neither the gate nor the tab; only the two real projects do. And the same list stays reachable: the Blueprints tab shows both rows with the current one filled, plus the served folder, so the folder or the blueprint can be changed without reinstalling anything."
+    }
+  ]
+}

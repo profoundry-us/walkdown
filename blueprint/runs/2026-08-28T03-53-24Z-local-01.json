@@ -1,0 +1,74 @@
+{
+  "run_id": "2026-08-28T03-53-24Z-local-01",
+  "created": "2026-08-28T03:53:24Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "cd41329-dirty",
+  "blueprint_sha": "cd41329-dirty",
+  "note": "The agent-tier rules outside panel.*, embed.* and threads.conversation.*: screen identity and ownership (screens.*), the stand-in surface, and the two brand-new status.sweep.* rules, judged against the running servers on 4700/4710/4310 and against scratch ledgers under .walkdown/tmp/ so the real blueprint's open sweep was never touched.",
+  "results": [
+    {
+      "rule": "status.sweep.declares-a-floor",
+      "status": "pass",
+      "statement_hash": "sha256:b0073c10a38b",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-23Z/sweep-declares-a-floor.txt"
+      ],
+      "reasoning": "Driven end to end on a synthetic ledger built for it at .walkdown/tmp/floor-bp: two rules, and three run records dated 2026-08-20 giving every rule a checks pass, an agent pass and a human approval. I recorded the sha256 of all three files, then ran `walkdown sweep --tiers agent --why \"the panel was split into sixteen modules\"` and re-derived. Every one of the four then-steps held. (1) Both agent cells flipped from pass to stale - stale, not never and not passing - and each carried sweptBy pointing at the new marker's run id. (4) The checks and human cells were untouched: still pass and approved, because the sweep named only the agent tier. (3) The three superseded run files hashed identically after the sweep as before it; the marker is a new file of kind \"sweep\" with tiers, why, actor and an empty results array, so nothing was edited or deleted. (2) I then appended one fresh agent walkdown for demo.alpha through lib/run-record.js and its agent cell read pass again while demo.beta stayed stale, so a rule judged after the floor earns its verdict back. The reason is genuinely required - cmdSweep exits 1 without --why, and writeSweep throws - and it is kept in the marker. The transcript is the whole session, commands and output."
+    },
+    {
+      "rule": "status.sweep.says-what-is-left",
+      "status": "fail",
+      "statement_hash": "sha256:108b3015acc9",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-23Z/sweep-says-what-is-left.txt"
+      ],
+      "reasoning": "Judged on a byte copy of blueprint/ at .walkdown/tmp/sweep-bp, which carries today's real open agent sweep. Two of the three then-steps hold and one does not. The report does name the sweep - `SWEEP agent on local - 0/71 judged, 71 to go`, then the run id, the actor and the reason - and the counts are derived from the rows rather than remembered: after I appended one agent walkdown for a single rule the same report re-read `1/71 judged, 70 to go` and the summary line changed to `70 awaiting the agent sweep`. What fails is \"the owed rules are listed as work, not merely counted\". The listing is capped at twelve (`for (const rule of s.owed.slice(0, 12))` in bin/walkdown.js) and prints `+59 more`; on the very sitting this rule was written for, 59 of 71 owed rules are named nowhere. I checked the rest of the report for them: the attention queue has cover/judge/verify/address/answer items only - there is no action for \"owed by an open sweep\" - so the truncated remainder is not recoverable by reading the report at all, only by running tools/sitting.mjs. Second, and separately: `walkdown status --json` has no sweeps block whatsoever (top-level keys are targets, rows, drift, attention, drafts, activeThreads). The machine-readable report - the one blueprint/AGENTS.md points agents at - does not name the sweep, its date, its reason or its counts. Per-row cells do carry sweptBy, so a caller could recompute the counts, but nothing states them and the why is absent entirely. The statement's promise is that \"did we miss any?\" is answered by reading; for an agent reading JSON it is not answerable at all, and for a person reading the terminal it is answerable only as a number. I have not filed a thread for this - reporting it to the sitting instead, as instructed."
+    },
+    {
+      "rule": "screens.identity.fragment-is-identity",
+      "status": "pass",
+      "statement_hash": "sha256:ac30c2879d52",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-23Z/fragment-and-navigation.txt",
+        "runs/evidence/2026-08-28T03-29-23Z/fragment-is-identity.png"
+      ],
+      "reasoning": "Driven on the example blueprint (4710), whose storyboard declares both waitlist-admin at /screens/waitlist-admin.html and waitlist-invite-batch at the same file plus #invite-batch - the exact page-and-fragment-state pair the given asks for. The panel was pointed at each address in turn through the framed delivery, which is same-origin there so the panel reads the framed location itself. Standing on the bare path the panel named \"Waitlist admin\"; standing on the path plus the declared fragment, loaded cold with no clicking, it named \"Confirm a batch invite\". A fragment nobody enumerated (#nobody-declared-this) resolved back to \"Waitlist admin\" rather than to the invite-batch screen, so a declared fragment is matched exactly and never as a near miss, and an app is usable before every route is written down. I checked the same four cases against lib/screen-match.js directly - the matcher src/panel/app.js imports and tools/sync-shared.mjs copies into the embed - and it agrees: /admin.html#invite-batch scores 100 on the fragment-bearing ref while /admin.html#some-other-fragment falls back to the score-0 page ref. For reachability on load rather than by clicking, the example app itself was loaded cold at http://localhost:4310/admin.html#invite-batch and its dialog was open on arrival, while the bare path's was not. No page errors during any of it. Caveat: the panel half was judged on the prototype surface, because the example app deliberately ships without an embed tag, so framed cross-origin the panel has nothing to hear from - that is by design (a comment in example/app/admin.html says so) and is not this rule's subject."
+    },
+    {
+      "rule": "screens.identity.follows-navigation",
+      "status": "pass",
+      "statement_hash": "sha256:e8763cbea8b6",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-23Z/fragment-and-navigation.txt",
+        "runs/evidence/2026-08-28T03-29-23Z/follows-navigation.png"
+      ],
+      "reasoning": "Same setup, but changing the URL without reloading. With the panel sitting on waitlist-admin I set location.hash to #invite-batch inside the framed page: the panel re-resolved to \"Confirm a batch invite\" with no reload. history.back() took it to \"Waitlist admin\" again. Then history.pushState to /screens/waitlist-join.html - the case the statement says cannot be announced - and the panel still re-answered \"Join the waitlist\", so it is caught by watching rather than pretended: src/panel/app.js says exactly that in prose, and lib/viewer/embed.js does the same three ways (hashchange, popstate, and a 400ms poll), which is how the embed re-resolves too and why a pin filed after a navigation is stamped against the screen you are actually on. For \"an answer a person gave about the previous page does not carry across\", I picked waitlist-already by hand from the screen picker (the title changed to \"Screen picked by hand\"), then had the framed page navigate itself to waitlist-join.html: the pick was dropped and the picker went back to \"detected from its address\", naming \"Join the waitlist\". I also confirmed the pick survives a hash change that leaves the page still being that screen, which is hereChanged()'s deliberate behaviour (n-0098) and not a carry-over. Limit worth stating: I did not place an actual pin after a navigation, because filing one would create a thread and I was told not to; the embed's re-resolution is evidenced by its watcher and by the shared matcher rather than by a written pin."
+    },
+    {
+      "rule": "screens.ownership.routes-by-page",
+      "status": "pass",
+      "statement_hash": "sha256:5ad49373b1d0",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-23Z/routes-by-page.txt",
+        "runs/evidence/2026-08-28T03-29-23Z/routes-claimed-page.png",
+        "runs/evidence/2026-08-28T03-29-23Z/routes-unclaimed-asks.png",
+        "runs/evidence/2026-08-28T03-29-23Z/routes-explicit-wins.png"
+      ],
+      "reasoning": "The server on 4700 holds two blueprints (`blueprint` and `example/blueprint`) and `walkdown claims` reports 13 claims with no page claimed twice, which is what makes the question answerable. All three then-steps drove green. (1) GET /api/whose routed http://localhost:4310/admin.html to example/blueprint screen waitlist-admin, the same address with #invite-batch to waitlist-invite-batch, and /confirm.html?email=... to waitlist-confirm; the CLI gave the same answers off the same index. Then at the panel, with a fresh browser context (nothing remembered) and ?bp= cleared so the served page's baked answer was out of the way, framing the example app opened project walkdown-example on screen \"Waitlist admin\" without asking. (3) An address no blueprint claims returned match:null from both the API and the CLI, and the panel put up the \"Which blueprint?\" gate listing both projects rather than guessing - the choose-blueprint screen, screenshotted. (2) With ?bp=blueprint named explicitly on the very same example page, the panel stayed on walkdown and reported \"No screen\": the explicit choice was not overridden. The same guard is what protects the pin path (`if (key === 'POST /api/threads' && !requested && body?.url)` in lib/serve.js). One limit: I did not POST a pin, because that writes a thread into example/blueprint and I was told not to file any - so the pin-lands-in-the-right-project half is evidenced by the routing decision and the guard rather than by a written thread; the checks tier covers the write."
+    },
+    {
+      "rule": "screens.surfaces.stand-in-app",
+      "status": "pass",
+      "statement_hash": "sha256:8c976257c8c0",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-23Z/stand-in-app.png",
+        "runs/evidence/2026-08-28T03-29-23Z/stand-in-app-measured.txt",
+        "runs/evidence/2026-08-28T03-29-23Z/stand-in-app-served.txt"
+      ],
+      "reasoning": "Switched the surface to App on walkdown's own review screen: the frame landed on http://localhost:4700/stand-in/review and the pane shows the review design served back as the app. The comparison controls are live, not decorative - measured in the panel's shadow root, the fade range (112x16), Pin mode (87x24) and both surface buttons all present, sized and not disabled. It announces itself on its own face: measured inside the frame, a #walkdown-stand-in-ring of 1080x894 with `2px solid oklch(0.7 0.16 160)` around the whole surface, and a corner label reading \"stand-in app - the design, served as the app\", visible with real box dimensions, both plainly visible in the screenshot at bottom right. It wears neither party's theme: the design ships data-theme=\"wireframe\", the stand-in serves it as data-theme=\"emerald\", and the panel's chrome is its own dark token set - the screenshot shows a light green-accented pane inside dark chrome, unmistakable for either. The anchors are the design's own: diffing /prototype/screens/review.html against /stand-in/review, the data-testid sets are identical (14 and 14, no difference), and the only additions are the theme swap, the marker stylesheet and the two marker divs - so an anchor pinned on one surface is the same element on the other. A screen with no design cannot pretend to have one: /stand-in/waitlist-export on 4710 returns 404 with \"no stand-in for screen ... it has no prototype\". Limit: I did not place a pin on the stand-in, because that files a thread; the shared-anchor mechanism is evidenced by the identical anchor sets rather than by a written pin, and the last then-step (\"it is not evidence - a verdict against it is a verdict about the design\") is a claim about meaning that the marking and the byte-identical body support but that no observation can settle on its own."
+    }
+  ]
+}

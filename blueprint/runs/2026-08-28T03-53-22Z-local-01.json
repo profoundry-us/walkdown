@@ -1,0 +1,183 @@
+{
+  "run_id": "2026-08-28T03-53-22Z-local-01",
+  "created": "2026-08-28T03:53:22Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "cd41329-dirty",
+  "blueprint_sha": "cd41329-dirty",
+  "note": "Agent sitting slice: panel.walkdown.*, panel.identity.*, panel.viewport.*, panel.signoff.* — 15 rules, driven live over a disposable copy of this blueprint (.walkdown/tmp/sittingspace) served on port 4760 with the extension fixture, so every verdict, note thread and run record written while judging landed in the throwaway copy and never in blueprint/runs.",
+  "results": [
+    {
+      "rule": "panel.walkdown.one-control-owns-the-sitting",
+      "status": "pass",
+      "statement_hash": "sha256:c74a54acc395",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-47Z/sitting-before.png",
+        "runs/evidence/2026-08-28T03-29-47Z/sitting-running.png",
+        "runs/evidence/2026-08-28T03-29-47Z/sitting-continue-opened.png",
+        "runs/evidence/2026-08-28T03-29-47Z/walk-nothing-owed.png"
+      ],
+      "reasoning": "One control in the bar owns both halves. With nothing running #wdp-walk reads 'Start walkdown', titled 'Begin a sitting — 71 rules owe you a verdict', and wears btn-warning; clicking it starts the sitting and the same button becomes 'Finish walkdown', titled 'Record this sitting to the runs ledger under your name', still filled warning. Carrying on is a separate control and it is not in the bar: panel.continue sits inside the panel.actor strip beside the tally, class 'btn btn-xs btn-outline btn-warning' — outlined where Finish is filled, so the two do not argue. The tally reads '0/71 judged' and is a fraction of judged over judged-plus-owed: after a fail and a pass it read '2/71' while the Rules tab badge fell 71 to 69, which is the same list counted twice and agreeing. Continue opened embed.pin.anchored-target, exactly the first entry of the server's own human-attention list, and after judging it, Continue opened the next one still owing rather than the next in the list. Approving carried the session on by itself; failing kept it on the rule (see pass-advances). On the example blueprint, after finishing with all four owed rules judged, the button dropped to 'btn btn-xs btn-primary' titled 'Begin a sitting on this blueprint' with the Rules badge gone — loud only while work is owed."
+    },
+    {
+      "rule": "panel.walkdown.records-to-ledger",
+      "status": "pass",
+      "statement_hash": "sha256:6cc28278f4a6",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-47Z/finish-refused-no-username.png",
+        "runs/evidence/2026-08-28T03-29-47Z/finish-refused-agent-actor.png",
+        "runs/evidence/2026-08-28T03-29-47Z/finish-recorded.png",
+        "runs/evidence/2026-08-28T03-29-47Z/discard-writes-nothing.png"
+      ],
+      "reasoning": "All three halves observed against the copy's runs directory, counted before and after each attempt. With settings.actor emptied, Finish toasted 'A walkdown is recorded under a person's name — set it in Settings (the gear)', opened Settings, left the session running and the draft on disk, and the runs directory stayed at 73 files. With the actor set to the literal string 'agent' it refused identically — an agent cannot record a walkdown through the panel, which is why this sitting's own verdicts are filed here and not through it. Setting a real username and pressing the same button appended exactly one record, 2026-08-28T03-36-10Z-local-01, carrying actor 'topher', target local, and the two verdicts given in the panel (embed.pin.anchored-target fail with thread n-0118 linked, embed.pin.right-project pass) — the verdicts the panel held, nothing more. Discarding was tested through the blueprint-crossing prompt ('Keep it as a draft · Discard it') with one verdict in hand: choosing Discard left the runs count unchanged at 76 and deleted drafts/local.json."
+    },
+    {
+      "rule": "panel.walkdown.session-survives-reload",
+      "status": "pass",
+      "statement_hash": "sha256:05503923167c",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-47Z/session-survives-reload.png",
+        "runs/evidence/2026-08-28T03-29-47Z/session-restored-verdict.png",
+        "runs/evidence/2026-08-28T03-29-47Z/finish-refused-no-username.png",
+        "runs/evidence/2026-08-28T03-29-47Z/finish-recorded.png"
+      ],
+      "reasoning": "Harder than a reload: the session with two verdicts in it was left behind and picked up in a brand-new browser context, so nothing came from browser storage and it had to be restored from the project. It came back whole — the strip present, the button reading 'Finish walkdown', 'Recording as Topher Fangio topher', the tally '2/71 judged' — and reopening embed.pin.anchored-target showed Fail still solid btn-error, so the verdicts and not merely the count survived. The refusal path hands the button back rather than bricking it: Finish was refused twice in a row (empty username, then the actor 'agent'), the session stayed running both times, and the third attempt with a real name recorded once and once only, appending a single run file. Finishing deleted drafts/local.json; discarding deleted it too, without writing."
+    },
+    {
+      "rule": "panel.walkdown.draft-on-disk",
+      "status": "pass",
+      "statement_hash": "sha256:cfb0ee61cad3",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-47Z/draft-on-disk.json",
+        "runs/evidence/2026-08-28T03-29-47Z/status-sitting-in-progress.txt",
+        "runs/evidence/2026-08-28T03-29-47Z/fail-with-why-recorded.png",
+        "runs/evidence/2026-08-28T03-29-47Z/finish-recorded.png"
+      ],
+      "reasoning": "The first verdict wrote blueprint/drafts/local.json in the project, and the second rewrote it — the file grew from one verdict to two, with `updated` moving. It is plainly not a run: it carries `draft: true`, no run_id, sits in drafts/ beside the ledger rather than in runs/, and the runs directory did not change while it was being written. `walkdown status` over the same directory reported it as work in progress — 'walkdown in progress — 2 rules judged by topher, unsealed since 2026-08-28T03:34:35.854Z / Not in the ledger until the session is finished in the panel' — while both drafted rules still read '~ stale' in the HUMAN column, so nothing counted as verified from it. Finishing appended exactly one record and deleted the draft; discarding deleted it and appended nothing. drafts/.gitignore reads '*' then '!.gitignore', so the directory ignores its own contents."
+    },
+    {
+      "rule": "panel.walkdown.verdicts-at-hand",
+      "status": "pass",
+      "statement_hash": "sha256:10b43c02479d",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-47Z/detail-verdicts.png",
+        "runs/evidence/2026-08-28T03-29-47Z/revisit-keeps-verdict.png"
+      ],
+      "reasoning": "Measured rather than queried: with a sitting running and a rule open, both buttons of detail.verdict were tested for being inside the window rather than merely in the DOM. Pass and Fail both returned visible with the detail pane's scrollTop at 0 and no scrolled ancestor between them and the shadow root — the pane's content is taller than its box (scrollHeight 1007 against clientHeight 753) and the verdicts still sit above the fold, at y 470 of a 950px window, directly under the statement. detail.judged sits immediately below reading '0 judged this session', and rose to '1' and '2' as verdicts were given. Revisiting a rule already judged showed the chosen verdict still chosen: after failing embed.pin.anchored-target and walking away, reopening it drew Fail as solid 'btn-error' against Pass's 'btn-outline btn-success'."
+    },
+    {
+      "rule": "panel.walkdown.pass-advances",
+      "status": "pass",
+      "statement_hash": "sha256:017026c31543",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-47Z/pass-advanced.png",
+        "runs/evidence/2026-08-28T03-29-47Z/fail-with-why-recorded.png",
+        "runs/evidence/2026-08-28T03-29-47Z/last-rule-returns-to-list.png",
+        "runs/evidence/2026-08-28T03-29-47Z/sitting-running.png"
+      ],
+      "reasoning": "Passing embed.pin.right-project opened embed.pin.both-surfaces, which is the next entry of the owed list with the two already-judged rules removed — I computed the expected next rule from the server's attention list before clicking and it matched — while the tally went 1/71 to 2/71 and the Rules badge 70 to 69. Failing kept the rule open: after failing embed.pin.anchored-target with feedback the detail pane still showed that same rule id. Pin mode was untouched by either verdict, its class staying 'btn btn-xs gap-1 btn-outline btn-primary' across the pass and across a refused fail. Judging the last owed rule returns to the list rather than dead-ending: on the example blueprint I judged all four owed rules and on the fourth the pane track slid back so the rules list sat at the panel's own left edge (x 723 to x 1105) instead of leaving an empty detail. And carrying on from a rule you stayed on is asked for, not done to you — panel.continue lives beside the tally in the session strip, which is where I reached for it each time."
+    },
+    {
+      "rule": "panel.walkdown.note-with-any-verdict",
+      "status": "pass",
+      "statement_hash": "sha256:f9043305838b",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-47Z/detail-verdicts.png",
+        "runs/evidence/2026-08-28T03-29-47Z/fail-with-why-recorded.png",
+        "runs/evidence/2026-08-28T03-29-47Z/finish-recorded.png"
+      ],
+      "reasoning": "detail.feedback precedes detail.verdict in document order and sits above it on screen (feedback top 384, verdict top 470), so the why is asked for before the verdict. Writing in the box and then failing embed.pin.anchored-target filed note thread n-0118 anchored to that rule, under the session's actor 'topher', carrying the text verbatim; the box cleared afterwards and the draft recorded the thread id against the rule. The finished run record then carried it into the ledger: the result for embed.pin.anchored-target reads status fail with threads ['n-0118']. Judging with the box empty files nothing — the pass on embed.pin.right-project produced no thread and its result in the same record has no threads key at all, and the four empty-box approvals on the example blueprint likewise produced no threads."
+    },
+    {
+      "rule": "panel.walkdown.fail-requires-why",
+      "status": "pass",
+      "statement_hash": "sha256:9644c16756d8",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-47Z/fail-refused-no-why.png",
+        "runs/evidence/2026-08-28T03-29-47Z/fail-with-why-recorded.png"
+      ],
+      "reasoning": "Judged by making it refuse. With the feedback box empty and nothing pinned on the rule, Fail recorded no verdict: detail.say unhid and read 'A fail needs a why — write it above, or turn on Pin mode and drop it on the page', detail.judged stayed at '0 judged this session', and the server's draft endpoint still returned null — no draft file had been written at all, so nothing reached disk either. The refusal names both ways and turns neither on: Pin mode's control was byte-identical before and after ('btn btn-xs gap-1 btn-outline btn-primary'), so the panel did not decide how I was going to answer. Writing feedback and failing again recorded it — verdict fail, judged 1, draft written, note n-0118 filed."
+    },
+    {
+      "rule": "panel.identity.default-actor",
+      "status": "fail",
+      "statement_hash": "sha256:6cf5b560bdde",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-47Z/identity-settings.png",
+        "runs/evidence/2026-08-28T03-29-47Z/identity-edited.png",
+        "runs/evidence/2026-08-28T03-29-47Z/identity-edit-survives-reload.png",
+        "runs/evidence/2026-08-28T03-29-47Z/identity-empty-username-note-filed.png"
+      ],
+      "reasoning": "Most of this rule holds. The identity arrives filled in from git with nothing typed: /api/blueprint reports username 'topher', name 'Topher Fangio', source git; the session strip reads 'Recording as Topher Fangio' with 'topher' in panel.actor-handle; no attributed action prompted for either. Settings carries both fields — settings.actor labelled 'Record as' holding 'topher', settings.display-name labelled 'Full name' holding 'Topher Fangio', under the line 'Records carry the username; the full name is only how you are shown. Clear either to go back to what git says' — and both are editable: setting them to 'someone' and 'Someone Else' changed the running session's strip immediately and survived a full page reload. Emptying the full name is an answer too: the strip fell back to the username 'someone' standing alone with the handle span gone. What fails is the last clause of the third step, 'no username makes the panel refuse attributed work'. It does not. With settings.actor emptied and a sitting running, writing feedback and pressing Fail was accepted: the verdict was recorded into the draft (whose `actor` field is the empty string) and a note thread was filed and persisted — n-0122 on embed.pin.follows-the-visible-surface, attributed by the server to 'topherfangio'. detail.say stayed hidden; nothing refused. The panel refuses only at Finish, which reads the session actor; the note-filing path sends no author and lets the server pick one. So with no username the panel does not refuse attributed work, it does it under a name the reviewer never chose."
+    },
+    {
+      "rule": "panel.identity.attribution-visible",
+      "status": "fail",
+      "statement_hash": "sha256:1b6a789fde73",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-47Z/identity-empty-username-before-fail.png",
+        "runs/evidence/2026-08-28T03-29-47Z/identity-empty-username-note-filed.png",
+        "runs/evidence/2026-08-28T03-29-47Z/sitting-running.png",
+        "runs/evidence/2026-08-28T03-29-47Z/identity-corrected-recorded.png"
+      ],
+      "reasoning": "In the ordinary state the rule is kept: with the git identity in place the session strip shows 'Recording as Topher Fangio' with the username 'topher' beside it in panel.actor-handle, on screen the whole time verdicts and thread actions are taken, and correcting the username in Settings before acting records the corrected one — set to 'corrected-name', the next note filed from a rule's detail came back authored 'corrected-name' (n-0121). It fails in the state n-0116 already flagged, and worse than that thread supposed. With settings.actor emptied but the full name left, the strip reads 'Recording as Topher Fangio' with no handle beside it; I then wrote feedback and pressed Fail. Nothing refused. Note n-0122 was filed and is on disk attributed to 'topherfangio' — a username the panel never displayed, and not the string it was displaying. With the full name emptied as well the strip reads 'set your name…' and the same action still files under 'topherfangio'. That is the rule's own words failing: the name being recorded was not on screen at the moment of the action, and somebody was attributed silently. n-0116 judged this not-a-fail on the belief that 'every attributed action is refused' once the username is empty; that belief is wrong for the thread-action path, so the mitigation it rested on is not there."
+    },
+    {
+      "rule": "panel.viewport.device-presets",
+      "status": "pass",
+      "statement_hash": "sha256:2ded288a785a",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-47Z/vp-mobile-390.png",
+        "runs/evidence/2026-08-28T03-29-47Z/vp-mobile-390-ghost.png",
+        "runs/evidence/2026-08-28T03-29-47Z/vp-desktop-1440.png",
+        "runs/evidence/2026-08-28T03-29-47Z/vp-back-desktop-ghost.png"
+      ],
+      "reasoning": "panel.viewport-toggle is a three-way join reading as devices, not numbers: Fit, then a desktop glyph and a phone glyph, each an inline svg with no text, the width living only in the tooltip ('Desktop — lay the page out at 1440px', 'Mobile — lay the page out at 390px'). Choosing mobile re-rendered the frame narrow — the app iframe's style width became 390px at scale 1, centred at x 357 — and the framed page visibly reflowed to a single stacked column rather than merely being cropped. The ghost follows: with the fade at full prototype, the ghost's iframe measured style width 390px occupying the identical rectangle (x 357, width 390, height 894) as the app frame, and at desktop both measured 1440px in the same rectangle — the two never disagreed on any of the three settings I cycled. Switching back to desktop restored both: app 1440px at scale 0.75 and ghost 1440px, in the same box they started in."
+    },
+    {
+      "rule": "panel.viewport.zoom-to-fit",
+      "status": "pass",
+      "statement_hash": "sha256:8beb5dbadbe0",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-47Z/vp-desktop-1440.png",
+        "runs/evidence/2026-08-28T03-29-47Z/vp-desktop-1440-ghost.png"
+      ],
+      "reasoning": "Driven in a 1500px-wide window, which leaves the frame about 1080px of space — narrower than the 1440 preset, so the condition the rule is about actually obtained. Choosing desktop laid the page out at the chosen width and scaled it whole: the app iframe's style width was 1440px with transform scale(0.75), giving a rendered rectangle 1080px across. That is a scale, not a reflow — the page inside is still doing 1440px layout, and the screenshot shows the desktop arrangement shrunk rather than collapsed into a column, which is exactly what the 390 preset does look like for contrast. panel.zoom read '1440px · fit 75%', naming both the layout width and the scale, and it changed with the preset (plain '390px' at mobile, where nothing is scaled). The ghost obeys the same arithmetic, so the comparison stays honest while zoomed."
+    },
+    {
+      "rule": "panel.signoff.spec-pair-derived",
+      "status": "pass",
+      "statement_hash": "sha256:d195df6ea5d8",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-47Z/signoff-pair-unbuilt.png",
+        "runs/evidence/2026-08-28T03-29-47Z/detail-verdicts.png",
+        "runs/evidence/2026-08-28T03-29-47Z/approved-still-signoff-pair.png"
+      ],
+      "reasoning": "Both pairs seen in one sitting on one blueprint. status.sweep.declares-a-floor, which the ledger holds no pass or fail for, offered '✍︎ Approve' and '✎︎ Refine' with the line beneath reading 'No build evidence yet — you are signing off the rule, not judging a build' — labelled as signing off the rule rather than judging a build, in as many words. embed.pin.anchored-target, which the ledger does hold a checks pass for, offered '✓ Pass' and '✗ Fail' in the same anchor. And approving does not flip the pair: I approved status.sweep.says-what-is-left, finished the sitting so the approval was really in the ledger, started a fresh sitting and reopened it — still Approve and Refine, still with the no-build-evidence line, so a sign-off record is not being mistaken for build evidence. The same rule's earlier 'refining' result likewise left the pair alone."
+    },
+    {
+      "rule": "panel.signoff.refine-requires-feedback",
+      "status": "pass",
+      "statement_hash": "sha256:cc9c4f5148e1",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-47Z/refine-refused-empty.png",
+        "runs/evidence/2026-08-28T03-29-47Z/refine-files-note.png",
+        "runs/evidence/2026-08-28T03-29-47Z/signoff-pair-unbuilt.png"
+      ],
+      "reasoning": "Judged by making it refuse. Refine on status.sweep.declares-a-floor with the box empty recorded nothing: detail.say read 'Refine is the feedback — write what should change first', detail.judged stayed '0 judged this session', and the draft endpoint still returned null, so no draft file existed on disk either. Writing feedback and refining again filed note thread n-0119 anchored to that rule under 'topher' with the text as written, recorded a 'refining' verdict, and left the session exactly where it was — the detail pane still showed status.sweep.declares-a-floor with Refine now drawn solid btn-warning. The two arrived linked in the finished run 2026-08-28T03-39-13Z-local-01, whose result reads {rule: status.sweep.declares-a-floor, status: refining, threads: [n-0119]}."
+    },
+    {
+      "rule": "panel.signoff.approved-recorded",
+      "status": "pass",
+      "statement_hash": "sha256:3debe377856e",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-29-47Z/approve-advances.png",
+        "runs/evidence/2026-08-28T03-29-47Z/approved-still-signoff-pair.png",
+        "runs/evidence/2026-08-28T03-29-47Z/last-rule-returns-to-list.png"
+      ],
+      "reasoning": "Approving status.sweep.says-what-is-left and finishing appended a run whose result reads status 'approved' with statement_hash sha256:108b3015acc9 — hash-stamped like a pass, taken at the moment of sign-off. Approving carried the session on by itself, opening embed.pin.both-surfaces, the next rule owing a verdict, with the judged count rising. It is not a build verdict: `walkdown status` renders an approved rule as '○ pending' with '✍︎ topher' in the HUMAN column rather than a pass, and the summary line still counted it among the pending. Staleness works the same way as for a pass — rewording an approved rule's statement in the copy turned its HUMAN cell from '✍︎ topher' to '~ topher', asking for a fresh sign-off. The one clause I could not drive to the end is 'still owes a human verdict once built': that needs the rule to acquire build evidence, which no state I could reach in a sitting produces. Everything observable short of that behaved as written, and the checks tier claims that clause."
+    }
+  ]
+}

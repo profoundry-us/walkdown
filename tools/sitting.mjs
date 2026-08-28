@@ -322,6 +322,19 @@ const STATES = [
     ],
   },
   {
+    /* The promise the placeholder makes is kept both ways: the form goes, and
+       the pin it was promising goes with it. */
+    name: 'embed-form-escape-takes-the-placeholder',
+    steps: [
+      ['sr', "r => r.querySelector('#wdp-pin').click()"], ['wait', 700],
+      ['aim', "(d, fr, fd) => { const b = fr.getBoundingClientRect(), e = fd.querySelector('[data-testid=\"panel.rules-list\"]').getBoundingClientRect(); return { x: b.x + e.x + e.width / 2, y: b.y + e.y + 20 }; }"],
+      ['click'], ['wait', 600],
+      ['probe', "(d, fr, fd, fsr) => ({ at: 'form open', forms: fsr.querySelectorAll('[data-testid=\"pin.form\"]').length, placeholders: fsr.querySelectorAll('[data-testid=\"pin.placeholder\"]').length })"],
+      ['key', 'Escape'], ['wait', 500],
+      ['probe', "(d, fr, fd, fsr) => ({ at: 'after Escape', forms: fsr.querySelectorAll('[data-testid=\"pin.form\"]').length, placeholders: fsr.querySelectorAll('[data-testid=\"pin.placeholder\"]').length, stillPinning: fd.documentElement.className })"],
+    ],
+  },
+  {
     /* The same spot, filed. Its own state because a screenshot is taken after
        the last step, and a state that saves the form photographs the surface
        with the form already gone. */
@@ -445,7 +458,7 @@ const STATES = [
       ['tab', 'threads'],
       ['sr', "r => (r.querySelector('[data-open-thread=\"n-0107\"]') ?? r.querySelector('[data-open-thread]')).click()"],
       ['wait', 1200],
-      ['probe', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const prov = r.querySelector('[data-testid=\"thread.provenance\"]'); const body = r.querySelector('[data-testid=\"thread.body\"]'); const where = prov.parentElement.nextElementSibling; const reply = r.querySelector('[data-testid=\"thread.reply\"]'); const acts = [...r.querySelectorAll('[data-testid=\"thread.actions\"]')]; const lh = (e) => Math.round(e.getBoundingClientRect().height / parseFloat(getComputedStyle(e).lineHeight)); return { provenance: { text: prov.textContent.replace(/\\s+/g, ' ').trim(), lines: lh(prov), fontSize: getComputedStyle(prov).fontSize, box: prov.getBoundingClientRect().toJSON() }, where: { text: where.textContent.replace(/\\s+/g, ' ').trim(), lines: lh(where), fontSize: getComputedStyle(where).fontSize }, body: { box: body.getBoundingClientRect().toJSON(), fontSize: getComputedStyle(body.querySelector('.wd-text')).fontSize, first: body.querySelector('.wd-text').textContent.replace(/\\s+/g, ' ').trim().slice(0, 120) }, reply: { placeholder: reply.placeholder, value: reply.value, row: reply.parentElement.textContent.replace(/\\s+/g, ' ').trim() }, actions: acts.map((a) => ({ label: a.textContent.trim(), act: a.dataset.act, top: Math.round(a.getBoundingClientRect().top) })) }; }"],
+      ['probe', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const prov = r.querySelector('[data-testid=\"thread.provenance\"]'); const body = r.querySelector('[data-testid=\"thread.body\"]'); const where = prov.parentElement.nextElementSibling; const reply = r.querySelector('[data-testid=\"thread.reply\"]'); const acts = [...r.querySelectorAll('[data-testid=\"thread.actions\"]')]; const lh = (e) => Math.round(e.getBoundingClientRect().height / parseFloat(getComputedStyle(e).lineHeight)); return { provenance: { text: prov.textContent.replace(/\\s+/g, ' ').trim(), lines: lh(prov), fontSize: getComputedStyle(prov).fontSize, box: prov.getBoundingClientRect().toJSON() }, where: { text: where.textContent.replace(/\\s+/g, ' ').trim(), lines: lh(where), fontSize: getComputedStyle(where).fontSize }, body: { box: body.getBoundingClientRect().toJSON(), overflowY: getComputedStyle(body).overflowY, scrollHeight: body.scrollHeight, clientHeight: body.clientHeight, replies: body.querySelectorAll('.wd-msg').length, paneHeight: Math.round(r.querySelector('[data-testid=\"thread.panel\"]').getBoundingClientRect().height), fontSize: getComputedStyle(body.querySelector('.wd-text')).fontSize, first: body.querySelector('.wd-text').textContent.replace(/\\s+/g, ' ').trim().slice(0, 120) }, reply: { placeholder: reply.placeholder, value: reply.value, row: reply.parentElement.textContent.replace(/\\s+/g, ' ').trim() }, actions: acts.map((a) => ({ label: a.textContent.trim(), act: a.dataset.act, top: Math.round(a.getBoundingClientRect().top) })) }; }"],
     ],
   },
   {

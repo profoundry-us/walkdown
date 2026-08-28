@@ -1,0 +1,172 @@
+{
+  "run_id": "2026-08-28T03-53-18Z-local-01",
+  "created": "2026-08-28T03:53:18Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "cd41329-dirty",
+  "blueprint_sha": "cd41329-dirty",
+  "note": "The fourteen embed.* rules (embed.pin, embed.threads), re-judged after the panel refactor against blueprint/runs/evidence/2026-08-28T03-48-15Z/ — new sitting states drive the pins on the page under review, and hold every POST to /api/threads so nothing was written to the ledger.",
+  "results": [
+    {
+      "rule": "embed.pin.anchored-target",
+      "status": "pass",
+      "statement_hash": "sha256:6feaf28d3505",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-48-15Z/embed-hover-anchored.png",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-hover-anchored.json",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-pin-filed-anchored.json",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-pin-spot-survives-zoom.json",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-form-below-the-spot.png"
+      ],
+      "reasoning": "Driven with a real pointer inside the app surface on screen `review`. In pin mode the document carries `wd-pinning` and resting the pointer over `panel.rules-list` lights exactly that element — a 2px rgb(75,184,221) outline and a crosshair cursor, measured on the computed style rather than asked for by selector. Clicking `panel.counts` at 40px in and half its height down files element `panel.counts`, offset {40,16} AND position {601,673}: the anchor is what makes the note follow the element, the spot is where the reviewer was pointing, and both are recorded together, which is exactly what the statement asks for. That the spot is replayed against the element rather than a corner shows in the zoom probe: n-0107, the one thread in the ledger carrying both element and offset, holds its spot at [282,-1] unchanged through a Fit→1440 zoom, a fade and a window resize, while the anchored-only pins (n-0071, n-0095/97, n-0116, n-0117) travel with their elements as the surface reflows — the note following the element, not the pixel. The anchor being optional is shown by the sibling coordinate-fallback state, where a spot with no anchored element under it still files as a pin with position alone. Later visitors seeing them is the same evidence read the other way: all six pins in the screenshots are drawn from the ledger, on both surfaces, without anything having been placed this session."
+    },
+    {
+      "rule": "embed.pin.right-project",
+      "status": "pass",
+      "statement_hash": "sha256:399853aef960",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-48-15Z/embed-pin-files-against-the-page-project.png",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-pin-files-against-the-page-project.json",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-pin-files-against-the-default.png",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-pin-files-against-the-default.json"
+      ],
+      "reasoning": "The server on 4700 hosts two sibling blueprints — `blueprint` (current) and `example/blueprint` — so the wrong answer here is silent and lands in another project's threads/. Judged on the standalone embed with no panel, the way an application carries it: a page declaring `bp: example/blueprint` through the extension's window config filed to http://localhost:4700/api/threads?bp=example%2Fblueprint, not to the server's current project. The same page with nothing declared — the served stand-in's own `<script src=\"/embed.js\" data-walkdown>` carries no data-bp, confirmed in the probe as tagBp null — posted to a bare /api/threads, leaving the server to use its default, unchanged. Both halves of the rule's `then`, and the query goes ahead of any fragment as the code comment requires. Both POSTs were held rather than sent, so no thread was created in either project."
+    },
+    {
+      "rule": "embed.pin.both-surfaces",
+      "status": "pass",
+      "statement_hash": "sha256:77fdab028ac1",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-48-15Z/embed-pin-filed-anchored.json",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-pin-filed-on-the-prototype.png",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-pin-filed-on-the-prototype.json"
+      ],
+      "reasoning": "The same element was pinned twice on screen `review`, once on each surface, with the same gesture and the same coordinates. On the app surface (the stand-in) it filed element `panel.counts`, offset {40,16}, surface `app`. Faded fully to the design and pinned again at the same place, it filed element `panel.counts`, offset {40,16}, surface `prototype` — identical anchor, different surface, which is the statement's claim that the same anchors exist in both and that the surface is recorded. All six pins already in the ledger render on both frames, so a pin placed on one is visible while reviewing the other. One gap between statement and step: the step adds that the two 'show on the rule, distinguished by the surface they came from', and the panel never displays the surface — the thread pane's provenance line names rule, screen, element and viewport but not surface (src/panel/thread-pane.js:82-87). The surface is recorded and it does govern which surface a positioned pin draws on, so the statement — which is authoritative — holds; the step's 'distinguished' is only true on the surfaces, not in the panel. Reported as a finding rather than a fail."
+    },
+    {
+      "rule": "embed.pin.follows-the-visible-surface",
+      "status": "pass",
+      "statement_hash": "sha256:7c9b1c0e3da1",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-48-15Z/embed-pin-filed-on-the-prototype.png",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-pin-filed-on-the-prototype.json",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-pin-mid-fade-refused.png",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-pin-mid-fade-refused.json"
+      ],
+      "reasoning": "Measured, not queried: with the fade taken all the way to Prototype the design's frame sits at exactly the app frame's rectangle (both 12,44 860x704) at opacity 1, and it is the design that carries `wd-pinning` while the app frame behind it carries nothing — the surface in front is armed and the one hidden behind it is disarmed, so a click cannot land twice or land on the one you are not looking at. Pinning there recorded surface `prototype`, anchored to the design's own `panel.counts` and positioned in the design's own coordinates. The control says which surface a pin would land on before you place one: its title read 'Click anything to attach a note — it lands on the prototype', and on the app surface 'it lands on the app'. Half-faded there is no honest answer, and the control closes rather than guessing: disabled, titled 'Slide fully to the prototype or the app first — half-faded, a pin has no surface to belong to', with neither frame armed. Pins already on the screen show on both. The one clause I did not exercise is the last: a surface with no walkdown running inside it cannot be pinned and says so — pinSurface() returns null unless ghostReady, and PIN_UNREACHABLE is the hint it then shows, but every surface reachable in this setup runs the embed, so that path is judged from the code path only."
+    },
+    {
+      "rule": "embed.pin.own-skin",
+      "status": "pass",
+      "statement_hash": "sha256:1f3400a09629",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-48-15Z/embed-pin-own-skin.json",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-pin-tooltip.png",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-form-below-the-spot.png"
+      ],
+      "reasoning": "The pin is drawn as a map marker: the Phosphor map-pin-fill path, 22px, with a white 11px disc in its head carrying '!' for a note (and '?' for a question, seen switching live in the form state). Its tip is the spot — the marker is offset by (-11,-19) from the recorded point. Colour carries state: this one computes to oklch(0.78 0.14 160), daisyUI's success, because the thread has settled; open ones are drawn text-warning. That those daisyUI tokens resolve at all is the proof the theme is the panel's own stylesheet rather than a hand-rolled lookalike — the layer's shadow root carries data-theme=\"blueprint\" and two style elements, the fetched /walkdown.css plus the shared conversation block. What reaches the host document is exactly two style elements and nothing else: one whose only selectors are `.wd-hover`, `.wd-pinning, .wd-pinning *` and `.wd-pinning [data-walkdown-chrome]` — the cursor and ring that must style the host's own elements — and one 2778-byte block with no selectors at all, only @property declarations, which paint nothing and exist because @property only registers at document level. The host's buttons, headings and form controls are matched by none of it. The layer itself measures 0x0, so it displaces nothing in the page it is guest in."
+    },
+    {
+      "rule": "embed.pin.viewport-recorded",
+      "status": "pass",
+      "statement_hash": "sha256:6971846eb2cc",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-48-15Z/embed-pin-filed-at-mobile.png",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-pin-filed-at-mobile.json",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-thread-provenance.json",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-thread-provenance.png"
+      ],
+      "reasoning": "With the mobile preset on, the surface is genuinely laid out at 390px (its own innerWidth is 390, the frame box is 390 wide) rather than merely scaled, and a pin placed there recorded viewport {name: 'mobile', width: 390}. The desktop-preset run of the same state recorded {name: 'desktop', width: 1440}, so the name and the width both follow the layout width rather than the panel's window, which stayed 1280 throughout. The second half of the rule — the panel showing that viewport alongside the rest of the provenance — is visible on n-0107, whose provenance line reads 'not attached to a rule · The review page · panel.bar · desktop 1050': the viewport it was placed at, sitting in the same compact line as the screen and the element, so a note about a layout cannot be read against the wrong width."
+    },
+    {
+      "rule": "embed.pin.settled-pins-leave",
+      "status": "blocked",
+      "statement_hash": "sha256:c82607d3ac2e",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-48-15Z/embed-pin-spot-survives-zoom.json",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-thread-waive-needs-a-reason.json"
+      ],
+      "reasoning": "Not judged, and deliberately left owed rather than guessed at. The rule's `when` is 'End that thread from the panel', and every way of ending one is a transition an agent may not write: verified and waived are human-only by this repo's conventions and by the server's own governance, and incorporating a real answered question would mutate the ledger this sitting exists to keep honest. The surrounding facts I could see are consistent with the rule — the six pins standing on both surfaces are precisely the threads whose status is not terminal, and the panel's pinsForScreen filters incorporated/verified/waived before pushing context to either frame, with threadAct calling load() and pushContexts() in the same turn so no reload is involved. But that is reading the code, not making it happen, and this rule is about what leaves the surface at the moment a person ends a conversation. I could have stubbed both the status POST and the blueprint fetch to simulate the end; that would have been a verdict on a fabricated server answer, which is worse than an unjudged rule. Needs a human to end one thread with the panel open."
+    },
+    {
+      "rule": "embed.pin.tooltip-says-what-it-is",
+      "status": "pass",
+      "statement_hash": "sha256:50dfb40b9f83",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-48-15Z/embed-pin-tooltip.png",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-pin-tooltip.json"
+      ],
+      "reasoning": "Hovering n-0071 with a real pointer brings up walkdown's own markup — the pin carries no title attribute at all (probe: titleAttribute null), so there is no browser delay; the tooltip is present on contact, computed visible/block at opacity 1. It is three short lines and no more: 'n-0071 · note · addressed' in bold, then 'rule panel.rules.takes-you-there · review · panel.app-frame', then the note truncated to 89 characters inside curly quotes with an ellipsis. That covers thread and state, the rule it is anchored to plus screen and element, and enough of the note to recognise it; a pin with no rule renders 'no rule' in the same slot (pinTip in lib/viewer/embed.js). Direction is chosen away from the nearest edge — this pin sits near the top of the surface and the tooltip opened `tooltip-bottom`, and its box (405,74 to 685,189) is wholly inside the 860x704 surface, measured rather than assumed. The tooltip is pointer-events: none, so it hovers over the page for reading while a click still reaches the pin and opens the thread's own screen."
+    },
+    {
+      "rule": "embed.pin.form-at-the-spot",
+      "status": "pass",
+      "statement_hash": "sha256:5bb13509dc3b",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-48-15Z/embed-form-below-the-spot.png",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-form-below-the-spot.json",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-form-above-near-the-bottom.png",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-form-above-near-the-bottom.json",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-form-is-chrome.json",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-form-escape-takes-the-placeholder.json"
+      ],
+      "reasoning": "Judged on a deliberately tall element — panel.rules-list is 526px high, so its head and its foot are far apart. Clicked 20px below its top at spot (704,151): the form opened at top 169px, eighteen pixels under the spot, not 500px away at the element's foot. Clicked again near the bottom of the surface on panel.counts at spot (601,673) with 704px of surface: the form flipped above, top 467.5 and bottom 655, so it is wholly on the surface instead of half off it; its left was clamped to 577 (and to 8px in the unanchored case at x=8), so it never runs off the side either. A placeholder pin stands on the spot the whole time — present in both states at exactly spot minus (11,19), the same offset the real pin uses — and it changes its mark with the kind: ticking 'question (not a note)' turned the head's letter from '!' to '?' while the form stayed open. Escape takes both together: one form and one placeholder before, zero and zero after, with pin mode still on so the next spot is one click away."
+    },
+    {
+      "rule": "embed.pin.form-is-chrome",
+      "status": "pass",
+      "statement_hash": "sha256:cac6da4be24f",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-48-15Z/embed-form-below-the-spot.json",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-form-is-chrome.png",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-form-is-chrome.json"
+      ],
+      "reasoning": "With pin mode on and the form open on screen `review`, the computed cursor inside the form is a caret over the textarea ('text') and a pointer over the checkbox, 'Pin it' and 'Cancel' — never the crosshair that the rest of the surface carries under `.wd-pinning *`. That is the host-document rule `.wd-pinning [data-walkdown-chrome] { cursor: auto }` doing its job, read off getComputedStyle rather than off the stylesheet. Pin mode not reaching through the form was tested by doing the thing that would break it: a real mouse click on the form's own 'question (not a note)' checkbox. Afterwards the checkbox is checked, the placeholder's mark has flipped to '?', and there is still exactly one form and exactly one placeholder — no second form opened behind the first and no extra pin was dropped where the checkbox is."
+    },
+    {
+      "rule": "embed.pin.surface-coordinates",
+      "status": "pass",
+      "statement_hash": "sha256:7d33bd0c80b2",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-48-15Z/embed-pin-filed-on-a-scaled-surface.json",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-pin-filed-anchored.json",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-pin-spot-survives-zoom.json"
+      ],
+      "reasoning": "The decisive case is a surface laid out at 1440 and scaled 0.597 into an 860px pane. Clicking 40 CSS pixels into panel.bar means clicking about 24 pixels in on the screen — and what was recorded was position {39,19} and viewport width 1440, the surface's own document pixels at its own viewport, not the pixels the click actually landed on in the panel's window. The unscaled case says the same from the other side: a click filed position {601,673} while the panel's own window was 1280x760 and the surface 860x704, so the numbers can only be the surface's. Stability was then measured on the pins already in the ledger rather than asserted: n-0107, the one carrying an element offset, sits at [282,-1] in surface coordinates at Fit, at the 1440 zoom (where its on-screen position moves from x=294 to x=180), after the fade is moved to 30, and after the window is resized to 1000x700 — the same spot of the same surface every time, while the panel around it changes. Nothing was recorded during any of that, because nothing about zoom, fade or resize touches a stored anchor."
+    },
+    {
+      "rule": "embed.pin.coordinate-fallback",
+      "status": "pass",
+      "statement_hash": "sha256:3c6fb006c94b",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-48-15Z/embed-form-unanchored-spot.png",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-form-unanchored-spot.json",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-pin-filed-unanchored.json"
+      ],
+      "reasoning": "The state hunts the review surface for a point whose element has no anchored ancestor — the same closest() test the embed itself uses — and clicks it. The form opens at the click point and says what it is: 'unanchored spot' as its title and 'no anchored element here — pinned by position' under it, with the placeholder pin standing on the spot exactly as for an anchored pin. Filing it records anchor {position: {x: 8, y: 680}, viewport: desktop 860, surface: app, screen: review} and no element and no offset — feedback was not blocked by the missing anchor, and what is kept is the screen and the position, which is what a later visitor needs to draw it back in the same place. renderPins draws such a pin from pin.position and skips it on the other surface, since the same numbers would mean somewhere else there; that filtering is the reason surface is recorded alongside."
+    },
+    {
+      "rule": "embed.threads.note-first",
+      "status": "pass",
+      "statement_hash": "sha256:870249ed1a7a",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-48-15Z/embed-thread-provenance.png",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-thread-provenance.json"
+      ],
+      "reasoning": "Opened n-0107, a pinned note carrying a rule-less anchor, an element and a viewport, so its provenance has everything to say. Anchor `thread.body` is plainly the most prominent text in the pane: 453 of the pane's 646 pixels, at 12.5px against the 11px of everything around it, and it starts at y=169 — twenty pixels below the header, nowhere near the fold. Anchor `thread.provenance` is one line, 16px tall, holding just the id and the status chip. The rest of the provenance is condensed into a single 11px sentence — 'not attached to a rule · The review page · panel.bar · desktop 1050' — middot-separated rather than stacked into sentences, which is what the statement asks. It does wrap onto a second line at this pane width; the anchor the step names is still one line, and I read the wrap as a width accident rather than the stacked-sentences failure the rule is aimed at, but it is worth a human's eye. The reply history does not grow the pane: 1635px of conversation scrolls inside a 453px region with overflow-y auto, and in the list a thread shows its replies behind a count with the faces beside it."
+    },
+    {
+      "rule": "embed.threads.actions-in-context",
+      "status": "pass",
+      "statement_hash": "sha256:9878eb8459f2",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-48-15Z/embed-thread-provenance.json",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-thread-waive-needs-a-reason.png",
+        "runs/evidence/2026-08-28T03-48-15Z/embed-thread-waive-needs-a-reason.json"
+      ],
+      "reasoning": "Anchor `thread.actions` is three short verbs on one row — '✓ Verify', 'Reopen', 'Waive', all at top 715 — and anchor `thread.reply` carries nothing but the placeholder 'Reply…'; the only words beside it are 'as topher · Enter sends', which is who you are and how to send, not a standing instruction about reasons. The reason-when-chosen half was judged by making it refuse rather than by reading the code: on n-0118, an open note, I pressed Waive with the reply box empty and the panel turned it away with 'Waiving is recorded with a reason — write it above, then press again.', keeping the thread open and the composer in place — the ask arrives at the moment the action is chosen, and nowhere before it. Nothing was written: blueprint/threads/ is untouched by this run. Actions a person may not take are absent rather than shown and refused: an open note offers Addressed and Waive only, while the addressed n-0107 offers Verify, Reopen and Waive — the list is the set of transitions the server would accept, so there is no button whose whole job is to be rejected."
+    }
+  ]
+}

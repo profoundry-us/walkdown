@@ -1,0 +1,113 @@
+{
+  "run_id": "2026-08-28T03-53-23Z-local-01",
+  "created": "2026-08-28T03:53:23Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "cd41329-dirty",
+  "blueprint_sha": "cd41329-dirty",
+  "note": "Agent sitting slice: panel.threads.* and threads.conversation.* (threads.lifecycle.* is checks-only and not agent tier), judged against the panel served at localhost:4700 after the sixteen-module split.",
+  "results": [
+    {
+      "rule": "panel.threads.reply-in-place",
+      "status": "pass",
+      "statement_hash": "sha256:a0dd8bb2f5b9",
+      "evidence": [
+        "runs/evidence/2026-08-28T05-10-00Z/thread-open-from-rule.png",
+        "runs/evidence/2026-08-28T05-10-00Z/composer-sending-real.png",
+        "runs/evidence/2026-08-28T05-10-00Z/composer-settled.png"
+      ],
+      "reasoning": "Opened n-0115 from the detail pane of panel.rules.steps-not-an-appendix. The pane shows the opening note first and the replies after it, each with author, age and the thread id, and the composer sits under them; the track measures at -764px, two panes right of the list, with the thread pane's box at x=885 inside the visible column 885-1267 - present and seen, not merely in the DOM. A reply was written and sent with Enter and appeared without any reload: pending at opacity .55 marked 'sending...', then the settled message with a real timestamp once the server answered (this is the one real write of the sitting, to n-0103 as `agent`). The offered transitions were read off seven threads covering every kind and status: note/open gives Addressed+Waive, note/addressed gives Verify+Reopen+Waive, question/open gives Answer+Waive, and question/incorporated, note/verified and note/waived each offer none. That is exactly the FLOWS table in lib/threads.js, so nothing illegal is offered."
+    },
+    {
+      "rule": "panel.threads.claim-never-accept",
+      "status": "pass",
+      "statement_hash": "sha256:7c4e1e2d1562",
+      "evidence": [
+        "runs/evidence/2026-08-28T05-10-00Z/governance-verify-no-name.png",
+        "runs/evidence/2026-08-28T05-10-00Z/governance-verify-as-agent.png",
+        "runs/evidence/2026-08-28T05-10-00Z/governance-waive-no-reason.png"
+      ],
+      "reasoning": "Judged by trying to break it, on n-0103 (a note in `addressed`, so Verify, Reopen and Waive are all on offer). With both identity fields cleared in Settings, pressing Verify recorded nothing and said 'Verify and waive are recorded under a person's name - set it in Settings first', and it opened Settings rather than leaving the reviewer to find it. Setting the username to `agent` and pressing Verify again was refused with the same words - an agent may claim work and never accept it. Waive with the reason box empty was refused the same way, and Reopen with an empty box was refused with 'Reopening is recorded with a reason - write it above, then press again'. blueprint/threads/n-0103.yml was read before the attempts and compared byte for byte afterwards: unchanged. The panel is refusing rather than posting and letting the server refuse, so the reviewer finds out before writing a reason."
+    },
+    {
+      "rule": "panel.threads.show-the-sketch",
+      "status": "blocked",
+      "statement_hash": "sha256:8244263349d7",
+      "evidence": [
+        "runs/evidence/2026-08-28T05-10-00Z/thread-before-ending.png",
+        "runs/evidence/2026-08-28T05-10-00Z/thread-stream-q0070.png"
+      ],
+      "reasoning": "Still blocked, and for the same reason recorded on 2026-08-25 and 2026-08-27 - the refactor changed nothing about it. ghostSource() in src/panel/app.js only offers the proposal ghost when the screen carries a `proposal`, and thread-pane.js only draws the 'View the proposed sketch' button when ghostSource(...).proposed is true. All seven screens in blueprint/storyboard.yml have a real `prototype` and none has a `proposal`, and there is no blueprint/proposals/ directory at all. Driven live: a thread anchored to a screen (n-0117, screen `review`) shows no sketch button, and a count of [data-sketch] across the whole shadow root is 0 in every state captured. There is nothing on this blueprint that could put the rule's given in place, so the five things it asks a reviewer to see cannot be seen. Judging it would need a screen with prototype: null and a proposal on file - which is design's routing to set up, not something to fabricate for a sitting."
+    },
+    {
+      "rule": "panel.threads.own-view",
+      "status": "pass",
+      "statement_hash": "sha256:faade3b887d1",
+      "evidence": [
+        "runs/evidence/2026-08-28T05-10-00Z/threads-list-scrolled.png",
+        "runs/evidence/2026-08-28T05-10-00Z/threads-filter-all.png",
+        "runs/evidence/2026-08-28T05-10-00Z/thread-stream-q0070.png"
+      ],
+      "reasoning": "The Threads tab lists every thread with what it is anchored to above each one, including threads anchored to nothing, which read 'not attached to anything' (n-0009 through n-0012 in the scrolled shot). The three filters carry counts that were compared against the command line at the same minute: panel Active 70 / Awaiting you 61 / All 118 against `walkdown threads --json` 70, `--all --json` 118, and 61 items in status.attention with who=human and a thread - one definition of active, not two, because threads-list.js takes the queue from the server rather than re-deriving it. The docking n-0103 asked for holds after the split: with the list scrolled from scrollTop 0 to 8929 of 9494 the filter bar's box is identical (y 109, height 24), because threadFilterBar() is drawn outside the scrolling wrapper rather than stuck to it. Asking for All reaches ended conversations (n-0109, n-0101, n-0049, all verified) that the rule list, the pins and the counts filter out. Opening one puts the conversation in the visible column (pane at x=885, track -382) with 'All threads' as the way back rather than a rule nobody opened. The count of what waits on a person rides on the tab itself - 'Threads 61' is legible in every screenshot here, including those taken from the Rules and Blueprints tabs."
+    },
+    {
+      "rule": "threads.conversation.one-stream",
+      "status": "pass",
+      "statement_hash": "sha256:e58134b3796f",
+      "evidence": [
+        "runs/evidence/2026-08-28T05-10-00Z/thread-stream-q0070-top.png",
+        "runs/evidence/2026-08-28T05-10-00Z/thread-grouped-hover.png",
+        "runs/evidence/2026-08-28T05-10-00Z/thread-day-dividers.png",
+        "runs/evidence/2026-08-28T05-10-00Z/threads-list-scrolled.png"
+      ],
+      "reasoning": "Read on q-0070 (14 messages) and n-0057 (4 messages over 4 days). Every message carries the same three parts - tile, name, age, body - and the opening note is message zero with no special treatment. Collapsed, a thread is that first message with the participants' faces, '1 reply'/'2 replies' and 'Last reply Saturday at 11:59 AM' underneath. The surface is one surface: .wd-row computes to a transparent background, no border radius, no margin, no box shadow and no left rail, with a 1px 10%-opacity top border between rows and each row's bottom exactly the next row's top - hairlines, not cards, and what waits on you is said in the status chip and the unread count. Four of q-0070's messages are continuations: they drop the name and the tile computes visibility:hidden, and the time computes hidden and turns visible under the cursor, measured. Line breaks survive (.wd-text is white-space: pre-wrap, and n-0115's two paragraphs render as two). Day boundaries are drawn - Monday, Tuesday, Today on n-0057. Rule and thread ids inside message text are real buttons (data-rule-ref / data-thread-ref): q-0070 alone carries nine, including q-0013. One implementation, not two lookalikes: the MSG source between the message-stream markers in lib/message-stream.js appears character for character (whitespace-normalised) inside both lib/viewer/panel.js and lib/viewer/embed.js, and Highball's 'The extension's vendored copies are current' check passes. I judged the panel's rendering by eye; the embed's is the same source but was captured by the embed slice, not by me."
+    },
+    {
+      "rule": "threads.conversation.composer-stays",
+      "status": "pass",
+      "statement_hash": "sha256:fc8772c1687a",
+      "evidence": [
+        "runs/evidence/2026-08-28T05-10-00Z/composer-sending-real.png",
+        "runs/evidence/2026-08-28T05-10-00Z/composer-settled.png",
+        "runs/evidence/2026-08-28T05-10-00Z/composer-refused.png",
+        "runs/evidence/2026-08-28T05-10-00Z/composer-shift-enter.png"
+      ],
+      "reasoning": "The box does not move: its box measured identical (x 892.98, y 591, 366x80) with the stream at the top and at the foot, and again on a terminal thread. Enter sends and Shift-Enter breaks the line - after typing, Shift+Enter, typing, the value was 'first line\\nsecond line' and nothing was posted; pressing Enter alone posted. The message is on screen before the server answers: with the POST held 3.5s, the message rendered immediately as `wd-msg pending` at computed opacity .55 with 'sending...' where the age goes, and settled to a plain message with a real timestamp when the server confirmed - this is the sitting's one real write, to n-0103. A refused reply is handled as the rule asks: with the POST stubbed 500 the message stayed on screen as `wd-msg failed` with 'not sent' in red and the text came back into the composer, and the thread file on disk was unchanged. The box asks for no name - it reads 'as <identity> - Enter sends', where the identity is what Settings holds ('topher' by default, 'agent' once set) and the name is a link that opens Settings. Typing survives a repaint: with the caret set at offset 5 and a character typed, selectionStart was 6 and the textarea still had focus. One thing short of a defect: the server's refusal text is put into thread.say by threadPost and then wiped by the render() that marks the message failed, so the reason for a refusal is not shown - the rule only asks that the message be marked and the text returned, and both happen."
+    },
+    {
+      "rule": "threads.conversation.new-since-you-looked",
+      "status": "fail",
+      "statement_hash": "sha256:e3e890cf2091",
+      "evidence": [
+        "runs/evidence/2026-08-28T05-10-00Z/thread-collapsed-unread.png",
+        "runs/evidence/2026-08-28T05-10-00Z/thread-new-line.png"
+      ],
+      "reasoning": "The remembering works and the reading is broken. With walkdown:seen:blueprint seeded to 2026-08-27T00:00Z for n-0115, the collapsed thread carries a red '2 new' beside its status on the rule's detail pane, the mark survives a reload, it is keyed per blueprint, and after the thread has been read the badge is gone. But opening that thread lands the reviewer on an empty column. Measured: with an unread mark, openThreadView's `mark.scrollIntoView({ block: 'start' })` scrolls every scrollable ancestor, and the pane wrapper (`flex min-h-0 flex-1 overflow-hidden`, x 885-1267) ends at scrollLeft 368, so the track's panes sit at 135 / 517 / 899 and the thread pane is off to the left of the column with an empty pane in its place. The same open with no unread mark leaves scrollLeft at 0 and the thread pane at 885, correct - so the defect is specific to the case this rule exists for. It reproduces from the Threads tab and from a rule's detail pane, and the screenshot shows the panel blank below the tabs. The line itself is drawn correctly above the first unseen message and stays in the stream while the stream scrolls; it is simply not on screen. The fix is to scroll the stream container directly (set scrollTop from the mark's offsetTop) rather than asking the browser to bring the element into view through a horizontally translated track. 'Your own reply is never marked new to you' I did not exercise as its own case - the one reply I sent was in a session that had just marked the thread read, and it carried no new marker."
+    },
+    {
+      "rule": "threads.conversation.append-only",
+      "status": "pass",
+      "statement_hash": "sha256:06a879b1032c",
+      "evidence": [
+        "runs/evidence/2026-08-28T05-10-00Z/thread-terminal-verified.png",
+        "runs/evidence/2026-08-28T05-10-00Z/thread-terminal-waived.png",
+        "runs/evidence/2026-08-28T05-10-00Z/thread-stream-q0070.png"
+      ],
+      "reasoning": "Looked for a way to change what was said, on an open thread, an addressed one, a verified one (n-0072) and a waived one (n-0086). Every button inside the thread pane was enumerated rather than eyeballed: on a terminal thread they are the Back link and the identity link, and nothing else - no edit, no delete, no overflow menu, and nothing offering a reaction that would mean 'addressed' or 'approved' without recording it. An ended thread says how it ended and by whom in its own footer ('verified by Agent - 1d ago'), its provenance chip reads `verified` / `waived`, and thread.actions is empty: no reopen is offered, because threadActions() returns nothing for a terminal status and FLOWS in lib/threads.js has no edge out of one. Replying to an ended thread is still possible - the composer and its 'Enter sends' line are present on both terminal threads, and replyToThread() in lib/threads.js appends with no status gate at all, so the record continues while the state does not. I did not post to an ended thread, to avoid a write the rule does not need."
+    },
+    {
+      "rule": "threads.conversation.thread-is-a-screen",
+      "status": "pass",
+      "statement_hash": "sha256:9971d7aaef65",
+      "evidence": [
+        "runs/evidence/2026-08-28T05-10-00Z/thread-open-from-rule.png",
+        "runs/evidence/2026-08-28T05-10-00Z/thread-ended-slides-back.png",
+        "runs/evidence/2026-08-28T05-10-00Z/thread-opened-by-pin.png",
+        "runs/evidence/2026-08-28T05-10-00Z/thread-stream-q0070.png"
+      ],
+      "reasoning": "Clicking the reply count under a thread on a rule slides one screen right - the track goes from -382 to -764 and the thread pane's box lands at x 885 filling the 382px column, stream above and composer pinned at the foot. Back names where it goes: '← steps-not-an-appendix' from a rule, '← All threads' from the Threads tab, and '← All rules' for a thread with no rule behind it. Ending a thread from its screen was exercised with the status POST stubbed 200 so nothing was written (n-0117.yml byte-identical afterwards): the panel slid back to the rule's detail, not to a blank pane, and said what happened - 'n-0117 waived - it leaves the rule's active threads.' The screen is never a dead end: with S.openThread pointing at a thread the data no longer holds, the pane still draws the Back link over 'That thread is no longer open here.' The surface under review does not move - the /stand-in/review frame measured at exactly 12,44 860x664 before and after opening a thread. And a pin clicked on the page opens the same screen: a real mouse click on pin.marker for n-0071 inside the frame put the panel on the thread screen at -764 with '← takes-you-there' as the way back, from the rules list, without touching the page. One caveat that belongs on the record rather than in this verdict: when the thread being opened has unread messages, the read-mark scroll drags the track sideways and the column comes up empty - measured and failed under threads.conversation.new-since-you-looked."
+    }
+  ]
+}

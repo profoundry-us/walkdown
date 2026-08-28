@@ -1,0 +1,136 @@
+{
+  "run_id": "2026-08-28T03-53-19Z-local-01",
+  "created": "2026-08-28T03:53:19Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "cd41329-dirty",
+  "blueprint_sha": "cd41329-dirty",
+  "note": "The twelve panel.rules.* rules only, re-judged against the sixteen-module panel after the agent-tier sweep; every verdict was driven live at localhost:4700 with bounding boxes measured, not just queried.",
+  "results": [
+    {
+      "rule": "panel.rules.detail-slide",
+      "status": "pass",
+      "statement_hash": "sha256:493a83d3f0bd",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-38-49Z/panel-review.png",
+        "runs/evidence/2026-08-28T03-38-49Z/rules-stepper-at-the-start.png",
+        "runs/evidence/2026-08-28T03-38-49Z/panel-rule-detail.png"
+      ],
+      "reasoning": "Measured rather than eyeballed, because the track holds three seats and querySelector cannot tell which one a reader can see. With the list showing, the sidebar runs x=885..1267 and the seats sit at 885 (rules list), 1267 and 1649; after clicking a rule they are at 503, 885 and 1267, so the list has slid off to the left and the detail occupies the sidebar alone at exactly its full 382px width. The back control reads '← All rules' verbatim and returns to the list. The tab strip is 325px wide inside a 382px sidebar with 29px left and 28px right of it, so it is sized to its labels and centred rather than stretched; Blueprints/Rules/Threads each carry their own 16x16 inline SVG from the panel's Phosphor set, not a shrunken glyph."
+    },
+    {
+      "rule": "panel.rules.takes-you-there",
+      "status": "pass",
+      "statement_hash": "sha256:bc2cef92cdd3",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-38-49Z/rules-setup-block.png",
+        "runs/evidence/2026-08-28T03-41-40Z/rules-setup-absent.png",
+        "runs/evidence/2026-08-28T03-38-49Z/rules-stepper-at-the-start.png"
+      ],
+      "reasoning": "All three asks moved the surface. Opening panel.start.open-a-folder took the frame from /stand-in/review to /stand-in/start, and stepping next to panel.start.choose-a-blueprint took it to /stand-in/choose-blueprint, so a step is an open. Picking 'Settings (state - open the gear)' out of the screen picker went to /stand-in/settings and the picker button then reported that screen as where you are. Crossing to the sibling example blueprint - which says nothing about the walkdown review page - moved the surface to the waitlist screens (title bar reads walkdown-example / 'Already on the list', then 'Join the waitlist'). The no-needless-reload clause was checked by watching frame navigations: opening panel.rules.counts-legible while already on the review page for panel.rules.detail-slide produced zero frame navigations and the same src. I did not drive the docked-by-script-tag and docked-by-extension deliveries, nor a screen with no URL on either surface; those clauses rest on the checks tier, which passes."
+    },
+    {
+      "rule": "panel.rules.one-pane-per-tab",
+      "status": "pass",
+      "statement_hash": "sha256:7cbb341f16bd",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-38-49Z/rules-open-then-blueprints-tab.png",
+        "runs/evidence/2026-08-28T03-38-49Z/panel-tab-threads.png",
+        "runs/evidence/2026-08-28T03-38-49Z/panel-tab-rules.png"
+      ],
+      "reasoning": "This is the one a naive probe gets backwards, so it was measured. With a rule open I switched to Blueprints: the rule detail is still in the DOM, but detail.statement is at x=1281 - one pixel past the sidebar's right edge at 1267 - and seat 0 is now panel.blueprints-list occupying the sidebar. The screenshot shows the server field and the two blueprint choices with no rule detail anywhere. On Threads, seat 0 is panel.threads-list and seat 1 is thread.panel; opening a conversation slides the track by exactly one seat so thread.panel lands at 885, the same seat the rule detail uses - no tab slides past another tab's detail. Returning to Rules restored the list with all 90 rows and the rule opened again."
+    },
+    {
+      "rule": "panel.rules.step-between",
+      "status": "pass",
+      "statement_hash": "sha256:56a26420e1f3",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-38-49Z/rules-stepper-at-the-start.png",
+        "runs/evidence/2026-08-28T03-38-49Z/panel-rule-detail.png"
+      ],
+      "reasoning": "From panel.rules.detail-slide the two bare arrows beside '← All rules' carried data-goto panel.start.choose-a-blueprint and panel.rules.takes-you-there - the neighbours in list order, across the story boundary as the list draws it. Next opened takes-you-there and previous came straight back to detail-slide, with no return to the list. Each control's tooltip names its destination: 'Previous rule: choose-a-blueprint', 'Next rule: takes-you-there'. At the first row (embed.pin.anchored-target) previous is disabled and reads 'No previous rule'; at the last (threads.conversation.thread-is-a-screen) next is disabled and reads 'No next rule' - visible as the greyed left arrow in the screenshot. Stepping navigates the surface like an open: next from panel.start.open-a-folder loaded /stand-in/choose-blueprint in the frame."
+    },
+    {
+      "rule": "panel.rules.steps-not-an-appendix",
+      "status": "pass",
+      "statement_hash": "sha256:0609e516526f",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-38-49Z/rules-steps-and-shut-disclosure.png",
+        "runs/evidence/2026-08-28T03-38-49Z/detail-check-source.png",
+        "runs/evidence/2026-08-28T03-38-49Z/rules-anchor-hover-highlights.png"
+      ],
+      "reasoning": "On panel.rules.tiers-at-a-glance the GIVEN/WHEN/THEN grid at detail.steps is drawn open with no disclosure around it, 354px wide and 388px tall, directly under the statement. detail.technical-disclosure below it is shut - the element measures 26px, the height of its summary alone, and the summary reads 'Check source · checks/panel.spec.js:918' behind a closed triangle; clicking it grows the source block to 605px. The hover clause was the one worth chasing, since an earlier probe found nothing: the anchor tokens are only lit on the surface that actually carries them, and panel.rule-tiers is not on the stand-in review page. Hovering panel.counts, which is, outlines that footer on the surface in rgb(75,184,221) 2px solid, and leaving the token clears it - visible in the screenshot as the cyan box round '2 of 8 rules verified'. The rule's standing human ✗ is a 2026-08-26 verdict predating n-0084/n-0087/n-0115, all of which are addressed; what is on screen now satisfies all three clauses."
+    },
+    {
+      "rule": "panel.rules.setup-says-how-to-arrive",
+      "status": "pass",
+      "statement_hash": "sha256:e41b088d8143",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-38-49Z/rules-setup-block.png",
+        "runs/evidence/2026-08-28T03-41-40Z/rules-setup-absent.png"
+      ],
+      "reasoning": "Judged on the example blueprint, because walkdown's own storyboard declares no setup - I crossed to it from the Blueprints tab rather than driving another server. waitlist.join.already-joined, whose flow ends on waitlist-already, shows detail.setup between the statement and the steps: a warning-outlined block labelled SETUP in the same small-caps label style as STEPS, reading 'Join with an email already on the list - the same page comes back saying so.', which is the storyboard's own field text and its own word for it. waitlist.join.email-required, whose screen declares no setup, goes statement straight to STEPS with nothing between them and no empty box. Both states are now in the harness as rules-setup-block and rules-setup-absent, each crossing on its own, since the crossing does not survive a reload."
+    },
+    {
+      "rule": "panel.rules.evidence-visible",
+      "status": "pass",
+      "statement_hash": "sha256:65b84178c291",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-38-49Z/rules-evidence-block.png",
+        "runs/evidence/2026-08-28T03-38-49Z/detail-screenshots-modal.png"
+      ],
+      "reasoning": "On panel.identity.default-actor, which asks for all three tiers, detail.evidence carries one row per verify type in the panel's own vocabulary: 'checks/local ✓ pass · topherfangio · 57m ago', 'agent ~ stale · agent · 55m ago', 'human ✓ pass · topherfangio · 7h ago' - so each tier shows its latest result, who produced it, and its staleness. The screenshots the agent run attached hang under the agent row as a bullet, '• Screenshots — open 1', inside the .evshot row rather than as a fourth tier, which is what n-0100 asked for. Pressing it opens detail.screenshots-modal over the desk, 720px tall with the image and its runs/evidence/... path captioned and a Close control. A rule with nothing recorded says so rather than showing an empty box: status.sweep.declares-a-floor reads 'checks/local ○ never run  agent ○ never run'. Same standing-human-✗ caveat as its siblings; n-0100 is addressed and the build now matches it."
+    },
+    {
+      "rule": "panel.rules.counts-legible",
+      "status": "pass",
+      "statement_hash": "sha256:669dfeb91eee",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-38-49Z/panel-review.png",
+        "runs/evidence/2026-08-28T03-38-49Z/rules-search-by-group.png"
+      ],
+      "reasoning": "The sweep made this rule newly checkable: with the agent tier swept, the footer reads '16/90 verified' with '1 walk' at the right. Every number states its unit - 'verified' is tooltipped 'Rules holding a current pass on every tier they ask for', and the owed badge is tooltipped '1 rule built and unjudged by you. Open one and give it a pass or a fail.' The badges reconcile with the list exactly: one owed badge of kind walk, and exactly one row in panel.rules-list carrying the word walk (panel.threads.show-the-sketch, 'walk 1⚑'); nothing is owed to sign and no sign badge is drawn. The Rules tab carries '1' - the footer's two kinds together - in badge-warning, the same warning colour the owed row's marks use, while Threads counts its own 61 in badge-info and Blueprints, holding nothing for you, draws no badge at all."
+    },
+    {
+      "rule": "panel.rules.lifecycle-legible",
+      "status": "pass",
+      "statement_hash": "sha256:817b59a5a95a",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-38-49Z/panel-review.png",
+        "runs/evidence/2026-08-28T03-38-49Z/rules-search-by-group.png"
+      ],
+      "reasoning": "Read off the live list, glyph by glyph. Unbuilt and unsigned rules draw the empty square dimmed (□, opacity-30, e.g. status.sweep.declares-a-floor); an approved one draws the signing hand (✍︎, panel.delivery.one-switch) and a refining one the pencil in warning yellow (✎︎, panel.delivery.absent-until-asked). Built rules draw no lifecycle glyph at all but the three tier marks of panel.rule-tiers in its place, so designed-but-unsigned (□) and built-but-unpassed (a tier row) are never the same mark. The one rule waiting on the reviewer, panel.threads.show-the-sketch, is warning-tinted and its badge says 'walk'. Every row's title spells the state in words - 'built — awaiting your walkdown', 'designed — awaiting sign-off', 'refining — sent back for spec rework'. The list pencils are text, not emoji: the codepoints are U+270E U+FE0E, the variation selector still present after the refactor."
+    },
+    {
+      "rule": "panel.rules.search-the-list",
+      "status": "pass",
+      "statement_hash": "sha256:87d61dee919f",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-38-49Z/rules-search-by-group.png",
+        "runs/evidence/2026-08-28T03-38-49Z/rules-search-filtered.png"
+      ],
+      "reasoning": "The strongest of the twelve, because it exercises the module that was split out. panel.rules-search sits above the scroller, not in it: with the list scrolled to 900px the box stayed at y=109, and the pane it heads does not contain it. Filtering is per keystroke and local - each query was applied by dispatching input alone, with no fetch. 'panel.rules' names a group and leaves all twelve of its rules standing under a single PANEL.RULES heading; 'one-pane-per-tab' names one rule and leaves that rule alone, still drawn under its heading; 'ghost' - a word in no id - finds three rules by statement across three stories, each under its own heading (PANEL.DOCK, PANEL.VIEWPORT, SCREENS.SURFACES). Emptying the box brought all 90 rows back."
+    },
+    {
+      "rule": "panel.rules.tiers-at-a-glance",
+      "status": "pass",
+      "statement_hash": "sha256:3e8240139040",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-38-49Z/panel-review.png",
+        "runs/evidence/2026-08-28T03-38-49Z/rules-search-by-group.png"
+      ],
+      "reasoning": "Every built row carries exactly three marks and data-tiers spells them in the order checks, agent, human. The sweep put the middle column into a state the earlier evidence could not show: 68 rows read ✓ ~ ✓, with the tilde titled 'agent — stale — a sweep asked for this tier again (2026-08-28T03-24-50Z-local-01)', so a stale pass keeps a shape of its own rather than borrowing pass or fail. Failures are the red cross in text-error (10 human ✗, three of them visible in the panel.rules group). A tier the rule does not ask for is the same check hollowed to opacity-20, which keeps the three marks aligned down the column as n-0109 asked. Each mark carries its tier and state in words in its title. Unbuilt rules keep their single lifecycle shape. Not evidenced: the ○ for a required tier no run has touched - no built rule in this blueprint is in that state right now."
+    },
+    {
+      "rule": "panel.rules.headless-says-so",
+      "status": "pass",
+      "statement_hash": "sha256:5bb6c7d6142a",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-38-49Z/rules-headless-cover.png"
+      ],
+      "reasoning": "Opening screens.identity.fragment-is-identity, which has neither screens nor flow, from the review page put an opaque cover in the panel's own colours over the desk at z-index 2147482000. Its box is 12,44 860x664 - pixel-identical to the app frame's - so the sheet is covered exactly, not the whole viewport. It reads 'No screen belongs to this rule / It is judged by its checks and recorded behavior, not by looking. / The page you were reviewing is untouched underneath.', and that last line is true: the frame's src stayed http://localhost:4700/stand-in/review throughout, so it covers rather than navigates. The detail pane carries the same note in smaller type directly beneath the statement. Going back to the list removed the cover, and so did opening a screened rule."
+    }
+  ]
+}

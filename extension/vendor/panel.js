@@ -2432,6 +2432,21 @@ function setViewport(w) {
     setGhost(false);
     setFade(share);
   }
+  /*
+   * Say the peek again, because this function just wiped it.
+   *
+   * Placement writes style.cssText wholesale - it has to, for the transition -
+   * and that drops the inline opacity the peek set. paintDesk already knew
+   * this and re-asserted afterwards, so dragging a dial kept the peek; every
+   * OTHER route through here did not, so using any control in the bar put the
+   * app back to full strength while the checkbox stayed ticked. The control
+   * that means "a way of looking" was left lying about what you were looking
+   * at (found by an agent walkdown, 2026-08-28).
+   *
+   * Re-asserting here rather than at each caller because the wipe happens
+   * here: a new caller should not have to know it owes the peek a repair.
+   */
+  if (S.hideAppOn) hideApp(true);
   renderBar();
 }
 
@@ -3406,13 +3421,33 @@ function openThreadView(id) {
   markSeen(id);
   S.view = 'thread';
   render();
-  // The first unread message if there is one, and otherwise the newest -
-  // never the top of an exchange you have already read.
+  /*
+   * The first unread message if there is one, and otherwise the newest -
+   * never the top of an exchange you have already read.
+   *
+   * Scroll the STREAM, by hand. scrollIntoView looks like the obvious way to
+   * say this and is not: it scrolls every scrollable ancestor, and one of the
+   * ancestors here is the pane wrapper that carries the slide track. Landing
+   * on an unread mark pushed that wrapper to scrollLeft 368, which slid all
+   * three panes a third of a column left and left the reviewer looking at an
+   * empty one - a thread with unread messages opened to blank, and only a
+   * thread with unread messages, which is why it survived every check.
+   *
+   * offsetTop is measured against the stream because the stream is the
+   * offsetParent here; the fallback covers a layout where it is not.
+   */
   const pane = D.host.querySelectorAll('.wdp-track > div')[S.listTab === 'threads' ? 1 : 2];
   const stream = pane?.querySelector('.overflow-y-auto');
   const mark = pane?.querySelector('.wd-new');
-  if (mark) mark.scrollIntoView({ block: 'start' });
-  else if (stream) stream.scrollTop = stream.scrollHeight;
+  if (!stream) return;
+  if (mark) {
+    const top = stream.contains(mark.offsetParent ?? mark)
+      ? mark.offsetTop
+      : mark.getBoundingClientRect().top - stream.getBoundingClientRect().top + stream.scrollTop;
+    stream.scrollTop = Math.max(0, top);
+  } else {
+    stream.scrollTop = stream.scrollHeight;
+  }
 }
 
 function wireThreads() {

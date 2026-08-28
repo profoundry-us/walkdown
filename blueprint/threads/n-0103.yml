@@ -55,3 +55,12 @@ replies:
 
 
       Nothing recorded to the ledger by me - a run of record is yours to take.
+  - author: agent
+    created: 2026-08-28T03:39:30Z
+    body: "Agent sitting 2026-08-28, re-judging panel.threads.own-view after the
+      panel was split into sixteen modules: the filter bar this note asked to
+      dock is now a fixed head above the scrolling list in
+      src/panel/threads-list.js — measured at the same y (109px) with the list
+      at scrollTop 0 and at 8929. This reply is also the sitting evidence for
+      threads.conversation.composer-stays, which needed a send the server
+      actually confirms."
