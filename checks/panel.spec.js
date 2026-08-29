@@ -1374,3 +1374,70 @@ test(
     }
   }
 );
+
+
+test(
+  'the rail groups by screen, in storyboard order, with the headless rules last',
+  { tag: '@rule:panel.rules.grouped-by-screen' },
+  async ({ page }) => {
+    await review(page);
+    const bp = await (await page.request.get(`${WD_ORIGIN}/api/blueprint`)).json();
+    const list = page.getByTestId('panel.rules-list');
+    await expect(list).toBeVisible();
+
+    /*
+     * The order the rail should be in, worked out from the ledger rather than
+     * read off the panel — an order is a claim about the storyboard, and a
+     * check that took it from the thing under test could not tell a right
+     * answer from a consistently wrong one.
+     */
+    const screenIdOf = (r) => r.flow?.at(-1) ?? r.screens?.[0] ?? null;
+    const board = (bp.storyboard ?? []).map((s) => s.id);
+    const present = [...new Set(bp.rows.map(screenIdOf))];
+    const expected = [
+      ...board.filter((id) => present.includes(id)),
+      ...(present.includes(null) ? [null] : []),
+    ];
+
+    const drawn = await list.getByTestId('panel.rules-screen')
+      .evaluateAll((els) => els.map((e) => e.dataset.screenGroup));
+    expect(drawn.map((g) => g || null), 'every screen with rules, in storyboard order, headless last')
+      .toEqual(expected);
+
+    // The story keeps only what the screen has not already said.
+    const firstScreen = expected.find((id) => id !== null);
+    const stories = [...new Set(bp.rows.filter((r) => screenIdOf(r) === firstScreen).map((r) => r.story))];
+    expect(stories.length, 'the first screen carries stories to label').toBeGreaterThan(0);
+    const labels = await list.locator('[data-story]').evaluateAll(
+      (els) => els.map((e) => ({ story: e.dataset.story, text: e.textContent.trim() })));
+    for (const story of stories) {
+      const drew = labels.find((l) => l.story === story);
+      expect(drew, `${story} is drawn`).toBeTruthy();
+      // Full id only when two stories on one screen would read the same word.
+      const leaf = story.split('.').at(-1);
+      const clash = stories.filter((s) => s.split('.').at(-1) === leaf).length > 1;
+      expect(drew.text.toLowerCase()).toBe((clash ? story : leaf).toLowerCase());
+    }
+
+    /*
+     * And the heading outlives its own group. Scrolled deep into the first
+     * screen's rules, the heading pinned at the top of the list is still that
+     * screen's — which is the whole point of a group that can run forty rules
+     * long.
+     */
+    // The scroller is inside the pane: the search box is a fixed head above it,
+    // so the pane itself does not move and a sticky heading sticks to this.
+    const scroller = page.getByTestId('panel.list-scroll');
+    const box = await scroller.boundingBox();
+    await scroller.evaluate((el) => { el.scrollTop = 700; });
+    await page.waitForTimeout(200);
+    const pinned = await list.getByTestId('panel.rules-screen').evaluateAll(
+      (els, top) => els
+        .map((e) => ({ g: e.dataset.screenGroup, t: e.getBoundingClientRect().top }))
+        .filter((e) => Math.abs(e.t - top) < 2)
+        .map((e) => e.g),
+      box.y);
+    expect(pinned, 'the screen being read is still named at the top of the list')
+      .toEqual([firstScreen]);
+  }
+);

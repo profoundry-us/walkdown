@@ -302,7 +302,24 @@ function stripTip(tiers, acceptance) {
   ]);
   const line = ([label, said]) =>
     `<span class="opacity-60">${esc(label)}</span><span>${esc(said)}</span>`;
-  return `<span class="tooltip-content w-60 whitespace-normal text-left text-[11px] leading-snug"
+  /*
+   * z-20 clears the sticky screen band, which sits at z-10.
+   *
+   * This is the second time a z-index has been put on this bubble. The first
+   * was wrong - it was fixing a fade caught mid-transition by a screenshot,
+   * and measuring it at daisyUI's own z-index of 2 showed the bubble opaque
+   * and on top. Nothing had changed by the time it came out again.
+   *
+   * What changed is the band, which sits at z-10. The row directly under it is
+   * the one row whose tooltip extends up behind it, and at daisyUI's z-index
+   * the band clips the bubble's first line off.
+   *
+   * Confirmed by looking, not by elementFromPoint - the bubble carries
+   * `pointer-events: none`, so that call reports whatever is behind it and
+   * would have said "covered" whichever z-index was set. Two screenshots of
+   * the same hover, one at z-2 and one at z-20, are what settled it.
+   */
+  return `<span class="tooltip-content z-20 w-60 whitespace-normal text-left text-[11px] leading-snug"
     data-testid="panel.rule-tiers-tip"><span class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5">${
       cells.map(line).join('')}${signs.length
         ? `<span class="col-span-2 mt-0.5 opacity-40">accepted by</span>${signs.map(line).join('')}`
@@ -355,11 +372,18 @@ export function tierMarks(row, mine = false) {
  * that attribute, and giving it a second meaning in the list made
  * `[data-screen="rule-detail"]` resolve to a heading nobody could click
  * instead of the option it was written for.
+ *
+ * Sticky to the top of the list's own scrollport, so the screen you are
+ * reading rules for is named however far down the group you are - forty-two
+ * rules hang off the review page, and the heading scrolled away long before
+ * you stopped needing it. The fill is opaque for the same reason: a
+ * translucent band with rows sliding under it is unreadable exactly when it
+ * is doing its job.
  */
 function screenHeader(id) {
   const sc = screenById(id);
   const title = sc ? (sc.title ?? sc.id) : id;
-  return `<div class="flex items-start gap-2 border-b border-t border-base-300 bg-base-200/50 px-3.5 py-2 first:border-t-0"
+  return `<div class="sticky top-0 z-10 flex items-start gap-2 border-b border-t border-base-300 bg-base-200 px-3.5 py-3 first:border-t-0"
     data-testid="panel.rules-screen" data-screen-group="${esc(id ?? '')}">
     <span class="mt-0.5 shrink-0 ${id ? 'text-primary' : 'opacity-30'}">${icon('frame-corners', 'size-3.5')}</span>
     <span class="min-w-0 text-[12.5px] font-semibold leading-snug">${

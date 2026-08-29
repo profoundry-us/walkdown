@@ -608,7 +608,8 @@ stories:
           statement_hash: sha256:cac7a0be0702
       - id: panel.rules.grouped-by-screen
         origin: walkdown
-        statement: The rail is grouped by the screen a rule is judged on, in storyboard order, each screen named as the storyboard names it and wearing the same icon the bar's picker wears - and the story beneath keeps only what the screen has not already said. Rules belonging to no screen are a group of their own at the end, because a blueprint can be a third ledger law and that is read rather than looked at.
+        statement: The rail is grouped by the screen a rule is judged on, in storyboard order, each screen named as the storyboard names it and wearing the same icon the bar's picker wears - and the story beneath keeps only what the screen has not already said. A screen's heading stays in view while its own rules are scrolled, because a group forty rules long outlives the heading that named it. Rules belonging to no screen are a group of their own at the end, because a blueprint can be a third ledger law and that is read rather than looked at.
+        verify: [checks]
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -621,7 +622,8 @@ stories:
             - The stories under a screen are labelled by what the screen has not already said, and keep their whole id when two of them would otherwise read the same word
             - A rule the storyboard does not place is grouped with the others that have none, after every screen
             - The detail's stepper and the walk move in this order too, so the arrows and Continue follow what the list shows rather than what the file happens to hold
-          statement_hash: sha256:bd6eeb030eaf
+            - Scrolling deep into a screen's rules leaves that screen's heading at the top of the list, naming what is being read
+          statement_hash: sha256:54d2a03fa8e6
 
       - id: panel.rules.headless-says-so
         origin: thread:n-0061

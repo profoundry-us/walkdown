@@ -1038,7 +1038,12 @@ export function render() {
         <div class="flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col overflow-hidden"
              data-testid="${onThreads ? 'panel.threads-list' : S.listTab === 'rules' ? 'panel.rules-list' : 'panel.blueprints-list'}">
           ${onThreads ? threadFilterBar() : S.listTab === 'rules' ? searchBox() : ''}
-          <div class="wdp-pane wdp-list flex min-h-0 flex-1 flex-col overflow-y-auto">${
+          <!-- The scroller, named: the pane above it is a column with a fixed
+               head, so THIS is the element that scrolls and the one a sticky
+               heading sticks to. It carries an anchor because checks select by
+               anchor, never by class. -->
+          <div class="wdp-pane wdp-list flex min-h-0 flex-1 flex-col overflow-y-auto"
+               data-testid="panel.list-scroll">${
             onThreads ? threadsPane()
             : S.listTab === 'blueprints' ? blueprintsPane()
             : listPane()}</div>
