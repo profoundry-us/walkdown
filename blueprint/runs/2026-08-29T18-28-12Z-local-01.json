@@ -1,0 +1,78 @@
+{
+  "run_id": "2026-08-29T18-28-12Z-local-01",
+  "created": "2026-08-29T18:28:12Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2af5211-dirty",
+  "blueprint_sha": "2af5211-dirty",
+  "results": [
+    {
+      "rule": "panel.rules.grouped-by-screen",
+      "status": "pass",
+      "statement_hash": "sha256:54d2a03fa8e6",
+      "evidence": [
+        "blueprint/runs/evidence/2026-08-29T18-28-12Z/app-review-rail.png",
+        "blueprint/runs/evidence/2026-08-29T18-28-12Z/app-review-sticky.png"
+      ],
+      "reasoning": "Read the rail cold against the storyboard. Every screen carrying rules is a heading, in the storyboard's own order, with the storyboard's own title and the same frame-corners icon the bar's picker wears; the headless rules are one group after every screen. Story labels drop the feature prefix - panel.dock reads DOCK. Scrolled 700px into the review page's rules and its heading was still the one pinned at the top of the scroller. The stepper claim I tested where it can actually fail: from embed.pin.coordinate-fallback the file's next rule is embed.threads.note-first and the rail's is panel.dock.toolbar, and the arrow landed on panel.dock.toolbar - it follows the rail, not the file. One half of one clause I could not exercise: two stories under one screen ending in the same word should keep their whole ids, and nothing in this blueprint collides. I tried to fabricate it in a disposable copy by moving embed.threads.note-first onto review and the state did not appear, because a rule's derived flow takes precedence over its declared screens when the group is chosen. The guard exists in the source and is unobserved here; every clause I could put in front of me held."
+    },
+    {
+      "rule": "panel.rules.legend-on-demand",
+      "status": "fail",
+      "statement_hash": "sha256:58cbf78e318c",
+      "evidence": [
+        "blueprint/runs/evidence/2026-08-29T18-28-12Z/app-review-legend.png"
+      ],
+      "threads": [
+        "n-0122"
+      ],
+      "reasoning": "The legend opens from beside the counts and reads well - signature shapes, what warning colour means, what sign, walk and the flag mean, all in one bubble rather than six tooltips. But the first clause asks for every state an evidence mark can take, and skipped is missing: seven of the eight are listed. It is not a pedantic gap, because skipped and na draw the same en dash, so the legend tells a reader that a dash means 'not applicable - this rule does not ask for it', which for a skipped run is a wrong answer rather than an absent one. Failing on the clause as written."
+    },
+    {
+      "rule": "panel.rules.owed-apart-from-said",
+      "status": "pass",
+      "statement_hash": "sha256:a59ee3d3b67c",
+      "evidence": [
+        "blueprint/runs/evidence/2026-08-29T18-28-12Z/app-review-rail.png"
+      ],
+      "reasoning": "Measured the right-hand edge across forty rows. The work badge sits at a constant left of 1269 and the thread count at 1305, each 28px wide, so both read as columns down the list rather than as one string that moves. The badge is warning yellow, the count is the panel's own ink at 45 percent - different channels, and the count no longer reads as a quantity of the work beside it. Rows carrying only one of the two still draw both slots, so nothing shifts."
+    },
+    {
+      "rule": "panel.rules.marks-carry-over",
+      "status": "pass",
+      "statement_hash": "sha256:53b22fd6a5a4",
+      "evidence": [
+        "blueprint/runs/evidence/2026-08-29T18-28-12Z/app-rule-detail.png"
+      ],
+      "reasoning": "Opened panel.dock.own-skin from the rail and compared the strips. The list drew checks:na agent:pass with product:none eng:signed; the detail drew the same, in the same order. Worth recording that my first measurement said they disagreed and was wrong: all three panes stay in the slide track, so an unscoped locator for the strip answers for the list's first row rather than the detail's. Scoped to the element beside detail.rule-id, they match."
+    },
+    {
+      "rule": "panel.rules.names-its-screen",
+      "status": "fail",
+      "statement_hash": "sha256:4a90d439391b",
+      "evidence": [
+        "blueprint/runs/evidence/2026-08-29T18-28-12Z/app-rule-detail.png",
+        "blueprint/runs/evidence/2026-08-29T18-28-12Z/app-rule-flow-chain.png",
+        "blueprint/runs/evidence/2026-08-29T18-28-12Z/app-rule-detail-headless.png",
+        "blueprint/runs/evidence/2026-08-29T18-28-12Z/app-rule-unknown-screen.png"
+      ],
+      "threads": [
+        "n-0123"
+      ],
+      "reasoning": "Three of four clauses hold. A single screen is named by title with its id beside it. A flow draws as a chain ending on the screen the rule is judged against - checked on the example project, since walkdown's own blueprint has no multi-screen flow. A rule with no screen says so in words. The fourth fails: pointing a rule at a screen the storyboard does not know renders the bare id in warning yellow and nothing else - no word saying it did not resolve. A reader who does not know the convention reads a screen that exists, and warning is this panel's 'waiting on you' colour, so it says something untrue about who is blocked. Marked by colour is not marked as unknown."
+    },
+    {
+      "rule": "panel.rules.talk-without-a-sitting",
+      "status": "pass",
+      "statement_hash": "sha256:d66e49c63ed9",
+      "evidence": [
+        "blueprint/runs/evidence/2026-08-29T18-28-12Z/app-rule-composer.png",
+        "blueprint/runs/evidence/2026-08-29T18-28-12Z/app-composer-empty-identity.png",
+        "blueprint/runs/evidence/2026-08-29T18-28-12Z/app-rule-composer-refused.png"
+      ],
+      "reasoning": "With no sitting started the composer is there at the foot of the rule, naming who it will record as. Wrote a note and it was filed against that rule, attributed to the name shown, and appeared in the conversations above without a reload; no verdict block appeared, so nothing began a sitting. Then emptied the username in Settings until the composer read 'set your name...' and tried again: refused, nothing filed, the reason on screen and Settings reopened. An earlier attempt appeared to show it filing under an empty identity - that was mine, not the panel's: I had cleared the field and pressed Escape, which discards the edit, so the identity was never actually empty. All writes went to a disposable copy of the blueprint, never the real ledger."
+    }
+  ]
+}

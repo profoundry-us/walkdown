@@ -19,6 +19,7 @@ screens:
     prototype: /screens/review.html
     app: { path: /stand-in/review }
     anchors:
+      - panel.legend
       - panel.bar
       - panel.desk
       - panel.desk-tuner
@@ -47,6 +48,7 @@ screens:
     prototype: /screens/rule-detail.html
     app: { path: /stand-in/rule-detail }
     anchors:
+      - detail.screen
       - detail.back
       - detail.stepper
       - detail.rule-id

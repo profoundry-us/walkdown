@@ -1,0 +1,34 @@
+id: n-0122
+kind: note
+author: agent
+created: 2026-08-29T18:35:06Z
+anchor:
+  rule: panel.rules.legend-on-demand
+  screen: review
+  element: panel.legend
+status: open
+body: >-
+  Agent walkdown 2026-08-29: the legend does not list every state an evidence
+  mark can take.
+
+
+  The rule says "Every state the evidence marks can take is listed with the mark
+  that draws it". The legend lists pass, fail, stale, never, blocked, unbuilt
+  and na - seven of the eight. `skipped` is missing, and it is a real state:
+  TIER_MARK.skipped draws an en dash at opacity-40, and checksTier returns it
+  whenever a target reports skipped for a rule.
+
+
+  It matters more than a missing row, because `skipped` and `na` draw the SAME
+  glyph. A reader who meets a dash on the rail and consults the legend is told
+  it means "not applicable - this rule does not ask for it", which for a skipped
+  run is the wrong answer, not merely an incomplete one.
+
+
+  Two honest fixes. Either add skipped to LEGEND_TIERS so the dash is explained
+  both ways, or give skipped a mark of its own. The second is the better answer
+  if a dash is meant to mean one thing.
+
+
+  Seen at http://localhost:4700 on the Rules tab, hovering Legend beside the
+  counts.

@@ -1,0 +1,36 @@
+id: n-0123
+kind: note
+author: agent
+created: 2026-08-29T18:35:06Z
+anchor:
+  rule: panel.rules.names-its-screen
+  screen: rule-detail
+  element: detail.screen
+status: open
+body: >-
+  Agent walkdown 2026-08-29: an unknown screen id is marked only by colour, and
+  by the wrong colour.
+
+
+  The rule says a screen id the storyboard does not know is "marked as unknown
+  rather than printed as though it resolved". Driven with a rule pointed at
+  `no-such-screen`, the SCREEN row renders exactly `<span
+  class="text-warning">no-such-screen</span>` - the raw id in warning yellow,
+  with no word saying it did not resolve and no id chip beside it.
+
+
+  Two problems. A reader who does not already know the convention sees a screen
+  name in yellow and reads it as a screen that exists. And warning yellow is
+  this panel is own "waiting on you" channel - it is what the sign and walk
+  badges wear - so here it says something actively untrue about who is blocked.
+
+
+  Suggested: say it in words, e.g. `no-such-screen - not in the storyboard`, and
+  drop the colour or use the error channel, which is the one that means
+  something is wrong rather than owed.
+
+
+  Produced in a disposable copy of the blueprint, by pointing panel.desk.peek at
+  a screen id the storyboard does not carry; nothing was written to the real
+  ledger to observe it. Evidence:
+  blueprint/runs/evidence/2026-08-29T18-28-12Z/app-rule-unknown-screen.png
