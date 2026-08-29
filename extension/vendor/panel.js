@@ -769,8 +769,66 @@ function toast(html, { sticky = false, on = null, tone = 'neutral' } = {}) {
  * they only agreed by hand. One definition, and the number on the tab is by
  * construction the list Continue walks.
  */
-const owedRows = () => (S.data?.rows ?? []).filter(
+const owedRows = () => orderedRows().filter(
   (r) => needsYou(r.rule) && !(S.session?.verdicts ?? {})[r.rule]);
+
+/** The screen a rule is filed under: the end of its flow, or the first it names. */
+const screenIdOf = (r) => r?.flow?.at(-1) ?? r?.screens?.[0] ?? null;
+
+/*
+ * The rail's own order, and the only definition of it.
+ *
+ * Rules are grouped by the SCREEN they are about, in storyboard order, then by
+ * story in blueprint order. A screen is where a reviewer actually stands, so
+ * it is the grouping that matches how the work is done - and the storyboard is
+ * already a sequence, so its order is the one to walk in.
+ *
+ * Rules with no screen come last, together. A third of this blueprint is
+ * headless - ledger law, CLI contracts, policies - and those are judged by
+ * reading rather than by looking, so they are a destination of their own
+ * rather than an awkward remainder scattered through the screens.
+ *
+ * The list, the detail's stepper and Continue all read THIS, because the
+ * stepper promises to move in the order the list shows and Continue promises
+ * to walk the list. Two orderings would break both promises quietly.
+ */
+function groupedRows(rows = S.data?.rows ?? []) {
+  const board = (S.data?.storyboard ?? []).map((s) => s.id);
+  const rank = new Map(board.map((id, i) => [id, i]));
+  // Unknown screen ids sort after every known one; no screen at all sorts last.
+  const at = (id) => (id === null ? Infinity : rank.get(id) ?? board.length);
+  const groups = new Map();
+  for (const row of rows) {
+    const sid = screenIdOf(row) ?? null;
+    if (!groups.has(sid)) groups.set(sid, new Map());
+    const stories = groups.get(sid);
+    if (!stories.has(row.story)) stories.set(row.story, []);
+    stories.get(row.story).push(row);
+  }
+  return [...groups.entries()]
+    .sort(([a], [b]) => at(a) - at(b))
+    .map(([screen, stories]) => ({
+      screen,
+      stories: [...stories.entries()].map(([story, rs]) => ({ story, rows: rs })),
+    }));
+}
+
+/** The same order, flat - what the stepper and the walk step through. */
+const orderedRows = (rows) => groupedRows(rows)
+  .flatMap((g) => g.stories.flatMap((s) => s.rows));
+
+/*
+ * What a story is called once its screen is named above it. The feature
+ * prefix is the screen's job now, so `invites.batch` reads as BATCH - unless
+ * two stories under one screen would end up with the same word, and then both
+ * keep their full id rather than the list drawing one label over two things.
+ */
+function storyLabels(stories) {
+  const leaf = (s) => String(s).split('.').at(-1);
+  const tally = {};
+  for (const s of stories) tally[leaf(s)] = (tally[leaf(s)] ?? 0) + 1;
+  return new Map(stories.map((s) => [s, tally[leaf(s)] > 1 ? s : leaf(s)]));
+}
 
 const needsYou = (rule) =>
   (S.data?.attention ?? []).some((i) => i.who === 'human' && !i.thread && i.rule === rule);
@@ -1206,8 +1264,13 @@ function searchBox() {
  * written for people to read.
  *
  * A heading matching takes its whole group with it. A rule matching brings
- * only itself, but its heading is drawn anyway by the grouping below, because
- * a filtered list that loses the hierarchy stops saying where anything lives.
+ * only itself, but its headings are drawn anyway by the grouping below,
+ * because a filtered list that loses the hierarchy stops saying where anything
+ * lives.
+ *
+ * The screen is a heading too now, and searchable as one: typing a screen's
+ * name gives you every rule judged on it. That is the question the grouping
+ * invites, and a heading you can see but not search for reads as broken.
  */
 const matchesQuery = (s, q) => String(s ?? '').toLowerCase().includes(q);
 function matchingRows() {
@@ -1216,8 +1279,12 @@ function matchingRows() {
   const groups = new Set(
     S.data.rows.map((r) => r.story).filter((story) => matchesQuery(story, q))
   );
+  const screens = new Set((S.data.storyboard ?? [])
+    .filter((sc) => matchesQuery(sc.title, q) || matchesQuery(sc.id, q))
+    .map((sc) => sc.id));
   return S.data.rows.filter((row) =>
-    groups.has(row.story) || matchesQuery(row.rule, q) || matchesQuery(row.statement, q));
+    groups.has(row.story) || screens.has(screenIdOf(row))
+    || matchesQuery(row.rule, q) || matchesQuery(row.statement, q));
 }
 
 /*
@@ -1472,6 +1539,78 @@ function tierMarks(row, mine = false) {
     }).join('')}${signoffStack(row.acceptance, mine)}</span>`;
 }
 
+/*
+ * The header a screen's rules sit under.
+ *
+ * It carries the same icon the bar's screen picker does, because they name the
+ * same thing and a reviewer should not have to learn that twice. The title is
+ * allowed to wrap: a storyboard title says what state it is - "Rule detail
+ * (state - open a rule on the Rules tab)" - and truncating that to an ellipsis
+ * in a 384px rail throws away the half that distinguishes it.
+ *
+ * `data-screen-group`, not `data-screen`: the bar's screen picker already owns
+ * that attribute, and giving it a second meaning in the list made
+ * `[data-screen="rule-detail"]` resolve to a heading nobody could click
+ * instead of the option it was written for.
+ */
+function screenHeader(id) {
+  const sc = screenById(id);
+  const title = sc ? (sc.title ?? sc.id) : id;
+  return `<div class="flex items-start gap-2 border-b border-t border-base-300 bg-base-200/50 px-3.5 py-2 first:border-t-0"
+    data-testid="panel.rules-screen" data-screen-group="${esc(id ?? '')}">
+    <span class="mt-0.5 shrink-0 ${id ? 'text-primary' : 'opacity-30'}">${icon('frame-corners', 'size-3.5')}</span>
+    <span class="min-w-0 text-[12.5px] font-semibold leading-snug">${
+      title ? esc(title) : 'No screen'}${
+      id ? '' : '<span class="ml-1.5 font-normal opacity-40">judged without looking</span>'}</span>
+  </div>`;
+}
+
+/** One rule, as the rail draws it. */
+function ruleRow(row) {
+  const mine = needsYou(row.rule);
+  /*
+   * A verdict picked this sitting is the one thing that still draws its own
+   * mark instead of the strip, and deliberately: it is not in the ledger
+   * yet. Standing outside the strip's vocabulary is how the row says the
+   * judgment is yours and unfiled.
+   */
+  const picked = S.session?.verdicts[row.rule];
+  const why = picked ? 'judged this session' : ruleWhy(row, mine);
+  const owes = mine && !picked ? (row.built ? 'walk' : 'sign') : '';
+  const thr = threadsFor(row.rule).length;
+  /*
+   * Two right-hand columns, always drawn, even when empty. What you owe and
+   * how much is being said about a rule are different questions, and run
+   * together in one warning-yellow string they read as one word - "walk 2"
+   * looked like a quantity of walking. Fixed widths so both answers stack
+   * into columns you can run an eye down; the thread count in plain ink at
+   * half strength, because it is context rather than a claim on you.
+   */
+  return `<button class="flex w-full cursor-pointer items-center gap-2.5 px-3.5 py-2 text-left text-[14px] hover:bg-base-200"
+      data-rule="${esc(row.rule)}" title="${esc(row.rule)} — ${esc(why)}">
+      ${picked
+        ? `<span class="w-11 shrink-0 text-center ${
+            { pass: 'text-success', fail: 'text-error', approved: 'text-success',
+              refining: 'text-warning' }[picked]}">${
+            { pass: '✓', fail: '✗', approved: '✍︎', refining: '✎︎' }[picked]}</span>`
+        : tierMarks(row, mine)}
+      <span class="truncate">${esc(shortName(row))}</span>
+      <span class="ml-auto flex shrink-0 items-center gap-2 text-[11.5px] font-semibold">
+        <span class="w-7 text-right text-warning">${owes}</span>
+        <span class="w-7 text-right font-normal text-base-content/45">${thr ? `${thr}⚑` : ''}</span>
+      </span>
+    </button>`;
+}
+
+/*
+ * The rail: screens, then the stories on them, then the rules.
+ *
+ * Grouping by story alone put `invites.batch` and `invites.list` next to each
+ * other and never said where either was judged - so the reviewer held the
+ * mapping from feature to screen in their head, on the one screen where it
+ * matters most. The screen is the heading now, and the story keeps only what
+ * the screen does not already say.
+ */
 function listPane() {
   if (!S.data.rows.length)
     return '<p class="p-3.5 text-[13.5px] opacity-40">No rules in this blueprint.</p>';
@@ -1480,46 +1619,14 @@ function listPane() {
     return `<p class="p-3.5 text-[13.5px] opacity-40" data-testid="panel.rules-empty">No rule matches ${
       esc(S.ruleQuery.trim())}.</p>`;
   let html = '';
-  let story = null;
-  for (const row of rows) {
-    if (row.story !== story) {
-      story = row.story;
-      html += `<div class="px-3.5 pb-1 pt-2.5 ${LBL}">${esc(story)}</div>`;
+  for (const group of groupedRows(rows)) {
+    html += screenHeader(group.screen);
+    const labels = storyLabels(group.stories.map((g) => g.story));
+    for (const { story, rows: within } of group.stories) {
+      html += `<div class="px-3.5 pb-1 pt-2.5 ${LBL}" data-story="${esc(story)}">${
+        esc(labels.get(story))}</div>`;
+      html += within.map((row) => ruleRow(row)).join('');
     }
-    const mine = needsYou(row.rule);
-    /*
-     * A verdict picked this sitting is the one thing that still draws its own
-     * mark instead of the strip, and deliberately: it is not in the ledger
-     * yet. Standing outside the strip's vocabulary is how the row says the
-     * judgment is yours and unfiled.
-     */
-    const picked = S.session?.verdicts[row.rule];
-    const why = picked ? 'judged this session' : ruleWhy(row, mine);
-    const owes = mine && !picked ? (row.built ? 'walk' : 'sign') : '';
-    const short = shortName(row);
-    const thr = threadsFor(row.rule).length;
-    /*
-     * Two right-hand columns, always drawn, even when empty. What you owe and
-     * how much is being said about a rule are different questions, and run
-     * together in one warning-yellow string they read as one word - "walk 2"
-     * looked like a quantity of walking. Fixed widths so both answers stack
-     * into columns you can run an eye down; the thread count in plain ink at
-     * half strength, because it is context rather than a claim on you.
-     */
-    html += `<button class="flex w-full cursor-pointer items-center gap-2.5 px-3.5 py-2 text-left text-[14px] hover:bg-base-200"
-      data-rule="${esc(row.rule)}" title="${esc(row.rule)} — ${esc(why)}">
-      ${picked
-        ? `<span class="w-11 shrink-0 text-center ${
-            { pass: 'text-success', fail: 'text-error', approved: 'text-success',
-              refining: 'text-warning' }[picked]}">${
-            { pass: '✓', fail: '✗', approved: '✍︎', refining: '✎︎' }[picked]}</span>`
-        : tierMarks(row, mine)}
-      <span class="truncate">${esc(short)}</span>
-      <span class="ml-auto flex shrink-0 items-center gap-2 text-[11.5px] font-semibold">
-        <span class="w-7 text-right text-warning">${owes}</span>
-        <span class="w-7 text-right font-normal text-base-content/45">${thr ? `${thr}⚑` : ''}</span>
-      </span>
-    </button>`;
   }
   return html;
 }
@@ -1753,7 +1860,15 @@ function detailPane() {
   // Step through the rules in the order the list shows them, without going
   // back to it. The back link keeps its word ("All rules") so the bare
   // arrows beside it read as the stepper rather than as a second way out.
-  const at = S.data.rows.findIndex((x) => x.rule === r.rule);
+  /*
+   * The list groups by screen now, so blueprint order and rail order are two
+   * different sequences. The stepper follows the RAIL - it exists to move
+   * through the rules the way they are shown, and arrows that jumped to
+   * whatever came next in a file would land somewhere the reviewer was not
+   * looking.
+   */
+  const walk = orderedRows();
+  const at = walk.findIndex((x) => x.rule === r.rule);
   const step = (row, cls, glyph, label) =>
     `<div class="tooltip tooltip-left" data-tip="${esc(row ? `${label} rule: ${shortName(row)}` : `No ${label.toLowerCase()} rule`)}">
       <button class="${cls} btn btn-ghost btn-xs" data-testid="detail.stepper" ${row ? `data-goto="${esc(row.rule)}"` : 'disabled'}>${glyph}</button>
@@ -1762,8 +1877,8 @@ function detailPane() {
     <div class="flex items-center px-2 pt-2">
       <button class="wdp-back btn btn-ghost btn-xs text-primary" data-testid="detail.back">← All rules</button>
       <div class="ml-auto flex gap-0.5">
-        ${step(at > 0 ? S.data.rows[at - 1] : null, 'wdp-prev', '←', 'Previous')}
-        ${step(at >= 0 && at < S.data.rows.length - 1 ? S.data.rows[at + 1] : null, 'wdp-next', '→', 'Next')}
+        ${step(at > 0 ? walk[at - 1] : null, 'wdp-prev', '←', 'Previous')}
+        ${step(at >= 0 && at < walk.length - 1 ? walk[at + 1] : null, 'wdp-next', '→', 'Next')}
       </div>
     </div>
     <div class="flex flex-col gap-3 px-3.5 pb-3.5 pt-1">

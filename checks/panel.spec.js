@@ -912,15 +912,41 @@ test(
     expect(new Set(shown), 'every rule in the group survives, and only those')
       .toEqual(new Set(inGroup.map((r) => r.rule)));
 
-    // A query naming one rule hides the rest — but not the heading it lives
-    // under, or a filtered list would stop saying where anything belongs.
+    /*
+     * A query naming one rule hides the rest — but not the headings it lives
+     * under, or a filtered list would stop saying where anything belongs.
+     * There are two of them now: the screen the rule is judged on, and the
+     * story within it. The story heading carries only its last segment, since
+     * the screen above already says the rest.
+     */
     const one = inGroup[0].rule;
     const leaf = one.slice(group.length + 1);
     await box.fill(leaf);
     await expect(rows).toHaveCount(1, { timeout: 1000 });
     await expect(rows.first()).toHaveAttribute('data-rule', one);
-    await expect(list, 'the group heading is still drawn above it')
-      .toContainText(storyOf.get(one));
+
+    const screenIdOf = (r) => r.flow?.at(-1) ?? r.screens?.[0] ?? null;
+    const sid = screenIdOf(inGroup[0]);
+    const sc = (bp.storyboard ?? []).find((x) => x.id === sid);
+    const heads = list.getByTestId('panel.rules-screen');
+    await expect(heads, 'one screen heading, for the one rule left').toHaveCount(1);
+    await expect(heads.first(), 'and it names the screen the rule is judged on')
+      .toContainText(sc ? (sc.title ?? sc.id) : 'No screen');
+    await expect(
+      list.locator('[data-story]'),
+      'the story heading keeps only what the screen does not already say'
+    ).toHaveText(storyOf.get(one).split('.').at(-1));
+
+    /*
+     * And the screen is searchable as well as visible. A heading a reader can
+     * see but not type is a heading that only half exists — and "every rule
+     * judged on this screen" is the question the grouping invites.
+     */
+    if (sc) {
+      const onScreen = bp.rows.filter((r) => screenIdOf(r) === sid);
+      await box.fill(sc.title ?? sc.id);
+      await expect(rows).toHaveCount(onScreen.length, { timeout: 1000 });
+    }
 
     // A query matching nothing says so rather than showing an empty pane.
     await box.fill('zzz-no-such-rule');

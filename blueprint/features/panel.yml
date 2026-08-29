@@ -569,7 +569,7 @@ stories:
 
       - id: panel.rules.search-the-list
         origin: thread:n-0108
-        statement: The rule list carries a search box fixed above it, and typing in it filters the list as you type - a query naming a group keeps every rule in that group, a query naming one rule keeps that rule alone, and the group heading a surviving rule sits under is always drawn, so the hierarchy stays readable while the list is filtered.
+        statement: The rule list carries a search box fixed above it, and typing in it filters the list as you type - a query naming a story keeps every rule in it, a query naming a screen keeps every rule judged on it, a query naming one rule keeps that rule alone, and both headings a surviving rule sits under are always drawn, so the hierarchy stays readable while the list is filtered.
         verify: [checks]
         signoff: [eng, product]
         screens: [review]
@@ -583,9 +583,10 @@ stories:
             - Filtering happens on each keystroke, in the browser, with nothing fetched
             - A query matching a group's name leaves every rule in that group standing
             - A query matching only a rule's own id or statement hides the other rules
-            - Every rule still listed is drawn under its own group heading
+            - A query naming a screen leaves standing every rule judged on that screen
+            - Every rule still listed is drawn under both of its headings - the screen it is judged on and the story it belongs to
             - Emptying the box brings the whole list back
-          statement_hash: sha256:87d61dee919f
+          statement_hash: sha256:f183d0a96302
       - id: panel.rules.tiers-at-a-glance
         origin: thread:n-0109
         statement: Every rule shows one mark per evidence tier - checks then agent - and beside them one dot per role that must sign, so which evidence a rule rests on, and whose signature it is still waiting for, can be read off the list rather than opened one rule at a time.
@@ -605,6 +606,23 @@ stories:
             - Beside the tiers, one slot per role the rule names, in a fixed order, filled to the extent that role has signed
             - One tooltip covers the whole strip and names every tier and every role in words
           statement_hash: sha256:cac7a0be0702
+      - id: panel.rules.grouped-by-screen
+        origin: walkdown
+        statement: The rail is grouped by the screen a rule is judged on, in storyboard order, each screen named as the storyboard names it and wearing the same icon the bar's picker wears - and the story beneath keeps only what the screen has not already said. Rules belonging to no screen are a group of their own at the end, because a blueprint can be a third ledger law and that is read rather than looked at.
+        signoff: [eng, product]
+        screens: [review]
+        steps:
+          given:
+            - A blueprint whose rules span several screens, some of them belonging to no screen at all
+          when:
+            - Reading anchor `panel.rules-list`
+          then:
+            - Each screen is a heading, in the storyboard's own order, carrying the storyboard's own name for it and the screen icon the bar uses
+            - The stories under a screen are labelled by what the screen has not already said, and keep their whole id when two of them would otherwise read the same word
+            - A rule the storyboard does not place is grouped with the others that have none, after every screen
+            - The detail's stepper and the walk move in this order too, so the arrows and Continue follow what the list shows rather than what the file happens to hold
+          statement_hash: sha256:bd6eeb030eaf
+
       - id: panel.rules.headless-says-so
         origin: thread:n-0061
         statement: Opening a rule that has no screen clears the surface under review - an unmistakable cover in walkdown's own voice takes the sheet's place - because a lingering page reads as the rule's screen, and the reviewer cannot tell a right screen from a rule that has none.

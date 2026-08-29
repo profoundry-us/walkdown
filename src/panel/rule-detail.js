@@ -10,7 +10,10 @@ import { openShots } from './shots.js';
 import { S } from './state.js';
 import { api, esc } from './util.js';
 import { tierMarks } from './rules-list.js';
-import { LBL, isHeadless, needsYou, ruleScreen, screenById, shortName, threadsFor, whoAmI } from './vocab.js';
+import {
+  LBL, isHeadless, needsYou, orderedRows, ruleScreen, screenById, shortName, threadsFor,
+  whoAmI,
+} from './vocab.js';
 
 /*
  * Where this rule's check source lives.
@@ -151,7 +154,15 @@ export function detailPane() {
   // Step through the rules in the order the list shows them, without going
   // back to it. The back link keeps its word ("All rules") so the bare
   // arrows beside it read as the stepper rather than as a second way out.
-  const at = S.data.rows.findIndex((x) => x.rule === r.rule);
+  /*
+   * The list groups by screen now, so blueprint order and rail order are two
+   * different sequences. The stepper follows the RAIL - it exists to move
+   * through the rules the way they are shown, and arrows that jumped to
+   * whatever came next in a file would land somewhere the reviewer was not
+   * looking.
+   */
+  const walk = orderedRows();
+  const at = walk.findIndex((x) => x.rule === r.rule);
   const step = (row, cls, glyph, label) =>
     `<div class="tooltip tooltip-left" data-tip="${esc(row ? `${label} rule: ${shortName(row)}` : `No ${label.toLowerCase()} rule`)}">
       <button class="${cls} btn btn-ghost btn-xs" data-testid="detail.stepper" ${row ? `data-goto="${esc(row.rule)}"` : 'disabled'}>${glyph}</button>
@@ -160,8 +171,8 @@ export function detailPane() {
     <div class="flex items-center px-2 pt-2">
       <button class="wdp-back btn btn-ghost btn-xs text-primary" data-testid="detail.back">← All rules</button>
       <div class="ml-auto flex gap-0.5">
-        ${step(at > 0 ? S.data.rows[at - 1] : null, 'wdp-prev', '←', 'Previous')}
-        ${step(at >= 0 && at < S.data.rows.length - 1 ? S.data.rows[at + 1] : null, 'wdp-next', '→', 'Next')}
+        ${step(at > 0 ? walk[at - 1] : null, 'wdp-prev', '←', 'Previous')}
+        ${step(at >= 0 && at < walk.length - 1 ? walk[at + 1] : null, 'wdp-next', '→', 'Next')}
       </div>
     </div>
     <div class="flex flex-col gap-3 px-3.5 pb-3.5 pt-1">
