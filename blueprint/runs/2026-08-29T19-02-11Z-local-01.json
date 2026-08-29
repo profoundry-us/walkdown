@@ -1,0 +1,36 @@
+{
+  "run_id": "2026-08-29T19-02-11Z-local-01",
+  "created": "2026-08-29T19:02:11Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "cf30621-dirty",
+  "blueprint_sha": "cf30621-dirty",
+  "results": [
+    {
+      "rule": "panel.rules.legend-on-demand",
+      "status": "pass",
+      "statement_hash": "sha256:58cbf78e318c",
+      "evidence": [
+        "blueprint/runs/evidence/2026-08-29T19-02-11Z/app-legend-after.png"
+      ],
+      "threads": [
+        "n-0122"
+      ],
+      "reasoning": "Re-judged after the fix for n-0122. The legend now carries eight evidence rows where it carried seven, and the missing one reads 'skipped - a run went past this rule'. skipped no longer shares the dash: it draws its own mark, so the dash means one thing and the legend's line about it is true for every row that wears it. The list is also derived from the mark map now rather than spelled out beside it, so a state added to the rail appears here by construction - which is what the clause about being built from the same vocabulary was asking for, and what the hand-written list quietly stopped delivering. Every other row unchanged."
+    },
+    {
+      "rule": "panel.rules.names-its-screen",
+      "status": "pass",
+      "statement_hash": "sha256:4a90d439391b",
+      "evidence": [
+        "blueprint/runs/evidence/2026-08-29T19-02-11Z/app-unknown-screen-after.png"
+      ],
+      "threads": [
+        "n-0123"
+      ],
+      "reasoning": "Re-judged after the fix for n-0123, with a rule pointed at `no-such-screen` in a disposable copy. The SCREEN row now reads 'no-such-screen - not in the storyboard': the id in the error colour, the reason in plain ink. It says in words what it could previously only imply by being yellow, and it has stopped borrowing the panel's 'waiting on you' channel to do it. Checked that a known screen is untouched - 'The review page' still draws its title with the id chip beside it."
+    }
+  ]
+}

@@ -240,10 +240,20 @@ export function detailPane() {
          */
         const ids = r.flow?.length ? r.flow : (r.screens ?? []);
         const sep = r.flow?.length ? ' → ' : ', ';
+        /*
+         * A screen the storyboard does not carry says so IN WORDS, and wears
+         * the error colour rather than the warning one (n-0123). It used to be
+         * the bare id in warning yellow and nothing else - which a reader who
+         * did not know the convention read as a screen that exists, and which
+         * borrowed the panel's "waiting on you" colour to say something untrue
+         * about who was blocked. Marked by colour is not marked as unknown.
+         */
         const name = (id) => {
           const sc = screenById(id);
-          return `<span class="${sc ? '' : 'text-warning'}">${esc(sc?.title ?? id)}</span>${
-            sc?.title ? ` <code class="rounded bg-base-200 px-1 text-[11px] opacity-70">${esc(id)}</code>` : ''}`;
+          if (!sc) return `<span class="text-error">${esc(id)}</span>
+            <span class="text-[11.5px] opacity-60">— not in the storyboard</span>`;
+          return `<span>${esc(sc.title ?? id)}</span>${
+            sc.title ? ` <code class="rounded bg-base-200 px-1 text-[11px] opacity-70">${esc(id)}</code>` : ''}`;
         };
         return `<div>
           <div class="${LBL} mb-1.5">Screen</div>

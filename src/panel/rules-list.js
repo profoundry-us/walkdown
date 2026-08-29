@@ -126,12 +126,14 @@ export const TIER_MARK = {
   stale: ['~', 'text-warning', 'stale — it passed, then the statement moved'],
   never: ['○', 'text-warning', 'required, but no run has touched it'],
   /*
-   * `skipped` shares the dash with `na` on purpose: a run that skipped this
-   * rule and a rule that never asked for the tier are the same news to
-   * somebody scanning the rail - no verdict, none owed. The tooltip is where
-   * they differ, and it is on every row.
+   * `skipped` had the dash too, on the argument that it and `na` are the same
+   * news to somebody scanning. An agent walkdown disagreed and was right
+   * (n-0122): one glyph for two states meant the legend had to pick which one
+   * to explain, and whichever it picked was a wrong answer for the other. A
+   * run that went past this rule is not the same as a rule that never asked -
+   * the first might run tomorrow.
    */
-  skipped: ['–', 'opacity-40', 'skipped'],
+  skipped: ['⋯', 'opacity-40', 'skipped — a run went past this rule'],
   blocked: ['⊘', 'text-warning', 'blocked'],
   /*
    * The two ways a tier can have no verdict coming. They were one dot for a
@@ -510,7 +512,19 @@ export function wireSearch() {
  * blue dot beside "signed" would read as though blue were part of the answer.
  * Colour is explained in its own line instead.
  */
-const LEGEND_TIERS = ['pass', 'fail', 'stale', 'never', 'blocked', 'unbuilt', 'na'];
+/*
+ * Ordered worst-news-first, then anything the map holds that this list has not
+ * named. Spelling the states out by hand let one go missing - `skipped` was
+ * absent while the rail could still draw it (n-0122) - and a legend that is
+ * silently incomplete is worse than none, because a reader who consults it
+ * and finds nothing concludes the mark means what the nearest row says.
+ * Deriving the tail means a new state appears here the moment it exists.
+ */
+const LEGEND_ORDER = ['pass', 'fail', 'stale', 'never', 'blocked', 'skipped', 'unbuilt', 'na'];
+const LEGEND_TIERS = [
+  ...LEGEND_ORDER.filter((k) => k in TIER_MARK),
+  ...Object.keys(TIER_MARK).filter((k) => !LEGEND_ORDER.includes(k)),
+];
 const LEGEND_SIGNS = ['signed', 'approved', 'stale', 'none', 'sent-back'];
 
 export function legendControl() {

@@ -6,7 +6,7 @@ anchor:
   rule: panel.rules.names-its-screen
   screen: rule-detail
   element: detail.screen
-status: open
+status: addressed
 body: >-
   Agent walkdown 2026-08-29: an unknown screen id is marked only by colour, and
   by the wrong colour.
@@ -34,3 +34,21 @@ body: >-
   a screen id the storyboard does not carry; nothing was written to the real
   ledger to observe it. Evidence:
   blueprint/runs/evidence/2026-08-29T18-28-12Z/app-rule-unknown-screen.png
+replies:
+  - author: agent
+    created: 2026-08-29T19:03:25Z
+    body: >-
+      Fixed, and re-verified by walkdown run 2026-08-29T19-02-11Z-local-01.
+
+
+      The SCREEN row now reads 'no-such-screen - not in the storyboard' - the id
+      in the error colour, the reason beside it in plain ink. It says in words
+      what it previously only implied by being yellow, and it has stopped
+      borrowing the panel's 'waiting on you' channel to say it, which was the
+      part that was actively untrue rather than merely thin.
+
+
+      Re-observed the way the finding was: a rule pointed at a screen id the
+      storyboard does not carry, in a disposable copy of the blueprint. Also
+      checked the case the fix could have broken - a known screen still draws
+      its storyboard title with the id chip beside it.
