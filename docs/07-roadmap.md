@@ -23,7 +23,7 @@ file disagrees with the code, the code is right and this file is out of date.
 
 - **Tickets are an agent's job, not a feature (8).** Ask an agent to read the spec and the
   technical design docs and propose the tickets. This works because the spec is plain text
-  in the repo — no API, no auth, no export — so every downstream artifact is a projection
+  on disk — no API, no auth, no export — so every downstream artifact is a projection
   an agent can produce on demand and re-produce when the spec moves. A spec behind an API
   would need an integration per artifact; a spec in files needs a prompt.
 - **We do not detect work no rule asked for.** Coverage runs one way on purpose. "Does
@@ -35,6 +35,17 @@ file disagrees with the code, the code is right and this file is out of date.
 - **The blueprint says *what*, never *how*.** Technical design documents are generated
   *from* it, never stored *in* it — a rule that specified the implementation could not be
   verified against a different implementation of the same behaviour.
+
+- **Nothing walkdown writes lands in a repository by default (2026-08-29).** Every
+  written path defaults under `~/.walkdown`, and a project opts pieces back in. Adoption
+  should be free and reversible — this repository was 102 MB, 95% of it screenshots
+  walkdown had taken of itself, and a tool that costs that before it has proved its worth
+  is a tool that gets removed. A mature project is still *encouraged* to keep its spec,
+  threads and runs committed, and this one does; the default is out because starting
+  should be cheap, not because staying out is better. See
+  [08-locations.md](08-locations.md), which also replaces `blueprint_sha` with a content
+  hash of the spec — the old field was the repository's HEAD, which moved on commits that
+  never touched the blueprint.
 
 - **One panel delivery (2026-08-26).** The docked layout — the panel injected into the
   application's own document by a script tag — is withdrawn. It was the cheaper path on

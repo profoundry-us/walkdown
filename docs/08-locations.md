@@ -1,0 +1,212 @@
+# 08 — Where things live
+
+## Principle: the project declares *what*, the machine declares *where*
+
+A blueprint says what the project must be true of. A person's machine says where that
+project's files sit on this disk and who is sitting at it. Those are different kinds of
+fact and they belong in different files:
+
+- **`blueprint/walkdown.yml`** — committed, shared, and about the project. What the
+  runner is, which targets exist, where the prototype root is *relative to the blueprint*.
+- **`~/.walkdown/config.yml`** — personal, per-machine, and about this checkout. Where
+  each project's pieces live on this disk, which ports this machine serves on, and who
+  you are.
+
+The personal config may never change what a rule *means* or what counts as evidence. It
+changes locations and identity, nothing else. Break that and `walkdown status` starts
+meaning two different things on two laptops, which is the one failure this whole scheme
+has to avoid.
+
+## Default: walkdown writes nothing into your repository
+
+Every path walkdown *writes* defaults to `~/.walkdown`. A project can opt any of them
+back into its repository, and for a mature project it should (see below) — but nothing
+lands in a working tree because a tool decided it should.
+
+The reason is not tidiness. In this repository, before this change:
+
+| | size | files |
+|---|---|---|
+| `blueprint/runs/evidence/` | **97 MB** | 626 |
+| `blueprint/runs/*.json` | 676 KB | 88 |
+| `blueprint/threads/` | 544 KB | 121 |
+| `blueprint/features/` — *the spec* | 128 KB | 6 |
+
+The repository was 102 MB, of which **95% was screenshots walkdown took of itself**. A
+tool that costs a project a hundred megabytes before it has proved its worth is a tool
+that gets removed. Defaulting out means adopting walkdown is free and reversible: delete
+`~/.walkdown` and your repository is exactly as it was.
+
+## The two homes
+
+**`~/.walkdown/` — personal.** Per machine, per person, never synced, safe to delete. Any
+walkdown state here can be regenerated or is only yours: evidence, drafts, your identity,
+which ports this machine uses.
+
+**The repository — shared.** Reviewed in pull requests, versioned alongside the code it
+describes, and the same for everyone who clones it. Anything here is a claim the team
+makes together.
+
+The question for each artifact is therefore not "is it big?" but **"would a second person
+need to see this?"**
+
+## What each artifact is, and where it starts
+
+| Artifact | Default | Opt into repo | Why |
+|---|---|---|---|
+| Evidence (screenshots) | `~/.walkdown` | discouraged | Binary, unreviewable in a diff, and 95% of the weight. Nobody has ever read one in a pull request. |
+| Run records | `~/.walkdown` | **encouraged** | Small and append-only. In the repo they become the team's shared board. |
+| Threads | `~/.walkdown` | **encouraged** | Human conversation and the reasons behind decisions — the same argument as the spec. |
+| Spec (features, storyboard) | `~/.walkdown` | **strongly encouraged** | Versioned beside the code is the whole premise: a spec that drifts from its build is the problem walkdown exists to solve. |
+| Drafts (a sitting in progress) | `~/.walkdown` | never | Half-finished judgment belonging to one person at one moment. |
+| Prototype | wherever it is | — | Design owns it and may keep it in another repository entirely. |
+| Identity and roles | `~/.walkdown` | never | About a person, not a project. |
+| This machine's target URLs | `~/.walkdown` | never | The blueprint declares the address the project means; the machine declares the port it happens to be serving on. |
+
+## Opting in, and why you eventually should
+
+A blueprint kept outside the repository still works completely — but it gives up three
+things, and they are the three the tool was built for:
+
+1. **Review.** A change to a rule is a change to what the team agreed to build. In the
+   repository it arrives as a diff somebody approves. Outside it, it arrives silently.
+2. **Atomicity.** "This commit changes the rule and the code that satisfies it" is a
+   sentence you can only write when both are in one commit.
+3. **History.** `git blame` on a statement answers *when did we decide this, and why*.
+
+So the recommended end state for a project that has decided to keep walkdown is: **spec
+and threads in the repository, runs in the repository, evidence outside it.** That is the
+shape this project itself uses — walkdown's own blueprint is committed, and it is the
+worked example of the configuration below.
+
+The default is out because adoption should be free, not because staying out is better.
+
+## `~/.walkdown/config.yml`
+
+```yaml
+identity:
+  username: topher          # what records are written under, forever
+  name: Topher Fangio       # what the UI shows; recorded nowhere
+  roles: [eng, product]     # the roles this person may sign for
+
+defaults:
+  # {id} is the project id below. These are where a project's pieces go
+  # unless the project names somewhere else.
+  spec:     ~/.walkdown/projects/{id}/blueprint
+  runs:     ~/.walkdown/projects/{id}/runs
+  threads:  ~/.walkdown/projects/{id}/threads
+  evidence: ~/.walkdown/projects/{id}/evidence
+  drafts:   ~/.walkdown/projects/{id}/drafts
+
+projects:
+  - id: walkdown
+    # Which working trees this project answers for. `walkdown` run from
+    # anywhere inside one of these resolves to this project.
+    roots: [~/Development/profoundry/walkdown]
+    # This project keeps its spec, threads and runs in the repository —
+    # the recommended shape. Evidence stays out.
+    spec:    ~/Development/profoundry/walkdown/blueprint
+    threads: ~/Development/profoundry/walkdown/blueprint/threads
+    runs:    ~/Development/profoundry/walkdown/blueprint/runs
+    targets:
+      local: { base_url: http://localhost:4700 }   # this machine's port, not the team's
+```
+
+Resolution order for any path, first hit wins:
+
+1. an explicit flag (`--dir`, `--runs`)
+2. the matching `projects[]` entry
+3. `defaults`, with `{id}` substituted
+4. the built-in `~/.walkdown/projects/{id}/…`
+
+A project is matched by walking up from the working directory until a `roots` entry
+matches. Failing that, a `blueprint/walkdown.yml` found by the existing search still wins
+— an in-repo blueprint keeps working with no personal config at all, which is what makes
+this backwards compatible.
+
+### Project ids
+
+The id is the key for everything above, so it has to be stable across time and
+meaningless to no one. In order of preference:
+
+1. `project:` from the blueprint's own `walkdown.yml` — already exists and is already
+   the project's name for itself.
+2. Failing that, the basename of the root, slugified.
+3. On collision, the id gains a short suffix from the root path's hash, and the config
+   records it explicitly so it never moves again.
+
+Ids are written into `config.yml` on first use rather than derived fresh each time. A
+derived id that quietly changes when a directory is renamed would orphan a project's
+whole ledger.
+
+## Identifying a spec: a content hash, not a git sha
+
+Runs currently carry `git_sha` and `blueprint_sha`, and both are set to the same thing:
+the repository's HEAD. That conflates two questions, and outside a repository it answers
+neither.
+
+- **`git_sha`** — *what code was running?* Keep it, when there is a repository. Omit it
+  when there is not.
+- **`spec_hash`** — *which version of the spec was this run made against?* This should be
+  a hash of the spec's own content, and it should be that whether or not the spec lives in
+  a repository.
+
+A content hash is a small amount of work, because the machinery already exists.
+`lib/hash.js` is thirty lines and already canonicalizes text before hashing so that
+re-wrapped YAML and folded scalars hash identically. A spec hash is the same idea one
+level up:
+
+- take the blueprint's own files — `walkdown.yml`, `storyboard.yml`, `features/*.yml`
+- sort by path relative to the blueprint root, so directory order cannot change the answer
+- feed each as `<relative path>\n<canonicalized content>\n` into one sha256
+- store it truncated, in the same `sha256:…` form rules already use
+
+Runs, threads, drafts and evidence are **not** part of it. They are what the spec produces,
+not the spec.
+
+This is worth doing even for projects that keep everything in the repository, because
+`blueprint_sha` is wrong today in a way nobody has noticed: it changes on every commit,
+including commits that do not touch the blueprint. It can tell you *when* a run happened
+but not *what it was judged against*, which is the only thing it was ever for. Per-rule
+`statement_hash` is unaffected — that answers a narrower question (has this rule's wording
+moved?) and keeps answering it.
+
+## Signing for more than one role
+
+Acceptance is per role, and one person may hold several. The common shape today is an
+engineer running the walkdown with the product person beside them, talking through each
+rule and signing for both at once; on a single-person project the same person is simply
+both. Both are recorded honestly: the run carries the roles its signer was acting in, and
+`identity.roles` above is the list of roles this person may claim.
+
+The boundary is that a person claims only roles they actually hold. Recording product's
+signature when product was not there and did not agree is exactly the lie the role model
+exists to prevent — it is not made honest by being convenient.
+
+## Migration
+
+Existing projects keep working untouched: an in-repo `blueprint/` is still found by the
+directory search, with or without a personal config. For a project that wants to move:
+
+- `walkdown where` prints every resolved path and which rule resolved it
+- `walkdown move <what> --to <where>` relocates one kind of artifact and rewrites the
+  config, leaving the ledger's contents alone — a run record is never edited, and moving
+  the file it lives in is not editing it
+
+Evidence paths inside existing run records are relative to the blueprint root, so moving
+evidence needs a rewrite of those paths or a resolver that tries the configured evidence
+root first. The resolver is the better answer: it leaves the append-only ledger genuinely
+untouched.
+
+## What the setup wizard reads
+
+The wizard is a later document, but it exists to write exactly this file. It should ask
+four things and nothing else:
+
+1. Who are you, and which roles may you sign for?
+2. Where is this project's spec, or shall I make one?
+3. Keep the spec and its conversations in the repository? *(recommend yes, explain why)*
+4. Which ports does this machine serve on?
+
+Everything else has a defensible default, and a wizard that asks about a defensible
+default is a wizard people cancel.
