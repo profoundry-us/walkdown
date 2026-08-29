@@ -171,6 +171,88 @@ but not *what it was judged against*, which is the only thing it was ever for. P
 `statement_hash` is unaffected — that answers a narrower question (has this rule's wording
 moved?) and keeps answering it.
 
+### The code's sha, when the spec has moved away from it
+
+`git_sha` is computed by shelling out to `git rev-parse` in a directory, so it does not
+care where the blueprint lives — only which directory it is asked about. That is what
+`roots:` is for: it names the working trees a project answers for, so the sha describes
+**the code under test** while `spec_hash` describes the spec, wherever that sits.
+
+A dirty tree is the common case, not the edge one: most runs happen mid-edit. Today such a
+run records `abc123-dirty`, which means "some unknown superset of `abc123`" — you cannot
+check it out, and you cannot tell two dirty runs apart. So runs also carry:
+
+```
+tree_hash: sha256 of `git diff HEAD`, when the tree is dirty
+```
+
+Three lines, no new failure modes, and it answers the question people actually ask — *were
+these two runs against identical code?* — rather than the rarer *can I reconstruct exactly
+what ran?* (`git stash create` would answer that one, by minting a real commit object for
+the dirty tree without touching HEAD or the index, but it writes objects that then need a
+retention policy, for a case that comes up seldom.)
+
+**There is no post-commit hook, and there will not be one.** The hook people reach for
+would go back and re-stamp earlier runs with the commit that eventually contained them —
+which is editing the ledger, and `status.derived.latest-wins` says no run file is ever
+edited or deleted. A hook could legally *append* a record sealing "runs X to Y became
+`abc123`", but that is bookkeeping nobody reads. Hooks are also per-clone and silently
+absent when they fail, which this project has already been bitten by once.
+
+## Currency: what makes a verdict stop counting
+
+`git_sha` and `tree_hash` are **provenance, not currency**. They answer *where do I go and
+look?* They must never be what decides whether a verdict still counts, because most commits
+do not touch the code any particular rule depends on — drive staleness from a repository
+sha and every commit invalidates every rule at once, and a board that is entirely stale is
+a board nobody reads.
+
+Currency is decided per cell, and each cell has its own conditions:
+
+| Cell | Stops counting when |
+|---|---|
+| A checks verdict | the statement moves, or the check that produced it moves |
+| An agent verdict | the statement moves, or a sweep names the tier |
+| A role's signature | the statement moves |
+
+The statement half exists today. The sweep exists. The check half is the roadmap's
+*staleness in both directions*: have the run record carry the hash of the check that
+produced the verdict, the way it already carries `statement_hash`.
+
+Note what is **not** in that table: a code change invalidates nothing by itself. If a
+change breaks something a check can see, the check fails the next time it runs. If it
+breaks something no check can see, no hash was ever going to notice — which is what the
+agent tier and sweeps are for.
+
+### What a green check licenses, and what it does not
+
+It is tempting to read the table above as: *if the check still passes, the code cannot have
+broken the rule, so the signature stands.* That is right to exactly the extent the check
+covers the rule, and walkdown deliberately never assumes it does. A check covers **what it
+asserts**; a statement is almost always broader — anything phrased as *reads as*, *stands
+out*, *is legible*, or *is not mistaken for* has a part no assertion reaches.
+
+This project has a worked example. `panel.rules.tiers-at-a-glance` carried a check that
+asserted every tier mark and every signature slot against the ledger's own answer. It
+passed continuously while a stale signature was being drawn as a slightly smaller version
+of a current one — unreadable in the only situation that matters, a slot with no neighbour
+to compare against. The check could not see it, because both shapes were structurally
+distinct and the defect was that they differed only in degree. A person looking at the
+board found it. The check that now guards it had to be written to assert something a DOM
+comparison *can* see — that no two states differ only in size — and even that is a proxy.
+
+So: a green check means the asserted part still holds. It is not a claim about the rest,
+which is why `ownership.evidence.same-surface` refuses a check the right to claim a rule
+whose behaviour it does not exercise, and why the cheapest tier is described there as the
+one most able to lie. It is also why the agent tier is assumed on every rule rather than
+opted into — see [00-vision.md](00-vision.md) on the ladder. The tiers exist *because* a
+check does not cover a statement.
+
+The safety valve is the one that needs no machinery: **a person can fail any rule at any
+time.** The ledger is append-only and latest-wins, so somebody who notices a rule is broken
+records a fail and the board says so from that moment. No staleness rule has to predict it,
+and none of the hashing above is trying to.
+
 ## Signing for more than one role
 
 Acceptance is per role, and one person may hold several. The common shape today is an
