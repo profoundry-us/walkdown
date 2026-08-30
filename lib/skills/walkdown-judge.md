@@ -23,10 +23,10 @@ verify requirement).
 
    **Judging something that writes? Take a scratch copy.** A rule saying the
    panel refuses a thread is judged by making it refuse, and pressing that
-   button files a thread. Serve a disposable blueprint instead of the real one:
-
-       node tools/scratch.mjs new judge-<what> --why "..."
-       node bin/walkdown.js serve --dir .walkdown/tmp/judge-<what>/blueprint
+   button files a thread. Serve a disposable copy of the blueprint instead of
+   the real one — copy it to a temporary directory, serve that with `--dir`,
+   and delete it when the judging is done. (walkdown's own repository has
+   `tools/scratch.mjs` for this, which stamps each copy and reaps it.)
 
    Verdicts still go in the real ledger — the copy is for the app under
    judgment, never for the record of it.
@@ -77,11 +77,12 @@ verify requirement).
    `walkdown status` — confirm the AGENT column updated. Report what passed,
    what failed and why, and what now awaits a human.
 
-   **Take your scratch space away**: `node tools/scratch.mjs clean <label>`.
-   Six abandoned copies once sat unnoticed for weeks because each one was made
-   by an agent that finished its report and stopped. Cleaning up is part of
-   finishing, not a courtesy — run `node tools/scratch.mjs list` before you
-   report, and say plainly if you are leaving one behind and why.
+   **Delete any scratch copy you made.** Six abandoned copies once sat
+   unnoticed for weeks because each one was made by an agent that finished its
+   report and stopped. Cleaning up is part of finishing, not a courtesy — check
+   before you report, and say plainly if you are leaving one behind and why.
+   (In walkdown's own repository: `node tools/scratch.mjs clean <label>`, and
+   `list` to see what else is lying about.)
 
 Never write `human` verdicts, never set threads to `verified`/`waived`, and
 never "re-judge" a fail into a pass without the underlying change actually

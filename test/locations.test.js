@@ -18,7 +18,15 @@ function scratch() {
   const home = join(root, 'home');
   mkdirSync(home, { recursive: true });
   process.env.WALKDOWN_HOME = home;
-  return { root, home, cleanup: () => rmSync(root, { recursive: true, force: true }) };
+  /*
+   * And the SKILLS home, which is a second door to the same room: skills
+   * install to the person's own ~/.claude/skills by default, so a test that
+   * pinned only WALKDOWN_HOME still wrote five directories into whoever ran
+   * it. Observed, not theorised - it happened here on 2026-08-30.
+   */
+  const skills = join(root, 'skills');
+  process.env.WALKDOWN_SKILLS_DIR = skills;
+  return { root, home, skills, cleanup: () => rmSync(root, { recursive: true, force: true }) };
 }
 
 function blueprint(at, { project = 'demo', dirs = [] } = {}) {
@@ -279,6 +287,7 @@ test('the same words in a different feature file are a different spec @rule:loca
 const CLI = new URL('../bin/walkdown.js', import.meta.url).pathname;
 const walkdown = (home, args) =>
   execFileSync(process.execPath, [CLI, ...args], { env: { ...process.env, WALKDOWN_HOME: home } }).toString();
+  // WALKDOWN_SKILLS_DIR rides along in process.env, pinned by scratch().
 
 /* Every path in the tree, so a test can say "and nothing else appeared". */
 function tree(dir, prefix = '') {
@@ -304,11 +313,9 @@ test('a fresh project gets nothing in its tree but conventions and a pointer @ru
     writeFileSync(join(repo, 'src', 'app.js'), '// theirs\n');
     walkdown(s.home, ['init', '--dir', repo]);
 
-    const paths = tree(repo);
-    assert.deepEqual(paths.filter((p) => !p.startsWith('.claude/') && !p.startsWith('src/')),
-      ['.claude', 'CLAUDE.md', 'src'],
-      'the pointer and the skills, and not one directory of walkdown furniture');
-    assert.ok(!paths.some((p) => /^(blueprint|runs|threads|drafts)/.test(p)), paths.join(' '));
+    assert.deepEqual(tree(repo), ['CLAUDE.md', 'src', 'src/app.js'],
+      'one file: the pointer. Not a directory of walkdown furniture, not even the skills');
+    assert.ok(existsSync(join(s.skills, 'walkdown-judge', 'SKILL.md')), 'which went to the person');
 
     // And everything it will write is under the personal home, filed by project.
     const loc = resolveLocations({ cwd: repo });

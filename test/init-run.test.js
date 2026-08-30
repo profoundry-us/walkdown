@@ -1,14 +1,19 @@
 import assert from 'node:assert/strict';
-import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
 import { loadBlueprint } from '../lib/blueprint.js';
-import { placePointer, pointerBlock, scaffold } from '../lib/init.js';
+import { installSkills, placePointer, pointerBlock, scaffold, skillFiles } from '../lib/init.js';
 import { lint } from '../lib/lint.js';
 import { runChecks } from '../lib/run-cmd.js';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-initrun-'));
+
+/* Every path in a tree, so a test can say "and nothing else appeared". */
+const tree = (dir, prefix = '') => readdirSync(dir, { withFileTypes: true })
+  .sort((a, b) => a.name.localeCompare(b.name))
+  .flatMap((e) => [prefix + e.name, ...(e.isDirectory() ? tree(join(dir, e.name), prefix + e.name + '/') : [])]);
 after(() => rmSync(root, { recursive: true, force: true }));
 
 test('init scaffolds a lint-clean blueprint with agent conventions', () => {
@@ -40,9 +45,11 @@ test('init is idempotent: rerun no-ops, customizations kept, --force updates own
   const proj = join(root, 'fresh'); // scaffolded by the previous test
   const actionOf = (rs, path) => rs.find((r) => r.path === path)?.action;
   const rerun = scaffold(proj);
-  // Every file is up to date; the last entry only reports where the spec is.
+  // Every file is up to date; the last two entries only report where the spec
+  // and the skills went.
   assert.ok(
-    rerun.every((r) => r.action === 'up-to-date' || r.action.startsWith('spec-')),
+    rerun.every((r) => r.action === 'up-to-date'
+      || r.action.startsWith('spec-') || r.action.startsWith('skills-')),
     JSON.stringify(rerun),
   );
 
@@ -120,6 +127,48 @@ test('a moved spec rewrites its own block and nothing around it @rule:locations.
   assert.equal(after.match(/walkdown:begin/g).length, 1, 'replaced, not appended');
   assert.match(after, /^# Head/);
   assert.match(after, /## Tail\n$/, "the person's own words survive on both sides");
+});
+
+/*
+ * Skills are procedures a person carries between projects, not records this
+ * project owns - so by default they go to the person, and the repository of
+ * somebody merely trying walkdown gains nothing but the pointer.
+ */
+test('skills follow the spec: outside it by default, committed when it is @rule:locations.default.skills-are-yours-by-default', () => {
+  const home = join(root, 'skills-home');
+  const proj = join(root, 'skills-out');
+  mkdirSync(proj, { recursive: true });
+  const outside = join(root, 'away', 'blueprint');
+  scaffold(proj, { specDir: outside, skills: home });
+
+  assert.ok(existsSync(join(home, 'walkdown-judge', 'SKILL.md')), 'the person got them');
+  assert.equal(existsSync(join(proj, '.claude')), false, 'and the repository did not');
+  assert.deepEqual(tree(proj), ['CLAUDE.md'], 'one file, which is the pointer');
+
+  // Committed spec, committed procedures - they should arrive with a clone.
+  const shared = join(root, 'skills-in');
+  mkdirSync(shared, { recursive: true });
+  const results = scaffold(shared, { specDir: join(shared, 'blueprint') });
+  assert.ok(existsSync(join(shared, '.claude', 'skills', 'walkdown-judge', 'SKILL.md')));
+  assert.equal(results.find((r) => r.action.startsWith('skills-'))?.action, 'skills-in-repo');
+});
+
+test('a skill whose harness only walkdown has is not shipped @rule:locations.default.skills-are-yours-by-default', () => {
+  const names = skillFiles().map((s) => s.name);
+  assert.ok(names.includes('walkdown-judge') && names.includes('walkdown-setup'));
+  assert.ok(!names.includes('walkdown-sitting'),
+    'it drives tools/sitting.mjs, which an adopting project does not have');
+});
+
+test('an edited skill is kept unless forced @rule:locations.default.skills-are-yours-by-default', () => {
+  const into = join(root, 'skills-edited');
+  installSkills(into);
+  const mine = join(into, 'walkdown-judge', 'SKILL.md');
+  writeFileSync(mine, '# mine now\n');
+  assert.equal(installSkills(into).find((r) => r.path === mine).action, 'kept-differs');
+  assert.equal(readFileSync(mine, 'utf8'), '# mine now\n', 'a procedure somebody edited was meant');
+  assert.equal(installSkills(into, { force: true }).find((r) => r.path === mine).action, 'updated');
+  assert.match(readFileSync(mine, 'utf8'), /^---\nname: walkdown-judge/);
 });
 
 test('run substitutes {id}, injects target env and WALKDOWN_TARGET, propagates exit code', () => {

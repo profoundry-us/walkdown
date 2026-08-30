@@ -40,13 +40,41 @@ panel riding beside the running app and rendering those same files.
 | [05-runs-ledger.md](docs/05-runs-ledger.md) | Verification runs, walkdowns, derived status |
 | [06-prototype-contract.md](docs/06-prototype-contract.md) | What a prototype must carry, and who owns it |
 | [07-roadmap.md](docs/07-roadmap.md) | Which problems are solved, what is next, what we decided not to do — a dated snapshot |
+| [08-locations.md](docs/08-locations.md) | Where a project's spec and records live, and why the default is outside the repository |
+| [09-delivery.md](docs/09-delivery.md) | How walkdown arrives: the clone, the one dependency, the skills, the extension |
+
+## Install
+
+walkdown is not on a registry yet, and does not need one. It runs from a clone:
+
+```
+git clone https://github.com/profoundry-us/walkdown.git ~/.walkdown/walkdown
+cd ~/.walkdown/walkdown && npm install --omit=dev
+```
+
+That install is exactly one package — `yaml`. The panel bundle and the stylesheet are
+committed, so nothing else is needed to run; rollup, tailwind and playwright are
+build-time only. Then:
+
+```
+walkdown skills                      # the agent procedures, into ~/.claude/skills
+walkdown init --dir <your-project>   # spec, ledger and pointer — outside your repo by default
+```
+
+Or hand the whole thing to an agent: **"visit https://walkdown.dev/setup and set walkdown
+up for this project"** — [site/setup.md](site/setup.md) is written to be followed, and the
+`walkdown-setup` skill takes it from there. [docs/09-delivery.md](docs/09-delivery.md) has
+the reasoning, including what it would take to remove the last package.
 
 ## CLI
 
 The first tooling slice — the two commands the hand-run milestone showed matter most:
 
 ```
-walkdown init [--dir <project-root>]
+walkdown init [--dir <project-root>] [--in-repo]
+walkdown skills [--into <dir>] [--project] [--force]
+walkdown where [<kind>] [--dir <blueprint>] [--json]
+walkdown pointer [--dir <project-root>] [--into <file>]
 walkdown run [--target <name>] [--rule <id>]
 walkdown status [<rule-id>] [--dir <blueprint>] [--target <name>] [--json]
 walkdown lint [--dir <blueprint>] [--no-checks] [--json]

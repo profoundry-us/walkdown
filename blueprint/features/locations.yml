@@ -18,7 +18,7 @@ stories:
           when:
             - walkdown is initialised and a run, a thread and a draft are recorded
           then:
-            - Nothing appears in the working tree but the agent conventions and the pointer
+            - Nothing appears in the working tree but the pointer saying where the spec is - not the spec, not the records, not even the skills
             - Every record is under the personal home, filed by project
             - Deleting that one directory removes everything walkdown made
           statement_hash: sha256:0f57ef142318
@@ -53,6 +53,23 @@ stories:
             - Evidence and drafts still resolve outside
             - The command reports which of the two happened, in words, and how to change its mind later
           statement_hash: sha256:bbc38bb440e9
+
+      - id: locations.default.skills-are-yours-by-default
+        origin: prd
+        statement: The agent procedures walkdown ships install into the person's own skills directory, where they work in every project on the machine and add nothing to any repository - and a project that commits its spec gets them committed beside it instead, because skills follow the spec for the same reason its runs and threads do. A procedure whose harness the receiving project does not have is not shipped at all.
+        verify: [checks]
+        signoff: [eng, product]
+        steps:
+          given:
+            - A project being set up, and a machine with a personal skills directory
+          when:
+            - The skills are installed, either by init or on their own
+          then:
+            - With the spec outside the repository they land in the person's own directory and the tree gains nothing
+            - With the spec committed they land in the repository, to arrive with a clone
+            - A skill that depends on a harness only walkdown's own repository has is not among them
+            - A copy the person has edited is kept and reported rather than overwritten
+          statement_hash: sha256:62223922d07f
 
   - id: locations.answer
     title: Anyone can ask where this project's pieces are

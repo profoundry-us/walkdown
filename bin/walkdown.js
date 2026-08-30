@@ -32,6 +32,7 @@ Usage:
   walkdown where [<kind>] [--dir <blueprint>] [--json]
   walkdown move <kind> --to <path> [--dir <blueprint>]
   walkdown pointer [--dir <project-root>] [--into <file>]
+  walkdown skills [--into <dir>] [--project] [--force]
 
 Commands:
   init    Scaffold blueprint/ in a project: config, storyboard, feature
@@ -79,6 +80,12 @@ Commands:
           project's own business - CLAUDE.md, AGENTS.md, a pack-level file in
           a monorepo - so walkdown asks rather than assuming. Idempotent: it
           replaces its own marked block and touches no other line.
+  skills  Install the agent procedures walkdown ships - formulate, judge,
+          incorporate, backlog, setup. Default is your own skills directory
+          (~/.claude/skills), where they work in every project and add nothing
+          to any repository; --project puts them in ./.claude/skills instead,
+          to be committed and shared. A copy you have edited is kept, not
+          overwritten, unless you pass --force.
   serve   Start the local viewer: status board, side-by-side prototype/app
           with the embed (pinning), and human walkdown recording. Also
           serves /embed.js and the pin/walkdown API.
@@ -792,12 +799,16 @@ async function cmdInit(args) {
     'pointer-appended': green('+ appended'),
     'pointer-updated': green('~ pointer updated'),
     'pointer-undecided': yellow('? several agent files — `walkdown pointer --into <file>`'),
+    'skills-in-repo': dim('· skills'),
+    'skills-personal': dim('· skills'),
     'up-to-date': dim('· up to date'),
     kept: dim('· kept'),
     'kept-differs': yellow('! kept (differs from packaged — --force to update)'),
   };
+  const summary = (r) => r.action.startsWith('spec-') || r.action.startsWith('skills-');
   const placed = results.filter((r) => r.action.startsWith('spec-'));
-  for (const r of results.filter((r) => !r.action.startsWith('spec-')))
+  const skills = results.find((r) => r.action.startsWith('skills-'));
+  for (const r of results.filter((r) => !summary(r)))
     console.log(`  ${MARK[r.action] ?? r.action}  ${r.path}`);
 
   /*
@@ -819,6 +830,19 @@ async function cmdInit(args) {
     if (outside)
       console.log(dim('  Prefer it committed? `walkdown init --in-repo`, or move it later'
         + ' with `walkdown move`.'));
+  }
+  /*
+   * And where the procedures went, which is the other half of "what did this
+   * just do to my repository". Skills follow the spec, so this line is usually
+   * a consequence of the one above rather than a separate decision - but it is
+   * the line a person scans for when they are worried about the answer.
+   */
+  if (skills) {
+    console.log(`\n  skills: ${skills.path}`);
+    console.log(dim(skills.action === 'skills-in-repo'
+      ? '  In the repository, so a clone brings them. `walkdown skills` re-installs them anywhere.'
+      : '  Yours, not this project\'s — they work in every project on this machine, and this'
+        + ' repository gets nothing. `walkdown skills --project` commits them here instead.'));
   }
   if (results.some((r) => r.action === 'created')) {
     const cfg = join(where?.path ?? 'blueprint', 'walkdown.yml');
@@ -865,6 +889,41 @@ async function cmdPointer(args) {
     ? `\n${dim(`Agent files here: ${homes.join(', ')}. `)}`
       + dim('`--into <file>` puts the block in one, idempotently.')
     : `\n${dim('No agent-instruction file here yet. `--into CLAUDE.md` makes one.')}`);
+}
+
+/*
+ * Skills are procedures a person carries, not records a project owns - so the
+ * default is the person's own directory and no repository is touched at all.
+ * This is the whole install for a team whose registry will not have walkdown
+ * in it: clone once, point the skills at your home, and every project on the
+ * machine has them.
+ */
+async function cmdSkills(args) {
+  const { values } = parseArgs({
+    args,
+    options: {
+      into: { type: 'string' },
+      project: { type: 'boolean', default: false },
+      force: { type: 'boolean', default: false },
+    },
+  });
+  const { installSkills } = await import('../lib/init.js');
+  const { skillsHome } = await import('../lib/locations.js');
+  const into = values.into ? resolve(values.into)
+    : values.project ? join(process.cwd(), '.claude', 'skills')
+    : skillsHome();
+
+  const MARK = {
+    created: green('+ created'), updated: green('~ updated'),
+    'up-to-date': dim('· up to date'),
+    'kept-differs': yellow('! kept (yours differs — --force to overwrite)'),
+  };
+  for (const r of installSkills(into, { force: values.force }))
+    console.log(`  ${MARK[r.action] ?? r.action}  ${r.path}`);
+  console.log(`\n  ${into}`);
+  console.log(dim(into.startsWith(process.cwd() + '/')
+    ? '  In the repository, so a clone brings them. Commit them with the spec.'
+    : '  Your own skills directory — every project on this machine, and nothing added to any of them.'));
 }
 
 async function cmdRun(args) {
@@ -972,6 +1031,7 @@ else if (cmd === 'claims') cmdClaims(rest);
 else if (cmd === 'where') cmdWhere(rest);
 else if (cmd === 'move') cmdMove(rest);
 else if (cmd === 'pointer') cmdPointer(rest);
+else if (cmd === 'skills') cmdSkills(rest);
 else {
   console.log(HELP);
   process.exit(cmd && cmd !== 'help' && cmd !== '--help' ? 2 : 0);
