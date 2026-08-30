@@ -32,7 +32,8 @@ Append-only: a run is never edited, and new runs never conflict in git.
   "target": "staging",
   "base_url": "https://staging.acme.com",
   "git_sha": "abc1234",
-  "blueprint_sha": "def5678",
+  "tree_hash": "sha256:b1da9878a57a",
+  "spec_hash": "sha256:cf08d9733bba",
   "results": [
     {
       "rule": "checkout.guest.email-required",
@@ -63,9 +64,15 @@ Fields of note:
   review; the port a harness binds to stand one up is not part of that. Where the two
   genuinely differ — a review app at an address the blueprint does not carry — the run
   says so by recording that address explicitly.
-- **`git_sha`** and **`blueprint_sha`**: what code and what version of the spec were
-  verified — provenance for humans digging into a run. An unclean working tree records
-  `<sha>-dirty`; formatters omit the fields entirely outside a git repo.
+- **`git_sha`**, **`tree_hash`** and **`spec_hash`**: what code and what spec were
+  verified — provenance for humans digging into a run, and never what decides whether a
+  verdict still counts (see [08-locations.md](08-locations.md)). `git_sha` is the
+  repository holding the code, omitted where there is none; an unclean tree records
+  `<sha>-dirty` and adds `tree_hash`, a hash of `git diff HEAD`, so two runs made
+  mid-edit can be told apart. `spec_hash` is a content hash of the blueprint's own files
+  and works with or without a repository. It replaces `blueprint_sha`, which was the
+  repository's HEAD and so moved on every commit, including the many that never touched
+  the blueprint — it could say when a run happened but not what it was judged against.
 - **`statement_hash`** per result: the hash of the rule statement *as it was when
   verified* (formatters emit it automatically). This is what powers staleness: a pass
   whose recorded hash no longer matches the rule's current statement is displayed as

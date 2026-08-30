@@ -114,15 +114,38 @@ projects:
 
 Resolution order for any path, first hit wins:
 
-1. an explicit flag (`--dir`, `--runs`)
+1. an explicit flag (`--dir`, and per-kind overrides)
 2. the matching `projects[]` entry
-3. `defaults`, with `{id}` substituted
-4. the built-in `~/.walkdown/projects/{id}/…`
+3. **a directory the blueprint already has** — `blueprint/runs`, `blueprint/threads`,
+   `blueprint/drafts`, `blueprint/runs/evidence`
+4. `defaults`, with `{id}` substituted
+5. the built-in `~/.walkdown/projects/{id}/…`
+
+Rule 3 is the one that keeps an upgrade from being a data loss, and it deliberately
+outranks `defaults`: a blanket default is a *preference*, and an existing ledger is a
+*fact*. A preference must never silently point past one — moving a ledger is a decision
+somebody makes, not something a config file does on their behalf.
+
+The test in rule 3 is **exists**, not "holds records". `drafts` is created empty but for a
+`.gitignore` and the writers still write there, so a resolver that required records would
+name a location nothing uses — and a `walkdown where` that is confidently wrong is worse
+than no `walkdown where` at all.
+
+For the spec itself, rule 3 is instead the existing upward search for
+`blueprint/walkdown.yml`: an in-repo blueprint keeps working with no personal config at
+all, which is what makes this backwards compatible.
 
 A project is matched by walking up from the working directory until a `roots` entry
-matches. Failing that, a `blueprint/walkdown.yml` found by the existing search still wins
-— an in-repo blueprint keeps working with no personal config at all, which is what makes
-this backwards compatible.
+matches.
+
+### Where this stands
+
+`walkdown where` prints the resolver's answer for every path, with the reason each was
+chosen, and writes nothing. The **writers are not rewired yet** — `run-record.js`,
+`threads.js` and `draft.js` still compose their own paths from the blueprint directory. For
+any project whose blueprint already holds those directories, which is every project
+`walkdown init` has ever created, the two agree exactly. They diverge only for a project
+that has none of them yet, and closing that gap is what rewiring the writers means.
 
 ### Project ids
 

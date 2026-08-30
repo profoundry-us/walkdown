@@ -6,6 +6,7 @@ import { parseArgs } from 'node:util';
 import { collectRules, findBlueprintDir, loadBlueprint } from '../lib/blueprint.js';
 import { blueprintForUrl, claimsOf, findCollisions } from '../lib/claims.js';
 import { listDrafts } from '../lib/draft.js';
+import { KINDS, resolveLocations } from '../lib/locations.js';
 import { runHashCommand } from '../lib/hash-cmd.js';
 import { writeSweep } from '../lib/run-record.js';
 import { lint } from '../lib/lint.js';
@@ -28,6 +29,7 @@ Usage:
                        [--reason <text>] [--actor <name>] [--dir <blueprint>] [--json]
   walkdown serve [--dir <blueprint>] [--port <n>]
   walkdown claims [--dir <blueprint>] [--url <address>] [--json]
+  walkdown where [--dir <blueprint>] [--json]
 
 Commands:
   init    Scaffold blueprint/ in a project: config, storyboard, feature
@@ -60,6 +62,10 @@ Commands:
           "waived" require a named human actor — never "agent". Waiving and
           reopening require --reason (recorded as a reply). Actor defaults
           to WALKDOWN_ACTOR or the OS username.
+  where   Print where this project's pieces live and why each was chosen -
+          the spec, the runs, the threads, the evidence, the drafts, and the
+          repository a run's git_sha comes from. Reads nothing but the
+          personal config and the working tree, and writes nothing at all.
   serve   Start the local viewer: status board, side-by-side prototype/app
           with the embed (pinning), and human walkdown recording. Also
           serves /embed.js and the pin/walkdown API.
@@ -108,6 +114,42 @@ function loadOrExit(dirOpt) {
  * It lives outside `lint` on purpose - lint validates ONE blueprint, and this
  * is only visible across the set.
  */
+/*
+ * `walkdown where`: the resolver's answer, in the order a person reads it.
+ *
+ * The reason each path was chosen is printed beside it, because the interesting
+ * question is never only "where" but "why there" - a path that came from a
+ * config, from the working tree, or from a default are three different
+ * situations, and only one of them is somebody's decision.
+ */
+function cmdWhere(args) {
+  const { values } = parseArgs({
+    args, options: { dir: { type: 'string' }, json: { type: 'boolean', default: false } },
+  });
+  const loc = resolveLocations({ dir: values.dir });
+  if (values.json) { console.log(JSON.stringify(loc, null, 2)); return end(0); }
+
+  console.log(`walkdown where — ${loc.id}\n`);
+  const cfg = loc.config.exists
+    ? (loc.config.error ? red(`unreadable — ${loc.config.error}`)
+      : loc.config.matched ? green('names this project') : dim('present, no entry for this project'))
+    : dim('not present — every default applies');
+  console.log(`  ${'config'.padEnd(9)} ${loc.config.path}`);
+  console.log(`  ${''.padEnd(9)} ${cfg}\n`);
+
+  const row = (label, cell) => {
+    const missing = cell.missing ? yellow('  (does not exist yet)') : '';
+    console.log(`  ${label.padEnd(9)} ${cell.path ?? dim('—')}${missing}`);
+    console.log(`  ${''.padEnd(9)} ${dim(cell.why)}`);
+  };
+  row('spec', loc.spec);
+  for (const kind of KINDS) row(kind, loc[kind]);
+  row('code', loc.code);
+
+  console.log(dim('\nNothing was written. See docs/08-locations.md for the resolution order.'));
+  return end(0);
+}
+
 function cmdClaims(args) {
   const { values } = parseArgs({
     args, options: { dir: { type: 'string' }, url: { type: 'string' }, json: { type: 'boolean' } },
@@ -774,6 +816,7 @@ else if (cmd === 'threads') cmdThreads(rest);
 else if (cmd === 'thread') cmdThread(rest);
 else if (cmd === 'serve') cmdServe(rest);
 else if (cmd === 'claims') cmdClaims(rest);
+else if (cmd === 'where') cmdWhere(rest);
 else {
   console.log(HELP);
   process.exit(cmd && cmd !== 'help' && cmd !== '--help' ? 2 : 0);

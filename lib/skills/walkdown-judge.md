@@ -39,8 +39,13 @@ verify requirement).
 5. **Record the run.** Append `blueprint/runs/<ts>-<target>-NN.json`
    (`ts` = ISO with dashes; `NN` = 01 unless the id collides):
    - `kind: "walkdown"`, `actor: "agent"`, `target`, `base_url`, `created`
-   - `git_sha`/`blueprint_sha`: `git rev-parse --short HEAD`, `-dirty` suffix
-     if the tree is unclean
+   - `git_sha`: `git rev-parse --short HEAD` of the repository holding the CODE,
+     with a `-dirty` suffix when the tree is unclean; omit it where there is no
+     repository. On a dirty tree add `tree_hash`, a sha256 of `git diff HEAD`,
+     so two runs mid-edit can be told apart
+   - `spec_hash`: `specHash(<blueprint dir>)` from `lib/hash.js` — what the run
+     was judged against, and unlike the old `blueprint_sha` it does not move on
+     commits that never touched the blueprint
    - per rule: `status` (`pass`/`fail`), `statement_hash` (copy
      `steps.statement_hash` **only after** `walkdown hash` reports it `ok`),
      `evidence` (the screenshot paths), and `reasoning` — one honest paragraph.
