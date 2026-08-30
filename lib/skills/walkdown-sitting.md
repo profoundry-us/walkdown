@@ -41,6 +41,15 @@ sweep, do it *before* capturing anything, so `owed` lists the whole board.
    target's `base_url` points at. Check both answer before capturing — a
    sitting captured against a dead server is an afternoon of grey rectangles.
 
+   A sitting reaches rules that can only be judged by making the panel WRITE —
+   filing, refusing, pinning. Serve a disposable copy for those, never the real
+   blueprint:
+
+       node tools/scratch.mjs new sitting-<date> --why "..."
+       node bin/walkdown.js serve --dir .walkdown/tmp/sitting-<date>/blueprint
+
+   The copy is for the app under judgment. Verdicts go in the real ledger.
+
 3. **Capture.** `node tools/sitting.mjs capture` drives the panel through every
    state it knows and writes both surfaces to
    `blueprint/runs/evidence/<ts>/`. It reports page errors per state; **a page
@@ -82,6 +91,14 @@ sweep, do it *before* capturing anything, so `owed` lists the whole board.
    report says how much of the sweep is done; **finish it or say plainly what
    you left**, with the count. Then report what passed, what failed and why, and
    what now awaits a human.
+
+   Then take the scratch away: `node tools/scratch.mjs clean <label>`, and
+   `list` to see what else is lying about. Six abandoned copies once sat there
+   for weeks, 367MB of them, because each was made by an agent that filed its
+   report and stopped — by the time anyone found them nobody could say which
+   sitting had made which. Cleaning up is part of finishing. If you leave one
+   standing, say so and say why; `clean --stale` will take it eventually, but
+   only because somebody has to.
 
 ## Judgment
 
