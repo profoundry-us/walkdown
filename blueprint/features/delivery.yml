@@ -1,0 +1,24 @@
+feature: delivery
+title: How walkdown arrives
+source:
+  prd: docs/09-delivery.md
+stories:
+  - id: delivery.install
+    title: Getting walkdown needs nobody's permission
+    statement: As someone inside an organisation that controls what may be installed, I can try walkdown without asking anyone, because there is nothing to approve.
+    rules:
+      - id: delivery.install.clone-is-the-install
+        origin: prd
+        statement: walkdown runs from a clone with nothing installed - no package registry, no build step, no network - because the projects that most need their requirements made legible are the governed ones, where installing anything is a conversation rather than a command. A tool that can only arrive through a package manager cannot be evaluated by the person who needs it most.
+        verify: [checks]
+        signoff: [eng, product]
+        steps:
+          given:
+            - A machine with git and Node, and a clone with no node_modules directory
+          when:
+            - walkdown is run from it
+          then:
+            - Every command works - init, where, lint, status, serve - and the panel and embed are served
+            - Nothing walkdown ships at runtime resolves outside itself or Node's own library
+            - Third-party code it carries is committed, attributed, and built from a named source rather than edited by hand
+          statement_hash: sha256:ffbb7cd667c2

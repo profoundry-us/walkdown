@@ -17,7 +17,7 @@ Measured, not assumed:
 
 | | |
 |---|---|
-| Runtime dependencies | **one**: `yaml` (ISC), 1.2 MB installed |
+| Runtime dependencies | **none.** `yaml` is vendored — `vendor/yaml.js`, 260 KB, committed |
 | Build dependencies | rollup, tailwind, playwright, eslint — **none needed to run** |
 | Node | 20 or newer |
 | Network, at runtime | none |
@@ -26,37 +26,56 @@ The build outputs are committed on purpose: `lib/viewer/panel.js` is Rollup's
 output, `lib/viewer/walkdown.css` is Tailwind's, and `extension/vendor/` holds
 copies of both. That was originally about two deliveries needing the same
 bundle; it turns out to be what makes the tool installable without a build
-toolchain at all. `git clone && npm install --omit=dev` installs exactly
-`yaml`, and every command works: `init`, `where`, `lint`, `status`, `serve`.
+toolchain at all. `vendor/yaml.js` finishes the job: **`git clone` is the whole
+install.**
+
+Verified rather than assumed — from a clone with no `node_modules` directory at
+all, `init`, `where`, `lint` and `serve` all work, walkdown's own 127-rule
+blueprint parses, and the panel and the embed both answer 200.
 
 ## The channels, in the order we would recommend them
 
-**1. Clone, plus one package.** Today's answer, and the one the setup page
-uses. The whole install is:
+**1. Clone. That is the install.**
 
     git clone https://github.com/profoundry-us/walkdown.git ~/.walkdown/walkdown
-    cd ~/.walkdown/walkdown && npm install --omit=dev
+    node ~/.walkdown/walkdown/bin/walkdown.js --help
 
-A restricted registry is a conversation about *one* well-known package rather
-than about a tool nobody has heard of, which is a conversation that can be won.
+No registry, no build, no network. This is what `vendor/yaml.js` buys, and it
+is why it is worth the costs below.
 
-**2. Clone, with `yaml` vendored.** Zero registry, and the honest end state for
-a tool that wants to be installable anywhere. `yaml` is ISC, its browser build
-is 456 KB across many files, and this repository already bundles with Rollup —
-so a committed `vendor/yaml.js` is a build step we already run and a single
-file to review. The costs are real and worth stating: the vendored copy has to
-be updated deliberately rather than by `npm update`, and the published npm
-package would need to keep the dependency for people installing it that way.
-**Not done. It is one commit away, and it is the thing that removes the last
-registry from the path.**
-
-**3. npm.** Still the nicest install where a registry is available, and the
+**2. npm.** Still the nicest install where a registry is available, and the
 package is already shaped for it (`bin`, `exports`, `files`). It should stay a
 channel, never the only one.
 
-**4. A release tarball.** Nothing here needs a build, so a zip of the working
+**3. A release tarball.** Nothing here needs a build, so a zip of the working
 tree is a functioning install. Worth doing when there is a release to cut; not
 worth doing before then.
+
+## The cost of vendoring, stated plainly
+
+`vendor/yaml.js` is 260 KB of somebody else's code in our repository, bundled
+from yaml's browser build by `npm run build:yaml` (`rollup.vendor.mjs` explains
+why the browser build: it is ESM with relative imports, so Rollup needs no
+resolver, while the Node build is CJS and would need two plugins). `yaml` stays
+in `devDependencies`, because it is still a real dependency — of the build,
+not of running walkdown.
+
+Three things this costs, none of them free:
+
+- **Updates become deliberate.** No `npm update` fixes a yaml bug for us; a
+  person bumps the devDependency and rebuilds. For a file that changes a few
+  times a year, deliberate is the right side of that trade — but it is a trade.
+- **A stale bundle is invisible.** Everything imports it and it still parses, so
+  nothing fails until somebody assumes a fix is present that is not. Hence
+  `npm run check:yaml`, which Highball runs: it rebuilds to a scratch path and
+  compares, the same arrangement the panel bundle has, and for the same reason
+  — rebuilding in place would make the file current and the check could never
+  fail.
+- **The browser build differs from the Node one** in exactly two places:
+  `log.js` calls `console.warn` instead of `process.emitWarning`, and `!!binary`
+  yields a `Uint8Array` rather than a `Buffer`. walkdown parses neither, so
+  neither reaches us — but that is a fact about today's walkdown, and it should
+  be re-checked if we ever accept binary tags.
 
 ## Skills are their own delivery
 

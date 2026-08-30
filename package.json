@@ -13,6 +13,7 @@
   "files": [
     "bin",
     "lib",
+    "vendor",
     "README.md",
     "docs"
   ],
@@ -26,17 +27,16 @@
     "check:js": "mkdir -p .walkdown/tmp && rollup -c --silent -o .walkdown/tmp/panel.built.js && diff -q .walkdown/tmp/panel.built.js lib/viewer/panel.js",
     "build:css": "tailwindcss -i styles/walkdown.css -o lib/viewer/walkdown.css --minify && cp lib/viewer/walkdown.css example/app/walkdown.css && cp lib/viewer/walkdown.css extension/walkdown.css",
     "watch:css": "tailwindcss -i styles/walkdown.css -o lib/viewer/walkdown.css --watch",
-    "prepack": "npm run build:js && npm run build:css",
+    "prepack": "npm run build:js && npm run build:css && npm run build:yaml",
     "build:ext": "cp lib/viewer/embed.js lib/viewer/panel.js extension/vendor/",
     "build": "npm run build:sync && npm run build:js && npm run build:icons && npm run build:css && npm run build:ext",
     "build:sync": "node tools/sync-shared.mjs && node tools/sync-phosphor.mjs",
     "build:icons": "node tools/make-icons.mjs steps --size 128",
     "checks": "playwright test",
     "checks:dev": "WALKDOWN_RECORD=0 playwright test",
-    "postinstall": "ln -sf ../../bin/walkdown.js node_modules/.bin/walkdown 2>/dev/null || true"
-  },
-  "dependencies": {
-    "yaml": "^2.6.0"
+    "postinstall": "ln -sf ../../bin/walkdown.js node_modules/.bin/walkdown 2>/dev/null || true",
+    "build:yaml": "rollup -c rollup.vendor.mjs --silent",
+    "check:yaml": "mkdir -p .walkdown/tmp && rollup -c rollup.vendor.mjs --silent -o .walkdown/tmp/yaml.built.js && diff -q .walkdown/tmp/yaml.built.js vendor/yaml.js"
   },
   "keywords": [
     "bdd",
@@ -56,6 +56,7 @@
     "eslint": "^10.9.1",
     "globals": "^17.11.0",
     "rollup": "^4.63.0",
-    "tailwindcss": "^4.3.3"
+    "tailwindcss": "^4.3.3",
+    "yaml": "^2.6.0"
   }
 }

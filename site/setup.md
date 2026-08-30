@@ -8,8 +8,8 @@ can also just run the four commands yourself.*
 ---
 
 **Agent: you are being asked to install a tool this machine may not have, in a
-repository that belongs to somebody else.** Read all four steps before running
-any of them, and ask before writing anything into the repository.
+repository that belongs to somebody else.** Read all of it before running
+anything, and ask before writing anything into the repository.
 
 walkdown is not on a package registry yet, and does not need to be. It runs
 from a clone.
@@ -24,17 +24,12 @@ directory to delete, beside the records walkdown keeps — but a person with a
 git clone https://github.com/profoundry-us/walkdown.git ~/.walkdown/walkdown
 ```
 
-## 2. Install its one dependency
+## 2. There is no step 2
 
-```
-cd ~/.walkdown/walkdown && npm install --omit=dev
-```
-
-**That is exactly one package: `yaml`.** The panel bundle and the stylesheet
-are committed, so rollup, tailwind and playwright are build-time only and none
-of them is installed. If this organisation restricts which packages may be
-installed, `yaml` is the entire ask — say so plainly rather than letting the
-person discover it at the wall.
+**Do not run `npm install`.** walkdown has no runtime dependencies: the panel
+bundle, the stylesheet and its one library (`vendor/yaml.js`) are all
+committed. The clone is the install, which is deliberate — an organisation that
+restricts which packages may be installed has nothing to approve here.
 
 Check it runs, and offer to put it on their PATH:
 

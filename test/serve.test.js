@@ -17,7 +17,7 @@ import { existsSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, 
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, before, test } from 'node:test';
-import { parse } from 'yaml';
+import { parse } from '../vendor/yaml.js';
 import { readDraft } from '../lib/draft.js';
 import { formatHash } from '../lib/hash.js';
 import { createWalkdownServer } from '../lib/serve.js';

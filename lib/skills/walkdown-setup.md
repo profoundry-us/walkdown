@@ -33,13 +33,12 @@ it sits beside the records walkdown keeps - but a person with a `~/src` will
 usually want it there.
 
     git clone https://github.com/profoundry-us/walkdown.git <where>
-    cd <where> && npm install --omit=dev
 
-**That install is one package: `yaml`.** Nothing else is needed to run - the
-panel bundle and the stylesheet are committed, so rollup, tailwind and
-playwright are build-time only. If the person's organisation restricts which
-packages may be installed, `yaml` is the entire ask, and it is worth saying so
-plainly rather than letting them discover it.
+**Do not run `npm install`.** walkdown has no runtime dependencies - the panel
+bundle, the stylesheet and its one library (`vendor/yaml.js`) are committed, so
+the clone is the install. If the person's organisation restricts which packages
+may be installed, there is nothing here to approve, and that is worth saying
+out loud because it is usually the thing they were braced for.
 
 Then check it runs, and offer to put it on their PATH:
 

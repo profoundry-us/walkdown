@@ -55,6 +55,15 @@ checks:
     run: npm run --silent check:js
     fast: true
 
+  # The same arrangement for the one third-party file walkdown commits: yaml,
+  # bundled so that a clone is the whole install. A stale bundle is invisible
+  # here (everything imports it and it still parses) and visible to nobody
+  # until a yaml fix everyone assumes is present turns out not to be.
+  - id: vendor-yaml-built
+    name: The vendored yaml bundle matches its source
+    run: npm run --silent check:yaml
+    fast: true
+
   # And the extension carries its own copy of the two viewer files. Editing
   # lib/viewer without rebuilding leaves the extension a version behind, which
   # shows up as behaviour that works in one delivery and not the other — the

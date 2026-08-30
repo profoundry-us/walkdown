@@ -3,7 +3,7 @@ import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'nod
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, beforeEach, test } from 'node:test';
-import { parse } from 'yaml';
+import { parse } from '../vendor/yaml.js';
 import { loadBlueprint } from '../lib/blueprint.js';
 import { replyToThread, transitionThread } from '../lib/threads.js';
 

@@ -45,16 +45,16 @@ panel riding beside the running app and rendering those same files.
 
 ## Install
 
-walkdown is not on a registry yet, and does not need one. It runs from a clone:
+walkdown is not on a registry, and does not need one. **The clone is the install:**
 
 ```
 git clone https://github.com/profoundry-us/walkdown.git ~/.walkdown/walkdown
-cd ~/.walkdown/walkdown && npm install --omit=dev
+node ~/.walkdown/walkdown/bin/walkdown.js --help
 ```
 
-That install is exactly one package — `yaml`. The panel bundle and the stylesheet are
-committed, so nothing else is needed to run; rollup, tailwind and playwright are
-build-time only. Then:
+No `npm install`, no build, no network. The panel bundle, the stylesheet and walkdown's
+one dependency ([`vendor/yaml.js`](vendor/README.md)) are all committed; rollup, tailwind
+and playwright are build-time only. Then:
 
 ```
 walkdown skills                      # the agent procedures, into ~/.claude/skills
