@@ -165,6 +165,66 @@ test('--dir does not inherit the ledger of whichever project you are standing in
   } finally { s.cleanup(); }
 });
 
+/*
+ * A repository can hold several blueprints - this one holds walkdown and
+ * walkdown-example. An entry rooted at the whole tree must not answer for a
+ * sibling inside it, or standing in one project reports another's ledger.
+ */
+test('the nearest blueprint wins over an entry rooted at the whole tree', () => {
+  const s = scratch();
+  try {
+    const repo = join(s.root, 'repo');
+    blueprint(join(repo, 'blueprint'), { project: 'outer' });
+    const inner = blueprint(join(repo, 'example', 'blueprint'), { project: 'inner', dirs: ['runs'] });
+    configure(s.home, [
+      'projects:',
+      '  - id: outer',
+      `    roots: [${repo}]`,
+      `    spec: ${join(repo, 'blueprint')}`,
+      '',
+    ].join('\n'));
+
+    const outside = resolveLocations({ cwd: repo });
+    assert.equal(outside.id, 'outer', 'at the root, the entry answers');
+
+    const within = resolveLocations({ cwd: join(repo, 'example') });
+    assert.equal(within.id, 'inner');
+    assert.equal(within.spec.path, inner);
+    assert.equal(within.runs.path, join(inner, 'runs'), 'and never the outer project\'s ledger');
+  } finally { s.cleanup(); }
+});
+
+test('a more specific entry beats a broader one', () => {
+  const s = scratch();
+  try {
+    const repo = join(s.root, 'repo');
+    blueprint(join(repo, 'blueprint'), { project: 'outer' });
+    const inner = blueprint(join(repo, 'sub', 'blueprint'), { project: 'inner' });
+    configure(s.home, [
+      'projects:',
+      `  - id: outer\n    roots: [${repo}]\n    spec: ${join(repo, 'blueprint')}`,
+      `  - id: pinned-inner\n    roots: [${join(repo, 'sub')}]\n    spec: ${inner}`
+      + `\n    evidence: ${join(s.home, 'inner-ev')}`,
+      '',
+    ].join('\n'));
+    const loc = resolveLocations({ cwd: join(repo, 'sub') });
+    assert.equal(loc.id, 'pinned-inner');
+    assert.equal(loc.evidence.path, join(s.home, 'inner-ev'));
+  } finally { s.cleanup(); }
+});
+
+test('an entry still answers where the tree has no blueprint to offer', () => {
+  const s = scratch();
+  try {
+    const repo = join(s.root, 'repo');
+    mkdirSync(join(repo, 'src'), { recursive: true });      // no blueprint anywhere
+    const away = blueprint(join(s.home, 'projects', 'away', 'blueprint'), { project: 'away' });
+    configure(s.home, `projects:\n  - id: away\n    roots: [${repo}]\n    spec: ${away}\n`);
+    const loc = resolveLocations({ cwd: join(repo, 'src') });
+    assert.equal(loc.spec.path, away, 'which is what an out-of-tree spec is for');
+  } finally { s.cleanup(); }
+});
+
 test('a broken config is reported, not thrown past', () => {
   const s = scratch();
   try {

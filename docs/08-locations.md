@@ -137,7 +137,23 @@ For the spec itself, rule 3 is instead the existing upward search for
 all, which is what makes this backwards compatible.
 
 A project is matched by walking up from the working directory until a `roots` entry
-matches.
+matches — the **most specific** one, when several do.
+
+### More than one blueprint in a repository
+
+A repository can hold several. This one holds two: `blueprint/` (walkdown) and
+`example/blueprint/` (walkdown-example), and they are separate projects with separate ids,
+separate ledgers and separate conversations.
+
+**The nearest blueprint wins.** A blueprint found in the tree beats a configured entry when
+it sits deeper than the root that entry matched on — otherwise an entry rooted at the whole
+repository answers for every sibling inside it, and standing in `example/` reports the
+outer project's spec, runs and threads. An entry still wins where the tree has nothing to
+offer, which is exactly the case a spec kept outside the repository is about.
+
+To pin a sibling's locations, give it its own entry with a narrower `roots`. Two entries,
+one rooted at the repository and one at a subdirectory, resolve to the subdirectory's when
+you are inside it.
 
 ### Runs and threads follow the spec
 
