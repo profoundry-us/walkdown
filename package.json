@@ -20,7 +20,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "test": "node --test",
+    "test": "WALKDOWN_HOME=.walkdown/test-home node --test",
     "lint": "eslint src/panel",
     "build:js": "rollup -c",
     "check:js": "mkdir -p .walkdown/tmp && rollup -c --silent -o .walkdown/tmp/panel.built.js && diff -q .walkdown/tmp/panel.built.js lib/viewer/panel.js",

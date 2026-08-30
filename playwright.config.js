@@ -46,6 +46,15 @@ const EXAMPLE_PORT = WD_PORT + 24;
  */
 export const EXAMPLE_ORIGIN = `http://localhost:${EXAMPLE_PORT}`;
 export const WD_ORIGIN = `http://localhost:${WD_PORT}`;
+
+/*
+ * Locations resolve from ~/.walkdown/config.yml, so pin the home at a scratch
+ * directory before anything spawns. Set here rather than in globalSetup because
+ * the web servers are launched from this config and would otherwise inherit the
+ * developer's own - and a suite whose result depends on whose laptop ran it is
+ * not a suite.
+ */
+process.env.WALKDOWN_HOME = new URL('./.walkdown/checkspace/home', import.meta.url).pathname;
 /*
  * The panel has one delivery: it frames the page it reviews. The fixture is the
  * extension's shape - a host page that publishes __walkdownConfig and loads

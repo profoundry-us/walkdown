@@ -13,12 +13,32 @@ import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, symlinkSync, write
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { EXAMPLE_DECLARED, EXAMPLE_ORIGIN } from '../playwright.config.js';
+import { resolveLocations } from '../lib/locations.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export const CHECKSPACE = join(root, '.walkdown', 'checkspace');
 
 export default function globalSetup() {
+  /*
+   * Pin the personal-config home at a scratch directory inside the checkspace.
+   * Locations are resolved from ~/.walkdown/config.yml, and a suite that read
+   * the developer's own would pass or fail depending on whose laptop ran it -
+   * the one thing a check may never depend on. Pinned rather than merely
+   * unset, because unset means the real home.
+   */
+  /*
+   * Where this machine really keeps evidence, asked BEFORE the home is pinned -
+   * the pin is what makes the suite reproducible, and it would otherwise
+   * answer with the empty scratch home instead of the place the screenshots
+   * actually are.
+   */
+  const pinned = process.env.WALKDOWN_HOME;
+  delete process.env.WALKDOWN_HOME;
+  const realEvidence = resolveLocations({ dir: join(root, 'blueprint') }).evidence.path;
+  process.env.WALKDOWN_HOME = pinned ?? join(CHECKSPACE, 'home');
+
   rmSync(CHECKSPACE, { recursive: true, force: true });
+  mkdirSync(join(CHECKSPACE, 'home'), { recursive: true });
   mkdirSync(CHECKSPACE, { recursive: true });
   cpSync(join(root, 'blueprint'), join(CHECKSPACE, 'blueprint'), { recursive: true });
   /*
@@ -44,6 +64,18 @@ export default function globalSetup() {
   rmSync(join(CHECKSPACE, 'blueprint', 'drafts'), { recursive: true, force: true });
   if (!existsSync(join(CHECKSPACE, 'prototype')))
     symlinkSync(join(root, 'prototype'), join(CHECKSPACE, 'prototype'), 'dir');
+  /*
+   * Evidence, linked rather than copied. It no longer lives in the repository,
+   * so copying `blueprint/` no longer brings it - and one check opens a
+   * screenshot and asserts the picture actually loaded, because a count of
+   * pictures nobody can see is not evidence. Linked because it is 97MB and
+   * this runs before every suite.
+   */
+  const evLink = join(CHECKSPACE, 'blueprint', 'runs', 'evidence');
+  if (realEvidence && existsSync(realEvidence) && !existsSync(evLink)) {
+    mkdirSync(dirname(evLink), { recursive: true });
+    symlinkSync(realEvidence, evLink, 'dir');
+  }
   /*
    * And the two check suites, for the same reason: `authoring.location`
    * resolves against the blueprint's parent, so without them the copy is a

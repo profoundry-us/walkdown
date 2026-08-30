@@ -44,15 +44,36 @@ test('with no config, a blueprint in the tree wins and its records stay put', ()
   } finally { s.cleanup(); }
 });
 
-test('a kind the blueprint does not already hold defaults outside the repository', () => {
+/*
+ * Runs and threads are the same KIND of thing the spec is - claims the team
+ * makes together - so they go where it goes. Evidence and drafts are not, so
+ * they never do. That is what makes opting in one decision instead of four.
+ */
+test('runs and threads follow the spec; evidence and drafts never do', () => {
   const s = scratch();
   try {
     const repo = join(s.root, 'repo');
-    blueprint(join(repo, 'blueprint'), { dirs: ['runs'] });   // no threads dir
+    const bp = blueprint(join(repo, 'blueprint'));   // no subdirectories at all
     const loc = resolveLocations({ cwd: repo });
-    assert.equal(loc.runs.path, join(repo, 'blueprint', 'runs'));
-    assert.equal(loc.threads.path, join(s.home, 'projects', 'demo', 'threads'));
-    assert.match(loc.threads.why, /outside the repository/);
+    assert.equal(loc.runs.path, join(bp, 'runs'));
+    assert.equal(loc.threads.path, join(bp, 'threads'));
+    assert.match(loc.threads.why, /beside the spec/);
+    assert.equal(loc.evidence.path, join(s.home, 'projects', 'demo', 'evidence'));
+    assert.equal(loc.drafts.path, join(s.home, 'projects', 'demo', 'drafts'));
+    assert.match(loc.evidence.why, /outside the repository/);
+  } finally { s.cleanup(); }
+});
+
+test('a spec kept outside the repository takes its runs and threads with it', () => {
+  const s = scratch();
+  try {
+    const repo = join(s.root, 'repo');
+    const away = blueprint(join(s.home, 'projects', 'demo', 'blueprint'));
+    configure(s.home, `projects:\n  - id: demo\n    roots: [${repo}]\n    spec: ${away}\n`);
+    const loc = resolveLocations({ cwd: repo });
+    assert.equal(loc.spec.path, away);
+    assert.equal(loc.runs.path, join(away, 'runs'), 'out with the spec, not back in the repo');
+    assert.equal(loc.threads.path, join(away, 'threads'));
   } finally { s.cleanup(); }
 });
 
@@ -94,9 +115,10 @@ test('a project entry outranks the tree, and {id} expands in defaults', () => {
     assert.equal(loc.id, 'pinned');
     assert.equal(loc.spec.path, away);
     assert.match(loc.spec.why, /this machine's config/);
-    // The away spec has no runs dir of its own, so the default applies...
-    assert.equal(loc.runs.path, join(s.home, 'projects', 'pinned', 'runs'));
-    // ...and {id} is the resolved id, not the blueprint's own name.
+    // Runs follow the spec wherever the config put it...
+    assert.equal(loc.runs.path, join(away, 'runs'));
+    // ...and evidence does not, taking the configured default with {id}
+    // resolved to the entry's id rather than the blueprint's own name.
     assert.equal(loc.evidence.path, join(s.home, 'ev', 'pinned'));
   } finally { s.cleanup(); }
 });

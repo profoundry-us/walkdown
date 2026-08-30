@@ -21,6 +21,7 @@ import { parse } from 'yaml';
 import { readDraft } from '../lib/draft.js';
 import { formatHash } from '../lib/hash.js';
 import { createWalkdownServer } from '../lib/serve.js';
+import { resolveLocations } from '../lib/locations.js';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-serve-'));
 const bp = join(root, 'blueprint');
@@ -301,7 +302,14 @@ test('the blueprint payload names the panel build it ships', async () => {
 });
 
 test('a session drafts to disk and finishing seals it into one run', async () => {
-  const draftFile = join(bp, 'drafts', 'local.json');
+  /*
+   * Asked, not assumed. Drafts do not follow the spec into a repository - a
+   * half-finished sitting is one person's working state - so where they land
+   * is a resolved location, and a test that hardcoded the blueprint's own
+   * folder would be asserting the old default rather than the behaviour.
+   */
+  const draftsDir = resolveLocations({ dir: bp }).drafts.path;
+  const draftFile = join(draftsDir, 'local.json');
   const post = (body) => fetch(`${base}/api/draft`, {
     method: 'POST', headers: { 'content-type': 'application/json' },
     body: JSON.stringify(body),
@@ -317,7 +325,7 @@ test('a session drafts to disk and finishing seals it into one run', async () =>
   assert.equal(draft.run_id, undefined);
   assert.ok(!readdirSync(join(bp, 'runs')).some((f) => f.includes('local.json')));
   // And never committed by accident.
-  assert.equal(readFileSync(join(bp, 'drafts', '.gitignore'), 'utf8'), '*\n!.gitignore\n');
+  assert.equal(readFileSync(join(draftsDir, '.gitignore'), 'utf8'), '*\n!.gitignore\n');
 
   await post({ actor: 'topher', started: '2026-08-24T00:00:00Z', verdicts: { 'demo.main.thing': 'pass' }, threads: { 'demo.main.thing': ['n-0002'] } });
   draft = JSON.parse(readFileSync(draftFile, 'utf8'));

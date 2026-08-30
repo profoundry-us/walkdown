@@ -24,7 +24,12 @@ test('init scaffolds a lint-clean blueprint with agent conventions', () => {
     assert.match(content, new RegExp(`^---\\nname: ${skill}\\ndescription: .+`));
   }
   assert.match(readFileSync(join(proj, 'blueprint/walkdown.yml'), 'utf8'), /project: fresh/);
-  assert.match(readFileSync(join(proj, 'CLAUDE.md'), 'utf8'), /blueprint\/AGENTS\.md/);
+  // The pointer names wherever the spec actually went, which is not
+  // necessarily inside the repository any more.
+  const pointer = readFileSync(join(proj, 'CLAUDE.md'), 'utf8');
+  assert.match(pointer, /walkdown blueprint in `blueprint\/`/);
+  assert.match(pointer, /AGENTS\.md/);
+  assert.equal(actionOf(results, join(proj, 'blueprint')), 'spec-in-repo');
 
   const { findings, exitCode } = lint(loadBlueprint(join(proj, 'blueprint')), { checks: false });
   assert.deepEqual(findings, [], JSON.stringify(findings));
@@ -35,7 +40,11 @@ test('init is idempotent: rerun no-ops, customizations kept, --force updates own
   const proj = join(root, 'fresh'); // scaffolded by the previous test
   const actionOf = (rs, path) => rs.find((r) => r.path === path)?.action;
   const rerun = scaffold(proj);
-  assert.ok(rerun.every((r) => r.action === 'up-to-date'), JSON.stringify(rerun));
+  // Every file is up to date; the last entry only reports where the spec is.
+  assert.ok(
+    rerun.every((r) => r.action === 'up-to-date' || r.action.startsWith('spec-')),
+    JSON.stringify(rerun),
+  );
 
   writeFileSync(join(proj, 'blueprint', 'walkdown.yml'), 'project: customized\n');
   writeFileSync(join(proj, '.claude', 'skills', 'walkdown-judge', 'SKILL.md'), 'customized');

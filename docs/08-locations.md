@@ -55,8 +55,8 @@ need to see this?"**
 | Artifact | Default | Opt into repo | Why |
 |---|---|---|---|
 | Evidence (screenshots) | `~/.walkdown` | discouraged | Binary, unreviewable in a diff, and 95% of the weight. Nobody has ever read one in a pull request. |
-| Run records | `~/.walkdown` | **encouraged** | Small and append-only. In the repo they become the team's shared board. |
-| Threads | `~/.walkdown` | **encouraged** | Human conversation and the reasons behind decisions — the same argument as the spec. |
+| Run records | **follows the spec** | **encouraged** | Small and append-only. Beside the spec they become the team's shared board. |
+| Threads | **follows the spec** | **encouraged** | Human conversation and the reasons behind decisions — the same argument as the spec. |
 | Spec (features, storyboard) | `~/.walkdown` | **strongly encouraged** | Versioned beside the code is the whole premise: a spec that drifts from its build is the problem walkdown exists to solve. |
 | Drafts (a sitting in progress) | `~/.walkdown` | never | Half-finished judgment belonging to one person at one moment. |
 | Prototype | wherever it is | — | Design owns it and may keep it in another repository entirely. |
@@ -119,7 +119,8 @@ Resolution order for any path, first hit wins:
 3. **a directory the blueprint already has** — `blueprint/runs`, `blueprint/threads`,
    `blueprint/drafts`, `blueprint/runs/evidence`
 4. `defaults`, with `{id}` substituted
-5. the built-in `~/.walkdown/projects/{id}/…`
+5. the built-in default — **beside the spec** for runs and threads,
+   `~/.walkdown/projects/{id}/…` for evidence and drafts
 
 Rule 3 is the one that keeps an upgrade from being a data loss, and it deliberately
 outranks `defaults`: a blanket default is a *preference*, and an existing ledger is a
@@ -138,6 +139,18 @@ all, which is what makes this backwards compatible.
 A project is matched by walking up from the working directory until a `roots` entry
 matches.
 
+### Runs and threads follow the spec
+
+They are the same *kind* of thing the spec is: claims a team makes together, worth
+reviewing, worth `git blame`. A spec in a repository with its conversations outside would
+let a second person clone a project and find no record of why anything was decided —
+and the argument for keeping them out was never about size. Runs and threads are 716 KB
+here against evidence's 97 MB; evidence was **135× everything else put together.**
+
+Following the spec also makes opting in **one decision instead of four**. Move the spec
+into the repository and its ledger and conversations come with it; evidence and drafts do
+not, because neither is a claim and neither belongs in a diff.
+
 ### Where this stands
 
 `walkdown where` prints the resolver's answer for every path, with the reason each was
@@ -155,11 +168,26 @@ what that does *not* do — git history still holds every blob, so `.git` does n
 It stops growing, which is the part worth having; shrinking it means rewriting history,
 which is destructive and nobody's decision but the owner's.
 
-**Runs, threads and drafts are not rewired yet** — `run-record.js`, `threads.js` and
-`draft.js` still compose their own paths from the blueprint directory. For any project
-whose blueprint already holds those directories, which is every project `walkdown init`
-has ever created, resolver and reality agree exactly. They diverge only for a project that
-has none of them yet.
+**Everything is wired.** `loadBlueprint` reads runs and threads from the resolved
+locations, and `run-record.js` and `draft.js` write to them — so every reader and writer
+in the project agrees with `walkdown where` by construction rather than by coincidence.
+`findBlueprintDir` moved into `locations.js`, since finding a blueprint is a question
+about where things are, and leaving it in `blueprint.js` would have made the two modules
+import each other.
+
+`walkdown move <kind> --to <path>` relocates one kind and records the choice. It moves
+files and never edits one; a destination that already holds records is refused rather than
+merged, because two ledgers in one directory would be an edit of both however the files
+got there.
+
+`walkdown init` puts the spec **outside the repository** unless given `--in-repo`, and
+says out loud which it did. It no longer scaffolds `runs/`, `threads/` or `drafts/` — every
+writer creates its own directory on demand, and a tree full of `.gitkeep` files is a
+project carrying walkdown's furniture before it has decided to keep the tool.
+
+Both test suites pin `WALKDOWN_HOME` at a scratch directory. Locations resolve from a
+personal config, and a suite that read the developer's own would pass or fail depending on
+whose laptop ran it.
 
 ### Project ids
 

@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-import { existsSync, readdirSync } from 'node:fs';
-import { userInfo } from 'node:os';
+import { existsSync, mkdirSync, readdirSync, renameSync } from 'node:fs';
+import { homedir, userInfo } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { collectRules, findBlueprintDir, loadBlueprint } from '../lib/blueprint.js';
 import { blueprintForUrl, claimsOf, findCollisions } from '../lib/claims.js';
 import { listDrafts } from '../lib/draft.js';
-import { KINDS, resolveLocations } from '../lib/locations.js';
+import { KINDS, rememberLocation, resolveLocations } from '../lib/locations.js';
 import { runHashCommand } from '../lib/hash-cmd.js';
 import { writeSweep } from '../lib/run-record.js';
 import { lint } from '../lib/lint.js';
@@ -18,7 +18,7 @@ import { getThread, listThreads, replyToThread, transitionThread } from '../lib/
 const HELP = `walkdown — verify that what you built is what you designed
 
 Usage:
-  walkdown init [--dir <project-root>]
+  walkdown init [--dir <project-root>] [--in-repo]
   walkdown run [--target <name>] [--rule <id>] [--dir <blueprint>]
   walkdown status [<rule-id>] [--dir <blueprint>] [--target <name>] [--json]
   walkdown lint [--dir <blueprint>] [--no-checks] [--json]
@@ -30,6 +30,7 @@ Usage:
   walkdown serve [--dir <blueprint>] [--port <n>]
   walkdown claims [--dir <blueprint>] [--url <address>] [--json]
   walkdown where [<kind>] [--dir <blueprint>] [--json]
+  walkdown move <kind> --to <path> [--dir <blueprint>]
 
 Commands:
   init    Scaffold blueprint/ in a project: config, storyboard, feature
@@ -68,6 +69,10 @@ Commands:
           runs, threads, evidence, drafts) prints that one path alone, for
           scripts. Reads the personal config and the working tree, and
           writes nothing at all.
+  move    Move one kind of record somewhere else and record the choice in
+          ~/.walkdown/config.yml. Moves files; never edits one. Refuses a
+          destination that already holds records rather than interleaving
+          two ledgers.
   serve   Start the local viewer: status board, side-by-side prototype/app
           with the embed (pinning), and human walkdown recording. Also
           serves /embed.js and the pin/walkdown API.
@@ -166,6 +171,51 @@ function cmdWhere(args) {
   row('code', loc.code);
 
   console.log(dim('\nNothing was written. See docs/08-locations.md for the resolution order.'));
+  return end(0);
+}
+
+/*
+ * `walkdown move`: relocate one kind of record, and write down that you did.
+ *
+ * Moving a run file is not editing it, so the append-only law is satisfied -
+ * but two ledgers merged into one directory would be, in every way that
+ * matters, an edit of both. So a destination holding records is refused
+ * rather than merged, and the caller is told to pick an empty one.
+ */
+function cmdMove(args) {
+  const { values, positionals } = parseArgs({
+    args, allowPositionals: true,
+    options: { to: { type: 'string' }, dir: { type: 'string' } },
+  });
+  const kind = positionals[0];
+  if (!KINDS.includes(kind)) {
+    console.error(`walkdown move <kind> --to <path>\n  kind is one of: ${KINDS.join(', ')}`);
+    return end(2);
+  }
+  if (!values.to) { console.error('move needs --to <path>'); return end(2); }
+
+  const loc = resolveLocations({ dir: values.dir });
+  const from = loc[kind].path;
+  const to = resolve(values.to.replace(/^~(?=$|\/)/, homedir()));
+  if (from === to) { console.log(`${kind} is already at ${to}`); return end(0); }
+
+  const held = (d) => (existsSync(d) ? readdirSync(d).filter((f) => !f.startsWith('.')) : []);
+  if (held(to).length) {
+    console.error(red(`${to} already holds ${held(to).length} file(s).`));
+    console.error('Two ledgers merged into one directory is an edit of both. Pick an empty destination.');
+    return end(2);
+  }
+
+  mkdirSync(dirname(to), { recursive: true });
+  if (existsSync(from)) renameSync(from, to);
+  else mkdirSync(to, { recursive: true });
+
+  const written = rememberLocation(loc, kind, to);
+  console.log(`${green('moved')} ${kind}`);
+  console.log(dim(`  from ${from}`));
+  console.log(dim(`  to   ${to}`));
+  console.log(dim(`  recorded in ${written}`));
+  console.log(dim('\nNo record was edited. `walkdown where` confirms it.'));
   return end(0);
 }
 
@@ -714,10 +764,22 @@ function cmdThread(args) {
 async function cmdInit(args) {
   const { values } = parseArgs({
     args,
-    options: { dir: { type: 'string' }, force: { type: 'boolean', default: false } },
+    options: {
+      dir: { type: 'string' },
+      force: { type: 'boolean', default: false },
+      'in-repo': { type: 'boolean', default: false },
+    },
   });
   const { scaffold } = await import('../lib/init.js');
-  const results = scaffold(values.dir ?? process.cwd(), { force: values.force });
+  const root = resolve(values.dir ?? process.cwd());
+  /*
+   * The spec goes outside the repository unless asked otherwise. Adopting
+   * walkdown should cost a project nothing and be undone by deleting one
+   * directory - and runs and threads follow the spec, so this one flag decides
+   * all three. Evidence and drafts are outside either way.
+   */
+  const specDir = values['in-repo'] ? join(root, 'blueprint') : resolveLocations({ cwd: root }).spec.path;
+  const results = scaffold(root, { force: values.force, specDir });
   const MARK = {
     created: green('+ created'),
     updated: green('~ updated'),
@@ -726,10 +788,35 @@ async function cmdInit(args) {
     kept: dim('· kept'),
     'kept-differs': yellow('! kept (differs from packaged — --force to update)'),
   };
-  for (const r of results) console.log(`  ${MARK[r.action] ?? r.action}  ${r.path}`);
-  if (results.every((r) => r.action === 'created' || r.action === 'pointer-appended')) {
-    console.log(`\nNext: fill in ${dim('blueprint/walkdown.yml')} (runner commands, targets), sketch your`);
-    console.log(`first feature from ${dim('blueprint/features/_template.yml')}, then \`walkdown lint\`.`);
+  const placed = results.filter((r) => r.action.startsWith('spec-'));
+  for (const r of results.filter((r) => !r.action.startsWith('spec-')))
+    console.log(`  ${MARK[r.action] ?? r.action}  ${r.path}`);
+
+  /*
+   * Say where it went, always. A tool that quietly puts a project's spec
+   * somewhere the person did not look for it has not been polite, it has been
+   * confusing - and half of what the setup wizard exists to do is this
+   * sentence.
+   */
+  const where = placed[0];
+  if (where) {
+    const outside = where.action === 'spec-outside';
+    console.log(`\n  spec: ${where.path}`);
+    console.log(dim(outside
+      ? '  Outside the repository, so walkdown has added nothing to your tree but'
+        + ' agent conventions. Runs and threads live beside it; evidence and drafts'
+        + ' stay out either way.'
+      : '  In the repository, where a rule change arrives as a diff somebody approves.'
+        + ' Runs and threads live beside it; evidence and drafts stay outside.'));
+    if (outside)
+      console.log(dim('  Prefer it committed? `walkdown init --in-repo`, or move it later'
+        + ' with `walkdown move`.'));
+  }
+  if (results.some((r) => r.action === 'created')) {
+    const cfg = join(where?.path ?? 'blueprint', 'walkdown.yml');
+    console.log(`\nNext: fill in ${dim(cfg)} (runner commands, targets), sketch your`);
+    console.log(`first feature from its ${dim('features/_template.yml')}, then \`walkdown lint\`.`);
+    console.log(dim('`walkdown where` shows every path this project uses.'));
   }
 }
 
@@ -836,6 +923,7 @@ else if (cmd === 'thread') cmdThread(rest);
 else if (cmd === 'serve') cmdServe(rest);
 else if (cmd === 'claims') cmdClaims(rest);
 else if (cmd === 'where') cmdWhere(rest);
+else if (cmd === 'move') cmdMove(rest);
 else {
   console.log(HELP);
   process.exit(cmd && cmd !== 'help' && cmd !== '--help' ? 2 : 0);
