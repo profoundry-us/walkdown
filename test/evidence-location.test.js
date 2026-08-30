@@ -44,7 +44,7 @@ test('a screenshot in the blueprint is served, as every older record expects', a
   } finally { f.cleanup(); }
 });
 
-test('with evidence moved out, the same recorded key finds it at the new root', async () => {
+test('with evidence moved out, the same recorded key finds it at the new root @rule:locations.travel.evidence-by-key', async () => {
   const f = fixture();
   try {
     // No runs/evidence in the blueprint, so the resolver defaults it outside.
@@ -59,7 +59,7 @@ test('with evidence moved out, the same recorded key finds it at the new root', 
   } finally { f.cleanup(); }
 });
 
-test('evidence serving still refuses anything outside the evidence key space', async () => {
+test('evidence serving still refuses anything outside the evidence key space @rule:locations.travel.evidence-by-key', async () => {
   const f = fixture();
   try {
     writeFileSync(join(f.bp, 'walkdown.yml'), 'project: ev-fixture\n');

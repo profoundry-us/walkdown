@@ -77,7 +77,7 @@ test('init appends a pointer to an existing CLAUDE.md exactly once', () => {
  * made a choice walkdown cannot read. Writing into all of them is noise and
  * picking one is a guess, so init names them and leaves the tree alone.
  */
-test('several agent files: init writes no pointer and says which they are', () => {
+test('several agent files: init writes no pointer and says which they are @rule:locations.pointer.placed-where-agents-read', () => {
   const proj = join(root, 'ambiguous');
   mkdirSync(proj);
   writeFileSync(join(proj, 'CLAUDE.md'), '# Mine\n');
@@ -94,7 +94,7 @@ test('several agent files: init writes no pointer and says which they are', () =
   assert.match(readFileSync(join(proj, 'AGENTS.md'), 'utf8'), /walkdown blueprint in `blueprint\/`/);
 });
 
-test('a project with only an AGENTS.md gets the pointer there, not in a new CLAUDE.md', () => {
+test('a project with only an AGENTS.md gets the pointer there, not in a new CLAUDE.md @rule:locations.pointer.placed-where-agents-read', () => {
   const proj = join(root, 'agents-only');
   mkdirSync(proj);
   writeFileSync(join(proj, 'AGENTS.md'), '# Conventions\n');
@@ -108,7 +108,7 @@ test('a project with only an AGENTS.md gets the pointer there, not in a new CLAU
  * saying `blueprint/` after the spec moved out is worse than no block at all,
  * because an agent believes it and goes looking.
  */
-test('a moved spec rewrites its own block and nothing around it', () => {
+test('a moved spec rewrites its own block and nothing around it @rule:locations.pointer.owns-only-its-block', () => {
   const proj = join(root, 'moved');
   mkdirSync(proj);
   const file = join(proj, 'CLAUDE.md');

@@ -1,10 +1,13 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { existsSync, mkdtempSync, mkdirSync, readdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
-import { resolveLocations } from '../lib/locations.js';
-import { specFiles, specHash } from '../lib/hash.js';
+import { resolveLocations, KINDS } from '../lib/locations.js';
+import { formatHash, specFiles, specHash } from '../lib/hash.js';
+import { deriveStatus } from '../lib/status.js';
+import { readUserConfig } from '../lib/locations.js';
 
 /*
  * Every case builds its own tree and points WALKDOWN_HOME at a scratch
@@ -49,7 +52,7 @@ test('with no config, a blueprint in the tree wins and its records stay put', ()
  * makes together - so they go where it goes. Evidence and drafts are not, so
  * they never do. That is what makes opting in one decision instead of four.
  */
-test('runs and threads follow the spec; evidence and drafts never do', () => {
+test('runs and threads follow the spec; evidence and drafts never do @rule:locations.default.records-follow-the-spec', () => {
   const s = scratch();
   try {
     const repo = join(s.root, 'repo');
@@ -64,7 +67,7 @@ test('runs and threads follow the spec; evidence and drafts never do', () => {
   } finally { s.cleanup(); }
 });
 
-test('a spec kept outside the repository takes its runs and threads with it', () => {
+test('a spec kept outside the repository takes its runs and threads with it @rule:locations.default.records-follow-the-spec', () => {
   const s = scratch();
   try {
     const repo = join(s.root, 'repo');
@@ -82,7 +85,7 @@ test('a spec kept outside the repository takes its runs and threads with it', ()
  * a preference, an existing ledger is a fact, and a preference must never
  * silently point past one.
  */
-test('a blanket default never orphans a ledger the blueprint already holds', () => {
+test('a blanket default never orphans a ledger the blueprint already holds @rule:locations.keeping.existing-outranks-preference', () => {
   const s = scratch();
   try {
     const repo = join(s.root, 'repo');
@@ -141,7 +144,7 @@ test('--dir beats every configured answer', () => {
  * you are STANDING describes a different project, and letting it keep applying
  * reported one project's spec beside another's ledger.
  */
-test('--dir does not inherit the ledger of whichever project you are standing in', () => {
+test('--dir does not inherit the ledger of whichever project you are standing in @rule:locations.answer.nearest-blueprint-wins', () => {
   const s = scratch();
   try {
     const repo = join(s.root, 'repo');
@@ -170,7 +173,7 @@ test('--dir does not inherit the ledger of whichever project you are standing in
  * walkdown-example. An entry rooted at the whole tree must not answer for a
  * sibling inside it, or standing in one project reports another's ledger.
  */
-test('the nearest blueprint wins over an entry rooted at the whole tree', () => {
+test('the nearest blueprint wins over an entry rooted at the whole tree @rule:locations.answer.nearest-blueprint-wins', () => {
   const s = scratch();
   try {
     const repo = join(s.root, 'repo');
@@ -239,7 +242,7 @@ test('a broken config is reported, not thrown past', () => {
 
 /* ---- spec_hash ----------------------------------------------------------- */
 
-test('the spec hash covers the spec and nothing the spec produces', () => {
+test('the spec hash covers the spec and nothing the spec produces @rule:locations.travel.judged-against-a-spec', () => {
   const s = scratch();
   try {
     const bp = blueprint(join(s.root, 'bp'), { dirs: ['runs', 'threads'] });
@@ -260,7 +263,7 @@ test('the spec hash covers the spec and nothing the spec produces', () => {
   } finally { s.cleanup(); }
 });
 
-test('the same words in a different feature file are a different spec', () => {
+test('the same words in a different feature file are a different spec @rule:locations.travel.judged-against-a-spec', () => {
   const s = scratch();
   try {
     const a = blueprint(join(s.root, 'a'));
@@ -269,4 +272,161 @@ test('the same words in a different feature file are a different spec', () => {
     writeFileSync(join(b, 'features', 'z.yml'), 'feature: a\nstories: []\n');
     assert.notEqual(specHash(a), specHash(b));
   } finally { s.cleanup(); }
+});
+
+/* ---- what a project gets by default ------------------------------------- */
+
+const CLI = new URL('../bin/walkdown.js', import.meta.url).pathname;
+const walkdown = (home, args) =>
+  execFileSync(process.execPath, [CLI, ...args], { env: { ...process.env, WALKDOWN_HOME: home } }).toString();
+
+/* Every path in the tree, so a test can say "and nothing else appeared". */
+function tree(dir, prefix = '') {
+  const out = [];
+  for (const e of readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+    const rel = prefix + e.name;
+    out.push(rel);
+    if (e.isDirectory()) out.push(...tree(join(dir, e.name), rel + '/'));
+  }
+  return out;
+}
+
+/*
+ * The promise adopting walkdown makes: try it, and your repository is as you
+ * left it. Anything that fails this makes the tool something a person has to
+ * ask permission to evaluate.
+ */
+test('a fresh project gets nothing in its tree but conventions and a pointer @rule:locations.default.nothing-in-the-tree', () => {
+  const s = scratch();
+  try {
+    const repo = join(s.root, 'repo');
+    mkdirSync(join(repo, 'src'), { recursive: true });
+    writeFileSync(join(repo, 'src', 'app.js'), '// theirs\n');
+    walkdown(s.home, ['init', '--dir', repo]);
+
+    const paths = tree(repo);
+    assert.deepEqual(paths.filter((p) => !p.startsWith('.claude/') && !p.startsWith('src/')),
+      ['.claude', 'CLAUDE.md', 'src'],
+      'the pointer and the skills, and not one directory of walkdown furniture');
+    assert.ok(!paths.some((p) => /^(blueprint|runs|threads|drafts)/.test(p)), paths.join(' '));
+
+    // And everything it will write is under the personal home, filed by project.
+    const loc = resolveLocations({ cwd: repo });
+    for (const kind of ['spec', ...KINDS])
+      assert.ok(loc[kind].path.startsWith(s.home + '/'), `${kind} went to ${loc[kind].path}`);
+  } finally { s.cleanup(); }
+});
+
+test('--in-repo commits the spec and takes its conversations with it @rule:locations.default.in-repo-on-request', () => {
+  const s = scratch();
+  try {
+    const repo = join(s.root, 'repo');
+    mkdirSync(repo, { recursive: true });
+    const said = walkdown(s.home, ['init', '--dir', repo, '--in-repo']);
+
+    const loc = resolveLocations({ cwd: repo });
+    assert.equal(loc.spec.path, join(repo, 'blueprint'));
+    assert.equal(loc.runs.path, join(repo, 'blueprint', 'runs'), 'runs follow it in');
+    assert.equal(loc.threads.path, join(repo, 'blueprint', 'threads'));
+    for (const kind of ['evidence', 'drafts'])
+      assert.ok(loc[kind].path.startsWith(s.home + '/'), `${kind} stayed out`);
+    // Said out loud, because a spec filed somewhere the person did not look is
+    // the whole failure this sentence exists to prevent.
+    assert.match(said, /spec: .*repo\/blueprint/);
+    assert.match(said, /In the repository/);
+  } finally { s.cleanup(); }
+});
+
+/* ---- asking ------------------------------------------------------------- */
+
+test('every path is reported with the decision that chose it @rule:locations.answer.says-why', () => {
+  const s = scratch();
+  try {
+    const repo = join(s.root, 'repo');
+    blueprint(join(repo, 'blueprint'), { dirs: ['runs'] });
+    configure(s.home, `projects:\n  - id: demo\n    roots: [${repo}]\n    evidence: ${join(s.home, 'ev')}\n`);
+    const loc = resolveLocations({ cwd: repo });
+
+    for (const kind of ['spec', ...KINDS])
+      assert.ok(loc[kind].why?.length > 8, `${kind} gave no reason: ${loc[kind].why}`);
+    // And the reasons name WHICH decision, so a person knows what to argue with.
+    assert.match(loc.spec.why, /working tree/);
+    assert.match(loc.runs.why, /already in the blueprint/);
+    assert.match(loc.threads.why, /beside the spec/);
+    assert.match(loc.evidence.why, /config/);
+    assert.match(loc.drafts.why, /built-in default/);
+
+    const said = walkdown(s.home, ['where', '--dir', join(repo, 'blueprint')]);
+    for (const kind of ['spec', ...KINDS]) assert.match(said, new RegExp(`\\b${kind}\\b`), kind);
+    assert.match(said, /already in the blueprint/);
+  } finally { s.cleanup(); }
+});
+
+/*
+ * The command a confused person reaches for first must not be able to change
+ * what they were confused about.
+ */
+test('asking where things live creates nothing at all @rule:locations.answer.asking-writes-nothing', () => {
+  const s = scratch();
+  try {
+    const repo = join(s.root, 'repo');
+    blueprint(join(repo, 'blueprint'));            // no runs, threads or drafts
+    const before = tree(s.root);
+
+    const loc = resolveLocations({ cwd: repo });
+    const said = walkdown(s.home, ['where', '--dir', join(repo, 'blueprint')]);
+    walkdown(s.home, ['where', 'evidence', '--dir', join(repo, 'blueprint')]);
+
+    assert.match(said, new RegExp(loc.evidence.path), 'it names a directory that is not there');
+    assert.ok(!existsSync(loc.evidence.path), 'and did not create it on being asked twice');
+    assert.deepEqual(tree(s.root), before, 'the disk is exactly as it was found');
+    assert.equal(readUserConfig().exists, false, 'including the personal config');
+  } finally { s.cleanup(); }
+});
+
+/* ---- provenance --------------------------------------------------------- */
+
+/*
+ * git_sha says where to LOOK, never whether a verdict still counts. Currency is
+ * answered per cell - the statement, the check that still claims it, a sweep -
+ * so a board must not turn grey because unrelated commits happened.
+ */
+test('a run made at another commit still counts @rule:locations.travel.provenance-not-currency', () => {
+  const statement = 'The visitor can do the thing.';
+  const bp = {
+    config: { runner: { targets: { local: {} } } },
+    features: [{
+      file: 'features/demo.yml',
+      data: { feature: 'demo', stories: [{ id: 'demo.main', rules: [{ id: 'demo.main.thing', statement, verify: ['checks'] }] }] },
+    }],
+    threads: [],
+    runs: [{
+      file: 'runs/r-0.json',
+      data: {
+        created: '2026-01-01T00:00:00Z', kind: 'checks', target: 'local', actor: 'agent',
+        run_id: 'r-0', git_sha: 'deadbee', tree_hash: 'sha256:aaaaaaaaaaaa',
+        spec_hash: 'sha256:bbbbbbbbbbbb',
+        results: [{ rule: 'demo.main.thing', status: 'pass', statement_hash: formatHash(statement) }],
+      },
+    }],
+  };
+  const cell = (b) => deriveStatus(b).rows[0].cells.local;
+  assert.equal(cell(bp).state, 'pass');
+
+  // Whatever those provenance fields say - a sha nobody can resolve, a hash of
+  // a working tree long gone - the cell reads the same.
+  const moved = structuredClone(bp);
+  moved.runs[0].data.git_sha = 'c0ffee1-dirty';
+  moved.runs[0].data.tree_hash = 'sha256:cccccccccccc';
+  assert.equal(cell(moved).state, 'pass', 'an unrelated commit is not an expiry');
+
+  const none = structuredClone(bp);
+  delete none.runs[0].data.git_sha;
+  delete none.runs[0].data.tree_hash;
+  assert.equal(cell(none).state, 'pass', 'and their absence is not one either');
+
+  // What DOES expire is the statement the verdict was made against.
+  const reworded = structuredClone(bp);
+  reworded.features[0].data.stories[0].rules[0].statement = 'The visitor can do something else.';
+  assert.equal(cell(reworded).state, 'stale');
 });

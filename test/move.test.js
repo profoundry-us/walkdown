@@ -23,7 +23,7 @@ const run = (p, args) => execFileSync('node', [CLI, ...args], {
   env: { ...process.env, WALKDOWN_HOME: p.home }, encoding: 'utf8',
 });
 
-test('move relocates the files, records the choice, and edits no record', () => {
+test('move relocates the files, records the choice, and edits no record @rule:locations.keeping.moving-is-a-decision', () => {
   const p = project();
   try {
     const dest = join(p.root, 'elsewhere', 'runs');
@@ -49,7 +49,7 @@ test('move relocates the files, records the choice, and edits no record', () => 
  * an edit of both — which the append-only law forbids however the files got
  * there. So a non-empty destination is refused rather than merged.
  */
-test('move refuses a destination that already holds records', () => {
+test('move refuses a destination that already holds records @rule:locations.keeping.moving-is-a-decision', () => {
   const p = project();
   try {
     const dest = join(p.root, 'occupied');

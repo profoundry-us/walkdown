@@ -1,0 +1,217 @@
+feature: locations
+title: Where a project's pieces live, and why
+source:
+  prd: docs/08-locations.md
+stories:
+  - id: locations.default
+    title: Adopting walkdown costs the repository nothing
+    statement: As a person trying walkdown on a repository I did not start, I can run it without adding anything to the tree, and stop by deleting one directory nobody else can see.
+    rules:
+      - id: locations.default.nothing-in-the-tree
+        origin: prd
+        statement: With nothing configured, every file walkdown creates lands outside the repository - the spec, the runs, the threads, the evidence and the drafts - so that trying the tool commits a project to nothing and abandoning it leaves no trace to clean up.
+        verify: [checks]
+        signoff: [eng, product]
+        steps:
+          given:
+            - A repository that has never seen walkdown, and no personal config
+          when:
+            - walkdown is initialised and a run, a thread and a draft are recorded
+          then:
+            - Nothing appears in the working tree but the agent conventions and the pointer
+            - Every record is under the personal home, filed by project
+            - Deleting that one directory removes everything walkdown made
+          statement_hash: sha256:0f57ef142318
+
+      - id: locations.default.records-follow-the-spec
+        origin: prd
+        statement: Runs and threads live wherever the spec lives and evidence and drafts never do, because runs and threads are the same kind of thing the spec is - claims the team makes, worth reviewing and worth blaming - while evidence is binary nobody reads in a diff and a draft is one person's half-finished sitting. Keeping them together makes committing a spec one decision instead of four.
+        verify: [checks]
+        steps:
+          given:
+            - A blueprint, wherever it sits
+          when:
+            - Its location is asked for
+          then:
+            - Runs and threads resolve beside the spec, in the repository or out of it as the spec is
+            - Evidence and drafts resolve outside either way
+            - Moving the spec takes its runs and threads with it and leaves the other two where they are
+          statement_hash: sha256:8f5ed2817f93
+
+      - id: locations.default.in-repo-on-request
+        origin: prd
+        statement: A project that wants its spec committed says so once - `walkdown init --in-repo` - and its conversations follow it there without being mentioned. Whichever way it went, the command says where the spec landed and what that means, because a tool that quietly files a project's spec somewhere the person did not look has not been polite.
+        verify: [checks]
+        signoff: [eng, product]
+        steps:
+          given:
+            - A repository being initialised
+          when:
+            - The person asks for the spec in the repository
+          then:
+            - The spec is written inside the tree, with its runs and threads beside it
+            - Evidence and drafts still resolve outside
+            - The command reports which of the two happened, in words, and how to change its mind later
+          statement_hash: sha256:bbc38bb440e9
+
+  - id: locations.answer
+    title: Anyone can ask where this project's pieces are
+    statement: As someone standing in a repository, I can ask where every piece lives and why it was chosen there, and the asking never changes the answer.
+    rules:
+      - id: locations.answer.says-why
+        origin: prd
+        statement: Every path walkdown reports comes with the reason it was chosen - named on the command line, this machine's config, already in the blueprint, the built-in default - because a person who disagrees with where something is needs to know which decision to argue with.
+        verify: [checks]
+        steps:
+          given:
+            - A project with some paths defaulted and some configured
+          when:
+            - walkdown is asked where things live
+          then:
+            - Each of the spec, runs, threads, evidence, drafts and code carries its reason
+            - The reason names the rule that decided it, not merely that a decision was made
+          statement_hash: sha256:971e878234f9
+
+      - id: locations.answer.asking-writes-nothing
+        origin: prd
+        statement: Asking where something lives creates nothing - no directory, no config file, no placeholder - so that the command a confused person reaches for first cannot itself change what they were confused about.
+        verify: [checks]
+        steps:
+          given:
+            - A project with no personal config at all
+          when:
+            - walkdown is asked where every kind of record lives
+          then:
+            - It answers in full, naming directories that do not exist yet
+            - The disk is exactly as it was found, including the personal home
+          statement_hash: sha256:0ba6f381a575
+
+      - id: locations.answer.nearest-blueprint-wins
+        origin: prd
+        statement: A blueprint found in the working tree beats a configured entry rooted above it, and a blueprint named outright is answered by the entry that owns that blueprint or by none at all - because a repository can hold several, and an entry rooted at the whole tree would otherwise answer for its own siblings and report one project's spec beside another project's ledger.
+        verify: [checks]
+        steps:
+          given:
+            - A repository holding two blueprints, and a config entry rooted at the whole repository
+          when:
+            - The location is resolved from inside the inner one
+          then:
+            - The inner blueprint answers, with its own runs and threads
+            - The outer entry still answers where the tree offers no blueprint, which is what an out-of-tree spec is for
+          statement_hash: sha256:8abbb2442baa
+
+  - id: locations.keeping
+    title: A ledger already written is never orphaned or edited
+    statement: As a team with history in our blueprint, no preference of anyone's machine can make our records stop being found, and moving them stays something a person did on purpose.
+    rules:
+      - id: locations.keeping.existing-outranks-preference
+        origin: prd
+        statement: A blanket default never points past records a blueprint already holds - an existing directory is a fact and a default is a preference, so the preference gives way and moving those records stays a decision somebody makes.
+        verify: [checks]
+        steps:
+          given:
+            - A blueprint whose runs directory already holds records
+          when:
+            - A personal config declares a different default for runs
+          then:
+            - The existing directory is still the answer, and the report says it is because the blueprint already holds it
+            - No record is moved, copied or hidden by the resolution
+          statement_hash: sha256:c5603d183d94
+
+      - id: locations.keeping.moving-is-a-decision
+        origin: prd
+        statement: Moving records relocates the files unchanged, remembers the choice in the personal config beside the person's own comments, and refuses a destination that already holds records - because two ledgers interleaved into one directory is an edit of both, and this ledger is append-only.
+        verify: [checks]
+        steps:
+          given:
+            - A blueprint whose runs live in the repository
+          when:
+            - They are moved somewhere else
+          then:
+            - Every file arrives byte for byte, and none is rewritten to suit its new address
+            - The personal config records where they went, keeping whatever the person had already written in it
+            - A destination that already holds records is refused rather than merged into
+          statement_hash: sha256:452142df8095
+
+  - id: locations.travel
+    title: A record means the same thing on somebody else's machine
+    statement: As a second person cloning this project, the verdicts I read were made against a spec I can identify and point at evidence I can actually open, without anyone having to have used my directory layout.
+    rules:
+      - id: locations.travel.evidence-by-key
+        origin: prd
+        statement: A run names the evidence it left by a logical key rather than a filesystem path, and the server resolves that key per machine - so a screenshot filed on one laptop is still findable from another, and no ledger entry is pinned to the disk of whoever recorded it.
+        verify: [checks]
+        steps:
+          given:
+            - A run recorded while evidence lived in the repository
+          when:
+            - Evidence is moved out of the repository and the run is read again
+          then:
+            - The same key still resolves, and the picture still opens
+            - No run file was edited to make that true
+            - A key that climbs out of the evidence directory is refused
+          statement_hash: sha256:a7bc7cd07be3
+
+      - id: locations.travel.judged-against-a-spec
+        origin: prd
+        statement: Every run records a content hash of the spec it was judged against, computed from the blueprint's own files, so that a verdict says what it was measured against whether or not the project has a repository - and recording a verdict never changes that hash, because a run is what the spec produced rather than part of it.
+        verify: [checks]
+        steps:
+          given:
+            - A blueprint and a run recorded against it
+          when:
+            - A verdict, a thread and a draft are written, then a rule is reworded
+          then:
+            - The three writes leave the spec hash exactly where it was
+            - The rewording moves it
+            - The same words in a different feature file are a different spec
+          statement_hash: sha256:5014abd76d50
+
+      - id: locations.travel.provenance-not-currency
+        origin: prd
+        statement: What code a run saw - the repository's sha, and a hash of the working tree when it was dirty - is provenance, never currency. It tells a person digging into a verdict where to look, and never decides whether that verdict still counts. Whether a verdict counts is answered per cell, by the statement it was made against, the check that still claims it, and any sweep since - so an unrelated commit does not turn a board green to grey.
+        verify: [checks]
+        steps:
+          given:
+            - A ledger of passing verdicts
+          when:
+            - Commits land that touch neither the rules nor the code they describe
+          then:
+            - Every cell reads exactly as it did before
+            - The runs still carry the shas they were recorded with, for anyone who wants to look
+          statement_hash: sha256:c513160f49fc
+
+  - id: locations.pointer
+    title: An agent arriving in the repository finds the spec
+    statement: As an AI agent cloning this project, I find one paragraph telling me a spec exists and where it is - in the file this project actually keeps its conventions in, saying where the spec is now rather than where it used to be.
+    rules:
+      - id: locations.pointer.placed-where-agents-read
+        origin: prd
+        statement: The pointer goes in a file this project already keeps its agent conventions in, and walkdown chooses only where there is no question - none, so it writes one; exactly one, so the project has already answered; several, so it names them and writes nothing. Which file agents read is a project's own business, and a sentence put in the wrong one is a sentence nobody reads.
+        verify: [checks]
+        signoff: [eng, product]
+        steps:
+          given:
+            - A repository being initialised
+          when:
+            - It holds no agent-instruction file, or exactly one, or several
+          then:
+            - With none, one is created carrying the pointer
+            - With one, the pointer goes into it and no second file is made to compete with it
+            - With several, none is written to and the report names them for a person to choose between
+          statement_hash: sha256:66759d1c478c
+
+      - id: locations.pointer.owns-only-its-block
+        origin: prd
+        statement: walkdown owns the fenced block and nothing else in that file. It rewrites what lies between its own markers, leaves every other line as it was, and updates the block when the spec moves - because a pointer still naming a directory the spec has left is worse than no pointer at all, since an agent believes it and goes looking.
+        verify: [checks]
+        steps:
+          given:
+            - An agent-instruction file with a person's own words above and below a walkdown block
+          when:
+            - The spec moves and the pointer is placed again
+          then:
+            - The block names the new place, and appears exactly once
+            - Every line outside the markers is untouched
+            - Placing it twice in a row changes nothing the second time
+          statement_hash: sha256:ec57ac3e3cc3
