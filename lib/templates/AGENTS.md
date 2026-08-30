@@ -59,6 +59,17 @@ notes), and the runs ledger. The blueprint is the single source of truth for
   is current, the bundle has no top-level imports, every name resolves — are
   Highball's, not walkdown's.
 
+## Writing code here
+
+`docs/10-house-style.md` is how code in this repository is written - it is
+mostly a description of what the repository already does, so the fastest way to
+follow it is to match the file you are editing. Two rules do the most work: a
+comment explains the decision and the failure it prevents, never the code; and
+a name that appears in `docs/01-glossary.md` appears nowhere else in another
+form. `docs/11-architecture.md` says which files are known to be wrong and what
+the fix is, so a change that touches one of them can move in that direction
+rather than adding to it.
+
 ## Checks
 
 - Write tests in this project's own framework and house style. Tag each with
@@ -91,7 +102,6 @@ notes), and the runs ledger. The blueprint is the single source of truth for
 
     walkdown status [--json]        derived verification + queues + drift
     walkdown status <rule-id>       one rule in full
-    walkdown status --retired       rules withdrawn from the report, and why
     walkdown status --retired       rules withdrawn from the report, and why
     walkdown lint                   validate everything
     walkdown hash --write           re-stamp statement hashes

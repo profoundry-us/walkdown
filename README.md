@@ -42,6 +42,8 @@ panel riding beside the running app and rendering those same files.
 | [07-roadmap.md](docs/07-roadmap.md) | Which problems are solved, what is next, what we decided not to do — a dated snapshot |
 | [08-locations.md](docs/08-locations.md) | Where a project's spec and records live, and why the default is outside the repository |
 | [09-delivery.md](docs/09-delivery.md) | How walkdown arrives: the clone, the one dependency, the skills, the extension |
+| [10-house-style.md](docs/10-house-style.md) | How code here is written — what the repo already does, written down |
+| [11-architecture.md](docs/11-architecture.md) | The 5000-foot review: what is healthy, what to refactor, in what order |
 
 ## Install
 
