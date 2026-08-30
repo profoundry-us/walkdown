@@ -114,6 +114,35 @@ test('--dir beats every configured answer', () => {
   } finally { s.cleanup(); }
 });
 
+/*
+ * `--dir` scopes the whole answer, not just the spec. The entry matching where
+ * you are STANDING describes a different project, and letting it keep applying
+ * reported one project's spec beside another's ledger.
+ */
+test('--dir does not inherit the ledger of whichever project you are standing in', () => {
+  const s = scratch();
+  try {
+    const repo = join(s.root, 'repo');
+    blueprint(join(repo, 'blueprint'), { project: 'mine', dirs: ['runs'] });
+    const other = blueprint(join(s.root, 'other'), { project: 'theirs', dirs: ['runs'] });
+    configure(s.home, [
+      'projects:',
+      '  - id: mine',
+      `    roots: [${repo}]`,
+      `    runs: ${join(s.home, 'mine-runs')}`,
+      '',
+    ].join('\n'));
+
+    const standing = resolveLocations({ cwd: repo });
+    assert.equal(standing.runs.path, join(s.home, 'mine-runs'), 'the entry applies where it matches');
+
+    const named = resolveLocations({ cwd: repo, dir: other });
+    assert.equal(named.id, 'theirs');
+    assert.equal(named.spec.path, other);
+    assert.equal(named.runs.path, join(other, 'runs'), "and never lends its ledger to another spec");
+  } finally { s.cleanup(); }
+});
+
 test('a broken config is reported, not thrown past', () => {
   const s = scratch();
   try {
