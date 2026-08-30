@@ -2,7 +2,8 @@
 ## walkdown
 
 This project's spec is the walkdown blueprint in `blueprint/`. Before building,
-testing, or reviewing, read and follow `blueprint/AGENTS.md`.
+testing, or reviewing, read and follow that folder's `AGENTS.md`. Run
+`walkdown where` to see where everything this project uses actually lives.
 <!-- walkdown:end -->
 
 ## Running walkdown's own CLI
@@ -73,6 +74,17 @@ at once — after a big refactor, or on a cadence of days — there is
 
 The state list inside `sitting.mjs` is data. A rule needing a state nobody has
 captured belongs in that list, not in a throwaway script.
+
+Both skills serve a disposable copy for anything that makes the panel write,
+and both are now told to take it away again:
+
+    node tools/scratch.mjs new sitting-0830 --why "..."   # a copy, stamped
+    node tools/scratch.mjs list                           # what is lying about
+    node tools/scratch.mjs clean sitting-0830             # or --stale
+
+The stamp exists because six unstamped copies once sat in `.walkdown/tmp` for
+weeks, and by the time anyone found them nobody could say which sitting had
+made which.
 
 To make "did we skip any?" answerable, declare a sweep first:
 

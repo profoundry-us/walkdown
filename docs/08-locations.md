@@ -361,15 +361,57 @@ evidence needs a rewrite of those paths or a resolver that tries the configured 
 root first. The resolver is the better answer: it leaves the append-only ledger genuinely
 untouched.
 
+## The one thing walkdown still writes into your repository
+
+Everything above moves records out of the tree. One thing stays in it and must: the
+**pointer** — a short paragraph in whichever file this project's AI agents read, saying
+that a spec exists and where it is.
+
+It has to be in the repository because that is the only place an agent looks. And it
+matters more now than it used to, not less: with the spec outside the tree by default,
+the pointer is frequently the *only* trace of walkdown a cloned project has. An agent
+that never finds it builds against nothing.
+
+But *which* file is not walkdown's to decide. Different tools read different names
+(`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.github/copilot-instructions.md`), a monorepo
+wants it beside the pack it describes rather than at the root, and most projects
+walkdown arrives in already have one of these files with a person's own words in it.
+
+So walkdown treats it as a location like any other — found, not assumed:
+
+- **The block is fenced** between `<!-- walkdown:begin -->` and `<!-- walkdown:end -->`.
+  walkdown reads and rewrites what is between them and touches no other line, so a file
+  full of somebody's conventions stays theirs. Rewriting rather than skipping is what
+  lets a **moved spec correct its own pointer**: `walkdown pointer` after a `move` and
+  the paragraph names the new place. A block that still says `blueprint/` after the spec
+  left is worse than no block, because an agent believes it.
+- **`walkdown init` places it only when there is no question.** No agent file at all, so
+  nothing to disturb: it writes `CLAUDE.md`. Exactly one, so the project has already
+  answered: it uses that one. Several: it names them and writes nothing, because picking
+  wrong puts the sentence where nobody reads it and writing to all of them is noise.
+- **`walkdown pointer`** prints the block for anyone to paste, and `--into <file>` places
+  it idempotently anywhere — including a file walkdown has never heard of.
+
+In a monorepo, point `init` at the pack: `walkdown init --dir packs/billing` puts the
+pointer beside the code it describes. Root-level discovery deliberately does not go
+hunting through subdirectories for a home — a search that guesses which of thirty packs
+a spec was about will guess wrong.
+
 ## What the setup wizard reads
 
 The wizard is a later document, but it exists to write exactly this file. It should ask
-four things and nothing else:
+five things and nothing else:
 
 1. Who are you, and which roles may you sign for?
 2. Where is this project's spec, or shall I make one?
 3. Keep the spec and its conversations in the repository? *(recommend yes, explain why)*
-4. Which ports does this machine serve on?
+4. **Which file do this project's agents read?** — offered as the files actually found in
+   the tree, plus "somewhere else" and "nowhere, I will paste it myself". This is the one
+   question walkdown genuinely cannot default its way out of, and it is the natural
+   question for the agent running the wizard to answer *for* the person: it is standing
+   in the repository, it can see which files exist and which are actually loaded, and it
+   knows which one it read to get here.
+5. Which ports does this machine serve on?
 
 Everything else has a defensible default, and a wizard that asks about a defensible
 default is a wizard people cancel.

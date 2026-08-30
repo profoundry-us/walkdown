@@ -21,6 +21,16 @@ verify requirement).
    app's own dev server (the `local` target's `base_url` in
    `blueprint/walkdown.yml`).
 
+   **Judging something that writes? Take a scratch copy.** A rule saying the
+   panel refuses a thread is judged by making it refuse, and pressing that
+   button files a thread. Serve a disposable blueprint instead of the real one:
+
+       node tools/scratch.mjs new judge-<what> --why "..."
+       node bin/walkdown.js serve --dir .walkdown/tmp/judge-<what>/blueprint
+
+   Verdicts still go in the real ledger — the copy is for the app under
+   judgment, never for the record of it.
+
 3. **Capture evidence.** For every screen the rule touches (its derived flow —
    the screens its steps mention — plus any others it lists), screenshot both
    surfaces at the same viewport, e.g.
@@ -66,6 +76,12 @@ verify requirement).
 7. **Close out.** `walkdown lint` (the record must validate), then
    `walkdown status` — confirm the AGENT column updated. Report what passed,
    what failed and why, and what now awaits a human.
+
+   **Take your scratch space away**: `node tools/scratch.mjs clean <label>`.
+   Six abandoned copies once sat unnoticed for weeks because each one was made
+   by an agent that finished its report and stopped. Cleaning up is part of
+   finishing, not a courtesy — run `node tools/scratch.mjs list` before you
+   report, and say plainly if you are leaving one behind and why.
 
 Never write `human` verdicts, never set threads to `verified`/`waived`, and
 never "re-judge" a fail into a pass without the underlying change actually

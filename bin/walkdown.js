@@ -31,6 +31,7 @@ Usage:
   walkdown claims [--dir <blueprint>] [--url <address>] [--json]
   walkdown where [<kind>] [--dir <blueprint>] [--json]
   walkdown move <kind> --to <path> [--dir <blueprint>]
+  walkdown pointer [--dir <project-root>] [--into <file>]
 
 Commands:
   init    Scaffold blueprint/ in a project: config, storyboard, feature
@@ -73,6 +74,11 @@ Commands:
           ~/.walkdown/config.yml. Moves files; never edits one. Refuses a
           destination that already holds records rather than interleaving
           two ledgers.
+  pointer Print the paragraph that tells an AI agent this project has a spec,
+          or place it with --into <file>. Which file agents read is a
+          project's own business - CLAUDE.md, AGENTS.md, a pack-level file in
+          a monorepo - so walkdown asks rather than assuming. Idempotent: it
+          replaces its own marked block and touches no other line.
   serve   Start the local viewer: status board, side-by-side prototype/app
           with the embed (pinning), and human walkdown recording. Also
           serves /embed.js and the pin/walkdown API.
@@ -784,6 +790,8 @@ async function cmdInit(args) {
     created: green('+ created'),
     updated: green('~ updated'),
     'pointer-appended': green('+ appended'),
+    'pointer-updated': green('~ pointer updated'),
+    'pointer-undecided': yellow('? several agent files — `walkdown pointer --into <file>`'),
     'up-to-date': dim('· up to date'),
     kept: dim('· kept'),
     'kept-differs': yellow('! kept (differs from packaged — --force to update)'),
@@ -818,6 +826,45 @@ async function cmdInit(args) {
     console.log(`first feature from its ${dim('features/_template.yml')}, then \`walkdown lint\`.`);
     console.log(dim('`walkdown where` shows every path this project uses.'));
   }
+}
+
+/*
+ * Print the pointer, or put it somewhere.
+ *
+ * A separate command because WHICH file an agent reads is a project's own
+ * business: CLAUDE.md, AGENTS.md, a pack-level one in a monorepo, or none at
+ * all because the team keeps conventions somewhere walkdown has never heard
+ * of. `init` handles the unambiguous cases; this handles the rest, and it is
+ * what the setup wizard will call once it has asked.
+ */
+async function cmdPointer(args) {
+  const { values } = parseArgs({
+    args,
+    options: { dir: { type: 'string' }, into: { type: 'string' } },
+  });
+  const { pointerBlock, pointerHomes, placePointer } = await import('../lib/init.js');
+  const root = resolve(values.dir ?? process.cwd());
+  const spec = resolveLocations({ cwd: root }).spec.path;
+  const block = pointerBlock(spec.startsWith(root + '/') ? `${spec.slice(root.length + 1)}/` : spec);
+
+  if (values.into) {
+    const file = resolve(root, values.into);
+    const action = placePointer(file, block);
+    const say = {
+      created: 'written to', 'pointer-appended': 'added to',
+      'pointer-updated': 'updated in', 'up-to-date': 'already current in',
+      kept: 'left alone (an unclosed walkdown:begin marker) in',
+    };
+    console.log(`${say[action] ?? action} ${file}`);
+    return;
+  }
+
+  process.stdout.write(block);
+  const homes = pointerHomes(root);
+  console.error(homes.length
+    ? `\n${dim(`Agent files here: ${homes.join(', ')}. `)}`
+      + dim('`--into <file>` puts the block in one, idempotently.')
+    : `\n${dim('No agent-instruction file here yet. `--into CLAUDE.md` makes one.')}`);
 }
 
 async function cmdRun(args) {
@@ -924,6 +971,7 @@ else if (cmd === 'serve') cmdServe(rest);
 else if (cmd === 'claims') cmdClaims(rest);
 else if (cmd === 'where') cmdWhere(rest);
 else if (cmd === 'move') cmdMove(rest);
+else if (cmd === 'pointer') cmdPointer(rest);
 else {
   console.log(HELP);
   process.exit(cmd && cmd !== 'help' && cmd !== '--help' ? 2 : 0);

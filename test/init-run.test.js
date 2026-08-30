@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
 import { loadBlueprint } from '../lib/blueprint.js';
-import { scaffold } from '../lib/init.js';
+import { placePointer, pointerBlock, scaffold } from '../lib/init.js';
 import { lint } from '../lib/lint.js';
 import { runChecks } from '../lib/run-cmd.js';
 
@@ -70,6 +70,56 @@ test('init appends a pointer to an existing CLAUDE.md exactly once', () => {
   const content = readFileSync(join(proj, 'CLAUDE.md'), 'utf8');
   assert.match(content, /^# My project/);
   assert.equal(content.match(/walkdown:begin/g).length, 1);
+});
+
+/*
+ * A project that keeps agent conventions in more than one file has already
+ * made a choice walkdown cannot read. Writing into all of them is noise and
+ * picking one is a guess, so init names them and leaves the tree alone.
+ */
+test('several agent files: init writes no pointer and says which they are', () => {
+  const proj = join(root, 'ambiguous');
+  mkdirSync(proj);
+  writeFileSync(join(proj, 'CLAUDE.md'), '# Mine\n');
+  writeFileSync(join(proj, 'AGENTS.md'), '# Also mine\n');
+  const results = scaffold(proj);
+  const undecided = results.find((r) => r.action === 'pointer-undecided');
+  assert.ok(undecided, 'the choice is reported');
+  assert.match(undecided.path, /CLAUDE\.md.*AGENTS\.md/);
+  for (const f of ['CLAUDE.md', 'AGENTS.md'])
+    assert.doesNotMatch(readFileSync(join(proj, f), 'utf8'), /walkdown:begin/, f);
+
+  // And the person (or the wizard) settles it by naming one.
+  assert.equal(placePointer(join(proj, 'AGENTS.md'), pointerBlock('blueprint/')), 'pointer-appended');
+  assert.match(readFileSync(join(proj, 'AGENTS.md'), 'utf8'), /walkdown blueprint in `blueprint\/`/);
+});
+
+test('a project with only an AGENTS.md gets the pointer there, not in a new CLAUDE.md', () => {
+  const proj = join(root, 'agents-only');
+  mkdirSync(proj);
+  writeFileSync(join(proj, 'AGENTS.md'), '# Conventions\n');
+  const results = scaffold(proj);
+  assert.equal(results.find((r) => r.path === 'AGENTS.md')?.action, 'pointer-appended');
+  assert.equal(existsSync(join(proj, 'CLAUDE.md')), false, 'no second file competing for the same job');
+});
+
+/*
+ * The pointer names where the spec is, and a spec can move. A block left
+ * saying `blueprint/` after the spec moved out is worse than no block at all,
+ * because an agent believes it and goes looking.
+ */
+test('a moved spec rewrites its own block and nothing around it', () => {
+  const proj = join(root, 'moved');
+  mkdirSync(proj);
+  const file = join(proj, 'CLAUDE.md');
+  writeFileSync(file, '# Head\n\n' + pointerBlock('blueprint/') + '\n## Tail\n');
+  assert.equal(placePointer(file, pointerBlock('/elsewhere/spec')), 'pointer-updated');
+  const after = readFileSync(file, 'utf8');
+  assert.match(after, /blueprint in `\/elsewhere\/spec`/);
+  assert.doesNotMatch(after, /`blueprint\/`/);
+  assert.equal(after.match(/walkdown:begin/g).length, 1, 'replaced, not appended');
+  assert.match(after, /^# Head/);
+  assert.match(after, /## Tail\n$/, "the person's own words survive on both sides");
 });
 
 test('run substitutes {id}, injects target env and WALKDOWN_TARGET, propagates exit code', () => {
