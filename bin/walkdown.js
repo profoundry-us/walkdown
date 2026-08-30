@@ -29,7 +29,7 @@ Usage:
                        [--reason <text>] [--actor <name>] [--dir <blueprint>] [--json]
   walkdown serve [--dir <blueprint>] [--port <n>]
   walkdown claims [--dir <blueprint>] [--url <address>] [--json]
-  walkdown where [--dir <blueprint>] [--json]
+  walkdown where [<kind>] [--dir <blueprint>] [--json]
 
 Commands:
   init    Scaffold blueprint/ in a project: config, storyboard, feature
@@ -64,8 +64,10 @@ Commands:
           to WALKDOWN_ACTOR or the OS username.
   where   Print where this project's pieces live and why each was chosen -
           the spec, the runs, the threads, the evidence, the drafts, and the
-          repository a run's git_sha comes from. Reads nothing but the
-          personal config and the working tree, and writes nothing at all.
+          repository a run's git_sha comes from. With a kind (spec, code,
+          runs, threads, evidence, drafts) prints that one path alone, for
+          scripts. Reads the personal config and the working tree, and
+          writes nothing at all.
   serve   Start the local viewer: status board, side-by-side prototype/app
           with the embed (pinning), and human walkdown recording. Also
           serves /embed.js and the pin/walkdown API.
@@ -123,11 +125,28 @@ function loadOrExit(dirOpt) {
  * situations, and only one of them is somebody's decision.
  */
 function cmdWhere(args) {
-  const { values } = parseArgs({
-    args, options: { dir: { type: 'string' }, json: { type: 'boolean', default: false } },
+  const { values, positionals } = parseArgs({
+    args, allowPositionals: true,
+    options: { dir: { type: 'string' }, json: { type: 'boolean', default: false } },
   });
   const loc = resolveLocations({ dir: values.dir });
   if (values.json) { console.log(JSON.stringify(loc, null, 2)); return end(0); }
+
+  /*
+   * One kind, one path, nothing else - so a script or a skill can ask
+   * `walkdown where evidence` and use the answer directly instead of parsing a
+   * report meant for a person.
+   */
+  const only = positionals[0];
+  if (only) {
+    const cell = only === 'spec' || only === 'code' ? loc[only] : (KINDS.includes(only) ? loc[only] : null);
+    if (!cell) {
+      console.error(`No such location "${only}". Try: spec, code, ${KINDS.join(', ')}.`);
+      return end(2);
+    }
+    console.log(cell.path ?? '');
+    return end(cell.path ? 0 : 1);
+  }
 
   console.log(`walkdown where — ${loc.id}\n`);
   const cfg = loc.config.exists

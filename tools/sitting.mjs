@@ -22,6 +22,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { parse } from 'yaml';
+import { resolveLocations } from '../lib/locations.js';
 
 const HERE = dirname(new URL(import.meta.url).pathname);
 const ROOT = join(HERE, '..');
@@ -782,10 +783,25 @@ const STATES = [
   },
 ];
 
+/** This machine's evidence root, falling back to the blueprint's own. */
+function evidenceRoot() {
+  try {
+    return resolveLocations({ dir: BP }).evidence.path;
+  } catch {
+    return join(BP, 'runs', 'evidence');
+  }
+}
+
 async function capture(only = []) {
   const { chromium } = await import('@playwright/test');
   const ts = stamp();
-  const dir = join(BP, 'runs', 'evidence', ts);
+  /*
+   * Ask where evidence goes rather than assuming the blueprint - it does not
+   * necessarily live in the repository (docs/08-locations.md). The ledger
+   * still records `runs/evidence/<ts>/…`, which is a logical key the server
+   * resolves per machine, so a moved evidence root needs no run record edited.
+   */
+  const dir = join(evidenceRoot(), ts);
   mkdirSync(dir, { recursive: true });
 
   /*
@@ -946,7 +962,7 @@ async function capture(only = []) {
   }
   await browser.close();
 
-  console.log(`\nevidence: blueprint/runs/evidence/${ts}/`);
+  console.log(`\nevidence: ${dir}  (recorded as runs/evidence/${ts}/)`);
   console.log(errors.length ? `\n${errors.length} PAGE ERROR(S):\n  ${errors.join('\n  ')}` : '\nno page errors in any state');
   writeFileSync(join(dir, 'errors.txt'), errors.join('\n') + '\n');
   return ts;

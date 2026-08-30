@@ -26,8 +26,15 @@ verify requirement).
    surfaces at the same viewport, e.g.
    `npx playwright screenshot --viewport-size=800,620 <url> <out>.png`.
    Resolve URLs through the storyboard only. Save under
-   `blueprint/runs/evidence/<ISO-timestamp>/` as `proto-<screen>.png` /
-   `app-<screen>.png`. If a screen has only a proposal (no `prototype:`), you
+   `$(walkdown where evidence)/<ISO-timestamp>/` as `proto-<screen>.png` /
+   `app-<screen>.png` — ask, never assume, because evidence does not
+   necessarily live in the repository (docs/08-locations.md).
+
+   **Record the paths as `runs/evidence/<ISO-timestamp>/<file>` whatever the
+   answer was.** That is a logical key, not a filesystem path: a run says which
+   evidence it left, never which disk somebody filed it on, and the server
+   resolves the key per machine. Writing an absolute path into a run record
+   would pin the ledger to your laptop. If a screen has only a proposal (no `prototype:`), you
    may compare against it but say so in your reasoning — a proposal is not
    design authority.
 
@@ -48,7 +55,8 @@ verify requirement).
      commits that never touched the blueprint
    - per rule: `status` (`pass`/`fail`), `statement_hash` (copy
      `steps.statement_hash` **only after** `walkdown hash` reports it `ok`),
-     `evidence` (the screenshot paths), and `reasoning` — one honest paragraph.
+     `evidence` (the `runs/evidence/…` keys from step 3, never absolute paths),
+     and `reasoning` — one honest paragraph.
 
 6. **Fails spawn threads.** For each failing rule, create a note anchored to
    the exact rule/screen/element (POST `/api/threads` while serve runs, or

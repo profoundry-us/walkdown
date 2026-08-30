@@ -141,11 +141,25 @@ matches.
 ### Where this stands
 
 `walkdown where` prints the resolver's answer for every path, with the reason each was
-chosen, and writes nothing. The **writers are not rewired yet** — `run-record.js`,
-`threads.js` and `draft.js` still compose their own paths from the blueprint directory. For
-any project whose blueprint already holds those directories, which is every project
-`walkdown init` has ever created, the two agree exactly. They diverge only for a project
-that has none of them yet, and closing that gap is what rewiring the writers means.
+chosen, and writes nothing. `walkdown where <kind>` prints one path alone, for scripts.
+
+**Evidence is fully wired.** It is written to the resolved root, and served from it — and
+because a run record's `runs/evidence/…` is a *logical key* rather than a filesystem path,
+moving evidence needs no run record edited, which the append-only law would have forbidden
+anyway. The server tries the configured root first and the blueprint second, so records
+written before any of this still find their screenshots.
+
+This repository has done it: 97 MB and 626 screenshots now live under
+`~/.walkdown/projects/walkdown/evidence`, and the spec, threads and runs stayed put. Note
+what that does *not* do — git history still holds every blob, so `.git` does not shrink.
+It stops growing, which is the part worth having; shrinking it means rewriting history,
+which is destructive and nobody's decision but the owner's.
+
+**Runs, threads and drafts are not rewired yet** — `run-record.js`, `threads.js` and
+`draft.js` still compose their own paths from the blueprint directory. For any project
+whose blueprint already holds those directories, which is every project `walkdown init`
+has ever created, resolver and reality agree exactly. They diverge only for a project that
+has none of them yet.
 
 ### Project ids
 
