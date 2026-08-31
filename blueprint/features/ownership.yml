@@ -12,6 +12,26 @@ stories:
         statement: An undesigned screen with no open design-request thread is flagged by lint; filing the request clears it.
         verify: [checks]
 
+  - id: ownership.writes
+    title: The server writes specification, never implementation
+    statement: As a team, we can let a browser talk to the review server because the only things a request can create are the things review is FOR - feedback, sittings, verdicts - and never the product itself.
+    rules:
+      - id: ownership.writes.spec-never-implementation
+        origin: thread:q-0019
+        statement: Through the review server a browser can write specification and only specification - a thread, a draft, a run record - and every such write passes through one module that is the complete list of them. No request can create or modify features, prototypes, source or checks, because the browser captures intent and the agent structures it; a write that lands anywhere but the resolved threads, drafts and runs directories is a breach, not a bug.
+        verify: [checks]
+        signoff: [eng, product]
+        steps:
+          given:
+            - A running review server, and a browser that can reach it
+          when:
+            - Every write the API offers is performed - a thread opened, a reply, a transition, a draft saved and discarded, a walkdown sealed
+          then:
+            - Everything that changed on disk is under the resolved threads, drafts or runs directories
+            - Nothing under features, the storyboard, the prototype root, source or checks moved by a byte
+            - The one module every write passes through names the author policy once, so a new writer cannot re-invent it
+          statement_hash: sha256:a966a60dc9bc
+
   - id: ownership.evidence
     title: A check is evidence only for what it actually exercises
     statement: As a team, we trust the checks column because a green cell means the described behaviour was exercised, not that something adjacent to it was.

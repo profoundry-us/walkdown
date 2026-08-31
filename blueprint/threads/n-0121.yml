@@ -5,36 +5,50 @@ created: 2026-08-28T04:25:00Z
 anchor:
   rule: panel.identity.attribution-visible
 status: open
-body: "The same bug was found five times tonight in five different places, and
-  the shape is worth naming because a sixth is likely.
+body: >-
+  The same bug was found five times tonight in five different places, and the
+  shape is worth naming because a sixth is likely.
 
   Every write the panel makes carries an author. Three of them expressed the
   author as `actor || undefined`, `...(msg.author && { author })`, or plain
   `actor: ''` - all of which READ as a default and are in fact a handoff: the
   key falls out of the JSON, and lib/serve.js completes it with
   `userInfo().username`. So a note, a reply, a pin and a reopen each went into
-  the ledger under the machine's username while the panel showed no name at
-  all. Each was fixed one at a time, and each fix was judged complete until the
-  next round of judging found the next one: postRuleNote, then postReply, then
-  the pin relay and the transition guard.
+  the ledger under the machine's username while the panel showed no name at all.
+  Each was fixed one at a time, and each fix was judged complete until the next
+  round of judging found the next one: postRuleNote, then postReply, then the
+  pin relay and the transition guard.
 
-  All four panel paths refuse now. The reason to keep this open is that the
-  fix is four guards rather than one property, and nothing stops a fifth
-  writer being added with the same shape. Two options worth weighing, neither
-  an agent's to choose:
+  All four panel paths refuse now. The reason to keep this open is that the fix
+  is four guards rather than one property, and nothing stops a fifth writer
+  being added with the same shape. Two options worth weighing, neither an
+  agent's to choose:
 
-  1. The server stops inventing an author. `lib/serve.js:368` and `:516` fill
-     a missing one; if they refused instead, every client would have to say
-     who it is and this class of bug would be a 400 rather than a wrong name
-     in the record. The cost is the standalone embed on a page with no panel,
-     which has no identity to send and where the machine's username is a
-     reasonable answer - so this probably means a client can DECLARE that it
-     has no identity, rather than staying silent and being guessed at.
-  2. The panel routes every write through one function that supplies the
-     actor and refuses without it, instead of four call sites each remembering.
+  1. The server stops inventing an author. `lib/serve.js:368` and `:516` fill a
+  missing one; if they refused instead, every client would have to say who it is
+  and this class of bug would be a 400 rather than a wrong name in the record.
+  The cost is the standalone embed on a page with no panel, which has no
+  identity to send and where the machine's username is a reasonable answer - so
+  this probably means a client can DECLARE that it has no identity, rather than
+  staying silent and being guessed at. 2. The panel routes every write through
+  one function that supplies the actor and refuses without it, instead of four
+  call sites each remembering.
 
-  Also observed, smaller: with a field emptied, the reload restores git's
-  answer rather than the empty value, because only non-empty strings are
-  restored (src/panel/app.js ~2618). That is arguably right - clearing a box
-  is how you undo - but it means 'emptied' is a state that only survives until
-  the next reload, which is worth being deliberate about."
+  Also observed, smaller: with a field emptied, the reload restores git's answer
+  rather than the empty value, because only non-empty strings are restored
+  (src/panel/app.js ~2618). That is arguably right - clearing a box is how you
+  undo - but it means 'emptied' is a state that only survives until the next
+  reload, which is worth being deliberate about.
+replies:
+  - author: agent
+    created: 2026-08-31T01:21:16Z
+    body: "Progress on the structural half: every write a browser can cause now
+      passes through one module, lib/writes.js, and the author default is one
+      function there (asWho) instead of four call sites - a fifth writer now
+      inherits the policy rather than re-inventing the handoff. The open
+      question this thread poses (should the server refuse a missing author
+      instead of guessing, with clients able to declare they have no identity?)
+      is now a one-function decision, but it is still undecided and still yours:
+      option 1 changes what the standalone embed can do. Rule
+      ownership.writes.spec-never-implementation and test/writes.test.js hold
+      the boundary in the meantime."

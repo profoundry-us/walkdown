@@ -3,7 +3,15 @@
  * cause to land on disk, and where.
  */
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -36,7 +44,8 @@ function project({ movedThreads = false } = {}) {
     ].join('\n'),
   );
   const threadsDir = join(home, 'moved-threads');
-  if (movedThreads) writeFileSync(join(home, 'config.yml'), `defaults:\n  threads: ${threadsDir}\n`);
+  if (movedThreads)
+    writeFileSync(join(home, 'config.yml'), `defaults:\n  threads: ${threadsDir}\n`);
   return { root, bp, threadsDir, cleanup: () => rmSync(root, { recursive: true, force: true }) };
 }
 
@@ -107,4 +116,120 @@ test('a pin on a fresh project creates the threads directory it needs', async ()
   } finally {
     p.cleanup();
   }
+});
+
+/* Every file under a root, with its mtime+size, so a test can say what moved. */
+function snapshot(dir, prefix = '') {
+  const out = new Map();
+  let entries;
+  try {
+    entries = readdirSync(dir, { withFileTypes: true });
+  } catch {
+    return out;
+  }
+  for (const e of entries.sort((a, b) => a.name.localeCompare(b.name))) {
+    const rel = prefix + e.name;
+    if (e.isDirectory()) for (const [k, v] of snapshot(join(dir, e.name), rel + '/')) out.set(k, v);
+    else {
+      const s = statSync(join(dir, e.name));
+      out.set(rel, `${s.size}:${s.mtimeMs}`);
+    }
+  }
+  return out;
+}
+
+/*
+ * The whole allowlist, exercised, and then the strongest claim a test can
+ * make about a boundary: not "the right files changed" but "NOTHING ELSE
+ * did". Every write the API offers runs against a real server, and every
+ * changed path in the entire project tree - spec, prototype, source, home -
+ * must sit under the resolved threads, drafts or runs directories.
+ */
+test('every write the API offers lands in threads, drafts or runs - and nowhere else @rule:ownership.writes.spec-never-implementation', async () => {
+  const p = project();
+  try {
+    mkdirSync(join(p.root, 'proj', 'src'), { recursive: true });
+    writeFileSync(join(p.root, 'proj', 'src', 'app.js'), '// the implementation\n');
+    await serve(p.bp, async (base) => {
+      const before = snapshot(p.root);
+
+      const opened = await post(base, '/api/threads', {
+        kind: 'note',
+        body: 'pin',
+        author: 'tester',
+        anchor: { rule: 'demo.main.thing' },
+      });
+      assert.ok(opened.ok);
+      const id = opened.data.id;
+      assert.ok(
+        (await post(base, `/api/threads/${id}/replies`, { author: 'tester', body: 'more' })).ok,
+      );
+      assert.ok(
+        (await post(base, `/api/threads/${id}/status`, { status: 'addressed', actor: 'tester' }))
+          .ok,
+      );
+      assert.ok(
+        (
+          await post(base, '/api/draft', {
+            target: 'local',
+            actor: 'tester',
+            started: '2026-01-01T00:00:00Z',
+            verdicts: { 'demo.main.thing': 'pass' },
+          })
+        ).ok,
+      );
+      assert.ok((await post(base, '/api/draft', { target: 'local', discard: true })).ok);
+      const sealed = await post(base, '/api/walkdowns', {
+        actor: 'tester',
+        target: 'local',
+        results: [{ rule: 'demo.main.thing', status: 'pass' }],
+      });
+      assert.ok(sealed.ok, JSON.stringify(sealed.data));
+
+      const after = snapshot(p.root);
+      const loc = loadBlueprint(p.bp).at;
+      const allowed = [loc.threads.path, loc.drafts.path, loc.runs.path].map(
+        (abs) => abs.slice(p.root.length + 1) + '/',
+      );
+      const changed = [...new Set([...before.keys(), ...after.keys()])].filter(
+        (k) => before.get(k) !== after.get(k),
+      );
+      assert.ok(changed.length >= 2, 'the writes actually wrote');
+      for (const path of changed)
+        assert.ok(
+          allowed.some((root) => path.startsWith(root)),
+          `${path} changed, outside ${allowed.join(', ')}`,
+        );
+    });
+  } finally {
+    p.cleanup();
+  }
+});
+
+/*
+ * The same claim, held structurally: the modules a request flows through may
+ * not carry a writer of their own. Read the source, like the one-matcher
+ * check does - a handler that imported writeFileSync would pass every
+ * behavioural test until the day it was used.
+ */
+test('only writes.js may write: the request path imports no writer of its own @rule:ownership.writes.spec-never-implementation', () => {
+  const requestPath = ['lib/serve.js', 'lib/api.js', 'lib/identity.js'];
+  const WRITERS =
+    /\b(writeFileSync|appendFileSync|mkdirSync|rmSync|renameSync|cpSync|unlinkSync|createWriteStream)\b/;
+  for (const file of requestPath) {
+    const src = readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
+    const imports = src.match(/^import[^;]+from\s+'[^']+';/gms) ?? [];
+    for (const line of imports)
+      assert.ok(
+        !WRITERS.test(line),
+        `${file} imports a filesystem writer: ${line.trim()} - route it through lib/writes.js`,
+      );
+  }
+  // The router must not reach the mutating modules at all - not even
+  // writes.js, so a new route cannot mutate without going through the API
+  // layer where validation lives. api.js reads drafts and validates roles,
+  // so its line is drawn at the filesystem writers above.
+  const serveSrc = readFileSync(new URL('../lib/serve.js', import.meta.url), 'utf8');
+  for (const banned of ["'./threads.js'", "'./draft.js'", "'./run-record.js'", "'./writes.js'"])
+    assert.ok(!serveSrc.includes(`from ${banned}`), `serve.js imports ${banned}`);
 });
