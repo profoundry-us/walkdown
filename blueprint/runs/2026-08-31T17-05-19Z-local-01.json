@@ -1,0 +1,24 @@
+{
+  "kind": "walkdown",
+  "actor": "agent",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "created": "2026-08-31T17:10:15Z",
+  "git_sha": "b1dd2b0",
+  "spec_hash": "sha256:42106cbc07b9",
+  "note": "First prompt-driven judging run: the prompt assembled by `walkdown judge panel.viewport.device-presets`, the verdict earned by the agent driving its own browser. One rule, by design.",
+  "results": [
+    {
+      "rule": "panel.viewport.device-presets",
+      "status": "pass",
+      "statement_hash": "sha256:2ded288a785a",
+      "evidence": [
+        "runs/evidence/2026-08-31T17-05-19Z/probes.json",
+        "runs/evidence/2026-08-31T17-05-19Z/panel-fit.png",
+        "runs/evidence/2026-08-31T17-05-19Z/panel-mobile.png",
+        "runs/evidence/2026-08-31T17-05-19Z/panel-desktop.png"
+      ],
+      "reasoning": "Judged live in the framed layout on screen review with the fade at 50 so the ghost rendered throughout. The control reads as devices, not numbers: Fit is a word, desktop and mobile are icons with empty text, and the widths live only in the tooltips (\"Desktop — lay the page out at 1440px\", \"Mobile — lay the page out at 390px\"). Choosing mobile re-rendered both iframes at a true 390x664 with no transform — the stand-in re-flowed into a narrow column rather than shrinking a desktop rendering — and the corner badge read 390px. Switching to desktop restored both to a 1440px layout, each carrying the identical scale matrix(0.597222) to fit the 860px box, with the badge honestly saying \"1440px · fit 60%\". At every state measured, frame and ghost agreed exactly in CSS width, rect, and transform. One observation outside this rule's claim: the stand-in's own header wraps scruffily at 390 — that is the app's rendering, which the frame reported honestly, exactly its job. Panel state (Fit, fade 100) restored after judging; nothing was written."
+    }
+  ]
+}
