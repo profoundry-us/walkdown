@@ -4,7 +4,7 @@
  * conversations anchored to it.
  */
 import { MSG } from '../../lib/message-stream.js';
-import { html, nothing } from '../../vendor/lit.js';
+import { html, live, nothing } from '../../vendor/lit.js';
 import { postRuleNote, sayFiling, verifyAll } from './conversation.js';
 import { tierMarks } from './rules-list.js';
 import { openSettings, requestReload, requestRender } from './shell.js';
@@ -331,9 +331,10 @@ export function detailPane() {
             ? 'Why? Anything written here is filed as a note with your verdict.'
             : 'What should change? Refine files this as the rule’s feedback.'
         }"
+        .value=${live(S.verdictNote)}
         @input=${(e) => {
           S.verdictNote = e.currentTarget.value;
-        }}>${S.verdictNote}</textarea>
+        }}></textarea>
         ${
           r.built
             ? html`<div class="flex gap-2" data-testid="detail.verdict">
@@ -448,9 +449,10 @@ export function detailPane() {
         <textarea id="wdp-rulenote" data-testid="detail.new-thread-box" rows="2"
           class="textarea textarea-xs w-full resize-none"
           placeholder="Start a conversation about this rule…"
+          .value=${live(S.ruleNote)}
           @input=${(e) => {
             S.ruleNote = e.currentTarget.value;
-          }}>${S.ruleNote}</textarea>
+          }}></textarea>
         <div class="mt-1 flex items-center gap-2">
           <span class="text-[10px] opacity-40">as <button id="wdp-nactor" class="link" @click=${openSettings}>${whoAmI() || 'set your name…'}</button></span>
           <button class="btn btn-xs btn-outline ml-auto" data-testid="detail.new-thread-post"
