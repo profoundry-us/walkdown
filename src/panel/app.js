@@ -73,8 +73,11 @@ import { api, esc } from './util.js';
 import { frameLoading, hideVeil, placeVeil, screenLabel, veilIsUp } from './veil.js';
 import {
   CHIP,
+  FLOWS,
+  HUMAN_ONLY,
   isHeadless,
   LBL,
+  NEEDS_REASON,
   needsYou,
   owedRows,
   ruleScreen,
@@ -966,34 +969,31 @@ export function ghostSource(screen) {
   return null;
 }
 
+/*
+ * The verbs are the panel's; which transitions exist is the lifecycle's.
+ * This used to be a hand-copy of the whole FLOWS table with labels attached,
+ * which is precisely the two-runtimes drift vocab.js exists to end: the menu
+ * now cannot offer a move the server would refuse, or hide one it allows.
+ */
+const VERB = {
+  addressed: 'Addressed',
+  verified: '\u2713 Verify',
+  answered: 'Answer',
+  incorporated: 'Incorporated',
+  open: 'Reopen',
+  waived: 'Waive',
+};
+
 /** Short verbs, and only the transitions this kind and status allow. */
 export function threadActions(t) {
-  if (t.kind === 'note') {
-    if (t.status === 'open')
-      return [
-        ['Addressed', 'addressed'],
-        ['Waive', 'waived', true],
-      ];
-    if (t.status === 'addressed')
-      return [
-        ['\u2713 Verify', 'verified'],
-        ['Reopen', 'open'],
-        ['Waive', 'waived', true],
-      ];
-  } else {
-    if (t.status === 'open')
-      return [
-        ['Answer', '__answer'],
-        ['Waive', 'waived', true],
-      ];
-    if (t.status === 'answered')
-      return [
-        ['Incorporated', 'incorporated'],
-        ['Reopen', 'open'],
-        ['Waive', 'waived', true],
-      ];
-  }
-  return [];
+  return (FLOWS[t.kind] ?? FLOWS.note)[t.status]?.map((next) => [
+    VERB[next],
+    // Answering is a reply that carries the transition, not a bare status
+    // change — the panel routes it through the reply box.
+    t.kind === 'question' && next === 'answered' ? '__answer' : next,
+    // The one visually-marked action: waiving buries work.
+    next === 'waived' || undefined,
+  ]) ?? [];
 }
 
 // ---- render ---------------------------------------------------------------
@@ -1806,7 +1806,7 @@ async function threadAct(id, status) {
   if (!t) return;
   const text = (D.host.querySelector('#wdp-note')?.value ?? '').trim();
   const actor = whoAmI();
-  const humanOnly = status === 'verified' || status === 'waived';
+  const humanOnly = HUMAN_ONLY.includes(status);
   // Agents claim work; a person accepts it. The server refuses this too —
   // saying so here means you find out before you have written the reason.
   if (humanOnly && (!actor || actor === 'agent')) {
@@ -1842,7 +1842,7 @@ async function threadAct(id, status) {
       await load();
     return;
   }
-  const needsReason = status === 'waived' || status === 'open';
+  const needsReason = NEEDS_REASON.includes(status);
   if (needsReason && !text)
     return say(
       `${status === 'waived' ? 'Waiving' : 'Reopening'} is recorded with a reason \u2014 write it above, then press again.`,
@@ -2630,7 +2630,7 @@ function pinsForScreen(id) {
   if (!id) return [];
   return (S.data?.threads ?? [])
     .filter(
-      (t) => t.anchor?.screen === id && !['incorporated', 'verified', 'waived'].includes(t.status),
+      (t) => t.anchor?.screen === id && !TERMINAL.includes(t.status),
     )
     .map((t) => ({
       id: t.id,

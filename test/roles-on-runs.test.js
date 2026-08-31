@@ -11,7 +11,8 @@ import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSyn
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, before, test } from 'node:test';
-import { normalizeRoles, ROLES, writeRunRecord } from '../lib/run-record.js';
+import { normalizeRoles, writeRunRecord } from '../lib/run-record.js';
+import { ROLES } from '../lib/vocab.js';
 import { createWalkdownServer, defaultActor } from '../lib/serve.js';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-roles-'));

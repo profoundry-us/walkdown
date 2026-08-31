@@ -29,6 +29,7 @@ const TARGETS = [join(ROOT, 'lib', 'viewer', 'embed.js')];
 const BLOCKS = [
   { name: 'screen-match', source: join(ROOT, 'lib', 'screen-match.js') },
   { name: 'message-stream', source: join(ROOT, 'lib', 'message-stream.js') },
+  { name: 'vocab', source: join(ROOT, 'lib', 'vocab.js') },
 ];
 const INDENT = '  ';
 

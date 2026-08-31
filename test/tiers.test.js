@@ -10,7 +10,8 @@
  */
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { excuseFor, signoffList, TIERS, verifyList } from '../lib/blueprint.js';
+import { excuseFor, signoffList, verifyList } from '../lib/blueprint.js';
+import { TIERS } from '../lib/vocab.js';
 
 const EXCUSE = 'The control is the browser toolbar, which no tool an agent drives can reach.';
 
