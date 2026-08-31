@@ -114,12 +114,16 @@ const dim = (s) => (tty ? `\x1b[2m${s}\x1b[0m` : s);
  * the pipe's buffer - 128KB, which a real blueprint passes without warning.
  * Setting the code lets the write drain and the process end on its own.
  */
-const end = (code) => { process.exitCode = code; };
+const end = (code) => {
+  process.exitCode = code;
+};
 
 function loadOrExit(dirOpt) {
   const dir = dirOpt ?? findBlueprintDir();
   if (!dir) {
-    console.error('No blueprint found: no walkdown.yml in ./, ./blueprint/, or ancestors. Use --dir.');
+    console.error(
+      'No blueprint found: no walkdown.yml in ./, ./blueprint/, or ancestors. Use --dir.',
+    );
     process.exit(2);
   }
   return loadBlueprint(dir);
@@ -144,11 +148,15 @@ function loadOrExit(dirOpt) {
  */
 function cmdWhere(args) {
   const { values, positionals } = parseArgs({
-    args, allowPositionals: true,
+    args,
+    allowPositionals: true,
     options: { dir: { type: 'string' }, json: { type: 'boolean', default: false } },
   });
   const loc = resolveLocations({ dir: values.dir });
-  if (values.json) { console.log(JSON.stringify(loc, null, 2)); return end(0); }
+  if (values.json) {
+    console.log(JSON.stringify(loc, null, 2));
+    return end(0);
+  }
 
   /*
    * One kind, one path, nothing else - so a script or a skill can ask
@@ -157,7 +165,8 @@ function cmdWhere(args) {
    */
   const only = positionals[0];
   if (only) {
-    const cell = only === 'spec' || only === 'code' ? loc[only] : (KINDS.includes(only) ? loc[only] : null);
+    const cell =
+      only === 'spec' || only === 'code' ? loc[only] : KINDS.includes(only) ? loc[only] : null;
     if (!cell) {
       console.error(`No such location "${only}". Try: spec, code, ${KINDS.join(', ')}.`);
       return end(2);
@@ -168,8 +177,11 @@ function cmdWhere(args) {
 
   console.log(`walkdown where — ${loc.id}\n`);
   const cfg = loc.config.exists
-    ? (loc.config.error ? red(`unreadable — ${loc.config.error}`)
-      : loc.config.matched ? green('names this project') : dim('present, no entry for this project'))
+    ? loc.config.error
+      ? red(`unreadable — ${loc.config.error}`)
+      : loc.config.matched
+        ? green('names this project')
+        : dim('present, no entry for this project')
     : dim('not present — every default applies');
   console.log(`  ${'config'.padEnd(9)} ${loc.config.path}`);
   console.log(`  ${''.padEnd(9)} ${cfg}\n`);
@@ -197,7 +209,8 @@ function cmdWhere(args) {
  */
 function cmdMove(args) {
   const { values, positionals } = parseArgs({
-    args, allowPositionals: true,
+    args,
+    allowPositionals: true,
     options: { to: { type: 'string' }, dir: { type: 'string' } },
   });
   const kind = positionals[0];
@@ -205,17 +218,25 @@ function cmdMove(args) {
     console.error(`walkdown move <kind> --to <path>\n  kind is one of: ${KINDS.join(', ')}`);
     return end(2);
   }
-  if (!values.to) { console.error('move needs --to <path>'); return end(2); }
+  if (!values.to) {
+    console.error('move needs --to <path>');
+    return end(2);
+  }
 
   const loc = resolveLocations({ dir: values.dir });
   const from = loc[kind].path;
   const to = resolve(values.to.replace(/^~(?=$|\/)/, homedir()));
-  if (from === to) { console.log(`${kind} is already at ${to}`); return end(0); }
+  if (from === to) {
+    console.log(`${kind} is already at ${to}`);
+    return end(0);
+  }
 
   const held = (d) => (existsSync(d) ? readdirSync(d).filter((f) => !f.startsWith('.')) : []);
   if (held(to).length) {
     console.error(red(`${to} already holds ${held(to).length} file(s).`));
-    console.error('Two ledgers merged into one directory is an edit of both. Pick an empty destination.');
+    console.error(
+      'Two ledgers merged into one directory is an edit of both. Pick an empty destination.',
+    );
     return end(2);
   }
 
@@ -234,40 +255,60 @@ function cmdMove(args) {
 
 function cmdClaims(args) {
   const { values } = parseArgs({
-    args, options: { dir: { type: 'string' }, url: { type: 'string' }, json: { type: 'boolean' } },
+    args,
+    options: { dir: { type: 'string' }, url: { type: 'string' }, json: { type: 'boolean' } },
   });
   const dir = values.dir ?? findBlueprintDir();
   if (!dir) {
-    console.error('No blueprint found: no walkdown.yml in ./, ./blueprint/, or ancestors. Use --dir.');
+    console.error(
+      'No blueprint found: no walkdown.yml in ./, ./blueprint/, or ancestors. Use --dir.',
+    );
     return end(2);
   }
   const baseRoot = dirname(resolve(dir));
-  const projects = discoverBlueprints(baseRoot).map((p) => ({ id: p.id, blueprint: loadBlueprint(p.dir) }));
+  const projects = discoverBlueprints(baseRoot).map((p) => ({
+    id: p.id,
+    blueprint: loadBlueprint(p.dir),
+  }));
 
   if (values.url) {
     const hit = blueprintForUrl(projects, values.url);
-    if (values.json) { console.log(JSON.stringify({ url: values.url, match: hit }, null, 2)); return end(0); }
-    if (!hit) { console.log(`no blueprint claims ${values.url}`); return end(1); }
+    if (values.json) {
+      console.log(JSON.stringify({ url: values.url, match: hit }, null, 2));
+      return end(0);
+    }
+    if (!hit) {
+      console.log(`no blueprint claims ${values.url}`);
+      return end(1);
+    }
     console.log(`${values.url}\n  ${hit.id} — screen ${hit.screen} (target ${hit.target})`);
     return end(0);
   }
 
   const clashes = findCollisions(projects);
   if (values.json) {
-    console.log(JSON.stringify({ projects: projects.map((p) => p.id), collisions: clashes }, null, 2));
+    console.log(
+      JSON.stringify({ projects: projects.map((p) => p.id), collisions: clashes }, null, 2),
+    );
     return end(clashes.length ? 1 : 0);
   }
   if (!clashes.length) {
     const total = projects.reduce((n, p) => n + claimsOf(p.blueprint).length, 0);
-    console.log(`\u2713 ${projects.length} blueprint(s), ${total} claim(s) — no page claimed twice`);
+    console.log(
+      `\u2713 ${projects.length} blueprint(s), ${total} claim(s) — no page claimed twice`,
+    );
     return end(0);
   }
   for (const c of clashes) {
-    console.log(`\u2717 ${c.key} is claimed by ${new Set(c.claimants.map((x) => x.blueprint)).size} blueprints:`);
+    console.log(
+      `\u2717 ${c.key} is claimed by ${new Set(c.claimants.map((x) => x.blueprint)).size} blueprints:`,
+    );
     for (const who of c.claimants)
       console.log(`    ${who.blueprint} — screen ${who.screen} (target ${who.target})`);
   }
-  console.log(`\n${clashes.length} page(s) claimed more than once. A page belongs to exactly one blueprint.`);
+  console.log(
+    `\n${clashes.length} page(s) claimed more than once. A page belongs to exactly one blueprint.`,
+  );
   return end(1);
 }
 
@@ -296,14 +337,18 @@ function cmdLint(args) {
     console.log(level === 'error' ? red('ERRORS') : yellow('WARNINGS'));
     for (const f of group) {
       const where = [f.file, f.subject].filter(Boolean).join(' › ');
-      console.log(`  ${level === 'error' ? red('✗') : yellow('⚠')} [${f.category}] ${where ? `${where}: ` : ''}${f.message}`);
+      console.log(
+        `  ${level === 'error' ? red('✗') : yellow('⚠')} [${f.category}] ${where ? `${where}: ` : ''}${f.message}`,
+      );
     }
     console.log('');
   }
   const s = summary;
   const counts = `${s.rules} rules, ${s.screens} screens, ${s.anchors} anchors, ${s.threads} threads, ${s.runs} runs`;
   const verdict = s.errors ? red(`${s.errors} error(s)`) : green('0 errors');
-  console.log(`${s.errors ? red('✗') : green('✓')} ${counts} — ${verdict}, ${s.warnings} warning(s)`);
+  console.log(
+    `${s.errors ? red('✗') : green('✓')} ${counts} — ${verdict}, ${s.warnings} warning(s)`,
+  );
   return end(exitCode);
 }
 
@@ -315,10 +360,18 @@ function cmdHash(args) {
   const blueprint = loadOrExit(values.dir);
   const { rows, changedFiles, exitCode } = runHashCommand(blueprint, { write: values.write });
 
-  const mark = { ok: green('✓'), written: green('✓'), stale: red('✗'), missing: yellow('⚠'), 'no-steps': dim('–') };
-  for (const r of rows) console.log(`  ${mark[r.status]} ${r.status.padEnd(8)} ${r.rule} ${dim(r.expected)}`);
+  const mark = {
+    ok: green('✓'),
+    written: green('✓'),
+    stale: red('✗'),
+    missing: yellow('⚠'),
+    'no-steps': dim('–'),
+  };
+  for (const r of rows)
+    console.log(`  ${mark[r.status]} ${r.status.padEnd(8)} ${r.rule} ${dim(r.expected)}`);
   if (values.write) console.log(`\n${changedFiles} file(s) updated`);
-  else if (exitCode) console.log(`\n${red('stale/missing hashes')} — run \`walkdown hash --write\``);
+  else if (exitCode)
+    console.log(`\n${red('stale/missing hashes')} — run \`walkdown hash --write\``);
   return end(exitCode);
 }
 
@@ -326,15 +379,31 @@ function cmdHash(args) {
  *  `walkdown threads --rule <id>` shows the full list. */
 function formatThreads(threads) {
   if (!threads.length) return '—';
-  const shown = threads.slice(0, 2).map((t) => `${t.id} ${t.status}`).join(', ');
+  const shown = threads
+    .slice(0, 2)
+    .map((t) => `${t.id} ${t.status}`)
+    .join(', ');
   return threads.length > 2 ? `${shown} +${threads.length - 2}` : shown;
 }
 
-const paint = { pass: green, fail: red, stale: yellow, blocked: yellow, never: dim, skipped: dim, na: dim, approved: yellow, refining: yellow };
+const paint = {
+  pass: green,
+  fail: red,
+  stale: yellow,
+  blocked: yellow,
+  never: dim,
+  skipped: dim,
+  na: dim,
+  approved: yellow,
+  refining: yellow,
+};
 const cellText = (cell, withActor = false) => {
   if (cell.state === 'na') return '·';
   if (cell.state === 'never') return 'never';
-  const glyph = { pass: '✓', fail: '✗', stale: '~', skipped: '–', blocked: '⊘', approved: '✍︎', refining: '✎︎' }[cell.state] ?? '?';
+  const glyph =
+    { pass: '✓', fail: '✗', stale: '~', skipped: '–', blocked: '⊘', approved: '✍︎', refining: '✎︎' }[
+      cell.state
+    ] ?? '?';
   const label = withActor && cell.actor ? cell.actor : cell.state;
   return `${glyph} ${label}`;
 };
@@ -377,7 +446,9 @@ const acceptanceCell = (acceptance) => {
   return { text: parts.map(([s]) => s).join(''), parts };
 };
 const truncate = (s, n) => {
-  const text = String(s ?? '').trim().replace(/\s+/g, ' ');
+  const text = String(s ?? '')
+    .trim()
+    .replace(/\s+/g, ' ');
   return [...text].length > n ? [...text].slice(0, n - 1).join('') + '…' : text;
 };
 
@@ -398,7 +469,10 @@ function renderRuleDetail(blueprint, derived, ruleId, json) {
      */
     const gone = retiredRules(blueprint).find((r) => r.rule === ruleId);
     if (gone) {
-      if (json) { console.log(JSON.stringify({ ...gone, state: 'retired' }, null, 2)); return end(0); }
+      if (json) {
+        console.log(JSON.stringify({ ...gone, state: 'retired' }, null, 2));
+        return end(0);
+      }
       console.log(`${gone.rule} · ${dim('retired')}`);
       console.log(`  ${dim(gone.statement)}`);
       console.log(`\n  ${yellow('RETIRED')}\n  ${gone.retired}`);
@@ -414,12 +488,18 @@ function renderRuleDetail(blueprint, derived, ruleId, json) {
     return end(exitCode);
   }
 
-  const verdictWord = { pass: green('verified'), fail: red('failing'), pending: yellow('pending') }[row.verdict];
+  const verdictWord = { pass: green('verified'), fail: red('failing'), pending: yellow('pending') }[
+    row.verdict
+  ];
   console.log(`${row.rule} · ${verdictWord}`);
   console.log(`  ${row.statement ?? dim('(no statement)')}`);
-  console.log(dim(`  story ${row.story} · verify ${row.verify.join(', ') || 'nothing'}`
-    + ` · signed by ${row.acceptance.map((a) => a.role).join(', ')}`
-    + ` · screens ${row.screens.join(', ') || '—'}`));
+  console.log(
+    dim(
+      `  story ${row.story} · verify ${row.verify.join(', ') || 'nothing'}` +
+        ` · signed by ${row.acceptance.map((a) => a.role).join(', ')}` +
+        ` · screens ${row.screens.join(', ') || '—'}`,
+    ),
+  );
 
   if (row.steps) {
     console.log(`\n  ${dim('STEPS')}`);
@@ -435,10 +515,13 @@ function renderRuleDetail(blueprint, derived, ruleId, json) {
   ].filter(([, cell]) => cell.state !== 'na');
   for (const [label, cell] of sources) {
     const state = (paint[cell.state] ?? ((s) => s))(cellText(cell));
-    const provenance = cell.runId ? dim(`  ${cell.runId}${cell.created ? ` · ${cell.created}` : ''}`) : '';
+    const provenance = cell.runId
+      ? dim(`  ${cell.runId}${cell.created ? ` · ${cell.created}` : ''}`)
+      : '';
     console.log(`    ${label.padEnd(15)}${state}${provenance}`);
     if (cell.detail) console.log(dim(`                   ${truncate(cell.detail, 90)}`));
-    if (cell.evidence?.length) console.log(dim(`                   evidence: ${cell.evidence.join(', ')}`));
+    if (cell.evidence?.length)
+      console.log(dim(`                   evidence: ${cell.evidence.join(', ')}`));
   }
   /*
    * The excuses, in full, under the evidence that is missing because of them.
@@ -460,8 +543,14 @@ function renderRuleDetail(blueprint, derived, ruleId, json) {
   console.log(`\n  ${dim('ACCEPTANCE')}`);
   for (const a of row.acceptance) {
     const [glyph, colour] = ACCEPT_MARK[a.state] ?? ['?', yellow];
-    const label = { signed: 'signed', approved: 'approved the wording', 'sent-back': 'sent back',
-      stale: 'signed an older wording', none: 'not yet' }[a.state] ?? a.state;
+    const label =
+      {
+        signed: 'signed',
+        approved: 'approved the wording',
+        'sent-back': 'sent back',
+        stale: 'signed an older wording',
+        none: 'not yet',
+      }[a.state] ?? a.state;
     const by = a.actor ? ` by ${a.actor}` : '';
     const provenance = a.runId ? dim(`  ${a.runId}${a.created ? ` · ${a.created}` : ''}`) : '';
     console.log(`    ${a.role.padEnd(15)}${colour(`${glyph} ${label}${by}`)}${provenance}`);
@@ -491,8 +580,14 @@ function cmdStatus(args) {
   const blueprint = loadOrExit(values.dir);
   if (values.retired) {
     const gone = retiredRules(blueprint);
-    if (values.json) { console.log(JSON.stringify(gone, null, 2)); return end(0); }
-    if (!gone.length) { console.log('No retired rules.'); return end(0); }
+    if (values.json) {
+      console.log(JSON.stringify(gone, null, 2));
+      return end(0);
+    }
+    if (!gone.length) {
+      console.log('No retired rules.');
+      return end(0);
+    }
     console.log(dim(`retired rules — ${blueprint.dir}\n`));
     for (const r of gone) console.log(`  ${yellow(r.rule)}\n    ${r.retired}\n`);
     console.log(dim(`${gone.length} rule(s) withdrawn. Their verdicts stay in the ledger.`));
@@ -515,7 +610,21 @@ function cmdStatus(args) {
     // `sweeps` rides along because the JSON is the surface agents read
     // (blueprint/AGENTS.md), and it was the one place an open sweep - its
     // date, its reason, what it still owes - could not be seen at all.
-    console.log(JSON.stringify({ targets, rows, drift: derived.drift, attention: derived.attention, sweeps: derived.sweeps, drafts, activeThreads: listThreads(blueprint) }, null, 2));
+    console.log(
+      JSON.stringify(
+        {
+          targets,
+          rows,
+          drift: derived.drift,
+          attention: derived.attention,
+          sweeps: derived.sweeps,
+          drafts,
+          activeThreads: listThreads(blueprint),
+        },
+        null,
+        2,
+      ),
+    );
     return end(rows.some((r) => r.verdict === 'fail') ? 1 : 0);
   }
 
@@ -527,7 +636,14 @@ function cmdStatus(args) {
    * header changed with the meaning on purpose: a column called HUMAN that had
    * quietly become something else is how a report starts being misread.
    */
-  const headers = ['', 'RULE', ...targets.map((t) => t.toUpperCase()), 'AGENT', 'ACCEPTED', 'THREADS'];
+  const headers = [
+    '',
+    'RULE',
+    ...targets.map((t) => t.toUpperCase()),
+    'AGENT',
+    'ACCEPTED',
+    'THREADS',
+  ];
   const table = rows.map((r) => [
     verdictMark[r.verdict],
     r.rule,
@@ -539,7 +655,7 @@ function cmdStatus(args) {
 
   const plain = (c) => (typeof c === 'string' ? c : c.text);
   const widths = headers.map((h, i) =>
-    Math.max(h.length, ...table.map((row) => [...plain(row[i])].length))
+    Math.max(h.length, ...table.map((row) => [...plain(row[i])].length)),
   );
   const renderCell = (c, i) => {
     const text = plain(c);
@@ -561,7 +677,7 @@ function cmdStatus(args) {
     `\n${counts.pass ?? 0} verified, ${counts.pending ?? 0} pending, ${counts.fail ?? 0} failing` +
       (open.length
         ? dim(` — ${open.map((s) => `${s.of - s.done} awaiting the ${s.tier} sweep`).join(', ')}`)
-        : '')
+        : ''),
   );
 
   /*
@@ -576,7 +692,9 @@ function cmdStatus(args) {
       ? `${yellow('SWEEP')} ${s.tier} on ${s.target} — ${s.done}/${s.of} judged, ${yellow(String(left))} to go`
       : `${green('SWEEP')} ${s.tier} on ${s.target} — ${s.done}/${s.of}, complete`;
     console.log(`\n  ${head}`);
-    console.log(dim(`  ${s.runId}${s.actor ? ` by ${s.actor}` : ''} — ${s.why ?? 'no reason recorded'}`));
+    console.log(
+      dim(`  ${s.runId}${s.actor ? ` by ${s.actor}` : ''} — ${s.why ?? 'no reason recorded'}`),
+    );
     /*
      * Every one of them, uncapped. A sweep's owed list IS the work - the rule
      * it answers says they are "listed as work, not merely counted" - and the
@@ -594,13 +712,18 @@ function cmdStatus(args) {
     // whether it needs PRODUCT or engineering, and a queue that cannot say
     // which is a queue two people both scroll past.
     judge: (i) => `walk down ${i.rule} — ${i.role ?? 'nobody'} has not accepted it yet`,
-    verify: (i) => `verify ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — fix claimed, awaiting your judgment`,
+    verify: (i) =>
+      `verify ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — fix claimed, awaiting your judgment`,
     answer: (i) => `answer ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''}`,
     address: (i) => `address ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — open note`,
-    incorporate: (i) => `incorporate ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — answered, fold it into the rule`,
+    incorporate: (i) =>
+      `incorporate ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — answered, fold it into the rule`,
     cover: (i) => `cover ${i.rule} — demands checks, and no check claims it`,
   };
-  for (const [who, title] of [['human', 'NEEDS A HUMAN'], ['agent', 'AGENT QUEUE']]) {
+  for (const [who, title] of [
+    ['human', 'NEEDS A HUMAN'],
+    ['agent', 'AGENT QUEUE'],
+  ]) {
     const items = derived.attention.filter((i) => i.who === who);
     if (!items.length) continue;
     console.log(`\n  ${dim(title)}`);
@@ -611,7 +734,7 @@ function cmdStatus(args) {
     const n = Object.keys(d.verdicts).length;
     console.log(
       `\n  ${yellow('◐')} walkdown in progress — ${n} rule${n === 1 ? '' : 's'} judged by ` +
-      `${d.actor ?? 'someone'}${dim(`, unsealed since ${d.started}`)}`
+        `${d.actor ?? 'someone'}${dim(`, unsealed since ${d.started}`)}`,
     );
     console.log(dim('    Not in the ledger until the session is finished in the panel.'));
   }
@@ -620,8 +743,10 @@ function cmdStatus(args) {
   if (drift.design.length || drift.sources.length) {
     console.log(`\n  ${dim('DRIFT — spec ahead of its sources')}`);
     for (const d of drift.design)
-      console.log(`  ${yellow(d.screen)}: no design yet${d.proposal ? ' (proposal on file)' : ''}` +
-        `${d.requests.length ? dim(` — request ${d.requests.join(', ')} open`) : red(' — no design request filed')}`);
+      console.log(
+        `  ${yellow(d.screen)}: no design yet${d.proposal ? ' (proposal on file)' : ''}` +
+          `${d.requests.length ? dim(` — request ${d.requests.join(', ')} open`) : red(' — no design request filed')}`,
+      );
     for (const s of drift.sources)
       console.log(`  ${yellow(s.rule)} ← ${s.origin} ${dim('(source docs not yet updated)')}`);
   }
@@ -631,14 +756,21 @@ function cmdStatus(args) {
     console.log(`\n  ${dim('ACTIVE THREADS')}`);
     for (const t of active.slice(0, 6))
       console.log(
-        `  ${t.id} ${paintStatus(t.status)} ${dim(`(${anchorLabel(t.anchor)})`)} — ${truncate(t.body, 60)}`
+        `  ${t.id} ${paintStatus(t.status)} ${dim(`(${anchorLabel(t.anchor)})`)} — ${truncate(t.body, 60)}`,
       );
     if (active.length > 6) console.log(dim(`  +${active.length - 6} more — walkdown threads`));
   }
   return end(counts.fail ? 1 : 0);
 }
 
-const STATUS_COLOR = { open: yellow, answered: yellow, addressed: green, incorporated: green, verified: green, waived: dim };
+const STATUS_COLOR = {
+  open: yellow,
+  answered: yellow,
+  addressed: green,
+  incorporated: green,
+  verified: green,
+  waived: dim,
+};
 const paintStatus = (s) => (STATUS_COLOR[s] ?? ((x) => x))(s);
 
 /*
@@ -655,9 +787,15 @@ function anchorLabel(a = {}) {
 }
 
 function anchorText(a = {}) {
-  return [a.rule && `rule ${a.rule}`, a.screen && `screen ${a.screen}`, a.element && `element ${a.element}`]
-    .filter(Boolean)
-    .join(' · ') || '(unanchored)';
+  return (
+    [
+      a.rule && `rule ${a.rule}`,
+      a.screen && `screen ${a.screen}`,
+      a.element && `element ${a.element}`,
+    ]
+      .filter(Boolean)
+      .join(' · ') || '(unanchored)'
+  );
 }
 
 function cmdThreads(args) {
@@ -683,8 +821,12 @@ function cmdThreads(args) {
   }
   console.log(dim(`walkdown threads — ${threads.length} ${values.all ? 'total' : 'active'}\n`));
   for (const t of threads) {
-    const firstLine = String(t.body ?? '').trim().split('\n')[0];
-    console.log(`  ${t.id}  ${t.kind.padEnd(8)} ${paintStatus(String(t.status).padEnd(12))} ${dim(anchorText(t.anchor))}`);
+    const firstLine = String(t.body ?? '')
+      .trim()
+      .split('\n')[0];
+    console.log(
+      `  ${t.id}  ${t.kind.padEnd(8)} ${paintStatus(String(t.status).padEnd(12))} ${dim(anchorText(t.anchor))}`,
+    );
     console.log(`      ${firstLine.length > 100 ? firstLine.slice(0, 97) + '…' : firstLine}\n`);
   }
   console.log(dim('  walkdown thread <id> shows a thread in full'));
@@ -709,13 +851,21 @@ function cmdThread(args) {
   });
   const id = positionals[0];
   if (!id) {
-    console.error('Usage: walkdown thread <id> [--reply <text>] [--status <s>|--verify|--reopen|--waive] [--reason <text>] [--actor <name>]');
+    console.error(
+      'Usage: walkdown thread <id> [--reply <text>] [--status <s>|--verify|--reopen|--waive] [--reason <text>] [--actor <name>]',
+    );
     process.exit(2);
   }
   let blueprint = loadOrExit(values.dir);
 
   const actor = values.actor ?? process.env.WALKDOWN_ACTOR ?? userInfo().username;
-  const status = values.verify ? 'verified' : values.reopen ? 'open' : values.waive ? 'waived' : values.status;
+  const status = values.verify
+    ? 'verified'
+    : values.reopen
+      ? 'open'
+      : values.waive
+        ? 'waived'
+        : values.status;
   const mutating = Boolean(values.reply || status);
   // What it was before we touched it, so the command can say what it changed
   // rather than only what the thread now happens to say.
@@ -763,13 +913,23 @@ function cmdThread(args) {
     console.log(dim(`  walkdown thread ${t.id} reads it in full`));
     return end(0);
   }
-  console.log(`${t.id} · ${t.kind} · ${paintStatus(t.status)}${t.status === 'waived' && t.waived_by ? dim(` by ${t.waived_by}`) : ''}`);
+  console.log(
+    `${t.id} · ${t.kind} · ${paintStatus(t.status)}${t.status === 'waived' && t.waived_by ? dim(` by ${t.waived_by}`) : ''}`,
+  );
   console.log(dim(`  ${anchorText(t.anchor)}`));
   console.log(dim(`  ${t.author ?? 'unknown'} · ${t.created ?? 'undated'}`));
-  console.log(`\n  ${String(t.body ?? '').trim().replace(/\n/g, '\n  ')}`);
+  console.log(
+    `\n  ${String(t.body ?? '')
+      .trim()
+      .replace(/\n/g, '\n  ')}`,
+  );
   for (const r of t.replies ?? []) {
     console.log(dim(`\n  ↳ ${r.author ?? 'unknown'} · ${r.created ?? 'undated'}`));
-    console.log(`    ${String(r.body ?? '').trim().replace(/\n/g, '\n    ')}`);
+    console.log(
+      `    ${String(r.body ?? '')
+        .trim()
+        .replace(/\n/g, '\n    ')}`,
+    );
   }
   return end(0);
 }
@@ -791,7 +951,9 @@ async function cmdInit(args) {
    * directory - and runs and threads follow the spec, so this one flag decides
    * all three. Evidence and drafts are outside either way.
    */
-  const specDir = values['in-repo'] ? join(root, 'blueprint') : resolveLocations({ cwd: root }).spec.path;
+  const specDir = values['in-repo']
+    ? join(root, 'blueprint')
+    : resolveLocations({ cwd: root }).spec.path;
   const results = scaffold(root, { force: values.force, specDir });
   const MARK = {
     created: green('+ created'),
@@ -821,15 +983,23 @@ async function cmdInit(args) {
   if (where) {
     const outside = where.action === 'spec-outside';
     console.log(`\n  spec: ${where.path}`);
-    console.log(dim(outside
-      ? '  Outside the repository, so walkdown has added nothing to your tree but'
-        + ' agent conventions. Runs and threads live beside it; evidence and drafts'
-        + ' stay out either way.'
-      : '  In the repository, where a rule change arrives as a diff somebody approves.'
-        + ' Runs and threads live beside it; evidence and drafts stay outside.'));
+    console.log(
+      dim(
+        outside
+          ? '  Outside the repository, so walkdown has added nothing to your tree but' +
+              ' agent conventions. Runs and threads live beside it; evidence and drafts' +
+              ' stay out either way.'
+          : '  In the repository, where a rule change arrives as a diff somebody approves.' +
+              ' Runs and threads live beside it; evidence and drafts stay outside.',
+      ),
+    );
     if (outside)
-      console.log(dim('  Prefer it committed? `walkdown init --in-repo`, or move it later'
-        + ' with `walkdown move`.'));
+      console.log(
+        dim(
+          '  Prefer it committed? `walkdown init --in-repo`, or move it later' +
+            ' with `walkdown move`.',
+        ),
+      );
   }
   /*
    * And where the procedures went, which is the other half of "what did this
@@ -839,10 +1009,14 @@ async function cmdInit(args) {
    */
   if (skills) {
     console.log(`\n  skills: ${skills.path}`);
-    console.log(dim(skills.action === 'skills-in-repo'
-      ? '  In the repository, so a clone brings them. `walkdown skills` re-installs them anywhere.'
-      : '  Yours, not this project\'s — they work in every project on this machine, and this'
-        + ' repository gets nothing. `walkdown skills --project` commits them here instead.'));
+    console.log(
+      dim(
+        skills.action === 'skills-in-repo'
+          ? '  In the repository, so a clone brings them. `walkdown skills` re-installs them anywhere.'
+          : "  Yours, not this project's — they work in every project on this machine, and this" +
+              ' repository gets nothing. `walkdown skills --project` commits them here instead.',
+      ),
+    );
   }
   if (results.some((r) => r.action === 'created')) {
     const cfg = join(where?.path ?? 'blueprint', 'walkdown.yml');
@@ -869,14 +1043,18 @@ async function cmdPointer(args) {
   const { pointerBlock, pointerHomes, placePointer } = await import('../lib/init.js');
   const root = resolve(values.dir ?? process.cwd());
   const spec = resolveLocations({ cwd: root }).spec.path;
-  const block = pointerBlock(spec.startsWith(root + '/') ? `${spec.slice(root.length + 1)}/` : spec);
+  const block = pointerBlock(
+    spec.startsWith(root + '/') ? `${spec.slice(root.length + 1)}/` : spec,
+  );
 
   if (values.into) {
     const file = resolve(root, values.into);
     const action = placePointer(file, block);
     const say = {
-      created: 'written to', 'pointer-appended': 'added to',
-      'pointer-updated': 'updated in', 'up-to-date': 'already current in',
+      created: 'written to',
+      'pointer-appended': 'added to',
+      'pointer-updated': 'updated in',
+      'up-to-date': 'already current in',
       kept: 'left alone (an unclosed walkdown:begin marker) in',
     };
     console.log(`${say[action] ?? action} ${file}`);
@@ -885,10 +1063,12 @@ async function cmdPointer(args) {
 
   process.stdout.write(block);
   const homes = pointerHomes(root);
-  console.error(homes.length
-    ? `\n${dim(`Agent files here: ${homes.join(', ')}. `)}`
-      + dim('`--into <file>` puts the block in one, idempotently.')
-    : `\n${dim('No agent-instruction file here yet. `--into CLAUDE.md` makes one.')}`);
+  console.error(
+    homes.length
+      ? `\n${dim(`Agent files here: ${homes.join(', ')}. `)}` +
+          dim('`--into <file>` puts the block in one, idempotently.')
+      : `\n${dim('No agent-instruction file here yet. `--into CLAUDE.md` makes one.')}`,
+  );
 }
 
 /*
@@ -909,21 +1089,28 @@ async function cmdSkills(args) {
   });
   const { installSkills } = await import('../lib/init.js');
   const { skillsHome } = await import('../lib/locations.js');
-  const into = values.into ? resolve(values.into)
-    : values.project ? join(process.cwd(), '.claude', 'skills')
-    : skillsHome();
+  const into = values.into
+    ? resolve(values.into)
+    : values.project
+      ? join(process.cwd(), '.claude', 'skills')
+      : skillsHome();
 
   const MARK = {
-    created: green('+ created'), updated: green('~ updated'),
+    created: green('+ created'),
+    updated: green('~ updated'),
     'up-to-date': dim('· up to date'),
     'kept-differs': yellow('! kept (yours differs — --force to overwrite)'),
   };
   for (const r of installSkills(into, { force: values.force }))
     console.log(`  ${MARK[r.action] ?? r.action}  ${r.path}`);
   console.log(`\n  ${into}`);
-  console.log(dim(into.startsWith(process.cwd() + '/')
-    ? '  In the repository, so a clone brings them. Commit them with the spec.'
-    : '  Your own skills directory — every project on this machine, and nothing added to any of them.'));
+  console.log(
+    dim(
+      into.startsWith(process.cwd() + '/')
+        ? '  In the repository, so a clone brings them. Commit them with the spec.'
+        : '  Your own skills directory — every project on this machine, and nothing added to any of them.',
+    ),
+  );
 }
 
 async function cmdRun(args) {
@@ -934,7 +1121,7 @@ async function cmdRun(args) {
   const blueprint = loadOrExit(values.dir);
   const { runChecks } = await import('../lib/run-cmd.js');
   const before = new Set(
-    existsSync(join(blueprint.dir, 'runs')) ? readdirSync(join(blueprint.dir, 'runs')) : []
+    existsSync(join(blueprint.dir, 'runs')) ? readdirSync(join(blueprint.dir, 'runs')) : [],
   );
   let result;
   try {
@@ -943,12 +1130,18 @@ async function cmdRun(args) {
     console.error(err.message);
     process.exit(2);
   }
-  const after = existsSync(join(blueprint.dir, 'runs')) ? readdirSync(join(blueprint.dir, 'runs')) : [];
+  const after = existsSync(join(blueprint.dir, 'runs'))
+    ? readdirSync(join(blueprint.dir, 'runs'))
+    : [];
   const recorded = after.filter((f) => !before.has(f) && f.endsWith('.json'));
   if (recorded.length)
-    console.log(`\n${green('recorded')}: ${recorded.join(', ')} — \`walkdown status\` for the picture`);
+    console.log(
+      `\n${green('recorded')}: ${recorded.join(', ')} — \`walkdown status\` for the picture`,
+    );
   else
-    console.log(`\n${yellow('no run record was written')} — is the walkdown reporter/formatter wired into the test config?`);
+    console.log(
+      `\n${yellow('no run record was written')} — is the walkdown reporter/formatter wired into the test config?`,
+    );
   process.exit(result.code);
 }
 
@@ -966,7 +1159,9 @@ async function cmdServe(args) {
   console.log(`  review:  http://localhost:${port}/`);
   // The embed, not the panel. The panel needs a page to frame and a page cannot
   // frame itself, so it arrives by extension or from the review page above.
-  console.log(`  in your app:  <script src="http://localhost:${port}/embed.js" data-walkdown data-bp="blueprint"></script>`);
+  console.log(
+    `  in your app:  <script src="http://localhost:${port}/embed.js" data-walkdown data-bp="blueprint"></script>`,
+  );
   console.log(dim('  Ctrl-C to stop'));
 }
 
@@ -989,7 +1184,9 @@ function cmdSweep(args) {
   });
   const blueprint = loadOrExit(values.dir);
   const tiers = (values.tiers ?? 'checks,agent')
-    .split(',').map((t) => t.trim()).filter(Boolean);
+    .split(',')
+    .map((t) => t.trim())
+    .filter(Boolean);
   const bad = tiers.filter((t) => !['checks', 'agent', 'human'].includes(t));
   if (bad.length) {
     console.error(`${red('unknown tier')}: ${bad.join(', ')} — expected checks, agent or human`);

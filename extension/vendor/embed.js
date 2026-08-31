@@ -614,8 +614,8 @@
   function splitScreenRef(ref) {
     if (!ref) return null;
     const s = String(ref);
-    const h = s.indexOf('#');           // the fragment starts at the FIRST #,
-    const fragment = h < 0 ? '' : s.slice(h);   // so "#/order?id=1" stays whole
+    const h = s.indexOf('#'); // the fragment starts at the FIRST #,
+    const fragment = h < 0 ? '' : s.slice(h); // so "#/order?id=1" stays whole
     const head = h < 0 ? s : s.slice(0, h);
     const q = head.indexOf('?');
     return { path: q < 0 ? head : head.slice(0, q), query: q < 0 ? '' : head.slice(q), fragment };
@@ -705,11 +705,17 @@
   const MSG = {
     /** Same escaping rules as the rest of the chrome; bodies are user text. */
     esc: (s) =>
-      String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])),
+      String(s ?? '').replace(
+        /[&<>"]/g,
+        (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c],
+      ),
 
     /** Up to two letters, from a name or an email-ish handle. */
     initials(name) {
-      const parts = String(name ?? '?').trim().split(/[\s._-]+/).filter(Boolean);
+      const parts = String(name ?? '?')
+        .trim()
+        .split(/[\s._-]+/)
+        .filter(Boolean);
       if (!parts.length) return '?';
       return (parts.length === 1 ? parts[0].slice(0, 2) : parts[0][0] + parts[1][0]).toUpperCase();
     },
@@ -720,7 +726,9 @@
      * thing you learn once.
      */
     tint(name) {
-      const who = String(name ?? '').trim().toLowerCase();
+      const who = String(name ?? '')
+        .trim()
+        .toLowerCase();
       if (who === 'agent') return 'oklch(52% 0.09 165)';
       // One tint per person: the first word is what a handle and a full name
       // have in common, so "topher" and "Topher Fangio" wear the same colour.
@@ -775,9 +783,15 @@
     body(text, { rules = [] } = {}) {
       const known = new Set(rules);
       return this.esc(text)
-        .replace(/\b([nq]-\d{4})\b/g, '<button class="wd-ref link link-hover" data-thread-ref="$1">$1</button>')
+        .replace(
+          /\b([nq]-\d{4})\b/g,
+          '<button class="wd-ref link link-hover" data-thread-ref="$1">$1</button>',
+        )
         .replace(/\b([a-z][\w-]*(?:\.[a-z][\w-]*){2,})\b/gi, (m) =>
-          known.has(m) ? `<button class="wd-ref link link-hover font-mono" data-rule-ref="${m}">${m}</button>` : m);
+          known.has(m)
+            ? `<button class="wd-ref link link-hover font-mono" data-rule-ref="${m}">${m}</button>`
+            : m,
+        );
     },
 
     /**
@@ -791,36 +805,43 @@
      */
     stream(thread, { seenAt = null, rules = [], pending = [], names = {} } = {}) {
       const all = [...this.messages(thread), ...pending];
-      let lastDay = '', prev = null, marked = false;
+      let lastDay = '',
+        prev = null,
+        marked = false;
       const GROUP_MS = 5 * 60 * 1000;
-      return all.map((m) => {
-        const out = [];
-        const day = this.day(m.created);
-        if (day && day !== lastDay) {
-          lastDay = day;
-          prev = null;
-          out.push(`<div class="wd-day"><span></span>${this.esc(day)}<span></span></div>`);
-        }
-        if (!marked && seenAt && m.created && String(m.created) > String(seenAt) && !m.pending) {
-          marked = true;
-          prev = null;
-          out.push('<div class="wd-new"><span></span>New<span></span></div>');
-        }
-        const cont = prev && prev.author === m.author &&
-          Math.abs(Date.parse(m.created ?? '') - Date.parse(prev.created ?? '')) < GROUP_MS;
-        prev = m;
-        const who = this.displayName(m.author, names);
-        out.push(`<div class="wd-msg${cont ? ' cont' : ''}${m.pending ? ' pending' : ''}${m.failed ? ' failed' : ''}">
+      return all
+        .map((m) => {
+          const out = [];
+          const day = this.day(m.created);
+          if (day && day !== lastDay) {
+            lastDay = day;
+            prev = null;
+            out.push(`<div class="wd-day"><span></span>${this.esc(day)}<span></span></div>`);
+          }
+          if (!marked && seenAt && m.created && String(m.created) > String(seenAt) && !m.pending) {
+            marked = true;
+            prev = null;
+            out.push('<div class="wd-new"><span></span>New<span></span></div>');
+          }
+          const cont =
+            prev &&
+            prev.author === m.author &&
+            Math.abs(Date.parse(m.created ?? '') - Date.parse(prev.created ?? '')) < GROUP_MS;
+          prev = m;
+          const who = this.displayName(m.author, names);
+          out.push(`<div class="wd-msg${cont ? ' cont' : ''}${m.pending ? ' pending' : ''}${m.failed ? ' failed' : ''}">
           <div class="wd-ava" style="background:${this.tint(who)}">${this.esc(this.initials(who))}</div>
           <div class="wd-col">
             <div class="wd-head">${cont ? '' : `<span class="wd-who">${this.esc(who)}</span>`}<span
               class="wd-at" title="${this.esc(this.stamp(m.created))}">${
-                m.failed ? 'not sent' : m.pending ? 'sending…' : this.esc(this.ago(m.created))}</span></div>
+                m.failed ? 'not sent' : m.pending ? 'sending…' : this.esc(this.ago(m.created))
+              }</span></div>
             <div class="wd-text">${this.body(m.body, { rules })}</div>
           </div>
         </div>`);
-        return out.join('');
-      }).join('');
+          return out.join('');
+        })
+        .join('');
     },
 
     /**
@@ -835,7 +856,10 @@
       if (!who) return 'someone';
       const key = who.toLowerCase().replace(/[^a-z0-9]/g, '');
       if (names[key]) return names[key];
-      return who.split(/(\s+)/).map((w) => (/^[a-z]/.test(w) ? w[0].toUpperCase() + w.slice(1) : w)).join('');
+      return who
+        .split(/(\s+)/)
+        .map((w) => (/^[a-z]/.test(w) ? w[0].toUpperCase() + w.slice(1) : w))
+        .join('');
     },
 
     /**
@@ -861,7 +885,10 @@
       const username = String(id.username ?? '').trim();
       const display = name || username;
       if (!display) return names;
-      const key = (s) => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
+      const key = (s) =>
+        String(s)
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, '');
       for (const handle of [username, name, ...(id.handles ?? [])])
         if (String(handle ?? '').trim()) names[key(handle)] = display;
       const first = name.split(/\s+/)[0];
@@ -882,8 +909,9 @@
     /** One initials tile. The same face for the same person, everywhere. */
     avatar(name, cls = 'wd-ava') {
       const who = name || 'someone';
-      return `<div class="${cls}" style="background:${this.tint(who)}" title="${
-        this.esc(who)}">${this.esc(this.initials(who))}</div>`;
+      return `<div class="${cls}" style="background:${this.tint(who)}" title="${this.esc(
+        who,
+      )}">${this.esc(this.initials(who))}</div>`;
     },
 
     /** "today at 1:09 PM" - when the conversation was last touched. */
@@ -902,8 +930,10 @@
      */
     repliesLine(thread, names = {}) {
       const replies = thread?.replies ?? [];
-      const faces = this.participants(thread).slice(0, 3)
-        .map((who) => this.avatar(this.displayName(who, names), 'wd-face')).join('');
+      const faces = this.participants(thread)
+        .slice(0, 3)
+        .map((who) => this.avatar(this.displayName(who, names), 'wd-face'))
+        .join('');
       if (!replies.length)
         return `<button class="wd-replies empty" data-testid="thread.replies" data-open-thread="${this.esc(thread?.id)}">Reply</button>`;
       return `<button class="wd-replies" data-testid="thread.replies" data-open-thread="${this.esc(thread?.id)}">

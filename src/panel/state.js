@@ -40,7 +40,7 @@ export const cfg = window.__walkdownConfig ?? {};
 export const S = {
   SERVER: cfg.server ?? new URL(script?.src ?? 'http://localhost:4700').origin,
   BP: cfg.bp ?? script?.dataset.bp ?? '',
-  frameUrl: cfg.frame?.url ?? null,   // where the app frame actually is
+  frameUrl: cfg.frame?.url ?? null, // where the app frame actually is
 
   data: null,
   view: 'list',
@@ -48,9 +48,9 @@ export const S = {
   session: null,
   ghost: null,
   ghostOpacity: 0.5,
-  protoShare: null,        // 0 = all app, 1 = all prototype; null = follow the page
+  protoShare: null, // 0 = all app, 1 = all prototype; null = follow the page
   pickedScreen: cfg.screen ?? script?.dataset.screen ?? null,
-  openThread: null,        // the thread expanded in the detail pane, by id
+  openThread: null, // the thread expanded in the detail pane, by id
 
   /*
    * A screen the ghost is pinned to for a moment — viewing a sketch from a
@@ -66,11 +66,11 @@ export const S = {
    * a blueprint from the ones it found, or reviewing. The first two are not
    * error states — a fresh install genuinely does not know either answer yet.
    */
-  phase: 'loading',        // loading | connect | choose | ready
+  phase: 'loading', // loading | connect | choose | ready
   projects: [],
-  jumpOnLoad: false,       // set when a blueprint is chosen by hand, spent once it has loaded
-  servedRoot: null,        // the folder the server reports it is serving
-  listTab: 'rules',        // blueprints | rules | threads — what the side lists
+  jumpOnLoad: false, // set when a blueprint is chosen by hand, spent once it has loaded
+  servedRoot: null, // the folder the server reports it is serving
+  listTab: 'rules', // blueprints | rules | threads — what the side lists
 
   /*
    * Which threads the Threads tab is showing. The same three questions
@@ -79,7 +79,7 @@ export const S = {
    * is the one with work in it - `all` is for going back to a conversation
    * that ended, which is the thing that was impossible before this tab.
    */
-  threadFilter: 'active',  // active | you | all
+  threadFilter: 'active', // active | you | all
 
   /*
    * What the rule search box says, and what the two note boxes say. Kept out
@@ -88,9 +88,9 @@ export const S = {
    * would forget itself the next time anything else on the panel changed.
    */
   ruleQuery: '',
-  threadNote: '',          // what the reply box says, kept across re-renders
-  verdictNote: '',         // the verdict feedback box, kept across re-renders
-  ruleNote: '',            // the rule's own new-thread box, kept the same way
+  threadNote: '', // what the reply box says, kept across re-renders
+  verdictNote: '', // the verdict feedback box, kept across re-renders
+  ruleNote: '', // the rule's own new-thread box, kept the same way
 
   /*
    * The check-source disclosure, kept OUTSIDE the markup that draws it.
@@ -103,18 +103,18 @@ export const S = {
    * here now, keyed by rule, so moving to another rule collapses it again
    * without anything to reset.
    */
-  srcOpenFor: null,        // the rule whose source is open
+  srcOpenFor: null, // the rule whose source is open
   srcCache: { rule: null, html: null },
 
   lastView: 'list',
-  ghostWidth: 0,           // 0 = fill the stage; otherwise a fixed CSS width
-  viewportW: 0,            // framed viewport preset: 0 = fit the space, else CSS px
+  ghostWidth: 0, // 0 = fill the stage; otherwise a fixed CSS width
+  viewportW: 0, // framed viewport preset: 0 = fit the space, else CSS px
 
-  dragging: false,         // whether the pointer is holding one of our own controls
-  deskOpen: false,         // the desk tuner behind the gear
-  screensOpen: false,      // the screen picker's list
-  hideAppOn: false,        // the tuner's "see the full effect" peek
-  docked: false,           // whether the chrome is out; the × in the bar puts it away
+  dragging: false, // whether the pointer is holding one of our own controls
+  deskOpen: false, // the desk tuner behind the gear
+  screensOpen: false, // the screen picker's list
+  hideAppOn: false, // the tuner's "see the full effect" peek
+  docked: false, // whether the chrome is out; the × in the bar puts it away
 
   /*
    * Set when the copy of walkdown inside the ghost announces itself. A
@@ -124,9 +124,9 @@ export const S = {
    * pin that lands on the page hidden underneath the one you are looking at.
    */
   ghostReady: false,
-  ghostSrc: null,          // what the kept ghost copy is showing, so a toggle can reuse it
+  ghostSrc: null, // what the kept ghost copy is showing, so a toggle can reuse it
 
-  headlessCover: null,     // the opaque cover a headless rule lays over the desk
+  headlessCover: null, // the opaque cover a headless rule lays over the desk
 };
 
 /*
@@ -140,16 +140,16 @@ export const S = {
  * import graph decides evaluation order and no shard should care.
  */
 export const D = {
-  shell: null,        // the popover over the whole viewport, host of the shadow root
-  sr: null,           // that shadow root
-  host: null,         // the transparent carrier inside it
-  bar: null,          // the tool bar across the top
-  side: null,         // the side panel
-  deskPanel: null,    // the desk tuner behind the gear
-  screenPanel: null,  // the screen picker's list
-  tab: null,          // the WALKDOWN pull tab, shown when the chrome is put away
-  swap: null,         // the prototype/app cross beside it
-  appFrame: null,     // the application under review
+  shell: null, // the popover over the whole viewport, host of the shadow root
+  sr: null, // that shadow root
+  host: null, // the transparent carrier inside it
+  bar: null, // the tool bar across the top
+  side: null, // the side panel
+  deskPanel: null, // the desk tuner behind the gear
+  screenPanel: null, // the screen picker's list
+  tab: null, // the WALKDOWN pull tab, shown when the chrome is put away
+  swap: null, // the prototype/app cross beside it
+  appFrame: null, // the application under review
 };
 /*
  * Whether this delivery comes back after a real page load. The extension
@@ -166,17 +166,29 @@ export const REINJECTS = cfg.reinjects === true;
  * practice never arises.
  */
 export const store = cfg.store ?? {
-  get: async (k) => { try { return JSON.parse(localStorage.getItem(k) ?? 'null'); } catch { return null; } },
-  set: async (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* private mode */ } },
+  get: async (k) => {
+    try {
+      return JSON.parse(localStorage.getItem(k) ?? 'null');
+    } catch {
+      return null;
+    }
+  },
+  set: async (k, v) => {
+    try {
+      localStorage.setItem(k, JSON.stringify(v));
+    } catch {
+      /* private mode */
+    }
+  },
 };
 export const CHOICE = `walkdown:blueprint:${location.origin}`;
 // The extension ships the stylesheet itself; served, it comes off the server.
 export const STYLESHEET = cfg.stylesheet ?? S.SERVER + '/walkdown.css';
 
 /* The panel's geometry, in pixels. */
-export const W = 384;    // the side panel
-export const TOP = 44;   // the tool bar across the top
-export const GAP = 12;   // how much desk shows around the wrapped page
+export const W = 384; // the side panel
+export const TOP = 44; // the tool bar across the top
+export const GAP = 12; // how much desk shows around the wrapped page
 // Nothing separates the bar from the page any more, so the bar's own bottom
 // padding does that job — a second 12px gap on top of it read as a gutter.
 export const HEAD = TOP;
@@ -212,8 +224,12 @@ export const HEAD = TOP;
  * null means nothing said; an empty array means "none of these", which is a
  * different answer and survives the reload the same way an emptied name does.
  */
-export const ACTOR_KEY = 'walkdown:actor';           // legacy: one free-text name
-export const IDENTITY_KEY = 'walkdown:identity';     // { username, name, roles }
+export const ACTOR_KEY = 'walkdown:actor'; // legacy: one free-text name
+export const IDENTITY_KEY = 'walkdown:identity'; // { username, name, roles }
 export const identityOverride = { username: null, name: null, roles: null };
-export const saveIdentity = () => store.set(IDENTITY_KEY,
-  { username: identityOverride.username, name: identityOverride.name, roles: identityOverride.roles });
+export const saveIdentity = () =>
+  store.set(IDENTITY_KEY, {
+    username: identityOverride.username,
+    name: identityOverride.name,
+    roles: identityOverride.roles,
+  });

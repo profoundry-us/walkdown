@@ -30,20 +30,29 @@ test('an unenumerated fragment falls back to the screen at that path @rule:scree
 });
 
 test('a declared query breaks ties between screens sharing a path @rule:screens.identity.query-is-not-identity', () => {
-  assert.equal(matchScreen(SCREENS, at('/confirm.html?email=you@example.com')).screen.id, 'confirm');
+  assert.equal(
+    matchScreen(SCREENS, at('/confirm.html?email=you@example.com')).screen.id,
+    'confirm',
+  );
   assert.equal(
     matchScreen(SCREENS, at('/confirm.html?email=you@example.com&already=1')).screen.id,
-    'already'
+    'already',
   );
 });
 
 test('an undeclared query does not change which screen you are on @rule:screens.identity.query-is-not-identity', () => {
   assert.equal(matchScreen(SCREENS, at('/admin.html?page=2')).screen.id, 'admin');
-  assert.equal(matchScreen(SCREENS, at('/admin.html?page=2#invite-batch')).screen.id, 'admin-invite');
+  assert.equal(
+    matchScreen(SCREENS, at('/admin.html?page=2#invite-batch')).screen.id,
+    'admin-invite',
+  );
 });
 
 test('the prototype surface is reported as the prototype', () => {
-  assert.equal(matchScreen(SCREENS, at('/prototype/screens/waitlist-admin.html')).surface, 'prototype');
+  assert.equal(
+    matchScreen(SCREENS, at('/prototype/screens/waitlist-admin.html')).surface,
+    'prototype',
+  );
   assert.equal(matchScreen(SCREENS, at('/admin.html')).surface, 'app');
 });
 

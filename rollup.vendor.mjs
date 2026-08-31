@@ -34,5 +34,8 @@ export default {
  * the original terms and vendor/README.md for why this file exists.
  */`,
   },
-  onwarn(warning, warn) { warn(warning); throw new Error(`rollup: ${warning.code}`); },
+  onwarn(warning, warn) {
+    warn(warning);
+    throw new Error(`rollup: ${warning.code}`);
+  },
 };

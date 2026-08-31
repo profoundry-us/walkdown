@@ -18,7 +18,13 @@ function writeFixture(dir, { goodHash = true, badScreen = false, threads = [] } 
   writeFileSync(join(bp, 'walkdown.yml'), 'project: fixture\n');
   writeFileSync(
     join(bp, 'storyboard.yml'),
-    ['screens:', '  - id: home', '    prototype: /home.html', '    app: { path: / }', '    anchors: [home.cta]'].join('\n')
+    [
+      'screens:',
+      '  - id: home',
+      '    prototype: /home.html',
+      '    app: { path: / }',
+      '    anchors: [home.cta]',
+    ].join('\n'),
   );
   const statement = 'The visitor can do the thing.';
   const hash = goodHash ? formatHash(statement) : 'sha256:000000000000';
@@ -36,7 +42,7 @@ function writeFixture(dir, { goodHash = true, badScreen = false, threads = [] } 
       '        steps:',
       `          statement_hash: "${hash}"`,
       '          when: [Click anchor `home.cta`]',
-    ].join('\n')
+    ].join('\n'),
   );
   threads.forEach((t, i) => writeFileSync(join(bp, 'threads', `t-${i}.yml`), t));
   return bp;
@@ -66,8 +72,14 @@ test('answered question warns; waived without waived_by errors', () => {
     ],
   });
   const { findings } = lint(loadBlueprint(bp), { checks: false });
-  assert.ok(findings.some((f) => f.level === 'warn' && f.subject === 'q-1' && /not incorporated/.test(f.message)));
-  assert.ok(findings.some((f) => f.level === 'error' && f.subject === 'n-1' && /waived_by/.test(f.message)));
+  assert.ok(
+    findings.some(
+      (f) => f.level === 'warn' && f.subject === 'q-1' && /not incorporated/.test(f.message),
+    ),
+  );
+  assert.ok(
+    findings.some((f) => f.level === 'error' && f.subject === 'n-1' && /waived_by/.test(f.message)),
+  );
 });
 
 test('hash --write repairs a stale hash and lint then passes', () => {
@@ -76,7 +88,11 @@ test('hash --write repairs a stale hash and lint then passes', () => {
   assert.equal(first.exitCode, 1);
   const wrote = runHashCommand(loadBlueprint(bp), { write: true });
   assert.equal(wrote.changedFiles, 1);
-  assert.ok(readFileSync(join(bp, 'features', 'demo.yml'), 'utf8').includes(formatHash('The visitor can do the thing.')));
+  assert.ok(
+    readFileSync(join(bp, 'features', 'demo.yml'), 'utf8').includes(
+      formatHash('The visitor can do the thing.'),
+    ),
+  );
   const { exitCode } = lint(loadBlueprint(bp), { checks: false });
   assert.equal(exitCode, 0);
 });
@@ -85,10 +101,14 @@ test('two screens claiming one address on a surface: the loser of the tie is nam
   const bp = writeFixture(join(root, 'tie'));
   const sb = readFileSync(join(bp, 'storyboard.yml'), 'utf8');
   // A state of the same page: its own design, no address of its own.
-  writeFileSync(join(bp, 'storyboard.yml'),
-    sb + '\n  - id: home-empty\n    prototype: /home.html#empty\n    app: { path: / }\n');
+  writeFileSync(
+    join(bp, 'storyboard.yml'),
+    sb + '\n  - id: home-empty\n    prototype: /home.html#empty\n    app: { path: / }\n',
+  );
   const { findings } = lint(loadBlueprint(bp), { checks: false });
-  const tie = findings.filter((f) => f.category === 'storyboard' && /already claimed/.test(f.message));
+  const tie = findings.filter(
+    (f) => f.category === 'storyboard' && /already claimed/.test(f.message),
+  );
   // The app path collides; the prototype refs differ by fragment, so they do not.
   assert.equal(tie.length, 1);
   assert.equal(tie[0].subject, 'home-empty');
@@ -99,19 +119,39 @@ test('two screens claiming one address on a surface: the loser of the tie is nam
 test('an undesigned screen without a design-request thread warns; with one it passes @rule:ownership.drift.design-requests-required', () => {
   const bp = writeFixture(join(root, 'drift'));
   const sb = readFileSync(join(bp, 'storyboard.yml'), 'utf8');
-  writeFileSync(join(bp, 'storyboard.yml'), sb + '\n  - id: specborn\n    prototype: null\n    app: { path: /x }\n');
+  writeFileSync(
+    join(bp, 'storyboard.yml'),
+    sb + '\n  - id: specborn\n    prototype: null\n    app: { path: /x }\n',
+  );
   let { findings } = lint(loadBlueprint(bp), { checks: false });
-  assert.ok(findings.some((f) => f.category === 'drift' && f.subject === 'specborn' && /no open design-request/.test(f.message)));
+  assert.ok(
+    findings.some(
+      (f) =>
+        f.category === 'drift' &&
+        f.subject === 'specborn' &&
+        /no open design-request/.test(f.message),
+    ),
+  );
 
-  writeFileSync(join(bp, 'threads', 'req.yml'),
-    'id: q-9\nkind: question\nstatus: open\nanchor: { rule: demo.main.thing, screen: specborn }\nbody: design this\n');
+  writeFileSync(
+    join(bp, 'threads', 'req.yml'),
+    'id: q-9\nkind: question\nstatus: open\nanchor: { rule: demo.main.thing, screen: specborn }\nbody: design this\n',
+  );
   ({ findings } = lint(loadBlueprint(bp), { checks: false }));
-  assert.deepEqual(findings.filter((f) => f.category === 'drift'), []);
+  assert.deepEqual(
+    findings.filter((f) => f.category === 'drift'),
+    [],
+  );
 
   const feat = readFileSync(join(bp, 'features', 'demo.yml'), 'utf8');
-  writeFileSync(join(bp, 'features', 'demo.yml'), feat.replace('        statement:', '        origin: thread:nope\n        statement:'));
+  writeFileSync(
+    join(bp, 'features', 'demo.yml'),
+    feat.replace('        statement:', '        origin: thread:nope\n        statement:'),
+  );
   ({ findings } = lint(loadBlueprint(bp), { checks: false }));
-  assert.ok(findings.some((f) => f.category === 'drift' && /unknown thread "nope"/.test(f.message)));
+  assert.ok(
+    findings.some((f) => f.category === 'drift' && /unknown thread "nope"/.test(f.message)),
+  );
 });
 
 test('the in-repo example blueprint lints clean (without runner)', () => {
@@ -126,8 +166,13 @@ test('the in-repo example blueprint lints clean (without runner)', () => {
    * warning names the cost until a state can say it is not URL-addressable
    * (issue #1). Everything else must stay clean.
    */
-  const known = (f) => f.category === 'storyboard' && /already claimed by screen `waitlist-confirm`/.test(f.message);
-  assert.deepEqual(findings.filter((f) => !known(f)), [], JSON.stringify(findings, null, 2));
+  const known = (f) =>
+    f.category === 'storyboard' && /already claimed by screen `waitlist-confirm`/.test(f.message);
+  assert.deepEqual(
+    findings.filter((f) => !known(f)),
+    [],
+    JSON.stringify(findings, null, 2),
+  );
   assert.equal(findings.filter(known).length, 1);
   assert.equal(exitCode, 0);
 });
@@ -144,9 +189,15 @@ function ruleFixture(dir, body) {
   writeFileSync(join(bp, 'walkdown.yml'), 'project: fixture\n');
   writeFileSync(
     join(bp, 'features', 'demo.yml'),
-    ['feature: demo', 'stories:', '  - id: demo.main', '    rules:',
-      '      - id: demo.main.thing', '        statement: The visitor can do the thing.',
-      ...body].join('\n')
+    [
+      'feature: demo',
+      'stories:',
+      '  - id: demo.main',
+      '    rules:',
+      '      - id: demo.main.thing',
+      '        statement: The visitor can do the thing.',
+      ...body,
+    ].join('\n'),
   );
   return lint(loadBlueprint(bp), { checks: false }).findings;
 }
@@ -165,13 +216,17 @@ test('a signoff list that omits eng is flagged as a file that lies @rule:status.
 
   // A list that names eng is silent, in either order.
   assert.deepEqual(
-    ruleFixture(join(root, 'signoff-ok'), ['        signoff: [eng, product]'])
-      .filter((x) => x.category === 'signoff'), []);
+    ruleFixture(join(root, 'signoff-ok'), ['        signoff: [eng, product]']).filter(
+      (x) => x.category === 'signoff',
+    ),
+    [],
+  );
 
   // A role no run can be recorded under can never be satisfied - the rule
   // would wait forever for a signature the ledger cannot accept.
-  const bogus = ruleFixture(join(root, 'signoff-bogus'), ['        signoff: [eng, marketing]'])
-    .filter((x) => x.category === 'signoff');
+  const bogus = ruleFixture(join(root, 'signoff-bogus'), [
+    '        signoff: [eng, marketing]',
+  ]).filter((x) => x.category === 'signoff');
   assert.equal(bogus.length, 1);
   assert.match(bogus[0].message, /not a role a run can be recorded under/);
 });
@@ -179,22 +234,29 @@ test('a signoff list that omits eng is flagged as a file that lies @rule:status.
 test('a thin excuse is worse than none @rule:status.evidence.excuse-must-argue', () => {
   // "n/a" is the silence the old schema allowed, wearing a key. An excuse
   // exists to be argued with, and nobody can argue with a shrug.
-  const thin = ruleFixture(join(root, 'excuse-thin'),
-    ['        unverifiable:', '          agent: n/a']).filter((x) => x.category === 'evidence');
+  const thin = ruleFixture(join(root, 'excuse-thin'), [
+    '        unverifiable:',
+    '          agent: n/a',
+  ]).filter((x) => x.category === 'evidence');
   assert.equal(thin.length, 1, JSON.stringify(thin));
   assert.equal(thin[0].level, 'warn');
   assert.match(thin[0].message, /too thin to argue with/);
 
   // A sentence passes.
   assert.deepEqual(
-    ruleFixture(join(root, 'excuse-real'),
-      ['        unverifiable:', `          agent: ${REAL_EXCUSE}`]).filter((x) => x.category === 'evidence'),
-    []);
+    ruleFixture(join(root, 'excuse-real'), [
+      '        unverifiable:',
+      `          agent: ${REAL_EXCUSE}`,
+    ]).filter((x) => x.category === 'evidence'),
+    [],
+  );
 
   // An excuse filed against something that is not a tier removes nothing, so
   // the rule silently still owes the evidence it thinks it has been let off.
-  const wrongTier = ruleFixture(join(root, 'excuse-tier'),
-    ['        unverifiable:', `          human: ${REAL_EXCUSE}`]).filter((x) => x.category === 'evidence');
+  const wrongTier = ruleFixture(join(root, 'excuse-tier'), [
+    '        unverifiable:',
+    `          human: ${REAL_EXCUSE}`,
+  ]).filter((x) => x.category === 'evidence');
   assert.equal(wrongTier.length, 1);
   assert.match(wrongTier[0].message, /which is not a tier/);
   // And it says where acceptance went, because that is the mistake being made.
@@ -218,15 +280,17 @@ test('a rule excusing both tiers is flagged, legitimately @rule:status.evidence.
 test('verify no longer knows the word human @rule:status.acceptance.signoff-defaults-to-eng', () => {
   // It used to mean "a person accepts this". It now means nothing at all, and
   // a rule carrying it reads as asking for a signature it is not asking for.
-  const findings = ruleFixture(join(root, 'verify-human'), ['        verify: [checks, human]'])
-    .filter((x) => x.category === 'schema');
+  const findings = ruleFixture(join(root, 'verify-human'), [
+    '        verify: [checks, human]',
+  ]).filter((x) => x.category === 'schema');
   assert.equal(findings.length, 1, JSON.stringify(findings));
   assert.equal(findings[0].level, 'warn');
   assert.match(findings[0].message, /acceptance is `signoff/);
 
   // A word that was never a tier is still an error, not a nudge.
-  const junk = ruleFixture(join(root, 'verify-junk'), ['        verify: [vibes]'])
-    .filter((x) => x.category === 'schema');
+  const junk = ruleFixture(join(root, 'verify-junk'), ['        verify: [vibes]']).filter(
+    (x) => x.category === 'schema',
+  );
   assert.equal(junk.length, 1);
   assert.equal(junk[0].level, 'error');
 });
@@ -235,11 +299,21 @@ test('a run signed under a role that does not exist is named @rule:status.accept
   const bp = join(root, 'run-roles', 'blueprint');
   mkdirSync(join(bp, 'runs'), { recursive: true });
   ruleFixture(join(root, 'run-roles'), []);
-  writeFileSync(join(bp, 'runs', 'r.json'), JSON.stringify({
-    run_id: 'r', created: '2026-01-01T00:00:00Z', actor: 'topher', roles: ['eng', 'marketing'],
-    kind: 'walkdown', target: 'local', results: [{ rule: 'demo.main.thing', status: 'pass' }],
-  }));
-  const findings = lint(loadBlueprint(bp), { checks: false }).findings.filter((f) => f.category === 'runs');
+  writeFileSync(
+    join(bp, 'runs', 'r.json'),
+    JSON.stringify({
+      run_id: 'r',
+      created: '2026-01-01T00:00:00Z',
+      actor: 'topher',
+      roles: ['eng', 'marketing'],
+      kind: 'walkdown',
+      target: 'local',
+      results: [{ rule: 'demo.main.thing', status: 'pass' }],
+    }),
+  );
+  const findings = lint(loadBlueprint(bp), { checks: false }).findings.filter(
+    (f) => f.category === 'runs',
+  );
   // The write paths refuse this, so a record carrying it was hand-edited or
   // came from a walkdown that knew a role this one does not - either way the
   // rule it meant to accept is silently still waiting, and only lint can say

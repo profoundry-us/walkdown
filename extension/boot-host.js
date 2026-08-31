@@ -52,9 +52,14 @@ if (!target) {
       const src = await (await fetch(chrome.runtime.getURL('vendor/panel.js'))).text();
       const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(src));
       window.__walkdownConfig.buildHash = [...new Uint8Array(digest)]
-        .map((b) => b.toString(16).padStart(2, '0')).join('').slice(0, 12);
-    } catch { /* undetectable staleness beats not starting */ }
-    import(chrome.runtime.getURL('vendor/panel.js'))
-      .catch((err) => console.warn('[walkdown] could not start:', err));
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('')
+        .slice(0, 12);
+    } catch {
+      /* undetectable staleness beats not starting */
+    }
+    import(chrome.runtime.getURL('vendor/panel.js')).catch((err) =>
+      console.warn('[walkdown] could not start:', err),
+    );
   })();
 }

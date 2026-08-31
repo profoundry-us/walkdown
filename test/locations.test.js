@@ -52,7 +52,9 @@ test('with no config, a blueprint in the tree wins and its records stay put', ()
     assert.match(loc.runs.why, /already in the blueprint/);
     // Nothing was written to find that out.
     assert.equal(loc.config.exists, false);
-  } finally { s.cleanup(); }
+  } finally {
+    s.cleanup();
+  }
 });
 
 /*
@@ -64,7 +66,7 @@ test('runs and threads follow the spec; evidence and drafts never do @rule:locat
   const s = scratch();
   try {
     const repo = join(s.root, 'repo');
-    const bp = blueprint(join(repo, 'blueprint'));   // no subdirectories at all
+    const bp = blueprint(join(repo, 'blueprint')); // no subdirectories at all
     const loc = resolveLocations({ cwd: repo });
     assert.equal(loc.runs.path, join(bp, 'runs'));
     assert.equal(loc.threads.path, join(bp, 'threads'));
@@ -72,7 +74,9 @@ test('runs and threads follow the spec; evidence and drafts never do @rule:locat
     assert.equal(loc.evidence.path, join(s.home, 'projects', 'demo', 'evidence'));
     assert.equal(loc.drafts.path, join(s.home, 'projects', 'demo', 'drafts'));
     assert.match(loc.evidence.why, /outside the repository/);
-  } finally { s.cleanup(); }
+  } finally {
+    s.cleanup();
+  }
 });
 
 test('a spec kept outside the repository takes its runs and threads with it @rule:locations.default.records-follow-the-spec', () => {
@@ -85,7 +89,9 @@ test('a spec kept outside the repository takes its runs and threads with it @rul
     assert.equal(loc.spec.path, away);
     assert.equal(loc.runs.path, join(away, 'runs'), 'out with the spec, not back in the repo');
     assert.equal(loc.threads.path, join(away, 'threads'));
-  } finally { s.cleanup(); }
+  } finally {
+    s.cleanup();
+  }
 });
 
 /*
@@ -103,7 +109,9 @@ test('a blanket default never orphans a ledger the blueprint already holds @rule
     const loc = resolveLocations({ cwd: repo });
     assert.equal(loc.runs.path, join(repo, 'blueprint', 'runs'));
     assert.match(loc.runs.why, /already in the blueprint \(1 file\)/);
-  } finally { s.cleanup(); }
+  } finally {
+    s.cleanup();
+  }
 });
 
 test('a project entry outranks the tree, and {id} expands in defaults', () => {
@@ -113,15 +121,18 @@ test('a project entry outranks the tree, and {id} expands in defaults', () => {
     blueprint(join(repo, 'blueprint'), { dirs: ['runs'] });
     const away = join(s.root, 'away', 'blueprint');
     blueprint(away, { project: 'away-spec' });
-    configure(s.home, [
-      'defaults:',
-      `  evidence: ${join(s.home, 'ev', '{id}')}`,
-      'projects:',
-      '  - id: pinned',
-      `    roots: [${repo}]`,
-      `    spec: ${away}`,
-      '',
-    ].join('\n'));
+    configure(
+      s.home,
+      [
+        'defaults:',
+        `  evidence: ${join(s.home, 'ev', '{id}')}`,
+        'projects:',
+        '  - id: pinned',
+        `    roots: [${repo}]`,
+        `    spec: ${away}`,
+        '',
+      ].join('\n'),
+    );
     const loc = resolveLocations({ cwd: repo });
     assert.equal(loc.id, 'pinned');
     assert.equal(loc.spec.path, away);
@@ -131,7 +142,9 @@ test('a project entry outranks the tree, and {id} expands in defaults', () => {
     // ...and evidence does not, taking the configured default with {id}
     // resolved to the entry's id rather than the blueprint's own name.
     assert.equal(loc.evidence.path, join(s.home, 'ev', 'pinned'));
-  } finally { s.cleanup(); }
+  } finally {
+    s.cleanup();
+  }
 });
 
 test('--dir beats every configured answer', () => {
@@ -140,11 +153,16 @@ test('--dir beats every configured answer', () => {
     const repo = join(s.root, 'repo');
     blueprint(join(repo, 'blueprint'));
     const other = blueprint(join(s.root, 'other'), { project: 'other' });
-    configure(s.home, `projects:\n  - id: pinned\n    roots: [${repo}]\n    spec: ${join(repo, 'blueprint')}\n`);
+    configure(
+      s.home,
+      `projects:\n  - id: pinned\n    roots: [${repo}]\n    spec: ${join(repo, 'blueprint')}\n`,
+    );
     const loc = resolveLocations({ cwd: repo, dir: other });
     assert.equal(loc.spec.path, other);
     assert.equal(loc.spec.why, 'named on the command line');
-  } finally { s.cleanup(); }
+  } finally {
+    s.cleanup();
+  }
 });
 
 /*
@@ -158,22 +176,35 @@ test('--dir does not inherit the ledger of whichever project you are standing in
     const repo = join(s.root, 'repo');
     blueprint(join(repo, 'blueprint'), { project: 'mine', dirs: ['runs'] });
     const other = blueprint(join(s.root, 'other'), { project: 'theirs', dirs: ['runs'] });
-    configure(s.home, [
-      'projects:',
-      '  - id: mine',
-      `    roots: [${repo}]`,
-      `    runs: ${join(s.home, 'mine-runs')}`,
-      '',
-    ].join('\n'));
+    configure(
+      s.home,
+      [
+        'projects:',
+        '  - id: mine',
+        `    roots: [${repo}]`,
+        `    runs: ${join(s.home, 'mine-runs')}`,
+        '',
+      ].join('\n'),
+    );
 
     const standing = resolveLocations({ cwd: repo });
-    assert.equal(standing.runs.path, join(s.home, 'mine-runs'), 'the entry applies where it matches');
+    assert.equal(
+      standing.runs.path,
+      join(s.home, 'mine-runs'),
+      'the entry applies where it matches',
+    );
 
     const named = resolveLocations({ cwd: repo, dir: other });
     assert.equal(named.id, 'theirs');
     assert.equal(named.spec.path, other);
-    assert.equal(named.runs.path, join(other, 'runs'), "and never lends its ledger to another spec");
-  } finally { s.cleanup(); }
+    assert.equal(
+      named.runs.path,
+      join(other, 'runs'),
+      'and never lends its ledger to another spec',
+    );
+  } finally {
+    s.cleanup();
+  }
 });
 
 /*
@@ -186,14 +217,20 @@ test('the nearest blueprint wins over an entry rooted at the whole tree @rule:lo
   try {
     const repo = join(s.root, 'repo');
     blueprint(join(repo, 'blueprint'), { project: 'outer' });
-    const inner = blueprint(join(repo, 'example', 'blueprint'), { project: 'inner', dirs: ['runs'] });
-    configure(s.home, [
-      'projects:',
-      '  - id: outer',
-      `    roots: [${repo}]`,
-      `    spec: ${join(repo, 'blueprint')}`,
-      '',
-    ].join('\n'));
+    const inner = blueprint(join(repo, 'example', 'blueprint'), {
+      project: 'inner',
+      dirs: ['runs'],
+    });
+    configure(
+      s.home,
+      [
+        'projects:',
+        '  - id: outer',
+        `    roots: [${repo}]`,
+        `    spec: ${join(repo, 'blueprint')}`,
+        '',
+      ].join('\n'),
+    );
 
     const outside = resolveLocations({ cwd: repo });
     assert.equal(outside.id, 'outer', 'at the root, the entry answers');
@@ -201,8 +238,10 @@ test('the nearest blueprint wins over an entry rooted at the whole tree @rule:lo
     const within = resolveLocations({ cwd: join(repo, 'example') });
     assert.equal(within.id, 'inner');
     assert.equal(within.spec.path, inner);
-    assert.equal(within.runs.path, join(inner, 'runs'), 'and never the outer project\'s ledger');
-  } finally { s.cleanup(); }
+    assert.equal(within.runs.path, join(inner, 'runs'), "and never the outer project's ledger");
+  } finally {
+    s.cleanup();
+  }
 });
 
 test('a more specific entry beats a broader one', () => {
@@ -211,29 +250,36 @@ test('a more specific entry beats a broader one', () => {
     const repo = join(s.root, 'repo');
     blueprint(join(repo, 'blueprint'), { project: 'outer' });
     const inner = blueprint(join(repo, 'sub', 'blueprint'), { project: 'inner' });
-    configure(s.home, [
-      'projects:',
-      `  - id: outer\n    roots: [${repo}]\n    spec: ${join(repo, 'blueprint')}`,
-      `  - id: pinned-inner\n    roots: [${join(repo, 'sub')}]\n    spec: ${inner}`
-      + `\n    evidence: ${join(s.home, 'inner-ev')}`,
-      '',
-    ].join('\n'));
+    configure(
+      s.home,
+      [
+        'projects:',
+        `  - id: outer\n    roots: [${repo}]\n    spec: ${join(repo, 'blueprint')}`,
+        `  - id: pinned-inner\n    roots: [${join(repo, 'sub')}]\n    spec: ${inner}` +
+          `\n    evidence: ${join(s.home, 'inner-ev')}`,
+        '',
+      ].join('\n'),
+    );
     const loc = resolveLocations({ cwd: join(repo, 'sub') });
     assert.equal(loc.id, 'pinned-inner');
     assert.equal(loc.evidence.path, join(s.home, 'inner-ev'));
-  } finally { s.cleanup(); }
+  } finally {
+    s.cleanup();
+  }
 });
 
 test('an entry still answers where the tree has no blueprint to offer', () => {
   const s = scratch();
   try {
     const repo = join(s.root, 'repo');
-    mkdirSync(join(repo, 'src'), { recursive: true });      // no blueprint anywhere
+    mkdirSync(join(repo, 'src'), { recursive: true }); // no blueprint anywhere
     const away = blueprint(join(s.home, 'projects', 'away', 'blueprint'), { project: 'away' });
     configure(s.home, `projects:\n  - id: away\n    roots: [${repo}]\n    spec: ${away}\n`);
     const loc = resolveLocations({ cwd: join(repo, 'src') });
     assert.equal(loc.spec.path, away, 'which is what an out-of-tree spec is for');
-  } finally { s.cleanup(); }
+  } finally {
+    s.cleanup();
+  }
 });
 
 test('a broken config is reported, not thrown past', () => {
@@ -245,7 +291,9 @@ test('a broken config is reported, not thrown past', () => {
     const loc = resolveLocations({ cwd: repo });
     assert.ok(loc.config.error, 'the parse failure is carried, not swallowed');
     assert.equal(loc.spec.path, join(repo, 'blueprint'), 'and the tree still answers');
-  } finally { s.cleanup(); }
+  } finally {
+    s.cleanup();
+  }
 });
 
 /* ---- spec_hash ----------------------------------------------------------- */
@@ -268,7 +316,9 @@ test('the spec hash covers the spec and nothing the spec produces @rule:location
     assert.equal(specHash(bp), before, 'line endings and trailing space are not the spec');
     writeFileSync(join(bp, 'features', 'a.yml'), 'feature: b\nstories: []\n');
     assert.notEqual(specHash(bp), before, 'a changed word is');
-  } finally { s.cleanup(); }
+  } finally {
+    s.cleanup();
+  }
 });
 
 test('the same words in a different feature file are a different spec @rule:locations.travel.judged-against-a-spec', () => {
@@ -279,20 +329,26 @@ test('the same words in a different feature file are a different spec @rule:loca
     rmSync(join(b, 'features', 'a.yml'));
     writeFileSync(join(b, 'features', 'z.yml'), 'feature: a\nstories: []\n');
     assert.notEqual(specHash(a), specHash(b));
-  } finally { s.cleanup(); }
+  } finally {
+    s.cleanup();
+  }
 });
 
 /* ---- what a project gets by default ------------------------------------- */
 
 const CLI = new URL('../bin/walkdown.js', import.meta.url).pathname;
 const walkdown = (home, args) =>
-  execFileSync(process.execPath, [CLI, ...args], { env: { ...process.env, WALKDOWN_HOME: home } }).toString();
-  // WALKDOWN_SKILLS_DIR rides along in process.env, pinned by scratch().
+  execFileSync(process.execPath, [CLI, ...args], {
+    env: { ...process.env, WALKDOWN_HOME: home },
+  }).toString();
+// WALKDOWN_SKILLS_DIR rides along in process.env, pinned by scratch().
 
 /* Every path in the tree, so a test can say "and nothing else appeared". */
 function tree(dir, prefix = '') {
   const out = [];
-  for (const e of readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+  for (const e of readdirSync(dir, { withFileTypes: true }).sort((a, b) =>
+    a.name.localeCompare(b.name),
+  )) {
     const rel = prefix + e.name;
     out.push(rel);
     if (e.isDirectory()) out.push(...tree(join(dir, e.name), rel + '/'));
@@ -313,15 +369,20 @@ test('a fresh project gets nothing in its tree but conventions and a pointer @ru
     writeFileSync(join(repo, 'src', 'app.js'), '// theirs\n');
     walkdown(s.home, ['init', '--dir', repo]);
 
-    assert.deepEqual(tree(repo), ['CLAUDE.md', 'src', 'src/app.js'],
-      'one file: the pointer. Not a directory of walkdown furniture, not even the skills');
+    assert.deepEqual(
+      tree(repo),
+      ['CLAUDE.md', 'src', 'src/app.js'],
+      'one file: the pointer. Not a directory of walkdown furniture, not even the skills',
+    );
     assert.ok(existsSync(join(s.skills, 'walkdown-judge', 'SKILL.md')), 'which went to the person');
 
     // And everything it will write is under the personal home, filed by project.
     const loc = resolveLocations({ cwd: repo });
     for (const kind of ['spec', ...KINDS])
       assert.ok(loc[kind].path.startsWith(s.home + '/'), `${kind} went to ${loc[kind].path}`);
-  } finally { s.cleanup(); }
+  } finally {
+    s.cleanup();
+  }
 });
 
 test('--in-repo commits the spec and takes its conversations with it @rule:locations.default.in-repo-on-request', () => {
@@ -341,7 +402,9 @@ test('--in-repo commits the spec and takes its conversations with it @rule:locat
     // the whole failure this sentence exists to prevent.
     assert.match(said, /spec: .*repo\/blueprint/);
     assert.match(said, /In the repository/);
-  } finally { s.cleanup(); }
+  } finally {
+    s.cleanup();
+  }
 });
 
 /* ---- asking ------------------------------------------------------------- */
@@ -351,7 +414,10 @@ test('every path is reported with the decision that chose it @rule:locations.ans
   try {
     const repo = join(s.root, 'repo');
     blueprint(join(repo, 'blueprint'), { dirs: ['runs'] });
-    configure(s.home, `projects:\n  - id: demo\n    roots: [${repo}]\n    evidence: ${join(s.home, 'ev')}\n`);
+    configure(
+      s.home,
+      `projects:\n  - id: demo\n    roots: [${repo}]\n    evidence: ${join(s.home, 'ev')}\n`,
+    );
     const loc = resolveLocations({ cwd: repo });
 
     for (const kind of ['spec', ...KINDS])
@@ -366,7 +432,9 @@ test('every path is reported with the decision that chose it @rule:locations.ans
     const said = walkdown(s.home, ['where', '--dir', join(repo, 'blueprint')]);
     for (const kind of ['spec', ...KINDS]) assert.match(said, new RegExp(`\\b${kind}\\b`), kind);
     assert.match(said, /already in the blueprint/);
-  } finally { s.cleanup(); }
+  } finally {
+    s.cleanup();
+  }
 });
 
 /*
@@ -377,7 +445,7 @@ test('asking where things live creates nothing at all @rule:locations.answer.ask
   const s = scratch();
   try {
     const repo = join(s.root, 'repo');
-    blueprint(join(repo, 'blueprint'));            // no runs, threads or drafts
+    blueprint(join(repo, 'blueprint')); // no runs, threads or drafts
     const before = tree(s.root);
 
     const loc = resolveLocations({ cwd: repo });
@@ -388,7 +456,9 @@ test('asking where things live creates nothing at all @rule:locations.answer.ask
     assert.ok(!existsSync(loc.evidence.path), 'and did not create it on being asked twice');
     assert.deepEqual(tree(s.root), before, 'the disk is exactly as it was found');
     assert.equal(readUserConfig().exists, false, 'including the personal config');
-  } finally { s.cleanup(); }
+  } finally {
+    s.cleanup();
+  }
 });
 
 /* ---- provenance --------------------------------------------------------- */
@@ -402,20 +472,36 @@ test('a run made at another commit still counts @rule:locations.travel.provenanc
   const statement = 'The visitor can do the thing.';
   const bp = {
     config: { runner: { targets: { local: {} } } },
-    features: [{
-      file: 'features/demo.yml',
-      data: { feature: 'demo', stories: [{ id: 'demo.main', rules: [{ id: 'demo.main.thing', statement, verify: ['checks'] }] }] },
-    }],
-    threads: [],
-    runs: [{
-      file: 'runs/r-0.json',
-      data: {
-        created: '2026-01-01T00:00:00Z', kind: 'checks', target: 'local', actor: 'agent',
-        run_id: 'r-0', git_sha: 'deadbee', tree_hash: 'sha256:aaaaaaaaaaaa',
-        spec_hash: 'sha256:bbbbbbbbbbbb',
-        results: [{ rule: 'demo.main.thing', status: 'pass', statement_hash: formatHash(statement) }],
+    features: [
+      {
+        file: 'features/demo.yml',
+        data: {
+          feature: 'demo',
+          stories: [
+            { id: 'demo.main', rules: [{ id: 'demo.main.thing', statement, verify: ['checks'] }] },
+          ],
+        },
       },
-    }],
+    ],
+    threads: [],
+    runs: [
+      {
+        file: 'runs/r-0.json',
+        data: {
+          created: '2026-01-01T00:00:00Z',
+          kind: 'checks',
+          target: 'local',
+          actor: 'agent',
+          run_id: 'r-0',
+          git_sha: 'deadbee',
+          tree_hash: 'sha256:aaaaaaaaaaaa',
+          spec_hash: 'sha256:bbbbbbbbbbbb',
+          results: [
+            { rule: 'demo.main.thing', status: 'pass', statement_hash: formatHash(statement) },
+          ],
+        },
+      },
+    ],
   };
   const cell = (b) => deriveStatus(b).rows[0].cells.local;
   assert.equal(cell(bp).state, 'pass');

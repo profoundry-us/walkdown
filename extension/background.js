@@ -8,8 +8,8 @@
  * headers off a response that refuses to be framed, and put the embed inside
  * the frame once it loads.
  */
-const REVIEWS = 'walkdown:reviews';   // tabId -> the url being reviewed
-const RULE_BASE = 9000;               // one session rule per reviewed tab
+const REVIEWS = 'walkdown:reviews'; // tabId -> the url being reviewed
+const RULE_BASE = 9000; // one session rule per reviewed tab
 
 const httpOrigin = (url) => {
   try {
@@ -21,7 +21,8 @@ const httpOrigin = (url) => {
 };
 
 const reviewPage = chrome.runtime.getURL('review.html');
-const reviewedUrl = (url) => (url?.startsWith(reviewPage) ? decodeURIComponent(new URL(url).hash.slice(1)) : null);
+const reviewedUrl = (url) =>
+  url?.startsWith(reviewPage) ? decodeURIComponent(new URL(url).hash.slice(1)) : null;
 
 const readReviews = async () => (await chrome.storage.session.get(REVIEWS))[REVIEWS] ?? {};
 const writeReviews = (next) => chrome.storage.session.set({ [REVIEWS]: next });
@@ -40,22 +41,24 @@ async function allowFraming(tabId, on) {
     await chrome.declarativeNetRequest.updateSessionRules({
       removeRuleIds: [id],
       addRules: on
-        ? [{
-            id,
-            priority: 1,
-            action: {
-              type: 'modifyHeaders',
-              responseHeaders: [
-                { header: 'x-frame-options', operation: 'remove' },
-                // DNR can only take a whole header, and frame-ancestors lives
-                // inside CSP — so the policy goes for the framed request. It is
-                // scoped to this tab and ends with the review.
-                { header: 'content-security-policy', operation: 'remove' },
-                { header: 'content-security-policy-report-only', operation: 'remove' },
-              ],
+        ? [
+            {
+              id,
+              priority: 1,
+              action: {
+                type: 'modifyHeaders',
+                responseHeaders: [
+                  { header: 'x-frame-options', operation: 'remove' },
+                  // DNR can only take a whole header, and frame-ancestors lives
+                  // inside CSP — so the policy goes for the framed request. It is
+                  // scoped to this tab and ends with the review.
+                  { header: 'content-security-policy', operation: 'remove' },
+                  { header: 'content-security-policy-report-only', operation: 'remove' },
+                ],
+              },
+              condition: { tabIds: [tabId], resourceTypes: ['sub_frame'] },
             },
-            condition: { tabIds: [tabId], resourceTypes: ['sub_frame'] },
-          }]
+          ]
         : [],
     });
   } catch (err) {
@@ -72,12 +75,17 @@ async function paint(tabId, url) {
   const on = Boolean(reviewedUrl(url));
   const here = httpOrigin(url);
   try {
-    await chrome.action.setIcon({ tabId, path: { 128: on ? 'icons/icon-128.png' : 'icons/icon-128-off.png' } });
+    await chrome.action.setIcon({
+      tabId,
+      path: { 128: on ? 'icons/icon-128.png' : 'icons/icon-128-off.png' },
+    });
     await chrome.action.setTitle({
       tabId,
-      title: on ? 'walking this page down — click to go back to it'
-        : here ? `walkdown — click to walk ${here.origin} down`
-        : 'walkdown runs on http and https pages',
+      title: on
+        ? 'walking this page down — click to go back to it'
+        : here
+          ? `walkdown — click to walk ${here.origin} down`
+          : 'walkdown runs on http and https pages',
     });
   } catch {
     // the tab went away mid-flight; nothing to paint
@@ -113,7 +121,7 @@ chrome.runtime.onMessage.addListener((msg, sender, reply) => {
   readReviews().then((reviews) => {
     reply({ role: sender.tab?.id != null && reviews[sender.tab.id] ? 'embed' : 'none' });
   });
-  return true;   // the answer is async
+  return true; // the answer is async
 });
 
 chrome.tabs.onRemoved.addListener(async (tabId) => {
@@ -128,7 +136,9 @@ chrome.tabs.onActivated.addListener(async ({ tabId }) => {
   try {
     const tab = await chrome.tabs.get(tabId);
     paint(tabId, tab.url);
-  } catch { /* gone */ }
+  } catch {
+    /* gone */
+  }
 });
 
 chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {

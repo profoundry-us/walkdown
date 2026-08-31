@@ -15,10 +15,14 @@ beforeEach(() => {
   rmSync(bp, { recursive: true, force: true });
   mkdirSync(join(bp, 'threads'), { recursive: true });
   writeFileSync(join(bp, 'walkdown.yml'), 'project: mut\n');
-  writeFileSync(join(bp, 'threads', 'n-1.yml'),
-    'id: n-1\nkind: note\nstatus: open\nbody: Fix the button.\n');
-  writeFileSync(join(bp, 'threads', 'q-1.yml'),
-    'id: q-1\nkind: question\nstatus: open\nbody: Blur or submit?\n');
+  writeFileSync(
+    join(bp, 'threads', 'n-1.yml'),
+    'id: n-1\nkind: note\nstatus: open\nbody: Fix the button.\n',
+  );
+  writeFileSync(
+    join(bp, 'threads', 'q-1.yml'),
+    'id: q-1\nkind: question\nstatus: open\nbody: Blur or submit?\n',
+  );
 });
 
 const load = () => loadBlueprint(bp);
@@ -41,24 +45,34 @@ test('legal note lifecycle: open → addressed → verified', () => {
 });
 
 test('illegal transitions are rejected @rule:threads.lifecycle.validated-transitions', () => {
-  assert.throws(() => transitionThread(load(), 'n-1', { status: 'verified', actor: 'topher' }),
-    /illegal transition open → verified/);
-  assert.throws(() => transitionThread(load(), 'q-1', { status: 'addressed', actor: 'x' }),
-    /illegal transition open → addressed for a question/);
-  assert.throws(() => transitionThread(load(), 'n-1', { status: 'open', actor: 'x', reason: 'r' }),
-    /illegal transition open → open|already open/);
+  assert.throws(
+    () => transitionThread(load(), 'n-1', { status: 'verified', actor: 'topher' }),
+    /illegal transition open → verified/,
+  );
+  assert.throws(
+    () => transitionThread(load(), 'q-1', { status: 'addressed', actor: 'x' }),
+    /illegal transition open → addressed for a question/,
+  );
+  assert.throws(
+    () => transitionThread(load(), 'n-1', { status: 'open', actor: 'x', reason: 'r' }),
+    /illegal transition open → open|already open/,
+  );
 });
 
 test('agents may claim, never accept: verified/waived need a named human @rule:threads.lifecycle.claim-never-accept', () => {
   transitionThread(load(), 'n-1', { status: 'addressed', actor: 'agent' });
-  assert.throws(() => transitionThread(load(), 'n-1', { status: 'verified', actor: 'agent' }),
-    /named human actor/);
+  assert.throws(
+    () => transitionThread(load(), 'n-1', { status: 'verified', actor: 'agent' }),
+    /named human actor/,
+  );
   assert.throws(() => transitionThread(load(), 'n-1', { status: 'waived' }), /named human actor/);
 });
 
 test('waiving records waived_by and the reason as a reply @rule:threads.lifecycle.reasoned-endings', () => {
-  assert.throws(() => transitionThread(load(), 'n-1', { status: 'waived', actor: 'topher' }),
-    /requires a reason/);
+  assert.throws(
+    () => transitionThread(load(), 'n-1', { status: 'waived', actor: 'topher' }),
+    /requires a reason/,
+  );
   transitionThread(load(), 'n-1', { status: 'waived', actor: 'topher', reason: 'By design.' });
   const t = onDisk('n-1');
   assert.equal(t.status, 'waived');
@@ -68,9 +82,15 @@ test('waiving records waived_by and the reason as a reply @rule:threads.lifecycl
 
 test('reopening requires a reason; question answer/incorporate flow works @rule:threads.lifecycle.reasoned-endings', () => {
   transitionThread(load(), 'n-1', { status: 'addressed', actor: 'agent' });
-  assert.throws(() => transitionThread(load(), 'n-1', { status: 'open', actor: 'topher' }),
-    /reopening requires a reason/);
-  transitionThread(load(), 'n-1', { status: 'open', actor: 'topher', reason: 'Still broken on mobile.' });
+  assert.throws(
+    () => transitionThread(load(), 'n-1', { status: 'open', actor: 'topher' }),
+    /reopening requires a reason/,
+  );
+  transitionThread(load(), 'n-1', {
+    status: 'open',
+    actor: 'topher',
+    reason: 'Still broken on mobile.',
+  });
   assert.equal(onDisk('n-1').status, 'open');
 
   transitionThread(load(), 'q-1', { status: 'answered', actor: 'topher' });

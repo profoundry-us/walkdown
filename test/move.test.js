@@ -19,9 +19,11 @@ function project() {
   writeFileSync(join(bp, 'runs', 'a.json'), '{"run_id":"a"}');
   return { root, home, bp, cleanup: () => rmSync(root, { recursive: true, force: true }) };
 }
-const run = (p, args) => execFileSync('node', [CLI, ...args], {
-  env: { ...process.env, WALKDOWN_HOME: p.home }, encoding: 'utf8',
-});
+const run = (p, args) =>
+  execFileSync('node', [CLI, ...args], {
+    env: { ...process.env, WALKDOWN_HOME: p.home },
+    encoding: 'utf8',
+  });
 
 test('move relocates the files, records the choice, and edits no record @rule:locations.keeping.moving-is-a-decision', () => {
   const p = project();
@@ -31,7 +33,11 @@ test('move relocates the files, records the choice, and edits no record @rule:lo
     run(p, ['move', 'runs', '--to', dest, '--dir', p.bp]);
 
     assert.ok(existsSync(join(dest, 'a.json')), 'the run moved');
-    assert.equal(readFileSync(join(dest, 'a.json'), 'utf8'), before, 'byte for byte — a move is not an edit');
+    assert.equal(
+      readFileSync(join(dest, 'a.json'), 'utf8'),
+      before,
+      'byte for byte — a move is not an edit',
+    );
     assert.ok(!existsSync(join(p.bp, 'runs', 'a.json')), 'and is not left behind');
 
     const cfg = readFileSync(join(p.home, 'config.yml'), 'utf8');
@@ -41,7 +47,9 @@ test('move relocates the files, records the choice, and edits no record @rule:lo
     // And the resolver now agrees, which is the only thing that makes it real.
     const where = run(p, ['where', 'runs', '--dir', p.bp]).trim();
     assert.equal(where, dest);
-  } finally { p.cleanup(); }
+  } finally {
+    p.cleanup();
+  }
 });
 
 /*
@@ -58,7 +66,10 @@ test('move refuses a destination that already holds records @rule:locations.keep
     assert.throws(
       () => run(p, ['move', 'runs', '--to', dest, '--dir', p.bp]),
       (e) => e.status === 2,
-      'refused, and loudly enough to fail a script');
+      'refused, and loudly enough to fail a script',
+    );
     assert.ok(existsSync(join(p.bp, 'runs', 'a.json')), 'and nothing moved');
-  } finally { p.cleanup(); }
+  } finally {
+    p.cleanup();
+  }
 });

@@ -14,8 +14,15 @@ test('node:test reporter records tagged tests as a hash-stamped run', () => {
   writeFileSync(join(root, 'blueprint', 'walkdown.yml'), 'project: node-fixture\n');
   writeFileSync(
     join(root, 'blueprint', 'features', 'demo.yml'),
-    ['feature: demo', 'stories:', '  - id: demo.main', '    rules:',
-      '      - id: demo.main.adds', '        statement: Adding works.', '        verify: [checks]'].join('\n')
+    [
+      'feature: demo',
+      'stories:',
+      '  - id: demo.main',
+      '    rules:',
+      '      - id: demo.main.adds',
+      '        statement: Adding works.',
+      '        verify: [checks]',
+    ].join('\n'),
   );
   // The tag is assembled so this file's source never contains a literal
   // rule ref — walkdown's own coverage lint greps test/ for them.
@@ -27,22 +34,30 @@ test('node:test reporter records tagged tests as a hash-stamped run', () => {
       "import { test } from 'node:test';",
       `test('adds ${tag}', () => assert.equal(1 + 1, 2));`,
       "test('untagged', () => assert.ok(true));",
-    ].join('\n')
+    ].join('\n'),
   );
 
   const reporter = new URL('../lib/node-test-reporter.js', import.meta.url).pathname;
   const res = spawnSync(
     process.execPath,
-    ['--test', `--test-reporter=${reporter}`, '--test-reporter-destination=stdout', 'demo.test.mjs'],
+    [
+      '--test',
+      `--test-reporter=${reporter}`,
+      '--test-reporter-destination=stdout',
+      'demo.test.mjs',
+    ],
     {
       cwd: root,
       encoding: 'utf8',
       // strip the parent test-runner's env so the nested node --test runs standalone
       env: Object.fromEntries(
-        Object.entries({ ...process.env, WALKDOWN_ACTOR: 'agent', WALKDOWN_TARGET: 'ci-lane' })
-          .filter(([k]) => !/^NODE_(TEST|OPTIONS)/.test(k))
+        Object.entries({
+          ...process.env,
+          WALKDOWN_ACTOR: 'agent',
+          WALKDOWN_TARGET: 'ci-lane',
+        }).filter(([k]) => !/^NODE_(TEST|OPTIONS)/.test(k)),
       ),
-    }
+    },
   );
   assert.equal(res.status, 0, res.stderr);
   assert.match(res.stdout, /recorded 1 rule result/);

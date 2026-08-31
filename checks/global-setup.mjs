@@ -9,7 +9,15 @@
  * beside it, because `prototype.root` resolves against the blueprint's parent.
  * Anything the checks write lands there and is thrown away next run.
  */
-import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { EXAMPLE_DECLARED, EXAMPLE_ORIGIN } from '../playwright.config.js';
@@ -46,7 +54,9 @@ export default function globalSetup() {
    * visible with a choice to make — which blueprint a page belongs to, and what
    * the panel does when you pick one that is about somewhere else.
    */
-  cpSync(join(root, 'example', 'blueprint'), join(CHECKSPACE, 'example', 'blueprint'), { recursive: true });
+  cpSync(join(root, 'example', 'blueprint'), join(CHECKSPACE, 'example', 'blueprint'), {
+    recursive: true,
+  });
   rmSync(join(CHECKSPACE, 'example', 'blueprint', 'drafts'), { recursive: true, force: true });
   /*
    * And point the copy's declared address at the port this run serves the
@@ -95,9 +105,21 @@ export default function globalSetup() {
    * a pin placed there would vanish the moment it was filed.
    */
   const sb = join(CHECKSPACE, 'blueprint', 'storyboard.yml');
-  writeFileSync(sb, readFileSync(sb, 'utf8') +
-    ['', '  - id: fixture-app', '    title: The application under review (browser checks only)',
-     '    prototype: /screens/review.html', '    app: { path: /app.html }',
-     '    anchors:', '      - host.title', '      - host.cta', '      - host.card',
-     '      - host.second', ''].join('\n'));
+  writeFileSync(
+    sb,
+    readFileSync(sb, 'utf8') +
+      [
+        '',
+        '  - id: fixture-app',
+        '    title: The application under review (browser checks only)',
+        '    prototype: /screens/review.html',
+        '    app: { path: /app.html }',
+        '    anchors:',
+        '      - host.title',
+        '      - host.cta',
+        '      - host.card',
+        '      - host.second',
+        '',
+      ].join('\n'),
+  );
 }

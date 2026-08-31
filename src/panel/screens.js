@@ -3,7 +3,14 @@
  * on file to compare against at all.
  */
 import {
-  closeScreenPanel, currentScreen, ghostSource, goTo, pageSurface, render, setFade, setGhost,
+  closeScreenPanel,
+  currentScreen,
+  ghostSource,
+  goTo,
+  pageSurface,
+  render,
+  setFade,
+  setGhost,
 } from './app.js';
 import { S } from './state.js';
 import { esc } from './util.js';
@@ -22,10 +29,16 @@ export function wireScreens(root) {
       S.ghostOverride = null;
       closeScreenPanel();
       const reghost = () => {
-        if (S.ghost) { setGhost(false); setFade(S.ghostOpacity || 1); } else render();
+        if (S.ghost) {
+          setGhost(false);
+          setFade(S.ghostOpacity || 1);
+        } else render();
       };
       // "Detect from the page" is a reset, not a destination.
-      if (!id) { S.pickedScreen = null; return reghost(); }
+      if (!id) {
+        S.pickedScreen = null;
+        return reghost();
+      }
       // Picked by hand, so the pick rides along and survives the arrival.
       if (goTo(screenById(id), pageSurface(), id)) return;
       // Nowhere to go: a screen with no URL on either surface. Then the only
@@ -51,10 +64,11 @@ export function screensPane() {
       ${auto && here ? `<span class="ml-auto text-[11px] opacity-50">${esc(here.id)}</span>` : ''}
     </button>
     <div class="mx-3.5 my-1 border-t border-base-300"></div>
-    ${screens.map((sc) => {
-      const on = S.pickedScreen === sc.id;
-      const design = ghostSource(sc);
-      return `<button class="flex w-full items-start gap-2 px-3.5 py-2 text-left hover:bg-base-200"
+    ${screens
+      .map((sc) => {
+        const on = S.pickedScreen === sc.id;
+        const design = ghostSource(sc);
+        return `<button class="flex w-full items-start gap-2 px-3.5 py-2 text-left hover:bg-base-200"
         data-screen="${esc(sc.id)}">
         <span class="w-3.5 shrink-0 pt-0.5 text-center ${on ? 'text-primary' : 'opacity-30'}">${on ? '\u25c9' : '\u25cb'}</span>
         <span class="min-w-0">
@@ -62,7 +76,9 @@ export function screensPane() {
           <span class="block truncate font-mono text-[10.5px] opacity-40">${esc(sc.id)}</span>
         </span>
         <span class="ml-auto shrink-0 pt-0.5 text-[10.5px] ${design ? 'opacity-50' : 'text-warning'}">${
-          design ? (design.proposed ? 'sketch' : 'design') : 'no design'}</span>
+          design ? (design.proposed ? 'sketch' : 'design') : 'no design'
+        }</span>
       </button>`;
-    }).join('')}`;
+      })
+      .join('')}`;
 }

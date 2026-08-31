@@ -1,5 +1,13 @@
 import assert from 'node:assert/strict';
-import { existsSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdtempSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
@@ -11,9 +19,13 @@ import { runChecks } from '../lib/run-cmd.js';
 const root = mkdtempSync(join(tmpdir(), 'walkdown-initrun-'));
 
 /* Every path in a tree, so a test can say "and nothing else appeared". */
-const tree = (dir, prefix = '') => readdirSync(dir, { withFileTypes: true })
-  .sort((a, b) => a.name.localeCompare(b.name))
-  .flatMap((e) => [prefix + e.name, ...(e.isDirectory() ? tree(join(dir, e.name), prefix + e.name + '/') : [])]);
+const tree = (dir, prefix = '') =>
+  readdirSync(dir, { withFileTypes: true })
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .flatMap((e) => [
+      prefix + e.name,
+      ...(e.isDirectory() ? tree(join(dir, e.name), prefix + e.name + '/') : []),
+    ]);
 after(() => rmSync(root, { recursive: true, force: true }));
 
 test('init scaffolds a lint-clean blueprint with agent conventions', () => {
@@ -48,8 +60,10 @@ test('init is idempotent: rerun no-ops, customizations kept, --force updates own
   // Every file is up to date; the last two entries only report where the spec
   // and the skills went.
   assert.ok(
-    rerun.every((r) => r.action === 'up-to-date'
-      || r.action.startsWith('spec-') || r.action.startsWith('skills-')),
+    rerun.every(
+      (r) =>
+        r.action === 'up-to-date' || r.action.startsWith('spec-') || r.action.startsWith('skills-'),
+    ),
     JSON.stringify(rerun),
   );
 
@@ -58,13 +72,22 @@ test('init is idempotent: rerun no-ops, customizations kept, --force updates own
   const third = scaffold(proj);
   assert.equal(actionOf(third, 'blueprint/walkdown.yml'), 'kept');
   assert.equal(actionOf(third, '.claude/skills/walkdown-judge/SKILL.md'), 'kept-differs');
-  assert.equal(readFileSync(join(proj, '.claude', 'skills', 'walkdown-judge', 'SKILL.md'), 'utf8'), 'customized');
+  assert.equal(
+    readFileSync(join(proj, '.claude', 'skills', 'walkdown-judge', 'SKILL.md'), 'utf8'),
+    'customized',
+  );
 
   const forced = scaffold(proj, { force: true });
   assert.equal(actionOf(forced, 'blueprint/walkdown.yml'), 'kept'); // user-owned: --force never touches it
   assert.equal(actionOf(forced, '.claude/skills/walkdown-judge/SKILL.md'), 'updated');
-  assert.match(readFileSync(join(proj, '.claude', 'skills', 'walkdown-judge', 'SKILL.md'), 'utf8'), /^---\nname: walkdown-judge/);
-  assert.equal(readFileSync(join(proj, 'blueprint', 'walkdown.yml'), 'utf8'), 'project: customized\n');
+  assert.match(
+    readFileSync(join(proj, '.claude', 'skills', 'walkdown-judge', 'SKILL.md'), 'utf8'),
+    /^---\nname: walkdown-judge/,
+  );
+  assert.equal(
+    readFileSync(join(proj, 'blueprint', 'walkdown.yml'), 'utf8'),
+    'project: customized\n',
+  );
 });
 
 test('init appends a pointer to an existing CLAUDE.md exactly once', () => {
@@ -97,8 +120,14 @@ test('several agent files: init writes no pointer and says which they are @rule:
     assert.doesNotMatch(readFileSync(join(proj, f), 'utf8'), /walkdown:begin/, f);
 
   // And the person (or the wizard) settles it by naming one.
-  assert.equal(placePointer(join(proj, 'AGENTS.md'), pointerBlock('blueprint/')), 'pointer-appended');
-  assert.match(readFileSync(join(proj, 'AGENTS.md'), 'utf8'), /walkdown blueprint in `blueprint\/`/);
+  assert.equal(
+    placePointer(join(proj, 'AGENTS.md'), pointerBlock('blueprint/')),
+    'pointer-appended',
+  );
+  assert.match(
+    readFileSync(join(proj, 'AGENTS.md'), 'utf8'),
+    /walkdown blueprint in `blueprint\/`/,
+  );
 });
 
 test('a project with only an AGENTS.md gets the pointer there, not in a new CLAUDE.md @rule:locations.pointer.placed-where-agents-read', () => {
@@ -107,7 +136,11 @@ test('a project with only an AGENTS.md gets the pointer there, not in a new CLAU
   writeFileSync(join(proj, 'AGENTS.md'), '# Conventions\n');
   const results = scaffold(proj);
   assert.equal(results.find((r) => r.path === 'AGENTS.md')?.action, 'pointer-appended');
-  assert.equal(existsSync(join(proj, 'CLAUDE.md')), false, 'no second file competing for the same job');
+  assert.equal(
+    existsSync(join(proj, 'CLAUDE.md')),
+    false,
+    'no second file competing for the same job',
+  );
 });
 
 /*
@@ -156,8 +189,10 @@ test('skills follow the spec: outside it by default, committed when it is @rule:
 test('a skill whose harness only walkdown has is not shipped @rule:locations.default.skills-are-yours-by-default', () => {
   const names = skillFiles().map((s) => s.name);
   assert.ok(names.includes('walkdown-judge') && names.includes('walkdown-setup'));
-  assert.ok(!names.includes('walkdown-sitting'),
-    'it drives tools/sitting.mjs, which an adopting project does not have');
+  assert.ok(
+    !names.includes('walkdown-sitting'),
+    'it drives tools/sitting.mjs, which an adopting project does not have',
+  );
 });
 
 test('an edited skill is kept unless forced @rule:locations.default.skills-are-yours-by-default', () => {
@@ -177,9 +212,14 @@ test('run substitutes {id}, injects target env and WALKDOWN_TARGET, propagates e
   const probe = `node -e "require('fs').writeFileSync('probe.txt', process.env.WALKDOWN_TARGET + ':' + process.env.APP_HOST + ':' + (process.env.RULE_ARG || ''))"`;
   writeFileSync(
     join(proj, 'blueprint', 'walkdown.yml'),
-    ['project: runner', 'runner:', `  run_all: "${probe.replaceAll('"', '\\"')}"`,
+    [
+      'project: runner',
+      'runner:',
+      `  run_all: "${probe.replaceAll('"', '\\"')}"`,
       `  run_for_rule: "RULE_ARG={id} ${probe.replaceAll('"', '\\"')}"`,
-      '  targets:', '    staging: { env: { APP_HOST: "https://stage.example" } }'].join('\n')
+      '  targets:',
+      '    staging: { env: { APP_HOST: "https://stage.example" } }',
+    ].join('\n'),
   );
   const blueprint = loadBlueprint(join(proj, 'blueprint'));
 
@@ -189,12 +229,17 @@ test('run substitutes {id}, injects target env and WALKDOWN_TARGET, propagates e
 
   const one = runChecks(blueprint, { target: 'staging', rule: 'a.b.c', stdio: 'pipe' });
   assert.equal(one.code, 0);
-  assert.equal(readFileSync(join(proj, 'probe.txt'), 'utf8'), 'staging:https://stage.example:a.b.c');
+  assert.equal(
+    readFileSync(join(proj, 'probe.txt'), 'utf8'),
+    'staging:https://stage.example:a.b.c',
+  );
 
   assert.throws(() => runChecks(blueprint, { target: 'nope', stdio: 'pipe' }), /unknown target/);
 
-  writeFileSync(join(proj, 'blueprint', 'walkdown.yml'),
-    'project: runner\nrunner: { run_all: "node -e \\"process.exit(3)\\"" }\n');
+  writeFileSync(
+    join(proj, 'blueprint', 'walkdown.yml'),
+    'project: runner\nrunner: { run_all: "node -e \\"process.exit(3)\\"" }\n',
+  );
   const failing = runChecks(loadBlueprint(join(proj, 'blueprint')), { stdio: 'pipe' });
   assert.equal(failing.code, 3);
 });

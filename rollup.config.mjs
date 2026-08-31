@@ -40,8 +40,8 @@ export default {
    * say — is still an error the build stops on.
    */
   onwarn(warning, warn) {
-    const inPanel = (p) => typeof p === 'string' && p.includes('src/panel/')
-      && !p.endsWith('src/panel/index.js');
+    const inPanel = (p) =>
+      typeof p === 'string' && p.includes('src/panel/') && !p.endsWith('src/panel/index.js');
     if (warning.code === 'CIRCULAR_DEPENDENCY' && (warning.ids ?? []).every(inPanel)) return;
     warn(warning);
     throw new Error(`rollup: ${warning.code}`);

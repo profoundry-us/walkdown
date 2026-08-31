@@ -32,8 +32,9 @@ export function threadsMatching(filter) {
      * status.js beside every other queue - a second copy in the panel is a
      * second thing to get wrong.
      */
-    const owed = new Set((S.data?.attention ?? [])
-      .filter((i) => i.who === 'human' && i.thread).map((i) => i.thread));
+    const owed = new Set(
+      (S.data?.attention ?? []).filter((i) => i.who === 'human' && i.thread).map((i) => i.thread),
+    );
     return all.filter((t) => owed.has(t.id));
   }
   return all.filter((t) => !TERMINAL.includes(t.status));
@@ -43,10 +44,10 @@ export function threadsMatching(filter) {
 export function threadWhere(t) {
   const a = t?.anchor ?? {};
   const sc = screenById(a.screen);
-  return [
-    a.rule,
-    a.element ?? (sc ? (sc.title ?? sc.id) : a.screen),
-  ].filter(Boolean).join(' · ') || 'not attached to anything';
+  return (
+    [a.rule, a.element ?? (sc ? (sc.title ?? sc.id) : a.screen)].filter(Boolean).join(' · ') ||
+    'not attached to anything'
+  );
 }
 
 /*
@@ -77,8 +78,9 @@ export function threadFilterBar() {
 }
 
 export function threadsPane() {
-  const list = [...threadsMatching(S.threadFilter)]
-    .sort((a, b) => threadTouched(b).localeCompare(threadTouched(a)));
+  const list = [...threadsMatching(S.threadFilter)].sort((a, b) =>
+    threadTouched(b).localeCompare(threadTouched(a)),
+  );
   const EMPTY = {
     active: 'No live threads. Everything said here has been answered — <b>All</b> has them.',
     you: 'Nothing is waiting on you.',

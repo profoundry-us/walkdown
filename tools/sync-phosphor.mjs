@@ -17,7 +17,7 @@ import { dirname, join } from 'node:path';
 
 const HERE = dirname(new URL(import.meta.url).pathname);
 const ROOT = join(HERE, '..');
-const PANEL = join(ROOT, 'src', 'panel', 'icons.js');   // the source, not the build
+const PANEL = join(ROOT, 'src', 'panel', 'icons.js'); // the source, not the build
 const EMBED = join(ROOT, 'lib', 'viewer', 'embed.js');
 
 /*
@@ -27,9 +27,23 @@ const EMBED = join(ROOT, 'lib', 'viewer', 'embed.js');
  * it, so `map-pin` and `map-pin-fill` can both exist.
  */
 const TARGETS = [
-  { file: PANEL, indent: '', icons: [['bounding-box', 'regular'], ['caret-down', 'regular'], ['chats-circle', 'regular'],
-    ['checks', 'regular'], ['desktop', 'regular'], ['device-mobile', 'regular'], ['frame-corners', 'regular'],
-    ['gear', 'regular'], ['info', 'regular'], ['map-pin', 'regular'], ['warning', 'fill']] },
+  {
+    file: PANEL,
+    indent: '',
+    icons: [
+      ['bounding-box', 'regular'],
+      ['caret-down', 'regular'],
+      ['chats-circle', 'regular'],
+      ['checks', 'regular'],
+      ['desktop', 'regular'],
+      ['device-mobile', 'regular'],
+      ['frame-corners', 'regular'],
+      ['gear', 'regular'],
+      ['info', 'regular'],
+      ['map-pin', 'regular'],
+      ['warning', 'fill'],
+    ],
+  },
   { file: EMBED, indent: '  ', icons: [['map-pin', 'fill']] },
 ];
 
@@ -39,19 +53,26 @@ const END = (i) => `${i}// --- phosphor:end ---`;
 const key = (name, weight) => (weight === 'regular' ? name : `${name}-${weight}`);
 const body = (name, weight) => {
   const file = `${key(name, weight)}.svg`;
-  const svg = readFileSync(join(ROOT, 'node_modules', '@phosphor-icons', 'core', 'assets', weight, file), 'utf8');
-  const inner = svg.replace(/^[\s\S]*?<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '').trim();
+  const svg = readFileSync(
+    join(ROOT, 'node_modules', '@phosphor-icons', 'core', 'assets', weight, file),
+    'utf8',
+  );
+  const inner = svg
+    .replace(/^[\s\S]*?<svg[^>]*>/, '')
+    .replace(/<\/svg>\s*$/, '')
+    .trim();
   if (!inner) throw new Error(`no markup in ${file}`);
   return inner;
 };
 
-const blockFor = (icons, i) => [
-  START(i),
-  `${i}const PHOSPHOR = {`,
-  ...icons.map(([n, w]) => `${i}  '${key(n, w)}': '${body(n, w).replace(/'/g, "\\'")}',`),
-  `${i}};`,
-  END(i),
-].join('\n');
+const blockFor = (icons, i) =>
+  [
+    START(i),
+    `${i}const PHOSPHOR = {`,
+    ...icons.map(([n, w]) => `${i}  '${key(n, w)}': '${body(n, w).replace(/'/g, "\\'")}',`),
+    `${i}};`,
+    END(i),
+  ].join('\n');
 
 const check = process.argv.includes('--check');
 let stale = 0;
@@ -65,7 +86,8 @@ for (const target of TARGETS) {
     console.error(`markers not found in ${target.file} — add:\n${start}\n${end}`);
     process.exit(1);
   }
-  const next = src.slice(0, from) + blockFor(target.icons, target.indent) + src.slice(to + end.length);
+  const next =
+    src.slice(0, from) + blockFor(target.icons, target.indent) + src.slice(to + end.length);
   if (next === src) continue;
   stale += 1;
   if (!check) writeFileSync(target.file, next);

@@ -33,8 +33,8 @@
 function splitScreenRef(ref) {
   if (!ref) return null;
   const s = String(ref);
-  const h = s.indexOf('#');           // the fragment starts at the FIRST #,
-  const fragment = h < 0 ? '' : s.slice(h);   // so "#/order?id=1" stays whole
+  const h = s.indexOf('#'); // the fragment starts at the FIRST #,
+  const fragment = h < 0 ? '' : s.slice(h); // so "#/order?id=1" stays whole
   const head = h < 0 ? s : s.slice(0, h);
   const q = head.indexOf('?');
   return { path: q < 0 ? head : head.slice(0, q), query: q < 0 ? '' : head.slice(q), fragment };
@@ -140,11 +140,17 @@ function locationOfUrl(url) {
 const MSG = {
   /** Same escaping rules as the rest of the chrome; bodies are user text. */
   esc: (s) =>
-    String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])),
+    String(s ?? '').replace(
+      /[&<>"]/g,
+      (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c],
+    ),
 
   /** Up to two letters, from a name or an email-ish handle. */
   initials(name) {
-    const parts = String(name ?? '?').trim().split(/[\s._-]+/).filter(Boolean);
+    const parts = String(name ?? '?')
+      .trim()
+      .split(/[\s._-]+/)
+      .filter(Boolean);
     if (!parts.length) return '?';
     return (parts.length === 1 ? parts[0].slice(0, 2) : parts[0][0] + parts[1][0]).toUpperCase();
   },
@@ -155,7 +161,9 @@ const MSG = {
    * thing you learn once.
    */
   tint(name) {
-    const who = String(name ?? '').trim().toLowerCase();
+    const who = String(name ?? '')
+      .trim()
+      .toLowerCase();
     if (who === 'agent') return 'oklch(52% 0.09 165)';
     // One tint per person: the first word is what a handle and a full name
     // have in common, so "topher" and "Topher Fangio" wear the same colour.
@@ -210,9 +218,15 @@ const MSG = {
   body(text, { rules = [] } = {}) {
     const known = new Set(rules);
     return this.esc(text)
-      .replace(/\b([nq]-\d{4})\b/g, '<button class="wd-ref link link-hover" data-thread-ref="$1">$1</button>')
+      .replace(
+        /\b([nq]-\d{4})\b/g,
+        '<button class="wd-ref link link-hover" data-thread-ref="$1">$1</button>',
+      )
       .replace(/\b([a-z][\w-]*(?:\.[a-z][\w-]*){2,})\b/gi, (m) =>
-        known.has(m) ? `<button class="wd-ref link link-hover font-mono" data-rule-ref="${m}">${m}</button>` : m);
+        known.has(m)
+          ? `<button class="wd-ref link link-hover font-mono" data-rule-ref="${m}">${m}</button>`
+          : m,
+      );
   },
 
   /**
@@ -226,36 +240,43 @@ const MSG = {
    */
   stream(thread, { seenAt = null, rules = [], pending = [], names = {} } = {}) {
     const all = [...this.messages(thread), ...pending];
-    let lastDay = '', prev = null, marked = false;
+    let lastDay = '',
+      prev = null,
+      marked = false;
     const GROUP_MS = 5 * 60 * 1000;
-    return all.map((m) => {
-      const out = [];
-      const day = this.day(m.created);
-      if (day && day !== lastDay) {
-        lastDay = day;
-        prev = null;
-        out.push(`<div class="wd-day"><span></span>${this.esc(day)}<span></span></div>`);
-      }
-      if (!marked && seenAt && m.created && String(m.created) > String(seenAt) && !m.pending) {
-        marked = true;
-        prev = null;
-        out.push('<div class="wd-new"><span></span>New<span></span></div>');
-      }
-      const cont = prev && prev.author === m.author &&
-        Math.abs(Date.parse(m.created ?? '') - Date.parse(prev.created ?? '')) < GROUP_MS;
-      prev = m;
-      const who = this.displayName(m.author, names);
-      out.push(`<div class="wd-msg${cont ? ' cont' : ''}${m.pending ? ' pending' : ''}${m.failed ? ' failed' : ''}">
+    return all
+      .map((m) => {
+        const out = [];
+        const day = this.day(m.created);
+        if (day && day !== lastDay) {
+          lastDay = day;
+          prev = null;
+          out.push(`<div class="wd-day"><span></span>${this.esc(day)}<span></span></div>`);
+        }
+        if (!marked && seenAt && m.created && String(m.created) > String(seenAt) && !m.pending) {
+          marked = true;
+          prev = null;
+          out.push('<div class="wd-new"><span></span>New<span></span></div>');
+        }
+        const cont =
+          prev &&
+          prev.author === m.author &&
+          Math.abs(Date.parse(m.created ?? '') - Date.parse(prev.created ?? '')) < GROUP_MS;
+        prev = m;
+        const who = this.displayName(m.author, names);
+        out.push(`<div class="wd-msg${cont ? ' cont' : ''}${m.pending ? ' pending' : ''}${m.failed ? ' failed' : ''}">
         <div class="wd-ava" style="background:${this.tint(who)}">${this.esc(this.initials(who))}</div>
         <div class="wd-col">
           <div class="wd-head">${cont ? '' : `<span class="wd-who">${this.esc(who)}</span>`}<span
             class="wd-at" title="${this.esc(this.stamp(m.created))}">${
-              m.failed ? 'not sent' : m.pending ? 'sending…' : this.esc(this.ago(m.created))}</span></div>
+              m.failed ? 'not sent' : m.pending ? 'sending…' : this.esc(this.ago(m.created))
+            }</span></div>
           <div class="wd-text">${this.body(m.body, { rules })}</div>
         </div>
       </div>`);
-      return out.join('');
-    }).join('');
+        return out.join('');
+      })
+      .join('');
   },
 
   /**
@@ -270,7 +291,10 @@ const MSG = {
     if (!who) return 'someone';
     const key = who.toLowerCase().replace(/[^a-z0-9]/g, '');
     if (names[key]) return names[key];
-    return who.split(/(\s+)/).map((w) => (/^[a-z]/.test(w) ? w[0].toUpperCase() + w.slice(1) : w)).join('');
+    return who
+      .split(/(\s+)/)
+      .map((w) => (/^[a-z]/.test(w) ? w[0].toUpperCase() + w.slice(1) : w))
+      .join('');
   },
 
   /**
@@ -296,7 +320,10 @@ const MSG = {
     const username = String(id.username ?? '').trim();
     const display = name || username;
     if (!display) return names;
-    const key = (s) => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
+    const key = (s) =>
+      String(s)
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
     for (const handle of [username, name, ...(id.handles ?? [])])
       if (String(handle ?? '').trim()) names[key(handle)] = display;
     const first = name.split(/\s+/)[0];
@@ -317,8 +344,9 @@ const MSG = {
   /** One initials tile. The same face for the same person, everywhere. */
   avatar(name, cls = 'wd-ava') {
     const who = name || 'someone';
-    return `<div class="${cls}" style="background:${this.tint(who)}" title="${
-      this.esc(who)}">${this.esc(this.initials(who))}</div>`;
+    return `<div class="${cls}" style="background:${this.tint(who)}" title="${this.esc(
+      who,
+    )}">${this.esc(this.initials(who))}</div>`;
   },
 
   /** "today at 1:09 PM" - when the conversation was last touched. */
@@ -337,8 +365,10 @@ const MSG = {
    */
   repliesLine(thread, names = {}) {
     const replies = thread?.replies ?? [];
-    const faces = this.participants(thread).slice(0, 3)
-      .map((who) => this.avatar(this.displayName(who, names), 'wd-face')).join('');
+    const faces = this.participants(thread)
+      .slice(0, 3)
+      .map((who) => this.avatar(this.displayName(who, names), 'wd-face'))
+      .join('');
     if (!replies.length)
       return `<button class="wd-replies empty" data-testid="thread.replies" data-open-thread="${this.esc(thread?.id)}">Reply</button>`;
     return `<button class="wd-replies" data-testid="thread.replies" data-open-thread="${this.esc(thread?.id)}">
@@ -462,7 +492,7 @@ const cfg = window.__walkdownConfig ?? {};
 const S = {
   SERVER: cfg.server ?? new URL(script?.src ?? 'http://localhost:4700').origin,
   BP: cfg.bp ?? script?.dataset.bp ?? '',
-  frameUrl: cfg.frame?.url ?? null,   // where the app frame actually is
+  frameUrl: cfg.frame?.url ?? null, // where the app frame actually is
 
   data: null,
   view: 'list',
@@ -470,9 +500,9 @@ const S = {
   session: null,
   ghost: null,
   ghostOpacity: 0.5,
-  protoShare: null,        // 0 = all app, 1 = all prototype; null = follow the page
+  protoShare: null, // 0 = all app, 1 = all prototype; null = follow the page
   pickedScreen: cfg.screen ?? script?.dataset.screen ?? null,
-  openThread: null,        // the thread expanded in the detail pane, by id
+  openThread: null, // the thread expanded in the detail pane, by id
 
   /*
    * A screen the ghost is pinned to for a moment — viewing a sketch from a
@@ -488,11 +518,11 @@ const S = {
    * a blueprint from the ones it found, or reviewing. The first two are not
    * error states — a fresh install genuinely does not know either answer yet.
    */
-  phase: 'loading',        // loading | connect | choose | ready
+  phase: 'loading', // loading | connect | choose | ready
   projects: [],
-  jumpOnLoad: false,       // set when a blueprint is chosen by hand, spent once it has loaded
-  servedRoot: null,        // the folder the server reports it is serving
-  listTab: 'rules',        // blueprints | rules | threads — what the side lists
+  jumpOnLoad: false, // set when a blueprint is chosen by hand, spent once it has loaded
+  servedRoot: null, // the folder the server reports it is serving
+  listTab: 'rules', // blueprints | rules | threads — what the side lists
 
   /*
    * Which threads the Threads tab is showing. The same three questions
@@ -501,7 +531,7 @@ const S = {
    * is the one with work in it - `all` is for going back to a conversation
    * that ended, which is the thing that was impossible before this tab.
    */
-  threadFilter: 'active',  // active | you | all
+  threadFilter: 'active', // active | you | all
 
   /*
    * What the rule search box says, and what the two note boxes say. Kept out
@@ -510,9 +540,9 @@ const S = {
    * would forget itself the next time anything else on the panel changed.
    */
   ruleQuery: '',
-  threadNote: '',          // what the reply box says, kept across re-renders
-  verdictNote: '',         // the verdict feedback box, kept across re-renders
-  ruleNote: '',            // the rule's own new-thread box, kept the same way
+  threadNote: '', // what the reply box says, kept across re-renders
+  verdictNote: '', // the verdict feedback box, kept across re-renders
+  ruleNote: '', // the rule's own new-thread box, kept the same way
 
   /*
    * The check-source disclosure, kept OUTSIDE the markup that draws it.
@@ -525,18 +555,18 @@ const S = {
    * here now, keyed by rule, so moving to another rule collapses it again
    * without anything to reset.
    */
-  srcOpenFor: null,        // the rule whose source is open
+  srcOpenFor: null, // the rule whose source is open
   srcCache: { rule: null, html: null },
 
   lastView: 'list',
-  ghostWidth: 0,           // 0 = fill the stage; otherwise a fixed CSS width
-  viewportW: 0,            // framed viewport preset: 0 = fit the space, else CSS px
+  ghostWidth: 0, // 0 = fill the stage; otherwise a fixed CSS width
+  viewportW: 0, // framed viewport preset: 0 = fit the space, else CSS px
 
-  dragging: false,         // whether the pointer is holding one of our own controls
-  deskOpen: false,         // the desk tuner behind the gear
-  screensOpen: false,      // the screen picker's list
-  hideAppOn: false,        // the tuner's "see the full effect" peek
-  docked: false,           // whether the chrome is out; the × in the bar puts it away
+  dragging: false, // whether the pointer is holding one of our own controls
+  deskOpen: false, // the desk tuner behind the gear
+  screensOpen: false, // the screen picker's list
+  hideAppOn: false, // the tuner's "see the full effect" peek
+  docked: false, // whether the chrome is out; the × in the bar puts it away
 
   /*
    * Set when the copy of walkdown inside the ghost announces itself. A
@@ -546,9 +576,9 @@ const S = {
    * pin that lands on the page hidden underneath the one you are looking at.
    */
   ghostReady: false,
-  ghostSrc: null,          // what the kept ghost copy is showing, so a toggle can reuse it
+  ghostSrc: null, // what the kept ghost copy is showing, so a toggle can reuse it
 
-  headlessCover: null,     // the opaque cover a headless rule lays over the desk
+  headlessCover: null, // the opaque cover a headless rule lays over the desk
 };
 
 /*
@@ -562,16 +592,16 @@ const S = {
  * import graph decides evaluation order and no shard should care.
  */
 const D = {
-  shell: null,        // the popover over the whole viewport, host of the shadow root
-  sr: null,           // that shadow root
-  host: null,         // the transparent carrier inside it
-  bar: null,          // the tool bar across the top
-  side: null,         // the side panel
-  deskPanel: null,    // the desk tuner behind the gear
-  screenPanel: null,  // the screen picker's list
-  tab: null,          // the WALKDOWN pull tab, shown when the chrome is put away
-  swap: null,         // the prototype/app cross beside it
-  appFrame: null,     // the application under review
+  shell: null, // the popover over the whole viewport, host of the shadow root
+  sr: null, // that shadow root
+  host: null, // the transparent carrier inside it
+  bar: null, // the tool bar across the top
+  side: null, // the side panel
+  deskPanel: null, // the desk tuner behind the gear
+  screenPanel: null, // the screen picker's list
+  tab: null, // the WALKDOWN pull tab, shown when the chrome is put away
+  swap: null, // the prototype/app cross beside it
+  appFrame: null, // the application under review
 };
 /*
  * Whether this delivery comes back after a real page load. The extension
@@ -588,17 +618,29 @@ const REINJECTS = cfg.reinjects === true;
  * practice never arises.
  */
 const store = cfg.store ?? {
-  get: async (k) => { try { return JSON.parse(localStorage.getItem(k) ?? 'null'); } catch { return null; } },
-  set: async (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* private mode */ } },
+  get: async (k) => {
+    try {
+      return JSON.parse(localStorage.getItem(k) ?? 'null');
+    } catch {
+      return null;
+    }
+  },
+  set: async (k, v) => {
+    try {
+      localStorage.setItem(k, JSON.stringify(v));
+    } catch {
+      /* private mode */
+    }
+  },
 };
 const CHOICE = `walkdown:blueprint:${location.origin}`;
 // The extension ships the stylesheet itself; served, it comes off the server.
 const STYLESHEET = cfg.stylesheet ?? S.SERVER + '/walkdown.css';
 
 /* The panel's geometry, in pixels. */
-const W = 384;    // the side panel
-const TOP = 44;   // the tool bar across the top
-const GAP = 12;   // how much desk shows around the wrapped page
+const W = 384; // the side panel
+const TOP = 44; // the tool bar across the top
+const GAP = 12; // how much desk shows around the wrapped page
 // Nothing separates the bar from the page any more, so the bar's own bottom
 // padding does that job — a second 12px gap on top of it read as a gutter.
 const HEAD = TOP;
@@ -634,11 +676,15 @@ const HEAD = TOP;
  * null means nothing said; an empty array means "none of these", which is a
  * different answer and survives the reload the same way an emptied name does.
  */
-const ACTOR_KEY = 'walkdown:actor';           // legacy: one free-text name
-const IDENTITY_KEY = 'walkdown:identity';     // { username, name, roles }
+const ACTOR_KEY = 'walkdown:actor'; // legacy: one free-text name
+const IDENTITY_KEY = 'walkdown:identity'; // { username, name, roles }
 const identityOverride = { username: null, name: null, roles: null };
-const saveIdentity = () => store.set(IDENTITY_KEY,
-  { username: identityOverride.username, name: identityOverride.name, roles: identityOverride.roles });
+const saveIdentity = () =>
+  store.set(IDENTITY_KEY, {
+    username: identityOverride.username,
+    name: identityOverride.name,
+    roles: identityOverride.roles,
+  });
 
 /*
  * The two helpers everything else needs: escaping, and where the server is.
@@ -648,8 +694,11 @@ const saveIdentity = () => store.set(IDENTITY_KEY,
  * beats a module named for where things happened to end up.
  */
 
-const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) =>
-  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const esc = (s) =>
+  String(s ?? '').replace(
+    /[&<>"]/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c],
+  );
 
 /*
  * The blueprint rides along as a query parameter — and it has to go BEFORE any
@@ -698,14 +747,20 @@ function openShots(paths) {
       <span class="text-[12px] font-semibold uppercase tracking-widest opacity-80">Screenshots</span>
       <button class="btn btn-xs ml-auto" data-testid="detail.screenshots-close">Close</button>
     </div>
-    ${paths.map((p) => `<figure class="w-full max-w-4xl">
+    ${paths
+      .map(
+        (p) => `<figure class="w-full max-w-4xl">
       <img src="${esc(api('/evidence/' + p))}" alt="${esc(p)}"
         class="w-full rounded border border-base-300 bg-base-100">
       <figcaption class="mt-1 font-mono text-[10.5px] text-base-100 opacity-70">${esc(p)}</figcaption>
-    </figure>`).join('')}`;
+    </figure>`,
+      )
+      .join('')}`;
   // The backdrop dismisses, the pictures do not: a click meant for an image
   // must not close the thing it is looking at.
-  shotLayer.onclick = (e) => { if (e.target === shotLayer) closeShots(); };
+  shotLayer.onclick = (e) => {
+    if (e.target === shotLayer) closeShots();
+  };
   shotLayer.querySelector('[data-testid="detail.screenshots-close"]').onclick = closeShots;
   D.sr.appendChild(shotLayer);
 }
@@ -769,8 +824,8 @@ function toast(html, { sticky = false, on = null, tone = 'neutral' } = {}) {
  * they only agreed by hand. One definition, and the number on the tab is by
  * construction the list Continue walks.
  */
-const owedRows = () => orderedRows().filter(
-  (r) => needsYou(r.rule) && !(S.session?.verdicts ?? {})[r.rule]);
+const owedRows = () =>
+  orderedRows().filter((r) => needsYou(r.rule) && !(S.session?.verdicts ?? {})[r.rule]);
 
 /** The screen a rule is filed under: the end of its flow, or the first it names. */
 const screenIdOf = (r) => r?.flow?.at(-1) ?? r?.screens?.[0] ?? null;
@@ -796,7 +851,7 @@ function groupedRows(rows = S.data?.rows ?? []) {
   const board = (S.data?.storyboard ?? []).map((s) => s.id);
   const rank = new Map(board.map((id, i) => [id, i]));
   // Unknown screen ids sort after every known one; no screen at all sorts last.
-  const at = (id) => (id === null ? Infinity : rank.get(id) ?? board.length);
+  const at = (id) => (id === null ? Infinity : (rank.get(id) ?? board.length));
   const groups = new Map();
   for (const row of rows) {
     const sid = screenIdOf(row) ?? null;
@@ -814,8 +869,8 @@ function groupedRows(rows = S.data?.rows ?? []) {
 }
 
 /** The same order, flat - what the stepper and the walk step through. */
-const orderedRows = (rows) => groupedRows(rows)
-  .flatMap((g) => g.stories.flatMap((s) => s.rows));
+const orderedRows = (rows) =>
+  groupedRows(rows).flatMap((g) => g.stories.flatMap((s) => s.rows));
 
 /*
  * What a story is called once its screen is named above it. The feature
@@ -832,8 +887,10 @@ function storyLabels(stories) {
 
 const needsYou = (rule) =>
   (S.data?.attention ?? []).some((i) => i.who === 'human' && !i.thread && i.rule === rule);
-const threadsFor = (rule) => (S.data?.threads ?? []).filter((t) => t.anchor?.rule === rule &&
-  !['incorporated', 'verified', 'waived'].includes(t.status));
+const threadsFor = (rule) =>
+  (S.data?.threads ?? []).filter(
+    (t) => t.anchor?.rule === rule && !['incorporated', 'verified', 'waived'].includes(t.status),
+  );
 
 const screenById = (id) => (S.data?.storyboard ?? []).find((s) => s.id === id) ?? null;
 
@@ -849,8 +906,12 @@ const shortName = (row) =>
  * the app under review.
  */
 const CHIP = {
-  open: 'badge-warning', answered: 'badge-warning', addressed: 'badge-info',
-  verified: 'badge-success', incorporated: 'badge-success', waived: 'badge-ghost',
+  open: 'badge-warning',
+  answered: 'badge-warning',
+  addressed: 'badge-info',
+  verified: 'badge-success',
+  incorporated: 'badge-success',
+  waived: 'badge-ghost',
 };
 const TERMINAL = ['verified', 'incorporated', 'waived'];
 
@@ -890,26 +951,35 @@ function blueprintsPane() {
                aria-label="walkdown server address">
         <button class="btn btn-xs btn-outline btn-primary" id="wdp-retry">Connect</button>
       </div>
-      ${S.servedRoot
-        ? `<p class="mt-1.5 text-[11px] leading-relaxed opacity-50" data-testid="start.folder">Serving
+      ${
+        S.servedRoot
+          ? `<p class="mt-1.5 text-[11px] leading-relaxed opacity-50" data-testid="start.folder">Serving
             <span class="font-mono opacity-80">${esc(S.servedRoot)}</span> \u2014 every blueprint
             under it is listed below.</p>`
-        : `<p class="mt-1.5 text-[11px] leading-relaxed opacity-40">Not connected. Run
-            <code>walkdown serve</code> in the folder holding your blueprints.</p>`}
+          : `<p class="mt-1.5 text-[11px] leading-relaxed opacity-40">Not connected. Run
+            <code>walkdown serve</code> in the folder holding your blueprints.</p>`
+      }
     </div>
-    <div data-testid="start.options">${S.projects.length ? S.projects.map((pr) => {
-      const on = pr.id === S.BP;
-      return `<button class="block w-full border-t border-base-300 px-3.5 py-2.5 text-left hover:bg-base-200"
+    <div data-testid="start.options">${
+      S.projects.length
+        ? S.projects
+            .map((pr) => {
+              const on = pr.id === S.BP;
+              return `<button class="block w-full border-t border-base-300 px-3.5 py-2.5 text-left hover:bg-base-200"
         data-pick="${esc(pr.id)}">
         <span class="flex items-center gap-2">
           <span class="w-3.5 shrink-0 text-center ${on ? 'text-primary' : 'opacity-30'}">${on ? '\u25c9' : '\u25cb'}</span>
           <span class="text-[13px] font-semibold">${esc(pr.name)}</span>
         </span>
-        <span class="mt-0.5 block pl-5.5 text-[12px] leading-snug opacity-60">${
-          esc(pr.description ?? 'No description \u2014 add one to this blueprint\u2019s walkdown.yml.')}</span>
+        <span class="mt-0.5 block pl-5.5 text-[12px] leading-snug opacity-60">${esc(
+          pr.description ?? 'No description \u2014 add one to this blueprint\u2019s walkdown.yml.',
+        )}</span>
         <span class="mt-0.5 block pl-5.5 font-mono text-[10.5px] opacity-35">${esc(pr.id)}</span>
       </button>`;
-    }).join('') : '<p class="px-3.5 py-3 text-[12.5px] opacity-40">Nothing found under that folder.</p>'}</div>`;
+            })
+            .join('')
+        : '<p class="px-3.5 py-3 text-[12.5px] opacity-40">Nothing found under that folder.</p>'
+    }</div>`;
 }
 
 /** Server address and blueprint choice, wired the same wherever they appear. */
@@ -922,13 +992,21 @@ function askAboutSitting(nextBp) {
   const name = S.projects.find((p) => p.id === nextBp)?.name ?? nextBp;
   toast(
     `A walkdown is running on <b>${esc(S.data.project)}</b>, with <b>${
-      Object.keys(S.session.verdicts).length} judged</b>. It cannot come with you to ${esc(name)}.` +
-    ` <button class="link" data-sitting="keep">Keep it as a draft</button>` +
-    ` · <button class="link" data-sitting="discard">Discard it</button>`,
-    { sticky: true, tone: 'warning', on: {
-      keep: () => crossTo(nextBp),        // the draft is already on disk
-      discard: async () => { await discardSitting(); crossTo(nextBp); },
-    } }
+      Object.keys(S.session.verdicts).length
+    } judged</b>. It cannot come with you to ${esc(name)}.` +
+      ` <button class="link" data-sitting="keep">Keep it as a draft</button>` +
+      ` · <button class="link" data-sitting="discard">Discard it</button>`,
+    {
+      sticky: true,
+      tone: 'warning',
+      on: {
+        keep: () => crossTo(nextBp), // the draft is already on disk
+        discard: async () => {
+          await discardSitting();
+          crossTo(nextBp);
+        },
+      },
+    },
   );
 }
 
@@ -937,13 +1015,14 @@ async function discardSitting() {
   S.session = null;
   saveSession();
   await fetch(api('/api/draft'), {
-    method: 'POST', headers: { 'content-type': 'application/json' },
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ discard: true }),
   }).catch(() => {});
 }
 
 function crossTo(nextBp) {
-  S.session = null;          // left behind, on disk, waiting to be resumed
+  S.session = null; // left behind, on disk, waiting to be resumed
   S.BP = nextBp;
   store.set(CHOICE, S.BP);
   S.listTab = 'rules';
@@ -956,12 +1035,16 @@ function crossTo(nextBp) {
 
 function wireBlueprints(root) {
   const retry = root.querySelector('#wdp-retry');
-  if (retry) retry.onclick = () => {
-    const at = root.querySelector('#wdp-server').value.trim();
-    if (at) { S.SERVER = at.replace(/\/+$/, ''); store.set(CHOICE + ':server', S.SERVER); }
-    S.phase = 'loading';
-    start();
-  };
+  if (retry)
+    retry.onclick = () => {
+      const at = root.querySelector('#wdp-server').value.trim();
+      if (at) {
+        S.SERVER = at.replace(/\/+$/, '');
+        store.set(CHOICE + ':server', S.SERVER);
+      }
+      S.phase = 'loading';
+      start();
+    };
   root.querySelectorAll('[data-pick]').forEach((b) => {
     b.onclick = async () => {
       /*
@@ -1015,16 +1098,16 @@ function wireBlueprints(root) {
  */
 const DESK_KEY = 'walkdown:desk';
 const DESK_DEFAULTS = {
-  tilt: 35,     // degrees clockwise, spun within the paper's own plane
-  tip: 35,      // degrees the plane leans away from the viewer
-  depth: 600,   // the camera's distance; nearer converges harder
-  gap: 60,      // ruling pitch on the tipped plane
-  ink: 10,      // line strength, % of the theme's ink
+  tilt: 35, // degrees clockwise, spun within the paper's own plane
+  tip: 35, // degrees the plane leans away from the viewer
+  depth: 600, // the camera's distance; nearer converges harder
+  gap: 60, // ruling pitch on the tipped plane
+  ink: 10, // line strength, % of the theme's ink
 };
 // Seeded here rather than with the rest of S, so the defaults stay beside
 // the dials that tune them.
 S.desk = { ...DESK_DEFAULTS };
-const DESK_SKEW = 7;     // fallback only: how far the rulings fall short of a right angle
+const DESK_SKEW = 7; // fallback only: how far the rulings fall short of a right angle
 const line = (ink) => `color-mix(in oklch, ${ink} ${S.desk.ink}%, transparent)`;
 const ruling = (ink, deg, gap) =>
   `repeating-linear-gradient(${deg}deg, ${line(ink)} 0 1px, transparent 1px ${gap}px)`;
@@ -1051,8 +1134,8 @@ const deskLines = (ink) =>
  * it and only the desk margins show it. Oversized because a tipped plane's
  * corners pull inward; the excess keeps its edges out of the viewport.
  */
-const HAS_3D = typeof CSS !== 'undefined' &&
-  CSS.supports?.('transform', 'perspective(1px) rotateX(1deg)');
+const HAS_3D =
+  typeof CSS !== 'undefined' && CSS.supports?.('transform', 'perspective(1px) rotateX(1deg)');
 let deskEl = null;
 
 function drawDesk(on, ink) {
@@ -1103,7 +1186,8 @@ function threadCard(t, where = null) {
   // whole row the way in: under a rule the reply line is enough, because the
   // rule above it is already the context.
   return `<div class="wd-row px-3.5 py-2${where ? ' cursor-pointer' : ''}"${
-    where ? ` data-open-thread="${esc(t.id)}"` : ''}>
+    where ? ` data-open-thread="${esc(t.id)}"` : ''
+  }>
     ${where ? `<div class="mb-1 truncate text-[11px] opacity-45" data-testid="thread.where">${esc(where)}</div>` : ''}
     <div class="wd-msg">
       ${MSG.avatar(who)}
@@ -1138,16 +1222,18 @@ function threadCard(t, where = null) {
  * rule there would offer a trip nobody took.
  */
 const backFromThread = (row) =>
-  (S.listTab === 'threads' ? 'All threads' : row ? shortName(row) : 'All rules');
+  S.listTab === 'threads' ? 'All threads' : row ? shortName(row) : 'All rules';
 
 function threadPane() {
   const t = (S.data?.threads ?? []).find((x) => x.id === S.openThread);
   // Whatever became of the thread — ended, reloaded away, never there — this
   // screen is never a dead end.
-  if (!t) return `
+  if (!t)
+    return `
     <div class="flex items-center px-2 pt-2">
-      <button class="wdp-thread-back btn btn-ghost btn-xs text-primary">← ${
-        esc(backFromThread(S.selected))}</button>
+      <button class="wdp-thread-back btn btn-ghost btn-xs text-primary">← ${esc(
+        backFromThread(S.selected),
+      )}</button>
     </div>
     <div class="px-3.5 pt-1 text-[12.5px] opacity-60">That thread is no longer open here.</div>`;
   const row = t.anchor?.rule ? S.data.rows.find((r) => r.rule === t.anchor.rule) : null;
@@ -1155,17 +1241,26 @@ function threadPane() {
   const where = [
     t.anchor?.rule ? '' : 'not attached to a rule',
     sc?.title ?? t.anchor?.screen,
-    t.anchor?.element ? `<span class="font-mono">${esc(t.anchor.element)}</span>` : (t.anchor?.position ? 'by position' : ''),
-    t.anchor?.viewport ? `${esc(t.anchor.viewport.name)} ${esc(String(t.anchor.viewport.width))}` : '',
-  ].filter(Boolean).join(' · ');
+    t.anchor?.element
+      ? `<span class="font-mono">${esc(t.anchor.element)}</span>`
+      : t.anchor?.position
+        ? 'by position'
+        : '',
+    t.anchor?.viewport
+      ? `${esc(t.anchor.viewport.name)} ${esc(String(t.anchor.viewport.width))}`
+      : '',
+  ]
+    .filter(Boolean)
+    .join(' · ');
   const sketch = ghostSource(sc);
   const acts = threadActions(t);
   const me = whoAmI();
   const ended = TERMINAL.includes(t.status) ? (t.replies ?? []).at(-1) : null;
   return `
     <div class="flex items-center gap-1 px-2 pt-2">
-      <button class="wdp-thread-back btn btn-ghost btn-xs text-primary" data-testid="thread.close">← ${
-        esc(backFromThread(row))}</button>
+      <button class="wdp-thread-back btn btn-ghost btn-xs text-primary" data-testid="thread.close">← ${esc(
+        backFromThread(row),
+      )}</button>
       <span class="ml-auto flex items-center gap-1 pr-1.5 text-[11px]" data-testid="thread.provenance">
         <b class="opacity-60">${esc(t.id)}</b>
         <span class="badge badge-xs ${CHIP[t.status] ?? 'badge-ghost'}">${esc(t.status)}</span>
@@ -1179,12 +1274,20 @@ function threadPane() {
         pending: pendingReplies.get(t.id) ?? [],
         names: names(),
       })}
-      ${ended ? `<div class="mt-2 flex items-center gap-1.5 rounded border border-success/40 px-2 py-1 text-[11px]">
+      ${
+        ended
+          ? `<div class="mt-2 flex items-center gap-1.5 rounded border border-success/40 px-2 py-1 text-[11px]">
         <span class="text-success">✓</span> ${esc(t.status === 'waived' ? 'Waived' : t.status)}${
           ended.author ? ` by <b>${esc(MSG.displayName(ended.author, names()))}</b>` : ''
-        } · ${esc(MSG.ago(ended.created))}</div>` : ''}
-      ${sketch?.proposed ? `<button class="btn btn-xs btn-outline mt-2 w-full" data-sketch="${esc(t.anchor.screen)}">
-        ⚠ View the proposed sketch</button>` : ''}
+        } · ${esc(MSG.ago(ended.created))}</div>`
+          : ''
+      }
+      ${
+        sketch?.proposed
+          ? `<button class="btn btn-xs btn-outline mt-2 w-full" data-sketch="${esc(t.anchor.screen)}">
+        ⚠ View the proposed sketch</button>`
+          : ''
+      }
     </div>
     <!-- The composer stays put at the foot of the screen: type, press Enter,
          the message is there. The name is not asked for again — it is
@@ -1193,11 +1296,16 @@ function threadPane() {
       <textarea id="wdp-note" data-testid="thread.reply" rows="2" class="textarea textarea-xs w-full resize-none"
         placeholder="Reply…">${esc(S.threadNote)}</textarea>
       <div class="mt-1 flex flex-wrap items-center gap-1">
-        <span class="text-[10px] opacity-40">as <button id="wdp-tactor" class="link">${
-          esc(me || 'set your name…')}</button> · <b>Enter</b> sends</span>
-        ${acts.map(([label, st, quiet], i) =>
-          `<button class="btn btn-xs${quiet ? ' btn-ghost opacity-60' : ''}${i === 0 ? ' ml-auto' : ''}"
-            data-testid="thread.actions" data-act="${esc(st)}" data-tid="${esc(t.id)}">${label}</button>`).join('')}
+        <span class="text-[10px] opacity-40">as <button id="wdp-tactor" class="link">${esc(
+          me || 'set your name…',
+        )}</button> · <b>Enter</b> sends</span>
+        ${acts
+          .map(
+            ([label, st, quiet], i) =>
+              `<button class="btn btn-xs${quiet ? ' btn-ghost opacity-60' : ''}${i === 0 ? ' ml-auto' : ''}"
+            data-testid="thread.actions" data-act="${esc(st)}" data-tid="${esc(t.id)}">${label}</button>`,
+          )
+          .join('')}
       </div>
       <div class="mt-1 hidden text-[11px] text-warning" data-testid="thread.say" id="wdp-tsay"></div>
     </div>`;
@@ -1272,19 +1380,26 @@ function searchBox() {
  * name gives you every rule judged on it. That is the question the grouping
  * invites, and a heading you can see but not search for reads as broken.
  */
-const matchesQuery = (s, q) => String(s ?? '').toLowerCase().includes(q);
+const matchesQuery = (s, q) =>
+  String(s ?? '')
+    .toLowerCase()
+    .includes(q);
 function matchingRows() {
   const q = S.ruleQuery.trim().toLowerCase();
   if (!q) return S.data.rows;
-  const groups = new Set(
-    S.data.rows.map((r) => r.story).filter((story) => matchesQuery(story, q))
+  const groups = new Set(S.data.rows.map((r) => r.story).filter((story) => matchesQuery(story, q)));
+  const screens = new Set(
+    (S.data.storyboard ?? [])
+      .filter((sc) => matchesQuery(sc.title, q) || matchesQuery(sc.id, q))
+      .map((sc) => sc.id),
   );
-  const screens = new Set((S.data.storyboard ?? [])
-    .filter((sc) => matchesQuery(sc.title, q) || matchesQuery(sc.id, q))
-    .map((sc) => sc.id));
-  return S.data.rows.filter((row) =>
-    groups.has(row.story) || screens.has(screenIdOf(row))
-    || matchesQuery(row.rule, q) || matchesQuery(row.statement, q));
+  return S.data.rows.filter(
+    (row) =>
+      groups.has(row.story) ||
+      screens.has(screenIdOf(row)) ||
+      matchesQuery(row.rule, q) ||
+      matchesQuery(row.statement, q),
+  );
 }
 
 /*
@@ -1436,17 +1551,18 @@ const SIGN_SAY = {
  */
 function signoffDot(a, mine) {
   const tint = ROLE_TINT[a.role] ?? 'text-base-content';
-  if (a.state === 'sent-back')
-    return `<span class="text-[8px] leading-none text-error">✗</span>`;
-  const shape = {
-    signed: 'size-[6px] bg-current',
-    approved: 'size-[6px] border border-current',
-    stale: 'size-[6px] border border-current',
-  }[a.state] ?? 'size-[6px] border border-current';
-  const fill = {
-    approved: ' style="background:linear-gradient(to top, currentColor 50%, transparent 50%)"',
-    stale: ' style="background:radial-gradient(currentColor 0 1.25px, transparent 1.25px)"',
-  }[a.state] ?? '';
+  if (a.state === 'sent-back') return `<span class="text-[8px] leading-none text-error">✗</span>`;
+  const shape =
+    {
+      signed: 'size-[6px] bg-current',
+      approved: 'size-[6px] border border-current',
+      stale: 'size-[6px] border border-current',
+    }[a.state] ?? 'size-[6px] border border-current';
+  const fill =
+    {
+      approved: ' style="background:linear-gradient(to top, currentColor 50%, transparent 50%)"',
+      stale: ' style="background:radial-gradient(currentColor 0 1.25px, transparent 1.25px)"',
+    }[a.state] ?? '';
   // Owed slots dim when the rule is not waiting on you, exactly as the tier
   // glyphs beside them do — the strip has one language for "your turn".
   const dim = a.state !== 'signed' && !mine ? ' opacity-60' : '';
@@ -1464,15 +1580,22 @@ const MAX_SLOTS = 3;
 function signoffStack(acceptance, mine) {
   const all = stackOrder(acceptance);
   if (!all.length) return '';
-  const slots = all.length > MAX_SLOTS
-    ? [all[0], { role: '+', state: 'more', n: all.length - 2 }, all.at(-1)]
-    : all;
+  const slots =
+    all.length > MAX_SLOTS
+      ? [all[0], { role: '+', state: 'more', n: all.length - 2 }, all.at(-1)]
+      : all;
   return `<span class="flex w-4 shrink-0 flex-col items-center justify-center"
     data-testid="panel.rule-signoff" data-signoff="${esc(all.map((a) => `${a.role}:${a.state}`).join(' '))}"
-    >${slots.map((a) => `<span class="flex h-[9px] items-center justify-center">${
-      a.state === 'more'
-        ? `<span class="text-[8px] leading-none opacity-60">+${a.n}</span>`
-        : signoffDot(a, mine)}</span>`).join('')}</span>`;
+    >${slots
+      .map(
+        (a) =>
+          `<span class="flex h-[9px] items-center justify-center">${
+            a.state === 'more'
+              ? `<span class="text-[8px] leading-none opacity-60">+${a.n}</span>`
+              : signoffDot(a, mine)
+          }</span>`,
+      )
+      .join('')}</span>`;
 }
 
 /*
@@ -1492,12 +1615,15 @@ function signoffStack(acceptance, mine) {
  * this one is read at a glance, on the way past.
  */
 function stripTip(tiers, acceptance) {
-  const cells = tiers.map(([kind, state, cell]) =>
-    [kind, state === 'stale' ? whyStale(cell) : (TIER_MARK[state] ?? TIER_MARK.na)[2]]);
+  const cells = tiers.map(([kind, state, cell]) => [
+    kind,
+    state === 'stale' ? whyStale(cell) : (TIER_MARK[state] ?? TIER_MARK.na)[2],
+  ]);
   const signs = stackOrder(acceptance).map((a) => [
     a.role,
     `${SIGN_SAY[a.state] ?? a.state}${a.actor ? ` · ${a.actor}` : ''}${
-      a.created ? ` · ${MSG.ago(a.created)}` : ''}`,
+      a.created ? ` · ${MSG.ago(a.created)}` : ''
+    }`,
   ]);
   const line = ([label, said]) =>
     `<span class="opacity-60">${esc(label)}</span><span>${esc(said)}</span>`;
@@ -1519,10 +1645,13 @@ function stripTip(tiers, acceptance) {
    * the same hover, one at z-2 and one at z-20, are what settled it.
    */
   return `<span class="tooltip-content z-20 w-60 whitespace-normal text-left text-[11px] leading-snug"
-    data-testid="panel.rule-tiers-tip"><span class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5">${
-      cells.map(line).join('')}${signs.length
+    data-testid="panel.rule-tiers-tip"><span class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5">${cells
+      .map(line)
+      .join('')}${
+      signs.length
         ? `<span class="col-span-2 mt-0.5 opacity-40">accepted by</span>${signs.map(line).join('')}`
-        : ''}</span></span>`;
+        : ''
+    }</span></span>`;
 }
 
 function tierMarks(row, mine = false) {
@@ -1551,11 +1680,14 @@ function tierMarks(row, mine = false) {
   // strip opens the strip's bubble and nothing else.
   return `<span class="tooltip tooltip-right flex w-11 shrink-0 items-center justify-center gap-0.5 text-[12px] leading-none"
     title="" data-testid="panel.rule-tiers" data-tiers="${esc(tiers.map((t) => `${t[0]}:${t[1]}`).join(' '))}"
-    >${stripTip(tiers, row.acceptance)}${tiers.map(([, state, cell]) => {
-      const [glyph, cls] = TIER_MARK[state] ?? TIER_MARK.na;
-      return `<span class="inline-block w-4 text-center ${
-        TIER_OWED.has(state) && !mine ? 'opacity-60' : cls}">${glyph}</span>`;
-    }).join('')}${signoffStack(row.acceptance, mine)}</span>`;
+    >${stripTip(tiers, row.acceptance)}${tiers
+      .map(([, state, cell]) => {
+        const [glyph, cls] = TIER_MARK[state] ?? TIER_MARK.na;
+        return `<span class="inline-block w-4 text-center ${
+          TIER_OWED.has(state) && !mine ? 'opacity-60' : cls
+        }">${glyph}</span>`;
+      })
+      .join('')}${signoffStack(row.acceptance, mine)}</span>`;
 }
 
 /*
@@ -1586,8 +1718,8 @@ function screenHeader(id) {
     data-testid="panel.rules-screen" data-screen-group="${esc(id ?? '')}">
     <span class="mt-0.5 shrink-0 ${id ? 'text-primary' : 'opacity-30'}">${icon('frame-corners', 'size-3.5')}</span>
     <span class="min-w-0 text-[12.5px] font-semibold leading-snug">${
-      title ? esc(title) : 'No screen'}${
-      id ? '' : '<span class="ml-1.5 font-normal opacity-40">judged without looking</span>'}</span>
+      title ? esc(title) : 'No screen'
+    }${id ? '' : '<span class="ml-1.5 font-normal opacity-40">judged without looking</span>'}</span>
   </div>`;
 }
 
@@ -1614,12 +1746,18 @@ function ruleRow(row) {
    */
   return `<button class="flex w-full cursor-pointer items-center gap-2.5 px-3.5 py-2 text-left text-[14px] hover:bg-base-200"
       data-rule="${esc(row.rule)}" title="${esc(row.rule)} — ${esc(why)}">
-      ${picked
-        ? `<span class="w-11 shrink-0 text-center ${
-            { pass: 'text-success', fail: 'text-error', approved: 'text-success',
-              refining: 'text-warning' }[picked]}">${
-            { pass: '✓', fail: '✗', approved: '✍︎', refining: '✎︎' }[picked]}</span>`
-        : tierMarks(row, mine)}
+      ${
+        picked
+          ? `<span class="w-11 shrink-0 text-center ${
+              {
+                pass: 'text-success',
+                fail: 'text-error',
+                approved: 'text-success',
+                refining: 'text-warning',
+              }[picked]
+            }">${{ pass: '✓', fail: '✗', approved: '✍︎', refining: '✎︎' }[picked]}</span>`
+          : tierMarks(row, mine)
+      }
       <span class="truncate">${esc(shortName(row))}</span>
       <span class="ml-auto flex shrink-0 items-center gap-2 text-[11.5px] font-semibold">
         <span class="w-7 text-right text-warning">${owes}</span>
@@ -1642,15 +1780,17 @@ function listPane() {
     return '<p class="p-3.5 text-[13.5px] opacity-40">No rules in this blueprint.</p>';
   const rows = matchingRows();
   if (!rows.length)
-    return `<p class="p-3.5 text-[13.5px] opacity-40" data-testid="panel.rules-empty">No rule matches ${
-      esc(S.ruleQuery.trim())}.</p>`;
+    return `<p class="p-3.5 text-[13.5px] opacity-40" data-testid="panel.rules-empty">No rule matches ${esc(
+      S.ruleQuery.trim(),
+    )}.</p>`;
   let html = '';
   for (const group of groupedRows(rows)) {
     html += screenHeader(group.screen);
     const labels = storyLabels(group.stories.map((g) => g.story));
     for (const { story, rows: within } of group.stories) {
-      html += `<div class="px-3.5 pb-1 pt-2.5 ${LBL}" data-story="${esc(story)}">${
-        esc(labels.get(story))}</div>`;
+      html += `<div class="px-3.5 pb-1 pt-2.5 ${LBL}" data-story="${esc(story)}">${esc(
+        labels.get(story),
+      )}</div>`;
       html += within.map((row) => ruleRow(row)).join('');
     }
   }
@@ -1676,14 +1816,17 @@ function paintRules() {
   const list = D.host.querySelector('.wdp-list');
   if (!list) return;
   list.innerHTML = listPane();
-  list.scrollTop = 0;   // a filtered list is a new list; showing its middle is not helpful
+  list.scrollTop = 0; // a filtered list is a new list; showing its middle is not helpful
   wireRuleRows();
 }
 
 function wireSearch() {
   const box = D.host.querySelector('#wdp-search');
   if (!box) return;
-  box.oninput = () => { S.ruleQuery = box.value; paintRules(); };
+  box.oninput = () => {
+    S.ruleQuery = box.value;
+    paintRules();
+  };
   box.onkeydown = (e) => {
     // Escape clears the box rather than reaching the page behind it, where it
     // would end pin mode and leave the list still filtered.
@@ -1725,7 +1868,8 @@ const LEGEND_TIERS = [
 const LEGEND_SIGNS = ['signed', 'approved', 'stale', 'none', 'sent-back'];
 
 function legendControl() {
-  const head = (t) => `<span class="col-span-2 pt-1 text-[10px] font-bold uppercase tracking-widest opacity-40">${t}</span>`;
+  const head = (t) =>
+    `<span class="col-span-2 pt-1 text-[10px] font-bold uppercase tracking-widest opacity-40">${t}</span>`;
   const tierLine = (state) => {
     const [glyph, cls, why] = TIER_MARK[state];
     return `<span class="text-center ${cls}">${glyph}</span><span>${esc(why)}</span>`;
@@ -1769,7 +1913,9 @@ function legendControl() {
  * reported (n-0084). So the suite's own scan is the fallback.
  */
 const checkRefs = (row) => {
-  const recorded = [...new Set((S.data?.targets ?? []).flatMap((t) => row.cells?.[t]?.checks ?? []))];
+  const recorded = [
+    ...new Set((S.data?.targets ?? []).flatMap((t) => row.cells?.[t]?.checks ?? [])),
+  ];
   return recorded.length ? recorded : (S.data?.checkSource?.[row.rule] ?? []);
 };
 
@@ -1788,11 +1934,17 @@ async function loadCheckSource(rule) {
   try {
     const res = await fetch(api(`/api/checks?rule=${encodeURIComponent(rule)}`));
     const out = await res.json();
-    html = (out.checks ?? []).map((c) => c.missing
-      ? `<div class="text-warning">${esc(c.ref)} — no longer in the tree</div>`
-      : `<div class="mb-1"><div class="font-mono text-[10.5px] opacity-60">${esc(c.ref)}</div>
-          <pre class="overflow-x-auto whitespace-pre rounded bg-base-300/40 p-1.5 text-[10.5px] leading-snug">${
-            esc(c.source)}</pre></div>`).join('') || 'No source recorded.';
+    html =
+      (out.checks ?? [])
+        .map((c) =>
+          c.missing
+            ? `<div class="text-warning">${esc(c.ref)} — no longer in the tree</div>`
+            : `<div class="mb-1"><div class="font-mono text-[10.5px] opacity-60">${esc(c.ref)}</div>
+          <pre class="overflow-x-auto whitespace-pre rounded bg-base-300/40 p-1.5 text-[10.5px] leading-snug">${esc(
+            c.source,
+          )}</pre></div>`,
+        )
+        .join('') || 'No source recorded.';
   } catch {
     html = 'walkdown server unreachable.';
   }
@@ -1809,18 +1961,26 @@ async function loadCheckSource(rule) {
  */
 function evidenceRows(row) {
   const STATE = {
-    pass: ['✓', 'text-success'], fail: ['✗', 'text-error'], stale: ['~', 'text-warning'],
-    approved: ['✍︎', 'text-warning'], refining: ['✎︎', 'text-warning'],
-    skipped: ['–', 'opacity-50'], blocked: ['⊘', 'text-warning'], never: ['○', 'opacity-50'],
+    pass: ['✓', 'text-success'],
+    fail: ['✗', 'text-error'],
+    stale: ['~', 'text-warning'],
+    approved: ['✍︎', 'text-warning'],
+    refining: ['✎︎', 'text-warning'],
+    skipped: ['–', 'opacity-50'],
+    blocked: ['⊘', 'text-warning'],
+    never: ['○', 'opacity-50'],
     na: ['·', 'opacity-40'],
   };
   const line = (label, cell) => {
     const [glyph, cls] = STATE[cell?.state] ?? STATE.na;
     const who = cell?.actor ? ` · ${esc(cell.actor)}` : '';
     const when = cell?.created ? ` · ${esc(MSG.ago(cell.created))}` : '';
-    const said = cell?.state === 'never' ? 'never run'
-      : cell?.state === 'na' ? 'not required'
-      : `${esc(cell.state)}${who}${when}`;
+    const said =
+      cell?.state === 'never'
+        ? 'never run'
+        : cell?.state === 'na'
+          ? 'not required'
+          : `${esc(cell.state)}${who}${when}`;
     return `<div class="evrow" title="${esc(cell?.runId ?? '')}">
       <span class="src">${esc(label)}</span>
       <span class="${cls}">${glyph} ${said}</span></div>`;
@@ -1872,7 +2032,8 @@ function detailPane() {
   const r = S.selected;
   // A pin with no rule has no rule screen: it opens on the thread screen
   // itself, and this slot is only what slides past on the way there.
-  if (!r) return `
+  if (!r)
+    return `
     <div class="flex items-center px-2 pt-2">
       <button class="wdp-back btn btn-ghost btn-xs text-primary" data-testid="detail.back">← All rules</button>
     </div>
@@ -1888,11 +2049,20 @@ function detailPane() {
    */
   const anchors = declaredAnchors();
   const steps = r.steps
-    ? Object.entries(r.steps).map(([ph, items]) =>
-        `<span class="${LBL} pt-1">${esc(ph)}</span><span>${items.map((s) =>
-          esc(s).replace(/`([^`]+)`/g, (_m, tok) => (anchors.has(tok)
-            ? `<code class="wdp-anchor cursor-help rounded bg-base-200 px-1 text-xs underline decoration-dotted underline-offset-2" data-anchor="${tok}" title="Show this on the surface">${tok}</code>`
-            : `<code class="rounded bg-base-200 px-1 text-xs">${tok}</code>`))).join('<br>')}</span>`).join('')
+    ? Object.entries(r.steps)
+        .map(
+          ([ph, items]) =>
+            `<span class="${LBL} pt-1">${esc(ph)}</span><span>${items
+              .map((s) =>
+                esc(s).replace(/`([^`]+)`/g, (_m, tok) =>
+                  anchors.has(tok)
+                    ? `<code class="wdp-anchor cursor-help rounded bg-base-200 px-1 text-xs underline decoration-dotted underline-offset-2" data-anchor="${tok}" title="Show this on the surface">${tok}</code>`
+                    : `<code class="rounded bg-base-200 px-1 text-xs">${tok}</code>`,
+                ),
+              )
+              .join('<br>')}</span>`,
+        )
+        .join('')
     : '';
   const picked = S.session?.verdicts[r.rule];
   // Step through the rules in the order the list shows them, without going
@@ -1932,22 +2102,32 @@ function detailPane() {
         <p class="text-[15px] leading-relaxed" data-testid="detail.statement">${esc(r.statement)}</p>
         ${elsewhere(r)}
       </div>
-      ${S.session ? `<div class="flex flex-col gap-1.5">
+      ${
+        S.session
+          ? `<div class="flex flex-col gap-1.5">
         <!-- The box rides ABOVE the buttons: write the why, then judge. -->
-        <textarea id="wdp-vnote" data-testid="detail.feedback" class="textarea textarea-xs h-14 w-full" placeholder="${r.built
-          ? 'Why? Anything written here is filed as a note with your verdict.'
-          : 'What should change? Refine files this as the rule’s feedback.'}">${esc(S.verdictNote)}</textarea>
-        ${r.built ? `<div class="flex gap-2" data-testid="detail.verdict">
+        <textarea id="wdp-vnote" data-testid="detail.feedback" class="textarea textarea-xs h-14 w-full" placeholder="${
+          r.built
+            ? 'Why? Anything written here is filed as a note with your verdict.'
+            : 'What should change? Refine files this as the rule’s feedback.'
+        }">${esc(S.verdictNote)}</textarea>
+        ${
+          r.built
+            ? `<div class="flex gap-2" data-testid="detail.verdict">
           <button class="btn btn-sm flex-1 ${picked === 'pass' ? 'btn-success' : 'btn-outline btn-success'}" data-v="pass">✓ Pass</button>
           <button class="btn btn-sm flex-1 ${picked === 'fail' ? 'btn-error' : 'btn-outline btn-error'}" data-v="fail">✗ Fail</button>
-        </div>` : `<div class="flex gap-2" data-testid="detail.verdict">
+        </div>`
+            : `<div class="flex gap-2" data-testid="detail.verdict">
           <button class="btn btn-sm flex-1 ${picked === 'approved' ? 'btn-success' : 'btn-outline btn-success'}" data-v="approved">✍︎ Approve</button>
           <button class="btn btn-sm flex-1 ${picked === 'refining' ? 'btn-warning' : 'btn-outline btn-warning'}" data-v="refining">✎︎ Refine</button>
         </div>
-        <div class="text-[11px] opacity-50">No build evidence yet — you are signing off the rule, not judging a build.</div>`}
+        <div class="text-[11px] opacity-50">No build evidence yet — you are signing off the rule, not judging a build.</div>`
+        }
         <div id="wdp-vsay" data-testid="detail.say" class="hidden text-[11px] text-warning"></div>
         <div class="text-[11.5px] opacity-50" data-testid="detail.judged">${Object.keys(S.session.verdicts).length} judged this session</div>
-      </div>` : ''}
+      </div>`
+          : ''
+      }
       ${(() => {
         /*
          * A screen can be a STATE rather than an address - a filtered list,
@@ -1959,14 +2139,16 @@ function detailPane() {
          * because it happens before them.
          */
         const setup = ruleScreen(r)?.app?.setup;
-        return setup ? `<div>
+        return setup
+          ? `<div>
           <!-- "Setup" is the storyboard's own word for this field, and the
                panel calling it something else made a reviewer translate
                between the two (n-0099). -->
           <div class="${LBL} mb-1.5">Setup</div>
           <div class="rounded border border-warning/40 bg-warning/10 px-2 py-1.5 text-[13px] leading-relaxed"
             data-testid="detail.setup">${esc(setup)}</div>
-        </div>` : '';
+        </div>`
+          : '';
       })()}
       ${(() => {
         /*
@@ -1994,34 +2176,52 @@ function detailPane() {
          */
         const name = (id) => {
           const sc = screenById(id);
-          if (!sc) return `<span class="text-error">${esc(id)}</span>
+          if (!sc)
+            return `<span class="text-error">${esc(id)}</span>
             <span class="text-[11.5px] opacity-60">— not in the storyboard</span>`;
           return `<span>${esc(sc.title ?? id)}</span>${
-            sc.title ? ` <code class="rounded bg-base-200 px-1 text-[11px] opacity-70">${esc(id)}</code>` : ''}`;
+            sc.title
+              ? ` <code class="rounded bg-base-200 px-1 text-[11px] opacity-70">${esc(id)}</code>`
+              : ''
+          }`;
         };
         return `<div>
           <div class="${LBL} mb-1.5">Screen</div>
           <div class="text-[13px] leading-relaxed" data-testid="detail.screen">${
             ids.length
               ? ids.map(name).join(sep)
-              : `<span class="opacity-50">${isHeadless(r)
-                  ? 'No screen — this rule is judged without one.'
-                  : 'No screen named.'}</span>`}</div>
+              : `<span class="opacity-50">${
+                  isHeadless(r)
+                    ? 'No screen — this rule is judged without one.'
+                    : 'No screen named.'
+                }</span>`
+          }</div>
         </div>`;
       })()}
-      ${steps ? `<div><div class="${LBL} mb-1.5">Steps</div>
+      ${
+        steps
+          ? `<div><div class="${LBL} mb-1.5">Steps</div>
         <div class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-[13px] leading-relaxed"
           data-testid="detail.steps">${steps}</div>
-        ${checkRefs(r).length ? `<!-- The steps are the rule; the source that checks them is a
+        ${
+          checkRefs(r).length
+            ? `<!-- The steps are the rule; the source that checks them is a
              technical detail, so it waits behind a disclosure until asked for. -->
           <details class="mt-2 rounded border border-base-300 bg-base-200/60 px-2 py-1 text-[11.5px]"
             data-testid="detail.technical-disclosure" data-checks="${esc(r.rule)}"${
-              S.srcOpenFor === r.rule ? ' open' : ''}>
-            <summary class="cursor-pointer opacity-60">Check source · ${
-              checkRefs(r).map((c) => esc(c)).join(', ')}</summary>
+              S.srcOpenFor === r.rule ? ' open' : ''
+            }>
+            <summary class="cursor-pointer opacity-60">Check source · ${checkRefs(r)
+              .map((c) => esc(c))
+              .join(', ')}</summary>
             <div class="wdp-check-src mt-1 opacity-70">${
-              S.srcCache.rule === r.rule && S.srcCache.html ? S.srcCache.html : 'Loading…'}</div>
-          </details>` : ''}</div>` : ''}
+              S.srcCache.rule === r.rule && S.srcCache.html ? S.srcCache.html : 'Loading…'
+            }</div>
+          </details>`
+            : ''
+        }</div>`
+          : ''
+      }
       <div>
         <div class="${LBL} mb-1.5">Evidence</div>
         <div data-testid="detail.evidence">${evidenceRows(r)}</div>
@@ -2030,20 +2230,24 @@ function detailPane() {
         <div class="${LBL} mb-1.5">Verify</div>
         <div class="text-[13px]" data-testid="detail.verify">${esc(r.verify.join(', '))}</div>
       </div>
-      ${threads.length ? `<div class="-mx-3.5" data-testid="detail.threads">
+      ${
+        threads.length
+          ? `<div class="-mx-3.5" data-testid="detail.threads">
         <div class="${LBL} mb-0.5 flex items-center gap-2 px-3.5">Threads
-          ${threads.filter((t) => t.status === 'addressed').length > 1
-            /*
-             * A rule whose fixes all landed together is verified together.
-             * Going through a dozen threads one at a time is the same
-             * judgment repeated, and the repetition is what makes people
-             * stop reading them - so the sweep is offered where the pile is,
-             * and it is still a person pressing it.
-             */
-            ? `<button class="btn btn-xs btn-outline btn-success ml-auto" data-verify-all="${esc(r.rule)}"
+          ${
+            threads.filter((t) => t.status === 'addressed').length > 1
+              ? /*
+                 * A rule whose fixes all landed together is verified together.
+                 * Going through a dozen threads one at a time is the same
+                 * judgment repeated, and the repetition is what makes people
+                 * stop reading them - so the sweep is offered where the pile is,
+                 * and it is still a person pressing it.
+                 */
+                `<button class="btn btn-xs btn-outline btn-success ml-auto" data-verify-all="${esc(r.rule)}"
                  title="Verify every addressed thread on this rule, under your name">
                  Verify all ${threads.filter((t) => t.status === 'addressed').length}</button>`
-            : ''}
+              : ''
+          }
         </div>
         <!-- Wrapped in an arrow, never passed bare: map hands its callback the
              array INDEX as a second argument, and threadCard's second
@@ -2051,7 +2255,9 @@ function detailPane() {
              the first printed its own position there and the whole row
              silently became a click target - a one-based counter nobody asked
              for, starting at the second thread because index 0 is falsy. -->
-        ${threads.map((t) => threadCard(t)).join('')}</div>` : ''}
+        ${threads.map((t) => threadCard(t)).join('')}</div>`
+          : ''
+      }
       <!--
         A rule is a place to have a conversation, and until now it was only
         that DURING a walkdown - the feedback box belongs to the sitting, and
@@ -2069,8 +2275,9 @@ function detailPane() {
           class="textarea textarea-xs w-full resize-none"
           placeholder="Start a conversation about this rule…">${esc(S.ruleNote)}</textarea>
         <div class="mt-1 flex items-center gap-2">
-          <span class="text-[10px] opacity-40">as <button id="wdp-nactor" class="link">${
-            esc(whoAmI() || 'set your name…')}</button></span>
+          <span class="text-[10px] opacity-40">as <button id="wdp-nactor" class="link">${esc(
+            whoAmI() || 'set your name…',
+          )}</button></span>
           <button class="btn btn-xs btn-outline ml-auto" data-testid="detail.new-thread-post"
             data-note-rule="${esc(r.rule)}">Start thread</button>
         </div>
@@ -2097,10 +2304,16 @@ function wireScreens(root) {
       S.ghostOverride = null;
       closeScreenPanel();
       const reghost = () => {
-        if (S.ghost) { setGhost(false); setFade(S.ghostOpacity || 1); } else render();
+        if (S.ghost) {
+          setGhost(false);
+          setFade(S.ghostOpacity || 1);
+        } else render();
       };
       // "Detect from the page" is a reset, not a destination.
-      if (!id) { S.pickedScreen = null; return reghost(); }
+      if (!id) {
+        S.pickedScreen = null;
+        return reghost();
+      }
       // Picked by hand, so the pick rides along and survives the arrival.
       if (goTo(screenById(id), pageSurface(), id)) return;
       // Nowhere to go: a screen with no URL on either surface. Then the only
@@ -2126,10 +2339,11 @@ function screensPane() {
       ${auto && here ? `<span class="ml-auto text-[11px] opacity-50">${esc(here.id)}</span>` : ''}
     </button>
     <div class="mx-3.5 my-1 border-t border-base-300"></div>
-    ${screens.map((sc) => {
-      const on = S.pickedScreen === sc.id;
-      const design = ghostSource(sc);
-      return `<button class="flex w-full items-start gap-2 px-3.5 py-2 text-left hover:bg-base-200"
+    ${screens
+      .map((sc) => {
+        const on = S.pickedScreen === sc.id;
+        const design = ghostSource(sc);
+        return `<button class="flex w-full items-start gap-2 px-3.5 py-2 text-left hover:bg-base-200"
         data-screen="${esc(sc.id)}">
         <span class="w-3.5 shrink-0 pt-0.5 text-center ${on ? 'text-primary' : 'opacity-30'}">${on ? '\u25c9' : '\u25cb'}</span>
         <span class="min-w-0">
@@ -2137,9 +2351,11 @@ function screensPane() {
           <span class="block truncate font-mono text-[10.5px] opacity-40">${esc(sc.id)}</span>
         </span>
         <span class="ml-auto shrink-0 pt-0.5 text-[10.5px] ${design ? 'opacity-50' : 'text-warning'}">${
-          design ? (design.proposed ? 'sketch' : 'design') : 'no design'}</span>
+          design ? (design.proposed ? 'sketch' : 'design') : 'no design'
+        }</span>
       </button>`;
-    }).join('')}`;
+      })
+      .join('')}`;
 }
 
 /*
@@ -2171,8 +2387,9 @@ function threadsMatching(filter) {
      * status.js beside every other queue - a second copy in the panel is a
      * second thing to get wrong.
      */
-    const owed = new Set((S.data?.attention ?? [])
-      .filter((i) => i.who === 'human' && i.thread).map((i) => i.thread));
+    const owed = new Set(
+      (S.data?.attention ?? []).filter((i) => i.who === 'human' && i.thread).map((i) => i.thread),
+    );
     return all.filter((t) => owed.has(t.id));
   }
   return all.filter((t) => !TERMINAL.includes(t.status));
@@ -2182,10 +2399,10 @@ function threadsMatching(filter) {
 function threadWhere(t) {
   const a = t?.anchor ?? {};
   const sc = screenById(a.screen);
-  return [
-    a.rule,
-    a.element ?? (sc ? (sc.title ?? sc.id) : a.screen),
-  ].filter(Boolean).join(' · ') || 'not attached to anything';
+  return (
+    [a.rule, a.element ?? (sc ? (sc.title ?? sc.id) : a.screen)].filter(Boolean).join(' · ') ||
+    'not attached to anything'
+  );
 }
 
 /*
@@ -2216,8 +2433,9 @@ function threadFilterBar() {
 }
 
 function threadsPane() {
-  const list = [...threadsMatching(S.threadFilter)]
-    .sort((a, b) => threadTouched(b).localeCompare(threadTouched(a)));
+  const list = [...threadsMatching(S.threadFilter)].sort((a, b) =>
+    threadTouched(b).localeCompare(threadTouched(a)),
+  );
   const EMPTY = {
     active: 'No live threads. Everything said here has been answered — <b>All</b> has them.',
     you: 'Nothing is waiting on you.',
@@ -2381,7 +2599,6 @@ function buildChrome() {
   D.sr = D.shell.attachShadow({ mode: 'open' });
   document.body.appendChild(D.shell);
 
-
   // A transparent frame over the viewport. It must NOT carry data-theme:
   // daisyUI paints background-color on every [data-theme] element, so a
   // full-viewport carrier would cover the page it is supposed to be framing.
@@ -2397,7 +2614,8 @@ function buildChrome() {
    * element, the document's own rules win. So the reset lives here, on our
    * first element INSIDE the boundary, where the host page has no reach.
    */
-  D.host.style.cssText = 'letter-spacing:normal; word-spacing:normal; text-transform:none; font-variant:normal; font-style:normal; text-indent:0; text-shadow:none; white-space:normal; word-break:normal; text-align:left; direction:ltr; text-decoration:none;';
+  D.host.style.cssText =
+    'letter-spacing:normal; word-spacing:normal; text-transform:none; font-variant:normal; font-style:normal; text-indent:0; text-shadow:none; white-space:normal; word-break:normal; text-align:left; direction:ltr; text-decoration:none;';
   D.sr.appendChild(D.host);
 
   // The two pieces of chrome are built once and filled by render(): the docking
@@ -2408,7 +2626,7 @@ function buildChrome() {
   // grid runs unbroken behind the controls and under the panel beside them.
   D.bar = document.createElement('header');
   D.bar.dataset.testid = 'panel.bar';
-  D.bar.dataset.theme = 'blueprint';   // walkdown's own skin — see styles/walkdown.css
+  D.bar.dataset.theme = 'blueprint'; // walkdown's own skin — see styles/walkdown.css
   D.bar.style.cssText = `position:absolute; top:0; left:0; right:0; height:${TOP}px;
     pointer-events:auto; transition:transform .2s ease; background:transparent;`;
   D.bar.className = 'flex items-center gap-2 px-3 text-base-content';
@@ -2420,7 +2638,8 @@ function buildChrome() {
   D.side.style.cssText = `position:absolute; top:${HEAD}px; right:${GAP}px; bottom:${GAP}px;
     width:${W}px; pointer-events:auto; transition:transform .22s ease; border-radius:10px;
     box-shadow:0 1px 2px rgba(0,0,0,.28), 0 12px 32px rgba(0,0,0,.34);`;
-  D.side.className = 'flex flex-col overflow-hidden border border-primary/45 bg-base-100 text-base-content';
+  D.side.className =
+    'flex flex-col overflow-hidden border border-primary/45 bg-base-100 text-base-content';
   D.host.append(D.bar, D.side);
 
   /*
@@ -2432,7 +2651,8 @@ function buildChrome() {
   D.deskPanel = document.createElement('div');
   D.deskPanel.dataset.testid = 'settings.panel';
   D.deskPanel.dataset.theme = 'blueprint';
-  D.deskPanel.className = 'w-64 rounded-box border border-primary/45 bg-base-100 p-3 text-base-content shadow-xl';
+  D.deskPanel.className =
+    'w-64 rounded-box border border-primary/45 bg-base-100 p-3 text-base-content shadow-xl';
   // Offset past the app's own top-left corner on purpose — flush against it
   // read as though the tuner belonged to the app's layout rather than to the
   // desk it sits on. One GAP beyond the corner on each axis, so it stands off
@@ -2456,7 +2676,8 @@ function buildChrome() {
   D.screenPanel = document.createElement('div');
   D.screenPanel.dataset.testid = 'panel.screens-list';
   D.screenPanel.dataset.theme = 'blueprint';
-  D.screenPanel.className = 'w-72 overflow-hidden rounded-box border border-primary/45 bg-base-100 py-1 text-base-content shadow-xl';
+  D.screenPanel.className =
+    'w-72 overflow-hidden rounded-box border border-primary/45 bg-base-100 py-1 text-base-content shadow-xl';
   D.screenPanel.style.cssText = `position:absolute; top:${TOP + GAP}px; left:${GAP * 2}px; display:none; pointer-events:auto; max-height:60vh; overflow-y:auto;`;
   D.host.appendChild(D.screenPanel);
 }
@@ -2524,8 +2745,13 @@ function editDialValue(dial) {
  * blueprint's rules ask for joins them, so a team that names a third role
  * sees it here rather than in a patch to this file.
  */
-const knownRoles = () => [...new Set(['eng', 'product',
-  ...(S.data?.rows ?? []).flatMap((r) => (r.acceptance ?? []).map((a) => a.role))])];
+const knownRoles = () => [
+  ...new Set([
+    'eng',
+    'product',
+    ...(S.data?.rows ?? []).flatMap((r) => (r.acceptance ?? []).map((a) => a.role)),
+  ]),
+];
 
 /** The gear panel is Settings: who you record as, then the desk ruling. */
 function openActorSettings() {
@@ -2561,10 +2787,14 @@ function buildDeskPanel() {
     <div class="mb-2 flex items-start gap-2">
       <span class="shrink-0 text-[12px] font-semibold">Signs as</span>
       <span class="ml-auto flex w-36 flex-wrap gap-x-3 gap-y-1">
-        ${knownRoles().map((r) => `<label class="flex cursor-pointer items-center gap-1 text-[11.5px]">
+        ${knownRoles()
+          .map(
+            (r) => `<label class="flex cursor-pointer items-center gap-1 text-[11.5px]">
           <input type="checkbox" class="checkbox checkbox-xs" data-testid="settings.roles"
             data-role="${esc(r)}" ${(identityOverride.roles ?? []).includes(r) ? 'checked' : ''}>
-          <span>${esc(r)}</span></label>`).join('')}
+          <span>${esc(r)}</span></label>`,
+          )
+          .join('')}
       </span>
     </div>
     <p class="mb-1 text-[10.5px] leading-relaxed opacity-40">Records carry the
@@ -2575,14 +2805,16 @@ function buildDeskPanel() {
       <span class="text-[12px] font-semibold">Desk ruling</span>
       <button class="btn btn-xs btn-ghost ml-auto" id="wdp-desk-reset">Reset</button>
     </div>
-    ${DESK_DIALS.map((d) => `
+    ${DESK_DIALS.map(
+      (d) => `
       <label class="mb-1.5 flex items-center gap-2 text-[11.5px]">
         <span class="w-14 shrink-0 opacity-60">${d.label}</span>
         <input type="range" class="range range-xs range-primary" data-testid="settings.dials" data-k="${d.k}"
           min="${d.min}" max="${d.max}" value="${S.desk[d.k]}" aria-label="${d.label}">
         <span class="w-12 shrink-0 cursor-text text-right font-mono text-[10.5px] opacity-60 hover:opacity-100"
           id="wdp-desk-${d.k}" title="Click to type a value">${S.desk[d.k]}${d.unit}</span>
-      </label>`).join('')}
+      </label>`,
+    ).join('')}
     <label class="mt-1 flex items-center gap-2 text-[11.5px]">
       <input type="checkbox" class="checkbox checkbox-xs" data-testid="settings.hide" id="wdp-desk-hide" ${S.hideAppOn ? 'checked' : ''}>
       <span>Hide app temporarily</span>
@@ -2594,7 +2826,8 @@ function buildDeskPanel() {
     // input repaints live under the drag; change is when the value is kept.
     inp.oninput = () => {
       S.desk[dial.k] = Number(inp.value);
-      D.deskPanel.querySelector(`#wdp-desk-${dial.k}`).textContent = `${S.desk[dial.k]}${dial.unit}`;
+      D.deskPanel.querySelector(`#wdp-desk-${dial.k}`).textContent =
+        `${S.desk[dial.k]}${dial.unit}`;
       if (S.docked) paintDesk(true);
     };
     inp.onchange = () => store.set(DESK_KEY, { ...S.desk });
@@ -2622,7 +2855,10 @@ function buildDeskPanel() {
     saveIdentity();
     // A running sitting is re-signed, the way the single field always did -
     // the verdicts already in it have not been sealed into a run yet.
-    if (S.session) { S.session.actor = whoAmI(); saveSession(); }
+    if (S.session) {
+      S.session.actor = whoAmI();
+      saveSession();
+    }
     render();
   };
   /*
@@ -2644,17 +2880,20 @@ function buildDeskPanel() {
     // someone who does not want a full name on screen.
     identityOverride.name = nam.value.trim();
     saveIdentity();
-    render();   // nothing recorded moves: this name is only ever shown
+    render(); // nothing recorded moves: this name is only ever shown
   };
 }
 
 function syncDeskPanel() {
   if (S.deskOpen) buildDeskPanel();
-  else hideApp(false);   // closing the tuner ends the peek, not just hides the checkbox
+  else hideApp(false); // closing the tuner ends the peek, not just hides the checkbox
   D.deskPanel.style.display = S.deskOpen ? '' : 'none';
 }
 
-const closeDeskPanel = () => { S.deskOpen = false; syncDeskPanel(); };
+const closeDeskPanel = () => {
+  S.deskOpen = false;
+  syncDeskPanel();
+};
 
 /*
  * The screen picker's contents are the list the Screens tab used to draw,
@@ -2687,7 +2926,10 @@ function syncScreenPanel() {
   D.screenPanel.style.display = S.screensOpen ? '' : 'none';
 }
 
-const closeScreenPanel = () => { S.screensOpen = false; syncScreenPanel(); };
+const closeScreenPanel = () => {
+  S.screensOpen = false;
+  syncScreenPanel();
+};
 
 /*
  * The two popovers the bar opens — the screen picker and the desk tuner —
@@ -2717,8 +2959,6 @@ function dismissPopovers(path = []) {
     if (!mine) closeDeskPanel();
   }
 }
-
-
 
 /*
  * The stylesheet, split in two on purpose:
@@ -2751,7 +2991,9 @@ function loadStylesheet() {
         document.head.appendChild(doc);
       }
     })
-    .catch(() => { /* unstyled beats absent; the panel still works */ });
+    .catch(() => {
+      /* unstyled beats absent; the panel still works */
+    });
 }
 
 /*
@@ -2798,7 +3040,10 @@ function buildPutAwayControls() {
 function paintTabs() {
   // Called from setDocked, which runs at boot before any blueprint is in
   // hand. Nothing here is worth an exception on the way up.
-  if (!S.data) { D.swap.style.display = 'none'; return; }
+  if (!S.data) {
+    D.swap.style.display = 'none';
+    return;
+  }
   if (!S.docked) {
     const tabH = D.tab.getBoundingClientRect().height || 96;
     D.tab.style.transform = `translateY(calc(-50% - ${Math.round(tabH / 2) + 4}px))`;
@@ -2857,10 +3102,18 @@ function frameSpace() {
  */
 function placeGhost(on) {
   if (!S.ghost) return;
-  Object.assign(S.ghost.style, on
-    ? { top: `${HEAD}px`, left: `${GAP}px`, right: `${W + GAP * 2}px`,
-        bottom: `${GAP}px`, borderRadius: '10px' }
-    : { top: '0px', left: '0px', right: '0px', bottom: '0px', borderRadius: '0px' });
+  Object.assign(
+    S.ghost.style,
+    on
+      ? {
+          top: `${HEAD}px`,
+          left: `${GAP}px`,
+          right: `${W + GAP * 2}px`,
+          bottom: `${GAP}px`,
+          borderRadius: '10px',
+        }
+      : { top: '0px', left: '0px', right: '0px', bottom: '0px', borderRadius: '0px' },
+  );
   sizeGhost();
 }
 
@@ -2875,7 +3128,7 @@ function placeAppFrame(on) {
   // width, and a viewport wider than the space scales down WHOLE - a
   // desktop layout seen as a desktop layout, never reflowed to a column.
   D.appFrame.style.cssText = on
-    ? (S.viewportW
+    ? S.viewportW
       ? `position:fixed; top:${HEAD}px;
          left:${GAP + Math.max(0, (availW - S.viewportW * scale) / 2)}px;
          width:${S.viewportW}px; height:${availH / scale}px;
@@ -2887,7 +3140,7 @@ function placeAppFrame(on) {
          width:calc(100vw - ${W + GAP * 3}px); height:calc(100vh - ${HEAD + GAP}px);
          border:0; border-radius:10px; background:#fff; transform:none;
          box-shadow:0 1px 2px rgba(0,0,0,.28), 0 12px 32px rgba(0,0,0,.34);
-         transition:width .22s ease, height .22s ease, top .22s ease, left .22s ease;`)
+         transition:width .22s ease, height .22s ease, top .22s ease, left .22s ease;`
     : `position:fixed; top:0; left:0; width:100vw; height:100vh;
        border:0; border-radius:0; background:#fff;
        transition:width .22s ease, height .22s ease, top .22s ease, left .22s ease;`;
@@ -2897,16 +3150,19 @@ function placeAppFrame(on) {
 let zoomBadge = null;
 function syncZoomBadge() {
   const show = S.docked && S.viewportW;
-  if (!show) { zoomBadge?.remove(); zoomBadge = null; return; }
+  if (!show) {
+    zoomBadge?.remove();
+    zoomBadge = null;
+    return;
+  }
   if (!zoomBadge) {
     zoomBadge = document.createElement('div');
     zoomBadge.dataset.testid = 'panel.zoom';
     document.body.appendChild(zoomBadge);
   }
   const { scale } = frameSpace();
-  zoomBadge.textContent = scale < 1
-    ? `${S.viewportW}px · fit ${Math.round(scale * 100)}%`
-    : `${S.viewportW}px`;
+  zoomBadge.textContent =
+    scale < 1 ? `${S.viewportW}px · fit ${Math.round(scale * 100)}%` : `${S.viewportW}px`;
   zoomBadge.style.cssText = `position:fixed; right:${W + GAP * 2 + 10}px; bottom:${GAP + 10}px;
     z-index:2147482001; padding:4px 9px; border-radius:99px;
     font:600 10.5px/1 -apple-system, system-ui, sans-serif;
@@ -2951,7 +3207,6 @@ function setViewport(w) {
   renderBar();
 }
 
-
 /*
  * Our own document: there is no host page to inset or to put back, only a
  * desk to paint and a frame to place on it. Until 2026-08-26 this function
@@ -2960,7 +3215,8 @@ function setViewport(w) {
  * it the only caller that could ever reach that code.
  */
 function paintDesk(on) {
-  const root = document.documentElement, page = document.body;
+  const root = document.documentElement,
+    page = document.body;
   const cs = getComputedStyle(D.side);
   const token = (n, fallback) => cs.getPropertyValue(n).trim() || fallback;
   const ink = token('--color-base-content', '#dbe7f3');
@@ -2994,10 +3250,16 @@ let framedPinMode = false;
  */
 const PIN = {
   isOn: () => framedPinMode,
-  set(on) { framedPinMode = on; pushContexts(); paintGhostReach(); renderBar(); },
-  watch() { /* the panel is the owner; there is nobody to hear from */ },
+  set(on) {
+    framedPinMode = on;
+    pushContexts();
+    paintGhostReach();
+    renderBar();
+  },
+  watch() {
+    /* the panel is the owner; there is nobody to hear from */
+  },
 };
-
 
 function setDocked(on) {
   S.docked = on;
@@ -3006,7 +3268,11 @@ function setDocked(on) {
   D.tab.style.display = on ? 'none' : 'block';
   // Nothing the bar opens outlives the bar: put away, neither the tuner nor
   // the screen picker has anything left to hang off.
-  if (!on) { S.deskOpen = false; syncDeskPanel(); closeScreenPanel(); }
+  if (!on) {
+    S.deskOpen = false;
+    syncDeskPanel();
+    closeScreenPanel();
+  }
   paintDesk(on);
   // How much of the right edge the panel is occupying. The embed's badge
   // reads this so it comes to rest beside the panel instead of under it.
@@ -3075,8 +3341,12 @@ function hereChanged() {
    * and the radio list snapped back to Detect (n-0098). A pick survives
    * exactly as long as the page still IS that screen.
    */
-  const arrived = S.pickedScreen && matchScreen(
-    (S.data?.storyboard ?? []).filter((s) => s.id === S.pickedScreen), hereLocation())?.screen;
+  const arrived =
+    S.pickedScreen &&
+    matchScreen(
+      (S.data?.storyboard ?? []).filter((s) => s.id === S.pickedScreen),
+      hereLocation(),
+    )?.screen;
   S.pickedScreen = arrived ? S.pickedScreen : null;
   S.ghostOverride = null;
   if (S.phase !== 'ready') return;
@@ -3119,7 +3389,8 @@ async function restoreSession() {
   const saved = (S.data?.draft?.verdicts && S.data.draft) || local;
   if (saved?.verdicts && Object.keys(saved.verdicts).length)
     S.session = {
-      verdicts: saved.verdicts, threads: saved.threads ?? {},
+      verdicts: saved.verdicts,
+      threads: saved.threads ?? {},
       actor: saved.actor ?? whoAmI(),
       started: saved.started ?? new Date().toISOString(),
     };
@@ -3133,7 +3404,8 @@ async function restoreSession() {
  */
 const defaultScreen = () =>
   screenById(S.data?.defaultScreen) ??
-  (S.data?.storyboard ?? []).find((sc) => screenUrl(sc, 'app') ?? screenUrl(sc, 'prototype')) ?? null;
+  (S.data?.storyboard ?? []).find((sc) => screenUrl(sc, 'app') ?? screenUrl(sc, 'prototype')) ??
+  null;
 
 /** The screen a surface control should act on: this page, or the front door. */
 const screenInHand = () => screenById(S.ghostOverride) ?? currentScreen() ?? defaultScreen();
@@ -3151,7 +3423,8 @@ function ghostSource(screen) {
       ? { url: S.data.appBase + screen.app.path, proposed: false }
       : null;
   }
-  if (screen?.prototype && S.data.hasPrototype) return { path: '/prototype' + screen.prototype, proposed: false };
+  if (screen?.prototype && S.data.hasPrototype)
+    return { path: '/prototype' + screen.prototype, proposed: false };
   if (screen?.proposal) return { path: '/proposals' + screen.proposal, proposed: true };
   return null;
 }
@@ -3159,11 +3432,29 @@ function ghostSource(screen) {
 /** Short verbs, and only the transitions this kind and status allow. */
 function threadActions(t) {
   if (t.kind === 'note') {
-    if (t.status === 'open') return [['Addressed', 'addressed'], ['Waive', 'waived', true]];
-    if (t.status === 'addressed') return [['\u2713 Verify', 'verified'], ['Reopen', 'open'], ['Waive', 'waived', true]];
+    if (t.status === 'open')
+      return [
+        ['Addressed', 'addressed'],
+        ['Waive', 'waived', true],
+      ];
+    if (t.status === 'addressed')
+      return [
+        ['\u2713 Verify', 'verified'],
+        ['Reopen', 'open'],
+        ['Waive', 'waived', true],
+      ];
   } else {
-    if (t.status === 'open') return [['Answer', '__answer'], ['Waive', 'waived', true]];
-    if (t.status === 'answered') return [['Incorporated', 'incorporated'], ['Reopen', 'open'], ['Waive', 'waived', true]];
+    if (t.status === 'open')
+      return [
+        ['Answer', '__answer'],
+        ['Waive', 'waived', true],
+      ];
+    if (t.status === 'answered')
+      return [
+        ['Incorporated', 'incorporated'],
+        ['Reopen', 'open'],
+        ['Waive', 'waived', true],
+      ];
   }
   return [];
 }
@@ -3183,7 +3474,8 @@ function render() {
   // is the difference between a conversation and a form.
   const typing = D.sr.activeElement;
   const caret = ['wdp-note', 'wdp-search'].includes(typing?.id)
-    ? { id: typing.id, start: typing.selectionStart, end: typing.selectionEnd } : null;
+    ? { id: typing.id, start: typing.selectionStart, end: typing.selectionEnd }
+    : null;
   const total = S.data.rows.length;
   const verified = S.data.rows.filter((r) => r.verdict === 'pass').length;
   /*
@@ -3227,9 +3519,9 @@ function render() {
     // (n-0102). Once the class was real, px-4 turned out to be too much:
     // three tabs, two of them carrying a count badge, wrap at 384px.
     `<button role="tab" class="tab px-3 gap-1${S.listTab === id ? ' tab-active' : ''}" data-tab="${id}">
-      ${icon(TAB_ICON[id], 'size-4')}${label}${badge
-        ? `<span class="badge badge-xs ${tone}" title="${esc(why)}">${badge}</span>`
-        : ''}</button>`;
+      ${icon(TAB_ICON[id], 'size-4')}${label}${
+        badge ? `<span class="badge badge-xs ${tone}" title="${esc(why)}">${badge}</span>` : ''
+      }</button>`;
   D.side.innerHTML = `
     <div role="tablist" class="tabs tabs-box tabs-sm m-2 shrink-0 self-center" data-testid="panel.tabs">
       ${tab('blueprints', 'Blueprints')}${
@@ -3240,11 +3532,20 @@ function render() {
          * empties as you walk, and reaching zero and the button saying there
          * is nothing left are the same fact rather than two.
          */
-        tab('rules', 'Rules', toSign + toWalk,
-          `${toSign + toWalk} rule${toSign + toWalk === 1 ? '' : 's'} a walkdown would take you through`
-          + `${toSign ? ` — ${toSign} to sign` : ''}${toWalk ? ` — ${toWalk} to walk` : ''}`)
-      }${tab('threads', 'Threads', toVerify,
-        `${toVerify} thread${toVerify === 1 ? '' : 's'} awaiting your judgment`, 'badge-info')}
+        tab(
+          'rules',
+          'Rules',
+          toSign + toWalk,
+          `${toSign + toWalk} rule${toSign + toWalk === 1 ? '' : 's'} a walkdown would take you through` +
+            `${toSign ? ` — ${toSign} to sign` : ''}${toWalk ? ` — ${toWalk} to walk` : ''}`,
+        )
+      }${tab(
+        'threads',
+        'Threads',
+        toVerify,
+        `${toVerify} thread${toVerify === 1 ? '' : 's'} awaiting your judgment`,
+        'badge-info',
+      )}
     </div>
     <!-- The name stays on screen while a session runs (nobody is attributed
          silently) but editing it lives in Settings - the strip only shows it.
@@ -3255,7 +3556,9 @@ function render() {
          blueprint picker it was a header describing a list you were not
          looking at, and Continue would have walked you off the tab you had
          just opened (n-0101). -->
-    ${S.session && S.listTab === 'rules' ? `<div class="flex items-center gap-2 border-b border-base-300 bg-warning/10 px-3.5 py-2 text-xs" data-testid="panel.actor">
+    ${
+      S.session && S.listTab === 'rules'
+        ? `<div class="flex items-center gap-2 border-b border-base-300 bg-warning/10 px-3.5 py-2 text-xs" data-testid="panel.actor">
       <!-- Two facts, because they are two fields now (n-0104): the name you
            go by, and the username the ledger will actually carry. The handle
            stays on screen rather than only in Settings, because a defaulted
@@ -3264,12 +3567,15 @@ function render() {
            while recording a handle would quietly break it. With no full name
            anywhere the two are the same string and only one is drawn. -->
       <span>Recording as
-        <button id="wdp-actor" data-testid="panel.actor-name" class="link font-semibold" title="Change the name in Settings (the gear)">${
-          esc(recordingDisplay() || 'set your name…')}</button>${
+        <button id="wdp-actor" data-testid="panel.actor-name" class="link font-semibold" title="Change the name in Settings (the gear)">${esc(
+          recordingDisplay() || 'set your name…',
+        )}</button>${
           recordingHandle() && recordingHandle() !== recordingDisplay()
-            ? ` <span data-testid="panel.actor-handle" class="font-mono opacity-60" title="Verdicts and thread actions are recorded under this username">${
-                esc(recordingHandle())}</span>`
-            : ''}</span>
+            ? ` <span data-testid="panel.actor-handle" class="font-mono opacity-60" title="Verdicts and thread actions are recorded under this username">${esc(
+                recordingHandle(),
+              )}</span>`
+            : ''
+        }</span>
       <!-- Both halves of the same fact: how many you have judged, and how
            many the sitting has in it. The denominator is what you have done
            plus what is still owed, so it holds steady as you walk and reads
@@ -3277,7 +3583,8 @@ function render() {
            one opened off the list that already passed - moves both numbers,
            which is honest: it was work the sitting did not set out to do. -->
       <span class="ml-auto" title="Judged in this sitting, of the rules owing you a verdict">${
-        judged.size}/${judged.size + toSign + toWalk} judged</span>
+        judged.size
+      }/${judged.size + toSign + toWalk} judged</span>
       <!-- Carrying on lives beside the tally, because they are the same
            thought: how far you have got, and the next one. A verdict of pass
            already advances on its own; a fail parks you on the rule so you
@@ -3292,7 +3599,9 @@ function render() {
            two solid yellows in view would argue about which is the act. -->
       <button class="btn btn-xs btn-outline btn-warning" data-testid="panel.continue" id="wdp-continue"
         title="Open the next rule still owing you a verdict">Continue</button>
-    </div>` : ''}
+    </div>`
+        : ''
+    }
     <!-- Three screens on one track — the list, the rule, and the thread, each
          one slide to the right of the last. The slot clips it, or an
          offscreen pane paints over the app instead of sliding within the
@@ -3317,9 +3626,12 @@ function render() {
                anchor, never by class. -->
           <div class="wdp-pane wdp-list flex min-h-0 flex-1 flex-col overflow-y-auto"
                data-testid="panel.list-scroll">${
-            onThreads ? threadsPane()
-            : S.listTab === 'blueprints' ? blueprintsPane()
-            : listPane()}</div>
+                 onThreads
+                   ? threadsPane()
+                   : S.listTab === 'blueprints'
+                     ? blueprintsPane()
+                     : listPane()
+}</div>
         </div>
         <!-- The second pane is whatever THIS tab opens: a rule from the rule
              list, a conversation from the thread list. A tab's detail belongs
@@ -3327,13 +3639,15 @@ function render() {
              opens into the seat beside it rather than sliding two panes over
              and flying past a rule detail nobody asked for. -->
         <div class="wdp-pane flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col ${
-             onThreads ? 'overflow-hidden' : 'overflow-y-auto'}"${
-             onThreads ? ' data-testid="thread.panel"' : ''}>${
-          onThreads ? threadPane() : detailPane()}</div>
+          onThreads ? 'overflow-hidden' : 'overflow-y-auto'
+        }"${onThreads ? ' data-testid="thread.panel"' : ''}>${
+          onThreads ? threadPane() : detailPane()
+        }</div>
         <!-- Third seat: the thread reached FROM a rule, which is a different
              trip - it keeps the rule behind it to come back to. -->
         <div class="flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col overflow-hidden"${
-             onThreads ? '' : ' data-testid="thread.panel"'}>${onThreads ? '' : threadPane()}</div>
+          onThreads ? '' : ' data-testid="thread.panel"'
+        }>${onThreads ? '' : threadPane()}</div>
       </div>
     </div>
     <!-- Every number here is derived from something, and a bare number told a
@@ -3355,32 +3669,47 @@ function render() {
          The row no longer dims as a whole - opacity on the container dimmed
          the tooltips it opens with it, and opacity cannot be undone by a
          child. The label carries its own. -->
-    ${S.listTab === 'rules' ? `<div class="grid shrink-0 grid-cols-3 items-center border-t border-base-300 px-3.5 py-2 text-xs" data-testid="panel.counts">
+    ${
+      S.listTab === 'rules'
+        ? `<div class="grid shrink-0 grid-cols-3 items-center border-t border-base-300 px-3.5 py-2 text-xs" data-testid="panel.counts">
       <span class="flex items-center gap-2 justify-self-start">
       <span class="tooltip tooltip-top tooltip-start [--tt-trans:0] shrink-0 whitespace-nowrap">
         <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug"
           >Rules holding a current pass on every tier they ask for. The rest are the work counted at the right.</span>
         <span class="opacity-70"><b>${verified}/${total}</b> verified</span></span>${
-        judged.size ? `<span class="tooltip tooltip-top tooltip-start [--tt-trans:0] shrink-0 text-primary">
+          judged.size
+            ? `<span class="tooltip tooltip-top tooltip-start [--tt-trans:0] shrink-0 text-primary">
         <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug"
           >Judged by you in this sitting. Nothing reaches the ledger until you press Finish walkdown.</span>
-        <b>+${judged.size}</b></span>` : ''}</span>
+        <b>+${judged.size}</b></span>`
+            : ''
+        }</span>
       <!-- Centred, and in its own grid column so it stays centred whether or
            not the two badges at the right are drawn. Every mark the rail uses
            is explained here rather than in six tooltips nobody assembles into
            a picture. -->
       <span class="justify-self-center">${legendControl()}</span>
       <span class="flex shrink-0 gap-1 justify-self-end">
-        ${toSign ? `<span class="tooltip tooltip-top tooltip-end [--tt-trans:0]">
+        ${
+          toSign
+            ? `<span class="tooltip tooltip-top tooltip-end [--tt-trans:0]">
           <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug"
             >${toSign} rule${toSign === 1 ? '' : 's'} designed but not built. Your sign-off on the spec is what they wait for.</span>
-          <span class="badge badge-xs badge-warning badge-outline">${toSign} sign</span></span>` : ''}
-        ${toWalk ? `<span class="tooltip tooltip-top tooltip-end [--tt-trans:0]">
+          <span class="badge badge-xs badge-warning badge-outline">${toSign} sign</span></span>`
+            : ''
+        }
+        ${
+          toWalk
+            ? `<span class="tooltip tooltip-top tooltip-end [--tt-trans:0]">
           <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug"
             >${toWalk} rule${toWalk === 1 ? '' : 's'} built and unjudged by you. Open one and give it a pass or a fail.</span>
-          <span class="badge badge-xs badge-warning badge-outline">${toWalk} walk</span></span>` : ''}
+          <span class="badge badge-xs badge-warning badge-outline">${toWalk} walk</span></span>`
+            : ''
+        }
       </span>
-    </div>` : ''}`;
+    </div>`
+        : ''
+    }`;
 
   const track = D.host.querySelector('.wdp-track');
   if (track) {
@@ -3395,7 +3724,9 @@ function render() {
     track.style.transform = `translateX(${AT[S.view] ?? '0%'})`;
     S.lastView = S.view;
   }
-  D.host.querySelectorAll('.wdp-pane').forEach((p, i) => { p.scrollTop = wasAt[i] ?? 0; });
+  D.host.querySelectorAll('.wdp-pane').forEach((p, i) => {
+    p.scrollTop = wasAt[i] ?? 0;
+  });
   if (caret) {
     const box = D.host.querySelector('#' + caret.id);
     if (box) {
@@ -3406,7 +3737,11 @@ function render() {
   wireRuleRows();
   wireSearch();
   const back = D.host.querySelector('.wdp-back');
-  if (back) back.onclick = () => { S.view = 'list'; render(); };
+  if (back)
+    back.onclick = () => {
+      S.view = 'list';
+      render();
+    };
   D.host.querySelectorAll('[data-goto]').forEach((el) => {
     // Through open(), not by assigning `selected`: stepping to a rule is
     // opening it, and a second way in that skipped the trip to its screen
@@ -3421,13 +3756,21 @@ function render() {
     // Back to the list as well as to the tab: the detail pane is a rule's,
     // and a rule is a thing on the Rules tab. Leaving the track slid over
     // showed the open rule sitting on top of whichever tab you picked.
-    b.onclick = () => { S.listTab = b.dataset.tab; S.view = 'list'; render(); };
+    b.onclick = () => {
+      S.listTab = b.dataset.tab;
+      S.view = 'list';
+      render();
+    };
   });
   D.side.querySelectorAll('[data-tfilter]').forEach((b) => {
     // Changing which threads are listed is not opening one: back to the list,
     // or the filter would quietly re-answer a question about the thread you
     // are reading rather than about the list behind it.
-    b.onclick = () => { S.threadFilter = b.dataset.tfilter; S.view = 'list'; render(); };
+    b.onclick = () => {
+      S.threadFilter = b.dataset.tfilter;
+      S.view = 'list';
+      render();
+    };
   });
   wireBlueprints(D.side);
   D.host.querySelectorAll('[data-goscreen]').forEach((el) => {
@@ -3463,8 +3806,10 @@ function render() {
  * once when the drag ends.
  */
 
-const PIN_MID = 'Slide fully to the prototype or the app first — half-faded, a pin has no surface to belong to';
-const PIN_UNREACHABLE = 'walkdown is not running inside this surface, so a pin here would land on the page underneath it';
+const PIN_MID =
+  'Slide fully to the prototype or the app first — half-faded, a pin has no surface to belong to';
+const PIN_UNREACHABLE =
+  'walkdown is not running inside this surface, so a pin here would land on the page underneath it';
 const pinHint = () => {
   const where = pinSurface();
   if (!where) return midFade() ? PIN_MID : PIN_UNREACHABLE;
@@ -3500,7 +3845,6 @@ function pinSurface() {
   return pageSurface();
 }
 
-
 /** Repaint the bar's state without rebuilding it — see `dragging`. */
 function paintBar() {
   const share = S.protoShare ?? (pageSurface() === 'prototype' ? 1 : 0);
@@ -3522,7 +3866,11 @@ const GEAR = () =>
   `<button class="btn btn-xs btn-ghost" id="wdp-desk-btn" data-testid="panel.desk-tuner" title="Settings">${icon('gear', 'size-3.5')}</button>`;
 const wireGear = () => {
   const gear = D.bar.querySelector('#wdp-desk-btn');
-  if (gear) gear.onclick = () => { S.deskOpen = !S.deskOpen; syncDeskPanel(); };
+  if (gear)
+    gear.onclick = () => {
+      S.deskOpen = !S.deskOpen;
+      syncDeskPanel();
+    };
 };
 
 function renderBar() {
@@ -3548,34 +3896,41 @@ function renderBar() {
   D.bar.innerHTML = `
     ${GEAR()}
     <span class="font-bold tracking-tight">walk<span class="text-primary">down</span></span>
-    ${STALE_COPY()
-      /*
-       * A stale copy takes the blueprint's place in the bar rather than
-       * sitting in the sidebar. It belongs beside the logo because it is
-       * about walkdown itself, not about the project - and the sidebar could
-       * be put away, while a stale panel is stale whether you are looking at
-       * it or not. Loud on purpose: everything it draws underneath is being
-       * judged against code that is not what shipped.
-       */
-      ? `<span class="badge badge-sm badge-error badge-dash gap-1 font-semibold"
+    ${
+      STALE_COPY()
+        ? /*
+           * A stale copy takes the blueprint's place in the bar rather than
+           * sitting in the sidebar. It belongs beside the logo because it is
+           * about walkdown itself, not about the project - and the sidebar could
+           * be put away, while a stale panel is stale whether you are looking at
+           * it or not. Loud on purpose: everything it draws underneath is being
+           * judged against code that is not what shipped.
+           */
+          `<span class="badge badge-sm badge-error badge-dash gap-1 font-semibold"
            data-testid="panel.stale"
            title="walkdown was updated — reload the extension at chrome://extensions, then reload this page, to run the current build.">
            ${icon('warning-fill', 'size-3.5')}Stale — reload the extension</span>`
-      : `<span class="truncate text-[11.5px] opacity-50" data-testid="panel.blueprint">${
-           esc(S.data.project)}</span>`}
+        : `<span class="truncate text-[11.5px] opacity-50" data-testid="panel.blueprint">${esc(
+            S.data.project,
+          )}</span>`
+    }
     <!-- Which screen this page is. It reads as the answer, not as a way to
          ask the question: the button is labelled with the screen you are on,
          so the common case costs no click at all. Outlined once a screen has
          been picked by hand, because a hand-picked screen outranks detection
          and the difference has to be visible from the bar. -->
     <button class="btn btn-xs shrink-0 gap-1 px-1.5 font-normal ${
-        S.pickedScreen ? 'btn-outline btn-primary' : 'btn-ghost'}"
+      S.pickedScreen ? 'btn-outline btn-primary' : 'btn-ghost'
+    }"
       id="wdp-screen-btn" data-testid="panel.screen-picker"
-      title="${S.pickedScreen
-        ? 'Screen picked by hand — open to change it, or go back to detecting from the page'
-        : 'Which screen this page is, detected from its address — open to pick one by hand'}">
-      ${icon('frame-corners', 'size-3.5')}<span class="max-w-32 truncate">${
-        esc(atScreen ? (atScreen.title ?? atScreen.id) : 'No screen')}</span>${icon('caret-down', 'size-3')}</button>
+      title="${
+        S.pickedScreen
+          ? 'Screen picked by hand — open to change it, or go back to detecting from the page'
+          : 'Which screen this page is, detected from its address — open to pick one by hand'
+      }">
+      ${icon('frame-corners', 'size-3.5')}<span class="max-w-32 truncate">${esc(
+        atScreen ? (atScreen.title ?? atScreen.id) : 'No screen',
+      )}</span>${icon('caret-down', 'size-3')}</button>
 
     <span class="absolute left-1/2 flex -translate-x-1/2 items-center gap-2"
       title="${canGhost ? 'Fade between the design and what shipped' : 'No design on file for this screen'}">
@@ -3611,12 +3966,13 @@ function renderBar() {
            is not about the sitting as a whole but about the next rule in it,
            and belongs beside the count of the ones already judged. -->
       <button class="btn btn-xs ${S.session || owedNow ? 'btn-warning' : 'btn-primary'}" id="wdp-walk" data-testid="panel.walk"
-        title="${S.session
-          ? 'Record this sitting to the runs ledger under your name'
-          : owedNow
-            ? `Begin a sitting — ${owedNow} rule${owedNow === 1 ? '' : 's'} owe you a verdict`
-            : 'Begin a sitting on this blueprint'}">${
-        S.session ? 'Finish walkdown' : 'Start walkdown'}</button>
+        title="${
+          S.session
+            ? 'Record this sitting to the runs ledger under your name'
+            : owedNow
+              ? `Begin a sitting — ${owedNow} rule${owedNow === 1 ? '' : 's'} owe you a verdict`
+              : 'Begin a sitting on this blueprint'
+        }">${S.session ? 'Finish walkdown' : 'Start walkdown'}</button>
       <button class="btn btn-xs btn-ghost" id="wdp-undock" title="Put walkdown away">\u00d7</button>
     </span>`;
 
@@ -3636,8 +3992,7 @@ function renderBar() {
    */
   syncScreenPanel();
   D.bar.querySelector('#wdp-undock').onclick = () => setDocked(false);
-  D.bar.querySelector('#wdp-pin').onclick = () =>
-    PIN.set(!PIN.isOn());
+  D.bar.querySelector('#wdp-pin').onclick = () => PIN.set(!PIN.isOn());
   // Start it, or end it: the same button, because it is the same sitting.
   D.bar.querySelector('#wdp-walk').onclick = () => (S.session ? finishWalkdown() : startWalkdown());
   D.bar.querySelectorAll('[data-vp]').forEach((b) => {
@@ -3654,17 +4009,25 @@ function renderBar() {
       const want = b.dataset.surface;
       if (!currentScreen() && !S.ghostOverride) {
         const home = defaultScreen();
-        const url = home && (screenUrl(home, want) ?? screenUrl(home, want === 'app' ? 'prototype' : 'app'));
+        const url =
+          home && (screenUrl(home, want) ?? screenUrl(home, want === 'app' ? 'prototype' : 'app'));
         /*
          * Getting there means a real page load, so the same rule applies as
          * everywhere else: framed walkdown owns the frame and goes, the
          * extension goes because it comes back, and a script tag offers the
          * trip rather than unloading the panel that is making it.
          */
-        if (url) { goTo(home, want); return; }
         if (url) {
-          return toast(`Nothing here is a screen — <a class="link" href="${esc(url)}">open ${
-            esc(home.title ?? home.id)}</a> to compare the ${esc(want)}.`, { tone: 'warning' });
+          goTo(home, want);
+          return;
+        }
+        if (url) {
+          return toast(
+            `Nothing here is a screen — <a class="link" href="${esc(url)}">open ${esc(
+              home.title ?? home.id,
+            )}</a> to compare the ${esc(want)}.`,
+            { tone: 'warning' },
+          );
         }
       }
       setFade(want === 'prototype' ? 1 : 0);
@@ -3675,7 +4038,10 @@ function renderBar() {
     // `input` fires all through the drag and must not disturb the element;
     // `change` fires when the pointer (or the keyboard) lets go, and that is
     // where the bar is rebuilt and a ghost at zero is finally torn down.
-    fade.oninput = () => { S.dragging = true; setFade(1 - fade.value / 100); };
+    fade.oninput = () => {
+      S.dragging = true;
+      setFade(1 - fade.value / 100);
+    };
     fade.onchange = () => {
       S.dragging = false;
       setFade(1 - fade.value / 100);
@@ -3702,7 +4068,11 @@ function setFade(share) {
   if (wanted === 0) {
     // Mid-drag the ghost stays, emptied: tearing it down calls render(), and
     // sliding back off the end would then have nothing to fade up.
-    if (S.dragging && S.ghost) { S.ghost.style.opacity = 0; paintGhostReach(); return paintBar(); }
+    if (S.dragging && S.ghost) {
+      S.ghost.style.opacity = 0;
+      paintGhostReach();
+      return paintBar();
+    }
     /*
      * Landing on the page's own surface hides the copy rather than throwing
      * it away, so coming back is instant. The one thing that must still end
@@ -3732,17 +4102,21 @@ function setFade(share) {
 // the copy that still works when the server is not there. Neither is the
 // ledger: a run is appended once, at Finish, and never edited.
 const SESSION_KEY = () => `walkdown:session:${S.BP}`;
-const sessionDraft = () => S.session && {
-  verdicts: S.session.verdicts, threads: S.session.threads,
-  actor: S.session.actor, started: S.session.started,
-};
+const sessionDraft = () =>
+  S.session && {
+    verdicts: S.session.verdicts,
+    threads: S.session.threads,
+    actor: S.session.actor,
+    started: S.session.started,
+  };
 function saveSession() {
   const draft = sessionDraft();
   store.set(SESSION_KEY(), draft);
   // Fire and forget: a verdict must never wait on the network, and the local
   // copy already holds it if this write does not land.
   fetch(api('/api/draft'), {
-    method: 'POST', headers: { 'content-type': 'application/json' },
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ target: 'local', ...(draft ?? { discard: true }) }),
   }).catch(() => {});
 }
@@ -3752,7 +4126,9 @@ function startWalkdown() {
   // fail's why and ride into the run record; `threads` collects the notes
   // the feedback box files, per rule.
   S.session = {
-    verdicts: {}, threads: {}, actor: whoAmI(),
+    verdicts: {},
+    threads: {},
+    actor: whoAmI(),
     started: new Date().toISOString(),
   };
   saveSession();
@@ -3774,11 +4150,12 @@ const recordingDisplay = () => {
  * display name were told apart. Old records are never rewritten; this is
  * what stops them reading as somebody else.
  */
-const names = () => MSG.nameMap({
-  username: whoAmI(),
-  name: (identityOverride.name ?? S.data?.identity?.name ?? '').trim(),
-  handles: [...(S.data?.identity?.handles ?? []), S.session?.actor].filter(Boolean),
-});
+const names = () =>
+  MSG.nameMap({
+    username: whoAmI(),
+    name: (identityOverride.name ?? S.data?.identity?.name ?? '').trim(),
+    handles: [...(S.data?.identity?.handles ?? []), S.session?.actor].filter(Boolean),
+  });
 
 /*
  * Threads remember where your reading stopped, so opening one the agent has
@@ -3787,7 +4164,8 @@ const names = () => MSG.nameMap({
  * vanish the instant it appeared.
  */
 const SEEN_KEY = () => `walkdown:seen:${S.BP}`;
-let seen = {}, seenFor = null;
+let seen = {},
+  seenFor = null;
 /* Read marks belong to a blueprint, and the blueprint is chosen after boot -
    so they are loaded once the choice is settled, and again if it changes. */
 async function loadSeen() {
@@ -3820,10 +4198,15 @@ function say(msg) {
 
 async function threadPost(path, body) {
   const res = await fetch(api(path), {
-    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body),
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body),
   });
   const out = await res.json().catch(() => ({}));
-  if (!res.ok) { say(out.error ?? 'request failed'); return false; }
+  if (!res.ok) {
+    say(out.error ?? 'request failed');
+    return false;
+  }
   return true;
 }
 
@@ -3861,9 +4244,15 @@ async function postReply(id, text, actor) {
   render();
   const ok = await threadPost(`/api/threads/${id}/replies`, { author: who, body: text });
   if (ok) {
-    pendingReplies.set(id, (pendingReplies.get(id) ?? []).filter((m) => m !== msg));
+    pendingReplies.set(
+      id,
+      (pendingReplies.get(id) ?? []).filter((m) => m !== msg),
+    );
     // The reply is yours and you have just read it: do not mark it new.
-    if (seen[id]) { seen[id] = new Date().toISOString(); store.set(SEEN_KEY(), { ...seen }); }
+    if (seen[id]) {
+      seen[id] = new Date().toISOString();
+      store.set(SEEN_KEY(), { ...seen });
+    }
     await load();
   } else {
     msg.pending = false;
@@ -3884,7 +4273,9 @@ async function threadAct(id, status) {
   // Agents claim work; a person accepts it. The server refuses this too —
   // saying so here means you find out before you have written the reason.
   if (humanOnly && (!actor || actor === 'agent')) {
-    say('Verify and waive are recorded under a person\u2019s name \u2014 set it in Settings first.');
+    say(
+      'Verify and waive are recorded under a person\u2019s name \u2014 set it in Settings first.',
+    );
     return openActorSettings();
   }
   /*
@@ -3907,15 +4298,25 @@ async function threadAct(id, status) {
   }
   if (status === '__answer') {
     if (!text) return say('Write the answer first \u2014 answering a question records it.');
-    if (await postReply(id, text, actor) &&
-        await threadPost(`/api/threads/${id}/status`, { status: 'answered', actor })) await load();
+    if (
+      (await postReply(id, text, actor)) &&
+      (await threadPost(`/api/threads/${id}/status`, { status: 'answered', actor }))
+    )
+      await load();
     return;
   }
   const needsReason = status === 'waived' || status === 'open';
   if (needsReason && !text)
-    return say(`${status === 'waived' ? 'Waiving' : 'Reopening'} is recorded with a reason \u2014 write it above, then press again.`);
-  if (await threadPost(`/api/threads/${id}/status`,
-      { status, actor, reason: needsReason ? text : undefined })) {
+    return say(
+      `${status === 'waived' ? 'Waiving' : 'Reopening'} is recorded with a reason \u2014 write it above, then press again.`,
+    );
+  if (
+    await threadPost(`/api/threads/${id}/status`, {
+      status,
+      actor,
+      reason: needsReason ? text : undefined,
+    })
+  ) {
     S.threadNote = '';
     // A thread that ends leaves the active list, so its screen has nothing
     // left to show — slide back to where it came from rather than emptying
@@ -3925,8 +4326,9 @@ async function threadAct(id, status) {
       if (S.view === 'thread') S.view = S.selected ? 'detail' : 'list';
       // An ended conversation is a finished piece of work, whichever way it
       // ended - verified, waived or incorporated - so it reads as one.
-      toast(`<b>${esc(id)}</b> ${esc(status)} — it leaves the rule’s active threads.`,
-        { tone: 'success' });
+      toast(`<b>${esc(id)}</b> ${esc(status)} — it leaves the rule’s active threads.`, {
+        tone: 'success',
+      });
     }
     await load();
   }
@@ -3940,8 +4342,10 @@ async function threadAct(id, status) {
 async function verifyAll(rule) {
   const actor = whoAmI();
   if (!actor || actor === 'agent') {
-    toast('Verifying is recorded under a person\u2019s name \u2014 set it in Settings (the gear).',
-      { tone: 'error' });
+    toast(
+      'Verifying is recorded under a person\u2019s name \u2014 set it in Settings (the gear).',
+      { tone: 'error' },
+    );
     return openActorSettings();
   }
   const pending = threadsFor(rule).filter((t) => t.status === 'addressed');
@@ -3952,10 +4356,12 @@ async function verifyAll(rule) {
   await load();
   // All of them is the result asked for; a partial pass is not a failure but
   // it is unfinished, and the colour is the difference.
-  toast(done === pending.length
-    ? `<b>${done}</b> thread${done === 1 ? '' : 's'} verified on ${esc(rule)}.`
-    : `<b>${done}</b> of ${pending.length} verified \u2014 the rest are still open.`,
-    { tone: done === pending.length ? 'success' : 'warning' });
+  toast(
+    done === pending.length
+      ? `<b>${done}</b> thread${done === 1 ? '' : 's'} verified on ${esc(rule)}.`
+      : `<b>${done}</b> of ${pending.length} verified \u2014 the rest are still open.`,
+    { tone: done === pending.length ? 'success' : 'warning' },
+  );
 }
 
 /** Open a thread on its own screen, landing where the reading resumes. */
@@ -3998,21 +4404,27 @@ function openThreadView(id) {
 
 function wireThreads() {
   D.host.querySelectorAll('[data-open-thread]').forEach((el) => {
-    el.onclick = (e) => { e.stopPropagation(); openThreadView(el.dataset.openThread); };
+    el.onclick = (e) => {
+      e.stopPropagation();
+      openThreadView(el.dataset.openThread);
+    };
   });
   const tback = D.host.querySelector('.wdp-thread-back');
-  if (tback) tback.onclick = () => {
-    const t = (S.data?.threads ?? []).find((x) => x.id === S.openThread);
-    // Back where you came from: the rule, or the list for a pin that has
-    // none - and on the Threads tab always the thread list, because that is
-    // where you came from and no rule was ever opened.
-    S.view = S.listTab !== 'threads' && t?.anchor?.rule && S.selected ? 'detail' : 'list';
-    S.openThread = null;
-    render();
-  };
+  if (tback)
+    tback.onclick = () => {
+      const t = (S.data?.threads ?? []).find((x) => x.id === S.openThread);
+      // Back where you came from: the rule, or the list for a pin that has
+      // none - and on the Threads tab always the thread list, because that is
+      // where you came from and no rule was ever opened.
+      S.view = S.listTab !== 'threads' && t?.anchor?.rule && S.selected ? 'detail' : 'list';
+      S.openThread = null;
+      render();
+    };
   const note = D.host.querySelector('#wdp-note');
   if (note) {
-    note.oninput = () => { S.threadNote = note.value; };
+    note.oninput = () => {
+      S.threadNote = note.value;
+    };
     // Enter sends, Shift+Enter breaks the line - the muscle memory everyone
     // already has. The button stays for the pointer.
     note.onkeydown = (e) => {
@@ -4032,12 +4444,16 @@ function wireThreads() {
       const t = (S.data?.threads ?? []).find((x) => x.id === id);
       // Follow it to its own rule, so going back from the thread lands
       // somewhere that makes sense rather than on the rule you came from.
-      if (t?.anchor?.rule) S.selected = S.data.rows.find((r) => r.rule === t.anchor.rule) ?? S.selected;
+      if (t?.anchor?.rule)
+        S.selected = S.data.rows.find((r) => r.rule === t.anchor.rule) ?? S.selected;
       openThreadView(id);
     };
   });
   D.host.querySelectorAll('[data-rule-ref]').forEach((el) => {
-    el.onclick = (e) => { e.stopPropagation(); open(el.dataset.ruleRef); };
+    el.onclick = (e) => {
+      e.stopPropagation();
+      open(el.dataset.ruleRef);
+    };
   });
   const tactor = D.host.querySelector('#wdp-tactor');
   if (tactor) tactor.onclick = () => openActorSettings();
@@ -4068,10 +4484,21 @@ function wireThreads() {
     el.onmouseleave = () => highlightAnchor(null);
   });
   D.host.querySelectorAll('[data-shots]').forEach((el) => {
-    el.onclick = () => { try { openShots(JSON.parse(el.dataset.shots)); } catch { /* nothing to show */ } };
+    el.onclick = () => {
+      try {
+        openShots(JSON.parse(el.dataset.shots));
+      } catch {
+        /* nothing to show */
+      }
+    };
   });
   D.host.querySelectorAll('[data-sketch]').forEach((el) => {
-    el.onclick = () => { S.ghostOverride = el.dataset.sketch; setGhost(false); S.ghostOverride = el.dataset.sketch; setGhost(true); };
+    el.onclick = () => {
+      S.ghostOverride = el.dataset.sketch;
+      setGhost(false);
+      S.ghostOverride = el.dataset.sketch;
+      setGhost(true);
+    };
   });
 }
 
@@ -4147,8 +4574,8 @@ const STALE_COPY = () =>
  * frame lands (n-0098).
  */
 function goTo(screen, surface = pageSurface(), pick = null) {
-  const url = screenUrl(screen, surface)
-    ?? screenUrl(screen, surface === 'app' ? 'prototype' : 'app');
+  const url =
+    screenUrl(screen, surface) ?? screenUrl(screen, surface === 'app' ? 'prototype' : 'app');
   if (!url) return false;
   /*
    * Already there. Assigning the same address is still a navigation - the
@@ -4188,7 +4615,11 @@ function goTo(screen, surface = pageSurface(), pick = null) {
  */
 function syncHeadlessCover() {
   const show = S.docked && S.view !== 'list' && isHeadless(S.selected);
-  if (!show) { S.headlessCover?.remove(); S.headlessCover = null; return; }
+  if (!show) {
+    S.headlessCover?.remove();
+    S.headlessCover = null;
+    return;
+  }
   if (!S.headlessCover) {
     S.headlessCover = document.createElement('div');
     document.body.appendChild(S.headlessCover);
@@ -4220,7 +4651,9 @@ function elsewhere(r) {
       this rule, so what is on the desk is beside the point. It is judged by its
       checks and recorded behavior, not by looking.</div>`;
   if (!want || !here || want.id === here.id) return '';
-  const can = Boolean(screenUrl(want, pageSurface()) ?? screenUrl(want, 'app') ?? screenUrl(want, 'prototype'));
+  const can = Boolean(
+    screenUrl(want, pageSurface()) ?? screenUrl(want, 'app') ?? screenUrl(want, 'prototype'),
+  );
   return `<div class="mt-1.5 text-[11.5px] opacity-60">This rule is on
     <b>${esc(want.id)}</b>; you are on <b>${esc(here.id)}</b>.
     ${can ? `<button class="link link-primary" data-goscreen="${esc(want.id)}">Go there</button>` : ''}</div>`;
@@ -4242,7 +4675,11 @@ function sayVerdict(msg) {
 function sayFiling(msg) {
   for (const id of ['#wdp-nsay', '#wdp-vsay']) {
     const el = D.host.querySelector(id);
-    if (el) { el.textContent = msg; el.classList.remove('hidden'); return; }
+    if (el) {
+      el.textContent = msg;
+      el.classList.remove('hidden');
+      return;
+    }
   }
   toast(msg, { tone: 'error' });
 }
@@ -4276,16 +4713,22 @@ async function postRuleNote(rule, body) {
    */
   const author = whoAmI();
   if (!author || author === 'agent') {
-    sayFiling('A note is recorded under a person\u2019s name \u2014 set it in Settings (the gear).');
+    sayFiling(
+      'A note is recorded under a person\u2019s name \u2014 set it in Settings (the gear).',
+    );
     openActorSettings();
     return null;
   }
   const res = await fetch(api('/api/threads'), {
-    method: 'POST', headers: { 'content-type': 'application/json' },
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ kind: 'note', author, body, anchor: { rule } }),
   });
   const out = await res.json().catch(() => ({}));
-  if (!res.ok) { sayFiling(out.error ?? 'note not filed'); return null; }
+  if (!res.ok) {
+    sayFiling(out.error ?? 'note not filed');
+    return null;
+  }
   return out.id;
 }
 
@@ -4299,31 +4742,40 @@ async function postRuleNote(rule, body) {
  */
 function wireRuleNote() {
   const box = D.host.querySelector('#wdp-rulenote');
-  if (box) box.oninput = () => { S.ruleNote = box.value; };
+  if (box)
+    box.oninput = () => {
+      S.ruleNote = box.value;
+    };
   const who = D.host.querySelector('#wdp-nactor');
   if (who) who.onclick = () => openActorSettings();
   const post = D.host.querySelector('[data-note-rule]');
   if (!post) return;
   post.onclick = async () => {
     const text = (D.host.querySelector('#wdp-rulenote')?.value ?? '').trim();
-    if (!text) return sayFiling('Write something first — a thread opens with what you have to say.');
+    if (!text)
+      return sayFiling('Write something first — a thread opens with what you have to say.');
     post.disabled = true;
     const tid = await postRuleNote(post.dataset.noteRule, text);
     post.disabled = false;
-    if (!tid) return;             // the refusal is on screen
+    if (!tid) return; // the refusal is on screen
     S.ruleNote = '';
-    await load();                 // pull the new thread into the lists and repaint
+    await load(); // pull the new thread into the lists and repaint
   };
 }
 
 /** A pin dropped on this rule since the session began — the other way to say why. */
 const pinnedThisSession = (rule) =>
-  (S.data?.threads ?? []).some((t) => t.anchor?.rule === rule &&
-    S.session?.started && String(t.created ?? '') >= S.session.started);
+  (S.data?.threads ?? []).some(
+    (t) =>
+      t.anchor?.rule === rule && S.session?.started && String(t.created ?? '') >= S.session.started,
+  );
 
 function wireVerdict() {
   const note = D.host.querySelector('#wdp-vnote');
-  if (note) note.oninput = () => { S.verdictNote = note.value; };
+  if (note)
+    note.oninput = () => {
+      S.verdictNote = note.value;
+    };
   D.host.querySelectorAll('[data-v]').forEach((b) => {
     b.onclick = async () => {
       const status = b.dataset.v;
@@ -4343,7 +4795,9 @@ function wireVerdict() {
            * pins, every fail left a mode behind to notice and turn off,
            * which is a tax on the commonest verdict in a hard sitting.
            */
-          sayVerdict('A fail needs a why — write it above, or turn on Pin mode and drop it on the page.');
+          sayVerdict(
+            'A fail needs a why — write it above, or turn on Pin mode and drop it on the page.',
+          );
           return;
         }
       }
@@ -4362,7 +4816,11 @@ function wireVerdict() {
       // verdict puts you in.
       if (status === 'pass' || status === 'approved') {
         const next = owedRows()[0];
-        if (next) { open(next.rule); load(); return; }
+        if (next) {
+          open(next.rule);
+          load();
+          return;
+        }
         S.view = 'list';
       }
       await load(); // pull the new thread into the lists and repaint
@@ -4388,8 +4846,10 @@ function continueWalkdown() {
     S.view = 'list';
     render();
     // Nothing owed is the good end of a walk, not an error.
-    return toast('Nothing left owing a verdict in this blueprint — <b>Finish walkdown</b> records the sitting.',
-      { tone: 'success' });
+    return toast(
+      'Nothing left owing a verdict in this blueprint — <b>Finish walkdown</b> records the sitting.',
+      { tone: 'success' },
+    );
   }
   open(next.rule);
 }
@@ -4410,12 +4870,18 @@ async function finishWalkdown() {
     const threads = [...new Set([...(S.session.threads?.[rule] ?? []), ...pins])];
     return { rule, status, ...(threads.length && { threads }) };
   });
-  if (!results.length) { S.session = null; saveSession(); render(); return; }
+  if (!results.length) {
+    S.session = null;
+    saveSession();
+    render();
+    return;
+  }
   const actor = (S.session.actor ?? '').trim();
   if (!actor || actor === 'agent') {
     S.session.posting = false;
-    toast('A walkdown is recorded under a person’s name — set it in Settings (the gear).',
-      { tone: 'error' });
+    toast('A walkdown is recorded under a person’s name — set it in Settings (the gear).', {
+      tone: 'error',
+    });
     openActorSettings();
     return;
   }
@@ -4435,8 +4901,10 @@ async function finishWalkdown() {
     S.view = 'list';
     S.selected = null;
     await load();
-    toast(`Recorded ${results.length} verdict${results.length === 1 ? '' : 's'} as <b>${esc(out.run_id)}</b>`,
-      { tone: 'success' });
+    toast(
+      `Recorded ${results.length} verdict${results.length === 1 ? '' : 's'} as <b>${esc(out.run_id)}</b>`,
+      { tone: 'success' },
+    );
   } catch {
     S.session.posting = false;
     toast('walkdown server unreachable — nothing recorded.', { tone: 'error' });
@@ -4492,9 +4960,9 @@ function setGhost(on) {
     S.ghost?.remove();
     S.ghost = null;
     S.ghostSrc = null;
-    S.ghostReady = false;     // whatever was in there is gone with it
-    S.ghostOverride = null;   // the detour ends with the overlay
-    S.protoShare = null;      // and the dial goes back to following the page
+    S.ghostReady = false; // whatever was in there is gone with it
+    S.ghostOverride = null; // the detour ends with the overlay
+    S.protoShare = null; // and the dial goes back to following the page
     render();
     return;
   }
@@ -4624,19 +5092,29 @@ const ghostFrame = () => S.ghost?.querySelector('iframe') ?? null;
 function pinsForScreen(id) {
   if (!id) return [];
   return (S.data?.threads ?? [])
-    .filter((t) => t.anchor?.screen === id && !['incorporated', 'verified', 'waived'].includes(t.status))
-    .map((t) => ({ id: t.id, kind: t.kind, status: t.status, element: t.anchor?.element,
+    .filter(
+      (t) => t.anchor?.screen === id && !['incorporated', 'verified', 'waived'].includes(t.status),
+    )
+    .map((t) => ({
+      id: t.id,
+      kind: t.kind,
+      status: t.status,
+      element: t.anchor?.element,
       offset: t.anchor?.offset,
-      position: t.anchor?.position, surface: t.anchor?.surface, viewport: t.anchor?.viewport,
+      position: t.anchor?.position,
+      surface: t.anchor?.surface,
+      viewport: t.anchor?.viewport,
       // What it is about, for the tooltip: a pin should say where it belongs
       // before you spend a click finding out.
-      rule: t.anchor?.rule ?? null, screen: t.anchor?.screen ?? null,
-      body: t.body, replies: t.replies ?? [] }));
+      rule: t.anchor?.rule ?? null,
+      screen: t.anchor?.screen ?? null,
+      body: t.body,
+      replies: t.replies ?? [],
+    }));
 }
 
 /** Whether the ghost currently takes the pointer instead of passing it through. */
-const ghostHasReach = () =>
-  Boolean(S.ghost) && S.ghostOpacity === 1 && S.ghostReady && PIN.isOn();
+const ghostHasReach = () => Boolean(S.ghost) && S.ghostOpacity === 1 && S.ghostReady && PIN.isOn();
 
 function paintGhostReach() {
   if (S.ghost) S.ghost.style.pointerEvents = ghostHasReach() ? 'auto' : 'none';
@@ -4649,13 +5127,16 @@ function paintGhostReach() {
  */
 function pushContext(frame, surface, pinMode) {
   const sc = screenById(S.ghostOverride) ?? currentScreen();
-  frame?.contentWindow?.postMessage({
-    type: 'walkdown:context',
-    screen: sc?.id ?? null,
-    surface,
-    pinMode,
-    pins: pinsForScreen(sc?.id),
-  }, '*');
+  frame?.contentWindow?.postMessage(
+    {
+      type: 'walkdown:context',
+      screen: sc?.id ?? null,
+      surface,
+      pinMode,
+      pins: pinsForScreen(sc?.id),
+    },
+    '*',
+  );
 }
 
 /*
@@ -4676,7 +5157,6 @@ function surfaceOfSource(src) {
   return null;
 }
 
-
 /*
  * Is the keystroke going somewhere that wants letters? e.target is retargeted
  * to the shadow host for anything typed inside the panel, so a tagName test
@@ -4688,7 +5168,6 @@ const typing = (e) => {
   const el = e.composedPath?.()[0] ?? e.target;
   return /^(INPUT|TEXTAREA|SELECT)$/.test(el?.tagName ?? '') || el?.isContentEditable === true;
 };
-
 
 /*
  * Three questions, asked once each and then not again: is there a server,
@@ -4723,8 +5202,11 @@ async function start() {
       const whose = asking
         ? await (await fetch(api(`/api/whose?url=${encodeURIComponent(asking)}`))).json()
         : null;
-      if (whose?.match?.id && S.projects.some((pr) => pr.id === whose.match.id)) S.BP = whose.match.id;
-    } catch { /* the server is old or unreachable; memory and the picker remain */ }
+      if (whose?.match?.id && S.projects.some((pr) => pr.id === whose.match.id))
+        S.BP = whose.match.id;
+    } catch {
+      /* the server is old or unreachable; memory and the picker remain */
+    }
   }
   if (!S.BP && S.projects.length > 1) {
     const remembered = await store.get(CHOICE);
@@ -4745,7 +5227,9 @@ async function start() {
      * page you are on. If it does cover this page, you are already where the
      * choice meant to put you, and moving would be the panel overruling you.
      */
-    const first = (S.data.storyboard ?? []).find((sc) => screenUrl(sc, 'app') ?? screenUrl(sc, 'prototype'));
+    const first = (S.data.storyboard ?? []).find(
+      (sc) => screenUrl(sc, 'app') ?? screenUrl(sc, 'prototype'),
+    );
     if (first && !currentScreen()) {
       /*
        * Three deliveries, two answers. Framed, walkdown owns the frame and
@@ -4807,8 +5291,6 @@ function renderGate() {
   wireBlueprints(D.side);
 }
 
-
-
 /*
  * Every listener the panel hangs on the document or the window.
  *
@@ -4821,8 +5303,10 @@ function renderGate() {
 function wireGlobals() {
   document.addEventListener(
     'pointerdown',
-    (e) => { if (S.screensOpen || S.deskOpen) dismissPopovers(e.composedPath()); },
-    true
+    (e) => {
+      if (S.screensOpen || S.deskOpen) dismissPopovers(e.composedPath());
+    },
+    true,
   );
   /*
    * One Escape handler, doing the most local thing first: the screen picker,
@@ -4885,8 +5369,7 @@ function wireGlobals() {
     }
     // The ghosted surface can leave pin mode too (Escape). Pin mode has one
     // owner, so it is told rather than each side keeping its own answer.
-    if (msg.type === 'walkdown:pin-mode' && msg.on === false)
-      return PIN.set(false);
+    if (msg.type === 'walkdown:pin-mode' && msg.on === false) return PIN.set(false);
 
     /*
      * A pointer went down on the page under review. That event is the frame's
@@ -4927,8 +5410,10 @@ function wireGlobals() {
        */
       const pinAuthor = (msg.author ?? '').trim() || whoAmI();
       if (!pinAuthor || pinAuthor === 'agent') {
-        toast('A pin is recorded under a person\u2019s name \u2014 set it in Settings (the gear).',
-          { tone: 'error' });
+        toast(
+          'A pin is recorded under a person\u2019s name \u2014 set it in Settings (the gear).',
+          { tone: 'error' },
+        );
         openActorSettings();
         return;
       }
@@ -4936,7 +5421,8 @@ function wireGlobals() {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
-          kind: msg.kind, body: msg.body,
+          kind: msg.kind,
+          body: msg.body,
           author: pinAuthor,
           anchor: {
             ...(msg.element && { element: msg.element }),
@@ -4959,7 +5445,8 @@ function wireGlobals() {
   });
   // Hold G to peek at the prototype at full strength.
   addEventListener('keydown', (e) => {
-    if (e.key.toLowerCase() === 'g' && S.ghost && !e.metaKey && !e.ctrlKey && !typing(e)) S.ghost.style.opacity = 1;
+    if (e.key.toLowerCase() === 'g' && S.ghost && !e.metaKey && !e.ctrlKey && !typing(e))
+      S.ghost.style.opacity = 1;
   });
   addEventListener('keyup', (e) => {
     if (e.key.toLowerCase() === 'g' && S.ghost) S.ghost.style.opacity = S.ghostOpacity;
@@ -5018,7 +5505,16 @@ function boot() {
   });
 
   store.get(IDENTITY_KEY).then(async (v) => {
-    const saved = typeof v === 'string' ? (() => { try { return JSON.parse(v); } catch { return null; } })() : v;
+    const saved =
+      typeof v === 'string'
+        ? (() => {
+            try {
+              return JSON.parse(v);
+            } catch {
+              return null;
+            }
+          })()
+        : v;
     if (saved && typeof saved === 'object') {
       /*
        * An emptied field is an answer, and it has to survive the reload.
@@ -5064,9 +5560,16 @@ function boot() {
       if (!saved || typeof saved !== 'object') return;
       S.desk = { ...DESK_DEFAULTS, ...saved };
       if (S.docked) paintDesk(true);
-    } catch { /* a malformed save loses to the defaults */ }
+    } catch {
+      /* a malformed save loses to the defaults */
+    }
   });
-  store.get(CHOICE + ':server').then((at) => { if (at) S.SERVER = at; }).finally(start);
+  store
+    .get(CHOICE + ':server')
+    .then((at) => {
+      if (at) S.SERVER = at;
+    })
+    .finally(start);
 }
 
 boot();

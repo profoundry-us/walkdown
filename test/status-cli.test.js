@@ -22,34 +22,60 @@ after(() => rmSync(root, { recursive: true, force: true }));
 
 const WAITING = 'The visitor can do the thing.';
 const EXCUSED = 'The extension adds nothing to a page until its toolbar button is clicked.';
-const AGENT_EXCUSE = 'The control is the browser\'s own toolbar button - browser chrome rather than '
-  + 'part of the page, and no tool an agent drives reaches it.';
-const CHECKS_EXCUSE = 'The same button, for the same reason - a test that drives a page cannot '
-  + 'click something that is not in the page.';
+const AGENT_EXCUSE =
+  "The control is the browser's own toolbar button - browser chrome rather than " +
+  'part of the page, and no tool an agent drives reaches it.';
+const CHECKS_EXCUSE =
+  'The same button, for the same reason - a test that drives a page cannot ' +
+  'click something that is not in the page.';
 
 function fixture(name) {
   const bp = join(root, name, 'blueprint');
   mkdirSync(join(bp, 'features'), { recursive: true });
   mkdirSync(join(bp, 'runs'), { recursive: true });
   writeFileSync(join(bp, 'walkdown.yml'), 'project: cli-fixture\n');
-  writeFileSync(join(bp, 'features', 'demo.yml'), [
-    'feature: demo', 'stories:', '  - id: demo.main', '    rules:',
-    '      - id: demo.main.waiting', `        statement: ${WAITING}`,
-    '        verify: [checks]', '        signoff: [eng, product]',
-    '      - id: demo.main.excused', `        statement: ${EXCUSED}`,
-    '        unverifiable:', `          agent: ${AGENT_EXCUSE}`, `          checks: ${CHECKS_EXCUSE}`,
-  ].join('\n'));
+  writeFileSync(
+    join(bp, 'features', 'demo.yml'),
+    [
+      'feature: demo',
+      'stories:',
+      '  - id: demo.main',
+      '    rules:',
+      '      - id: demo.main.waiting',
+      `        statement: ${WAITING}`,
+      '        verify: [checks]',
+      '        signoff: [eng, product]',
+      '      - id: demo.main.excused',
+      `        statement: ${EXCUSED}`,
+      '        unverifiable:',
+      `          agent: ${AGENT_EXCUSE}`,
+      `          checks: ${CHECKS_EXCUSE}`,
+    ].join('\n'),
+  );
   // Checks green, engineering signed, product has not been asked yet.
-  writeFileSync(join(bp, 'runs', '2026-01-01T00-00-00Z-local-01.json'), JSON.stringify({
-    run_id: '2026-01-01T00-00-00Z-local-01', created: '2026-01-01T00:00:00Z',
-    actor: 'agent', kind: 'checks', target: 'local',
-    results: [{ rule: 'demo.main.waiting', status: 'pass', statement_hash: formatHash(WAITING) }],
-  }));
-  writeFileSync(join(bp, 'runs', '2026-01-02T00-00-00Z-local-01.json'), JSON.stringify({
-    run_id: '2026-01-02T00-00-00Z-local-01', created: '2026-01-02T00:00:00Z',
-    actor: 'topher', roles: ['eng'], kind: 'walkdown', target: 'local',
-    results: [{ rule: 'demo.main.waiting', status: 'pass', statement_hash: formatHash(WAITING) }],
-  }));
+  writeFileSync(
+    join(bp, 'runs', '2026-01-01T00-00-00Z-local-01.json'),
+    JSON.stringify({
+      run_id: '2026-01-01T00-00-00Z-local-01',
+      created: '2026-01-01T00:00:00Z',
+      actor: 'agent',
+      kind: 'checks',
+      target: 'local',
+      results: [{ rule: 'demo.main.waiting', status: 'pass', statement_hash: formatHash(WAITING) }],
+    }),
+  );
+  writeFileSync(
+    join(bp, 'runs', '2026-01-02T00-00-00Z-local-01.json'),
+    JSON.stringify({
+      run_id: '2026-01-02T00-00-00Z-local-01',
+      created: '2026-01-02T00:00:00Z',
+      actor: 'topher',
+      roles: ['eng'],
+      kind: 'walkdown',
+      target: 'local',
+      results: [{ rule: 'demo.main.waiting', status: 'pass', statement_hash: formatHash(WAITING) }],
+    }),
+  );
   return bp;
 }
 

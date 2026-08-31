@@ -57,13 +57,9 @@
   },
   "overrides": [
     {
-      "includes": [
-        "extension/*.js"
-      ],
+      "includes": ["extension/*.js"],
       "javascript": {
-        "globals": [
-          "chrome"
-        ]
+        "globals": ["chrome"]
       }
     }
   ]

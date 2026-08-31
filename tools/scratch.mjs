@@ -20,7 +20,17 @@
  *   node tools/scratch.mjs clean <label>             take yours away
  *   node tools/scratch.mjs clean --stale             and anything abandoned
  */
-import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, symlinkSync, writeFileSync } from 'node:fs';
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  statSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { resolveLocations } from '../lib/locations.js';
@@ -32,9 +42,16 @@ const STAMP = '.scratch.json';
  * before it is a mystery. */
 const STALE_MS = 4 * 60 * 60 * 1000;
 
-const die = (msg) => { console.error(msg); process.exit(1); };
-const age = (ms) => (ms < 90e3 ? `${Math.round(ms / 1e3)}s`
-  : ms < 5400e3 ? `${Math.round(ms / 60e3)}m` : `${Math.round(ms / 36e5)}h`);
+const die = (msg) => {
+  console.error(msg);
+  process.exit(1);
+};
+const age = (ms) =>
+  ms < 90e3
+    ? `${Math.round(ms / 1e3)}s`
+    : ms < 5400e3
+      ? `${Math.round(ms / 60e3)}m`
+      : `${Math.round(ms / 36e5)}h`;
 
 function spaces() {
   if (!existsSync(TMP)) return [];
@@ -43,7 +60,11 @@ function spaces() {
     .map((e) => {
       const path = join(TMP, e.name);
       let stamp = null;
-      try { stamp = JSON.parse(readFileSync(join(path, STAMP), 'utf8')); } catch { /* unstamped */ }
+      try {
+        stamp = JSON.parse(readFileSync(join(path, STAMP), 'utf8'));
+      } catch {
+        /* unstamped */
+      }
       return { label: e.name, path, stamp, touched: statSync(path).mtimeMs };
     })
     .sort((a, b) => a.touched - b.touched);
@@ -58,7 +79,8 @@ function make(label, why) {
    * normal, and handing the second one the first one's half-written ledger
    * would produce a run record neither of them could account for.
    */
-  if (existsSync(path)) die(`${path} already exists — pick another label, or clean that one first.`);
+  if (existsSync(path))
+    die(`${path} already exists — pick another label, or clean that one first.`);
 
   mkdirSync(path, { recursive: true });
   cpSync(join(root, 'blueprint'), join(path, 'blueprint'), { recursive: true });
@@ -77,15 +99,27 @@ function make(label, why) {
     mkdirSync(join(path, 'blueprint', 'runs'), { recursive: true });
     symlinkSync(real, join(path, 'blueprint', 'runs', 'evidence'), 'dir');
   }
-  writeFileSync(join(path, STAMP), JSON.stringify({
-    label, why: why ?? null, created: new Date().toISOString(), pid: process.pid,
-  }, null, 2) + '\n');
+  writeFileSync(
+    join(path, STAMP),
+    JSON.stringify(
+      {
+        label,
+        why: why ?? null,
+        created: new Date().toISOString(),
+        pid: process.pid,
+      },
+      null,
+      2,
+    ) + '\n',
+  );
 
   console.log(path);
-  console.error(`\nA disposable copy. Serve it with:\n`
-    + `  node bin/walkdown.js serve --dir ${join(path, 'blueprint')}\n`
-    + `Take it away when the sitting closes:\n`
-    + `  node tools/scratch.mjs clean ${label}\n`);
+  console.error(
+    `\nA disposable copy. Serve it with:\n` +
+      `  node bin/walkdown.js serve --dir ${join(path, 'blueprint')}\n` +
+      `Take it away when the sitting closes:\n` +
+      `  node tools/scratch.mjs clean ${label}\n`,
+  );
 }
 
 function list() {
@@ -94,7 +128,9 @@ function list() {
   const now = Date.now();
   for (const s of all) {
     const stale = now - s.touched > STALE_MS;
-    console.log(`${stale ? '!' : ' '} ${s.label.padEnd(24)} ${age(now - s.touched).padStart(5)} old  ${s.stamp?.why ?? (s.stamp ? '(no why recorded)' : '(unstamped — made by hand)')}`);
+    console.log(
+      `${stale ? '!' : ' '} ${s.label.padEnd(24)} ${age(now - s.touched).padStart(5)} old  ${s.stamp?.why ?? (s.stamp ? '(no why recorded)' : '(unstamped — made by hand)')}`,
+    );
   }
   if (all.some((s) => now - s.touched > STALE_MS))
     console.log(`\n! = untouched for over ${STALE_MS / 36e5}h. \`clean --stale\` takes those.`);
@@ -121,8 +157,15 @@ function clean(args) {
 }
 
 const [cmd, ...rest] = process.argv.slice(2);
-const flag = (name) => { const i = rest.indexOf(`--${name}`); return i < 0 ? null : rest[i + 1]; };
-if (cmd === 'new') make(rest.find((a) => !a.startsWith('--') && a !== flag('why')), flag('why'));
+const flag = (name) => {
+  const i = rest.indexOf(`--${name}`);
+  return i < 0 ? null : rest[i + 1];
+};
+if (cmd === 'new')
+  make(
+    rest.find((a) => !a.startsWith('--') && a !== flag('why')),
+    flag('why'),
+  );
 else if (cmd === 'list') list();
 else if (cmd === 'clean') clean(rest);
 else die('usage: scratch new <label> --why "..." | list | clean <label>… | clean --stale');

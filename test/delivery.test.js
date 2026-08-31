@@ -9,7 +9,15 @@
  */
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { cpSync, existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync } from 'node:fs';
+import {
+  cpSync,
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  statSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -29,8 +37,11 @@ function shipped(dir, out = []) {
 
 test('nothing walkdown ships at runtime resolves outside itself @rule:delivery.install.clone-is-the-install', () => {
   const pkg = JSON.parse(read('package.json'));
-  assert.equal(pkg.dependencies, undefined,
-    'a runtime dependency is a package registry on the critical path');
+  assert.equal(
+    pkg.dependencies,
+    undefined,
+    'a runtime dependency is a package registry on the critical path',
+  );
   assert.ok(pkg.files.includes('vendor'), 'and the vendored library has to be published too');
 
   /*
@@ -40,7 +51,9 @@ test('nothing walkdown ships at runtime resolves outside itself @rule:delivery.i
    */
   const offenders = [];
   for (const file of [...shipped('lib'), ...shipped('bin'), ...shipped('vendor')]) {
-    for (const [, spec] of read(file).matchAll(/^\s*(?:import|export)[^'"]*from\s+['"]([^'"]+)['"]/gm))
+    for (const [, spec] of read(file).matchAll(
+      /^\s*(?:import|export)[^'"]*from\s+['"]([^'"]+)['"]/gm,
+    ))
       if (!spec.startsWith('.') && !spec.startsWith('node:')) offenders.push(`${file} → ${spec}`);
   }
   assert.deepEqual(offenders, [], 'these would need installing before walkdown could run');
@@ -66,12 +79,23 @@ test('the third-party code it carries is attributed and machine-built @rule:deli
 test('the CLI runs from a tree with no node_modules @rule:delivery.install.clone-is-the-install', () => {
   const away = mkdtempSync(join(tmpdir(), 'wd-bare-'));
   try {
-    for (const d of ['bin', 'lib', 'vendor']) cpSync(join(root, d), join(away, d), { recursive: true });
+    for (const d of ['bin', 'lib', 'vendor'])
+      cpSync(join(root, d), join(away, d), { recursive: true });
     cpSync(join(root, 'package.json'), join(away, 'package.json'));
     assert.equal(existsSync(join(away, 'node_modules')), false);
 
-    const out = execFileSync(process.execPath,
-      [join(away, 'bin', 'walkdown.js'), 'lint', '--dir', join(root, 'blueprint')]).toString();
-    assert.match(out, /rules, \d+ screens/, "it parsed walkdown's own blueprint with nothing installed");
-  } finally { rmSync(away, { recursive: true, force: true }); }
+    const out = execFileSync(process.execPath, [
+      join(away, 'bin', 'walkdown.js'),
+      'lint',
+      '--dir',
+      join(root, 'blueprint'),
+    ]).toString();
+    assert.match(
+      out,
+      /rules, \d+ screens/,
+      "it parsed walkdown's own blueprint with nothing installed",
+    );
+  } finally {
+    rmSync(away, { recursive: true, force: true });
+  }
 });

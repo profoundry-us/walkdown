@@ -17,7 +17,7 @@
   try {
     answer = await chrome.runtime.sendMessage({ type: 'walkdown:role' });
   } catch {
-    return;   // the worker is gone; stay out of the page entirely
+    return; // the worker is gone; stay out of the page entirely
   }
   if (answer?.role !== 'embed') return;
 

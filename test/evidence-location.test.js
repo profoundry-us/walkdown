@@ -16,7 +16,11 @@ async function withServer(bp, fn) {
   const server = createWalkdownServer(bp);
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
   const base = `http://127.0.0.1:${server.address().port}`;
-  try { await fn(base); } finally { server.close(); }
+  try {
+    await fn(base);
+  } finally {
+    server.close();
+  }
 }
 
 function fixture() {
@@ -41,7 +45,9 @@ test('a screenshot in the blueprint is served, as every older record expects', a
       assert.equal(res.status, 200);
       assert.equal(await res.text(), 'IN-REPO');
     });
-  } finally { f.cleanup(); }
+  } finally {
+    f.cleanup();
+  }
 });
 
 test('with evidence moved out, the same recorded key finds it at the new root @rule:locations.travel.evidence-by-key', async () => {
@@ -54,9 +60,15 @@ test('with evidence moved out, the same recorded key finds it at the new root @r
     await withServer(f.bp, async (base) => {
       const res = await fetch(`${base}/evidence/runs/evidence/r1/shot.png`);
       assert.equal(res.status, 200);
-      assert.equal(await res.text(), 'MOVED-OUT', 'the logical key resolved to the configured root');
+      assert.equal(
+        await res.text(),
+        'MOVED-OUT',
+        'the logical key resolved to the configured root',
+      );
     });
-  } finally { f.cleanup(); }
+  } finally {
+    f.cleanup();
+  }
 });
 
 test('evidence serving still refuses anything outside the evidence key space @rule:locations.travel.evidence-by-key', async () => {
@@ -64,10 +76,16 @@ test('evidence serving still refuses anything outside the evidence key space @ru
   try {
     writeFileSync(join(f.bp, 'walkdown.yml'), 'project: ev-fixture\n');
     await withServer(f.bp, async (base) => {
-      for (const path of ['/evidence/walkdown.yml', '/evidence/../walkdown.yml', '/evidence/runs/walkdown.yml']) {
+      for (const path of [
+        '/evidence/walkdown.yml',
+        '/evidence/../walkdown.yml',
+        '/evidence/runs/walkdown.yml',
+      ]) {
         const res = await fetch(base + path);
         assert.equal(res.status, 404, `${path} is not evidence`);
       }
     });
-  } finally { f.cleanup(); }
+  } finally {
+    f.cleanup();
+  }
 });

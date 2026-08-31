@@ -15,10 +15,22 @@ const rulesById = new Map([['demo.thing', { id: 'demo.thing', statement: STATEME
 test('aggregation: fail beats pass, durations sum, checks and evidence dedupe', () => {
   const results = aggregateResults(
     [
-      { ruleId: 'demo.thing', status: 'pass', durationMs: 100, check: 'a.spec.ts:1', evidence: ['x.png'] },
-      { ruleId: 'demo.thing', status: 'fail', durationMs: 50, check: 'b.spec.ts:9', evidence: ['x.png', 'y.png'] },
+      {
+        ruleId: 'demo.thing',
+        status: 'pass',
+        durationMs: 100,
+        check: 'a.spec.ts:1',
+        evidence: ['x.png'],
+      },
+      {
+        ruleId: 'demo.thing',
+        status: 'fail',
+        durationMs: 50,
+        check: 'b.spec.ts:9',
+        evidence: ['x.png', 'y.png'],
+      },
     ],
-    rulesById
+    rulesById,
   );
   assert.equal(results.length, 1);
   assert.equal(results[0].status, 'fail');
@@ -34,7 +46,7 @@ test('pass/fail results are stamped with the current statement_hash; skipped and
       { ruleId: 'demo.gone', status: 'pass', durationMs: 1 },
       { ruleId: 'demo.skip', status: 'skipped', durationMs: 0 },
     ],
-    rulesById
+    rulesById,
   );
   const byRule = Object.fromEntries(results.map((r) => [r.rule, r]));
   assert.equal(byRule['demo.thing'].statement_hash, formatHash(STATEMENT));
@@ -46,9 +58,14 @@ test('nextRunId sequences within the same timestamp and target', () => {
   const date = new Date('2026-08-20T22:00:00Z');
   const runsDir = join(root, 'bp', 'runs');
   assert.equal(nextRunId(runsDir, 'local', date), '2026-08-20T22-00-00Z-local-01');
-  writeRunRecord({ blueprintDir: join(root, 'bp'), target: 'local', actor: 't', perTest: [
-    { ruleId: 'demo.thing', status: 'pass', durationMs: 1 },
-  ], rulesById, date });
+  writeRunRecord({
+    blueprintDir: join(root, 'bp'),
+    target: 'local',
+    actor: 't',
+    perTest: [{ ruleId: 'demo.thing', status: 'pass', durationMs: 1 }],
+    rulesById,
+    date,
+  });
   assert.equal(nextRunId(runsDir, 'local', date), '2026-08-20T22-00-00Z-local-02');
   assert.equal(nextRunId(runsDir, 'staging', date), '2026-08-20T22-00-00Z-staging-01');
 });
@@ -80,19 +97,22 @@ test('a sweep refuses to be written without a reason @rule:status.sweep.delibera
   const dir = mkdtempSync(join(tmpdir(), 'wd-sweep-'));
   assert.throws(
     () => writeSweep({ blueprintDir: dir, target: 'local', tiers: ['agent'], why: '  ' }),
-    /needs a reason/
+    /needs a reason/,
   );
   assert.throws(
     () => writeSweep({ blueprintDir: dir, target: 'local', tiers: [], why: 'because' }),
-    /at least one tier/
+    /at least one tier/,
   );
 });
 
 test('a written sweep carries its reason and no results @rule:status.sweep.deliberate', () => {
   const dir = mkdtempSync(join(tmpdir(), 'wd-sweep-'));
   const { record } = writeSweep({
-    blueprintDir: dir, target: 'local', tiers: ['checks', 'agent'],
-    why: 'the panel was split into sixteen modules', actor: 'topher',
+    blueprintDir: dir,
+    target: 'local',
+    tiers: ['checks', 'agent'],
+    why: 'the panel was split into sixteen modules',
+    actor: 'topher',
   });
   assert.equal(record.kind, 'sweep');
   assert.deepEqual(record.tiers, ['checks', 'agent']);

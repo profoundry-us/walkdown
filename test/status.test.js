@@ -29,7 +29,14 @@ function blueprint({ runs = [], threads = [], verify = ['checks'], environments,
           stories: [
             {
               id: 'demo.main',
-              rules: [{ id: 'demo.main.thing', statement: STATEMENT, verify, ...(environments && { environments }) }],
+              rules: [
+                {
+                  id: 'demo.main.thing',
+                  statement: STATEMENT,
+                  verify,
+                  ...(environments && { environments }),
+                },
+              ],
             },
           ],
         },
@@ -41,11 +48,19 @@ function blueprint({ runs = [], threads = [], verify = ['checks'], environments,
 }
 
 const checksRun = (created, target, status, hash = formatHash(STATEMENT)) => ({
-  created, kind: 'checks', target, actor: 'agent', run_id: created,
+  created,
+  kind: 'checks',
+  target,
+  actor: 'agent',
+  run_id: created,
   results: [{ rule: 'demo.main.thing', status, statement_hash: hash }],
 });
 const walkdownRun = (created, actor, status) => ({
-  created, kind: 'walkdown', target: 'local', actor, run_id: created,
+  created,
+  kind: 'walkdown',
+  target: 'local',
+  actor,
+  run_id: created,
   results: [{ rule: 'demo.main.thing', status, statement_hash: formatHash(STATEMENT) }],
 });
 
@@ -59,12 +74,17 @@ test('no runs: required cells are never, verdict pending', () => {
   assert.equal(rows[0].verdict, 'pending');
   // And engineering signs everything, so an unsigned rule is short a signature
   // even before any evidence lands.
-  assert.deepEqual(rows[0].acceptance.map((a) => [a.role, a.state]), [['eng', 'none']]);
+  assert.deepEqual(
+    rows[0].acceptance.map((a) => [a.role, a.state]),
+    [['eng', 'none']],
+  );
 });
 
 test('later run wins; per-target isolation @rule:status.derived.latest-wins', () => {
   const { rows } = deriveStatus(
-    blueprint({ runs: [checksRun('2026-01-01', 'local', 'fail'), checksRun('2026-01-02', 'local', 'pass')] })
+    blueprint({
+      runs: [checksRun('2026-01-01', 'local', 'fail'), checksRun('2026-01-02', 'local', 'pass')],
+    }),
   );
   assert.equal(rows[0].cells.local.state, 'pass');
   assert.equal(rows[0].cells.staging.state, 'never');
@@ -73,14 +93,16 @@ test('later run wins; per-target isolation @rule:status.derived.latest-wins', ()
 
 test('any fail makes the verdict fail', () => {
   const { rows } = deriveStatus(
-    blueprint({ runs: [checksRun('2026-01-01', 'local', 'pass'), checksRun('2026-01-01', 'staging', 'fail')] })
+    blueprint({
+      runs: [checksRun('2026-01-01', 'local', 'pass'), checksRun('2026-01-01', 'staging', 'fail')],
+    }),
   );
   assert.equal(rows[0].verdict, 'fail');
 });
 
 test('a pass with an outdated statement_hash renders stale, not passing @rule:status.derived.stale-never-passes', () => {
   const { rows } = deriveStatus(
-    blueprint({ runs: [checksRun('2026-01-01', 'local', 'pass', BOGUS_HASH)] })
+    blueprint({ runs: [checksRun('2026-01-01', 'local', 'pass', BOGUS_HASH)] }),
   );
   assert.equal(rows[0].cells.local.state, 'stale');
   assert.equal(rows[0].verdict, 'pending');
@@ -92,7 +114,7 @@ test('environments scope targets; agent pass does not satisfy human @rule:status
       verify: ['agent', 'human'],
       environments: ['local'],
       runs: [walkdownRun('2026-01-01', 'agent', 'pass')],
-    })
+    }),
   );
   assert.equal(rows[0].cells.local.state, 'na'); // checks not required
   assert.equal(rows[0].agent.state, 'pass');
@@ -101,8 +123,11 @@ test('environments scope targets; agent pass does not satisfy human @rule:status
   const done = deriveStatus(
     blueprint({
       verify: ['agent', 'human'],
-      runs: [walkdownRun('2026-01-01', 'agent', 'pass'), walkdownRun('2026-01-02', 'topher', 'pass')],
-    })
+      runs: [
+        walkdownRun('2026-01-01', 'agent', 'pass'),
+        walkdownRun('2026-01-02', 'topher', 'pass'),
+      ],
+    }),
   );
   assert.equal(done.rows[0].human.actor, 'topher');
   assert.equal(done.rows[0].verdict, 'pass');
@@ -128,29 +153,33 @@ test('screenFlow: step order wins, consecutive repeats collapse, revisits show',
   const rule = (steps) => ({ steps });
   assert.deepEqual(
     screenFlow(rule({ given: ['On `join`'], then: ['Now on `confirm` showing `x.y`'] }), screens),
-    ['join', 'confirm']
+    ['join', 'confirm'],
   );
   // "remains on" shape: same screen mentioned in given and then
-  assert.deepEqual(
-    screenFlow(rule({ given: ['On `join`'], then: ['Still on `join`'] }), screens),
-    ['join']
-  );
+  assert.deepEqual(screenFlow(rule({ given: ['On `join`'], then: ['Still on `join`'] }), screens), [
+    'join',
+  ]);
   // a genuine revisit is preserved
   assert.deepEqual(
-    screenFlow(rule({ given: ['On `join`'], when: ['Go to `confirm`'], then: ['Back on `join`'] }), screens),
-    ['join', 'confirm', 'join']
+    screenFlow(
+      rule({ given: ['On `join`'], when: ['Go to `confirm`'], then: ['Back on `join`'] }),
+      screens,
+    ),
+    ['join', 'confirm', 'join'],
   );
-  assert.deepEqual(screenFlow({ }, screens), []);
+  assert.deepEqual(screenFlow({}, screens), []);
 });
 
 test('drift: undesigned screens and thread-born rules are derived', () => {
   const bp = blueprint({
     threads: [{ id: 'q-9', kind: 'question', status: 'open', anchor: { screen: 'extra' } }],
   });
-  bp.storyboard = { screens: [
-    { id: 'home', prototype: '/home.html' },
-    { id: 'extra', prototype: null, proposal: '/extra.html' },
-  ] };
+  bp.storyboard = {
+    screens: [
+      { id: 'home', prototype: '/home.html' },
+      { id: 'extra', prototype: null, proposal: '/extra.html' },
+    ],
+  };
   bp.features[0].data.stories[0].rules[0].origin = 'thread:q-9';
   const { drift } = deriveStatus(bp);
   assert.deepEqual(drift.design, [{ screen: 'extra', proposal: '/extra.html', requests: ['q-9'] }]);
@@ -173,7 +202,8 @@ test('attention: human vs agent queues derived from rows and threads @rule:statu
     ],
   });
   const { attention } = deriveStatus(bp);
-  const byWho = (who) => attention.filter((i) => i.who === who).map((i) => `${i.action}:${i.thread ?? i.rule}`);
+  const byWho = (who) =>
+    attention.filter((i) => i.who === who).map((i) => `${i.action}:${i.thread ?? i.rule}`);
   assert.deepEqual(byWho('human'), ['judge:demo.main.thing', 'verify:n-1', 'answer:q-1']);
   assert.deepEqual(byWho('agent'), ['address:n-2', 'incorporate:q-2']);
 });
@@ -183,26 +213,38 @@ test('open threads listed; terminal ones excluded', () => {
     blueprint({
       threads: [
         { id: 'n-1', kind: 'note', status: 'addressed', anchor: { rule: 'demo.main.thing' } },
-        { id: 'q-1', kind: 'question', status: 'incorporated', anchor: { rule: 'demo.main.thing' } },
+        {
+          id: 'q-1',
+          kind: 'question',
+          status: 'incorporated',
+          anchor: { rule: 'demo.main.thing' },
+        },
       ],
-    })
+    }),
   );
   assert.deepEqual(rows[0].threads, [{ id: 'n-1', status: 'addressed' }]);
 });
 
 test('sign-off is not build evidence: approved stays unbuilt and pending, and discharges the queue until built', () => {
   const owed = (attention) =>
-    attention.some((a) => a.who === 'human' && a.action === 'judge' && a.rule === 'demo.main.thing');
-  const unbuilt = deriveStatus(blueprint({
-    verify: ['human'],
-    runs: [walkdownRun('2026-01-02T00:00:00Z', 'topher', 'approved')],
-  }));
+    attention.some(
+      (a) => a.who === 'human' && a.action === 'judge' && a.rule === 'demo.main.thing',
+    );
+  const unbuilt = deriveStatus(
+    blueprint({
+      verify: ['human'],
+      runs: [walkdownRun('2026-01-02T00:00:00Z', 'topher', 'approved')],
+    }),
+  );
   assert.equal(unbuilt.rows[0].built, false);
   assert.equal(unbuilt.rows[0].human.state, 'approved');
   assert.equal(unbuilt.rows[0].signoff, 'approved');
   // The role that approved reads as approved, not as signed: the wording is
   // accepted and the build is not judged.
-  assert.deepEqual(unbuilt.rows[0].acceptance.map((a) => [a.role, a.state]), [['eng', 'approved']]);
+  assert.deepEqual(
+    unbuilt.rows[0].acceptance.map((a) => [a.role, a.state]),
+    [['eng', 'approved']],
+  );
   assert.equal(unbuilt.rows[0].verdict, 'pending');
   // The sign-off is given: nothing is owed until the build lands.
   assert.equal(owed(unbuilt.attention), false);
@@ -210,28 +252,41 @@ test('sign-off is not build evidence: approved stays unbuilt and pending, and di
   const unsigned = deriveStatus(blueprint({ verify: ['human'] }));
   assert.equal(owed(unsigned.attention), true);
   // Built with only a stale-free approval on file: a real walkdown is owed.
-  const built = deriveStatus(blueprint({
-    verify: ['checks', 'human'],
-    runs: [
-      walkdownRun('2026-01-02T00:00:00Z', 'topher', 'approved'),
-      checksRun('2026-01-03T00:00:00Z', 'local', 'pass'),
-    ],
-  }));
+  const built = deriveStatus(
+    blueprint({
+      verify: ['checks', 'human'],
+      runs: [
+        walkdownRun('2026-01-02T00:00:00Z', 'topher', 'approved'),
+        checksRun('2026-01-03T00:00:00Z', 'local', 'pass'),
+      ],
+    }),
+  );
   assert.equal(built.rows[0].built, true);
   assert.equal(owed(built.attention), true);
 });
 
 test('a build verdict flips built; an approval goes stale when the statement moves', () => {
-  const built = deriveStatus(blueprint({ runs: [checksRun('2026-01-02T00:00:00Z', 'local', 'fail')] }));
+  const built = deriveStatus(
+    blueprint({ runs: [checksRun('2026-01-02T00:00:00Z', 'local', 'fail')] }),
+  );
   assert.equal(built.rows[0].built, true);
-  const stale = deriveStatus(blueprint({
-    verify: ['human'],
-    runs: [{ created: '2026-01-02T00:00:00Z', kind: 'walkdown', target: 'local', actor: 'topher',
-      run_id: 'r-stale', results: [{ rule: 'demo.main.thing', status: 'approved', statement_hash: BOGUS_HASH }] }],
-  }));
+  const stale = deriveStatus(
+    blueprint({
+      verify: ['human'],
+      runs: [
+        {
+          created: '2026-01-02T00:00:00Z',
+          kind: 'walkdown',
+          target: 'local',
+          actor: 'topher',
+          run_id: 'r-stale',
+          results: [{ rule: 'demo.main.thing', status: 'approved', statement_hash: BOGUS_HASH }],
+        },
+      ],
+    }),
+  );
   assert.equal(stale.rows[0].human.state, 'stale');
 });
-
 
 /*
  * A verdict is about a place. These fix the rule that a pass earned against one
@@ -249,35 +304,49 @@ test('a verdict counts only at the address it was made against @rule:status.deri
   const here = { local: { base_url: 'https://pr-1.review.app' } };
   const moved = { local: { base_url: 'https://pr-2.review.app' } };
 
-  const before = deriveStatus(blueprint({ runs, verify: ['checks', 'agent'], targets: here })).rows[0];
+  const before = deriveStatus(blueprint({ runs, verify: ['checks', 'agent'], targets: here }))
+    .rows[0];
   assert.equal(before.cells.local.state, 'pass');
   assert.equal(before.agent.state, 'pass');
 
   // Same ledger, same files - only the address the target points at moved.
-  const after = deriveStatus(blueprint({ runs, verify: ['checks', 'agent'], targets: moved })).rows[0];
-  assert.equal(after.cells.local.state, 'never', 'checks earned elsewhere must not fill this target');
-  assert.equal(after.agent.state, 'never', 'a walkdown of another system is not a walkdown of this one');
+  const after = deriveStatus(blueprint({ runs, verify: ['checks', 'agent'], targets: moved }))
+    .rows[0];
+  assert.equal(
+    after.cells.local.state,
+    'never',
+    'checks earned elsewhere must not fill this target',
+  );
+  assert.equal(
+    after.agent.state,
+    'never',
+    'a walkdown of another system is not a walkdown of this one',
+  );
 
   // Nothing was consumed: aiming back restores it, because the ledger is history.
-  const back = deriveStatus(blueprint({ runs, verify: ['checks', 'agent'], targets: here })).rows[0];
+  const back = deriveStatus(blueprint({ runs, verify: ['checks', 'agent'], targets: here }))
+    .rows[0];
   assert.equal(back.agent.state, 'pass');
 });
 
 test('a run with no recorded address is taken at face value @rule:status.derived.addressless-runs-count', () => {
   const runs = [walkdownRun('2026-01-01T00:00:00Z', 'agent', 'pass')]; // no base_url, as a unit-test runner writes
   const row = deriveStatus(
-    blueprint({ runs, verify: ['agent'], targets: { local: { base_url: 'https://pr-2.review.app' } } })
+    blueprint({
+      runs,
+      verify: ['agent'],
+      targets: { local: { base_url: 'https://pr-2.review.app' } },
+    }),
   ).rows[0];
   assert.equal(row.agent.state, 'pass');
 });
 
 test('a walkdown on one target does not answer for another @rule:status.derived.latest-wins', () => {
-  const runs = [
-    { ...walkdownRun('2026-01-02T00:00:00Z', 'agent', 'pass'), target: 'staging' },
-  ];
+  const runs = [{ ...walkdownRun('2026-01-02T00:00:00Z', 'agent', 'pass'), target: 'staging' }];
   // The verdict was made on staging; local has never been judged.
   const local = deriveStatus(blueprint({ runs, verify: ['agent'] }), { target: 'local' }).rows[0];
-  const staging = deriveStatus(blueprint({ runs, verify: ['agent'] }), { target: 'staging' }).rows[0];
+  const staging = deriveStatus(blueprint({ runs, verify: ['agent'] }), { target: 'staging' })
+    .rows[0];
   assert.equal(local.agent.state, 'never');
   assert.equal(staging.agent.state, 'pass');
 });
@@ -287,10 +356,16 @@ test('a pass whose check no longer claims the rule goes stale @rule:status.deriv
   const bp = blueprint({ runs });
 
   // Suite still claims it: a live pass.
-  assert.equal(deriveStatus(bp, { checkRefs: new Set(['demo.main.thing']) }).rows[0].cells.local.state, 'pass');
+  assert.equal(
+    deriveStatus(bp, { checkRefs: new Set(['demo.main.thing']) }).rows[0].cells.local.state,
+    'pass',
+  );
 
   // Suite no longer mentions it - deleted, renamed, or untagged as false evidence.
-  assert.equal(deriveStatus(bp, { checkRefs: new Set(['something.else']) }).rows[0].cells.local.state, 'stale');
+  assert.equal(
+    deriveStatus(bp, { checkRefs: new Set(['something.else']) }).rows[0].cells.local.state,
+    'stale',
+  );
 
   // No inventory supplied is not evidence of an empty suite.
   assert.equal(deriveStatus(bp).rows[0].cells.local.state, 'pass');
@@ -298,7 +373,8 @@ test('a pass whose check no longer claims the rule goes stale @rule:status.deriv
 
 test('coverage staleness does not touch judgment tiers @rule:status.derived.unbacked-pass-goes-stale', () => {
   const runs = [walkdownRun('2026-01-01T00:00:00Z', 'agent', 'pass')];
-  const row = deriveStatus(blueprint({ runs, verify: ['agent'] }), { checkRefs: new Set() }).rows[0];
+  const row = deriveStatus(blueprint({ runs, verify: ['agent'] }), { checkRefs: new Set() })
+    .rows[0];
   // An agent looked at it; no check ever claimed to. That is not staleness.
   assert.equal(row.agent.state, 'pass');
 });
@@ -318,8 +394,14 @@ test('an empty inventory is not proof the suite is empty @rule:status.derived.un
  * available shape (status.derived.latest-wins).
  */
 const sweep = (created, tiers, target = 'local') => ({
-  created, kind: 'sweep', target, actor: 'topher', run_id: created,
-  tiers, why: 'the thing was rebuilt', results: [],
+  created,
+  kind: 'sweep',
+  target,
+  actor: 'topher',
+  run_id: created,
+  tiers,
+  why: 'the thing was rebuilt',
+  results: [],
 });
 
 test('a sweep makes earlier verdicts stale, and the runs survive it @rule:status.sweep.declares-a-floor', () => {
@@ -327,10 +409,12 @@ test('a sweep makes earlier verdicts stale, and the runs survive it @rule:status
   const before = deriveStatus(blueprint({ runs, verify: ['checks', 'agent'] }));
   assert.equal(before.rows[0].agent.state, 'pass');
 
-  const swept = deriveStatus(blueprint({
-    runs: [...runs, sweep('2026-02-01T00:00:00Z', ['agent'])],
-    verify: ['checks', 'agent'],
-  }));
+  const swept = deriveStatus(
+    blueprint({
+      runs: [...runs, sweep('2026-02-01T00:00:00Z', ['agent'])],
+      verify: ['checks', 'agent'],
+    }),
+  );
   // Stale, not never: it did pass once, and saying so is the difference
   // between "we have not got to it" and "nothing ever tested this".
   assert.equal(swept.rows[0].agent.state, 'stale');
@@ -340,39 +424,45 @@ test('a sweep makes earlier verdicts stale, and the runs survive it @rule:status
 });
 
 test('judging again after a sweep clears it @rule:status.sweep.declares-a-floor', () => {
-  const derived = deriveStatus(blueprint({
-    runs: [
-      walkdownRun('2026-01-01T00:00:00Z', 'agent', 'pass'),
-      sweep('2026-02-01T00:00:00Z', ['agent']),
-      walkdownRun('2026-03-01T00:00:00Z', 'agent', 'pass'),
-    ],
-    verify: ['checks', 'agent'],
-  }));
+  const derived = deriveStatus(
+    blueprint({
+      runs: [
+        walkdownRun('2026-01-01T00:00:00Z', 'agent', 'pass'),
+        sweep('2026-02-01T00:00:00Z', ['agent']),
+        walkdownRun('2026-03-01T00:00:00Z', 'agent', 'pass'),
+      ],
+      verify: ['checks', 'agent'],
+    }),
+  );
   assert.equal(derived.rows[0].agent.state, 'pass');
   assert.equal(derived.rows[0].agent.sweptBy, undefined);
 });
 
 test('a sweep touches only the tiers it names @rule:status.sweep.declares-a-floor', () => {
-  const derived = deriveStatus(blueprint({
-    runs: [
-      checksRun('2026-01-01T00:00:00Z', 'local', 'pass'),
-      walkdownRun('2026-01-01T00:00:01Z', 'agent', 'pass'),
-      sweep('2026-02-01T00:00:00Z', ['agent']),
-    ],
-    verify: ['checks', 'agent'],
-  }));
+  const derived = deriveStatus(
+    blueprint({
+      runs: [
+        checksRun('2026-01-01T00:00:00Z', 'local', 'pass'),
+        walkdownRun('2026-01-01T00:00:01Z', 'agent', 'pass'),
+        sweep('2026-02-01T00:00:00Z', ['agent']),
+      ],
+      verify: ['checks', 'agent'],
+    }),
+  );
   assert.equal(derived.rows[0].cells.local.state, 'pass', 'checks were not swept');
   assert.equal(derived.rows[0].agent.state, 'stale', 'agent was');
 });
 
 test('a sweep counts what is still owed, never-judged rules included @rule:status.sweep.says-what-is-left', () => {
-  const derived = deriveStatus(blueprint({
-    runs: [
-      walkdownRun('2026-01-01T00:00:00Z', 'agent', 'pass'),
-      sweep('2026-02-01T00:00:00Z', ['agent']),
-    ],
-    verify: ['checks', 'agent'],
-  }));
+  const derived = deriveStatus(
+    blueprint({
+      runs: [
+        walkdownRun('2026-01-01T00:00:00Z', 'agent', 'pass'),
+        sweep('2026-02-01T00:00:00Z', ['agent']),
+      ],
+      verify: ['checks', 'agent'],
+    }),
+  );
   const [s] = derived.sweeps;
   assert.equal(s.tier, 'agent');
   assert.equal(s.of, 1);
@@ -384,14 +474,16 @@ test('a sweep counts what is still owed, never-judged rules included @rule:statu
 test('nothing but the sweep command writes a sweep @rule:status.sweep.deliberate', () => {
   // The shape of the guarantee: no checks run and no walkdown carries the kind,
   // so deriving over a ledger of ordinary runs finds no sweep to report.
-  const derived = deriveStatus(blueprint({
-    runs: [
-      checksRun('2026-01-01T00:00:00Z', 'local', 'pass'),
-      walkdownRun('2026-01-02T00:00:00Z', 'agent', 'pass'),
-      walkdownRun('2026-01-03T00:00:00Z', 'topher', 'pass'),
-    ],
-    verify: ['checks', 'agent', 'human'],
-  }));
+  const derived = deriveStatus(
+    blueprint({
+      runs: [
+        checksRun('2026-01-01T00:00:00Z', 'local', 'pass'),
+        walkdownRun('2026-01-02T00:00:00Z', 'agent', 'pass'),
+        walkdownRun('2026-01-03T00:00:00Z', 'topher', 'pass'),
+      ],
+      verify: ['checks', 'agent', 'human'],
+    }),
+  );
   assert.deepEqual(derived.sweeps, []);
   assert.equal(derived.rows[0].agent.state, 'pass');
 });

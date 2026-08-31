@@ -26,16 +26,16 @@ import { S } from './state.js';
  */
 export const DESK_KEY = 'walkdown:desk';
 export const DESK_DEFAULTS = {
-  tilt: 35,     // degrees clockwise, spun within the paper's own plane
-  tip: 35,      // degrees the plane leans away from the viewer
-  depth: 600,   // the camera's distance; nearer converges harder
-  gap: 60,      // ruling pitch on the tipped plane
-  ink: 10,      // line strength, % of the theme's ink
+  tilt: 35, // degrees clockwise, spun within the paper's own plane
+  tip: 35, // degrees the plane leans away from the viewer
+  depth: 600, // the camera's distance; nearer converges harder
+  gap: 60, // ruling pitch on the tipped plane
+  ink: 10, // line strength, % of the theme's ink
 };
 // Seeded here rather than with the rest of S, so the defaults stay beside
 // the dials that tune them.
 S.desk = { ...DESK_DEFAULTS };
-const DESK_SKEW = 7;     // fallback only: how far the rulings fall short of a right angle
+const DESK_SKEW = 7; // fallback only: how far the rulings fall short of a right angle
 const line = (ink) => `color-mix(in oklch, ${ink} ${S.desk.ink}%, transparent)`;
 const ruling = (ink, deg, gap) =>
   `repeating-linear-gradient(${deg}deg, ${line(ink)} 0 1px, transparent 1px ${gap}px)`;
@@ -62,8 +62,8 @@ const deskLines = (ink) =>
  * it and only the desk margins show it. Oversized because a tipped plane's
  * corners pull inward; the excess keeps its edges out of the viewport.
  */
-const HAS_3D = typeof CSS !== 'undefined' &&
-  CSS.supports?.('transform', 'perspective(1px) rotateX(1deg)');
+const HAS_3D =
+  typeof CSS !== 'undefined' && CSS.supports?.('transform', 'perspective(1px) rotateX(1deg)');
 let deskEl = null;
 
 export function drawDesk(on, ink) {

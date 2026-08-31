@@ -20,23 +20,34 @@ function fixture(name, thread) {
   const bp = join(root, name);
   mkdirSync(join(bp, 'threads'), { recursive: true });
   writeFileSync(join(bp, 'walkdown.yml'), 'project: thread-cli-fixture\n');
-  writeFileSync(join(bp, 'threads', `${thread.id}.yml`), [
-    `id: ${thread.id}`, 'kind: note', 'author: someone',
-    'created: 2026-01-01T00:00:00Z', 'anchor: {}',
-    `status: ${thread.status}`, 'body: A thing that is wrong.',
-  ].join('\n'));
+  writeFileSync(
+    join(bp, 'threads', `${thread.id}.yml`),
+    [
+      `id: ${thread.id}`,
+      'kind: note',
+      'author: someone',
+      'created: 2026-01-01T00:00:00Z',
+      'anchor: {}',
+      `status: ${thread.status}`,
+      'body: A thing that is wrong.',
+    ].join('\n'),
+  );
   return bp;
 }
 
 /** Run the CLI, stripping colour so assertions read the words, not the escapes. */
 const run = (args, dir) =>
-  execFileSync(process.execPath, [CLI, 'thread', ...args, '--dir', dir],
-    { encoding: 'utf8', env: { ...process.env, NO_COLOR: '1' } })
-    .replace(/\x1b\[[0-9;]*m/g, '');
+  execFileSync(process.execPath, [CLI, 'thread', ...args, '--dir', dir], {
+    encoding: 'utf8',
+    env: { ...process.env, NO_COLOR: '1' },
+  }).replace(/\x1b\[[0-9;]*m/g, '');
 
 test('a transition reports where the thread came from and where it landed @rule:threads.lifecycle.says-what-it-did', () => {
   const bp = fixture('moved', { id: 'n-0001', status: 'addressed' });
-  const out = run(['n-0001', '--actor', 'A Person', '--waive', '--reason', 'not valid any more'], bp);
+  const out = run(
+    ['n-0001', '--actor', 'A Person', '--waive', '--reason', 'not valid any more'],
+    bp,
+  );
   assert.match(out, /n-0001/);
   assert.match(out, /addressed → waived/, 'the report must name both ends of the move');
   assert.match(out, /A Person/, 'waiving is recorded under somebody, and says so');
@@ -68,6 +79,6 @@ test('a refused transition says so and exits non-zero @rule:threads.lifecycle.sa
       assert.equal(err.status, 2, 'a loop must be able to stop on the failure');
       assert.match(String(err.stderr), /illegal transition/);
       return true;
-    }
+    },
   );
 });

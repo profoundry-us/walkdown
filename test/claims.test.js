@@ -19,14 +19,25 @@ test('a claim is an origin plus a path, one per target @rule:screens.ownership.o
   const two = {
     id: 'a',
     blueprint: {
-      config: { runner: { targets: { local: { base_url: 'http://localhost:3000' },
-                                     staging: { base_url: 'https://staging.example.com' } } } },
+      config: {
+        runner: {
+          targets: {
+            local: { base_url: 'http://localhost:3000' },
+            staging: { base_url: 'https://staging.example.com' },
+          },
+        },
+      },
       storyboard: { screens: [{ id: 'home', app: { path: '/index.html' } }] },
     },
   };
-  const keys = claimsOf(two.blueprint).map((c) => c.key).sort();
+  const keys = claimsOf(two.blueprint)
+    .map((c) => c.key)
+    .sort();
   // One screen, two targets: a blueprint with several targets claims several origins.
-  assert.deepEqual(keys, ['http://localhost:3000/index.html', 'https://staging.example.com/index.html']);
+  assert.deepEqual(keys, [
+    'http://localhost:3000/index.html',
+    'https://staging.example.com/index.html',
+  ]);
 });
 
 test('the same path on two origins is not a collision @rule:screens.ownership.one-claimant', () => {
@@ -37,8 +48,12 @@ test('the same path on two origins is not a collision @rule:screens.ownership.on
 
 test('two blueprints on one page collide, even under different queries @rule:screens.ownership.one-claimant', () => {
   // The naive check q-0019 warned about: differing queries, same page.
-  const a = bp('a', 'http://localhost:3000', [{ id: 'confirm', app: { path: '/confirm.html?email=x' } }]);
-  const b = bp('b', 'http://localhost:3000', [{ id: 'done', app: { path: '/confirm.html?already=1' } }]);
+  const a = bp('a', 'http://localhost:3000', [
+    { id: 'confirm', app: { path: '/confirm.html?email=x' } },
+  ]);
+  const b = bp('b', 'http://localhost:3000', [
+    { id: 'done', app: { path: '/confirm.html?already=1' } },
+  ]);
   const clash = findCollisions([a, b]);
   assert.equal(clash.length, 1);
   assert.equal(clash[0].key, 'http://localhost:3000/confirm.html');
@@ -68,6 +83,9 @@ test('an enumerated fragment beats the page it lives on @rule:screens.ownership.
     { id: 'admin', app: { path: '/admin.html' } },
     { id: 'batch', app: { path: '/admin.html#invite-batch' } },
   ]);
-  assert.equal(blueprintForUrl([a], 'http://localhost:3000/admin.html#invite-batch')?.screen, 'batch');
+  assert.equal(
+    blueprintForUrl([a], 'http://localhost:3000/admin.html#invite-batch')?.screen,
+    'batch',
+  );
   assert.equal(blueprintForUrl([a], 'http://localhost:3000/admin.html')?.screen, 'admin');
 });

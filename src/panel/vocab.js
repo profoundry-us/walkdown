@@ -17,8 +17,8 @@ import { S, identityOverride } from './state.js';
  * they only agreed by hand. One definition, and the number on the tab is by
  * construction the list Continue walks.
  */
-export const owedRows = () => orderedRows().filter(
-  (r) => needsYou(r.rule) && !(S.session?.verdicts ?? {})[r.rule]);
+export const owedRows = () =>
+  orderedRows().filter((r) => needsYou(r.rule) && !(S.session?.verdicts ?? {})[r.rule]);
 
 /** The screen a rule is filed under: the end of its flow, or the first it names. */
 export const screenIdOf = (r) => r?.flow?.at(-1) ?? r?.screens?.[0] ?? null;
@@ -44,7 +44,7 @@ export function groupedRows(rows = S.data?.rows ?? []) {
   const board = (S.data?.storyboard ?? []).map((s) => s.id);
   const rank = new Map(board.map((id, i) => [id, i]));
   // Unknown screen ids sort after every known one; no screen at all sorts last.
-  const at = (id) => (id === null ? Infinity : rank.get(id) ?? board.length);
+  const at = (id) => (id === null ? Infinity : (rank.get(id) ?? board.length));
   const groups = new Map();
   for (const row of rows) {
     const sid = screenIdOf(row) ?? null;
@@ -62,8 +62,8 @@ export function groupedRows(rows = S.data?.rows ?? []) {
 }
 
 /** The same order, flat - what the stepper and the walk step through. */
-export const orderedRows = (rows) => groupedRows(rows)
-  .flatMap((g) => g.stories.flatMap((s) => s.rows));
+export const orderedRows = (rows) =>
+  groupedRows(rows).flatMap((g) => g.stories.flatMap((s) => s.rows));
 
 /*
  * What a story is called once its screen is named above it. The feature
@@ -80,8 +80,10 @@ export function storyLabels(stories) {
 
 export const needsYou = (rule) =>
   (S.data?.attention ?? []).some((i) => i.who === 'human' && !i.thread && i.rule === rule);
-export const threadsFor = (rule) => (S.data?.threads ?? []).filter((t) => t.anchor?.rule === rule &&
-  !['incorporated', 'verified', 'waived'].includes(t.status));
+export const threadsFor = (rule) =>
+  (S.data?.threads ?? []).filter(
+    (t) => t.anchor?.rule === rule && !['incorporated', 'verified', 'waived'].includes(t.status),
+  );
 
 export const screenById = (id) => (S.data?.storyboard ?? []).find((s) => s.id === id) ?? null;
 
@@ -97,8 +99,12 @@ export const shortName = (row) =>
  * the app under review.
  */
 export const CHIP = {
-  open: 'badge-warning', answered: 'badge-warning', addressed: 'badge-info',
-  verified: 'badge-success', incorporated: 'badge-success', waived: 'badge-ghost',
+  open: 'badge-warning',
+  answered: 'badge-warning',
+  addressed: 'badge-info',
+  verified: 'badge-success',
+  incorporated: 'badge-success',
+  waived: 'badge-ghost',
 };
 export const TERMINAL = ['verified', 'incorporated', 'waived'];
 

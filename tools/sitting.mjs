@@ -30,7 +30,11 @@ const BP = join(ROOT, 'blueprint');
 const BASE = process.env.WALKDOWN_SITTING_URL ?? 'http://localhost:4700';
 
 const [cmd, ...rest] = process.argv.slice(2);
-const stamp = () => new Date().toISOString().replace(/\.\d+Z$/, 'Z').replaceAll(':', '-');
+const stamp = () =>
+  new Date()
+    .toISOString()
+    .replace(/\.\d+Z$/, 'Z')
+    .replaceAll(':', '-');
 
 /*
  * `walkdown status` exits non-zero when anything is failing, which is most of
@@ -39,9 +43,13 @@ const stamp = () => new Date().toISOString().replace(/\.\d+Z$/, 'Z').replaceAll(
  */
 const status = () => {
   try {
-    return JSON.parse(execFileSync('node', [join(ROOT, 'bin/walkdown.js'), 'status', '--json'], {
-      cwd: ROOT, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024,
-    }));
+    return JSON.parse(
+      execFileSync('node', [join(ROOT, 'bin/walkdown.js'), 'status', '--json'], {
+        cwd: ROOT,
+        encoding: 'utf8',
+        maxBuffer: 64 * 1024 * 1024,
+      }),
+    );
   } catch (e) {
     if (e.stdout) return JSON.parse(e.stdout);
     throw e;
@@ -64,7 +72,9 @@ function owed() {
     console.log(`  ${story}`);
     for (const r of byStory[story]) {
       const screens = [...new Set([...(r.flow ?? []), ...(r.screens ?? [])])];
-      console.log(`    ${r.agent.state.padEnd(7)} ${r.rule}${screens.length ? `  [${screens.join(' ')}]` : '  [headless]'}`);
+      console.log(
+        `    ${r.agent.state.padEnd(7)} ${r.rule}${screens.length ? `  [${screens.join(' ')}]` : '  [headless]'}`,
+      );
     }
   }
   const screens = new Set();
@@ -84,22 +94,56 @@ function owed() {
  */
 const STATES = [
   { name: 'panel-review', steps: [] },
-  { name: 'panel-screens-list', steps: [['sr', "r => r.querySelector('#wdp-screen-btn').click()"], ['wait', 400]] },
-  { name: 'panel-settings', steps: [['sr', "r => r.querySelector('#wdp-desk-btn').click()"], ['wait', 400]] },
-  { name: 'panel-pin-mode', steps: [['sr', "r => r.querySelector('#wdp-pin').click()"], ['wait', 600]] },
+  {
+    name: 'panel-screens-list',
+    steps: [
+      ['sr', "r => r.querySelector('#wdp-screen-btn').click()"],
+      ['wait', 400],
+    ],
+  },
+  {
+    name: 'panel-settings',
+    steps: [
+      ['sr', "r => r.querySelector('#wdp-desk-btn').click()"],
+      ['wait', 400],
+    ],
+  },
+  {
+    name: 'panel-pin-mode',
+    steps: [
+      ['sr', "r => r.querySelector('#wdp-pin').click()"],
+      ['wait', 600],
+    ],
+  },
   { name: 'panel-tab-blueprints', steps: [['tab', 'blueprints']] },
   { name: 'panel-tab-rules', steps: [['tab', 'rules']] },
   { name: 'panel-tab-threads', steps: [['tab', 'threads']] },
-  { name: 'panel-rule-detail', steps: [['tab', 'rules'], ['sr', "r => r.querySelector('[data-rule]').click()"], ['wait', 800]] },
+  {
+    name: 'panel-rule-detail',
+    steps: [
+      ['tab', 'rules'],
+      ['sr', "r => r.querySelector('[data-rule]').click()"],
+      ['wait', 800],
+    ],
+  },
   {
     name: 'detail-check-source',
     steps: [
       ['tab', 'rules'],
-      ['sr', "r => [...r.querySelectorAll('[data-rule]')].find(e => e.dataset.rule === 'panel.rules.tiers-at-a-glance')?.click()"],
+      [
+        'sr',
+        "r => [...r.querySelectorAll('[data-rule]')].find(e => e.dataset.rule === 'panel.rules.tiers-at-a-glance')?.click()",
+      ],
       ['wait', 900],
-      ['sr', "r => { const d = r.querySelector('[data-testid=\"detail.technical-disclosure\"]'); (d?.querySelector('summary') ?? d)?.click(); }"],
+      [
+        'sr',
+        "r => { const d = r.querySelector('[data-testid=\"detail.technical-disclosure\"]'); (d?.querySelector('summary') ?? d)?.click(); }",
+      ],
       ['wait', 1800],
-      ['sr', "r => r.querySelector('[data-testid=\"detail.technical-disclosure\"]')?.scrollIntoView({ block: 'center' })"],
+      [
+        'sr',
+        "r => r.querySelector('[data-testid=\"detail.technical-disclosure\"]')?.scrollIntoView({ block: 'center' })",
+      ],
       ['wait', 400],
     ],
   },
@@ -107,9 +151,15 @@ const STATES = [
     name: 'detail-screenshots-modal',
     steps: [
       ['tab', 'rules'],
-      ['sr', "r => [...r.querySelectorAll('[data-rule]')].find(e => e.dataset.rule === 'panel.identity.default-actor')?.click()"],
+      [
+        'sr',
+        "r => [...r.querySelectorAll('[data-rule]')].find(e => e.dataset.rule === 'panel.identity.default-actor')?.click()",
+      ],
       ['wait', 900],
-      ['sr', "r => (r.querySelector('[data-testid=\"detail.screenshots\"]') ?? [...r.querySelectorAll('button')].find(x => /^open \\d+$/.test(x.textContent.trim())))?.click()"],
+      [
+        'sr',
+        "r => (r.querySelector('[data-testid=\"detail.screenshots\"]') ?? [...r.querySelectorAll('button')].find(x => /^open \\d+$/.test(x.textContent.trim())))?.click()",
+      ],
       ['wait', 1200],
     ],
   },
@@ -117,28 +167,51 @@ const STATES = [
     name: 'rules-search-filtered',
     steps: [
       ['tab', 'rules'],
-      ['sr', "r => { const q = r.querySelector('input[placeholder*=\"Search\"]'); q.value = 'ghost'; q.dispatchEvent(new Event('input', { bubbles: true })); }"],
+      [
+        'sr',
+        "r => { const q = r.querySelector('input[placeholder*=\"Search\"]'); q.value = 'ghost'; q.dispatchEvent(new Event('input', { bubbles: true })); }",
+      ],
       ['wait', 600],
     ],
   },
   {
     name: 'panel-thread-panel',
-    steps: [['tab', 'threads'], ['sr', "r => r.querySelector('[data-open-thread]')?.click()"], ['wait', 900]],
+    steps: [
+      ['tab', 'threads'],
+      ['sr', "r => r.querySelector('[data-open-thread]')?.click()"],
+      ['wait', 900],
+    ],
   },
   {
     /* The governance one: with no name set, a verdict must be refused. */
     name: 'refuses-without-a-name',
     steps: [
-      ['sr', "r => r.querySelector('#wdp-desk-btn').click()"], ['wait', 400],
-      ['sr', "r => { for (const i of r.querySelectorAll('input')) if (/actor|name/i.test(i.dataset.testid ?? '')) { i.value = ''; i.dispatchEvent(new Event('input', { bubbles: true })); i.dispatchEvent(new Event('change', { bubbles: true })); } }"],
-      ['wait', 600], ['key', 'Escape'], ['wait', 400],
+      ['sr', "r => r.querySelector('#wdp-desk-btn').click()"],
+      ['wait', 400],
+      [
+        'sr',
+        "r => { for (const i of r.querySelectorAll('input')) if (/actor|name/i.test(i.dataset.testid ?? '')) { i.value = ''; i.dispatchEvent(new Event('input', { bubbles: true })); i.dispatchEvent(new Event('change', { bubbles: true })); } }",
+      ],
+      ['wait', 600],
+      ['key', 'Escape'],
+      ['wait', 400],
       ['tab', 'threads'],
-      ['sr', "r => r.querySelector('[data-open-thread]')?.click()"], ['wait', 800],
-      ['sr', "r => [...r.querySelectorAll('button')].find(x => /Verify/.test(x.textContent))?.click()"],
+      ['sr', "r => r.querySelector('[data-open-thread]')?.click()"],
+      ['wait', 800],
+      [
+        'sr',
+        "r => [...r.querySelectorAll('button')].find(x => /Verify/.test(x.textContent))?.click()",
+      ],
       ['wait', 900],
     ],
   },
-  { name: 'panel-put-away', steps: [['sr', "r => r.querySelector('#wdp-undock').click()"], ['wait', 1000]] },
+  {
+    name: 'panel-put-away',
+    steps: [
+      ['sr', "r => r.querySelector('#wdp-undock').click()"],
+      ['wait', 1000],
+    ],
+  },
 
   /* ---- the rule pane's own states -------------------------------------- */
 
@@ -151,9 +224,15 @@ const STATES = [
     name: 'rules-steps-and-shut-disclosure',
     steps: [
       ['tab', 'rules'],
-      ['sr', "r => [...r.querySelectorAll('[data-rule]')].find(e => e.dataset.rule === 'panel.rules.tiers-at-a-glance')?.click()"],
+      [
+        'sr',
+        "r => [...r.querySelectorAll('[data-rule]')].find(e => e.dataset.rule === 'panel.rules.tiers-at-a-glance')?.click()",
+      ],
       ['wait', 900],
-      ['sr', "r => r.querySelector('[data-testid=\"detail.technical-disclosure\"]')?.scrollIntoView({ block: 'center' })"],
+      [
+        'sr',
+        "r => r.querySelector('[data-testid=\"detail.technical-disclosure\"]')?.scrollIntoView({ block: 'center' })",
+      ],
       ['wait', 400],
     ],
   },
@@ -164,9 +243,15 @@ const STATES = [
     name: 'rules-evidence-block',
     steps: [
       ['tab', 'rules'],
-      ['sr', "r => [...r.querySelectorAll('[data-rule]')].find(e => e.dataset.rule === 'panel.identity.default-actor')?.click()"],
+      [
+        'sr',
+        "r => [...r.querySelectorAll('[data-rule]')].find(e => e.dataset.rule === 'panel.identity.default-actor')?.click()",
+      ],
       ['wait', 900],
-      ['sr', "r => r.querySelector('[data-testid=\"detail.evidence\"]')?.scrollIntoView({ block: 'center' })"],
+      [
+        'sr',
+        "r => r.querySelector('[data-testid=\"detail.evidence\"]')?.scrollIntoView({ block: 'center' })",
+      ],
       ['wait', 400],
     ],
   },
@@ -185,9 +270,15 @@ const STATES = [
     name: 'rules-anchor-hover-highlights',
     steps: [
       ['tab', 'rules'],
-      ['sr', "r => [...r.querySelectorAll('[data-rule]')].find(e => e.dataset.rule === 'panel.rules.counts-legible')?.click()"],
+      [
+        'sr',
+        "r => [...r.querySelectorAll('[data-rule]')].find(e => e.dataset.rule === 'panel.rules.counts-legible')?.click()",
+      ],
       ['wait', 900],
-      ['sr', "r => { const a = [...r.querySelectorAll('.wdp-anchor')].find(x => x.dataset.anchor === 'panel.counts'); a.scrollIntoView({ block: 'center' }); a.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true })); }"],
+      [
+        'sr',
+        "r => { const a = [...r.querySelectorAll('.wdp-anchor')].find(x => x.dataset.anchor === 'panel.counts'); a.scrollIntoView({ block: 'center' }); a.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true })); }",
+      ],
       ['wait', 700],
     ],
   },
@@ -196,7 +287,10 @@ const STATES = [
     name: 'rules-headless-cover',
     steps: [
       ['tab', 'rules'],
-      ['sr', "r => [...r.querySelectorAll('[data-rule]')].find(e => e.dataset.rule === 'screens.identity.fragment-is-identity')?.click()"],
+      [
+        'sr',
+        "r => [...r.querySelectorAll('[data-rule]')].find(e => e.dataset.rule === 'screens.identity.fragment-is-identity')?.click()",
+      ],
       ['wait', 1000],
     ],
   },
@@ -206,7 +300,10 @@ const STATES = [
     name: 'rules-open-then-blueprints-tab',
     steps: [
       ['tab', 'rules'],
-      ['sr', "r => [...r.querySelectorAll('[data-rule]')].find(e => e.dataset.rule === 'panel.rules.detail-slide')?.click()"],
+      [
+        'sr',
+        "r => [...r.querySelectorAll('[data-rule]')].find(e => e.dataset.rule === 'panel.rules.detail-slide')?.click()",
+      ],
       ['wait', 900],
       ['tab', 'blueprints'],
       ['wait', 600],
@@ -217,7 +314,10 @@ const STATES = [
     name: 'rules-search-by-group',
     steps: [
       ['tab', 'rules'],
-      ['sr', "r => { const q = r.querySelector('#wdp-search'); q.value = 'panel.rules'; q.dispatchEvent(new Event('input', { bubbles: true })); }"],
+      [
+        'sr',
+        "r => { const q = r.querySelector('#wdp-search'); q.value = 'panel.rules'; q.dispatchEvent(new Event('input', { bubbles: true })); }",
+      ],
       ['wait', 600],
     ],
   },
@@ -237,10 +337,16 @@ const STATES = [
     name: 'rules-setup-block',
     steps: [
       ['tab', 'blueprints'],
-      ['sr', "r => [...r.querySelectorAll('[data-pick]')].find(b => b.dataset.pick !== r.querySelector('[data-pick]').dataset.pick && /example/.test(b.dataset.pick))?.click()"],
+      [
+        'sr',
+        "r => [...r.querySelectorAll('[data-pick]')].find(b => b.dataset.pick !== r.querySelector('[data-pick]').dataset.pick && /example/.test(b.dataset.pick))?.click()",
+      ],
       ['wait', 2500],
       ['tab', 'rules'],
-      ['sr', "r => [...r.querySelectorAll('[data-rule]')].find(e => e.dataset.rule === 'waitlist.join.already-joined')?.click()"],
+      [
+        'sr',
+        "r => [...r.querySelectorAll('[data-rule]')].find(e => e.dataset.rule === 'waitlist.join.already-joined')?.click()",
+      ],
       ['wait', 1200],
     ],
   },
@@ -248,10 +354,16 @@ const STATES = [
     name: 'rules-setup-absent',
     steps: [
       ['tab', 'blueprints'],
-      ['sr', "r => [...r.querySelectorAll('[data-pick]')].find(b => /example/.test(b.dataset.pick))?.click()"],
+      [
+        'sr',
+        "r => [...r.querySelectorAll('[data-pick]')].find(b => /example/.test(b.dataset.pick))?.click()",
+      ],
       ['wait', 2500],
       ['tab', 'rules'],
-      ['sr', "r => [...r.querySelectorAll('[data-rule]')].find(e => e.dataset.rule === 'waitlist.join.email-required')?.click()"],
+      [
+        'sr',
+        "r => [...r.querySelectorAll('[data-rule]')].find(e => e.dataset.rule === 'waitlist.join.email-required')?.click()",
+      ],
       ['wait', 1200],
     ],
   },
@@ -274,25 +386,57 @@ const STATES = [
   {
     name: 'dock-fade-drag-midway',
     steps: [
-      ['aim', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-fade').getBoundingClientRect(); return { x: b.right - 5, y: b.y + b.height / 2 }; }"],
-      ['hover'], ['down'],
-      ['aim', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-fade').getBoundingClientRect(); return { x: b.x + b.width * 0.75, y: b.y + b.height / 2 }; }"],
-      ['hover'], ['wait', 300],
-      ['aim', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-fade').getBoundingClientRect(); return { x: b.x + b.width * 0.5, y: b.y + b.height / 2 }; }"],
-      ['hover'], ['wait', 800],
-      ['probe', "(d, fr, fd, fsr, gh) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'still held', fade: r.querySelector('#wdp-fade').value, ghost: !!gh, ghostSrc: gh && gh.src, ghostOpacity: gh && getComputedStyle(gh).opacity, appOpacity: fr && getComputedStyle(fr).opacity }; }"],
+      [
+        'aim',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-fade').getBoundingClientRect(); return { x: b.right - 5, y: b.y + b.height / 2 }; }",
+      ],
+      ['hover'],
+      ['down'],
+      [
+        'aim',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-fade').getBoundingClientRect(); return { x: b.x + b.width * 0.75, y: b.y + b.height / 2 }; }",
+      ],
+      ['hover'],
+      ['wait', 300],
+      [
+        'aim',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-fade').getBoundingClientRect(); return { x: b.x + b.width * 0.5, y: b.y + b.height / 2 }; }",
+      ],
+      ['hover'],
+      ['wait', 800],
+      [
+        'probe',
+        "(d, fr, fd, fsr, gh) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'still held', fade: r.querySelector('#wdp-fade').value, ghost: !!gh, ghostSrc: gh && gh.src, ghostOpacity: gh && getComputedStyle(gh).opacity, appOpacity: fr && getComputedStyle(fr).opacity }; }",
+      ],
     ],
   },
   {
     name: 'dock-fade-drag-settled',
     steps: [
-      ['aim', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-fade').getBoundingClientRect(); return { x: b.right - 5, y: b.y + b.height / 2 }; }"],
-      ['hover'], ['down'],
-      ['aim', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-fade').getBoundingClientRect(); return { x: b.x + b.width * 0.75, y: b.y + b.height / 2 }; }"],
-      ['hover'], ['wait', 200],
-      ['aim', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-fade').getBoundingClientRect(); return { x: b.x + b.width * 0.5, y: b.y + b.height / 2 }; }"],
-      ['hover'], ['wait', 400], ['up'], ['wait', 1200],
-      ['probe', "(d, fr, fd, fsr, gh) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'let go', fade: r.querySelector('#wdp-fade').value, ghost: !!gh, ghostOpacity: gh && getComputedStyle(gh).opacity, surfaceButtons: [...r.querySelectorAll('[data-surface]')].map((b) => b.dataset.surface + ' ' + b.className) }; }"],
+      [
+        'aim',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-fade').getBoundingClientRect(); return { x: b.right - 5, y: b.y + b.height / 2 }; }",
+      ],
+      ['hover'],
+      ['down'],
+      [
+        'aim',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-fade').getBoundingClientRect(); return { x: b.x + b.width * 0.75, y: b.y + b.height / 2 }; }",
+      ],
+      ['hover'],
+      ['wait', 200],
+      [
+        'aim',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-fade').getBoundingClientRect(); return { x: b.x + b.width * 0.5, y: b.y + b.height / 2 }; }",
+      ],
+      ['hover'],
+      ['wait', 400],
+      ['up'],
+      ['wait', 1200],
+      [
+        'probe',
+        "(d, fr, fd, fsr, gh) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'let go', fade: r.querySelector('#wdp-fade').value, ghost: !!gh, ghostOpacity: gh && getComputedStyle(gh).opacity, surfaceButtons: [...r.querySelectorAll('[data-surface]')].map((b) => b.dataset.surface + ' ' + b.className) }; }",
+      ],
     ],
   },
   /* A screen chosen by hand, which outranks detection: the picker closes, the
@@ -300,9 +444,14 @@ const STATES = [
   {
     name: 'dock-screen-picked-by-hand',
     steps: [
-      ['sr', "r => r.querySelector('#wdp-screen-btn').click()"], ['wait', 500],
-      ['sr', "r => r.querySelector('[data-screen=\"rule-detail\"]').click()"], ['wait', 2500],
-      ['probe', "(d, fr) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const list = r.querySelector('[data-screen]').parentElement; return { button: r.querySelector('#wdp-screen-btn').textContent.replace(/\\s+/g, ' ').trim(), buttonClass: r.querySelector('#wdp-screen-btn').className, pickerShowing: getComputedStyle(list).display, frameSrc: fr.src }; }"],
+      ['sr', "r => r.querySelector('#wdp-screen-btn').click()"],
+      ['wait', 500],
+      ['sr', 'r => r.querySelector(\'[data-screen="rule-detail"]\').click()'],
+      ['wait', 2500],
+      [
+        'probe',
+        "(d, fr) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const list = r.querySelector('[data-screen]').parentElement; return { button: r.querySelector('#wdp-screen-btn').textContent.replace(/\\s+/g, ' ').trim(), buttonClass: r.querySelector('#wdp-screen-btn').className, pickerShowing: getComputedStyle(list).display, frameSrc: fr.src }; }",
+      ],
     ],
   },
   /* The picker open while the page underneath changes: the list is about the
@@ -311,10 +460,14 @@ const STATES = [
   {
     name: 'dock-list-follows-the-page',
     steps: [
-      ['sr', "r => r.querySelector('#wdp-screen-btn').click()"], ['wait', 500],
+      ['sr', "r => r.querySelector('#wdp-screen-btn').click()"],
+      ['wait', 500],
       ['top', "(d, fr) => { fr.src = new URL('/stand-in/rule-detail', location.href).href; }"],
       ['wait', 2500],
-      ['probe', "(d, fr) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { frameSrc: fr.src, open: !!r.querySelector('[data-screen]'), button: r.querySelector('#wdp-screen-btn').textContent.replace(/\\s+/g, ' ').trim(), marked: [...r.querySelectorAll('[data-screen]')].map((b) => b.textContent.replace(/\\s+/g, ' ').trim()).filter((t) => /\\u25c9/.test(t)) }; }"],
+      [
+        'probe',
+        "(d, fr) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { frameSrc: fr.src, open: !!r.querySelector('[data-screen]'), button: r.querySelector('#wdp-screen-btn').textContent.replace(/\\s+/g, ' ').trim(), marked: [...r.querySelectorAll('[data-screen]')].map((b) => b.textContent.replace(/\\s+/g, ' ').trim()).filter((t) => /\\u25c9/.test(t)) }; }",
+      ],
     ],
   },
   /*
@@ -327,10 +480,18 @@ const STATES = [
   {
     name: 'dock-chrome-gear-in-pin-mode',
     steps: [
-      ['sr', "r => r.querySelector('#wdp-pin').click()"], ['wait', 700],
-      ['aim', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-desk-btn').getBoundingClientRect(); return { x: b.x + b.width / 2, y: b.y + b.height / 2 }; }"],
-      ['click'], ['wait', 800],
-      ['probe', "(d, fr, fd, fsr) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { tuner: !!r.querySelector('#wdp-desk-hide'), pinLit: r.querySelector('#wdp-pin').className, formsInTheApp: fsr ? fsr.querySelectorAll('[data-testid=\"pin.form\"]').length : null, placeholders: fsr ? fsr.querySelectorAll('[data-testid=\"pin.placeholder\"]').length : null }; }"],
+      ['sr', "r => r.querySelector('#wdp-pin').click()"],
+      ['wait', 700],
+      [
+        'aim',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-desk-btn').getBoundingClientRect(); return { x: b.x + b.width / 2, y: b.y + b.height / 2 }; }",
+      ],
+      ['click'],
+      ['wait', 800],
+      [
+        'probe',
+        "(d, fr, fd, fsr) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { tuner: !!r.querySelector('#wdp-desk-hide'), pinLit: r.querySelector('#wdp-pin').className, formsInTheApp: fsr ? fsr.querySelectorAll('[data-testid=\"pin.form\"]').length : null, placeholders: fsr ? fsr.querySelectorAll('[data-testid=\"pin.placeholder\"]').length : null }; }",
+      ],
     ],
   },
   /* Peeking at the desk: the app, the aside and the headless cover all go
@@ -341,11 +502,19 @@ const STATES = [
     name: 'desk-peek-on',
     steps: [
       ['tab', 'rules'],
-      ['sr', "r => [...r.querySelectorAll('[data-rule]')].find(e => e.dataset.rule === 'screens.identity.fragment-is-identity')?.click()"],
+      [
+        'sr',
+        "r => [...r.querySelectorAll('[data-rule]')].find(e => e.dataset.rule === 'screens.identity.fragment-is-identity')?.click()",
+      ],
       ['wait', 1000],
-      ['sr', "r => r.querySelector('#wdp-desk-btn').click()"], ['wait', 500],
-      ['sr', "r => r.querySelector('#wdp-desk-hide').click()"], ['wait', 900],
-      ['probe', "(d, fr) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const faint = (e) => e && { opacity: getComputedStyle(e).opacity, box: e.getBoundingClientRect().toJSON() }; return { hideOn: r.querySelector('#wdp-desk-hide').checked, app: faint(fr), aside: faint(r.querySelector('aside')), bar: faint(r.querySelector('#wdp-pin')) }; }"],
+      ['sr', "r => r.querySelector('#wdp-desk-btn').click()"],
+      ['wait', 500],
+      ['sr', "r => r.querySelector('#wdp-desk-hide').click()"],
+      ['wait', 900],
+      [
+        'probe',
+        "(d, fr) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const faint = (e) => e && { opacity: getComputedStyle(e).opacity, box: e.getBoundingClientRect().toJSON() }; return { hideOn: r.querySelector('#wdp-desk-hide').checked, app: faint(fr), aside: faint(r.querySelector('aside')), bar: faint(r.querySelector('#wdp-pin')) }; }",
+      ],
     ],
   },
   /*
@@ -358,16 +527,33 @@ const STATES = [
   {
     name: 'desk-tuner-typed',
     steps: [
-      ['aim', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-desk-btn').getBoundingClientRect(); return { x: b.x + b.width / 2, y: b.y + b.height / 2 }; }"],
-      ['click'], ['wait', 700],
-      ['aim', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-desk-gap').getBoundingClientRect(); return { x: b.x + b.width / 2, y: b.y + b.height / 2 }; }"],
-      ['click'], ['wait', 500],
-      ['probe', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const cell = r.querySelector('#wdp-desk-gap'); const i = cell.querySelector('input'); return { at: 'clicked', editing: !!i, type: i && i.type, value: i && i.value }; }"],
+      [
+        'aim',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-desk-btn').getBoundingClientRect(); return { x: b.x + b.width / 2, y: b.y + b.height / 2 }; }",
+      ],
+      ['click'],
+      ['wait', 700],
+      [
+        'aim',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-desk-gap').getBoundingClientRect(); return { x: b.x + b.width / 2, y: b.y + b.height / 2 }; }",
+      ],
+      ['click'],
+      ['wait', 500],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const cell = r.querySelector('#wdp-desk-gap'); const i = cell.querySelector('input'); return { at: 'clicked', editing: !!i, type: i && i.type, value: i && i.value }; }",
+      ],
       // Selected by hand: a number input has no text selection to `select()`,
       // so typing over an opened dial appends to the number already there and
       // the dial's own clamp quietly answers with its maximum.
-      ['key', 'ControlOrMeta+a'], ['type', '24'], ['key', 'Enter'], ['wait', 700],
-      ['probe', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'entered', cell: r.querySelector('#wdp-desk-gap').textContent.trim(), stillEditing: !!r.querySelector('#wdp-desk-gap input'), slider: r.querySelector('input[type=range][data-k=\"gap\"]')?.value }; }"],
+      ['key', 'ControlOrMeta+a'],
+      ['type', '24'],
+      ['key', 'Enter'],
+      ['wait', 700],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'entered', cell: r.querySelector('#wdp-desk-gap').textContent.trim(), stillEditing: !!r.querySelector('#wdp-desk-gap input'), slider: r.querySelector('input[type=range][data-k=\"gap\"]')?.value }; }",
+      ],
     ],
   },
   /* The presets. The window is narrower than 1440, which is what gives
@@ -376,8 +562,12 @@ const STATES = [
   {
     name: 'vp-desktop-1440',
     steps: [
-      ['sr', "r => r.querySelector('[data-vp=\"1440\"]').click()"], ['wait', 2000],
-      ['probe', "(d, fr, fd) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { laidOutAt: fd.defaultView.innerWidth, scale: new DOMMatrix(getComputedStyle(fr).transform).a, frameBox: fr.getBoundingClientRect().toJSON(), zoomPill: d.body.querySelector('[data-testid=\"panel.zoom\"]')?.textContent.trim() ?? null, toggle: [...r.querySelectorAll('[data-vp]')].map((b) => b.dataset.vp + ' ' + b.className) }; }"],
+      ['sr', 'r => r.querySelector(\'[data-vp="1440"]\').click()'],
+      ['wait', 2000],
+      [
+        'probe',
+        "(d, fr, fd) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { laidOutAt: fd.defaultView.innerWidth, scale: new DOMMatrix(getComputedStyle(fr).transform).a, frameBox: fr.getBoundingClientRect().toJSON(), zoomPill: d.body.querySelector('[data-testid=\"panel.zoom\"]')?.textContent.trim() ?? null, toggle: [...r.querySelectorAll('[data-vp]')].map((b) => b.dataset.vp + ' ' + b.className) }; }",
+      ],
     ],
   },
   /*
@@ -389,10 +579,17 @@ const STATES = [
   {
     name: 'vp-mobile-390-ghost',
     steps: [
-      ['sr', "r => r.querySelector('[data-vp=\"390\"]').click()"], ['wait', 2000],
-      ['sr', "r => { const f = r.querySelector('#wdp-fade'); f.value = 0; f.dispatchEvent(new Event('input', { bubbles: true })); f.dispatchEvent(new Event('change', { bubbles: true })); }"],
+      ['sr', 'r => r.querySelector(\'[data-vp="390"]\').click()'],
+      ['wait', 2000],
+      [
+        'sr',
+        "r => { const f = r.querySelector('#wdp-fade'); f.value = 0; f.dispatchEvent(new Event('input', { bubbles: true })); f.dispatchEvent(new Event('change', { bubbles: true })); }",
+      ],
       ['wait', 2500],
-      ['probe', "(d, fr, fd, fsr, gh, gd) => ({ laidOutAt: fd.defaultView.innerWidth, ghost: !!gh, ghostSrc: gh && gh.src, ghostOpacity: gh && getComputedStyle(gh).opacity, ghostBox: gh && gh.getBoundingClientRect().toJSON(), ghostLaidOutAt: gd && gd.defaultView.innerWidth, appBox: fr.getBoundingClientRect().toJSON() })"],
+      [
+        'probe',
+        '(d, fr, fd, fsr, gh, gd) => ({ laidOutAt: fd.defaultView.innerWidth, ghost: !!gh, ghostSrc: gh && gh.src, ghostOpacity: gh && getComputedStyle(gh).opacity, ghostBox: gh && gh.getBoundingClientRect().toJSON(), ghostLaidOutAt: gd && gd.defaultView.innerWidth, appBox: fr.getBoundingClientRect().toJSON() })',
+      ],
     ],
   },
 
@@ -418,7 +615,10 @@ const STATES = [
     config: { server: 'http://localhost:4999', stylesheet: `${BASE}/walkdown.css` },
     steps: [
       ['wait', 2500],
-      ['probe', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const said = [...r.children].filter((e) => e.tagName !== 'STYLE').map((e) => e.textContent.replace(/\\s+/g, ' ').trim()).join(' ').trim(); return { server: d.defaultView.__walkdownConfig.server, stylesheet: d.defaultView.__walkdownConfig.stylesheet, sheets: r.querySelectorAll('style, link[rel=stylesheet]').length, said: said.slice(0, 400) }; }"],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const said = [...r.children].filter((e) => e.tagName !== 'STYLE').map((e) => e.textContent.replace(/\\s+/g, ' ').trim()).join(' ').trim(); return { server: d.defaultView.__walkdownConfig.server, stylesheet: d.defaultView.__walkdownConfig.stylesheet, sheets: r.querySelectorAll('style, link[rel=stylesheet]').length, said: said.slice(0, 400) }; }",
+      ],
     ],
   },
   {
@@ -436,7 +636,10 @@ const STATES = [
       // Read past the stylesheet: it lives in the shadow root too, and the
       // root's own textContent is a few thousand characters of Tailwind
       // before a word the gate actually says.
-      ['probe', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const said = [...r.children].filter((e) => e.tagName !== 'STYLE').map((e) => e.textContent.replace(/\\s+/g, ' ').trim()).join(' ').trim(); return { offers: [...r.querySelectorAll('[data-pick]')].map((b) => b.dataset.pick), said: said.slice(0, 300) }; }"],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const said = [...r.children].filter((e) => e.tagName !== 'STYLE').map((e) => e.textContent.replace(/\\s+/g, ' ').trim()).join(' ').trim(); return { offers: [...r.querySelectorAll('[data-pick]')].map((b) => b.dataset.pick), said: said.slice(0, 300) }; }",
+      ],
     ],
   },
   {
@@ -446,7 +649,10 @@ const STATES = [
     config: { buildHash: 'deadbeef0000' },
     steps: [
       ['wait', 2500],
-      ['probe', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('[data-testid=\"panel.blueprint\"]'); return { carries: d.defaultView.__walkdownConfig.buildHash, blueprintSlot: b && b.textContent.replace(/\\s+/g, ' ').trim(), bar: r.querySelector('#wdp-pin').closest('div').textContent.replace(/\\s+/g, ' ').trim().slice(0, 200) }; }"],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('[data-testid=\"panel.blueprint\"]'); return { carries: d.defaultView.__walkdownConfig.buildHash, blueprintSlot: b && b.textContent.replace(/\\s+/g, ' ').trim(), bar: r.querySelector('#wdp-pin').closest('div').textContent.replace(/\\s+/g, ' ').trim().slice(0, 200) }; }",
+      ],
     ],
   },
 
@@ -458,11 +664,15 @@ const STATES = [
     name: 'threads-filter-all',
     steps: [
       ['tab', 'threads'],
-      ['sr', "r => r.querySelector('[data-tfilter=\"all\"]').click()"], ['wait', 700],
+      ['sr', 'r => r.querySelector(\'[data-tfilter="all"]\').click()'],
+      ['wait', 700],
       // Counted on the rows, not on `[data-open-thread]`: every reply line in
       // the list carries that attribute too, and counting both reports twice
       // as many conversations as the blueprint has.
-      ['probe', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { filters: [...r.querySelectorAll('[data-tfilter]')].map((b) => b.textContent.replace(/\\s+/g, ' ').trim()), showing: r.querySelectorAll('.wd-row[data-open-thread]').length, statuses: [...r.querySelectorAll('.wd-row[data-open-thread] .badge')].map((b) => b.textContent.trim()) }; }"],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { filters: [...r.querySelectorAll('[data-tfilter]')].map((b) => b.textContent.replace(/\\s+/g, ' ').trim()), showing: r.querySelectorAll('.wd-row[data-open-thread]').length, statuses: [...r.querySelectorAll('.wd-row[data-open-thread] .badge')].map((b) => b.textContent.trim()) }; }",
+      ],
     ],
   },
   /* A long conversation, for the shape of the stream rather than its words:
@@ -472,12 +682,22 @@ const STATES = [
     name: 'thread-stream-grouped',
     steps: [
       ['tab', 'threads'],
-      ['sr', "r => r.querySelector('[data-tfilter=\"all\"]').click()"], ['wait', 500],
-      ['sr', "r => (r.querySelector('[data-open-thread=\"q-0070\"]') ?? r.querySelector('[data-open-thread]')).click()"],
-      ['wait', 1200],
-      ['sr', "r => { const b = r.querySelector('[data-testid=\"thread.body\"]'); b.scrollTop = b.scrollHeight; }"],
+      ['sr', 'r => r.querySelector(\'[data-tfilter="all"]\').click()'],
       ['wait', 500],
-      ['probe', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const body = r.querySelector('[data-testid=\"thread.body\"]'); const reply = r.querySelector('[data-testid=\"thread.reply\"]'); return { thread: r.querySelector('[data-testid=\"thread.provenance\"]').textContent.replace(/\\s+/g, ' ').trim(), messages: body.querySelectorAll('.wd-msg').length, continuations: body.querySelectorAll('.wd-msg.cont').length, days: [...body.querySelectorAll('.wd-day')].map((e) => e.textContent.trim()), authors: [...body.querySelectorAll('.wd-who')].map((e) => e.textContent.trim()), scrolled: body.scrollTop + ' of ' + body.scrollHeight, composerBox: reply.getBoundingClientRect().toJSON() }; }"],
+      [
+        'sr',
+        "r => (r.querySelector('[data-open-thread=\"q-0070\"]') ?? r.querySelector('[data-open-thread]')).click()",
+      ],
+      ['wait', 1200],
+      [
+        'sr',
+        'r => { const b = r.querySelector(\'[data-testid="thread.body"]\'); b.scrollTop = b.scrollHeight; }',
+      ],
+      ['wait', 500],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const body = r.querySelector('[data-testid=\"thread.body\"]'); const reply = r.querySelector('[data-testid=\"thread.reply\"]'); return { thread: r.querySelector('[data-testid=\"thread.provenance\"]').textContent.replace(/\\s+/g, ' ').trim(), messages: body.querySelectorAll('.wd-msg').length, continuations: body.querySelectorAll('.wd-msg.cont').length, days: [...body.querySelectorAll('.wd-day')].map((e) => e.textContent.trim()), authors: [...body.querySelectorAll('.wd-who')].map((e) => e.textContent.trim()), scrolled: body.scrollTop + ' of ' + body.scrollHeight, composerBox: reply.getBoundingClientRect().toJSON() }; }",
+      ],
     ],
   },
   /*
@@ -490,10 +710,17 @@ const STATES = [
     name: 'thread-terminal-verified',
     steps: [
       ['tab', 'threads'],
-      ['sr', "r => r.querySelector('[data-tfilter=\"all\"]').click()"], ['wait', 500],
-      ['sr', "r => [...r.querySelectorAll('.wd-row[data-open-thread]')].find(e => /verified|waived/.test(e.querySelector('.badge:last-of-type')?.textContent ?? ''))?.click()"],
+      ['sr', 'r => r.querySelector(\'[data-tfilter="all"]\').click()'],
+      ['wait', 500],
+      [
+        'sr',
+        "r => [...r.querySelectorAll('.wd-row[data-open-thread]')].find(e => /verified|waived/.test(e.querySelector('.badge:last-of-type')?.textContent ?? ''))?.click()",
+      ],
       ['wait', 1200],
-      ['probe', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const body = r.querySelector('[data-testid=\"thread.body\"]'); return { thread: r.querySelector('[data-testid=\"thread.provenance\"]').textContent.replace(/\\s+/g, ' ').trim(), actions: [...r.querySelectorAll('[data-testid=\"thread.actions\"]')].map((a) => a.dataset.act), footer: body.lastElementChild.textContent.replace(/\\s+/g, ' ').trim(), composer: !!r.querySelector('[data-testid=\"thread.reply\"]'), otherButtonsInThePane: [...r.querySelector('[data-testid=\"thread.panel\"]').querySelectorAll('button')].map((b) => b.textContent.replace(/\\s+/g, ' ').trim()).filter(Boolean) }; }"],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const body = r.querySelector('[data-testid=\"thread.body\"]'); return { thread: r.querySelector('[data-testid=\"thread.provenance\"]').textContent.replace(/\\s+/g, ' ').trim(), actions: [...r.querySelectorAll('[data-testid=\"thread.actions\"]')].map((a) => a.dataset.act), footer: body.lastElementChild.textContent.replace(/\\s+/g, ' ').trim(), composer: !!r.querySelector('[data-testid=\"thread.reply\"]'), otherButtonsInThePane: [...r.querySelector('[data-testid=\"thread.panel\"]').querySelectorAll('button')].map((b) => b.textContent.replace(/\\s+/g, ' ').trim()).filter(Boolean) }; }",
+      ],
     ],
   },
   /* Shift-Enter breaks the line where Enter would send. Typed rather than
@@ -503,10 +730,17 @@ const STATES = [
     steps: [
       ['no-writes'],
       ['tab', 'threads'],
-      ['sr', "r => r.querySelector('[data-open-thread]').click()"], ['wait', 1200],
+      ['sr', "r => r.querySelector('[data-open-thread]').click()"],
+      ['wait', 1200],
       ['sr', "r => r.querySelector('#wdp-note').focus()"],
-      ['type', 'first line'], ['key', 'Shift+Enter'], ['type', 'second line'], ['wait', 500],
-      ['probe', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const n = r.querySelector('#wdp-note'); return { value: n.value, lines: n.value.split('\\n').length, caret: n.selectionStart, sent: d.defaultView.__held, messages: r.querySelectorAll('[data-testid=\"thread.body\"] .wd-msg').length }; }"],
+      ['type', 'first line'],
+      ['key', 'Shift+Enter'],
+      ['type', 'second line'],
+      ['wait', 500],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const n = r.querySelector('#wdp-note'); return { value: n.value, lines: n.value.split('\\n').length, caret: n.selectionStart, sent: d.defaultView.__held, messages: r.querySelectorAll('[data-testid=\"thread.body\"] .wd-msg').length }; }",
+      ],
     ],
   },
   /*
@@ -521,11 +755,16 @@ const STATES = [
     steps: [
       ['no-writes', 500],
       ['tab', 'threads'],
-      ['sr', "r => r.querySelector('[data-open-thread]').click()"], ['wait', 1200],
+      ['sr', "r => r.querySelector('[data-open-thread]').click()"],
+      ['wait', 1200],
       ['sr', "r => r.querySelector('#wdp-note').focus()"],
       ['type', 'sitting probe — a reply the server will refuse'],
-      ['key', 'Enter'], ['wait', 1200],
-      ['probe', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const body = r.querySelector('[data-testid=\"thread.body\"]'); const failed = body.querySelector('.wd-msg.failed'); return { attempted: d.defaultView.__held, failedMessage: failed && failed.textContent.replace(/\\s+/g, ' ').trim(), marks: failed && failed.className, textIsBack: r.querySelector('#wdp-note').value, said: r.querySelector('[data-testid=\"thread.say\"]').textContent.trim() }; }"],
+      ['key', 'Enter'],
+      ['wait', 1200],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const body = r.querySelector('[data-testid=\"thread.body\"]'); const failed = body.querySelector('.wd-msg.failed'); return { attempted: d.defaultView.__held, failedMessage: failed && failed.textContent.replace(/\\s+/g, ' ').trim(), marks: failed && failed.className, textIsBack: r.querySelector('#wdp-note').value, said: r.querySelector('[data-testid=\"thread.say\"]').textContent.trim() }; }",
+      ],
     ],
   },
 
@@ -548,28 +787,52 @@ const STATES = [
   {
     name: 'embed-hover-anchored',
     steps: [
-      ['sr', "r => r.querySelector('#wdp-pin').click()"], ['wait', 700],
-      ['aim', "(d, fr, fd) => { const b = fr.getBoundingClientRect(), e = fd.querySelector('[data-testid=\"panel.rules-list\"]').getBoundingClientRect(); return { x: b.x + e.x + e.width / 2, y: b.y + e.y + 30 }; }"],
-      ['hover'], ['wait', 500],
-      ['probe', "(d, fr, fd) => ({ pinning: fd.documentElement.className, lit: [...fd.querySelectorAll('.wd-hover')].map((e) => ({ anchor: e.getAttribute('data-testid'), outline: getComputedStyle(e).outline, cursor: getComputedStyle(e).cursor, box: e.getBoundingClientRect().toJSON() })) })"],
+      ['sr', "r => r.querySelector('#wdp-pin').click()"],
+      ['wait', 700],
+      [
+        'aim',
+        '(d, fr, fd) => { const b = fr.getBoundingClientRect(), e = fd.querySelector(\'[data-testid="panel.rules-list"]\').getBoundingClientRect(); return { x: b.x + e.x + e.width / 2, y: b.y + e.y + 30 }; }',
+      ],
+      ['hover'],
+      ['wait', 500],
+      [
+        'probe',
+        "(d, fr, fd) => ({ pinning: fd.documentElement.className, lit: [...fd.querySelectorAll('.wd-hover')].map((e) => ({ anchor: e.getAttribute('data-testid'), outline: getComputedStyle(e).outline, cursor: getComputedStyle(e).cursor, box: e.getBoundingClientRect().toJSON() })) })",
+      ],
     ],
   },
   {
     name: 'embed-form-below-the-spot',
     steps: [
-      ['sr', "r => r.querySelector('#wdp-pin').click()"], ['wait', 700],
-      ['aim', "(d, fr, fd) => { const b = fr.getBoundingClientRect(), e = fd.querySelector('[data-testid=\"panel.rules-list\"]').getBoundingClientRect(); return { x: b.x + e.x + e.width / 2, y: b.y + e.y + 20 }; }"],
-      ['click'], ['wait', 600],
-      ['probe', "(d, fr, fd, fsr) => { const f = fsr.querySelector('[data-testid=\"pin.form\"]'), p = fsr.querySelector('[data-testid=\"pin.placeholder\"]'); const cur = (s) => { const e = f.querySelector(s); return e && getComputedStyle(e).cursor; }; return { surfaceViewport: { w: fd.defaultView.innerWidth, h: fd.defaultView.innerHeight }, spot: { x: parseFloat(p.style.left) + 11, y: parseFloat(p.style.top) + 19 }, form: { left: f.style.left, top: f.style.top, box: f.getBoundingClientRect().toJSON() }, element: f.querySelector('b').textContent.trim(), elementBox: fd.querySelector('[data-testid=\"panel.rules-list\"]').getBoundingClientRect().toJSON(), placeholderMark: p.querySelector('.wd-kind').textContent, cursors: { textarea: cur('textarea'), checkbox: cur('input[type=checkbox]'), save: cur('[data-testid=\"pin.save\"]'), cancel: cur('[data-testid=\"pin.cancel\"]') } }; }"],
+      ['sr', "r => r.querySelector('#wdp-pin').click()"],
+      ['wait', 700],
+      [
+        'aim',
+        '(d, fr, fd) => { const b = fr.getBoundingClientRect(), e = fd.querySelector(\'[data-testid="panel.rules-list"]\').getBoundingClientRect(); return { x: b.x + e.x + e.width / 2, y: b.y + e.y + 20 }; }',
+      ],
+      ['click'],
+      ['wait', 600],
+      [
+        'probe',
+        "(d, fr, fd, fsr) => { const f = fsr.querySelector('[data-testid=\"pin.form\"]'), p = fsr.querySelector('[data-testid=\"pin.placeholder\"]'); const cur = (s) => { const e = f.querySelector(s); return e && getComputedStyle(e).cursor; }; return { surfaceViewport: { w: fd.defaultView.innerWidth, h: fd.defaultView.innerHeight }, spot: { x: parseFloat(p.style.left) + 11, y: parseFloat(p.style.top) + 19 }, form: { left: f.style.left, top: f.style.top, box: f.getBoundingClientRect().toJSON() }, element: f.querySelector('b').textContent.trim(), elementBox: fd.querySelector('[data-testid=\"panel.rules-list\"]').getBoundingClientRect().toJSON(), placeholderMark: p.querySelector('.wd-kind').textContent, cursors: { textarea: cur('textarea'), checkbox: cur('input[type=checkbox]'), save: cur('[data-testid=\"pin.save\"]'), cancel: cur('[data-testid=\"pin.cancel\"]') } }; }",
+      ],
     ],
   },
   {
     name: 'embed-form-above-near-the-bottom',
     steps: [
-      ['sr', "r => r.querySelector('#wdp-pin').click()"], ['wait', 700],
-      ['aim', "(d, fr, fd) => { const b = fr.getBoundingClientRect(), e = fd.querySelector('[data-testid=\"panel.counts\"]').getBoundingClientRect(); return { x: b.x + e.x + 40, y: b.y + e.y + e.height / 2 }; }"],
-      ['click'], ['wait', 600],
-      ['probe', "(d, fr, fd, fsr) => { const f = fsr.querySelector('[data-testid=\"pin.form\"]'), p = fsr.querySelector('[data-testid=\"pin.placeholder\"]'); return { surfaceViewport: { w: fd.defaultView.innerWidth, h: fd.defaultView.innerHeight }, spot: { x: parseFloat(p.style.left) + 11, y: parseFloat(p.style.top) + 19 }, form: { left: f.style.left, top: f.style.top, box: f.getBoundingClientRect().toJSON() }, element: f.querySelector('b').textContent.trim() }; }"],
+      ['sr', "r => r.querySelector('#wdp-pin').click()"],
+      ['wait', 700],
+      [
+        'aim',
+        '(d, fr, fd) => { const b = fr.getBoundingClientRect(), e = fd.querySelector(\'[data-testid="panel.counts"]\').getBoundingClientRect(); return { x: b.x + e.x + 40, y: b.y + e.y + e.height / 2 }; }',
+      ],
+      ['click'],
+      ['wait', 600],
+      [
+        'probe',
+        "(d, fr, fd, fsr) => { const f = fsr.querySelector('[data-testid=\"pin.form\"]'), p = fsr.querySelector('[data-testid=\"pin.placeholder\"]'); return { surfaceViewport: { w: fd.defaultView.innerWidth, h: fd.defaultView.innerHeight }, spot: { x: parseFloat(p.style.left) + 11, y: parseFloat(p.style.top) + 19 }, form: { left: f.style.left, top: f.style.top, box: f.getBoundingClientRect().toJSON() }, element: f.querySelector('b').textContent.trim() }; }",
+      ],
     ],
   },
   {
@@ -577,22 +840,42 @@ const STATES = [
        checkbox must toggle the checkbox, not drop a second pin behind it. */
     name: 'embed-form-is-chrome',
     steps: [
-      ['sr', "r => r.querySelector('#wdp-pin').click()"], ['wait', 700],
-      ['aim', "(d, fr, fd) => { const b = fr.getBoundingClientRect(), e = fd.querySelector('[data-testid=\"panel.rules-list\"]').getBoundingClientRect(); return { x: b.x + e.x + e.width / 2, y: b.y + e.y + 20 }; }"],
-      ['click'], ['wait', 600],
-      ['aim', "(d, fr, fd, fsr) => { const b = fr.getBoundingClientRect(), e = fsr.querySelector('[data-testid=\"pin.kind\"]').getBoundingClientRect(); return { x: b.x + e.x + e.width / 2, y: b.y + e.y + e.height / 2 }; }"],
-      ['click'], ['wait', 500],
-      ['probe', "(d, fr, fd, fsr) => ({ forms: fsr.querySelectorAll('[data-testid=\"pin.form\"]').length, placeholders: fsr.querySelectorAll('[data-testid=\"pin.placeholder\"]').length, kindChecked: fsr.querySelector('[data-testid=\"pin.kind\"]').checked, placeholderMark: fsr.querySelector('[data-testid=\"pin.placeholder\"] .wd-kind').textContent })"],
+      ['sr', "r => r.querySelector('#wdp-pin').click()"],
+      ['wait', 700],
+      [
+        'aim',
+        '(d, fr, fd) => { const b = fr.getBoundingClientRect(), e = fd.querySelector(\'[data-testid="panel.rules-list"]\').getBoundingClientRect(); return { x: b.x + e.x + e.width / 2, y: b.y + e.y + 20 }; }',
+      ],
+      ['click'],
+      ['wait', 600],
+      [
+        'aim',
+        '(d, fr, fd, fsr) => { const b = fr.getBoundingClientRect(), e = fsr.querySelector(\'[data-testid="pin.kind"]\').getBoundingClientRect(); return { x: b.x + e.x + e.width / 2, y: b.y + e.y + e.height / 2 }; }',
+      ],
+      ['click'],
+      ['wait', 500],
+      [
+        'probe',
+        '(d, fr, fd, fsr) => ({ forms: fsr.querySelectorAll(\'[data-testid="pin.form"]\').length, placeholders: fsr.querySelectorAll(\'[data-testid="pin.placeholder"]\').length, kindChecked: fsr.querySelector(\'[data-testid="pin.kind"]\').checked, placeholderMark: fsr.querySelector(\'[data-testid="pin.placeholder"] .wd-kind\').textContent })',
+      ],
     ],
   },
   {
     name: 'embed-form-unanchored-spot',
     steps: [
       ['no-writes'],
-      ['sr', "r => r.querySelector('#wdp-pin').click()"], ['wait', 700],
-      ['aim', "(d, fr, fd) => { const b = fr.getBoundingClientRect(), w = fd.defaultView; for (let y = w.innerHeight - 24; y > 24; y -= 12) for (let x = 8; x < 120; x += 8) { const t = fd.elementFromPoint(x, y); if (t && !t.closest('[data-testid]')) return { x: b.x + x, y: b.y + y }; } throw new Error('no unanchored spot on this surface'); }"],
-      ['click'], ['wait', 600],
-      ['probe', "(d, fr, fd, fsr) => ({ copy: fsr.querySelector('[data-testid=\"pin.form\"]').textContent.replace(/\\s+/g, ' ').trim(), formLeft: fsr.querySelector('[data-testid=\"pin.form\"]').style.left, placeholder: !!fsr.querySelector('[data-testid=\"pin.placeholder\"]') })"],
+      ['sr', "r => r.querySelector('#wdp-pin').click()"],
+      ['wait', 700],
+      [
+        'aim',
+        "(d, fr, fd) => { const b = fr.getBoundingClientRect(), w = fd.defaultView; for (let y = w.innerHeight - 24; y > 24; y -= 12) for (let x = 8; x < 120; x += 8) { const t = fd.elementFromPoint(x, y); if (t && !t.closest('[data-testid]')) return { x: b.x + x, y: b.y + y }; } throw new Error('no unanchored spot on this surface'); }",
+      ],
+      ['click'],
+      ['wait', 600],
+      [
+        'probe',
+        "(d, fr, fd, fsr) => ({ copy: fsr.querySelector('[data-testid=\"pin.form\"]').textContent.replace(/\\s+/g, ' ').trim(), formLeft: fsr.querySelector('[data-testid=\"pin.form\"]').style.left, placeholder: !!fsr.querySelector('[data-testid=\"pin.placeholder\"]') })",
+      ],
     ],
   },
   {
@@ -600,12 +883,24 @@ const STATES = [
        the pin it was promising goes with it. */
     name: 'embed-form-escape-takes-the-placeholder',
     steps: [
-      ['sr', "r => r.querySelector('#wdp-pin').click()"], ['wait', 700],
-      ['aim', "(d, fr, fd) => { const b = fr.getBoundingClientRect(), e = fd.querySelector('[data-testid=\"panel.rules-list\"]').getBoundingClientRect(); return { x: b.x + e.x + e.width / 2, y: b.y + e.y + 20 }; }"],
-      ['click'], ['wait', 600],
-      ['probe', "(d, fr, fd, fsr) => ({ at: 'form open', forms: fsr.querySelectorAll('[data-testid=\"pin.form\"]').length, placeholders: fsr.querySelectorAll('[data-testid=\"pin.placeholder\"]').length })"],
-      ['key', 'Escape'], ['wait', 500],
-      ['probe', "(d, fr, fd, fsr) => ({ at: 'after Escape', forms: fsr.querySelectorAll('[data-testid=\"pin.form\"]').length, placeholders: fsr.querySelectorAll('[data-testid=\"pin.placeholder\"]').length, stillPinning: fd.documentElement.className })"],
+      ['sr', "r => r.querySelector('#wdp-pin').click()"],
+      ['wait', 700],
+      [
+        'aim',
+        '(d, fr, fd) => { const b = fr.getBoundingClientRect(), e = fd.querySelector(\'[data-testid="panel.rules-list"]\').getBoundingClientRect(); return { x: b.x + e.x + e.width / 2, y: b.y + e.y + 20 }; }',
+      ],
+      ['click'],
+      ['wait', 600],
+      [
+        'probe',
+        "(d, fr, fd, fsr) => ({ at: 'form open', forms: fsr.querySelectorAll('[data-testid=\"pin.form\"]').length, placeholders: fsr.querySelectorAll('[data-testid=\"pin.placeholder\"]').length })",
+      ],
+      ['key', 'Escape'],
+      ['wait', 500],
+      [
+        'probe',
+        "(d, fr, fd, fsr) => ({ at: 'after Escape', forms: fsr.querySelectorAll('[data-testid=\"pin.form\"]').length, placeholders: fsr.querySelectorAll('[data-testid=\"pin.placeholder\"]').length, stillPinning: fd.documentElement.className })",
+      ],
     ],
   },
   {
@@ -615,24 +910,43 @@ const STATES = [
     name: 'embed-pin-filed-unanchored',
     steps: [
       ['no-writes'],
-      ['sr', "r => r.querySelector('#wdp-pin').click()"], ['wait', 700],
-      ['aim', "(d, fr, fd) => { const b = fr.getBoundingClientRect(), w = fd.defaultView; for (let y = w.innerHeight - 24; y > 24; y -= 12) for (let x = 8; x < 120; x += 8) { const t = fd.elementFromPoint(x, y); if (t && !t.closest('[data-testid]')) return { x: b.x + x, y: b.y + y }; } throw new Error('no unanchored spot on this surface'); }"],
-      ['click'], ['wait', 600],
-      ['top', "(d, fr, fd, fsr) => { const t = fsr.querySelector('[data-testid=\"pin.note\"]'); t.value = 'sitting probe — unanchored spot'; t.dispatchEvent(new Event('input', { bubbles: true })); fsr.querySelector('[data-testid=\"pin.save\"]').click(); }"],
+      ['sr', "r => r.querySelector('#wdp-pin').click()"],
+      ['wait', 700],
+      [
+        'aim',
+        "(d, fr, fd) => { const b = fr.getBoundingClientRect(), w = fd.defaultView; for (let y = w.innerHeight - 24; y > 24; y -= 12) for (let x = 8; x < 120; x += 8) { const t = fd.elementFromPoint(x, y); if (t && !t.closest('[data-testid]')) return { x: b.x + x, y: b.y + y }; } throw new Error('no unanchored spot on this surface'); }",
+      ],
+      ['click'],
+      ['wait', 600],
+      [
+        'top',
+        "(d, fr, fd, fsr) => { const t = fsr.querySelector('[data-testid=\"pin.note\"]'); t.value = 'sitting probe — unanchored spot'; t.dispatchEvent(new Event('input', { bubbles: true })); fsr.querySelector('[data-testid=\"pin.save\"]').click(); }",
+      ],
       ['wait', 1000],
-      ['probe', "(d) => d.defaultView.__held"],
+      ['probe', '(d) => d.defaultView.__held'],
     ],
   },
   {
     name: 'embed-pin-filed-anchored',
     steps: [
       ['no-writes'],
-      ['sr', "r => r.querySelector('#wdp-pin').click()"], ['wait', 700],
-      ['aim', "(d, fr, fd) => { const b = fr.getBoundingClientRect(), e = fd.querySelector('[data-testid=\"panel.counts\"]').getBoundingClientRect(); return { x: b.x + e.x + 40, y: b.y + e.y + e.height / 2 }; }"],
-      ['click'], ['wait', 600],
-      ['top', "(d, fr, fd, fsr) => { const t = fsr.querySelector('[data-testid=\"pin.note\"]'); t.value = 'sitting probe — anchored on panel.counts'; t.dispatchEvent(new Event('input', { bubbles: true })); fsr.querySelector('[data-testid=\"pin.save\"]').click(); }"],
+      ['sr', "r => r.querySelector('#wdp-pin').click()"],
+      ['wait', 700],
+      [
+        'aim',
+        '(d, fr, fd) => { const b = fr.getBoundingClientRect(), e = fd.querySelector(\'[data-testid="panel.counts"]\').getBoundingClientRect(); return { x: b.x + e.x + 40, y: b.y + e.y + e.height / 2 }; }',
+      ],
+      ['click'],
+      ['wait', 600],
+      [
+        'top',
+        "(d, fr, fd, fsr) => { const t = fsr.querySelector('[data-testid=\"pin.note\"]'); t.value = 'sitting probe — anchored on panel.counts'; t.dispatchEvent(new Event('input', { bubbles: true })); fsr.querySelector('[data-testid=\"pin.save\"]').click(); }",
+      ],
       ['wait', 1000],
-      ['probe', "(d, fr, fd) => ({ held: d.defaultView.__held, elementBox: fd.querySelector('[data-testid=\"panel.counts\"]').getBoundingClientRect().toJSON(), surfaceViewport: { w: fd.defaultView.innerWidth, h: fd.defaultView.innerHeight }, panelWindow: { w: d.defaultView.innerWidth, h: d.defaultView.innerHeight } })"],
+      [
+        'probe',
+        '(d, fr, fd) => ({ held: d.defaultView.__held, elementBox: fd.querySelector(\'[data-testid="panel.counts"]\').getBoundingClientRect().toJSON(), surfaceViewport: { w: fd.defaultView.innerWidth, h: fd.defaultView.innerHeight }, panelWindow: { w: d.defaultView.innerWidth, h: d.defaultView.innerHeight } })',
+      ],
     ],
   },
   {
@@ -641,15 +955,29 @@ const STATES = [
     name: 'embed-pin-filed-on-the-prototype',
     steps: [
       ['no-writes'],
-      ['sr', "r => r.querySelector('#wdp-pin').click()"], ['wait', 500],
-      ['sr', "r => [...r.querySelectorAll('[data-surface]')].find(b => b.dataset.surface === 'prototype').click()"],
+      ['sr', "r => r.querySelector('#wdp-pin').click()"],
+      ['wait', 500],
+      [
+        'sr',
+        "r => [...r.querySelectorAll('[data-surface]')].find(b => b.dataset.surface === 'prototype').click()",
+      ],
       ['wait', 3500],
-      ['probe', "(d, fr, fd, fsr, gh, gd) => ({ ghostSrc: gh && gh.src, ghostOpacity: gh && getComputedStyle(gh).opacity, ghostArmed: gd && gd.documentElement.className, appArmed: fd.documentElement.className, ghostBox: gh && gh.getBoundingClientRect().toJSON(), appBox: fr.getBoundingClientRect().toJSON() })"],
-      ['aim', "(d, fr, fd, fsr, gh, gd) => { const b = gh.getBoundingClientRect(), e = gd.querySelector('[data-testid=\"panel.counts\"]').getBoundingClientRect(); return { x: b.x + e.x + 40, y: b.y + e.y + e.height / 2 }; }"],
-      ['click'], ['wait', 600],
-      ['top', "(d, fr, fd, fsr, gh, gd, gsr) => { const t = gsr.querySelector('[data-testid=\"pin.note\"]'); t.value = 'sitting probe — on the design'; t.dispatchEvent(new Event('input', { bubbles: true })); gsr.querySelector('[data-testid=\"pin.save\"]').click(); }"],
+      [
+        'probe',
+        '(d, fr, fd, fsr, gh, gd) => ({ ghostSrc: gh && gh.src, ghostOpacity: gh && getComputedStyle(gh).opacity, ghostArmed: gd && gd.documentElement.className, appArmed: fd.documentElement.className, ghostBox: gh && gh.getBoundingClientRect().toJSON(), appBox: fr.getBoundingClientRect().toJSON() })',
+      ],
+      [
+        'aim',
+        '(d, fr, fd, fsr, gh, gd) => { const b = gh.getBoundingClientRect(), e = gd.querySelector(\'[data-testid="panel.counts"]\').getBoundingClientRect(); return { x: b.x + e.x + 40, y: b.y + e.y + e.height / 2 }; }',
+      ],
+      ['click'],
+      ['wait', 600],
+      [
+        'top',
+        "(d, fr, fd, fsr, gh, gd, gsr) => { const t = gsr.querySelector('[data-testid=\"pin.note\"]'); t.value = 'sitting probe — on the design'; t.dispatchEvent(new Event('input', { bubbles: true })); gsr.querySelector('[data-testid=\"pin.save\"]').click(); }",
+      ],
       ['wait', 1000],
-      ['probe', "(d) => d.defaultView.__held"],
+      ['probe', '(d) => d.defaultView.__held'],
     ],
   },
   {
@@ -657,23 +985,42 @@ const STATES = [
        so the control closes and says why. */
     name: 'embed-pin-mid-fade-refused',
     steps: [
-      ['sr', "r => r.querySelector('#wdp-pin').click()"], ['wait', 500],
-      ['sr', "r => { const f = r.querySelector('#wdp-fade'); f.value = 50; f.dispatchEvent(new Event('input', { bubbles: true })); f.dispatchEvent(new Event('change', { bubbles: true })); }"],
+      ['sr', "r => r.querySelector('#wdp-pin').click()"],
+      ['wait', 500],
+      [
+        'sr',
+        "r => { const f = r.querySelector('#wdp-fade'); f.value = 50; f.dispatchEvent(new Event('input', { bubbles: true })); f.dispatchEvent(new Event('change', { bubbles: true })); }",
+      ],
       ['wait', 2000],
-      ['probe', "(d, fr, fd, fsr, gh, gd) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-pin'); return { disabled: b.disabled, title: b.title, ghostOpacity: gh && getComputedStyle(gh).opacity, ghostArmed: gd && gd.documentElement.className, appArmed: fd.documentElement.className }; }"],
+      [
+        'probe',
+        "(d, fr, fd, fsr, gh, gd) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-pin'); return { disabled: b.disabled, title: b.title, ghostOpacity: gh && getComputedStyle(gh).opacity, ghostArmed: gd && gd.documentElement.className, appArmed: fd.documentElement.className }; }",
+      ],
     ],
   },
   {
     name: 'embed-pin-filed-at-mobile',
     steps: [
       ['no-writes'],
-      ['sr', "r => r.querySelector('[data-vp=\"390\"]').click()"], ['wait', 2000],
-      ['sr', "r => r.querySelector('#wdp-pin').click()"], ['wait', 700],
-      ['aim', "(d, fr, fd) => { const b = fr.getBoundingClientRect(), e = fd.querySelector('[data-testid=\"panel.bar\"]').getBoundingClientRect(); return { x: b.x + e.x + 40, y: b.y + e.y + e.height / 2 }; }"],
-      ['click'], ['wait', 600],
-      ['top', "(d, fr, fd, fsr) => { const t = fsr.querySelector('[data-testid=\"pin.note\"]'); t.value = 'sitting probe — at a mobile viewport'; t.dispatchEvent(new Event('input', { bubbles: true })); fsr.querySelector('[data-testid=\"pin.save\"]').click(); }"],
+      ['sr', 'r => r.querySelector(\'[data-vp="390"]\').click()'],
+      ['wait', 2000],
+      ['sr', "r => r.querySelector('#wdp-pin').click()"],
+      ['wait', 700],
+      [
+        'aim',
+        '(d, fr, fd) => { const b = fr.getBoundingClientRect(), e = fd.querySelector(\'[data-testid="panel.bar"]\').getBoundingClientRect(); return { x: b.x + e.x + 40, y: b.y + e.y + e.height / 2 }; }',
+      ],
+      ['click'],
+      ['wait', 600],
+      [
+        'top',
+        "(d, fr, fd, fsr) => { const t = fsr.querySelector('[data-testid=\"pin.note\"]'); t.value = 'sitting probe — at a mobile viewport'; t.dispatchEvent(new Event('input', { bubbles: true })); fsr.querySelector('[data-testid=\"pin.save\"]').click(); }",
+      ],
       ['wait', 1000],
-      ['probe', "(d, fr, fd) => ({ held: d.defaultView.__held, surfaceViewport: { w: fd.defaultView.innerWidth, h: fd.defaultView.innerHeight }, frameBox: fr.getBoundingClientRect().toJSON() })"],
+      [
+        'probe',
+        '(d, fr, fd) => ({ held: d.defaultView.__held, surfaceViewport: { w: fd.defaultView.innerWidth, h: fd.defaultView.innerHeight }, frameBox: fr.getBoundingClientRect().toJSON() })',
+      ],
     ],
   },
   {
@@ -682,13 +1029,25 @@ const STATES = [
     name: 'embed-pin-filed-on-a-scaled-surface',
     steps: [
       ['no-writes'],
-      ['sr', "r => r.querySelector('[data-vp=\"1440\"]').click()"], ['wait', 2000],
-      ['sr', "r => r.querySelector('#wdp-pin').click()"], ['wait', 700],
-      ['aim', "(d, fr, fd) => { const b = fr.getBoundingClientRect(), e = fd.querySelector('[data-testid=\"panel.bar\"]').getBoundingClientRect(), s = new DOMMatrix(getComputedStyle(fr).transform).a; return { x: b.x + (e.x + 40) * s, y: b.y + (e.y + e.height / 2) * s }; }"],
-      ['click'], ['wait', 600],
-      ['top', "(d, fr, fd, fsr) => { const t = fsr.querySelector('[data-testid=\"pin.note\"]'); t.value = 'sitting probe — on a scaled surface'; t.dispatchEvent(new Event('input', { bubbles: true })); fsr.querySelector('[data-testid=\"pin.save\"]').click(); }"],
+      ['sr', 'r => r.querySelector(\'[data-vp="1440"]\').click()'],
+      ['wait', 2000],
+      ['sr', "r => r.querySelector('#wdp-pin').click()"],
+      ['wait', 700],
+      [
+        'aim',
+        '(d, fr, fd) => { const b = fr.getBoundingClientRect(), e = fd.querySelector(\'[data-testid="panel.bar"]\').getBoundingClientRect(), s = new DOMMatrix(getComputedStyle(fr).transform).a; return { x: b.x + (e.x + 40) * s, y: b.y + (e.y + e.height / 2) * s }; }',
+      ],
+      ['click'],
+      ['wait', 600],
+      [
+        'top',
+        "(d, fr, fd, fsr) => { const t = fsr.querySelector('[data-testid=\"pin.note\"]'); t.value = 'sitting probe — on a scaled surface'; t.dispatchEvent(new Event('input', { bubbles: true })); fsr.querySelector('[data-testid=\"pin.save\"]').click(); }",
+      ],
       ['wait', 1000],
-      ['probe', "(d, fr, fd) => ({ held: d.defaultView.__held, scale: new DOMMatrix(getComputedStyle(fr).transform).a, frameBox: fr.getBoundingClientRect().toJSON(), surfaceViewport: { w: fd.defaultView.innerWidth, h: fd.defaultView.innerHeight } })"],
+      [
+        'probe',
+        '(d, fr, fd) => ({ held: d.defaultView.__held, scale: new DOMMatrix(getComputedStyle(fr).transform).a, frameBox: fr.getBoundingClientRect().toJSON(), surfaceViewport: { w: fd.defaultView.innerWidth, h: fd.defaultView.innerHeight } })',
+      ],
     ],
   },
   {
@@ -697,23 +1056,48 @@ const STATES = [
        around them did. */
     name: 'embed-pin-spot-survives-zoom',
     steps: [
-      ['probe', "(d, fr, fd, fsr) => ({ at: 'fit', innerW: fd.defaultView.innerWidth, scale: new DOMMatrix(getComputedStyle(fr).transform).a, pins: Object.fromEntries([...fsr.querySelectorAll('.wd-pin')].map((p) => [p.dataset.thread, [Math.round(parseFloat(p.style.left)), Math.round(parseFloat(p.style.top))]])) })"],
-      ['sr', "r => r.querySelector('[data-vp=\"1440\"]').click()"], ['wait', 2000],
-      ['probe', "(d, fr, fd, fsr) => ({ at: '1440', innerW: fd.defaultView.innerWidth, scale: new DOMMatrix(getComputedStyle(fr).transform).a, pins: Object.fromEntries([...fsr.querySelectorAll('.wd-pin')].map((p) => [p.dataset.thread, [Math.round(parseFloat(p.style.left)), Math.round(parseFloat(p.style.top))]])) })"],
-      ['sr', "r => r.querySelector('[data-vp=\"0\"]').click()"], ['wait', 1500],
-      ['sr', "r => { const f = r.querySelector('#wdp-fade'); f.value = 30; f.dispatchEvent(new Event('input', { bubbles: true })); f.dispatchEvent(new Event('change', { bubbles: true })); }"],
+      [
+        'probe',
+        "(d, fr, fd, fsr) => ({ at: 'fit', innerW: fd.defaultView.innerWidth, scale: new DOMMatrix(getComputedStyle(fr).transform).a, pins: Object.fromEntries([...fsr.querySelectorAll('.wd-pin')].map((p) => [p.dataset.thread, [Math.round(parseFloat(p.style.left)), Math.round(parseFloat(p.style.top))]])) })",
+      ],
+      ['sr', 'r => r.querySelector(\'[data-vp="1440"]\').click()'],
       ['wait', 2000],
-      ['probe', "(d, fr, fd, fsr) => ({ at: 'faded', innerW: fd.defaultView.innerWidth, pins: Object.fromEntries([...fsr.querySelectorAll('.wd-pin')].map((p) => [p.dataset.thread, [Math.round(parseFloat(p.style.left)), Math.round(parseFloat(p.style.top))]])) })"],
-      ['size', [1000, 700]], ['wait', 1500],
-      ['probe', "(d, fr, fd, fsr) => ({ at: 'resized', innerW: fd.defaultView.innerWidth, pins: Object.fromEntries([...fsr.querySelectorAll('.wd-pin')].map((p) => [p.dataset.thread, [Math.round(parseFloat(p.style.left)), Math.round(parseFloat(p.style.top))]])) })"],
+      [
+        'probe',
+        "(d, fr, fd, fsr) => ({ at: '1440', innerW: fd.defaultView.innerWidth, scale: new DOMMatrix(getComputedStyle(fr).transform).a, pins: Object.fromEntries([...fsr.querySelectorAll('.wd-pin')].map((p) => [p.dataset.thread, [Math.round(parseFloat(p.style.left)), Math.round(parseFloat(p.style.top))]])) })",
+      ],
+      ['sr', 'r => r.querySelector(\'[data-vp="0"]\').click()'],
+      ['wait', 1500],
+      [
+        'sr',
+        "r => { const f = r.querySelector('#wdp-fade'); f.value = 30; f.dispatchEvent(new Event('input', { bubbles: true })); f.dispatchEvent(new Event('change', { bubbles: true })); }",
+      ],
+      ['wait', 2000],
+      [
+        'probe',
+        "(d, fr, fd, fsr) => ({ at: 'faded', innerW: fd.defaultView.innerWidth, pins: Object.fromEntries([...fsr.querySelectorAll('.wd-pin')].map((p) => [p.dataset.thread, [Math.round(parseFloat(p.style.left)), Math.round(parseFloat(p.style.top))]])) })",
+      ],
+      ['size', [1000, 700]],
+      ['wait', 1500],
+      [
+        'probe',
+        "(d, fr, fd, fsr) => ({ at: 'resized', innerW: fd.defaultView.innerWidth, pins: Object.fromEntries([...fsr.querySelectorAll('.wd-pin')].map((p) => [p.dataset.thread, [Math.round(parseFloat(p.style.left)), Math.round(parseFloat(p.style.top))]])) })",
+      ],
     ],
   },
   {
     name: 'embed-pin-tooltip',
     steps: [
-      ['aim', "(d, fr, fd, fsr) => { const b = fr.getBoundingClientRect(); const p = [...fsr.querySelectorAll('.wd-pin')].find((x) => parseFloat(x.style.top) > 20); const e = p.querySelector('.wd-dot').getBoundingClientRect(); return { x: b.x + e.x + e.width / 2, y: b.y + e.y + e.height / 2 }; }"],
-      ['hover'], ['wait', 800],
-      ['probe', "(d, fr, fd, fsr) => { const p = [...fsr.querySelectorAll('.wd-pin')].find((x) => parseFloat(x.style.top) > 20); const t = p.querySelector('[data-testid=\"pin.tip\"]'); const cs = getComputedStyle(t), r = t.getBoundingClientRect(), w = fd.defaultView; return { thread: p.dataset.thread, side: (p.className.match(/tooltip-\\w+/) || [])[0], titleAttribute: p.getAttribute('title'), lines: [...t.children].map((c) => c.textContent.replace(/\\s+/g, ' ').trim()), visible: cs.visibility + ' ' + cs.display + ' opacity ' + cs.opacity, pointerEvents: cs.pointerEvents, box: r.toJSON(), whollyOnSurface: r.left >= 0 && r.top >= 0 && r.right <= w.innerWidth && r.bottom <= w.innerHeight }; }"],
+      [
+        'aim',
+        "(d, fr, fd, fsr) => { const b = fr.getBoundingClientRect(); const p = [...fsr.querySelectorAll('.wd-pin')].find((x) => parseFloat(x.style.top) > 20); const e = p.querySelector('.wd-dot').getBoundingClientRect(); return { x: b.x + e.x + e.width / 2, y: b.y + e.y + e.height / 2 }; }",
+      ],
+      ['hover'],
+      ['wait', 800],
+      [
+        'probe',
+        "(d, fr, fd, fsr) => { const p = [...fsr.querySelectorAll('.wd-pin')].find((x) => parseFloat(x.style.top) > 20); const t = p.querySelector('[data-testid=\"pin.tip\"]'); const cs = getComputedStyle(t), r = t.getBoundingClientRect(), w = fd.defaultView; return { thread: p.dataset.thread, side: (p.className.match(/tooltip-\\w+/) || [])[0], titleAttribute: p.getAttribute('title'), lines: [...t.children].map((c) => c.textContent.replace(/\\s+/g, ' ').trim()), visible: cs.visibility + ' ' + cs.display + ' opacity ' + cs.opacity, pointerEvents: cs.pointerEvents, box: r.toJSON(), whollyOnSurface: r.left >= 0 && r.top >= 0 && r.right <= w.innerWidth && r.bottom <= w.innerHeight }; }",
+      ],
     ],
   },
   {
@@ -721,7 +1105,10 @@ const STATES = [
        itself. The count of host stylesheets it adds is the whole rule. */
     name: 'embed-pin-own-skin',
     steps: [
-      ['probe', "(d, fr, fd, fsr) => { const layer = [...fd.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot); const pin = fsr.querySelector('.wd-pin'); const dot = pin.querySelector('.wd-dot'); return { layerIsShadow: !!layer.shadowRoot, layerHasNoSize: layer.getBoundingClientRect().width + 'x' + layer.getBoundingClientRect().height, theme: layer.shadowRoot.querySelector('[data-theme]').dataset.theme, sheetsInShadow: layer.shadowRoot.querySelectorAll('style').length, sheetsAddedToHost: [...fd.querySelectorAll('style')].filter((s) => /wd-hover|wd-pinning|@property/.test(s.textContent)).map((s) => ({ selects: (s.textContent.match(/^[^{@][^{]*/gm) || []).map((x) => x.trim()).filter(Boolean).slice(0, 6), length: s.textContent.length })), pinMarkup: dot.innerHTML.replace(/\\s+/g, ' ').trim(), pinTone: getComputedStyle(dot).color, kindDisc: getComputedStyle(pin.querySelector('.wd-kind')).backgroundColor, kindLetter: pin.querySelector('.wd-kind').textContent }; }"],
+      [
+        'probe',
+        "(d, fr, fd, fsr) => { const layer = [...fd.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot); const pin = fsr.querySelector('.wd-pin'); const dot = pin.querySelector('.wd-dot'); return { layerIsShadow: !!layer.shadowRoot, layerHasNoSize: layer.getBoundingClientRect().width + 'x' + layer.getBoundingClientRect().height, theme: layer.shadowRoot.querySelector('[data-theme]').dataset.theme, sheetsInShadow: layer.shadowRoot.querySelectorAll('style').length, sheetsAddedToHost: [...fd.querySelectorAll('style')].filter((s) => /wd-hover|wd-pinning|@property/.test(s.textContent)).map((s) => ({ selects: (s.textContent.match(/^[^{@][^{]*/gm) || []).map((x) => x.trim()).filter(Boolean).slice(0, 6), length: s.textContent.length })), pinMarkup: dot.innerHTML.replace(/\\s+/g, ' ').trim(), pinTone: getComputedStyle(dot).color, kindDisc: getComputedStyle(pin.querySelector('.wd-kind')).backgroundColor, kindLetter: pin.querySelector('.wd-kind').textContent }; }",
+      ],
     ],
   },
   {
@@ -730,9 +1117,15 @@ const STATES = [
     name: 'embed-thread-provenance',
     steps: [
       ['tab', 'threads'],
-      ['sr', "r => (r.querySelector('[data-open-thread=\"n-0107\"]') ?? r.querySelector('[data-open-thread]')).click()"],
+      [
+        'sr',
+        "r => (r.querySelector('[data-open-thread=\"n-0107\"]') ?? r.querySelector('[data-open-thread]')).click()",
+      ],
       ['wait', 1200],
-      ['probe', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const prov = r.querySelector('[data-testid=\"thread.provenance\"]'); const body = r.querySelector('[data-testid=\"thread.body\"]'); const where = prov.parentElement.nextElementSibling; const reply = r.querySelector('[data-testid=\"thread.reply\"]'); const acts = [...r.querySelectorAll('[data-testid=\"thread.actions\"]')]; const lh = (e) => Math.round(e.getBoundingClientRect().height / parseFloat(getComputedStyle(e).lineHeight)); return { provenance: { text: prov.textContent.replace(/\\s+/g, ' ').trim(), lines: lh(prov), fontSize: getComputedStyle(prov).fontSize, box: prov.getBoundingClientRect().toJSON() }, where: { text: where.textContent.replace(/\\s+/g, ' ').trim(), lines: lh(where), fontSize: getComputedStyle(where).fontSize }, body: { box: body.getBoundingClientRect().toJSON(), overflowY: getComputedStyle(body).overflowY, scrollHeight: body.scrollHeight, clientHeight: body.clientHeight, replies: body.querySelectorAll('.wd-msg').length, paneHeight: Math.round(r.querySelector('[data-testid=\"thread.panel\"]').getBoundingClientRect().height), fontSize: getComputedStyle(body.querySelector('.wd-text')).fontSize, first: body.querySelector('.wd-text').textContent.replace(/\\s+/g, ' ').trim().slice(0, 120) }, reply: { placeholder: reply.placeholder, value: reply.value, row: reply.parentElement.textContent.replace(/\\s+/g, ' ').trim() }, actions: acts.map((a) => ({ label: a.textContent.trim(), act: a.dataset.act, top: Math.round(a.getBoundingClientRect().top) })) }; }"],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const prov = r.querySelector('[data-testid=\"thread.provenance\"]'); const body = r.querySelector('[data-testid=\"thread.body\"]'); const where = prov.parentElement.nextElementSibling; const reply = r.querySelector('[data-testid=\"thread.reply\"]'); const acts = [...r.querySelectorAll('[data-testid=\"thread.actions\"]')]; const lh = (e) => Math.round(e.getBoundingClientRect().height / parseFloat(getComputedStyle(e).lineHeight)); return { provenance: { text: prov.textContent.replace(/\\s+/g, ' ').trim(), lines: lh(prov), fontSize: getComputedStyle(prov).fontSize, box: prov.getBoundingClientRect().toJSON() }, where: { text: where.textContent.replace(/\\s+/g, ' ').trim(), lines: lh(where), fontSize: getComputedStyle(where).fontSize }, body: { box: body.getBoundingClientRect().toJSON(), overflowY: getComputedStyle(body).overflowY, scrollHeight: body.scrollHeight, clientHeight: body.clientHeight, replies: body.querySelectorAll('.wd-msg').length, paneHeight: Math.round(r.querySelector('[data-testid=\"thread.panel\"]').getBoundingClientRect().height), fontSize: getComputedStyle(body.querySelector('.wd-text')).fontSize, first: body.querySelector('.wd-text').textContent.replace(/\\s+/g, ' ').trim().slice(0, 120) }, reply: { placeholder: reply.placeholder, value: reply.value, row: reply.parentElement.textContent.replace(/\\s+/g, ' ').trim() }, actions: acts.map((a) => ({ label: a.textContent.trim(), act: a.dataset.act, top: Math.round(a.getBoundingClientRect().top) })) }; }",
+      ],
     ],
   },
   {
@@ -748,11 +1141,20 @@ const STATES = [
     config: { bp: 'example/blueprint', server: BASE },
     steps: [
       ['no-writes'],
-      ['top', "(d) => d.defaultView.walkdownEmbed.setPinMode(true)"], ['wait', 400],
-      ['aim', "(d) => ({ x: 300, y: 300 })"], ['click'], ['wait', 600],
-      ['top', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const t = r.querySelector('[data-testid=\"pin.note\"]'); t.value = 'sitting probe — which project does this land in'; t.dispatchEvent(new Event('input', { bubbles: true })); r.querySelector('[data-testid=\"pin.save\"]').click(); }"],
+      ['top', '(d) => d.defaultView.walkdownEmbed.setPinMode(true)'],
+      ['wait', 400],
+      ['aim', '(d) => ({ x: 300, y: 300 })'],
+      ['click'],
+      ['wait', 600],
+      [
+        'top',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const t = r.querySelector('[data-testid=\"pin.note\"]'); t.value = 'sitting probe — which project does this land in'; t.dispatchEvent(new Event('input', { bubbles: true })); r.querySelector('[data-testid=\"pin.save\"]').click(); }",
+      ],
       ['wait', 1000],
-      ['probe', "(d) => ({ declares: d.defaultView.__walkdownConfig, held: d.defaultView.__held })"],
+      [
+        'probe',
+        '(d) => ({ declares: d.defaultView.__walkdownConfig, held: d.defaultView.__held })',
+      ],
     ],
   },
   {
@@ -762,11 +1164,20 @@ const STATES = [
     url: '/stand-in/review',
     steps: [
       ['no-writes'],
-      ['top', "(d) => d.defaultView.walkdownEmbed.setPinMode(true)"], ['wait', 400],
-      ['aim', "(d) => ({ x: 300, y: 300 })"], ['click'], ['wait', 600],
-      ['top', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const t = r.querySelector('[data-testid=\"pin.note\"]'); t.value = 'sitting probe — no project declared'; t.dispatchEvent(new Event('input', { bubbles: true })); r.querySelector('[data-testid=\"pin.save\"]').click(); }"],
+      ['top', '(d) => d.defaultView.walkdownEmbed.setPinMode(true)'],
+      ['wait', 400],
+      ['aim', '(d) => ({ x: 300, y: 300 })'],
+      ['click'],
+      ['wait', 600],
+      [
+        'top',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const t = r.querySelector('[data-testid=\"pin.note\"]'); t.value = 'sitting probe — no project declared'; t.dispatchEvent(new Event('input', { bubbles: true })); r.querySelector('[data-testid=\"pin.save\"]').click(); }",
+      ],
       ['wait', 1000],
-      ['probe', "(d) => ({ declares: d.defaultView.__walkdownConfig ?? null, tagBp: d.querySelector('script[data-walkdown]')?.dataset.bp ?? null, held: d.defaultView.__held })"],
+      [
+        'probe',
+        "(d) => ({ declares: d.defaultView.__walkdownConfig ?? null, tagBp: d.querySelector('script[data-walkdown]')?.dataset.bp ?? null, held: d.defaultView.__held })",
+      ],
     ],
   },
   {
@@ -775,10 +1186,17 @@ const STATES = [
     name: 'embed-thread-waive-needs-a-reason',
     steps: [
       ['tab', 'threads'],
-      ['sr', "r => r.querySelector('[data-open-thread]').click()"], ['wait', 1200],
-      ['sr', "r => [...r.querySelectorAll('[data-testid=\"thread.actions\"]')].find((a) => a.dataset.act === 'waived').click()"],
+      ['sr', "r => r.querySelector('[data-open-thread]').click()"],
+      ['wait', 1200],
+      [
+        'sr',
+        "r => [...r.querySelectorAll('[data-testid=\"thread.actions\"]')].find((a) => a.dataset.act === 'waived').click()",
+      ],
       ['wait', 1000],
-      ['probe', "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const say = r.querySelector('[data-testid=\"thread.say\"]'); return { thread: r.querySelector('[data-testid=\"thread.provenance\"]').textContent.replace(/\\s+/g, ' ').trim(), said: say.textContent.trim(), shown: !say.classList.contains('hidden'), stillOnThread: !!r.querySelector('[data-testid=\"thread.reply\"]') }; }"],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const say = r.querySelector('[data-testid=\"thread.say\"]'); return { thread: r.querySelector('[data-testid=\"thread.provenance\"]').textContent.replace(/\\s+/g, ' ').trim(), said: say.textContent.trim(), shown: !say.classList.contains('hidden'), stillOnThread: !!r.querySelector('[data-testid=\"thread.reply\"]') }; }",
+      ],
     ],
   },
 ];
@@ -821,7 +1239,9 @@ async function capture(only = []) {
   const errors = [];
   const watch = (pg) => {
     pg.on('pageerror', (e) => errors.push(`PAGEERROR ${e.message}`));
-    pg.on('console', (m) => { if (m.type() === 'error') errors.push(`CONSOLE ${m.text()}`); });
+    pg.on('console', (m) => {
+      if (m.type() === 'error') errors.push(`CONSOLE ${m.text()}`);
+    });
     return pg;
   };
   let page = watch(await browser.newPage({ viewportSize: { width: 1280, height: 760 } }));
@@ -831,17 +1251,23 @@ async function capture(only = []) {
   for (const s of screens) {
     const url = `${BASE}/${protoRoot}${s.path}`;
     const res = await page.goto(url, { waitUntil: 'load' }).catch(() => null);
-    if (!res?.ok()) { console.log(`  proto-${s.id}: ${res?.status() ?? 'unreachable'} — skipped`); continue; }
+    if (!res?.ok()) {
+      console.log(`  proto-${s.id}: ${res?.status() ?? 'unreachable'} — skipped`);
+      continue;
+    }
     await page.waitForTimeout(700);
     await page.screenshot({ path: join(dir, `proto-${s.id}.png`) });
     console.log(`  proto-${s.id}.png`);
   }
 
-  const inSr = (body) => page.evaluate((src) => {
-    const root = [...document.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot)?.shadowRoot;
-    if (!root) throw new Error('the panel has no shadow root — did it boot?');
-    return new Function('root', `return (${src})(root)`)(root);
-  }, body);
+  const inSr = (body) =>
+    page.evaluate((src) => {
+      const root = [...document.querySelectorAll('[data-walkdown-chrome]')].find(
+        (e) => e.shadowRoot,
+      )?.shadowRoot;
+      if (!root) throw new Error('the panel has no shadow root — did it boot?');
+      return new Function('root', `return (${src})(root)`)(root);
+    }, body);
 
   /*
    * The same thing for the page under review. `sr` reaches the panel; this
@@ -852,19 +1278,44 @@ async function capture(only = []) {
    * through shadow roots and writing it fifteen times is how one of them ends
    * up subtly different from the others.
    */
-  const inTop = (body) => page.evaluate((src) => {
-    const fr = document.querySelector('[data-testid="panel.app-frame"]');
-    const found = [];
-    const walk = (n) => { for (const e of n.querySelectorAll('*')) { if (e.tagName === 'IFRAME') found.push(e); if (e.shadowRoot) walk(e.shadowRoot); } };
-    walk(document);
-    const gh = found.find((f) => f !== fr) ?? null;
-    const shadow = (f) => {
-      const doc = f?.contentDocument;
-      return doc ? [...doc.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot)?.shadowRoot ?? null : null;
-    };
-    return new Function('d', 'fr', 'fd', 'fsr', 'gh', 'gd', 'gsr', `return (${src})(d, fr, fd, fsr, gh, gd, gsr)`)(
-      document, fr, fr?.contentDocument ?? null, shadow(fr), gh, gh?.contentDocument ?? null, shadow(gh));
-  }, body);
+  const inTop = (body) =>
+    page.evaluate((src) => {
+      const fr = document.querySelector('[data-testid="panel.app-frame"]');
+      const found = [];
+      const walk = (n) => {
+        for (const e of n.querySelectorAll('*')) {
+          if (e.tagName === 'IFRAME') found.push(e);
+          if (e.shadowRoot) walk(e.shadowRoot);
+        }
+      };
+      walk(document);
+      const gh = found.find((f) => f !== fr) ?? null;
+      const shadow = (f) => {
+        const doc = f?.contentDocument;
+        return doc
+          ? ([...doc.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot)
+              ?.shadowRoot ?? null)
+          : null;
+      };
+      return new Function(
+        'd',
+        'fr',
+        'fd',
+        'fsr',
+        'gh',
+        'gd',
+        'gsr',
+        `return (${src})(d, fr, fd, fsr, gh, gd, gsr)`,
+      )(
+        document,
+        fr,
+        fr?.contentDocument ?? null,
+        shadow(fr),
+        gh,
+        gh?.contentDocument ?? null,
+        shadow(gh),
+      );
+    }, body);
 
   for (const state of STATES) {
     if (only.length && !only.includes(state.name)) continue;
@@ -893,7 +1344,9 @@ async function capture(only = []) {
         Object.defineProperty(window, '__walkdownConfig', {
           configurable: true,
           get: () => held,
-          set: (v) => { held = { ...v, ...c }; },
+          set: (v) => {
+            held = { ...v, ...c };
+          },
         });
       }, state.config);
     }
@@ -903,7 +1356,8 @@ async function capture(only = []) {
     const probes = [];
     for (const [op, arg] of state.steps) {
       if (op === 'sr') await inSr(arg);
-      else if (op === 'tab') await inSr(`r => r.querySelector('[role=tab][data-tab=${arg}]').click()`);
+      else if (op === 'tab')
+        await inSr(`r => r.querySelector('[role=tab][data-tab=${arg}]').click()`);
       else if (op === 'key') await page.keyboard.press(arg);
       else if (op === 'wait') await page.waitForTimeout(arg);
       else if (op === 'top') await inTop(arg);
@@ -916,8 +1370,7 @@ async function capture(only = []) {
        * three ops rather than one `drag` because what a drag has to prove is
        * what happens PART WAY through it, and a state can only photograph
        * that if it can stop in the middle.
-       */
-      else if (op === 'down') await page.mouse.down();
+       */ else if (op === 'down') await page.mouse.down();
       else if (op === 'up') await page.mouse.up();
       // Typing where focus already is - the panel's dial editors and the
       // composer both care that a real keystroke arrived, not that a value
@@ -936,34 +1389,50 @@ async function capture(only = []) {
        * purpose: every call the panel makes carries `?bp=`, and a glob ending
        * in `/api/threads` matches none of them - a miss that filed real junk
        * threads twice in one night before it was noticed.
-       */
-      else if (op === 'no-writes') await page.evaluate((status) => {
-        window.__held = [];
-        const real = window.fetch;
-        window.fetch = (u, o) => {
-          if (o?.method !== 'POST' || !String(u).includes('/api/threads')) return real(u, o);
-          window.__held.push({ url: String(u), body: JSON.parse(o.body) });
-          const body = status ? { error: 'held by the sitting harness' } : { id: 'n-HELD', thread: {} };
-          return Promise.resolve(new Response(JSON.stringify(body),
-            { status: status ?? 200, headers: { 'content-type': 'application/json' } }));
-        };
-      }, arg ?? null);
+       */ else if (op === 'no-writes')
+        await page.evaluate((status) => {
+          window.__held = [];
+          const real = window.fetch;
+          window.fetch = (u, o) => {
+            if (o?.method !== 'POST' || !String(u).includes('/api/threads')) return real(u, o);
+            window.__held.push({ url: String(u), body: JSON.parse(o.body) });
+            const body = status
+              ? { error: 'held by the sitting harness' }
+              : { id: 'n-HELD', thread: {} };
+            return Promise.resolve(
+              new Response(JSON.stringify(body), {
+                status: status ?? 200,
+                headers: { 'content-type': 'application/json' },
+              }),
+            );
+          };
+        }, arg ?? null);
       if (op === 'tab') await page.waitForTimeout(500);
     }
     await page.screenshot({ path: join(dir, `${state.name}.png`) });
     console.log(`  ${state.name}.png`);
     // A measurement is evidence too, and it goes beside the picture it explains.
     if (probes.length) {
-      writeFileSync(join(dir, `${state.name}.json`), JSON.stringify(probes.length === 1 ? probes[0] : probes, null, 2) + '\n');
+      writeFileSync(
+        join(dir, `${state.name}.json`),
+        JSON.stringify(probes.length === 1 ? probes[0] : probes, null, 2) + '\n',
+      );
       console.log(`  ${state.name}.json`);
     }
     await page.setViewportSize({ width: 1280, height: 760 });
-    if (page !== home) { await page.close(); page = home; }
+    if (page !== home) {
+      await page.close();
+      page = home;
+    }
   }
   await browser.close();
 
   console.log(`\nevidence: ${dir}  (recorded as runs/evidence/${ts}/)`);
-  console.log(errors.length ? `\n${errors.length} PAGE ERROR(S):\n  ${errors.join('\n  ')}` : '\nno page errors in any state');
+  console.log(
+    errors.length
+      ? `\n${errors.length} PAGE ERROR(S):\n  ${errors.join('\n  ')}`
+      : '\nno page errors in any state',
+  );
   writeFileSync(join(dir, 'errors.txt'), errors.join('\n') + '\n');
   return ts;
 }
@@ -981,26 +1450,44 @@ function record(file) {
   const bad = [];
   for (const r of input.results ?? []) {
     if (!r.reasoning || r.reasoning.trim().length < 40) bad.push(`${r.rule}: reasoning too thin`);
-    if (!['pass', 'fail', 'blocked', 'skipped'].includes(r.status)) bad.push(`${r.rule}: bad status`);
+    if (!['pass', 'fail', 'blocked', 'skipped'].includes(r.status))
+      bad.push(`${r.rule}: bad status`);
     if (!(r.evidence ?? []).length) bad.push(`${r.rule}: no evidence`);
     if (!s.rows.some((row) => row.rule === r.rule)) bad.push(`${r.rule}: no such rule`);
   }
-  if (bad.length) { console.error('refusing to record:\n  ' + bad.join('\n  ')); process.exit(1); }
+  if (bad.length) {
+    console.error('refusing to record:\n  ' + bad.join('\n  '));
+    process.exit(1);
+  }
 
   const ts = stamp();
-  const sha = execFileSync('git', ['rev-parse', '--short', 'HEAD'], { cwd: ROOT, encoding: 'utf8' }).trim();
-  const dirty = execFileSync('git', ['status', '--porcelain'], { cwd: ROOT, encoding: 'utf8' }).trim() ? '-dirty' : '';
+  const sha = execFileSync('git', ['rev-parse', '--short', 'HEAD'], {
+    cwd: ROOT,
+    encoding: 'utf8',
+  }).trim();
+  const dirty = execFileSync('git', ['status', '--porcelain'], {
+    cwd: ROOT,
+    encoding: 'utf8',
+  }).trim()
+    ? '-dirty'
+    : '';
   const run = {
     run_id: `${ts}-local-01`,
     created: ts.replace(/T(\d\d)-(\d\d)-(\d\d)Z$/, (m, h, mi, sec) => `T${h}:${mi}:${sec}Z`),
-    actor: 'agent', kind: 'walkdown', target: input.target ?? 'local',
+    actor: 'agent',
+    kind: 'walkdown',
+    target: input.target ?? 'local',
     base_url: input.base_url ?? BASE,
-    git_sha: sha + dirty, blueprint_sha: sha + dirty,
+    git_sha: sha + dirty,
+    blueprint_sha: sha + dirty,
     ...(input.note && { note: input.note }),
     results: input.results,
   };
   const out = join(BP, 'runs', `${run.run_id}.json`);
-  if (existsSync(out)) { console.error(`${out} exists`); process.exit(1); }
+  if (existsSync(out)) {
+    console.error(`${out} exists`);
+    process.exit(1);
+  }
   writeFileSync(out, JSON.stringify(run, null, 2) + '\n');
   console.log(`recorded ${run.run_id} — ${run.results.length} verdict(s)`);
   console.log(`  ${out}`);
@@ -1010,8 +1497,14 @@ function record(file) {
 
 if (cmd === 'owed') owed();
 else if (cmd === 'capture') await capture(rest);
-else if (cmd === 'record') record(rest[0] ?? (console.error('usage: record <verdicts.json>'), process.exit(1)));
+else if (cmd === 'record')
+  record(rest[0] ?? (console.error('usage: record <verdicts.json>'), process.exit(1)));
 else {
-  console.log(readFileSync(new URL(import.meta.url), 'utf8').split('*/')[0].replace(/^\/\*\n?/, '').replace(/^ \* ?/gm, ''));
+  console.log(
+    readFileSync(new URL(import.meta.url), 'utf8')
+      .split('*/')[0]
+      .replace(/^\/\*\n?/, '')
+      .replace(/^ \* ?/gm, ''),
+  );
   process.exit(cmd ? 1 : 0);
 }

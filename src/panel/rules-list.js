@@ -8,7 +8,14 @@ import { icon } from './icons.js';
 import { D, S } from './state.js';
 import { esc } from './util.js';
 import {
-  LBL, groupedRows, needsYou, screenById, screenIdOf, shortName, storyLabels, threadsFor,
+  LBL,
+  groupedRows,
+  needsYou,
+  screenById,
+  screenIdOf,
+  shortName,
+  storyLabels,
+  threadsFor,
 } from './vocab.js';
 
 /**
@@ -75,19 +82,26 @@ export function searchBox() {
  * name gives you every rule judged on it. That is the question the grouping
  * invites, and a heading you can see but not search for reads as broken.
  */
-export const matchesQuery = (s, q) => String(s ?? '').toLowerCase().includes(q);
+export const matchesQuery = (s, q) =>
+  String(s ?? '')
+    .toLowerCase()
+    .includes(q);
 export function matchingRows() {
   const q = S.ruleQuery.trim().toLowerCase();
   if (!q) return S.data.rows;
-  const groups = new Set(
-    S.data.rows.map((r) => r.story).filter((story) => matchesQuery(story, q))
+  const groups = new Set(S.data.rows.map((r) => r.story).filter((story) => matchesQuery(story, q)));
+  const screens = new Set(
+    (S.data.storyboard ?? [])
+      .filter((sc) => matchesQuery(sc.title, q) || matchesQuery(sc.id, q))
+      .map((sc) => sc.id),
   );
-  const screens = new Set((S.data.storyboard ?? [])
-    .filter((sc) => matchesQuery(sc.title, q) || matchesQuery(sc.id, q))
-    .map((sc) => sc.id));
-  return S.data.rows.filter((row) =>
-    groups.has(row.story) || screens.has(screenIdOf(row))
-    || matchesQuery(row.rule, q) || matchesQuery(row.statement, q));
+  return S.data.rows.filter(
+    (row) =>
+      groups.has(row.story) ||
+      screens.has(screenIdOf(row)) ||
+      matchesQuery(row.rule, q) ||
+      matchesQuery(row.statement, q),
+  );
 }
 
 /*
@@ -239,17 +253,18 @@ export const SIGN_SAY = {
  */
 function signoffDot(a, mine) {
   const tint = ROLE_TINT[a.role] ?? 'text-base-content';
-  if (a.state === 'sent-back')
-    return `<span class="text-[8px] leading-none text-error">✗</span>`;
-  const shape = {
-    signed: 'size-[6px] bg-current',
-    approved: 'size-[6px] border border-current',
-    stale: 'size-[6px] border border-current',
-  }[a.state] ?? 'size-[6px] border border-current';
-  const fill = {
-    approved: ' style="background:linear-gradient(to top, currentColor 50%, transparent 50%)"',
-    stale: ' style="background:radial-gradient(currentColor 0 1.25px, transparent 1.25px)"',
-  }[a.state] ?? '';
+  if (a.state === 'sent-back') return `<span class="text-[8px] leading-none text-error">✗</span>`;
+  const shape =
+    {
+      signed: 'size-[6px] bg-current',
+      approved: 'size-[6px] border border-current',
+      stale: 'size-[6px] border border-current',
+    }[a.state] ?? 'size-[6px] border border-current';
+  const fill =
+    {
+      approved: ' style="background:linear-gradient(to top, currentColor 50%, transparent 50%)"',
+      stale: ' style="background:radial-gradient(currentColor 0 1.25px, transparent 1.25px)"',
+    }[a.state] ?? '';
   // Owed slots dim when the rule is not waiting on you, exactly as the tier
   // glyphs beside them do — the strip has one language for "your turn".
   const dim = a.state !== 'signed' && !mine ? ' opacity-60' : '';
@@ -267,15 +282,22 @@ const MAX_SLOTS = 3;
 function signoffStack(acceptance, mine) {
   const all = stackOrder(acceptance);
   if (!all.length) return '';
-  const slots = all.length > MAX_SLOTS
-    ? [all[0], { role: '+', state: 'more', n: all.length - 2 }, all.at(-1)]
-    : all;
+  const slots =
+    all.length > MAX_SLOTS
+      ? [all[0], { role: '+', state: 'more', n: all.length - 2 }, all.at(-1)]
+      : all;
   return `<span class="flex w-4 shrink-0 flex-col items-center justify-center"
     data-testid="panel.rule-signoff" data-signoff="${esc(all.map((a) => `${a.role}:${a.state}`).join(' '))}"
-    >${slots.map((a) => `<span class="flex h-[9px] items-center justify-center">${
-      a.state === 'more'
-        ? `<span class="text-[8px] leading-none opacity-60">+${a.n}</span>`
-        : signoffDot(a, mine)}</span>`).join('')}</span>`;
+    >${slots
+      .map(
+        (a) =>
+          `<span class="flex h-[9px] items-center justify-center">${
+            a.state === 'more'
+              ? `<span class="text-[8px] leading-none opacity-60">+${a.n}</span>`
+              : signoffDot(a, mine)
+          }</span>`,
+      )
+      .join('')}</span>`;
 }
 
 /*
@@ -295,12 +317,15 @@ function signoffStack(acceptance, mine) {
  * this one is read at a glance, on the way past.
  */
 function stripTip(tiers, acceptance) {
-  const cells = tiers.map(([kind, state, cell]) =>
-    [kind, state === 'stale' ? whyStale(cell) : (TIER_MARK[state] ?? TIER_MARK.na)[2]]);
+  const cells = tiers.map(([kind, state, cell]) => [
+    kind,
+    state === 'stale' ? whyStale(cell) : (TIER_MARK[state] ?? TIER_MARK.na)[2],
+  ]);
   const signs = stackOrder(acceptance).map((a) => [
     a.role,
     `${SIGN_SAY[a.state] ?? a.state}${a.actor ? ` · ${a.actor}` : ''}${
-      a.created ? ` · ${MSG.ago(a.created)}` : ''}`,
+      a.created ? ` · ${MSG.ago(a.created)}` : ''
+    }`,
   ]);
   const line = ([label, said]) =>
     `<span class="opacity-60">${esc(label)}</span><span>${esc(said)}</span>`;
@@ -322,10 +347,13 @@ function stripTip(tiers, acceptance) {
    * the same hover, one at z-2 and one at z-20, are what settled it.
    */
   return `<span class="tooltip-content z-20 w-60 whitespace-normal text-left text-[11px] leading-snug"
-    data-testid="panel.rule-tiers-tip"><span class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5">${
-      cells.map(line).join('')}${signs.length
+    data-testid="panel.rule-tiers-tip"><span class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5">${cells
+      .map(line)
+      .join('')}${
+      signs.length
         ? `<span class="col-span-2 mt-0.5 opacity-40">accepted by</span>${signs.map(line).join('')}`
-        : ''}</span></span>`;
+        : ''
+    }</span></span>`;
 }
 
 export function tierMarks(row, mine = false) {
@@ -354,11 +382,14 @@ export function tierMarks(row, mine = false) {
   // strip opens the strip's bubble and nothing else.
   return `<span class="tooltip tooltip-right flex w-11 shrink-0 items-center justify-center gap-0.5 text-[12px] leading-none"
     title="" data-testid="panel.rule-tiers" data-tiers="${esc(tiers.map((t) => `${t[0]}:${t[1]}`).join(' '))}"
-    >${stripTip(tiers, row.acceptance)}${tiers.map(([, state, cell]) => {
-      const [glyph, cls] = TIER_MARK[state] ?? TIER_MARK.na;
-      return `<span class="inline-block w-4 text-center ${
-        TIER_OWED.has(state) && !mine ? 'opacity-60' : cls}">${glyph}</span>`;
-    }).join('')}${signoffStack(row.acceptance, mine)}</span>`;
+    >${stripTip(tiers, row.acceptance)}${tiers
+      .map(([, state, cell]) => {
+        const [glyph, cls] = TIER_MARK[state] ?? TIER_MARK.na;
+        return `<span class="inline-block w-4 text-center ${
+          TIER_OWED.has(state) && !mine ? 'opacity-60' : cls
+        }">${glyph}</span>`;
+      })
+      .join('')}${signoffStack(row.acceptance, mine)}</span>`;
 }
 
 /*
@@ -389,8 +420,8 @@ function screenHeader(id) {
     data-testid="panel.rules-screen" data-screen-group="${esc(id ?? '')}">
     <span class="mt-0.5 shrink-0 ${id ? 'text-primary' : 'opacity-30'}">${icon('frame-corners', 'size-3.5')}</span>
     <span class="min-w-0 text-[12.5px] font-semibold leading-snug">${
-      title ? esc(title) : 'No screen'}${
-      id ? '' : '<span class="ml-1.5 font-normal opacity-40">judged without looking</span>'}</span>
+      title ? esc(title) : 'No screen'
+    }${id ? '' : '<span class="ml-1.5 font-normal opacity-40">judged without looking</span>'}</span>
   </div>`;
 }
 
@@ -417,12 +448,18 @@ function ruleRow(row) {
    */
   return `<button class="flex w-full cursor-pointer items-center gap-2.5 px-3.5 py-2 text-left text-[14px] hover:bg-base-200"
       data-rule="${esc(row.rule)}" title="${esc(row.rule)} — ${esc(why)}">
-      ${picked
-        ? `<span class="w-11 shrink-0 text-center ${
-            { pass: 'text-success', fail: 'text-error', approved: 'text-success',
-              refining: 'text-warning' }[picked]}">${
-            { pass: '✓', fail: '✗', approved: '✍︎', refining: '✎︎' }[picked]}</span>`
-        : tierMarks(row, mine)}
+      ${
+        picked
+          ? `<span class="w-11 shrink-0 text-center ${
+              {
+                pass: 'text-success',
+                fail: 'text-error',
+                approved: 'text-success',
+                refining: 'text-warning',
+              }[picked]
+            }">${{ pass: '✓', fail: '✗', approved: '✍︎', refining: '✎︎' }[picked]}</span>`
+          : tierMarks(row, mine)
+      }
       <span class="truncate">${esc(shortName(row))}</span>
       <span class="ml-auto flex shrink-0 items-center gap-2 text-[11.5px] font-semibold">
         <span class="w-7 text-right text-warning">${owes}</span>
@@ -445,15 +482,17 @@ export function listPane() {
     return '<p class="p-3.5 text-[13.5px] opacity-40">No rules in this blueprint.</p>';
   const rows = matchingRows();
   if (!rows.length)
-    return `<p class="p-3.5 text-[13.5px] opacity-40" data-testid="panel.rules-empty">No rule matches ${
-      esc(S.ruleQuery.trim())}.</p>`;
+    return `<p class="p-3.5 text-[13.5px] opacity-40" data-testid="panel.rules-empty">No rule matches ${esc(
+      S.ruleQuery.trim(),
+    )}.</p>`;
   let html = '';
   for (const group of groupedRows(rows)) {
     html += screenHeader(group.screen);
     const labels = storyLabels(group.stories.map((g) => g.story));
     for (const { story, rows: within } of group.stories) {
-      html += `<div class="px-3.5 pb-1 pt-2.5 ${LBL}" data-story="${esc(story)}">${
-        esc(labels.get(story))}</div>`;
+      html += `<div class="px-3.5 pb-1 pt-2.5 ${LBL}" data-story="${esc(story)}">${esc(
+        labels.get(story),
+      )}</div>`;
       html += within.map((row) => ruleRow(row)).join('');
     }
   }
@@ -479,14 +518,17 @@ export function paintRules() {
   const list = D.host.querySelector('.wdp-list');
   if (!list) return;
   list.innerHTML = listPane();
-  list.scrollTop = 0;   // a filtered list is a new list; showing its middle is not helpful
+  list.scrollTop = 0; // a filtered list is a new list; showing its middle is not helpful
   wireRuleRows();
 }
 
 export function wireSearch() {
   const box = D.host.querySelector('#wdp-search');
   if (!box) return;
-  box.oninput = () => { S.ruleQuery = box.value; paintRules(); };
+  box.oninput = () => {
+    S.ruleQuery = box.value;
+    paintRules();
+  };
   box.onkeydown = (e) => {
     // Escape clears the box rather than reaching the page behind it, where it
     // would end pin mode and leave the list still filtered.
@@ -528,7 +570,8 @@ const LEGEND_TIERS = [
 const LEGEND_SIGNS = ['signed', 'approved', 'stale', 'none', 'sent-back'];
 
 export function legendControl() {
-  const head = (t) => `<span class="col-span-2 pt-1 text-[10px] font-bold uppercase tracking-widest opacity-40">${t}</span>`;
+  const head = (t) =>
+    `<span class="col-span-2 pt-1 text-[10px] font-bold uppercase tracking-widest opacity-40">${t}</span>`;
   const tierLine = (state) => {
     const [glyph, cls, why] = TIER_MARK[state];
     return `<span class="text-center ${cls}">${glyph}</span><span>${esc(why)}</span>`;

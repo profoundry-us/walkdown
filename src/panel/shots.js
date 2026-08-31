@@ -33,14 +33,20 @@ export function openShots(paths) {
       <span class="text-[12px] font-semibold uppercase tracking-widest opacity-80">Screenshots</span>
       <button class="btn btn-xs ml-auto" data-testid="detail.screenshots-close">Close</button>
     </div>
-    ${paths.map((p) => `<figure class="w-full max-w-4xl">
+    ${paths
+      .map(
+        (p) => `<figure class="w-full max-w-4xl">
       <img src="${esc(api('/evidence/' + p))}" alt="${esc(p)}"
         class="w-full rounded border border-base-300 bg-base-100">
       <figcaption class="mt-1 font-mono text-[10.5px] text-base-100 opacity-70">${esc(p)}</figcaption>
-    </figure>`).join('')}`;
+    </figure>`,
+      )
+      .join('')}`;
   // The backdrop dismisses, the pictures do not: a click meant for an image
   // must not close the thing it is looking at.
-  shotLayer.onclick = (e) => { if (e.target === shotLayer) closeShots(); };
+  shotLayer.onclick = (e) => {
+    if (e.target === shotLayer) closeShots();
+  };
   shotLayer.querySelector('[data-testid="detail.screenshots-close"]').onclick = closeShots;
   D.sr.appendChild(shotLayer);
 }

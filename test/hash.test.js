@@ -5,7 +5,7 @@ import { canonicalize, formatHash, hashMatches, statementHash } from '../lib/has
 test('canonicalize collapses whitespace and trims', () => {
   assert.equal(
     canonicalize('  A visitor\n  must provide\ta valid email.  '),
-    'A visitor must provide a valid email.'
+    'A visitor must provide a valid email.',
   );
 });
 
