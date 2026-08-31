@@ -18,7 +18,7 @@ import { dirname, join } from 'node:path';
 const HERE = dirname(new URL(import.meta.url).pathname);
 const ROOT = join(HERE, '..');
 const PANEL = join(ROOT, 'src', 'panel', 'icons.js'); // the source, not the build
-const EMBED = join(ROOT, 'lib', 'viewer', 'embed.js');
+const EMBED = join(ROOT, 'src', 'embed', 'index.js');
 
 /*
  * Who needs which icons. The embed is injected into every page walkdown looks

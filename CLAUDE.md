@@ -45,22 +45,24 @@ belong in walkdown's runs ledger, never in a Highball run.
 The hooks call the local binary directly — npx resolves the same package
 but intermittently stalls for minutes, which a per-edit hook cannot afford.
 
-## The panel is built, not edited in place
+## The panel and the embed are built, not edited in place
 
-`lib/viewer/panel.js` is Rollup's output. Edit `src/panel/index.js` — an edit
-to the built file survives until the next `npm run build:js` and then vanishes,
-which reads exactly like the change never worked.
+`lib/viewer/panel.js` and `lib/viewer/embed.js` are Rollup's output. Edit
+`src/panel/` and `src/embed/` — an edit to a built file survives until the
+next `npm run build:js` and then vanishes, which reads exactly like the change
+never worked.
 
-    npm run build:js     # src/panel -> lib/viewer/panel.js
-    npm run check:js     # the build is current (Highball runs this)
+    npm run build:js     # src/panel -> lib/viewer/panel.js, src/embed -> lib/viewer/embed.js
+    npm run check:js     # both builds are current (Highball runs this)
 
-The build is committed because both deliveries read it: the classic `<script>`
-`walkdown serve` hands out, and `extension/vendor/panel.js`, which `build:ext`
-copies. Rollup runs with `treeshake: false` and `format: 'es'`; the reasons are
-in `rollup.config.mjs` and both are load-bearing.
+The builds are committed because both deliveries read them: the classic
+`<script>` `walkdown serve` hands out, and `extension/vendor/`, which
+`build:ext` copies. Rollup runs with `treeshake: false` and `format: 'es'`;
+the reasons are in `rollup.config.mjs` and both are load-bearing.
 
-`tools/sync-shared.mjs` and `tools/sync-phosphor.mjs` write their generated
-blocks into the source, not the build, for the same reason.
+`tools/sync-phosphor.mjs` writes its generated icon blocks into the sources,
+not the builds, for the same reason. (`tools/sync-shared.mjs`, which pasted
+shared modules into the embed, retired when the embed got its bundler.)
 
 ## Judging the whole board
 

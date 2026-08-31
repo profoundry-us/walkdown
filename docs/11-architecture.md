@@ -183,14 +183,16 @@ never combined with a behaviour change in the same commit.
    *Done, and tooled: Biome owns format and correctness lint; `lib/` is
    JSDoc-typed under `tsc --checkJs`; both run in Highball.*
 1. **`lib/vocab.js`.** Smallest change, highest leverage, touches every file
-   once. Do it while the codebase is still small enough that "every file" is a
-   morning.
-2. **Split `bin/`.** Purely mechanical, no behaviour to break, and it makes the
+   once. *Done - the terminal set alone existed five times, in three orders.*
+2. **Split `bin/`.** *Done: router + `bin/commands/` + `lib/report/`.* Purely mechanical, no behaviour to break, and it makes the
    next three easier to review by getting the noisiest file out of every diff.
    Types follow: `bin/` joins the `checkJs` scope as it splits.
 3. **Split `lib/serve.js`**, and make the write allowlist a module with its own
-   rule and its own checks.
-4. **Bundle the embed**; retire `tools/sync-shared.mjs`.
+   rule and its own checks. *Done: `lib/{serve,api,identity,writes}.js`, rule
+   `ownership.writes.spec-never-implementation`.*
+4. **Bundle the embed**; retire `tools/sync-shared.mjs`. *Done: `src/embed/`
+   builds to `lib/viewer/embed.js`, the pasted blocks became imports, and the
+   panel/embed `CHIP` duplicate collapsed into `lib/vocab.js`.*
 5. **Rebuild the panel's panes on Lit** (decision made: lit-html + LitElement,
    the Chrome DevTools stack - see [10-house-style.md](10-house-style.md)).
    This *replaces* the old step 5: most of the `app.js` cycle is panes

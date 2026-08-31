@@ -15,7 +15,7 @@ import { identityOverride, S } from './state.js';
  * the vocabulary; this module adds only the presentation layer (labels,
  * badge classes, readings of S).
  */
-export { FLOWS, HUMAN_ONLY, NEEDS_REASON, TERMINAL } from '../../lib/vocab.js';
+export { CHIP, FLOWS, HUMAN_ONLY, NEEDS_REASON, TERMINAL } from '../../lib/vocab.js';
 
 // ---- data -----------------------------------------------------------------
 /*
@@ -106,14 +106,6 @@ export const shortName = (row) =>
  * state allows — feedback gets answered where it is read, without leaving
  * the app under review.
  */
-export const CHIP = {
-  open: 'badge-warning',
-  answered: 'badge-warning',
-  addressed: 'badge-info',
-  verified: 'badge-success',
-  incorporated: 'badge-success',
-  waived: 'badge-ghost',
-};
 
 /** Who a reply and a transition are recorded as - one answer, as everywhere. */
 export const whoAmI = () =>

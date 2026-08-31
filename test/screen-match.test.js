@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
@@ -70,15 +69,22 @@ test('a ref splits into path, query and fragment; the fragment wins at the first
   assert.equal(screenKey('/admin.html#invite-batch'), '/admin.html#invite-batch');
 });
 
-test('the browser copies of the matcher have not drifted @rule:screens.identity.one-matcher', () => {
-  // The two browser files ship self-contained and cannot import the module, so
-  // the only thing keeping three programs answering alike is that their copies
-  // are generated. This is that guarantee, enforced.
-  const sync = spawnSync('node', ['tools/sync-shared.mjs', '--check'], {
-    cwd: new URL('..', import.meta.url).pathname,
-    encoding: 'utf8',
-  });
-  assert.equal(sync.status, 0, sync.stderr || sync.stdout);
+test('the panel and the embed take the matcher from the module, never a copy @rule:screens.identity.one-matcher', () => {
+  // The browser files are BUILT now, so "the copies have not drifted" became
+  // "there are no copies": both sources import lib/screen-match.js and rollup
+  // inlines it. This asserts the construction - a hand-written matcher
+  // reappearing in either source is the drift coming back - and the built
+  // bundles being current is highball's panel-built/embed-built check.
+  const root = new URL('..', import.meta.url).pathname;
+  for (const entry of ['src/panel/app.js', 'src/embed/index.js']) {
+    const src = readFileSync(join(root, entry), 'utf8');
+    assert.match(
+      src,
+      /from '\.\.\/\.\.\/lib\/screen-match\.js'/,
+      `${entry} imports the one matcher`,
+    );
+    assert.ok(!/function matchScreen/.test(src), `${entry} carries its own matcher`);
+  }
 });
 
 /*
