@@ -195,14 +195,31 @@ const STATES = [
       ['wait', 600],
       ['key', 'Escape'],
       ['wait', 400],
+      /* The refusal is the panel's own guard, which fires before any POST -
+       * but this state runs against the real blueprint, so if that guard ever
+       * regresses, the click below would file a real transition. Held, so a
+       * regression shows up as a held write instead of as ledger damage. */
+      ['no-writes'],
       ['tab', 'threads'],
-      ['sr', "r => r.querySelector('[data-open-thread]')?.click()"],
+      /* An OPEN thread offers no Verify - only an addressed one puts the
+       * human-only action on screen, so the refusal this state exists to
+       * photograph can actually be provoked. The first cut clicked the first
+       * thread it saw, found no Verify button, and captured a state that
+       * proved nothing. */
+      [
+        'sr',
+        "r => [...r.querySelectorAll('[data-open-thread]')].find((x) => /addressed/.test(x.textContent)).click()",
+      ],
       ['wait', 800],
       [
         'sr',
         "r => [...r.querySelectorAll('button')].find(x => /Verify/.test(x.textContent))?.click()",
       ],
-      ['wait', 900],
+      ['wait', 600],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const said = [...r.querySelectorAll('.wd-note, [role=alert], .toast, .alert')].map((e) => e.textContent.replace(/\\s+/g, ' ').trim()); const chip = r.querySelector('[data-testid=\"thread.status\"]'); return { said: said.length ? said : r.textContent.match(/recorded under a person[^.]*\\./)?.slice(0, 1) ?? [], settingsOpened: !!r.querySelector('[data-testid=\"settings.username\"], [data-testid*=actor]'), threadStatusShown: chip ? chip.textContent.trim() : null }; }",
+      ],
     ],
   },
   {
@@ -262,6 +279,23 @@ const STATES = [
       ['tab', 'rules'],
       ['sr', "r => r.querySelector('[data-rule]').click()"],
       ['wait', 900],
+      /* "Each control says where it lands": the tips are the saying, and at
+       * the first rule the previous arrow must admit there is nowhere to go. */
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const steps = [...r.querySelectorAll('[data-testid=\"detail.stepper\"]')]; const before = r.querySelector('[data-testid=\"detail.rule-id\"]').textContent.trim(); /* read BEFORE clicking - lit updates these buttons in place, so a post-click read reports the NEXT rule's neighbours */ const seen = steps.map((b) => ({ tip: b.closest('.tooltip')?.dataset.tip ?? null, disabled: b.disabled, goesTo: b.dataset.goto || null })); steps.at(-1).click(); return { at: 'first rule', rule: before, steppers: seen }; }",
+      ],
+      ['wait', 900],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'stepped next', rule: r.querySelector('[data-testid=\"detail.rule-id\"]').textContent.trim(), steppers: [...r.querySelectorAll('[data-testid=\"detail.stepper\"]')].map((b) => ({ tip: b.closest('.tooltip')?.dataset.tip ?? null, disabled: b.disabled })) }; }",
+      ],
+      /* The stepper promises to follow the rail. The rail's own order is in
+       * the DOM, so the two can be held side by side. */
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'order check', railHead: [...r.querySelectorAll('[data-rule]')].slice(0, 5).map((e) => e.dataset.rule), ruleIds: [...r.querySelectorAll('[data-testid=\"detail.rule-id\"]')].map((e) => e.textContent.trim()) }; }",
+      ],
     ],
   },
   /* Hovering an anchor a step names lights that element up on the surface.
@@ -406,7 +440,7 @@ const STATES = [
       ['wait', 800],
       [
         'probe',
-        "(d, fr, fd, fsr, gh) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'still held', fade: r.querySelector('#wdp-fade').value, ghost: !!gh, ghostSrc: gh && gh.src, ghostOpacity: gh && getComputedStyle(gh).opacity, appOpacity: fr && getComputedStyle(fr).opacity }; }",
+        "(d, fr, fd, fsr, gh) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'still held', fade: r.querySelector('#wdp-fade').value, ghost: !!gh, ghostSrc: gh && gh.src, ghostOpacity: gh && getComputedStyle(gh.parentElement).opacity, appOpacity: fr && getComputedStyle(fr).opacity }; }",
       ],
     ],
   },
@@ -435,7 +469,7 @@ const STATES = [
       ['wait', 1200],
       [
         'probe',
-        "(d, fr, fd, fsr, gh) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'let go', fade: r.querySelector('#wdp-fade').value, ghost: !!gh, ghostOpacity: gh && getComputedStyle(gh).opacity, surfaceButtons: [...r.querySelectorAll('[data-surface]')].map((b) => b.dataset.surface + ' ' + b.className) }; }",
+        "(d, fr, fd, fsr, gh) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'let go', fade: r.querySelector('#wdp-fade').value, ghost: !!gh, ghostOpacity: gh && getComputedStyle(gh.parentElement).opacity, surfaceButtons: [...r.querySelectorAll('[data-surface]')].map((b) => b.dataset.surface + ' ' + b.className) }; }",
       ],
     ],
   },
@@ -467,6 +501,42 @@ const STATES = [
       [
         'probe',
         "(d, fr) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { frameSrc: fr.src, open: !!r.querySelector('[data-screen]'), button: r.querySelector('#wdp-screen-btn').textContent.replace(/\\s+/g, ' ').trim(), marked: [...r.querySelectorAll('[data-screen]')].map((b) => b.textContent.replace(/\\s+/g, ' ').trim()).filter((t) => /\\u25c9/.test(t)) }; }",
+      ],
+    ],
+  },
+  /*
+   * The one kind of navigation nobody announces: history.pushState inside the
+   * frame, no reload. Only the embed's slow poll can notice it, so this state
+   * is the whole chain photographed - a screen picked by hand first, so the
+   * navigation also has a previous-page answer to throw away, then a
+   * pushState, then Back. The marker on the frame's window is what proves no
+   * reload happened: a full load would tell everyone and prove nothing.
+   */
+  {
+    name: 'spa-pushstate-refollows',
+    steps: [
+      ['sr', "r => r.querySelector('#wdp-screen-btn').click()"],
+      ['wait', 500],
+      ['sr', 'r => r.querySelector(\'[data-screen="review"]\').click()'],
+      ['wait', 2500],
+      [
+        'probe',
+        "(d, fr) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'picked by hand', button: r.querySelector('#wdp-screen-btn').textContent.replace(/\\s+/g, ' ').trim(), buttonClass: r.querySelector('#wdp-screen-btn').className, frameHref: fr.contentWindow.location.href }; }",
+      ],
+      [
+        'top',
+        "(d, fr) => { fr.contentWindow.__spaMarker = 'set before pushState'; fr.contentWindow.history.pushState({}, '', '/stand-in/rule-detail'); }",
+      ],
+      ['wait', 1600],
+      [
+        'probe',
+        "(d, fr) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'after pushState', button: r.querySelector('#wdp-screen-btn').textContent.replace(/\\s+/g, ' ').trim(), buttonClass: r.querySelector('#wdp-screen-btn').className, frameHref: fr.contentWindow.location.href, noReload: fr.contentWindow.__spaMarker }; }",
+      ],
+      ['top', '(d, fr) => { fr.contentWindow.history.back(); }'],
+      ['wait', 1600],
+      [
+        'probe',
+        "(d, fr) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'after back', button: r.querySelector('#wdp-screen-btn').textContent.replace(/\\s+/g, ' ').trim(), buttonClass: r.querySelector('#wdp-screen-btn').className, frameHref: fr.contentWindow.location.href, noReload: fr.contentWindow.__spaMarker }; }",
       ],
     ],
   },
@@ -588,7 +658,7 @@ const STATES = [
       ['wait', 2500],
       [
         'probe',
-        '(d, fr, fd, fsr, gh, gd) => ({ laidOutAt: fd.defaultView.innerWidth, ghost: !!gh, ghostSrc: gh && gh.src, ghostOpacity: gh && getComputedStyle(gh).opacity, ghostBox: gh && gh.getBoundingClientRect().toJSON(), ghostLaidOutAt: gd && gd.defaultView.innerWidth, appBox: fr.getBoundingClientRect().toJSON() })',
+        '(d, fr, fd, fsr, gh, gd) => ({ laidOutAt: fd.defaultView.innerWidth, ghost: !!gh, ghostSrc: gh && gh.src, ghostOpacity: gh && getComputedStyle(gh.parentElement).opacity, ghostBox: gh && gh.getBoundingClientRect().toJSON(), ghostLaidOutAt: gd && gd.defaultView.innerWidth, appBox: fr.getBoundingClientRect().toJSON() })',
       ],
     ],
   },
@@ -964,7 +1034,7 @@ const STATES = [
       ['wait', 3500],
       [
         'probe',
-        '(d, fr, fd, fsr, gh, gd) => ({ ghostSrc: gh && gh.src, ghostOpacity: gh && getComputedStyle(gh).opacity, ghostArmed: gd && gd.documentElement.className, appArmed: fd.documentElement.className, ghostBox: gh && gh.getBoundingClientRect().toJSON(), appBox: fr.getBoundingClientRect().toJSON() })',
+        '(d, fr, fd, fsr, gh, gd) => ({ ghostSrc: gh && gh.src, ghostOpacity: gh && getComputedStyle(gh.parentElement).opacity, ghostArmed: gd && gd.documentElement.className, appArmed: fd.documentElement.className, ghostBox: gh && gh.getBoundingClientRect().toJSON(), appBox: fr.getBoundingClientRect().toJSON() })',
       ],
       [
         'aim',
@@ -994,7 +1064,7 @@ const STATES = [
       ['wait', 2000],
       [
         'probe',
-        "(d, fr, fd, fsr, gh, gd) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-pin'); return { disabled: b.disabled, title: b.title, ghostOpacity: gh && getComputedStyle(gh).opacity, ghostArmed: gd && gd.documentElement.className, appArmed: fd.documentElement.className }; }",
+        "(d, fr, fd, fsr, gh, gd) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-pin'); return { disabled: b.disabled, title: b.title, ghostOpacity: gh && getComputedStyle(gh.parentElement).opacity, ghostArmed: gd && gd.documentElement.className, appArmed: fd.documentElement.className }; }",
       ],
     ],
   },
@@ -1199,6 +1269,414 @@ const STATES = [
       ],
     ],
   },
+  /*
+   * The rail's legend, opened. It is a hover tooltip, so the picture needs
+   * the pointer on it - but the content is in the DOM either way, and the
+   * probe reads it whole.
+   */
+  {
+    name: 'rules-legend-open',
+    steps: [
+      ['tab', 'rules'],
+      ['wait', 400],
+      [
+        'aim',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('[data-testid=\"panel.legend\"]').getBoundingClientRect(); return { x: b.x + b.width / 2, y: b.y + b.height / 2 }; }",
+      ],
+      ['hover'],
+      ['wait', 600],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const tip = r.querySelector('[data-testid=\"panel.legend-tip\"]'); return { visible: getComputedStyle(tip).visibility, lines: tip.textContent.replace(/\\s+/g, ' ').trim() }; }",
+      ],
+    ],
+  },
+  /*
+   * A thread read up to a point, with replies landing after it: the card has
+   * to say how much is new, and opening it has to land the reader at the
+   * line. The read-mark is seeded (the state starts as a fresh reviewer, so
+   * a real history has to be given to it) and the panel reloaded to read it.
+   */
+  {
+    name: 'threads-new-since-you-looked',
+    steps: [
+      [
+        'top',
+        "(d) => { d.defaultView.localStorage.setItem('walkdown:seen:blueprint', JSON.stringify({ 'n-0071': '2026-08-26T00:00:00Z' })); }",
+      ],
+      ['top', '(d) => d.defaultView.location.reload()'],
+      ['wait', 3000],
+      ['tab', 'rules'],
+      ['wait', 400],
+      [
+        'sr',
+        "r => [...r.querySelectorAll('[data-rule]')].find((e) => e.dataset.rule === 'panel.rules.takes-you-there').click()",
+      ],
+      ['wait', 900],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const badge = [...r.querySelectorAll('.badge')].find((b) => /new/.test(b.textContent)); return { at: 'collapsed', badge: badge ? badge.textContent.trim() : null }; }",
+      ],
+      ['sr', "r => r.querySelector('[data-open-thread]').click()"],
+      ['wait', 900],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const line = [...r.querySelectorAll('*')].find((e) => e.children.length === 0 && /new/i.test(e.textContent) && e.textContent.trim().length < 30); const body = r.querySelector('[data-testid=\"thread.body\"]'); return { at: 'open', newLine: line ? line.textContent.trim() : null, scrolled: body ? body.scrollTop : null, scrollHeight: body ? body.scrollHeight : null }; }",
+      ],
+    ],
+  },
+  /*
+   * Crossing to a blueprint that says nothing about this page: the surface
+   * has to go to a page the chosen blueprint DOES claim, rather than keep
+   * showing one it cannot say anything about.
+   */
+  {
+    name: 'blueprints-crossing-goes-there',
+    steps: [
+      ['tab', 'blueprints'],
+      ['wait', 600],
+      [
+        'probe',
+        "(d, fr) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'before', project: r.querySelector('[data-testid=\"panel.blueprint\"]')?.textContent.trim() ?? null, frameSrc: fr.src }; }",
+      ],
+      [
+        'sr',
+        "r => [...r.querySelectorAll('input[type=radio], [data-bp], button, [role=radio], .wd-row')].find((x) => /walkdown-example/.test(x.textContent ?? '') || /example/.test(x.dataset?.bp ?? ''))?.click()",
+      ],
+      ['wait', 3000],
+      [
+        'probe',
+        "(d, fr) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'crossed', project: r.querySelector('[data-testid=\"panel.blueprint\"]')?.textContent.trim() ?? null, frameSrc: fr ? fr.src : null, button: r.querySelector('#wdp-screen-btn')?.textContent.replace(/\\s+/g, ' ').trim() ?? null }; }",
+      ],
+    ],
+  },
+  /*
+   * Swapping surfaces is a fade, not a load: the ghost built for one look is
+   * still the same frame on the next. The marker on the ghost's window is the
+   * proof - a reload would take it.
+   */
+  {
+    name: 'dock-surface-swap-keeps-the-ghost',
+    steps: [
+      ['sr', "r => r.querySelector('[data-surface=\"prototype\"]').click()"],
+      ['wait', 2000],
+      [
+        'probe',
+        "(d, fr, fd, fsr, gh, gd) => { gd.defaultView.__noReload = 'set on the first look'; return { at: 'prototype', ghostSrc: gh.src, ghostOpacity: getComputedStyle(gh.parentElement).opacity }; }",
+      ],
+      ['sr', "r => r.querySelector('[data-surface=\"app\"]').click()"],
+      ['wait', 800],
+      ['sr', "r => r.querySelector('[data-surface=\"prototype\"]').click()"],
+      ['wait', 800],
+      [
+        'probe',
+        "(d, fr, fd, fsr, gh, gd) => ({ at: 'back on the prototype', ghostSrc: gh.src, ghostOpacity: getComputedStyle(gh.parentElement).opacity, noReload: gd.defaultView.__noReload })",
+      ],
+    ],
+  },
+  /* Escape with no form open: pin mode itself is what stands down. */
+  {
+    name: 'dock-escape-leaves-pin-mode',
+    steps: [
+      ['sr', "r => r.querySelector('#wdp-pin').click()"],
+      ['wait', 700],
+      [
+        'probe',
+        "(d, fr, fd, fsr) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'pinning', pinCls: r.querySelector('#wdp-pin').className, appArmed: fd.documentElement.className }; }",
+      ],
+      ['key', 'Escape'],
+      ['wait', 700],
+      [
+        'probe',
+        "(d, fr, fd, fsr) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'after Escape', pinCls: r.querySelector('#wdp-pin').className, appArmed: fd.documentElement.className }; }",
+      ],
+    ],
+  },
+  /*
+   * The scratch states. Everything below WRITES - a session finished into the
+   * runs ledger, a thread incorporated, a draft discarded - so they run only
+   * when asked for by name, against a served scratch copy:
+   *
+   *   WALKDOWN_SITTING_URL=http://localhost:<scratch> \
+   *     node tools/sitting.mjs capture walkdown-session-journey
+   *
+   * They expect the fixtures a sitting sets up on its copy (an answered
+   * pinned question, a proposal-only screen with a thread) - see the
+   * walkdown-sitting skill. Left out of the plain full capture on purpose:
+   * against the real blueprint they would be exactly the junk-write hazard
+   * the no-writes op exists to prevent, and no interceptor is protection
+   * enough for a state whose PURPOSE is that the write lands.
+   */
+  {
+    name: 'scratch-settled-pin-leaves',
+    scratchOnly: true,
+    steps: [
+      // Fully onto the design: the pinned fixture question lives on the
+      // prototype surface, and pins draw on the surface they belong to.
+      ['sr', "r => r.querySelector('[data-surface=\"prototype\"]').click()"],
+      ['wait', 2500],
+      [
+        'probe',
+        "(d, fr, fd, fsr, gh, gd, gsr) => { gd.defaultView.__noReload = 'set before incorporating'; return { at: 'pinned', pins: [...gsr.querySelectorAll('.wd-pin')].map((p) => p.dataset.thread), ghostOpacity: getComputedStyle(gh.parentElement).opacity }; }",
+      ],
+      ['tab', 'threads'],
+      ['wait', 600],
+      [
+        'sr',
+        "r => [...r.querySelectorAll('[data-open-thread]')].find((x) => /q-0125/.test(x.textContent)).click()",
+      ],
+      ['wait', 800],
+      [
+        'sr',
+        "r => [...r.querySelectorAll('[data-testid=\"thread.actions\"]')].find((a) => a.dataset.act === 'incorporated').click()",
+      ],
+      ['wait', 1500],
+      [
+        'probe',
+        "(d, fr, fd, fsr, gh, gd, gsr) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'incorporated', pins: [...gsr.querySelectorAll('.wd-pin')].map((p) => p.dataset.thread), noReload: gd.defaultView.__noReload, thread: r.querySelector('[data-testid=\"thread.provenance\"]')?.textContent.replace(/\\s+/g, ' ').trim() ?? null }; }",
+      ],
+    ],
+  },
+  {
+    name: 'scratch-sketch-over-the-app',
+    scratchOnly: true,
+    steps: [
+      ['tab', 'threads'],
+      ['wait', 600],
+      ['sr', "r => [...r.querySelectorAll('button')].find((b) => /All/.test(b.textContent))?.click()"],
+      ['wait', 400],
+      [
+        'sr',
+        "r => [...r.querySelectorAll('[data-open-thread]')].find((x) => /n-0126/.test(x.textContent)).click()",
+      ],
+      ['wait', 800],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('[data-sketch]'); return { at: 'thread open', sketchButton: b ? b.textContent.trim() : null }; }",
+      ],
+      ['sr', "r => r.querySelector('[data-sketch]').click()"],
+      ['wait', 2000],
+      [
+        'probe',
+        "(d, fr, fd, fsr, gh) => { const flag = [...(gh?.parentElement.children ?? [])].find((e) => /Proposed sketch/.test(e.textContent)); return { at: 'sketch shown', ghostSrc: gh && gh.src, badge: flag ? flag.textContent.trim() : null, ghostOpacity: gh && getComputedStyle(gh.parentElement).opacity }; }",
+      ],
+    ],
+  },
+  {
+    name: 'walkdown-session-journey',
+    scratchOnly: true,
+    steps: [
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-walk'); return { at: 'before', button: b.textContent.trim(), title: b.title, cls: b.className }; }",
+      ],
+      ['sr', "r => r.querySelector('#wdp-walk').click()"],
+      ['wait', 800],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-walk'); return { at: 'started', button: b.textContent.trim(), title: b.title }; }",
+      ],
+      // A rule with build evidence, so the pair is Pass/Fail.
+      ['tab', 'rules'],
+      ['wait', 400],
+      [
+        'sr',
+        "r => [...r.querySelectorAll('[data-rule]')].find((e) => e.dataset.rule === 'embed.pin.anchored-target').click()",
+      ],
+      ['wait', 900],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const v = r.querySelector('[data-testid=\"detail.verdict\"]'); const stmt = r.querySelector('[data-testid=\"detail.statement\"]'); const fb = r.querySelector('[data-testid=\"detail.feedback\"]'); const judged = r.querySelector('[data-testid=\"detail.judged\"]'); const pane = v.closest('[data-testid=\"detail.pane\"]') ?? r.querySelector('[data-walkdown-chrome]') ?? d.body; return { at: 'rule open in session', buttons: [...v.querySelectorAll('button')].map((b) => b.textContent.trim()), verdictTop: Math.round(v.getBoundingClientRect().top), statementBottom: Math.round(stmt.getBoundingClientRect().bottom), viewportH: d.defaultView.innerHeight, feedbackAboveVerdict: fb.getBoundingClientRect().bottom <= v.getBoundingClientRect().top, judged: judged.textContent.trim() }; }",
+      ],
+      // Fail with the box empty: refused, with the why named.
+      ['sr', "r => r.querySelector('[data-v=\"fail\"]').click()"],
+      ['wait', 800],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'fail refused', said: r.querySelector('[data-testid=\"detail.say\"]').textContent.trim(), judged: r.querySelector('[data-testid=\"detail.judged\"]').textContent.trim(), failCls: r.querySelector('[data-v=\"fail\"]').className }; }",
+      ],
+      // Now with a why: recorded, and the session stays put.
+      [
+        'sr',
+        "r => { const t = r.querySelector('#wdp-vnote'); t.value = 'sitting probe — the why a fail owes, filed as a note'; t.dispatchEvent(new Event('input', { bubbles: true })); }",
+      ],
+      ['sr', "r => r.querySelector('[data-v=\"fail\"]').click()"],
+      ['wait', 1500],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'fail recorded', rule: r.querySelector('[data-testid=\"detail.rule-id\"]').textContent.trim(), failCls: r.querySelector('[data-v=\"fail\"]').className, judged: r.querySelector('[data-testid=\"detail.judged\"]').textContent.trim() }; }",
+      ],
+      // Pass on the next rule: the session moves on by itself.
+      ['sr', "r => [...r.querySelectorAll('[data-testid=\"detail.stepper\"]')].at(-1).click()"],
+      ['wait', 900],
+      ['sr', "r => r.querySelector('[data-v=\"pass\"]').click()"],
+      ['wait', 1200],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'pass advanced', nowOn: r.querySelector('[data-testid=\"detail.rule-id\"]')?.textContent.trim() ?? '(list)', judged: r.querySelector('[data-testid=\"detail.judged\"]')?.textContent.trim() }; }",
+      ],
+      // The draft is on the project, not only in this tab.
+      [
+        'probe',
+        "async (d) => { const res = await fetch('/api/draft?bp=blueprint&target=local'); return { at: 'draft on disk', draft: await res.json() }; }",
+      ],
+      // A reload, and the session comes back from what was written down.
+      ['top', '(d) => d.defaultView.location.reload()'],
+      ['wait', 3500],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-walk'); return { at: 'after reload', button: b.textContent.trim(), title: b.title }; }",
+      ],
+      // Finish, named: the record is appended - the ledger side is counted
+      // on disk by the sitting reading this state's output.
+      ['sr', "r => r.querySelector('#wdp-walk').click()"],
+      ['wait', 2000],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-walk'); return { at: 'finished', button: b.textContent.trim(), said: r.textContent.match(/[Rr]ecorded[^.]*\\./)?.[0] ?? null }; }",
+      ],
+    ],
+  },
+  {
+    name: 'walkdown-session-discard',
+    scratchOnly: true,
+    steps: [
+      ['sr', "r => r.querySelector('#wdp-walk').click()"],
+      ['wait', 600],
+      ['tab', 'rules'],
+      ['wait', 400],
+      [
+        'sr',
+        "r => [...r.querySelectorAll('[data-rule]')].find((e) => e.dataset.rule === 'embed.pin.tooltip-says-what-it-is').click()",
+      ],
+      ['wait', 900],
+      ['sr', "r => r.querySelector('[data-v=\"pass\"]').click()"],
+      ['wait', 1200],
+      [
+        'probe',
+        "async (d) => { const res = await fetch('/api/draft?bp=blueprint&target=local'); return { at: 'one verdict drafted', draft: await res.json() }; }",
+      ],
+      /*
+       * The Discard control lives on the blueprint-crossing ask, and a
+       * scratch serves one blueprint - so the state exercises the same call
+       * that control makes (discardSitting: POST /api/draft {discard:true}),
+       * and the run ledger is counted on disk before and after by the
+       * sitting reading this.
+       */
+      [
+        'probe',
+        "async (d) => { await fetch('/api/draft?bp=blueprint', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ target: 'local', discard: true }) }); const res = await fetch('/api/draft?bp=blueprint&target=local'); return { at: 'after discard', draft: await res.json() }; }",
+      ],
+    ],
+  },
+  /*
+   * The sign-off pair, driven on rules the scratch ledger holds no build
+   * evidence for: Approve and Refine where Pass and Fail would be, Refine
+   * refused empty, an approval that advances - and a Finish whose record
+   * carries `approved`, checked on the scratch's disk by the sitting.
+   */
+  {
+    name: 'signoff-journey',
+    scratchOnly: true,
+    steps: [
+      ['sr', "r => r.querySelector('#wdp-walk').click()"],
+      ['wait', 600],
+      ['tab', 'rules'],
+      ['wait', 400],
+      [
+        'sr',
+        "r => [...r.querySelectorAll('[data-rule]')].find((e) => e.dataset.rule === 'panel.delivery.absent-until-asked').click()",
+      ],
+      ['wait', 900],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const v = r.querySelector('[data-testid=\"detail.verdict\"]'); return { at: 'unbuilt pair', buttons: [...v.querySelectorAll('button')].map((b) => b.textContent.trim()), underline: v.nextElementSibling?.textContent.trim() ?? null, placeholder: r.querySelector('[data-testid=\"detail.feedback\"]').placeholder }; }",
+      ],
+      ['sr', "r => r.querySelector('[data-v=\"refining\"]').click()"],
+      ['wait', 800],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'refine refused empty', said: r.querySelector('[data-testid=\"detail.say\"]').textContent.trim(), judged: r.querySelector('[data-testid=\"detail.judged\"]').textContent.trim() }; }",
+      ],
+      [
+        'sr',
+        "r => { const t = r.querySelector('#wdp-vnote'); t.value = 'sitting probe — what should change about the wording'; t.dispatchEvent(new Event('input', { bubbles: true })); }",
+      ],
+      ['sr', "r => r.querySelector('[data-v=\"refining\"]').click()"],
+      ['wait', 1500],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'refined, stays put', rule: r.querySelector('[data-testid=\"detail.rule-id\"]').textContent.trim(), judged: r.querySelector('[data-testid=\"detail.judged\"]').textContent.trim() }; }",
+      ],
+      ['sr', "r => r.querySelector('[data-testid=\"detail.back\"]').click()"],
+      ['wait', 600],
+      [
+        'sr',
+        "r => [...r.querySelectorAll('[data-rule]')].find((e) => e.dataset.rule === 'panel.delivery.one-switch').click()",
+      ],
+      ['wait', 900],
+      /* The next rule inherits a visibly empty box or the stale-why defect
+       * fires here too - the probe records what the box holds either way. */
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'next rule box', rule: r.querySelector('[data-testid=\"detail.rule-id\"]').textContent.trim(), boxValue: r.querySelector('[data-testid=\"detail.feedback\"]').value }; }",
+      ],
+      [
+        'sr',
+        "r => { const t = r.querySelector('#wdp-vnote'); t.value = ''; t.dispatchEvent(new Event('input', { bubbles: true })); }",
+      ],
+      ['sr', "r => r.querySelector('[data-v=\"approved\"]').click()"],
+      ['wait', 1200],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'approved advanced', nowOn: r.querySelector('[data-testid=\"detail.rule-id\"]')?.textContent.trim() ?? '(list)', judged: r.querySelector('[data-testid=\"detail.judged\"]')?.textContent.trim() ?? null }; }",
+      ],
+      ['sr', "r => r.querySelector('#wdp-walk').click()"],
+      ['wait', 2000],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'finished', button: r.querySelector('#wdp-walk').textContent.trim() }; }",
+      ],
+    ],
+  },
+  /*
+   * Finish reads the name the sitting was STARTED under - emptying Settings
+   * mid-session changes nothing, by design - so the refusal can only be
+   * provoked by starting nameless. This state leaves its refused session as
+   * a draft on the scratch; the scratch is taken away at the end of the
+   * sitting, so nothing outlives it.
+   */
+  {
+    name: 'walkdown-finish-refused-nameless',
+    scratchOnly: true,
+    steps: [
+      ['sr', "r => r.querySelector('#wdp-desk-btn').click()"],
+      ['wait', 400],
+      [
+        'sr',
+        "r => { for (const i of r.querySelectorAll('input')) if (/actor|name/i.test(i.dataset.testid ?? '')) { i.value = ''; i.dispatchEvent(new Event('input', { bubbles: true })); i.dispatchEvent(new Event('change', { bubbles: true })); } }",
+      ],
+      ['key', 'Escape'],
+      ['wait', 400],
+      ['sr', "r => r.querySelector('#wdp-walk').click()"],
+      ['wait', 600],
+      ['tab', 'rules'],
+      ['wait', 400],
+      [
+        'sr',
+        "r => [...r.querySelectorAll('[data-rule]')].find((e) => e.dataset.rule === 'embed.pin.own-skin').click()",
+      ],
+      ['wait', 900],
+      ['sr', "r => r.querySelector('[data-v=\"pass\"]').click()"],
+      ['wait', 1000],
+      ['sr', "r => r.querySelector('#wdp-walk').click()"],
+      ['wait', 1000],
+      [
+        'probe',
+        "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const b = r.querySelector('#wdp-walk'); return { at: 'finish refused nameless', button: b.textContent.trim(), toast: r.textContent.match(/recorded under a person[^.]*\\./)?.[0] ?? null, settingsOpen: !!r.querySelector('[data-testid=\"settings.actor\"]') }; }",
+      ],
+    ],
+  },
 ];
 
 /** This machine's evidence root, falling back to the blueprint's own. */
@@ -1319,6 +1797,9 @@ async function capture(only = []) {
 
   for (const state of STATES) {
     if (only.length && !only.includes(state.name)) continue;
+    // The writing states run only when asked for by name, against a scratch
+    // copy - a full sweep against the real blueprint must never reach them.
+    if (state.scratchOnly && !only.length) continue;
     /*
      * Almost every state is the panel at the server's front door. `url` is for
      * the handful that are not - a page carrying the embed and no panel, which
@@ -1350,6 +1831,21 @@ async function capture(only = []) {
         });
       }, state.config);
     }
+    /*
+     * Each state starts as a fresh reviewer. The refusal states EMPTY the
+     * identity to prove the panel refuses attributed work - and since the
+     * emptied-name fix (2026-08-28, "an emptied name is an answer"), that
+     * emptiness survives reloads by design. Left in place it bled into every
+     * state after the first refusal, and a whole sitting's pins were refused
+     * by a guard doing its job on the wrong state's answer. The panel's own
+     * storage keys are cleared, never git's answers - a fresh reviewer is
+     * the machine's default identity, not nobody.
+     */
+    await page.goto(state.url ? BASE + state.url : BASE, { waitUntil: 'load' });
+    await page.evaluate(() => {
+      for (const k of Object.keys(localStorage))
+        if (k.startsWith('walkdown:')) localStorage.removeItem(k);
+    });
     await page.goto(state.url ? BASE + state.url : BASE, { waitUntil: 'load' });
     await page.waitForTimeout(2500);
     let spot = null;

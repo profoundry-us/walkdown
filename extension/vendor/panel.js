@@ -5048,6 +5048,9 @@
     // so an uncovered strip never reads as design. Inline styles: this element
     // is in the host document, where our stylesheet has no reach.
     S.ghost = document.createElement('div');
+    // Named so a probe can measure the element the fade is actually set on -
+    // opacity is not inherited, and the iframe inside reads 1 forever.
+    S.ghost.dataset.walkdownGhost = '';
     /*
      * The box is stated in pixels, not left to the four insets to work out.
      * This element is promoted into the top layer, where the UA's own popover
