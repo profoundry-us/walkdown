@@ -95,6 +95,25 @@ test('a refused transition refuses the whole mutation - the reply never lands @r
   assert.equal(readFileSync(file, 'utf8'), before, 'a refused command must have written nothing');
 });
 
+test('an empty reply is refused, not read back - and drops no status change @rule:threads.lifecycle.says-what-it-did', () => {
+  // Round three (n-0125): `--reply "$MSG"` with an empty variable used to be
+  // treated as no reply at all - alone it printed the conversation, and with
+  // a status it applied the transition while silently dropping the reply.
+  const bp = fixture('empty', { id: 'n-0007', status: 'open' });
+  const file = join(bp, 'threads', 'n-0007.yml');
+  const before = readFileSync(file, 'utf8');
+  for (const args of [
+    ['n-0007', '--actor', 'A Person', '--reply', ''],
+    ['n-0007', '--actor', 'A Person', '--reply', '', '--status', 'addressed'],
+  ]) {
+    assert.throws(
+      () => run(args, bp),
+      (err) => err.status === 2 && /reply body required/.test(String(err.stderr)),
+    );
+    assert.equal(readFileSync(file, 'utf8'), before, 'refused whole, nothing landed');
+  }
+});
+
 test('a refused transition says so and exits non-zero @rule:threads.lifecycle.says-what-it-did', () => {
   const bp = fixture('refused', { id: 'n-0004', status: 'open' });
   assert.throws(

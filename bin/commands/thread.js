@@ -39,7 +39,14 @@ export function run(args) {
       : values.waive
         ? 'waived'
         : values.status;
-  const mutating = Boolean(values.reply || status);
+  /*
+   * Present, not truthy: `--reply "$MSG"` with an empty variable is still a
+   * mutation ask, and answering it with read output - or applying the status
+   * while silently dropping the reply - is the round-three finding on
+   * n-0125. An empty body reaches replyToThread and gets its refusal.
+   */
+  const replying = values.reply !== undefined;
+  const mutating = Boolean(replying || status);
   // What it was before we touched it, so the command can say what it changed
   // rather than only what the thread now happens to say.
   const was = mutating ? getThread(blueprint, id) : null;
@@ -48,7 +55,7 @@ export function run(args) {
       // Validate the transition before ANY write: a refused status must
       // refuse the whole command, or the reply lands and the output denies it.
       if (status && was) checkTransition(was, { status, actor, reason: values.reason });
-      if (values.reply) replyToThread(blueprint, id, { author: actor, body: values.reply });
+      if (replying) replyToThread(blueprint, id, { author: actor, body: values.reply });
       if (status) transitionThread(blueprint, id, { status, actor, reason: values.reason });
     } catch (err) {
       console.error(err.message);
