@@ -68,17 +68,23 @@ shared modules into the embed, retired when the embed got its bundler.)
 
 `walkdown-judge` is for a rule or the handful a change touched. For everything
 at once — after a big refactor, or on a cadence of days — there is
-`walkdown-sitting`, and a harness for the mechanical half:
+`walkdown-sitting`. Both skills are prompt-driven now: `walkdown judge <rule>`
+assembles each rule's prompt and the agent drives its own browser. This repo
+also keeps an interim scripted harness for when a whole board must be
+photographed cheaply:
 
     node tools/sitting.mjs owed       what the agent tier still owes
     node tools/sitting.mjs capture    drive every panel state, save both surfaces
     node tools/sitting.mjs record f   append the run (refuses thin reasoning)
 
-The state list inside `sitting.mjs` is data. A rule needing a state nobody has
-captured belongs in that list, not in a throwaway script.
+The state list inside `sitting.mjs` is data — but interim data: grow it only
+for an immediate sitting need (docs/11-architecture.md, "Where the agent tier
+goes next").
 
-Both skills serve a disposable copy for anything that makes the panel write,
-and both are now told to take it away again:
+Here the panel under review writes to the blueprint it serves, so judging
+anything that files, refuses or pins needs a scratch copy first. The shipped
+skills no longer say so — this blueprint's own `governance:` lines in
+`blueprint/walkdown.yml` do, and every judge prompt carries them:
 
     node tools/scratch.mjs new sitting-0830 --why "..."   # a copy, stamped
     node tools/scratch.mjs list                           # what is lying about

@@ -36,3 +36,17 @@ authoring:
     node:test name, or `{ tag: '@rule:<id>' }` in Playwright. One rule per
     test. A check may only claim a rule whose surface it actually exercises
     (ownership.evidence.same-surface).
+
+# What a judging agent must be told here that no generic prompt can know: the
+# usual "your target is already disposable" does not hold, because the app
+# under review is walkdown's own panel and it writes to the blueprint it
+# serves. `walkdown judge` carries these lines into every prompt.
+governance:
+  - >-
+    The application under review is walkdown's own panel, and it writes to the
+    very blueprint it serves — this working tree's blueprint is the real
+    ledger, not a disposable environment. Before judging anything that files,
+    refuses, pins or replies, make a scratch copy (node tools/scratch.mjs new
+    <label> --why "..."), serve it with --dir, and judge against that; the
+    verdict still goes in the real ledger. Take the copy away when done
+    (node tools/scratch.mjs clean <label>).

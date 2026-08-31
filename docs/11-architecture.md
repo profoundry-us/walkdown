@@ -260,15 +260,22 @@ and writes its reasoning against what it actually saw.
 
 What the product owes this direction — the harness's parts that survive as
 product surface rather than script: assembling the per-rule prompt from the
-blueprint; filing evidence under `runs/evidence/` logical keys; the
-scratch-copy mechanism for anything that makes the panel write; and the
-server's governance rails (claim-never-accept, named actors), which are what
-make an improvising agent with a browser trustable near an append-only ledger.
+blueprint; filing evidence under `runs/evidence/` logical keys; project
+governance carried in config (a `governance:` list in `walkdown.yml`, ridden
+into every prompt verbatim); and the server's governance rails
+(claim-never-accept, named actors), which are what make an improvising agent
+with a browser trustable near an append-only ledger. The scratch-copy
+mechanism turned out to be the first governance line rather than product: a
+judge's target — a dev machine, a review app, staging — already exists to
+absorb what judging does to it, and only walkdown's own blueprint needs more,
+because there the panel under review writes to the blueprint it serves. Its
+`governance:` entry says so; no other project inherits the warning.
 The state list stops being the growth path: a rule that needs something new
 gets it from the judging agent's own hands, not from a new entry in a script.
 
 The first of those parts shipped the same day: `walkdown judge <rule>` prints
 the per-rule prompt — statement, steps, setup, screen addresses resolved
-through the target, anchors, where evidence goes and how a verdict is
-recorded — ready to hand to any agent with a browser. It judges nothing
-itself; the prompt ends where the reader begins.
+through the target, anchors, where evidence goes, how a verdict is recorded,
+and the governance, built-in lines plus the project's own — ready to hand to
+any agent with a browser. It judges nothing itself; the prompt ends where the
+reader begins. The shipped judge and sitting skills now walk this shape.

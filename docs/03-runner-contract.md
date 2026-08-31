@@ -67,6 +67,15 @@ authoring:
     Write workflow specs in house style (see spec/workflows/README.md). Tag each example
     with rule: metadata. Select elements by anchor (test id), never by CSS path.
     One rule per example.
+
+# What a judging agent must be told about THIS project that no generic prompt
+# can know. `walkdown judge` carries each line into every prompt verbatim, after
+# its built-in governance (claim-never-accept, fail-needs-a-thread, append-only).
+# Most projects need none: the target a judge runs against - a dev server, a
+# review app, staging - already exists to absorb what judging does to it.
+governance:
+  - Checkout against the sandbox payment keys only; a declined test card is the
+    happy path, not an incident.
 ```
 
 - walkdown shells out; it does not know what RSpec is. `{id}`, `{results}`, and target

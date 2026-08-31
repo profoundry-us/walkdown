@@ -65,6 +65,15 @@ export function run(args) {
     .filter(Boolean);
 
   const baseUrl = config?.runner?.targets?.[values.target]?.base_url ?? null;
+  /*
+   * The project's own governance (walkdown.yml `governance:`), carried into
+   * every prompt verbatim. The built-in lines below cover what is true of any
+   * blueprint; these cover what only the project knows - walkdown's own
+   * blueprint, for instance, is written to by the very panel under review.
+   */
+  const governance = (Array.isArray(config?.governance) ? config.governance : [])
+    .map((g) => String(g).trim())
+    .filter(Boolean);
   const serve = (values.serve ?? `http://localhost:${config?.embed?.port ?? 4700}`).replace(
     /\/+$/,
     '',
@@ -80,6 +89,21 @@ export function run(args) {
     for (const step of rule.steps?.[phase] ?? [])
       for (const m of String(step).matchAll(/`([A-Za-z0-9][A-Za-z0-9._-]*)`/g))
         if (m[1].includes('.')) anchors.add(m[1]);
+
+  // A governance line arrives as one string; fold it to the block's width.
+  const bullet = (text) => {
+    const out = [];
+    let line = '  -';
+    for (const word of text.split(/\s+/)) {
+      if (line.length + 1 + word.length > 96 && line.trim()) {
+        out.push(line);
+        line = '   ';
+      }
+      line += ` ${word}`;
+    }
+    out.push(line);
+    return out;
+  };
 
   const stamp = new Date()
     .toISOString()
@@ -111,6 +135,7 @@ export function run(args) {
           target: values.target,
           base_url: baseUrl,
           serve,
+          governance,
           evidence: { key_prefix: evidenceKey, resolved_root: blueprint.at.evidence.path },
           runs_dir: blueprint.at.runs.path,
         },
@@ -188,9 +213,8 @@ export function run(args) {
     'GOVERNANCE',
     '  - You claim work; a person accepts it. Never write "verified" or "waived" anywhere.',
     '  - A fail needs a note thread anchored to this rule citing the evidence; put its id in the result.',
-    '  - If judging this makes the application under review WRITE, aim it at a disposable copy',
-    '    of whatever it writes to — a verdict goes in the real ledger, junk data never does.',
     `  - The ledger is append-only: one new record, at the end, and no record ever edited.`,
+    ...governance.flatMap(bullet),
   );
 
   console.log(lines.join('\n'));

@@ -20,7 +20,7 @@ after(() => rmSync(root, { recursive: true, force: true }));
 
 const STATEMENT = 'Submitting the form lands the visitor on the done screen.';
 
-function fixture(name) {
+function fixture(name, governance = []) {
   const bp = join(root, name, 'blueprint');
   mkdirSync(join(bp, 'features'), { recursive: true });
   mkdirSync(join(bp, 'runs'), { recursive: true });
@@ -34,6 +34,9 @@ function fixture(name) {
       '      base_url: http://localhost:9999',
       '    staging:',
       '      base_url: https://staging.example.test',
+      ...(governance.length
+        ? ['governance:', ...governance.map((g) => `  - ${g}`)]
+        : []),
     ].join('\n'),
   );
   writeFileSync(
@@ -113,6 +116,21 @@ test('the prompt carries everything a judging agent needs to start', () => {
   );
   assert.match(out, /runs\/evidence\//, 'evidence goes under the logical key');
   assert.match(out, /Never write "verified" or "waived"/, 'governance rides along');
+  assert.doesNotMatch(
+    out,
+    /disposable/,
+    'the built-ins never presume what the target is - wherever judges run is already theirs to dirty',
+  );
+});
+
+test("the project's own governance rides into the prompt", () => {
+  const LINE =
+    'The app stores joins in the browser - clear site data between attempts instead of restarting anything.';
+  const bp = fixture('governed', [LINE]);
+  const out = run(['demo.main.walks'], bp);
+  assert.match(out, /clear site data between attempts/, 'the config line arrives verbatim');
+  const doc = JSON.parse(run(['demo.main.walks', '--json'], bp));
+  assert.deepEqual(doc.governance, [LINE], '--json carries the same lines');
 });
 
 test('a screenless rule is told to judge without looking', () => {
