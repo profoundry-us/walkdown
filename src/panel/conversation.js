@@ -305,37 +305,6 @@ export async function postRuleNote(rule, body) {
   return out.id;
 }
 
-/*
- * Starting a conversation on a rule, outside a walkdown.
- *
- * The same POST the sitting's feedback box makes, and deliberately so: a note
- * is a note, and a rule read on a Tuesday deserves the same record as one
- * judged in a sitting. What it does NOT do is touch S.session - there may not
- * be one, and a thread is not a verdict.
- */
-function wireRuleNote() {
-  const box = D.host.querySelector('#wdp-rulenote');
-  if (box)
-    box.oninput = () => {
-      S.ruleNote = box.value;
-    };
-  const who = D.host.querySelector('#wdp-nactor');
-  if (who) who.onclick = () => openSettings();
-  const post = D.host.querySelector('[data-note-rule]');
-  if (!post) return;
-  post.onclick = async () => {
-    const text = (D.host.querySelector('#wdp-rulenote')?.value ?? '').trim();
-    if (!text)
-      return sayFiling('Write something first — a thread opens with what you have to say.');
-    post.disabled = true;
-    const tid = await postRuleNote(post.dataset.noteRule, text);
-    post.disabled = false;
-    if (!tid) return; // the refusal is on screen
-    S.ruleNote = '';
-    await requestRerequestReload(); // pull the new thread into the lists and repaint
-  };
-}
-
 /** Open a thread on its own screen, landing where the reading resumes. */
 export function openThreadView(id) {
   if (!(S.data?.threads ?? []).some((x) => x.id === id))
