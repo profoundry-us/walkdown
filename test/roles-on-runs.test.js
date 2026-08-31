@@ -12,8 +12,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, before, test } from 'node:test';
 import { normalizeRoles, writeRunRecord } from '../lib/run-record.js';
-import { ROLES } from '../lib/vocab.js';
 import { createWalkdownServer, defaultActor } from '../lib/serve.js';
+import { ROLES } from '../lib/vocab.js';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-roles-'));
 const bp = join(root, 'blueprint');

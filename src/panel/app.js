@@ -986,14 +986,16 @@ const VERB = {
 
 /** Short verbs, and only the transitions this kind and status allow. */
 export function threadActions(t) {
-  return (FLOWS[t.kind] ?? FLOWS.note)[t.status]?.map((next) => [
-    VERB[next],
-    // Answering is a reply that carries the transition, not a bare status
-    // change — the panel routes it through the reply box.
-    t.kind === 'question' && next === 'answered' ? '__answer' : next,
-    // The one visually-marked action: waiving buries work.
-    next === 'waived' || undefined,
-  ]) ?? [];
+  return (
+    (FLOWS[t.kind] ?? FLOWS.note)[t.status]?.map((next) => [
+      VERB[next],
+      // Answering is a reply that carries the transition, not a bare status
+      // change — the panel routes it through the reply box.
+      t.kind === 'question' && next === 'answered' ? '__answer' : next,
+      // The one visually-marked action: waiving buries work.
+      next === 'waived' || undefined,
+    ]) ?? []
+  );
 }
 
 // ---- render ---------------------------------------------------------------
@@ -2629,9 +2631,7 @@ const ghostFrame = () => S.ghost?.querySelector('iframe') ?? null;
 function pinsForScreen(id) {
   if (!id) return [];
   return (S.data?.threads ?? [])
-    .filter(
-      (t) => t.anchor?.screen === id && !TERMINAL.includes(t.status),
-    )
+    .filter((t) => t.anchor?.screen === id && !TERMINAL.includes(t.status))
     .map((t) => ({
       id: t.id,
       kind: t.kind,

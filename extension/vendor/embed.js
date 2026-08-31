@@ -1038,8 +1038,7 @@
   ]);
 
   /** May a `kind` thread move from `from` to `to`? The one answer, for every caller. */
-  const canTransition = (kind, from, to) =>
-    ((FLOWS[kind] ?? FLOWS.note)[from] ?? []).includes(to);
+  const canTransition = (kind, from, to) => ((FLOWS[kind] ?? FLOWS.note)[from] ?? []).includes(to);
 
   /**
    * Statuses that mean "a person judged it". An agent claims work and never
@@ -1079,6 +1078,7 @@
     'approved',
     'refining',
   ]);
+
   // --- vocab:end ---
 
   /*
