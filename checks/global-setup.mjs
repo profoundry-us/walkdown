@@ -20,8 +20,8 @@ import {
 } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { EXAMPLE_DECLARED, EXAMPLE_ORIGIN } from '../playwright.config.js';
 import { resolveLocations } from '../lib/locations.js';
+import { EXAMPLE_DECLARED, EXAMPLE_ORIGIN } from '../playwright.config.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export const CHECKSPACE = join(root, '.walkdown', 'checkspace');

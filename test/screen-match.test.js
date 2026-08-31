@@ -1,8 +1,8 @@
+import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import assert from 'node:assert/strict';
 import { locationOfUrl, matchScreen, screenKey, splitScreenRef } from '../lib/screen-match.js';
 
 const at = (url) => locationOfUrl('http://localhost:4310' + url);

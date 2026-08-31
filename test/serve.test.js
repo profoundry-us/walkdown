@@ -15,21 +15,21 @@
 import assert from 'node:assert/strict';
 import {
   existsSync,
-  mkdtempSync,
   mkdirSync,
-  readFileSync,
+  mkdtempSync,
   readdirSync,
+  readFileSync,
   rmSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, before, test } from 'node:test';
-import { parse } from '../vendor/yaml.js';
 import { readDraft } from '../lib/draft.js';
 import { formatHash } from '../lib/hash.js';
-import { createWalkdownServer } from '../lib/serve.js';
 import { resolveLocations } from '../lib/locations.js';
+import { createWalkdownServer } from '../lib/serve.js';
+import { parse } from '../vendor/yaml.js';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-serve-'));
 const bp = join(root, 'blueprint');

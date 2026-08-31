@@ -7,7 +7,7 @@
  * reached from all of them without a cycle. When one pane needed a helper the
  * next pane also needed, this is where it went.
  */
-import { S, identityOverride } from './state.js';
+import { identityOverride, S } from './state.js';
 
 // ---- data -----------------------------------------------------------------
 /*

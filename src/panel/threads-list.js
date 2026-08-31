@@ -3,10 +3,10 @@
  * ways `walkdown threads` filters them, in the same words.
  */
 import { open, start } from './app.js';
-import { threadCard } from './thread-pane.js';
 import { S } from './state.js';
+import { threadCard } from './thread-pane.js';
 import { esc } from './util.js';
-import { TERMINAL, screenById, threadTouched } from './vocab.js';
+import { screenById, TERMINAL, threadTouched } from './vocab.js';
 
 /*
  * ---- the Threads tab -------------------------------------------------

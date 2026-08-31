@@ -19,6 +19,7 @@
  * stage — carry inline styles.
  */
 
+import { MSG } from '../../lib/message-stream.js';
 /*
  * The two blocks that used to sit in the middle of this file as generated
  * copies — the shared screen matcher and the conversation model — are
@@ -32,48 +33,10 @@
  * tools/sync-shared.mjs still keeps it honest.
  */
 import { locationOfUrl, matchScreen } from '../../lib/screen-match.js';
-import { MSG } from '../../lib/message-stream.js';
-import { icon } from './icons.js';
-import {
-  ACTOR_KEY,
-  CHOICE,
-  D,
-  GAP,
-  HEAD,
-  IDENTITY_KEY,
-  REINJECTS,
-  S,
-  STYLESHEET,
-  TOP,
-  W,
-  cfg,
-  identityOverride,
-  saveIdentity,
-  script,
-  store,
-} from './state.js';
-import { closeShots, openShots, shotsOpen } from './shots.js';
-import { toast } from './toast.js';
-import { api, esc } from './util.js';
-import {
-  CHIP,
-  LBL,
-  TERMINAL,
-  isHeadless,
-  needsYou,
-  owedRows,
-  ruleScreen,
-  screenById,
-  shortName,
-  threadTouched,
-  threadsFor,
-  whoAmI,
-} from './vocab.js';
 import { askAboutSitting, blueprintsPane, crossTo, wireBlueprints } from './blueprints.js';
 import { DESK_DEFAULTS, DESK_KEY, drawDesk } from './desk.js';
-import { backFromThread, threadCard, threadPane } from './thread-pane.js';
+import { icon } from './icons.js';
 import { checkRefs, detailPane, evidenceRows, loadCheckSource } from './rule-detail.js';
-import { screensPane, wireScreens } from './screens.js';
 import {
   legendControl,
   listPane,
@@ -83,8 +46,45 @@ import {
   wireRuleRows,
   wireSearch,
 } from './rules-list.js';
+import { screensPane, wireScreens } from './screens.js';
+import { closeShots, openShots, shotsOpen } from './shots.js';
+import {
+  ACTOR_KEY,
+  CHOICE,
+  cfg,
+  D,
+  GAP,
+  HEAD,
+  IDENTITY_KEY,
+  identityOverride,
+  REINJECTS,
+  S,
+  STYLESHEET,
+  saveIdentity,
+  script,
+  store,
+  TOP,
+  W,
+} from './state.js';
+import { backFromThread, threadCard, threadPane } from './thread-pane.js';
 import { threadFilterBar, threadsMatching, threadsPane } from './threads-list.js';
+import { toast } from './toast.js';
+import { api, esc } from './util.js';
 import { frameLoading, hideVeil, placeVeil, screenLabel, veilIsUp } from './veil.js';
+import {
+  CHIP,
+  isHeadless,
+  LBL,
+  needsYou,
+  owedRows,
+  ruleScreen,
+  screenById,
+  shortName,
+  TERMINAL,
+  threadsFor,
+  threadTouched,
+  whoAmI,
+} from './vocab.js';
 
 /*
  * Two layouts, one panel.

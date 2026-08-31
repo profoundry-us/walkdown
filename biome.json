@@ -40,7 +40,7 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": false,
+      "preset": "none",
       "correctness": {
         "noUndeclaredVariables": "error",
         "noUnusedVariables": "error",
@@ -58,13 +58,9 @@
   },
   "overrides": [
     {
-      "includes": [
-        "extension/*.js"
-      ],
+      "includes": ["extension/*.js"],
       "javascript": {
-        "globals": [
-          "chrome"
-        ]
+        "globals": ["chrome"]
       }
     }
   ]

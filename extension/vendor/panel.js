@@ -1,125 +1,4 @@
 /*
- * Which storyboard screen a location is — the one answer three separate
- * programs have to agree on.
- *
- * The panel resolves it to label the page and aim the ghost, the embed
- * resolves it to stamp pins, and the server resolves it again for pins that
- * arrive from a standalone embed. If those three ever disagree, a pin lands on
- * the wrong screen and nothing says so — so the logic lives here once and is
- * copied verbatim into the two browser files by tools/sync-shared.mjs. They
- * ship as single self-contained scripts down two delivery paths and cannot
- * import anything; a copy that a tool keeps honest beats three hand-written
- * near-matches.
- *
- * Everything between the markers must stay dependency-free and browser-safe.
- */
-
-// --- screen-match:start ---
-/**
- * A screen is identified by origin + path + fragment (docs/06 §2). The
- * storyboard writes that as one string, the way a URL is written:
- *
- *   prototype: /screens/waitlist-admin.html#invite-batch
- *   app: { path: /waitlist#invite-batch }
- *
- * A query may also be written, and it is treated differently on purpose: the
- * fragment is part of identity, the query is not. `?page=2` is the same screen
- * holding different data, and forking the storyboard on every filter would be
- * absurd. What a declared query does is break ties between screens that share
- * a path — /confirm.html and /confirm.html?already=1 are two screens, and the
- * constraint that a page belongs to exactly one blueprint is still checked on
- * path and fragment alone.
- */
-function splitScreenRef(ref) {
-  if (!ref) return null;
-  const s = String(ref);
-  const h = s.indexOf('#'); // the fragment starts at the FIRST #,
-  const fragment = h < 0 ? '' : s.slice(h); // so "#/order?id=1" stays whole
-  const head = h < 0 ? s : s.slice(0, h);
-  const q = head.indexOf('?');
-  return { path: q < 0 ? head : head.slice(0, q), query: q < 0 ? '' : head.slice(q), fragment };
-}
-
-/** An empty hash and a bare "#" are the same absence. */
-function normalizeFragment(hash) {
-  if (!hash || hash === '#') return '';
-  return String(hash).startsWith('#') ? String(hash) : '#' + hash;
-}
-
-/** The canonical identity of one surface of one screen, for collision checks. */
-function screenKey(ref) {
-  const parts = splitScreenRef(ref);
-  return parts ? parts.path + parts.fragment : null;
-}
-
-function pathMatches(refPath, pathname) {
-  if (!refPath) return false;
-  return pathname === refPath || String(pathname).endsWith(refPath);
-}
-
-/**
- * The two surfaces a screen can be reached at, as parsed refs. The prototype
- * comes first because app paths are the loose ones — an app path of "/" is a
- * suffix of every URL there is — and a page that is genuinely the design
- * should never be reported as the running app.
- */
-function screenRefs(screen) {
-  const out = [];
-  const proto = splitScreenRef(screen?.prototype);
-  if (proto) out.push({ surface: 'prototype', ref: proto });
-  const app = splitScreenRef(screen?.app?.path);
-  if (app) out.push({ surface: 'app', ref: app });
-  return out;
-}
-
-/**
- * How well a declared ref fits a location: -1 for "not this one", otherwise
- * higher is more specific.
- *
- * A declared fragment must match exactly, because it is part of what the
- * screen IS. A ref with no fragment still matches a location that has one, and
- * scores lower — that fallback is what keeps an SPA usable before anyone has
- * enumerated its routes: at /orders#/order/1234 with only `/orders` in the
- * storyboard you are still, correctly, on the orders screen. Enumerating the
- * route later makes the answer sharper without breaking the one you had.
- */
-function scoreRef(ref, loc) {
-  if (!pathMatches(ref.path, loc.pathname ?? '')) return -1;
-  if (ref.fragment && ref.fragment !== normalizeFragment(loc.hash)) return -1;
-  const want = new URLSearchParams(ref.query);
-  const have = new URLSearchParams(loc.search ?? '');
-  let bonus = 0;
-  for (const [k, v] of want) {
-    if (have.get(k) !== v) return -1;
-    bonus += 1;
-  }
-  return (ref.fragment ? 100 : 0) + bonus;
-}
-
-/** Resolve a location to the most specific storyboard screen that claims it. */
-function matchScreen(screens, loc) {
-  let best = null;
-  for (const screen of screens ?? []) {
-    for (const { surface, ref } of screenRefs(screen)) {
-      const score = scoreRef(ref, loc ?? {});
-      if (score < 0 || (best && score <= best.score)) continue;
-      best = { screen, surface, fragment: ref.fragment, score };
-    }
-  }
-  return best;
-}
-
-/** The identity-bearing parts of a URL string, for callers holding one. */
-function locationOfUrl(url) {
-  try {
-    const u = new URL(url);
-    return { pathname: u.pathname, search: u.search, hash: u.hash };
-  } catch {
-    return null;
-  }
-}
-
-/*
  * A thread, rendered as a conversation.
  *
  * The panel and the embed both show threads, and they have to show them the
@@ -424,31 +303,125 @@ const MSG = {
 };
 
 /*
- * The panel's icons: Phosphor markup, and the one helper that draws it.
+ * Which storyboard screen a location is — the one answer three separate
+ * programs have to agree on.
  *
- * The markup is inlined rather than fetched because what ships is a single
- * file down two delivery paths — a <script> tag and an extension import — and
- * neither can afford a second request. tools/sync-phosphor.mjs copies the
- * paths for the names we use out of @phosphor-icons/core; everything between
- * the markers is generated, so edit the tool's icon list, not this.
+ * The panel resolves it to label the page and aim the ghost, the embed
+ * resolves it to stamp pins, and the server resolves it again for pins that
+ * arrive from a standalone embed. If those three ever disagree, a pin lands on
+ * the wrong screen and nothing says so — so the logic lives here once and is
+ * copied verbatim into the two browser files by tools/sync-shared.mjs. They
+ * ship as single self-contained scripts down two delivery paths and cannot
+ * import anything; a copy that a tool keeps honest beats three hand-written
+ * near-matches.
+ *
+ * Everything between the markers must stay dependency-free and browser-safe.
  */
-// --- phosphor:start (generated by tools/sync-phosphor.mjs) ---
-const PHOSPHOR = {
-  'bounding-box': '<path d="M208,96a16,16,0,0,0,16-16V48a16,16,0,0,0-16-16H176a16,16,0,0,0-16,16v8H96V48A16,16,0,0,0,80,32H48A16,16,0,0,0,32,48V80A16,16,0,0,0,48,96h8v64H48a16,16,0,0,0-16,16v32a16,16,0,0,0,16,16H80a16,16,0,0,0,16-16v-8h64v8a16,16,0,0,0,16,16h32a16,16,0,0,0,16-16V176a16,16,0,0,0-16-16h-8V96ZM176,48h32V80H176ZM48,48H80V63.9a.51.51,0,0,0,0,.2V80H48ZM80,208H48V176H80v15.9a.51.51,0,0,0,0,.2V208Zm128,0H176V176h32Zm-24-48h-8a16,16,0,0,0-16,16v8H96v-8a16,16,0,0,0-16-16H72V96h8A16,16,0,0,0,96,80V72h64v8a16,16,0,0,0,16,16h8Z"/>',
-  'caret-down': '<path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/>',
-  'chats-circle': '<path d="M232.07,186.76a80,80,0,0,0-62.5-114.17A80,80,0,1,0,23.93,138.76l-7.27,24.71a16,16,0,0,0,19.87,19.87l24.71-7.27a80.39,80.39,0,0,0,25.18,7.35,80,80,0,0,0,108.34,40.65l24.71,7.27a16,16,0,0,0,19.87-19.86ZM62,159.5a8.28,8.28,0,0,0-2.26.32L32,168l8.17-27.76a8,8,0,0,0-.63-6,64,64,0,1,1,26.26,26.26A8,8,0,0,0,62,159.5Zm153.79,28.73L224,216l-27.76-8.17a8,8,0,0,0-6,.63,64.05,64.05,0,0,1-85.87-24.88A79.93,79.93,0,0,0,174.7,89.71a64,64,0,0,1,41.75,92.48A8,8,0,0,0,215.82,188.23Z"/>',
-  'checks': '<path d="M149.61,85.71l-89.6,88a8,8,0,0,1-11.22,0L10.39,136a8,8,0,1,1,11.22-11.41L54.4,156.79l84-82.5a8,8,0,1,1,11.22,11.42Zm96.1-11.32a8,8,0,0,0-11.32-.1l-84,82.5-18.83-18.5a8,8,0,0,0-11.21,11.42l24.43,24a8,8,0,0,0,11.22,0l89.6-88A8,8,0,0,0,245.71,74.39Z"/>',
-  'desktop': '<path d="M208,40H48A24,24,0,0,0,24,64V176a24,24,0,0,0,24,24h72v16H96a8,8,0,0,0,0,16h64a8,8,0,0,0,0-16H136V200h72a24,24,0,0,0,24-24V64A24,24,0,0,0,208,40ZM48,56H208a8,8,0,0,1,8,8v80H40V64A8,8,0,0,1,48,56ZM208,184H48a8,8,0,0,1-8-8V160H216v16A8,8,0,0,1,208,184Z"/>',
-  'device-mobile': '<path d="M176,16H80A24,24,0,0,0,56,40V216a24,24,0,0,0,24,24h96a24,24,0,0,0,24-24V40A24,24,0,0,0,176,16ZM72,64H184V192H72Zm8-32h96a8,8,0,0,1,8,8v8H72V40A8,8,0,0,1,80,32Zm96,192H80a8,8,0,0,1-8-8v-8H184v8A8,8,0,0,1,176,224Z"/>',
-  'frame-corners': '<path d="M200,80v32a8,8,0,0,1-16,0V88H160a8,8,0,0,1,0-16h32A8,8,0,0,1,200,80ZM96,168H72V144a8,8,0,0,0-16,0v32a8,8,0,0,0,8,8H96a8,8,0,0,0,0-16ZM232,56V200a16,16,0,0,1-16,16H40a16,16,0,0,1-16-16V56A16,16,0,0,1,40,40H216A16,16,0,0,1,232,56ZM216,200V56H40V200H216Z"/>',
-  'gear': '<path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm88-29.84q.06-2.16,0-4.32l14.92-18.64a8,8,0,0,0,1.48-7.06,107.21,107.21,0,0,0-10.88-26.25,8,8,0,0,0-6-3.93l-23.72-2.64q-1.48-1.56-3-3L186,40.54a8,8,0,0,0-3.94-6,107.71,107.71,0,0,0-26.25-10.87,8,8,0,0,0-7.06,1.49L130.16,40Q128,40,125.84,40L107.2,25.11a8,8,0,0,0-7.06-1.48A107.6,107.6,0,0,0,73.89,34.51a8,8,0,0,0-3.93,6L67.32,64.27q-1.56,1.49-3,3L40.54,70a8,8,0,0,0-6,3.94,107.71,107.71,0,0,0-10.87,26.25,8,8,0,0,0,1.49,7.06L40,125.84Q40,128,40,130.16L25.11,148.8a8,8,0,0,0-1.48,7.06,107.21,107.21,0,0,0,10.88,26.25,8,8,0,0,0,6,3.93l23.72,2.64q1.49,1.56,3,3L70,215.46a8,8,0,0,0,3.94,6,107.71,107.71,0,0,0,26.25,10.87,8,8,0,0,0,7.06-1.49L125.84,216q2.16.06,4.32,0l18.64,14.92a8,8,0,0,0,7.06,1.48,107.21,107.21,0,0,0,26.25-10.88,8,8,0,0,0,3.93-6l2.64-23.72q1.56-1.48,3-3L215.46,186a8,8,0,0,0,6-3.94,107.71,107.71,0,0,0,10.87-26.25,8,8,0,0,0-1.49-7.06Zm-16.1-6.5a73.93,73.93,0,0,1,0,8.68,8,8,0,0,0,1.74,5.48l14.19,17.73a91.57,91.57,0,0,1-6.23,15L187,173.11a8,8,0,0,0-5.1,2.64,74.11,74.11,0,0,1-6.14,6.14,8,8,0,0,0-2.64,5.1l-2.51,22.58a91.32,91.32,0,0,1-15,6.23l-17.74-14.19a8,8,0,0,0-5-1.75h-.48a73.93,73.93,0,0,1-8.68,0,8,8,0,0,0-5.48,1.74L100.45,215.8a91.57,91.57,0,0,1-15-6.23L82.89,187a8,8,0,0,0-2.64-5.1,74.11,74.11,0,0,1-6.14-6.14,8,8,0,0,0-5.1-2.64L46.43,170.6a91.32,91.32,0,0,1-6.23-15l14.19-17.74a8,8,0,0,0,1.74-5.48,73.93,73.93,0,0,1,0-8.68,8,8,0,0,0-1.74-5.48L40.2,100.45a91.57,91.57,0,0,1,6.23-15L69,82.89a8,8,0,0,0,5.1-2.64,74.11,74.11,0,0,1,6.14-6.14A8,8,0,0,0,82.89,69L85.4,46.43a91.32,91.32,0,0,1,15-6.23l17.74,14.19a8,8,0,0,0,5.48,1.74,73.93,73.93,0,0,1,8.68,0,8,8,0,0,0,5.48-1.74L155.55,40.2a91.57,91.57,0,0,1,15,6.23L173.11,69a8,8,0,0,0,2.64,5.1,74.11,74.11,0,0,1,6.14,6.14,8,8,0,0,0,5.1,2.64l22.58,2.51a91.32,91.32,0,0,1,6.23,15l-14.19,17.74A8,8,0,0,0,199.87,123.66Z"/>',
-  'info': '<path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"/>',
-  'map-pin': '<path d="M128,64a40,40,0,1,0,40,40A40,40,0,0,0,128,64Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,128Zm0-112a88.1,88.1,0,0,0-88,88c0,31.4,14.51,64.68,42,96.25a254.19,254.19,0,0,0,41.45,38.3,8,8,0,0,0,9.18,0A254.19,254.19,0,0,0,174,200.25c27.45-31.57,42-64.85,42-96.25A88.1,88.1,0,0,0,128,16Zm0,206c-16.53-13-72-60.75-72-118a72,72,0,0,1,144,0C200,161.23,144.53,209,128,222Z"/>',
-  'warning-fill': '<path d="M236.8,188.09,149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM120,104a8,8,0,0,1,16,0v40a8,8,0,0,1-16,0Zm8,88a12,12,0,1,1,12-12A12,12,0,0,1,128,192Z"/>',
-};
-// --- phosphor:end ---
-const icon = (name, cls = 'size-4') =>
-  `<svg class="${cls}" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">${PHOSPHOR[name] ?? ''}</svg>`;
+
+// --- screen-match:start ---
+/**
+ * A screen is identified by origin + path + fragment (docs/06 §2). The
+ * storyboard writes that as one string, the way a URL is written:
+ *
+ *   prototype: /screens/waitlist-admin.html#invite-batch
+ *   app: { path: /waitlist#invite-batch }
+ *
+ * A query may also be written, and it is treated differently on purpose: the
+ * fragment is part of identity, the query is not. `?page=2` is the same screen
+ * holding different data, and forking the storyboard on every filter would be
+ * absurd. What a declared query does is break ties between screens that share
+ * a path — /confirm.html and /confirm.html?already=1 are two screens, and the
+ * constraint that a page belongs to exactly one blueprint is still checked on
+ * path and fragment alone.
+ */
+function splitScreenRef(ref) {
+  if (!ref) return null;
+  const s = String(ref);
+  const h = s.indexOf('#'); // the fragment starts at the FIRST #,
+  const fragment = h < 0 ? '' : s.slice(h); // so "#/order?id=1" stays whole
+  const head = h < 0 ? s : s.slice(0, h);
+  const q = head.indexOf('?');
+  return { path: q < 0 ? head : head.slice(0, q), query: q < 0 ? '' : head.slice(q), fragment };
+}
+
+/** An empty hash and a bare "#" are the same absence. */
+function normalizeFragment(hash) {
+  if (!hash || hash === '#') return '';
+  return String(hash).startsWith('#') ? String(hash) : '#' + hash;
+}
+
+/** The canonical identity of one surface of one screen, for collision checks. */
+function screenKey(ref) {
+  const parts = splitScreenRef(ref);
+  return parts ? parts.path + parts.fragment : null;
+}
+
+function pathMatches(refPath, pathname) {
+  if (!refPath) return false;
+  return pathname === refPath || String(pathname).endsWith(refPath);
+}
+
+/**
+ * The two surfaces a screen can be reached at, as parsed refs. The prototype
+ * comes first because app paths are the loose ones — an app path of "/" is a
+ * suffix of every URL there is — and a page that is genuinely the design
+ * should never be reported as the running app.
+ */
+function screenRefs(screen) {
+  const out = [];
+  const proto = splitScreenRef(screen?.prototype);
+  if (proto) out.push({ surface: 'prototype', ref: proto });
+  const app = splitScreenRef(screen?.app?.path);
+  if (app) out.push({ surface: 'app', ref: app });
+  return out;
+}
+
+/**
+ * How well a declared ref fits a location: -1 for "not this one", otherwise
+ * higher is more specific.
+ *
+ * A declared fragment must match exactly, because it is part of what the
+ * screen IS. A ref with no fragment still matches a location that has one, and
+ * scores lower — that fallback is what keeps an SPA usable before anyone has
+ * enumerated its routes: at /orders#/order/1234 with only `/orders` in the
+ * storyboard you are still, correctly, on the orders screen. Enumerating the
+ * route later makes the answer sharper without breaking the one you had.
+ */
+function scoreRef(ref, loc) {
+  if (!pathMatches(ref.path, loc.pathname ?? '')) return -1;
+  if (ref.fragment && ref.fragment !== normalizeFragment(loc.hash)) return -1;
+  const want = new URLSearchParams(ref.query);
+  const have = new URLSearchParams(loc.search ?? '');
+  let bonus = 0;
+  for (const [k, v] of want) {
+    if (have.get(k) !== v) return -1;
+    bonus += 1;
+  }
+  return (ref.fragment ? 100 : 0) + bonus;
+}
+
+/** Resolve a location to the most specific storyboard screen that claims it. */
+function matchScreen(screens, loc) {
+  let best = null;
+  for (const screen of screens ?? []) {
+    for (const { surface, ref } of screenRefs(screen)) {
+      const score = scoreRef(ref, loc ?? {});
+      if (score < 0 || (best && score <= best.score)) continue;
+      best = { screen, surface, fragment: ref.fragment, score };
+    }
+  }
+  return best;
+}
+
+/** The identity-bearing parts of a URL string, for callers holding one. */
+function locationOfUrl(url) {
+  try {
+    const u = new URL(url);
+    return { pathname: u.pathname, search: u.search, hash: u.hash };
+  } catch {
+    return null;
+  }
+}
 
 /*
  * What the panel knows before it draws anything: how it was delivered, where
@@ -687,85 +660,6 @@ const saveIdentity = () =>
   });
 
 /*
- * The two helpers everything else needs: escaping, and where the server is.
- *
- * They are here rather than in state.js because state has no dependencies and
- * these have one — api reads S — and because a module named for what it holds
- * beats a module named for where things happened to end up.
- */
-
-const esc = (s) =>
-  String(s ?? '').replace(
-    /[&<>"]/g,
-    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c],
-  );
-
-/*
- * The blueprint rides along as a query parameter — and it has to go BEFORE any
- * fragment, or the fragment swallows it: "#invite-batch?bp=..." is one
- * fragment named that, not a query, so the server never sees the blueprint and
- * the screen never sees its own fragment.
- */
-const api = (path) => {
-  const h = path.indexOf('#');
-  const head = h < 0 ? path : path.slice(0, h);
-  const frag = h < 0 ? '' : path.slice(h);
-  const q = S.BP ? (head.includes('?') ? '&' : '?') + 'bp=' + encodeURIComponent(S.BP) : '';
-  return S.SERVER + head + q + frag;
-};
-
-/*
- * The screenshots an agent walkdown left behind, shown over the whole desk.
- */
-
-/*
- * The screenshots themselves, over the whole desk.
- *
- * Deliberately NOT a native <dialog showModal()>: the shell is already a
- * manual popover in the browser's top layer, and promoting a second element
- * into it from inside the first is exactly the pairing that left the rule
- * list unable to take a wheel event at all (n-0086). A plain layer inside
- * the same shadow root is a modal by every behaviour that matters here -
- * it covers the surface, it takes the pointer, and Escape closes it.
- */
-let shotLayer = null;
-const shotsOpen = () => Boolean(shotLayer);
-function closeShots() {
-  shotLayer?.remove();
-  shotLayer = null;
-}
-function openShots(paths) {
-  closeShots();
-  shotLayer = document.createElement('div');
-  shotLayer.dataset.theme = 'blueprint';
-  shotLayer.dataset.testid = 'detail.screenshots-modal';
-  shotLayer.style.cssText = `position:fixed; inset:0; z-index:10; pointer-events:auto;
-    background:rgba(16,20,30,.72); display:flex; flex-direction:column; gap:10px;
-    align-items:center; justify-content:flex-start; overflow:auto; padding:20px;`;
-  shotLayer.innerHTML = `
-    <div class="flex w-full max-w-4xl items-center gap-2 text-base-100">
-      <span class="text-[12px] font-semibold uppercase tracking-widest opacity-80">Screenshots</span>
-      <button class="btn btn-xs ml-auto" data-testid="detail.screenshots-close">Close</button>
-    </div>
-    ${paths
-      .map(
-        (p) => `<figure class="w-full max-w-4xl">
-      <img src="${esc(api('/evidence/' + p))}" alt="${esc(p)}"
-        class="w-full rounded border border-base-300 bg-base-100">
-      <figcaption class="mt-1 font-mono text-[10.5px] text-base-100 opacity-70">${esc(p)}</figcaption>
-    </figure>`,
-      )
-      .join('')}`;
-  // The backdrop dismisses, the pictures do not: a click meant for an image
-  // must not close the thing it is looking at.
-  shotLayer.onclick = (e) => {
-    if (e.target === shotLayer) closeShots();
-  };
-  shotLayer.querySelector('[data-testid="detail.screenshots-close"]').onclick = closeShots;
-  D.sr.appendChild(shotLayer);
-}
-
-/*
  * The panel's transient word to the reviewer.
  */
 
@@ -807,130 +701,32 @@ function toast(html, { sticky = false, on = null, tone = 'neutral' } = {}) {
 }
 
 /*
- * The panel's shared vocabulary: the small questions every pane asks of the
- * data, and the two class strings they all label with.
+ * The two helpers everything else needs: escaping, and where the server is.
  *
- * None of it decides anything or draws anything — each is a plain reading of
- * S — which is why it can sit below every pane in the import graph and be
- * reached from all of them without a cycle. When one pane needed a helper the
- * next pane also needed, this is where it went.
+ * They are here rather than in state.js because state has no dependencies and
+ * these have one — api reads S — and because a module named for what it holds
+ * beats a module named for where things happened to end up.
  */
 
-// ---- data -----------------------------------------------------------------
-/*
- * The walk's own work list: rules owing you a verdict, less the ones you
- * have already judged this sitting. Four copies of this predicate had grown
- * up - the footer's counts, the tab badge, the pass-advance, Continue - and
- * they only agreed by hand. One definition, and the number on the tab is by
- * construction the list Continue walks.
- */
-const owedRows = () =>
-  orderedRows().filter((r) => needsYou(r.rule) && !(S.session?.verdicts ?? {})[r.rule]);
-
-/** The screen a rule is filed under: the end of its flow, or the first it names. */
-const screenIdOf = (r) => r?.flow?.at(-1) ?? r?.screens?.[0] ?? null;
-
-/*
- * The rail's own order, and the only definition of it.
- *
- * Rules are grouped by the SCREEN they are about, in storyboard order, then by
- * story in blueprint order. A screen is where a reviewer actually stands, so
- * it is the grouping that matches how the work is done - and the storyboard is
- * already a sequence, so its order is the one to walk in.
- *
- * Rules with no screen come last, together. A third of this blueprint is
- * headless - ledger law, CLI contracts, policies - and those are judged by
- * reading rather than by looking, so they are a destination of their own
- * rather than an awkward remainder scattered through the screens.
- *
- * The list, the detail's stepper and Continue all read THIS, because the
- * stepper promises to move in the order the list shows and Continue promises
- * to walk the list. Two orderings would break both promises quietly.
- */
-function groupedRows(rows = S.data?.rows ?? []) {
-  const board = (S.data?.storyboard ?? []).map((s) => s.id);
-  const rank = new Map(board.map((id, i) => [id, i]));
-  // Unknown screen ids sort after every known one; no screen at all sorts last.
-  const at = (id) => (id === null ? Infinity : (rank.get(id) ?? board.length));
-  const groups = new Map();
-  for (const row of rows) {
-    const sid = screenIdOf(row) ?? null;
-    if (!groups.has(sid)) groups.set(sid, new Map());
-    const stories = groups.get(sid);
-    if (!stories.has(row.story)) stories.set(row.story, []);
-    stories.get(row.story).push(row);
-  }
-  return [...groups.entries()]
-    .sort(([a], [b]) => at(a) - at(b))
-    .map(([screen, stories]) => ({
-      screen,
-      stories: [...stories.entries()].map(([story, rs]) => ({ story, rows: rs })),
-    }));
-}
-
-/** The same order, flat - what the stepper and the walk step through. */
-const orderedRows = (rows) =>
-  groupedRows(rows).flatMap((g) => g.stories.flatMap((s) => s.rows));
-
-/*
- * What a story is called once its screen is named above it. The feature
- * prefix is the screen's job now, so `invites.batch` reads as BATCH - unless
- * two stories under one screen would end up with the same word, and then both
- * keep their full id rather than the list drawing one label over two things.
- */
-function storyLabels(stories) {
-  const leaf = (s) => String(s).split('.').at(-1);
-  const tally = {};
-  for (const s of stories) tally[leaf(s)] = (tally[leaf(s)] ?? 0) + 1;
-  return new Map(stories.map((s) => [s, tally[leaf(s)] > 1 ? s : leaf(s)]));
-}
-
-const needsYou = (rule) =>
-  (S.data?.attention ?? []).some((i) => i.who === 'human' && !i.thread && i.rule === rule);
-const threadsFor = (rule) =>
-  (S.data?.threads ?? []).filter(
-    (t) => t.anchor?.rule === rule && !['incorporated', 'verified', 'waived'].includes(t.status),
+const esc = (s) =>
+  String(s ?? '').replace(
+    /[&<>"]/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c],
   );
 
-const screenById = (id) => (S.data?.storyboard ?? []).find((s) => s.id === id) ?? null;
-
-const LBL = 'text-[10.5px] font-bold uppercase tracking-widest opacity-40';
-/** A rule id with its story prefix dropped — what the rail calls it. */
-const shortName = (row) =>
-  row.rule.startsWith(row.story + '.') ? row.rule.slice(row.story.length + 1) : row.rule;
-
-/**
- * A thread in the detail pane. Collapsed it is a line of provenance and the
- * note; open it carries its replies, a reply box and the transitions its
- * state allows — feedback gets answered where it is read, without leaving
- * the app under review.
- */
-const CHIP = {
-  open: 'badge-warning',
-  answered: 'badge-warning',
-  addressed: 'badge-info',
-  verified: 'badge-success',
-  incorporated: 'badge-success',
-  waived: 'badge-ghost',
-};
-const TERMINAL = ['verified', 'incorporated', 'waived'];
-
-/** Who a reply and a transition are recorded as - one answer, as everywhere. */
-const whoAmI = () =>
-  (identityOverride.username ?? S.session?.actor ?? S.data?.identity?.username ?? '').trim();
-
-/** The screen a rule is about: the end of its flow, or the one it names. */
-const ruleScreen = (r) => screenById(r?.flow?.at(-1) ?? r?.screens?.[0]);
-
 /*
- * When a rule lives on a screen you are not looking at, say so — and, now
- * that walkdown can move the surface, offer the trip as something it will
- * actually make rather than as a link out of the tool.
+ * The blueprint rides along as a query parameter — and it has to go BEFORE any
+ * fragment, or the fragment swallows it: "#invite-batch?bp=..." is one
+ * fragment named that, not a query, so the server never sees the blueprint and
+ * the screen never sees its own fragment.
  */
-const isHeadless = (r) => Boolean(r) && !r.screens?.length && !r.flow?.length;
-
-/** Last time anything was said - what a list of conversations sorts by. */
-const threadTouched = (t) => String((t?.replies ?? []).at(-1)?.created ?? t?.created ?? '');
+const api = (path) => {
+  const h = path.indexOf('#');
+  const head = h < 0 ? path : path.slice(0, h);
+  const frag = h < 0 ? '' : path.slice(h);
+  const q = S.BP ? (head.includes('?') ? '&' : '?') + 'bp=' + encodeURIComponent(S.BP) : '';
+  return S.SERVER + head + q + frag;
+};
 
 /*
  * The Blueprints tab: which server, which blueprint, and what crossing to
@@ -1163,153 +959,157 @@ function drawDesk(on, ink) {
 }
 
 /*
- * One conversation, opened: the thread's own detail pane, and the card the
- * lists draw for it.
+ * The panel's icons: Phosphor markup, and the one helper that draws it.
+ *
+ * The markup is inlined rather than fetched because what ships is a single
+ * file down two delivery paths — a <script> tag and an extension import — and
+ * neither can afford a second request. tools/sync-phosphor.mjs copies the
+ * paths for the names we use out of @phosphor-icons/core; everything between
+ * the markers is generated, so edit the tool's icon list, not this.
  */
+// --- phosphor:start (generated by tools/sync-phosphor.mjs) ---
+const PHOSPHOR = {
+  'bounding-box': '<path d="M208,96a16,16,0,0,0,16-16V48a16,16,0,0,0-16-16H176a16,16,0,0,0-16,16v8H96V48A16,16,0,0,0,80,32H48A16,16,0,0,0,32,48V80A16,16,0,0,0,48,96h8v64H48a16,16,0,0,0-16,16v32a16,16,0,0,0,16,16H80a16,16,0,0,0,16-16v-8h64v8a16,16,0,0,0,16,16h32a16,16,0,0,0,16-16V176a16,16,0,0,0-16-16h-8V96ZM176,48h32V80H176ZM48,48H80V63.9a.51.51,0,0,0,0,.2V80H48ZM80,208H48V176H80v15.9a.51.51,0,0,0,0,.2V208Zm128,0H176V176h32Zm-24-48h-8a16,16,0,0,0-16,16v8H96v-8a16,16,0,0,0-16-16H72V96h8A16,16,0,0,0,96,80V72h64v8a16,16,0,0,0,16,16h8Z"/>',
+  'caret-down': '<path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/>',
+  'chats-circle': '<path d="M232.07,186.76a80,80,0,0,0-62.5-114.17A80,80,0,1,0,23.93,138.76l-7.27,24.71a16,16,0,0,0,19.87,19.87l24.71-7.27a80.39,80.39,0,0,0,25.18,7.35,80,80,0,0,0,108.34,40.65l24.71,7.27a16,16,0,0,0,19.87-19.86ZM62,159.5a8.28,8.28,0,0,0-2.26.32L32,168l8.17-27.76a8,8,0,0,0-.63-6,64,64,0,1,1,26.26,26.26A8,8,0,0,0,62,159.5Zm153.79,28.73L224,216l-27.76-8.17a8,8,0,0,0-6,.63,64.05,64.05,0,0,1-85.87-24.88A79.93,79.93,0,0,0,174.7,89.71a64,64,0,0,1,41.75,92.48A8,8,0,0,0,215.82,188.23Z"/>',
+  'checks': '<path d="M149.61,85.71l-89.6,88a8,8,0,0,1-11.22,0L10.39,136a8,8,0,1,1,11.22-11.41L54.4,156.79l84-82.5a8,8,0,1,1,11.22,11.42Zm96.1-11.32a8,8,0,0,0-11.32-.1l-84,82.5-18.83-18.5a8,8,0,0,0-11.21,11.42l24.43,24a8,8,0,0,0,11.22,0l89.6-88A8,8,0,0,0,245.71,74.39Z"/>',
+  'desktop': '<path d="M208,40H48A24,24,0,0,0,24,64V176a24,24,0,0,0,24,24h72v16H96a8,8,0,0,0,0,16h64a8,8,0,0,0,0-16H136V200h72a24,24,0,0,0,24-24V64A24,24,0,0,0,208,40ZM48,56H208a8,8,0,0,1,8,8v80H40V64A8,8,0,0,1,48,56ZM208,184H48a8,8,0,0,1-8-8V160H216v16A8,8,0,0,1,208,184Z"/>',
+  'device-mobile': '<path d="M176,16H80A24,24,0,0,0,56,40V216a24,24,0,0,0,24,24h96a24,24,0,0,0,24-24V40A24,24,0,0,0,176,16ZM72,64H184V192H72Zm8-32h96a8,8,0,0,1,8,8v8H72V40A8,8,0,0,1,80,32Zm96,192H80a8,8,0,0,1-8-8v-8H184v8A8,8,0,0,1,176,224Z"/>',
+  'frame-corners': '<path d="M200,80v32a8,8,0,0,1-16,0V88H160a8,8,0,0,1,0-16h32A8,8,0,0,1,200,80ZM96,168H72V144a8,8,0,0,0-16,0v32a8,8,0,0,0,8,8H96a8,8,0,0,0,0-16ZM232,56V200a16,16,0,0,1-16,16H40a16,16,0,0,1-16-16V56A16,16,0,0,1,40,40H216A16,16,0,0,1,232,56ZM216,200V56H40V200H216Z"/>',
+  'gear': '<path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm88-29.84q.06-2.16,0-4.32l14.92-18.64a8,8,0,0,0,1.48-7.06,107.21,107.21,0,0,0-10.88-26.25,8,8,0,0,0-6-3.93l-23.72-2.64q-1.48-1.56-3-3L186,40.54a8,8,0,0,0-3.94-6,107.71,107.71,0,0,0-26.25-10.87,8,8,0,0,0-7.06,1.49L130.16,40Q128,40,125.84,40L107.2,25.11a8,8,0,0,0-7.06-1.48A107.6,107.6,0,0,0,73.89,34.51a8,8,0,0,0-3.93,6L67.32,64.27q-1.56,1.49-3,3L40.54,70a8,8,0,0,0-6,3.94,107.71,107.71,0,0,0-10.87,26.25,8,8,0,0,0,1.49,7.06L40,125.84Q40,128,40,130.16L25.11,148.8a8,8,0,0,0-1.48,7.06,107.21,107.21,0,0,0,10.88,26.25,8,8,0,0,0,6,3.93l23.72,2.64q1.49,1.56,3,3L70,215.46a8,8,0,0,0,3.94,6,107.71,107.71,0,0,0,26.25,10.87,8,8,0,0,0,7.06-1.49L125.84,216q2.16.06,4.32,0l18.64,14.92a8,8,0,0,0,7.06,1.48,107.21,107.21,0,0,0,26.25-10.88,8,8,0,0,0,3.93-6l2.64-23.72q1.56-1.48,3-3L215.46,186a8,8,0,0,0,6-3.94,107.71,107.71,0,0,0,10.87-26.25,8,8,0,0,0-1.49-7.06Zm-16.1-6.5a73.93,73.93,0,0,1,0,8.68,8,8,0,0,0,1.74,5.48l14.19,17.73a91.57,91.57,0,0,1-6.23,15L187,173.11a8,8,0,0,0-5.1,2.64,74.11,74.11,0,0,1-6.14,6.14,8,8,0,0,0-2.64,5.1l-2.51,22.58a91.32,91.32,0,0,1-15,6.23l-17.74-14.19a8,8,0,0,0-5-1.75h-.48a73.93,73.93,0,0,1-8.68,0,8,8,0,0,0-5.48,1.74L100.45,215.8a91.57,91.57,0,0,1-15-6.23L82.89,187a8,8,0,0,0-2.64-5.1,74.11,74.11,0,0,1-6.14-6.14,8,8,0,0,0-5.1-2.64L46.43,170.6a91.32,91.32,0,0,1-6.23-15l14.19-17.74a8,8,0,0,0,1.74-5.48,73.93,73.93,0,0,1,0-8.68,8,8,0,0,0-1.74-5.48L40.2,100.45a91.57,91.57,0,0,1,6.23-15L69,82.89a8,8,0,0,0,5.1-2.64,74.11,74.11,0,0,1,6.14-6.14A8,8,0,0,0,82.89,69L85.4,46.43a91.32,91.32,0,0,1,15-6.23l17.74,14.19a8,8,0,0,0,5.48,1.74,73.93,73.93,0,0,1,8.68,0,8,8,0,0,0,5.48-1.74L155.55,40.2a91.57,91.57,0,0,1,15,6.23L173.11,69a8,8,0,0,0,2.64,5.1,74.11,74.11,0,0,1,6.14,6.14,8,8,0,0,0,5.1,2.64l22.58,2.51a91.32,91.32,0,0,1,6.23,15l-14.19,17.74A8,8,0,0,0,199.87,123.66Z"/>',
+  'info': '<path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"/>',
+  'map-pin': '<path d="M128,64a40,40,0,1,0,40,40A40,40,0,0,0,128,64Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,128Zm0-112a88.1,88.1,0,0,0-88,88c0,31.4,14.51,64.68,42,96.25a254.19,254.19,0,0,0,41.45,38.3,8,8,0,0,0,9.18,0A254.19,254.19,0,0,0,174,200.25c27.45-31.57,42-64.85,42-96.25A88.1,88.1,0,0,0,128,16Zm0,206c-16.53-13-72-60.75-72-118a72,72,0,0,1,144,0C200,161.23,144.53,209,128,222Z"/>',
+  'warning-fill': '<path d="M236.8,188.09,149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM120,104a8,8,0,0,1,16,0v40a8,8,0,0,1-16,0Zm8,88a12,12,0,1,1,12-12A12,12,0,0,1,128,192Z"/>',
+};
+// --- phosphor:end ---
+const icon = (name, cls = 'size-4') =>
+  `<svg class="${cls}" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">${PHOSPHOR[name] ?? ''}</svg>`;
 
 /*
- * A thread, collapsed: the opening message and the way into the rest of it.
- * It reads the way a message with replies reads anywhere - a face, a name, a
- * time, what was said, and under it the people in the thread, the number of
- * replies, and when it was last touched. The count is the door; opening it
- * slides the whole conversation in beside the rule.
+ * The panel's shared vocabulary: the small questions every pane asks of the
+ * data, and the two class strings they all label with.
+ *
+ * None of it decides anything or draws anything — each is a plain reading of
+ * S — which is why it can sit below every pane in the import graph and be
+ * reached from all of them without a cycle. When one pane needed a helper the
+ * next pane also needed, this is where it went.
  */
-function threadCard(t, where = null) {
-  const who = MSG.displayName(t.author, names());
-  const unread = unreadCount(t);
-  // No card, no rail: threads share one surface with the pane, the way
-  // messages share a channel. What is waiting on you is said in words - the
-  // status chip and the unread count - rather than by tinting a box.
-  //
-  // `where` is passed only by the Threads tab, which is not scoped to a rule
-  // and so has to say what each conversation is about. It also makes the
-  // whole row the way in: under a rule the reply line is enough, because the
-  // rule above it is already the context.
-  return `<div class="wd-row px-3.5 py-2${where ? ' cursor-pointer' : ''}"${
-    where ? ` data-open-thread="${esc(t.id)}"` : ''
-  }>
-    ${where ? `<div class="mb-1 truncate text-[11px] opacity-45" data-testid="thread.where">${esc(where)}</div>` : ''}
-    <div class="wd-msg">
-      ${MSG.avatar(who)}
-      <div class="wd-col min-w-0">
-        <div class="wd-head">
-          <span class="wd-who">${esc(who)}</span>
-          <span class="wd-at" title="${esc(MSG.stamp(t.created))}">${esc(MSG.ago(t.created))}</span>
-          <!-- The id stays visible, quietly: a conversation you can name is a
-               conversation you can point at from a run record or a commit. -->
-          <span class="wd-at font-mono">${esc(t.id)}</span>
-          <span class="ml-auto flex shrink-0 items-center gap-1">
-            ${unread ? `<span class="badge badge-xs badge-error">${unread} new</span>` : ''}
-            <span class="badge badge-xs ${CHIP[t.status] ?? 'badge-ghost'}">${esc(t.status)}</span>
-          </span>
-        </div>
-        <div class="wd-text wd-preview">${MSG.body(t.body, { rules: (S.data?.rows ?? []).map((r) => r.rule) })}</div>
-        ${MSG.repliesLine(t, names())}
-      </div>
-    </div>
-  </div>`;
+
+// ---- data -----------------------------------------------------------------
+/*
+ * The walk's own work list: rules owing you a verdict, less the ones you
+ * have already judged this sitting. Four copies of this predicate had grown
+ * up - the footer's counts, the tab badge, the pass-advance, Continue - and
+ * they only agreed by hand. One definition, and the number on the tab is by
+ * construction the list Continue walks.
+ */
+const owedRows = () =>
+  orderedRows().filter((r) => needsYou(r.rule) && !(S.session?.verdicts ?? {})[r.rule]);
+
+/** The screen a rule is filed under: the end of its flow, or the first it names. */
+const screenIdOf = (r) => r?.flow?.at(-1) ?? r?.screens?.[0] ?? null;
+
+/*
+ * The rail's own order, and the only definition of it.
+ *
+ * Rules are grouped by the SCREEN they are about, in storyboard order, then by
+ * story in blueprint order. A screen is where a reviewer actually stands, so
+ * it is the grouping that matches how the work is done - and the storyboard is
+ * already a sequence, so its order is the one to walk in.
+ *
+ * Rules with no screen come last, together. A third of this blueprint is
+ * headless - ledger law, CLI contracts, policies - and those are judged by
+ * reading rather than by looking, so they are a destination of their own
+ * rather than an awkward remainder scattered through the screens.
+ *
+ * The list, the detail's stepper and Continue all read THIS, because the
+ * stepper promises to move in the order the list shows and Continue promises
+ * to walk the list. Two orderings would break both promises quietly.
+ */
+function groupedRows(rows = S.data?.rows ?? []) {
+  const board = (S.data?.storyboard ?? []).map((s) => s.id);
+  const rank = new Map(board.map((id, i) => [id, i]));
+  // Unknown screen ids sort after every known one; no screen at all sorts last.
+  const at = (id) => (id === null ? Infinity : (rank.get(id) ?? board.length));
+  const groups = new Map();
+  for (const row of rows) {
+    const sid = screenIdOf(row) ?? null;
+    if (!groups.has(sid)) groups.set(sid, new Map());
+    const stories = groups.get(sid);
+    if (!stories.has(row.story)) stories.set(row.story, []);
+    stories.get(row.story).push(row);
+  }
+  return [...groups.entries()]
+    .sort(([a], [b]) => at(a) - at(b))
+    .map(([screen, stories]) => ({
+      screen,
+      stories: [...stories.entries()].map(([story, rs]) => ({ story, rows: rs })),
+    }));
 }
 
+/** The same order, flat - what the stepper and the walk step through. */
+const orderedRows = (rows) =>
+  groupedRows(rows).flatMap((g) => g.stories.flatMap((s) => s.rows));
+
 /*
- * The thread itself: its own screen, one slide to the right of the rule it
- * belongs to. A conversation deserves the width - reading and answering
- * should not happen in a card wedged between a rule's steps and its verify
- * list - and the way back is where you came from.
+ * What a story is called once its screen is named above it. The feature
+ * prefix is the screen's job now, so `invites.batch` reads as BATCH - unless
+ * two stories under one screen would end up with the same word, and then both
+ * keep their full id rather than the list drawing one label over two things.
  */
+function storyLabels(stories) {
+  const leaf = (s) => String(s).split('.').at(-1);
+  const tally = {};
+  for (const s of stories) tally[leaf(s)] = (tally[leaf(s)] ?? 0) + 1;
+  return new Map(stories.map((s) => [s, tally[leaf(s)] > 1 ? s : leaf(s)]));
+}
+
+const needsYou = (rule) =>
+  (S.data?.attention ?? []).some((i) => i.who === 'human' && !i.thread && i.rule === rule);
+const threadsFor = (rule) =>
+  (S.data?.threads ?? []).filter(
+    (t) => t.anchor?.rule === rule && !['incorporated', 'verified', 'waived'].includes(t.status),
+  );
+
+const screenById = (id) => (S.data?.storyboard ?? []).find((s) => s.id === id) ?? null;
+
+const LBL = 'text-[10.5px] font-bold uppercase tracking-widest opacity-40';
+/** A rule id with its story prefix dropped — what the rail calls it. */
+const shortName = (row) =>
+  row.rule.startsWith(row.story + '.') ? row.rule.slice(row.story.length + 1) : row.rule;
+
 /**
- * What the way out of a thread is called. On the Threads tab the thread is
- * the tab's own detail, so the way back is the list of threads - naming a
- * rule there would offer a trip nobody took.
+ * A thread in the detail pane. Collapsed it is a line of provenance and the
+ * note; open it carries its replies, a reply box and the transitions its
+ * state allows — feedback gets answered where it is read, without leaving
+ * the app under review.
  */
-const backFromThread = (row) =>
-  S.listTab === 'threads' ? 'All threads' : row ? shortName(row) : 'All rules';
+const CHIP = {
+  open: 'badge-warning',
+  answered: 'badge-warning',
+  addressed: 'badge-info',
+  verified: 'badge-success',
+  incorporated: 'badge-success',
+  waived: 'badge-ghost',
+};
+const TERMINAL = ['verified', 'incorporated', 'waived'];
 
-function threadPane() {
-  const t = (S.data?.threads ?? []).find((x) => x.id === S.openThread);
-  // Whatever became of the thread — ended, reloaded away, never there — this
-  // screen is never a dead end.
-  if (!t)
-    return `
-    <div class="flex items-center px-2 pt-2">
-      <button class="wdp-thread-back btn btn-ghost btn-xs text-primary">← ${esc(
-        backFromThread(S.selected),
-      )}</button>
-    </div>
-    <div class="px-3.5 pt-1 text-[12.5px] opacity-60">That thread is no longer open here.</div>`;
-  const row = t.anchor?.rule ? S.data.rows.find((r) => r.rule === t.anchor.rule) : null;
-  const sc = screenById(t.anchor?.screen);
-  const where = [
-    t.anchor?.rule ? '' : 'not attached to a rule',
-    sc?.title ?? t.anchor?.screen,
-    t.anchor?.element
-      ? `<span class="font-mono">${esc(t.anchor.element)}</span>`
-      : t.anchor?.position
-        ? 'by position'
-        : '',
-    t.anchor?.viewport
-      ? `${esc(t.anchor.viewport.name)} ${esc(String(t.anchor.viewport.width))}`
-      : '',
-  ]
-    .filter(Boolean)
-    .join(' · ');
-  const sketch = ghostSource(sc);
-  const acts = threadActions(t);
-  const me = whoAmI();
-  const ended = TERMINAL.includes(t.status) ? (t.replies ?? []).at(-1) : null;
-  return `
-    <div class="flex items-center gap-1 px-2 pt-2">
-      <button class="wdp-thread-back btn btn-ghost btn-xs text-primary" data-testid="thread.close">← ${esc(
-        backFromThread(row),
-      )}</button>
-      <span class="ml-auto flex items-center gap-1 pr-1.5 text-[11px]" data-testid="thread.provenance">
-        <b class="opacity-60">${esc(t.id)}</b>
-        <span class="badge badge-xs ${CHIP[t.status] ?? 'badge-ghost'}">${esc(t.status)}</span>
-      </span>
-    </div>
-    ${where ? `<div class="px-3.5 pb-1 text-[11px] opacity-45">${where}</div>` : ''}
-    <div class="min-h-0 flex-1 overflow-y-auto px-3.5 pb-2" data-testid="thread.body">
-      ${MSG.stream(t, {
-        seenAt: seenAtOpen[t.id] ?? null,
-        rules: (S.data?.rows ?? []).map((r) => r.rule),
-        pending: pendingReplies.get(t.id) ?? [],
-        names: names(),
-      })}
-      ${
-        ended
-          ? `<div class="mt-2 flex items-center gap-1.5 rounded border border-success/40 px-2 py-1 text-[11px]">
-        <span class="text-success">✓</span> ${esc(t.status === 'waived' ? 'Waived' : t.status)}${
-          ended.author ? ` by <b>${esc(MSG.displayName(ended.author, names()))}</b>` : ''
-        } · ${esc(MSG.ago(ended.created))}</div>`
-          : ''
-      }
-      ${
-        sketch?.proposed
-          ? `<button class="btn btn-xs btn-outline mt-2 w-full" data-sketch="${esc(t.anchor.screen)}">
-        ⚠ View the proposed sketch</button>`
-          : ''
-      }
-    </div>
-    <!-- The composer stays put at the foot of the screen: type, press Enter,
-         the message is there. The name is not asked for again — it is
-         whoever you are recording as, changed in Settings like everywhere. -->
-    <div class="shrink-0 border-t border-base-300 p-2">
-      <textarea id="wdp-note" data-testid="thread.reply" rows="2" class="textarea textarea-xs w-full resize-none"
-        placeholder="Reply…">${esc(S.threadNote)}</textarea>
-      <div class="mt-1 flex flex-wrap items-center gap-1">
-        <span class="text-[10px] opacity-40">as <button id="wdp-tactor" class="link">${esc(
-          me || 'set your name…',
-        )}</button> · <b>Enter</b> sends</span>
-        ${acts
-          .map(
-            ([label, st, quiet], i) =>
-              `<button class="btn btn-xs${quiet ? ' btn-ghost opacity-60' : ''}${i === 0 ? ' ml-auto' : ''}"
-            data-testid="thread.actions" data-act="${esc(st)}" data-tid="${esc(t.id)}">${label}</button>`,
-          )
-          .join('')}
-      </div>
-      <div class="mt-1 hidden text-[11px] text-warning" data-testid="thread.say" id="wdp-tsay"></div>
-    </div>`;
-}
+/** Who a reply and a transition are recorded as - one answer, as everywhere. */
+const whoAmI = () =>
+  (identityOverride.username ?? S.session?.actor ?? S.data?.identity?.username ?? '').trim();
+
+/** The screen a rule is about: the end of its flow, or the one it names. */
+const ruleScreen = (r) => screenById(r?.flow?.at(-1) ?? r?.screens?.[0]);
+
+/*
+ * When a rule lives on a screen you are not looking at, say so — and, now
+ * that walkdown can move the surface, offer the trip as something it will
+ * actually make rather than as a link out of the tool.
+ */
+const isHeadless = (r) => Boolean(r) && !r.screens?.length && !r.flow?.length;
+
+/** Last time anything was said - what a list of conversations sorts by. */
+const threadTouched = (t) => String((t?.replies ?? []).at(-1)?.created ?? t?.created ?? '');
 
 /*
  * The Rules tab: the rail of rules, the box that filters it, and the marks
@@ -1895,6 +1695,206 @@ function legendControl() {
     </span></span>
     <span class="flex cursor-help items-center gap-1 opacity-50">${icon('info', 'size-3.5')}Legend</span>
   </span>`;
+}
+
+/*
+ * The screenshots an agent walkdown left behind, shown over the whole desk.
+ */
+
+/*
+ * The screenshots themselves, over the whole desk.
+ *
+ * Deliberately NOT a native <dialog showModal()>: the shell is already a
+ * manual popover in the browser's top layer, and promoting a second element
+ * into it from inside the first is exactly the pairing that left the rule
+ * list unable to take a wheel event at all (n-0086). A plain layer inside
+ * the same shadow root is a modal by every behaviour that matters here -
+ * it covers the surface, it takes the pointer, and Escape closes it.
+ */
+let shotLayer = null;
+const shotsOpen = () => Boolean(shotLayer);
+function closeShots() {
+  shotLayer?.remove();
+  shotLayer = null;
+}
+function openShots(paths) {
+  closeShots();
+  shotLayer = document.createElement('div');
+  shotLayer.dataset.theme = 'blueprint';
+  shotLayer.dataset.testid = 'detail.screenshots-modal';
+  shotLayer.style.cssText = `position:fixed; inset:0; z-index:10; pointer-events:auto;
+    background:rgba(16,20,30,.72); display:flex; flex-direction:column; gap:10px;
+    align-items:center; justify-content:flex-start; overflow:auto; padding:20px;`;
+  shotLayer.innerHTML = `
+    <div class="flex w-full max-w-4xl items-center gap-2 text-base-100">
+      <span class="text-[12px] font-semibold uppercase tracking-widest opacity-80">Screenshots</span>
+      <button class="btn btn-xs ml-auto" data-testid="detail.screenshots-close">Close</button>
+    </div>
+    ${paths
+      .map(
+        (p) => `<figure class="w-full max-w-4xl">
+      <img src="${esc(api('/evidence/' + p))}" alt="${esc(p)}"
+        class="w-full rounded border border-base-300 bg-base-100">
+      <figcaption class="mt-1 font-mono text-[10.5px] text-base-100 opacity-70">${esc(p)}</figcaption>
+    </figure>`,
+      )
+      .join('')}`;
+  // The backdrop dismisses, the pictures do not: a click meant for an image
+  // must not close the thing it is looking at.
+  shotLayer.onclick = (e) => {
+    if (e.target === shotLayer) closeShots();
+  };
+  shotLayer.querySelector('[data-testid="detail.screenshots-close"]').onclick = closeShots;
+  D.sr.appendChild(shotLayer);
+}
+
+/*
+ * One conversation, opened: the thread's own detail pane, and the card the
+ * lists draw for it.
+ */
+
+/*
+ * A thread, collapsed: the opening message and the way into the rest of it.
+ * It reads the way a message with replies reads anywhere - a face, a name, a
+ * time, what was said, and under it the people in the thread, the number of
+ * replies, and when it was last touched. The count is the door; opening it
+ * slides the whole conversation in beside the rule.
+ */
+function threadCard(t, where = null) {
+  const who = MSG.displayName(t.author, names());
+  const unread = unreadCount(t);
+  // No card, no rail: threads share one surface with the pane, the way
+  // messages share a channel. What is waiting on you is said in words - the
+  // status chip and the unread count - rather than by tinting a box.
+  //
+  // `where` is passed only by the Threads tab, which is not scoped to a rule
+  // and so has to say what each conversation is about. It also makes the
+  // whole row the way in: under a rule the reply line is enough, because the
+  // rule above it is already the context.
+  return `<div class="wd-row px-3.5 py-2${where ? ' cursor-pointer' : ''}"${
+    where ? ` data-open-thread="${esc(t.id)}"` : ''
+  }>
+    ${where ? `<div class="mb-1 truncate text-[11px] opacity-45" data-testid="thread.where">${esc(where)}</div>` : ''}
+    <div class="wd-msg">
+      ${MSG.avatar(who)}
+      <div class="wd-col min-w-0">
+        <div class="wd-head">
+          <span class="wd-who">${esc(who)}</span>
+          <span class="wd-at" title="${esc(MSG.stamp(t.created))}">${esc(MSG.ago(t.created))}</span>
+          <!-- The id stays visible, quietly: a conversation you can name is a
+               conversation you can point at from a run record or a commit. -->
+          <span class="wd-at font-mono">${esc(t.id)}</span>
+          <span class="ml-auto flex shrink-0 items-center gap-1">
+            ${unread ? `<span class="badge badge-xs badge-error">${unread} new</span>` : ''}
+            <span class="badge badge-xs ${CHIP[t.status] ?? 'badge-ghost'}">${esc(t.status)}</span>
+          </span>
+        </div>
+        <div class="wd-text wd-preview">${MSG.body(t.body, { rules: (S.data?.rows ?? []).map((r) => r.rule) })}</div>
+        ${MSG.repliesLine(t, names())}
+      </div>
+    </div>
+  </div>`;
+}
+
+/*
+ * The thread itself: its own screen, one slide to the right of the rule it
+ * belongs to. A conversation deserves the width - reading and answering
+ * should not happen in a card wedged between a rule's steps and its verify
+ * list - and the way back is where you came from.
+ */
+/**
+ * What the way out of a thread is called. On the Threads tab the thread is
+ * the tab's own detail, so the way back is the list of threads - naming a
+ * rule there would offer a trip nobody took.
+ */
+const backFromThread = (row) =>
+  S.listTab === 'threads' ? 'All threads' : row ? shortName(row) : 'All rules';
+
+function threadPane() {
+  const t = (S.data?.threads ?? []).find((x) => x.id === S.openThread);
+  // Whatever became of the thread — ended, reloaded away, never there — this
+  // screen is never a dead end.
+  if (!t)
+    return `
+    <div class="flex items-center px-2 pt-2">
+      <button class="wdp-thread-back btn btn-ghost btn-xs text-primary">← ${esc(
+        backFromThread(S.selected),
+      )}</button>
+    </div>
+    <div class="px-3.5 pt-1 text-[12.5px] opacity-60">That thread is no longer open here.</div>`;
+  const row = t.anchor?.rule ? S.data.rows.find((r) => r.rule === t.anchor.rule) : null;
+  const sc = screenById(t.anchor?.screen);
+  const where = [
+    t.anchor?.rule ? '' : 'not attached to a rule',
+    sc?.title ?? t.anchor?.screen,
+    t.anchor?.element
+      ? `<span class="font-mono">${esc(t.anchor.element)}</span>`
+      : t.anchor?.position
+        ? 'by position'
+        : '',
+    t.anchor?.viewport
+      ? `${esc(t.anchor.viewport.name)} ${esc(String(t.anchor.viewport.width))}`
+      : '',
+  ]
+    .filter(Boolean)
+    .join(' · ');
+  const sketch = ghostSource(sc);
+  const acts = threadActions(t);
+  const me = whoAmI();
+  const ended = TERMINAL.includes(t.status) ? (t.replies ?? []).at(-1) : null;
+  return `
+    <div class="flex items-center gap-1 px-2 pt-2">
+      <button class="wdp-thread-back btn btn-ghost btn-xs text-primary" data-testid="thread.close">← ${esc(
+        backFromThread(row),
+      )}</button>
+      <span class="ml-auto flex items-center gap-1 pr-1.5 text-[11px]" data-testid="thread.provenance">
+        <b class="opacity-60">${esc(t.id)}</b>
+        <span class="badge badge-xs ${CHIP[t.status] ?? 'badge-ghost'}">${esc(t.status)}</span>
+      </span>
+    </div>
+    ${where ? `<div class="px-3.5 pb-1 text-[11px] opacity-45">${where}</div>` : ''}
+    <div class="min-h-0 flex-1 overflow-y-auto px-3.5 pb-2" data-testid="thread.body">
+      ${MSG.stream(t, {
+        seenAt: seenAtOpen[t.id] ?? null,
+        rules: (S.data?.rows ?? []).map((r) => r.rule),
+        pending: pendingReplies.get(t.id) ?? [],
+        names: names(),
+      })}
+      ${
+        ended
+          ? `<div class="mt-2 flex items-center gap-1.5 rounded border border-success/40 px-2 py-1 text-[11px]">
+        <span class="text-success">✓</span> ${esc(t.status === 'waived' ? 'Waived' : t.status)}${
+          ended.author ? ` by <b>${esc(MSG.displayName(ended.author, names()))}</b>` : ''
+        } · ${esc(MSG.ago(ended.created))}</div>`
+          : ''
+      }
+      ${
+        sketch?.proposed
+          ? `<button class="btn btn-xs btn-outline mt-2 w-full" data-sketch="${esc(t.anchor.screen)}">
+        ⚠ View the proposed sketch</button>`
+          : ''
+      }
+    </div>
+    <!-- The composer stays put at the foot of the screen: type, press Enter,
+         the message is there. The name is not asked for again — it is
+         whoever you are recording as, changed in Settings like everywhere. -->
+    <div class="shrink-0 border-t border-base-300 p-2">
+      <textarea id="wdp-note" data-testid="thread.reply" rows="2" class="textarea textarea-xs w-full resize-none"
+        placeholder="Reply…">${esc(S.threadNote)}</textarea>
+      <div class="mt-1 flex flex-wrap items-center gap-1">
+        <span class="text-[10px] opacity-40">as <button id="wdp-tactor" class="link">${esc(
+          me || 'set your name…',
+        )}</button> · <b>Enter</b> sends</span>
+        ${acts
+          .map(
+            ([label, st, quiet], i) =>
+              `<button class="btn btn-xs${quiet ? ' btn-ghost opacity-60' : ''}${i === 0 ? ' ml-auto' : ''}"
+            data-testid="thread.actions" data-act="${esc(st)}" data-tid="${esc(t.id)}">${label}</button>`,
+          )
+          .join('')}
+      </div>
+      <div class="mt-1 hidden text-[11px] text-warning" data-testid="thread.say" id="wdp-tsay"></div>
+    </div>`;
 }
 
 /*

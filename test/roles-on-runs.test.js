@@ -7,11 +7,11 @@
  * on disk, which no browser can see.
  */
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, before, test } from 'node:test';
-import { ROLES, normalizeRoles, writeRunRecord } from '../lib/run-record.js';
+import { normalizeRoles, ROLES, writeRunRecord } from '../lib/run-record.js';
 import { createWalkdownServer, defaultActor } from '../lib/serve.js';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-roles-'));

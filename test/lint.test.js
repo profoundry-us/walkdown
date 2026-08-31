@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
 import { loadBlueprint } from '../lib/blueprint.js';
-import { runHashCommand } from '../lib/hash-cmd.js';
 import { formatHash } from '../lib/hash.js';
+import { runHashCommand } from '../lib/hash-cmd.js';
 import { lint } from '../lib/lint.js';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-test-'));

@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
 import { loadBlueprint } from '../lib/blueprint.js';
-import { deriveStatus } from '../lib/status.js';
-import { lint } from '../lib/lint.js';
 import { formatHash } from '../lib/hash.js';
+import { lint } from '../lib/lint.js';
+import { deriveStatus } from '../lib/status.js';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-retired-'));
 after(() => rmSync(root, { recursive: true, force: true }));

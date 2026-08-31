@@ -5,14 +5,14 @@
  */
 import { MSG } from '../../lib/message-stream.js';
 import { declaredAnchors, elsewhere, open, render } from './app.js';
-import { threadCard } from './thread-pane.js';
+import { tierMarks } from './rules-list.js';
 import { openShots } from './shots.js';
 import { S } from './state.js';
+import { threadCard } from './thread-pane.js';
 import { api, esc } from './util.js';
-import { tierMarks } from './rules-list.js';
 import {
-  LBL,
   isHeadless,
+  LBL,
   needsYou,
   orderedRows,
   ruleScreen,

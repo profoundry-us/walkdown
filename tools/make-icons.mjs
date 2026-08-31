@@ -8,9 +8,10 @@
  *
  *   node tools/make-icons.mjs [mark] [--out DIR]
  */
-import { deflateSync } from 'node:zlib';
-import { writeFileSync, mkdirSync } from 'node:fs';
+
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+import { deflateSync } from 'node:zlib';
 
 const HERE = dirname(new URL(import.meta.url).pathname);
 const SIZES = [16, 32, 48, 128];

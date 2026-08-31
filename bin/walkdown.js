@@ -4,15 +4,15 @@ import { homedir, userInfo } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { collectRules, findBlueprintDir, loadBlueprint } from '../lib/blueprint.js';
+import { checkedRuleIds } from '../lib/checks.js';
 import { blueprintForUrl, claimsOf, findCollisions } from '../lib/claims.js';
 import { listDrafts } from '../lib/draft.js';
-import { KINDS, rememberLocation, resolveLocations } from '../lib/locations.js';
 import { runHashCommand } from '../lib/hash-cmd.js';
-import { writeSweep } from '../lib/run-record.js';
 import { lint } from '../lib/lint.js';
-import { checkedRuleIds } from '../lib/checks.js';
-import { deriveStatus } from '../lib/status.js';
+import { KINDS, rememberLocation, resolveLocations } from '../lib/locations.js';
+import { writeSweep } from '../lib/run-record.js';
 import { discoverBlueprints } from '../lib/serve.js';
+import { deriveStatus } from '../lib/status.js';
 import { getThread, listThreads, replyToThread, transitionThread } from '../lib/threads.js';
 
 const HELP = `walkdown — verify that what you built is what you designed

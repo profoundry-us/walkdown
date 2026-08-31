@@ -21,8 +21,8 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { parse } from '../vendor/yaml.js';
 import { resolveLocations } from '../lib/locations.js';
+import { parse } from '../vendor/yaml.js';
 
 const HERE = dirname(new URL(import.meta.url).pathname);
 const ROOT = join(HERE, '..');

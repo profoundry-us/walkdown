@@ -1,13 +1,12 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdtempSync, mkdirSync, readdirSync, writeFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
-import { resolveLocations, KINDS } from '../lib/locations.js';
 import { formatHash, specFiles, specHash } from '../lib/hash.js';
+import { KINDS, readUserConfig, resolveLocations } from '../lib/locations.js';
 import { deriveStatus } from '../lib/status.js';
-import { readUserConfig } from '../lib/locations.js';
 
 /*
  * Every case builds its own tree and points WALKDOWN_HOME at a scratch

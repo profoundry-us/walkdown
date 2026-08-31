@@ -16,7 +16,7 @@ import {
 import { icon } from './icons.js';
 import { S } from './state.js';
 import { esc } from './util.js';
-import { CHIP, TERMINAL, screenById, shortName, whoAmI } from './vocab.js';
+import { CHIP, screenById, shortName, TERMINAL, whoAmI } from './vocab.js';
 
 /*
  * A thread, collapsed: the opening message and the way into the rest of it.

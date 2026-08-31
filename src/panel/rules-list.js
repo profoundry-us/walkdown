@@ -8,8 +8,8 @@ import { icon } from './icons.js';
 import { D, S } from './state.js';
 import { esc } from './util.js';
 import {
-  LBL,
   groupedRows,
+  LBL,
   needsYou,
   screenById,
   screenIdOf,
