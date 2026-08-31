@@ -5,19 +5,24 @@
  */
 import { MSG } from '../../lib/message-stream.js';
 import { html, nothing } from '../../vendor/lit.js';
-import { declaredAnchors, elsewhere, open, render } from './app.js';
+import { postRuleNote, sayFiling, verifyAll } from './conversation.js';
 import { tierMarks } from './rules-list.js';
+import { openSettings, requestReload, requestRender } from './shell.js';
 import { openShots } from './shots.js';
 import { S } from './state.js';
 import { threadCard } from './thread-pane.js';
-import { api } from './util.js';
+import { api, fire } from './util.js';
 import {
+  currentScreen,
+  declaredAnchors,
   isHeadless,
   LBL,
   needsYou,
   orderedRows,
+  pageSurface,
   ruleScreen,
   screenById,
+  screenUrl,
   shortName,
   threadsFor,
   whoAmI,
@@ -32,6 +37,34 @@ import {
  * recorded run is a disclosure nobody ever finds - which is exactly what was
  * reported (n-0084). So the suite's own scan is the fallback.
  */
+/*
+ * "This rule is on another screen." Lived in app.js while navigation wiring
+ * did; the note is the detail pane's own sentence, and the trip it offers is
+ * an event the shell answers.
+ */
+function elsewhere(r) {
+  const here = currentScreen();
+  const want = ruleScreen(r);
+  // A headless rule must say so - otherwise whatever is on the desk reads
+  // as the rule's screen, and it is not.
+  if (!want && isHeadless(r))
+    return html`<div class="mt-1.5 text-[11.5px] opacity-60">Headless — no screen belongs to
+      this rule, so what is on the desk is beside the point. It is judged by its
+      checks and recorded behavior, not by looking.</div>`;
+  if (!want || !here || want.id === here.id) return nothing;
+  const can = Boolean(
+    screenUrl(want, pageSurface()) ?? screenUrl(want, 'app') ?? screenUrl(want, 'prototype'),
+  );
+  return html`<div class="mt-1.5 text-[11.5px] opacity-60">This rule is on
+    <b>${want.id}</b>; you are on <b>${here.id}</b>.
+    ${
+      can
+        ? html`<button class="link link-primary" data-goscreen="${want.id}"
+            @click=${(e) => fire(e.currentTarget, 'go-screen', { screen: want.id })}>Go there</button>`
+        : nothing
+    }</div>`;
+}
+
 export const checkRefs = (row) => {
   const recorded = [
     ...new Set((S.data?.targets ?? []).flatMap((t) => row.cells?.[t]?.checks ?? [])),
@@ -68,7 +101,7 @@ export async function loadCheckSource(rule) {
   }
   if (S.srcCache.rule !== rule) return;
   S.srcCache.view = view;
-  render();
+  requestRender();
 }
 
 /*
@@ -119,6 +152,7 @@ export function evidenceRows(row) {
         <button class="link link-hover text-primary" data-testid="detail.screenshots"
           data-shots="${JSON.stringify(shot)}"
           title="Open the ${shot.length} screenshot${shot.length > 1 ? 's' : ''} this run attached"
+          @click=${() => openShots(shot)}
           >open ${shot.length}</button></span></div>`;
   };
   /*
@@ -144,6 +178,23 @@ export function evidenceRows(row) {
   return rows.length ? rows : html`<div class="text-[13px] opacity-50">Nothing recorded yet.</div>`;
 }
 
+function backToList() {
+  S.view = 'list';
+  requestRender();
+}
+
+/** File the composer's text as a note thread on the rule, then refresh. */
+async function postNote(button, rule) {
+  const text = (S.ruleNote ?? '').trim();
+  if (!text) return sayFiling('Write something first — a thread opens with what you have to say.');
+  button.disabled = true;
+  const tid = await postRuleNote(rule, text);
+  button.disabled = false;
+  if (!tid) return; // the refusal is on screen
+  S.ruleNote = '';
+  await requestReload(); // pull the new thread into the lists and repaint
+}
+
 export function detailPane() {
   const r = S.selected;
   // A pin with no rule has no rule screen: it opens on the thread screen
@@ -151,7 +202,7 @@ export function detailPane() {
   if (!r)
     return html`
     <div class="flex items-center px-2 pt-2">
-      <button class="wdp-back btn btn-ghost btn-xs text-primary" data-testid="detail.back">← All rules</button>
+      <button class="wdp-back btn btn-ghost btn-xs text-primary" data-testid="detail.back" @click=${backToList}>← All rules</button>
     </div>
     <div class="px-3.5 pt-1 text-[12.5px] opacity-60">This thread is not attached to a rule.</div>`;
   const threads = threadsFor(r.rule);
@@ -166,7 +217,9 @@ export function detailPane() {
   const anchors = declaredAnchors();
   const token = (tok) =>
     anchors.has(tok)
-      ? html`<code class="wdp-anchor cursor-help rounded bg-base-200 px-1 text-xs underline decoration-dotted underline-offset-2" data-anchor="${tok}" title="Show this on the surface">${tok}</code>`
+      ? html`<code class="wdp-anchor cursor-help rounded bg-base-200 px-1 text-xs underline decoration-dotted underline-offset-2" data-anchor="${tok}" title="Show this on the surface"
+          @mouseenter=${(e) => fire(e.currentTarget, 'highlight', { anchor: tok })}
+          @mouseleave=${(e) => fire(e.currentTarget, 'highlight', { anchor: null })}>${tok}</code>`
       : html`<code class="rounded bg-base-200 px-1 text-xs">${tok}</code>`;
   const stepText = (s) => {
     const parts = [];
@@ -201,7 +254,8 @@ export function detailPane() {
   const at = walk.findIndex((x) => x.rule === r.rule);
   const step = (row, cls, glyph, label) =>
     html`<div class="tooltip tooltip-left" data-tip="${row ? `${label} rule: ${shortName(row)}` : `No ${label.toLowerCase()} rule`}">
-      <button class="${cls} btn btn-ghost btn-xs" data-testid="detail.stepper" data-goto="${row ? row.rule : nothing}" ?disabled=${!row}>${glyph}</button>
+      <button class="${cls} btn btn-ghost btn-xs" data-testid="detail.stepper" data-goto="${row ? row.rule : nothing}" ?disabled=${!row}
+        @click=${row ? (e) => fire(e.currentTarget, 'open-rule', { rule: row.rule }) : nothing}>${glyph}</button>
     </div>`;
   /*
    * A screen can be a STATE rather than an address - a filtered list, an open
@@ -249,7 +303,7 @@ export function detailPane() {
   const addressed = threads.filter((x) => x.status === 'addressed').length;
   return html`
     <div class="flex items-center px-2 pt-2">
-      <button class="wdp-back btn btn-ghost btn-xs text-primary" data-testid="detail.back">← All rules</button>
+      <button class="wdp-back btn btn-ghost btn-xs text-primary" data-testid="detail.back" @click=${backToList}>← All rules</button>
       <div class="ml-auto flex gap-0.5">
         ${step(at > 0 ? walk[at - 1] : null, 'wdp-prev', '←', 'Previous')}
         ${step(at >= 0 && at < walk.length - 1 ? walk[at + 1] : null, 'wdp-next', '→', 'Next')}
@@ -276,16 +330,19 @@ export function detailPane() {
           r.built
             ? 'Why? Anything written here is filed as a note with your verdict.'
             : 'What should change? Refine files this as the rule’s feedback.'
-        }">${S.verdictNote}</textarea>
+        }"
+        @input=${(e) => {
+          S.verdictNote = e.currentTarget.value;
+        }}>${S.verdictNote}</textarea>
         ${
           r.built
             ? html`<div class="flex gap-2" data-testid="detail.verdict">
-          <button class="btn btn-sm flex-1 ${picked === 'pass' ? 'btn-success' : 'btn-outline btn-success'}" data-v="pass">✓ Pass</button>
-          <button class="btn btn-sm flex-1 ${picked === 'fail' ? 'btn-error' : 'btn-outline btn-error'}" data-v="fail">✗ Fail</button>
+          <button class="btn btn-sm flex-1 ${picked === 'pass' ? 'btn-success' : 'btn-outline btn-success'}" data-v="pass" @click=${(e) => fire(e.currentTarget, 'verdict', { status: 'pass' })}>✓ Pass</button>
+          <button class="btn btn-sm flex-1 ${picked === 'fail' ? 'btn-error' : 'btn-outline btn-error'}" data-v="fail" @click=${(e) => fire(e.currentTarget, 'verdict', { status: 'fail' })}>✗ Fail</button>
         </div>`
             : html`<div class="flex gap-2" data-testid="detail.verdict">
-          <button class="btn btn-sm flex-1 ${picked === 'approved' ? 'btn-success' : 'btn-outline btn-success'}" data-v="approved">✍︎ Approve</button>
-          <button class="btn btn-sm flex-1 ${picked === 'refining' ? 'btn-warning' : 'btn-outline btn-warning'}" data-v="refining">✎︎ Refine</button>
+          <button class="btn btn-sm flex-1 ${picked === 'approved' ? 'btn-success' : 'btn-outline btn-success'}" data-v="approved" @click=${(e) => fire(e.currentTarget, 'verdict', { status: 'approved' })}>✍︎ Approve</button>
+          <button class="btn btn-sm flex-1 ${picked === 'refining' ? 'btn-warning' : 'btn-outline btn-warning'}" data-v="refining" @click=${(e) => fire(e.currentTarget, 'verdict', { status: 'refining' })}>✎︎ Refine</button>
         </div>
         <div class="text-[11px] opacity-50">No build evidence yet — you are signing off the rule, not judging a build.</div>`
         }
@@ -326,7 +383,15 @@ export function detailPane() {
             ? html`<!-- The steps are the rule; the source that checks them is a
              technical detail, so it waits behind a disclosure until asked for. -->
           <details class="mt-2 rounded border border-base-300 bg-base-200/60 px-2 py-1 text-[11.5px]"
-            data-testid="detail.technical-disclosure" data-checks="${r.rule}" ?open=${S.srcOpenFor === r.rule}>
+            data-testid="detail.technical-disclosure" data-checks="${r.rule}" ?open=${S.srcOpenFor === r.rule}
+            @toggle=${(e) => {
+              // A pane rebuilt with the disclosure already open fires this
+              // too; only a real change is one.
+              const el = e.currentTarget;
+              if (el.open === (S.srcOpenFor === r.rule)) return;
+              S.srcOpenFor = el.open ? r.rule : null;
+              if (el.open) loadCheckSource(r.rule);
+            }}>
             <summary class="cursor-pointer opacity-60">Check source · ${checkRefs(r).join(', ')}</summary>
             <div class="wdp-check-src mt-1 opacity-70">${
               S.srcCache.rule === r.rule && S.srcCache.view ? S.srcCache.view : 'Loading…'
@@ -358,7 +423,8 @@ export function detailPane() {
                  * and it is still a person pressing it.
                  */
                 html`<button class="btn btn-xs btn-outline btn-success ml-auto" data-verify-all="${r.rule}"
-                 title="Verify every addressed thread on this rule, under your name">
+                 title="Verify every addressed thread on this rule, under your name"
+                 @click=${() => verifyAll(r.rule)}>
                  Verify all ${addressed}</button>`
               : nothing
           }
@@ -381,11 +447,14 @@ export function detailPane() {
       <div class="-mx-3.5 border-t border-base-300 px-3.5 pt-2" data-testid="detail.new-thread">
         <textarea id="wdp-rulenote" data-testid="detail.new-thread-box" rows="2"
           class="textarea textarea-xs w-full resize-none"
-          placeholder="Start a conversation about this rule…">${S.ruleNote}</textarea>
+          placeholder="Start a conversation about this rule…"
+          @input=${(e) => {
+            S.ruleNote = e.currentTarget.value;
+          }}>${S.ruleNote}</textarea>
         <div class="mt-1 flex items-center gap-2">
-          <span class="text-[10px] opacity-40">as <button id="wdp-nactor" class="link">${whoAmI() || 'set your name…'}</button></span>
+          <span class="text-[10px] opacity-40">as <button id="wdp-nactor" class="link" @click=${openSettings}>${whoAmI() || 'set your name…'}</button></span>
           <button class="btn btn-xs btn-outline ml-auto" data-testid="detail.new-thread-post"
-            data-note-rule="${r.rule}">Start thread</button>
+            data-note-rule="${r.rule}" @click=${(e) => postNote(e.currentTarget, r.rule)}>Start thread</button>
         </div>
         <div class="mt-1 hidden text-[11px] text-warning" data-testid="detail.new-thread-say" id="wdp-nsay"></div>
       </div>

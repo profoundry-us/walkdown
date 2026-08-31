@@ -4,9 +4,10 @@
  */
 import { MSG } from '../../lib/message-stream.js';
 import { html, nothing, render as put } from '../../vendor/lit.js';
-import { open, render } from './app.js';
 import { icon } from './icons.js';
+import { requestRender } from './shell.js';
 import { D, S } from './state.js';
+import { fire } from './util.js';
 import {
   groupedRows,
   LBL,
@@ -58,7 +59,20 @@ export function searchBox() {
   return html`<div class="shrink-0 border-b border-base-300 px-3.5 py-2">
     <input id="wdp-search" type="search" data-testid="panel.rules-search"
       class="input input-xs w-full" spellcheck="false" autocomplete="off"
-      aria-label="Search rules" placeholder="Search rules…" value="${S.ruleQuery}">
+      aria-label="Search rules" placeholder="Search rules…" value="${S.ruleQuery}"
+      @input=${(e) => {
+        S.ruleQuery = e.currentTarget.value;
+        paintRules();
+      }}
+      @keydown=${(e) => {
+        // Escape clears the box rather than reaching the page behind it, where
+        // it would end pin mode and leave the list still filtered.
+        if (e.key !== 'Escape' || !S.ruleQuery) return;
+        e.stopPropagation();
+        S.ruleQuery = '';
+        e.currentTarget.value = '';
+        paintRules();
+      }}>
   </div>`;
 }
 
@@ -446,7 +460,8 @@ function ruleRow(row) {
    * half strength, because it is context rather than a claim on you.
    */
   return html`<button class="flex w-full cursor-pointer items-center gap-2.5 px-3.5 py-2 text-left text-[14px] hover:bg-base-200"
-      data-rule="${row.rule}" title="${row.rule} — ${why}">
+      data-rule="${row.rule}" title="${row.rule} — ${why}"
+      @click=${(e) => fire(e.currentTarget, 'open-rule', { rule: row.rule })}>
       ${
         picked
           ? html`<span class="w-11 shrink-0 text-center ${
@@ -492,13 +507,6 @@ export function listPane() {
   });
 }
 
-/** Opening a rule is a click on its row, wherever the row was just drawn. */
-export function wireRuleRows() {
-  D.host.querySelectorAll('[data-rule]').forEach((el) => {
-    el.onclick = () => open(el.dataset.rule);
-  });
-}
-
 /*
  * Filtering repaints the LIST and nothing else. A full render() would work -
  * the caret is put back either way - but the filter has to feel like the
@@ -515,27 +523,9 @@ export function wireRuleRows() {
  * template managers on one container, which lit does not allow twice.
  */
 export function paintRules() {
-  render();
+  requestRender();
   const list = D.host.querySelector('.wdp-list');
   if (list) list.scrollTop = 0; // a filtered list is a new list; showing its middle is not helpful
-}
-
-export function wireSearch() {
-  const box = D.host.querySelector('#wdp-search');
-  if (!box) return;
-  box.oninput = () => {
-    S.ruleQuery = box.value;
-    paintRules();
-  };
-  box.onkeydown = (e) => {
-    // Escape clears the box rather than reaching the page behind it, where it
-    // would end pin mode and leave the list still filtered.
-    if (e.key !== 'Escape' || !S.ruleQuery) return;
-    e.stopPropagation();
-    S.ruleQuery = '';
-    box.value = '';
-    paintRules();
-  };
 }
 
 /*

@@ -7,7 +7,10 @@
  * reached from all of them without a cycle. When one pane needed a helper the
  * next pane also needed, this is where it went.
  */
+import { locationOfUrl, matchScreen } from '../../lib/screen-match.js';
+import { FLOWS } from '../../lib/vocab.js';
 import { identityOverride, S } from './state.js';
+import { api } from './util.js';
 
 /*
  * The domain terms come from the same file the server enforces them with —
@@ -123,3 +126,97 @@ export const isHeadless = (r) => Boolean(r) && !r.screens?.length && !r.flow?.le
 
 /** Last time anything was said - what a list of conversations sorts by. */
 export const threadTouched = (t) => String((t?.replies ?? []).at(-1)?.created ?? t?.created ?? '');
+
+// ---- where the reviewer is standing ---------------------------------------
+// Readings of the frame URL against the storyboard - which screen, which
+// surface, what the ghost would show. Moved from app.js because they decide
+// nothing and draw nothing, which is this module's admission test.
+
+export const hereLocation = () => locationOfUrl(S.frameUrl) ?? {};
+
+export function pageSurface() {
+  const sc = currentScreen();
+  if (!sc) return 'app';
+  return matchScreen([sc], hereLocation())?.surface ?? 'app';
+}
+
+/** Which storyboard screen this page is, by URL — same trick the embed uses. */
+export function currentScreen() {
+  const screens = S.data?.storyboard ?? [];
+  if (S.pickedScreen) return screens.find((s) => s.id === S.pickedScreen) ?? null;
+  return matchScreen(screens, hereLocation())?.screen ?? null;
+}
+
+/** Where a screen lives on one surface, as a URL walkdown can navigate to. */
+export function screenUrl(screen, surface) {
+  if (!screen) return null;
+  if (surface === 'prototype')
+    return screen.prototype && S.data?.hasPrototype ? api('/prototype' + screen.prototype) : null;
+  return screen.app?.path && S.data?.appBase ? S.data.appBase + screen.app.path : null;
+}
+
+/*
+ * Where a surface goes when the page is not a screen. Without this the fade
+ * control was dead everywhere except the handful of pages walkdown happens to
+ * recognise - so crossing between the design and the build, the single most
+ * frequent thing a reviewer does, depended on where you already were.
+ */
+export const defaultScreen = () =>
+  screenById(S.data?.defaultScreen) ??
+  (S.data?.storyboard ?? []).find((sc) => screenUrl(sc, 'app') ?? screenUrl(sc, 'prototype')) ??
+  null;
+
+/** The screen a surface control should act on: this page, or the front door. */
+export const screenInHand = () => screenById(S.ghostOverride) ?? currentScreen() ?? defaultScreen();
+
+/**
+ * What the ghost should draw for a screen: the design if there is one, and
+ * otherwise a proposal sketch — flagged, because a sketch that reads as the
+ * design is exactly the confusion the ownership rules exist to prevent.
+ */
+export function ghostSource(screen) {
+  if (pageSurface() === 'prototype') {
+    // Standing on the design, the other surface is the running app — and it
+    // lives at its own origin, so the ghost takes an absolute URL.
+    return screen?.app?.path && S.data.appBase
+      ? { url: S.data.appBase + screen.app.path, proposed: false }
+      : null;
+  }
+  if (screen?.prototype && S.data.hasPrototype)
+    return { path: '/prototype' + screen.prototype, proposed: false };
+  if (screen?.proposal) return { path: '/proposals' + screen.proposal, proposed: true };
+  return null;
+}
+
+/** Every anchor the storyboard declares, on any screen. */
+export const declaredAnchors = () =>
+  new Set((S.data?.storyboard ?? []).flatMap((s) => s.anchors ?? []));
+
+/*
+ * The verbs are the panel's; which transitions exist is the lifecycle's.
+ * This used to be a hand-copy of the whole FLOWS table with labels attached,
+ * which is precisely the two-runtimes drift vocab.js exists to end: the menu
+ * now cannot offer a move the server would refuse, or hide one it allows.
+ */
+const VERB = {
+  addressed: 'Addressed',
+  verified: '\u2713 Verify',
+  answered: 'Answer',
+  incorporated: 'Incorporated',
+  open: 'Reopen',
+  waived: 'Waive',
+};
+
+/** Short verbs, and only the transitions this kind and status allow. */
+export function threadActions(t) {
+  return (
+    (FLOWS[t.kind] ?? FLOWS.note)[t.status]?.map((next) => [
+      VERB[next],
+      // Answering is a reply that carries the transition, not a bare status
+      // change — the panel routes it through the reply box.
+      t.kind === 'question' && next === 'answered' ? '__answer' : next,
+      // The one visually-marked action: waiving buries work.
+      next === 'waived' || undefined,
+    ]) ?? []
+  );
+}

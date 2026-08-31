@@ -11,19 +11,20 @@ import { MSG } from '../../lib/message-stream.js';
  * the embed ever renders with lit.
  */
 import { html, nothing, unsafeHTML } from '../../vendor/lit.js';
-import {
-  ghostSource,
-  names,
-  open,
-  pendingReplies,
-  say,
-  seenAtOpen,
-  threadActions,
-  unreadCount,
-} from './app.js';
+import { names, pendingReplies, seenAtOpen, threadAct, unreadCount } from './conversation.js';
 import { icon } from './icons.js';
+import { openSettings, requestRender } from './shell.js';
 import { S } from './state.js';
-import { CHIP, screenById, shortName, TERMINAL, whoAmI } from './vocab.js';
+import { fire } from './util.js';
+import {
+  CHIP,
+  ghostSource,
+  screenById,
+  shortName,
+  TERMINAL,
+  threadActions,
+  whoAmI,
+} from './vocab.js';
 
 /*
  * A thread, collapsed: the opening message and the way into the rest of it.
@@ -83,6 +84,18 @@ export function threadCard(t, where = null) {
 export const backFromThread = (row) =>
   S.listTab === 'threads' ? 'All threads' : row ? shortName(row) : 'All rules';
 
+/*
+ * Back where you came from: the rule, or the list for a pin that has none -
+ * and on the Threads tab always the thread list, because that is where you
+ * came from and no rule was ever opened.
+ */
+function leaveThread() {
+  const t = (S.data?.threads ?? []).find((x) => x.id === S.openThread);
+  S.view = S.listTab !== 'threads' && t?.anchor?.rule && S.selected ? 'detail' : 'list';
+  S.openThread = null;
+  requestRender();
+}
+
 export function threadPane() {
   const t = (S.data?.threads ?? []).find((x) => x.id === S.openThread);
   // Whatever became of the thread — ended, reloaded away, never there — this
@@ -90,7 +103,7 @@ export function threadPane() {
   if (!t)
     return html`
     <div class="flex items-center px-2 pt-2">
-      <button class="wdp-thread-back btn btn-ghost btn-xs text-primary">← ${backFromThread(S.selected)}</button>
+      <button class="wdp-thread-back btn btn-ghost btn-xs text-primary" @click=${leaveThread}>← ${backFromThread(S.selected)}</button>
     </div>
     <div class="px-3.5 pt-1 text-[12.5px] opacity-60">That thread is no longer open here.</div>`;
   const row = t.anchor?.rule ? S.data.rows.find((r) => r.rule === t.anchor.rule) : null;
@@ -111,7 +124,7 @@ export function threadPane() {
   const ended = TERMINAL.includes(t.status) ? (t.replies ?? []).at(-1) : null;
   return html`
     <div class="flex items-center gap-1 px-2 pt-2">
-      <button class="wdp-thread-back btn btn-ghost btn-xs text-primary" data-testid="thread.close">← ${backFromThread(row)}</button>
+      <button class="wdp-thread-back btn btn-ghost btn-xs text-primary" data-testid="thread.close" @click=${leaveThread}>← ${backFromThread(row)}</button>
       <span class="ml-auto flex items-center gap-1 pr-1.5 text-[11px]" data-testid="thread.provenance">
         <b class="opacity-60">${t.id}</b>
         <span class="badge badge-xs ${CHIP[t.status] ?? 'badge-ghost'}">${t.status}</span>
@@ -143,7 +156,8 @@ export function threadPane() {
       }
       ${
         sketch?.proposed
-          ? html`<button class="btn btn-xs btn-outline mt-2 w-full" data-sketch="${t.anchor.screen}">
+          ? html`<button class="btn btn-xs btn-outline mt-2 w-full" data-sketch="${t.anchor.screen}"
+        @click=${(e) => fire(e.currentTarget, 'view-sketch', { screen: t.anchor.screen })}>
         ⚠ View the proposed sketch</button>`
           : nothing
       }
@@ -153,13 +167,25 @@ export function threadPane() {
          whoever you are recording as, changed in Settings like everywhere. -->
     <div class="shrink-0 border-t border-base-300 p-2">
       <textarea id="wdp-note" data-testid="thread.reply" rows="2" class="textarea textarea-xs w-full resize-none"
-        placeholder="Reply…">${S.threadNote}</textarea>
+        placeholder="Reply…"
+        @input=${(e) => {
+          S.threadNote = e.currentTarget.value;
+        }}
+        @keydown=${(e) => {
+          // Enter sends, Shift+Enter breaks the line - the muscle memory
+          // everyone already has. The button stays for the pointer.
+          if (e.key !== 'Enter' || e.shiftKey || e.isComposing) return;
+          e.preventDefault();
+          const text = e.currentTarget.value.trim();
+          if (S.openThread && text) threadAct(S.openThread, '__reply');
+        }}>${S.threadNote}</textarea>
       <div class="mt-1 flex flex-wrap items-center gap-1">
-        <span class="text-[10px] opacity-40">as <button id="wdp-tactor" class="link">${me || 'set your name…'}</button> · <b>Enter</b> sends</span>
+        <span class="text-[10px] opacity-40">as <button id="wdp-tactor" class="link" @click=${openSettings}>${me || 'set your name…'}</button> · <b>Enter</b> sends</span>
         ${acts.map(
           ([label, st, quiet], i) =>
             html`<button class="btn btn-xs${quiet ? ' btn-ghost opacity-60' : ''}${i === 0 ? ' ml-auto' : ''}"
-            data-testid="thread.actions" data-act="${st}" data-tid="${t.id}">${label}</button>`,
+            data-testid="thread.actions" data-act="${st}" data-tid="${t.id}"
+            @click=${() => threadAct(t.id, st)}>${label}</button>`,
         )}
       </div>
       <div class="mt-1 hidden text-[11px] text-warning" data-testid="thread.say" id="wdp-tsay"></div>

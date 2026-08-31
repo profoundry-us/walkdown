@@ -20,7 +20,8 @@
       "!vendor/**",
       "!extension/vendor/**",
       "!lib/skills/**",
-      "!src/panel/icons.js"
+      "!src/panel/icons.js",
+      "!src/embed/icons.js"
     ]
   },
   "formatter": {

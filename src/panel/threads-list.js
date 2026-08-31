@@ -3,7 +3,7 @@
  * ways `walkdown threads` filters them, in the same words.
  */
 import { html } from '../../vendor/lit.js';
-import { open, start } from './app.js';
+import { requestRender } from './shell.js';
 import { S } from './state.js';
 import { threadCard } from './thread-pane.js';
 import { screenById, TERMINAL, threadTouched } from './vocab.js';
@@ -67,7 +67,15 @@ export function threadFilterBar() {
   };
   const pick = (id, label, hint) =>
     html`<button class="btn btn-xs join-item gap-1 ${S.threadFilter === id ? 'btn-primary' : 'btn-outline btn-primary'}"
-      data-tfilter="${id}" title="${hint}">${label}<span class="opacity-60">${counts[id]}</span></button>`;
+      data-tfilter="${id}" title="${hint}"
+      @click=${() => {
+        // Changing which threads are listed is not opening one: back to the
+        // list, or the filter would quietly re-answer a question about the
+        // thread you are reading rather than about the list behind it.
+        S.threadFilter = id;
+        S.view = 'list';
+        requestRender();
+      }}>${label}<span class="opacity-60">${counts[id]}</span></button>`;
   return html`<div class="flex shrink-0 justify-center border-b border-base-300 px-3.5 py-2">
     <div class="join" data-testid="panel.thread-filter">
       ${pick('active', 'Active', 'Questions and notes still in play')}

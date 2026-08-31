@@ -34,21 +34,13 @@ export default {
   output: { file: 'lib/viewer/panel.js', format: 'iife' },
 
   /*
-   * A pane triggers behaviour that redraws panes, so app.js and the pane
-   * modules import each other. That cycle is expected and safe — nothing
-   * crosses it at module evaluation time, only from handlers and renders —
-   * and the alternative was threading a bag of callbacks through every wire
-   * call. Reporting it on every build would train everyone to ignore the
-   * warning that matters.
-   *
-   * So: cycles inside src/panel pass in silence, and everything else — a
-   * cycle reaching the entry, an unresolved import, anything Rollup wants to
-   * say — is still an error the build stops on.
+   * Every warning is fatal, cycles included. The whitelist that used to
+   * excuse cycles inside src/panel is gone with the cycles themselves: the
+   * panes render templates and fire events, conversation.js talks upward
+   * only through shell.js, and nothing imports app.js back. A cycle
+   * appearing here again is a design regression, not an inconvenience.
    */
   onwarn(warning, warn) {
-    const inPanel = (p) =>
-      typeof p === 'string' && p.includes('src/panel/') && !p.endsWith('src/panel/index.js');
-    if (warning.code === 'CIRCULAR_DEPENDENCY' && (warning.ids ?? []).every(inPanel)) return;
     warn(warning);
     throw new Error(`rollup: ${warning.code}`);
   },

@@ -26,3 +26,13 @@ export const api = (path) => {
   const q = S.BP ? (head.includes('?') ? '&' : '?') + 'bp=' + encodeURIComponent(S.BP) : '';
   return S.SERVER + head + q + frag;
 };
+
+/*
+ * A pane asking the shell to act: a bubbling CustomEvent, named wd-<verb>,
+ * caught once at the panel root (app.js wireGlobals). This is the browser's
+ * own inversion mechanism, and it is what lets a pane offer "open this rule"
+ * without importing the module that owns navigation - the import cycle the
+ * old wire* functions kept alive.
+ */
+export const fire = (el, verb, detail = {}) =>
+  el.dispatchEvent(new CustomEvent(`wd-${verb}`, { detail, bubbles: true, composed: true }));

@@ -34,20 +34,14 @@ import { MSG } from '../../lib/message-stream.js';
  */
 import { locationOfUrl, matchScreen } from '../../lib/screen-match.js';
 import { html, nothing, render as put } from '../../vendor/lit.js';
-import { askAboutSitting, blueprintsPane, crossTo, wireBlueprints } from './blueprints.js';
+import { blueprintsPane } from './blueprints.js';
+import { loadSeen, markSeen, openThreadView, postRuleNote, sayVerdict } from './conversation.js';
 import { DESK_DEFAULTS, DESK_KEY, drawDesk } from './desk.js';
 import { icon } from './icons.js';
 import { checkRefs, detailPane, evidenceRows, loadCheckSource } from './rule-detail.js';
-import {
-  legendControl,
-  listPane,
-  paintRules,
-  searchBox,
-  tierMarks,
-  wireRuleRows,
-  wireSearch,
-} from './rules-list.js';
-import { screensPane, wireScreens } from './screens.js';
+import { legendControl, listPane, searchBox, tierMarks } from './rules-list.js';
+import { screensPane } from './screens.js';
+import { provideShell } from './shell.js';
 import { closeShots, openShots, shotsOpen } from './shots.js';
 import {
   ACTOR_KEY,
@@ -74,19 +68,20 @@ import { api, esc } from './util.js';
 import { frameLoading, hideVeil, placeVeil, screenLabel, veilIsUp } from './veil.js';
 import {
   CHIP,
-  FLOWS,
-  HUMAN_ONLY,
+  currentScreen,
+  declaredAnchors,
+  defaultScreen,
+  ghostSource,
+  hereLocation,
   isHeadless,
-  LBL,
-  NEEDS_REASON,
   needsYou,
   owedRows,
+  pageSurface,
   ruleScreen,
   screenById,
-  shortName,
+  screenInHand,
+  screenUrl,
   TERMINAL,
-  threadsFor,
-  threadTouched,
   whoAmI,
 } from './vocab.js';
 
@@ -455,7 +450,6 @@ function syncScreenPanel() {
     // panel drew would be worse than one that lagged.
     const wasAt = D.screenPanel.scrollTop;
     put(screensPane(), D.screenPanel);
-    wireScreens(D.screenPanel);
     D.screenPanel.scrollTop = wasAt;
     const btn = D.bar.querySelector('#wdp-screen-btn');
     if (btn) {
@@ -778,6 +772,57 @@ function paintDesk(on) {
   syncHeadlessCover();
 }
 
+/** Server address and blueprint choice, wired the same wherever they appear. */
+/*
+ * Offered rather than decided: a sitting is somebody's work in progress, and
+ * a picker that silently discarded it - or silently carried it - would be
+ * making that call for them.
+ */
+function askAboutSitting(nextBp) {
+  const name = S.projects.find((p) => p.id === nextBp)?.name ?? nextBp;
+  toast(
+    `A walkdown is running on <b>${esc(S.data.project)}</b>, with <b>${
+      Object.keys(S.session.verdicts).length
+    } judged</b>. It cannot come with you to ${esc(name)}.` +
+      ` <button class="link" data-sitting="keep">Keep it as a draft</button>` +
+      ` · <button class="link" data-sitting="discard">Discard it</button>`,
+    {
+      sticky: true,
+      tone: 'warning',
+      on: {
+        keep: () => crossTo(nextBp), // the draft is already on disk
+        discard: async () => {
+          await discardSitting();
+          crossTo(nextBp);
+        },
+      },
+    },
+  );
+}
+
+/** End the sitting and take nothing with it. */
+async function discardSitting() {
+  S.session = null;
+  saveSession();
+  await fetch(api('/api/draft'), {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ discard: true }),
+  }).catch(() => {});
+}
+
+function crossTo(nextBp) {
+  S.session = null; // left behind, on disk, waiting to be resumed
+  S.BP = nextBp;
+  store.set(CHOICE, S.BP);
+  S.listTab = 'rules';
+  S.view = 'list';
+  S.selected = null;
+  S.phase = 'loading';
+  S.jumpOnLoad = true;
+  start();
+}
+
 /*
  * Pin mode has one owner. Docked, that is the embed sharing this document.
  * Framed, there is no embed here — it is inside the frames — so the panel
@@ -843,21 +888,6 @@ function setDocked(on) {
  * framed it is the frame's, which we cannot read across origins — the copy
  * of walkdown inside it says so instead, as it loads and whenever it moves.
  */
-const hereLocation = () => locationOfUrl(S.frameUrl) ?? {};
-
-export function pageSurface() {
-  const sc = currentScreen();
-  if (!sc) return 'app';
-  return matchScreen([sc], hereLocation())?.surface ?? 'app';
-}
-
-/** Which storyboard screen this page is, by URL — same trick the embed uses. */
-export function currentScreen() {
-  const screens = S.data?.storyboard ?? [];
-  if (S.pickedScreen) return screens.find((s) => s.id === S.pickedScreen) ?? null;
-  return matchScreen(screens, hereLocation())?.screen ?? null;
-}
-
 /*
  * The URL can change without the page reloading, and a modal or a drawer or
  * an SPA route is its own screen (docs/06 §2) — so the panel has to notice.
@@ -937,68 +967,6 @@ async function restoreSession() {
     };
 }
 
-/*
- * Where a surface goes when the page is not a screen. Without this the fade
- * control was dead everywhere except the handful of pages walkdown happens to
- * recognise - so crossing between the design and the build, the single most
- * frequent thing a reviewer does, depended on where you already were.
- */
-const defaultScreen = () =>
-  screenById(S.data?.defaultScreen) ??
-  (S.data?.storyboard ?? []).find((sc) => screenUrl(sc, 'app') ?? screenUrl(sc, 'prototype')) ??
-  null;
-
-/** The screen a surface control should act on: this page, or the front door. */
-const screenInHand = () => screenById(S.ghostOverride) ?? currentScreen() ?? defaultScreen();
-
-/**
- * What the ghost should draw for a screen: the design if there is one, and
- * otherwise a proposal sketch — flagged, because a sketch that reads as the
- * design is exactly the confusion the ownership rules exist to prevent.
- */
-export function ghostSource(screen) {
-  if (pageSurface() === 'prototype') {
-    // Standing on the design, the other surface is the running app — and it
-    // lives at its own origin, so the ghost takes an absolute URL.
-    return screen?.app?.path && S.data.appBase
-      ? { url: S.data.appBase + screen.app.path, proposed: false }
-      : null;
-  }
-  if (screen?.prototype && S.data.hasPrototype)
-    return { path: '/prototype' + screen.prototype, proposed: false };
-  if (screen?.proposal) return { path: '/proposals' + screen.proposal, proposed: true };
-  return null;
-}
-
-/*
- * The verbs are the panel's; which transitions exist is the lifecycle's.
- * This used to be a hand-copy of the whole FLOWS table with labels attached,
- * which is precisely the two-runtimes drift vocab.js exists to end: the menu
- * now cannot offer a move the server would refuse, or hide one it allows.
- */
-const VERB = {
-  addressed: 'Addressed',
-  verified: '\u2713 Verify',
-  answered: 'Answer',
-  incorporated: 'Incorporated',
-  open: 'Reopen',
-  waived: 'Waive',
-};
-
-/** Short verbs, and only the transitions this kind and status allow. */
-export function threadActions(t) {
-  return (
-    (FLOWS[t.kind] ?? FLOWS.note)[t.status]?.map((next) => [
-      VERB[next],
-      // Answering is a reply that carries the transition, not a bare status
-      // change — the panel routes it through the reply box.
-      t.kind === 'question' && next === 'answered' ? '__answer' : next,
-      // The one visually-marked action: waiving buries work.
-      next === 'waived' || undefined,
-    ]) ?? []
-  );
-}
-
 // ---- render ---------------------------------------------------------------
 export function render() {
   if (!S.data) return;
@@ -1058,7 +1026,15 @@ export function render() {
     // so the tabs ran on daisyUI's own padding and read as squished
     // (n-0102). Once the class was real, px-4 turned out to be too much:
     // three tabs, two of them carrying a count badge, wrap at 384px.
-    html`<button role="tab" class="tab px-3 gap-1${S.listTab === id ? ' tab-active' : ''}" data-tab="${id}">
+    html`<button role="tab" class="tab px-3 gap-1${S.listTab === id ? ' tab-active' : ''}" data-tab="${id}"
+      @click=${() => {
+        // Back to the list as well as to the tab: the detail pane is a rule's,
+        // and a rule is a thing on the Rules tab. Leaving the track slid over
+        // showed the open rule sitting on top of whichever tab you picked.
+        S.listTab = id;
+        S.view = 'list';
+        render();
+      }}>
       ${icon(TAB_ICON[id], 'size-4')}${label}${
         badge ? html`<span class="badge badge-xs ${tone}" title="${why}">${badge}</span>` : nothing
       }</button>`;
@@ -1107,13 +1083,12 @@ export function render() {
            while recording a handle would quietly break it. With no full name
            anywhere the two are the same string and only one is drawn. -->
       <span>Recording as
-        <button id="wdp-actor" data-testid="panel.actor-name" class="link font-semibold" title="Change the name in Settings (the gear)">${
-          recordingDisplay() || 'set your name…'
-        }</button>${
-          recordingHandle() && recordingHandle() !== recordingDisplay()
-            ? html` <span data-testid="panel.actor-handle" class="font-mono opacity-60" title="Verdicts and thread actions are recorded under this username">${recordingHandle()}</span>`
-            : nothing
-        }</span>
+        <button id="wdp-actor" data-testid="panel.actor-name" class="link font-semibold" title="Change the name in Settings (the gear)"
+          @click=${openActorSettings}>${recordingDisplay() || 'set your name…'}</button>${
+            recordingHandle() && recordingHandle() !== recordingDisplay()
+              ? html` <span data-testid="panel.actor-handle" class="font-mono opacity-60" title="Verdicts and thread actions are recorded under this username">${recordingHandle()}</span>`
+              : nothing
+          }</span>
       <!-- Both halves of the same fact: how many you have judged, and how
            many the sitting has in it. The denominator is what you have done
            plus what is still owed, so it holds steady as you walk and reads
@@ -1136,7 +1111,7 @@ export function render() {
            rather than filled because Finish walkdown is the solid one, and
            two solid yellows in view would argue about which is the act. -->
       <button class="btn btn-xs btn-outline btn-warning" data-testid="panel.continue" id="wdp-continue"
-        title="Open the next rule still owing you a verdict">Continue</button>
+        title="Open the next rule still owing you a verdict" @click=${continueWalkdown}>Continue</button>
     </div>`
         : nothing
     }
@@ -1272,51 +1247,15 @@ export function render() {
       box.setSelectionRange(caret.start, caret.end);
     }
   }
-  wireRuleRows();
-  wireSearch();
-  const back = D.host.querySelector('.wdp-back');
-  if (back)
-    back.onclick = () => {
-      S.view = 'list';
-      render();
-    };
-  D.host.querySelectorAll('[data-goto]').forEach((el) => {
-    // Through open(), not by assigning `selected`: stepping to a rule is
-    // opening it, and a second way in that skipped the trip to its screen
-    // meant next/previous quietly judged whatever page you were left on.
-    el.onclick = () => open(el.dataset.goto);
-  });
-  const actorName = D.host.querySelector('#wdp-actor');
-  if (actorName) actorName.onclick = openActorSettings;
-  const carryOn = D.host.querySelector('#wdp-continue');
-  if (carryOn) carryOn.onclick = continueWalkdown;
-  D.side.querySelectorAll('[data-tab]').forEach((b) => {
-    // Back to the list as well as to the tab: the detail pane is a rule's,
-    // and a rule is a thing on the Rules tab. Leaving the track slid over
-    // showed the open rule sitting on top of whichever tab you picked.
-    b.onclick = () => {
-      S.listTab = b.dataset.tab;
-      S.view = 'list';
-      render();
-    };
-  });
-  D.side.querySelectorAll('[data-tfilter]').forEach((b) => {
-    // Changing which threads are listed is not opening one: back to the list,
-    // or the filter would quietly re-answer a question about the thread you
-    // are reading rather than about the list behind it.
-    b.onclick = () => {
-      S.threadFilter = b.dataset.tfilter;
-      S.view = 'list';
-      render();
-    };
-  });
-  wireBlueprints(D.side);
-  D.host.querySelectorAll('[data-goscreen]').forEach((el) => {
-    el.onclick = () => goTo(screenById(el.dataset.goscreen));
-  });
-  wireVerdict();
-  wireRuleNote();
-  wireThreads();
+  /*
+   * The panes carry their own handlers now (lit template bindings and
+   * wd-* events) - the per-render querySelector wiring this block held is
+   * gone with them. Two effects remain the shell's to make after a paint:
+   * an anchor highlight cleared, because a pane rebuilt while the pointer
+   * was over a token never gets the mouseleave that would have put the
+   * surface back; and the headless cover, which reads the selected rule.
+   */
+  highlightAnchor(null);
   syncHeadlessCover();
 }
 
@@ -1401,15 +1340,11 @@ function paintBar() {
 }
 
 const GEAR = () =>
-  html`<button class="btn btn-xs btn-ghost" id="wdp-desk-btn" data-testid="panel.desk-tuner" title="Settings">${icon('gear', 'size-3.5')}</button>`;
-const wireGear = () => {
-  const gear = D.bar.querySelector('#wdp-desk-btn');
-  if (gear)
-    gear.onclick = () => {
+  html`<button class="btn btn-xs btn-ghost" id="wdp-desk-btn" data-testid="panel.desk-tuner" title="Settings"
+    @click=${() => {
       S.deskOpen = !S.deskOpen;
       syncDeskPanel();
-    };
-};
+    }}>${icon('gear', 'size-3.5')}</button>`;
 
 function renderBar() {
   if (S.dragging) return paintBar();
@@ -1418,7 +1353,7 @@ function renderBar() {
       html`${GEAR()}<span class="font-bold tracking-tight">walk<span class="text-primary">down</span></span>`,
       D.bar,
     );
-    return wireGear();
+    return;
   }
   const canGhost = Boolean(ghostSource(screenInHand()));
   // Left is Prototype and right is App, matching the buttons on either side —
@@ -1462,6 +1397,10 @@ function renderBar() {
       S.pickedScreen ? 'btn-outline btn-primary' : 'btn-ghost'
     }"
       id="wdp-screen-btn" data-testid="panel.screen-picker"
+      @click=${() => {
+        S.screensOpen = !S.screensOpen;
+        syncScreenPanel();
+      }}
       title="${
         S.pickedScreen
           ? 'Screen picked by hand — open to change it, or go back to detecting from the page'
@@ -1474,12 +1413,25 @@ function renderBar() {
     <span class="absolute left-1/2 flex -translate-x-1/2 items-center gap-2"
       title="${canGhost ? 'Fade between the design and what shipped' : 'No design on file for this screen'}">
       <button class="btn btn-xs btn-primary${share === 1 ? '' : ' btn-outline'}" data-surface="prototype"
-        ?disabled=${!(canGhost || pageSurface() === 'prototype')}>Prototype</button>
+        ?disabled=${!(canGhost || pageSurface() === 'prototype')}
+        @click=${() => pickSurface('prototype')}>Prototype</button>
       <input type="range" min="0" max="100" value="${value}" id="wdp-fade" data-testid="panel.fade"
         class="range range-xs range-primary w-28" ?disabled=${!canGhost}
-        aria-label="Fade between the design and the running app">
+        aria-label="Fade between the design and the running app"
+        @input=${(e) => {
+          // input fires all through the drag and must not disturb the element;
+          // change is when the pointer lets go, and that is where the bar is
+          // rebuilt and a ghost at zero is finally torn down.
+          S.dragging = true;
+          setFade(1 - e.currentTarget.value / 100);
+        }}
+        @change=${(e) => {
+          S.dragging = false;
+          setFade(1 - e.currentTarget.value / 100);
+        }}>
       <button class="btn btn-xs btn-primary${share === 0 ? '' : ' btn-outline'}" data-surface="app"
-        ?disabled=${!(canGhost || pageSurface() === 'app')}>App</button>
+        ?disabled=${!(canGhost || pageSurface() === 'app')}
+        @click=${() => pickSurface('app')}>App</button>
     </span>
 
     <span class="ml-auto flex items-center gap-2">
@@ -1489,14 +1441,14 @@ function renderBar() {
            scale actually is while a preset is on. -->
       <span class="join" data-testid="panel.viewport-toggle">
         <button class="btn btn-xs join-item ${S.viewportW === 0 ? 'btn-primary' : 'btn-outline btn-primary'}"
-          data-vp="0" title="Fit the frame to the space">Fit</button>
+          data-vp="0" @click=${() => setViewport(0)} title="Fit the frame to the space">Fit</button>
         <button class="btn btn-xs join-item ${S.viewportW === 1440 ? 'btn-primary' : 'btn-outline btn-primary'}"
-          data-vp="1440" title="Desktop — lay the page out at 1440px">${icon('desktop', 'size-3.5')}</button>
+          data-vp="1440" @click=${() => setViewport(1440)} title="Desktop — lay the page out at 1440px">${icon('desktop', 'size-3.5')}</button>
         <button class="btn btn-xs join-item ${S.viewportW === 390 ? 'btn-primary' : 'btn-outline btn-primary'}"
-          data-vp="390" title="Mobile — lay the page out at 390px">${icon('device-mobile', 'size-3.5')}</button>
+          data-vp="390" @click=${() => setViewport(390)} title="Mobile — lay the page out at 390px">${icon('device-mobile', 'size-3.5')}</button>
       </span>
       <button class="btn btn-xs gap-1 ${pinning ? 'btn-warning' : 'btn-outline btn-primary'}" id="wdp-pin" data-testid="panel.pin-mode"
-        ?disabled=${!pinSurface()}
+        ?disabled=${!pinSurface()} @click=${() => PIN.set(!PIN.isOn())}
         title="${pinHint()}">${icon('map-pin', 'size-3.5')}Pin mode</button>
       <!-- One control owns the sitting from end to end: it starts one, and
            while one runs it is how you end it. Starting in the bar and
@@ -1504,7 +1456,9 @@ function renderBar() {
            two unrelated buttons - and left the bar holding "Continue", which
            is not about the sitting as a whole but about the next rule in it,
            and belongs beside the count of the ones already judged. -->
+      <!-- Start it, or end it: the same button, because it is the same sitting. -->
       <button class="btn btn-xs ${S.session || owedNow ? 'btn-warning' : 'btn-primary'}" id="wdp-walk" data-testid="panel.walk"
+        @click=${() => (S.session ? finishWalkdown() : startWalkdown())}
         title="${
           S.session
             ? 'Record this sitting to the runs ledger under your name'
@@ -1512,15 +1466,10 @@ function renderBar() {
               ? `Begin a sitting — ${owedNow} rule${owedNow === 1 ? '' : 's'} owe you a verdict`
               : 'Begin a sitting on this blueprint'
         }">${S.session ? 'Finish walkdown' : 'Start walkdown'}</button>
-      <button class="btn btn-xs btn-ghost" id="wdp-undock" title="Put walkdown away">\u00d7</button>
+      <button class="btn btn-xs btn-ghost" id="wdp-undock" title="Put walkdown away" @click=${() => setDocked(false)}>\u00d7</button>
     </span>`;
   put(bar, D.bar);
 
-  wireGear();
-  D.bar.querySelector('#wdp-screen-btn').onclick = () => {
-    S.screensOpen = !S.screensOpen;
-    syncScreenPanel();
-  };
   /*
    * The button and the list are one control saying one thing, so they are
    * repainted together. The label above was rebuilt from the page just now;
@@ -1531,62 +1480,59 @@ function renderBar() {
    * nothing unless the list is open.
    */
   syncScreenPanel();
-  D.bar.querySelector('#wdp-undock').onclick = () => setDocked(false);
-  D.bar.querySelector('#wdp-pin').onclick = () => PIN.set(!PIN.isOn());
-  // Start it, or end it: the same button, because it is the same sitting.
-  D.bar.querySelector('#wdp-walk').onclick = () => (S.session ? finishWalkdown() : startWalkdown());
-  D.bar.querySelectorAll('[data-vp]').forEach((b) => {
-    b.onclick = () => setViewport(Number(b.dataset.vp));
-  });
-  D.bar.querySelectorAll('[data-surface]').forEach((b) => {
-    b.onclick = () => {
-      /*
-       * Off a screen entirely, fading is meaningless - there is no design of
-       * THIS page to fade to. So the control takes you to the blueprint's
-       * front door on the surface you asked for, which is what someone
-       * pressing Prototype from nowhere in particular actually wants.
-       */
-      const want = b.dataset.surface;
-      if (!currentScreen() && !S.ghostOverride) {
-        const home = defaultScreen();
-        const url =
-          home && (screenUrl(home, want) ?? screenUrl(home, want === 'app' ? 'prototype' : 'app'));
-        /*
-         * Getting there means a real page load, so the same rule applies as
-         * everywhere else: framed walkdown owns the frame and goes, the
-         * extension goes because it comes back, and a script tag offers the
-         * trip rather than unloading the panel that is making it.
-         */
-        if (url) {
-          goTo(home, want);
-          return;
-        }
-        if (url) {
-          return toast(
-            `Nothing here is a screen — <a class="link" href="${esc(url)}">open ${esc(
-              home.title ?? home.id,
-            )}</a> to compare the ${esc(want)}.`,
-            { tone: 'warning' },
-          );
-        }
-      }
-      setFade(want === 'prototype' ? 1 : 0);
-    };
-  });
-  const fade = D.bar.querySelector('#wdp-fade');
-  if (fade) {
-    // `input` fires all through the drag and must not disturb the element;
-    // `change` fires when the pointer (or the keyboard) lets go, and that is
-    // where the bar is rebuilt and a ghost at zero is finally torn down.
-    fade.oninput = () => {
-      S.dragging = true;
-      setFade(1 - fade.value / 100);
-    };
-    fade.onchange = () => {
-      S.dragging = false;
-      setFade(1 - fade.value / 100);
-    };
+}
+
+/*
+ * A screen picked from the bar's list. Picking one closes the chooser - a
+ * chooser that stayed open over the screen it just took you to would be
+ * covering its own result.
+ */
+function pickScreen(id) {
+  S.ghostOverride = null;
+  closeScreenPanel();
+  const reghost = () => {
+    if (S.ghost) {
+      setGhost(false);
+      setFade(S.ghostOpacity || 1);
+    } else render();
+  };
+  // "Detect from the page" is a reset, not a destination.
+  if (!id) {
+    S.pickedScreen = null;
+    return reghost();
   }
+  // Picked by hand, so the pick rides along and survives the arrival.
+  if (goTo(screenById(id), pageSurface(), id)) return;
+  // Nowhere to go: a screen with no URL on either surface. Then the only
+  // thing the picker can do is what it always did — record that this page
+  // is that screen.
+  S.pickedScreen = id;
+  reghost();
+}
+
+/*
+ * Off a screen entirely, fading is meaningless - there is no design of THIS
+ * page to fade to. So the control takes you to the blueprint's front door on
+ * the surface you asked for, which is what someone pressing Prototype from
+ * nowhere in particular actually wants.
+ */
+function pickSurface(want) {
+  if (!currentScreen() && !S.ghostOverride) {
+    const home = defaultScreen();
+    const url =
+      home && (screenUrl(home, want) ?? screenUrl(home, want === 'app' ? 'prototype' : 'app'));
+    /*
+     * Getting there means a real page load, so the same rule applies as
+     * everywhere else: framed walkdown owns the frame and goes, the
+     * extension goes because it comes back, and a script tag offers the
+     * trip rather than unloading the panel that is making it.
+     */
+    if (url) {
+      goTo(home, want);
+      return;
+    }
+  }
+  setFade(want === 'prototype' ? 1 : 0);
 }
 
 /**
@@ -1682,378 +1628,6 @@ const recordingDisplay = () => {
   const full = (identityOverride.name ?? S.data?.identity?.name ?? '').trim();
   return full || recordingHandle();
 };
-/**
- * The handles that resolve to a full name, for every message on screen.
- *
- * Every handle this machine could have signed with goes in - the username,
- * the OS name, the full name records were written under before identity and
- * display name were told apart. Old records are never rewritten; this is
- * what stops them reading as somebody else.
- */
-export const names = () =>
-  MSG.nameMap({
-    username: whoAmI(),
-    name: (identityOverride.name ?? S.data?.identity?.name ?? '').trim(),
-    handles: [...(S.data?.identity?.handles ?? []), S.session?.actor].filter(Boolean),
-  });
-
-/*
- * Threads remember where your reading stopped, so opening one the agent has
- * replied to twice shows which part is new. `seen` is what is remembered;
- * `seenAtOpen` freezes the mark for this viewing, or the New line would
- * vanish the instant it appeared.
- */
-const SEEN_KEY = () => `walkdown:seen:${S.BP}`;
-let seen = {},
-  seenFor = null;
-/* Read marks belong to a blueprint, and the blueprint is chosen after boot -
-   so they are loaded once the choice is settled, and again if it changes. */
-async function loadSeen() {
-  if (seenFor === S.BP) return;
-  seenFor = S.BP;
-  seen = (await store.get(SEEN_KEY()).catch(() => null)) ?? {};
-}
-export const seenAtOpen = {};
-/** Replies on screen before the server has answered, by thread id. */
-export const pendingReplies = new Map();
-
-export const unreadCount = (t) => {
-  const at = seen[t.id];
-  if (!at) return 0;
-  return (t.replies ?? []).filter((r) => String(r.created ?? '') > String(at)).length;
-};
-
-function markSeen(id) {
-  seenAtOpen[id] = seen[id] ?? null;
-  seen[id] = new Date().toISOString();
-  store.set(SEEN_KEY(), { ...seen });
-}
-
-export function say(msg) {
-  const el = D.host.querySelector('#wdp-tsay');
-  if (!el) return toast(msg, { tone: 'error' });
-  el.textContent = msg;
-  el.classList.remove('hidden');
-}
-
-async function threadPost(path, body) {
-  const res = await fetch(api(path), {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  const out = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    say(out.error ?? 'request failed');
-    return false;
-  }
-  return true;
-}
-
-/**
- * A reply lands on screen before the server has answered - the message is
- * what you wrote, and waiting on a round trip to see it is what makes a
- * thread feel like a form. If the post is refused the message stays,
- * marked, and the text comes back to the composer so it can be sent again.
- */
-async function postReply(id, text, actor) {
-  /*
-   * The same refusal postRuleNote makes, for the same reason.
-   *
-   * This sent `author: actor || undefined`, the key fell out of the JSON, and
-   * the server filled it from the machine's username - so a reply landed in a
-   * conversation under a name the panel had never shown, while the composer
-   * said only "set your name...". A reply is attributed work.
-   *
-   * Fixing the note path alone left the rule half-kept, which is what an
-   * independent re-judge found an hour after the first fix: one path over,
-   * identical line, same server fallback. Worth remembering that the bug was
-   * never in either function - it was in the shape `actor || undefined`,
-   * which reads as a default and is a handoff.
-   */
-  const who = (actor ?? '').trim();
-  if (!who || who === 'agent') {
-    say('A reply is recorded under a person\u2019s name \u2014 set it in Settings (the gear).');
-    openActorSettings();
-    return false;
-  }
-  const msg = { author: who, created: new Date().toISOString(), body: text, pending: true };
-  const list = pendingReplies.get(id) ?? [];
-  pendingReplies.set(id, [...list, msg]);
-  S.threadNote = '';
-  render();
-  const ok = await threadPost(`/api/threads/${id}/replies`, { author: who, body: text });
-  if (ok) {
-    pendingReplies.set(
-      id,
-      (pendingReplies.get(id) ?? []).filter((m) => m !== msg),
-    );
-    // The reply is yours and you have just read it: do not mark it new.
-    if (seen[id]) {
-      seen[id] = new Date().toISOString();
-      store.set(SEEN_KEY(), { ...seen });
-    }
-    await load();
-  } else {
-    msg.pending = false;
-    msg.failed = true;
-    S.threadNote = text;
-    render();
-  }
-  return ok;
-}
-
-/** Reply and lifecycle, under the same governance the server enforces. */
-async function threadAct(id, status) {
-  const t = (S.data.threads ?? []).find((x) => x.id === id);
-  if (!t) return;
-  const text = (D.host.querySelector('#wdp-note')?.value ?? '').trim();
-  const actor = whoAmI();
-  const humanOnly = HUMAN_ONLY.includes(status);
-  // Agents claim work; a person accepts it. The server refuses this too —
-  // saying so here means you find out before you have written the reason.
-  if (humanOnly && (!actor || actor === 'agent')) {
-    say(
-      'Verify and waive are recorded under a person\u2019s name \u2014 set it in Settings first.',
-    );
-    return openActorSettings();
-  }
-  /*
-   * And every OTHER transition needs a name too, which this guard used to
-   * leave to the two human-only ones. Reopening posted `actor: ''`, went
-   * through, and lib/threads.js filed the reason as a reply authored
-   * "unknown" - a transition recorded under nobody, in a ledger whose whole
-   * claim is that a verdict says whose judgment it was. Answering was the
-   * same. Not the human-only refusal, which is about WHICH person may act;
-   * this one is about there being a person at all.
-   */
-  if (!actor) {
-    say('A thread action is recorded under a person\u2019s name \u2014 set it in Settings first.');
-    return openActorSettings();
-  }
-  if (status === '__reply') {
-    if (!text) return say('Write the reply first.');
-    await postReply(id, text, actor);
-    return;
-  }
-  if (status === '__answer') {
-    if (!text) return say('Write the answer first \u2014 answering a question records it.');
-    if (
-      (await postReply(id, text, actor)) &&
-      (await threadPost(`/api/threads/${id}/status`, { status: 'answered', actor }))
-    )
-      await load();
-    return;
-  }
-  const needsReason = NEEDS_REASON.includes(status);
-  if (needsReason && !text)
-    return say(
-      `${status === 'waived' ? 'Waiving' : 'Reopening'} is recorded with a reason \u2014 write it above, then press again.`,
-    );
-  if (
-    await threadPost(`/api/threads/${id}/status`, {
-      status,
-      actor,
-      reason: needsReason ? text : undefined,
-    })
-  ) {
-    S.threadNote = '';
-    // A thread that ends leaves the active list, so its screen has nothing
-    // left to show — slide back to where it came from rather than emptying
-    // the pane and stranding the reader on a blank one.
-    if (TERMINAL.includes(status)) {
-      S.openThread = null;
-      if (S.view === 'thread') S.view = S.selected ? 'detail' : 'list';
-      // An ended conversation is a finished piece of work, whichever way it
-      // ended - verified, waived or incorporated - so it reads as one.
-      toast(`<b>${esc(id)}</b> ${esc(status)} — it leaves the rule’s active threads.`, {
-        tone: 'success',
-      });
-    }
-    await load();
-  }
-}
-
-/*
- * Verify every addressed thread on one rule. Same governance as verifying
- * one: it is recorded under the person pressing it, and refused outright
- * without a name, because an agent may claim work and never accept it.
- */
-async function verifyAll(rule) {
-  const actor = whoAmI();
-  if (!actor || actor === 'agent') {
-    toast(
-      'Verifying is recorded under a person\u2019s name \u2014 set it in Settings (the gear).',
-      { tone: 'error' },
-    );
-    return openActorSettings();
-  }
-  const pending = threadsFor(rule).filter((t) => t.status === 'addressed');
-  if (!pending.length) return;
-  let done = 0;
-  for (const t of pending)
-    if (await threadPost(`/api/threads/${t.id}/status`, { status: 'verified', actor })) done += 1;
-  await load();
-  // All of them is the result asked for; a partial pass is not a failure but
-  // it is unfinished, and the colour is the difference.
-  toast(
-    done === pending.length
-      ? `<b>${done}</b> thread${done === 1 ? '' : 's'} verified on ${esc(rule)}.`
-      : `<b>${done}</b> of ${pending.length} verified \u2014 the rest are still open.`,
-    { tone: done === pending.length ? 'success' : 'warning' },
-  );
-}
-
-/** Open a thread on its own screen, landing where the reading resumes. */
-function openThreadView(id) {
-  if (!(S.data?.threads ?? []).some((x) => x.id === id))
-    return toast(`No thread ${esc(id)} here.`, { tone: 'error' });
-  S.openThread = id;
-  S.threadNote = '';
-  markSeen(id);
-  S.view = 'thread';
-  render();
-  /*
-   * The first unread message if there is one, and otherwise the newest -
-   * never the top of an exchange you have already read.
-   *
-   * Scroll the STREAM, by hand. scrollIntoView looks like the obvious way to
-   * say this and is not: it scrolls every scrollable ancestor, and one of the
-   * ancestors here is the pane wrapper that carries the slide track. Landing
-   * on an unread mark pushed that wrapper to scrollLeft 368, which slid all
-   * three panes a third of a column left and left the reviewer looking at an
-   * empty one - a thread with unread messages opened to blank, and only a
-   * thread with unread messages, which is why it survived every check.
-   *
-   * offsetTop is measured against the stream because the stream is the
-   * offsetParent here; the fallback covers a layout where it is not.
-   */
-  const pane = D.host.querySelectorAll('.wdp-track > div')[S.listTab === 'threads' ? 1 : 2];
-  const stream = pane?.querySelector('.overflow-y-auto');
-  const mark = pane?.querySelector('.wd-new');
-  if (!stream) return;
-  if (mark) {
-    const top = stream.contains(mark.offsetParent ?? mark)
-      ? mark.offsetTop
-      : mark.getBoundingClientRect().top - stream.getBoundingClientRect().top + stream.scrollTop;
-    stream.scrollTop = Math.max(0, top);
-  } else {
-    stream.scrollTop = stream.scrollHeight;
-  }
-}
-
-function wireThreads() {
-  D.host.querySelectorAll('[data-open-thread]').forEach((el) => {
-    el.onclick = (e) => {
-      e.stopPropagation();
-      openThreadView(el.dataset.openThread);
-    };
-  });
-  const tback = D.host.querySelector('.wdp-thread-back');
-  if (tback)
-    tback.onclick = () => {
-      const t = (S.data?.threads ?? []).find((x) => x.id === S.openThread);
-      // Back where you came from: the rule, or the list for a pin that has
-      // none - and on the Threads tab always the thread list, because that is
-      // where you came from and no rule was ever opened.
-      S.view = S.listTab !== 'threads' && t?.anchor?.rule && S.selected ? 'detail' : 'list';
-      S.openThread = null;
-      render();
-    };
-  const note = D.host.querySelector('#wdp-note');
-  if (note) {
-    note.oninput = () => {
-      S.threadNote = note.value;
-    };
-    // Enter sends, Shift+Enter breaks the line - the muscle memory everyone
-    // already has. The button stays for the pointer.
-    note.onkeydown = (e) => {
-      if (e.key !== 'Enter' || e.shiftKey || e.isComposing) return;
-      e.preventDefault();
-      const id = S.openThread;
-      const text = note.value.trim();
-      if (id && text) threadAct(id, '__reply');
-    };
-  }
-  // An id written in a message is a link: thread ids open that thread, rule
-  // ids open that rule, so a conversation can point at things.
-  D.host.querySelectorAll('[data-thread-ref]').forEach((el) => {
-    el.onclick = (e) => {
-      e.stopPropagation();
-      const id = el.dataset.threadRef;
-      const t = (S.data?.threads ?? []).find((x) => x.id === id);
-      // Follow it to its own rule, so going back from the thread lands
-      // somewhere that makes sense rather than on the rule you came from.
-      if (t?.anchor?.rule)
-        S.selected = S.data.rows.find((r) => r.rule === t.anchor.rule) ?? S.selected;
-      openThreadView(id);
-    };
-  });
-  D.host.querySelectorAll('[data-rule-ref]').forEach((el) => {
-    el.onclick = (e) => {
-      e.stopPropagation();
-      open(el.dataset.ruleRef);
-    };
-  });
-  const tactor = D.host.querySelector('#wdp-tactor');
-  if (tactor) tactor.onclick = () => openActorSettings();
-  D.host.querySelectorAll('[data-act]').forEach((el) => {
-    el.onclick = () => threadAct(el.dataset.tid, el.dataset.act);
-  });
-  D.host.querySelectorAll('[data-verify-all]').forEach((el) => {
-    el.onclick = () => verifyAll(el.dataset.verifyAll);
-  });
-  D.host.querySelectorAll('[data-checks]').forEach((el) => {
-    el.ontoggle = () => {
-      const rule = el.dataset.checks;
-      // A pane rebuilt with the disclosure already open fires this too; only
-      // a real change is one.
-      if (el.open === (S.srcOpenFor === rule)) return;
-      S.srcOpenFor = el.open ? rule : null;
-      if (el.open) loadCheckSource(rule);
-    };
-  });
-  /*
-   * An anchor written into a step points at the thing it names. Cleared
-   * first, because a pane rebuilt while the pointer was over a token never
-   * gets the mouseleave that would have put the surface back.
-   */
-  highlightAnchor(null);
-  D.host.querySelectorAll('[data-anchor]').forEach((el) => {
-    el.onmouseenter = () => highlightAnchor(el.dataset.anchor);
-    el.onmouseleave = () => highlightAnchor(null);
-  });
-  D.host.querySelectorAll('[data-shots]').forEach((el) => {
-    el.onclick = () => {
-      try {
-        openShots(JSON.parse(el.dataset.shots));
-      } catch {
-        /* nothing to show */
-      }
-    };
-  });
-  D.host.querySelectorAll('[data-sketch]').forEach((el) => {
-    el.onclick = () => {
-      S.ghostOverride = el.dataset.sketch;
-      setGhost(false);
-      S.ghostOverride = el.dataset.sketch;
-      setGhost(true);
-    };
-  });
-}
-
-/** Where a screen lives on one surface, as a URL walkdown can navigate to. */
-function screenUrl(screen, surface) {
-  if (!screen) return null;
-  if (surface === 'prototype')
-    return screen.prototype && S.data?.hasPrototype ? api('/prototype' + screen.prototype) : null;
-  return screen.app?.path && S.data?.appBase ? S.data.appBase + screen.app.path : null;
-}
-
-/** Every anchor the storyboard declares, on any screen. */
-export const declaredAnchors = () =>
-  new Set((S.data?.storyboard ?? []).flatMap((s) => s.anchors ?? []));
-
 /*
  * Point at an element on the surface under review, by the anchor that names
  * it. Both surfaces are told and each answers for itself: the design is what
@@ -2199,110 +1773,12 @@ export function elsewhere(r) {
     ${can ? html`<button class="link link-primary" data-goscreen="${want.id}">Go there</button>` : nothing}</div>`;
 }
 
-function sayVerdict(msg) {
-  const el = D.host.querySelector('#wdp-vsay');
-  if (!el) return toast(msg, { tone: 'error' });
-  el.textContent = msg;
-  el.classList.remove('hidden');
-}
-
 /*
  * A refusal, put where the person who triggered it is looking. Two composers
  * can file a note now, each with its own line to say why one was refused, and
  * a message printed into the box you are not looking at is a message nobody
  * reads. Falls through to a toast when neither box is on screen.
  */
-function sayFiling(msg) {
-  for (const id of ['#wdp-nsay', '#wdp-vsay']) {
-    const el = D.host.querySelector(id);
-    if (el) {
-      el.textContent = msg;
-      el.classList.remove('hidden');
-      return;
-    }
-  }
-  toast(msg, { tone: 'error' });
-}
-
-/** File the feedback box's text as a note on the rule; null on refusal. */
-async function postRuleNote(rule, body) {
-  /*
-   * Refuse rather than let the server choose a name for us.
-   *
-   * This sent `author: undefined` when the sitting had no actor, the field
-   * dropped out of the JSON, and the server filled it in from the machine's
-   * own username - so a note went into the ledger under a name the panel had
-   * never put on screen. `panel.identity.attribution-visible` says a defaulted
-   * identity is always visible BEFORE it is used, and this was the one path
-   * that used one nobody had seen. Finish already refused; the note-filing
-   * half did not, so a fail could be recorded, and its reason attributed,
-   * under a stranger.
-   *
-   * Found by an agent walkdown on 2026-08-28 emptying Settings and pressing
-   * Fail. n-0116 had looked at the same screen and judged it harmless on the
-   * belief that every attributed action was refused; that belief was true of
-   * every path but this one.
-   */
-  /*
-   * whoAmI() rather than the sitting's actor, because a rule is now a place
-   * to talk WITHOUT a sitting - and outside one, S.session is null, which
-   * this line used to read straight through. It keeps the guard it was
-   * written for: whoAmI is precisely the name the panel puts on screen as
-   * you, in the bar, in Settings and above both composers, so a note can
-   * still never be filed under a name nobody was shown (n-0116, n-0121).
-   */
-  const author = whoAmI();
-  if (!author || author === 'agent') {
-    sayFiling(
-      'A note is recorded under a person\u2019s name \u2014 set it in Settings (the gear).',
-    );
-    openActorSettings();
-    return null;
-  }
-  const res = await fetch(api('/api/threads'), {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ kind: 'note', author, body, anchor: { rule } }),
-  });
-  const out = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    sayFiling(out.error ?? 'note not filed');
-    return null;
-  }
-  return out.id;
-}
-
-/*
- * Starting a conversation on a rule, outside a walkdown.
- *
- * The same POST the sitting's feedback box makes, and deliberately so: a note
- * is a note, and a rule read on a Tuesday deserves the same record as one
- * judged in a sitting. What it does NOT do is touch S.session - there may not
- * be one, and a thread is not a verdict.
- */
-function wireRuleNote() {
-  const box = D.host.querySelector('#wdp-rulenote');
-  if (box)
-    box.oninput = () => {
-      S.ruleNote = box.value;
-    };
-  const who = D.host.querySelector('#wdp-nactor');
-  if (who) who.onclick = () => openActorSettings();
-  const post = D.host.querySelector('[data-note-rule]');
-  if (!post) return;
-  post.onclick = async () => {
-    const text = (D.host.querySelector('#wdp-rulenote')?.value ?? '').trim();
-    if (!text)
-      return sayFiling('Write something first — a thread opens with what you have to say.');
-    post.disabled = true;
-    const tid = await postRuleNote(post.dataset.noteRule, text);
-    post.disabled = false;
-    if (!tid) return; // the refusal is on screen
-    S.ruleNote = '';
-    await load(); // pull the new thread into the lists and repaint
-  };
-}
-
 /** A pin dropped on this rule since the session began — the other way to say why. */
 const pinnedThisSession = (rule) =>
   (S.data?.threads ?? []).some(
@@ -2310,15 +1786,14 @@ const pinnedThisSession = (rule) =>
       t.anchor?.rule === rule && S.session?.started && String(t.created ?? '') >= S.session.started,
   );
 
-function wireVerdict() {
-  const note = D.host.querySelector('#wdp-vnote');
-  if (note)
-    note.oninput = () => {
-      S.verdictNote = note.value;
-    };
-  D.host.querySelectorAll('[data-v]').forEach((b) => {
-    b.onclick = async () => {
-      const status = b.dataset.v;
+/*
+ * One verdict, from either pair of buttons. Lives in the shell rather than
+ * the pane because a verdict moves the session and can move the surface -
+ * pass advances to the next rule owed, which is a trip.
+ */
+async function giveVerdict(status) {
+  {
+    {
       const rule = S.selected.rule;
       const text = (D.host.querySelector('#wdp-vnote')?.value ?? '').trim();
       // A refusal is work nobody can act on until it says why. Refine's why
@@ -2364,8 +1839,8 @@ function wireVerdict() {
         S.view = 'list';
       }
       await load(); // pull the new thread into the lists and repaint
-    };
-  });
+    }
+  }
 }
 
 /*
@@ -2819,7 +2294,6 @@ function renderGate() {
       </div>`,
       D.side,
     );
-    wireBlueprints(D.side);
     return;
   }
   put(
@@ -2832,7 +2306,6 @@ function renderGate() {
     <div class="flex-1 overflow-y-auto">${blueprintsPane()}</div>`,
     D.side,
   );
-  wireBlueprints(D.side);
 }
 
 /*
@@ -2845,6 +2318,67 @@ function renderGate() {
  * and boot() calls this once, after the guard has had its say.
  */
 function wireGlobals() {
+  /*
+   * The panes' requests, caught once at the panel root. A pane offers "open
+   * this rule" as a bubbling wd-* event (util.js `fire`) instead of importing
+   * the module that owns navigation - which is what finally let the panes
+   * stop importing app.js back, and the rollup cycle whitelist go.
+   */
+  const on = (verb, handle) => D.host.addEventListener(`wd-${verb}`, (e) => handle(e.detail));
+  on('open-rule', ({ rule }) => open(rule));
+  on('go-screen', ({ screen }) => goTo(screenById(screen)));
+  on('highlight', ({ anchor }) => highlightAnchor(anchor));
+  on('verdict', ({ status }) => giveVerdict(status));
+  on('pick-screen', ({ id }) => pickScreen(id));
+  on('pick-blueprint', ({ id }) => {
+    /*
+     * A walkdown belongs to the blueprint it was started in - its verdicts
+     * name that blueprint's rules and nothing else. Carrying a sitting
+     * across would either write those verdicts into a project they do not
+     * describe or drop them on the floor, so the crossing has to be settled
+     * first. The draft is already on disk, which is what makes "keep it and
+     * come back" a real offer rather than a promise.
+     */
+    if (S.session && id !== S.BP) return askAboutSitting(id);
+    crossTo(id);
+  });
+  on('connect', ({ server }) => {
+    if (server) {
+      S.SERVER = server.replace(/\/+$/, '');
+      store.set(CHOICE + ':server', S.SERVER);
+    }
+    S.phase = 'loading';
+    start();
+  });
+  on('view-sketch', ({ screen }) => {
+    S.ghostOverride = screen;
+    setGhost(false);
+    S.ghostOverride = screen;
+    setGhost(true);
+  });
+  /*
+   * Ids written into MESSAGE BODIES are links - thread ids open that thread,
+   * rule ids open that rule. The bodies are rendered by MSG, which is shared
+   * with the string-rendered embed, so its markup cannot carry lit handlers;
+   * one delegated listener at the root answers for whatever it prints.
+   */
+  D.host.addEventListener('click', (e) => {
+    const ref = e.target.closest?.('[data-thread-ref], [data-rule-ref], [data-open-thread]');
+    if (!ref) return;
+    e.stopPropagation();
+    if (ref.dataset.ruleRef) return open(ref.dataset.ruleRef);
+    // The replies line a card draws is MSG markup too, and it is the door
+    // into a thread listed under a rule.
+    if (ref.dataset.openThread) return openThreadView(ref.dataset.openThread);
+    const id = ref.dataset.threadRef;
+    const th = (S.data?.threads ?? []).find((x) => x.id === id);
+    // Follow it to its own rule, so going back from the thread lands
+    // somewhere that makes sense rather than on the rule you came from.
+    if (th?.anchor?.rule)
+      S.selected = S.data.rows.find((r) => r.rule === th.anchor.rule) ?? S.selected;
+    openThreadView(id);
+  });
+
   document.addEventListener(
     'pointerdown',
     (e) => {
@@ -3020,7 +2554,13 @@ function boot() {
     return;
   }
 
-  wireGlobals();
+  /*
+   * The shell interface, provided before anything below could ask: repaint,
+   * refetch, Settings. This is the registration half of shell.js - the one
+   * inversion that let the panes and conversation.js stop importing this
+   * module back.
+   */
+  provideShell({ render, reload: load, settings: openActorSettings });
   /*
    * Boot, in the one order that works: the chrome exists, then the stylesheet
    * is asked for (it lands in the shadow root whenever it arrives), then the
@@ -3036,6 +2576,9 @@ function boot() {
    * buildAppFrame, which is where it belongs.)
    */
   buildChrome();
+  // After the chrome: wireGlobals hangs the wd-* listeners off D.host, which
+  // buildChrome has only just created.
+  wireGlobals();
   loadStylesheet();
   buildPutAwayControls();
   buildAppFrame();
