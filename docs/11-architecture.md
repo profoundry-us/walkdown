@@ -215,6 +215,16 @@ never combined with a behaviour change in the same commit.
    does should become one (10-house-style.md).*
 6. **Schema as data**, with `lint` reading it.
 
+   *Done. `lib/schema.js` declares what a rule, a thread and a run may say —
+   fields, vocabularies drawn from `lib/vocab.js`, and every finding's level,
+   category and exact wording as data beside the constraint — and lint applies
+   the shapes through a small interpreter (`applyShape`) that throws on a kind
+   it does not know. The relational checks stayed lint's own code on purpose:
+   duplicate ids, statement-hash currency, coverage, storyboard claims and
+   drift need the whole blueprint in hand. Verified as a pure refactor: lint
+   output is byte-identical across this blueprint, the example, and a fixture
+   holding all thirty-seven findings at once.*
+
 Sweep after each of 3, 4 and 5 — those move enough that a verdict recorded
 before them should be re-earned rather than assumed. One sitting per sweep,
 finished before the next step starts, or the board fills with stale cells
