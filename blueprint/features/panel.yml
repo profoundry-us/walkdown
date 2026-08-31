@@ -928,6 +928,7 @@ stories:
       - id: panel.walkdown.fail-requires-why
         origin: thread:n-0051
         statement: A fail is refused until it has a why - feedback text or a pin dropped on the rule during the session - because a fail with no why is work nobody can act on.
+        verify: [checks]
         signoff: [eng, product]
         screens: [rule-detail]
         steps:

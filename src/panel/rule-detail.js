@@ -347,7 +347,11 @@ export function detailPane() {
         </div>
         <div class="text-[11px] opacity-50">No build evidence yet — you are signing off the rule, not judging a build.</div>`
         }
-        <div id="wdp-vsay" data-testid="detail.say" class="hidden text-[11px] text-warning"></div>
+        ${
+          S.verdictSay
+            ? html`<div data-testid="detail.say" class="text-[11px] text-warning">${S.verdictSay}</div>`
+            : nothing
+        }
         <div class="text-[11.5px] opacity-50" data-testid="detail.judged">${Object.keys(S.session.verdicts).length} judged this session</div>
       </div>`
           : nothing
@@ -458,7 +462,11 @@ export function detailPane() {
           <button class="btn btn-xs btn-outline ml-auto" data-testid="detail.new-thread-post"
             data-note-rule="${r.rule}" @click=${(e) => postNote(e.currentTarget, r.rule)}>Start thread</button>
         </div>
-        <div class="mt-1 hidden text-[11px] text-warning" data-testid="detail.new-thread-say" id="wdp-nsay"></div>
+        ${
+          S.composerSay
+            ? html`<div class="mt-1 text-[11px] text-warning" data-testid="detail.new-thread-say">${S.composerSay}</div>`
+            : nothing
+        }
       </div>
     </div>`;
 }

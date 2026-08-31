@@ -560,6 +560,8 @@
     ruleQuery: '',
     threadNote: '', // what the reply box says, kept across re-renders
     verdictNote: '', // the verdict feedback box, kept across re-renders
+    verdictSay: '', // the verdict refusal line; dies with the rule it refused
+    composerSay: '', // the composer's refusal line; same lifetime, same reason
     ruleNote: '', // the rule's own new-thread box, kept the same way
 
     /*
@@ -1267,25 +1269,23 @@
     el.classList.remove('hidden');
   }
 
+  // Same shape as sayVerdict, for the composer's line: state, so the refusal
+  // cannot outlive the rule it was about.
   function sayFiling(msg) {
-    for (const id of ['#wdp-nsay', '#wdp-vsay']) {
-      const el = D.host.querySelector(id);
-      if (el) {
-        el.textContent = msg;
-        el.classList.remove('hidden');
-        return;
-      }
-    }
-    toast(msg, { tone: 'error' });
+    S.composerSay = msg;
+    requestRender();
   }
 
   /** File the feedback box's text as a note on the rule; null on refusal. */
 
+  /*
+   * State, not DOM: writing the refusal into the element directly outlived the
+   * rule it refused - lit has no binding to reset, so the text stood on the
+   * next rule's pane, Fail-refusal wording on a pane with no Fail button.
+   */
   function sayVerdict(msg) {
-    const el = D.host.querySelector('#wdp-vsay');
-    if (!el) return toast(msg, { tone: 'error' });
-    el.textContent = msg;
-    el.classList.remove('hidden');
+    S.verdictSay = msg;
+    requestRender();
   }
 
   async function threadPost(path, body) {
@@ -2792,7 +2792,11 @@
         </div>
         <div class="text-[11px] opacity-50">No build evidence yet — you are signing off the rule, not judging a build.</div>`
         }
-        <div id="wdp-vsay" data-testid="detail.say" class="hidden text-[11px] text-warning"></div>
+        ${
+          S.verdictSay
+            ? b`<div data-testid="detail.say" class="text-[11px] text-warning">${S.verdictSay}</div>`
+            : A
+        }
         <div class="text-[11.5px] opacity-50" data-testid="detail.judged">${Object.keys(S.session.verdicts).length} judged this session</div>
       </div>`
           : A
@@ -2903,7 +2907,11 @@
           <button class="btn btn-xs btn-outline ml-auto" data-testid="detail.new-thread-post"
             data-note-rule="${r.rule}" @click=${(e) => postNote(e.currentTarget, r.rule)}>Start thread</button>
         </div>
-        <div class="mt-1 hidden text-[11px] text-warning" data-testid="detail.new-thread-say" id="wdp-nsay"></div>
+        ${
+          S.composerSay
+            ? b`<div class="mt-1 text-[11px] text-warning" data-testid="detail.new-thread-say">${S.composerSay}</div>`
+            : A
+        }
       </div>
     </div>`;
   }
@@ -4876,6 +4884,7 @@
         S.session.verdicts[rule] = status;
         saveSession();
         S.verdictNote = '';
+        S.verdictSay = '';
         // A pass or approval moves you on; fail and refine keep you here, so
         // the reason can be written or pinned where the rule is. Staying put
         // is the whole of it - pin mode is a tool you reach for, not a mode a
@@ -4978,7 +4987,11 @@
   }
 
   function selectRow(row) {
-    if ((row?.rule ?? null) !== (S.selected?.rule ?? null)) S.verdictNote = '';
+    if ((row?.rule ?? null) !== (S.selected?.rule ?? null)) {
+      S.verdictNote = '';
+      S.verdictSay = '';
+      S.composerSay = '';
+    }
     S.selected = row ?? null;
   }
 

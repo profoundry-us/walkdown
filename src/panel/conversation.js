@@ -69,25 +69,23 @@ export function say(msg) {
   el.classList.remove('hidden');
 }
 
+// Same shape as sayVerdict, for the composer's line: state, so the refusal
+// cannot outlive the rule it was about.
 export function sayFiling(msg) {
-  for (const id of ['#wdp-nsay', '#wdp-vsay']) {
-    const el = D.host.querySelector(id);
-    if (el) {
-      el.textContent = msg;
-      el.classList.remove('hidden');
-      return;
-    }
-  }
-  toast(msg, { tone: 'error' });
+  S.composerSay = msg;
+  requestRender();
 }
 
 /** File the feedback box's text as a note on the rule; null on refusal. */
 
+/*
+ * State, not DOM: writing the refusal into the element directly outlived the
+ * rule it refused - lit has no binding to reset, so the text stood on the
+ * next rule's pane, Fail-refusal wording on a pane with no Fail button.
+ */
 export function sayVerdict(msg) {
-  const el = D.host.querySelector('#wdp-vsay');
-  if (!el) return toast(msg, { tone: 'error' });
-  el.textContent = msg;
-  el.classList.remove('hidden');
+  S.verdictSay = msg;
+  requestRender();
 }
 
 export async function threadPost(path, body) {

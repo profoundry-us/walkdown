@@ -1810,6 +1810,7 @@ async function giveVerdict(status) {
       S.session.verdicts[rule] = status;
       saveSession();
       S.verdictNote = '';
+      S.verdictSay = '';
       // A pass or approval moves you on; fail and refine keep you here, so
       // the reason can be written or pinned where the rule is. Staying put
       // is the whole of it - pin mode is a tool you reach for, not a mode a
@@ -1912,7 +1913,11 @@ async function finishWalkdown() {
 }
 
 function selectRow(row) {
-  if ((row?.rule ?? null) !== (S.selected?.rule ?? null)) S.verdictNote = '';
+  if ((row?.rule ?? null) !== (S.selected?.rule ?? null)) {
+    S.verdictNote = '';
+    S.verdictSay = '';
+    S.composerSay = '';
+  }
   S.selected = row ?? null;
 }
 

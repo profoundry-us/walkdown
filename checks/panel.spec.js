@@ -114,6 +114,39 @@ const draft = (page) =>
     return r.ok ? r.json() : null;
   }, WD_ORIGIN);
 
+test('the fail refusal names both ways to give a why, and dies with the rule it refused', {
+  tag: '@rule:panel.walkdown.fail-requires-why',
+}, async ({ page }) => {
+  await session(page);
+  // A built rule is one whose verdict pair offers Fail; walk until found.
+  let idx = 0;
+  while (!(await page.locator('[data-v="fail"]').count()) && idx < 6) {
+    idx += 1;
+    await page.getByTestId('detail.back').click();
+    await page.getByTestId('panel.rules-list').locator('button').nth(idx).click();
+    await expect(page.getByTestId('detail.rule-id')).toBeVisible();
+  }
+  const judged = await page.getByTestId('detail.judged').textContent();
+  await page.locator('[data-v="fail"]').click();
+  const say = page.getByTestId('detail.say');
+  await expect(say).toBeVisible();
+  await expect(say).toContainText('write it above');
+  await expect(say).toContainText('Pin mode');
+  await expect(page.getByTestId('detail.judged')).toHaveText(judged ?? '', {
+    useInnerText: true,
+  }); // refused means refused: nothing recorded
+  /*
+   * The refusal belongs to the moment it refused. It used to be written
+   * straight into the DOM, so it stood on the next rule's pane - Fail
+   * wording on a pane with no Fail button (found in passing by the agent
+   * sitting of 2026-08-31, round three on note-with-any-verdict).
+   */
+  await page.getByTestId('detail.back').click();
+  await page.getByTestId('panel.rules-list').locator('button').nth(idx === 0 ? 1 : 0).click();
+  await expect(page.getByTestId('detail.rule-id')).toBeVisible();
+  await expect(page.getByTestId('detail.say')).toHaveCount(0);
+});
+
 test('a verdict is written to the project as it is given, and survives the browser', {
   tag: '@rule:panel.walkdown.draft-on-disk',
 }, async ({ page }) => {

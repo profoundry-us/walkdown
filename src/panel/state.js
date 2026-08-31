@@ -90,6 +90,8 @@ export const S = {
   ruleQuery: '',
   threadNote: '', // what the reply box says, kept across re-renders
   verdictNote: '', // the verdict feedback box, kept across re-renders
+  verdictSay: '', // the verdict refusal line; dies with the rule it refused
+  composerSay: '', // the composer's refusal line; same lifetime, same reason
   ruleNote: '', // the rule's own new-thread box, kept the same way
 
   /*
