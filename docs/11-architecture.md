@@ -266,3 +266,9 @@ server's governance rails (claim-never-accept, named actors), which are what
 make an improvising agent with a browser trustable near an append-only ledger.
 The state list stops being the growth path: a rule that needs something new
 gets it from the judging agent's own hands, not from a new entry in a script.
+
+The first of those parts shipped the same day: `walkdown judge <rule>` prints
+the per-rule prompt — statement, steps, setup, screen addresses resolved
+through the target, anchors, where evidence goes and how a verdict is
+recorded — ready to hand to any agent with a browser. It judges nothing
+itself; the prompt ends where the reader begins.

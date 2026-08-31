@@ -14,6 +14,7 @@ Usage:
   walkdown status [<rule-id>] [--dir <blueprint>] [--target <name>] [--json]
   walkdown lint [--dir <blueprint>] [--no-checks] [--json]
   walkdown hash [--dir <blueprint>] [--write]
+  walkdown judge <rule-id> [--target <name>] [--serve <origin>] [--dir <blueprint>] [--json]
   walkdown sweep --why <reason> [--tiers checks,agent] [--dir <blueprint>] [--target <name>]
   walkdown threads [--dir <blueprint>] [--rule <id>] [--all] [--json]
   walkdown thread <id> [--reply <text>] [--status <s>|--verify|--reopen|--waive]
@@ -41,6 +42,11 @@ Commands:
           check coverage (via runner.list), threads, and runs.
   hash    Report statement_hash status for every rule; --write updates
           missing/stale hashes in place (formatting preserved).
+  judge   Print the judging prompt for one rule — statement, steps, setup,
+          screens with real addresses, where evidence goes and how a verdict
+          is recorded — ready to paste into any agent with a browser. The
+          first step toward prompt-driven judging (docs/11-architecture.md):
+          the prompt ends where the reader begins, and this judges nothing.
 
   sweep   Ask for the named tiers to be judged again from scratch. Verdicts
           recorded before the sweep read as stale, so a rule nobody gets back
@@ -99,6 +105,7 @@ const COMMANDS = new Set([
   'lint',
   'status',
   'hash',
+  'judge',
   'sweep',
   'threads',
   'thread',
