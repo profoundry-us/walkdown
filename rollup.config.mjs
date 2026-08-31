@@ -8,10 +8,16 @@
  *
  * Two settings are load-bearing:
  *
- *   format: 'es'  — an 'iife' format would wrap the result in a second
- *     function. The panel is already its own IIFE, and the extension imports
- *     the output as a module; 'es' with only internal modules emits neither
- *     an import nor an export, so the same bytes satisfy both deliveries.
+ *   format: 'iife' — this used to be 'es', on the reasoning that the panel
+ *     was already its own IIFE. That was true and still insufficient: as a
+ *     CLASSIC script, a bundle's top-level const/let are page-global lexical
+ *     bindings shared with every other script on the page, and the panel is
+ *     injected into pages it does not own. It survived by luck while its
+ *     names were distinctive; bundling lit (whose minified top level is
+ *     one-letter names like `s`) made a collision near-certain — the check
+ *     fixture's own `const s` was the first to die of it. The wrapper leaks
+ *     nothing, and a module import() of an export-less IIFE is still fine,
+ *     which is how the extension loads it.
  *
  *   treeshake: false — the panel's top level is nothing but side effects
  *     (it builds a shadow root and hangs listeners off the document). Tree
@@ -25,7 +31,7 @@
 export default {
   input: 'src/panel/index.js',
   treeshake: false,
-  output: { file: 'lib/viewer/panel.js', format: 'es' },
+  output: { file: 'lib/viewer/panel.js', format: 'iife' },
 
   /*
    * A pane triggers behaviour that redraws panes, so app.js and the pane

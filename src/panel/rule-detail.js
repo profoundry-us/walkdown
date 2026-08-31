@@ -4,12 +4,13 @@
  * conversations anchored to it.
  */
 import { MSG } from '../../lib/message-stream.js';
+import { html, nothing } from '../../vendor/lit.js';
 import { declaredAnchors, elsewhere, open, render } from './app.js';
 import { tierMarks } from './rules-list.js';
 import { openShots } from './shots.js';
 import { S } from './state.js';
 import { threadCard } from './thread-pane.js';
-import { api, esc } from './util.js';
+import { api } from './util.js';
 import {
   isHeadless,
   LBL,
@@ -48,27 +49,25 @@ export const checkRefs = (row) => {
  */
 export async function loadCheckSource(rule) {
   if (S.srcCache.rule === rule && S.srcCache.html) return;
-  S.srcCache = { rule, html: null };
-  let html;
+  S.srcCache = { rule, view: null };
+  let view;
   try {
     const res = await fetch(api(`/api/checks?rule=${encodeURIComponent(rule)}`));
     const out = await res.json();
-    html =
-      (out.checks ?? [])
-        .map((c) =>
+    const checks = out.checks ?? [];
+    view = checks.length
+      ? checks.map((c) =>
           c.missing
-            ? `<div class="text-warning">${esc(c.ref)} — no longer in the tree</div>`
-            : `<div class="mb-1"><div class="font-mono text-[10.5px] opacity-60">${esc(c.ref)}</div>
-          <pre class="overflow-x-auto whitespace-pre rounded bg-base-300/40 p-1.5 text-[10.5px] leading-snug">${esc(
-            c.source,
-          )}</pre></div>`,
+            ? html`<div class="text-warning">${c.ref} — no longer in the tree</div>`
+            : html`<div class="mb-1"><div class="font-mono text-[10.5px] opacity-60">${c.ref}</div>
+          <pre class="overflow-x-auto whitespace-pre rounded bg-base-300/40 p-1.5 text-[10.5px] leading-snug">${c.source}</pre></div>`,
         )
-        .join('') || 'No source recorded.';
+      : 'No source recorded.';
   } catch {
-    html = 'walkdown server unreachable.';
+    view = 'walkdown server unreachable.';
   }
   if (S.srcCache.rule !== rule) return;
-  S.srcCache.html = html;
+  S.srcCache.view = view;
   render();
 }
 
@@ -92,16 +91,16 @@ export function evidenceRows(row) {
   };
   const line = (label, cell) => {
     const [glyph, cls] = STATE[cell?.state] ?? STATE.na;
-    const who = cell?.actor ? ` · ${esc(cell.actor)}` : '';
-    const when = cell?.created ? ` · ${esc(MSG.ago(cell.created))}` : '';
+    const who = cell?.actor ? ` · ${cell.actor}` : '';
+    const when = cell?.created ? ` · ${MSG.ago(cell.created)}` : '';
     const said =
       cell?.state === 'never'
         ? 'never run'
         : cell?.state === 'na'
           ? 'not required'
-          : `${esc(cell.state)}${who}${when}`;
-    return `<div class="evrow" title="${esc(cell?.runId ?? '')}">
-      <span class="src">${esc(label)}</span>
+          : `${cell.state}${who}${when}`;
+    return html`<div class="evrow" title="${cell?.runId ?? ''}">
+      <span class="src">${label}</span>
       <span class="${cls}">${glyph} ${said}</span></div>`;
   };
   /*
@@ -114,11 +113,11 @@ export function evidenceRows(row) {
   const shots = (cell) => {
     const shot = cell?.evidence ?? [];
     if (!shot.length) return '';
-    return `<div class="evrow evshot">
+    return html`<div class="evrow evshot">
       <span class="src"></span>
       <span class="opacity-70">• Screenshots —
         <button class="link link-hover text-primary" data-testid="detail.screenshots"
-          data-shots="${esc(JSON.stringify(shot))}"
+          data-shots="${JSON.stringify(shot)}"
           title="Open the ${shot.length} screenshot${shot.length > 1 ? 's' : ''} this run attached"
           >open ${shot.length}</button></span></div>`;
   };
@@ -129,9 +128,9 @@ export function evidenceRows(row) {
    * rather than left as an omission - so it is a line on the page, not a
    * tooltip and not a silence where a row used to be.
    */
-  const excuse = (label, why) => `<div class="evrow" data-testid="detail.excuse">
-    <span class="src">${esc(label)}</span>
-    <span class="opacity-70">— not checkable here: ${esc(why)}</span></div>`;
+  const excuse = (label, why) => html`<div class="evrow" data-testid="detail.excuse">
+    <span class="src">${label}</span>
+    <span class="opacity-70">— not checkable here: ${why}</span></div>`;
   const rows = [
     ...(row.verify.includes('checks')
       ? (S.data?.targets ?? []).map((t) => line(`checks/${t}`, row.cells?.[t]))
@@ -142,9 +141,7 @@ export function evidenceRows(row) {
     ...(row.verify.includes('human') ? [line('human', row.human)] : []),
   ].filter(Boolean);
   // A rule with nothing recorded says so, rather than showing an empty box.
-  return rows.length
-    ? rows.join('')
-    : '<div class="text-[13px] opacity-50">Nothing recorded yet.</div>';
+  return rows.length ? rows : html`<div class="text-[13px] opacity-50">Nothing recorded yet.</div>`;
 }
 
 export function detailPane() {
@@ -152,7 +149,7 @@ export function detailPane() {
   // A pin with no rule has no rule screen: it opens on the thread screen
   // itself, and this slot is only what slides past on the way there.
   if (!r)
-    return `
+    return html`
     <div class="flex items-center px-2 pt-2">
       <button class="wdp-back btn btn-ghost btn-xs text-primary" data-testid="detail.back">← All rules</button>
     </div>
@@ -167,22 +164,28 @@ export function detailPane() {
    * backticks is a screen id or prose and stays plain type.
    */
   const anchors = declaredAnchors();
+  const token = (tok) =>
+    anchors.has(tok)
+      ? html`<code class="wdp-anchor cursor-help rounded bg-base-200 px-1 text-xs underline decoration-dotted underline-offset-2" data-anchor="${tok}" title="Show this on the surface">${tok}</code>`
+      : html`<code class="rounded bg-base-200 px-1 text-xs">${tok}</code>`;
+  const stepText = (s) => {
+    const parts = [];
+    let last = 0;
+    for (const m of String(s).matchAll(/`([^`]+)`/g)) {
+      parts.push(s.slice(last, m.index), token(m[1]));
+      last = m.index + m[0].length;
+    }
+    parts.push(s.slice(last));
+    return parts;
+  };
   const steps = r.steps
-    ? Object.entries(r.steps)
-        .map(
-          ([ph, items]) =>
-            `<span class="${LBL} pt-1">${esc(ph)}</span><span>${items
-              .map((s) =>
-                esc(s).replace(/`([^`]+)`/g, (_m, tok) =>
-                  anchors.has(tok)
-                    ? `<code class="wdp-anchor cursor-help rounded bg-base-200 px-1 text-xs underline decoration-dotted underline-offset-2" data-anchor="${tok}" title="Show this on the surface">${tok}</code>`
-                    : `<code class="rounded bg-base-200 px-1 text-xs">${tok}</code>`,
-                ),
-              )
-              .join('<br>')}</span>`,
-        )
-        .join('')
-    : '';
+    ? Object.entries(r.steps).map(
+        ([ph, items]) =>
+          html`<span class="${LBL} pt-1">${ph}</span><span>${items.map(
+            (s, i) => html`${i ? html`<br>` : nothing}${stepText(s)}`,
+          )}</span>`,
+      )
+    : null;
   const picked = S.session?.verdicts[r.rule];
   // Step through the rules in the order the list shows them, without going
   // back to it. The back link keeps its word ("All rules") so the bare
@@ -197,10 +200,54 @@ export function detailPane() {
   const walk = orderedRows();
   const at = walk.findIndex((x) => x.rule === r.rule);
   const step = (row, cls, glyph, label) =>
-    `<div class="tooltip tooltip-left" data-tip="${esc(row ? `${label} rule: ${shortName(row)}` : `No ${label.toLowerCase()} rule`)}">
-      <button class="${cls} btn btn-ghost btn-xs" data-testid="detail.stepper" ${row ? `data-goto="${esc(row.rule)}"` : 'disabled'}>${glyph}</button>
+    html`<div class="tooltip tooltip-left" data-tip="${row ? `${label} rule: ${shortName(row)}` : `No ${label.toLowerCase()} rule`}">
+      <button class="${cls} btn btn-ghost btn-xs" data-testid="detail.stepper" data-goto="${row ? row.rule : nothing}" ?disabled=${!row}>${glyph}</button>
     </div>`;
-  return `
+  /*
+   * A screen can be a STATE rather than an address - a filtered list, an open
+   * drawer, the second time you submit the same form - and a state shares its
+   * URL with the page it is a state of. Walking to a rule about one navigates
+   * to that shared address and lands you on the page, not in the state, so
+   * the storyboard's setup is the rest of the sentence: it says what to do on
+   * arrival. Above the steps, because it happens before them.
+   */
+  const setup = ruleScreen(r)?.app?.setup;
+  /*
+   * Which screen this rule is about, said plainly and above the steps.
+   *
+   * It was only ever implicit before - the surface moved when you opened the
+   * rule, and if it moved somewhere wrong the rule looked wrong instead. A
+   * rule pointed at the wrong screen is a common and quiet error in a
+   * blueprint this size, and it cannot be corrected by somebody who cannot
+   * see what was chosen.
+   *
+   * A flow is drawn as the chain it is, because the LAST screen of a flow is
+   * the one the rule is judged on (ruleScreen) and a chain that did not show
+   * its end would answer a different question.
+   */
+  const ids = r.flow?.length ? r.flow : (r.screens ?? []);
+  const sep = r.flow?.length ? ' → ' : ', ';
+  /*
+   * A screen the storyboard does not carry says so IN WORDS, and wears the
+   * error colour rather than the warning one (n-0123). It used to be the
+   * bare id in warning yellow and nothing else - which a reader who did not
+   * know the convention read as a screen that exists, and which borrowed the
+   * panel's "waiting on you" colour to say something untrue about who was
+   * blocked. Marked by colour is not marked as unknown.
+   */
+  const name = (id) => {
+    const sc = screenById(id);
+    if (!sc)
+      return html`<span class="text-error">${id}</span>
+            <span class="text-[11.5px] opacity-60">— not in the storyboard</span>`;
+    return html`<span>${sc.title ?? id}</span>${
+      sc.title
+        ? html` <code class="rounded bg-base-200 px-1 text-[11px] opacity-70">${id}</code>`
+        : nothing
+    }`;
+  };
+  const addressed = threads.filter((x) => x.status === 'addressed').length;
+  return html`
     <div class="flex items-center px-2 pt-2">
       <button class="wdp-back btn btn-ghost btn-xs text-primary" data-testid="detail.back">← All rules</button>
       <div class="ml-auto flex gap-0.5">
@@ -216,27 +263,27 @@ export function detailPane() {
              is how the CLI and the panel came to disagree about ✍︎ (n-0118). -->
         <div class="flex items-center gap-2">
           ${tierMarks(r, needsYou(r.rule))}
-          <div class="break-all font-mono text-[11px] opacity-40" data-testid="detail.rule-id">${esc(r.rule)}</div>
+          <div class="break-all font-mono text-[11px] opacity-40" data-testid="detail.rule-id">${r.rule}</div>
         </div>
-        <p class="text-[15px] leading-relaxed" data-testid="detail.statement">${esc(r.statement)}</p>
+        <p class="text-[15px] leading-relaxed" data-testid="detail.statement">${r.statement}</p>
         ${elsewhere(r)}
       </div>
       ${
         S.session
-          ? `<div class="flex flex-col gap-1.5">
+          ? html`<div class="flex flex-col gap-1.5">
         <!-- The box rides ABOVE the buttons: write the why, then judge. -->
         <textarea id="wdp-vnote" data-testid="detail.feedback" class="textarea textarea-xs h-14 w-full" placeholder="${
           r.built
             ? 'Why? Anything written here is filed as a note with your verdict.'
             : 'What should change? Refine files this as the rule’s feedback.'
-        }">${esc(S.verdictNote)}</textarea>
+        }">${S.verdictNote}</textarea>
         ${
           r.built
-            ? `<div class="flex gap-2" data-testid="detail.verdict">
+            ? html`<div class="flex gap-2" data-testid="detail.verdict">
           <button class="btn btn-sm flex-1 ${picked === 'pass' ? 'btn-success' : 'btn-outline btn-success'}" data-v="pass">✓ Pass</button>
           <button class="btn btn-sm flex-1 ${picked === 'fail' ? 'btn-error' : 'btn-outline btn-error'}" data-v="fail">✗ Fail</button>
         </div>`
-            : `<div class="flex gap-2" data-testid="detail.verdict">
+            : html`<div class="flex gap-2" data-testid="detail.verdict">
           <button class="btn btn-sm flex-1 ${picked === 'approved' ? 'btn-success' : 'btn-outline btn-success'}" data-v="approved">✍︎ Approve</button>
           <button class="btn btn-sm flex-1 ${picked === 'refining' ? 'btn-warning' : 'btn-outline btn-warning'}" data-v="refining">✎︎ Refine</button>
         </div>
@@ -245,101 +292,49 @@ export function detailPane() {
         <div id="wdp-vsay" data-testid="detail.say" class="hidden text-[11px] text-warning"></div>
         <div class="text-[11.5px] opacity-50" data-testid="detail.judged">${Object.keys(S.session.verdicts).length} judged this session</div>
       </div>`
-          : ''
+          : nothing
       }
-      ${(() => {
-        /*
-         * A screen can be a STATE rather than an address - a filtered list,
-         * an open drawer, the second time you submit the same form - and a
-         * state shares its URL with the page it is a state of. Walking to a
-         * rule about one navigates to that shared address and lands you on
-         * the page, not in the state, so the storyboard's setup is the rest
-         * of the sentence: it says what to do on arrival. Above the steps,
-         * because it happens before them.
-         */
-        const setup = ruleScreen(r)?.app?.setup;
-        return setup
-          ? `<div>
+      ${
+        setup
+          ? html`<div>
           <!-- "Setup" is the storyboard's own word for this field, and the
                panel calling it something else made a reviewer translate
                between the two (n-0099). -->
           <div class="${LBL} mb-1.5">Setup</div>
           <div class="rounded border border-warning/40 bg-warning/10 px-2 py-1.5 text-[13px] leading-relaxed"
-            data-testid="detail.setup">${esc(setup)}</div>
+            data-testid="detail.setup">${setup}</div>
         </div>`
-          : '';
-      })()}
-      ${(() => {
-        /*
-         * Which screen this rule is about, said plainly and above the steps.
-         *
-         * It was only ever implicit before - the surface moved when you opened
-         * the rule, and if it moved somewhere wrong the rule looked wrong
-         * instead. A rule pointed at the wrong screen is a common and quiet
-         * error in a blueprint this size, and it cannot be corrected by
-         * somebody who cannot see what was chosen.
-         *
-         * A flow is drawn as the chain it is, because the LAST screen of a
-         * flow is the one the rule is judged on (ruleScreen) and a chain that
-         * did not show its end would answer a different question.
-         */
-        const ids = r.flow?.length ? r.flow : (r.screens ?? []);
-        const sep = r.flow?.length ? ' → ' : ', ';
-        /*
-         * A screen the storyboard does not carry says so IN WORDS, and wears
-         * the error colour rather than the warning one (n-0123). It used to be
-         * the bare id in warning yellow and nothing else - which a reader who
-         * did not know the convention read as a screen that exists, and which
-         * borrowed the panel's "waiting on you" colour to say something untrue
-         * about who was blocked. Marked by colour is not marked as unknown.
-         */
-        const name = (id) => {
-          const sc = screenById(id);
-          if (!sc)
-            return `<span class="text-error">${esc(id)}</span>
-            <span class="text-[11.5px] opacity-60">— not in the storyboard</span>`;
-          return `<span>${esc(sc.title ?? id)}</span>${
-            sc.title
-              ? ` <code class="rounded bg-base-200 px-1 text-[11px] opacity-70">${esc(id)}</code>`
-              : ''
-          }`;
-        };
-        return `<div>
-          <div class="${LBL} mb-1.5">Screen</div>
-          <div class="text-[13px] leading-relaxed" data-testid="detail.screen">${
-            ids.length
-              ? ids.map(name).join(sep)
-              : `<span class="opacity-50">${
-                  isHeadless(r)
-                    ? 'No screen — this rule is judged without one.'
-                    : 'No screen named.'
-                }</span>`
-          }</div>
-        </div>`;
-      })()}
+          : nothing
+      }
+      <div>
+        <div class="${LBL} mb-1.5">Screen</div>
+        <div class="text-[13px] leading-relaxed" data-testid="detail.screen">${
+          ids.length
+            ? ids.map((id, i) => html`${i ? sep : nothing}${name(id)}`)
+            : html`<span class="opacity-50">${
+                isHeadless(r) ? 'No screen — this rule is judged without one.' : 'No screen named.'
+              }</span>`
+        }</div>
+      </div>
       ${
         steps
-          ? `<div><div class="${LBL} mb-1.5">Steps</div>
+          ? html`<div><div class="${LBL} mb-1.5">Steps</div>
         <div class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-[13px] leading-relaxed"
           data-testid="detail.steps">${steps}</div>
         ${
           checkRefs(r).length
-            ? `<!-- The steps are the rule; the source that checks them is a
+            ? html`<!-- The steps are the rule; the source that checks them is a
              technical detail, so it waits behind a disclosure until asked for. -->
           <details class="mt-2 rounded border border-base-300 bg-base-200/60 px-2 py-1 text-[11.5px]"
-            data-testid="detail.technical-disclosure" data-checks="${esc(r.rule)}"${
-              S.srcOpenFor === r.rule ? ' open' : ''
-            }>
-            <summary class="cursor-pointer opacity-60">Check source · ${checkRefs(r)
-              .map((c) => esc(c))
-              .join(', ')}</summary>
+            data-testid="detail.technical-disclosure" data-checks="${r.rule}" ?open=${S.srcOpenFor === r.rule}>
+            <summary class="cursor-pointer opacity-60">Check source · ${checkRefs(r).join(', ')}</summary>
             <div class="wdp-check-src mt-1 opacity-70">${
-              S.srcCache.rule === r.rule && S.srcCache.html ? S.srcCache.html : 'Loading…'
+              S.srcCache.rule === r.rule && S.srcCache.view ? S.srcCache.view : 'Loading…'
             }</div>
           </details>`
-            : ''
+            : nothing
         }</div>`
-          : ''
+          : nothing
       }
       <div>
         <div class="${LBL} mb-1.5">Evidence</div>
@@ -347,14 +342,14 @@ export function detailPane() {
       </div>
       <div>
         <div class="${LBL} mb-1.5">Verify</div>
-        <div class="text-[13px]" data-testid="detail.verify">${esc(r.verify.join(', '))}</div>
+        <div class="text-[13px]" data-testid="detail.verify">${r.verify.join(', ')}</div>
       </div>
       ${
         threads.length
-          ? `<div class="-mx-3.5" data-testid="detail.threads">
+          ? html`<div class="-mx-3.5" data-testid="detail.threads">
         <div class="${LBL} mb-0.5 flex items-center gap-2 px-3.5">Threads
           ${
-            threads.filter((t) => t.status === 'addressed').length > 1
+            addressed > 1
               ? /*
                  * A rule whose fixes all landed together is verified together.
                  * Going through a dozen threads one at a time is the same
@@ -362,20 +357,14 @@ export function detailPane() {
                  * stop reading them - so the sweep is offered where the pile is,
                  * and it is still a person pressing it.
                  */
-                `<button class="btn btn-xs btn-outline btn-success ml-auto" data-verify-all="${esc(r.rule)}"
+                html`<button class="btn btn-xs btn-outline btn-success ml-auto" data-verify-all="${r.rule}"
                  title="Verify every addressed thread on this rule, under your name">
-                 Verify all ${threads.filter((t) => t.status === 'addressed').length}</button>`
-              : ''
+                 Verify all ${addressed}</button>`
+              : nothing
           }
         </div>
-        <!-- Wrapped in an arrow, never passed bare: map hands its callback the
-             array INDEX as a second argument, and threadCard's second
-             parameter is the provenance line. Passed bare, every card after
-             the first printed its own position there and the whole row
-             silently became a click target - a one-based counter nobody asked
-             for, starting at the second thread because index 0 is falsy. -->
-        ${threads.map((t) => threadCard(t)).join('')}</div>`
-          : ''
+        ${threads.map((x) => threadCard(x))}</div>`
+          : nothing
       }
       <!--
         A rule is a place to have a conversation, and until now it was only
@@ -392,13 +381,11 @@ export function detailPane() {
       <div class="-mx-3.5 border-t border-base-300 px-3.5 pt-2" data-testid="detail.new-thread">
         <textarea id="wdp-rulenote" data-testid="detail.new-thread-box" rows="2"
           class="textarea textarea-xs w-full resize-none"
-          placeholder="Start a conversation about this rule…">${esc(S.ruleNote)}</textarea>
+          placeholder="Start a conversation about this rule…">${S.ruleNote}</textarea>
         <div class="mt-1 flex items-center gap-2">
-          <span class="text-[10px] opacity-40">as <button id="wdp-nactor" class="link">${esc(
-            whoAmI() || 'set your name…',
-          )}</button></span>
+          <span class="text-[10px] opacity-40">as <button id="wdp-nactor" class="link">${whoAmI() || 'set your name…'}</button></span>
           <button class="btn btn-xs btn-outline ml-auto" data-testid="detail.new-thread-post"
-            data-note-rule="${esc(r.rule)}">Start thread</button>
+            data-note-rule="${r.rule}">Start thread</button>
         </div>
         <div class="mt-1 hidden text-[11px] text-warning" data-testid="detail.new-thread-say" id="wdp-nsay"></div>
       </div>

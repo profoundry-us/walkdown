@@ -30,6 +30,7 @@ const TARGETS = [
   {
     file: PANEL,
     indent: '',
+    lit: true,
     icons: [
       ['bounding-box', 'regular'],
       ['caret-down', 'regular'],
@@ -65,11 +66,22 @@ const body = (name, weight) => {
   return inner;
 };
 
-const blockFor = (icons, i) =>
+/*
+ * Two output shapes for one source of truth. The panel renders with lit, so
+ * its block is svg\`\` templates - static, no interpolations, and lit treats
+ * them as markup without an unsafe directive. The embed still renders by
+ * string, so its block stays plain strings. Same paths either way.
+ */
+const entry = (lit, n, w, i) =>
+  lit
+    ? `${i}  '${key(n, w)}': svg\`${body(n, w)}\`,`
+    : `${i}  '${key(n, w)}': '${body(n, w).replace(/'/g, "\\'")}',`;
+
+const blockFor = (icons, i, lit) =>
   [
     START(i),
     `${i}const PHOSPHOR = {`,
-    ...icons.map(([n, w]) => `${i}  '${key(n, w)}': '${body(n, w).replace(/'/g, "\\'")}',`),
+    ...icons.map(([n, w]) => entry(lit, n, w, i)),
     `${i}};`,
     END(i),
   ].join('\n');
@@ -87,7 +99,9 @@ for (const target of TARGETS) {
     process.exit(1);
   }
   const next =
-    src.slice(0, from) + blockFor(target.icons, target.indent) + src.slice(to + end.length);
+    src.slice(0, from) +
+    blockFor(target.icons, target.indent, target.lit) +
+    src.slice(to + end.length);
   if (next === src) continue;
   stale += 1;
   if (!check) writeFileSync(target.file, next);

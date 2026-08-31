@@ -3,10 +3,15 @@
 Third-party code, committed rather than installed, so that **cloning walkdown
 is the whole install**.
 
-There is one file: `yaml.js`, bundled from the [`yaml`][yaml] package by
-`npm run build:yaml`. It is not edited by hand and never should be — the build
-that produces it is `rollup.vendor.mjs`, which also explains why it is bundled
-from yaml's browser build rather than its Node one.
+Two files, neither ever edited by hand:
+
+- `yaml.js` — the [`yaml`][yaml] package, bundled by `npm run build:yaml`
+  (`rollup.vendor.mjs`, which also explains why it is bundled from yaml's
+  browser build rather than its Node one).
+- `lit.js` — [`lit-html`][lit], bundled by `npm run build:lit`
+  (`rollup.lit.mjs`) from the curated entry `src/vendor-entries/lit.js`, so
+  the bundle carries exactly what the panel uses. Terms in `LICENSE-lit`
+  (BSD-3-Clause).
 
 ## Why
 
@@ -35,7 +40,9 @@ the right side of that trade.
 
 ## Terms
 
-`yaml` is ISC, by Eemeli Aro. `LICENSE` is its own licence file, copied
-verbatim; the bundle carries a header pointing back here.
+`yaml` is ISC, by Eemeli Aro (`LICENSE`); `lit-html` is BSD-3-Clause, by
+Google (`LICENSE-lit`). Each licence file is copied verbatim, and each bundle
+carries a header pointing back here.
 
 [yaml]: https://github.com/eemeli/yaml
+[lit]: https://lit.dev

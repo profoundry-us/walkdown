@@ -33,6 +33,7 @@ import { MSG } from '../../lib/message-stream.js';
  * tools/sync-shared.mjs still keeps it honest.
  */
 import { locationOfUrl, matchScreen } from '../../lib/screen-match.js';
+import { html, nothing, render as put } from '../../vendor/lit.js';
 import { askAboutSitting, blueprintsPane, crossTo, wireBlueprints } from './blueprints.js';
 import { DESK_DEFAULTS, DESK_KEY, drawDesk } from './desk.js';
 import { icon } from './icons.js';
@@ -453,7 +454,7 @@ function syncScreenPanel() {
     // on every repaint, and a list that jumped back to the top whenever the
     // panel drew would be worse than one that lagged.
     const wasAt = D.screenPanel.scrollTop;
-    D.screenPanel.innerHTML = screensPane();
+    put(screensPane(), D.screenPanel);
     wireScreens(D.screenPanel);
     D.screenPanel.scrollTop = wasAt;
     const btn = D.bar.querySelector('#wdp-screen-btn');
@@ -1057,11 +1058,11 @@ export function render() {
     // so the tabs ran on daisyUI's own padding and read as squished
     // (n-0102). Once the class was real, px-4 turned out to be too much:
     // three tabs, two of them carrying a count badge, wrap at 384px.
-    `<button role="tab" class="tab px-3 gap-1${S.listTab === id ? ' tab-active' : ''}" data-tab="${id}">
+    html`<button role="tab" class="tab px-3 gap-1${S.listTab === id ? ' tab-active' : ''}" data-tab="${id}">
       ${icon(TAB_ICON[id], 'size-4')}${label}${
-        badge ? `<span class="badge badge-xs ${tone}" title="${esc(why)}">${badge}</span>` : ''
+        badge ? html`<span class="badge badge-xs ${tone}" title="${why}">${badge}</span>` : nothing
       }</button>`;
-  D.side.innerHTML = `
+  const side = html`
     <div role="tablist" class="tabs tabs-box tabs-sm m-2 shrink-0 self-center" data-testid="panel.tabs">
       ${tab('blueprints', 'Blueprints')}${
         /*
@@ -1097,7 +1098,7 @@ export function render() {
          just opened (n-0101). -->
     ${
       S.session && S.listTab === 'rules'
-        ? `<div class="flex items-center gap-2 border-b border-base-300 bg-warning/10 px-3.5 py-2 text-xs" data-testid="panel.actor">
+        ? html`<div class="flex items-center gap-2 border-b border-base-300 bg-warning/10 px-3.5 py-2 text-xs" data-testid="panel.actor">
       <!-- Two facts, because they are two fields now (n-0104): the name you
            go by, and the username the ledger will actually carry. The handle
            stays on screen rather than only in Settings, because a defaulted
@@ -1106,14 +1107,12 @@ export function render() {
            while recording a handle would quietly break it. With no full name
            anywhere the two are the same string and only one is drawn. -->
       <span>Recording as
-        <button id="wdp-actor" data-testid="panel.actor-name" class="link font-semibold" title="Change the name in Settings (the gear)">${esc(
-          recordingDisplay() || 'set your name…',
-        )}</button>${
+        <button id="wdp-actor" data-testid="panel.actor-name" class="link font-semibold" title="Change the name in Settings (the gear)">${
+          recordingDisplay() || 'set your name…'
+        }</button>${
           recordingHandle() && recordingHandle() !== recordingDisplay()
-            ? ` <span data-testid="panel.actor-handle" class="font-mono opacity-60" title="Verdicts and thread actions are recorded under this username">${esc(
-                recordingHandle(),
-              )}</span>`
-            : ''
+            ? html` <span data-testid="panel.actor-handle" class="font-mono opacity-60" title="Verdicts and thread actions are recorded under this username">${recordingHandle()}</span>`
+            : nothing
         }</span>
       <!-- Both halves of the same fact: how many you have judged, and how
            many the sitting has in it. The denominator is what you have done
@@ -1139,7 +1138,7 @@ export function render() {
       <button class="btn btn-xs btn-outline btn-warning" data-testid="panel.continue" id="wdp-continue"
         title="Open the next rule still owing you a verdict">Continue</button>
     </div>`
-        : ''
+        : nothing
     }
     <!-- Three screens on one track — the list, the rule, and the thread, each
          one slide to the right of the last. The slot clips it, or an
@@ -1158,7 +1157,7 @@ export function render() {
              way, so scroll restoration still lines up by index. -->
         <div class="flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col overflow-hidden"
              data-testid="${onThreads ? 'panel.threads-list' : S.listTab === 'rules' ? 'panel.rules-list' : 'panel.blueprints-list'}">
-          ${onThreads ? threadFilterBar() : S.listTab === 'rules' ? searchBox() : ''}
+          ${onThreads ? threadFilterBar() : S.listTab === 'rules' ? searchBox() : nothing}
           <!-- The scroller, named: the pane above it is a column with a fixed
                head, so THIS is the element that scrolls and the one a sticky
                heading sticks to. It carries an anchor because checks select by
@@ -1179,14 +1178,13 @@ export function render() {
              and flying past a rule detail nobody asked for. -->
         <div class="wdp-pane flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col ${
           onThreads ? 'overflow-hidden' : 'overflow-y-auto'
-        }"${onThreads ? ' data-testid="thread.panel"' : ''}>${
+        }" data-testid="${onThreads ? 'thread.panel' : nothing}">${
           onThreads ? threadPane() : detailPane()
         }</div>
         <!-- Third seat: the thread reached FROM a rule, which is a different
              trip - it keeps the rule behind it to come back to. -->
-        <div class="flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col overflow-hidden"${
-          onThreads ? '' : ' data-testid="thread.panel"'
-        }>${onThreads ? '' : threadPane()}</div>
+        <div class="flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col overflow-hidden"
+          data-testid="${onThreads ? nothing : 'thread.panel'}">${onThreads ? nothing : threadPane()}</div>
       </div>
     </div>
     <!-- Every number here is derived from something, and a bare number told a
@@ -1210,18 +1208,18 @@ export function render() {
          child. The label carries its own. -->
     ${
       S.listTab === 'rules'
-        ? `<div class="grid shrink-0 grid-cols-3 items-center border-t border-base-300 px-3.5 py-2 text-xs" data-testid="panel.counts">
+        ? html`<div class="grid shrink-0 grid-cols-3 items-center border-t border-base-300 px-3.5 py-2 text-xs" data-testid="panel.counts">
       <span class="flex items-center gap-2 justify-self-start">
       <span class="tooltip tooltip-top tooltip-start [--tt-trans:0] shrink-0 whitespace-nowrap">
         <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug"
           >Rules holding a current pass on every tier they ask for. The rest are the work counted at the right.</span>
         <span class="opacity-70"><b>${verified}/${total}</b> verified</span></span>${
           judged.size
-            ? `<span class="tooltip tooltip-top tooltip-start [--tt-trans:0] shrink-0 text-primary">
+            ? html`<span class="tooltip tooltip-top tooltip-start [--tt-trans:0] shrink-0 text-primary">
         <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug"
           >Judged by you in this sitting. Nothing reaches the ledger until you press Finish walkdown.</span>
         <b>+${judged.size}</b></span>`
-            : ''
+            : nothing
         }</span>
       <!-- Centred, and in its own grid column so it stays centred whether or
            not the two badges at the right are drawn. Every mark the rail uses
@@ -1231,24 +1229,25 @@ export function render() {
       <span class="flex shrink-0 gap-1 justify-self-end">
         ${
           toSign
-            ? `<span class="tooltip tooltip-top tooltip-end [--tt-trans:0]">
+            ? html`<span class="tooltip tooltip-top tooltip-end [--tt-trans:0]">
           <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug"
             >${toSign} rule${toSign === 1 ? '' : 's'} designed but not built. Your sign-off on the spec is what they wait for.</span>
           <span class="badge badge-xs badge-warning badge-outline">${toSign} sign</span></span>`
-            : ''
+            : nothing
         }
         ${
           toWalk
-            ? `<span class="tooltip tooltip-top tooltip-end [--tt-trans:0]">
+            ? html`<span class="tooltip tooltip-top tooltip-end [--tt-trans:0]">
           <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug"
             >${toWalk} rule${toWalk === 1 ? '' : 's'} built and unjudged by you. Open one and give it a pass or a fail.</span>
           <span class="badge badge-xs badge-warning badge-outline">${toWalk} walk</span></span>`
-            : ''
+            : nothing
         }
       </span>
     </div>`
-        : ''
+        : nothing
     }`;
+  put(side, D.side);
 
   const track = D.host.querySelector('.wdp-track');
   if (track) {
@@ -1402,7 +1401,7 @@ function paintBar() {
 }
 
 const GEAR = () =>
-  `<button class="btn btn-xs btn-ghost" id="wdp-desk-btn" data-testid="panel.desk-tuner" title="Settings">${icon('gear', 'size-3.5')}</button>`;
+  html`<button class="btn btn-xs btn-ghost" id="wdp-desk-btn" data-testid="panel.desk-tuner" title="Settings">${icon('gear', 'size-3.5')}</button>`;
 const wireGear = () => {
   const gear = D.bar.querySelector('#wdp-desk-btn');
   if (gear)
@@ -1415,7 +1414,10 @@ const wireGear = () => {
 function renderBar() {
   if (S.dragging) return paintBar();
   if (S.phase !== 'ready') {
-    D.bar.innerHTML = `${GEAR()}<span class="font-bold tracking-tight">walk<span class="text-primary">down</span></span>`;
+    put(
+      html`${GEAR()}<span class="font-bold tracking-tight">walk<span class="text-primary">down</span></span>`,
+      D.bar,
+    );
     return wireGear();
   }
   const canGhost = Boolean(ghostSource(screenInHand()));
@@ -1432,7 +1434,7 @@ function renderBar() {
    * because a control that is always loud says nothing.
    */
   const owedNow = owedRows().length;
-  D.bar.innerHTML = `
+  const bar = html`
     ${GEAR()}
     <span class="font-bold tracking-tight">walk<span class="text-primary">down</span></span>
     ${
@@ -1445,13 +1447,11 @@ function renderBar() {
            * it or not. Loud on purpose: everything it draws underneath is being
            * judged against code that is not what shipped.
            */
-          `<span class="badge badge-sm badge-error badge-dash gap-1 font-semibold"
+          html`<span class="badge badge-sm badge-error badge-dash gap-1 font-semibold"
            data-testid="panel.stale"
            title="walkdown was updated — reload the extension at chrome://extensions, then reload this page, to run the current build.">
            ${icon('warning-fill', 'size-3.5')}Stale — reload the extension</span>`
-        : `<span class="truncate text-[11.5px] opacity-50" data-testid="panel.blueprint">${esc(
-            S.data.project,
-          )}</span>`
+        : html`<span class="truncate text-[11.5px] opacity-50" data-testid="panel.blueprint">${S.data.project}</span>`
     }
     <!-- Which screen this page is. It reads as the answer, not as a way to
          ask the question: the button is labelled with the screen you are on,
@@ -1467,19 +1467,19 @@ function renderBar() {
           ? 'Screen picked by hand — open to change it, or go back to detecting from the page'
           : 'Which screen this page is, detected from its address — open to pick one by hand'
       }">
-      ${icon('frame-corners', 'size-3.5')}<span class="max-w-32 truncate">${esc(
-        atScreen ? (atScreen.title ?? atScreen.id) : 'No screen',
-      )}</span>${icon('caret-down', 'size-3')}</button>
+      ${icon('frame-corners', 'size-3.5')}<span class="max-w-32 truncate">${
+        atScreen ? (atScreen.title ?? atScreen.id) : 'No screen'
+      }</span>${icon('caret-down', 'size-3')}</button>
 
     <span class="absolute left-1/2 flex -translate-x-1/2 items-center gap-2"
       title="${canGhost ? 'Fade between the design and what shipped' : 'No design on file for this screen'}">
       <button class="btn btn-xs btn-primary${share === 1 ? '' : ' btn-outline'}" data-surface="prototype"
-        ${canGhost || pageSurface() === 'prototype' ? '' : 'disabled'}>Prototype</button>
+        ?disabled=${!(canGhost || pageSurface() === 'prototype')}>Prototype</button>
       <input type="range" min="0" max="100" value="${value}" id="wdp-fade" data-testid="panel.fade"
-        class="range range-xs range-primary w-28" ${canGhost ? '' : 'disabled'}
+        class="range range-xs range-primary w-28" ?disabled=${!canGhost}
         aria-label="Fade between the design and the running app">
       <button class="btn btn-xs btn-primary${share === 0 ? '' : ' btn-outline'}" data-surface="app"
-        ${canGhost || pageSurface() === 'app' ? '' : 'disabled'}>App</button>
+        ?disabled=${!(canGhost || pageSurface() === 'app')}>App</button>
     </span>
 
     <span class="ml-auto flex items-center gap-2">
@@ -1496,8 +1496,8 @@ function renderBar() {
           data-vp="390" title="Mobile — lay the page out at 390px">${icon('device-mobile', 'size-3.5')}</button>
       </span>
       <button class="btn btn-xs gap-1 ${pinning ? 'btn-warning' : 'btn-outline btn-primary'}" id="wdp-pin" data-testid="panel.pin-mode"
-        ${pinSurface() ? '' : 'disabled'}
-        title="${esc(pinHint())}">${icon('map-pin', 'size-3.5')}Pin mode</button>
+        ?disabled=${!pinSurface()}
+        title="${pinHint()}">${icon('map-pin', 'size-3.5')}Pin mode</button>
       <!-- One control owns the sitting from end to end: it starts one, and
            while one runs it is how you end it. Starting in the bar and
            finishing somewhere else made the two halves of one act look like
@@ -1514,6 +1514,7 @@ function renderBar() {
         }">${S.session ? 'Finish walkdown' : 'Start walkdown'}</button>
       <button class="btn btn-xs btn-ghost" id="wdp-undock" title="Put walkdown away">\u00d7</button>
     </span>`;
+  put(bar, D.bar);
 
   wireGear();
   D.bar.querySelector('#wdp-screen-btn').onclick = () => {
@@ -2186,16 +2187,16 @@ export function elsewhere(r) {
   // A headless rule must say so - otherwise whatever is on the desk reads
   // as the rule's screen, and it is not.
   if (!want && isHeadless(r))
-    return `<div class="mt-1.5 text-[11.5px] opacity-60">Headless — no screen belongs to
+    return html`<div class="mt-1.5 text-[11.5px] opacity-60">Headless — no screen belongs to
       this rule, so what is on the desk is beside the point. It is judged by its
       checks and recorded behavior, not by looking.</div>`;
-  if (!want || !here || want.id === here.id) return '';
+  if (!want || !here || want.id === here.id) return nothing;
   const can = Boolean(
     screenUrl(want, pageSurface()) ?? screenUrl(want, 'app') ?? screenUrl(want, 'prototype'),
   );
-  return `<div class="mt-1.5 text-[11.5px] opacity-60">This rule is on
-    <b>${esc(want.id)}</b>; you are on <b>${esc(here.id)}</b>.
-    ${can ? `<button class="link link-primary" data-goscreen="${esc(want.id)}">Go there</button>` : ''}</div>`;
+  return html`<div class="mt-1.5 text-[11.5px] opacity-60">This rule is on
+    <b>${want.id}</b>; you are on <b>${here.id}</b>.
+    ${can ? html`<button class="link link-primary" data-goscreen="${want.id}">Go there</button>` : nothing}</div>`;
 }
 
 function sayVerdict(msg) {
@@ -2796,7 +2797,8 @@ export async function start() {
 function renderGate() {
   renderBar();
   if (S.phase === 'connect') {
-    D.side.innerHTML = `
+    put(
+      html`
       <div class="flex flex-1 flex-col justify-center gap-3 p-5">
         <div class="flex flex-col gap-3" data-testid="start.message">
           <div class="text-[15px] font-semibold">No blueprints open</div>
@@ -2809,22 +2811,27 @@ function renderGate() {
         </div>
         <code class="rounded-box bg-base-200 px-3 py-2 text-[12px]">walkdown serve</code>
         <div class="flex items-center gap-2">
-          <input id="wdp-server" data-testid="start.server" class="input input-sm flex-1" value="${esc(S.SERVER)}"
+          <input id="wdp-server" data-testid="start.server" class="input input-sm flex-1" value="${S.SERVER}"
                  aria-label="walkdown server address">
           <button class="btn btn-sm btn-primary" id="wdp-retry" data-testid="start.connect">Connect</button>
         </div>
         <p class="text-[11.5px] opacity-40">Then every blueprint under that folder is listed here.</p>
-      </div>`;
+      </div>`,
+      D.side,
+    );
     wireBlueprints(D.side);
     return;
   }
-  D.side.innerHTML = `
+  put(
+    html`
     <div class="p-4 pb-2">
       <div class="text-[15px] font-semibold">Which blueprint?</div>
       <p class="mt-1 text-[12.5px] leading-relaxed opacity-60">Remembered for
-        <b>${esc(location.origin)}</b>, and changeable later from the Blueprints tab.</p>
+        <b>${location.origin}</b>, and changeable later from the Blueprints tab.</p>
     </div>
-    <div class="flex-1 overflow-y-auto">${blueprintsPane()}</div>`;
+    <div class="flex-1 overflow-y-auto">${blueprintsPane()}</div>`,
+    D.side,
+  );
   wireBlueprints(D.side);
 }
 

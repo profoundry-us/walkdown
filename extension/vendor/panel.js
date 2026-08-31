@@ -1,147 +1,150 @@
-/*
- * A thread, rendered as a conversation.
- *
- * The panel and the embed both show threads, and they have to show them the
- * same way — the same grouping, the same "new since you looked" line, the same
- * shape of message — or the two surfaces of one tool disagree about what a
- * conversation looks like. Both bundle this module, so there is one shape.
- *
- * The model is deliberately flat: a thread is an opening message plus replies,
- * and the opening message is not special. Everything append-only — no editing,
- * no deleting, no reactions. A verdict is the ledger's job, and a thumbs-up
- * that quietly means "addressed" without recording it would be a lie.
- *
- * Everything here must stay dependency-free and browser-safe.
- */
+(function () {
+  'use strict';
 
-const MSG = {
-  /** Same escaping rules as the rest of the chrome; bodies are user text. */
-  esc: (s) =>
-    String(s ?? '').replace(
-      /[&<>"]/g,
-      (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c],
-    ),
-
-  /** Up to two letters, from a name or an email-ish handle. */
-  initials(name) {
-    const parts = String(name ?? '?')
-      .trim()
-      .split(/[\s._-]+/)
-      .filter(Boolean);
-    if (!parts.length) return '?';
-    return (parts.length === 1 ? parts[0].slice(0, 2) : parts[0][0] + parts[1][0]).toUpperCase();
-  },
-
-  /**
-   * A stable colour per name. Recognising who is speaking should not require
-   * reading — and the agent is always the same green, so its voice is one
-   * thing you learn once.
-   */
-  tint(name) {
-    const who = String(name ?? '')
-      .trim()
-      .toLowerCase();
-    if (who === 'agent') return 'oklch(52% 0.09 165)';
-    // One tint per person: the first word is what a handle and a full name
-    // have in common, so "topher" and "Topher Fangio" wear the same colour.
-    const first = who.split(/[\s._-]+/)[0] || who;
-    let h = 0;
-    for (const ch of first) h = (h * 31 + ch.charCodeAt(0)) % 360;
-    return `oklch(52% 0.10 ${h})`;
-  },
-
-  /** "12m ago" / "3h ago" / "2d ago" — short enough to sit beside a name. */
-  ago(iso) {
-    const then = Date.parse(iso ?? '');
-    if (!Number.isFinite(then)) return '';
-    const mins = Math.max(0, Math.round((Date.now() - then) / 60000));
-    if (mins < 1) return 'just now';
-    if (mins < 60) return `${mins}m ago`;
-    if (mins < 1440) return `${Math.round(mins / 60)}h ago`;
-    return `${Math.round(mins / 1440)}d ago`;
-  },
-
-  /** The full stamp, for the hover title — "2h ago" is never the whole answer. */
-  stamp(iso) {
-    const at = new Date(iso ?? '');
-    return Number.isFinite(at.getTime()) ? at.toLocaleString() : '';
-  },
-
-  /** Today / Yesterday / a weekday-and-date, for the divider between days. */
-  day(iso) {
-    const at = new Date(iso ?? '');
-    if (!Number.isFinite(at.getTime())) return '';
-    const midnight = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-    const days = Math.round((midnight(new Date()) - midnight(at)) / 86400000);
-    if (days === 0) return 'Today';
-    if (days === 1) return 'Yesterday';
-    if (days < 7) return at.toLocaleDateString(undefined, { weekday: 'long' });
-    return at.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-  },
-
-  /** The opening note and its replies as one list. The note is message zero. */
-  messages(thread) {
-    return [
-      { author: thread?.author, created: thread?.created, body: thread?.body },
-      ...(thread?.replies ?? []),
-    ].filter((m) => m && (m.body ?? '') !== '');
-  },
-
-  /**
-   * Message text, with the ids in it made clickable: a thread id opens that
-   * thread, a rule id opens that rule. Line breaks survive, because a reply
-   * written as three lines was meant as three lines.
-   */
-  body(text, { rules = [] } = {}) {
-    const known = new Set(rules);
-    return this.esc(text)
-      .replace(
-        /\b([nq]-\d{4})\b/g,
-        '<button class="wd-ref link link-hover" data-thread-ref="$1">$1</button>',
-      )
-      .replace(/\b([a-z][\w-]*(?:\.[a-z][\w-]*){2,})\b/gi, (m) =>
-        known.has(m)
-          ? `<button class="wd-ref link link-hover font-mono" data-rule-ref="${m}">${m}</button>`
-          : m,
-      );
-  },
-
-  /**
-   * The stream. `seenAt` is when this reader last had the thread open: newer
-   * messages sit under a "New" line, which is the whole reason to open a
-   * thread you have already read.
+  /*
+   * A thread, rendered as a conversation.
    *
-   * Consecutive messages from one author, close in time, drop the repeated
-   * name and tile — the grouping is what makes a long thread read as talking
-   * rather than as filing.
+   * The panel and the embed both show threads, and they have to show them the
+   * same way — the same grouping, the same "new since you looked" line, the same
+   * shape of message — or the two surfaces of one tool disagree about what a
+   * conversation looks like. Both bundle this module, so there is one shape.
+   *
+   * The model is deliberately flat: a thread is an opening message plus replies,
+   * and the opening message is not special. Everything append-only — no editing,
+   * no deleting, no reactions. A verdict is the ledger's job, and a thumbs-up
+   * that quietly means "addressed" without recording it would be a lie.
+   *
+   * Everything here must stay dependency-free and browser-safe.
    */
-  stream(thread, { seenAt = null, rules = [], pending = [], names = {} } = {}) {
-    const all = [...this.messages(thread), ...pending];
-    let lastDay = '',
-      prev = null,
-      marked = false;
-    const GROUP_MS = 5 * 60 * 1000;
-    return all
-      .map((m) => {
-        const out = [];
-        const day = this.day(m.created);
-        if (day && day !== lastDay) {
-          lastDay = day;
-          prev = null;
-          out.push(`<div class="wd-day"><span></span>${this.esc(day)}<span></span></div>`);
-        }
-        if (!marked && seenAt && m.created && String(m.created) > String(seenAt) && !m.pending) {
-          marked = true;
-          prev = null;
-          out.push('<div class="wd-new"><span></span>New<span></span></div>');
-        }
-        const cont =
-          prev &&
-          prev.author === m.author &&
-          Math.abs(Date.parse(m.created ?? '') - Date.parse(prev.created ?? '')) < GROUP_MS;
-        prev = m;
-        const who = this.displayName(m.author, names);
-        out.push(`<div class="wd-msg${cont ? ' cont' : ''}${m.pending ? ' pending' : ''}${m.failed ? ' failed' : ''}">
+
+  const MSG = {
+    /** Same escaping rules as the rest of the chrome; bodies are user text. */
+    esc: (s) =>
+      String(s ?? '').replace(
+        /[&<>"]/g,
+        (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c],
+      ),
+
+    /** Up to two letters, from a name or an email-ish handle. */
+    initials(name) {
+      const parts = String(name ?? '?')
+        .trim()
+        .split(/[\s._-]+/)
+        .filter(Boolean);
+      if (!parts.length) return '?';
+      return (parts.length === 1 ? parts[0].slice(0, 2) : parts[0][0] + parts[1][0]).toUpperCase();
+    },
+
+    /**
+     * A stable colour per name. Recognising who is speaking should not require
+     * reading — and the agent is always the same green, so its voice is one
+     * thing you learn once.
+     */
+    tint(name) {
+      const who = String(name ?? '')
+        .trim()
+        .toLowerCase();
+      if (who === 'agent') return 'oklch(52% 0.09 165)';
+      // One tint per person: the first word is what a handle and a full name
+      // have in common, so "topher" and "Topher Fangio" wear the same colour.
+      const first = who.split(/[\s._-]+/)[0] || who;
+      let h = 0;
+      for (const ch of first) h = (h * 31 + ch.charCodeAt(0)) % 360;
+      return `oklch(52% 0.10 ${h})`;
+    },
+
+    /** "12m ago" / "3h ago" / "2d ago" — short enough to sit beside a name. */
+    ago(iso) {
+      const then = Date.parse(iso ?? '');
+      if (!Number.isFinite(then)) return '';
+      const mins = Math.max(0, Math.round((Date.now() - then) / 60000));
+      if (mins < 1) return 'just now';
+      if (mins < 60) return `${mins}m ago`;
+      if (mins < 1440) return `${Math.round(mins / 60)}h ago`;
+      return `${Math.round(mins / 1440)}d ago`;
+    },
+
+    /** The full stamp, for the hover title — "2h ago" is never the whole answer. */
+    stamp(iso) {
+      const at = new Date(iso ?? '');
+      return Number.isFinite(at.getTime()) ? at.toLocaleString() : '';
+    },
+
+    /** Today / Yesterday / a weekday-and-date, for the divider between days. */
+    day(iso) {
+      const at = new Date(iso ?? '');
+      if (!Number.isFinite(at.getTime())) return '';
+      const midnight = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+      const days = Math.round((midnight(new Date()) - midnight(at)) / 86400000);
+      if (days === 0) return 'Today';
+      if (days === 1) return 'Yesterday';
+      if (days < 7) return at.toLocaleDateString(undefined, { weekday: 'long' });
+      return at.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    },
+
+    /** The opening note and its replies as one list. The note is message zero. */
+    messages(thread) {
+      return [
+        { author: thread?.author, created: thread?.created, body: thread?.body },
+        ...(thread?.replies ?? []),
+      ].filter((m) => m && (m.body ?? '') !== '');
+    },
+
+    /**
+     * Message text, with the ids in it made clickable: a thread id opens that
+     * thread, a rule id opens that rule. Line breaks survive, because a reply
+     * written as three lines was meant as three lines.
+     */
+    body(text, { rules = [] } = {}) {
+      const known = new Set(rules);
+      return this.esc(text)
+        .replace(
+          /\b([nq]-\d{4})\b/g,
+          '<button class="wd-ref link link-hover" data-thread-ref="$1">$1</button>',
+        )
+        .replace(/\b([a-z][\w-]*(?:\.[a-z][\w-]*){2,})\b/gi, (m) =>
+          known.has(m)
+            ? `<button class="wd-ref link link-hover font-mono" data-rule-ref="${m}">${m}</button>`
+            : m,
+        );
+    },
+
+    /**
+     * The stream. `seenAt` is when this reader last had the thread open: newer
+     * messages sit under a "New" line, which is the whole reason to open a
+     * thread you have already read.
+     *
+     * Consecutive messages from one author, close in time, drop the repeated
+     * name and tile — the grouping is what makes a long thread read as talking
+     * rather than as filing.
+     */
+    stream(thread, { seenAt = null, rules = [], pending = [], names = {} } = {}) {
+      const all = [...this.messages(thread), ...pending];
+      let lastDay = '',
+        prev = null,
+        marked = false;
+      const GROUP_MS = 5 * 60 * 1000;
+      return all
+        .map((m) => {
+          const out = [];
+          const day = this.day(m.created);
+          if (day && day !== lastDay) {
+            lastDay = day;
+            prev = null;
+            out.push(`<div class="wd-day"><span></span>${this.esc(day)}<span></span></div>`);
+          }
+          if (!marked && seenAt && m.created && String(m.created) > String(seenAt) && !m.pending) {
+            marked = true;
+            prev = null;
+            out.push('<div class="wd-new"><span></span>New<span></span></div>');
+          }
+          const cont =
+            prev &&
+            prev.author === m.author &&
+            Math.abs(Date.parse(m.created ?? '') - Date.parse(prev.created ?? '')) < GROUP_MS;
+          prev = m;
+          const who = this.displayName(m.author, names);
+          out.push(`<div class="wd-msg${cont ? ' cont' : ''}${m.pending ? ' pending' : ''}${m.failed ? ' failed' : ''}">
         <div class="wd-ava" style="background:${this.tint(who)}">${this.esc(this.initials(who))}</div>
         <div class="wd-col">
           <div class="wd-head">${cont ? '' : `<span class="wd-who">${this.esc(who)}</span>`}<span
@@ -151,112 +154,112 @@ const MSG = {
           <div class="wd-text">${this.body(m.body, { rules })}</div>
         </div>
       </div>`);
-        return out.join('');
-      })
-      .join('');
-  },
+          return out.join('');
+        })
+        .join('');
+    },
 
-  /**
-   * What to call whoever wrote a message. Threads record whatever name the
-   * writer's machine had - "topher" from a git handle, "agent" from a script -
-   * but a conversation should use the name a person goes by. `names` maps the
-   * handles that are known to belong to someone to their full name; anything
-   * unknown is shown as recorded, only capitalised.
-   */
-  displayName(name, names = {}) {
-    const who = String(name ?? '').trim();
-    if (!who) return 'someone';
-    const key = who.toLowerCase().replace(/[^a-z0-9]/g, '');
-    if (names[key]) return names[key];
-    return who
-      .split(/(\s+)/)
-      .map((w) => (/^[a-z]/.test(w) ? w[0].toUpperCase() + w.slice(1) : w))
-      .join('');
-  },
+    /**
+     * What to call whoever wrote a message. Threads record whatever name the
+     * writer's machine had - "topher" from a git handle, "agent" from a script -
+     * but a conversation should use the name a person goes by. `names` maps the
+     * handles that are known to belong to someone to their full name; anything
+     * unknown is shown as recorded, only capitalised.
+     */
+    displayName(name, names = {}) {
+      const who = String(name ?? '').trim();
+      if (!who) return 'someone';
+      const key = who.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (names[key]) return names[key];
+      return who
+        .split(/(\s+)/)
+        .map((w) => (/^[a-z]/.test(w) ? w[0].toUpperCase() + w.slice(1) : w))
+        .join('');
+    },
 
-  /**
-   * The handles that resolve to a full name. The person walking down is known
-   * by the identity the server reports, and the agent is always the agent -
-   * beyond those two, a name is whatever it says it is, because guessing that
-   * two handles are one person is how a message ends up over the wrong face.
-   *
-   * Identity and display name are two fields now (n-0104): records carry the
-   * username, the UI shows the full name. That makes this the seam where the
-   * ledger's history stays legible - every handle the server says belongs to
-   * this person, including the full name records were written under before the
-   * split, maps onto the one name shown today. Nothing is rewritten; the old
-   * messages simply stop looking like a second person.
-   *
-   * Takes the identity object; a bare string is still accepted and read as the
-   * one name it used to be.
-   */
-  nameMap(identity) {
-    const names = { agent: 'Agent' };
-    const id = typeof identity === 'string' ? { name: identity } : (identity ?? {});
-    const name = String(id.name ?? '').trim();
-    const username = String(id.username ?? '').trim();
-    const display = name || username;
-    if (!display) return names;
-    const key = (s) =>
-      String(s)
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, '');
-    for (const handle of [username, name, ...(id.handles ?? [])])
-      if (String(handle ?? '').trim()) names[key(handle)] = display;
-    const first = name.split(/\s+/)[0];
-    if (first && first.length > 2) names[key(first)] = display;
-    return names;
-  },
+    /**
+     * The handles that resolve to a full name. The person walking down is known
+     * by the identity the server reports, and the agent is always the agent -
+     * beyond those two, a name is whatever it says it is, because guessing that
+     * two handles are one person is how a message ends up over the wrong face.
+     *
+     * Identity and display name are two fields now (n-0104): records carry the
+     * username, the UI shows the full name. That makes this the seam where the
+     * ledger's history stays legible - every handle the server says belongs to
+     * this person, including the full name records were written under before the
+     * split, maps onto the one name shown today. Nothing is rewritten; the old
+     * messages simply stop looking like a second person.
+     *
+     * Takes the identity object; a bare string is still accepted and read as the
+     * one name it used to be.
+     */
+    nameMap(identity) {
+      const names = { agent: 'Agent' };
+      const id = typeof identity === 'string' ? { name: identity } : (identity ?? {});
+      const name = String(id.name ?? '').trim();
+      const username = String(id.username ?? '').trim();
+      const display = name || username;
+      if (!display) return names;
+      const key = (s) =>
+        String(s)
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, '');
+      for (const handle of [username, name, ...(id.handles ?? [])])
+        if (String(handle ?? '').trim()) names[key(handle)] = display;
+      const first = name.split(/\s+/)[0];
+      if (first && first.length > 2) names[key(first)] = display;
+      return names;
+    },
 
-  /** Who has spoken in this thread, in the order they first did. */
-  participants(thread) {
-    const seen = [];
-    for (const m of this.messages(thread)) {
-      const who = m.author || 'someone';
-      if (!seen.includes(who)) seen.push(who);
-    }
-    return seen;
-  },
+    /** Who has spoken in this thread, in the order they first did. */
+    participants(thread) {
+      const seen = [];
+      for (const m of this.messages(thread)) {
+        const who = m.author || 'someone';
+        if (!seen.includes(who)) seen.push(who);
+      }
+      return seen;
+    },
 
-  /** One initials tile. The same face for the same person, everywhere. */
-  avatar(name, cls = 'wd-ava') {
-    const who = name || 'someone';
-    return `<div class="${cls}" style="background:${this.tint(who)}" title="${this.esc(
+    /** One initials tile. The same face for the same person, everywhere. */
+    avatar(name, cls = 'wd-ava') {
+      const who = name || 'someone';
+      return `<div class="${cls}" style="background:${this.tint(who)}" title="${this.esc(
       who,
     )}">${this.esc(this.initials(who))}</div>`;
-  },
+    },
 
-  /** "today at 1:09 PM" - when the conversation was last touched. */
-  lastReply(iso) {
-    const at = new Date(iso ?? '');
-    if (!Number.isFinite(at.getTime())) return '';
-    const clock = at.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
-    const day = this.day(iso);
-    return `${day === 'Today' ? 'today' : day === 'Yesterday' ? 'yesterday' : day} at ${clock}`;
-  },
+    /** "today at 1:09 PM" - when the conversation was last touched. */
+    lastReply(iso) {
+      const at = new Date(iso ?? '');
+      if (!Number.isFinite(at.getTime())) return '';
+      const clock = at.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+      const day = this.day(iso);
+      return `${day === 'Today' ? 'today' : day === 'Yesterday' ? 'yesterday' : day} at ${clock}`;
+    },
 
-  /**
-   * The replies line under a message: the faces of everyone in the thread, the
-   * count as the way in, and when it was last touched. This is the affordance
-   * that makes a list of threads read as a channel rather than as a table.
-   */
-  repliesLine(thread, names = {}) {
-    const replies = thread?.replies ?? [];
-    const faces = this.participants(thread)
-      .slice(0, 3)
-      .map((who) => this.avatar(this.displayName(who, names), 'wd-face'))
-      .join('');
-    if (!replies.length)
-      return `<button class="wd-replies empty" data-testid="thread.replies" data-open-thread="${this.esc(thread?.id)}">Reply</button>`;
-    return `<button class="wd-replies" data-testid="thread.replies" data-open-thread="${this.esc(thread?.id)}">
+    /**
+     * The replies line under a message: the faces of everyone in the thread, the
+     * count as the way in, and when it was last touched. This is the affordance
+     * that makes a list of threads read as a channel rather than as a table.
+     */
+    repliesLine(thread, names = {}) {
+      const replies = thread?.replies ?? [];
+      const faces = this.participants(thread)
+        .slice(0, 3)
+        .map((who) => this.avatar(this.displayName(who, names), 'wd-face'))
+        .join('');
+      if (!replies.length)
+        return `<button class="wd-replies empty" data-testid="thread.replies" data-open-thread="${this.esc(thread?.id)}">Reply</button>`;
+      return `<button class="wd-replies" data-testid="thread.replies" data-open-thread="${this.esc(thread?.id)}">
       <span class="wd-faces">${faces}</span>
       <span class="wd-count">${replies.length} ${replies.length === 1 ? 'reply' : 'replies'}</span>
       <span class="wd-last">Last reply ${this.esc(this.lastReply(replies.at(-1)?.created))}</span>
     </button>`;
-  },
+    },
 
-  /** One stylesheet for both deliveries, injected into each shadow root. */
-  css: `
+    /** One stylesheet for both deliveries, injected into each shadow root. */
+    css: `
     .wd-msg { display: grid; grid-template-columns: 1.6rem 1fr; gap: .45rem; padding: .18rem 0; }
     .wd-msg.cont { padding-top: 0; }
     .wd-ava { width: 1.6rem; height: 1.6rem; border-radius: .3rem; display: grid; place-items: center;
@@ -298,1371 +301,1414 @@ const MSG = {
     .wd-day span, .wd-new span { flex: 1; height: 1px; background: currentColor; opacity: .25; }
     .wd-new { color: oklch(72% 0.17 22); opacity: .9; }
   `,
-};
-
-/*
- * Which storyboard screen a location is — the one answer three separate
- * programs have to agree on.
- *
- * The panel resolves it to label the page and aim the ghost, the embed
- * resolves it to stamp pins, and the server resolves it again for pins that
- * arrive from a standalone embed. If those three ever disagree, a pin lands on
- * the wrong screen and nothing says so — so the logic lives here once. The
- * server imports it; the panel and the embed bundle it (rollup inlines this
- * module into each committed single-file build). It used to be PASTED into
- * the browser files by tools/sync-shared.mjs, back when they were
- * hand-written and could not import; the bundlers retired that tool.
- *
- * Everything here must stay dependency-free and browser-safe.
- */
-
-/**
- * A screen is identified by origin + path + fragment (docs/06 §2). The
- * storyboard writes that as one string, the way a URL is written:
- *
- *   prototype: /screens/waitlist-admin.html#invite-batch
- *   app: { path: /waitlist#invite-batch }
- *
- * A query may also be written, and it is treated differently on purpose: the
- * fragment is part of identity, the query is not. `?page=2` is the same screen
- * holding different data, and forking the storyboard on every filter would be
- * absurd. What a declared query does is break ties between screens that share
- * a path — /confirm.html and /confirm.html?already=1 are two screens, and the
- * constraint that a page belongs to exactly one blueprint is still checked on
- * path and fragment alone.
- */
-function splitScreenRef(ref) {
-  if (!ref) return null;
-  const s = String(ref);
-  const h = s.indexOf('#'); // the fragment starts at the FIRST #,
-  const fragment = h < 0 ? '' : s.slice(h); // so "#/order?id=1" stays whole
-  const head = h < 0 ? s : s.slice(0, h);
-  const q = head.indexOf('?');
-  return { path: q < 0 ? head : head.slice(0, q), query: q < 0 ? '' : head.slice(q), fragment };
-}
-
-/** An empty hash and a bare "#" are the same absence. */
-function normalizeFragment(hash) {
-  if (!hash || hash === '#') return '';
-  return String(hash).startsWith('#') ? String(hash) : '#' + hash;
-}
-
-/** The canonical identity of one surface of one screen, for collision checks. */
-function screenKey(ref) {
-  const parts = splitScreenRef(ref);
-  return parts ? parts.path + parts.fragment : null;
-}
-
-function pathMatches(refPath, pathname) {
-  if (!refPath) return false;
-  return pathname === refPath || String(pathname).endsWith(refPath);
-}
-
-/**
- * The two surfaces a screen can be reached at, as parsed refs. The prototype
- * comes first because app paths are the loose ones — an app path of "/" is a
- * suffix of every URL there is — and a page that is genuinely the design
- * should never be reported as the running app.
- */
-function screenRefs(screen) {
-  const out = [];
-  const proto = splitScreenRef(screen?.prototype);
-  if (proto) out.push({ surface: 'prototype', ref: proto });
-  const app = splitScreenRef(screen?.app?.path);
-  if (app) out.push({ surface: 'app', ref: app });
-  return out;
-}
-
-/**
- * How well a declared ref fits a location: -1 for "not this one", otherwise
- * higher is more specific.
- *
- * A declared fragment must match exactly, because it is part of what the
- * screen IS. A ref with no fragment still matches a location that has one, and
- * scores lower — that fallback is what keeps an SPA usable before anyone has
- * enumerated its routes: at /orders#/order/1234 with only `/orders` in the
- * storyboard you are still, correctly, on the orders screen. Enumerating the
- * route later makes the answer sharper without breaking the one you had.
- */
-function scoreRef(ref, loc) {
-  if (!pathMatches(ref.path, loc.pathname ?? '')) return -1;
-  if (ref.fragment && ref.fragment !== normalizeFragment(loc.hash)) return -1;
-  const want = new URLSearchParams(ref.query);
-  const have = new URLSearchParams(loc.search ?? '');
-  let bonus = 0;
-  for (const [k, v] of want) {
-    if (have.get(k) !== v) return -1;
-    bonus += 1;
-  }
-  return (ref.fragment ? 100 : 0) + bonus;
-}
-
-/** Resolve a location to the most specific storyboard screen that claims it. */
-function matchScreen(screens, loc) {
-  let best = null;
-  for (const screen of screens ?? []) {
-    for (const { surface, ref } of screenRefs(screen)) {
-      const score = scoreRef(ref, loc ?? {});
-      if (score < 0 || (best && score <= best.score)) continue;
-      best = { screen, surface, fragment: ref.fragment, score };
-    }
-  }
-  return best;
-}
-
-/** The identity-bearing parts of a URL string, for callers holding one. */
-function locationOfUrl(url) {
-  try {
-    const u = new URL(url);
-    return { pathname: u.pathname, search: u.search, hash: u.hash };
-  } catch {
-    return null;
-  }
-}
-
-/*
- * What the panel knows before it draws anything: how it was delivered, where
- * it keeps things, and the two holders every other shard reads and writes.
- *
- * These live together because they are one dependency: S.SERVER is derived
- * from the delivery, and STYLESHEET is derived from S.SERVER. Splitting
- * config from state would only buy a cycle.
- *
- * Nothing here has a side effect. That matters more than it looks: Rollup
- * emits this module's body ahead of the panel's own, which means it runs
- * BEFORE the once-per-page guard in index.js has had its say. Building two
- * objects and reading two globals is safe to do twice; creating an element or
- * hanging a listener would not be.
- */
-// See the note in embed.js: served as a <script> tag, or handed the same
-// answers by the extension's bootstrap on window.__walkdownConfig.
-const script = document.currentScript;
-const cfg = window.__walkdownConfig ?? {};
-
-/*
- * Everything the panel remembers, in one object rather than as three dozen
- * free variables scattered down the file.
- *
- * The reason is the split. A module's exported binding is read-only to
- * whoever imports it, so `view = 'detail'` from another file is a syntax
- * error where `S.view = 'detail'` is not — the holder is what lets any of
- * this state be written from more than one shard. Collecting it has a
- * second effect worth having on its own: the panel's entire memory is now
- * readable in one place instead of being reconstructed from declarations
- * four thousand lines apart.
- *
- * State that never leaves one neighbourhood stayed a plain `let` where it
- * was — the veil's timer, the shot layer, the desk element, `framedPinMode`,
- * `seen` — because those travel with the code that owns them and gain
- * nothing from being global. `S` is for what genuinely crosses.
- *
- * One field is seeded later on purpose: `S.desk` waits for DESK_DEFAULTS,
- * so the defaults stay beside the dials that tune them.
- */
-const S = {
-  SERVER: cfg.server ?? new URL(script?.src ?? 'http://localhost:4700').origin,
-  BP: cfg.bp ?? script?.dataset.bp ?? '',
-  frameUrl: cfg.frame?.url ?? null, // where the app frame actually is
-
-  data: null,
-  view: 'list',
-  selected: null,
-  session: null,
-  ghost: null,
-  ghostOpacity: 0.5,
-  protoShare: null, // 0 = all app, 1 = all prototype; null = follow the page
-  pickedScreen: cfg.screen ?? script?.dataset.screen ?? null,
-  openThread: null, // the thread expanded in the detail pane, by id
+  };
 
   /*
-   * A screen the ghost is pinned to for a moment — viewing a sketch from a
-   * thread, say. Kept apart from pickedScreen on purpose: pickedScreen
-   * answers "which screen is this page?", and a passing look at another
-   * screen's artwork must not rewrite that answer, or the panel spends the
-   * rest of the session describing a page you are not on.
-   */
-  ghostOverride: null,
-
-  /*
-   * Which of the three things the panel is doing: finding a server, choosing
-   * a blueprint from the ones it found, or reviewing. The first two are not
-   * error states — a fresh install genuinely does not know either answer yet.
-   */
-  phase: 'loading', // loading | connect | choose | ready
-  projects: [],
-  jumpOnLoad: false, // set when a blueprint is chosen by hand, spent once it has loaded
-  servedRoot: null, // the folder the server reports it is serving
-  listTab: 'rules', // blueprints | rules | threads — what the side lists
-
-  /*
-   * Which threads the Threads tab is showing. The same three questions
-   * `walkdown threads` answers at the command line: what is live, what is
-   * waiting on me, and everything ever said. Default `active`, because that
-   * is the one with work in it - `all` is for going back to a conversation
-   * that ended, which is the thing that was impossible before this tab.
-   */
-  threadFilter: 'active', // active | you | all
-
-  /*
-   * What the rule search box says, and what the two note boxes say. Kept out
-   * here rather than read off the inputs, because the panes are rebuilt
-   * wholesale on every render and a value whose only record was the DOM
-   * would forget itself the next time anything else on the panel changed.
-   */
-  ruleQuery: '',
-  threadNote: '', // what the reply box says, kept across re-renders
-  verdictNote: '', // the verdict feedback box, kept across re-renders
-  ruleNote: '', // the rule's own new-thread box, kept the same way
-
-  /*
-   * The check-source disclosure, kept OUTSIDE the markup that draws it.
+   * Which storyboard screen a location is — the one answer three separate
+   * programs have to agree on.
    *
-   * Renders arrive unbidden - the framed surface announcing itself is
-   * enough. So a disclosure whose only record of being open was the DOM
-   * closed itself a frame later, and the source, fetched meanwhile, was
-   * written into a node that had already been thrown away: opened, it said
-   * "Loading…" forever (n-0084, n-0057). Both the asking and the answer live
-   * here now, keyed by rule, so moving to another rule collapses it again
-   * without anything to reset.
+   * The panel resolves it to label the page and aim the ghost, the embed
+   * resolves it to stamp pins, and the server resolves it again for pins that
+   * arrive from a standalone embed. If those three ever disagree, a pin lands on
+   * the wrong screen and nothing says so — so the logic lives here once. The
+   * server imports it; the panel and the embed bundle it (rollup inlines this
+   * module into each committed single-file build). It used to be PASTED into
+   * the browser files by tools/sync-shared.mjs, back when they were
+   * hand-written and could not import; the bundlers retired that tool.
+   *
+   * Everything here must stay dependency-free and browser-safe.
    */
-  srcOpenFor: null, // the rule whose source is open
-  srcCache: { rule: null, html: null },
 
-  lastView: 'list',
-  ghostWidth: 0, // 0 = fill the stage; otherwise a fixed CSS width
-  viewportW: 0, // framed viewport preset: 0 = fit the space, else CSS px
-
-  dragging: false, // whether the pointer is holding one of our own controls
-  deskOpen: false, // the desk tuner behind the gear
-  screensOpen: false, // the screen picker's list
-  hideAppOn: false, // the tuner's "see the full effect" peek
-  docked: false, // whether the chrome is out; the × in the bar puts it away
-
-  /*
-   * Set when the copy of walkdown inside the ghost announces itself. A
-   * prototype carries the embed by contract (docs/06 §4); an app being
-   * ghosted from a prototype page may not, and then the ghosted surface
-   * simply cannot be pinned. Saying so is the point — the alternative is a
-   * pin that lands on the page hidden underneath the one you are looking at.
+  /**
+   * A screen is identified by origin + path + fragment (docs/06 §2). The
+   * storyboard writes that as one string, the way a URL is written:
+   *
+   *   prototype: /screens/waitlist-admin.html#invite-batch
+   *   app: { path: /waitlist#invite-batch }
+   *
+   * A query may also be written, and it is treated differently on purpose: the
+   * fragment is part of identity, the query is not. `?page=2` is the same screen
+   * holding different data, and forking the storyboard on every filter would be
+   * absurd. What a declared query does is break ties between screens that share
+   * a path — /confirm.html and /confirm.html?already=1 are two screens, and the
+   * constraint that a page belongs to exactly one blueprint is still checked on
+   * path and fragment alone.
    */
-  ghostReady: false,
-  ghostSrc: null, // what the kept ghost copy is showing, so a toggle can reuse it
+  function splitScreenRef(ref) {
+    if (!ref) return null;
+    const s = String(ref);
+    const h = s.indexOf('#'); // the fragment starts at the FIRST #,
+    const fragment = h < 0 ? '' : s.slice(h); // so "#/order?id=1" stays whole
+    const head = h < 0 ? s : s.slice(0, h);
+    const q = head.indexOf('?');
+    return { path: q < 0 ? head : head.slice(0, q), query: q < 0 ? '' : head.slice(q), fragment };
+  }
 
-  headlessCover: null, // the opaque cover a headless rule lays over the desk
-};
+  /** An empty hash and a bare "#" are the same absence. */
+  function normalizeFragment(hash) {
+    if (!hash || hash === '#') return '';
+    return String(hash).startsWith('#') ? String(hash) : '#' + hash;
+  }
 
-/*
- * The chrome itself, on a holder for the same reason S exists: these are
- * written once, at build time, from whichever shard ends up owning each
- * element, and an imported binding cannot be assigned.
- *
- * Every field is null until buildChrome() runs. Nothing above the boot
- * sequence at the foot of this file may touch them at module level — that
- * is the property that keeps the shards order-independent, because an
- * import graph decides evaluation order and no shard should care.
- */
-const D = {
-  shell: null, // the popover over the whole viewport, host of the shadow root
-  sr: null, // that shadow root
-  host: null, // the transparent carrier inside it
-  bar: null, // the tool bar across the top
-  side: null, // the side panel
-  deskPanel: null, // the desk tuner behind the gear
-  screenPanel: null, // the screen picker's list
-  tab: null, // the WALKDOWN pull tab, shown when the chrome is put away
-  swap: null, // the prototype/app cross beside it
-  appFrame: null, // the application under review
-};
-/*
- * Whether this delivery comes back after a real page load. The extension
- * says so, because its content script runs on every page; a script tag
- * cannot, because the navigation unloads it. It decides whether a trip the
- * panel wants to make is taken or merely offered.
- */
-const REINJECTS = cfg.reinjects === true;
-/*
- * Where the choice of blueprint is remembered. The extension hands us
- * chrome.storage — its own, per-profile, and untouched by a site clearing
- * its data. A page that loaded us from a script tag has already said which
- * blueprint it is, so the localStorage fallback is for a case that in
- * practice never arises.
- */
-const store = cfg.store ?? {
-  get: async (k) => {
+  /** The canonical identity of one surface of one screen, for collision checks. */
+  function screenKey(ref) {
+    const parts = splitScreenRef(ref);
+    return parts ? parts.path + parts.fragment : null;
+  }
+
+  function pathMatches(refPath, pathname) {
+    if (!refPath) return false;
+    return pathname === refPath || String(pathname).endsWith(refPath);
+  }
+
+  /**
+   * The two surfaces a screen can be reached at, as parsed refs. The prototype
+   * comes first because app paths are the loose ones — an app path of "/" is a
+   * suffix of every URL there is — and a page that is genuinely the design
+   * should never be reported as the running app.
+   */
+  function screenRefs(screen) {
+    const out = [];
+    const proto = splitScreenRef(screen?.prototype);
+    if (proto) out.push({ surface: 'prototype', ref: proto });
+    const app = splitScreenRef(screen?.app?.path);
+    if (app) out.push({ surface: 'app', ref: app });
+    return out;
+  }
+
+  /**
+   * How well a declared ref fits a location: -1 for "not this one", otherwise
+   * higher is more specific.
+   *
+   * A declared fragment must match exactly, because it is part of what the
+   * screen IS. A ref with no fragment still matches a location that has one, and
+   * scores lower — that fallback is what keeps an SPA usable before anyone has
+   * enumerated its routes: at /orders#/order/1234 with only `/orders` in the
+   * storyboard you are still, correctly, on the orders screen. Enumerating the
+   * route later makes the answer sharper without breaking the one you had.
+   */
+  function scoreRef(ref, loc) {
+    if (!pathMatches(ref.path, loc.pathname ?? '')) return -1;
+    if (ref.fragment && ref.fragment !== normalizeFragment(loc.hash)) return -1;
+    const want = new URLSearchParams(ref.query);
+    const have = new URLSearchParams(loc.search ?? '');
+    let bonus = 0;
+    for (const [k, v] of want) {
+      if (have.get(k) !== v) return -1;
+      bonus += 1;
+    }
+    return (ref.fragment ? 100 : 0) + bonus;
+  }
+
+  /** Resolve a location to the most specific storyboard screen that claims it. */
+  function matchScreen(screens, loc) {
+    let best = null;
+    for (const screen of screens ?? []) {
+      for (const { surface, ref } of screenRefs(screen)) {
+        const score = scoreRef(ref, loc ?? {});
+        if (score < 0 || (best && score <= best.score)) continue;
+        best = { screen, surface, fragment: ref.fragment, score };
+      }
+    }
+    return best;
+  }
+
+  /** The identity-bearing parts of a URL string, for callers holding one. */
+  function locationOfUrl(url) {
     try {
-      return JSON.parse(localStorage.getItem(k) ?? 'null');
+      const u = new URL(url);
+      return { pathname: u.pathname, search: u.search, hash: u.hash };
     } catch {
       return null;
     }
-  },
-  set: async (k, v) => {
-    try {
-      localStorage.setItem(k, JSON.stringify(v));
-    } catch {
-      /* private mode */
-    }
-  },
-};
-const CHOICE = `walkdown:blueprint:${location.origin}`;
-// The extension ships the stylesheet itself; served, it comes off the server.
-const STYLESHEET = cfg.stylesheet ?? S.SERVER + '/walkdown.css';
+  }
 
-/* The panel's geometry, in pixels. */
-const W = 384; // the side panel
-const TOP = 44; // the tool bar across the top
-const GAP = 12; // how much desk shows around the wrapped page
-// Nothing separates the bar from the page any more, so the bar's own bottom
-// padding does that job — a second 12px gap on top of it read as a gutter.
-const HEAD = TOP;
+  // @ts-nocheck — third-party code; walkdown type-checks its own source, not lit's internals.
+  /*
+   * lit-html — vendored into walkdown, not hand-written. Do not edit.
+   * Bundled from the `lit-html` package by `npm run build:lit`
+   * (rollup.lit.mjs). Update by bumping lit-html in devDependencies and
+   * rebuilding; vendor/LICENSE-lit carries the original terms.
+   */
+  /**
+   * @license
+   * Copyright 2017 Google LLC
+   * SPDX-License-Identifier: BSD-3-Clause
+   */
+  const t$2=globalThis,i$1=t=>t,s=t$2.trustedTypes,e$2=s?s.createPolicy("lit-html",{createHTML:t=>t}):void 0,h="$lit$",o$2=`lit$${Math.random().toFixed(9).slice(2)}$`,n="?"+o$2,r$1=`<${n}>`,l$1=document,c=()=>l$1.createComment(""),a=t=>null===t||"object"!=typeof t&&"function"!=typeof t,u=Array.isArray,d=t=>u(t)||"function"==typeof t?.[Symbol.iterator],f="[ \t\n\f\r]",v=/<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g,_=/-->/g,m$1=/>/g,p$1=RegExp(`>|${f}(?:([^\\s"'>=/]+)(${f}*=${f}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`,"g"),g=/'/g,$=/"/g,y=/^(?:script|style|textarea|title)$/i,x=t=>(i,...s)=>({_$litType$:t,strings:i,values:s}),b=x(1),w=x(2),E=Symbol.for("lit-noChange"),A=Symbol.for("lit-nothing"),C=new WeakMap,P=l$1.createTreeWalker(l$1,129);function V(t,i){if(!u(t)||!t.hasOwnProperty("raw"))throw Error("invalid template strings array");return void 0!==e$2?e$2.createHTML(i):i}const N=(t,i)=>{const s=t.length-1,e=[];let n,l=2===i?"<svg>":3===i?"<math>":"",c=v;for(let i=0;i<s;i++){const s=t[i];let a,u,d=-1,f=0;for(;f<s.length&&(c.lastIndex=f,u=c.exec(s),null!==u);)f=c.lastIndex,c===v?"!--"===u[1]?c=_:void 0!==u[1]?c=m$1:void 0!==u[2]?(y.test(u[2])&&(n=RegExp("</"+u[2],"g")),c=p$1):void 0!==u[3]&&(c=p$1):c===p$1?">"===u[0]?(c=n??v,d=-1):void 0===u[1]?d=-2:(d=c.lastIndex-u[2].length,a=u[1],c=void 0===u[3]?p$1:'"'===u[3]?$:g):c===$||c===g?c=p$1:c===_||c===m$1?c=v:(c=p$1,n=void 0);const x=c===p$1&&t[i+1].startsWith("/>")?" ":"";l+=c===v?s+r$1:d>=0?(e.push(a),s.slice(0,d)+h+s.slice(d)+o$2+x):s+o$2+(-2===d?i:x);}return [V(t,l+(t[s]||"<?>")+(2===i?"</svg>":3===i?"</math>":"")),e]};let S$1 = class S{constructor({strings:t,_$litType$:i},e){let r;this.parts=[];let l=0,a=0;const u=t.length-1,d=this.parts,[f,v]=N(t,i);if(this.el=S.createElement(f,e),P.currentNode=this.el.content,2===i||3===i){const t=this.el.content.firstChild;t.replaceWith(...t.childNodes);}for(;null!==(r=P.nextNode())&&d.length<u;){if(1===r.nodeType){if(r.hasAttributes())for(const t of r.getAttributeNames())if(t.endsWith(h)){const i=v[a++],s=r.getAttribute(t).split(o$2),e=/([.?@])?(.*)/.exec(i);d.push({type:1,index:l,name:e[2],strings:s,ctor:"."===e[1]?I:"?"===e[1]?L:"@"===e[1]?z:H}),r.removeAttribute(t);}else t.startsWith(o$2)&&(d.push({type:6,index:l}),r.removeAttribute(t));if(y.test(r.tagName)){const t=r.textContent.split(o$2),i=t.length-1;if(i>0){r.textContent=s?s.emptyScript:"";for(let s=0;s<i;s++)r.append(t[s],c()),P.nextNode(),d.push({type:2,index:++l});r.append(t[i],c());}}}else if(8===r.nodeType)if(r.data===n)d.push({type:2,index:l});else {let t=-1;for(;-1!==(t=r.data.indexOf(o$2,t+1));)d.push({type:7,index:l}),t+=o$2.length-1;}l++;}}static createElement(t,i){const s=l$1.createElement("template");return s.innerHTML=t,s}};function M(t,i,s=t,e){if(i===E)return i;let h=void 0!==e?s._$Co?.[e]:s._$Cl;const o=a(i)?void 0:i._$litDirective$;return h?.constructor!==o&&(h?._$AO?.(false),void 0===o?h=void 0:(h=new o(t),h._$AT(t,s,e)),void 0!==e?(s._$Co??=[])[e]=h:s._$Cl=h),void 0!==h&&(i=M(t,h._$AS(t,i.values),h,e)),i}class R{constructor(t,i){this._$AV=[],this._$AN=void 0,this._$AD=t,this._$AM=i;}get parentNode(){return this._$AM.parentNode}get _$AU(){return this._$AM._$AU}u(t){const{el:{content:i},parts:s}=this._$AD,e=(t?.creationScope??l$1).importNode(i,true);P.currentNode=e;let h=P.nextNode(),o=0,n=0,r=s[0];for(;void 0!==r;){if(o===r.index){let i;2===r.type?i=new k(h,h.nextSibling,this,t):1===r.type?i=new r.ctor(h,r.name,r.strings,this,t):6===r.type&&(i=new Z(h,this,t)),this._$AV.push(i),r=s[++n];}o!==r?.index&&(h=P.nextNode(),o++);}return P.currentNode=l$1,e}p(t){let i=0;for(const s of this._$AV) void 0!==s&&(void 0!==s.strings?(s._$AI(t,s,i),i+=s.strings.length-2):s._$AI(t[i])),i++;}}class k{get _$AU(){return this._$AM?._$AU??this._$Cv}constructor(t,i,s,e){this.type=2,this._$AH=A,this._$AN=void 0,this._$AA=t,this._$AB=i,this._$AM=s,this.options=e,this._$Cv=e?.isConnected??true;}get parentNode(){let t=this._$AA.parentNode;const i=this._$AM;return void 0!==i&&11===t?.nodeType&&(t=i.parentNode),t}get startNode(){return this._$AA}get endNode(){return this._$AB}_$AI(t,i=this){t=M(this,t,i),a(t)?t===A||null==t||""===t?(this._$AH!==A&&this._$AR(),this._$AH=A):t!==this._$AH&&t!==E&&this._(t):void 0!==t._$litType$?this.$(t):void 0!==t.nodeType?this.T(t):d(t)?this.k(t):this._(t);}O(t){return this._$AA.parentNode.insertBefore(t,this._$AB)}T(t){this._$AH!==t&&(this._$AR(),this._$AH=this.O(t));}_(t){this._$AH!==A&&a(this._$AH)?this._$AA.nextSibling.data=t:this.T(l$1.createTextNode(t)),this._$AH=t;}$(t){const{values:i,_$litType$:s}=t,e="number"==typeof s?this._$AC(t):(void 0===s.el&&(s.el=S$1.createElement(V(s.h,s.h[0]),this.options)),s);if(this._$AH?._$AD===e)this._$AH.p(i);else {const t=new R(e,this),s=t.u(this.options);t.p(i),this.T(s),this._$AH=t;}}_$AC(t){let i=C.get(t.strings);return void 0===i&&C.set(t.strings,i=new S$1(t)),i}k(t){u(this._$AH)||(this._$AH=[],this._$AR());const i=this._$AH;let s,e=0;for(const h of t)e===i.length?i.push(s=new k(this.O(c()),this.O(c()),this,this.options)):s=i[e],s._$AI(h),e++;e<i.length&&(this._$AR(s&&s._$AB.nextSibling,e),i.length=e);}_$AR(t=this._$AA.nextSibling,s){for(this._$AP?.(false,true,s);t!==this._$AB;){const s=i$1(t).nextSibling;i$1(t).remove(),t=s;}}setConnected(t){ void 0===this._$AM&&(this._$Cv=t,this._$AP?.(t));}}class H{get tagName(){return this.element.tagName}get _$AU(){return this._$AM._$AU}constructor(t,i,s,e,h){this.type=1,this._$AH=A,this._$AN=void 0,this.element=t,this.name=i,this._$AM=e,this.options=h,s.length>2||""!==s[0]||""!==s[1]?(this._$AH=Array(s.length-1).fill(new String),this.strings=s):this._$AH=A;}_$AI(t,i=this,s,e){const h=this.strings;let o=false;if(void 0===h)t=M(this,t,i,0),o=!a(t)||t!==this._$AH&&t!==E,o&&(this._$AH=t);else {const e=t;let n,r;for(t=h[0],n=0;n<h.length-1;n++)r=M(this,e[s+n],i,n),r===E&&(r=this._$AH[n]),o||=!a(r)||r!==this._$AH[n],r===A?t=A:t!==A&&(t+=(r??"")+h[n+1]),this._$AH[n]=r;}o&&!e&&this.j(t);}j(t){t===A?this.element.removeAttribute(this.name):this.element.setAttribute(this.name,t??"");}}class I extends H{constructor(){super(...arguments),this.type=3;}j(t){this.element[this.name]=t===A?void 0:t;}}class L extends H{constructor(){super(...arguments),this.type=4;}j(t){this.element.toggleAttribute(this.name,!!t&&t!==A);}}class z extends H{constructor(t,i,s,e,h){super(t,i,s,e,h),this.type=5;}_$AI(t,i=this){if((t=M(this,t,i,0)??A)===E)return;const s=this._$AH,e=t===A&&s!==A||t.capture!==s.capture||t.once!==s.once||t.passive!==s.passive,h=t!==A&&(s===A||e);e&&this.element.removeEventListener(this.name,this,s),h&&this.element.addEventListener(this.name,this,t),this._$AH=t;}handleEvent(t){"function"==typeof this._$AH?this._$AH.call(this.options?.host??this.element,t):this._$AH.handleEvent(t);}}class Z{constructor(t,i,s){this.element=t,this.type=6,this._$AN=void 0,this._$AM=i,this.options=s;}get _$AU(){return this._$AM._$AU}_$AI(t){M(this,t);}}const B=t$2.litHtmlPolyfillSupport;B?.(S$1,k),(t$2.litHtmlVersions??=[]).push("3.3.3");const D$1=(t,i,s)=>{const e=s?.renderBefore??i;let h=e._$litPart$;if(void 0===h){const t=s?.renderBefore??null;e._$litPart$=h=new k(i.insertBefore(c(),t),t,void 0,s??{});}return h._$AI(t),h};
 
-/*
- * Identity is two fields, not one (n-0104). Each holds null for "nothing
- * said" - fall back to what the server derived - or the string the person
- * typed, the empty string very much included.
- *
- * `username` is what every record is written under - verdicts, replies,
- * transitions, the draft. It is a handle, it is stable, and it is the only
- * thing the ledger ever sees. `name` is the full name git may or may not
- * know; it is what the panel SHOWS, because "Topher Fangio" reads better
- * than "topher", and it is never what gets recorded, because plenty of
- * people do not have one.
- *
- * Either can be set in Settings, including by someone whose git knows
- * neither - honour system, as asked. Empty means "no override": the field
- * falls back to what the server derived, so clearing a box is how you undo.
- *
- * ACTOR_KEY is the single free-text field this replaces. It is read once, at
- * boot, and migrated into the display name - which is the field it actually
- * held, since it was seeded from `git config user.name`. The username goes
- * back to being derived. Nothing in the ledger is touched: records written
- * under the old value stay exactly as written, and nameMap keeps showing
- * them under one face (see `handles` in the identity payload).
- */
-/*
- * `roles` is the third field and the odd one out: it is not a name, it is
- * which hats this person signs in. It lives here because it is the same kind
- * of setting - per person, per machine, said once and remembered - and
- * because a signature's role has to be known before the signature is written.
- * null means nothing said; an empty array means "none of these", which is a
- * different answer and survives the reload the same way an emptied name does.
- */
-const ACTOR_KEY = 'walkdown:actor'; // legacy: one free-text name
-const IDENTITY_KEY = 'walkdown:identity'; // { username, name, roles }
-const identityOverride = { username: null, name: null, roles: null };
-const saveIdentity = () =>
-  store.set(IDENTITY_KEY, {
-    username: identityOverride.username,
-    name: identityOverride.name,
-    roles: identityOverride.roles,
-  });
+  /**
+   * @license
+   * Copyright 2017 Google LLC
+   * SPDX-License-Identifier: BSD-3-Clause
+   */
+  const t$1={ATTRIBUTE:1,CHILD:2,PROPERTY:3,BOOLEAN_ATTRIBUTE:4},e$1=t=>(...e)=>({_$litDirective$:t,values:e});class i{constructor(t){}get _$AU(){return this._$AM._$AU}_$AT(t,e,i){this._$Ct=t,this._$AM=e,this._$Ci=i;}_$AS(t,e){return this.update(t,e)}update(t,e){return this.render(...e)}}
 
-/*
- * The panel's transient word to the reviewer.
- */
+  /**
+   * @license
+   * Copyright 2017 Google LLC
+   * SPDX-License-Identifier: BSD-3-Clause
+   */class e extends i{constructor(i){if(super(i),this.it=A,i.type!==t$1.CHILD)throw Error(this.constructor.directiveName+"() can only be used in child bindings")}render(r){if(r===A||null==r)return this._t=void 0,this.it=r;if(r===E)return r;if("string"!=typeof r)throw Error(this.constructor.directiveName+"() called with a non-string value");if(r===this.it)return this._t;this.it=r;const s=[r];return s.raw=s,this._t={_$litType$:this.constructor.resultType,strings:s,values:[]}}}e.directiveName="unsafeHTML",e.resultType=1;const o$1=e$1(e);
 
-/*
- * What a toast is telling you, in colour. Written as whole class names - a
- * template-built `alert-${tone}` is a class Tailwind's scanner never sees,
- * and the rule would be missing from the built sheet.
- *
- * The mapping is the panel's existing one: green for something recorded,
- * red for a refusal or a write that did not land, yellow for a question the
- * toast is asking, and neutral for a plain statement of fact. Nothing here
- * invents a fifth voice.
- */
-const TOAST_TONE = {
-  neutral: 'alert-neutral',
-  success: 'alert-success',
-  warning: 'alert-warning',
-  error: 'alert-error',
-};
+  /**
+   * @license
+   * Copyright 2017 Google LLC
+   * SPDX-License-Identifier: BSD-3-Clause
+   */class t extends e{}t.directiveName="unsafeSVG",t.resultType=2;const o=e$1(t);
 
-function toast(html, { sticky = false, on = null, tone = 'neutral' } = {}) {
-  const t = document.createElement('div');
-  t.className = 'toast toast-end pointer-events-auto';
-  t.dataset.theme = 'blueprint';
-  t.style.right = `${W + 18}px`;
-  t.innerHTML = `<div class="alert ${TOAST_TONE[tone] ?? TOAST_TONE.neutral} text-[13px]">${html}</div>`;
-  if (on)
-    for (const [name, fn] of Object.entries(on))
-      t.querySelector(`[data-sitting="${name}"]`)?.addEventListener('click', () => {
-        t.remove();
-        fn();
-      });
-  // Onto the shell, not into the panel: render() rewrites the panel's markup
-  // wholesale, and the things worth toasting - a verdict recorded, a thread
-  // ended - are exactly the things that trigger a repaint, so a toast living
-  // in there was swept away in the same tick it appeared.
-  D.host.appendChild(t);
-  if (!sticky) setTimeout(() => t.remove(), 4200);
-}
+  /**
+   * @license
+   * Copyright 2020 Google LLC
+   * SPDX-License-Identifier: BSD-3-Clause
+   */const r=o=>void 0===o.strings,m={},p=(o,t=m)=>o._$AH=t;
 
-/*
- * The two helpers everything else needs: escaping, and where the server is.
- *
- * They are here rather than in state.js because state has no dependencies and
- * these have one — api reads S — and because a module named for what it holds
- * beats a module named for where things happened to end up.
- */
+  /**
+   * @license
+   * Copyright 2020 Google LLC
+   * SPDX-License-Identifier: BSD-3-Clause
+   */const l=e$1(class extends i{constructor(r$1){if(super(r$1),r$1.type!==t$1.PROPERTY&&r$1.type!==t$1.ATTRIBUTE&&r$1.type!==t$1.BOOLEAN_ATTRIBUTE)throw Error("The `live` directive is not allowed on child or event bindings");if(!r(r$1))throw Error("`live` bindings can only contain a single expression")}render(r){return r}update(i,[t]){if(t===E||t===A)return t;const o=i.element,l=i.name;if(i.type===t$1.PROPERTY){if(t===o[l])return E}else if(i.type===t$1.BOOLEAN_ATTRIBUTE){if(!!t===o.hasAttribute(l))return E}else if(i.type===t$1.ATTRIBUTE&&o.getAttribute(l)===t+"")return E;return p(i),t}});
 
-const esc = (s) =>
-  String(s ?? '').replace(
-    /[&<>"]/g,
-    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c],
-  );
+  /*
+   * What the panel knows before it draws anything: how it was delivered, where
+   * it keeps things, and the two holders every other shard reads and writes.
+   *
+   * These live together because they are one dependency: S.SERVER is derived
+   * from the delivery, and STYLESHEET is derived from S.SERVER. Splitting
+   * config from state would only buy a cycle.
+   *
+   * Nothing here has a side effect. That matters more than it looks: Rollup
+   * emits this module's body ahead of the panel's own, which means it runs
+   * BEFORE the once-per-page guard in index.js has had its say. Building two
+   * objects and reading two globals is safe to do twice; creating an element or
+   * hanging a listener would not be.
+   */
+  // See the note in embed.js: served as a <script> tag, or handed the same
+  // answers by the extension's bootstrap on window.__walkdownConfig.
+  const script = document.currentScript;
+  const cfg = window.__walkdownConfig ?? {};
 
-/*
- * The blueprint rides along as a query parameter — and it has to go BEFORE any
- * fragment, or the fragment swallows it: "#invite-batch?bp=..." is one
- * fragment named that, not a query, so the server never sees the blueprint and
- * the screen never sees its own fragment.
- */
-const api = (path) => {
-  const h = path.indexOf('#');
-  const head = h < 0 ? path : path.slice(0, h);
-  const frag = h < 0 ? '' : path.slice(h);
-  const q = S.BP ? (head.includes('?') ? '&' : '?') + 'bp=' + encodeURIComponent(S.BP) : '';
-  return S.SERVER + head + q + frag;
-};
+  /*
+   * Everything the panel remembers, in one object rather than as three dozen
+   * free variables scattered down the file.
+   *
+   * The reason is the split. A module's exported binding is read-only to
+   * whoever imports it, so `view = 'detail'` from another file is a syntax
+   * error where `S.view = 'detail'` is not — the holder is what lets any of
+   * this state be written from more than one shard. Collecting it has a
+   * second effect worth having on its own: the panel's entire memory is now
+   * readable in one place instead of being reconstructed from declarations
+   * four thousand lines apart.
+   *
+   * State that never leaves one neighbourhood stayed a plain `let` where it
+   * was — the veil's timer, the shot layer, the desk element, `framedPinMode`,
+   * `seen` — because those travel with the code that owns them and gain
+   * nothing from being global. `S` is for what genuinely crosses.
+   *
+   * One field is seeded later on purpose: `S.desk` waits for DESK_DEFAULTS,
+   * so the defaults stay beside the dials that tune them.
+   */
+  const S = {
+    SERVER: cfg.server ?? new URL(script?.src ?? 'http://localhost:4700').origin,
+    BP: cfg.bp ?? script?.dataset.bp ?? '',
+    frameUrl: cfg.frame?.url ?? null, // where the app frame actually is
 
-/*
- * The Blueprints tab: which server, which blueprint, and what crossing to
- * another one does to a sitting already in progress.
- */
+    data: null,
+    view: 'list',
+    selected: null,
+    session: null,
+    ghost: null,
+    ghostOpacity: 0.5,
+    protoShare: null, // 0 = all app, 1 = all prototype; null = follow the page
+    pickedScreen: cfg.screen ?? script?.dataset.screen ?? null,
+    openThread: null, // the thread expanded in the detail pane, by id
 
-/*
- * Which screen is this page? The panel guesses from the URL and is usually
- * right; this is where you say otherwise, and where you see which screens
- * have a design on file to compare against at all.
- */
-function blueprintsPane() {
-  return `
+    /*
+     * A screen the ghost is pinned to for a moment — viewing a sketch from a
+     * thread, say. Kept apart from pickedScreen on purpose: pickedScreen
+     * answers "which screen is this page?", and a passing look at another
+     * screen's artwork must not rewrite that answer, or the panel spends the
+     * rest of the session describing a page you are not on.
+     */
+    ghostOverride: null,
+
+    /*
+     * Which of the three things the panel is doing: finding a server, choosing
+     * a blueprint from the ones it found, or reviewing. The first two are not
+     * error states — a fresh install genuinely does not know either answer yet.
+     */
+    phase: 'loading', // loading | connect | choose | ready
+    projects: [],
+    jumpOnLoad: false, // set when a blueprint is chosen by hand, spent once it has loaded
+    servedRoot: null, // the folder the server reports it is serving
+    listTab: 'rules', // blueprints | rules | threads — what the side lists
+
+    /*
+     * Which threads the Threads tab is showing. The same three questions
+     * `walkdown threads` answers at the command line: what is live, what is
+     * waiting on me, and everything ever said. Default `active`, because that
+     * is the one with work in it - `all` is for going back to a conversation
+     * that ended, which is the thing that was impossible before this tab.
+     */
+    threadFilter: 'active', // active | you | all
+
+    /*
+     * What the rule search box says, and what the two note boxes say. Kept out
+     * here rather than read off the inputs, because the panes are rebuilt
+     * wholesale on every render and a value whose only record was the DOM
+     * would forget itself the next time anything else on the panel changed.
+     */
+    ruleQuery: '',
+    threadNote: '', // what the reply box says, kept across re-renders
+    verdictNote: '', // the verdict feedback box, kept across re-renders
+    ruleNote: '', // the rule's own new-thread box, kept the same way
+
+    /*
+     * The check-source disclosure, kept OUTSIDE the markup that draws it.
+     *
+     * Renders arrive unbidden - the framed surface announcing itself is
+     * enough. So a disclosure whose only record of being open was the DOM
+     * closed itself a frame later, and the source, fetched meanwhile, was
+     * written into a node that had already been thrown away: opened, it said
+     * "Loading…" forever (n-0084, n-0057). Both the asking and the answer live
+     * here now, keyed by rule, so moving to another rule collapses it again
+     * without anything to reset.
+     */
+    srcOpenFor: null, // the rule whose source is open
+    srcCache: { rule: null, view: null },
+
+    lastView: 'list',
+    ghostWidth: 0, // 0 = fill the stage; otherwise a fixed CSS width
+    viewportW: 0, // framed viewport preset: 0 = fit the space, else CSS px
+
+    dragging: false, // whether the pointer is holding one of our own controls
+    deskOpen: false, // the desk tuner behind the gear
+    screensOpen: false, // the screen picker's list
+    hideAppOn: false, // the tuner's "see the full effect" peek
+    docked: false, // whether the chrome is out; the × in the bar puts it away
+
+    /*
+     * Set when the copy of walkdown inside the ghost announces itself. A
+     * prototype carries the embed by contract (docs/06 §4); an app being
+     * ghosted from a prototype page may not, and then the ghosted surface
+     * simply cannot be pinned. Saying so is the point — the alternative is a
+     * pin that lands on the page hidden underneath the one you are looking at.
+     */
+    ghostReady: false,
+    ghostSrc: null, // what the kept ghost copy is showing, so a toggle can reuse it
+
+    headlessCover: null, // the opaque cover a headless rule lays over the desk
+  };
+
+  /*
+   * The chrome itself, on a holder for the same reason S exists: these are
+   * written once, at build time, from whichever shard ends up owning each
+   * element, and an imported binding cannot be assigned.
+   *
+   * Every field is null until buildChrome() runs. Nothing above the boot
+   * sequence at the foot of this file may touch them at module level — that
+   * is the property that keeps the shards order-independent, because an
+   * import graph decides evaluation order and no shard should care.
+   */
+  const D = {
+    shell: null, // the popover over the whole viewport, host of the shadow root
+    sr: null, // that shadow root
+    host: null, // the transparent carrier inside it
+    bar: null, // the tool bar across the top
+    side: null, // the side panel
+    deskPanel: null, // the desk tuner behind the gear
+    screenPanel: null, // the screen picker's list
+    tab: null, // the WALKDOWN pull tab, shown when the chrome is put away
+    swap: null, // the prototype/app cross beside it
+    appFrame: null, // the application under review
+  };
+  /*
+   * Whether this delivery comes back after a real page load. The extension
+   * says so, because its content script runs on every page; a script tag
+   * cannot, because the navigation unloads it. It decides whether a trip the
+   * panel wants to make is taken or merely offered.
+   */
+  const REINJECTS = cfg.reinjects === true;
+  /*
+   * Where the choice of blueprint is remembered. The extension hands us
+   * chrome.storage — its own, per-profile, and untouched by a site clearing
+   * its data. A page that loaded us from a script tag has already said which
+   * blueprint it is, so the localStorage fallback is for a case that in
+   * practice never arises.
+   */
+  const store = cfg.store ?? {
+    get: async (k) => {
+      try {
+        return JSON.parse(localStorage.getItem(k) ?? 'null');
+      } catch {
+        return null;
+      }
+    },
+    set: async (k, v) => {
+      try {
+        localStorage.setItem(k, JSON.stringify(v));
+      } catch {
+        /* private mode */
+      }
+    },
+  };
+  const CHOICE = `walkdown:blueprint:${location.origin}`;
+  // The extension ships the stylesheet itself; served, it comes off the server.
+  const STYLESHEET = cfg.stylesheet ?? S.SERVER + '/walkdown.css';
+
+  /* The panel's geometry, in pixels. */
+  const W = 384; // the side panel
+  const TOP = 44; // the tool bar across the top
+  const GAP = 12; // how much desk shows around the wrapped page
+  // Nothing separates the bar from the page any more, so the bar's own bottom
+  // padding does that job — a second 12px gap on top of it read as a gutter.
+  const HEAD = TOP;
+
+  /*
+   * Identity is two fields, not one (n-0104). Each holds null for "nothing
+   * said" - fall back to what the server derived - or the string the person
+   * typed, the empty string very much included.
+   *
+   * `username` is what every record is written under - verdicts, replies,
+   * transitions, the draft. It is a handle, it is stable, and it is the only
+   * thing the ledger ever sees. `name` is the full name git may or may not
+   * know; it is what the panel SHOWS, because "Topher Fangio" reads better
+   * than "topher", and it is never what gets recorded, because plenty of
+   * people do not have one.
+   *
+   * Either can be set in Settings, including by someone whose git knows
+   * neither - honour system, as asked. Empty means "no override": the field
+   * falls back to what the server derived, so clearing a box is how you undo.
+   *
+   * ACTOR_KEY is the single free-text field this replaces. It is read once, at
+   * boot, and migrated into the display name - which is the field it actually
+   * held, since it was seeded from `git config user.name`. The username goes
+   * back to being derived. Nothing in the ledger is touched: records written
+   * under the old value stay exactly as written, and nameMap keeps showing
+   * them under one face (see `handles` in the identity payload).
+   */
+  /*
+   * `roles` is the third field and the odd one out: it is not a name, it is
+   * which hats this person signs in. It lives here because it is the same kind
+   * of setting - per person, per machine, said once and remembered - and
+   * because a signature's role has to be known before the signature is written.
+   * null means nothing said; an empty array means "none of these", which is a
+   * different answer and survives the reload the same way an emptied name does.
+   */
+  const ACTOR_KEY = 'walkdown:actor'; // legacy: one free-text name
+  const IDENTITY_KEY = 'walkdown:identity'; // { username, name, roles }
+  const identityOverride = { username: null, name: null, roles: null };
+  const saveIdentity = () =>
+    store.set(IDENTITY_KEY, {
+      username: identityOverride.username,
+      name: identityOverride.name,
+      roles: identityOverride.roles,
+    });
+
+  /*
+   * The panel's transient word to the reviewer.
+   */
+
+  /*
+   * What a toast is telling you, in colour. Written as whole class names - a
+   * template-built `alert-${tone}` is a class Tailwind's scanner never sees,
+   * and the rule would be missing from the built sheet.
+   *
+   * The mapping is the panel's existing one: green for something recorded,
+   * red for a refusal or a write that did not land, yellow for a question the
+   * toast is asking, and neutral for a plain statement of fact. Nothing here
+   * invents a fifth voice.
+   */
+  const TOAST_TONE = {
+    neutral: 'alert-neutral',
+    success: 'alert-success',
+    warning: 'alert-warning',
+    error: 'alert-error',
+  };
+
+  function toast(html, { sticky = false, on = null, tone = 'neutral' } = {}) {
+    const t = document.createElement('div');
+    t.className = 'toast toast-end pointer-events-auto';
+    t.dataset.theme = 'blueprint';
+    t.style.right = `${W + 18}px`;
+    t.innerHTML = `<div class="alert ${TOAST_TONE[tone] ?? TOAST_TONE.neutral} text-[13px]">${html}</div>`;
+    if (on)
+      for (const [name, fn] of Object.entries(on))
+        t.querySelector(`[data-sitting="${name}"]`)?.addEventListener('click', () => {
+          t.remove();
+          fn();
+        });
+    // Onto the shell, not into the panel: render() rewrites the panel's markup
+    // wholesale, and the things worth toasting - a verdict recorded, a thread
+    // ended - are exactly the things that trigger a repaint, so a toast living
+    // in there was swept away in the same tick it appeared.
+    D.host.appendChild(t);
+    if (!sticky) setTimeout(() => t.remove(), 4200);
+  }
+
+  /*
+   * The two helpers everything else needs: escaping, and where the server is.
+   *
+   * They are here rather than in state.js because state has no dependencies and
+   * these have one — api reads S — and because a module named for what it holds
+   * beats a module named for where things happened to end up.
+   */
+
+  const esc = (s) =>
+    String(s ?? '').replace(
+      /[&<>"]/g,
+      (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c],
+    );
+
+  /*
+   * The blueprint rides along as a query parameter — and it has to go BEFORE any
+   * fragment, or the fragment swallows it: "#invite-batch?bp=..." is one
+   * fragment named that, not a query, so the server never sees the blueprint and
+   * the screen never sees its own fragment.
+   */
+  const api = (path) => {
+    const h = path.indexOf('#');
+    const head = h < 0 ? path : path.slice(0, h);
+    const frag = h < 0 ? '' : path.slice(h);
+    const q = S.BP ? (head.includes('?') ? '&' : '?') + 'bp=' + encodeURIComponent(S.BP) : '';
+    return S.SERVER + head + q + frag;
+  };
+
+  /*
+   * The Blueprints tab: which server, which blueprint, and what crossing to
+   * another one does to a sitting already in progress.
+   */
+
+  /*
+   * Which screen is this page? The panel guesses from the URL and is usually
+   * right; this is where you say otherwise, and where you see which screens
+   * have a design on file to compare against at all.
+   */
+  function blueprintsPane() {
+    return b`
     <div class="px-3.5 pb-2 pt-1">
       <div class="mb-1 text-[11px] font-bold uppercase tracking-wider opacity-50">walkdown server</div>
       <div class="flex items-center gap-2">
-        <input id="wdp-server" class="input input-xs flex-1" value="${esc(S.SERVER)}"
+        <input id="wdp-server" class="input input-xs flex-1" value="${S.SERVER}"
                aria-label="walkdown server address">
         <button class="btn btn-xs btn-outline btn-primary" id="wdp-retry">Connect</button>
       </div>
       ${
         S.servedRoot
-          ? `<p class="mt-1.5 text-[11px] leading-relaxed opacity-50" data-testid="start.folder">Serving
-            <span class="font-mono opacity-80">${esc(S.servedRoot)}</span> \u2014 every blueprint
+          ? b`<p class="mt-1.5 text-[11px] leading-relaxed opacity-50" data-testid="start.folder">Serving
+            <span class="font-mono opacity-80">${S.servedRoot}</span> \u2014 every blueprint
             under it is listed below.</p>`
-          : `<p class="mt-1.5 text-[11px] leading-relaxed opacity-40">Not connected. Run
+          : b`<p class="mt-1.5 text-[11px] leading-relaxed opacity-40">Not connected. Run
             <code>walkdown serve</code> in the folder holding your blueprints.</p>`
       }
     </div>
     <div data-testid="start.options">${
       S.projects.length
-        ? S.projects
-            .map((pr) => {
-              const on = pr.id === S.BP;
-              return `<button class="block w-full border-t border-base-300 px-3.5 py-2.5 text-left hover:bg-base-200"
-        data-pick="${esc(pr.id)}">
+        ? S.projects.map((pr) => {
+            const on = pr.id === S.BP;
+            return b`<button class="block w-full border-t border-base-300 px-3.5 py-2.5 text-left hover:bg-base-200"
+        data-pick="${pr.id}">
         <span class="flex items-center gap-2">
           <span class="w-3.5 shrink-0 text-center ${on ? 'text-primary' : 'opacity-30'}">${on ? '\u25c9' : '\u25cb'}</span>
-          <span class="text-[13px] font-semibold">${esc(pr.name)}</span>
+          <span class="text-[13px] font-semibold">${pr.name}</span>
         </span>
-        <span class="mt-0.5 block pl-5.5 text-[12px] leading-snug opacity-60">${esc(
-          pr.description ?? 'No description \u2014 add one to this blueprint\u2019s walkdown.yml.',
-        )}</span>
-        <span class="mt-0.5 block pl-5.5 font-mono text-[10.5px] opacity-35">${esc(pr.id)}</span>
+        <span class="mt-0.5 block pl-5.5 text-[12px] leading-snug opacity-60">${
+          pr.description ?? 'No description \u2014 add one to this blueprint\u2019s walkdown.yml.'
+        }</span>
+        <span class="mt-0.5 block pl-5.5 font-mono text-[10.5px] opacity-35">${pr.id}</span>
       </button>`;
-            })
-            .join('')
-        : '<p class="px-3.5 py-3 text-[12.5px] opacity-40">Nothing found under that folder.</p>'
+          })
+        : b`<p class="px-3.5 py-3 text-[12.5px] opacity-40">Nothing found under that folder.</p>`
     }</div>`;
-}
+  }
 
-/** Server address and blueprint choice, wired the same wherever they appear. */
-/*
- * Offered rather than decided: a sitting is somebody's work in progress, and
- * a picker that silently discarded it - or silently carried it - would be
- * making that call for them.
- */
-function askAboutSitting(nextBp) {
-  const name = S.projects.find((p) => p.id === nextBp)?.name ?? nextBp;
-  toast(
-    `A walkdown is running on <b>${esc(S.data.project)}</b>, with <b>${
+  /** Server address and blueprint choice, wired the same wherever they appear. */
+  /*
+   * Offered rather than decided: a sitting is somebody's work in progress, and
+   * a picker that silently discarded it - or silently carried it - would be
+   * making that call for them.
+   */
+  function askAboutSitting(nextBp) {
+    const name = S.projects.find((p) => p.id === nextBp)?.name ?? nextBp;
+    toast(
+      `A walkdown is running on <b>${esc(S.data.project)}</b>, with <b>${
       Object.keys(S.session.verdicts).length
     } judged</b>. It cannot come with you to ${esc(name)}.` +
-      ` <button class="link" data-sitting="keep">Keep it as a draft</button>` +
-      ` · <button class="link" data-sitting="discard">Discard it</button>`,
-    {
-      sticky: true,
-      tone: 'warning',
-      on: {
-        keep: () => crossTo(nextBp), // the draft is already on disk
-        discard: async () => {
-          await discardSitting();
-          crossTo(nextBp);
+        ` <button class="link" data-sitting="keep">Keep it as a draft</button>` +
+        ` · <button class="link" data-sitting="discard">Discard it</button>`,
+      {
+        sticky: true,
+        tone: 'warning',
+        on: {
+          keep: () => crossTo(nextBp), // the draft is already on disk
+          discard: async () => {
+            await discardSitting();
+            crossTo(nextBp);
+          },
         },
       },
-    },
-  );
-}
+    );
+  }
 
-/** End the sitting and take nothing with it. */
-async function discardSitting() {
-  S.session = null;
-  saveSession();
-  await fetch(api('/api/draft'), {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ discard: true }),
-  }).catch(() => {});
-}
+  /** End the sitting and take nothing with it. */
+  async function discardSitting() {
+    S.session = null;
+    saveSession();
+    await fetch(api('/api/draft'), {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ discard: true }),
+    }).catch(() => {});
+  }
 
-function crossTo(nextBp) {
-  S.session = null; // left behind, on disk, waiting to be resumed
-  S.BP = nextBp;
-  store.set(CHOICE, S.BP);
-  S.listTab = 'rules';
-  S.view = 'list';
-  S.selected = null;
-  S.phase = 'loading';
-  S.jumpOnLoad = true;
-  start();
-}
+  function crossTo(nextBp) {
+    S.session = null; // left behind, on disk, waiting to be resumed
+    S.BP = nextBp;
+    store.set(CHOICE, S.BP);
+    S.listTab = 'rules';
+    S.view = 'list';
+    S.selected = null;
+    S.phase = 'loading';
+    S.jumpOnLoad = true;
+    start();
+  }
 
-function wireBlueprints(root) {
-  const retry = root.querySelector('#wdp-retry');
-  if (retry)
-    retry.onclick = () => {
-      const at = root.querySelector('#wdp-server').value.trim();
-      if (at) {
-        S.SERVER = at.replace(/\/+$/, '');
-        store.set(CHOICE + ':server', S.SERVER);
+  function wireBlueprints(root) {
+    const retry = root.querySelector('#wdp-retry');
+    if (retry)
+      retry.onclick = () => {
+        const at = root.querySelector('#wdp-server').value.trim();
+        if (at) {
+          S.SERVER = at.replace(/\/+$/, '');
+          store.set(CHOICE + ':server', S.SERVER);
+        }
+        S.phase = 'loading';
+        start();
+      };
+    root.querySelectorAll('[data-pick]').forEach((b) => {
+      b.onclick = async () => {
+        /*
+         * A walkdown belongs to the blueprint it was started in - its verdicts
+         * name that blueprint's rules and nothing else. Carrying a sitting
+         * across would either write those verdicts into a project they do not
+         * describe or drop them on the floor, so the crossing has to be
+         * settled first. The draft is already on disk, which is what makes
+         * "keep it and come back" a real offer rather than a promise.
+         */
+        if (S.session && b.dataset.pick !== S.BP) return askAboutSitting(b.dataset.pick);
+        S.BP = b.dataset.pick;
+        await store.set(CHOICE, S.BP);
+        S.listTab = 'rules';
+        S.view = 'list';
+        S.selected = null;
+        S.phase = 'loading';
+        // A picker that changes the panel and not the page is only half a
+        // choice — but where to go depends on the blueprint that is still
+        // loading, so it is settled there.
+        S.jumpOnLoad = true;
+        start();
+      };
+    });
+  }
+
+  /*
+   * How the desk is drawn — the ruled plane the page sheet lies on.
+   *
+   * Drawing only. What happens WHEN the desk is repainted (reseating the frame,
+   * the ghost, the peek and the headless cover) is paintDesk, which stays in
+   * index.js because it orchestrates half the panel; this module would have had
+   * to import back from it, and a cycle for one function is a bad trade.
+   */
+
+  /*
+   * The desk: drafting paper, ruled faintly enough to read as texture rather
+   * than as content, and tilted off square because a perfectly upright grid
+   * reads as a spreadsheet.
+   *
+   * repeating-linear-gradient rather than a tiled background-size, because the
+   * repetition runs along the gradient's own axis: it seams correctly at any
+   * angle, where a 24px tile only lines up with its neighbours at multiples of
+   * 90 degrees. The two rulings are one right angle apart, so the grid stays
+   * square and only its orientation changes.
+   */
+  /*
+   * The desk's look is a preference, not a truth about any blueprint — so the
+   * values live in one object, are tunable from the gear in the bar, and
+   * persist through the same store as every other panel choice.
+   */
+  const DESK_KEY = 'walkdown:desk';
+  const DESK_DEFAULTS = {
+    tilt: 35, // degrees clockwise, spun within the paper's own plane
+    tip: 35, // degrees the plane leans away from the viewer
+    depth: 600, // the camera's distance; nearer converges harder
+    gap: 60, // ruling pitch on the tipped plane
+    ink: 10, // line strength, % of the theme's ink
+  };
+  // Seeded here rather than with the rest of S, so the defaults stay beside
+  // the dials that tune them.
+  S.desk = { ...DESK_DEFAULTS };
+  const DESK_SKEW = 7; // fallback only: how far the rulings fall short of a right angle
+  const line = (ink) => `color-mix(in oklch, ${ink} ${S.desk.ink}%, transparent)`;
+  const ruling = (ink, deg, gap) =>
+    `repeating-linear-gradient(${deg}deg, ${line(ink)} 0 1px, transparent 1px ${gap}px)`;
+
+  /*
+   * The fallback ruling: an affine skew painted straight onto the root. Not
+   * quite a right angle, one axis breathing wider — the most a background can
+   * do on its own, since gradients repeat at a fixed pitch and parallel stays
+   * parallel.
+   */
+  const deskLines = (ink) =>
+    `${ruling(ink, S.desk.tilt, S.desk.gap - 8)}, ${ruling(ink, S.desk.tilt + 90 - DESK_SKEW, S.desk.gap - 4)}`;
+
+  /*
+   * The real thing: a square grid on its own plane, tipped away from the
+   * viewer in actual 3D, so the lines converge toward the horizon the way a
+   * sheet on a desk does. This was never possible on the root itself — in the
+   * docked layout that is the host application's own <html>, and a transform
+   * there hands every fixed element in the app a new containing block — but a
+   * dedicated layer transforms nothing but itself.
+   *
+   * The layer sits at z-index -1 as a child of the root: painted above the
+   * root's own background, below the body's — so the page sheet still covers
+   * it and only the desk margins show it. Oversized because a tipped plane's
+   * corners pull inward; the excess keeps its edges out of the viewport.
+   */
+  const HAS_3D =
+    typeof CSS !== 'undefined' && CSS.supports?.('transform', 'perspective(1px) rotateX(1deg)');
+  let deskEl = null;
+
+  function drawDesk(on, ink) {
+    const root = document.documentElement;
+    if (!on || !HAS_3D) {
+      deskEl?.remove();
+      deskEl = null;
+      if (on) {
+        root.style.backgroundImage = deskLines(ink);
+        root.style.backgroundAttachment = 'fixed';
       }
-      S.phase = 'loading';
-      start();
-    };
-  root.querySelectorAll('[data-pick]').forEach((b) => {
-    b.onclick = async () => {
-      /*
-       * A walkdown belongs to the blueprint it was started in - its verdicts
-       * name that blueprint's rules and nothing else. Carrying a sitting
-       * across would either write those verdicts into a project they do not
-       * describe or drop them on the floor, so the crossing has to be
-       * settled first. The draft is already on disk, which is what makes
-       * "keep it and come back" a real offer rather than a promise.
-       */
-      if (S.session && b.dataset.pick !== S.BP) return askAboutSitting(b.dataset.pick);
-      S.BP = b.dataset.pick;
-      await store.set(CHOICE, S.BP);
-      S.listTab = 'rules';
-      S.view = 'list';
-      S.selected = null;
-      S.phase = 'loading';
-      // A picker that changes the panel and not the page is only half a
-      // choice — but where to go depends on the blueprint that is still
-      // loading, so it is settled there.
-      S.jumpOnLoad = true;
-      start();
-    };
-  });
-}
-
-/*
- * How the desk is drawn — the ruled plane the page sheet lies on.
- *
- * Drawing only. What happens WHEN the desk is repainted (reseating the frame,
- * the ghost, the peek and the headless cover) is paintDesk, which stays in
- * index.js because it orchestrates half the panel; this module would have had
- * to import back from it, and a cycle for one function is a bad trade.
- */
-
-/*
- * The desk: drafting paper, ruled faintly enough to read as texture rather
- * than as content, and tilted off square because a perfectly upright grid
- * reads as a spreadsheet.
- *
- * repeating-linear-gradient rather than a tiled background-size, because the
- * repetition runs along the gradient's own axis: it seams correctly at any
- * angle, where a 24px tile only lines up with its neighbours at multiples of
- * 90 degrees. The two rulings are one right angle apart, so the grid stays
- * square and only its orientation changes.
- */
-/*
- * The desk's look is a preference, not a truth about any blueprint — so the
- * values live in one object, are tunable from the gear in the bar, and
- * persist through the same store as every other panel choice.
- */
-const DESK_KEY = 'walkdown:desk';
-const DESK_DEFAULTS = {
-  tilt: 35, // degrees clockwise, spun within the paper's own plane
-  tip: 35, // degrees the plane leans away from the viewer
-  depth: 600, // the camera's distance; nearer converges harder
-  gap: 60, // ruling pitch on the tipped plane
-  ink: 10, // line strength, % of the theme's ink
-};
-// Seeded here rather than with the rest of S, so the defaults stay beside
-// the dials that tune them.
-S.desk = { ...DESK_DEFAULTS };
-const DESK_SKEW = 7; // fallback only: how far the rulings fall short of a right angle
-const line = (ink) => `color-mix(in oklch, ${ink} ${S.desk.ink}%, transparent)`;
-const ruling = (ink, deg, gap) =>
-  `repeating-linear-gradient(${deg}deg, ${line(ink)} 0 1px, transparent 1px ${gap}px)`;
-
-/*
- * The fallback ruling: an affine skew painted straight onto the root. Not
- * quite a right angle, one axis breathing wider — the most a background can
- * do on its own, since gradients repeat at a fixed pitch and parallel stays
- * parallel.
- */
-const deskLines = (ink) =>
-  `${ruling(ink, S.desk.tilt, S.desk.gap - 8)}, ${ruling(ink, S.desk.tilt + 90 - DESK_SKEW, S.desk.gap - 4)}`;
-
-/*
- * The real thing: a square grid on its own plane, tipped away from the
- * viewer in actual 3D, so the lines converge toward the horizon the way a
- * sheet on a desk does. This was never possible on the root itself — in the
- * docked layout that is the host application's own <html>, and a transform
- * there hands every fixed element in the app a new containing block — but a
- * dedicated layer transforms nothing but itself.
- *
- * The layer sits at z-index -1 as a child of the root: painted above the
- * root's own background, below the body's — so the page sheet still covers
- * it and only the desk margins show it. Oversized because a tipped plane's
- * corners pull inward; the excess keeps its edges out of the viewport.
- */
-const HAS_3D =
-  typeof CSS !== 'undefined' && CSS.supports?.('transform', 'perspective(1px) rotateX(1deg)');
-let deskEl = null;
-
-function drawDesk(on, ink) {
-  const root = document.documentElement;
-  if (!on || !HAS_3D) {
-    deskEl?.remove();
-    deskEl = null;
-    if (on) {
-      root.style.backgroundImage = deskLines(ink);
-      root.style.backgroundAttachment = 'fixed';
+      return;
     }
-    return;
-  }
-  root.style.backgroundImage = 'none';
-  if (!deskEl) {
-    deskEl = document.createElement('div');
-    deskEl.dataset.testid = 'panel.desk';
-    deskEl.dataset.walkdownChrome = '';
-    root.appendChild(deskEl);
-  }
-  deskEl.style.cssText = `position:fixed; left:50%; top:50%; width:320vmax; height:320vmax;
+    root.style.backgroundImage = 'none';
+    if (!deskEl) {
+      deskEl = document.createElement('div');
+      deskEl.dataset.testid = 'panel.desk';
+      deskEl.dataset.walkdownChrome = '';
+      root.appendChild(deskEl);
+    }
+    deskEl.style.cssText = `position:fixed; left:50%; top:50%; width:320vmax; height:320vmax;
     margin:-160vmax 0 0 -160vmax; z-index:-1; pointer-events:none;
     background-image:${ruling(ink, 0, S.desk.gap)}, ${ruling(ink, 90, S.desk.gap)};
     transform:perspective(${S.desk.depth}px) rotateX(${S.desk.tip}deg) rotate(${S.desk.tilt}deg);`;
-}
+  }
 
-/*
- * The panel's icons: Phosphor markup, and the one helper that draws it.
- *
- * The markup is inlined rather than fetched because what ships is a single
- * file down two delivery paths — a <script> tag and an extension import — and
- * neither can afford a second request. tools/sync-phosphor.mjs copies the
- * paths for the names we use out of @phosphor-icons/core; everything between
- * the markers is generated, so edit the tool's icon list, not this.
- */
-// --- phosphor:start (generated by tools/sync-phosphor.mjs) ---
-const PHOSPHOR = {
-  'bounding-box': '<path d="M208,96a16,16,0,0,0,16-16V48a16,16,0,0,0-16-16H176a16,16,0,0,0-16,16v8H96V48A16,16,0,0,0,80,32H48A16,16,0,0,0,32,48V80A16,16,0,0,0,48,96h8v64H48a16,16,0,0,0-16,16v32a16,16,0,0,0,16,16H80a16,16,0,0,0,16-16v-8h64v8a16,16,0,0,0,16,16h32a16,16,0,0,0,16-16V176a16,16,0,0,0-16-16h-8V96ZM176,48h32V80H176ZM48,48H80V63.9a.51.51,0,0,0,0,.2V80H48ZM80,208H48V176H80v15.9a.51.51,0,0,0,0,.2V208Zm128,0H176V176h32Zm-24-48h-8a16,16,0,0,0-16,16v8H96v-8a16,16,0,0,0-16-16H72V96h8A16,16,0,0,0,96,80V72h64v8a16,16,0,0,0,16,16h8Z"/>',
-  'caret-down': '<path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/>',
-  'chats-circle': '<path d="M232.07,186.76a80,80,0,0,0-62.5-114.17A80,80,0,1,0,23.93,138.76l-7.27,24.71a16,16,0,0,0,19.87,19.87l24.71-7.27a80.39,80.39,0,0,0,25.18,7.35,80,80,0,0,0,108.34,40.65l24.71,7.27a16,16,0,0,0,19.87-19.86ZM62,159.5a8.28,8.28,0,0,0-2.26.32L32,168l8.17-27.76a8,8,0,0,0-.63-6,64,64,0,1,1,26.26,26.26A8,8,0,0,0,62,159.5Zm153.79,28.73L224,216l-27.76-8.17a8,8,0,0,0-6,.63,64.05,64.05,0,0,1-85.87-24.88A79.93,79.93,0,0,0,174.7,89.71a64,64,0,0,1,41.75,92.48A8,8,0,0,0,215.82,188.23Z"/>',
-  'checks': '<path d="M149.61,85.71l-89.6,88a8,8,0,0,1-11.22,0L10.39,136a8,8,0,1,1,11.22-11.41L54.4,156.79l84-82.5a8,8,0,1,1,11.22,11.42Zm96.1-11.32a8,8,0,0,0-11.32-.1l-84,82.5-18.83-18.5a8,8,0,0,0-11.21,11.42l24.43,24a8,8,0,0,0,11.22,0l89.6-88A8,8,0,0,0,245.71,74.39Z"/>',
-  'desktop': '<path d="M208,40H48A24,24,0,0,0,24,64V176a24,24,0,0,0,24,24h72v16H96a8,8,0,0,0,0,16h64a8,8,0,0,0,0-16H136V200h72a24,24,0,0,0,24-24V64A24,24,0,0,0,208,40ZM48,56H208a8,8,0,0,1,8,8v80H40V64A8,8,0,0,1,48,56ZM208,184H48a8,8,0,0,1-8-8V160H216v16A8,8,0,0,1,208,184Z"/>',
-  'device-mobile': '<path d="M176,16H80A24,24,0,0,0,56,40V216a24,24,0,0,0,24,24h96a24,24,0,0,0,24-24V40A24,24,0,0,0,176,16ZM72,64H184V192H72Zm8-32h96a8,8,0,0,1,8,8v8H72V40A8,8,0,0,1,80,32Zm96,192H80a8,8,0,0,1-8-8v-8H184v8A8,8,0,0,1,176,224Z"/>',
-  'frame-corners': '<path d="M200,80v32a8,8,0,0,1-16,0V88H160a8,8,0,0,1,0-16h32A8,8,0,0,1,200,80ZM96,168H72V144a8,8,0,0,0-16,0v32a8,8,0,0,0,8,8H96a8,8,0,0,0,0-16ZM232,56V200a16,16,0,0,1-16,16H40a16,16,0,0,1-16-16V56A16,16,0,0,1,40,40H216A16,16,0,0,1,232,56ZM216,200V56H40V200H216Z"/>',
-  'gear': '<path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm88-29.84q.06-2.16,0-4.32l14.92-18.64a8,8,0,0,0,1.48-7.06,107.21,107.21,0,0,0-10.88-26.25,8,8,0,0,0-6-3.93l-23.72-2.64q-1.48-1.56-3-3L186,40.54a8,8,0,0,0-3.94-6,107.71,107.71,0,0,0-26.25-10.87,8,8,0,0,0-7.06,1.49L130.16,40Q128,40,125.84,40L107.2,25.11a8,8,0,0,0-7.06-1.48A107.6,107.6,0,0,0,73.89,34.51a8,8,0,0,0-3.93,6L67.32,64.27q-1.56,1.49-3,3L40.54,70a8,8,0,0,0-6,3.94,107.71,107.71,0,0,0-10.87,26.25,8,8,0,0,0,1.49,7.06L40,125.84Q40,128,40,130.16L25.11,148.8a8,8,0,0,0-1.48,7.06,107.21,107.21,0,0,0,10.88,26.25,8,8,0,0,0,6,3.93l23.72,2.64q1.49,1.56,3,3L70,215.46a8,8,0,0,0,3.94,6,107.71,107.71,0,0,0,26.25,10.87,8,8,0,0,0,7.06-1.49L125.84,216q2.16.06,4.32,0l18.64,14.92a8,8,0,0,0,7.06,1.48,107.21,107.21,0,0,0,26.25-10.88,8,8,0,0,0,3.93-6l2.64-23.72q1.56-1.48,3-3L215.46,186a8,8,0,0,0,6-3.94,107.71,107.71,0,0,0,10.87-26.25,8,8,0,0,0-1.49-7.06Zm-16.1-6.5a73.93,73.93,0,0,1,0,8.68,8,8,0,0,0,1.74,5.48l14.19,17.73a91.57,91.57,0,0,1-6.23,15L187,173.11a8,8,0,0,0-5.1,2.64,74.11,74.11,0,0,1-6.14,6.14,8,8,0,0,0-2.64,5.1l-2.51,22.58a91.32,91.32,0,0,1-15,6.23l-17.74-14.19a8,8,0,0,0-5-1.75h-.48a73.93,73.93,0,0,1-8.68,0,8,8,0,0,0-5.48,1.74L100.45,215.8a91.57,91.57,0,0,1-15-6.23L82.89,187a8,8,0,0,0-2.64-5.1,74.11,74.11,0,0,1-6.14-6.14,8,8,0,0,0-5.1-2.64L46.43,170.6a91.32,91.32,0,0,1-6.23-15l14.19-17.74a8,8,0,0,0,1.74-5.48,73.93,73.93,0,0,1,0-8.68,8,8,0,0,0-1.74-5.48L40.2,100.45a91.57,91.57,0,0,1,6.23-15L69,82.89a8,8,0,0,0,5.1-2.64,74.11,74.11,0,0,1,6.14-6.14A8,8,0,0,0,82.89,69L85.4,46.43a91.32,91.32,0,0,1,15-6.23l17.74,14.19a8,8,0,0,0,5.48,1.74,73.93,73.93,0,0,1,8.68,0,8,8,0,0,0,5.48-1.74L155.55,40.2a91.57,91.57,0,0,1,15,6.23L173.11,69a8,8,0,0,0,2.64,5.1,74.11,74.11,0,0,1,6.14,6.14,8,8,0,0,0,5.1,2.64l22.58,2.51a91.32,91.32,0,0,1,6.23,15l-14.19,17.74A8,8,0,0,0,199.87,123.66Z"/>',
-  'info': '<path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"/>',
-  'map-pin': '<path d="M128,64a40,40,0,1,0,40,40A40,40,0,0,0,128,64Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,128Zm0-112a88.1,88.1,0,0,0-88,88c0,31.4,14.51,64.68,42,96.25a254.19,254.19,0,0,0,41.45,38.3,8,8,0,0,0,9.18,0A254.19,254.19,0,0,0,174,200.25c27.45-31.57,42-64.85,42-96.25A88.1,88.1,0,0,0,128,16Zm0,206c-16.53-13-72-60.75-72-118a72,72,0,0,1,144,0C200,161.23,144.53,209,128,222Z"/>',
-  'warning-fill': '<path d="M236.8,188.09,149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM120,104a8,8,0,0,1,16,0v40a8,8,0,0,1-16,0Zm8,88a12,12,0,1,1,12-12A12,12,0,0,1,128,192Z"/>',
-};
-// --- phosphor:end ---
-const icon = (name, cls = 'size-4') =>
-  `<svg class="${cls}" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">${PHOSPHOR[name] ?? ''}</svg>`;
+  /*
+   * The panel's icons: Phosphor markup, and the one helper that draws it.
+   *
+   * The markup is inlined rather than fetched because what ships is a single
+   * file down two delivery paths — a <script> tag and an extension import — and
+   * neither can afford a second request. tools/sync-phosphor.mjs copies the
+   * paths for the names we use out of @phosphor-icons/core; everything between
+   * the markers is generated, so edit the tool's icon list, not this.
+   */
 
-/*
- * The vocabulary. One module, no dependencies, both runtimes.
- *
- * walkdown exists so that a term means one thing, and for its first month its
- * own vocabulary was string literals in ten files across two runtimes. The
- * panel's idea of a terminal thread agreed with the server's because two
- * people typed the same words carefully — the panel's TERMINAL even listed
- * them in a different order — and one typo would have disagreed silently, in
- * the direction that matters: a status the panel cannot draw is invisible,
- * not loud.
- *
- * So every LIST and TABLE lives here: the sets two files must agree on, the
- * transition table, and what derives from them. The line is enumeration, not
- * comparison — `status === 'open'` in a handler is fine, because a typo there
- * fails the check that drives it, but naming the members of a set anywhere
- * else is a second copy of this file waiting to drift.
- *
- * Browser-safe on purpose: no node imports, no I/O. The panel bundles it the
- * way it bundles screen-match; the CLI and server import it like any module.
- * Derivations (TERMINAL, statusesFor) are computed from FLOWS rather than
- * written beside it, because two spellings of one fact is the disease this
- * module treats.
- */
+  // --- phosphor:start (generated by tools/sync-phosphor.mjs) ---
+  const PHOSPHOR = {
+    'bounding-box': w`<path d="M208,96a16,16,0,0,0,16-16V48a16,16,0,0,0-16-16H176a16,16,0,0,0-16,16v8H96V48A16,16,0,0,0,80,32H48A16,16,0,0,0,32,48V80A16,16,0,0,0,48,96h8v64H48a16,16,0,0,0-16,16v32a16,16,0,0,0,16,16H80a16,16,0,0,0,16-16v-8h64v8a16,16,0,0,0,16,16h32a16,16,0,0,0,16-16V176a16,16,0,0,0-16-16h-8V96ZM176,48h32V80H176ZM48,48H80V63.9a.51.51,0,0,0,0,.2V80H48ZM80,208H48V176H80v15.9a.51.51,0,0,0,0,.2V208Zm128,0H176V176h32Zm-24-48h-8a16,16,0,0,0-16,16v8H96v-8a16,16,0,0,0-16-16H72V96h8A16,16,0,0,0,96,80V72h64v8a16,16,0,0,0,16,16h8Z"/>`,
+    'caret-down': w`<path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/>`,
+    'chats-circle': w`<path d="M232.07,186.76a80,80,0,0,0-62.5-114.17A80,80,0,1,0,23.93,138.76l-7.27,24.71a16,16,0,0,0,19.87,19.87l24.71-7.27a80.39,80.39,0,0,0,25.18,7.35,80,80,0,0,0,108.34,40.65l24.71,7.27a16,16,0,0,0,19.87-19.86ZM62,159.5a8.28,8.28,0,0,0-2.26.32L32,168l8.17-27.76a8,8,0,0,0-.63-6,64,64,0,1,1,26.26,26.26A8,8,0,0,0,62,159.5Zm153.79,28.73L224,216l-27.76-8.17a8,8,0,0,0-6,.63,64.05,64.05,0,0,1-85.87-24.88A79.93,79.93,0,0,0,174.7,89.71a64,64,0,0,1,41.75,92.48A8,8,0,0,0,215.82,188.23Z"/>`,
+    'checks': w`<path d="M149.61,85.71l-89.6,88a8,8,0,0,1-11.22,0L10.39,136a8,8,0,1,1,11.22-11.41L54.4,156.79l84-82.5a8,8,0,1,1,11.22,11.42Zm96.1-11.32a8,8,0,0,0-11.32-.1l-84,82.5-18.83-18.5a8,8,0,0,0-11.21,11.42l24.43,24a8,8,0,0,0,11.22,0l89.6-88A8,8,0,0,0,245.71,74.39Z"/>`,
+    'desktop': w`<path d="M208,40H48A24,24,0,0,0,24,64V176a24,24,0,0,0,24,24h72v16H96a8,8,0,0,0,0,16h64a8,8,0,0,0,0-16H136V200h72a24,24,0,0,0,24-24V64A24,24,0,0,0,208,40ZM48,56H208a8,8,0,0,1,8,8v80H40V64A8,8,0,0,1,48,56ZM208,184H48a8,8,0,0,1-8-8V160H216v16A8,8,0,0,1,208,184Z"/>`,
+    'device-mobile': w`<path d="M176,16H80A24,24,0,0,0,56,40V216a24,24,0,0,0,24,24h96a24,24,0,0,0,24-24V40A24,24,0,0,0,176,16ZM72,64H184V192H72Zm8-32h96a8,8,0,0,1,8,8v8H72V40A8,8,0,0,1,80,32Zm96,192H80a8,8,0,0,1-8-8v-8H184v8A8,8,0,0,1,176,224Z"/>`,
+    'frame-corners': w`<path d="M200,80v32a8,8,0,0,1-16,0V88H160a8,8,0,0,1,0-16h32A8,8,0,0,1,200,80ZM96,168H72V144a8,8,0,0,0-16,0v32a8,8,0,0,0,8,8H96a8,8,0,0,0,0-16ZM232,56V200a16,16,0,0,1-16,16H40a16,16,0,0,1-16-16V56A16,16,0,0,1,40,40H216A16,16,0,0,1,232,56ZM216,200V56H40V200H216Z"/>`,
+    'gear': w`<path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm88-29.84q.06-2.16,0-4.32l14.92-18.64a8,8,0,0,0,1.48-7.06,107.21,107.21,0,0,0-10.88-26.25,8,8,0,0,0-6-3.93l-23.72-2.64q-1.48-1.56-3-3L186,40.54a8,8,0,0,0-3.94-6,107.71,107.71,0,0,0-26.25-10.87,8,8,0,0,0-7.06,1.49L130.16,40Q128,40,125.84,40L107.2,25.11a8,8,0,0,0-7.06-1.48A107.6,107.6,0,0,0,73.89,34.51a8,8,0,0,0-3.93,6L67.32,64.27q-1.56,1.49-3,3L40.54,70a8,8,0,0,0-6,3.94,107.71,107.71,0,0,0-10.87,26.25,8,8,0,0,0,1.49,7.06L40,125.84Q40,128,40,130.16L25.11,148.8a8,8,0,0,0-1.48,7.06,107.21,107.21,0,0,0,10.88,26.25,8,8,0,0,0,6,3.93l23.72,2.64q1.49,1.56,3,3L70,215.46a8,8,0,0,0,3.94,6,107.71,107.71,0,0,0,26.25,10.87,8,8,0,0,0,7.06-1.49L125.84,216q2.16.06,4.32,0l18.64,14.92a8,8,0,0,0,7.06,1.48,107.21,107.21,0,0,0,26.25-10.88,8,8,0,0,0,3.93-6l2.64-23.72q1.56-1.48,3-3L215.46,186a8,8,0,0,0,6-3.94,107.71,107.71,0,0,0,10.87-26.25,8,8,0,0,0-1.49-7.06Zm-16.1-6.5a73.93,73.93,0,0,1,0,8.68,8,8,0,0,0,1.74,5.48l14.19,17.73a91.57,91.57,0,0,1-6.23,15L187,173.11a8,8,0,0,0-5.1,2.64,74.11,74.11,0,0,1-6.14,6.14,8,8,0,0,0-2.64,5.1l-2.51,22.58a91.32,91.32,0,0,1-15,6.23l-17.74-14.19a8,8,0,0,0-5-1.75h-.48a73.93,73.93,0,0,1-8.68,0,8,8,0,0,0-5.48,1.74L100.45,215.8a91.57,91.57,0,0,1-15-6.23L82.89,187a8,8,0,0,0-2.64-5.1,74.11,74.11,0,0,1-6.14-6.14,8,8,0,0,0-5.1-2.64L46.43,170.6a91.32,91.32,0,0,1-6.23-15l14.19-17.74a8,8,0,0,0,1.74-5.48,73.93,73.93,0,0,1,0-8.68,8,8,0,0,0-1.74-5.48L40.2,100.45a91.57,91.57,0,0,1,6.23-15L69,82.89a8,8,0,0,0,5.1-2.64,74.11,74.11,0,0,1,6.14-6.14A8,8,0,0,0,82.89,69L85.4,46.43a91.32,91.32,0,0,1,15-6.23l17.74,14.19a8,8,0,0,0,5.48,1.74,73.93,73.93,0,0,1,8.68,0,8,8,0,0,0,5.48-1.74L155.55,40.2a91.57,91.57,0,0,1,15,6.23L173.11,69a8,8,0,0,0,2.64,5.1,74.11,74.11,0,0,1,6.14,6.14,8,8,0,0,0,5.1,2.64l22.58,2.51a91.32,91.32,0,0,1,6.23,15l-14.19,17.74A8,8,0,0,0,199.87,123.66Z"/>`,
+    'info': w`<path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"/>`,
+    'map-pin': w`<path d="M128,64a40,40,0,1,0,40,40A40,40,0,0,0,128,64Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,128Zm0-112a88.1,88.1,0,0,0-88,88c0,31.4,14.51,64.68,42,96.25a254.19,254.19,0,0,0,41.45,38.3,8,8,0,0,0,9.18,0A254.19,254.19,0,0,0,174,200.25c27.45-31.57,42-64.85,42-96.25A88.1,88.1,0,0,0,128,16Zm0,206c-16.53-13-72-60.75-72-118a72,72,0,0,1,144,0C200,161.23,144.53,209,128,222Z"/>`,
+    'warning-fill': w`<path d="M236.8,188.09,149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM120,104a8,8,0,0,1,16,0v40a8,8,0,0,1-16,0Zm8,88a12,12,0,1,1,12-12A12,12,0,0,1,128,192Z"/>`,
+  };
+  // --- phosphor:end ---
+  const icon = (name, cls = 'size-4') =>
+    b`<svg class="${cls}" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">${PHOSPHOR[name] ?? A}</svg>`;
 
-// ---- threads --------------------------------------------------------------
+  /*
+   * The vocabulary. One module, no dependencies, both runtimes.
+   *
+   * walkdown exists so that a term means one thing, and for its first month its
+   * own vocabulary was string literals in ten files across two runtimes. The
+   * panel's idea of a terminal thread agreed with the server's because two
+   * people typed the same words carefully — the panel's TERMINAL even listed
+   * them in a different order — and one typo would have disagreed silently, in
+   * the direction that matters: a status the panel cannot draw is invisible,
+   * not loud.
+   *
+   * So every LIST and TABLE lives here: the sets two files must agree on, the
+   * transition table, and what derives from them. The line is enumeration, not
+   * comparison — `status === 'open'` in a handler is fine, because a typo there
+   * fails the check that drives it, but naming the members of a set anywhere
+   * else is a second copy of this file waiting to drift.
+   *
+   * Browser-safe on purpose: no node imports, no I/O. The panel bundles it the
+   * way it bundles screen-match; the CLI and server import it like any module.
+   * Derivations (TERMINAL, statusesFor) are computed from FLOWS rather than
+   * written beside it, because two spellings of one fact is the disease this
+   * module treats.
+   */
 
-const THREAD_KINDS = Object.freeze(['note', 'question']);
+  // ---- threads --------------------------------------------------------------
 
-/** The id prefix a kind files under: n-0042 is a note, q-0042 a question. */
-const threadPrefix = (kind) => (kind === 'question' ? 'q' : 'n');
+  const THREAD_KINDS = Object.freeze(['note', 'question']);
 
-/**
- * Legal status transitions per thread kind — the lifecycle itself.
- * Order is meaningful twice over: the keys are each kind's statuses in
- * lifecycle order, and each list is the order actions are offered in.
- */
-const FLOWS = Object.freeze({
-  note: Object.freeze({
-    open: Object.freeze(['addressed', 'waived']),
-    addressed: Object.freeze(['verified', 'open', 'waived']),
-    verified: Object.freeze([]),
-    waived: Object.freeze([]),
-  }),
-  question: Object.freeze({
-    open: Object.freeze(['answered', 'waived']),
-    answered: Object.freeze(['incorporated', 'open', 'waived']),
-    incorporated: Object.freeze([]),
-    waived: Object.freeze([]),
-  }),
-});
+  /** The id prefix a kind files under: n-0042 is a note, q-0042 a question. */
+  const threadPrefix = (kind) => (kind === 'question' ? 'q' : 'n');
 
-/** Every status a thread of this kind may hold. */
-const statusesFor = (kind) => Object.freeze(Object.keys(FLOWS[kind] ?? FLOWS.note));
+  /**
+   * Legal status transitions per thread kind — the lifecycle itself.
+   * Order is meaningful twice over: the keys are each kind's statuses in
+   * lifecycle order, and each list is the order actions are offered in.
+   */
+  const FLOWS = Object.freeze({
+    note: Object.freeze({
+      open: Object.freeze(['addressed', 'waived']),
+      addressed: Object.freeze(['verified', 'open', 'waived']),
+      verified: Object.freeze([]),
+      waived: Object.freeze([]),
+    }),
+    question: Object.freeze({
+      open: Object.freeze(['answered', 'waived']),
+      answered: Object.freeze(['incorporated', 'open', 'waived']),
+      incorporated: Object.freeze([]),
+      waived: Object.freeze([]),
+    }),
+  });
 
-/**
- * Statuses a thread never leaves. Derived, not listed: a status is terminal
- * exactly when its kind's flow offers it nowhere to go, so this cannot
- * disagree with FLOWS no matter who edits which.
- */
-const TERMINAL = Object.freeze([
-  ...new Set(
-    Object.values(FLOWS).flatMap((flow) =>
-      Object.entries(flow)
-        .filter(([, next]) => next.length === 0)
-        .map(([status]) => status),
+  /** Every status a thread of this kind may hold. */
+  const statusesFor = (kind) => Object.freeze(Object.keys(FLOWS[kind] ?? FLOWS.note));
+
+  /**
+   * Statuses a thread never leaves. Derived, not listed: a status is terminal
+   * exactly when its kind's flow offers it nowhere to go, so this cannot
+   * disagree with FLOWS no matter who edits which.
+   */
+  const TERMINAL = Object.freeze([
+    ...new Set(
+      Object.values(FLOWS).flatMap((flow) =>
+        Object.entries(flow)
+          .filter(([, next]) => next.length === 0)
+          .map(([status]) => status),
+      ),
     ),
-  ),
-]);
+  ]);
 
-/** May a `kind` thread move from `from` to `to`? The one answer, for every caller. */
-const canTransition = (kind, from, to) => ((FLOWS[kind] ?? FLOWS.note)[from] ?? []).includes(to);
+  /** May a `kind` thread move from `from` to `to`? The one answer, for every caller. */
+  const canTransition = (kind, from, to) => ((FLOWS[kind] ?? FLOWS.note)[from] ?? []).includes(to);
 
-/**
- * Statuses that mean "a person judged it". An agent claims work and never
- * accepts it — blueprint/AGENTS.md states the law, threads.js enforces it,
- * and the panel greys the buttons; all three read this list.
- */
-const HUMAN_ONLY = Object.freeze(['verified', 'waived']);
+  /**
+   * Statuses that mean "a person judged it". An agent claims work and never
+   * accepts it — blueprint/AGENTS.md states the law, threads.js enforces it,
+   * and the panel greys the buttons; all three read this list.
+   */
+  const HUMAN_ONLY = Object.freeze(['verified', 'waived']);
 
-/**
- * Transitions that must say why: waiving buries work and reopening un-buries
- * it, and both are illegible a week later without a sentence attached.
- */
-const NEEDS_REASON = Object.freeze(['waived', 'open']);
+  /**
+   * Transitions that must say why: waiving buries work and reopening un-buries
+   * it, and both are illegible a week later without a sentence attached.
+   */
+  const NEEDS_REASON = Object.freeze(['waived', 'open']);
 
-/*
- * How a status is drawn, wherever it is drawn. daisyUI badge classes rather
- * than abstract tokens because every surface walkdown ships uses daisyUI -
- * and the panel and the embed carrying separate copies of this map is how a
- * status ends up amber on one surface and blue on the other.
- */
-const CHIP = Object.freeze({
-  open: 'badge-warning',
-  answered: 'badge-warning',
-  addressed: 'badge-info',
-  verified: 'badge-success',
-  incorporated: 'badge-success',
-  waived: 'badge-ghost',
-});
+  /*
+   * How a status is drawn, wherever it is drawn. daisyUI badge classes rather
+   * than abstract tokens because every surface walkdown ships uses daisyUI -
+   * and the panel and the embed carrying separate copies of this map is how a
+   * status ends up amber on one surface and blue on the other.
+   */
+  const CHIP = Object.freeze({
+    open: 'badge-warning',
+    answered: 'badge-warning',
+    addressed: 'badge-info',
+    verified: 'badge-success',
+    incorporated: 'badge-success',
+    waived: 'badge-ghost',
+  });
 
-// ---- verification ---------------------------------------------------------
+  // ---- verification ---------------------------------------------------------
 
-/**
- * The declarable verify tiers. `human` is not one: humans accept rules
- * through signoff, not through a verify list (docs/02-blueprint-schema.md —
- * the verify inversion).
- */
-const TIERS = Object.freeze(['checks', 'agent']);
+  /**
+   * The declarable verify tiers. `human` is not one: humans accept rules
+   * through signoff, not through a verify list (docs/02-blueprint-schema.md —
+   * the verify inversion).
+   */
+  const TIERS = Object.freeze(['checks', 'agent']);
 
-/** Who can sign a rule off. */
-const ROLES = Object.freeze(['eng', 'product', 'design']);
+  /** Who can sign a rule off. */
+  const ROLES = Object.freeze(['eng', 'product', 'design']);
 
-/**
- * What one result in a run record may say. The last two are sign-off verdicts
- * on unbuilt rules — a judgment of the spec, recorded by walkdown sessions
- * only, and never build evidence (docs/05-runs-ledger.md).
- */
-const RESULT_STATUSES = Object.freeze([
-  'pass',
-  'fail',
-  'skipped',
-  'blocked',
-  'approved',
-  'refining',
-]);
+  /**
+   * What one result in a run record may say. The last two are sign-off verdicts
+   * on unbuilt rules — a judgment of the spec, recorded by walkdown sessions
+   * only, and never build evidence (docs/05-runs-ledger.md).
+   */
+  const RESULT_STATUSES = Object.freeze([
+    'pass',
+    'fail',
+    'skipped',
+    'blocked',
+    'approved',
+    'refining',
+  ]);
 
-/*
- * The panel's shared vocabulary: the small questions every pane asks of the
- * data, and the two class strings they all label with.
- *
- * None of it decides anything or draws anything — each is a plain reading of
- * S — which is why it can sit below every pane in the import graph and be
- * reached from all of them without a cycle. When one pane needed a helper the
- * next pane also needed, this is where it went.
- */
+  /*
+   * The panel's shared vocabulary: the small questions every pane asks of the
+   * data, and the two class strings they all label with.
+   *
+   * None of it decides anything or draws anything — each is a plain reading of
+   * S — which is why it can sit below every pane in the import graph and be
+   * reached from all of them without a cycle. When one pane needed a helper the
+   * next pane also needed, this is where it went.
+   */
 
-// ---- data -----------------------------------------------------------------
-/*
- * The walk's own work list: rules owing you a verdict, less the ones you
- * have already judged this sitting. Four copies of this predicate had grown
- * up - the footer's counts, the tab badge, the pass-advance, Continue - and
- * they only agreed by hand. One definition, and the number on the tab is by
- * construction the list Continue walks.
- */
-const owedRows = () =>
-  orderedRows().filter((r) => needsYou(r.rule) && !(S.session?.verdicts ?? {})[r.rule]);
+  // ---- data -----------------------------------------------------------------
+  /*
+   * The walk's own work list: rules owing you a verdict, less the ones you
+   * have already judged this sitting. Four copies of this predicate had grown
+   * up - the footer's counts, the tab badge, the pass-advance, Continue - and
+   * they only agreed by hand. One definition, and the number on the tab is by
+   * construction the list Continue walks.
+   */
+  const owedRows = () =>
+    orderedRows().filter((r) => needsYou(r.rule) && !(S.session?.verdicts ?? {})[r.rule]);
 
-/** The screen a rule is filed under: the end of its flow, or the first it names. */
-const screenIdOf = (r) => r?.flow?.at(-1) ?? r?.screens?.[0] ?? null;
+  /** The screen a rule is filed under: the end of its flow, or the first it names. */
+  const screenIdOf = (r) => r?.flow?.at(-1) ?? r?.screens?.[0] ?? null;
 
-/*
- * The rail's own order, and the only definition of it.
- *
- * Rules are grouped by the SCREEN they are about, in storyboard order, then by
- * story in blueprint order. A screen is where a reviewer actually stands, so
- * it is the grouping that matches how the work is done - and the storyboard is
- * already a sequence, so its order is the one to walk in.
- *
- * Rules with no screen come last, together. A third of this blueprint is
- * headless - ledger law, CLI contracts, policies - and those are judged by
- * reading rather than by looking, so they are a destination of their own
- * rather than an awkward remainder scattered through the screens.
- *
- * The list, the detail's stepper and Continue all read THIS, because the
- * stepper promises to move in the order the list shows and Continue promises
- * to walk the list. Two orderings would break both promises quietly.
- */
-function groupedRows(rows = S.data?.rows ?? []) {
-  const board = (S.data?.storyboard ?? []).map((s) => s.id);
-  const rank = new Map(board.map((id, i) => [id, i]));
-  // Unknown screen ids sort after every known one; no screen at all sorts last.
-  const at = (id) => (id === null ? Infinity : (rank.get(id) ?? board.length));
-  const groups = new Map();
-  for (const row of rows) {
-    const sid = screenIdOf(row) ?? null;
-    if (!groups.has(sid)) groups.set(sid, new Map());
-    const stories = groups.get(sid);
-    if (!stories.has(row.story)) stories.set(row.story, []);
-    stories.get(row.story).push(row);
+  /*
+   * The rail's own order, and the only definition of it.
+   *
+   * Rules are grouped by the SCREEN they are about, in storyboard order, then by
+   * story in blueprint order. A screen is where a reviewer actually stands, so
+   * it is the grouping that matches how the work is done - and the storyboard is
+   * already a sequence, so its order is the one to walk in.
+   *
+   * Rules with no screen come last, together. A third of this blueprint is
+   * headless - ledger law, CLI contracts, policies - and those are judged by
+   * reading rather than by looking, so they are a destination of their own
+   * rather than an awkward remainder scattered through the screens.
+   *
+   * The list, the detail's stepper and Continue all read THIS, because the
+   * stepper promises to move in the order the list shows and Continue promises
+   * to walk the list. Two orderings would break both promises quietly.
+   */
+  function groupedRows(rows = S.data?.rows ?? []) {
+    const board = (S.data?.storyboard ?? []).map((s) => s.id);
+    const rank = new Map(board.map((id, i) => [id, i]));
+    // Unknown screen ids sort after every known one; no screen at all sorts last.
+    const at = (id) => (id === null ? Infinity : (rank.get(id) ?? board.length));
+    const groups = new Map();
+    for (const row of rows) {
+      const sid = screenIdOf(row) ?? null;
+      if (!groups.has(sid)) groups.set(sid, new Map());
+      const stories = groups.get(sid);
+      if (!stories.has(row.story)) stories.set(row.story, []);
+      stories.get(row.story).push(row);
+    }
+    return [...groups.entries()]
+      .sort(([a], [b]) => at(a) - at(b))
+      .map(([screen, stories]) => ({
+        screen,
+        stories: [...stories.entries()].map(([story, rs]) => ({ story, rows: rs })),
+      }));
   }
-  return [...groups.entries()]
-    .sort(([a], [b]) => at(a) - at(b))
-    .map(([screen, stories]) => ({
-      screen,
-      stories: [...stories.entries()].map(([story, rs]) => ({ story, rows: rs })),
-    }));
-}
 
-/** The same order, flat - what the stepper and the walk step through. */
-const orderedRows = (rows) =>
-  groupedRows(rows).flatMap((g) => g.stories.flatMap((s) => s.rows));
+  /** The same order, flat - what the stepper and the walk step through. */
+  const orderedRows = (rows) =>
+    groupedRows(rows).flatMap((g) => g.stories.flatMap((s) => s.rows));
 
-/*
- * What a story is called once its screen is named above it. The feature
- * prefix is the screen's job now, so `invites.batch` reads as BATCH - unless
- * two stories under one screen would end up with the same word, and then both
- * keep their full id rather than the list drawing one label over two things.
- */
-function storyLabels(stories) {
-  const leaf = (s) => String(s).split('.').at(-1);
-  const tally = {};
-  for (const s of stories) tally[leaf(s)] = (tally[leaf(s)] ?? 0) + 1;
-  return new Map(stories.map((s) => [s, tally[leaf(s)] > 1 ? s : leaf(s)]));
-}
-
-const needsYou = (rule) =>
-  (S.data?.attention ?? []).some((i) => i.who === 'human' && !i.thread && i.rule === rule);
-const threadsFor = (rule) =>
-  (S.data?.threads ?? []).filter(
-    (t) => t.anchor?.rule === rule && !['incorporated', 'verified', 'waived'].includes(t.status),
-  );
-
-const screenById = (id) => (S.data?.storyboard ?? []).find((s) => s.id === id) ?? null;
-
-const LBL = 'text-[10.5px] font-bold uppercase tracking-widest opacity-40';
-/** A rule id with its story prefix dropped — what the rail calls it. */
-const shortName = (row) =>
-  row.rule.startsWith(row.story + '.') ? row.rule.slice(row.story.length + 1) : row.rule;
-
-/**
- * A thread in the detail pane. Collapsed it is a line of provenance and the
- * note; open it carries its replies, a reply box and the transitions its
- * state allows — feedback gets answered where it is read, without leaving
- * the app under review.
- */
-
-/** Who a reply and a transition are recorded as - one answer, as everywhere. */
-const whoAmI = () =>
-  (identityOverride.username ?? S.session?.actor ?? S.data?.identity?.username ?? '').trim();
-
-/** The screen a rule is about: the end of its flow, or the one it names. */
-const ruleScreen = (r) => screenById(r?.flow?.at(-1) ?? r?.screens?.[0]);
-
-/*
- * When a rule lives on a screen you are not looking at, say so — and, now
- * that walkdown can move the surface, offer the trip as something it will
- * actually make rather than as a link out of the tool.
- */
-const isHeadless = (r) => Boolean(r) && !r.screens?.length && !r.flow?.length;
-
-/** Last time anything was said - what a list of conversations sorts by. */
-const threadTouched = (t) => String((t?.replies ?? []).at(-1)?.created ?? t?.created ?? '');
-
-/*
- * The Rules tab: the rail of rules, the box that filters it, and the marks
- * that say where each rule stands.
- */
-
-/**
- * Where a rule stands, in a sentence, for the row's own title.
- *
- * This used to also pick a GLYPH - □ designed, ✍︎ approved, ✎︎ refining, ○
- * built-unverified - drawn alone in the space a built rule fills with three
- * marks. That second display mode was the whole trouble: a lone yellow □ in a
- * column of ✓✓● read as an alarm about a rule whose only sin was not being
- * built yet, and the two pencils were indistinguishable at 12px anyway.
- *
- * There is one language now (see tierMarks). Lifecycle is not a mark of its
- * own; it is what the strip already says - nothing filled is designed, half a
- * dot is approved, owed glyphs are built-but-unwalked, all filled is verified.
- * So this returns only the words, and the shapes are somebody else's job.
- */
-function ruleWhy(row, mine) {
-  if (row.verdict === 'pass') return 'verified';
-  if (row.verdict === 'fail') return 'failing — the build was rejected';
-  if (!row.built) {
-    if (row.signoff === 'refining') return 'refining — sent back for spec rework';
-    if (row.signoff === 'approved') return 'approved — spec signed off, awaiting build';
-    return `designed — awaiting ${mine ? 'your ' : ''}sign-off`;
+  /*
+   * What a story is called once its screen is named above it. The feature
+   * prefix is the screen's job now, so `invites.batch` reads as BATCH - unless
+   * two stories under one screen would end up with the same word, and then both
+   * keep their full id rather than the list drawing one label over two things.
+   */
+  function storyLabels(stories) {
+    const leaf = (s) => String(s).split('.').at(-1);
+    const tally = {};
+    for (const s of stories) tally[leaf(s)] = (tally[leaf(s)] ?? 0) + 1;
+    return new Map(stories.map((s) => [s, tally[leaf(s)] > 1 ? s : leaf(s)]));
   }
-  return mine ? 'built — awaiting your walkdown' : 'built — awaiting verification';
-}
 
-/*
- * The search box over the rule list.
- *
- * It is drawn OUTSIDE the scrolling wrapper, as a sibling above it, which is
- * the whole of the trick. `position: sticky` is the reflex here and it is
- * the wrong tool: the pane itself is what scrolls, so a sticky child sticks
- * to a scrollport that is moving with it, and the box either rides away or
- * needs a second scroller underneath it to have something to stick to. A
- * column with a fixed head and a growing body says the same thing with no
- * stacking, no offsets, and nothing to go wrong when the list is short.
- */
-function searchBox() {
-  return `<div class="shrink-0 border-b border-base-300 px-3.5 py-2">
+  const needsYou = (rule) =>
+    (S.data?.attention ?? []).some((i) => i.who === 'human' && !i.thread && i.rule === rule);
+  const threadsFor = (rule) =>
+    (S.data?.threads ?? []).filter(
+      (t) => t.anchor?.rule === rule && !['incorporated', 'verified', 'waived'].includes(t.status),
+    );
+
+  const screenById = (id) => (S.data?.storyboard ?? []).find((s) => s.id === id) ?? null;
+
+  const LBL = 'text-[10.5px] font-bold uppercase tracking-widest opacity-40';
+  /** A rule id with its story prefix dropped — what the rail calls it. */
+  const shortName = (row) =>
+    row.rule.startsWith(row.story + '.') ? row.rule.slice(row.story.length + 1) : row.rule;
+
+  /**
+   * A thread in the detail pane. Collapsed it is a line of provenance and the
+   * note; open it carries its replies, a reply box and the transitions its
+   * state allows — feedback gets answered where it is read, without leaving
+   * the app under review.
+   */
+
+  /** Who a reply and a transition are recorded as - one answer, as everywhere. */
+  const whoAmI = () =>
+    (identityOverride.username ?? S.session?.actor ?? S.data?.identity?.username ?? '').trim();
+
+  /** The screen a rule is about: the end of its flow, or the one it names. */
+  const ruleScreen = (r) => screenById(r?.flow?.at(-1) ?? r?.screens?.[0]);
+
+  /*
+   * When a rule lives on a screen you are not looking at, say so — and, now
+   * that walkdown can move the surface, offer the trip as something it will
+   * actually make rather than as a link out of the tool.
+   */
+  const isHeadless = (r) => Boolean(r) && !r.screens?.length && !r.flow?.length;
+
+  /** Last time anything was said - what a list of conversations sorts by. */
+  const threadTouched = (t) => String((t?.replies ?? []).at(-1)?.created ?? t?.created ?? '');
+
+  /*
+   * The Rules tab: the rail of rules, the box that filters it, and the marks
+   * that say where each rule stands.
+   */
+
+  /**
+   * Where a rule stands, in a sentence, for the row's own title.
+   *
+   * This used to also pick a GLYPH - □ designed, ✍︎ approved, ✎︎ refining, ○
+   * built-unverified - drawn alone in the space a built rule fills with three
+   * marks. That second display mode was the whole trouble: a lone yellow □ in a
+   * column of ✓✓● read as an alarm about a rule whose only sin was not being
+   * built yet, and the two pencils were indistinguishable at 12px anyway.
+   *
+   * There is one language now (see tierMarks). Lifecycle is not a mark of its
+   * own; it is what the strip already says - nothing filled is designed, half a
+   * dot is approved, owed glyphs are built-but-unwalked, all filled is verified.
+   * So this returns only the words, and the shapes are somebody else's job.
+   */
+  function ruleWhy(row, mine) {
+    if (row.verdict === 'pass') return 'verified';
+    if (row.verdict === 'fail') return 'failing — the build was rejected';
+    if (!row.built) {
+      if (row.signoff === 'refining') return 'refining — sent back for spec rework';
+      if (row.signoff === 'approved') return 'approved — spec signed off, awaiting build';
+      return `designed — awaiting ${mine ? 'your ' : ''}sign-off`;
+    }
+    return mine ? 'built — awaiting your walkdown' : 'built — awaiting verification';
+  }
+
+  /*
+   * The search box over the rule list.
+   *
+   * It is drawn OUTSIDE the scrolling wrapper, as a sibling above it, which is
+   * the whole of the trick. `position: sticky` is the reflex here and it is
+   * the wrong tool: the pane itself is what scrolls, so a sticky child sticks
+   * to a scrollport that is moving with it, and the box either rides away or
+   * needs a second scroller underneath it to have something to stick to. A
+   * column with a fixed head and a growing body says the same thing with no
+   * stacking, no offsets, and nothing to go wrong when the list is short.
+   */
+  function searchBox() {
+    return b`<div class="shrink-0 border-b border-base-300 px-3.5 py-2">
     <input id="wdp-search" type="search" data-testid="panel.rules-search"
       class="input input-xs w-full" spellcheck="false" autocomplete="off"
-      aria-label="Search rules" placeholder="Search rules…" value="${esc(S.ruleQuery)}">
+      aria-label="Search rules" placeholder="Search rules…" value="${S.ruleQuery}">
   </div>`;
-}
+  }
 
-/*
- * Which rules a query leaves standing.
- *
- * Matching is over three fields, and the choice is deliberate: the group
- * heading (the story id, which carries its feature as its first segment), the
- * rule id, and the rule's statement. So "panel" reaches every rule in the
- * panel feature because every story under it is named for it; "panel.rules"
- * reaches that story alone; and words nobody put in an id - "scroll",
- * "ghost" - still find the rule, because the statement is the part of a rule
- * written for people to read.
- *
- * A heading matching takes its whole group with it. A rule matching brings
- * only itself, but its headings are drawn anyway by the grouping below,
- * because a filtered list that loses the hierarchy stops saying where anything
- * lives.
- *
- * The screen is a heading too now, and searchable as one: typing a screen's
- * name gives you every rule judged on it. That is the question the grouping
- * invites, and a heading you can see but not search for reads as broken.
- */
-const matchesQuery = (s, q) =>
-  String(s ?? '')
-    .toLowerCase()
-    .includes(q);
-function matchingRows() {
-  const q = S.ruleQuery.trim().toLowerCase();
-  if (!q) return S.data.rows;
-  const groups = new Set(S.data.rows.map((r) => r.story).filter((story) => matchesQuery(story, q)));
-  const screens = new Set(
-    (S.data.storyboard ?? [])
-      .filter((sc) => matchesQuery(sc.title, q) || matchesQuery(sc.id, q))
-      .map((sc) => sc.id),
-  );
-  return S.data.rows.filter(
-    (row) =>
-      groups.has(row.story) ||
-      screens.has(screenIdOf(row)) ||
-      matchesQuery(row.rule, q) ||
-      matchesQuery(row.statement, q),
-  );
-}
-
-/*
- * The marks a BUILT rule wears: checks, then agent, then who has accepted it.
- * A rule verified by one tier and a rule verified by all of them both used to
- * read as a single ✓, which hid the thing worth seeing - how much of the
- * ledger is actually standing behind a green rule.
- *
- * The first two are machine results and stay glyphs. The third used to be a
- * glyph too - the human TIER - and is now a stack of dots, one per role,
- * because acceptance is a set of PEOPLE and "somebody signed" was never the
- * question. See signoffStack below.
- *
- * Every built rule, not only the verified ones. A rule reaches 'verified'
- * only when every tier it asks for holds a current pass, so on a verified
- * rule these marks can be nothing but green or grey - the red, the open
- * circle and the tilde were unreachable, and they are the ones that answer
- * the question the row is here to answer: which tiers is this rule missing.
- * A rule that is not built at all has no tiers to report and keeps its
- * lifecycle shape.
- *
- * Same vocabulary as the detail pane's evidence rows, so the panel says one
- * thing in one language: shape carries what happened, colour carries whether
- * it is owed. Grey · is "this rule never asked for that tier". The two
- * in-between states keep their own shapes rather than borrowing either end -
- * ○ for a tier that is required and has never run, ~ for a pass whose
- * statement has since moved - both in warning yellow when the rule is
- * waiting on YOU, quiet otherwise. Colour carries ownership here exactly as
- * it does for the single lifecycle glyph (panel.rules.lifecycle-legible),
- * and the shape carries what happened either way, so a tier nobody has run
- * is never read as one the rule never asked for.
- */
-const TIER_MARK = {
-  pass: ['✓', 'text-success', 'passed'],
-  fail: ['✗', 'text-error', 'failed'],
-  stale: ['~', 'text-warning', 'stale — it passed, then the statement moved'],
-  never: ['○', 'text-warning', 'required, but no run has touched it'],
   /*
-   * `skipped` had the dash too, on the argument that it and `na` are the same
-   * news to somebody scanning. An agent walkdown disagreed and was right
-   * (n-0122): one glyph for two states meant the legend had to pick which one
-   * to explain, and whichever it picked was a wrong answer for the other. A
-   * run that went past this rule is not the same as a rule that never asked -
-   * the first might run tomorrow.
-   */
-  skipped: ['⋯', 'opacity-40', 'skipped — a run went past this rule'],
-  blocked: ['⊘', 'text-warning', 'blocked'],
-  /*
-   * The two ways a tier can have no verdict coming. They were one dot for a
-   * while and that was too quiet to be worth drawing: at 12px a dot says
-   * nothing at all, and it said the same nothing for both states.
+   * Which rules a query leaves standing.
    *
-   * `unbuilt` is a tier with nothing to judge yet, and it wears a grey tick:
-   * the rule is not waiting on this tier, and the shape it will eventually
-   * wear is already the shape it wears now. `na` is a tier the rule has
-   * declared it cannot honestly have, and it wears a dash: a line through
-   * where a verdict would go, which is what an excuse is.
+   * Matching is over three fields, and the choice is deliberate: the group
+   * heading (the story id, which carries its feature as its first segment), the
+   * rule id, and the rule's statement. So "panel" reaches every rule in the
+   * panel feature because every story under it is named for it; "panel.rules"
+   * reaches that story alone; and words nobody put in an id - "scroll",
+   * "ghost" - still find the rule, because the statement is the part of a rule
+   * written for people to read.
+   *
+   * A heading matching takes its whole group with it. A rule matching brings
+   * only itself, but its headings are drawn anyway by the grouping below,
+   * because a filtered list that loses the hierarchy stops saying where anything
+   * lives.
+   *
+   * The screen is a heading too now, and searchable as one: typing a screen's
+   * name gives you every rule judged on it. That is the question the grouping
+   * invites, and a heading you can see but not search for reads as broken.
    */
-  unbuilt: ['✓', 'opacity-25', 'nothing to judge yet — the rule is not built'],
-  na: ['–', 'opacity-30', 'not applicable — this rule does not ask for it'],
-};
+  const matchesQuery = (s, q) =>
+    String(s ?? '')
+      .toLowerCase()
+      .includes(q);
+  function matchingRows() {
+    const q = S.ruleQuery.trim().toLowerCase();
+    if (!q) return S.data.rows;
+    const groups = new Set(S.data.rows.map((r) => r.story).filter((story) => matchesQuery(story, q)));
+    const screens = new Set(
+      (S.data.storyboard ?? [])
+        .filter((sc) => matchesQuery(sc.title, q) || matchesQuery(sc.id, q))
+        .map((sc) => sc.id),
+    );
+    return S.data.rows.filter(
+      (row) =>
+        groups.has(row.story) ||
+        screens.has(screenIdOf(row)) ||
+        matchesQuery(row.rule, q) ||
+        matchesQuery(row.statement, q),
+    );
+  }
 
-/*
- * The checks tier is per target, and the marks are per rule, so the targets
- * have to come down to one state. Worst-news-first, the way the verdict
- * itself aggregates: a rule that fails anywhere has not passed.
- */
-function checksTier(row) {
-  const states = (S.data?.targets ?? Object.keys(row.cells ?? {}))
-    .map((t) => row.cells?.[t]?.state)
-    .filter((state) => state && state !== 'na');
-  if (!states.length) return 'na';
-  for (const worse of ['fail', 'blocked', 'never', 'stale', 'skipped'])
-    if (states.includes(worse)) return worse;
-  return states.every((state) => state === 'pass') ? 'pass' : 'never';
-}
+  /*
+   * The marks a BUILT rule wears: checks, then agent, then who has accepted it.
+   * A rule verified by one tier and a rule verified by all of them both used to
+   * read as a single ✓, which hid the thing worth seeing - how much of the
+   * ledger is actually standing behind a green rule.
+   *
+   * The first two are machine results and stay glyphs. The third used to be a
+   * glyph too - the human TIER - and is now a stack of dots, one per role,
+   * because acceptance is a set of PEOPLE and "somebody signed" was never the
+   * question. See signoffStack below.
+   *
+   * Every built rule, not only the verified ones. A rule reaches 'verified'
+   * only when every tier it asks for holds a current pass, so on a verified
+   * rule these marks can be nothing but green or grey - the red, the open
+   * circle and the tilde were unreachable, and they are the ones that answer
+   * the question the row is here to answer: which tiers is this rule missing.
+   * A rule that is not built at all has no tiers to report and keeps its
+   * lifecycle shape.
+   *
+   * Same vocabulary as the detail pane's evidence rows, so the panel says one
+   * thing in one language: shape carries what happened, colour carries whether
+   * it is owed. Grey · is "this rule never asked for that tier". The two
+   * in-between states keep their own shapes rather than borrowing either end -
+   * ○ for a tier that is required and has never run, ~ for a pass whose
+   * statement has since moved - both in warning yellow when the rule is
+   * waiting on YOU, quiet otherwise. Colour carries ownership here exactly as
+   * it does for the single lifecycle glyph (panel.rules.lifecycle-legible),
+   * and the shape carries what happened either way, so a tier nobody has run
+   * is never read as one the rule never asked for.
+   */
+  const TIER_MARK = {
+    pass: ['✓', 'text-success', 'passed'],
+    fail: ['✗', 'text-error', 'failed'],
+    stale: ['~', 'text-warning', 'stale — it passed, then the statement moved'],
+    never: ['○', 'text-warning', 'required, but no run has touched it'],
+    /*
+     * `skipped` had the dash too, on the argument that it and `na` are the same
+     * news to somebody scanning. An agent walkdown disagreed and was right
+     * (n-0122): one glyph for two states meant the legend had to pick which one
+     * to explain, and whichever it picked was a wrong answer for the other. A
+     * run that went past this rule is not the same as a rule that never asked -
+     * the first might run tomorrow.
+     */
+    skipped: ['⋯', 'opacity-40', 'skipped — a run went past this rule'],
+    blocked: ['⊘', 'text-warning', 'blocked'],
+    /*
+     * The two ways a tier can have no verdict coming. They were one dot for a
+     * while and that was too quiet to be worth drawing: at 12px a dot says
+     * nothing at all, and it said the same nothing for both states.
+     *
+     * `unbuilt` is a tier with nothing to judge yet, and it wears a grey tick:
+     * the rule is not waiting on this tier, and the shape it will eventually
+     * wear is already the shape it wears now. `na` is a tier the rule has
+     * declared it cannot honestly have, and it wears a dash: a line through
+     * where a verdict would go, which is what an excuse is.
+     */
+    unbuilt: ['✓', 'opacity-25', 'nothing to judge yet — the rule is not built'],
+    na: ['–', 'opacity-30', 'not applicable — this rule does not ask for it'],
+  };
 
-/** Tier states that are work somebody still owes, rather than settled news. */
-const TIER_OWED = new Set(['never', 'stale', 'blocked']);
+  /*
+   * The checks tier is per target, and the marks are per rule, so the targets
+   * have to come down to one state. Worst-news-first, the way the verdict
+   * itself aggregates: a rule that fails anywhere has not passed.
+   */
+  function checksTier(row) {
+    const states = (S.data?.targets ?? Object.keys(row.cells ?? {}))
+      .map((t) => row.cells?.[t]?.state)
+      .filter((state) => state && state !== 'na');
+    if (!states.length) return 'na';
+    for (const worse of ['fail', 'blocked', 'never', 'stale', 'skipped'])
+      if (states.includes(worse)) return worse;
+    return states.every((state) => state === 'pass') ? 'pass' : 'never';
+  }
 
-/*
- * A stale mark has two causes now, and saying the wrong one is worse than
- * saying nothing: a verdict goes stale when the rule's wording moves under it,
- * and it goes stale when a sweep asks for the whole tier to be earned again.
- * The cell says which - a swept cell carries the marker's id - so the mark can
- * name the reason instead of guessing at the commoner one.
- */
-const whyStale = (cell) =>
-  cell?.sweptBy
-    ? `stale — a sweep asked for this tier again (${cell.sweptBy})`
-    : TIER_MARK.stale[2];
+  /** Tier states that are work somebody still owes, rather than settled news. */
+  const TIER_OWED = new Set(['never', 'stale', 'blocked']);
 
-/*
- * Who has to accept a rule, and where each of them sits.
- *
- * A fixed slot per role, top to bottom, so the stack reads by POSITION and
- * colour is only a confirmation: product on top because it is the more final
- * signature, eng at the bottom because it is the one everything else stands
- * on, and any other role a team names in between - which is also the order
- * signoffList declares them in, eng last. Sorting is stable, so two middle
- * roles keep the order the rule wrote them in.
- *
- * The tints are a map keyed by role rather than a branch, because custom
- * roles are coming and a team adding "design" should be a line of data. A
- * role nobody has tinted draws in the panel's own ink instead of failing.
- */
-const ROLE_TINT = { eng: 'text-blue-400', product: 'text-purple-400' };
-const ROLE_RANK = { product: 0, eng: 2 };
-const stackOrder = (acceptance) =>
-  [...(acceptance ?? [])].sort((a, b) => (ROLE_RANK[a.role] ?? 1) - (ROLE_RANK[b.role] ?? 1));
+  /*
+   * A stale mark has two causes now, and saying the wrong one is worse than
+   * saying nothing: a verdict goes stale when the rule's wording moves under it,
+   * and it goes stale when a sweep asks for the whole tier to be earned again.
+   * The cell says which - a swept cell carries the marker's id - so the mark can
+   * name the reason instead of guessing at the commoner one.
+   */
+  const whyStale = (cell) =>
+    cell?.sweptBy
+      ? `stale — a sweep asked for this tier again (${cell.sweptBy})`
+      : TIER_MARK.stale[2];
 
-/*
- * What each acceptance state says, in the tooltip's words. `signed` is the
- * built thing; `approved` is the wording only, which is a real answer to a
- * question nobody has built yet and not a half-hearted signature.
- */
-const SIGN_SAY = {
-  signed: 'signed the build',
-  approved: 'approved the wording, not the build',
-  'sent-back': 'sent it back — not yet',
-  stale: 'signed an older wording',
-  none: 'has not signed',
-};
+  /*
+   * Who has to accept a rule, and where each of them sits.
+   *
+   * A fixed slot per role, top to bottom, so the stack reads by POSITION and
+   * colour is only a confirmation: product on top because it is the more final
+   * signature, eng at the bottom because it is the one everything else stands
+   * on, and any other role a team names in between - which is also the order
+   * signoffList declares them in, eng last. Sorting is stable, so two middle
+   * roles keep the order the rule wrote them in.
+   *
+   * The tints are a map keyed by role rather than a branch, because custom
+   * roles are coming and a team adding "design" should be a line of data. A
+   * role nobody has tinted draws in the panel's own ink instead of failing.
+   */
+  const ROLE_TINT = { eng: 'text-blue-400', product: 'text-purple-400' };
+  const ROLE_RANK = { product: 0, eng: 2 };
+  const stackOrder = (acceptance) =>
+    [...(acceptance ?? [])].sort((a, b) => (ROLE_RANK[a.role] ?? 1) - (ROLE_RANK[b.role] ?? 1));
 
-/*
- * One role's slot. Every shape is legible at 5px, which rules out most of
- * the obvious ideas - a dashed ring is mush at this size and a faded disc is
- * hard to tell from a ring - so the four states differ by FILL and SIZE:
- *
- *   signed    a solid disc: their name is on the built thing
- *   approved  half a disc, filled from the bottom: half a signature, because
- *             approving the wording is not accepting the build
- *   stale     a hollow ring around a point: the signature is still there but
- *             no longer covers what the rule says, so it has pulled back from
- *             the edge without vanishing
- *   none      an outline ring: the slot is there and empty
- *   sent-back a red ✗, not a dot - somebody looked and disagreed, which is
- *             the one thing on this strip that is not an absence
- *
- * Stale was a smaller solid disc first, and that was wrong. Size alone needs
- * a neighbour to be read against, and the common case is one dot with nothing
- * beside it - so a stale signature read as a signature, which is the exact lie
- * `status.derived.stale-never-passes` exists to forbid. The ring differs from
- * a solid disc in kind, not degree, and needs no reference to be seen.
- *
- * The half fill and the ring's centre are inline gradients rather than
- * classes: each is one declaration used in one place, and a two-tone 5px box
- * is not something the utility vocabulary has a name for.
- */
-function signoffDot(a, mine) {
-  const tint = ROLE_TINT[a.role] ?? 'text-base-content';
-  if (a.state === 'sent-back') return `<span class="text-[8px] leading-none text-error">✗</span>`;
-  const shape =
-    {
-      signed: 'size-[6px] bg-current',
-      approved: 'size-[6px] border border-current',
-      stale: 'size-[6px] border border-current',
-    }[a.state] ?? 'size-[6px] border border-current';
-  const fill =
-    {
-      approved: ' style="background:linear-gradient(to top, currentColor 50%, transparent 50%)"',
-      stale: ' style="background:radial-gradient(currentColor 0 1.25px, transparent 1.25px)"',
-    }[a.state] ?? '';
-  // Owed slots dim when the rule is not waiting on you, exactly as the tier
-  // glyphs beside them do — the strip has one language for "your turn".
-  const dim = a.state !== 'signed' && !mine ? ' opacity-60' : '';
-  return `<span class="block rounded-full ${shape} ${tint}${dim}"${fill}></span>`;
-}
+  /*
+   * What each acceptance state says, in the tooltip's words. `signed` is the
+   * built thing; `approved` is the wording only, which is a real answer to a
+   * question nobody has built yet and not a half-hearted signature.
+   */
+  const SIGN_SAY = {
+    signed: 'signed the build',
+    approved: 'approved the wording, not the build',
+    'sent-back': 'sent it back — not yet',
+    stale: 'signed an older wording',
+    none: 'has not signed',
+  };
 
-/*
- * Three slots is what fits beside a 12px glyph. A rule naming more roles than
- * that keeps the two that carry the most - product on top, eng at the bottom -
- * and collapses everything between them into a +N, which the tooltip then
- * spells out in full. Dropping from the middle rather than the end keeps the
- * two fixed slots fixed, which is the whole reason the stack reads.
- */
-const MAX_SLOTS = 3;
-function signoffStack(acceptance, mine) {
-  const all = stackOrder(acceptance);
-  if (!all.length) return '';
-  const slots =
-    all.length > MAX_SLOTS
-      ? [all[0], { role: '+', state: 'more', n: all.length - 2 }, all.at(-1)]
-      : all;
-  return `<span class="flex w-4 shrink-0 flex-col items-center justify-center"
-    data-testid="panel.rule-signoff" data-signoff="${esc(all.map((a) => `${a.role}:${a.state}`).join(' '))}"
-    >${slots
-      .map(
-        (a) =>
-          `<span class="flex h-[9px] items-center justify-center">${
-            a.state === 'more'
-              ? `<span class="text-[8px] leading-none opacity-60">+${a.n}</span>`
-              : signoffDot(a, mine)
-          }</span>`,
-      )
-      .join('')}</span>`;
-}
+  /*
+   * One role's slot. Every shape is legible at 5px, which rules out most of
+   * the obvious ideas - a dashed ring is mush at this size and a faded disc is
+   * hard to tell from a ring - so the four states differ by FILL and SIZE:
+   *
+   *   signed    a solid disc: their name is on the built thing
+   *   approved  half a disc, filled from the bottom: half a signature, because
+   *             approving the wording is not accepting the build
+   *   stale     a hollow ring around a point: the signature is still there but
+   *             no longer covers what the rule says, so it has pulled back from
+   *             the edge without vanishing
+   *   none      an outline ring: the slot is there and empty
+   *   sent-back a red ✗, not a dot - somebody looked and disagreed, which is
+   *             the one thing on this strip that is not an absence
+   *
+   * Stale was a smaller solid disc first, and that was wrong. Size alone needs
+   * a neighbour to be read against, and the common case is one dot with nothing
+   * beside it - so a stale signature read as a signature, which is the exact lie
+   * `status.derived.stale-never-passes` exists to forbid. The ring differs from
+   * a solid disc in kind, not degree, and needs no reference to be seen.
+   *
+   * The half fill and the ring's centre are inline gradients rather than
+   * classes: each is one declaration used in one place, and a two-tone 5px box
+   * is not something the utility vocabulary has a name for.
+   */
+  function signoffDot(a, mine) {
+    const tint = ROLE_TINT[a.role] ?? 'text-base-content';
+    if (a.state === 'sent-back')
+      return b`<span class="text-[8px] leading-none text-error">✗</span>`;
+    const shape =
+      {
+        signed: 'size-[6px] bg-current',
+        approved: 'size-[6px] border border-current',
+        stale: 'size-[6px] border border-current',
+      }[a.state] ?? 'size-[6px] border border-current';
+    // lit binds attribute VALUES, not attribute pairs, so the inline gradient
+    // is a bound style value and `nothing` withholds the attribute entirely.
+    const fill =
+      {
+        approved: 'background:linear-gradient(to top, currentColor 50%, transparent 50%)',
+        stale: 'background:radial-gradient(currentColor 0 1.25px, transparent 1.25px)',
+      }[a.state] ?? A;
+    // Owed slots dim when the rule is not waiting on you, exactly as the tier
+    // glyphs beside them do — the strip has one language for "your turn".
+    const dim = a.state !== 'signed' && !mine ? ' opacity-60' : '';
+    return b`<span class="block rounded-full ${shape} ${tint}${dim}" style=${fill}></span>`;
+  }
 
-/*
- * ONE tooltip for the whole strip, not one per mark.
- *
- * Six little native tooltips said six unrelated things and never the sentence
- * a reader actually wants — where does this rule stand. So the strip is the
- * hover target and the bubble answers for every tier and every role at once,
- * naming the signer where the ledger knows it.
- *
- * daisyUI rather than a title attribute, for the reason the footer counts use
- * one (n-0091): a native tooltip cannot hold four lines of explanation, and
- * the panel already says these words this way. It opens to the RIGHT because
- * the strip sits on the left edge of a pane as wide as the whole panel -
- * there is 340px of room that way and 14px the other, and a bubble opening up
- * or down would be centred on that same 14px. Kept to short lines anyway:
- * this one is read at a glance, on the way past.
- */
-function stripTip(tiers, acceptance) {
-  const cells = tiers.map(([kind, state, cell]) => [
-    kind,
-    state === 'stale' ? whyStale(cell) : (TIER_MARK[state] ?? TIER_MARK.na)[2],
-  ]);
-  const signs = stackOrder(acceptance).map((a) => [
-    a.role,
-    `${SIGN_SAY[a.state] ?? a.state}${a.actor ? ` · ${a.actor}` : ''}${
+  /*
+   * Three slots is what fits beside a 12px glyph. A rule naming more roles than
+   * that keeps the two that carry the most - product on top, eng at the bottom -
+   * and collapses everything between them into a +N, which the tooltip then
+   * spells out in full. Dropping from the middle rather than the end keeps the
+   * two fixed slots fixed, which is the whole reason the stack reads.
+   */
+  const MAX_SLOTS = 3;
+  function signoffStack(acceptance, mine) {
+    const all = stackOrder(acceptance);
+    if (!all.length) return A;
+    const slots =
+      all.length > MAX_SLOTS
+        ? [all[0], { role: '+', state: 'more', n: all.length - 2 }, all.at(-1)]
+        : all;
+    return b`<span class="flex w-4 shrink-0 flex-col items-center justify-center"
+    data-testid="panel.rule-signoff" data-signoff="${all.map((a) => `${a.role}:${a.state}`).join(' ')}"
+    >${slots.map(
+      (a) =>
+        b`<span class="flex h-[9px] items-center justify-center">${
+          a.state === 'more'
+            ? b`<span class="text-[8px] leading-none opacity-60">+${a.n}</span>`
+            : signoffDot(a, mine)
+        }</span>`,
+    )}</span>`;
+  }
+
+  /*
+   * ONE tooltip for the whole strip, not one per mark.
+   *
+   * Six little native tooltips said six unrelated things and never the sentence
+   * a reader actually wants — where does this rule stand. So the strip is the
+   * hover target and the bubble answers for every tier and every role at once,
+   * naming the signer where the ledger knows it.
+   *
+   * daisyUI rather than a title attribute, for the reason the footer counts use
+   * one (n-0091): a native tooltip cannot hold four lines of explanation, and
+   * the panel already says these words this way. It opens to the RIGHT because
+   * the strip sits on the left edge of a pane as wide as the whole panel -
+   * there is 340px of room that way and 14px the other, and a bubble opening up
+   * or down would be centred on that same 14px. Kept to short lines anyway:
+   * this one is read at a glance, on the way past.
+   */
+  function stripTip(tiers, acceptance) {
+    const cells = tiers.map(([kind, state, cell]) => [
+      kind,
+      state === 'stale' ? whyStale(cell) : (TIER_MARK[state] ?? TIER_MARK.na)[2],
+    ]);
+    const signs = stackOrder(acceptance).map((a) => [
+      a.role,
+      `${SIGN_SAY[a.state] ?? a.state}${a.actor ? ` · ${a.actor}` : ''}${
       a.created ? ` · ${MSG.ago(a.created)}` : ''
     }`,
-  ]);
-  const line = ([label, said]) =>
-    `<span class="opacity-60">${esc(label)}</span><span>${esc(said)}</span>`;
-  /*
-   * z-20 clears the sticky screen band, which sits at z-10.
-   *
-   * This is the second time a z-index has been put on this bubble. The first
-   * was wrong - it was fixing a fade caught mid-transition by a screenshot,
-   * and measuring it at daisyUI's own z-index of 2 showed the bubble opaque
-   * and on top. Nothing had changed by the time it came out again.
-   *
-   * What changed is the band, which sits at z-10. The row directly under it is
-   * the one row whose tooltip extends up behind it, and at daisyUI's z-index
-   * the band clips the bubble's first line off.
-   *
-   * Confirmed by looking, not by elementFromPoint - the bubble carries
-   * `pointer-events: none`, so that call reports whatever is behind it and
-   * would have said "covered" whichever z-index was set. Two screenshots of
-   * the same hover, one at z-2 and one at z-20, are what settled it.
-   */
-  return `<span class="tooltip-content z-20 w-60 whitespace-normal text-left text-[11px] leading-snug"
-    data-testid="panel.rule-tiers-tip"><span class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5">${cells
-      .map(line)
-      .join('')}${
+    ]);
+    const line = ([label, said]) =>
+      b`<span class="opacity-60">${label}</span><span>${said}</span>`;
+    /*
+     * z-20 clears the sticky screen band, which sits at z-10.
+     *
+     * This is the second time a z-index has been put on this bubble. The first
+     * was wrong - it was fixing a fade caught mid-transition by a screenshot,
+     * and measuring it at daisyUI's own z-index of 2 showed the bubble opaque
+     * and on top. Nothing had changed by the time it came out again.
+     *
+     * What changed is the band, which sits at z-10. The row directly under it is
+     * the one row whose tooltip extends up behind it, and at daisyUI's z-index
+     * the band clips the bubble's first line off.
+     *
+     * Confirmed by looking, not by elementFromPoint - the bubble carries
+     * `pointer-events: none`, so that call reports whatever is behind it and
+     * would have said "covered" whichever z-index was set. Two screenshots of
+     * the same hover, one at z-2 and one at z-20, are what settled it.
+     */
+    return b`<span class="tooltip-content z-20 w-60 whitespace-normal text-left text-[11px] leading-snug"
+    data-testid="panel.rule-tiers-tip"><span class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5">${cells.map(
+      line,
+    )}${
       signs.length
-        ? `<span class="col-span-2 mt-0.5 opacity-40">accepted by</span>${signs.map(line).join('')}`
-        : ''
+        ? b`<span class="col-span-2 mt-0.5 opacity-40">accepted by</span>${signs.map(line)}`
+        : A
     }</span></span>`;
-}
+  }
 
-function tierMarks(row, mine = false) {
-  /*
-   * An unbuilt rule has the same three slots as any other, both evidence
-   * tiers reading "nothing to judge yet". It is not that the tiers are
-   * absent - they are owed by the BUILD, which does not exist, and saying so
-   * in the same three positions is what lets the eye run down the column.
-   */
-  /*
-   * `unbuilt` stands in only for a tier that has NEVER run. Blanketing both
-   * tiers with it the moment a rule was unbuilt threw away real news: a rule
-   * can be unbuilt and still carry an agent run that came back blocked, and
-   * that run is the reason it is not built. What the strip owes an unbuilt
-   * rule is "nothing has judged this, and nothing could have" - which is what
-   * `never` means here - not silence about what did happen.
-   */
-  const quiet = (state) => (!row.built && state === 'never' ? 'unbuilt' : state);
-  const tiers = [
-    ['checks', quiet(checksTier(row)), null],
-    ['agent', quiet(row.agent?.state ?? 'na'), row.agent],
-  ];
-  // title="" is not a leftover: the row around this is a button carrying its
-  // own native title, and a native tooltip is inherited from the nearest
-  // ancestor that has one. An empty title stops that here, so hovering the
-  // strip opens the strip's bubble and nothing else.
-  return `<span class="tooltip tooltip-right flex w-11 shrink-0 items-center justify-center gap-0.5 text-[12px] leading-none"
-    title="" data-testid="panel.rule-tiers" data-tiers="${esc(tiers.map((t) => `${t[0]}:${t[1]}`).join(' '))}"
-    >${stripTip(tiers, row.acceptance)}${tiers
-      .map(([, state, cell]) => {
-        const [glyph, cls] = TIER_MARK[state] ?? TIER_MARK.na;
-        return `<span class="inline-block w-4 text-center ${
-          TIER_OWED.has(state) && !mine ? 'opacity-60' : cls
-        }">${glyph}</span>`;
-      })
-      .join('')}${signoffStack(row.acceptance, mine)}</span>`;
-}
+  function tierMarks(row, mine = false) {
+    /*
+     * An unbuilt rule has the same three slots as any other, both evidence
+     * tiers reading "nothing to judge yet". It is not that the tiers are
+     * absent - they are owed by the BUILD, which does not exist, and saying so
+     * in the same three positions is what lets the eye run down the column.
+     */
+    /*
+     * `unbuilt` stands in only for a tier that has NEVER run. Blanketing both
+     * tiers with it the moment a rule was unbuilt threw away real news: a rule
+     * can be unbuilt and still carry an agent run that came back blocked, and
+     * that run is the reason it is not built. What the strip owes an unbuilt
+     * rule is "nothing has judged this, and nothing could have" - which is what
+     * `never` means here - not silence about what did happen.
+     */
+    const quiet = (state) => (!row.built && state === 'never' ? 'unbuilt' : state);
+    const tiers = [
+      ['checks', quiet(checksTier(row)), null],
+      ['agent', quiet(row.agent?.state ?? 'na'), row.agent],
+    ];
+    // title="" is not a leftover: the row around this is a button carrying its
+    // own native title, and a native tooltip is inherited from the nearest
+    // ancestor that has one. An empty title stops that here, so hovering the
+    // strip opens the strip's bubble and nothing else.
+    return b`<span class="tooltip tooltip-right flex w-11 shrink-0 items-center justify-center gap-0.5 text-[12px] leading-none"
+    title="" data-testid="panel.rule-tiers" data-tiers="${tiers.map((t) => `${t[0]}:${t[1]}`).join(' ')}"
+    >${stripTip(tiers, row.acceptance)}${tiers.map(([, state]) => {
+      const [glyph, cls] = TIER_MARK[state] ?? TIER_MARK.na;
+      return b`<span class="inline-block w-4 text-center ${
+        TIER_OWED.has(state) && !mine ? 'opacity-60' : cls
+      }">${glyph}</span>`;
+    })}${signoffStack(row.acceptance, mine)}</span>`;
+  }
 
-/*
- * The header a screen's rules sit under.
- *
- * It carries the same icon the bar's screen picker does, because they name the
- * same thing and a reviewer should not have to learn that twice. The title is
- * allowed to wrap: a storyboard title says what state it is - "Rule detail
- * (state - open a rule on the Rules tab)" - and truncating that to an ellipsis
- * in a 384px rail throws away the half that distinguishes it.
- *
- * `data-screen-group`, not `data-screen`: the bar's screen picker already owns
- * that attribute, and giving it a second meaning in the list made
- * `[data-screen="rule-detail"]` resolve to a heading nobody could click
- * instead of the option it was written for.
- *
- * Sticky to the top of the list's own scrollport, so the screen you are
- * reading rules for is named however far down the group you are - forty-two
- * rules hang off the review page, and the heading scrolled away long before
- * you stopped needing it. The fill is opaque for the same reason: a
- * translucent band with rows sliding under it is unreadable exactly when it
- * is doing its job.
- */
-function screenHeader(id) {
-  const sc = screenById(id);
-  const title = sc ? (sc.title ?? sc.id) : id;
-  return `<div class="sticky top-0 z-10 flex items-start gap-2 border-b border-t border-base-300 bg-base-200 px-3.5 py-3 first:border-t-0"
-    data-testid="panel.rules-screen" data-screen-group="${esc(id ?? '')}">
+  /*
+   * The header a screen's rules sit under.
+   *
+   * It carries the same icon the bar's screen picker does, because they name the
+   * same thing and a reviewer should not have to learn that twice. The title is
+   * allowed to wrap: a storyboard title says what state it is - "Rule detail
+   * (state - open a rule on the Rules tab)" - and truncating that to an ellipsis
+   * in a 384px rail throws away the half that distinguishes it.
+   *
+   * `data-screen-group`, not `data-screen`: the bar's screen picker already owns
+   * that attribute, and giving it a second meaning in the list made
+   * `[data-screen="rule-detail"]` resolve to a heading nobody could click
+   * instead of the option it was written for.
+   *
+   * Sticky to the top of the list's own scrollport, so the screen you are
+   * reading rules for is named however far down the group you are - forty-two
+   * rules hang off the review page, and the heading scrolled away long before
+   * you stopped needing it. The fill is opaque for the same reason: a
+   * translucent band with rows sliding under it is unreadable exactly when it
+   * is doing its job.
+   */
+  function screenHeader(id) {
+    const sc = screenById(id);
+    const title = sc ? (sc.title ?? sc.id) : id;
+    return b`<div class="sticky top-0 z-10 flex items-start gap-2 border-b border-t border-base-300 bg-base-200 px-3.5 py-3 first:border-t-0"
+    data-testid="panel.rules-screen" data-screen-group="${id ?? ''}">
     <span class="mt-0.5 shrink-0 ${id ? 'text-primary' : 'opacity-30'}">${icon('frame-corners', 'size-3.5')}</span>
-    <span class="min-w-0 text-[12.5px] font-semibold leading-snug">${
-      title ? esc(title) : 'No screen'
-    }${id ? '' : '<span class="ml-1.5 font-normal opacity-40">judged without looking</span>'}</span>
+    <span class="min-w-0 text-[12.5px] font-semibold leading-snug">${title || 'No screen'}${
+      id ? A : b`<span class="ml-1.5 font-normal opacity-40">judged without looking</span>`
+    }</span>
   </div>`;
-}
+  }
 
-/** One rule, as the rail draws it. */
-function ruleRow(row) {
-  const mine = needsYou(row.rule);
-  /*
-   * A verdict picked this sitting is the one thing that still draws its own
-   * mark instead of the strip, and deliberately: it is not in the ledger
-   * yet. Standing outside the strip's vocabulary is how the row says the
-   * judgment is yours and unfiled.
-   */
-  const picked = S.session?.verdicts[row.rule];
-  const why = picked ? 'judged this session' : ruleWhy(row, mine);
-  const owes = mine && !picked ? (row.built ? 'walk' : 'sign') : '';
-  const thr = threadsFor(row.rule).length;
-  /*
-   * Two right-hand columns, always drawn, even when empty. What you owe and
-   * how much is being said about a rule are different questions, and run
-   * together in one warning-yellow string they read as one word - "walk 2"
-   * looked like a quantity of walking. Fixed widths so both answers stack
-   * into columns you can run an eye down; the thread count in plain ink at
-   * half strength, because it is context rather than a claim on you.
-   */
-  return `<button class="flex w-full cursor-pointer items-center gap-2.5 px-3.5 py-2 text-left text-[14px] hover:bg-base-200"
-      data-rule="${esc(row.rule)}" title="${esc(row.rule)} — ${esc(why)}">
+  /** One rule, as the rail draws it. */
+  function ruleRow(row) {
+    const mine = needsYou(row.rule);
+    /*
+     * A verdict picked this sitting is the one thing that still draws its own
+     * mark instead of the strip, and deliberately: it is not in the ledger
+     * yet. Standing outside the strip's vocabulary is how the row says the
+     * judgment is yours and unfiled.
+     */
+    const picked = S.session?.verdicts[row.rule];
+    const why = picked ? 'judged this session' : ruleWhy(row, mine);
+    const owes = mine && !picked ? (row.built ? 'walk' : 'sign') : '';
+    const thr = threadsFor(row.rule).length;
+    /*
+     * Two right-hand columns, always drawn, even when empty. What you owe and
+     * how much is being said about a rule are different questions, and run
+     * together in one warning-yellow string they read as one word - "walk 2"
+     * looked like a quantity of walking. Fixed widths so both answers stack
+     * into columns you can run an eye down; the thread count in plain ink at
+     * half strength, because it is context rather than a claim on you.
+     */
+    return b`<button class="flex w-full cursor-pointer items-center gap-2.5 px-3.5 py-2 text-left text-[14px] hover:bg-base-200"
+      data-rule="${row.rule}" title="${row.rule} — ${why}">
       ${
         picked
-          ? `<span class="w-11 shrink-0 text-center ${
+          ? b`<span class="w-11 shrink-0 text-center ${
               {
                 pass: 'text-success',
                 fail: 'text-error',
@@ -1672,126 +1718,125 @@ function ruleRow(row) {
             }">${{ pass: '✓', fail: '✗', approved: '✍︎', refining: '✎︎' }[picked]}</span>`
           : tierMarks(row, mine)
       }
-      <span class="truncate">${esc(shortName(row))}</span>
+      <span class="truncate">${shortName(row)}</span>
       <span class="ml-auto flex shrink-0 items-center gap-2 text-[11.5px] font-semibold">
         <span class="w-7 text-right text-warning">${owes}</span>
         <span class="w-7 text-right font-normal text-base-content/45">${thr ? `${thr}⚑` : ''}</span>
       </span>
     </button>`;
-}
-
-/*
- * The rail: screens, then the stories on them, then the rules.
- *
- * Grouping by story alone put `invites.batch` and `invites.list` next to each
- * other and never said where either was judged - so the reviewer held the
- * mapping from feature to screen in their head, on the one screen where it
- * matters most. The screen is the heading now, and the story keeps only what
- * the screen does not already say.
- */
-function listPane() {
-  if (!S.data.rows.length)
-    return '<p class="p-3.5 text-[13.5px] opacity-40">No rules in this blueprint.</p>';
-  const rows = matchingRows();
-  if (!rows.length)
-    return `<p class="p-3.5 text-[13.5px] opacity-40" data-testid="panel.rules-empty">No rule matches ${esc(
-      S.ruleQuery.trim(),
-    )}.</p>`;
-  let html = '';
-  for (const group of groupedRows(rows)) {
-    html += screenHeader(group.screen);
-    const labels = storyLabels(group.stories.map((g) => g.story));
-    for (const { story, rows: within } of group.stories) {
-      html += `<div class="px-3.5 pb-1 pt-2.5 ${LBL}" data-story="${esc(story)}">${esc(
-        labels.get(story),
-      )}</div>`;
-      html += within.map((row) => ruleRow(row)).join('');
-    }
   }
-  return html;
-}
 
-/** Opening a rule is a click on its row, wherever the row was just drawn. */
-function wireRuleRows() {
-  D.host.querySelectorAll('[data-rule]').forEach((el) => {
-    el.onclick = () => open(el.dataset.rule);
-  });
-}
+  /*
+   * The rail: screens, then the stories on them, then the rules.
+   *
+   * Grouping by story alone put `invites.batch` and `invites.list` next to each
+   * other and never said where either was judged - so the reviewer held the
+   * mapping from feature to screen in their head, on the one screen where it
+   * matters most. The screen is the heading now, and the story keeps only what
+   * the screen does not already say.
+   */
+  function listPane() {
+    if (!S.data.rows.length)
+      return b`<p class="p-3.5 text-[13.5px] opacity-40">No rules in this blueprint.</p>`;
+    const rows = matchingRows();
+    if (!rows.length)
+      return b`<p class="p-3.5 text-[13.5px] opacity-40" data-testid="panel.rules-empty">No rule matches ${S.ruleQuery.trim()}.</p>`;
+    return groupedRows(rows).map((group) => {
+      const labels = storyLabels(group.stories.map((g) => g.story));
+      return b`${screenHeader(group.screen)}${group.stories.map(
+      ({ story, rows: within }) =>
+        b`<div class="px-3.5 pb-1 pt-2.5 ${LBL}" data-story="${story}">${labels.get(story)}</div>
+          ${within.map((row) => ruleRow(row))}`,
+    )}`;
+    });
+  }
 
-/*
- * Filtering repaints the LIST and nothing else. A full render() would work -
- * the caret is put back either way - but the filter has to feel like the
- * letters are doing the work, and rebuilding the bar, the tabs and two other
- * panes on every keystroke is a lot of work to do behind a caret. Repainting
- * one element never touches the input, so there is no caret to restore and
- * no chance of restoring it a frame late.
- */
-function paintRules() {
-  const list = D.host.querySelector('.wdp-list');
-  if (!list) return;
-  list.innerHTML = listPane();
-  list.scrollTop = 0; // a filtered list is a new list; showing its middle is not helpful
-  wireRuleRows();
-}
+  /** Opening a rule is a click on its row, wherever the row was just drawn. */
+  function wireRuleRows() {
+    D.host.querySelectorAll('[data-rule]').forEach((el) => {
+      el.onclick = () => open(el.dataset.rule);
+    });
+  }
 
-function wireSearch() {
-  const box = D.host.querySelector('#wdp-search');
-  if (!box) return;
-  box.oninput = () => {
-    S.ruleQuery = box.value;
-    paintRules();
-  };
-  box.onkeydown = (e) => {
-    // Escape clears the box rather than reaching the page behind it, where it
-    // would end pin mode and leave the list still filtered.
-    if (e.key !== 'Escape' || !S.ruleQuery) return;
-    e.stopPropagation();
-    S.ruleQuery = '';
-    box.value = '';
-    paintRules();
-  };
-}
+  /*
+   * Filtering repaints the LIST and nothing else. A full render() would work -
+   * the caret is put back either way - but the filter has to feel like the
+   * letters are doing the work, and rebuilding the bar, the tabs and two other
+   * panes on every keystroke is a lot of work to do behind a caret. Repainting
+   * one element never touches the input, so there is no caret to restore and
+   * no chance of restoring it a frame late.
+   */
+  /*
+   * Filtering used to repaint the list element alone, because a wholesale
+   * innerHTML render behind every keystroke would eat the caret. Under lit the
+   * full render is a diff - the search box is the same element afterwards, so
+   * the caret never moves - and rendering the list separately would put two
+   * template managers on one container, which lit does not allow twice.
+   */
+  function paintRules() {
+    render();
+    const list = D.host.querySelector('.wdp-list');
+    if (list) list.scrollTop = 0; // a filtered list is a new list; showing its middle is not helpful
+  }
 
-/*
- * The legend: what every mark on the rail means, in one hover.
- *
- * Built FROM the same maps the rail draws from - TIER_MARK for the glyphs,
- * signoffDot for the dots - rather than from a hand-written copy of them.
- * A legend that is a second description of the vocabulary is a legend that
- * goes quietly wrong the first time the vocabulary moves, and this one has
- * already moved twice this week.
- *
- * The role passed to signoffDot is deliberately one nobody has tinted, so the
- * shapes draw in the panel's own ink: the legend is teaching SHAPE, and a
- * blue dot beside "signed" would read as though blue were part of the answer.
- * Colour is explained in its own line instead.
- */
-/*
- * Ordered worst-news-first, then anything the map holds that this list has not
- * named. Spelling the states out by hand let one go missing - `skipped` was
- * absent while the rail could still draw it (n-0122) - and a legend that is
- * silently incomplete is worse than none, because a reader who consults it
- * and finds nothing concludes the mark means what the nearest row says.
- * Deriving the tail means a new state appears here the moment it exists.
- */
-const LEGEND_ORDER = ['pass', 'fail', 'stale', 'never', 'blocked', 'skipped', 'unbuilt', 'na'];
-const LEGEND_TIERS = [
-  ...LEGEND_ORDER.filter((k) => k in TIER_MARK),
-  ...Object.keys(TIER_MARK).filter((k) => !LEGEND_ORDER.includes(k)),
-];
-const LEGEND_SIGNS = ['signed', 'approved', 'stale', 'none', 'sent-back'];
+  function wireSearch() {
+    const box = D.host.querySelector('#wdp-search');
+    if (!box) return;
+    box.oninput = () => {
+      S.ruleQuery = box.value;
+      paintRules();
+    };
+    box.onkeydown = (e) => {
+      // Escape clears the box rather than reaching the page behind it, where it
+      // would end pin mode and leave the list still filtered.
+      if (e.key !== 'Escape' || !S.ruleQuery) return;
+      e.stopPropagation();
+      S.ruleQuery = '';
+      box.value = '';
+      paintRules();
+    };
+  }
 
-function legendControl() {
-  const head = (t) =>
-    `<span class="col-span-2 pt-1 text-[10px] font-bold uppercase tracking-widest opacity-40">${t}</span>`;
-  const tierLine = (state) => {
-    const [glyph, cls, why] = TIER_MARK[state];
-    return `<span class="text-center ${cls}">${glyph}</span><span>${esc(why)}</span>`;
-  };
-  const signLine = (state) =>
-    `<span class="flex justify-center">${signoffDot({ role: '_', state }, true)}</span>
-     <span>${esc(SIGN_SAY[state])}</span>`;
-  return `<span class="tooltip tooltip-top shrink-0" data-testid="panel.legend">
+  /*
+   * The legend: what every mark on the rail means, in one hover.
+   *
+   * Built FROM the same maps the rail draws from - TIER_MARK for the glyphs,
+   * signoffDot for the dots - rather than from a hand-written copy of them.
+   * A legend that is a second description of the vocabulary is a legend that
+   * goes quietly wrong the first time the vocabulary moves, and this one has
+   * already moved twice this week.
+   *
+   * The role passed to signoffDot is deliberately one nobody has tinted, so the
+   * shapes draw in the panel's own ink: the legend is teaching SHAPE, and a
+   * blue dot beside "signed" would read as though blue were part of the answer.
+   * Colour is explained in its own line instead.
+   */
+  /*
+   * Ordered worst-news-first, then anything the map holds that this list has not
+   * named. Spelling the states out by hand let one go missing - `skipped` was
+   * absent while the rail could still draw it (n-0122) - and a legend that is
+   * silently incomplete is worse than none, because a reader who consults it
+   * and finds nothing concludes the mark means what the nearest row says.
+   * Deriving the tail means a new state appears here the moment it exists.
+   */
+  const LEGEND_ORDER = ['pass', 'fail', 'stale', 'never', 'blocked', 'skipped', 'unbuilt', 'na'];
+  const LEGEND_TIERS = [
+    ...LEGEND_ORDER.filter((k) => k in TIER_MARK),
+    ...Object.keys(TIER_MARK).filter((k) => !LEGEND_ORDER.includes(k)),
+  ];
+  const LEGEND_SIGNS = ['signed', 'approved', 'stale', 'none', 'sent-back'];
+
+  function legendControl() {
+    const head = (t) =>
+      b`<span class="col-span-2 pt-1 text-[10px] font-bold uppercase tracking-widest opacity-40">${t}</span>`;
+    const tierLine = (state) => {
+      const [glyph, cls, why] = TIER_MARK[state];
+      return b`<span class="text-center ${cls}">${glyph}</span><span>${why}</span>`;
+    };
+    const signLine = (state) =>
+      b`<span class="flex justify-center">${signoffDot({ role: '_', state }, true)}</span>
+      <span>${SIGN_SAY[state]}</span>`;
+    return b`<span class="tooltip tooltip-top shrink-0" data-testid="panel.legend">
     <!-- z-50 here is load-bearing, and unlike the rule strip's bubble it was
          measured rather than assumed: this one opens UPWARD across the whole
          scrolling list from the last row in the panel, and at daisyUI's own
@@ -1800,8 +1845,8 @@ function legendControl() {
     <span class="tooltip-content z-50 w-72 whitespace-normal text-left text-[11.5px] leading-snug"
       data-testid="panel.legend-tip"
       ><span class="grid grid-cols-[1.25rem_1fr] items-center gap-x-2 gap-y-0.5">
-      ${head('Evidence — checks, then agent')}${LEGEND_TIERS.map(tierLine).join('')}
-      ${head('Signatures — one slot per role')}${LEGEND_SIGNS.map(signLine).join('')}
+      ${head('Evidence — checks, then agent')}${LEGEND_TIERS.map(tierLine)}
+      ${head('Signatures — one slot per role')}${LEGEND_SIGNS.map(signLine)}
       ${head('And around them')}
       <span class="text-center text-warning">◆</span><span>Warning yellow anywhere means the rule is waiting on <b>you</b>.</span>
       <span class="text-center text-warning">▪</span><span><b>sign</b> is a spec to accept; <b>walk</b> is a build to judge.</span>
@@ -1809,37 +1854,37 @@ function legendControl() {
     </span></span>
     <span class="flex cursor-help items-center gap-1 opacity-50">${icon('info', 'size-3.5')}Legend</span>
   </span>`;
-}
+  }
 
-/*
- * The screenshots an agent walkdown left behind, shown over the whole desk.
- */
+  /*
+   * The screenshots an agent walkdown left behind, shown over the whole desk.
+   */
 
-/*
- * The screenshots themselves, over the whole desk.
- *
- * Deliberately NOT a native <dialog showModal()>: the shell is already a
- * manual popover in the browser's top layer, and promoting a second element
- * into it from inside the first is exactly the pairing that left the rule
- * list unable to take a wheel event at all (n-0086). A plain layer inside
- * the same shadow root is a modal by every behaviour that matters here -
- * it covers the surface, it takes the pointer, and Escape closes it.
- */
-let shotLayer = null;
-const shotsOpen = () => Boolean(shotLayer);
-function closeShots() {
-  shotLayer?.remove();
-  shotLayer = null;
-}
-function openShots(paths) {
-  closeShots();
-  shotLayer = document.createElement('div');
-  shotLayer.dataset.theme = 'blueprint';
-  shotLayer.dataset.testid = 'detail.screenshots-modal';
-  shotLayer.style.cssText = `position:fixed; inset:0; z-index:10; pointer-events:auto;
+  /*
+   * The screenshots themselves, over the whole desk.
+   *
+   * Deliberately NOT a native <dialog showModal()>: the shell is already a
+   * manual popover in the browser's top layer, and promoting a second element
+   * into it from inside the first is exactly the pairing that left the rule
+   * list unable to take a wheel event at all (n-0086). A plain layer inside
+   * the same shadow root is a modal by every behaviour that matters here -
+   * it covers the surface, it takes the pointer, and Escape closes it.
+   */
+  let shotLayer = null;
+  const shotsOpen = () => Boolean(shotLayer);
+  function closeShots() {
+    shotLayer?.remove();
+    shotLayer = null;
+  }
+  function openShots(paths) {
+    closeShots();
+    shotLayer = document.createElement('div');
+    shotLayer.dataset.theme = 'blueprint';
+    shotLayer.dataset.testid = 'detail.screenshots-modal';
+    shotLayer.style.cssText = `position:fixed; inset:0; z-index:10; pointer-events:auto;
     background:rgba(16,20,30,.72); display:flex; flex-direction:column; gap:10px;
     align-items:center; justify-content:flex-start; overflow:auto; padding:20px;`;
-  shotLayer.innerHTML = `
+    shotLayer.innerHTML = `
     <div class="flex w-full max-w-4xl items-center gap-2 text-base-100">
       <span class="text-[12px] font-semibold uppercase tracking-widest opacity-80">Screenshots</span>
       <button class="btn btn-xs ml-auto" data-testid="detail.screenshots-close">Close</button>
@@ -1853,140 +1898,141 @@ function openShots(paths) {
     </figure>`,
       )
       .join('')}`;
-  // The backdrop dismisses, the pictures do not: a click meant for an image
-  // must not close the thing it is looking at.
-  shotLayer.onclick = (e) => {
-    if (e.target === shotLayer) closeShots();
-  };
-  shotLayer.querySelector('[data-testid="detail.screenshots-close"]').onclick = closeShots;
-  D.sr.appendChild(shotLayer);
-}
+    // The backdrop dismisses, the pictures do not: a click meant for an image
+    // must not close the thing it is looking at.
+    shotLayer.onclick = (e) => {
+      if (e.target === shotLayer) closeShots();
+    };
+    shotLayer.querySelector('[data-testid="detail.screenshots-close"]').onclick = closeShots;
+    D.sr.appendChild(shotLayer);
+  }
 
-/*
- * One conversation, opened: the thread's own detail pane, and the card the
- * lists draw for it.
- */
+  /*
+   * One conversation, opened: the thread's own detail pane, and the card the
+   * lists draw for it.
+   */
 
-/*
- * A thread, collapsed: the opening message and the way into the rest of it.
- * It reads the way a message with replies reads anywhere - a face, a name, a
- * time, what was said, and under it the people in the thread, the number of
- * replies, and when it was last touched. The count is the door; opening it
- * slides the whole conversation in beside the rule.
- */
-function threadCard(t, where = null) {
-  const who = MSG.displayName(t.author, names());
-  const unread = unreadCount(t);
-  // No card, no rail: threads share one surface with the pane, the way
-  // messages share a channel. What is waiting on you is said in words - the
-  // status chip and the unread count - rather than by tinting a box.
-  //
-  // `where` is passed only by the Threads tab, which is not scoped to a rule
-  // and so has to say what each conversation is about. It also makes the
-  // whole row the way in: under a rule the reply line is enough, because the
-  // rule above it is already the context.
-  return `<div class="wd-row px-3.5 py-2${where ? ' cursor-pointer' : ''}"${
-    where ? ` data-open-thread="${esc(t.id)}"` : ''
-  }>
-    ${where ? `<div class="mb-1 truncate text-[11px] opacity-45" data-testid="thread.where">${esc(where)}</div>` : ''}
+  /*
+   * A thread, collapsed: the opening message and the way into the rest of it.
+   * It reads the way a message with replies reads anywhere - a face, a name, a
+   * time, what was said, and under it the people in the thread, the number of
+   * replies, and when it was last touched. The count is the door; opening it
+   * slides the whole conversation in beside the rule.
+   */
+  function threadCard(t, where = null) {
+    const who = MSG.displayName(t.author, names());
+    const unread = unreadCount(t);
+    // No card, no rail: threads share one surface with the pane, the way
+    // messages share a channel. What is waiting on you is said in words - the
+    // status chip and the unread count - rather than by tinting a box.
+    //
+    // `where` is passed only by the Threads tab, which is not scoped to a rule
+    // and so has to say what each conversation is about. It also makes the
+    // whole row the way in: under a rule the reply line is enough, because the
+    // rule above it is already the context.
+    return b`<div class="wd-row px-3.5 py-2${where ? ' cursor-pointer' : ''}"
+    data-open-thread="${where ? t.id : A}">
+    ${where ? b`<div class="mb-1 truncate text-[11px] opacity-45" data-testid="thread.where">${where}</div>` : A}
     <div class="wd-msg">
-      ${MSG.avatar(who)}
+      ${o$1(MSG.avatar(who))}
       <div class="wd-col min-w-0">
         <div class="wd-head">
-          <span class="wd-who">${esc(who)}</span>
-          <span class="wd-at" title="${esc(MSG.stamp(t.created))}">${esc(MSG.ago(t.created))}</span>
+          <span class="wd-who">${who}</span>
+          <span class="wd-at" title="${MSG.stamp(t.created)}">${MSG.ago(t.created)}</span>
           <!-- The id stays visible, quietly: a conversation you can name is a
                conversation you can point at from a run record or a commit. -->
-          <span class="wd-at font-mono">${esc(t.id)}</span>
+          <span class="wd-at font-mono">${t.id}</span>
           <span class="ml-auto flex shrink-0 items-center gap-1">
-            ${unread ? `<span class="badge badge-xs badge-error">${unread} new</span>` : ''}
-            <span class="badge badge-xs ${CHIP[t.status] ?? 'badge-ghost'}">${esc(t.status)}</span>
+            ${unread ? b`<span class="badge badge-xs badge-error">${unread} new</span>` : A}
+            <span class="badge badge-xs ${CHIP[t.status] ?? 'badge-ghost'}">${t.status}</span>
           </span>
         </div>
-        <div class="wd-text wd-preview">${MSG.body(t.body, { rules: (S.data?.rows ?? []).map((r) => r.rule) })}</div>
-        ${MSG.repliesLine(t, names())}
+        <div class="wd-text wd-preview">${o$1(
+          MSG.body(t.body, { rules: (S.data?.rows ?? []).map((r) => r.rule) }),
+        )}</div>
+        ${o$1(MSG.repliesLine(t, names()))}
       </div>
     </div>
   </div>`;
-}
+  }
 
-/*
- * The thread itself: its own screen, one slide to the right of the rule it
- * belongs to. A conversation deserves the width - reading and answering
- * should not happen in a card wedged between a rule's steps and its verify
- * list - and the way back is where you came from.
- */
-/**
- * What the way out of a thread is called. On the Threads tab the thread is
- * the tab's own detail, so the way back is the list of threads - naming a
- * rule there would offer a trip nobody took.
- */
-const backFromThread = (row) =>
-  S.listTab === 'threads' ? 'All threads' : row ? shortName(row) : 'All rules';
+  /*
+   * The thread itself: its own screen, one slide to the right of the rule it
+   * belongs to. A conversation deserves the width - reading and answering
+   * should not happen in a card wedged between a rule's steps and its verify
+   * list - and the way back is where you came from.
+   */
+  /**
+   * What the way out of a thread is called. On the Threads tab the thread is
+   * the tab's own detail, so the way back is the list of threads - naming a
+   * rule there would offer a trip nobody took.
+   */
+  const backFromThread = (row) =>
+    S.listTab === 'threads' ? 'All threads' : row ? shortName(row) : 'All rules';
 
-function threadPane() {
-  const t = (S.data?.threads ?? []).find((x) => x.id === S.openThread);
-  // Whatever became of the thread — ended, reloaded away, never there — this
-  // screen is never a dead end.
-  if (!t)
-    return `
+  function threadPane() {
+    const t = (S.data?.threads ?? []).find((x) => x.id === S.openThread);
+    // Whatever became of the thread — ended, reloaded away, never there — this
+    // screen is never a dead end.
+    if (!t)
+      return b`
     <div class="flex items-center px-2 pt-2">
-      <button class="wdp-thread-back btn btn-ghost btn-xs text-primary">← ${esc(
-        backFromThread(S.selected),
-      )}</button>
+      <button class="wdp-thread-back btn btn-ghost btn-xs text-primary">← ${backFromThread(S.selected)}</button>
     </div>
     <div class="px-3.5 pt-1 text-[12.5px] opacity-60">That thread is no longer open here.</div>`;
-  const row = t.anchor?.rule ? S.data.rows.find((r) => r.rule === t.anchor.rule) : null;
-  const sc = screenById(t.anchor?.screen);
-  const where = [
-    t.anchor?.rule ? '' : 'not attached to a rule',
-    sc?.title ?? t.anchor?.screen,
-    t.anchor?.element
-      ? `<span class="font-mono">${esc(t.anchor.element)}</span>`
-      : t.anchor?.position
-        ? 'by position'
-        : '',
-    t.anchor?.viewport
-      ? `${esc(t.anchor.viewport.name)} ${esc(String(t.anchor.viewport.width))}`
-      : '',
-  ]
-    .filter(Boolean)
-    .join(' · ');
-  const sketch = ghostSource(sc);
-  const acts = threadActions(t);
-  const me = whoAmI();
-  const ended = TERMINAL.includes(t.status) ? (t.replies ?? []).at(-1) : null;
-  return `
+    const row = t.anchor?.rule ? S.data.rows.find((r) => r.rule === t.anchor.rule) : null;
+    const sc = screenById(t.anchor?.screen);
+    const where = [
+      t.anchor?.rule ? '' : 'not attached to a rule',
+      sc?.title ?? t.anchor?.screen,
+      t.anchor?.element
+        ? b`<span class="font-mono">${t.anchor.element}</span>`
+        : t.anchor?.position
+          ? 'by position'
+          : '',
+      t.anchor?.viewport ? `${t.anchor.viewport.name} ${t.anchor.viewport.width}` : '',
+    ].filter(Boolean);
+    const sketch = ghostSource(sc);
+    const acts = threadActions(t);
+    const me = whoAmI();
+    const ended = TERMINAL.includes(t.status) ? (t.replies ?? []).at(-1) : null;
+    return b`
     <div class="flex items-center gap-1 px-2 pt-2">
-      <button class="wdp-thread-back btn btn-ghost btn-xs text-primary" data-testid="thread.close">← ${esc(
-        backFromThread(row),
-      )}</button>
+      <button class="wdp-thread-back btn btn-ghost btn-xs text-primary" data-testid="thread.close">← ${backFromThread(row)}</button>
       <span class="ml-auto flex items-center gap-1 pr-1.5 text-[11px]" data-testid="thread.provenance">
-        <b class="opacity-60">${esc(t.id)}</b>
-        <span class="badge badge-xs ${CHIP[t.status] ?? 'badge-ghost'}">${esc(t.status)}</span>
+        <b class="opacity-60">${t.id}</b>
+        <span class="badge badge-xs ${CHIP[t.status] ?? 'badge-ghost'}">${t.status}</span>
       </span>
     </div>
-    ${where ? `<div class="px-3.5 pb-1 text-[11px] opacity-45">${where}</div>` : ''}
+    ${
+      where.length
+        ? b`<div class="px-3.5 pb-1 text-[11px] opacity-45">${where.map(
+            (part, i) => b`${i ? ' · ' : A}${part}`,
+          )}</div>`
+        : A
+    }
     <div class="min-h-0 flex-1 overflow-y-auto px-3.5 pb-2" data-testid="thread.body">
-      ${MSG.stream(t, {
-        seenAt: seenAtOpen[t.id] ?? null,
-        rules: (S.data?.rows ?? []).map((r) => r.rule),
-        pending: pendingReplies.get(t.id) ?? [],
-        names: names(),
-      })}
+      ${o$1(
+        MSG.stream(t, {
+          seenAt: seenAtOpen[t.id] ?? null,
+          rules: (S.data?.rows ?? []).map((r) => r.rule),
+          pending: pendingReplies.get(t.id) ?? [],
+          names: names(),
+        }),
+      )}
       ${
         ended
-          ? `<div class="mt-2 flex items-center gap-1.5 rounded border border-success/40 px-2 py-1 text-[11px]">
-        <span class="text-success">✓</span> ${esc(t.status === 'waived' ? 'Waived' : t.status)}${
-          ended.author ? ` by <b>${esc(MSG.displayName(ended.author, names()))}</b>` : ''
-        } · ${esc(MSG.ago(ended.created))}</div>`
-          : ''
+          ? b`<div class="mt-2 flex items-center gap-1.5 rounded border border-success/40 px-2 py-1 text-[11px]">
+        <span class="text-success">✓</span> ${t.status === 'waived' ? 'Waived' : t.status}${
+          ended.author ? b` by <b>${MSG.displayName(ended.author, names())}</b>` : A
+        } · ${MSG.ago(ended.created)}</div>`
+          : A
       }
       ${
         sketch?.proposed
-          ? `<button class="btn btn-xs btn-outline mt-2 w-full" data-sketch="${esc(t.anchor.screen)}">
+          ? b`<button class="btn btn-xs btn-outline mt-2 w-full" data-sketch="${t.anchor.screen}">
         ⚠ View the proposed sketch</button>`
-          : ''
+          : A
       }
     </div>
     <!-- The composer stays put at the foot of the screen: type, press Enter,
@@ -1994,208 +2040,250 @@ function threadPane() {
          whoever you are recording as, changed in Settings like everywhere. -->
     <div class="shrink-0 border-t border-base-300 p-2">
       <textarea id="wdp-note" data-testid="thread.reply" rows="2" class="textarea textarea-xs w-full resize-none"
-        placeholder="Reply…">${esc(S.threadNote)}</textarea>
+        placeholder="Reply…">${S.threadNote}</textarea>
       <div class="mt-1 flex flex-wrap items-center gap-1">
-        <span class="text-[10px] opacity-40">as <button id="wdp-tactor" class="link">${esc(
-          me || 'set your name…',
-        )}</button> · <b>Enter</b> sends</span>
-        ${acts
-          .map(
-            ([label, st, quiet], i) =>
-              `<button class="btn btn-xs${quiet ? ' btn-ghost opacity-60' : ''}${i === 0 ? ' ml-auto' : ''}"
-            data-testid="thread.actions" data-act="${esc(st)}" data-tid="${esc(t.id)}">${label}</button>`,
-          )
-          .join('')}
+        <span class="text-[10px] opacity-40">as <button id="wdp-tactor" class="link">${me || 'set your name…'}</button> · <b>Enter</b> sends</span>
+        ${acts.map(
+          ([label, st, quiet], i) =>
+            b`<button class="btn btn-xs${quiet ? ' btn-ghost opacity-60' : ''}${i === 0 ? ' ml-auto' : ''}"
+            data-testid="thread.actions" data-act="${st}" data-tid="${t.id}">${label}</button>`,
+        )}
       </div>
       <div class="mt-1 hidden text-[11px] text-warning" data-testid="thread.say" id="wdp-tsay"></div>
     </div>`;
-}
-
-/*
- * The rule detail: the whole of one rule — its statement, its steps, what each
- * tier has recorded, the check's own source behind a disclosure, and the
- * conversations anchored to it.
- */
-
-/*
- * Where this rule's check source lives.
- *
- * The ledger is asked first, because a recorded ref is the truth about what
- * a run actually went through. But a rule whose checks have never been run
- * still HAS check source, and a disclosure that stays empty until the first
- * recorded run is a disclosure nobody ever finds - which is exactly what was
- * reported (n-0084). So the suite's own scan is the fallback.
- */
-const checkRefs = (row) => {
-  const recorded = [
-    ...new Set((S.data?.targets ?? []).flatMap((t) => row.cells?.[t]?.checks ?? [])),
-  ];
-  return recorded.length ? recorded : (S.data?.checkSource?.[row.rule] ?? []);
-};
-
-/*
- * Fetch the source behind a rule's checks, keep it, and repaint.
- *
- * Kept rather than written straight into the disclosure: the answer outlives
- * several rebuilds of the pane that asked for it. A request the reader has
- * moved on from is dropped on arrival rather than painted over whatever they
- * are reading now.
- */
-async function loadCheckSource(rule) {
-  if (S.srcCache.rule === rule && S.srcCache.html) return;
-  S.srcCache = { rule, html: null };
-  let html;
-  try {
-    const res = await fetch(api(`/api/checks?rule=${encodeURIComponent(rule)}`));
-    const out = await res.json();
-    html =
-      (out.checks ?? [])
-        .map((c) =>
-          c.missing
-            ? `<div class="text-warning">${esc(c.ref)} — no longer in the tree</div>`
-            : `<div class="mb-1"><div class="font-mono text-[10.5px] opacity-60">${esc(c.ref)}</div>
-          <pre class="overflow-x-auto whitespace-pre rounded bg-base-300/40 p-1.5 text-[10.5px] leading-snug">${esc(
-            c.source,
-          )}</pre></div>`,
-        )
-        .join('') || 'No source recorded.';
-  } catch {
-    html = 'walkdown server unreachable.';
   }
-  if (S.srcCache.rule !== rule) return;
-  S.srcCache.html = html;
-  render();
-}
 
-/*
- * What the rule's standing rests on: the latest ledger result for each kind
- * of evidence it asks for, who or what produced it, and when. The chain of
- * trust belongs where the rule is judged - a verdict you cannot see the
- * basis of is a verdict you have to take on faith.
- */
-function evidenceRows(row) {
-  const STATE = {
-    pass: ['✓', 'text-success'],
-    fail: ['✗', 'text-error'],
-    stale: ['~', 'text-warning'],
-    approved: ['✍︎', 'text-warning'],
-    refining: ['✎︎', 'text-warning'],
-    skipped: ['–', 'opacity-50'],
-    blocked: ['⊘', 'text-warning'],
-    never: ['○', 'opacity-50'],
-    na: ['·', 'opacity-40'],
-  };
-  const line = (label, cell) => {
-    const [glyph, cls] = STATE[cell?.state] ?? STATE.na;
-    const who = cell?.actor ? ` · ${esc(cell.actor)}` : '';
-    const when = cell?.created ? ` · ${esc(MSG.ago(cell.created))}` : '';
-    const said =
-      cell?.state === 'never'
-        ? 'never run'
-        : cell?.state === 'na'
-          ? 'not required'
-          : `${esc(cell.state)}${who}${when}`;
-    return `<div class="evrow" title="${esc(cell?.runId ?? '')}">
-      <span class="src">${esc(label)}</span>
-      <span class="${cls}">${glyph} ${said}</span></div>`;
-  };
   /*
-   * The screenshots an agent's run attached. They are that run's evidence,
-   * not a tier of their own, so they hang under the agent's row as a bullet
-   * rather than standing beside it as a fourth kind of verdict (n-0100) -
-   * and they are a link, because a count of pictures nobody can look at is
-   * not evidence.
+   * The rule detail: the whole of one rule — its statement, its steps, what each
+   * tier has recorded, the check's own source behind a disclosure, and the
+   * conversations anchored to it.
    */
-  const shots = (cell) => {
-    const shot = cell?.evidence ?? [];
-    if (!shot.length) return '';
-    return `<div class="evrow evshot">
+
+  /*
+   * Where this rule's check source lives.
+   *
+   * The ledger is asked first, because a recorded ref is the truth about what
+   * a run actually went through. But a rule whose checks have never been run
+   * still HAS check source, and a disclosure that stays empty until the first
+   * recorded run is a disclosure nobody ever finds - which is exactly what was
+   * reported (n-0084). So the suite's own scan is the fallback.
+   */
+  const checkRefs = (row) => {
+    const recorded = [
+      ...new Set((S.data?.targets ?? []).flatMap((t) => row.cells?.[t]?.checks ?? [])),
+    ];
+    return recorded.length ? recorded : (S.data?.checkSource?.[row.rule] ?? []);
+  };
+
+  /*
+   * Fetch the source behind a rule's checks, keep it, and repaint.
+   *
+   * Kept rather than written straight into the disclosure: the answer outlives
+   * several rebuilds of the pane that asked for it. A request the reader has
+   * moved on from is dropped on arrival rather than painted over whatever they
+   * are reading now.
+   */
+  async function loadCheckSource(rule) {
+    if (S.srcCache.rule === rule && S.srcCache.html) return;
+    S.srcCache = { rule, view: null };
+    let view;
+    try {
+      const res = await fetch(api(`/api/checks?rule=${encodeURIComponent(rule)}`));
+      const out = await res.json();
+      const checks = out.checks ?? [];
+      view = checks.length
+        ? checks.map((c) =>
+            c.missing
+              ? b`<div class="text-warning">${c.ref} — no longer in the tree</div>`
+              : b`<div class="mb-1"><div class="font-mono text-[10.5px] opacity-60">${c.ref}</div>
+          <pre class="overflow-x-auto whitespace-pre rounded bg-base-300/40 p-1.5 text-[10.5px] leading-snug">${c.source}</pre></div>`,
+          )
+        : 'No source recorded.';
+    } catch {
+      view = 'walkdown server unreachable.';
+    }
+    if (S.srcCache.rule !== rule) return;
+    S.srcCache.view = view;
+    render();
+  }
+
+  /*
+   * What the rule's standing rests on: the latest ledger result for each kind
+   * of evidence it asks for, who or what produced it, and when. The chain of
+   * trust belongs where the rule is judged - a verdict you cannot see the
+   * basis of is a verdict you have to take on faith.
+   */
+  function evidenceRows(row) {
+    const STATE = {
+      pass: ['✓', 'text-success'],
+      fail: ['✗', 'text-error'],
+      stale: ['~', 'text-warning'],
+      approved: ['✍︎', 'text-warning'],
+      refining: ['✎︎', 'text-warning'],
+      skipped: ['–', 'opacity-50'],
+      blocked: ['⊘', 'text-warning'],
+      never: ['○', 'opacity-50'],
+      na: ['·', 'opacity-40'],
+    };
+    const line = (label, cell) => {
+      const [glyph, cls] = STATE[cell?.state] ?? STATE.na;
+      const who = cell?.actor ? ` · ${cell.actor}` : '';
+      const when = cell?.created ? ` · ${MSG.ago(cell.created)}` : '';
+      const said =
+        cell?.state === 'never'
+          ? 'never run'
+          : cell?.state === 'na'
+            ? 'not required'
+            : `${cell.state}${who}${when}`;
+      return b`<div class="evrow" title="${cell?.runId ?? ''}">
+      <span class="src">${label}</span>
+      <span class="${cls}">${glyph} ${said}</span></div>`;
+    };
+    /*
+     * The screenshots an agent's run attached. They are that run's evidence,
+     * not a tier of their own, so they hang under the agent's row as a bullet
+     * rather than standing beside it as a fourth kind of verdict (n-0100) -
+     * and they are a link, because a count of pictures nobody can look at is
+     * not evidence.
+     */
+    const shots = (cell) => {
+      const shot = cell?.evidence ?? [];
+      if (!shot.length) return '';
+      return b`<div class="evrow evshot">
       <span class="src"></span>
       <span class="opacity-70">• Screenshots —
         <button class="link link-hover text-primary" data-testid="detail.screenshots"
-          data-shots="${esc(JSON.stringify(shot))}"
+          data-shots="${JSON.stringify(shot)}"
           title="Open the ${shot.length} screenshot${shot.length > 1 ? 's' : ''} this run attached"
           >open ${shot.length}</button></span></div>`;
-  };
-  /*
-   * A tier the rule declares it cannot honestly have, said in the row that
-   * tier's evidence would have occupied. An excuse nobody can read is one
-   * nobody can argue with, which is the whole reason it is written down
-   * rather than left as an omission - so it is a line on the page, not a
-   * tooltip and not a silence where a row used to be.
-   */
-  const excuse = (label, why) => `<div class="evrow" data-testid="detail.excuse">
-    <span class="src">${esc(label)}</span>
-    <span class="opacity-70">— not checkable here: ${esc(why)}</span></div>`;
-  const rows = [
-    ...(row.verify.includes('checks')
-      ? (S.data?.targets ?? []).map((t) => line(`checks/${t}`, row.cells?.[t]))
-      : []),
-    row.excuses?.checks ? excuse('checks', row.excuses.checks) : '',
-    ...(row.verify.includes('agent') ? [line('agent', row.agent), shots(row.agent)] : []),
-    row.excuses?.agent ? excuse('agent', row.excuses.agent) : '',
-    ...(row.verify.includes('human') ? [line('human', row.human)] : []),
-  ].filter(Boolean);
-  // A rule with nothing recorded says so, rather than showing an empty box.
-  return rows.length
-    ? rows.join('')
-    : '<div class="text-[13px] opacity-50">Nothing recorded yet.</div>';
-}
+    };
+    /*
+     * A tier the rule declares it cannot honestly have, said in the row that
+     * tier's evidence would have occupied. An excuse nobody can read is one
+     * nobody can argue with, which is the whole reason it is written down
+     * rather than left as an omission - so it is a line on the page, not a
+     * tooltip and not a silence where a row used to be.
+     */
+    const excuse = (label, why) => b`<div class="evrow" data-testid="detail.excuse">
+    <span class="src">${label}</span>
+    <span class="opacity-70">— not checkable here: ${why}</span></div>`;
+    const rows = [
+      ...(row.verify.includes('checks')
+        ? (S.data?.targets ?? []).map((t) => line(`checks/${t}`, row.cells?.[t]))
+        : []),
+      row.excuses?.checks ? excuse('checks', row.excuses.checks) : '',
+      ...(row.verify.includes('agent') ? [line('agent', row.agent), shots(row.agent)] : []),
+      row.excuses?.agent ? excuse('agent', row.excuses.agent) : '',
+      ...(row.verify.includes('human') ? [line('human', row.human)] : []),
+    ].filter(Boolean);
+    // A rule with nothing recorded says so, rather than showing an empty box.
+    return rows.length ? rows : b`<div class="text-[13px] opacity-50">Nothing recorded yet.</div>`;
+  }
 
-function detailPane() {
-  const r = S.selected;
-  // A pin with no rule has no rule screen: it opens on the thread screen
-  // itself, and this slot is only what slides past on the way there.
-  if (!r)
-    return `
+  function detailPane() {
+    const r = S.selected;
+    // A pin with no rule has no rule screen: it opens on the thread screen
+    // itself, and this slot is only what slides past on the way there.
+    if (!r)
+      return b`
     <div class="flex items-center px-2 pt-2">
       <button class="wdp-back btn btn-ghost btn-xs text-primary" data-testid="detail.back">← All rules</button>
     </div>
     <div class="px-3.5 pt-1 text-[12.5px] opacity-60">This thread is not attached to a rule.</div>`;
-  const threads = threadsFor(r.rule);
-  /*
-   * A step writes the things it is about in backticks - anchors and screen
-   * ids, the same tokens lint scans for. An anchor among them is a pointer:
-   * hovering it lights the element up on the surface under review, so
-   * reading a step and finding what it means are one act rather than a hunt
-   * (n-0087). Only DECLARED anchors get the treatment; anything else in
-   * backticks is a screen id or prose and stays plain type.
-   */
-  const anchors = declaredAnchors();
-  const steps = r.steps
-    ? Object.entries(r.steps)
-        .map(
+    const threads = threadsFor(r.rule);
+    /*
+     * A step writes the things it is about in backticks - anchors and screen
+     * ids, the same tokens lint scans for. An anchor among them is a pointer:
+     * hovering it lights the element up on the surface under review, so
+     * reading a step and finding what it means are one act rather than a hunt
+     * (n-0087). Only DECLARED anchors get the treatment; anything else in
+     * backticks is a screen id or prose and stays plain type.
+     */
+    const anchors = declaredAnchors();
+    const token = (tok) =>
+      anchors.has(tok)
+        ? b`<code class="wdp-anchor cursor-help rounded bg-base-200 px-1 text-xs underline decoration-dotted underline-offset-2" data-anchor="${tok}" title="Show this on the surface">${tok}</code>`
+        : b`<code class="rounded bg-base-200 px-1 text-xs">${tok}</code>`;
+    const stepText = (s) => {
+      const parts = [];
+      let last = 0;
+      for (const m of String(s).matchAll(/`([^`]+)`/g)) {
+        parts.push(s.slice(last, m.index), token(m[1]));
+        last = m.index + m[0].length;
+      }
+      parts.push(s.slice(last));
+      return parts;
+    };
+    const steps = r.steps
+      ? Object.entries(r.steps).map(
           ([ph, items]) =>
-            `<span class="${LBL} pt-1">${esc(ph)}</span><span>${items
-              .map((s) =>
-                esc(s).replace(/`([^`]+)`/g, (_m, tok) =>
-                  anchors.has(tok)
-                    ? `<code class="wdp-anchor cursor-help rounded bg-base-200 px-1 text-xs underline decoration-dotted underline-offset-2" data-anchor="${tok}" title="Show this on the surface">${tok}</code>`
-                    : `<code class="rounded bg-base-200 px-1 text-xs">${tok}</code>`,
-                ),
-              )
-              .join('<br>')}</span>`,
+            b`<span class="${LBL} pt-1">${ph}</span><span>${items.map(
+            (s, i) => b`${i ? b`<br>` : A}${stepText(s)}`,
+          )}</span>`,
         )
-        .join('')
-    : '';
-  const picked = S.session?.verdicts[r.rule];
-  // Step through the rules in the order the list shows them, without going
-  // back to it. The back link keeps its word ("All rules") so the bare
-  // arrows beside it read as the stepper rather than as a second way out.
-  /*
-   * The list groups by screen now, so blueprint order and rail order are two
-   * different sequences. The stepper follows the RAIL - it exists to move
-   * through the rules the way they are shown, and arrows that jumped to
-   * whatever came next in a file would land somewhere the reviewer was not
-   * looking.
-   */
-  const walk = orderedRows();
-  const at = walk.findIndex((x) => x.rule === r.rule);
-  const step = (row, cls, glyph, label) =>
-    `<div class="tooltip tooltip-left" data-tip="${esc(row ? `${label} rule: ${shortName(row)}` : `No ${label.toLowerCase()} rule`)}">
-      <button class="${cls} btn btn-ghost btn-xs" data-testid="detail.stepper" ${row ? `data-goto="${esc(row.rule)}"` : 'disabled'}>${glyph}</button>
+      : null;
+    const picked = S.session?.verdicts[r.rule];
+    // Step through the rules in the order the list shows them, without going
+    // back to it. The back link keeps its word ("All rules") so the bare
+    // arrows beside it read as the stepper rather than as a second way out.
+    /*
+     * The list groups by screen now, so blueprint order and rail order are two
+     * different sequences. The stepper follows the RAIL - it exists to move
+     * through the rules the way they are shown, and arrows that jumped to
+     * whatever came next in a file would land somewhere the reviewer was not
+     * looking.
+     */
+    const walk = orderedRows();
+    const at = walk.findIndex((x) => x.rule === r.rule);
+    const step = (row, cls, glyph, label) =>
+      b`<div class="tooltip tooltip-left" data-tip="${row ? `${label} rule: ${shortName(row)}` : `No ${label.toLowerCase()} rule`}">
+      <button class="${cls} btn btn-ghost btn-xs" data-testid="detail.stepper" data-goto="${row ? row.rule : A}" ?disabled=${!row}>${glyph}</button>
     </div>`;
-  return `
+    /*
+     * A screen can be a STATE rather than an address - a filtered list, an open
+     * drawer, the second time you submit the same form - and a state shares its
+     * URL with the page it is a state of. Walking to a rule about one navigates
+     * to that shared address and lands you on the page, not in the state, so
+     * the storyboard's setup is the rest of the sentence: it says what to do on
+     * arrival. Above the steps, because it happens before them.
+     */
+    const setup = ruleScreen(r)?.app?.setup;
+    /*
+     * Which screen this rule is about, said plainly and above the steps.
+     *
+     * It was only ever implicit before - the surface moved when you opened the
+     * rule, and if it moved somewhere wrong the rule looked wrong instead. A
+     * rule pointed at the wrong screen is a common and quiet error in a
+     * blueprint this size, and it cannot be corrected by somebody who cannot
+     * see what was chosen.
+     *
+     * A flow is drawn as the chain it is, because the LAST screen of a flow is
+     * the one the rule is judged on (ruleScreen) and a chain that did not show
+     * its end would answer a different question.
+     */
+    const ids = r.flow?.length ? r.flow : (r.screens ?? []);
+    const sep = r.flow?.length ? ' → ' : ', ';
+    /*
+     * A screen the storyboard does not carry says so IN WORDS, and wears the
+     * error colour rather than the warning one (n-0123). It used to be the
+     * bare id in warning yellow and nothing else - which a reader who did not
+     * know the convention read as a screen that exists, and which borrowed the
+     * panel's "waiting on you" colour to say something untrue about who was
+     * blocked. Marked by colour is not marked as unknown.
+     */
+    const name = (id) => {
+      const sc = screenById(id);
+      if (!sc)
+        return b`<span class="text-error">${id}</span>
+            <span class="text-[11.5px] opacity-60">— not in the storyboard</span>`;
+      return b`<span>${sc.title ?? id}</span>${
+      sc.title
+        ? b` <code class="rounded bg-base-200 px-1 text-[11px] opacity-70">${id}</code>`
+        : A
+    }`;
+    };
+    const addressed = threads.filter((x) => x.status === 'addressed').length;
+    return b`
     <div class="flex items-center px-2 pt-2">
       <button class="wdp-back btn btn-ghost btn-xs text-primary" data-testid="detail.back">← All rules</button>
       <div class="ml-auto flex gap-0.5">
@@ -2211,27 +2299,27 @@ function detailPane() {
              is how the CLI and the panel came to disagree about ✍︎ (n-0118). -->
         <div class="flex items-center gap-2">
           ${tierMarks(r, needsYou(r.rule))}
-          <div class="break-all font-mono text-[11px] opacity-40" data-testid="detail.rule-id">${esc(r.rule)}</div>
+          <div class="break-all font-mono text-[11px] opacity-40" data-testid="detail.rule-id">${r.rule}</div>
         </div>
-        <p class="text-[15px] leading-relaxed" data-testid="detail.statement">${esc(r.statement)}</p>
+        <p class="text-[15px] leading-relaxed" data-testid="detail.statement">${r.statement}</p>
         ${elsewhere(r)}
       </div>
       ${
         S.session
-          ? `<div class="flex flex-col gap-1.5">
+          ? b`<div class="flex flex-col gap-1.5">
         <!-- The box rides ABOVE the buttons: write the why, then judge. -->
         <textarea id="wdp-vnote" data-testid="detail.feedback" class="textarea textarea-xs h-14 w-full" placeholder="${
           r.built
             ? 'Why? Anything written here is filed as a note with your verdict.'
             : 'What should change? Refine files this as the rule’s feedback.'
-        }">${esc(S.verdictNote)}</textarea>
+        }">${S.verdictNote}</textarea>
         ${
           r.built
-            ? `<div class="flex gap-2" data-testid="detail.verdict">
+            ? b`<div class="flex gap-2" data-testid="detail.verdict">
           <button class="btn btn-sm flex-1 ${picked === 'pass' ? 'btn-success' : 'btn-outline btn-success'}" data-v="pass">✓ Pass</button>
           <button class="btn btn-sm flex-1 ${picked === 'fail' ? 'btn-error' : 'btn-outline btn-error'}" data-v="fail">✗ Fail</button>
         </div>`
-            : `<div class="flex gap-2" data-testid="detail.verdict">
+            : b`<div class="flex gap-2" data-testid="detail.verdict">
           <button class="btn btn-sm flex-1 ${picked === 'approved' ? 'btn-success' : 'btn-outline btn-success'}" data-v="approved">✍︎ Approve</button>
           <button class="btn btn-sm flex-1 ${picked === 'refining' ? 'btn-warning' : 'btn-outline btn-warning'}" data-v="refining">✎︎ Refine</button>
         </div>
@@ -2240,101 +2328,49 @@ function detailPane() {
         <div id="wdp-vsay" data-testid="detail.say" class="hidden text-[11px] text-warning"></div>
         <div class="text-[11.5px] opacity-50" data-testid="detail.judged">${Object.keys(S.session.verdicts).length} judged this session</div>
       </div>`
-          : ''
+          : A
       }
-      ${(() => {
-        /*
-         * A screen can be a STATE rather than an address - a filtered list,
-         * an open drawer, the second time you submit the same form - and a
-         * state shares its URL with the page it is a state of. Walking to a
-         * rule about one navigates to that shared address and lands you on
-         * the page, not in the state, so the storyboard's setup is the rest
-         * of the sentence: it says what to do on arrival. Above the steps,
-         * because it happens before them.
-         */
-        const setup = ruleScreen(r)?.app?.setup;
-        return setup
-          ? `<div>
+      ${
+        setup
+          ? b`<div>
           <!-- "Setup" is the storyboard's own word for this field, and the
                panel calling it something else made a reviewer translate
                between the two (n-0099). -->
           <div class="${LBL} mb-1.5">Setup</div>
           <div class="rounded border border-warning/40 bg-warning/10 px-2 py-1.5 text-[13px] leading-relaxed"
-            data-testid="detail.setup">${esc(setup)}</div>
+            data-testid="detail.setup">${setup}</div>
         </div>`
-          : '';
-      })()}
-      ${(() => {
-        /*
-         * Which screen this rule is about, said plainly and above the steps.
-         *
-         * It was only ever implicit before - the surface moved when you opened
-         * the rule, and if it moved somewhere wrong the rule looked wrong
-         * instead. A rule pointed at the wrong screen is a common and quiet
-         * error in a blueprint this size, and it cannot be corrected by
-         * somebody who cannot see what was chosen.
-         *
-         * A flow is drawn as the chain it is, because the LAST screen of a
-         * flow is the one the rule is judged on (ruleScreen) and a chain that
-         * did not show its end would answer a different question.
-         */
-        const ids = r.flow?.length ? r.flow : (r.screens ?? []);
-        const sep = r.flow?.length ? ' → ' : ', ';
-        /*
-         * A screen the storyboard does not carry says so IN WORDS, and wears
-         * the error colour rather than the warning one (n-0123). It used to be
-         * the bare id in warning yellow and nothing else - which a reader who
-         * did not know the convention read as a screen that exists, and which
-         * borrowed the panel's "waiting on you" colour to say something untrue
-         * about who was blocked. Marked by colour is not marked as unknown.
-         */
-        const name = (id) => {
-          const sc = screenById(id);
-          if (!sc)
-            return `<span class="text-error">${esc(id)}</span>
-            <span class="text-[11.5px] opacity-60">— not in the storyboard</span>`;
-          return `<span>${esc(sc.title ?? id)}</span>${
-            sc.title
-              ? ` <code class="rounded bg-base-200 px-1 text-[11px] opacity-70">${esc(id)}</code>`
-              : ''
-          }`;
-        };
-        return `<div>
-          <div class="${LBL} mb-1.5">Screen</div>
-          <div class="text-[13px] leading-relaxed" data-testid="detail.screen">${
-            ids.length
-              ? ids.map(name).join(sep)
-              : `<span class="opacity-50">${
-                  isHeadless(r)
-                    ? 'No screen — this rule is judged without one.'
-                    : 'No screen named.'
-                }</span>`
-          }</div>
-        </div>`;
-      })()}
+          : A
+      }
+      <div>
+        <div class="${LBL} mb-1.5">Screen</div>
+        <div class="text-[13px] leading-relaxed" data-testid="detail.screen">${
+          ids.length
+            ? ids.map((id, i) => b`${i ? sep : A}${name(id)}`)
+            : b`<span class="opacity-50">${
+                isHeadless(r) ? 'No screen — this rule is judged without one.' : 'No screen named.'
+              }</span>`
+        }</div>
+      </div>
       ${
         steps
-          ? `<div><div class="${LBL} mb-1.5">Steps</div>
+          ? b`<div><div class="${LBL} mb-1.5">Steps</div>
         <div class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-[13px] leading-relaxed"
           data-testid="detail.steps">${steps}</div>
         ${
           checkRefs(r).length
-            ? `<!-- The steps are the rule; the source that checks them is a
+            ? b`<!-- The steps are the rule; the source that checks them is a
              technical detail, so it waits behind a disclosure until asked for. -->
           <details class="mt-2 rounded border border-base-300 bg-base-200/60 px-2 py-1 text-[11.5px]"
-            data-testid="detail.technical-disclosure" data-checks="${esc(r.rule)}"${
-              S.srcOpenFor === r.rule ? ' open' : ''
-            }>
-            <summary class="cursor-pointer opacity-60">Check source · ${checkRefs(r)
-              .map((c) => esc(c))
-              .join(', ')}</summary>
+            data-testid="detail.technical-disclosure" data-checks="${r.rule}" ?open=${S.srcOpenFor === r.rule}>
+            <summary class="cursor-pointer opacity-60">Check source · ${checkRefs(r).join(', ')}</summary>
             <div class="wdp-check-src mt-1 opacity-70">${
-              S.srcCache.rule === r.rule && S.srcCache.html ? S.srcCache.html : 'Loading…'
+              S.srcCache.rule === r.rule && S.srcCache.view ? S.srcCache.view : 'Loading…'
             }</div>
           </details>`
-            : ''
+            : A
         }</div>`
-          : ''
+          : A
       }
       <div>
         <div class="${LBL} mb-1.5">Evidence</div>
@@ -2342,14 +2378,14 @@ function detailPane() {
       </div>
       <div>
         <div class="${LBL} mb-1.5">Verify</div>
-        <div class="text-[13px]" data-testid="detail.verify">${esc(r.verify.join(', '))}</div>
+        <div class="text-[13px]" data-testid="detail.verify">${r.verify.join(', ')}</div>
       </div>
       ${
         threads.length
-          ? `<div class="-mx-3.5" data-testid="detail.threads">
+          ? b`<div class="-mx-3.5" data-testid="detail.threads">
         <div class="${LBL} mb-0.5 flex items-center gap-2 px-3.5">Threads
           ${
-            threads.filter((t) => t.status === 'addressed').length > 1
+            addressed > 1
               ? /*
                  * A rule whose fixes all landed together is verified together.
                  * Going through a dozen threads one at a time is the same
@@ -2357,20 +2393,14 @@ function detailPane() {
                  * stop reading them - so the sweep is offered where the pile is,
                  * and it is still a person pressing it.
                  */
-                `<button class="btn btn-xs btn-outline btn-success ml-auto" data-verify-all="${esc(r.rule)}"
+                b`<button class="btn btn-xs btn-outline btn-success ml-auto" data-verify-all="${r.rule}"
                  title="Verify every addressed thread on this rule, under your name">
-                 Verify all ${threads.filter((t) => t.status === 'addressed').length}</button>`
-              : ''
+                 Verify all ${addressed}</button>`
+              : A
           }
         </div>
-        <!-- Wrapped in an arrow, never passed bare: map hands its callback the
-             array INDEX as a second argument, and threadCard's second
-             parameter is the provenance line. Passed bare, every card after
-             the first printed its own position there and the whole row
-             silently became a click target - a one-based counter nobody asked
-             for, starting at the second thread because index 0 is falsy. -->
-        ${threads.map((t) => threadCard(t)).join('')}</div>`
-          : ''
+        ${threads.map((x) => threadCard(x))}</div>`
+          : A
       }
       <!--
         A rule is a place to have a conversation, and until now it was only
@@ -2387,495 +2417,492 @@ function detailPane() {
       <div class="-mx-3.5 border-t border-base-300 px-3.5 pt-2" data-testid="detail.new-thread">
         <textarea id="wdp-rulenote" data-testid="detail.new-thread-box" rows="2"
           class="textarea textarea-xs w-full resize-none"
-          placeholder="Start a conversation about this rule…">${esc(S.ruleNote)}</textarea>
+          placeholder="Start a conversation about this rule…">${S.ruleNote}</textarea>
         <div class="mt-1 flex items-center gap-2">
-          <span class="text-[10px] opacity-40">as <button id="wdp-nactor" class="link">${esc(
-            whoAmI() || 'set your name…',
-          )}</button></span>
+          <span class="text-[10px] opacity-40">as <button id="wdp-nactor" class="link">${whoAmI() || 'set your name…'}</button></span>
           <button class="btn btn-xs btn-outline ml-auto" data-testid="detail.new-thread-post"
-            data-note-rule="${esc(r.rule)}">Start thread</button>
+            data-note-rule="${r.rule}">Start thread</button>
         </div>
         <div class="mt-1 hidden text-[11px] text-warning" data-testid="detail.new-thread-say" id="wdp-nsay"></div>
       </div>
     </div>`;
-}
+  }
 
-/*
- * The Screens tab: which screen this page is, and which screens have a design
- * on file to compare against at all.
- */
+  /*
+   * The Screens tab: which screen this page is, and which screens have a design
+   * on file to compare against at all.
+   */
 
-/**
- * Wire a rendered screen list. Lives apart from the list itself because the
- * two are now in different places: the rows are drawn into the bar's picker,
- * and picking one closes it - a chooser that stayed open over the screen it
- * just took you to would be covering its own result.
- */
-function wireScreens(root) {
-  root.querySelectorAll('[data-screen]').forEach((b) => {
-    b.onclick = () => {
-      const id = b.dataset.screen || null;
-      S.ghostOverride = null;
-      closeScreenPanel();
-      const reghost = () => {
-        if (S.ghost) {
-          setGhost(false);
-          setFade(S.ghostOpacity || 1);
-        } else render();
+
+  /**
+   * Wire a rendered screen list. Lives apart from the list itself because the
+   * two are now in different places: the rows are drawn into the bar's picker,
+   * and picking one closes it - a chooser that stayed open over the screen it
+   * just took you to would be covering its own result.
+   */
+  function wireScreens(root) {
+    root.querySelectorAll('[data-screen]').forEach((b) => {
+      b.onclick = () => {
+        const id = b.dataset.screen || null;
+        S.ghostOverride = null;
+        closeScreenPanel();
+        const reghost = () => {
+          if (S.ghost) {
+            setGhost(false);
+            setFade(S.ghostOpacity || 1);
+          } else render();
+        };
+        // "Detect from the page" is a reset, not a destination.
+        if (!id) {
+          S.pickedScreen = null;
+          return reghost();
+        }
+        // Picked by hand, so the pick rides along and survives the arrival.
+        if (goTo(screenById(id), pageSurface(), id)) return;
+        // Nowhere to go: a screen with no URL on either surface. Then the only
+        // thing the picker can do is what it always did — record that this
+        // page is that screen.
+        S.pickedScreen = id;
+        reghost();
       };
-      // "Detect from the page" is a reset, not a destination.
-      if (!id) {
-        S.pickedScreen = null;
-        return reghost();
-      }
-      // Picked by hand, so the pick rides along and survives the arrival.
-      if (goTo(screenById(id), pageSurface(), id)) return;
-      // Nowhere to go: a screen with no URL on either surface. Then the only
-      // thing the picker can do is what it always did — record that this
-      // page is that screen.
-      S.pickedScreen = id;
-      reghost();
-    };
-  });
-}
+    });
+  }
 
-function screensPane() {
-  const screens = S.data.storyboard ?? [];
-  if (!screens.length)
-    return '<p class="p-3.5 text-[12.5px] opacity-40">No screens in this blueprint — headless rules only.</p>';
-  const here = currentScreen();
-  const auto = !S.pickedScreen;
-  return `
+  function screensPane() {
+    const screens = S.data.storyboard ?? [];
+    if (!screens.length)
+      return b`<p class="p-3.5 text-[12.5px] opacity-40">No screens in this blueprint — headless rules only.</p>`;
+    const here = currentScreen();
+    const auto = !S.pickedScreen;
+    return b`
     <button class="flex w-full items-center gap-2 px-3.5 py-2 text-left text-[12.5px] hover:bg-base-200"
       data-screen="">
       <span class="w-3.5 shrink-0 text-center ${auto ? 'text-primary' : 'opacity-30'}">${auto ? '\u25c9' : '\u25cb'}</span>
       <span>Detect from the page</span>
-      ${auto && here ? `<span class="ml-auto text-[11px] opacity-50">${esc(here.id)}</span>` : ''}
+      ${auto && here ? b`<span class="ml-auto text-[11px] opacity-50">${here.id}</span>` : A}
     </button>
     <div class="mx-3.5 my-1 border-t border-base-300"></div>
-    ${screens
-      .map((sc) => {
-        const on = S.pickedScreen === sc.id;
-        const design = ghostSource(sc);
-        return `<button class="flex w-full items-start gap-2 px-3.5 py-2 text-left hover:bg-base-200"
-        data-screen="${esc(sc.id)}">
+    ${screens.map((sc) => {
+      const on = S.pickedScreen === sc.id;
+      const design = ghostSource(sc);
+      return b`<button class="flex w-full items-start gap-2 px-3.5 py-2 text-left hover:bg-base-200"
+        data-screen="${sc.id}">
         <span class="w-3.5 shrink-0 pt-0.5 text-center ${on ? 'text-primary' : 'opacity-30'}">${on ? '\u25c9' : '\u25cb'}</span>
         <span class="min-w-0">
-          <span class="block truncate text-[13px]">${esc(sc.title ?? sc.id)}</span>
-          <span class="block truncate font-mono text-[10.5px] opacity-40">${esc(sc.id)}</span>
+          <span class="block truncate text-[13px]">${sc.title ?? sc.id}</span>
+          <span class="block truncate font-mono text-[10.5px] opacity-40">${sc.id}</span>
         </span>
         <span class="ml-auto shrink-0 pt-0.5 text-[10.5px] ${design ? 'opacity-50' : 'text-warning'}">${
           design ? (design.proposed ? 'sketch' : 'design') : 'no design'
         }</span>
       </button>`;
-      })
-      .join('')}`;
-}
-
-/*
- * The Threads tab: every conversation on this blueprint, filtered the three
- * ways `walkdown threads` filters them, in the same words.
- */
-
-/*
- * ---- the Threads tab -------------------------------------------------
- *
- * A conversation used to be reachable only through the rule it was anchored
- * to, and once it ended it was reachable nowhere at all - the panel filters
- * terminal threads out of the rule list, the pins and the counts, and gave
- * nobody a way to ask for them back. `walkdown threads --all` could show
- * them; the panel could not. This is that view (n-0094).
- *
- * The three filters are the three questions the command line already
- * answers, in the same words, so the two never disagree about what "active"
- * means.
- */
-function threadsMatching(filter) {
-  const all = S.data?.threads ?? [];
-  if (filter === 'all') return all;
-  if (filter === 'you') {
-    /*
-     * Whose turn it is, taken from the server's attention queue rather than
-     * re-derived here. A note awaiting verification and a question awaiting
-     * an answer are both work for a person, and the rules for that live in
-     * status.js beside every other queue - a second copy in the panel is a
-     * second thing to get wrong.
-     */
-    const owed = new Set(
-      (S.data?.attention ?? []).filter((i) => i.who === 'human' && i.thread).map((i) => i.thread),
-    );
-    return all.filter((t) => owed.has(t.id));
+    })}`;
   }
-  return all.filter((t) => !TERMINAL.includes(t.status));
-}
 
-/** Where a thread is anchored, in words, for a list that is not scoped to one rule. */
-function threadWhere(t) {
-  const a = t?.anchor ?? {};
-  const sc = screenById(a.screen);
-  return (
-    [a.rule, a.element ?? (sc ? (sc.title ?? sc.id) : a.screen)].filter(Boolean).join(' · ') ||
-    'not attached to anything'
-  );
-}
+  /*
+   * The Threads tab: every conversation on this blueprint, filtered the three
+   * ways `walkdown threads` filters them, in the same words.
+   */
 
-/*
- * The three questions over the thread list, drawn OUTSIDE the scrolling
- * wrapper as a sibling above it - the same shape as the rule list's search
- * box, and for the same reason. `position: sticky` is the reflex and the
- * wrong tool: the pane itself is what scrolls, so a sticky child sticks to a
- * scrollport that is already moving with it. A column with a fixed head and
- * a growing body needs no stacking, no offsets, and nothing to go wrong when
- * the list is short (n-0103).
- */
-function threadFilterBar() {
-  const counts = {
-    active: threadsMatching('active').length,
-    you: threadsMatching('you').length,
-    all: (S.data?.threads ?? []).length,
-  };
-  const pick = (id, label, hint) =>
-    `<button class="btn btn-xs join-item gap-1 ${S.threadFilter === id ? 'btn-primary' : 'btn-outline btn-primary'}"
-      data-tfilter="${id}" title="${esc(hint)}">${label}<span class="opacity-60">${counts[id]}</span></button>`;
-  return `<div class="flex shrink-0 justify-center border-b border-base-300 px-3.5 py-2">
+  /*
+   * ---- the Threads tab -------------------------------------------------
+   *
+   * A conversation used to be reachable only through the rule it was anchored
+   * to, and once it ended it was reachable nowhere at all - the panel filters
+   * terminal threads out of the rule list, the pins and the counts, and gave
+   * nobody a way to ask for them back. `walkdown threads --all` could show
+   * them; the panel could not. This is that view (n-0094).
+   *
+   * The three filters are the three questions the command line already
+   * answers, in the same words, so the two never disagree about what "active"
+   * means.
+   */
+  function threadsMatching(filter) {
+    const all = S.data?.threads ?? [];
+    if (filter === 'all') return all;
+    if (filter === 'you') {
+      /*
+       * Whose turn it is, taken from the server's attention queue rather than
+       * re-derived here. A note awaiting verification and a question awaiting
+       * an answer are both work for a person, and the rules for that live in
+       * status.js beside every other queue - a second copy in the panel is a
+       * second thing to get wrong.
+       */
+      const owed = new Set(
+        (S.data?.attention ?? []).filter((i) => i.who === 'human' && i.thread).map((i) => i.thread),
+      );
+      return all.filter((t) => owed.has(t.id));
+    }
+    return all.filter((t) => !TERMINAL.includes(t.status));
+  }
+
+  /** Where a thread is anchored, in words, for a list that is not scoped to one rule. */
+  function threadWhere(t) {
+    const a = t?.anchor ?? {};
+    const sc = screenById(a.screen);
+    return (
+      [a.rule, a.element ?? (sc ? (sc.title ?? sc.id) : a.screen)].filter(Boolean).join(' · ') ||
+      'not attached to anything'
+    );
+  }
+
+  /*
+   * The three questions over the thread list, drawn OUTSIDE the scrolling
+   * wrapper as a sibling above it - the same shape as the rule list's search
+   * box, and for the same reason. `position: sticky` is the reflex and the
+   * wrong tool: the pane itself is what scrolls, so a sticky child sticks to a
+   * scrollport that is already moving with it. A column with a fixed head and
+   * a growing body needs no stacking, no offsets, and nothing to go wrong when
+   * the list is short (n-0103).
+   */
+  function threadFilterBar() {
+    const counts = {
+      active: threadsMatching('active').length,
+      you: threadsMatching('you').length,
+      all: (S.data?.threads ?? []).length,
+    };
+    const pick = (id, label, hint) =>
+      b`<button class="btn btn-xs join-item gap-1 ${S.threadFilter === id ? 'btn-primary' : 'btn-outline btn-primary'}"
+      data-tfilter="${id}" title="${hint}">${label}<span class="opacity-60">${counts[id]}</span></button>`;
+    return b`<div class="flex shrink-0 justify-center border-b border-base-300 px-3.5 py-2">
     <div class="join" data-testid="panel.thread-filter">
       ${pick('active', 'Active', 'Questions and notes still in play')}
       ${pick('you', 'Awaiting you', 'A fix claimed and unverified, or a question unanswered — the same queue walkdown status shows')}
       ${pick('all', 'All', 'Every thread ever filed on this blueprint, ended ones included')}
     </div>
   </div>`;
-}
+  }
 
-function threadsPane() {
-  const list = [...threadsMatching(S.threadFilter)].sort((a, b) =>
-    threadTouched(b).localeCompare(threadTouched(a)),
-  );
-  const EMPTY = {
-    active: 'No live threads. Everything said here has been answered — <b>All</b> has them.',
-    you: 'Nothing is waiting on you.',
-    all: 'No threads yet. Drop a pin on the page, or leave a note on a rule, to start one.',
-  };
-  return list.length
-    ? list.map((t) => threadCard(t, threadWhere(t))).join('')
-    : `<p class="p-3.5 text-[12.5px] opacity-40">${EMPTY[S.threadFilter]}</p>`;
-}
+  function threadsPane() {
+    const list = [...threadsMatching(S.threadFilter)].sort((a, b) =>
+      threadTouched(b).localeCompare(threadTouched(a)),
+    );
+    const EMPTY = {
+      active: b`No live threads. Everything said here has been answered — <b>All</b> has them.`,
+      you: b`Nothing is waiting on you.`,
+      all: b`No threads yet. Drop a pin on the page, or leave a note on a rule, to start one.`,
+    };
+    return list.length
+      ? list.map((t) => threadCard(t, threadWhere(t)))
+      : b`<p class="p-3.5 text-[12.5px] opacity-40">${EMPTY[S.threadFilter]}</p>`;
+  }
 
-/*
- * The loading veil: what the panel says while the frame is fetching.
- *
- * It lives in the HOST document beside the frame rather than in the shadow
- * root, which is why it carries its styles inline, and it is marked as
- * walkdown's own chrome so pin mode ignores it.
- */
+  /*
+   * The loading veil: what the panel says while the frame is fetching.
+   *
+   * It lives in the HOST document beside the frame rather than in the shadow
+   * root, which is why it carries its styles inline, and it is marked as
+   * walkdown's own chrome so pin mode ignores it.
+   */
 
-/*
- * While the frame is fetching, say so. A page that takes its time leaves the
- * PREVIOUS screen on display, and a reviewer reads that as a walkdown that
- * went somewhere wrong rather than one still on its way - the slower the app,
- * the longer it lies (n-0071).
- *
- * Held back by a short delay, because a veil that flashes on every quick load
- * is its own kind of noise. Lives in the host document beside the frame, so
- * it carries its styles inline, and it is marked as walkdown's own chrome so
- * pin mode ignores it.
- */
-const VEIL_DELAY = 180;
-let veil = null;
-let veilTimer = null;
+  /*
+   * While the frame is fetching, say so. A page that takes its time leaves the
+   * PREVIOUS screen on display, and a reviewer reads that as a walkdown that
+   * went somewhere wrong rather than one still on its way - the slower the app,
+   * the longer it lies (n-0071).
+   *
+   * Held back by a short delay, because a veil that flashes on every quick load
+   * is its own kind of noise. Lives in the host document beside the frame, so
+   * it carries its styles inline, and it is marked as walkdown's own chrome so
+   * pin mode ignores it.
+   */
+  const VEIL_DELAY = 180;
+  let veil = null;
+  let veilTimer = null;
 
-/** Whether a veil is currently up — the frame's placement asks before it schedules. */
-const veilIsUp = () => Boolean(veil);
+  /** Whether a veil is currently up — the frame's placement asks before it schedules. */
+  const veilIsUp = () => Boolean(veil);
 
-function placeVeil() {
-  if (!veil || !D.appFrame) return;
-  const r = D.appFrame.getBoundingClientRect();
-  veil.style.top = `${r.top}px`;
-  veil.style.left = `${r.left}px`;
-  veil.style.width = `${r.width}px`;
-  veil.style.height = `${r.height}px`;
-}
+  function placeVeil() {
+    if (!veil || !D.appFrame) return;
+    const r = D.appFrame.getBoundingClientRect();
+    veil.style.top = `${r.top}px`;
+    veil.style.left = `${r.left}px`;
+    veil.style.width = `${r.width}px`;
+    veil.style.height = `${r.height}px`;
+  }
 
-function showVeil(label) {
-  if (!D.appFrame) return;
-  if (!veil) {
-    veil = document.createElement('div');
-    veil.dataset.walkdownChrome = '';
-    veil.dataset.testid = 'panel.frame-loading';
-    veil.dataset.theme = 'blueprint';
-    veil.style.cssText = `position:fixed; z-index:2147483004; border-radius:10px;
+  function showVeil(label) {
+    if (!D.appFrame) return;
+    if (!veil) {
+      veil = document.createElement('div');
+      veil.dataset.walkdownChrome = '';
+      veil.dataset.testid = 'panel.frame-loading';
+      veil.dataset.theme = 'blueprint';
+      veil.style.cssText = `position:fixed; z-index:2147483004; border-radius:10px;
       display:flex; align-items:center; justify-content:center; gap:.55rem;
       background:rgba(255,255,255,.82); backdrop-filter:blur(1.5px);
       font:500 13px/1.4 ui-sans-serif, system-ui, sans-serif; color:#334155;
       pointer-events:none; transition:opacity .15s ease;`;
-    veil.innerHTML = `<span style="width:14px;height:14px;border:2px solid currentColor;
+      veil.innerHTML = `<span style="width:14px;height:14px;border:2px solid currentColor;
         border-right-color:transparent;border-radius:50%;display:inline-block;
         animation:wdspin .7s linear infinite;opacity:.65"></span><span class="wd-veil-label"></span>
       <style>@keyframes wdspin{to{transform:rotate(360deg)}}</style>`;
-    document.body.appendChild(veil);
+      document.body.appendChild(veil);
+    }
+    veil.querySelector('.wd-veil-label').textContent = label;
+    placeVeil();
   }
-  veil.querySelector('.wd-veil-label').textContent = label;
-  placeVeil();
-}
 
-function hideVeil() {
-  clearTimeout(veilTimer);
-  veilTimer = null;
-  veil?.remove();
-  veil = null;
-}
+  function hideVeil() {
+    clearTimeout(veilTimer);
+    veilTimer = null;
+    veil?.remove();
+    veil = null;
+  }
 
-/** The frame is going somewhere: promise a veil if it does not arrive fast. */
-/*
- * Short enough to read at a glance. Screen titles carry a parenthetical
- * saying which state they are - useful in a list, too long for a veil.
- */
-function screenLabel(screen) {
-  const name = String(screen?.title ?? screen?.id ?? 'the page');
-  const plain = name.split('(')[0].trim() || name;
-  return plain.length > 38 ? `${plain.slice(0, 37)}…` : plain;
-}
-
-function frameLoading(url, label) {
-  if (!D.appFrame) return;
-  hideVeil();
-  veilTimer = setTimeout(() => showVeil(label), VEIL_DELAY);
-}
-
-/* walkdown panel — the reviewer's chrome around the app under review.
- *
- * Loaded into walkdown's own page: the browser extension's, or the one
- * `walkdown serve` puts at /. The application lives in a frame inside it,
- * because a frame is a viewport of its own — the app's modals lay out against
- * the sheet rather than over the tool, and the `inert` a native <dialog>
- * imposes stops at the frame's edge. The prototype has no permanent seat; it
- * ghosts over the frame on demand.
- *
- * Until 2026-08-26 there was a second layout, docked into the application's own
- * document by a script tag. It is gone, and so is everything it needed to
- * survive in a page it did not own: the climb into the browser's top layer, the
- * reset for inherited host CSS, the inset-and-restore of somebody else's body.
- *
- * Everything the panel draws still lives in a SHADOW ROOT, because the panel is
- * not the only thing in this document — Tailwind's preflight would restyle the
- * host page's own markup, and the extension's page is not always bare. The few
- * elements that must sit outside it — the shell, the reopen tab, the ghost
- * stage — carry inline styles.
- */
-
-
-/*
- * Two layouts, one panel.
- *
- * DOCKED: injected into the application's own document, which is inset by a
- * margin to leave room for the chrome. Cheap, works from a script tag — and
- * bounded by the fact that the application owns the viewport. Anything it
- * positions against that viewport ignores the margin, and a native
- * <dialog showModal()> makes everything outside it inert.
- *
- * walkdown owns the document and the application is a frame inside
- * it. A frame is a viewport of its own, so the app's modals are laid out
- * against the sheet, nothing it draws can paint over the tool, and inert
- * stops at the frame boundary. The extension delivers this one, because
- * putting a page in a frame it refuses is something only an extension can do.
- */
-/*
- * The blueprint rides along as a query parameter — and it has to go BEFORE
- * any fragment, or the fragment swallows it: "#invite-batch?bp=..." is one
- * fragment named that, not a query, so the server never sees the blueprint
- * and the screen never sees its own fragment.
- */
-
-// ---- chrome ---------------------------------------------------------------
-function buildChrome() {
-  D.shell = document.createElement('div');
-  // The embed reads this to know the panel is walkdown's own chrome and not a
-  // place to drop a pin. A click inside the shadow root retargets to this host
-  // element, so marking the shell covers everything the panel draws.
-  D.shell.dataset.walkdownChrome = '';
-  // One shadow root over the whole viewport now that chrome runs along the top
-  // as well as down the side. It is transparent and click-through; only the bar
-  // and the panel take pointer events, so the page under it stays live.
+  /** The frame is going somewhere: promise a veil if it does not arrive fast. */
   /*
-   * z-index is not enough, and this is the one thing a docked tool cannot do
-   * without: an application's own <dialog showModal()> (or any popover) is
-   * promoted to the browser's TOP LAYER, which is painted above every
-   * z-index there is — so the app's modal, and the backdrop that dims the
-   * whole viewport with it, would cover walkdown's chrome. The only way to be
-   * above the top layer is to be in it, so the shell is a manual popover.
-   *
-   * The UA stylesheet gives popovers a size, border, padding and background of
-   * their own; every one of those is overridden back to the transparent
-   * full-viewport sheet this has always been.
+   * Short enough to read at a glance. Screen titles carry a parenthetical
+   * saying which state they are - useful in a list, too long for a veil.
    */
-  D.shell.style.cssText = `position:fixed; inset:0; z-index:2147483000; pointer-events:none;
+  function screenLabel(screen) {
+    const name = String(screen?.title ?? screen?.id ?? 'the page');
+    const plain = name.split('(')[0].trim() || name;
+    return plain.length > 38 ? `${plain.slice(0, 37)}…` : plain;
+  }
+
+  function frameLoading(url, label) {
+    if (!D.appFrame) return;
+    hideVeil();
+    veilTimer = setTimeout(() => showVeil(label), VEIL_DELAY);
+  }
+
+  /* walkdown panel — the reviewer's chrome around the app under review.
+   *
+   * Loaded into walkdown's own page: the browser extension's, or the one
+   * `walkdown serve` puts at /. The application lives in a frame inside it,
+   * because a frame is a viewport of its own — the app's modals lay out against
+   * the sheet rather than over the tool, and the `inert` a native <dialog>
+   * imposes stops at the frame's edge. The prototype has no permanent seat; it
+   * ghosts over the frame on demand.
+   *
+   * Until 2026-08-26 there was a second layout, docked into the application's own
+   * document by a script tag. It is gone, and so is everything it needed to
+   * survive in a page it did not own: the climb into the browser's top layer, the
+   * reset for inherited host CSS, the inset-and-restore of somebody else's body.
+   *
+   * Everything the panel draws still lives in a SHADOW ROOT, because the panel is
+   * not the only thing in this document — Tailwind's preflight would restyle the
+   * host page's own markup, and the extension's page is not always bare. The few
+   * elements that must sit outside it — the shell, the reopen tab, the ghost
+   * stage — carry inline styles.
+   */
+
+
+  /*
+   * Two layouts, one panel.
+   *
+   * DOCKED: injected into the application's own document, which is inset by a
+   * margin to leave room for the chrome. Cheap, works from a script tag — and
+   * bounded by the fact that the application owns the viewport. Anything it
+   * positions against that viewport ignores the margin, and a native
+   * <dialog showModal()> makes everything outside it inert.
+   *
+   * walkdown owns the document and the application is a frame inside
+   * it. A frame is a viewport of its own, so the app's modals are laid out
+   * against the sheet, nothing it draws can paint over the tool, and inert
+   * stops at the frame boundary. The extension delivers this one, because
+   * putting a page in a frame it refuses is something only an extension can do.
+   */
+  /*
+   * The blueprint rides along as a query parameter — and it has to go BEFORE
+   * any fragment, or the fragment swallows it: "#invite-batch?bp=..." is one
+   * fragment named that, not a query, so the server never sees the blueprint
+   * and the screen never sees its own fragment.
+   */
+
+  // ---- chrome ---------------------------------------------------------------
+  function buildChrome() {
+    D.shell = document.createElement('div');
+    // The embed reads this to know the panel is walkdown's own chrome and not a
+    // place to drop a pin. A click inside the shadow root retargets to this host
+    // element, so marking the shell covers everything the panel draws.
+    D.shell.dataset.walkdownChrome = '';
+    // One shadow root over the whole viewport now that chrome runs along the top
+    // as well as down the side. It is transparent and click-through; only the bar
+    // and the panel take pointer events, so the page under it stays live.
+    /*
+     * z-index is not enough, and this is the one thing a docked tool cannot do
+     * without: an application's own <dialog showModal()> (or any popover) is
+     * promoted to the browser's TOP LAYER, which is painted above every
+     * z-index there is — so the app's modal, and the backdrop that dims the
+     * whole viewport with it, would cover walkdown's chrome. The only way to be
+     * above the top layer is to be in it, so the shell is a manual popover.
+     *
+     * The UA stylesheet gives popovers a size, border, padding and background of
+     * their own; every one of those is overridden back to the transparent
+     * full-viewport sheet this has always been.
+     */
+    D.shell.style.cssText = `position:fixed; inset:0; z-index:2147483000; pointer-events:none;
     width:100%; height:100%; max-width:none; max-height:none; margin:0; border:0; padding:0;
     background:transparent; overflow:visible;`;
-  D.sr = D.shell.attachShadow({ mode: 'open' });
-  document.body.appendChild(D.shell);
+    D.sr = D.shell.attachShadow({ mode: 'open' });
+    document.body.appendChild(D.shell);
 
-  // A transparent frame over the viewport. It must NOT carry data-theme:
-  // daisyUI paints background-color on every [data-theme] element, so a
-  // full-viewport carrier would cover the page it is supposed to be framing.
-  // The theme goes on the two opaque surfaces instead, which is where the
-  // background belongs anyway.
-  D.host = document.createElement('div');
-  D.host.className = 'h-full w-full text-sm';
-  /*
-   * The one thing a shadow root does NOT keep out: inheritance. A host page
-   * with `* { letter-spacing: 3px }` - or a text-transform, or a word-spacing -
-   * sets it on our shell element like any other, and it flows down into every
-   * word walkdown draws. Styling `:host` cannot fix it either: for the host
-   * element, the document's own rules win. So the reset lives here, on our
-   * first element INSIDE the boundary, where the host page has no reach.
-   */
-  D.host.style.cssText =
-    'letter-spacing:normal; word-spacing:normal; text-transform:none; font-variant:normal; font-style:normal; text-indent:0; text-shadow:none; white-space:normal; word-break:normal; text-align:left; direction:ltr; text-decoration:none;';
-  D.sr.appendChild(D.host);
+    // A transparent frame over the viewport. It must NOT carry data-theme:
+    // daisyUI paints background-color on every [data-theme] element, so a
+    // full-viewport carrier would cover the page it is supposed to be framing.
+    // The theme goes on the two opaque surfaces instead, which is where the
+    // background belongs anyway.
+    D.host = document.createElement('div');
+    D.host.className = 'h-full w-full text-sm';
+    /*
+     * The one thing a shadow root does NOT keep out: inheritance. A host page
+     * with `* { letter-spacing: 3px }` - or a text-transform, or a word-spacing -
+     * sets it on our shell element like any other, and it flows down into every
+     * word walkdown draws. Styling `:host` cannot fix it either: for the host
+     * element, the document's own rules win. So the reset lives here, on our
+     * first element INSIDE the boundary, where the host page has no reach.
+     */
+    D.host.style.cssText =
+      'letter-spacing:normal; word-spacing:normal; text-transform:none; font-variant:normal; font-style:normal; text-indent:0; text-shadow:none; white-space:normal; word-break:normal; text-align:left; direction:ltr; text-decoration:none;';
+    D.sr.appendChild(D.host);
 
-  // The two pieces of chrome are built once and filled by render(): the docking
-  // transforms live on them, and a rebuild must never throw the panel back on
-  // screen after you have put it away.
-  // The bar carries no surface of its own — background:transparent overrides
-  // the one daisyUI paints on every [data-theme] element — so the drafting
-  // grid runs unbroken behind the controls and under the panel beside them.
-  D.bar = document.createElement('header');
-  D.bar.dataset.testid = 'panel.bar';
-  D.bar.dataset.theme = 'blueprint'; // walkdown's own skin — see styles/walkdown.css
-  D.bar.style.cssText = `position:absolute; top:0; left:0; right:0; height:${TOP}px;
+    // The two pieces of chrome are built once and filled by render(): the docking
+    // transforms live on them, and a rebuild must never throw the panel back on
+    // screen after you have put it away.
+    // The bar carries no surface of its own — background:transparent overrides
+    // the one daisyUI paints on every [data-theme] element — so the drafting
+    // grid runs unbroken behind the controls and under the panel beside them.
+    D.bar = document.createElement('header');
+    D.bar.dataset.testid = 'panel.bar';
+    D.bar.dataset.theme = 'blueprint'; // walkdown's own skin — see styles/walkdown.css
+    D.bar.style.cssText = `position:absolute; top:0; left:0; right:0; height:${TOP}px;
     pointer-events:auto; transition:transform .2s ease; background:transparent;`;
-  D.bar.className = 'flex items-center gap-2 px-3 text-base-content';
+    D.bar.className = 'flex items-center gap-2 px-3 text-base-content';
 
-  // The panel is a card lying on the same desk as the page, inset by the same
-  // margin — two sheets side by side rather than a sheet and a wall.
-  D.side = document.createElement('aside');
-  D.side.dataset.theme = 'blueprint';
-  D.side.style.cssText = `position:absolute; top:${HEAD}px; right:${GAP}px; bottom:${GAP}px;
+    // The panel is a card lying on the same desk as the page, inset by the same
+    // margin — two sheets side by side rather than a sheet and a wall.
+    D.side = document.createElement('aside');
+    D.side.dataset.theme = 'blueprint';
+    D.side.style.cssText = `position:absolute; top:${HEAD}px; right:${GAP}px; bottom:${GAP}px;
     width:${W}px; pointer-events:auto; transition:transform .22s ease; border-radius:10px;
     box-shadow:0 1px 2px rgba(0,0,0,.28), 0 12px 32px rgba(0,0,0,.34);`;
-  D.side.className =
-    'flex flex-col overflow-hidden border border-primary/45 bg-base-100 text-base-content';
-  D.host.append(D.bar, D.side);
+    D.side.className =
+      'flex flex-col overflow-hidden border border-primary/45 bg-base-100 text-base-content';
+    D.host.append(D.bar, D.side);
+
+    /*
+     * The desk tuner. A separate element rather than part of the bar's innerHTML
+     * for the same reason the fade slider needed `dragging`: the bar is rebuilt
+     * wholesale, and rebuilding an input mid-drag kills the drag. This panel is
+     * built once and only shown or hidden, so its sliders survive anything.
+     */
+    D.deskPanel = document.createElement('div');
+    D.deskPanel.dataset.testid = 'settings.panel';
+    D.deskPanel.dataset.theme = 'blueprint';
+    D.deskPanel.className =
+      'w-64 rounded-box border border-primary/45 bg-base-100 p-3 text-base-content shadow-xl';
+    // Offset past the app's own top-left corner on purpose — flush against it
+    // read as though the tuner belonged to the app's layout rather than to the
+    // desk it sits on. One GAP beyond the corner on each axis, so it stands off
+    // evenly rather than drifting further from one side than the other.
+    D.deskPanel.style.cssText = `position:absolute; top:${TOP + GAP}px; left:${GAP * 2}px; display:none; pointer-events:auto;`;
+    D.host.appendChild(D.deskPanel);
+
+    /*
+     * Which screen this page is. It used to be a third tab in the sidebar and it
+     * was never at home there: Blueprints and Rules answer "what did we agree to
+     * build", and this answers "where am I standing", which is a session control
+     * with a current value - the same kind of thing as the surface dial and the
+     * viewport, which live in the bar. Moved there it also stops hiding its own
+     * answer: the control is labelled with the screen you are on, so reading it
+     * no longer costs a tab switch and a trip back.
+     *
+     * Built once and shown or hidden, like the tuner beside it, and positioned
+     * under its own button at open time rather than at a guessed offset - the
+     * bar's left side changes width with the project's name.
+     */
+    D.screenPanel = document.createElement('div');
+    D.screenPanel.dataset.testid = 'panel.screens-list';
+    D.screenPanel.dataset.theme = 'blueprint';
+    D.screenPanel.className =
+      'w-72 overflow-hidden rounded-box border border-primary/45 bg-base-100 py-1 text-base-content shadow-xl';
+    D.screenPanel.style.cssText = `position:absolute; top:${TOP + GAP}px; left:${GAP * 2}px; display:none; pointer-events:auto; max-height:60vh; overflow-y:auto;`;
+    D.host.appendChild(D.screenPanel);
+  }
+
+  const DESK_DIALS = [
+    { k: 'tilt', label: 'Tilt', min: 0, max: 45, unit: '°' },
+    { k: 'tip', label: 'Tip', min: 0, max: 60, unit: '°' },
+    { k: 'depth', label: 'Depth', min: 400, max: 3000, unit: 'px' },
+    { k: 'gap', label: 'Spacing', min: 16, max: 64, unit: 'px' },
+    { k: 'ink', label: 'Ink', min: 2, max: 24, unit: '%' },
+  ];
 
   /*
-   * The desk tuner. A separate element rather than part of the bar's innerHTML
-   * for the same reason the fade slider needed `dragging`: the bar is rebuilt
-   * wholesale, and rebuilding an input mid-drag kills the drag. This panel is
-   * built once and only shown or hidden, so its sliders survive anything.
+   * "See the full effect" means seeing the app out of the way without it
+   * being gone — 10%, not 0, so the ruling is judged against the thing it
+   * actually sits behind rather than against nothing. Deliberately not saved:
+   * the checkbox is a way of looking, not a preference, and it always starts
+   * unchecked because leaving it on would mean a reviewer opening the tuner
+   * to a half-invisible application without having asked for that.
    */
-  D.deskPanel = document.createElement('div');
-  D.deskPanel.dataset.testid = 'settings.panel';
-  D.deskPanel.dataset.theme = 'blueprint';
-  D.deskPanel.className =
-    'w-64 rounded-box border border-primary/45 bg-base-100 p-3 text-base-content shadow-xl';
-  // Offset past the app's own top-left corner on purpose — flush against it
-  // read as though the tuner belonged to the app's layout rather than to the
-  // desk it sits on. One GAP beyond the corner on each axis, so it stands off
-  // evenly rather than drifting further from one side than the other.
-  D.deskPanel.style.cssText = `position:absolute; top:${TOP + GAP}px; left:${GAP * 2}px; display:none; pointer-events:auto;`;
-  D.host.appendChild(D.deskPanel);
+  function hideApp(on) {
+    S.hideAppOn = on;
+    const app = D.appFrame;
+    // The aside goes with the app rather than staying — it sits on the desk
+    // over the page, so leaving it at full strength would still hide most of
+    // the ruling behind it. So does the headless cover, which is opaque by
+    // design. The bar stays: its buttons have to keep working while you're
+    // peeking, and it draws no surface of its own to cover the desk with.
+    for (const el of [app, D.side, S.headlessCover]) if (el) el.style.opacity = on ? '0.1' : '';
+  }
 
-  /*
-   * Which screen this page is. It used to be a third tab in the sidebar and it
-   * was never at home there: Blueprints and Rules answer "what did we agree to
-   * build", and this answers "where am I standing", which is a session control
-   * with a current value - the same kind of thing as the surface dial and the
-   * viewport, which live in the bar. Moved there it also stops hiding its own
-   * answer: the control is labelled with the screen you are on, so reading it
-   * no longer costs a tab switch and a trip back.
-   *
-   * Built once and shown or hidden, like the tuner beside it, and positioned
-   * under its own button at open time rather than at a guessed offset - the
-   * bar's left side changes width with the project's name.
-   */
-  D.screenPanel = document.createElement('div');
-  D.screenPanel.dataset.testid = 'panel.screens-list';
-  D.screenPanel.dataset.theme = 'blueprint';
-  D.screenPanel.className =
-    'w-72 overflow-hidden rounded-box border border-primary/45 bg-base-100 py-1 text-base-content shadow-xl';
-  D.screenPanel.style.cssText = `position:absolute; top:${TOP + GAP}px; left:${GAP * 2}px; display:none; pointer-events:auto; max-height:60vh; overflow-y:auto;`;
-  D.host.appendChild(D.screenPanel);
-}
-
-const DESK_DIALS = [
-  { k: 'tilt', label: 'Tilt', min: 0, max: 45, unit: '°' },
-  { k: 'tip', label: 'Tip', min: 0, max: 60, unit: '°' },
-  { k: 'depth', label: 'Depth', min: 400, max: 3000, unit: 'px' },
-  { k: 'gap', label: 'Spacing', min: 16, max: 64, unit: 'px' },
-  { k: 'ink', label: 'Ink', min: 2, max: 24, unit: '%' },
-];
-
-/*
- * "See the full effect" means seeing the app out of the way without it
- * being gone — 10%, not 0, so the ruling is judged against the thing it
- * actually sits behind rather than against nothing. Deliberately not saved:
- * the checkbox is a way of looking, not a preference, and it always starts
- * unchecked because leaving it on would mean a reviewer opening the tuner
- * to a half-invisible application without having asked for that.
- */
-function hideApp(on) {
-  S.hideAppOn = on;
-  const app = D.appFrame;
-  // The aside goes with the app rather than staying — it sits on the desk
-  // over the page, so leaving it at full strength would still hide most of
-  // the ruling behind it. So does the headless cover, which is opaque by
-  // design. The bar stays: its buttons have to keep working while you're
-  // peeking, and it draws no surface of its own to cover the desk with.
-  for (const el of [app, D.side, S.headlessCover]) if (el) el.style.opacity = on ? '0.1' : '';
-}
-
-/** A dial's number, click-to-edit: text until clicked, then a real input. */
-function editDialValue(dial) {
-  const cell = D.deskPanel.querySelector(`#wdp-desk-${dial.k}`);
-  if (!cell || cell.querySelector('input')) return;
-  const range = D.deskPanel.querySelector(`input[type=range][data-k="${dial.k}"]`);
-  cell.innerHTML = `<input type="number" class="input input-xs w-12 px-1 text-right font-mono text-[10.5px]"
+  /** A dial's number, click-to-edit: text until clicked, then a real input. */
+  function editDialValue(dial) {
+    const cell = D.deskPanel.querySelector(`#wdp-desk-${dial.k}`);
+    if (!cell || cell.querySelector('input')) return;
+    const range = D.deskPanel.querySelector(`input[type=range][data-k="${dial.k}"]`);
+    cell.innerHTML = `<input type="number" class="input input-xs w-12 px-1 text-right font-mono text-[10.5px]"
     min="${dial.min}" max="${dial.max}" value="${S.desk[dial.k]}">`;
-  const inp = cell.querySelector('input');
-  inp.focus();
-  inp.select();
-  const commit = () => {
-    const v = Math.min(dial.max, Math.max(dial.min, Number(inp.value) || 0));
-    S.desk[dial.k] = v;
-    range.value = v;
-    store.set(DESK_KEY, { ...S.desk });
-    if (S.docked) paintDesk(true);
-    cell.textContent = `${v}${dial.unit}`;
-  };
-  inp.onblur = commit;
-  inp.onkeydown = (e) => {
-    if (e.key === 'Enter') inp.blur();
-    if (e.key === 'Escape') {
-      // Cancel the edit rather than the tuner — the outer Escape handler
-      // would otherwise close the whole panel from under an open edit.
-      e.stopPropagation();
-      cell.textContent = `${S.desk[dial.k]}${dial.unit}`;
-    }
-  };
-}
+    const inp = cell.querySelector('input');
+    inp.focus();
+    inp.select();
+    const commit = () => {
+      const v = Math.min(dial.max, Math.max(dial.min, Number(inp.value) || 0));
+      S.desk[dial.k] = v;
+      range.value = v;
+      store.set(DESK_KEY, { ...S.desk });
+      if (S.docked) paintDesk(true);
+      cell.textContent = `${v}${dial.unit}`;
+    };
+    inp.onblur = commit;
+    inp.onkeydown = (e) => {
+      if (e.key === 'Enter') inp.blur();
+      if (e.key === 'Escape') {
+        // Cancel the edit rather than the tuner — the outer Escape handler
+        // would otherwise close the whole panel from under an open edit.
+        e.stopPropagation();
+        cell.textContent = `${S.desk[dial.k]}${dial.unit}`;
+      }
+    };
+  }
 
-/*
- * The roles somebody could sign in. eng and product are always offered - they
- * are the two the ledger itself knows about - and anything else this
- * blueprint's rules ask for joins them, so a team that names a third role
- * sees it here rather than in a patch to this file.
- */
-const knownRoles = () => [
-  ...new Set([
-    'eng',
-    'product',
-    ...(S.data?.rows ?? []).flatMap((r) => (r.acceptance ?? []).map((a) => a.role)),
-  ]),
-];
+  /*
+   * The roles somebody could sign in. eng and product are always offered - they
+   * are the two the ledger itself knows about - and anything else this
+   * blueprint's rules ask for joins them, so a team that names a third role
+   * sees it here rather than in a patch to this file.
+   */
+  const knownRoles = () => [
+    ...new Set([
+      'eng',
+      'product',
+      ...(S.data?.rows ?? []).flatMap((r) => (r.acceptance ?? []).map((a) => a.role)),
+    ]),
+  ];
 
-/** The gear panel is Settings: who you record as, then the desk ruling. */
-function openActorSettings() {
-  S.deskOpen = true;
-  syncDeskPanel();
-  D.deskPanel.querySelector('#wdp-set-actor')?.focus();
-}
+  /** The gear panel is Settings: who you record as, then the desk ruling. */
+  function openActorSettings() {
+    S.deskOpen = true;
+    syncDeskPanel();
+    D.deskPanel.querySelector('#wdp-set-actor')?.focus();
+  }
 
-function buildDeskPanel() {
-  D.deskPanel.innerHTML = `
+  function buildDeskPanel() {
+    D.deskPanel.innerHTML = `
     <div class="mb-2 flex items-center gap-2">
       <span class="text-[12px] font-semibold">Record as</span>
       <input id="wdp-set-actor" data-testid="settings.actor" class="input input-xs ml-auto w-36" placeholder="username"
@@ -2935,707 +2962,707 @@ function buildDeskPanel() {
     </label>
     <p class="mt-2 text-[10.5px] leading-relaxed opacity-40">Yours alone — how the paper
       lies changes nothing about what gets verified.</p>`;
-  D.deskPanel.querySelectorAll('input[type=range]').forEach((inp) => {
-    const dial = DESK_DIALS.find((d) => d.k === inp.dataset.k);
-    // input repaints live under the drag; change is when the value is kept.
-    inp.oninput = () => {
-      S.desk[dial.k] = Number(inp.value);
-      D.deskPanel.querySelector(`#wdp-desk-${dial.k}`).textContent =
-        `${S.desk[dial.k]}${dial.unit}`;
-      if (S.docked) paintDesk(true);
-    };
-    inp.onchange = () => store.set(DESK_KEY, { ...S.desk });
-  });
-  DESK_DIALS.forEach((d) => {
-    D.deskPanel.querySelector(`#wdp-desk-${d.k}`).onclick = () => editDialValue(d);
-  });
-  D.deskPanel.querySelector('#wdp-desk-reset').onclick = () => {
-    S.desk = { ...DESK_DEFAULTS };
-    store.set(DESK_KEY, { ...S.desk });
-    buildDeskPanel();
-    if (S.docked) paintDesk(true);
-  };
-  D.deskPanel.querySelector('#wdp-desk-hide').onchange = (e) => hideApp(e.target.checked);
-  const act = D.deskPanel.querySelector('#wdp-set-actor');
-  act.onchange = () => {
-    /*
-     * An emptied field is an explicit answer, not the absence of one: it
-     * means "nobody", and the panel then refuses attributed work under it
-     * (panel.threads.claim-never-accept). Reverting to git's answer is
-     * retyping it - which is cheap, and a good deal less surprising than a
-     * box that silently refills itself with a name you just removed.
-     */
-    identityOverride.username = act.value.trim();
-    saveIdentity();
-    // A running sitting is re-signed, the way the single field always did -
-    // the verdicts already in it have not been sealed into a run yet.
-    if (S.session) {
-      S.session.actor = whoAmI();
-      saveSession();
-    }
-    render();
-  };
-  /*
-   * The roles are kept as a set, so unticking the last one leaves an empty
-   * array rather than nothing said - "I sign as none of these" is an answer.
-   * Nothing repaints: no run record reads this yet, and a panel that redrew
-   * itself would only be claiming otherwise.
-   */
-  const boxes = [...D.deskPanel.querySelectorAll('input[data-testid="settings.roles"]')];
-  boxes.forEach((box) => {
-    box.onchange = () => {
-      identityOverride.roles = boxes.filter((b) => b.checked).map((b) => b.dataset.role);
-      saveIdentity();
-    };
-  });
-  const nam = D.deskPanel.querySelector('#wdp-set-name');
-  nam.onchange = () => {
-    // Emptied here means "show me by my username" - the honest answer for
-    // someone who does not want a full name on screen.
-    identityOverride.name = nam.value.trim();
-    saveIdentity();
-    render(); // nothing recorded moves: this name is only ever shown
-  };
-}
-
-function syncDeskPanel() {
-  if (S.deskOpen) buildDeskPanel();
-  else hideApp(false); // closing the tuner ends the peek, not just hides the checkbox
-  D.deskPanel.style.display = S.deskOpen ? '' : 'none';
-}
-
-const closeDeskPanel = () => {
-  S.deskOpen = false;
-  syncDeskPanel();
-};
-
-/*
- * The screen picker's contents are the list the Screens tab used to draw,
- * unchanged - the same radio rows, the same "Detect from the page" reset at
- * the top. It is placed under its own button because the bar's left side is
- * as wide as the project's name, and clamped to the stage so a long
- * storyboard cannot run the list off the right edge.
- *
- * Called on every repaint of the bar as well as on opening, because the list
- * is an answer and not a snapshot: in Detect mode both the button's label and
- * the row the list marks are reporting which screen the page IS, and a page
- * that moves under an open list has to move the list with it (n-0107).
- */
-function syncScreenPanel() {
-  if (S.screensOpen) {
-    // Rebuilt in place, so a long storyboard keeps its scroll: this now runs
-    // on every repaint, and a list that jumped back to the top whenever the
-    // panel drew would be worse than one that lagged.
-    const wasAt = D.screenPanel.scrollTop;
-    D.screenPanel.innerHTML = screensPane();
-    wireScreens(D.screenPanel);
-    D.screenPanel.scrollTop = wasAt;
-    const btn = D.bar.querySelector('#wdp-screen-btn');
-    if (btn) {
-      const at = btn.getBoundingClientRect();
-      const wide = D.screenPanel.offsetWidth || 288;
-      D.screenPanel.style.left = `${Math.max(GAP * 2, Math.min(at.left, innerWidth - wide - GAP * 2))}px`;
-    }
-  }
-  D.screenPanel.style.display = S.screensOpen ? '' : 'none';
-}
-
-const closeScreenPanel = () => {
-  S.screensOpen = false;
-  syncScreenPanel();
-};
-
-/*
- * The two popovers the bar opens — the screen picker and the desk tuner —
- * dismiss on the same gesture, so they dismiss through the same function.
- * `path` is the event's composedPath rather than e.target, because e.target
- * of an event crossing into a shadow root is retargeted to the shadow's host
- * and would see every click in the panel as "the panel", popover included.
- * Each popover's own button is excluded on purpose: its onclick already
- * toggles the flag, and closing here first would just have that reopen it a
- * moment later.
- *
- * A click on the page under review arrives with no path at all — a
- * pointerdown inside the frame never reaches this document, so the embed
- * posts `walkdown:page-click` instead (see the message handler). Nothing in
- * this document is on that path, which is exactly right: a click in the
- * application is outside both popovers.
- */
-function dismissPopovers(path = []) {
-  if (S.screensOpen) {
-    const btn = D.bar.querySelector('#wdp-screen-btn');
-    const mine = path.includes(D.screenPanel) || (btn && path.includes(btn));
-    if (!mine) closeScreenPanel();
-  }
-  if (S.deskOpen) {
-    const gear = D.bar.querySelector('#wdp-desk-btn');
-    const mine = path.includes(D.deskPanel) || (gear && path.includes(gear));
-    if (!mine) closeDeskPanel();
-  }
-}
-
-/*
- * The stylesheet, split in two on purpose:
- *
- *   – the whole thing goes into the shadow root, where it styles us alone;
- *   – its @property rules are ALSO copied into the host document, because
- *     the CSS Properties API only registers @property at document level.
- *     Unregistered, Tailwind's --tw-border-style and friends have no initial
- *     value and borders, transforms and rings silently stop working. The
- *     copy declares custom-property types and paints nothing, so it is the
- *     one thing we add to the host page.
- */
-function loadStylesheet() {
-  fetch(STYLESHEET)
-    .then((r) => r.text())
-    .then((css) => {
-      const sheet = document.createElement('style');
-      // The conversation's own rules ride with the stylesheet: one shared
-      // block, so a thread looks the same in the panel and in the embed.
-      sheet.textContent = css + MSG.css;
-      D.sr.insertBefore(sheet, D.host);
-      // The desk was painted from fallbacks before the theme existed; now that
-      // the tokens resolve, paint it in walkdown's actual colours.
-      if (S.docked) paintDesk(true);
-      const props = css.match(/@property\s+--[\w-]+\s*\{[^}]*\}/g);
-      if (props) {
-        const doc = document.createElement('style');
-        doc.setAttribute('data-walkdown-property-registrations', '');
-        doc.textContent = props.join('');
-        document.head.appendChild(doc);
-      }
-    })
-    .catch(() => {
-      /* unstyled beats absent; the panel still works */
+    D.deskPanel.querySelectorAll('input[type=range]').forEach((inp) => {
+      const dial = DESK_DIALS.find((d) => d.k === inp.dataset.k);
+      // input repaints live under the drag; change is when the value is kept.
+      inp.oninput = () => {
+        S.desk[dial.k] = Number(inp.value);
+        D.deskPanel.querySelector(`#wdp-desk-${dial.k}`).textContent =
+          `${S.desk[dial.k]}${dial.unit}`;
+        if (S.docked) paintDesk(true);
+      };
+      inp.onchange = () => store.set(DESK_KEY, { ...S.desk });
     });
-}
+    DESK_DIALS.forEach((d) => {
+      D.deskPanel.querySelector(`#wdp-desk-${d.k}`).onclick = () => editDialValue(d);
+    });
+    D.deskPanel.querySelector('#wdp-desk-reset').onclick = () => {
+      S.desk = { ...DESK_DEFAULTS };
+      store.set(DESK_KEY, { ...S.desk });
+      buildDeskPanel();
+      if (S.docked) paintDesk(true);
+    };
+    D.deskPanel.querySelector('#wdp-desk-hide').onchange = (e) => hideApp(e.target.checked);
+    const act = D.deskPanel.querySelector('#wdp-set-actor');
+    act.onchange = () => {
+      /*
+       * An emptied field is an explicit answer, not the absence of one: it
+       * means "nobody", and the panel then refuses attributed work under it
+       * (panel.threads.claim-never-accept). Reverting to git's answer is
+       * retyping it - which is cheap, and a good deal less surprising than a
+       * box that silently refills itself with a name you just removed.
+       */
+      identityOverride.username = act.value.trim();
+      saveIdentity();
+      // A running sitting is re-signed, the way the single field always did -
+      // the verdicts already in it have not been sealed into a run yet.
+      if (S.session) {
+        S.session.actor = whoAmI();
+        saveSession();
+      }
+      render();
+    };
+    /*
+     * The roles are kept as a set, so unticking the last one leaves an empty
+     * array rather than nothing said - "I sign as none of these" is an answer.
+     * Nothing repaints: no run record reads this yet, and a panel that redrew
+     * itself would only be claiming otherwise.
+     */
+    const boxes = [...D.deskPanel.querySelectorAll('input[data-testid="settings.roles"]')];
+    boxes.forEach((box) => {
+      box.onchange = () => {
+        identityOverride.roles = boxes.filter((b) => b.checked).map((b) => b.dataset.role);
+        saveIdentity();
+      };
+    });
+    const nam = D.deskPanel.querySelector('#wdp-set-name');
+    nam.onchange = () => {
+      // Emptied here means "show me by my username" - the honest answer for
+      // someone who does not want a full name on screen.
+      identityOverride.name = nam.value.trim();
+      saveIdentity();
+      render(); // nothing recorded moves: this name is only ever shown
+    };
+  }
 
-/*
- * The two controls that survive the chrome being put away: the pull tab
- * that brings it back, and the prototype/app cross beside it.
- */
-function buildPutAwayControls() {
-  D.tab = document.createElement('button');
-  D.tab.dataset.walkdownChrome = '';
-  D.tab.textContent = 'WALKDOWN';
-  D.tab.style.cssText = `position:fixed; right:0; top:50%; z-index:2147483000; transform:translateY(-50%);
+  function syncDeskPanel() {
+    if (S.deskOpen) buildDeskPanel();
+    else hideApp(false); // closing the tuner ends the peek, not just hides the checkbox
+    D.deskPanel.style.display = S.deskOpen ? '' : 'none';
+  }
+
+  const closeDeskPanel = () => {
+    S.deskOpen = false;
+    syncDeskPanel();
+  };
+
+  /*
+   * The screen picker's contents are the list the Screens tab used to draw,
+   * unchanged - the same radio rows, the same "Detect from the page" reset at
+   * the top. It is placed under its own button because the bar's left side is
+   * as wide as the project's name, and clamped to the stage so a long
+   * storyboard cannot run the list off the right edge.
+   *
+   * Called on every repaint of the bar as well as on opening, because the list
+   * is an answer and not a snapshot: in Detect mode both the button's label and
+   * the row the list marks are reporting which screen the page IS, and a page
+   * that moves under an open list has to move the list with it (n-0107).
+   */
+  function syncScreenPanel() {
+    if (S.screensOpen) {
+      // Rebuilt in place, so a long storyboard keeps its scroll: this now runs
+      // on every repaint, and a list that jumped back to the top whenever the
+      // panel drew would be worse than one that lagged.
+      const wasAt = D.screenPanel.scrollTop;
+      D$1(screensPane(), D.screenPanel);
+      wireScreens(D.screenPanel);
+      D.screenPanel.scrollTop = wasAt;
+      const btn = D.bar.querySelector('#wdp-screen-btn');
+      if (btn) {
+        const at = btn.getBoundingClientRect();
+        const wide = D.screenPanel.offsetWidth || 288;
+        D.screenPanel.style.left = `${Math.max(GAP * 2, Math.min(at.left, innerWidth - wide - GAP * 2))}px`;
+      }
+    }
+    D.screenPanel.style.display = S.screensOpen ? '' : 'none';
+  }
+
+  const closeScreenPanel = () => {
+    S.screensOpen = false;
+    syncScreenPanel();
+  };
+
+  /*
+   * The two popovers the bar opens — the screen picker and the desk tuner —
+   * dismiss on the same gesture, so they dismiss through the same function.
+   * `path` is the event's composedPath rather than e.target, because e.target
+   * of an event crossing into a shadow root is retargeted to the shadow's host
+   * and would see every click in the panel as "the panel", popover included.
+   * Each popover's own button is excluded on purpose: its onclick already
+   * toggles the flag, and closing here first would just have that reopen it a
+   * moment later.
+   *
+   * A click on the page under review arrives with no path at all — a
+   * pointerdown inside the frame never reaches this document, so the embed
+   * posts `walkdown:page-click` instead (see the message handler). Nothing in
+   * this document is on that path, which is exactly right: a click in the
+   * application is outside both popovers.
+   */
+  function dismissPopovers(path = []) {
+    if (S.screensOpen) {
+      const btn = D.bar.querySelector('#wdp-screen-btn');
+      const mine = path.includes(D.screenPanel) || (btn && path.includes(btn));
+      if (!mine) closeScreenPanel();
+    }
+    if (S.deskOpen) {
+      const gear = D.bar.querySelector('#wdp-desk-btn');
+      const mine = path.includes(D.deskPanel) || (gear && path.includes(gear));
+      if (!mine) closeDeskPanel();
+    }
+  }
+
+  /*
+   * The stylesheet, split in two on purpose:
+   *
+   *   – the whole thing goes into the shadow root, where it styles us alone;
+   *   – its @property rules are ALSO copied into the host document, because
+   *     the CSS Properties API only registers @property at document level.
+   *     Unregistered, Tailwind's --tw-border-style and friends have no initial
+   *     value and borders, transforms and rings silently stop working. The
+   *     copy declares custom-property types and paints nothing, so it is the
+   *     one thing we add to the host page.
+   */
+  function loadStylesheet() {
+    fetch(STYLESHEET)
+      .then((r) => r.text())
+      .then((css) => {
+        const sheet = document.createElement('style');
+        // The conversation's own rules ride with the stylesheet: one shared
+        // block, so a thread looks the same in the panel and in the embed.
+        sheet.textContent = css + MSG.css;
+        D.sr.insertBefore(sheet, D.host);
+        // The desk was painted from fallbacks before the theme existed; now that
+        // the tokens resolve, paint it in walkdown's actual colours.
+        if (S.docked) paintDesk(true);
+        const props = css.match(/@property\s+--[\w-]+\s*\{[^}]*\}/g);
+        if (props) {
+          const doc = document.createElement('style');
+          doc.setAttribute('data-walkdown-property-registrations', '');
+          doc.textContent = props.join('');
+          document.head.appendChild(doc);
+        }
+      })
+      .catch(() => {
+        /* unstyled beats absent; the panel still works */
+      });
+  }
+
+  /*
+   * The two controls that survive the chrome being put away: the pull tab
+   * that brings it back, and the prototype/app cross beside it.
+   */
+  function buildPutAwayControls() {
+    D.tab = document.createElement('button');
+    D.tab.dataset.walkdownChrome = '';
+    D.tab.textContent = 'WALKDOWN';
+    D.tab.style.cssText = `position:fixed; right:0; top:50%; z-index:2147483000; transform:translateY(-50%);
     background:#16181d; color:#fff; border:0; border-radius:8px 0 0 8px; padding:11px 7px; cursor:pointer;
     font:600 11px/1 -apple-system, sans-serif; writing-mode:vertical-rl; letter-spacing:.08em; display:none;`;
-  D.tab.onclick = () => setDocked(true);
-  document.body.appendChild(D.tab);
+    D.tab.onclick = () => setDocked(true);
+    document.body.appendChild(D.tab);
 
-  /*
-   * Beside the tab, a way to cross between the design and what shipped without
-   * opening anything (n-0072). Comparing the two is the most frequent gesture
-   * there is, and with the panel put away it otherwise costs re-opening the
-   * whole thing to reach the fade control - the cheapest comparison behind the
-   * most expensive move. It says the surface it will take you TO, because a
-   * control that names where you already are gives you nothing to act on.
-   */
-  D.swap = document.createElement('button');
-  D.swap.dataset.walkdownChrome = '';
-  D.swap.dataset.testid = 'panel.tab-swap';
-  D.swap.style.cssText = `position:fixed; right:0; top:50%; z-index:2147483000;
+    /*
+     * Beside the tab, a way to cross between the design and what shipped without
+     * opening anything (n-0072). Comparing the two is the most frequent gesture
+     * there is, and with the panel put away it otherwise costs re-opening the
+     * whole thing to reach the fade control - the cheapest comparison behind the
+     * most expensive move. It says the surface it will take you TO, because a
+     * control that names where you already are gives you nothing to act on.
+     */
+    D.swap = document.createElement('button');
+    D.swap.dataset.walkdownChrome = '';
+    D.swap.dataset.testid = 'panel.tab-swap';
+    D.swap.style.cssText = `position:fixed; right:0; top:50%; z-index:2147483000;
     background:#2b303a; color:#fff; border:0; border-radius:8px 0 0 8px; padding:9px 7px; cursor:pointer;
     font:600 10px/1 -apple-system, sans-serif; writing-mode:vertical-rl; letter-spacing:.08em; display:none;`;
-  D.swap.onclick = () => {
-    const share = S.protoShare ?? (pageSurface() === 'prototype' ? 1 : 0);
-    setFade(share === 1 ? 0 : 1);
-    paintTabs();
-  };
-  document.body.appendChild(D.swap);
-}
-
-/*
- * The put-away controls, kept in step: the swap only appears when there is a
- * design on file to cross to, and it is stacked clear of the tab rather than
- * centred on top of it.
- */
-function paintTabs() {
-  // Called from setDocked, which runs at boot before any blueprint is in
-  // hand. Nothing here is worth an exception on the way up.
-  if (!S.data) {
-    D.swap.style.display = 'none';
-    return;
+    D.swap.onclick = () => {
+      const share = S.protoShare ?? (pageSurface() === 'prototype' ? 1 : 0);
+      setFade(share === 1 ? 0 : 1);
+      paintTabs();
+    };
+    document.body.appendChild(D.swap);
   }
-  if (!S.docked) {
-    const tabH = D.tab.getBoundingClientRect().height || 96;
-    D.tab.style.transform = `translateY(calc(-50% - ${Math.round(tabH / 2) + 4}px))`;
-    const canGhost = Boolean(ghostSource(screenInHand()));
-    D.swap.style.display = canGhost ? 'block' : 'none';
-    const share = S.protoShare ?? (pageSurface() === 'prototype' ? 1 : 0);
-    const goingTo = share === 1 ? 'APP' : 'PROTOTYPE';
-    D.swap.textContent = goingTo;
-    D.swap.title = `Show the ${goingTo.toLowerCase()} instead`;
-    const swapH = D.swap.getBoundingClientRect().height || 80;
-    D.swap.style.transform = `translateY(calc(-50% + ${Math.round(swapH / 2) + 4}px))`;
-  } else {
-    D.tab.style.transform = 'translateY(-50%)';
-    D.swap.style.display = 'none';
-  }
-}
 
-/*
- * Framed: the application is a frame of ours, laid on the desk exactly where
- * the docked layout lays the host page. Everything downstream — the ghost's
- * geometry, the fade, the pin plumbing — measures the same rectangle either
- * way, so only this differs.
- */
-function buildAppFrame() {
-  D.appFrame = document.createElement('iframe');
-  D.appFrame.src = S.frameUrl;
-  D.appFrame.dataset.testid = 'panel.app-frame';
-  D.appFrame.setAttribute('title', 'the application under review');
-  // Whatever the frame lands on - our navigation or the app's own - the wait
-  // is over. Errors never fire load, and a frame that never arrives is still
-  // loading, which is what the veil should keep saying.
-  D.appFrame.addEventListener('load', hideVeil);
-  document.body.appendChild(D.appFrame);
-}
-
-/** The desk space the frame may occupy, and the scale a preset needs. */
-function frameSpace() {
   /*
-   * Put away, the panel occupies nothing and the stage is the whole window.
-   * Measuring as though it were still there left the design floating in a
-   * box the size of the old stage, with the app showing along the edges it
-   * no longer covered - which is the thing the swap beside the tab exists to
-   * make easy (n-0072).
+   * The put-away controls, kept in step: the swap only appears when there is a
+   * design on file to cross to, and it is stacked clear of the tab rather than
+   * centred on top of it.
    */
-  const availW = S.docked ? innerWidth - (W + GAP * 3) : innerWidth;
-  const availH = S.docked ? innerHeight - (HEAD + GAP) : innerHeight;
-  const scale = S.viewportW ? Math.min(1, availW / S.viewportW) : 1;
-  return { availW, availH, scale };
-}
+  function paintTabs() {
+    // Called from setDocked, which runs at boot before any blueprint is in
+    // hand. Nothing here is worth an exception on the way up.
+    if (!S.data) {
+      D.swap.style.display = 'none';
+      return;
+    }
+    if (!S.docked) {
+      const tabH = D.tab.getBoundingClientRect().height || 96;
+      D.tab.style.transform = `translateY(calc(-50% - ${Math.round(tabH / 2) + 4}px))`;
+      const canGhost = Boolean(ghostSource(screenInHand()));
+      D.swap.style.display = canGhost ? 'block' : 'none';
+      const share = S.protoShare ?? (pageSurface() === 'prototype' ? 1 : 0);
+      const goingTo = share === 1 ? 'APP' : 'PROTOTYPE';
+      D.swap.textContent = goingTo;
+      D.swap.title = `Show the ${goingTo.toLowerCase()} instead`;
+      const swapH = D.swap.getBoundingClientRect().height || 80;
+      D.swap.style.transform = `translateY(calc(-50% + ${Math.round(swapH / 2) + 4}px))`;
+    } else {
+      D.tab.style.transform = 'translateY(-50%)';
+      D.swap.style.display = 'none';
+    }
+  }
 
-/*
- * The ghost lies exactly where the app frame lies - it is the same sheet,
- * showing the other surface - so it is placed by the same rules and at the
- * same moments. Only the frame used to be, which is how the design ended up
- * inset over a full-bleed app.
- */
-function placeGhost(on) {
-  if (!S.ghost) return;
-  Object.assign(
-    S.ghost.style,
-    on
-      ? {
-          top: `${HEAD}px`,
-          left: `${GAP}px`,
-          right: `${W + GAP * 2}px`,
-          bottom: `${GAP}px`,
-          borderRadius: '10px',
-        }
-      : { top: '0px', left: '0px', right: '0px', bottom: '0px', borderRadius: '0px' },
-  );
-  sizeGhost();
-}
+  /*
+   * Framed: the application is a frame of ours, laid on the desk exactly where
+   * the docked layout lays the host page. Everything downstream — the ghost's
+   * geometry, the fade, the pin plumbing — measures the same rectangle either
+   * way, so only this differs.
+   */
+  function buildAppFrame() {
+    D.appFrame = document.createElement('iframe');
+    D.appFrame.src = S.frameUrl;
+    D.appFrame.dataset.testid = 'panel.app-frame';
+    D.appFrame.setAttribute('title', 'the application under review');
+    // Whatever the frame lands on - our navigation or the app's own - the wait
+    // is over. Errors never fire load, and a frame that never arrives is still
+    // loading, which is what the veil should keep saying.
+    D.appFrame.addEventListener('load', hideVeil);
+    document.body.appendChild(D.appFrame);
+  }
 
-function placeAppFrame(on) {
-  if (!D.appFrame) return;
-  // The veil is pinned to the frame's box, so it follows every move of it.
-  if (veilIsUp()) requestAnimationFrame(placeVeil);
-  const { availW, availH, scale } = frameSpace();
-  // An iframe is a replaced element: four insets alone leave it at its
-  // intrinsic 300x150, so the size has to be said outright. A viewport
-  // preset sizes the frame like a real device: the app lays out at that
-  // width, and a viewport wider than the space scales down WHOLE - a
-  // desktop layout seen as a desktop layout, never reflowed to a column.
-  D.appFrame.style.cssText = on
-    ? S.viewportW
-      ? `position:fixed; top:${HEAD}px;
+  /** The desk space the frame may occupy, and the scale a preset needs. */
+  function frameSpace() {
+    /*
+     * Put away, the panel occupies nothing and the stage is the whole window.
+     * Measuring as though it were still there left the design floating in a
+     * box the size of the old stage, with the app showing along the edges it
+     * no longer covered - which is the thing the swap beside the tab exists to
+     * make easy (n-0072).
+     */
+    const availW = S.docked ? innerWidth - (W + GAP * 3) : innerWidth;
+    const availH = S.docked ? innerHeight - (HEAD + GAP) : innerHeight;
+    const scale = S.viewportW ? Math.min(1, availW / S.viewportW) : 1;
+    return { availW, availH, scale };
+  }
+
+  /*
+   * The ghost lies exactly where the app frame lies - it is the same sheet,
+   * showing the other surface - so it is placed by the same rules and at the
+   * same moments. Only the frame used to be, which is how the design ended up
+   * inset over a full-bleed app.
+   */
+  function placeGhost(on) {
+    if (!S.ghost) return;
+    Object.assign(
+      S.ghost.style,
+      on
+        ? {
+            top: `${HEAD}px`,
+            left: `${GAP}px`,
+            right: `${W + GAP * 2}px`,
+            bottom: `${GAP}px`,
+            borderRadius: '10px',
+          }
+        : { top: '0px', left: '0px', right: '0px', bottom: '0px', borderRadius: '0px' },
+    );
+    sizeGhost();
+  }
+
+  function placeAppFrame(on) {
+    if (!D.appFrame) return;
+    // The veil is pinned to the frame's box, so it follows every move of it.
+    if (veilIsUp()) requestAnimationFrame(placeVeil);
+    const { availW, availH, scale } = frameSpace();
+    // An iframe is a replaced element: four insets alone leave it at its
+    // intrinsic 300x150, so the size has to be said outright. A viewport
+    // preset sizes the frame like a real device: the app lays out at that
+    // width, and a viewport wider than the space scales down WHOLE - a
+    // desktop layout seen as a desktop layout, never reflowed to a column.
+    D.appFrame.style.cssText = on
+      ? S.viewportW
+        ? `position:fixed; top:${HEAD}px;
          left:${GAP + Math.max(0, (availW - S.viewportW * scale) / 2)}px;
          width:${S.viewportW}px; height:${availH / scale}px;
          transform:scale(${scale}); transform-origin:top left;
          border:0; border-radius:${10 / scale}px; background:#fff;
          box-shadow:0 1px 2px rgba(0,0,0,.28), 0 12px 32px rgba(0,0,0,.34);
          transition:width .22s ease, height .22s ease, top .22s ease, left .22s ease;`
-      : `position:fixed; top:${HEAD}px; left:${GAP}px;
+        : `position:fixed; top:${HEAD}px; left:${GAP}px;
          width:calc(100vw - ${W + GAP * 3}px); height:calc(100vh - ${HEAD + GAP}px);
          border:0; border-radius:10px; background:#fff; transform:none;
          box-shadow:0 1px 2px rgba(0,0,0,.28), 0 12px 32px rgba(0,0,0,.34);
          transition:width .22s ease, height .22s ease, top .22s ease, left .22s ease;`
-    : `position:fixed; top:0; left:0; width:100vw; height:100vh;
+      : `position:fixed; top:0; left:0; width:100vw; height:100vh;
        border:0; border-radius:0; background:#fff;
        transition:width .22s ease, height .22s ease, top .22s ease, left .22s ease;`;
-}
+  }
 
-/** The little pill naming the preset and, when the frame is scaled, by how much. */
-let zoomBadge = null;
-function syncZoomBadge() {
-  const show = S.docked && S.viewportW;
-  if (!show) {
-    zoomBadge?.remove();
-    zoomBadge = null;
-    return;
-  }
-  if (!zoomBadge) {
-    zoomBadge = document.createElement('div');
-    zoomBadge.dataset.testid = 'panel.zoom';
-    document.body.appendChild(zoomBadge);
-  }
-  const { scale } = frameSpace();
-  zoomBadge.textContent =
-    scale < 1 ? `${S.viewportW}px · fit ${Math.round(scale * 100)}%` : `${S.viewportW}px`;
-  zoomBadge.style.cssText = `position:fixed; right:${W + GAP * 2 + 10}px; bottom:${GAP + 10}px;
+  /** The little pill naming the preset and, when the frame is scaled, by how much. */
+  let zoomBadge = null;
+  function syncZoomBadge() {
+    const show = S.docked && S.viewportW;
+    if (!show) {
+      zoomBadge?.remove();
+      zoomBadge = null;
+      return;
+    }
+    if (!zoomBadge) {
+      zoomBadge = document.createElement('div');
+      zoomBadge.dataset.testid = 'panel.zoom';
+      document.body.appendChild(zoomBadge);
+    }
+    const { scale } = frameSpace();
+    zoomBadge.textContent =
+      scale < 1 ? `${S.viewportW}px · fit ${Math.round(scale * 100)}%` : `${S.viewportW}px`;
+    zoomBadge.style.cssText = `position:fixed; right:${W + GAP * 2 + 10}px; bottom:${GAP + 10}px;
     z-index:2147482001; padding:4px 9px; border-radius:99px;
     font:600 10.5px/1 -apple-system, system-ui, sans-serif;
     background:rgba(20,25,40,.75); color:#fff; pointer-events:none;`;
-}
-
-/** Size the frame like a real device; the ghost always follows. */
-function setViewport(w) {
-  S.viewportW = w;
-  S.ghostWidth = w;
-  if (S.docked) paintDesk(true);
-  syncZoomBadge();
-  /*
-   * The ghost renders at the same viewport or the comparison lies. A preset
-   * changes how the page lays out, not just how big its box is, so this is
-   * one of the few things that genuinely reloads it - and the dial has to be
-   * put back where it was, by its own value. Restoring from the ghost's
-   * opacity instead reads the wrong number: on a page standing on the
-   * prototype, full opacity means the dial is at the APP end, so handing
-   * that back as the share tore the rebuilt ghost straight down again.
-   */
-  if (S.ghost) {
-    const share = S.protoShare ?? (pageSurface() === 'prototype' ? 0 : 1);
-    setGhost(false);
-    setFade(share);
   }
-  /*
-   * Say the peek again, because this function just wiped it.
-   *
-   * Placement writes style.cssText wholesale - it has to, for the transition -
-   * and that drops the inline opacity the peek set. paintDesk already knew
-   * this and re-asserted afterwards, so dragging a dial kept the peek; every
-   * OTHER route through here did not, so using any control in the bar put the
-   * app back to full strength while the checkbox stayed ticked. The control
-   * that means "a way of looking" was left lying about what you were looking
-   * at (found by an agent walkdown, 2026-08-28).
-   *
-   * Re-asserting here rather than at each caller because the wipe happens
-   * here: a new caller should not have to know it owes the peek a repair.
-   */
-  if (S.hideAppOn) hideApp(true);
-  renderBar();
-}
 
-/*
- * Our own document: there is no host page to inset or to put back, only a
- * desk to paint and a frame to place on it. Until 2026-08-26 this function
- * had a second half that inset the host page and restored it on the way
- * out; the docked-into-the-application layout it served is gone, and with
- * it the only caller that could ever reach that code.
- */
-function paintDesk(on) {
-  const root = document.documentElement,
-    page = document.body;
-  const cs = getComputedStyle(D.side);
-  const token = (n, fallback) => cs.getPropertyValue(n).trim() || fallback;
-  const ink = token('--color-base-content', '#dbe7f3');
-  root.style.background = token('--color-base-200', '#12283f');
-  drawDesk(on, ink);
-  // Whatever the page painted on <body> to avoid a white flash would sit
-  // on top of the desk, so it stands down now that the desk is real.
-  page.style.background = 'transparent';
-  placeAppFrame(on);
-  placeGhost(on);
-  // placeAppFrame replaces the frame's whole style attribute wholesale (it
-  // needs to, for the transition), which silently drops any opacity the
-  // peek checkbox had set — and every dial edit repaints the desk, so a
-  // peek that survived one repaint would be undone by the very next drag.
-  // Re-asserting is cheap and idempotent, unlike trying to make the two
-  // writers share one attribute.
-  if (S.hideAppOn) hideApp(true);
-  syncHeadlessCover();
-}
-
-/*
- * Pin mode has one owner. Docked, that is the embed sharing this document.
- * Framed, there is no embed here — it is inside the frames — so the panel
- * owns the flag and tells them, which is the arrangement the viewer had.
- */
-let framedPinMode = false;
-/*
- * Pin mode has one owner and it is this panel: the embed lives in the framed
- * document and is told, never asked. (Docked, the embed shared our document
- * and owned it instead - that is gone with the layout.)
- */
-const PIN = {
-  isOn: () => framedPinMode,
-  set(on) {
-    framedPinMode = on;
-    pushContexts();
-    paintGhostReach();
+  /** Size the frame like a real device; the ghost always follows. */
+  function setViewport(w) {
+    S.viewportW = w;
+    S.ghostWidth = w;
+    if (S.docked) paintDesk(true);
+    syncZoomBadge();
+    /*
+     * The ghost renders at the same viewport or the comparison lies. A preset
+     * changes how the page lays out, not just how big its box is, so this is
+     * one of the few things that genuinely reloads it - and the dial has to be
+     * put back where it was, by its own value. Restoring from the ghost's
+     * opacity instead reads the wrong number: on a page standing on the
+     * prototype, full opacity means the dial is at the APP end, so handing
+     * that back as the share tore the rebuilt ghost straight down again.
+     */
+    if (S.ghost) {
+      const share = S.protoShare ?? (pageSurface() === 'prototype' ? 0 : 1);
+      setGhost(false);
+      setFade(share);
+    }
+    /*
+     * Say the peek again, because this function just wiped it.
+     *
+     * Placement writes style.cssText wholesale - it has to, for the transition -
+     * and that drops the inline opacity the peek set. paintDesk already knew
+     * this and re-asserted afterwards, so dragging a dial kept the peek; every
+     * OTHER route through here did not, so using any control in the bar put the
+     * app back to full strength while the checkbox stayed ticked. The control
+     * that means "a way of looking" was left lying about what you were looking
+     * at (found by an agent walkdown, 2026-08-28).
+     *
+     * Re-asserting here rather than at each caller because the wipe happens
+     * here: a new caller should not have to know it owes the peek a repair.
+     */
+    if (S.hideAppOn) hideApp(true);
     renderBar();
-  },
-  watch() {
-    /* the panel is the owner; there is nobody to hear from */
-  },
-};
-
-function setDocked(on) {
-  S.docked = on;
-  D.bar.style.transform = on ? 'none' : `translateY(-${TOP}px)`;
-  D.side.style.transform = on ? 'none' : `translateX(calc(100% + ${GAP}px))`;
-  D.tab.style.display = on ? 'none' : 'block';
-  // Nothing the bar opens outlives the bar: put away, neither the tuner nor
-  // the screen picker has anything left to hang off.
-  if (!on) {
-    S.deskOpen = false;
-    syncDeskPanel();
-    closeScreenPanel();
   }
-  paintDesk(on);
-  // How much of the right edge the panel is occupying. The embed's badge
-  // reads this so it comes to rest beside the panel instead of under it.
-  // Docked, the embed's badge reads this so it comes to rest beside the panel
-  // rather than under it. Framed, the embed is in another document and the
-  // panel is not over it at all.
+
   /*
-   * The surface you were looking at survives being put away, because the
-   * swap beside the tab is there to change it. Tearing the ghost down here
-   * used to mean the panel decided for you the moment you got it out of the
-   * way, and put a page load between you and getting back.
+   * Our own document: there is no host page to inset or to put back, only a
+   * desk to paint and a frame to place on it. Until 2026-08-26 this function
+   * had a second half that inset the host page and restored it on the way
+   * out; the docked-into-the-application layout it served is gone, and with
+   * it the only caller that could ever reach that code.
    */
-  paintTabs();
-}
+  function paintDesk(on) {
+    const root = document.documentElement,
+      page = document.body;
+    const cs = getComputedStyle(D.side);
+    const token = (n, fallback) => cs.getPropertyValue(n).trim() || fallback;
+    const ink = token('--color-base-content', '#dbe7f3');
+    root.style.background = token('--color-base-200', '#12283f');
+    drawDesk(on, ink);
+    // Whatever the page painted on <body> to avoid a white flash would sit
+    // on top of the desk, so it stands down now that the desk is real.
+    page.style.background = 'transparent';
+    placeAppFrame(on);
+    placeGhost(on);
+    // placeAppFrame replaces the frame's whole style attribute wholesale (it
+    // needs to, for the transition), which silently drops any opacity the
+    // peek checkbox had set — and every dial edit repaints the desk, so a
+    // peek that survived one repaint would be undone by the very next drag.
+    // Re-asserting is cheap and idempotent, unlike trying to make the two
+    // writers share one attribute.
+    if (S.hideAppOn) hideApp(true);
+    syncHeadlessCover();
+  }
 
-/*
- * Screen identity, shared verbatim with the embed and the server so a pin
- * cannot land on one screen here and a different one there.
- */
-/**
- * Which of the two surfaces this page already is. Without it the control is
- * asymmetric: on a prototype page, "show me the prototype" would ghost the
- * prototype over itself and do nothing visible.
- */
-/*
- * Where the surface under review is. Docked that is this document's own URL;
- * framed it is the frame's, which we cannot read across origins — the copy
- * of walkdown inside it says so instead, as it loads and whenever it moves.
- */
-const hereLocation = () => locationOfUrl(S.frameUrl) ?? {};
-
-function pageSurface() {
-  const sc = currentScreen();
-  if (!sc) return 'app';
-  return matchScreen([sc], hereLocation())?.surface ?? 'app';
-}
-
-/** Which storyboard screen this page is, by URL — same trick the embed uses. */
-function currentScreen() {
-  const screens = S.data?.storyboard ?? [];
-  if (S.pickedScreen) return screens.find((s) => s.id === S.pickedScreen) ?? null;
-  return matchScreen(screens, hereLocation())?.screen ?? null;
-}
-
-/*
- * The URL can change without the page reloading, and a modal or a drawer or
- * an SPA route is its own screen (docs/06 §2) — so the panel has to notice.
- *
- * Two of the three ways it changes announce themselves: hashchange and
- * popstate. history.pushState announces nothing, and the extension runs in an
- * isolated world where patching the page's own History object is not
- * possible — its History is not ours. So the events keep the ordinary cases
- * instant, and a slow poll catches the rest rather than pretending pushState
- * is covered.
- */
-/*
- * Both overrides answered a question about the page you were on — "this page
- * is that screen", "show me that screen's art". Carrying them across a
- * navigation would have the panel describing somewhere you have left.
- */
-function hereChanged() {
   /*
-   * Arriving at the screen someone picked is not leaving it. The frame
-   * announces every landing, including the one the picker asked for, so a
-   * blanket reset here threw the choice away between the click and the load
-   * and the radio list snapped back to Detect (n-0098). A pick survives
-   * exactly as long as the page still IS that screen.
+   * Pin mode has one owner. Docked, that is the embed sharing this document.
+   * Framed, there is no embed here — it is inside the frames — so the panel
+   * owns the flag and tells them, which is the arrangement the viewer had.
    */
-  const arrived =
-    S.pickedScreen &&
-    matchScreen(
-      (S.data?.storyboard ?? []).filter((s) => s.id === S.pickedScreen),
-      hereLocation(),
-    )?.screen;
-  S.pickedScreen = arrived ? S.pickedScreen : null;
-  S.ghostOverride = null;
-  if (S.phase !== 'ready') return;
-  if (S.protoShare === null) setGhost(false);
-  else setFade(S.protoShare);
-  render();
-}
+  let framedPinMode = false;
+  /*
+   * Pin mode has one owner and it is this panel: the embed lives in the framed
+   * document and is told, never asked. (Docked, the embed shared our document
+   * and owned it instead - that is gone with the layout.)
+   */
+  const PIN = {
+    isOn: () => framedPinMode,
+    set(on) {
+      framedPinMode = on;
+      pushContexts();
+      paintGhostReach();
+      renderBar();
+    },
+    watch() {
+      /* the panel is the owner; there is nobody to hear from */
+    },
+  };
 
-/*
- * This document never moves - the frame does, and the copy of walkdown inside
- * it says so, which is what the `walkdown:ready` handler acts on. The docked
- * layout had to watch its own location three ways because it lived in the
- * page it was reviewing; nothing here does.
- */
+  function setDocked(on) {
+    S.docked = on;
+    D.bar.style.transform = on ? 'none' : `translateY(-${TOP}px)`;
+    D.side.style.transform = on ? 'none' : `translateX(calc(100% + ${GAP}px))`;
+    D.tab.style.display = on ? 'none' : 'block';
+    // Nothing the bar opens outlives the bar: put away, neither the tuner nor
+    // the screen picker has anything left to hang off.
+    if (!on) {
+      S.deskOpen = false;
+      syncDeskPanel();
+      closeScreenPanel();
+    }
+    paintDesk(on);
+    // How much of the right edge the panel is occupying. The embed's badge
+    // reads this so it comes to rest beside the panel instead of under it.
+    // Docked, the embed's badge reads this so it comes to rest beside the panel
+    // rather than under it. Framed, the embed is in another document and the
+    // panel is not over it at all.
+    /*
+     * The surface you were looking at survives being put away, because the
+     * swap beside the tab is there to change it. Tearing the ghost down here
+     * used to mean the panel decided for you the moment you got it out of the
+     * way, and put a page load between you and getting back.
+     */
+    paintTabs();
+  }
 
-async function load() {
-  const res = await fetch(api('/api/blueprint'));
-  S.data = await res.json();
-  // Re-resolve against the reloaded data: the old object is a stale copy, so
-  // holding it would show yesterday's verdict and threads.
-  if (S.selected) S.selected = S.data.rows.find((r) => r.rule === S.selected.rule) ?? null;
-  await loadSeen();
-  await restoreSession();
-  render();
-  // The surfaces carry the pins, so they have to hear about a thread that
-  // has just ended - a verified note leaves the page it was pinned to,
-  // rather than sitting there until something else happens to refresh it.
-  if (S.phase === 'ready') pushContexts();
-}
+  /*
+   * Screen identity, shared verbatim with the embed and the server so a pin
+   * cannot land on one screen here and a different one there.
+   */
+  /**
+   * Which of the two surfaces this page already is. Without it the control is
+   * asymmetric: on a prototype page, "show me the prototype" would ghost the
+   * prototype over itself and do nothing visible.
+   */
+  /*
+   * Where the surface under review is. Docked that is this document's own URL;
+   * framed it is the frame's, which we cannot read across origins — the copy
+   * of walkdown inside it says so instead, as it loads and whenever it moves.
+   */
+  const hereLocation = () => locationOfUrl(S.frameUrl) ?? {};
 
-/**
- * Bring back an unfinished session the last page or extension unload ate.
- * The project's draft wins over the browser's copy: it is the one another
- * window, another browser, or `walkdown status` can also see, so trusting it
- * is what makes "the sitting is on disk" true rather than nearly true.
- */
-async function restoreSession() {
-  if (S.session) return;
-  const local = await store.get(SESSION_KEY()).catch(() => null);
-  const saved = (S.data?.draft?.verdicts && S.data.draft) || local;
-  if (saved?.verdicts && Object.keys(saved.verdicts).length)
-    S.session = {
-      verdicts: saved.verdicts,
-      threads: saved.threads ?? {},
-      actor: saved.actor ?? whoAmI(),
-      started: saved.started ?? new Date().toISOString(),
-    };
-}
+  function pageSurface() {
+    const sc = currentScreen();
+    if (!sc) return 'app';
+    return matchScreen([sc], hereLocation())?.surface ?? 'app';
+  }
 
-/*
- * Where a surface goes when the page is not a screen. Without this the fade
- * control was dead everywhere except the handful of pages walkdown happens to
- * recognise - so crossing between the design and the build, the single most
- * frequent thing a reviewer does, depended on where you already were.
- */
-const defaultScreen = () =>
-  screenById(S.data?.defaultScreen) ??
-  (S.data?.storyboard ?? []).find((sc) => screenUrl(sc, 'app') ?? screenUrl(sc, 'prototype')) ??
-  null;
+  /** Which storyboard screen this page is, by URL — same trick the embed uses. */
+  function currentScreen() {
+    const screens = S.data?.storyboard ?? [];
+    if (S.pickedScreen) return screens.find((s) => s.id === S.pickedScreen) ?? null;
+    return matchScreen(screens, hereLocation())?.screen ?? null;
+  }
 
-/** The screen a surface control should act on: this page, or the front door. */
-const screenInHand = () => screenById(S.ghostOverride) ?? currentScreen() ?? defaultScreen();
+  /*
+   * The URL can change without the page reloading, and a modal or a drawer or
+   * an SPA route is its own screen (docs/06 §2) — so the panel has to notice.
+   *
+   * Two of the three ways it changes announce themselves: hashchange and
+   * popstate. history.pushState announces nothing, and the extension runs in an
+   * isolated world where patching the page's own History object is not
+   * possible — its History is not ours. So the events keep the ordinary cases
+   * instant, and a slow poll catches the rest rather than pretending pushState
+   * is covered.
+   */
+  /*
+   * Both overrides answered a question about the page you were on — "this page
+   * is that screen", "show me that screen's art". Carrying them across a
+   * navigation would have the panel describing somewhere you have left.
+   */
+  function hereChanged() {
+    /*
+     * Arriving at the screen someone picked is not leaving it. The frame
+     * announces every landing, including the one the picker asked for, so a
+     * blanket reset here threw the choice away between the click and the load
+     * and the radio list snapped back to Detect (n-0098). A pick survives
+     * exactly as long as the page still IS that screen.
+     */
+    const arrived =
+      S.pickedScreen &&
+      matchScreen(
+        (S.data?.storyboard ?? []).filter((s) => s.id === S.pickedScreen),
+        hereLocation(),
+      )?.screen;
+    S.pickedScreen = arrived ? S.pickedScreen : null;
+    S.ghostOverride = null;
+    if (S.phase !== 'ready') return;
+    if (S.protoShare === null) setGhost(false);
+    else setFade(S.protoShare);
+    render();
+  }
 
-/**
- * What the ghost should draw for a screen: the design if there is one, and
- * otherwise a proposal sketch — flagged, because a sketch that reads as the
- * design is exactly the confusion the ownership rules exist to prevent.
- */
-function ghostSource(screen) {
-  if (pageSurface() === 'prototype') {
-    // Standing on the design, the other surface is the running app — and it
-    // lives at its own origin, so the ghost takes an absolute URL.
-    return screen?.app?.path && S.data.appBase
-      ? { url: S.data.appBase + screen.app.path, proposed: false }
+  /*
+   * This document never moves - the frame does, and the copy of walkdown inside
+   * it says so, which is what the `walkdown:ready` handler acts on. The docked
+   * layout had to watch its own location three ways because it lived in the
+   * page it was reviewing; nothing here does.
+   */
+
+  async function load() {
+    const res = await fetch(api('/api/blueprint'));
+    S.data = await res.json();
+    // Re-resolve against the reloaded data: the old object is a stale copy, so
+    // holding it would show yesterday's verdict and threads.
+    if (S.selected) S.selected = S.data.rows.find((r) => r.rule === S.selected.rule) ?? null;
+    await loadSeen();
+    await restoreSession();
+    render();
+    // The surfaces carry the pins, so they have to hear about a thread that
+    // has just ended - a verified note leaves the page it was pinned to,
+    // rather than sitting there until something else happens to refresh it.
+    if (S.phase === 'ready') pushContexts();
+  }
+
+  /**
+   * Bring back an unfinished session the last page or extension unload ate.
+   * The project's draft wins over the browser's copy: it is the one another
+   * window, another browser, or `walkdown status` can also see, so trusting it
+   * is what makes "the sitting is on disk" true rather than nearly true.
+   */
+  async function restoreSession() {
+    if (S.session) return;
+    const local = await store.get(SESSION_KEY()).catch(() => null);
+    const saved = (S.data?.draft?.verdicts && S.data.draft) || local;
+    if (saved?.verdicts && Object.keys(saved.verdicts).length)
+      S.session = {
+        verdicts: saved.verdicts,
+        threads: saved.threads ?? {},
+        actor: saved.actor ?? whoAmI(),
+        started: saved.started ?? new Date().toISOString(),
+      };
+  }
+
+  /*
+   * Where a surface goes when the page is not a screen. Without this the fade
+   * control was dead everywhere except the handful of pages walkdown happens to
+   * recognise - so crossing between the design and the build, the single most
+   * frequent thing a reviewer does, depended on where you already were.
+   */
+  const defaultScreen = () =>
+    screenById(S.data?.defaultScreen) ??
+    (S.data?.storyboard ?? []).find((sc) => screenUrl(sc, 'app') ?? screenUrl(sc, 'prototype')) ??
+    null;
+
+  /** The screen a surface control should act on: this page, or the front door. */
+  const screenInHand = () => screenById(S.ghostOverride) ?? currentScreen() ?? defaultScreen();
+
+  /**
+   * What the ghost should draw for a screen: the design if there is one, and
+   * otherwise a proposal sketch — flagged, because a sketch that reads as the
+   * design is exactly the confusion the ownership rules exist to prevent.
+   */
+  function ghostSource(screen) {
+    if (pageSurface() === 'prototype') {
+      // Standing on the design, the other surface is the running app — and it
+      // lives at its own origin, so the ghost takes an absolute URL.
+      return screen?.app?.path && S.data.appBase
+        ? { url: S.data.appBase + screen.app.path, proposed: false }
+        : null;
+    }
+    if (screen?.prototype && S.data.hasPrototype)
+      return { path: '/prototype' + screen.prototype, proposed: false };
+    if (screen?.proposal) return { path: '/proposals' + screen.proposal, proposed: true };
+    return null;
+  }
+
+  /*
+   * The verbs are the panel's; which transitions exist is the lifecycle's.
+   * This used to be a hand-copy of the whole FLOWS table with labels attached,
+   * which is precisely the two-runtimes drift vocab.js exists to end: the menu
+   * now cannot offer a move the server would refuse, or hide one it allows.
+   */
+  const VERB = {
+    addressed: 'Addressed',
+    verified: '\u2713 Verify',
+    answered: 'Answer',
+    incorporated: 'Incorporated',
+    open: 'Reopen',
+    waived: 'Waive',
+  };
+
+  /** Short verbs, and only the transitions this kind and status allow. */
+  function threadActions(t) {
+    return (
+      (FLOWS[t.kind] ?? FLOWS.note)[t.status]?.map((next) => [
+        VERB[next],
+        // Answering is a reply that carries the transition, not a bare status
+        // change — the panel routes it through the reply box.
+        t.kind === 'question' && next === 'answered' ? '__answer' : next,
+        // The one visually-marked action: waiving buries work.
+        next === 'waived' || undefined,
+      ]) ?? []
+    );
+  }
+
+  // ---- render ---------------------------------------------------------------
+  function render() {
+    if (!S.data) return;
+    // The thread screen without a thread is not a screen.
+    if (S.view === 'thread' && !S.openThread) S.view = S.selected ? 'detail' : 'list';
+    // render() rebuilds the panel wholesale, which resets scroll. Clicking a
+    // control near the bottom of a long thread would otherwise throw you back
+    // to the top — so note where each pane was and put it back. Read live, not
+    // from a record kept by scroll events: those fire AFTER the position has
+    // already moved, so a record would sometimes be the staler of the two.
+    const wasAt = [...D.host.querySelectorAll('.wdp-pane')].map((p) => p.scrollTop);
+    // Typing must survive a repaint: a composer that loses the caret mid-reply
+    // is the difference between a conversation and a form.
+    const typing = D.sr.activeElement;
+    const caret = ['wdp-note', 'wdp-search'].includes(typing?.id)
+      ? { id: typing.id, start: typing.selectionStart, end: typing.selectionEnd }
       : null;
-  }
-  if (screen?.prototype && S.data.hasPrototype)
-    return { path: '/prototype' + screen.prototype, proposed: false };
-  if (screen?.proposal) return { path: '/proposals' + screen.proposal, proposed: true };
-  return null;
-}
-
-/*
- * The verbs are the panel's; which transitions exist is the lifecycle's.
- * This used to be a hand-copy of the whole FLOWS table with labels attached,
- * which is precisely the two-runtimes drift vocab.js exists to end: the menu
- * now cannot offer a move the server would refuse, or hide one it allows.
- */
-const VERB = {
-  addressed: 'Addressed',
-  verified: '\u2713 Verify',
-  answered: 'Answer',
-  incorporated: 'Incorporated',
-  open: 'Reopen',
-  waived: 'Waive',
-};
-
-/** Short verbs, and only the transitions this kind and status allow. */
-function threadActions(t) {
-  return (
-    (FLOWS[t.kind] ?? FLOWS.note)[t.status]?.map((next) => [
-      VERB[next],
-      // Answering is a reply that carries the transition, not a bare status
-      // change — the panel routes it through the reply box.
-      t.kind === 'question' && next === 'answered' ? '__answer' : next,
-      // The one visually-marked action: waiving buries work.
-      next === 'waived' || undefined,
-    ]) ?? []
-  );
-}
-
-// ---- render ---------------------------------------------------------------
-function render() {
-  if (!S.data) return;
-  // The thread screen without a thread is not a screen.
-  if (S.view === 'thread' && !S.openThread) S.view = S.selected ? 'detail' : 'list';
-  // render() rebuilds the panel wholesale, which resets scroll. Clicking a
-  // control near the bottom of a long thread would otherwise throw you back
-  // to the top — so note where each pane was and put it back. Read live, not
-  // from a record kept by scroll events: those fire AFTER the position has
-  // already moved, so a record would sometimes be the staler of the two.
-  const wasAt = [...D.host.querySelectorAll('.wdp-pane')].map((p) => p.scrollTop);
-  // Typing must survive a repaint: a composer that loses the caret mid-reply
-  // is the difference between a conversation and a form.
-  const typing = D.sr.activeElement;
-  const caret = ['wdp-note', 'wdp-search'].includes(typing?.id)
-    ? { id: typing.id, start: typing.selectionStart, end: typing.selectionEnd }
-    : null;
-  const total = S.data.rows.length;
-  const verified = S.data.rows.filter((r) => r.verdict === 'pass').length;
-  /*
-   * A sitting's verdicts are not in the ledger until Finish, so the footer
-   * used to sit frozen through the very work it is meant to be counting -
-   * "23 of 83 verified" three inches under "34 judged", which reads as a
-   * broken number rather than as two different facts. The work in hand is
-   * now counted separately and marked as not yet recorded, and a rule judged
-   * this sitting stops being listed as owed, because it is not.
-   */
-  const judged = new Set(Object.keys(S.session?.verdicts ?? {}));
-  const owed = owedRows();
-  const toSign = owed.filter((r) => !r.built).length;
-  const toWalk = owed.filter((r) => r.built).length;
-  /*
-   * Threads waiting on a person - counted the way the server counts them, so
-   * the badge and `walkdown status` can never disagree. It rides on the tab
-   * rather than in the rules footer: it is a count of conversations, and the
-   * footer beneath the rule list counts rules.
-   */
-  const toVerify = threadsMatching('you').length;
-  renderBar();
-  const onThreads = S.listTab === 'threads';
-  const TAB_ICON = { blueprints: 'bounding-box', rules: 'checks', threads: 'chats-circle' };
-  /*
-   * A tab's badge is what that tab is holding for you, and the colour ranks
-   * it. Warning yellow is this panel's "waiting on you" - the rule glyphs,
-   * their badges and the footer all say it in that colour
-   * (panel.rules.lifecycle-legible) - and it belongs to the rules a walkdown
-   * would take you through, which is the work the whole tool exists to get
-   * done. Threads are blue: real work, answered when you get to it, and a
-   * second yellow beside the first would flatten the two into one call on
-   * the eye. Nothing is drawn at zero - a badge saying none is a claim on
-   * the eye that turns out to be about nothing.
-   */
-  const tab = (id, label, badge = 0, why = '', tone = 'badge-warning') =>
-    // px-3 sits mid-list on purpose. Tailwind scans this file as text, and a
-    // utility written flush against a \${…} is not a candidate it can see -
-    // a px-4 sat here for months and never reached the built sheet at all,
-    // so the tabs ran on daisyUI's own padding and read as squished
-    // (n-0102). Once the class was real, px-4 turned out to be too much:
-    // three tabs, two of them carrying a count badge, wrap at 384px.
-    `<button role="tab" class="tab px-3 gap-1${S.listTab === id ? ' tab-active' : ''}" data-tab="${id}">
+    const total = S.data.rows.length;
+    const verified = S.data.rows.filter((r) => r.verdict === 'pass').length;
+    /*
+     * A sitting's verdicts are not in the ledger until Finish, so the footer
+     * used to sit frozen through the very work it is meant to be counting -
+     * "23 of 83 verified" three inches under "34 judged", which reads as a
+     * broken number rather than as two different facts. The work in hand is
+     * now counted separately and marked as not yet recorded, and a rule judged
+     * this sitting stops being listed as owed, because it is not.
+     */
+    const judged = new Set(Object.keys(S.session?.verdicts ?? {}));
+    const owed = owedRows();
+    const toSign = owed.filter((r) => !r.built).length;
+    const toWalk = owed.filter((r) => r.built).length;
+    /*
+     * Threads waiting on a person - counted the way the server counts them, so
+     * the badge and `walkdown status` can never disagree. It rides on the tab
+     * rather than in the rules footer: it is a count of conversations, and the
+     * footer beneath the rule list counts rules.
+     */
+    const toVerify = threadsMatching('you').length;
+    renderBar();
+    const onThreads = S.listTab === 'threads';
+    const TAB_ICON = { blueprints: 'bounding-box', rules: 'checks', threads: 'chats-circle' };
+    /*
+     * A tab's badge is what that tab is holding for you, and the colour ranks
+     * it. Warning yellow is this panel's "waiting on you" - the rule glyphs,
+     * their badges and the footer all say it in that colour
+     * (panel.rules.lifecycle-legible) - and it belongs to the rules a walkdown
+     * would take you through, which is the work the whole tool exists to get
+     * done. Threads are blue: real work, answered when you get to it, and a
+     * second yellow beside the first would flatten the two into one call on
+     * the eye. Nothing is drawn at zero - a badge saying none is a claim on
+     * the eye that turns out to be about nothing.
+     */
+    const tab = (id, label, badge = 0, why = '', tone = 'badge-warning') =>
+      // px-3 sits mid-list on purpose. Tailwind scans this file as text, and a
+      // utility written flush against a \${…} is not a candidate it can see -
+      // a px-4 sat here for months and never reached the built sheet at all,
+      // so the tabs ran on daisyUI's own padding and read as squished
+      // (n-0102). Once the class was real, px-4 turned out to be too much:
+      // three tabs, two of them carrying a count badge, wrap at 384px.
+      b`<button role="tab" class="tab px-3 gap-1${S.listTab === id ? ' tab-active' : ''}" data-tab="${id}">
       ${icon(TAB_ICON[id], 'size-4')}${label}${
-        badge ? `<span class="badge badge-xs ${tone}" title="${esc(why)}">${badge}</span>` : ''
+        badge ? b`<span class="badge badge-xs ${tone}" title="${why}">${badge}</span>` : A
       }</button>`;
-  D.side.innerHTML = `
+    const side = b`
     <div role="tablist" class="tabs tabs-box tabs-sm m-2 shrink-0 self-center" data-testid="panel.tabs">
       ${tab('blueprints', 'Blueprints')}${
         /*
@@ -3671,7 +3698,7 @@ function render() {
          just opened (n-0101). -->
     ${
       S.session && S.listTab === 'rules'
-        ? `<div class="flex items-center gap-2 border-b border-base-300 bg-warning/10 px-3.5 py-2 text-xs" data-testid="panel.actor">
+        ? b`<div class="flex items-center gap-2 border-b border-base-300 bg-warning/10 px-3.5 py-2 text-xs" data-testid="panel.actor">
       <!-- Two facts, because they are two fields now (n-0104): the name you
            go by, and the username the ledger will actually carry. The handle
            stays on screen rather than only in Settings, because a defaulted
@@ -3680,14 +3707,12 @@ function render() {
            while recording a handle would quietly break it. With no full name
            anywhere the two are the same string and only one is drawn. -->
       <span>Recording as
-        <button id="wdp-actor" data-testid="panel.actor-name" class="link font-semibold" title="Change the name in Settings (the gear)">${esc(
-          recordingDisplay() || 'set your name…',
-        )}</button>${
+        <button id="wdp-actor" data-testid="panel.actor-name" class="link font-semibold" title="Change the name in Settings (the gear)">${
+          recordingDisplay() || 'set your name…'
+        }</button>${
           recordingHandle() && recordingHandle() !== recordingDisplay()
-            ? ` <span data-testid="panel.actor-handle" class="font-mono opacity-60" title="Verdicts and thread actions are recorded under this username">${esc(
-                recordingHandle(),
-              )}</span>`
-            : ''
+            ? b` <span data-testid="panel.actor-handle" class="font-mono opacity-60" title="Verdicts and thread actions are recorded under this username">${recordingHandle()}</span>`
+            : A
         }</span>
       <!-- Both halves of the same fact: how many you have judged, and how
            many the sitting has in it. The denominator is what you have done
@@ -3713,7 +3738,7 @@ function render() {
       <button class="btn btn-xs btn-outline btn-warning" data-testid="panel.continue" id="wdp-continue"
         title="Open the next rule still owing you a verdict">Continue</button>
     </div>`
-        : ''
+        : A
     }
     <!-- Three screens on one track — the list, the rule, and the thread, each
          one slide to the right of the last. The slot clips it, or an
@@ -3732,7 +3757,7 @@ function render() {
              way, so scroll restoration still lines up by index. -->
         <div class="flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col overflow-hidden"
              data-testid="${onThreads ? 'panel.threads-list' : S.listTab === 'rules' ? 'panel.rules-list' : 'panel.blueprints-list'}">
-          ${onThreads ? threadFilterBar() : S.listTab === 'rules' ? searchBox() : ''}
+          ${onThreads ? threadFilterBar() : S.listTab === 'rules' ? searchBox() : A}
           <!-- The scroller, named: the pane above it is a column with a fixed
                head, so THIS is the element that scrolls and the one a sticky
                heading sticks to. It carries an anchor because checks select by
@@ -3753,14 +3778,13 @@ function render() {
              and flying past a rule detail nobody asked for. -->
         <div class="wdp-pane flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col ${
           onThreads ? 'overflow-hidden' : 'overflow-y-auto'
-        }"${onThreads ? ' data-testid="thread.panel"' : ''}>${
+        }" data-testid="${onThreads ? 'thread.panel' : A}">${
           onThreads ? threadPane() : detailPane()
         }</div>
         <!-- Third seat: the thread reached FROM a rule, which is a different
              trip - it keeps the rule behind it to come back to. -->
-        <div class="flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col overflow-hidden"${
-          onThreads ? '' : ' data-testid="thread.panel"'
-        }>${onThreads ? '' : threadPane()}</div>
+        <div class="flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col overflow-hidden"
+          data-testid="${onThreads ? A : 'thread.panel'}">${onThreads ? A : threadPane()}</div>
       </div>
     </div>
     <!-- Every number here is derived from something, and a bare number told a
@@ -3784,18 +3808,18 @@ function render() {
          child. The label carries its own. -->
     ${
       S.listTab === 'rules'
-        ? `<div class="grid shrink-0 grid-cols-3 items-center border-t border-base-300 px-3.5 py-2 text-xs" data-testid="panel.counts">
+        ? b`<div class="grid shrink-0 grid-cols-3 items-center border-t border-base-300 px-3.5 py-2 text-xs" data-testid="panel.counts">
       <span class="flex items-center gap-2 justify-self-start">
       <span class="tooltip tooltip-top tooltip-start [--tt-trans:0] shrink-0 whitespace-nowrap">
         <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug"
           >Rules holding a current pass on every tier they ask for. The rest are the work counted at the right.</span>
         <span class="opacity-70"><b>${verified}/${total}</b> verified</span></span>${
           judged.size
-            ? `<span class="tooltip tooltip-top tooltip-start [--tt-trans:0] shrink-0 text-primary">
+            ? b`<span class="tooltip tooltip-top tooltip-start [--tt-trans:0] shrink-0 text-primary">
         <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug"
           >Judged by you in this sitting. Nothing reaches the ledger until you press Finish walkdown.</span>
         <b>+${judged.size}</b></span>`
-            : ''
+            : A
         }</span>
       <!-- Centred, and in its own grid column so it stays centred whether or
            not the two badges at the right are drawn. Every mark the rail uses
@@ -3805,208 +3829,212 @@ function render() {
       <span class="flex shrink-0 gap-1 justify-self-end">
         ${
           toSign
-            ? `<span class="tooltip tooltip-top tooltip-end [--tt-trans:0]">
+            ? b`<span class="tooltip tooltip-top tooltip-end [--tt-trans:0]">
           <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug"
             >${toSign} rule${toSign === 1 ? '' : 's'} designed but not built. Your sign-off on the spec is what they wait for.</span>
           <span class="badge badge-xs badge-warning badge-outline">${toSign} sign</span></span>`
-            : ''
+            : A
         }
         ${
           toWalk
-            ? `<span class="tooltip tooltip-top tooltip-end [--tt-trans:0]">
+            ? b`<span class="tooltip tooltip-top tooltip-end [--tt-trans:0]">
           <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug"
             >${toWalk} rule${toWalk === 1 ? '' : 's'} built and unjudged by you. Open one and give it a pass or a fail.</span>
           <span class="badge badge-xs badge-warning badge-outline">${toWalk} walk</span></span>`
-            : ''
+            : A
         }
       </span>
     </div>`
-        : ''
+        : A
     }`;
+    D$1(side, D.side);
 
-  const track = D.host.querySelector('.wdp-track');
-  if (track) {
-    // A rebuilt element has no state to transition from, so paint where we
-    // were, flush that, then move. A rAF is not enough — the browser
-    // coalesces both states into one recalc and the slide is skipped.
-    const AT = { list: '0%', detail: '-33.3333%', thread: onThreads ? '-33.3333%' : '-66.6667%' };
-    track.style.transition = 'none';
-    track.style.transform = `translateX(${AT[S.lastView] ?? '0%'})`;
-    void track.offsetWidth;
-    track.style.transition = '';
-    track.style.transform = `translateX(${AT[S.view] ?? '0%'})`;
-    S.lastView = S.view;
-  }
-  D.host.querySelectorAll('.wdp-pane').forEach((p, i) => {
-    p.scrollTop = wasAt[i] ?? 0;
-  });
-  if (caret) {
-    const box = D.host.querySelector('#' + caret.id);
-    if (box) {
-      box.focus();
-      box.setSelectionRange(caret.start, caret.end);
+    const track = D.host.querySelector('.wdp-track');
+    if (track) {
+      // A rebuilt element has no state to transition from, so paint where we
+      // were, flush that, then move. A rAF is not enough — the browser
+      // coalesces both states into one recalc and the slide is skipped.
+      const AT = { list: '0%', detail: '-33.3333%', thread: onThreads ? '-33.3333%' : '-66.6667%' };
+      track.style.transition = 'none';
+      track.style.transform = `translateX(${AT[S.lastView] ?? '0%'})`;
+      void track.offsetWidth;
+      track.style.transition = '';
+      track.style.transform = `translateX(${AT[S.view] ?? '0%'})`;
+      S.lastView = S.view;
     }
+    D.host.querySelectorAll('.wdp-pane').forEach((p, i) => {
+      p.scrollTop = wasAt[i] ?? 0;
+    });
+    if (caret) {
+      const box = D.host.querySelector('#' + caret.id);
+      if (box) {
+        box.focus();
+        box.setSelectionRange(caret.start, caret.end);
+      }
+    }
+    wireRuleRows();
+    wireSearch();
+    const back = D.host.querySelector('.wdp-back');
+    if (back)
+      back.onclick = () => {
+        S.view = 'list';
+        render();
+      };
+    D.host.querySelectorAll('[data-goto]').forEach((el) => {
+      // Through open(), not by assigning `selected`: stepping to a rule is
+      // opening it, and a second way in that skipped the trip to its screen
+      // meant next/previous quietly judged whatever page you were left on.
+      el.onclick = () => open(el.dataset.goto);
+    });
+    const actorName = D.host.querySelector('#wdp-actor');
+    if (actorName) actorName.onclick = openActorSettings;
+    const carryOn = D.host.querySelector('#wdp-continue');
+    if (carryOn) carryOn.onclick = continueWalkdown;
+    D.side.querySelectorAll('[data-tab]').forEach((b) => {
+      // Back to the list as well as to the tab: the detail pane is a rule's,
+      // and a rule is a thing on the Rules tab. Leaving the track slid over
+      // showed the open rule sitting on top of whichever tab you picked.
+      b.onclick = () => {
+        S.listTab = b.dataset.tab;
+        S.view = 'list';
+        render();
+      };
+    });
+    D.side.querySelectorAll('[data-tfilter]').forEach((b) => {
+      // Changing which threads are listed is not opening one: back to the list,
+      // or the filter would quietly re-answer a question about the thread you
+      // are reading rather than about the list behind it.
+      b.onclick = () => {
+        S.threadFilter = b.dataset.tfilter;
+        S.view = 'list';
+        render();
+      };
+    });
+    wireBlueprints(D.side);
+    D.host.querySelectorAll('[data-goscreen]').forEach((el) => {
+      el.onclick = () => goTo(screenById(el.dataset.goscreen));
+    });
+    wireVerdict();
+    wireRuleNote();
+    wireThreads();
+    syncHeadlessCover();
   }
-  wireRuleRows();
-  wireSearch();
-  const back = D.host.querySelector('.wdp-back');
-  if (back)
-    back.onclick = () => {
-      S.view = 'list';
-      render();
-    };
-  D.host.querySelectorAll('[data-goto]').forEach((el) => {
-    // Through open(), not by assigning `selected`: stepping to a rule is
-    // opening it, and a second way in that skipped the trip to its screen
-    // meant next/previous quietly judged whatever page you were left on.
-    el.onclick = () => open(el.dataset.goto);
-  });
-  const actorName = D.host.querySelector('#wdp-actor');
-  if (actorName) actorName.onclick = openActorSettings;
-  const carryOn = D.host.querySelector('#wdp-continue');
-  if (carryOn) carryOn.onclick = continueWalkdown;
-  D.side.querySelectorAll('[data-tab]').forEach((b) => {
-    // Back to the list as well as to the tab: the detail pane is a rule's,
-    // and a rule is a thing on the Rules tab. Leaving the track slid over
-    // showed the open rule sitting on top of whichever tab you picked.
-    b.onclick = () => {
-      S.listTab = b.dataset.tab;
-      S.view = 'list';
-      render();
-    };
-  });
-  D.side.querySelectorAll('[data-tfilter]').forEach((b) => {
-    // Changing which threads are listed is not opening one: back to the list,
-    // or the filter would quietly re-answer a question about the thread you
-    // are reading rather than about the list behind it.
-    b.onclick = () => {
-      S.threadFilter = b.dataset.tfilter;
-      S.view = 'list';
-      render();
-    };
-  });
-  wireBlueprints(D.side);
-  D.host.querySelectorAll('[data-goscreen]').forEach((el) => {
-    el.onclick = () => goTo(screenById(el.dataset.goscreen));
-  });
-  wireVerdict();
-  wireRuleNote();
-  wireThreads();
-  syncHeadlessCover();
-}
 
-/*
- * The bar across the top: which project, which surface you are looking at,
- * and pin mode. These are the controls that are about the whole session
- * rather than about the rule in front of you, which is why they sit apart
- * from the panel.
- *
- * Prototype/App is the ghost at full strength — one idea, not two. There is
- * no Split here on purpose: the app is the actual page at its actual size,
- * and half of it would be a worse view of it than ghosting.
- */
-/*
- * The bar across the top: the surface you are looking at, and the two actions
- * that are about the whole session. Prototype and App are the ends of one
- * slider rather than two separate ideas — the slider IS the ghost, so
- * "compare them" and "show me the design" are one control, not three.
- */
-/*
- * A drag holds the slider element itself. Rebuilding the bar mid-drag
- * replaces the very input the pointer is on, and the drag dies on its first
- * move — which is the whole of the "the slider will not drag" bug. So while
- * a drag is live the bar is painted in place instead of rebuilt, and rebuilt
- * once when the drag ends.
- */
-
-const PIN_MID =
-  'Slide fully to the prototype or the app first — half-faded, a pin has no surface to belong to';
-const PIN_UNREACHABLE =
-  'walkdown is not running inside this surface, so a pin here would land on the page underneath it';
-const pinHint = () => {
-  const where = pinSurface();
-  if (!where) return midFade() ? PIN_MID : PIN_UNREACHABLE;
-  return `Click anything to attach a note — it lands on the ${where}`;
-};
-
-/**
- * Half-way through the fade you are looking at both surfaces at once, so a
- * pin cannot answer which one it is about. Rather than record a guess, the
- * control closes until you commit to an end.
- */
-const midFade = () => S.protoShare !== null && S.ghostOpacity > 0 && S.ghostOpacity < 1;
-
-/** Where the ghost's surface lives right now, as a URL — or null if nowhere. */
-function ghostUrlNow() {
-  const src = ghostSource(screenInHand());
-  return src ? (src.url ?? api(src.path)) : null;
-}
-
-/** The surface the ghost carries: always the one the page itself is not. */
-const ghostSurface = () => (pageSurface() === 'prototype' ? 'app' : 'prototype');
-
-/**
- * Which surface a pin would land on right now, or null if it has no honest
- * answer. Fully ghosted, you are looking at the OTHER surface, so that is
- * where a pin belongs — which means the ghost has to stop being scenery and
- * take the click. It can only do that if walkdown is running inside it,
- * which is what `ghostReady` records.
- */
-function pinSurface() {
-  if (midFade()) return null;
-  if (S.ghost && S.ghostOpacity === 1) return S.ghostReady ? ghostSurface() : null;
-  return pageSurface();
-}
-
-/** Repaint the bar's state without rebuilding it — see `dragging`. */
-function paintBar() {
-  const share = S.protoShare ?? (pageSurface() === 'prototype' ? 1 : 0);
-  D.bar.querySelectorAll('[data-surface]').forEach((b) => {
-    const on = b.dataset.surface === 'prototype' ? share === 1 : share === 0;
-    b.classList.toggle('btn-outline', !on);
-  });
-  const pin = D.bar.querySelector('#wdp-pin');
-  if (!pin) return;
-  const pinning = PIN.isOn();
-  pin.disabled = !pinSurface();
-  pin.title = pinHint();
-  pin.classList.toggle('btn-warning', pinning);
-  pin.classList.toggle('btn-outline', !pinning);
-  pin.classList.toggle('btn-primary', !pinning);
-}
-
-const GEAR = () =>
-  `<button class="btn btn-xs btn-ghost" id="wdp-desk-btn" data-testid="panel.desk-tuner" title="Settings">${icon('gear', 'size-3.5')}</button>`;
-const wireGear = () => {
-  const gear = D.bar.querySelector('#wdp-desk-btn');
-  if (gear)
-    gear.onclick = () => {
-      S.deskOpen = !S.deskOpen;
-      syncDeskPanel();
-    };
-};
-
-function renderBar() {
-  if (S.dragging) return paintBar();
-  if (S.phase !== 'ready') {
-    D.bar.innerHTML = `${GEAR()}<span class="font-bold tracking-tight">walk<span class="text-primary">down</span></span>`;
-    return wireGear();
-  }
-  const canGhost = Boolean(ghostSource(screenInHand()));
-  // Left is Prototype and right is App, matching the buttons on either side —
-  // so the slider reads 100 at the App end and the value is inverted here.
-  const share = S.protoShare ?? (pageSurface() === 'prototype' ? 1 : 0);
-  const value = Math.round((1 - share) * 100);
-  const pinning = PIN.isOn();
-  const atScreen = (S.pickedScreen && screenById(S.pickedScreen)) || currentScreen();
   /*
-   * Starting wears the same warning colour as finishing when there is
-   * something to walk - the blueprint asking before you have asked it. With
-   * nothing owed it drops back to primary: an invitation, not a summons,
-   * because a control that is always loud says nothing.
+   * The bar across the top: which project, which surface you are looking at,
+   * and pin mode. These are the controls that are about the whole session
+   * rather than about the rule in front of you, which is why they sit apart
+   * from the panel.
+   *
+   * Prototype/App is the ghost at full strength — one idea, not two. There is
+   * no Split here on purpose: the app is the actual page at its actual size,
+   * and half of it would be a worse view of it than ghosting.
    */
-  const owedNow = owedRows().length;
-  D.bar.innerHTML = `
+  /*
+   * The bar across the top: the surface you are looking at, and the two actions
+   * that are about the whole session. Prototype and App are the ends of one
+   * slider rather than two separate ideas — the slider IS the ghost, so
+   * "compare them" and "show me the design" are one control, not three.
+   */
+  /*
+   * A drag holds the slider element itself. Rebuilding the bar mid-drag
+   * replaces the very input the pointer is on, and the drag dies on its first
+   * move — which is the whole of the "the slider will not drag" bug. So while
+   * a drag is live the bar is painted in place instead of rebuilt, and rebuilt
+   * once when the drag ends.
+   */
+
+  const PIN_MID =
+    'Slide fully to the prototype or the app first — half-faded, a pin has no surface to belong to';
+  const PIN_UNREACHABLE =
+    'walkdown is not running inside this surface, so a pin here would land on the page underneath it';
+  const pinHint = () => {
+    const where = pinSurface();
+    if (!where) return midFade() ? PIN_MID : PIN_UNREACHABLE;
+    return `Click anything to attach a note — it lands on the ${where}`;
+  };
+
+  /**
+   * Half-way through the fade you are looking at both surfaces at once, so a
+   * pin cannot answer which one it is about. Rather than record a guess, the
+   * control closes until you commit to an end.
+   */
+  const midFade = () => S.protoShare !== null && S.ghostOpacity > 0 && S.ghostOpacity < 1;
+
+  /** Where the ghost's surface lives right now, as a URL — or null if nowhere. */
+  function ghostUrlNow() {
+    const src = ghostSource(screenInHand());
+    return src ? (src.url ?? api(src.path)) : null;
+  }
+
+  /** The surface the ghost carries: always the one the page itself is not. */
+  const ghostSurface = () => (pageSurface() === 'prototype' ? 'app' : 'prototype');
+
+  /**
+   * Which surface a pin would land on right now, or null if it has no honest
+   * answer. Fully ghosted, you are looking at the OTHER surface, so that is
+   * where a pin belongs — which means the ghost has to stop being scenery and
+   * take the click. It can only do that if walkdown is running inside it,
+   * which is what `ghostReady` records.
+   */
+  function pinSurface() {
+    if (midFade()) return null;
+    if (S.ghost && S.ghostOpacity === 1) return S.ghostReady ? ghostSurface() : null;
+    return pageSurface();
+  }
+
+  /** Repaint the bar's state without rebuilding it — see `dragging`. */
+  function paintBar() {
+    const share = S.protoShare ?? (pageSurface() === 'prototype' ? 1 : 0);
+    D.bar.querySelectorAll('[data-surface]').forEach((b) => {
+      const on = b.dataset.surface === 'prototype' ? share === 1 : share === 0;
+      b.classList.toggle('btn-outline', !on);
+    });
+    const pin = D.bar.querySelector('#wdp-pin');
+    if (!pin) return;
+    const pinning = PIN.isOn();
+    pin.disabled = !pinSurface();
+    pin.title = pinHint();
+    pin.classList.toggle('btn-warning', pinning);
+    pin.classList.toggle('btn-outline', !pinning);
+    pin.classList.toggle('btn-primary', !pinning);
+  }
+
+  const GEAR = () =>
+    b`<button class="btn btn-xs btn-ghost" id="wdp-desk-btn" data-testid="panel.desk-tuner" title="Settings">${icon('gear', 'size-3.5')}</button>`;
+  const wireGear = () => {
+    const gear = D.bar.querySelector('#wdp-desk-btn');
+    if (gear)
+      gear.onclick = () => {
+        S.deskOpen = !S.deskOpen;
+        syncDeskPanel();
+      };
+  };
+
+  function renderBar() {
+    if (S.dragging) return paintBar();
+    if (S.phase !== 'ready') {
+      D$1(
+        b`${GEAR()}<span class="font-bold tracking-tight">walk<span class="text-primary">down</span></span>`,
+        D.bar,
+      );
+      return wireGear();
+    }
+    const canGhost = Boolean(ghostSource(screenInHand()));
+    // Left is Prototype and right is App, matching the buttons on either side —
+    // so the slider reads 100 at the App end and the value is inverted here.
+    const share = S.protoShare ?? (pageSurface() === 'prototype' ? 1 : 0);
+    const value = Math.round((1 - share) * 100);
+    const pinning = PIN.isOn();
+    const atScreen = (S.pickedScreen && screenById(S.pickedScreen)) || currentScreen();
+    /*
+     * Starting wears the same warning colour as finishing when there is
+     * something to walk - the blueprint asking before you have asked it. With
+     * nothing owed it drops back to primary: an invitation, not a summons,
+     * because a control that is always loud says nothing.
+     */
+    const owedNow = owedRows().length;
+    const bar = b`
     ${GEAR()}
     <span class="font-bold tracking-tight">walk<span class="text-primary">down</span></span>
     ${
@@ -4019,13 +4047,11 @@ function renderBar() {
            * it or not. Loud on purpose: everything it draws underneath is being
            * judged against code that is not what shipped.
            */
-          `<span class="badge badge-sm badge-error badge-dash gap-1 font-semibold"
+          b`<span class="badge badge-sm badge-error badge-dash gap-1 font-semibold"
            data-testid="panel.stale"
            title="walkdown was updated — reload the extension at chrome://extensions, then reload this page, to run the current build.">
            ${icon('warning-fill', 'size-3.5')}Stale — reload the extension</span>`
-        : `<span class="truncate text-[11.5px] opacity-50" data-testid="panel.blueprint">${esc(
-            S.data.project,
-          )}</span>`
+        : b`<span class="truncate text-[11.5px] opacity-50" data-testid="panel.blueprint">${S.data.project}</span>`
     }
     <!-- Which screen this page is. It reads as the answer, not as a way to
          ask the question: the button is labelled with the screen you are on,
@@ -4041,19 +4067,19 @@ function renderBar() {
           ? 'Screen picked by hand — open to change it, or go back to detecting from the page'
           : 'Which screen this page is, detected from its address — open to pick one by hand'
       }">
-      ${icon('frame-corners', 'size-3.5')}<span class="max-w-32 truncate">${esc(
-        atScreen ? (atScreen.title ?? atScreen.id) : 'No screen',
-      )}</span>${icon('caret-down', 'size-3')}</button>
+      ${icon('frame-corners', 'size-3.5')}<span class="max-w-32 truncate">${
+        atScreen ? (atScreen.title ?? atScreen.id) : 'No screen'
+      }</span>${icon('caret-down', 'size-3')}</button>
 
     <span class="absolute left-1/2 flex -translate-x-1/2 items-center gap-2"
       title="${canGhost ? 'Fade between the design and what shipped' : 'No design on file for this screen'}">
       <button class="btn btn-xs btn-primary${share === 1 ? '' : ' btn-outline'}" data-surface="prototype"
-        ${canGhost || pageSurface() === 'prototype' ? '' : 'disabled'}>Prototype</button>
+        ?disabled=${!(canGhost || pageSurface() === 'prototype')}>Prototype</button>
       <input type="range" min="0" max="100" value="${value}" id="wdp-fade" data-testid="panel.fade"
-        class="range range-xs range-primary w-28" ${canGhost ? '' : 'disabled'}
+        class="range range-xs range-primary w-28" ?disabled=${!canGhost}
         aria-label="Fade between the design and the running app">
       <button class="btn btn-xs btn-primary${share === 0 ? '' : ' btn-outline'}" data-surface="app"
-        ${canGhost || pageSurface() === 'app' ? '' : 'disabled'}>App</button>
+        ?disabled=${!(canGhost || pageSurface() === 'app')}>App</button>
     </span>
 
     <span class="ml-auto flex items-center gap-2">
@@ -4070,8 +4096,8 @@ function renderBar() {
           data-vp="390" title="Mobile — lay the page out at 390px">${icon('device-mobile', 'size-3.5')}</button>
       </span>
       <button class="btn btn-xs gap-1 ${pinning ? 'btn-warning' : 'btn-outline btn-primary'}" id="wdp-pin" data-testid="panel.pin-mode"
-        ${pinSurface() ? '' : 'disabled'}
-        title="${esc(pinHint())}">${icon('map-pin', 'size-3.5')}Pin mode</button>
+        ?disabled=${!pinSurface()}
+        title="${pinHint()}">${icon('map-pin', 'size-3.5')}Pin mode</button>
       <!-- One control owns the sitting from end to end: it starts one, and
            while one runs it is how you end it. Starting in the bar and
            finishing somewhere else made the two halves of one act look like
@@ -4088,1050 +4114,1051 @@ function renderBar() {
         }">${S.session ? 'Finish walkdown' : 'Start walkdown'}</button>
       <button class="btn btn-xs btn-ghost" id="wdp-undock" title="Put walkdown away">\u00d7</button>
     </span>`;
+    D$1(bar, D.bar);
 
-  wireGear();
-  D.bar.querySelector('#wdp-screen-btn').onclick = () => {
-    S.screensOpen = !S.screensOpen;
+    wireGear();
+    D.bar.querySelector('#wdp-screen-btn').onclick = () => {
+      S.screensOpen = !S.screensOpen;
+      syncScreenPanel();
+    };
+    /*
+     * The button and the list are one control saying one thing, so they are
+     * repainted together. The label above was rebuilt from the page just now;
+     * an open list drawn before the page moved would still be marking the
+     * screen we left, and in Detect mode still naming it beside "Detect from
+     * the page" - the control reporting one answer in the bar and a staler one
+     * an inch below it (n-0107). Cheap when it is shut: syncScreenPanel builds
+     * nothing unless the list is open.
+     */
     syncScreenPanel();
-  };
-  /*
-   * The button and the list are one control saying one thing, so they are
-   * repainted together. The label above was rebuilt from the page just now;
-   * an open list drawn before the page moved would still be marking the
-   * screen we left, and in Detect mode still naming it beside "Detect from
-   * the page" - the control reporting one answer in the bar and a staler one
-   * an inch below it (n-0107). Cheap when it is shut: syncScreenPanel builds
-   * nothing unless the list is open.
-   */
-  syncScreenPanel();
-  D.bar.querySelector('#wdp-undock').onclick = () => setDocked(false);
-  D.bar.querySelector('#wdp-pin').onclick = () => PIN.set(!PIN.isOn());
-  // Start it, or end it: the same button, because it is the same sitting.
-  D.bar.querySelector('#wdp-walk').onclick = () => (S.session ? finishWalkdown() : startWalkdown());
-  D.bar.querySelectorAll('[data-vp]').forEach((b) => {
-    b.onclick = () => setViewport(Number(b.dataset.vp));
-  });
-  D.bar.querySelectorAll('[data-surface]').forEach((b) => {
-    b.onclick = () => {
-      /*
-       * Off a screen entirely, fading is meaningless - there is no design of
-       * THIS page to fade to. So the control takes you to the blueprint's
-       * front door on the surface you asked for, which is what someone
-       * pressing Prototype from nowhere in particular actually wants.
-       */
-      const want = b.dataset.surface;
-      if (!currentScreen() && !S.ghostOverride) {
-        const home = defaultScreen();
-        const url =
-          home && (screenUrl(home, want) ?? screenUrl(home, want === 'app' ? 'prototype' : 'app'));
+    D.bar.querySelector('#wdp-undock').onclick = () => setDocked(false);
+    D.bar.querySelector('#wdp-pin').onclick = () => PIN.set(!PIN.isOn());
+    // Start it, or end it: the same button, because it is the same sitting.
+    D.bar.querySelector('#wdp-walk').onclick = () => (S.session ? finishWalkdown() : startWalkdown());
+    D.bar.querySelectorAll('[data-vp]').forEach((b) => {
+      b.onclick = () => setViewport(Number(b.dataset.vp));
+    });
+    D.bar.querySelectorAll('[data-surface]').forEach((b) => {
+      b.onclick = () => {
         /*
-         * Getting there means a real page load, so the same rule applies as
-         * everywhere else: framed walkdown owns the frame and goes, the
-         * extension goes because it comes back, and a script tag offers the
-         * trip rather than unloading the panel that is making it.
+         * Off a screen entirely, fading is meaningless - there is no design of
+         * THIS page to fade to. So the control takes you to the blueprint's
+         * front door on the surface you asked for, which is what someone
+         * pressing Prototype from nowhere in particular actually wants.
          */
-        if (url) {
-          goTo(home, want);
-          return;
-        }
-        if (url) {
-          return toast(
-            `Nothing here is a screen — <a class="link" href="${esc(url)}">open ${esc(
+        const want = b.dataset.surface;
+        if (!currentScreen() && !S.ghostOverride) {
+          const home = defaultScreen();
+          const url =
+            home && (screenUrl(home, want) ?? screenUrl(home, want === 'app' ? 'prototype' : 'app'));
+          /*
+           * Getting there means a real page load, so the same rule applies as
+           * everywhere else: framed walkdown owns the frame and goes, the
+           * extension goes because it comes back, and a script tag offers the
+           * trip rather than unloading the panel that is making it.
+           */
+          if (url) {
+            goTo(home, want);
+            return;
+          }
+          if (url) {
+            return toast(
+              `Nothing here is a screen — <a class="link" href="${esc(url)}">open ${esc(
               home.title ?? home.id,
             )}</a> to compare the ${esc(want)}.`,
-            { tone: 'warning' },
-          );
+              { tone: 'warning' },
+            );
+          }
         }
-      }
-      setFade(want === 'prototype' ? 1 : 0);
-    };
-  });
-  const fade = D.bar.querySelector('#wdp-fade');
-  if (fade) {
-    // `input` fires all through the drag and must not disturb the element;
-    // `change` fires when the pointer (or the keyboard) lets go, and that is
-    // where the bar is rebuilt and a ghost at zero is finally torn down.
-    fade.oninput = () => {
-      S.dragging = true;
-      setFade(1 - fade.value / 100);
-    };
-    fade.onchange = () => {
-      S.dragging = false;
-      setFade(1 - fade.value / 100);
-    };
+        setFade(want === 'prototype' ? 1 : 0);
+      };
+    });
+    const fade = D.bar.querySelector('#wdp-fade');
+    if (fade) {
+      // `input` fires all through the drag and must not disturb the element;
+      // `change` fires when the pointer (or the keyboard) lets go, and that is
+      // where the bar is rebuilt and a ghost at zero is finally torn down.
+      fade.oninput = () => {
+        S.dragging = true;
+        setFade(1 - fade.value / 100);
+      };
+      fade.onchange = () => {
+        S.dragging = false;
+        setFade(1 - fade.value / 100);
+      };
+    }
   }
-}
 
-/**
- * One dial, expressed as how much PROTOTYPE is on screen. The ghost carries
- * whichever surface the page is not, so the same 1 means "ghost fully on"
- * standing on the app and "ghost fully off" standing on the prototype.
- */
-function setFade(share) {
-  S.protoShare = Math.max(0, Math.min(1, share));
-  // The put-away swap names the surface it will take you to, so it follows
-  // every crossing however it was made.
-  if (!S.docked) queueMicrotask(paintTabs);
-  const wanted = pageSurface() === 'prototype' ? 1 - S.protoShare : S.protoShare;
-  S.ghostOpacity = wanted;
-  // Mid-fade, both surfaces are on screen at once and a pin cannot say which
-  // it belongs to. Closing pin mode is the honest move; leaving it open and
-  // recording a guess is not.
-  if (wanted > 0 && wanted < 1 && PIN.isOn()) PIN.set(false);
-  if (wanted === 0) {
-    // Mid-drag the ghost stays, emptied: tearing it down calls render(), and
-    // sliding back off the end would then have nothing to fade up.
-    if (S.dragging && S.ghost) {
+  /**
+   * One dial, expressed as how much PROTOTYPE is on screen. The ghost carries
+   * whichever surface the page is not, so the same 1 means "ghost fully on"
+   * standing on the app and "ghost fully off" standing on the prototype.
+   */
+  function setFade(share) {
+    S.protoShare = Math.max(0, Math.min(1, share));
+    // The put-away swap names the surface it will take you to, so it follows
+    // every crossing however it was made.
+    if (!S.docked) queueMicrotask(paintTabs);
+    const wanted = pageSurface() === 'prototype' ? 1 - S.protoShare : S.protoShare;
+    S.ghostOpacity = wanted;
+    // Mid-fade, both surfaces are on screen at once and a pin cannot say which
+    // it belongs to. Closing pin mode is the honest move; leaving it open and
+    // recording a guess is not.
+    if (wanted > 0 && wanted < 1 && PIN.isOn()) PIN.set(false);
+    if (wanted === 0) {
+      // Mid-drag the ghost stays, emptied: tearing it down calls render(), and
+      // sliding back off the end would then have nothing to fade up.
+      if (S.dragging && S.ghost) {
+        S.ghost.style.opacity = 0;
+        paintGhostReach();
+        return paintBar();
+      }
+      /*
+       * Landing on the page's own surface hides the copy rather than throwing
+       * it away, so coming back is instant. The one thing that must still end
+       * here is a detour to a proposal sketch: looking at a sketch is
+       * temporary by rule, and a kept one would quietly return.
+       */
+      if (!S.ghost || S.ghostOverride) return setGhost(false);
       S.ghost.style.opacity = 0;
       paintGhostReach();
-      return paintBar();
+      pushContexts();
+      return render();
     }
-    /*
-     * Landing on the page's own surface hides the copy rather than throwing
-     * it away, so coming back is instant. The one thing that must still end
-     * here is a detour to a proposal sketch: looking at a sketch is
-     * temporary by rule, and a kept one would quietly return.
-     */
-    if (!S.ghost || S.ghostOverride) return setGhost(false);
-    S.ghost.style.opacity = 0;
-    paintGhostReach();
-    pushContexts();
-    return render();
+    // The kept copy is only reusable while it is showing what the ghost should
+    // be showing. When the screen moved under it, this falls through to a
+    // rebuild rather than fading up yesterday's page.
+    if (S.ghost && S.ghostSrc === ghostUrlNow()) {
+      S.ghost.style.opacity = wanted;
+      paintGhostReach();
+      pushContexts();
+      renderBar();
+    } else setGhost(true);
   }
-  // The kept copy is only reusable while it is showing what the ghost should
-  // be showing. When the screen moved under it, this falls through to a
-  // rebuild rather than fading up yesterday's page.
-  if (S.ghost && S.ghostSrc === ghostUrlNow()) {
-    S.ghost.style.opacity = wanted;
-    paintGhostReach();
-    pushContexts();
-    renderBar();
-  } else setGhost(true);
-}
 
-// An unfinished session is real judging work, so it is written down from the
-// first verdict: to the project as a draft on disk - where `walkdown status`
-// can see it and another window can pick it up - and to browser storage as
-// the copy that still works when the server is not there. Neither is the
-// ledger: a run is appended once, at Finish, and never edited.
-const SESSION_KEY = () => `walkdown:session:${S.BP}`;
-const sessionDraft = () =>
-  S.session && {
-    verdicts: S.session.verdicts,
-    threads: S.session.threads,
-    actor: S.session.actor,
-    started: S.session.started,
-  };
-function saveSession() {
-  const draft = sessionDraft();
-  store.set(SESSION_KEY(), draft);
-  // Fire and forget: a verdict must never wait on the network, and the local
-  // copy already holds it if this write does not land.
-  fetch(api('/api/draft'), {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ target: 'local', ...(draft ?? { discard: true }) }),
-  }).catch(() => {});
-}
-
-function startWalkdown() {
-  // `started` marks the session so pins dropped during it can count as a
-  // fail's why and ride into the run record; `threads` collects the notes
-  // the feedback box files, per rule.
-  S.session = {
-    verdicts: {},
-    threads: {},
-    actor: whoAmI(),
-    started: new Date().toISOString(),
-  };
-  saveSession();
-  render();
-}
-
-/** The username a sitting's records will carry: the one it was started under. */
-const recordingHandle = () => (S.session?.actor ?? '').trim() || whoAmI();
-/** And how to read that handle - the same fallback, one place. */
-const recordingDisplay = () => {
-  const full = (identityOverride.name ?? S.data?.identity?.name ?? '').trim();
-  return full || recordingHandle();
-};
-/**
- * The handles that resolve to a full name, for every message on screen.
- *
- * Every handle this machine could have signed with goes in - the username,
- * the OS name, the full name records were written under before identity and
- * display name were told apart. Old records are never rewritten; this is
- * what stops them reading as somebody else.
- */
-const names = () =>
-  MSG.nameMap({
-    username: whoAmI(),
-    name: (identityOverride.name ?? S.data?.identity?.name ?? '').trim(),
-    handles: [...(S.data?.identity?.handles ?? []), S.session?.actor].filter(Boolean),
-  });
-
-/*
- * Threads remember where your reading stopped, so opening one the agent has
- * replied to twice shows which part is new. `seen` is what is remembered;
- * `seenAtOpen` freezes the mark for this viewing, or the New line would
- * vanish the instant it appeared.
- */
-const SEEN_KEY = () => `walkdown:seen:${S.BP}`;
-let seen = {},
-  seenFor = null;
-/* Read marks belong to a blueprint, and the blueprint is chosen after boot -
-   so they are loaded once the choice is settled, and again if it changes. */
-async function loadSeen() {
-  if (seenFor === S.BP) return;
-  seenFor = S.BP;
-  seen = (await store.get(SEEN_KEY()).catch(() => null)) ?? {};
-}
-const seenAtOpen = {};
-/** Replies on screen before the server has answered, by thread id. */
-const pendingReplies = new Map();
-
-const unreadCount = (t) => {
-  const at = seen[t.id];
-  if (!at) return 0;
-  return (t.replies ?? []).filter((r) => String(r.created ?? '') > String(at)).length;
-};
-
-function markSeen(id) {
-  seenAtOpen[id] = seen[id] ?? null;
-  seen[id] = new Date().toISOString();
-  store.set(SEEN_KEY(), { ...seen });
-}
-
-function say(msg) {
-  const el = D.host.querySelector('#wdp-tsay');
-  if (!el) return toast(msg, { tone: 'error' });
-  el.textContent = msg;
-  el.classList.remove('hidden');
-}
-
-async function threadPost(path, body) {
-  const res = await fetch(api(path), {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  const out = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    say(out.error ?? 'request failed');
-    return false;
+  // An unfinished session is real judging work, so it is written down from the
+  // first verdict: to the project as a draft on disk - where `walkdown status`
+  // can see it and another window can pick it up - and to browser storage as
+  // the copy that still works when the server is not there. Neither is the
+  // ledger: a run is appended once, at Finish, and never edited.
+  const SESSION_KEY = () => `walkdown:session:${S.BP}`;
+  const sessionDraft = () =>
+    S.session && {
+      verdicts: S.session.verdicts,
+      threads: S.session.threads,
+      actor: S.session.actor,
+      started: S.session.started,
+    };
+  function saveSession() {
+    const draft = sessionDraft();
+    store.set(SESSION_KEY(), draft);
+    // Fire and forget: a verdict must never wait on the network, and the local
+    // copy already holds it if this write does not land.
+    fetch(api('/api/draft'), {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ target: 'local', ...(draft ?? { discard: true }) }),
+    }).catch(() => {});
   }
-  return true;
-}
 
-/**
- * A reply lands on screen before the server has answered - the message is
- * what you wrote, and waiting on a round trip to see it is what makes a
- * thread feel like a form. If the post is refused the message stays,
- * marked, and the text comes back to the composer so it can be sent again.
- */
-async function postReply(id, text, actor) {
-  /*
-   * The same refusal postRuleNote makes, for the same reason.
-   *
-   * This sent `author: actor || undefined`, the key fell out of the JSON, and
-   * the server filled it from the machine's username - so a reply landed in a
-   * conversation under a name the panel had never shown, while the composer
-   * said only "set your name...". A reply is attributed work.
-   *
-   * Fixing the note path alone left the rule half-kept, which is what an
-   * independent re-judge found an hour after the first fix: one path over,
-   * identical line, same server fallback. Worth remembering that the bug was
-   * never in either function - it was in the shape `actor || undefined`,
-   * which reads as a default and is a handoff.
-   */
-  const who = (actor ?? '').trim();
-  if (!who || who === 'agent') {
-    say('A reply is recorded under a person\u2019s name \u2014 set it in Settings (the gear).');
-    openActorSettings();
-    return false;
-  }
-  const msg = { author: who, created: new Date().toISOString(), body: text, pending: true };
-  const list = pendingReplies.get(id) ?? [];
-  pendingReplies.set(id, [...list, msg]);
-  S.threadNote = '';
-  render();
-  const ok = await threadPost(`/api/threads/${id}/replies`, { author: who, body: text });
-  if (ok) {
-    pendingReplies.set(
-      id,
-      (pendingReplies.get(id) ?? []).filter((m) => m !== msg),
-    );
-    // The reply is yours and you have just read it: do not mark it new.
-    if (seen[id]) {
-      seen[id] = new Date().toISOString();
-      store.set(SEEN_KEY(), { ...seen });
-    }
-    await load();
-  } else {
-    msg.pending = false;
-    msg.failed = true;
-    S.threadNote = text;
+  function startWalkdown() {
+    // `started` marks the session so pins dropped during it can count as a
+    // fail's why and ride into the run record; `threads` collects the notes
+    // the feedback box files, per rule.
+    S.session = {
+      verdicts: {},
+      threads: {},
+      actor: whoAmI(),
+      started: new Date().toISOString(),
+    };
+    saveSession();
     render();
   }
-  return ok;
-}
 
-/** Reply and lifecycle, under the same governance the server enforces. */
-async function threadAct(id, status) {
-  const t = (S.data.threads ?? []).find((x) => x.id === id);
-  if (!t) return;
-  const text = (D.host.querySelector('#wdp-note')?.value ?? '').trim();
-  const actor = whoAmI();
-  const humanOnly = HUMAN_ONLY.includes(status);
-  // Agents claim work; a person accepts it. The server refuses this too —
-  // saying so here means you find out before you have written the reason.
-  if (humanOnly && (!actor || actor === 'agent')) {
-    say(
-      'Verify and waive are recorded under a person\u2019s name \u2014 set it in Settings first.',
-    );
-    return openActorSettings();
-  }
-  /*
-   * And every OTHER transition needs a name too, which this guard used to
-   * leave to the two human-only ones. Reopening posted `actor: ''`, went
-   * through, and lib/threads.js filed the reason as a reply authored
-   * "unknown" - a transition recorded under nobody, in a ledger whose whole
-   * claim is that a verdict says whose judgment it was. Answering was the
-   * same. Not the human-only refusal, which is about WHICH person may act;
-   * this one is about there being a person at all.
+  /** The username a sitting's records will carry: the one it was started under. */
+  const recordingHandle = () => (S.session?.actor ?? '').trim() || whoAmI();
+  /** And how to read that handle - the same fallback, one place. */
+  const recordingDisplay = () => {
+    const full = (identityOverride.name ?? S.data?.identity?.name ?? '').trim();
+    return full || recordingHandle();
+  };
+  /**
+   * The handles that resolve to a full name, for every message on screen.
+   *
+   * Every handle this machine could have signed with goes in - the username,
+   * the OS name, the full name records were written under before identity and
+   * display name were told apart. Old records are never rewritten; this is
+   * what stops them reading as somebody else.
    */
-  if (!actor) {
-    say('A thread action is recorded under a person\u2019s name \u2014 set it in Settings first.');
-    return openActorSettings();
+  const names = () =>
+    MSG.nameMap({
+      username: whoAmI(),
+      name: (identityOverride.name ?? S.data?.identity?.name ?? '').trim(),
+      handles: [...(S.data?.identity?.handles ?? []), S.session?.actor].filter(Boolean),
+    });
+
+  /*
+   * Threads remember where your reading stopped, so opening one the agent has
+   * replied to twice shows which part is new. `seen` is what is remembered;
+   * `seenAtOpen` freezes the mark for this viewing, or the New line would
+   * vanish the instant it appeared.
+   */
+  const SEEN_KEY = () => `walkdown:seen:${S.BP}`;
+  let seen = {},
+    seenFor = null;
+  /* Read marks belong to a blueprint, and the blueprint is chosen after boot -
+     so they are loaded once the choice is settled, and again if it changes. */
+  async function loadSeen() {
+    if (seenFor === S.BP) return;
+    seenFor = S.BP;
+    seen = (await store.get(SEEN_KEY()).catch(() => null)) ?? {};
   }
-  if (status === '__reply') {
-    if (!text) return say('Write the reply first.');
-    await postReply(id, text, actor);
-    return;
+  const seenAtOpen = {};
+  /** Replies on screen before the server has answered, by thread id. */
+  const pendingReplies = new Map();
+
+  const unreadCount = (t) => {
+    const at = seen[t.id];
+    if (!at) return 0;
+    return (t.replies ?? []).filter((r) => String(r.created ?? '') > String(at)).length;
+  };
+
+  function markSeen(id) {
+    seenAtOpen[id] = seen[id] ?? null;
+    seen[id] = new Date().toISOString();
+    store.set(SEEN_KEY(), { ...seen });
   }
-  if (status === '__answer') {
-    if (!text) return say('Write the answer first \u2014 answering a question records it.');
-    if (
-      (await postReply(id, text, actor)) &&
-      (await threadPost(`/api/threads/${id}/status`, { status: 'answered', actor }))
-    )
-      await load();
-    return;
+
+  function say(msg) {
+    const el = D.host.querySelector('#wdp-tsay');
+    if (!el) return toast(msg, { tone: 'error' });
+    el.textContent = msg;
+    el.classList.remove('hidden');
   }
-  const needsReason = NEEDS_REASON.includes(status);
-  if (needsReason && !text)
-    return say(
-      `${status === 'waived' ? 'Waiving' : 'Reopening'} is recorded with a reason \u2014 write it above, then press again.`,
-    );
-  if (
-    await threadPost(`/api/threads/${id}/status`, {
-      status,
-      actor,
-      reason: needsReason ? text : undefined,
-    })
-  ) {
-    S.threadNote = '';
-    // A thread that ends leaves the active list, so its screen has nothing
-    // left to show — slide back to where it came from rather than emptying
-    // the pane and stranding the reader on a blank one.
-    if (TERMINAL.includes(status)) {
-      S.openThread = null;
-      if (S.view === 'thread') S.view = S.selected ? 'detail' : 'list';
-      // An ended conversation is a finished piece of work, whichever way it
-      // ended - verified, waived or incorporated - so it reads as one.
-      toast(`<b>${esc(id)}</b> ${esc(status)} — it leaves the rule’s active threads.`, {
-        tone: 'success',
-      });
+
+  async function threadPost(path, body) {
+    const res = await fetch(api(path), {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const out = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      say(out.error ?? 'request failed');
+      return false;
     }
-    await load();
+    return true;
   }
-}
 
-/*
- * Verify every addressed thread on one rule. Same governance as verifying
- * one: it is recorded under the person pressing it, and refused outright
- * without a name, because an agent may claim work and never accept it.
- */
-async function verifyAll(rule) {
-  const actor = whoAmI();
-  if (!actor || actor === 'agent') {
-    toast(
-      'Verifying is recorded under a person\u2019s name \u2014 set it in Settings (the gear).',
-      { tone: 'error' },
-    );
-    return openActorSettings();
-  }
-  const pending = threadsFor(rule).filter((t) => t.status === 'addressed');
-  if (!pending.length) return;
-  let done = 0;
-  for (const t of pending)
-    if (await threadPost(`/api/threads/${t.id}/status`, { status: 'verified', actor })) done += 1;
-  await load();
-  // All of them is the result asked for; a partial pass is not a failure but
-  // it is unfinished, and the colour is the difference.
-  toast(
-    done === pending.length
-      ? `<b>${done}</b> thread${done === 1 ? '' : 's'} verified on ${esc(rule)}.`
-      : `<b>${done}</b> of ${pending.length} verified \u2014 the rest are still open.`,
-    { tone: done === pending.length ? 'success' : 'warning' },
-  );
-}
-
-/** Open a thread on its own screen, landing where the reading resumes. */
-function openThreadView(id) {
-  if (!(S.data?.threads ?? []).some((x) => x.id === id))
-    return toast(`No thread ${esc(id)} here.`, { tone: 'error' });
-  S.openThread = id;
-  S.threadNote = '';
-  markSeen(id);
-  S.view = 'thread';
-  render();
-  /*
-   * The first unread message if there is one, and otherwise the newest -
-   * never the top of an exchange you have already read.
-   *
-   * Scroll the STREAM, by hand. scrollIntoView looks like the obvious way to
-   * say this and is not: it scrolls every scrollable ancestor, and one of the
-   * ancestors here is the pane wrapper that carries the slide track. Landing
-   * on an unread mark pushed that wrapper to scrollLeft 368, which slid all
-   * three panes a third of a column left and left the reviewer looking at an
-   * empty one - a thread with unread messages opened to blank, and only a
-   * thread with unread messages, which is why it survived every check.
-   *
-   * offsetTop is measured against the stream because the stream is the
-   * offsetParent here; the fallback covers a layout where it is not.
+  /**
+   * A reply lands on screen before the server has answered - the message is
+   * what you wrote, and waiting on a round trip to see it is what makes a
+   * thread feel like a form. If the post is refused the message stays,
+   * marked, and the text comes back to the composer so it can be sent again.
    */
-  const pane = D.host.querySelectorAll('.wdp-track > div')[S.listTab === 'threads' ? 1 : 2];
-  const stream = pane?.querySelector('.overflow-y-auto');
-  const mark = pane?.querySelector('.wd-new');
-  if (!stream) return;
-  if (mark) {
-    const top = stream.contains(mark.offsetParent ?? mark)
-      ? mark.offsetTop
-      : mark.getBoundingClientRect().top - stream.getBoundingClientRect().top + stream.scrollTop;
-    stream.scrollTop = Math.max(0, top);
-  } else {
-    stream.scrollTop = stream.scrollHeight;
-  }
-}
-
-function wireThreads() {
-  D.host.querySelectorAll('[data-open-thread]').forEach((el) => {
-    el.onclick = (e) => {
-      e.stopPropagation();
-      openThreadView(el.dataset.openThread);
-    };
-  });
-  const tback = D.host.querySelector('.wdp-thread-back');
-  if (tback)
-    tback.onclick = () => {
-      const t = (S.data?.threads ?? []).find((x) => x.id === S.openThread);
-      // Back where you came from: the rule, or the list for a pin that has
-      // none - and on the Threads tab always the thread list, because that is
-      // where you came from and no rule was ever opened.
-      S.view = S.listTab !== 'threads' && t?.anchor?.rule && S.selected ? 'detail' : 'list';
-      S.openThread = null;
+  async function postReply(id, text, actor) {
+    /*
+     * The same refusal postRuleNote makes, for the same reason.
+     *
+     * This sent `author: actor || undefined`, the key fell out of the JSON, and
+     * the server filled it from the machine's username - so a reply landed in a
+     * conversation under a name the panel had never shown, while the composer
+     * said only "set your name...". A reply is attributed work.
+     *
+     * Fixing the note path alone left the rule half-kept, which is what an
+     * independent re-judge found an hour after the first fix: one path over,
+     * identical line, same server fallback. Worth remembering that the bug was
+     * never in either function - it was in the shape `actor || undefined`,
+     * which reads as a default and is a handoff.
+     */
+    const who = (actor ?? '').trim();
+    if (!who || who === 'agent') {
+      say('A reply is recorded under a person\u2019s name \u2014 set it in Settings (the gear).');
+      openActorSettings();
+      return false;
+    }
+    const msg = { author: who, created: new Date().toISOString(), body: text, pending: true };
+    const list = pendingReplies.get(id) ?? [];
+    pendingReplies.set(id, [...list, msg]);
+    S.threadNote = '';
+    render();
+    const ok = await threadPost(`/api/threads/${id}/replies`, { author: who, body: text });
+    if (ok) {
+      pendingReplies.set(
+        id,
+        (pendingReplies.get(id) ?? []).filter((m) => m !== msg),
+      );
+      // The reply is yours and you have just read it: do not mark it new.
+      if (seen[id]) {
+        seen[id] = new Date().toISOString();
+        store.set(SEEN_KEY(), { ...seen });
+      }
+      await load();
+    } else {
+      msg.pending = false;
+      msg.failed = true;
+      S.threadNote = text;
       render();
-    };
-  const note = D.host.querySelector('#wdp-note');
-  if (note) {
-    note.oninput = () => {
-      S.threadNote = note.value;
-    };
-    // Enter sends, Shift+Enter breaks the line - the muscle memory everyone
-    // already has. The button stays for the pointer.
-    note.onkeydown = (e) => {
-      if (e.key !== 'Enter' || e.shiftKey || e.isComposing) return;
-      e.preventDefault();
-      const id = S.openThread;
-      const text = note.value.trim();
-      if (id && text) threadAct(id, '__reply');
-    };
+    }
+    return ok;
   }
-  // An id written in a message is a link: thread ids open that thread, rule
-  // ids open that rule, so a conversation can point at things.
-  D.host.querySelectorAll('[data-thread-ref]').forEach((el) => {
-    el.onclick = (e) => {
-      e.stopPropagation();
-      const id = el.dataset.threadRef;
-      const t = (S.data?.threads ?? []).find((x) => x.id === id);
-      // Follow it to its own rule, so going back from the thread lands
-      // somewhere that makes sense rather than on the rule you came from.
-      if (t?.anchor?.rule)
-        S.selected = S.data.rows.find((r) => r.rule === t.anchor.rule) ?? S.selected;
-      openThreadView(id);
-    };
-  });
-  D.host.querySelectorAll('[data-rule-ref]').forEach((el) => {
-    el.onclick = (e) => {
-      e.stopPropagation();
-      open(el.dataset.ruleRef);
-    };
-  });
-  const tactor = D.host.querySelector('#wdp-tactor');
-  if (tactor) tactor.onclick = () => openActorSettings();
-  D.host.querySelectorAll('[data-act]').forEach((el) => {
-    el.onclick = () => threadAct(el.dataset.tid, el.dataset.act);
-  });
-  D.host.querySelectorAll('[data-verify-all]').forEach((el) => {
-    el.onclick = () => verifyAll(el.dataset.verifyAll);
-  });
-  D.host.querySelectorAll('[data-checks]').forEach((el) => {
-    el.ontoggle = () => {
-      const rule = el.dataset.checks;
-      // A pane rebuilt with the disclosure already open fires this too; only
-      // a real change is one.
-      if (el.open === (S.srcOpenFor === rule)) return;
-      S.srcOpenFor = el.open ? rule : null;
-      if (el.open) loadCheckSource(rule);
-    };
-  });
+
+  /** Reply and lifecycle, under the same governance the server enforces. */
+  async function threadAct(id, status) {
+    const t = (S.data.threads ?? []).find((x) => x.id === id);
+    if (!t) return;
+    const text = (D.host.querySelector('#wdp-note')?.value ?? '').trim();
+    const actor = whoAmI();
+    const humanOnly = HUMAN_ONLY.includes(status);
+    // Agents claim work; a person accepts it. The server refuses this too —
+    // saying so here means you find out before you have written the reason.
+    if (humanOnly && (!actor || actor === 'agent')) {
+      say(
+        'Verify and waive are recorded under a person\u2019s name \u2014 set it in Settings first.',
+      );
+      return openActorSettings();
+    }
+    /*
+     * And every OTHER transition needs a name too, which this guard used to
+     * leave to the two human-only ones. Reopening posted `actor: ''`, went
+     * through, and lib/threads.js filed the reason as a reply authored
+     * "unknown" - a transition recorded under nobody, in a ledger whose whole
+     * claim is that a verdict says whose judgment it was. Answering was the
+     * same. Not the human-only refusal, which is about WHICH person may act;
+     * this one is about there being a person at all.
+     */
+    if (!actor) {
+      say('A thread action is recorded under a person\u2019s name \u2014 set it in Settings first.');
+      return openActorSettings();
+    }
+    if (status === '__reply') {
+      if (!text) return say('Write the reply first.');
+      await postReply(id, text, actor);
+      return;
+    }
+    if (status === '__answer') {
+      if (!text) return say('Write the answer first \u2014 answering a question records it.');
+      if (
+        (await postReply(id, text, actor)) &&
+        (await threadPost(`/api/threads/${id}/status`, { status: 'answered', actor }))
+      )
+        await load();
+      return;
+    }
+    const needsReason = NEEDS_REASON.includes(status);
+    if (needsReason && !text)
+      return say(
+        `${status === 'waived' ? 'Waiving' : 'Reopening'} is recorded with a reason \u2014 write it above, then press again.`,
+      );
+    if (
+      await threadPost(`/api/threads/${id}/status`, {
+        status,
+        actor,
+        reason: needsReason ? text : undefined,
+      })
+    ) {
+      S.threadNote = '';
+      // A thread that ends leaves the active list, so its screen has nothing
+      // left to show — slide back to where it came from rather than emptying
+      // the pane and stranding the reader on a blank one.
+      if (TERMINAL.includes(status)) {
+        S.openThread = null;
+        if (S.view === 'thread') S.view = S.selected ? 'detail' : 'list';
+        // An ended conversation is a finished piece of work, whichever way it
+        // ended - verified, waived or incorporated - so it reads as one.
+        toast(`<b>${esc(id)}</b> ${esc(status)} — it leaves the rule’s active threads.`, {
+          tone: 'success',
+        });
+      }
+      await load();
+    }
+  }
+
   /*
-   * An anchor written into a step points at the thing it names. Cleared
-   * first, because a pane rebuilt while the pointer was over a token never
-   * gets the mouseleave that would have put the surface back.
+   * Verify every addressed thread on one rule. Same governance as verifying
+   * one: it is recorded under the person pressing it, and refused outright
+   * without a name, because an agent may claim work and never accept it.
    */
-  highlightAnchor(null);
-  D.host.querySelectorAll('[data-anchor]').forEach((el) => {
-    el.onmouseenter = () => highlightAnchor(el.dataset.anchor);
-    el.onmouseleave = () => highlightAnchor(null);
-  });
-  D.host.querySelectorAll('[data-shots]').forEach((el) => {
-    el.onclick = () => {
+  async function verifyAll(rule) {
+    const actor = whoAmI();
+    if (!actor || actor === 'agent') {
+      toast(
+        'Verifying is recorded under a person\u2019s name \u2014 set it in Settings (the gear).',
+        { tone: 'error' },
+      );
+      return openActorSettings();
+    }
+    const pending = threadsFor(rule).filter((t) => t.status === 'addressed');
+    if (!pending.length) return;
+    let done = 0;
+    for (const t of pending)
+      if (await threadPost(`/api/threads/${t.id}/status`, { status: 'verified', actor })) done += 1;
+    await load();
+    // All of them is the result asked for; a partial pass is not a failure but
+    // it is unfinished, and the colour is the difference.
+    toast(
+      done === pending.length
+        ? `<b>${done}</b> thread${done === 1 ? '' : 's'} verified on ${esc(rule)}.`
+        : `<b>${done}</b> of ${pending.length} verified \u2014 the rest are still open.`,
+      { tone: done === pending.length ? 'success' : 'warning' },
+    );
+  }
+
+  /** Open a thread on its own screen, landing where the reading resumes. */
+  function openThreadView(id) {
+    if (!(S.data?.threads ?? []).some((x) => x.id === id))
+      return toast(`No thread ${esc(id)} here.`, { tone: 'error' });
+    S.openThread = id;
+    S.threadNote = '';
+    markSeen(id);
+    S.view = 'thread';
+    render();
+    /*
+     * The first unread message if there is one, and otherwise the newest -
+     * never the top of an exchange you have already read.
+     *
+     * Scroll the STREAM, by hand. scrollIntoView looks like the obvious way to
+     * say this and is not: it scrolls every scrollable ancestor, and one of the
+     * ancestors here is the pane wrapper that carries the slide track. Landing
+     * on an unread mark pushed that wrapper to scrollLeft 368, which slid all
+     * three panes a third of a column left and left the reviewer looking at an
+     * empty one - a thread with unread messages opened to blank, and only a
+     * thread with unread messages, which is why it survived every check.
+     *
+     * offsetTop is measured against the stream because the stream is the
+     * offsetParent here; the fallback covers a layout where it is not.
+     */
+    const pane = D.host.querySelectorAll('.wdp-track > div')[S.listTab === 'threads' ? 1 : 2];
+    const stream = pane?.querySelector('.overflow-y-auto');
+    const mark = pane?.querySelector('.wd-new');
+    if (!stream) return;
+    if (mark) {
+      const top = stream.contains(mark.offsetParent ?? mark)
+        ? mark.offsetTop
+        : mark.getBoundingClientRect().top - stream.getBoundingClientRect().top + stream.scrollTop;
+      stream.scrollTop = Math.max(0, top);
+    } else {
+      stream.scrollTop = stream.scrollHeight;
+    }
+  }
+
+  function wireThreads() {
+    D.host.querySelectorAll('[data-open-thread]').forEach((el) => {
+      el.onclick = (e) => {
+        e.stopPropagation();
+        openThreadView(el.dataset.openThread);
+      };
+    });
+    const tback = D.host.querySelector('.wdp-thread-back');
+    if (tback)
+      tback.onclick = () => {
+        const t = (S.data?.threads ?? []).find((x) => x.id === S.openThread);
+        // Back where you came from: the rule, or the list for a pin that has
+        // none - and on the Threads tab always the thread list, because that is
+        // where you came from and no rule was ever opened.
+        S.view = S.listTab !== 'threads' && t?.anchor?.rule && S.selected ? 'detail' : 'list';
+        S.openThread = null;
+        render();
+      };
+    const note = D.host.querySelector('#wdp-note');
+    if (note) {
+      note.oninput = () => {
+        S.threadNote = note.value;
+      };
+      // Enter sends, Shift+Enter breaks the line - the muscle memory everyone
+      // already has. The button stays for the pointer.
+      note.onkeydown = (e) => {
+        if (e.key !== 'Enter' || e.shiftKey || e.isComposing) return;
+        e.preventDefault();
+        const id = S.openThread;
+        const text = note.value.trim();
+        if (id && text) threadAct(id, '__reply');
+      };
+    }
+    // An id written in a message is a link: thread ids open that thread, rule
+    // ids open that rule, so a conversation can point at things.
+    D.host.querySelectorAll('[data-thread-ref]').forEach((el) => {
+      el.onclick = (e) => {
+        e.stopPropagation();
+        const id = el.dataset.threadRef;
+        const t = (S.data?.threads ?? []).find((x) => x.id === id);
+        // Follow it to its own rule, so going back from the thread lands
+        // somewhere that makes sense rather than on the rule you came from.
+        if (t?.anchor?.rule)
+          S.selected = S.data.rows.find((r) => r.rule === t.anchor.rule) ?? S.selected;
+        openThreadView(id);
+      };
+    });
+    D.host.querySelectorAll('[data-rule-ref]').forEach((el) => {
+      el.onclick = (e) => {
+        e.stopPropagation();
+        open(el.dataset.ruleRef);
+      };
+    });
+    const tactor = D.host.querySelector('#wdp-tactor');
+    if (tactor) tactor.onclick = () => openActorSettings();
+    D.host.querySelectorAll('[data-act]').forEach((el) => {
+      el.onclick = () => threadAct(el.dataset.tid, el.dataset.act);
+    });
+    D.host.querySelectorAll('[data-verify-all]').forEach((el) => {
+      el.onclick = () => verifyAll(el.dataset.verifyAll);
+    });
+    D.host.querySelectorAll('[data-checks]').forEach((el) => {
+      el.ontoggle = () => {
+        const rule = el.dataset.checks;
+        // A pane rebuilt with the disclosure already open fires this too; only
+        // a real change is one.
+        if (el.open === (S.srcOpenFor === rule)) return;
+        S.srcOpenFor = el.open ? rule : null;
+        if (el.open) loadCheckSource(rule);
+      };
+    });
+    /*
+     * An anchor written into a step points at the thing it names. Cleared
+     * first, because a pane rebuilt while the pointer was over a token never
+     * gets the mouseleave that would have put the surface back.
+     */
+    highlightAnchor(null);
+    D.host.querySelectorAll('[data-anchor]').forEach((el) => {
+      el.onmouseenter = () => highlightAnchor(el.dataset.anchor);
+      el.onmouseleave = () => highlightAnchor(null);
+    });
+    D.host.querySelectorAll('[data-shots]').forEach((el) => {
+      el.onclick = () => {
+        try {
+          openShots(JSON.parse(el.dataset.shots));
+        } catch {
+          /* nothing to show */
+        }
+      };
+    });
+    D.host.querySelectorAll('[data-sketch]').forEach((el) => {
+      el.onclick = () => {
+        S.ghostOverride = el.dataset.sketch;
+        setGhost(false);
+        S.ghostOverride = el.dataset.sketch;
+        setGhost(true);
+      };
+    });
+  }
+
+  /** Where a screen lives on one surface, as a URL walkdown can navigate to. */
+  function screenUrl(screen, surface) {
+    if (!screen) return null;
+    if (surface === 'prototype')
+      return screen.prototype && S.data?.hasPrototype ? api('/prototype' + screen.prototype) : null;
+    return screen.app?.path && S.data?.appBase ? S.data.appBase + screen.app.path : null;
+  }
+
+  /** Every anchor the storyboard declares, on any screen. */
+  const declaredAnchors = () =>
+    new Set((S.data?.storyboard ?? []).flatMap((s) => s.anchors ?? []));
+
+  /*
+   * Point at an element on the surface under review, by the anchor that names
+   * it. Both surfaces are told and each answers for itself: the design is what
+   * you are usually reading a step against, but the same step is about the
+   * built page too, and the frame that has no such element simply draws
+   * nothing. `null` puts the surfaces back.
+   */
+  function highlightAnchor(element) {
+    const msg = { type: 'walkdown:highlight', element: element ?? null };
+    ghostFrame()?.contentWindow?.postMessage(msg, '*');
+    D.appFrame?.contentWindow?.postMessage(msg, '*');
+  }
+
+  /**
+   * Take the surface under review to a screen.
+   *
+   * Framed, walkdown owns the frame and simply navigates it. Docked, the page
+   * belongs to the browser and this is a real navigation, which is why the
+   * docked layout used to only ever offer the trip rather than make it.
+   *
+   * Staying on the surface you are on matters: asking for a screen while
+   * looking at the design should show you the design of it. Only when that
+   * surface has no URL for the screen does it cross over.
+   */
+  /*
+   * Whether two addresses are the same page. `bp` is walkdown's own, added on
+   * the way out so a prototype page can tell which blueprint it belongs to; it
+   * never distinguishes one page from another.
+   */
+  function sameAddress(a, b) {
+    if (!a || !b) return false;
+    const strip = (u) => {
       try {
-        openShots(JSON.parse(el.dataset.shots));
+        const parsed = new URL(u, location.href);
+        parsed.searchParams.delete('bp');
+        return parsed.href;
       } catch {
-        /* nothing to show */
+        return String(u);
       }
     };
-  });
-  D.host.querySelectorAll('[data-sketch]').forEach((el) => {
-    el.onclick = () => {
-      S.ghostOverride = el.dataset.sketch;
-      setGhost(false);
-      S.ghostOverride = el.dataset.sketch;
-      setGhost(true);
-    };
-  });
-}
+    return strip(a) === strip(b);
+  }
 
-/** Where a screen lives on one surface, as a URL walkdown can navigate to. */
-function screenUrl(screen, surface) {
-  if (!screen) return null;
-  if (surface === 'prototype')
-    return screen.prototype && S.data?.hasPrototype ? api('/prototype' + screen.prototype) : null;
-  return screen.app?.path && S.data?.appBase ? S.data.appBase + screen.app.path : null;
-}
+  /*
+   * Is the copy we are running the one the server ships? Only the extension
+   * can be stale — a script tag fetches the panel afresh every load — so a
+   * delivery that publishes no build hash never claims to be current or not.
+   */
+  const STALE_COPY = () =>
+    Boolean(cfg.buildHash && S.data?.panelHash && cfg.buildHash !== S.data.panelHash);
 
-/** Every anchor the storyboard declares, on any screen. */
-const declaredAnchors = () =>
-  new Set((S.data?.storyboard ?? []).flatMap((s) => s.anchors ?? []));
-
-/*
- * Point at an element on the surface under review, by the anchor that names
- * it. Both surfaces are told and each answers for itself: the design is what
- * you are usually reading a step against, but the same step is about the
- * built page too, and the frame that has no such element simply draws
- * nothing. `null` puts the surfaces back.
- */
-function highlightAnchor(element) {
-  const msg = { type: 'walkdown:highlight', element: element ?? null };
-  ghostFrame()?.contentWindow?.postMessage(msg, '*');
-  D.appFrame?.contentWindow?.postMessage(msg, '*');
-}
-
-/**
- * Take the surface under review to a screen.
- *
- * Framed, walkdown owns the frame and simply navigates it. Docked, the page
- * belongs to the browser and this is a real navigation, which is why the
- * docked layout used to only ever offer the trip rather than make it.
- *
- * Staying on the surface you are on matters: asking for a screen while
- * looking at the design should show you the design of it. Only when that
- * surface has no URL for the screen does it cross over.
- */
-/*
- * Whether two addresses are the same page. `bp` is walkdown's own, added on
- * the way out so a prototype page can tell which blueprint it belongs to; it
- * never distinguishes one page from another.
- */
-function sameAddress(a, b) {
-  if (!a || !b) return false;
-  const strip = (u) => {
-    try {
-      const parsed = new URL(u, location.href);
-      parsed.searchParams.delete('bp');
-      return parsed.href;
-    } catch {
-      return String(u);
+  /*
+   * Go to a screen. `pick` is what the screen override should say once we are
+   * there: null for every trip walkdown makes on its own (a rule's screen, the
+   * blueprint's front door), and the screen's own id when a person chose it in
+   * the picker - that choice outranks detection and has to survive arriving,
+   * or the radio list snaps back to "Detect from the page" the moment the
+   * frame lands (n-0098).
+   */
+  function goTo(screen, surface = pageSurface(), pick = null) {
+    const url =
+      screenUrl(screen, surface) ?? screenUrl(screen, surface === 'app' ? 'prototype' : 'app');
+    if (!url) return false;
+    /*
+     * Already there. Assigning the same address is still a navigation - the
+     * page reloads, scroll position and form state go, and on a slow app you
+     * watch it rebuild for nothing.
+     *
+     * Compared without walkdown's own `bp` parameter, which we append so a
+     * prototype page knows which blueprint it belongs to. It is bookkeeping,
+     * not part of the page's identity, and comparing raw strings made the same
+     * page look like a different one the first time we asked for it - so the
+     * frame reloaded for a screen it was already showing.
+     */
+    if (!sameAddress(S.frameUrl, url)) {
+      S.frameUrl = url;
+      frameLoading(url, `Loading ${screenLabel(screen)}…`);
+      D.appFrame.src = url;
     }
-  };
-  return strip(a) === strip(b);
-}
+    /*
+     * The screen override describes where we are going, not where we have
+     * been: null for a trip walkdown decided on, and the picked id when a
+     * person named the screen. The sketch override always describes the page
+     * being left, so it goes either way.
+     */
+    S.pickedScreen = pick;
+    S.ghostOverride = null;
+    if (S.protoShare === null) setGhost(false);
+    else setFade(S.protoShare);
+    render();
+    return true;
+  }
 
-/*
- * Is the copy we are running the one the server ships? Only the extension
- * can be stale — a script tag fetches the panel afresh every load — so a
- * delivery that publishes no build hash never claims to be current or not.
- */
-const STALE_COPY = () =>
-  Boolean(cfg.buildHash && S.data?.panelHash && cfg.buildHash !== S.data.panelHash);
-
-/*
- * Go to a screen. `pick` is what the screen override should say once we are
- * there: null for every trip walkdown makes on its own (a rule's screen, the
- * blueprint's front door), and the screen's own id when a person chose it in
- * the picker - that choice outranks detection and has to survive arriving,
- * or the radio list snaps back to "Detect from the page" the moment the
- * frame lands (n-0098).
- */
-function goTo(screen, surface = pageSurface(), pick = null) {
-  const url =
-    screenUrl(screen, surface) ?? screenUrl(screen, surface === 'app' ? 'prototype' : 'app');
-  if (!url) return false;
   /*
-   * Already there. Assigning the same address is still a navigation - the
-   * page reloads, scroll position and form state go, and on a slow app you
-   * watch it rebuild for nothing.
-   *
-   * Compared without walkdown's own `bp` parameter, which we append so a
-   * prototype page knows which blueprint it belongs to. It is bookkeeping,
-   * not part of the page's identity, and comparing raw strings made the same
-   * page look like a different one the first time we asked for it - so the
-   * frame reloaded for a screen it was already showing.
+   * Opening a headless rule clears the desk: an opaque cover in walkdown's
+   * own colors takes the sheet's place, so the previous screen cannot keep
+   * masquerading as the rule's. Covering rather than navigating keeps the
+   * application's state intact underneath.
    */
-  if (!sameAddress(S.frameUrl, url)) {
-    S.frameUrl = url;
-    frameLoading(url, `Loading ${screenLabel(screen)}…`);
-    D.appFrame.src = url;
-  }
-  /*
-   * The screen override describes where we are going, not where we have
-   * been: null for a trip walkdown decided on, and the picked id when a
-   * person named the screen. The sketch override always describes the page
-   * being left, so it goes either way.
-   */
-  S.pickedScreen = pick;
-  S.ghostOverride = null;
-  if (S.protoShare === null) setGhost(false);
-  else setFade(S.protoShare);
-  render();
-  return true;
-}
-
-/*
- * Opening a headless rule clears the desk: an opaque cover in walkdown's
- * own colors takes the sheet's place, so the previous screen cannot keep
- * masquerading as the rule's. Covering rather than navigating keeps the
- * application's state intact underneath.
- */
-function syncHeadlessCover() {
-  const show = S.docked && S.view !== 'list' && isHeadless(S.selected);
-  if (!show) {
-    S.headlessCover?.remove();
-    S.headlessCover = null;
-    return;
-  }
-  if (!S.headlessCover) {
-    S.headlessCover = document.createElement('div');
-    document.body.appendChild(S.headlessCover);
-  }
-  const cs = getComputedStyle(D.side);
-  S.headlessCover.style.cssText = `position:fixed; top:${HEAD}px; left:${GAP}px;
+  function syncHeadlessCover() {
+    const show = S.docked && S.view !== 'list' && isHeadless(S.selected);
+    if (!show) {
+      S.headlessCover?.remove();
+      S.headlessCover = null;
+      return;
+    }
+    if (!S.headlessCover) {
+      S.headlessCover = document.createElement('div');
+      document.body.appendChild(S.headlessCover);
+    }
+    const cs = getComputedStyle(D.side);
+    S.headlessCover.style.cssText = `position:fixed; top:${HEAD}px; left:${GAP}px;
     width:calc(100vw - ${W + GAP * 3}px); height:calc(100vh - ${HEAD + GAP}px);
     z-index:2147482000; border-radius:10px; overflow:hidden;
     background:${cs.backgroundColor}; color:${cs.color};
     box-shadow:0 1px 2px rgba(0,0,0,.28), 0 12px 32px rgba(0,0,0,.34);
     display:flex; align-items:center; justify-content:center; text-align:center;
     font:13px/1.6 system-ui, sans-serif;`;
-  // cssText above is wholesale, so the peek's dimming must be re-said here
-  // or a repaint mid-peek snaps the cover back to full strength.
-  S.headlessCover.style.opacity = S.hideAppOn ? '0.1' : '';
-  S.headlessCover.innerHTML = `<div style="max-width:26rem; padding:2rem; opacity:.9">
+    // cssText above is wholesale, so the peek's dimming must be re-said here
+    // or a repaint mid-peek snaps the cover back to full strength.
+    S.headlessCover.style.opacity = S.hideAppOn ? '0.1' : '';
+    S.headlessCover.innerHTML = `<div style="max-width:26rem; padding:2rem; opacity:.9">
     <div style="font-size:15px; font-weight:700; margin-bottom:.5rem">No screen belongs to this rule</div>
     It is judged by its checks and recorded behavior, not by looking.<br>
     The page you were reviewing is untouched underneath.</div>`;
-}
+  }
 
-function elsewhere(r) {
-  const here = currentScreen();
-  const want = ruleScreen(r);
-  // A headless rule must say so - otherwise whatever is on the desk reads
-  // as the rule's screen, and it is not.
-  if (!want && isHeadless(r))
-    return `<div class="mt-1.5 text-[11.5px] opacity-60">Headless — no screen belongs to
+  function elsewhere(r) {
+    const here = currentScreen();
+    const want = ruleScreen(r);
+    // A headless rule must say so - otherwise whatever is on the desk reads
+    // as the rule's screen, and it is not.
+    if (!want && isHeadless(r))
+      return b`<div class="mt-1.5 text-[11.5px] opacity-60">Headless — no screen belongs to
       this rule, so what is on the desk is beside the point. It is judged by its
       checks and recorded behavior, not by looking.</div>`;
-  if (!want || !here || want.id === here.id) return '';
-  const can = Boolean(
-    screenUrl(want, pageSurface()) ?? screenUrl(want, 'app') ?? screenUrl(want, 'prototype'),
-  );
-  return `<div class="mt-1.5 text-[11.5px] opacity-60">This rule is on
-    <b>${esc(want.id)}</b>; you are on <b>${esc(here.id)}</b>.
-    ${can ? `<button class="link link-primary" data-goscreen="${esc(want.id)}">Go there</button>` : ''}</div>`;
-}
+    if (!want || !here || want.id === here.id) return A;
+    const can = Boolean(
+      screenUrl(want, pageSurface()) ?? screenUrl(want, 'app') ?? screenUrl(want, 'prototype'),
+    );
+    return b`<div class="mt-1.5 text-[11.5px] opacity-60">This rule is on
+    <b>${want.id}</b>; you are on <b>${here.id}</b>.
+    ${can ? b`<button class="link link-primary" data-goscreen="${want.id}">Go there</button>` : A}</div>`;
+  }
 
-function sayVerdict(msg) {
-  const el = D.host.querySelector('#wdp-vsay');
-  if (!el) return toast(msg, { tone: 'error' });
-  el.textContent = msg;
-  el.classList.remove('hidden');
-}
+  function sayVerdict(msg) {
+    const el = D.host.querySelector('#wdp-vsay');
+    if (!el) return toast(msg, { tone: 'error' });
+    el.textContent = msg;
+    el.classList.remove('hidden');
+  }
 
-/*
- * A refusal, put where the person who triggered it is looking. Two composers
- * can file a note now, each with its own line to say why one was refused, and
- * a message printed into the box you are not looking at is a message nobody
- * reads. Falls through to a toast when neither box is on screen.
- */
-function sayFiling(msg) {
-  for (const id of ['#wdp-nsay', '#wdp-vsay']) {
-    const el = D.host.querySelector(id);
-    if (el) {
-      el.textContent = msg;
-      el.classList.remove('hidden');
-      return;
+  /*
+   * A refusal, put where the person who triggered it is looking. Two composers
+   * can file a note now, each with its own line to say why one was refused, and
+   * a message printed into the box you are not looking at is a message nobody
+   * reads. Falls through to a toast when neither box is on screen.
+   */
+  function sayFiling(msg) {
+    for (const id of ['#wdp-nsay', '#wdp-vsay']) {
+      const el = D.host.querySelector(id);
+      if (el) {
+        el.textContent = msg;
+        el.classList.remove('hidden');
+        return;
+      }
     }
+    toast(msg, { tone: 'error' });
   }
-  toast(msg, { tone: 'error' });
-}
 
-/** File the feedback box's text as a note on the rule; null on refusal. */
-async function postRuleNote(rule, body) {
-  /*
-   * Refuse rather than let the server choose a name for us.
-   *
-   * This sent `author: undefined` when the sitting had no actor, the field
-   * dropped out of the JSON, and the server filled it in from the machine's
-   * own username - so a note went into the ledger under a name the panel had
-   * never put on screen. `panel.identity.attribution-visible` says a defaulted
-   * identity is always visible BEFORE it is used, and this was the one path
-   * that used one nobody had seen. Finish already refused; the note-filing
-   * half did not, so a fail could be recorded, and its reason attributed,
-   * under a stranger.
-   *
-   * Found by an agent walkdown on 2026-08-28 emptying Settings and pressing
-   * Fail. n-0116 had looked at the same screen and judged it harmless on the
-   * belief that every attributed action was refused; that belief was true of
-   * every path but this one.
-   */
-  /*
-   * whoAmI() rather than the sitting's actor, because a rule is now a place
-   * to talk WITHOUT a sitting - and outside one, S.session is null, which
-   * this line used to read straight through. It keeps the guard it was
-   * written for: whoAmI is precisely the name the panel puts on screen as
-   * you, in the bar, in Settings and above both composers, so a note can
-   * still never be filed under a name nobody was shown (n-0116, n-0121).
-   */
-  const author = whoAmI();
-  if (!author || author === 'agent') {
-    sayFiling(
-      'A note is recorded under a person\u2019s name \u2014 set it in Settings (the gear).',
-    );
-    openActorSettings();
-    return null;
-  }
-  const res = await fetch(api('/api/threads'), {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ kind: 'note', author, body, anchor: { rule } }),
-  });
-  const out = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    sayFiling(out.error ?? 'note not filed');
-    return null;
-  }
-  return out.id;
-}
-
-/*
- * Starting a conversation on a rule, outside a walkdown.
- *
- * The same POST the sitting's feedback box makes, and deliberately so: a note
- * is a note, and a rule read on a Tuesday deserves the same record as one
- * judged in a sitting. What it does NOT do is touch S.session - there may not
- * be one, and a thread is not a verdict.
- */
-function wireRuleNote() {
-  const box = D.host.querySelector('#wdp-rulenote');
-  if (box)
-    box.oninput = () => {
-      S.ruleNote = box.value;
-    };
-  const who = D.host.querySelector('#wdp-nactor');
-  if (who) who.onclick = () => openActorSettings();
-  const post = D.host.querySelector('[data-note-rule]');
-  if (!post) return;
-  post.onclick = async () => {
-    const text = (D.host.querySelector('#wdp-rulenote')?.value ?? '').trim();
-    if (!text)
-      return sayFiling('Write something first — a thread opens with what you have to say.');
-    post.disabled = true;
-    const tid = await postRuleNote(post.dataset.noteRule, text);
-    post.disabled = false;
-    if (!tid) return; // the refusal is on screen
-    S.ruleNote = '';
-    await load(); // pull the new thread into the lists and repaint
-  };
-}
-
-/** A pin dropped on this rule since the session began — the other way to say why. */
-const pinnedThisSession = (rule) =>
-  (S.data?.threads ?? []).some(
-    (t) =>
-      t.anchor?.rule === rule && S.session?.started && String(t.created ?? '') >= S.session.started,
-  );
-
-function wireVerdict() {
-  const note = D.host.querySelector('#wdp-vnote');
-  if (note)
-    note.oninput = () => {
-      S.verdictNote = note.value;
-    };
-  D.host.querySelectorAll('[data-v]').forEach((b) => {
-    b.onclick = async () => {
-      const status = b.dataset.v;
-      const rule = S.selected.rule;
-      const text = (D.host.querySelector('#wdp-vnote')?.value ?? '').trim();
-      // A refusal is work nobody can act on until it says why. Refine's why
-      // is the text itself; a fail's may also be a pin on the page.
-      if (status === 'refining' && !text)
-        return sayVerdict('Refine is the feedback — write what should change first.');
-      if (status === 'fail' && !text) {
-        await load(); // a pin may have landed since the last paint
-        if (!pinnedThisSession(rule)) {
-          /*
-           * The refusal names both ways to give a why and switches neither
-           * on. Arming pin mode here made the panel decide how you were
-           * going to answer - and for a reviewer who writes rather than
-           * pins, every fail left a mode behind to notice and turn off,
-           * which is a tax on the commonest verdict in a hard sitting.
-           */
-          sayVerdict(
-            'A fail needs a why — write it above, or turn on Pin mode and drop it on the page.',
-          );
-          return;
-        }
-      }
-      if (text) {
-        const tid = await postRuleNote(rule, text);
-        if (!tid) return; // the refusal is on screen; verdict stays unrecorded
-        (S.session.threads[rule] ??= []).push(tid);
-        saveSession();
-      }
-      S.session.verdicts[rule] = status;
-      saveSession();
-      S.verdictNote = '';
-      // A pass or approval moves you on; fail and refine keep you here, so
-      // the reason can be written or pinned where the rule is. Staying put
-      // is the whole of it - pin mode is a tool you reach for, not a mode a
-      // verdict puts you in.
-      if (status === 'pass' || status === 'approved') {
-        const next = owedRows()[0];
-        if (next) {
-          open(next.rule);
-          load();
-          return;
-        }
-        S.view = 'list';
-      }
-      await load(); // pull the new thread into the lists and repaint
-    };
-  });
-}
-
-/*
- * `sticky` for a toast that asks something: a question that disappears after
- * four seconds is worse than no question. `on` wires its buttons by their
- * data-sitting name, so the caller says what each choice does rather than
- * reaching back into the DOM for it.
- */
-/*
- * Carry on where the sitting left off: the next rule still owing a verdict.
- * A sitting resumed from disk lands here too - the draft survives crossing to
- * another blueprint and back, so "continue" is a real offer rather than a
- * word for "start over".
- */
-function continueWalkdown() {
-  const next = owedRows()[0];
-  if (!next) {
-    S.view = 'list';
-    render();
-    // Nothing owed is the good end of a walk, not an error.
-    return toast(
-      'Nothing left owing a verdict in this blueprint — <b>Finish walkdown</b> records the sitting.',
-      { tone: 'success' },
-    );
-  }
-  open(next.rule);
-}
-
-/** Append the session to the runs ledger — the same write the viewer makes. */
-async function finishWalkdown() {
-  // A double-click on Finish must not append the same record twice - but a
-  // refused or failed attempt must hand the button back, or one hiccup
-  // silently bricks Finish for the rest of the session.
-  if (S.session.posting) return;
-  S.session.posting = true;
-  // Each verdict carries its why: the notes the feedback box filed, plus
-  // any pins dropped on the rule during this session.
-  const results = Object.entries(S.session.verdicts).map(([rule, status]) => {
-    const pins = (S.data?.threads ?? [])
-      .filter((t) => t.anchor?.rule === rule && String(t.created ?? '') >= S.session.started)
-      .map((t) => t.id);
-    const threads = [...new Set([...(S.session.threads?.[rule] ?? []), ...pins])];
-    return { rule, status, ...(threads.length && { threads }) };
-  });
-  if (!results.length) {
-    S.session = null;
-    saveSession();
-    render();
-    return;
-  }
-  const actor = (S.session.actor ?? '').trim();
-  if (!actor || actor === 'agent') {
-    S.session.posting = false;
-    toast('A walkdown is recorded under a person’s name — set it in Settings (the gear).', {
-      tone: 'error',
-    });
-    openActorSettings();
-    return;
-  }
-  try {
-    const res = await fetch(api('/api/walkdowns'), {
+  /** File the feedback box's text as a note on the rule; null on refusal. */
+  async function postRuleNote(rule, body) {
+    /*
+     * Refuse rather than let the server choose a name for us.
+     *
+     * This sent `author: undefined` when the sitting had no actor, the field
+     * dropped out of the JSON, and the server filled it in from the machine's
+     * own username - so a note went into the ledger under a name the panel had
+     * never put on screen. `panel.identity.attribution-visible` says a defaulted
+     * identity is always visible BEFORE it is used, and this was the one path
+     * that used one nobody had seen. Finish already refused; the note-filing
+     * half did not, so a fail could be recorded, and its reason attributed,
+     * under a stranger.
+     *
+     * Found by an agent walkdown on 2026-08-28 emptying Settings and pressing
+     * Fail. n-0116 had looked at the same screen and judged it harmless on the
+     * belief that every attributed action was refused; that belief was true of
+     * every path but this one.
+     */
+    /*
+     * whoAmI() rather than the sitting's actor, because a rule is now a place
+     * to talk WITHOUT a sitting - and outside one, S.session is null, which
+     * this line used to read straight through. It keeps the guard it was
+     * written for: whoAmI is precisely the name the panel puts on screen as
+     * you, in the bar, in Settings and above both composers, so a note can
+     * still never be filed under a name nobody was shown (n-0116, n-0121).
+     */
+    const author = whoAmI();
+    if (!author || author === 'agent') {
+      sayFiling(
+        'A note is recorded under a person\u2019s name \u2014 set it in Settings (the gear).',
+      );
+      openActorSettings();
+      return null;
+    }
+    const res = await fetch(api('/api/threads'), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ actor, target: 'local', results }),
+      body: JSON.stringify({ kind: 'note', author, body, anchor: { rule } }),
     });
-    const out = await res.json();
+    const out = await res.json().catch(() => ({}));
     if (!res.ok) {
-      S.session.posting = false;
-      return toast(`Not recorded: ${esc(out.error ?? 'request failed')}`, { tone: 'error' });
+      sayFiling(out.error ?? 'note not filed');
+      return null;
     }
-    S.session = null;
-    saveSession();
-    S.view = 'list';
-    S.selected = null;
-    await load();
-    toast(
-      `Recorded ${results.length} verdict${results.length === 1 ? '' : 's'} as <b>${esc(out.run_id)}</b>`,
-      { tone: 'success' },
-    );
-  } catch {
-    S.session.posting = false;
-    toast('walkdown server unreachable — nothing recorded.', { tone: 'error' });
+    return out.id;
   }
-}
 
-function open(ruleId) {
-  S.selected = S.data.rows.find((r) => r.rule === ruleId) ?? S.selected;
-  S.view = 'detail';
   /*
-   * A walkdown is a sequence of deep links, so opening a rule goes to the
-   * screen it is about — but only framed, where walkdown owns the surface
-   * and moving it costs nothing. Docked, every move is a real page load that
-   * takes the panel down with it, so browsing the rule list would mean
-   * reloading the application on every click; there the trip stays something
-   * you ask for, on the rule itself.
+   * Starting a conversation on a rule, outside a walkdown.
    *
-   * Either way, never when the rule is about the screen you are already on:
-   * re-navigating throws away the page's state for nothing.
+   * The same POST the sitting's feedback box makes, and deliberately so: a note
+   * is a note, and a rule read on a Tuesday deserves the same record as one
+   * judged in a sitting. What it does NOT do is touch S.session - there may not
+   * be one, and a thread is not a verdict.
    */
-  const want = ruleScreen(S.selected);
-  if (want && want.id !== currentScreen()?.id && goTo(want)) return;
-  render();
-}
+  function wireRuleNote() {
+    const box = D.host.querySelector('#wdp-rulenote');
+    if (box)
+      box.oninput = () => {
+        S.ruleNote = box.value;
+      };
+    const who = D.host.querySelector('#wdp-nactor');
+    if (who) who.onclick = () => openActorSettings();
+    const post = D.host.querySelector('[data-note-rule]');
+    if (!post) return;
+    post.onclick = async () => {
+      const text = (D.host.querySelector('#wdp-rulenote')?.value ?? '').trim();
+      if (!text)
+        return sayFiling('Write something first — a thread opens with what you have to say.');
+      post.disabled = true;
+      const tid = await postRuleNote(post.dataset.noteRule, text);
+      post.disabled = false;
+      if (!tid) return; // the refusal is on screen
+      S.ruleNote = '';
+      await load(); // pull the new thread into the lists and repaint
+    };
+  }
 
-/** The prototype for this screen, laid over the running app. */
-/**
- * The ghost's geometry, said outright in pixels — the stage and the framed
- * copy inside it. Kept apart from building the ghost so a window resize
- * re-measures rather than reloading the page in there.
- */
-function sizeGhost() {
-  const frame = ghostFrame();
-  if (!S.ghost || !frame) return;
-  const { availW, availH } = frameSpace();
-  // At a preset the ghost lays out at that width too, scaling down whole
-  // when the stage is narrower - the same rule the app frame follows.
-  const gs = S.ghostWidth ? Math.min(1, availW / S.ghostWidth) : 1;
-  S.ghost.style.width = `${availW}px`;
-  S.ghost.style.height = `${availH}px`;
-  S.ghost.style.alignItems = S.ghostWidth ? 'flex-start' : 'center';
-  frame.style.width = `${S.ghostWidth || availW}px`;
-  frame.style.height = `${gs < 1 ? availH / gs : availH}px`;
-  frame.style.transform = gs < 1 ? `scale(${gs})` : '';
-  frame.style.transformOrigin = 'top center';
-  frame.style.maxWidth = 'none';
-  frame.style.maxHeight = 'none';
-  frame.style.flex = 'none';
-}
+  /** A pin dropped on this rule since the session began — the other way to say why. */
+  const pinnedThisSession = (rule) =>
+    (S.data?.threads ?? []).some(
+      (t) =>
+        t.anchor?.rule === rule && S.session?.started && String(t.created ?? '') >= S.session.started,
+    );
 
-function setGhost(on) {
-  if (!on) {
+  function wireVerdict() {
+    const note = D.host.querySelector('#wdp-vnote');
+    if (note)
+      note.oninput = () => {
+        S.verdictNote = note.value;
+      };
+    D.host.querySelectorAll('[data-v]').forEach((b) => {
+      b.onclick = async () => {
+        const status = b.dataset.v;
+        const rule = S.selected.rule;
+        const text = (D.host.querySelector('#wdp-vnote')?.value ?? '').trim();
+        // A refusal is work nobody can act on until it says why. Refine's why
+        // is the text itself; a fail's may also be a pin on the page.
+        if (status === 'refining' && !text)
+          return sayVerdict('Refine is the feedback — write what should change first.');
+        if (status === 'fail' && !text) {
+          await load(); // a pin may have landed since the last paint
+          if (!pinnedThisSession(rule)) {
+            /*
+             * The refusal names both ways to give a why and switches neither
+             * on. Arming pin mode here made the panel decide how you were
+             * going to answer - and for a reviewer who writes rather than
+             * pins, every fail left a mode behind to notice and turn off,
+             * which is a tax on the commonest verdict in a hard sitting.
+             */
+            sayVerdict(
+              'A fail needs a why — write it above, or turn on Pin mode and drop it on the page.',
+            );
+            return;
+          }
+        }
+        if (text) {
+          const tid = await postRuleNote(rule, text);
+          if (!tid) return; // the refusal is on screen; verdict stays unrecorded
+          (S.session.threads[rule] ??= []).push(tid);
+          saveSession();
+        }
+        S.session.verdicts[rule] = status;
+        saveSession();
+        S.verdictNote = '';
+        // A pass or approval moves you on; fail and refine keep you here, so
+        // the reason can be written or pinned where the rule is. Staying put
+        // is the whole of it - pin mode is a tool you reach for, not a mode a
+        // verdict puts you in.
+        if (status === 'pass' || status === 'approved') {
+          const next = owedRows()[0];
+          if (next) {
+            open(next.rule);
+            load();
+            return;
+          }
+          S.view = 'list';
+        }
+        await load(); // pull the new thread into the lists and repaint
+      };
+    });
+  }
+
+  /*
+   * `sticky` for a toast that asks something: a question that disappears after
+   * four seconds is worse than no question. `on` wires its buttons by their
+   * data-sitting name, so the caller says what each choice does rather than
+   * reaching back into the DOM for it.
+   */
+  /*
+   * Carry on where the sitting left off: the next rule still owing a verdict.
+   * A sitting resumed from disk lands here too - the draft survives crossing to
+   * another blueprint and back, so "continue" is a real offer rather than a
+   * word for "start over".
+   */
+  function continueWalkdown() {
+    const next = owedRows()[0];
+    if (!next) {
+      S.view = 'list';
+      render();
+      // Nothing owed is the good end of a walk, not an error.
+      return toast(
+        'Nothing left owing a verdict in this blueprint — <b>Finish walkdown</b> records the sitting.',
+        { tone: 'success' },
+      );
+    }
+    open(next.rule);
+  }
+
+  /** Append the session to the runs ledger — the same write the viewer makes. */
+  async function finishWalkdown() {
+    // A double-click on Finish must not append the same record twice - but a
+    // refused or failed attempt must hand the button back, or one hiccup
+    // silently bricks Finish for the rest of the session.
+    if (S.session.posting) return;
+    S.session.posting = true;
+    // Each verdict carries its why: the notes the feedback box filed, plus
+    // any pins dropped on the rule during this session.
+    const results = Object.entries(S.session.verdicts).map(([rule, status]) => {
+      const pins = (S.data?.threads ?? [])
+        .filter((t) => t.anchor?.rule === rule && String(t.created ?? '') >= S.session.started)
+        .map((t) => t.id);
+      const threads = [...new Set([...(S.session.threads?.[rule] ?? []), ...pins])];
+      return { rule, status, ...(threads.length && { threads }) };
+    });
+    if (!results.length) {
+      S.session = null;
+      saveSession();
+      render();
+      return;
+    }
+    const actor = (S.session.actor ?? '').trim();
+    if (!actor || actor === 'agent') {
+      S.session.posting = false;
+      toast('A walkdown is recorded under a person’s name — set it in Settings (the gear).', {
+        tone: 'error',
+      });
+      openActorSettings();
+      return;
+    }
+    try {
+      const res = await fetch(api('/api/walkdowns'), {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ actor, target: 'local', results }),
+      });
+      const out = await res.json();
+      if (!res.ok) {
+        S.session.posting = false;
+        return toast(`Not recorded: ${esc(out.error ?? 'request failed')}`, { tone: 'error' });
+      }
+      S.session = null;
+      saveSession();
+      S.view = 'list';
+      S.selected = null;
+      await load();
+      toast(
+        `Recorded ${results.length} verdict${results.length === 1 ? '' : 's'} as <b>${esc(out.run_id)}</b>`,
+        { tone: 'success' },
+      );
+    } catch {
+      S.session.posting = false;
+      toast('walkdown server unreachable — nothing recorded.', { tone: 'error' });
+    }
+  }
+
+  function open(ruleId) {
+    S.selected = S.data.rows.find((r) => r.rule === ruleId) ?? S.selected;
+    S.view = 'detail';
+    /*
+     * A walkdown is a sequence of deep links, so opening a rule goes to the
+     * screen it is about — but only framed, where walkdown owns the surface
+     * and moving it costs nothing. Docked, every move is a real page load that
+     * takes the panel down with it, so browsing the rule list would mean
+     * reloading the application on every click; there the trip stays something
+     * you ask for, on the rule itself.
+     *
+     * Either way, never when the rule is about the screen you are already on:
+     * re-navigating throws away the page's state for nothing.
+     */
+    const want = ruleScreen(S.selected);
+    if (want && want.id !== currentScreen()?.id && goTo(want)) return;
+    render();
+  }
+
+  /** The prototype for this screen, laid over the running app. */
+  /**
+   * The ghost's geometry, said outright in pixels — the stage and the framed
+   * copy inside it. Kept apart from building the ghost so a window resize
+   * re-measures rather than reloading the page in there.
+   */
+  function sizeGhost() {
+    const frame = ghostFrame();
+    if (!S.ghost || !frame) return;
+    const { availW, availH } = frameSpace();
+    // At a preset the ghost lays out at that width too, scaling down whole
+    // when the stage is narrower - the same rule the app frame follows.
+    const gs = S.ghostWidth ? Math.min(1, availW / S.ghostWidth) : 1;
+    S.ghost.style.width = `${availW}px`;
+    S.ghost.style.height = `${availH}px`;
+    S.ghost.style.alignItems = S.ghostWidth ? 'flex-start' : 'center';
+    frame.style.width = `${S.ghostWidth || availW}px`;
+    frame.style.height = `${gs < 1 ? availH / gs : availH}px`;
+    frame.style.transform = gs < 1 ? `scale(${gs})` : '';
+    frame.style.transformOrigin = 'top center';
+    frame.style.maxWidth = 'none';
+    frame.style.maxHeight = 'none';
+    frame.style.flex = 'none';
+  }
+
+  function setGhost(on) {
+    if (!on) {
+      S.ghost?.remove();
+      S.ghost = null;
+      S.ghostSrc = null;
+      S.ghostReady = false; // whatever was in there is gone with it
+      S.ghostOverride = null; // the detour ends with the overlay
+      S.protoShare = null; // and the dial goes back to following the page
+      render();
+      return;
+    }
+    const screen = screenById(S.ghostOverride) ?? currentScreen();
+    const src = ghostSource(screen);
+    if (!src) return;
+    const url = src.url ?? api(src.path);
+    /*
+     * The copy is kept between looks. Swapping surfaces used to tear the ghost
+     * down and load it again on the way back, which is a fresh page load - and
+     * a visible flash - every time you compare. What actually invalidates it is
+     * the source changing: another screen, another surface, a viewport preset
+     * that lays the page out differently. Those all arrive here as a different
+     * url or through a deliberate teardown; a plain toggle does not, so a
+     * plain toggle is now instant. The page in there is as old as the last
+     * load, which is the trade: a reload of walkdown refreshes it.
+     */
+    if (S.ghost && S.ghostSrc === url) {
+      sizeGhost();
+      S.ghost.style.opacity = S.ghostOpacity;
+      paintGhostReach();
+      render();
+      return;
+    }
     S.ghost?.remove();
-    S.ghost = null;
-    S.ghostSrc = null;
-    S.ghostReady = false; // whatever was in there is gone with it
-    S.ghostOverride = null; // the detour ends with the overlay
-    S.protoShare = null; // and the dial goes back to following the page
-    render();
-    return;
-  }
-  const screen = screenById(S.ghostOverride) ?? currentScreen();
-  const src = ghostSource(screen);
-  if (!src) return;
-  const url = src.url ?? api(src.path);
-  /*
-   * The copy is kept between looks. Swapping surfaces used to tear the ghost
-   * down and load it again on the way back, which is a fresh page load - and
-   * a visible flash - every time you compare. What actually invalidates it is
-   * the source changing: another screen, another surface, a viewport preset
-   * that lays the page out differently. Those all arrive here as a different
-   * url or through a deliberate teardown; a plain toggle does not, so a
-   * plain toggle is now instant. The page in there is as old as the last
-   * load, which is the trade: a reload of walkdown refreshes it.
-   */
-  if (S.ghost && S.ghostSrc === url) {
-    sizeGhost();
-    S.ghost.style.opacity = S.ghostOpacity;
-    paintGhostReach();
-    render();
-    return;
-  }
-  S.ghost?.remove();
-  S.ghostReady = false;
-  S.ghostSrc = url;
-  // The stage owns the opacity so the backdrop fades with the prototype: at
-  // full strength the app is properly covered, not blended into. The
-  // checkerboard says "nothing is here" where the prototype does not reach,
-  // so an uncovered strip never reads as design. Inline styles: this element
-  // is in the host document, where our stylesheet has no reach.
-  S.ghost = document.createElement('div');
-  /*
-   * The box is stated in pixels, not left to the four insets to work out.
-   * This element is promoted into the top layer, where the UA's own popover
-   * rules give it fit-content sizing, and it lives in a page we know nothing
-   * about — either can leave an inset-sized box collapsed, and a collapsed
-   * ghost shows a corner of the design over a full-size app, which reads as
-   * the design being cut off. The app frame has always said its size
-   * outright for the same reason; so does this now.
-   */
-  const box = frameSpace();
-  /*
-   * No z-index of its own, on purpose. It used to carry one from when it was
-   * an overlay in the host document, and inside the shadow root that number
-   * stopped meaning "above the app" - the app frame is in the page, and the
-   * shell that holds this is in the top layer above all of it - and started
-   * meaning "above walkdown's own chrome". The bar's popovers (the screen
-   * picker, the desk tuner) hang off an unpositioned wrapper and paint at
-   * z-index auto and a ghost at 2147482000 buried them: the picker opened
-   * under the design and reads as a button that does nothing (n-0107).
-   * Left to auto, painting follows DOM order inside the root - ghost first,
-   * chrome after - which is the ordering the insert below is written for.
-   */
-  S.ghost.style.cssText = `position:fixed; top:${HEAD}px; left:${GAP}px; bottom:${GAP}px;
+    S.ghostReady = false;
+    S.ghostSrc = url;
+    // The stage owns the opacity so the backdrop fades with the prototype: at
+    // full strength the app is properly covered, not blended into. The
+    // checkerboard says "nothing is here" where the prototype does not reach,
+    // so an uncovered strip never reads as design. Inline styles: this element
+    // is in the host document, where our stylesheet has no reach.
+    S.ghost = document.createElement('div');
+    /*
+     * The box is stated in pixels, not left to the four insets to work out.
+     * This element is promoted into the top layer, where the UA's own popover
+     * rules give it fit-content sizing, and it lives in a page we know nothing
+     * about — either can leave an inset-sized box collapsed, and a collapsed
+     * ghost shows a corner of the design over a full-size app, which reads as
+     * the design being cut off. The app frame has always said its size
+     * outright for the same reason; so does this now.
+     */
+    const box = frameSpace();
+    /*
+     * No z-index of its own, on purpose. It used to carry one from when it was
+     * an overlay in the host document, and inside the shadow root that number
+     * stopped meaning "above the app" - the app frame is in the page, and the
+     * shell that holds this is in the top layer above all of it - and started
+     * meaning "above walkdown's own chrome". The bar's popovers (the screen
+     * picker, the desk tuner) hang off an unpositioned wrapper and paint at
+     * z-index auto and a ghost at 2147482000 buried them: the picker opened
+     * under the design and reads as a button that does nothing (n-0107).
+     * Left to auto, painting follows DOM order inside the root - ghost first,
+     * chrome after - which is the ordering the insert below is written for.
+     */
+    S.ghost.style.cssText = `position:fixed; top:${HEAD}px; left:${GAP}px; bottom:${GAP}px;
     right:${W + GAP * 2}px; border-radius:10px; overflow:hidden;
     width:${box.availW}px; height:${box.availH}px; max-width:none; max-height:none;
     min-width:0; min-height:0; margin:0; border:0; padding:0;
@@ -5144,233 +5171,234 @@ function setGhost(on) {
       linear-gradient(-45deg, transparent 75%, #d5dae1 75%);
     background-size:22px 22px; background-position:0 0, 0 11px, 11px -11px, -11px 0;
     opacity:${S.ghostOpacity};`;
-  // An iframe is a replaced element: insets alone leave it at its intrinsic
-  // 300x150, so the size is explicit.
-  const frame = document.createElement('iframe');
-  frame.style.cssText = `border:0; background:#fff;
+    // An iframe is a replaced element: insets alone leave it at its intrinsic
+    // 300x150, so the size is explicit.
+    const frame = document.createElement('iframe');
+    frame.style.cssText = `border:0; background:#fff;
     box-shadow:0 0 0 1px rgba(20,25,40,.14), 0 10px 40px rgba(20,25,40,.18);`;
-  frame.src = url;
-  /*
-   * A surface carrying walkdown announces itself while it parses, so by the
-   * time the frame has loaded the answer is in. Nobody there means the ghost
-   * cannot be pinned, and pin mode must not stay armed over it — a pin would
-   * land on the page hidden underneath the one being looked at.
-   */
-  frame.addEventListener('load', () => {
-    if (S.ghostReady) return;
-    if (S.ghostOpacity === 1) PIN.set(false);
-    renderBar();
-  });
-  S.ghost.appendChild(frame);
-  // Built while the panel is put away, it must be built full-bleed: the box
-  // stated at creation is the docked one.
-  placeGhost(S.docked);
-  // A proposal is an agent's sketch, not design's work. It says so on its
-  // face, so nobody walks a screen down against a drawing we made up.
-  if (src.proposed) {
-    const flag = document.createElement('div');
-    flag.textContent = '\u26a0 Proposed sketch \u2014 not from design';
-    flag.style.cssText = `position:absolute; top:0; left:0; right:0; z-index:1; text-align:center;
+    frame.src = url;
+    /*
+     * A surface carrying walkdown announces itself while it parses, so by the
+     * time the frame has loaded the answer is in. Nobody there means the ghost
+     * cannot be pinned, and pin mode must not stay armed over it — a pin would
+     * land on the page hidden underneath the one being looked at.
+     */
+    frame.addEventListener('load', () => {
+      if (S.ghostReady) return;
+      if (S.ghostOpacity === 1) PIN.set(false);
+      renderBar();
+    });
+    S.ghost.appendChild(frame);
+    // Built while the panel is put away, it must be built full-bleed: the box
+    // stated at creation is the docked one.
+    placeGhost(S.docked);
+    // A proposal is an agent's sketch, not design's work. It says so on its
+    // face, so nobody walks a screen down against a drawing we made up.
+    if (src.proposed) {
+      const flag = document.createElement('div');
+      flag.textContent = '\u26a0 Proposed sketch \u2014 not from design';
+      flag.style.cssText = `position:absolute; top:0; left:0; right:0; z-index:1; text-align:center;
       background:#d97706; color:#fff; font:600 11px/1 -apple-system, sans-serif;
       letter-spacing:.06em; padding:6px 8px;`;
-    S.ghost.appendChild(flag);
-  }
-  /*
-   * Into the panel's own shadow root, ahead of the chrome, rather than into
-   * the page beside it. The ghost still has to clear the app's modals, which
-   * live in the top layer - but the shell is already up there, so riding
-   * inside it gets the same height for free, and DOM order keeps the chrome
-   * above the design it is ghosting - which is now plain DOM order inside
-   * one shadow root, rather than an ordering in the browser's top layer.
-   * When it was the latter, promoting two elements in sequence left the
-   * panel's rule list unable to receive a wheel event at all until a reload
-   * (n-0086), and a fade slider dying mid-drag was the same failure (n-0068).
-   */
-  D.sr.insertBefore(S.ghost, D.host);
-  paintGhostReach();
-  render();
-}
-
-/*
- * ---- the ghosted surface, when it is the one you are looking at ---------
- *
- * A ghost at full strength is not an overlay any more, it is the view. So
- * when pin mode is on and the fade has landed there, the ghost stops being
- * click-through and the copy of walkdown inside it does the pinning — the
- * same framed conversation the old viewer had with its two panes, which is
- * why the embed already speaks it and nothing in there needed changing.
- */
-const ghostFrame = () => S.ghost?.querySelector('iframe') ?? null;
-
-function pinsForScreen(id) {
-  if (!id) return [];
-  return (S.data?.threads ?? [])
-    .filter((t) => t.anchor?.screen === id && !TERMINAL.includes(t.status))
-    .map((t) => ({
-      id: t.id,
-      kind: t.kind,
-      status: t.status,
-      element: t.anchor?.element,
-      offset: t.anchor?.offset,
-      position: t.anchor?.position,
-      surface: t.anchor?.surface,
-      viewport: t.anchor?.viewport,
-      // What it is about, for the tooltip: a pin should say where it belongs
-      // before you spend a click finding out.
-      rule: t.anchor?.rule ?? null,
-      screen: t.anchor?.screen ?? null,
-      body: t.body,
-      replies: t.replies ?? [],
-    }));
-}
-
-/** Whether the ghost currently takes the pointer instead of passing it through. */
-const ghostHasReach = () => Boolean(S.ghost) && S.ghostOpacity === 1 && S.ghostReady && PIN.isOn();
-
-function paintGhostReach() {
-  if (S.ghost) S.ghost.style.pointerEvents = ghostHasReach() ? 'auto' : 'none';
-}
-
-/*
- * What the copy inside the ghost needs in order to behave: which screen it
- * is showing, which surface it counts as, whether pinning is live, and the
- * pins already on that screen. Same message the viewer sent its panes.
- */
-function pushContext(frame, surface, pinMode) {
-  const sc = screenById(S.ghostOverride) ?? currentScreen();
-  frame?.contentWindow?.postMessage(
-    {
-      type: 'walkdown:context',
-      screen: sc?.id ?? null,
-      surface,
-      pinMode,
-      pins: pinsForScreen(sc?.id),
-    },
-    '*',
-  );
-}
-
-/*
- * Both surfaces are told, and only one of them is armed: whichever is in
- * front. Two live pin modes would mean a click landing twice, or landing on
- * the one you are not looking at.
- */
-function pushContexts() {
-  pushContext(ghostFrame(), ghostSurface(), ghostHasReach());
-  if (D.appFrame) pushContext(D.appFrame, pageSurface(), PIN.isOn() && !ghostHasReach());
-}
-
-/** Which surface a message came from, or null if it is not one of ours. */
-function surfaceOfSource(src) {
-  if (!src) return null;
-  if (src === ghostFrame()?.contentWindow) return ghostSurface();
-  if (D.appFrame && src === D.appFrame.contentWindow) return pageSurface();
-  return null;
-}
-
-/*
- * Is the keystroke going somewhere that wants letters? e.target is retargeted
- * to the shadow host for anything typed inside the panel, so a tagName test
- * on it sees a DIV and every "g" in a reply body used to flash the ghost.
- * composedPath()[0] is the element actually being typed into, on either side
- * of the boundary.
- */
-const typing = (e) => {
-  const el = e.composedPath?.()[0] ?? e.target;
-  return /^(INPUT|TEXTAREA|SELECT)$/.test(el?.tagName ?? '') || el?.isContentEditable === true;
-};
-
-/*
- * Three questions, asked once each and then not again: is there a server,
- * which blueprint is this site, and then the actual work. A script tag has
- * already answered the second, so it goes straight past the picker.
- */
-async function start() {
-  let payload;
-  try {
-    payload = await (await fetch(api('/api/blueprint'))).json();
-  } catch {
-    S.phase = 'connect';
-    return renderGate();
-  }
-  S.projects = payload.projects ?? [];
-  S.servedRoot = payload.root ?? null;
-  /*
-   * Ask the page first. A blueprint that claims this address is a fact about
-   * where you are; a remembered choice is a fact about what you picked last,
-   * somewhere else. Preferring memory is what made walkdown open its own
-   * rules on somebody else's app and then stay there.
-   *
-   * A page belongs to exactly one blueprint, which is the constraint that
-   * lets this be an answer rather than a guess - `walkdown claims` is what
-   * keeps it true.
-   */
-  if (!S.BP && S.projects.length > 1) {
-    try {
-      // Framed, the page under review is the one in the frame, not walkdown's
-      // own address — asking about ourselves would answer about nothing.
-      const asking = S.frameUrl;
-      const whose = asking
-        ? await (await fetch(api(`/api/whose?url=${encodeURIComponent(asking)}`))).json()
-        : null;
-      if (whose?.match?.id && S.projects.some((pr) => pr.id === whose.match.id))
-        S.BP = whose.match.id;
-    } catch {
-      /* the server is old or unreachable; memory and the picker remain */
+      S.ghost.appendChild(flag);
     }
-  }
-  if (!S.BP && S.projects.length > 1) {
-    const remembered = await store.get(CHOICE);
-    if (remembered && S.projects.some((pr) => pr.id === remembered)) S.BP = remembered;
-  }
-  if (!S.BP && S.projects.length > 1) {
-    S.phase = 'choose';
-    return renderGate();
-  }
-  S.phase = 'ready';
-  S.data = S.BP ? await (await fetch(api('/api/blueprint'))).json() : payload;
-  await loadSeen();
-  await restoreSession();
-  if (S.jumpOnLoad) {
-    S.jumpOnLoad = false;
     /*
-     * Only when the blueprint you have just chosen says nothing about the
-     * page you are on. If it does cover this page, you are already where the
-     * choice meant to put you, and moving would be the panel overruling you.
+     * Into the panel's own shadow root, ahead of the chrome, rather than into
+     * the page beside it. The ghost still has to clear the app's modals, which
+     * live in the top layer - but the shell is already up there, so riding
+     * inside it gets the same height for free, and DOM order keeps the chrome
+     * above the design it is ghosting - which is now plain DOM order inside
+     * one shadow root, rather than an ordering in the browser's top layer.
+     * When it was the latter, promoting two elements in sequence left the
+     * panel's rule list unable to receive a wheel event at all until a reload
+     * (n-0086), and a fade slider dying mid-drag was the same failure (n-0068).
      */
-    const first = (S.data.storyboard ?? []).find(
-      (sc) => screenUrl(sc, 'app') ?? screenUrl(sc, 'prototype'),
-    );
-    if (first && !currentScreen()) {
-      /*
-       * Three deliveries, two answers. Framed, walkdown owns the frame and
-       * can simply take you there. Docked BY THE EXTENSION it can go too:
-       * the content script matches every URL, so walkdown is waiting on the
-       * other side. Docked by a script tag it cannot - navigating unloads
-       * the very script drawing this panel, and you would arrive at the
-       * other site with no walkdown at all, which is what used to happen.
-       * Only that last case offers the trip instead of taking it.
-       */
-      if (goTo(first)) return;
-    }
+    D.sr.insertBefore(S.ghost, D.host);
+    paintGhostReach();
+    render();
   }
-  render();
-  /*
-   * And tell the surfaces, exactly as a reload does. The frame announces
-   * itself the moment it lands, which is well before this first fetch comes
-   * back - so every context pushed from that announcement carried no
-   * storyboard, no screen, and therefore no pins, and nothing pushed one
-   * again. The page under review sat there with its pins invisible until
-   * something unrelated happened to repaint them.
-   */
-  pushContexts();
-}
 
-/** The two screens that come before there is anything to review. */
-function renderGate() {
-  renderBar();
-  if (S.phase === 'connect') {
-    D.side.innerHTML = `
+  /*
+   * ---- the ghosted surface, when it is the one you are looking at ---------
+   *
+   * A ghost at full strength is not an overlay any more, it is the view. So
+   * when pin mode is on and the fade has landed there, the ghost stops being
+   * click-through and the copy of walkdown inside it does the pinning — the
+   * same framed conversation the old viewer had with its two panes, which is
+   * why the embed already speaks it and nothing in there needed changing.
+   */
+  const ghostFrame = () => S.ghost?.querySelector('iframe') ?? null;
+
+  function pinsForScreen(id) {
+    if (!id) return [];
+    return (S.data?.threads ?? [])
+      .filter((t) => t.anchor?.screen === id && !TERMINAL.includes(t.status))
+      .map((t) => ({
+        id: t.id,
+        kind: t.kind,
+        status: t.status,
+        element: t.anchor?.element,
+        offset: t.anchor?.offset,
+        position: t.anchor?.position,
+        surface: t.anchor?.surface,
+        viewport: t.anchor?.viewport,
+        // What it is about, for the tooltip: a pin should say where it belongs
+        // before you spend a click finding out.
+        rule: t.anchor?.rule ?? null,
+        screen: t.anchor?.screen ?? null,
+        body: t.body,
+        replies: t.replies ?? [],
+      }));
+  }
+
+  /** Whether the ghost currently takes the pointer instead of passing it through. */
+  const ghostHasReach = () => Boolean(S.ghost) && S.ghostOpacity === 1 && S.ghostReady && PIN.isOn();
+
+  function paintGhostReach() {
+    if (S.ghost) S.ghost.style.pointerEvents = ghostHasReach() ? 'auto' : 'none';
+  }
+
+  /*
+   * What the copy inside the ghost needs in order to behave: which screen it
+   * is showing, which surface it counts as, whether pinning is live, and the
+   * pins already on that screen. Same message the viewer sent its panes.
+   */
+  function pushContext(frame, surface, pinMode) {
+    const sc = screenById(S.ghostOverride) ?? currentScreen();
+    frame?.contentWindow?.postMessage(
+      {
+        type: 'walkdown:context',
+        screen: sc?.id ?? null,
+        surface,
+        pinMode,
+        pins: pinsForScreen(sc?.id),
+      },
+      '*',
+    );
+  }
+
+  /*
+   * Both surfaces are told, and only one of them is armed: whichever is in
+   * front. Two live pin modes would mean a click landing twice, or landing on
+   * the one you are not looking at.
+   */
+  function pushContexts() {
+    pushContext(ghostFrame(), ghostSurface(), ghostHasReach());
+    if (D.appFrame) pushContext(D.appFrame, pageSurface(), PIN.isOn() && !ghostHasReach());
+  }
+
+  /** Which surface a message came from, or null if it is not one of ours. */
+  function surfaceOfSource(src) {
+    if (!src) return null;
+    if (src === ghostFrame()?.contentWindow) return ghostSurface();
+    if (D.appFrame && src === D.appFrame.contentWindow) return pageSurface();
+    return null;
+  }
+
+  /*
+   * Is the keystroke going somewhere that wants letters? e.target is retargeted
+   * to the shadow host for anything typed inside the panel, so a tagName test
+   * on it sees a DIV and every "g" in a reply body used to flash the ghost.
+   * composedPath()[0] is the element actually being typed into, on either side
+   * of the boundary.
+   */
+  const typing = (e) => {
+    const el = e.composedPath?.()[0] ?? e.target;
+    return /^(INPUT|TEXTAREA|SELECT)$/.test(el?.tagName ?? '') || el?.isContentEditable === true;
+  };
+
+  /*
+   * Three questions, asked once each and then not again: is there a server,
+   * which blueprint is this site, and then the actual work. A script tag has
+   * already answered the second, so it goes straight past the picker.
+   */
+  async function start() {
+    let payload;
+    try {
+      payload = await (await fetch(api('/api/blueprint'))).json();
+    } catch {
+      S.phase = 'connect';
+      return renderGate();
+    }
+    S.projects = payload.projects ?? [];
+    S.servedRoot = payload.root ?? null;
+    /*
+     * Ask the page first. A blueprint that claims this address is a fact about
+     * where you are; a remembered choice is a fact about what you picked last,
+     * somewhere else. Preferring memory is what made walkdown open its own
+     * rules on somebody else's app and then stay there.
+     *
+     * A page belongs to exactly one blueprint, which is the constraint that
+     * lets this be an answer rather than a guess - `walkdown claims` is what
+     * keeps it true.
+     */
+    if (!S.BP && S.projects.length > 1) {
+      try {
+        // Framed, the page under review is the one in the frame, not walkdown's
+        // own address — asking about ourselves would answer about nothing.
+        const asking = S.frameUrl;
+        const whose = asking
+          ? await (await fetch(api(`/api/whose?url=${encodeURIComponent(asking)}`))).json()
+          : null;
+        if (whose?.match?.id && S.projects.some((pr) => pr.id === whose.match.id))
+          S.BP = whose.match.id;
+      } catch {
+        /* the server is old or unreachable; memory and the picker remain */
+      }
+    }
+    if (!S.BP && S.projects.length > 1) {
+      const remembered = await store.get(CHOICE);
+      if (remembered && S.projects.some((pr) => pr.id === remembered)) S.BP = remembered;
+    }
+    if (!S.BP && S.projects.length > 1) {
+      S.phase = 'choose';
+      return renderGate();
+    }
+    S.phase = 'ready';
+    S.data = S.BP ? await (await fetch(api('/api/blueprint'))).json() : payload;
+    await loadSeen();
+    await restoreSession();
+    if (S.jumpOnLoad) {
+      S.jumpOnLoad = false;
+      /*
+       * Only when the blueprint you have just chosen says nothing about the
+       * page you are on. If it does cover this page, you are already where the
+       * choice meant to put you, and moving would be the panel overruling you.
+       */
+      const first = (S.data.storyboard ?? []).find(
+        (sc) => screenUrl(sc, 'app') ?? screenUrl(sc, 'prototype'),
+      );
+      if (first && !currentScreen()) {
+        /*
+         * Three deliveries, two answers. Framed, walkdown owns the frame and
+         * can simply take you there. Docked BY THE EXTENSION it can go too:
+         * the content script matches every URL, so walkdown is waiting on the
+         * other side. Docked by a script tag it cannot - navigating unloads
+         * the very script drawing this panel, and you would arrive at the
+         * other site with no walkdown at all, which is what used to happen.
+         * Only that last case offers the trip instead of taking it.
+         */
+        if (goTo(first)) return;
+      }
+    }
+    render();
+    /*
+     * And tell the surfaces, exactly as a reload does. The frame announces
+     * itself the moment it lands, which is well before this first fetch comes
+     * back - so every context pushed from that announcement carried no
+     * storyboard, no screen, and therefore no pins, and nothing pushed one
+     * again. The page under review sat there with its pins invisible until
+     * something unrelated happened to repaint them.
+     */
+    pushContexts();
+  }
+
+  /** The two screens that come before there is anything to review. */
+  function renderGate() {
+    renderBar();
+    if (S.phase === 'connect') {
+      D$1(
+        b`
       <div class="flex flex-1 flex-col justify-center gap-3 p-5">
         <div class="flex flex-col gap-3" data-testid="start.message">
           <div class="text-[15px] font-semibold">No blueprints open</div>
@@ -5383,321 +5411,328 @@ function renderGate() {
         </div>
         <code class="rounded-box bg-base-200 px-3 py-2 text-[12px]">walkdown serve</code>
         <div class="flex items-center gap-2">
-          <input id="wdp-server" data-testid="start.server" class="input input-sm flex-1" value="${esc(S.SERVER)}"
+          <input id="wdp-server" data-testid="start.server" class="input input-sm flex-1" value="${S.SERVER}"
                  aria-label="walkdown server address">
           <button class="btn btn-sm btn-primary" id="wdp-retry" data-testid="start.connect">Connect</button>
         </div>
         <p class="text-[11.5px] opacity-40">Then every blueprint under that folder is listed here.</p>
-      </div>`;
-    wireBlueprints(D.side);
-    return;
-  }
-  D.side.innerHTML = `
+      </div>`,
+        D.side,
+      );
+      wireBlueprints(D.side);
+      return;
+    }
+    D$1(
+      b`
     <div class="p-4 pb-2">
       <div class="text-[15px] font-semibold">Which blueprint?</div>
       <p class="mt-1 text-[12.5px] leading-relaxed opacity-60">Remembered for
-        <b>${esc(location.origin)}</b>, and changeable later from the Blueprints tab.</p>
+        <b>${location.origin}</b>, and changeable later from the Blueprints tab.</p>
     </div>
-    <div class="flex-1 overflow-y-auto">${blueprintsPane()}</div>`;
-  wireBlueprints(D.side);
-}
-
-/*
- * Every listener the panel hangs on the document or the window.
- *
- * They used to sit where each one was relevant, at the top level of the
- * IIFE, which was safe because the once-per-page guard returned before them.
- * With the wrapper gone the guard cannot reach them, and a second injection
- * would have registered every one of these twice — so they are gathered here
- * and boot() calls this once, after the guard has had its say.
- */
-function wireGlobals() {
-  document.addEventListener(
-    'pointerdown',
-    (e) => {
-      if (S.screensOpen || S.deskOpen) dismissPopovers(e.composedPath());
-    },
-    true,
-  );
-  /*
-   * One Escape handler, doing the most local thing first: the screen picker,
-   * then the desk tuner, then pin mode. Three of them side by side would each
-   * fire on the same keystroke and close everything at once - and pin mode had
-   * no handler here at all, which is why Escape stopped leaving it (n-0077).
-   * Docked, the embed shared this document and owned that key; framed, the
-   * embed is inside the frame and only hears Escape when the frame has focus,
-   * so the panel has to answer for the keystrokes typed at its own chrome.
-   * (A dial being edited cancels itself first - it stops the event, see above.)
-   */
-  document.addEventListener('keydown', (e) => {
-    if (e.key !== 'Escape') return;
-    if (shotsOpen()) return closeShots();
-    if (S.screensOpen) return closeScreenPanel();
-    if (S.deskOpen) return closeDeskPanel();
-    if (PIN.isOn()) PIN.set(false);
-  });
-  addEventListener('resize', () => {
-    placeAppFrame(S.docked);
-    placeGhost(S.docked);
-    if (!S.docked) return;
-    // The ghost states its size in pixels, so it has to be told about a resize
-    // rather than being carried along by percentages - re-measured, not
-    // rebuilt, or every drag of the window edge reloads the page inside it.
-    sizeGhost();
-    if (S.hideAppOn) hideApp(true);
-    syncHeadlessCover();
-    syncZoomBadge();
-  });
-  /*
-   * Only the ghost gets to speak. This script runs inside somebody else's
-   * application, which may have iframes of its own, and a message is not
-   * evidence of who sent it — so anything that is not one of our own frames is
-   * not walkdown talking.
-   */
-  addEventListener('message', async (e) => {
-    const msg = e.data;
-    if (!msg || typeof msg !== 'object') return;
-    const surface = surfaceOfSource(e.source);
-    if (!surface) return;
-    const fromGhost = e.source === ghostFrame()?.contentWindow;
-
-    if (msg.type === 'walkdown:ready') {
-      if (fromGhost) {
-        S.ghostReady = true;
-        paintGhostReach();
-        pushContexts();
-        return renderBar();
-      }
-      /*
-       * The application saying where it is. Framed we cannot read that across
-       * origins, and this is also how an SPA reports moving — so a hash route
-       * or a pushState inside the frame re-answers which screen this is.
-       */
-      const moved = msg.href && msg.href !== S.frameUrl;
-      S.frameUrl = msg.href ?? S.frameUrl;
-      pushContexts();
-      return moved ? hereChanged() : render();
-    }
-    // The ghosted surface can leave pin mode too (Escape). Pin mode has one
-    // owner, so it is told rather than each side keeping its own answer.
-    if (msg.type === 'walkdown:pin-mode' && msg.on === false) return PIN.set(false);
-
-    /*
-     * A pointer went down on the page under review. That event is the frame's
-     * and never reaches this document, so the embed relays it; from here it is
-     * an outside click like any other, and goes through the same dismissal.
-     * Pin mode is deliberately untouched: it is a mode you work in, and every
-     * click while pinning happens on the page.
-     */
-    if (msg.type === 'walkdown:page-click') return dismissPopovers();
-
-    if (msg.type === 'walkdown:open-thread') {
-      S.openThread = msg.id;
-      markSeen(msg.id);
-      S.view = 'thread';
-      const t = (S.data?.threads ?? []).find((x) => x.id === msg.id);
-      const row = t?.anchor?.rule ? S.data.rows.find((r) => r.rule === t.anchor.rule) : null;
-      // The rule behind it, when it has one, so going back from the thread
-      // lands on it. A pin with no rule still opens - the thread screen is
-      // about the thread, not about what it happens to be attached to.
-      S.selected = row ?? null;
-      return render();
-    }
-
-    if (msg.type === 'walkdown:new-pin') {
-      const sc = screenById(S.ghostOverride) ?? currentScreen();
-      /*
-       * A pin is a thread, so it is attributed work, so it needs a name that
-       * has been on screen. The embed sends none - it has no identity of its
-       * own - and this spread let the key fall out of the JSON, after which
-       * lib/serve.js filled it from the machine's username. Third path
-       * tonight with the same shape after postRuleNote and postReply, and the
-       * one that mattered most: the panel drew the resulting thread under a
-       * name an inch above its own composer offering "set your name...".
-       *
-       * The panel is the thing that knows who you are, so the panel names the
-       * pin. Refusing here rather than in the embed keeps the embed free of
-       * an identity it has no way to ask for.
-       */
-      const pinAuthor = (msg.author ?? '').trim() || whoAmI();
-      if (!pinAuthor || pinAuthor === 'agent') {
-        toast(
-          'A pin is recorded under a person\u2019s name \u2014 set it in Settings (the gear).',
-          { tone: 'error' },
-        );
-        openActorSettings();
-        return;
-      }
-      await fetch(api('/api/threads'), {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          kind: msg.kind,
-          body: msg.body,
-          author: pinAuthor,
-          anchor: {
-            ...(msg.element && { element: msg.element }),
-            // The spot within the element, and the spot on the surface: both
-            // travel, so an anchored pin still draws where it was put.
-            ...(msg.offset && { offset: msg.offset }),
-            ...(msg.position && { position: msg.position }),
-            ...(msg.viewport && { viewport: msg.viewport }),
-            surface,
-            ...(sc && { screen: sc.id }),
-            // A pin dropped while a rule is open is feedback on that rule -
-            // the linkage the fail gate and the rule's thread list live on.
-            ...(S.view !== 'list' && S.selected && { rule: S.selected.rule }),
-          },
-        }),
-      }).catch(() => {});
-      await load();
-      pushContexts();
-    }
-  });
-  // Hold G to peek at the prototype at full strength.
-  addEventListener('keydown', (e) => {
-    if (e.key.toLowerCase() === 'g' && S.ghost && !e.metaKey && !e.ctrlKey && !typing(e))
-      S.ghost.style.opacity = 1;
-  });
-  addEventListener('keyup', (e) => {
-    if (e.key.toLowerCase() === 'g' && S.ghost) S.ghost.style.opacity = S.ghostOpacity;
-  });
-}
-
-function boot() {
-  /*
-   * Once per page, across BOTH JavaScript worlds. A page can carry walkdown by
-   * script tag while the extension injects it too, and those run in separate
-   * globals — so a window flag cannot see the other copy and you get two of
-   * everything. The DOM is the one thing the two worlds share. The script tag
-   * wins when both are present: it runs at parse time, and an app that
-   * declares its own blueprint should keep it.
-   */
-  if (document.documentElement.dataset.walkdownPanel) return;
-  document.documentElement.dataset.walkdownPanel = '1';
-  window.__walkdownPanel = true;
-
-  /*
-   * The panel reviews a page by framing it, and a page cannot frame itself - so
-   * there is always a frame, and whoever started us said which. The extension's
-   * bootstrap and walkdown's own review page both refuse to load us without one.
-   */
-  if (!cfg.frame?.url) {
-    console.warn('[walkdown] no page to review — the panel needs a frame url');
-    return;
+    <div class="flex-1 overflow-y-auto">${blueprintsPane()}</div>`,
+      D.side,
+    );
+    wireBlueprints(D.side);
   }
 
-  wireGlobals();
   /*
-   * Boot, in the one order that works: the chrome exists, then the stylesheet
-   * is asked for (it lands in the shadow root whenever it arrives), then the
-   * frame, then the panel is put out.
+   * Every listener the panel hangs on the document or the window.
    *
-   * This sequence is the reason nothing above it may READ D at module level.
-   * Writing D from a builder is fine and is the point of the holder; reading
-   * it while the file is still evaluating is not, because after the split an
-   * import graph decides who evaluates first and no shard should have to know
-   * the answer. (One statement did read it — the frame's load listener, which
-   * asked `if (D.appFrame)` at module level and would have quietly registered
-   * nothing once the frame stopped existing that early. It moved into
-   * buildAppFrame, which is where it belongs.)
+   * They used to sit where each one was relevant, at the top level of the
+   * IIFE, which was safe because the once-per-page guard returned before them.
+   * With the wrapper gone the guard cannot reach them, and a second injection
+   * would have registered every one of these twice — so they are gathered here
+   * and boot() calls this once, after the guard has had its say.
    */
-  buildChrome();
-  loadStylesheet();
-  buildPutAwayControls();
-  buildAppFrame();
-  setDocked(true);
-  // Pin mode has one owner — the embed. The bar mirrors it rather than keeping
-  // a second copy that Escape would have to remember to update.
-  PIN.watch(() => {
-    paintGhostReach();
-    pushContexts();
-    if (S.phase === 'ready') renderBar();
-  });
+  function wireGlobals() {
+    document.addEventListener(
+      'pointerdown',
+      (e) => {
+        if (S.screensOpen || S.deskOpen) dismissPopovers(e.composedPath());
+      },
+      true,
+    );
+    /*
+     * One Escape handler, doing the most local thing first: the screen picker,
+     * then the desk tuner, then pin mode. Three of them side by side would each
+     * fire on the same keystroke and close everything at once - and pin mode had
+     * no handler here at all, which is why Escape stopped leaving it (n-0077).
+     * Docked, the embed shared this document and owned that key; framed, the
+     * embed is inside the frame and only hears Escape when the frame has focus,
+     * so the panel has to answer for the keystrokes typed at its own chrome.
+     * (A dial being edited cancels itself first - it stops the event, see above.)
+     */
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      if (shotsOpen()) return closeShots();
+      if (S.screensOpen) return closeScreenPanel();
+      if (S.deskOpen) return closeDeskPanel();
+      if (PIN.isOn()) PIN.set(false);
+    });
+    addEventListener('resize', () => {
+      placeAppFrame(S.docked);
+      placeGhost(S.docked);
+      if (!S.docked) return;
+      // The ghost states its size in pixels, so it has to be told about a resize
+      // rather than being carried along by percentages - re-measured, not
+      // rebuilt, or every drag of the window edge reloads the page inside it.
+      sizeGhost();
+      if (S.hideAppOn) hideApp(true);
+      syncHeadlessCover();
+      syncZoomBadge();
+    });
+    /*
+     * Only the ghost gets to speak. This script runs inside somebody else's
+     * application, which may have iframes of its own, and a message is not
+     * evidence of who sent it — so anything that is not one of our own frames is
+     * not walkdown talking.
+     */
+    addEventListener('message', async (e) => {
+      const msg = e.data;
+      if (!msg || typeof msg !== 'object') return;
+      const surface = surfaceOfSource(e.source);
+      if (!surface) return;
+      const fromGhost = e.source === ghostFrame()?.contentWindow;
 
-  store.get(IDENTITY_KEY).then(async (v) => {
-    const saved =
-      typeof v === 'string'
-        ? (() => {
-            try {
-              return JSON.parse(v);
-            } catch {
-              return null;
-            }
-          })()
-        : v;
-    if (saved && typeof saved === 'object') {
+      if (msg.type === 'walkdown:ready') {
+        if (fromGhost) {
+          S.ghostReady = true;
+          paintGhostReach();
+          pushContexts();
+          return renderBar();
+        }
+        /*
+         * The application saying where it is. Framed we cannot read that across
+         * origins, and this is also how an SPA reports moving — so a hash route
+         * or a pushState inside the frame re-answers which screen this is.
+         */
+        const moved = msg.href && msg.href !== S.frameUrl;
+        S.frameUrl = msg.href ?? S.frameUrl;
+        pushContexts();
+        return moved ? hereChanged() : render();
+      }
+      // The ghosted surface can leave pin mode too (Escape). Pin mode has one
+      // owner, so it is told rather than each side keeping its own answer.
+      if (msg.type === 'walkdown:pin-mode' && msg.on === false) return PIN.set(false);
+
       /*
-       * An emptied field is an answer, and it has to survive the reload.
-       *
-       * These two lines used to require a NON-EMPTY string, so the empty pair
-       * the panel had just written was read back and thrown away: whoAmI fell
-       * through to git, and somebody who had deliberately removed their name
-       * got it silently reinstated by the next refresh - along with the
-       * ability to attribute work under it, which the emptied state exists to
-       * refuse. The comment on this feature already said "clearing a box is
-       * how you undo"; the code only honoured that until the tab closed.
-       *
-       * The distinction the null-coalescing in whoAmI relies on is between
-       * ABSENT (no override, fall through to what the server derived) and
-       * EMPTY (an override that says nobody), so an empty string has to be
-       * restored as an empty string rather than skipped.
+       * A pointer went down on the page under review. That event is the frame's
+       * and never reaches this document, so the embed relays it; from here it is
+       * an outside click like any other, and goes through the same dismissal.
+       * Pin mode is deliberately untouched: it is a mode you work in, and every
+       * click while pinning happens on the page.
        */
-      if (typeof saved.username === 'string') identityOverride.username = saved.username.trim();
-      if (typeof saved.name === 'string') identityOverride.name = saved.name.trim();
-      // Same distinction one field over: an empty array is "none of these",
-      // and only a missing key means nothing was ever said.
-      if (Array.isArray(saved.roles))
-        identityOverride.roles = saved.roles.map((r) => String(r).trim()).filter(Boolean);
+      if (msg.type === 'walkdown:page-click') return dismissPopovers();
+
+      if (msg.type === 'walkdown:open-thread') {
+        S.openThread = msg.id;
+        markSeen(msg.id);
+        S.view = 'thread';
+        const t = (S.data?.threads ?? []).find((x) => x.id === msg.id);
+        const row = t?.anchor?.rule ? S.data.rows.find((r) => r.rule === t.anchor.rule) : null;
+        // The rule behind it, when it has one, so going back from the thread
+        // lands on it. A pin with no rule still opens - the thread screen is
+        // about the thread, not about what it happens to be attached to.
+        S.selected = row ?? null;
+        return render();
+      }
+
+      if (msg.type === 'walkdown:new-pin') {
+        const sc = screenById(S.ghostOverride) ?? currentScreen();
+        /*
+         * A pin is a thread, so it is attributed work, so it needs a name that
+         * has been on screen. The embed sends none - it has no identity of its
+         * own - and this spread let the key fall out of the JSON, after which
+         * lib/serve.js filled it from the machine's username. Third path
+         * tonight with the same shape after postRuleNote and postReply, and the
+         * one that mattered most: the panel drew the resulting thread under a
+         * name an inch above its own composer offering "set your name...".
+         *
+         * The panel is the thing that knows who you are, so the panel names the
+         * pin. Refusing here rather than in the embed keeps the embed free of
+         * an identity it has no way to ask for.
+         */
+        const pinAuthor = (msg.author ?? '').trim() || whoAmI();
+        if (!pinAuthor || pinAuthor === 'agent') {
+          toast(
+            'A pin is recorded under a person\u2019s name \u2014 set it in Settings (the gear).',
+            { tone: 'error' },
+          );
+          openActorSettings();
+          return;
+        }
+        await fetch(api('/api/threads'), {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            kind: msg.kind,
+            body: msg.body,
+            author: pinAuthor,
+            anchor: {
+              ...(msg.element && { element: msg.element }),
+              // The spot within the element, and the spot on the surface: both
+              // travel, so an anchored pin still draws where it was put.
+              ...(msg.offset && { offset: msg.offset }),
+              ...(msg.position && { position: msg.position }),
+              ...(msg.viewport && { viewport: msg.viewport }),
+              surface,
+              ...(sc && { screen: sc.id }),
+              // A pin dropped while a rule is open is feedback on that rule -
+              // the linkage the fail gate and the rule's thread list live on.
+              ...(S.view !== 'list' && S.selected && { rule: S.selected.rule }),
+            },
+          }),
+        }).catch(() => {});
+        await load();
+        pushContexts();
+      }
+    });
+    // Hold G to peek at the prototype at full strength.
+    addEventListener('keydown', (e) => {
+      if (e.key.toLowerCase() === 'g' && S.ghost && !e.metaKey && !e.ctrlKey && !typing(e))
+        S.ghost.style.opacity = 1;
+    });
+    addEventListener('keyup', (e) => {
+      if (e.key.toLowerCase() === 'g' && S.ghost) S.ghost.style.opacity = S.ghostOpacity;
+    });
+  }
+
+  function boot() {
+    /*
+     * Once per page, across BOTH JavaScript worlds. A page can carry walkdown by
+     * script tag while the extension injects it too, and those run in separate
+     * globals — so a window flag cannot see the other copy and you get two of
+     * everything. The DOM is the one thing the two worlds share. The script tag
+     * wins when both are present: it runs at parse time, and an app that
+     * declares its own blueprint should keep it.
+     */
+    if (document.documentElement.dataset.walkdownPanel) return;
+    document.documentElement.dataset.walkdownPanel = '1';
+    window.__walkdownPanel = true;
+
+    /*
+     * The panel reviews a page by framing it, and a page cannot frame itself - so
+     * there is always a frame, and whoever started us said which. The extension's
+     * bootstrap and walkdown's own review page both refuse to load us without one.
+     */
+    if (!cfg.frame?.url) {
+      console.warn('[walkdown] no page to review — the panel needs a frame url');
       return;
     }
+
+    wireGlobals();
     /*
-     * The single field this replaced becomes the FULL NAME, not the username.
-     * It was seeded from `git config user.name` and in practice held a
-     * person's name, so that is the box it belongs in; the username goes back
-     * to being derived. Whatever was already recorded under the old value
-     * stays recorded under it - the ledger is history, and history does not
-     * get edited to match a later opinion about field names.
+     * Boot, in the one order that works: the chrome exists, then the stylesheet
+     * is asked for (it lands in the shadow root whenever it arrives), then the
+     * frame, then the panel is put out.
+     *
+     * This sequence is the reason nothing above it may READ D at module level.
+     * Writing D from a builder is fine and is the point of the holder; reading
+     * it while the file is still evaluating is not, because after the split an
+     * import graph decides who evaluates first and no shard should have to know
+     * the answer. (One statement did read it — the frame's load listener, which
+     * asked `if (D.appFrame)` at module level and would have quietly registered
+     * nothing once the frame stopped existing that early. It moved into
+     * buildAppFrame, which is where it belongs.)
      */
-    const legacy = await store.get(ACTOR_KEY).catch(() => null);
-    if (typeof legacy === 'string' && legacy.trim()) {
-      identityOverride.name = legacy.trim();
-      saveIdentity();
-    }
-  });
-  store.get(DESK_KEY).then((v) => {
-    try {
-      const saved = typeof v === 'string' ? JSON.parse(v) : v;
-      if (!saved || typeof saved !== 'object') return;
-      S.desk = { ...DESK_DEFAULTS, ...saved };
-      if (S.docked) paintDesk(true);
-    } catch {
-      /* a malformed save loses to the defaults */
-    }
-  });
-  store
-    .get(CHOICE + ':server')
-    .then((at) => {
-      if (at) S.SERVER = at;
-    })
-    .finally(start);
-}
+    buildChrome();
+    loadStylesheet();
+    buildPutAwayControls();
+    buildAppFrame();
+    setDocked(true);
+    // Pin mode has one owner — the embed. The bar mirrors it rather than keeping
+    // a second copy that Escape would have to remember to update.
+    PIN.watch(() => {
+      paintGhostReach();
+      pushContexts();
+      if (S.phase === 'ready') renderBar();
+    });
 
-boot();
+    store.get(IDENTITY_KEY).then(async (v) => {
+      const saved =
+        typeof v === 'string'
+          ? (() => {
+              try {
+                return JSON.parse(v);
+              } catch {
+                return null;
+              }
+            })()
+          : v;
+      if (saved && typeof saved === 'object') {
+        /*
+         * An emptied field is an answer, and it has to survive the reload.
+         *
+         * These two lines used to require a NON-EMPTY string, so the empty pair
+         * the panel had just written was read back and thrown away: whoAmI fell
+         * through to git, and somebody who had deliberately removed their name
+         * got it silently reinstated by the next refresh - along with the
+         * ability to attribute work under it, which the emptied state exists to
+         * refuse. The comment on this feature already said "clearing a box is
+         * how you undo"; the code only honoured that until the tab closed.
+         *
+         * The distinction the null-coalescing in whoAmI relies on is between
+         * ABSENT (no override, fall through to what the server derived) and
+         * EMPTY (an override that says nobody), so an empty string has to be
+         * restored as an empty string rather than skipped.
+         */
+        if (typeof saved.username === 'string') identityOverride.username = saved.username.trim();
+        if (typeof saved.name === 'string') identityOverride.name = saved.name.trim();
+        // Same distinction one field over: an empty array is "none of these",
+        // and only a missing key means nothing was ever said.
+        if (Array.isArray(saved.roles))
+          identityOverride.roles = saved.roles.map((r) => String(r).trim()).filter(Boolean);
+        return;
+      }
+      /*
+       * The single field this replaced becomes the FULL NAME, not the username.
+       * It was seeded from `git config user.name` and in practice held a
+       * person's name, so that is the box it belongs in; the username goes back
+       * to being derived. Whatever was already recorded under the old value
+       * stays recorded under it - the ledger is history, and history does not
+       * get edited to match a later opinion about field names.
+       */
+      const legacy = await store.get(ACTOR_KEY).catch(() => null);
+      if (typeof legacy === 'string' && legacy.trim()) {
+        identityOverride.name = legacy.trim();
+        saveIdentity();
+      }
+    });
+    store.get(DESK_KEY).then((v) => {
+      try {
+        const saved = typeof v === 'string' ? JSON.parse(v) : v;
+        if (!saved || typeof saved !== 'object') return;
+        S.desk = { ...DESK_DEFAULTS, ...saved };
+        if (S.docked) paintDesk(true);
+      } catch {
+        /* a malformed save loses to the defaults */
+      }
+    });
+    store
+      .get(CHOICE + ':server')
+      .then((at) => {
+        if (at) S.SERVER = at;
+      })
+      .finally(start);
+  }
 
-/*
- * The panel's entry point, and deliberately nothing else.
- *
- * The panes import the behaviour they trigger — render, open, goTo, start —
- * from app.js, and app.js imports the panes back. That cycle is inherent to a
- * user interface whose controls cause the thing that drew them to be redrawn,
- * and it is safe here for one reason: nothing crosses the cycle at module
- * evaluation time. Every import is called from a handler or a render, long
- * after both bodies have run. It is the same invariant Phase 2b wrote down
- * for D, applied to functions instead of elements.
- *
- * What the cycle must NOT include is the entry, because the entry is where
- * evaluation order stops being something Rollup can reason about. So the
- * entry holds one import and no code of its own; app.js calls boot() at the
- * foot of its own body, where it always did.
- */
+  boot();
+
+  /*
+   * The panel's entry point, and deliberately nothing else.
+   *
+   * The panes import the behaviour they trigger — render, open, goTo, start —
+   * from app.js, and app.js imports the panes back. That cycle is inherent to a
+   * user interface whose controls cause the thing that drew them to be redrawn,
+   * and it is safe here for one reason: nothing crosses the cycle at module
+   * evaluation time. Every import is called from a handler or a render, long
+   * after both bodies have run. It is the same invariant Phase 2b wrote down
+   * for D, applied to functions instead of elements.
+   *
+   * What the cycle must NOT include is the entry, because the entry is where
+   * evaluation order stops being something Rollup can reason about. So the
+   * entry holds one import and no code of its own; app.js calls boot() at the
+   * foot of its own body, where it always did.
+   */
+
+})();

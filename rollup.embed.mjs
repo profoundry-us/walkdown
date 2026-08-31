@@ -9,11 +9,15 @@
  * The output keeps the __ANCHOR_ATTR__ placeholder verbatim: `walkdown
  * serve` substitutes it per blueprint on the way out, and the extension's
  * bootstrap answers it at runtime instead.
+ *
+ * format 'iife' for the same page-global reason as the panel (see
+ * rollup.config.mjs): the embed is injected into applications it does not
+ * own, and a classic script's top-level bindings are shared with theirs.
  */
 export default {
   input: 'src/embed/index.js',
   treeshake: false,
-  output: { file: 'lib/viewer/embed.js', format: 'es' },
+  output: { file: 'lib/viewer/embed.js', format: 'iife' },
   onwarn(warning, warn) {
     warn(warning);
     throw new Error(`rollup: ${warning.code}`);

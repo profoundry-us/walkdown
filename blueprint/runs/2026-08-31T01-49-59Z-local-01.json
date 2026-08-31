@@ -1,0 +1,338 @@
+{
+  "run_id": "2026-08-31T01-49-59Z-local-01",
+  "created": "2026-08-31T01:49:59Z",
+  "actor": "topherfangio",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "d545db7-dirty",
+  "spec_hash": "sha256:881a04ca14a1",
+  "results": [
+    {
+      "rule": "embed.pin.anchored-target",
+      "status": "fail",
+      "statement_hash": "sha256:6feaf28d3505",
+      "duration_ms": 5289,
+      "checks": [
+        "checks/embed.spec.js:122"
+      ],
+      "evidence": [
+        "test-results/embed-a-pin-lands-on-the-a-805bd--pointer-and-keeps-the-spot/test-failed-1.png",
+        "test-results/embed-a-pin-lands-on-the-a-805bd--pointer-and-keeps-the-spot/error-context.md"
+      ]
+    },
+    {
+      "rule": "embed.pin.viewport-recorded",
+      "status": "fail",
+      "statement_hash": "sha256:6971846eb2cc",
+      "duration_ms": 5143,
+      "checks": [
+        "checks/embed.spec.js:148"
+      ],
+      "evidence": [
+        "test-results/embed-a-pin-records-the-viewport-it-was-placed-at/test-failed-1.png",
+        "test-results/embed-a-pin-records-the-viewport-it-was-placed-at/error-context.md"
+      ]
+    },
+    {
+      "rule": "embed.pin.coordinate-fallback",
+      "status": "fail",
+      "statement_hash": "sha256:3c6fb006c94b",
+      "duration_ms": 5143,
+      "checks": [
+        "checks/embed.spec.js:167"
+      ],
+      "evidence": [
+        "test-results/embed-a-pin-dropped-where--2c258-ill-placed-kept-by-position/test-failed-1.png",
+        "test-results/embed-a-pin-dropped-where--2c258-ill-placed-kept-by-position/error-context.md"
+      ]
+    },
+    {
+      "rule": "embed.pin.surface-coordinates",
+      "status": "fail",
+      "statement_hash": "sha256:7d33bd0c80b2",
+      "duration_ms": 5167,
+      "checks": [
+        "checks/embed.spec.js:181"
+      ],
+      "evidence": [
+        "test-results/embed-positions-are-record-df402-dinate-space-not-the-screen/test-failed-1.png",
+        "test-results/embed-positions-are-record-df402-dinate-space-not-the-screen/error-context.md"
+      ]
+    },
+    {
+      "rule": "embed.pin.both-surfaces",
+      "status": "fail",
+      "statement_hash": "sha256:77fdab028ac1",
+      "duration_ms": 5105,
+      "checks": [
+        "checks/embed.spec.js:205"
+      ],
+      "evidence": [
+        "test-results/embed-the-same-anchors-exi-3fe30-ords-which-it-was-placed-on/test-failed-1.png",
+        "test-results/embed-the-same-anchors-exi-3fe30-ords-which-it-was-placed-on/error-context.md"
+      ]
+    },
+    {
+      "rule": "embed.pin.right-project",
+      "status": "fail",
+      "statement_hash": "sha256:399853aef960",
+      "duration_ms": 5126,
+      "checks": [
+        "checks/embed.spec.js:274"
+      ],
+      "evidence": [
+        "test-results/embed-a-pin-files-against--60410-s-to-not-the-server-default/test-failed-1.png",
+        "test-results/embed-a-pin-files-against--60410-s-to-not-the-server-default/error-context.md"
+      ]
+    },
+    {
+      "rule": "embed.pin.tooltip-says-what-it-is",
+      "status": "fail",
+      "statement_hash": "sha256:50dfb40b9f83",
+      "duration_ms": 5113,
+      "checks": [
+        "checks/embed.spec.js:304"
+      ],
+      "evidence": [
+        "test-results/embed-a-pin-says-what-it-i-4a046-and-says-nothing-until-then/test-failed-1.png",
+        "test-results/embed-a-pin-says-what-it-i-4a046-and-says-nothing-until-then/error-context.md"
+      ]
+    },
+    {
+      "rule": "panel.identity.default-actor",
+      "status": "fail",
+      "statement_hash": "sha256:6cf5b560bdde",
+      "duration_ms": 10273,
+      "checks": [
+        "checks/panel.spec.js:65",
+        "checks/panel.spec.js:1178"
+      ],
+      "evidence": [
+        "test-results/panel-the-actor-arrives-fi-ddc6b-identity-and-stays-editable/test-failed-1.png",
+        "test-results/panel-the-actor-arrives-fi-ddc6b-identity-and-stays-editable/error-context.md",
+        "test-results/panel-the-identity-is-a-us-551b0--name-to-show-both-editable/test-failed-1.png",
+        "test-results/panel-the-identity-is-a-us-551b0--name-to-show-both-editable/error-context.md"
+      ]
+    },
+    {
+      "rule": "panel.walkdown.draft-on-disk",
+      "status": "fail",
+      "statement_hash": "sha256:cfb0ee61cad3",
+      "duration_ms": 5138,
+      "checks": [
+        "checks/panel.spec.js:117"
+      ],
+      "evidence": [
+        "test-results/panel-a-verdict-is-written-10102-en-and-survives-the-browser/test-failed-1.png",
+        "test-results/panel-a-verdict-is-written-10102-en-and-survives-the-browser/error-context.md"
+      ]
+    },
+    {
+      "rule": "panel.signoff.spec-pair-derived",
+      "status": "fail",
+      "statement_hash": "sha256:d195df6ea5d8",
+      "duration_ms": 5121,
+      "checks": [
+        "checks/panel.spec.js:167"
+      ],
+      "evidence": [
+        "test-results/panel-which-verdict-pair-a-2f2a8-the-ledger-not-fixed-chrome/test-failed-1.png",
+        "test-results/panel-which-verdict-pair-a-2f2a8-the-ledger-not-fixed-chrome/error-context.md"
+      ]
+    },
+    {
+      "rule": "panel.walkdown.records-to-ledger",
+      "status": "fail",
+      "statement_hash": "sha256:6cc28278f4a6",
+      "duration_ms": 5135,
+      "checks": [
+        "checks/panel.spec.js:207"
+      ],
+      "evidence": [
+        "test-results/panel-finishing-appends-a--c0370--discarding-records-nothing/test-failed-1.png",
+        "test-results/panel-finishing-appends-a--c0370--discarding-records-nothing/error-context.md"
+      ]
+    },
+    {
+      "rule": "panel.delivery.stale-copy-says-so",
+      "status": "fail",
+      "statement_hash": "sha256:124fa1fddaac",
+      "duration_ms": 5117,
+      "checks": [
+        "checks/panel.spec.js:244"
+      ],
+      "evidence": [
+        "test-results/panel-the-panel-says-plain-c5c83-t-is-running-has-gone-stale/test-failed-1.png",
+        "test-results/panel-the-panel-says-plain-c5c83-t-is-running-has-gone-stale/error-context.md"
+      ]
+    },
+    {
+      "rule": "panel.threads.claim-never-accept",
+      "status": "fail",
+      "statement_hash": "sha256:7c4e1e2d1562",
+      "duration_ms": 10249,
+      "checks": [
+        "checks/panel.spec.js:265",
+        "checks/panel.spec.js:486"
+      ],
+      "evidence": [
+        "test-results/panel-the-panel-will-not-a-2b767-son-and-asks-for-the-reason/test-failed-1.png",
+        "test-results/panel-the-panel-will-not-a-2b767-son-and-asks-for-the-reason/error-context.md",
+        "test-results/panel-a-rule-whose-fixes-a-660c4-ed-in-one-pass-under-a-name/test-failed-1.png",
+        "test-results/panel-a-rule-whose-fixes-a-660c4-ed-in-one-pass-under-a-name/error-context.md"
+      ]
+    },
+    {
+      "rule": "panel.rules.takes-you-there",
+      "status": "fail",
+      "statement_hash": "sha256:bc2cef92cdd3",
+      "duration_ms": 15409,
+      "checks": [
+        "checks/panel.spec.js:297",
+        "checks/panel.spec.js:326",
+        "checks/panel.spec.js:358"
+      ],
+      "evidence": [
+        "test-results/panel-choosing-a-blueprint-bb79d-nother-page-takes-you-there/test-failed-1.png",
+        "test-results/panel-choosing-a-blueprint-bb79d-nother-page-takes-you-there/error-context.md",
+        "test-results/panel-a-screen-you-are-already-on-is-not-navigated-to-again/test-failed-1.png",
+        "test-results/panel-a-screen-you-are-already-on-is-not-navigated-to-again/error-context.md",
+        "test-results/panel-the-frame-says-it-is-19386-ng-the-screen-you-just-left/test-failed-1.png",
+        "test-results/panel-the-frame-says-it-is-19386-ng-the-screen-you-just-left/error-context.md"
+      ]
+    },
+    {
+      "rule": "panel.dock.toolbar",
+      "status": "fail",
+      "statement_hash": "sha256:aaf28fbb5e0a",
+      "duration_ms": 20485,
+      "checks": [
+        "checks/panel.spec.js:402",
+        "checks/panel.spec.js:668",
+        "checks/panel.spec.js:708",
+        "checks/panel.spec.js:1128"
+      ],
+      "evidence": [
+        "test-results/panel-put-away-the-badge-s-abcae-the-design-and-what-shipped/test-failed-1.png",
+        "test-results/panel-put-away-the-badge-s-abcae-the-design-and-what-shipped/error-context.md",
+        "test-results/panel-the-screen-picker-op-d2917-he-design-not-underneath-it/test-failed-1.png",
+        "test-results/panel-the-screen-picker-op-d2917-he-design-not-underneath-it/error-context.md",
+        "test-results/panel-a-screen-picked-by-h-a3fda-after-the-frame-lands-on-it/test-failed-1.png",
+        "test-results/panel-a-screen-picked-by-h-a3fda-after-the-frame-lands-on-it/error-context.md",
+        "test-results/panel-in-Detect-mode-the-p-5ec08-he-bar-and-in-the-open-list/test-failed-1.png",
+        "test-results/panel-in-Detect-mode-the-p-5ec08-he-bar-and-in-the-open-list/error-context.md"
+      ]
+    },
+    {
+      "rule": "panel.rules.setup-says-how-to-arrive",
+      "status": "fail",
+      "statement_hash": "sha256:e41b088d8143",
+      "duration_ms": 5161,
+      "checks": [
+        "checks/panel.spec.js:537"
+      ],
+      "evidence": [
+        "test-results/panel-a-screen-that-is-a-s-bbc54-dress-says-how-to-get-there/test-failed-1.png",
+        "test-results/panel-a-screen-that-is-a-s-bbc54-dress-says-how-to-get-there/error-context.md"
+      ]
+    },
+    {
+      "rule": "panel.threads.own-view",
+      "status": "fail",
+      "statement_hash": "sha256:faade3b887d1",
+      "duration_ms": 5111,
+      "checks": [
+        "checks/panel.spec.js:596"
+      ],
+      "evidence": [
+        "test-results/panel-threads-have-a-view-of-their-own-ended-ones-included/test-failed-1.png",
+        "test-results/panel-threads-have-a-view-of-their-own-ended-ones-included/error-context.md"
+      ]
+    },
+    {
+      "rule": "panel.dock.chrome-not-a-pin-target",
+      "status": "fail",
+      "statement_hash": "sha256:466c5e212ed7",
+      "duration_ms": 5167,
+      "checks": [
+        "checks/panel.spec.js:742"
+      ],
+      "evidence": [
+        "test-results/panel-Escape-leaves-pin-mo-f6aa1-is-more-local-than-pin-mode/test-failed-1.png",
+        "test-results/panel-Escape-leaves-pin-mo-f6aa1-is-more-local-than-pin-mode/error-context.md"
+      ]
+    },
+    {
+      "rule": "panel.rules.evidence-visible",
+      "status": "fail",
+      "statement_hash": "sha256:65b84178c291",
+      "duration_ms": 5158,
+      "checks": [
+        "checks/panel.spec.js:792"
+      ],
+      "evidence": [
+        "test-results/panel-the-evidence-names-e-363e6-nder-the-run-that-took-them/test-failed-1.png",
+        "test-results/panel-the-evidence-names-e-363e6-nder-the-run-that-took-them/error-context.md"
+      ]
+    },
+    {
+      "rule": "panel.rules.steps-not-an-appendix",
+      "status": "fail",
+      "statement_hash": "sha256:0609e516526f",
+      "duration_ms": 10282,
+      "checks": [
+        "checks/panel.spec.js:843",
+        "checks/panel.spec.js:869"
+      ],
+      "evidence": [
+        "test-results/panel-the-steps-are-read-o-b123b-e-waits-behind-a-disclosure/test-failed-1.png",
+        "test-results/panel-the-steps-are-read-o-b123b-e-waits-behind-a-disclosure/error-context.md",
+        "test-results/panel-hovering-an-anchor-a-f8401-points-at-it-on-the-surface/test-failed-1.png",
+        "test-results/panel-hovering-an-anchor-a-f8401-points-at-it-on-the-surface/error-context.md"
+      ]
+    },
+    {
+      "rule": "panel.rules.search-the-list",
+      "status": "fail",
+      "statement_hash": "sha256:f183d0a96302",
+      "duration_ms": 5122,
+      "checks": [
+        "checks/panel.spec.js:892"
+      ],
+      "evidence": [
+        "test-results/panel-the-rule-list-is-fil-64c18-m-a-box-that-stays-above-it/test-failed-1.png",
+        "test-results/panel-the-rule-list-is-fil-64c18-m-a-box-that-stays-above-it/error-context.md"
+      ]
+    },
+    {
+      "rule": "panel.rules.tiers-at-a-glance",
+      "status": "fail",
+      "statement_hash": "sha256:cac7a0be0702",
+      "duration_ms": 10266,
+      "checks": [
+        "checks/panel.spec.js:981",
+        "checks/panel.spec.js:1319"
+      ],
+      "evidence": [
+        "test-results/panel-a-built-rule-wears-o-59520-dot-per-role-that-must-sign/test-failed-1.png",
+        "test-results/panel-a-built-rule-wears-o-59520-dot-per-role-that-must-sign/error-context.md",
+        "test-results/panel-no-two-signature-states-are-drawn-the-same-way/test-failed-1.png",
+        "test-results/panel-no-two-signature-states-are-drawn-the-same-way/error-context.md"
+      ]
+    },
+    {
+      "rule": "panel.rules.grouped-by-screen",
+      "status": "fail",
+      "statement_hash": "sha256:54d2a03fa8e6",
+      "duration_ms": 5157,
+      "checks": [
+        "checks/panel.spec.js:1421"
+      ],
+      "evidence": [
+        "test-results/panel-the-rail-groups-by-s-d9a42-ith-the-headless-rules-last/test-failed-1.png",
+        "test-results/panel-the-rail-groups-by-s-d9a42-ith-the-headless-rules-last/error-context.md"
+      ]
+    }
+  ]
+}

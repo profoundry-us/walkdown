@@ -3,10 +3,10 @@
  * that say where each rule stands.
  */
 import { MSG } from '../../lib/message-stream.js';
+import { html, nothing, render as put } from '../../vendor/lit.js';
 import { open, render } from './app.js';
 import { icon } from './icons.js';
 import { D, S } from './state.js';
-import { esc } from './util.js';
 import {
   groupedRows,
   LBL,
@@ -55,10 +55,10 @@ export function ruleWhy(row, mine) {
  * stacking, no offsets, and nothing to go wrong when the list is short.
  */
 export function searchBox() {
-  return `<div class="shrink-0 border-b border-base-300 px-3.5 py-2">
+  return html`<div class="shrink-0 border-b border-base-300 px-3.5 py-2">
     <input id="wdp-search" type="search" data-testid="panel.rules-search"
       class="input input-xs w-full" spellcheck="false" autocomplete="off"
-      aria-label="Search rules" placeholder="Search rules…" value="${esc(S.ruleQuery)}">
+      aria-label="Search rules" placeholder="Search rules…" value="${S.ruleQuery}">
   </div>`;
 }
 
@@ -253,22 +253,25 @@ export const SIGN_SAY = {
  */
 function signoffDot(a, mine) {
   const tint = ROLE_TINT[a.role] ?? 'text-base-content';
-  if (a.state === 'sent-back') return `<span class="text-[8px] leading-none text-error">✗</span>`;
+  if (a.state === 'sent-back')
+    return html`<span class="text-[8px] leading-none text-error">✗</span>`;
   const shape =
     {
       signed: 'size-[6px] bg-current',
       approved: 'size-[6px] border border-current',
       stale: 'size-[6px] border border-current',
     }[a.state] ?? 'size-[6px] border border-current';
+  // lit binds attribute VALUES, not attribute pairs, so the inline gradient
+  // is a bound style value and `nothing` withholds the attribute entirely.
   const fill =
     {
-      approved: ' style="background:linear-gradient(to top, currentColor 50%, transparent 50%)"',
-      stale: ' style="background:radial-gradient(currentColor 0 1.25px, transparent 1.25px)"',
-    }[a.state] ?? '';
+      approved: 'background:linear-gradient(to top, currentColor 50%, transparent 50%)',
+      stale: 'background:radial-gradient(currentColor 0 1.25px, transparent 1.25px)',
+    }[a.state] ?? nothing;
   // Owed slots dim when the rule is not waiting on you, exactly as the tier
   // glyphs beside them do — the strip has one language for "your turn".
   const dim = a.state !== 'signed' && !mine ? ' opacity-60' : '';
-  return `<span class="block rounded-full ${shape} ${tint}${dim}"${fill}></span>`;
+  return html`<span class="block rounded-full ${shape} ${tint}${dim}" style=${fill}></span>`;
 }
 
 /*
@@ -281,23 +284,21 @@ function signoffDot(a, mine) {
 const MAX_SLOTS = 3;
 function signoffStack(acceptance, mine) {
   const all = stackOrder(acceptance);
-  if (!all.length) return '';
+  if (!all.length) return nothing;
   const slots =
     all.length > MAX_SLOTS
       ? [all[0], { role: '+', state: 'more', n: all.length - 2 }, all.at(-1)]
       : all;
-  return `<span class="flex w-4 shrink-0 flex-col items-center justify-center"
-    data-testid="panel.rule-signoff" data-signoff="${esc(all.map((a) => `${a.role}:${a.state}`).join(' '))}"
-    >${slots
-      .map(
-        (a) =>
-          `<span class="flex h-[9px] items-center justify-center">${
-            a.state === 'more'
-              ? `<span class="text-[8px] leading-none opacity-60">+${a.n}</span>`
-              : signoffDot(a, mine)
-          }</span>`,
-      )
-      .join('')}</span>`;
+  return html`<span class="flex w-4 shrink-0 flex-col items-center justify-center"
+    data-testid="panel.rule-signoff" data-signoff="${all.map((a) => `${a.role}:${a.state}`).join(' ')}"
+    >${slots.map(
+      (a) =>
+        html`<span class="flex h-[9px] items-center justify-center">${
+          a.state === 'more'
+            ? html`<span class="text-[8px] leading-none opacity-60">+${a.n}</span>`
+            : signoffDot(a, mine)
+        }</span>`,
+    )}</span>`;
 }
 
 /*
@@ -328,7 +329,7 @@ function stripTip(tiers, acceptance) {
     }`,
   ]);
   const line = ([label, said]) =>
-    `<span class="opacity-60">${esc(label)}</span><span>${esc(said)}</span>`;
+    html`<span class="opacity-60">${label}</span><span>${said}</span>`;
   /*
    * z-20 clears the sticky screen band, which sits at z-10.
    *
@@ -346,13 +347,13 @@ function stripTip(tiers, acceptance) {
    * would have said "covered" whichever z-index was set. Two screenshots of
    * the same hover, one at z-2 and one at z-20, are what settled it.
    */
-  return `<span class="tooltip-content z-20 w-60 whitespace-normal text-left text-[11px] leading-snug"
-    data-testid="panel.rule-tiers-tip"><span class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5">${cells
-      .map(line)
-      .join('')}${
+  return html`<span class="tooltip-content z-20 w-60 whitespace-normal text-left text-[11px] leading-snug"
+    data-testid="panel.rule-tiers-tip"><span class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5">${cells.map(
+      line,
+    )}${
       signs.length
-        ? `<span class="col-span-2 mt-0.5 opacity-40">accepted by</span>${signs.map(line).join('')}`
-        : ''
+        ? html`<span class="col-span-2 mt-0.5 opacity-40">accepted by</span>${signs.map(line)}`
+        : nothing
     }</span></span>`;
 }
 
@@ -380,16 +381,14 @@ export function tierMarks(row, mine = false) {
   // own native title, and a native tooltip is inherited from the nearest
   // ancestor that has one. An empty title stops that here, so hovering the
   // strip opens the strip's bubble and nothing else.
-  return `<span class="tooltip tooltip-right flex w-11 shrink-0 items-center justify-center gap-0.5 text-[12px] leading-none"
-    title="" data-testid="panel.rule-tiers" data-tiers="${esc(tiers.map((t) => `${t[0]}:${t[1]}`).join(' '))}"
-    >${stripTip(tiers, row.acceptance)}${tiers
-      .map(([, state, cell]) => {
-        const [glyph, cls] = TIER_MARK[state] ?? TIER_MARK.na;
-        return `<span class="inline-block w-4 text-center ${
-          TIER_OWED.has(state) && !mine ? 'opacity-60' : cls
-        }">${glyph}</span>`;
-      })
-      .join('')}${signoffStack(row.acceptance, mine)}</span>`;
+  return html`<span class="tooltip tooltip-right flex w-11 shrink-0 items-center justify-center gap-0.5 text-[12px] leading-none"
+    title="" data-testid="panel.rule-tiers" data-tiers="${tiers.map((t) => `${t[0]}:${t[1]}`).join(' ')}"
+    >${stripTip(tiers, row.acceptance)}${tiers.map(([, state]) => {
+      const [glyph, cls] = TIER_MARK[state] ?? TIER_MARK.na;
+      return html`<span class="inline-block w-4 text-center ${
+        TIER_OWED.has(state) && !mine ? 'opacity-60' : cls
+      }">${glyph}</span>`;
+    })}${signoffStack(row.acceptance, mine)}</span>`;
 }
 
 /*
@@ -416,12 +415,12 @@ export function tierMarks(row, mine = false) {
 function screenHeader(id) {
   const sc = screenById(id);
   const title = sc ? (sc.title ?? sc.id) : id;
-  return `<div class="sticky top-0 z-10 flex items-start gap-2 border-b border-t border-base-300 bg-base-200 px-3.5 py-3 first:border-t-0"
-    data-testid="panel.rules-screen" data-screen-group="${esc(id ?? '')}">
+  return html`<div class="sticky top-0 z-10 flex items-start gap-2 border-b border-t border-base-300 bg-base-200 px-3.5 py-3 first:border-t-0"
+    data-testid="panel.rules-screen" data-screen-group="${id ?? ''}">
     <span class="mt-0.5 shrink-0 ${id ? 'text-primary' : 'opacity-30'}">${icon('frame-corners', 'size-3.5')}</span>
-    <span class="min-w-0 text-[12.5px] font-semibold leading-snug">${
-      title ? esc(title) : 'No screen'
-    }${id ? '' : '<span class="ml-1.5 font-normal opacity-40">judged without looking</span>'}</span>
+    <span class="min-w-0 text-[12.5px] font-semibold leading-snug">${title || 'No screen'}${
+      id ? nothing : html`<span class="ml-1.5 font-normal opacity-40">judged without looking</span>`
+    }</span>
   </div>`;
 }
 
@@ -446,11 +445,11 @@ function ruleRow(row) {
    * into columns you can run an eye down; the thread count in plain ink at
    * half strength, because it is context rather than a claim on you.
    */
-  return `<button class="flex w-full cursor-pointer items-center gap-2.5 px-3.5 py-2 text-left text-[14px] hover:bg-base-200"
-      data-rule="${esc(row.rule)}" title="${esc(row.rule)} — ${esc(why)}">
+  return html`<button class="flex w-full cursor-pointer items-center gap-2.5 px-3.5 py-2 text-left text-[14px] hover:bg-base-200"
+      data-rule="${row.rule}" title="${row.rule} — ${why}">
       ${
         picked
-          ? `<span class="w-11 shrink-0 text-center ${
+          ? html`<span class="w-11 shrink-0 text-center ${
               {
                 pass: 'text-success',
                 fail: 'text-error',
@@ -460,7 +459,7 @@ function ruleRow(row) {
             }">${{ pass: '✓', fail: '✗', approved: '✍︎', refining: '✎︎' }[picked]}</span>`
           : tierMarks(row, mine)
       }
-      <span class="truncate">${esc(shortName(row))}</span>
+      <span class="truncate">${shortName(row)}</span>
       <span class="ml-auto flex shrink-0 items-center gap-2 text-[11.5px] font-semibold">
         <span class="w-7 text-right text-warning">${owes}</span>
         <span class="w-7 text-right font-normal text-base-content/45">${thr ? `${thr}⚑` : ''}</span>
@@ -479,24 +478,18 @@ function ruleRow(row) {
  */
 export function listPane() {
   if (!S.data.rows.length)
-    return '<p class="p-3.5 text-[13.5px] opacity-40">No rules in this blueprint.</p>';
+    return html`<p class="p-3.5 text-[13.5px] opacity-40">No rules in this blueprint.</p>`;
   const rows = matchingRows();
   if (!rows.length)
-    return `<p class="p-3.5 text-[13.5px] opacity-40" data-testid="panel.rules-empty">No rule matches ${esc(
-      S.ruleQuery.trim(),
-    )}.</p>`;
-  let html = '';
-  for (const group of groupedRows(rows)) {
-    html += screenHeader(group.screen);
+    return html`<p class="p-3.5 text-[13.5px] opacity-40" data-testid="panel.rules-empty">No rule matches ${S.ruleQuery.trim()}.</p>`;
+  return groupedRows(rows).map((group) => {
     const labels = storyLabels(group.stories.map((g) => g.story));
-    for (const { story, rows: within } of group.stories) {
-      html += `<div class="px-3.5 pb-1 pt-2.5 ${LBL}" data-story="${esc(story)}">${esc(
-        labels.get(story),
-      )}</div>`;
-      html += within.map((row) => ruleRow(row)).join('');
-    }
-  }
-  return html;
+    return html`${screenHeader(group.screen)}${group.stories.map(
+      ({ story, rows: within }) =>
+        html`<div class="px-3.5 pb-1 pt-2.5 ${LBL}" data-story="${story}">${labels.get(story)}</div>
+          ${within.map((row) => ruleRow(row))}`,
+    )}`;
+  });
 }
 
 /** Opening a rule is a click on its row, wherever the row was just drawn. */
@@ -514,12 +507,17 @@ export function wireRuleRows() {
  * one element never touches the input, so there is no caret to restore and
  * no chance of restoring it a frame late.
  */
+/*
+ * Filtering used to repaint the list element alone, because a wholesale
+ * innerHTML render behind every keystroke would eat the caret. Under lit the
+ * full render is a diff - the search box is the same element afterwards, so
+ * the caret never moves - and rendering the list separately would put two
+ * template managers on one container, which lit does not allow twice.
+ */
 export function paintRules() {
+  render();
   const list = D.host.querySelector('.wdp-list');
-  if (!list) return;
-  list.innerHTML = listPane();
-  list.scrollTop = 0; // a filtered list is a new list; showing its middle is not helpful
-  wireRuleRows();
+  if (list) list.scrollTop = 0; // a filtered list is a new list; showing its middle is not helpful
 }
 
 export function wireSearch() {
@@ -571,15 +569,15 @@ const LEGEND_SIGNS = ['signed', 'approved', 'stale', 'none', 'sent-back'];
 
 export function legendControl() {
   const head = (t) =>
-    `<span class="col-span-2 pt-1 text-[10px] font-bold uppercase tracking-widest opacity-40">${t}</span>`;
+    html`<span class="col-span-2 pt-1 text-[10px] font-bold uppercase tracking-widest opacity-40">${t}</span>`;
   const tierLine = (state) => {
     const [glyph, cls, why] = TIER_MARK[state];
-    return `<span class="text-center ${cls}">${glyph}</span><span>${esc(why)}</span>`;
+    return html`<span class="text-center ${cls}">${glyph}</span><span>${why}</span>`;
   };
   const signLine = (state) =>
-    `<span class="flex justify-center">${signoffDot({ role: '_', state }, true)}</span>
-     <span>${esc(SIGN_SAY[state])}</span>`;
-  return `<span class="tooltip tooltip-top shrink-0" data-testid="panel.legend">
+    html`<span class="flex justify-center">${signoffDot({ role: '_', state }, true)}</span>
+      <span>${SIGN_SAY[state]}</span>`;
+  return html`<span class="tooltip tooltip-top shrink-0" data-testid="panel.legend">
     <!-- z-50 here is load-bearing, and unlike the rule strip's bubble it was
          measured rather than assumed: this one opens UPWARD across the whole
          scrolling list from the last row in the panel, and at daisyUI's own
@@ -588,8 +586,8 @@ export function legendControl() {
     <span class="tooltip-content z-50 w-72 whitespace-normal text-left text-[11.5px] leading-snug"
       data-testid="panel.legend-tip"
       ><span class="grid grid-cols-[1.25rem_1fr] items-center gap-x-2 gap-y-0.5">
-      ${head('Evidence — checks, then agent')}${LEGEND_TIERS.map(tierLine).join('')}
-      ${head('Signatures — one slot per role')}${LEGEND_SIGNS.map(signLine).join('')}
+      ${head('Evidence — checks, then agent')}${LEGEND_TIERS.map(tierLine)}
+      ${head('Signatures — one slot per role')}${LEGEND_SIGNS.map(signLine)}
       ${head('And around them')}
       <span class="text-center text-warning">◆</span><span>Warning yellow anywhere means the rule is waiting on <b>you</b>.</span>
       <span class="text-center text-warning">▪</span><span><b>sign</b> is a spec to accept; <b>walk</b> is a build to judge.</span>

@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-08-31T01-51-24Z-local-01",
+  "created": "2026-08-31T01:51:24Z",
+  "actor": "topherfangio",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "d545db7-dirty",
+  "spec_hash": "sha256:881a04ca14a1",
+  "results": [
+    {
+      "rule": "panel.rules.grouped-by-screen",
+      "status": "fail",
+      "statement_hash": "sha256:54d2a03fa8e6",
+      "duration_ms": 5281,
+      "checks": [
+        "checks/panel.spec.js:1421"
+      ],
+      "evidence": [
+        "test-results/panel-the-rail-groups-by-s-d9a42-ith-the-headless-rules-last/test-failed-1.png",
+        "test-results/panel-the-rail-groups-by-s-d9a42-ith-the-headless-rules-last/error-context.md"
+      ]
+    }
+  ]
+}

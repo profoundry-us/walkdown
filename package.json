@@ -27,7 +27,7 @@
     "check:js": "mkdir -p .walkdown/tmp && rollup -c --silent -o .walkdown/tmp/panel.built.js && diff -q .walkdown/tmp/panel.built.js lib/viewer/panel.js && rollup -c rollup.embed.mjs --silent -o .walkdown/tmp/embed.built.js && diff -q .walkdown/tmp/embed.built.js lib/viewer/embed.js",
     "build:css": "tailwindcss -i styles/walkdown.css -o lib/viewer/walkdown.css --minify && cp lib/viewer/walkdown.css example/app/walkdown.css && cp lib/viewer/walkdown.css extension/walkdown.css",
     "watch:css": "tailwindcss -i styles/walkdown.css -o lib/viewer/walkdown.css --watch",
-    "prepack": "npm run build:js && npm run build:css && npm run build:yaml",
+    "prepack": "npm run build:js && npm run build:css && npm run build:yaml && npm run build:lit",
     "build:ext": "cp lib/viewer/embed.js lib/viewer/panel.js extension/vendor/",
     "build": "npm run build:sync && npm run build:js && npm run build:icons && npm run build:css && npm run build:ext",
     "build:sync": "node tools/sync-phosphor.mjs",
@@ -39,7 +39,9 @@
     "check:yaml": "mkdir -p .walkdown/tmp && rollup -c rollup.vendor.mjs --silent -o .walkdown/tmp/yaml.built.js && diff -q .walkdown/tmp/yaml.built.js vendor/yaml.js",
     "format": "biome format --write .",
     "check:format": "biome check .",
-    "check:types": "tsc -p jsconfig.json"
+    "check:types": "tsc -p jsconfig.json",
+    "build:lit": "rollup -c rollup.lit.mjs --silent",
+    "check:lit": "mkdir -p .walkdown/tmp && rollup -c rollup.lit.mjs --silent -o .walkdown/tmp/lit.built.js && diff -q .walkdown/tmp/lit.built.js vendor/lit.js"
   },
   "keywords": [
     "bdd",
@@ -55,9 +57,11 @@
     "@phosphor-icons/core": "^2.1.1",
     "@playwright/test": "^1.62.1",
     "@profoundry-us/highball": "^0.4.1",
+    "@rollup/plugin-node-resolve": "^16.0.3",
     "@tailwindcss/cli": "^4.3.3",
     "@types/node": "^26.4.0",
     "daisyui": "^5.7.20",
+    "lit-html": "^3.3.3",
     "rollup": "^4.63.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",

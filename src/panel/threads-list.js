@@ -2,10 +2,10 @@
  * The Threads tab: every conversation on this blueprint, filtered the three
  * ways `walkdown threads` filters them, in the same words.
  */
+import { html } from '../../vendor/lit.js';
 import { open, start } from './app.js';
 import { S } from './state.js';
 import { threadCard } from './thread-pane.js';
-import { esc } from './util.js';
 import { screenById, TERMINAL, threadTouched } from './vocab.js';
 
 /*
@@ -66,9 +66,9 @@ export function threadFilterBar() {
     all: (S.data?.threads ?? []).length,
   };
   const pick = (id, label, hint) =>
-    `<button class="btn btn-xs join-item gap-1 ${S.threadFilter === id ? 'btn-primary' : 'btn-outline btn-primary'}"
-      data-tfilter="${id}" title="${esc(hint)}">${label}<span class="opacity-60">${counts[id]}</span></button>`;
-  return `<div class="flex shrink-0 justify-center border-b border-base-300 px-3.5 py-2">
+    html`<button class="btn btn-xs join-item gap-1 ${S.threadFilter === id ? 'btn-primary' : 'btn-outline btn-primary'}"
+      data-tfilter="${id}" title="${hint}">${label}<span class="opacity-60">${counts[id]}</span></button>`;
+  return html`<div class="flex shrink-0 justify-center border-b border-base-300 px-3.5 py-2">
     <div class="join" data-testid="panel.thread-filter">
       ${pick('active', 'Active', 'Questions and notes still in play')}
       ${pick('you', 'Awaiting you', 'A fix claimed and unverified, or a question unanswered — the same queue walkdown status shows')}
@@ -82,11 +82,11 @@ export function threadsPane() {
     threadTouched(b).localeCompare(threadTouched(a)),
   );
   const EMPTY = {
-    active: 'No live threads. Everything said here has been answered — <b>All</b> has them.',
-    you: 'Nothing is waiting on you.',
-    all: 'No threads yet. Drop a pin on the page, or leave a note on a rule, to start one.',
+    active: html`No live threads. Everything said here has been answered — <b>All</b> has them.`,
+    you: html`Nothing is waiting on you.`,
+    all: html`No threads yet. Drop a pin on the page, or leave a note on a rule, to start one.`,
   };
   return list.length
-    ? list.map((t) => threadCard(t, threadWhere(t))).join('')
-    : `<p class="p-3.5 text-[12.5px] opacity-40">${EMPTY[S.threadFilter]}</p>`;
+    ? list.map((t) => threadCard(t, threadWhere(t)))
+    : html`<p class="p-3.5 text-[12.5px] opacity-40">${EMPTY[S.threadFilter]}</p>`;
 }
