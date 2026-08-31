@@ -1,0 +1,22 @@
+id: n-0128
+kind: note
+author: agent
+created: 2026-08-31T15:09:13Z
+anchor: {}
+status: open
+body: "Direction, set by Topher 2026-08-31: the agent tier should be
+  prompt-driven judging, not scripted capture. Today a sitting splits into a
+  mechanical half (tools/sitting.mjs drives the panel through a state list and
+  photographs it) and a reading half (the agent judges the evidence). The
+  decided direction is to hand the judging agent one rule at a time — statement,
+  steps, setup, screens, anchors, the target's base_url — and let it decide how
+  to earn the verdict, interfacing with its own browser via the built-in Claude
+  browser tooling. The browser-use library was considered for this and rejected
+  in favor of the built-in tooling. What survives from the harness is product
+  surface, not script: assembling the per-rule prompt from the blueprint, filing
+  evidence under runs/evidence logical keys, the scratch-copy mechanism for
+  anything that makes the panel write, and the server's governance rails
+  (claim-never-accept, named actors) — which are what make an improvising agent
+  with a browser trustable near the ledger. The state list in sitting.mjs stops
+  being the growth path; it remains interim support until the product grows this
+  shape. Also recorded in docs/11-architecture.md."

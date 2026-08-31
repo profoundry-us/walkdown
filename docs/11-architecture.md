@@ -238,3 +238,31 @@ gives the checking; a build between clone and run would break the zero-install
 property we just bought), no test-suite rewrite, no renaming things that are already named
 after the glossary, and no refactor of `lib/`'s graph — it is the part that is
 right.
+
+## Where the agent tier goes next
+
+Decided 2026-08-31 (Topher; recorded as thread n-0128). The sitting harness —
+`tools/sitting.mjs`, a scripted state list the capture drives and photographs —
+is interim tooling, not the direction. It made this repo's sittings affordable
+by splitting judging into a mechanical half and a reading half, but it bakes
+every rule's judgment-prep into a script that duplicates the checks' driving,
+cannot improvise when a rule needs a state nobody anticipated, and is
+walkdown-specific besides: no adopting project can use it.
+
+The direction is **prompt-driven judging**. A sitting hands the judging agent
+one rule at a time — statement, steps, setup, screens, anchors, the target's
+`base_url` — and the agent decides how to earn the verdict, interfacing with
+its own browser through the built-in Claude browser tooling. (The `browser-use`
+library was considered for this and rejected in favor of the built-in
+tooling.) The agent goes and looks the way a person would, improvises the way
+the diagnosis half of the 2026-08-31 sitting already did in a live browser,
+and writes its reasoning against what it actually saw.
+
+What the product owes this direction — the harness's parts that survive as
+product surface rather than script: assembling the per-rule prompt from the
+blueprint; filing evidence under `runs/evidence/` logical keys; the
+scratch-copy mechanism for anything that makes the panel write; and the
+server's governance rails (claim-never-accept, named actors), which are what
+make an improvising agent with a browser trustable near an append-only ledger.
+The state list stops being the growth path: a rule that needs something new
+gets it from the judging agent's own hands, not from a new entry in a script.

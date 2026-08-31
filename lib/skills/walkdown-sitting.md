@@ -110,3 +110,14 @@ and a `note` on the run saying what the scope was costs a sentence.
 
 **Never write `verified` or `waived`,** and never turn a fail into a pass
 without the fix actually shipping. You claim work; a person accepts it.
+
+## Direction
+
+This harness is interim (decided 2026-08-31; thread `n-0128`, and
+docs/11-architecture.md "Where the agent tier goes next"). The destination is
+prompt-driven judging: each rule handed to a judging agent as a prompt —
+statement, steps, setup, screens, anchors, target — with the agent driving its
+own browser through the built-in Claude browser tooling to earn the verdict.
+(`browser-use` was considered and rejected in favor of the built-in tooling.)
+Grow the state list only when a sitting needs it *now*; anything aimed at the
+future belongs to that shape, not to `tools/sitting.mjs`.
