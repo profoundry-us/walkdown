@@ -2,6 +2,7 @@ import { parseArgs } from 'node:util';
 import { collectRules, excuseFor, signoffList, verifyList } from '../../lib/blueprint.js';
 import { formatHash } from '../../lib/hash.js';
 import { screenFlow } from '../../lib/status.js';
+import { ensureAllocated } from '../../lib/locations.js';
 import { end, loadOrExit } from './context.js';
 
 /*
@@ -39,6 +40,9 @@ export function run(args) {
   }
   const blueprint = loadOrExit(values.dir);
   const { config, storyboard } = blueprint;
+  // The evidence path below is written to BY HAND from this printout, so a
+  // fresh project's tentative home is made real before it is promised.
+  ensureAllocated(blueprint.at, 'evidence');
 
   const found = collectRules(blueprint.features).find(({ rule }) => rule?.id === id);
   if (!found) {

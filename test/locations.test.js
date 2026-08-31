@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { formatHash, specFiles, specHash } from '../lib/hash.js';
-import { KINDS, readUserConfig, resolveLocations } from '../lib/locations.js';
+import { ensureAllocated, KINDS, readUserConfig, resolveLocations } from '../lib/locations.js';
 import { deriveStatus } from '../lib/status.js';
 
 /*
@@ -70,8 +70,8 @@ test('runs and threads follow the spec; evidence and drafts never do @rule:locat
     assert.equal(loc.runs.path, join(bp, 'runs'));
     assert.equal(loc.threads.path, join(bp, 'threads'));
     assert.match(loc.threads.why, /beside the spec/);
-    assert.equal(loc.evidence.path, join(s.home, 'projects', 'demo', 'evidence'));
-    assert.equal(loc.drafts.path, join(s.home, 'projects', 'demo', 'drafts'));
+    assert.equal(loc.evidence.path, join(s.home, 'blueprints', '0001-demo', 'evidence'));
+    assert.equal(loc.drafts.path, join(s.home, 'blueprints', '0001-demo', 'drafts'));
     assert.match(loc.evidence.why, /outside the repository/);
   } finally {
     s.cleanup();
@@ -521,4 +521,99 @@ test('a run made at another commit still counts @rule:locations.travel.provenanc
   const reworded = structuredClone(bp);
   reworded.features[0].data.stories[0].rules[0].statement = 'The visitor can do something else.';
   assert.equal(cell(reworded).state, 'stale');
+});
+
+/*
+ * The numbered home registry (thread n-0124). A name-keyed home collides
+ * exactly where the default-out design matters most - thirty monorepo packs
+ * all called by the repository's basename - so a home is ALLOCATED, and the
+ * only thing a name does in its path is help a person read the directory list.
+ */
+test('two repositories with one basename get homes of their own @rule:locations.default.one-home-per-blueprint', () => {
+  const s = scratch();
+  try {
+    const a = join(s.root, 'one', 'app');
+    const b = join(s.root, 'two', 'app');
+    blueprint(join(a, 'blueprint'), { project: 'app' });
+    blueprint(join(b, 'blueprint'), { project: 'app' });
+    // Asking is free: both answers are tentative and nothing was written.
+    const askA = resolveLocations({ cwd: a });
+    assert.match(askA.evidence.why, /allocated on first write/);
+    assert.equal(existsSync(join(s.home, 'blueprints')), false, 'asking allocated nothing');
+    // The first write claims each home; the numbers disambiguate the name.
+    const locA = ensureAllocated(resolveLocations({ cwd: a }), 'evidence');
+    const locB = ensureAllocated(resolveLocations({ cwd: b }), 'evidence');
+    assert.equal(locA.evidence.path, join(s.home, 'blueprints', '0001-app', 'evidence'));
+    assert.equal(locB.evidence.path, join(s.home, 'blueprints', '0002-app', 'evidence'));
+    // Settled: asking again answers with the allocation, not a guess.
+    const again = resolveLocations({ cwd: b });
+    assert.equal(again.evidence.path, locB.evidence.path);
+    assert.doesNotMatch(again.evidence.why, /allocated on first write/);
+  } finally {
+    s.cleanup();
+  }
+});
+
+test('a legacy name-keyed home keeps answering until migrate renumbers it @rule:locations.default.one-home-per-blueprint', () => {
+  const s = scratch();
+  try {
+    const repo = join(s.root, 'repo');
+    blueprint(join(repo, 'blueprint'), { project: 'demo' });
+    mkdirSync(join(s.home, 'projects', 'demo', 'evidence'), { recursive: true });
+    writeFileSync(join(s.home, 'projects', 'demo', 'evidence', 'shot.png'), 'x');
+    const loc = resolveLocations({ cwd: repo });
+    // An existing ledger is a fact; a resolver never moves one on its own.
+    assert.equal(loc.evidence.path, join(s.home, 'projects', 'demo', 'evidence'));
+    assert.match(loc.evidence.why, /legacy home/);
+    assert.match(loc.evidence.why, /walkdown migrate/);
+  } finally {
+    s.cleanup();
+  }
+});
+
+test('migrate renumbers a config-claimed home and re-points the config @rule:locations.default.one-home-per-blueprint', () => {
+  const s = scratch();
+  try {
+    const repo = join(s.root, 'repo');
+    const bp = blueprint(join(repo, 'blueprint'), { project: 'demo' });
+    mkdirSync(join(s.home, 'projects', 'demo', 'evidence'), { recursive: true });
+    writeFileSync(join(s.home, 'projects', 'demo', 'evidence', 'shot.png'), 'x');
+    mkdirSync(join(s.home, 'projects', 'orphan'), { recursive: true });
+    configure(
+      s.home,
+      [
+        'projects:',
+        '  - id: demo',
+        `    roots: [${repo}]`,
+        `    spec: ${bp}`,
+        `    evidence: ${join(s.home, 'projects', 'demo', 'evidence')}`,
+        '',
+      ].join('\n'),
+    );
+    const out = execFileSync(
+      process.execPath,
+      [new URL('../bin/walkdown.js', import.meta.url).pathname, 'migrate'],
+      { encoding: 'utf8', env: { ...process.env, WALKDOWN_HOME: s.home, NO_COLOR: '1' } },
+    );
+    assert.match(out, /moved/);
+    assert.ok(
+      existsSync(join(s.home, 'blueprints', '0001-demo', 'evidence', 'shot.png')),
+      'the records moved with the home',
+    );
+    assert.equal(existsSync(join(s.home, 'projects', 'demo')), false);
+    const cfg = readUserConfig().config;
+    assert.equal(
+      cfg.projects[0].evidence,
+      join(s.home, 'blueprints', '0001-demo', 'evidence'),
+      'the config now speaks the new address',
+    );
+    // The home nobody claimed is reported and left standing, never guessed at.
+    assert.match(out, /no config entry claims it/);
+    assert.ok(existsSync(join(s.home, 'projects', 'orphan')));
+    // And the resolver now answers from the allocation.
+    const loc = resolveLocations({ cwd: repo });
+    assert.equal(loc.evidence.path, join(s.home, 'blueprints', '0001-demo', 'evidence'));
+  } finally {
+    s.cleanup();
+  }
 });

@@ -71,6 +71,23 @@ stories:
             - A copy the person has edited is kept and reported rather than overwritten
           statement_hash: sha256:62223922d07f
 
+      - id: locations.default.one-home-per-blueprint
+        origin: thread:n-0124
+        statement: A blueprint's out-of-tree home is a numbered directory allocated to it on creation, never one derived from a name - so two blueprints can never resolve to the same home, not thirty monorepo packs sharing a repository basename and not two blueprints inside one pack. Asking where things live allocates nothing; the first write claims the number, and a legacy name-keyed home keeps answering until `walkdown migrate` renumbers it on the person's say-so.
+        verify: [checks]
+        signoff: [eng, product]
+        steps:
+          given:
+            - Two repositories with the same basename, or two blueprints inside one, and a fresh personal home
+          when:
+            - Each is asked about, then written to for the first time
+          then:
+            - Asking reports a tentative home and writes nothing, not even the allocation
+            - The first write allocates each blueprint its own numbered directory, and the numbers never repeat
+            - A home that already exists under the legacy name keeps answering, marked as legacy, until `walkdown migrate` moves it and re-points the personal config
+            - A legacy home no config entry claims is reported and left standing, never guessed at
+          statement_hash: sha256:625dd678dbdd
+
   - id: locations.answer
     title: Anyone can ask where this project's pieces are
     statement: As someone standing in a repository, I can ask where every piece lives and why it was chosen there, and the asking never changes the answer.

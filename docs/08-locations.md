@@ -50,6 +50,25 @@ makes together.
 The question for each artifact is therefore not "is it big?" but **"would a second person
 need to see this?"**
 
+### The numbered home registry
+
+Inside the personal home, each blueprint's records live in a directory **allocated** to
+it — `~/.walkdown/blueprints/0001-walkdown/` — with `blueprints/index.yml` as the
+allocation record. The number is the identity and the slug is only there for the person
+reading a directory listing, because a *name*-keyed home collides exactly where the
+default-out design matters most: thirty monorepo packs all resolve to the repository's
+basename, and two blueprints inside one pack have nowhere to go at all (thread n-0124).
+
+Three rules keep it honest. **Asking allocates nothing** — `walkdown where` on a fresh
+project reports a tentative home, worded as "allocated on first write", and leaves the
+disk alone. **The first write claims the number** — init, a thread, a draft, a run, or
+`walkdown judge` printing an evidence path someone will use by hand; through the review
+server the claim happens when the server *starts*, never inside a browser request, so
+requests still write only to the resolved threads, drafts and runs directories. **An
+existing ledger is a fact** — a legacy `projects/<id>/` home keeps answering, marked as
+legacy, until `walkdown migrate` renumbers it and re-points the personal config; a
+legacy home no config entry claims is reported and left standing, never guessed at.
+
 ## What each artifact is, and where it starts
 
 | Artifact | Default | Opt into repo | Why |

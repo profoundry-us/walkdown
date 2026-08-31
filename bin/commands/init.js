@@ -1,6 +1,6 @@
 import { join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
-import { resolveLocations } from '../../lib/locations.js';
+import { ensureAllocated, resolveLocations } from '../../lib/locations.js';
 import { dim, green, yellow } from '../../lib/report/tty.js';
 
 export async function run(args) {
@@ -22,7 +22,7 @@ export async function run(args) {
    */
   const specDir = values['in-repo']
     ? join(root, 'blueprint')
-    : resolveLocations({ cwd: root }).spec.path;
+    : ensureAllocated(resolveLocations({ cwd: root }), 'spec').spec.path;
   const results = scaffold(root, { force: values.force, specDir });
   const MARK = {
     created: green('+ created'),

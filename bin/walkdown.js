@@ -20,6 +20,7 @@ Usage:
   walkdown thread <id> [--reply <text>] [--status <s>|--verify|--reopen|--waive]
                        [--reason <text>] [--actor <name>] [--dir <blueprint>] [--json]
   walkdown serve [--dir <blueprint>] [--port <n>]
+  walkdown migrate
   walkdown claims [--dir <blueprint>] [--url <address>] [--json]
   walkdown where [<kind>] [--dir <blueprint>] [--json]
   walkdown move <kind> --to <path> [--dir <blueprint>]
@@ -47,6 +48,11 @@ Commands:
           is recorded — ready to paste into any agent with a browser. The
           first step toward prompt-driven judging (docs/11-architecture.md):
           the prompt ends where the reader begins, and this judges nothing.
+
+  migrate Renumber legacy name-keyed homes under ~/.walkdown/projects/ into
+          the allocated registry (~/.walkdown/blueprints/NNNN-slug/), moving
+          each directory once and re-pointing the personal config. Names
+          collide across a monorepo's packs; allocated numbers cannot.
 
   sweep   Ask for the named tiers to be judged again from scratch. Verdicts
           recorded before the sweep read as stale, so a rule nobody gets back
@@ -107,6 +113,7 @@ const COMMANDS = new Set([
   'hash',
   'judge',
   'sweep',
+  'migrate',
   'threads',
   'thread',
   'serve',
