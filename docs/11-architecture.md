@@ -201,6 +201,15 @@ never combined with a behaviour change in the same commit.
    lit-html templates first, LitElement components where a pane owns real
    state; `app.js` shrinks to boot, session, and I/O. The Rollup cycle
    whitelist goes when the last pane stops importing `app.js` back.
+
+   *Half done: every pane and the shell render as lit templates (the esc()
+   discipline is gone; vendor/lit.js rides the bundle; both browser bundles
+   are format:'iife' after the conversion surfaced the classic-script
+   page-global trap). Still owed: the querySelector wire* functions become
+   template event bindings; the action functions leave `app.js` for real
+   modules so panes stop importing it back; then the whitelist goes and the
+   scroll/caret/track-repaint hacks in render() can be re-examined - lit's
+   diffing may make each unnecessary, but that is measured, not assumed.*
 6. **Schema as data**, with `lint` reading it.
 
 Sweep after each of 3, 4 and 5 — those move enough that a verdict recorded
