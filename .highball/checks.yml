@@ -76,9 +76,10 @@ checks:
   # Splitting the panel turns a working reference into a ReferenceError the
   # moment its name moves to another file and one caller stays behind. The
   # syntax stays perfect, so `node --check` and the unit tests both pass and
-  # only a browser finds it. One rule, no style gate: see eslint.config.mjs.
-  - id: panel-names-resolve
-    name: Every name in the panel resolves
+  # only a browser finds it, plus write-only state and dead helpers. Biome
+  # also owns formatting, so style is a machine's problem (docs/10-house-style.md).
+  - id: source-lints
+    name: Every name resolves, and nothing is write-only or dead
     run: npm run --silent lint
     fast: true
 

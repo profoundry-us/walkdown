@@ -21,7 +21,6 @@ import { D } from './state.js';
 const VEIL_DELAY = 180;
 let veil = null;
 let veilTimer = null;
-let veilFor = null;
 
 /** Whether a veil is currently up — the frame's placement asks before it schedules. */
 export const veilIsUp = () => Boolean(veil);
@@ -60,7 +59,6 @@ function showVeil(label) {
 export function hideVeil() {
   clearTimeout(veilTimer);
   veilTimer = null;
-  veilFor = null;
   veil?.remove();
   veil = null;
 }
@@ -79,6 +77,5 @@ export function screenLabel(screen) {
 export function frameLoading(url, label) {
   if (!D.appFrame) return;
   hideVeil();
-  veilFor = url;
   veilTimer = setTimeout(() => showVeil(label), VEIL_DELAY);
 }

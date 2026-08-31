@@ -1,0 +1,70 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "includes": [
+      "bin/**",
+      "lib/**",
+      "src/**",
+      "test/**",
+      "checks/**",
+      "tools/**",
+      "extension/*.js",
+      "*.mjs",
+      "*.json",
+      "!lib/viewer/**",
+      "!vendor/**",
+      "!extension/vendor/**",
+      "!lib/skills/**"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "semicolons": "always",
+      "trailingCommas": "all",
+      "arrowParentheses": "always"
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": false,
+      "correctness": {
+        "noUndeclaredVariables": "error",
+        "noUnusedVariables": "error",
+        "noUnreachable": "error",
+        "noConstAssign": "error",
+        "useIsNan": "error"
+      },
+      "suspicious": {
+        "noDoubleEquals": "error",
+        "noDuplicateObjectKeys": "error",
+        "noFallthroughSwitchClause": "error",
+        "useAwait": "off"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": [
+        "extension/*.js"
+      ],
+      "javascript": {
+        "globals": [
+          "chrome"
+        ]
+      }
+    }
+  ]
+}

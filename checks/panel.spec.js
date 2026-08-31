@@ -107,14 +107,6 @@ async function session(page) {
   return page.getByTestId('detail.rule-id').textContent();
 }
 
-/** What the ledger currently says about one rule's human tier. */
-const humanState = (page, rule) =>
-  page.evaluate(async ([origin, id]) => {
-    const r = await fetch(`${origin}/api/blueprint`);
-    const row = (await r.json()).rows.find((x) => x.rule === id);
-    return row ? row.human.state : null;
-  }, [WD_ORIGIN, rule]);
-
 /** What the server currently holds as the unfinished sitting. */
 const draft = (page) =>
   page.evaluate(async (origin) => {
@@ -281,7 +273,7 @@ test(
   async ({ page }) => {
     await review(page);
     await endSession(page);
-    const { rows, threads } = await payload(page);
+    const { threads } = await payload(page);
     const addressed = (threads ?? []).find((t) => t.status === 'addressed' && t.anchor?.rule);
     expect(addressed, 'the blueprint needs an addressed thread to accept').toBeTruthy();
 

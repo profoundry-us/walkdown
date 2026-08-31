@@ -2250,7 +2250,6 @@ function threadsPane() {
 const VEIL_DELAY = 180;
 let veil = null;
 let veilTimer = null;
-let veilFor = null;
 
 /** Whether a veil is currently up — the frame's placement asks before it schedules. */
 const veilIsUp = () => Boolean(veil);
@@ -2289,7 +2288,6 @@ function showVeil(label) {
 function hideVeil() {
   clearTimeout(veilTimer);
   veilTimer = null;
-  veilFor = null;
   veil?.remove();
   veil = null;
 }
@@ -2308,7 +2306,6 @@ function screenLabel(screen) {
 function frameLoading(url, label) {
   if (!D.appFrame) return;
   hideVeil();
-  veilFor = url;
   veilTimer = setTimeout(() => showVeil(label), VEIL_DELAY);
 }
 

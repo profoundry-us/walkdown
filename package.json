@@ -1,7 +1,7 @@
 {
   "name": "walkdown",
   "version": "0.1.0",
-  "description": "Verify that what you built is what you designed \u2014 blueprint lint & hashing for the walkdown spec format",
+  "description": "Verify that what you built is what you designed — blueprint lint & hashing for the walkdown spec format",
   "type": "module",
   "bin": {
     "walkdown": "bin/walkdown.js"
@@ -22,7 +22,7 @@
   },
   "scripts": {
     "test": "WALKDOWN_HOME=.walkdown/test-home node --test",
-    "lint": "eslint src/panel",
+    "lint": "biome lint .",
     "build:js": "rollup -c",
     "check:js": "mkdir -p .walkdown/tmp && rollup -c --silent -o .walkdown/tmp/panel.built.js && diff -q .walkdown/tmp/panel.built.js lib/viewer/panel.js",
     "build:css": "tailwindcss -i styles/walkdown.css -o lib/viewer/walkdown.css --minify && cp lib/viewer/walkdown.css example/app/walkdown.css && cp lib/viewer/walkdown.css extension/walkdown.css",
@@ -36,7 +36,9 @@
     "checks:dev": "WALKDOWN_RECORD=0 playwright test",
     "postinstall": "ln -sf ../../bin/walkdown.js node_modules/.bin/walkdown 2>/dev/null || true",
     "build:yaml": "rollup -c rollup.vendor.mjs --silent",
-    "check:yaml": "mkdir -p .walkdown/tmp && rollup -c rollup.vendor.mjs --silent -o .walkdown/tmp/yaml.built.js && diff -q .walkdown/tmp/yaml.built.js vendor/yaml.js"
+    "check:yaml": "mkdir -p .walkdown/tmp && rollup -c rollup.vendor.mjs --silent -o .walkdown/tmp/yaml.built.js && diff -q .walkdown/tmp/yaml.built.js vendor/yaml.js",
+    "format": "biome format --write .",
+    "check:format": "biome check ."
   },
   "keywords": [
     "bdd",
@@ -48,13 +50,12 @@
   "author": "Topher Fangio <topher@profoundry.us>",
   "license": "MIT",
   "devDependencies": {
+    "@biomejs/biome": "^2.5.11",
     "@phosphor-icons/core": "^2.1.1",
     "@playwright/test": "^1.62.1",
     "@profoundry-us/highball": "^0.4.1",
     "@tailwindcss/cli": "^4.3.3",
     "daisyui": "^5.7.20",
-    "eslint": "^10.9.1",
-    "globals": "^17.11.0",
     "rollup": "^4.63.0",
     "tailwindcss": "^4.3.3",
     "yaml": "^2.6.0"
