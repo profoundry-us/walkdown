@@ -121,7 +121,19 @@ export function threadPane() {
   const sketch = ghostSource(sc);
   const acts = threadActions(t);
   const me = whoAmI();
-  const ended = TERMINAL.includes(t.status) ? (t.replies ?? []).at(-1) : null;
+  /*
+   * Who ended the thread: the record first, the guess second. verified_by /
+   * waived_by name whoever accepted; only a thread from before those were
+   * recorded falls back to the last reply's author, which once credited an
+   * agent's evidence post with a human's acceptance (n-0127).
+   */
+  const lastReply = (t.replies ?? []).at(-1);
+  const recordedBy =
+    t.status === 'verified' ? t.verified_by : t.status === 'waived' ? t.waived_by : null;
+  const ended =
+    TERMINAL.includes(t.status) && (recordedBy || lastReply)
+      ? { author: recordedBy ?? lastReply?.author, created: lastReply?.created }
+      : null;
   return html`
     <div class="flex items-center gap-1 px-2 pt-2">
       <button class="wdp-thread-back btn btn-ghost btn-xs text-primary" data-testid="thread.close" @click=${leaveThread}>← ${backFromThread(row)}</button>
@@ -151,7 +163,7 @@ export function threadPane() {
           ? html`<div class="mt-2 flex items-center gap-1.5 rounded border border-success/40 px-2 py-1 text-[11px]">
         <span class="text-success">✓</span> ${t.status === 'waived' ? 'Waived' : t.status}${
           ended.author ? html` by <b>${MSG.displayName(ended.author, names())}</b>` : nothing
-        } · ${MSG.ago(ended.created)}</div>`
+        }${ended.created ? html` · ${MSG.ago(ended.created)}` : nothing}</div>`
           : nothing
       }
       ${

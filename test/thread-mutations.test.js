@@ -42,6 +42,7 @@ test('legal note lifecycle: open → addressed → verified', () => {
   transitionThread(load(), 'n-1', { status: 'addressed', actor: 'agent' });
   transitionThread(load(), 'n-1', { status: 'verified', actor: 'topher' });
   assert.equal(onDisk('n-1').status, 'verified');
+  assert.equal(onDisk('n-1').verified_by, 'topher', 'acceptance keeps the name it demanded');
 });
 
 test('illegal transitions are rejected @rule:threads.lifecycle.validated-transitions', () => {
