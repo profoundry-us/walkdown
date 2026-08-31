@@ -325,6 +325,13 @@ test('the panel will not accept work without a named person, and asks for the re
   // The thread is untouched: nothing was accepted under nobody's name.
   const after = (await payload(page)).threads.find((t) => t.id === addressed.id);
   expect(after.status).toBe('addressed');
+
+  // And the refusal belongs to the moment it refused: leave the screen and
+  // come back, and it is gone rather than standing over the next reading.
+  await page.getByTestId('thread.close').click();
+  await page.locator(`[data-open-thread="${addressed.id}"]`).first().click();
+  await expect(page.getByTestId('thread.actions').first()).toBeVisible();
+  await expect(page.getByTestId('thread.say')).toHaveCount(0);
 });
 
 test('choosing a blueprint about another page takes you there', {

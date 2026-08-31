@@ -2458,6 +2458,7 @@ function wireGlobals() {
 
     if (msg.type === 'walkdown:open-thread') {
       S.openThread = msg.id;
+      S.threadSay = '';
       markSeen(msg.id);
       S.view = 'thread';
       const t = (S.data?.threads ?? []).find((x) => x.id === msg.id);

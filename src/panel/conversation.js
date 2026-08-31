@@ -62,11 +62,11 @@ export function markSeen(id) {
   store.set(SEEN_KEY(), { ...seen });
 }
 
+// State, like its two siblings on the rule pane (9d9638a): a refusal written
+// straight into the DOM outlives the thread it refused.
 export function say(msg) {
-  const el = D.host.querySelector('#wdp-tsay');
-  if (!el) return toast(msg, { tone: 'error' });
-  el.textContent = msg;
-  el.classList.remove('hidden');
+  S.threadSay = msg;
+  requestRender();
 }
 
 // Same shape as sayVerdict, for the composer's line: state, so the refusal
@@ -215,6 +215,7 @@ export async function threadAct(id, status) {
     // the pane and stranding the reader on a blank one.
     if (TERMINAL.includes(status)) {
       S.openThread = null;
+      S.threadSay = '';
       if (S.view === 'thread') S.view = S.selected ? 'detail' : 'list';
       // An ended conversation is a finished piece of work, whichever way it
       // ended - verified, waived or incorporated - so it reads as one.
@@ -309,6 +310,7 @@ export function openThreadView(id) {
     return toast(`No thread ${esc(id)} here.`, { tone: 'error' });
   S.openThread = id;
   S.threadNote = '';
+  S.threadSay = '';
   markSeen(id);
   S.view = 'thread';
   requestRender();

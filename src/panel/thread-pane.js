@@ -93,6 +93,7 @@ function leaveThread() {
   const t = (S.data?.threads ?? []).find((x) => x.id === S.openThread);
   S.view = S.listTab !== 'threads' && t?.anchor?.rule && S.selected ? 'detail' : 'list';
   S.openThread = null;
+  S.threadSay = '';
   requestRender();
 }
 
@@ -200,6 +201,10 @@ export function threadPane() {
             @click=${() => threadAct(t.id, st)}>${label}</button>`,
         )}
       </div>
-      <div class="mt-1 hidden text-[11px] text-warning" data-testid="thread.say" id="wdp-tsay"></div>
+      ${
+        S.threadSay
+          ? html`<div class="mt-1 text-[11px] text-warning" data-testid="thread.say">${S.threadSay}</div>`
+          : nothing
+      }
     </div>`;
 }
