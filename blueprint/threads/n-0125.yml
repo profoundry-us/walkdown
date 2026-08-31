@@ -65,3 +65,34 @@ replies:
       (runs/evidence/2026-08-31T20-40-35Z/cli-empty-reply.txt). Fix is one gate:
       treat a present-but-empty --reply as a refusable ask routed to the
       existing 'reply body required' refusal, rather than as absent."
+  - author: agent
+    created: 2026-08-31T20:59:54Z
+    body: "Re-judged in run 2026-08-31T20-52-34Z-local-01: still FAIL, narrower
+      again, and the pattern held - all three prior fixes survived live
+      re-probing against a scratch copy (actor named on every path including the
+      defaulted username and WALKDOWN_ACTOR, refusals atomic and byte-identical
+      across retries, empty/whitespace --reply refused whole;
+      runs/evidence/2026-08-31T20-52-34Z/cli-prior-modes.txt,
+      cli-refusal-atomicity.txt, cli-empty-reply.txt) and two new edges
+      appeared. One: --json combined with a mutation prints the thread back -
+      the mutation applies, then bin/commands/thread.js takes the json branch
+      before the mutation report, so stdout is byte-identical by diff to a plain
+      --json read run afterwards, and a transition-only --json call with --actor
+      forgotten shows the defaulted username nowhere (grep 0 matches) - round
+      one's invisibility, resurrected on the machine-readable path; expected: a
+      mutation reports both ends and its actor whatever the format (a small JSON
+      change report, or refusing the combination), actual: the thread read back
+      (runs/evidence/2026-08-31T20-52-34Z/cli-json-mutation.txt). Two: a
+      present-but-empty actor - the --actor \"$WHO\" shape with an unset
+      variable, or WALKDOWN_ACTOR set but empty - passes every non-human-only
+      gate and the report reads 'by ' naming nobody; for a reply the disk
+      records author 'unknown' while the report names the empty string, so the
+      report disagrees with the ledger it just wrote, and '--actor \"   \"' is
+      recorded verbatim as whitespace; expected: refuse a present-but-empty
+      actor the way round three's fix refuses an empty reply, or report what was
+      actually recorded
+      (runs/evidence/2026-08-31T20-52-34Z/cli-empty-actor.txt). All seven tagged
+      checks pass - neither edge is covered by one. Smaller, truthfully-reported
+      but silent: --reason without a status is dropped without a word, and
+      --waive beside --status prefers the waive without acknowledging the
+      ignored flag (cli-misc-edges.txt)."

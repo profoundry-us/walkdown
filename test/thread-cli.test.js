@@ -8,7 +8,7 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { tmpdir, userInfo } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
 
@@ -112,6 +112,29 @@ test('an empty reply is refused, not read back - and drops no status change @rul
     );
     assert.equal(readFileSync(file, 'utf8'), before, 'refused whole, nothing landed');
   }
+});
+
+test('a mutating --json call reports the change, never the thread @rule:threads.lifecycle.says-what-it-did', () => {
+  // Round four (n-0125): the json branch ran first, so a mutation's stdout
+  // was byte-identical to a read - round one's invisibility, machine-readable.
+  const bp = fixture('jsonmut', { id: 'n-0008', status: 'open' });
+  const doc = JSON.parse(run(['n-0008', '--actor', 'agent', '--status', 'addressed', '--json'], bp));
+  assert.equal(doc.was, 'open');
+  assert.equal(doc.status, 'addressed');
+  assert.equal(doc.by, 'agent', 'recorded-under survives into the machine format');
+  assert.equal(doc.replies_added, 0);
+  assert.equal(doc.body, undefined, 'a mutation must not print the conversation');
+});
+
+test('a present-but-empty actor defaults visibly, and the report matches the disk @rule:threads.lifecycle.says-what-it-did', () => {
+  // Round four (n-0125): `--actor "$WHO"` with an unset variable named nobody
+  // in the report while the disk recorded `author: unknown`.
+  const me = userInfo().username;
+  const bp = fixture('noactor', { id: 'n-0009', status: 'open' });
+  const out = run(['n-0009', '--actor', '', '--reply', 'noted'], bp);
+  assert.match(out, new RegExp(`by ${me}`), 'the default is named, never an empty string');
+  const disk = readFileSync(join(bp, 'threads', 'n-0009.yml'), 'utf8');
+  assert.match(disk, new RegExp(`author: ${me}`), 'the ledger records the same name the report gave');
 });
 
 test('a refused transition says so and exits non-zero @rule:threads.lifecycle.says-what-it-did', () => {

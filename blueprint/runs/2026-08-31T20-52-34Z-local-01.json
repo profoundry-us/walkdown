@@ -1,0 +1,29 @@
+{
+  "run_id": "2026-08-31T20-52-34Z-local-01",
+  "created": "2026-08-31T20:52:34Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "49b69ce",
+  "spec_hash": "sha256:4c52ef26f897",
+  "note": "Fourth single-rule judgment of threads.lifecycle.says-what-it-did after n-0125's three fails; headless, every mutation run against the scratch copy judge-0831-cli4, taken away after.",
+  "results": [
+    {
+      "rule": "threads.lifecycle.says-what-it-did",
+      "status": "fail",
+      "statement_hash": "sha256:224b3a652a3a",
+      "evidence": [
+        "runs/evidence/2026-08-31T20-52-34Z/cli-prior-modes.txt",
+        "runs/evidence/2026-08-31T20-52-34Z/cli-refusal-atomicity.txt",
+        "runs/evidence/2026-08-31T20-52-34Z/cli-empty-reply.txt",
+        "runs/evidence/2026-08-31T20-52-34Z/cli-json-mutation.txt",
+        "runs/evidence/2026-08-31T20-52-34Z/cli-empty-actor.txt",
+        "runs/evidence/2026-08-31T20-52-34Z/cli-misc-edges.txt",
+        "runs/evidence/2026-08-31T20-52-34Z/tagged-checks.txt"
+      ],
+      "reasoning": "Judged live against the scratch copy judge-0831-cli4 at 49b69ce, re-probing all three prior failure modes and then hunting new edges. Every prior fix holds: each mutation names its actor on every path including the defaulted username and a WALKDOWN_ACTOR env actor, a bare reply says 'still <status>', a waive names its person, reading with no flags prints the conversation (cli-prior-modes.txt); seven refusal shapes - illegal transition, human-only gate, nonsense status word, missing reason, same-status, unknown id - all say why on stderr with exit 2 and leave the thread file byte-identical by sha256 across three retries (cli-refusal-atomicity.txt); a present-but-empty or whitespace --reply is refused whole, alone and with a valid --status (cli-empty-reply.txt); reply counts are honest including '+2 replies' when a reason and a reply both land, and a question-kind transition reports the same shape (cli-misc-edges.txt); all seven tagged checks pass (tagged-checks.txt). The verdict is fail on two edges the checks do not reach. First, --json combined with a mutation does exactly what the statement forbids: bin/commands/thread.js applies the mutation, then the json branch prints the thread back - stdout byte-identical by diff to a plain --json read run afterwards, and on a transition-only --json call with --actor forgotten the silently-defaulted username appears nowhere in the output (grep 0 matches), resurrecting round one's invisibility on the machine-readable path; no line names the status it left (cli-json-mutation.txt). Second, a present-but-empty actor - the --actor \"$WHO\" shape with an unset variable, or WALKDOWN_ACTOR set but empty - is accepted on every non-human-only path and the report reads 'by ' with nobody after it; worse, for a reply the disk records author 'unknown' while the report names the empty string, so the report disagrees with what was recorded, and a whitespace actor is recorded verbatim as '   ' (cli-empty-actor.txt); the human-only gate already refuses blank actors, so only the agent-reachable paths accept them. Expected by the statement's words: a mutation report that names both ends and who it was recorded under whatever the output format, and an empty actor either refused like the empty reply or reported as what the ledger actually wrote. Also observed, not counted as failures because the reports stay truthful about what did happen: --reason without a status (alone, or beside --reply) is silently dropped, and conflicting --waive --status silently prefers the waive while reporting the waive accurately.",
+      "threads": ["n-0125"]
+    }
+  ]
+}

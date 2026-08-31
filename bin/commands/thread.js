@@ -31,7 +31,10 @@ export function run(args) {
   }
   let blueprint = loadOrExit(values.dir);
 
-  const actor = values.actor ?? process.env.WALKDOWN_ACTOR ?? userInfo().username;
+  const actor =
+    [values.actor, process.env.WALKDOWN_ACTOR, userInfo().username]
+      .map((a) => a?.trim())
+      .find(Boolean) ?? 'unknown';
   const status = values.verify
     ? 'verified'
     : values.reopen
@@ -69,7 +72,7 @@ export function run(args) {
     console.error(`No thread "${id}". \`walkdown threads --all\` lists every thread.`);
     process.exit(2);
   }
-  if (values.json) {
+  if (values.json && !mutating) {
     console.log(JSON.stringify(t, null, 2));
     return end(0);
   }
@@ -83,6 +86,23 @@ export function run(args) {
    */
   if (mutating) {
     const added = (t.replies ?? []).length - (was?.replies ?? []).length;
+    const under =
+      (t.status === 'verified' && t.verified_by) ||
+      (t.status === 'waived' && t.waived_by) ||
+      actor;
+    if (values.json) {
+      console.log(
+        JSON.stringify({
+          id: t.id,
+          was: was?.status ?? null,
+          status: t.status,
+          moved: Boolean(status),
+          by: under,
+          replies_added: added,
+        }),
+      );
+      return end(0);
+    }
     const parts = [];
     if (status) parts.push(`${was?.status ?? '?'} → ${paintStatus(t.status)}`);
     else parts.push(`still ${paintStatus(t.status)}`);
@@ -93,11 +113,7 @@ export function run(args) {
      * status-gated, because a reopened thread still carries the old
      * waived_by; the actor is what this invocation ran under either way.
      */
-    parts.push(
-      `by ${
-        (t.status === 'verified' && t.verified_by) || (t.status === 'waived' && t.waived_by) || actor
-      }`,
-    );
+    parts.push(`by ${under}`);
     if (added > 0) parts.push(`+${added} ${added === 1 ? 'reply' : 'replies'}`);
     console.log(`✓ ${t.id} ${parts.join(' · ')}`);
     console.log(dim(`  ${anchorText(t.anchor)}`));
