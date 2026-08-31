@@ -4,7 +4,7 @@ author: agent
 created: 2026-08-31T04:11:53Z
 anchor:
   rule: threads.lifecycle.says-what-it-did
-status: open
+status: addressed
 body: "Agent sitting 2026-08-31: FAIL on the recorded-under clause. The
   statement promises a mutation report says who the change was recorded under;
   live against the scratch copy, a transition prints '✓ n-0093 open → addressed
@@ -130,3 +130,31 @@ replies:
       re-examined and upheld as truthful: an orphan --reason lands nowhere and
       claims nothing, and --waive beside --status reports the move that actually
       happened (cli-misc-edges.txt)."
+  - author: agent
+    created: 2026-08-31T21:17:38Z
+    body: "Re-judged in run 2026-08-31T21-12-08Z-local-01: PASS - round six found
+      nothing left to narrow. Every prior round's failure mode was re-probed
+      live against a scratch copy and held: mutations name their actor on every
+      path including the defaulted machine username and an env actor, report
+      matching disk (runs/evidence/2026-08-31T21-12-08Z/cli-prior-modes.txt);
+      refusals are atomic - a combined reply with a refused waive left
+      n-0096.yml byte-identical by sha256 across three attempts, why on stderr,
+      exit 2, stdout empty (cli-refusal-atomicity.txt); empty and whitespace
+      --reply refuse whole even beside a valid --status or a valid human waive
+      (cli-empty-reply.txt); --json mutations print a change report with both
+      ends, actor and replies_added while refused --json keeps stdout empty, and
+      a present-but-empty --actor falls through with report agreeing with the
+      ledger (cli-json-mutation.txt); and round five's fix in 3dc2b0b holds - a
+      reply to a waived or verified thread reports its own actor, agent or the
+      visibly-defaulted username, never the status holder, in text and JSON,
+      while the bare read keeps 'waived by Probe Human' as the record
+      (cli-reply-to-terminal.txt). New round-six probes stayed clean: combined
+      reply+transition reports one line with both ends and count,
+      waive-with-reason counts +2 replies, question flows report identically,
+      flagless read prints the whole conversation, a mutation on a missing
+      thread refuses on stderr exit 2, and a set -e loop stops at the first
+      refusal with the refused thread untouched (cli-round6-probes.txt). All ten
+      tagged checks pass and the terminal-reply gap is now itself tagged
+      (tagged-checks.txt). The two truthful-but-silent flag edges from round
+      four remain and I concur they do not violate the statement. Marking
+      addressed; verification is a human's call."

@@ -1,0 +1,27 @@
+{
+  "kind": "walkdown",
+  "actor": "agent",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "created": "2026-08-31T21:12:08Z",
+  "git_sha": "2bdb951",
+  "spec_hash": "sha256:4c52ef26f897",
+  "results": [
+    {
+      "rule": "threads.lifecycle.says-what-it-did",
+      "status": "pass",
+      "statement_hash": "sha256:224b3a652a3a",
+      "evidence": [
+        "runs/evidence/2026-08-31T21-12-08Z/cli-prior-modes.txt",
+        "runs/evidence/2026-08-31T21-12-08Z/cli-refusal-atomicity.txt",
+        "runs/evidence/2026-08-31T21-12-08Z/cli-empty-reply.txt",
+        "runs/evidence/2026-08-31T21-12-08Z/cli-json-mutation.txt",
+        "runs/evidence/2026-08-31T21-12-08Z/cli-reply-to-terminal.txt",
+        "runs/evidence/2026-08-31T21-12-08Z/cli-round6-probes.txt",
+        "runs/evidence/2026-08-31T21-12-08Z/tagged-checks.txt"
+      ],
+      "reasoning": "Round six, and for the first time nothing gave: all five prior failure modes were re-probed live against a scratch copy and every one held - each mutation names its actor including the defaulted machine username and an env-supplied one, with report matching disk (cli-prior-modes.txt); a combined reply with a refused transition writes nothing, n-0096.yml byte-identical by sha256 across three attempts, why on stderr and exit 2 with stdout empty (cli-refusal-atomicity.txt); empty and whitespace --reply are refused whole, even beside a valid --status and even beside a valid human waive, with no partial write (cli-empty-reply.txt); --json mutations print a change report carrying both ends, the actor and an explicit replies_added while a refused --json keeps stdout empty, and a present-but-empty --actor falls through to the next source with the report agreeing with the ledger on every combination (cli-json-mutation.txt); a reply to a waived or verified thread now reports its own actor - agent, or the visibly-defaulted username - never the status holder, in text and JSON alike, while the bare read still shows 'waived by Probe Human' as the record (cli-reply-to-terminal.txt). New probes of my own found nothing the statement condemns: a combined reply+transition reports one line with both ends, actor and count, a waive-with-reason counts both landed replies as '+2 replies', question-kind flows report identically, a flagless read prints the whole conversation, a mutation aimed at a missing thread refuses on stderr with exit 2, and a set -e loop over three threads stops at the first refusal with the refused thread untouched (cli-round6-probes.txt). Round four's two truthful-but-silent edges remain (an orphan --reason lands nowhere and claims nothing; --waive beside --status reports the move that actually happened) and I concur with rounds four and five that neither violates a statement about reporting the change made. All ten tagged checks pass, and the terminal-reply gap round five named is now itself a tagged check (tagged-checks.txt). Judged by driving the CLI against a disposable copy, not by reading the code.",
+      "threads": []
+    }
+  ]
+}
