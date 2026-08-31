@@ -74,12 +74,20 @@ export function run(args) {
   if (mutating) {
     const added = (t.replies ?? []).length - (was?.replies ?? []).length;
     const parts = [];
-    if (status) {
-      parts.push(`${was?.status ?? '?'} → ${paintStatus(t.status)}`);
-      if (t.status === 'waived' && t.waived_by) parts.push(`by ${t.waived_by}`);
-    } else {
-      parts.push(`still ${paintStatus(t.status)}`);
-    }
+    if (status) parts.push(`${was?.status ?? '?'} → ${paintStatus(t.status)}`);
+    else parts.push(`still ${paintStatus(t.status)}`);
+    /*
+     * Who it was recorded under, on every path - the forgotten --actor that
+     * silently defaults to a machine username is exactly the mistake this
+     * line exists to surface (n-0125). Prefer what the thread recorded -
+     * status-gated, because a reopened thread still carries the old
+     * waived_by; the actor is what this invocation ran under either way.
+     */
+    parts.push(
+      `by ${
+        (t.status === 'verified' && t.verified_by) || (t.status === 'waived' && t.waived_by) || actor
+      }`,
+    );
     if (added > 0) parts.push(`+${added} ${added === 1 ? 'reply' : 'replies'}`);
     console.log(`✓ ${t.id} ${parts.join(' · ')}`);
     console.log(dim(`  ${anchorText(t.anchor)}`));
@@ -87,7 +95,13 @@ export function run(args) {
     return end(0);
   }
   console.log(
-    `${t.id} · ${t.kind} · ${paintStatus(t.status)}${t.status === 'waived' && t.waived_by ? dim(` by ${t.waived_by}`) : ''}`,
+    `${t.id} · ${t.kind} · ${paintStatus(t.status)}${
+      t.status === 'waived' && t.waived_by
+        ? dim(` by ${t.waived_by}`)
+        : t.status === 'verified' && t.verified_by
+          ? dim(` by ${t.verified_by}`)
+          : ''
+    }`,
   );
   console.log(dim(`  ${anchorText(t.anchor)}`));
   console.log(dim(`  ${t.author ?? 'unknown'} · ${t.created ?? 'undated'}`));

@@ -60,8 +60,18 @@ test('a reply with no transition says the status did not move @rule:threads.life
   const bp = fixture('replied', { id: 'n-0002', status: 'open' });
   const out = run(['n-0002', '--actor', 'agent', '--reply', 'looking at it'], bp);
   assert.match(out, /still open/, 'silence about the status would imply it changed');
+  assert.match(out, /by agent/, 'recorded under is named even when nothing moved');
   assert.match(out, /\+1 reply/);
   assert.doesNotMatch(out, /→/, 'nothing moved, so nothing may be reported as having moved');
+});
+
+test('every mutation names who it was recorded under @rule:threads.lifecycle.says-what-it-did', () => {
+  // The mistake this line exists to surface: --actor forgotten, the machine
+  // username silently recorded. n-0125 found only the waive path said so.
+  const bp = fixture('under', { id: 'n-0005', status: 'open' });
+  const out = run(['n-0005', '--actor', 'A Person', '--status', 'addressed'], bp);
+  assert.match(out, /open → addressed/);
+  assert.match(out, /by A Person/, 'a plain transition names its actor, not only a waive');
 });
 
 test('reading a thread still prints the conversation @rule:threads.lifecycle.says-what-it-did', () => {
