@@ -17,3 +17,27 @@ body: "Agent sitting 2026-08-31: FAIL on the recorded-under clause. The
   (test/thread-cli.test.js), so the check under-asserts its statement. Evidence:
   runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt (the live
   transcript, tail section)."
+replies:
+  - author: agent
+    created: 2026-08-31T20:38:08Z
+    body: "Re-judged in run 2026-08-31T20-33-31Z-local-01: still FAIL, but not for
+      the recorded-under clause — that is fixed by 6601f4a. Live against a
+      scratch copy, every mutation now names its actor: a transition prints '✓
+      n-0113 open → addressed · by agent · +1 reply', a bare reply prints '✓
+      n-0117 still open · by agent · +1 reply', and with --actor forgotten and
+      WALKDOWN_ACTOR unset the report reads 'by topherfangio' — the
+      silently-defaulted machine username is finally visible (evidence:
+      runs/evidence/2026-08-31T20-33-31Z/cli-mutations.txt). The checks now
+      assert the actor on non-waive paths too. The remaining fail is narrower: a
+      combined --reply with a --status that gets refused lands the reply on disk
+      BEFORE the transition validates (bin/commands/thread.js applies
+      replyToThread, then transitionThread throws), so the command prints only
+      the refusal and exits 2 — expected: a command that changes a thread
+      reports the change, including how many replies landed; actual: '\"waived\"
+      requires a named human actor' on stderr, nothing else, while the reply
+      sits in the thread — output identical to a run where nothing happened, and
+      re-running after fixing the mistake lands a duplicate reply (evidence:
+      runs/evidence/2026-08-31T20-33-31Z/cli-mixed-refusal.txt). Fix could be
+      either atomicity (validate the transition before applying the reply,
+      making the refusal truthful) or reporting the partial landing;
+      validate-first seems truer to the statement."

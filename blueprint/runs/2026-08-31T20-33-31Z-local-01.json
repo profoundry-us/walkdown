@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-08-31T20-33-31Z-local-01",
+  "created": "2026-08-31T20:33:31Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "d1ec05c-dirty",
+  "tree_hash": "sha256:3a11070effb7",
+  "spec_hash": "sha256:42106cbc07b9",
+  "note": "Single-rule re-judgment of threads.lifecycle.says-what-it-did after n-0125's fail; headless, every mutation run against the scratch copy judge-0831-cli, taken away after.",
+  "results": [
+    {
+      "rule": "threads.lifecycle.says-what-it-did",
+      "status": "fail",
+      "statement_hash": "sha256:224b3a652a3a",
+      "evidence": [
+        "runs/evidence/2026-08-31T20-33-31Z/cli-mutations.txt",
+        "runs/evidence/2026-08-31T20-33-31Z/cli-refusals.txt",
+        "runs/evidence/2026-08-31T20-33-31Z/cli-mixed-refusal.txt"
+      ],
+      "reasoning": "Judged live against a scratch copy, driving bin/walkdown.js thread through every clause. The clause n-0125 failed is fixed: a transition prints '✓ n-0113 open → addressed · by agent · +1 reply', a bare reply prints 'still open · by agent · +1 reply', and with --actor forgotten and WALKDOWN_ACTOR unset the report says 'by topherfangio' — the silently-defaulted machine username the clause exists to surface is now visible, and the tagged checks in test/thread-cli.test.js now assert the actor on non-waive paths. Waiving names its person, a bare read still prints the whole conversation, and every refusal I could provoke (already at that status, illegal flow, agent at a human-only gate, missing reason, unknown id) says why on stderr with empty stdout and exit 2. But trying to break the refusal path found the statement's opening claim failing on one real path: a combined --reply with a refused --status (cli-mixed-refusal.txt) lands the reply on disk first, then prints only the refusal — output identical to a run in which nothing happened, which is exactly the 'output that looks the same whether or not anything happened' the statement names; a caller who fixes their mistake and re-runs the same command lands a duplicate reply without ever being told the first one landed. The steps' refusal clause reads satisfied as written, but the statement is authoritative and it promises that a command which changes a thread reports the change — this one changed the thread and reported as if it had not.",
+      "threads": ["n-0125"]
+    }
+  ]
+}

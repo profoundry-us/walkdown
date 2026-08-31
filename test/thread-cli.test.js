@@ -7,7 +7,7 @@
  */
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
@@ -79,6 +79,20 @@ test('reading a thread still prints the conversation @rule:threads.lifecycle.say
   const out = run(['n-0003'], bp);
   assert.match(out, /A thing that is wrong/, 'reading is a different ask from changing');
   assert.doesNotMatch(out, /→/);
+});
+
+test('a refused transition refuses the whole mutation - the reply never lands @rule:threads.lifecycle.says-what-it-did', () => {
+  // Found by the judging agent on 2026-08-31 (n-0125, second round): the
+  // reply used to be written BEFORE the transition validated, so the output
+  // denied a change that had happened, and a retry duplicated the reply.
+  const bp = fixture('mixed', { id: 'n-0006', status: 'open' });
+  const file = join(bp, 'threads', 'n-0006.yml');
+  const before = readFileSync(file, 'utf8');
+  assert.throws(
+    () => run(['n-0006', '--actor', 'A Person', '--reply', 'and verified', '--verify'], bp),
+    (err) => err.status === 2 && /illegal transition/.test(String(err.stderr)),
+  );
+  assert.equal(readFileSync(file, 'utf8'), before, 'a refused command must have written nothing');
 });
 
 test('a refused transition says so and exits non-zero @rule:threads.lifecycle.says-what-it-did', () => {

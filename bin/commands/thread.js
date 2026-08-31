@@ -3,7 +3,7 @@ import { parseArgs } from 'node:util';
 import { loadBlueprint } from '../../lib/blueprint.js';
 import { anchorText, paintStatus } from '../../lib/report/threads.js';
 import { dim } from '../../lib/report/tty.js';
-import { getThread, replyToThread, transitionThread } from '../../lib/threads.js';
+import { checkTransition, getThread, replyToThread, transitionThread } from '../../lib/threads.js';
 import { end, loadOrExit } from './context.js';
 
 export function run(args) {
@@ -45,6 +45,9 @@ export function run(args) {
   const was = mutating ? getThread(blueprint, id) : null;
   if (mutating) {
     try {
+      // Validate the transition before ANY write: a refused status must
+      // refuse the whole command, or the reply lands and the output denies it.
+      if (status && was) checkTransition(was, { status, actor, reason: values.reason });
       if (values.reply) replyToThread(blueprint, id, { author: actor, body: values.reply });
       if (status) transitionThread(blueprint, id, { status, actor, reason: values.reason });
     } catch (err) {

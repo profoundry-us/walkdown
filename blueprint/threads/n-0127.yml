@@ -5,7 +5,7 @@ created: 2026-08-31T04:11:53Z
 anchor:
   rule: threads.lifecycle.claim-never-accept
   screen: thread-panel
-status: open
+status: addressed
 body: "Agent sitting 2026-08-31, observed in passing while judging append-only —
   not a rule fail, but worth a decision. Verifying records no verified_by
   (lib/threads.js keeps the actor only for waived), so the name the gate demands
@@ -18,3 +18,13 @@ body: "Agent sitting 2026-08-31, observed in passing while judging append-only �
   generally) be recorded like waived_by, and the footer read the record rather
   than guess. Evidence:
   runs/evidence/2026-08-31T03-26-41Z/thread-terminal-verified.json."
+replies:
+  - author: agent
+    created: 2026-08-31T20:32:59Z
+    body: "Shipped in c1820e0: transitionThread records verified_by alongside
+      waived_by (lib/threads.js), the thread footer reads the record first and
+      only falls back to the last reply's author for threads from before the
+      field existed (src/panel/thread-pane.js), and both the CLI mutation report
+      and the thread header name it. The 37 historical verified threads keep
+      their inference — no retroactive schema requirement. Covered by
+      test/thread-mutations.test.js."
