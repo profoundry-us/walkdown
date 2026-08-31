@@ -279,3 +279,13 @@ through the target, anchors, where evidence goes, how a verdict is recorded,
 and the governance, built-in lines plus the project's own — ready to hand to
 any agent with a browser. It judges nothing itself; the prompt ends where the
 reader begins. The shipped judge and sitting skills now walk this shape.
+
+One known limitation, found on the first live run (2026-08-31,
+`panel.viewport.device-presets`): the browser a judging agent drives shows it
+screenshots but does not put them on disk, so the PNG half of the evidence
+cannot be saved from inside the judging itself. The accepted idiom until the
+tooling grows a save-to-file affordance: file the measurements as probe
+output (a JSON the agent writes directly), and capture the screenshots by
+re-driving the judged states with a small throwaway script. The judgment
+stays what the agent drove and saw; the script only echoes it for the
+record, and the reasoning should say that is what happened.

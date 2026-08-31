@@ -50,6 +50,13 @@ verify requirement).
    `app-<screen>.png` — ask, never assume, because evidence does not
    necessarily live in the repository (docs/08-locations.md).
 
+   If the browser you drive shows you screenshots but cannot save them to
+   disk (a current limitation of built-in browser tooling — docs/11), file
+   what you measured as probe output you write directly, and save the PNGs
+   by re-driving the judged states with a small throwaway script. Your
+   judgment is what you drove and saw; the script only echoes it for the
+   record — say so in your reasoning.
+
    **Record the paths as `runs/evidence/<ISO-timestamp>/<file>` whatever the
    answer was.** That is a logical key, not a filesystem path: a run says which
    evidence it left, never which disk somebody filed it on, and the server
