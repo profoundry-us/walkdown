@@ -4,10 +4,11 @@ author: agent
 created: 2026-08-30T22:45:00Z
 anchor:
   rule: locations.default.nothing-in-the-tree
-status: open
-body: "Filed while formulating this feature, because the rule above says every
-  record lands outside the repository FILED BY PROJECT, and in one shape that
-  is currently untrue.
+status: addressed
+body: >-
+  Filed while formulating this feature, because the rule above says every record
+  lands outside the repository FILED BY PROJECT, and in one shape that is
+  currently untrue.
 
   The project id is: the matching config entry's id, or the blueprint's own
   `project:` field, or - last - the basename of the git root. The last one is
@@ -17,20 +18,38 @@ body: "Filed while formulating this feature, because the rule above says every
   directory. Two packs initialised on the same laptop would share one spec.
 
   Nothing has been lost - the fallback only applies where no blueprint exists,
-  so it is reached at init time and by `walkdown where` before there is
-  anything to collide. But it is a trap laid for exactly the audience the
-  default-out design is meant to serve: a person trying walkdown on a large
-  repository, twice.
+  so it is reached at init time and by `walkdown where` before there is anything
+  to collide. But it is a trap laid for exactly the audience the default-out
+  design is meant to serve: a person trying walkdown on a large repository,
+  twice.
 
   Two fixes were discussed on 2026-08-28 and neither is an agent's to choose:
 
   1. A numbered blueprint registry - `~/.walkdown/blueprints/0001-slug/` with
-     ids allocated on creation, and `projects/` renamed to match. This also
-     answers the case a project id cannot: several blueprints inside ONE pack,
-     which a name-based scheme has nowhere to put. It needs a migration for
-     the two directories that exist today.
-  2. Deriving the id from the path within the repository rather than the repo
-     name, which is cheaper and fixes only the collision.
+  ids allocated on creation, and `projects/` renamed to match. This also answers
+  the case a project id cannot: several blueprints inside ONE pack, which a
+  name-based scheme has nowhere to put. It needs a migration for the two
+  directories that exist today. 2. Deriving the id from the path within the
+  repository rather than the repo name, which is cheaper and fixes only the
+  collision.
 
   The second is a patch; the first is the structure the rest of this feature
-  already implies. Worth deciding before anyone points walkdown at a monorepo."
+  already implies. Worth deciding before anyone points walkdown at a monorepo.
+replies:
+  - author: agent
+    created: 2026-08-31T21:18:40Z
+    body: "Topher chose the numbered blueprint registry (2026-08-31), and it shipped
+      in 021e60c: homes are allocated at ~/.walkdown/blueprints/NNNN-slug/ with
+      index.yml as the allocation record, keyed by spec path (repository root
+      while a fresh project has no spec). Asking allocates nothing — walkdown
+      where words a fresh project's answer as 'allocated on first write' and
+      leaves the disk alone; the first write claims the number (through the
+      review server the claim happens at server start, so a browser request
+      still writes only to threads, drafts and runs). A legacy projects/<id>
+      home keeps answering, marked legacy, until walkdown migrate renumbers it
+      and re-points the personal config; a home no config entry claims is
+      reported and left standing. Spec'd as
+      locations.default.one-home-per-blueprint (origin this thread) with three
+      tagged checks, documented in docs/08-locations.md. Migrate ran on this
+      machine: projects/walkdown → blueprints/0001-walkdown with the config
+      re-pointed; projects/serve-fixture reported unclaimed and left."
