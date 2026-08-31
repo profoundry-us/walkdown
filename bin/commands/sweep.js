@@ -2,6 +2,7 @@ import { userInfo } from 'node:os';
 import { parseArgs } from 'node:util';
 import { dim, green, red } from '../../lib/report/tty.js';
 import { writeSweep } from '../../lib/run-record.js';
+import { TIERS } from '../../lib/vocab.js';
 import { end, loadOrExit } from './context.js';
 
 /*
@@ -24,7 +25,7 @@ export function run(args) {
     .split(',')
     .map((t) => t.trim())
     .filter(Boolean);
-  const bad = tiers.filter((t) => !['checks', 'agent', 'human'].includes(t));
+  const bad = tiers.filter((t) => ![...TIERS, 'human'].includes(t));
   if (bad.length) {
     console.error(`${red('unknown tier')}: ${bad.join(', ')} — expected checks, agent or human`);
     return end(1);

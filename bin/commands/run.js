@@ -1,5 +1,4 @@
 import { existsSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 import { green, yellow } from '../../lib/report/tty.js';
 import { loadOrExit } from './context.js';
@@ -11,9 +10,14 @@ export async function run(args) {
   });
   const blueprint = loadOrExit(values.dir);
   const { runChecks } = await import('../../lib/run-cmd.js');
-  const before = new Set(
-    existsSync(join(blueprint.dir, 'runs')) ? readdirSync(join(blueprint.dir, 'runs')) : [],
-  );
+  /*
+   * The RESOLVED runs directory, not `<spec>/runs`. They are the same path
+   * until a config moves the ledger - and then the hardcoded one reported
+   * "no run record was written" over a record that was, which reads as a
+   * broken reporter to the person who just watched their tests pass.
+   */
+  const runsDir = blueprint.at.runs.path;
+  const before = new Set(existsSync(runsDir) ? readdirSync(runsDir) : []);
   let result;
   try {
     result = runChecks(blueprint, { target: values.target ?? 'local', rule: values.rule });
@@ -21,9 +25,7 @@ export async function run(args) {
     console.error(err.message);
     process.exit(2);
   }
-  const after = existsSync(join(blueprint.dir, 'runs'))
-    ? readdirSync(join(blueprint.dir, 'runs'))
-    : [];
+  const after = existsSync(runsDir) ? readdirSync(runsDir) : [];
   const recorded = after.filter((f) => !before.has(f) && f.endsWith('.json'));
   if (recorded.length)
     console.log(

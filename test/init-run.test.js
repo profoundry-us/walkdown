@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import {
   existsSync,
   mkdirSync,
@@ -204,6 +205,45 @@ test('an edited skill is kept unless forced @rule:locations.default.skills-are-y
   assert.equal(readFileSync(mine, 'utf8'), '# mine now\n', 'a procedure somebody edited was meant');
   assert.equal(installSkills(into, { force: true }).find((r) => r.path === mine).action, 'updated');
   assert.match(readFileSync(mine, 'utf8'), /^---\nname: walkdown-judge/);
+});
+
+/*
+ * `walkdown run` decides whether a record landed by diffing the runs
+ * directory - so it has to diff the RESOLVED one. With a config that moves
+ * the ledger, the old `<spec>/runs` said "no run record was written" over a
+ * record that was, which reads as a broken reporter to the person who just
+ * watched their tests pass.
+ */
+test('run sees a record arrive in a runs directory a config moved @rule:locations.keeping.moving-is-a-decision', () => {
+  const proj = join(root, 'moved-ledger');
+  const home = join(root, 'moved-ledger-home');
+  const runsAway = join(home, 'elsewhere', 'runs');
+  mkdirSync(join(proj, 'blueprint'), { recursive: true });
+  mkdirSync(home, { recursive: true });
+  writeFileSync(join(home, 'config.yml'), `defaults:\n  runs: ${runsAway}\n`);
+  // The runner stands in for a real reporter: it appends one record where
+  // the locations resolver says records go.
+  const probe =
+    `node -e "const fs=require('fs');fs.mkdirSync('${runsAway}',{recursive:true});` +
+    `fs.writeFileSync('${runsAway}/probe-run.json','{}')"`;
+  writeFileSync(
+    join(proj, 'blueprint', 'walkdown.yml'),
+    ['project: moved-ledger', 'runner:', `  run_all: "${probe.replaceAll('"', '\\"')}"`, ''].join(
+      '\n',
+    ),
+  );
+
+  const out = execFileSync(
+    process.execPath,
+    [
+      new URL('../bin/walkdown.js', import.meta.url).pathname,
+      'run',
+      '--dir',
+      join(proj, 'blueprint'),
+    ],
+    { env: { ...process.env, WALKDOWN_HOME: home } },
+  ).toString();
+  assert.match(out, /recorded.*probe-run\.json/, 'the record was seen where it actually landed');
 });
 
 test('run substitutes {id}, injects target env and WALKDOWN_TARGET, propagates exit code', () => {
