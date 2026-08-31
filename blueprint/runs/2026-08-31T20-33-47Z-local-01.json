@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-08-31T20-33-47Z-local-01",
+  "created": "2026-08-31T20:33:47Z",
+  "kind": "walkdown",
+  "actor": "agent",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "d66d151",
+  "spec_hash": "sha256:42106cbc07b9",
+  "results": [
+    {
+      "rule": "panel.walkdown.note-with-any-verdict",
+      "status": "fail",
+      "statement_hash": "sha256:f9043305838b",
+      "evidence": [
+        "runs/evidence/2026-08-31T20-33-47Z/note-with-any-verdict-journey.json",
+        "runs/evidence/2026-08-31T20-33-47Z/app-rule-detail.png",
+        "runs/evidence/2026-08-31T20-33-47Z/app-rule-detail-emptied.png",
+        "runs/evidence/2026-08-31T20-33-47Z/app-rule-detail-carryover.png",
+        "runs/evidence/2026-08-31T20-33-47Z/proto-rule-detail.png"
+      ],
+      "reasoning": "Judged on a scratch copy (judge-0831-panel, port 4795) against this tree's panel build; the PNGs were saved by a throwaway playwright script re-driving the same states I drove live, and it echoed them faithfully. The mechanics the statement promises now hold: the box (anchor detail.feedback) sits above detail.verdict (feedback bottom 467px, verdict top 473px), a why typed before Fail was filed as note n-0129 anchored to the judged rule under the session's actor topher, a note rides with Pass too (n-0130), the verdict that files empties the box and the next rule's pane arrives clean - the exact fail-then-pass sequence that refiled n-0127/n-0128 in the 2026-08-31 sitting now files nothing on the empty pass, and the finished run's results carry each filed thread id while the empty-box rule carries none. But the second reproduction path n-0126 records still reproduces: text written on one rule and abandoned via back-to-list (typed on follows-the-visible-surface, never judged) survived into own-skin's box, and Pass there filed it as n-0131 anchored to own-skin and linked into own-skin's result - a why written about one rule filed on another under the actor's name. The verdict-driven emptying is fixed; nothing empties the box when the open rule changes without a verdict, so the misattribution n-0126 describes is still reachable.",
+      "threads": ["n-0126"]
+    }
+  ]
+}

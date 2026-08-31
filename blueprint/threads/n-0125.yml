@@ -41,3 +41,27 @@ replies:
       either atomicity (validate the transition before applying the reply,
       making the refusal truthful) or reporting the partial landing;
       validate-first seems truer to the statement."
+  - author: agent
+    created: 2026-08-31T20:46:47Z
+    body: "Re-judged in run 2026-08-31T20-40-35Z-local-01: still FAIL, narrower
+      again. Both prior findings held up under live probing against a scratch
+      copy: every mutation names its actor, including the defaulted machine
+      username when --actor is forgotten
+      (runs/evidence/2026-08-31T20-40-35Z/cli-actor-default.txt), and a combined
+      --reply with a refused --status now writes nothing — n-0126.yml
+      byte-identical by sha256 across three refused attempts, no duplicate on
+      retry (runs/evidence/2026-08-31T20-40-35Z/cli-refusal-atomicity.txt). The
+      remaining fail is the empty-string reply: bin/commands/thread.js line 42
+      computes mutating as Boolean(values.reply || status), so --reply '' — the
+      shape --reply \"$MSG\" takes when the variable is empty, in exactly the
+      loop the statement's refusal clause protects — is treated as no reply
+      given at all. Expected: 'reply body required' on stderr and a non-zero
+      exit, which --reply '   ' (whitespace) already produces. Actual, alone:
+      the whole conversation printed back and exit 0 — a mutation ask answered
+      with read output that looks the same whether or not anything happened.
+      Actual, combined with a valid --status: the transition applies, the reply
+      is silently dropped, and the report reads clean success with no reply
+      count — omitting that zero of the one requested reply landed
+      (runs/evidence/2026-08-31T20-40-35Z/cli-empty-reply.txt). Fix is one gate:
+      treat a present-but-empty --reply as a refusable ask routed to the
+      existing 'reply body required' refusal, rather than as absent."

@@ -19,3 +19,21 @@ body: "Agent sitting 2026-08-31: FAIL — the feedback box is not emptied by the
   Evidence: runs/evidence/2026-08-31T03-57-12Z/walkdown-session-journey.json
   (draft probe: both threads),
   runs/evidence/2026-08-31T04-07-07Z/signoff-journey.json ('next rule box')."
+replies:
+  - author: agent
+    created: 2026-08-31T20:43:30Z
+    body: "Re-judged fresh on a scratch copy (run 2026-08-31T20-33-47Z-local-01):
+      still FAIL, but narrower. The first path is fixed - live() now makes the
+      verdict's clear stick, so fail-with-why (filed n-0129 on the scratch) ->
+      next rule -> empty pass files nothing; a note also rides with Pass
+      (n-0130), the box sits above the verdict row, and the finished run carries
+      each thread id. The second path in this thread still reproduces: text
+      typed on follows-the-visible-surface and abandoned via back-to-list
+      survived into own-skin's box, and Pass there filed it as n-0131 anchored
+      to own-skin - expected an empty box on opening a different rule, actual
+      the stale why filed on the wrong rule and linked into its result.
+      giveVerdict clears S.verdictNote, but nothing clears it when the open rule
+      changes without a verdict (src/panel/app.js open/rule-change path).
+      Evidence:
+      runs/evidence/2026-08-31T20-33-47Z/note-with-any-verdict-journey.json,
+      .../app-rule-detail-carryover.png."

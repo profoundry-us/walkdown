@@ -1,0 +1,29 @@
+{
+  "run_id": "2026-08-31T20-40-35Z-local-01",
+  "created": "2026-08-31T20:40:35Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "d66d151-dirty",
+  "tree_hash": "sha256:c78c2c67df87",
+  "spec_hash": "sha256:42106cbc07b9",
+  "note": "Third single-rule judgment of threads.lifecycle.says-what-it-did after n-0125's two fails; headless, every mutation run against the scratch copy judge-0831-cli3, taken away after.",
+  "results": [
+    {
+      "rule": "threads.lifecycle.says-what-it-did",
+      "status": "fail",
+      "statement_hash": "sha256:224b3a652a3a",
+      "evidence": [
+        "runs/evidence/2026-08-31T20-40-35Z/cli-transcript.txt",
+        "runs/evidence/2026-08-31T20-40-35Z/cli-refusal-atomicity.txt",
+        "runs/evidence/2026-08-31T20-40-35Z/cli-actor-default.txt",
+        "runs/evidence/2026-08-31T20-40-35Z/cli-empty-reply.txt",
+        "runs/evidence/2026-08-31T20-40-35Z/cli-json-mutation.txt",
+        "runs/evidence/2026-08-31T20-40-35Z/tagged-checks.txt"
+      ],
+      "reasoning": "Judged live against the scratch copy judge-0831-cli3, driving bin/walkdown.js thread through every clause and both prior rounds' failure modes. Round one's clause holds everywhere: a transition prints 'open → addressed · by agent', a bare reply 'still open · by agent · +1 reply', a waive names its person, a reopen names the invocation's actor rather than the stale waived_by, and with --actor forgotten and WALKDOWN_ACTOR unset the report reads 'by topherfangio' (cli-actor-default.txt). Round two's atomicity fail is fixed: three refused combined mutations left n-0126.yml byte-identical by sha256, the reply never landed, and the retry that used to duplicate refuses identically (cli-refusal-atomicity.txt). Every refusal I could provoke — human-only gate, missing reason, unknown status word, same-status, unknown id, whitespace-only reply — says why on stderr with empty stdout and exit 2, and the six tagged checks pass (tagged-checks.txt). But probing the mutation gate found the statement failing on one adjacent path: bin/commands/thread.js line 42 computes mutating as Boolean(values.reply || status), so --reply '' — the shape --reply \"$MSG\" takes when the variable is empty, in exactly the loop the statement's refusal clause protects — is treated as no reply given. Alone, the command prints the whole conversation back and exits 0: a mutation ask answered with read output that looks the same whether or not anything happened, while the library's own 'reply body required' refusal (which --reply '   ' correctly triggers with exit 2) is never reached. Combined with a valid --status, the transition applies, the requested reply is silently dropped, and the report reads '✓ n-0128 open → addressed · by agent' with no reply count — a command that changed a thread reporting clean success while omitting that zero of the one requested reply landed (cli-empty-reply.txt). The statement enumerates how many replies landed as part of the report and demands refusals be loud so a loop can stop; this path fails both, so the verdict stays fail, though far narrower than either prior round.",
+      "threads": ["n-0125"]
+    }
+  ]
+}
