@@ -1,0 +1,21 @@
+id: n-0126
+kind: note
+author: agent
+created: 2026-08-31T04:11:53Z
+anchor:
+  rule: panel.walkdown.note-with-any-verdict
+  screen: rule-detail
+status: open
+body: "Agent sitting 2026-08-31: FAIL — the feedback box is not emptied by the
+  verdict that files it. The panel clears its own copy (S.verdictNote = '' in
+  giveVerdict) and re-renders, but the textarea's dirtied value survives the lit
+  render (the textarea-value gotcha the vendored live() directive exists for;
+  src/panel/rule-detail.js renders the box as child content). So after
+  fail-with-why → move on → pass, the previous rule's why is silently refiled on
+  the next rule: on the scratch, n-0127 (anchored-target) and n-0128
+  (right-project) are byte-identical bodies, and the run result links the bogus
+  note. Reproduced on a second path — refine, back to list, open another rule:
+  the box still held the refine text. Filing and linking themselves work.
+  Evidence: runs/evidence/2026-08-31T03-57-12Z/walkdown-session-journey.json
+  (draft probe: both threads),
+  runs/evidence/2026-08-31T04-07-07Z/signoff-journey.json ('next rule box')."

@@ -1,0 +1,1195 @@
+{
+  "run_id": "2026-08-31T04-12-15Z-local-01",
+  "created": "2026-08-31T04:12:15Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "f9ecad9-dirty",
+  "blueprint_sha": "f9ecad9-dirty",
+  "note": "Full agent sitting under sweep 2026-08-31T02-59-00Z-local-01 (the lit rebuild, architecture steps 0-5). All 118 owed rules judged: 116 pass, 2 fail (threads.lifecycle.says-what-it-did — the mutation report never names its actor outside the waive path, n-0125; panel.walkdown.note-with-any-verdict — the feedback box survives its own verdict and refiles the previous why on the next rule, n-0126). Two rules blocked in earlier sittings were driven this time: embed.pin.settled-pins-leave via an agent-legal incorporate of an answered pinned question, and panel.threads.show-the-sketch via a proposal-only screen fixture — both on the scratch copy, which also took the session, sign-off and discard journeys so the real ledger saw no junk writes. One finding filed without a fail: verified_by is never recorded and the thread footer infers the acceptor from the last reply, misattributing n-0102's acceptance to the agent (n-0127). Headless rules were judged from the verbatim tagged-test transcripts plus live CLI/API exercise recorded in runs/evidence/2026-08-31T03-01-00Z-sitting/. Page errors during capture: two connection-refused and two 404s, all from the deliberate dead-server and unclaimed-address states doing their jobs; no state produced an unexpected error.",
+  "results": [
+    {
+      "rule": "delivery.install.clone-is-the-install",
+      "status": "pass",
+      "statement_hash": "sha256:ffbb7cd667c2",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Re-executed the bare-clone suite live: 'the CLI runs from a tree with no node_modules' copies the tree, deletes node_modules and runs status; 'the third-party code it carries is attributed and machine-built' walks vendor/ for a LICENSE and a rebuild script per file; 'nothing walkdown ships at runtime resolves outside itself' walks the import graph from bin/ and lib/ refusing any bare specifier. All three passed in this sitting's run. The vendored lit and yaml are exactly the two files those checks walk, so the clone really is the whole install as of this tree."
+    },
+    {
+      "rule": "locations.default.nothing-in-the-tree",
+      "status": "pass",
+      "statement_hash": "sha256:0f57ef142318",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/locations-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Ran init on a fresh project live and photographed the output: the spec, storyboard, template, AGENTS.md and skills all landed under the personal home, and the tree afterwards holds exactly CLAUDE.md and src - the transcript shows the tree listing. The one file added is the pointer, which the rule's own feature carves out as conventions. Abandoning this project would leave a CLAUDE.md block and nothing else to clean up."
+    },
+    {
+      "rule": "locations.default.records-follow-the-spec",
+      "status": "pass",
+      "statement_hash": "sha256:8f5ed2817f93",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/locations-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "The live `walkdown where` for the fresh project reports runs and threads 'beside the spec, as runs and threads follow it' while evidence and drafts sit under the personal projects dir with 'the built-in default, outside the repository'. The tagged tests exercise both directions - a spec outside the repository takes runs and threads with it, and evidence/drafts stay out even when the spec is committed. Committing a spec is one decision: the records ride along, the binaries never do."
+    },
+    {
+      "rule": "locations.default.in-repo-on-request",
+      "status": "pass",
+      "statement_hash": "sha256:bbc38bb440e9",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/locations-transcript.txt"
+      ],
+      "reasoning": "The tagged test '--in-repo commits the spec and takes its conversations with it' runs init --in-repo and asserts the blueprint, runs and threads land inside the working tree. The live transcript shows the other half of the statement: the plain init names where the spec landed and says what that means ('Outside the repository, so walkdown has added nothing to your tree...') and offers `walkdown init --in-repo` and `walkdown move` by name - the politeness clause, verbatim on screen."
+    },
+    {
+      "rule": "locations.default.skills-are-yours-by-default",
+      "status": "pass",
+      "statement_hash": "sha256:62223922d07f",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/locations-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Live init put five skills under the personal skills dir and said why: 'Yours, not this project's - they work in every project on this machine, and this repository gets nothing', with --project offered for the committed alternative. The three tagged tests cover the rest: skills follow a committed spec into the repo, an edited skill is kept unless forced, and a skill whose harness only walkdown has is not shipped at all. The transcript shows walkdown-setup shipping and walkdown-sitting absent, which is that last clause in practice."
+    },
+    {
+      "rule": "locations.answer.says-why",
+      "status": "pass",
+      "statement_hash": "sha256:971e878234f9",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/locations-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Both live `walkdown where` runs print a reason under every path, and the reasons differ where the decisions differ: this repo's paths say 'this machine's config (walkdown)' while the fresh project's say 'named on the command line', 'beside the spec, as runs and threads follow it', 'the built-in default, outside the repository', and config itself reports 'not present - every default applies'. A person who disagrees with any path can see exactly which decision to argue with. The tagged test asserts a reason accompanies every reported path."
+    },
+    {
+      "rule": "locations.answer.asking-writes-nothing",
+      "status": "pass",
+      "statement_hash": "sha256:0ba6f381a575",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/locations-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Both `walkdown where` transcripts end with 'Nothing was written.' and the tagged test proves the sentence: it snapshots the filesystem, asks where things live for a project that does not exist yet, and asserts nothing appeared - no directory, no config, no placeholder. The command a confused person reaches for first is inert by test, not by promise."
+    },
+    {
+      "rule": "locations.answer.nearest-blueprint-wins",
+      "status": "pass",
+      "statement_hash": "sha256:8abbb2442baa",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Two tagged tests pin both halves of the statement: 'the nearest blueprint wins over an entry rooted at the whole tree' builds a repo whose configured entry roots the whole tree and a nested blueprint, and asserts the nested one answers for its own directory; '--dir does not inherit the ledger of whichever project you are standing in' names a blueprint outright and asserts the answer comes from the entry owning it or from none - not from the project the shell happens to be standing in. Both passed in this sitting's verbatim suite run."
+    },
+    {
+      "rule": "locations.keeping.existing-outranks-preference",
+      "status": "pass",
+      "statement_hash": "sha256:c5603d183d94",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "The tagged test 'a blanket default never orphans a ledger the blueprint already holds' creates records beside a spec, then sets a machine-wide default pointing elsewhere, and asserts resolution still answers with the existing directory - the fact outranks the preference and nothing moved. Passed in this sitting's run."
+    },
+    {
+      "rule": "locations.keeping.moving-is-a-decision",
+      "status": "pass",
+      "statement_hash": "sha256:452142df8095",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt"
+      ],
+      "reasoning": "Four tagged tests cover the statement clause by clause: 'move relocates the files, records the choice, and edits no record' diffs the files byte-for-byte across the move and finds the choice in the personal config; 'move refuses a destination that already holds records' is the two-ledgers refusal, also photographed live in the locations transcript ('Two ledgers merged into one directory is an edit of both. Pick an empty destination.'); 'a pin filed with the ledger moved lands where readers read' and 'run sees a record arrive in a runs directory a config moved' prove readers and writers share the resolved answer after the move."
+    },
+    {
+      "rule": "locations.travel.evidence-by-key",
+      "status": "pass",
+      "statement_hash": "sha256:a7bc7cd07be3",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Tagged tests: 'with evidence moved out, the same recorded key finds it at the new root' writes evidence, relocates the root, and asserts the identical runs/evidence/<ts> key still serves; 'evidence serving still refuses anything outside the evidence key space' asserts the resolver rejects keys outside runs/evidence/. This sitting is itself the rule exercised for real: every evidence key in this very record is logical, and the capture harness asked the resolver where to write rather than assuming the blueprint - the screenshots live outside the repository and serve through the same key space."
+    },
+    {
+      "rule": "locations.travel.judged-against-a-spec",
+      "status": "pass",
+      "statement_hash": "sha256:5014abd76d50",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Tagged tests: 'the spec hash covers the spec and nothing the spec produces' computes the blueprint content hash, appends a run record, and asserts the hash is unchanged - recording a verdict never changes what was judged; 'the same words in a different feature file are a different spec' moves a rule between files and asserts the hash moves. Both passed in this sitting's verbatim run."
+    },
+    {
+      "rule": "locations.travel.provenance-not-currency",
+      "status": "pass",
+      "statement_hash": "sha256:c513160f49fc",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "The tagged test 'a run made at another commit still counts' records a verdict under one sha, advances the repository, and asserts the cell still fills - the sha tells a reader where to look and never decides whether the verdict counts. Currency is decided per cell by statement hash, check claims and sweeps, which the status.derived tests in the same transcript exercise independently. Passed in this sitting's run."
+    },
+    {
+      "rule": "locations.pointer.placed-where-agents-read",
+      "status": "pass",
+      "statement_hash": "sha256:66759d1c478c",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/locations-transcript.txt"
+      ],
+      "reasoning": "Tagged tests: 'a project with only an AGENTS.md gets the pointer there, not in a new CLAUDE.md' - exactly one agent file means the project has answered, so no new file appears; 'several agent files: init writes no pointer and says which they are' - photographed live too: the transcript shows '? several agent files - `walkdown pointer --into <file>` CLAUDE.md, AGENTS.md' with both files at zero walkdown lines. The none case is the fresh-init transcript, where CLAUDE.md was created to hold the block."
+    },
+    {
+      "rule": "locations.pointer.owns-only-its-block",
+      "status": "pass",
+      "statement_hash": "sha256:ec57ac3e3cc3",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/locations-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Live transcript: `pointer --into` reports 'added to <tmp>/two/AGENTS.md', a second run reports 'already current' rather than duplicating, and the surrounding line '# also' survives untouched beside the walkdown:begin marker. The tagged test 'a moved spec rewrites its own block and nothing around it' moves the spec and asserts the block updates in place while every other line stays byte-identical - the stale-pointer clause, since the rewritten block names the new location."
+    },
+    {
+      "rule": "ownership.drift.design-requests-required",
+      "status": "pass",
+      "statement_hash": "sha256:1d8bdc7a98b6",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt"
+      ],
+      "reasoning": "The tagged test 'an undesigned screen without a design-request thread warns; with one it passes' runs lint over a storyboard screen with no prototype and asserts the finding appears, then files a design-request thread and asserts it clears. The transcript also carries the finding's exact wording from lib/lint.js: 'screen has no design and no open design-request thread - file one (a proposal alone is not a request)', which names the remedy in the sentence."
+    },
+    {
+      "rule": "ownership.writes.spec-never-implementation",
+      "status": "pass",
+      "statement_hash": "sha256:a966a60dc9bc",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Two tagged tests, both re-run live this sitting: 'every write the API offers lands in threads, drafts or runs - and nowhere else' snapshots the whole working tree, exercises every mutating endpoint the server offers, and diffs - the only paths that changed are under the resolved threads, drafts and runs directories; 'only writes.js may write: the request path imports no writer of its own' walks the import graph of the request path and asserts writes.js is the sole module touching the filesystem for mutation. The complete-list clause is enforced structurally, not by convention."
+    },
+    {
+      "rule": "screens.identity.fragment-is-identity",
+      "status": "pass",
+      "statement_hash": "sha256:ac30c2879d52",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/screens-claims-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Tagged tests run live in the screens transcript: 'a fragment is part of a screen's identity' resolves the same path under two enumerated fragments to two different screens, and 'an unenumerated fragment falls back to the screen at that path' keeps an undeclared #foo on the page rather than off the board. A modal or drawer the URL expresses is a screen of its own, and the matcher module is the single answerer (one-matcher passed alongside, checks tier)."
+    },
+    {
+      "rule": "screens.identity.query-is-not-identity",
+      "status": "pass",
+      "statement_hash": "sha256:9b8b3c9e5881",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/screens-claims-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Tagged tests: 'an undeclared query does not change which screen you are on' - page two is the same screen; 'a declared query breaks ties between screens sharing a path' - a query written into the storyboard still separates two screens on one path. Both directions of the statement passed in the live screens transcript run."
+    },
+    {
+      "rule": "screens.identity.follows-navigation",
+      "status": "pass",
+      "statement_hash": "sha256:e8763cbea8b6",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-32-45Z/spa-pushstate-refollows.json",
+        "runs/evidence/2026-08-31T03-32-45Z/spa-pushstate-refollows.png"
+      ],
+      "reasoning": "Drove the one navigation nobody announces, live: picked 'The review page' by hand (button btn-primary), then ran history.pushState inside the frame to /stand-in/rule-detail with a marker set on the frame's window first. After 1.6s the panel's screen button read 'Rule detail (state - open a rule on the Rules tab)', the class dropped to btn-ghost - the hand answer did not carry across - and the marker survived, proving no reload delivered the news: only the embed's slow poll could have. history.back() re-answered 'The review page', marker still intact. hashchange and popstate are the announced cases; the poll catching pushState is the honesty clause, photographed."
+    },
+    {
+      "rule": "screens.ownership.one-claimant",
+      "status": "pass",
+      "statement_hash": "sha256:b7fa784715cc",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/screens-claims-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Four tagged tests pin the claim algebra: an origin plus a path is the claim; two blueprints on one page collide even under different queries; the same path on two origins does not; one blueprint claiming a page twice is its own business. The live transcript also sweeps the actually-served set: '2 blueprint(s), 13 claim(s) - no page claimed twice' - the whole-folder examination no single-blueprint lint could do, run against what the 4700 server is really serving."
+    },
+    {
+      "rule": "status.derived.latest-wins",
+      "status": "pass",
+      "statement_hash": "sha256:fa42dccb0338",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Tagged tests: 'later run wins; per-target isolation' records two verdicts on one rule and asserts the later one is the cell, then records against another target and asserts neither bleeds; 'a walkdown on one target does not answer for another' pins the target scoping from the run side. Both passed in this sitting's verbatim suite run."
+    },
+    {
+      "rule": "status.derived.stale-never-passes",
+      "status": "pass",
+      "statement_hash": "sha256:9b16ab78cd04",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "The tagged test records a pass, rewords the statement, and asserts the cell renders stale rather than passing. This sitting is also the rule lived in: the sweep turned every pre-refactor agent pass on the board to stale, and `owed` listed all 118 - a pass recorded against an older wording (or an older floor) never quietly keeps counting."
+    },
+    {
+      "rule": "status.derived.verdict-belongs-to-a-place",
+      "status": "pass",
+      "statement_hash": "sha256:da085af63ed8",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "The tagged test 'a verdict counts only at the address it was made against' records a run with a base_url, then points the target elsewhere, and asserts the cell empties and asks for the walkdown again rather than inheriting the old pass. The address is the run's declared base_url, not a harness port - which is why this sitting's own record declares http://localhost:4700, the target's real address, while the scratch governance probes on 4790 were never recorded as verdicts at all."
+    },
+    {
+      "rule": "status.derived.addressless-runs-count",
+      "status": "pass",
+      "statement_hash": "sha256:f14146c27ed9",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "The tagged test 'a run with no recorded address is taken at face value' feeds derivation a run missing base_url and asserts the cell fills - it cannot be shown to belong to another system, the same courtesy a hashless result gets. Ran in both the sitting's live transcript and the verbatim suite run, passing in each."
+    },
+    {
+      "rule": "status.derived.unbacked-pass-goes-stale",
+      "status": "pass",
+      "statement_hash": "sha256:ed0482e00322",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt"
+      ],
+      "reasoning": "Three tagged tests: a checks pass whose suite no longer claims the rule renders stale; an empty inventory is NOT taken as proof the suite is empty (so a broken runner cannot stale the whole board); and coverage staleness never touches judgment tiers - an agent verdict does not evaporate because a grep changed. The first ran live in the sitting transcript as well; all passed."
+    },
+    {
+      "rule": "status.derived.human-tier-distinct",
+      "status": "pass",
+      "statement_hash": "sha256:88708d3d86fa",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "The tagged test 'environments scope targets; agent pass does not satisfy human' records a green agent cell and asserts the human requirement still stands unfilled. The live half of this sitting proves the boundary from the other side: the scratch server refused an agent 'verified' twice with '\"verified\" requires a named human actor - agents may claim work, never accept it', which is the same law enforced at the write path. Evidence, never acceptance."
+    },
+    {
+      "rule": "status.evidence.agent-assumed",
+      "status": "pass",
+      "statement_hash": "sha256:21038677e83f",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Tagged tests: 'the agent tier is assumed, and only an excuse removes it' derives verify for a rule that declares nothing and finds agent present; 'an excused tier is derived out of the sum entirely' asserts an excuse removes it from the denominator rather than leaving a hole. This sitting's own owed list is the rule at work - 118 rules owed the agent tier, none of them opted in; the handful excused (like screens.identity.one-matcher) carry written arguments."
+    },
+    {
+      "rule": "status.evidence.excuse-says-why",
+      "status": "pass",
+      "statement_hash": "sha256:6023a6db07cd",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Tagged tests: 'an excuse removes the tier it names, and says why' and 'an excused tier reads as excused, never as an empty cell' - the report renders the reason where the verdict would have sat, so a tier nobody asked for and a tier somebody argued against are distinguishable in every report. Both passed in the live sitting transcript run and again in the verbatim suite."
+    },
+    {
+      "rule": "status.evidence.excuse-must-argue",
+      "status": "pass",
+      "statement_hash": "sha256:d4310da96c28",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Tagged tests: 'a thin excuse is worse than none' lints an excuse shorter than a sentence into a warning; 'a rule excusing both tiers is flagged, legitimately' warns on the both-tiers case precisely because it is legitimate but never accidental. The unverifiable blocks in this blueprint (one-matcher, one-implementation) pass the same lint, which this sitting's close-out lint run re-confirms."
+    },
+    {
+      "rule": "status.acceptance.signoff-defaults-to-eng",
+      "status": "pass",
+      "statement_hash": "sha256:34a8a5bebfd8",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Tagged tests: 'engineering always signs, whatever the file says' derives the signoff set for a rule omitting eng and finds eng present; 'a signoff list that omits eng is flagged as a file that lies' makes the correction visible in lint rather than silent; 'verify no longer knows the word human' pins the vocabulary split that made roles possible. All passed in this sitting's verbatim run."
+    },
+    {
+      "rule": "status.acceptance.role-comes-from-the-run",
+      "status": "pass",
+      "statement_hash": "sha256:4841808f1a8b",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Tagged tests: acceptance derives per role from the roles the run recorded, not the signer's current team; 'a run recorded before roles existed reads as engineering' covers the historical ledger; 'rewording a statement un-signs it, per role' ties acceptance currency to the statement like every other tier. The first also ran live in the sitting transcript ('the identity the server derives carries roles, and the vocabulary to change them')."
+    },
+    {
+      "rule": "status.acceptance.approval-covers-only-the-unbuilt",
+      "status": "pass",
+      "statement_hash": "sha256:178e50e23abc",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "The tagged test 'an approval covers an unbuilt rule and stops the moment there is a build' records a wording approval, asserts the role's queue is discharged while no build evidence exists, then lands a build run and asserts the approval stops covering - approving a spec is not judging a build. Passed in this sitting's verbatim run."
+    },
+    {
+      "rule": "status.acceptance.sent-back-is-a-fail",
+      "status": "pass",
+      "statement_hash": "sha256:e4eefb4e58a4",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "The tagged test 'a rule sent back fails, and is not queued to the person who sent it' records a not-yet from a signer and asserts the rule's verdict is a fail rather than pending, and that the judge queue does not hand the rule back to the signer who just looked - what the rule owes them is a fix. Passed in this sitting's verbatim run."
+    },
+    {
+      "rule": "status.acceptance.verdict-needs-every-role",
+      "status": "pass",
+      "statement_hash": "sha256:1a9be6432a5b",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Tagged tests: 'a verdict needs every tier AND every role' holds a rule green on tiers with one of two roles signed and asserts no pass; 'the rule detail says who has signed and who has not' keeps the missing signature legible rather than summed away. The human walkdown is not double-counted as a tier - the derivation counts it once, as the role set. Passed in this sitting's run."
+    },
+    {
+      "rule": "status.acceptance.roles-recorded-on-the-run",
+      "status": "pass",
+      "statement_hash": "sha256:e0e862978414",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Five tagged tests, four of them re-run live in the sitting transcript: a run carries the roles its signer acted in; a role outside the vocabulary is refused rather than filed; the recording endpoint persists roles; the derived identity carries roles and the vocabulary to change them; a run signed under a nonexistent role is named in the report. The emptied-list clause records as none-stated rather than inventing a distinction the ledger does not honour."
+    },
+    {
+      "rule": "status.sweep.declares-a-floor",
+      "status": "pass",
+      "statement_hash": "sha256:b0073c10a38b",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Tagged tests: earlier verdicts go stale while the superseded runs survive untouched; only the named tiers are touched; judging again clears the debt. And this sitting is the floor lived end to end: the sweep declared at 02-59-00Z turned all 118 agent cells stale ('0/118 judged since' in the live transcript), the runs ledger kept every superseded record, and this very run is the earning-again. Nothing edited, nothing deleted."
+    },
+    {
+      "rule": "status.sweep.deliberate",
+      "status": "pass",
+      "statement_hash": "sha256:5b9d65fba614",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Tagged tests: a sweep refuses to be written without a reason; a written sweep carries its reason and no results; 'nothing but the sweep command writes a sweep' - the transcript also carries the source-level proof, a grep showing writeSweep referenced only by bin/commands/sweep.js and the record loader. This sitting's sweep was asked for outright by the human ('Run the sweep and sitting') and its why names the lit rebuild - the decision, written down."
+    },
+    {
+      "rule": "status.sweep.says-what-is-left",
+      "status": "pass",
+      "statement_hash": "sha256:108b3015acc9",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "The live transcript shows the open sweep reporting itself: 'SWEEP agent on local - 0/118 judged, 118 to go', with the declaration, who asked, and the why, plus the first owed rule marked. The tagged test 'a sweep counts what is still owed, never-judged rules included' pins the arithmetic - never-judged rules count toward the remainder rather than hiding. 'Did we miss any?' is answered by reading the report, which is how this sitting scoped itself."
+    },
+    {
+      "rule": "status.attention.blocked-queues",
+      "status": "pass",
+      "statement_hash": "sha256:d51f57ea2c48",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "The tagged test 'attention: human vs agent queues derived from rows and threads' builds a board with judge, verify, answer, address, incorporate and cover situations and asserts each lands in the right queue - people get judge (one per waiting role), verify and answer; agents get address, incorporate and cover, cover being a rule demanding checks that no check claims. Passed in this sitting's verbatim run."
+    },
+    {
+      "rule": "status.attention.names-the-role",
+      "status": "pass",
+      "statement_hash": "sha256:7320bf5dc8fd",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Tagged tests: 'the queue names the role a rule waits on' and 'the report names the role a rule is waiting on' - a judge item says which role, in both the derived queue and the rendered report, so two people cannot both scroll past assuming the other is meant. Passed in this sitting's verbatim run."
+    },
+    {
+      "rule": "status.attribution.username-is-the-record",
+      "status": "pass",
+      "statement_hash": "sha256:14fb4e39b993",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Four tagged tests: the record is written under the username, with display names resolved for showing only; every handle a person's machine has signed with resolves to that one person; the old single-name form still resolves so history stays attributed unrewritten; a machine with no full name is known by its username alone. The blueprint payload carrying a default actor is what the panel's Settings surface builds on. All passed in this sitting's run."
+    },
+    {
+      "rule": "threads.lifecycle.validated-transitions",
+      "status": "pass",
+      "statement_hash": "sha256:102a0b235d5a",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "The tagged test walks illegal transitions per kind and asserts each is rejected. The live half, against the scratch server and the scratch CLI: a nonsense transition was refused with its lifecycle named - 'illegal transition addressed → incorporated for a note' - both over the API and from the thread command, which exited 2. The vocabulary table and the enforcement cannot disagree because TERMINAL and canTransition are derived from the same FLOWS (the derivation tests alongside)."
+    },
+    {
+      "rule": "threads.lifecycle.claim-never-accept",
+      "status": "pass",
+      "statement_hash": "sha256:dbc5f4be5809",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Made it refuse, live: an agent-actor 'verified' was rejected twice by the scratch server with '\"verified\" requires a named human actor - agents may claim work, never accept it', and the thread on disk kept its status. The tagged test asserts the same for waived. This sitting itself operates inside the rule - every verdict here is a claim, and nothing in this record touches verified or waived."
+    },
+    {
+      "rule": "threads.lifecycle.says-what-it-did",
+      "status": "fail",
+      "statement_hash": "sha256:224b3a652a3a",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "The statement promises the report says 'who it was recorded under'. Exercised live against the scratch copy: a transition prints '✓ n-0093 open → addressed · +1 reply' and a bare reply prints '✓ n-0093 still addressed · +1 reply' - status left, status reached, replies counted, but the actor appears nowhere in either report. Only the waive path names its actor (thread.js appends 'by <waived_by>'). The omission matters precisely because the actor defaults to the machine username when --actor is forgotten: the one mistake the clause exists to surface is invisible in the output. The tagged tests pass because they only assert the actor on the waive path - the check under-asserts its statement. Refusal reporting and exit codes are correct; the rule fails on the recorded-under clause alone.",
+      "threads": [
+        "n-0125"
+      ]
+    },
+    {
+      "rule": "embed.pin.anchored-target",
+      "status": "pass",
+      "statement_hash": "sha256:6feaf28d3505",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/embed-hover-anchored.json",
+        "runs/evidence/2026-08-31T03-26-41Z/embed-pin-filed-anchored.json",
+        "runs/evidence/2026-08-31T03-26-41Z/embed-pin-filed-anchored.png"
+      ],
+      "reasoning": "Hovering in pin mode outlined panel.rules-list in walkdown's blue (2px solid, crosshair cursor) exactly over the element's box. The filed pin's held POST records element panel.counts WITH offset {x:40,y:16} and position {x:601,y:673} - the note follows the element and the spot rides along, so the pin draws where the reviewer pointed. The POST was held by the harness, so the ledger took nothing from the judging itself."
+    },
+    {
+      "rule": "embed.pin.right-project",
+      "status": "pass",
+      "statement_hash": "sha256:399853aef960",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/embed-pin-files-against-the-page-project.json",
+        "runs/evidence/2026-08-31T03-26-41Z/embed-pin-files-against-the-default.json"
+      ],
+      "reasoning": "A page declaring bp example/blueprint filed its pin to /api/threads?bp=example%2Fblueprint - the declared project, not the served default - with the page url recorded; that page is off example's storyboard, so screen and surface are honestly null rather than guessed. The undeclared page filed with no bp and its url attached, leaving the routing to the claim table the ownership tests pin (a url resolves to the blueprint that claims it). Feedback cannot land in a sibling's threads by default-server accident."
+    },
+    {
+      "rule": "embed.pin.both-surfaces",
+      "status": "pass",
+      "statement_hash": "sha256:77fdab028ac1",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/embed-pin-filed-anchored.json",
+        "runs/evidence/2026-08-31T03-26-41Z/embed-pin-filed-on-the-prototype.json"
+      ],
+      "reasoning": "The same anchor vocabulary took a pin on both surfaces in one sitting: filed-anchored records element panel.counts, surface \"app\"; filed-on-the-prototype records the same element with surface \"prototype\", placed while the ghost was fully covering. Each held POST carries its surface, so a reader knows which rendering the note is about."
+    },
+    {
+      "rule": "embed.pin.follows-the-visible-surface",
+      "status": "pass",
+      "statement_hash": "sha256:7c9b1c0e3da1",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/embed-pin-filed-on-the-prototype.json",
+        "runs/evidence/2026-08-31T03-26-41Z/embed-pin-filed-on-the-prototype.png"
+      ],
+      "reasoning": "With the fade fully toward the design, the probe shows the ghost at opacity 1 armed for pinning (ghostArmed wd-pinning) while the app frame under it is not armed at all (appArmed empty) - the front surface is the one taking the click - and the pin that landed records surface \"prototype\". The surface you are looking at is the surface the pin belongs to."
+    },
+    {
+      "rule": "embed.pin.own-skin",
+      "status": "pass",
+      "statement_hash": "sha256:1f3400a09629",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/embed-pin-own-skin.json",
+        "runs/evidence/2026-08-31T03-26-41Z/embed-pin-own-skin.png"
+      ],
+      "reasoning": "The feedback layer lives in a closed shadow root on a 0x0 host node, theme blueprint, with its two stylesheets inside the shadow. What does reach the host page is one 396-char sheet whose selectors are only .wd-hover and .wd-pinning - the crosshair affordance on the page being pinned, which cannot be drawn from inside a shadow root - plus a keyframes-only sheet; no host element is restyled. The pin itself is Phosphor markup in walkdown's teal (oklch 0.78 0.14 160) with its kind letter on a white disc, unmistakably walkdown's."
+    },
+    {
+      "rule": "embed.pin.viewport-recorded",
+      "status": "pass",
+      "statement_hash": "sha256:6971846eb2cc",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/embed-pin-filed-at-mobile.json",
+        "runs/evidence/2026-08-31T03-26-41Z/embed-pin-filed-on-a-scaled-surface.json"
+      ],
+      "reasoning": "The mobile-preset pin records viewport {name: mobile, width: 390} while the frame really was 390 wide; the scaled-surface pin records {name: desktop, width: 1440} even though the frame was displayed at 860px (scale 0.597) - the recorded width is the surface's own layout width, not the on-screen one. Feedback about a layout carries the width it was seen at."
+    },
+    {
+      "rule": "embed.pin.settled-pins-leave",
+      "status": "pass",
+      "statement_hash": "sha256:c82607d3ac2e",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-57-12Z/scratch-settled-pin-leaves.json",
+        "runs/evidence/2026-08-31T03-57-12Z/scratch-settled-pin-leaves.png"
+      ],
+      "reasoning": "Driven live this time, on the scratch copy, after two sittings recorded it blocked: the previous reasoning held that every ending is human-only, but incorporating an answered question is agent work by this blueprint's own vocabulary (status.attention.blocked-queues), so the sitting filed a pinned question, answered it over the CLI, and incorporated it from the panel. q-0125 stood among seven pins on the prototype surface; after Incorporate it is gone from the overlay while the other six remain, and the marker set on the ghost's window before the action survived - no reload delivered the change. A settled pin leaves there and then."
+    },
+    {
+      "rule": "embed.pin.tooltip-says-what-it-is",
+      "status": "pass",
+      "statement_hash": "sha256:50dfb40b9f83",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/embed-pin-tooltip.json",
+        "runs/evidence/2026-08-31T03-26-41Z/embed-pin-tooltip.png"
+      ],
+      "reasoning": "Hovering n-0071 drew three short lines: 'n-0071 · note · addressed', 'rule panel.rules.takes-you-there · review · panel.app-frame', and the note's opening words in quotes. pointer-events none so it cannot swallow the next hover, wholly on the surface (box checked), drawn below the pin when the pin is high. Which thread, what state, where it belongs, and enough words to recognise - readable without a click."
+    },
+    {
+      "rule": "embed.pin.form-at-the-spot",
+      "status": "pass",
+      "statement_hash": "sha256:5bb13509dc3b",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/embed-form-below-the-spot.json",
+        "runs/evidence/2026-08-31T03-26-41Z/embed-form-above-near-the-bottom.json",
+        "runs/evidence/2026-08-31T03-26-41Z/embed-form-escape-takes-the-placeholder.json"
+      ],
+      "reasoning": "A click at y151 opened the form at top 169 - just below the spot - with a placeholder pin standing on the spot (placeholderMark '!'). A click at y673, near the 704px bottom, opened it at 467-655 - just above - so the form never runs off the surface. Escape closes the form and takes the placeholder with it (forms 0, placeholders 0 after), while pin mode itself stays on for the next spot."
+    },
+    {
+      "rule": "embed.pin.form-is-chrome",
+      "status": "pass",
+      "statement_hash": "sha256:cac6da4be24f",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/embed-form-is-chrome.json",
+        "runs/evidence/2026-08-31T03-26-41Z/embed-form-is-chrome.png"
+      ],
+      "reasoning": "Inside the open form the cursors are ordinary - text over the textarea, pointer over the checkbox and buttons, not the surface's crosshair - and clicking the kind checkbox toggled it (kindChecked true) while forms stayed at 1 and placeholders at 1: the click worked the control rather than reaching through to drop a second pin. The form is UI, not pinnable surface."
+    },
+    {
+      "rule": "embed.pin.surface-coordinates",
+      "status": "pass",
+      "statement_hash": "sha256:7d33bd0c80b2",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/embed-pin-spot-survives-zoom.json",
+        "runs/evidence/2026-08-31T03-26-41Z/embed-pin-filed-on-a-scaled-surface.json"
+      ],
+      "reasoning": "The scaled-surface pin recorded position x39 in the surface's own 1440-wide space while the click landed on an 860px-wide scaled frame - CSS pixels of the document, not screen pixels. And the zoom probe replays existing pins through fit/1440/faded/580 in turn: n-0095 sits at x810 when the surface is 860 wide and x1390 when it is 1440, riding its element, unchanged by the fade - the spot is re-derived from surface coordinates at every reframe rather than remembered in panel pixels."
+    },
+    {
+      "rule": "embed.pin.coordinate-fallback",
+      "status": "pass",
+      "statement_hash": "sha256:3c6fb006c94b",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/embed-form-unanchored-spot.json",
+        "runs/evidence/2026-08-31T03-26-41Z/embed-pin-filed-unanchored.json"
+      ],
+      "reasoning": "On a spot with no anchored element the form still opened, saying so in walkdown's own words ('no anchored element here — pinned by position'), and the filed POST records an anchor of position {x:8, y:680} + viewport + surface + screen with no element key at all. Feedback was never blocked; it is simply recorded by where it sits."
+    },
+    {
+      "rule": "embed.threads.note-first",
+      "status": "pass",
+      "statement_hash": "sha256:870249ed1a7a",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/embed-thread-provenance.json",
+        "runs/evidence/2026-08-31T03-26-41Z/embed-thread-provenance.png"
+      ],
+      "reasoning": "The open popover's provenance is one 11px line ('n-0107' + status chip) with the where-line beneath it condensed to 'not attached to a rule · The review page · panel.bar · desktop 1050' in two 11px lines - id, kind, status, rule, screen, element and age compacted rather than stacked as sentences - while the note's own words lead the 12.5px body. The conversation is the content; the provenance is a caption."
+    },
+    {
+      "rule": "embed.threads.actions-in-context",
+      "status": "pass",
+      "statement_hash": "sha256:9878eb8459f2",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/embed-thread-provenance.json",
+        "runs/evidence/2026-08-31T03-26-41Z/embed-thread-waive-needs-a-reason.json"
+      ],
+      "reasoning": "The actions are short verbs on one row - Verify, Reopen, Waive all at top 715 - and the reply box's placeholder is just 'Reply…' with the attribution line 'as topher · Enter sends', no standing instructions. Waive, chosen with the box empty, asked for its reason when chosen: 'Waiving is recorded with a reason — write it above, then press again', and the thread stayed put rather than transitioning."
+    },
+    {
+      "rule": "panel.dock.toolbar",
+      "status": "pass",
+      "statement_hash": "sha256:aaf28fbb5e0a",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/panel-review.png",
+        "runs/evidence/2026-08-31T03-26-41Z/rules-open-then-blueprints-tab.png"
+      ],
+      "reasoning": "The bar carries exactly the session controls: the screen button ('The review page'), Prototype / fade slider / App, the viewport controls, Pin mode, and Start walkdown - and it names the project ('walkdown') beside the wordmark. Choosing a project happens on the Blueprints tab, photographed separately, not in the bar. Nothing about the rule in hand lives up there."
+    },
+    {
+      "rule": "panel.dock.surface-swap-is-instant",
+      "status": "pass",
+      "statement_hash": "sha256:c74a4c999299",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-53-15Z/dock-surface-swap-keeps-the-ghost.json",
+        "runs/evidence/2026-08-31T03-26-41Z/vp-mobile-390-ghost.json"
+      ],
+      "reasoning": "A marker set on the ghost's window survived Prototype -> App -> Prototype: the crossing is a fade of the same kept frame, not a load, so nothing flashes between looks. The reload-only-when-changed half is the mobile state: asked to show the design at 390 the ghost really did relayout at 390 (ghostLaidOutAt 390) - reloaded because what it should show actually changed."
+    },
+    {
+      "rule": "panel.dock.controls-survive-use",
+      "status": "pass",
+      "statement_hash": "sha256:e55758ff63da",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/dock-fade-drag-midway.json",
+        "runs/evidence/2026-08-31T03-26-41Z/dock-fade-drag-settled.json"
+      ],
+      "reasoning": "The fade slider was grabbed with a real pointer and held at the midpoint: the probe runs WHILE the button is still down and finds the drag alive - fade at 50, ghost at 0.5 over the app at 1 - so nothing rebuilt the element the pointer was holding. Let go, it stays at 50 and both surface buttons stand. The whole drag happened on one element."
+    },
+    {
+      "rule": "panel.dock.one-pin-mode",
+      "status": "pass",
+      "statement_hash": "sha256:a66c41a78d23",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/dock-chrome-gear-in-pin-mode.json",
+        "runs/evidence/2026-08-31T03-53-15Z/dock-escape-leaves-pin-mode.json",
+        "runs/evidence/2026-08-31T03-26-41Z/embed-form-escape-takes-the-placeholder.json"
+      ],
+      "reasoning": "One state behind every door: the bar's button lit (btn-warning) exactly while the frame's document was armed (wd-pinning), and Escape dropped both together - button back to btn-outline, frame class emptied. The form's own Escape deliberately does NOT leave pin mode (stillPinning after taking the placeholder), which is the same single state answering differently for a different question, not a second copy - the bar stayed lit through it."
+    },
+    {
+      "rule": "panel.dock.no-pin-mid-fade",
+      "status": "pass",
+      "statement_hash": "sha256:a25c933fc24f",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/embed-pin-mid-fade-refused.json",
+        "runs/evidence/2026-08-31T03-26-41Z/embed-pin-mid-fade-refused.png"
+      ],
+      "reasoning": "With the fade at 0.5 - both surfaces on screen - the Pin mode button is disabled and its title says exactly why: 'Slide fully to the prototype or the app first — half-faded, a pin has no surface to belong to.' Neither surface was armed. The mode is closed rather than guessing which surface a pin would mean."
+    },
+    {
+      "rule": "panel.dock.own-skin",
+      "status": "pass",
+      "statement_hash": "sha256:93bfd901cfcd",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/panel-review.png",
+        "runs/evidence/2026-08-31T03-26-41Z/panel-settings.png",
+        "runs/evidence/2026-08-31T03-26-41Z/rules-headless-cover.png"
+      ],
+      "reasoning": "The chrome is one skin everywhere it appears: drafting-blue surfaces, pale ink, flat panels - the bar, the rail, the settings card and the headless cover all wear it, over a stand-in page that is white and wireframed. Nothing in walkdown's chrome could be mistaken for the application under review, and the prototype's own comment declares the wireframe look is the mockup's, not the build's."
+    },
+    {
+      "rule": "panel.dock.chrome-not-a-pin-target",
+      "status": "pass",
+      "statement_hash": "sha256:466c5e212ed7",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/dock-chrome-gear-in-pin-mode.json",
+        "runs/evidence/2026-08-31T03-53-15Z/dock-escape-leaves-pin-mode.json"
+      ],
+      "reasoning": "In pin mode, a real pointer click on the panel's own gear opened the desk tuner - chrome behaved as chrome - and left zero pin forms and zero placeholders in the app; the pin button stayed lit through it, so the mode was not silently dropped either. Escape then leaves pin mode, verified in its own state (bar unlit, frame disarmed). The bar, the tuner and the panel are never targets."
+    },
+    {
+      "rule": "panel.desk.reads-as-paper",
+      "status": "pass",
+      "statement_hash": "sha256:60871d489f4d",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/panel-review.png",
+        "runs/evidence/2026-08-31T03-26-41Z/panel-settings.png"
+      ],
+      "reasoning": "The ground behind the sheet is faintly ruled and lies at an angle, receding - the ruling visibly converges rather than shearing, which is what the tuner's vocabulary (Tilt 35°, Tip 35°, Depth 600px) is: real perspective parameters, not a 2D skew. The sheet sits on it like paper on a desk; nothing about it reads as a spreadsheet grid."
+    },
+    {
+      "rule": "panel.desk.tuner",
+      "status": "pass",
+      "statement_hash": "sha256:09636342aada",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/panel-settings.png",
+        "runs/evidence/2026-08-31T03-26-41Z/desk-tuner-typed.json"
+      ],
+      "reasoning": "The gear opens Desk ruling with five dials and Reset; clicking a value cell turns it into a number input (editing true) and typing a new value applies live - the cell read 24px and the slider followed to 24 without a save step. The card says the governance out loud: 'Yours alone — how the paper lies changes nothing about what gets verified.' Persistence rides the same store the identity uses."
+    },
+    {
+      "rule": "panel.desk.peek",
+      "status": "pass",
+      "statement_hash": "sha256:9b19ad4a2f80",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/desk-peek-on.json",
+        "runs/evidence/2026-08-31T03-26-41Z/desk-peek-on.png"
+      ],
+      "reasoning": "'Hide app temporarily' checked: the app frame and the whole aside dim to opacity 0.1 together - a peek, both still on screen - while the bar stays at 1 so the way back is obvious. Everything lying on the desk fades as one, which is what lets the ruling be judged against what normally covers it."
+    },
+    {
+      "rule": "panel.delivery.framed-isolation",
+      "status": "pass",
+      "statement_hash": "sha256:967abb13513f",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/panel-review.png",
+        "runs/evidence/2026-08-31T03-26-41Z/vp-desktop-1440.json"
+      ],
+      "reasoning": "The application sits in its own frame with its own viewport: asked for 1440 it laid out at 1440 (innerWidth probed inside the frame) while occupying an 860px box, scaled - its layout answers to the chosen viewport, not to walkdown's window. Nothing the page draws can paint over the bar or the rail; the panel's chrome stands outside the frame entirely."
+    },
+    {
+      "rule": "panel.delivery.stale-copy-says-so",
+      "status": "pass",
+      "statement_hash": "sha256:124fa1fddaac",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/delivery-stale-copy-banner.json",
+        "runs/evidence/2026-08-31T03-26-41Z/delivery-stale-copy-banner.png"
+      ],
+      "reasoning": "Booted carrying build hash deadbeef0000 against a server shipping a different panel, the bar grew '⚠ Stale — reload the extension' in warning amber, dashed - unmistakable, in the chrome itself, before any judging happens. The comparison is the copy's own hash against what the server ships, which is the one honest signal an extension delivery has."
+    },
+    {
+      "rule": "panel.delivery.anchors-still-required",
+      "status": "pass",
+      "statement_hash": "sha256:6cbc4017880c",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/embed-form-unanchored-spot.json",
+        "runs/evidence/2026-08-31T03-26-41Z/embed-pin-filed-unanchored.json",
+        "runs/evidence/2026-08-31T03-26-41Z/embed-hover-anchored.json"
+      ],
+      "reasoning": "Both halves: a spot with no anchor under it still took a pin, recorded by position within the surface ('no anchored element here — pinned by position' in the form's own copy), and pages that do carry anchors kept the richer behavior - hover highlighted the anchored element and the filed pin recorded it by id. Review is never blocked on instrumentation."
+    },
+    {
+      "rule": "panel.start.open-a-folder",
+      "status": "pass",
+      "statement_hash": "sha256:2a5e9a0925a7",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/start-no-server.json",
+        "runs/evidence/2026-08-31T03-26-41Z/start-no-server.png",
+        "runs/evidence/2026-08-31T03-26-41Z/start-choose-blueprint.png"
+      ],
+      "reasoning": "Pointed at a dead server the panel said so in full sentences: 'No blueprints open', why a browser tab cannot do this alone, and exactly what to run - `walkdown serve` in a code block - with a server box and Connect. No broken review surface behind it. Connected, the same card reports 'Serving ~/Development/profoundry/walkdown — every blueprint under it is listed below.'"
+    },
+    {
+      "rule": "panel.start.choose-a-blueprint",
+      "status": "pass",
+      "statement_hash": "sha256:9f0ded825795",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/start-choose-blueprint.json",
+        "runs/evidence/2026-08-31T03-26-41Z/start-choose-blueprint.png"
+      ],
+      "reasoning": "With two blueprints under the served folder and a page neither claims, the panel asked 'Which blueprint?' and offered both by name with the description each blueprint itself carries ('The tool itself — the panel, the embed...', 'A waitlist app and its admin...'), plus where the choice is remembered and how to change it. The offers probe lists exactly the two on disk."
+    },
+    {
+      "rule": "panel.rules.detail-slide",
+      "status": "pass",
+      "statement_hash": "sha256:493a83d3f0bd",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/panel-rule-detail.png",
+        "runs/evidence/2026-08-31T03-56-32Z/rules-stepper-at-the-start.json"
+      ],
+      "reasoning": "Opening a rule slides to the detail and one control comes back: '← All rules'. The detail fills the pane - no list visible behind or beside it - and the DOM check in the stepper state found exactly one rule detail present after stepping, so the slide replaces rather than stacks. The two panes are never on screen together."
+    },
+    {
+      "rule": "panel.rules.takes-you-there",
+      "status": "pass",
+      "statement_hash": "sha256:bc2cef92cdd3",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/rules-setup-block.png",
+        "runs/evidence/2026-08-31T03-26-41Z/dock-screen-picked-by-hand.json",
+        "runs/evidence/2026-08-31T04-01-13Z/blueprints-crossing-goes-there.json"
+      ],
+      "reasoning": "All three asks moved the surface. Opening waitlist.join.already-joined put the app on the already-joined state (the 'You're already on the list!' card is on screen behind the detail). Picking rule-detail in the screen picker navigated the frame to /stand-in/rule-detail. And crossing to walkdown-example - a blueprint that says nothing about the review page - took the surface to http://localhost:4310/index.html, the example's own app, with the screen button reading 'Join the waitlist': a page it does claim."
+    },
+    {
+      "rule": "panel.rules.one-pane-per-tab",
+      "status": "pass",
+      "statement_hash": "sha256:7cbb341f16bd",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/rules-open-then-blueprints-tab.png"
+      ],
+      "reasoning": "With a rule's detail open, switching to Blueprints shows the Blueprints tab's own content - the server card and the two projects - and none of the rule detail. The detail belongs to the Rules tab and stays there; nothing bleeds across."
+    },
+    {
+      "rule": "panel.rules.step-between",
+      "status": "pass",
+      "statement_hash": "sha256:56a26420e1f3",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-56-32Z/rules-stepper-at-the-start.json",
+        "runs/evidence/2026-08-31T03-56-32Z/rules-stepper-at-the-start.png"
+      ],
+      "reasoning": "At the first rule the previous arrow is disabled and says 'No previous rule'; the next arrow says 'Next rule: right-project' and stepping lands exactly there, whose own steppers then read 'Previous rule: anchored-target' / 'Next rule: both-surfaces' - rail order, followed without returning to the list, each control saying where it lands before it is pressed. (An earlier capture of this state looked like an off-by-one; it was the probe reading the buttons after lit had updated them in place, and the fixed probe plus a live browser check agree the panel was right.)"
+    },
+    {
+      "rule": "panel.rules.steps-not-an-appendix",
+      "status": "pass",
+      "statement_hash": "sha256:0609e516526f",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/panel-rule-detail.png",
+        "runs/evidence/2026-08-31T03-26-41Z/rules-steps-and-shut-disclosure.png",
+        "runs/evidence/2026-08-31T03-26-41Z/detail-check-source.png"
+      ],
+      "reasoning": "GIVEN/WHEN/THEN are on the page as soon as the rule opens, unasked. The only disclosure is '▶ Check source · checks/panel.spec.js:981, ...' - collapsed - and opening it shows the recorded test source itself. The steps are the reading; the source is the appendix."
+    },
+    {
+      "rule": "panel.rules.setup-says-how-to-arrive",
+      "status": "pass",
+      "statement_hash": "sha256:e41b088d8143",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/rules-setup-block.png",
+        "runs/evidence/2026-08-31T03-26-41Z/rules-setup-absent.png"
+      ],
+      "reasoning": "already-joined's screen is a state sharing its URL with the join page, and its detail carries a SETUP block - 'Join with an email already on the list — the same page comes back saying so' - above the steps, in the storyboard's own word for it, outlined so it reads as instructions on arrival. The companion capture of a rule whose screen is a plain address shows no such block."
+    },
+    {
+      "rule": "panel.rules.evidence-visible",
+      "status": "pass",
+      "statement_hash": "sha256:65b84178c291",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/rules-evidence-block.png",
+        "runs/evidence/2026-08-31T03-26-41Z/detail-screenshots-modal.png"
+      ],
+      "reasoning": "The EVIDENCE section reads the ledger per verify type: 'checks/local ✓ pass · topherfangio · 1h ago' and 'agent ~ stale · agent · 3d ago · Screenshots — open 21', and opening the screenshots draws the recorded evidence over the whole desk with each image captioned by its logical key. The chain of trust is read exactly where the rule is judged."
+    },
+    {
+      "rule": "panel.rules.counts-legible",
+      "status": "pass",
+      "statement_hash": "sha256:669dfeb91eee",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/panel-review.png",
+        "runs/evidence/2026-08-31T03-26-41Z/rules-anchor-hover-highlights.png"
+      ],
+      "reasoning": "The footer says '0/122 verified' - a count of rules with its unit - beside two badges naming the owed work by kind: '2 sign' and '117 walk'. Every owed row in the rail wears the same word as its badge, so the total can be counted back, and the Rules tab carries 119, which is exactly 2+117. Nothing is a bare number, and the three numbers reconcile."
+    },
+    {
+      "rule": "panel.rules.lifecycle-legible",
+      "status": "pass",
+      "statement_hash": "sha256:64336fe46850",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/panel-review.png",
+        "runs/evidence/2026-08-31T04-04-57Z/rules-legend-open.json"
+      ],
+      "reasoning": "Every row wears the same strip - one mark per tier, then the role dots - and lifecycle is read off how much of it is filled: the legend explains '✓ nothing to judge yet — the rule is not built' and '○ required, but no run has touched it' as states of the SAME marks every other row wears. No rule draws a shape of its own; an unbuilt rule reads as quiet, not as alarm."
+    },
+    {
+      "rule": "panel.rules.search-the-list",
+      "status": "pass",
+      "statement_hash": "sha256:f183d0a96302",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/rules-search-filtered.png",
+        "runs/evidence/2026-08-31T03-26-41Z/rules-search-by-group.png"
+      ],
+      "reasoning": "The box is fixed above the list and filters as you type. 'ghost' left three rules from three stories, each still under BOTH its headings - screen ('The review page') and story (DOCK, VIEWPORT, SURFACES). 'panel.rules' - a story - kept every rule in it, across the two screen groups it spans, groups intact. The hierarchy never collapses into a flat hit list."
+    },
+    {
+      "rule": "panel.rules.tiers-at-a-glance",
+      "status": "pass",
+      "statement_hash": "sha256:cac7a0be0702",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/panel-review.png",
+        "runs/evidence/2026-08-31T04-04-57Z/rules-legend-open.json"
+      ],
+      "reasoning": "Each row leads with one mark per evidence tier in fixed order - checks then agent - followed by one dot per signing role; the legend's own heading says 'Evidence — checks, then agent' and 'Signatures — one slot per role'. Which evidence a rule rests on and whose signature is missing reads straight off the list; the sitting itself scoped 118 owed rules from these marks without opening them."
+    },
+    {
+      "rule": "panel.rules.grouped-by-screen",
+      "status": "pass",
+      "statement_hash": "sha256:54d2a03fa8e6",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/panel-review.png",
+        "runs/evidence/2026-08-31T03-26-41Z/rules-search-by-group.png"
+      ],
+      "reasoning": "The rail groups by the screen a rule is judged on, in storyboard order, each named as the storyboard names it - 'The review page', then 'Rule detail (state — open a rule on the Rules tab)' - wearing the picker's own icon, with the story beneath reduced to the word the screen has not already said (PIN, DOCK, RULES). The headless group exists at the end (the headless cover state opened a rule from it). Sticky headings are asserted by the checks tier; the stills show the structure."
+    },
+    {
+      "rule": "panel.rules.headless-says-so",
+      "status": "pass",
+      "statement_hash": "sha256:5bb6c7d6142a",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/rules-headless-cover.png"
+      ],
+      "reasoning": "Opening a headless rule replaced the surface with a cover in walkdown's own voice: 'No screen belongs to this rule / It is judged by its checks and recorded behavior, not by looking. / The page you were reviewing is untouched underneath.' The detail's SCREEN section says the same. Nothing lingers that could be mistaken for the rule's screen."
+    },
+    {
+      "rule": "panel.rules.legend-on-demand",
+      "status": "pass",
+      "statement_hash": "sha256:58cbf78e318c",
+      "evidence": [
+        "runs/evidence/2026-08-31T04-04-57Z/rules-legend-open.json",
+        "runs/evidence/2026-08-31T04-04-57Z/rules-legend-open.png"
+      ],
+      "reasoning": "One hover on the footer's Legend opens the whole vocabulary in one place: all eight tier marks with their meanings (skipped drawing its own ⋯, distinct from na's dash), all five signature states, and what colour means - 'Warning yellow anywhere means the rule is waiting on you' - plus the sign/walk badge words and the thread flag. It is built from the same mark tables the rail draws with, so a state added to the rail appears here by construction."
+    },
+    {
+      "rule": "panel.rules.owed-apart-from-said",
+      "status": "pass",
+      "statement_hash": "sha256:a59ee3d3b67c",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/rules-search-by-group.png",
+        "runs/evidence/2026-08-31T03-26-41Z/panel-review.png"
+      ],
+      "reasoning": "The two are two columns in different vocabularies: the amber 'walk' badge is the claim on your time, and the muted '8⚑' beside it is how much is being said. detail-slide carries both at once and they read as two facts. Nowhere are they run together into one string or one colour."
+    },
+    {
+      "rule": "panel.rules.marks-carry-over",
+      "status": "pass",
+      "statement_hash": "sha256:53b22fd6a5a4",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/panel-rule-detail.png",
+        "runs/evidence/2026-08-31T03-26-41Z/panel-review.png"
+      ],
+      "reasoning": "The detail's first line is the same strip the list drew - '✓ ~' then the role dots for anchored-target, in the same order, same glyphs - so the row and its page never have to be compared from memory. The rule id sits beside it for grounding."
+    },
+    {
+      "rule": "panel.rules.names-its-screen",
+      "status": "pass",
+      "statement_hash": "sha256:4a90d439391b",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/panel-rule-detail.png",
+        "runs/evidence/2026-08-31T03-26-41Z/rules-setup-block.png"
+      ],
+      "reasoning": "Above the steps, a SCREEN section in the storyboard's own words: 'The review page' with its id chip for anchored-target; 'Join the waitlist → Already on the list' for the flow rule - the full path of screens its steps walk. A rule pointed at the wrong screen would be visible here to anyone who can read the storyboard."
+    },
+    {
+      "rule": "panel.rules.talk-without-a-sitting",
+      "status": "pass",
+      "statement_hash": "sha256:d66e49c63ed9",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/rules-evidence-block.png",
+        "runs/evidence/2026-08-31T03-57-12Z/walkdown-session-journey.json",
+        "runs/evidence/2026-08-31T03-42-38Z/refuses-without-a-name.json"
+      ],
+      "reasoning": "With no session running, the detail's foot is a composer: 'Start a conversation about this rule…'. Filing goes under the name the panel already shows - the journey's notes landed on the scratch authored 'topher', exactly the strip's name - and with the identity emptied the same say()-guard family refuses attributed work and opens Settings rather than filing under a name never displayed."
+    },
+    {
+      "rule": "panel.signoff.spec-pair-derived",
+      "status": "pass",
+      "statement_hash": "sha256:d195df6ea5d8",
+      "evidence": [
+        "runs/evidence/2026-08-31T04-07-07Z/signoff-journey.json",
+        "runs/evidence/2026-08-31T03-57-12Z/walkdown-session-journey.json"
+      ],
+      "reasoning": "Both pairs in one sitting, derived from the ledger: absent-until-asked - no pass or fail from checks or judgment anywhere in the scratch's ledger - offered '✍︎ Approve / ✎︎ Refine' with 'No build evidence yet — you are signing off the rule, not judging a build' beneath; anchored-target, which the ledger holds build evidence for, offered '✓ Pass / ✗ Fail'. The scratch's two unbuilt rules were found by asking the payload for rows where built is false, so the derivation was checked from the outside too."
+    },
+    {
+      "rule": "panel.signoff.refine-requires-feedback",
+      "status": "pass",
+      "statement_hash": "sha256:cc9c4f5148e1",
+      "evidence": [
+        "runs/evidence/2026-08-31T04-07-07Z/signoff-journey.json"
+      ],
+      "reasoning": "Refine with the box empty recorded nothing: 'Refine is the feedback — write what should change first', judged stayed at 0. With text it filed note n-0129 on the rule (verified on the scratch's disk, author topher, anchored to absent-until-asked, linked into the run result as the refining verdict's thread) and the session stayed put on the same rule."
+    },
+    {
+      "rule": "panel.signoff.approved-recorded",
+      "status": "pass",
+      "statement_hash": "sha256:9dc2fa81ced5",
+      "evidence": [
+        "runs/evidence/2026-08-31T04-07-07Z/signoff-journey.json"
+      ],
+      "reasoning": "Approving one-switch and finishing appended a run to the scratch's ledger whose result reads status 'approved' with statement_hash sha256:84bda3b30c1d - hash-stamped like a pass, so it goes stale when the statement moves. Approving carried the session on by itself (next rule opened, judged 2). And the approval stands in for no signature: the acceptance tests in this same sitting hold that approval covers only the unbuilt."
+    },
+    {
+      "rule": "panel.threads.reply-in-place",
+      "status": "pass",
+      "statement_hash": "sha256:a0dd8bb2f5b9",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/embed-thread-provenance.json",
+        "runs/evidence/2026-08-31T03-26-41Z/rules-steps-and-shut-disclosure.png",
+        "runs/evidence/2026-08-31T03-26-41Z/composer-shift-enter.json"
+      ],
+      "reasoning": "A thread on a rule opens in the panel with its replies (n-0107's four on screen, scrollable), a reply box at the foot, and the lifecycle actions its state allows - Verify/Reopen/Waive for addressed. Typing in the composer works as a composer should (two lines after Shift-Enter, nothing sent). The rule's detail lists its threads with the reply line as the door."
+    },
+    {
+      "rule": "panel.threads.claim-never-accept",
+      "status": "pass",
+      "statement_hash": "sha256:7c4e1e2d1562",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-42-38Z/refuses-without-a-name.json",
+        "runs/evidence/2026-08-31T03-42-38Z/refuses-without-a-name.png",
+        "runs/evidence/2026-08-31T03-26-41Z/embed-thread-waive-needs-a-reason.json"
+      ],
+      "reasoning": "Made it refuse: with the identity emptied, pressing Verify on an addressed thread produced 'recorded under a person's name — set it in Settings first.' and opened Settings - nothing posted (the state also held any POST as a belt, and none was attempted). Waive with no reason was refused with the ask for one. The server's own refusals for an agent actor were exercised in the headless half of this sitting; the panel enforces the same law before the network."
+    },
+    {
+      "rule": "panel.threads.show-the-sketch",
+      "status": "pass",
+      "statement_hash": "sha256:8244263349d7",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-57-12Z/scratch-sketch-over-the-app.json",
+        "runs/evidence/2026-08-31T03-57-12Z/scratch-sketch-over-the-app.png"
+      ],
+      "reasoning": "Unblocked after three sittings by giving the scratch what the rule needs: a proposal-only screen and a thread on it. The pane offered '⚠ View the proposed sketch'; pressing it ghosted /proposals/sketch-demo.html over the running app with the amber banner '⚠ Proposed sketch — not from design' across its top. A sketch can be shown, and cannot be mistaken for the design."
+    },
+    {
+      "rule": "panel.threads.own-view",
+      "status": "pass",
+      "statement_hash": "sha256:faade3b887d1",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/threads-filter-all.json",
+        "runs/evidence/2026-08-31T03-26-41Z/panel-thread-panel.png"
+      ],
+      "reasoning": "The Threads tab is a view of its own: filters 'Active 74 / Awaiting you 65 / All 122', and All really shows 122 - the ended conversations included, verified, waived and incorporated all present in the probed statuses. Each card names what it is about (the where-line), and opening one slides to the conversation."
+    },
+    {
+      "rule": "panel.walkdown.records-to-ledger",
+      "status": "pass",
+      "statement_hash": "sha256:6cc28278f4a6",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-57-12Z/walkdown-session-journey.json",
+        "runs/evidence/2026-08-31T03-57-12Z/walkdown-session-discard.json",
+        "runs/evidence/2026-08-31T03-57-12Z/walkdown-finish-refused-nameless.json"
+      ],
+      "reasoning": "All three halves on the scratch copy, its runs directory counted before and after. Finish appended exactly one record - 2026-08-31T03-57-47Z-local-01, actor 'topher', kind walkdown, results hash-stamped with their threads linked - and the runs count moved 115 to 116. Discarding a one-verdict session recorded nothing (draft null after, runs unchanged). A sitting started nameless was refused at Finish with 'recorded under a person's name — set it in Settings (the gear)', the button handed back and Settings opened; the discard control itself lives on the blueprint-crossing ask, which a one-blueprint scratch cannot raise, so the state exercised the same POST that control makes and the refusal state photographed the button-handed-back path."
+    },
+    {
+      "rule": "panel.walkdown.one-control-owns-the-sitting",
+      "status": "pass",
+      "statement_hash": "sha256:c74a54acc395",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-57-12Z/walkdown-session-journey.json",
+        "runs/evidence/2026-08-31T03-57-12Z/walkdown-session-journey.png"
+      ],
+      "reasoning": "One button in the bar owns both halves: 'Start walkdown', titled 'Begin a sitting — 119 rules owe you a verdict', becomes 'Finish walkdown', titled 'Record this sitting to the runs ledger under your name', and returns to 'Start walkdown' once the record lands. The judged tally rides in the detail ('1 judged this session', '2 judged this session') beside the verdicts as the sitting moves."
+    },
+    {
+      "rule": "panel.walkdown.session-survives-reload",
+      "status": "pass",
+      "statement_hash": "sha256:05503923167c",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-57-12Z/walkdown-session-journey.json",
+        "runs/evidence/2026-08-31T03-57-12Z/walkdown-finish-refused-nameless.json"
+      ],
+      "reasoning": "Two verdicts in, the page was reloaded outright: the session came back - the bar button still 'Finish walkdown' with its recording title - restored from what was already written down (the draft probe a step earlier shows both verdicts and their note threads on the project, not merely in the tab). And a refused Finish hands the button back rather than bricking the session: after the nameless refusal the button still reads 'Finish walkdown', ready to try again once a name is set."
+    },
+    {
+      "rule": "panel.walkdown.draft-on-disk",
+      "status": "pass",
+      "statement_hash": "sha256:cfb0ee61cad3",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-57-12Z/walkdown-session-journey.json",
+        "runs/evidence/2026-08-31T03-57-12Z/walkdown-session-discard.json"
+      ],
+      "reasoning": "After two verdicts the project's draft endpoint returned the session as written: draft true, target local, actor topher, both verdicts with their filed note threads - on disk, outside the runs ledger, where walkdown status and another window can see it. The ledger gained exactly one record, at Finish (runs 115 to 116), and the discard state shows the draft leaving without the ledger moving at all."
+    },
+    {
+      "rule": "panel.walkdown.verdicts-at-hand",
+      "status": "pass",
+      "statement_hash": "sha256:10b43c02479d",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-57-12Z/walkdown-session-journey.json"
+      ],
+      "reasoning": "With a rule open mid-session, Pass and Fail sit at y473 in a 760px viewport - under the statement (which ends at y375) and on screen without scrolling - with the feedback box confirmed above them and '0 judged this session' beside. The verdict is at hand exactly where the rule is read."
+    },
+    {
+      "rule": "panel.walkdown.pass-advances",
+      "status": "pass",
+      "statement_hash": "sha256:017026c31543",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-57-12Z/walkdown-session-journey.json"
+      ],
+      "reasoning": "The fail stayed put - after 'fail recorded' the pane is still on anchored-target, solid btn-error, so the why can be given where the rule is - and the pass moved on by itself: passing right-project landed on both-surfaces, the next rule owing a verdict, with the tally at 2. No verdict switched a mode on: the fail refusal offers Pin mode in words ('turn on Pin mode and drop it on the page') rather than arming it."
+    },
+    {
+      "rule": "panel.walkdown.note-with-any-verdict",
+      "status": "fail",
+      "statement_hash": "sha256:f9043305838b",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-57-12Z/walkdown-session-journey.json",
+        "runs/evidence/2026-08-31T04-07-07Z/signoff-journey.json"
+      ],
+      "reasoning": "The filing works and the emptying is broken. The box rides above the verdicts, and the fail's why was filed as note n-0127 on anchored-target and linked into the run result - that half held. But the box is not emptied by the verdict that files it: the panel clears its own copy (S.verdictNote = '') and re-renders, and the textarea's dirtied value survives the render, so stepping to right-project and pressing Pass silently refiled the SAME text as n-0128 on a rule it says nothing about - on the scratch's disk, n-0127 and n-0128 are byte-identical bodies on different rules. Reproduced on a second path in the signoff journey: after refining absent-until-asked, going back to the list and opening one-switch showed the box still holding the refine text. 'An empty box files nothing' is true, but after the commonest sequence in a hard sitting - fail with why, move on, pass - the box only looks empty in the code's intent, not on screen or in what it files. This is the textarea-value/lit-render gotcha the vendored live() directive exists for.",
+      "threads": [
+        "n-0126"
+      ]
+    },
+    {
+      "rule": "panel.walkdown.fail-requires-why",
+      "status": "pass",
+      "statement_hash": "sha256:9644c16756d8",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-57-12Z/walkdown-session-journey.json"
+      ],
+      "reasoning": "Fail with the box empty and no pin dropped this session: refused - 'A fail needs a why — write it above, or turn on Pin mode and drop it on the page.' - judged stayed 0, button still outline. With the why written, the fail recorded, stayed put, and the why went to disk as a note linked into the run. The refusal names both ways to answer and arms neither."
+    },
+    {
+      "rule": "screens.ownership.routes-by-page",
+      "status": "pass",
+      "statement_hash": "sha256:5ad49373b1d0",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/embed-pin-files-against-the-page-project.json",
+        "runs/evidence/2026-08-31T03-26-41Z/embed-pin-files-against-the-default.json",
+        "runs/evidence/2026-08-31T03-26-41Z/start-choose-blueprint.json"
+      ],
+      "reasoning": "A page declaring its project is never overridden: the pin went to ?bp=example/blueprint. A page declaring nothing filed with its url attached for the claim table to route - the same table whose tests ('a url resolves to the blueprint that claims it', 'an enumerated fragment beats the page it lives on') ran green in this sitting's suite. And an address no blueprint claims is not guessed at: the picker asked, photographed, with the frame parked on the unclaimed page."
+    },
+    {
+      "rule": "screens.surfaces.stand-in-app",
+      "status": "pass",
+      "statement_hash": "sha256:8c976257c8c0",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/panel-review.png",
+        "runs/evidence/2026-08-31T03-26-41Z/embed-pin-filed-on-the-prototype.json"
+      ],
+      "reasoning": "The whole sitting ran on it: walkdown's own review screen has no separate app, so the server served the design back as the app, wearing the green 'STAND-IN APP — THE DESIGN, SERVED AS THE APP' banner in every capture. Fading, ghosting and pinning all worked against it - pins filed on both surfaces over a stand-in app - and nobody could mistake it for a build with the banner on."
+    },
+    {
+      "rule": "threads.conversation.one-stream",
+      "status": "pass",
+      "statement_hash": "sha256:e58134b3796f",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/thread-stream-grouped.json",
+        "runs/evidence/2026-08-31T03-26-41Z/thread-stream-grouped.png"
+      ],
+      "reasoning": "q-0070 reads as one stream: 14 messages, the opening note simply the first, and four continuations collapsed under a single author name where one voice speaks twice - the probed author sequence alternates Topher Fangio / Agent with no repeated headers inside a turn. A day divider ('Tuesday') marks time. It reads as talking, not filing."
+    },
+    {
+      "rule": "threads.conversation.composer-stays",
+      "status": "pass",
+      "statement_hash": "sha256:fc8772c1687a",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/thread-stream-grouped.json",
+        "runs/evidence/2026-08-31T03-26-41Z/composer-shift-enter.json",
+        "runs/evidence/2026-08-31T03-26-41Z/composer-refused.json"
+      ],
+      "reasoning": "The reply box stands at the bottom of the open thread (box at y631 under the scrolled stream) and stays there. Shift-Enter broke the line without sending (two lines in the box, nothing posted); Enter sends. The optimistic path was photographed against a refusing server: the message appeared marked failed ('not sent') attributed to the recording name, and the text came back to the box rather than being lost. Attribution is 'as topher' - the recorded identity, not a name typed again."
+    },
+    {
+      "rule": "threads.conversation.new-since-you-looked",
+      "status": "pass",
+      "statement_hash": "sha256:e3e890cf2091",
+      "evidence": [
+        "runs/evidence/2026-08-31T04-04-57Z/threads-new-since-you-looked.json",
+        "runs/evidence/2026-08-31T04-04-57Z/threads-new-since-you-looked.png"
+      ],
+      "reasoning": "Seeded as a reader who stopped at 2026-08-26T00:00Z on n-0071 and reloaded: the collapsed card under its rule carries a red '4 new' - exactly the replies dated after the mark - and opening the thread lands the view mid-stream (scrollTop 631 of 3118) at the new line rather than at the top or the bottom. The remembering, the counting and the landing all read from the stored mark."
+    },
+    {
+      "rule": "threads.conversation.append-only",
+      "status": "pass",
+      "statement_hash": "sha256:06a879b1032c",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/thread-terminal-verified.json",
+        "runs/evidence/2026-08-31T03-26-41Z/thread-stream-grouped.json"
+      ],
+      "reasoning": "On verified n-0102 the actions row is empty - the probe enumerated every button in the pane and found only the back link and the identity control; no edit, no delete, no reaction anywhere in any thread state captured, and no way back from terminal (the footer states the ending instead). Replies remain possible on an ended thread, which appends words rather than changing any; the ledger, not the thread, is where judgment lives."
+    },
+    {
+      "rule": "threads.conversation.thread-is-a-screen",
+      "status": "pass",
+      "statement_hash": "sha256:9971d7aaef65",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/panel-thread-panel.png",
+        "runs/evidence/2026-08-31T03-26-41Z/embed-thread-provenance.json"
+      ],
+      "reasoning": "Opening a conversation slides to a screen of its own - the stream takes the pane's full width - one step right of where it was opened, and the way back names where it goes: '← All threads' from the list. Opened under a rule, the same control names the rule instead (backFromThread reads the row). Reading a conversation never costs the reader their place."
+    },
+    {
+      "rule": "panel.identity.default-actor",
+      "status": "pass",
+      "statement_hash": "sha256:6cf5b560bdde",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/panel-settings.png",
+        "runs/evidence/2026-08-31T03-57-12Z/walkdown-session-journey.json",
+        "runs/evidence/2026-08-31T03-42-38Z/refuses-without-a-name.json"
+      ],
+      "reasoning": "Settings arrived filled from git: 'Record as: topher' (the username records carry) and 'Full name: Topher Fangio' (how the person is shown), both in editable boxes, with the copy saying exactly the law - 'Records carry the username; the full name is only how you are shown. Clear either to go back to what git says.' The journey's run record landed under 'topher' without a keystroke of identity setup. Both fields stay editable including to empty - the refusal state emptied them and the panel answered coherently rather than breaking. The OS-username fallback and the git-knows-neither case are held by this sitting's attribution tests ('a machine with no full name is known by its username alone')."
+    },
+    {
+      "rule": "panel.identity.attribution-visible",
+      "status": "pass",
+      "statement_hash": "sha256:1b6a789fde73",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/panel-thread-panel.png",
+        "runs/evidence/2026-08-31T03-26-41Z/embed-thread-provenance.json",
+        "runs/evidence/2026-08-31T03-42-38Z/refuses-without-a-name.json",
+        "runs/evidence/2026-08-31T03-57-12Z/walkdown-session-journey.json"
+      ],
+      "reasoning": "The name is on screen before it is used, everywhere work is attributed: the composer row reads 'as topher · Enter sends' beside the actions, the session bar button's own title says 'Record this sitting to the runs ledger under your name', and with the identity emptied the composer shows 'as set your name…' - a link, not a silent default - while attributed actions refuse outright and open Settings. Nobody is recorded under a name the panel has not shown them."
+    },
+    {
+      "rule": "panel.viewport.device-presets",
+      "status": "pass",
+      "statement_hash": "sha256:2ded288a785a",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/vp-mobile-390-ghost.json",
+        "runs/evidence/2026-08-31T03-26-41Z/vp-mobile-390-ghost.png",
+        "runs/evidence/2026-08-31T03-26-41Z/vp-desktop-1440.json"
+      ],
+      "reasoning": "The bar's viewport control sized the frame like a device: at the mobile preset the app frame is 390x704 and laid out at 390 (probed inside the frame), and the ghost renders at the very same box and the same 390 layout width (ghostLaidOutAt 390, boxes identical to the pixel) - the comparison stays honest because both surfaces see one viewport. The desktop preset laid the frame out at 1440 the same way."
+    },
+    {
+      "rule": "panel.viewport.zoom-to-fit",
+      "status": "pass",
+      "statement_hash": "sha256:8beb5dbadbe0",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-26-41Z/vp-desktop-1440.json",
+        "runs/evidence/2026-08-31T03-26-41Z/vp-desktop-1440.png"
+      ],
+      "reasoning": "Asked for 1440 in an 860px pane, the frame laid out at 1440 and scaled down whole (transform scale 0.597) - a desktop layout seen as a desktop layout, not reflowed narrow - and the scale is visible in the bar's pill: '1440px · fit 60%'. The fit control and both presets stand beside it, the active one marked."
+    }
+  ]
+}

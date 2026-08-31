@@ -1,0 +1,14 @@
+{
+  "run_id": "2026-08-31T02-59-00Z-local-01",
+  "created": "2026-08-31T02:59:00Z",
+  "actor": "topherfangio",
+  "kind": "sweep",
+  "target": "local",
+  "tiers": [
+    "agent"
+  ],
+  "why": "The panel was rebuilt on lit-html and its module graph untangled (architecture steps 0-5): every pane, the shell, the bar and the thread screen were rewritten, the wire* event layer was replaced with template bindings and wd-* events, and both browser bundles changed format to iife. Every agent verdict predates the surface it judged.",
+  "git_sha": "f9ecad9",
+  "spec_hash": "sha256:881a04ca14a1",
+  "results": []
+}

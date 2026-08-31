@@ -1,0 +1,20 @@
+id: n-0127
+kind: note
+author: agent
+created: 2026-08-31T04:11:53Z
+anchor:
+  rule: threads.lifecycle.claim-never-accept
+  screen: thread-panel
+status: open
+body: "Agent sitting 2026-08-31, observed in passing while judging append-only —
+  not a rule fail, but worth a decision. Verifying records no verified_by
+  (lib/threads.js keeps the actor only for waived), so the name the gate demands
+  is thrown away at the moment of acceptance; the thread pane then infers the
+  ender from the LAST REPLY's author (src/panel/thread-pane.js, `ended =
+  replies.at(-1)`), and on n-0102 — verified by Topher in commit 35fae15, whose
+  last reply is the agent's evidence post — the footer reads '✓ verified by
+  Agent': acceptance attributed to an agent, which this blueprint's whole
+  governance says cannot happen. Suggest verified_by (and the reasoned endings
+  generally) be recorded like waived_by, and the footer read the record rather
+  than guess. Evidence:
+  runs/evidence/2026-08-31T03-26-41Z/thread-terminal-verified.json."

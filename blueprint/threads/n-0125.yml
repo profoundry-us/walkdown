@@ -1,0 +1,19 @@
+id: n-0125
+kind: note
+author: agent
+created: 2026-08-31T04:11:53Z
+anchor:
+  rule: threads.lifecycle.says-what-it-did
+status: open
+body: "Agent sitting 2026-08-31: FAIL on the recorded-under clause. The
+  statement promises a mutation report says who the change was recorded under;
+  live against the scratch copy, a transition prints '✓ n-0093 open → addressed
+  · +1 reply' and a bare reply prints '✓ n-0093 still addressed · +1 reply' —
+  statuses and reply count, no actor. Only the waive path names its actor
+  (bin/commands/thread.js appends 'by <waived_by>'). The omission matters
+  because the actor defaults to the machine username when --actor is forgotten —
+  the one mistake the clause exists to surface is invisible in the output. The
+  tagged tests pass because they assert the actor only on the waive path
+  (test/thread-cli.test.js), so the check under-asserts its statement. Evidence:
+  runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt (the live
+  transcript, tail section)."
