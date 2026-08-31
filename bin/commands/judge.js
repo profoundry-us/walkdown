@@ -188,8 +188,8 @@ export function run(args) {
     'GOVERNANCE',
     '  - You claim work; a person accepts it. Never write "verified" or "waived" anywhere.',
     '  - A fail needs a note thread anchored to this rule citing the evidence; put its id in the result.',
-    '  - If judging this makes the application under review WRITE, serve a disposable copy of the',
-    '    blueprint and break things there — a verdict goes in the real ledger, junk data never does.',
+    '  - If judging this makes the application under review WRITE, aim it at a disposable copy',
+    '    of whatever it writes to — a verdict goes in the real ledger, junk data never does.',
     `  - The ledger is append-only: one new record, at the end, and no record ever edited.`,
   );
 
