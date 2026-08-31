@@ -8,15 +8,8 @@
     "strict": false,
     "noImplicitAny": false,
     "skipLibCheck": true,
-    "types": [
-      "node"
-    ]
+    "types": ["node"]
   },
-  "include": [
-    "lib/**/*.js"
-  ],
-  "exclude": [
-    "lib/viewer",
-    "lib/skills"
-  ]
+  "include": ["lib/**/*.js"],
+  "exclude": ["lib/viewer", "lib/skills"]
 }
