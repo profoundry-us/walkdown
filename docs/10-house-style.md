@@ -121,13 +121,115 @@ types are bad but because `tsc` puts a build between clone and run, which is
 precisely what we spent a day removing. Where a type would genuinely help, JSDoc
 gives most of the value and costs nothing at runtime.
 
+## The concrete standards
+
+What the philosophy above compiles down to, so nobody has to re-derive it.
+These follow what the major JS projects converged on, with the deviations
+named and reasoned.
+
+### Tooling: the formatter owns style, the linter owns correctness
+
+The split every large JS repo settled on: nobody reviews whitespace, and the
+linter never argues taste. Here both jobs are **Biome** (`biome.json`, one
+devDependency):
+
+    npm run format          # biome format --write .
+    npm run lint            # correctness rules only, wired into Highball
+
+The lint set is deliberately small - undeclared names, unused variables,
+unreachable code, `==`, duplicate keys, switch fallthrough. Every rule in it
+catches a bug class this repo has actually had (its first run found a dead
+helper and write-only state). Growing it requires the same argument: name the
+failure it prevents. The old ESLint config's warning survives Biome: a rule
+nobody asked for is a rule people learn to skip.
+
+The one-time reformat is in `.git-blame-ignore-revs`; run
+`git config blame.ignoreRevsFile .git-blame-ignore-revs` once per clone and
+blame answers with the person who decided a line, not the machine that
+re-wrapped it.
+
+### Types: JSDoc + tsc, the SvelteKit pattern, and never a compile step
+
+`lib/` is typed the way SvelteKit and webpack are typed: plain JS, JSDoc
+annotations, checked by `tsc --checkJs` (`jsconfig.json`, `npm run
+check:types`, enforced by Highball). Zero build step, zero runtime cost -
+clone-is-the-install holds.
+
+The working rule: **let inference do it, annotate only where the checker
+cannot follow, and treat a forced annotation as information.** Most of `lib/`
+needed nothing. Where annotations were required, each found something - a
+docstring lying about a return value, a union no caller used. An annotation
+the checker did not force should usually be a `@typedef` documenting a real
+contract (`Location` in `lib/locations.js`), not ceremony on obvious
+parameters.
+
+Scope grows with the refactor: `lib/` now, `bin/` when it splits, the panel
+as panes are rebuilt on Lit - never annotate code that is about to be
+rewritten.
+
+### Naming
+
+The ecosystem's conventions, which we already follow - written down so the
+next fifty functions match the first fifty:
+
+- `camelCase` functions and variables; `PascalCase` classes and Lit
+  components; `UPPER_SNAKE` module-level constants.
+- Predicates read as questions and return booleans: `is*`, `has*`, `can*`
+  (`hashMatches`, `veilIsUp`). Never a predicate that returns a string.
+- Actions start with the verb: `resolveLocations`, `writeRunRecord`,
+  `placePointer`. Converters are `to*`/`from*`; factories are `create*`;
+  event handlers are `on*`.
+- Collections are plural (`threads`, `runs`); a lookup table says what it is
+  keyed by (`rulesById`).
+- And the rule above all of these: a name in
+  [01-glossary.md](01-glossary.md) appears in exactly that form, everywhere.
+
+### Modules and files
+
+- **ESM only, named exports only** - a default export exists where a
+  framework demands one (the two reporters). Named exports are what make
+  renames find every caller.
+- **`node:` prefix on builtins**, always.
+- **Imports at the top, sorted by the formatter** - no lazy `import()` except
+  in `bin/`, where it keeps command startup honest.
+- **~300 lines is the smell threshold, not a limit.** The major projects do
+  not lint file length and neither do we; culture holds it. The median `lib/`
+  file is 92 lines. A file crossing ~300 owes a look at its seams; the two
+  standing violations are named in [11-architecture.md](11-architecture.md)
+  with their split plans.
+- **One job per file, and the name says which.** `locations.js` resolves
+  locations. If the name needs "and", it is two files.
+
+### The panel: Lit, adopted with the refactor
+
+The panel's UI standardizes on **lit-html + LitElement** - the stack Chrome
+DevTools uses for the same kind of surface, and the smallest step from the
+template-literal code we already write. What it buys, in order of how much we
+have paid for the lack of it: values are escaped by default (the `esc()`
+discipline stops being a convention someone can forget), events bind in the
+template (`@click=${...}` instead of render-then-wire), and updates are
+incremental (the focus-and-scroll preservation we hand-fought comes free).
+
+Rules of engagement while the migration runs
+([11-architecture.md](11-architecture.md) has the order):
+
+- New panes and rewritten panes use `html\`...\`` from lit-html; a pane
+  graduates to a LitElement component when it owns real state, not before.
+- No raw `innerHTML` in new code. `unsafeHTML` is a code smell with one
+  reviewer question attached: why is this not a template?
+- Lit is bundled by Rollup into the committed panel bundle, exactly as yaml
+  is vendored for the CLI - a devDependency at build time, zero install cost
+  to adopters.
+- One shared `CSSStyleSheet` adopted into each component's shadow root -
+  Tailwind utilities do not pierce shadow boundaries, and per-component
+  stylesheets would fork the design system.
+
 ## What this style is not
 
-- **Not a linter.** ESLint runs one rule (`no-undef`) over `src/panel`, for one
-  failure mode, and its own comment says it should not grow into a style gate:
-  *a rule nobody asked for is a rule people learn to skip.*
-- **Not formatting.** Two spaces, single quotes, semicolons, because that is
-  what is here. Nobody should spend a minute on it.
+- **Not a style gate.** The lint set stays correctness-only; growth requires
+  naming the failure a rule prevents.
+- **Not a formatting debate.** Biome's output is the style. Nobody spends a
+  minute on it, including in review.
 - **Not a reason to rewrite working code.** These are the rules for what we
   write next, and for what we touch anyway. A file that breaks one of them and
   is not otherwise being changed is fine where it is.

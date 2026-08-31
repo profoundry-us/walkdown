@@ -179,18 +179,26 @@ is a day's work to invert.
 Each step is independently shippable, ends green, and is a **refactor only** —
 never combined with a behaviour change in the same commit.
 
-0. **Write the standards down.** [10-house-style.md](10-house-style.md). Cheap,
-   and it is what makes the rest of the list consistent rather than personal.
+0. **Write the standards down.** [10-house-style.md](10-house-style.md).
+   *Done, and tooled: Biome owns format and correctness lint; `lib/` is
+   JSDoc-typed under `tsc --checkJs`; both run in Highball.*
 1. **`lib/vocab.js`.** Smallest change, highest leverage, touches every file
    once. Do it while the codebase is still small enough that "every file" is a
    morning.
 2. **Split `bin/`.** Purely mechanical, no behaviour to break, and it makes the
    next three easier to review by getting the noisiest file out of every diff.
+   Types follow: `bin/` joins the `checkJs` scope as it splits.
 3. **Split `lib/serve.js`**, and make the write allowlist a module with its own
    rule and its own checks.
 4. **Bundle the embed**; retire `tools/sync-shared.mjs`.
-5. **Break up `app.js`** along the five seams, inverting the effects dependency
-   so the Rollup cycle whitelist can go.
+5. **Rebuild the panel's panes on Lit** (decision made: lit-html + LitElement,
+   the Chrome DevTools stack - see [10-house-style.md](10-house-style.md)).
+   This *replaces* the old step 5: most of the `app.js` cycle is panes
+   reaching back for `render()` and manual DOM patching, and Lit's own update
+   model deletes that plumbing rather than rearranging it. Pane by pane,
+   lit-html templates first, LitElement components where a pane owns real
+   state; `app.js` shrinks to boot, session, and I/O. The Rollup cycle
+   whitelist goes when the last pane stops importing `app.js` back.
 6. **Schema as data**, with `lint` reading it.
 
 Sweep after each of 3, 4 and 5 — those move enough that a verdict recorded
@@ -199,8 +207,10 @@ finished before the next step starts, or the board fills with stale cells
 nobody gets back to.
 
 **What not to do**, in the same breath, because every one of these has been
-proposed for codebases at this exact moment in their lives: no framework in the
-panel, no TypeScript compile step (it would break the zero-install property we
-just bought), no test-suite rewrite, no renaming things that are already named
+proposed for codebases at this exact moment in their lives: no vDOM framework in the
+panel (Lit is a templating layer, not a framework - if a step needs a router
+or a store, the step is wrong), no TypeScript compile step (JSDoc + checkJs
+gives the checking; a build between clone and run would break the zero-install
+property we just bought), no test-suite rewrite, no renaming things that are already named
 after the glossary, and no refactor of `lib/`'s graph — it is the part that is
 right.
