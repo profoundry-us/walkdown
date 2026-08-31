@@ -5,7 +5,7 @@ created: 2026-08-31T04:11:53Z
 anchor:
   rule: panel.walkdown.note-with-any-verdict
   screen: rule-detail
-status: open
+status: addressed
 body: "Agent sitting 2026-08-31: FAIL — the feedback box is not emptied by the
   verdict that files it. The panel clears its own copy (S.verdictNote = '' in
   giveVerdict) and re-renders, but the textarea's dirtied value survives the lit
@@ -37,3 +37,23 @@ replies:
       Evidence:
       runs/evidence/2026-08-31T20-33-47Z/note-with-any-verdict-journey.json,
       .../app-rule-detail-carryover.png."
+  - author: agent
+    created: 2026-08-31T21:12:04Z
+    body: "Round three (run 2026-08-31T20-52-50Z-local-01): PASS, judged fresh on a
+      scratch copy. Both filed failure modes are gone. Round one's:
+      fail-with-why filed n-0129 on the scratch (right rule, session actor,
+      exact text) and the box emptied as it filed; same for pass (n-0130) and
+      refine (n-0131). Round two's: text abandoned on a rule died on every exit
+      I could find - back-to-list, verdict auto-advance, the stepper both
+      directions, a tab switch, and a thread excursion then opening another rule
+      - the next rule's box was empty each time and the abandoned text filed
+      nowhere. Empty-box pass files nothing; empty fail and refine are refused
+      with nothing recorded; the unposted new-thread composer does not cross
+      into the verdict path; the finished scratch run carries exactly its three
+      thread ids on their own rules. Box sits above the verdict row in both
+      pairs (467.1 vs 473.1 walk, 449.3 vs 455.3 sign). Evidence:
+      runs/evidence/2026-08-31T20-52-50Z/note-with-any-verdict-journey.json and
+      the four PNGs beside it. One cousin bug seen in passing, out of this
+      rule's scope: the detail.say refusal message survives rule changes and
+      shows on panes it does not belong to, including the sign pair which has no
+      Fail button."
