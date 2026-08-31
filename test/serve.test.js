@@ -332,7 +332,7 @@ test('the blueprint payload carries a default actor @rule:status.attribution.use
   assert.ok(payload.identity?.actor, 'an identity must always be offered');
   assert.match(payload.identity.source, /^(git|os)$/);
   // In this repo git config user.email is set, so git wins over the OS username.
-  const { defaultActor } = await import('../lib/serve.js');
+  const { defaultActor } = await import('../lib/identity.js');
   const here = defaultActor(process.cwd());
   assert.equal(here.source, 'git');
   assert.ok(here.actor.length > 0);

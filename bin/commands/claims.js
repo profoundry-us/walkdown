@@ -1,8 +1,7 @@
 import { dirname, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
-import { findBlueprintDir, loadBlueprint } from '../../lib/blueprint.js';
+import { discoverBlueprints, findBlueprintDir, loadBlueprint } from '../../lib/blueprint.js';
 import { blueprintForUrl, claimsOf, findCollisions } from '../../lib/claims.js';
-import { discoverBlueprints } from '../../lib/serve.js';
 import { end } from './context.js';
 
 /*
