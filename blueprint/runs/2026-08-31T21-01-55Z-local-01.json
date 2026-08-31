@@ -1,0 +1,31 @@
+{
+  "run_id": "2026-08-31T21-01-55Z-local-01",
+  "created": "2026-08-31T21:01:55Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "5a6cb7e",
+  "spec_hash": "sha256:4c52ef26f897",
+  "note": "Fifth single-rule judgment of threads.lifecycle.says-what-it-did after n-0125's four fails; headless, every mutation run against the scratch copy judge-0831-cli5, taken away after.",
+  "results": [
+    {
+      "rule": "threads.lifecycle.says-what-it-did",
+      "status": "fail",
+      "statement_hash": "sha256:224b3a652a3a",
+      "evidence": [
+        "runs/evidence/2026-08-31T21-01-55Z/cli-prior-modes.txt",
+        "runs/evidence/2026-08-31T21-01-55Z/cli-refusal-atomicity.txt",
+        "runs/evidence/2026-08-31T21-01-55Z/cli-empty-reply.txt",
+        "runs/evidence/2026-08-31T21-01-55Z/cli-json-mutation.txt",
+        "runs/evidence/2026-08-31T21-01-55Z/cli-empty-actor.txt",
+        "runs/evidence/2026-08-31T21-01-55Z/cli-new-probes.txt",
+        "runs/evidence/2026-08-31T21-01-55Z/cli-reply-to-terminal.txt",
+        "runs/evidence/2026-08-31T21-01-55Z/cli-misc-edges.txt",
+        "runs/evidence/2026-08-31T21-01-55Z/tagged-checks.txt"
+      ],
+      "reasoning": "Judged live against the scratch copy judge-0831-cli5 at 5a6cb7e, re-probing all four prior rounds' failure modes and then hunting fresh edges. Every prior fix holds: each mutation names its actor on every path including the defaulted username and an env actor (cli-prior-modes.txt); refusals are atomic - three refused reply+waive attempts leave the thread file byte-identical by sha256, and illegal, already-there, no-reason, human-only and unknown-id shapes all say why on stderr with exit 2 and empty stdout (cli-refusal-atomicity.txt, cli-new-probes.txt); a present-but-empty or whitespace --reply is refused whole, alone and beside a valid --status (cli-empty-reply.txt); a mutating --json call now prints a change report naming both ends, the actor including the defaulted username, and the reply count, while a refused --json mutation keeps stdout empty (cli-json-mutation.txt); a present-but-empty --actor falls through to the next source and the report matches the disk on every combination probed (cli-empty-actor.txt); reply counts are honest including '+2 replies' when reply and reason both land, verify and waive record and report their person consistently, and reading with no flags still prints the conversation (cli-new-probes.txt). The verdict is fail on one edge none of the nine passing tagged checks reaches: the recorded-under clause on the only mutation a terminal thread still accepts. A reply to a waived or verified thread lands on disk under the invocation's actor, but the report's 'by' names waived_by or verified_by instead - '--actor agent --reply ...' on the waived n-0118 prints 'still waived · by Probe Human · +1 reply' while the disk records author 'agent', the verified n-0123 behaves the same, and the JSON change report says by 'Probe Human' beside replies_added 1, so the change report names someone who did not make the change; with --actor forgotten the reply lands under 'topherfangio' while the report still reads 'by Probe Human' - round one's silently-defaulted username invisible again, and worse, another person's name standing where it should be (cli-reply-to-terminal.txt). The cause is the status-gated preference in bin/commands/thread.js (under = verified_by/waived_by when the thread sits in that status, else actor), whose comment argues the actor is what this invocation ran under either way - true when this invocation performed the waive or verify, false exactly when the mutation is a reply against an already-terminal thread. Expected by the statement's words: the report says who the change it made was recorded under - either name the reply's actor separately from the status-holder, or refuse replies to terminal threads. Re-examined round four's two uncounted edges and upheld both as truthful: an orphan --reason lands nowhere and the report claims nothing about it (disk grep 0 for its distinct text), --reason alone is answered as a read, and --waive beside --status reports the move that actually happened, so the ignored flag is visible in the output (cli-misc-edges.txt).",
+      "threads": ["n-0125"]
+    }
+  ]
+}

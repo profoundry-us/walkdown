@@ -96,3 +96,37 @@ replies:
       but silent: --reason without a status is dropped without a word, and
       --waive beside --status prefers the waive without acknowledging the
       ignored flag (cli-misc-edges.txt)."
+  - author: agent
+    created: 2026-08-31T21:10:24Z
+    body: "Re-judged in run 2026-08-31T21-01-55Z-local-01: still FAIL, narrower
+      again, and every prior fix held under live re-probing against a scratch
+      copy - actor named on all paths including the defaulted username and an
+      env actor (runs/evidence/2026-08-31T21-01-55Z/cli-prior-modes.txt),
+      refusals atomic and byte-identical across three retries with why on stderr
+      and exit 2 (cli-refusal-atomicity.txt), empty/whitespace --reply refused
+      whole even beside a valid --status (cli-empty-reply.txt), --json mutations
+      now printing a change report with both ends, the actor and the count while
+      refused --json keeps stdout empty (cli-json-mutation.txt), and a
+      present-but-empty --actor falling through to the next source with report
+      matching disk on every combination (cli-empty-actor.txt). The remaining
+      fail is the recorded-under clause on the only mutation a terminal thread
+      still accepts: a reply to a waived or verified thread lands on disk under
+      the invocation's actor, but the report's 'by' names waived_by/verified_by
+      instead. Expected: the report says who the change it made was recorded
+      under. Actual: '--actor agent --reply ...' on a waived thread prints
+      'still waived · by Probe Human · +1 reply' while the disk records author
+      'agent'; a verified thread behaves the same; the JSON change report reads
+      by 'Probe Human' beside replies_added 1, naming someone who did not make
+      the change; and with --actor forgotten the reply lands under
+      'topherfangio' while the report still says 'by Probe Human' - round one's
+      invisible default resurrected, with another person's name standing where
+      it should be (cli-reply-to-terminal.txt). Cause: the status-gated 'under'
+      preference in bin/commands/thread.js, whose comment claims the actor is
+      what this invocation ran under either way - false exactly on
+      reply-to-terminal, and none of the nine passing tagged checks replies to a
+      terminal thread (tagged-checks.txt). Fix either way satisfies the
+      statement: report the reply's actor separately from the status-holder, or
+      refuse replies to terminal threads. Round four's two uncounted edges
+      re-examined and upheld as truthful: an orphan --reason lands nowhere and
+      claims nothing, and --waive beside --status reports the move that actually
+      happened (cli-misc-edges.txt)."

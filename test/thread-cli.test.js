@@ -29,6 +29,7 @@ function fixture(name, thread) {
       'created: 2026-01-01T00:00:00Z',
       'anchor: {}',
       `status: ${thread.status}`,
+      ...(thread.waived_by ? [`waived_by: ${thread.waived_by}`] : []),
       'body: A thing that is wrong.',
     ].join('\n'),
   );
@@ -135,6 +136,18 @@ test('a present-but-empty actor defaults visibly, and the report matches the dis
   assert.match(out, new RegExp(`by ${me}`), 'the default is named, never an empty string');
   const disk = readFileSync(join(bp, 'threads', 'n-0009.yml'), 'utf8');
   assert.match(disk, new RegExp(`author: ${me}`), 'the ledger records the same name the report gave');
+});
+
+test("a reply to a terminal thread is recorded under its own actor, not the status holder @rule:threads.lifecycle.says-what-it-did", () => {
+  // Round five (n-0125): the report named the waiver for someone else's
+  // reply, putting another person's name on a change they did not make.
+  const bp = fixture('terminal', { id: 'n-0010', status: 'waived', waived_by: 'Probe Human' });
+  const out = run(['n-0010', '--actor', 'agent', '--reply', 'noting this for later'], bp);
+  assert.match(out, /still waived/);
+  assert.match(out, /by agent/, "the reply's author is who the change was recorded under");
+  assert.doesNotMatch(out, /by Probe Human/, 'the status holder did not make this change');
+  const disk = readFileSync(join(bp, 'threads', 'n-0010.yml'), 'utf8');
+  assert.match(disk, /author: agent/, 'and the disk agrees');
 });
 
 test('a refused transition says so and exits non-zero @rule:threads.lifecycle.says-what-it-did', () => {

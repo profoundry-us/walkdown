@@ -86,10 +86,14 @@ export function run(args) {
    */
   if (mutating) {
     const added = (t.replies ?? []).length - (was?.replies ?? []).length;
-    const under =
-      (t.status === 'verified' && t.verified_by) ||
-      (t.status === 'waived' && t.waived_by) ||
-      actor;
+    /*
+     * Who THIS change was recorded under is the invocation's actor - the
+     * reply's author, or the transition's actor (a terminal transition just
+     * recorded that same name). Preferring the thread's status holder here
+     * named the waiver for someone else's reply (n-0125, round five); the
+     * holder belongs to the read path below, where it is the record.
+     */
+    const under = actor;
     if (values.json) {
       console.log(
         JSON.stringify({
