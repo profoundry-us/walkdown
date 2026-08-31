@@ -25,7 +25,8 @@ export default {
   output: {
     file: 'vendor/yaml.js',
     format: 'es',
-    banner: `/*
+    banner: `// @ts-nocheck — third-party code; walkdown type-checks its own lib/, not yaml's internals.
+/*
  * yaml — vendored into walkdown, not hand-written. Do not edit.
  *
  * Bundled from the \`yaml\` package's browser build by \`npm run build:yaml\`

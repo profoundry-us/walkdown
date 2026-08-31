@@ -1,7 +1,7 @@
 {
   "name": "walkdown",
   "version": "0.1.0",
-  "description": "Verify that what you built is what you designed — blueprint lint & hashing for the walkdown spec format",
+  "description": "Verify that what you built is what you designed \u2014 blueprint lint & hashing for the walkdown spec format",
   "type": "module",
   "bin": {
     "walkdown": "bin/walkdown.js"
@@ -38,7 +38,8 @@
     "build:yaml": "rollup -c rollup.vendor.mjs --silent",
     "check:yaml": "mkdir -p .walkdown/tmp && rollup -c rollup.vendor.mjs --silent -o .walkdown/tmp/yaml.built.js && diff -q .walkdown/tmp/yaml.built.js vendor/yaml.js",
     "format": "biome format --write .",
-    "check:format": "biome check ."
+    "check:format": "biome check .",
+    "check:types": "tsc -p jsconfig.json"
   },
   "keywords": [
     "bdd",
@@ -55,9 +56,11 @@
     "@playwright/test": "^1.62.1",
     "@profoundry-us/highball": "^0.4.1",
     "@tailwindcss/cli": "^4.3.3",
+    "@types/node": "^26.4.0",
     "daisyui": "^5.7.20",
     "rollup": "^4.63.0",
     "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
     "yaml": "^2.6.0"
   }
 }

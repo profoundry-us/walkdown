@@ -83,6 +83,17 @@ checks:
     run: npm run --silent lint
     fast: true
 
+  # lib/ is typed the way SvelteKit and webpack are typed: JSDoc annotations
+  # over plain JS, checked by tsc with no build step, so clone-is-the-install
+  # survives. checkJs means the checker reads the code itself - an annotation
+  # is only needed where inference cannot follow, and each one it forced has
+  # so far been a real gap (a docstring that lied about a return value, an
+  # invented union no caller used).
+  - id: lib-types
+    name: lib/ types hold
+    run: npm run --silent check:types
+    fast: true
+
   # Neither browser file is imported by the test suite — they are delivered as
   # text — so a syntax error in one is invisible until a page loads it.
   - id: viewer-parses
