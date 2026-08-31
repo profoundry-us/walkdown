@@ -972,18 +972,14 @@ export function render() {
   if (!S.data) return;
   // The thread screen without a thread is not a screen.
   if (S.view === 'thread' && !S.openThread) S.view = S.selected ? 'detail' : 'list';
-  // render() rebuilds the panel wholesale, which resets scroll. Clicking a
-  // control near the bottom of a long thread would otherwise throw you back
-  // to the top — so note where each pane was and put it back. Read live, not
-  // from a record kept by scroll events: those fire AFTER the position has
-  // already moved, so a record would sometimes be the staler of the two.
-  const wasAt = [...D.host.querySelectorAll('.wdp-pane')].map((p) => p.scrollTop);
-  // Typing must survive a repaint: a composer that loses the caret mid-reply
-  // is the difference between a conversation and a form.
-  const typing = D.sr.activeElement;
-  const caret = ['wdp-note', 'wdp-search'].includes(typing?.id)
-    ? { id: typing.id, start: typing.selectionStart, end: typing.selectionEnd }
-    : null;
+  /*
+   * Two ceremonies used to open this function: noting every pane's scrollTop
+   * to put back after the repaint, and saving the focused composer's caret to
+   * restore it. Both existed because innerHTML replaced every element; lit
+   * updates them in place, so the scroll positions and the caret were never
+   * lost to begin with. Removed on measurement, not faith - the browser suite
+   * covers the composer surviving a repaint and the panes holding position.
+   */
   const total = S.data.rows.length;
   const verified = S.data.rows.filter((r) => r.verdict === 'pass').length;
   /*
@@ -1226,26 +1222,15 @@ export function render() {
 
   const track = D.host.querySelector('.wdp-track');
   if (track) {
-    // A rebuilt element has no state to transition from, so paint where we
-    // were, flush that, then move. A rAF is not enough — the browser
-    // coalesces both states into one recalc and the slide is skipped.
+    /*
+     * Just set the destination. This used to be a five-step dance - kill the
+     * transition, paint the OLD position, flush, restore, then move - because
+     * a rebuilt element had no state to transition from. lit keeps the track,
+     * so the old transform is still on it and the browser animates from where
+     * it actually is.
+     */
     const AT = { list: '0%', detail: '-33.3333%', thread: onThreads ? '-33.3333%' : '-66.6667%' };
-    track.style.transition = 'none';
-    track.style.transform = `translateX(${AT[S.lastView] ?? '0%'})`;
-    void track.offsetWidth;
-    track.style.transition = '';
     track.style.transform = `translateX(${AT[S.view] ?? '0%'})`;
-    S.lastView = S.view;
-  }
-  D.host.querySelectorAll('.wdp-pane').forEach((p, i) => {
-    p.scrollTop = wasAt[i] ?? 0;
-  });
-  if (caret) {
-    const box = D.host.querySelector('#' + caret.id);
-    if (box) {
-      box.focus();
-      box.setSelectionRange(caret.start, caret.end);
-    }
   }
   /*
    * The panes carry their own handlers now (lit template bindings and

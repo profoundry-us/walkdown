@@ -106,7 +106,6 @@ export const S = {
   srcOpenFor: null, // the rule whose source is open
   srcCache: { rule: null, view: null },
 
-  lastView: 'list',
   ghostWidth: 0, // 0 = fill the stage; otherwise a fixed CSS width
   viewportW: 0, // framed viewport preset: 0 = fit the space, else CSS px
 

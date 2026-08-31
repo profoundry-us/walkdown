@@ -202,14 +202,17 @@ never combined with a behaviour change in the same commit.
    state; `app.js` shrinks to boot, session, and I/O. The Rollup cycle
    whitelist goes when the last pane stops importing `app.js` back.
 
-   *Half done: every pane and the shell render as lit templates (the esc()
-   discipline is gone; vendor/lit.js rides the bundle; both browser bundles
-   are format:'iife' after the conversion surfaced the classic-script
-   page-global trap). Still owed: the querySelector wire* functions become
-   template event bindings; the action functions leave `app.js` for real
-   modules so panes stop importing it back; then the whitelist goes and the
-   scroll/caret/track-repaint hacks in render() can be re-examined - lit's
-   diffing may make each unnecessary, but that is measured, not assumed.*
+   *Done. Every pane and the shell render as lit templates (esc() gone;
+   vendor/lit.js rides the bundle; both browser bundles are format:'iife'
+   after the conversion surfaced the classic-script page-global trap). The
+   graph is a DAG: reads live in vocab.js, thread I/O in conversation.js,
+   the three-verb shell interface in shell.js, everything else a pane offers
+   is a wd-* event caught at the root - and rollup builds with every warning
+   fatal, whitelist deleted. The scroll, caret and track-repaint ceremonies
+   in render() were measured against the suite and removed: lit keeps the
+   elements, so the state they preserved was never lost. No pane owns
+   enough local state yet to earn a LitElement component; the first that
+   does should become one (10-house-style.md).*
 6. **Schema as data**, with `lint` reading it.
 
 Sweep after each of 3, 4 and 5 — those move enough that a verdict recorded
