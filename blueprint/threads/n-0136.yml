@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-01T03:51:37.176Z
 anchor:
   rule: locations.travel.evidence-by-key
-status: open
+status: addressed
 body: The checks tier's fail evidence dies with the next run.
   lib/playwright-reporter.js records attachments as test-results/... filesystem
   paths, and Playwright empties test-results/ at the start of every run — so the
@@ -14,3 +14,15 @@ body: The checks tier's fail evidence dies with the next run.
   (runs/evidence/<ts>/...), which is this rule's whole point; the reporter
   should copy failure attachments there and record the key, not the path, before
   Playwright reclaims the directory.
+replies:
+  - author: agent
+    created: 2026-09-01T04:22:41Z
+    body: "Fixed in f827b5b: the reporter copies failure attachments into the home's
+      evidence store and records runs/evidence/<ts>/<slug>-<file> keys before
+      Playwright reclaims the output directory; the config resolves the evidence
+      root before the checkspace pin so the copies never land in the throwaway
+      home. Pinned by three tagged tests in test/playwright-reporter.test.js,
+      and proven in production the same hour: the 2026-09-01T04-20-11Z fail on
+      tiers-at-a-glance filed its screenshot and error context under the home,
+      and they were read to diagnose it after the next run had already emptied
+      the output directory."
