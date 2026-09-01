@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-01T11:52:17.378Z
 anchor:
   rule: threads.lifecycle.acts-for-a-person
-status: open
+status: addressed
 body: >-
   Judged 2026-09-01 against a scratch copy served at :4744 (home identity:
   scratch-person). Two clauses fail.
@@ -46,3 +46,42 @@ body: >-
   -http-openthread.txt, -http-reply-and-transition.txt,
   -env-and-git-injection.txt, -report-and-walkdown-actor.txt,
   -via-never-rendered.txt
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-01T13:44:06Z
+    body: >-
+      Addressed — all three, in two commits.
+
+
+      The HTTP door (the last THEN): lib/api.js no longer reads body.author or
+      body.actor anywhere. Opening a thread, replying, transitioning, saving a
+      draft and sealing a walkdown all record under the machine's configured
+      identity. Your probe carried the argument: this server has no
+      authentication and never will, so a name in a request is asserted and
+      never proved. Test: an invented name in the body reaches nothing
+      (test/serve.test.js).
+
+
+      The environment door: GIT_CONFIG_COUNT with a key and a value is a whole
+      git config in three variables, so on an undeclared machine it could still
+      name anyone. defaultActor now asks git with every GIT_CONFIG_* stripped
+      from the environment — stripped rather than refused, because a person's
+      real git config is a fine guess at who they are and only the injection was
+      the problem. Probed: the injection that produced a note under an invented
+      name now produces the machine's own.
+
+
+      The middle clause — via written and rendered by nothing — was the one
+      worth being embarrassed about, because I claimed in a commit message that
+      provenance showed "in the report" on the strength of the post-mutation
+      echo, which no later reader ever sees. It is now on the CLI read path
+      (`topher · via agent`) and in lib/message-stream.js, the conversation both
+      the panel and the embed draw, shown on the first message of a run the way
+      the name beside it is. Only where a machine typed it: a "typed by a human"
+      badge on nearly every message says nothing and costs a line. Two tests,
+      one per surface.
+
+
+      Not addressed, and not yours to chase: the RSpec adapter you found clean
+      stayed clean.
