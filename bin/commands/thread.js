@@ -3,9 +3,9 @@ import { collectRules, loadBlueprint } from '../../lib/blueprint.js';
 import { defaultActor } from '../../lib/identity.js';
 import { anchorText, paintStatus } from '../../lib/report/threads.js';
 import { dim } from '../../lib/report/tty.js';
-import { checkTransition, getThread, replyToThread, transitionThread } from '../../lib/threads.js';
-import { HUMAN_ONLY, THREAD_KINDS } from '../../lib/vocab.js';
-import { openThread } from '../../lib/writes.js';
+import { getThread } from '../../lib/threads.js';
+import { THREAD_KINDS } from '../../lib/vocab.js';
+import { mutateThread, openThread } from '../../lib/writes.js';
 import { end, loadOrExit } from './context.js';
 
 export function run(args) {
@@ -48,22 +48,16 @@ export function run(args) {
    * lets any caller type a name is not attribution, it is a text field
    * (n-0139).
    *
-   * So the identity comes from the personal config, and the only thing a
-   * caller may say about who is acting is `--as-agent` - provenance, and the
-   * one deviation that matters: it says a machine typed this. It can only
-   * ever subtract authority.
+   * The identity itself is resolved by lib/writes.js, which every interface
+   * writes through - this reads the same answer only to REPORT it, since a
+   * command that changes something has to say whose name went on the change.
+   * The only thing this door says about who is acting is `--as-agent`:
+   * provenance, and the one deviation that matters. It says a machine typed
+   * this, and it can only ever subtract authority.
    */
   const who = defaultActor(blueprint.codeRoot ?? blueprint.projectRoot);
   const actor = who.username?.trim() || 'unknown';
   const via = values['as-agent'] ? 'agent' : null;
-  /*
-   * SAID versus INHERITED, which outlives the flag that used to answer it. An
-   * acceptance may not ride on a guess: a machine login name is what this box
-   * is called, not a signature, and a bare --verify accepting under it is
-   * n-0130. What counts as said is now the identity block in the personal
-   * config - a person wrote it down, or asked for it to be written.
-   */
-  const explicit = who.declared;
   const status = values.verify
     ? 'verified'
     : values.reopen
@@ -115,7 +109,7 @@ export function run(args) {
       ...(values.screen ? { screen: values.screen } : {}),
       ...(values.element ? { element: values.element } : {}),
     };
-    const { id: opened, thread } = openThread(blueprint, { kind, body, anchor, author: actor, via });
+    const { id: opened, thread } = openThread(blueprint, { kind, body, anchor, via });
     if (values.json) {
       console.log(
         JSON.stringify({ id: opened, kind, status: thread.status, by: actor, ...(via ? { via } : {}), anchor }),
@@ -134,15 +128,21 @@ export function run(args) {
   const was = mutating ? getThread(blueprint, id) : null;
   if (mutating) {
     try {
-      if (status && HUMAN_ONLY.includes(status) && !explicit)
-        throw new Error(
-          `"${status}" is recorded under a person's name, and this machine only has a guess (${actor}, from ${who.source}). Say who you are in ~/.walkdown/config.yml under \`identity:\` — a login name is not a decision`,
-        );
-      // Validate the transition before ANY write: a refused status must
-      // refuse the whole command, or the reply lands and the output denies it.
-      if (status && was) checkTransition(was, { status, actor, reason: values.reason, via });
-      if (replying) replyToThread(blueprint, id, { author: actor, body: values.reply, via });
-      if (status) transitionThread(blueprint, id, { status, actor, reason: values.reason, via });
+      /*
+       * One ask, one call. The reply and the transition used to be issued
+       * separately from here, with the rule that a refused status must refuse
+       * the WHOLE command living in this file - so the ordering that keeps a
+       * refused transition from stranding its reply was the terminal's
+       * property rather than the ask's. It belongs to the ask
+       * (ownership.writes.spec-never-implementation), and a second interface
+       * now inherits it instead of rediscovering it (n-0125).
+       */
+      mutateThread(blueprint, id, {
+        ...(replying ? { body: values.reply } : {}),
+        ...(status ? { status } : {}),
+        reason: values.reason,
+        via,
+      });
     } catch (err) {
       console.error(err.message);
       process.exit(2);
