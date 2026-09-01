@@ -95,6 +95,15 @@ export default defineConfig({
    */
   workers: 1,
   fullyParallel: false,
+  /*
+   * Playwright's scratch - failure screenshots, error contexts, .last-run -
+   * goes where this repo keeps all of its per-checkout working state, beside
+   * checkspace/ and test-home/, instead of littering the tree with a second
+   * ignored directory. Scratch, not records: Playwright empties it every run,
+   * and the durable copy of a failure's evidence is n-0136's business (filed
+   * under the home by key, where deleting ~/.walkdown removes it).
+   */
+  outputDir: './.walkdown/test-results',
   globalSetup: './checks/global-setup.mjs',
   // Adopters write ['walkdown/reporter']; inside the package itself that alias
   // cannot self-resolve from Playwright's own module scope, so point at the file.
