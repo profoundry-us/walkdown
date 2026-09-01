@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-01T04:42:00.080Z
 anchor:
   rule: locations.answer.nearest-blueprint-wins
-status: open
+status: answered
 body: >-
   Does the deeper-sibling exception survive the always-config decision on
   n-0133?
@@ -50,3 +50,25 @@ body: >-
 
 
   Nothing has been built either way; n-0133 is held pending this answer.
+replies:
+  - author: Topher Fangio
+    created: 2026-09-01T04:45:57Z
+    body: >-
+      Answered by deleting the question. None of the three: the tree stops being
+      searched at all.
+
+
+      Every blueprint is listed in the config. walkdown stops looking for
+      blueprints outside it — no findBlueprintDir walking up from the working
+      directory, no discoverBlueprints walking down for siblings. With no tree
+      answer there is no tree-versus-config precedence, so this rule has nothing
+      left to arbitrate and goes.
+
+
+      The reasoning is scale, not elegance. There are two projects using
+      walkdown today: this one, and a work project with exactly one blueprint.
+      The tree search, the nearest-wins exception, the depth-4 sibling walk and
+      its fixture-name skip list are all machinery for a case neither of them
+      has. It is far easier to make everything the same than to keep it smart
+      and configurable, and one list somebody wrote down beats three mechanisms
+      that each guess.

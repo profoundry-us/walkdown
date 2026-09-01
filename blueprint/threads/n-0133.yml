@@ -39,3 +39,37 @@ replies:
       Not to be started yet — see the question filed against
       locations.answer.nearest-blueprint-wins, which this contradicts and which
       must be answered first.
+  - author: Topher Fangio
+    created: 2026-09-01T04:46:10Z
+    body: >-
+      Revising the decision above, which q-0138 now answers more simply. Not 'a
+      config entry wins over the tree' — there is no tree answer to win against.
+      Every blueprint is listed in the config, and walkdown stops looking for
+      blueprints anywhere else.
+
+
+      That still fixes what this thread is about: the nine commands behind
+      loadOrExit resolve through the same answer as where, and an out-of-tree
+      spec is visible to all of them, because the config entry names it and
+      nothing has to find it. It fixes it by removing a resolution path rather
+      than teaching a second one to agree with the first.
+
+
+      Three things the change has to answer, and none is decided yet:
+
+      1. First run. init does not write a config entry today — it allocates a
+      home in the registry and leaves config.yml untouched. Under config-only, a
+      project with no entry does not exist, so init must write one, and a fresh
+      clone of an existing project needs a one-command way to say 'this repo is
+      that project' before anything works. Today a clone plus walkdown status
+      simply works, and that stops.
+
+      2. The panel's picker. panel.start.choose-a-blueprint and the ?bp=
+      switching are built on discoverBlueprints scanning the tree; their list
+      becomes the config's. In this repository example/ has no entry, so today's
+      two-project picker becomes one until it gets one.
+
+      3. Two lists. config.yml projects: and blueprints/index.yml both enumerate
+      blueprints. If the config is the list, the registry should be demoted to
+      what it actually is — where an entry's out-of-tree records live, keyed by
+      that entry — rather than a second directory of projects.
