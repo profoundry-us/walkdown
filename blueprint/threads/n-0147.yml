@@ -1,0 +1,22 @@
+id: n-0147
+kind: note
+author: topher
+via: agent
+created: 2026-09-01T20:13:25.658Z
+anchor:
+  rule: threads.lifecycle.acts-for-a-person
+status: open
+body: |-
+  Judged 2026-09-01 against a scratch copy served on :4788, personal config identity scratchpat (Pat Scratch), so any leak of the real 'topher' would be visible. Two THENs hold; the middle one fails on the panel.
+
+  HOLDS — 'the record carries that person as the author, and the agent as the provenance beside it'. CLI --as-agent writes author: scratchpat with via: agent beside it, on opens and on replies, and the thread file keeps them as two fields rather than one.
+
+  HOLDS, and I tried hard to break it — 'no argument and no environment variable can name somebody else'. --actor / --author / --as are not options; --as-agent=mallory is refused as taking no argument. WALKDOWN_ACTOR, WALKDOWN_AUTHOR, USER and LOGNAME are ignored. GIT_CONFIG_COUNT/KEY_0/VALUE_0 and GIT_CONFIG_GLOBAL are stripped before git is asked. On the HTTP door, POST /api/threads, /replies, /status, /api/walkdowns and /api/draft all recorded scratchpat while the body said author/actor mallory and the headers said X-Walkdown-Actor, X-Forwarded-User and Authorization; the waive landed waived_by: scratchpat and the run record actor: scratchpat. One residue, outside this rule's GIVEN and not counted against it: on a machine with NO identity: block, HOME= pointed at a directory holding a mallory .gitconfig files a note under mallory — but moving HOME also moves walkdown's own home unless WALKDOWN_HOME is pinned apart from it, and the GIVEN is a machine whose config says who is sitting at it.
+
+  FAILS — 'the report names both, so a reader can tell a sentence a person wrote from one a machine did'. On the CLI it does: 'scratchpat · via agent'. In the panel it does not, twice over.
+
+  (a) The thread stream drops it. lib/message-stream.js:159 renders via only when !cont, and cont is true whenever the previous message has the same author within GROUP_MS (5 minutes, line 125). Because an agent records under the person's own name — which is this rule's first clause — a person's message followed by an agent's ALWAYS groups, so 'via agent' is exactly the thing suppressed. n-0157 in the scratch copy: opened by the person, then a reply by the person, then a reply --as-agent. On disk the third reply carries via: agent. Read live out of the running panel, walking every shadow root: three .wd-msg, not one .wd-via, and 'A sentence a MACHINE typed.' renders with no marker of any kind under the person's name. Same code in both built surfaces (lib/viewer/panel.js:162, lib/viewer/embed.js:162), so the embed reads the same way.
+
+  (b) The threads LIST never renders it at all. src/panel/thread-pane.js:50 (built at lib/viewer/panel.js:2372) emits .wd-who and no .wd-via, so an agent-opened thread — n-0145 and q-0154 here, both via: agent on disk — reads in the list as a sentence the person wrote. The list is where a reader meets a thread first.
+
+  Evidence: runs/evidence/2026-09-01T20-03-04Z/acts-for-a-person-provenance-not-in-the-panel.txt, -panel-dom-n-0157.html, -cli-doors.txt, -http-doors.txt, -no-name-can-be-passed-in.txt

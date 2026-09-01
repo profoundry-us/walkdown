@@ -919,6 +919,69 @@ test('the code root is named or inferred from the spec, never guessed from the w
 });
 
 /*
+ * And the same mistake in the shape n-0141 did not reach: init run TWICE in
+ * one repository, in init's default out-of-tree shape.
+ *
+ * The claim's already-listed test was by spec, and out of the tree the spec
+ * lives inside the home - so it does not exist to be matched on when the home
+ * is chosen, the test could never fire, and the uniqueness loop then bumped
+ * past the existing home BECAUSE that directory was there, which is the first
+ * run's claim doing exactly its job. Two entries with the same roots, and the
+ * second blueprint read by nothing while init told the person to fill it in.
+ */
+test('init twice in one repository keeps the home it already claimed @rule:locations.default.one-home-per-blueprint', () => {
+  const s = scratch();
+  try {
+    const root = join(s.root, 'app');
+    mkdirSync(join(root, '.git'), { recursive: true });
+    init(root, s.home);
+    const first = readUserConfig({ cwd: root }).config.projects;
+    init(root, s.home);
+    init(root, s.home);
+
+    const after = readUserConfig({ cwd: root }).config.projects;
+    assert.equal(after.length, 1, 'one project, however many times it is set up');
+    assert.deepEqual(after[0].spec, first[0].spec, 'and the same blueprint, not a fresh one');
+    assert.deepEqual(
+      readdirSync(join(s.home, 'blueprints')).sort(),
+      [after[0].id],
+      'one home on disk — a second would be a blueprint nothing reads',
+    );
+
+    // The neighbouring behaviours the fix must not cost: a DIFFERENT
+    // repository of the same name still gets its own, since the match is on
+    // the root and not on the name.
+    const other = join(s.root, 'elsewhere', 'app');
+    mkdirSync(join(other, '.git'), { recursive: true });
+    init(other, s.home);
+    const both = readUserConfig({ cwd: other }).config.projects;
+    assert.equal(both.length, 2);
+    assert.notEqual(both[0].evidence, both[1].evidence, 'two projects, two homes');
+  } finally {
+    s.cleanup();
+  }
+});
+
+/*
+ * The in-repo shape stays idempotent for the reason it always was - it knows
+ * its spec before the home is chosen - and this asserts it from the outside so
+ * the two paths cannot drift apart again.
+ */
+test('init --in-repo twice keeps one entry too @rule:locations.default.one-home-per-blueprint', () => {
+  const s = scratch();
+  try {
+    const root = join(s.root, 'pack');
+    mkdirSync(join(root, '.git'), { recursive: true });
+    init(root, s.home, ['--in-repo']);
+    init(root, s.home, ['--in-repo']);
+    const listed = parse(readFileSync(join(root, '.walkdown', 'config.yml'), 'utf8')).projects;
+    assert.equal(listed.length, 1);
+  } finally {
+    s.cleanup();
+  }
+});
+
+/*
  * `walkdown migrate` is the old spelling and still works. The name promised a
  * great deal more than it did from the day it stopped renaming directories -
  * folding four addresses into a config is `where` finishing its own sentence,

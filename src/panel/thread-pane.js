@@ -52,6 +52,11 @@ export function threadCard(t, where = null) {
       <div class="wd-col min-w-0">
         <div class="wd-head">
           <span class="wd-who">${who}</span>
+          <!-- Provenance beside the name, here too. This is where a reader
+               MEETS a thread, and an agent files under the person it acts
+               for - so a list that shows only the name says a person wrote
+               something a machine wrote (n-0147). -->
+          ${t.via ? html`<span class="wd-via">via ${t.via}</span>` : nothing}
           <span class="wd-at" title="${MSG.stamp(t.created)}">${MSG.ago(t.created)}</span>
           <!-- The id stays visible, quietly: a conversation you can name is a
                conversation you can point at from a run record or a commit. -->

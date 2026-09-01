@@ -1,0 +1,35 @@
+id: n-0146
+kind: note
+author: topher
+via: agent
+created: 2026-09-01T20:11:31.755Z
+anchor:
+  rule: locations.answer.declared-not-discovered
+status: open
+body: |-
+  The last THEN still fails, in a different place: when the REPOSITORY config is the broken one, `walkdown where` blames the personal file for the repository's parse error — and does not say the personal file answered, though it did.
+
+  Fixture (evidence key runs/evidence/2026-09-01T20-03-02Z/declared-not-discovered-05-report-blames-the-wrong-config.txt): a throwaway git repo whose .walkdown/config.yml declares alpha and beta; a personal config under a scratch WALKDOWN_HOME that is valid YAML and declares beta (roots:) and solo. Break the repository config with one bad indent — the sort a bad merge leaves behind:
+
+      projects:
+        - id: alpha
+           bad_indent: "REPO-SIDE PARSE ERROR"
+
+  Standing in beta, `walkdown where` prints BOTH rows as:
+
+      config    <home>/config.yml
+                unreadable — Nested mappings are not allowed in compact mappings at line 2, column 9 …
+                <repo>/.walkdown/config.yml
+                unreadable — Nested mappings are not allowed in compact mappings at line 2, column 9 …
+
+  The personal file is fine: walkdown's own vendor/yaml.js parses it and returns projects ["beta","solo"] (in the same transcript). The error text printed against it is the repository config's, verbatim — and --json agrees: config.error carries that string in the personal file's own cell, beside config.matchedIn: "personal" and config.matched: true. So the report simultaneously says the personal config could not be read and that it is the file that named this project.
+
+  The person's next move is to open ~/.walkdown/config.yml looking for a syntax error that is not there, while the file that actually needs fixing is the committed one somebody else broke.
+
+  Cause is the one field in that cell still computed across both files. readUserConfig (lib/locations.js) ends with `error: personal.error ?? repo.error`, and where.js reads loc.config.error for the personal row — and its error branch outranks the matchedIn wording, so 'names this project' is unreachable whenever the repository's file fails to parse. The comment two lines above the merge already states the principle this misses: `exists` describes the personal file alone "because a caller asking 'does this person have a config yet' must not be told yes by somebody else's committed file". The same argument applies to `error`, key by key, exactly as n-0144's fix applied it to `matched`.
+
+  Control in the same transcript: broken personal config with a good repository config labels each row correctly (evidence key …-04-both-configs-consulted.txt, case F), and restoring the repository config makes beta read correctly again.
+
+  The rest of the rule held under everything I could throw at it, recorded in …-01-declared-vs-undeclared.txt, -02-named-outright.txt and -03-records-do-not-bleed.txt. n-0144's own fixture now reads correctly: standing in alpha with a personal config that has no alpha entry, the personal row says 'present, no entry for this project' and every path is credited to the repository's config. Per-key provenance is right in each arrangement I could build (personal supplies threads: only; personal and repo disagree about spec:; personal supplies roots: only, as beta does, where spec is credited to the repo and code to the personal file). An undeclared blueprint is not a project from inside it (`status` and `thread new` refuse, naming the config consulted), a decoy blueprint in the working directory never wins, a repo entry rooted at the whole repository answers from inside the undeclared one rather than that blueprint answering for itself, and the panel 404s ?bp=ghost and ?bp=decoy while listing exactly the declared three. Records do not bleed: same-named threads in each blueprint stay put, POST /api/threads?bp=beta on a server serving alpha writes into beta, and --dir at a sibling brings that sibling's threads, runs and personal overrides from inside the other project and from outside the repository entirely. Nothing was written to the personal home by any of the asking.
+
+  A fix is one line plus its row: give the personal cell its own error and let the repo cell keep its own — and, since the error branch currently swallows the 'names this project' wording, decide whether an unreadable committed file should hide the fact that the personal one answered. Which of those the report should say is a call for a person.

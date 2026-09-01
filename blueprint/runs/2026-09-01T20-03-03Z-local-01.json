@@ -1,0 +1,35 @@
+{
+  "run_id": "2026-09-01T20-03-03Z-local-01",
+  "created": "2026-09-01T20:03:03Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "0e20aed-dirty",
+  "blueprint_sha": "0e20aed-dirty",
+  "note": "Judging threads.lifecycle.claim-never-accept by making the tool refuse at all three doors, against a scratch copy of this blueprint served on :4877 with a scratch WALKDOWN_HOME.",
+  "results": [
+    {
+      "rule": "threads.lifecycle.claim-never-accept",
+      "status": "pass",
+      "statement_hash": "sha256:482531dc241f",
+      "evidence": [
+        "runs/evidence/2026-09-01T20-03-03Z/cli-undeclared.txt",
+        "runs/evidence/2026-09-01T20-03-03Z/cli-as-agent.txt",
+        "runs/evidence/2026-09-01T20-03-03Z/cli-actor-named-agent.txt",
+        "runs/evidence/2026-09-01T20-03-03Z/cli-bypass-attempts.txt",
+        "runs/evidence/2026-09-01T20-03-03Z/http-undeclared.txt",
+        "runs/evidence/2026-09-01T20-03-03Z/http-actor-named-agent.txt",
+        "runs/evidence/2026-09-01T20-03-03Z/panel-door.txt",
+        "runs/evidence/2026-09-01T20-03-03Z/claiming-still-works.txt",
+        "runs/evidence/2026-09-01T20-03-03Z/disk-state.txt",
+        "runs/evidence/2026-09-01T20-03-03Z/side-finding-malformed-identity.txt",
+        "runs/evidence/2026-09-01T20-03-03Z/tagged-checks.txt"
+      ],
+      "threads": [
+        "n-0148"
+      ],
+      "reasoning": "Judged by trying to accept work at every door, from threads where verified and waived were legal, against a scratch copy served on :4877 under a scratch WALKDOWN_HOME so the machine's identity could be rewritten between probes. All three of the named ways in are refused everywhere. With nobody written down (empty home, a git email and a login name still available) the CLI refuses --verify, --status verified and --waive, the HTTP door refuses POST /api/threads/<id>/status with the same sentence, and the panel - whose action row offered Verify and Waive over the line 'as topher' - refused on click, sent no request at all, and opened Settings reading 'Not written down - this is a guess, and accepting work is refused until identity: names you in ~/.walkdown/config.yml'. Under a declared identity, --as-agent is refused for both statuses at the CLI, and 'via' can never arrive from outside at all: neither api.js nor serve.js reads it, so no HTTP caller can even claim a machine typed the words. An identity declared as the actor 'agent' is refused in every spelling I could write - agent, Agent, AGENT, aGeNt, and with leading or trailing space - at both the CLI and the HTTP door, while the near-miss 'agentic-larry' is correctly let through, so the gate names a role and not a substring. Nothing landed: n-0010's bytes are identical across four refusals including a combined --reply --status (the reply text appears in no file in the tree), n-0144's bytes are identical across the panel's Verify and Waive clicks, and no verified_by or waived_by anywhere in the copy holds the machine's guess or any spelling of 'agent'. The refusals point at ~/.walkdown/config.yml and 'identity:' and never fill the gap: GIT_CONFIG_COUNT injection naming a person, a body carrying actor or identity, a removed --actor flag, and a config declaring only a display name all still refuse, and a status of 'Verified' or 'verified ' is thrown out as an illegal transition rather than normalised into one. The other half of the THEN holds too - claiming works: --as-agent with --reply --status addressed landed under 'judgeprobe' with 'via: agent' beside it, and that same machine was then refused the acceptance of what it had just claimed; an undeclared machine can still reply over HTTP. Two limits on this verdict. The panel was exercised live only for the undeclared case: the browser pane in this session is shared and kept being navigated to another judge's server mid-batch, so I stopped clicking in it rather than risk mutating somebody else's board, and covered the 'AGENT' identity at the endpoint the panel posts to. And a gap that is nobody's THEN but is next door to this one: a config whose identity.username is not a string (a list, a number) crashes defaultActor before any gate runs - closed, so nothing is accepted, but the CLI prints a Node stack trace and GET /api/blueprint 400s, which would leave that person unable to boot the panel at all. Filed as n-0148."
+    }
+  ]
+}

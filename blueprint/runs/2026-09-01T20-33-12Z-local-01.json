@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-09-01T20-33-12Z-local-01",
+  "created": "2026-09-01T20:33:12Z",
+  "actor": "checks-person",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "0e20aed-dirty",
+  "tree_hash": "sha256:720b6f1dd5e7",
+  "spec_hash": "sha256:9b4eb3621eba",
+  "results": [
+    {
+      "rule": "threads.lifecycle.acts-for-a-person",
+      "status": "fail",
+      "statement_hash": "sha256:6790e9b3474c",
+      "duration_ms": 5795,
+      "checks": [
+        "checks/panel.spec.js:1609"
+      ],
+      "evidence": [
+        "runs/evidence/2026-09-01T20-33-11Z/panel-a-thread-an-agent-fi-8ed9e--not-only-once-it-is-opened-test-failed-1.png",
+        "runs/evidence/2026-09-01T20-33-11Z/panel-a-thread-an-agent-fi-8ed9e--not-only-once-it-is-opened-error-context.md"
+      ]
+    }
+  ]
+}

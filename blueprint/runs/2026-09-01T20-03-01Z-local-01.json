@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-09-01T20-03-01Z-local-01",
+  "created": "2026-09-01T20:03:01Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "0e20aed",
+  "blueprint_sha": "0e20aed",
+  "note": "One rule, judged headless against throwaway git repositories and scratch WALKDOWN_HOME directories, driving the real CLI from the working tree.",
+  "results": [
+    {
+      "rule": "locations.default.one-home-per-blueprint",
+      "status": "fail",
+      "statement_hash": "sha256:014a9a4fb6f1",
+      "evidence": [
+        "runs/evidence/2026-09-01T20-03-01Z/asking-writes-nothing-and-homes-are-distinct.txt",
+        "runs/evidence/2026-09-01T20-03-01Z/init-twice-second-home.txt",
+        "runs/evidence/2026-09-01T20-03-01Z/existing-home-answers-unclaimed-home-left.txt"
+      ],
+      "threads": [
+        "n-0145"
+      ],
+      "reasoning": "Judged from the CLI against fresh git repositories and empty scratch homes, never the real one. Three of the four THEN clauses hold under deliberate attack. Asking allocates nothing: four `walkdown where` runs from two repositories both basenamed `app` against an empty WALKDOWN_HOME left the directory tree byte-identical, and the two same-basename repositories both report the same prospective path without either taking it. Distinctness holds in both shapes the statement names: two repositories called `app` init to `blueprints/app` and `blueprints/app-2`, and two blueprints inside one repository, each `init --in-repo` so that neither committed config can see the other's claim, still separate - because claimHome takes the directory on disk, which is the one thing both claims share. An occupied home keeps answering: a legacy `projects/<id>` home is reported with its own reason and is not superseded by the new key, and `where --fix` reports an unclaimed home as `left` with nothing moved or renamed, checksummed before and after. It fails on the clause about a second home. Running `walkdown init` twice in the SAME repository, in init's DEFAULT out-of-tree shape, mints `blueprints/app-2` and a second config entry whose `roots` are identical to the first's; a third run mints `app-3`. Records already in the first home stay there and `status`/`where` keep reading it, while init's closing lines send the person to fill in the new blueprint that nothing will ever read - one blueprint, two homes, records stranded in the first. `init --in-repo` is idempotent because it hands claimHome a spec to match on; the out-of-tree path passes `spec: null`, so claimHome's already-listed test can never fire and the uniqueness loop bumps past the home it is supposed to recognise. Filed as n-0145."
+    }
+  ]
+}

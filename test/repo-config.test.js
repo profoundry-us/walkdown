@@ -204,3 +204,54 @@ test('each path row names the file that supplied that key', () => {
   assert.match(loc.evidence.why, /this machine's config \(shared\)/, 'the person moved evidence');
   assert.ok(home);
 });
+
+/*
+ * The last field that was computed across both files (n-0146).
+ *
+ * `error: personal.error ?? repo.error` put a REPOSITORY parse failure on the
+ * personal file's row, and where.js's error branch outranks the wording that
+ * says which file answered - so the reader was told the file that answered was
+ * unreadable, and sent to hunt a syntax error that was not there. The same
+ * mistake as n-0144, one field over, which is why the fix is the shape rather
+ * than the field: every key in that cell now describes the file it names.
+ */
+test('a parse failure is reported against the file that has it @rule:locations.answer.declared-not-discovered', () => {
+  const broken = project({
+    repoYaml: 'projects:\n  - id: alpha\n   roots: [alpha]\n',
+    personalYaml: 'projects:\n  - id: solo\n    roots: [/nowhere]\n',
+  });
+  const cfg = readUserConfig({ cwd: broken.repo });
+  assert.equal(cfg.error, null, 'the personal file parses, and says so');
+  assert.ok(cfg.repo.error, 'the repository file does not, and says so');
+
+  const loc = resolveLocations({ cwd: broken.repo });
+  assert.equal(loc.config.error, null);
+  assert.ok(loc.config.repo.error);
+
+  const report = execFileSync(
+    process.execPath,
+    [new URL('../bin/walkdown.js', import.meta.url).pathname, 'where'],
+    {
+      cwd: broken.repo,
+      encoding: 'utf8',
+      env: { ...process.env, WALKDOWN_HOME: broken.home, NO_COLOR: '1' },
+    },
+  );
+  // Each file's verdict is the line UNDER its path, so the two are told apart
+  // by position rather than by counting - one "unreadable" in the report says
+  // nothing about which of the two rows it landed on, which was the bug.
+  const lines = report.split('\n');
+  const under = (path) => lines[lines.findIndex((l) => l.includes(path)) + 1] ?? '';
+  assert.doesNotMatch(under(broken.home), /unreadable/, 'the file that parsed is not blamed');
+  assert.match(under(join(broken.repo, '.walkdown')), /unreadable/, 'the one that did not, is');
+
+  // The control, which is the direction that always worked and is exactly why
+  // the other one went unnoticed.
+  const other = project({
+    repoYaml: 'projects: []\n',
+    personalYaml: 'projects: [oops\n',
+  });
+  const flip = readUserConfig({ cwd: other.repo });
+  assert.ok(flip.error);
+  assert.equal(flip.repo.error, null);
+});

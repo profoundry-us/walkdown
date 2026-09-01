@@ -1,0 +1,25 @@
+id: n-0148
+kind: note
+author: topher
+via: agent
+created: 2026-09-01T20:14:09.640Z
+anchor:
+  rule: threads.lifecycle.claim-never-accept
+status: open
+body: 'Not a failure of this rule — every THEN held under probing (see run
+  2026-09-01T20-03-03Z). Found beside it: a personal config whose
+  `identity.username` is not a string crashes lib/identity.js defaultActor
+  before any gate runs. `identity:\n  username: ["agent"]` (a list, or a bare
+  number) makes `declared?.username?.trim()` throw "declared?.username?.trim is
+  not a function" at identity.js:94. It fails CLOSED — the CLI exits 1 with a
+  raw Node stack trace, the HTTP door returns 400 with the TypeError text as its
+  message, the thread is unchanged and the server stays up — so nothing is
+  accepted under a name nobody wrote. But GET /api/blueprint 400s too, so the
+  panel will not boot at all for someone whose config has that shape, and the
+  report says nothing about which file to fix. Everywhere else this design
+  refuses in a sentence naming ~/.walkdown/config.yml and `identity:`; here the
+  same person gets a stack trace. Suggest defaultActor coerce/reject a
+  non-string username with the same sentence the accept gate uses. Reproduced
+  2026-09-01 against a scratch WALKDOWN_HOME and a scratch blueprint served on
+  :4877; probe output in
+  runs/evidence/2026-09-01T20-03-03Z/side-finding-malformed-identity.txt.'

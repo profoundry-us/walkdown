@@ -1,0 +1,29 @@
+{
+  "run_id": "2026-09-01T20-03-04Z-local-01",
+  "created": "2026-09-01T20:03:04Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "0e20aed-dirty",
+  "blueprint_sha": "0e20aed-dirty",
+  "note": "Re-judging threads.lifecycle.acts-for-a-person after n-0142 was marked addressed, by an independent agent, against a scratch copy of this blueprint served on :4788 under a scratch WALKDOWN_HOME declaring a different person.",
+  "results": [
+    {
+      "rule": "threads.lifecycle.acts-for-a-person",
+      "status": "fail",
+      "statement_hash": "sha256:6790e9b3474c",
+      "evidence": [
+        "runs/evidence/2026-09-01T20-03-04Z/acts-for-a-person-cli-doors.txt",
+        "runs/evidence/2026-09-01T20-03-04Z/acts-for-a-person-http-doors.txt",
+        "runs/evidence/2026-09-01T20-03-04Z/acts-for-a-person-no-name-can-be-passed-in.txt",
+        "runs/evidence/2026-09-01T20-03-04Z/acts-for-a-person-provenance-not-in-the-panel.txt",
+        "runs/evidence/2026-09-01T20-03-04Z/acts-for-a-person-panel-dom-n-0157.html"
+      ],
+      "threads": [
+        "n-0147"
+      ],
+      "reasoning": "Judged by writing through every door and reading back what landed on disk, against a scratch copy whose personal config names scratchpat, so a leak of the real identity would have been visible in every record. Two THENs now hold, and the last one holds hard. An agent opening or replying --as-agent records author: scratchpat with via: agent as a separate field beside it, never instead of it, and the human-only transitions are refused to it however spelled. Nothing a caller passes can name anybody: --actor, --author and --as are not options at all, --as-agent=mallory is refused as taking no argument, WALKDOWN_ACTOR/WALKDOWN_AUTHOR/USER/LOGNAME are ignored, and GIT_CONFIG_COUNT/KEY_0/VALUE_0 and GIT_CONFIG_GLOBAL are stripped before git is consulted. The HTTP door, wide open when this rule was last judged, is now shut: opening a thread, replying, transitioning, sealing a walkdown and saving a draft all recorded scratchpat while the request body said author and actor mallory and the headers said X-Walkdown-Actor, X-Forwarded-User and Authorization - the waive landed waived_by: scratchpat and the run record actor: scratchpat. The middle THEN still fails, on the surface most readers actually read. via is on the CLI read path now (scratchpat . via agent), but in the panel it is suppressed exactly where it matters: lib/message-stream.js renders it only when the message is not a continuation, and a message continues whenever the previous one has the SAME AUTHOR within five minutes - which, because an agent records under the person's own name, is precisely the person-then-agent sequence the clause exists for. Built live: n-0157, opened by the person, replied to by the person, then replied to --as-agent, carries via: agent on disk and renders in the running panel as three messages under one name with not a single .wd-via in the DOM; \"A sentence a MACHINE typed.\" is indistinguishable from the person's. Identical code in lib/viewer/embed.js, so the embed reads the same way. Separately, the threads LIST row (src/panel/thread-pane.js) emits the author and no provenance at all, so an agent-opened thread reads as the person's in the place a reader meets it first. One residue outside the GIVEN, reported and not counted: on a machine with no identity: block, pointing HOME at a directory holding somebody else's .gitconfig files a note under that name - but that also moves walkdown's own home unless WALKDOWN_HOME is pinned apart from it, and the GIVEN is a machine whose config says who is sitting at it."
+    }
+  ]
+}

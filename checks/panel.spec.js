@@ -1592,3 +1592,51 @@ test('the rail groups by screen, in storyboard order, with the headless rules la
     firstScreen,
   ]);
 });
+
+/*
+ * Provenance where a reader MEETS a thread (n-0147).
+ *
+ * An agent records under the person it acts for - that is the rule this
+ * check claims - so the author line cannot carry the distinction and the
+ * second field has to be drawn beside it. The thread list drew the name and
+ * not the field, so every thread an agent filed read as the person's in the
+ * one place a reader sees it before opening anything.
+ *
+ * Driven from the list rather than from the stream because the two render in
+ * different modules and only one of them had the bug; the stream's half is a
+ * unit test, which is where a pure render belongs.
+ */
+test('a thread an agent filed says so in the list, not only once it is opened', {
+  tag: '@rule:threads.lifecycle.acts-for-a-person',
+}, async ({ page }) => {
+  await review(page);
+  const { threads } = await payload(page);
+  // Live ones only: the list does not draw terminal threads, so a verified
+  // thread would be a card that is legitimately absent rather than a card
+  // missing its line.
+  const LIVE = (t) => !['verified', 'incorporated', 'waived'].includes(t.status);
+  const byAgent = (threads ?? []).find((t) => t.via && LIVE(t));
+  expect(byAgent, 'the ledger holds a live thread some machine typed').toBeTruthy();
+  const plain = (threads ?? []).find((t) => !t.via && LIVE(t));
+
+  await page.getByTestId('panel.tabs').getByText(/Threads/).click();
+  const list = page.getByTestId('panel.threads-list');
+  // By the card's own id attribute, never by text: a thread whose BODY names
+  // another thread matches a text selector for it, and .first() then picks
+  // the wrong row.
+  const card = list.locator(`[data-open-thread="${byAgent.id}"]`).first();
+  await card.scrollIntoViewIfNeeded();
+  await expect(card.locator('.wd-via'), 'the card says a machine typed it').toBeVisible();
+  await expect(card.locator('.wd-via')).toHaveText(new RegExp(byAgent.via));
+  // The person is still named: provenance sits BESIDE attribution, and a
+  // reader who wants to know whose decision it was must still be told.
+  await expect(card.locator('.wd-who')).toBeVisible();
+
+  // And a thread a person typed carries no such line - an "authored by a
+  // human" badge on nearly every card says nothing and costs a row.
+  if (plain) {
+    const hand = list.locator(`[data-open-thread="${plain.id}"]`).first();
+    await hand.scrollIntoViewIfNeeded();
+    await expect(hand.locator('.wd-via')).toHaveCount(0);
+  }
+});

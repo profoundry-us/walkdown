@@ -1,0 +1,55 @@
+id: n-0145
+kind: note
+author: topher
+via: agent
+created: 2026-09-01T20:06:48.047Z
+anchor:
+  rule: locations.default.one-home-per-blueprint
+status: open
+body: >-
+  Running `walkdown init` a second time in the SAME repository, in init's
+  DEFAULT out-of-tree shape, mints a SECOND home and a second config entry for a
+  blueprint that already has one — "one blueprint is never given a second home
+  with its records stranded in the first".
+
+
+  Repro (evidence:
+  runs/evidence/2026-09-01T20-03-01Z/init-twice-second-home.txt), WALKDOWN_HOME
+  pointed at a fresh scratch:
+
+    git init app && cd app
+    walkdown init          -> blueprints/app/blueprint,   listed as `app`
+    walkdown init          -> blueprints/app-2/blueprint, listed as `app-2`
+    walkdown init          -> blueprints/app-3/blueprint, listed as `app-3`
+
+  Both entries carry the same `roots:`, so the config now says one repository is
+  two projects. `walkdown status` and `walkdown where` keep answering from `app`
+  (projectFor keeps the first of two equally-specific roots), while init's own
+  closing lines tell the person to go fill in
+  `blueprints/app-2/blueprint/walkdown.yml` — a blueprint nothing will ever
+  read. Any records already in `app` (I planted evidence/shot/a.png) stay
+  stranded there.
+
+
+  Cause: bin/commands/init.js passes `spec: values['in-repo'] ? join(root,
+  'blueprint') : null` to claimHome. claimHome's "already listed?" test is by
+  spec, so with null it can never fire, and the uniqueness loop then bumps past
+  `blueprints/app` because that directory exists — the n-0141 split, reappearing
+  in the shape where the spec path is derived FROM the home rather than known
+  before it. `init --in-repo" is idempotent for exactly this reason: it has a
+  spec to match, and re-running it reports "up to date" and adds no home.
+
+
+  A fix would need a match the out-of-tree shape can make before the home is
+  chosen — e.g. claimHome also matching an entry whose `roots` contain the
+  project root.
+
+
+  The rule's other clauses hold under probing: asking allocates nothing (four
+  `walkdown where` runs against an empty home left it empty, including the two
+  same-basename repos that both report the same prospective path); two
+  repositories basenamed `app` get `app` and `app-2`; two blueprints in one
+  repository each `init --in-repo`, whose committed configs cannot see each
+  other, still get distinct homes because claimHome takes the directory on disk;
+  a legacy `projects/<id>` home keeps answering and `where --fix` reports an
+  unclaimed home as "left" and moves nothing.

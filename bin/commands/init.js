@@ -33,6 +33,9 @@ export async function run(args) {
   const claim = claimHome({
     id: basename(root),
     spec: values['in-repo'] ? join(root, 'blueprint') : null,
+    // And out of the tree, where the spec does not exist yet to be matched on,
+    // the project root is what says "this one again" (n-0145).
+    root,
     cwd: root,
   });
   const specDir = values['in-repo'] ? join(root, 'blueprint') : join(claim.dir, 'blueprint');
