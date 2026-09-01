@@ -57,8 +57,8 @@ governance:
     (node tools/scratch.mjs clean <label>).
   - >-
     A serve of that scratch copy still resolves its home through the REAL
-    registry — serve claims a numbered home for whatever spec it is handed.
-    Export WALKDOWN_HOME to a directory inside the scratch for any serve or
-    probe against a copy, and unset it for everything against the real
-    ledger; otherwise ~/.walkdown/blueprints/index.yml accumulates dead
-    entries somebody has to hunt down (four did on 2026-09-01).
+    personal config, and a probe that lists a fixture project writes an entry
+    into it. Export WALKDOWN_HOME to a directory inside the scratch for any
+    serve or probe against a copy, and unset it for everything against the
+    real ledger; otherwise ~/.walkdown/config.yml collects projects nobody
+    meant to keep, which somebody then has to tell apart from the real ones.
