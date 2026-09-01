@@ -1,0 +1,93 @@
+{
+  "run_id": "2026-09-01T11-57-47Z-local-01",
+  "created": "2026-09-01T11:57:47Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2295241-dirty",
+  "blueprint_sha": "2295241-dirty",
+  "note": "Five rules the config-and-identity work left owed, judged by five independent agents, one rule each, against disposable copies. The two locations rules and the two thread-lifecycle rules were judged headless against throwaway fixtures; the panel rule was driven in a browser against a server listing only throwaway projects.",
+  "results": [
+    {
+      "rule": "locations.answer.declared-not-discovered",
+      "status": "fail",
+      "statement_hash": "sha256:af12fc97131b",
+      "evidence": [
+        "runs/evidence/2026-09-01T11-48-09Z/declared-not-discovered-01-declared-vs-undeclared.txt",
+        "runs/evidence/2026-09-01T11-48-09Z/declared-not-discovered-02-named-outright.txt",
+        "runs/evidence/2026-09-01T11-48-09Z/declared-not-discovered-03-monorepo-evidence-collision.txt",
+        "runs/evidence/2026-09-01T11-48-09Z/declared-not-discovered-04-both-configs-consulted.txt",
+        "runs/evidence/2026-09-01T11-48-09Z/declared-not-discovered-05-report-credits-wrong-config.txt"
+      ],
+      "threads": [
+        "n-0144"
+      ],
+      "reasoning": "Judged against a throwaway git repository declaring two blueprints plus an undeclared ghost/blueprint, driving the real CLI and a scratch serve. Everything about declaration holds, and holds hard: from inside the ghost, `where` reports a nonexistent default home and `thread new` refuses with \"No blueprint here\"; the panel answers 404 for ?bp=ghost while offering exactly the three written down; a decoy blueprint planted deep inside a declared root never wins over the declared one, so there is genuinely no search left; and `--dir ../beta/blueprint` from inside alpha returns beta's thread and beta's runs path, identical to the answer given from inside beta and from outside the repository, so the caller's position never leaks into the answer. Nothing was written to the personal home by any asking, checksummed before and after. It fails on the last THEN only: with a personal config that exists and lists other projects but not this one, `walkdown where` labels the PERSONAL config \"names this project\" and gives every row the reason \"this machine's config (alpha)\" when the repository's committed config supplied all of them - the report credits the file that did not answer, and --json exposes only a single merged config.matched boolean, so nothing distinguishes them. Controls in the same transcript show the label is correct when the personal config really does name the project and when it is absent entirely. Cause is where.js reading loc.config.matched, which resolveLocations computes over the MERGED config, making where.js's own 'present, no entry for this project' branch unreachable whenever a repo config claims the project."
+    },
+    {
+      "rule": "locations.default.one-home-per-blueprint",
+      "status": "fail",
+      "statement_hash": "sha256:014a9a4fb6f1",
+      "evidence": [
+        "runs/evidence/2026-09-01T11-48-09Z/one-home-A-asking-writes-nothing.txt",
+        "runs/evidence/2026-09-01T11-48-09Z/one-home-B-same-basename-two-homes.txt",
+        "runs/evidence/2026-09-01T11-48-09Z/one-home-C-shared-ledger-and-split-home.txt",
+        "runs/evidence/2026-09-01T11-48-09Z/one-home-D-two-blueprints-one-repo.txt",
+        "runs/evidence/2026-09-01T11-48-09Z/one-home-E-existing-ledger-and-migrate.txt",
+        "runs/evidence/2026-09-01T11-48-09Z/one-home-F-migrate-claimed-home.txt"
+      ],
+      "threads": [
+        "n-0141"
+      ],
+      "reasoning": "Judged clause by clause against real fixtures under a scratch home. Three clauses hold: asking allocates and writes nothing (repeated `where` with no config at all left the home empty); a legacy projects/<id> home keeps answering and is labelled legacy; and `walkdown migrate` moves nothing, every file's shasum identical across the run, reporting a home no entry claims as left standing rather than guessing. Two fail, and they are the two the statement most explicitly forbids. Two blueprints resolve to one home: two git repositories both basenamed `app` - `init` in the second reported every file up to date, adopted the FIRST repository's spec, and printed no `+ listed` line, leaving one entry rooted at the first; `where` from the second says 'present, no entry for this project' and hands back the first's spec, runs and threads; and a note filed while standing in the first is listed by `walkdown threads` while standing in the second, so it is one ledger and not merely one path. The same happens for two packs in one repository, which is the monorepo case the statement names outright. And one blueprint is given two homes: the single entry carries spec/runs/threads under blueprints/<id> but evidence/drafts under blueprints/<id>-2, because init takes specDir from the derived home and scaffolds it BEFORE rememberProject, whose uniqueness loop then bumps past the directory init just created. A second judge, working on a different rule, independently reproduced the collision and watched one pack overwrite the other's evidence file."
+    },
+    {
+      "rule": "panel.start.choose-a-blueprint",
+      "status": "pass",
+      "statement_hash": "sha256:6aa78c304c03",
+      "evidence": [
+        "runs/evidence/2026-09-01T11-48-09Z/choose-a-blueprint-proto-choose-blueprint.png",
+        "runs/evidence/2026-09-01T11-48-09Z/choose-a-blueprint-app-choose-blueprint.png",
+        "runs/evidence/2026-09-01T11-48-09Z/choose-a-blueprint-app-panel-picker.png",
+        "runs/evidence/2026-09-01T11-48-09Z/choose-a-blueprint-app-blueprints-tab.png",
+        "runs/evidence/2026-09-01T11-48-09Z/choose-a-blueprint-app-declared-not-asked.png"
+      ],
+      "threads": [],
+      "reasoning": "Judged against a disposable server listing exactly two blueprints, both throwaway copies, from outside the repository so no real project could appear. The choose-blueprint screen has only a stand-in app surface, and a stand-in is not evidence of the build, so the verdict was earned by driving the real panel: with localStorage cleared and an unclaimed page framed, the panel gated on the picker - heading 'Which blueprint?', the subline naming the origin it will be remembered for, then both blueprints with the description each one's own walkdown.yml carries. Clicking the second actually crossed over: the frame navigated to that blueprint's front door, the header changed, the rule list went from 121 rules to 9, and localStorage held the choice keyed by origin, which survived a full reload. Loading with ?bp= set and memory cleared went straight to ready with no picker, so a page that declares its blueprint is never asked, and the same list stayed reachable from the Blueprints tab with the current one marked. To test that nothing is offered which nobody wrote down, the judge planted an undeclared blueprint under the served root; it never appeared in the picker or the payload. No console messages or page errors on any state driven. Disclosed: the built-in browser cannot write PNGs, so the five screenshots were re-driven by a throwaway script echoing states already judged live."
+    },
+    {
+      "rule": "threads.lifecycle.claim-never-accept",
+      "status": "fail",
+      "statement_hash": "sha256:482531dc241f",
+      "evidence": [
+        "runs/evidence/2026-09-01T11-48-09Z/claim-never-accept-cli-refusals.txt",
+        "runs/evidence/2026-09-01T11-48-09Z/claim-never-accept-cli-undeclared.txt",
+        "runs/evidence/2026-09-01T11-48-09Z/claim-never-accept-http-api.txt",
+        "runs/evidence/2026-09-01T11-48-09Z/claim-never-accept-panel-guessed-name.txt"
+      ],
+      "threads": [
+        "n-0143"
+      ],
+      "reasoning": "Judged by provoking refusals rather than reading the code that refuses, against a scratch copy. The CLI holds under everything: with a home declaring no identity, --verify, --status verified and --waive were each refused at exit 2 with a message naming the guess and pointing at where to say who you are; --verify --as-agent and --waive --as-agent were refused on the provenance; an identity literally called Agent was refused case-insensitively; a whitespace-only username and a name without a username were both treated as no signature; WALKDOWN_ACTOR is ignored and --actor no longer exists; a --reply carried alongside a refused transition did not land; and the thread file's sha1 was byte-identical before and after all nine probes. The HTTP door is open. threadAction passes body.actor straight through and never asks whether anyone declared an identity, so only the 'agent' spellings and an empty actor are refused: POST to a thread's status with an invented human name returned 200 and wrote verified_by under it, as did a POST carrying the machine's own guessed git name. That is not curl-only - serving a copy with an undeclared home, the panel's own action bar read 'as <guessed name>' with Verify enabled, and ONE CLICK verified an addressed note under that name. Both halves of the statement fail on that path: the guessed name is accepted rather than refused, and the gap is filled with a login name instead of the refusal the CLI gives."
+    },
+    {
+      "rule": "threads.lifecycle.acts-for-a-person",
+      "status": "fail",
+      "statement_hash": "sha256:6790e9b3474c",
+      "evidence": [
+        "runs/evidence/2026-09-01T11-48-09Z/acts-for-a-person-cli-doors.txt",
+        "runs/evidence/2026-09-01T11-48-09Z/acts-for-a-person-http-openthread.txt",
+        "runs/evidence/2026-09-01T11-48-09Z/acts-for-a-person-http-reply-and-transition.txt",
+        "runs/evidence/2026-09-01T11-48-09Z/acts-for-a-person-env-and-git-injection.txt",
+        "runs/evidence/2026-09-01T11-48-09Z/acts-for-a-person-report-and-walkdown-actor.txt",
+        "runs/evidence/2026-09-01T11-48-09Z/acts-for-a-person-provenance-in-report.txt",
+        "runs/evidence/2026-09-01T11-48-09Z/acts-for-a-person-via-never-rendered.txt"
+      ],
+      "threads": [
+        "n-0142"
+      ],
+      "reasoning": "Judged by exercising every write door rather than reading them, against a scratch copy whose home declares one person. The CLI holds: `thread new --as-agent` recorded under the declared person with via: agent beside it, --actor is rejected as an unknown option, and WALKDOWN_ACTOR, WALKDOWN_USER, USER and LOGNAME all changed nothing. Two clauses fail. The last one - that no argument and no environment variable can name somebody else - fails at the HTTP API, which passes body.author and body.actor straight through to the writer, whose author policy refuses only an EMPTY author and never a wrong one: a POST filed a thread reading author: mallory on a machine whose identity is somebody else, a reply landed authored by a name curl invented, a status POST waived a thread recording waived_by under that invented name, and a walkdown run was filed the same way. It also fails at the CLI on a machine with no declared identity, where injecting user.username through GIT_CONFIG_COUNT/KEY/VALUE put a note under an invented name - though the human-only gate still refused a waive there, and a declared config correctly beat the injected value. The middle clause fails too: via is written to disk but rendered by NO report. The thread file carries via: agent, yet `walkdown thread <id>` prints only the author and date, `walkdown threads` prints neither, and the string appears nowhere in the panel sources, the report modules, or the built panel - only the CLI's post-mutation echo says it, which no later reader ever sees. The RSpec adapter's actor is clean."
+    }
+  ]
+}

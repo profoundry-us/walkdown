@@ -1,0 +1,47 @@
+id: n-0143
+kind: note
+author: topher
+via: agent
+created: 2026-09-01T11:55:47.793Z
+anchor:
+  rule: threads.lifecycle.claim-never-accept
+status: open
+body: "Judged 2026-09-01 against a running panel and its HTTP API; the statement
+  as amended fails on the panel/HTTP door. The CLI is solid: with WALKDOWN_HOME
+  pointing at a config with no identity: block (identity {username: topher,
+  source: git, declared: false}), --verify, --status verified and --waive
+  --reason are all refused with \"...this machine only has a guess (topher, from
+  git). Say who you are in ~/.walkdown/config.yml under identity:\", exit 2, and
+  the thread file's sha is byte-identical before and after; --verify --as-agent
+  and --waive --as-agent are refused on via: agent; a reply carried alongside a
+  refused transition does not land; identity.username: Agent is refused
+  case-insensitively; WALKDOWN_ACTOR and --actor are gone (evidence
+  runs/evidence/2026-09-01T11-48-09Z/claim-never-accept-cli-refusals.txt and
+  claim-never-accept-cli-undeclared.txt). The HTTP transition (lib/api.js
+  threadAction -> writes.transition, actor: body.actor) never asks whether
+  anyone DECLARED an identity, so the guess-vs-said gate that
+  bin/commands/thread.js applies does not exist there. Against a scratch copy
+  served on :4744, POST /api/threads/n-0009/status {status: verified, actor:
+  'Some Person Who Never Sat Here'} returned 200 and wrote status: verified /
+  verified_by: Some Person Who Never Sat Here; POST /api/threads/n-0015/status
+  {status: verified, actor: 'topher'} - the machine's own guessed git name -
+  likewise returned 200 and wrote verified_by: topher
+  (runs/evidence/2026-09-01T11-48-09Z/claim-never-accept-http-api.txt). Only the
+  'agent' spellings and the empty actor are refused there. This is reachable
+  from the shipped UI, not just curl: serving with a home that declares no
+  identity, GET /api/blueprint reports declared: false and the panel's whoAmI()
+  (src/panel/vocab.js:114) falls back to S.data.identity.username, so a thread's
+  action bar reads 'as topher' with Verify enabled, and one click verified an
+  addressed note under that guessed name - 200 OK, thread left the active list,
+  disk written to status: verified with verified_by: topher
+  (runs/evidence/2026-09-01T11-48-09Z/claim-never-accept-panel-guessed-name.txt\
+  ). Two clauses of the statement fail on that path: a name this machine merely
+  guessed at is accepted rather than rejected, and the gap is filled with the
+  login/git name rather than a refusal saying where to say who you are. n-0139's
+  second reply discloses body.actor over HTTP as a deliberate open deviation
+  awaiting your yes/no - if the answer is that the panel door stays open, the
+  statement needs to say so, because as written it does not. Disclosed: the
+  panel click addressed the project by ?bp=walkdown rather than the server's
+  --dir, so it landed on the real blueprint/threads/n-0139.yml; it was reverted
+  immediately with git checkout and that file is clean again. No run record was
+  written."

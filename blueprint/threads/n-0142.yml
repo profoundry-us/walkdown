@@ -1,0 +1,48 @@
+id: n-0142
+kind: note
+author: topher
+via: agent
+created: 2026-09-01T11:52:17.378Z
+anchor:
+  rule: threads.lifecycle.acts-for-a-person
+status: open
+body: >-
+  Judged 2026-09-01 against a scratch copy served at :4744 (home identity:
+  scratch-person). Two clauses fail.
+
+
+  (1) "Who a write is recorded under is never something a caller can pass in" —
+  the HTTP API takes the name verbatim from the request body. POST /api/threads
+  {"author":"mallory"} filed n-0144 with author: mallory on disk, on a machine
+  whose identity is scratch-person; POST /api/threads/<id>/replies
+  {"author":"eve"} appended a reply authored by eve; POST
+  /api/threads/<id>/status {"actor":"mallory","status":"waived"} moved a thread
+  to waived with waived_by: mallory — a human-only acceptance under a name curl
+  invented, with no identity check at all. POST /api/walkdowns
+  {"actor":"mallory"} likewise filed run 2026-09-01T11-51-25Z-local-01.
+  lib/api.js reads author/actor straight out of body and hands them to
+  lib/writes.js, whose asWho() only refuses EMPTY, never wrong. The CLI door is
+  closed (no --actor; WALKDOWN_ACTOR/USER/LOGNAME all ignored) — the server door
+  is wide open. Secondary: with no identity: block in the personal config,
+  GIT_CONFIG_COUNT/KEY_0/VALUE_0=user.username=mallory made a CLI note land
+  under mallory (n-0146), i.e. an environment variable naming somebody else,
+  though the human-only gate still refused a waive there.
+
+
+  (2) "The report names both, so a reader can tell a sentence a person wrote
+  from one a machine did" — via is written to disk but no read path renders it.
+  n-0141.yml carries via: agent, yet 'walkdown thread n-0141' prints
+  'scratch-person · <date>' with no provenance, 'walkdown threads' prints
+  neither author nor via, and 'via' appears nowhere in src/panel/, lib/report/,
+  or the built panel. Only the CLI's post-mutation echo says '(via agent)',
+  which no later reader ever sees.
+
+
+  Passing clauses: an agent does record under the config'd person, and
+  --as-agent stores provenance beside the author rather than instead of it.
+
+
+  Evidence: runs/evidence/2026-09-01T11-48-09Z/acts-for-a-person-cli-doors.txt,
+  -http-openthread.txt, -http-reply-and-transition.txt,
+  -env-and-git-injection.txt, -report-and-walkdown-actor.txt,
+  -via-never-rendered.txt
