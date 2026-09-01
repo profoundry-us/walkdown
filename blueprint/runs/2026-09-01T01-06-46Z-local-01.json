@@ -1,0 +1,39 @@
+{
+  "run_id": "2026-09-01T01-06-46Z-local-01",
+  "created": "2026-09-01T01:06:46Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "3d72f2a-dirty",
+  "tree_hash": "sha256:cd5e7427e0b7974fbf7a41fdd472f21480bcae6ecdc4b6ade40096ad2ae4b6d6",
+  "spec_hash": "sha256:bd6cdba6d858",
+  "results": [
+    {
+      "rule": "locations.default.one-home-per-blueprint",
+      "status": "fail",
+      "statement_hash": "sha256:625dd678dbdd",
+      "evidence": [
+        "runs/evidence/2026-09-01T01-06-46Z/probe-01-asking-allocates-nothing.txt",
+        "runs/evidence/2026-09-01T01-06-46Z/probe-02-first-write-claims-and-collision.txt",
+        "runs/evidence/2026-09-01T01-06-46Z/probe-03-monorepo-two-blueprints.txt",
+        "runs/evidence/2026-09-01T01-06-46Z/probe-04-two-inrepo-blueprints-serve-claims.txt",
+        "runs/evidence/2026-09-01T01-06-46Z/probe-05-serve-claims-at-start.txt",
+        "runs/evidence/2026-09-01T01-06-46Z/probe-06-legacy-homes-where.txt",
+        "runs/evidence/2026-09-01T01-06-46Z/probe-07-migrate.txt",
+        "runs/evidence/2026-09-01T01-06-46Z/probe-08-post-migrate-state.txt",
+        "runs/evidence/2026-09-01T01-06-46Z/probe-09-judge-claims-thread-does-not.txt",
+        "runs/evidence/2026-09-01T01-06-46Z/probe-10-implicit-post-migrate-next-write.txt",
+        "runs/evidence/2026-09-01T01-06-46Z/probe-11-loader-vs-resolver.txt",
+        "runs/evidence/2026-09-01T01-06-46Z/probe-12-dir-write-into-migrated-home.txt",
+        "runs/evidence/2026-09-01T01-06-46Z/probe-13-serve-migrated-home-no-realloc.txt",
+        "runs/evidence/2026-09-01T01-06-46Z/probe-14-final-home-state.txt"
+      ],
+      "reasoning": "Judged entirely by driving the real CLI against throwaway projects under two scratch WALKDOWN_HOMEs, the real home untouched: two git repos both named myapp, a monorepo with two packs, a repo holding two in-repo blueprints, and legacy homes planted under projects/ in each claiming shape. Every allocation clause held under attack. Asking allocated nothing: where on a byte-for-byte empty home reported a tentative 0001-myapp worded 'allocated on first write' and left the disk empty, and later asks against a populated index also wrote nothing (probes 01, 04, 06). First writes claimed distinct numbers in every shape: init claimed 0001-myapp and the same-basename sibling then allocated 0002-myapp; serve --dir claimed 0004-billing at server start with zero HTTP requests and the second blueprint in the same repository claimed 0005-mailer, after its own earlier tentative answer had said 0004 - tentative numbers are provisional; judge printing an evidence path claimed 0006-solo while thread new on an in-repo spec, an in-tree write, claimed nothing (probes 02, 05, 09); a legacy home arriving after 0001-0003 was renumbered to 0004, and no number was ever refilled or repeated. The legacy clauses' front half held: a projects/ home claimed by an explicit-path config entry kept answering through the config, and one claimed implicitly (id+roots only, spec inside the home) resolved spec, evidence and drafts into projects/implicitapp each marked 'legacy home - walkdown migrate renumbers it' (probe 06). The n-0129 stranding is fixed: migrating the implicit shape moved the home to 0001-implicitapp with an index entry carrying both spec: and root:, where answered the migrated home ('already in the blueprint (1 file)') rather than a fresh tentative one, and a subsequent serve --dir of that home allocated nothing new - one blueprint, one number (probes 08, 13); the explicit shape printed 'config re-pointed' and rewrote all four paths (probes 07, 08). The fail is the final clause: walkdown migrate moved projects/orphanapp - a home no config entry claims - to blueprints/0003-orphanapp in the same breath and with the same 'moved' wording as the claimed homes, no report that nothing claims it, and wrote an index entry with no root:, an allocation no project can ever match by root; a second unclaimed home planted later was moved the same way to 0004-lateapp (probes 07, 08, 14). The step says an unclaimed legacy home is reported and left standing, never guessed at, and the prior run measured exactly that holding at 00:11Z - the fix for the implicit stranding regressed the orphan clause. Two adjacent observations, neither this fail: the loader/resolver asymmetry n-0133 records reproduced here for every out-of-tree spec, migrated or fresh, with no phantom allocation resulting (probe 11), and init --dir on a second pack silently attaching to the sibling's blueprint is filed as n-0135 (probe 03).",
+      "threads": [
+        "n-0129",
+        "n-0135"
+      ]
+    }
+  ]
+}

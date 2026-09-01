@@ -1,0 +1,30 @@
+id: n-0134
+kind: note
+author: agent
+created: 2026-09-01T01:17:35.321Z
+anchor:
+  rule: locations.travel.provenance-not-currency
+status: open
+body: "Judge 2026-09-01 (says-why re-judge), side finding, measured in code and
+  corroborated by a live probe, not by a recorded run: git_sha does not describe
+  the code under test when the spec and the code live apart. writeRunRecord and
+  writeSweep compute gitSha(blueprintDir) (lib/run-record.js:161,202), and the
+  node:test reporter resolves that dir from the blueprint
+  (lib/node-test-reporter.js:39) - so in the cross-repo shape (spec configured
+  into its own git repository, roots naming the code repo; probe transcript
+  runs/evidence/2026-09-01T01-06-52Z/probe-d-crossrepo.txt) a checks-tier run
+  would stamp the SPEC repository's HEAD as git_sha, and in walkdown's default
+  shape for new adopters (spec outside any repository; probe-a-bare.txt,
+  probe-c-config-outside.txt) it would stamp nothing at all, even though
+  walkdown where names a code repository on the same screen.
+  docs/08-locations.md ('The code's sha, when the spec has moved away from it')
+  says roots: exists precisely so the sha describes the code under test while
+  spec_hash describes the spec. The agent tier meanwhile is told to rev-parse
+  the repository holding the CODE, so the two tiers would stamp different
+  provenance for the same project. walkdown where is internally consistent - its
+  code row honestly reports the resolver's actual choice, which is why
+  locations.answer.says-why passes - but the choice itself contradicts the doc.
+  Either resolve git_sha through the code row / roots, or correct docs/08. Not
+  observed breaking the in-repo shape, where spec and code share a repository
+  and the sha is right. Supporting note:
+  runs/evidence/2026-09-01T01-06-52Z/recorder-provenance-note.txt."

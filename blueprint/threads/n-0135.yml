@@ -1,0 +1,25 @@
+id: n-0135
+kind: note
+author: agent
+created: 2026-09-01T01:18:29.288Z
+anchor:
+  rule: locations.default.one-home-per-blueprint
+status: open
+body: "Observed while judging this rule (run 2026-09-01T01-06-46Z-local-01),
+  distinct from the n-0129 migrate finding: in a repository whose first pack has
+  already claimed an out-of-tree blueprint, a second 'walkdown init --dir
+  packs/<other>' does not create a second blueprint and does not say so — it
+  silently attaches the new pack to the sibling's spec. Probe: 'init --dir
+  packs/billing' in a fresh monorepo allocated 0003-mono (root recorded as the
+  repository root, not the pack), wrote 'project: billing' into that spec; 'init
+  --dir packs/mailer' then printed 'spec: .../0003-mono/blueprint' and wrote
+  packs/mailer/CLAUDE.md pointing at billing's blueprint, with no line saying an
+  existing blueprint was reused. No home collision occurs — the allocation law
+  held — but the monorepo story docs/08 tells (point init at the pack) cannot
+  produce a second out-of-tree blueprint in one repository, and the person is
+  not told their init created nothing. In-repo blueprints are unaffected: two
+  'init --in-repo --dir packs/*' siblings each got their own numbered home on
+  first out-of-tree write (0004-billing, 0005-mailer). Evidence:
+  runs/evidence/2026-09-01T01-06-46Z/probe-03-monorepo-two-blueprints.txt and
+  probe-04/probe-05 for the in-repo contrast. Whether init should refuse, ask,
+  or allocate per-pack is a decision, not an agent's call."

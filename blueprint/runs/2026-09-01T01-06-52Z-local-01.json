@@ -1,0 +1,35 @@
+{
+  "run_id": "2026-09-01T01-06-52Z-local-01",
+  "created": "2026-09-01T01:17:42Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "3d72f2a-dirty",
+  "tree_hash": "sha256:20b0372da8cd",
+  "spec_hash": "sha256:bd6cdba6d858",
+  "results": [
+    {
+      "rule": "locations.answer.says-why",
+      "status": "pass",
+      "statement_hash": "sha256:971e878234f9",
+      "evidence": [
+        "runs/evidence/2026-09-01T01-06-52Z/probe-a-bare.txt",
+        "runs/evidence/2026-09-01T01-06-52Z/probe-a-bare-json.txt",
+        "runs/evidence/2026-09-01T01-06-52Z/probe-b-intree.txt",
+        "runs/evidence/2026-09-01T01-06-52Z/probe-c-config-outside.txt",
+        "runs/evidence/2026-09-01T01-06-52Z/probe-d-crossrepo.txt",
+        "runs/evidence/2026-09-01T01-06-52Z/probe-e-nogit.txt",
+        "runs/evidence/2026-09-01T01-06-52Z/probe-f-dirflag.txt",
+        "runs/evidence/2026-09-01T01-06-52Z/probe-g-broken-config.txt",
+        "runs/evidence/2026-09-01T01-06-52Z/probe-h-single-kind.txt",
+        "runs/evidence/2026-09-01T01-06-52Z/probe-i-config-default.txt",
+        "runs/evidence/2026-09-01T01-06-52Z/probe-j-dirflag-crossrepo.txt",
+        "runs/evidence/2026-09-01T01-06-52Z/probe-k-legacy-home.txt",
+        "runs/evidence/2026-09-01T01-06-52Z/real-where.txt",
+        "runs/evidence/2026-09-01T01-06-52Z/recorder-provenance-note.txt"
+      ],
+      "reasoning": "Re-judge of the n-0131 fail. Drove node bin/walkdown.js where live under a scratch WALKDOWN_HOME against eleven arranged situations - a bare git repo with nothing, an in-tree blueprint whose runs/ exists while threads/ does not, a config-named project whose spec sits outside any repository with a per-kind evidence override, a config-named spec sitting in a different git repository from the roots-named code repo, a plain no-git directory, --dir from an unrelated cwd and --dir across repositories, a defaults: block with {id}, an unparseable config, a legacy projects/<id>/ home, the single-kind scripts form - plus the real project's own answer with the real home. Every row of every answer carries a reason, the reasons name the deciding rule rather than that a decision was made ('named on the command line', 'this machine's config (<id>)', 'the config default', 'already in the blueprint', 'found in the working tree', 'beside the spec, as runs and threads follow it', 'the built-in default, outside the repository (allocated on first write)', with the legacy-home variant naming the migrate remedy), the config line reports its own state including the parse error verbatim, and --json carries the same why strings. The code row, n-0131's defect, now distinguishes its three situations truthfully: 'the git repository the spec sits in' only when that is true (in-tree, cross-repo), 'the working directory's repository - the spec sits outside any repository' in the fresh-adopter shape that used to be mislabeled, and 'no git repository - runs will carry no git_sha' with no path at all when there is none. I could not make any row misname its decision; a mixed answer (probe C: flag-less config spec, followed runs/threads, overridden evidence, defaulted drafts) names four different decisions on one screen, which is exactly the statement's point. Same reading as the prior judge on the scripts form: where <kind> prints a bare path and the rule governs the report. One adjacent tension found while verifying the D code row against the recorder is a provenance question, not a says-why one - the row honestly reports the resolver's choice - filed separately as n-0134."
+    }
+  ]
+}

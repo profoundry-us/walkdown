@@ -4,24 +4,65 @@ author: agent
 created: 2026-09-01T00:11:34Z
 anchor:
   rule: locations.default.one-home-per-blueprint
-status: open
+status: addressed
 body: "Agent judging 2026-09-01: FAIL on the migrate clause. Every allocation
   promise up to it held under attack — asking allocated nothing, first writes
-  claimed distinct numbers for two same-basename repos (0001/0002-myapp) and
-  for two blueprints in one repo (0004-mono/0003-billing), a deleted home's
-  number was never refilled, a claimed legacy home answered marked legacy, and
-  an orphan legacy home was reported and left standing. But migrating a legacy
-  home whose config entry claims it implicitly (id + roots only, no explicit
+  claimed distinct numbers for two same-basename repos (0001/0002-myapp) and for
+  two blueprints in one repo (0004-mono/0003-billing), a deleted home's number
+  was never refilled, a claimed legacy home answered marked legacy, and an
+  orphan legacy home was reported and left standing. But migrating a legacy home
+  whose config entry claims it implicitly (id + roots only, no explicit
   evidence:/drafts: paths — the shape the old defaults produced) strands the
   ledger: migrate moved projects/legacyapp to blueprints/0006-legacyapp,
   reported success, wrote an index entry carrying root: but no spec: key, and
   re-pointed nothing. Resolution matches neither, so `walkdown where`
   immediately answered a fresh tentative home and the next write allocated
-  0008-legacyapp — one blueprint with two numbered homes, its migrated
-  evidence sitting in a directory nothing resolves to any more. The re-pointing
-  machinery itself works: with explicit paths in the config entry, migrate
-  printed 'config re-pointed' and post-migrate resolution landed correctly on
-  0009-oldtimer. The broken path is exactly the common one. Evidence:
+  0008-legacyapp — one blueprint with two numbered homes, its migrated evidence
+  sitting in a directory nothing resolves to any more. The re-pointing machinery
+  itself works: with explicit paths in the config entry, migrate printed 'config
+  re-pointed' and post-migrate resolution landed correctly on 0009-oldtimer. The
+  broken path is exactly the common one. Evidence:
   runs/evidence/2026-09-01T00-11-34Z/probe-transcript.txt (probes 8-12) and
   runs/evidence/2026-09-01T00-11-34Z/probe-final-home-state.txt (the 0006/0008
   split and the spec-less index entry in one screen)."
+replies:
+  - author: agent
+    created: 2026-09-01T01:19:01Z
+    body: "Re-judged 2026-09-01 (run 2026-09-01T01-06-46Z-local-01): the stranding
+      this thread reports is fixed, measured, not read from code. Migrating an
+      implicitly-claimed home (id + roots only, spec inside projects/<id>/) now
+      moves it to a numbered home whose index entry carries both spec: and
+      root:, walkdown where answers the migrated home ('already in the blueprint
+      (1 file)') instead of a fresh tentative one, and a subsequent serve --dir
+      of that home allocates nothing new - one blueprint, one number (probe-08,
+      probe-13). The explicit-path shape still re-points all four config paths.
+      The rule still fails, on a narrower clause the fix regressed: this run at
+      00:11Z measured an unclaimed projects/ home being reported and left
+      standing, and migrate now moves it - projects/orphanapp went to
+      blueprints/0003-orphanapp with the same 'moved' wording as the claimed
+      homes, no report that nothing claims it, and an index entry with no root:,
+      an allocation nothing can ever match; a later unclaimed home was moved the
+      same way to 0004-lateapp (probe-07, probe-08, probe-14). Leaving this open
+      for the orphan clause. Evidence:
+      runs/evidence/2026-09-01T01-06-46Z/probe-07-migrate.txt,
+      probe-08-post-migrate-state.txt,
+      probe-13-serve-migrated-home-no-realloc.txt,
+      probe-14-final-home-state.txt."
+  - author: agent
+    created: 2026-09-01T01:29:27Z
+    body: "Re-judged 2026-09-01 (run 2026-09-01T01-21-23Z-local-01): the orphan
+      clause this thread stayed open on now holds, measured against the CLI. One
+      migrate pass over four planted shapes moved only the two a config entry
+      claims (implicit id+roots to 0006-implapp with spec: and root: in its
+      index entry, explicit paths to 0007-legacyapp with all five config paths
+      re-pointed) and left both unclaimed homes standing - projects/orphanspec
+      with a full spec inside and projects/orphanbare with only evidence - each
+      reported '? left ... no config entry claims it - add one under projects:
+      with id <id>, or delete the directory if it is done with', contents
+      intact, no index entry, and the same report again on a second migrate. The
+      earlier fixes did not regress: asking allocated nothing, first writes
+      claimed 0001-0005 across init/judge/serve shapes with no number refilled,
+      and serving a still-legacy claimed spec before migrate allocated nothing,
+      so one blueprint never held two numbers. The rule passes; evidence at
+      runs/evidence/2026-09-01T01-21-23Z/ (probe-06-migrate-all-shapes.txt and
+      probe-07-post-migrate-state.txt carry the orphan measurement)."

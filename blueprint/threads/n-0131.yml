@@ -4,35 +4,34 @@ author: agent
 created: 2026-09-01T00:19:20Z
 anchor:
   rule: locations.answer.says-why
-status: open
+status: addressed
 body: "Agent judge 2026-09-01: FAIL - one of the six kinds the steps name
   carries a reason that misnames the decision. Probed live with node
-  bin/walkdown.js where against throwaway projects under a scratch
-  WALKDOWN_HOME (the real home untouched). Five of the six kinds always
-  explain themselves truthfully and specifically: 'named on the command line'
-  (--dir), 'this machine's config (<id>)', 'the config default', 'already in
-  the blueprint', 'found in the working tree', 'the built-in default, outside
-  the repository (allocated on first write)', 'beside the spec, as runs and
-  threads follow it' - and the config line itself reports 'names this
-  project', 'present, no entry for this project', or 'unreadable - <parse
-  error>' while resolution degrades gracefully. The code line is the defect:
-  its reason is the fixed string 'the git repository the spec sits in',
-  printed even when the spec sits in no git repository at all. In a bare repo
-  with no blueprint (spec allocated to the personal home, '(does not exist
-  yet)') and in a config-named project whose spec lives outside any
-  repository, code resolves to the working directory's repository and the
-  report still claims the spec's location decided it - the same screen shows
-  the spec somewhere else, so the report contradicts itself, and a person who
-  disagrees with the code path is pointed at a decision that never happened.
-  The wording is right when it is true (cross-repo probe: spec configured
-  into a different repository, and code correctly follows it there), and the
-  no-repo case proves situation-specific code reasons exist ('no git
-  repository - runs will carry no git_sha'); only the fallback keeps the
-  wrong label. Spec-outside-the-repository is walkdown's default shape for
-  new projects, so the mislabeled case is the fresh-adopter case, not a
-  corner. Suggested fix: when no repository holds the spec, say what actually
-  decided the path - the working directory's repository - the way the no-git
-  case already names its own situation. Evidence:
+  bin/walkdown.js where against throwaway projects under a scratch WALKDOWN_HOME
+  (the real home untouched). Five of the six kinds always explain themselves
+  truthfully and specifically: 'named on the command line' (--dir), 'this
+  machine's config (<id>)', 'the config default', 'already in the blueprint',
+  'found in the working tree', 'the built-in default, outside the repository
+  (allocated on first write)', 'beside the spec, as runs and threads follow it'
+  - and the config line itself reports 'names this project', 'present, no entry
+  for this project', or 'unreadable - <parse error>' while resolution degrades
+  gracefully. The code line is the defect: its reason is the fixed string 'the
+  git repository the spec sits in', printed even when the spec sits in no git
+  repository at all. In a bare repo with no blueprint (spec allocated to the
+  personal home, '(does not exist yet)') and in a config-named project whose
+  spec lives outside any repository, code resolves to the working directory's
+  repository and the report still claims the spec's location decided it - the
+  same screen shows the spec somewhere else, so the report contradicts itself,
+  and a person who disagrees with the code path is pointed at a decision that
+  never happened. The wording is right when it is true (cross-repo probe: spec
+  configured into a different repository, and code correctly follows it there),
+  and the no-repo case proves situation-specific code reasons exist ('no git
+  repository - runs will carry no git_sha'); only the fallback keeps the wrong
+  label. Spec-outside-the-repository is walkdown's default shape for new
+  projects, so the mislabeled case is the fresh-adopter case, not a corner.
+  Suggested fix: when no repository holds the spec, say what actually decided
+  the path - the working directory's repository - the way the no-git case
+  already names its own situation. Evidence:
   runs/evidence/2026-09-01T00-12-06Z/probe-bare-where.txt,
   runs/evidence/2026-09-01T00-12-06Z/probe-configured-where.txt,
   runs/evidence/2026-09-01T00-12-06Z/probe-crossrepo-where.txt,
@@ -42,3 +41,28 @@ body: "Agent judge 2026-09-01: FAIL - one of the six kinds the steps name
   runs/evidence/2026-09-01T00-12-06Z/probe-broken-config-where.txt,
   runs/evidence/2026-09-01T00-12-06Z/probe-config.txt,
   runs/evidence/2026-09-01T00-12-06Z/real-where.txt."
+replies:
+  - author: agent
+    created: 2026-09-01T01:18:27Z
+    body: "Re-judged 2026-09-01, run 2026-09-01T01-06-52Z-local-01: PASS. Re-drove
+      walkdown where under a scratch WALKDOWN_HOME through the four situations
+      this note names and seven more (bare repo, in-tree with runs/ present and
+      threads/ absent, config-named spec outside any repository with a per-kind
+      override, cross-repo spec, no-git directory, --dir same- and cross-repo,
+      defaults: with {id}, unreadable config, legacy projects/<id>/ home,
+      single-kind form, and the real project's answer). The code row now names
+      its actual decision in all three of its situations: 'the git repository
+      the spec sits in' only where true, 'the working directory's repository -
+      the spec sits outside any repository' in the fresh-adopter shape this note
+      failed on (measured in probe-a-bare.txt and probe-c-config-outside.txt:
+      the same screen shows the spec allocated to the personal home and the code
+      row explaining itself against it, no contradiction left), and 'no git
+      repository - runs will carry no git_sha' with no path when there is none.
+      Every other row still names its deciding rule, --json carries the same why
+      strings, and a broken config degrades with the parse error printed
+      verbatim. Evidence under runs/evidence/2026-09-01T01-06-52Z/ (fourteen
+      files). While verifying the cross-repo code row against what runs actually
+      record I found an adjacent provenance gap - git_sha is computed from the
+      spec's directory, not the roots-named code repo - filed as n-0134 against
+      locations.travel.provenance-not-currency rather than here, because the
+      where answer reports the resolver's real choice honestly."

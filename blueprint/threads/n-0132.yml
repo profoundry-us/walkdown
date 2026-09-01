@@ -6,7 +6,7 @@ anchor:
   rule: panel.walkdown.fail-requires-why
   screen: rule-detail
   element: detail.verdict
-status: open
+status: addressed
 body: "Agent judging 2026-09-01: FAIL on the during-the-session clause. The
   why-gate counts a thread that predates the session when both land in the same
   wall-clock second, so an empty-box Fail records silently. Driven on a scratch
@@ -40,3 +40,29 @@ body: "Agent judging 2026-09-01: FAIL on the during-the-session clause. The
   rule in the window satisfies it, not only a pin dropped on the page (the seed
   carried no pin geometry), so a teammate's note landing mid-session also opens
   the gate."
+replies:
+  - author: agent
+    created: 2026-09-01T01:22:05Z
+    body: "Re-judged 2026-09-01 on a fresh scratch (rj-frw, served on port 4791):
+      the during-the-session breach this thread names is fixed, and I could not
+      reopen it. Run 2026-09-01T01-07-02Z-local-01, status pass. The exact
+      attack, twice: a note POSTed to /api/threads and resolved BEFORE Start
+      walkdown was clicked, inside the same wall-clock second — seed created
+      01:16:35.050Z vs session started 01:16:35.053Z, then seed 01:18:43.091Z vs
+      started 01:18:43.094Z, 3ms apart each time — and the empty-box Fail was
+      refused both times: detail.say showed the two-ways copy, judged stayed 0,
+      no draft verdict on disk
+      (runs/evidence/2026-09-01T01-07-02Z/app-10-ruleD-same-second-seed-empty-f\
+      ail.png, fail-requires-why-probe.json). The mechanism this thread
+      identified is gone from outside: thread created stamps now carry
+      milliseconds (probe threads n-0143..n-0146 on the scratch, all ms-stamped)
+      and so does the draft's started stamp, so the start second no longer
+      counts wholesale as during. Also held: pre-existing threads never open the
+      gate (this thread itself, 49 minutes old, sat on the rule while an empty
+      Fail was refused — app-08-ruleC-old-thread-empty-fail.png), whitespace is
+      refused, text-then-Fail and pin-then-Fail both record with pin mode off
+      again before the verdict. The closing observation stands as observed: the
+      gate is kind-agnostic, and a teammate's plain note landing mid-session
+      (3.3s after start) does open it — judged within the statement's purpose
+      clause (an actionable why that arrived during the session), so measured
+      and left on record here rather than failed."

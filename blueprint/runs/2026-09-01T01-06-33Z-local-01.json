@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-09-01T01-06-33Z-local-01",
+  "created": "2026-09-01T01:10:32Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "3d72f2a",
+  "spec_hash": "sha256:bd6cdba6d858",
+  "results": [
+    {
+      "rule": "threads.lifecycle.claim-never-accept",
+      "status": "pass",
+      "statement_hash": "sha256:dbc5f4be5809",
+      "evidence": [
+        "runs/evidence/2026-09-01T01-06-33Z/cli-gate.txt",
+        "runs/evidence/2026-09-01T01-06-33Z/http-gate.txt"
+      ],
+      "reasoning": "Re-judged by walking through the gate at both of its doors on a fresh scratch copy (rj-lcna), never the real ledger, checking each thread file's sha256 after every attempt; both breaches n-0130 recorded are closed at 3d72f2a. CLI door: from addressed, where verified and waived are legal, nineteen attempts refused with exit 2 and the file byte-identical - --actor agent, WALKDOWN_ACTOR=agent, and the case and padding variants Agent, AGENT, aGeNt, ' agent ' (flag and env alike) all refuse 'requires a named human actor'; and the no-actor clause the CLI used to fill with the machine username now refuses on its own message - bare --verify and --waive with WALKDOWN_ACTOR unset, --actor '' and '   ', empty and whitespace WALKDOWN_ACTOR, and the differently-spelled --status verified/waived path all exit 2 with 'recorded under a person's name... the machine username is not a decision' (cli-gate.txt). HTTP door, scratch serve on 4792: sixteen POST /api/threads/<id>/status attempts - actor agent, absent, empty, whitespace, null, Agent, AGENT, aGeNt, padded, and trailing-newline for verified; agent, absent, Agent, and whitespace for waived - every one refused 400 with the thread file unchanged (http-gate.txt). Controls prove the refusals are the actor gate, not the state: 'agent' still claims (open to addressed succeeded at both doors), and 'Probe Human' verified and waived the very threads the agent was refused on, from the same states, on both surfaces, landing verified_by and waived_by on disk. Every mutation landed on the scratch copy only; the real ledger receives nothing from this sitting but this record and the reply on n-0130.",
+      "threads": []
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "run_id": "2026-09-01T01-21-23Z-local-01",
+  "created": "2026-09-01T01:21:23Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "3ab41bc-dirty",
+  "tree_hash": "sha256:95d74ce9c6d8ec2d17920e86bb7892a1b318e3ac1301bf7193026bf9fe076a12",
+  "spec_hash": "sha256:bd6cdba6d858",
+  "results": [
+    {
+      "rule": "locations.default.one-home-per-blueprint",
+      "status": "pass",
+      "statement_hash": "sha256:625dd678dbdd",
+      "evidence": [
+        "runs/evidence/2026-09-01T01-21-23Z/probe-01-asking-allocates-nothing.txt",
+        "runs/evidence/2026-09-01T01-21-23Z/probe-02-first-write-collision.txt",
+        "runs/evidence/2026-09-01T01-21-23Z/probe-03-gap-never-refilled.txt",
+        "runs/evidence/2026-09-01T01-21-23Z/probe-04-two-blueprints-one-repo-judge-and-serve.txt",
+        "runs/evidence/2026-09-01T01-21-23Z/probe-05-legacy-homes-keep-answering.txt",
+        "runs/evidence/2026-09-01T01-21-23Z/probe-06-migrate-all-shapes.txt",
+        "runs/evidence/2026-09-01T01-21-23Z/probe-07-post-migrate-state.txt",
+        "runs/evidence/2026-09-01T01-21-23Z/probe-08-resolver-after-migrate.txt",
+        "runs/evidence/2026-09-01T01-21-23Z/probe-09-write-into-migrated-home.txt",
+        "runs/evidence/2026-09-01T01-21-23Z/probe-10-serve-unmigrated-legacy-spec.txt",
+        "runs/evidence/2026-09-01T01-21-23Z/probe-11-final-home-state.txt"
+      ],
+      "reasoning": "Judged entirely by driving the real CLI against throwaway projects under a scratch WALKDOWN_HOME, the real registry untouched (it still holds only 0001-walkdown). Every clause held under attack, including the orphan clause the last run failed. Asking allocated nothing: where on a byte-for-byte empty home reported a tentative 0001-myapp worded 'allocated on first write' and left the home empty, and every later ask left the index count unchanged (probes 01, 05, 08). First writes claimed distinct numbers in every shape: init claimed 0001-myapp, the same-basename sibling 0002-myapp, a third 0003-myapp; judge printing an evidence path claimed 0004-mailer and serve --dir claimed 0005-billing at server start with zero HTTP requests, two blueprints inside one repository ending on two numbers; deleting 0002's directory left its number allocated and the next write took 0003, never the gap (probes 02, 03, 04). Both claimed legacy shapes kept answering before migrate - the explicit-path entry through 'this machine's config', the implicit id+roots home marked 'legacy home - walkdown migrate renumbers it' - and serving a still-legacy claimed spec allocated nothing, so one blueprint never held two numbers even mid-transition (probes 05, 10). One migrate pass over all four shapes moved exactly the claimed two: the implicit home to 0006-implapp and the explicit to 0007-legacyapp, both index entries carrying spec: and root:, the explicit entry's five config paths re-pointed; afterward where answered the migrated homes, a thread landed in 0006's threads/ and a serve of it re-allocated nothing (probes 06, 07, 08, 09). The n-0129 regression is fixed and measured: both unclaimed homes - orphanspec with a full spec inside and orphanbare with only evidence - were reported '? left ... no config entry claims it - add one under projects: ... or delete the directory', left standing with contents intact and no index entry, distinctly worded from the claimed homes' 'moved', and a second migrate repeated the report without touching them; a lateapp home claimed after the first migrate got one number, 0008, on the person's say-so and nothing renumbered anything except migrate (probes 06, 07, 08, 10, 11). The loader still wanting --dir for out-of-tree specs is n-0133's standing observation, reproduced but allocating nothing, and the init --dir second-pack attach is n-0135's separate question; neither was re-filed."
+    }
+  ]
+}

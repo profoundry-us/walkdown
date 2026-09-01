@@ -1,0 +1,34 @@
+{
+  "kind": "walkdown",
+  "actor": "agent",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "created": "2026-09-01T01:21:10Z",
+  "git_sha": "3d72f2a-dirty",
+  "tree_hash": "sha256:531538ca1ba7fa9552631b4b29760c013553e791f074a358fdf52020578cf728",
+  "spec_hash": "sha256:bd6cdba6d858",
+  "results": [
+    {
+      "rule": "panel.walkdown.fail-requires-why",
+      "status": "pass",
+      "statement_hash": "sha256:9644c16756d8",
+      "evidence": [
+        "runs/evidence/2026-09-01T01-07-02Z/proto-rule-detail.png",
+        "runs/evidence/2026-09-01T01-07-02Z/app-rule-detail.png",
+        "runs/evidence/2026-09-01T01-07-02Z/app-01-ruleA-open-box-empty.png",
+        "runs/evidence/2026-09-01T01-07-02Z/app-02-ruleA-empty-fail.png",
+        "runs/evidence/2026-09-01T01-07-02Z/app-03-ruleA-whitespace-fail.png",
+        "runs/evidence/2026-09-01T01-07-02Z/app-04-ruleA-text-fail.png",
+        "runs/evidence/2026-09-01T01-07-02Z/app-05-ruleB-empty-fail.png",
+        "runs/evidence/2026-09-01T01-07-02Z/app-06-ruleB-pin-dropped.png",
+        "runs/evidence/2026-09-01T01-07-02Z/app-07-ruleB-fail-after-pin.png",
+        "runs/evidence/2026-09-01T01-07-02Z/app-08-ruleC-old-thread-empty-fail.png",
+        "runs/evidence/2026-09-01T01-07-02Z/app-09-ruleC-empty-fail-after-midsession-note.png",
+        "runs/evidence/2026-09-01T01-07-02Z/app-10-ruleD-same-second-seed-empty-fail.png",
+        "runs/evidence/2026-09-01T01-07-02Z/app-11-ruleD-text-fail.png",
+        "runs/evidence/2026-09-01T01-07-02Z/fail-requires-why-probe.json"
+      ],
+      "reasoning": "Re-judge of n-0132's finding, earned fresh on a scratch copy (scratch rj-frw served on port 4791 with WALKDOWN_HOME inside the scratch; the panel framed the target's base_url :4700 read-only, and every pin rode the framed embed's postMessage back to the scratch panel, so all writes landed on the copy). Driven with a throwaway Playwright script per the documented seam (docs/11): the judgment is what I drove and saw as I went; the script only echoes the PNGs and probe output for the record, and the whole drive ran twice end to end with identical outcomes. The statement's plain promises held under attack: with a rule open, the box empty and nothing pinned, Fail recorded nothing — judged stayed 0, no draft verdict on disk, and the panel said 'A fail needs a why — write it above, or turn on Pin mode and drop it on the page', naming both ways while arming neither (pin mode stayed off, its wd-pinning class absent from the framed surface, the box untouched); whitespace-only text was refused identically; writing text then failing recorded (judged moved to 1, the note filed, the box cleared); arming pin mode, dropping a real pin with a real click, saving it, then switching pin mode OFF before the verdict let an empty-box Fail record, the pin as its why. The clause n-0132 failed — a pre-session thread counting as during-the-session when both land in the same wall-clock second — is fixed and I could not reopen it: a note POSTed at API speed and resolved 3ms before Start walkdown was clicked, inside the same second, no longer opens the gate (pass one: seed n-0138 created 01:16:35.050Z, session started 01:16:35.053Z; pass two: seed n-0145 created 01:18:43.091Z, started 01:18:43.094Z — both empty-box Fails refused, draft null), and the mechanism n-0132 named is visibly gone from outside: thread created stamps now carry milliseconds (probe threads n-0143..n-0146 all ms-stamped) as does the draft's started stamp, so the compare no longer counts the whole start second. Older threads never open the gate either — the rule's own 49-minute-old n-0132, an Aug-24 thread on the seeded rule, and the first pass's leftover probe threads all sat on their rules while the empty Fail was still refused. One boundary from n-0132's closing observation persists as observed, and I judge it within the statement rather than against it: the gate is kind-agnostic, so a teammate's plain note landing mid-session (n-0144, filed 3.3s after start) satisfies it and an empty-box Fail then records — the statement's purpose clause is that a fail with no why is work nobody can act on, and a thread that genuinely arrived on the rule during the session is an actionable why; it remains on record inside n-0132's body. No page errors surfaced on either pass. The code judged is 3d72f2a's content (its lib/writes.js change was in the working tree the serve booted from); the tree's divergence from HEAD at record time is the parallel sitting's own ledger writes — thread files, no code."
+    }
+  ]
+}
