@@ -17,3 +17,9 @@ body: "Agent walkdown 2026-08-27: the rule says the bar names the project this
   rule should say that a stale panel gives the slot up. Judged a pass on a
   current build, where all six steps hold. Evidence:
   runs/evidence/2026-08-27T16-19-56Z/toolbar-bar.png."
+replies:
+  - author: Topher Fangio
+    created: 2026-09-01T04:32:48Z
+    body: "Decision: the bar keeps the project name. A stale panel gives up neither
+      slot — the badge sits beside the name, not instead of it. The rule stands
+      as written; the code carries the exception it should not have had."

@@ -52,3 +52,12 @@ replies:
       option 1 changes what the standalone embed can do. Rule
       ownership.writes.spec-never-implementation and test/writes.test.js hold
       the boundary in the meantime."
+  - author: Topher Fangio
+    created: 2026-09-01T04:32:50Z
+    body: "Decision: option 1 — the server refuses a missing author instead of
+      inventing one. A write with no author is a 400, not a guess at whoever
+      owns the laptop. The standalone embed keeps working by DECLARING it has no
+      identity rather than staying silent and being filled in: an explicit
+      anonymous claim is a different thing from an omission, and only the
+      omission is refused. The smaller observation stands too — an emptied field
+      is an answer and should survive the reload."
