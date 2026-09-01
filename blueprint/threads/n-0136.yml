@@ -1,0 +1,16 @@
+id: n-0136
+kind: note
+author: agent
+created: 2026-09-01T03:51:37.176Z
+anchor:
+  rule: locations.travel.evidence-by-key
+status: open
+body: The checks tier's fail evidence dies with the next run.
+  lib/playwright-reporter.js records attachments as test-results/... filesystem
+  paths, and Playwright empties test-results/ at the start of every run — so the
+  2026-09-01T01-04-49Z fail on panel.rules.steps-not-an-appendix cites a
+  screenshot and an error-context.md that no longer exist anywhere. The agent
+  tier already files evidence under the home by logical key
+  (runs/evidence/<ts>/...), which is this rule's whole point; the reporter
+  should copy failure attachments there and record the key, not the path, before
+  Playwright reclaims the directory.
