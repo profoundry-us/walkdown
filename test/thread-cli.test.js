@@ -283,3 +283,34 @@ test('WALKDOWN_ACTOR is a said name and satisfies the accept gate @rule:threads.
   const disk = readFileSync(join(bp, 'threads', 'n-0014.yml'), 'utf8');
   assert.match(disk, /verified_by: Env Person/);
 });
+
+/*
+ * Concurrent filers must never overwrite each other. Two judges computed the
+ * same next id within a minute of each other on 2026-09-01 and the second
+ * write clobbered the first thread; openThread now creates exclusively and
+ * re-scans on collision.
+ */
+test('ten concurrent filers get ten threads, none overwritten', async () => {
+  const { execFile } = await import('node:child_process');
+  const { promisify } = await import('node:util');
+  const exec = promisify(execFile);
+  const bp = ruleFixture('new-race');
+  await Promise.all(
+    Array.from({ length: 10 }, (_, i) =>
+      exec(
+        process.execPath,
+        [CLI, 'thread', 'new', '--rule', 'f.s.rule', '--body', `finding ${i}`, '--actor', 'agent', '--dir', bp],
+        { env: { ...process.env, NO_COLOR: '1' } },
+      ),
+    ),
+  );
+  const { readdirSync } = await import('node:fs');
+  const files = readdirSync(join(bp, 'threads')).filter((f) => f.endsWith('.yml'));
+  assert.equal(files.length, 10, 'every filer landed a file');
+  const bodies = files.map((f) => readFileSync(join(bp, 'threads', f), 'utf8'));
+  for (let i = 0; i < 10; i++)
+    assert.ok(
+      bodies.some((b) => b.includes(`finding ${i}`)),
+      `finding ${i} survived - nothing was overwritten`,
+    );
+});
