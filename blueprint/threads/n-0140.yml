@@ -1,0 +1,64 @@
+id: n-0140
+kind: note
+author: Topher Fangio
+created: 2026-09-01T05:27:34.007Z
+anchor:
+  rule: locations.default.records-follow-the-spec
+status: open
+body: >-
+  Decision: two config files, and which one a team uses IS the decision about
+  whether the spec is shared.
+
+
+  .walkdown/config.yml in the repository carries the shared list of that
+  project's blueprints — committed, reviewed, the same for everyone who clones
+  it. ~/.walkdown/config.yml stays personal: machine facts, ports, identity.
+  Read the repo config first, then the personal one, and the personal one wins
+  on conflict. That is the split docs/08 already describes, made mechanical: the
+  repo half is the project's claim, the personal half is where on this disk and
+  who is sitting here.
+
+
+  A team that does not want a shared spec simply has no repo config. Everyone
+  keeps their own blueprints and does not share them — an arrangement they
+  choose rather than one they discover.
+
+
+  This closes the adoption question the plan raised, and closes it by removing
+  it. A clone carries .walkdown/config.yml with it, so the blueprints are listed
+  the moment the checkout exists and walkdown status works with nothing run
+  first. No adopt verb, no registration step. init still writes an entry — into
+  the repo config when the spec is in the repo, into the personal one when it is
+  not.
+
+
+  Four details found while writing this down.
+
+
+  1. .walkdown/ is gitignored in this repository today, so a committed config
+  there would be invisible — confirmed with git check-ignore. And a plain
+  negation will not fix it: git does not descend into an excluded directory, so
+  the rule has to become '.walkdown/*' with '!.walkdown/config.yml' beside it.
+
+  2. Relative paths in the repo config must resolve against the REPOSITORY ROOT,
+  never the working directory. A committed 'spec: blueprint/' has to mean the
+  same thing on every machine. This is the third appearance of the shape the
+  whole rework is about — a relative path hanging off whichever root happens to
+  win — after projectRoot and {results}.
+
+  3. Merge by project id with personal fields winning, rather than wholesale
+  replacement. The repo says which blueprints exist and where their specs sit; a
+  person overrides the machine-local pieces. Whole-entry replacement would mean
+  overriding an evidence path costs you the spec path.
+
+  4. Identity is never read from the repo config. A committed file naming who
+  you are would be wrong on every machine but one, and n-0139 already makes
+  identity a thing you read rather than supply.
+
+
+  Said honestly, this leaves one thing still looked for in the tree:
+  .walkdown/config.yml itself. That is a different act from what is being
+  removed — one filename in one known place, and what it finds is a declaration,
+  where the old search scanned for any walkdown.yml anywhere and had to guess
+  which one you meant. 'Walkdown stops looking for blueprints' stays true;
+  'walkdown looks at nothing' would not be.
