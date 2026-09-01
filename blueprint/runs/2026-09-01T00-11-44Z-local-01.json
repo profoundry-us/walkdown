@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-09-01T00-11-44Z-local-01",
+  "created": "2026-09-01T00:19:30Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "dd82cc9",
+  "spec_hash": "sha256:b6f9f5f0573e",
+  "results": [
+    {
+      "rule": "locations.default.nothing-in-the-tree",
+      "status": "pass",
+      "statement_hash": "sha256:0f57ef142318",
+      "evidence": [
+        "runs/evidence/2026-09-01T00-11-44Z/probe-transcript.txt"
+      ],
+      "reasoning": "Judged by driving the working tree's CLI against a throwaway git repo under the session scratchpad, with WALKDOWN_HOME pointed at a fresh scratch home and no personal config. `walkdown init` with no flags wrote the spec to <home>/blueprints/0001-probe-repo/blueprint, the skills to the person's machine-level ~/.claude/skills, and exactly one file into the tree: CLAUDE.md holding the fenced pointer - `git status --porcelain` read `?? CLAUDE.md` and nothing else, and no .claude/ appeared. A run (POST /api/walkdowns), a thread (POST /api/threads) and a draft (POST /api/draft), recorded through `walkdown serve --dir` on port 4797, all landed under the personal home - runs/ and threads/ beside the spec, the draft as blueprints/0002-probe-repo/drafts/local.json - and the tree still read `?? CLAUDE.md` alone. Evidence is the one kind no vanilla flow writes bytes for, so it is verified by the CLI's own resolution: `walkdown where` and the probe project's judge prompt both direct it under the home, said plainly. rm -rf of the personal home left the repository holding only the pointer, and removing the pointer left the porcelain empty - pristine, no trace. Two warts observed, neither this rule's claim: the same blueprint was allocated a second numbered home (0002-probe-repo) when serve started against the spec init had filed under 0001, because init's allocation entry records root but no spec - that splits one project's drafts and evidence from its spec, runs and threads, and belongs to locations.default.one-home-per-blueprint; and serve, status and lint run from the probe repo all said `No blueprint found ... Use --dir` for the out-of-tree spec that `walkdown where` resolves from the same directory, a discovery gap that files nothing in the tree. Judged from CLI behavior and git porcelain, not from source or unit tests.",
+      "threads": []
+    }
+  ]
+}

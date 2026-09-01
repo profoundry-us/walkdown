@@ -1,0 +1,38 @@
+id: n-0130
+kind: note
+author: agent
+created: 2026-09-01T00:18:02Z
+anchor:
+  rule: threads.lifecycle.claim-never-accept
+status: open
+body: "Agent judge 2026-09-01: FAIL - the gate holds only at one of its two
+  doors, and both doors admit the agent under a capital letter. Probed live on
+  a scratch copy (sit-lcna), never the real ledger. The no-actor clause: the
+  steps say a transition attempted with no actor is rejected, and the HTTP
+  surface keeps that promise - POST /api/threads/<id>/status with the actor
+  missing, empty or whitespace refuses 400 'requires a named human actor' with
+  the thread file byte-identical by sha256. The CLI does not: a bare
+  'thread n-0126 --verify' with no --actor and WALKDOWN_ACTOR unset exited 0,
+  moved addressed to verified, and wrote verified_by: topherfangio - the
+  machine username silently substituted by the actor chain in
+  bin/commands/thread.js ([--actor, WALKDOWN_ACTOR, userInfo().username])
+  before checkTransition ever looks, so the enforcement layer's own empty-actor
+  refusal is unreachable from this door. A no-actor --waive did the same
+  (waived_by: topherfangio), and --actor '' / --actor '   ' fall through the
+  chain identically. The acceptance was produced by an agent - me - and the
+  ledger attributes it to a person who never acted; n-0116's history already
+  treated machine-username backfill as a defect on the panel path, and the
+  server refuses exactly what the CLI accepts. Second breach, both doors: the
+  agent match is case-sensitive ('agent' only), so --actor Agent at the CLI
+  and actor 'Agent' over HTTP (200) both landed verified_by: Agent on disk -
+  an agent's name standing as accepter, the record this rule exists to make
+  impossible. Controls prove the refusals that do fire are the actor gate, not
+  the state: 'agent' and WALKDOWN_ACTOR=agent refuse on both doors, while
+  'Probe Human' verified the same threads from the same states. Suggested fix:
+  for HUMAN_ONLY statuses the CLI must not default the actor - require one
+  explicitly, refusing the way the server does - and the agent comparison
+  should be case-insensitive. Evidence:
+  runs/evidence/2026-09-01T00-11-17Z/cli-no-actor.txt,
+  runs/evidence/2026-09-01T00-11-17Z/cli-actor-edges.txt,
+  runs/evidence/2026-09-01T00-11-17Z/http-gate.txt,
+  runs/evidence/2026-09-01T00-11-17Z/cli-agent-actor.txt."

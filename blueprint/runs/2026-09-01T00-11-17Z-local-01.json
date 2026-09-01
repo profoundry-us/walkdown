@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-09-01T00-11-17Z-local-01",
+  "created": "2026-09-01T00:17:01Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "dd82cc9",
+  "spec_hash": "sha256:b6f9f5f0573e",
+  "results": [
+    {
+      "rule": "threads.lifecycle.claim-never-accept",
+      "status": "fail",
+      "statement_hash": "sha256:dbc5f4be5809",
+      "evidence": [
+        "runs/evidence/2026-09-01T00-11-17Z/cli-agent-actor.txt",
+        "runs/evidence/2026-09-01T00-11-17Z/cli-no-actor.txt",
+        "runs/evidence/2026-09-01T00-11-17Z/cli-actor-edges.txt",
+        "runs/evidence/2026-09-01T00-11-17Z/http-gate.txt"
+      ],
+      "reasoning": "Judged by walking through the gate itself on a scratch copy (sit-lcna), at both of its doors: the thread CLI and the panel's POST /api/threads/<id>/status on a scratch serve at 4795, checking the disk after every attempt. The agent actor is rejected wherever it names itself in lowercase: --actor agent, WALKDOWN_ACTOR=agent, and HTTP actor 'agent' all refuse with 'requires a named human actor', exit 2 or HTTP 400, the thread files byte-identical by sha256 (cli-agent-actor.txt, http-gate.txt). The HTTP door also holds the no-actor clause - missing, empty and whitespace actors refuse 400 with no write. The CLI door does not: a bare --verify with no --actor and WALKDOWN_ACTOR unset exited 0 and moved n-0126 addressed to verified with verified_by: topherfangio, the machine username silently substituted by the CLI's actor chain before the enforcement gate looks; a no-actor --waive landed waived_by: topherfangio the same way, and --actor '' / --actor '   ' fall through identically (cli-no-actor.txt, cli-actor-edges.txt). The steps say an attempt with no actor is rejected; at the CLI it is accepted, and the acceptance - produced by an agent, me - is attributed to a person who never acted. Second breach, present at both doors: the agent match is case-sensitive, so --actor Agent and HTTP actor 'Agent' (200) both wrote verified_by: Agent - an agent's name standing as accepter. Controls prove the refusals that do fire are the actor gate rather than the state: 'Probe Human' verified threads from the very states the agent was refused in, on both surfaces. Every mutation here landed on the scratch copy only; the real ledger received nothing but this record and n-0130.",
+      "threads": ["n-0130"]
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "run_id": "2026-09-01T00-12-06Z-local-01",
+  "created": "2026-09-01T00:19:20Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "dd82cc9-dirty",
+  "spec_hash": "sha256:b6f9f5f0573e",
+  "results": [
+    {
+      "rule": "locations.answer.says-why",
+      "status": "fail",
+      "statement_hash": "sha256:971e878234f9",
+      "evidence": [
+        "runs/evidence/2026-09-01T00-12-06Z/probe-bare-where.txt",
+        "runs/evidence/2026-09-01T00-12-06Z/probe-intree-where.txt",
+        "runs/evidence/2026-09-01T00-12-06Z/probe-configured-where.txt",
+        "runs/evidence/2026-09-01T00-12-06Z/probe-crossrepo-where.txt",
+        "runs/evidence/2026-09-01T00-12-06Z/probe-nogit-where.txt",
+        "runs/evidence/2026-09-01T00-12-06Z/probe-dirflag-where.txt",
+        "runs/evidence/2026-09-01T00-12-06Z/probe-where-single-kind.txt",
+        "runs/evidence/2026-09-01T00-12-06Z/probe-broken-config-where.txt",
+        "runs/evidence/2026-09-01T00-12-06Z/probe-config.txt",
+        "runs/evidence/2026-09-01T00-12-06Z/real-where.txt"
+      ],
+      "reasoning": "Drove node bin/walkdown.js where live against six throwaway situations under a scratch WALKDOWN_HOME - a bare git repo with nothing, a repo with an in-tree blueprint holding runs/ and threads/, a project whose spec and runs are named in the personal config, a config-named spec sitting in a different git repository, a plain directory with no git at all, and a blueprint named on the command line with --dir - plus a config defaults: block, a deliberately unparseable config, and the real project's own report. Every path always carries a reason, and for spec, runs, threads, evidence and drafts the reason names the deciding rule precisely: 'named on the command line', 'this machine's config (<id>)', 'the config default', 'already in the blueprint', 'found in the working tree', 'the built-in default, outside the repository (allocated on first write)', 'beside the spec, as runs and threads follow it'; the config line reports 'names this project' / 'present, no entry for this project' / 'unreadable - <parse error>' and reasons survive a broken config. The code line fails the steps' second clause: its reason is the fixed string 'the git repository the spec sits in', printed even when the spec sits in no repository - in the bare-repo and spec-outside-config situations code actually came from the working directory's repository, and the same screen shows the spec elsewhere, so the reason names a decision that never happened; the cross-repo probe shows the wording right when true (code follows the spec into a different repository), and the no-git probe shows situation-specific code reasons exist ('no git repository - runs will carry no git_sha'), so only the fallback is mislabeled. Spec-outside is walkdown's default shape for new projects, so the mislabeled case is the fresh-adopter case, not a corner; fail, n-0131. One reading noted, not failed on: the single-kind walkdown where <kind> prints a bare path, which docs describe as the scripts form - I read the rule as governing the report that answers where things live, not the plumbing accessor.",
+      "threads": [
+        "n-0131"
+      ]
+    }
+  ]
+}

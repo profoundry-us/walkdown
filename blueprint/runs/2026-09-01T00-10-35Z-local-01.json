@@ -1,0 +1,24 @@
+{
+  "kind": "walkdown",
+  "actor": "agent",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "created": "2026-09-01T00:22:35Z",
+  "git_sha": "dd82cc9",
+  "spec_hash": "sha256:b6f9f5f0573e",
+  "results": [
+    {
+      "rule": "panel.walkdown.note-with-any-verdict",
+      "status": "pass",
+      "statement_hash": "sha256:f9043305838b",
+      "evidence": [
+        "runs/evidence/2026-09-01T00-10-35Z/note-with-any-verdict-journey.json",
+        "runs/evidence/2026-09-01T00-10-35Z/app-rule-detail-note.png",
+        "runs/evidence/2026-09-01T00-10-35Z/app-rule-detail-after-fail.png",
+        "runs/evidence/2026-09-01T00-10-35Z/app-rule-detail-sign-pair.png",
+        "runs/evidence/2026-09-01T00-10-35Z/proto-rule-detail.png"
+      ],
+      "reasoning": "Judged fresh on a scratch copy (sit-nwav, served on 4791) with the session actor overridden to nwav-probe - a name distinct from both the git default (topher) and the machine username (topherfangio), so attribution could not be a server-side fallback in disguise. Every claim in the statement held under every break I could devise, on both button pairs. The box sits above the verdict in the walk pair (box bottom 466.6 vs verdict top 472.6) and the sign pair (448.8 vs 454.8), matching the prototype's order of statement, box, buttons. Fail-with-why filed n-0129 on the scratch - right rule, author nwav-probe, byte-identical body - and the box emptied 206ms after the click (my first read raced the server round-trip and briefly looked like the old n-0126 defect; a polling re-probe settled it); pass-with-note, approve-with-note and refine-with-why filed n-0130, n-0131, n-0132 the same way, refine emptying in the same 206ms. Empty-box pass advanced and filed nothing; empty fail and refine were refused with a visible why and recorded nothing; a whitespace-only box filed nothing. Abandoned text died on every exit: back-to-list, the stepper in both directions, a tab excursion, and - new since round three, because sittings now resume from disk - a mid-typing reload, after which the resumed session's box was empty and the text filed nowhere. Fail-then-pass and refine-then-approve with the box untouched did not refile the already-filed why. The panel's own scratch runs carry exactly the filed ids on their own rules (2026-09-01T00-18-34Z-local-01: anchored-target pass with [n-0129,n-0130], absent-until-asked approved [n-0131], one-switch refining [n-0132], five empty-box verdicts with no threads at all; 00-20-44Z likewise for n-0133/n-0134), and the closing sweep found exactly six probe threads and zero filings of the four abandoned texts. I drove these states with a throwaway Playwright script against my own port because the shared browser pane was contended, and read the saved PNGs and probe output myself - the script drove and echoed, the judgment is mine. One aside outside this statement: the feedback placeholder's copy drifts from the prototype ('Why? Filed as a note with your verdict.' there, 'Why? Anything written here is filed as a note with your verdict.' in the panel)."
+    }
+  ]
+}

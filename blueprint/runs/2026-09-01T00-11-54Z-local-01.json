@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-09-01T00-11-54Z-local-01",
+  "created": "2026-09-01T00:16:24Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "dd82cc9",
+  "spec_hash": "sha256:b6f9f5f0573e",
+  "results": [
+    {
+      "rule": "locations.answer.asking-writes-nothing",
+      "status": "pass",
+      "statement_hash": "sha256:0ba6f381a575",
+      "evidence": [
+        "runs/evidence/2026-09-01T00-11-54Z/asks-transcript.txt",
+        "runs/evidence/2026-09-01T00-11-54Z/fs-diffs.txt",
+        "runs/evidence/2026-09-01T00-11-54Z/snapshots.txt",
+        "runs/evidence/2026-09-01T00-11-54Z/probe-summary.txt"
+      ],
+      "reasoning": "Judged by driving the working tree's CLI against four throwaway probes under a session scratchpad with WALKDOWN_HOME pointed away from the real home, snapshotting each probe repo and probe home recursively (path, size, mtime, sha256 per file) before and after every batch of asks, and diffing. Probe-a (fresh git repo, no blueprint, home nonexistent) took twelve asks - the full where, all six kinds, two invalid kinds, three repeats - and stayed byte-identical while the home stayed absent. Probe-b (in-repo blueprint, deeply nested nonexistent home) and probe-c (not even a git repo) likewise: full answers, nothing created, the nested path never made. Probe-d was the sharpest temptation: an existing home whose blueprints/index.yml already allocates 0001 to a different project - asked from a never-seen repo, where named a tentative 0002 home as allocated-on-first-write and left config.yml, index.yml and every mtime untouched, on the repeat ask too. Every full answer named all seven rows (config, spec, runs, threads, evidence, drafts, code) with the reason each was chosen, marked not-yet-existing paths, and closed with 'Nothing was written', which the diffs corroborate rather than take on trust. The one diff in the real ~/.walkdown across the probe window is a concurrent judge's evidence under a different key (2026-09-01T00-11-17Z), documented in fs-diffs.txt; my asks named only scratch paths and no scratch home was ever created. Judged from CLI behavior and filesystem state, not from source or unit tests.",
+      "threads": []
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+id: n-0132
+kind: note
+author: agent
+created: 2026-09-01T00:27:00Z
+anchor:
+  rule: panel.walkdown.fail-requires-why
+  screen: rule-detail
+  element: detail.verdict
+status: open
+body: "Agent judging 2026-09-01: FAIL on the during-the-session clause. The
+  why-gate counts a thread that predates the session when both land in the same
+  wall-clock second, so an empty-box Fail records silently. Driven on a scratch
+  copy (serve --dir, port 4792): with a rule open, the feedback box empty and
+  nothing pinned, a note POSTed to /api/threads resolved BEFORE Start walkdown
+  was clicked but inside the same second (seed created 2026-09-01T00:22:51Z;
+  session started between 00:22:51.184Z and 00:22:51.246Z, bounded by the
+  driving process's clock around the click) — choosing Fail then recorded the
+  verdict with no refusal: detail.say never appeared, the judged count moved 0
+  to 1, the Fail button went solid, and the finished scratch run attached the
+  pre-session seed as the fail's why, a thread the session's reviewer neither
+  wrote nor pinned. First hit accidentally
+  (runs/evidence/2026-09-01T00-10-45Z/app-panel-04-fail-refused.png — named for
+  the refusal it expected to show), then reproduced deliberately on a second
+  rule (app-panel-13-ruleD-boundary-breach.png, fail-requires-why-probe-3.json).
+  The mechanism visible from outside: thread created stamps are
+  second-resolution while the session's started stamp carries milliseconds, and
+  the lexicographic compare counts the whole start second as during the session
+  ('...51Z' >= '...51.184Z' because 'Z' sorts after '.'). Everything else the
+  statement promises held under attack: the empty-box Fail is refused with 'A
+  fail needs a why — write it above, or turn on Pin mode and drop it on the
+  page', naming both ways with pin mode left off and nothing recorded
+  (app-panel-11-ruleC-refused.png, app-panel-06-ruleB-refused.png),
+  whitespace-only text is refused, text-then-Fail records and files the note
+  (app-panel-12-ruleC-text-recorded.png), and pin-then-Fail records with pin
+  mode switched off again before the verdict, the pin riding into the run as the
+  why (app-panel-08-pin-dropped.png, app-panel-09-fail-after-pin.png). The
+  window is under a second and needs API-speed writes to hit — but agent
+  sittings drive this panel at exactly that speed. Related, observed while
+  probing, not failed on: the gate is kind-agnostic — any thread anchored to the
+  rule in the window satisfies it, not only a pin dropped on the page (the seed
+  carried no pin geometry), so a teammate's note landing mid-session also opens
+  the gate."

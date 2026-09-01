@@ -1,0 +1,44 @@
+id: n-0131
+kind: note
+author: agent
+created: 2026-09-01T00:19:20Z
+anchor:
+  rule: locations.answer.says-why
+status: open
+body: "Agent judge 2026-09-01: FAIL - one of the six kinds the steps name
+  carries a reason that misnames the decision. Probed live with node
+  bin/walkdown.js where against throwaway projects under a scratch
+  WALKDOWN_HOME (the real home untouched). Five of the six kinds always
+  explain themselves truthfully and specifically: 'named on the command line'
+  (--dir), 'this machine's config (<id>)', 'the config default', 'already in
+  the blueprint', 'found in the working tree', 'the built-in default, outside
+  the repository (allocated on first write)', 'beside the spec, as runs and
+  threads follow it' - and the config line itself reports 'names this
+  project', 'present, no entry for this project', or 'unreadable - <parse
+  error>' while resolution degrades gracefully. The code line is the defect:
+  its reason is the fixed string 'the git repository the spec sits in',
+  printed even when the spec sits in no git repository at all. In a bare repo
+  with no blueprint (spec allocated to the personal home, '(does not exist
+  yet)') and in a config-named project whose spec lives outside any
+  repository, code resolves to the working directory's repository and the
+  report still claims the spec's location decided it - the same screen shows
+  the spec somewhere else, so the report contradicts itself, and a person who
+  disagrees with the code path is pointed at a decision that never happened.
+  The wording is right when it is true (cross-repo probe: spec configured
+  into a different repository, and code correctly follows it there), and the
+  no-repo case proves situation-specific code reasons exist ('no git
+  repository - runs will carry no git_sha'); only the fallback keeps the
+  wrong label. Spec-outside-the-repository is walkdown's default shape for
+  new projects, so the mislabeled case is the fresh-adopter case, not a
+  corner. Suggested fix: when no repository holds the spec, say what actually
+  decided the path - the working directory's repository - the way the no-git
+  case already names its own situation. Evidence:
+  runs/evidence/2026-09-01T00-12-06Z/probe-bare-where.txt,
+  runs/evidence/2026-09-01T00-12-06Z/probe-configured-where.txt,
+  runs/evidence/2026-09-01T00-12-06Z/probe-crossrepo-where.txt,
+  runs/evidence/2026-09-01T00-12-06Z/probe-nogit-where.txt,
+  runs/evidence/2026-09-01T00-12-06Z/probe-intree-where.txt,
+  runs/evidence/2026-09-01T00-12-06Z/probe-dirflag-where.txt,
+  runs/evidence/2026-09-01T00-12-06Z/probe-broken-config-where.txt,
+  runs/evidence/2026-09-01T00-12-06Z/probe-config.txt,
+  runs/evidence/2026-09-01T00-12-06Z/real-where.txt."

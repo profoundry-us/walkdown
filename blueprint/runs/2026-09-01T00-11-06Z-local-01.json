@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-09-01T00-11-06Z-local-01",
+  "created": "2026-09-01T00:14:09Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "dd82cc9",
+  "spec_hash": "sha256:b6f9f5f0573e",
+  "results": [
+    {
+      "rule": "threads.lifecycle.says-what-it-did",
+      "status": "pass",
+      "statement_hash": "sha256:224b3a652a3a",
+      "evidence": [
+        "runs/evidence/2026-09-01T00-11-06Z/cli-thread-probes.txt",
+        "runs/evidence/2026-09-01T00-11-06Z/cli-thread-probes-2.txt"
+      ],
+      "reasoning": "Judged by driving the CLI live against a scratch copy (sit-swid), twenty probes with stdout, stderr and exit codes captured separately. Every clause held. Reply plus transition prints one line naming the thread and both ends ('n-0117 open → addressed · by agent · +1 reply'); transition alone the same without the count; waiving names the person it was recorded under ('n-0126 addressed → waived · by topher'), which was the clause n-0125's earlier FAIL was about, and the read-back attributes the waive reason to topher in the record too. A reply with no transition says the status did not move ('n-0113 still open · by agent · +1 reply') rather than staying silent. Reading with no flags prints the whole conversation, replies included, and mutation output never prints the thread back — a one-line report plus a pointer to the read command. Refusals were earned, not read from code: unknown status word, agent attempting --waive (policy refusal naming the reason), illegal transitions, an empty --reply body with and without a status, reopen without a reason, and a nonexistent id all say why on stderr only, print nothing to stdout, and exit 2; a refused transition also refuses the accompanying reply (the read-back shows it never landed), and a shell loop over two threads stopped at the first refusal, which is exactly what the last step asks the exit code to make possible. One observation outside this rule's scope: '--help' is an unknown option and dies with a raw parseArgs stack trace — non-zero, but a crash rather than a report; it is not a thread change, so it does not touch this verdict.",
+      "threads": []
+    }
+  ]
+}

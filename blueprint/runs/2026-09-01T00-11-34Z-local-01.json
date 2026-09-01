@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-09-01T00-11-34Z-local-01",
+  "created": "2026-09-01T00:11:34Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "dd82cc9",
+  "spec_hash": "sha256:b6f9f5f0573e",
+  "results": [
+    {
+      "rule": "locations.default.one-home-per-blueprint",
+      "status": "fail",
+      "statement_hash": "sha256:625dd678dbdd",
+      "evidence": [
+        "runs/evidence/2026-09-01T00-11-34Z/probe-transcript.txt",
+        "runs/evidence/2026-09-01T00-11-34Z/probe-final-home-state.txt"
+      ],
+      "reasoning": "Judged entirely by driving the real CLI against throwaway projects under a scratch WALKDOWN_HOME, never the real home: two git repos both named myapp, a monorepo holding a root blueprint and packs/billing, and planted legacy homes under projects/. The allocation half of the statement held under every attack I mounted: `where` on both fresh same-basename projects reported the same tentative 0001-myapp worded 'allocated on first write' while the home stayed byte-for-byte empty; the first write (judge printing an evidence path) claimed 0001-myapp for one repo and the other then resolved and allocated 0002-myapp; the two blueprints inside one repository took 0003-billing and 0004-mono; and after rm -rf of 0001's directory with the index intact, a new blueprint allocated 0005 rather than refilling the gap while 0001's owner kept resolving to its own number. The legacy clauses held at their front half - a projects/legacyapp home claimed by an id+roots config entry kept answering marked '(legacy home - walkdown migrate renumbers it)', and an unclaimed projects/orphan was reported by migrate and left standing - but the migrate half fails: migrating that implicitly-claimed home moved it to 0006-legacyapp, wrote an index entry carrying root: but no spec: key, re-pointed nothing in the config, and resolution then answered a fresh tentative home for the same blueprint, whose next write allocated 0008-legacyapp. One blueprint, two numbered homes, its migrated evidence stranded in a directory nothing resolves to any more. A control shows the re-pointing machinery works when the config names the legacy paths explicitly (migrate printed 'config re-pointed' and post-migrate resolution landed on 0009-oldtimer), so the broken path is precisely the shape the old defaults produced. Probes 8-12 in the transcript carry the full command-by-command record.",
+      "threads": [
+        "n-0129"
+      ]
+    }
+  ]
+}

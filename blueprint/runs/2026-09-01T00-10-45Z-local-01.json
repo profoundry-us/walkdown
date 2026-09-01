@@ -1,0 +1,33 @@
+{
+  "kind": "walkdown",
+  "actor": "agent",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "created": "2026-09-01T00:27:14Z",
+  "git_sha": "dd82cc9",
+  "spec_hash": "sha256:b6f9f5f0573e",
+  "results": [
+    {
+      "rule": "panel.walkdown.fail-requires-why",
+      "status": "fail",
+      "statement_hash": "sha256:9644c16756d8",
+      "evidence": [
+        "runs/evidence/2026-09-01T00-10-45Z/proto-rule-detail.png",
+        "runs/evidence/2026-09-01T00-10-45Z/app-rule-detail.png",
+        "runs/evidence/2026-09-01T00-10-45Z/app-panel-11-ruleC-refused.png",
+        "runs/evidence/2026-09-01T00-10-45Z/app-panel-12-ruleC-text-recorded.png",
+        "runs/evidence/2026-09-01T00-10-45Z/app-panel-06-ruleB-refused.png",
+        "runs/evidence/2026-09-01T00-10-45Z/app-panel-08-pin-dropped.png",
+        "runs/evidence/2026-09-01T00-10-45Z/app-panel-09-fail-after-pin.png",
+        "runs/evidence/2026-09-01T00-10-45Z/app-panel-04-fail-refused.png",
+        "runs/evidence/2026-09-01T00-10-45Z/app-panel-13-ruleD-boundary-breach.png",
+        "runs/evidence/2026-09-01T00-10-45Z/fail-requires-why-probe.json",
+        "runs/evidence/2026-09-01T00-10-45Z/fail-requires-why-probe-2.json",
+        "runs/evidence/2026-09-01T00-10-45Z/fail-requires-why-probe-3.json"
+      ],
+      "reasoning": "Judged fresh on a scratch copy (scratch sit-frw, served on port 4792); driven with a throwaway Playwright script whose per-state screenshots I read as I went and whose probe output is filed directly — the documented seam, so the PNGs are the states the drive itself saw. The statement's plain promises all held under attack: with a rule open, the box empty and nothing pinned, Fail recorded nothing and put 'A fail needs a why — write it above, or turn on Pin mode and drop it on the page' under the verdict row, naming both ways while arming neither (pin mode stayed off, the box stayed empty, 0 judged, no draft verdict — app-panel-11, app-panel-06); whitespace-only text was refused the same way; writing text then failing recorded (1 judged, note filed, box cleared — app-panel-12); dropping a real pin through the embed then failing with the box still empty and pin mode switched back off recorded too, the pin riding into the finished scratch run as the why (app-panel-08, -09). What failed is the during-the-session clause: a note POSTed to /api/threads before Start walkdown was clicked, but inside the same wall-clock second, satisfied the gate — the empty-box Fail recorded silently with no refusal (first hit accidentally, app-panel-04; then reproduced deliberately with the start moment bounded by the driver's own clock: seed created 00:22:51Z, session started between 00:22:51.184Z and 00:22:51.246Z — app-panel-13, probe-3), and the finished run attached that pre-session thread as the fail's why, one the reviewer neither wrote nor pinned. Second-resolution created stamps against a millisecond started stamp make the lexicographic compare count the entire start second as 'during'; the window is under a second and takes API-speed writes to hit, but agent sittings drive this panel at exactly that speed. Filed as n-0132. The gate is also kind-agnostic — any thread on the rule in the window opens it, not only a pin — noted in the thread, not failed on. The tree's only divergence from HEAD dd82cc9 during judging was this sitting's own ledger appends; no code differed."
+      ,
+      "threads": ["n-0132"]
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "run_id": "2026-09-01T00-10-58Z-local-01",
+  "created": "2026-09-01T00:10:58Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "dd82cc9-dirty",
+  "spec_hash": "sha256:b6f9f5f0573e",
+  "results": [
+    {
+      "rule": "panel.threads.claim-never-accept",
+      "status": "pass",
+      "statement_hash": "sha256:7c4e1e2d1562",
+      "evidence": [
+        "runs/evidence/2026-09-01T00-10-58Z/refuse-verify-no-name.png",
+        "runs/evidence/2026-09-01T00-10-58Z/refuse-verify-as-agent.png",
+        "runs/evidence/2026-09-01T00-10-58Z/refuse-waive-no-reason.png",
+        "runs/evidence/2026-09-01T00-10-58Z/refuse-reopen-no-reason.png",
+        "runs/evidence/2026-09-01T00-10-58Z/probe-claim-never-accept.json",
+        "runs/evidence/2026-09-01T00-10-58Z/app-rule-detail.png",
+        "runs/evidence/2026-09-01T00-10-58Z/proto-rule-detail.png",
+        "runs/evidence/2026-09-01T00-10-58Z/app-standin-rule-detail.png"
+      ],
+      "reasoning": "Judged on a scratch copy (sit-cna) served at :4793 so every refusal fired at a disposable ledger, with only this verdict landing in the real one. I drove the live panel to rule panel.rules.detail-slide on the Rules tab, opened its addressed note n-0043, and tried to make it accept: Verify with the identity emptied and again with the name agent both recorded nothing - the panel said Verify and waive are recorded under a person's name, set it in Settings first, and opened Settings on the Record as field, which is the ask for a person's name the rule requires; the thread file's sha256 was byte-identical after every attempt and the panel issued zero write requests to /api/threads (probe JSON). Under a person-shaped name with the composer empty, Waive and Reopen were each refused until a reason is written, and the thread stayed addressed on screen and on disk. I also went around the buttons: POST /api/threads/n-0043/status with verified-as-agent, verified-with-no-actor, waive-without-reason and reopen-without-reason all came back 400 carrying the governance error, disk still unchanged, so the refusal is the serve's and not only the button's. Driven with a throwaway Playwright script against my own serve because the built-in browser pane could not composite screenshots this session; the script was the driving itself, not a re-enactment, and the PNGs and probe JSON it saved are what I judged from. Both declared surfaces are captured at 1280x900 for the record, but the behavioural judgment is against the live panel, since the stand-in app surface is the design served statically and cannot refuse anything.",
+      "threads": []
+    }
+  ]
+}
