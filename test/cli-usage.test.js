@@ -4,6 +4,7 @@
  * stderr, exit 2, in words. Both used to be a raw parseArgs stack trace
  * pointing at node internals (found in passing by the 2026-09-01 sitting).
  */
+import '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { test } from 'node:test';

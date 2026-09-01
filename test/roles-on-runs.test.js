@@ -6,6 +6,7 @@
  * is the panel's, and its check belongs in checks/. This is about what ends up
  * on disk, which no browser can see.
  */
+import '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';

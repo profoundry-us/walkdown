@@ -1,3 +1,4 @@
+import '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { getThread, listThreads } from '../lib/threads.js';

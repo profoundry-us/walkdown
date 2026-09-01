@@ -7,6 +7,7 @@
  * who cloned it. So this reads the package manifest and the source rather
  * than trusting that today's suite would have noticed.
  */
+import '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import {

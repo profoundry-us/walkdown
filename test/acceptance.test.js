@@ -5,6 +5,7 @@
  * the Settings control that picks a role are claims about the panel and belong
  * in checks/ - deriving the right answer is not drawing it (thread q-0070).
  */
+import '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { formatHash } from '../lib/hash.js';

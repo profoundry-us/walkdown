@@ -3,6 +3,7 @@
  * This is the ledger-law tier, not a browser scenario — no page is involved,
  * only what the set of blueprints claims.
  */
+import '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { blueprintForUrl, claimsOf, findCollisions } from '../lib/claims.js';

@@ -1,3 +1,4 @@
+import '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { applyShape, RULE_SHAPE, RUN_SHAPE, THREAD_SHAPE } from '../lib/schema.js';

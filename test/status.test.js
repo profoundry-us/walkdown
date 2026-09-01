@@ -8,6 +8,7 @@
  * removed on 2026-08-25 (thread q-0070): a check must exercise the same surface
  * the rule describes.
  */
+import '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { formatHash } from '../lib/hash.js';

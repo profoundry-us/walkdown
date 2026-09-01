@@ -12,6 +12,7 @@
  * If you are here to make a red rule green, write the browser check. Do not
  * re-tag one of these.
  */
+import '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import {
   existsSync,
@@ -358,12 +359,36 @@ test('positions are stored in the surface coordinate space given', async () => {
 test('the blueprint payload carries a default actor @rule:status.attribution.username-is-the-record', async () => {
   const payload = await (await fetch(`${base}/api/blueprint`)).json();
   assert.ok(payload.identity?.actor, 'an identity must always be offered');
-  assert.match(payload.identity.source, /^(git|os)$/);
-  // In this repo git config user.email is set, so git wins over the OS username.
+  assert.match(payload.identity.source, /^(config|git|os)$/);
   const { defaultActor } = await import('../lib/identity.js');
   const here = defaultActor(process.cwd());
-  assert.equal(here.source, 'git');
   assert.ok(here.actor.length > 0);
+
+  /*
+   * Where it comes from, in order, and the top of that order is new: the
+   * personal config's `identity:` block used to be read by nothing at all
+   * while looking exactly like the source of truth (n-0139). Everything under
+   * it - a git email, a login name - is inference, and the report says which
+   * it is, because a guess and a signature must not read the same.
+   */
+  const said = mkdtempSync(join(tmpdir(), 'walkdown-said-'));
+  writeFileSync(
+    join(said, 'config.yml'),
+    'identity:\n  username: declared-person\n  name: A Declared Person\n  roles: [product]\n',
+  );
+  const pinned = process.env.WALKDOWN_HOME;
+  process.env.WALKDOWN_HOME = said;
+  try {
+    const declared = defaultActor(process.cwd());
+    assert.equal(declared.username, 'declared-person', 'the config outranks what git guesses');
+    assert.equal(declared.name, 'A Declared Person');
+    assert.deepEqual(declared.roles, ['product']);
+    assert.equal(declared.source, 'config');
+    assert.equal(declared.declared, true, 'and it is legible AS said, which the accept gate asks');
+  } finally {
+    process.env.WALKDOWN_HOME = pinned;
+  }
+  assert.equal(defaultActor(process.cwd()).declared, false, 'inference is never a signature');
 
   // Identity and display name are two fields. `actor` - the one thing records
   // are written under - is the username, never the full name.

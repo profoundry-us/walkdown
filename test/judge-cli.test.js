@@ -6,6 +6,7 @@
  * rather than guessed, and that the rules with nothing to judge say so
  * instead of printing a prompt that would be acted on.
  */
+import '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';

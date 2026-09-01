@@ -1,3 +1,4 @@
+import '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';

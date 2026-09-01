@@ -8,6 +8,7 @@
  * the whole point: the derivation has been right the entire time the column
  * said "pending".
  */
+import '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';

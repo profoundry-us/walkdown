@@ -11,6 +11,7 @@
  * The panel's own behaviour - what the strip shows, what Settings offers - is a
  * browser check under panel.identity.default-actor, not this file.
  */
+import '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { MSG } from '../lib/message-stream.js';

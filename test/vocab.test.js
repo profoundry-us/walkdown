@@ -5,6 +5,7 @@
  * ledger) — the rules these terms power are claimed by the thread-lifecycle
  * and status tests, which exercise them through real behaviour.
  */
+import '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {

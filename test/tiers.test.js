@@ -8,6 +8,7 @@
  * checks/ under panel.* ids; deriving the right answer is not the same as
  * drawing it (thread q-0070).
  */
+import '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { excuseFor, signoffList, verifyList } from '../lib/blueprint.js';
