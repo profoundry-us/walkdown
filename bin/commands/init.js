@@ -1,7 +1,7 @@
 import { basename, join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { defaultActor } from '../../lib/identity.js';
-import { rememberIdentity, rememberProject, resolveLocations } from '../../lib/locations.js';
+import { claimHome, rememberIdentity, rememberProject } from '../../lib/locations.js';
 import { dim, green, yellow } from '../../lib/report/tty.js';
 
 export async function run(args) {
@@ -21,9 +21,21 @@ export async function run(args) {
    * directory - and runs and threads follow the spec, so this one flag decides
    * all three. Evidence and drafts are outside either way.
    */
-  const specDir = values['in-repo']
-    ? join(root, 'blueprint')
-    : resolveLocations({ cwd: root }).spec.path;
+  /*
+   * Decide the id and the home FIRST, then build into it. This used to take
+   * the spec path from resolveLocations - whose derived home is name-keyed
+   * with nothing to disambiguate it - and let rememberProject pick a
+   * different, unique name afterwards. Two repositories with one basename
+   * therefore derived the same spec path and the second silently adopted the
+   * first's blueprint and its ledger, while the entry that did get written
+   * split its records across two homes (n-0141).
+   */
+  const claim = claimHome({
+    id: basename(root),
+    spec: values['in-repo'] ? join(root, 'blueprint') : null,
+    cwd: root,
+  });
+  const specDir = values['in-repo'] ? join(root, 'blueprint') : join(claim.dir, 'blueprint');
   const results = scaffold(root, { force: values.force, specDir });
   /*
    * And write it down. Walkdown does not find blueprints by looking any more,
@@ -33,10 +45,11 @@ export async function run(args) {
    * is written where it belongs, and a clone reads it from the repository.
    */
   const entry = rememberProject({
-    id: basename(root),
+    id: claim.id,
     root,
     spec: specDir,
     inRepo: values['in-repo'],
+    home: claim.dir,
   });
   /*
    * And who is sitting here, if nobody has said. Every record is written

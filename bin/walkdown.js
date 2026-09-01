@@ -51,10 +51,11 @@ Commands:
           first step toward prompt-driven judging (docs/11-architecture.md):
           the prompt ends where the reader begins, and this judges nothing.
 
-  migrate Renumber legacy name-keyed homes under ~/.walkdown/projects/ into
-          the allocated registry (~/.walkdown/blueprints/NNNN-slug/), moving
-          each directory once and re-pointing the personal config. Names
-          collide across a monorepo's packs; allocated numbers cannot.
+  migrate Write the homes an older layout left behind into the config, so the
+          records in them keep being found. Moves nothing and renames nothing:
+          an existing ledger is a fact, and relocating one is a decision a
+          person makes with 'walkdown move'. A home no entry claims is
+          reported and left standing.
 
   sweep   Ask for the named tiers to be judged again from scratch. Verdicts
           recorded before the sweep read as stale, so a rule nobody gets back

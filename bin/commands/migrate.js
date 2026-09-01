@@ -51,6 +51,16 @@ export async function run() {
   }
 
   const { config } = readUserConfig();
+  /*
+   * One home per entry, even here. Two old layouts could each hold records
+   * for the same project - a home the index recorded by spec, and an older
+   * name-keyed one beside it - and writing both into one entry left that
+   * blueprint with its evidence in one directory and its drafts in another,
+   * which is the split this rule exists to prevent (n-0141). The first is
+   * written down; the second is reported for a person to settle, because
+   * which of two ledgers is the real one is not a guess a tool should make.
+   */
+  const spokenFor = new Set();
   const doc = existsSync(configPath())
     ? parseDocument(readFileSync(configPath(), 'utf8'))
     : parseDocument('');
@@ -73,6 +83,13 @@ export async function run() {
       console.log(dim(`             no config entry claims it — add one, or delete the directory`));
       continue;
     }
+    if (spokenFor.has(entry.id)) {
+      console.log(`  ${yellow('? left')}     ${h.path}`);
+      console.log(
+        dim(`             \`${entry.id}\` already has a home recorded — say which is the real one`),
+      );
+      continue;
+    }
     const item = (projects.items ?? []).find((it) => String(it.get?.('id') ?? '') === entry.id);
     if (!item) continue;
     let touched = false;
@@ -85,8 +102,10 @@ export async function run() {
     }
     if (!touched) {
       console.log(`  ${dim('· already said')} ${h.path}`);
+      spokenFor.add(entry.id);
       continue;
     }
+    spokenFor.add(entry.id);
     written++;
     console.log(`  ${green('→ recorded')} ${h.path}`);
     console.log(dim(`             now named by entry \`${entry.id}\` — nothing moved`));

@@ -4,8 +4,9 @@ import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, 
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import test from 'node:test';
+import { parse } from '../vendor/yaml.js';
 import { formatHash, specFiles, specHash } from '../lib/hash.js';
-import { KINDS, readUserConfig, rememberProject, resolveLocations } from '../lib/locations.js';
+import { expand, KINDS, readUserConfig, rememberProject, resolveLocations } from '../lib/locations.js';
 import { deriveStatus } from '../lib/status.js';
 
 /*
@@ -622,6 +623,123 @@ test('two repositories with one basename get homes of their own @rule:locations.
       'kept',
     );
     assert.equal(readUserConfig({ cwd: a }).config.projects.length, 2);
+  } finally {
+    s.cleanup();
+  }
+});
+
+/** What `walkdown init` really does, since that is where the two answers met. */
+const init = (dir, home, extra = []) =>
+  execFileSync(
+    process.execPath,
+    [new URL('../bin/walkdown.js', import.meta.url).pathname, 'init', '--dir', dir, ...extra],
+    { cwd: dir, encoding: 'utf8', env: { ...process.env, WALKDOWN_HOME: home, NO_COLOR: '1' } },
+  );
+
+/*
+ * The three shapes n-0141 found, each driven through the real `init` rather
+ * than through the function that chooses names - because the bug was never in
+ * that function. It was that the name was chosen TWICE, half a command apart,
+ * and the two answers disagreed.
+ */
+test('two repositories with one basename never share a home or a ledger @rule:locations.default.one-home-per-blueprint', () => {
+  const s = scratch();
+  try {
+    const a = join(s.root, 'one', 'app');
+    const b = join(s.root, 'two', 'app');
+    for (const r of [a, b]) mkdirSync(join(r, '.git'), { recursive: true });
+
+    const first = init(a, s.home);
+    const second = init(b, s.home);
+    assert.match(first, /\+ listed/);
+    assert.match(second, /\+ listed/, 'the second is a project too, and says so');
+
+    const cfg = readUserConfig({ cwd: a }).config;
+    assert.equal(cfg.projects.length, 2, 'two blueprints, two entries');
+    const [p, q] = cfg.projects;
+    assert.notEqual(p.id, q.id);
+    assert.notEqual(p.spec, q.spec, 'and the second did not adopt the first’s blueprint');
+
+    /*
+     * One home apiece is the visible half; one LEDGER apiece is the half that
+     * mattered. A note filed while standing in the first repository was
+     * listed by `walkdown threads` while standing in the second, because both
+     * resolved to the same spec.
+     */
+    for (const dir of [p, q].map((e) => e.spec)) assert.ok(existsSync(join(dir, 'walkdown.yml')));
+    assert.notEqual(expand(p.evidence), expand(q.evidence));
+    assert.notEqual(expand(p.drafts), expand(q.drafts));
+  } finally {
+    s.cleanup();
+  }
+});
+
+test('a project keeps its spec and its records in ONE home @rule:locations.default.one-home-per-blueprint', () => {
+  const s = scratch();
+  try {
+    const repo = join(s.root, 'solo');
+    mkdirSync(join(repo, '.git'), { recursive: true });
+    init(repo, s.home);
+    const [entry] = readUserConfig({ cwd: repo }).config.projects;
+    /*
+     * The entry used to carry a spec under `blueprints/solo` and evidence
+     * under `blueprints/solo-2`: init scaffolded the derived home, and the
+     * uniqueness loop that ran afterwards saw the directory init had just
+     * made and skipped past it. One decision, made first, cannot do that.
+     */
+    const home = dirname(expand(entry.evidence));
+    assert.equal(dirname(expand(entry.drafts)), home);
+    assert.equal(dirname(expand(entry.spec)), home, 'the spec lives in the same home');
+  } finally {
+    s.cleanup();
+  }
+});
+
+test('two packs in one repository each get their own home @rule:locations.default.one-home-per-blueprint', () => {
+  const s = scratch();
+  try {
+    const repo = join(s.root, 'mono');
+    mkdirSync(join(repo, '.git'), { recursive: true });
+    for (const pack of ['one', 'two']) mkdirSync(join(repo, 'packs', pack), { recursive: true });
+    init(join(repo, 'packs', 'one'), s.home);
+    init(join(repo, 'packs', 'two'), s.home);
+
+    const cfg = readUserConfig({ cwd: repo }).config;
+    assert.equal(cfg.projects.length, 2);
+    // Named for the pack, not for the repository: the derived spec path was
+    // keyed on the git root's basename while the entry was keyed on the
+    // pack's, so the two could not have agreed even in principle.
+    assert.deepEqual(cfg.projects.map((p) => p.id).sort(), ['one', 'two']);
+    assert.notEqual(expand(cfg.projects[0].evidence), expand(cfg.projects[1].evidence));
+  } finally {
+    s.cleanup();
+  }
+});
+
+/*
+ * The quietest costume, and the one a config-only check cannot catch: two
+ * packs adopted with --in-repo write their entries into two SEPARATE
+ * committed configs, so neither claim can see the other's id. Both picked the
+ * same name and the same evidence home, and one pack overwrote the other's
+ * screenshots. The disk is the one thing both claims share, so claiming a
+ * name means taking the directory.
+ */
+test('a home claimed from a config the next one cannot see is still taken @rule:locations.default.one-home-per-blueprint', () => {
+  const s = scratch();
+  try {
+    const repo = join(s.root, 'twins');
+    mkdirSync(join(repo, '.git'), { recursive: true });
+    const packs = [join(repo, 'packs', 'app'), join(repo, 'other', 'app')];
+    for (const p of packs) mkdirSync(p, { recursive: true });
+    for (const p of packs) init(p, s.home, ['--in-repo']);
+
+    const evidence = packs.map((p) => {
+      const cfg = parse(readFileSync(join(p, '.walkdown', 'config.yml'), 'utf8'));
+      return expand(cfg.projects[0].evidence);
+    });
+    assert.notEqual(evidence[0], evidence[1], 'one pack’s evidence is not the other’s');
+    // And the claim is on the disk, where the other config could see it.
+    for (const e of evidence) assert.ok(existsSync(dirname(e)));
   } finally {
     s.cleanup();
   }
