@@ -995,6 +995,20 @@
   ]);
 
   /*
+   * Did this thread arrive during a session that started at `started`? By
+   * NUMBER, never by string: thread stamps carried seconds while session starts
+   * carried milliseconds, and the lexicographic compare counted the whole start
+   * second as "during" - a thread POSTed just before Start walkdown satisfied
+   * the fail gate (n-0132). Thread stamps carry milliseconds now; an older
+   * seconds-only stamp floors toward "before", which is the side a gate errs on.
+   */
+  function duringSession(created, started) {
+    const c = Date.parse(created ?? '');
+    const s = Date.parse(started ?? '');
+    return Number.isFinite(c) && Number.isFinite(s) && c >= s;
+  }
+
+  /*
    * The panel's shared vocabulary: the small questions every pane asks of the
    * data, and the two class strings they all label with.
    *
@@ -4850,7 +4864,7 @@
   const pinnedThisSession = (rule) =>
     (S.data?.threads ?? []).some(
       (t) =>
-        t.anchor?.rule === rule && S.session?.started && String(t.created ?? '') >= S.session.started,
+        t.anchor?.rule === rule && S.session?.started && duringSession(t.created, S.session.started),
     );
 
   /*
@@ -4948,7 +4962,7 @@
     // any pins dropped on the rule during this session.
     const results = Object.entries(S.session.verdicts).map(([rule, status]) => {
       const pins = (S.data?.threads ?? [])
-        .filter((t) => t.anchor?.rule === rule && String(t.created ?? '') >= S.session.started)
+        .filter((t) => t.anchor?.rule === rule && duringSession(t.created, S.session.started))
         .map((t) => t.id);
       const threads = [...new Set([...(S.session.threads?.[rule] ?? []), ...pins])];
       return { rule, status, ...(threads.length && { threads }) };

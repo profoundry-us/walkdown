@@ -18,7 +18,7 @@ import { api } from './util.js';
  * the vocabulary; this module adds only the presentation layer (labels,
  * badge classes, readings of S).
  */
-export { CHIP, FLOWS, HUMAN_ONLY, NEEDS_REASON, TERMINAL } from '../../lib/vocab.js';
+export { CHIP, duringSession, FLOWS, HUMAN_ONLY, NEEDS_REASON, TERMINAL } from '../../lib/vocab.js';
 
 // ---- data -----------------------------------------------------------------
 /*

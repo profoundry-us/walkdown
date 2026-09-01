@@ -9,6 +9,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   canTransition,
+  duringSession,
   FLOWS,
   HUMAN_ONLY,
   NEEDS_REASON,
@@ -75,4 +76,27 @@ test('the guarded lists are subsets of real statuses, and everything is frozen',
 test('thread prefixes: q for questions, n for everything else', () => {
   assert.equal(threadPrefix('question'), 'q');
   assert.equal(threadPrefix('note'), 'n');
+});
+
+/*
+ * Tagged, unlike the rest of this file: the boundary IS the rule's promise -
+ * a why must come from the session, and the whole start second counted as
+ * "during" when this compared strings (n-0132).
+ */
+test('the session gate compares by number, and the start second is not during @rule:panel.walkdown.fail-requires-why', () => {
+  const started = '2026-09-01T00:22:51.184Z';
+  assert.equal(
+    duringSession('2026-09-01T00:22:51Z', started),
+    false,
+    'a thread stamped in the start second but posted before the start is BEFORE',
+  );
+  assert.equal(duringSession('2026-09-01T00:22:51.500Z', started), true);
+  assert.equal(duringSession('2026-09-01T00:22:50.900Z', started), false);
+  assert.equal(
+    duringSession('2026-09-01T00:22:52Z', started),
+    true,
+    'older seconds-only stamps still count once past the start second',
+  );
+  assert.equal(duringSession(undefined, started), false, 'no stamp is never during');
+  assert.equal(duringSession('2026-09-01T00:22:52Z', undefined), false, 'no session, no during');
 });

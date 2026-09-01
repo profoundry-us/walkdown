@@ -71,6 +71,7 @@ import {
   currentScreen,
   declaredAnchors,
   defaultScreen,
+  duringSession,
   ghostSource,
   hereLocation,
   isHeadless,
@@ -1768,7 +1769,7 @@ export function elsewhere(r) {
 const pinnedThisSession = (rule) =>
   (S.data?.threads ?? []).some(
     (t) =>
-      t.anchor?.rule === rule && S.session?.started && String(t.created ?? '') >= S.session.started,
+      t.anchor?.rule === rule && S.session?.started && duringSession(t.created, S.session.started),
   );
 
 /*
@@ -1866,7 +1867,7 @@ async function finishWalkdown() {
   // any pins dropped on the rule during this session.
   const results = Object.entries(S.session.verdicts).map(([rule, status]) => {
     const pins = (S.data?.threads ?? [])
-      .filter((t) => t.anchor?.rule === rule && String(t.created ?? '') >= S.session.started)
+      .filter((t) => t.anchor?.rule === rule && duringSession(t.created, S.session.started))
       .map((t) => t.id);
     const threads = [...new Set([...(S.session.threads?.[rule] ?? []), ...pins])];
     return { rule, status, ...(threads.length && { threads }) };

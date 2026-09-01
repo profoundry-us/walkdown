@@ -162,6 +162,14 @@ test('POST /api/threads writes a thread file; screen resolved from URL', async (
   assert.equal(onDisk.status, 'open');
   assert.equal(onDisk.anchor.screen, 'home'); // resolved from the app path
   assert.equal(onDisk.anchor.element, 'home.cta');
+  // Millisecond precision: the panel's session gate compares this stamp to a
+  // millisecond session start, and a seconds-only stamp made the whole start
+  // second ambiguous (n-0132).
+  assert.match(
+    String(onDisk.created),
+    /\.\d{3}Z$/,
+    'a thread stamp carries milliseconds @rule:panel.walkdown.fail-requires-why',
+  );
 });
 
 test('a pin with no anchored element is kept by position', async () => {
