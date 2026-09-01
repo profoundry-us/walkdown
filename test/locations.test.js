@@ -710,3 +710,32 @@ test('the code row says which repository actually answered @rule:locations.answe
     s.cleanup();
   }
 });
+
+/*
+ * The orphan clause, probed the hard way (n-0129, second judging): a legacy
+ * home no config entry claims stays put even when it happens to CONTAIN a
+ * spec - contents are not a claim, and migrate moved two such homes on the
+ * strength of theirs.
+ */
+test('migrate never moves an unclaimed home, spec inside or not @rule:locations.default.one-home-per-blueprint', () => {
+  const s = scratch();
+  try {
+    // An orphan that self-describes: full blueprint inside, no config entry.
+    blueprint(join(s.home, 'projects', 'orphanapp', 'blueprint'), { project: 'orphanapp' });
+    configure(s.home, 'projects: []\n');
+    const out = execFileSync(
+      process.execPath,
+      [new URL('../bin/walkdown.js', import.meta.url).pathname, 'migrate'],
+      { encoding: 'utf8', env: { ...process.env, WALKDOWN_HOME: s.home, NO_COLOR: '1' } },
+    );
+    assert.match(out, /no config entry claims it/);
+    assert.ok(existsSync(join(s.home, 'projects', 'orphanapp')), 'left standing');
+    assert.equal(
+      existsSync(join(s.home, 'blueprints')),
+      false,
+      'and nothing was allocated on its behalf',
+    );
+  } finally {
+    s.cleanup();
+  }
+});

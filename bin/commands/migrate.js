@@ -32,13 +32,15 @@ export async function run() {
     const legacy = join(legacyRoot, id);
     /*
      * Which blueprint does this home serve? Only the config can say - the
-     * directory carries records, not an address book. A home no entry claims
-     * is reported and left standing: guessing which repository it belonged
-     * to is exactly the mistake this migration exists to end.
+     * directory carries records, not an address book, and a spec sitting
+     * INSIDE the directory is still not a claim: it says what the records
+     * are, never whose machine wants them moved. A home no entry claims is
+     * reported and left standing - migrating one on the strength of its
+     * contents moved two orphans on 2026-09-01 (n-0129, second judging),
+     * and guessing is exactly the mistake this migration exists to end.
      */
     const entry = (config.projects ?? []).find((p) => p?.id === id);
-    const containedSpec = existsSync(join(legacy, 'blueprint', 'walkdown.yml'));
-    if (!entry && !containedSpec) {
+    if (!entry) {
       console.log(
         `  ${yellow('? left')}     ${legacy}\n` +
           dim(
