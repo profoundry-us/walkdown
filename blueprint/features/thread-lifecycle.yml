@@ -22,16 +22,33 @@ stories:
 
       - id: threads.lifecycle.claim-never-accept
         origin: prd
-        statement: Setting a thread to verified or waived requires a named human actor; the agent actor is rejected.
+        statement: Setting a thread to verified or waived requires a person who has said who they are - a name this machine merely guessed at, an actor called "agent" in any spelling, and any mutation a machine says it typed are all rejected.
         verify: [checks]
         steps:
           given:
             - A thread in a state from which verified or waived is legal
           when:
-            - The transition is attempted with actor "agent" or no actor
+            - The transition is attempted where nobody has written down who is sitting here, or under an actor named "agent", or marked as typed by a machine
           then:
-            - The mutation is rejected - agents claim work, only a person accepts it
-          statement_hash: sha256:dbc5f4be5809
+            - Each is rejected and the thread is unchanged - work can be claimed on somebody's behalf, and accepted only by them
+            - The refusal says where to say who you are, and never fills the gap with a login name
+          statement_hash: sha256:482531dc241f
+
+      - id: threads.lifecycle.acts-for-a-person
+        origin: thread:n-0139
+        created_at: 2026-09-01
+        statement: An agent working on a person's behalf records under that person's name, because the instruction was theirs - and says beside it that a machine typed the words. Who a write is recorded under is never something a caller can pass in.
+        verify: [checks]
+        steps:
+          given:
+            - A machine whose personal config says who is sitting at it
+          when:
+            - An agent opens a thread, replies, or moves one, saying that it is the one acting
+          then:
+            - The record carries that person as the author, and the agent as the provenance beside it
+            - The report names both, so a reader can tell a sentence a person wrote from one a machine did
+            - No argument and no environment variable can name somebody else
+          statement_hash: sha256:6790e9b3474c
 
       - id: threads.lifecycle.reasoned-endings
         origin: prd

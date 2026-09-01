@@ -82,8 +82,9 @@ rather than adding to it.
   lint errors on a check naming a rule that does not exist, and warns on a
   rule asking for checks that nothing claims. An untagged check is never a
   finding.
-- Run with `WALKDOWN_ACTOR=agent walkdown run [--target <t>] [--rule <id>]` —
-  the reporter/formatter appends the run record automatically.
+- Run with `walkdown run [--target <t>] [--rule <id>]` — the
+  reporter/formatter appends the run record automatically, under the identity
+  in `~/.walkdown/config.yml`.
 - `walkdown lint` before you finish: coverage, staleness, storyboard refs,
   thread hygiene.
 
@@ -91,9 +92,10 @@ rather than adding to it.
 
 - Work your queue: `address` open notes; `incorporate` answered questions —
   fold the answer into the rule's statement/steps, then mark the thread.
-- Mutate threads only through `walkdown thread <id> --actor agent
+- Mutate threads only through `walkdown thread <id> --as-agent
   --reply "..." --status <s>` — never raw YAML edits — so transitions stay
-  validated.
+  validated. You record under the person you are working for; `--as-agent` is
+  provenance, and it refuses `verified` and `waived` however it is spelled.
 - After fixing what a note asks: reply with what you changed and which run
   re-verified it, then `--status addressed`.
 - You may **never** set `verified` or `waived`. Those are human judgments —

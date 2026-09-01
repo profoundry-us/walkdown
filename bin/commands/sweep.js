@@ -1,5 +1,5 @@
-import { userInfo } from 'node:os';
 import { parseArgs } from 'node:util';
+import { defaultActor } from '../../lib/identity.js';
 import { dim, green, red } from '../../lib/report/tty.js';
 import { writeSweep } from '../../lib/run-record.js';
 import { TIERS } from '../../lib/vocab.js';
@@ -43,7 +43,7 @@ export function run(args) {
     target,
     tiers,
     why: values.why,
-    actor: process.env.WALKDOWN_ACTOR ?? userInfo().username,
+    actor: defaultActor(blueprint.codeRoot ?? blueprint.projectRoot).username,
   });
   console.log(`${green('swept')} ${record.run_id} — ${tiers.join(', ')} on ${target}`);
   console.log(dim(`  ${record.why}`));

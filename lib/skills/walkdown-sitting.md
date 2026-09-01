@@ -75,7 +75,7 @@ start.
 
 5. **Fails spawn threads.** A failing rule gets a note anchored to the exact
    rule and element, citing the evidence (`walkdown thread new --kind note
-   --rule <id> --body <text> --actor agent`), and its id goes in that
+   --rule <id> --body <text> --as-agent`), and its id goes in that
    result's `threads`.
 
 6. **Close out.** `walkdown lint`, then `walkdown status`. If you swept, the

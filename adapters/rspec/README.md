@@ -42,8 +42,9 @@ metadata: it dry-run-prints `rule:<id> <file>:<line>` per tagged example, which 
 - Pass/fail results are stamped with the rule's current `statement_hash` (identical
   hashing to the JS CLI: sha256 of the whitespace-normalized statement, 12 hex chars).
 - `git_sha`/`blueprint_sha` recorded, with a `-dirty` suffix for an unclean tree.
-- Target/actor: `WALKDOWN_TARGET` (default `local`); `WALKDOWN_ACTOR` (default `ci`
-  under CI, else the OS username). `base_url`: `Capybara.app_host`, else `APP_HOST`.
+- Target: `WALKDOWN_TARGET` (default `local`). Who a run is recorded under is `ci`
+  under CI and the `identity:` in `~/.walkdown/config.yml` otherwise — never an env
+  var. `base_url`: `Capybara.app_host`, else `APP_HOST`.
 - Evidence: add `evidence: ["tmp/screenshots/foo.png"]` metadata to an example to attach
   files your spec saved.
 - Never fails the run: with no blueprint or no tagged examples it warns and writes nothing.

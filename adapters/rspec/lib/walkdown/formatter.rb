@@ -21,10 +21,12 @@ require 'yaml'
 #     command for walkdown lint's coverage check (RSpec's JSON formatter does
 #     not include custom metadata, so this lister is the reliable source).
 #
-# Env: WALKDOWN_TARGET (default "local"), WALKDOWN_ACTOR (default "ci" under
-# CI, else the OS username), APP_HOST (base_url fallback; Capybara.app_host
-# wins when Capybara is loaded). Evidence: set `evidence: [paths]` metadata on
-# an example to attach files (screenshots your workflow specs saved).
+# Env: WALKDOWN_TARGET (default "local"), APP_HOST (base_url fallback;
+# Capybara.app_host
+# wins when Capybara is loaded). Who a run is recorded under is "ci" under CI
+# and the `identity:` in ~/.walkdown/config.yml otherwise — never an env var.
+# Evidence: set `evidence: [paths]` metadata on an example to attach files
+# (screenshots your workflow specs saved).
 #
 # The formatter never fails a test run: any error is printed as a warning and
 # the record is simply not written.
@@ -176,8 +178,22 @@ module Walkdown
       [file, record]
     end
 
+    # Who the run is recorded under. The personal config first, because it is
+    # where a person has actually said who they are; a login name is what the
+    # box is called. There used to be a WALKDOWN_ACTOR here, and an env var
+    # that lets any caller type a name is not attribution (n-0139).
     def actor
-      ENV['WALKDOWN_ACTOR'] || (ENV['CI'] ? 'ci' : (Etc.getlogin || 'unknown'))
+      return 'ci' if ENV['CI']
+
+      home = ENV['WALKDOWN_HOME'] || File.join(Dir.home, '.walkdown')
+      config = File.join(home, 'config.yml')
+      if File.exist?(config)
+        said = (YAML.safe_load_file(config, aliases: true) || {}).dig('identity', 'username')
+        return said.strip if said.is_a?(String) && !said.strip.empty?
+      end
+      Etc.getlogin || 'unknown'
+    rescue StandardError
+      Etc.getlogin || 'unknown'
     end
 
     def base_url

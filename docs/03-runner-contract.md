@@ -108,8 +108,9 @@ directly — status, failure message, duration, screenshot/trace paths as eviden
   config's `reporter` array and every run appends a run record — rule results aggregated
   from `@rule:` tags, current `statement_hash` stamped, failure screenshots/error context
   attached as evidence, `git_sha` recorded (with a `-dirty` suffix for an unclean tree).
-  Target/actor come from options or `WALKDOWN_TARGET`/`WALKDOWN_ACTOR` (defaulting to
-  `ci` under CI, else the OS username). It never fails the test run; with no blueprint
+  The target comes from options or `WALKDOWN_TARGET`; who it is recorded under is
+  `ci` under CI and the configured identity otherwise — never an environment variable,
+  because who acted is not something a caller gets to type (n-0139). It never fails the test run; with no blueprint
   or no tagged tests it prints a warning and records nothing.
 - **RSpec** ships as the `walkdown-rspec` gem (in-repo: `adapters/rspec/`):
   `--format Walkdown::Formatter` appends the identical record shape — statuses mapped

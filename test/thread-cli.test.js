@@ -8,7 +8,7 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir, userInfo } from 'node:os';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
 
@@ -36,19 +36,33 @@ function fixture(name, thread) {
   return bp;
 }
 
+/*
+ * Who the CLI runs as is not an argument any more - there is no --actor to
+ * pass - so every case here pins a personal config, which is where the
+ * identity now comes from (n-0139). A home with no `identity:` block is the
+ * OTHER case worth testing: a machine that only has a guess about who is
+ * sitting at it.
+ */
+let homes = 0;
+function identity(username) {
+  const home = join(root, `home-${++homes}`);
+  mkdirSync(home, { recursive: true });
+  if (username) writeFileSync(join(home, 'config.yml'), `identity:\n  username: ${username}\n`);
+  return home;
+}
+const SAID = identity('A Person');
+const GUESSING = identity(null);
+
 /** Run the CLI, stripping colour so assertions read the words, not the escapes. */
-const run = (args, dir) =>
+const run = (args, dir, home = SAID) =>
   execFileSync(process.execPath, [CLI, 'thread', ...args, '--dir', dir], {
     encoding: 'utf8',
-    env: { ...process.env, NO_COLOR: '1' },
+    env: { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: home },
   }).replace(/\x1b\[[0-9;]*m/g, '');
 
 test('a transition reports where the thread came from and where it landed @rule:threads.lifecycle.says-what-it-did', () => {
   const bp = fixture('moved', { id: 'n-0001', status: 'addressed' });
-  const out = run(
-    ['n-0001', '--actor', 'A Person', '--waive', '--reason', 'not valid any more'],
-    bp,
-  );
+  const out = run(['n-0001', '--waive', '--reason', 'not valid any more'], bp);
   assert.match(out, /n-0001/);
   assert.match(out, /addressed → waived/, 'the report must name both ends of the move');
   assert.match(out, /A Person/, 'waiving is recorded under somebody, and says so');
@@ -57,20 +71,21 @@ test('a transition reports where the thread came from and where it landed @rule:
   assert.doesNotMatch(out, /A thing that is wrong/, 'a mutation must not print the conversation');
 });
 
-test('a reply with no transition says the status did not move @rule:threads.lifecycle.says-what-it-did', () => {
+test('a reply with no transition says the status did not move @rule:threads.lifecycle.says-what-it-did @rule:threads.lifecycle.acts-for-a-person', () => {
   const bp = fixture('replied', { id: 'n-0002', status: 'open' });
-  const out = run(['n-0002', '--actor', 'agent', '--reply', 'looking at it'], bp);
+  const out = run(['n-0002', '--as-agent', '--reply', 'looking at it'], bp);
   assert.match(out, /still open/, 'silence about the status would imply it changed');
-  assert.match(out, /by agent/, 'recorded under is named even when nothing moved');
+  assert.match(out, /by A Person/, 'recorded under is named even when nothing moved');
+  assert.match(out, /via agent/, 'and a machine typing it is said beside the name, not instead');
   assert.match(out, /\+1 reply/);
   assert.doesNotMatch(out, /→/, 'nothing moved, so nothing may be reported as having moved');
 });
 
 test('every mutation names who it was recorded under @rule:threads.lifecycle.says-what-it-did', () => {
-  // The mistake this line exists to surface: --actor forgotten, the machine
-  // username silently recorded. n-0125 found only the waive path said so.
+  // The mistake this line exists to surface: a name nobody reads back. n-0125
+  // found only the waive path said whose name went on the change.
   const bp = fixture('under', { id: 'n-0005', status: 'open' });
-  const out = run(['n-0005', '--actor', 'A Person', '--status', 'addressed'], bp);
+  const out = run(['n-0005', '--status', 'addressed'], bp);
   assert.match(out, /open → addressed/);
   assert.match(out, /by A Person/, 'a plain transition names its actor, not only a waive');
 });
@@ -90,7 +105,7 @@ test('a refused transition refuses the whole mutation - the reply never lands @r
   const file = join(bp, 'threads', 'n-0006.yml');
   const before = readFileSync(file, 'utf8');
   assert.throws(
-    () => run(['n-0006', '--actor', 'A Person', '--reply', 'and verified', '--verify'], bp),
+    () => run(['n-0006', '--reply', 'and verified', '--verify'], bp),
     (err) => err.status === 2 && /illegal transition/.test(String(err.stderr)),
   );
   assert.equal(readFileSync(file, 'utf8'), before, 'a refused command must have written nothing');
@@ -104,8 +119,8 @@ test('an empty reply is refused, not read back - and drops no status change @rul
   const file = join(bp, 'threads', 'n-0007.yml');
   const before = readFileSync(file, 'utf8');
   for (const args of [
-    ['n-0007', '--actor', 'A Person', '--reply', ''],
-    ['n-0007', '--actor', 'A Person', '--reply', '', '--status', 'addressed'],
+    ['n-0007', '--reply', ''],
+    ['n-0007', '--reply', '', '--status', 'addressed'],
   ]) {
     assert.throws(
       () => run(args, bp),
@@ -119,41 +134,46 @@ test('a mutating --json call reports the change, never the thread @rule:threads.
   // Round four (n-0125): the json branch ran first, so a mutation's stdout
   // was byte-identical to a read - round one's invisibility, machine-readable.
   const bp = fixture('jsonmut', { id: 'n-0008', status: 'open' });
-  const doc = JSON.parse(run(['n-0008', '--actor', 'agent', '--status', 'addressed', '--json'], bp));
+  const doc = JSON.parse(run(['n-0008', '--as-agent', '--status', 'addressed', '--json'], bp));
   assert.equal(doc.was, 'open');
   assert.equal(doc.status, 'addressed');
-  assert.equal(doc.by, 'agent', 'recorded-under survives into the machine format');
+  assert.equal(doc.by, 'A Person', 'recorded-under survives into the machine format');
+  assert.equal(doc.via, 'agent', 'and so does the provenance beside it');
   assert.equal(doc.replies_added, 0);
   assert.equal(doc.body, undefined, 'a mutation must not print the conversation');
 });
 
-test('a present-but-empty actor defaults visibly, and the report matches the disk @rule:threads.lifecycle.says-what-it-did', () => {
+test('the report names the same person the disk records @rule:threads.lifecycle.says-what-it-did @rule:threads.lifecycle.acts-for-a-person', () => {
   // Round four (n-0125): `--actor "$WHO"` with an unset variable named nobody
-  // in the report while the disk recorded `author: unknown`.
-  const me = userInfo().username;
+  // in the report while the disk recorded `author: unknown`. The flag is gone
+  // and the empty-string case with it, but the discipline it taught is not:
+  // whatever the report says a change was recorded under, the ledger must say
+  // the same, or the report is a second story about the same event.
   const bp = fixture('noactor', { id: 'n-0009', status: 'open' });
-  const out = run(['n-0009', '--actor', '', '--reply', 'noted'], bp);
-  assert.match(out, new RegExp(`by ${me}`), 'the default is named, never an empty string');
+  const out = run(['n-0009', '--reply', 'noted'], bp);
+  assert.match(out, /by A Person/, 'the configured identity, named out loud');
   const disk = readFileSync(join(bp, 'threads', 'n-0009.yml'), 'utf8');
-  assert.match(disk, new RegExp(`author: ${me}`), 'the ledger records the same name the report gave');
+  assert.match(disk, /author: A Person/, 'the ledger records the same name the report gave');
+  assert.doesNotMatch(disk, /via:/, 'a person typing is the ordinary case and needs no annotation');
 });
 
 test("a reply to a terminal thread is recorded under its own actor, not the status holder @rule:threads.lifecycle.says-what-it-did", () => {
   // Round five (n-0125): the report named the waiver for someone else's
   // reply, putting another person's name on a change they did not make.
   const bp = fixture('terminal', { id: 'n-0010', status: 'waived', waived_by: 'Probe Human' });
-  const out = run(['n-0010', '--actor', 'agent', '--reply', 'noting this for later'], bp);
+  const out = run(['n-0010', '--as-agent', '--reply', 'noting this for later'], bp);
   assert.match(out, /still waived/);
-  assert.match(out, /by agent/, "the reply's author is who the change was recorded under");
+  assert.match(out, /by A Person/, "the reply's author is who the change was recorded under");
   assert.doesNotMatch(out, /by Probe Human/, 'the status holder did not make this change');
   const disk = readFileSync(join(bp, 'threads', 'n-0010.yml'), 'utf8');
-  assert.match(disk, /author: agent/, 'and the disk agrees');
+  assert.match(disk, /author: A Person/, 'and the disk agrees');
+  assert.match(disk, /via: agent/, 'with the provenance beside the author');
 });
 
 test('a refused transition says so and exits non-zero @rule:threads.lifecycle.says-what-it-did', () => {
   const bp = fixture('refused', { id: 'n-0004', status: 'open' });
   assert.throws(
-    () => run(['n-0004', '--actor', 'A Person', '--verify'], bp),
+    () => run(['n-0004', '--verify'], bp),
     (err) => {
       assert.equal(err.status, 2, 'a loop must be able to stop on the failure');
       assert.match(String(err.stderr), /illegal transition/);
@@ -187,19 +207,21 @@ function ruleFixture(name) {
   return bp;
 }
 
-test('thread new opens an anchored thread and reports under whom @rule:threads.lifecycle.says-what-it-did', () => {
+test('thread new opens an anchored thread and reports under whom @rule:threads.lifecycle.says-what-it-did @rule:threads.lifecycle.acts-for-a-person', () => {
   const bp = ruleFixture('new-note');
   const out = run(
-    ['new', '--kind', 'note', '--rule', 'f.s.rule', '--body', 'Seen: a thing.', '--actor', 'agent'],
+    ['new', '--kind', 'note', '--rule', 'f.s.rule', '--body', 'Seen: a thing.', '--as-agent'],
     bp,
   );
-  assert.match(out, /n-0001 opened · note · by agent/);
+  assert.match(out, /n-0001 opened · note · by A Person/);
+  assert.match(out, /via agent/, 'a note an agent typed says so');
   assert.doesNotMatch(out, /Seen: a thing/, 'a report, not the thread read back');
   const disk = readFileSync(join(bp, 'threads', 'n-0001.yml'), 'utf8');
-  assert.match(disk, /author: agent/);
+  assert.match(disk, /author: A Person/);
+  assert.match(disk, /via: agent/);
   assert.match(disk, /rule: f\.s\.rule/);
   assert.match(disk, /status: open/);
-  const q = run(['new', '--kind', 'question', '--rule', 'f.s.rule', '--body', 'Which?', '--actor', 'agent'], bp);
+  const q = run(['new', '--kind', 'question', '--rule', 'f.s.rule', '--body', 'Which?', '--as-agent'], bp);
   assert.match(q, /q-0002 opened · question/, 'questions take their own prefix');
 });
 
@@ -228,60 +250,79 @@ test('thread new is creation only - mutation flags on it are refused', () => {
 });
 
 /*
- * The accept gate at the CLI door (n-0130). The username default keeps
- * ordinary mutations attributed; an acceptance may never ride on it - the
- * name must be SAID, with --actor or WALKDOWN_ACTOR, or the command refuses
- * before the gate ever sees a substitute.
+ * The accept gate at the CLI door (n-0130). An acceptance may never ride on a
+ * guess: a machine login name is what this box is called, not a signature.
+ * What counts as SAID is now the identity block in the personal config, and
+ * the other half of the gate is provenance - an agent may claim work on a
+ * person's behalf and may never accept it, whoever's name it records under.
  */
-const runBare = (args, dir, env = {}) =>
-  execFileSync(process.execPath, [CLI, 'thread', ...args, '--dir', dir], {
-    encoding: 'utf8',
-    env: { ...process.env, NO_COLOR: '1', WALKDOWN_ACTOR: '', ...env },
-  }).replace(/\x1b\[[0-9;]*m/g, '');
-
-test('a no-actor verify is refused, never attributed to the machine username @rule:threads.lifecycle.claim-never-accept', () => {
+test('a verify on a machine that only has a guess is refused @rule:threads.lifecycle.claim-never-accept', () => {
   const bp = fixture('noactor-verify', { id: 'n-0011', status: 'addressed' });
   const before = readFileSync(join(bp, 'threads', 'n-0011.yml'), 'utf8');
   assert.throws(
-    () => runBare(['n-0011', '--verify'], bp),
+    () => run(['n-0011', '--verify'], bp, GUESSING),
     (err) => {
       assert.equal(err.status, 2);
-      assert.match(String(err.stderr), /say it with --actor/);
-      assert.doesNotMatch(String(err.stderr), new RegExp(userInfo().username));
+      assert.match(String(err.stderr), /identity:/, 'and it says where to say who you are');
       return true;
     },
   );
   assert.equal(readFileSync(join(bp, 'threads', 'n-0011.yml'), 'utf8'), before, 'disk untouched');
 });
 
-test('a no-actor waive is refused the same way @rule:threads.lifecycle.claim-never-accept', () => {
+test('a waive on a guess is refused the same way @rule:threads.lifecycle.claim-never-accept', () => {
   const bp = fixture('noactor-waive', { id: 'n-0012', status: 'open' });
   assert.throws(
-    () => runBare(['n-0012', '--waive', '--reason', 'x'], bp),
-    (err) => err.status === 2 && /say it with --actor/.test(String(err.stderr)),
+    () => run(['n-0012', '--waive', '--reason', 'x'], bp, GUESSING),
+    (err) => err.status === 2 && /a login name is not a decision/.test(String(err.stderr)),
   );
   const disk = readFileSync(join(bp, 'threads', 'n-0012.yml'), 'utf8');
   assert.match(disk, /status: open/, 'the thread never moved');
 });
 
-test('the agent actor is refused in any spelling, at the CLI too @rule:threads.lifecycle.claim-never-accept', () => {
-  const bp = fixture('spelled-agent', { id: 'n-0013', status: 'addressed' });
-  for (const spelled of ['Agent', 'AGENT']) {
+/*
+ * The heart of it. An agent records under the person it acts for - that is
+ * the truth of the arrangement - so `actor` can no longer answer "was a
+ * machine driving?". The flag that SAYS one was carries the refusal, and it
+ * can only ever subtract authority: there is no way to spell --as-agent that
+ * turns a claim into an acceptance.
+ */
+test('--as-agent may claim, and may never accept @rule:threads.lifecycle.claim-never-accept', () => {
+  const bp = fixture('as-agent', { id: 'n-0013', status: 'addressed' });
+  // Claiming is exactly what it is for.
+  assert.match(run(['n-0013', '--as-agent', '--reply', 'looked at it'], bp), /\+1 reply/);
+  for (const args of [['n-0013', '--as-agent', '--verify'], ['n-0013', '--as-agent', '--waive', '--reason', 'x']])
     assert.throws(
-      () => runBare(['n-0013', '--actor', spelled, '--verify'], bp),
-      (err) => err.status === 2 && /named human actor/.test(String(err.stderr)),
+      () => run(args, bp),
+      (err) => err.status === 2 && /never accept it/.test(String(err.stderr)),
     );
-  }
   const disk = readFileSync(join(bp, 'threads', 'n-0013.yml'), 'utf8');
-  assert.doesNotMatch(disk, /verified_by/, 'no spelling stood as accepter');
+  assert.doesNotMatch(disk, /verified_by|waived_by/, 'no agent stood as accepter');
+  assert.match(disk, /status: addressed/);
 });
 
-test('WALKDOWN_ACTOR is a said name and satisfies the accept gate @rule:threads.lifecycle.claim-never-accept', () => {
+test('an identity literally called agent is refused too, in any spelling @rule:threads.lifecycle.claim-never-accept', () => {
+  // The older half of the gate, which still has work to do: a config naming
+  // its person "Agent" is not a way around the one above.
+  const bp = fixture('spelled-agent', { id: 'n-0015', status: 'addressed' });
+  for (const spelled of ['Agent', 'AGENT'])
+    assert.throws(
+      () => run(['n-0015', '--verify'], bp, identity(spelled)),
+      (err) => err.status === 2 && /named human actor/.test(String(err.stderr)),
+    );
+  assert.doesNotMatch(
+    readFileSync(join(bp, 'threads', 'n-0015.yml'), 'utf8'),
+    /verified_by/,
+    'no spelling stood as accepter',
+  );
+});
+
+test('a declared identity satisfies the accept gate @rule:threads.lifecycle.claim-never-accept', () => {
   const bp = fixture('env-actor', { id: 'n-0014', status: 'addressed' });
-  const out = runBare(['n-0014', '--verify'], bp, { WALKDOWN_ACTOR: 'Env Person' });
-  assert.match(out, /by Env Person/);
+  const out = run(['n-0014', '--verify'], bp);
+  assert.match(out, /by A Person/);
   const disk = readFileSync(join(bp, 'threads', 'n-0014.yml'), 'utf8');
-  assert.match(disk, /verified_by: Env Person/);
+  assert.match(disk, /verified_by: A Person/);
 });
 
 /*
@@ -299,8 +340,8 @@ test('ten concurrent filers get ten threads, none overwritten', async () => {
     Array.from({ length: 10 }, (_, i) =>
       exec(
         process.execPath,
-        [CLI, 'thread', 'new', '--rule', 'f.s.rule', '--body', `finding ${i}`, '--actor', 'agent', '--dir', bp],
-        { env: { ...process.env, NO_COLOR: '1' } },
+        [CLI, 'thread', 'new', '--rule', 'f.s.rule', '--body', `finding ${i}`, '--as-agent', '--dir', bp],
+        { env: { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: SAID } },
       ),
     ),
   );

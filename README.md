@@ -170,8 +170,11 @@ statement, stored truncated (`sha256:` + 12 hex).
   and Mark incorporated for questions). Transitions are validated server-side; `verified`
   and `waived` require a named human — agents claim work (`addressed`), never accept it.
   The same mutations are available from the terminal:
-  `walkdown thread n-0002 --actor agent --reply "fixed in run …" --status addressed`,
-  then `walkdown thread n-0002 --verify` as yourself.
+  `walkdown thread n-0002 --as-agent --reply "fixed in run …" --status addressed`,
+  then `walkdown thread n-0002 --verify` as yourself. Who a mutation records under is
+  never an argument — it is the `identity:` in your `~/.walkdown/config.yml`. An agent
+  working for you records under *your* name, because it is your instruction; `--as-agent`
+  adds the provenance beside it, and refuses `verified` and `waived` outright.
 
 ## Styling — Tailwind CSS + daisyUI
 
@@ -222,9 +225,9 @@ The write side of the loop: add `['walkdown/reporter']` to a project's Playwrigh
 `reporter` array and every `npx playwright test` run appends a run record to
 `blueprint/runs/` — per-rule results aggregated from `@rule:` tags, current
 `statement_hash` stamped (so future staleness is detectable), failure screenshots as
-evidence, and git provenance (`<sha>-dirty` on an unclean tree). `WALKDOWN_TARGET` and
-`WALKDOWN_ACTOR` set the target/actor (defaults: `local`, and `ci` under CI or the OS
-username otherwise). The reporter never fails a test run.
+evidence, and git provenance (`<sha>-dirty` on an unclean tree). `WALKDOWN_TARGET` sets the target
+(default `local`); who it is recorded under is `ci` under CI and your configured
+identity otherwise. The reporter never fails a test run.
 
 Run `npm test` for the suite. The [example](example/) is both the schema demo and the
 integration fixture: `node bin/walkdown.js lint --dir example/blueprint`.

@@ -11,9 +11,10 @@ description: The tool itself — the panel, the embed, and the governance that k
 # run record; they cover disjoint rules, so the ledger reads them as one.
 runner:
   # WALKDOWN_HOME pinned on the unit half only: several suites build fixture
-  # blueprints, and unpinned they claim real homes in ~/.walkdown/blueprints/
-  # index.yml (thirteen dead entries on 2026-09-01). The browser half pins its
-  # own scratch home inside checks/global-setup.mjs and must keep it.
+  # blueprints and personal configs, and unpinned they write into the real one
+  # (thirteen dead home entries got allocated there on 2026-09-01, back when a
+  # registry allocated them). The browser half pins its own scratch home
+  # inside checks/global-setup.mjs and must keep it.
   run_all: "WALKDOWN_HOME=.walkdown/test-home node --test --test-reporter=./lib/node-test-reporter.js --test-reporter-destination=stdout && npx playwright test"
   run_for_rule: "WALKDOWN_HOME=.walkdown/test-home node --test --test-name-pattern='{id}' --test-reporter=./lib/node-test-reporter.js --test-reporter-destination=stdout && npx playwright test --grep '@rule:{id}'"
   list: "grep -rn '@rule:' test/ checks/"

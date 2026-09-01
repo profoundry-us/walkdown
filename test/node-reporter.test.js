@@ -7,9 +7,12 @@ import { after, test } from 'node:test';
 import { formatHash } from '../lib/hash.js';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-nodereporter-'));
+const home = join(root, 'home');
 after(() => rmSync(root, { recursive: true, force: true }));
 
 test('node:test reporter records tagged tests as a hash-stamped run', () => {
+  mkdirSync(home, { recursive: true });
+  writeFileSync(join(home, 'config.yml'), 'identity:\n  username: A Person\n');
   mkdirSync(join(root, 'blueprint', 'features'), { recursive: true });
   writeFileSync(join(root, 'blueprint', 'walkdown.yml'), 'project: node-fixture\n');
   writeFileSync(
@@ -63,7 +66,10 @@ test('node:test reporter records tagged tests as a hash-stamped run', () => {
       env: Object.fromEntries(
         Object.entries({
           ...process.env,
-          WALKDOWN_ACTOR: 'agent',
+          // Who a check run is recorded under is the configured identity —
+          // never an environment variable, which is the door an agent used to
+          // record under a name of its choosing (n-0139).
+          WALKDOWN_HOME: home,
           WALKDOWN_TARGET: 'ci-lane',
         }).filter(([k]) => !/^NODE_(TEST|OPTIONS)/.test(k)),
       ),
@@ -75,7 +81,7 @@ test('node:test reporter records tagged tests as a hash-stamped run', () => {
   const runFile = readdirSync(join(root, 'blueprint', 'runs')).find((f) => f.endsWith('.json'));
   const record = JSON.parse(readFileSync(join(root, 'blueprint', 'runs', runFile), 'utf8'));
   assert.equal(record.kind, 'checks');
-  assert.equal(record.actor, 'agent');
+  assert.equal(record.actor, 'A Person');
   assert.equal(record.target, 'ci-lane');
   assert.equal(record.results.length, 1); // the untagged test is ignored
   assert.equal(record.results[0].rule, 'demo.main.adds');

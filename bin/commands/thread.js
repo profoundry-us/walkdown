@@ -1,6 +1,6 @@
-import { userInfo } from 'node:os';
 import { parseArgs } from 'node:util';
 import { collectRules, loadBlueprint } from '../../lib/blueprint.js';
+import { defaultActor } from '../../lib/identity.js';
 import { anchorText, paintStatus } from '../../lib/report/threads.js';
 import { dim } from '../../lib/report/tty.js';
 import { checkTransition, getThread, replyToThread, transitionThread } from '../../lib/threads.js';
@@ -20,7 +20,7 @@ export function run(args) {
       reopen: { type: 'boolean', default: false },
       waive: { type: 'boolean', default: false },
       reason: { type: 'string' },
-      actor: { type: 'string' },
+      'as-agent': { type: 'boolean', default: false },
       kind: { type: 'string' },
       rule: { type: 'string' },
       screen: { type: 'string' },
@@ -32,24 +32,38 @@ export function run(args) {
   const id = positionals[0];
   if (!id) {
     console.error(
-      'Usage: walkdown thread <id> [--reply <text>] [--status <s>|--verify|--reopen|--waive] [--reason <text>] [--actor <name>]\n' +
-        '       walkdown thread new --rule <id> --body <text> [--kind note|question] [--screen <id>] [--element <sel>] [--actor <name>]',
+      'Usage: walkdown thread <id> [--reply <text>] [--status <s>|--verify|--reopen|--waive] [--reason <text>] [--as-agent]\n' +
+        '       walkdown thread new --rule <id> --body <text> [--kind note|question] [--screen <id>] [--element <sel>] [--as-agent]',
     );
     process.exit(2);
   }
   let blueprint = loadOrExit(values.dir);
 
   /*
-   * SAID versus INHERITED. The username default keeps replies and ordinary
-   * transitions attributed to somebody real, and the report makes the
-   * defaulting visible (n-0125). But an acceptance may never ride on it: the
-   * gate below reads the actor it is GIVEN, and handing it the machine
-   * username let a bare --verify accept work under a person who never acted
-   * (n-0130). So the default is applied here, and the accept path checks
-   * `explicit` before the gate ever sees a name.
+   * Who this runs as is not an argument. There was a `--actor <name>` here,
+   * and a WALKDOWN_ACTOR beside it, on the premise that the caller might be
+   * somebody other than the person whose machine this is - which is exactly
+   * backwards. An agent working here IS working for the person who asked it
+   * to; it acts on their behalf and records under their name, and a flag that
+   * lets any caller type a name is not attribution, it is a text field
+   * (n-0139).
+   *
+   * So the identity comes from the personal config, and the only thing a
+   * caller may say about who is acting is `--as-agent` - provenance, and the
+   * one deviation that matters: it says a machine typed this. It can only
+   * ever subtract authority.
    */
-  const explicit = [values.actor, process.env.WALKDOWN_ACTOR].map((a) => a?.trim()).find(Boolean);
-  const actor = explicit ?? userInfo().username?.trim() ?? 'unknown';
+  const who = defaultActor(blueprint.codeRoot ?? blueprint.projectRoot);
+  const actor = who.username?.trim() || 'unknown';
+  const via = values['as-agent'] ? 'agent' : null;
+  /*
+   * SAID versus INHERITED, which outlives the flag that used to answer it. An
+   * acceptance may not ride on a guess: a machine login name is what this box
+   * is called, not a signature, and a bare --verify accepting under it is
+   * n-0130. What counts as said is now the identity block in the personal
+   * config - a person wrote it down, or asked for it to be written.
+   */
+  const explicit = who.declared;
   const status = values.verify
     ? 'verified'
     : values.reopen
@@ -101,12 +115,14 @@ export function run(args) {
       ...(values.screen ? { screen: values.screen } : {}),
       ...(values.element ? { element: values.element } : {}),
     };
-    const { id: opened, thread } = openThread(blueprint, { kind, body, anchor, author: actor });
+    const { id: opened, thread } = openThread(blueprint, { kind, body, anchor, author: actor, via });
     if (values.json) {
-      console.log(JSON.stringify({ id: opened, kind, status: thread.status, by: actor, anchor }));
+      console.log(
+        JSON.stringify({ id: opened, kind, status: thread.status, by: actor, ...(via ? { via } : {}), anchor }),
+      );
       return end(0);
     }
-    console.log(`✓ ${opened} opened · ${kind} · by ${actor}`);
+    console.log(`✓ ${opened} opened · ${kind} · by ${actor}${via ? dim(` (via ${via})`) : ''}`);
     console.log(dim(`  ${anchorText(anchor)}`));
     console.log(dim(`  walkdown thread ${opened} reads it in full`));
     return end(0);
@@ -120,13 +136,13 @@ export function run(args) {
     try {
       if (status && HUMAN_ONLY.includes(status) && !explicit)
         throw new Error(
-          `"${status}" is recorded under a person's name — say it with --actor (or WALKDOWN_ACTOR); the machine username is not a decision`,
+          `"${status}" is recorded under a person's name, and this machine only has a guess (${actor}, from ${who.source}). Say who you are in ~/.walkdown/config.yml under \`identity:\` — a login name is not a decision`,
         );
       // Validate the transition before ANY write: a refused status must
       // refuse the whole command, or the reply lands and the output denies it.
-      if (status && was) checkTransition(was, { status, actor, reason: values.reason });
-      if (replying) replyToThread(blueprint, id, { author: actor, body: values.reply });
-      if (status) transitionThread(blueprint, id, { status, actor, reason: values.reason });
+      if (status && was) checkTransition(was, { status, actor, reason: values.reason, via });
+      if (replying) replyToThread(blueprint, id, { author: actor, body: values.reply, via });
+      if (status) transitionThread(blueprint, id, { status, actor, reason: values.reason, via });
     } catch (err) {
       console.error(err.message);
       process.exit(2);
@@ -169,6 +185,7 @@ export function run(args) {
           status: t.status,
           moved: Boolean(status),
           by: under,
+          ...(via ? { via } : {}),
           replies_added: added,
         }),
       );
@@ -178,13 +195,13 @@ export function run(args) {
     if (status) parts.push(`${was?.status ?? '?'} → ${paintStatus(t.status)}`);
     else parts.push(`still ${paintStatus(t.status)}`);
     /*
-     * Who it was recorded under, on every path - the forgotten --actor that
-     * silently defaults to a machine username is exactly the mistake this
-     * line exists to surface (n-0125). Prefer what the thread recorded -
+     * Who it was recorded under, on every path - a name nobody read back is
+     * how four attribution bugs stayed invisible (n-0125), and it is the line
+     * that says `via agent` out loud too. Prefer what the thread recorded -
      * status-gated, because a reopened thread still carries the old
      * waived_by; the actor is what this invocation ran under either way.
      */
-    parts.push(`by ${under}`);
+    parts.push(`by ${under}${via ? ` (via ${via})` : ''}`);
     if (added > 0) parts.push(`+${added} ${added === 1 ? 'reply' : 'replies'}`);
     console.log(`✓ ${t.id} ${parts.join(' · ')}`);
     console.log(dim(`  ${anchorText(t.anchor)}`));

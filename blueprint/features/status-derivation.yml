@@ -234,7 +234,7 @@ stories:
         verify: [checks]
         steps:
           given:
-            - A machine whose git knows a username and, perhaps, a full name
+            - A machine whose personal config, or failing that git, knows a username and, perhaps, a full name
           when:
             - A verdict, a reply or a transition is recorded, and older records are read back beside it
           then:

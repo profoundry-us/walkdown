@@ -46,8 +46,8 @@ derives from it.
 6. **Lint early.** `walkdown lint --no-checks` until the structure is clean.
 
 7. **Checks.** One test per `checks` rule, in the project's own framework,
-   tagged with the rule id, selecting by anchor. Then `walkdown run` (with
-   `WALKDOWN_ACTOR=agent`) and a full `walkdown lint`.
+   tagged with the rule id, selecting by anchor. Then `walkdown run` and a
+   full `walkdown lint`.
 
 8. **Report.** `walkdown status` — say what's verified, what awaits judgment
    (`agent`/`human` rules), what questions are open, and any drift (screens

@@ -31,12 +31,14 @@ thread: `walkdown thread <id>`.
 4. **Implement** the app change, carrying anchors verbatim
    (`embed.anchor_attribute`, default `data-testid`).
 5. **Check.** Write or extend a test in the project's own framework, tagged
-   with the rule id, selecting by anchor. `walkdown run [--rule <id>]` with
-   `WALKDOWN_ACTOR=agent` — confirm a run record was appended.
+   with the rule id, selecting by anchor. `walkdown run [--rule <id>]` —
+   confirm a run record was appended.
 6. **Validate.** `walkdown lint` must be clean (coverage, hashes, refs).
 7. **Close the thread** — only via the CLI so the transition is validated:
-   `walkdown thread <id> --actor agent --reply "<what changed, which files,
-   which rule(s), which run re-verified it>" --status incorporated`.
+   `walkdown thread <id> --as-agent --reply "<what changed, which files,
+   which rule(s), which run re-verified it>" --status incorporated`. It records
+   under the human you are working for — that is whose instruction it was —
+   and `--as-agent` says a machine typed it.
 
 ## Addressing an open note
 
@@ -44,7 +46,7 @@ Same shape, smaller: understand exactly what the note's anchor points at →
 fix it (spec change? follow the incorporation steps; implementation-only?
 just fix, carrying anchors) → re-verify with a run (`walkdown run --rule ...`,
 or an agent walkdown via the walkdown-judge skill for judgment rules) →
-`walkdown thread <id> --actor agent --reply "<fix + evidence>"
+`walkdown thread <id> --as-agent --reply "<fix + evidence>"
 --status addressed`.
 
 ## Never
