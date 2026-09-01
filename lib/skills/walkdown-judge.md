@@ -88,8 +88,9 @@ verify requirement).
      and `reasoning` — one honest paragraph.
 
 7. **Fails spawn threads.** For each failing rule, create a note anchored to
-   the exact rule/screen/element (POST `/api/threads` while serve runs, or
-   write the YAML), citing the evidence pair. Put the thread id in that
+   the exact rule/screen/element, citing the evidence pair
+   (`walkdown thread new --kind note --rule <id> --body <text> --actor agent`,
+   or POST `/api/threads` while serve runs). Put the thread id in that
    result's `threads` array.
 
 8. **Close out.** `walkdown lint` (the record must validate), then

@@ -161,3 +161,68 @@ test('a refused transition says so and exits non-zero @rule:threads.lifecycle.sa
     },
   );
 });
+
+/*
+ * `thread new` - the creation door. Filing a finding used to take a running
+ * serve or a hand-edited YAML; now the same front door that mutates threads
+ * can open one, under the same report discipline: one line saying what
+ * happened and under whom, never the thread read back.
+ */
+function ruleFixture(name) {
+  const bp = join(root, name);
+  mkdirSync(join(bp, 'features'), { recursive: true });
+  mkdirSync(join(bp, 'threads'), { recursive: true });
+  writeFileSync(join(bp, 'walkdown.yml'), 'project: thread-cli-fixture\n');
+  writeFileSync(
+    join(bp, 'features', 'f.yml'),
+    [
+      'feature: F',
+      'stories:',
+      '  - id: f.s',
+      '    rules:',
+      '      - id: f.s.rule',
+      '        statement: A statement.',
+    ].join('\n'),
+  );
+  return bp;
+}
+
+test('thread new opens an anchored thread and reports under whom @rule:threads.lifecycle.says-what-it-did', () => {
+  const bp = ruleFixture('new-note');
+  const out = run(
+    ['new', '--kind', 'note', '--rule', 'f.s.rule', '--body', 'Seen: a thing.', '--actor', 'agent'],
+    bp,
+  );
+  assert.match(out, /n-0001 opened · note · by agent/);
+  assert.doesNotMatch(out, /Seen: a thing/, 'a report, not the thread read back');
+  const disk = readFileSync(join(bp, 'threads', 'n-0001.yml'), 'utf8');
+  assert.match(disk, /author: agent/);
+  assert.match(disk, /rule: f\.s\.rule/);
+  assert.match(disk, /status: open/);
+  const q = run(['new', '--kind', 'question', '--rule', 'f.s.rule', '--body', 'Which?', '--actor', 'agent'], bp);
+  assert.match(q, /q-0002 opened · question/, 'questions take their own prefix');
+});
+
+test('thread new refuses an unknown rule, an empty body, and a strange kind', () => {
+  const bp = ruleFixture('new-refuse');
+  for (const args of [
+    ['new', '--rule', 'no.such.rule', '--body', 'x'],
+    ['new', '--rule', 'f.s.rule', '--body', '   '],
+    ['new', '--kind', 'rumor', '--rule', 'f.s.rule', '--body', 'x'],
+    ['new', '--body', 'x'],
+  ]) {
+    assert.throws(
+      () => run(args, bp),
+      (err) => err.status === 2 && err.stdout === '',
+    );
+  }
+  assert.throws(() => readFileSync(join(bp, 'threads', 'n-0001.yml')), 'no refusal filed anything');
+});
+
+test('thread new is creation only - mutation flags on it are refused', () => {
+  const bp = ruleFixture('new-mixed');
+  assert.throws(
+    () => run(['new', '--rule', 'f.s.rule', '--body', 'x', '--verify'], bp),
+    (err) => err.status === 2 && /exists/.test(String(err.stderr)),
+  );
+});

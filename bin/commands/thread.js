@@ -1,9 +1,11 @@
 import { userInfo } from 'node:os';
 import { parseArgs } from 'node:util';
-import { loadBlueprint } from '../../lib/blueprint.js';
+import { collectRules, loadBlueprint } from '../../lib/blueprint.js';
 import { anchorText, paintStatus } from '../../lib/report/threads.js';
 import { dim } from '../../lib/report/tty.js';
 import { checkTransition, getThread, replyToThread, transitionThread } from '../../lib/threads.js';
+import { THREAD_KINDS } from '../../lib/vocab.js';
+import { openThread } from '../../lib/writes.js';
 import { end, loadOrExit } from './context.js';
 
 export function run(args) {
@@ -19,13 +21,19 @@ export function run(args) {
       waive: { type: 'boolean', default: false },
       reason: { type: 'string' },
       actor: { type: 'string' },
+      kind: { type: 'string' },
+      rule: { type: 'string' },
+      screen: { type: 'string' },
+      element: { type: 'string' },
+      body: { type: 'string' },
     },
     allowPositionals: true,
   });
   const id = positionals[0];
   if (!id) {
     console.error(
-      'Usage: walkdown thread <id> [--reply <text>] [--status <s>|--verify|--reopen|--waive] [--reason <text>] [--actor <name>]',
+      'Usage: walkdown thread <id> [--reply <text>] [--status <s>|--verify|--reopen|--waive] [--reason <text>] [--actor <name>]\n' +
+        '       walkdown thread new --rule <id> --body <text> [--kind note|question] [--screen <id>] [--element <sel>] [--actor <name>]',
     );
     process.exit(2);
   }
@@ -49,6 +57,54 @@ export function run(args) {
    * n-0125. An empty body reaches replyToThread and gets its refusal.
    */
   const replying = values.reply !== undefined;
+
+  /*
+   * `thread new` opens a thread from the CLI - the door that was missing.
+   * Filing a finding used to take a running serve (POST /api/threads) or a
+   * hand-edited YAML, and this project forbids the second; the mutation
+   * commands and the creation belong behind the same front door. Opening is
+   * claiming, never accepting, so the ordinary actor chain applies.
+   */
+  if (id === 'new') {
+    if (replying || status) {
+      console.error('thread new opens a thread; --reply and the status flags act on one that exists.');
+      process.exit(2);
+    }
+    const kind = values.kind ?? 'note';
+    if (!THREAD_KINDS.includes(kind)) {
+      console.error(`kind must be ${THREAD_KINDS.join(' or ')}`);
+      process.exit(2);
+    }
+    const body = values.body?.trim();
+    if (!body) {
+      console.error('a thread needs a body — say what was seen (--body <text>)');
+      process.exit(2);
+    }
+    const rule = values.rule?.trim();
+    if (!rule) {
+      console.error('a thread needs an anchor — name the rule it is about (--rule <id>)');
+      process.exit(2);
+    }
+    if (!collectRules(blueprint.features).some((r) => r.rule?.id === rule)) {
+      console.error(`No rule "${rule}". \`walkdown status\` lists every rule.`);
+      process.exit(2);
+    }
+    const anchor = {
+      rule,
+      ...(values.screen ? { screen: values.screen } : {}),
+      ...(values.element ? { element: values.element } : {}),
+    };
+    const { id: opened, thread } = openThread(blueprint, { kind, body, anchor, author: actor });
+    if (values.json) {
+      console.log(JSON.stringify({ id: opened, kind, status: thread.status, by: actor, anchor }));
+      return end(0);
+    }
+    console.log(`✓ ${opened} opened · ${kind} · by ${actor}`);
+    console.log(dim(`  ${anchorText(anchor)}`));
+    console.log(dim(`  walkdown thread ${opened} reads it in full`));
+    return end(0);
+  }
+
   const mutating = Boolean(replying || status);
   // What it was before we touched it, so the command can say what it changed
   // rather than only what the thread now happens to say.

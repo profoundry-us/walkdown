@@ -13,8 +13,9 @@ notes), and the runs ledger. The blueprint is the single source of truth for
   it. If they disagree, the statement wins. After editing any statement, run
   `walkdown hash --write` so staleness detection keeps working.
 - If a rule is ambiguous, do not guess. File a question thread anchored to the
-  rule/screen/element (`POST /api/threads` via `walkdown serve`, or write the
-  YAML) and say what you assumed if you proceed.
+  rule/screen/element (`walkdown thread new --kind question --rule <id>
+  --body <text>`, or `POST /api/threads` via `walkdown serve`) and say what
+  you assumed if you proceed.
 
 ## Ownership boundaries
 

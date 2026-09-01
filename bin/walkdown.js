@@ -19,6 +19,8 @@ Usage:
   walkdown threads [--dir <blueprint>] [--rule <id>] [--all] [--json]
   walkdown thread <id> [--reply <text>] [--status <s>|--verify|--reopen|--waive]
                        [--reason <text>] [--actor <name>] [--dir <blueprint>] [--json]
+  walkdown thread new --rule <id> --body <text> [--kind note|question]
+                      [--screen <id>] [--element <sel>] [--actor <name>] [--dir <blueprint>] [--json]
   walkdown serve [--dir <blueprint>] [--port <n>]
   walkdown migrate
   walkdown claims [--dir <blueprint>] [--url <address>] [--json]
@@ -67,7 +69,9 @@ Commands:
           open → answered → incorporated | reopen | waived). "verified" and
           "waived" require a named human actor — never "agent". Waiving and
           reopening require --reason (recorded as a reply). Actor defaults
-          to WALKDOWN_ACTOR or the OS username.
+          to WALKDOWN_ACTOR or the OS username. "thread new" opens one
+          instead: --rule anchors it (--screen/--element sharpen the spot),
+          --kind picks note or question, --body says what was seen.
   where   Print where this project's pieces live and why each was chosen -
           the spec, the runs, the threads, the evidence, the drafts, and the
           repository a run's git_sha comes from. With a kind (spec, code,

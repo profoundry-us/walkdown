@@ -74,8 +74,9 @@ start.
    sentence and is worth it.
 
 5. **Fails spawn threads.** A failing rule gets a note anchored to the exact
-   rule and element, citing the evidence, and its id goes in that result's
-   `threads`.
+   rule and element, citing the evidence (`walkdown thread new --kind note
+   --rule <id> --body <text> --actor agent`), and its id goes in that
+   result's `threads`.
 
 6. **Close out.** `walkdown lint`, then `walkdown status`. If you swept, the
    report says how much of the sweep is done; **finish it or say plainly what
