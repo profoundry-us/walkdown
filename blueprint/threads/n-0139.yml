@@ -1,0 +1,61 @@
+id: n-0139
+kind: note
+author: Topher Fangio
+created: 2026-09-01T04:54:57.686Z
+anchor:
+  rule: threads.lifecycle.claim-never-accept
+status: open
+body: >-
+  Decision: identity is read, never supplied. It comes from the config, an agent
+  may never change it without explicit permission, and it may never be
+  overridden by an argument to the CLI or the MCP. Generating the config in the
+  first place is fine — that happens at a human's request, and building it
+  around the human who is running it is the point.
+
+
+  This closes a hole n-0130 left standing. That fix made verified/waived require
+  an EXPLICIT actor, on the reasoning that the machine username is not a
+  decision. It made attribution deliberate but not authentic: the explicit name
+  is just a string the caller types, so any agent can type any human's. Three
+  paths supply one today, and all three go — --actor
+  (bin/commands/thread.js:51), WALKDOWN_ACTOR (same line, and
+  bin/commands/sweep.js:46), and body.actor over HTTP (lib/api.js:309).
+
+
+  Two things found while writing this down.
+
+
+  First, the identity block in ~/.walkdown/config.yml is read by nothing.
+  lib/identity.js defaultActor() derives the actor from git user.username,
+  github.user, the email local part, then the OS username, and roles from git
+  walkdown.roles. The config block looks like the source of truth and is inert.
+  Making identity come from the config is wiring it up for the first time, not
+  merely protecting it.
+
+
+  Second, and this is the part that still needs answering: removing the override
+  is necessary but not sufficient, and on its own it makes things worse. If the
+  actor always comes from the config and cannot be overridden, an agent running
+  'walkdown thread n-XXXX --verify' inherits the human's name automatically — no
+  flag, no marker, work accepted under their name with nothing said. Something
+  has to positively distinguish a human driving from an agent driving. Three
+  candidates: an interactive confirmation, which an agent running
+  non-interactively cannot satisfy and which is literally what 'explicit
+  permission' means; an agent self-declaration from the harness that can only
+  ever RESTRICT, so declaring yourself an agent removes verify and failing to
+  declare is the remaining hole; or the CLI simply cannot accept work at all and
+  the panel is the only surface where a human signs.
+
+
+  Recommendation: the first. Verify, waive, and any write to the identity block
+  require an interactive confirmation, and are refused outright when stdin is
+  not a TTY — the same mechanism for both, and explicit permission becomes
+  mechanical rather than honour-system.
+
+
+  Disclosed for the record: the replies filing today's decisions on n-0117,
+  n-0121, n-0133 and q-0138 were recorded by an agent passing --actor 'Topher
+  Fangio'. The attributions are true — those are the human's decisions, made in
+  conversation — but the mechanism is the one being removed here, and under the
+  new design relaying a human's decision needs a shape that does not involve
+  typing their name.

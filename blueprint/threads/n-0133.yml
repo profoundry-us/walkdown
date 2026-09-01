@@ -100,3 +100,13 @@ replies:
       moves out. Two files split by AUTHORITY is a different thing from two
       files split by bookkeeping, and only the second one is what we are
       deleting here.
+  - author: Topher Fangio
+    created: 2026-09-01T04:55:04Z
+    body: "The identity boundary raised above is settled, and filed as n-0139
+      because it outgrew this thread: identity is read from the config and never
+      supplied by a caller. Generating the config is fine — it happens at a
+      human's request and is built around whoever is running it — but an agent
+      may not change the identity block without explicit permission, and no CLI
+      or MCP argument may override it. Note that the block is inert today;
+      nothing reads it. So the config-only work includes making identity real,
+      not just guarding it."
