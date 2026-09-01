@@ -73,7 +73,7 @@ stories:
 
       - id: locations.default.one-home-per-blueprint
         origin: thread:n-0124
-        statement: A blueprint's out-of-tree home is a numbered directory allocated to it on creation, never one derived from a name - so two blueprints can never resolve to the same home, not thirty monorepo packs sharing a repository basename and not two blueprints inside one pack. Asking where things live allocates nothing; the first write claims the number, and a legacy name-keyed home keeps answering until `walkdown migrate` renumbers it on the person's say-so.
+        statement: A blueprint's out-of-tree home belongs to that blueprint alone - two blueprints never resolve to the same home, not thirty monorepo packs sharing a repository basename and not two blueprints inside one pack, and one blueprint is never given a second home with its records stranded in the first. Asking where things live allocates nothing and writes nothing. A home that already holds records keeps answering for its blueprint, and moving one stays a decision a person makes rather than something a resolver does on its own.
         verify: [checks]
         signoff: [eng, product]
         steps:
@@ -82,11 +82,11 @@ stories:
           when:
             - Each is asked about, then written to for the first time
           then:
-            - Asking reports a tentative home and writes nothing, not even the allocation
-            - The first write allocates each blueprint its own numbered directory, and the numbers never repeat
-            - A home that already exists under the legacy name keeps answering, marked as legacy, until `walkdown migrate` moves it and re-points the personal config
-            - A legacy home no config entry claims is reported and left standing, never guessed at
-          statement_hash: sha256:625dd678dbdd
+            - Asking reports where records would go and writes nothing, not even the claim on that home
+            - Each blueprint ends up with a home of its own, and no two ever coincide
+            - A home that already holds a blueprint's records keeps answering for it
+            - A home nothing claims is reported and left standing, never guessed at and never moved
+          statement_hash: sha256:014a9a4fb6f1
 
   - id: locations.answer
     title: Anyone can ask where this project's pieces are

@@ -110,3 +110,39 @@ replies:
       or MCP argument may override it. Note that the block is inert today;
       nothing reads it. So the config-only work includes making identity real,
       not just guarding it."
+  - author: Topher Fangio
+    created: 2026-09-01T05:20:58Z
+    body: >-
+      Three of the plan's open items answered.
+
+
+      example/ gets a config entry. It is a real blueprint that this repository
+      ships and several browser checks need a second project to switch to, so it
+      should be written down like any other rather than surviving on being
+      findable.
+
+
+      {results} is defined in the config. It is hardcoded to the relative
+      '.walkdown/results.out' today (lib/run-cmd.js:27), which is the same class
+      of bug as issue #7 — a relative path following whichever cwd wins. It
+      becomes runner.results_file in walkdown.yml, defaulting to
+      .walkdown/results.out and always resolved ABSOLUTE against the code root.
+      Project-level rather than personal, because which file a framework writes
+      is a fact about the project; the path is scratch, per-checkout, alongside
+      where Playwright's output now goes. Worth noting walkdown never reads this
+      file — it only substitutes the token, and the project's own reporter emits
+      the record — so this is fixing a path handed to somebody else's tool, not
+      our own ingestion.
+
+
+      one-home-per-blueprint is reworded rather than retired, and reworded to
+      survive the change rather than to describe its destination. Everything
+      mechanical came out of the statement — numbered directories, allocation on
+      creation, legacy name-keyed homes, migrate renumbering — leaving the
+      properties that are true both before and after: a home belongs to one
+      blueprint, no blueprint gets a second home with records stranded in the
+      first, asking allocates nothing, an existing home keeps answering, and a
+      home nothing claims is left standing. Measured after the reword: both
+      tiers went stale as they should, and all 33 tagged tests still pass, so no
+      coverage was lost and nothing falsely claims the new wording. It will not
+      need rewording again when the registry goes.
