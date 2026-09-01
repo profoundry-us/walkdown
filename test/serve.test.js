@@ -569,6 +569,91 @@ test('GET /api/checks returns source snippets from ledger refs; traversal refs a
   assert.equal((await fetch(`${base}/api/checks?rule=nope`)).status, 400);
 });
 
+/*
+ * A recorded ref is a line number in a file that keeps being edited. When the
+ * tree's own @rule tag scan no longer corroborates it, serving the old line
+ * literally shows a NEIGHBORING test's tail as this rule's source - which is
+ * what failed panel.rules.steps-not-an-appendix in the 2026-09-01T01-04-49Z
+ * run, after 40 lines landed above the tests it pointed at. The tree answers
+ * for content then; the stale ref stays visible as provenance.
+ */
+test('a drifted check ref hands display to the tree and keeps the stale line as provenance', async () => {
+  const root2 = mkdtempSync(join(tmpdir(), 'walkdown-drift-'));
+  const bp2 = join(root2, 'blueprint');
+  mkdirSync(join(bp2, 'features'), { recursive: true });
+  mkdirSync(join(bp2, 'threads'), { recursive: true });
+  mkdirSync(join(bp2, 'runs'), { recursive: true });
+  writeFileSync(
+    join(bp2, 'walkdown.yml'),
+    'project: drift-fixture\nauthoring: { location: [suite/] }\n',
+  );
+  writeFileSync(
+    join(bp2, 'features', 'd.yml'),
+    'feature: d\nstories:\n  - id: d.s\n    rules:\n      - id: d.s.thing\n        statement: The thing.\n        verify: [checks]\n',
+  );
+  mkdirSync(join(root2, 'suite'), { recursive: true });
+  writeFileSync(
+    join(root2, 'suite', 'demo.spec.js'),
+    [
+      "test('neighbor', () => {", // line 1 — where the ledger still says d.s.thing lives
+      '  neighborBody();',
+      '});',
+      '',
+      "test('does the thing', {", // line 5 — where it actually lives now
+      // Concatenated so the real project's own coverage scan never reads this
+      // fixture literal as a check claiming a rule that does not exist.
+      `  tag: '${'@rule' + ':d.s.thing'}',`, // line 6 — the scan sees this; snaps to the opener above
+      '}, () => {',
+      '  realBody();',
+      '});',
+    ].join('\n'),
+  );
+  const record = (checks) =>
+    writeFileSync(
+      join(bp2, 'runs', '2026-01-01T00-00-00Z-local-01.json'),
+      JSON.stringify({
+        run_id: '2026-01-01T00-00-00Z-local-01',
+        created: '2026-01-01T00:00:00Z',
+        actor: 'agent',
+        kind: 'checks',
+        target: 'local',
+        results: [{ rule: 'd.s.thing', status: 'pass', checks }],
+      }),
+    );
+  const srv = createWalkdownServer(bp2);
+  await new Promise((r) => srv.listen(0, '127.0.0.1', r));
+  const at = `http://127.0.0.1:${srv.address().port}`;
+  const ask = async () => (await (await fetch(`${at}/api/checks?rule=d.s.thing`)).json()).checks;
+  try {
+    // Drifted: the run recorded :1, the test now opens at :5.
+    record(['suite/demo.spec.js:1']);
+    const drifted = await ask();
+    assert.equal(drifted.length, 1);
+    assert.equal(drifted[0].ref, 'suite/demo.spec.js:5');
+    assert.equal(drifted[0].recorded, 'suite/demo.spec.js:1');
+    assert.match(drifted[0].source, /realBody/);
+    assert.doesNotMatch(drifted[0].source, /neighbor/);
+
+    // Corroborated: the recorded opener (:5) and the scanned tag (:6) are the
+    // same test - the offset between them must never read as drift.
+    record(['suite/demo.spec.js:5']);
+    const steady = await ask();
+    assert.equal(steady[0].ref, 'suite/demo.spec.js:5');
+    assert.equal(steady[0].recorded, undefined);
+    assert.match(steady[0].source, /realBody/);
+
+    // Never recorded: the tree still answers (n-0084), from the opener.
+    rmSync(join(bp2, 'runs', '2026-01-01T00-00-00Z-local-01.json'));
+    const unrecorded = await ask();
+    assert.equal(unrecorded[0].ref, 'suite/demo.spec.js:5');
+    assert.equal(unrecorded[0].recorded, undefined);
+    assert.match(unrecorded[0].source, /realBody/);
+  } finally {
+    srv.close();
+    rmSync(root2, { recursive: true, force: true });
+  }
+});
+
 test('multi-project: sibling blueprints are discovered and ?bp= switches, membership-validated', async () => {
   mkdirSync(join(root, 'sibling', 'blueprint', 'features'), { recursive: true });
   writeFileSync(join(root, 'sibling', 'blueprint', 'walkdown.yml'), 'project: sibling-app\n');

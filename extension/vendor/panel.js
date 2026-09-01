@@ -2555,11 +2555,25 @@
       const res = await fetch(api(`/api/checks?rule=${encodeURIComponent(rule)}`));
       const out = await res.json();
       const checks = out.checks ?? [];
+      /*
+       * A drifted ref names its provenance: the server serves the source from
+       * where the test sits NOW, and `recorded` is the stale address the last
+       * run wrote before the file was edited above it. Shortened to ":NNN"
+       * when the file is the same, which it nearly always is.
+       */
+      const wasAt = (c) =>
+        c.recorded?.startsWith(c.ref.slice(0, c.ref.lastIndexOf(':') + 1))
+          ? c.recorded.slice(c.recorded.lastIndexOf(':'))
+          : c.recorded;
       view = checks.length
         ? checks.map((c) =>
             c.missing
               ? b`<div class="text-warning">${c.ref} — no longer in the tree</div>`
-              : b`<div class="mb-1"><div class="font-mono text-[10.5px] opacity-60">${c.ref}</div>
+              : b`<div class="mb-1"><div class="font-mono text-[10.5px] opacity-60">${c.ref}${
+                c.recorded
+                  ? b` <span class="text-warning">· was ${wasAt(c)} when last recorded</span>`
+                  : ''
+              }</div>
           <pre class="overflow-x-auto whitespace-pre rounded bg-base-300/40 p-1.5 text-[10.5px] leading-snug">${c.source}</pre></div>`,
           )
         : 'No source recorded.';
