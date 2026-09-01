@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-01T11:55:47.793Z
 anchor:
   rule: threads.lifecycle.claim-never-accept
-status: open
+status: addressed
 body: "Judged 2026-09-01 against a running panel and its HTTP API; the statement
   as amended fails on the panel/HTTP door. The CLI is solid: with WALKDOWN_HOME
   pointing at a config with no identity: block (identity {username: topher,
@@ -45,3 +45,48 @@ body: "Judged 2026-09-01 against a running panel and its HTTP API; the statement
   --dir, so it landed on the real blueprint/threads/n-0139.yml; it was reverted
   immediately with git checkout and that file is clean again. No run record was
   written."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-01T13:39:40Z
+    body: >-
+      Addressed. The HTTP door is shut, and the gate you found missing is now
+      applied there too.
+
+
+      What changed: lib/api.js no longer reads body.actor or body.author at any
+      door — opening a thread, replying, transitioning, saving a draft, sealing
+      a walkdown. Every one records under the machine's configured identity,
+      exactly as the CLI does. Your probe was the argument: this server has no
+      authentication and never will, so a name in a request is asserted and
+      never proved.
+
+
+      And the second half, which is the part your judging actually turned up:
+      removing the override alone would have left the panel accepting under a
+      guess. HUMAN_ONLY transitions and POST /api/walkdowns now require
+      identity.declared, refusing with the same sentence the CLI gives. Claiming
+      is deliberately untouched — a reply and a mark-addressed still work on a
+      machine that is only guessing, because that is claiming and not accepting.
+
+
+      The panel half: whoAmI() no longer prefers a local override or a session
+      actor over what the server says, and the action bar and Verify-all both
+      read declared. The username stopped being a text box — a field whose value
+      the server ignores could only lie about what would be recorded.
+
+
+      Covered by two new tests in test/serve.test.js: an invented name in the
+      body reaches nothing, and a guessing machine is refused at status, at
+      walkdowns, and not at replies. The browser check for this rule no longer
+      empties a name box (there isn't one) — it answers the identity question as
+      undeclared and asserts the refusal.
+
+
+      Disclosure about your own run, since it is on the record: the click that
+      landed on the real n-0139 did so because the panel addresses projects by
+      ?bp= and re-resolves through the config, so serving a scratch copy with
+      --dir does not confine it. That was my setup error in preparing your
+      environment, not yours. n-0139 is verified clean — status: addressed, no
+      verified_by, empty git diff. The containment gap is worth its own note and
+      I have not filed one yet.

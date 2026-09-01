@@ -168,6 +168,16 @@ test("a reply to a terminal thread is recorded under its own actor, not the stat
   const disk = readFileSync(join(bp, 'threads', 'n-0010.yml'), 'utf8');
   assert.match(disk, /author: A Person/, 'and the disk agrees');
   assert.match(disk, /via: agent/, 'with the provenance beside the author');
+
+  /*
+   * And a LATER reader sees it. Provenance reached the disk and was rendered
+   * by nothing - `walkdown thread <id>` printed the author alone - so the one
+   * person it was for never saw it, and the field might as well not have
+   * existed (n-0142). The echo after a mutation is not that reader: it scrolls
+   * past once and is gone.
+   */
+  const read = run(['n-0010'], bp);
+  assert.match(read, /A Person · via agent/, 'the read path names both');
 });
 
 test('a refused transition says so and exits non-zero @rule:threads.lifecycle.says-what-it-did', () => {

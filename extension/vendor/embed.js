@@ -85,7 +85,9 @@
     /** The opening note and its replies as one list. The note is message zero. */
     messages(thread) {
       return [
-        { author: thread?.author, created: thread?.created, body: thread?.body },
+        // `via` rides along with the author, because it is a fact about the same
+        // message: who decided it, and how it arrived.
+        { author: thread?.author, via: thread?.via, created: thread?.created, body: thread?.body },
         ...(thread?.replies ?? []),
       ].filter((m) => m && (m.body ?? '') !== '');
     },
@@ -147,7 +149,18 @@
           out.push(`<div class="wd-msg${cont ? ' cont' : ''}${m.pending ? ' pending' : ''}${m.failed ? ' failed' : ''}">
         <div class="wd-ava" style="background:${this.tint(who)}">${this.esc(this.initials(who))}</div>
         <div class="wd-col">
-          <div class="wd-head">${cont ? '' : `<span class="wd-who">${this.esc(who)}</span>`}<span
+          <div class="wd-head">${cont ? '' : `<span class="wd-who">${this.esc(who)}</span>`}${
+            /*
+             * How the words arrived, beside who decided them. An agent acting
+             * on somebody's behalf records under that person - the
+             * instruction was theirs - and this is the part a reader cannot
+             * otherwise recover: which sentences a person typed. It was
+             * written to disk and rendered nowhere, which made it a field
+             * with no reader (n-0142). Shown on the first message of a run
+             * only, like the name it sits beside.
+             */
+            !cont && m.via ? `<span class="wd-via">via ${this.esc(m.via)}</span>` : ''
+          }<span
             class="wd-at" title="${this.esc(this.stamp(m.created))}">${
               m.failed ? 'not sent' : m.pending ? 'sending…' : this.esc(this.ago(m.created))
             }</span></div>
@@ -268,6 +281,9 @@
     .wd-head { display: flex; align-items: center; gap: .4rem; margin-bottom: .18rem; min-height: 1.15rem; }
     .wd-head .badge { padding-inline: .5rem; margin-left: .15rem; }
     .wd-who { font-weight: 600; font-size: 12px; }
+    /* Quieter than the name and louder than nothing: provenance is a fact
+       about the message, not a second author. */
+    .wd-via { font-size: 10px; opacity: .55; font-style: italic; }
     .wd-at { font-size: 10px; opacity: .45; }
     .wd-msg.cont .wd-at { visibility: hidden; }
     .wd-msg.cont:hover .wd-at { visibility: visible; }

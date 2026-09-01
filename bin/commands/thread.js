@@ -218,14 +218,24 @@ export function run(args) {
     }`,
   );
   console.log(dim(`  ${anchorText(t.anchor)}`));
-  console.log(dim(`  ${t.author ?? 'unknown'} · ${t.created ?? 'undated'}`));
+  /*
+   * Author, and how the words arrived. Provenance was written to disk and
+   * rendered by nothing - the thread file carried `via: agent` while every
+   * report showed the author alone, so the one reader who could have used it
+   * never saw it (n-0142). A person typing is the ordinary case and stays
+   * unannotated; a machine typing says so.
+   */
+  const saidVia = (m) => (m?.via ? dim(` · via ${m.via}`) : '');
+  console.log(dim(`  ${t.author ?? 'unknown'}`) + saidVia(t) + dim(` · ${t.created ?? 'undated'}`));
   console.log(
     `\n  ${String(t.body ?? '')
       .trim()
       .replace(/\n/g, '\n  ')}`,
   );
   for (const r of t.replies ?? []) {
-    console.log(dim(`\n  ↳ ${r.author ?? 'unknown'} · ${r.created ?? 'undated'}`));
+    console.log(
+      dim(`\n  ↳ ${r.author ?? 'unknown'}`) + saidVia(r) + dim(` · ${r.created ?? 'undated'}`),
+    );
     console.log(
       `    ${String(r.body ?? '')
         .trim()
