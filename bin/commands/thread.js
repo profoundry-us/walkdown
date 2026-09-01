@@ -4,7 +4,7 @@ import { collectRules, loadBlueprint } from '../../lib/blueprint.js';
 import { anchorText, paintStatus } from '../../lib/report/threads.js';
 import { dim } from '../../lib/report/tty.js';
 import { checkTransition, getThread, replyToThread, transitionThread } from '../../lib/threads.js';
-import { THREAD_KINDS } from '../../lib/vocab.js';
+import { HUMAN_ONLY, THREAD_KINDS } from '../../lib/vocab.js';
 import { openThread } from '../../lib/writes.js';
 import { end, loadOrExit } from './context.js';
 
@@ -39,10 +39,17 @@ export function run(args) {
   }
   let blueprint = loadOrExit(values.dir);
 
-  const actor =
-    [values.actor, process.env.WALKDOWN_ACTOR, userInfo().username]
-      .map((a) => a?.trim())
-      .find(Boolean) ?? 'unknown';
+  /*
+   * SAID versus INHERITED. The username default keeps replies and ordinary
+   * transitions attributed to somebody real, and the report makes the
+   * defaulting visible (n-0125). But an acceptance may never ride on it: the
+   * gate below reads the actor it is GIVEN, and handing it the machine
+   * username let a bare --verify accept work under a person who never acted
+   * (n-0130). So the default is applied here, and the accept path checks
+   * `explicit` before the gate ever sees a name.
+   */
+  const explicit = [values.actor, process.env.WALKDOWN_ACTOR].map((a) => a?.trim()).find(Boolean);
+  const actor = explicit ?? userInfo().username?.trim() ?? 'unknown';
   const status = values.verify
     ? 'verified'
     : values.reopen
@@ -111,6 +118,10 @@ export function run(args) {
   const was = mutating ? getThread(blueprint, id) : null;
   if (mutating) {
     try {
+      if (status && HUMAN_ONLY.includes(status) && !explicit)
+        throw new Error(
+          `"${status}" is recorded under a person's name — say it with --actor (or WALKDOWN_ACTOR); the machine username is not a decision`,
+        );
       // Validate the transition before ANY write: a refused status must
       // refuse the whole command, or the reply lands and the output denies it.
       if (status && was) checkTransition(was, { status, actor, reason: values.reason });

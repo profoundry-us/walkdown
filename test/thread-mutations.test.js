@@ -66,6 +66,14 @@ test('agents may claim, never accept: verified/waived need a named human @rule:t
     () => transitionThread(load(), 'n-1', { status: 'verified', actor: 'agent' }),
     /named human actor/,
   );
+  // The gate names a role, not a spelling: "Agent" and "AGENT" walked
+  // through the case-sensitive match and stood on disk as accepters (n-0130).
+  for (const spelled of ['Agent', 'AGENT', ' agent ']) {
+    assert.throws(
+      () => transitionThread(load(), 'n-1', { status: 'verified', actor: spelled }),
+      /named human actor/,
+    );
+  }
   assert.throws(() => transitionThread(load(), 'n-1', { status: 'waived' }), /named human actor/);
 });
 

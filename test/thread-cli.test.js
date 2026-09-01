@@ -226,3 +226,60 @@ test('thread new is creation only - mutation flags on it are refused', () => {
     (err) => err.status === 2 && /exists/.test(String(err.stderr)),
   );
 });
+
+/*
+ * The accept gate at the CLI door (n-0130). The username default keeps
+ * ordinary mutations attributed; an acceptance may never ride on it - the
+ * name must be SAID, with --actor or WALKDOWN_ACTOR, or the command refuses
+ * before the gate ever sees a substitute.
+ */
+const runBare = (args, dir, env = {}) =>
+  execFileSync(process.execPath, [CLI, 'thread', ...args, '--dir', dir], {
+    encoding: 'utf8',
+    env: { ...process.env, NO_COLOR: '1', WALKDOWN_ACTOR: '', ...env },
+  }).replace(/\x1b\[[0-9;]*m/g, '');
+
+test('a no-actor verify is refused, never attributed to the machine username @rule:threads.lifecycle.claim-never-accept', () => {
+  const bp = fixture('noactor-verify', { id: 'n-0011', status: 'addressed' });
+  const before = readFileSync(join(bp, 'threads', 'n-0011.yml'), 'utf8');
+  assert.throws(
+    () => runBare(['n-0011', '--verify'], bp),
+    (err) => {
+      assert.equal(err.status, 2);
+      assert.match(String(err.stderr), /say it with --actor/);
+      assert.doesNotMatch(String(err.stderr), new RegExp(userInfo().username));
+      return true;
+    },
+  );
+  assert.equal(readFileSync(join(bp, 'threads', 'n-0011.yml'), 'utf8'), before, 'disk untouched');
+});
+
+test('a no-actor waive is refused the same way @rule:threads.lifecycle.claim-never-accept', () => {
+  const bp = fixture('noactor-waive', { id: 'n-0012', status: 'open' });
+  assert.throws(
+    () => runBare(['n-0012', '--waive', '--reason', 'x'], bp),
+    (err) => err.status === 2 && /say it with --actor/.test(String(err.stderr)),
+  );
+  const disk = readFileSync(join(bp, 'threads', 'n-0012.yml'), 'utf8');
+  assert.match(disk, /status: open/, 'the thread never moved');
+});
+
+test('the agent actor is refused in any spelling, at the CLI too @rule:threads.lifecycle.claim-never-accept', () => {
+  const bp = fixture('spelled-agent', { id: 'n-0013', status: 'addressed' });
+  for (const spelled of ['Agent', 'AGENT']) {
+    assert.throws(
+      () => runBare(['n-0013', '--actor', spelled, '--verify'], bp),
+      (err) => err.status === 2 && /named human actor/.test(String(err.stderr)),
+    );
+  }
+  const disk = readFileSync(join(bp, 'threads', 'n-0013.yml'), 'utf8');
+  assert.doesNotMatch(disk, /verified_by/, 'no spelling stood as accepter');
+});
+
+test('WALKDOWN_ACTOR is a said name and satisfies the accept gate @rule:threads.lifecycle.claim-never-accept', () => {
+  const bp = fixture('env-actor', { id: 'n-0014', status: 'addressed' });
+  const out = runBare(['n-0014', '--verify'], bp, { WALKDOWN_ACTOR: 'Env Person' });
+  assert.match(out, /by Env Person/);
+  const disk = readFileSync(join(bp, 'threads', 'n-0014.yml'), 'utf8');
+  assert.match(disk, /verified_by: Env Person/);
+});
