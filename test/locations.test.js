@@ -673,3 +673,40 @@ test('a home claimed before its spec exists owns the spec written into it @rule:
     s.cleanup();
   }
 });
+
+/*
+ * n-0131: the code row printed one fixed reason - "the git repository the
+ * spec sits in" - even when the spec sat in no repository at all, which is
+ * the DEFAULT shape for a new project. The row now says which situation it
+ * is actually in.
+ */
+test('the code row says which repository actually answered @rule:locations.answer.says-why', () => {
+  const s = scratch();
+  try {
+    // Spec inside a repository: code is that repository, and says so.
+    const repo = join(s.root, 'repo');
+    mkdirSync(join(repo, '.git'), { recursive: true });
+    blueprint(join(repo, 'blueprint'));
+    const inTree = resolveLocations({ cwd: repo });
+    assert.equal(inTree.code.path, repo);
+    assert.match(inTree.code.why, /the spec sits in/);
+
+    // The default shape for a fresh project: a repo, no spec anywhere yet.
+    const bare = join(s.root, 'bare');
+    mkdirSync(join(bare, '.git'), { recursive: true });
+    const fresh = resolveLocations({ cwd: bare });
+    assert.equal(fresh.code.path, bare, 'code still answers from the working directory');
+    assert.match(fresh.code.why, /working directory/, 'and names that decision');
+    assert.match(fresh.code.why, /outside any repository/, 'instead of a claim the screen contradicts');
+
+    // A configured spec outside any repository reads the same way.
+    const spec2 = join(s.root, 'elsewhere', 'blueprint');
+    blueprint(spec2, { project: 'demo2' });
+    configure(s.home, `projects:\n  - id: demo2\n    roots: [${bare}]\n    spec: ${spec2}\n`);
+    const outside = resolveLocations({ cwd: bare });
+    assert.equal(outside.code.path, bare);
+    assert.match(outside.code.why, /working directory/);
+  } finally {
+    s.cleanup();
+  }
+});
