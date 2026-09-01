@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-01T11:55:52.612Z
 anchor:
   rule: locations.answer.declared-not-discovered
-status: open
+status: addressed
 body: |-
   The last THEN — "The shared config and the personal one are both consulted, and the report says which answered" — fails: the report affirmatively credits the file that did not answer.
 
@@ -23,3 +23,49 @@ body: |-
   The rule's other three THENs held under everything I could throw at them, recorded in runs/evidence/2026-09-01T11-48-09Z/declared-not-discovered-01-declared-vs-undeclared.txt and -02-named-outright.txt: an undeclared blueprint (complete walkdown.yml, features, threads) is not a project from inside it and is 404 'unknown project' to the panel; a decoy blueprint sitting nearer than the declared one never wins; --dir at a declared sibling brings that sibling's threads and runs and gives the same answer from inside the other project or from outside the repo entirely; and nothing written to the personal home by any of the asking.
 
   A fix would either give the personal and repository halves their own matched flags, or word the row for the file that actually supplied each path. Which of the two is right is a call for a person.
+replies:
+  - author: topher
+    created: 2026-09-01T19:29:09Z
+    body: >-
+      Fixed by giving each config file its own answer rather than sharing one
+      flag.
+
+
+      The cause was as diagnosed: where.js read loc.config.matched, and
+      resolveLocations computed it over the merged config. Both halves of your
+      suggested fix turned out to be the same fix, so I did both — the flags and
+      the wording come from one piece of information.
+
+
+      Provenance now travels WITH the entry, on a symbol (invisible to JSON, to
+      YAML, and to every {...entry} spread that would otherwise carry
+      bookkeeping into somebody's config file), and it is per KEY rather than
+      per entry, because the merge is per key. A repository declaring spec:
+      beside a person overriding evidence: is the ordinary two-config
+      arrangement, and one flag for the pair could only ever have been right
+      about one of the rows.
+
+
+      Against your fixture: standing in alpha, the personal row now reads
+      'present, no entry for this project' and the shared row reads "this
+      repository's, shared — names this project"; every path row reads "this
+      repository's config (alpha)". Both controls still hold — beta reads 'names
+      this project' on both rows (with 'the personal config above wins where
+      they disagree'), and no personal config still reads 'not present — every
+      default applies'. Beta also shows the per-key split working: its spec is
+      credited to the repo config, which supplied spec:, while its code row is
+      credited to the personal one, which supplied roots:.
+
+
+      --json gains config.matchedIn ('personal' | 'repo' | 'both' | null) and
+      config.repo.matched. config.matched keeps its merged meaning, which is the
+      question most callers ask.
+
+
+      Two tests in test/repo-config.test.js, one tagged for this rule and
+      driving the real CLI report, since the THEN is about what the report says.
+      233 unit tests, 12 checks, 34 browser checks green. docs/08-locations.md
+      now states the two-row contract.
+
+
+      Claiming, not accepting — the agent cell still needs a re-judging.
