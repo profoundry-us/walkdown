@@ -4,6 +4,7 @@
  * neither can stand in for the other (see ownership.evidence.same-surface).
  */
 import { readFileSync } from 'node:fs';
+import { ensureAllocated, resolveLocations } from './lib/locations.js';
 import { defineConfig } from '@playwright/test';
 import { parse } from 'yaml';
 
@@ -46,6 +47,26 @@ const EXAMPLE_PORT = WD_PORT + 24;
  */
 export const EXAMPLE_ORIGIN = `http://localhost:${EXAMPLE_PORT}`;
 export const WD_ORIGIN = `http://localhost:${WD_PORT}`;
+
+/*
+ * Where failure evidence is filed for good, resolved BEFORE the pin two
+ * statements down puts the whole run under the throwaway checkspace home.
+ * Resolved after it, the reporter's copies land in a directory the next run
+ * deletes - the exact fate of the test-results/ paths they replace (n-0136).
+ * The same unpin-resolve-repin dance global-setup does for realEvidence, so
+ * new evidence is filed into the very root the checkspace symlink reads.
+ * ensureAllocated is a no-op once the home exists, and only a run of record
+ * resolves this at all.
+ */
+const prePin = process.env.WALKDOWN_HOME;
+delete process.env.WALKDOWN_HOME;
+const EVIDENCE = RECORD
+  ? ensureAllocated(
+      resolveLocations({ dir: new URL('./blueprint', import.meta.url).pathname }),
+      'evidence',
+    ).evidence.path
+  : null;
+if (prePin !== undefined) process.env.WALKDOWN_HOME = prePin;
 
 /*
  * Locations resolve from ~/.walkdown/config.yml, so pin the home at a scratch
@@ -107,7 +128,7 @@ export default defineConfig({
   globalSetup: './checks/global-setup.mjs',
   // Adopters write ['walkdown/reporter']; inside the package itself that alias
   // cannot self-resolve from Playwright's own module scope, so point at the file.
-  reporter: RECORD ? [['list'], ['./lib/playwright-reporter.js', { baseUrl: DECLARED }]] : [['list']],
+  reporter: RECORD ? [['list'], ['./lib/playwright-reporter.js', { baseUrl: DECLARED, evidenceDir: EVIDENCE }]] : [['list']],
   use: {
     /*
      * The system under test is walkdown itself, so this is walkdown's own
