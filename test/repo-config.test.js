@@ -11,6 +11,7 @@
  * an arrangement they choose rather than one they discover.
  */
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -136,4 +137,70 @@ test('the search stops at the repository and never mistakes the personal config 
     repoConfigPath(join(repo, 'deep', 'nested')),
     join(repo, '.walkdown', 'config.yml'),
   );
+});
+
+/*
+ * Two files, two rows, two answers - and each row answers for its own file.
+ *
+ * n-0144: both rows read one flag, computed over the MERGE, so a repository
+ * declaring the project printed "names this project" against a personal
+ * config that had never heard of it, and every path in the report was
+ * credited to the file that did not supply it. The wording "this machine's
+ * config" is docs/08-locations.md's phrase for the personal file; pointing a
+ * reader at it for a path the committed config chose sends them to edit a
+ * file with nothing to say about it.
+ */
+test('the report credits the config that actually answered @rule:locations.answer.declared-not-discovered', () => {
+  const { repo, home } = project({
+    repoYaml:
+      'projects:\n  - id: alpha\n    roots: [alpha]\n    spec: alpha/blueprint\n  - id: beta\n    roots: [beta]\n    spec: beta/blueprint\n',
+  });
+  for (const id of ['alpha', 'beta'])
+    mkdirSync(join(repo, id, 'blueprint'), { recursive: true });
+  // The personal config exists and names beta and a project elsewhere - but
+  // has no entry at all for alpha, which is the case that used to be misread.
+  writeFileSync(
+    join(home, 'config.yml'),
+    `projects:\n  - id: beta\n    roots: [${join(repo, 'beta')}]\n  - id: solo\n    roots: [/nowhere]\n`,
+  );
+
+  const alpha = resolveLocations({ cwd: join(repo, 'alpha') });
+  assert.equal(alpha.config.matched, true, 'it is a project');
+  assert.equal(alpha.config.matchedIn, 'repo', 'declared by the repository, not by this machine');
+  assert.equal(alpha.config.repo.matched, true);
+  assert.match(alpha.spec.why, /this repository's config/);
+
+  const beta = resolveLocations({ cwd: join(repo, 'beta') });
+  assert.equal(beta.config.matchedIn, 'both');
+  assert.equal(beta.config.repo.matched, true);
+
+  // A project only this machine knows about leaves the shared row saying so.
+  const solo = resolveLocations({ cwd: repo });
+  assert.equal(solo.config.repo.matched, false, 'the repo config has no entry rooted here');
+
+  const report = execFileSync(
+    process.execPath,
+    [new URL('../bin/walkdown.js', import.meta.url).pathname, 'where'],
+    { cwd: join(repo, 'alpha'), encoding: 'utf8', env: { ...process.env, WALKDOWN_HOME: home } },
+  );
+  assert.match(report, /present, no entry for this project/, "the personal file says it did not");
+  assert.match(report, /shared — names this project/, 'and the committed one says it did');
+  assert.doesNotMatch(report, /this machine's config \(alpha\)/);
+});
+
+/*
+ * Provenance is per KEY, not per entry, because the merge is per key: a
+ * repository declaring `spec:` beside a person overriding `roots:` is the
+ * ordinary two-config arrangement, and one flag for the pair could only ever
+ * be right about one of the rows.
+ */
+test('each path row names the file that supplied that key', () => {
+  const { repo, home } = project({
+    repoYaml: 'projects:\n  - id: shared\n    roots: [.]\n    spec: blueprint\n',
+    personalYaml: `projects:\n  - id: shared\n    evidence: ${join('/tmp', 'mine')}\n`,
+  });
+  const loc = resolveLocations({ cwd: repo });
+  assert.match(loc.spec.why, /this repository's config \(shared\)/, 'the repo declared the spec');
+  assert.match(loc.evidence.why, /this machine's config \(shared\)/, 'the person moved evidence');
+  assert.ok(home);
 });

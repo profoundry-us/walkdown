@@ -203,6 +203,13 @@ not, because neither is a claim and neither belongs in a diff.
 `walkdown where` prints the resolver's answer for every path, with the reason each was
 chosen, and writes nothing. `walkdown where <kind>` prints one path alone, for scripts.
 
+Where two configs are in play, each answers for itself: the personal row and the shared
+row each say whether *that* file names the project, and each path's reason names the file
+that supplied it — "this machine's config" for the personal one, "this repository's
+config" for the committed one. A repository declaring the spec while a person overrides
+where evidence lives is the ordinary arrangement, and the report says so key by key
+(`config.matchedIn` and `config.repo.matched` in `--json`).
+
 **Evidence is fully wired.** It is written to the resolved root, and served from it — and
 because a run record's `runs/evidence/…` is a *logical key* rather than a filesystem path,
 moving evidence needs no run record edited, which the append-only law would have forbidden

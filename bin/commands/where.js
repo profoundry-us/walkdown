@@ -41,28 +41,39 @@ export function run(args) {
   }
 
   console.log(`walkdown where — ${loc.id}\n`);
+  /*
+   * Each file answers for ITSELF. The two rows used to share one flag, which
+   * was computed over the merge - so a repository declaring the project lit
+   * up the personal file's row as "names this project" even where the
+   * personal file had never heard of it, and the alternative wording was
+   * unreachable whenever a repo config claimed the project (n-0144). Two
+   * files with two authors get two answers; that is the question this command
+   * exists to answer.
+   */
+  const names = loc.config.matchedIn;
   const cfg = loc.config.exists
     ? loc.config.error
       ? red(`unreadable — ${loc.config.error}`)
-      : loc.config.matched
+      : names === 'personal' || names === 'both'
         ? green('names this project')
         : dim('present, no entry for this project')
     : dim('not present — every default applies');
   console.log(`  ${'config'.padEnd(9)} ${loc.config.path}`);
   console.log(`  ${''.padEnd(9)} ${cfg}`);
-  /*
-   * The shared half, when a project ships one. Printed as its own row rather
-   * than folded into the line above: they are two files with two authors, and
-   * "which of these said so" is exactly the question this command exists to
-   * answer.
-   */
   if (loc.config.repo) {
     console.log(`  ${''.padEnd(9)} ${loc.config.repo.path}`);
+    const shared = "this repository's, shared";
     console.log(
       `  ${''.padEnd(9)} ${
         loc.config.repo.error
           ? red(`unreadable — ${loc.config.repo.error}`)
-          : dim("this repository's, shared — the personal config above wins over it")
+          : loc.config.repo.matched
+            ? green(
+                names === 'both'
+                  ? `${shared} — names this project too; the personal config above wins where they disagree`
+                  : `${shared} — names this project`,
+              )
+            : dim(`${shared} — no entry for this project`)
       }`,
     );
   }
