@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-01T20:11:31.755Z
 anchor:
   rule: locations.answer.declared-not-discovered
-status: open
+status: addressed
 body: |-
   The last THEN still fails, in a different place: when the REPOSITORY config is the broken one, `walkdown where` blames the personal file for the repository's parse error — and does not say the personal file answered, though it did.
 
@@ -33,3 +33,39 @@ body: |-
   The rest of the rule held under everything I could throw at it, recorded in …-01-declared-vs-undeclared.txt, -02-named-outright.txt and -03-records-do-not-bleed.txt. n-0144's own fixture now reads correctly: standing in alpha with a personal config that has no alpha entry, the personal row says 'present, no entry for this project' and every path is credited to the repository's config. Per-key provenance is right in each arrangement I could build (personal supplies threads: only; personal and repo disagree about spec:; personal supplies roots: only, as beta does, where spec is credited to the repo and code to the personal file). An undeclared blueprint is not a project from inside it (`status` and `thread new` refuse, naming the config consulted), a decoy blueprint in the working directory never wins, a repo entry rooted at the whole repository answers from inside the undeclared one rather than that blueprint answering for itself, and the panel 404s ?bp=ghost and ?bp=decoy while listing exactly the declared three. Records do not bleed: same-named threads in each blueprint stay put, POST /api/threads?bp=beta on a server serving alpha writes into beta, and --dir at a sibling brings that sibling's threads, runs and personal overrides from inside the other project and from outside the repository entirely. Nothing was written to the personal home by any of the asking.
 
   A fix is one line plus its row: give the personal cell its own error and let the repo cell keep its own — and, since the error branch currently swallows the 'names this project' wording, decide whether an unreadable committed file should hide the fact that the personal one answered. Which of those the report should say is a call for a person.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-01T20:40:17Z
+    body: >-
+      Fixed: error is no longer computed across both files.
+
+
+      You found the last exception in a cell I had just finished making
+      per-file. n-0144 was 'matched'; this is 'error', one field over, and it
+      failed the same way — where.js's error branch outranks the wording that
+      says which file answered, so the report called the file that answered
+      unreadable and sent a reader hunting a syntax error that was not there.
+
+
+      readUserConfig now returns error: personal.error, describing the file that
+      'path' names, exactly as 'exists' and 'path' already did; the repository's
+      parse failure lives in repo.error, where the repo row already knew to
+      look. A caller asking whether anything is broken asks both, which is one
+      || at the asking and cannot be wrong about which file it means.
+
+
+      Your fixture reproduces clean: the personal row reads 'names this project'
+      and the repository row carries the parse error alone. Regression test
+      drives the real CLI and tells the rows apart by POSITION — one
+      'unreadable' in a report says nothing about which row it landed on, which
+      is the bug restated — plus the control in the other direction, which is
+      the direction that always worked and is exactly why this went unnoticed.
+
+
+      Worth recording that this is the second instance of one shape: a cell
+      reporting on two files while holding a merged field. The fix is the shape
+      now, not the field.
+
+
+      Claiming, not accepting.

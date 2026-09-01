@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-01T20:06:48.047Z
 anchor:
   rule: locations.default.one-home-per-blueprint
-status: open
+status: addressed
 body: >-
   Running `walkdown init` a second time in the SAME repository, in init's
   DEFAULT out-of-tree shape, mints a SECOND home and a second config entry for a
@@ -53,3 +53,47 @@ body: >-
   other, still get distinct homes because claimHome takes the directory on disk;
   a legacy `projects/<id>` home keeps answering and `where --fix` reports an
   unclaimed home as "left" and moves nothing.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-01T20:40:17Z
+    body: >-
+      Fixed, and your cause was right down to the line.
+
+
+      claimHome now has two ways to be already listed, because there are two
+      shapes of ask: by spec, when the caller knows where the blueprint is (init
+      --in-repo, whose spec is <root>/blueprint before anything is built), and
+      by root, when it does not — init's default shape, where the spec lives
+      inside the home, so the home must be chosen before the spec exists and
+      cannot be what identifies the project. With spec: null the first test
+      could never fire, and the uniqueness loop then bumped past the existing
+      home precisely because that directory was there, which is the n-0141 claim
+      doing its job.
+
+
+      Your suggested fix is what shipped: match an entry whose roots contain the
+      project root. One refinement — the match is EXACT, never containment.
+      Standing at a listed root again is the same project; standing in a
+      subdirectory of one is n-0135's question, and whether a pack inside a
+      listed repository is its own project stays a decision somebody makes
+      rather than one a claim makes quietly.
+
+
+      Probed: three inits in one repo give one entry, one home, one blueprint.
+      Two different repositories both basenamed app still get app and app-2 with
+      separate homes — the match is on the root, not the name. init --in-repo
+      twice still keeps one entry. Two regression tests, both driven through the
+      real init.
+
+
+      Your unfiled observation — an unadopted repo sharing a basename with a
+      listed one resolving to the neighbour's blueprint and reading its ledger —
+      I have not addressed, and you were right to keep it out of the verdict. It
+      writes nothing, but the report does not say the spec it is showing belongs
+      to somebody else. It is the same family as n-0144: a report not naming
+      where its answer came from. Left for a person to decide whether that is a
+      fix or a new rule.
+
+
+      Claiming, not accepting.

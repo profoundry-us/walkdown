@@ -1,0 +1,61 @@
+id: q-0149
+kind: question
+author: topher
+via: agent
+created: 2026-09-01T20:39:43.914Z
+anchor:
+  rule: locations.answer.declared-not-discovered
+status: open
+body: >-
+  Should `serve --dir` scope the server to the blueprint it names?
+
+
+  Today it does not, and every judging prompt is relying on the assumption that
+  it does. The governance lines in walkdown.yml tell an agent to make a scratch
+  copy and serve it with --dir precisely so the app under review cannot write to
+  the real ledger. But the served process still resolves every OTHER listed
+  blueprint, and the panel's own chooser offers them — so the isolation is one
+  click deep.
+
+
+  Measured just now against a scratch copy of this blueprint, served on :4933
+  with --dir .walkdown/tmp/hazard-0901/blueprint, with a marker thread n-9999
+  planted in the copy:
+
+    GET /api/blueprint              147 threads, has n-9999: true   (the copy)
+    GET /api/blueprint?bp=walkdown  146 threads, has n-9999: false  (the REAL ledger)
+    GET /api/blueprint?bp=example     6 threads, has n-9999: false
+
+  The chooser lists walkdown and example, both marked "current": false — so the
+  served scratch is not offered as an option at all, while the two things it
+  exists to protect are. An agent told to serve a copy, browsing its own board,
+  is one selection away from filing notes and verdicts into the real blueprint.
+  Nothing was mutated through that path while measuring; the marker file was
+  removed and the scratch cleaned.
+
+
+  Raised by an independent judge of threads.lifecycle.claim-never-accept
+  (2026-09-01), which also reported the same session's browser pane being
+  navigated onto another judge's server mid-run — the same hazard from the other
+  direction: a surface that does not say which blueprint it is about.
+
+
+  Three shapes this could take, and which is right is a decision rather than a
+  fix:
+
+
+  1. --dir pins the server. ?bp= for anything else is 404, and the chooser shows
+  the one blueprint. Strongest, and it makes the governance line true; costs the
+  multi-project panel whenever --dir is used.
+
+  2. --dir marks the server disposable. The chooser still lists others but they
+  are read-only, or the panel says plainly that the served blueprint is a copy.
+
+  3. Leave the behaviour, fix the prompts. Judging prompts stop implying
+  isolation --dir does not provide, and say to pin WALKDOWN_HOME and stay off
+  the chooser.
+
+
+  I lean 1: the governance text already describes it, and an isolation an agent
+  has to remember is not one. But it changes what --dir means for everybody, not
+  only for judges, so it is yours.

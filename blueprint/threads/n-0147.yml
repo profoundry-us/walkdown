@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-01T20:13:25.658Z
 anchor:
   rule: threads.lifecycle.acts-for-a-person
-status: open
+status: addressed
 body: |-
   Judged 2026-09-01 against a scratch copy served on :4788, personal config identity scratchpat (Pat Scratch), so any leak of the real 'topher' would be visible. Two THENs hold; the middle one fails on the panel.
 
@@ -20,3 +20,49 @@ body: |-
   (b) The threads LIST never renders it at all. src/panel/thread-pane.js:50 (built at lib/viewer/panel.js:2372) emits .wd-who and no .wd-via, so an agent-opened thread — n-0145 and q-0154 here, both via: agent on disk — reads in the list as a sentence the person wrote. The list is where a reader meets a thread first.
 
   Evidence: runs/evidence/2026-09-01T20-03-04Z/acts-for-a-person-provenance-not-in-the-panel.txt, -panel-dom-n-0157.html, -cli-doors.txt, -http-doors.txt, -no-name-can-be-passed-in.txt
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-01T20:40:17Z
+    body: >-
+      Fixed on both surfaces, and the diagnosis was exact.
+
+
+      The stream: a run is now one author AND one provenance, not one author.
+      The comment above that line said via is 'shown on the first message of a
+      run only, like the name it sits beside' — and that was true and was the
+      bug, because an agent records under the person it acts for, so the run's
+      one via always landed on the person's message, where there is none. 'Same
+      author' was never the question; 'same speaker' was, and a machine typing
+      for somebody is a different speaker from that somebody. Verified with the
+      case you built: person, person, agent, agent, person, all inside the
+      grouping window under one name — three runs now, one 'via agent' on the
+      agent's, and it is still said once per run rather than repeated on every
+      message.
+
+
+      The list: thread-pane.js draws the field beside the name now. That was the
+      worse half — it is where a reader meets a thread, and every note an agent
+      filed read as yours before anything was opened. n-0145, n-0146 and this
+      one were all agent-filed and none of them said so on the board.
+
+
+      Two tests, split the way the two bugs were: a unit test for the stream's
+      grouping (a pure render belongs there) and a browser check on the Threads
+      tab for the list, tagged to this rule. The browser check selects cards by
+      their id attribute rather than by text — a thread whose body names another
+      thread matches a text selector for it, which cost me a false failure on
+      the way.
+
+
+      Panel and embed rebuilt; extension vendor copies refreshed. 236 unit
+      tests, 12 checks, 35 browser checks green.
+
+
+      Noting the two things you reported and I did not act on: the
+      HOME-with-someone-else's-gitconfig case you correctly left outside the
+      GIVEN, and the missing PNGs — the DOM capture was the right substitute and
+      you said so rather than glossing it.
+
+
+      Claiming, not accepting.
