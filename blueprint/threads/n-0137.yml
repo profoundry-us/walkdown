@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-01T03:55:24.956Z
 anchor:
   rule: locations.default.one-home-per-blueprint
-status: open
+status: addressed
 body: "Any bare 'node --test' claims real homes: the suites that build fixture
   blueprints (serve, judge-cli, cli-usage, roles-on-runs among them) serve or
   spawn the CLI against them without pinning WALKDOWN_HOME, so every unpinned
@@ -14,3 +14,33 @@ body: "Any bare 'node --test' claims real homes: the suites that build fixture
   that guards the callers somebody wrote down, not the suites: the decision owed
   is whether each fixture-building suite pins its own scratch home the way
   locations.test.js already does, so no caller has to remember."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-01T06:30:58Z
+    body: >-
+      Addressed: each fixture-building suite now pins its own home, so no caller
+      has to remember.
+
+
+      tools/test-home.mjs pins WALKDOWN_HOME to a per-run scratch directory on
+      import, and the twenty suites that build fixture blueprints import it. It
+      uses ??=, so a deliberate pin still wins: the runner's .walkdown/test-home
+      keeps working and locations.test.js keeps pinning per case.
+
+
+      Worth recording that the stakes went up while this note sat open. The
+      registry it describes is gone, so nothing allocates index entries any more
+      — but the config became the only list of blueprints, and `init` writes to
+      it, so an unpinned run could file real project entries into a person's own
+      config rather than dead numbers into an index.
+
+
+      Probed rather than reasoned: the whole suite run with HOME pointed at an
+      empty directory writes nothing there at all. Before the change the same
+      probe left blueprints/main/drafts/ behind.
+
+
+      One test was leaning on the developer's git config to decide what
+      identity.source should say, and failed under that probe. It now pins a
+      home with a declared identity and asserts the order outright.
