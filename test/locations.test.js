@@ -778,20 +778,21 @@ test('a legacy name-keyed home keeps answering until a person moves it @rule:loc
     // An existing ledger is a fact; a resolver never moves one on its own.
     assert.equal(loc.evidence.path, join(s.home, 'projects', 'demo', 'evidence'));
     assert.match(loc.evidence.why, /legacy home/);
-    assert.match(loc.evidence.why, /walkdown migrate/);
+    assert.match(loc.evidence.why, /walkdown where --fix/);
   } finally {
     s.cleanup();
   }
 });
 
 /*
- * And what `migrate` does about that now. It used to RENAME - allocate a
- * number, move the records into it, re-point the config - which is the one
- * thing the rule says a tool may not do on its own. There is nothing to
- * allocate any more, so migration is only the sentence: the config learns
- * where the records already are, and the disk is left alone.
+ * And what `walkdown where --fix` does about that. It was `walkdown migrate`,
+ * and before that it RENAMED - allocate a number, move the records into it,
+ * re-point the config - which is the one thing the rule says a tool may not do
+ * on its own. There is nothing to allocate any more, so the whole job is the
+ * sentence: the config learns where the records already are, and the disk is
+ * left alone.
  */
-test('migrate writes down where the records already are, and moves nothing @rule:locations.default.one-home-per-blueprint', () => {
+test('--fix writes down where the records already are, and moves nothing @rule:locations.default.one-home-per-blueprint', () => {
   const s = scratch();
   try {
     const repo = join(s.root, 'repo');
@@ -804,7 +805,7 @@ test('migrate writes down where the records already are, and moves nothing @rule
 
     const out = execFileSync(
       process.execPath,
-      [new URL('../bin/walkdown.js', import.meta.url).pathname, 'migrate'],
+      [new URL('../bin/walkdown.js', import.meta.url).pathname, 'where', '--fix'],
       { cwd: s.root, encoding: 'utf8', env: { ...process.env, WALKDOWN_HOME: s.home, NO_COLOR: '1' } },
     );
     assert.match(out, /nothing moved/);
@@ -918,12 +919,35 @@ test('the code root is named or inferred from the spec, never guessed from the w
 });
 
 /*
+ * `walkdown migrate` is the old spelling and still works. The name promised a
+ * great deal more than it did from the day it stopped renaming directories -
+ * folding four addresses into a config is `where` finishing its own sentence,
+ * not a migration - but it is a published command name and somebody's notes
+ * still say to run it, so it says where it went rather than answering old
+ * advice with a usage error.
+ */
+test('the old migrate spelling still works and says where it went', () => {
+  const s = scratch();
+  try {
+    configure(s.home, 'projects: []\n');
+    const out = execFileSync(
+      process.execPath,
+      [new URL('../bin/walkdown.js', import.meta.url).pathname, 'migrate'],
+      { cwd: s.root, encoding: 'utf8', env: { ...process.env, WALKDOWN_HOME: s.home, NO_COLOR: '1' } },
+    );
+    assert.match(out, /walkdown where --fix/);
+  } finally {
+    s.cleanup();
+  }
+});
+
+/*
  * The orphan clause, probed the hard way (n-0129, second judging): a legacy
  * home no config entry claims stays put even when it happens to CONTAIN a
- * spec - contents are not a claim, and migrate moved two such homes on the
- * strength of theirs.
+ * spec - contents are not a claim, and the old migrate moved two such homes
+ * on the strength of theirs.
  */
-test('migrate never moves an unclaimed home, spec inside or not @rule:locations.default.one-home-per-blueprint', () => {
+test('--fix never moves an unclaimed home, spec inside or not @rule:locations.default.one-home-per-blueprint', () => {
   const s = scratch();
   try {
     // An orphan that self-describes: full blueprint inside, no config entry.
@@ -931,7 +955,7 @@ test('migrate never moves an unclaimed home, spec inside or not @rule:locations.
     configure(s.home, 'projects: []\n');
     const out = execFileSync(
       process.execPath,
-      [new URL('../bin/walkdown.js', import.meta.url).pathname, 'migrate'],
+      [new URL('../bin/walkdown.js', import.meta.url).pathname, 'where', '--fix'],
       { cwd: s.root, encoding: 'utf8', env: { ...process.env, WALKDOWN_HOME: s.home, NO_COLOR: '1' } },
     );
     assert.match(out, /no config entry claims it/);

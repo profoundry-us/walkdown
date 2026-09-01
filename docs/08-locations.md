@@ -59,7 +59,8 @@ so the config is the whole record of where a blueprint's records are.
 
 There used to be a second file for this: `blueprints/index.yml`, an allocator handing out
 numbered directories, consulted on every resolve and kept in step with the config by hand
-and by `walkdown migrate`. It existed because walkdown could not assume a blueprint had
+and by what is now `walkdown where --fix`. It existed because walkdown could not assume a
+blueprint had
 been written down, and because a *person* maintained the config and should not have to do
 allocation bookkeeping. Neither premise survives — every blueprint is declared (n-0133)
 and `init` writes the declaration — so the entry simply carries its home, and the index is
@@ -76,10 +77,17 @@ a no-op.
 Two rules keep it honest. **Asking writes nothing** — `walkdown where` on a blueprint
 nobody has listed derives a home from its id and leaves the disk alone; there is nothing
 left to allocate, so answering cannot write. **An existing ledger is a fact** — a legacy
-`projects/<id>/` home keeps answering, marked as legacy, and `walkdown migrate` writes its
-address into the config rather than moving it. Migration moves nothing at all now: a home
+`projects/<id>/` home keeps answering, marked as legacy, and `walkdown where --fix` writes
+its address into the config rather than moving it. That fold moves nothing at all: a home
 no entry claims is reported and left standing, and the index file is left for its owner to
 delete.
+
+`--fix` is the one thing `where` does that is not asking, and it lives there because it
+answers the same question — these are homes full of records the config does not name, so
+`where` cannot see them and nothing else will look. It was `walkdown migrate`, a name that
+promised a great deal more than it did from the day it stopped renaming directories; the
+old spelling still works and says where it went. The bare command keeps its promise: it
+allocates nothing, claims nothing, and leaves the disk as it found it.
 
 ## What each artifact is, and where it starts
 
@@ -389,7 +397,8 @@ exists to prevent — it is not made honest by being convenient.
 Existing projects keep working untouched: an in-repo `blueprint/` is still found by the
 directory search, with or without a personal config. For a project that wants to move:
 
-- `walkdown where` prints every resolved path and which rule resolved it
+- `walkdown where` prints every resolved path and which rule resolved it; `--fix` folds
+  the homes an older layout left behind into the config, moving none of them
 - `walkdown move <what> --to <where>` relocates one kind of artifact and rewrites the
   config, leaving the ledger's contents alone — a run record is never edited, and moving
   the file it lives in is not editing it

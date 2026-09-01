@@ -22,9 +22,8 @@ Usage:
   walkdown thread new --rule <id> --body <text> [--kind note|question]
                       [--screen <id>] [--element <sel>] [--as-agent] [--dir <blueprint>] [--json]
   walkdown serve [--dir <blueprint>] [--port <n>]
-  walkdown migrate
   walkdown claims [--dir <blueprint>] [--url <address>] [--json]
-  walkdown where [<kind>] [--dir <blueprint>] [--json]
+  walkdown where [<kind>] [--dir <blueprint>] [--json] [--fix]
   walkdown move <kind> --to <path> [--dir <blueprint>]
   walkdown pointer [--dir <project-root>] [--into <file>]
   walkdown skills [--into <dir>] [--project] [--force]
@@ -51,12 +50,6 @@ Commands:
           first step toward prompt-driven judging (docs/11-architecture.md):
           the prompt ends where the reader begins, and this judges nothing.
 
-  migrate Write the homes an older layout left behind into the config, so the
-          records in them keep being found. Moves nothing and renames nothing:
-          an existing ledger is a fact, and relocating one is a decision a
-          person makes with 'walkdown move'. A home no entry claims is
-          reported and left standing.
-
   sweep   Ask for the named tiers to be judged again from scratch. Verdicts
           recorded before the sweep read as stale, so a rule nobody gets back
           to is legible as unfinished rather than as passing. Nothing is
@@ -80,7 +73,13 @@ Commands:
           repository a run's git_sha comes from. With a kind (spec, code,
           runs, threads, evidence, drafts) prints that one path alone, for
           scripts. Reads the personal config and the working tree, and
-          writes nothing at all.
+          writes nothing at all. --fix is the exception, and the only one:
+          it writes the homes an older layout left behind into the config so
+          the records in them keep being found, then prints the report. It
+          moves nothing and renames nothing - an existing ledger is a fact,
+          and relocating one is a decision a person makes with 'walkdown
+          move'. A home no entry claims is reported and left standing.
+          (This was 'walkdown migrate', which still works and says so.)
   move    Move one kind of record somewhere else and record the choice in
           ~/.walkdown/config.yml. Moves files; never edits one. Refuses a
           destination that already holds records rather than interleaving
@@ -109,6 +108,7 @@ Options:
   --write          hash: write missing/stale hashes back to feature files
   --why <reason>   sweep: why the whole thing is being asked for again (required)
   --tiers <list>   sweep: comma-separated tiers to sweep (default: checks,agent)
+  --fix            where: fold an older layout's homes into the config
   --json           status/lint/threads/thread: machine-readable output
 `;
 
