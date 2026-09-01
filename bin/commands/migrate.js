@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, renameSync } from 'node:fs';
 import { join } from 'node:path';
-import { allocateHome, configPath, expand, readUserConfig, registryDir, walkdownHome } from '../../lib/locations.js';
+import { allocateHome, configPath, expand, readUserConfig, registryDir, setHomeSpec, walkdownHome } from '../../lib/locations.js';
 import { dim, green, yellow } from '../../lib/report/tty.js';
 import { end } from './context.js';
 
@@ -65,6 +65,24 @@ export async function run() {
     moved++;
     console.log(`  ${green('→ moved')}    ${legacy}`);
     console.log(dim(`             now ${allocated.path}`));
+
+    /*
+     * The index must say where this home's spec lives, or the next
+     * spec-keyed ask misses the entry and allocates the same blueprint a
+     * second home with the first one's records stranded (n-0129). Two
+     * shapes: a configured spec that sat INSIDE the legacy directory follows
+     * it to the new address; the config-less shape the old defaults produced
+     * (an entry of only id and roots) holds its spec at blueprint/ inside
+     * the home it just became.
+     */
+    const specWas = allocated.spec ? expand(allocated.spec) : null;
+    const specNow =
+      specWas && (specWas === legacy || specWas.startsWith(legacy + '/'))
+        ? allocated.path + specWas.slice(legacy.length)
+        : existsSync(join(allocated.path, 'blueprint', 'walkdown.yml'))
+          ? join(allocated.path, 'blueprint')
+          : null;
+    if (specNow) setHomeSpec(allocated.name, specNow);
 
     /*
      * The person's config spoke in the old address; keep it true. Surgical,

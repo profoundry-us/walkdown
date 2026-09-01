@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -613,6 +613,62 @@ test('migrate renumbers a config-claimed home and re-points the config @rule:loc
     // And the resolver now answers from the allocation.
     const loc = resolveLocations({ cwd: repo });
     assert.equal(loc.evidence.path, join(s.home, 'blueprints', '0001-demo', 'evidence'));
+  } finally {
+    s.cleanup();
+  }
+});
+
+/*
+ * n-0129: an index entry carrying only `root:` can never be found by a
+ * spec-keyed ask, so `--dir <its own spec>` allocated the same blueprint a
+ * second home and stranded the first one's records. The moment a home is
+ * known to hold a spec, the index must say which.
+ */
+test('migrate records the spec a moved home holds, so the blueprint is never homed twice @rule:locations.default.one-home-per-blueprint', () => {
+  const s = scratch();
+  try {
+    const repo = join(s.root, 'repo');
+    mkdirSync(join(repo, '.git'), { recursive: true });
+    // The old default-out shape: the spec LIVES in the legacy home, and the
+    // config entry claims it implicitly - id and roots, nothing else.
+    blueprint(join(s.home, 'projects', 'demo', 'blueprint'), { project: 'demo' });
+    mkdirSync(join(s.home, 'projects', 'demo', 'evidence'), { recursive: true });
+    writeFileSync(join(s.home, 'projects', 'demo', 'evidence', 'shot.png'), 'x');
+    configure(s.home, ['projects:', '  - id: demo', `    roots: [${repo}]`, ''].join('\n'));
+    execFileSync(
+      process.execPath,
+      [new URL('../bin/walkdown.js', import.meta.url).pathname, 'migrate'],
+      { encoding: 'utf8', env: { ...process.env, WALKDOWN_HOME: s.home, NO_COLOR: '1' } },
+    );
+    const spec = join(s.home, 'blueprints', '0001-demo', 'blueprint');
+    const index = readFileSync(join(s.home, 'blueprints', 'index.yml'), 'utf8');
+    assert.match(index, new RegExp(`spec: ${spec.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`));
+    // One home, whichever way it is asked for.
+    const fromRepo = resolveLocations({ cwd: repo });
+    assert.equal(fromRepo.evidence.path, join(s.home, 'blueprints', '0001-demo', 'evidence'));
+    assert.equal(fromRepo.pendingHome, null);
+    const byDir = resolveLocations({ dir: spec });
+    assert.equal(byDir.evidence.path, join(s.home, 'blueprints', '0001-demo', 'evidence'));
+    assert.equal(byDir.pendingHome, null, 'a spec-keyed ask finds the SAME home, never a second');
+  } finally {
+    s.cleanup();
+  }
+});
+
+test('a home claimed before its spec exists owns the spec written into it @rule:locations.default.one-home-per-blueprint', () => {
+  const s = scratch();
+  try {
+    const repo = join(s.root, 'repo');
+    mkdirSync(join(repo, '.git'), { recursive: true });
+    // What init does: claim the home for the spec it is about to write.
+    const loc = ensureAllocated(resolveLocations({ cwd: repo }), 'spec');
+    const index = readFileSync(join(s.home, 'blueprints', 'index.yml'), 'utf8');
+    assert.match(index, /spec: /, 'the claim already names the spec the home will hold');
+    blueprint(loc.spec.path, { project: 'repo' });
+    // What serve --dir does next: ask by the spec path outright.
+    const byDir = resolveLocations({ dir: loc.spec.path });
+    assert.equal(byDir.drafts.path, join(s.home, 'blueprints', '0001-repo', 'drafts'));
+    assert.equal(byDir.pendingHome, null, 'serving the spec finds the claimed home, never 0002');
   } finally {
     s.cleanup();
   }
