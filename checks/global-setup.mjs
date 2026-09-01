@@ -104,6 +104,31 @@ export default function globalSetup() {
    * a screen - without which the panel has no pins to push into the frame and
    * a pin placed there would vanish the moment it was filed.
    */
+  /*
+   * Declare the copies. The server used to WALK the checkspace for
+   * `walkdown.yml` files; it reads a config now (n-0133), and without one
+   * here the walk upward finds walkdown's OWN committed config instead - so
+   * the panel would list the real blueprint beside the disposable one and
+   * `?bp=` could select the ledger this suite exists not to touch.
+   *
+   * Ids match what the discovery used to produce, because the fixture page
+   * defaults `data-bp` to `blueprint`.
+   */
+  mkdirSync(join(CHECKSPACE, '.walkdown'), { recursive: true });
+  writeFileSync(
+    join(CHECKSPACE, '.walkdown', 'config.yml'),
+    [
+      'projects:',
+      '  - id: blueprint',
+      '    roots: [.]',
+      '    spec: blueprint',
+      '  - id: example/blueprint',
+      '    roots: [example]',
+      '    spec: example/blueprint',
+      '',
+    ].join('\n'),
+  );
+
   const sb = join(CHECKSPACE, 'blueprint', 'storyboard.yml');
   writeFileSync(
     sb,

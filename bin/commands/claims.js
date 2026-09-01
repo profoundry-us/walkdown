@@ -1,6 +1,7 @@
 import { dirname, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
-import { discoverBlueprints, findBlueprintDir, loadBlueprint } from '../../lib/blueprint.js';
+import { listedBlueprints, loadBlueprint } from '../../lib/blueprint.js';
+import { resolveLocations } from '../../lib/locations.js';
 import { blueprintForUrl, claimsOf, findCollisions } from '../../lib/claims.js';
 import { end } from './context.js';
 
@@ -18,15 +19,13 @@ export function run(args) {
     args,
     options: { dir: { type: 'string' }, url: { type: 'string' }, json: { type: 'boolean' } },
   });
-  const dir = values.dir ?? findBlueprintDir();
+  const at = resolveLocations({ dir: values.dir });
+  const dir = at.spec?.missing ? null : at.spec?.path;
   if (!dir) {
-    console.error(
-      'No blueprint found: no walkdown.yml in ./, ./blueprint/, or ancestors. Use --dir.',
-    );
+    console.error(`No blueprint here. Nothing in ${at.config.repo?.path ?? at.config.path} claims this directory.`);
     return end(2);
   }
-  const baseRoot = dirname(resolve(dir));
-  const projects = discoverBlueprints(baseRoot).map((p) => ({
+  const projects = listedBlueprints({ cwd: dirname(resolve(dir)) }).map((p) => ({
     id: p.id,
     blueprint: loadBlueprint(p.dir),
   }));

@@ -386,21 +386,21 @@ stories:
 
       - id: panel.start.choose-a-blueprint
         origin: thread:n-0017
-        statement: When the folder holds more than one blueprint, the panel asks which one this site is, showing each by name and by a description the blueprint itself carries.
+        statement: When the config lists more than one blueprint, the panel asks which one this site is, showing each by name and by a description the blueprint itself carries.
         signoff: [eng, product]
         screens: [choose-blueprint]
         steps:
           given:
-            - A server whose folder holds several blueprints
+            - A config listing several blueprints
           when:
             - The panel starts with no choice recorded for this origin
           then:
-            - Every blueprint is listed with its name and its own description
+            - Every listed blueprint is offered, with its name and its own description
             - Choosing one loads it and remembers the choice for that origin
             - A page that declares its blueprint is never asked
-            - Test fixtures are not offered - a fixture is an input to the suite, not a project anyone reviews
-            - The same list stays reachable later, so the folder or the blueprint can be changed without reinstalling anything
-          statement_hash: sha256:9f0ded825795
+            - Nothing is offered that nobody wrote down - the list is the config's, so a fixture or a vendored copy is absent by never having been declared rather than by being filtered out
+            - The same list stays reachable later, so the choice can be changed without reinstalling anything
+          statement_hash: sha256:6aa78c304c03
 
   - id: panel.rules
     title: The rules are one tap away, and so is the way back

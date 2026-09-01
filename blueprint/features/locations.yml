@@ -121,6 +121,8 @@ stories:
           statement_hash: sha256:0ba6f381a575
 
       - id: locations.answer.nearest-blueprint-wins
+        retired: >-
+          Answered by deleting the question (2026-09-01, q-0138). Walkdown no longer searches the tree for blueprints, so there is no tree answer to arbitrate against a configured one and no precedence left to state. The half of this that survived - a repository may hold several blueprints without them bleeding into each other - is now locations.answer.declared-not-discovered, which carries it without the contest.
         origin: prd
         statement: A blueprint found in the working tree beats a configured entry rooted above it, and a blueprint named outright is answered by the entry that owns that blueprint or by none at all - because a repository can hold several, and an entry rooted at the whole tree would otherwise answer for its own siblings and report one project's spec beside another project's ledger.
         verify: [checks]
@@ -133,6 +135,23 @@ stories:
             - The inner blueprint answers, with its own runs and threads
             - The outer entry still answers where the tree offers no blueprint, which is what an out-of-tree spec is for
           statement_hash: sha256:8abbb2442baa
+
+      - id: locations.answer.declared-not-discovered
+        origin: thread:q-0138
+        statement: Every blueprint walkdown answers for is one somebody wrote down - in the repository's shared config or the person's own - and never one it went looking for, so a repository may hold several without them bleeding into each other and naming one outright never inherits another's records.
+        verify: [checks]
+        signoff: [eng, product]
+        steps:
+          given:
+            - A repository holding two blueprints, each declared, and a third nobody declared
+          when:
+            - The location is resolved from inside each of them, and one is named outright
+          then:
+            - Each declared blueprint answers for itself, with its own runs and threads
+            - The undeclared one is not a project at all, however much it looks like one from the outside
+            - A blueprint named on the command line brings its own records, never those of the project the caller is standing in
+            - The shared config and the personal one are both consulted, and the report says which answered
+          statement_hash: sha256:af12fc97131b
 
   - id: locations.keeping
     title: A ledger already written is never orphaned or edited

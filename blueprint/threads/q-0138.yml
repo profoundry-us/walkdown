@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-01T04:42:00.080Z
 anchor:
   rule: locations.answer.nearest-blueprint-wins
-status: answered
+status: incorporated
 body: >-
   Does the deeper-sibling exception survive the always-config decision on
   n-0133?
@@ -72,3 +72,12 @@ replies:
       has. It is far easier to make everything the same than to keep it smart
       and configurable, and one list somebody wrote down beats three mechanisms
       that each guess.
+  - author: Topher Fangio
+    created: 2026-09-01T05:45:37Z
+    body: Folded into the rules in this phase.
+      locations.answer.nearest-blueprint-wins is retired with the reason
+      pointing here, and the half of it that survived — a repository may hold
+      several blueprints without them bleeding into each other — is now
+      locations.answer.declared-not-discovered, which states it as a property of
+      things being written down rather than as the outcome of a contest between
+      the tree and the config.

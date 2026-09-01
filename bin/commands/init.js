@@ -1,6 +1,6 @@
-import { join, resolve } from 'node:path';
+import { basename, join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
-import { ensureAllocated, resolveLocations } from '../../lib/locations.js';
+import { ensureAllocated, rememberProject, resolveLocations } from '../../lib/locations.js';
 import { dim, green, yellow } from '../../lib/report/tty.js';
 
 export async function run(args) {
@@ -24,6 +24,19 @@ export async function run(args) {
     ? join(root, 'blueprint')
     : ensureAllocated(resolveLocations({ cwd: root }), 'spec').spec.path;
   const results = scaffold(root, { force: values.force, specDir });
+  /*
+   * And write it down. Walkdown does not find blueprints by looking any more,
+   * so a spec nobody declared is a directory rather than a project - init
+   * would otherwise hand somebody a blueprint that `walkdown status` denies
+   * the existence of. This is also why there is no adopt command: the entry
+   * is written where it belongs, and a clone reads it from the repository.
+   */
+  const entry = rememberProject({
+    id: basename(root),
+    root,
+    spec: specDir,
+    inRepo: values['in-repo'],
+  });
   const MARK = {
     created: green('+ created'),
     updated: green('~ updated'),
@@ -48,6 +61,8 @@ export async function run(args) {
    * confusing - and half of what the setup wizard exists to do is this
    * sentence.
    */
+  if (entry.action === 'written') console.log(`  ${green('+ listed')}   ${entry.path}`);
+
   const where = placed[0];
   if (where) {
     const outside = where.action === 'spec-outside';

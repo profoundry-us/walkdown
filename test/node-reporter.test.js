@@ -24,6 +24,16 @@ test('node:test reporter records tagged tests as a hash-stamped run', () => {
       '        verify: [checks]',
     ].join('\n'),
   );
+  /*
+   * Declared, because the reporter resolves through the config now rather
+   * than walking up for a `walkdown.yml` (n-0133). A repository config beside
+   * the fixture, which is what a project shipping its own blueprint has.
+   */
+  mkdirSync(join(root, '.walkdown'), { recursive: true });
+  writeFileSync(
+    join(root, '.walkdown', 'config.yml'),
+    'projects:\n  - id: node-fixture\n    roots: [.]\n    spec: blueprint\n',
+  );
   // The tag is assembled so this file's source never contains a literal
   // rule ref — walkdown's own coverage lint greps test/ for them.
   const tag = '@rule' + ':demo.main.adds';

@@ -91,6 +91,26 @@ before(async () => {
     }),
   );
 
+  /*
+   * Declared, not discovered. The server used to walk the fixture root for
+   * `walkdown.yml` files; it reads the list now, so the fixture writes one -
+   * a repository config beside the blueprints it describes (n-0133, n-0140).
+   */
+  mkdirSync(join(root, '.walkdown'), { recursive: true });
+  writeFileSync(
+    join(root, '.walkdown', 'config.yml'),
+    [
+      'projects:',
+      '  - id: main',
+      '    roots: [.]',
+      '    spec: blueprint',
+      '  - id: sibling',
+      '    roots: [sibling]',
+      '    spec: sibling/blueprint',
+      '',
+    ].join('\n'),
+  );
+
   server = createWalkdownServer(bp);
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
   base = `http://127.0.0.1:${server.address().port}`;
@@ -140,7 +160,7 @@ test('the review page is handed its front door and its blueprint', async () => {
   assert.doesNotMatch(html, /__FRONT_DOOR__|__BLUEPRINT__/);
   // No app base declared in this fixture, so the front door is the design.
   assert.match(html, /'\/prototype\/home\.html'/);
-  assert.match(html, /'blueprint'/);
+  assert.match(html, /'main'/);
 });
 
 test('POST /api/threads writes a thread file; screen resolved from URL', async () => {
@@ -664,15 +684,17 @@ test('multi-project: sibling blueprints are discovered and ?bp= switches, member
 
   const home = await (await fetch(`${base}/api/blueprint`)).json();
   const ids = home.projects.map((p) => p.id).sort();
-  assert.deepEqual(ids, ['blueprint', 'sibling/blueprint']);
-  assert.ok(home.projects.find((p) => p.id === 'blueprint').current);
+  // The config entry's id, not a path relative to wherever this server was
+  // started — the same string on every machine.
+  assert.deepEqual(ids, ['main', 'sibling']);
+  assert.ok(home.projects.find((p) => p.id === 'main').current);
 
   const sibling = await (
-    await fetch(`${base}/api/blueprint?bp=${encodeURIComponent('sibling/blueprint')}`)
+    await fetch(`${base}/api/blueprint?bp=sibling`)
   ).json();
   assert.equal(sibling.project, 'sibling-app');
   assert.equal(sibling.rows[0].rule, 'f.s.one');
-  assert.ok(sibling.projects.find((p) => p.id === 'sibling/blueprint').current);
+  assert.ok(sibling.projects.find((p) => p.id === 'sibling').current);
 
   assert.equal((await fetch(`${base}/api/blueprint?bp=../../etc`)).status, 404);
 });
@@ -682,7 +704,7 @@ test('a pin files against the page\u2019s own project, not the server\u2019s def
   // is about where a WRITE lands, which is the part a mis-routed pin gets wrong.
   mkdirSync(join(root, 'sibling', 'blueprint', 'threads'), { recursive: true });
   const res = await (
-    await fetch(`${base}/api/threads?bp=${encodeURIComponent('sibling/blueprint')}`, {
+    await fetch(`${base}/api/threads?bp=sibling`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ kind: 'note', body: 'Belongs to the sibling.', author: 'tester' }),

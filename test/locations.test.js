@@ -37,20 +37,43 @@ function blueprint(at, { project = 'demo', dirs = [] } = {}) {
   return at;
 }
 
+/*
+ * Declare a blueprint the way every project now must: walkdown stopped
+ * walking the tree for `walkdown.yml`, so a blueprint nobody wrote down is
+ * not a project (n-0133). Most of these tests used to lean on that walk.
+ */
+const declare = (home, { id = 'demo', roots, spec, ...rest }) =>
+  configure(
+    home,
+    ['projects:', `  - id: ${id}`, `    roots: [${roots}]`, `    spec: ${spec}`,
+     ...Object.entries(rest).map(([k, v]) => `    ${k}: ${v}`), ''].join('\n'),
+  );
+
 const configure = (home, yaml) => writeFileSync(join(home, 'config.yml'), yaml);
 
-test('with no config, a blueprint in the tree wins and its records stay put', () => {
+/*
+  * This test used to be called "with no config, a blueprint in the tree wins".
+  * It does not any more, and that reversal is the whole of n-0133: a
+  * blueprint nobody declared is not a project, and the records of one that
+  * IS declared still stay where they already are.
+  */
+test('a declared blueprint answers, and its existing records stay put', () => {
   const s = scratch();
   try {
     const repo = join(s.root, 'repo');
     blueprint(join(repo, 'blueprint'), { dirs: ['runs', 'threads'] });
+    declare(s.home, { roots: repo, spec: join(repo, 'blueprint') });
     const loc = resolveLocations({ cwd: repo });
     assert.equal(loc.id, 'demo');
     assert.equal(loc.spec.path, join(repo, 'blueprint'));
     assert.equal(loc.runs.path, join(repo, 'blueprint', 'runs'));
     assert.match(loc.runs.why, /already in the blueprint/);
-    // Nothing was written to find that out.
-    assert.equal(loc.config.exists, false);
+
+    // And an undeclared one is nothing at all, however much it looks like a
+    // project from the outside.
+    const stray = join(s.root, 'stray');
+    blueprint(join(stray, 'blueprint'), { project: 'stray' });
+    assert.equal(resolveLocations({ cwd: stray }).spec.missing, true);
   } finally {
     s.cleanup();
   }
@@ -66,6 +89,7 @@ test('runs and threads follow the spec; evidence and drafts never do @rule:locat
   try {
     const repo = join(s.root, 'repo');
     const bp = blueprint(join(repo, 'blueprint')); // no subdirectories at all
+    declare(s.home, { roots: repo, spec: bp });
     const loc = resolveLocations({ cwd: repo });
     assert.equal(loc.runs.path, join(bp, 'runs'));
     assert.equal(loc.threads.path, join(bp, 'threads'));
@@ -104,7 +128,10 @@ test('a blanket default never orphans a ledger the blueprint already holds @rule
     const repo = join(s.root, 'repo');
     blueprint(join(repo, 'blueprint'), { dirs: ['runs'] });
     writeFileSync(join(repo, 'blueprint', 'runs', 'r.json'), '{}');
-    configure(s.home, `defaults:\n  runs: ${join(s.home, 'elsewhere', '{id}')}\n`);
+    configure(
+      s.home,
+      `defaults:\n  runs: ${join(s.home, 'elsewhere', '{id}')}\nprojects:\n  - id: demo\n    roots: [${repo}]\n    spec: ${join(repo, 'blueprint')}\n`,
+    );
     const loc = resolveLocations({ cwd: repo });
     assert.equal(loc.runs.path, join(repo, 'blueprint', 'runs'));
     assert.match(loc.runs.why, /already in the blueprint \(1 file\)/);
@@ -169,7 +196,7 @@ test('--dir beats every configured answer', () => {
  * you are STANDING describes a different project, and letting it keep applying
  * reported one project's spec beside another's ledger.
  */
-test('--dir does not inherit the ledger of whichever project you are standing in @rule:locations.answer.nearest-blueprint-wins', () => {
+test('--dir does not inherit the ledger of whichever project you are standing in @rule:locations.answer.declared-not-discovered', () => {
   const s = scratch();
   try {
     const repo = join(s.root, 'repo');
@@ -211,9 +238,15 @@ test('--dir does not inherit the ledger of whichever project you are standing in
  * walkdown-example. An entry rooted at the whole tree must not answer for a
  * sibling inside it, or standing in one project reports another's ledger.
  */
-test('the nearest blueprint wins over an entry rooted at the whole tree @rule:locations.answer.nearest-blueprint-wins', () => {
+test('two packs in one repository each answer for themselves @rule:locations.answer.declared-not-discovered', () => {
   const s = scratch();
   try {
+    /*
+     * This used to be "the nearest blueprint wins over an entry rooted at the
+     * whole tree" - the tree beating the config for a monorepo sibling. There
+     * is no contest now: each pack is declared, so each simply answers, and
+     * the one nobody declared is not a project (q-0138).
+     */
     const repo = join(s.root, 'repo');
     blueprint(join(repo, 'blueprint'), { project: 'outer' });
     const inner = blueprint(join(repo, 'example', 'blueprint'), {
@@ -227,17 +260,32 @@ test('the nearest blueprint wins over an entry rooted at the whole tree @rule:lo
         '  - id: outer',
         `    roots: [${repo}]`,
         `    spec: ${join(repo, 'blueprint')}`,
+        '  - id: inner',
+        `    roots: [${join(repo, 'example')}]`,
+        `    spec: ${inner}`,
         '',
       ].join('\n'),
     );
 
     const outside = resolveLocations({ cwd: repo });
-    assert.equal(outside.id, 'outer', 'at the root, the entry answers');
+    assert.equal(outside.id, 'outer', 'at the root, the outer entry answers');
 
     const within = resolveLocations({ cwd: join(repo, 'example') });
-    assert.equal(within.id, 'inner');
+    assert.equal(within.id, 'inner', 'the more specific entry answers inside it');
     assert.equal(within.spec.path, inner);
     assert.equal(within.runs.path, join(inner, 'runs'), "and never the outer project's ledger");
+
+    /*
+     * And a third pack nobody wrote down does not quietly become a project.
+     * It sits inside the outer entry's roots, so the outer entry answers for
+     * it - where the old tree walk would have found its `walkdown.yml` and
+     * handed it a project of its own that no one had declared.
+     */
+    const undeclared = join(repo, 'ghost');
+    blueprint(join(undeclared, 'blueprint'), { project: 'ghost' });
+    const ghost = resolveLocations({ cwd: undeclared });
+    assert.equal(ghost.id, 'outer', 'claimed by the entry whose roots contain it');
+    assert.notEqual(ghost.spec.path, join(undeclared, 'blueprint'));
   } finally {
     s.cleanup();
   }
@@ -289,7 +337,13 @@ test('a broken config is reported, not thrown past', () => {
     configure(s.home, 'projects: [oops\n');
     const loc = resolveLocations({ cwd: repo });
     assert.ok(loc.config.error, 'the parse failure is carried, not swallowed');
-    assert.equal(loc.spec.path, join(repo, 'blueprint'), 'and the tree still answers');
+    /*
+     * And nothing is invented in its place. The tree used to rescue a broken
+     * config by answering from it; a config nobody can read is now a project
+     * nobody can resolve, which is the honest report rather than a silent
+     * fallback to something that merely looks right (n-0133).
+     */
+    assert.equal(loc.spec.missing, true, 'an unreadable config resolves nothing');
   } finally {
     s.cleanup();
   }
@@ -422,14 +476,14 @@ test('every path is reported with the decision that chose it @rule:locations.ans
     blueprint(join(repo, 'blueprint'), { dirs: ['runs'] });
     configure(
       s.home,
-      `projects:\n  - id: demo\n    roots: [${repo}]\n    evidence: ${join(s.home, 'ev')}\n`,
+      `projects:\n  - id: demo\n    roots: [${repo}]\n    spec: ${join(repo, 'blueprint')}\n    evidence: ${join(s.home, 'ev')}\n`,
     );
     const loc = resolveLocations({ cwd: repo });
 
     for (const kind of ['spec', ...KINDS])
       assert.ok(loc[kind].why?.length > 8, `${kind} gave no reason: ${loc[kind].why}`);
     // And the reasons name WHICH decision, so a person knows what to argue with.
-    assert.match(loc.spec.why, /working tree/);
+    assert.match(loc.spec.why, /config/);
     assert.match(loc.runs.why, /already in the blueprint/);
     assert.match(loc.threads.why, /beside the spec/);
     assert.match(loc.evidence.why, /config/);
@@ -452,6 +506,7 @@ test('asking where things live creates nothing at all @rule:locations.answer.ask
   try {
     const repo = join(s.root, 'repo');
     blueprint(join(repo, 'blueprint')); // no runs, threads or drafts
+    declare(s.home, { roots: repo, spec: join(repo, 'blueprint') });
     const before = tree(s.root);
 
     const loc = resolveLocations({ cwd: repo });
@@ -461,7 +516,8 @@ test('asking where things live creates nothing at all @rule:locations.answer.ask
     assert.match(said, new RegExp(loc.evidence.path), 'it names a directory that is not there');
     assert.ok(!existsSync(loc.evidence.path), 'and did not create it on being asked twice');
     assert.deepEqual(tree(s.root), before, 'the disk is exactly as it was found');
-    assert.equal(readUserConfig({ cwd: repo }).exists, false, 'including the personal config');
+    // Nothing about the personal config either — the tree comparison above
+    // covers the whole scratch, home included, byte for byte.
   } finally {
     s.cleanup();
   }
@@ -543,6 +599,21 @@ test('two repositories with one basename get homes of their own @rule:locations.
     const b = join(s.root, 'two', 'app');
     blueprint(join(a, 'blueprint'), { project: 'app' });
     blueprint(join(b, 'blueprint'), { project: 'app' });
+    // Both declared, since a blueprint nobody wrote down is not a project.
+    // Their IDS collide on purpose - that is the case this rule is about.
+    configure(
+      s.home,
+      [
+        'projects:',
+        '  - id: app',
+        `    roots: [${a}]`,
+        `    spec: ${join(a, 'blueprint')}`,
+        '  - id: app',
+        `    roots: [${b}]`,
+        `    spec: ${join(b, 'blueprint')}`,
+        '',
+      ].join('\n'),
+    );
     // Asking is free: both answers are tentative and nothing was written.
     const askA = resolveLocations({ cwd: a });
     assert.match(askA.evidence.why, /allocated on first write/);
@@ -566,6 +637,7 @@ test('a legacy name-keyed home keeps answering until migrate renumbers it @rule:
   try {
     const repo = join(s.root, 'repo');
     blueprint(join(repo, 'blueprint'), { project: 'demo' });
+    declare(s.home, { roots: repo, spec: join(repo, 'blueprint') });
     mkdirSync(join(s.home, 'projects', 'demo', 'evidence'), { recursive: true });
     writeFileSync(join(s.home, 'projects', 'demo', 'evidence', 'shot.png'), 'x');
     const loc = resolveLocations({ cwd: repo });
@@ -690,13 +762,22 @@ test('a home claimed before its spec exists owns the spec written into it @rule:
 test('the code row says which repository actually answered @rule:locations.answer.says-why', () => {
   const s = scratch();
   try {
-    // Spec inside a repository: code is that repository, and says so.
+    // Spec inside a repository, declared with roots: the entry named the
+    // code, and the report says that rather than implying it was discovered.
     const repo = join(s.root, 'repo');
     mkdirSync(join(repo, '.git'), { recursive: true });
     blueprint(join(repo, 'blueprint'));
+    declare(s.home, { roots: repo, spec: join(repo, 'blueprint') });
     const inTree = resolveLocations({ cwd: repo });
     assert.equal(inTree.code.path, repo);
-    assert.match(inTree.code.why, /the spec sits in/);
+    assert.match(inTree.code.why, /config \(demo\)/);
+
+    // An entry that names a spec but no roots still gets a truthful answer,
+    // from the repository the spec itself sits in.
+    configure(s.home, `projects:\n  - id: demo\n    spec: ${join(repo, 'blueprint')}\n`);
+    const bySpec = resolveLocations({ dir: join(repo, 'blueprint') });
+    assert.equal(bySpec.code.path, repo);
+    assert.match(bySpec.code.why, /the spec sits in/);
 
     // The default shape for a fresh project: a repo, no spec anywhere yet.
     const bare = join(s.root, 'bare');
