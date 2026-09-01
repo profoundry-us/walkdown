@@ -73,3 +73,30 @@ replies:
       blueprints. If the config is the list, the registry should be demoted to
       what it actually is — where an entry's out-of-tree records live, keyed by
       that entry — rather than a second directory of projects.
+  - author: Topher Fangio
+    created: 2026-09-01T04:51:10Z
+    body: >-
+      Third item settled, and further than 'demoted': the registry is deleted.
+      ~/.walkdown/blueprints/index.yml goes, and the config entry carries its
+      own home — one list, one file, nothing to keep in sync with anything.
+
+
+      The registry only ever existed to hand out collision-free directory names
+      with no human involved, because walkdown could not assume a project had
+      been written down. Both halves of that premise are gone. Every blueprint
+      is written down now, by decision; and the writer is an agent, not a person
+      at an editor — so there is no 'hand-written config' to be spared the
+      bookkeeping. The asymmetry that justified a second machine-owned file
+      (yours to declare, walkdown's to allocate) does not describe how this file
+      is actually maintained. init writes the entry and the home path in it, and
+      where becomes a formality that reads back what the file already says.
+
+
+      What this raises, and it is the last thing to decide before building: the
+      same file carries identity — username, name, roles — and that is the file
+      naming which humans may accept work. An agent-written file that says who
+      the humans are needs the n-0130 boundary restated at the file level:
+      agents may write project entries and never the identity block, or identity
+      moves out. Two files split by AUTHORITY is a different thing from two
+      files split by bookkeeping, and only the second one is what we are
+      deleting here.
