@@ -4,7 +4,7 @@ author: Topher Fangio
 created: 2026-09-01T04:54:57.686Z
 anchor:
   rule: threads.lifecycle.claim-never-accept
-status: open
+status: addressed
 body: >-
   Decision: identity is read, never supplied. It comes from the config, an agent
   may never change it without explicit permission, and it may never be
@@ -96,3 +96,59 @@ replies:
       human sitting at a TTY, and would make 'which verifies did a person type
       themselves' answerable later. It is one field and it is not required by
       anything above — worth a yes or no rather than a design.
+  - author: topher
+    via: agent
+    created: 2026-09-01T06:27:16Z
+    body: >-
+      Done, in the shape the reply above describes, plus the provenance field —
+      a yes.
+
+
+      Identity is read: lib/identity.js defaultActor() now consults the personal
+      config's identity: block first (username, name, roles) and falls back to
+      git and the OS only where it says nothing. The block was inert; it is the
+      source of truth now.
+
+
+      The overrides are gone: --actor and WALKDOWN_ACTOR from
+      bin/commands/thread.js, WALKDOWN_ACTOR from bin/commands/sweep.js, both
+      reporters, and the RSpec gem, which now reads the same config block.
+      --actor becomes --as-agent, a boolean.
+
+
+      Provenance is a separate column, as the optional idea proposed. The author
+      stays the human; via: agent sits beside it on the thread, on the reply,
+      and in the report. This reply is the first record written that way.
+
+
+      The gate moved with it. Once an agent records under the person it acts
+      for, actor can no longer answer "was a machine driving?", so
+      checkTransition now refuses verified/waived on via: agent as well as on an
+      actor spelled "agent" — the flag that says a machine typed this is the one
+      that removes its ability to accept. And n-0130's guess/said distinction
+      outlived the flag that expressed it: acceptance now requires a DECLARED
+      identity, so a machine that only has a login name to go on is refused and
+      told where to say who you are.
+
+
+      Two deviations you should know about, both mine to confirm or reverse:
+
+
+      body.actor over HTTP (lib/api.js:309) is still there. The panel is a
+      person sitting at a browser, and its identity control — an editable
+      username and full name, rule panel.identity.default-actor with two browser
+      checks — is that person naming themselves. Removing it makes the control
+      decorative. The CLI and MCP doors are shut, which is what the decision
+      named; the panel door is a human at a UI. Say if you want it shut too, and
+      the identity control becomes a config editor instead.
+
+
+      n-0121's open question is answered in passing: a write with no author is
+      refused rather than defaulted to the machine username. It was the one
+      policy with four defaulting bugs behind it, and refusing is the answer you
+      filed on that thread.
+
+
+      The rule's statement is amended, so its agent verdict is honestly stale
+      and awaits a judging. threads.lifecycle.acts-for-a-person is added for the
+      half the old statement had no words for; both checks cells pass.
