@@ -80,6 +80,13 @@ governance:
 
 - walkdown shells out; it does not know what RSpec is. `{id}`, `{results}`, and target
   `env` are the only substitutions.
+- **Commands run in the CODE, not beside the spec.** Those are the same directory only
+  while the blueprint lives in the repository, and `walkdown init` puts it outside by
+  default — so the cwd is the code root: the `roots` of this project's config entry, or
+  the spec's own parent when there is no entry. `walkdown where` reports it as `code`.
+- `{results}` expands to an **absolute** path under that root, `.walkdown/results.out`
+  by default. Name another with `runner.results_file` when a framework insists; a
+  relative value is resolved against the code root, never the working directory.
 - **Targets** reuse whatever base-URL mechanism the project already has (Capybara
   `APP_HOST`, Playwright `baseURL` env). The target name flows into the run record, which
   is what powers multi-environment status ("passes locally, never passed on staging").

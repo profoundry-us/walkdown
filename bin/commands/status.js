@@ -152,7 +152,7 @@ export function run(args) {
   }
   const derived = deriveStatus(blueprint, {
     target: values.target,
-    checkRefs: checkedRuleIds(blueprint.config, blueprint.projectRoot),
+    checkRefs: checkedRuleIds(blueprint.config, blueprint.codeRoot ?? blueprint.projectRoot),
   });
   const { targets, rows } = derived;
 

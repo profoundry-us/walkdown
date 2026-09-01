@@ -699,13 +699,62 @@ test('the code row says which repository actually answered @rule:locations.answe
     assert.match(fresh.code.why, /working directory/, 'and names that decision');
     assert.match(fresh.code.why, /outside any repository/, 'instead of a claim the screen contradicts');
 
-    // A configured spec outside any repository reads the same way.
+    /*
+     * A configured spec outside any repository lands on the same directory,
+     * but for a better reason: the entry's `roots` NAMED it. Saying "the
+     * working directory's repository" there was true by accident - it would
+     * have said the same thing standing anywhere else with a repo in it.
+     */
     const spec2 = join(s.root, 'elsewhere', 'blueprint');
     blueprint(spec2, { project: 'demo2' });
     configure(s.home, `projects:\n  - id: demo2\n    roots: [${bare}]\n    spec: ${spec2}\n`);
     const outside = resolveLocations({ cwd: bare });
     assert.equal(outside.code.path, bare);
-    assert.match(outside.code.why, /working directory/);
+    assert.match(outside.code.why, /config \(demo2\)/);
+    assert.match(outside.code.why, /where the code is/);
+  } finally {
+    s.cleanup();
+  }
+});
+
+/*
+ * `codeRoot` is a different question from `code`, and the difference is the
+ * last resort. Issue #7: with the spec outside the repository, dirname(spec)
+ * became the walkdown home and `walkdown run` shelled out where there was no
+ * suite. Falling back to the cwd's repository would fix that by guessing -
+ * and would run a project's tests inside whatever checkout you were standing
+ * in. This is the chain that refuses to guess.
+ */
+test('the code root is named or inferred from the spec, never guessed from the working directory @rule:locations.answer.says-why', () => {
+  const s = scratch();
+  try {
+    // Named by the entry: true from anywhere, not just from inside the repo.
+    const repo = join(s.root, 'work');
+    mkdirSync(join(repo, '.git'), { recursive: true });
+    const away = join(s.root, 'away', 'blueprint');
+    blueprint(away, { project: 'named' });
+    configure(s.home, `projects:\n  - id: named\n    roots: [${repo}]\n    spec: ${away}\n`);
+    assert.equal(resolveLocations({ cwd: repo }).codeRoot, repo, 'the entry says where the code is');
+    assert.equal(
+      resolveLocations({ dir: away }).codeRoot,
+      repo,
+      'and still says so when the blueprint is named outright from elsewhere',
+    );
+
+    // No entry, spec outside any repository: the spec's own parent, NOT the
+    // repository the caller happens to be standing in.
+    const s2 = scratch();
+    try {
+      const loose = join(s2.root, 'loose', 'blueprint');
+      blueprint(loose, { project: 'loose' });
+      const standing = join(s2.root, 'unrelated');
+      mkdirSync(join(standing, '.git'), { recursive: true });
+      const loc = resolveLocations({ dir: loose, cwd: standing });
+      assert.equal(loc.codeRoot, join(s2.root, 'loose'));
+      assert.notEqual(loc.codeRoot, standing, 'never the checkout you happen to be in');
+    } finally {
+      s2.cleanup();
+    }
   } finally {
     s.cleanup();
   }
