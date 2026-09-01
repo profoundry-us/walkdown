@@ -59,3 +59,40 @@ body: >-
   conversation — but the mechanism is the one being removed here, and under the
   new design relaying a human's decision needs a shape that does not involve
   typing their name.
+replies:
+  - author: Topher Fangio
+    created: 2026-09-01T05:04:04Z
+    body: >-
+      Withdrawing the interactive-confirmation recommendation above. It modelled
+      the agent as an adversary; the right model is a delegate. An agent told to
+      record something is acting on the human's behalf, so recording it under
+      the human's identity is correct rather than a loophole — and the claim
+      that removing the override 'makes things worse' was wrong for the same
+      reason. There is nothing to make worse: the agent inheriting the human's
+      name IS the intended behaviour when the human asked for the thing.
+
+
+      So the shape is smaller than anything proposed here, and needs no new
+      mechanism at all. The actor comes from the config's identity, always. The
+      single deviation worth supporting is an agent marking something as its OWN
+      voice — a note or a question it originated rather than relayed — and that
+      is a boolean, not a name: --actor <name> becomes --as-agent,
+      WALKDOWN_ACTOR goes, body.actor over HTTP goes. You can never type a name;
+      you can only step down from the human to the agent.
+
+
+      What makes that safe is already built. checkTransition (lib/threads.js:40)
+      refuses verified and waived when the actor is 'agent', case-insensitively,
+      from the n-0130 fix. So the one flag an agent can set is precisely the one
+      that removes its ability to accept work: the marker can only ever subtract
+      authority, never claim it. Nothing else is needed.
+
+
+      One optional idea, recorded and not argued for, because it may be exactly
+      the cleverness this project is cutting: attribution and provenance are
+      different columns. 'Who decided' is the human; 'how it arrived' is the
+      agent session. A separate provenance field would let a record read
+      'verified by Topher Fangio, via agent' without the agent lying or the
+      human sitting at a TTY, and would make 'which verifies did a person type
+      themselves' answerable later. It is one field and it is not required by
+      anything above — worth a yes or no rather than a design.
