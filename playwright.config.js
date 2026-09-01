@@ -4,7 +4,7 @@
  * neither can stand in for the other (see ownership.evidence.same-surface).
  */
 import { readFileSync } from 'node:fs';
-import { ensureAllocated, resolveLocations } from './lib/locations.js';
+import { resolveLocations } from './lib/locations.js';
 import { defineConfig } from '@playwright/test';
 import { parse } from 'yaml';
 
@@ -55,16 +55,13 @@ export const WD_ORIGIN = `http://localhost:${WD_PORT}`;
  * deletes - the exact fate of the test-results/ paths they replace (n-0136).
  * The same unpin-resolve-repin dance global-setup does for realEvidence, so
  * new evidence is filed into the very root the checkspace symlink reads.
- * ensureAllocated is a no-op once the home exists, and only a run of record
- * resolves this at all.
+ * Only a run of record resolves this at all; the directory is made by
+ * whoever first writes into it.
  */
 const prePin = process.env.WALKDOWN_HOME;
 delete process.env.WALKDOWN_HOME;
 const EVIDENCE = RECORD
-  ? ensureAllocated(
-      resolveLocations({ dir: new URL('./blueprint', import.meta.url).pathname }),
-      'evidence',
-    ).evidence.path
+  ? resolveLocations({ dir: new URL('./blueprint', import.meta.url).pathname }).evidence.path
   : null;
 if (prePin !== undefined) process.env.WALKDOWN_HOME = prePin;
 

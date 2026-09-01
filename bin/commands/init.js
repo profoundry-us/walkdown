@@ -1,6 +1,6 @@
 import { basename, join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
-import { ensureAllocated, rememberProject, resolveLocations } from '../../lib/locations.js';
+import { rememberProject, resolveLocations } from '../../lib/locations.js';
 import { dim, green, yellow } from '../../lib/report/tty.js';
 
 export async function run(args) {
@@ -22,7 +22,7 @@ export async function run(args) {
    */
   const specDir = values['in-repo']
     ? join(root, 'blueprint')
-    : ensureAllocated(resolveLocations({ cwd: root }), 'spec').spec.path;
+    : resolveLocations({ cwd: root }).spec.path;
   const results = scaffold(root, { force: values.force, specDir });
   /*
    * And write it down. Walkdown does not find blueprints by looking any more,
@@ -61,7 +61,8 @@ export async function run(args) {
    * confusing - and half of what the setup wizard exists to do is this
    * sentence.
    */
-  if (entry.action === 'written') console.log(`  ${green('+ listed')}   ${entry.path}`);
+  if (entry.action === 'written')
+    console.log(`  ${green('+ listed')}   ${entry.path}  ${dim(`as \`${entry.id}\``)}`);
 
   const where = placed[0];
   if (where) {

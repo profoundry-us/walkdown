@@ -50,24 +50,36 @@ makes together.
 The question for each artifact is therefore not "is it big?" but **"would a second person
 need to see this?"**
 
-### The numbered home registry
+### One home per blueprint
 
-Inside the personal home, each blueprint's records live in a directory **allocated** to
-it — `~/.walkdown/blueprints/0001-walkdown/` — with `blueprints/index.yml` as the
-allocation record. The number is the identity and the slug is only there for the person
-reading a directory listing, because a *name*-keyed home collides exactly where the
-default-out design matters most: thirty monorepo packs all resolve to the repository's
-basename, and two blueprints inside one pack have nowhere to go at all (thread n-0124).
+Inside the personal home, each blueprint's records live in a directory of their own —
+`~/.walkdown/blueprints/<name>/` — **named by the config entry that owns them**. The entry
+carries its own `evidence:` and `drafts:` paths, written once when the project is listed,
+so the config is the whole record of where a blueprint's records are.
 
-Three rules keep it honest. **Asking allocates nothing** — `walkdown where` on a fresh
-project reports a tentative home, worded as "allocated on first write", and leaves the
-disk alone. **The first write claims the number** — init, a thread, a draft, a run, or
-`walkdown judge` printing an evidence path someone will use by hand; through the review
-server the claim happens when the server *starts*, never inside a browser request, so
-requests still write only to the resolved threads, drafts and runs directories. **An
-existing ledger is a fact** — a legacy `projects/<id>/` home keeps answering, marked as
-legacy, until `walkdown migrate` renumbers it and re-points the personal config; a
-legacy home no config entry claims is reported and left standing, never guessed at.
+There used to be a second file for this: `blueprints/index.yml`, an allocator handing out
+numbered directories, consulted on every resolve and kept in step with the config by hand
+and by `walkdown migrate`. It existed because walkdown could not assume a blueprint had
+been written down, and because a *person* maintained the config and should not have to do
+allocation bookkeeping. Neither premise survives — every blueprint is declared (n-0133)
+and `init` writes the declaration — so the entry simply carries its home, and the index is
+no longer read.
+
+What the numbers were *for* still has to hold, because a name-keyed home collides exactly
+where the default-out design matters most: thirty monorepo packs all named by their
+repository's basename, and two blueprints inside one pack (thread n-0124). That is settled
+when the entry is written rather than on every resolve. `rememberProject` asks whether
+*this spec* is listed — not whether the name is taken — so listing a second `app` writes a
+second entry under `app-2` with a home of its own, and listing the same blueprint twice is
+a no-op.
+
+Two rules keep it honest. **Asking writes nothing** — `walkdown where` on a blueprint
+nobody has listed derives a home from its id and leaves the disk alone; there is nothing
+left to allocate, so answering cannot write. **An existing ledger is a fact** — a legacy
+`projects/<id>/` home keeps answering, marked as legacy, and `walkdown migrate` writes its
+address into the config rather than moving it. Migration moves nothing at all now: a home
+no entry claims is reported and left standing, and the index file is left for its owner to
+delete.
 
 ## What each artifact is, and where it starts
 
@@ -206,9 +218,9 @@ which is destructive and nobody's decision but the owner's.
 **Everything is wired.** `loadBlueprint` reads runs and threads from the resolved
 locations, and `run-record.js` and `draft.js` write to them — so every reader and writer
 in the project agrees with `walkdown where` by construction rather than by coincidence.
-`findBlueprintDir` moved into `locations.js`, since finding a blueprint is a question
-about where things are, and leaving it in `blueprint.js` would have made the two modules
-import each other.
+Finding a blueprint is a question about where things are, so it is `locations.js` that
+answers it — and since walkdown stopped searching the tree, the answer is a lookup in the
+config rather than a walk (n-0133).
 
 `walkdown move <kind> --to <path>` relocates one kind and records the choice. It moves
 files and never edits one; a destination that already holds records is refused rather than
