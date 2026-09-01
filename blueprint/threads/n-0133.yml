@@ -1,0 +1,21 @@
+id: n-0133
+kind: note
+author: agent
+created: 2026-09-01T01:05:28.925Z
+anchor:
+  rule: locations.default.nothing-in-the-tree
+status: open
+body: "Sitting 2026-09-01, observed while judging this rule (run
+  2026-09-01T00-11-44Z-local-01): after a default init, the out-of-tree spec is
+  invisible to most of the CLI. `walkdown serve`, `status`, and `lint` run from
+  the probe repo all answered 'No blueprint found ... Use --dir', while
+  `walkdown where` from the same directory resolved the spec correctly —
+  bin/commands/context.js loadOrExit only searches the tree upward
+  (findBlueprintDir) and never consults the locations resolver. Nothing lands in
+  the tree, so this rule held; but the person the default-out design serves runs
+  `walkdown status` as their second command and is told there is no blueprint
+  they just created. The fix direction is a decision, not an agent's call:
+  loadOrExit falling back to resolveLocations' spec answer would make every
+  command agree with `where`, but it changes which blueprint ambient commands
+  bind to in multi-project repos, so the nearest-blueprint-wins rules should get
+  a say."
