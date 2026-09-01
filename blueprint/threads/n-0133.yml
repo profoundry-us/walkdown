@@ -19,3 +19,23 @@ body: "Sitting 2026-09-01, observed while judging this rule (run
   command agree with `where`, but it changes which blueprint ambient commands
   bind to in multi-project repos, so the nearest-blueprint-wins rules should get
   a say."
+replies:
+  - author: Topher Fangio
+    created: 2026-09-01T04:41:44Z
+    body: >-
+      Decision: every command resolves where things live through one answer —
+      resolveLocations — so status, lint, serve, run, judge, sweep, thread,
+      threads and hash agree with where, move and every record-writing path.
+      loadOrExit's tree-only findBlueprintDir search goes; spec.missing is what
+      keeps 'no blueprint found' honest when nothing has been created yet.
+
+
+      And the precedence is settled in the same breath: a config entry ALWAYS
+      wins. Where an entry names a spec, that spec is the answer even when the
+      repository also holds a blueprint. Writing the entry is the act of saying
+      which blueprint this is; the tree does not get to overrule it.
+
+
+      Not to be started yet — see the question filed against
+      locations.answer.nearest-blueprint-wins, which this contradicts and which
+      must be answered first.

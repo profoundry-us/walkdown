@@ -1,0 +1,52 @@
+id: q-0138
+kind: question
+author: agent
+created: 2026-09-01T04:42:00.080Z
+anchor:
+  rule: locations.answer.nearest-blueprint-wins
+status: open
+body: >-
+  Does the deeper-sibling exception survive the always-config decision on
+  n-0133?
+
+
+  That decision says a config entry always wins over a blueprint in the
+  repository. This rule's statement says the opposite for one case: 'A blueprint
+  found in the working tree beats a configured entry rooted above it ... because
+  a repository can hold several, and an entry rooted at the whole tree would
+  otherwise answer for its own siblings and report one project's spec beside
+  another project's ledger.' The resolver implements exactly that narrow
+  exception — the tree wins only when the found blueprint sits STRICTLY DEEPER
+  than the root the entry matched on (lib/locations.js, the 'nearer' test). At
+  the entry's own root the config already wins today, which is the Case B
+  disagreement n-0133 is about.
+
+
+  So the two are not in conflict everywhere, only in the monorepo-sibling case,
+  and this repository is that case. The walkdown entry in this machine's config
+  is rooted at the whole repository (~/Development/profoundry/walkdown) and
+  example/blueprint sits inside it. Measured today: resolving from example/
+  answers example's own blueprint, 'found in the working tree'. Read literally,
+  always-config would make walkdown status run from example/ report walkdown's
+  spec beside walkdown's ledger — the precise outcome the rule was written to
+  prevent.
+
+
+  Three ways to answer, and it is a rule decision rather than an implementation
+  one:
+
+  1. Keep the exception. Always-config means 'over a blueprint at or above the
+  entry's root', which is already the resolver's behaviour — then n-0133 is
+  purely about loadOrExit catching up, and this rule needs no change at all.
+
+  2. Drop the exception. The rule's statement is reworded, its two tagged checks
+  (test/locations.test.js:172, :214) are rewritten, and a monorepo declares each
+  pack with its own entry instead of relying on the tree. Costs: rewording
+  un-signs the rule, and every sibling blueprint in a repository with a broad
+  entry silently changes which ledger it reads.
+
+  3. Keep the exception but make it loud — the tree wins, and the command says
+  which entry it declined to use and why.
+
+
+  Nothing has been built either way; n-0133 is held pending this answer.
