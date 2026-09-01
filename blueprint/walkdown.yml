@@ -10,8 +10,12 @@ description: The tool itself — the panel, the embed, and the governance that k
 # ledger's own laws, which no browser can reach. Each reporter appends its own
 # run record; they cover disjoint rules, so the ledger reads them as one.
 runner:
-  run_all: "node --test --test-reporter=./lib/node-test-reporter.js --test-reporter-destination=stdout && npx playwright test"
-  run_for_rule: "node --test --test-name-pattern='{id}' --test-reporter=./lib/node-test-reporter.js --test-reporter-destination=stdout && npx playwright test --grep '@rule:{id}'"
+  # WALKDOWN_HOME pinned on the unit half only: several suites build fixture
+  # blueprints, and unpinned they claim real homes in ~/.walkdown/blueprints/
+  # index.yml (thirteen dead entries on 2026-09-01). The browser half pins its
+  # own scratch home inside checks/global-setup.mjs and must keep it.
+  run_all: "WALKDOWN_HOME=.walkdown/test-home node --test --test-reporter=./lib/node-test-reporter.js --test-reporter-destination=stdout && npx playwright test"
+  run_for_rule: "WALKDOWN_HOME=.walkdown/test-home node --test --test-name-pattern='{id}' --test-reporter=./lib/node-test-reporter.js --test-reporter-destination=stdout && npx playwright test --grep '@rule:{id}'"
   list: "grep -rn '@rule:' test/ checks/"
   results: native
   targets:
