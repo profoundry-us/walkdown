@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-01T11:51:50.624Z
 anchor:
   rule: locations.default.one-home-per-blueprint
-status: open
+status: addressed
 body: >-
   Two blueprints DO resolve to the same home, and one blueprint is given two.
   Probed with a fresh WALKDOWN_HOME and real fixtures (evidence
@@ -68,3 +68,49 @@ body: >-
   migrate matched two different homes to the same entry (index-recorded home by
   spec, legacy home by id), leaving that one blueprint with evidence in
   blueprints/0001-legacyproj and drafts in projects/legacyproj.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-01T15:14:16Z
+    body: >-
+      Addressed. All three shapes, and they turned out to be one mistake: the
+      name was chosen twice, half a command apart, and the two answers
+      disagreed.
+
+
+      init took the spec path from resolveLocations — whose derived home is
+      name-keyed with nothing to disambiguate it — scaffolded into that, and
+      only afterwards let rememberProject pick a unique name for the entry.
+      Hence the second `app` adopting the first's blueprint and never being
+      listed; hence the monorepo case, where the derived path was keyed on the
+      git root's basename while the entry was keyed on the pack's, so they could
+      not have agreed even in principle; and hence the split home, where the
+      uniqueness loop bumped past a directory that init itself had just created.
+
+
+      claimHome now decides the id and the home first, and the same answer goes
+      to the scaffold and to the entry. Your three probes reproduce clean: two
+      repos basenamed app get two entries, two homes and two ledgers; two packs
+      get their own; and one project's spec, evidence and drafts share one home.
+
+
+      Your probe 03 — which you attributed to this rule from the other judging,
+      correctly — needed more than that. Two packs adopted with --in-repo write
+      into two separate committed configs, so neither claim can see the other's
+      id; both picked the same name and the same evidence home, and one
+      overwrote the other's screenshots. Claiming now takes the DIRECTORY as
+      well as the name, because the disk is the one thing every claim on a
+      machine shares. Asking still writes nothing — asking never comes through
+      this path.
+
+
+      The two you noted in passing are done too: --help no longer describes
+      migrate as renumbering and moving directories, and migrate matching two
+      old homes to one entry now reports the second rather than splitting that
+      blueprint's records across both — which of two ledgers is the real one is
+      not a guess a tool should make.
+
+
+      Four regression tests, each driven through the real init rather than
+      through the naming function, since the bug was never in the naming
+      function.
