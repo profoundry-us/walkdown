@@ -49,7 +49,24 @@ export function run(args) {
         : dim('present, no entry for this project')
     : dim('not present — every default applies');
   console.log(`  ${'config'.padEnd(9)} ${loc.config.path}`);
-  console.log(`  ${''.padEnd(9)} ${cfg}\n`);
+  console.log(`  ${''.padEnd(9)} ${cfg}`);
+  /*
+   * The shared half, when a project ships one. Printed as its own row rather
+   * than folded into the line above: they are two files with two authors, and
+   * "which of these said so" is exactly the question this command exists to
+   * answer.
+   */
+  if (loc.config.repo) {
+    console.log(`  ${''.padEnd(9)} ${loc.config.repo.path}`);
+    console.log(
+      `  ${''.padEnd(9)} ${
+        loc.config.repo.error
+          ? red(`unreadable — ${loc.config.repo.error}`)
+          : dim("this repository's, shared — the personal config above wins over it")
+      }`,
+    );
+  }
+  console.log('');
 
   const row = (label, cell) => {
     const missing = cell.missing ? yellow('  (does not exist yet)') : '';

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import test from 'node:test';
 import { formatHash, specFiles, specHash } from '../lib/hash.js';
 import { ensureAllocated, KINDS, readUserConfig, resolveLocations } from '../lib/locations.js';
@@ -336,8 +336,15 @@ test('the same words in a different feature file are a different spec @rule:loca
 /* ---- what a project gets by default ------------------------------------- */
 
 const CLI = new URL('../bin/walkdown.js', import.meta.url).pathname;
-const walkdown = (home, args) =>
+/*
+ * `cwd` matters as much as the home now: a repository config is found by
+ * walking up from where the command RUNS, so a subprocess left in walkdown's
+ * own checkout would read walkdown's committed config while claiming to be a
+ * scratch project somewhere else. Defaults beside the pinned home.
+ */
+const walkdown = (home, args, cwd = dirname(home)) =>
   execFileSync(process.execPath, [CLI, ...args], {
+    cwd,
     env: { ...process.env, WALKDOWN_HOME: home },
   }).toString();
 // WALKDOWN_SKILLS_DIR rides along in process.env, pinned by scratch().
@@ -454,7 +461,7 @@ test('asking where things live creates nothing at all @rule:locations.answer.ask
     assert.match(said, new RegExp(loc.evidence.path), 'it names a directory that is not there');
     assert.ok(!existsSync(loc.evidence.path), 'and did not create it on being asked twice');
     assert.deepEqual(tree(s.root), before, 'the disk is exactly as it was found');
-    assert.equal(readUserConfig().exists, false, 'including the personal config');
+    assert.equal(readUserConfig({ cwd: repo }).exists, false, 'including the personal config');
   } finally {
     s.cleanup();
   }
@@ -593,7 +600,7 @@ test('migrate renumbers a config-claimed home and re-points the config @rule:loc
     const out = execFileSync(
       process.execPath,
       [new URL('../bin/walkdown.js', import.meta.url).pathname, 'migrate'],
-      { encoding: 'utf8', env: { ...process.env, WALKDOWN_HOME: s.home, NO_COLOR: '1' } },
+      { cwd: s.root, encoding: 'utf8', env: { ...process.env, WALKDOWN_HOME: s.home, NO_COLOR: '1' } },
     );
     assert.match(out, /moved/);
     assert.ok(
@@ -601,7 +608,7 @@ test('migrate renumbers a config-claimed home and re-points the config @rule:loc
       'the records moved with the home',
     );
     assert.equal(existsSync(join(s.home, 'projects', 'demo')), false);
-    const cfg = readUserConfig().config;
+    const cfg = readUserConfig({ cwd: s.root }).config;
     assert.equal(
       cfg.projects[0].evidence,
       join(s.home, 'blueprints', '0001-demo', 'evidence'),
@@ -638,7 +645,7 @@ test('migrate records the spec a moved home holds, so the blueprint is never hom
     execFileSync(
       process.execPath,
       [new URL('../bin/walkdown.js', import.meta.url).pathname, 'migrate'],
-      { encoding: 'utf8', env: { ...process.env, WALKDOWN_HOME: s.home, NO_COLOR: '1' } },
+      { cwd: s.root, encoding: 'utf8', env: { ...process.env, WALKDOWN_HOME: s.home, NO_COLOR: '1' } },
     );
     const spec = join(s.home, 'blueprints', '0001-demo', 'blueprint');
     const index = readFileSync(join(s.home, 'blueprints', 'index.yml'), 'utf8');
@@ -775,7 +782,7 @@ test('migrate never moves an unclaimed home, spec inside or not @rule:locations.
     const out = execFileSync(
       process.execPath,
       [new URL('../bin/walkdown.js', import.meta.url).pathname, 'migrate'],
-      { encoding: 'utf8', env: { ...process.env, WALKDOWN_HOME: s.home, NO_COLOR: '1' } },
+      { cwd: s.root, encoding: 'utf8', env: { ...process.env, WALKDOWN_HOME: s.home, NO_COLOR: '1' } },
     );
     assert.match(out, /no config entry claims it/);
     assert.ok(existsSync(join(s.home, 'projects', 'orphanapp')), 'left standing');

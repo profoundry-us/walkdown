@@ -1,3 +1,8 @@
 node_modules/
 package-lock.json
-.walkdown/
+# Per-checkout working state: the checkspace, the test home, Playwright's
+# output. Written as `/*` with a negation rather than `.walkdown/`, because
+# git does not descend into an excluded directory - so the committed config
+# below could never be re-included past a directory-level ignore.
+.walkdown/*
+!.walkdown/config.yml
