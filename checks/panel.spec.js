@@ -1079,10 +1079,16 @@ test('a built rule wears one mark per tier, and one dot per role that must sign'
   }
   const sample = [...byShape.values()].slice(0, 6);
   expect(byShape.size, 'the blueprint offers more than one shape of row').toBeGreaterThan(1);
-  expect(
-    built.some((r) => tiersOf(r).some(([, st]) => ['fail', 'never', 'stale'].includes(st))),
-    'including one with a tier still owed',
-  ).toBe(true);
+  /*
+   * And no demand that an OWED tier be among them. This check once insisted
+   * some built rule show fail/never/stale - written when there always was
+   * one, to be sure the vary-state mark got exercised. On 2026-09-01 the
+   * board went fully green for the first time and the demand turned the
+   * check into its own counterexample: it failed for want of a failure, and
+   * its own fail then supplied the owed tier for the next run. A check that
+   * can only pass while something else fails measures the ledger's mood,
+   * not the rule.
+   */
 
   for (const row of sample) {
     const strip = list.locator(`[data-rule="${row.rule}"]`).getByTestId('panel.rule-tiers');
