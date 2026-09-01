@@ -134,5 +134,25 @@ if (!COMMANDS.has(cmd)) {
   process.exit(cmd && cmd !== 'help' && cmd !== '--help' ? 2 : 0);
 }
 
+// Asking a subcommand for help is the friendliest possible ask, and every
+// subcommand used to hand it straight to parseArgs, which answered with a
+// stack trace pointing at node internals. One answer, here, for all of them.
+if (rest.includes('--help') || rest.includes('-h')) {
+  console.log(HELP);
+  process.exit(0);
+}
+
 const { run } = await import(`./commands/${cmd}.js`);
-await run(rest);
+try {
+  await run(rest);
+} catch (err) {
+  const usage =
+    err?.code === 'ERR_PARSE_ARGS_UNKNOWN_OPTION' ||
+    err?.code === 'ERR_PARSE_ARGS_INVALID_OPTION_VALUE';
+  if (!usage) throw err;
+  // A usage mistake is refused the way every refusal here is: what was
+  // wrong, on stderr, exit 2 - so a script stops and a person is answered.
+  console.error(`walkdown ${cmd}: ${err.message.split('. ')[0]}.`);
+  console.error("'walkdown --help' lists every command and its flags.");
+  process.exit(2);
+}
