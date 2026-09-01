@@ -26,6 +26,13 @@ function project({ movedThreads = false } = {}) {
   const root = mkdtempSync(join(tmpdir(), 'wd-writes-'));
   const home = join(root, 'home');
   mkdirSync(home, { recursive: true });
+  /*
+   * And a person at it. Every write here is recorded under the config's
+   * identity rather than under a name the request carried, and accepting work
+   * is refused outright on a machine that has only a login name to go on - so
+   * a fixture with no identity cannot exercise the write paths at all.
+   */
+  writeFileSync(join(home, 'config.yml'), 'identity:\n  username: writes-person\n');
   process.env.WALKDOWN_HOME = home;
   const bp = join(root, 'proj', 'blueprint');
   mkdirSync(join(bp, 'features'), { recursive: true });

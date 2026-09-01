@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-09-01T13-31-46Z-local-01",
+  "created": "2026-09-01T13:31:46Z",
+  "actor": "checks-person",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "19d8f7e-dirty",
+  "tree_hash": "sha256:8828881deb56",
+  "spec_hash": "sha256:f5b6216bbea8",
+  "results": [
+    {
+      "rule": "panel.threads.claim-never-accept",
+      "status": "fail",
+      "statement_hash": "sha256:7c4e1e2d1562",
+      "duration_ms": 7409,
+      "checks": [
+        "checks/panel.spec.js:543"
+      ],
+      "evidence": [
+        "runs/evidence/2026-09-01T13-31-46Z/panel-a-rule-whose-fixes-a-660c4-ed-in-one-pass-under-a-name-test-failed-1.png",
+        "runs/evidence/2026-09-01T13-31-46Z/panel-a-rule-whose-fixes-a-660c4-ed-in-one-pass-under-a-name-error-context.md"
+      ]
+    }
+  ]
+}

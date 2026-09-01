@@ -1,6 +1,7 @@
 import { basename, join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
-import { rememberProject, resolveLocations } from '../../lib/locations.js';
+import { defaultActor } from '../../lib/identity.js';
+import { rememberIdentity, rememberProject, resolveLocations } from '../../lib/locations.js';
 import { dim, green, yellow } from '../../lib/report/tty.js';
 
 export async function run(args) {
@@ -37,6 +38,15 @@ export async function run(args) {
     spec: specDir,
     inRepo: values['in-repo'],
   });
+  /*
+   * And who is sitting here, if nobody has said. Every record is written
+   * under the config's identity now and nothing else can name a person, so an
+   * absent block is a wall rather than a default - work cannot be accepted on
+   * a machine that only has a git email to go on. Setting it up is part of
+   * being set up, which is what this command is.
+   */
+  const who = defaultActor(root);
+  const me = rememberIdentity({ username: who.username, name: who.name });
   const MARK = {
     created: green('+ created'),
     updated: green('~ updated'),
@@ -63,6 +73,12 @@ export async function run(args) {
    */
   if (entry.action === 'written')
     console.log(`  ${green('+ listed')}   ${entry.path}  ${dim(`as \`${entry.id}\``)}`);
+  if (me.action === 'written')
+    console.log(`  ${green('+ you')}      ${me.path}  ${dim(`as \`${me.username}\``)}`);
+  else if (me.action === 'unknown')
+    console.log(
+      `  ${yellow('? you')}      this machine offers no name — add \`identity:\` to ${me.path} before accepting work`,
+    );
 
   const where = placed[0];
   if (where) {

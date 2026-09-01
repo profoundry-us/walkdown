@@ -13,7 +13,7 @@ import { openSettings, requestReload, requestRender } from './shell.js';
 import { D, identityOverride, S, store } from './state.js';
 import { toast } from './toast.js';
 import { api, esc } from './util.js';
-import { HUMAN_ONLY, NEEDS_REASON, TERMINAL, threadsFor, whoAmI } from './vocab.js';
+import { HUMAN_ONLY, iAmDeclared, NEEDS_REASON, TERMINAL, threadsFor, whoAmI } from './vocab.js';
 
 /**
  * The handles that resolve to a full name, for every message on screen.
@@ -162,11 +162,20 @@ export async function threadAct(id, status) {
   const text = (D.host.querySelector('#wdp-note')?.value ?? '').trim();
   const actor = whoAmI();
   const humanOnly = HUMAN_ONLY.includes(status);
-  // Agents claim work; a person accepts it. The server refuses this too —
-  // saying so here means you find out before you have written the reason.
-  if (humanOnly && (!actor || actor === 'agent')) {
+  /*
+   * Agents claim work; a person accepts it. The server refuses this too —
+   * saying so here means you find out before you have written the reason.
+   *
+   * The test is whether somebody WROTE DOWN who is sitting here, not whether
+   * the panel can produce a string: a machine with no `identity:` block still
+   * has a git email and a login name, and this bar used to offer Verify under
+   * one of those with the click going through (n-0143).
+   */
+  if (humanOnly && (!actor || actor === 'agent' || !iAmDeclared())) {
     say(
-      'Verify and waive are recorded under a person\u2019s name \u2014 set it in Settings first.',
+      !actor || actor === 'agent'
+        ? 'Verify and waive are recorded under a person\u2019s name.'
+        : `Verify and waive are recorded under a person\u2019s name, and this machine only has a guess (${actor}). Say who you are in ~/.walkdown/config.yml under \`identity:\`.`,
     );
     return openSettings();
   }
@@ -234,9 +243,14 @@ export async function threadAct(id, status) {
  */
 export async function verifyAll(rule) {
   const actor = whoAmI();
-  if (!actor || actor === 'agent') {
+  // The same gate one verify passes, because a sweep is only several of them:
+  // a machine that has not been told who is sitting at it still has a login
+  // name to offer, and accepting under one is the click n-0143 got through.
+  if (!actor || actor === 'agent' || !iAmDeclared()) {
     toast(
-      'Verifying is recorded under a person\u2019s name \u2014 set it in Settings (the gear).',
+      !actor || actor === 'agent'
+        ? 'Verifying is recorded under a person\u2019s name.'
+        : `Verifying is recorded under a person\u2019s name, and this machine only has a guess (${actor}). Say who you are in ~/.walkdown/config.yml under \`identity:\`.`,
       { tone: 'error' },
     );
     return openSettings();

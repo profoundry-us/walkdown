@@ -962,20 +962,21 @@ stories:
     rules:
       - id: panel.identity.default-actor
         origin: thread:n-0008
-        statement: The identity arrives filled in from the repository's git identity - a username to record under, and the full name to show wherever git knows one - falling back to the operating system username; both stay editable, including by someone whose git knows neither.
+        statement: The identity arrives filled in - the username records are written under, and the full name to show alongside it - so no attributed action ever asks who you are. The username is the machine's answer and is shown rather than typed, because a name a browser can set is a name it can invent; the full name is only ever displayed, so it stays yours to change, from empty.
         verify: [checks]
         signoff: [eng, product]
         screens: [review, settings]
         steps:
           given:
-            - A walkdown session started in a git repository
+            - A walkdown session on a machine that has been told who is sitting at it
           when:
             - Reading anchor `panel.actor` on screen `review`, then opening Settings from the gear
           then:
-            - The session strip already shows the full name where git knows one, with the username it records under beside it in anchor `panel.actor-handle`; no attributed action prompts for either
-            - Settings shows both - anchor `settings.actor` for the username records carry, anchor `settings.display-name` for the name the panel shows - and both are editable, from empty if git knows neither
-            - An edit applies to the running session and is remembered across reloads; emptying a field is an answer too - no full name leaves the username standing alone, and no username makes the panel refuse attributed work
-          statement_hash: sha256:6cf5b560bdde
+            - The session strip already shows the full name where there is one, with the username it records under beside it in anchor `panel.actor-handle`; no attributed action prompts for either
+            - Settings shows both - anchor `settings.actor` for the username records carry, anchor `settings.display-name` for the name the panel shows - and says where the username comes from
+            - The username cannot be typed here, and nothing a request carries can change what a record is written under
+            - The full name is editable from empty, applies to the running session, and is remembered across reloads; emptying it is an answer too, leaving the username standing alone
+          statement_hash: sha256:870f334762eb
 
       - id: panel.identity.attribution-visible
         origin: thread:n-0008

@@ -228,10 +228,10 @@ export const HEAD = TOP;
  */
 export const ACTOR_KEY = 'walkdown:actor'; // legacy: one free-text name
 export const IDENTITY_KEY = 'walkdown:identity'; // { username, name, roles }
+// `username` is gone from this: what a record is written under is the
+// server's answer, not a value the browser keeps. What stays is what the
+// browser legitimately owns - how you are SHOWN, and which hats you are
+// signing in this sitting.
 export const identityOverride = { username: null, name: null, roles: null };
 export const saveIdentity = () =>
-  store.set(IDENTITY_KEY, {
-    username: identityOverride.username,
-    name: identityOverride.name,
-    roles: identityOverride.roles,
-  });
+  store.set(IDENTITY_KEY, { name: identityOverride.name, roles: identityOverride.roles });

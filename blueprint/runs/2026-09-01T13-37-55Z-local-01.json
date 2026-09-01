@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-09-01T13-37-55Z-local-01",
+  "created": "2026-09-01T13:37:55Z",
+  "actor": "checks-person",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "19d8f7e-dirty",
+  "tree_hash": "sha256:a00ab1433690",
+  "spec_hash": "sha256:9b4eb3621eba",
+  "results": [
+    {
+      "rule": "panel.threads.own-view",
+      "status": "fail",
+      "statement_hash": "sha256:faade3b887d1",
+      "duration_ms": 6036,
+      "checks": [
+        "checks/panel.spec.js:666"
+      ],
+      "evidence": [
+        "runs/evidence/2026-09-01T13-37-55Z/panel-threads-have-a-view-of-their-own-ended-ones-included-test-failed-1.png",
+        "runs/evidence/2026-09-01T13-37-55Z/panel-threads-have-a-view-of-their-own-ended-ones-included-error-context.md"
+      ]
+    }
+  ]
+}

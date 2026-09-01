@@ -34,10 +34,26 @@ import { parse } from '../vendor/yaml.js';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-serve-'));
 const bp = join(root, 'blueprint');
+/*
+ * A home that declares who is sitting here. Every write this server makes is
+ * recorded under the config's identity now - a name in a request is asserted
+ * and never proved, since this server has no authentication - so a fixture
+ * with no identity is a machine that refuses to accept work, which is a
+ * different test and lives beside the first one.
+ */
+const DECLARED_HOME = join(root, 'home-declared');
+const GUESSING_HOME = join(root, 'home-guessing');
 let base;
 let server;
 
 before(async () => {
+  mkdirSync(DECLARED_HOME, { recursive: true });
+  mkdirSync(GUESSING_HOME, { recursive: true });
+  writeFileSync(
+    join(DECLARED_HOME, 'config.yml'),
+    'identity:\n  username: serve-person\n  name: A Serve Person\n',
+  );
+  process.env.WALKDOWN_HOME = DECLARED_HOME;
   mkdirSync(join(bp, 'features'), { recursive: true });
   mkdirSync(join(bp, 'threads'), { recursive: true });
   mkdirSync(join(root, 'proto'), { recursive: true });
@@ -388,7 +404,17 @@ test('the blueprint payload carries a default actor @rule:status.attribution.use
   } finally {
     process.env.WALKDOWN_HOME = pinned;
   }
-  assert.equal(defaultActor(process.cwd()).declared, false, 'inference is never a signature');
+  // And inference is never a signature: a home that says nothing reports the
+  // guess it made AS a guess, which is what the accept gate reads.
+  const guessing = defaultActor(process.cwd());
+  process.env.WALKDOWN_HOME = GUESSING_HOME;
+  try {
+    assert.equal(defaultActor(process.cwd()).declared, false);
+    assert.notEqual(defaultActor(process.cwd()).source, 'config');
+  } finally {
+    process.env.WALKDOWN_HOME = DECLARED_HOME;
+  }
+  assert.ok(guessing.username.length > 0, 'though it still always has a name to offer');
 
   // Identity and display name are two fields. `actor` - the one thing records
   // are written under - is the username, never the full name.
@@ -424,7 +450,9 @@ test('POST /api/walkdowns writes a hash-stamped human run record', async () => {
   const file = readdirSync(join(bp, 'runs')).find((f) => f.includes(res.run_id));
   const record = JSON.parse(readFileSync(join(bp, 'runs', file), 'utf8'));
   assert.equal(record.kind, 'walkdown');
-  assert.equal(record.actor, 'topher');
+  // Not the actor the request asked for: a walkdown is an acceptance, and it
+  // is recorded under the person this machine says is sitting at it.
+  assert.equal(record.actor, 'serve-person');
   assert.equal(record.results[0].statement_hash, formatHash('The visitor can do the thing.'));
 });
 
@@ -482,7 +510,7 @@ test('a session drafts to disk and finishing seals it into one run', async () =>
   });
   let draft = JSON.parse(readFileSync(draftFile, 'utf8'));
   assert.equal(draft.draft, true);
-  assert.equal(draft.actor, 'topher');
+  assert.equal(draft.actor, 'serve-person');
   assert.deepEqual(draft.verdicts, { 'demo.main.thing': 'approved' });
   // Not a run: no run id, and it is nowhere near runs/.
   assert.equal(draft.run_id, undefined);
@@ -586,16 +614,20 @@ test('thread reply and status endpoints mutate through the validated path', asyn
   ).json();
   assert.equal(addressed.thread.status, 'addressed');
 
-  // an agent may not self-accept
-  const agentVerify = await post('/api/threads/n-0001/status', {
-    status: 'verified',
-    actor: 'agent',
-  });
-  assert.equal(agentVerify.status, 400);
-  assert.match((await agentVerify.json()).error, /named human/);
+  /*
+   * An agent may not self-accept. It used to be spelled by sending
+   * `actor: 'agent'`, which this door no longer reads at all — what an agent
+   * cannot do now is have a declared identity to act under, so the refusal
+   * that stands here is the one for a machine nobody has named.
+   */
+  process.env.WALKDOWN_HOME = GUESSING_HOME;
+  const guessVerify = await post('/api/threads/n-0001/status', { status: 'verified' });
+  process.env.WALKDOWN_HOME = DECLARED_HOME;
+  assert.equal(guessVerify.status, 400);
+  assert.match((await guessVerify.json()).error, /identity:/);
 
   const verified = await (
-    await post('/api/threads/n-0001/status', { status: 'verified', actor: 'topher' })
+    await post('/api/threads/n-0001/status', { status: 'verified' })
   ).json();
   assert.equal(verified.thread.status, 'verified');
 
@@ -748,40 +780,102 @@ test('a pin files against the page\u2019s own project, not the server\u2019s def
     assert.notEqual(parse(readFileSync(inDefault, 'utf8')).body, 'Belongs to the sibling.');
 });
 
-test('the panel refuses to accept work under the agent\u2019s name', async () => {
+test('the browser cannot name who a write is recorded under @rule:threads.lifecycle.acts-for-a-person', async () => {
   const note = await (
     await fetch(`${base}/api/threads`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         kind: 'note',
-        body: 'Needs a person to accept it.',
-        author: 'agent',
+        body: 'something is off',
+        author: 'mallory',
         anchor: { screen: 'home' },
       }),
+    })
+  ).json();
+  /*
+   * `author` was passed straight through and written to disk, so a POST filed
+   * a thread under any name it liked. This server has no authentication and
+   * never will — it is a localhost review server over one person's own
+   * blueprint — so a name in a request is asserted, never proved, and an
+   * assertion nobody can check is the text field `--actor` was at the CLI
+   * (n-0142). The machine's own configured identity answers instead.
+   */
+  assert.equal(note.thread.author, 'serve-person', 'the request did not get to choose');
+
+  await fetch(`${base}/api/threads/${note.id}/status`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ status: 'addressed', actor: 'mallory' }),
+  });
+
+  // Accepting is the panel's own person doing it, under their own name —
+  // never the name the request carried.
+  const accepted = await fetch(`${base}/api/threads/${note.id}/status`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ status: 'verified', actor: 'mallory' }),
+  });
+  assert.equal(accepted.status, 200);
+  const disk = parse(readFileSync(join(bp, 'threads', `${note.id}.yml`), 'utf8'));
+  assert.equal(disk.verified_by, 'serve-person');
+  assert.notEqual(disk.verified_by, 'mallory', 'the invented name never reaches the ledger');
+});
+
+test('a machine that only has a guess is refused, at this door too @rule:threads.lifecycle.claim-never-accept', async () => {
+  const note = await (
+    await fetch(`${base}/api/threads`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ kind: 'note', body: 'unaccepted', anchor: { screen: 'home' } }),
     })
   ).json();
   await fetch(`${base}/api/threads/${note.id}/status`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ status: 'addressed', actor: 'agent' }),
+    body: JSON.stringify({ status: 'addressed' }),
   });
-  // The same endpoint the panel's buttons post to: an agent may claim work,
-  // never accept it, and the refusal happens server-side so no client can
-  // talk its way past it.
-  const refused = await fetch(`${base}/api/threads/${note.id}/status`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ status: 'verified', actor: 'agent' }),
-  });
-  assert.equal(refused.status, 400);
-  assert.match((await refused.json()).error, /named human/);
-  const nameless = await fetch(`${base}/api/threads/${note.id}/status`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ status: 'verified' }),
-  });
-  assert.equal(nameless.status, 400);
+
+  /*
+   * Removing the override is not enough on its own: a machine whose config
+   * declares nobody still has a git email and a login name to fall back to,
+   * and the panel offered Verify under one of those with the click going
+   * through (n-0143). The refusal the CLI gives belongs here too.
+   */
+  process.env.WALKDOWN_HOME = GUESSING_HOME;
+  try {
+    const refused = await fetch(`${base}/api/threads/${note.id}/status`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ status: 'verified' }),
+    });
+    assert.equal(refused.status, 400);
+    assert.match((await refused.json()).error, /identity:/, 'and it says where to say who you are');
+
+    // A walkdown is an acceptance too, and asks the same.
+    const run = await fetch(`${base}/api/walkdowns`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        target: 'local',
+        results: [{ rule: 'demo.main.thing', status: 'pass' }],
+      }),
+    });
+    assert.equal(run.status, 400);
+
+    // Claiming is not accepting, and stays open to a machine that is guessing.
+    const claimed = await fetch(`${base}/api/threads/${note.id}/replies`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ body: 'looked at it' }),
+    });
+    assert.equal(claimed.status, 200);
+  } finally {
+    process.env.WALKDOWN_HOME = DECLARED_HOME;
+  }
+  const disk = parse(readFileSync(join(bp, 'threads', `${note.id}.yml`), 'utf8'));
+  assert.equal(disk.status, 'addressed', 'the thread never moved');
+  assert.equal(disk.verified_by, undefined);
 });
 
 test('OPTIONS preflight answers CORS and Private Network Access', async () => {

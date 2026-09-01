@@ -111,8 +111,20 @@ export const shortName = (row) =>
  */
 
 /** Who a reply and a transition are recorded as - one answer, as everywhere. */
-export const whoAmI = () =>
-  (identityOverride.username ?? S.session?.actor ?? S.data?.identity?.username ?? '').trim();
+/*
+ * Who this panel is. Not a local choice: the server records under the
+ * machine's configured identity whatever a request claims, so this reports
+ * that answer rather than competing with it. An override used to come first
+ * and a running session's actor second, which is how the panel came to offer
+ * Verify under a name nobody had typed (n-0143).
+ */
+export const whoAmI = () => (S.data?.identity?.username ?? '').trim();
+
+/*
+ * And whether that name was WRITTEN DOWN or merely guessed at. Accepting work
+ * asks for a person, and a login name is what a machine is called.
+ */
+export const iAmDeclared = () => Boolean(S.data?.identity?.declared);
 
 /** The screen a rule is about: the end of its flow, or the one it names. */
 export const ruleScreen = (r) => screenById(r?.flow?.at(-1) ?? r?.screens?.[0]);

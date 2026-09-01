@@ -313,11 +313,28 @@ test('the panel will not accept work without a named person, and asks for the re
     .first();
   await expect(verify).toBeVisible();
 
-  // Clear the name, then try to accept: agents may claim work, only a person
-  // accepts it, and the panel obeys that rather than trusting the server to.
-  await page.getByTestId('panel.desk-tuner').click();
-  await page.getByTestId('settings.actor').fill('');
-  await page.getByTestId('panel.desk-tuner').click();
+  /*
+   * Make this a machine that has not been told who is sitting at it, then try
+   * to accept. Agents may claim work, only a person accepts it, and the panel
+   * obeys that rather than trusting the server to.
+   *
+   * Done by answering the identity question differently rather than by
+   * emptying a box, because the box is gone: the username was a text field
+   * whose value rode up on every write, and the server wrote records under
+   * whatever arrived (n-0142). What the panel must now read is whether the
+   * machine's config DECLARES a person - a git email and a login name are
+   * still there to fall back on, and accepting under one of those is exactly
+   * the click that went through in n-0143.
+   */
+  await page.route('**/api/blueprint*', async (route) => {
+    const res = await route.fetch();
+    const body = await res.json();
+    if (body.identity) body.identity = { ...body.identity, declared: false };
+    await route.fulfill({ response: res, json: body });
+  });
+  await page.reload();
+  await openRule(page, addressed.anchor.rule);
+  await page.locator(`[data-open-thread="${addressed.id}"]`).first().click();
   await verify.click();
   await expect(page.getByTestId('thread.say')).toBeVisible();
   await expect(page.getByTestId('thread.say')).toContainText(/name/i);
@@ -548,11 +565,23 @@ test('a rule whose fixes all landed can be verified in one pass, under a name', 
   const sweep = page.getByTestId('detail.threads').getByRole('button', { name: /Verify all/i });
   await expect(sweep).toBeVisible();
 
-  // With no name set it must refuse, exactly as verifying one does: an agent
-  // may claim work and never accept it.
-  await page.getByTestId('panel.desk-tuner').click();
-  await page.getByTestId('settings.actor').fill('');
-  await page.getByTestId('panel.desk-tuner').click();
+  /*
+   * On a machine nobody has been named on it must refuse, exactly as
+   * verifying one does: an agent may claim work and never accept it. Answered
+   * by intercepting the identity rather than by emptying a field, because the
+   * username is not a field any more - the server records under the config's
+   * identity whatever a request says (n-0142), so what the panel reads is
+   * whether that config DECLARES a person or is guessing from a login name.
+   */
+  let declared = false;
+  await page.route('**/api/blueprint*', async (route) => {
+    const res = await route.fetch();
+    const body = await res.json();
+    if (body.identity) body.identity = { ...body.identity, declared };
+    await route.fulfill({ response: res, json: body });
+  });
+  await page.reload();
+  await openRule(page, rule);
   await sweep.click();
   await expect(page.getByTestId('settings.panel')).toBeVisible();
   expect(
@@ -560,9 +589,10 @@ test('a rule whose fixes all landed can be verified in one pass, under a name', 
       .length,
   ).toBe(before);
 
-  // With a name, the whole pile goes at once — and under that name.
-  await page.getByTestId('settings.actor').fill('Test Reviewer');
-  await page.getByTestId('panel.desk-tuner').click();
+  // And where the machine does say who is here, the whole pile goes at once.
+  declared = true;
+  await page.reload();
+  await openRule(page, rule);
   await sweep.click();
   await expect
     .poll(
@@ -661,14 +691,32 @@ test('threads have a view of their own, ended ones included', {
   const list = page.getByTestId('panel.threads-list');
   await expect(list).toBeVisible();
 
-  // Active is what is live — an ended conversation is not in it.
+  /*
+   * Active is what is live — an ended conversation is not in it.
+   *
+   * Asked of the list's ENTRIES rather than of its text: a thread id is a
+   * short string like `n-0130`, and threads quote each other's ids in their
+   * bodies all the time, so a text search finds an ended thread that is only
+   * being talked about and calls the panel broken for it.
+   */
   const gone = ended[0].id;
-  await expect(list).not.toContainText(gone);
+  /*
+   * Counted rather than searched for as text, and counted across every copy
+   * of the list: a thread id is a short string like `n-0130`, threads quote
+   * each other's ids in their bodies constantly, and a text search finds an
+   * ended thread that is merely being TALKED about and calls the panel broken
+   * for it. Presence is the question here, not how many nodes carry it - the
+   * panel keeps a list per layout, so one listed thread is more than one
+   * element by design.
+   */
+  const listed = (id) =>
+    page.getByTestId('panel.list-scroll').locator(`[data-open-thread="${id}"]`).count();
+  expect(await listed(gone)).toBe(0);
 
   // ...and All reaches it, which nothing else in the panel can do.
   const filter = page.getByTestId('panel.thread-filter');
   await filter.getByText('All', { exact: false }).click();
-  await expect(list).toContainText(gone);
+  await expect.poll(() => listed(gone)).toBeGreaterThan(0);
 
   /*
    * Docked to the top: with every thread listed, scrolling to the far end
@@ -1246,39 +1294,44 @@ test('the identity is a username to record under and a full name to show, both e
   expect(username).not.toContain(' '); // a handle, not a full name
   expect(username).not.toBe(fullName);
 
-  // Settings shows the same two, in two fields, saying which is which.
+  // Settings shows the same two, and says which is which - but only one of
+  // them is a field.
   await shown.click();
-  const actorField = page.getByTestId('settings.actor');
+  const actorShown = page.getByTestId('settings.actor');
   const nameField = page.getByTestId('settings.display-name');
-  await expect(actorField).toHaveValue(username);
+  await expect(actorShown).toHaveText(username);
   await expect(nameField).toHaveValue(fullName);
 
-  // The display name is only ever shown: editing it moves the strip's name
-  // and leaves the recorded handle exactly where it was.
+  /*
+   * The username is READ. It was a text box once, and its value rode up on
+   * every write while the server recorded under whatever arrived - so a POST
+   * filed a verify under a name it invented, and this panel offered the same
+   * click under a login name nobody had typed (n-0142, n-0143). A localhost
+   * review server has no authentication and never will, so a name in a
+   * request is asserted and never proved: records carry the machine's own
+   * configured identity, and this says which one and where it comes from.
+   */
+  await expect(actorShown).not.toHaveJSProperty('tagName', 'INPUT');
+  await expect(page.getByTestId('settings.actor-source')).toContainText(/config\.yml/);
+
+  // The display name is only ever shown, so it stays the panel's to change:
+  // editing it moves the strip's name and leaves the recorded handle put.
   await nameField.fill('Someone Else');
   await nameField.blur();
   await expect(shown).toHaveText('Someone Else');
   await expect(handle).toHaveText(username);
 
-  // The username is the record: editing it moves what the sitting is filed
-  // under, live, the way the single field always did.
-  await shown.click();
-  await page.getByTestId('settings.actor').fill('someone');
-  await page.getByTestId('settings.actor').blur();
-  await expect(handle).toHaveText('someone');
-  await expect(shown).toHaveText('Someone Else');
-
   /*
-   * Both fields take an edit from empty, which is the case the split exists
-   * for: somebody whose git knows neither has to be able to type both in.
-   * Emptying the full name is an answer too - \"show me by my username\" - and
-   * then there is one name on the strip rather than two, because the name
-   * shown and the name recorded have become the same string.
+   * It takes an edit from empty, which is the case the split exists for:
+   * somebody whose git knows no full name has to be able to type one in.
+   * Emptying it is an answer too - "show me by my username" - and then there
+   * is one name on the strip rather than two, because the name shown and the
+   * name recorded have become the same string.
    */
   await shown.click();
   await page.getByTestId('settings.display-name').fill('');
   await page.getByTestId('settings.display-name').blur();
-  await expect(shown).toHaveText('someone');
+  await expect(shown).toHaveText(username);
   await expect(page.getByTestId('panel.actor-handle')).toHaveCount(0);
 
   // Put a full name back, from empty, and the two are told apart again.
@@ -1286,20 +1339,21 @@ test('the identity is a username to record under and a full name to show, both e
   await page.getByTestId('settings.display-name').fill('Someone Else');
   await page.getByTestId('settings.display-name').blur();
   await expect(shown).toHaveText('Someone Else');
-  await expect(page.getByTestId('panel.actor-handle')).toHaveText('someone');
+  await expect(page.getByTestId('panel.actor-handle')).toHaveText(username);
 
   /*
-   * And both edits outlive the page. A sitting with no verdicts in it is not
-   * restored (that is panel.walkdown.session-survives-reload's business, and
-   * it needs a verdict to have something to survive), so the strip is brought
-   * back the same way it was raised the first time - what is being checked
-   * here is that the identity it comes back under is the edited one.
+   * And the edit outlives the page, while the username comes back from the
+   * machine rather than from anything the browser kept. A sitting with no
+   * verdicts in it is not restored (that is
+   * panel.walkdown.session-survives-reload's business, and it needs a verdict
+   * to have something to survive), so the strip is raised again the way it
+   * was the first time.
    */
   await page.reload();
   await expect(page.getByTestId('panel.bar')).toBeVisible();
   await ensureSession(page);
   await expect(page.getByTestId('panel.actor-name')).toHaveText('Someone Else');
-  await expect(page.getByTestId('panel.actor-handle')).toHaveText('someone');
+  await expect(page.getByTestId('panel.actor-handle')).toHaveText(username);
 
   await endSession(page);
 });

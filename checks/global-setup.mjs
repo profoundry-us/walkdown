@@ -114,6 +114,18 @@ export default function globalSetup() {
    * Ids match what the discovery used to produce, because the fixture page
    * defaults `data-bp` to `blueprint`.
    */
+  /*
+   * And who is sitting at this machine. Records are written under the config's
+   * identity now, and accepting work is refused outright where nobody has
+   * written one down (n-0143) - so without this the suite is a machine that
+   * cannot verify anything, and half the panel's checks fail on a refusal
+   * that is correct.
+   */
+  writeFileSync(
+    join(process.env.WALKDOWN_HOME, 'config.yml'),
+    ['identity:', '  username: checks-person', '  name: A Checks Person', ''].join('\n'),
+  );
+
   mkdirSync(join(CHECKSPACE, '.walkdown'), { recursive: true });
   writeFileSync(
     join(CHECKSPACE, '.walkdown', 'config.yml'),

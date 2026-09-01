@@ -18,11 +18,22 @@ import { createWalkdownServer } from '../lib/serve.js';
 import { ROLES } from '../lib/vocab.js';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-roles-'));
+/*
+ * A machine that says who is sitting at it. Recording a walkdown is an
+ * acceptance, so it asks for a person who wrote their name down rather than a
+ * name the request carried (n-0143). The roles beside it are still the
+ * caller's to send: which hats you sign in is a choice you make per sitting,
+ * and is not a claim about who you are.
+ */
+const HOME = join(root, 'home');
 const bp = join(root, 'blueprint');
 let base;
 let server;
 
 before(async () => {
+  mkdirSync(HOME, { recursive: true });
+  writeFileSync(join(HOME, 'config.yml'), 'identity:\n  username: roles-person\n');
+  process.env.WALKDOWN_HOME = HOME;
   mkdirSync(join(bp, 'features'), { recursive: true });
   mkdirSync(join(bp, 'runs'), { recursive: true });
   writeFileSync(join(bp, 'walkdown.yml'), 'project: roles-fixture\n');

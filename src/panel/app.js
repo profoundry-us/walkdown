@@ -299,16 +299,39 @@ function openActorSettings() {
 
 function buildDeskPanel() {
   D.deskPanel.innerHTML = `
+    <!-- The username, shown and not editable. It used to be a text box whose
+         value rode up on every write, and the server wrote records under
+         whatever arrived: a POST recorded a verify under a name it invented,
+         and the panel itself offered the same click under a login name nobody
+         had typed (n-0142, n-0143). This server has no authentication and
+         never will, so a name in a request is asserted and never proved -
+         records are written under the machine's own configured identity, and
+         this says which one that is and where to change it. -->
     <div class="mb-2 flex items-center gap-2">
       <span class="text-[12px] font-semibold">Record as</span>
-      <input id="wdp-set-actor" data-testid="settings.actor" class="input input-xs ml-auto w-36" placeholder="username"
-        value="${esc(identityOverride.username ?? S.session?.actor ?? S.data?.identity?.username ?? '')}"
-        title="Walkdown verdicts, sign-offs and thread actions are recorded under this username">
+      <span data-testid="settings.actor" class="ml-auto w-36 truncate text-right text-[12px] ${
+        S.data?.identity?.declared ? 'font-mono' : 'font-mono italic opacity-60'
+      }" title="${
+        S.data?.identity?.declared
+          ? 'Records are written under this username, from identity: in ~/.walkdown/config.yml'
+          : 'This machine has not been told who you are — it is guessing from ' +
+            esc(S.data?.identity?.source ?? 'this machine') +
+            '. Add identity: to ~/.walkdown/config.yml to accept work.'
+      }">${esc(S.data?.identity?.username ?? '')}</span>
+    </div>
+    <div class="mb-2 text-[11px] leading-snug opacity-60" data-testid="settings.actor-source">
+      ${
+        S.data?.identity?.declared
+          ? 'Set in <code>~/.walkdown/config.yml</code>, where <code>walkdown init</code> wrote it.'
+          : 'Not written down — this is a guess, and accepting work is refused until <code>identity:</code> names you in <code>~/.walkdown/config.yml</code>.'
+      }
     </div>
     <!-- The display name. Shown everywhere in the UI, recorded nowhere - so
          someone whose git has no full name loses nothing but the nicety, and
-         someone who has one is not silently filed under it. Both are
-         editable, including from empty, on the honour system (n-0104). -->
+         someone who has one is not silently filed under it. This one stays
+         editable from empty precisely BECAUSE it is recorded nowhere: it is
+         how you are shown, and the username above is what you are (n-0104,
+         status.attribution.username-is-the-record). -->
     <div class="mb-2 flex items-center gap-2">
       <span class="text-[12px] font-semibold">Full name</span>
       <input id="wdp-set-name" data-testid="settings.display-name" class="input input-xs ml-auto w-36" placeholder="optional"
@@ -379,25 +402,14 @@ function buildDeskPanel() {
     if (S.docked) paintDesk(true);
   };
   D.deskPanel.querySelector('#wdp-desk-hide').onchange = (e) => hideApp(e.target.checked);
-  const act = D.deskPanel.querySelector('#wdp-set-actor');
-  act.onchange = () => {
-    /*
-     * An emptied field is an explicit answer, not the absence of one: it
-     * means "nobody", and the panel then refuses attributed work under it
-     * (panel.threads.claim-never-accept). Reverting to git's answer is
-     * retyping it - which is cheap, and a good deal less surprising than a
-     * box that silently refills itself with a name you just removed.
-     */
-    identityOverride.username = act.value.trim();
-    saveIdentity();
-    // A running sitting is re-signed, the way the single field always did -
-    // the verdicts already in it have not been sealed into a run yet.
-    if (S.session) {
-      S.session.actor = whoAmI();
-      saveSession();
-    }
-    render();
-  };
+  /*
+   * No handler for the username: it is not a field any more. It was one, and
+   * an emptied box was an answer meaning "nobody" - which was a real piece of
+   * design for a value the browser owned. The browser does not own it. The
+   * server writes every record under its own configured identity and ignores
+   * what a request says, so a box here could only ever have lied about what
+   * would be recorded (n-0142, n-0143).
+   */
   /*
    * The roles are kept as a set, so unticking the last one leaves an empty
    * array rather than nothing said - "I sign as none of these" is an answer.
@@ -2619,7 +2631,9 @@ function boot() {
        * EMPTY (an override that says nobody), so an empty string has to be
        * restored as an empty string rather than skipped.
        */
-      if (typeof saved.username === 'string') identityOverride.username = saved.username.trim();
+      // The username is deliberately NOT restored: a browser cannot decide who
+      // a record is written under any more, and a leftover override from
+      // before that changed would show a name the server would not use.
       if (typeof saved.name === 'string') identityOverride.name = saved.name.trim();
       // Same distinction one field over: an empty array is "none of these",
       // and only a missing key means nothing was ever said.
