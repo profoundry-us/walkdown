@@ -1,0 +1,45 @@
+id: n-0151
+kind: note
+author: topher
+via: agent
+created: 2026-09-01T21:38:06.884Z
+anchor:
+  rule: locations.answer.declared-not-discovered
+status: open
+body: |-
+  The last THEN fails a third time, one layer down from n-0144 and n-0146: a personal entry that restates every key the repository declared erases the repository's declaration from the report.
+
+  Fixture (evidence key runs/evidence/2026-09-01T21-02-00Z/declared-not-discovered-06-full-override-erases-the-repo-row.txt): a throwaway git repo whose committed .walkdown/config.yml declares alpha, beta and gamma; gamma's entry is the ordinary minimal one:
+
+      - id: gamma
+        roots: [gamma]
+        spec: gamma
+
+  Personal config (scratch WALKDOWN_HOME) with no gamma entry — CONTROL — reads correctly: personal row "present, no entry for this project", repository row "this repository's, shared — names this project", matchedIn "repo".
+
+  Now the person does the ordinary thing and moves their checkout of that blueprint, restating the same three keys:
+
+      - id: gamma
+        roots: [<repo>/gamma]
+        spec: <elsewhere>/moved-gamma
+
+  Standing in gamma, with the committed file unchanged byte for byte:
+
+      config    <home>/config.yml
+                names this project
+                <repo>/.walkdown/config.yml
+                this repository's, shared — no entry for this project
+
+  and --json agrees: matchedIn "personal", config.repo.matched false. The committed file still contains the gamma entry, and it is the only reason gamma is a project on anybody else's clone. The report denies it.
+
+  Same shape on beta, where the repo declares five keys (id/roots/spec/runs/threads) and the person restates all five: repository row again "no entry for this project". Leave ONE repo key un-restated — personal entry of id + evidence only — and the same two files, same project, now read "names this project too; the personal config above wins where they disagree". So the repository row's wording is decided by which keys the person happened to restate, not by whether the committed file declares the project. And that "wins where they disagree" wording is unreachable in exactly the case where the two files disagree about everything, which is the case a reader most needs it for.
+
+  The person's next move is to go looking for the gamma entry in the repository's config to add it — it is already there — or, worse, to believe the blueprint is theirs alone and delete the committed entry that everyone else's clone reads.
+
+  Cause (lib/locations.js): readUserConfig merges the two entries key by key and stamps each key's origin onto DECLARED_IN, where a personal key overwrites the repo's mark for that key — correct, and exactly what the per-key `why` rows need. declaringFiles() then answers the PER-FILE question ("which files declare this entry at all") out of those surviving per-key marks, so a repo entry whose every key was overridden leaves no trace of having declared anything; resolveLocations passes that through as matchedIn and as config.repo.matched, and where.js prints the repo row from it. This is n-0144's shape a third time: a question about one file answered from data that only survived the merge. The per-key marks cannot answer it, because "declared" is not the same fact as "supplied the winning value" — the entry needs to remember that the repo declared it independently of which keys still carry a repo mark.
+
+  Everything else in the rule held under what I could throw at it, in evidence keys …-01-declared-vs-undeclared.txt, …-02-named-outright-and-no-bleed.txt, …-04-both-configs-consulted.txt and …-05-broken-file-on-either-side.txt: alpha, beta and gamma each answer for themselves with their own spec/runs/threads; ghost, a blueprint by shape that nobody declared, is not a project (status and thread new both refuse, naming the config they consulted), and neither is the repository root itself; --dir beta from inside alpha and from outside the repository entirely brings beta's threads, and a run record written into alpha is listed by alpha and by --dir alpha from inside beta, never by beta; two notes with the same id n-0001 in two blueprints stay put. n-0146's fixture reproduces correctly now — a broken repository config leaves the personal row saying it named the project and puts the parse error on the repository's own row, and the reverse arrangement labels each row correctly too. A personal-only project leaves the shared row saying it has no entry, and an absent personal config reads "not present — every default applies". Nothing was written to any personal home by any of the asking.
+
+  Two fixes are possible and the choice is a person's: carry a per-entry "this file declared it" fact alongside the per-key marks (declaringFiles then reads that, not the marks), or keep the marks and have the repo row read the repository's own parsed entries directly rather than the merged result. Either way the repository row should say what the committed file contains, which is a fact about that file alone.
+
+  Claiming, not accepting.

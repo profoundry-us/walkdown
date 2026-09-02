@@ -74,7 +74,10 @@ test('a declared blueprint answers, and its existing records stay put', () => {
     // project from the outside.
     const stray = join(s.root, 'stray');
     blueprint(join(stray, 'blueprint'), { project: 'stray' });
-    assert.equal(resolveLocations({ cwd: stray }).spec.missing, true);
+    // `path: null`, not "a path that happens not to exist": an undeclared
+    // directory has no spec to name, and naming one was how a stray blueprint
+    // came to be answered with a listed project's paths (n-0150).
+    assert.equal(resolveLocations({ cwd: stray }).spec.path, null);
   } finally {
     s.cleanup();
   }
@@ -344,7 +347,7 @@ test('a broken config is reported, not thrown past', () => {
      * nobody can resolve, which is the honest report rather than a silent
      * fallback to something that merely looks right (n-0133).
      */
-    assert.equal(loc.spec.missing, true, 'an unreadable config resolves nothing');
+    assert.equal(loc.spec.path, null, 'an unreadable config resolves nothing');
   } finally {
     s.cleanup();
   }
@@ -976,6 +979,63 @@ test('init --in-repo twice keeps one entry too @rule:locations.default.one-home-
     init(root, s.home, ['--in-repo']);
     const listed = parse(readFileSync(join(root, '.walkdown', 'config.yml'), 'utf8')).projects;
     assert.equal(listed.length, 1);
+  } finally {
+    s.cleanup();
+  }
+});
+
+/*
+ * THE LAW THIS RULE RESTS ON (n-0150): a home is only ever keyed by an id the
+ * CONFIG ALLOCATED.
+ *
+ * `claimHome` hands those out and makes them unique. A blueprint's own
+ * `project:` field and a directory's basename are not unique and never were -
+ * which is exactly why the deleted registry allocated numbers in the first
+ * place. Deriving a home from either put the registry's collision back on the
+ * READ path, where no guard on `init` could reach it: two blueprints resolved
+ * to one drafts directory, and standing in an unlisted repository answered
+ * with a listed project's spec, ledger and threads.
+ *
+ * So an undeclared blueprint gets no home at all. Not a fallback, not a guess:
+ * nothing declares it, so there is nothing to answer with.
+ */
+test('an undeclared blueprint never resolves to a declared one\u2019s home @rule:locations.default.one-home-per-blueprint', () => {
+  const s = scratch();
+  try {
+    const listed = join(s.root, 'one', 'app');
+    mkdirSync(join(listed, '.git'), { recursive: true });
+    init(listed, s.home);
+    const mine = readUserConfig({ cwd: listed }).config.projects[0];
+
+    // A second blueprint that looks exactly like the first from the outside:
+    // same basename, and its walkdown.yml declares the same `project:`.
+    const stray = join(s.root, 'two', 'app');
+    mkdirSync(join(stray, '.git'), { recursive: true });
+    blueprint(join(stray, 'blueprint'), { project: 'app' });
+
+    // Standing in it, it is not a project - rather than being answered with
+    // the listed one's paths.
+    const standing = resolveLocations({ cwd: stray });
+    assert.equal(standing.spec.path, null, 'no spec is invented');
+    for (const kind of KINDS) assert.equal(standing[kind].path, null, `no ${kind} either`);
+
+    // And named outright, it answers for ITSELF: runs and threads beside the
+    // spec as always, and evidence and drafts beside it too, because the path
+    // was named and so cannot collide with anybody else's.
+    const named = resolveLocations({ dir: join(stray, 'blueprint') });
+    assert.equal(named.spec.path, join(stray, 'blueprint'));
+    for (const kind of KINDS) {
+      assert.ok(
+        named[kind].path.startsWith(join(stray, 'blueprint')),
+        `${kind} stays inside the blueprint that was named, not in a shared home`,
+      );
+      assert.notEqual(named[kind].path, expand(mine[kind]), `${kind} is not the listed project's`);
+    }
+
+    // The listed project is untouched by any of it.
+    const still = resolveLocations({ cwd: listed });
+    assert.equal(still.spec.path, expand(mine.spec));
+    assert.equal(still.drafts.path, expand(mine.drafts));
   } finally {
     s.cleanup();
   }

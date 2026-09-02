@@ -74,10 +74,32 @@ when the entry is written rather than on every resolve. `rememberProject` asks w
 second entry under `app-2` with a home of its own, and listing the same blueprint twice is
 a no-op.
 
-Two rules keep it honest. **Asking writes nothing** — `walkdown where` on a blueprint
-nobody has listed derives a home from its id and leaves the disk alone; there is nothing
-left to allocate, so answering cannot write. **An existing ledger is a fact** — a legacy
-`projects/<id>/` home keeps answering, marked as legacy, and `walkdown where --fix` writes
+That settles it when the entry is written. It does not settle it when a blueprint is
+*resolved*, and for a while nothing did: the resolver still derived
+`blueprints/<id>` for anything with no entry, where `id` fell back to the blueprint's own
+`project:` field or the repository's basename. Both are names, and names collide — which
+is the whole reason the deleted registry allocated numbers. So the collision the registry
+existed to prevent outlived it, on the read path, where no guard on `init` could reach
+(n-0150).
+
+**A home is only ever keyed by an id the config allocated.** `claimHome` hands those out
+and makes them unique; a `project:` field and a basename are not unique and never were. A
+blueprint nobody listed therefore gets **no home** — `walkdown where` says nothing declares
+this directory rather than naming a path, and every command refuses the same way it always
+did for an unlisted directory. That is not a gap. It is what "the config is the only list"
+already meant (q-0138); the derived home was the registry's ghost, kept after the thing it
+disambiguated was deleted.
+
+A blueprint *named outright* with `--dir` still answers for itself. Runs and threads sit
+beside the spec as always, and evidence and drafts sit beside it too — normally they stay
+out of the tree, but that needs a home, and a named path is the one answer that is
+certainly this blueprint's own.
+
+Two rules keep it honest. **Asking writes nothing** — answering allocates nothing and
+claims nothing; where there is no home there is simply no answer. **An existing ledger is
+a fact** — a legacy
+`projects/<id>/` home keeps answering, marked as legacy — reached through an allocated id
+now, so it inherits the same uniqueness — and `walkdown where --fix` writes
 its address into the config rather than moving it. That fold moves nothing at all: a home
 no entry claims is reported and left standing, and the index file is left for its owner to
 delete.

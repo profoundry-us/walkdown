@@ -53,7 +53,18 @@ test('a screenshot in the blueprint is served, as every older record expects', a
 test('with evidence moved out, the same recorded key finds it at the new root @rule:locations.travel.evidence-by-key', async () => {
   const f = fixture();
   try {
-    // No runs/evidence in the blueprint, so the resolver defaults it outside.
+    /*
+     * Declared, because a home is only ever keyed by an id the config
+     * allocated (n-0150). This fixture used to rely on the resolver deriving
+     * `projects/<project: field>` for a blueprint nobody had listed - which is
+     * precisely the derivation from a non-unique name that let two blueprints
+     * share one home. The rule under test is unchanged: a recorded key still
+     * finds its screenshot at the configured root.
+     */
+    writeFileSync(
+      join(f.home, 'config.yml'),
+      `projects:\n  - id: ev-fixture\n    spec: ${f.bp}\n    evidence: ${join(f.home, 'projects', 'ev-fixture', 'evidence')}\n`,
+    );
     const out = join(f.home, 'projects', 'ev-fixture', 'evidence', 'r1');
     mkdirSync(out, { recursive: true });
     writeFileSync(join(out, 'shot.png'), 'MOVED-OUT');

@@ -1,0 +1,62 @@
+id: n-0152
+kind: note
+author: topher
+via: agent
+created: 2026-09-01T21:39:51.458Z
+anchor:
+  rule: threads.lifecycle.acts-for-a-person
+status: open
+body: >-
+  Judged 2026-09-01 against a scratch copy (.walkdown/tmp/judge-acts-0901)
+  served on :4899 with WALKDOWN_HOME pointed inside it (declared identity
+  judgeperson). FAIL, on the second THEN, in a surface the earlier rounds did
+  not reach: the embed's pin popover.
+
+
+  An agent-filed note (n-0160: author judgeperson, via: agent, with an
+  agent-typed reply under it) opens in the embed as:
+
+    Judge Person  3m ago      PROBE EMBED OPENING typed by a machine     <- no provenance
+    Judge Person  via agent   PROBE EMBED REPLY typed by a machine       <- provenance
+
+  Both sentences were typed by the same machine in the same second. The reader
+  is not merely under-informed, they are shown a contrast that says the first
+  sentence is the person's own. Read live out of the embed's shadow root at
+  http://localhost:4899/stand-in/review.
+
+
+  Cause, in the shipped build: lib/viewer/embed.js:1358-1375 (source
+  src/embed/index.js:758-767) maps a blueprint thread into a pin and copies
+  id/kind/status/anchor bits/author/created/body/replies - but not `via`. The
+  popover then calls MSG.stream(pin), and lib/message-stream.js:87 builds the
+  FIRST message from { author: thread.author, via: thread.via } - undefined.
+  `replies` is copied whole, so replies keep theirs. Same family as n-0142 and
+  n-0147: a field written to disk and rendered nowhere on the surface a reader
+  is actually on, moved one surface along. One line - `via: t.via` in that
+  mapping - and a check that reads the popover, not only the panel.
+
+
+  Second observation, same rule, different door: the HTTP API drops `via` on
+  every path. lib/api.js POST /api/threads calls writes.openThread with no via,
+  and threadAction calls writes.reply / writes.transition with no via, so an
+  agent driving the HTTP door cannot say a machine typed the words at all - it
+  records as the person, unannotated. The CLI is currently the only door that
+  can carry provenance. (Attribution itself holds everywhere: author, actor and
+  via in a request body are all ignored, and the record is always the declared
+  person.)
+
+
+  The other THENs hold under attack. No argument or environment variable moved
+  the author on a machine whose config declares one: --actor is rejected
+  outright, WALKDOWN_ACTOR is dead, GIT_CONFIG_COUNT/KEY/VALUE injection and
+  GIT_CONFIG_GLOBAL are stripped, HOME and USER/LOGNAME change nothing, and
+  every request-body name is ignored. On a machine that declares NOBODY, HOME
+  does move the git guess (n-0167 landed under mallory3) - outside this rule's
+  GIVEN, and that machine is still refused anything a person must sign.
+
+
+  Evidence:
+  runs/evidence/2026-09-01T21-03-00Z/acts-for-a-person-embed-drops-via.txt,
+  .../acts-for-a-person-cli-doors.txt, .../acts-for-a-person-http-doors.txt,
+  .../acts-for-a-person-no-name-passed-in.txt,
+  .../acts-for-a-person-panel-surfaces.txt

@@ -1,0 +1,55 @@
+id: n-0150
+kind: note
+author: topher
+via: agent
+created: 2026-09-01T21:36:44.567Z
+anchor:
+  rule: locations.default.one-home-per-blueprint
+status: open
+body: >-
+  Agent judging 2026-09-01 (run 2026-09-01T21-01-00Z-local-01): FAIL. n-0141's
+  fix guards the INIT path only. claimHome() takes the directory on disk, so
+  init can no longer hand two blueprints one home — but resolveLocations() still
+  derives an unlisted blueprint's home as <WALKDOWN_HOME>/blueprints/<slug(id)>
+  with no test for whether that directory is already a listed project's claimed
+  home, and `id` there is the blueprint's own `project:` field or, absent one,
+  the repository basename. So the same collision returns wearing the resolver's
+  coat.
+
+
+  Two shapes, both reproduced (evidence
+  runs/evidence/2026-09-01T21-01-00Z/two-blueprints-one-home.txt, full
+  transcript probe-transcript.txt, reproducer probe.sh):
+
+
+  A. --dir, the documented way to reach a blueprint that is not listed. Project
+  `app` is listed with drafts at blueprints/app/drafts. A different blueprint at
+  another path declaring `project: app` resolves to the SAME drafts path, reason
+  'the built-in default'. Served on two ports: A saves a sitting; C's GET
+  /api/draft returns A's sitting verbatim; C saves its own; A's is gone. Drafts
+  are keyed by target alone (<drafts>/local.json), so one blueprint's
+  half-finished sitting silently destroys another's.
+
+
+  B. The statement's own GIVEN. A second git repository basenamed `app`, with
+  its own blueprint on disk and no config entry: from inside it `walkdown where`
+  names the FIRST project's spec, runs (11 files) and threads (6 files), every
+  row credited to 'the built-in default' with nothing said about the home being
+  spoken for; `walkdown threads` lists the first project's n-0004; and `thread
+  new --as-agent` wrote n-0005 into blueprints/app/blueprint/threads/. A note
+  filed while standing in one repository landed in another repository's ledger.
+
+
+  The other three THEN clauses hold under attack and are recorded in the same
+  evidence: asking allocates nothing (where/status/lint/threads left an empty
+  home byte-identical), init distinctness holds for two same-basename
+  repositories, for two packs in one repository each --in-repo, and for three
+  inits in one repository (n-0145 stays fixed), and where --fix reports an
+  unclaimed home as 'left' and moves nothing.
+
+
+  Suggested shape of a fix, for whoever picks it up: the derived home in
+  resolveLocations should refuse a directory another entry already claims —
+  either by disambiguating the derived name the way claimHome does, or by
+  reporting the collision instead of answering with somebody else's path. Which
+  of the two is a decision, not a bug fix.

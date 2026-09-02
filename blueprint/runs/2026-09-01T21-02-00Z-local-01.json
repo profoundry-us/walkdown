@@ -1,0 +1,30 @@
+{
+  "run_id": "2026-09-01T21-02-00Z-local-01",
+  "created": "2026-09-01T21:02:00Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "0c45c43",
+  "blueprint_sha": "0c45c43",
+  "note": "One rule, judged headless from the working-tree CLI against a throwaway git repository and a scratch WALKDOWN_HOME. The real personal config was never written to.",
+  "results": [
+    {
+      "rule": "locations.answer.declared-not-discovered",
+      "status": "fail",
+      "statement_hash": "sha256:af12fc97131b",
+      "evidence": [
+        "runs/evidence/2026-09-01T21-02-00Z/declared-not-discovered-00-fixture.sh",
+        "runs/evidence/2026-09-01T21-02-00Z/declared-not-discovered-01-declared-vs-undeclared.txt",
+        "runs/evidence/2026-09-01T21-02-00Z/declared-not-discovered-02-named-outright-and-no-bleed.txt",
+        "runs/evidence/2026-09-01T21-02-00Z/declared-not-discovered-04-both-configs-consulted.txt",
+        "runs/evidence/2026-09-01T21-02-00Z/declared-not-discovered-05-broken-file-on-either-side.txt",
+        "runs/evidence/2026-09-01T21-02-00Z/declared-not-discovered-06-full-override-erases-the-repo-row.txt"
+      ],
+      "reasoning": "Judged from the working-tree CLI against a throwaway git repository holding four blueprints - alpha, beta and gamma declared in a committed .walkdown/config.yml, ghost declared nowhere - with WALKDOWN_HOME pointed inside the scratch for every probe; the real personal config is byte-clean of the fixture afterwards. Three THEN clauses hold under everything I could build. Each declared blueprint answers for itself: alpha, beta and gamma each report their own spec, runs and threads, and a note filed from inside each lands in that blueprint's own directory even though all three anchor to an identically-named rule and all three got the id n-0001. The undeclared one is not a project: from inside ghost, and from the repository root itself, status and thread new both refuse and name the config they consulted rather than adopting the walkdown.yml sitting right there. Naming one outright brings its own records: --dir beta from inside alpha and from /tmp entirely outside the repository lists BETA-ONLY, never ALPHA-ONLY, and a run record dropped into alpha/runs is read by alpha and by --dir alpha from inside beta but never by beta. The last clause fails, for the third time and one layer down from n-0144 and n-0146. Both files are genuinely consulted, and every arrangement where the person leaves at least one repository key un-restated reports correctly - repo-only reads 'names this project' on the shared row and 'present, no entry' on the personal one, personal-only reverses it, a personal evidence: override reads 'names this project too', an absent personal config reads 'not present - every default applies', and a parse error on either file now sits on that file's own row with the other row still saying it answered, which is n-0146's fixture reproducing clean. But a personal entry that restates EVERY key the repository declared erases the repository's declaration from the report: with the committed 'id: gamma / roots / spec' entry unchanged byte for byte, adding a personal entry with those same three keys (the ordinary shape when a person's checkout of the blueprint sits elsewhere) flips the shared row from 'names this project' to 'this repository's, shared - no entry for this project', and --json to matchedIn 'personal', config.repo.matched false. Same on beta with all five keys restated. Leave one key un-restated and the same two files read correctly again, so the shared row's wording is decided by which keys the person happened to type, not by what the committed file contains - and the 'the personal config above wins where they disagree' wording is unreachable in exactly the case where the two disagree about everything. The cause is n-0144's shape again: declaringFiles answers a per-FILE question out of the per-KEY DECLARED_IN marks, which a full override overwrites, so an entry the repository declared independently leaves no trace of having declared it. Filed as n-0151.",
+      "threads": [
+        "n-0151"
+      ]
+    }
+  ]
+}

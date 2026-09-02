@@ -1,0 +1,29 @@
+{
+  "run_id": "2026-09-01T21-03-00Z-local-01",
+  "created": "2026-09-01T21:03:00Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "0c45c43",
+  "blueprint_sha": "0c45c43",
+  "note": "One rule, judged by writing through every door against a scratch copy served on :4899 with WALKDOWN_HOME pointed inside the scratch. The real personal config and the real blueprint were written to only for this record and the note thread it names.",
+  "results": [
+    {
+      "rule": "threads.lifecycle.acts-for-a-person",
+      "status": "fail",
+      "statement_hash": "sha256:6790e9b3474c",
+      "evidence": [
+        "runs/evidence/2026-09-01T21-03-00Z/acts-for-a-person-embed-drops-via.txt",
+        "runs/evidence/2026-09-01T21-03-00Z/acts-for-a-person-cli-doors.txt",
+        "runs/evidence/2026-09-01T21-03-00Z/acts-for-a-person-http-doors.txt",
+        "runs/evidence/2026-09-01T21-03-00Z/acts-for-a-person-no-name-passed-in.txt",
+        "runs/evidence/2026-09-01T21-03-00Z/acts-for-a-person-panel-surfaces.txt"
+      ],
+      "reasoning": "Judged by writing through the CLI and the HTTP API against a scratch copy of this blueprint served on :4899, with WALKDOWN_HOME pointed at a scratch config declaring judgeperson, and by reading back both the YAML on disk and every surface a reader meets. Attribution holds everywhere I could push on it: an agent's writes are recorded under the declared person on both doors, and no argument, environment variable or request field moved that name - --actor is rejected outright, WALKDOWN_ACTOR is dead, GIT_CONFIG_COUNT/KEY/VALUE injection and GIT_CONFIG_GLOBAL are stripped before git is asked, HOME and USER/LOGNAME change nothing, and author/actor/via in a POST body are all ignored. The accept gate holds on the CLI in both spellings and cases. On a machine whose config declares nobody, HOME does move the git guess and a note landed under mallory3 - outside this rule's GIVEN, and that machine is refused everything a person must sign, so I do not fail on it. The second THEN fails, in a surface the two earlier rounds did not reach. n-0160 was filed and replied to with --as-agent; both sentences carry via: agent on disk. Opened in the embed's pin popover at /stand-in/review, the REPLY reads 'Judge Person via agent' and the opening note directly above it reads 'Judge Person' alone - the reader is shown a contrast that says the first sentence was the person's own, when the same machine typed both in the same second. The cause is in the shipped bundle: lib/viewer/embed.js:1358-1375 (src/embed/index.js:758-767) maps a thread into a pin and copies author, created, body and replies but not via, and MSG.stream builds the opening message from the object it is handed, so replies keep their provenance and the note loses it. Same family as n-0142 and n-0147 - a field written to disk and rendered nowhere the reader is - one surface along. Observed beside it, and recorded in the same thread: the HTTP door never passes via at all, so an agent driving the API cannot say a machine typed the words on any path; the CLI is currently the only door that can. The panel's cards and thread pane, and the CLI's read and confirmation lines, do name both. Filed as n-0152.",
+      "threads": [
+        "n-0152"
+      ]
+    }
+  ]
+}

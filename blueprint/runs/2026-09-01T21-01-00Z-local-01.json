@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-09-01T21-01-00Z-local-01",
+  "created": "2026-09-01T21:01:00Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "0c45c43",
+  "blueprint_sha": "0c45c43",
+  "note": "One rule, judged headless from the working-tree CLI and from two live panels, against throwaway git repositories and scratch WALKDOWN_HOME directories.",
+  "results": [
+    {
+      "rule": "locations.default.one-home-per-blueprint",
+      "status": "fail",
+      "statement_hash": "sha256:014a9a4fb6f1",
+      "evidence": [
+        "runs/evidence/2026-09-01T21-01-00Z/two-blueprints-one-home.txt",
+        "runs/evidence/2026-09-01T21-01-00Z/probe-transcript.txt",
+        "runs/evidence/2026-09-01T21-01-00Z/probe.sh"
+      ],
+      "reasoning": "Judged from the CLI and from two live panels, against fresh git repositories and scratch WALKDOWN_HOMEs only; the real personal config was never written to. Three of the four THEN clauses hold under deliberate attack. Asking allocates nothing: where, status, lint and threads against an empty home left it byte-identical by md5 of find, and two repositories both basenamed app each reported the same prospective path without either taking it. An unclaimed home is reported and left: where --fix printed it as `left`, wrote 0 homes, and the directory is still standing. Init distinctness holds in every shape the statement names, including the two that used to fail - two same-basename repositories get app and app-2, two packs in one repository each `init --in-repo` into a config the other cannot see still separate because claimHome takes the directory on disk (n-0141), and three inits in one repository mint one home and one entry (n-0145). It fails on the clause that two blueprints never resolve to the same home, because n-0141's guard sits on the init path and the resolve path has none: resolveLocations derives the out-of-tree home as blueprints/<slug(id)> with no test for whether that directory is already a listed project's claimed home, and id there is the blueprint's own `project:` field or the repository basename. Reproduced twice. With --dir, the documented way to reach an unlisted blueprint: a second blueprint declaring `project: app` resolved to listed project app's drafts directory, and because drafts are keyed by target alone, the second panel read the first's in-progress sitting as its own and then overwrote it - GET on port 4882 returned A's verdicts verbatim, and after C saved, A's sitting was gone. And in the statement's own GIVEN shape: a second git repository basenamed app, with its own blueprint on disk and no entry, had `walkdown where` name the FIRST project's spec, runs (11 files) and threads (6 files) as 'the built-in default' with no hint the home was spoken for, `walkdown threads` list the first project's n-0004, and `thread new --as-agent` write n-0005 into the first repository's threads directory - a note filed while standing in one repository landed in another's ledger. Filed as n-0150.",
+      "threads": [
+        "n-0150"
+      ]
+    }
+  ]
+}
