@@ -1,0 +1,58 @@
+id: n-0153
+kind: note
+author: topher
+via: agent
+created: 2026-09-02T15:21:21.869Z
+anchor:
+  rule: locations.default.one-home-per-blueprint
+status: open
+body: >-
+  one-home-per-blueprint still fails, one step past n-0150's guard, on the WRITE
+  door and on the entry-keyed read.
+
+
+  n-0150 stopped resolveLocations from deriving a home for a blueprint with NO
+  entry. Two things it did not reach still key a home by a name nobody
+  allocated.
+
+
+  (1) `walkdown move` writes through a name. bin/commands/move.js calls
+  rememberLocation(loc, kind, to), and lib/locations.js:1007 finds the entry by
+  `String(it.get('id')) === loc.id` — but loc.id is resolveLocations' id, which
+  with no matching entry falls back to declaredProject(spec) or
+  slug(basename(code ?? cwd)). Those are exactly the non-unique keys the rule
+  exists to keep out of a path, and here they select somebody else's config
+  ENTRY.
+
+    Reproduced, scratch WALKDOWN_HOME, transcript in evidence key runs/evidence/2026-09-02T15-30-00Z/move-rewrites-another-projects-home.txt:
+    - one/app is a listed project `app` with a draft in blueprints/app/drafts.
+    - Standing in two/app — a different repository, same basename, which `walkdown where` itself reports as "nothing declares this directory" — `walkdown move drafts --to $PWD/dr` prints "moved drafts / from null" and rewrites project `app`'s drafts key to two/app/dr.
+    - `walkdown where drafts` in one/app now answers with two/app/dr; its sitting.json is stranded in blueprints/app/drafts. One blueprint, two homes, records stranded in the first — the statement's own words — and a resolver did it, not a person: the person moved a different blueprint.
+    A `--dir` variant does the same through the blueprint's own `project:` field (probe 3 section D in the same evidence key): an unlisted blueprint declaring `project: app` moves ITS evidence and the listed project `app` is the entry that gets rewritten.
+    Two smaller faults sit in the same call: `from null` (loc[kind].path is null for an undeclared directory, and existsSync(null) raises a Node deprecation warning), and a `move` that lands on a directory nothing declares should refuse rather than invent an entry.
+
+  (2) The read path still name-keys a home whenever the id came from a committed
+  repo config. resolveLocations' homeFor is
+  join(home,'blueprints',slug(project.id)); the comment says a home may only be
+  keyed by "an id the CONFIG ALLOCATED", but claimHome only allocates within the
+  configs it can see, and a committed .walkdown/config.yml cannot see another
+  repository's. Two clones each declaring `id: app` with no evidence/drafts keys
+  — the ordinary hand-written shape — both resolve evidence and drafts to
+  blueprints/app/*. A file written under one repo's evidence path is read back
+  from the other; transcript in
+  runs/evidence/2026-09-02T15-30-00Z/two-repos-one-home-via-committed-id.txt.
+
+
+  Three clauses hold and were re-probed
+  (runs/evidence/2026-09-02T15-30-00Z/clauses-that-hold-and-a-third-route.txt):
+  asking allocates nothing (home byte-identical after where/status from two
+  same-basename repos against an empty home), init distinctness (app / app-2,
+  and a repeat init keeps one entry), and `where --fix` reporting an unclaimed
+  legacy home as `left` with its shasums unchanged.
+
+
+  The shape of the fix, if it helps: a home may only be keyed by an id claimHome
+  allocated ON THIS MACHINE, which means the personal config — a repo config's
+  id names the entry, not the directory — and every write door should refuse
+  rather than fall back to a basename. rememberLocation should take the resolved
+  entry (or nothing) rather than re-finding one by id.

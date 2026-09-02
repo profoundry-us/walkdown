@@ -9,7 +9,7 @@ stories:
     rules:
       - id: locations.default.nothing-in-the-tree
         origin: prd
-        statement: With nothing configured, every file walkdown creates lands outside the repository - the spec, the runs, the threads, the evidence and the drafts - so that trying the tool commits a project to nothing and abandoning it leaves no trace to clean up.
+        statement: With nothing configured, nothing walkdown creates is added to version control - the spec, the runs, the threads, the evidence and the drafts all land in the project's own `.walkdown/` directory, ignored by git from the moment it is made - so that trying the tool commits a project to nothing and abandoning it means deleting one directory. Beside the code is not the same as in the repository, and walkdown's files belong beside the code they describe rather than in somebody's home directory, where they lose track of which checkout they were about.
         verify: [checks]
         signoff: [eng, product]
         steps:
@@ -18,10 +18,10 @@ stories:
           when:
             - walkdown is initialised and a run, a thread and a draft are recorded
           then:
-            - Nothing appears in the working tree but the pointer saying where the spec is - not the spec, not the records, not even the skills
-            - Every record is under the personal home, filed by project
+            - Everything walkdown made sits under `.walkdown/`, beside the code and outside git
+            - Nothing is staged for commit but the pointer saying where the spec is, and the ignore rule that keeps the rest out
             - Deleting that one directory removes everything walkdown made
-          statement_hash: sha256:0f57ef142318
+          statement_hash: sha256:b0dc22f6f7f6
 
       - id: locations.default.records-follow-the-spec
         origin: prd
@@ -33,26 +33,26 @@ stories:
           when:
             - Its location is asked for
           then:
-            - Runs and threads resolve beside the spec, in the repository or out of it as the spec is
-            - Evidence and drafts resolve outside either way
+            - Runs and threads resolve beside the spec, committed or not as the spec is
+            - Evidence and drafts stay in the blueprint's own home under `.walkdown/`, ignored either way
             - Moving the spec takes its runs and threads with it and leaves the other two where they are
           statement_hash: sha256:8f5ed2817f93
 
       - id: locations.default.in-repo-on-request
         origin: prd
-        statement: A project that wants its spec committed says so once - `walkdown init --in-repo` - and its conversations follow it there without being mentioned. Whichever way it went, the command says where the spec landed and what that means, because a tool that quietly files a project's spec somewhere the person did not look has not been polite.
+        statement: A project that wants walkdown's files in version control says so once, and there are two answers worth offering - commit the spec and the conversations that go with it, or commit everything including the evidence. Neither is the default, both are one flag, and the second is offered because a team that reviews screenshots in pull requests should not have to assemble it by hand. Whichever was chosen, the command says what is tracked now and what is not, because a tool that quietly adds a project's screenshots to its history has not been polite.
         verify: [checks]
         signoff: [eng, product]
         steps:
           given:
             - A repository being initialised
           when:
-            - The person asks for the spec in the repository
+            - The person asks for the spec to be committed, or for everything to be
           then:
-            - The spec is written inside the tree, with its runs and threads beside it
-            - Evidence and drafts still resolve outside
-            - The command reports which of the two happened, in words, and how to change its mind later
-          statement_hash: sha256:bbc38bb440e9
+            - The spec is written where git will see it, with its runs and threads beside it
+            - Evidence and drafts stay ignored unless everything was asked for
+            - The command reports what is tracked now and what is not, in words, and how to change its mind later
+          statement_hash: sha256:ccda72abc474
 
       - id: locations.default.skills-are-yours-by-default
         origin: prd
@@ -65,28 +65,29 @@ stories:
           when:
             - The skills are installed, either by init or on their own
           then:
-            - With the spec outside the repository they land in the person's own directory and the tree gains nothing
-            - With the spec committed they land in the repository, to arrive with a clone
+            - With nothing committed they land in the person's own directory and the tree gains nothing
+            - With the spec committed they land beside it, to arrive with a clone
             - A skill that depends on a harness only walkdown's own repository has is not among them
             - A copy the person has edited is kept and reported rather than overwritten
           statement_hash: sha256:62223922d07f
 
       - id: locations.default.one-home-per-blueprint
         origin: thread:n-0124
-        statement: A blueprint's out-of-tree home belongs to that blueprint alone - two blueprints never resolve to the same home, not thirty monorepo packs sharing a repository basename and not two blueprints inside one pack, and one blueprint is never given a second home with its records stranded in the first. Asking where things live allocates nothing and writes nothing. A home that already holds records keeps answering for its blueprint, and moving one stays a decision a person makes rather than something a resolver does on its own.
+        statement: Every blueprint gets a numbered home of its own inside the `.walkdown` that answers for it - `.walkdown/blueprints/0002-name/` - and two blueprints never share one, because the number is allocated against that directory's own listing rather than derived from a name two projects can both have. No path walkdown resolves is keyed by a name somebody else could also choose. One blueprint is never given a second home with its records stranded in the first. Asking where things live allocates nothing and writes nothing. A home that already holds records keeps answering for its blueprint, and moving one stays a decision a person makes rather than something a resolver does on its own.
         verify: [checks]
         signoff: [eng, product]
         steps:
           given:
-            - Two repositories with the same basename, or two blueprints inside one, and a fresh personal home
+            - Two blueprints in one `.walkdown`, and two repositories whose directories share a name
           when:
             - Each is asked about, then written to for the first time
           then:
             - Asking reports where records would go and writes nothing, not even the claim on that home
-            - Each blueprint ends up with a home of its own, and no two ever coincide
+            - Each blueprint ends up with a numbered home of its own, and no two ever coincide
+            - Nothing resolves through a name two projects could share, whichever door does the resolving
             - A home that already holds a blueprint's records keeps answering for it
             - A home nothing claims is reported and left standing, never guessed at and never moved
-          statement_hash: sha256:014a9a4fb6f1
+          statement_hash: sha256:510f6287d680
 
   - id: locations.answer
     title: Anyone can ask where this project's pieces are
@@ -136,9 +137,26 @@ stories:
             - The outer entry still answers where the tree offers no blueprint, which is what an out-of-tree spec is for
           statement_hash: sha256:8abbb2442baa
 
+      - id: locations.answer.one-walkdown-answers
+        origin: walkdown
+        statement: Exactly one `.walkdown` directory answers for where you are standing - the nearest one at or above you - and it is merged with the personal `~/.walkdown` and with nothing else. A pack carrying its own `.walkdown` never sees the repository root's, and the root's never sees the pack's, because a monorepo is several projects that happen to share a checkout, and a tool that pooled them would let one pack's board list, serve and write to another pack's ledger. Only blueprints under the `.walkdown` that answered are listed, served or written to.
+        verify: [checks]
+        signoff: [eng, product]
+        steps:
+          given:
+            - A repository holding a `.walkdown` at its root and another inside a pack, and a personal `~/.walkdown`
+          when:
+            - A location is resolved from inside the pack, and again from the repository root
+          then:
+            - From the pack, the pack's own answers and the root's is not consulted at all
+            - From the root, the root's answers and the pack's is invisible
+            - Each is merged with the personal one, and with no second repository config however many lie above it
+            - A server started in one of them offers only the blueprints that `.walkdown` declares
+          statement_hash: sha256:b08354a355f7
+
       - id: locations.answer.declared-not-discovered
         origin: thread:q-0138
-        statement: Every blueprint walkdown answers for is one somebody wrote down - in the repository's shared config or the person's own - and never one it went looking for, so a repository may hold several without them bleeding into each other and naming one outright never inherits another's records.
+        statement: Every blueprint walkdown answers for is one somebody wrote down - in the `.walkdown` that answers for where you are standing, or in the person's own - and never one it went looking for, so a repository may hold several without them bleeding into each other.
         verify: [checks]
         signoff: [eng, product]
         steps:
@@ -149,9 +167,8 @@ stories:
           then:
             - Each declared blueprint answers for itself, with its own runs and threads
             - The undeclared one is not a project at all, however much it looks like one from the outside
-            - A blueprint named on the command line brings its own records, never those of the project the caller is standing in
             - The shared config and the personal one are both consulted, and the report says which answered
-          statement_hash: sha256:af12fc97131b
+          statement_hash: sha256:dd87f8781211
 
   - id: locations.keeping
     title: A ledger already written is never orphaned or edited

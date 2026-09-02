@@ -1,0 +1,59 @@
+id: n-0154
+kind: note
+author: topher
+via: agent
+created: 2026-09-02T18:33:02.692Z
+anchor:
+  rule: locations.default.nothing-in-the-tree
+status: open
+body: >-
+  Why walkdown's files live beside the code, in .walkdown/, rather than in the
+  home directory.
+
+
+  Decision (2026-09-02, Topher): "out of repo" was conflating two different
+  things — out of the working directory, and out of git. Only the second was
+  ever wanted. Evidence and drafts were kept out of the tree because they are
+  big and are not claims, so they do not belong in a diff; that reasoning is
+  about VERSION CONTROL, and it was implemented as distance from the directory.
+
+
+  The cost of the conflation was five failed fixes to one rule in one day. Every
+  one needed a path derived from a name — the blueprint's `project:` field, or a
+  directory's basename — because a home in ~/.walkdown has nothing else to key
+  on. Names collide, which is exactly why the deleted registry allocated
+  numbers, and the collision outlived the registry on the read path (n-0124,
+  n-0129, n-0141, n-0145, n-0150, n-0153).
+
+
+  A path relative to the project's own directory cannot collide with another
+  project's. Verified while deciding this: two clones both declaring `id: app`,
+  each with `evidence: .walkdown/evidence` in its committed config, resolve to
+  different directories, because a committed config's relative paths anchor to
+  its own repository root. The same two clones without that key both resolved to
+  one directory and one read back the other's file.
+
+
+  The mechanism already existed. This repo's .gitignore has carried
+  `.walkdown/*` with `!.walkdown/config.yml` since the two-config split — git
+  will not descend into an excluded directory, so the negation is required
+  rather than stylistic. `.walkdown/` is already 'in the project's folder,
+  outside git'; it simply was not being used as the home.
+
+
+  It also honours a promise init's own source already makes — that adopting
+  walkdown should cost a project nothing and be undone by deleting one
+  directory. Under the old default that is why the spec went to ~/.walkdown.
+  Under this one, deleting .walkdown/ does it, and nothing leaves the project's
+  folder to lose track of which checkout it was about.
+
+
+  What stays in ~/.walkdown: the personal config — identity, and this machine's
+  overrides — and blueprints for things that are not in a repository at all,
+  which have no project directory to be relative to.
+
+
+  Existing installs are unaffected by construction:
+  locations.keeping.existing-outranks-preference already says an existing
+  directory outranks a blanket default, so a home named outright in a config
+  keeps answering. This changes what a project gets when it has not chosen.

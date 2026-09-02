@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-09-02T15-30-00Z-local-01",
+  "created": "2026-09-02T15:30:00Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "7d27052",
+  "blueprint_sha": "7d27052",
+  "note": "One rule, judged headless from the working-tree CLI against throwaway git repositories and scratch WALKDOWN_HOME directories; the real personal config was never written to.",
+  "results": [
+    {
+      "rule": "locations.default.one-home-per-blueprint",
+      "status": "fail",
+      "statement_hash": "sha256:014a9a4fb6f1",
+      "evidence": [
+        "runs/evidence/2026-09-02T15-30-00Z/move-rewrites-another-projects-home.txt",
+        "runs/evidence/2026-09-02T15-30-00Z/two-repos-one-home-via-committed-id.txt",
+        "runs/evidence/2026-09-02T15-30-00Z/clauses-that-hold-and-a-third-route.txt"
+      ],
+      "reasoning": "Judged from the working-tree CLI against fresh git repositories under scratch WALKDOWN_HOMEs; no probe touched the real personal config. Three clauses hold and were re-earned rather than assumed: asking allocates nothing (the home is byte-identical by md5 of find after where and status from two same-basename repositories against an empty home, and nothing on disk after a whole probe run in the committed-config fixture); init distinctness holds (two repositories basenamed app get app and app-2, and a repeat init keeps the one entry and the one home); and an unclaimed legacy home is reported as `left` by `where --fix`, 0 homes written, its files' shasums unchanged. The rule still fails, one step past the guard n-0150 added: that guard sits on the resolve path for a blueprint with NO entry, and neither the write door nor the entry-keyed resolve is covered. `walkdown move` re-finds its entry by name - rememberLocation matches `id`, and resolveLocations' id falls back to the blueprint's own `project:` field or the repository basename when nothing is listed - so standing in an undeclared second repository that merely shares a basename, `walkdown move drafts --to $PWD/dr` printed `moved drafts / from null` and rewrote the FIRST, unrelated project's drafts key to a directory inside the second repository; `walkdown where drafts` in the first repository then answered with the second's path while its sitting.json stayed stranded in blueprints/app/drafts. One blueprint, two homes, records stranded in the first, done by a resolver rather than by a person, since the person moved a different blueprint. A --dir variant reproduces it through a blueprint's own `project: app` field against the listed project app. Separately, the read path still name-keys a home whenever the id came from a committed repo config: two clones each declaring `id: app` with no evidence/drafts keys - a config cannot see another repository's, so claimHome never arbitrated between them - both resolve evidence and drafts to blueprints/app/*, and a file written under one repository's evidence path is read back from the other. Filed as n-0153.",
+      "threads": [
+        "n-0153"
+      ]
+    }
+  ]
+}

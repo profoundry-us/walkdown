@@ -1,0 +1,51 @@
+id: n-0156
+kind: note
+author: topher
+via: agent
+created: 2026-09-02T18:33:27.019Z
+anchor:
+  rule: locations.answer.one-walkdown-answers
+status: open
+body: >-
+  Why exactly one .walkdown answers, and never two.
+
+
+  Decision (2026-09-02, Topher): resolution consults the NEAREST .walkdown at or
+  above the working directory, stops there, and merges it with the personal
+  ~/.walkdown. Never a second repository-level one, however many lie above.
+
+
+  The layout this has to serve:
+
+    ~/.walkdown/blueprints/
+    my_repo/.walkdown/blueprints/
+    my_other_repo/.walkdown/blueprints/
+    my_other_repo/packs/pack1/.walkdown/blueprints/
+    my_other_repo/packs/pack2/.walkdown/blueprints/
+
+  Standing in pack1, the repository root's .walkdown is not consulted at all. A
+  monorepo is several projects that happen to share a checkout; pooling their
+  blueprints would let pack1's board list, serve and write to pack2's ledger,
+  and the panel's blueprint chooser would offer it as a click.
+
+
+  That is not hypothetical — it is q-0149, filed the same day. A serve of a
+  scratch copy still resolves every other listed blueprint and the chooser
+  offers them, so an agent told to work against a disposable copy is one
+  selection away from the real ledger. Scoping to the .walkdown that answered
+  closes it structurally rather than by asking people to be careful, and 'only
+  blueprints under the .walkdown that answered are listed, served or written to'
+  is now a clause of this rule.
+
+
+  This does reintroduce a search, which q-0138 removed, and the distinction
+  matters. What was removed was searching the tree for BLUEPRINTS — several
+  candidates, needing arbitration, with its own precedence rule and its own
+  exceptions. What this adds is finding one file with one known name and
+  stopping at the first hit. It resolves a declaration, not a guess, and there
+  is no contest to arbitrate because the nearest one wins by definition.
+
+
+  The stopping condition changes too. Today the walk stops at the git root; now
+  it stops at the first .walkdown found, which may be well below it. A pack with
+  its own is answered by its own.

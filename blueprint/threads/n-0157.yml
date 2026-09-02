@@ -1,0 +1,46 @@
+id: n-0157
+kind: note
+author: topher
+via: agent
+created: 2026-09-02T18:33:27.143Z
+anchor:
+  rule: locations.default.in-repo-on-request
+status: open
+body: >-
+  Why two commit standards rather than one flag.
+
+
+  Decision (2026-09-02, Topher): nothing under .walkdown/ is committed by
+  default, and there are two ways to opt in — commit the spec and the
+  conversations that go with it (runs and threads), or commit everything
+  including evidence.
+
+
+  One flag was not enough because the two answers are genuinely different
+  decisions. Committing the spec makes the blueprint reviewable and gives a
+  clone the rules and the conversations about them; that is the arrangement most
+  teams want, and it is why runs and threads follow the spec — one decision
+  instead of four. Committing evidence as well is a real choice a team can make
+  deliberately, and it is what this repository's own history argues about: 97MB
+  and 626 screenshots, where git history keeps every blob whether or not the
+  working copy moves.
+
+
+  Making the second an explicit standard rather than something assembled by hand
+  matters because assembling it by hand means editing .gitignore negations, and
+  a negation written wrong silently commits nothing (git does not descend into
+  an excluded directory) or silently commits everything. Neither failure is
+  visible until somebody looks at a diff.
+
+
+  The old flag was --in-repo, and that name stops making sense here. Everything
+  is in the repository's DIRECTORY now; what the flag chooses is what version
+  control sees. The rule no longer names a flag, so the spelling is an
+  implementation decision — but it should say 'commit', because that is the noun
+  the choice is about.
+
+
+  The rule keeps one property that was already load-bearing and is easy to lose
+  in a rename: whichever was chosen, the command says what is tracked now and
+  what is not. A tool that quietly adds a project's screenshots to its history
+  has not been polite.

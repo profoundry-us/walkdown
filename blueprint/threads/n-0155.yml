@@ -1,0 +1,49 @@
+id: n-0155
+kind: note
+author: topher
+via: agent
+created: 2026-09-02T18:33:02.830Z
+anchor:
+  rule: locations.default.one-home-per-blueprint
+status: open
+body: >-
+  Why numbered homes came back, and why numbering works now when the registry's
+  did not.
+
+
+  Decision (2026-09-02, Topher): every .walkdown holds `blueprints/NNNN-name/`,
+  always numbered and always plural. Multiple blueprints are supported in every
+  location rather than as a special case.
+
+
+  The registry — blueprints/index.yml — allocated numbers for exactly this
+  reason and was deleted in Phase 4 because it was a second list to keep in step
+  with the config by hand. Deleting it was right. Keeping its DERIVATION was
+  not, and that is the mistake this reverses: the resolver went on computing
+  blueprints/<id> from a name, so the collision the numbering existed to prevent
+  survived the thing that prevented it.
+
+
+  Numbering works now for a reason it could not before. The registry allocated
+  against a file that had to be maintained; this allocates against the
+  directory's own listing, and the listing IS the record. There is nothing to
+  keep in step, because the thing being allocated and the thing recording the
+  allocation are the same directory.
+
+
+  It also fixes the failure mode that defeated claimHome twice. Allocation only
+  works when every claimant can see the others' claims. Two committed configs in
+  two repositories cannot see each other (n-0141), and a hand-written committed
+  config never passes through the allocator at all (n-0153) — so ids are unique
+  within a config file and nowhere else. `.walkdown/blueprints/` is one
+  directory that every claim against that .walkdown reads, which is the property
+  allocation actually needs.
+
+
+  The rule keeps its id and its property — two blueprints never share a home,
+  asking allocates nothing, an existing home keeps answering, moving is a
+  person's decision — and drops the phrase 'out-of-tree home', which no longer
+  describes anything. One THEN was added, because it is the clause five fixes
+  kept violating in a new place each time: nothing resolves through a name two
+  projects could share, whichever door does the resolving. That covers the read
+  path and the write doors, not only init.
