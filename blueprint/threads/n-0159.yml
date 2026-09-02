@@ -1,0 +1,52 @@
+id: n-0159
+kind: note
+author: topher
+created: 2026-09-02T19:55:58.747Z
+anchor:
+  rule: locations.answer.one-walkdown-answers
+status: open
+body: >-
+  A server's project picker is computed from where the served blueprint SITS,
+  not from the `.walkdown` that answered where the server was started — so a
+  root-started server lists, serves and writes to a pack's blueprints.
+
+
+  `lib/serve.js:163` does `listedBlueprints({ cwd: baseRoot })` where `baseRoot
+  = dirname(resolve(blueprintDir))`. That re-resolves the answering `.walkdown`
+  from the blueprint's own location. Whenever a declared `spec:` path lies under
+  a DIFFERENT `.walkdown`, the whole of that other config's list is offered,
+  served and written to. `bin/commands/claims.js:28` has the same shape.
+
+
+  Reproduced in a fixture monorepo (evidence
+  runs/evidence/2026-09-02T19-49-05Z/locations-answer-probe.txt, section 5):
+
+    mono/.walkdown            declares root-proj, and root-reaching-in (spec: packs/alpha/blueprint)
+    mono/packs/alpha/.walkdown declares alpha-proj and alpha-two (spec: blueprint2)
+
+  `walkdown projects` at the root lists root-proj and root-reaching-in.
+  alpha-two is not reachable from the root by any resolution. But `walkdown
+  serve --project root-reaching-in`, started at the repository root, answers
+  /api/blueprint with `offers: alpha-proj*, alpha-two`, serves `?bp=alpha-two`
+  happily, refuses `?bp=root-proj` as an unknown project, and a POST to
+  /api/threads?bp=alpha-two lands a new note in packs/alpha/blueprint2/threads.
+  So the root's server listed, served and wrote to a blueprint only the pack's
+  `.walkdown` ever declared — the pooling this rule forbids, in the root->pack
+  direction. `walkdown lint` says nothing about the crossing.
+
+
+  Resolution itself (lib/locations.js walkdownRoot) is solid: from the pack the
+  pack answers and the root is never consulted; from the root the pack is
+  invisible; an intermediate `.walkdown` answers for directories below it and
+  hides the root's; a `.walkdown` directory with no config.yml still stops the
+  walk; the walk stops at the enclosing `.git`; and the personal home is never
+  read twice as a project's. The defect is only in what a running server offers.
+
+
+  Two candidate fixes, and it is a judgement call which: (a) serve computes
+  `listedBlueprints` from the cwd it was started in rather than from the
+  blueprint's parent — the picker then always belongs to the `.walkdown` that
+  answered; or (b) walkdown refuses at declaration time a `spec:` that lies
+  under a different `.walkdown`, since that declaration is itself the boundary
+  crossing. (a) alone leaves the mis-declaration standing but contained; (b)
+  alone is the stricter reading of the statement's last sentence.

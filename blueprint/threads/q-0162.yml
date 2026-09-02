@@ -1,0 +1,55 @@
+id: q-0162
+kind: question
+author: topher
+via: agent
+created: 2026-09-02T19:58:56.800Z
+anchor:
+  rule: locations.default.nothing-in-the-tree
+status: open
+body: >-
+  Is the second THEN's 'ignore rule' meant to be a thing git can see? Under the
+  default it cannot be.
+
+
+  Judging this rule on 2026-09-02 I hit an ambiguity I did not want to settle by
+
+  guessing. The step reads:
+
+    Nothing is staged for commit but the pointer saying where the spec is, and
+    the ignore rule that keeps the rest out
+
+  Observed (evidence runs/evidence/2026-09-02T19-49-09Z/after-records.txt): the
+
+  default ignore rule is a bare `*` inside .walkdown/.gitignore, and a gitignore
+
+  matches itself, so git reports:
+
+    $ git check-ignore -v .walkdown/.gitignore
+    .walkdown/.gitignore:4:*    .walkdown/.gitignore
+
+  Only CLAUDE.md is stageable; the ignore rule and .walkdown/config.yml are both
+
+  ignored by the ignore rule. So of the two artifacts the step names, exactly
+  one
+
+  can ever reach the index.
+
+
+  Two readings, and the statement does not choose between them:
+
+    (a) an upper bound - 'nothing but at most these two' - which the observed
+        behaviour satisfies, and which agrees with the statement's 'nothing
+        walkdown creates is added to version control';
+    (b) a list of two things that should both be committed, which the default
+        cannot deliver without dropping the `*`, and which would then contradict
+        the statement.
+
+  I judged on (a) and recorded a pass, saying so here rather than assuming
+
+  quietly. If (b) was meant, the step and the statement disagree and the default
+
+  ignore rule needs re-writing; if (a) was meant, the step could say so - 'and
+
+  nothing else, not even the ignore rule that keeps the rest out' - so the next
+
+  judge does not have to make this call again.

@@ -1,0 +1,32 @@
+{
+  "run_id": "2026-09-02T19-49-09Z-local-01",
+  "created": "2026-09-02T20:05:00Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "c6ad5c5-dirty",
+  "tree_hash": "sha256:f04c0628aec5",
+  "spec_hash": "sha256:fd2ccc8276df",
+  "results": [
+    {
+      "rule": "locations.default.nothing-in-the-tree",
+      "status": "pass",
+      "statement_hash": "sha256:b0dc22f6f7f6",
+      "evidence": [
+        "runs/evidence/2026-09-02T19-49-09Z/README.txt",
+        "runs/evidence/2026-09-02T19-49-09Z/fresh-init.txt",
+        "runs/evidence/2026-09-02T19-49-09Z/after-records.txt",
+        "runs/evidence/2026-09-02T19-49-09Z/after-delete.txt",
+        "runs/evidence/2026-09-02T19-49-09Z/pointer-default.txt",
+        "runs/evidence/2026-09-02T19-49-09Z/pointer-commit-spec.txt",
+        "runs/evidence/2026-09-02T19-49-09Z/monorepo.txt"
+      ],
+      "reasoning": "Judged by driving the working tree's CLI against throwaway git repositories in the session scratchpad, with WALKDOWN_HOME and CLAUDE_CONFIG_DIR pinned inside the scratch so no fixture ever reached the real personal config. I asked GIT rather than the filesystem, which is where the existing check (test/locations.test.js:461) is blind: it compares directory listings and greps the ignore file's last line, and never runs git, never records a run, a thread or a draft, and so proves none of the three THENs. Fresh repo, `walkdown init` with no flags: the spec, and then a run (POST /api/walkdowns), a thread (CLI `thread new`) and a draft (POST /api/draft) recorded through `walkdown serve --port 4899`, all landed under <repo>/.walkdown/ - runs and threads beside the spec, drafts and evidence in the blueprint's own numbered home - and `git check-ignore -v` named .walkdown/.gitignore:4:* as the rule covering every one of them, including the config and the ignore file itself. `git status --porcelain` read `?? CLAUDE.md` alone and `git add -A --dry-run` offered to add that and nothing else. Nothing was written into the personal config but the identity block; the project entry went into the repository's own .walkdown/config.yml, so nothing about this checkout landed in a home directory. `rm -rf .walkdown` then left the tree holding only the pointer, with `walkdown status` and `walkdown where` both correctly reporting that nothing declares the directory. A monorepo probe (init inside packs/billing of a repo whose CLAUDE.md was already tracked) ignored just as cleanly from the repository root. Two things I did not let pass silently. The second THEN names two artifacts as stageable, but the default ignore rule is a bare `*` and a gitignore matches itself, so .walkdown/.gitignore can never reach the index - I read the step as an upper bound ('nothing but at most these'), which is the only reading that agrees with the statement, and filed q-0162 rather than settle it myself. And the one file version control does receive is wrong in a way this rule's own subject covers: under --commit none the pointer names the spec by ABSOLUTE path, while the identical layout under --commit spec names it relatively, because lib/init.js keys the block on `inRepo` (a question about tracking) to decide whether the spec is inside the root (always true now). In the monorepo probe that produced a diff adding a private home path to an already-tracked file. I judged that a defect of the pointer's content rather than of what enters version control - this rule's three THENs all held - and filed it as n-0161 against locations.pointer.owns-only-its-block, whose statement it contradicts directly.",
+      "threads": [
+        "n-0161",
+        "q-0162"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+id: n-0160
+kind: note
+author: topher
+via: agent
+created: 2026-09-02T19:57:29.606Z
+anchor:
+  rule: locations.default.one-home-per-blueprint
+status: open
+body: >-
+  Agent judging 2026-09-02 (run 2026-09-02T19-49-06Z-local-01): FAIL. The
+  numbered home fixed the two doors n-0150 and n-0153 named, and it holds where
+  it is asked to. Two doors are still keyed by a name two projects can share,
+  and each of them still hands one blueprint another blueprint's ledger.
+
+
+  (1) THE CONFIG MERGE ITSELF IS KEYED BY A NAME. readUserConfig merges the
+  personal and repository halves by `id` (lib/locations.js, `byId`), and `id` is
+  a name: `init` writes `basename(root)` and deduplicates it only WITHIN the
+  file it is writing. So two blueprints in two different `.walkdown` directories
+  that happen to be called `app` become one merged entry - repository roots,
+  personal spec/runs/threads/home - which is the collision the numbering was
+  reinstated to end, arriving through the file that reads the numbers.
+
+
+  Both halves of the damage reproduce (evidence key
+  runs/evidence/2026-09-02T19-49-06Z/two-walkdowns-one-name-merge.txt, script
+  .sh beside it), from a fresh WALKDOWN_HOME, two repositories both basenamed
+  `app`, alpha adopted first from outside itself and beta then `walkdown
+  init`ed:
+
+    - Personal entry has no roots (`project add --ephemeral`): beta keeps its own roots and gets ALPHA's spec, runs and threads, credited to "this machine's config (app)". `walkdown thread new` standing in beta/app wrote n-0001 into alpha/app/blueprint/threads, and `walkdown status` in beta prints alpha's board. Beta's own `0001-app` home, which init had built one command earlier, is read by nothing.
+    - Personal entry has roots (plain `project add`): the personal roots overwrite beta's `roots: [.]`, so beta matches NOTHING. `walkdown init` says "+ listed ... as `app`" and then `walkdown status`, in that same directory, says "No blueprint here. Nothing in <beta>/.walkdown/config.yml claims this directory" - about a file that does hold an entry named app. `walkdown where` reports "no entry for this project" against both configs.
+
+  The second shape needs no scratch copy and no unusual flag: two checkouts
+  called `app` on one disk, one of them listed personally, is an ordinary
+  Tuesday.
+
+
+  (2) `walkdown move` STILL RE-FINDS THE ENTRY BY NAME - n-0153.1, unchanged.
+  rememberLocation (lib/locations.js:1035) selects the entry with
+  `String(it.get('id')) === loc.id`, and `loc.id` with no matching entry falls
+  back to `declaredProject(spec)` or `slug(basename(code ?? cwd))`. Reproduced
+  verbatim (evidence key
+  runs/evidence/2026-09-02T19-49-06Z/move-rewrites-another-projects-home.txt):
+  one/app is a listed project `app` with a sitting in
+  blueprints/0001-app/drafts; standing in two/app - a different repository, same
+  basename, which `walkdown where` itself answers about with nothing - `walkdown
+  move drafts --to $PWD/dr` prints "moved drafts / from null" and rewrites
+  project `app`'s drafts key to two/app/dr. one/app's sitting is stranded in the
+  home it was written to. One blueprint, two homes, records stranded in the
+  first, and a resolver did it: the person moved a different blueprint.
+
+
+  Two smaller faults in the same call, both still present from n-0153: `from
+  null`, and a Node DeprecationWarning from existsSync(null). And where the
+  personal config has no `projects:` list at all, the same command dies with an
+  uncaught `TypeError: projects.add is not a function` at lib/locations.js:1043
+  (transcript section F of clauses-that-hold.txt) - `doc.set('projects', [])`
+  inserts a plain JS array. A `move` onto a directory nothing declares should
+  refuse; it currently either crashes or hijacks.
+
+
+  WHAT HOLDS, PROBED THE SAME WAY
+  (runs/evidence/2026-09-02T19-49-06Z/clauses-that-hold.txt):
+    - Asking allocates nothing. Twelve asking commands (where, where --json, status, threads, lint, projects) from two same-basename repositories against an empty home left every file and directory byte-identical, and named directories that do not exist.
+    - Two same-basename repositories each get their own `.walkdown` and their own `0001-app`; init a second and third time in one repository keeps the one home and the one entry (n-0145 stays fixed), and planted evidence keeps being answered for.
+    - Several blueprints in ONE `.walkdown` are numbered against that directory's listing: 0001-app, 0002-lib, 0003-lib-2, ids app / lib / lib-2. Two arriving blueprints in directories both named `lib` are separated, and by the id deduplication rather than by the number.
+    - `where --fix` records where records already are and moves nothing: a planted orphan home's shasum and contents are unchanged across the run.
+
+  ONE OBSERVATION, NOT PART OF THE VERDICT
+  (runs/evidence/2026-09-02T19-49-06Z/number-reuse-after-a-clone.txt): the
+  listing is the record, but the listing is not what a clone gets. A `--commit
+  spec` repository's committed config claims `home: 0002-lib` while that home
+  holds only evidence/ and drafts/, both gitignored, so git carries no trace of
+  the directory. In a fresh clone `.walkdown/blueprints/` lists only 0001-team,
+  and the next `project add` allocates 0002 again. Nothing collides today,
+  because the id deduplication makes the names differ (0002-lib vs 0002-other) -
+  but the number, which the statement says is what makes two blueprints
+  distinct, is not the thing doing the work. Worth deciding whether the
+  allocator should also read the config's claimed homes, or whether a claimed
+  home ought to leave a tracked file behind.
+
+
+  Shape of a fix, for whoever picks it up: a config entry's identity across two
+  `.walkdown` files cannot be its `id`, for the same reason a home's name could
+  not be - `id` is a name, and the merge is the last door in this module still
+  opening on one. The `.walkdown` an entry lives in plus its numbered home is a
+  key nothing else can collide with; the personal half wanting to override a
+  repository entry could name that pair. And rememberLocation should be handed
+  the resolved entry (or nothing, and refuse) rather than re-finding one by id.

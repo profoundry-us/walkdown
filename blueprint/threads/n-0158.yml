@@ -1,0 +1,48 @@
+id: n-0158
+kind: note
+author: topher
+via: agent
+created: 2026-09-02T19:52:33.373Z
+anchor:
+  rule: locations.default.in-repo-on-request
+status: open
+body: >-
+  Changing the commit standard is a no-op that reports success.
+
+
+  Judged 2026-09-02 (agent), evidence runs/evidence/2026-09-02T19-49-10Z/.
+
+
+  Fresh inits are right: --commit spec puts the spec, runs and threads where git
+
+  sees them and keeps evidence and drafts ignored; --commit all commits
+
+  everything; the default ignores all of it.
+
+
+  Two failures, both about the rule's third THEN.
+
+
+  1. Running `walkdown init --commit spec` (or `--commit all`) in a project that
+     already has a `.walkdown` does not rewrite `.walkdown/.gitignore` — it is
+     written only when the directory is fresh or `--force` is passed
+     (bin/commands/init.js). The command nonetheless prints "Committed, so a rule
+     change arrives as a diff somebody approves, and a clone is a working
+     project" while the ignore file still reads `*` and `git check-ignore`
+     confirms the spec is ignored. Same in the other direction: spec -> all
+     prints "Committed in full, evidence included" with
+     `blueprints/*/evidence/` still ignored. This is the command that the
+     default output itself advertises as the way to change your mind, and the
+     skills DO relocate into the repository on that run, so the tree looks
+     half-converted and the sentence looks true. A person can believe their spec
+     is under review when git has never seen it.
+
+  2. Neither opt-in path says how to change its mind later. Only the default
+     prints a way out. `--force` is the only working escape and is mentioned
+     nowhere; it reads as destructive even though scaffolding is kept.
+
+  Evidence: runs/evidence/2026-09-02T19-49-10Z/probe-1-three-standards.txt,
+
+  runs/evidence/2026-09-02T19-49-10Z/probe-2-change-of-mind.txt,
+
+  runs/evidence/2026-09-02T19-49-10Z/summary.md

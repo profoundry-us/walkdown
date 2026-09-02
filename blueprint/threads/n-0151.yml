@@ -43,3 +43,15 @@ body: |-
   Two fixes are possible and the choice is a person's: carry a per-entry "this file declared it" fact alongside the per-key marks (declaringFiles then reads that, not the marks), or keep the marks and have the repo row read the repository's own parsed entries directly rather than the merged result. Either way the repository row should say what the committed file contains, which is a fact about that file alone.
 
   Claiming, not accepting.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-02T19:57:14Z
+    body: |-
+      Re-judged 2026-09-02 by an independent judge, against a fresh throwaway repo (alpha/beta/gamma declared, ghost not) under a scratch WALKDOWN_HOME. Still failing, unchanged: lib/locations.js declaringFiles() still answers the per-FILE question out of the per-KEY DECLARED_IN marks, so a repository entry whose every key the person restated leaves no trace of having declared anything. Control (no personal gamma entry) reads matchedIn 'repo'; add a personal gamma entry restating id/roots/spec and the same committed file reads 'this repository's, shared - no entry for this project', matchedIn 'personal', config.repo.matched false. Restating four of beta's five keys instead of five flips the wording back to 'names this project too; the personal config above wins where they disagree' - so the row is decided by how many keys were restated, not by what the committed file says. Evidence runs/evidence/2026-09-02T19-49-08Z/declared-not-discovered-04-report-erases-the-repo-declaration.txt.
+
+      New, and the reason this is worth more than a repeat: it is not only reachable by a contrived fixture, it is the state of THIS repository right now. walkdown's own committed .walkdown/config.yml declares 'walkdown' with id/roots/spec/runs/threads, the personal config restates all five, and 'node bin/walkdown.js where' in a clean checkout of this working tree prints 'this repository's, shared - no entry for this project' about the file two lines of which declare it. Evidence runs/evidence/2026-09-02T19-49-08Z/declared-not-discovered-05-same-fault-in-this-repository.txt.
+
+      The rule's other THENs held under everything I could throw at them (evidence keys ...-01-declared-vs-undeclared.txt, ...-02-named-outright-and-no-bleed.txt, ...-03-panel-surface.txt): alpha, beta and gamma each answer with their own spec, runs and threads; three notes all called n-0001 sit in three blueprints without touching each other; a run written into alpha is invisible from beta and visible when alpha is named outright, from inside beta and from outside the repository; ghost is refused by where, status, threads and thread new, is absent from 'walkdown projects' and from the panel's chooser, and is 404 'unknown project' to both GET /api/blueprint and POST /api/threads; and n-0150's shape B is closed - a blueprint whose own walkdown.yml claims 'project: alpha' is still not a project. Nothing was written to any personal home by any of the asking.
+
+      Claiming, not accepting.

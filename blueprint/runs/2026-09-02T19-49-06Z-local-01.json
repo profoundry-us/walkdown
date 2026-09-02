@@ -1,0 +1,31 @@
+{
+  "run_id": "2026-09-02T19-49-06Z-local-01",
+  "created": "2026-09-02T19:49:06Z",
+  "git_sha": "c6ad5c5-dirty",
+  "blueprint_sha": "c6ad5c5-dirty",
+  "kind": "walkdown",
+  "actor": "agent",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "results": [
+    {
+      "rule": "locations.default.one-home-per-blueprint",
+      "status": "fail",
+      "statement_hash": "sha256:510f6287d680",
+      "evidence": [
+        "runs/evidence/2026-09-02T19-49-06Z/two-walkdowns-one-name-merge.txt",
+        "runs/evidence/2026-09-02T19-49-06Z/two-walkdowns-one-name-merge.sh",
+        "runs/evidence/2026-09-02T19-49-06Z/move-rewrites-another-projects-home.txt",
+        "runs/evidence/2026-09-02T19-49-06Z/move-rewrites-another-projects-home.sh",
+        "runs/evidence/2026-09-02T19-49-06Z/clauses-that-hold.txt",
+        "runs/evidence/2026-09-02T19-49-06Z/clauses-that-hold.sh",
+        "runs/evidence/2026-09-02T19-49-06Z/number-reuse-after-a-clone.txt",
+        "runs/evidence/2026-09-02T19-49-06Z/number-reuse-after-a-clone.sh"
+      ],
+      "reasoning": "Judged by building fixtures against a scratch WALKDOWN_HOME and driving the real CLI, never the test suite. The numbered home does the work it was reinstated for: asking allocates nothing (twelve asking commands from two same-basename repositories left an empty home byte-identical), two repositories called `app` each get their own `.walkdown` and their own `0001-app`, three inits in one repository keep one home and one entry, several blueprints in one `.walkdown` are numbered 0001/0002/0003 against that directory's listing, and `where --fix` records an orphan home without moving a byte of it. But two doors still resolve through a name two projects can share. First, readUserConfig merges the personal and repository configs by `id`, and `id` is a name deduplicated only within the file that writes it - so two blueprints in two different `.walkdown` directories both called `app` become one merged entry. With a rootless personal entry, `walkdown thread new` standing in beta/app filed its note into alpha/app's ledger and `walkdown status` printed alpha's board; with a rooted one, the personal roots overwrite beta's own, `walkdown init` says '+ listed as app' and `walkdown status` in that same directory then says 'No blueprint here', denying an entry its own repository config holds. Second, rememberLocation still selects the entry by `String(it.get('id')) === loc.id`, whose fallback is a basename: standing in an undeclared repository basenamed `app`, `walkdown move drafts --to $PWD/dr` printed 'moved drafts / from null' and rewrote the unrelated listed project `app`'s drafts key, stranding that project's sitting in the home it was written to - n-0153.1 unchanged, and the same command crashes with an uncaught TypeError where the personal config has no `projects:` list. That is the fourth THEN clause failing, and the third with it: one blueprint given a second home with its records stranded in the first, done by a resolver rather than by a person.",
+      "threads": [
+        "n-0160"
+      ]
+    }
+  ]
+}

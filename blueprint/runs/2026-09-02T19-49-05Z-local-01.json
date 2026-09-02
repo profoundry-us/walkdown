@@ -1,0 +1,20 @@
+{
+  "kind": "walkdown",
+  "actor": "agent",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "results": [
+    {
+      "rule": "locations.answer.one-walkdown-answers",
+      "status": "fail",
+      "statement_hash": "sha256:b08354a355f7",
+      "evidence": [
+        "runs/evidence/2026-09-02T19-49-05Z/locations-answer-probe.txt",
+        "runs/evidence/2026-09-02T19-49-05Z/locations-answer-probe.sh",
+        "runs/evidence/2026-09-02T19-49-05Z/README.md"
+      ],
+      "reasoning": "Judged against a purpose-built fixture monorepo (a root .walkdown with a .git, an intermediate .walkdown at packs/, a pack carrying its own .walkdown declaring two blueprints, a pack whose .walkdown holds no config.yml, a pack with none, a second checkout with a .walkdown lying above it, and a personal config), with WALKDOWN_HOME pointed inside the fixture so the real personal config was never touched. Resolution itself is exactly what the statement claims and I could not break it: from the pack the pack's .walkdown answers and the root's is never consulted; from the root the pack is invisible; the intermediate .walkdown answers for everything below it and hides the root's, so no second repository config is ever merged however many lie above; a .walkdown directory with no config.yml still stops the walk rather than letting a grandparent answer; the walk stops at the enclosing .git so a checkout cannot inherit from whatever contains it; the personal home is never mistaken for a project's; and each answer is merged with the personal config alone. Servers started in the pack and at the root each offered only their own .walkdown's blueprints and refused the other's ids by name, and both an API POST and a CLI thread from the pack landed in the pack's ledger, not the root's. The fourth THEN is where it breaks. lib/serve.js:163 computes the picker with listedBlueprints({ cwd: baseRoot }) where baseRoot is the parent of the blueprint being served, not the directory the server was started in - so the answering .walkdown is recomputed from where the blueprint sits. When a declared spec: path lies under a different .walkdown, that other config's entire list is offered. With the root declaring root-reaching-in (spec: packs/alpha/blueprint), a server started at the repository root answered /api/blueprint with alpha-proj and alpha-two, served ?bp=alpha-two, refused ?bp=root-proj as an unknown project, and accepted a POST to /api/threads?bp=alpha-two that wrote a note into packs/alpha/blueprint2/threads. alpha-two is declared only by the pack's .walkdown and is unreachable from the root by any resolution, so the root's server listed, served and wrote to a blueprint the answering .walkdown never declared - the pooling this rule exists to forbid, running root to pack. walkdown lint reports nothing about the crossing, and bin/commands/claims.js:28 carries the same shape. Because the statement's last sentence and the fourth THEN are load-bearing rather than incidental, this is a fail rather than a pass with a caveat.",
+      "threads": ["n-0159"]
+    }
+  ]
+}

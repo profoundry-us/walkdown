@@ -1,0 +1,56 @@
+id: n-0161
+kind: note
+author: topher
+via: agent
+created: 2026-09-02T19:58:45.178Z
+anchor:
+  rule: locations.pointer.owns-only-its-block
+status: open
+body: >-
+  Default `walkdown init` (--commit none) writes the pointer as an ABSOLUTE
+  path, so the one file version control receives is machine-specific.
+
+
+  Observed on a fresh repo (evidence runs/evidence/2026-09-02T19-49-09Z/, files
+  pointer-default.txt, pointer-commit-spec.txt, monorepo.txt):
+
+    --commit none : `the walkdown blueprint in `/Users/<me>/.../proj/.walkdown/blueprints/0001-proj/blueprint``
+    --commit spec : `the walkdown blueprint in `.walkdown/blueprints/0001-proj/blueprint/``
+
+  Same layout both times. lib/init.js scaffold() computes the block as
+
+  pointerBlock(inRepo ? spec.slice(root.length + 1) : spec), and inRepo is
+
+  commit !== 'none' - a question about whether git TRACKS the spec, used here to
+
+  decide whether the spec is INSIDE the root. Under the current layout the spec
+
+  is always inside the root, so the relative form is always available and always
+
+  correct. This is the same confusion the comment eleven lines above it warns
+
+  about in n-0154's words ('reading the path would answer committed for a
+
+  directory that is ignored'), surviving one line below the warning.
+
+
+  Why it matters: CLAUDE.md is the only thing default init puts in front of git
+
+  (git add -A takes it and nothing else). In the monorepo probe the pack's
+
+  CLAUDE.md was already TRACKED, so trying walkdown produced a diff adding a
+
+  private home path to shared history. And on a moved or renamed checkout the
+
+  pointer names a directory that does not exist while the spec sits untouched in
+
+  .walkdown/ - which is exactly what this rule's statement calls worse than no
+
+  pointer, arrived at without the spec ever moving.
+
+
+  Suggested fix: pass the repo-relative path unconditionally, since specDir is
+
+  always under root now; keep inRepo for the ignore rules and the skills
+
+  destination, which are what it actually answers.

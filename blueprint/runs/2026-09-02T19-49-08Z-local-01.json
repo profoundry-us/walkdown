@@ -1,0 +1,30 @@
+{
+  "run_id": "2026-09-02T19-49-08Z-local-01",
+  "created": "2026-09-02T19:49:08Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "c6ad5c5",
+  "blueprint_sha": "c6ad5c5",
+  "note": "One rule, judged headless from the working-tree CLI against a throwaway git repository and a scratch WALKDOWN_HOME, plus this repository own unmodified configuration. The real personal config was never written to.",
+  "results": [
+    {
+      "rule": "locations.answer.declared-not-discovered",
+      "status": "fail",
+      "statement_hash": "sha256:dd87f8781211",
+      "evidence": [
+        "runs/evidence/2026-09-02T19-49-08Z/declared-not-discovered-00-fixture.txt",
+        "runs/evidence/2026-09-02T19-49-08Z/declared-not-discovered-01-declared-vs-undeclared.txt",
+        "runs/evidence/2026-09-02T19-49-08Z/declared-not-discovered-02-named-outright-and-no-bleed.txt",
+        "runs/evidence/2026-09-02T19-49-08Z/declared-not-discovered-03-panel-surface.txt",
+        "runs/evidence/2026-09-02T19-49-08Z/declared-not-discovered-04-report-erases-the-repo-declaration.txt",
+        "runs/evidence/2026-09-02T19-49-08Z/declared-not-discovered-05-same-fault-in-this-repository.txt"
+      ],
+      "reasoning": "Judged headless from the working-tree CLI against a throwaway git repository holding four blueprint-shaped directories - alpha, beta and gamma declared in a committed .walkdown/config.yml, ghost declared nowhere - with WALKDOWN_HOME pointed inside the scratch for every probe, so the real personal config was never written to and is byte-clean of the fixture afterwards. Three of the four claims hold under everything I could build against them. Each declared blueprint answers for itself: alpha, beta and gamma each report their own spec, runs and threads, a note filed from inside each lands in that blueprint own threads directory even though all three got the id n-0001, a run record dropped into alpha runs is read by alpha and never by beta, and naming one outright with --project brings that blueprint records from inside a sibling and from outside the repository entirely. The undeclared one is not a project at all: from inside ghost, and from the repository root itself, where, status, threads and thread new all refuse and name the config they consulted rather than adopting the perfectly good walkdown.yml sitting right there; ghost is absent from walkdown projects and from the panel chooser; and both GET /api/blueprint?bp=ghost and POST /api/threads?bp=ghost are 404 unknown project, leaving ghost threads directory empty. n-0150 shape B is closed too - a blueprint whose own walkdown.yml claims project: alpha is still nobody project. The last clause fails. Both files are genuinely consulted, and every arrangement in which the person leaves at least one repository key un-restated reports correctly, including n-0146 fixture: a parse error on either file now sits on that file own row while the other row still says it answered. But a personal entry that restates EVERY key the repository declared erases the repository declaration from the report. With the committed id: gamma / roots / spec entry unchanged byte for byte, adding a personal entry with those same three keys - the ordinary shape when a person checkout of a blueprint sits elsewhere - flips the shared row from names this project to this repository shared, no entry for this project, and --json to matchedIn personal, config.repo.matched false. Restating four of beta five keys instead of five flips the wording back, so the row is decided by how many keys the person happened to type rather than by what the committed file contains, and the wording about the personal config winning where they disagree is unreachable in exactly the case where the two disagree about everything. This is not only a fixture: it is the state of this repository right now, where walkdown own committed .walkdown/config.yml declares walkdown with five keys, the personal config restates all five, and node bin/walkdown.js where prints no entry for this project about the file that declares it. The cause is n-0144 shape a third time, unfixed since 2026-09-01: lib/locations.js declaringFiles() answers a per-FILE question out of the per-KEY DECLARED_IN marks, which a full override overwrites. Recorded as a reply on the open note n-0151 rather than as a duplicate thread. Claiming, not accepting.",
+      "threads": [
+        "n-0151"
+      ]
+    }
+  ]
+}

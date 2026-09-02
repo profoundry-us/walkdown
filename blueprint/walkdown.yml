@@ -52,13 +52,17 @@ governance:
     very blueprint it serves — this working tree's blueprint is the real
     ledger, not a disposable environment. Before judging anything that files,
     refuses, pins or replies, make a scratch copy (node tools/scratch.mjs new
-    <label> --why "..."), serve it with --dir, and judge against that; the
-    verdict still goes in the real ledger. Take the copy away when done
-    (node tools/scratch.mjs clean <label>).
+    <label> --why "..."), declare it (node bin/walkdown.js project add
+    <copy>/blueprint --ephemeral --why "..."), serve it with --project <id>,
+    and judge against that; the verdict still goes in the real ledger. Take
+    the copy away when done (node tools/scratch.mjs clean <label>, then
+    node bin/walkdown.js project forget <id>). There is no --dir: everything
+    walkdown answers for is declared, and a scratch copy is no exception.
   - >-
-    A serve of that scratch copy still resolves its home through the REAL
-    personal config, and a probe that lists a fixture project writes an entry
-    into it. Export WALKDOWN_HOME to a directory inside the scratch for any
-    serve or probe against a copy, and unset it for everything against the
-    real ledger; otherwise ~/.walkdown/config.yml collects projects nobody
-    meant to keep, which somebody then has to tell apart from the real ones.
+    Declaring that scratch copy writes an entry into the REAL personal
+    config, and so does any probe that lists a fixture project. Mark such an
+    entry --ephemeral so the listing groups it apart and forget it when the
+    sitting ends; or, for a probe, export WALKDOWN_HOME to a directory inside
+    the scratch and unset it for everything against the real ledger.
+    Otherwise ~/.walkdown/config.yml collects projects nobody meant to keep,
+    which somebody then has to tell apart from the real ones.

@@ -1,0 +1,24 @@
+{
+  "run_id": "2026-09-02T19-49-10Z-local-01",
+  "created": "2026-09-02T19:49:10Z",
+  "git_sha": "c6ad5c5-dirty",
+  "blueprint_sha": "c6ad5c5-dirty",
+  "kind": "walkdown",
+  "actor": "agent",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "results": [
+    {
+      "rule": "locations.default.in-repo-on-request",
+      "status": "fail",
+      "statement_hash": "sha256:ccda72abc474",
+      "evidence": [
+        "runs/evidence/2026-09-02T19-49-10Z/probe-1-three-standards.txt",
+        "runs/evidence/2026-09-02T19-49-10Z/probe-2-change-of-mind.txt",
+        "runs/evidence/2026-09-02T19-49-10Z/summary.md"
+      ],
+      "reasoning": "I judged this by running `walkdown init` from the working tree against real git repositories rather than reading the tests, which only cover a fresh `--commit spec`. On a fresh repository the rule holds: two standards, neither the default, each one flag, an unknown value refused with all three spelled out; `--commit spec` leaves the spec, its runs and its threads visible to `git status` while `blueprints/*/evidence/` and `blueprints/*/drafts/` are ignored, and `--commit all` leaves the screenshots and drafts visible too. The rule fails on its third THEN. Neither opt-in path says how to change its mind later — only the default prints a way out — and worse, that advertised way out does not work. `.walkdown/.gitignore` is written only when the directory is fresh or `--force` is passed, so running the very command the default output recommends, `walkdown init --commit spec`, in an already-initialised project prints \"Committed, so a rule change arrives as a diff somebody approves, and a clone is a working project\" while the ignore file still reads `*` and `git check-ignore` shows the whole spec ignored; spec -> all fails the same way, reporting \"Committed in full, evidence included\" with evidence still ignored. The skills do relocate into the repository on that second run, so the tree looks half-converted and the report looks true, which is exactly the impoliteness the statement is about, only in the direction where a person believes their spec is under review when git has never seen it. `--force` is the only escape and is named nowhere.",
+      "threads": ["n-0158"]
+    }
+  ]
+}
