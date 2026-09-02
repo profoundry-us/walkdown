@@ -36,7 +36,7 @@ import { fileURLToPath } from 'node:url';
 import { resolveLocations } from '../lib/locations.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const TMP = join(root, '.walkdown', 'tmp');
+const TMP = join(root, 'tmp', 'scratch');
 const STAMP = '.scratch.json';
 /* Long enough for any sitting, short enough that a forgotten space is gone
  * before it is a mystery. */
@@ -99,6 +99,35 @@ function make(label, why) {
     mkdirSync(join(path, 'blueprint', 'runs'), { recursive: true });
     symlinkSync(real, join(path, 'blueprint', 'runs', 'evidence'), 'dir');
   }
+  /*
+   * A `.walkdown` of its own, and a personal home of its own, so that a server
+   * started INSIDE the copy answers for the copy and nothing else. The nearest
+   * `.walkdown` is the scope of everything a server offers - but the personal
+   * config is merged with it, and the real project is rooted at a directory
+   * that contains this one, so from the real home the real ledger is still one
+   * `?bp=` away (q-0149). Pinning WALKDOWN_HOME inside the copy is what closes
+   * that, and it is what checks/checkspace.mjs has always done.
+   */
+  mkdirSync(join(path, '.walkdown'), { recursive: true });
+  writeFileSync(
+    join(path, '.walkdown', 'config.yml'),
+    [
+      '# A scratch copy for judging. Serve it from inside this directory, with',
+      '# WALKDOWN_HOME pointed at its home/, and it answers for itself alone.',
+      'projects:',
+      '  - id: blueprint',
+      '    roots: [.]',
+      '    spec: blueprint',
+      '    runs: blueprint/runs',
+      '    threads: blueprint/threads',
+      '',
+    ].join('\n'),
+  );
+  mkdirSync(join(path, 'home'), { recursive: true });
+  writeFileSync(
+    join(path, 'home', 'config.yml'),
+    `identity:\n  username: scratch-${label}\n  name: A scratch sitting (${label})\n`,
+  );
   writeFileSync(
     join(path, STAMP),
     JSON.stringify(
@@ -115,9 +144,9 @@ function make(label, why) {
 
   console.log(path);
   console.error(
-    `\nA disposable copy. Serve it with:\n` +
-      `  node bin/walkdown.js project add ${join(path, 'blueprint')} --ephemeral --why "..."\n` +
-      `  node bin/walkdown.js serve --project <the id it printed>\n` +
+    `\nA disposable copy, declared to itself. Serve it FROM INSIDE IT, with its own home:\n` +
+      `  cd ${path} && WALKDOWN_HOME=${join(path, 'home')} node ${join(root, 'bin', 'walkdown.js')} serve --port <n>\n` +
+      `Started there it offers this copy and nothing else - not the real ledger.\n` +
       `Take it away when the sitting closes:\n` +
       `  node tools/scratch.mjs clean ${label}\n`,
   );

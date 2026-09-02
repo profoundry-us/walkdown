@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-02T19:58:45.178Z
 anchor:
   rule: locations.pointer.owns-only-its-block
-status: open
+status: addressed
 body: >-
   Default `walkdown init` (--commit none) writes the pointer as an ABSOLUTE
   path, so the one file version control receives is machine-specific.
@@ -54,3 +54,18 @@ body: >-
   always under root now; keep inRepo for the ignore rules and the skills
 
   destination, which are what it actually answers.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-02T20:46:00Z
+    body: 'Addressed, and one step further than suggested: under `--commit none` no
+      pointer is written at all, because the home is in ~/.walkdown and the
+      repository gets nothing - "without altering the repository" means without
+      altering it. init says so and names `walkdown pointer --into CLAUDE.md`
+      for anyone who wants one. When the spec is committed the pointer is
+      relative whenever the spec is inside the root, decided by the PATH, not by
+      inRepo. Leaving the repository (init --commit none on a committed project)
+      takes the fenced block back out, and the file with it if the block was all
+      it held. Checks: test/locations.test.js nothing-in-the-tree asserts the
+      tree is byte for byte as found; in-repo-on-request asserts the relative
+      pointer and its removal. Claiming, not accepting.'

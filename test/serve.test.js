@@ -128,7 +128,10 @@ before(async () => {
     ].join('\n'),
   );
 
-  server = createWalkdownServer(bp);
+  // Started IN the fixture: the `.walkdown` that answers where a server is
+  // started is the scope of what it offers, never the served blueprint's
+  // parent (n-0159).
+  server = createWalkdownServer(bp, { cwd: root });
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
   base = `http://127.0.0.1:${server.address().port}`;
 });

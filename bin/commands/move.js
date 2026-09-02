@@ -31,6 +31,23 @@ export function run(args) {
   }
 
   const loc = resolveLocations({ project: values.project });
+  /*
+   * Only a listed project's records move. Standing in a directory nothing
+   * declares, this used to fall through to an entry found BY NAME and rewrote
+   * an unrelated project's drafts key from a repository that merely shared
+   * its basename (n-0153, n-0160). No entry, no move.
+   */
+  if (!loc.project) {
+    console.error(
+      red(
+        values.project
+          ? `No project \`${values.project}\` — \`walkdown projects\` lists them.`
+          : 'Nothing declares this directory, so there is no entry to remember a move in.',
+      ),
+    );
+    console.error(dim('`walkdown init` starts a project here; `walkdown project add <path>` lists one.'));
+    return end(2);
+  }
   const from = loc[kind].path;
   const to = resolve(values.to.replace(/^~(?=$|\/)/, homedir()));
   if (from === to) {

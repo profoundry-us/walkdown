@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-01T20:39:43.914Z
 anchor:
   rule: locations.answer.declared-not-discovered
-status: open
+status: incorporated
 body: >-
   Should `serve --dir` scope the server to the blueprint it names?
 
@@ -59,3 +59,27 @@ body: >-
   I lean 1: the governance text already describes it, and an isolation an agent
   has to remember is not one. But it changes what --dir means for everybody, not
   only for judges, so it is yours.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-02T20:46:00Z
+    body: Yes, and it is settled structurally rather than by care. There is no
+      --dir; a server offers what the .walkdown WHERE IT WAS STARTED declares,
+      merged with the personal config (locations.answer.one-walkdown-answers,
+      n-0159). That alone is not enough for a scratch copy served from the real
+      repository - the real project's config is merged in and its roots contain
+      the copy, so the real ledger was still one ?bp= away. So `node
+      tools/scratch.mjs new` now gives the copy a .walkdown of its own declaring
+      only itself and a home/ of its own, and the governance lines say to serve
+      it from inside the copy with WALKDOWN_HOME pointed at that home. Started
+      there, /api/blueprint offers [blueprint] and ?bp=walkdown is 404 (checked
+      by hand, 2026-09-02). Serving a copy with --project from the real
+      repository is now named in governance as the thing not to do.
+  - author: topher
+    via: agent
+    created: 2026-09-02T20:46:57Z
+    body: "Folded into locations.answer.one-walkdown-answers (statement and THEN 4:
+      a server offers only what the .walkdown where it was started declares,
+      wherever the served blueprint sits) and into the governance lines of
+      walkdown.yml, which now say how a scratch copy is served so that the real
+      ledger is unreachable from it."

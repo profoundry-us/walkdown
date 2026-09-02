@@ -100,8 +100,10 @@ test('init appends a pointer to an existing CLAUDE.md exactly once', () => {
   mkdirSync(proj);
   writeFileSync(join(proj, 'CLAUDE.md'), '# My project\n');
   const actionOf = (rs, path) => rs.find((r) => r.path === path)?.action;
-  assert.equal(actionOf(scaffold(proj), 'CLAUDE.md'), 'pointer-appended');
-  assert.equal(actionOf(scaffold(proj), 'CLAUDE.md'), 'up-to-date');
+  // A pointer is what a COMMITTED spec gets; with nothing committed the
+  // repository is not touched at all (n-0161).
+  assert.equal(actionOf(scaffold(proj, { commit: 'spec' }), 'CLAUDE.md'), 'pointer-appended');
+  assert.equal(actionOf(scaffold(proj, { commit: 'spec' }), 'CLAUDE.md'), 'up-to-date');
   const content = readFileSync(join(proj, 'CLAUDE.md'), 'utf8');
   assert.match(content, /^# My project/);
   assert.equal(content.match(/walkdown:begin/g).length, 1);
@@ -117,7 +119,7 @@ test('several agent files: init writes no pointer and says which they are @rule:
   mkdirSync(proj);
   writeFileSync(join(proj, 'CLAUDE.md'), '# Mine\n');
   writeFileSync(join(proj, 'AGENTS.md'), '# Also mine\n');
-  const results = scaffold(proj);
+  const results = scaffold(proj, { commit: 'spec' });
   const undecided = results.find((r) => r.action === 'pointer-undecided');
   assert.ok(undecided, 'the choice is reported');
   assert.match(undecided.path, /CLAUDE\.md.*AGENTS\.md/);
@@ -139,7 +141,7 @@ test('a project with only an AGENTS.md gets the pointer there, not in a new CLAU
   const proj = join(root, 'agents-only');
   mkdirSync(proj);
   writeFileSync(join(proj, 'AGENTS.md'), '# Conventions\n');
-  const results = scaffold(proj);
+  const results = scaffold(proj, { commit: 'spec' });
   assert.equal(results.find((r) => r.path === 'AGENTS.md')?.action, 'pointer-appended');
   assert.equal(
     existsSync(join(proj, 'CLAUDE.md')),
@@ -170,7 +172,7 @@ test('a moved spec rewrites its own block and nothing around it @rule:locations.
 /*
  * Skills are procedures a person carries between projects, not records this
  * project owns - so by default they go to the person, and the repository of
- * somebody merely trying walkdown gains nothing but the pointer.
+ * somebody merely trying walkdown gains nothing at all.
  */
 test('skills follow the spec: outside it by default, committed when it is @rule:locations.default.skills-are-yours-by-default', () => {
   const home = join(root, 'skills-home');
@@ -181,7 +183,7 @@ test('skills follow the spec: outside it by default, committed when it is @rule:
 
   assert.ok(existsSync(join(home, 'walkdown-judge', 'SKILL.md')), 'the person got them');
   assert.equal(existsSync(join(proj, '.claude')), false, 'and the repository did not');
-  assert.deepEqual(tree(proj), ['CLAUDE.md'], 'one file, which is the pointer');
+  assert.deepEqual(tree(proj), [], 'nothing - not even a pointer, which is a committed spec\'s (n-0161)');
 
   // Committed spec, committed procedures - they should arrive with a clone.
   const shared = join(root, 'skills-in');

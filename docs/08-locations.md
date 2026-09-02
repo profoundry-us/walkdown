@@ -2,293 +2,246 @@
 
 ## Principle: the project declares *what*, the machine declares *where*
 
-A blueprint says what the project must be true of. A person's machine says where that
-project's files sit on this disk and who is sitting at it. Those are different kinds of
-fact and they belong in different files:
+A blueprint says what the project must be true of. A config says where that project's
+files sit and who is sitting at it. Those are different kinds of fact and they belong in
+different files:
 
 - **`blueprint/walkdown.yml`** — committed, shared, and about the project. What the
   runner is, which targets exist, where the prototype root is *relative to the blueprint*.
-- **`~/.walkdown/config.yml`** — personal, per-machine, and about this checkout. Where
-  each project's pieces live on this disk, which ports this machine serves on, and who
-  you are.
+- **`~/.walkdown/config.yml`** — personal, per-machine. Which projects this person has,
+  where each one's home is on this disk, which ports this machine serves on, and who you
+  are.
+- **`<repo>/.walkdown/config.yml`** — committed, shared. Which blueprints this repository
+  has and where they sit *relative to the repository*, so a clone is a working project
+  with nothing else to run. Same schema as the personal file; it just cannot name a path
+  outside the repository.
 
-The personal config may never change what a rule *means* or what counts as evidence. It
-changes locations and identity, nothing else. Break that and `walkdown status` starts
-meaning two different things on two laptops, which is the one failure this whole scheme
-has to avoid.
+A config may never change what a rule *means* or what counts as evidence. It changes
+locations and identity, nothing else. Break that and `walkdown status` starts meaning two
+different things on two laptops, which is the one failure this whole scheme has to avoid.
 
-## Default: walkdown writes nothing into your repository
+## A home
 
-Every path walkdown *writes* defaults to `~/.walkdown`. A project can opt any of them
-back into its repository, and for a mature project it should (see below) — but nothing
-lands in a working tree because a tool decided it should.
+Every blueprint lives in a **home**: one numbered directory holding the spec and the four
+kinds of record it produces, as siblings —
 
-The reason is not tidiness. In this repository, before this change:
+```
+blueprints/0001-acme/
+├── blueprint/     the spec — walkdown.yml, storyboard.yml, features/
+├── threads/       the conversation about it
+├── runs/          what a machine or a sitting said about a build
+├── evidence/      the screenshots those runs point at
+└── drafts/        one person's half-finished sitting
+```
 
-| | size | files |
-|---|---|---|
-| `blueprint/runs/evidence/` | **97 MB** | 626 |
-| `blueprint/runs/*.json` | 676 KB | 88 |
-| `blueprint/threads/` | 544 KB | 121 |
-| `blueprint/features/` — *the spec* | 128 KB | 6 |
+One layout, wherever the home sits. That is what lets a home move between the two
+`.walkdown` directories below as a single directory, with no record rewritten — and it
+is what lets a three-line `.gitignore` say which siblings git gets.
 
-The repository was 102 MB, of which **95% was screenshots walkdown took of itself**. A
-tool that costs a project a hundred megabytes before it has proved its worth is a tool
-that gets removed. Defaulting out means adopting walkdown is free and reversible: delete
-`~/.walkdown` and your repository is exactly as it was.
+The number is allocated against the listing of the `blueprints/` directory the home is
+made in, and the listing *is* the record: there is nothing to keep in step. The name after
+the dash is only so `ls` reads well. Nothing walkdown resolves is keyed by a name two
+projects could share — that derivation, in each of six costumes, was the ancestor of every
+collision this module has had (n-0124 through n-0160).
 
-## The two homes
+## The three arrangements, and where the home sits
 
-**`~/.walkdown/` — personal.** Per machine, per person, never synced, safe to delete. Any
-walkdown state here can be regenerated or is only yours: evidence, drafts, your identity,
-which ports this machine uses.
+**Nothing committed — the default.** The home is `~/.walkdown/blueprints/NNNN-name/`. The
+repository gets *nothing*: no `.walkdown/`, no ignore rule, not even a pointer. Trying
+walkdown alters no tree, and abandoning it is deleting one directory in your own home.
 
-**The repository — shared.** Reviewed in pull requests, versioned alongside the code it
-describes, and the same for everyone who clones it. Anything here is a claim the team
-makes together.
+```
+walkdown init
+```
 
-The question for each artifact is therefore not "is it big?" but **"would a second person
-need to see this?"**
+**The spec committed.** The home is `<repo>/.walkdown/blueprints/NNNN-name/`, and beside
+it `<repo>/.walkdown/.gitignore` holds three lines:
 
-### One home per blueprint
+```
+blueprints/*/runs/
+blueprints/*/evidence/
+blueprints/*/drafts/
+```
 
-Inside the personal home, each blueprint's records live in a directory of their own —
-`~/.walkdown/blueprints/<name>/` — **named by the config entry that owns them**. The entry
-carries its own `evidence:` and `drafts:` paths, written once when the project is listed,
-so the config is the whole record of where a blueprint's records are.
+The spec and its threads are git's; what a machine or one person produced is not. That
+file, and `config.yml` next to it, are themselves committed — the standard is something a
+clone receives.
 
-There used to be a second file for this: `blueprints/index.yml`, an allocator handing out
-numbered directories, consulted on every resolve and kept in step with the config by hand
-and by what is now `walkdown where --fix`. It existed because walkdown could not assume a
-blueprint had
-been written down, and because a *person* maintained the config and should not have to do
-allocation bookkeeping. Neither premise survives — every blueprint is declared (n-0133)
-and `init` writes the declaration — so the entry simply carries its home, and the index is
-no longer read.
+```
+walkdown init --commit spec
+```
 
-What the numbers were *for* still has to hold, because a name-keyed home collides exactly
-where the default-out design matters most: thirty monorepo packs all named by their
-repository's basename, and two blueprints inside one pack (thread n-0124). That is settled
-when the entry is written rather than on every resolve. `rememberProject` asks whether
-*this spec* is listed — not whether the name is taken — so listing a second `app` writes a
-second entry under `app-2` with a home of its own, and listing the same blueprint twice is
-a no-op.
+**Everything committed.** The same home, and no `.gitignore` at all. Runs and evidence
+arrive in pull requests, which is a thing a team can genuinely want and should not have
+to assemble by hand — a negation chain in git is easy to write wrong, and a wrong one
+silently commits nothing or everything.
 
-That settles it when the entry is written. It does not settle it when a blueprint is
-*resolved*, and for a while nothing did: the resolver still derived
-`blueprints/<id>` for anything with no entry, where `id` fell back to the blueprint's own
-`project:` field or the repository's basename. Both are names, and names collide — which
-is the whole reason the deleted registry allocated numbers. So the collision the registry
-existed to prevent outlived it, on the read path, where no guard on `init` could reach
-(n-0150).
+```
+walkdown init --commit all
+```
 
-**A home is only ever keyed by an id the config allocated.** `claimHome` hands those out
-and makes them unique; a `project:` field and a basename are not unique and never were. A
-blueprint nobody listed therefore gets **no home** — `walkdown where` says nothing declares
-this directory rather than naming a path, and every command refuses the same way it always
-did for an unlisted directory. That is not a gap. It is what "the config is the only list"
-already meant (q-0138); the derived home was the registry's ghost, kept after the thing it
-disambiguated was deleted.
+Nothing records which arrangement a project chose. **The tree is the answer**: a home
+under `~/.walkdown` is nobody's diff; a home under the repository's `.walkdown` is git's
+except for what the `.gitignore` beside it keeps out; no `.gitignore` there means all of
+it. `walkdown where` reports it on a `tracked` row by looking. There used to be a flag
+that wrote ignore rules once and could not be asked to write them again, so changing your
+mind printed success and changed nothing (n-0158).
 
-There is no `--dir` any more. A blueprint walkdown answers for is one somebody wrote down,
-selected by `--project <id>` or by standing in it; `walkdown project add <path>` is how a
-blueprint that arrived rather than one `init` made gets written down, and `--ephemeral`
-marks a throwaway copy — reachable by name, never by standing somewhere, and only ever in
-your own config. A path on the command line was the second way in, and a blueprint reached
-that way had no entry, so it needed a home derived from a name (n-0156).
+### Changing your mind
 
-Two rules keep it honest. **Asking writes nothing** — answering allocates nothing and
-claims nothing; where there is no home there is simply no answer. **An existing ledger is
-a fact** — a legacy
-`projects/<id>/` home keeps answering, marked as legacy — reached through an allocated id
-now, so it inherits the same uniqueness — and `walkdown where --fix` writes
-its address into the config rather than moving it. That fold moves nothing at all: a home
-no entry claims is reported and left standing, and the index file is left for its owner to
-delete.
+The same command, again. Between `spec` and `all` it writes or deletes the one file.
+Between `none` and either of the others it **moves the home whole** — spec, threads,
+runs, evidence, drafts, one directory — claims a fresh number in the receiving
+`blueprints/`, and rewrites the declarations to match: the repository's config gains or
+loses the entry, the personal one loses or gains it. Leaving the repository also takes the
+pointer back out of `CLAUDE.md` (only the fenced block, or the file if the block was all
+there was).
 
-`--fix` is the one thing `where` does that is not asking, and it lives there because it
-answers the same question — these are homes full of records the config does not name, so
-`where` cannot see them and nothing else will look. It was `walkdown migrate`, a name that
-promised a great deal more than it did from the day it stopped renaming directories; the
-old spelling still works and says where it went. The bare command keeps its promise: it
-allocates nothing, claims nothing, and leaves the disk as it found it.
+walkdown never touches the git index. A file already committed stays tracked until you
+`git rm --cached` it, and the command says so.
 
-## What each artifact is, and where it starts
+## The two `.walkdown` directories, and which one answers
 
-| Artifact | Default | Opt into repo | Why |
-|---|---|---|---|
-| Evidence (screenshots) | `~/.walkdown` | discouraged | Binary, unreviewable in a diff, and 95% of the weight. Nobody has ever read one in a pull request. |
-| Run records | **follows the spec** | **encouraged** | Small and append-only. Beside the spec they become the team's shared board. |
-| Threads | **follows the spec** | **encouraged** | Human conversation and the reasons behind decisions — the same argument as the spec. |
-| Spec (features, storyboard) | `~/.walkdown` | **strongly encouraged** | Versioned beside the code is the whole premise: a spec that drifts from its build is the problem walkdown exists to solve. |
-| Drafts (a sitting in progress) | `~/.walkdown` | never | Half-finished judgment belonging to one person at one moment. |
-| Prototype | wherever it is | — | Design owns it and may keep it in another repository entirely. |
-| Identity and roles | `~/.walkdown` | never | About a person, not a project. |
-| This machine's target URLs | `~/.walkdown` | never | The blueprint declares the address the project means; the machine declares the port it happens to be serving on. |
+**`~/.walkdown/`** — personal. Per machine, per person, never synced. `config.yml` with
+your identity and your list of projects; `blueprints/` with the homes of projects that
+commit nothing.
 
-## Opting in, and why you eventually should
+**`<repo>/.walkdown/`** — the repository's, and there may be several: a monorepo pack can
+carry its own. Committed or ignored as the arrangement above says.
 
-A blueprint kept outside the repository still works completely — but it gives up three
-things, and they are the three the tool was built for:
+**Exactly one repository `.walkdown` answers for where you are standing** — the nearest
+one at or above the working directory — and it is merged with the personal one and with
+nothing else. The walk stops at the first `.walkdown` it finds, or at the top of the
+repository, and it never mistakes `~/.walkdown` for a project's. A pack with its own
+`.walkdown` therefore never sees the root's list and the root never sees the pack's; a
+monorepo is several projects that happen to share a checkout, and a tool that pooled them
+would let one pack's board list, serve and write to another pack's ledger (n-0156,
+n-0159). A server offers what the `.walkdown` *where it was started* declares, wherever
+the blueprint it happens to serve sits.
 
-1. **Review.** A change to a rule is a change to what the team agreed to build. In the
-   repository it arrives as a diff somebody approves. Outside it, it arrives silently.
-2. **Atomicity.** "This commit changes the rule and the code that satisfies it" is a
-   sentence you can only write when both are in one commit.
-3. **History.** `git blame` on a statement answers *when did we decide this, and why*.
+### How the two configs merge
 
-So the recommended end state for a project that has decided to keep walkdown is: **spec
-and threads in the repository, runs in the repository, evidence outside it.** That is the
-shape this project itself uses — walkdown's own blueprint is committed, and it is the
-worked example of the configuration below.
+The repository's entries say which blueprints exist; a personal entry may override any key
+of one of them — where evidence goes on this disk, which port is yours. Entries merge key
+by key, and each key remembers which file supplied it, so `walkdown where` can say "this
+repository's config" for the spec and "this machine's config" for the evidence on the same
+report (n-0144). Whether a file declared an entry *at all* is a separate fact carried
+beside those marks, so restating every key personally does not erase the repository's row
+(n-0151).
 
-The default is out because adoption should be free, not because staying out is better.
+A personal entry overrides a repository's only when it is **about that checkout**: it
+shares the id, and either has one of its `roots` inside the repository or has no blueprint
+of its own (the pure-override shape — `id` and `evidence:` and nothing else). A personal
+entry with the same id rooted somewhere else is a different project that happens to share
+the name; here it is shadowed by the repository's and `walkdown projects` says so, and it
+is reachable from its own checkout exactly as before. An entry with no roots but a `spec`
+of its own — an ephemeral copy — is never an override of anything (n-0160).
 
-## `~/.walkdown/config.yml`
+Identity is never taken from the repository. A committed file naming a person would be
+wrong on every machine but one.
+
+## Every blueprint is written down
+
+There is no `--dir`, and walkdown does not search the tree for `walkdown.yml`. A
+blueprint walkdown answers for is one somebody declared: `init` writes the entry for what
+it makes, `walkdown project add <path>` writes one for a blueprint that arrived — a clone,
+a copy, somebody else's checkout — and `--ephemeral` marks a throwaway copy, reachable by
+name, never by standing somewhere, and only ever in your own config. `walkdown project
+forget <id>` takes an entry off the list and touches no records.
+
+A blueprint nobody listed is not a project. `walkdown where` says nothing declares this
+directory rather than naming a path, and every command refuses the same way. That is not
+a gap; a path reached without an entry needed a home derived from a name, which is where
+the collisions came from (n-0133, q-0138, n-0156).
+
+Selection is by standing somewhere — the entry whose `roots` contain the working
+directory, the most specific when several do — or by `--project <id>`. Where two entries
+share an id, `--project` prefers the one rooted where you are, then the repository's.
+
+## `config.yml`
+
+The same schema in both files. Relative paths in the repository's resolve against the
+repository; paths in the personal one are written as `~/…`.
 
 ```yaml
+# ~/.walkdown/config.yml
 identity:
   username: topher          # what records are written under, forever
   name: Topher Fangio       # what the UI shows; recorded nowhere
   roles: [eng, product]     # the roles this person may sign for
 
-defaults:
-  # {id} is the project id below. These are where a project's pieces go
-  # unless the project names somewhere else.
-  spec:     ~/.walkdown/projects/{id}/blueprint
-  runs:     ~/.walkdown/projects/{id}/runs
-  threads:  ~/.walkdown/projects/{id}/threads
-  evidence: ~/.walkdown/projects/{id}/evidence
-  drafts:   ~/.walkdown/projects/{id}/drafts
-
 projects:
-  - id: walkdown
-    # Which working trees this project answers for. `walkdown` run from
-    # anywhere inside one of these resolves to this project.
-    roots: [~/Development/profoundry/walkdown]
-    # This project keeps its spec, threads and runs in the repository —
-    # the recommended shape. Evidence stays out.
-    spec:    ~/Development/profoundry/walkdown/blueprint
-    threads: ~/Development/profoundry/walkdown/blueprint/threads
-    runs:    ~/Development/profoundry/walkdown/blueprint/runs
+  - id: acme
+    roots: [~/src/acme]                              # which working trees answer as this project
+    spec:     ~/.walkdown/blueprints/0001-acme/blueprint
+    threads:  ~/.walkdown/blueprints/0001-acme/threads
+    runs:     ~/.walkdown/blueprints/0001-acme/runs
+    evidence: ~/.walkdown/blueprints/0001-acme/evidence
+    drafts:   ~/.walkdown/blueprints/0001-acme/drafts
+    home: 0001-acme                                  # the numbered directory, by name
     targets:
-      local: { base_url: http://localhost:4700 }   # this machine's port, not the team's
+      local: { base_url: http://localhost:4700 }     # this machine's port, not the team's
 ```
 
-Resolution order for any path, first hit wins:
+```yaml
+# <repo>/.walkdown/config.yml
+projects:
+  - id: acme
+    roots: [.]
+    spec:     .walkdown/blueprints/0001-acme/blueprint
+    threads:  .walkdown/blueprints/0001-acme/threads
+    runs:     .walkdown/blueprints/0001-acme/runs
+    evidence: .walkdown/blueprints/0001-acme/evidence
+    drafts:   .walkdown/blueprints/0001-acme/drafts
+    home: 0001-acme
+```
+
+Every path is written out even though the home implies them: the config is the one place
+that says where things are, and a person reading it should not need to know the layout.
+
+Resolution order for any record kind, first hit wins:
 
 1. an explicit flag (per-kind overrides)
-2. the matching `projects[]` entry
-3. **a directory the blueprint already has** — `blueprint/runs`, `blueprint/threads`,
-   `blueprint/drafts`, `blueprint/runs/evidence`
-4. `defaults`, with `{id}` substituted
-5. the built-in default — **beside the spec** for runs and threads,
-   `~/.walkdown/projects/{id}/…` for evidence and drafts
+2. the matching `projects[]` entry's own key
+3. **a directory the blueprint already has inside it** — `blueprint/runs`,
+   `blueprint/threads`, `blueprint/drafts`, `blueprint/runs/evidence` — the shape every
+   blueprint had before homes, kept answering so an upgrade is never a data loss
+4. `defaults`, with `{id}` substituted (only when the entry allocated an id)
+5. the home's layout — `<home>/<kind>` — or, for a blueprint a reader holds by path with no
+   entry at all, inside the spec directory
 
-Rule 3 is the one that keeps an upgrade from being a data loss, and it deliberately
-outranks `defaults`: a blanket default is a *preference*, and an existing ledger is a
-*fact*. A preference must never silently point past one — moving a ledger is a decision
-somebody makes, not something a config file does on their behalf.
-
-The test in rule 3 is **exists**, not "holds records". `drafts` is created empty but for a
-`.gitignore` and the writers still write there, so a resolver that required records would
-name a location nothing uses — and a `walkdown where` that is confidently wrong is worse
-than no `walkdown where` at all.
-
-For the spec itself, rule 3 is instead the existing upward search for
-`blueprint/walkdown.yml`: an in-repo blueprint keeps working with no personal config at
-all, which is what makes this backwards compatible.
-
-A project is matched by walking up from the working directory until a `roots` entry
-matches — the **most specific** one, when several do.
-
-### More than one blueprint in a repository
-
-A repository can hold several. This one holds two: `blueprint/` (walkdown) and
-`example/blueprint/` (walkdown-example), and they are separate projects with separate ids,
-separate ledgers and separate conversations.
-
-**The nearest blueprint wins.** A blueprint found in the tree beats a configured entry when
-it sits deeper than the root that entry matched on — otherwise an entry rooted at the whole
-repository answers for every sibling inside it, and standing in `example/` reports the
-outer project's spec, runs and threads. An entry still wins where the tree has nothing to
-offer, which is exactly the case a spec kept outside the repository is about.
-
-To pin a sibling's locations, give it its own entry with a narrower `roots`. Two entries,
-one rooted at the repository and one at a subdirectory, resolve to the subdirectory's when
-you are inside it.
-
-### Runs and threads follow the spec
-
-They are the same *kind* of thing the spec is: claims a team makes together, worth
-reviewing, worth `git blame`. A spec in a repository with its conversations outside would
-let a second person clone a project and find no record of why anything was decided —
-and the argument for keeping them out was never about size. Runs and threads are 716 KB
-here against evidence's 97 MB; evidence was **135× everything else put together.**
-
-Following the spec also makes opting in **one decision instead of four**. Move the spec
-into the repository and its ledger and conversations come with it; evidence and drafts do
-not, because neither is a claim and neither belongs in a diff.
+Rule 3 deliberately outranks `defaults`: a blanket default is a *preference*, an existing
+ledger is a *fact*, and a preference must never silently point past one. Moving a ledger is
+a decision somebody makes with `walkdown move`, not something a config does on their
+behalf. The test is **exists**, not "holds records".
 
 ### Where this stands
 
-`walkdown where` prints the resolver's answer for every path, with the reason each was
-chosen, and writes nothing. `walkdown where <kind>` prints one path alone, for scripts.
+`walkdown where` prints the resolver's answer for every path with the reason each was
+chosen, which `.walkdown` answered, and what git sees — and writes nothing. `walkdown
+where <kind>` prints one path alone, for scripts. `--fix` is the one thing it does that is
+not asking: it writes the addresses of homes an older layout left behind into the config,
+moving none of them. It was `walkdown migrate`, and the old spelling still works.
 
-Where two configs are in play, each answers for itself: the personal row and the shared
-row each say whether *that* file names the project, and each path's reason names the file
-that supplied it — "this machine's config" for the personal one, "this repository's
-config" for the committed one. A repository declaring the spec while a person overrides
-where evidence lives is the ordinary arrangement, and the report says so key by key
-(`config.matchedIn` and `config.repo.matched` in `--json`).
+`walkdown move <kind> --to <path>` relocates one kind and records the choice against the
+entry that resolved — never one found by name (n-0153). A destination that already holds
+records is refused rather than merged, because two ledgers in one directory would be an
+edit of both. A directory nothing declares has no entry to remember a move in, and is
+refused.
 
-**Evidence is fully wired.** It is written to the resolved root, and served from it — and
-because a run record's `runs/evidence/…` is a *logical key* rather than a filesystem path,
-moving evidence needs no run record edited, which the append-only law would have forbidden
-anyway. The server tries the configured root first and the blueprint second, so records
-written before any of this still find their screenshots.
+Every reader and writer resolves through the same function, so they agree with `walkdown
+where` by construction. Both test suites pin `WALKDOWN_HOME` and `WALKDOWN_SKILLS_DIR` at
+scratch directories under `tmp/`, so a suite cannot read or write whoever ran it; this
+repository's own `.walkdown/` holds only its config, like anybody else's.
 
-This repository has done it: 97 MB and 626 screenshots now live under
-`~/.walkdown/projects/walkdown/evidence`, and the spec, threads and runs stayed put. Note
-what that does *not* do — git history still holds every blob, so `.git` does not shrink.
-It stops growing, which is the part worth having; shrinking it means rewriting history,
-which is destructive and nobody's decision but the owner's.
+**Evidence travels by key.** A run record names `runs/evidence/…` as a logical key rather
+than a filesystem path, and the server resolves it per machine — so moving evidence needs
+no run record edited, which the append-only law would have forbidden anyway.
 
-**Everything is wired.** `loadBlueprint` reads runs and threads from the resolved
-locations, and `run-record.js` and `draft.js` write to them — so every reader and writer
-in the project agrees with `walkdown where` by construction rather than by coincidence.
-Finding a blueprint is a question about where things are, so it is `locations.js` that
-answers it — and since walkdown stopped searching the tree, the answer is a lookup in the
-config rather than a walk (n-0133).
-
-`walkdown move <kind> --to <path>` relocates one kind and records the choice. It moves
-files and never edits one; a destination that already holds records is refused rather than
-merged, because two ledgers in one directory would be an edit of both however the files
-got there.
-
-`walkdown init` puts the spec **outside the repository** unless given `--in-repo`, and
-says out loud which it did. It no longer scaffolds `runs/`, `threads/` or `drafts/` — every
-writer creates its own directory on demand, and a tree full of `.gitkeep` files is a
-project carrying walkdown's furniture before it has decided to keep the tool.
-
-Both test suites pin `WALKDOWN_HOME` at a scratch directory. Locations resolve from a
-personal config, and a suite that read the developer's own would pass or fail depending on
-whose laptop ran it.
-
-### Project ids
-
-The id is the key for everything above, so it has to be stable across time and
-meaningless to no one. In order of preference:
-
-1. `project:` from the blueprint's own `walkdown.yml` — already exists and is already
-   the project's name for itself.
-2. Failing that, the basename of the root, slugified.
-3. On collision, the id gains a short suffix from the root path's hash, and the config
-   records it explicitly so it never moves again.
-
-Ids are written into `config.yml` on first use rather than derived fresh each time. A
-derived id that quietly changes when a directory is renamed would orphan a project's
-whole ledger.
+This repository's own blueprint predates homes: it sits at `blueprint/` with its runs and
+threads inside it, declared by path in both configs, with evidence overridden personally
+to `~/.walkdown`. That is rule 3 at work, and it is the worked example of an upgrade that
+cost nothing. Moving it into a numbered home is a decision for another day.
 
 ## Identifying a spec: a content hash, not a git sha
 
@@ -418,56 +371,38 @@ exists to prevent — it is not made honest by being convenient.
 
 ## Migration
 
-Existing projects keep working untouched: an in-repo `blueprint/` is still found by the
-directory search, with or without a personal config. For a project that wants to move:
+Existing projects keep working untouched: a blueprint declared by path, wherever it sits,
+keeps its runs and threads where they are (rule 3 above), and `walkdown where --fix` folds
+the homes an older layout left behind into the config without moving one. `walkdown move
+<kind> --to <where>` relocates one kind and rewrites the config, leaving every record's
+contents alone.
 
-- `walkdown where` prints every resolved path and which rule resolved it; `--fix` folds
-  the homes an older layout left behind into the config, moving none of them
-- `walkdown move <what> --to <where>` relocates one kind of artifact and rewrites the
-  config, leaving the ledger's contents alone — a run record is never edited, and moving
-  the file it lives in is not editing it
+## The pointer
 
-Evidence paths inside existing run records are relative to the blueprint root, so moving
-evidence needs a rewrite of those paths or a resolver that tries the configured evidence
-root first. The resolver is the better answer: it leaves the append-only ledger genuinely
-untouched.
+A short paragraph in whichever file this project's AI agents read, saying that a spec
+exists and where it is. It is written when the spec is committed and not otherwise —
+with nothing committed, the pointer would be the one thing walkdown put in the tree, and
+it would carry a home-directory path into shared history (n-0161). `walkdown pointer
+--into CLAUDE.md` places one on request.
 
-## The one thing walkdown still writes into your repository
-
-Everything above moves records out of the tree. One thing stays in it and must: the
-**pointer** — a short paragraph in whichever file this project's AI agents read, saying
-that a spec exists and where it is.
-
-It has to be in the repository because that is the only place an agent looks. And it
-matters more now than it used to, not less: with the spec outside the tree by default,
-the pointer is frequently the *only* trace of walkdown a cloned project has. An agent
-that never finds it builds against nothing.
-
-But *which* file is not walkdown's to decide. Different tools read different names
+*Which* file is not walkdown's to decide. Different tools read different names
 (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.github/copilot-instructions.md`), a monorepo
-wants it beside the pack it describes rather than at the root, and most projects
-walkdown arrives in already have one of these files with a person's own words in it.
-
-So walkdown treats it as a location like any other — found, not assumed:
+wants it beside the pack it describes, and most projects walkdown arrives in already have
+one of these files with a person's own words in it. So:
 
 - **The block is fenced** between `<!-- walkdown:begin -->` and `<!-- walkdown:end -->`.
-  walkdown reads and rewrites what is between them and touches no other line, so a file
-  full of somebody's conventions stays theirs. Rewriting rather than skipping is what
-  lets a **moved spec correct its own pointer**: `walkdown pointer` after a `move` and
-  the paragraph names the new place. A block that still says `blueprint/` after the spec
-  left is worse than no block, because an agent believes it.
-- **`walkdown init` places it only when there is no question.** No agent file at all, so
-  nothing to disturb: it writes `CLAUDE.md`. Exactly one, so the project has already
-  answered: it uses that one. Several: it names them and writes nothing, because picking
-  wrong puts the sentence where nobody reads it and writing to all of them is noise.
-- **`walkdown pointer`** prints the block for anyone to paste, and `--into <file>` places
-  it idempotently anywhere — including a file walkdown has never heard of.
+  walkdown reads and rewrites what is between them and touches no other line. Rewriting
+  rather than skipping is what lets a **moved spec correct its own pointer**; leaving the
+  repository takes the block back out, and the file with it if the block was all it held.
+- **`walkdown init` places it only when there is no question.** No agent file, so nothing
+  to disturb: it writes `CLAUDE.md`. Exactly one: it uses that one. Several: it names them
+  and writes nothing.
+- **`walkdown pointer`** prints the block, and `--into <file>` places it idempotently
+  anywhere. The path is relative whenever the spec is inside the repository.
 
-In a monorepo, point `init` at the pack: `walkdown init --dir packs/billing` gives that pack
-its own `.walkdown`, which is then the only one that answers from inside it. It puts the
-pointer beside the code it describes. Root-level discovery deliberately does not go
-hunting through subdirectories for a home — a search that guesses which of thirty packs
-a spec was about will guess wrong.
+In a monorepo, point `init` at the pack: `walkdown init --dir packs/billing --commit spec`
+gives that pack its own `.walkdown`, which is then the only one that answers from inside
+it, and puts the pointer beside the code it describes.
 
 ## What the setup wizard reads
 
@@ -476,7 +411,7 @@ five things and nothing else:
 
 1. Who are you, and which roles may you sign for?
 2. Where is this project's spec, or shall I make one?
-3. Keep the spec and its conversations in the repository? *(recommend yes, explain why)*
+3. Commit the spec and its threads, everything, or nothing? *(recommend the spec, explain why)*
 4. **Which file do this project's agents read?** — offered as the files actually found in
    the tree, plus "somewhere else" and "nowhere, I will paste it myself". This is the one
    question walkdown genuinely cannot default its way out of, and it is the natural

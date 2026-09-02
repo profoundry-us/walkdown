@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-02T19:52:33.373Z
 anchor:
   rule: locations.default.in-repo-on-request
-status: open
+status: addressed
 body: >-
   Changing the commit standard is a no-op that reports success.
 
@@ -46,3 +46,24 @@ body: >-
   runs/evidence/2026-09-02T19-49-10Z/probe-2-change-of-mind.txt,
 
   runs/evidence/2026-09-02T19-49-10Z/summary.md
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-02T20:45:59Z
+    body: >-
+      Addressed by removing the thing that could go stale. The commit standard
+      is no longer written by init and remembered; it is READ off the tree
+      (lib/standard.js, resolveLocations().standard): a home under ~/.walkdown
+      is `none`, a .gitignore beside a home under <repo>/.walkdown is `spec`, no
+      such file is `all`. `walkdown init --commit <standard>` on an existing
+      project now performs the change - writes or deletes the file between spec
+      and all, moves the whole home between none and the others - and prints
+      what it did and how to change its mind again, in every direction.
+      `walkdown where` shows a `tracked` row.
+
+
+      Checks: test/locations.test.js "--commit spec and --commit all are one
+      .gitignore apart, and changing your mind changes the tree" drives spec ->
+      all -> spec -> none -> spec through the real CLI, with a run record
+      carried round the loop; "the spec standard is a file git can see" asks git
+      itself what is stageable. Claiming, not accepting.

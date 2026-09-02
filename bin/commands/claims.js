@@ -1,4 +1,3 @@
-import { dirname, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { listedBlueprints, loadBlueprint } from '../../lib/blueprint.js';
 import { resolveLocations } from '../../lib/locations.js';
@@ -25,7 +24,9 @@ export function run(args) {
     console.error(`No blueprint here. Nothing in ${at.config.repo?.path ?? at.config.path} claims this directory.`);
     return end(2);
   }
-  const projects = listedBlueprints({ cwd: dirname(resolve(dir)) }).map((p) => ({
+  // The set the `.walkdown` here declares - not the one beside wherever the
+  // spec sits, which may be another project's (n-0159).
+  const projects = listedBlueprints({ cwd: process.cwd() }).map((p) => ({
     id: p.id,
     blueprint: loadBlueprint(p.dir),
   }));

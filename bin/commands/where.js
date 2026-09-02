@@ -102,6 +102,13 @@ export function run(args) {
       }`,
     );
   }
+  /*
+   * Which `.walkdown` answered, before any path it answered with - the one
+   * fact every row below is relative to, and the one a person in a monorepo
+   * most needs to see (locations.answer.one-walkdown-answers).
+   */
+  console.log(`  ${'answers'.padEnd(9)} ${loc.walkdown.path ?? dim('—')}`);
+  console.log(`  ${''.padEnd(9)} ${dim(loc.walkdown.why)}`);
   console.log('');
 
   const row = (label, cell) => {
@@ -112,6 +119,20 @@ export function run(args) {
   row('spec', loc.spec);
   for (const kind of KINDS) row(kind, loc[kind]);
   row('code', loc.code);
+  /*
+   * And what git sees of it, read off the tree rather than remembered: a
+   * home in `~/.walkdown` is nobody's diff, a `.gitignore` beside a home in
+   * the repository says what stays out, and no such file means all of it is
+   * committed (n-0158).
+   */
+  console.log(
+    `  ${'tracked'.padEnd(9)} ${
+      loc.standard
+        ? { none: 'nothing', spec: 'the spec and its threads', all: 'everything' }[loc.standard.name]
+        : dim('—')
+    }`,
+  );
+  console.log(`  ${''.padEnd(9)} ${dim(loc.standard?.why ?? 'not a project')}`);
 
   console.log(
     dim(

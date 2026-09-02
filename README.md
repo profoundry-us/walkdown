@@ -73,14 +73,14 @@ the reasoning, including what it would take to remove the last package.
 The first tooling slice — the two commands the hand-run milestone showed matter most:
 
 ```
-walkdown init [--dir <project-root>] [--in-repo]
+walkdown init [--dir <project-root>] [--commit none|spec|all]
 walkdown skills [--into <dir>] [--project] [--force]
-walkdown where [<kind>] [--dir <blueprint>] [--json]
+walkdown where [<kind>] [--project <id>] [--json] [--fix]
 walkdown pointer [--dir <project-root>] [--into <file>]
 walkdown run [--target <name>] [--rule <id>]
-walkdown status [<rule-id>] [--dir <blueprint>] [--target <name>] [--json]
-walkdown lint [--dir <blueprint>] [--no-checks] [--json]
-walkdown hash [--dir <blueprint>] [--write]
+walkdown status [<rule-id>] [--project <id>] [--target <name>] [--json]
+walkdown lint [--project <id>] [--no-checks] [--json]
+walkdown hash [--project <id>] [--write]
 walkdown threads [--rule <id>] [--all] [--json]
 walkdown thread <id> [--json]
 ```

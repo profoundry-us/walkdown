@@ -15,8 +15,8 @@ runner:
   # (thirteen dead home entries got allocated there on 2026-09-01, back when a
   # registry allocated them). The browser half pins its own scratch home
   # inside checks/global-setup.mjs and must keep it.
-  run_all: "WALKDOWN_HOME=.walkdown/test-home node --test --test-reporter=./lib/node-test-reporter.js --test-reporter-destination=stdout && npx playwright test"
-  run_for_rule: "WALKDOWN_HOME=.walkdown/test-home node --test --test-name-pattern='{id}' --test-reporter=./lib/node-test-reporter.js --test-reporter-destination=stdout && npx playwright test --grep '@rule:{id}'"
+  run_all: "WALKDOWN_HOME=tmp/test-home node --test --test-reporter=./lib/node-test-reporter.js --test-reporter-destination=stdout && npx playwright test"
+  run_for_rule: "WALKDOWN_HOME=tmp/test-home node --test --test-name-pattern='{id}' --test-reporter=./lib/node-test-reporter.js --test-reporter-destination=stdout && npx playwright test --grep '@rule:{id}'"
   list: "grep -rn '@rule:' test/ checks/"
   results: native
   targets:
@@ -52,17 +52,17 @@ governance:
     very blueprint it serves — this working tree's blueprint is the real
     ledger, not a disposable environment. Before judging anything that files,
     refuses, pins or replies, make a scratch copy (node tools/scratch.mjs new
-    <label> --why "..."), declare it (node bin/walkdown.js project add
-    <copy>/blueprint --ephemeral --why "..."), serve it with --project <id>,
-    and judge against that; the verdict still goes in the real ledger. Take
-    the copy away when done (node tools/scratch.mjs clean <label>, then
-    node bin/walkdown.js project forget <id>). There is no --dir: everything
-    walkdown answers for is declared, and a scratch copy is no exception.
+    <label> --why "..."), and serve it FROM INSIDE THE COPY with the copy's
+    own home: cd <copy> && WALKDOWN_HOME=<copy>/home node <repo>/bin/walkdown.js
+    serve --port <n>. The copy carries its own .walkdown declaring only itself,
+    and the nearest .walkdown is the scope of everything a server offers — so
+    started there it cannot list, serve or write to the real ledger, however
+    the panel's chooser is driven. The verdict still goes in the real ledger.
+    Take the copy away when done (node tools/scratch.mjs clean <label>).
   - >-
-    Declaring that scratch copy writes an entry into the REAL personal
-    config, and so does any probe that lists a fixture project. Mark such an
-    entry --ephemeral so the listing groups it apart and forget it when the
-    sitting ends; or, for a probe, export WALKDOWN_HOME to a directory inside
-    the scratch and unset it for everything against the real ledger.
-    Otherwise ~/.walkdown/config.yml collects projects nobody meant to keep,
-    which somebody then has to tell apart from the real ones.
+    Never serve a copy with --project from the real repository, and never
+    point WALKDOWN_HOME at the real home while serving one. Either way the
+    real project stays declared for that server — its config is merged in,
+    and its roots contain the copy — and the real ledger is one ?bp= away
+    (q-0149). There is no --dir: everything walkdown answers for is declared,
+    and a scratch copy is declared to itself.

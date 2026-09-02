@@ -3,6 +3,8 @@
  * sees and does. The node:test suite next door verifies the ledger's own laws;
  * neither can stand in for the other (see ownership.evidence.same-surface).
  */
+import { join } from 'node:path';
+import { CHECKSPACE, prepare } from './checks/checkspace.mjs';
 import { readFileSync } from 'node:fs';
 import { resolveLocations } from './lib/locations.js';
 import { defineConfig } from '@playwright/test';
@@ -61,7 +63,7 @@ export const WD_ORIGIN = `http://localhost:${WD_PORT}`;
 const prePin = process.env.WALKDOWN_HOME;
 delete process.env.WALKDOWN_HOME;
 const EVIDENCE = RECORD
-  ? resolveLocations({ dir: new URL('./blueprint', import.meta.url).pathname }).evidence.path
+  ? resolveLocations({ spec: new URL('./blueprint', import.meta.url).pathname }).evidence.path
   : null;
 if (prePin !== undefined) process.env.WALKDOWN_HOME = prePin;
 
@@ -72,7 +74,7 @@ if (prePin !== undefined) process.env.WALKDOWN_HOME = prePin;
  * developer's own - and a suite whose result depends on whose laptop ran it is
  * not a suite.
  */
-process.env.WALKDOWN_HOME = new URL('./.walkdown/checkspace/home', import.meta.url).pathname;
+process.env.WALKDOWN_HOME = join(CHECKSPACE, 'home');
 /*
  * The panel has one delivery: it frames the page it reviews. The fixture is the
  * extension's shape - a host page that publishes __walkdownConfig and loads
@@ -102,6 +104,12 @@ export const EXAMPLE_DECLARED = parse(
   readFileSync(new URL('./example/blueprint/walkdown.yml', import.meta.url), 'utf8'),
 )?.runner?.targets?.local?.base_url ?? EXAMPLE_ORIGIN;
 
+/*
+ * The disposable copy, built now - before the servers below are launched over
+ * it. See checks/checkspace.mjs for why it cannot wait for globalSetup.
+ */
+prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAMPLE_ORIGIN });
+
 export default defineConfig({
   testDir: './checks',
   /*
@@ -116,12 +124,13 @@ export default defineConfig({
   /*
    * Playwright's scratch - failure screenshots, error contexts, .last-run -
    * goes where this repo keeps all of its per-checkout working state, beside
-   * checkspace/ and test-home/, instead of littering the tree with a second
-   * ignored directory. Scratch, not records: Playwright empties it every run,
+   * checkspace/ and test-home/ under tmp/, instead of littering the tree with
+   * a second ignored directory - and out of .walkdown/, which is this project's
+   * home like anybody else's and holds nothing the test suite made. Scratch, not records: Playwright empties it every run,
    * and the durable copy of a failure's evidence is n-0136's business (filed
    * under the home by key, where deleting ~/.walkdown removes it).
    */
-  outputDir: './.walkdown/test-results',
+  outputDir: './tmp/test-results',
   globalSetup: './checks/global-setup.mjs',
   // Adopters write ['walkdown/reporter']; inside the package itself that alias
   // cannot self-resolve from Playwright's own module scope, so point at the file.
@@ -152,7 +161,7 @@ export default defineConfig({
       // the real ledger is not merely un-chosen but unreachable from here
       // (locations.answer.one-walkdown-answers).
       command: `node ../../bin/walkdown.js serve --project blueprint --port ${WD_PORT}`,
-      cwd: '.walkdown/checkspace',
+      cwd: 'tmp/checkspace',
       url: `${WD_ORIGIN}/api/blueprint`,
       reuseExistingServer: false,
       stdout: 'ignore',

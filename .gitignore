@@ -1,8 +1,7 @@
 node_modules/
 package-lock.json
 # Per-checkout working state: the checkspace, the test home, Playwright's
-# output. Written as `/*` with a negation rather than `.walkdown/`, because
-# git does not descend into an excluded directory - so the committed config
-# below could never be re-included past a directory-level ignore.
-.walkdown/*
-!.walkdown/config.yml
+# output, scratch copies for sittings, the build-check outputs. All of it
+# under tmp/, so .walkdown/ is this project's home like anybody else's and
+# holds nothing the test suite made.
+tmp/

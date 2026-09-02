@@ -90,7 +90,7 @@ skills no longer say so — this blueprint's own `governance:` lines in
     node tools/scratch.mjs list                           # what is lying about
     node tools/scratch.mjs clean sitting-0830             # or --stale
 
-The stamp exists because six unstamped copies once sat in `.walkdown/tmp` for
+The stamp exists because six unstamped copies once sat in `tmp/scratch` for
 weeks, and by the time anyone found them nobody could say which sitting had
 made which.
 

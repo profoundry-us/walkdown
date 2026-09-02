@@ -95,19 +95,23 @@ test('a declared blueprint answers, and its existing records stay put', () => {
  * makes together - so they go where it goes. Evidence and drafts are not, so
  * they never do. That is what makes opting in one decision instead of four.
  */
-test('runs and threads follow the spec; evidence and drafts never do @rule:locations.default.records-follow-the-spec', () => {
+test('a home holds the spec and its four records as siblings @rule:locations.default.records-follow-the-spec', () => {
   const s = scratch();
   try {
     const repo = join(s.root, 'repo');
-    const bp = blueprint(join(repo, 'blueprint')); // no subdirectories at all
+    const home = join(s.home, 'blueprints', '0001-demo');
+    const bp = blueprint(join(home, 'blueprint')); // no subdirectories at all
     declare(s.home, { roots: repo, spec: bp });
     const loc = resolveLocations({ cwd: repo });
-    assert.equal(loc.runs.path, join(bp, 'runs'));
-    assert.equal(loc.threads.path, join(bp, 'threads'));
-    assert.match(loc.threads.why, /beside the spec/);
-    assert.equal(loc.evidence.path, join(s.home, 'blueprints', '0001-demo', 'evidence'));
-    assert.equal(loc.drafts.path, join(s.home, 'blueprints', '0001-demo', 'drafts'));
-    assert.match(loc.evidence.why, /\.walkdown/, 'in the blueprint’s own home, ignored by git');
+    /*
+     * One layout. Runs and threads used to sit INSIDE the spec directory and
+     * evidence beside it, so a config had two shapes to say and a reader two
+     * to learn; now the five are siblings and a home moves as one directory.
+     */
+    for (const kind of KINDS) assert.equal(loc[kind].path, join(home, kind), kind);
+    assert.equal(dirname(loc.spec.path), home);
+    assert.match(loc.threads.why, /walkdown/, 'the home its entry names');
+    assert.match(loc.evidence.why, /\.walkdown/, 'in the blueprint’s own home');
   } finally {
     s.cleanup();
   }
@@ -458,67 +462,149 @@ function tree(dir, prefix = '') {
  * left it. Anything that fails this makes the tool something a person has to
  * ask permission to evaluate.
  */
-test('a fresh project gets nothing in its tree but conventions and a pointer @rule:locations.default.nothing-in-the-tree', () => {
+test('a fresh project gets nothing in its tree at all @rule:locations.default.nothing-in-the-tree', () => {
   const s = scratch();
   try {
     const repo = join(s.root, 'repo');
     mkdirSync(join(repo, 'src'), { recursive: true });
     writeFileSync(join(repo, 'src', 'app.js'), '// theirs\n');
-    walkdown(s.home, ['init', '--dir', repo]);
+    const before = tree(repo);
+    const said = walkdown(s.home, ['init', '--dir', repo]);
 
     /*
-     * The promise is about VERSION CONTROL, not about the directory. Walkdown's
-     * files sit beside the code now - that is the point of `.walkdown/`, and it
-     * is what makes every path repo-relative and so unable to collide with
-     * another project's (n-0154). What must be untouched is what git sees.
+     * "Without altering the repository" means without altering it: no
+     * `.walkdown/`, no pointer. The pointer was the one file default `init`
+     * put in front of git, carrying an absolute path that was wrong on every
+     * other machine (n-0161).
      */
-    assert.deepEqual(
-      tree(repo).filter((f) => !f.startsWith('.walkdown')),
-      ['CLAUDE.md', 'src', 'src/app.js'],
-      'one file outside .walkdown/: the pointer. Not even the skills',
-    );
-    assert.ok(existsSync(join(s.skills, 'walkdown-judge', 'SKILL.md')), 'which went to the person');
+    assert.deepEqual(tree(repo), before, 'the tree is exactly as it was found');
+    assert.ok(existsSync(join(s.skills, 'walkdown-judge', 'SKILL.md')), 'the skills went to the person');
 
-    // Everything walkdown will write is inside that one directory, which the
-    // ignore rule it wrote keeps out of git.
+    // Everything walkdown made is in the person's own home, in one numbered
+    // directory, laid out as every home is.
     const loc = resolveLocations({ cwd: repo });
-    const mine = join(repo, '.walkdown');
-    for (const kind of ['spec', ...KINDS])
-      assert.ok(loc[kind].path.startsWith(mine + '/'), `${kind} went to ${loc[kind].path}`);
-    assert.equal(readFileSync(join(mine, '.gitignore'), 'utf8').trim().split('\n').pop(), '*');
+    const home = join(s.home, 'blueprints', '0001-repo');
+    assert.equal(loc.spec.path, join(home, 'blueprint'));
+    for (const kind of KINDS) assert.equal(loc[kind].path, join(home, kind), kind);
+    assert.equal(loc.standard.name, 'none');
+    assert.match(said, /git never sees/);
+    assert.match(said, /walkdown pointer --into/, 'and says how to get a pointer if you want one');
+
+    // Abandoning it is deleting that one directory.
+    rmSync(home, { recursive: true, force: true });
+    assert.deepEqual(tree(repo), before);
   } finally {
     s.cleanup();
   }
 });
 
-test('--commit spec tracks the spec and its conversations, and not the evidence @rule:locations.default.in-repo-on-request', () => {
+/*
+ * What git sees is not remembered anywhere; it is READ off the tree
+ * (lib/standard.js). So changing your mind is a filesystem act - a home moving,
+ * a file written or deleted - and `init --commit` performs it, in every
+ * direction, on a project that already exists. It used to write the ignore
+ * rules once and print success ever after (n-0158).
+ */
+test('--commit spec and --commit all are one .gitignore apart, and changing your mind changes the tree @rule:locations.default.in-repo-on-request', () => {
+  const s = scratch();
+  try {
+    const repo = join(s.root, 'repo');
+    mkdirSync(join(repo, '.git'), { recursive: true });
+    const said = walkdown(s.home, ['init', '--dir', repo, '--commit', 'spec']);
+
+    const loc = () => resolveLocations({ cwd: repo });
+    const home = join(repo, '.walkdown', 'blueprints', '0001-repo');
+    assert.equal(loc().spec.path, join(home, 'blueprint'));
+    for (const kind of KINDS) assert.equal(loc()[kind].path, join(home, kind), kind);
+
+    const ignore = join(repo, '.walkdown', '.gitignore');
+    const rules = () =>
+      readFileSync(ignore, 'utf8').split('\n').filter((l) => l.trim() && !l.startsWith('#'));
+    assert.deepEqual(rules(), ['blueprints/*/runs/', 'blueprints/*/evidence/', 'blueprints/*/drafts/']);
+    assert.equal(loc().standard.name, 'spec');
+    assert.match(said, /Committed: the spec and its threads/);
+    assert.match(said, /delete it to commit everything/, 'and how to change its mind');
+    assert.match(readFileSync(join(repo, 'CLAUDE.md'), 'utf8'), /in `\.walkdown\/blueprints\/0001-repo\/blueprint\/`/, 'the pointer is relative');
+
+    // A record, so the round trip below can be seen to carry it.
+    mkdirSync(join(home, 'runs'), { recursive: true });
+    writeFileSync(join(home, 'runs', 'r.json'), '{"kind":"walkdown","results":[]}\n');
+
+    // spec -> all: the file goes away, and the command says so.
+    const all = walkdown(s.home, ['init', '--dir', repo, '--commit', 'all']);
+    assert.equal(existsSync(ignore), false, 'no .gitignore is what "all" IS');
+    assert.equal(loc().standard.name, 'all');
+    assert.match(all, /- removed/);
+    assert.match(all, /in full/);
+
+    // all -> spec: written back.
+    walkdown(s.home, ['init', '--dir', repo, '--commit', 'spec']);
+    assert.equal(loc().standard.name, 'spec');
+    assert.ok(existsSync(join(home, 'runs', 'r.json')), 'nothing moved for a file to change');
+
+    // spec -> none: the home leaves the repository whole, and so does the pointer.
+    const out = walkdown(s.home, ['init', '--dir', repo, '--commit', 'none']);
+    assert.match(out, /→ moved/);
+    assert.equal(existsSync(join(repo, '.walkdown')), false, 'the repository has nothing of walkdown\'s');
+    assert.equal(existsSync(join(repo, 'CLAUDE.md')), false, 'not even the pointer walkdown made');
+    const personal = join(s.home, 'blueprints', '0001-repo');
+    assert.equal(loc().spec.path, join(personal, 'blueprint'));
+    assert.ok(existsSync(join(personal, 'runs', 'r.json')), 'the record came along, unedited');
+    assert.equal(loc().standard.name, 'none');
+    assert.equal(parse(readFileSync(join(s.home, 'config.yml'), 'utf8')).projects.length, 1, 'one entry, rewritten');
+
+    // none -> spec: back in, numbered against the repository's own listing.
+    walkdown(s.home, ['init', '--dir', repo, '--commit', 'spec']);
+    assert.equal(loc().spec.path, join(home, 'blueprint'));
+    assert.ok(existsSync(join(home, 'runs', 'r.json')));
+    assert.equal(existsSync(personal), false, 'and not left behind');
+    assert.equal(loc().standard.name, 'spec');
+    assert.equal(
+      (parse(readFileSync(join(s.home, 'config.yml'), 'utf8')).projects ?? []).length,
+      0,
+      'the personal config no longer declares what the repository does',
+    );
+  } finally {
+    s.cleanup();
+  }
+});
+
+/*
+ * A committed spec's .gitignore is itself committable, and so is the config
+ * beside it: the standard is a file a clone receives. A bare `*` could not be
+ * (q-0162).
+ */
+test('the spec standard is a file git can see @rule:locations.default.in-repo-on-request', () => {
   const s = scratch();
   try {
     const repo = join(s.root, 'repo');
     mkdirSync(repo, { recursive: true });
-    const said = walkdown(s.home, ['init', '--dir', repo, '--commit', 'spec']);
-
-    /*
-     * The layout does not move - it never does now, whichever standard is
-     * chosen. What changes is the ignore rules, so there is one shape for a
-     * reader and a resolver to learn rather than two (n-0157).
-     */
-    const loc = resolveLocations({ cwd: repo });
-    const home = dirname(loc.spec.path);
-    assert.equal(loc.runs.path, join(loc.spec.path, 'runs'), 'runs follow the spec');
-    assert.equal(loc.threads.path, join(loc.spec.path, 'threads'));
-    for (const kind of ['evidence', 'drafts'])
-      assert.equal(loc[kind].path, join(home, kind), `${kind} in the blueprint's own home`);
-
-    const ignore = readFileSync(join(repo, '.walkdown', '.gitignore'), 'utf8');
-    assert.match(ignore, /blueprints\/\*\/evidence\//, 'and git is told to skip them');
-    assert.match(ignore, /blueprints\/\*\/drafts\//);
-    assert.doesNotMatch(ignore, /^\*$/m, 'while the spec itself is tracked');
-
-    // Said out loud, because files landing somewhere the person did not look
-    // is the whole failure this sentence exists to prevent.
-    assert.match(said, /spec: /);
-    assert.match(said, /Committed/);
+    let git = true;
+    try {
+      execFileSync('git', ['init', '-q'], { cwd: repo });
+    } catch {
+      git = false;
+    }
+    walkdown(s.home, ['init', '--dir', repo, '--commit', 'spec']);
+    const home = join(repo, '.walkdown', 'blueprints', '0001-repo');
+    for (const kind of ['runs', 'evidence', 'drafts']) {
+      mkdirSync(join(home, kind), { recursive: true });
+      writeFileSync(join(home, kind, 'x'), 'x');
+    }
+    mkdirSync(join(home, 'threads'), { recursive: true });
+    writeFileSync(join(home, 'threads', 'n-0001.yml'), 'id: n-0001\n');
+    if (!git) return;
+    const staged = execFileSync('git', ['add', '-A', '--dry-run'], { cwd: repo, encoding: 'utf8' })
+      .split('\n')
+      .filter(Boolean)
+      .map((l) => l.replace(/^add '|'$/g, ''));
+    const under = (p) => staged.filter((f) => f.startsWith(p));
+    assert.ok(staged.includes('.walkdown/.gitignore'), staged.join('\n'));
+    assert.ok(staged.includes('.walkdown/config.yml'));
+    assert.ok(under('.walkdown/blueprints/0001-repo/blueprint/').length);
+    assert.ok(under('.walkdown/blueprints/0001-repo/threads/').length);
+    for (const kind of ['runs', 'evidence', 'drafts'])
+      assert.deepEqual(under(`.walkdown/blueprints/0001-repo/${kind}/`), [], `${kind} stays out`);
   } finally {
     s.cleanup();
   }
@@ -542,7 +628,7 @@ test('every path is reported with the decision that chose it @rule:locations.ans
     // And the reasons name WHICH decision, so a person knows what to argue with.
     assert.match(loc.spec.why, /config/);
     assert.match(loc.runs.why, /already in the blueprint/);
-    assert.match(loc.threads.why, /beside the spec/);
+    assert.match(loc.threads.why, /walkdown/, 'the home its entry names');
     assert.match(loc.evidence.why, /config/);
     assert.match(loc.drafts.why, /walkdown/, 'the home its entry names');
 
@@ -1020,15 +1106,15 @@ test('init twice in one repository keeps the home it already claimed @rule:locat
     assert.equal(after.length, 1, 'one project, however many times it is set up');
     assert.deepEqual(after[0].spec, first[0].spec, 'and the same blueprint, not a fresh one');
     assert.deepEqual(
-      readdirSync(join(root, '.walkdown', 'blueprints')).sort(),
+      readdirSync(join(s.home, 'blueprints')).sort(),
       ['0001-app'],
       'one home on disk — a second would be a blueprint nothing reads',
     );
 
     // The neighbouring behaviour the change must not cost: a DIFFERENT
-    // repository of the same name gets its own, and now trivially so — its
-    // records are under its own `.walkdown`, so the two cannot be the same
-    // directory whatever either is called.
+    // repository of the same name gets its own — the next number in the same
+    // listing, so the two cannot be the same directory whatever either is
+    // called.
     const other = join(s.root, 'elsewhere', 'app');
     mkdirSync(join(other, '.git'), { recursive: true });
     init(other, s.home);

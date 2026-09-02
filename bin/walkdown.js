@@ -32,10 +32,12 @@ Usage:
   walkdown skills [--into <dir>] [--project] [--force]
 
 Commands:
-  init    Set a project up: a '.walkdown/' beside the code, a numbered home
-          inside it, the blueprint, and a pointer in CLAUDE.md. Nothing is
-          committed unless you say so - '--commit spec' tracks the spec and
-          its runs and threads, '--commit all' tracks the evidence too.
+  init    Set a project up: a numbered home holding the blueprint, its
+          threads, runs, evidence and drafts. By default the home is in
+          ~/.walkdown and the repository gets nothing at all; '--commit spec'
+          puts it in .walkdown/ with a .gitignore that keeps runs, evidence
+          and drafts out, '--commit all' the same with no .gitignore. Run
+          again with --commit to change your mind: the home moves whole.
   project add <path> lists a blueprint walkdown did not create - a clone, a
           copy, somebody else's checkout - so it becomes something every
           command can reach. --ephemeral marks a throwaway copy: reachable by

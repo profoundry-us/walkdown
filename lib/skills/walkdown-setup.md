@@ -1,6 +1,6 @@
 ---
 name: walkdown-setup
-description: Set walkdown up for a project from nothing - clone it, install it without a package registry, put the skills where the agent will find them, initialise the project's spec outside the repository, start the panel, and hand the person the browser-extension steps. Use when asked to set up, install, or add walkdown to a project, or when walkdown.dev sends you here.
+description: Set walkdown up for a project from nothing - clone it, install it without a package registry, put the skills where the agent will find them, initialise the project's home outside the repository unless asked otherwise, start the panel, and hand the person the browser-extension steps. Use when asked to set up, install, or add walkdown to a project, or when walkdown.dev sends you here.
 ---
 
 # Set walkdown up for this project
@@ -61,17 +61,23 @@ to have them from a clone.
 
     walkdown init --dir <project-root>
 
-By default the spec, its runs and its threads land in `~/.walkdown`, and the
-repository gets exactly one file: the pointer that tells an agent a spec
-exists. Ask whether they would rather commit it (`--in-repo`) - the honest
-recommendation is yes for a team and no for an evaluation, and it can be
-changed later with `walkdown move`.
+By default the whole home - spec, threads, runs, evidence, drafts - lands in
+`~/.walkdown/blueprints/`, and the repository gets nothing at all, not even a
+pointer. Ask whether they would rather commit it: `--commit spec` puts the home
+in `.walkdown/` with a `.gitignore` that keeps runs, evidence and drafts out;
+`--commit all` the same with no `.gitignore`. The honest recommendation is
+`spec` for a team and nothing for an evaluation, and it can be changed later
+by running `init --commit <standard>` again - the home moves whole.
 
-Then place the pointer deliberately. If the project has several agent files
-(`CLAUDE.md`, `AGENTS.md`, `.github/copilot-instructions.md`), init writes none
-of them and says so - ask which one their agents actually read, and:
+With the spec committed, place the pointer deliberately. If the project has
+several agent files (`CLAUDE.md`, `AGENTS.md`, `.github/copilot-instructions.md`),
+init writes none of them and says so - ask which one their agents actually
+read, and:
 
     walkdown pointer --dir <project-root> --into <that file>
+
+With nothing committed there is no pointer; the person's own skills are how
+their agent knows to ask `walkdown where`.
 
 Finally, tell them where everything went, in one line each: `walkdown where`.
 

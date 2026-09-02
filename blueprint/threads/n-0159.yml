@@ -4,7 +4,7 @@ author: topher
 created: 2026-09-02T19:55:58.747Z
 anchor:
   rule: locations.answer.one-walkdown-answers
-status: open
+status: addressed
 body: >-
   A server's project picker is computed from where the served blueprint SITS,
   not from the `.walkdown` that answered where the server was started — so a
@@ -50,3 +50,27 @@ body: >-
   under a different `.walkdown`, since that declaration is itself the boundary
   crossing. (a) alone leaves the mis-declaration standing but contained; (b)
   alone is the stricter reading of the statement's last sentence.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-02T20:45:59Z
+    body: >-
+      Addressed as fix (a): a server's list is the cwd's.
+      createWalkdownServer(blueprintDir, { cwd }) and startServe carry the
+      directory the server was started in, and the picker is listedBlueprints({
+      cwd }) - never the served blueprint's parent. bin/commands/claims.js the
+      same. resolveLocations now also returns `walkdown: { path, why }` - the
+      .walkdown that answered - and `walkdown where` prints it on an `answers`
+      row, so the scope is a thing a person can see.
+
+
+      (b) was not done: a declaration whose spec lies under another .walkdown is
+      left standing, but contained - the server started at the root serves it
+      and offers only the root's list. Refusing it at declaration time is a
+      stricter reading the human can still ask for.
+
+
+      Check: test/standard.test.js "a server offers what the .walkdown where it
+      was started declares, wherever the served spec sits" rebuilds your
+      monorepo fixture and asserts offers = [reach, root-proj], ?bp=alpha-two
+      404 on read and on write, ?bp=root-proj 200. Claiming, not accepting.

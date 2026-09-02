@@ -101,12 +101,20 @@ function add(args) {
   let id = name;
   for (let n = 2; taken.has(id); n++) id = `${name}-${n}`;
   const claim = claimHome({ name: id, walkdown: wd });
+  /*
+   * Where its records already are. A blueprint that predates homes keeps its
+   * runs and threads inside the spec directory; one built as a home keeps
+   * them beside it. Whichever it is, the entry says so outright, so nothing
+   * downstream has to guess which shape it is looking at.
+   */
+  const beside = (kind) =>
+    existsSync(join(spec, kind)) ? join(spec, kind) : join(resolve(spec, '..'), kind);
   projects.add(
     doc.createNode({
       id,
       spec,
-      runs: join(spec, 'runs'),
-      threads: join(spec, 'threads'),
+      runs: beside('runs'),
+      threads: beside('threads'),
       home: claim.home,
       ...(values.ephemeral
         ? { ephemeral: true, declared: new Date().toISOString(), why: values.why ?? '' }
@@ -147,7 +155,7 @@ function forget(args) {
 
 export function list(args) {
   const { values } = parseArgs({ args, options: { stale: { type: 'boolean', default: false } } });
-  const { config } = readUserConfig();
+  const { config, shadowed } = readUserConfig();
   const all = config.projects ?? [];
   const live = all.filter((p) => !p?.ephemeral);
   const scratch = all.filter((p) => p?.ephemeral);
@@ -160,6 +168,15 @@ export function list(args) {
     console.log(`${pad}${String(p.id).padEnd(14)} ${expand(p.spec ?? '')}${missing}`);
   };
   if (!values.stale) for (const p of live) row(p);
+  // A personal entry sharing a name with one this repository declares, and
+  // rooted elsewhere: a different project, reachable from its own checkout,
+  // and not silently merged into this one (n-0160).
+  if (shadowed?.length && !values.stale)
+    console.log(
+      dim(
+        `\n  ${shadowed.length} personal entr${shadowed.length === 1 ? 'y' : 'ies'} shadowed here by this repository's: ${shadowed.join(', ')}`,
+      ),
+    );
   if (scratch.length) {
     console.log(`\n  ${dim('Ephemeral')}`);
     for (const p of scratch) {

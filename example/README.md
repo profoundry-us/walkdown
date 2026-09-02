@@ -28,7 +28,7 @@ at it: `app/export.html` holds its own load event open for about three seconds.
 Two servers, from the repository root:
 
     python3 -m http.server 4310 --directory example/app
-    node bin/walkdown.js serve --dir example/blueprint --port 4700
+    node bin/walkdown.js serve --project example --port 4700
 
 Then open <http://localhost:4700/>, go to the Rules tab, and open
 **waitlist.export.says-why-it-waits**. The frame heads for the export screen and

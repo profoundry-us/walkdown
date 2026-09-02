@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-01T21:38:06.884Z
 anchor:
   rule: locations.answer.declared-not-discovered
-status: open
+status: addressed
 body: |-
   The last THEN fails a third time, one layer down from n-0144 and n-0146: a personal entry that restates every key the repository declared erases the repository's declaration from the report.
 
@@ -55,3 +55,15 @@ replies:
       The rule's other THENs held under everything I could throw at them (evidence keys ...-01-declared-vs-undeclared.txt, ...-02-named-outright-and-no-bleed.txt, ...-03-panel-surface.txt): alpha, beta and gamma each answer with their own spec, runs and threads; three notes all called n-0001 sit in three blueprints without touching each other; a run written into alpha is invisible from beta and visible when alpha is named outright, from inside beta and from outside the repository; ghost is refused by where, status, threads and thread new, is absent from 'walkdown projects' and from the panel's chooser, and is 404 'unknown project' to both GET /api/blueprint and POST /api/threads; and n-0150's shape B is closed - a blueprint whose own walkdown.yml claims 'project: alpha' is still not a project. Nothing was written to any personal home by any of the asking.
 
       Claiming, not accepting.
+  - author: topher
+    via: agent
+    created: 2026-09-02T20:46:00Z
+    body: "Addressed by the first of the two fixes offered: a per-entry fact,
+      DECLARED_BY, set when each file is read and carried beside the per-key
+      marks; declaringFiles() reads it and nothing else. A personal entry
+      restating every key now reads 'both', config.repo.matched stays true, and
+      the report says \"names this project too\". This repository's own
+      `walkdown where` - the live instance you found - now prints exactly that.
+      Check: test/standard.test.js \"restating every key personally does not
+      erase the repository's declaration\" restates every committed key through
+      the real CLI. Claiming, not accepting."

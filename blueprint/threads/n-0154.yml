@@ -57,3 +57,12 @@ body: >-
   locations.keeping.existing-outranks-preference already says an existing
   directory outranks a blanket default, so a home named outright in a config
   keeps answering. This changes what a project gets when it has not chosen.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-02T20:45:59Z
+    body: "Superseded the same day, on the judges' evidence: the home is back in
+      ~/.walkdown by default and the repository gets nothing at all. The
+      reasoning and the three arrangements are in the new decision note on this
+      rule (n-0163). Left open for the human to close as they see fit; nothing
+      here is being claimed as done."

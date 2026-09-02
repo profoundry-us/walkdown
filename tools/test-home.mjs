@@ -16,7 +16,7 @@
  *     import '../tools/test-home.mjs';
  *
  * `??=`, so a caller that pinned deliberately still wins - the runner's
- * `.walkdown/test-home` keeps working, and a suite that pins its own scratch
+ * `tmp/test-home` keeps working, and a suite that pins its own scratch
  * home per case (locations.test.js) is unaffected either way.
  */
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';

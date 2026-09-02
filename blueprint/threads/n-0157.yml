@@ -44,3 +44,11 @@ body: >-
   in a rename: whichever was chosen, the command says what is tracked now and
   what is not. A tool that quietly adds a project's screenshots to its history
   has not been polite.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-02T20:45:59Z
+    body: "Superseded: the two standards survive (spec, all) but neither is recorded
+      anywhere now - the tree is the answer, and a .gitignore beside the home IS
+      the spec standard. See the decision note n-0163 on nothing-in-the-tree.
+      Left open for the human."

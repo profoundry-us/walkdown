@@ -1,0 +1,62 @@
+id: n-0163
+kind: note
+author: topher
+via: agent
+created: 2026-09-02T20:45:59.284Z
+anchor:
+  rule: locations.default.nothing-in-the-tree
+status: open
+body: >-
+  Why the home went back to ~/.walkdown, and what the three arrangements are now
+  (supersedes n-0154 and n-0157).
+
+
+  Decision (2026-09-02, Topher): "to use walkdown without altering the repo, put
+  it in ~/.walkdown; to commit the spec, use a .gitignore that ignores runs,
+  evidence and drafts; to commit everything, just delete the .gitignore."
+
+
+  n-0154 put the home beside the code in an ignored .walkdown/ by default. That
+  was reversed the same afternoon, on the judges' evidence: a .walkdown/ in the
+  tree, however well ignored, is still a thing git has to be told about, and the
+  pointer it needed was the one file default init put in front of git - carrying
+  a home-directory path into shared history (n-0161). "Without altering the
+  repository" means without altering it.
+
+
+  The three arrangements:
+    none  the home is ~/.walkdown/blueprints/NNNN-name/; the repository gets nothing - no .walkdown/, no pointer
+    spec  the home is <repo>/.walkdown/blueprints/NNNN-name/, and .walkdown/.gitignore ignores blueprints/*/runs/, evidence/ and drafts/
+    all   the same home, and no .gitignore at all
+
+  What changed underneath: NOTHING RECORDS WHICH WAS CHOSEN. The tree is the
+  answer, read by resolveLocations and reported by `walkdown where` on a
+  `tracked` row. That is the shape fix for n-0158 - init used to write ignore
+  rules once and could not be asked to write them again - and it dissolves
+  q-0162 (no bare `*`, so the spec standard's .gitignore and config.yml are
+  themselves committable), n-0161 (no pointer under none; relative by path
+  otherwise), and the clone-numbering hazard the fourth judge kept out of the
+  verdict (every in-repo home has at least blueprint/ committed, so a clone's
+  listing matches the config).
+
+
+  Changing your mind is `walkdown init --commit <standard>` again: between spec
+  and all it writes or deletes the one file; between none and either it moves
+  the home whole - claims a fresh number in the receiving blueprints/, rewrites
+  both configs, takes the pointer back out on the way out. walkdown never
+  touches the git index and says so.
+
+
+  One layout for every home, wherever it sits: blueprint/ threads/ runs/
+  evidence/ drafts/ as siblings. Runs and threads had been inside blueprint/, a
+  habit from before homes; the layout the decision asked for was siblings, and
+  it is what lets a home move as one directory and a three-line ignore file say
+  what git gets.
+
+
+  What it costs: n-0154 and n-0157 are superseded as decision records (this note
+  replaces them); the rules nothing-in-the-tree, records-follow-the-spec and
+  in-repo-on-request were reworded and re-stamped. This repository's own
+  blueprint still predates homes - blueprint/ at the root, runs and threads
+  inside it, declared by path - which rule 3 of the resolution order keeps
+  answering for. Moving it into a numbered home is a separate decision.

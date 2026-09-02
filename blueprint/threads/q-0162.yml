@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-02T19:58:56.800Z
 anchor:
   rule: locations.default.nothing-in-the-tree
-status: open
+status: incorporated
 body: >-
   Is the second THEN's 'ignore rule' meant to be a thing git can see? Under the
   default it cannot be.
@@ -53,3 +53,21 @@ body: >-
   nothing else, not even the ignore rule that keeps the rest out' - so the next
 
   judge does not have to make this call again.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-02T20:46:00Z
+    body: "Reading (a) was the intended one, and it is moot now: under the default
+      there is no ignore rule at all, because there is nothing in the repository
+      to ignore - the home is in ~/.walkdown. The spec standard's .gitignore
+      holds three positive rules (blueprints/*/runs/, evidence/, drafts/) rather
+      than a bare `*`, so it and config.yml beside it are stageable, and the
+      rule's steps now say so outright: \"that file, and the config, are
+      themselves committable\". A check asks git (`git add -A --dry-run`) rather
+      than the filesystem."
+  - author: topher
+    via: agent
+    created: 2026-09-02T20:46:57Z
+    body: "Folded into locations.default.in-repo-on-request, THEN 2: 'that file, and
+      the config, are themselves committable' - and into nothing-in-the-tree,
+      whose THEN 1 now reads 'nothing for git to see'."

@@ -1,53 +1,32 @@
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { defaultActor } from '../../lib/identity.js';
 import {
+  canon,
   claimHome,
   expand,
+  homePaths,
   readUserConfig,
   rememberIdentity,
   rememberProject,
+  resolveLocations,
+  walkdownHome,
 } from '../../lib/locations.js';
-import { dim, green, yellow } from '../../lib/report/tty.js';
+import { relocateHome, removePointer, setIgnore, STANDARDS } from '../../lib/standard.js';
+import { dim, green, red, yellow } from '../../lib/report/tty.js';
 
 /*
- * WHAT VERSION CONTROL SEES, as three standards rather than a pile of
- * negations (locations.default.in-repo-on-request, n-0157).
+ * `walkdown init`: a project, set up - and, run again with `--commit`, a
+ * project moved between the three arrangements version control can be in.
  *
- * The whole `.walkdown` is beside the code and out of git by default, so
- * trying walkdown adds nothing to anybody's history and abandoning it is one
- * `rm -rf`. Committing is a decision, and there are two worth offering.
- *
- * These are written as ignore rules inside `.walkdown/` rather than appended
- * to the project's own .gitignore, which keeps the whole arrangement in one
- * directory a person can read at a glance - and keeps walkdown out of a file
- * it does not own.
- *
- * Written as they are for a reason worth not rediscovering: git does not
- * descend into an excluded directory, so "ignore everything, then re-include
- * some of it" needs negations in an order that is easy to get subtly wrong,
- * and a wrong one silently commits nothing or silently commits everything.
- * Ignoring only what is unwanted has no such failure mode.
+ * WHAT VERSION CONTROL SEES is not recorded anywhere; it is read off the tree
+ * (lib/standard.js, n-0158). So this command's whole job with a standard is
+ * to make the tree say it: put the home under the `.walkdown` the standard
+ * needs, and write or delete the `.gitignore` beside it. Run with no
+ * `--commit` on a project that exists, it keeps whatever the tree already
+ * says, which is what makes it safe to run twice.
  */
-const IGNORE = {
-  none: `# Everything walkdown makes for this project lives here, beside the code
-# and out of git. \`walkdown init --commit spec\` (or \`--commit all\`) changes
-# that; nothing else in your tree is touched either way.
-*
-`,
-  spec: `# The spec and its conversations are committed; evidence and drafts are not.
-# Screenshots are binary nobody reads in a diff, and a draft is one person's
-# half-finished sitting.
-blueprints/*/evidence/
-blueprints/*/drafts/
-`,
-  all: `# Everything here is committed, evidence included — asked for outright with
-# \`walkdown init --commit all\`. Note that git keeps every version of every
-# screenshot forever, whether or not the working copy moves.
-`,
-};
-
 export async function run(args) {
   const { values } = parseArgs({
     args,
@@ -57,32 +36,16 @@ export async function run(args) {
       commit: { type: 'string' },
     },
   });
-  const commit = values.commit ?? 'none';
-  if (!IGNORE[commit]) {
-    console.error(`walkdown init --commit takes none, spec or all — not "${commit}".`);
-    console.error('  none  nothing is committed (the default)');
-    console.error('  spec  the spec and its runs and threads');
-    console.error('  all   everything, evidence included');
+  if (values.commit && !STANDARDS.includes(values.commit)) {
+    console.error(`walkdown init --commit takes none, spec or all — not "${values.commit}".`);
+    console.error('  none  the home lives in ~/.walkdown and the repository gets nothing (the default)');
+    console.error('  spec  the home lives in .walkdown/; the spec and its threads are committed');
+    console.error('  all   the same, and the runs and evidence are committed too');
     return process.exit(2);
   }
   const { scaffold } = await import('../../lib/init.js');
   const root = resolve(values.dir ?? process.cwd());
-  /*
-   * The project's own `.walkdown`, and a numbered home inside it. One layout
-   * whichever way the commit question is answered - what changes is the
-   * ignore rules, not where anything sits, so there is no second shape for a
-   * reader (or a resolver) to learn.
-   *
-   * Decide the home FIRST, then build into it. This used to take the spec
-   * path from resolveLocations, whose derived home was keyed on a name, and
-   * let rememberProject pick a different one afterwards; the two answers then
-   * disagreed in both directions (n-0141, n-0145).
-   */
-  const walkdown = join(root, '.walkdown');
-  const fresh = !existsSync(walkdown);
-  mkdirSync(walkdown, { recursive: true });
-  const ignore = join(walkdown, '.gitignore');
-  if (fresh || values.force || !existsSync(ignore)) writeFileSync(ignore, IGNORE[commit]);
+
   /*
    * Already set up? Then keep the home it has. Allocating unconditionally is
    * how `init` run twice in one project minted a second home and a second
@@ -92,30 +55,66 @@ export async function run(args) {
    * containment, since a pack inside a listed repository is its own question
    * and not one a claim should answer quietly (n-0135).
    */
-  const here = expand(root);
-  const listed = (readUserConfig({ cwd: root }).config.projects ?? []).find((p) =>
-    [p?.roots ?? []].flat().some((r) => r && expand(r) === here),
-  );
-  const claim =
-    listed?.home
-      ? { home: String(listed.home), dir: join(walkdown, 'blueprints', String(listed.home)) }
-      : claimHome({ name: basename(root), walkdown });
-  const specDir = join(claim.dir, 'blueprint');
+  const exact = () =>
+    (readUserConfig({ cwd: root }).config.projects ?? []).find((p) =>
+      [p?.roots ?? []].flat().some((r) => r && canon(expand(r)) === canon(root)),
+    );
+  let listed = exact();
+  let loc = listed ? resolveLocations({ cwd: root, project: listed.id }) : null;
+  const current = loc?.standard?.name ?? null;
+  const commit = values.commit ?? current ?? 'none';
+
+  /*
+   * A change of standard that crosses the line - into the repository, or
+   * back out - is a home moving. It moves whole, and the declarations follow
+   * it; only then is the ignore file the question.
+   */
+  let moved = null;
+  if (listed && current && (current === 'none') !== (commit === 'none')) {
+    try {
+      moved = relocateHome({ loc, root, to: commit === 'none' ? 'personal' : 'repo' });
+    } catch (e) {
+      console.error(red(e.message));
+      return process.exit(2);
+    }
+    listed = exact();
+    loc = resolveLocations({ cwd: root, project: listed.id });
+  }
+
+  /*
+   * The home, decided FIRST and built into afterwards. This used to take the
+   * spec path from one derivation and let the entry-writer pick another, and
+   * the two disagreed in both directions (n-0141, n-0145). A project with no
+   * home at all - a blueprint standing where it always stood, declared by
+   * path - is scaffolded where it is and claims nothing.
+   */
+  const walkdown = commit === 'none' ? walkdownHome() : join(root, '.walkdown');
+  const claim = listed
+    ? { home: listed.home ? String(listed.home) : null, dir: loc.homeDir }
+    : claimHome({ name: basename(root), walkdown });
+  const specDir = listed ? loc.spec.path : homePaths(claim.dir).spec;
   const results = scaffold(root, { force: values.force, specDir, commit });
   /*
-   * And write it down. Walkdown does not find blueprints by looking any more,
-   * so a spec nobody declared is a directory rather than a project - init
-   * would otherwise hand somebody a blueprint that `walkdown status` denies
-   * the existence of. This is also why there is no adopt command: the entry
-   * is written where it belongs, and a clone reads it from the repository.
+   * And write it down. Walkdown does not find blueprints by looking, so a
+   * spec nobody declared is a directory rather than a project - init would
+   * otherwise hand somebody a blueprint that `walkdown status` denies the
+   * existence of. This is also why there is no adopt command: the entry is
+   * written where it belongs, and a clone reads it from the repository.
    */
-  const entry = rememberProject({
-    id: basename(root),
-    root,
-    spec: specDir,
-    inRepo: true,
-    home: claim.home,
-  });
+  const entry = listed
+    ? { action: 'kept', id: listed.id }
+    : rememberProject({
+        id: basename(root),
+        root,
+        homeDir: claim.dir,
+        home: claim.home,
+        inRepo: commit !== 'none',
+      });
+  const ignore = commit === 'none' || !claim.dir ? null : setIgnore(walkdown, commit, { force: values.force });
+  if (commit === 'none' && moved)
+    for (const rel of ['CLAUDE.md', 'AGENTS.md', 'GEMINI.md', '.github/copilot-instructions.md', 'CONVENTIONS.md'])
+      if (['removed', 'deleted'].includes(removePointer(join(root, rel))))
+        results.push({ path: rel, action: 'pointer-removed' });
   /*
    * And who is sitting here, if nobody has said. Every record is written
    * under the config's identity now and nothing else can name a person, so an
@@ -125,11 +124,13 @@ export async function run(args) {
    */
   const who = defaultActor(root);
   const me = rememberIdentity({ username: who.username, name: who.name });
+
   const MARK = {
     created: green('+ created'),
     updated: green('~ updated'),
     'pointer-appended': green('+ appended'),
     'pointer-updated': green('~ pointer updated'),
+    'pointer-removed': green('- pointer removed'),
     'pointer-undecided': yellow('? several agent files — `walkdown pointer --into <file>`'),
     'skills-in-repo': dim('· skills'),
     'skills-personal': dim('· skills'),
@@ -140,8 +141,23 @@ export async function run(args) {
   const summary = (r) => r.action.startsWith('spec-') || r.action.startsWith('skills-');
   const placed = results.filter((r) => r.action.startsWith('spec-'));
   const skills = results.find((r) => r.action.startsWith('skills-'));
+  if (moved) {
+    console.log(`  ${green('→ moved')}    ${moved.from}`);
+    console.log(`  ${''.padEnd(10)} ${dim(`to ${moved.to} — the whole home, no record edited`)}`);
+    for (const g of moved.gone) console.log(`  ${green('- removed')}  ${g}`);
+  }
   for (const r of results.filter((r) => !summary(r)))
     console.log(`  ${MARK[r.action] ?? r.action}  ${r.path}`);
+  if (ignore) {
+    const IGN = {
+      written: green('+ written'),
+      'up-to-date': dim('· up to date'),
+      removed: green('- removed'),
+      absent: null,
+      'kept-differs': yellow('! kept (yours differs from the spec standard — --force to rewrite)'),
+    };
+    if (IGN[ignore.action]) console.log(`  ${IGN[ignore.action]}  ${ignore.path}`);
+  }
 
   /*
    * Say where it went, always. A tool that quietly puts a project's spec
@@ -151,6 +167,8 @@ export async function run(args) {
    */
   if (entry.action === 'written')
     console.log(`  ${green('+ listed')}   ${entry.path}  ${dim(`as \`${entry.id}\``)}`);
+  else if (moved)
+    console.log(`  ${green('~ listed')}   ${moved.config}  ${dim(`as \`${moved.id}\``)}`);
   if (me.action === 'written')
     console.log(`  ${green('+ you')}      ${me.path}  ${dim(`as \`${me.username}\``)}`);
   else if (me.action === 'unknown')
@@ -161,21 +179,28 @@ export async function run(args) {
   const where = placed[0];
   if (where) {
     console.log(`\n  spec: ${where.path}`);
-    console.log(
-      dim(
-        commit === 'none'
-          ? '  Beside your code and out of git — walkdown has added nothing to your' +
-              ' history. Deleting .walkdown/ undoes all of it.'
-          : commit === 'spec'
-            ? '  Committed, so a rule change arrives as a diff somebody approves, and a' +
-              ' clone is a working project. Evidence and drafts stay out of git.'
-            : '  Committed in full, evidence included. Note that git keeps every version' +
-              ' of every screenshot forever, whether or not the working copy moves.',
-      ),
-    );
-    if (commit === 'none')
+    const say = {
+      none:
+        '  In ~/.walkdown, which git never sees. Nothing was added to this repository,' +
+        ' not even a pointer — `walkdown pointer --into CLAUDE.md` adds one for agents.' +
+        '\n  Prefer it committed? `walkdown init --commit spec` moves the home into the repository.',
+      spec:
+        '  Committed: the spec and its threads, so a rule change arrives as a diff somebody' +
+        ' approves and a clone is a working project. .walkdown/.gitignore keeps runs,' +
+        '\n  evidence and drafts out — delete it to commit everything, or `walkdown init' +
+        ' --commit none` to move the home back out of the repository.',
+      all:
+        '  Committed in full, runs and evidence included — there is no .gitignore under' +
+        ' .walkdown/. Note that git keeps every version of every screenshot forever.' +
+        '\n  `walkdown init --commit spec` writes the ignore file back.',
+    };
+    console.log(dim(say[commit]));
+    if (moved && commit !== 'all')
       console.log(
-        dim('  Prefer it committed? `walkdown init --commit spec`, or `--commit all`.'),
+        dim(
+          '  Anything already committed stays tracked until you `git rm --cached` it —' +
+            ' walkdown never touches the index.',
+        ),
       );
   }
   /*
@@ -195,10 +220,11 @@ export async function run(args) {
       ),
     );
   }
-  if (results.some((r) => r.action === 'created')) {
+  if (results.some((r) => r.action === 'created' && !r.path.includes('SKILL.md'))) {
     const cfg = join(where?.path ?? 'blueprint', 'walkdown.yml');
     console.log(`\nNext: fill in ${dim(cfg)} (runner commands, targets), sketch your`);
     console.log(`first feature from its ${dim('features/_template.yml')}, then \`walkdown lint\`.`);
     console.log(dim('`walkdown where` shows every path this project uses.'));
   }
+  if (!existsSync(specDir)) console.error(red(`  the spec did not land at ${specDir}`));
 }

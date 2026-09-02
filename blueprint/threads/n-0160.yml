@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-02T19:57:29.606Z
 anchor:
   rule: locations.default.one-home-per-blueprint
-status: open
+status: addressed
 body: >-
   Agent judging 2026-09-02 (run 2026-09-02T19-49-06Z-local-01): FAIL. The
   numbered home fixed the two doors n-0150 and n-0153 named, and it holds where
@@ -88,3 +88,40 @@ body: >-
   key nothing else can collide with; the personal half wanting to override a
   repository entry could name that pair. And rememberLocation should be handed
   the resolved entry (or nothing, and refuse) rather than re-finding one by id.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-02T20:46:00Z
+    body: >-
+      Addressed at the root rather than the two doors. (1) The config merge is
+      no longer keyed by id alone: a personal entry overrides a repository's
+      only when it is ABOUT THAT CHECKOUT - same id, and either one of its roots
+      lies inside the repository the .walkdown answers for, or it has no
+      blueprint of its own (the pure-override shape, id + evidence). A personal
+      entry with the same id rooted elsewhere is a different project; here it is
+      shadowed by the repository's, readUserConfig reports it under `shadowed`,
+      `walkdown projects` prints it, and it is reachable from its own checkout.
+      A rootless entry with a spec of its own (an ephemeral copy) never merges.
+      --project prefers the entry rooted where you stand, then the repository's.
+      Path comparison is canonical (realpath), so a checkout reached through a
+      symlink still claims its cwd.
+
+
+      (2) rememberLocation writes to loc.project - the entry that resolved - and
+      never re-finds one by name; a personal row for a repository-declared entry
+      is created rooted at this checkout so it merges with that entry only.
+      `walkdown move` refuses a directory nothing declares before resolving
+      `from`, so `from null` and existsSync(null) cannot occur, and
+      `doc.set('projects', doc.createNode([]))` fixes the TypeError.
+
+
+      The clone-numbering observation dissolved with the return to ~/.walkdown
+      as the default: every in-repo home has at least blueprint/ committed, so a
+      clone's listing matches the committed config.
+
+
+      Checks: test/standard.test.js - two `app` checkouts, one personal and one
+      committed, stay two projects with two ledgers; a rootless ephemeral `repo`
+      does not override the repository's `repo`; a pure override still does;
+      move refuses the stranger and moves the listed one. Claiming, not
+      accepting.
