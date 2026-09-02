@@ -1,4 +1,7 @@
-import '../tools/test-home.mjs';
+import { declareProject, suiteHome } from '../tools/test-home.mjs';
+
+/** This file's own personal home — declaring into a shared one races. */
+const HOME = suiteHome('retired');
 import assert from 'node:assert/strict';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -80,7 +83,14 @@ test('the CLI answers for a retired rule instead of calling it unknown', async (
   const { execFileSync } = await import('node:child_process');
   const cli = new URL('../bin/walkdown.js', import.meta.url).pathname;
   const run = (args) =>
-    execFileSync(process.execPath, [cli, ...args, '--dir', bp], { encoding: 'utf8' });
+    execFileSync(
+      process.execPath,
+      [cli, ...args, '--project', declareProject(HOME, bp)],
+      {
+        encoding: 'utf8',
+        env: { ...process.env, WALKDOWN_HOME: HOME },
+      },
+    );
 
   // Retiring and deleting must not look the same from the command line.
   const one = run(['status', 'demo.main.gone', '--json']);

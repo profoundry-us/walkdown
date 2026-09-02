@@ -75,7 +75,7 @@ test('a failure attachment outlives the output directory: copied under the home,
   );
   // The key resolves the way every reader will resolve it - through the
   // home's evidence root - and the picture is really there, byte for byte.
-  const evidenceRoot = resolveLocations({ dir: bp }).evidence.path;
+  const evidenceRoot = resolveLocations({ spec: bp }).evidence.path;
   const copied = join(evidenceRoot, key.slice('runs/evidence/'.length));
   assert.equal(readFileSync(copied, 'utf8'), 'the-picture-bytes');
 });

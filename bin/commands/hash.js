@@ -6,9 +6,9 @@ import { end, loadOrExit } from './context.js';
 export function run(args) {
   const { values } = parseArgs({
     args,
-    options: { dir: { type: 'string' }, write: { type: 'boolean', default: false } },
+    options: { project: { type: 'string' }, write: { type: 'boolean', default: false } },
   });
-  const blueprint = loadOrExit(values.dir);
+  const blueprint = loadOrExit(values.project);
   const { rows, changedFiles, exitCode } = runHashCommand(blueprint, { write: values.write });
 
   const mark = {

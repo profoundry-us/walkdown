@@ -94,7 +94,7 @@ function make(label, why) {
    * everything else here — copying it is how the abandoned spaces got big
    * enough to notice.
    */
-  const real = resolveLocations({ dir: join(root, 'blueprint') }).evidence.path;
+  const real = resolveLocations({ spec: join(root, 'blueprint') }).evidence.path;
   if (real && existsSync(real)) {
     mkdirSync(join(path, 'blueprint', 'runs'), { recursive: true });
     symlinkSync(real, join(path, 'blueprint', 'runs', 'evidence'), 'dir');
@@ -116,7 +116,8 @@ function make(label, why) {
   console.log(path);
   console.error(
     `\nA disposable copy. Serve it with:\n` +
-      `  node bin/walkdown.js serve --dir ${join(path, 'blueprint')}\n` +
+      `  node bin/walkdown.js project add ${join(path, 'blueprint')} --ephemeral --why "..."\n` +
+      `  node bin/walkdown.js serve --project <the id it printed>\n` +
       `Take it away when the sitting closes:\n` +
       `  node tools/scratch.mjs clean ${label}\n`,
   );

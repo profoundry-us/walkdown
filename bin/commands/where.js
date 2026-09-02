@@ -16,7 +16,7 @@ export function run(args) {
     args,
     allowPositionals: true,
     options: {
-      dir: { type: 'string' },
+      project: { type: 'string' },
       json: { type: 'boolean', default: false },
       fix: { type: 'boolean', default: false },
     },
@@ -42,7 +42,7 @@ export function run(args) {
     return end(2);
   }
   if (values.fix && !fix()) return end(2);
-  const loc = resolveLocations({ dir: values.dir });
+  const loc = resolveLocations({ project: values.project });
   if (values.json) {
     console.log(JSON.stringify(loc, null, 2));
     return end(0);

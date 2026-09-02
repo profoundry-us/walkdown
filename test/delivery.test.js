@@ -88,9 +88,9 @@ test('the CLI runs from a tree with no node_modules @rule:delivery.install.clone
     const out = execFileSync(process.execPath, [
       join(away, 'bin', 'walkdown.js'),
       'lint',
-      '--dir',
-      join(root, 'blueprint'),
-    ]).toString();
+      '--project',
+      'walkdown',
+    ], { cwd: root }).toString();
     assert.match(
       out,
       /rules, \d+ screens/,

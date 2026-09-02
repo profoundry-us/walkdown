@@ -17,9 +17,9 @@ import { end } from './context.js';
 export function run(args) {
   const { values } = parseArgs({
     args,
-    options: { dir: { type: 'string' }, url: { type: 'string' }, json: { type: 'boolean' } },
+    options: { project: { type: 'string' }, url: { type: 'string' }, json: { type: 'boolean' } },
   });
-  const at = resolveLocations({ dir: values.dir });
+  const at = resolveLocations({ project: values.project });
   const dir = at.spec?.missing ? null : at.spec?.path;
   if (!dir) {
     console.error(`No blueprint here. Nothing in ${at.config.repo?.path ?? at.config.path} claims this directory.`);

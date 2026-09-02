@@ -14,13 +14,13 @@ export function run(args) {
   const { values } = parseArgs({
     args,
     options: {
-      dir: { type: 'string' },
+      project: { type: 'string' },
       target: { type: 'string' },
       tiers: { type: 'string' },
       why: { type: 'string' },
     },
   });
-  const blueprint = loadOrExit(values.dir);
+  const blueprint = loadOrExit(values.project);
   const tiers = (values.tiers ?? 'checks,agent')
     .split(',')
     .map((t) => t.trim())

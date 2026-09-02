@@ -1,3 +1,4 @@
+import { declareProject } from '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -30,7 +31,7 @@ test('move relocates the files, records the choice, and edits no record @rule:lo
   try {
     const dest = join(p.root, 'elsewhere', 'runs');
     const before = readFileSync(join(p.bp, 'runs', 'a.json'), 'utf8');
-    run(p, ['move', 'runs', '--to', dest, '--dir', p.bp]);
+    run(p, ['move', 'runs', '--to', dest, '--project', declareProject(p.home, p.bp, 'movable')]);
 
     assert.ok(existsSync(join(dest, 'a.json')), 'the run moved');
     assert.equal(
@@ -45,7 +46,7 @@ test('move relocates the files, records the choice, and edits no record @rule:lo
     assert.match(cfg, new RegExp(`runs: ${dest.replace(/[/\\-]/g, '\\$&')}`));
 
     // And the resolver now agrees, which is the only thing that makes it real.
-    const where = run(p, ['where', 'runs', '--dir', p.bp]).trim();
+    const where = run(p, ['where', 'runs', '--project', declareProject(p.home, p.bp, 'movable')]).trim();
     assert.equal(where, dest);
   } finally {
     p.cleanup();
@@ -64,7 +65,7 @@ test('move refuses a destination that already holds records @rule:locations.keep
     mkdirSync(dest, { recursive: true });
     writeFileSync(join(dest, 'someone-elses.json'), '{}');
     assert.throws(
-      () => run(p, ['move', 'runs', '--to', dest, '--dir', p.bp]),
+      () => run(p, ['move', 'runs', '--to', dest, '--project', declareProject(p.home, p.bp, 'movable')]),
       (e) => e.status === 2,
       'refused, and loudly enough to fail a script',
     );

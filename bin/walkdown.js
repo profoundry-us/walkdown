@@ -9,29 +9,41 @@
 const HELP = `walkdown — verify that what you built is what you designed
 
 Usage:
-  walkdown init [--dir <project-root>] [--in-repo]
-  walkdown run [--target <name>] [--rule <id>] [--dir <blueprint>]
-  walkdown status [<rule-id>] [--dir <blueprint>] [--target <name>] [--json]
-  walkdown lint [--dir <blueprint>] [--no-checks] [--json]
-  walkdown hash [--dir <blueprint>] [--write]
-  walkdown judge <rule-id> [--target <name>] [--serve <origin>] [--dir <blueprint>] [--json]
-  walkdown sweep --why <reason> [--tiers checks,agent] [--dir <blueprint>] [--target <name>]
-  walkdown threads [--dir <blueprint>] [--rule <id>] [--all] [--json]
+  walkdown init [--dir <project-root>] [--commit none|spec|all]
+  walkdown run [--target <name>] [--rule <id>] [--project <id>]
+  walkdown status [<rule-id>] [--project <id>] [--target <name>] [--json]
+  walkdown lint [--project <id>] [--no-checks] [--json]
+  walkdown hash [--project <id>] [--write]
+  walkdown judge <rule-id> [--target <name>] [--serve <origin>] [--project <id>] [--json]
+  walkdown sweep --why <reason> [--tiers checks,agent] [--project <id>] [--target <name>]
+  walkdown threads [--project <id>] [--rule <id>] [--all] [--json]
   walkdown thread <id> [--reply <text>] [--status <s>|--verify|--reopen|--waive]
-                       [--reason <text>] [--as-agent] [--dir <blueprint>] [--json]
+                       [--reason <text>] [--as-agent] [--project <id>] [--json]
   walkdown thread new --rule <id> --body <text> [--kind note|question]
-                      [--screen <id>] [--element <sel>] [--as-agent] [--dir <blueprint>] [--json]
-  walkdown serve [--dir <blueprint>] [--port <n>]
-  walkdown claims [--dir <blueprint>] [--url <address>] [--json]
-  walkdown where [<kind>] [--dir <blueprint>] [--json] [--fix]
-  walkdown move <kind> --to <path> [--dir <blueprint>]
+                      [--screen <id>] [--element <sel>] [--as-agent] [--project <id>] [--json]
+  walkdown serve [--project <id>] [--port <n>]
+  walkdown claims [--project <id>] [--url <address>] [--json]
+  walkdown where [<kind>] [--project <id>] [--json] [--fix]
+  walkdown projects [--stale]
+  walkdown project add <path> [--id <name>] [--ephemeral] [--why <reason>]
+  walkdown project forget <id>
+  walkdown move <kind> --to <path> [--project <id>]
   walkdown pointer [--dir <project-root>] [--into <file>]
   walkdown skills [--into <dir>] [--project] [--force]
 
 Commands:
-  init    Scaffold blueprint/ in a project: config, storyboard, feature
-          template, and blueprint/AGENTS.md (the conventions AI agents follow),
-          plus a pointer in CLAUDE.md.
+  init    Set a project up: a '.walkdown/' beside the code, a numbered home
+          inside it, the blueprint, and a pointer in CLAUDE.md. Nothing is
+          committed unless you say so - '--commit spec' tracks the spec and
+          its runs and threads, '--commit all' tracks the evidence too.
+  project add <path> lists a blueprint walkdown did not create - a clone, a
+          copy, somebody else's checkout - so it becomes something every
+          command can reach. --ephemeral marks a throwaway copy: reachable by
+          name, never by standing somewhere, and only ever in your own config.
+          'project forget <id>' takes it off the list and touches no records.
+  projects
+          Every blueprint declared here, with throwaway copies grouped under
+          Ephemeral and marked when they are old enough to be worth clearing.
   run     Run the project's checks via the runner contract (run_all, or
           run_for_rule with --rule), injecting the target's env and
           WALKDOWN_TARGET. The reporter/formatter records the run.
@@ -100,7 +112,8 @@ Commands:
           serves /embed.js and the pin/walkdown API.
 
 Options:
-  --dir <path>     Blueprint directory (default: found from cwd upward)
+  --project <id>   Which declared blueprint (default: the one claiming cwd)
+  --dir <path>     init/pointer only: the project root to set up
   --target <name>  status: only this target's checks column
   --rule <id>      threads: only threads anchored to this rule
   --all            threads: include terminal (incorporated/verified/waived)
@@ -121,6 +134,8 @@ const COMMANDS = new Set([
   'judge',
   'sweep',
   'migrate',
+  'project',
+  'projects',
   'threads',
   'thread',
   'serve',

@@ -8,13 +8,13 @@ export function run(args) {
   const { values } = parseArgs({
     args,
     options: {
-      dir: { type: 'string' },
+      project: { type: 'string' },
       rule: { type: 'string' },
       all: { type: 'boolean', default: false },
       json: { type: 'boolean', default: false },
     },
   });
-  const blueprint = loadOrExit(values.dir);
+  const blueprint = loadOrExit(values.project);
   const threads = listThreads(blueprint, { rule: values.rule, all: values.all });
 
   if (values.json) {

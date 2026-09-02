@@ -23,7 +23,7 @@ export function run(args) {
   const { values, positionals } = parseArgs({
     args,
     options: {
-      dir: { type: 'string' },
+      project: { type: 'string' },
       target: { type: 'string', default: 'local' },
       serve: { type: 'string' },
       json: { type: 'boolean', default: false },
@@ -37,7 +37,7 @@ export function run(args) {
     );
     process.exit(2);
   }
-  const blueprint = loadOrExit(values.dir);
+  const blueprint = loadOrExit(values.project);
   const { config, storyboard } = blueprint;
   // The evidence path below is written to BY HAND from this printout, so a
   // fresh project's tentative home is made real before it is promised.

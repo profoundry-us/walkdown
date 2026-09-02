@@ -77,7 +77,7 @@ Finally, tell them where everything went, in one line each: `walkdown where`.
 
 ## 4. Serve it
 
-    walkdown serve --dir "$(walkdown where spec --dir <project-root>)"
+    walkdown serve --project <id>
 
 Run it in the background and report the URL (`http://localhost:4700` unless
 taken). This is the panel: the rules, the threads, and the side-by-side review.

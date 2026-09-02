@@ -15,7 +15,7 @@
  * fails here immediately — which is the whole reason the door is one module
  * now, and the reason a third interface can be added without a fourth copy.
  */
-import '../tools/test-home.mjs';
+import { declareProject } from '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -103,10 +103,10 @@ const doors = {
 
   cli: {
     async verify({ bp, home }) {
-      return run(['n-0001', '--verify', '--dir', bp], home);
+      return run(['n-0001', '--verify', '--project', declareProject(home, bp)], home);
     },
     async claim({ bp, home }) {
-      return run(['n-0001', '--reply', 'looked at it', '--dir', bp], home);
+      return run(['n-0001', '--reply', 'looked at it', '--project', declareProject(home, bp)], home);
     },
   },
 

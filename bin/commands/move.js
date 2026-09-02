@@ -18,7 +18,7 @@ export function run(args) {
   const { values, positionals } = parseArgs({
     args,
     allowPositionals: true,
-    options: { to: { type: 'string' }, dir: { type: 'string' } },
+    options: { to: { type: 'string' }, project: { type: 'string' } },
   });
   const kind = positionals[0];
   if (!KINDS.includes(kind)) {
@@ -30,7 +30,7 @@ export function run(args) {
     return end(2);
   }
 
-  const loc = resolveLocations({ dir: values.dir });
+  const loc = resolveLocations({ project: values.project });
   const from = loc[kind].path;
   const to = resolve(values.to.replace(/^~(?=$|\/)/, homedir()));
   if (from === to) {

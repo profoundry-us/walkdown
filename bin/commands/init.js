@@ -1,8 +1,52 @@
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { defaultActor } from '../../lib/identity.js';
-import { claimHome, rememberIdentity, rememberProject } from '../../lib/locations.js';
+import {
+  claimHome,
+  expand,
+  readUserConfig,
+  rememberIdentity,
+  rememberProject,
+} from '../../lib/locations.js';
 import { dim, green, yellow } from '../../lib/report/tty.js';
+
+/*
+ * WHAT VERSION CONTROL SEES, as three standards rather than a pile of
+ * negations (locations.default.in-repo-on-request, n-0157).
+ *
+ * The whole `.walkdown` is beside the code and out of git by default, so
+ * trying walkdown adds nothing to anybody's history and abandoning it is one
+ * `rm -rf`. Committing is a decision, and there are two worth offering.
+ *
+ * These are written as ignore rules inside `.walkdown/` rather than appended
+ * to the project's own .gitignore, which keeps the whole arrangement in one
+ * directory a person can read at a glance - and keeps walkdown out of a file
+ * it does not own.
+ *
+ * Written as they are for a reason worth not rediscovering: git does not
+ * descend into an excluded directory, so "ignore everything, then re-include
+ * some of it" needs negations in an order that is easy to get subtly wrong,
+ * and a wrong one silently commits nothing or silently commits everything.
+ * Ignoring only what is unwanted has no such failure mode.
+ */
+const IGNORE = {
+  none: `# Everything walkdown makes for this project lives here, beside the code
+# and out of git. \`walkdown init --commit spec\` (or \`--commit all\`) changes
+# that; nothing else in your tree is touched either way.
+*
+`,
+  spec: `# The spec and its conversations are committed; evidence and drafts are not.
+# Screenshots are binary nobody reads in a diff, and a draft is one person's
+# half-finished sitting.
+blueprints/*/evidence/
+blueprints/*/drafts/
+`,
+  all: `# Everything here is committed, evidence included — asked for outright with
+# \`walkdown init --commit all\`. Note that git keeps every version of every
+# screenshot forever, whether or not the working copy moves.
+`,
+};
 
 export async function run(args) {
   const { values } = parseArgs({
@@ -10,36 +54,54 @@ export async function run(args) {
     options: {
       dir: { type: 'string' },
       force: { type: 'boolean', default: false },
-      'in-repo': { type: 'boolean', default: false },
+      commit: { type: 'string' },
     },
   });
+  const commit = values.commit ?? 'none';
+  if (!IGNORE[commit]) {
+    console.error(`walkdown init --commit takes none, spec or all — not "${commit}".`);
+    console.error('  none  nothing is committed (the default)');
+    console.error('  spec  the spec and its runs and threads');
+    console.error('  all   everything, evidence included');
+    return process.exit(2);
+  }
   const { scaffold } = await import('../../lib/init.js');
   const root = resolve(values.dir ?? process.cwd());
   /*
-   * The spec goes outside the repository unless asked otherwise. Adopting
-   * walkdown should cost a project nothing and be undone by deleting one
-   * directory - and runs and threads follow the spec, so this one flag decides
-   * all three. Evidence and drafts are outside either way.
+   * The project's own `.walkdown`, and a numbered home inside it. One layout
+   * whichever way the commit question is answered - what changes is the
+   * ignore rules, not where anything sits, so there is no second shape for a
+   * reader (or a resolver) to learn.
+   *
+   * Decide the home FIRST, then build into it. This used to take the spec
+   * path from resolveLocations, whose derived home was keyed on a name, and
+   * let rememberProject pick a different one afterwards; the two answers then
+   * disagreed in both directions (n-0141, n-0145).
    */
+  const walkdown = join(root, '.walkdown');
+  const fresh = !existsSync(walkdown);
+  mkdirSync(walkdown, { recursive: true });
+  const ignore = join(walkdown, '.gitignore');
+  if (fresh || values.force || !existsSync(ignore)) writeFileSync(ignore, IGNORE[commit]);
   /*
-   * Decide the id and the home FIRST, then build into it. This used to take
-   * the spec path from resolveLocations - whose derived home is name-keyed
-   * with nothing to disambiguate it - and let rememberProject pick a
-   * different, unique name afterwards. Two repositories with one basename
-   * therefore derived the same spec path and the second silently adopted the
-   * first's blueprint and its ledger, while the entry that did get written
-   * split its records across two homes (n-0141).
+   * Already set up? Then keep the home it has. Allocating unconditionally is
+   * how `init` run twice in one project minted a second home and a second
+   * entry, with the second blueprint read by nothing while the command told
+   * the person to go fill it in (n-0145). The test is the project ROOT,
+   * because that is what a repeat `init` is about - and it is exact, never
+   * containment, since a pack inside a listed repository is its own question
+   * and not one a claim should answer quietly (n-0135).
    */
-  const claim = claimHome({
-    id: basename(root),
-    spec: values['in-repo'] ? join(root, 'blueprint') : null,
-    // And out of the tree, where the spec does not exist yet to be matched on,
-    // the project root is what says "this one again" (n-0145).
-    root,
-    cwd: root,
-  });
-  const specDir = values['in-repo'] ? join(root, 'blueprint') : join(claim.dir, 'blueprint');
-  const results = scaffold(root, { force: values.force, specDir });
+  const here = expand(root);
+  const listed = (readUserConfig({ cwd: root }).config.projects ?? []).find((p) =>
+    [p?.roots ?? []].flat().some((r) => r && expand(r) === here),
+  );
+  const claim =
+    listed?.home
+      ? { home: String(listed.home), dir: join(walkdown, 'blueprints', String(listed.home)) }
+      : claimHome({ name: basename(root), walkdown });
+  const specDir = join(claim.dir, 'blueprint');
+  const results = scaffold(root, { force: values.force, specDir, commit });
   /*
    * And write it down. Walkdown does not find blueprints by looking any more,
    * so a spec nobody declared is a directory rather than a project - init
@@ -48,11 +110,11 @@ export async function run(args) {
    * is written where it belongs, and a clone reads it from the repository.
    */
   const entry = rememberProject({
-    id: claim.id,
+    id: basename(root),
     root,
     spec: specDir,
-    inRepo: values['in-repo'],
-    home: claim.dir,
+    inRepo: true,
+    home: claim.home,
   });
   /*
    * And who is sitting here, if nobody has said. Every record is written
@@ -98,24 +160,22 @@ export async function run(args) {
 
   const where = placed[0];
   if (where) {
-    const outside = where.action === 'spec-outside';
     console.log(`\n  spec: ${where.path}`);
     console.log(
       dim(
-        outside
-          ? '  Outside the repository, so walkdown has added nothing to your tree but' +
-              ' agent conventions. Runs and threads live beside it; evidence and drafts' +
-              ' stay out either way.'
-          : '  In the repository, where a rule change arrives as a diff somebody approves.' +
-              ' Runs and threads live beside it; evidence and drafts stay outside.',
+        commit === 'none'
+          ? '  Beside your code and out of git — walkdown has added nothing to your' +
+              ' history. Deleting .walkdown/ undoes all of it.'
+          : commit === 'spec'
+            ? '  Committed, so a rule change arrives as a diff somebody approves, and a' +
+              ' clone is a working project. Evidence and drafts stay out of git.'
+            : '  Committed in full, evidence included. Note that git keeps every version' +
+              ' of every screenshot forever, whether or not the working copy moves.',
       ),
     );
-    if (outside)
+    if (commit === 'none')
       console.log(
-        dim(
-          '  Prefer it committed? `walkdown init --in-repo`, or move it later' +
-            ' with `walkdown move`.',
-        ),
+        dim('  Prefer it committed? `walkdown init --commit spec`, or `--commit all`.'),
       );
   }
   /*

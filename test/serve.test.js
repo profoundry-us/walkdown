@@ -493,7 +493,7 @@ test('a session drafts to disk and finishing seals it into one run', async () =>
    * is a resolved location, and a test that hardcoded the blueprint's own
    * folder would be asserting the old default rather than the behaviour.
    */
-  const draftsDir = resolveLocations({ dir: bp }).drafts.path;
+  const draftsDir = resolveLocations({ spec: bp }).drafts.path;
   const draftFile = join(draftsDir, 'local.json');
   const post = (body) =>
     fetch(`${base}/api/draft`, {

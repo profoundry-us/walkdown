@@ -8,7 +8,10 @@
  * the whole point: the derivation has been right the entire time the column
  * said "pending".
  */
-import '../tools/test-home.mjs';
+import { declareProject, suiteHome } from '../tools/test-home.mjs';
+
+/** This file's own personal home — declaring into a shared one races. */
+const HOME = suiteHome('status');
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
@@ -81,7 +84,14 @@ function fixture(name) {
 }
 
 const run = (bp, args) =>
-  execFileSync(process.execPath, [CLI, 'status', ...args, '--dir', bp], { encoding: 'utf8' });
+  execFileSync(
+    process.execPath,
+    [CLI, 'status', ...args, '--project', declareProject(HOME, bp)],
+    {
+      encoding: 'utf8',
+      env: { ...process.env, WALKDOWN_HOME: HOME },
+    },
+  );
 
 test('the report names the role a rule is waiting on @rule:status.attention.names-the-role', () => {
   const out = run(fixture('waiting'), []);

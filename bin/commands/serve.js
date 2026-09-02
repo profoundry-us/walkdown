@@ -5,9 +5,9 @@ import { loadOrExit } from './context.js';
 export async function run(args) {
   const { values } = parseArgs({
     args,
-    options: { dir: { type: 'string' }, port: { type: 'string' } },
+    options: { project: { type: 'string' }, port: { type: 'string' } },
   });
-  const blueprint = loadOrExit(values.dir);
+  const blueprint = loadOrExit(values.project);
   const { startServe } = await import('../../lib/serve.js');
   const { port } = await startServe(blueprint.dir, {
     port: values.port ? Number(values.port) : undefined,

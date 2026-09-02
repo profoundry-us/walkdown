@@ -146,7 +146,13 @@ export default defineConfig({
       // Our own server, on our own port, over the disposable copy. Never reuse
       // an existing one: whatever is already listening is somebody else's, and
       // these checks write.
-      command: `node bin/walkdown.js serve --dir .walkdown/checkspace/blueprint --port ${WD_PORT}`,
+      // Started INSIDE the checkspace, because the nearest `.walkdown` is what
+      // answers now and the checkspace has its own - so the suite reaches the
+      // disposable copy by standing in it rather than by naming a path, and
+      // the real ledger is not merely un-chosen but unreachable from here
+      // (locations.answer.one-walkdown-answers).
+      command: `node ../../bin/walkdown.js serve --project blueprint --port ${WD_PORT}`,
+      cwd: '.walkdown/checkspace',
       url: `${WD_ORIGIN}/api/blueprint`,
       reuseExistingServer: false,
       stdout: 'ignore',

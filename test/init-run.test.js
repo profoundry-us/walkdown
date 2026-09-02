@@ -1,3 +1,4 @@
+import '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import {
@@ -32,7 +33,7 @@ after(() => rmSync(root, { recursive: true, force: true }));
 test('init scaffolds a lint-clean blueprint with agent conventions', () => {
   const proj = join(root, 'fresh');
   mkdirSync(proj);
-  const results = scaffold(proj);
+  const results = scaffold(proj, { commit: 'spec' });
   const actionOf = (rs, path) => rs.find((r) => r.path === path)?.action;
   for (const path of ['blueprint/walkdown.yml', 'blueprint/AGENTS.md', 'CLAUDE.md'])
     assert.equal(actionOf(results, path), 'created', path);
@@ -57,7 +58,10 @@ test('init scaffolds a lint-clean blueprint with agent conventions', () => {
 test('init is idempotent: rerun no-ops, customizations kept, --force updates owned docs only', () => {
   const proj = join(root, 'fresh'); // scaffolded by the previous test
   const actionOf = (rs, path) => rs.find((r) => r.path === path)?.action;
-  const rerun = scaffold(proj);
+  // Same standard as the run that made it: the pointer is written relative
+  // when the spec is committed and absolute when it is not, so scaffolding the
+  // same project under a different answer is a real change, not a no-op.
+  const rerun = scaffold(proj, { commit: 'spec' });
   // Every file is up to date; the last two entries only report where the spec
   // and the skills went.
   assert.ok(
@@ -70,7 +74,7 @@ test('init is idempotent: rerun no-ops, customizations kept, --force updates own
 
   writeFileSync(join(proj, 'blueprint', 'walkdown.yml'), 'project: customized\n');
   writeFileSync(join(proj, '.claude', 'skills', 'walkdown-judge', 'SKILL.md'), 'customized');
-  const third = scaffold(proj);
+  const third = scaffold(proj, { commit: 'spec' });
   assert.equal(actionOf(third, 'blueprint/walkdown.yml'), 'kept');
   assert.equal(actionOf(third, '.claude/skills/walkdown-judge/SKILL.md'), 'kept-differs');
   assert.equal(
@@ -78,7 +82,7 @@ test('init is idempotent: rerun no-ops, customizations kept, --force updates own
     'customized',
   );
 
-  const forced = scaffold(proj, { force: true });
+  const forced = scaffold(proj, { force: true, commit: 'spec' });
   assert.equal(actionOf(forced, 'blueprint/walkdown.yml'), 'kept'); // user-owned: --force never touches it
   assert.equal(actionOf(forced, '.claude/skills/walkdown-judge/SKILL.md'), 'updated');
   assert.match(
@@ -182,7 +186,7 @@ test('skills follow the spec: outside it by default, committed when it is @rule:
   // Committed spec, committed procedures - they should arrive with a clone.
   const shared = join(root, 'skills-in');
   mkdirSync(shared, { recursive: true });
-  const results = scaffold(shared, { specDir: join(shared, 'blueprint') });
+  const results = scaffold(shared, { specDir: join(shared, 'blueprint'), commit: 'spec' });
   assert.ok(existsSync(join(shared, '.claude', 'skills', 'walkdown-judge', 'SKILL.md')));
   assert.equal(results.find((r) => r.action.startsWith('skills-'))?.action, 'skills-in-repo');
 });
@@ -220,7 +224,18 @@ test('run sees a record arrive in a runs directory a config moved @rule:location
   const runsAway = join(home, 'elsewhere', 'runs');
   mkdirSync(join(proj, 'blueprint'), { recursive: true });
   mkdirSync(home, { recursive: true });
-  writeFileSync(join(home, 'config.yml'), `defaults:\n  runs: ${runsAway}\n`);
+  writeFileSync(
+    join(home, 'config.yml'),
+    [
+      'defaults:',
+      `  runs: ${runsAway}`,
+      'projects:',
+      '  - id: moved-ledger',
+      `    roots: [${proj}]`,
+      `    spec: ${join(proj, 'blueprint')}`,
+      '',
+    ].join('\n'),
+  );
   // The runner stands in for a real reporter: it appends one record where
   // the locations resolver says records go.
   const probe =
@@ -238,8 +253,8 @@ test('run sees a record arrive in a runs directory a config moved @rule:location
     [
       new URL('../bin/walkdown.js', import.meta.url).pathname,
       'run',
-      '--dir',
-      join(proj, 'blueprint'),
+      '--project',
+      'moved-ledger',
     ],
     { env: { ...process.env, WALKDOWN_HOME: home } },
   ).toString();

@@ -43,10 +43,17 @@ function blueprint(at, { project = 'demo', dirs = [] } = {}) {
  * walking the tree for `walkdown.yml`, so a blueprint nobody wrote down is
  * not a project (n-0133). Most of these tests used to lean on that walk.
  */
-const declare = (home, { id = 'demo', roots, spec, ...rest }) =>
+/*
+ * `home` is the numbered directory inside the declaring `.walkdown`, not a
+ * path - the entry carries the NAME and the resolver reads it against the
+ * file that declared it, which is what makes two projects' records distinct
+ * without either config having to know about the other (n-0155).
+ */
+const declare = (home, { id = 'demo', roots, spec, at = `0001-${id}`, ...rest }) =>
   configure(
     home,
     ['projects:', `  - id: ${id}`, `    roots: [${roots}]`, `    spec: ${spec}`,
+     ...(at ? [`    home: ${at}`] : []),
      ...Object.entries(rest).map(([k, v]) => `    ${k}: ${v}`), ''].join('\n'),
   );
 
@@ -98,9 +105,9 @@ test('runs and threads follow the spec; evidence and drafts never do @rule:locat
     assert.equal(loc.runs.path, join(bp, 'runs'));
     assert.equal(loc.threads.path, join(bp, 'threads'));
     assert.match(loc.threads.why, /beside the spec/);
-    assert.equal(loc.evidence.path, join(s.home, 'blueprints', 'demo', 'evidence'));
-    assert.equal(loc.drafts.path, join(s.home, 'blueprints', 'demo', 'drafts'));
-    assert.match(loc.evidence.why, /outside the repository/);
+    assert.equal(loc.evidence.path, join(s.home, 'blueprints', '0001-demo', 'evidence'));
+    assert.equal(loc.drafts.path, join(s.home, 'blueprints', '0001-demo', 'drafts'));
+    assert.match(loc.evidence.why, /\.walkdown/, 'in the blueprint’s own home, ignored by git');
   } finally {
     s.cleanup();
   }
@@ -177,7 +184,14 @@ test('a project entry outranks the tree, and {id} expands in defaults', () => {
   }
 });
 
-test('--dir beats every configured answer', () => {
+/*
+ * `--project <id>` replaced `--dir <path>`, and the difference is the point.
+ * A path named on the command line reached a blueprint that no config knew
+ * about - so it had no entry, so its home had to be derived from a name, and
+ * that derivation is the ancestor of every collision this file tests for
+ * (n-0156). An id can only name something already written down.
+ */
+test('--project selects a declared blueprint, and an unknown id is nothing at all', () => {
   const s = scratch();
   try {
     const repo = join(s.root, 'repo');
@@ -185,11 +199,26 @@ test('--dir beats every configured answer', () => {
     const other = blueprint(join(s.root, 'other'), { project: 'other' });
     configure(
       s.home,
-      `projects:\n  - id: pinned\n    roots: [${repo}]\n    spec: ${join(repo, 'blueprint')}\n`,
+      [
+        'projects:',
+        '  - id: pinned',
+        `    roots: [${repo}]`,
+        `    spec: ${join(repo, 'blueprint')}`,
+        '    home: 0001-pinned',
+        '  - id: other',
+        `    spec: ${other}`,
+        '    home: 0002-other',
+        '',
+      ].join('\n'),
     );
-    const loc = resolveLocations({ cwd: repo, dir: other });
+    const loc = resolveLocations({ cwd: repo, project: 'other' });
     assert.equal(loc.spec.path, other);
-    assert.equal(loc.spec.why, 'named on the command line');
+    assert.match(loc.spec.why, /config \(other\)/);
+
+    // And a path is not a way in any more, however much it looks like one.
+    const nobody = resolveLocations({ cwd: repo, project: other });
+    assert.equal(nobody.spec.path, null);
+    assert.match(nobody.spec.why, /no project/);
   } finally {
     s.cleanup();
   }
@@ -200,7 +229,7 @@ test('--dir beats every configured answer', () => {
  * you are STANDING describes a different project, and letting it keep applying
  * reported one project's spec beside another's ledger.
  */
-test('--dir does not inherit the ledger of whichever project you are standing in @rule:locations.answer.declared-not-discovered', () => {
+test('--project does not inherit the ledger of whichever project you are standing in @rule:locations.answer.declared-not-discovered', () => {
   const s = scratch();
   try {
     const repo = join(s.root, 'repo');
@@ -212,7 +241,11 @@ test('--dir does not inherit the ledger of whichever project you are standing in
         'projects:',
         '  - id: mine',
         `    roots: [${repo}]`,
+        `    spec: ${join(repo, 'blueprint')}`,
         `    runs: ${join(s.home, 'mine-runs')}`,
+        '  - id: theirs',
+        `    spec: ${other}`,
+        '    home: 0002-theirs',
         '',
       ].join('\n'),
     );
@@ -224,7 +257,7 @@ test('--dir does not inherit the ledger of whichever project you are standing in
       'the entry applies where it matches',
     );
 
-    const named = resolveLocations({ cwd: repo, dir: other });
+    const named = resolveLocations({ cwd: repo, project: 'theirs' });
     assert.equal(named.id, 'theirs');
     assert.equal(named.spec.path, other);
     assert.equal(
@@ -433,39 +466,59 @@ test('a fresh project gets nothing in its tree but conventions and a pointer @ru
     writeFileSync(join(repo, 'src', 'app.js'), '// theirs\n');
     walkdown(s.home, ['init', '--dir', repo]);
 
+    /*
+     * The promise is about VERSION CONTROL, not about the directory. Walkdown's
+     * files sit beside the code now - that is the point of `.walkdown/`, and it
+     * is what makes every path repo-relative and so unable to collide with
+     * another project's (n-0154). What must be untouched is what git sees.
+     */
     assert.deepEqual(
-      tree(repo),
+      tree(repo).filter((f) => !f.startsWith('.walkdown')),
       ['CLAUDE.md', 'src', 'src/app.js'],
-      'one file: the pointer. Not a directory of walkdown furniture, not even the skills',
+      'one file outside .walkdown/: the pointer. Not even the skills',
     );
     assert.ok(existsSync(join(s.skills, 'walkdown-judge', 'SKILL.md')), 'which went to the person');
 
-    // And everything it will write is under the personal home, filed by project.
+    // Everything walkdown will write is inside that one directory, which the
+    // ignore rule it wrote keeps out of git.
     const loc = resolveLocations({ cwd: repo });
+    const mine = join(repo, '.walkdown');
     for (const kind of ['spec', ...KINDS])
-      assert.ok(loc[kind].path.startsWith(s.home + '/'), `${kind} went to ${loc[kind].path}`);
+      assert.ok(loc[kind].path.startsWith(mine + '/'), `${kind} went to ${loc[kind].path}`);
+    assert.equal(readFileSync(join(mine, '.gitignore'), 'utf8').trim().split('\n').pop(), '*');
   } finally {
     s.cleanup();
   }
 });
 
-test('--in-repo commits the spec and takes its conversations with it @rule:locations.default.in-repo-on-request', () => {
+test('--commit spec tracks the spec and its conversations, and not the evidence @rule:locations.default.in-repo-on-request', () => {
   const s = scratch();
   try {
     const repo = join(s.root, 'repo');
     mkdirSync(repo, { recursive: true });
-    const said = walkdown(s.home, ['init', '--dir', repo, '--in-repo']);
+    const said = walkdown(s.home, ['init', '--dir', repo, '--commit', 'spec']);
 
+    /*
+     * The layout does not move - it never does now, whichever standard is
+     * chosen. What changes is the ignore rules, so there is one shape for a
+     * reader and a resolver to learn rather than two (n-0157).
+     */
     const loc = resolveLocations({ cwd: repo });
-    assert.equal(loc.spec.path, join(repo, 'blueprint'));
-    assert.equal(loc.runs.path, join(repo, 'blueprint', 'runs'), 'runs follow it in');
-    assert.equal(loc.threads.path, join(repo, 'blueprint', 'threads'));
+    const home = dirname(loc.spec.path);
+    assert.equal(loc.runs.path, join(loc.spec.path, 'runs'), 'runs follow the spec');
+    assert.equal(loc.threads.path, join(loc.spec.path, 'threads'));
     for (const kind of ['evidence', 'drafts'])
-      assert.ok(loc[kind].path.startsWith(s.home + '/'), `${kind} stayed out`);
-    // Said out loud, because a spec filed somewhere the person did not look is
-    // the whole failure this sentence exists to prevent.
-    assert.match(said, /spec: .*repo\/blueprint/);
-    assert.match(said, /In the repository/);
+      assert.equal(loc[kind].path, join(home, kind), `${kind} in the blueprint's own home`);
+
+    const ignore = readFileSync(join(repo, '.walkdown', '.gitignore'), 'utf8');
+    assert.match(ignore, /blueprints\/\*\/evidence\//, 'and git is told to skip them');
+    assert.match(ignore, /blueprints\/\*\/drafts\//);
+    assert.doesNotMatch(ignore, /^\*$/m, 'while the spec itself is tracked');
+
+    // Said out loud, because files landing somewhere the person did not look
+    // is the whole failure this sentence exists to prevent.
+    assert.match(said, /spec: /);
+    assert.match(said, /Committed/);
   } finally {
     s.cleanup();
   }
@@ -480,7 +533,7 @@ test('every path is reported with the decision that chose it @rule:locations.ans
     blueprint(join(repo, 'blueprint'), { dirs: ['runs'] });
     configure(
       s.home,
-      `projects:\n  - id: demo\n    roots: [${repo}]\n    spec: ${join(repo, 'blueprint')}\n    evidence: ${join(s.home, 'ev')}\n`,
+      `projects:\n  - id: demo\n    roots: [${repo}]\n    spec: ${join(repo, 'blueprint')}\n    home: 0001-demo\n    evidence: ${join(s.home, 'ev')}\n`,
     );
     const loc = resolveLocations({ cwd: repo });
 
@@ -491,9 +544,9 @@ test('every path is reported with the decision that chose it @rule:locations.ans
     assert.match(loc.runs.why, /already in the blueprint/);
     assert.match(loc.threads.why, /beside the spec/);
     assert.match(loc.evidence.why, /config/);
-    assert.match(loc.drafts.why, /built-in default/);
+    assert.match(loc.drafts.why, /walkdown/, 'the home its entry names');
 
-    const said = walkdown(s.home, ['where', '--dir', join(repo, 'blueprint')]);
+    const said = walkdown(s.home, ['where', '--project', 'demo'], repo);
     for (const kind of ['spec', ...KINDS]) assert.match(said, new RegExp(`\\b${kind}\\b`), kind);
     assert.match(said, /already in the blueprint/);
   } finally {
@@ -514,8 +567,8 @@ test('asking where things live creates nothing at all @rule:locations.answer.ask
     const before = tree(s.root);
 
     const loc = resolveLocations({ cwd: repo });
-    const said = walkdown(s.home, ['where', '--dir', join(repo, 'blueprint')]);
-    walkdown(s.home, ['where', 'evidence', '--dir', join(repo, 'blueprint')]);
+    const said = walkdown(s.home, ['where', '--project', 'demo'], repo);
+    walkdown(s.home, ['where', 'evidence', '--project', 'demo'], repo);
 
     assert.match(said, new RegExp(loc.evidence.path), 'it names a directory that is not there');
     assert.ok(!existsSync(loc.evidence.path), 'and did not create it on being asked twice');
@@ -612,7 +665,11 @@ test('two repositories with one basename get homes of their own @rule:locations.
     assert.equal(first.action, 'written');
     assert.equal(second.action, 'written', 'the second was written down, not mistaken for the first');
     assert.equal(first.id, 'app');
-    assert.equal(second.id, 'app-2', 'and it took the next name free');
+    assert.equal(
+      second.id,
+      'app-2',
+      'and it took the next name free — two entries in ONE config still need two ids',
+    );
 
     const locA = resolveLocations({ cwd: a });
     const locB = resolveLocations({ cwd: b });
@@ -657,21 +714,22 @@ test('two repositories with one basename never share a home or a ledger @rule:lo
     assert.match(first, /\+ listed/);
     assert.match(second, /\+ listed/, 'the second is a project too, and says so');
 
-    const cfg = readUserConfig({ cwd: a }).config;
-    assert.equal(cfg.projects.length, 2, 'two blueprints, two entries');
-    const [p, q] = cfg.projects;
-    assert.notEqual(p.id, q.id);
-    assert.notEqual(p.spec, q.spec, 'and the second did not adopt the first’s blueprint');
-
     /*
+     * Each repository declares its own project in its own `.walkdown`, so
+     * "two entries" is now two FILES rather than two rows in one - and the
+     * question the rule asks is about the resolved answer, which is what is
+     * asserted here rather than the config's internal shape.
+     *
      * One home apiece is the visible half; one LEDGER apiece is the half that
      * mattered. A note filed while standing in the first repository was
      * listed by `walkdown threads` while standing in the second, because both
      * resolved to the same spec.
      */
-    for (const dir of [p, q].map((e) => e.spec)) assert.ok(existsSync(join(dir, 'walkdown.yml')));
-    assert.notEqual(expand(p.evidence), expand(q.evidence));
-    assert.notEqual(expand(p.drafts), expand(q.drafts));
+    const locA = resolveLocations({ cwd: a });
+    const locB = resolveLocations({ cwd: b });
+    assert.notEqual(locA.spec.path, locB.spec.path, 'the second did not adopt the first’s blueprint');
+    for (const l of [locA, locB]) assert.ok(existsSync(join(l.spec.path, 'walkdown.yml')));
+    for (const kind of KINDS) assert.notEqual(locA[kind].path, locB[kind].path);
   } finally {
     s.cleanup();
   }
@@ -683,16 +741,17 @@ test('a project keeps its spec and its records in ONE home @rule:locations.defau
     const repo = join(s.root, 'solo');
     mkdirSync(join(repo, '.git'), { recursive: true });
     init(repo, s.home);
-    const [entry] = readUserConfig({ cwd: repo }).config.projects;
     /*
      * The entry used to carry a spec under `blueprints/solo` and evidence
      * under `blueprints/solo-2`: init scaffolded the derived home, and the
      * uniqueness loop that ran afterwards saw the directory init had just
      * made and skipped past it. One decision, made first, cannot do that.
      */
-    const home = dirname(expand(entry.evidence));
-    assert.equal(dirname(expand(entry.drafts)), home);
-    assert.equal(dirname(expand(entry.spec)), home, 'the spec lives in the same home');
+    const loc = resolveLocations({ cwd: repo });
+    const home = dirname(loc.spec.path);
+    assert.equal(dirname(loc.evidence.path), home);
+    assert.equal(dirname(loc.drafts.path), home, 'spec, evidence and drafts in one home');
+    assert.match(home, /blueprints\/\d{4}-solo$/, 'and it is numbered');
   } finally {
     s.cleanup();
   }
@@ -707,13 +766,17 @@ test('two packs in one repository each get their own home @rule:locations.defaul
     init(join(repo, 'packs', 'one'), s.home);
     init(join(repo, 'packs', 'two'), s.home);
 
-    const cfg = readUserConfig({ cwd: repo }).config;
-    assert.equal(cfg.projects.length, 2);
-    // Named for the pack, not for the repository: the derived spec path was
-    // keyed on the git root's basename while the entry was keyed on the
-    // pack's, so the two could not have agreed even in principle.
-    assert.deepEqual(cfg.projects.map((p) => p.id).sort(), ['one', 'two']);
-    assert.notEqual(expand(cfg.projects[0].evidence), expand(cfg.projects[1].evidence));
+    /*
+     * Each pack carries its own `.walkdown`, so each answers for itself and
+     * neither sees the other's - which is the property the pack layout needs
+     * and the thing a shared home could never give it
+     * (locations.answer.one-walkdown-answers).
+     */
+    const locs = ['one', 'two'].map((pack) =>
+      resolveLocations({ cwd: join(repo, 'packs', pack) }),
+    );
+    assert.deepEqual(locs.map((l) => l.id).sort(), ['one', 'two']);
+    for (const kind of KINDS) assert.notEqual(locs[0][kind].path, locs[1][kind].path);
   } finally {
     s.cleanup();
   }
@@ -734,15 +797,20 @@ test('a home claimed from a config the next one cannot see is still taken @rule:
     mkdirSync(join(repo, '.git'), { recursive: true });
     const packs = [join(repo, 'packs', 'app'), join(repo, 'other', 'app')];
     for (const p of packs) mkdirSync(p, { recursive: true });
-    for (const p of packs) init(p, s.home, ['--in-repo']);
+    for (const p of packs) init(p, s.home, ['--commit', 'spec']);
 
-    const evidence = packs.map((p) => {
-      const cfg = parse(readFileSync(join(p, '.walkdown', 'config.yml'), 'utf8'));
-      return expand(cfg.projects[0].evidence);
-    });
+    /*
+     * This case used to need a claim visible ACROSS configs, because two
+     * packs wrote into two committed configs that could not see each other
+     * and both derived the same name-keyed home. Neither derivation nor
+     * cross-config arbitration exists now: each pack's records are under its
+     * OWN `.walkdown`, so distinctness is a property of the path rather than
+     * of an allocator getting it right (n-0155).
+     */
+    const evidence = packs.map((p) => resolveLocations({ cwd: p }).evidence.path);
     assert.notEqual(evidence[0], evidence[1], 'one pack’s evidence is not the other’s');
-    // And the claim is on the disk, where the other config could see it.
-    for (const e of evidence) assert.ok(existsSync(dirname(e)));
+    for (const [i, e] of evidence.entries())
+      assert.ok(e.startsWith(join(packs[i], '.walkdown') + '/'), 'and it is inside its own pack');
   } finally {
     s.cleanup();
   }
@@ -757,7 +825,7 @@ test('asking where records go writes nothing at all @rule:locations.default.one-
     const before = readdirSync(s.home).sort();
 
     const loc = resolveLocations({ cwd: repo });
-    assert.equal(loc.evidence.path, join(s.home, 'blueprints', 'demo', 'evidence'));
+    assert.equal(loc.evidence.path, join(s.home, 'blueprints', '0001-demo', 'evidence'));
     // Derived rather than allocated: the answer exists, the directory does not.
     assert.equal(existsSync(join(s.home, 'blueprints')), false);
     assert.deepEqual(readdirSync(s.home).sort(), before, 'the home is exactly as it was');
@@ -774,14 +842,20 @@ test('a legacy name-keyed home keeps answering until a person moves it @rule:loc
   try {
     const repo = join(s.root, 'repo');
     blueprint(join(repo, 'blueprint'));
-    declare(s.home, { roots: repo, spec: join(repo, 'blueprint') });
-    mkdirSync(join(s.home, 'projects', 'demo', 'evidence'), { recursive: true });
-    writeFileSync(join(s.home, 'projects', 'demo', 'evidence', 'shot.png'), 'x');
+    const old = join(s.home, 'projects', 'demo', 'evidence');
+    mkdirSync(old, { recursive: true });
+    writeFileSync(join(old, 'shot.png'), 'x');
+    /*
+     * Named by the config, which is how a legacy home is reached now. It used
+     * to be FOUND, by deriving `projects/<id>` from a name - and a derived
+     * path is exactly what two blueprints can both derive (n-0150, n-0153).
+     * `walkdown where --fix` is what writes an old address down; once written,
+     * an existing ledger keeps answering and no resolver moves it.
+     */
+    declare(s.home, { roots: repo, spec: join(repo, 'blueprint'), evidence: old });
     const loc = resolveLocations({ cwd: repo });
-    // An existing ledger is a fact; a resolver never moves one on its own.
-    assert.equal(loc.evidence.path, join(s.home, 'projects', 'demo', 'evidence'));
-    assert.match(loc.evidence.why, /legacy home/);
-    assert.match(loc.evidence.why, /walkdown where --fix/);
+    assert.equal(loc.evidence.path, old);
+    assert.match(loc.evidence.why, /config/);
   } finally {
     s.cleanup();
   }
@@ -848,7 +922,7 @@ test('the code row says which repository actually answered @rule:locations.answe
     // An entry that names a spec but no roots still gets a truthful answer,
     // from the repository the spec itself sits in.
     configure(s.home, `projects:\n  - id: demo\n    spec: ${join(repo, 'blueprint')}\n`);
-    const bySpec = resolveLocations({ dir: join(repo, 'blueprint') });
+    const bySpec = resolveLocations({ spec: join(repo, 'blueprint') });
     assert.equal(bySpec.code.path, repo);
     assert.match(bySpec.code.why, /the spec sits in/);
 
@@ -897,7 +971,7 @@ test('the code root is named or inferred from the spec, never guessed from the w
     configure(s.home, `projects:\n  - id: named\n    roots: [${repo}]\n    spec: ${away}\n`);
     assert.equal(resolveLocations({ cwd: repo }).codeRoot, repo, 'the entry says where the code is');
     assert.equal(
-      resolveLocations({ dir: away }).codeRoot,
+      resolveLocations({ spec: away }).codeRoot,
       repo,
       'and still says so when the blueprint is named outright from elsewhere',
     );
@@ -910,7 +984,7 @@ test('the code root is named or inferred from the spec, never guessed from the w
       blueprint(loose, { project: 'loose' });
       const standing = join(s2.root, 'unrelated');
       mkdirSync(join(standing, '.git'), { recursive: true });
-      const loc = resolveLocations({ dir: loose, cwd: standing });
+      const loc = resolveLocations({ spec: loose, cwd: standing });
       assert.equal(loc.codeRoot, join(s2.root, 'loose'));
       assert.notEqual(loc.codeRoot, standing, 'never the checkout you happen to be in');
     } finally {
@@ -946,37 +1020,39 @@ test('init twice in one repository keeps the home it already claimed @rule:locat
     assert.equal(after.length, 1, 'one project, however many times it is set up');
     assert.deepEqual(after[0].spec, first[0].spec, 'and the same blueprint, not a fresh one');
     assert.deepEqual(
-      readdirSync(join(s.home, 'blueprints')).sort(),
-      [after[0].id],
+      readdirSync(join(root, '.walkdown', 'blueprints')).sort(),
+      ['0001-app'],
       'one home on disk — a second would be a blueprint nothing reads',
     );
 
-    // The neighbouring behaviours the fix must not cost: a DIFFERENT
-    // repository of the same name still gets its own, since the match is on
-    // the root and not on the name.
+    // The neighbouring behaviour the change must not cost: a DIFFERENT
+    // repository of the same name gets its own, and now trivially so — its
+    // records are under its own `.walkdown`, so the two cannot be the same
+    // directory whatever either is called.
     const other = join(s.root, 'elsewhere', 'app');
     mkdirSync(join(other, '.git'), { recursive: true });
     init(other, s.home);
-    const both = readUserConfig({ cwd: other }).config.projects;
-    assert.equal(both.length, 2);
-    assert.notEqual(both[0].evidence, both[1].evidence, 'two projects, two homes');
+    assert.notEqual(
+      resolveLocations({ cwd: root }).evidence.path,
+      resolveLocations({ cwd: other }).evidence.path,
+      'two projects, two homes',
+    );
   } finally {
     s.cleanup();
   }
 });
 
 /*
- * The in-repo shape stays idempotent for the reason it always was - it knows
- * its spec before the home is chosen - and this asserts it from the outside so
- * the two paths cannot drift apart again.
+ * And with the spec committed, which is a different ignore file and the same
+ * layout - asserted from the outside so the two cannot drift apart again.
  */
-test('init --in-repo twice keeps one entry too @rule:locations.default.one-home-per-blueprint', () => {
+test('init --commit spec twice keeps one entry too @rule:locations.default.one-home-per-blueprint', () => {
   const s = scratch();
   try {
     const root = join(s.root, 'pack');
     mkdirSync(join(root, '.git'), { recursive: true });
-    init(root, s.home, ['--in-repo']);
-    init(root, s.home, ['--in-repo']);
+    init(root, s.home, ['--commit', 'spec']);
+    init(root, s.home, ['--commit', 'spec']);
     const listed = parse(readFileSync(join(root, '.walkdown', 'config.yml'), 'utf8')).projects;
     assert.equal(listed.length, 1);
   } finally {
@@ -1005,7 +1081,7 @@ test('an undeclared blueprint never resolves to a declared one\u2019s home @rule
     const listed = join(s.root, 'one', 'app');
     mkdirSync(join(listed, '.git'), { recursive: true });
     init(listed, s.home);
-    const mine = readUserConfig({ cwd: listed }).config.projects[0];
+    const mine = resolveLocations({ cwd: listed });
 
     // A second blueprint that looks exactly like the first from the outside:
     // same basename, and its walkdown.yml declares the same `project:`.
@@ -1022,20 +1098,20 @@ test('an undeclared blueprint never resolves to a declared one\u2019s home @rule
     // And named outright, it answers for ITSELF: runs and threads beside the
     // spec as always, and evidence and drafts beside it too, because the path
     // was named and so cannot collide with anybody else's.
-    const named = resolveLocations({ dir: join(stray, 'blueprint') });
+    const named = resolveLocations({ spec: join(stray, 'blueprint') });
     assert.equal(named.spec.path, join(stray, 'blueprint'));
     for (const kind of KINDS) {
       assert.ok(
         named[kind].path.startsWith(join(stray, 'blueprint')),
         `${kind} stays inside the blueprint that was named, not in a shared home`,
       );
-      assert.notEqual(named[kind].path, expand(mine[kind]), `${kind} is not the listed project's`);
+      assert.notEqual(named[kind].path, mine[kind].path, `${kind} is not the listed project's`);
     }
 
     // The listed project is untouched by any of it.
     const still = resolveLocations({ cwd: listed });
-    assert.equal(still.spec.path, expand(mine.spec));
-    assert.equal(still.drafts.path, expand(mine.drafts));
+    assert.equal(still.spec.path, mine.spec.path);
+    assert.equal(still.drafts.path, mine.drafts.path);
   } finally {
     s.cleanup();
   }

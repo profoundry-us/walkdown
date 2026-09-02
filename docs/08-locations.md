@@ -90,10 +90,12 @@ did for an unlisted directory. That is not a gap. It is what "the config is the 
 already meant (q-0138); the derived home was the registry's ghost, kept after the thing it
 disambiguated was deleted.
 
-A blueprint *named outright* with `--dir` still answers for itself. Runs and threads sit
-beside the spec as always, and evidence and drafts sit beside it too — normally they stay
-out of the tree, but that needs a home, and a named path is the one answer that is
-certainly this blueprint's own.
+There is no `--dir` any more. A blueprint walkdown answers for is one somebody wrote down,
+selected by `--project <id>` or by standing in it; `walkdown project add <path>` is how a
+blueprint that arrived rather than one `init` made gets written down, and `--ephemeral`
+marks a throwaway copy — reachable by name, never by standing somewhere, and only ever in
+your own config. A path on the command line was the second way in, and a blueprint reached
+that way had no entry, so it needed a home derived from a name (n-0156).
 
 Two rules keep it honest. **Asking writes nothing** — answering allocates nothing and
 claims nothing; where there is no home there is simply no answer. **An existing ledger is
@@ -175,7 +177,7 @@ projects:
 
 Resolution order for any path, first hit wins:
 
-1. an explicit flag (`--dir`, and per-kind overrides)
+1. an explicit flag (per-kind overrides)
 2. the matching `projects[]` entry
 3. **a directory the blueprint already has** — `blueprint/runs`, `blueprint/threads`,
    `blueprint/drafts`, `blueprint/runs/evidence`
@@ -461,7 +463,8 @@ So walkdown treats it as a location like any other — found, not assumed:
 - **`walkdown pointer`** prints the block for anyone to paste, and `--into <file>` places
   it idempotently anywhere — including a file walkdown has never heard of.
 
-In a monorepo, point `init` at the pack: `walkdown init --dir packs/billing` puts the
+In a monorepo, point `init` at the pack: `walkdown init --dir packs/billing` gives that pack
+its own `.walkdown`, which is then the only one that answers from inside it. It puts the
 pointer beside the code it describes. Root-level discovery deliberately does not go
 hunting through subdirectories for a home — a search that guesses which of thirty packs
 a spec was about will guess wrong.

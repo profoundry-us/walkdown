@@ -7,13 +7,13 @@ export function run(args) {
   const { values } = parseArgs({
     args,
     options: {
-      dir: { type: 'string' },
+      project: { type: 'string' },
       checks: { type: 'boolean', default: true },
       json: { type: 'boolean', default: false },
     },
     allowNegative: true,
   });
-  const blueprint = loadOrExit(values.dir);
+  const blueprint = loadOrExit(values.project);
   const { findings, summary, exitCode } = lint(blueprint, { checks: values.checks });
 
   if (values.json) {

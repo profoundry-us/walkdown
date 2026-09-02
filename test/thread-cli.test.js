@@ -1,3 +1,4 @@
+import { declareProject } from '../tools/test-home.mjs';
 /*
  * What `walkdown thread` SAYS, as opposed to what it does. The mutations
  * themselves are covered next door in thread-mutations.test.js; this is about
@@ -55,7 +56,7 @@ const GUESSING = identity(null);
 
 /** Run the CLI, stripping colour so assertions read the words, not the escapes. */
 const run = (args, dir, home = SAID) =>
-  execFileSync(process.execPath, [CLI, 'thread', ...args, '--dir', dir], {
+  execFileSync(process.execPath, [CLI, 'thread', ...args, '--project', declareProject(home, dir)], {
     encoding: 'utf8',
     env: { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: home },
   }).replace(/\x1b\[[0-9;]*m/g, '');
@@ -350,7 +351,18 @@ test('ten concurrent filers get ten threads, none overwritten', async () => {
     Array.from({ length: 10 }, (_, i) =>
       exec(
         process.execPath,
-        [CLI, 'thread', 'new', '--rule', 'f.s.rule', '--body', `finding ${i}`, '--as-agent', '--dir', bp],
+        [
+          CLI,
+          'thread',
+          'new',
+          '--rule',
+          'f.s.rule',
+          '--body',
+          `finding ${i}`,
+          '--as-agent',
+          '--project',
+          declareProject(SAID, bp),
+        ],
         { env: { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: SAID } },
       ),
     ),

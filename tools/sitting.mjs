@@ -1682,7 +1682,7 @@ const STATES = [
 /** This machine's evidence root, falling back to the blueprint's own. */
 function evidenceRoot() {
   try {
-    return resolveLocations({ dir: BP }).evidence.path;
+    return resolveLocations({ spec: BP }).evidence.path;
   } catch {
     return join(BP, 'runs', 'evidence');
   }

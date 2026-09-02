@@ -42,7 +42,7 @@ export default function globalSetup() {
    */
   const pinned = process.env.WALKDOWN_HOME;
   delete process.env.WALKDOWN_HOME;
-  const realEvidence = resolveLocations({ dir: join(root, 'blueprint') }).evidence.path;
+  const realEvidence = resolveLocations({ spec: join(root, 'blueprint') }).evidence.path;
   process.env.WALKDOWN_HOME = pinned ?? join(CHECKSPACE, 'home');
 
   rmSync(CHECKSPACE, { recursive: true, force: true });

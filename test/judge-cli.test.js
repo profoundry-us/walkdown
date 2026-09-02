@@ -6,7 +6,10 @@
  * rather than guessed, and that the rules with nothing to judge say so
  * instead of printing a prompt that would be acted on.
  */
-import '../tools/test-home.mjs';
+import { declareProject, suiteHome } from '../tools/test-home.mjs';
+
+/** This file's own personal home — declaring into a shared one races. */
+const HOME = suiteHome('judge');
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
@@ -91,9 +94,9 @@ function fixture(name, governance = []) {
 }
 
 const run = (args, dir) =>
-  execFileSync(process.execPath, [CLI, 'judge', ...args, '--dir', dir], {
+  execFileSync(process.execPath, [CLI, 'judge', ...args, '--project', declareProject(HOME, dir)], {
     encoding: 'utf8',
-    env: { ...process.env, NO_COLOR: '1' },
+    env: { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: HOME },
   }).replace(/\x1b\[[0-9;]*m/g, '');
 
 test('the prompt carries everything a judging agent needs to start', () => {
