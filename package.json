@@ -1,7 +1,7 @@
 {
   "name": "walkdown",
   "version": "0.1.0",
-  "description": "Verify that what you built is what you designed \u2014 blueprint lint & hashing for the walkdown spec format",
+  "description": "Verify that what you built is what you designed — blueprint lint & hashing for the walkdown spec format",
   "type": "module",
   "bin": {
     "walkdown": "bin/walkdown.js"
@@ -56,7 +56,7 @@
     "@biomejs/biome": "^2.5.11",
     "@phosphor-icons/core": "^2.1.1",
     "@playwright/test": "^1.62.1",
-    "@profoundry-us/highball": "^0.4.1",
+    "@profoundry-us/highball": "^0.5.0",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@tailwindcss/cli": "^4.3.3",
     "@types/node": "^26.4.0",
