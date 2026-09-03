@@ -1,0 +1,30 @@
+{
+  "run_id": "2026-09-03T16-30-11Z-local-01",
+  "created": "2026-09-03T16:30:11Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "0bbf385",
+  "blueprint_sha": "0bbf385",
+  "note": "One rule, judged headless from the working-tree CLI (node bin/walkdown.js) against a throwaway git repository built with the real init under a private WALKDOWN_HOME inside the scratchpad (judge-4/), with servers on ports 4840-4849 started inside that fixture and stopped afterwards; the user's servers on 4700/4710 were never touched. Nothing in this repository was read as a project and nothing here was written except this record and its evidence; the real personal config was never read or written. `git diff HEAD` was empty at recording time; the only untracked files were run records and threads other judging sessions were filing concurrently.",
+  "results": [
+    {
+      "rule": "locations.answer.one-walkdown-answers",
+      "status": "pass",
+      "statement_hash": "sha256:b08354a355f7",
+      "evidence": [
+        "runs/evidence/2026-09-03T16-30-11Z/fixture-build.txt",
+        "runs/evidence/2026-09-03T16-30-11Z/where-probe.txt",
+        "runs/evidence/2026-09-03T16-30-11Z/cross-boundary-cli-probe.txt",
+        "runs/evidence/2026-09-03T16-30-11Z/handwritten-entry-probe.txt",
+        "runs/evidence/2026-09-03T16-30-11Z/server-probe.txt",
+        "runs/evidence/2026-09-03T16-30-11Z/project-add-probe.txt",
+        "runs/evidence/2026-09-03T16-30-11Z/served-elsewhere-probe.txt",
+        "runs/evidence/2026-09-03T16-30-11Z/ephemeral-probe.txt"
+      ],
+      "reasoning": "Fixture: a git repository `mono` whose root, `packs/`, `packs/alpha`, `packs/alpha/nested` each got a `.walkdown` from `init --commit spec`, a hand-built legacy-layout pack `packs/legacy` (spec: blueprint, threads and runs inside it), a plain blueprint `tools/plain` listed from the root, a `.walkdown` above the git root, and a private personal home declaring its own project `solo` plus `evidence:` overrides for `mono` and `alpha` (fixture-build). Every THEN held under everything I tried. From each of nine standing places exactly the nearest `.walkdown` answers: the pack sees only its own config and the personal one, the root only its own and the personal one, `packs/other` gets the intermediate `packs/.walkdown` rather than the root's, the nested pack gets its own rather than alpha's, and nothing inside `mono` ever consults `above/.walkdown`; both personal overrides land on their own project and nowhere else (where-probe). `projects`, `status --project`, `where --project`, `thread new --project` and `serve --project` refuse every id across the line in both directions and downward into nested, and never write (cross-boundary-cli). Three committed entries written by hand into the root config - the pack's home blueprint, the legacy pack's live blueprint, and the pack reached through a symlink - are named by `where` as refused with the directory that answers for them, absent from `projects`, unknown to `status`/`thread new`/`serve --project`, reported by lint as three errors naming the entry, both files and the way out, invisible from inside the pack they point at, and lint inside the pack says nothing (handwritten-entry). Servers started in the root, the pack and the legacy pack each offer exactly the blueprints their `.walkdown` declares plus the personal `solo`, answer 404 to every other by id and by spec key including the refused entries, and every pin lands in the served ledger; a root server serving `plain` (in the tree, outside `.walkdown`) or `solo` (in the home) still offers only the root's list (server-probe, served-elsewhere). `project add` from the root, from a sibling pack, from the nested pack upward, from `solo` and from `above` refuses a pack's own blueprint in the relative, realpath and `/tmp` spellings, with and without `--ephemeral`, naming the answering `.walkdown` and the copy location; from inside the pack its own blueprint is `already listed`, and none of forty attempts changed either config (project-add). A real copy under `packs/alpha/.walkdown/tmp/` is accepted `--ephemeral`, listed personally with a numbered home, offered by root and pack servers, and its pins land in the home, never in alpha's ledger (ephemeral). Two doors beyond the text, neither changing the verdict: a hand-written personal `ephemeral: true` entry naming a pack's declared original - the exact shape `project add` refuses - is read, listed, served, and a root server's pin landed n-0004 in `packs/legacy/blueprint/threads` (which `walkdown threads` in the pack lists as its own) and a stray `threads/n-0001.yml` inside alpha's committed blueprint directory, with no `where` row and no lint finding; the THEN reserves `not read either` for committed entries and the statement merges the personal config in, so I read this as declared rather than pooled, but it is one hand-edit from the q-0176 defect. And `project add --ephemeral` accepts an undeclared legacy-shaped blueprint under a bare `.walkdown` (`packs/bare`), writing an entry whose runs and threads follow the spec into that pack's tree - allowed by q-0176's `declared` test, but not a copy either. Also seen, not this rule: the server accepts a pin anchored to a rule that does not exist where the CLI refuses it. Claiming, not accepting.",
+      "threads": []
+    }
+  ]
+}

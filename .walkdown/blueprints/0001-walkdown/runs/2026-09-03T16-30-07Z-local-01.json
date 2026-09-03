@@ -1,0 +1,33 @@
+{
+  "run_id": "2026-09-03T16-30-07Z-local-01",
+  "created": "2026-09-03T16:30:07Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "0bbf385-dirty",
+  "note": "One rule, judged headless from the working-tree CLI and its HTTP API against fixtures built in the judge's private scratchpad directory with WALKDOWN_HOME and WALKDOWN_SKILLS_DIR inside it (four private homes: home, home2, home5, home6): pairs of git repositories sharing the basename app, a monorepo with a committed root blueprint, a second blueprint listed in the same .walkdown, a nested pack sharing the root's name given a plain init, a deeper pack with its own .walkdown, the old projects/ and index.yml layouts, ephemeral copies, a symlinked checkout, and a personal config hand-edited to carry two rows called app. Two servers on the judge's own ports 4820 and 4821; 4700/4710/4310 untouched. The tree reads dirty only because two other judges' untracked run records and threads were present at the time of writing; no source file was changed. The real ledger received this record and nothing else. One fixture attempt (p5x) broke its own config by appending a row after the identity block; it is kept because it shows the CLI under an unparseable config, and the probes were redone on a fresh home (p5-p7). Evidence under runs/evidence/2026-09-03T16-30-07Z/: p1 through p7b transcripts, and scripts/ holding every script that produced them.",
+  "results": [
+    {
+      "rule": "locations.default.one-home-per-blueprint",
+      "status": "pass",
+      "statement_hash": "sha256:c2e4b20e7f0d",
+      "evidence": [
+        "runs/evidence/2026-09-03T16-30-07Z/p1-asking-writes-nothing.txt",
+        "runs/evidence/2026-09-03T16-30-07Z/p2-two-repos-share-a-name.txt",
+        "runs/evidence/2026-09-03T16-30-07Z/p2b-first-writes-two-checkouts.txt",
+        "runs/evidence/2026-09-03T16-30-07Z/p3-one-walkdown-nested-name-server.txt",
+        "runs/evidence/2026-09-03T16-30-07Z/p3b-writes-and-nested-walkdown.txt",
+        "runs/evidence/2026-09-03T16-30-07Z/p4-move-then-commit-standard.txt",
+        "runs/evidence/2026-09-03T16-30-07Z/p5-fix-and-unclaimed-homes.txt",
+        "runs/evidence/2026-09-03T16-30-07Z/p5x-broken-config-attempt.txt",
+        "runs/evidence/2026-09-03T16-30-07Z/p6-deleted-home-number-not-reminted.txt",
+        "runs/evidence/2026-09-03T16-30-07Z/p7-ephemeral-symlink-duplicate-ids.txt",
+        "runs/evidence/2026-09-03T16-30-07Z/p7b-write-under-duplicated-id.txt",
+        "runs/evidence/2026-09-03T16-30-07Z/scripts/lib.sh"
+      ],
+      "reasoning": "Asking wrote nothing: where (plain, --json, one kind, --project), status, projects and threads run in an unlisted repository beside an unclaimed 0003-other holding a run left the home's fingerprint and both repositories byte-identical and created no config (p1). Two repositories called app were given 0004-app as app and 0005-app as app-2, numbered past the unclaimed home; each resolved to its own, a thread filed from each landed in its own ledger, and --project app from b/app went to the row named app, which is unique in that file (p2, p2b). In one committed .walkdown, init and project add gave 0001-app and 0002-lib, and re-adding either blueprint by relative or absolute path, or from inside the repository's own numbered home, listed nothing twice and minted nothing (p3). A pack sharing the root's name (mono/app/packs/app given a plain init, so a personal app rooted at the pack beside a committed app rooted at the root) never merged over the root's: where from each place answered with its own home, --project app picked the row rooted where you stand, bare and --project writes from the pack went to the pack's ledger and from the root and from packs/lib to the root's; servers started at the root and at the pack both listed both under distinct keys, answered ?bp=app with 409 and the two candidates on GET and on POST /api/threads, and filed by key into the ledger the key names (p3, p3b). A deeper pack carrying its own .walkdown was refused from the root and a hand-written committed row reaching under it was set aside with a reason (p3b). move recorded its choice on the resolving row only, refused three destinations that already held records, and refused a directory nothing declares; init --commit spec moved the whole home into the repository with the moved-out evidence surviving as a personal override, a bare init kept it, spec<->all moved nothing, and --commit none moved it back under a fresh 0006 with every thread and the evidence still found while the other checkout's home fingerprint never changed; the next same-named checkout got 0007 (p4). where --fix reported each old-layout home, recorded the one it could attribute, left three with a reason each, moved nothing, and was idempotent; a numbered home nothing claims kept its number (0010 minted past 0009-old); after project forget, a re-init minted 0011 rather than guessing the orphaned 0002-app was this checkout's, leaving it standing with its thread (p5). A deleted home's number was not re-minted for the next checkout and the original rebuilt into its own number (p6). Two ephemeral copies sharing a name got 0014 and 0015, a symlinked checkout resolved to the same project and a repeat init there minted nothing, and with a personal config hand-edited to two rows both called app each checkout answered with its own home and wrote into it, --project app from each picking its own and from nowhere the first (p7, p7b). Under an unparseable config, where answered nothing rather than deriving a home from the basename and init refused (p5x). Two things a person should see, neither a breach of this rule: the closing line of where --fix reads 'Only the config was written' even when nothing was folded and the config's hash is unchanged (p5); and an orphaned numbered home - after project forget, or when its entry is gone - is left standing and its number is never reused, but no command lists it afterwards: only the projects/ and index.yml layouts are reported by --fix, so the step's 'reported' is carried by --fix for the old layouts and by forget's own message at the time, not by any later listing. Also seen in passing: project forget on an unparseable config dies with a stack trace instead of the refusal init gives (p5x), which is not this rule's claim.",
+      "threads": []
+    }
+  ]
+}

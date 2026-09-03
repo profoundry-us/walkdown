@@ -1,0 +1,27 @@
+id: n-0180
+kind: note
+author: topher
+via: agent
+created: 2026-09-03T16:37:53.899Z
+anchor:
+  rule: locations.default.in-repo-on-request
+status: open
+body: "The 'Committed' sentence describes walkdown's own ignore file, not what
+  git will take. Judged 2026-09-03T16-30-06Z, two trees. (1) evidence
+  runs/evidence/2026-09-03T16-30-06Z/probe-d.txt, step D3: a repository whose
+  root .gitignore already holds '.walkdown/' ran init --commit spec and was told
+  'Committed: the spec and its threads … .walkdown/.gitignore keeps runs,
+  evidence and drafts out'; git status showed only CLAUDE.md, git check-ignore
+  attributed the spec's walkdown.yml to .gitignore:1:.walkdown/, and walkdown
+  where also answered 'tracked: the spec and its threads'. init --commit all
+  then said 'Committed in full' over the same tree, where nothing under
+  .walkdown/ can be committed at all. (2) evidence probe-b.txt, step B6b: with
+  .walkdown/.gitignore emptied by hand, init --commit spec correctly printed '!
+  kept (yours differs …)' but the summary below it still read
+  '.walkdown/.gitignore keeps runs, evidence and drafts out'; walkdown where was
+  honest there ('keeps out nothing'). The standard is read off the tree, as the
+  rule wants, but only off the one file walkdown wrote — the report already asks
+  git what is still tracked (stillTracked), so asking git check-ignore whether
+  the spec and the config are committable, and wording the spec sentence from
+  the file's actual rules (where already has them), would keep 'Committed' from
+  being printed over a tree where it is false."

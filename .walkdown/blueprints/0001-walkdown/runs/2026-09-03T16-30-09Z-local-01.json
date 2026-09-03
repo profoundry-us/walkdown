@@ -1,0 +1,32 @@
+{
+  "run_id": "2026-09-03T16-30-09Z-local-01",
+  "created": "2026-09-03T16:30:09Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "0bbf385",
+  "blueprint_sha": "0bbf385",
+  "note": "One rule, judged headless from the working-tree CLI (node bin/walkdown.js) against a throwaway git repository under a private WALKDOWN_HOME inside the scratchpad, with servers on ports 4830-4832 started inside that fixture. This repository's own configuration was read live once (probe 07) and never written; the real personal config was never written. `git diff HEAD` was empty at recording time; the only untracked files were thread records other judging sessions were filing concurrently.",
+  "results": [
+    {
+      "rule": "locations.answer.declared-not-discovered",
+      "status": "pass",
+      "statement_hash": "sha256:dd87f8781211",
+      "evidence": [
+        "runs/evidence/2026-09-03T16-30-09Z/declared-not-discovered-00-fixture.txt",
+        "runs/evidence/2026-09-03T16-30-09Z/declared-not-discovered-01-declared-vs-undeclared.txt",
+        "runs/evidence/2026-09-03T16-30-09Z/declared-not-discovered-01b-own-runs-ledgers.txt",
+        "runs/evidence/2026-09-03T16-30-09Z/declared-not-discovered-02-personal-restated-keys.txt",
+        "runs/evidence/2026-09-03T16-30-09Z/declared-not-discovered-03-server-surface.txt",
+        "runs/evidence/2026-09-03T16-30-09Z/declared-not-discovered-04-same-id-elsewhere-and-personal-gamma.txt",
+        "runs/evidence/2026-09-03T16-30-09Z/declared-not-discovered-05-tracked-row-in-tree-personal.txt",
+        "runs/evidence/2026-09-03T16-30-09Z/declared-not-discovered-06-undeclared-dressed-as-home.txt",
+        "runs/evidence/2026-09-03T16-30-09Z/declared-not-discovered-07-this-repository-live.txt",
+        "runs/evidence/2026-09-03T16-30-09Z/declared-not-discovered-08-run-writer.txt"
+      ],
+      "reasoning": "Judged headless from the working-tree CLI against a throwaway monorepo whose root .walkdown/config.yml declares alpha (packs/alpha, home 0001-alpha) and beta (packs/beta, home 0002-beta), with packs/gamma/blueprint a complete legacy-shaped blueprint holding its own runs/ and threads/ that nobody declares, and a private WALKDOWN_HOME. All three THENs held under everything I tried. Each declared blueprint answers for itself: where, status, threads, thread new and the real run writer (node:test with walkdown's reporter) resolve alpha's and beta's own ledgers from inside each pack and when named outright with --project from the other pack, from gamma and from the repository root - two n-0001s in two threads directories, a seeded run visible only to alpha, run --project beta from gamma landing in 0002-beta/runs (01, 01b, 08). The undeclared one is not a project: from packs/gamma, from inside its blueprint and from the repository root, where says nothing declares this directory, status/threads/thread new/run refuse with exit 2 and write nothing, --project gamma answers no project, a server started in packs/alpha lists alpha and beta only and returns 404 for ?bp=gamma and for gamma's spec path as a key on GET and POST, and the same blueprint dressed as .walkdown/blueprints/0003-gamma/ with no entry is still refused everywhere and by the server (01, 03, 06). Both configs are consulted and the report says which answered, however many keys are restated: beta restated in full with absolute paths, home: and targets: reads `names this project` on the personal row, `names this project too; the personal config above wins` on the repository's, every path row credited to this machine's config, home: set aside with its reason and the ledger unchanged; the same entry copied verbatim (relative) prints seven ignores lines and every row stays the repository's; blank, whitespace, ~name, ., ./, relative values in roots, spec, every record kind and defaults.* are each set aside and named in words and in --json, and none claims gamma or the root (02). A personal entry sharing an id but rooted elsewhere - another checkout, or packs/gamma inside this one - is its own project answering from its own root while the committed alpha keeps answering in packs/alpha, --project alpha picks the one rooted where you stand and the repository's elsewhere, and the server refuses a bare ?bp=alpha two answer to with both keys named; gamma declared personally with absolute paths becomes a project because somebody wrote it down; an ephemeral copy sharing beta's id never overrides it (04). This repository's own where reads matchedIn both with evidence credited to this machine and everything else to the committed file (07). One adjacent defect, outside this rule's claim: the tracked row for a personally-declared blueprint sitting in the tree outside .walkdown/ quotes the root .gitignore as keeping its runs out while git shows them untracked and not ignored - filed as n-0181 on locations.default.in-repo-on-request. Also noticed, not filed: /api/blueprint?bp=beta reports root as the default blueprint's home rather than beta's. Claiming, not accepting.",
+      "threads": []
+    }
+  ]
+}

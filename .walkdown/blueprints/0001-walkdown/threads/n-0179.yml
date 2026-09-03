@@ -1,0 +1,24 @@
+id: n-0179
+kind: note
+author: topher
+via: agent
+created: 2026-09-03T16:37:31.517Z
+anchor:
+  rule: locations.default.in-repo-on-request
+status: open
+body: "Leaving the repository says nothing about what git still holds. Judged
+  2026-09-03T16-30-06Z, evidence runs/evidence/2026-09-03T16-30-06Z/probe-b.txt,
+  step B5: with the whole tree committed under all, init --commit none moved the
+  home out, took the config, the ignore file and the pointer, and printed 'In
+  ~/.walkdown, which git never sees. Nothing was added to this repository' —
+  while git status showed eight paths under .walkdown/ and CLAUDE.md as pending
+  deletions and modifications, all still in the index (git ls-files lists every
+  one). The tightening direction has its sentence for this (init --commit spec
+  lists what is 'Already committed, so still tracked', B4), but stillTracked
+  runs only when commit === 'spec' (bin/commands/init.js), so the none direction
+  reports the standard and not the index. The rule asks the command to report
+  what is tracked now; here what is tracked now is the spec, the runs and the
+  screenshots the person just asked to take out, until they commit the removal.
+  A line like the spec one — these files are still in the index; commit the
+  deletion or git rm --cached them — would make the report true in both
+  directions."

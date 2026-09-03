@@ -1,0 +1,31 @@
+id: n-0181
+kind: note
+author: topher
+via: agent
+created: 2026-09-03T16:40:07.126Z
+anchor:
+  rule: locations.default.in-repo-on-request
+status: open
+body: "The `tracked` row of `walkdown where` is wrong for a blueprint the person
+  declared that sits inside the repository but outside `.walkdown/`. Fixture: a
+  repository whose root .walkdown/config.yml declares alpha and beta, plus
+  packs/gamma/blueprint (a legacy-shaped blueprint with its own runs/ and
+  threads/) declared only in the personal file with absolute roots and spec.
+  From inside packs/gamma the report reads `tracked: the spec and its threads —
+  <repo>/.walkdown/.gitignore keeps out blueprints/*/runs/,
+  blueprints/*/evidence/, blueprints/*/drafts/` while the runs row names
+  packs/gamma/blueprint/runs. That .gitignore does not reach that directory:
+  `git status --porcelain --untracked-files=all -- packs/gamma` lists the run
+  record as `??`, `git check-ignore -v` on it exits 1, and `git ls-files`
+  already holds a file from the same runs/ directory
+  (runs/evidence/2026-09-03T16-30-09Z/declared-not-discovered-05-tracked-row-in\
+  -tree-personal.txt; the same sentence appears in 04e and 04f of
+  ...-04-same-id-elsewhere-and-personal-gamma.txt). The standard is computed in
+  resolveLocations from `homeFor?.dir ?? spec.path`: with no home the spec path
+  falls through to reading the answering .walkdown's .gitignore as if the home
+  sat under it. The row should say what git sees of the directories the report
+  itself named — here everything in them is git's — or say it cannot tell,
+  rather than quoting ignore rules that do not apply. Found while judging
+  locations.answer.declared-not-discovered (run 2026-09-03T16-30-09Z-local-01);
+  it does not touch that rule's verdict, which is about which config answered.
+  Claiming, not accepting."

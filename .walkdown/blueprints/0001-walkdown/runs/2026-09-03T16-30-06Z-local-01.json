@@ -1,0 +1,29 @@
+{
+  "run_id": "2026-09-03T16-30-06Z-local-01",
+  "created": "2026-09-03T16:30:06Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "0bbf385",
+  "note": "One rule, judged headless from the working-tree CLI against fixture repositories built in the judge private scratchpad with WALKDOWN_HOME and WALKDOWN_SKILLS_DIR inside it (one personal home per probe): a fresh project taken through spec, all, none and back by every route, with planted runs, evidence, drafts and a CLI-filed thread checksummed across each move; a bad --commit value; an agent file the project already kept; records git already tracked; an edited, emptied and hand-deleted ignore file; unparseable personal and repository configs; a personal evidence override and a port row present while the standard changed; two repositories both named app; a pack sharing the root .walkdown; a root .gitignore hiding .walkdown/; a directory that is not a repository; --dir from elsewhere and a repeat from a subdirectory; a stray ignore file over a personal home. No server was needed and none was started; 4700/4710/4310 untouched. The real repository was written to only by this record and two threads; fixtures removed afterwards. Evidence under runs/evidence/2026-09-03T16-30-06Z/: fixture-harness.txt, probe-a.txt, probe-b.txt, probe-c.txt, probe-d.txt.",
+  "results": [
+    {
+      "rule": "locations.default.in-repo-on-request",
+      "status": "fail",
+      "statement_hash": "sha256:d66c40335b64",
+      "evidence": [
+        "runs/evidence/2026-09-03T16-30-06Z/fixture-harness.txt",
+        "runs/evidence/2026-09-03T16-30-06Z/probe-a.txt",
+        "runs/evidence/2026-09-03T16-30-06Z/probe-b.txt",
+        "runs/evidence/2026-09-03T16-30-06Z/probe-c.txt",
+        "runs/evidence/2026-09-03T16-30-06Z/probe-d.txt"
+      ],
+      "reasoning": "Four of the five THENs held on every tree I could build. init --commit spec put the home at .walkdown/blueprints/0001-<name>/ with the standard layout, wrote a committed config naming it by relative paths and a CLAUDE.md pointer naming the blueprint by a relative path (probe-a A1, probe-d D5 with --dir), and beside it an ignore file whose three positive rules git check-ignore attributed to runs, evidence and drafts alone while the ignore file, the config, the spec and the thread stayed committable (A2). --commit all left no .gitignore at all and where read the standard off the tree as all; deleting the file by hand read as all too and a flagless init kept it (probe-b B7). Every change of mind changed the tree: spec<->all wrote or removed the one file, none<->spec and none<->all moved the home whole in both directions with the md5 of every planted run, screenshot, draft and CLI-filed thread identical after three moves (A7, A8, A10, probe-c C2), threads and lint still reading them; repeats were no-ops; a bad standard exited 2 with the three choices; unparseable personal and repository configs were refused before anything moved (C1); an evidence override outside the repository and a port row survived both directions (C2, C3); two repositories named app got separate homes and ids and each came back with its own run (probe-d D1); a pack sharing the root .walkdown kept the directory, the config and the ignore file when the root left (D2, the returning home renumbered 0003, which the rule permits). The fifth THEN — the command reports what is tracked now, in words — I broke three ways, all in the report and never in the tree. Leaving a repository whose walkdown files were committed printed that git never sees the home and nothing was added while git still held eight paths as pending deletions, the still-tracked sentence existing only for the spec direction (probe-b B5; n-0179). A root .gitignore holding .walkdown/ got Committed: the spec and its threads from init and where alike while git ignored every file under it, and Committed in full a step later (probe-d D3; n-0180). An emptied ignore file was flagged as kept-differs yet the summary still said it keeps runs, evidence and drafts out, where alone answering keeps out nothing (B6b; also n-0180). Each is a narrow tree and the direction the statement worries about most — screenshots quietly added — never happened; but the rule asks in its own words for a true report of what is tracked, and on those trees the report is false, so the verdict is fail on that THEN with the other four earned.",
+      "threads": [
+        "n-0179",
+        "n-0180"
+      ]
+    }
+  ]
+}

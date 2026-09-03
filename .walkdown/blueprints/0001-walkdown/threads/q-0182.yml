@@ -1,0 +1,22 @@
+id: q-0182
+kind: question
+author: topher
+via: agent
+created: 2026-09-03T16:46:46.113Z
+anchor:
+  rule: locations.answer.one-walkdown-answers
+status: open
+body: "Seen while judging 2026-09-03 (run 2026-09-03T16-30-11Z-local-01, PASS -
+  not the reason for the verdict). project add --ephemeral now refuses a pack's
+  declared original (q-0176), but the same shape written BY HAND into
+  ~/.walkdown/config.yml - a rootless entry with ephemeral: true whose spec is a
+  pack's live blueprint - is read, listed and served: a root server's pin landed
+  in packs/legacy/blueprint/threads, which the pack then lists as its own, with
+  no where row and no lint finding. Second door of the same shape: project add
+  --ephemeral accepts an UNDECLARED legacy-shaped blueprint under a bare
+  .walkdown, and the entry's runs and threads follow the spec into that pack's
+  tree - allowed by the declared test, but not a copy. The q-0176 THEN reserves
+  'not read either' for committed entries. Should a personal ephemeral entry
+  whose spec any .walkdown declares (or that stands under one) be set aside the
+  same way when read, so the hand-edit cannot reopen q-0176? Evidence:
+  runs/evidence/2026-09-03T16-30-11Z/ephemeral-probe.txt"
