@@ -4,7 +4,7 @@
  * neither can stand in for the other (see ownership.evidence.same-surface).
  */
 import { join } from 'node:path';
-import { CHECKSPACE, HOME, prepare } from './checks/checkspace.mjs';
+import { CHECKSPACE, EXAMPLE_HOME, HOME, prepare } from './checks/checkspace.mjs';
 import { readFileSync } from 'node:fs';
 import { resolveLocations } from './lib/locations.js';
 import { defineConfig } from '@playwright/test';
@@ -101,7 +101,7 @@ export const DECLARED = parse(readFileSync(new URL(`./${HOME}/blueprint/walkdown
 
 /* The same, for the example project — read from its blueprint, never hardcoded. */
 export const EXAMPLE_DECLARED = parse(
-  readFileSync(new URL('./example/blueprint/walkdown.yml', import.meta.url), 'utf8'),
+  readFileSync(new URL(`./example/${EXAMPLE_HOME}/blueprint/walkdown.yml`, import.meta.url), 'utf8'),
 )?.runner?.targets?.local?.base_url ?? EXAMPLE_ORIGIN;
 
 /*

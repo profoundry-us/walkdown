@@ -29,7 +29,7 @@ checks:
   # integration tests run against, so its blueprint drifting is a real failure.
   - id: example-blueprint-lint
     name: The example blueprint lints
-    run: node bin/walkdown.js lint --project example
+    run: cd example && node ../bin/walkdown.js lint
     fast: true
 
   # The panel and the embed ship self-contained down two delivery paths, so

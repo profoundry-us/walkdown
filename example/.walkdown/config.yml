@@ -1,0 +1,20 @@
+# This project's blueprints, committed.
+#
+# The shared half: which blueprints exist and where they sit relative to this
+# directory, so a clone is a working project with nothing else to run. The
+# personal half lives at ~/.walkdown/config.yml and wins wherever the two
+# speak about the same thing. Identity is only ever read from there.
+#
+# This is the example that ships with walkdown, laid out exactly as
+# `walkdown init --commit spec` lays a project out. It is a project of its own:
+# stand in example/ and every walkdown command answers for it, and the
+# repository above never sees it (locations.answer.one-walkdown-answers).
+projects:
+  - id: example
+    roots: [.]
+    spec: .walkdown/blueprints/0001-example/blueprint
+    threads: .walkdown/blueprints/0001-example/threads
+    runs: .walkdown/blueprints/0001-example/runs
+    evidence: .walkdown/blueprints/0001-example/evidence
+    drafts: .walkdown/blueprints/0001-example/drafts
+    home: 0001-example

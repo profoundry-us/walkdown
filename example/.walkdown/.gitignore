@@ -1,0 +1,5 @@
+# The spec, its threads and its runs are committed: the runs are the demo's
+# ledger, which is what the panel shows. Evidence and drafts are not - this
+# is `walkdown init --commit spec` with the `blueprints/*/runs/` line taken out.
+blueprints/*/evidence/
+blueprints/*/drafts/

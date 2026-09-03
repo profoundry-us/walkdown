@@ -156,8 +156,11 @@ test('an undesigned screen without a design-request thread warns; with one it pa
 });
 
 test('the in-repo example blueprint lints clean (without runner)', () => {
-  const bp = new URL('../example/blueprint', import.meta.url).pathname;
-  const { findings, exitCode } = lint(loadBlueprint(bp), { checks: false });
+  // The example is a project of its own, declared by its own .walkdown - so it
+  // is read as if standing in example/, where that .walkdown answers.
+  const example = new URL('../example', import.meta.url).pathname;
+  const bp = join(example, '.walkdown', 'blueprints', '0001-example', 'blueprint');
+  const { findings, exitCode } = lint(loadBlueprint(bp, { cwd: example }), { checks: false });
   /*
    * One warning stands on purpose. waitlist-confirm and waitlist-already are
    * the same page told apart by a query, and a query is not identity

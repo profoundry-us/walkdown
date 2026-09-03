@@ -156,7 +156,13 @@ function forget(args) {
 export function list(args) {
   const { values } = parseArgs({ args, options: { stale: { type: 'boolean', default: false } } });
   const { config, shadowed } = readUserConfig();
-  const all = config.projects ?? [];
+  /*
+   * An entry with no spec is not a blueprint: it is a personal override of a
+   * repository's entry - evidence on this disk, a port - and it lists as that
+   * repository's project wherever that repository answers. Standing anywhere
+   * else there is nothing to list under it.
+   */
+  const all = (config.projects ?? []).filter((p) => p?.spec);
   const live = all.filter((p) => !p?.ephemeral);
   const scratch = all.filter((p) => p?.ephemeral);
   if (!all.length) {

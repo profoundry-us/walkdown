@@ -230,7 +230,7 @@ evidence, and git provenance (`<sha>-dirty` on an unclean tree). `WALKDOWN_TARGE
 identity otherwise. The reporter never fails a test run.
 
 Run `npm test` for the suite. The [example](example/) is both the schema demo and the
-integration fixture: `node bin/walkdown.js lint --dir example/blueprint`.
+integration fixture: `cd example && node ../bin/walkdown.js lint`.
 
 ## Status
 

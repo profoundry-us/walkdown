@@ -35,6 +35,8 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export const CHECKSPACE = join(root, 'tmp', 'checkspace');
 /** walkdown's own home, relative to either root. */
 export const HOME = join('.walkdown', 'blueprints', '0001-walkdown');
+/** The example's home, relative to example/. */
+export const EXAMPLE_HOME = join('.walkdown', 'blueprints', '0001-example');
 
 /**
  * @param {{ exampleDeclared: string, exampleOrigin: string }} addresses
@@ -77,10 +79,18 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
    * visible with a choice to make — which blueprint a page belongs to, and what
    * the panel does when you pick one that is about somewhere else.
    */
-  cpSync(join(root, 'example', 'blueprint'), join(CHECKSPACE, 'example', 'blueprint'), {
-    recursive: true,
-  });
-  rmSync(join(CHECKSPACE, 'example', 'blueprint', 'drafts'), { recursive: true, force: true });
+  /*
+   * Copied FLAT - spec with runs and threads inside it, at example/blueprint -
+   * rather than as the pack-with-its-own-.walkdown it really is. The
+   * checkspace's one config declares both projects so one server offers both,
+   * and a pack's .walkdown would hide it from that server by design. The flat
+   * shape is the legacy one the resolver still answers for (rule 3), which
+   * this copy also exercises.
+   */
+  const exHome = join(root, 'example', EXAMPLE_HOME);
+  cpSync(join(exHome, 'blueprint'), join(CHECKSPACE, 'example', 'blueprint'), { recursive: true });
+  for (const part of ['runs', 'threads'])
+    cpSync(join(exHome, part), join(CHECKSPACE, 'example', 'blueprint', part), { recursive: true });
   /*
    * And point the copy's declared address at the port this run serves the
    * example app on. A pin filed on a page that names no project is routed to
