@@ -66,3 +66,36 @@ test('the old single-name form still resolves @rule:status.attribution.username-
   assert.equal(MSG.displayName('Topher Fangio', names), 'Topher Fangio');
   assert.equal(MSG.displayName('topher', names), 'Topher Fangio');
 });
+
+test('a username that is not a string counts as nobody and names its file @rule:panel.identity.default-actor', async () => {
+  /*
+   * A list or a number under `identity.username:` used to be a TypeError out
+   * of defaultActor - which took the panel down at GET /api/blueprint with a
+   * stack trace and no word about which file to fix (n-0148). Read as nothing
+   * said: not declared, the guess falls back to git or the OS, and `problem`
+   * names the file and the shape so the refusal can point at the line.
+   */
+  const { defaultActor } = await import('../lib/identity.js');
+  const { mkdtempSync, writeFileSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  const home = mkdtempSync(join(tmpdir(), 'walkdown-identity-'));
+  writeFileSync(join(home, 'config.yml'), 'identity:\n  username: [agent]\n  name: 7\n');
+  const was = process.env.WALKDOWN_HOME;
+  process.env.WALKDOWN_HOME = home;
+  try {
+    const who = defaultActor(process.cwd());
+    assert.equal(who.declared, false);
+    assert.notEqual(who.source, 'config');
+    assert.ok(who.username, 'the guess is still a name, so the report still boots');
+    assert.match(who.problem, /identity\.username.*config\.yml.*a list/);
+    assert.notEqual(who.name, 7, 'a number is not a display name either');
+    writeFileSync(join(home, 'config.yml'), 'identity:\n  username: " person "\n');
+    const fine = defaultActor(process.cwd());
+    assert.equal(fine.problem, null);
+    assert.equal(fine.username, 'person');
+    assert.equal(fine.declared, true);
+  } finally {
+    process.env.WALKDOWN_HOME = was;
+  }
+});

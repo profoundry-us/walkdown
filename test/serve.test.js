@@ -893,3 +893,40 @@ test('OPTIONS preflight answers CORS and Private Network Access', async () => {
   assert.equal(res.headers.get('access-control-allow-origin'), 'https://staging.example.com');
   assert.equal(res.headers.get('access-control-allow-private-network'), 'true');
 });
+
+test('via rides through the API on a note, a reply and a move @rule:status.attribution.username-is-the-record', async () => {
+  /*
+   * The CLI has always carried provenance (--as-agent); the HTTP door dropped
+   * it, so an agent driving the panel or the embed filed under a person's
+   * bare name, and the embed showed the opening note with no `via` while the
+   * reply under it said `via agent` (n-0152).
+   */
+  const post = (path, body) =>
+    fetch(`${base}${path}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    }).then((r) => r.json());
+  const { id } = await post('/api/threads', {
+    kind: 'note',
+    body: 'Typed by a machine.',
+    via: 'agent',
+    anchor: { element: 'home.cta' },
+    url: 'http://localhost:3000/home',
+  });
+  const file = join(bp, 'threads', `${id}.yml`);
+  assert.equal(parse(readFileSync(file, 'utf8')).via, 'agent');
+  await post(`/api/threads/${id}/replies`, { body: 'Also typed by a machine.', via: 'agent' });
+  await post(`/api/threads/${id}/replies`, { body: 'Typed by the person.', via: ['agent'] });
+  const replies = parse(readFileSync(file, 'utf8')).replies;
+  assert.equal(replies[0].via, 'agent');
+  assert.equal(replies[1].via, undefined, 'anything but a plain string is no provenance');
+  await post(`/api/threads/${id}/status`, { status: 'addressed', reason: 'done', via: 'agent' });
+  const t = parse(readFileSync(file, 'utf8'));
+  assert.equal(t.status, 'addressed');
+  // The reason is recorded as a reply, so the move's provenance sits there.
+  assert.equal(t.replies.at(-1).via, 'agent');
+  // What the embed and the panel read back carries it too.
+  const listed = (await (await fetch(`${base}/api/blueprint`)).json()).threads.find((x) => x.id === id);
+  assert.equal(listed.via, 'agent');
+});

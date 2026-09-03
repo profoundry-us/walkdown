@@ -33,6 +33,7 @@ import {
   configPath,
   expand,
   readUserConfig,
+  rememberProject,
   walkdownHome,
   walkdownRoot,
 } from '../../lib/locations.js';
@@ -83,7 +84,26 @@ function add(args) {
    * `.walkdown` that answers where you are standing, so a declaration a team
    * shares travels with the checkout.
    */
+  /*
+   * A blueprint whose own checkout declares it is already a project there,
+   * and listing it again from outside minted a second entry and an empty
+   * second home for the same spec (n-0170, G2). Say so and stop; standing in
+   * that checkout is how it is reached.
+   */
+  const own = walkdownRoot(resolve(spec, '..'));
+  if (own && !values.ephemeral) {
+    const theirs = load(join(own, 'config.yml')).get('projects');
+    const there = (theirs?.items ?? []).find(
+      (it) => String(it.get?.('spec') ?? '') && expand(String(it.get('spec')), resolve(own, '..')) === spec,
+    );
+    if (there && own !== walkdownRoot()) {
+      console.log(`  ${dim('· already listed')} ${spec}  ${dim(`as \`${there.get('id')}\` in ${join(own, 'config.yml')}`)}`);
+      console.log(dim('            That checkout declares it; stand in it to use it.'));
+      return end(0);
+    }
+  }
   const wd = values.ephemeral ? walkdownHome() : (walkdownRoot() ?? walkdownHome());
+  const inRepo = !values.ephemeral && wd !== walkdownHome();
   const target = join(wd, 'config.yml');
   const doc = load(target);
   const projects = doc.get('projects');
@@ -102,28 +122,44 @@ function add(args) {
   for (let n = 2; taken.has(id); n++) id = `${name}-${n}`;
   const claim = claimHome({ name: id, walkdown: wd });
   /*
-   * Where its records already are. A blueprint that predates homes keeps its
-   * runs and threads inside the spec directory; one built as a home keeps
-   * them beside it. Whichever it is, the entry says so outright, so nothing
-   * downstream has to guess which shape it is looking at.
+   * Where its records go: into the home just claimed, beside nothing - the
+   * spec stands where it already stands. A blueprint that predates homes
+   * and keeps runs or threads inside itself keeps them there, and the entry
+   * says so outright rather than leaving anything downstream to guess.
+   *
+   * Written by the same hand as init's entry, which is what keeps a
+   * committed entry relative to its repository and a personal one spelled
+   * with `~`. This used to write absolute paths into the committed file and
+   * send runs and threads to the blueprint's parent, a directory the home it
+   * named never read (n-0169).
    */
-  const beside = (kind) =>
-    existsSync(join(spec, kind)) ? join(spec, kind) : join(resolve(spec, '..'), kind);
-  projects.add(
-    doc.createNode({
-      id,
-      spec,
-      runs: beside('runs'),
-      threads: beside('threads'),
-      home: claim.home,
-      ...(values.ephemeral
-        ? { ephemeral: true, declared: new Date().toISOString(), why: values.why ?? '' }
-        : { roots: [resolve(spec, '..')] }),
-    }),
+  const records = Object.fromEntries(
+    ['runs', 'threads', 'evidence', 'drafts']
+      .filter((kind) => existsSync(join(spec, kind)))
+      .map((kind) => [kind, join(spec, kind)]),
   );
-  writeFileSync(target, String(doc));
-  console.log(`  ${green('+ listed')}   ${spec}  ${dim(`as \`${id}\``)}`);
-  console.log(`  ${dim(`            in ${target}${values.ephemeral ? ' · ephemeral' : ''}`)}`);
+  let written;
+  try {
+    written = rememberProject({
+      id,
+      root: values.ephemeral ? null : resolve(spec, '..'),
+      base: inRepo ? resolve(wd, '..') : null,
+      spec,
+      homeDir: claim.dir,
+      home: claim.home,
+      inRepo,
+      records,
+      ...(values.ephemeral
+        ? { extra: { ephemeral: true, declared: new Date().toISOString(), why: values.why ?? '' } }
+        : {}),
+    });
+  } catch (e) {
+    console.error(red(e.message));
+    console.error(dim('  `walkdown project add <path> --ephemeral` lists it in ~/.walkdown instead.'));
+    return end(2);
+  }
+  console.log(`  ${green('+ listed')}   ${spec}  ${dim(`as \`${written.id}\``)}`);
+  console.log(`  ${dim(`            in ${written.path}${values.ephemeral ? ' · ephemeral' : ''}`)}`);
   return end(0);
 }
 

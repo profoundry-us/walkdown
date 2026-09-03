@@ -49,6 +49,8 @@ collision this module has had (n-0124 through n-0160).
 **Nothing committed — the default.** The home is `~/.walkdown/blueprints/NNNN-name/`. The
 repository gets *nothing*: no `.walkdown/`, no ignore rule, not even a pointer. Trying
 walkdown alters no tree, and abandoning it is deleting one directory in your own home.
+The entry that named it stays in your config and `walkdown projects` shows the home gone;
+its number is never handed to the next same-named repository (n-0170).
 
 ```
 walkdown init
@@ -95,10 +97,13 @@ runs, evidence, drafts, one directory — claims a fresh number in the receiving
 `blueprints/`, and rewrites the declarations to match: the repository's config gains or
 loses the entry, the personal one loses or gains it. Leaving the repository also takes the
 pointer back out of `CLAUDE.md` (only the fenced block, or the file if the block was all
-there was).
+there was) and the skills back out of `.claude/skills/` — walkdown's own unedited copies;
+one you edited is kept and named (n-0166).
 
-walkdown never touches the git index. A file already committed stays tracked until you
-`git rm --cached` it, and the command says so.
+walkdown never touches the git index. An ignore file rules only what git has not met, so a
+run committed under `all` stays tracked after `--commit spec` writes the file. The command
+asks git, every time, and says what is still tracked and that `git rm --cached` is yours
+to run (n-0164).
 
 ## The two `.walkdown` directories, and which one answers
 
@@ -130,12 +135,20 @@ beside those marks, so restating every key personally does not erase the reposit
 (n-0151).
 
 A personal entry overrides a repository's only when it is **about that checkout**: it
-shares the id, and either has one of its `roots` inside the repository or has no blueprint
-of its own (the pure-override shape — `id` and `evidence:` and nothing else). A personal
-entry with the same id rooted somewhere else is a different project that happens to share
-the name; here it is shadowed by the repository's and `walkdown projects` says so, and it
-is reachable from its own checkout exactly as before. An entry with no roots but a `spec`
-of its own — an ephemeral copy — is never an override of anything (n-0160).
+shares the id, and either has one of its `roots` equal to one of the repository row's
+roots or has no blueprint of its own (the pure-override shape — `id` and `evidence:` and
+nothing else). A personal entry with the same id rooted somewhere else — another checkout,
+or a directory nested inside this one that happens to share the name — is a different
+project: it answers from its own root, never merges into the repository's, and where the
+repository's row covers the same ground `walkdown projects` says it is shadowed (n-0160,
+n-0170). An entry with no roots but a `spec` of its own — an ephemeral copy — is never an
+override of anything.
+
+A relative path in the personal file means nothing: that file sits in `~/.walkdown` and is
+about every project on the disk, so there is no base it could honestly be resolved
+against. Such keys are set aside and `walkdown where` says so on the personal row —
+`ignores \`roots: gamma\` in entry \`gamma\``. A committed entry copied verbatim into the
+personal file is therefore the override of nothing it did not spell out in full (n-0167).
 
 Identity is never taken from the repository. A committed file naming a person would be
 wrong on every machine but one.
@@ -148,6 +161,13 @@ it makes, `walkdown project add <path>` writes one for a blueprint that arrived 
 a copy, somebody else's checkout — and `--ephemeral` marks a throwaway copy, reachable by
 name, never by standing somewhere, and only ever in your own config. `walkdown project
 forget <id>` takes an entry off the list and touches no records.
+
+`project add` writes the entry the way `init` does: inside a repository it is relative to
+the repository and every record kind points into the home it claims (a legacy blueprint
+that keeps runs or threads inside itself has those keys say so); a blueprint outside the
+repository is refused for a committed entry rather than written as an absolute path, and
+`--ephemeral` lists it personally instead. A blueprint whose own checkout already declares
+it is not listed twice — stand in that checkout to use it (n-0169, n-0170).
 
 A blueprint nobody listed is not a project. `walkdown where` says nothing declares this
 directory rather than naming a path, and every command refuses the same way. That is not

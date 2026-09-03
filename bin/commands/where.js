@@ -85,6 +85,14 @@ export function run(args) {
     : dim('not present — every default applies');
   console.log(`  ${'config'.padEnd(9)} ${loc.config.path}`);
   console.log(`  ${''.padEnd(9)} ${cfg}`);
+  // A relative path has no base in a file that sits in ~/.walkdown and is
+  // about every project on the disk; it was set aside, and this says so.
+  for (const ig of loc.config.ignored ?? [])
+    console.log(
+      `  ${''.padEnd(9)} ${yellow(
+        `ignores \`${ig.key}: ${ig.value}\`${ig.id ? ` in entry \`${ig.id}\`` : ''} — a relative path means nothing in this file; write it in full`,
+      )}`,
+    );
   if (loc.config.repo) {
     console.log(`  ${''.padEnd(9)} ${loc.config.repo.path}`);
     const shared = "this repository's, shared";

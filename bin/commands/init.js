@@ -1,5 +1,6 @@
+import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { basename, join, resolve } from 'node:path';
+import { basename, join, relative, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { defaultActor } from '../../lib/identity.js';
 import {
@@ -43,7 +44,7 @@ export async function run(args) {
     console.error('  all   the same, and the runs and evidence are committed too');
     return process.exit(2);
   }
-  const { scaffold } = await import('../../lib/init.js');
+  const { removeSkills, scaffold } = await import('../../lib/init.js');
   const root = resolve(values.dir ?? process.cwd());
 
   /*
@@ -111,10 +112,23 @@ export async function run(args) {
         inRepo: commit !== 'none',
       });
   const ignore = commit === 'none' || !claim.dir ? null : setIgnore(walkdown, commit, { force: values.force });
-  if (commit === 'none' && moved)
+  /*
+   * What git STILL tracks under the standard just chosen. An ignore file is
+   * a rule for files git has not met: a run committed under `all` stays in
+   * the index after `--commit spec` writes the file, and this command said
+   * "keeps runs, evidence and drafts out" over a tree where they were in -
+   * the sentence about the index was printed only when a home had moved,
+   * which the spec<->all flip never does (n-0164). So ask git, every time.
+   */
+  const tracked = commit === 'spec' && claim.dir ? stillTracked(root, claim.dir) : [];
+  if (commit === 'none' && moved) {
     for (const rel of ['CLAUDE.md', 'AGENTS.md', 'GEMINI.md', '.github/copilot-instructions.md', 'CONVENTIONS.md'])
       if (['removed', 'deleted'].includes(removePointer(join(root, rel))))
         results.push({ path: rel, action: 'pointer-removed' });
+    // The skills leave with the spec, or the "repository gets nothing" line lies.
+    for (const r of removeSkills(join(root, '.claude', 'skills')))
+      results.push({ path: relative(root, r.path), action: `skill-${r.action}` });
+  }
   /*
    * And who is sitting here, if nobody has said. Every record is written
    * under the config's identity now and nothing else can name a person, so an
@@ -131,6 +145,8 @@ export async function run(args) {
     'pointer-appended': green('+ appended'),
     'pointer-updated': green('~ pointer updated'),
     'pointer-removed': green('- pointer removed'),
+    'skill-removed': green('- removed'),
+    'skill-kept-edited': yellow('! kept (edited here — it is yours now, and this repository keeps it)'),
     'pointer-undecided': yellow('? several agent files — `walkdown pointer --into <file>`'),
     'skills-in-repo': dim('· skills'),
     'skills-personal': dim('· skills'),
@@ -195,11 +211,13 @@ export async function run(args) {
         '\n  `walkdown init --commit spec` writes the ignore file back.',
     };
     console.log(dim(say[commit]));
-    if (moved && commit !== 'all')
+    if (tracked.length)
       console.log(
         dim(
-          '  Anything already committed stays tracked until you `git rm --cached` it —' +
-            ' walkdown never touches the index.',
+          `  Already committed, so still tracked: ${tracked.length} file(s) under runs, evidence` +
+            ' or drafts. The ignore file rules only what git has not met; they stay in history' +
+            '\n  until you `git rm --cached` them — walkdown never touches the index.' +
+            `\n    ${tracked.slice(0, 3).join('\n    ')}${tracked.length > 3 ? `\n    … ${tracked.length - 3} more` : ''}`,
         ),
       );
   }
@@ -227,4 +245,24 @@ export async function run(args) {
     console.log(dim('`walkdown where` shows every path this project uses.'));
   }
   if (!existsSync(specDir)) console.error(red(`  the spec did not land at ${specDir}`));
+}
+
+/**
+ * The record files git already tracks under a home, asked of git itself -
+ * the only thing that knows. Empty outside a repository.
+ * @param {string} root
+ * @param {string} home
+ * @returns {string[]}
+ */
+function stillTracked(root, home) {
+  const under = relative(root, home);
+  const dirs = ['runs', 'evidence', 'drafts'].map((k) => join(under, k));
+  try {
+    return execFileSync('git', ['ls-files', '-z', '--', ...dirs], { cwd: root, stdio: ['ignore', 'pipe', 'ignore'] })
+      .toString()
+      .split('\0')
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
 }

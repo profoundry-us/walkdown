@@ -543,6 +543,7 @@ import { icon } from './icons.js';
             id: data.id,
             status: 'open',
             author: data.thread?.author,
+            via: data.thread?.via ?? null,
             created: data.thread?.created,
           });
           renderPins();
@@ -760,6 +761,10 @@ import { icon } from './icons.js';
               rule: t.anchor?.rule ?? null,
               screen: t.anchor?.screen ?? null,
               author: t.author,
+              // How the opening message arrived rides with its author: a note an
+              // agent typed under a person's name must not read as the person's
+              // own words while the reply under it says `via agent` (n-0152).
+              via: t.via ?? null,
               created: t.created,
               body: t.body,
               replies: t.replies ?? [],
