@@ -118,6 +118,25 @@ run committed under `all` stays tracked after `--commit spec` writes the file. T
 asks git, every time, and says what is still tracked and that `git rm --cached` is yours
 to run (n-0164).
 
+**What is tracked is git's answer, never the ignore file's.** The file walkdown writes is
+a promise; git holds the fact, and the two part company in ways no reading of the file can
+see: a root `.gitignore` that hides `.walkdown/` entirely, a rule that does not reach a
+blueprint standing elsewhere in the tree, an ignore file somebody emptied, a home that
+left the repository with its files still in the index. So `walkdown where` and `init`
+ask git about the spec and each record kind at the paths the resolver actually answered
+with — tracked, ignored by which file and line, or neither — and print that as the
+`tracked` row, beside what the tree promised. Leaving the repository says how many files
+git now holds as deletions rather than "nothing was added" (n-0179, n-0180, n-0181).
+
+Where the promise and the fact disagree, **`walkdown lint` errors**, because a project
+that is not set up the way it says is the one thing this tool exists to make loud: a rule
+hiding the spec or its threads from git (a clone gets no blueprint); a record kind kept
+out by some file other than `.walkdown/.gitignore`, or kept out at all when there is no
+such file; an ignore file present that keeps nothing out; a rule in it that git does not
+apply to this home's records. Records committed before the rule was written are a
+warning, with the `git rm --cached` that clears it — a known, transitional state rather
+than a misconfiguration.
+
 ## The two `.walkdown` directories, and which one answers
 
 **`~/.walkdown/`** — personal. Per machine, per person, never synced. `config.yml` with

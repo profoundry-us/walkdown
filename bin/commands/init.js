@@ -1,4 +1,3 @@
-import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { basename, join, relative, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
@@ -14,7 +13,7 @@ import {
   resolveLocations,
   walkdownHome,
 } from '../../lib/locations.js';
-import { relocateHome, removePointer, setIgnore, STANDARDS } from '../../lib/standard.js';
+import { gitView, relocateHome, removePointer, setIgnore, STANDARDS, tracking } from '../../lib/standard.js';
 import { dim, green, red, yellow } from '../../lib/report/tty.js';
 
 /*
@@ -121,6 +120,23 @@ export async function run(args) {
       return process.exit(2);
     }
   }
+  /*
+   * What git tracked under what just left - the home, and the declaration
+   * files taken away with it. "Nothing was added to this repository" was
+   * printed over eight files git now held as pending deletions (n-0179).
+   * The index still lists a file whose working copy is gone, so git can be
+   * asked after the move, about the old paths.
+   */
+  const leaving =
+    moved && commit === 'none'
+      ? [
+          ...new Set(
+            Object.values(
+              gitView({ root, paths: { home: moved.from, ...Object.fromEntries(moved.gone.map((g, i) => [`gone${i}`, g])) } }).kinds,
+            ).flatMap((v) => v.tracked),
+          ),
+        ]
+      : [];
 
   /*
    * The home, decided FIRST and built into afterwards. This used to take the
@@ -152,15 +168,6 @@ export async function run(args) {
         inRepo: commit !== 'none',
       });
   const ignore = commit === 'none' || !claim.dir ? null : setIgnore(walkdown, commit, { force: values.force });
-  /*
-   * What git STILL tracks under the standard just chosen. An ignore file is
-   * a rule for files git has not met: a run committed under `all` stays in
-   * the index after `--commit spec` writes the file, and this command said
-   * "keeps runs, evidence and drafts out" over a tree where they were in -
-   * the sentence about the index was printed only when a home had moved,
-   * which the spec<->all flip never does (n-0164). So ask git, every time.
-   */
-  const tracked = commit === 'spec' && claim.dir ? stillTracked(root, claim.dir) : [];
   if (commit === 'none' && moved) {
     for (const rel of ['CLAUDE.md', 'AGENTS.md', 'GEMINI.md', '.github/copilot-instructions.md', 'CONVENTIONS.md'])
       if (['removed', 'deleted'].includes(removePointer(join(root, rel))))
@@ -242,22 +249,34 @@ export async function run(args) {
         '\n  Prefer it committed? `walkdown init --commit spec` moves the home into the repository.',
       spec:
         '  Committed: the spec and its threads, so a rule change arrives as a diff somebody' +
-        ' approves and a clone is a working project. .walkdown/.gitignore keeps runs,' +
-        '\n  evidence and drafts out — delete it to commit everything, or `walkdown init' +
-        ' --commit none` to move the home back out of the repository.',
+        ' approves and a clone is a working project. .walkdown/.gitignore is the standard —' +
+        '\n  delete it to commit everything, or `walkdown init --commit none` moves the home back out.',
       all:
-        '  Committed in full, runs and evidence included — there is no .gitignore under' +
-        ' .walkdown/. Note that git keeps every version of every screenshot forever.' +
+        '  Committed in full, says the tree: no .gitignore under .walkdown/, so everything there is' +
+        " git's — and git keeps every version of every screenshot forever." +
         '\n  `walkdown init --commit spec` writes the ignore file back.',
     };
     console.log(dim(say[commit]));
-    if (tracked.length)
+    /*
+     * What git tracks NOW, asked of git rather than asserted from the file
+     * just written. An ignore file rules only what git has not met: a run
+     * committed under `all` stays in the index after `--commit spec` writes
+     * the file, and this command said "keeps runs, evidence and drafts out"
+     * over a tree where they were in (n-0164); a root `.gitignore` hiding
+     * `.walkdown/` made "Committed" a lie (n-0180). So the sentence is git's,
+     * and where git and the tree disagree it is said here in colour and lint
+     * refuses it.
+     */
+    const after = resolveLocations({ cwd: root, project: entry.id ?? listed?.id });
+    const t = tracking(after);
+    console.log(`  tracked: ${t.words}  ${dim(t.why)}`);
+    for (const f of t.findings)
+      console.log(`  ${f.level === 'error' ? red(`✗ ${f.message}`) : yellow(`! ${f.message}`)}`);
+    if (leaving.length)
       console.log(
-        dim(
-          `  Already committed, so still tracked: ${tracked.length} file(s) under runs, evidence` +
-            ' or drafts. The ignore file rules only what git has not met; they stay in history' +
-            '\n  until you `git rm --cached` them — walkdown never touches the index.' +
-            `\n    ${tracked.slice(0, 3).join('\n    ')}${tracked.length > 3 ? `\n    … ${tracked.length - 3} more` : ''}`,
+        yellow(
+          `  ${leaving.length} file(s) git tracked under the .walkdown that left are now deletions to commit — git keeps` +
+            ` their history, and walkdown never touches the index.\n    ${leaving.slice(0, 3).join('\n    ')}${leaving.length > 3 ? `\n    … ${leaving.length - 3} more` : ''}`,
         ),
       );
   }
@@ -285,24 +304,4 @@ export async function run(args) {
     console.log(dim('`walkdown where` shows every path this project uses.'));
   }
   if (!existsSync(specDir)) console.error(red(`  the spec did not land at ${specDir}`));
-}
-
-/**
- * The record files git already tracks under a home, asked of git itself -
- * the only thing that knows. Empty outside a repository.
- * @param {string} root
- * @param {string} home
- * @returns {string[]}
- */
-function stillTracked(root, home) {
-  const under = relative(root, home);
-  const dirs = ['runs', 'evidence', 'drafts'].map((k) => join(under, k));
-  try {
-    return execFileSync('git', ['ls-files', '-z', '--', ...dirs], { cwd: root, stdio: ['ignore', 'pipe', 'ignore'] })
-      .toString()
-      .split('\0')
-      .filter(Boolean);
-  } catch {
-    return [];
-  }
 }

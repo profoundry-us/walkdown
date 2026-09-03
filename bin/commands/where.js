@@ -1,6 +1,7 @@
 import { parseArgs } from 'node:util';
 import { configPath, foldLegacyHomes, KINDS, resolveLocations } from '../../lib/locations.js';
 import { dim, green, red, yellow } from '../../lib/report/tty.js';
+import { tracking } from '../../lib/standard.js';
 import { end } from './context.js';
 
 /*
@@ -44,7 +45,8 @@ export function run(args) {
   if (values.fix && !fix()) return end(2);
   const loc = resolveLocations({ project: values.project });
   if (values.json) {
-    console.log(JSON.stringify(loc, null, 2));
+    const { findings, words, why } = tracking(loc);
+    console.log(JSON.stringify({ ...loc, tracking: { words, why, findings } }, null, 2));
     return end(0);
   }
 
@@ -136,19 +138,20 @@ export function run(args) {
   for (const kind of KINDS) row(kind, loc[kind]);
   row('code', loc.code);
   /*
-   * And what git sees of it, read off the tree rather than remembered: a
-   * home in `~/.walkdown` is nobody's diff, a `.gitignore` beside a home in
-   * the repository says what stays out, and no such file means all of it is
-   * committed (n-0158).
+   * And what git sees of it, asked of git rather than of the ignore file
+   * walkdown wrote: a home in `~/.walkdown` is nobody's diff, a `.gitignore`
+   * beside a home in the repository says what stays out, and no such file
+   * means all of it is committed (n-0158) - but a root `.gitignore` hiding
+   * `.walkdown/`, or a rule that does not reach a home standing elsewhere,
+   * makes the file a liar, and git is the one that knows (n-0180, n-0181).
+   * Where the two disagree it is said here in colour and refused by lint.
    */
-  console.log(
-    `  ${'tracked'.padEnd(9)} ${
-      loc.standard
-        ? { none: 'nothing', spec: 'the spec and its threads', all: 'everything' }[loc.standard.name]
-        : dim('—')
-    }`,
-  );
-  console.log(`  ${''.padEnd(9)} ${dim(loc.standard?.why ?? 'not a project')}`);
+  const t = tracking(loc);
+  console.log(`  ${'tracked'.padEnd(9)} ${t.words}`);
+  console.log(`  ${''.padEnd(9)} ${dim(t.why)}`);
+  if (loc.standard) console.log(`  ${''.padEnd(9)} ${dim(`the tree says: ${loc.standard.why}`)}`);
+  for (const f of t.findings)
+    console.log(`  ${''.padEnd(9)} ${f.level === 'error' ? red(`✗ ${f.message}`) : yellow(`! ${f.message}`)}`);
 
   console.log(
     dim(

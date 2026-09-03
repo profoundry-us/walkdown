@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-03T16:46:46.113Z
 anchor:
   rule: locations.answer.one-walkdown-answers
-status: open
+status: answered
 body: "Seen while judging 2026-09-03 (run 2026-09-03T16-30-11Z-local-01, PASS -
   not the reason for the verdict). project add --ephemeral now refuses a pack's
   declared original (q-0176), but the same shape written BY HAND into
@@ -20,3 +20,12 @@ body: "Seen while judging 2026-09-03 (run 2026-09-03T16-30-11Z-local-01, PASS -
   whose spec any .walkdown declares (or that stands under one) be set aside the
   same way when read, so the hand-edit cannot reopen q-0176? Evidence:
   runs/evidence/2026-09-03T16-30-11Z/ephemeral-probe.txt"
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-03T16:53:03Z
+    body: "Topher, 2026-09-03: not a door we defend. A hand-written personal entry
+      is outside the tools - people who edit the config by hand are likely to
+      break things, and that is on them. walkdown supports its own commands
+      working well; project add refuses this shape, and that is the whole of the
+      guarantee."

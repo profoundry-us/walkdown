@@ -55,6 +55,7 @@ stories:
             - With everything committed there is no `.gitignore` there at all
             - Asked again with a different standard, the tree changes to say so - the file is written or removed, or the home moves whole with no record edited
             - The command reports what is tracked now, in words, and how to change its mind later
+            - What is tracked is asked of git, not read off the ignore file walkdown wrote - a root .gitignore hiding .walkdown, a rule that does not reach a blueprint standing elsewhere, an ignore file somebody emptied, and a home that left with its files still in the index are each said outright, and lint errors wherever the tree's promise and git's answer disagree (n-0179, n-0180, n-0181)
           statement_hash: sha256:d66c40335b64
 
       - id: locations.default.skills-are-yours-by-default

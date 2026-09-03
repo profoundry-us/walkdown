@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import test from 'node:test';
@@ -1836,6 +1836,99 @@ test('--fix says an entry names its records elsewhere rather than claiming the o
     assert.match(out, /already names evidence elsewhere/, out);
     assert.doesNotMatch(out, /already named by the config/);
     assert.ok(existsSync(join(old, 'shot.png')));
+  } finally {
+    s.cleanup();
+  }
+});
+
+/* A git repository under the scratch root, with a committer configured. */
+const gitRepo = (dir) => {
+  mkdirSync(dir, { recursive: true });
+  execFileSync('git', ['init', '-q'], { cwd: dir });
+  return (...args) =>
+    execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@x', ...args], { cwd: dir, encoding: 'utf8' });
+};
+const cli = (home, args, cwd) =>
+  spawnSync(process.execPath, [CLI, ...args], { cwd, env: { ...process.env, WALKDOWN_HOME: home }, encoding: 'utf8' });
+
+test('leaving the repository after committing everything says what git now holds as deletions @rule:locations.default.in-repo-on-request', () => {
+  /* n-0179: "Nothing was added" was printed over eight files git still tracked. */
+  const s = scratch();
+  try {
+    const repo = join(s.root, 'repo');
+    const git = gitRepo(repo);
+    walkdown(s.home, ['init', '--commit', 'all'], repo);
+    mkdirSync(join(repo, '.walkdown', 'blueprints', '0001-repo', 'runs'), { recursive: true });
+    writeFileSync(join(repo, '.walkdown', 'blueprints', '0001-repo', 'runs', 'r.json'), '{}');
+    git('add', '-A');
+    git('commit', '-q', '-m', 'everything');
+    const tracked = git('ls-files', '.walkdown').split('\n').filter(Boolean).length;
+    const out = walkdown(s.home, ['init', '--commit', 'none'], repo);
+    assert.match(out, new RegExp(`${tracked} file\\(s\\) git tracked under the .walkdown that left are now deletions to commit`), out);
+    assert.ok(!existsSync(join(repo, '.walkdown')));
+    // And git agrees: every one of them is a pending deletion, not a quiet "nothing was added".
+    assert.equal(git('ls-files', '--deleted', '--', '.walkdown').split('\n').filter(Boolean).length, tracked);
+  } finally {
+    s.cleanup();
+  }
+});
+
+test('a root .gitignore hiding .walkdown/ makes the tracked row say so, and lint refuses it @rule:locations.default.in-repo-on-request', () => {
+  /* n-0180: the tree said "the spec and its threads" while git ignored all of it. */
+  const s = scratch();
+  try {
+    const repo = join(s.root, 'repo');
+    gitRepo(repo);
+    walkdown(s.home, ['init', '--commit', 'spec'], repo);
+    assert.match(walkdown(s.home, ['where'], repo), /tracked\s+the spec and its threads/);
+    assert.equal(cli(s.home, ['lint', '--no-checks'], repo).status, 0);
+
+    writeFileSync(join(repo, '.gitignore'), '.walkdown/\n');
+    const where = walkdown(s.home, ['where'], repo);
+    assert.match(where, /tracked\s+nothing — \.gitignore:1 `\.walkdown\/` hides the spec from git/, where);
+    const lint = cli(s.home, ['lint', '--no-checks'], repo);
+    assert.notEqual(lint.status, 0, lint.stdout);
+    assert.match(lint.stdout, /\[tracking\].*hides \.walkdown\/blueprints\/0001-repo\/blueprint from git — a clone will not get the spec/);
+    // init reports the same, in colour, rather than "Committed".
+    const again = walkdown(s.home, ['init', '--commit', 'spec'], repo);
+    assert.match(again, /tracked: nothing — \.gitignore:1/);
+    assert.match(again, /a clone will not get the spec/);
+
+    // An ignore file somebody emptied is a promise that keeps nothing: lint says so.
+    unlinkSync(join(repo, '.gitignore'));
+    writeFileSync(join(repo, '.walkdown', '.gitignore'), '# nothing\n');
+    const empty = cli(s.home, ['lint', '--no-checks'], repo);
+    assert.notEqual(empty.status, 0, empty.stdout);
+    assert.match(empty.stdout, /\.walkdown\/\.gitignore is present and keeps nothing out — git will commit runs, evidence and drafts/);
+    assert.match(walkdown(s.home, ['where'], repo), /tracked\s+everything/);
+  } finally {
+    s.cleanup();
+  }
+});
+
+test('the ignore file beside a .walkdown does not answer for a blueprint standing elsewhere in the tree @rule:locations.default.in-repo-on-request', () => {
+  /* n-0181: the tracked row quoted rules that never reached the blueprint's own records. */
+  const s = scratch();
+  try {
+    const repo = join(s.root, 'repo');
+    gitRepo(repo);
+    walkdown(s.home, ['init', '--commit', 'spec'], repo);
+    const pack = join(repo, 'packs', 'x');
+    const spec = join(pack, 'blueprint');
+    mkdirSync(join(spec, 'runs'), { recursive: true });
+    writeFileSync(join(spec, 'walkdown.yml'), 'project: x\n');
+    writeFileSync(join(spec, 'runs', 'r.json'), '{}');
+    // Declared personally, records inside the blueprint, the legacy shape.
+    configure(
+      s.home,
+      `projects:\n  - id: x\n    roots: [${pack}]\n    spec: ${spec}\n    runs: ${join(spec, 'runs')}\n    threads: ${join(spec, 'threads')}\n    evidence: ${join(spec, 'evidence')}\n    drafts: ${join(spec, 'drafts')}\n`,
+    );
+    const where = walkdown(s.home, ['where'], pack);
+    assert.match(where, /tracked\s+everything/, where);
+    assert.match(where, /no rule keeps any of it out/);
+    const lint = cli(s.home, ['lint', '--no-checks'], pack);
+    assert.notEqual(lint.status, 0, lint.stdout);
+    assert.match(lint.stdout, /\.walkdown\/\.gitignore says `blueprints\/\*\/runs\/`, but git does not keep packs\/x\/blueprint\/runs out — the rule does not reach this home/);
   } finally {
     s.cleanup();
   }
