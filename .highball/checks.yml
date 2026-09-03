@@ -11,11 +11,6 @@
 version: 1
 project: walkdown
 
-# The URL is per-team and not a secret, so it is committed; the token never
-# enters the repo — `highball login` once per machine, or HIGHBALL_TOKEN in CI.
-reporting:
-  url: http://localhost:3600
-
 # No container: this repo is Node and its only runtime dependency is `yaml`.
 # Every rule runs on the host.
 

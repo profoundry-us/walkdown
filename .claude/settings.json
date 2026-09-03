@@ -2,11 +2,11 @@
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": "Write|Edit",
+        "matcher": "Write|Edit|Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "node_modules/.bin/highball run --fast"
+            "command": "node_modules/.bin/highball run --fast --if-changed"
           }
         ]
       }
