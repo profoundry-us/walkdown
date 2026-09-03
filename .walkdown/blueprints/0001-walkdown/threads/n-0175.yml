@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-03T02:56:30.479Z
 anchor:
   rule: locations.answer.declared-not-discovered
-status: open
+status: addressed
 body: |-
   Three smaller doors of the same family as n-0167 - a base-less value resolved where you stand, or a row computed over the merge instead of over the file it describes. None is the fail on its own; they are here so the next fix can close them together.
 
@@ -18,3 +18,16 @@ body: |-
   4. Wording: `walkdown where --project ghost` from inside alpha prints the repo row as "names this project" (repoRooted is true because alpha is rooted at cwd) above "no project ghost" - the row is about the directory, the header and spec row about the id asked for (04d, and ...-01-declared-vs-undeclared.txt).
 
   Claiming, not accepting.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-03T16:29:02Z
+    body: "Claimed in 583d041, a through d. The repository's row is read from the
+      committed file with repoRooted computed before the merge, so restating it
+      personally cannot make the personal file the declarer. Blank values, ~name
+      that is not a home directory, and relative paths are set aside for roots,
+      spec, every record kind and defaults.* alike, each with a why the report
+      prints. Repository defaults: are anchored at the repository. --project
+      names the id the committed row carries. Test: 'the repository's row is
+      read from the committed file, defaults and stray roots are set aside, and
+      --project names the id'."

@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-03T02:57:27.591Z
 anchor:
   rule: locations.answer.one-walkdown-answers
-status: open
+status: answered
 body: "Judged 2026-09-03 (run 2026-09-03T02-45-46Z-local-01, PASS): the q-0168
   THEN holds - project add refuses a spec under another .walkdown from every
   direction and for every layout, lint names the entry and both files, and only
@@ -27,3 +27,19 @@ body: "Judged 2026-09-03 (run 2026-09-03T02-45-46Z-local-01, PASS): the q-0168
   that another .walkdown declares unless it is actually a copy (a path nothing
   declares), or at least say that its writes will reach the pack's ledger when
   the pack keeps records inside its blueprint?"
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-03T16:29:01Z
+    body: "Decided with Topher 2026-09-03: refuse it, a copy means a copy. In
+      583d041 an ephemeral entry may no longer name a blueprint some .walkdown
+      declares - listed in its config, or standing in one of its numbered homes
+      - and project add says where to copy it instead
+      (<that>/.walkdown/tmp/<label>/blueprint, say). And a committed entry whose
+      spec lies under another .walkdown is now refused when READ, in
+      readUserConfig itself: where names it on the repository row with the
+      directory that answers for it, status never lists it, serve never offers
+      it. The one-walkdown-answers THEN says both; the statement is unchanged.
+      Tests: 'a committed entry never reaches under another .walkdown'
+      (rewritten) and 'a server offers what the .walkdown where it was started
+      declares'."

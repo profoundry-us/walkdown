@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-03T02:53:43.320Z
 anchor:
   rule: locations.default.one-home-per-blueprint
-status: open
+status: addressed
 body: >-
   Agent judging 2026-09-03 (run 2026-09-03T02-45-43Z-local-01): FAIL. All four
   doors n-0170 named are closed, re-driven the same way (fresh WALKDOWN_HOME and
@@ -110,3 +110,22 @@ body: >-
   either contains the other. Relocation should look for the personal row already
   rooted at this checkout and write into it rather than beside it - and never
   fall through to scaffolding into the tree when the resolved spec is null.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-03T16:29:02Z
+    body: "Claimed in 583d041, all four doors plus G. (1) --project prefers the
+      entry rooted where you stand, then the repository's, then the first named;
+      projects no longer calls a pack shadowed when the root's row is no more
+      specific. (2) covered by n-0171's rowAbout. (3) rememberLocation keys by
+      rowAbout too, so a move at the root records on the root's row and never
+      the nested pack's. (4) the server and the panel key blueprints by the
+      canonical spec directory: each carries a key, ?bp= takes a key or a unique
+      id, and an id two answer to is refused with the candidates (409). F2:
+      dropPaths drops only the kinds that pointed into the home that moved. G:
+      --fix says an entry already names its records elsewhere rather than
+      claiming the old home is named. Tests: '--project from inside a nested
+      same-named pack answers the pack', 'move at the root records on the root's
+      row', 'relocation writes into the personal row a move already made, and
+      keeps what it moved', and in serve.test.js 'two listed blueprints sharing
+      an id are told apart by key'."

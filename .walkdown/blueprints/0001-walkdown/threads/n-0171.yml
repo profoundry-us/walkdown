@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-03T02:52:25.651Z
 anchor:
   rule: locations.default.in-repo-on-request
-status: open
+status: addressed
 body: >-
   Leaving the repository with a personal port override splits the project in
   two, and the next change of mind scaffolds a second blueprint at
@@ -59,3 +59,15 @@ body: >-
   tracked row could ask git too); init now does say it, correctly and with the
   count, in every case tried (probe-1-transitions.txt step D, probe-2-doors.txt
   P2-b/c/d).
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-03T16:29:01Z
+    body: "Claimed in 583d041. rememberProject now finds its row with rowAbout() -
+      same id and a root canon-equal to the checkout's, or rootless with no
+      blueprint of its own - which is the merge's own test, and writes the
+      home's paths INTO that row: the port override keeps its port and gains
+      spec/threads/runs/evidence/drafts, and no repo-2 is minted. relocateHome
+      also hands over any record kind the person had already moved outside the
+      home, so it is not dropped on the way out. Test: 'leaving the repository
+      with a port override kept writes the home back into that row'."

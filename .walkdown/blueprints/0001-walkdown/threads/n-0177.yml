@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-03T02:57:27.769Z
 anchor:
   rule: locations.answer.one-walkdown-answers
-status: open
+status: addressed
 body: "Seen while judging 2026-09-03 (run 2026-09-03T02-45-46Z-local-01, PASS -
   not the reason for any verdict). The q-0168 refusal misfires on a symlinked
   path: standing inside packs/gamma and naming gamma's own blueprint through
@@ -19,3 +19,13 @@ body: "Seen while judging 2026-09-03 (run 2026-09-03T02-45-46Z-local-01, PASS -
   this ('on macOS everything under /var is'), and rememberProject's own copy of
   the check already uses it. Small, and it refuses rather than pools, but the
   message tells the person the wrong thing."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-03T16:29:02Z
+    body: "Claimed in 583d041. project add compares the blueprint's own .walkdown
+      root with the one where you stand canonically, so naming a pack's
+      blueprint through /tmp when cwd resolves to /private/tmp reads as already
+      listed rather than as lying under itself. Test: 'a pack's own blueprint
+      named through another spelling of its path is already listed, not
+      refused'."

@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-03T02:58:05.546Z
 anchor:
   rule: locations.default.one-home-per-blueprint
-status: open
+status: addressed
 body: "Seen while judging one-walkdown-answers 2026-09-03 (run
   2026-09-03T02-45-46Z-local-01); a door n-0170 and n-0173 do not name. Standing
   INSIDE a checkout that declares its own blueprint (packs/gamma, made by init
@@ -26,3 +26,14 @@ body: "Seen while judging one-walkdown-answers 2026-09-03 (run
   0001-gamma pointing at a home that moved to 0003-gamma
   (ephemeral-and-writers-probe.txt D7). The same path from OUTSIDE is refused
   correctly by the q-0168 check, so this is the one direction left open."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-03T16:29:02Z
+    body: Claimed in 583d041. A committed listing is expanded against the
+      repository, not the .walkdown directory, so .walkdown/blueprints/... no
+      longer doubles up and a blueprint already listed is reported as listed.
+      rememberProject matches by spec alone when the spec stands inside the
+      file's own numbered homes, so a re-listing writes nothing new. Covered by
+      the same test as n-0177 and by 'init --commit spec twice keeps one entry
+      too'.

@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-03T02:52:40.832Z
 anchor:
   rule: locations.default.in-repo-on-request
-status: open
+status: addressed
 body: >-
   A personal config that does not parse makes init treat the project as
   unlisted: none->spec mints a fresh empty home in the repository beside the
@@ -36,3 +36,16 @@ body: >-
   and relocateHome should read and prepare both config documents before moving
   the directory, so a config that cannot be written leaves the tree as it found
   it.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-03T16:29:02Z
+    body: "Claimed in 583d041. init refuses up front when either config does not
+      parse - the file and the parser's line are named, and it says init writes
+      to it and cannot tell what it already says - and relocateHome parse-checks
+      both files before moveDir, so a move that cannot be written down does not
+      happen. A listed entry that resolves to no spec is refused (exit 2) before
+      scaffolding and again after relocation, instead of being treated as
+      unlisted. Tests: 'an unreadable personal config stops init before anything
+      is claimed or moved' and 'init refuses an entry that resolves to no spec
+      instead of scaffolding into the tree'."
