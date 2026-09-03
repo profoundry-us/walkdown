@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-01T20:14:09.640Z
 anchor:
   rule: threads.lifecycle.claim-never-accept
-status: open
+status: addressed
 body: 'Not a failure of this rule — every THEN held under probing (see run
   2026-09-01T20-03-03Z). Found beside it: a personal config whose
   `identity.username` is not a string crashes lib/identity.js defaultActor
@@ -23,3 +23,16 @@ body: 'Not a failure of this rule — every THEN held under probing (see run
   2026-09-01 against a scratch WALKDOWN_HOME and a scratch blueprint served on
   :4877; probe output in
   runs/evidence/2026-09-01T20-03-03Z/side-finding-malformed-identity.txt.'
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-03T01:46:00Z
+    body: "Fixed. lib/identity.js reads a declaration through spoken(): a string is
+      trimmed, anything else (a list, a number, a map) counts as nothing said,
+      and the report carries a `problem` line naming `identity.username` in
+      ~/.walkdown/config.yml and what it is instead. GET /api/blueprint boots,
+      the identity falls back to git or the OS as undeclared, and the accept
+      gate's refusal in lib/writes.js now prints that problem in place of the
+      generic 'say who you are' sentence, so the person is pointed at the line.
+      Test: test/identity.test.js 'a username that is not a string counts as
+      nobody and names its file'."

@@ -1,0 +1,34 @@
+{
+  "run_id": "2026-09-03T01-26-24Z-local-01",
+  "created": "2026-09-03T01:26:24Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6dad3a3",
+  "blueprint_sha": "6dad3a3",
+  "note": "One rule, judged headless from the working-tree CLI against a throwaway git repository under scratch WALKDOWN_HOMEs, a server on port 4793 inside that fixture, and this repository's own unmodified configuration read live. The real personal config was read once and never written.",
+  "results": [
+    {
+      "rule": "locations.answer.declared-not-discovered",
+      "status": "fail",
+      "statement_hash": "sha256:dd87f8781211",
+      "evidence": [
+        "runs/evidence/2026-09-03T01-26-24Z/declared-not-discovered-00-fixture.txt",
+        "runs/evidence/2026-09-03T01-26-24Z/declared-not-discovered-01-declared-vs-undeclared.txt",
+        "runs/evidence/2026-09-03T01-26-24Z/declared-not-discovered-02-own-records-and-named-outright.txt",
+        "runs/evidence/2026-09-03T01-26-24Z/declared-not-discovered-03-restated-none-some-all.txt",
+        "runs/evidence/2026-09-03T01-26-24Z/declared-not-discovered-03b-root-spellings.txt",
+        "runs/evidence/2026-09-03T01-26-24Z/declared-not-discovered-03c-verbatim-copy-and-dot-root.txt",
+        "runs/evidence/2026-09-03T01-26-24Z/declared-not-discovered-03d-dot-root-claims-a-sibling.txt",
+        "runs/evidence/2026-09-03T01-26-24Z/declared-not-discovered-04-moved-checkouts.txt",
+        "runs/evidence/2026-09-03T01-26-24Z/declared-not-discovered-05-this-repository-live.txt",
+        "runs/evidence/2026-09-03T01-26-24Z/declared-not-discovered-06-server-surface.txt"
+      ],
+      "reasoning": "Judged headless from the working-tree CLI against a throwaway git repository holding alpha, beta and gamma declared in a committed .walkdown/config.yml and ghost declared nowhere, with WALKDOWN_HOME pointed at scratch homes for every probe. The n-0151 fix holds as built: restating none, some (evidence only; roots only; roots and spec identically; six of beta's seven keys) or all of gamma's and beta's keys with absolute personal paths - including the n-0151 shape with the spec moved elsewhere, and a duplicate personal id - reads \"names this project too; the personal config above wins where they disagree\" with matchedIn \"both\" and config.repo.matched true in words and in --json, the per-kind rows credit the right file each time, and this repository's own `walkdown where` reads the same live. Each declared blueprint answers for itself with its own runs and threads (three notes all n-0001 in three ledgers; a run dropped into alpha invisible from beta and reachable by --project alpha from inside beta and inside ghost); ghost and the repository root are refused by where, status, threads, thread new, --project, the server's chooser, GET /api/blueprint?bp=ghost and POST /api/threads?bp=ghost; --project alpha from outside the repository is refused because that .walkdown is not consulted there; moving a checkout four ways (spec moved by a personal entry, whole checkout moved under a stale root, a second checkout declared elsewhere, the ephemeral shape) answers correctly and `projects` names what is shadowed. What fails is how the keys are restated rather than how many: personal entries are never anchored, so a relative path in the personal file resolves against process.cwd(), in about() and in projectFor(). The committed gamma entry copied verbatim into the personal file (roots: [gamma], spec: gamma/blueprint) makes `where` inside repo/gamma print \"no entry for this project\" on BOTH rows and \"nothing declares this directory\" for a directory the committed file roots gamma at, with --json matchedIn null and config.repo.matched false, while `projects` from the same directory lists gamma at repo/gamma/gamma/blueprint (gone) - config.repo.matched is still derived from the selected project, so an override that breaks selection denies the committed file's contents. And a personal alpha entry with roots: [ . ] - the spelling this repository's own committed config uses - answers with alpha from inside gamma, beta, the root and ghost: status inside gamma prints alpha's board and a thread filed there would land in alpha's ledger, which is one blueprint bleeding into another and into the undeclared one, with both config rows reading as if the personal entry were about this checkout. Filed as n-0167 with the mechanism and two possible fixes. Claiming, not accepting.",
+      "threads": [
+        "n-0167"
+      ]
+    }
+  ]
+}

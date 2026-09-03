@@ -1,0 +1,96 @@
+id: n-0170
+kind: note
+author: topher
+via: agent
+created: 2026-09-03T01:43:55.973Z
+anchor:
+  rule: locations.default.one-home-per-blueprint
+status: addressed
+body: >-
+  Agent judging 2026-09-03 (run 2026-09-03T01-26-22Z-local-01): FAIL. n-0160's
+  fix holds for the shape it names - two same-basename checkouts side by side,
+  one personal and one committed, stay two projects with two ledgers in both
+  orders and under both --commit spec and --commit all (evidence key
+  runs/evidence/2026-09-03T01-26-22Z/A-two-checkouts-one-name.txt). The merge is
+  still keyed by id one door further along: a personal entry counts as "about
+  this checkout" when any of its roots lies ANYWHERE INSIDE the repository, so
+  two rows rooted at different directories are merged the moment they share a
+  name.
+
+
+  (1) THE MERGE STILL JOINS TWO ROOTS BY ID, through containment
+  (runs/evidence/2026-09-03T01-26-22Z/B-nested-checkout-same-name.txt, script
+  .sh beside it). A repository `mono/app` runs `walkdown init --commit spec`:
+  repo config declares `app`, roots [.], home 0001-app; a note n-0001 is filed
+  at the root. Then a directory inside it that happens to share the name -
+  `mono/app/packs/app` - gets a plain `walkdown init` (the default arrangement,
+  which puts no .walkdown in the tree, so the root's .walkdown keeps answering
+  for it). That writes a personal `app` rooted at packs/app, with its own home
+  in ~/.walkdown. readUserConfig's `about()` (lib/locations.js, `roots.some(r =>
+  within(r, base))`) accepts the nested root as an override of the repository's
+  `app`, and the merged entry carries the PERSONAL roots and spec. Standing at
+  the repository root afterwards:
+    - `walkdown where` reports the personal config "present, no entry for this project" and the repository's config "no entry for this project" - about a file that holds `id: app, roots: [.]`.
+    - `walkdown status`, `threads` and `thread new` all refuse: "No blueprint here. Nothing in mono/app/.walkdown/config.yml claims this directory."
+    - `walkdown projects` at the root lists `app` -> the PACK's spec in ~/.walkdown.
+    - `walkdown where --project app spec` from the root answers with the pack's spec.
+    The root's n-0001 is stranded in .walkdown/blueprints/0001-app/threads with no command able to reach it from the checkout it belongs to. Two blueprints, two roots, one name, one project - n-0160's second shape ("beta matches NOTHING"), arriving through containment instead of bare id. The statement says which rows are one project "is answered by where an entry is rooted and never by its id alone"; here the rows are rooted at `.` and at `packs/app`, and it was the id that joined them. Layouts where a package shares the repository's name (apps/<name>, packages/<name>) are ordinary, and docs/08 recommends per-pack blueprints. The reverse (outer personal, nested committed, B2 in the same transcript) holds, because the pack's own .walkdown answers inside it.
+
+  (2) A NUMBER IS RE-ALLOCATED INTO AN ADDRESS THE CONFIG STILL CLAIMS
+  (runs/evidence/2026-09-03T01-26-22Z/C-abandoned-home-renumbered.txt). docs/08
+  says abandoning a default project is "deleting one directory in your own
+  home". Doing exactly that for one/app (entry `app`, home 0001-app) and then
+  running `walkdown init` in three/app, another repository called app: claimHome
+  allocates against the listing, the listing has forgotten, so 0001-app is
+  minted again and three's blueprint is scaffolded into it - and rememberProject
+  then finds the stale entry BY SPEC PATH and returns `kept`. init prints
+  success with no "+ listed" line; `walkdown where` and `status` in three/app
+  say nothing declares this directory; and one/app, a checkout that no longer
+  has a blueprint, answers with three's spec and files n-0001 into three's fresh
+  home. Not a name-keyed path, but two blueprints' addresses coincide and the
+  second is silently left undeclared, which is what "each blueprint ends up with
+  a numbered home of its own" is meant to rule out. The listing is the record
+  only while nothing else remembers a number.
+
+
+  WHAT HOLDS, PROBED THE SAME WAY (fresh WALKDOWN_HOME per probe, real CLI,
+  scripts in the evidence key):
+    - A: two same-basename checkouts, one personal and one committed, both orders, spec and all; plus two committed and one personal: separate homes, separate threads, `projects` reports the shadowed entry, --project app resolves by standing.
+    - D: an ephemeral copy taking a committed project's id is shadowed inside the repository and reachable outside; `thread new --project repo` lands in the copy from outside and in the repository from inside; adding it from inside dedups to repo-2; a scratch copy carrying its own .walkdown answers only for itself.
+    - E: `move` from a directory nothing declares refuses and leaves the config byte-identical; `move --project app` from an unrelated directory moves the one `app` visible there (the person named it); move from a committed checkout writes a personal row rooted at that checkout and the other `app` is untouched (E-move-and-project-flag.txt, E5-pure-override-then-move.txt).
+    - F: thirty asking commands (where, where --json, where --project, status, threads, projects, lint, where --fix) from three directories leave every tree and the home byte-identical; a server started in each checkout lists only what that .walkdown declares, ?bp=app is its own, and an undeclared directory refuses to serve (F-asking-writes-nothing-and-server.txt).
+    - G: `init --commit spec` then `--commit none` on the second of two personal same-name projects moves the whole home both ways and the two stay app / app-2 with their own threads (G-relocate-and-add-a-clone.txt).
+
+  TWO OBSERVATIONS, NOT PART OF THE VERDICT:
+    - G2 in the same transcript: `walkdown project add <spec>` run from OUTSIDE a checkout that already declares that spec in its own .walkdown gives the blueprint a second entry (`0001-app`, rooted at the home directory) and claims a second, empty personal home 0001-0001-app; standing in the checkout, `projects` lists two ids for one spec and evidence/drafts resolve to different homes per id. A person asked for it, and nothing refused - "one blueprint is never given a second home" is what happened.
+    - E5: `move` in a committed checkout that already has a pure-override row (id + evidence, no roots) appends a second personal row for the same id rather than writing into the override; both merge, so nothing crosses projects, but one project now has two personal rows.
+
+  Shape of a fix, for whoever picks it up: `about()` should ask whether a
+  personal root IS the repository's root (or is one of the roots the
+  repository's entry itself lists), not whether it lies somewhere inside the
+  repository - containment is how a nested project with the same name becomes an
+  override. And when a claimed home is missing from the listing, either the
+  allocator should count the config's claimed `home:` values too, or `init`
+  should refuse/say so when rememberProject finds an entry whose roots are not
+  this checkout.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-03T01:49:21Z
+    body: "Both doors closed, and both observations. (1) A personal row overrides a
+      repository row only when one of its roots IS one of the repository row's
+      roots (canonically equal), not merely inside the repository; a same-id row
+      rooted deeper is its own project - mono/app/packs/app answers for itself,
+      the root answers for itself, a thread filed at the top lands at the top.
+      (2) claimHome counts every number the config beside it still names (by
+      `home:` and by spec path) as taken, so an abandoned home is never
+      re-minted; the next same-named repository gets 0002-app and the abandoned
+      checkout answers with its own gone home, not the new one. rememberProject
+      also refuses to call a same-spec entry rooted elsewhere 'already listed'.
+      G2: `project add` from outside a checkout that declares the spec in its
+      own .walkdown says 'already listed ... stand in it to use it' and mints
+      nothing. E5: `move` writes into a rootless same-id personal row instead of
+      appending a second. Tests: test/locations.test.js 'a nested directory
+      sharing the name is its own project', 'a number the config still names is
+      never minted again', 'move writes into a pure-override row', and the
+      project-add test."

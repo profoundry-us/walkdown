@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-09-03T01-26-20Z-local-01",
+  "created": "2026-09-03T01:26:20Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6dad3a3-dirty",
+  "note": "One rule, judged headless from the working-tree CLI against throwaway git repositories with WALKDOWN_HOME and WALKDOWN_SKILLS_DIR inside the scratchpad; the real personal config and skills were never written to. Records seeded before every move and sha256-compared after; git asked directly what it would stage after each transition.",
+  "results": [
+    {
+      "rule": "locations.default.in-repo-on-request",
+      "status": "fail",
+      "statement_hash": "sha256:d66c40335b64",
+      "evidence": [
+        "runs/evidence/2026-09-03T01-26-20Z/summary.md",
+        "runs/evidence/2026-09-03T01-26-20Z/probe-1-transitions.txt",
+        "runs/evidence/2026-09-03T01-26-20Z/probe-2-edges.txt",
+        "runs/evidence/2026-09-03T01-26-20Z/probe-3-own-checks.txt",
+        "runs/evidence/2026-09-03T01-26-20Z/probe-4-threads-stageable.txt"
+      ],
+      "reasoning": "The rewrite does what n-0158 asked: the standard is read off the tree, and changing it changes the tree. Driven through the real CLI with a run, evidence bytes and a draft seeded in the home, every transition (none->spec, spec->all, all->spec, spec->none, none->all, all->none) moved the home whole with identical sha256s, wrote or removed the three-line .gitignore, and git's own dry-run staging matched the standard each time - spec stages blueprint/, threads/, .gitignore and config.yml while runs, evidence and drafts are ignored; all stages everything; none leaves the repository with no .walkdown, no pointer, no config. The pointer is relative, both configs gain and lose the entry, repeating a standard says 'up to date', and every direction now prints how to change its mind. What fails is the last THEN, 'reports what is tracked now, in words', in one realistic direction: after a project commits under all, 'init --commit spec' writes the file and says runs, evidence and drafts are kept out, but git ls-files still tracks the run and the screenshot and 'where' answers 'the spec and its threads'; the 'stays tracked until git rm --cached' sentence the docs promise is printed only when a home moves, never on the spec<->all flip. That is the statement's own concern - screenshots in the history and words that say otherwise - so this is a fail, narrow and cheap to fix (n-0164). Two further defects seen on the way are filed separately and did not decide the verdict: the personal config comes back in YAML flow style after moving out (n-0165), and .claude/skills stays in the repository on leaving while the command says the repository gets nothing (n-0166).",
+      "threads": ["n-0164", "n-0165", "n-0166"]
+    }
+  ]
+}

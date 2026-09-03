@@ -1,0 +1,68 @@
+id: n-0164
+kind: note
+author: topher
+via: agent
+created: 2026-09-03T01:31:23.395Z
+anchor:
+  rule: locations.default.in-repo-on-request
+status: addressed
+body: >-
+  Changing all -> spec after records were committed reports them as kept out;
+  git still tracks them, and the command does not say so.
+
+
+  Judged 2026-09-03 (agent), evidence runs/evidence/2026-09-03T01-26-20Z/.
+
+
+  The rewrite holds up on the tree: every transition (none->spec, spec->all,
+  all->spec, spec->none, none->all, all->none) was driven through the real CLI
+  with a run, evidence bytes and a draft in the home, the home moved whole with
+  identical sha256s each time, the .gitignore was written or removed, and git's
+  own dry-run staging matched the standard after each step
+  (probe-1-transitions.txt). n-0158's no-op is gone.
+
+
+  The remaining gap is the rule's last THEN, 'reports what is tracked now, in
+  words', in one direction. In probe-2-edges.txt step P1-e a project commits
+  under 'all' (runs and a screenshot land in history), then runs 'walkdown init
+  --commit spec'. The file is written and the command prints
+  '.walkdown/.gitignore keeps runs, evidence and drafts out' - but git ls-files
+  still lists the run and the screenshot, git check-ignore exits 1 on them (a
+  tracked file is never ignored), and 'walkdown where' answers 'the spec and its
+  threads'. Only new runs are actually kept out. docs/08-locations.md promises
+  'A file already committed stays tracked until you git rm --cached it, and the
+  command says so' - and bin/commands/init.js has that sentence, but prints it
+  only when a home moved (moved && commit !== 'all'), so the spec<->all flip,
+  the one that does not move anything, never says it. This is the direction the
+  statement's own rationale is about: the screenshots are in the tree and the
+  tool's words say they are not.
+
+
+  Suggested shape of a fix: when the standard tightens (to spec, or to none),
+  ask git what is still tracked under the now-ignored siblings (git ls-files --
+  .walkdown/blueprints/*/{runs,evidence,drafts}) and print it, or at least print
+  the 'stays tracked' sentence on every tightening rather than only on a move.
+  'where' could do the same on its tracked row.
+
+
+  Not a fail but noted while here: '--commit all' deletes a person-edited
+  .gitignore without --force (P2-d), while '--commit spec' keeps an edited one
+  and reports it (P2-c). Reads as intended - asking for everything is asking for
+  the file to go - but it is asymmetric.
+
+
+  Evidence: runs/evidence/2026-09-03T01-26-20Z/probe-2-edges.txt (P1-c through
+  P1-e), runs/evidence/2026-09-03T01-26-20Z/probe-1-transitions.txt,
+  runs/evidence/2026-09-03T01-26-20Z/summary.md
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-03T01:46:00Z
+    body: "Fixed. init asks git itself, every time it writes the spec standard: `git
+      ls-files` under the home's runs, evidence and drafts, and if anything is
+      still in the index the command says so with the count and the first paths
+      - 'Already committed, so still tracked: N file(s) ... until you git rm
+      --cached them'. It no longer keys on whether a home moved. Test:
+      test/locations.test.js 'tightening to spec says what git still tracks...'
+      commits a run and a screenshot under all, flips to spec, and reads the
+      sentence and git's index."

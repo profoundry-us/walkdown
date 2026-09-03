@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-01T21:39:51.458Z
 anchor:
   rule: threads.lifecycle.acts-for-a-person
-status: open
+status: addressed
 body: >-
   Judged 2026-09-01 against a scratch copy (.walkdown/tmp/judge-acts-0901)
   served on :4899 with WALKDOWN_HOME pointed inside it (declared identity
@@ -60,3 +60,17 @@ body: >-
   .../acts-for-a-person-cli-doors.txt, .../acts-for-a-person-http-doors.txt,
   .../acts-for-a-person-no-name-passed-in.txt,
   .../acts-for-a-person-panel-surfaces.txt
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-03T01:46:00Z
+    body: "Fixed at both ends. The embed's pin now carries `via` from the thread
+      (src/embed/index.js, both the listing and the just-filed pin), so
+      MSG.stream shows 'via agent' on the opening message exactly as on the
+      reply beneath it; lib/viewer/embed.js and extension/vendor/embed.js
+      rebuilt. And the HTTP door carries provenance at all now: POST
+      /api/threads, /replies and /status accept a plain-string `via` and hand it
+      to writes.js the way the CLI's --as-agent always did (lib/api.js
+      provenance()); anything that is not a short string is no provenance. Test:
+      test/serve.test.js 'via rides through the API on a note, a reply and a
+      move'."

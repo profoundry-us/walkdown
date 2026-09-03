@@ -1,0 +1,40 @@
+{
+  "run_id": "2026-09-03T01-26-22Z-local-01",
+  "created": "2026-09-03T01:26:22Z",
+  "git_sha": "6dad3a3-dirty",
+  "blueprint_sha": "6dad3a3-dirty",
+  "kind": "walkdown",
+  "actor": "agent",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "results": [
+    {
+      "rule": "locations.default.one-home-per-blueprint",
+      "status": "fail",
+      "statement_hash": "sha256:c2e4b20e7f0d",
+      "evidence": [
+        "runs/evidence/2026-09-03T01-26-22Z/B-nested-checkout-same-name.txt",
+        "runs/evidence/2026-09-03T01-26-22Z/B-nested-checkout-same-name.sh",
+        "runs/evidence/2026-09-03T01-26-22Z/C-abandoned-home-renumbered.txt",
+        "runs/evidence/2026-09-03T01-26-22Z/C-abandoned-home-renumbered.sh",
+        "runs/evidence/2026-09-03T01-26-22Z/A-two-checkouts-one-name.txt",
+        "runs/evidence/2026-09-03T01-26-22Z/A-two-checkouts-one-name.sh",
+        "runs/evidence/2026-09-03T01-26-22Z/D-ephemeral-shares-id.txt",
+        "runs/evidence/2026-09-03T01-26-22Z/D-ephemeral-shares-id.sh",
+        "runs/evidence/2026-09-03T01-26-22Z/E-move-and-project-flag.txt",
+        "runs/evidence/2026-09-03T01-26-22Z/E-move-and-project-flag.sh",
+        "runs/evidence/2026-09-03T01-26-22Z/E5-pure-override-then-move.txt",
+        "runs/evidence/2026-09-03T01-26-22Z/E5-pure-override-then-move.sh",
+        "runs/evidence/2026-09-03T01-26-22Z/F-asking-writes-nothing-and-server.txt",
+        "runs/evidence/2026-09-03T01-26-22Z/F-asking-writes-nothing-and-server.sh",
+        "runs/evidence/2026-09-03T01-26-22Z/G-relocate-and-add-a-clone.txt",
+        "runs/evidence/2026-09-03T01-26-22Z/G-relocate-and-add-a-clone.sh",
+        "runs/evidence/2026-09-03T01-26-22Z/lib.sh"
+      ],
+      "reasoning": "Judged by building fixtures under a scratch WALKDOWN_HOME per probe and driving the real CLI and a server on a spare port, never the suite. n-0160's fix holds for the shape it names: two same-basename checkouts side by side, one personal and one committed, stay two projects with two ledgers in both orders, under --commit spec and --commit all, with three checkouts, with an ephemeral copy taking the committed id, through --project from inside and outside, through thread new, through a server's list, and through move, which refuses an undeclared directory and writes only the entry that resolved; thirty asking commands from three directories left every tree byte-identical. It fails one door further along. The merge decides that a personal row is about a repository's row when it shares the id and any of its roots lies anywhere INSIDE the repository, so a plain `walkdown init` in mono/app/packs/app - a directory that shares the repository's name, with no .walkdown of its own because the default arrangement puts nothing in the tree - writes a personal `app` that the root's .walkdown then merges over its own committed `app`: at the repository root every command says nothing declares this directory while both configs hold an entry for it, `walkdown projects` lists `app` as the pack's spec, `--project app` answers with the pack, and the root's own n-0001 is stranded in a home no command can reach from the checkout it belongs to. Two rows rooted at different directories were made one project by their id. Separately, the abandonment path docs/08 prescribes - delete the home directory - leaves the entry claiming 0001-app, the next same-basename init re-mints 0001-app against the forgotten listing, scaffolds into it and matches the stale entry by spec path, so init reports success without listing the new checkout and the abandoned checkout answers with the new blueprint. Details, transcripts and two smaller observations (project add of a self-declaring clone minting a second home; move appending a second personal row beside a pure override) in n-0170. Claiming, not accepting.",
+      "threads": [
+        "n-0170"
+      ]
+    }
+  ]
+}

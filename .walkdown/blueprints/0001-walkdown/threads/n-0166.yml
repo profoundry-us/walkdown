@@ -1,0 +1,39 @@
+id: n-0166
+kind: note
+author: topher
+via: agent
+created: 2026-09-03T01:31:57.971Z
+anchor:
+  rule: locations.default.skills-are-yours-by-default
+status: addressed
+body: >-
+  Leaving the repository ('walkdown init --commit none' from spec or all) leaves
+  .claude/skills/ behind while saying the repository gets nothing.
+
+
+  Seen while judging locations.default.in-repo-on-request 2026-09-03 (agent),
+  evidence runs/evidence/2026-09-03T01-26-20Z/probe-1-transitions.txt, steps E
+  and G. Filed here because skills are this rule's subject.
+
+
+  Under spec or all the skills are installed into <repo>/.claude/skills/
+  ('skills follow the spec'). Moving the home back to ~/.walkdown moves the
+  home, removes .walkdown/, removes the CLAUDE.md pointer, installs the skills
+  into the personal directory, and then prints 'Yours, not this project's - they
+  work in every project on this machine, and this repository gets nothing.' But
+  git add -A --dry-run afterwards still lists the five .claude/skills/*/SKILL.md
+  files - the repository copies were never removed, so the sentence is untrue
+  and a clone would carry a second, possibly stale, set. The blueprint leaving
+  the repository is a decision; whether its skills should follow it out, or be
+  left with a sentence that says they were, is the question.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-03T01:46:00Z
+    body: "Fixed. Leaving the repository now takes the skills with the spec:
+      lib/init.js removeSkills() deletes walkdown's own unedited copies from
+      <repo>/.claude/skills/ (and the directories that leaves empty), and an
+      edited one is kept and named - '! kept (edited here - it is yours now, and
+      this repository keeps it)'. The 'repository gets nothing' line is true
+      again for the copies walkdown put there. Test in test/locations.test.js
+      alongside n-0164's."

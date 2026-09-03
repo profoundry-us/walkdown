@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-09-03T01-26-23Z-local-01",
+  "created": "2026-09-03T01:26:23Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6dad3a3-dirty",
+  "note": "One rule, judged headless from the working-tree CLI and its HTTP API against a fixture monorepo in the scratchpad, built with the real `init` (root, a pack, a pack nested inside that pack), extended by hand with a legacy-layout pack, a `.walkdown` above the git root, root declarations reaching into two packs, and a personal home (WALKDOWN_HOME inside the fixture) carrying an override and a project of its own. Ten servers on the judge's own ports 4791-4800; 4700/4710/4310 untouched. The repository's own example/ was exercised twice: writes against a copy of this repository's .walkdown and example/ with its own home, and GET-only against the real tree with the real personal home. The real ledger received nothing but this record and two threads.",
+  "results": [
+    {
+      "rule": "locations.answer.one-walkdown-answers",
+      "status": "pass",
+      "statement_hash": "sha256:b08354a355f7",
+      "evidence": [
+        "runs/evidence/2026-09-03T01-26-23Z/locations-answer-probe.txt",
+        "runs/evidence/2026-09-03T01-26-23Z/server-probe.txt"
+      ],
+      "reasoning": "Every THEN held, and the n-0159 defect is gone: `where --json` from the root, from a pack, from a directory deep inside the pack, from inside the pack's own .walkdown tree, and from a nested pack each named exactly the nearest .walkdown on its `answers` row, and moving the root's .walkdown aside proved the walk stops at .git rather than reaching the .walkdown planted above the checkout, which was consulted only when standing there. `--project` across the boundary is refused in every direction (root->pack, pack->root, pack->nested, nested->pack, and the outer config's id from anywhere inside), and `thread new` from each place landed in that place's own ledger and nowhere else. The personal home merged everywhere - its override changed the pack's evidence row, its own project was listed and reachable from every server, and its more specific root beat the repository's `.` - which is what the statement asks. Servers started at the root, in the pack, in the nested pack, and at the root with --project pointing into the pack each offered only what the .walkdown where they were started declares (root: mono, reach, reach2, personal-proj; pack: alpha, alpha-two, personal-proj; nested: nested, personal-proj), answered 404 to every foreign ?bp= on GET /api/blueprint, POST /api/threads, /api/walkdowns, /api/draft and the per-thread reply and status routes, and wrote only where their own list points - so the fix's own test is telling the truth, and it also holds through the CLI's real cwd rather than only the injected one the test uses. This repository's example/ behaves the same: from the root the picker is [walkdown] and ?bp=example is unknown; from example/ it is [example] and ?bp=walkdown is unknown, in the copy (where a write into example landed as n-0005 in example's own ledger and nothing landed in walkdown's) and GET-only in the real tree. One shape stays open, and it is a declaration a person wrote rather than pooling, so it did not fail the rule: a root entry whose spec is a pack's own blueprint (n-0159 option b, left standing on purpose) is contained on the list but not on the write when the pack keeps records inside its blueprint directory - the root's --project reach2 server filed a note that `walkdown threads` inside packs/gamma then lists (server-probe S5). Filed as q-0168 for a person to decide; a second side finding, that `project add` writes absolute paths and a non-home layout into a committed pack config, is n-0169 under records-follow-the-spec.",
+      "threads": ["q-0168", "n-0169"]
+    }
+  ]
+}

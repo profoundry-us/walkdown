@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-01T01:05:28.925Z
 anchor:
   rule: locations.default.nothing-in-the-tree
-status: open
+status: addressed
 body: "Sitting 2026-09-01, observed while judging this rule (run
   2026-09-01T00-11-44Z-local-01): after a default init, the out-of-tree spec is
   invisible to most of the CLI. `walkdown serve`, `status`, and `lint` run from
@@ -146,3 +146,13 @@ replies:
       tiers went stale as they should, and all 33 tagged tests still pass, so no
       coverage was lost and nothing falsely claims the new wording. It will not
       need rewording again when the registry goes.
+  - author: topher
+    via: agent
+    created: 2026-09-03T01:30:34Z
+    body: "The decision here is implemented: every command reaches its blueprint
+      through resolveLocations - status, lint, serve, run, judge, sweep, thread,
+      threads, hash, where and move all agree, the tree-only findBlueprintDir
+      search is gone, and a default init's out-of-tree spec is visible from the
+      repository root. The registry (~/.walkdown/projects/) is deleted; the two
+      config files are the only source. Example now has its own .walkdown rather
+      than an entry in this repository's config."

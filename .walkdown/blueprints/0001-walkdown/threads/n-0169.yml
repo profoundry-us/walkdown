@@ -1,0 +1,41 @@
+id: n-0169
+kind: note
+author: topher
+via: agent
+created: 2026-09-03T01:37:16.598Z
+anchor:
+  rule: locations.default.records-follow-the-spec
+status: addressed
+body: "Seen in passing while judging locations.answer.one-walkdown-answers (run
+  2026-09-03T01-26-23Z-local-01); did not decide that verdict. 'walkdown project
+  add blueprint2 --id alpha-two', run from inside a pack whose committed
+  .walkdown init had just made, wrote this entry into the PACK'S committed
+  config.yml (evidence
+  runs/evidence/2026-09-03T01-26-23Z/locations-answer-probe.txt, FIXTURE
+  section): spec, runs, threads and roots all as ABSOLUTE paths under
+  /private/tmp/..., beside 'home: 0002-alpha-two'. Two things are wrong with it.
+  The paths are absolute in a file docs/08-locations.md says is 'relative to the
+  repository, deliberately' and 'cannot name a path outside the repository' - on
+  any other machine the clone's entry points at a directory that does not exist.
+  And the entry names a home (0002-alpha-two) but sends runs and threads to
+  <pack>/runs and <pack>/threads, the blueprint's PARENT, not the home's
+  siblings - so the records do not follow the spec into the home this rule says
+  they live in, and 'where' will report a home nothing writes to. Compare the
+  entry init wrote beside it, which is relative and keeps all five siblings in
+  0001-alpha. Not fixed here; filing because a person should decide whether
+  'project add' into a repository config should write relative paths and a home
+  layout, or refuse a repository config altogether and stay personal."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-03T01:46:01Z
+    body: "Fixed. `project add` writes through rememberProject, the same hand as
+      init: inside a repository the entry is relative to the repository (roots:
+      [second], spec: second/blueprint, runs: .walkdown/blueprints/0002-two/runs
+      ...), and every record kind points into the home it names; a legacy
+      blueprint that keeps runs or threads inside itself has those keys say so.
+      A blueprint outside the repository is refused for a committed entry ('lies
+      outside ..., list it personally instead') rather than written as an
+      absolute path; --ephemeral lists it personally with ~-spelled paths and no
+      root. Test: test/locations.test.js 'project add writes the entry the way
+      init does'."

@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-02T15:21:21.869Z
 anchor:
   rule: locations.default.one-home-per-blueprint
-status: open
+status: addressed
 body: >-
   one-home-per-blueprint still fails, one step past n-0150's guard, on the WRITE
   door and on the entry-keyed read.
@@ -56,3 +56,15 @@ body: >-
   id names the entry, not the directory — and every write door should refuse
   rather than fall back to a basename. rememberLocation should take the resolved
   entry (or nothing) rather than re-finding one by id.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-03T01:30:33Z
+    body: "Both doors closed. (1) walkdown move now refuses when no entry declares
+      the directory it is run from - rememberLocation throws without
+      loc.project, and there is no fallback id from a basename
+      (test/standard.test.js, 'move refuses undeclared'). (2) The config merge
+      is scoped by roots: a personal entry overrides a repo entry only when it
+      shares the id AND a root inside that repository, or is a pure rootless
+      override; same id rooted elsewhere is reported as shadowed, not merged.
+      Re-judged today by an independent judge (run 2026-09-03T01-26-22Z)."

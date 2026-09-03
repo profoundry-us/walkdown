@@ -4,7 +4,7 @@ author: Topher Fangio
 created: 2026-09-01T05:27:34.007Z
 anchor:
   rule: locations.default.records-follow-the-spec
-status: open
+status: addressed
 body: >-
   Decision: two config files, and which one a team uses IS the decision about
   whether the spec is shared.
@@ -62,3 +62,16 @@ body: >-
   where the old search scanned for any walkdown.yml anywhere and had to guess
   which one you meant. 'Walkdown stops looking for blueprints' stays true;
   'walkdown looks at nothing' would not be.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-03T01:30:33Z
+    body: "Implemented, in substance as written: two files of one schema, the
+      repository's .walkdown/config.yml committed and the personal
+      ~/.walkdown/config.yml never, read together with the personal one winning.
+      Two refinements since, both recorded in n-0163: the override is scoped by
+      roots (a personal entry beats a repo row only for a checkout inside that
+      repository, or as a rootless pure override), and whether the spec is
+      shared is read off the tree - where the home sits and whether
+      .walkdown/.gitignore exists - never recorded in either file. A team with
+      no repo config keeps everything personal, exactly as decided here."

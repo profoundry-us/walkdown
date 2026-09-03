@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-01T01:18:29.288Z
 anchor:
   rule: locations.default.one-home-per-blueprint
-status: open
+status: addressed
 body: "Observed while judging this rule (run 2026-09-01T01-06-46Z-local-01),
   distinct from the n-0129 migrate finding: in a repository whose first pack has
   already claimed an out-of-tree blueprint, a second 'walkdown init --dir
@@ -23,3 +23,14 @@ body: "Observed while judging this rule (run 2026-09-01T01-06-46Z-local-01),
   runs/evidence/2026-09-01T01-06-46Z/probe-03-monorepo-two-blueprints.txt and
   probe-04/probe-05 for the in-repo contrast. Whether init should refuse, ask,
   or allocate per-pack is a decision, not an agent's call."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-03T01:30:33Z
+    body: "Addressed. init matches an existing entry only by exact root, so a second
+      pack gets its own home. Reproduced today in a fixture monorepo: init at
+      the root claims 0001-mono; init inside packs/a claims 0002-a in the
+      personal home; init --commit spec inside packs/b claims
+      packs/b/.walkdown/blueprints/0001-b; 'walkdown where spec' from each of
+      the three directories names its own. Nothing attaches silently to a
+      sibling any more."

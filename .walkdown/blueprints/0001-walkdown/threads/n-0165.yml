@@ -1,0 +1,40 @@
+id: n-0165
+kind: note
+author: topher
+via: agent
+created: 2026-09-03T01:31:37.489Z
+anchor:
+  rule: locations.default.in-repo-on-request
+status: addressed
+body: >-
+  Moving the home back out of the repository rewrites the personal config in
+  YAML flow style.
+
+
+  Seen while judging 2026-09-03 (agent), evidence
+  runs/evidence/2026-09-03T01-26-20Z/probe-1-transitions.txt, snapshot 'after E
+  (none)'. Not the reason the rule failed; a separate defect in the same
+  command.
+
+
+  After 'walkdown init --commit spec' the personal entry is dropped and the file
+  is left with 'projects: []'. When 'walkdown init --commit none' later adds the
+  entry back, the yaml document keeps the empty sequence's flow style, so
+  ~/.walkdown/config.yml comes out as 'projects:\n  [\n    {\n        id:
+  acme,\n        roots:\n          [ ... ]' - valid, and 'walkdown where'
+  resolves it, but it is the file docs/08-locations.md describes as one a person
+  reads and edits, and every other write to it is block style. Every later
+  relocation keeps the flow style.
+
+
+  Likely in lib/standard.js dropPaths (the emptied sequence) or lib/locations.js
+  rememberProject (appending to it); setting the sequence's flow to false when
+  it is emptied, or re-serialising with block style, would fix it.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-03T01:46:00Z
+    body: "Fixed in rememberProject: the projects sequence is forced to block style
+      before an entry is added, so a list a relocation emptied to `projects: []`
+      comes back as `projects:\\n  - id: ...`. Covered by the same test as
+      n-0164, which reads the personal file after moving the home back out."

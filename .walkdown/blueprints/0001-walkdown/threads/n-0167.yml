@@ -1,0 +1,47 @@
+id: n-0167
+kind: note
+author: topher
+via: agent
+created: 2026-09-03T01:35:55.497Z
+anchor:
+  rule: locations.answer.declared-not-discovered
+status: addressed
+body: |-
+  The last THEN fails a fourth time, and this time the statement's "without them bleeding into each other" fails with it - by a route the n-0151 fix (DECLARED_BY) does not reach. The fix itself holds: restating none, some, or all of gamma's and beta's keys with absolute personal paths reads "names this project too; the personal config above wins where they disagree", matchedIn "both", config.repo.matched true, in words and in --json (evidence runs/evidence/2026-09-03T01-26-24Z/declared-not-discovered-03-restated-none-some-all.txt), and this repository's own `walkdown where` reads the same (…-05-this-repository-live.txt).
+
+  What breaks is HOW the keys are restated, not how many. Personal entries are never anchored: lib/locations.js anchorEntry() resolves a REPO entry's relative paths against the repository (its comment calls cwd-relative resolution "the same mistake as issue #7 … wearing a third costume"), but a personal entry's paths go through expand(p) with no base, which is process.cwd() - both in about(), which decides whether the entry is an override, and in projectFor(). So the committed entry copied verbatim into the personal file - `roots: [gamma]`, `spec: gamma/blueprint`, the most literal way to restate every key - resolves against wherever you stand:
+
+    cd repo/gamma; walkdown where   ->  personal row "present, no entry for this project",
+                                         repo row "this repository's, shared - no entry for this project",
+                                         spec "nothing declares this directory - `walkdown init` starts a project",
+                                         --json matchedIn null, config.repo.matched false;
+                                         `walkdown projects` from the same directory lists
+                                         gamma at repo/gamma/gamma/blueprint (gone);
+                                         status and thread new refuse.
+
+  (…-03c-verbatim-copy-and-dot-root.txt, and …-03b-root-spellings.txt for `roots: [gamma]` from the root.) Both files declare gamma, the directory is the one the committed file roots it at, and the report says neither file has an entry and nothing declares the directory. That is n-0151's symptom reproduced one step upstream: config.repo.matched is still derived from the SELECTED project (declaredBy is null when the merged entry's roots no longer contain cwd), so a personal override that breaks selection makes the repo row deny the committed file's contents.
+
+  The same mechanism bleeds. `roots: [.]` is the spelling this repository's own committed config uses; a personal alpha entry with `roots: [ . ]` and alpha's spec, standing in repo/gamma, answers with ALPHA: where --json id alpha, matchedIn both, spec repo/alpha/blueprint "this machine's config (alpha)"; `walkdown status` inside gamma prints alpha's board; and the same from repo/beta, from the repo root, and from repo/ghost - the undeclared one - which now yields a project (…-03d-dot-root-claims-a-sibling.txt). A thread filed from inside gamma against an alpha rule would land in alpha's ledger. The report gives no hint: both rows read as if the personal entry were about this checkout, which it is - about every checkout you happen to stand in.
+
+  Everything else in the rule held under what I could throw at it: alpha, beta and gamma each answer with their own spec, runs and threads (three notes all n-0001, a run dropped into alpha invisible from beta and visible via --project alpha from inside beta and from inside ghost); ghost and the repo root are refused by where, status, threads, thread new, --project ghost, the chooser, GET /api/blueprint?bp=ghost and POST /api/threads?bp=ghost (404); from outside the repository --project alpha is refused because that .walkdown is not consulted there; a spec moved elsewhere by a personal entry takes its threads with it; a checkout moved under a stale personal root falls back to the repository's entry and `projects` names the shadowed entry; a second checkout declared elsewhere is shadowed here and answers there; the ephemeral shape is never an override; /tmp-symlink and trailing-slash spellings of an absolute root work; a duplicate personal id merges without harm (…-01, -02, -03b, -04, -06).
+
+  Two fixes, a person's call: refuse or ignore a relative path in the personal file and say so on the personal row (there is no base a personal relative path could honestly mean), or anchor it somewhere and document what. Either way the repo row should read from the committed file's own entries rather than from the selected project, so a personal override that breaks selection cannot make it deny an entry that is there.
+
+  Claiming, not accepting.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-03T01:46:00Z
+    body: "Fixed along the first line you offered, plus the second. A relative path
+      in the personal file has no base, so readUserConfig sets it aside: roots,
+      spec and the four record kinds that are neither absolute nor ~-spelled are
+      dropped from the personal entry and listed as config.ignored, and
+      `walkdown where` prints 'ignores `roots: gamma` in entry `gamma` - a
+      relative path means nothing in this file; write it in full' under the
+      personal row (and --json carries config.ignored). The verbatim copy
+      therefore reads as a pure override: matchedIn both, repo row 'names this
+      project too'. A personal `roots: [.]` claims nothing. And the repository's
+      row is now read from the committed file's own entries (repoRooted), not
+      from the selected project. Test: test/locations.test.js 'a relative path
+      in the personal file is set aside and named, never resolved where you
+      stand'."
