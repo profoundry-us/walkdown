@@ -1,0 +1,45 @@
+id: n-0183
+kind: note
+author: topher
+via: agent
+created: 2026-09-03T17:21:36.857Z
+anchor:
+  rule: locations.default.in-repo-on-request
+status: open
+body: "init --commit spec|all on a blueprint that stands outside any numbered
+  home prints the standard's canned sentence over a tree it did not change.
+  Judged 2026-09-03 (agent), evidence
+  runs/evidence/2026-09-03T17-13-45Z/probe-d-personal-in-tree.txt (the two init
+  calls from packs/x, and D2). Fixture: a repository whose .walkdown/ holds
+  project delta under the spec standard (its .gitignore in place, committed),
+  plus packs/x/blueprint with packs/x/runs holding a committed run, declared
+  only in the personal config with an absolute root and spec - the n-0181 shape.
+  From packs/x, 'walkdown where' and 'walkdown lint' are honest: tracked is
+  'everything - asked git: no rule keeps any of it out' and lint errors three
+  times that .walkdown/.gitignore's rules do not reach this home. 'init --commit
+  none' refuses with exit 2 and says walkdown does not move a blueprint outside
+  a numbered home, which is right. But 'init --commit all' exits 0, removes
+  nothing (delta/.walkdown/.gitignore is still there, 439 bytes, and git status
+  shows nothing under .walkdown changed) and prints 'Committed in full, says the
+  tree: no .gitignore under .walkdown/, so everything there is git's' - the tree
+  says no such thing. 'init --commit spec' likewise exits 0, writes nothing, and
+  prints 'Committed: the spec and its threads ... .walkdown/.gitignore is the
+  standard - delete it to commit everything, or walkdown init --commit none
+  moves the home back out' - and --commit none is the command that just refused
+  for this blueprint. In both cases the tracked row underneath is git's and
+  correct, and the three lint findings are printed in red, so the report
+  contradicts itself rather than lying outright; but the sentence a person reads
+  first is keyed on the flag they typed (say[commit] in bin/commands/init.js)
+  rather than on what the tree holds, and the rule's own rationale names 'prints
+  success without changing anything' as the worse failure. Every other state I
+  drove holds: none->spec->all->spec->none on a fresh repo with a run, a
+  screenshot and a draft committed under all (the home moved whole, the ignore
+  file written and removed, 'still tracked' named the committed records, leaving
+  named the 9 pending deletions), a root .gitignore hiding .walkdown/ under both
+  spec and all, an emptied ignore file, a bare *, a rule that does not reach the
+  home, an evidence override outside the repository across all three standards,
+  a directory with no git, and a clone. Suggested shape: treat a homeless
+  blueprint the way relocateHome already does for none - say its standard is
+  whatever the person's own .gitignore says, and print no standard sentence - or
+  word the sentence from tracking(after) rather than from the flag. Claiming,
+  not accepting."

@@ -1,0 +1,31 @@
+{
+  "run_id": "2026-09-03T17-13-45Z-local-01",
+  "created": "2026-09-03T17:13:45Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "ad3a8d9-dirty",
+  "note": "One rule, judged headless from the working-tree CLI (node bin/walkdown.js at ad3a8d9) against seven throwaway fixtures built under the scratchpad judge-5/ with a private WALKDOWN_HOME and WALKDOWN_SKILLS_DIR, git-initialised where a repository was wanted. No server was started and nothing on 4700/4710/4310 was touched. -dirty because git status --porcelain was non-empty at recording time: the only uncommitted paths were this session's own thread n-0183 and this record; git diff HEAD was empty. Nothing in this repository was read as a project by a probe and nothing here was written except this record, the evidence under the key below, and n-0183. Every transcript is a command followed by its output, recorded by the wrapper saved as wd.sh.txt.",
+  "results": [
+    {
+      "rule": "locations.default.in-repo-on-request",
+      "status": "fail",
+      "statement_hash": "sha256:d66c40335b64",
+      "evidence": [
+        "runs/evidence/2026-09-03T17-13-45Z/index.txt",
+        "runs/evidence/2026-09-03T17-13-45Z/probe-a-cycle.txt",
+        "runs/evidence/2026-09-03T17-13-45Z/probe-b-root-ignore.txt",
+        "runs/evidence/2026-09-03T17-13-45Z/probe-c-ignore-edits.txt",
+        "runs/evidence/2026-09-03T17-13-45Z/probe-d-personal-in-tree.txt",
+        "runs/evidence/2026-09-03T17-13-45Z/probe-e-evidence-override.txt",
+        "runs/evidence/2026-09-03T17-13-45Z/probe-f-no-git.txt",
+        "runs/evidence/2026-09-03T17-13-45Z/probe-g-clone.txt"
+      ],
+      "reasoning": "The core of the rule holds everywhere I could push it, and I checked each claim against git rather than against walkdown's own words. On a fresh repository (probe-a) init put nothing in the tree; --commit spec moved the home whole into .walkdown/blueprints/0001-alpha with the private home emptied, wrote the three-rule .gitignore, a relative pointer in CLAUDE.md and a relative committed config, and git check-ignore attributed runs, evidence and drafts to .walkdown/.gitignore:7-9 while the spec, config and ignore file were plain untracked and committable; --commit all removed the file and check-ignore then matched nothing; --commit spec again over a run, a screenshot and a draft committed under all wrote the file back and named each still-tracked file with git rm --cached left to the person (a warning in init, where and lint); --commit none moved the home back out with identical files, took the config, ignore file, pointer and skills, and named the 9 tracked paths under .walkdown now pending as deletions, which git status confirmed. A root .gitignore holding .walkdown/ (probe-b) turned the tracked row into 'nothing - .gitignore:2 hides the spec from git' under both spec and all with five lint errors, and a root rule hiding only evidence under all was an error too. An emptied .walkdown/.gitignore (probe-c) was kept-differs on rerun, 'keeps nothing out' in red, a lint error, and rewritten only with --force; a bare * was 'hides the spec' plus still-tracked; a pattern naming a home number that does not exist was 'the rule does not reach this home'. An evidence override outside the repository (probe-e) survived spec, all, none and spec again as a personal override with the tracked row saying 'the rest is outside the repository'. Outside git (probe-f) the row said 'not a git repository - there is nothing to track' and lint stayed clean; a clone (probe-g) was a working project by its relative paths. Same-standard reruns changed nothing and said so; an invalid value was refused with the three standards listed. The fail is one shape, probe-d and its D2: a blueprint declared only in the personal config that stands in the tree at packs/x outside .walkdown/, the n-0181 fixture. where and lint are honest there (tracked: everything, asked git; three errors that the ignore file's rules do not reach this home) and --commit none refuses with exit 2 saying walkdown does not move a blueprint outside a numbered home. But --commit all exited 0, changed nothing (delta/.walkdown/.gitignore still there, git status unchanged under .walkdown) and printed 'Committed in full, says the tree: no .gitignore under .walkdown/', and --commit spec likewise exited 0, wrote nothing, and printed 'Committed: the spec and its threads ... or walkdown init --commit none moves the home back out' - advice that is the command which had just refused. The git row and the red findings beneath are correct, so the report contradicts itself rather than lying cleanly, but the sentence read first is keyed on the flag typed rather than on the tree, which is the 'prints success without changing anything' the statement calls worse than impoliteness, and 'how to change its mind later' is wrong for that shape. n-0183 carries the fixture and a suggested shape. Also noted, not failed on: 'still tracked' after tightening is a warning while the last THEN speaks of lint errors wherever promise and answer disagree - n-0164 chose warn as transitional and the case is said outright in all three places; and the 'the tree says' line of where still quotes the delta ignore rules for the packs/x blueprint before the error corrects it.",
+      "threads": [
+        "n-0183"
+      ]
+    }
+  ]
+}
