@@ -1,0 +1,29 @@
+id: q-0176
+kind: question
+author: topher
+via: agent
+created: 2026-09-03T02:57:27.591Z
+anchor:
+  rule: locations.answer.one-walkdown-answers
+status: open
+body: "Judged 2026-09-03 (run 2026-09-03T02-45-46Z-local-01, PASS): the q-0168
+  THEN holds - project add refuses a spec under another .walkdown from every
+  direction and for every layout, lint names the entry and both files, and only
+  --ephemeral gets through. This question is about what --ephemeral then lets
+  through. The refusal says 'list a throwaway copy with --ephemeral', but
+  project add --ephemeral accepts the pack's LIVE spec, the very path it just
+  refused, and an ephemeral entry's records follow records-follow-the-spec: for
+  a legacy-layout pack (spec: blueprint, threads inside it) the personal entry's
+  threads: row IS the pack's live ledger, so a root server's POST
+  /api/threads?bp=delta-eph landed n-0001 in packs/delta/blueprint/threads,
+  which 'walkdown threads' inside packs/delta lists as the pack's own
+  (runs/evidence/2026-09-03T02-45-46Z/server-probe.txt E1w/E1y,
+  ephemeral-and-writers-probe.txt C2/C5). And from inside the pack itself,
+  ?bp=gamma-eph resolved to gamma's committed ledger rather than the ephemeral's
+  home, because the served spec matches the pack's own entry first
+  (server-probe.txt E2w). Neither crosses the .walkdown boundary the rule is
+  about - the person wrote the entry - but the message promises a copy and the
+  tool writes to the original. For a person: should --ephemeral refuse a spec
+  that another .walkdown declares unless it is actually a copy (a path nothing
+  declares), or at least say that its writes will reach the pack's ledger when
+  the pack keeps records inside its blueprint?"

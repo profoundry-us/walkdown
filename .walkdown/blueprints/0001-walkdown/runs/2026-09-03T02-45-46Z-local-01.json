@@ -1,0 +1,31 @@
+{
+  "run_id": "2026-09-03T02-45-46Z-local-01",
+  "created": "2026-09-03T02:45:46Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "c2aa9dd",
+  "note": "One rule, judged headless from the working-tree CLI and its HTTP API against a fixture monorepo built in the judge's private scratchpad directory with WALKDOWN_HOME and WALKDOWN_SKILLS_DIR inside it: root and pack made by the real init --commit spec, a legacy-layout pack (spec beside its .walkdown, records inside the spec), a pack whose .walkdown holds no config.yml, a pack with no .walkdown (control), a blueprint outside the checkout, a .walkdown planted above the git root, and a personal home. Four servers on the judge's own ports 4801-4804; 4700/4710/4310 untouched. The real repository was never written to except this record and three threads; the fixture was removed afterwards. Evidence under runs/evidence/2026-09-03T02-45-46Z/: fixture-build.sh, refuse-probe.txt, lint-probe.txt, ephemeral-and-writers-probe.txt, server-probe.txt, fixture-layout.txt.",
+  "results": [
+    {
+      "rule": "locations.answer.one-walkdown-answers",
+      "status": "pass",
+      "statement_hash": "sha256:b08354a355f7",
+      "evidence": [
+        "runs/evidence/2026-09-03T02-45-46Z/refuse-probe.txt",
+        "runs/evidence/2026-09-03T02-45-46Z/lint-probe.txt",
+        "runs/evidence/2026-09-03T02-45-46Z/ephemeral-and-writers-probe.txt",
+        "runs/evidence/2026-09-03T02-45-46Z/server-probe.txt",
+        "runs/evidence/2026-09-03T02-45-46Z/fixture-layout.txt",
+        "runs/evidence/2026-09-03T02-45-46Z/fixture-build.sh"
+      ],
+      "reasoning": "The new THEN (q-0168) holds as written, driven rather than read off the fix's test. `project add` of a spec under another .walkdown was refused with exit 2 from the root into a home-layout pack, a legacy-layout pack, and a pack whose .walkdown has no config.yml; by relative and absolute path; from a sibling pack; and in reverse from inside the pack up to the root's blueprint and sideways into another pack - eight refusals, and md5 of the root config and the list of homes were identical before and after, so nothing was written and no home was minted (refuse-probe.txt A1-A8); the control add of a pack with no .walkdown of its own was listed normally (A9). The same four shapes written by hand into the root config are each a lint error naming the entry id, the committed file, and the pack's .walkdown, with exit 1, both from the root and from a pack directory the root answers for; the packs' own lint is silent, and removing epsilon's .walkdown removed exactly its error (lint-probe.txt B1-B8). --ephemeral was the only way through, wrote only to the personal config, and left both committed files unchanged (ephemeral-and-writers-probe.txt C1-C2). No other committed writer can mint the shape: init in a new pack made its own .walkdown, init --dir and a repeat init kept, the --commit none/spec round trip wrote a spec under its own .walkdown each way, and where --fix and move write only the personal file - the root config's md5 never moved through D1-D7. The earlier THENs still hold: where --json from eight places named exactly the nearest .walkdown, the one planted above the git root answered only when standing there, the personal override of mono's drafts merged in, --project across the boundary is unknown in both directions, and servers started at the root and in the pack offered only what their .walkdown declares plus the personal ephemerals, 404ed every foreign ?bp= on GET and POST, and filed threads only where their own list points (server-probe.txt E1-E4, E1w-E2w). Two things a person should see, neither a breach of this rule: an ephemeral entry naming a pack's LIVE spec writes into that pack's live ledger when the pack keeps records inside its blueprint, and from inside the pack resolves to the pack's own ledger - filed as q-0176; and a hand-written entry that lint reports is still served and written to by a root server while it stands (E3w, a thread inside the pack's spec directory that the pack's own entry never reads), which the THEN as worded permits. Side findings: the refusal misfires on a symlinked spelling of the pack's own path (A11, n-0177 here), and project add from inside a self-declaring checkout by relative path lists the blueprint a second time with an empty second home (A10, n-0178 under one-home-per-blueprint).",
+      "threads": [
+        "q-0176",
+        "n-0177",
+        "n-0178"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+id: n-0178
+kind: note
+author: topher
+via: agent
+created: 2026-09-03T02:58:05.546Z
+anchor:
+  rule: locations.default.one-home-per-blueprint
+status: open
+body: "Seen while judging one-walkdown-answers 2026-09-03 (run
+  2026-09-03T02-45-46Z-local-01); a door n-0170 and n-0173 do not name. Standing
+  INSIDE a checkout that declares its own blueprint (packs/gamma, made by init
+  --commit spec), 'walkdown project add
+  .walkdown/blueprints/0001-gamma/blueprint' does not say 'already listed': it
+  appends a second committed entry id 0001-gamma, roots
+  [.walkdown/blueprints/0001-gamma], and mints an empty second home
+  0002-0001-gamma for a spec the same file already lists as gamma
+  (runs/evidence/2026-09-03T02-45-46Z/refuse-probe.txt A10, and the config in
+  fixture-layout.txt). Two causes, both in the writer: bin/commands/project.js
+  checks 'listed' by expanding the file's spec against wd - the .walkdown
+  directory - so the committed spec .walkdown/blueprints/... becomes
+  .walkdown/.walkdown/blueprints/... and never matches; and rememberProject's
+  own listed check passes root = the blueprint's PARENT (the numbered home),
+  which gamma's roots [.] do not contain, so it writes rather than keeps. The
+  default id is then the home's number. The stale row outlives a relocation:
+  after init --commit none and --commit spec the pack's config still carries
+  0001-gamma pointing at a home that moved to 0003-gamma
+  (ephemeral-and-writers-probe.txt D7). The same path from OUTSIDE is refused
+  correctly by the q-0168 check, so this is the one direction left open."

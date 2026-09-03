@@ -1,0 +1,21 @@
+id: n-0177
+kind: note
+author: topher
+via: agent
+created: 2026-09-03T02:57:27.769Z
+anchor:
+  rule: locations.answer.one-walkdown-answers
+status: open
+body: "Seen while judging 2026-09-03 (run 2026-09-03T02-45-46Z-local-01, PASS -
+  not the reason for any verdict). The q-0168 refusal misfires on a symlinked
+  path: standing inside packs/gamma and naming gamma's own blueprint through
+  /tmp/... (which is /private/tmp/... on macOS), project add refuses it with
+  'lies under /tmp/.../packs/gamma/.walkdown, which answers for it (listed there
+  as gamma)' - naming the pack's OWN .walkdown as the other one
+  (runs/evidence/2026-09-03T02-45-46Z/refuse-probe.txt A11).
+  bin/commands/project.js compares own !== walkdownRoot() as strings;
+  walkdownRoot() sees process.cwd(), which is the real path, while own is walked
+  from the spelling the person typed. lib/locations.js has canon() for exactly
+  this ('on macOS everything under /var is'), and rememberProject's own copy of
+  the check already uses it. Small, and it refuses rather than pools, but the
+  message tells the person the wrong thing."

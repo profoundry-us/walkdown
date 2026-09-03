@@ -1,9 +1,13 @@
 {
-  "kind": "walkdown",
+  "run_id": "2026-09-03T02-45-45Z-local-01",
+  "created": "2026-09-03T02:45:45Z",
   "actor": "agent",
+  "kind": "walkdown",
   "target": "local",
   "base_url": "http://localhost:4700",
-  "recorded_at": "2026-09-03T02:45:45Z",
+  "git_sha": "c2aa9dd",
+  "blueprint_sha": "c2aa9dd",
+  "note": "One rule, judged headless from the working-tree CLI against a throwaway git repository under a private WALKDOWN_HOME and WALKDOWN_SKILLS_DIR inside the scratchpad, a server on port 4901 inside that fixture, and this repository's own unmodified configuration read live. The real personal config was read and never written; the fixture was removed afterwards.",
   "results": [
     {
       "rule": "locations.answer.declared-not-discovered",
