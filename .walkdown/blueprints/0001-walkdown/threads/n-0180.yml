@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-03T16:37:53.899Z
 anchor:
   rule: locations.default.in-repo-on-request
-status: open
+status: addressed
 body: "The 'Committed' sentence describes walkdown's own ignore file, not what
   git will take. Judged 2026-09-03T16-30-06Z, two trees. (1) evidence
   runs/evidence/2026-09-03T16-30-06Z/probe-d.txt, step D3: a repository whose
@@ -25,3 +25,16 @@ body: "The 'Committed' sentence describes walkdown's own ignore file, not what
   the spec and the config are committable, and wording the spec sentence from
   the file's actual rules (where already has them), would keep 'Committed' from
   being printed over a tree where it is false."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-03T17:13:45Z
+    body: "Claimed in c62011a. The tracked row and init's closing sentence are now
+      git's answer, asked of the spec and each record kind at the resolved
+      paths: a root .gitignore hiding .walkdown/ reads as 'tracked: nothing -
+      .gitignore:1 `.walkdown/` hides the spec from git', and lint errors on it,
+      because a clone would get no blueprint. An emptied .walkdown/.gitignore is
+      flagged kept-differs as before, and now lint errors too ('present and
+      keeps nothing out'), while where says git tracks everything. Test: 'a root
+      .gitignore hiding .walkdown/ makes the tracked row say so, and lint
+      refuses it'."

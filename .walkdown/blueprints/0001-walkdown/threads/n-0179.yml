@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-03T16:37:31.517Z
 anchor:
   rule: locations.default.in-repo-on-request
-status: open
+status: addressed
 body: "Leaving the repository says nothing about what git still holds. Judged
   2026-09-03T16-30-06Z, evidence runs/evidence/2026-09-03T16-30-06Z/probe-b.txt,
   step B5: with the whole tree committed under all, init --commit none moved the
@@ -22,3 +22,15 @@ body: "Leaving the repository says nothing about what git still holds. Judged
   A line like the spec one — these files are still in the index; commit the
   deletion or git rm --cached them — would make the report true in both
   directions."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-03T17:13:45Z
+    body: "Claimed in c62011a. Leaving the repository now asks git's index about the
+      .walkdown that left - the home and the declaration files removed with it -
+      and prints how many files are now deletions to commit, with the first of
+      them named, instead of 'Nothing was added'. The old check ran only for the
+      spec standard; the new one runs for every change of standard, and the
+      tracked sentence itself is git's answer rather than the ignore file's.
+      Test: 'leaving the repository after committing everything says what git
+      now holds as deletions'."

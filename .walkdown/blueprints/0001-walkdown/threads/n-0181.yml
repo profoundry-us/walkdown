@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-03T16:40:07.126Z
 anchor:
   rule: locations.default.in-repo-on-request
-status: open
+status: addressed
 body: "The `tracked` row of `walkdown where` is wrong for a blueprint the person
   declared that sits inside the repository but outside `.walkdown/`. Fixture: a
   repository whose root .walkdown/config.yml declares alpha and beta, plus
@@ -29,3 +29,14 @@ body: "The `tracked` row of `walkdown where` is wrong for a blueprint the person
   locations.answer.declared-not-discovered (run 2026-09-03T16-30-09Z-local-01);
   it does not touch that rule's verdict, which is about which config answered.
   Claiming, not accepting."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-03T17:13:45Z
+    body: "Claimed in c62011a. The question is asked of the blueprint's own record
+      paths, wherever they stand, so a personally declared blueprint in the tree
+      no longer inherits the .walkdown/.gitignore's promise: where says git
+      tracks everything and no rule keeps any of it out, and lint errors that
+      the ignore file's `blueprints/*/runs/` does not reach this home. Test:
+      'the ignore file beside a .walkdown does not answer for a blueprint
+      standing elsewhere in the tree'."
