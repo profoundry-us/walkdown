@@ -1,0 +1,112 @@
+id: n-0173
+kind: note
+author: topher
+via: agent
+created: 2026-09-03T02:53:43.320Z
+anchor:
+  rule: locations.default.one-home-per-blueprint
+status: open
+body: >-
+  Agent judging 2026-09-03 (run 2026-09-03T02-45-43Z-local-01): FAIL. All four
+  doors n-0170 named are closed, re-driven the same way (fresh WALKDOWN_HOME and
+  WALKDOWN_SKILLS_DIR per probe, real CLI, a server on a port of my own; scripts
+  and transcripts under runs/evidence/2026-09-03T02-45-43Z/): a plain init in
+  mono/app/packs/app stays its own project and a thread filed at the root lands
+  at the root (A-nested-same-name.txt); an abandoned home is never re-minted -
+  three/app gets 0002-app and app-2, one/app answers with its own gone home and
+  status refuses (B-abandoned-home.txt, which also forgets an entry with its
+  home standing, and relocates the middle of three same-named checkouts in and
+  out - 0004-app, nothing coinciding); project add from outside a self-declaring
+  checkout, or from another repository, refuses with "stand in that checkout to
+  use it" and mints nothing, and every project add of a spec the personal file
+  already lists dedups to "already listed" (C-project-add.txt); move writes into
+  a pure-override row rather than beside it (D-move.txt, D). Fifteen asking
+  commands from three directories plus six server GETs left home and both
+  checkouts byte-identical by sha256 (J-asking-writes-nothing.txt).
+
+
+  It fails at the next doors, all in the ONE arrangement n-0170 (1) fixed -
+  mono/app committed at the root, a plain init in mono/app/packs/app - where the
+  two rows are now correctly two projects, but three things still select between
+  them by the id they share:
+
+
+  (1) --project app FROM INSIDE THE PACK ANSWERS THE ROOT
+  (A-nested-same-name.txt, last section). Standing in packs/app, bare `where`,
+  `threads`, `thread new` answer the pack (n-0001 into the personal home);
+  `where --project app spec` answers the root's spec, `threads --project app`
+  lists the root's two threads, and `thread new --project app` filed n-0003 into
+  mono/app/.walkdown/blueprints/0001-app/threads - the root's ledger, from the
+  pack's directory, one flag away from the bare command that filed into the
+  pack's. resolveLocations picks `named.find(x => projectFor(cwd, [x]))` - the
+  FIRST row whose roots contain cwd, and both contain the pack; docs/08 promises
+  "the one rooted where you are". In the same place `walkdown projects` prints
+  "1 personal entry shadowed here by this repository's: app" while standing in
+  the directory where that personal entry is the one answering.
+
+
+  (2) THE SERVER'S ?bp=app IS THE ROOT'S, WHICHEVER ROW IS CURRENT
+  (A2-server.txt). A server started in packs/app serves the pack's blueprint by
+  default and lists projects [{id: app, current: false}, {id: app, current:
+  true}] - two rows the chooser cannot tell apart. GET /api/blueprint?bp=app
+  returns the ROOT's (three threads, root 0001-app under mono/app/.walkdown)
+  with current flipped onto the root's row; POST /api/threads?bp=app on the
+  pack's server wrote n-0004 into the root's ledger. serve.js does
+  `projects.find(p => p.id === requested)`. The step says "not a server's list".
+
+
+  (3) MOVE AT THE ROOT RECORDS THE ROOT'S EVIDENCE ON THE PACK'S ROW
+  (D-move.txt, D2). Root evidence holds root.png, pack evidence holds pack.png.
+  `walkdown move evidence --to root-evidence` at mono/app moves root.png to
+  root-evidence and writes `evidence: root-evidence` into the personal row `{id:
+  app, roots: [mono/app/packs/app]}` - the pack's. Afterwards `where evidence`
+  at the root answers the home directory that no longer exists, and in the pack
+  answers root-evidence, the root's screenshots. rememberLocation matches the
+  personal row by id plus containment in EITHER direction (`within(code, at) ||
+  within(at, code)`), which is the test n-0170's reply took out of the merge and
+  left in the writer. D3 (root override row written first, pack init second)
+  only holds because the pack was renamed app-2 by the in-file dedup.
+
+
+  (4) RELOCATION IGNORES A PERSONAL ROW ALREADY ABOUT THIS CHECKOUT, AND THE
+  CHECKOUT STOPS ANSWERING (F-relocate.txt F1, F1b-after.txt). A committed
+  project; `move evidence --to my-evidence` writes the personal row `{id: repo,
+  roots: [repo], evidence: my-evidence}`; then `init --commit none`.
+  relocateHome moves the home to personal 0001-repo (n-0001 travels with it),
+  rememberProject finds `repo` taken in the personal file and appends `repo-2`
+  rooted at the same directory, and the old row stays first - so projectFor's
+  tie goes to the row with no spec. The command prints "spec:
+  $FX/F/repo/blueprint ... the spec did not land at null" with a
+  DeprecationWarning, and SCAFFOLDS A NEW BLUEPRINT INTO THE TREE at
+  repo/blueprint/ (walkdown.yml, storyboard.yml, features/, AGENTS.md) on the
+  same screen that says "Nothing was added to this repository". Afterwards
+  `where` in the checkout says nothing declares this directory, `status` and
+  `threads` refuse, `projects` lists only repo-2, and n-0001 is reachable solely
+  through `--project repo-2`. A repeat `init` there says "up to date" about the
+  in-tree blueprint and repeats the null. One blueprint, three places - the
+  personal home holding its records, a scaffolded blueprint in git's view, and a
+  checkout that denies both. F3 (a pure-override row instead of a move row)
+  renames the project repo-2 and orphans the override's evidence path; F2
+  (personal project, move evidence, then --commit spec) drops the moved
+  `evidence:` key on the way in - dropPaths removes every path key - so
+  my-evidence/shot.png is named by nothing and `where evidence` answers the
+  home. H-relocate-nested.txt shows the nested arrangement relocating cleanly in
+  both directions, with the root silently becoming app-2.
+
+
+  OBSERVATION, not part of the verdict (G-fix.txt): `where --fix` over a legacy
+  projects/app home with two projects named app prints "already said - already
+  named by the config" for a directory the config does not name (both entries
+  carry init's own evidence key, so the fold skips and the report is wrong about
+  why). Nothing was moved or written, which is what the step asks; only the
+  sentence is false.
+
+
+  Shape of a fix, for whoever picks it up: the three selectors should be the
+  merge's - `--project` ties broken by the most specific containing root
+  (projectFor already knows how), the server keying its chooser by something the
+  two rows do not share (the spec directory, or refusing an ambiguous ?bp=), and
+  rememberLocation asking whether a personal root IS loc.code, not whether
+  either contains the other. Relocation should look for the personal row already
+  rooted at this checkout and write into it rather than beside it - and never
+  fall through to scaffolding into the tree when the resolved spec is null.

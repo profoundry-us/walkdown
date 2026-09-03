@@ -1,0 +1,29 @@
+{
+  "kind": "walkdown",
+  "actor": "agent",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "recorded_at": "2026-09-03T02:45:45Z",
+  "results": [
+    {
+      "rule": "locations.answer.declared-not-discovered",
+      "status": "fail",
+      "statement_hash": "sha256:dd87f8781211",
+      "evidence": [
+        "runs/evidence/2026-09-03T02-45-45Z/declared-not-discovered-00-fixture.txt",
+        "runs/evidence/2026-09-03T02-45-45Z/declared-not-discovered-01-declared-vs-undeclared.txt",
+        "runs/evidence/2026-09-03T02-45-45Z/declared-not-discovered-02-own-records-and-named-outright.txt",
+        "runs/evidence/2026-09-03T02-45-45Z/declared-not-discovered-03-restated-none-some-all.txt",
+        "runs/evidence/2026-09-03T02-45-45Z/declared-not-discovered-04-next-doors.txt",
+        "runs/evidence/2026-09-03T02-45-45Z/declared-not-discovered-04b-next-doors-continued.txt",
+        "runs/evidence/2026-09-03T02-45-45Z/declared-not-discovered-05-this-repository-live.txt",
+        "runs/evidence/2026-09-03T02-45-45Z/declared-not-discovered-06-server-surface.txt"
+      ],
+      "reasoning": "Judged headless from the working-tree CLI (c2aa9dd) against a throwaway git repository holding alpha and gamma, both declared by `project add` in repo/.walkdown/config.yml, and ghost, declared nowhere, with WALKDOWN_HOME and WALKDOWN_SKILLS_DIR pinned inside the fixture. The first two THENs hold everywhere I pushed: each declared blueprint answers with its own spec, runs and threads (two n-0001s in two ledgers, a run dropped into alpha invisible from gamma, reachable by --project alpha from gamma and from ghost); ghost and the repository root are refused by where, status, threads, thread new, --project ghost and by a server started in the fixture on port 4901 (?bp=ghost 404 on GET and POST, the chooser lists alpha and gamma only), and ghost dressed as .walkdown/blueprints/0003-ghost/ is still not a project. The n-0167 fix holds for every path key: none, some and all keys restated with absolute and ~-spelled paths read `names this project too; the personal config above wins`, each row credited to the file that supplied it in words and in --json; a verbatim relative copy prints six `ignores` lines and carries config.ignored; `.`, `./`, `./gamma`, `gamma/` and `../repo/gamma` are set aside, and a personal roots: [.] claims nothing from gamma, ghost or the root; this repository's own `walkdown where` reads matchedIn both, ignored [], tracked spec. The last THEN still fails by the one key that is not a path: `home:` in the verbatim copy is re-based against the personal .walkdown, so the copy is not the override of nothing it did not spell out in full. With the init-shaped committed entry that flips `tracked` to `nothing / the home is in ~/.walkdown` while everything is git's; with a committed entry in the documented lean shape it moves all four record kinds to <personal>/blueprints/0002-gamma, hides gamma's existing thread (`No active threads`) and files a second n-0001 there - a home keyed by a number allocated in a different blueprints/ listing, the name-keyed derivation this module exists to keep out (n-0174). Three smaller doors of the same family - repoRooted computed over the merged roots so a narrowed personal root makes the repo row deny its own entry, personal `defaults:` expanded at cwd, and a whitespace-only root surviving the guard and claiming the working directory - plus one wording slip on --project <undeclared> are in n-0175. Claiming, not accepting.",
+      "threads": [
+        "n-0174",
+        "n-0175"
+      ]
+    }
+  ]
+}

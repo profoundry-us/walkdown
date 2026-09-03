@@ -1,0 +1,30 @@
+{
+  "run_id": "2026-09-03T02-45-42Z-local-01",
+  "created": "2026-09-03T02:45:42Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "c2aa9dd-dirty",
+  "note": "One rule, judged headless from the working-tree CLI against throwaway git repositories under a private scratchpad fixture with WALKDOWN_HOME and WALKDOWN_SKILLS_DIR inside it; the real personal config, skills and home were never written to, and the fixture was removed afterwards. Records seeded and committed under all before every tightening, sha256 of every file in the home compared after every move, and git asked directly (ls-files, status, add --dry-run, check-ignore) after each transition.",
+  "results": [
+    {
+      "rule": "locations.default.in-repo-on-request",
+      "status": "fail",
+      "statement_hash": "sha256:d66c40335b64",
+      "evidence": [
+        "runs/evidence/2026-09-03T02-45-42Z/summary.md",
+        "runs/evidence/2026-09-03T02-45-42Z/probe-1-transitions.txt",
+        "runs/evidence/2026-09-03T02-45-42Z/probe-2-doors.txt",
+        "runs/evidence/2026-09-03T02-45-42Z/probe-2b-doors-redone.txt",
+        "runs/evidence/2026-09-03T02-45-42Z/probe-2c-targets.txt",
+        "runs/evidence/2026-09-03T02-45-42Z/probe-3-own-checks.txt"
+      ],
+      "reasoning": "The three claimed fixes hold when driven for real. With a run, a screenshot and a draft committed under all, 'init --commit spec' now says 'Already committed, so still tracked: 3 file(s) ... until you git rm --cached them' and names exactly the paths git ls-files holds; the count is right for seven files, for a monorepo pack via --dir and from inside it, and the sentence stops once the person untracks them (n-0164). Leaving the repository removes walkdown's four unedited skills, names the edited one as kept, and leaves the person's own skill, settings.json and a notes file beside an unedited SKILL.md untouched (n-0166). The personal file is rewritten in block style after being emptied (n-0165). Every home sha256 was identical across none->spec, spec->none, none->all and all->none; the .gitignore was written or removed as the standard says, .gitignore and config.yml are themselves stageable, the pointer is relative, and each direction names how to change its mind. The fail is the next door: docs/08 says a personal entry may carry 'which port is yours', and dropPaths deliberately keeps such an entry on the way into the repository, reduced to id, roots and targets. On the way back out, rememberProject looks for the existing row by spec path, finds none, sees the id taken and appends 'beta-2' rooted at the same directory - the home has moved whole, the command prints success, and the checkout is no longer a project: 'walkdown status' says nothing claims this directory, 'where' shows every kind undeclared and tracked as 'not a project', and the person's run sits in a home reachable from nowhere. Asked again with '--commit spec', init resolves the leftover row to no home, skips the move, scaffolds a fresh blueprint at <repo>/blueprint/ outside any home with no .walkdown, no entry and no .gitignore, prints the spec-standard paragraph about a .walkdown/.gitignore that does not exist, and ends 'the spec did not land at null' with exit 0. The same chain without the override round-trips cleanly. That is the statement's own case - the tree changed to say something other than what was asked and the words claimed a standard nothing enforces - so this rule fails (n-0171). A second door, an unreadable personal config making init mint a second home and the return die mid-move, is n-0172 and did not decide the verdict.",
+      "threads": [
+        "n-0171",
+        "n-0172"
+      ]
+    }
+  ]
+}

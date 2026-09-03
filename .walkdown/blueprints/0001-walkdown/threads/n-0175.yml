@@ -1,0 +1,20 @@
+id: n-0175
+kind: note
+author: topher
+via: agent
+created: 2026-09-03T02:56:30.479Z
+anchor:
+  rule: locations.answer.declared-not-discovered
+status: open
+body: |-
+  Three smaller doors of the same family as n-0167 - a base-less value resolved where you stand, or a row computed over the merge instead of over the file it describes. None is the fail on its own; they are here so the next fix can close them together.
+
+  1. repoRooted reads the MERGED entry's roots, not the committed file's (lib/locations.js, readUserConfig: `[...byId.values()]` after the personal merge). The n-0167 reply says the repository's row is "read from the committed file's own entries"; it is read from the committed entries after the personal file has overwritten their roots. Committed gamma rooted at [gamma, gamma2], personal gamma restating roots: [<abs>/gamma] only (an override, absolute, about this checkout): from gamma2 the report reads "this repository's, shared - no entry for this project" and "nothing declares this directory", status refuses, while the committed file plainly roots gamma there (runs/evidence/2026-09-03T02-45-45Z/declared-not-discovered-04b-next-doors-continued.txt, 04b). Narrowing roots may well be the person's decision; the row denying the committed file's entry is not.
+
+  2. `defaults:` in the personal file is expanded at cwd. `defaults: { drafts: tmp/drafts-{id} }` resolves to repo/gamma/tmp/drafts-gamma from inside gamma and to repo/gamma/blueprint/tmp/drafts-gamma from inside the blueprint - two drafts directories for one project depending on where the command ran, credited "the config default" (04c). The relative-path guard covers projects[] keys only; fromDefault() still calls expand(raw) with no base.
+
+  3. A whitespace-only root survives the guard: rel() tests String(v).trim() and an all-space string trims to '', which reads as "not relative", so `roots: ['  ']` is kept and expand('  ') resolves to process.cwd(). From ghost, gamma then answers - matchedIn personal, spec gamma's, records "inside the blueprint this reader holds" i.e. gamma/blueprint/threads, a second ledger for gamma - and from inside gamma the same entry merges as an override (...-03-restated-none-some-all.txt, last section). Nobody writes this on purpose; it is the n-0167 mechanism, still reachable. `~name` (no slash) passes the guard too but expands to cwd/~name and claims nothing.
+
+  4. Wording: `walkdown where --project ghost` from inside alpha prints the repo row as "names this project" (repoRooted is true because alpha is rooted at cwd) above "no project ghost" - the row is about the directory, the header and spec row about the id asked for (04d, and ...-01-declared-vs-undeclared.txt).
+
+  Claiming, not accepting.

@@ -1,0 +1,38 @@
+id: n-0172
+kind: note
+author: topher
+via: agent
+created: 2026-09-03T02:52:40.832Z
+anchor:
+  rule: locations.default.in-repo-on-request
+status: open
+body: >-
+  A personal config that does not parse makes init treat the project as
+  unlisted: none->spec mints a fresh empty home in the repository beside the
+  person's real one, and spec->none moves the home and then dies mid-transition.
+
+
+  Seen while judging 2026-09-03 (agent), evidence
+  runs/evidence/2026-09-03T02-45-42Z/probe-2b-doors-redone.txt, section P2-g.
+  Not the reason the rule failed - the precondition is a hand-broken
+  ~/.walkdown/config.yml (one bad indent) - but the consequences are the kind
+  the statement's rationale is about, so noted here.
+
+
+  With the personal file unreadable ('walkdown where' says so on its config
+  row), 'walkdown init --commit spec' prints no warning, allocates
+  .walkdown/blueprints/0001-theta in the repository, scaffolds an empty
+  blueprint into it and lists it as theta - while the person's 0001-theta under
+  ~/.walkdown, runs and all, stays where it was, declared by a file nothing can
+  read. Then 'walkdown init --commit none' relocates the repository home to
+  ~/.walkdown/blueprints/0002-theta and only afterwards fails with 'Document
+  with errors cannot be stringified' (exit 2), leaving the repository's
+  config.yml and .gitignore in place declaring a home that is gone: 'walkdown
+  projects' shows theta '(gone)', 'walkdown status' says no blueprint here.
+
+
+  Suggested shape: init should refuse to act on a personal config it cannot
+  parse (readUserConfig already knows), the same way 'where' already reports it;
+  and relocateHome should read and prepare both config documents before moving
+  the directory, so a config that cannot be written leaves the tree as it found
+  it.

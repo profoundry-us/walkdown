@@ -1,0 +1,22 @@
+id: n-0174
+kind: note
+author: topher
+via: agent
+created: 2026-09-03T02:56:17.178Z
+anchor:
+  rule: locations.answer.declared-not-discovered
+status: open
+body: |-
+  The n-0167 fix holds for every PATH key, and the last THEN now fails by one key that is not a path: `home:`. A committed entry copied verbatim into the personal file - the exact case n-0167 named - is still not "the override of nothing it did not spell out in full" (docs/08-locations.md), because readUserConfig sets aside roots/spec/runs/threads/evidence/drafts that are relative, and `home: 0002-gamma` is neither absolute nor relative: it is a NAME, and resolveLocations reads it against the .walkdown that declared it (declaredIn(project,'home') === 'personal' -> the personal home). So the copy declares a home at <personal>/blueprints/0002-gamma - a directory nobody made, keyed by a number that was allocated in a DIFFERENT blueprints/ listing, which is the name-keyed derivation the docs say nothing resolves by any more.
+
+  Two consequences, by the shape of the committed entry:
+
+  1. With the shape init/project add write (every kind spelled out): every path row is right and credited to the committed file, the six ignores are printed, matchedIn both - and the `tracked` row reads "nothing / the home is in ~/.walkdown, which git never sees" while the home is in repo/.walkdown with no .gitignore, i.e. everything is git's. Restating all keys ABSOLUTELY (including home) does the same: tracked flips from everything to nothing (runs/evidence/2026-09-03T02-45-45Z/declared-not-discovered-03-restated-none-some-all.txt, sections ALL absolute and ALL VERBATIM; --json standard.name "none").
+
+  2. With a committed entry in the documented lean shape (id, roots, spec, home - "every path is written out even though the home implies them", resolution rule 5): the personal `home: 0002-gamma` alone moves all four record kinds to <personal>/blueprints/0002-gamma/*, credited "this machine's ~/.walkdown". From inside gamma, `walkdown threads` then says "No active threads" while repo/.walkdown/blueprints/0002-gamma/threads/n-0001.yml exists, and `thread new` files a SECOND n-0001 into home/blueprints/0002-gamma/threads/ - gamma's ledger split in two by one restated key, the existing record no longer found (...-04-next-doors.txt, section 04a). The report is honest about which file answered each row; what it answers with is a home nobody declared as a path.
+
+  Everything else in the rule held: alpha and gamma each answer with their own spec, runs and threads (two n-0001s in two ledgers, a run dropped into alpha invisible from gamma, --project alpha from inside gamma and from ghost); ghost and the repo root are refused by where, status, threads, thread new, --project ghost, and by the server (GET/POST ?bp=ghost 404; the chooser lists only alpha and gamma); ghost dressed as .walkdown/blueprints/0003-ghost/ is still not a project; none/some/all keys restated with absolute and ~ paths read "names this project too; the personal config above wins", each row credited to the file that supplied it, in words and --json; `.`, `./`, `./gamma`, `gamma/`, `../repo/gamma` are all set aside and named, and a personal roots: [.] claims nothing from gamma, ghost or the root; this repository's own `walkdown where` reads matchedIn both, ignored [], tracked spec (…-00 through …-06).
+
+  Fix shape, a person's call: treat `home:` in the personal file the way the relative paths are treated when the entry is an override of a committed one (set aside and named - the committed file's home is the only one that can mean anything for a committed entry), or read homeFor from the file that declared the ENTRY rather than the file that last wrote the key. Either way `tracked` should follow the records' actual directory, not the home key's provenance.
+
+  Claiming, not accepting.

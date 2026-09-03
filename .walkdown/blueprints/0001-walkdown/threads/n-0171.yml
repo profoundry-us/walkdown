@@ -1,0 +1,61 @@
+id: n-0171
+kind: note
+author: topher
+via: agent
+created: 2026-09-03T02:52:25.651Z
+anchor:
+  rule: locations.default.in-repo-on-request
+status: open
+body: >-
+  Leaving the repository with a personal port override splits the project in
+  two, and the next change of mind scaffolds a second blueprint at
+  <repo>/blueprint/ while describing a .gitignore that does not exist.
+
+
+  Judged 2026-09-03 (agent), evidence
+  runs/evidence/2026-09-03T02-45-42Z/probe-2c-targets.txt (steps 1-3, and step 4
+  as a control).
+
+
+  docs/08-locations.md says a personal entry may override 'which port is yours',
+  and lib/standard.js dropPaths deliberately keeps an entry that still has such
+  keys: after 'walkdown init --commit spec' the personal row is reduced to {id:
+  beta, roots: [<repo>], targets: {...}} - the override shape - and 'walkdown
+  where' names both configs. So far right. Then 'walkdown init --commit none'
+  moves the home back whole (hashes intact) but lib/locations.js rememberProject
+  looks for the existing personal row by SPEC path, which that row no longer
+  has, sees the id 'beta' taken, and appends a second row 'beta-2' rooted at the
+  very same directory. The command prints success ('~ listed ... as beta-2').
+  After it: 'walkdown status' says 'No blueprint here. Nothing in
+  ~/.walkdown/config.yml claims this directory', 'walkdown where' shows every
+  kind as '- nothing declares this directory' and tracked as 'not a project',
+  and 'walkdown projects' lists only beta-2. The person's home, with their run
+  in it, is at ~/.walkdown/blueprints/0001-beta and reachable by nothing from
+  the checkout.
+
+
+  Asking again - 'walkdown init --commit spec' - does not move it back. init's
+  exact() picks the first row rooted here (beta, no spec), resolves it to no
+  home, skips the relocation, and scaffolds a fresh blueprint at
+  <repo>/blueprint/ outside any home, writes no .walkdown/, no config entry and
+  no .gitignore, prints 'Committed: the spec and its threads ...
+  .walkdown/.gitignore keeps runs, evidence and drafts out' over a tree with no
+  .walkdown at all, and finishes with 'the spec did not land at null' and a Node
+  deprecation warning (exit 0). git add --dry-run would stage blueprint/ at the
+  root. The same four commands with no targets: line (step 4) round-trip
+  cleanly, so the override is the trigger.
+
+
+  This is the statement's own case: the tool changed the wrong thing and said
+  the standard was in force when nothing enforces it. Suggested shape: when the
+  receiving personal file already holds a row for this root and id (an override
+  left behind by the outward move), write the paths back into THAT row rather
+  than minting id-2 - the reverse of what dropPaths did on the way out; and init
+  should refuse, not scaffold, when the matched entry resolves to no spec.
+
+
+  Not the fail but seen alongside: 'walkdown where' after all->spec with records
+  still in the index says only 'the spec and its threads' (n-0164 suggested the
+  tracked row could ask git too); init now does say it, correctly and with the
+  count, in every case tried (probe-1-transitions.txt step D, probe-2-doors.txt
+  P2-b/c/d).

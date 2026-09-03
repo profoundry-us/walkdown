@@ -1,0 +1,44 @@
+{
+  "run_id": "2026-09-03T02-45-43Z-local-01",
+  "created": "2026-09-03T02:45:43Z",
+  "git_sha": "c2aa9dd",
+  "blueprint_sha": "c2aa9dd",
+  "kind": "walkdown",
+  "actor": "agent",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "results": [
+    {
+      "rule": "locations.default.one-home-per-blueprint",
+      "status": "fail",
+      "statement_hash": "sha256:c2e4b20e7f0d",
+      "evidence": [
+        "runs/evidence/2026-09-03T02-45-43Z/A-nested-same-name.txt",
+        "runs/evidence/2026-09-03T02-45-43Z/A-nested-same-name.sh",
+        "runs/evidence/2026-09-03T02-45-43Z/A2-server.txt",
+        "runs/evidence/2026-09-03T02-45-43Z/A2-server.sh",
+        "runs/evidence/2026-09-03T02-45-43Z/D-move.txt",
+        "runs/evidence/2026-09-03T02-45-43Z/D-move.sh",
+        "runs/evidence/2026-09-03T02-45-43Z/F-relocate.txt",
+        "runs/evidence/2026-09-03T02-45-43Z/F-relocate.sh",
+        "runs/evidence/2026-09-03T02-45-43Z/F1b-after.txt",
+        "runs/evidence/2026-09-03T02-45-43Z/F1b-after.sh",
+        "runs/evidence/2026-09-03T02-45-43Z/B-abandoned-home.txt",
+        "runs/evidence/2026-09-03T02-45-43Z/B-abandoned-home.sh",
+        "runs/evidence/2026-09-03T02-45-43Z/C-project-add.txt",
+        "runs/evidence/2026-09-03T02-45-43Z/C-project-add.sh",
+        "runs/evidence/2026-09-03T02-45-43Z/H-relocate-nested.txt",
+        "runs/evidence/2026-09-03T02-45-43Z/H-relocate-nested.sh",
+        "runs/evidence/2026-09-03T02-45-43Z/J-asking-writes-nothing.txt",
+        "runs/evidence/2026-09-03T02-45-43Z/J-asking-writes-nothing.sh",
+        "runs/evidence/2026-09-03T02-45-43Z/G-fix.txt",
+        "runs/evidence/2026-09-03T02-45-43Z/G-fix.sh",
+        "runs/evidence/2026-09-03T02-45-43Z/harness-lib.sh"
+      ],
+      "reasoning": "Judged by building fixtures under a private scratch directory with a fresh WALKDOWN_HOME and WALKDOWN_SKILLS_DIR per probe and driving the real CLI and a server on ports of my own, never the suite. Every door n-0170 named is closed when re-driven: a plain init in mono/app/packs/app is its own project and a thread filed at the root lands at the root; an abandoned home is never re-minted (the next same-named checkout gets 0002-app and app-2, the abandoned one answers with its own gone home); project add from outside a self-declaring checkout refuses and mints nothing; move writes into a pure-override row; relocating the middle of three same-named checkouts in and out coincides with nothing; fifteen asking commands from three directories and six server GETs left every tree byte-identical by sha256. It fails at the next doors, in the one arrangement that fix made correct: the root and the pack are now two projects, but three selectors still pick between them by the id they share. From inside the pack, --project app answers the root - thread new --project app filed n-0003 into the root ledger from the directory where the bare command files into the pack, and projects there calls the answering entry shadowed. A server started in the pack lists two rows named app the chooser cannot tell apart, and ?bp=app selects the root: POST /api/threads?bp=app on the pack server wrote n-0004 into the root ledger. move evidence at the root moved the root screenshots and recorded the destination on the pack personal row, so the root answers a directory that no longer exists and the pack answers the root evidence - rememberLocation still matches by id plus containment in either direction, the test the merge dropped. And relocation ignores a personal row already about the checkout: after move evidence in a committed project, init --commit none appended repo-2 beside the move row, the specless row won the tie, the command printed the spec did not land at null and scaffolded a new blueprint into the tree under the sentence that nothing was added, and the checkout then denies being a project while n-0001 sits in a home reachable only by --project repo-2; the same relocation the other way drops a moved evidence key so the moved screenshots are named by nothing. One blueprint given a second home with its records stranded, and paths still resolving through a shared name, at the --project flag, the server list and the move - the three places the steps name. Details, transcripts and one observation about the --fix report in n-0173. Claiming, not accepting.",
+      "threads": [
+        "n-0173"
+      ]
+    }
+  ]
+}
