@@ -91,16 +91,23 @@ function add(args) {
    * that checkout is how it is reached.
    */
   const own = walkdownRoot(resolve(spec, '..'));
-  if (own && !values.ephemeral) {
+  if (own && !values.ephemeral && own !== walkdownRoot()) {
     const theirs = load(join(own, 'config.yml')).get('projects');
     const there = (theirs?.items ?? []).find(
       (it) => String(it.get?.('spec') ?? '') && expand(String(it.get('spec')), resolve(own, '..')) === spec,
     );
-    if (there && own !== walkdownRoot()) {
-      console.log(`  ${dim('· already listed')} ${spec}  ${dim(`as \`${there.get('id')}\` in ${join(own, 'config.yml')}`)}`);
-      console.log(dim('            That checkout declares it; stand in it to use it.'));
-      return end(0);
-    }
+    /*
+     * That `.walkdown` is the one that answers for it, listed there already
+     * or not (q-0168): a committed entry from here would be the boundary
+     * crossing one-walkdown-answers forbids, so it is refused rather than
+     * written and contained.
+     */
+    console.error(
+      red(
+        `${spec} lies under ${own}, which answers for it${there ? ` (listed there as \`${there.get('id')}\`)` : ''} — stand in that checkout to use it, declare it there, or list a throwaway copy with --ephemeral.`,
+      ),
+    );
+    return end(2);
   }
   const wd = values.ephemeral ? walkdownHome() : (walkdownRoot() ?? walkdownHome());
   const inRepo = !values.ephemeral && wd !== walkdownHome();

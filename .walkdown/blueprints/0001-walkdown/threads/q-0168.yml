@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-03T01:36:56.870Z
 anchor:
   rule: locations.answer.one-walkdown-answers
-status: open
+status: incorporated
 body: "Judged 2026-09-03 (run 2026-09-03T01-26-23Z-local-01, PASS). Every THEN
   held in a fixture monorepo built with the real init: root .walkdown, a pack's,
   a pack nested inside that pack, a legacy-layout pack, a .walkdown above the
@@ -34,3 +34,27 @@ body: "Judged 2026-09-03 (run 2026-09-03T01-26-23Z-local-01, PASS). Every THEN
   person: is a spec: that lies under ANOTHER .walkdown a declaration walkdown
   should refuse (n-0159's option b), or at least one 'lint' and 'project add'
   should name? Today neither says a word."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-03T02:41:39Z
+    body: "Decision (Topher, 2026-09-02): refuse it. A blueprint that sits under its
+      own .walkdown already has one owner; a second committed declaration from a
+      .walkdown above is the same defect family as n-0160 and n-0170, written by
+      hand instead of merged by code. So: `project add` and every other writer
+      of a committed entry refuse a spec that lies under another .walkdown,
+      naming that .walkdown and pointing at --ephemeral for a throwaway copy;
+      `lint` reports a hand-written entry of that shape as an error, naming both
+      declaring files; and the rule gains a THEN saying so. Implementation
+      follows in this session."
+  - author: topher
+    via: agent
+    created: 2026-09-03T02:44:11Z
+    body: "Incorporated. The rule one-walkdown-answers gained a THEN: a committed
+      entry whose spec lies under another .walkdown is refused when written and
+      reported by lint when found. Code: rememberProject refuses it for every
+      committed writer, `project add` refuses it outright (listed there or not)
+      and points at --ephemeral, and lint reports a hand-written one as an error
+      naming the entry, both .walkdown directories and the way out. Test:
+      test/locations.test.js 'a committed entry never reaches under another
+      .walkdown'. docs/08 says the same."

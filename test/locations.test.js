@@ -740,9 +740,8 @@ test('project add writes the entry the way init does: relative in the repository
     assert.equal(old.threads, 'old/blueprint/threads');
     assert.equal(old.runs, '.walkdown/blueprints/0003-old/runs');
 
-    // A blueprint whose own checkout already declares it is not listed a second time.
-    const again = walkdown(s.home, ['project', 'add', join(repo, 'second', 'blueprint')], s.root);
-    assert.match(again, /already listed/, again);
+    // A blueprint whose own checkout already declares it is refused from outside (q-0168).
+    assert.throws(() => walkdown(s.home, ['project', 'add', join(repo, 'second', 'blueprint')], s.root), /lies under/);
     assert.ok(!existsSync(join(s.home, 'config.yml')) || !readFileSync(join(s.home, 'config.yml'), 'utf8').includes('second'));
     assert.ok(!existsSync(join(s.home, 'blueprints', '0001-second')));
     // Outside the repository, a committed entry is refused, not written wrong.
@@ -837,6 +836,52 @@ test('move writes into a pure-override row rather than beside it @rule:locations
     assert.equal(rows.length, 1, JSON.stringify(rows));
     assert.ok(rows[0].drafts.endsWith('/drafts'));
     assert.ok(rows[0].evidence.endsWith('/ev'));
+  } finally {
+    s.cleanup();
+  }
+});
+
+test('a committed entry never reaches under another .walkdown @rule:locations.answer.one-walkdown-answers', () => {
+  /*
+   * q-0168: a root entry whose spec lies inside a pack that carries its own
+   * `.walkdown` is the boundary crossing the rule forbids, written by hand.
+   * The pack's `.walkdown` answers for it; from the root it is refused, and
+   * only --ephemeral may name it from outside.
+   */
+  const s = scratch();
+  try {
+    const repo = join(s.root, 'mono');
+    const pack = join(repo, 'packs', 'gamma');
+    mkdirSync(pack, { recursive: true });
+    walkdown(s.home, ['init', '--commit', 'spec'], repo);
+    walkdown(s.home, ['init', '--commit', 'spec'], pack);
+    const spec = join(pack, '.walkdown', 'blueprints', '0001-gamma', 'blueprint');
+    const before = readFileSync(join(repo, '.walkdown', 'config.yml'), 'utf8');
+    assert.throws(() => walkdown(s.home, ['project', 'add', spec, '--id', 'reach'], repo), /lies under/);
+    assert.equal(readFileSync(join(repo, '.walkdown', 'config.yml'), 'utf8'), before, 'nothing written');
+    assert.ok(!existsSync(join(repo, '.walkdown', 'blueprints', '0002-reach')), 'no home minted');
+    // The same shape written by hand is a lint error naming both files.
+    writeFileSync(
+      join(repo, '.walkdown', 'config.yml'),
+      before + `  - id: reach\n    roots: [packs/gamma]\n    spec: packs/gamma/.walkdown/blueprints/0001-gamma/blueprint\n`,
+    );
+    let out = '';
+    try {
+      execFileSync(process.execPath, [CLI, 'lint'], {
+        cwd: repo,
+        env: { ...process.env, WALKDOWN_HOME: s.home, NO_COLOR: '1' },
+        encoding: 'utf8',
+      });
+      assert.fail('lint exits non-zero on an error');
+    } catch (e) {
+      out = String(e.stdout ?? '');
+    }
+    assert.match(out, /reach/, out);
+    assert.match(out, /packs\/gamma\/\.walkdown/, out);
+    assert.match(out, /error/, out);
+    // A throwaway copy may still be named from outside, personally.
+    walkdown(s.home, ['project', 'add', spec, '--ephemeral', '--why', 'a look'], repo);
+    assert.ok(readFileSync(join(s.home, 'config.yml'), 'utf8').includes('ephemeral: true'));
   } finally {
     s.cleanup();
   }

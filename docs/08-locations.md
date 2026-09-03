@@ -169,6 +169,12 @@ repository is refused for a committed entry rather than written as an absolute p
 `--ephemeral` lists it personally instead. A blueprint whose own checkout already declares
 it is not listed twice — stand in that checkout to use it (n-0169, n-0170).
 
+A committed entry never reaches under another `.walkdown`. A pack carrying its own
+`.walkdown` is a project of its own, and a root entry whose `spec:` lies inside it is the
+boundary crossing `one-walkdown-answers` forbids, written by hand: `project add` refuses
+it, `lint` reports one it finds, naming both files, and only `--ephemeral` may name that
+blueprint from outside (q-0168).
+
 A blueprint nobody listed is not a project. `walkdown where` says nothing declares this
 directory rather than naming a path, and every command refuses the same way. That is not
 a gap; a path reached without an entry needed a home derived from a name, which is where
