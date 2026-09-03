@@ -1,0 +1,8 @@
+# The spec, its threads AND its runs are committed here: this repository's
+# ledger is the point of the repository, and a run record is 3KB of JSON
+# somebody reviews. That is the spec standard with one line fewer - the
+# `blueprints/*/runs/` rule `walkdown init --commit spec` would write is
+# deliberately absent. Evidence is 97MB of screenshots nobody reads in a
+# diff, and a draft is one person's half-finished sitting.
+blueprints/*/evidence/
+blueprints/*/drafts/

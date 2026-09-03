@@ -5,7 +5,7 @@ description: Formulate a walkdown feature - derive storyboard screens, stories, 
 
 # Formulate a feature
 
-Conventions live in `blueprint/AGENTS.md` — read it first. Formulation turns a
+Conventions live in the blueprint's `AGENTS.md` (`walkdown where spec` names the directory) — read it first. Formulation turns a
 source (prototype, PRD, conversation) into the blueprint's canonical form:
 screens, stories, rules. Plain language is authoritative; everything else
 derives from it.

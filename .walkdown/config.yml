@@ -10,13 +10,18 @@
 # a committed file naming a person would be wrong on every machine but one.
 #
 # Paths are relative to this repository, deliberately: this file is read on
-# machines whose layouts have nothing in common.
+# machines whose layouts have nothing in common. walkdown's own home is laid
+# out like anybody's - blueprint/ threads/ runs/ evidence/ drafts/ under a
+# numbered directory - and .walkdown/.gitignore says which of those git gets.
 projects:
   - id: walkdown
     roots: [.]
-    spec: blueprint
-    runs: blueprint/runs
-    threads: blueprint/threads
+    spec: .walkdown/blueprints/0001-walkdown/blueprint
+    threads: .walkdown/blueprints/0001-walkdown/threads
+    runs: .walkdown/blueprints/0001-walkdown/runs
+    evidence: .walkdown/blueprints/0001-walkdown/evidence
+    drafts: .walkdown/blueprints/0001-walkdown/drafts
+    home: 0001-walkdown
 
   # The example project is a real blueprint this repository ships, and the
   # panel's picker needs a second project to switch to. It used to be found

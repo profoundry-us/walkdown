@@ -1,7 +1,7 @@
 <!-- walkdown:begin -->
 ## walkdown
 
-This project's spec is the walkdown blueprint in `blueprint/`. Before building,
+This project's spec is the walkdown blueprint in `.walkdown/blueprints/0001-walkdown/blueprint/`. Before building,
 testing, or reviewing, read and follow that folder's `AGENTS.md`. Run
 `walkdown where` to see where everything this project uses actually lives.
 <!-- walkdown:end -->
@@ -84,7 +84,7 @@ goes next").
 Here the panel under review writes to the blueprint it serves, so judging
 anything that files, refuses or pins needs a scratch copy first. The shipped
 skills no longer say so — this blueprint's own `governance:` lines in
-`blueprint/walkdown.yml` do, and every judge prompt carries them:
+`.walkdown/blueprints/0001-walkdown/blueprint/walkdown.yml` do, and every judge prompt carries them:
 
     node tools/scratch.mjs new sitting-0830 --why "..."   # a copy, stamped
     node tools/scratch.mjs list                           # what is lying about

@@ -4,7 +4,7 @@
  * neither can stand in for the other (see ownership.evidence.same-surface).
  */
 import { join } from 'node:path';
-import { CHECKSPACE, prepare } from './checks/checkspace.mjs';
+import { CHECKSPACE, HOME, prepare } from './checks/checkspace.mjs';
 import { readFileSync } from 'node:fs';
 import { resolveLocations } from './lib/locations.js';
 import { defineConfig } from '@playwright/test';
@@ -63,7 +63,7 @@ export const WD_ORIGIN = `http://localhost:${WD_PORT}`;
 const prePin = process.env.WALKDOWN_HOME;
 delete process.env.WALKDOWN_HOME;
 const EVIDENCE = RECORD
-  ? resolveLocations({ spec: new URL('./blueprint', import.meta.url).pathname }).evidence.path
+  ? resolveLocations({ spec: new URL(`./${HOME}/blueprint`, import.meta.url).pathname }).evidence.path
   : null;
 if (prePin !== undefined) process.env.WALKDOWN_HOME = prePin;
 
@@ -96,7 +96,7 @@ export const FIXTURE = `http://localhost:${FIXTURE_PORT}/extension.html?wd=${
  * The checks resolve this address to the server the run actually started; see
  * `declaredResolvesHere` in checks/panel.spec.js. It is exported for that.
  */
-export const DECLARED = parse(readFileSync(new URL('./blueprint/walkdown.yml', import.meta.url), 'utf8'))
+export const DECLARED = parse(readFileSync(new URL(`./${HOME}/blueprint/walkdown.yml`, import.meta.url), 'utf8'))
   ?.runner?.targets?.local?.base_url ?? WD_ORIGIN;
 
 /* The same, for the example project — read from its blueprint, never hardcoded. */

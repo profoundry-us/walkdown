@@ -5,7 +5,7 @@ description: Run a full agent sitting - judge EVERY rule whose verify list inclu
 
 # A full agent sitting
 
-Read `blueprint/AGENTS.md` first. This is `walkdown-judge` taken across the
+Read the blueprint's `AGENTS.md` (`walkdown where spec` names the directory) first. This is `walkdown-judge` taken across the
 whole blueprint at once, with a sweep for knowing what you missed.
 
 **Use this when the whole board needs re-earning**: a refactor that moved a lot

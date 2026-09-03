@@ -26,7 +26,7 @@ import { parse } from '../vendor/yaml.js';
 
 const HERE = dirname(new URL(import.meta.url).pathname);
 const ROOT = join(HERE, '..');
-const BP = join(ROOT, 'blueprint');
+const BP = join(ROOT, '.walkdown', 'blueprints', '0001-walkdown', 'blueprint');
 const BASE = process.env.WALKDOWN_SITTING_URL ?? 'http://localhost:4700';
 
 const [cmd, ...rest] = process.argv.slice(2);

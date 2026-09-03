@@ -1,1 +1,0 @@
-../lib/templates/AGENTS.md

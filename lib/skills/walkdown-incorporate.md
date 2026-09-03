@@ -5,7 +5,7 @@ description: Work the walkdown agent queue - incorporate an answered question in
 
 # Incorporate & address
 
-Conventions live in `blueprint/AGENTS.md` — read it first. The governing idea:
+Conventions live in the blueprint's `AGENTS.md` (`walkdown where spec` names the directory) — read it first. The governing idea:
 knowledge must land in the blueprint, not stay in thread side-channels — and
 you claim work, you never accept it.
 

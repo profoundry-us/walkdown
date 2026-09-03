@@ -5,7 +5,7 @@ description: Work the whole open backlog unattended - survey every open thread a
 
 # Working the backlog unattended
 
-Conventions live in `blueprint/AGENTS.md` — read it first. This skill is the
+Conventions live in the blueprint's `AGENTS.md` (`walkdown where spec` names the directory) — read it first. This skill is the
 orchestration procedure: how to get a night's worth of the backlog done with
 sub-agents while nobody is awake to answer a question.
 

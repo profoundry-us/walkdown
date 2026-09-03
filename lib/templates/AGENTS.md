@@ -1,6 +1,6 @@
 # walkdown — agent conventions
 
-This project's spec lives in `blueprint/`: features, stories, and **rules**
+This project's spec lives in this directory - `walkdown where spec` names it: features, stories, and **rules**
 (acceptance criteria), plus the storyboard (screens), threads (questions &
 notes), and the runs ledger. The blueprint is the single source of truth for
 *what to build*. Read this before building, testing, or reviewing.
@@ -29,7 +29,7 @@ notes), and the runs ledger. The blueprint is the single source of truth for
 ## Building
 
 - Carry anchors **verbatim** from prototype to implementation. The attribute is
-  `embed.anchor_attribute` in `blueprint/walkdown.yml` (default
+  `embed.anchor_attribute` in the blueprint's `walkdown.yml` (default
   `data-testid`). Every element the spec references keeps its anchor.
 - Reference screens and anchors by id — never URLs, never CSS selectors.
 - Rules don't require screens: headless rules (API, CLI, jobs, policies) get the

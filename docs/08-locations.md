@@ -238,10 +238,11 @@ repository's own `.walkdown/` holds only its config, like anybody else's.
 than a filesystem path, and the server resolves it per machine — so moving evidence needs
 no run record edited, which the append-only law would have forbidden anyway.
 
-This repository's own blueprint predates homes: it sits at `blueprint/` with its runs and
-threads inside it, declared by path in both configs, with evidence overridden personally
-to `~/.walkdown`. That is rule 3 at work, and it is the worked example of an upgrade that
-cost nothing. Moving it into a numbered home is a decision for another day.
+This repository's own blueprint is the worked example: `.walkdown/blueprints/0001-walkdown/`
+with the spec, threads and runs committed and a hand-edited `.walkdown/.gitignore` that
+keeps out evidence and drafts but not runs - the ledger is the point of this repository.
+The personal config overrides only where evidence sits on this disk. `walkdown where`
+reports it as the spec standard and names the file that decides.
 
 ## Identifying a spec: a content hash, not a git sha
 

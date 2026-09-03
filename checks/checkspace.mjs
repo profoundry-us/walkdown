@@ -33,6 +33,8 @@ import { resolveLocations } from '../lib/locations.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export const CHECKSPACE = join(root, 'tmp', 'checkspace');
+/** walkdown's own home, relative to either root. */
+export const HOME = join('.walkdown', 'blueprints', '0001-walkdown');
 
 /**
  * @param {{ exampleDeclared: string, exampleOrigin: string }} addresses
@@ -57,13 +59,19 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
    */
   const pinned = process.env.WALKDOWN_HOME;
   delete process.env.WALKDOWN_HOME;
-  const realEvidence = resolveLocations({ spec: join(root, 'blueprint') }).evidence.path;
+  const realEvidence = resolveLocations({ spec: join(root, HOME, 'blueprint') }).evidence.path;
   process.env.WALKDOWN_HOME = pinned ?? join(CHECKSPACE, 'home');
 
   rmSync(CHECKSPACE, { recursive: true, force: true });
   mkdirSync(join(CHECKSPACE, 'home'), { recursive: true });
   mkdirSync(CHECKSPACE, { recursive: true });
-  cpSync(join(root, 'blueprint'), join(CHECKSPACE, 'blueprint'), { recursive: true });
+  /*
+   * The home, as it is laid out - blueprint/ threads/ runs/ - into a
+   * .walkdown of the checkspace's own, so the copy has the same shape as the
+   * real thing and the same shape as any adopter's.
+   */
+  for (const part of ['blueprint', 'threads', 'runs'])
+    cpSync(join(root, HOME, part), join(CHECKSPACE, HOME, part), { recursive: true });
   /*
    * A sibling, so the server holds more than one project. Some rules are only
    * visible with a choice to make — which blueprint a page belongs to, and what
@@ -85,8 +93,6 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
    */
   const exCfg = join(CHECKSPACE, 'example', 'blueprint', 'walkdown.yml');
   writeFileSync(exCfg, readFileSync(exCfg, 'utf8').replaceAll(EXAMPLE_DECLARED, EXAMPLE_ORIGIN));
-  // Drafts are working state; a copied half-finished sitting would confuse a check.
-  rmSync(join(CHECKSPACE, 'blueprint', 'drafts'), { recursive: true, force: true });
   if (!existsSync(join(CHECKSPACE, 'prototype')))
     symlinkSync(join(root, 'prototype'), join(CHECKSPACE, 'prototype'), 'dir');
   /*
@@ -96,7 +102,7 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
    * pictures nobody can see is not evidence. Linked because it is 97MB and
    * this runs before every suite.
    */
-  const evLink = join(CHECKSPACE, 'blueprint', 'runs', 'evidence');
+  const evLink = join(CHECKSPACE, HOME, 'evidence');
   if (realEvidence && existsSync(realEvidence) && !existsSync(evLink)) {
     mkdirSync(dirname(evLink), { recursive: true });
     symlinkSync(realEvidence, evLink, 'dir');
@@ -148,7 +154,12 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
       'projects:',
       '  - id: blueprint',
       '    roots: [.]',
-      '    spec: blueprint',
+      `    spec: ${HOME}/blueprint`,
+      `    threads: ${HOME}/threads`,
+      `    runs: ${HOME}/runs`,
+      `    evidence: ${HOME}/evidence`,
+      `    drafts: ${HOME}/drafts`,
+      '    home: 0001-walkdown',
       '  - id: example/blueprint',
       '    roots: [example]',
       '    spec: example/blueprint',
@@ -156,7 +167,7 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
     ].join('\n'),
   );
 
-  const sb = join(CHECKSPACE, 'blueprint', 'storyboard.yml');
+  const sb = join(CHECKSPACE, HOME, 'blueprint', 'storyboard.yml');
   writeFileSync(
     sb,
     readFileSync(sb, 'utf8') +

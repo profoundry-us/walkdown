@@ -5,7 +5,7 @@ description: Perform an agent walkdown - judge walkdown rules whose verify list 
 
 # Agent walkdown
 
-Conventions live in `blueprint/AGENTS.md` — read it first. This skill is the
+Conventions live in the blueprint's `AGENTS.md` (`walkdown where spec` names the directory) — read it first. This skill is the
 judgment procedure only. You are producing evidence a human can trust; you are
 never producing their acceptance (`agent` verdicts satisfy only the `agent`
 verify requirement).
@@ -72,7 +72,7 @@ verify requirement).
    error is a finding, not noise — say so in the run even if the screenshot
    looks right.
 
-6. **Record the run.** Append `blueprint/runs/<ts>-<target>-NN.json`
+6. **Record the run.** Append `<ts>-<target>-NN.json` to the runs directory `walkdown where runs` names
    (`ts` = ISO with dashes; `NN` = 01 unless the id collides):
    - `kind: "walkdown"`, `actor: "agent"`, `target`, `base_url`, `created`
    - `git_sha`: `git rev-parse --short HEAD` of the repository holding the CODE,

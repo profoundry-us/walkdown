@@ -37,6 +37,8 @@ import { resolveLocations } from '../lib/locations.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const TMP = join(root, 'tmp', 'scratch');
+/** walkdown's own home, relative to either root. */
+const HOME = join('.walkdown', 'blueprints', '0001-walkdown');
 const STAMP = '.scratch.json';
 /* Long enough for any sitting, short enough that a forgotten space is gone
  * before it is a mystery. */
@@ -83,10 +85,11 @@ function make(label, why) {
     die(`${path} already exists — pick another label, or clean that one first.`);
 
   mkdirSync(path, { recursive: true });
-  cpSync(join(root, 'blueprint'), join(path, 'blueprint'), { recursive: true });
-  // A half-finished sitting is one person's working state; a copy of it is nobody's.
-  rmSync(join(path, 'blueprint', 'drafts'), { recursive: true, force: true });
-  // `prototype.root` resolves against the blueprint's parent, so it has to be beside it.
+  // The home as it is laid out - and no drafts: a half-finished sitting is one
+  // person's working state, and a copy of it is nobody's.
+  for (const part of ['blueprint', 'threads', 'runs'])
+    cpSync(join(root, HOME, part), join(path, HOME, part), { recursive: true });
+  // `prototype.root` resolves against the code root, which is this directory.
   symlinkSync(join(root, 'prototype'), join(path, 'prototype'), 'dir');
   /*
    * Evidence is linked, not copied. It lives outside the repository now
@@ -94,11 +97,8 @@ function make(label, why) {
    * everything else here — copying it is how the abandoned spaces got big
    * enough to notice.
    */
-  const real = resolveLocations({ spec: join(root, 'blueprint') }).evidence.path;
-  if (real && existsSync(real)) {
-    mkdirSync(join(path, 'blueprint', 'runs'), { recursive: true });
-    symlinkSync(real, join(path, 'blueprint', 'runs', 'evidence'), 'dir');
-  }
+  const real = resolveLocations({ spec: join(root, HOME, 'blueprint') }).evidence.path;
+  if (real && existsSync(real)) symlinkSync(real, join(path, HOME, 'evidence'), 'dir');
   /*
    * A `.walkdown` of its own, and a personal home of its own, so that a server
    * started INSIDE the copy answers for the copy and nothing else. The nearest
@@ -117,9 +117,12 @@ function make(label, why) {
       'projects:',
       '  - id: blueprint',
       '    roots: [.]',
-      '    spec: blueprint',
-      '    runs: blueprint/runs',
-      '    threads: blueprint/threads',
+      `    spec: ${HOME}/blueprint`,
+      `    threads: ${HOME}/threads`,
+      `    runs: ${HOME}/runs`,
+      `    evidence: ${HOME}/evidence`,
+      `    drafts: ${HOME}/drafts`,
+      '    home: 0001-walkdown',
       '',
     ].join('\n'),
   );
