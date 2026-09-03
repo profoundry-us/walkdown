@@ -56,12 +56,48 @@ export async function run(args) {
    * containment, since a pack inside a listed repository is its own question
    * and not one a claim should answer quietly (n-0135).
    */
+  /*
+   * A config that does not parse is refused before anything is claimed. Read
+   * as empty, an unreadable personal file made a listed project look
+   * unlisted: `--commit spec` minted a second home in the repository beside
+   * the person's real one, and `--commit none` moved the home and then died
+   * on the write, leaving the tree declaring a home that had gone (n-0172).
+   */
+  const cfg = readUserConfig({ cwd: root });
+  for (const [file, error] of [
+    [cfg.path, cfg.error],
+    [cfg.repo?.path, cfg.repo?.error],
+  ])
+    if (error) {
+      console.error(red(`${file} does not parse — ${error}`));
+      console.error(dim('  Fix it first: init writes to it, and cannot tell what it already says.'));
+      return process.exit(2);
+    }
   const exact = () =>
     (readUserConfig({ cwd: root }).config.projects ?? []).find((p) =>
       [p?.roots ?? []].flat().some((r) => r && canon(expand(r)) === canon(root)),
     );
+  /*
+   * An entry rooted here that resolves to NO spec - a row holding only a
+   * port override, say, after its paths left with a relocation - is not a
+   * project to build into, and it is not a reason to scaffold one in the
+   * tree either: that printed "the spec did not land at null" under a fresh
+   * blueprint at <repo>/blueprint/ outside any home, with exit 0 (n-0171,
+   * n-0173). Say what the entry lacks, and stop.
+   */
+  const noSpec = (entry, at) =>
+    console.error(
+      red(
+        `\`${entry.id}\` is listed at this directory but names no spec and no home — nothing to build into. ` +
+          `Add \`spec:\` or \`home:\` to the entry, or \`walkdown project forget ${entry.id}\` and run init again.`,
+      ),
+    ) ?? console.error(dim(`  the entry: ${at}`));
   let listed = exact();
   let loc = listed ? resolveLocations({ cwd: root, project: listed.id }) : null;
+  if (listed && !loc.spec.path) {
+    noSpec(listed, loc.config.matchedIn === 'repo' ? loc.config.repo.path : loc.config.path);
+    return process.exit(2);
+  }
   const current = loc?.standard?.name ?? null;
   const commit = values.commit ?? current ?? 'none';
 
@@ -80,6 +116,10 @@ export async function run(args) {
     }
     listed = exact();
     loc = resolveLocations({ cwd: root, project: listed.id });
+    if (!loc.spec.path) {
+      noSpec(listed, moved.config);
+      return process.exit(2);
+    }
   }
 
   /*

@@ -100,6 +100,19 @@ pointer back out of `CLAUDE.md` (only the fenced block, or the file if the block
 there was) and the skills back out of `.claude/skills/` — walkdown's own unedited copies;
 one you edited is kept and named (n-0166).
 
+The declaration is rewritten **into the row that is about this checkout**, never beside it.
+A personal row that already names the project — a port override, evidence moved elsewhere
+on this disk — gains the home's paths when the home leaves the repository, and keeps what
+it had; it does not get a `repo-2` twin, and nothing it said is dropped on the way in or
+out (n-0171, n-0173). Writers ask the same question the merge asks: same id, and a root
+canon-equal to the checkout's, or no root and no blueprint of its own.
+
+The command refuses before it moves anything when a move could not be written down: a
+config that does not parse — either file — stops it with the file named, because a home
+moved and then not declared is the split n-0172 saw. And a listed entry that resolves to
+no spec is refused rather than scaffolded over, since `init` cannot tell what that entry
+meant.
+
 walkdown never touches the git index. An ignore file rules only what git has not met, so a
 run committed under `all` stays tracked after `--commit spec` writes the file. The command
 asks git, every time, and says what is still tracked and that `git rm --cached` is yours
@@ -123,6 +136,13 @@ monorepo is several projects that happen to share a checkout, and a tool that po
 would let one pack's board list, serve and write to another pack's ledger (n-0156,
 n-0159). A server offers what the `.walkdown` *where it was started* declares, wherever
 the blueprint it happens to serve sits.
+
+The server and the panel tell blueprints apart by **where the spec is**, never by id. Two
+listed entries may share an id — a pack named after its repository, a copy of a project
+beside the project — and an id is a name a person chose, not an address. Each blueprint
+the server offers carries a `key`, the canonical spec directory; `?bp=` accepts a key, or
+an id when exactly one blueprint answers to it, and refuses a bare id two answer to with
+the candidates named rather than picking one (n-0173).
 
 ### How the two configs merge
 
@@ -149,6 +169,20 @@ about every project on the disk, so there is no base it could honestly be resolv
 against. Such keys are set aside and `walkdown where` says so on the personal row —
 `ignores \`roots: gamma\` in entry \`gamma\``. A committed entry copied verbatim into the
 personal file is therefore the override of nothing it did not spell out in full (n-0167).
+The same goes for a blank value, a `~name` that is not a home directory, and a relative
+path under the personal `defaults:` — each is set aside and named with its reason
+(n-0175). A repository's `defaults:` are anchored at the repository, the one base that
+file honestly has.
+
+One key on an override is not a path and is set aside all the same: `home:`. A home is
+named by the file whose listing allocated it, so a personal `home:` on an override of a
+committed entry is ignored with that reason, and `tracked` reads off where the records
+actually are (n-0174).
+
+A committed entry whose spec lies under **another** `.walkdown` is not read at all. It is
+excluded before the merge, so `where`, `status` and `serve` never see it, and `where`
+names it on the repository row — `refuses \`gamma\` — its spec … lies under …, which
+answers for it; declare it there` (q-0176).
 
 Identity is never taken from the repository. A committed file naming a person would be
 wrong on every machine but one.
@@ -172,8 +206,15 @@ it is not listed twice — stand in that checkout to use it (n-0169, n-0170).
 A committed entry never reaches under another `.walkdown`. A pack carrying its own
 `.walkdown` is a project of its own, and a root entry whose `spec:` lies inside it is the
 boundary crossing `one-walkdown-answers` forbids, written by hand: `project add` refuses
-it, `lint` reports one it finds, naming both files, and only `--ephemeral` may name that
-blueprint from outside (q-0168).
+it, `lint` reports one it finds, naming both files, and the resolver refuses to read one
+that is there anyway (q-0168, q-0176).
+
+`--ephemeral` does not cross that boundary either: **a copy means a copy**. An ephemeral
+entry's records follow its spec, so listing a pack's live blueprint as "a throwaway copy"
+gave the pack's ledger a second name, and a root server's pin landed in it. A blueprint
+some `.walkdown` declares — listed in its config, or standing in one of its numbered
+homes — is refused with the place to copy it to (`<that>/.walkdown/tmp/<label>/blueprint`,
+say); a path nothing declares is what the flag is for (q-0176).
 
 A blueprint nobody listed is not a project. `walkdown where` says nothing declares this
 directory rather than naming a path, and every command refuses the same way. That is not

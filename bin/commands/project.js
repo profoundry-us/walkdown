@@ -29,6 +29,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import {
+  canon,
   claimHome,
   configPath,
   expand,
@@ -91,11 +92,24 @@ function add(args) {
    * that checkout is how it is reached.
    */
   const own = walkdownRoot(resolve(spec, '..'));
-  if (own && !values.ephemeral && own !== walkdownRoot()) {
-    const theirs = load(join(own, 'config.yml')).get('projects');
-    const there = (theirs?.items ?? []).find(
-      (it) => String(it.get?.('spec') ?? '') && expand(String(it.get('spec')), resolve(own, '..')) === spec,
+  const here = walkdownRoot();
+  /*
+   * Compared canonically: `own` is walked from the spelling the person
+   * typed and `here` from process.cwd(), which is the real path, and on
+   * macOS /tmp is /private/tmp - so naming a pack's own blueprint through
+   * the other spelling refused it as lying under itself (n-0177).
+   */
+  const same = (a, b) => Boolean(a) && Boolean(b) && canon(a) === canon(b);
+  const listedIn = (walkdown) => {
+    const rows = load(join(walkdown, 'config.yml')).get('projects');
+    return (rows?.items ?? []).find(
+      (it) =>
+        String(it.get?.('spec') ?? '') &&
+        canon(expand(String(it.get('spec')), resolve(walkdown, '..'))) === canon(spec),
     );
+  };
+  if (own && !values.ephemeral && !same(own, here)) {
+    const there = listedIn(own);
     /*
      * That `.walkdown` is the one that answers for it, listed there already
      * or not (q-0168): a committed entry from here would be the boundary
@@ -104,18 +118,49 @@ function add(args) {
      */
     console.error(
       red(
-        `${spec} lies under ${own}, which answers for it${there ? ` (listed there as \`${there.get('id')}\`)` : ''} — stand in that checkout to use it, declare it there, or list a throwaway copy with --ephemeral.`,
+        `${spec} lies under ${own}, which answers for it${there ? ` (listed there as \`${there.get('id')}\`)` : ''} — stand in that checkout to use it, declare it there, or list a throwaway COPY of it with --ephemeral.`,
       ),
     );
     return end(2);
   }
-  const wd = values.ephemeral ? walkdownHome() : (walkdownRoot() ?? walkdownHome());
+  /*
+   * A COPY MEANS A COPY. `--ephemeral` used to accept the very spec the
+   * refusal above pointed away from, and an ephemeral entry's records follow
+   * its spec - so for a pack that keeps its ledger inside its blueprint, the
+   * "throwaway copy" was the pack's live ledger with a second name, and a
+   * root server's pin landed in it (q-0176). A blueprint some `.walkdown`
+   * declares - listed in its config, or standing in one of its numbered
+   * homes - is refused; a path nothing declares, such as a copy under
+   * `.walkdown/tmp/`, is what this flag is for.
+   */
+  if (own && values.ephemeral) {
+    const there = listedIn(own);
+    const inHome = spec.startsWith(join(own, 'blueprints') + '/');
+    if (there || inHome) {
+      console.error(
+        red(
+          `${spec} is ${own}'s own blueprint${there ? ` (listed there as \`${there.get('id')}\`)` : ''} — an ephemeral entry is for a throwaway COPY, and this is the original. Copy it somewhere nothing declares (${join(own, 'tmp', '<label>', 'blueprint')}, say) and list the copy.`,
+        ),
+      );
+      return end(2);
+    }
+  }
+  const wd = values.ephemeral ? walkdownHome() : (here ?? walkdownHome());
   const inRepo = !values.ephemeral && wd !== walkdownHome();
   const target = join(wd, 'config.yml');
   const doc = load(target);
   const projects = doc.get('projects');
+  /*
+   * Against the file's own base - the repository for a committed file, and
+   * nothing for the personal one, whose paths are absolute. Expanded against
+   * the `.walkdown` directory, `.walkdown/blueprints/...` became
+   * `.walkdown/.walkdown/blueprints/...` and a blueprint the file already
+   * listed was listed again (n-0178).
+   */
   const listed = (projects.items ?? []).find(
-    (it) => String(it.get?.('spec') ?? '') && expand(String(it.get('spec')), wd) === spec,
+    (it) =>
+      String(it.get?.('spec') ?? '') &&
+      canon(expand(String(it.get('spec')), inRepo ? resolve(wd, '..') : undefined)) === canon(spec),
   );
   if (listed) {
     console.log(`  ${dim('· already listed')} ${spec}  ${dim(`as \`${listed.get('id')}\``)}`);
@@ -162,7 +207,7 @@ function add(args) {
     });
   } catch (e) {
     console.error(red(e.message));
-    console.error(dim('  `walkdown project add <path> --ephemeral` lists it in ~/.walkdown instead.'));
+    console.error(dim('  `walkdown project add <copy> --ephemeral` lists a throwaway copy in ~/.walkdown instead.'));
     return end(2);
   }
   console.log(`  ${green('+ listed')}   ${spec}  ${dim(`as \`${written.id}\``)}`);

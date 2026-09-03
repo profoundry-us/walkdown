@@ -36,9 +36,9 @@ export function blueprintsPane() {
     <div data-testid="start.options">${
       S.projects.length
         ? S.projects.map((pr) => {
-            const on = pr.id === S.BP;
+            const on = pr.key === S.BP;
             return html`<button class="block w-full border-t border-base-300 px-3.5 py-2.5 text-left hover:bg-base-200"
-        data-pick="${pr.id}" @click=${(e) => fire(e.currentTarget, 'pick-blueprint', { id: pr.id })}>
+        data-pick="${pr.key ?? pr.id}" @click=${(e) => fire(e.currentTarget, 'pick-blueprint', { id: pr.key ?? pr.id })}>
         <span class="flex items-center gap-2">
           <span class="w-3.5 shrink-0 text-center ${on ? 'text-primary' : 'opacity-30'}">${on ? '\u25c9' : '\u25cb'}</span>
           <span class="text-[13px] font-semibold">${pr.name}</span>

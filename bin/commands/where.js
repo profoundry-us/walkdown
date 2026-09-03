@@ -90,7 +90,7 @@ export function run(args) {
   for (const ig of loc.config.ignored ?? [])
     console.log(
       `  ${''.padEnd(9)} ${yellow(
-        `ignores \`${ig.key}: ${ig.value}\`${ig.id ? ` in entry \`${ig.id}\`` : ''} — a relative path means nothing in this file; write it in full`,
+        `ignores \`${ig.key}: ${ig.value}\`${ig.id ? ` in entry \`${ig.id}\`` : ''} — ${ig.why ?? 'a relative path means nothing in this file; write it in full'}`,
       )}`,
     );
   if (loc.config.repo) {
@@ -109,6 +109,14 @@ export function run(args) {
             : dim(`${shared} — no entry for this project`)
       }`,
     );
+    // A committed entry reaching under another `.walkdown` is not read: that
+    // directory answers for it, and this row says which (q-0168, q-0176).
+    for (const r of loc.config.repo.refused ?? [])
+      console.log(
+        `  ${''.padEnd(9)} ${red(
+          `refuses \`${r.id}\` — its spec ${r.spec} lies under ${r.under}, which answers for it; declare it there`,
+        )}`,
+      );
   }
   /*
    * Which `.walkdown` answered, before any path it answered with - the one

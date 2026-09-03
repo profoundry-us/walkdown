@@ -792,7 +792,7 @@ function paintDesk(on) {
  * making that call for them.
  */
 function askAboutSitting(nextBp) {
-  const name = S.projects.find((p) => p.id === nextBp)?.name ?? nextBp;
+  const name = S.projects.find((p) => p.key === nextBp)?.name ?? nextBp;
   toast(
     `A walkdown is running on <b>${esc(S.data.project)}</b>, with <b>${
       Object.keys(S.session.verdicts).length
@@ -2226,15 +2226,22 @@ export async function start() {
       const whose = asking
         ? await (await fetch(api(`/api/whose?url=${encodeURIComponent(asking)}`))).json()
         : null;
-      if (whose?.match?.id && S.projects.some((pr) => pr.id === whose.match.id))
-        S.BP = whose.match.id;
+      // By key, never by id: two listed blueprints may share a name, and the
+      // one this page belongs to is one directory, not one name (n-0173).
+      if (whose?.match?.key && S.projects.some((pr) => pr.key === whose.match.key))
+        S.BP = whose.match.key;
     } catch {
       /* the server is old or unreachable; memory and the picker remain */
     }
   }
   if (!S.BP && S.projects.length > 1) {
     const remembered = await store.get(CHOICE);
-    if (remembered && S.projects.some((pr) => pr.id === remembered)) S.BP = remembered;
+    // A choice remembered before keys existed is an id; it still counts
+    // while exactly one listed blueprint carries it.
+    const byKey = S.projects.find((pr) => pr.key === remembered);
+    const byId = S.projects.filter((pr) => pr.id === remembered);
+    const kept = byKey ?? (byId.length === 1 ? byId[0] : null);
+    if (remembered && kept) S.BP = kept.key;
   }
   if (!S.BP && S.projects.length > 1) {
     S.phase = 'choose';

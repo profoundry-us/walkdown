@@ -187,7 +187,14 @@ test('a server offers what the .walkdown where it was started declares, wherever
     const base = `http://127.0.0.1:${server.address().port}`;
     try {
       const home = await (await fetch(`${base}/api/blueprint`)).json();
-      assert.deepEqual(home.projects.map((p) => p.id).sort(), ['reach', 'root-proj']);
+      /*
+       * `reach` is a hand-written committed entry naming a spec the pack's
+       * own `.walkdown` answers for. Lint reports it; and since q-0176 it
+       * is not read either, so the server never lists, serves or writes to
+       * it while it stands - the report and the behaviour agree.
+       */
+      assert.deepEqual(home.projects.map((p) => p.id).sort(), ['root-proj']);
+      assert.equal((await fetch(`${base}/api/blueprint?bp=reach`)).status, 404, 'a refused entry is not on offer');
       assert.equal((await fetch(`${base}/api/blueprint?bp=alpha-two`)).status, 404, 'the pack\'s own is not on offer');
       assert.equal((await fetch(`${base}/api/blueprint?bp=root-proj`)).status, 200);
       const write = await fetch(`${base}/api/threads?bp=alpha-two`, {

@@ -180,7 +180,12 @@ test('the review page is handed its front door and its blueprint', async () => {
   assert.doesNotMatch(html, /__FRONT_DOOR__|__BLUEPRINT__/);
   // No app base declared in this fixture, so the front door is the design.
   assert.match(html, /'\/prototype\/home\.html'/);
-  assert.match(html, /'main'/);
+  // The blueprint's KEY, not its id: the one string that still tells two
+  // same-named blueprints apart (n-0173). The panel picks by it.
+  const home = await (await fetch(`${base}/api/blueprint`)).json();
+  const current = home.projects.find((p) => p.current);
+  assert.ok(current.key, JSON.stringify(current));
+  assert.ok(html.includes(`'${current.key}'`), html.slice(html.indexOf('const bp'), html.indexOf('const bp') + 200));
 });
 
 test('POST /api/threads writes a thread file; screen resolved from URL', async () => {
@@ -757,6 +762,48 @@ test('multi-project: sibling blueprints are discovered and ?bp= switches, member
   assert.ok(sibling.projects.find((p) => p.id === 'sibling').current);
 
   assert.equal((await fetch(`${base}/api/blueprint?bp=../../etc`)).status, 404);
+});
+
+test('two listed blueprints sharing an id are told apart by key, and a bare ?bp= that names both is refused @rule:locations.default.one-home-per-blueprint', async () => {
+  /*
+   * n-0173 (2): mono/app committed at the root and mono/app/packs/app listed
+   * personally are both `app`, and the chooser served the root's for either.
+   * A key is the spec directory - unique by construction - and an id that
+   * names two is refused with the choices rather than resolved to the first.
+   */
+  mkdirSync(join(root, 'twin', 'blueprint', 'features'), { recursive: true });
+  writeFileSync(join(root, 'twin', 'blueprint', 'walkdown.yml'), 'project: the-twin\n');
+  writeFileSync(
+    join(root, 'twin', 'blueprint', 'features', 'f.yml'),
+    'feature: f\nstories:\n  - id: f.s\n    rules:\n      - id: f.s.twin\n        statement: Twin.\n        verify: [checks]\n',
+  );
+  const cfg = join(DECLARED_HOME, 'config.yml');
+  const before = readFileSync(cfg, 'utf8');
+  writeFileSync(cfg, before + `projects:\n  - id: sibling\n    roots: [${join(root, 'twin')}]\n    spec: ${join(root, 'twin', 'blueprint')}\n`);
+  try {
+    const home = await (await fetch(`${base}/api/blueprint`)).json();
+    const twins = home.projects.filter((p) => p.id === 'sibling');
+    assert.equal(twins.length, 2);
+    assert.notEqual(twins[0].key, twins[1].key);
+    const refused = await fetch(`${base}/api/blueprint?bp=sibling`);
+    assert.equal(refused.status, 409);
+    const body = await refused.json();
+    assert.equal(body.candidates.length, 2);
+    const twin = twins.find((p) => p.key.endsWith('/twin/blueprint'));
+    const picked = await (await fetch(`${base}/api/blueprint?bp=${encodeURIComponent(twin.key)}`)).json();
+    assert.equal(picked.project, 'the-twin');
+    assert.ok(picked.projects.find((p) => p.key === twin.key).current);
+    // A write through an ambiguous name lands nowhere.
+    const write = await fetch(`${base}/api/threads?bp=sibling`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ kind: 'note', body: 'nowhere', author: 'tester' }),
+    });
+    assert.equal(write.status, 409);
+    assert.ok(!existsSync(join(root, 'twin', 'blueprint', 'threads')));
+  } finally {
+    writeFileSync(cfg, before);
+  }
 });
 
 test('a pin files against the page\u2019s own project, not the server\u2019s default', async () => {

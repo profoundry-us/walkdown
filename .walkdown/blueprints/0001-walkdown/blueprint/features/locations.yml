@@ -156,7 +156,8 @@ stories:
             - From the root, the root's answers and the pack's is invisible
             - Each is merged with the personal one, and with no second repository config however many lie above it
             - A server started in one of them offers only the blueprints that `.walkdown` declares, wherever the blueprint it serves happens to sit
-            - A committed entry whose spec lies under another `.walkdown` is refused when written and reported by lint when found - that `.walkdown` already answers for it, and only an ephemeral personal entry may name it from outside (q-0168)
+            - A committed entry whose spec lies under another `.walkdown` is refused when written and reported by lint when found - that `.walkdown` already answers for it (q-0168)
+            - One that is there anyway is not read either - where names it as refused and says which directory answers for it, and status and serve never see it - and an ephemeral entry may not name it from outside, because a copy means a copy and this is the original (q-0176)
           statement_hash: sha256:b08354a355f7
 
       - id: locations.answer.declared-not-discovered
