@@ -1,0 +1,31 @@
+{
+  "run_id": "2026-09-04T20-48-06Z-local-01",
+  "created": "2026-09-04T20:48:06Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6c52840",
+  "note": "One rule, judged from the working-tree CLI (node bin/walkdown.js at 6c52840) against throwaway git repositories under the scratchpad judge-locations/work/, each with its own private HOME. Two servers were started, both from inside a fixture with the fixture's HOME, on ports 4791/4792, and both were stopped. No probe read this repository as a project. Nothing here was written except this record and the evidence it cites.",
+  "results": [
+    {
+      "rule": "locations.default.nothing-in-the-tree",
+      "status": "pass",
+      "statement_hash": "sha256:7a82184b4b5d",
+      "evidence": [
+        "runs/evidence/2026-09-04T20-48-06Z/01-before-init.txt",
+        "runs/evidence/2026-09-04T20-48-06Z/02-init-output.txt",
+        "runs/evidence/2026-09-04T20-48-06Z/03-after-init-tree.txt",
+        "runs/evidence/2026-09-04T20-48-06Z/05-run.txt",
+        "runs/evidence/2026-09-04T20-48-06Z/06-thread.txt",
+        "runs/evidence/2026-09-04T20-48-06Z/07-draft.txt",
+        "runs/evidence/2026-09-04T20-48-06Z/08-after-activity-tree.txt",
+        "runs/evidence/2026-09-04T20-48-06Z/09-home-contents.txt",
+        "runs/evidence/2026-09-04T20-48-06Z/10-delete-one-directory.txt",
+        "runs/evidence/2026-09-04T20-48-06Z/11-subdir-and-tracked.txt"
+      ],
+      "reasoning": "I built fresh git repositories that had never seen walkdown, each with an empty private HOME, and drove the whole WHEN through the working-tree CLI. In the clean end-to-end trial I hashed every worktree file, every entry, and every file under .git before default `init`, then ran init, a real checks run recorded by the node:test reporter, `thread new`, and a draft saved through POST /api/draft on a server started from inside the fixture - after which the worktree hashes, the entry list, the .git file hashes and HEAD were all identical, `git status --porcelain --ignored` was empty, `git clean -ndx` proposed nothing, and no file in the tree so much as contained the word walkdown (03, 05, 06, 07, 08). Nothing appeared at the repository root when init was run from a nested subdirectory either, and a second init made a second numbered home rather than touching the tree (11). Everything the statement enumerates - spec, threads, runs, evidence, drafts - sat under one ~/.walkdown/blueprints/0001-<name> directory, and deleting that one directory took all of it away while the repository stayed clean and usable (09, 10). Asked what is tracked, `walkdown where` answered `tracked nothing` with a reason on both lines - 'every path is outside the repository, where git never looks' and 'the tree says: the home is in ~/.walkdown, which git never sees' - and --json carries the same as tracking.words/why. Two honest caveats that I judged do not break the words as written: what survives the delete is the personal ~/.walkdown/config.yml entry and identity plus the machine-wide ~/.claude/skills copies, neither of which is the spec/threads/runs/evidence/drafts the statement enumerates and both of which init names out loud as personal rather than the project's; and after the numbered home is deleted, `walkdown status` says 'Nothing in <config> claims this directory' when the config does still list a matching root - imprecise wording, but a deliberate collapse of the two no-blueprint cases, commented as such in bin/commands/context.js. The load-bearing promise - try it, and the repository is byte for byte as it was - held under every attempt I made to break it.",
+      "threads": []
+    }
+  ]
+}

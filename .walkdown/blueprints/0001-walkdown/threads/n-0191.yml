@@ -1,0 +1,47 @@
+id: n-0191
+kind: note
+author: topher
+via: agent
+created: 2026-09-04T21:16:44.346Z
+anchor:
+  rule: status.derived.verdict-belongs-to-a-place
+status: open
+body: >-
+  A run record with no `created` is accepted by lint and then silently fills no
+  cell.
+
+
+  Two of the fifteen records written in today's locations sitting —
+  `2026-09-04T20-48-24Z-local-01.json` (locations.travel.evidence-by-key, pass)
+  and `2026-09-04T20-48-27Z-local-01.json`
+  (locations.travel.provenance-not-currency, FAIL) — carry neither `created` nor
+  `run_id`. They are the only two of the fifteen that do not, and they are
+  exactly the two whose rules still read the 2026-08-31 verdict on the board.
+  The other thirteen registered.
+
+
+  The consequence is worse than a missing row: `provenance-not-currency` reads
+  `pass` in `walkdown status` while a `fail` verdict for it sits in the ledger.
+  A recorded fail that the report shows as a pass is the one outcome this ledger
+  exists to prevent.
+
+
+  `walkdown lint` reports 0 errors over both. `RUN_SHAPE` in lib/schema.js:226
+  requires only `kind`, `target` and `actor` (and only at `warn`), so nothing
+  asks for `created` — yet the derivation orders and ages verdicts by it, so a
+  record without one can never win a cell and can never go stale either.
+
+
+  The route in is the same one n-0189 names: an agent judging by prompt
+  hand-writes its record into `runs/` and bypasses `writeRunRecord`, which would
+  have stamped `created`, `run_id`, `git_sha` and `spec_hash`. The record
+  skeleton `walkdown judge` prints (bin/commands/judge.js) shows only `kind`,
+  `actor`, `target`, `base_url` and `results`, so a judge that copies it
+  faithfully produces an inert record. Both fixes n-0189 suggests would cover
+  this too: lint erroring on a results-bearing run with no `created`, and/or the
+  judge skeleton carrying the derived fields pre-filled.
+
+
+  Filed after the 2026-09-04 locations sitting. Anchored here because this is
+  the rule that owns which runs fill a target's cells; it may belong on a
+  lint-side rule instead.

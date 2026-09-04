@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-09-04T20-48-31Z-local-01",
+  "created": "2026-09-04T20:48:31Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6c52840",
+  "note": "Independent per-rule agent judging of the locations feature. Judged headless from the working-tree CLI against throwaway git repositories under a scratchpad, each with its own private HOME; the real personal config and this repository were never written to except for this record and the evidence it cites.",
+  "results": [
+    {
+      "rule": "locations.pointer.owns-only-its-block",
+      "status": "fail",
+      "statement_hash": "sha256:ec57ac3e3cc3",
+      "evidence": [
+        "runs/evidence/2026-09-04T20-48-31Z/pointer-owns-only-its-block-happy-path.txt",
+        "runs/evidence/2026-09-04T20-48-31Z/pointer-owns-only-its-block-boundary-probes.txt"
+      ],
+      "reasoning": "Judged headless from the working-tree CLI (node bin/walkdown.js) against throwaway git repositories under a scratchpad, each with its own private HOME and WALKDOWN_HOME, so neither the real personal config nor this repository was ever in scope. The rule's own scenario holds cleanly and that belongs on the record first: with the person's words above and below the block and the spec then moved (`init --commit none` out of the repository, `init --commit spec` back in, which is the only way the spec moves - `walkdown move` takes runs/threads/evidence/drafts and refuses `spec`), placing the pointer again rewrote the block in place, and the unified diff of the whole file is one changed line naming the new place with every other byte identical; the block appeared exactly once; and a second placement reported `already current` and left the file md5-identical. A duplicated block was not reachable through walkdown's own commands either - `init` refuses to guess when several agent files exist, and following its own advice into a symlinked AGENTS.md/CLAUDE.md pair found the block it had just written and reported up-to-date rather than appending a second. What fails is narrower, and it is the literal promise 'nothing else in that file'. placePointer resumes the person's text at `text.slice(to + POINTER_END.length + 1)` (lib/init.js:150, and the same expression in the equality test at :148), which assumes exactly one newline follows its own end marker and swallows whatever character is actually there. Three files where it is not a newline, all in the boundary-probes evidence: trailing whitespace on the end-marker line leaves behind a new line holding a single space; a CRLF file - an ordinary Windows checkout, or core.autocrlf - loses the CR and gains a blank line the person never wrote between the block and their next line; and a person's own HTML comment written after the marker loses its leading angle bracket and becomes broken markup. None of these accumulate - each stabilises after one run - and none of them mislead an agent about where the spec is, so this is a boundary bug in an otherwise sound design rather than a wrong design. I am calling it fail rather than pass because the statement is absolute about ownership and the third case destroys a character of the person's own text, and because the fix is small: consume to the end of the marker's own line (the next newline after it, or end of file) instead of assuming its length. Filed as n-0187. Recorded in that thread but deliberately not the ground of this verdict: when a file already contains two marker pairs, only the first is rewritten and the second keeps naming the place the spec has left - the exact harm the statement describes - but no walkdown command was found that produces that state, so it needs a person to have pasted the markers themselves.",
+      "threads": [
+        "n-0187"
+      ]
+    }
+  ]
+}

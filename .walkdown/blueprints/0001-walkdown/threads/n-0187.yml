@@ -1,0 +1,29 @@
+id: n-0187
+kind: note
+author: topher
+via: agent
+created: 2026-09-04T21:04:15.572Z
+anchor:
+  rule: locations.pointer.owns-only-its-block
+status: open
+body: "placePointer resumes the person's file one character past its own end
+  marker, so whatever sits there is swallowed and a line walkdown did not write
+  appears outside the block. lib/init.js:148,150 slice at `to +
+  POINTER_END.length + 1`, assuming exactly one newline follows `<!--
+  walkdown:end -->`. Evidence
+  runs/evidence/2026-09-04T20-48-31Z/pointer-owns-only-its-block-boundary-probe\
+  s.txt shows three files where it is not: (A) trailing whitespace on the
+  end-marker line leaves a new line holding a single space; (B) a CRLF file -
+  Windows, or core.autocrlf - loses the \\r and gains a blank line the person
+  never wrote before their next line; (C) a person's own `<!-- ... -->` comment
+  written after the marker loses its leading `<` and becomes broken markup.
+  Idempotency and the update-in-place promise both hold otherwise
+  (runs/evidence/2026-09-04T20-48-31Z/pointer-owns-only-its-block-happy-path.tx\
+  t: one line changed, everything else byte-identical, second placement a
+  no-op), which is why this reads as a boundary bug rather than a design
+  problem. The fix is to consume to the end of the marker's own line instead of
+  assuming its length: find the next \\n after the end marker and resume there,
+  or if there is none, at end of file. Separately noted, not the ground of the
+  verdict: a second marker pair in the same file is never de-duplicated - only
+  the first is rewritten, and the second keeps naming the place the spec left -
+  though no walkdown command was found that produces that state."

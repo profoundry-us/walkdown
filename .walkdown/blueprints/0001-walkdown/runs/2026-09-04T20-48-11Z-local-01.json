@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-09-04T20-48-11Z-local-01",
+  "created": "2026-09-04T20:48:11Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6c52840",
+  "note": "One rule, judged headless from the working-tree CLI (node bin/walkdown.js at 6c52840) against throwaway git fixtures under the scratchpad judge-locations/work/, each run with a private HOME and with CLAUDE_CONFIG_DIR and WALKDOWN_SKILLS_DIR unset so the personal skills directory was the fixture's own. No server was started; no probe read this repository as a project. Nothing here was written except this record, the evidence it cites, and thread n-0184.",
+  "results": [
+    {
+      "rule": "locations.default.skills-are-yours-by-default",
+      "status": "fail",
+      "statement_hash": "sha256:62223922d07f",
+      "evidence": [
+        "runs/evidence/2026-09-04T20-48-11Z/probe-1-init-paths.txt",
+        "runs/evidence/2026-09-04T20-48-11Z/probe-2-skills-on-their-own.txt"
+      ],
+      "reasoning": "Everything the rule claims holds through init, and the one door it does not hold through is the other one the WHEN names. Probe 1: default init in a fresh repository put all five skills under the fixture's own ~/.claude/skills and left `git status --porcelain` empty with README.md the only file in the tree - the repository gained nothing, not even a pointer. `--commit spec` created them at .claude/skills/*/SKILL.md, git check-ignore matched nothing so a plain `git add -A` committed them, and a fresh clone carried all five. walkdown-sitting, whose first command is tools/sitting.mjs, is in lib/skills/ and shipped nowhere, and none of the five even mentions it, so an adopting agent is not sent at a harness it lacks. An edited copy was kept and named ('! kept (differs from packaged - --force to update)') with my line still on the end, --force updated it when asked, and `--commit none` afterwards took walkdown's own copies back out while keeping and naming the one I had edited (n-0166's fix, holding). The fail is probe 2, the 'or on their own' half of the WHEN. bin/commands/skills.js picks its destination as --into | (--project ? cwd/.claude/skills : skillsHome()) and consults no project at all, so in a project whose spec IS committed - where the same statement says the skills follow the spec - `walkdown skills` with no flag installs to the person's directory and prints 'Your own skills directory - every project on this machine, and nothing added to any of them.' I committed a --commit spec project, then let its committed set drift (walkdown-judge reduced to '# STALE', walkdown-backlog deleted and committed) and ran `walkdown skills` standing in it: five fresh personal copies were created, the four committed copies were left exactly as they were - one stale, one still missing - and nothing was said about them; the person is left with two same-named sets for a project that had decided its skills are committed. That is the mirror of n-0166, where the same divergence in the other direction was treated as worth fixing, and the checks reach only the init door (test/init-run.test.js:212, :231, :240). I considered reading the standalone command as the person naming a destination and so outside the rule, but the steps put both doors in one WHEN and key the THENs on the commit state rather than on the command, so I judged it against the words as written. n-0184 carries the fixture and says the fix is a choice - follow the standing project's standard, or keep the personal default and stop claiming nothing was added anywhere.",
+      "threads": [
+        "n-0184"
+      ]
+    }
+  ]
+}

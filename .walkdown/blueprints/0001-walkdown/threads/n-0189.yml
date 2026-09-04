@@ -1,0 +1,27 @@
+id: n-0189
+kind: note
+author: topher
+via: agent
+created: 2026-09-04T21:11:22.796Z
+anchor:
+  rule: locations.travel.judged-against-a-spec
+status: open
+body: "The hash itself behaves exactly as the rule says, but 'every run records'
+  it is not enforced anywhere, and the agent tier is where it is missing. Survey
+  of this ledger (evidence
+  runs/evidence/2026-09-04T20-48-26Z/ledger-spec-hash-coverage.txt): 67
+  kind=walkdown records written by agents carry no spec_hash, including all ten
+  written earlier today in this very sitting (2026-09-04T20-48-*), several of
+  which still carry the retired blueprint_sha. Cause: every record walkdown's
+  own writer produces is stamped (lib/run-record.js calls specHash for both
+  writeRunRecord and writeSweep - confirmed for panel walkdowns, sweeps and both
+  check reporters, evidence
+  runs/evidence/2026-09-04T20-48-26Z/spec-hash-probe.txt), but an agent judging
+  by prompt hands-writes its record into runs/ and never goes through that
+  writer. RUN_SHAPE in lib/schema.js does not mention spec_hash, so lint accepts
+  a verdict that says nothing about what spec it measured.
+  lib/skills/walkdown-judge.md step 6 does ask for it, so the procedure is right
+  and only the enforcement is missing. Two candidate fixes: have lint warn on a
+  run with results and no spec_hash, or give the agent path a writer to call
+  (walkdown judge could print the record skeleton with spec_hash already filled
+  in) so it cannot be forgotten."

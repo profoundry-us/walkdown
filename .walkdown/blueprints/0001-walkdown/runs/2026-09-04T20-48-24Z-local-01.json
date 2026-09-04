@@ -1,0 +1,25 @@
+{
+  "kind": "walkdown",
+  "actor": "agent",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "results": [
+    {
+      "rule": "locations.travel.evidence-by-key",
+      "status": "pass",
+      "statement_hash": "sha256:a7bc7cd07be3",
+      "evidence": [
+        "runs/evidence/2026-09-04T20-48-24Z/00-index.txt",
+        "runs/evidence/2026-09-04T20-48-24Z/01-before-move.txt",
+        "runs/evidence/2026-09-04T20-48-24Z/02-traversal.txt",
+        "runs/evidence/2026-09-04T20-48-24Z/03-symlink.txt",
+        "runs/evidence/2026-09-04T20-48-24Z/04-move.txt",
+        "runs/evidence/2026-09-04T20-48-24Z/05-after-move.txt",
+        "runs/evidence/2026-09-04T20-48-24Z/06-directory-key-crash.txt",
+        "runs/evidence/2026-09-04T20-48-24Z/07-picture-served-after-move.png"
+      ],
+      "reasoning": "Judged on a scratch copy (tools/scratch.mjs new judge-evkey-0904) served from inside it on :4757 with the copy's own home, so the real ledger was never served. I filed a PNG and a text file under runs/evidence/judge-evkey-0904/ while evidence still lived in the copy's repository home and wrote a run record citing those keys; both served 200 with the right content-type, and a file left under the older <spec>/runs/evidence root served too, so the second fallback root still answers for pre-relocation records (01-before-move.txt). I then ran `walkdown move evidence --to` a directory outside the repository: the sha256 of all six run records was identical before and after, the new root was written into the PERSONAL home config rather than the shared repo config - which is what makes the resolution per-machine - and after restarting the server the SAME key returned byte-identical PNG bytes from the new location, with the legacy root still working (04-move.txt, 05-after-move.txt, 07-picture-served-after-move.png). Keys that climb out are refused: twelve shapes - plain ../, %2e%2e, double-encoded %252e, ..%2f, leading //, ....//, a %00 splice, and a climb starting from a real evidence directory - all returned 404, before and after the move (02-traversal.txt). Two defects found on the same surface, neither of them one of the rule's three THENs, so I did not fail the rule on them and filed n-0186 instead: a key naming a DIRECTORY crashes the server outright (serveFile sends 200, readFileSync throws EISDIR, the catch's sendJson throws ERR_HTTP_HEADERS_SENT uncaught and node exits) - and that is exactly the `runs/evidence/<stamp>/` key_prefix shape judge.js hands every judge, rendered verbatim as an <img src> by the panel; and a symlink planted inside the evidence root is followed out of it, which needs local write access to that directory and so is the weaker of the two (03-symlink.txt, 06-directory-key-crash.txt).",
+      "threads": ["n-0186"]
+    }
+  ]
+}

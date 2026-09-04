@@ -1,0 +1,51 @@
+id: n-0184
+kind: note
+author: topher
+via: agent
+created: 2026-09-04T20:53:12.911Z
+anchor:
+  rule: locations.default.skills-are-yours-by-default
+status: open
+body: >-
+  `walkdown skills` on its own never reads the project's standard, so in a
+  project whose spec IS committed the on-their-own install lands in the person's
+  directory and prints 'nothing added to any of them' — while the committed set
+  a clone brings is left untouched, and can be stale.
+
+
+  The rule's WHEN covers both doors ('either by init or on their own') and its
+  THEN is keyed on the commit state, not on which command was used. Only `init`
+  consults it: lib/init.js scaffold() chooses skillsHome() vs
+  <root>/.claude/skills from `commit`, whereas bin/commands/skills.js chooses
+  `--into` | (`--project` ? cwd/.claude/skills : skillsHome()) and looks at no
+  project at all.
+
+
+  Seen judging this rule 2026-09-04 (agent). Evidence
+  runs/evidence/2026-09-04T20-48-11Z/probe-2-skills-on-their-own.txt: a project
+  set up with --commit spec and committed; its
+  .claude/skills/walkdown-judge/SKILL.md then drifts to '# STALE' and
+  walkdown-backlog is deleted and committed; `walkdown skills` run standing in
+  that project creates five fresh copies under $HOME/.claude/skills and reports
+  'Your own skills directory — every project on this machine, and nothing added
+  to any of them.' The repository's four committed copies are untouched — one
+  stale, one still missing — and nothing is said about them. The person now also
+  has two same-named sets, personal and project, for a project that had decided
+  its skills are committed.
+
+
+  The init side is sound:
+  runs/evidence/2026-09-04T20-48-11Z/probe-1-init-paths.txt shows default init
+  leaving `git status` empty, --commit spec landing them un-gitignored so a
+  clone carries all five, walkdown-sitting shipped nowhere and referenced by
+  none of the five, an edited copy kept and named (--force overwriting on
+  request), and --commit none taking walkdown's own copies back out while
+  keeping the edited one (n-0166).
+
+
+  The fix is a choice, not obvious: make `walkdown skills` with no flag follow
+  the standard of the project it is standing in (and `--into`/`--project` stay
+  the overrides), or keep the personal default and have it say what the
+  project's committed copies look like instead of 'nothing added to any of
+  them'. The tests cover only the init door (test/init-run.test.js:212, :231,
+  :240).

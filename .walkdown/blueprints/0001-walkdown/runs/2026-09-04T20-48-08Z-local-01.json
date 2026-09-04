@@ -1,0 +1,24 @@
+{
+  "run_id": "2026-09-04T20-48-08Z-local-01",
+  "created": "2026-09-04T20:48:08Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6c52840",
+  "note": "One rule, judged from the working-tree CLI (node bin/walkdown.js at 6c52840) against throwaway git repositories under the scratchpad judge-locations/work/, each with its own private HOME. No server was started - this rule is about where a home's five directories resolve, which the CLI answers directly. Nothing in this repository was written except this record and the evidence it cites; the only reads of the real project were `walkdown where` and `walkdown status`, both of which write nothing.",
+  "results": [
+    {
+      "rule": "locations.default.records-follow-the-spec",
+      "status": "pass",
+      "statement_hash": "sha256:3272ecc28575",
+      "evidence": [
+        "runs/evidence/2026-09-04T20-48-08Z/records-follow-the-spec-probe.txt",
+        "runs/evidence/2026-09-04T20-48-08Z/records-follow-the-spec-unit-tests.txt",
+        "runs/evidence/2026-09-04T20-48-08Z/records-follow-the-spec-real-project-where.txt"
+      ],
+      "reasoning": "I built fresh git repositories with private HOMEs and asked the working-tree CLI where everything is. A default `init` produced one numbered home whose spec and four records are five direct children of it - blueprint/ runs/ threads/ evidence/ drafts/ - and a pairwise containment check over the resolved paths found no kind inside another and no kind more than one level below the home (probe 1-2). The old nested shape is genuinely not read: with blueprint/runs/old.json planted, `walkdown where runs` still answered the sibling (probe 3). For the move I seeded a file in every record kind, hashed the whole home, and ran `init --commit spec`: the CLI said 'the whole home, no record edited', the personal blueprints directory was left with nothing, and shasum of every file under the new location was identical to before - then `--commit none` moved it back and matched the original hashes again, so nothing inside the home is rewritten in either direction (probe 4-5). Which siblings git sees moved independently of the layout, exactly as the second sentence says: --commit spec wrote .walkdown/.gitignore and `tracked` read back from git 'the spec and its threads', with runs, evidence and drafts each named to the ignore line keeping them out, while --commit all removed the file and tracked said spec, threads, runs, drafts. I also stripped the per-kind paths out of the config entry, leaving only `home:`, and all five still resolved with the reason \"this machine's `~/.walkdown`\" (probe 6), and copying a whole home into a second repository and declaring it with `project add` resolved all five under the copy with nothing inside it edited. The 49 tagged tests in test/locations.test.js all pass. Two things I looked at and judged do not falsify the statement: this project's own evidence resolves to ~/.walkdown/blueprints/0001-walkdown/evidence rather than beside its siblings, but that is a written-down per-machine override in the personal config, which `where` labels \"this machine's config\" against the home's \"this repository's config\" - a decision, not the default, and I confirmed such an override survives a home move unmoved and is reported as its own row; and lib/serve.js still resolves a `runs/evidence/<ts>/…` key against <spec>/runs/evidence as a second-choice fallback for records written under the old layout, which is a read-compatibility path in the server rather than an answer the resolver ever gives - `where evidence` never names a nested path. The prior agent verdict on this rule described the older shape (evidence and drafts under a personal projects dir, 'the built-in default') and is stale for good reason: the layout it describes no longer exists.",
+      "threads": []
+    }
+  ]
+}

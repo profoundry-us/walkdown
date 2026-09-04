@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-09-04T20-48-13Z-local-01",
+  "created": "2026-09-04T20:48:13Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6c52840",
+  "note": "One rule, judged from the working-tree CLI (node bin/walkdown.js at 6c52840) against throwaway git fixtures under the scratchpad judge-locations/work/one-home/, every command run with WALKDOWN_HOME and WALKDOWN_SKILLS_DIR pointed inside the fixture so neither the real personal config nor ~/.claude/skills was touched. Two servers were started, both inside fixture checkouts on ports 4711-4713 and both stopped; no probe read this repository as a project. Nothing here was written except this record and the evidence it cites.",
+  "results": [
+    {
+      "rule": "locations.default.one-home-per-blueprint",
+      "status": "pass",
+      "statement_hash": "sha256:c2e4b20e7f0d",
+      "evidence": [
+        "runs/evidence/2026-09-04T20-48-13Z/one-home-replay.sh",
+        "runs/evidence/2026-09-04T20-48-13Z/one-home-replay.txt",
+        "runs/evidence/2026-09-04T20-48-13Z/two-homes-ledger.sh",
+        "runs/evidence/2026-09-04T20-48-13Z/two-homes-ledger.txt"
+      ],
+      "reasoning": "I built the rule's GIVEN literally - two checkouts both called `app`, and later two blueprints in one `.walkdown` both called `app` - and drove init, project add/forget, move, where, projects and a real server against them (replay sections 1-10, ledger transcript). Asking wrote nothing: `where` on an undeclared checkout left the tree byte-identical, and `where evidence` on a declared project whose evidence directory I had deleted reported the path without re-creating it, so asking neither allocates nor claims. Each blueprint got its own numbered home (0001-app, 0002-app) with its own id (`app`, `app-2`, `app-3`) and its own runs/threads/evidence; a second init kept the home it already had, and `init --commit spec` then `--commit none` moved the home whole, marker file and thread file intact, never leaving a second home with records stranded in the first. Nothing resolved through the shared name: with a personal entry hand-renamed to the same id as the repository's but rooted at the other checkout, `where` in each checkout answered with that checkout's own home and `projects` reported the shadowing rather than merging the rows; the server's list keyed each blueprint by its spec directory and answered `?bp=app` with 409 and the candidates instead of guessing; two threads posted through one server, one by key and one by default, landed one per home with the same-named other checkout's ledger left empty; and `move` in the repository wrote its override row against the row rooted here, not the same-id row rooted elsewhere. A home whose entry I forgot kept its blueprint, runs, threads, evidence and drafts standing untouched and its number was not re-minted - the next claim against that listing returned 0003-app - and the reverse case, an entry whose directory is gone, also kept its number (0003-next). The one thing I would not call proven is the wording 'asking reports where records would go' for a directory nothing declares: there `where` reports that nothing declares it rather than a hypothetical path, which is this design's deliberate answer (no by-path door) and writes nothing, so I read it as consistent rather than as a miss.",
+      "threads": []
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-09-04T20-48-20Z-local-01",
+  "created": "2026-09-04T20:48:20Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6c52840",
+  "note": "Independent per-rule agent judging of the locations feature. Judged from the working-tree CLI (node bin/walkdown.js) and from a walkdown server started inside a throwaway repository under the scratchpad, every command run with a private HOME; the real personal config and this repository were never written to except for this record and the evidence it cites.",
+  "results": [
+    {
+      "rule": "locations.answer.declared-not-discovered",
+      "status": "pass",
+      "statement_hash": "sha256:dd87f8781211",
+      "evidence": [
+        "runs/evidence/2026-09-04T20-48-20Z/01-resolution-from-inside-each.txt",
+        "runs/evidence/2026-09-04T20-48-20Z/02-named-outright.txt",
+        "runs/evidence/2026-09-04T20-48-20Z/03-own-runs-and-threads.txt",
+        "runs/evidence/2026-09-04T20-48-20Z/04-undeclared-is-not-a-project.txt",
+        "runs/evidence/2026-09-04T20-48-20Z/05-both-configs-and-which-answered.txt",
+        "runs/evidence/2026-09-04T20-48-20Z/06-server-offers-only-declared.txt",
+        "runs/evidence/2026-09-04T20-48-20Z/07-siblings-with-their-own-walkdown.txt"
+      ],
+      "reasoning": "Built the rule's GIVEN twice in throwaway git repositories under a scratchpad, each command run with its own HOME so the real personal config was never in scope. Shape one (01, 02, 03): one repository whose single .walkdown declares two blueprints - 0001-repo2 rooted at packs/one, 0002-two rooted at packs/two - beside two blueprint-shaped directories nobody declared, packs/three/home and a numbered home .walkdown/blueprints/0003-three sitting inside the very .walkdown that answers there. Standing in each declared pack, `where` and `status` answered with that pack's own spec, runs, threads, evidence and drafts and nothing of the other's; each ledger numbers its own threads from n-0001, a thread filed in one never appeared in the other, and a rule belonging to the sibling could not even be named from the wrong pack. Naming one outright behaved the same way: `--project two` from packs/one resolved to 0002-two, `--project repo2` from packs/two to 0001-repo2, and `thread new --project two` from packs/one landed in 0002-two's threads directory only. Shape two (07): one repository holding alpha/ and beta/, each with its own .walkdown from `init --commit spec`, plus gamma/ holding a byte copy of alpha's whole home - each sibling answered for itself, neither could see the other by name, and the copy was nothing. On the undeclared half (04) I tried to reach the ghosts by every door I could find: lint, hash, status, threads, claims, run, judge and serve all refused from inside packs/three with the same sentence naming the config that does not claim it; the server refused ?bp= for the numbered home's id, for its path relative to the repository, for a ../ path and for its name (06); deleting the committed config.yml while leaving both homes on disk produced no fallback discovery, only 'nothing declares this directory'; `init` inside packs/three did not adopt the blueprint already sitting there but minted a fresh declared home; and there is no environment door - the only WALKDOWN_ vars are HOME, SKILLS_DIR, ACTOR, ROLES and TARGET, none of which name a spec. The one way in was `project add` on the numbered home, which is the declaration itself, and after `project forget` it went back to being invisible while the files never moved. On the third THEN (05): with a personal entry that restated every key of the committed 'two' row, the report still credited the repository's config with naming the project and only then said the personal one wins where they disagree - the n-0151 regression is not back - while a personal entry overriding a single key had spec, runs, threads and drafts credited to 'this repository's config' and only evidence to 'this machine's', which is the per-key provenance n-0144 asked for. Relative and blank keys in the personal file were ignored and each named on the report rather than resolved against the working directory. Stress: a hand-written personal entry reusing the committed id 'two' for a different blueprint outside the repository did not displace either checkout's own answer - from packs/two `--project two` was still the repository's - and the server refused the ambiguous ?bp=two with both candidates rather than guessing. Two things I judged short of a defect and record for the reader: from a directory where only the stranger is rooted, the CLI resolves `--project two` to it silently (the report does say the repository's config has no entry for it, and both rows are declared, so nothing undeclared answered); and when two declared entries share one root - which `project add` from a repository root produces, since it writes roots: [.] - standing there resolves to the first silently, the second remaining reachable only by name. Every blueprint that answered in these probes was one written into a config; none was found by looking."
+    }
+  ]
+}

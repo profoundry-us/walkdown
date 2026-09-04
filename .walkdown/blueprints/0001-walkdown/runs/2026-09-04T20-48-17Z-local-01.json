@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-09-04T20-48-17Z-local-01",
+  "created": "2026-09-04T20:48:17Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6c52840-dirty",
+  "note": "One rule judged headless from the working-tree CLI, in scratch projects under the judge private scratchpad, every invocation with env -i and HOME pointed at an empty private home so the real personal config was never read or written. No server was started and no port was touched. Evidence under runs/evidence/2026-09-04T20-48-17Z/ with the awn- prefix.",
+  "results": [
+    {
+      "rule": "locations.answer.asking-writes-nothing",
+      "status": "pass",
+      "statement_hash": "sha256:0ba6f381a575",
+      "evidence": [
+        "runs/evidence/2026-09-04T20-48-17Z/awn-G-before-after.txt",
+        "runs/evidence/2026-09-04T20-48-17Z/awn-D-where-asking-set.txt",
+        "runs/evidence/2026-09-04T20-48-17Z/awn-E1-declared-home-absent.txt",
+        "runs/evidence/2026-09-04T20-48-17Z/awn-F-readonly-surfaces.txt",
+        "runs/evidence/2026-09-04T20-48-17Z/awn-H-lint-aside.txt"
+      ],
+      "reasoning": "Judged from the working-tree CLI against scratch projects in the judge's own directory, each run with env -i and HOME pointed at an empty private home so the real ~/.walkdown was never in play. A repository given `init --commit spec` declares its own blueprint and nothing else; its runs, threads, evidence and drafts directories were never created by init, and the personal home was then deleted outright, which is the step's `no personal config at all`. Against that, nineteen asking commands - where plain, where for each of spec, code, runs, threads, evidence and drafts, where for a kind that does not exist, where --json, where --project proj, where --project nosuchproject, where evidence --project proj, status, threads, projects, project list, and where from a subdirectory and from a directory nothing declares - left a sha256 manifest of every file under both the project and the home byte-identical, 55 entries before and after, the same manifest digest, .git included, so even the git calls behind the `tracked` row dirtied no index (awn-G). The answer is full while the disk is not: the same command names the four record directories in the answer and all four are still absent afterwards, and asking twice does not create them either (awn-D, thirty-eight invocations over two identical passes). ~/.walkdown itself was never brought into being: HOME stayed a single empty directory through all of it, and `where` said so in its config row rather than allocating a config to answer from. Where the personal config does name a home, deleting that home from disk does not make asking rebuild it - `where` named the absent ~/.walkdown/blueprints/0001-proj2 spec, runs, threads, evidence and drafts in full and left the home holding nothing but config.yml (awn-E1). The strongest attempt to break it was to remove the ability to write at all: with HOME at mode 0500 and the project's .walkdown recursively read-only, where, where <kind>, where --json, where --project and status all exited 0 with their usual output, where a hidden mkdir or a placeholder write would have failed loudly (awn-F). One honest aside, recorded but not counted here: `walkdown lint` on a fresh scaffold runs the blueprint's own checks-listing command, `npx playwright test --list`, which installs playwright and writes 3762 entries into the person's home (awn-H). That is a question with a consequence, but it is not the question this rule scopes - `walkdown is asked where every kind of record lives` - and every command in that scope wrote nothing. The one cosmetic gap seen: the `(does not exist yet)` marker is only ever computed for spec, and only when spec comes from a home default, so the four absent record directories are named without being flagged as absent; they are named, which is what the step asks.",
+      "threads": []
+    }
+  ]
+}

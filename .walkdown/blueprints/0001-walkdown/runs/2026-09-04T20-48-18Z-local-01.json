@@ -1,0 +1,29 @@
+{
+  "run_id": "2026-09-04T20-48-18Z-local-01",
+  "created": "2026-09-04T20:48:18Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6c52840",
+  "note": "Independent per-rule agent judging of the locations feature. Judged from the working-tree CLI against throwaway fixtures in a scratchpad with a private HOME; two walkdown servers were run inside those fixtures on ports 4811/4812 and stopped afterwards. The real personal config and this repository were never written to except for this record, the note thread it names, and the evidence it cites.",
+  "results": [
+    {
+      "rule": "locations.answer.one-walkdown-answers",
+      "status": "fail",
+      "statement_hash": "sha256:b08354a355f7",
+      "evidence": [
+        "runs/evidence/2026-09-04T20-48-18Z/one-walkdown-answers-01-nearest.txt",
+        "runs/evidence/2026-09-04T20-48-18Z/one-walkdown-answers-02-third-above.txt",
+        "runs/evidence/2026-09-04T20-48-18Z/one-walkdown-answers-03-servers.txt",
+        "runs/evidence/2026-09-04T20-48-18Z/one-walkdown-answers-04-writers-refuse.txt",
+        "runs/evidence/2026-09-04T20-48-18Z/one-walkdown-answers-05-committed-held.txt",
+        "runs/evidence/2026-09-04T20-48-18Z/one-walkdown-answers-06-personal-open.txt"
+      ],
+      "reasoning": "Judged from the working-tree CLI (node bin/walkdown.js at 6c52840) against a fixture built by `walkdown init --commit spec`: a git repository `mono` with its own .walkdown, a pack `mono/packs/app` carrying a second one, a pinned personal home holding an identity block and an override row for `app`, and two `walkdown serve` processes started one inside each. Most of the rule holds, and holds under pressure. The nearest .walkdown answers from each side and `where` says so in as many words; neither side's `projects` shows the other's entry; `--project mono` from inside the pack and `--project app` from the root both resolve to nothing rather than to the neighbour; a third .walkdown planted above the git root is never consulted from either, while standing in it makes it the one that answers; the personal file is merged per key, with `where` crediting \"this machine's config\" for the overridden drafts and the repository's for the rest. Each server offers exactly its own list and refuses the other's blueprint both by id and by the full spec key the chooser posts, on GET and on a POST that tries to file a thread. And every writer refuses the crossing: `project add` of the pack's blueprint from the root, `--ephemeral` naming an original from inside a repo and from outside any, and even listing a wholly separate repository's blueprint personally. The committed hand-written entry q-0168 is about is held on every surface - set aside on read, named as refused on `where`, reported as a lint error, absent from `projects`, unknown to the server. What fails is the same entry written into the personal config instead. readUserConfig filters the crossing only out of the committed half, and lint reads only the config of the .walkdown that answered, so a personal row naming the pack's own blueprint outright is honoured everywhere: `projects` at the repository root lists it beside `mono`, `where --project pcross` resolves the pack's spec and all four record kinds while printing in the same block that it refuses the byte-identical committed entry, lint is silent at both ends, and the server started in `mono` lists it, serves it at ?bp=pcross, and a POST /api/threads there wrote n-0001 into the pack's own threads directory - which the pack, standing in its own checkout, then reads as a thread it never filed. That is precisely the harm the statement names, reached through a row no walkdown command will write for you. Filed as n-0188.",
+      "threads": [
+        "n-0188"
+      ]
+    }
+  ]
+}

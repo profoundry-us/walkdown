@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-09-04T20-48-22Z-local-01",
+  "created": "2026-09-04T20:48:22Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6c52840",
+  "note": "Independent per-rule agent judging of the locations feature. Judged headless from the working-tree CLI against throwaway fixtures under a scratchpad with a private HOME and a scratch APFS ram-disk volume; the real personal config and this repository were never written to except for this record, the note thread it names, and the evidence it cites.",
+  "results": [
+    {
+      "rule": "locations.keeping.moving-is-a-decision",
+      "status": "fail",
+      "statement_hash": "sha256:452142df8095",
+      "evidence": [
+        "runs/evidence/2026-09-04T20-48-22Z/01-move-in-volume.txt",
+        "runs/evidence/2026-09-04T20-48-22Z/02-refuses-occupied-destination.txt",
+        "runs/evidence/2026-09-04T20-48-22Z/03-cross-volume-crash.txt",
+        "runs/evidence/2026-09-04T20-48-22Z/04-hidden-destination-crash.txt",
+        "runs/evidence/2026-09-04T20-48-22Z/05-init-crosses-volumes-move-does-not.txt"
+      ],
+      "reasoning": "Judged headless from the working-tree CLI (node bin/walkdown.js at 6c52840) against a throwaway repo with its own HOME: `init --commit spec` so runs began in the repository, then a runs directory holding a json record, a 4KB random binary, a CRLF file, a file with no trailing newline, a nested subdirectory and a relative symlink. Two of the three THENs held cleanly. Moving within the volume relocated everything byte for byte - sha256 identical file by file, mtimes and the symlink intact, nothing rewritten to suit the new address - and wrote the choice into the personal config while keeping the person's header prose, an inline comment on `identity`, a hand-written `defaults:` block and an unrelated project entry exactly as they were, with `walkdown where` afterwards crediting \"this machine's config\" for runs alone and the repository's committed config for every other kind. A destination already holding a record was refused with exit 2 and a sentence naming the reason, leaving both ledgers and the config untouched. What fails is the first clause: `move` relocates with a bare renameSync and catches nothing, so `walkdown move runs --to /Volumes/wdtest/runs` (an APFS ram disk) dies with a raw EXDEV stack trace at bin/commands/move.js:68 and no file arrives at all. Nothing is lost - rename fails atomically and the config is not written - but a whole class of destinations, and the most plausible real one (evidence onto an external drive or a mounted share), cannot be moved to, and the answer is a stack trace rather than either a copy or a refusal. This repository already solved it elsewhere: lib/standard.js moveDir, which `init --commit` uses to relocate a whole home, catches EXDEV and falls back to cpSync + rmSync, and `init --commit none` duly moved a home holding a run file off the ram disk while `move` crashed on the same hop. The same unguarded line has a second, smaller hole: the occupied-destination check filters dotfiles, so a destination holding only hidden entries passes the guard and then dies on ENOTEMPTY from renameSync - again a stack trace where the command has a good sentence available. Filed as n-0185.",
+      "threads": [
+        "n-0185"
+      ]
+    }
+  ]
+}

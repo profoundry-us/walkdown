@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-09-04T20-48-10Z-local-01",
+  "created": "2026-09-04T20:57:53Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6c52840",
+  "note": "One rule, judged headless from the working-tree CLI (node bin/walkdown.js at 6c52840) against throwaway git repositories under the scratchpad work/in-repo-on-request/, each driven with a private HOME so the real ~/.walkdown was never read or written. No server was started and no probe named this repository as a project. Nothing here was written except this record and the evidence it cites.",
+  "results": [
+    {
+      "rule": "locations.default.in-repo-on-request",
+      "status": "pass",
+      "statement_hash": "sha256:d66c40335b64",
+      "evidence": [
+        "runs/evidence/2026-09-04T20-48-10Z/in-repo-on-request-cycle.txt",
+        "runs/evidence/2026-09-04T20-48-10Z/in-repo-on-request-edges.txt"
+      ],
+      "reasoning": "I drove the full round trip none -> spec -> all -> spec -> none in a throwaway repository and every THEN held. Default init put the home in the fixture's ~/.walkdown and left `git status --porcelain` empty with README.md the only file in the tree. `--commit spec` moved the whole home - runs, evidence and drafts I had planted went with it, no record edited - to <repo>/.walkdown/blueprints/0001-proj/, laid out as every home is, and wrote a repo config.yml whose spec/threads/runs/evidence/drafts keys are all relative (`.walkdown/blueprints/0001-proj/...`); .walkdown/.gitignore appeared naming only the three record directories, so the file itself and config.yml beside it stayed committable. `--commit all` deleted that file and nothing else; `--commit spec` wrote it back. The closing sentence names the standard, what git holds and the exact command to change its mind, in all three states. The last step's four cases are each said outright, and each is asked of git rather than read off the file walkdown wrote: a root `.gitignore` of `.walkdown/` produced `tracked: nothing - .gitignore:1 `.walkdown/` hides the spec from git` plus five errors; `walkdown move runs --to <repo>/records/runs` produced `.walkdown/.gitignore says `blueprints/*/runs/`, but git does not keep records/runs out - the rule does not reach this home`; an emptied ignore file produced `present and keeps nothing out`; and records committed under `all` stayed warned as `still tracked ... `git rm --cached` is yours to run`. `walkdown lint` refused the same tree with 5 errors, and `walkdown where` printed the identical findings. Two probes I added beyond the steps back the 'asked of git' claim: a rule in .git/info/exclude (a file walkdown never writes) was caught and cited by file and line, and a project rooted below the git toplevel had its ignore rule correctly resolved against the repository top. Attempts to break it: `--commit yes` exits 2 with the three standards spelled out; a listed blueprint standing outside any numbered home is refused with exit 2 and an unchanged tree for all three standards (n-0183's fix, holding); a non-git directory says `nothing - ... is not a git repository`; a hand-edited ignore file is kept and named rather than clobbered; the receiving .walkdown claims its own number, so a home leaving a repository into a ~/.walkdown that already held 0001 landed as 0002-p7; and `init` with no flag, run twice, keeps whatever the tree says. On the way out, the home moved back whole, the repository's .walkdown/config.yml, .gitignore and directories were taken away, the pointer block and the five skill copies were removed and each removal printed, and the 8 files git still tracked under the departed .walkdown were named as deletions to commit (n-0179's fix, holding). One imprecision I decided not to fail on: that tally counts only files under the .walkdown, so the 6 further pending deletions (CLAUDE.md and the five skills) are not in its number - but each is printed on its own `- removed` line immediately above, so nothing is hidden and the 'nothing was added to this repository' line is true as written.",
+      "threads": []
+    }
+  ]
+}

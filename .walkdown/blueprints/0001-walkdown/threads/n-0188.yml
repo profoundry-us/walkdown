@@ -1,0 +1,53 @@
+id: n-0188
+kind: note
+author: topher
+via: agent
+created: 2026-09-04T21:08:13.391Z
+anchor:
+  rule: locations.answer.one-walkdown-answers
+status: open
+body: >-
+  A hand-written PERSONAL entry crosses the boundary the committed one is
+  refused for, and one .walkdown's server then lists, serves and writes to
+  another's ledger.
+
+
+  Fixture: mono/ (git repo, .walkdown declares `mono`), mono/packs/app/ (its own
+  .walkdown declares `app`), and a pinned personal home. Everything the steps
+  ask for holds: the nearest .walkdown answers from each side, neither sees the
+  other's projects even with --project, a third .walkdown above the repository
+  is never consulted, each server offers only its own list and refuses the
+  other's blueprint by id AND by key, and every writer refuses the crossing -
+  `project add` of the pack's blueprint from the root, --ephemeral of an
+  original from inside or outside a repo, and even listing a wholly separate
+  repository's blueprint personally (evidence keys
+  runs/evidence/2026-09-04T20-48-18Z/one-walkdown-answers-01-nearest.txt,
+  -02-third-above.txt, -03-servers.txt, -04-writers-refuse.txt). The committed
+  hand-written entry q-0168 is about is held on every surface: refused on read,
+  named on `where`, reported by lint, invisible to projects and to the server
+  (-05-committed-held.txt).
+
+
+  What is open is the same entry written into ~/.walkdown/config.yml instead.
+  readUserConfig filters the crossing only out of the COMMITTED half
+  (lib/locations.js, `const committed = (shared.projects ?? []).filter(...)`),
+  and lint reads only the config of the .walkdown that answered (lib/lint.js).
+  So a personal row naming the pack's own blueprint outright is accepted
+  everywhere: `walkdown projects` at the repository root lists it beside `mono`;
+  `where --project pcross` resolves the pack's spec, runs, threads, evidence and
+  drafts, and prints, in the same block, that it refuses the identical committed
+  entry; lint at the root and inside the pack are both silent; and the server
+  started in mono/ offers it in /api/blueprint, serves it at ?bp=pcross, and a
+  POST /api/threads there wrote n-0001 into the PACK's threads directory, where
+  the pack then reads a thread it never filed (-06-personal-open.txt).
+
+
+  That is the harm the statement names - one board listing, serving and writing
+  to another's ledger - reached through a file walkdown itself will not write it
+  into. The committed side was closed by refusing the row on read plus a lint
+  error; the personal side has neither. Worth deciding as part of the fix:
+  whether a personal row whose spec lies under some other .walkdown should be
+  set aside like a stray relative path (with an `ignored` line on `where`), or
+  refused only when that .walkdown is not the one answering where you stand -
+  the writers already take the first, stricter line, since `project add` refuses
+  it from anywhere.

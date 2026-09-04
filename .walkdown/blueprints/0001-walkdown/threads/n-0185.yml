@@ -1,0 +1,50 @@
+id: n-0185
+kind: note
+author: topher
+via: agent
+created: 2026-09-04T20:57:54.291Z
+anchor:
+  rule: locations.keeping.moving-is-a-decision
+status: open
+body: >-
+  `walkdown move` cannot move records to another volume: it relocates with a
+  bare renameSync and nothing catches EXDEV, so the command dies with a raw node
+  stack trace and nothing arrives.
+
+
+  `walkdown move runs --to /Volumes/wdtest/runs` (an APFS volume) exits 1 on
+  'EXDEV: cross-device link not permitted' at bin/commands/move.js:68 —
+  runs/evidence/2026-09-04T20-48-22Z/03-cross-volume-crash.txt. This is the one
+  destination a person most plausibly picks: evidence off the boot disk, a
+  ledger on an external drive or a mounted share. Nothing is lost (rename fails
+  atomically, the config is not written) but the rule's first promise — moving
+  relocates the files — simply does not hold there, and the failure is a stack
+  trace rather than a refusal.
+
+
+  The repository already knows the answer. lib/standard.js moveDir, which `init
+  --commit` uses to relocate a whole home, catches EXDEV and falls back to
+  cpSync + rmSync, with the comment 'across volumes too, since ~ and a checkout
+  need not share one'. In
+  runs/evidence/2026-09-04T20-48-22Z/05-init-crosses-volumes-move-does-not.txt
+  `init --commit none` moves a home holding a run file from /Volumes/wdtest onto
+  the boot volume without complaint, while `move` crashes on the same hop. One
+  of the two paths got the fix.
+
+
+  A second, smaller hole on the same line: the destination-occupied guard
+  filters dotfiles, so a destination holding only hidden entries passes the
+  check and then dies on ENOTEMPTY from renameSync — again a stack trace where
+  the command has a perfectly good sentence to print
+  (runs/evidence/2026-09-04T20-48-22Z/04-hidden-destination-crash.txt).
+
+
+  Everything else the rule asks for held. In-volume, the files arrive byte for
+  byte (sha256 identical over json, a 4KB binary, CRLF and a no-trailing-newline
+  file), mtimes and a relative symlink survive, and nothing is rewritten; the
+  choice is written into the personal config with the person's prose, comments,
+  defaults block and unrelated project entry all intact, and `walkdown where`
+  credits 'this machine's config' for runs alone; a destination already holding
+  a record is refused with exit 2, both ledgers untouched and the config
+  unchanged (runs/evidence/2026-09-04T20-48-22Z/01-move-in-volume.txt,
+  02-refuses-occupied-destination.txt).

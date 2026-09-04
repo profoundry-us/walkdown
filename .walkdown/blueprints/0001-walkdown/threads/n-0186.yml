@@ -1,0 +1,25 @@
+id: n-0186
+kind: note
+author: topher
+via: agent
+created: 2026-09-04T21:02:11.989Z
+anchor:
+  rule: locations.travel.evidence-by-key
+status: open
+body: "An evidence key that names a DIRECTORY kills the server process.
+  lib/serve.js serveFile() writes 200 + content-type, then readFileSync(dir)
+  throws EISDIR; the request handler's catch calls sendJson, which throws
+  ERR_HTTP_HEADERS_SENT, and nothing catches that — node exits, the panel goes
+  dead for everyone using it. This is not a hypothetical key shape:
+  bin/commands/judge.js:114 builds evidenceKey = `runs/evidence/<stamp>/` and
+  prints it to every judge as the key to file evidence under, and
+  src/panel/shots.js:39 renders each cited key verbatim as <img
+  src=api('/evidence/'+p)>. So one run record citing the prefix it was handed
+  takes the local server down when someone opens its screenshots. Reproduced on
+  a scratch copy served on :4757 — evidence
+  runs/evidence/2026-09-04T20-48-24Z/06-directory-key-crash.txt (stack trace and
+  the dead port), first seen in 03-symlink.txt. The rule's three THENs
+  themselves held (see 01/02/04/05 in that key); this is the same resolver
+  refusing badly rather than crashing. Same file also follows symlinks planted
+  inside the evidence root (03-symlink.txt) — lower stakes, needs local write
+  access there."

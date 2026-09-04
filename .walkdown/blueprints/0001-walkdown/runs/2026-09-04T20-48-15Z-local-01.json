@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-09-04T20-48-15Z-local-01",
+  "created": "2026-09-04T20:48:15Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6c52840",
+  "note": "Independent per-rule agent judging of the locations feature. Each rule was judged headless from the working-tree CLI against throwaway fixtures under a scratchpad with a private HOME; the real personal config and this repository were never written to except for this record and the evidence it cites.",
+  "results": [
+    {
+      "rule": "locations.answer.says-why",
+      "status": "pass",
+      "statement_hash": "sha256:971e878234f9",
+      "evidence": [
+        "runs/evidence/2026-09-04T20-48-15Z/locations.answer.says-why.probes.txt"
+      ],
+      "reasoning": "Judged headless from the working-tree CLI (node bin/walkdown.js at 6c52840) against throwaway fixtures under the scratchpad with a private HOME; no server, and nothing in the real ~/.walkdown or this repository was read as a project. I built the mixed state the GIVEN asks for and varied which file decided each key. With every key written by init (probe A) all six rows plus the walkdown/config/tracked rows carried a reason, and it named the deciding file and entry: \"this machine's config (proj)\". Dropping runs and evidence from the entry and adding a top-level defaults.drafts (probe B) split the report three ways in one screen - the kept keys still said \"this machine's config (proj)\", the dropped ones said \"this machine's `~/.walkdown`\" (the home's built-in layout), and drafts said \"the config default\" - so a person can tell which of the three decisions to argue with, and --json carries the same why per cell rather than only the prose report. An entry with a spec but no home and no record keys (probe C) reported no path and said so per kind, naming the missing key: \"the entry names no runs and no home - walkdown writes both\". A repository-committed home (probe D) said \"this repository's config (proj2)\" throughout, and the sharpest case (probe E) - a personal entry overriding only `runs` for a project the repository declares - attributed runs to \"this machine's config (proj2)\" while the other five stayed \"this repository's config (proj2)\", which is the per-key attribution n-0144 asked for and not a flag computed over the merge; the tracked row correctly dropped runs from the ignore list at the same time. A directory nothing declares (probe F) invented no path and gave the reason plus the two commands that would change it. The code row varied with its actual situation rather than repeating one string: entry roots, the spec's repository, or \"the working directory's repository - the spec sits outside any repository\" (n-0131's shape). Two things I looked at and did not fail on: `walkdown where <kind>` prints a bare path with no prose, which is the documented machine form - it answers exactly what a script asked and prints nothing when there is no path; and the statement's list of possible reasons still includes \"named on the command line\" and \"already in the blueprint\", neither of which any current command can produce (no caller passes `overrides`, and records are no longer looked for inside the spec), so those are dead branches in the enumeration rather than paths reported without a reason. Both THENs held in every state I could reach.",
+      "threads": []
+    }
+  ]
+}

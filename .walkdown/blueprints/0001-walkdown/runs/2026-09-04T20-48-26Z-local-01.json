@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-09-04T20-48-26Z-local-01",
+  "created": "2026-09-04T21:12:00Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6c52840-dirty",
+  "spec_hash": "sha256:9cf589d6656b",
+  "results": [
+    {
+      "rule": "locations.travel.judged-against-a-spec",
+      "status": "pass",
+      "statement_hash": "sha256:5014abd76d50",
+      "evidence": [
+        "runs/evidence/2026-09-04T20-48-26Z/spec-hash-probe.txt",
+        "runs/evidence/2026-09-04T20-48-26Z/scratch-verdict-baseline.json",
+        "runs/evidence/2026-09-04T20-48-26Z/no-repository-verdict.json",
+        "runs/evidence/2026-09-04T20-48-26Z/ledger-spec-hash-coverage.txt"
+      ],
+      "reasoning": "Judged by driving a scratch copy of this blueprint served from inside itself, and a second copy placed outside any repository, reading each spec_hash out of a record walkdown itself wrote. Baseline sha256:9cf589d6656b. Writing a verdict, a note (n-0184) and a draft (drafts/local.json) left it at sha256:9cf589d6656b and touched no file under blueprint/; a one-word rewording moved it to sha256:21b106f8bfb7 and restoring the bytes brought it back; edits to storyboard.yml and walkdown.yml moved it too, while trailing whitespace and extra blank lines at EOF correctly did not, and a two-space re-indent did (sha256:63682ec4fde5). For the third clause I renamed features/locations.yml to locations2.yml with byte-identical content and an unchanged sort position: sha256:54ed9bb1731d, so the path really is inside the hash, and cutting the rule into panel.yml gave a third value again. Served from a directory with no git above it, the record carried no git_sha and no tree_hash yet the same sha256:9cf589d6656b, so a verdict says what it measured with or without a repository. Sweeps and both check reporters stamp it too. One gap I could not resolve into a fail of these steps but which undercuts the statement's 'every run': nothing enforces the field, RUN_SHAPE ignores it, and 67 agent-written walkdown records in this ledger - including the ten written earlier in this sitting - have no spec_hash at all. Filed as n-0189. Two smaller observations: blueprint/AGENTS.md is outside specFiles(), and the per-file feed is unprefixed so a collision is theoretically constructible but not in valid YAML.",
+      "threads": ["n-0189"]
+    }
+  ]
+}

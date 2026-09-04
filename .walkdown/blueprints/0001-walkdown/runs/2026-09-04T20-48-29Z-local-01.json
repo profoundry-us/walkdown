@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-09-04T20-48-29Z-local-01",
+  "created": "2026-09-04T20:48:29Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6c52840",
+  "note": "Independent per-rule agent judging of the locations feature. Judged headless from the working-tree CLI against throwaway git repositories under a scratchpad, each with its own private HOME; the real personal config and this repository were never written to except for this record and the evidence it cites.",
+  "results": [
+    {
+      "rule": "locations.pointer.placed-where-agents-read",
+      "status": "pass",
+      "statement_hash": "sha256:66759d1c478c",
+      "evidence": [
+        "runs/evidence/2026-09-04T20-48-29Z/locations.pointer.placed-where-agents-read.probe.txt",
+        "runs/evidence/2026-09-04T20-48-29Z/locations.pointer.placed-where-agents-read.edges.txt"
+      ],
+      "reasoning": "Judged headless from the working-tree CLI (node bin/walkdown.js at 6c52840) against nine throwaway git repositories, each committed first and each given its own HOME, so nothing of the real personal config or this repository was in scope. All three branches held. With no agent-instruction file, `init --commit spec` created CLAUDE.md carrying exactly one pointer block and nothing else at the root. With exactly one, the pointer went into that file and no second file was made to compete with it - I tried each of the five homes walkdown recognises separately (CLAUDE.md, AGENTS.md, GEMINI.md, .github/copilot-instructions.md, CONVENTIONS.md) and in every case the block was appended below the project's own text, with the root left holding only the file the project had already chosen; the copilot case matters because it proves the choice is not a root-markdown heuristic. With several (two, then three), the report printed `? several agent files - `walkdown pointer --into <file>`` naming them in order and every candidate came out with zero pointer blocks, and re-running init left it that way rather than eventually giving up and picking one; the remedy the report names then put the block into the one file I chose and left the other untouched. The GIVEN's exclusion holds too: default `init` over a repository with a CLAUDE.md wrote no pointer at all and said so, offering the explicit command instead. Four edges I pushed on and did not fail: a stale pointer is rewritten in place with the surrounding project text preserved on both sides (so a moved spec corrects itself); a sole file left half-edited - begin marker, no end - is `kept` untouched with no competing file created, which is the right refusal to guess; CLAUDE.md symlinked to the one real AGENTS.md is counted as `several` and so nothing is written, which is a false plural but lands on the conservative branch and tells a person, harming nothing; and `init --dir packs/billing` under a root CLAUDE.md creates the pack's own CLAUDE.md rather than writing to the root, which is the documented monorepo intent (the pointer beside the pack it describes, with a path relative to the pack) and not a second file competing for the same scope. The one thing I want on the record rather than hidden: the detection is a fixed five-name, root-only, existence-only list, so a project whose conventions live somewhere else entirely - .cursorrules, docs/AGENTS.md, a nested pack without --dir - reads to walkdown as \"none\" and gets a fresh CLAUDE.md. That is a limit of the list, not a violation of the rule as stated, and the created file is itself a file agents read.",
+      "threads": []
+    }
+  ]
+}

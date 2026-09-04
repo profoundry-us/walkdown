@@ -1,0 +1,21 @@
+{
+  "kind": "walkdown",
+  "actor": "agent",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "results": [
+    {
+      "rule": "locations.travel.provenance-not-currency",
+      "status": "fail",
+      "statement_hash": "sha256:c513160f49fc",
+      "evidence": [
+        "runs/evidence/2026-09-04T20-48-27Z/provenance-not-currency-index.txt",
+        "runs/evidence/2026-09-04T20-48-27Z/provenance-not-currency-probe-ab-currency.txt",
+        "runs/evidence/2026-09-04T20-48-27Z/provenance-not-currency-probe-c-controls.txt",
+        "runs/evidence/2026-09-04T20-48-27Z/provenance-not-currency-probe-d-missing-git-sha.txt"
+      ],
+      "reasoning": "Judged headless from the working-tree CLI against throwaway projects under the session scratchpad with a private HOME; no server was started and nothing here was read as a project. The currency half of the rule holds under everything I could think to try: with a ledger holding a checks pass and an agent pass, three commits touching neither the rules nor the code they describe (a README, an unrelated module, an empty commit) plus an untracked file left in the tree left `status --json` byte-identical and every run file's sha1 unchanged, and so did rewriting those commits away so the recorded sha was no longer reachable; the runs still cited 6d5e2cd after HEAD had moved and been reset. The controls rule out a board that simply never moves: rewording a statement, with no commit involved, turned both cells stale and putting it back restored them, and `sweep --tiers agent` turned the agent cell alone stale. What fails is the provenance half, which this rule states as plainly as the other: in the layout `init` now produces by DEFAULT, a run carries no git_sha and no tree_hash at all, so there is nothing for a person digging into a verdict to look at. Same throwaway project, code in a clean repository at 713cda4, `walkdown where code` naming it, and the recorded run holds only spec_hash; move the home into the repository with `init --commit spec` and the next run records git_sha 6d5e2cd. lib/run-record.js asks gitSha/treeHash of the BLUEPRINT directory, which outside the repository is ~/.walkdown and no repository, while lib/locations.js already resolves `code` expressly for git_sha (lines 1233 and 1340) and lib/skills/walkdown-judge.md:78 tells a hand-driven judge to record the repository holding the code. Filed as n-0190.",
+      "threads": ["n-0190"]
+    }
+  ]
+}
