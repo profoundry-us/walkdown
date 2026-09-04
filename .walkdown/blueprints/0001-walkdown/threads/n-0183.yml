@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-03T17:21:36.857Z
 anchor:
   rule: locations.default.in-repo-on-request
-status: open
+status: addressed
 body: "init --commit spec|all on a blueprint that stands outside any numbered
   home prints the standard's canned sentence over a tree it did not change.
   Judged 2026-09-03 (agent), evidence
@@ -43,3 +43,20 @@ body: "init --commit spec|all on a blueprint that stands outside any numbered
   whatever the person's own .gitignore says, and print no standard sentence - or
   word the sentence from tracking(after) rather than from the flag. Claiming,
   not accepting."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-04T20:31:44Z
+    body: "Fixed in c90cd2d, though not by either shape suggested: the blueprint
+      this was about cannot exist any more. Topher's call on 2026-09-04 was to
+      remove legacy support outright - every blueprint walkdown answers for is
+      declared and lives in a numbered home - so a listed entry standing outside
+      one is a hand-edited config rather than a state init has to word
+      carefully. init now refuses every --commit standard over such an entry,
+      exit 2, with the same sentence relocateHome already used for --commit
+      none, and names what the entry is missing. The contradiction this thread
+      found is gone because the state is: there is no tree without a home to
+      read a standard off, so no standard sentence is printed over one. lint
+      errors on the same config independently (locations category), which is the
+      alarm Topher asked for. Verified: 264 unit tests, 12 Highball checks, 35
+      browser checks."
