@@ -25,6 +25,28 @@ process.env.WALKDOWN_HOME = home;
 const root = mkdtempSync(join(tmpdir(), 'wd-reporter-'));
 const bp = join(root, 'blueprint');
 mkdirSync(join(bp, 'features'), { recursive: true });
+/*
+ * Declared in the pinned home, with every record named. The reporter resolves
+ * where a run goes from the config, and a blueprint nothing declares has
+ * nowhere to file one - so a fixture that skipped this would be testing a
+ * door that no longer opens.
+ */
+writeFileSync(
+  join(home, 'config.yml'),
+  [
+    'identity:',
+    '  username: A Person',
+    'projects:',
+    '  - id: reporter-fixture',
+    `    roots: [${root}]`,
+    `    spec: ${bp}`,
+    `    threads: ${join(root, 'threads')}`,
+    `    runs: ${join(root, 'runs')}`,
+    `    evidence: ${join(root, 'evidence')}`,
+    `    drafts: ${join(root, 'drafts')}`,
+    '',
+  ].join('\n'),
+);
 writeFileSync(join(bp, 'walkdown.yml'), 'project: reporter-fixture\n');
 writeFileSync(
   join(bp, 'features', 'd.yml'),
@@ -53,8 +75,9 @@ const fakeTest = (attachments) => ({
 const record = (reporter, tests) => {
   reporter.onBegin({}, { allTests: () => tests });
   reporter.onEnd();
-  const file = readdirSync(join(bp, 'runs')).sort().at(-1);
-  return JSON.parse(readFileSync(join(bp, 'runs', file), 'utf8'));
+  const runs = join(root, 'runs');
+  const file = readdirSync(runs).sort().at(-1);
+  return JSON.parse(readFileSync(join(runs, file), 'utf8'));
 };
 
 test('a failure attachment outlives the output directory: copied under the home, recorded by key @rule:locations.travel.evidence-by-key', () => {

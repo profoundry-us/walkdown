@@ -35,8 +35,11 @@ const CHECKS_EXCUSE =
 
 function fixture(name) {
   const bp = join(root, name, 'blueprint');
+  // Beside the spec, not inside it: the home's layout is the only one
+  // walkdown answers for, and `declareProject` writes the entry to match.
+  const runs = join(root, name, 'runs');
   mkdirSync(join(bp, 'features'), { recursive: true });
-  mkdirSync(join(bp, 'runs'), { recursive: true });
+  mkdirSync(runs, { recursive: true });
   writeFileSync(join(bp, 'walkdown.yml'), 'project: cli-fixture\n');
   writeFileSync(
     join(bp, 'features', 'demo.yml'),
@@ -58,7 +61,7 @@ function fixture(name) {
   );
   // Checks green, engineering signed, product has not been asked yet.
   writeFileSync(
-    join(bp, 'runs', '2026-01-01T00-00-00Z-local-01.json'),
+    join(runs, '2026-01-01T00-00-00Z-local-01.json'),
     JSON.stringify({
       run_id: '2026-01-01T00-00-00Z-local-01',
       created: '2026-01-01T00:00:00Z',
@@ -69,7 +72,7 @@ function fixture(name) {
     }),
   );
   writeFileSync(
-    join(bp, 'runs', '2026-01-02T00-00-00Z-local-01.json'),
+    join(runs, '2026-01-02T00-00-00Z-local-01.json'),
     JSON.stringify({
       run_id: '2026-01-02T00-00-00Z-local-01',
       created: '2026-01-02T00:00:00Z',

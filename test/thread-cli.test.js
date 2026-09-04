@@ -10,19 +10,28 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { after, test } from 'node:test';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-thread-cli-'));
 after(() => rmSync(root, { recursive: true, force: true }));
 const CLI = new URL('../bin/walkdown.js', import.meta.url).pathname;
 
+/*
+ * A home per case: the spec is `blueprint/` and the threads sit beside it.
+ * `declareProject` (called by `run`) lays the siblings out and writes the
+ * entry - every blueprint walkdown answers for is one somebody declared, and
+ * a ledger kept inside the spec is the layout from before homes.
+ */
+const threadsOf = (bp) => join(dirname(bp), 'threads');
+
 function fixture(name, thread) {
-  const bp = join(root, name);
-  mkdirSync(join(bp, 'threads'), { recursive: true });
+  const bp = join(root, name, 'blueprint');
+  mkdirSync(bp, { recursive: true });
+  mkdirSync(threadsOf(bp), { recursive: true });
   writeFileSync(join(bp, 'walkdown.yml'), 'project: thread-cli-fixture\n');
   writeFileSync(
-    join(bp, 'threads', `${thread.id}.yml`),
+    join(threadsOf(bp), `${thread.id}.yml`),
     [
       `id: ${thread.id}`,
       'kind: note',
@@ -103,7 +112,7 @@ test('a refused transition refuses the whole mutation - the reply never lands @r
   // reply used to be written BEFORE the transition validated, so the output
   // denied a change that had happened, and a retry duplicated the reply.
   const bp = fixture('mixed', { id: 'n-0006', status: 'open' });
-  const file = join(bp, 'threads', 'n-0006.yml');
+  const file = join(threadsOf(bp), 'n-0006.yml');
   const before = readFileSync(file, 'utf8');
   assert.throws(
     () => run(['n-0006', '--reply', 'and verified', '--verify'], bp),
@@ -117,7 +126,7 @@ test('an empty reply is refused, not read back - and drops no status change @rul
   // treated as no reply at all - alone it printed the conversation, and with
   // a status it applied the transition while silently dropping the reply.
   const bp = fixture('empty', { id: 'n-0007', status: 'open' });
-  const file = join(bp, 'threads', 'n-0007.yml');
+  const file = join(threadsOf(bp), 'n-0007.yml');
   const before = readFileSync(file, 'utf8');
   for (const args of [
     ['n-0007', '--reply', ''],
@@ -153,7 +162,7 @@ test('the report names the same person the disk records @rule:threads.lifecycle.
   const bp = fixture('noactor', { id: 'n-0009', status: 'open' });
   const out = run(['n-0009', '--reply', 'noted'], bp);
   assert.match(out, /by A Person/, 'the configured identity, named out loud');
-  const disk = readFileSync(join(bp, 'threads', 'n-0009.yml'), 'utf8');
+  const disk = readFileSync(join(threadsOf(bp), 'n-0009.yml'), 'utf8');
   assert.match(disk, /author: A Person/, 'the ledger records the same name the report gave');
   assert.doesNotMatch(disk, /via:/, 'a person typing is the ordinary case and needs no annotation');
 });
@@ -166,7 +175,7 @@ test("a reply to a terminal thread is recorded under its own actor, not the stat
   assert.match(out, /still waived/);
   assert.match(out, /by A Person/, "the reply's author is who the change was recorded under");
   assert.doesNotMatch(out, /by Probe Human/, 'the status holder did not make this change');
-  const disk = readFileSync(join(bp, 'threads', 'n-0010.yml'), 'utf8');
+  const disk = readFileSync(join(threadsOf(bp), 'n-0010.yml'), 'utf8');
   assert.match(disk, /author: A Person/, 'and the disk agrees');
   assert.match(disk, /via: agent/, 'with the provenance beside the author');
 
@@ -200,9 +209,9 @@ test('a refused transition says so and exits non-zero @rule:threads.lifecycle.sa
  * happened and under whom, never the thread read back.
  */
 function ruleFixture(name) {
-  const bp = join(root, name);
+  const bp = join(root, name, 'blueprint');
   mkdirSync(join(bp, 'features'), { recursive: true });
-  mkdirSync(join(bp, 'threads'), { recursive: true });
+  mkdirSync(threadsOf(bp), { recursive: true });
   writeFileSync(join(bp, 'walkdown.yml'), 'project: thread-cli-fixture\n');
   writeFileSync(
     join(bp, 'features', 'f.yml'),
@@ -227,7 +236,7 @@ test('thread new opens an anchored thread and reports under whom @rule:threads.l
   assert.match(out, /n-0001 opened · note · by A Person/);
   assert.match(out, /via agent/, 'a note an agent typed says so');
   assert.doesNotMatch(out, /Seen: a thing/, 'a report, not the thread read back');
-  const disk = readFileSync(join(bp, 'threads', 'n-0001.yml'), 'utf8');
+  const disk = readFileSync(join(threadsOf(bp), 'n-0001.yml'), 'utf8');
   assert.match(disk, /author: A Person/);
   assert.match(disk, /via: agent/);
   assert.match(disk, /rule: f\.s\.rule/);
@@ -249,7 +258,7 @@ test('thread new refuses an unknown rule, an empty body, and a strange kind', ()
       (err) => err.status === 2 && err.stdout === '',
     );
   }
-  assert.throws(() => readFileSync(join(bp, 'threads', 'n-0001.yml')), 'no refusal filed anything');
+  assert.throws(() => readFileSync(join(threadsOf(bp), 'n-0001.yml')), 'no refusal filed anything');
 });
 
 test('thread new is creation only - mutation flags on it are refused', () => {
@@ -269,7 +278,7 @@ test('thread new is creation only - mutation flags on it are refused', () => {
  */
 test('a verify on a machine that only has a guess is refused @rule:threads.lifecycle.claim-never-accept', () => {
   const bp = fixture('noactor-verify', { id: 'n-0011', status: 'addressed' });
-  const before = readFileSync(join(bp, 'threads', 'n-0011.yml'), 'utf8');
+  const before = readFileSync(join(threadsOf(bp), 'n-0011.yml'), 'utf8');
   assert.throws(
     () => run(['n-0011', '--verify'], bp, GUESSING),
     (err) => {
@@ -278,7 +287,7 @@ test('a verify on a machine that only has a guess is refused @rule:threads.lifec
       return true;
     },
   );
-  assert.equal(readFileSync(join(bp, 'threads', 'n-0011.yml'), 'utf8'), before, 'disk untouched');
+  assert.equal(readFileSync(join(threadsOf(bp), 'n-0011.yml'), 'utf8'), before, 'disk untouched');
 });
 
 test('a waive on a guess is refused the same way @rule:threads.lifecycle.claim-never-accept', () => {
@@ -287,7 +296,7 @@ test('a waive on a guess is refused the same way @rule:threads.lifecycle.claim-n
     () => run(['n-0012', '--waive', '--reason', 'x'], bp, GUESSING),
     (err) => err.status === 2 && /a login name is not a decision/.test(String(err.stderr)),
   );
-  const disk = readFileSync(join(bp, 'threads', 'n-0012.yml'), 'utf8');
+  const disk = readFileSync(join(threadsOf(bp), 'n-0012.yml'), 'utf8');
   assert.match(disk, /status: open/, 'the thread never moved');
 });
 
@@ -307,7 +316,7 @@ test('--as-agent may claim, and may never accept @rule:threads.lifecycle.claim-n
       () => run(args, bp),
       (err) => err.status === 2 && /never accept it/.test(String(err.stderr)),
     );
-  const disk = readFileSync(join(bp, 'threads', 'n-0013.yml'), 'utf8');
+  const disk = readFileSync(join(threadsOf(bp), 'n-0013.yml'), 'utf8');
   assert.doesNotMatch(disk, /verified_by|waived_by/, 'no agent stood as accepter');
   assert.match(disk, /status: addressed/);
 });
@@ -322,7 +331,7 @@ test('an identity literally called agent is refused too, in any spelling @rule:t
       (err) => err.status === 2 && /named human actor/.test(String(err.stderr)),
     );
   assert.doesNotMatch(
-    readFileSync(join(bp, 'threads', 'n-0015.yml'), 'utf8'),
+    readFileSync(join(threadsOf(bp), 'n-0015.yml'), 'utf8'),
     /verified_by/,
     'no spelling stood as accepter',
   );
@@ -332,7 +341,7 @@ test('a declared identity satisfies the accept gate @rule:threads.lifecycle.clai
   const bp = fixture('env-actor', { id: 'n-0014', status: 'addressed' });
   const out = run(['n-0014', '--verify'], bp);
   assert.match(out, /by A Person/);
-  const disk = readFileSync(join(bp, 'threads', 'n-0014.yml'), 'utf8');
+  const disk = readFileSync(join(threadsOf(bp), 'n-0014.yml'), 'utf8');
   assert.match(disk, /verified_by: A Person/);
 });
 
@@ -368,9 +377,9 @@ test('ten concurrent filers get ten threads, none overwritten', async () => {
     ),
   );
   const { readdirSync } = await import('node:fs');
-  const files = readdirSync(join(bp, 'threads')).filter((f) => f.endsWith('.yml'));
+  const files = readdirSync(threadsOf(bp)).filter((f) => f.endsWith('.yml'));
   assert.equal(files.length, 10, 'every filer landed a file');
-  const bodies = files.map((f) => readFileSync(join(bp, 'threads', f), 'utf8'));
+  const bodies = files.map((f) => readFileSync(join(threadsOf(bp), f), 'utf8'));
   for (let i = 0; i < 10; i++)
     assert.ok(
       bodies.some((b) => b.includes(`finding ${i}`)),

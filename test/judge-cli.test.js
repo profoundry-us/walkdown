@@ -26,8 +26,11 @@ const STATEMENT = 'Submitting the form lands the visitor on the done screen.';
 
 function fixture(name, governance = []) {
   const bp = join(root, name, 'blueprint');
+  // Beside the spec, not inside it: the home's layout is the only one
+  // walkdown answers for, and `declareProject` writes the entry to match.
+  const runs = join(root, name, 'runs');
   mkdirSync(join(bp, 'features'), { recursive: true });
-  mkdirSync(join(bp, 'runs'), { recursive: true });
+  mkdirSync(runs, { recursive: true });
   writeFileSync(
     join(bp, 'walkdown.yml'),
     [

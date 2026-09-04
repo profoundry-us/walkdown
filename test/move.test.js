@@ -12,13 +12,14 @@ function project() {
   const root = mkdtempSync(join(tmpdir(), 'wd-move-'));
   const home = join(root, 'home');
   const bp = join(root, 'repo', 'blueprint');
+  const runs = join(root, 'repo', 'runs');
   mkdirSync(join(bp, 'features'), { recursive: true });
-  mkdirSync(join(bp, 'runs'), { recursive: true });
+  mkdirSync(runs, { recursive: true });
   mkdirSync(home, { recursive: true });
   writeFileSync(join(bp, 'walkdown.yml'), 'project: movable\n');
   writeFileSync(join(bp, 'storyboard.yml'), 'screens: []\n');
-  writeFileSync(join(bp, 'runs', 'a.json'), '{"run_id":"a"}');
-  return { root, home, bp, cleanup: () => rmSync(root, { recursive: true, force: true }) };
+  writeFileSync(join(runs, 'a.json'), '{"run_id":"a"}');
+  return { root, home, bp, runs, cleanup: () => rmSync(root, { recursive: true, force: true }) };
 }
 const run = (p, args) =>
   execFileSync('node', [CLI, ...args], {
@@ -30,7 +31,7 @@ test('move relocates the files, records the choice, and edits no record @rule:lo
   const p = project();
   try {
     const dest = join(p.root, 'elsewhere', 'runs');
-    const before = readFileSync(join(p.bp, 'runs', 'a.json'), 'utf8');
+    const before = readFileSync(join(p.runs, 'a.json'), 'utf8');
     run(p, ['move', 'runs', '--to', dest, '--project', declareProject(p.home, p.bp, 'movable')]);
 
     assert.ok(existsSync(join(dest, 'a.json')), 'the run moved');
@@ -39,7 +40,7 @@ test('move relocates the files, records the choice, and edits no record @rule:lo
       before,
       'byte for byte — a move is not an edit',
     );
-    assert.ok(!existsSync(join(p.bp, 'runs', 'a.json')), 'and is not left behind');
+    assert.ok(!existsSync(join(p.runs, 'a.json')), 'and is not left behind');
 
     const cfg = readFileSync(join(p.home, 'config.yml'), 'utf8');
     assert.match(cfg, /id: movable/);
@@ -69,7 +70,7 @@ test('move refuses a destination that already holds records @rule:locations.keep
       (e) => e.status === 2,
       'refused, and loudly enough to fail a script',
     );
-    assert.ok(existsSync(join(p.bp, 'runs', 'a.json')), 'and nothing moved');
+    assert.ok(existsSync(join(p.runs, 'a.json')), 'and nothing moved');
   } finally {
     p.cleanup();
   }

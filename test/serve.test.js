@@ -34,6 +34,10 @@ import { parse } from '../vendor/yaml.js';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-serve-'));
 const bp = join(root, 'blueprint');
+// Beside the spec, never inside it: the home layout is the only one walkdown
+// answers for, and the fixture's `.walkdown` declares exactly these.
+const threads = join(root, 'threads');
+const runs = join(root, 'runs');
 /*
  * A home that declares who is sitting here. Every write this server makes is
  * recorded under the config's identity now - a name in a request is asserted
@@ -55,7 +59,7 @@ before(async () => {
   );
   process.env.WALKDOWN_HOME = DECLARED_HOME;
   mkdirSync(join(bp, 'features'), { recursive: true });
-  mkdirSync(join(bp, 'threads'), { recursive: true });
+  mkdirSync(threads, { recursive: true });
   mkdirSync(join(root, 'proto'), { recursive: true });
   writeFileSync(join(bp, 'walkdown.yml'), 'project: serve-fixture\nprototype: { root: proto/ }\n');
   writeFileSync(
@@ -89,9 +93,9 @@ before(async () => {
       "test('unrelated', () => {});",
     ].join('\n'),
   );
-  mkdirSync(join(bp, 'runs'), { recursive: true });
+  mkdirSync(runs, { recursive: true });
   writeFileSync(
-    join(bp, 'runs', '2026-01-01T00-00-00Z-local-01.json'),
+    join(runs, '2026-01-01T00-00-00Z-local-01.json'),
     JSON.stringify({
       run_id: '2026-01-01T00-00-00Z-local-01',
       created: '2026-01-01T00:00:00Z',
@@ -117,13 +121,24 @@ before(async () => {
   writeFileSync(
     join(root, '.walkdown', 'config.yml'),
     [
+      // Every record named. A blueprint keeping its ledger inside itself was
+      // the layout before homes, and the resolver does not answer for it - an
+      // entry that names a spec and nothing else has nowhere to write.
       'projects:',
       '  - id: main',
       '    roots: [.]',
       '    spec: blueprint',
+      '    threads: threads',
+      '    runs: runs',
+      '    evidence: evidence',
+      '    drafts: drafts',
       '  - id: sibling',
       '    roots: [sibling]',
       '    spec: sibling/blueprint',
+      '    threads: sibling/threads',
+      '    runs: sibling/runs',
+      '    evidence: sibling/evidence',
+      '    drafts: sibling/drafts',
       '',
     ].join('\n'),
   );
@@ -136,6 +151,7 @@ before(async () => {
   base = `http://127.0.0.1:${server.address().port}`;
 });
 after(() => {
+  server.closeAllConnections();
   server.close();
   rmSync(root, { recursive: true, force: true });
 });
@@ -203,7 +219,7 @@ test('POST /api/threads writes a thread file; screen resolved from URL', async (
     })
   ).json();
   assert.equal(res.id, 'n-0001');
-  const onDisk = parse(readFileSync(join(bp, 'threads', 'n-0001.yml'), 'utf8'));
+  const onDisk = parse(readFileSync(join(threads, 'n-0001.yml'), 'utf8'));
   assert.equal(onDisk.status, 'open');
   assert.equal(onDisk.anchor.screen, 'home'); // resolved from the app path
   assert.equal(onDisk.anchor.element, 'home.cta');
@@ -230,7 +246,7 @@ test('a pin with no anchored element is kept by position', async () => {
       }),
     })
   ).json();
-  const onDisk = parse(readFileSync(join(bp, 'threads', `${res.id}.yml`), 'utf8'));
+  const onDisk = parse(readFileSync(join(threads, `${res.id}.yml`), 'utf8'));
   assert.equal(onDisk.anchor.element, undefined);
   assert.deepEqual(onDisk.anchor.position, { x: 412, y: 219 });
   assert.equal(onDisk.anchor.screen, 'home');
@@ -255,7 +271,7 @@ test('a pin with no anchored element is kept by position', async () => {
       }),
     })
   ).json();
-  const anchoredDisk = parse(readFileSync(join(bp, 'threads', `${anchored.id}.yml`), 'utf8'));
+  const anchoredDisk = parse(readFileSync(join(threads, `${anchored.id}.yml`), 'utf8'));
   assert.equal(anchoredDisk.anchor.element, 'home.cta');
   assert.deepEqual(anchoredDisk.anchor.position, { x: 205, y: 190 });
   assert.deepEqual(anchoredDisk.anchor.offset, { x: 5, y: 5 });
@@ -274,7 +290,7 @@ test('a pin with no anchored element is kept by position', async () => {
     })
   ).json();
   assert.equal(
-    parse(readFileSync(join(bp, 'threads', `${stray.id}.yml`), 'utf8')).anchor.offset,
+    parse(readFileSync(join(threads, `${stray.id}.yml`), 'utf8')).anchor.offset,
     undefined,
   );
 
@@ -291,7 +307,7 @@ test('a pin with no anchored element is kept by position', async () => {
       }),
     })
   ).json();
-  const junkDisk = parse(readFileSync(join(bp, 'threads', `${junk.id}.yml`), 'utf8'));
+  const junkDisk = parse(readFileSync(join(threads, `${junk.id}.yml`), 'utf8'));
   assert.equal(junkDisk.anchor.position, undefined);
 });
 
@@ -302,7 +318,7 @@ test('a pin records the surface it was placed on', async () => {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ kind: 'note', body: 'On this surface.', author: 'tester', anchor }),
     }).then((r) => r.json());
-  const onDisk = async (id) => parse(readFileSync(join(bp, 'threads', `${id}.yml`), 'utf8'));
+  const onDisk = async (id) => parse(readFileSync(join(threads, `${id}.yml`), 'utf8'));
 
   const fromApp = await pin({ screen: 'home', element: 'home.cta', surface: 'app' });
   assert.equal((await onDisk(fromApp.id)).anchor.surface, 'app');
@@ -333,7 +349,7 @@ test('a pin records the viewport it was placed at', async () => {
       }),
     })
   ).json();
-  const onDisk = parse(readFileSync(join(bp, 'threads', `${res.id}.yml`), 'utf8'));
+  const onDisk = parse(readFileSync(join(threads, `${res.id}.yml`), 'utf8'));
   assert.deepEqual(onDisk.anchor.viewport, { name: 'mobile', width: 390 });
 
   const noWidth = await (
@@ -349,7 +365,7 @@ test('a pin records the viewport it was placed at', async () => {
     })
   ).json();
   assert.equal(
-    parse(readFileSync(join(bp, 'threads', `${noWidth.id}.yml`), 'utf8')).anchor.viewport,
+    parse(readFileSync(join(threads, `${noWidth.id}.yml`), 'utf8')).anchor.viewport,
     undefined,
   );
 });
@@ -372,8 +388,8 @@ test('positions are stored in the surface coordinate space given', async () => {
 
   const wide = await place(at, { name: 'desktop', width: 1440 });
   const narrow = await place(at, { name: 'mobile', width: 390 });
-  const w = parse(readFileSync(join(bp, 'threads', `${wide.id}.yml`), 'utf8')).anchor;
-  const n = parse(readFileSync(join(bp, 'threads', `${narrow.id}.yml`), 'utf8')).anchor;
+  const w = parse(readFileSync(join(threads, `${wide.id}.yml`), 'utf8')).anchor;
+  const n = parse(readFileSync(join(threads, `${narrow.id}.yml`), 'utf8')).anchor;
   assert.deepEqual(w.position, at);
   assert.deepEqual(n.position, at, 'the viewport must not rescale a recorded position');
   assert.equal(w.viewport.width, 1440);
@@ -455,8 +471,8 @@ test('POST /api/walkdowns writes a hash-stamped human run record', async () => {
     })
   ).json();
   assert.ok(res.run_id, JSON.stringify(res));
-  const file = readdirSync(join(bp, 'runs')).find((f) => f.includes(res.run_id));
-  const record = JSON.parse(readFileSync(join(bp, 'runs', file), 'utf8'));
+  const file = readdirSync(runs).find((f) => f.includes(res.run_id));
+  const record = JSON.parse(readFileSync(join(runs, file), 'utf8'));
   assert.equal(record.kind, 'walkdown');
   // Not the actor the request asked for: a walkdown is an acceptance, and it
   // is recorded under the person this machine says is sitting at it.
@@ -476,8 +492,8 @@ test('a sign-off records approved with its hash and threads @rule:panel.signoff.
     })
   ).json();
   assert.ok(res.run_id, JSON.stringify(res));
-  const file = readdirSync(join(bp, 'runs')).find((f) => f.includes(res.run_id));
-  const record = JSON.parse(readFileSync(join(bp, 'runs', file), 'utf8'));
+  const file = readdirSync(runs).find((f) => f.includes(res.run_id));
+  const record = JSON.parse(readFileSync(join(runs, file), 'utf8'));
   assert.equal(record.results[0].status, 'approved');
   // An approval is of the statement as written, so it is hash-stamped like a pass.
   assert.equal(record.results[0].statement_hash, formatHash('The visitor can do the thing.'));
@@ -501,7 +517,7 @@ test('a session drafts to disk and finishing seals it into one run', async () =>
    * is a resolved location, and a test that hardcoded the blueprint's own
    * folder would be asserting the old default rather than the behaviour.
    */
-  const draftsDir = resolveLocations({ spec: bp }).drafts.path;
+  const draftsDir = resolveLocations({ spec: bp, cwd: root }).drafts.path;
   const draftFile = join(draftsDir, 'local.json');
   const post = (body) =>
     fetch(`${base}/api/draft`, {
@@ -522,7 +538,7 @@ test('a session drafts to disk and finishing seals it into one run', async () =>
   assert.deepEqual(draft.verdicts, { 'demo.main.thing': 'approved' });
   // Not a run: no run id, and it is nowhere near runs/.
   assert.equal(draft.run_id, undefined);
-  assert.ok(!readdirSync(join(bp, 'runs')).some((f) => f.includes('local.json')));
+  assert.ok(!readdirSync(runs).some((f) => f.includes('local.json')));
   // And never committed by accident.
   assert.equal(readFileSync(join(draftsDir, '.gitignore'), 'utf8'), '*\n!.gitignore\n');
 
@@ -552,7 +568,7 @@ test('a session drafts to disk and finishing seals it into one run', async () =>
   assert.equal(bad.status, 400);
 
   // Finish: one run appended, draft gone.
-  const before = readdirSync(join(bp, 'runs')).length;
+  const before = readdirSync(runs).length;
   const sealed = await (
     await fetch(`${base}/api/walkdowns`, {
       method: 'POST',
@@ -564,14 +580,14 @@ test('a session drafts to disk and finishing seals it into one run', async () =>
     })
   ).json();
   assert.ok(sealed.run_id);
-  assert.equal(readdirSync(join(bp, 'runs')).length, before + 1);
-  assert.equal(readDraft(bp), null);
+  assert.equal(readdirSync(runs).length, before + 1);
+  assert.equal(readDraft(draftsDir), null);
 
   // Discarding writes nothing and leaves nothing.
   await post({ actor: 'topher', verdicts: { 'demo.main.thing': 'fail' } });
-  assert.ok(readDraft(bp));
+  assert.ok(readDraft(draftsDir));
   assert.deepEqual(await post({ discard: true }), { draft: null });
-  assert.equal(readDraft(bp), null);
+  assert.equal(readDraft(draftsDir), null);
 });
 
 test('a stand-in serves the design as the app, marked as one @rule:screens.surfaces.stand-in-app', async () => {
@@ -665,9 +681,25 @@ test('GET /api/checks returns source snippets from ledger refs; traversal refs a
 test('a drifted check ref hands display to the tree and keeps the stale line as provenance', async () => {
   const root2 = mkdtempSync(join(tmpdir(), 'walkdown-drift-'));
   const bp2 = join(root2, 'blueprint');
+  const runs2 = join(root2, 'runs');
   mkdirSync(join(bp2, 'features'), { recursive: true });
-  mkdirSync(join(bp2, 'threads'), { recursive: true });
-  mkdirSync(join(bp2, 'runs'), { recursive: true });
+  mkdirSync(join(root2, 'threads'), { recursive: true });
+  mkdirSync(runs2, { recursive: true });
+  mkdirSync(join(root2, '.walkdown'), { recursive: true });
+  writeFileSync(
+    join(root2, '.walkdown', 'config.yml'),
+    [
+      'projects:',
+      '  - id: drift-fixture',
+      '    roots: [.]',
+      '    spec: blueprint',
+      '    threads: threads',
+      '    runs: runs',
+      '    evidence: evidence',
+      '    drafts: drafts',
+      '',
+    ].join('\n'),
+  );
   writeFileSync(
     join(bp2, 'walkdown.yml'),
     'project: drift-fixture\nauthoring: { location: [suite/] }\n',
@@ -695,7 +727,7 @@ test('a drifted check ref hands display to the tree and keeps the stale line as 
   );
   const record = (checks) =>
     writeFileSync(
-      join(bp2, 'runs', '2026-01-01T00-00-00Z-local-01.json'),
+      join(runs2, '2026-01-01T00-00-00Z-local-01.json'),
       JSON.stringify({
         run_id: '2026-01-01T00-00-00Z-local-01',
         created: '2026-01-01T00:00:00Z',
@@ -705,7 +737,7 @@ test('a drifted check ref hands display to the tree and keeps the stale line as 
         results: [{ rule: 'd.s.thing', status: 'pass', checks }],
       }),
     );
-  const srv = createWalkdownServer(bp2);
+  const srv = createWalkdownServer(bp2, { cwd: root2 });
   await new Promise((r) => srv.listen(0, '127.0.0.1', r));
   const at = `http://127.0.0.1:${srv.address().port}`;
   const ask = async () => (await (await fetch(`${at}/api/checks?rule=d.s.thing`)).json()).checks;
@@ -728,7 +760,7 @@ test('a drifted check ref hands display to the tree and keeps the stale line as 
     assert.match(steady[0].source, /realBody/);
 
     // Never recorded: the tree still answers (n-0084), from the opener.
-    rmSync(join(bp2, 'runs', '2026-01-01T00-00-00Z-local-01.json'));
+    rmSync(join(runs2, '2026-01-01T00-00-00Z-local-01.json'));
     const unrecorded = await ask();
     assert.equal(unrecorded[0].ref, 'suite/demo.spec.js:5');
     assert.equal(unrecorded[0].recorded, undefined);
@@ -822,10 +854,10 @@ test('a pin files against the page\u2019s own project, not the server\u2019s def
   // a blueprint - each has its own ledger - so the check is what the file
   // says, not whether the name happens to be taken in the default project.
   const filed = parse(
-    readFileSync(join(root, 'sibling', 'blueprint', 'threads', `${res.id}.yml`), 'utf8'),
+    readFileSync(join(root, 'sibling', 'threads', `${res.id}.yml`), 'utf8'),
   );
   assert.equal(filed.body, 'Belongs to the sibling.');
-  const inDefault = join(bp, 'threads', `${res.id}.yml`);
+  const inDefault = join(threads, `${res.id}.yml`);
   if (existsSync(inDefault))
     assert.notEqual(parse(readFileSync(inDefault, 'utf8')).body, 'Belongs to the sibling.');
 });
@@ -867,7 +899,7 @@ test('the browser cannot name who a write is recorded under @rule:threads.lifecy
     body: JSON.stringify({ status: 'verified', actor: 'mallory' }),
   });
   assert.equal(accepted.status, 200);
-  const disk = parse(readFileSync(join(bp, 'threads', `${note.id}.yml`), 'utf8'));
+  const disk = parse(readFileSync(join(threads, `${note.id}.yml`), 'utf8'));
   assert.equal(disk.verified_by, 'serve-person');
   assert.notEqual(disk.verified_by, 'mallory', 'the invented name never reaches the ledger');
 });
@@ -923,7 +955,7 @@ test('a machine that only has a guess is refused, at this door too @rule:threads
   } finally {
     process.env.WALKDOWN_HOME = DECLARED_HOME;
   }
-  const disk = parse(readFileSync(join(bp, 'threads', `${note.id}.yml`), 'utf8'));
+  const disk = parse(readFileSync(join(threads, `${note.id}.yml`), 'utf8'));
   assert.equal(disk.status, 'addressed', 'the thread never moved');
   assert.equal(disk.verified_by, undefined);
 });
@@ -961,7 +993,7 @@ test('via rides through the API on a note, a reply and a move @rule:status.attri
     anchor: { element: 'home.cta' },
     url: 'http://localhost:3000/home',
   });
-  const file = join(bp, 'threads', `${id}.yml`);
+  const file = join(threads, `${id}.yml`);
   assert.equal(parse(readFileSync(file, 'utf8')).via, 'agent');
   await post(`/api/threads/${id}/replies`, { body: 'Also typed by a machine.', via: 'agent' });
   await post(`/api/threads/${id}/replies`, { body: 'Typed by the person.', via: ['agent'] });

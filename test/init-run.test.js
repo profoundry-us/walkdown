@@ -11,7 +11,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { after, test } from 'node:test';
 import { loadBlueprint } from '../lib/blueprint.js';
 import { installSkills, placePointer, pointerBlock, scaffold, skillFiles } from '../lib/init.js';
@@ -30,27 +30,62 @@ const tree = (dir, prefix = '') =>
     ]);
 after(() => rmSync(root, { recursive: true, force: true }));
 
+/*
+ * Where `init --commit spec` actually puts a blueprint: a numbered home under
+ * the repository's own `.walkdown`. `scaffold` takes it outright now - there
+ * is no `<root>/blueprint` default any more - so these cases name the same
+ * path the command would, and `declare` writes the entry init's other half
+ * writes, since a blueprint nothing declares is not one walkdown reads.
+ */
+const homeSpec = (proj, name = basename(proj)) =>
+  join(proj, '.walkdown', 'blueprints', `0001-${name}`, 'blueprint');
+const spec = (proj) => ({ specDir: homeSpec(proj), commit: 'spec' });
+/** The spec's path as `scaffold` reports it: relative to the project root. */
+const rel = (proj, ...parts) =>
+  join('.walkdown', 'blueprints', `0001-${basename(proj)}`, 'blueprint', ...parts);
+function declare(proj, name = basename(proj)) {
+  const home = join('.walkdown', 'blueprints', `0001-${name}`);
+  mkdirSync(join(proj, '.walkdown'), { recursive: true });
+  writeFileSync(
+    join(proj, '.walkdown', 'config.yml'),
+    [
+      'projects:',
+      `  - id: ${name}`,
+      '    roots: [.]',
+      `    home: 0001-${name}`,
+      `    spec: ${join(home, 'blueprint')}`,
+      `    threads: ${join(home, 'threads')}`,
+      `    runs: ${join(home, 'runs')}`,
+      `    evidence: ${join(home, 'evidence')}`,
+      `    drafts: ${join(home, 'drafts')}`,
+      '',
+    ].join('\n'),
+  );
+  return homeSpec(proj, name);
+}
+
 test('init scaffolds a lint-clean blueprint with agent conventions', () => {
   const proj = join(root, 'fresh');
   mkdirSync(proj);
-  const results = scaffold(proj, { commit: 'spec' });
+  const results = scaffold(proj, spec(proj));
   const actionOf = (rs, path) => rs.find((r) => r.path === path)?.action;
-  for (const path of ['blueprint/walkdown.yml', 'blueprint/AGENTS.md', 'CLAUDE.md'])
+  for (const path of [rel(proj, 'walkdown.yml'), rel(proj, 'AGENTS.md'), 'CLAUDE.md'])
     assert.equal(actionOf(results, path), 'created', path);
   for (const skill of ['walkdown-judge', 'walkdown-incorporate', 'walkdown-formulate']) {
     assert.equal(actionOf(results, `.claude/skills/${skill}/SKILL.md`), 'created', skill);
     const content = readFileSync(join(proj, '.claude', 'skills', skill, 'SKILL.md'), 'utf8');
     assert.match(content, new RegExp(`^---\\nname: ${skill}\\ndescription: .+`));
   }
-  assert.match(readFileSync(join(proj, 'blueprint/walkdown.yml'), 'utf8'), /project: fresh/);
+  assert.match(readFileSync(join(homeSpec(proj), 'walkdown.yml'), 'utf8'), /project: fresh/);
   // The pointer names wherever the spec actually went, which is not
   // necessarily inside the repository any more.
   const pointer = readFileSync(join(proj, 'CLAUDE.md'), 'utf8');
-  assert.match(pointer, /walkdown blueprint in `blueprint\/`/);
+  // The pointer names the home the spec actually went to.
+  assert.match(pointer, /walkdown blueprint in `\.walkdown\/blueprints\/0001-fresh\/blueprint\/`/);
   assert.match(pointer, /AGENTS\.md/);
-  assert.equal(actionOf(results, join(proj, 'blueprint')), 'spec-in-repo');
+  assert.equal(actionOf(results, homeSpec(proj)), 'spec-in-repo');
 
-  const { findings, exitCode } = lint(loadBlueprint(join(proj, 'blueprint')), { checks: false });
+  const { findings, exitCode } = lint(loadBlueprint(declare(proj), { cwd: proj }), { checks: false });
   assert.deepEqual(findings, [], JSON.stringify(findings));
   assert.equal(exitCode, 0);
 });
@@ -61,7 +96,7 @@ test('init is idempotent: rerun no-ops, customizations kept, --force updates own
   // Same standard as the run that made it: the pointer is written relative
   // when the spec is committed and absolute when it is not, so scaffolding the
   // same project under a different answer is a real change, not a no-op.
-  const rerun = scaffold(proj, { commit: 'spec' });
+  const rerun = scaffold(proj, spec(proj));
   // Every file is up to date; the last two entries only report where the spec
   // and the skills went.
   assert.ok(
@@ -72,25 +107,25 @@ test('init is idempotent: rerun no-ops, customizations kept, --force updates own
     JSON.stringify(rerun),
   );
 
-  writeFileSync(join(proj, 'blueprint', 'walkdown.yml'), 'project: customized\n');
+  writeFileSync(join(homeSpec(proj), 'walkdown.yml'), 'project: customized\n');
   writeFileSync(join(proj, '.claude', 'skills', 'walkdown-judge', 'SKILL.md'), 'customized');
-  const third = scaffold(proj, { commit: 'spec' });
-  assert.equal(actionOf(third, 'blueprint/walkdown.yml'), 'kept');
+  const third = scaffold(proj, spec(proj));
+  assert.equal(actionOf(third, rel(proj, 'walkdown.yml')), 'kept');
   assert.equal(actionOf(third, '.claude/skills/walkdown-judge/SKILL.md'), 'kept-differs');
   assert.equal(
     readFileSync(join(proj, '.claude', 'skills', 'walkdown-judge', 'SKILL.md'), 'utf8'),
     'customized',
   );
 
-  const forced = scaffold(proj, { force: true, commit: 'spec' });
-  assert.equal(actionOf(forced, 'blueprint/walkdown.yml'), 'kept'); // user-owned: --force never touches it
+  const forced = scaffold(proj, { ...spec(proj), force: true });
+  assert.equal(actionOf(forced, rel(proj, 'walkdown.yml')), 'kept'); // user-owned: --force never touches it
   assert.equal(actionOf(forced, '.claude/skills/walkdown-judge/SKILL.md'), 'updated');
   assert.match(
     readFileSync(join(proj, '.claude', 'skills', 'walkdown-judge', 'SKILL.md'), 'utf8'),
     /^---\nname: walkdown-judge/,
   );
   assert.equal(
-    readFileSync(join(proj, 'blueprint', 'walkdown.yml'), 'utf8'),
+    readFileSync(join(homeSpec(proj), 'walkdown.yml'), 'utf8'),
     'project: customized\n',
   );
 });
@@ -102,8 +137,8 @@ test('init appends a pointer to an existing CLAUDE.md exactly once', () => {
   const actionOf = (rs, path) => rs.find((r) => r.path === path)?.action;
   // A pointer is what a COMMITTED spec gets; with nothing committed the
   // repository is not touched at all (n-0161).
-  assert.equal(actionOf(scaffold(proj, { commit: 'spec' }), 'CLAUDE.md'), 'pointer-appended');
-  assert.equal(actionOf(scaffold(proj, { commit: 'spec' }), 'CLAUDE.md'), 'up-to-date');
+  assert.equal(actionOf(scaffold(proj, spec(proj)), 'CLAUDE.md'), 'pointer-appended');
+  assert.equal(actionOf(scaffold(proj, spec(proj)), 'CLAUDE.md'), 'up-to-date');
   const content = readFileSync(join(proj, 'CLAUDE.md'), 'utf8');
   assert.match(content, /^# My project/);
   assert.equal(content.match(/walkdown:begin/g).length, 1);
@@ -119,7 +154,7 @@ test('several agent files: init writes no pointer and says which they are @rule:
   mkdirSync(proj);
   writeFileSync(join(proj, 'CLAUDE.md'), '# Mine\n');
   writeFileSync(join(proj, 'AGENTS.md'), '# Also mine\n');
-  const results = scaffold(proj, { commit: 'spec' });
+  const results = scaffold(proj, spec(proj));
   const undecided = results.find((r) => r.action === 'pointer-undecided');
   assert.ok(undecided, 'the choice is reported');
   assert.match(undecided.path, /CLAUDE\.md.*AGENTS\.md/);
@@ -141,7 +176,7 @@ test('a project with only an AGENTS.md gets the pointer there, not in a new CLAU
   const proj = join(root, 'agents-only');
   mkdirSync(proj);
   writeFileSync(join(proj, 'AGENTS.md'), '# Conventions\n');
-  const results = scaffold(proj, { commit: 'spec' });
+  const results = scaffold(proj, spec(proj));
   assert.equal(results.find((r) => r.path === 'AGENTS.md')?.action, 'pointer-appended');
   assert.equal(
     existsSync(join(proj, 'CLAUDE.md')),
@@ -266,6 +301,27 @@ test('run sees a record arrive in a runs directory a config moved @rule:location
 test('run substitutes {id}, injects target env and WALKDOWN_TARGET, propagates exit code', () => {
   const proj = join(root, 'runner');
   mkdirSync(join(proj, 'blueprint'), { recursive: true });
+  /*
+   * Declared, with every record named. A hand-built fixture is still a
+   * blueprint somebody wrote down - that is the only kind walkdown answers
+   * for - and `runChecks` reaches it through the same resolver everything
+   * else does.
+   */
+  mkdirSync(join(proj, '.walkdown'), { recursive: true });
+  writeFileSync(
+    join(proj, '.walkdown', 'config.yml'),
+    [
+      'projects:',
+      '  - id: runner',
+      '    roots: [.]',
+      '    spec: blueprint',
+      '    threads: threads',
+      '    runs: runs',
+      '    evidence: evidence',
+      '    drafts: drafts',
+      '',
+    ].join('\n'),
+  );
   const probe = `node -e "require('fs').writeFileSync('probe.txt', process.env.WALKDOWN_TARGET + ':' + process.env.APP_HOST + ':' + (process.env.RULE_ARG || ''))"`;
   writeFileSync(
     join(proj, 'blueprint', 'walkdown.yml'),
@@ -278,7 +334,7 @@ test('run substitutes {id}, injects target env and WALKDOWN_TARGET, propagates e
       '    staging: { env: { APP_HOST: "https://stage.example" } }',
     ].join('\n'),
   );
-  const blueprint = loadBlueprint(join(proj, 'blueprint'));
+  const blueprint = loadBlueprint(join(proj, 'blueprint'), { cwd: proj });
 
   const all = runChecks(blueprint, { target: 'staging', stdio: 'pipe' });
   assert.equal(all.code, 0);
@@ -297,6 +353,6 @@ test('run substitutes {id}, injects target env and WALKDOWN_TARGET, propagates e
     join(proj, 'blueprint', 'walkdown.yml'),
     'project: runner\nrunner: { run_all: "node -e \\"process.exit(3)\\"" }\n',
   );
-  const failing = runChecks(loadBlueprint(join(proj, 'blueprint')), { stdio: 'pipe' });
+  const failing = runChecks(loadBlueprint(join(proj, 'blueprint'), { cwd: proj }), { stdio: 'pipe' });
   assert.equal(failing.code, 3);
 });

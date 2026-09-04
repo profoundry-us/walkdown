@@ -41,9 +41,16 @@ function fixture({ declared = true } = {}) {
   mkdirSync(home, { recursive: true });
   if (declared)
     writeFileSync(join(home, 'config.yml'), 'identity:\n  username: door-person\n');
+  /*
+   * A home: the spec is `blueprint/` and the ledger sits beside it. Declared
+   * here rather than per door, because the library door loads the blueprint
+   * in-process and every blueprint walkdown answers for is one somebody wrote
+   * down - the CLI and HTTP doors just declare it again, which is a no-op.
+   */
   const bp = join(root, 'blueprint');
+  const threads = join(root, 'threads');
   mkdirSync(join(bp, 'features'), { recursive: true });
-  mkdirSync(join(bp, 'threads'), { recursive: true });
+  mkdirSync(threads, { recursive: true });
   writeFileSync(join(bp, 'walkdown.yml'), 'project: doors\n');
   writeFileSync(join(bp, 'storyboard.yml'), 'screens: []\n');
   writeFileSync(
@@ -58,7 +65,7 @@ function fixture({ declared = true } = {}) {
     ].join('\n'),
   );
   writeFileSync(
-    join(bp, 'threads', 'n-0001.yml'),
+    join(threads, 'n-0001.yml'),
     [
       'id: n-0001',
       'kind: note',
@@ -69,7 +76,8 @@ function fixture({ declared = true } = {}) {
       'body: A thing that is wrong.',
     ].join('\n'),
   );
-  return { root, home, bp, thread: () => parse(readFileSync(join(bp, 'threads', 'n-0001.yml'), 'utf8')) };
+  declareProject(home, bp);
+  return { root, home, bp, thread: () => parse(readFileSync(join(threads, 'n-0001.yml'), 'utf8')) };
 }
 
 /*

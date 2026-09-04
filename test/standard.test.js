@@ -186,13 +186,24 @@ test('a server offers what the .walkdown where it was started declares, wherever
     await new Promise((r) => server.listen(0, '127.0.0.1', r));
     const base = `http://127.0.0.1:${server.address().port}`;
     try {
-      const home = await (await fetch(`${base}/api/blueprint`)).json();
       /*
-       * `reach` is a hand-written committed entry naming a spec the pack's
-       * own `.walkdown` answers for. Lint reports it; and since q-0176 it
-       * is not read either, so the server never lists, serves or writes to
-       * it while it stands - the report and the behaviour agree.
+       * The served spec is alpha's, and mono's `.walkdown` - the one that
+       * answers where this server was started - does not declare it: `reach`
+       * names it, and a committed entry reaching under another `.walkdown`
+       * is refused. So the default selection is a misconfiguration, said
+       * outright on the request rather than by the server dying on it.
        */
+      const dflt = await fetch(`${base}/api/blueprint`);
+      assert.equal(dflt.status, 409);
+      assert.match((await dflt.json()).error, /nothing declares/);
+      /*
+       * And the LIST is still the cwd's. `reach` is a hand-written committed
+       * entry naming a spec the pack's own `.walkdown` answers for. Lint
+       * reports it; and since q-0176 it is not read either, so the server
+       * never lists, serves or writes to it while it stands - the report and
+       * the behaviour agree.
+       */
+      const home = await (await fetch(`${base}/api/blueprint?bp=root-proj`)).json();
       assert.deepEqual(home.projects.map((p) => p.id).sort(), ['root-proj']);
       assert.equal((await fetch(`${base}/api/blueprint?bp=reach`)).status, 404, 'a refused entry is not on offer');
       assert.equal((await fetch(`${base}/api/blueprint?bp=alpha-two`)).status, 404, 'the pack\'s own is not on offer');
@@ -205,6 +216,7 @@ test('a server offers what the .walkdown where it was started declares, wherever
       assert.equal(write.status, 404, 'and cannot be written to');
       assert.equal(existsSync(join(alpha, 'blueprint2', 'threads')), false);
     } finally {
+      server.closeAllConnections();
       server.close();
     }
   } finally {

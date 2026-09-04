@@ -74,7 +74,9 @@ function apart({ runner = {}, withEntry = true } = {}) {
   if (withEntry)
     writeFileSync(
       join(home, 'config.yml'),
-      `projects:\n  - id: apart\n    roots: [${code}]\n    spec: ${spec}\n`,
+      // A real home: `home:` is what every record path derives from, and an
+      // entry naming a spec but no home is a hand edit lint now refuses.
+      `projects:\n  - id: apart\n    roots: [${code}]\n    home: 0001-apart\n    spec: ${spec}\n`,
     );
   return { root, home, code, spec };
 }
@@ -155,9 +157,21 @@ test('authoring.location resolves into the code, so coverage sees the suite', ()
  * guessing from the working directory - that would run one project's suite
  * inside whatever checkout the caller happened to be standing in.
  */
-test('without an entry the code root falls back to the spec, never to the caller', () => {
+test('a blueprint no entry declares is refused, never resolved from the caller', () => {
+  /*
+   * This used to assert a FALLBACK: with no entry, the code root became the
+   * spec's own parent. That fallback was the by-path door - a blueprint
+   * walkdown answered for without anybody having written it down - and it is
+   * gone. What matters is what replaced it: a refusal that says so, rather
+   * than a silent answer derived from wherever this process happens to be.
+   */
   const { spec } = apart({ runner: { lines: [] }, withEntry: false });
-  const bp = loadBlueprint(spec);
-  assert.equal(bp.codeRoot, bp.projectRoot, 'the spec’s own parent');
-  assert.ok(!bp.codeRoot.includes('walkdown/lib'), 'and never this process’s repository');
+  assert.throws(
+    () => loadBlueprint(spec),
+    (err) => {
+      assert.match(err.message, /nothing declares/);
+      assert.ok(!err.message.includes('walkdown/lib'), 'and never this process’s repository');
+      return true;
+    },
+  );
 });

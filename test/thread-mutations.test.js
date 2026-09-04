@@ -1,4 +1,4 @@
-import '../tools/test-home.mjs';
+import { declaredHome } from '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -9,25 +9,32 @@ import { replyToThread, transitionThread } from '../lib/threads.js';
 import { parse } from '../vendor/yaml.js';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-mut-'));
-const bp = join(root, 'blueprint');
+/*
+ * A home: the threads sit BESIDE the spec, which is the only layout walkdown
+ * answers for. Declared in the root's own `.walkdown`, so the blueprint is
+ * one somebody wrote down rather than one found by looking.
+ */
+const h = declaredHome(root, 'mut');
+const bp = h.spec;
 after(() => rmSync(root, { recursive: true, force: true }));
 
 beforeEach(() => {
-  rmSync(bp, { recursive: true, force: true });
-  mkdirSync(join(bp, 'threads'), { recursive: true });
+  rmSync(h.threads, { recursive: true, force: true });
+  mkdirSync(h.threads, { recursive: true });
+  mkdirSync(bp, { recursive: true });
   writeFileSync(join(bp, 'walkdown.yml'), 'project: mut\n');
   writeFileSync(
-    join(bp, 'threads', 'n-1.yml'),
+    join(h.threads, 'n-1.yml'),
     'id: n-1\nkind: note\nstatus: open\nbody: Fix the button.\n',
   );
   writeFileSync(
-    join(bp, 'threads', 'q-1.yml'),
+    join(h.threads, 'q-1.yml'),
     'id: q-1\nkind: question\nstatus: open\nbody: Blur or submit?\n',
   );
 });
 
-const load = () => loadBlueprint(bp);
-const onDisk = (id) => parse(readFileSync(join(bp, 'threads', `${id}.yml`), 'utf8'));
+const load = () => loadBlueprint(bp, { cwd: h.root });
+const onDisk = (id) => parse(readFileSync(join(h.threads, `${id}.yml`), 'utf8'));
 
 test('replies append with author and timestamp', () => {
   replyToThread(load(), 'n-1', { author: 'agent', body: 'Fixed in abc123.' });

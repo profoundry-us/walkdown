@@ -35,7 +35,20 @@ test('node:test reporter records tagged tests as a hash-stamped run', () => {
   mkdirSync(join(root, '.walkdown'), { recursive: true });
   writeFileSync(
     join(root, '.walkdown', 'config.yml'),
-    'projects:\n  - id: node-fixture\n    roots: [.]\n    spec: blueprint\n',
+    // Naming every record, because the entry is what says where they go:
+    // a blueprint keeping runs inside itself is the layout from before homes
+    // and the resolver does not answer for it.
+    [
+      'projects:',
+      '  - id: node-fixture',
+      '    roots: [.]',
+      '    spec: blueprint',
+      '    threads: threads',
+      '    runs: runs',
+      '    evidence: evidence',
+      '    drafts: drafts',
+      '',
+    ].join('\n'),
   );
   // The tag is assembled so this file's source never contains a literal
   // rule ref — walkdown's own coverage lint greps test/ for them.
@@ -78,8 +91,8 @@ test('node:test reporter records tagged tests as a hash-stamped run', () => {
   assert.equal(res.status, 0, res.stderr);
   assert.match(res.stdout, /recorded 1 rule result/);
 
-  const runFile = readdirSync(join(root, 'blueprint', 'runs')).find((f) => f.endsWith('.json'));
-  const record = JSON.parse(readFileSync(join(root, 'blueprint', 'runs', runFile), 'utf8'));
+  const runFile = readdirSync(join(root, 'runs')).find((f) => f.endsWith('.json'));
+  const record = JSON.parse(readFileSync(join(root, 'runs', runFile), 'utf8'));
   assert.equal(record.kind, 'checks');
   assert.equal(record.actor, 'A Person');
   assert.equal(record.target, 'ci-lane');
