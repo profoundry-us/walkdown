@@ -96,11 +96,13 @@ function fixture(name, governance = []) {
   return bp;
 }
 
-const run = (args, dir) =>
-  execFileSync(process.execPath, [CLI, 'judge', ...args, '--project', declareProject(HOME, dir)], {
+const cli = (args, dir) =>
+  execFileSync(process.execPath, [CLI, ...args, '--project', declareProject(HOME, dir)], {
     encoding: 'utf8',
     env: { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: HOME },
   }).replace(/\x1b\[[0-9;]*m/g, '');
+
+const run = (args, dir) => cli(['judge', ...args], dir);
 
 test('the prompt carries everything a judging agent needs to start', () => {
   const bp = fixture('full');
@@ -188,4 +190,49 @@ test('--json is the same assembly, structured', () => {
   );
   assert.equal(doc.screens[1].setup, 'Submit the form first - the address alone lands short of it.');
   assert.match(doc.evidence.key_prefix, /^runs\/evidence\//);
+});
+
+/*
+ * The skeleton is the whole reason a hand-written verdict counts.
+ *
+ * A judge driven by this prompt never goes through `writeRunRecord`, so the
+ * fields that writer stamps have to arrive some other way. They used not to:
+ * the printed record showed kind/actor/target/base_url and nothing else, and
+ * `created` - which is what orders verdicts and ages them against a sweep - was
+ * left to an agent with no way to know it mattered. Fifteen records written
+ * from that skeleton on 2026-09-04 included two with no `created`, and both
+ * filled no cell while lint called the ledger clean; one of them was a FAIL
+ * that the board went on reading as a pass (n-0191).
+ *
+ * So this test does not check for the field. It fills the skeleton in the way
+ * a judge does and asks the board what it now says, which is the only question
+ * the field exists to answer.
+ */
+test('the skeleton it prints is a record the board reads back', () => {
+  const bp = fixture('skeleton');
+  const out = run(['demo.main.headless'], bp);
+
+  const from = out.indexOf('{', out.indexOf('VERDICT'));
+  const to = out.indexOf('\n  }', from) + 4;
+  const record = JSON.parse(out.slice(from, to));
+
+  assert.equal(record.actor, 'agent');
+  assert.equal(record.kind, 'walkdown');
+  assert.equal(record.target, 'local');
+  assert.match(record.created, /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$/, 'the verdict is dated');
+  assert.equal(record.run_id, `${record.created.replaceAll(':', '-')}-local-01`);
+  assert.ok(record.spec_hash?.startsWith('sha256:'), 'the spec it was judged against is stamped');
+  assert.equal(record.results[0].rule, 'demo.main.headless');
+
+  record.results[0].status = 'pass';
+  record.results[0].evidence = [];
+  record.results[0].reasoning = 'Drove every door the steps name and none of them gave.';
+  writeFileSync(
+    join(root, 'skeleton', 'runs', `${record.run_id}.json`),
+    JSON.stringify(record, null, 2) + '\n',
+  );
+
+  const row = JSON.parse(cli(['status', 'demo.main.headless', '--json'], bp));
+  assert.equal(row.agent.state, 'pass', 'a record copied from the skeleton fills the cell');
+  assert.equal(row.agent.runId, record.run_id);
 });

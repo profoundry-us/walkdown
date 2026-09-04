@@ -1,6 +1,7 @@
 import { parseArgs } from 'node:util';
 import { collectRules, excuseFor, signoffList, verifyList } from '../../lib/blueprint.js';
-import { formatHash } from '../../lib/hash.js';
+import { formatHash, specHash } from '../../lib/hash.js';
+import { gitSha, treeHash } from '../../lib/run-record.js';
 import { screenFlow } from '../../lib/status.js';
 import { end, loadOrExit } from './context.js';
 
@@ -107,12 +108,53 @@ export function run(args) {
     return out;
   };
 
-  const stamp = new Date()
-    .toISOString()
-    .replace(/\.\d+Z$/, 'Z')
-    .replaceAll(':', '-');
+  const created = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
+  const stamp = created.replaceAll(':', '-');
   const evidenceKey = `runs/evidence/${stamp}/`;
   const hash = rule.statement ? formatHash(rule.statement) : null;
+
+  /*
+   * The record, with everything a hand-written one used to lose already in it.
+   *
+   * A prompt-driven judge writes its verdict by hand, so it never passes
+   * through writeRunRecord and never gets the fields that writer stamps. The
+   * skeleton printed here used to show only kind/actor/target/base_url, and a
+   * record copied faithfully from it came out inert: `created` is what orders
+   * verdicts and ages them against a sweep, so a record without one fills no
+   * cell at all - while RUN_SHAPE never asks for it, so lint calls the ledger
+   * clean and a recorded FAIL reads as a pass on the board (n-0191, n-0189).
+   *
+   * So they are derived here, where a command can compute them, rather than
+   * asked of an agent that has no way to. git_sha and tree_hash come from the
+   * CODE root, which is the tree a verdict is actually about; the blueprint's
+   * own directory is in ~/.walkdown on the default layout and is no repository
+   * at all (n-0190).
+   */
+  const runId = `${stamp}-${values.target}-01`;
+  const sha = gitSha(blueprint.codeRoot);
+  const tree = treeHash(blueprint.codeRoot);
+  const spec = specHash(blueprint.dir);
+  const record = {
+    run_id: runId,
+    created,
+    actor: 'agent',
+    kind: 'walkdown',
+    target: values.target,
+    ...(baseUrl && { base_url: baseUrl }),
+    ...(sha && { git_sha: sha }),
+    ...(tree && { tree_hash: tree }),
+    ...(spec && { spec_hash: spec }),
+    results: [
+      {
+        rule: id,
+        status: 'pass|fail',
+        ...(hash && { statement_hash: hash }),
+        evidence: [`${evidenceKey}<file>`],
+        reasoning: '<one honest paragraph>',
+        threads: [],
+      },
+    ],
+  };
 
   if (values.json) {
     console.log(
@@ -140,6 +182,7 @@ export function run(args) {
           governance,
           evidence: { key_prefix: evidenceKey, resolved_root: blueprint.at.evidence.path },
           runs_dir: blueprint.at.runs.path,
+          record,
         },
         null,
         2,
@@ -204,12 +247,16 @@ export function run(args) {
     '  Cite evidence by the logical key, never a filesystem path.',
     '',
     'VERDICT',
-    `  Append one run record to ${blueprint.at.runs.path}/${stamp}-${values.target}-01.json:`,
-    `  { "kind": "walkdown", "actor": "agent", "target": "${values.target}"${baseUrl ? `, "base_url": "${baseUrl}"` : ''},`,
-    '    "results": [ { "rule", "status": "pass"|"fail", "statement_hash", "evidence": [<keys>],',
-    '                   "reasoning": <one honest paragraph>, "threads": [<ids>] } ] }',
+    `  Append one run record to ${blueprint.at.runs.path}/${runId}.json.`,
+    '  Everything but `results` is filled in below, derived when this prompt was assembled.',
+    '  Take it as it stands and write your results into it: a record with no `created` fills',
+    '  no cell and lint does not object, so a verdict written without one is silently lost.',
+    '',
+    ...JSON.stringify(record, null, 2)
+      .split('\n')
+      .map((l) => `  ${l}`),
     ...(hash
-      ? [`  statement_hash to stamp: ${hash} — valid only while the statement reads exactly as above.`]
+      ? ['', `  The statement_hash above holds only while the statement reads exactly as printed.`]
       : []),
     '',
     'GOVERNANCE',
