@@ -84,7 +84,14 @@ function add(args) {
    * refused with the shape spelled out, since the fix is a copy of the
    * whole home, not a rename.
    */
-  const named = expand(at, process.cwd());
+  /*
+   * Canonical from the start. A person may type `/var/...` where the process
+   * knows the same directory as `/private/var/...`, and the entry is written
+   * RELATIVE to the repository - so an uncanonical path came out as a string
+   * of `../..` climbing out of the tree and back in (the n-0169 shape, one
+   * spelling over).
+   */
+  const named = canon(expand(at, process.cwd()));
   const homeDir = existsSync(join(named, 'walkdown.yml'))
     ? resolve(named, '..')
     : existsSync(join(named, HOME_LAYOUT.spec, 'walkdown.yml'))
