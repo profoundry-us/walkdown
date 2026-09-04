@@ -161,7 +161,7 @@ export function run(args) {
   // Sittings that are underway but not yet sealed. They are not verdicts and
   // never count as any, but a queue that hides them tells you to go judge what
   // someone is judging right now.
-  const drafts = listDrafts(blueprint.dir);
+  const drafts = listDrafts(blueprint.at.drafts.path);
 
   if (values.json) {
     // `sweeps` rides along because the JSON is the surface agents read

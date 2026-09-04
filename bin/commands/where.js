@@ -1,5 +1,5 @@
 import { parseArgs } from 'node:util';
-import { configPath, foldLegacyHomes, KINDS, resolveLocations } from '../../lib/locations.js';
+import { KINDS, resolveLocations } from '../../lib/locations.js';
 import { dim, green, red, yellow } from '../../lib/report/tty.js';
 import { tracking } from '../../lib/standard.js';
 import { end } from './context.js';
@@ -19,30 +19,9 @@ export function run(args) {
     options: {
       project: { type: 'string' },
       json: { type: 'boolean', default: false },
-      fix: { type: 'boolean', default: false },
     },
   });
 
-  /*
-   * `--fix` is the one thing this command does that is not asking, and it is
-   * spelled as a flag on `where` because it answers the same question: these
-   * are homes full of records that the config does not name, so `where` cannot
-   * see them and nothing else will look. It was `walkdown migrate` - a command
-   * whose name promised a great deal more than it did, since the day it
-   * stopped renaming directories (n-0124). Folding four addresses into a
-   * config is not a migration; it is `where`, finishing its own sentence.
-   *
-   * The bare command still writes nothing, and that is a rule
-   * (locations.default.one-home-per-blueprint): asking allocates nothing,
-   * claims nothing, and leaves the disk as it found it. --fix is not asking,
-   * says so, and prints the report afterwards so the answer it changed is the
-   * next thing you read.
-   */
-  if (values.fix && positionals.length) {
-    console.error('walkdown where --fix takes no kind — it repairs the config, not one path.');
-    return end(2);
-  }
-  if (values.fix && !fix()) return end(2);
   const loc = resolveLocations({ project: values.project });
   if (values.json) {
     const { findings, words, why } = tracking(loc);
@@ -153,52 +132,14 @@ export function run(args) {
   for (const f of t.findings)
     console.log(`  ${''.padEnd(9)} ${f.level === 'error' ? red(`✗ ${f.message}`) : yellow(`! ${f.message}`)}`);
 
-  console.log(
-    dim(
-      values.fix
-        ? '\nOnly the config was written — no record was moved, renamed or edited.'
-        : '\nNothing was written. See docs/08-locations.md for the resolution order.',
-    ),
-  );
+  /*
+   * Asking writes nothing, and that is a rule
+   * (locations.default.one-home-per-blueprint): asking allocates nothing,
+   * claims nothing, and leaves the disk as it found it. There used to be a
+   * `--fix` here, and a `walkdown migrate` before it, that folded the homes
+   * an older layout left behind into the config; the older layout is not
+   * read any more, so there is nothing left to fold.
+   */
+  console.log(dim('\nNothing was written. See docs/08-locations.md for the resolution order.'));
   return end(0);
-}
-
-/*
- * The homes an older layout left behind, written into the config so the
- * records in them keep being found. Nothing is renamed and nothing is moved:
- * an existing ledger is a fact, and relocating one is a decision a person
- * makes with `walkdown move`.
- */
-function fix() {
-  let plan;
-  try {
-    plan = foldLegacyHomes();
-  } catch (e) {
-    console.error(e.message);
-    return false;
-  }
-  if (!plan.found.length) {
-    console.log(dim(`Nothing to fold in — no homes from the old layout under ${plan.home}\n`));
-    return true;
-  }
-  // Padded before colouring: an escape sequence has no width, and padEnd
-  // counts it, so a coloured label pads itself into a ragged column.
-  const pad = (s) => s.padEnd(14);
-  const mark = {
-    recorded: green(pad('→ recorded')),
-    already: dim(pad('· already said')),
-    left: yellow(pad('? left')),
-  };
-  for (const f of plan.found) {
-    console.log(`  ${mark[f.act]} ${f.path}`);
-    console.log(dim(`  ${''.padEnd(14)} ${f.why}`));
-  }
-  console.log(
-    `\n  ${plan.written} home${plan.written === 1 ? '' : 's'} written into ${configPath()}.` +
-      (plan.index
-        ? `\n  ${dim(`${plan.index} is no longer read. Delete it when you are satisfied — it is your record, not ours.`)}`
-        : ''),
-  );
-  console.log('');
-  return true;
 }

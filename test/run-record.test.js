@@ -1,4 +1,4 @@
-import '../tools/test-home.mjs';
+import { declaredHome } from '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -57,10 +57,12 @@ test('pass/fail results are stamped with the current statement_hash; skipped and
 
 test('nextRunId sequences within the same timestamp and target', () => {
   const date = new Date('2026-08-20T22:00:00Z');
-  const runsDir = join(root, 'bp', 'runs');
+  const h = declaredHome(join(root, 'bp'), 'runrec');
+  const runsDir = h.runs;
   assert.equal(nextRunId(runsDir, 'local', date), '2026-08-20T22-00-00Z-local-01');
   writeRunRecord({
-    blueprintDir: join(root, 'bp'),
+    blueprintDir: h.spec,
+    runsDir: h.runs,
     target: 'local',
     actor: 't',
     perTest: [{ ruleId: 'demo.thing', status: 'pass', durationMs: 1 }],
@@ -72,8 +74,10 @@ test('nextRunId sequences within the same timestamp and target', () => {
 });
 
 test('writeRunRecord emits a well-formed record', () => {
+  const h = declaredHome(join(root, 'bp2'), 'runrec-2');
   const { file, record } = writeRunRecord({
-    blueprintDir: join(root, 'bp2'),
+    blueprintDir: h.spec,
+    runsDir: h.runs,
     target: 'staging',
     baseUrl: 'https://staging.example.com',
     actor: 'agent',
@@ -107,9 +111,10 @@ test('a sweep refuses to be written without a reason @rule:status.sweep.delibera
 });
 
 test('a written sweep carries its reason and no results @rule:status.sweep.deliberate', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'wd-sweep-'));
+  const h = declaredHome(mkdtempSync(join(tmpdir(), 'wd-sweep-')), 'sweep');
   const { record } = writeSweep({
-    blueprintDir: dir,
+    blueprintDir: h.spec,
+    runsDir: h.runs,
     target: 'local',
     tiers: ['checks', 'agent'],
     why: 'the panel was split into sixteen modules',

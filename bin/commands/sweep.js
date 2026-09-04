@@ -40,6 +40,7 @@ export function run(args) {
   const target = values.target ?? targets[0] ?? 'local';
   const { file, record } = writeSweep({
     blueprintDir: blueprint.dir,
+    runsDir: blueprint.at?.runs?.path,
     target,
     tiers,
     why: values.why,

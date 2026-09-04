@@ -6,7 +6,7 @@
  * is the panel's, and its check belongs in checks/. This is about what ends up
  * on disk, which no browser can see.
  */
-import '../tools/test-home.mjs';
+import { declaredHome } from '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -26,7 +26,13 @@ const root = mkdtempSync(join(tmpdir(), 'walkdown-roles-'));
  * and is not a claim about who you are.
  */
 const HOME = join(root, 'home');
-const bp = join(root, 'blueprint');
+/*
+ * A home: `blueprint/` with runs beside it, declared in the root's own
+ * `.walkdown`. The server is handed the spec and the tree it stands in, the
+ * way `walkdown serve` is - runs no longer live inside the blueprint.
+ */
+let h;
+let bp;
 let base;
 let server;
 
@@ -34,8 +40,9 @@ before(async () => {
   mkdirSync(HOME, { recursive: true });
   writeFileSync(join(HOME, 'config.yml'), 'identity:\n  username: roles-person\n');
   process.env.WALKDOWN_HOME = HOME;
+  h = declaredHome(join(root, 'proj'), 'roles-fixture');
+  bp = h.spec;
   mkdirSync(join(bp, 'features'), { recursive: true });
-  mkdirSync(join(bp, 'runs'), { recursive: true });
   writeFileSync(join(bp, 'walkdown.yml'), 'project: roles-fixture\n');
   writeFileSync(
     join(bp, 'features', 'demo.yml'),
@@ -49,7 +56,7 @@ before(async () => {
       '        signoff: [eng, product]',
     ].join('\n'),
   );
-  server = createWalkdownServer(bp);
+  server = createWalkdownServer(bp, { cwd: h.root });
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
   base = `http://127.0.0.1:${server.address().port}`;
 });
@@ -57,6 +64,12 @@ after(() => {
   server?.close();
   rmSync(root, { recursive: true, force: true });
 });
+
+/*
+ * The direct writes go to a home of their own: `writeRunRecord` resolves the
+ * runs directory from the config, and a directory nothing declares has none.
+ */
+const direct = declaredHome(join(root, 'direct'), 'roles-direct');
 
 const post = (body) =>
   fetch(`${base}/api/walkdowns`, {
@@ -67,18 +80,15 @@ const post = (body) =>
 const recordFor = (runId) =>
   JSON.parse(
     readFileSync(
-      join(
-        bp,
-        'runs',
-        readdirSync(join(bp, 'runs')).find((f) => f.includes(runId)),
-      ),
+      join(h.runs, readdirSync(h.runs).find((f) => f.includes(runId))),
       'utf8',
     ),
   );
 
 test('a run carries the roles its signer was acting in @rule:status.acceptance.roles-recorded-on-the-run', () => {
   const { record } = writeRunRecord({
-    blueprintDir: join(root, 'direct'),
+    blueprintDir: direct.spec,
+    runsDir: direct.runs,
     target: 'local',
     actor: 'topher',
     kind: 'walkdown',
@@ -96,7 +106,8 @@ test('a run carries the roles its signer was acting in @rule:status.acceptance.r
    */
   for (const roles of [undefined, null, [], ['', '  ']]) {
     const { record: r } = writeRunRecord({
-      blueprintDir: join(root, 'direct'),
+      blueprintDir: direct.spec,
+    runsDir: direct.runs,
       target: 'local',
       actor: 'topher',
       kind: 'walkdown',
@@ -161,7 +172,7 @@ test('the recording endpoint accepts roles and persists them @rule:status.accept
 
   // And a bad role is a 400 with nothing written, rather than a run nobody
   // can act on.
-  const before = readdirSync(join(bp, 'runs')).length;
+  const before = readdirSync(h.runs).length;
   const bad = await post({
     actor: 'topher',
     roles: ['eng', 'marketing'],
@@ -169,7 +180,7 @@ test('the recording endpoint accepts roles and persists them @rule:status.accept
   });
   assert.equal(bad.status, 400);
   assert.match((await bad.json()).error, /unknown role "marketing"/);
-  assert.equal(readdirSync(join(bp, 'runs')).length, before);
+  assert.equal(readdirSync(h.runs).length, before);
 });
 
 test('the identity the server derives carries roles, and the vocabulary to change them @rule:status.acceptance.roles-recorded-on-the-run', async () => {

@@ -75,7 +75,7 @@ The first tooling slice — the two commands the hand-run milestone showed matte
 ```
 walkdown init [--dir <project-root>] [--commit none|spec|all]
 walkdown skills [--into <dir>] [--project] [--force]
-walkdown where [<kind>] [--project <id>] [--json] [--fix]
+walkdown where [<kind>] [--project <id>] [--json]
 walkdown pointer [--dir <project-root>] [--into <file>]
 walkdown run [--target <name>] [--rule <id>]
 walkdown status [<rule-id>] [--project <id>] [--target <name>] [--json]

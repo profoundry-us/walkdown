@@ -97,6 +97,22 @@ export async function run(args) {
     noSpec(listed, loc.config.matchedIn === 'repo' ? loc.config.repo.path : loc.config.path);
     return process.exit(2);
   }
+  /*
+   * A listed blueprint with no home has no tree to read a standard off and
+   * nothing for one to be written against: `--commit spec` over it printed
+   * success and changed nothing (n-0183). Every blueprint lives in a home
+   * now, so an entry naming none is a hand edit, and the honest answer is
+   * to refuse and say what the entry is missing.
+   */
+  if (listed && !loc.homeDir) {
+    console.error(
+      red(
+        `\`${listed.id}\` is listed at this directory but names no home — its spec ${loc.spec.path} stands outside any numbered home, so there is no tree to set a standard on. ` +
+          `\`walkdown project forget ${listed.id}\`, copy the blueprint into a home \`walkdown init\` lays out, and list that.`,
+      ),
+    );
+    return process.exit(2);
+  }
   const current = loc?.standard?.name ?? null;
   const commit = values.commit ?? current ?? 'none';
 

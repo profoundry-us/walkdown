@@ -1,4 +1,4 @@
-import '../tools/test-home.mjs';
+import { declaredHome } from '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -12,13 +12,19 @@ import { lint } from '../lib/lint.js';
 const root = mkdtempSync(join(tmpdir(), 'walkdown-test-'));
 after(() => rmSync(root, { recursive: true, force: true }));
 
+/*
+ * A fixture is a HOME: `blueprint/` with threads, runs, evidence and drafts
+ * beside it, declared in the root's own `.walkdown`. That is the only layout
+ * walkdown answers for - records inside the spec were the shape before homes
+ * and are not read - so a fixture built the old way tests a door that is not
+ * there any more.
+ */
 function writeFixture(dir, { goodHash = true, badScreen = false, threads = [] } = {}) {
-  const bp = join(dir, 'blueprint');
-  mkdirSync(join(bp, 'features'), { recursive: true });
-  mkdirSync(join(bp, 'threads'), { recursive: true });
-  writeFileSync(join(bp, 'walkdown.yml'), 'project: fixture\n');
+  const h = declaredHome(dir);
+  mkdirSync(join(h.spec, 'features'), { recursive: true });
+  writeFileSync(join(h.spec, 'walkdown.yml'), 'project: fixture\n');
   writeFileSync(
-    join(bp, 'storyboard.yml'),
+    join(h.spec, 'storyboard.yml'),
     [
       'screens:',
       '  - id: home',
@@ -30,7 +36,7 @@ function writeFixture(dir, { goodHash = true, badScreen = false, threads = [] } 
   const statement = 'The visitor can do the thing.';
   const hash = goodHash ? formatHash(statement) : 'sha256:000000000000';
   writeFileSync(
-    join(bp, 'features', 'demo.yml'),
+    join(h.spec, 'features', 'demo.yml'),
     [
       'feature: demo',
       'stories:',
@@ -45,20 +51,23 @@ function writeFixture(dir, { goodHash = true, badScreen = false, threads = [] } 
       '          when: [Click anchor `home.cta`]',
     ].join('\n'),
   );
-  threads.forEach((t, i) => writeFileSync(join(bp, 'threads', `t-${i}.yml`), t));
-  return bp;
+  threads.forEach((t, i) => writeFileSync(join(h.threads, `t-${i}.yml`), t));
+  return h;
 }
 
+/* Loaded the way a person's checkout is: by standing in it. */
+const load = (h) => loadBlueprint(h.spec, { cwd: h.root });
+
 test('clean fixture lints with no findings', () => {
-  const bp = writeFixture(join(root, 'clean'));
-  const { findings, exitCode } = lint(loadBlueprint(bp), { checks: false });
+  const h = writeFixture(join(root, 'clean'));
+  const { findings, exitCode } = lint(load(h), { checks: false });
   assert.deepEqual(findings, []);
   assert.equal(exitCode, 0);
 });
 
 test('stale hash and unknown screen are errors', () => {
-  const bp = writeFixture(join(root, 'broken'), { goodHash: false, badScreen: true });
-  const { findings, exitCode } = lint(loadBlueprint(bp), { checks: false });
+  const h = writeFixture(join(root, 'broken'), { goodHash: false, badScreen: true });
+  const { findings, exitCode } = lint(load(h), { checks: false });
   const categories = findings.map((f) => `${f.level}:${f.category}`).sort();
   assert.ok(categories.includes('error:stale-steps'), `got ${categories}`);
   assert.ok(categories.includes('error:storyboard'), `got ${categories}`);
@@ -66,13 +75,13 @@ test('stale hash and unknown screen are errors', () => {
 });
 
 test('answered question warns; waived without waived_by errors', () => {
-  const bp = writeFixture(join(root, 'threads'), {
+  const h = writeFixture(join(root, 'threads'), {
     threads: [
       'id: q-1\nkind: question\nstatus: answered\nanchor: { rule: demo.main.thing, screen: home }\nbody: x\n',
       'id: n-1\nkind: note\nstatus: waived\nanchor: { rule: demo.main.thing }\nbody: x\n',
     ],
   });
-  const { findings } = lint(loadBlueprint(bp), { checks: false });
+  const { findings } = lint(load(h), { checks: false });
   assert.ok(
     findings.some(
       (f) => f.level === 'warn' && f.subject === 'q-1' && /not incorporated/.test(f.message),
@@ -84,29 +93,29 @@ test('answered question warns; waived without waived_by errors', () => {
 });
 
 test('hash --write repairs a stale hash and lint then passes', () => {
-  const bp = writeFixture(join(root, 'repair'), { goodHash: false });
-  const first = runHashCommand(loadBlueprint(bp), { write: false });
+  const h = writeFixture(join(root, 'repair'), { goodHash: false });
+  const first = runHashCommand(load(h), { write: false });
   assert.equal(first.exitCode, 1);
-  const wrote = runHashCommand(loadBlueprint(bp), { write: true });
+  const wrote = runHashCommand(load(h), { write: true });
   assert.equal(wrote.changedFiles, 1);
   assert.ok(
-    readFileSync(join(bp, 'features', 'demo.yml'), 'utf8').includes(
+    readFileSync(join(h.spec, 'features', 'demo.yml'), 'utf8').includes(
       formatHash('The visitor can do the thing.'),
     ),
   );
-  const { exitCode } = lint(loadBlueprint(bp), { checks: false });
+  const { exitCode } = lint(load(h), { checks: false });
   assert.equal(exitCode, 0);
 });
 
 test('two screens claiming one address on a surface: the loser of the tie is named', () => {
-  const bp = writeFixture(join(root, 'tie'));
-  const sb = readFileSync(join(bp, 'storyboard.yml'), 'utf8');
+  const h = writeFixture(join(root, 'tie'));
+  const sb = readFileSync(join(h.spec, 'storyboard.yml'), 'utf8');
   // A state of the same page: its own design, no address of its own.
   writeFileSync(
-    join(bp, 'storyboard.yml'),
+    join(h.spec, 'storyboard.yml'),
     sb + '\n  - id: home-empty\n    prototype: /home.html#empty\n    app: { path: / }\n',
   );
-  const { findings } = lint(loadBlueprint(bp), { checks: false });
+  const { findings } = lint(load(h), { checks: false });
   const tie = findings.filter(
     (f) => f.category === 'storyboard' && /already claimed/.test(f.message),
   );
@@ -118,13 +127,13 @@ test('two screens claiming one address on a surface: the loser of the tie is nam
 });
 
 test('an undesigned screen without a design-request thread warns; with one it passes @rule:ownership.drift.design-requests-required', () => {
-  const bp = writeFixture(join(root, 'drift'));
-  const sb = readFileSync(join(bp, 'storyboard.yml'), 'utf8');
+  const h = writeFixture(join(root, 'drift'));
+  const sb = readFileSync(join(h.spec, 'storyboard.yml'), 'utf8');
   writeFileSync(
-    join(bp, 'storyboard.yml'),
+    join(h.spec, 'storyboard.yml'),
     sb + '\n  - id: specborn\n    prototype: null\n    app: { path: /x }\n',
   );
-  let { findings } = lint(loadBlueprint(bp), { checks: false });
+  let { findings } = lint(load(h), { checks: false });
   assert.ok(
     findings.some(
       (f) =>
@@ -135,21 +144,21 @@ test('an undesigned screen without a design-request thread warns; with one it pa
   );
 
   writeFileSync(
-    join(bp, 'threads', 'req.yml'),
+    join(h.threads, 'req.yml'),
     'id: q-9\nkind: question\nstatus: open\nanchor: { rule: demo.main.thing, screen: specborn }\nbody: design this\n',
   );
-  ({ findings } = lint(loadBlueprint(bp), { checks: false }));
+  ({ findings } = lint(load(h), { checks: false }));
   assert.deepEqual(
     findings.filter((f) => f.category === 'drift'),
     [],
   );
 
-  const feat = readFileSync(join(bp, 'features', 'demo.yml'), 'utf8');
+  const feat = readFileSync(join(h.spec, 'features', 'demo.yml'), 'utf8');
   writeFileSync(
-    join(bp, 'features', 'demo.yml'),
+    join(h.spec, 'features', 'demo.yml'),
     feat.replace('        statement:', '        origin: thread:nope\n        statement:'),
   );
-  ({ findings } = lint(loadBlueprint(bp), { checks: false }));
+  ({ findings } = lint(load(h), { checks: false }));
   assert.ok(
     findings.some((f) => f.category === 'drift' && /unknown thread "nope"/.test(f.message)),
   );
@@ -187,12 +196,12 @@ test('the in-repo example blueprint lints clean (without runner)', () => {
  * because a rule carrying three mistakes at once cannot show which finding
  * belongs to which.
  */
-function ruleFixture(dir, body) {
-  const bp = join(dir, 'blueprint');
-  mkdirSync(join(bp, 'features'), { recursive: true });
-  writeFileSync(join(bp, 'walkdown.yml'), 'project: fixture\n');
+function ruleHome(dir, body) {
+  const h = declaredHome(dir);
+  mkdirSync(join(h.spec, 'features'), { recursive: true });
+  writeFileSync(join(h.spec, 'walkdown.yml'), 'project: fixture\n');
   writeFileSync(
-    join(bp, 'features', 'demo.yml'),
+    join(h.spec, 'features', 'demo.yml'),
     [
       'feature: demo',
       'stories:',
@@ -203,8 +212,9 @@ function ruleFixture(dir, body) {
       ...body,
     ].join('\n'),
   );
-  return lint(loadBlueprint(bp), { checks: false }).findings;
+  return h;
 }
+const ruleFixture = (dir, body) => lint(load(ruleHome(dir, body)), { checks: false }).findings;
 const REAL_EXCUSE = 'The control is the browser toolbar, which no tool an agent drives can reach.';
 
 test('a signoff list that omits eng is flagged as a file that lies @rule:status.acceptance.signoff-defaults-to-eng', () => {
@@ -300,11 +310,9 @@ test('verify no longer knows the word human @rule:status.acceptance.signoff-defa
 });
 
 test('a run signed under a role that does not exist is named @rule:status.acceptance.roles-recorded-on-the-run', () => {
-  const bp = join(root, 'run-roles', 'blueprint');
-  mkdirSync(join(bp, 'runs'), { recursive: true });
-  ruleFixture(join(root, 'run-roles'), []);
+  const h = ruleHome(join(root, 'run-roles'), []);
   writeFileSync(
-    join(bp, 'runs', 'r.json'),
+    join(h.runs, 'r.json'),
     JSON.stringify({
       run_id: 'r',
       created: '2026-01-01T00:00:00Z',
@@ -315,7 +323,7 @@ test('a run signed under a role that does not exist is named @rule:status.accept
       results: [{ rule: 'demo.main.thing', status: 'pass' }],
     }),
   );
-  const findings = lint(loadBlueprint(bp), { checks: false }).findings.filter(
+  const findings = lint(load(h), { checks: false }).findings.filter(
     (f) => f.category === 'runs',
   );
   // The write paths refuse this, so a record carrying it was hand-edited or

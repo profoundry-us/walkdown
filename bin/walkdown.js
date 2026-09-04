@@ -23,7 +23,7 @@ Usage:
                       [--screen <id>] [--element <sel>] [--as-agent] [--project <id>] [--json]
   walkdown serve [--project <id>] [--port <n>]
   walkdown claims [--project <id>] [--url <address>] [--json]
-  walkdown where [<kind>] [--project <id>] [--json] [--fix]
+  walkdown where [<kind>] [--project <id>] [--json]
   walkdown projects [--stale]
   walkdown project add <path> [--id <name>] [--ephemeral] [--why <reason>]
   walkdown project forget <id>
@@ -87,13 +87,7 @@ Commands:
           repository a run's git_sha comes from. With a kind (spec, code,
           runs, threads, evidence, drafts) prints that one path alone, for
           scripts. Reads the personal config and the working tree, and
-          writes nothing at all. --fix is the exception, and the only one:
-          it writes the homes an older layout left behind into the config so
-          the records in them keep being found, then prints the report. It
-          moves nothing and renames nothing - an existing ledger is a fact,
-          and relocating one is a decision a person makes with 'walkdown
-          move'. A home no entry claims is reported and left standing.
-          (This was 'walkdown migrate', which still works and says so.)
+          writes nothing at all.
   move    Move one kind of record somewhere else and record the choice in
           ~/.walkdown/config.yml. Moves files; never edits one. Refuses a
           destination that already holds records rather than interleaving
@@ -123,7 +117,6 @@ Options:
   --write          hash: write missing/stale hashes back to feature files
   --why <reason>   sweep: why the whole thing is being asked for again (required)
   --tiers <list>   sweep: comma-separated tiers to sweep (default: checks,agent)
-  --fix            where: fold an older layout's homes into the config
   --json           status/lint/threads/thread: machine-readable output
 `;
 
@@ -135,7 +128,6 @@ const COMMANDS = new Set([
   'hash',
   'judge',
   'sweep',
-  'migrate',
   'project',
   'projects',
   'threads',

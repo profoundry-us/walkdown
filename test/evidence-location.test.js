@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { createWalkdownServer } from '../lib/serve.js';
+import { declaredHome } from '../tools/test-home.mjs';
 
 /*
  * Evidence is recorded in the ledger as a logical key - "runs/evidence/<run>/
@@ -12,8 +13,8 @@ import { createWalkdownServer } from '../lib/serve.js';
  * blueprint, and one on a machine that has moved evidence out finds it at the
  * configured root, with no run record edited either way.
  */
-async function withServer(bp, fn) {
-  const server = createWalkdownServer(bp);
+async function withServer(f, fn) {
+  const server = createWalkdownServer(f.bp, { cwd: f.root });
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
   const base = `http://127.0.0.1:${server.address().port}`;
   try {
@@ -23,27 +24,41 @@ async function withServer(bp, fn) {
   }
 }
 
+/*
+ * A declared home, because that is the only shape walkdown answers for. The
+ * evidence key space is unchanged - a run records `runs/evidence/<id>/x.png`
+ * and the server resolves it against wherever evidence actually lives - but
+ * where it lives is now always a home's `evidence/`, never a directory
+ * inside the blueprint.
+ */
 function fixture() {
   const root = mkdtempSync(join(tmpdir(), 'wd-ev-'));
-  const bp = join(root, 'blueprint');
-  mkdirSync(join(bp, 'features'), { recursive: true });
-  writeFileSync(join(bp, 'walkdown.yml'), 'project: ev-fixture\n');
-  writeFileSync(join(bp, 'storyboard.yml'), 'screens: []\n');
+  const h = declaredHome(root, 'ev-fixture');
+  mkdirSync(join(h.spec, 'features'), { recursive: true });
+  writeFileSync(join(h.spec, 'walkdown.yml'), 'project: ev-fixture\n');
+  writeFileSync(join(h.spec, 'storyboard.yml'), 'screens: []\n');
   const home = join(root, 'home');
   mkdirSync(home, { recursive: true });
   process.env.WALKDOWN_HOME = home;
-  return { root, bp, home, cleanup: () => rmSync(root, { recursive: true, force: true }) };
+  return { root, bp: h.spec, h, home, cleanup: () => rmSync(root, { recursive: true, force: true }) };
 }
 
-test('a screenshot in the blueprint is served, as every older record expects', async () => {
+/*
+ * The case that used to stand here served a screenshot from
+ * `blueprint/runs/evidence/` - records kept INSIDE the spec, the layout from
+ * before homes. Nothing reads that layout now (every blueprint is declared
+ * and lives in a home), so the test went with it rather than being rewritten
+ * to assert a shape walkdown no longer produces.
+ */
+test('a screenshot in the home is served under the key the run recorded @rule:locations.travel.evidence-by-key', async () => {
   const f = fixture();
   try {
-    mkdirSync(join(f.bp, 'runs', 'evidence', 'r1'), { recursive: true });
-    writeFileSync(join(f.bp, 'runs', 'evidence', 'r1', 'shot.png'), 'IN-REPO');
-    await withServer(f.bp, async (base) => {
+    mkdirSync(join(f.h.evidence, 'r1'), { recursive: true });
+    writeFileSync(join(f.h.evidence, 'r1', 'shot.png'), 'IN-HOME');
+    await withServer(f, async (base) => {
       const res = await fetch(`${base}/evidence/runs/evidence/r1/shot.png`);
       assert.equal(res.status, 200);
-      assert.equal(await res.text(), 'IN-REPO');
+      assert.equal(await res.text(), 'IN-HOME');
     });
   } finally {
     f.cleanup();
@@ -63,12 +78,16 @@ test('with evidence moved out, the same recorded key finds it at the new root @r
      */
     writeFileSync(
       join(f.home, 'config.yml'),
-      `projects:\n  - id: ev-fixture\n    spec: ${f.bp}\n    evidence: ${join(f.home, 'projects', 'ev-fixture', 'evidence')}\n`,
+      // A pure personal override on the declared entry - the shape
+      // `walkdown move evidence --to <path>` writes. It names no spec and no
+      // roots: the repository's entry says where the blueprint is, and this
+      // says only where THIS machine keeps its screenshots.
+      `projects:\n  - id: ev-fixture\n    evidence: ${join(f.home, 'projects', 'ev-fixture', 'evidence')}\n`,
     );
     const out = join(f.home, 'projects', 'ev-fixture', 'evidence', 'r1');
     mkdirSync(out, { recursive: true });
     writeFileSync(join(out, 'shot.png'), 'MOVED-OUT');
-    await withServer(f.bp, async (base) => {
+    await withServer(f, async (base) => {
       const res = await fetch(`${base}/evidence/runs/evidence/r1/shot.png`);
       assert.equal(res.status, 200);
       assert.equal(
@@ -86,7 +105,7 @@ test('evidence serving still refuses anything outside the evidence key space @ru
   const f = fixture();
   try {
     writeFileSync(join(f.bp, 'walkdown.yml'), 'project: ev-fixture\n');
-    await withServer(f.bp, async (base) => {
+    await withServer(f, async (base) => {
       for (const path of [
         '/evidence/walkdown.yml',
         '/evidence/../walkdown.yml',

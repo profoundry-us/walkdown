@@ -25,14 +25,15 @@
  * rooted entry would shadow the real thing from the person's own working
  * directory.
  */
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import {
   canon,
-  claimHome,
   configPath,
   expand,
+  HOME_LAYOUT,
+  KINDS,
   readUserConfig,
   rememberProject,
   walkdownHome,
@@ -73,9 +74,29 @@ function add(args) {
     console.error(HELP);
     return end(2);
   }
-  const spec = expand(at, process.cwd());
-  if (!existsSync(join(spec, 'walkdown.yml'))) {
-    console.error(`No blueprint at ${at} — no walkdown.yml there.`);
+  /*
+   * A path to a home, or to the blueprint inside one - either spelling names
+   * the same thing. Every blueprint walkdown answers for lives in a home:
+   * `blueprint/` with threads, runs, evidence and drafts beside it, the
+   * layout `init` lays out. A bare `<dir>/blueprint` keeping records inside
+   * itself was the layout from before homes, and it is not read any more;
+   * listing one would write an entry the resolver cannot finish. It is
+   * refused with the shape spelled out, since the fix is a copy of the
+   * whole home, not a rename.
+   */
+  const named = expand(at, process.cwd());
+  const homeDir = existsSync(join(named, 'walkdown.yml'))
+    ? resolve(named, '..')
+    : existsSync(join(named, HOME_LAYOUT.spec, 'walkdown.yml'))
+      ? named
+      : null;
+  const spec = homeDir ? join(homeDir, HOME_LAYOUT.spec) : null;
+  if (!homeDir || basename(spec) !== HOME_LAYOUT.spec || !existsSync(join(spec, 'walkdown.yml'))) {
+    console.error(
+      red(
+        `No home at ${at} — every blueprint walkdown answers for lives in one: ${HOME_LAYOUT.spec}/ with ${KINDS.join(', ')} beside it. \`walkdown init\` lays one out, and a copy is a copy of the whole home.`,
+      ),
+    );
     return end(2);
   }
   /*
@@ -91,7 +112,7 @@ function add(args) {
    * second home for the same spec (n-0170, G2). Say so and stop; standing in
    * that checkout is how it is reached.
    */
-  const own = walkdownRoot(resolve(spec, '..'));
+  const own = walkdownRoot(homeDir);
   const here = walkdownRoot();
   /*
    * Compared canonically: `own` is walked from the spelling the person
@@ -147,6 +168,21 @@ function add(args) {
   }
   const wd = values.ephemeral ? walkdownHome() : (here ?? walkdownHome());
   const inRepo = !values.ephemeral && wd !== walkdownHome();
+  /*
+   * A listed home is a numbered one under the `.walkdown` that answers for
+   * it - that is what `home:` in the entry names, and what every other
+   * writer keeps. A home standing anywhere else is a copy, and a copy is
+   * what `--ephemeral` lists.
+   */
+  if (!values.ephemeral && canon(resolve(homeDir, '..')) !== canon(join(wd, 'blueprints'))) {
+    console.error(
+      red(
+        `${homeDir} is not one of ${join(wd, 'blueprints')}'s homes — a listed blueprint lives in a numbered home there (\`walkdown init\` lays one out). A copy standing elsewhere is listed with --ephemeral.`,
+      ),
+    );
+    return end(2);
+  }
+  for (const kind of KINDS) mkdirSync(join(homeDir, HOME_LAYOUT[kind]), { recursive: true });
   const target = join(wd, 'config.yml');
   const doc = load(target);
   const projects = doc.get('projects');
@@ -166,41 +202,28 @@ function add(args) {
     console.log(`  ${dim('· already listed')} ${spec}  ${dim(`as \`${listed.get('id')}\``)}`);
     return end(0);
   }
-  const name = values.id ?? basename(resolve(spec, '..'));
+  const name = values.id ?? basename(homeDir).replace(/^\d{4}-/, '');
   const taken = new Set(
     (readUserConfig().config.projects ?? []).map((p) => p?.id).filter(Boolean),
   );
   let id = name;
   for (let n = 2; taken.has(id); n++) id = `${name}-${n}`;
-  const claim = claimHome({ name: id, walkdown: wd });
   /*
-   * Where its records go: into the home just claimed, beside nothing - the
-   * spec stands where it already stands. A blueprint that predates homes
-   * and keeps runs or threads inside itself keeps them there, and the entry
-   * says so outright rather than leaving anything downstream to guess.
-   *
    * Written by the same hand as init's entry, which is what keeps a
    * committed entry relative to its repository and a personal one spelled
-   * with `~`. This used to write absolute paths into the committed file and
-   * send runs and threads to the blueprint's parent, a directory the home it
-   * named never read (n-0169).
+   * with `~` (n-0169). The home implies every record path; nothing is
+   * claimed, since the directory already stands, and an ephemeral copy
+   * carries no `home:` because it is nobody's numbered home.
    */
-  const records = Object.fromEntries(
-    ['runs', 'threads', 'evidence', 'drafts']
-      .filter((kind) => existsSync(join(spec, kind)))
-      .map((kind) => [kind, join(spec, kind)]),
-  );
   let written;
   try {
     written = rememberProject({
       id,
-      root: values.ephemeral ? null : resolve(spec, '..'),
+      root: values.ephemeral ? null : resolve(wd, '..'),
       base: inRepo ? resolve(wd, '..') : null,
-      spec,
-      homeDir: claim.dir,
-      home: claim.home,
+      homeDir,
+      home: values.ephemeral ? null : basename(homeDir),
       inRepo,
-      records,
       ...(values.ephemeral
         ? { extra: { ephemeral: true, declared: new Date().toISOString(), why: values.why ?? '' } }
         : {}),

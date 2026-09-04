@@ -1,4 +1,4 @@
-import { declareProject, suiteHome } from '../tools/test-home.mjs';
+import { declaredHome, suiteHome } from '../tools/test-home.mjs';
 
 /** This file's own personal home — declaring into a shared one races. */
 const HOME = suiteHome('retired');
@@ -15,15 +15,21 @@ import { deriveStatus } from '../lib/status.js';
 const root = mkdtempSync(join(tmpdir(), 'walkdown-retired-'));
 after(() => rmSync(root, { recursive: true, force: true }));
 
-function fixture() {
-  const bp = join(root, 'blueprint');
+/*
+ * A home per case: `blueprint/` with runs beside it, declared in that
+ * subdirectory's own `.walkdown`. Records inside the spec were the layout
+ * before homes and nothing reads them now, and a home per case keeps two
+ * tests' entries from sharing an id in one config.
+ */
+function fixture(label) {
+  const h = declaredHome(join(root, label), 'retired-fixture');
+  const bp = h.spec;
   mkdirSync(join(bp, 'features'), { recursive: true });
-  mkdirSync(join(bp, 'runs'), { recursive: true });
   writeFileSync(join(bp, 'walkdown.yml'), 'project: retired-fixture\n');
   const live = 'The visitor can do the thing.';
   const gone = 'The visitor could do the old thing.';
   writeFileSync(
-    join(bp, 'features', 'demo.yml'),
+    join(h.spec, 'features', 'demo.yml'),
     [
       'feature: demo',
       'stories:',
@@ -43,7 +49,7 @@ function fixture() {
   );
   // A run that judged both, the way the ledger actually looks after a retirement.
   writeFileSync(
-    join(bp, 'runs', '2026-01-01T00-00-00Z-local-01.json'),
+    join(h.runs, '2026-01-01T00-00-00Z-local-01.json'),
     JSON.stringify({
       run_id: '2026-01-01T00-00-00Z-local-01',
       created: '2026-01-01T00:00:00Z',
@@ -56,18 +62,18 @@ function fixture() {
       ],
     }),
   );
-  return bp;
+  return h;
 }
 
 test('a retired rule leaves the report but keeps its id resolvable', () => {
-  const bp = fixture();
-  const { rows } = deriveStatus(loadBlueprint(bp));
+  const h = fixture('status');
+  const { rows } = deriveStatus(loadBlueprint(h.spec, { cwd: h.root }));
   assert.deepEqual(
     rows.map((r) => r.rule),
     ['demo.main.live'],
   );
 
-  const { findings, exitCode } = lint(loadBlueprint(bp), { checks: false });
+  const { findings, exitCode } = lint(loadBlueprint(h.spec, { cwd: h.root }), { checks: false });
   assert.equal(exitCode, 0);
   // The verdict recorded against it is still a verdict about a rule that exists.
   assert.equal(findings.filter((f) => /unknown rule/.test(f.message)).length, 0);
@@ -79,17 +85,14 @@ test('a retired rule leaves the report but keeps its id resolvable', () => {
 });
 
 test('the CLI answers for a retired rule instead of calling it unknown', async () => {
-  const bp = fixture();
+  const h = fixture('cli');
   const { execFileSync } = await import('node:child_process');
   const cli = new URL('../bin/walkdown.js', import.meta.url).pathname;
   const run = (args) =>
     execFileSync(
       process.execPath,
-      [cli, ...args, '--project', declareProject(HOME, bp)],
-      {
-        encoding: 'utf8',
-        env: { ...process.env, WALKDOWN_HOME: HOME },
-      },
+      [cli, ...args, '--project', h.id],
+      { encoding: 'utf8', cwd: h.root, env: { ...process.env, WALKDOWN_HOME: HOME } },
     );
 
   // Retiring and deleting must not look the same from the command line.
@@ -108,9 +111,9 @@ test('the CLI answers for a retired rule instead of calling it unknown', async (
 });
 
 test('a retired screen leaves the surfaces but keeps the threads anchored to it valid', () => {
-  const bp = fixture();
+  const h = fixture('threads');
   writeFileSync(
-    join(bp, 'storyboard.yml'),
+    join(h.spec, 'storyboard.yml'),
     [
       'screens:',
       '  - id: live',
@@ -123,13 +126,12 @@ test('a retired screen leaves the surfaces but keeps the threads anchored to it 
   );
   // A thread saying something about a screen we later stopped meaning. The
   // record is still true; only the screen is gone.
-  mkdirSync(join(bp, 'threads'), { recursive: true });
   writeFileSync(
-    join(bp, 'threads', 'n-1.yml'),
+    join(h.threads, 'n-1.yml'),
     'id: n-1\nkind: note\nstatus: open\nanchor: { screen: gone }\nbody: said about it at the time\n',
   );
 
-  const { findings, exitCode } = lint(loadBlueprint(bp), { checks: false });
+  const { findings, exitCode } = lint(loadBlueprint(h.spec, { cwd: h.root }), { checks: false });
   assert.equal(exitCode, 0);
   // Not "anchored to unknown screen" — the id still resolves.
   assert.deepEqual(
@@ -142,7 +144,7 @@ test('a retired screen leaves the surfaces but keeps the threads anchored to it 
     [],
   );
 
-  const { drift } = deriveStatus(loadBlueprint(bp));
+  const { drift } = deriveStatus(loadBlueprint(h.spec, { cwd: h.root }));
   assert.deepEqual(
     drift.design.map((d) => d.screen),
     [],
@@ -150,8 +152,8 @@ test('a retired screen leaves the surfaces but keeps the threads anchored to it 
 });
 
 test('retired must say why', () => {
-  const bp = fixture();
-  const path = join(bp, 'features', 'demo.yml');
+  const h = fixture('drift');
+  const path = join(h.spec, 'features', 'demo.yml');
   writeFileSync(
     path,
     readFileSync(path, 'utf8').replace(
@@ -159,7 +161,7 @@ test('retired must say why', () => {
       '        retired: true',
     ),
   );
-  const { findings } = lint(loadBlueprint(bp), { checks: false });
+  const { findings } = lint(loadBlueprint(h.spec, { cwd: h.root }), { checks: false });
   assert.ok(
     findings.some((f) => f.subject === 'demo.main.gone' && /retired must say why/.test(f.message)),
   );

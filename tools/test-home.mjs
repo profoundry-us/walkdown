@@ -21,7 +21,7 @@
  */
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { parse, stringify } from '../vendor/yaml.js';
 
 process.env.WALKDOWN_HOME ??= mkdtempSync(join(tmpdir(), 'walkdown-test-home-'));
@@ -58,7 +58,17 @@ export function declareProject(home, spec, id = 'fixture') {
    * the other's entry vanishes, which fails a suite only when another suite
    * happens to be running beside it. `suiteHome()` is how a file gets one of
    * its own; the shared pinned home is for reading, not for declaring into.
+   *
+   * And the spec must be the `blueprint/` of a home. Every blueprint walkdown
+   * answers for lives in one - threads, runs, evidence and drafts BESIDE the
+   * spec, never inside it - and a fixture is no exception: the entry written
+   * here names the home's paths the way `project add --ephemeral` does, and
+   * the siblings are created so a suite can write into them.
    */
+  if (basename(spec) !== 'blueprint')
+    throw new Error(`declareProject: ${spec} is not a home's blueprint/ — fixtures are laid out as homes now`);
+  const homeDir = dirname(spec);
+  for (const kind of ['threads', 'runs', 'evidence', 'drafts']) mkdirSync(join(homeDir, kind), { recursive: true });
   mkdirSync(home, { recursive: true });
   const path = join(home, 'config.yml');
   const doc = existsSync(path) ? (parse(readFileSync(path, 'utf8')) ?? {}) : {};
@@ -70,14 +80,49 @@ export function declareProject(home, spec, id = 'fixture') {
   for (let n = 2; taken.has(pick); n++) pick = `${id}-${n}`;
   projects.push({
     id: pick,
-    roots: [dirname(spec)],
+    roots: [homeDir],
     spec,
-    runs: join(spec, 'runs'),
-    threads: join(spec, 'threads'),
+    threads: join(homeDir, 'threads'),
+    runs: join(homeDir, 'runs'),
+    evidence: join(homeDir, 'evidence'),
+    drafts: join(homeDir, 'drafts'),
   });
   doc.projects = projects;
   writeFileSync(path, stringify(doc));
   return pick;
+}
+
+/**
+ * A declared, home-shaped blueprint inside its own repository-style root:
+ * `<root>/.walkdown/config.yml` lists it, and its home is
+ * `<root>/.walkdown/blueprints/0001-<id>/` with the five siblings laid out.
+ * Hands back every path, so a suite writes `h.runs` and loads with
+ * `loadBlueprint(h.spec, { cwd: h.root })` - the same door a person's
+ * checkout goes through, and no personal config touched at all.
+ *
+ * A second call with a new id lists a second home beside the first
+ * (`0002-<id>`), for suites that need two blueprints in one tree.
+ */
+export function declaredHome(root, id = 'fixture') {
+  const wd = join(root, '.walkdown');
+  const path = join(wd, 'config.yml');
+  const doc = existsSync(path) ? (parse(readFileSync(path, 'utf8')) ?? {}) : {};
+  const projects = doc.projects ?? [];
+  const n = String(projects.length + 1).padStart(4, '0');
+  const home = `${n}-${id}`;
+  const homeDir = join(wd, 'blueprints', home);
+  const kinds = { spec: 'blueprint', threads: 'threads', runs: 'runs', evidence: 'evidence', drafts: 'drafts' };
+  const paths = Object.fromEntries(Object.entries(kinds).map(([k, d]) => [k, join(homeDir, d)]));
+  for (const p of Object.values(paths)) mkdirSync(p, { recursive: true });
+  projects.push({
+    id,
+    roots: ['.'],
+    home,
+    ...Object.fromEntries(Object.entries(kinds).map(([k, d]) => [k, join('.walkdown', 'blueprints', home, d)])),
+  });
+  doc.projects = projects;
+  writeFileSync(path, stringify(doc));
+  return { root, wd, id, home, homeDir, ...paths };
 }
 
 /**
