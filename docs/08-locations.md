@@ -215,11 +215,12 @@ a copy, somebody else's checkout — and `--ephemeral` marks a throwaway copy, r
 name, never by standing somewhere, and only ever in your own config. `walkdown project
 forget <id>` takes an entry off the list and touches no records.
 
-`project add` writes the entry the way `init` does: inside a repository it is relative to
-the repository and every record kind points into the home it claims (a legacy blueprint
-that keeps runs or threads inside itself has those keys say so); a blueprint outside the
-repository is refused for a committed entry rather than written as an absolute path, and
-`--ephemeral` lists it personally instead. A blueprint whose own checkout already declares
+`project add` takes a HOME — `blueprint/` with threads, runs, evidence and drafts beside
+it — or the `blueprint/` inside one, and refuses anything else with the shape spelled out.
+It writes the entry the way `init` does: inside a repository it is relative to the
+repository and every record kind points into the home; a home standing outside the
+answering `.walkdown`'s own `blueprints/` is a copy, and `--ephemeral` lists it personally
+instead. A blueprint whose own checkout already declares
 it is not listed twice — stand in that checkout to use it (n-0169, n-0170).
 
 A committed entry never reaches under another `.walkdown`. A pack carrying its own
@@ -305,9 +306,9 @@ behalf. The test is **exists**, not "holds records".
 
 `walkdown where` prints the resolver's answer for every path with the reason each was
 chosen, which `.walkdown` answered, and what git sees — and writes nothing. `walkdown
-where <kind>` prints one path alone, for scripts. `--fix` is the one thing it does that is
-not asking: it writes the addresses of homes an older layout left behind into the config,
-moving none of them. It was `walkdown migrate`, and the old spelling still works.
+where <kind>` prints one path alone, for scripts. It has no write mode at all: there used
+to be a `--fix` (and a `walkdown migrate` before it) that folded the homes an older layout
+had left behind into the config, and with that layout gone there is nothing left to fold.
 
 `walkdown move <kind> --to <path>` relocates one kind and records the choice against the
 entry that resolved — never one found by name (n-0153). A destination that already holds
@@ -456,13 +457,19 @@ The boundary is that a person claims only roles they actually hold. Recording pr
 signature when product was not there and did not agree is exactly the lie the role model
 exists to prevent — it is not made honest by being convenient.
 
-## Migration
+## One layout, and only one
 
-Existing projects keep working untouched: a blueprint declared by path, wherever it sits,
-keeps its runs and threads where they are (rule 3 above), and `walkdown where --fix` folds
-the homes an older layout left behind into the config without moving one. `walkdown move
-<kind> --to <where>` relocates one kind and rewrites the config, leaving every record's
-contents alone.
+Every blueprint walkdown answers for is declared, and every declared blueprint lives in a
+home. There is no second shape and no compatibility path: a bare `<dir>/blueprint` keeping
+its runs and threads inside itself was how projects looked before homes, and the resolver
+does not answer for it — an undeclared path resolves to no spec and a sentence saying how
+to declare one, and `walkdown lint` errors when a declared entry names no home or leaves a
+record kind pointing nowhere. That is the alarm for a config that does not match what the
+tools write: an agent reading it can put the tree right.
+
+`walkdown move <kind> --to <where>` relocates one kind and rewrites the config, leaving
+every record's contents alone. It is the only thing that moves records, and a person asks
+for it.
 
 ## The pointer
 

@@ -40,6 +40,13 @@ module Walkdown
       "sha256:#{Digest::SHA256.hexdigest(statement.to_s.gsub(/\s+/, ' ').strip)[0, 12]}"
     end
 
+    # The home's runs/, given the blueprint directory inside it. A spec named
+    # `blueprint` sits in its home; anything else is somebody's own layout and
+    # keeps the sibling rule all the same.
+    def runs_dir(blueprint_dir)
+      File.join(File.dirname(File.expand_path(blueprint_dir)), 'runs')
+    end
+
     def find_blueprint_dir(start = Dir.pwd)
       dir = File.expand_path(start)
       6.times do
@@ -150,8 +157,14 @@ module Walkdown
       "#{path}:#{ex.metadata[:line_number]}"
     end
 
+    # Where the runs go: BESIDE the blueprint, in the home that holds it.
+    #
+    # It used to be `<blueprint>/runs` - records kept inside the spec, the
+    # layout every project had before homes. Nothing reads that now: a home is
+    # `blueprint/` with threads, runs, evidence and drafts as siblings, and a
+    # run filed inside the spec is a run `walkdown status` never sees.
     def write_record(dir, results)
-      runs_dir = File.join(dir, 'runs')
+      runs_dir = Support.runs_dir(dir)
       FileUtils.mkdir_p(runs_dir)
       now = Time.now.utc
       target = ENV['WALKDOWN_TARGET'] || 'local'

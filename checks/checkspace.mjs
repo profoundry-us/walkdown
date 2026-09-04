@@ -80,17 +80,18 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
    * the panel does when you pick one that is about somewhere else.
    */
   /*
-   * Copied FLAT - spec with runs and threads inside it, at example/blueprint -
-   * rather than as the pack-with-its-own-.walkdown it really is. The
-   * checkspace's one config declares both projects so one server offers both,
-   * and a pack's .walkdown would hide it from that server by design. The flat
-   * shape is the legacy one the resolver still answers for (rule 3), which
-   * this copy also exercises.
+   * Copied as a HOME - blueprint/ with threads/ and runs/ beside it, at
+   * example/ - but WITHOUT its own `.walkdown`: the checkspace's one config
+   * declares both projects so a single server offers both, and a pack's own
+   * `.walkdown` would hide it from that server by design.
+   *
+   * It used to be copied flat, spec with its records inside, because the
+   * resolver still answered for that shape. It does not: every blueprint
+   * lives in a home, so the copy is one.
    */
   const exHome = join(root, 'example', EXAMPLE_HOME);
-  cpSync(join(exHome, 'blueprint'), join(CHECKSPACE, 'example', 'blueprint'), { recursive: true });
-  for (const part of ['runs', 'threads'])
-    cpSync(join(exHome, part), join(CHECKSPACE, 'example', 'blueprint', part), { recursive: true });
+  for (const part of ['blueprint', 'runs', 'threads'])
+    cpSync(join(exHome, part), join(CHECKSPACE, 'example', part), { recursive: true });
   /*
    * And point the copy's declared address at the port this run serves the
    * example app on. A pin filed on a page that names no project is routed to
@@ -173,6 +174,10 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
       '  - id: example/blueprint',
       '    roots: [example]',
       '    spec: example/blueprint',
+      '    threads: example/threads',
+      '    runs: example/runs',
+      '    evidence: example/evidence',
+      '    drafts: example/drafts',
       '',
     ].join('\n'),
   );

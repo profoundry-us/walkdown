@@ -104,8 +104,9 @@ checks:
   - id: unit-tests
     name: Unit tests
     run: npm test
-    fast: true      # the whole suite is well under a second; there is no
-                    # reason to make an agent wait for turn end to learn it
+    fast: true      # ~14s for the whole suite, most of it CLI subprocesses and
+                    # servers; still worth paying per edit rather than finding
+                    # out at turn end
 
   # A page belongs to exactly one blueprint (docs/06 §2). `walkdown lint`
   # validates one blueprint in isolation, so this constraint is only visible

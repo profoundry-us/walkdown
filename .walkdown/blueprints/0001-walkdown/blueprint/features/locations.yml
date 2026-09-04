@@ -183,6 +183,17 @@ stories:
     rules:
       - id: locations.keeping.existing-outranks-preference
         origin: prd
+        retired: >-
+          The rule was about records found INSIDE a blueprint - `blueprint/runs/`,
+          the layout every project had before homes - outranking a blanket
+          default. That layout is not read any more: every blueprint walkdown
+          answers for is declared, lives in a home, and its entry names the
+          records or the home they derive from, so there is no directory for
+          the resolver to discover and nothing for a preference to give way to
+          (2026-09-04, Topher's call to remove legacy support entirely). What
+          survives of it is locations.keeping.moving-is-a-decision: relocating
+          records is still something a person does, never something a default
+          does to them.
         statement: A blanket default never points past records a blueprint already holds - an existing directory is a fact and a default is a preference, so the preference gives way and moving those records stays a decision somebody makes.
         verify: [checks]
         steps:
