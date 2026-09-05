@@ -185,9 +185,14 @@ export async function run(args) {
       });
   const ignore = commit === 'none' || !claim.dir ? null : setIgnore(walkdown, commit, { force: values.force });
   if (commit === 'none' && moved) {
-    for (const rel of ['CLAUDE.md', 'AGENTS.md', 'GEMINI.md', '.github/copilot-instructions.md', 'CONVENTIONS.md'])
-      if (['removed', 'deleted'].includes(removePointer(join(root, rel))))
-        results.push({ path: rel, action: 'pointer-removed' });
+    for (const rel of ['CLAUDE.md', 'AGENTS.md', 'GEMINI.md', '.github/copilot-instructions.md', 'CONVENTIONS.md']) {
+      // Said apart, because they are different things to have done to a
+      // person's file: one gives the block back, the other takes the whole
+      // file away - which walkdown may only do because it made it.
+      const what = removePointer(join(root, rel));
+      if (what === 'removed') results.push({ path: rel, action: 'pointer-removed' });
+      else if (what === 'deleted') results.push({ path: rel, action: 'pointer-file-deleted' });
+    }
     // The skills leave with the spec, or the "repository gets nothing" line lies.
     for (const r of removeSkills(join(root, '.claude', 'skills')))
       results.push({ path: relative(root, r.path), action: `skill-${r.action}` });
@@ -208,6 +213,7 @@ export async function run(args) {
     'pointer-appended': green('+ appended'),
     'pointer-updated': green('~ pointer updated'),
     'pointer-removed': green('- pointer removed'),
+    'pointer-file-deleted': green('- removed (walkdown made this file)'),
     'skill-removed': green('- removed'),
     'skill-kept-edited': yellow('! kept (edited here — it is yours now, and this repository keeps it)'),
     'pointer-undecided': yellow('? several agent files — `walkdown pointer --into <file>`'),

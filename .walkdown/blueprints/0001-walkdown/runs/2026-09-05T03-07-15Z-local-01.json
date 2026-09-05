@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-09-05T03-07-15Z-local-01",
+  "created": "2026-09-05T03:07:15Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "e794bef",
+  "spec_hash": "sha256:9cf589d6656b",
+  "results": [
+    {
+      "rule": "locations.pointer.owns-only-its-block",
+      "status": "pass",
+      "statement_hash": "sha256:ec57ac3e3cc3",
+      "evidence": [
+        "runs/evidence/2026-09-05T03-07-15Z/pointer-owns-only-its-block-probe.txt",
+        "runs/evidence/2026-09-05T03-07-15Z/pointer-owns-only-its-block-probe.sh"
+      ],
+      "reasoning": "Judged by driving the working tree's CLI against throwaway git repositories in my own scratchpad, each with its own HOME, so no fixture reached the real config; the probe script is saved beside its transcript so anyone can re-run it. Every door that writes an agent file was exercised, not just the one the fix touched: `init --commit spec` (append), `init --commit spec` again after the home moved (update), `pointer --into` (append, update, create, up-to-date) and `init --commit none` (removal from all five agent-file homes). The happy path holds - a CLAUDE.md with the person's words above and below survived the spec leaving the repository, the block being placed again by hand while the spec sat in ~/.walkdown, and the spec moving back in: the block named the new place each time, one begin and one end marker, and a diff of everything outside the markers was identical across the move. Placing twice in a row reported `already current` and left the file byte-identical, on every fixture including the ones it had just rewritten. The boundary n-0187 and n-0194 were about is now genuinely one function and both callers ask it: with a trailing space after the end marker the space-only line is gone rather than left behind; a `<!-- mine -->` written after the end marker comes back whole on its own line, not shorn of its `<`; a CRLF file keeps the \\r on every line the person wrote; a file ending at the end marker with no newline is handled without loss; a person's text before the begin marker on the same line and an indented block both keep their surroundings. Removal is now symmetric - all four hostile shapes came back to exactly the person's lines, and a file that held nothing but our block was deleted rather than left empty. An unclosed begin marker is refused with `kept` and nothing is written. Three things I noticed and did not let the pass hide, none of which contradicts a THEN. Taking the block out mid-file leaves the blank line that separated it, so `- use tabs` and the next heading end up two blank lines apart; every line the person wrote is intact and in order, so I read this as whitespace rather than a touched line. A second block a person duplicated by hand is left standing with its stale text, since only the first marker pair is rewritten - I could find no door by which walkdown itself produces two, so `appears exactly once` holds of walkdown's own writing. And `init --commit none` prints `pointer removed` for a file it actually deleted whole, which is a reporting imprecision in bin/commands/init.js, not a matter of what the file kept."
+    }
+  ]
+}
