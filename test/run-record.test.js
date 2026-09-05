@@ -1,6 +1,7 @@
 import { declaredHome } from '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
@@ -91,6 +92,65 @@ test('writeRunRecord emits a well-formed record', () => {
   assert.equal(record.target, 'staging');
   assert.equal(record.created, '2026-08-20T22:05:00Z');
   assert.equal(record.results[0].statement_hash, formatHash(STATEMENT));
+});
+
+/*
+ * What a verdict is ABOUT is the code. These fields used to be asked of the
+ * blueprint directory, which was the same place only while a spec lived at
+ * <project>/blueprint - on the default layout the home is in ~/.walkdown and
+ * carries no repository, so records came out with no provenance at all
+ * (n-0190). And a home that IS versioned, which is what keeping your dotfiles
+ * in git gives you, stamped its own sha onto verdicts about code sitting at
+ * another commit somewhere else (n-0192). That is the case worth a test: the
+ * wrong answer here is a plausible-looking sha, not a missing one.
+ */
+test('a run is stamped with the code repository, not the home the blueprint sits in', () => {
+  const git = (cwd, ...args) =>
+    execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@x', ...args], {
+      cwd,
+      encoding: 'utf8',
+    }).trim();
+
+  const code = join(root, 'code-repo');
+  mkdirSync(code, { recursive: true });
+  git(code, 'init', '-q');
+  writeFileSync(join(code, 'app.js'), 'export const x = 1;\n');
+  git(code, 'add', '-A');
+  git(code, 'commit', '-qm', 'the code this verdict is about');
+  const codeSha = git(code, 'rev-parse', '--short', 'HEAD');
+
+  // The home lives elsewhere and is versioned in its own right.
+  const h = declaredHome(join(root, 'bp-provenance'), 'runrec-3');
+  git(h.root, 'init', '-q');
+  git(h.root, 'add', '-A');
+  git(h.root, 'commit', '-qm', 'the home, which no verdict is about');
+  const homeSha = git(h.root, 'rev-parse', '--short', 'HEAD');
+  assert.notEqual(codeSha, homeSha, 'the two trees must be distinguishable for this to mean anything');
+
+  const { record } = writeRunRecord({
+    blueprintDir: h.spec,
+    runsDir: h.runs,
+    codeRoot: code,
+    target: 'local',
+    actor: 'agent',
+    kind: 'walkdown',
+    results: [{ rule: 'demo.thing', status: 'pass' }],
+    date: new Date('2026-09-05T03:00:00Z'),
+  });
+  assert.equal(record.git_sha, codeSha, 'the sha names the code, so a person can go and look at it');
+  assert.notEqual(record.git_sha, homeSha);
+
+  const swept = writeSweep({
+    blueprintDir: h.spec,
+    runsDir: h.runs,
+    codeRoot: code,
+    target: 'local',
+    tiers: ['agent'],
+    why: 'the code moved under every verdict',
+    actor: 'agent',
+    date: new Date('2026-09-05T03:01:00Z'),
+  });
+  assert.equal(swept.record.git_sha, codeSha, 'a sweep is stamped the same way');
 });
 
 /*

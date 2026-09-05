@@ -163,8 +163,11 @@ every type in its `verify` list shows a current pass.
 Query semantics:
 
 - Each cell = **latest relevant run** for that (rule, target/kind).
-- Staleness beats recency: a pass against outdated rule content or an older `git_sha`
-  than the current branch renders as `~ stale`, prompting a re-run.
+- Staleness beats recency: a pass whose `statement_hash` no longer matches the rule
+  renders as `~ stale`, prompting a re-run. An older `git_sha` does not — code moving
+  under a verdict is not what unmakes it, and the sha is provenance for a person digging
+  in rather than an input to the derivation (as the field list above says, and
+  [08-locations.md](08-locations.md) at length).
 - `*` marks threads stuck at `answered` (knowledge not yet incorporated —
   see [02-blueprint-schema.md](02-blueprint-schema.md)).
 - `--json` output is the agent-facing form; the human-facing table and the panel's

@@ -41,6 +41,7 @@ export function run(args) {
   const { file, record } = writeSweep({
     blueprintDir: blueprint.dir,
     runsDir: blueprint.at?.runs?.path,
+    codeRoot: blueprint.codeRoot,
     target,
     tiers,
     why: values.why,
