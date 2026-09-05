@@ -335,3 +335,31 @@ test('a run signed under a role that does not exist is named @rule:status.accept
   assert.equal(findings[0].level, 'warn');
   assert.match(findings[0].message, /signed under "marketing"/);
 });
+
+test('a run holding verdicts but no date is named as filling no cell', () => {
+  // `writeRunRecord` stamps `created` and `walkdown judge` prints it already
+  // filled in, so only a hand-written record arrives without one - and until
+  // this check it passed lint in silence while the board went on showing the
+  // verdict before it. A FAIL recorded that way reads as a pass (n-0191).
+  const h = ruleHome(join(root, 'run-undated'), []);
+  const record = {
+    actor: 'agent',
+    kind: 'walkdown',
+    target: 'local',
+    results: [{ rule: 'demo.main.thing', status: 'fail' }],
+  };
+  writeFileSync(join(h.runs, 'undated.json'), JSON.stringify(record));
+  const findings = lint(load(h), { checks: false }).findings.filter((f) => f.category === 'runs');
+  assert.equal(findings.length, 1, JSON.stringify(findings));
+  assert.equal(findings[0].level, 'warn', 'the ledger is history, not something to refuse to read');
+  assert.match(findings[0].message, /no `created`/);
+
+  // A record with nothing to place is not the same complaint: a sweep carries
+  // no results, and neither does a walkdown somebody abandoned.
+  writeFileSync(join(h.runs, 'undated.json'), JSON.stringify({ ...record, results: [] }));
+  assert.deepEqual(
+    lint(load(h), { checks: false }).findings.filter((f) => f.category === 'runs'),
+    [],
+    'the date is only owed once there are verdicts to order',
+  );
+});
