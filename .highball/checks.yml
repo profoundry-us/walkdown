@@ -51,6 +51,16 @@ checks:
     run: diff -q .walkdown/blueprints/0001-walkdown/blueprint/AGENTS.md lib/templates/AGENTS.md && diff -q example/.walkdown/blueprints/0001-example/blueprint/AGENTS.md lib/templates/AGENTS.md
     fast: true
 
+  # And the skills, for the same reason. `.claude/skills/*/SKILL.md` were
+  # symlinks into lib/skills so the two could not drift, which made them a door
+  # of exactly the kind n-0186 named: `walkdown skills --project --force` run
+  # in this checkout writes THROUGH them and edits the shipped sources. Copies
+  # now, with the drift caught here instead (n-0197).
+  - id: skills-copied
+    name: The installed skills match their sources
+    run: for f in .claude/skills/*/SKILL.md; do diff -q "$f" "lib/skills/$(basename $(dirname $f)).md" || exit 1; done
+    fast: true
+
   # The panel is assembled from src/panel by Rollup; lib/viewer/panel.js is
   # the build, and it is committed because both deliveries read it — the
   # served <script> and the extension's vendored copy. Editing the build by

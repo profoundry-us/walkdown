@@ -1,0 +1,35 @@
+id: n-0197
+kind: note
+author: topher
+via: agent
+created: 2026-09-05T23:29:19.022Z
+anchor:
+  rule: locations.default.skills-are-yours-by-default
+status: addressed
+body: |-
+  This repository's own `.claude/skills/*/SKILL.md` are symlinks into `lib/skills/`, so `walkdown skills --project --force` run here writes THROUGH them and edits the shipped sources.
+
+  Six of them: .claude/skills/walkdown-{backlog,formulate,incorporate,judge,setup,sitting}/SKILL.md -> ../../../lib/skills/<name>.md. `installSkills` writes with `writeFileSync(abs, content)` and existsSync/readFileSync follow the link, so the target is what gets read, compared and written. It did not fire today only because the contents were already identical and the write was skipped — `up to date`, by luck rather than by design.
+
+  This is n-0186's finding one directory over, and it was found by running the command rather than by reading it: `walkdown skills --project --force` in this checkout is a documented invocation on a project whose skills are committed.
+
+  The remedy that was taken for the other one applies here unchanged: make them real copies and let a Highball check keep the two identical, which is the drift protection the link was buying without the door. The lint warning added for n-0186 does not see these, because it walks the answering `.walkdown` and `.claude/` is outside it — worth deciding whether that check should cover every directory walkdown WRITES to rather than the home alone.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-05T23:30:48Z
+    body: >-
+      Addressed in the commit that carries this reply, the same way n-0186 was.
+
+
+      The six `.claude/skills/*/SKILL.md` are real copies now, and
+      `skills-copied` in .highball diffs each against `lib/skills/<name>.md` —
+      the drift protection the links were buying, without a door that `--force`
+      can write through.
+
+
+      Left as a question rather than patched: whether the lint warning added for
+      n-0186 should cover every directory walkdown WRITES to rather than the
+      home alone. It walks the answering `.walkdown`, so it could not see these,
+      and `installSkills` is the second writer this year to reach a file nobody
+      named. That wants a decision about scope, not another special case.
