@@ -1,6 +1,6 @@
 import { declaredHome } from '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
@@ -63,6 +63,46 @@ test('clean fixture lints with no findings', () => {
   const { findings, exitCode } = lint(load(h), { checks: false });
   assert.deepEqual(findings, []);
   assert.equal(exitCode, 0);
+});
+
+/*
+ * The door out of the home. Reading through a link is supported - a scratch
+ * copy shares the real evidence directory by linking each entry into it - so
+ * the check is about where the link POINTS, not that one exists: an inward
+ * link stays silent, and the one leaving the home is named. It is a warning
+ * because linking outward can be deliberate; what it must not be is invisible,
+ * which is how `init --force` truncated lib/templates/AGENTS.md through the
+ * link that was blueprint/AGENTS.md (n-0186).
+ */
+test('a symlink out of the home is named; one pointing inside it is not', () => {
+  const h = writeFixture(join(root, 'links'));
+  const outside = join(root, 'links-target');
+  mkdirSync(outside, { recursive: true });
+  writeFileSync(join(outside, 'conventions.md'), 'somebody else owns this\n');
+  symlinkSync(join(outside, 'conventions.md'), join(h.spec, 'AGENTS.md'));
+  symlinkSync(join(h.spec, 'walkdown.yml'), join(h.evidence, 'spec.yml'));
+
+  const { findings } = lint(load(h), { checks: false });
+  const links = findings.filter((f) => f.message.startsWith('symlink to'));
+  assert.equal(links.length, 1, 'only the escaping link is named');
+  assert.equal(links[0].level, 'warn');
+  assert.equal(links[0].category, 'locations');
+  assert.match(links[0].file, /AGENTS\.md$/);
+  assert.match(links[0].message, /resolves outside the home/);
+});
+
+/*
+ * And it does not walk THROUGH the door it just reported. A linked directory
+ * is named and not descended, so a link out of the tree is not a way to read
+ * the whole disk - and a link to an ancestor is not an infinite walk.
+ */
+test('a linked directory is reported, never descended', () => {
+  const h = writeFixture(join(root, 'loop'));
+  symlinkSync(h.root, join(h.evidence, 'up'));
+  const { findings } = lint(load(h), { checks: false });
+  const links = findings.filter((f) => f.message.startsWith('symlink to'));
+  assert.equal(links.length, 1);
+  assert.match(links[0].file, /up$/);
 });
 
 test('stale hash and unknown screen are errors', () => {

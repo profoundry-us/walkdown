@@ -40,6 +40,17 @@ checks:
     run: node tools/sync-phosphor.mjs --check
     fast: true
 
+  # Both blueprints in this repo carry the agent conventions `walkdown init`
+  # writes, and they used to carry them as symlinks into lib/templates so the
+  # two could not drift. That link was a door: `init --force` writes through
+  # it, and one judge's scaffolding truncated the template to 35 bytes with
+  # every check here still green. They are copies now, and this is the drift
+  # protection the link was buying (n-0186).
+  - id: agents-conventions-copied
+    name: Both blueprints carry the shipped agent conventions
+    run: diff -q .walkdown/blueprints/0001-walkdown/blueprint/AGENTS.md lib/templates/AGENTS.md && diff -q example/.walkdown/blueprints/0001-example/blueprint/AGENTS.md lib/templates/AGENTS.md
+    fast: true
+
   # The panel is assembled from src/panel by Rollup; lib/viewer/panel.js is
   # the build, and it is committed because both deliveries read it — the
   # served <script> and the extension's vendored copy. Editing the build by
