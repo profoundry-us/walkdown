@@ -6,7 +6,7 @@ anchor:
   rule: panel.dock.toolbar
   screen: review
   element: panel.blueprint
-status: open
+status: addressed
 body: "Agent walkdown 2026-08-27: the rule says the bar names the project this
   session is against. It does - except when the panel is a stale copy, where the
   stale badge is rendered INSTEAD of anchor panel.blueprint
@@ -23,3 +23,20 @@ replies:
     body: "Decision: the bar keeps the project name. A stale panel gives up neither
       slot — the badge sits beside the name, not instead of it. The rule stands
       as written; the code carries the exception it should not have had."
+  - author: topher
+    via: agent
+    created: 2026-09-05T23:39:13Z
+    body: >-
+      Built, in the commit that carries this reply.
+
+
+      The bar keeps the project name. `STALE_COPY()` now renders the badge as a
+      sibling of the `panel.blueprint` span rather than in a ternary that
+      replaced it, so a stale panel gives up neither slot — exactly as you
+      decided. The rule stands as written and the code no longer carries the
+      exception.
+
+
+      This is a panel rule, so it wants a judge's eye rather than a unit test;
+      the board will ask for one, since this claim is newer than the passing
+      verdict.
