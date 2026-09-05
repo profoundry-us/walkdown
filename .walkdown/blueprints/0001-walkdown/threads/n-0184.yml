@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-04T20:53:12.911Z
 anchor:
   rule: locations.default.skills-are-yours-by-default
-status: open
+status: addressed
 body: >-
   `walkdown skills` on its own never reads the project's standard, so in a
   project whose spec IS committed the on-their-own install lands in the person's
@@ -83,3 +83,40 @@ replies:
 
 
       Left open until it is built.
+  - author: topher
+    via: agent
+    created: 2026-09-05T23:28:47Z
+    body: >-
+      Built, in the commit that carries this reply.
+
+
+      `walkdown skills` with no flags now prints every destination it can see,
+      what is already in each, and then asks. It never picks. With no terminal
+      to ask it writes nothing, exits 2, carries the same survey, and names the
+      flags.
+
+
+      The survey says what a person actually needs before choosing — not "does
+      this directory exist" but how many of THESE skills are in it and how many
+      differ from the shipped copy, since an edited copy is somebody's work and
+      is what `--force` would overwrite.
+
+
+      The repository's copy is the ROOT's `.claude/skills`, from anywhere in the
+      tree: standing in a nested pack offers the repo root, never
+      `packs/<pack>/.claude/skills`. `--project` means that now, rather than the
+      working directory, and says so instead of inventing a repository when
+      there is not one.
+
+
+      One thing worth recording, because it is the same class of fault as the
+      ones you have been finding. My first version of the survey guarded only
+      the `mkdirSync` in `installSkills`, not the writes — so surveying a
+      destination that already existed INSTALLED into it and reported the result
+      as a survey, and one that did not exist crashed. A survey that installs is
+      worse than no survey. The test now asserts that surveying an existing
+      directory leaves it empty.
+
+
+      Left for you: the eng signature. The prompt itself needs a terminal, so
+      what the tests drive is the refusal path and the two explicit doors.

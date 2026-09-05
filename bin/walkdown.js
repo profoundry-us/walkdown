@@ -98,11 +98,14 @@ Commands:
           a monorepo - so walkdown asks rather than assuming. Idempotent: it
           replaces its own marked block and touches no other line.
   skills  Install the agent procedures walkdown ships - formulate, judge,
-          incorporate, backlog, setup. Default is your own skills directory
-          (~/.claude/skills), where they work in every project and add nothing
-          to any repository; --project puts them in ./.claude/skills instead,
-          to be committed and shared. A copy you have edited is kept, not
-          overwritten, unless you pass --force.
+          incorporate, backlog, setup. With no flags it shows every place they
+          can go and what is already in each, then ASKS - it never picks for
+          you, and with no terminal to ask it writes nothing and says so.
+          --into <dir> names a directory outright; --project is the
+          repository's one copy, at the root's .claude/skills wherever in the
+          tree you run it, to be committed and shared. Your own directory
+          (~/.claude/skills) works in every project and touches no repository.
+          A copy you have edited is kept, not overwritten, unless --force.
   serve   Start the local viewer: status board, side-by-side prototype/app
           with the embed (pinning), and human walkdown recording. Also
           serves /embed.js and the pin/walkdown API.

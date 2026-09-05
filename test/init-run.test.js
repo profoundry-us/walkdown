@@ -448,3 +448,98 @@ test('run substitutes {id}, injects target env and WALKDOWN_TARGET, propagates e
   const failing = runChecks(loadBlueprint(join(proj, 'blueprint'), { cwd: proj }), { stdio: 'pipe' });
   assert.equal(failing.code, 3);
 });
+
+/*
+ * `walkdown skills` on its own asks, and never picks (n-0184).
+ *
+ * It used to write to the person's directory whatever the project had decided,
+ * so in a project whose spec IS committed the on-their-own install left the
+ * committed set untouched and possibly stale, made five fresh copies under
+ * $HOME, and reported "nothing added to any of them".
+ *
+ * The prompt itself needs a terminal, which a unit test does not have - so what
+ * is asserted here is the half that matters most: with nothing to ask, it
+ * writes NOTHING, says so, and shows the person where their skills already are.
+ */
+const CLI_SKILLS = new URL('../bin/walkdown.js', import.meta.url).pathname;
+const skillsCli = (cwd, home, args) => {
+  try {
+    return {
+      status: 0,
+      out: execFileSync(process.execPath, [CLI_SKILLS, 'skills', ...args], {
+        cwd,
+        env: { ...process.env, WALKDOWN_SKILLS_DIR: join(home, 'skills'), NO_COLOR: '1' },
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+      }),
+    };
+  } catch (e) {
+    return { status: e.status, out: `${e.stdout ?? ''}${e.stderr ?? ''}` };
+  }
+};
+
+test('skills with no flags writes nothing and surveys both destinations @rule:locations.default.skills-are-yours-by-default', () => {
+  const dir = join(root, 'ask');
+  const repo = join(dir, 'repo');
+  const home = join(dir, 'home');
+  mkdirSync(repo, { recursive: true });
+  mkdirSync(home, { recursive: true });
+  execFileSync('git', ['init', '-q', '.'], { cwd: repo });
+
+  const { status, out } = skillsCli(repo, home, []);
+  assert.equal(status, 2, 'no terminal to ask, so nothing is picked');
+  assert.match(out, /Where should the skills go\?/);
+  assert.match(out, /nothing here yet/, 'and it says what is in each');
+  assert.match(out, /Nothing written/);
+  assert.match(out, /--into/);
+  // Asking wrote nothing at all - not a file, not a directory.
+  assert.ok(!existsSync(join(home, 'skills')), 'the personal directory was not created');
+  assert.ok(!existsSync(join(repo, '.claude')), 'nor the repository one');
+
+  /*
+   * And nothing into a destination that DOES exist, which is the shape the
+   * first version of this got wrong: only the mkdir was guarded, so surveying
+   * a directory already standing installed into it and reported the result as
+   * a survey. A survey that installs is worse than no survey.
+   */
+  mkdirSync(join(home, 'skills'), { recursive: true });
+  const again = skillsCli(repo, home, []);
+  assert.equal(again.status, 2);
+  assert.deepEqual(readdirSync(join(home, 'skills')), [], 'surveying an existing directory wrote nothing');
+});
+
+/*
+ * And one committed set per repository, wherever you run it from: standing in a
+ * nested pack offers the ROOT, never packs/<pack>/.claude/skills.
+ */
+test('the repository copy is the root one, from anywhere in the tree @rule:locations.default.skills-are-yours-by-default', () => {
+  const dir = join(root, 'nested');
+  const repo = join(dir, 'repo');
+  const pack = join(repo, 'packs', 'app');
+  const home = join(dir, 'home');
+  mkdirSync(pack, { recursive: true });
+  mkdirSync(home, { recursive: true });
+  execFileSync('git', ['init', '-q', '.'], { cwd: repo });
+
+  const { status, out } = skillsCli(pack, home, ['--project']);
+  assert.equal(status, 0, out);
+  assert.ok(existsSync(join(repo, '.claude', 'skills')), 'landed at the repository root');
+  assert.ok(!existsSync(join(pack, '.claude')), 'and nothing in the pack');
+});
+
+test('skills outside a repository has only the one place to offer @rule:locations.default.skills-are-yours-by-default', () => {
+  const dir = join(root, 'norepo');
+  const here = join(dir, 'plain');
+  const home = join(dir, 'home');
+  mkdirSync(here, { recursive: true });
+  mkdirSync(home, { recursive: true });
+
+  const { out } = skillsCli(here, home, []);
+  assert.match(out, /One place to put them/);
+  assert.doesNotMatch(out, /the repository —/);
+
+  // And --project says so rather than inventing a repository.
+  const asked = skillsCli(here, home, ['--project']);
+  assert.equal(asked.status, 2);
+  assert.match(asked.out, /not in one/);
+});
