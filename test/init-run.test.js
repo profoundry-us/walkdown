@@ -16,6 +16,7 @@ import { after, test } from 'node:test';
 import { loadBlueprint } from '../lib/blueprint.js';
 import { installSkills, placePointer, pointerBlock, scaffold, skillFiles } from '../lib/init.js';
 import { lint } from '../lib/lint.js';
+import { removePointer } from '../lib/standard.js';
 import { runChecks } from '../lib/run-cmd.js';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-initrun-'));
@@ -210,19 +211,20 @@ test('a moved spec rewrites its own block and nothing around it @rule:locations.
  * the assumption that a single newline followed - so anything else sitting
  * there was eaten (n-0187). Three files where something else does.
  */
+const BOUNDARY_CASES = {
+  // A trailing space on the marker's own line: it belongs to our line, and
+  // must not survive as a space-only line outside the block.
+  trailing: { head: '# Head\n\n', gap: ' \n', tail: '## Tail\n' },
+  // A CRLF file - a Windows checkout, or core.autocrlf. The \r is ours; the
+  // person's next line is not, and must not gain a blank line above it.
+  crlf: { head: '# Head\r\n\r\n', gap: '\r\n', tail: '## Tail\r\n' },
+  // A comment of the person's own, on the line after ours. It used to lose
+  // its leading `<` and become broken markup.
+  comment: { head: '# Head\n\n', gap: '\n', tail: '<!-- mine, not walkdown\'s -->\n' },
+};
+
 test('the block ends at its marker\'s line, whatever comes next @rule:locations.pointer.owns-only-its-block', () => {
-  const cases = {
-    // A trailing space on the marker's own line: it belongs to our line, and
-    // must not survive as a space-only line outside the block.
-    trailing: { head: '# Head\n\n', gap: ' \n', tail: '## Tail\n' },
-    // A CRLF file - a Windows checkout, or core.autocrlf. The \r is ours; the
-    // person's next line is not, and must not gain a blank line above it.
-    crlf: { head: '# Head\r\n\r\n', gap: '\r\n', tail: '## Tail\r\n' },
-    // A comment of the person's own, on the line after ours. It used to lose
-    // its leading `<` and become broken markup.
-    comment: { head: '# Head\n\n', gap: '\n', tail: '<!-- mine, not walkdown\'s -->\n' },
-  };
-  for (const [name, { head, gap, tail }] of Object.entries(cases)) {
+  for (const [name, { head, gap, tail }] of Object.entries(BOUNDARY_CASES)) {
     const proj = join(root, `boundary-${name}`);
     mkdirSync(proj, { recursive: true });
     const file = join(proj, 'CLAUDE.md');
@@ -242,6 +244,56 @@ test('the block ends at its marker\'s line, whatever comes next @rule:locations.
       `${name}: the block owns its own lines and not one character more`,
     );
   }
+});
+
+/*
+ * Removal is the same promise. `init --commit none` on a committed project
+ * takes the block back out of CLAUDE.md, and that is walkdown editing the
+ * person's file just as much as putting it in was - so it owns no more of the
+ * file going than coming. Fixing only `placePointer` left this door corrupting
+ * all three files (n-0194), which is why both writers now ask one function.
+ */
+test('taking the block out leaves the file as it would have been @rule:locations.pointer.owns-only-its-block', () => {
+  for (const [name, { head, gap, tail }] of Object.entries(BOUNDARY_CASES)) {
+    const proj = join(root, `removal-${name}`);
+    mkdirSync(proj, { recursive: true });
+    const file = join(proj, 'CLAUDE.md');
+    writeFileSync(file, head + pointerBlock('blueprint/').replace(/\n$/, '') + gap + tail);
+
+    assert.equal(removePointer(file), 'removed', name);
+    assert.equal(readFileSync(file, 'utf8'), head + tail, `${name}: their words, and only theirs`);
+  }
+
+  // And when the block was the whole file, walkdown made the file, so it goes.
+  const proj = join(root, 'removal-whole');
+  mkdirSync(proj, { recursive: true });
+  const file = join(proj, 'CLAUDE.md');
+  writeFileSync(file, pointerBlock('blueprint/'));
+  assert.equal(removePointer(file), 'deleted');
+  assert.equal(existsSync(file), false);
+});
+
+/*
+ * Text a person typed on the end marker's OWN line. Ambiguous by nature - it
+ * sits inside our line - so the rule is that our markers and our whitespace go
+ * and their words come back on a line of their own. Deleting them outright
+ * would be quieter than the old corruption and no more honest.
+ */
+test('words left on the marker\'s line are kept, not swallowed @rule:locations.pointer.owns-only-its-block', () => {
+  const proj = join(root, 'boundary-sameline');
+  mkdirSync(proj, { recursive: true });
+  const file = join(proj, 'CLAUDE.md');
+  const theirs = '<!-- mine, on the same line -->';
+  writeFileSync(file, `# Head\n\n${pointerBlock('blueprint/').replace(/\n$/, '')} ${theirs}\n## Tail\n`);
+
+  assert.equal(placePointer(file, pointerBlock('/elsewhere/spec')), 'pointer-updated');
+  assert.equal(
+    readFileSync(file, 'utf8'),
+    `# Head\n\n${pointerBlock('/elsewhere/spec')}${theirs}\n## Tail\n`,
+  );
+
+  assert.equal(removePointer(file), 'removed');
+  assert.equal(readFileSync(file, 'utf8'), `# Head\n\n${theirs}\n## Tail\n`);
 });
 
 /*

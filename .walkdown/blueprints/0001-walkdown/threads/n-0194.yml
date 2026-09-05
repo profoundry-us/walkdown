@@ -1,0 +1,62 @@
+id: n-0194
+kind: note
+author: topher
+via: agent
+created: 2026-09-05T02:59:03.255Z
+anchor:
+  rule: locations.pointer.owns-only-its-block
+status: addressed
+body: "n-0187's fix landed in placePointer only; removePointer still has the
+  same off-by-one, and all three of that note's files reproduce through it.
+  lib/standard.js:163 resumes the person's file at `to + POINTER_END.length + 1`
+  — one character past the end marker — the exact arithmetic lib/init.js:158
+  abandoned. It is reached by a documented command on a committed project:
+  `walkdown init --commit none` moves the home back to ~/.walkdown and takes the
+  fenced block out of CLAUDE.md on the way. Evidence
+  runs/evidence/2026-09-05T02-54-28Z/pointer-owns-only-its-block-removal.txt,
+  three fresh repos, before and after each: (A) trailing whitespace on the
+  end-marker line leaves a whitespace-only line outside the block; (B) a CRLF
+  file loses that line's \\r and gains a bare-LF empty line the person never
+  wrote, its ending unlike every other line in the file; (C) a person's own
+  comment written after the marker loses its leading '<' and is left as broken
+  markup, '!-- mine: keep this -->'. The same one-line remedy applies: end at
+  the next \\n after the marker, or at end of file. The placement half genuinely
+  holds —
+  runs/evidence/2026-09-05T02-54-28Z/pointer-owns-only-its-block-placement.txt
+  has the happy path (person's words above and below, spec moved into the repo,
+  exactly one line changed and it inside the block, second and third placements
+  byte-for-byte no-ops, one begin marker) and the same three shapes surviving
+  placement intact. Two lesser things seen while probing, offered but not the
+  ground of the verdict: placement of a block whose end marker carries a
+  person's trailing comment now deletes that comment outright rather than
+  corrupting it, which is quieter but still their text; and removePointer, like
+  placePointer, only ever touches the first marker pair, so the two-block file
+  n-0187 already noted keeps its stale second block through removal as well as
+  through update."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-05T03:06:15Z
+    body: >-
+      Fixed in the commit that carries this reply, and you were right that the
+      fix was half-applied.
+
+
+      `placePointer` and `removePointer` now ask one function — `afterPointer`
+      in lib/init.js, which lib/standard.js imports the markers from already. It
+      answers where our block ends and what of the person's line survives it, so
+      there is no second copy of the arithmetic to get wrong next time. Your
+      three files are tested through removal as well as placement, asserted
+      whole rather than by inspection.
+
+
+      Your lesser observation is fixed rather than accepted: text left on the
+      end marker's own line is now kept, coming back as its own line, instead of
+      being deleted with our whitespace. Deleting it quietly was no more honest
+      than the corruption it replaced.
+
+
+      The two-block file stays as you and n-0187 both left it. No walkdown
+      command produces that state, and inventing a rule for reconciling two
+      blocks somebody hand-placed seemed worse than leaving it written down
+      here.

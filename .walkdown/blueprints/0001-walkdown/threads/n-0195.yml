@@ -1,0 +1,66 @@
+id: n-0195
+kind: note
+author: topher
+via: agent
+created: 2026-09-05T03:00:03.634Z
+anchor:
+  rule: locations.keeping.moving-is-a-decision
+status: addressed
+body: >-
+  The copy path of `walkdown move` rewrites symlinks to suit the new address,
+  and two destination shapes still exit with a raw stack trace.
+
+
+  Driven against a real second volume (a 20MB RAM disk) and captured in
+  runs/evidence/2026-09-05T02-54-26Z/move-probes.txt (section E), with the
+  script beside it. The n-0185 fix holds for regular files: every JSON and
+  binary record arrived byte for byte across the volume boundary, dotfiles
+  included, and a destination holding only dotfiles now merges rather than dying
+  on ENOTEMPTY (section F).
+
+
+  What does not hold: `moveDir`'s fallback is `cpSync` with node's default
+  `verbatimSymlinks: false`, which resolves a relative symlink against its OLD
+  directory and writes an absolute path. A link that read `../real.json` and
+  resolved arrived reading `/…/elsewhere/runs/real.json` — the address it was
+  just moved out of — and no longer resolves at all. That is a file rewritten to
+  suit its new address, which is the one thing the rule's THEN forbids, and it
+  is silent. It only bites the copy path (cross-volume, or a dotfile-holding
+  destination); the same-volume rename preserves the link exactly (section B).
+  `{ recursive: true, verbatimSymlinks: true }` is the whole fix. Timestamps
+  also reset on the copy path (2020 mtime became today) where rename preserves
+  them — worth a decision, not obviously wrong.
+
+
+  Two destination shapes still crash the way n-0185 described. `--to` an
+  existing regular file: the `held()` guard calls `readdirSync` on it and dies
+  with an ENOTDIR stack trace (section G). `--to` a path inside the source
+  directory: the guard passes because the path does not exist yet, and
+  `renameSync` dies with EINVAL (section H). Neither loses anything — the
+  records and the personal config were untouched in both — so this is a rudeness
+  rather than a hazard, but the guard is one `statSync` and one prefix test away
+  from saying which destination it will not take.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-05T03:06:15Z
+    body: >-
+      Both fixed in the commit that carries this reply.
+
+
+      `moveDir` now copies with `verbatimSymlinks: true` and
+      `preserveTimestamps: true`, so the fallback path is as faithful as the
+      rename it stands in for. You were right to call the rewritten link a file
+      changed to suit its new address; the fact that it can only reach a symlink
+      made it a smaller fault, not a different one. The test plants a relative
+      link, forces the copy path with a dotfile destination, and asserts the
+      link reads exactly as written and still resolves where it landed.
+
+
+      The two rude refusals are refusals now: a destination that exists and is
+      not a directory, and a destination inside the source, each say so in a
+      sentence and exit 2 before touching anything.
+
+
+      Thank you for the RAM disk. That is the first time the EXDEV half has been
+      driven rather than reasoned about.

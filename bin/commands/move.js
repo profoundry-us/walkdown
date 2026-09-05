@@ -1,6 +1,6 @@
-import { existsSync, mkdirSync, readdirSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, statSync } from 'node:fs';
 import { homedir } from 'node:os';
-import { dirname, resolve } from 'node:path';
+import { dirname, resolve, sep } from 'node:path';
 import { parseArgs } from 'node:util';
 import { KINDS, rememberLocation, resolveLocations } from '../../lib/locations.js';
 import { dim, green, red } from '../../lib/report/tty.js';
@@ -54,6 +54,24 @@ export function run(args) {
   if (from === to) {
     console.log(`${kind} is already at ${to}`);
     return end(0);
+  }
+
+  /*
+   * Two destinations that are not destinations. Both used to reach the
+   * filesystem and come back as a raw stack trace - ENOTDIR from the readdir
+   * below, EINVAL from the rename (n-0195). Nothing was lost either way, but a
+   * command that refuses in a sentence everywhere else should not answer these
+   * with a crash.
+   */
+  if (existsSync(to) && !statSync(to).isDirectory()) {
+    console.error(red(`${to} is not a directory.`));
+    console.error(`${kind} is a directory of records. Name a directory to keep them in.`);
+    return end(2);
+  }
+  if (to.startsWith(from + sep)) {
+    console.error(red(`${to} is inside ${from}.`));
+    console.error('A directory cannot be moved into itself. Pick a destination beside it.');
+    return end(2);
   }
 
   const held = (d) => (existsSync(d) ? readdirSync(d).filter((f) => !f.startsWith('.')) : []);

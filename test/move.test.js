@@ -1,7 +1,16 @@
 import { declareProject } from '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readlinkSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -104,6 +113,65 @@ test('a destination holding only the dotfiles the guard ignores is still moved i
       'finder',
       'what was already there is merged with, never cleared',
     );
+  } finally {
+    p.cleanup();
+  }
+});
+
+/*
+ * The copy path must be as faithful as the rename it stands in for.
+ *
+ * cpSync resolves symlinks unless told not to, so a relative link arrived
+ * pointing at an absolute path back into the directory it had just left, and
+ * no longer resolved - a file rewritten to suit its new address, which is what
+ * the second THEN forbids (n-0195). The dotfile destination is how a unit test
+ * reaches that branch; a second volume is the same branch and cannot be built
+ * portably here.
+ */
+test('a relative link is still relative on the other side @rule:locations.keeping.moving-is-a-decision', () => {
+  const p = project();
+  try {
+    writeFileSync(join(p.runs, 'real.json'), '{"run_id":"real"}');
+    symlinkSync('real.json', join(p.runs, 'link.json'));
+    const dest = join(p.root, 'elsewhere', 'runs');
+    mkdirSync(dest, { recursive: true });
+    writeFileSync(join(dest, '.DS_Store'), 'finder'); // forces the copy path
+
+    run(p, ['move', 'runs', '--to', dest, '--project', declareProject(p.home, p.bp, 'movable')]);
+
+    assert.equal(readlinkSync(join(dest, 'link.json')), 'real.json', 'the link reads as it was written');
+    assert.equal(
+      readFileSync(join(dest, 'link.json'), 'utf8'),
+      '{"run_id":"real"}',
+      'and still resolves where it landed',
+    );
+  } finally {
+    p.cleanup();
+  }
+});
+
+/*
+ * Two destinations that are not destinations. Neither loses anything - they
+ * used to arrive as a raw ENOTDIR and a raw EINVAL - but a command that
+ * refuses in a sentence everywhere else should not answer these with a crash.
+ */
+test('a destination that is not a directory is refused in words @rule:locations.keeping.moving-is-a-decision', () => {
+  const p = project();
+  try {
+    const file = join(p.root, 'not-a-dir');
+    writeFileSync(file, 'i am a file');
+    assert.throws(
+      () => run(p, ['move', 'runs', '--to', file, '--project', declareProject(p.home, p.bp, 'movable')]),
+      (e) => e.status === 2 && /is not a directory/.test(e.stderr),
+    );
+
+    const inside = join(p.runs, 'deeper');
+    assert.throws(
+      () => run(p, ['move', 'runs', '--to', inside, '--project', declareProject(p.home, p.bp, 'movable')]),
+      (e) => e.status === 2 && /inside/.test(e.stderr),
+    );
+
+    assert.ok(existsSync(join(p.runs, 'a.json')), 'and nothing moved either time');
   } finally {
     p.cleanup();
   }

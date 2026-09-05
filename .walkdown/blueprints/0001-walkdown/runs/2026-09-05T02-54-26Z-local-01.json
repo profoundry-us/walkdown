@@ -1,0 +1,24 @@
+{
+  "run_id": "2026-09-05T02-54-26Z-local-01",
+  "created": "2026-09-05T02:54:26Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "77c8a38-dirty",
+  "tree_hash": "sha256:37556aea9568",
+  "spec_hash": "sha256:9cf589d6656b",
+  "results": [
+    {
+      "rule": "locations.keeping.moving-is-a-decision",
+      "status": "pass",
+      "statement_hash": "sha256:452142df8095",
+      "evidence": [
+        "runs/evidence/2026-09-05T02-54-26Z/move-probes.txt",
+        "runs/evidence/2026-09-05T02-54-26Z/move-probes.sh"
+      ],
+      "reasoning": "Driven end to end in a throwaway project of its own (own HOME, own repo, `--commit spec` so runs began in the repository), never against this ledger. A runs directory holding JSON, a 4KB binary, a nested subtree, a dotfile and a symlink moved three times - same volume, across a real second volume (a 20MB RAM disk, the EXDEV case n-0185 was filed about), and into a destination holding only a dotfile - and every regular file's sha256 was identical at every stop, dotfile included; the same-volume hop preserved mtimes too. The personal config gained a row naming the new path each time and kept every comment the person had written, including one inside another project's entry. An occupied destination was refused with exit 2 and neither the records nor the config moved, and the same refusal caught a destination that was the source reached by its /tmp alias. Moving is real, not cosmetic: after moving threads, `thread new` wrote into the new directory and `threads` read it back. Two rough edges I could not talk myself out of, both filed as n-0195. On the copy path only, `cpSync` runs with node's default verbatimSymlinks:false, so a relative symlink is rewritten to an absolute path aimed at the directory it just left and stops resolving - literally the rewriting-to-suit-its-new-address the THEN forbids, though it can only touch a symlink, which is not a record and which walkdown never creates. And `--to` an existing regular file, or a path inside the source, still exits with a raw ENOTDIR/EINVAL stack trace; both leave the records and the config untouched, so they are rudeness rather than loss. I pass the rule on its three clauses as they bear on records, and would not argue with a human who reads the symlink case as failing the second clause on its wording.",
+      "threads": ["n-0195"]
+    }
+  ]
+}

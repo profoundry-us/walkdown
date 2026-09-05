@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-09-05T02-54-28Z-local-01",
+  "created": "2026-09-05T02:54:28Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "77c8a38-dirty",
+  "tree_hash": "sha256:37556aea9568",
+  "spec_hash": "sha256:9cf589d6656b",
+  "results": [
+    {
+      "rule": "locations.pointer.owns-only-its-block",
+      "status": "fail",
+      "statement_hash": "sha256:ec57ac3e3cc3",
+      "evidence": [
+        "runs/evidence/2026-09-05T02-54-28Z/pointer-owns-only-its-block-placement.txt",
+        "runs/evidence/2026-09-05T02-54-28Z/pointer-owns-only-its-block-removal.txt"
+      ],
+      "reasoning": "Driven in throwaway git repos, each with its own HOME; the real project was never named. The placement half of today's fix genuinely holds: with a person's words above and below the block, moving the spec into the repository changed exactly one line and that line inside the markers, the second and third placements were byte-for-byte no-ops reported as already current, one begin marker in the file, and the three shapes n-0187 was about - trailing whitespace on the end-marker line, a CRLF file, a comment written after the marker - all survive placement with every outside line intact. But the fix went into placePointer only. removePointer (lib/standard.js:163) still resumes the person's file at `to + POINTER_END.length + 1`, the exact arithmetic lib/init.js:158 abandoned, and it is reached by a documented command: `walkdown init --commit none` on a committed project takes the block back out of CLAUDE.md. All three of n-0187's files reproduce through it - a whitespace-only line left outside the block, a CRLF file losing that line's CR and gaining a bare-LF empty line the person never wrote, and a person's comment left as broken markup reading `!-- mine: keep this -->`. Taking the block out is walkdown editing that file, so the statement's `and nothing else in that file` covers it, and corrupting a line a person wrote is the plainest way to break it. Filed as n-0194, with two lesser observations offered there rather than counted here: placement now deletes outright a comment sitting after the end marker instead of corrupting it, and neither function has ever touched more than the first marker pair, so the two-block file n-0187 already noted keeps its stale second block through removal too.",
+      "threads": [
+        "n-0194"
+      ]
+    }
+  ]
+}
