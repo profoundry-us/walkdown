@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-05T02:59:03.255Z
 anchor:
   rule: locations.pointer.owns-only-its-block
-status: addressed
+status: verified
 body: "n-0187's fix landed in placePointer only; removePointer still has the
   same off-by-one, and all three of that note's files reproduce through it.
   lib/standard.js:163 resumes the person's file at `to + POINTER_END.length + 1`
@@ -60,3 +60,4 @@ replies:
       command produces that state, and inventing a rule for reconciling two
       blocks somebody hand-placed seemed worse than leaving it written down
       here.
+verified_by: topher

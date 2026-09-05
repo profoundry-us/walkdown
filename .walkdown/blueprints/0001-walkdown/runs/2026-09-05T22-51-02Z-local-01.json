@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-09-05T22-51-02Z-local-01",
+  "created": "2026-09-05T22:51:02Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "159405e-dirty",
+  "tree_hash": "sha256:d22653d8400c",
+  "spec_hash": "sha256:9cf589d6656b",
+  "results": [
+    {
+      "rule": "locations.keeping.moving-is-a-decision",
+      "status": "pass",
+      "statement_hash": "sha256:452142df8095",
+      "evidence": [
+        "runs/evidence/2026-09-05T22-51-02Z/move-probes.txt",
+        "runs/evidence/2026-09-05T22-51-02Z/move-probes.sh",
+        "runs/evidence/2026-09-05T22-51-02Z/move-probes-xdev.txt",
+        "runs/evidence/2026-09-05T22-51-02Z/move-probes-xdev.sh",
+        "runs/evidence/2026-09-05T22-51-02Z/move-probes-edges.txt",
+        "runs/evidence/2026-09-05T22-51-02Z/move-probes-edges.sh"
+      ],
+      "reasoning": "Driven in throwaway projects with their own WALKDOWN_HOME, whose runs started in the repository, and across a real second volume (a 20MB APFS RAM disk) so the copy path was exercised rather than reasoned about. Every file arrives unchanged: a manifest of sha256, mtime and link text over JSON, a 4KB binary, CRLF, a file with no trailing newline, a dotfile, a nested directory, an absolute link and a relative one diffed empty after the same-volume rename, after the copy path forced by a dotfile-holding destination, after the hop onto the RAM disk, and after the hop back — the relative link still reads `../real.json` and still resolves on the other side, and 2020 mtimes are still 2020, so the two faults n-0195 named on this path are gone. The personal config keeps its owner: hand-written prose, a comment trailing a scalar, a defaults block and an unrelated project's entry all survived, the new row was added rather than the file rewritten, and `walkdown where` credits 'this machine's config' for runs alone while every other kind stays with the repository. A destination already holding a record is refused with exit 2 in the same words in-volume, across the volume boundary, and through a symlink pointing at it — the other ledger untouched, ours where it was, the config not written. Three neighbouring shapes refuse in sentences too: a destination that is a regular file, one inside the source, and a move from a directory nothing declares. What I could not break the rule with, but did find: a copy that fails PART WAY through — a full volume, an unreadable record, an unwritable destination parent — exits on a raw node stack trace and leaves a partial copy behind, so the retry is then met by the occupied-destination refusal. Nothing is lost there (source intact, config unwritten, `where` still names the old directory), and none of the rule's three THENs is broken by it, so it is filed as n-0196 rather than held against the verdict.",
+      "threads": ["n-0196"]
+    }
+  ]
+}

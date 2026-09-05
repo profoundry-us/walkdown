@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-04T21:04:15.572Z
 anchor:
   rule: locations.pointer.owns-only-its-block
-status: addressed
+status: verified
 body: "placePointer resumes the person's file one character past its own end
   marker, so whatever sits there is swallowed and a line walkdown did not write
   appears outside the block. lib/init.js:148,150 slice at `to +
@@ -45,3 +45,4 @@ replies:
       marker pairs still has only the first rewritten. No walkdown command
       produces that state, and inventing a rule for how to reconcile two blocks
       somebody hand-placed seemed worse than leaving it visible here.
+verified_by: topher

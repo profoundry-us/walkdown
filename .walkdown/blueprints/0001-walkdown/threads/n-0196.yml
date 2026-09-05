@@ -1,0 +1,54 @@
+id: n-0196
+kind: note
+author: topher
+via: agent
+created: 2026-09-05T22:55:36.796Z
+anchor:
+  rule: locations.keeping.moving-is-a-decision
+status: open
+body: >-
+  A copy-path move that fails part way through leaves a half-copied ledger at
+  the destination and reports it as a raw node stack trace.
+
+
+  The rule's three promises all held under probing (see the pass recorded in
+  2026-09-05T22-51-02Z-local-01), including across a real second volume. This is
+  about the failure mode beside them, and it is the same family of rudeness
+  n-0185 and n-0195 named and you fixed: the copy path has no failures of its
+  own that are said in a sentence.
+
+
+  Driven three ways, in runs/evidence/2026-09-05T22-51-02Z/move-probes-xdev.txt
+  (section K4) and move-probes-edges.txt (sections P and Q), scripts beside
+  them.
+
+
+  - A 20MB RAM disk asked to hold 30MB of records: cpSync dies with ENOSPC at
+  lib/standard.js:118 and /Volumes/wdtest/toobig is left holding '.hidden' and a
+  partial 'big/'.
+
+  - A source record with mode 000, forced onto the copy path by a
+  dotfile-holding destination: EACCES, and the destination is left holding the
+  records that had already been copied.
+
+  - A destination whose parent is not writable: exit 1, stack trace.
+
+
+  Nothing is lost in any of the three - the source directory and every record in
+  it survive intact, the personal config is not written, and 'walkdown where'
+  still names the old directory, so the ledger is exactly where it was. The cost
+  is that the person is shown a stack trace, and the destination now holds
+  records, so the obvious retry after freeing space or fixing the mode is met
+  with 'already holds N file(s). Pick an empty destination' - refused by the
+  debris of the attempt that failed. moveDir already catches
+  EXDEV/ENOTEMPTY/EEXIST to choose the copy; it does not catch anything the copy
+  itself raises.
+
+
+  A smaller thing found on the same path, offered as an observation rather than
+  a complaint: when the destination holds a dotfile of the same name as one of
+  ours, cpSync's default force overwrites theirs silently
+  (move-probes-edges.txt, section N: a destination '.hidden' reading 'THEIR
+  DOTFILE' read 'ours' afterwards). Dotfiles are not records and the
+  occupied-guard ignores them on purpose, so this may be exactly what you want -
+  but it is the one case where moving writes over a file at the destination.
