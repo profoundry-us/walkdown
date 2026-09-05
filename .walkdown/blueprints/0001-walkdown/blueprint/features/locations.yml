@@ -159,6 +159,9 @@ stories:
             - A server started in one of them offers only the blueprints that `.walkdown` declares, wherever the blueprint it serves happens to sit
             - A committed entry whose spec lies under another `.walkdown` is refused when written and reported by lint when found - that `.walkdown` already answers for it (q-0168)
             - One that is there anyway is not read either - where names it as refused and says which directory answers for it, and status and serve never see it - and an ephemeral entry may not name it from outside, because a copy means a copy and this is the original (q-0176)
+            - The same row in the PERSONAL file is refused on the same terms - set aside on read, named on the report, reported by lint - because a tool that resolved it while refusing the byte-identical committed one would answer the same question two ways in one breath (n-0188)
+            - A row may name a blueprint under its OWN `.walkdown` - the personal home, whose config that file is, or the one answering where you stand - so the way to a pack is to stand in its checkout, or to list a real copy of it
+            - A `.walkdown` holding homes but no config declares nothing and answers for nothing, so a row naming a blueprint under it is that blueprint's only declaration and is read
           statement_hash: sha256:b08354a355f7
 
       - id: locations.answer.declared-not-discovered

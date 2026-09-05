@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-03T16:46:46.113Z
 anchor:
   rule: locations.answer.one-walkdown-answers
-status: answered
+status: incorporated
 body: "Seen while judging 2026-09-03 (run 2026-09-03T16-30-11Z-local-01, PASS -
   not the reason for the verdict). project add --ephemeral now refuses a pack's
   declared original (q-0176), but the same shape written BY HAND into
@@ -29,3 +29,29 @@ replies:
       break things, and that is on them. walkdown supports its own commands
       working well; project add refuses this shape, and that is the whole of the
       guarantee."
+  - author: topher
+    via: agent
+    created: 2026-09-05T23:33:55Z
+    body: >-
+      Folded in, with one thing worth recording because the answer has been
+      partly overtaken.
+
+
+      The principle stands as you gave it: a hand-edited personal config is
+      outside the tools, and walkdown's guarantee is that its own commands work
+      well.
+
+
+      What changed since is n-0188, decided 2026-09-05: a personal row naming a
+      blueprint that another .walkdown declares is now refused on READ, not only
+      when written. So the specific door you found here — a hand-written
+      rootless ephemeral entry pointing at a pack's live blueprint — is closed
+      too, wherever that pack's .walkdown has a config of its own. Not because
+      hand-edits are defended, but because the refusal turned out to belong at
+      the reader for a different reason: 'where' was resolving the personal row
+      while refusing the byte-identical committed one, in the same block.
+
+
+      The limit your answer draws is still the limit. A .walkdown holding homes
+      but no config declares nothing, and a row naming a blueprint under it is
+      read — that is a person's own arrangement, and it is theirs.

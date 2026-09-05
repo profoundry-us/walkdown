@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-03T02:57:27.591Z
 anchor:
   rule: locations.answer.one-walkdown-answers
-status: answered
+status: incorporated
 body: "Judged 2026-09-03 (run 2026-09-03T02-45-46Z-local-01, PASS): the q-0168
   THEN holds - project add refuses a spec under another .walkdown from every
   direction and for every layout, lint names the entry and both files, and only
@@ -43,3 +43,13 @@ replies:
       Tests: 'a committed entry never reaches under another .walkdown'
       (rewritten) and 'a server offers what the .walkdown where it was started
       declares'."
+  - author: topher
+    via: agent
+    created: 2026-09-05T23:33:55Z
+    body: "Folded into locations.answer.one-walkdown-answers. The THEN naming the
+      ephemeral refusal — 'a copy means a copy and this is the original' — was
+      already carried there from 583d041; what was missing beside it is the
+      personal half, now three steps: the same row in the personal file refused
+      on the same terms, what a row may legitimately name (its own .walkdown —
+      the personal home, or the one answering where you stand), and the way
+      through, which is to stand in the checkout or list a real copy."
