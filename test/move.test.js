@@ -2,6 +2,7 @@ import { declareProject } from '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import {
+  chmodSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
@@ -177,3 +178,51 @@ test('a destination that is not a directory is refused in words @rule:locations.
   }
 });
 
+
+/*
+ * The copy path's own failures. moveDir catches EXDEV/ENOTEMPTY/EEXIST to
+ * CHOOSE the copy and used to catch nothing the copy itself raised, so a volume
+ * that filled or a record it could not read died as a stack trace and left a
+ * half-copied ledger at the destination - and the obvious retry was then
+ * refused by the debris of the attempt that failed (n-0196).
+ *
+ * Driven with an unreadable record rather than a full volume: a RAM disk cannot
+ * be built portably in a unit test, and both take the same branch.
+ */
+test('a copy that stops part way is a refusal, and leaves no debris behind @rule:locations.keeping.moving-is-a-decision', () => {
+  const p = project();
+  const locked = join(p.runs, 'locked.json');
+  try {
+    writeFileSync(locked, '{"run_id":"locked"}');
+    chmodSync(locked, 0o000);
+    // A dotfile at the destination forces the copy path, the way a second
+    // volume would: the guard ignores it, and rename then will not.
+    const dest = join(p.root, 'elsewhere', 'runs');
+    mkdirSync(dest, { recursive: true });
+    writeFileSync(join(dest, '.DS_Store'), 'finder');
+
+    let out;
+    try {
+      run(p, ['move', 'runs', '--to', dest, '--project', declareProject(p.home, p.bp, 'movable')]);
+      assert.fail('the move should have been refused');
+    } catch (e) {
+      out = `${e.stdout ?? ''}${e.stderr ?? ''}`;
+      assert.equal(e.status, 2, 'a worded refusal, not a stack trace');
+    }
+    assert.match(out, /stopped part way/);
+    assert.match(out, /Nothing was lost/);
+    assert.ok(!/at Object\.|node:internal/.test(out), 'no stack trace');
+
+    // The ledger is exactly where it was.
+    assert.ok(existsSync(join(p.runs, 'a.json')), 'the records stayed');
+    assert.equal(readFileSync(join(dest, '.DS_Store'), 'utf8'), 'finder', 'theirs untouched');
+    // And the destination holds nothing of ours, so a retry is not refused by
+    // the wreckage of this attempt.
+    assert.ok(!existsSync(join(dest, 'a.json')), 'no half-copied record left behind');
+  } finally {
+    try {
+      chmodSync(locked, 0o600);
+    } catch {}
+    p.cleanup();
+  }
+});

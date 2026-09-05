@@ -4,7 +4,7 @@ import { dirname, resolve, sep } from 'node:path';
 import { parseArgs } from 'node:util';
 import { KINDS, rememberLocation, resolveLocations } from '../../lib/locations.js';
 import { dim, green, red } from '../../lib/report/tty.js';
-import { moveDir } from '../../lib/standard.js';
+import { MoveFailed, moveDir } from '../../lib/standard.js';
 import { end } from './context.js';
 
 /*
@@ -86,8 +86,20 @@ export function run(args) {
   mkdirSync(dirname(to), { recursive: true });
   // Across volumes too, and into a destination holding only the dotfiles the
   // guard above ignores - `renameSync` alone refused both (n-0185).
-  if (existsSync(from)) moveDir(from, to);
-  else mkdirSync(to, { recursive: true });
+  try {
+    if (existsSync(from)) moveDir(from, to);
+    else mkdirSync(to, { recursive: true });
+  } catch (e) {
+    /*
+     * A copy that stopped part way is news, not a crash: the ledger is exactly
+     * where it was, and the sentence says so and says what to fix. Anything
+     * else still throws - an error nobody has thought about is better read as
+     * a stack trace than dressed up as a refusal (n-0196).
+     */
+    if (!(e instanceof MoveFailed)) throw e;
+    console.error(red(e.message));
+    return end(2);
+  }
 
   const written = rememberLocation(loc, kind, to);
   console.log(`${green('moved')} ${kind}`);
