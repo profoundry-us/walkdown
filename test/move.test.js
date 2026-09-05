@@ -75,3 +75,37 @@ test('move refuses a destination that already holds records @rule:locations.keep
     p.cleanup();
   }
 });
+
+/*
+ * The destination the guard above deliberately allows.
+ *
+ * `held()` ignores dotfiles, which is right - refusing a move because Finder
+ * left a .DS_Store there would be absurd - and then `renameSync` refused it
+ * anyway with a raw ENOTEMPTY, because rename does not care what kind of entry
+ * is in the way. The same fallback carries EXDEV, which is the half of n-0185
+ * that matters most in practice: an external drive or a mounted share is the
+ * most plausible place for records leaving a repository, and it cannot be
+ * built portably in a unit test. Both take this branch.
+ */
+test('a destination holding only the dotfiles the guard ignores is still moved into @rule:locations.keeping.moving-is-a-decision', () => {
+  const p = project();
+  try {
+    const dest = join(p.root, 'elsewhere', 'runs');
+    mkdirSync(dest, { recursive: true });
+    writeFileSync(join(dest, '.DS_Store'), 'finder');
+    const before = readFileSync(join(p.runs, 'a.json'), 'utf8');
+
+    run(p, ['move', 'runs', '--to', dest, '--project', declareProject(p.home, p.bp, 'movable')]);
+
+    assert.equal(readFileSync(join(dest, 'a.json'), 'utf8'), before, 'the record arrived unchanged');
+    assert.ok(!existsSync(join(p.runs, 'a.json')), 'and did not stay behind');
+    assert.equal(
+      readFileSync(join(dest, '.DS_Store'), 'utf8'),
+      'finder',
+      'what was already there is merged with, never cleared',
+    );
+  } finally {
+    p.cleanup();
+  }
+});
+

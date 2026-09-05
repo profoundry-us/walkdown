@@ -205,6 +205,46 @@ test('a moved spec rewrites its own block and nothing around it @rule:locations.
 });
 
 /*
+ * "Nothing else in that file" taken literally, at the boundary the block used
+ * to get wrong. Its end was computed as one character past the end marker, on
+ * the assumption that a single newline followed - so anything else sitting
+ * there was eaten (n-0187). Three files where something else does.
+ */
+test('the block ends at its marker\'s line, whatever comes next @rule:locations.pointer.owns-only-its-block', () => {
+  const cases = {
+    // A trailing space on the marker's own line: it belongs to our line, and
+    // must not survive as a space-only line outside the block.
+    trailing: { head: '# Head\n\n', gap: ' \n', tail: '## Tail\n' },
+    // A CRLF file - a Windows checkout, or core.autocrlf. The \r is ours; the
+    // person's next line is not, and must not gain a blank line above it.
+    crlf: { head: '# Head\r\n\r\n', gap: '\r\n', tail: '## Tail\r\n' },
+    // A comment of the person's own, on the line after ours. It used to lose
+    // its leading `<` and become broken markup.
+    comment: { head: '# Head\n\n', gap: '\n', tail: '<!-- mine, not walkdown\'s -->\n' },
+  };
+  for (const [name, { head, gap, tail }] of Object.entries(cases)) {
+    const proj = join(root, `boundary-${name}`);
+    mkdirSync(proj, { recursive: true });
+    const file = join(proj, 'CLAUDE.md');
+    // pointerBlock ends in a newline of its own; strip it and put back the
+    // line ending this file actually uses.
+    writeFileSync(file, head + pointerBlock('blueprint/').replace(/\n$/, '') + gap + tail);
+
+    assert.equal(placePointer(file, pointerBlock('/elsewhere/spec')), 'pointer-updated', name);
+    const after = readFileSync(file, 'utf8');
+    assert.equal(after.match(/walkdown:begin/g).length, 1, `${name}: replaced, not appended`);
+    // The whole file, exactly: their words on both sides untouched, our block
+    // between them, and nothing invented in the gap. The old code left a
+    // space-only line here, or a blank one, or ate a `<`.
+    assert.equal(
+      after,
+      head + pointerBlock('/elsewhere/spec') + tail,
+      `${name}: the block owns its own lines and not one character more`,
+    );
+  }
+});
+
+/*
  * Skills are procedures a person carries between projects, not records this
  * project owns - so by default they go to the person, and the repository of
  * somebody merely trying walkdown gains nothing at all.

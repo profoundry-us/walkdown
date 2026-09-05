@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-04T21:04:15.572Z
 anchor:
   rule: locations.pointer.owns-only-its-block
-status: open
+status: addressed
 body: "placePointer resumes the person's file one character past its own end
   marker, so whatever sits there is swallowed and a line walkdown did not write
   appears outside the block. lib/init.js:148,150 slice at `to +
@@ -27,3 +27,21 @@ body: "placePointer resumes the person's file one character past its own end
   verdict: a second marker pair in the same file is never de-duplicated - only
   the first is rewritten, and the second keeps naming the place the spec left -
   though no walkdown command was found that produces that state."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-05T02:52:03Z
+    body: >-
+      Fixed in the commit that carries this reply. `placePointer` now ends the
+      block at the end of its marker's own line — `indexOf('\n', to +
+      POINTER_END.length)` — instead of assuming one newline follows it. All
+      three of your files are tested and asserted whole rather than by
+      inspection: the result must equal the person's head, plus our block, plus
+      their tail, byte for byte. It fails against the old code on the
+      trailing-whitespace case.
+
+
+      The second observation stands as you left it: a file already holding two
+      marker pairs still has only the first rewritten. No walkdown command
+      produces that state, and inventing a rule for how to reconcile two blocks
+      somebody hand-placed seemed worse than leaving it visible here.

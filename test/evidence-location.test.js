@@ -119,3 +119,34 @@ test('evidence serving still refuses anything outside the evidence key space @ru
     f.cleanup();
   }
 });
+
+/*
+ * The prefix, not a file under it. `walkdown judge` prints the evidence key as
+ * `runs/evidence/<stamp>/`, and src/panel/shots.js renders every cited key
+ * straight into an <img src>, so a record citing the directory it was handed is
+ * a request the panel makes on its own. It used to kill the server: existsSync
+ * says yes, readFileSync throws EISDIR after the 200 has gone out, the catch
+ * calls sendJson, and ERR_HTTP_HEADERS_SENT takes the process with it (n-0186).
+ *
+ * So this asserts the server is still answering afterwards, which is the half
+ * that mattered - a 404 from a dead server would look identical on one request.
+ */
+test('an evidence key naming a directory is refused, and the server lives @rule:locations.travel.evidence-by-key', async () => {
+  const f = fixture();
+  try {
+    mkdirSync(join(f.h.evidence, 'r1'), { recursive: true });
+    writeFileSync(join(f.h.evidence, 'r1', 'shot.png'), 'IN-HOME');
+    await withServer(f, async (base) => {
+      for (const path of ['/evidence/runs/evidence/r1/', '/evidence/runs/evidence/r1']) {
+        const res = await fetch(base + path);
+        assert.equal(res.status, 404, `${path} names a directory, not evidence`);
+        await res.text();
+      }
+      const after = await fetch(`${base}/evidence/runs/evidence/r1/shot.png`);
+      assert.equal(after.status, 200, 'the server survived being asked for the prefix');
+      assert.equal(await after.text(), 'IN-HOME');
+    });
+  } finally {
+    f.cleanup();
+  }
+});

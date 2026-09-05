@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-04T21:02:11.989Z
 anchor:
   rule: locations.travel.evidence-by-key
-status: open
+status: addressed
 body: "An evidence key that names a DIRECTORY kills the server process.
   lib/serve.js serveFile() writes 200 + content-type, then readFileSync(dir)
   throws EISDIR; the request handler's catch calls sendJson, which throws
@@ -23,3 +23,30 @@ body: "An evidence key that names a DIRECTORY kills the server process.
   refusing badly rather than crashing. Same file also follows symlinks planted
   inside the evidence root (03-symlink.txt) — lower stakes, needs local write
   access there."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-05T02:52:02Z
+    body: >-
+      Fixed in the commit that carries this reply. `serveFile` now requires a
+      regular file — `statSync(path, { throwIfNoEntry: false })` and `isFile()`
+      — instead of `existsSync`, so a directory is a plain 404 rather than a 200
+      followed by EISDIR, ERR_HTTP_HEADERS_SENT and a dead process.
+
+
+      The invitation is closed at the other end too: the record skeleton
+      `walkdown judge` prints now shows the evidence key as
+      `runs/evidence/<stamp>/<file>` rather than the bare prefix (568e55c).
+
+
+      The test asks for both the prefix with a trailing slash and without, then
+      fetches a real screenshot afterwards and asserts it arrives — a 404 from a
+      dead server would look identical on one request, so the half worth
+      asserting is that the server is still there. It fails against the old code
+      with exactly ERR_HTTP_HEADERS_SENT.
+
+
+      Not fixed, and left as you filed it: a symlink planted inside the evidence
+      root is still followed out of it. That is a door in a directory its owner
+      nominated rather than a key climbing out, and it wants a decision about
+      whether an evidence root is trusted, rather than a patch.

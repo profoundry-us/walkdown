@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-09-05T02-33-16Z-local-01",
+  "created": "2026-09-05T02:33:16Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "cc03d19",
+  "spec_hash": "sha256:9cf589d6656b",
+  "results": [
+    {
+      "rule": "locations.travel.provenance-not-currency",
+      "status": "pass",
+      "statement_hash": "sha256:c513160f49fc",
+      "evidence": [
+        "runs/evidence/2026-09-05T02-33-16Z/provenance-after-fix.txt",
+        "runs/evidence/2026-09-05T02-33-16Z/currency-holds.txt"
+      ],
+      "reasoning": "Judged in four throwaway projects, each with its own HOME, never against the real ledger. Provenance, the half that was failing: in the default layout (code in git, home in ~/.walkdown) a checks run now records the CODE repository's sha with -dirty and a tree_hash; with the home kept in git at its own commit, a sweep, two checks runs (one driven from an unrelated cwd with --project) and a walkdown filed through the running panel's POST /api/walkdowns all carry the code repository's sha and never the home's; the committed layout records it too (provenance-after-fix.txt, probes A-C). The one shape that still records nothing is an --ephemeral copy standing outside any repository with no roots declared - there the writer refuses to stamp the repository you happen to be standing in, which is the right refusal, though `walkdown where code` still names that repository, so the report and the record disagree in that one shape; nothing misdirects, so I did not fail on it. Currency, the half that already held, holds under harder pressure: two unrelated commits, a branch and a --no-ff merge, an untracked file, and then a history rewrite that made the recorded sha unresolvable left `status --json`, the human table and every run file byte-identical, while a statement reword and a sweep each moved exactly that one cell (currency-holds.txt). docs/05-runs-ledger.md no longer claims an older git_sha renders stale.",
+      "threads": []
+    }
+  ]
+}

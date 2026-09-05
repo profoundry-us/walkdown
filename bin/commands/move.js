@@ -1,9 +1,10 @@
-import { existsSync, mkdirSync, readdirSync, renameSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { KINDS, rememberLocation, resolveLocations } from '../../lib/locations.js';
 import { dim, green, red } from '../../lib/report/tty.js';
+import { moveDir } from '../../lib/standard.js';
 import { end } from './context.js';
 
 /*
@@ -65,7 +66,9 @@ export function run(args) {
   }
 
   mkdirSync(dirname(to), { recursive: true });
-  if (existsSync(from)) renameSync(from, to);
+  // Across volumes too, and into a destination holding only the dotfiles the
+  // guard above ignores - `renameSync` alone refused both (n-0185).
+  if (existsSync(from)) moveDir(from, to);
   else mkdirSync(to, { recursive: true });
 
   const written = rememberLocation(loc, kind, to);

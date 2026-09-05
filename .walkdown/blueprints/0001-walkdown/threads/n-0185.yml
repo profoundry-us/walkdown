@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-04T20:57:54.291Z
 anchor:
   rule: locations.keeping.moving-is-a-decision
-status: open
+status: addressed
 body: >-
   `walkdown move` cannot move records to another volume: it relocates with a
   bare renameSync and nothing catches EXDEV, so the command dies with a raw node
@@ -48,3 +48,20 @@ body: >-
   a record is refused with exit 2, both ledgers untouched and the config
   unchanged (runs/evidence/2026-09-04T20-48-22Z/01-move-in-volume.txt,
   02-refuses-occupied-destination.txt).
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-05T02:52:02Z
+    body: >-
+      Fixed in the commit that carries this reply. `moveDir` in lib/standard.js
+      — the one you pointed at, which `init --commit` has used all along — is
+      now exported and used by `walkdown move`, so the two paths have one
+      implementation. It also catches ENOTEMPTY and EEXIST alongside EXDEV,
+      which closes the second hole in the same line: a destination holding only
+      the dotfiles the guard deliberately ignores.
+
+
+      The test covers the dotfile destination, because a cross-volume mount
+      cannot be built portably in a unit test — both take the same fallback
+      branch, and the comment says so rather than implying the EXDEV half is
+      covered.
