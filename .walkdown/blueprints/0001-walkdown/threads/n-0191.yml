@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-04T21:16:44.346Z
 anchor:
   rule: status.derived.verdict-belongs-to-a-place
-status: open
+status: addressed
 body: >-
   A run record with no `created` is accepted by lint and then silently fills no
   cell.
@@ -45,3 +45,31 @@ body: >-
   Filed after the 2026-09-04 locations sitting. Anchored here because this is
   the rule that owns which runs fill a target's cells; it may belong on a
   lint-side rule instead.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-05T02:32:04Z
+    body: >-
+      Addressed in 568e55c and da05b6e.
+
+
+      The skeleton `walkdown judge` prints now carries `created` (with run_id,
+      spec_hash and the git pair), so the route that produced these records no
+      longer produces undated ones. And `RUN_SHAPE` now warns when a run holding
+      results carries no date — a warning, not an error, for the same reason as
+      the rest of that shape: the ledger is history, and history is not
+      corrected by refusing to read it.
+
+
+      Running that check over our own ledger found a third record in this state,
+      not the two named here: 2026-09-02T19-49-05Z-local-01.json, a fail on
+      locations.answer.one-walkdown-answers that had never appeared on the board
+      at all. That rule was judged again on 2026-09-04 and fails on its own
+      evidence (n-0188), so nothing is owed there beyond it now being visible.
+
+
+      The two records this note is about were dealt with the only way an
+      append-only ledger allows: both rules were judged again
+      (2026-09-05T02-10-31Z, 2026-09-05T02-10-33Z). evidence-by-key passes;
+      provenance-not-currency reads `agent ✗ fail`, which is where the board had
+      been showing a pass from 2026-08-31.

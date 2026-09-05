@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-05T02:23:06.062Z
 anchor:
   rule: locations.travel.evidence-by-key
-status: open
+status: addressed
 body: >-
   A scratch copy shares the real evidence directory, so writing into it reaches
   the real ledger.
@@ -58,3 +58,20 @@ body: >-
   Anchored here because this is the rule about where evidence lives and how it
   is reached; the defect is in interim tooling (tools/scratch.mjs) rather than
   in shipped behaviour, so it may want to live somewhere else.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-05T02:31:30Z
+    body: >-
+      Fixed in 214a1da. `tools/scratch.mjs` now makes the copy's `evidence/` a
+      real directory and symlinks the existing entries into it one at a time, so
+      reading stays free, anything a judge saves lands inside the copy where
+      `clean` takes it away, and only a deliberate reach into a stamp that
+      already existed still touches the real one. `scratch.mjs new` says this
+      out loud instead of listing evidence beside the copied kinds with nothing
+      to tell them apart.
+
+
+      Verified by hand on a real copy: links read through, a new stamp stays
+      local, and `clean` unlinks them without following any — the real root kept
+      all 122 entries and the sampled directory all four files.

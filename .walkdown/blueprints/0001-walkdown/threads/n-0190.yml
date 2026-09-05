@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-04T21:12:31.480Z
 anchor:
   rule: locations.travel.provenance-not-currency
-status: open
+status: addressed
 body: |-
   Provenance holds as a rule about currency and fails as a rule about the record: in the layout `walkdown init` now produces by DEFAULT, a run carries no git_sha and no tree_hash at all, so there is nothing for a person digging into a verdict to look at.
 
@@ -14,3 +14,23 @@ body: |-
   The cause is one argument in lib/run-record.js: writeRunRecord (and writeSweep) call gitSha(blueprintDir) and treeHash(blueprintDir), asking the BLUEPRINT directory — which outside the repository is ~/.walkdown and no repository at all. lib/locations.js already resolves this: `code` is documented as the repository "for the report and for git_sha" (line 1233) and its null case says "runs will carry no git_sha" (line 1340). Nothing asks it. lib/skills/walkdown-judge.md:78 tells a hand-driven judge to record "the repository holding the CODE", so the automatic emitters and the skill disagree about the same field.
 
   The other half of the rule holds under everything tried (probe-ab, probe-c): three commits touching neither rules nor code, an untracked file, and a history rewrite that made the recorded sha unreachable left `status --json` byte-identical and every run file unchanged, while rewording a statement and `sweep --tiers agent` each moved exactly one cell.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-05T02:31:02Z
+    body: >-
+      Fixed in 0fac529. `writeRunRecord` and `writeSweep` now take the code root
+      — passed by a caller holding a loaded blueprint, resolved alongside the
+      runs directory otherwise — and ask git about that instead of the blueprint
+      directory. `spec_hash` still comes from the blueprint, which really is
+      what it is about.
+
+
+      Covered by a test that builds two real repositories, with the home
+      versioned in its own right, and asserts the record carries the code
+      repository's sha. It fails against the old code.
+
+
+      The skill wording this note contrasted with
+      (lib/skills/walkdown-judge.md:78, "the repository holding the CODE") is
+      now what the writer does, so the two ends agree.

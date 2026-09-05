@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-04T21:11:22.796Z
 anchor:
   rule: locations.travel.judged-against-a-spec
-status: open
+status: addressed
 body: "The hash itself behaves exactly as the rule says, but 'every run records'
   it is not enforced anywhere, and the agent tier is where it is missing. Survey
   of this ledger (evidence
@@ -25,3 +25,27 @@ body: "The hash itself behaves exactly as the rule says, but 'every run records'
   run with results and no spec_hash, or give the agent path a writer to call
   (walkdown judge could print the record skeleton with spec_hash already filled
   in) so it cannot be forgotten."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-05T02:32:04Z
+    body: >-
+      Addressed in 568e55c and da05b6e, taking both of the fixes this note
+      suggested rather than one.
+
+
+      `walkdown judge` now prints the record whole — run_id, created, spec_hash
+      and the git pair derived at assembly time — with only `results` left to
+      write, so a judge that copies the skeleton faithfully produces a
+      countable, stamped record. Its test fills the skeleton the way a judge
+      does and asks the board what it then says, rather than checking a field is
+      present.
+
+
+      Lint got the belt to that braces, but only for `created`: a
+      results-bearing run with no date is now a warning. `spec_hash`
+      deliberately did not get the same check — 67 records in this ledger carry
+      none, and 67 warnings would drown the report rather than tell anyone
+      anything. If that history should be legible as unstamped, it wants a
+      different shape than a per-record warning, and that is a call worth making
+      on purpose rather than as a side effect of this note.
