@@ -1,0 +1,52 @@
+id: n-0199
+kind: note
+author: topher
+via: agent
+created: 2026-09-05T23:45:11.512Z
+anchor:
+  rule: status.derived.verdict-belongs-to-a-place
+status: open
+body: >-
+  Deleting a target's `base_url` resurrects every verdict ever made against it,
+  all at once.
+
+
+  Found by the judge that re-earned this rule on 2026-09-05 (run
+  2026-09-05T23-31-45Z-local-01, PASS) and offered as an observation, correctly:
+  a target aimed at NOTHING is not the "aimed at a new system" the statement
+  describes, and lib/status.js takes an unknown address at face value on purpose
+  (`if (!want || !run?.base_url) return true`), which is the sibling rule
+  status.derived.addressless-runs-count.
+
+
+  But it is the one route anybody has found to make a verdict outlive its place.
+  Measured on a scratch board: 116 agent passes and 54 human passes, earned at
+  localhost:4700 AND at a pr-1 review app, filling the same cells simultaneously
+  the moment the address was removed. Repointing the target empties them, as the
+  rule promises; deleting it hands them all back.
+
+
+  The decision is not obvious, which is why this is a note rather than a fix.
+  Addressless RUNS counting is deliberate and right — an old record made before
+  addresses existed should not be thrown away. Whether an addressless TARGET
+  should mean the same thing is a different question, and the answer "a target
+  with no address counts nothing rather than everything" would be the safe
+  direction.
+
+
+  Two smaller things from the same run, recorded so they are not rediscovered:
+
+
+  Address comparison is exact string equality, so a trailing slash or an
+  uppercased host empties the board. The direction is safe — it asks for the
+  walkdown again rather than inheriting one — but a cosmetic URL edit costs
+  every verdict on that target, and a person doing it will read the result as a
+  bug.
+
+
+  For adopters, the Playwright reporter falls back to
+  `config.projects[0].use.baseURL ?? APP_HOST`. walkdown's own config overrides
+  it with the declared address, so this repo never sees it; a project whose
+  Playwright `webServer` binds an ephemeral port would record that port as the
+  place its verdict belongs to, which is exactly what this rule's second clause
+  forbids.

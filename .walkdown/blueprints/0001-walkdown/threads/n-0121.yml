@@ -61,3 +61,43 @@ replies:
       anonymous claim is a different thing from an omission, and only the
       omission is refused. The smaller observation stands too — an emptied field
       is an answer and should survive the reload."
+  - author: topher
+    via: agent
+    created: 2026-09-05T23:40:12Z
+    body: >-
+      Reporting where this actually stands, because your decision has been
+      overtaken by later work in a way worth reading before anything else is
+      built on it.
+
+
+      Option 1 is in force, and by a stronger route than the one you chose
+      between. `asWho` in lib/writes.js refuses an empty author, and any throw
+      on that path is a 400 — but more than that, n-0139/n-0142 removed
+      client-supplied authorship altogether: there is no `actor` in a request
+      body and no `--actor` at the CLI. The server writes under its OWN resolved
+      identity, and `via` is the only thing an interface may still say about who
+      is acting. So a write cannot be recorded under a guessed name because a
+      name never arrives from outside at all. The five-bugs-in-five-places shape
+      you named is closed structurally: one module, one function, nothing to
+      re-invent.
+
+
+      Which makes the second half of your decision moot rather than built. The
+      standalone embed does not need to declare anonymity, because it never
+      claims an identity in the first place — it POSTs a pin with no author and
+      the server supplies its own. There is no omission left to refuse and no
+      anonymous claim to accept. I have not built a vocabulary for something
+      nothing needs; if a client ever writes from somewhere the server's
+      identity is not the right answer, that is when the declaration earns its
+      place.
+
+
+      Left open for you, because it is the one piece of your decision that has
+      no home under the new model: "an emptied field is an answer and should
+      survive the reload". Under the old model that meant a cleared author
+      field. Under this one the panel has no author field to clear — identity is
+      the server's, read from ~/.walkdown/config.yml. The nearest live thing is
+      `src/panel/app.js`'s pin relay, which still does `(msg.author ??
+      '').trim() || whoAmI()`, and that fallback is now dead weight since the
+      body's author is never read. Deleting it is safe; whether "an emptied
+      field survives" should mean something else now is yours to say.

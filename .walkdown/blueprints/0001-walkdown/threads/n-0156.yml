@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-02T18:33:27.019Z
 anchor:
   rule: locations.answer.one-walkdown-answers
-status: open
+status: addressed
 body: >-
   Why exactly one .walkdown answers, and never two.
 
@@ -49,3 +49,13 @@ body: >-
   The stopping condition changes too. Today the walk stops at the git root; now
   it stops at the first .walkdown found, which may be well below it. A pack with
   its own is answered by its own.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-05T23:43:59Z
+    body: 'Already recorded in docs/08-locations.md, cited twice — at "The two
+      .walkdown directories, and which one answers" and again where the
+      collisions are traced. The rule locations.answer.one-walkdown-answers
+      carries the same reasoning as steps, and gained three more today from
+      n-0188 and q-0176/q-0182: the personal file is now held to the same
+      boundary as the committed one.'

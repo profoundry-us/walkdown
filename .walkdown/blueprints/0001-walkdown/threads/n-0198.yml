@@ -1,0 +1,37 @@
+id: n-0198
+kind: note
+author: topher
+via: agent
+created: 2026-09-05T23:42:08.646Z
+anchor:
+  rule: locations.travel.judged-against-a-spec
+status: open
+body: >-
+  `specHash` throws EISDIR on a directory named `<something>.yml` under
+  `features/`, which would take down every run record and `walkdown judge` at
+  once.
+
+
+  Found by the judge that re-earned this rule on 2026-09-05 (run
+  2026-09-05T23-31-36Z-local-01, PASS) and offered as an observation rather than
+  the ground of the verdict, which is right — it fails loudly rather than
+  producing a wrong hash, so the rule's promise holds.
+
+
+  Filing it anyway, because a finding nobody writes down is a finding somebody
+  rediscovers: n-0134 sat correctly diagnosed for four days while two later
+  judges found it again independently.
+
+
+  The shape is a divergence between two readers of the same directory. The
+  blueprint loader ignores a directory whose name ends in `.yml`; `specFiles`
+  includes it, and `readFileSync` on it throws. Everything that stamps
+  provenance calls `specHash` — `writeRunRecord`, `writeSweep`, and the skeleton
+  `walkdown judge` prints — so one oddly-named directory stops all three with a
+  raw stack trace rather than a sentence.
+
+
+  Pathological, and cheap to close: skip anything that is not a regular file,
+  the way `serveFile` now does for the same class of mistake (n-0186). Worth
+  deciding whether it should be skipped silently or named, since a directory
+  called `features/thing.yml` is more likely a mistake than an intention.

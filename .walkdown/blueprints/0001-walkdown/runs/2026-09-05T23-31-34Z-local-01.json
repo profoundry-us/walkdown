@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-09-05T23-31-34Z-local-01",
+  "created": "2026-09-05T23:31:34Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "93c8823",
+  "spec_hash": "sha256:9cf589d6656b",
+  "results": [
+    {
+      "rule": "locations.travel.evidence-by-key",
+      "status": "pass",
+      "statement_hash": "sha256:a7bc7cd07be3",
+      "evidence": [
+        "runs/evidence/2026-09-05T23-31-34Z/01-baseline-key-resolves.txt",
+        "runs/evidence/2026-09-05T23-31-34Z/02-evidence-moved-out.txt",
+        "runs/evidence/2026-09-05T23-31-34Z/03-same-key-after-the-move.txt",
+        "runs/evidence/2026-09-05T23-31-34Z/04-keys-that-climb-out-are-refused.txt",
+        "runs/evidence/2026-09-05T23-31-34Z/05-panel-opens-the-picture.txt",
+        "runs/evidence/2026-09-05T23-31-34Z/06-the-picture-as-served-after-the-move.png"
+      ],
+      "reasoning": "Driven end to end against a scratch copy served from inside itself on 4801, never the real ledger. I filed a real PNG at runs/evidence/PROBE-KEY/shot.png inside the copy's evidence directory and a run record citing exactly that key, then took evidence out of the project with `walkdown move evidence --to` to a directory on another tree entirely: the move wrote a pure-override row into the copy's own personal config, left the blueprint home with no evidence directory at all, and did not touch a byte of the run record (sha256 04365df2... before and after). Restarted, the server served the same recorded key with the same bytes (sha256 c414cd0e...), and with a decoy of the same key planted back in blueprint/runs/evidence/ the configured root won while a key that existed only in the blueprint still fell back to it - so both halves of the resolution order hold. The panel proves the last clause of the THEN: its screenshot button carried the key verbatim (data-shots [\"runs/evidence/PROBE-KEY/shot.png\"]) and the image it built from it loaded at its true 360x140, with the file itself living outside the project. I then tried to climb out sixteen ways - ../ chains, percent-encoded and doubly-nested ones, ....// , a climb out of a valid stamp, and bare paths at /evidence/ - and every one was 404 with the server still answering afterwards; the two that returned 200 (runs/../runs/evidence/... and a doubled slash) normalize back inside the key space and serve the right file. Directory keys, which killed the process when this rule was last judged (n-0186), now 404 and the server lives. What I did not get past: a symlink planted inside the evidence root is followed and served, which is deliberate here - every historical stamp in a scratch copy is a symlink and must read through - and reaching it needs write access to the evidence root, where you could put the file itself. Judged on the copy; the verdict is recorded here."
+    }
+  ]
+}

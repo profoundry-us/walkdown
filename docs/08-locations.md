@@ -42,9 +42,18 @@ The number is allocated against the listing of the `blueprints/` directory the h
 made in, and the listing *is* the record: there is nothing to keep in step. The name after
 the dash is only so `ls` reads well. Nothing walkdown resolves is keyed by a name two
 projects could share — that derivation, in each of six costumes, was the ancestor of every
-collision this module has had (n-0124 through n-0160).
+collision this module has had (n-0124 through n-0160). Why numbering works here when the
+deleted registry's numbering did not is n-0155: an allocator only works when every
+claimant can see the others' claims, and two committed configs in two repositories cannot
+see each other, while a hand-written one never passes through an allocator at all.
 
 ## The three arrangements, and where the home sits
+
+These three, and the move of the default home back to `~/.walkdown`, are recorded as
+n-0163 — which supersedes n-0154 (why the files lived beside the code) and n-0157 (why two
+commit standards rather than one flag). Both of those describe an arrangement walkdown no
+longer has; they are kept because the ledger is append-only and the reasoning is still
+worth reading against this one.
 
 **Nothing committed — the default.** The home is `~/.walkdown/blueprints/NNNN-name/`. The
 repository gets *nothing*: no `.walkdown/`, no ignore rule, not even a pointer. Trying

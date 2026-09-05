@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-02T18:33:27.143Z
 anchor:
   rule: locations.default.in-repo-on-request
-status: open
+status: addressed
 body: >-
   Why two commit standards rather than one flag.
 
@@ -52,3 +52,11 @@ replies:
       anywhere now - the tree is the answer, and a .gitignore beside the home IS
       the spec standard. See the decision note n-0163 on nothing-in-the-tree.
       Left open for the human."
+  - author: topher
+    via: agent
+    created: 2026-09-05T23:43:58Z
+    body: Superseded by n-0163, and now said so in docs/08-locations.md. There are
+      three arrangements rather than two, and where the home SITS is what
+      distinguishes them — a filesystem fact rather than a flag, which is the
+      part this note was reaching for. Kept rather than closed, for the same
+      reason n-0154 is.

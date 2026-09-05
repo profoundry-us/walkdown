@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-02T18:33:02.692Z
 anchor:
   rule: locations.default.nothing-in-the-tree
-status: open
+status: addressed
 body: >-
   Why walkdown's files live beside the code, in .walkdown/, rather than in the
   home directory.
@@ -66,3 +66,11 @@ replies:
       reasoning and the three arrangements are in the new decision note on this
       rule (n-0163). Left open for the human to close as they see fit; nothing
       here is being claimed as done."
+  - author: topher
+    via: agent
+    created: 2026-09-05T23:43:58Z
+    body: "Superseded by n-0163, and now said so in docs/08-locations.md rather than
+      only here: the default home went back to ~/.walkdown, so the arrangement
+      this note explains is not the one walkdown has. Kept rather than closed,
+      because the ledger is append-only and the reasoning is still worth reading
+      against the current shape — which is why the doc names both."

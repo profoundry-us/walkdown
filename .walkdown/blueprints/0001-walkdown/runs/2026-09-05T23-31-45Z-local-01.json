@@ -1,0 +1,30 @@
+{
+  "run_id": "2026-09-05T23-31-45Z-local-01",
+  "created": "2026-09-05T23:31:45Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "93c8823",
+  "spec_hash": "sha256:9cf589d6656b",
+  "results": [
+    {
+      "rule": "status.derived.verdict-belongs-to-a-place",
+      "status": "pass",
+      "statement_hash": "sha256:da085af63ed8",
+      "evidence": [
+        "runs/evidence/2026-09-05T23-31-45Z/transcript.txt",
+        "runs/evidence/2026-09-05T23-31-45Z/board-at-localhost-4700.txt",
+        "runs/evidence/2026-09-05T23-31-45Z/board-at-pr-1.txt",
+        "runs/evidence/2026-09-05T23-31-45Z/board-at-pr-2.txt",
+        "runs/evidence/2026-09-05T23-31-45Z/board-back-at-pr-1.txt",
+        "runs/evidence/2026-09-05T23-31-45Z/ledger-before.txt",
+        "runs/evidence/2026-09-05T23-31-45Z/ledger-after.txt",
+        "runs/evidence/2026-09-05T23-31-45Z/probe-address-equivalence.txt",
+        "runs/evidence/2026-09-05T23-31-45Z/probe-two-targets.txt"
+      ],
+      "reasoning": "Driven in a scratch copy served from inside itself on 4804. With the local target declaring http://localhost:4700 the board carried 116 agent passes and 52 human passes; pointed at https://pr-1.review.app it carried none of them, and a walkdown recorded there through POST /api/walkdowns came back stamped base_url https://pr-1.review.app even though the only server alive was on port 4804 and nothing was listening at pr-1 - the address is what the blueprint declares, not what the harness bound (the judge prompt that opened this sitting says the same thing, printing 4700 while serving nothing). Pointed at https://pr-2.review.app, those two fresh passes read never rather than pass; pointed back, the board came back byte-identical, and across the whole exercise not one run file's sha256 changed and none disappeared - the only difference was the record the probe appended. A second target proved the address consulted belongs to the run's own target: a staging run made at pr-1 fills staging while staging points there and empties when it is moved to pr-2, with local untouched either way. Trying to break it: comparison is exact string equality, so a trailing slash or an uppercased host empties the entire board - a false negative in the safe direction, asking for the walkdown again rather than inheriting. The one way found to make a verdict outlive its place is to delete base_url from the target altogether, after which verdicts earned at localhost:4700 and at pr-1 all fill the same cells at once; lib/status.js takes an unknown address at face value on purpose, and a target aimed nowhere is not the target-aimed-at-a-new-system this rule describes, so it is reported rather than counted against the rule.",
+      "threads": []
+    }
+  ]
+}

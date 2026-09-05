@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-02T18:33:02.830Z
 anchor:
   rule: locations.default.one-home-per-blueprint
-status: open
+status: addressed
 body: >-
   Why numbered homes came back, and why numbering works now when the registry's
   did not.
@@ -47,3 +47,15 @@ body: >-
   kept violating in a new place each time: nothing resolves through a name two
   projects could share, whichever door does the resolving. That covers the read
   path and the write doors, not only init.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-05T23:43:58Z
+    body: "Recorded where a reader will meet it: docs/08-locations.md, under \"A
+      home\", now carries why numbering works here when the deleted registry's
+      did not — an allocator only works when every claimant can see the others'
+      claims, and two committed configs in two repositories cannot see each
+      other, while a hand-written one never passes through an allocator at all.
+      The mechanism it describes (allocation against the blueprints/ listing,
+      where the listing IS the record) was already there; what was missing
+      beside it was the reason the previous two attempts failed."

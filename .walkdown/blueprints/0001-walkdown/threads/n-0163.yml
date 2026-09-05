@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-02T20:45:59.284Z
 anchor:
   rule: locations.default.nothing-in-the-tree
-status: open
+status: addressed
 body: >-
   Why the home went back to ~/.walkdown, and what the three arrangements are now
   (supersedes n-0154 and n-0157).
@@ -60,3 +60,12 @@ body: >-
   blueprint still predates homes - blueprint/ at the root, runs and threads
   inside it, declared by path - which rule 3 of the resolution order keeps
   answering for. Moving it into a numbered home is a separate decision.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-05T23:43:58Z
+    body: Recorded in docs/08-locations.md, under "The three arrangements, and where
+      the home sits", which now names this thread and says outright that it
+      supersedes n-0154 and n-0157. The arrangements themselves were already
+      documented; the citation is what makes the decision findable from the doc
+      rather than only from the ledger.

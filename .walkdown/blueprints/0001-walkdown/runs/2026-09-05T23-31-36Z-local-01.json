@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-09-05T23-31-36Z-local-01",
+  "created": "2026-09-05T23:31:36Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "93c8823",
+  "spec_hash": "sha256:9cf589d6656b",
+  "results": [
+    {
+      "rule": "locations.travel.judged-against-a-spec",
+      "status": "pass",
+      "statement_hash": "sha256:5014abd76d50",
+      "evidence": [
+        "runs/evidence/2026-09-05T23-31-36Z/spec-hash-writes-probe.txt",
+        "runs/evidence/2026-09-05T23-31-36Z/panel-run-stamped.json",
+        "runs/evidence/2026-09-05T23-31-36Z/no-repository-spec-hash.txt",
+        "runs/evidence/2026-09-05T23-31-36Z/runs-inside-the-spec.txt",
+        "runs/evidence/2026-09-05T23-31-36Z/spec-hash-break-attempts.txt"
+      ],
+      "reasoning": "Judged against a scratch copy of this blueprint served from inside itself on :4802, whose spec hashed identically to the real one (sha256:9cf589d6656b), plus a second project standing outside any repository. Driving the panel's own write doors in turn - POST /api/draft, POST /api/threads (n-0198), POST /api/walkdowns - left the hash at sha256:9cf589d6656b after every one, and a checksum of every file under blueprint/ was byte-identical before and after all three; the verdict the panel wrote carries spec_hash itself. Rewording one word of a statement moved it (74a8f3f4d314), re-indenting without changing a word moved it too (dda5825a3cc9), and the same bytes under a different feature filename were a different spec (a8c6330c9652), while CRLF line endings, trailing spaces and extra trailing blank lines were not (unchanged). The no-repository half holds: in a project git knows nothing about, writeRunRecord and writeSweep both filed records carrying spec_hash and no git_sha, and the hash was the same before and after those two records existed. The hardest attempt to break 'recording a verdict never changes that hash' was to declare runs/ INSIDE the spec directory and file a run there - the hash still did not move, because specFiles enumerates walkdown.yml, storyboard.yml and features/*.yml rather than walking the tree, and lint accepted that layout without complaint. Two things short of a failure: specHash throws EISDIR on a directory named like a feature file under features/, where the blueprint loader tolerates it (loud, not wrong, and pathological); and the real working tree's spec moved under me mid-judgment (to 9666fe299538) from an uncommitted edit that is not mine, which is exactly the situation this hash exists to make legible - this record names the spec that was actually measured. The statement_hash was re-derived from the real repository at the end and still reads sha256:5014abd76d50.",
+      "threads": []
+    }
+  ]
+}
