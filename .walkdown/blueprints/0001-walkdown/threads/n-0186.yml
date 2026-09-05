@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-04T21:02:11.989Z
 anchor:
   rule: locations.travel.evidence-by-key
-status: addressed
+status: verified
 body: "An evidence key that names a DIRECTORY kills the server process.
   lib/serve.js serveFile() writes 200 + content-type, then readFileSync(dir)
   throws EISDIR; the request handler's catch calls sendJson, which throws
@@ -50,3 +50,27 @@ replies:
       root is still followed out of it. That is a door in a directory its owner
       nominated rather than a key climbing out, and it wants a decision about
       whether an evidence root is trusted, rather than a patch.
+  - author: topher
+    created: 2026-09-05T04:36:38Z
+    body: >-
+      The symlink half is closed too, in the commit before this reply.
+
+
+      Not by refusing to serve through a link — that would have broken the
+      working case (the panel showing a linked screenshot, a scratch copy
+      sharing the real evidence directory) and left the one that costs something
+      open. Reading through a link is fine. WRITING through one is the hazard:
+      `init --force` rewrote blueprint/AGENTS.md and truncated
+      lib/templates/AGENTS.md, the file it was linked to, while every check in
+      the repo stayed green.
+
+
+      So: `walkdown lint` now warns on a symlink under the home whose target
+      resolves outside it, and both blueprints carry AGENTS.md as a copy with a
+      Highball check keeping it identical to the shipped template — the drift
+      protection the link was buying, without the door.
+
+
+      The check earned itself immediately: the example blueprint had the same
+      link, and nobody had noticed it.
+verified_by: topher

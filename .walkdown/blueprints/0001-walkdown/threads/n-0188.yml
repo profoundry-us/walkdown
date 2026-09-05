@@ -51,3 +51,31 @@ body: >-
   refused only when that .walkdown is not the one answering where you stand -
   the writers already take the first, stricter line, since `project add` refuses
   it from anywhere.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-05T04:18:39Z
+    body: >-
+      Topher's decision, 2026-09-05: refuse it in both files.
+
+
+      The personal half gets the same filter the committed half already has — a
+      row naming a blueprint that lives under another `.walkdown` is set aside
+      and named on the report, rather than honoured. `readUserConfig` currently
+      applies the crossing filter only to the committed half (lib/locations.js),
+      and lint only ever reads the config of the `.walkdown` that answered, so
+      both ends want fixing.
+
+
+      What settles it is not the harm on its own but the contradiction:
+      `walkdown where` prints, in one block, that it resolves the personal row
+      and refuses the byte-identical committed one. A tool that answers the same
+      question two ways in the same breath is worse than one that is merely
+      strict.
+
+
+      The way to reach a nested pack stays what it always was: stand in that
+      checkout, or list a throwaway copy with `--ephemeral`.
+
+
+      Left open until it is built.

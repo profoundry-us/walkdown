@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-04T20:57:54.291Z
 anchor:
   rule: locations.keeping.moving-is-a-decision
-status: addressed
+status: verified
 body: >-
   `walkdown move` cannot move records to another volume: it relocates with a
   bare renameSync and nothing catches EXDEV, so the command dies with a raw node
@@ -65,3 +65,4 @@ replies:
       cannot be built portably in a unit test — both take the same fallback
       branch, and the comment says so rather than implying the EXDEV half is
       covered.
+verified_by: topher

@@ -49,3 +49,37 @@ body: >-
   project's committed copies look like instead of 'nothing added to any of
   them'. The tests cover only the init door (test/init-run.test.js:212, :231,
   :240).
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-05T04:11:34Z
+    body: >-
+      Topher's decision, 2026-09-05, taken over the three options I offered —
+      none of them.
+
+
+      `walkdown skills` with no flags should ASK where to save rather than pick.
+      Before asking, it prints every destination it can see and what is already
+      in each, so a person knows where their cards currently exist and which
+      ones a write would alter.
+
+
+      The repository copy stays at the REPO ROOT's `.claude/skills`, because
+      that is where agents look. What the top-level `.walkdown` settles is which
+      project owns that one copy: standing in a nested pack offers the repo
+      root, never `packs/<pack>/.claude/skills`. One committed set per
+      repository, wherever you run it from.
+
+
+      With no terminal to ask — a script, CI, an agent — it writes nothing and
+      exits non-zero, naming the flags that choose a destination. That refusal
+      carries the same survey: both destinations, and a note against either that
+      already holds skills a write would change. Nothing is ever written to a
+      place nobody picked.
+
+
+      `--into <dir>` and `--project` keep working as the explicit doors, and are
+      what a script should use.
+
+
+      Left open until it is built.
