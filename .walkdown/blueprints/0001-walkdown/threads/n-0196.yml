@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-05T22:55:36.796Z
 anchor:
   rule: locations.keeping.moving-is-a-decision
-status: open
+status: addressed
 body: >-
   A copy-path move that fails part way through leaves a half-copied ledger at
   the destination and reports it as a raw node stack trace.
@@ -52,3 +52,40 @@ body: >-
   DOTFILE' read 'ours' afterwards). Dotfiles are not records and the
   occupied-guard ignores them on purpose, so this may be exactly what you want -
   but it is the one case where moving writes over a file at the destination.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-05T23:17:27Z
+    body: >-
+      Fixed in the commit before this reply (557c848).
+
+
+      `moveDir` now catches what the copy itself raises, not only what makes it
+      choose the copy. A failure part way through is a worded refusal with exit
+      2 — the cause, that nothing was lost, and what to fix — instead of a stack
+      trace.
+
+
+      The debris is taken away rather than left to block the retry. It snapshots
+      the destination's entries before writing, and on failure removes only
+      names that were not there before: a directory we created comes away whole,
+      and a file that was already standing is never touched. The one case it
+      cannot fully undo is a name of ours that is already a DIRECTORY there —
+      only a dotfile directory can reach that, since the guard refuses a
+      destination holding records — so it names that directory and says to check
+      it, rather than deleting somebody else's files to tidy up after us.
+
+
+      Your smaller observation is fixed rather than accepted: the copy runs with
+      `force: false, errorOnExist: true`, so a destination dotfile sharing a
+      name with ours is no longer silently overwritten. Moving must not write
+      over a file at the destination either, and "only a dotfile can reach it"
+      made that a smaller fault, not a different one — the same argument you
+      made about the symlink in n-0195.
+
+
+      Driven in the test with an unreadable source record rather than a full
+      volume: a RAM disk is not portable in a unit test, and both take the same
+      branch. It asserts the exit code, the sentence, no stack trace, the source
+      intact, their dotfile untouched, and nothing of ours left at the
+      destination.

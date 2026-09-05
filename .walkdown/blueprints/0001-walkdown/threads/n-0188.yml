@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-04T21:08:13.391Z
 anchor:
   rule: locations.answer.one-walkdown-answers
-status: open
+status: addressed
 body: >-
   A hand-written PERSONAL entry crosses the boundary the committed one is
   refused for, and one .walkdown's server then lists, serves and writes to
@@ -79,3 +79,44 @@ replies:
 
 
       Left open until it is built.
+  - author: topher
+    via: agent
+    created: 2026-09-05T23:23:18Z
+    body: >-
+      Built, in the commit that carries this reply.
+
+
+      `readUserConfig` now applies the crossing filter to the personal half too:
+      a row whose spec lies under another `.walkdown` is set aside, named on
+      `where`, and never seen downstream as a project. Two directories stay a
+      row's own to declare from — the personal home itself, because blueprints
+      kept out of a repository live under it and that file IS its config; and
+      the `.walkdown` answering where you stand, because that is what standing
+      in a checkout means.
+
+
+      One refinement the tests forced, and it is worth writing down: the refusal
+      only fires when that other `.walkdown` actually has a `config.yml`. A
+      directory holding homes and no config declares nothing, so nothing there
+      is claiming the spec and the personal row is its only declaration — a
+      monorepo pack whose entries a person keeps personally, not a boundary
+      crossing. The harm you measured needs somebody on the other side: in your
+      fixture the pack's own config declared the blueprint, and two boards then
+      listed, served and wrote to one ledger.
+
+
+      `walkdown lint` reads the personal file now as well. It had only ever read
+      the config of the `.walkdown` that answered, which is why both sides of
+      the repository were silent.
+
+
+      The contradiction you named is gone: `where` refuses the personal row and
+      the byte-identical committed one in the same block, in the same words, and
+      points at the same two ways through — stand in that checkout, or list a
+      copy with `--ephemeral`.
+
+
+      Tested with your fixture: a personal `pcross` naming a pack's own
+      blueprint is absent from `projects`, unresolvable by `--project`, named on
+      `where` with the ephemeral hint, and a lint error against the personal
+      file — while standing in the pack still simply works.

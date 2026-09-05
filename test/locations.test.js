@@ -1853,3 +1853,59 @@ test('the ignore file beside a .walkdown does not answer for a blueprint standin
     s.cleanup();
   }
 });
+
+/*
+ * n-0188: the SAME crossing written into the personal file instead.
+ *
+ * The committed half is refused above. Written into ~/.walkdown/config.yml the
+ * identical row was honoured by every reader: `projects` listed it, `where
+ * --project` resolved the pack's spec and ledger, the server offered it, and a
+ * POST wrote a thread into the pack's own threads directory. `where` printed,
+ * in one block, that it resolved the personal row and refused the byte-
+ * identical committed one - a tool answering the same question two ways in the
+ * same breath, which is what settled the decision to refuse both.
+ */
+test('a personal entry never reaches under another .walkdown either @rule:locations.answer.one-walkdown-answers', () => {
+  const s = scratch();
+  try {
+    const repo = join(s.root, 'mono');
+    const pack = join(repo, 'packs', 'app');
+    mkdirSync(pack, { recursive: true });
+    walkdown(s.home, ['init', '--commit', 'spec'], repo);
+    walkdown(s.home, ['init', '--commit', 'spec'], pack);
+    const spec = join(pack, '.walkdown', 'blueprints', '0001-app', 'blueprint');
+
+    const personal = readFileSync(join(s.home, 'config.yml'), 'utf8');
+    writeFileSync(
+      join(s.home, 'config.yml'),
+      `${personal}\nprojects:\n  - id: pcross\n    roots: [${repo}]\n    spec: ${spec}\n`,
+    );
+
+    // Not a project here: not listed, not resolvable, and named on the report.
+    assert.doesNotMatch(walkdown(s.home, ['projects'], repo), /pcross/);
+    assert.match(walkdown(s.home, ['where', '--project', 'pcross'], repo), /no project `pcross`/);
+    const where = walkdown(s.home, ['where'], repo);
+    assert.match(where, /refuses `pcross`/, where);
+    assert.match(where, /--ephemeral/, where);
+
+    // And lint says so, naming the personal file rather than the repository's.
+    let out = '';
+    try {
+      execFileSync(process.execPath, [CLI, 'lint'], {
+        cwd: repo,
+        env: { ...process.env, WALKDOWN_HOME: s.home, NO_COLOR: '1' },
+        encoding: 'utf8',
+      });
+      assert.fail('lint exits non-zero on an error');
+    } catch (e) {
+      out = String(e.stdout ?? '');
+    }
+    assert.match(out, /pcross/, out);
+    assert.match(out, /error/, out);
+
+    // The way in is unchanged: stand in the checkout, and it is simply yours.
+    assert.equal(resolveLocations({ cwd: pack }).spec.path, spec);
+  } finally {
+    s.cleanup();
+  }
+});

@@ -90,15 +90,22 @@ export function run(args) {
             : dim(`${shared} — no entry for this project`)
       }`,
     );
-    // A committed entry reaching under another `.walkdown` is not read: that
-    // directory answers for it, and this row says which (q-0168, q-0176).
-    for (const r of loc.config.repo.refused ?? [])
-      console.log(
-        `  ${''.padEnd(9)} ${red(
-          `refuses \`${r.id}\` — its spec ${r.spec} lies under ${r.under}, which answers for it; declare it there`,
-        )}`,
-      );
   }
+  /*
+   * An entry reaching under another `.walkdown` is not read, from EITHER file:
+   * that directory answers for the spec (q-0168, n-0188). Printed outside the
+   * block above because the personal file is consulted whether or not a
+   * committed one exists - and because `where` resolving a personal row while
+   * refusing the byte-identical committed one, in this same block, was the
+   * contradiction that settled the decision.
+   */
+  for (const r of loc.config.refused ?? [])
+    console.log(
+      `  ${''.padEnd(9)} ${red(
+        `refuses \`${r.id}\` — its spec ${r.spec} lies under ${r.under}, which answers for it; ` +
+          `declare it there${r.from === 'personal' ? ', stand in that checkout, or list a copy with --ephemeral' : ''}`,
+      )}`,
+    );
   /*
    * Which `.walkdown` answered, before any path it answered with - the one
    * fact every row below is relative to, and the one a person in a monorepo
