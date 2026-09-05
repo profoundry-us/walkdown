@@ -1,0 +1,39 @@
+id: n-0192
+kind: note
+author: topher
+via: agent
+created: 2026-09-05T02:19:56.592Z
+anchor:
+  rule: locations.travel.provenance-not-currency
+status: open
+body: >-
+  A run's git_sha is taken from the BLUEPRINT directory, so where the home and
+  the code are different repositories it names the wrong one — provenance that
+  actively misdirects, which n-0190 (missing sha, default layout) does not
+  cover.
+
+
+  Reproduced in
+  runs/evidence/2026-09-05T02-10-33Z/provenance-missing-or-wrong.txt, probe C: a
+  default-layout project whose code sits in a clean repository at b7158bd, with
+  ~/.walkdown itself kept in git (dotfiles) at 3c086b4. `walkdown where code`
+  names the code repository; the very next record — writeRunRecord, the path
+  every emitter takes — carries "git_sha": "3c086b4". A person digging into that
+  verdict is sent to a repository holding none of the code judged, and nothing
+  on the record says so. Probes A and B in the same file are n-0190's case: with
+  the home in a non-git ~/.walkdown, a sweep and a checks run carry no git_sha
+  and no tree_hash at all.
+
+
+  One fix covers both: lib/run-record.js:179-180 and :235-236 ask
+  gitSha/treeHash for blueprintDir; lib/locations.js already resolves `code` for
+  exactly this (:1233 'for the report and for git_sha', :1340 'no git repository
+  — runs will carry no git_sha'). Nothing asks it.
+
+
+  Second, smaller: docs/05-runs-ledger.md:166 states the opposite of this rule —
+  'a pass against outdated rule content or an older git_sha than the current
+  branch renders as ~ stale'. The code does not do that
+  (runs/evidence/2026-09-05T02-10-33Z/currency-holds.txt: unrelated commits, a
+  merge, a dirty tree and a foreign sha all left every cell byte-identical), and
+  line 69 of the same document says it correctly. The stale line should go.

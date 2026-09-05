@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-09-05T02-10-33Z-local-01",
+  "created": "2026-09-05T02:10:33Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "da05b6e",
+  "spec_hash": "sha256:9cf589d6656b",
+  "results": [
+    {
+      "rule": "locations.travel.provenance-not-currency",
+      "status": "fail",
+      "statement_hash": "sha256:c513160f49fc",
+      "evidence": [
+        "runs/evidence/2026-09-05T02-10-33Z/currency-holds.txt",
+        "runs/evidence/2026-09-05T02-10-33Z/provenance-missing-or-wrong.txt"
+      ],
+      "reasoning": "Judged headless from the working-tree CLI against throwaway git repositories in the judge scratchpad, each with its own HOME; the real repository was written to only by this record, the evidence it cites, and the note. The currency half — the rule's own steps — holds under everything I could throw at it, and that belongs on the record first. A seeded ledger (one passing checks run, one passing agent walkdown, both stamped f99ef04) read byte-identically in table and --json after two unrelated commits, five more, a branch-and-merge, and with a dirty tree and an untracked file present; the run files stayed md5-identical and still carried f99ef04 while HEAD had moved to 457ded1. The panel agreed: GET /api/blueprint rows were identical across a commit landed while the server was up. Controls proved the cells are not simply inert — rewording the agent rule's statement moved exactly that cell to stale with no commit at all, and `sweep --tiers agent` moved it with --json naming sweptBy — so staleness is answered per cell by the statement and the sweep, never by a sha. Nor does a sha work in the other direction: a later pass carrying git_sha 'deadbee-dirty' for a tree this repository has never had filled its cell as a plain pass and lint reported no errors. What fails is the statement's first sentence, the half the steps do not exercise: 'the repository's sha ... tells a person digging into a verdict where to look'. In the layout `walkdown init` produces by DEFAULT — home in ~/.walkdown, code in a clean repository that `walkdown where code` names — a sweep and a writeRunRecord checks run both carry no git_sha and no tree_hash at all, so there is nothing to look at (n-0190's finding, reproduced here as probes A and B). Worse, and not covered by that note: make ~/.walkdown itself a git repository, as anyone versioning dotfiles would, and the next record carries git_sha 3c086b4 — the HOME's sha — while the code judged sits at b7158bd in another repository, so the field misdirects rather than merely missing. The cause is one argument, read after the fact: lib/run-record.js:179-180 and :235-236 ask gitSha/treeHash for blueprintDir, while lib/locations.js already resolves `code` for exactly this purpose (:1233, :1340) and nothing asks it. Filed as n-0192, which also records that docs/05-runs-ledger.md:166 promises the opposite of this rule ('an older git_sha than the current branch renders as ~ stale') where line 69 of the same file states it correctly. I call this fail rather than pass because a rule whose whole point is that the sha is provenance is not satisfied by a sha that is absent by default and wrong by layout.",
+      "threads": [
+        "n-0192",
+        "n-0190"
+      ]
+    }
+  ]
+}

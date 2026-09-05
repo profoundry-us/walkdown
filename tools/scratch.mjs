@@ -96,9 +96,22 @@ function make(label, why) {
    * (docs/08-locations.md) and is two orders of magnitude larger than
    * everything else here — copying it is how the abandoned spaces got big
    * enough to notice.
+   *
+   * Entry by entry, though, and not the directory itself. Linking `evidence`
+   * whole shares the real root outright: everything a judge saves lands in the
+   * real home, and anything that moves or renames an evidence directory moves
+   * the real one. That is the opposite of what the governance block in every
+   * judge prompt promises, and it is not theoretical — on 2026-09-05 a judge
+   * relocated 121 real entries believing they were a copy's, and restored them
+   * only because it happened to be judging the rule about moving evidence
+   * roots (n-0193). Linking the entries keeps reading free, leaves anything
+   * new inside the copy where `clean` takes it away, and narrows the sharp
+   * edge to deliberately reaching into a stamp that already existed.
    */
   const real = resolveLocations({ spec: join(root, HOME, 'blueprint') }).evidence.path;
-  if (real && existsSync(real)) symlinkSync(real, join(path, HOME, 'evidence'), 'dir');
+  const shared = real && existsSync(real) ? readdirSync(real) : [];
+  mkdirSync(join(path, HOME, 'evidence'), { recursive: true });
+  for (const entry of shared) symlinkSync(join(real, entry), join(path, HOME, 'evidence', entry));
   /*
    * A `.walkdown` of its own, and a personal home of its own, so that a server
    * started INSIDE the copy answers for the copy and nothing else. The nearest
@@ -150,6 +163,10 @@ function make(label, why) {
     `\nA disposable copy, declared to itself. Serve it FROM INSIDE IT, with its own home:\n` +
       `  cd ${path} && WALKDOWN_HOME=${join(path, 'home')} node ${join(root, 'bin', 'walkdown.js')} serve --port <n>\n` +
       `Started there it offers this copy and nothing else - not the real ledger.\n` +
+      (shared.length
+        ? `Evidence is the exception: its ${shared.length} existing entries are LINKS to the real ones, so\n` +
+          `read them freely and move or delete none of them. Anything you save lands in the copy.\n`
+        : `Evidence starts empty here, and anything you save lands in the copy.\n`) +
       `Take it away when the sitting closes:\n` +
       `  node tools/scratch.mjs clean ${label}\n`,
   );

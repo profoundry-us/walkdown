@@ -1,0 +1,60 @@
+id: n-0193
+kind: note
+author: topher
+via: agent
+created: 2026-09-05T02:23:06.062Z
+anchor:
+  rule: locations.travel.evidence-by-key
+status: open
+body: >-
+  A scratch copy shares the real evidence directory, so writing into it reaches
+  the real ledger.
+
+
+  `tools/scratch.mjs` copies blueprint/, threads/ and runs/ but symlinks the
+  copy's `evidence` straight at the answering project's real evidence root
+  (tools/scratch.mjs:100-101). The reasoning in the comment is about size and is
+  sound for reading — 138M, two orders of magnitude larger than everything else
+  in the copy. It only covers reading.
+
+
+  Every judge prompt this project prints carries the opposite promise in its
+  governance block: make a scratch copy before judging anything that files,
+  refuses, pins or replies, because "the copy carries its own .walkdown
+  declaring only itself ... so started there it cannot list, serve or write to
+  the real ledger". For evidence that is not true, and an agent has no way to
+  tell — `walkdown where evidence` inside the copy answers with the copy's own
+  path, which is the symlink.
+
+
+  It has already nearly cost us. Judging this rule on 2026-09-05, a judge moved
+  evidence out of what it believed was a disposable copy and moved 121 real
+  entries out of ~/.walkdown/blueprints/0001-walkdown/evidence/. It noticed and
+  restored all 121 immediately, sha1 spot-checked, and reported it. Nothing was
+  lost. The next one may not be driving a rule about moving evidence roots.
+
+
+  Two things worth separating:
+
+
+  1. New evidence a judge saves under its own timestamp is written THROUGH the
+  link into the real home. That is arguably wanted — the verdict goes in the
+  real ledger, so its evidence should too — but nobody decided it, and it means
+  a copy taken away by `scratch.mjs clean` leaves evidence behind.
+
+  2. Anything that moves, renames or deletes an existing evidence directory
+  operates on the real one, with no warning anywhere.
+
+
+  Cheapest honest fix: make the copy's `evidence/` a real directory and symlink
+  the existing entries into it one by one. New evidence then lands inside the
+  copy, only pre-existing directories are shared, and (2) narrows to
+  deliberately reaching into an old stamp. Whatever is chosen, `scratch.mjs new`
+  should print that evidence is shared rather than copied — its current output
+  lists `evidence: 0001-walkdown/evidence` beside the copied kinds with nothing
+  to distinguish it.
+
+
+  Anchored here because this is the rule about where evidence lives and how it
+  is reached; the defect is in interim tooling (tools/scratch.mjs) rather than
+  in shipped behaviour, so it may want to live somewhere else.

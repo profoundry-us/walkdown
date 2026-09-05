@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-09-05T02-10-31Z-local-01",
+  "created": "2026-09-05T02:10:31Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "da05b6e",
+  "spec_hash": "sha256:9cf589d6656b",
+  "results": [
+    {
+      "rule": "locations.travel.evidence-by-key",
+      "status": "pass",
+      "statement_hash": "sha256:a7bc7cd07be3",
+      "evidence": [
+        "runs/evidence/2026-09-05T02-10-31Z/probe-transcript.txt",
+        "runs/evidence/2026-09-05T02-10-31Z/relocation-and-precedence.txt",
+        "runs/evidence/2026-09-05T02-10-31Z/run-record-untouched.txt",
+        "runs/evidence/2026-09-05T02-10-31Z/panel-opens-the-picture.txt",
+        "runs/evidence/2026-09-05T02-10-31Z/directory-key-crash-still-open.txt"
+      ],
+      "reasoning": "Driven against a scratch copy served from inside itself. I took an existing run record that cites runs/evidence/2026-08-31T03-26-41Z/embed-pin-own-skin.png, moved evidence off the blueprint entirely - first to the home's evidence directory, then to a directory on another path outside the copy's tree, named only in config - and asked for the same key each time: 200, same bytes, byte-identical sha1 with the file on disk, while the blueprint dir held no screenshot at all. The citing record's sha1 is identical in the copy, in the working tree and at git HEAD, so nothing was rewritten to make that true; the picture also opened in the panel itself, whose img rendered naturalWidth 1280 from that relocated root, addressed from the key alone. A file placed under blueprint/runs/evidence still serves, so records written before evidence was relocatable keep pointing, and when a key exists in both roots the configured one wins. Fourteen climbing keys were refused with 404 - ../ chains at every depth, %2e and %252e and %5c encodings, a leading /, a doubled slash - all sent with curl --path-as-is so no client collapsed them, against a control key that served 200 in the same breath; a key naming evidence this machine does not have is a plain 404, not a leak. One thing worth a person's eye but outside the steps: a symlink placed inside the evidence root is followed (etc-link -> /etc served /etc/hosts), which is a door in the directory its owner nominated rather than a key climbing out. I also re-drove the open note anchored here, n-0186: a key that names a directory still kills the server process on a fresh copy today (200 on the file, connection dropped on the trailing-slash key, ERR_HTTP_HEADERS_SENT in the log, port gone), which is the same key shape this prompt prints for filing evidence under. I left the verdict at pass because every THEN this rule states held under adversarial probing and that crash is refusing badly rather than resolving wrongly, but the note stays open and a person may well read it as heavier than I did.",
+      "threads": [
+        "n-0186"
+      ]
+    }
+  ]
+}
