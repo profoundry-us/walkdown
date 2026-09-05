@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-01T01:17:35.321Z
 anchor:
   rule: locations.travel.provenance-not-currency
-status: open
+status: addressed
 body: "Judge 2026-09-01 (says-why re-judge), side finding, measured in code and
   corroborated by a live probe, not by a recorded run: git_sha does not describe
   the code under test when the spec and the code live apart. writeRunRecord and
@@ -28,3 +28,27 @@ body: "Judge 2026-09-01 (says-why re-judge), side finding, measured in code and
   observed breaking the in-repo shape, where spec and code share a repository
   and the sha is right. Supporting note:
   runs/evidence/2026-09-01T01-06-52Z/recorder-provenance-note.txt."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-05T02:53:59Z
+    body: >-
+      Fixed in 0fac529, four days after you filed it. `writeRunRecord` and
+      `writeSweep` now take the code root — passed by a caller holding a loaded
+      blueprint, resolved alongside the runs directory otherwise — and ask git
+      about that. Both shapes you measured are covered: the cross-repo one no
+      longer stamps the spec repository's HEAD, and walkdown's default shape for
+      new adopters records the code repository's sha instead of nothing.
+
+
+      You named the choice exactly right, including which of the two ways out to
+      take: resolve through the code row rather than correct docs/08. It went
+      unread for four days and was found again independently by two judges on
+      2026-09-04 and 2026-09-05 (n-0190, n-0192), the second of which added the
+      case where it does not merely omit but misdirects — a home versioned in
+      its own right stamps its own sha onto a verdict about code elsewhere.
+
+
+      An independent judge drove the current behaviour on 2026-09-05 and reports
+      your measured claim no longer reproduces in any of the three shapes (run
+      2026-09-05T02-33-16Z-local-01).
