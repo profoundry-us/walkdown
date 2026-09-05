@@ -273,12 +273,17 @@ export function run(args) {
     // which is a queue two people both scroll past.
     judge: (i) => `walk down ${i.rule} — ${i.role ?? 'nobody'} has not accepted it yet`,
     verify: (i) =>
-      `verify ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — fix claimed, awaiting your judgment`,
+      `verify ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — ` +
+      (i.unjudged
+        ? yellow('fix claimed, but nothing has judged it yet')
+        : 'fix claimed, awaiting your judgment'),
     answer: (i) => `answer ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''}`,
     address: (i) => `address ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — open note`,
     incorporate: (i) =>
       `incorporate ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — answered, fold it into the rule`,
     cover: (i) => `cover ${i.rule} — demands checks, and no check claims it`,
+    rejudge: (i) =>
+      `judge ${i.rule} again — ${i.thread} claims a fix newer than the passing verdict`,
   };
   for (const [who, title] of [
     ['human', 'NEEDS A HUMAN'],

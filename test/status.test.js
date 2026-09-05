@@ -488,3 +488,132 @@ test('nothing but the sweep command writes a sweep @rule:status.sweep.deliberate
   assert.deepEqual(derived.sweeps, []);
   assert.equal(derived.rows[0].agent.state, 'pass');
 });
+
+/*
+ * A pass that predates the fix claimed on its rule.
+ *
+ * The board goes stale on three things - a moved statement, a sweep, a dropped
+ * check - and deliberately not on the code changing. That leaves the common
+ * shape uncovered: a judge passes a rule and files a note about something it
+ * saw beside the verdict, somebody fixes the note, and the cell stays green
+ * through all of it. n-0195 sat exactly there, its passing run the very one
+ * that filed it.
+ */
+const note = (id, status, replyAt, rule = 'demo.main.thing') => ({
+  id,
+  kind: 'note',
+  status,
+  anchor: { rule },
+  created: '2026-01-01T00:00:00Z',
+  ...(replyAt && { replies: [{ author: 'topher', created: replyAt, body: 'fixed' }] }),
+});
+
+test('a pass older than the fix claimed on its rule is marked, and owed to the agent @rule:status.derived.latest-wins', () => {
+  const { rows, attention } = deriveStatus(
+    blueprint({
+      verify: ['agent'],
+      runs: [walkdownRun('2026-02-01T00:00:00Z', 'agent', 'pass')],
+      threads: [note('n-1', 'addressed', '2026-02-02T00:00:00Z')],
+    }),
+  );
+  // The verdict is not withdrawn - it was earned. It is marked.
+  assert.equal(rows[0].agent.state, 'pass');
+  assert.deepEqual(rows[0].unjudgedFix, { thread: 'n-1', at: '2026-02-02T00:00:00Z' });
+  assert.ok(
+    attention.some((i) => i.who === 'agent' && i.action === 'rejudge' && i.thread === 'n-1'),
+    'the agent owes a fresh judgment',
+  );
+  // And the human item says the machine side is not finished, rather than
+  // presenting acceptance as the only step left.
+  assert.equal(attention.find((i) => i.action === 'verify')?.unjudged, true);
+});
+
+test('a pass recorded after the claim is not marked', () => {
+  const { rows, attention } = deriveStatus(
+    blueprint({
+      verify: ['agent'],
+      runs: [walkdownRun('2026-02-03T00:00:00Z', 'agent', 'pass')],
+      threads: [note('n-1', 'addressed', '2026-02-02T00:00:00Z')],
+    }),
+  );
+  assert.equal(rows[0].unjudgedFix, null);
+  assert.ok(!attention.some((i) => i.action === 'rejudge'));
+  assert.equal(attention.find((i) => i.action === 'verify')?.unjudged, false);
+});
+
+/*
+ * The checks tier is deliberately exempt. Its suite runs on every edit and only
+ * sometimes RECORDS, so its newest record is routinely older than everything
+ * while the tests themselves are current - marking it starred sixty rules at
+ * once and buried the four that meant something.
+ */
+test('the checks tier is not marked, however old its record is', () => {
+  const { rows } = deriveStatus(
+    blueprint({
+      verify: ['checks'],
+      runs: [checksRun('2026-02-01T00:00:00Z', 'local', 'pass')],
+      threads: [note('n-1', 'addressed', '2026-02-02T00:00:00Z')],
+    }),
+  );
+  assert.equal(rows[0].cells.local.state, 'pass');
+  assert.equal(rows[0].cells.local.unjudgedFix, undefined);
+  assert.equal(rows[0].unjudgedFix, null);
+});
+
+/*
+ * A claim is a reply. Addressing a note means saying what was done, and the
+ * transition itself records no time - threads.js writes a reply or nothing -
+ * so a thread that moved status silently has no honest answer to give and is
+ * left alone rather than guessed at.
+ */
+test('a thread addressed with nothing written claims no time', () => {
+  const { rows } = deriveStatus(
+    blueprint({
+      verify: ['agent'],
+      runs: [walkdownRun('2026-02-01T00:00:00Z', 'agent', 'pass')],
+      threads: [note('n-1', 'addressed', null)],
+    }),
+  );
+  assert.equal(rows[0].unjudgedFix, null);
+});
+
+test('an open note claims nothing - it is unfixed work, already queued as such', () => {
+  const { rows, attention } = deriveStatus(
+    blueprint({
+      verify: ['agent'],
+      runs: [walkdownRun('2026-02-01T00:00:00Z', 'agent', 'pass')],
+      threads: [note('n-1', 'open', '2026-02-02T00:00:00Z')],
+    }),
+  );
+  assert.equal(rows[0].unjudgedFix, null);
+  assert.ok(attention.some((i) => i.action === 'address'));
+});
+
+/*
+ * A rule nobody has judged owes a FIRST judgment, not a second one, and the
+ * board already says so. Marking it would put two items on the queue for one
+ * piece of work.
+ */
+test('a rule with no verdict at all is never marked', () => {
+  const { rows, attention } = deriveStatus(
+    blueprint({
+      verify: ['agent'],
+      threads: [note('n-1', 'addressed', '2026-02-02T00:00:00Z')],
+    }),
+  );
+  assert.equal(rows[0].agent.state, 'never');
+  assert.equal(rows[0].unjudgedFix, null);
+  assert.ok(!attention.some((i) => i.action === 'rejudge'));
+});
+
+test('a fail is not marked either - it is loud already, and owes a fix rather than a re-judgment', () => {
+  const { rows } = deriveStatus(
+    blueprint({
+      verify: ['agent'],
+      runs: [walkdownRun('2026-02-01T00:00:00Z', 'agent', 'fail')],
+      threads: [note('n-1', 'addressed', '2026-02-02T00:00:00Z')],
+    }),
+  );
+  assert.equal(rows[0].agent.state, 'fail');
+  assert.equal(rows[0].unjudgedFix, null);
+});

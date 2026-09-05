@@ -209,6 +209,22 @@ const whyStale = (cell) =>
     : TIER_MARK.stale[2];
 
 /*
+ * And a third thing a cell can be: a pass that predates the fix claimed on its
+ * rule. Not stale - the verdict was earned and stands - but it cannot have seen
+ * the fix, and a green tick that says nothing about that is how n-0195 came to
+ * be queued to a person for acceptance while nothing had judged it at all.
+ */
+const preFix = (cell) =>
+  `passed — but ${cell.unjudgedFix.thread} claims a fix newer than this verdict, and nothing has judged it since`;
+
+const tierSay = (state, cell) =>
+  state === 'stale'
+    ? whyStale(cell)
+    : cell?.unjudgedFix
+      ? preFix(cell)
+      : (TIER_MARK[state] ?? TIER_MARK.na)[2];
+
+/*
  * Who has to accept a rule, and where each of them sits.
  *
  * A fixed slot per role, top to bottom, so the stack reads by POSITION and
@@ -332,10 +348,7 @@ function signoffStack(acceptance, mine) {
  * this one is read at a glance, on the way past.
  */
 function stripTip(tiers, acceptance) {
-  const cells = tiers.map(([kind, state, cell]) => [
-    kind,
-    state === 'stale' ? whyStale(cell) : (TIER_MARK[state] ?? TIER_MARK.na)[2],
-  ]);
+  const cells = tiers.map(([kind, state, cell]) => [kind, tierSay(state, cell)]);
   const signs = stackOrder(acceptance).map((a) => [
     a.role,
     `${SIGN_SAY[a.state] ?? a.state}${a.actor ? ` · ${a.actor}` : ''}${
@@ -397,10 +410,14 @@ export function tierMarks(row, mine = false) {
   // strip opens the strip's bubble and nothing else.
   return html`<span class="tooltip tooltip-right flex w-11 shrink-0 items-center justify-center gap-0.5 text-[12px] leading-none"
     title="" data-testid="panel.rule-tiers" data-tiers="${tiers.map((t) => `${t[0]}:${t[1]}`).join(' ')}"
-    >${stripTip(tiers, row.acceptance)}${tiers.map(([, state]) => {
+    >${stripTip(tiers, row.acceptance)}${tiers.map(([, state, cell]) => {
       const [glyph, cls] = TIER_MARK[state] ?? TIER_MARK.na;
+      // The panel's version of the terminal's star: the tick stays a tick,
+      // because the pass is real, and it is warning-coloured because something
+      // is owed on it. The tooltip says which of the two warnings it is.
+      const paint = cell?.unjudgedFix ? 'text-warning' : cls;
       return html`<span class="inline-block w-4 text-center ${
-        TIER_OWED.has(state) && !mine ? 'opacity-60' : cls
+        TIER_OWED.has(state) && !mine ? 'opacity-60' : paint
       }">${glyph}</span>`;
     })}${signoffStack(row.acceptance, mine)}</span>`;
 }
