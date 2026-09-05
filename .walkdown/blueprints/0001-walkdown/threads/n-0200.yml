@@ -1,0 +1,51 @@
+id: n-0200
+kind: note
+author: topher
+via: agent
+created: 2026-09-05T23:46:21.549Z
+anchor:
+  rule: status.derived.verdict-belongs-to-a-place
+status: open
+body: >-
+  The judge prompt hands every judge `base_url: http://localhost:4700` and, in
+  the same breath, tells it to serve its scratch copy on a port of its own. A
+  verdict recorded against the port it was actually driven at then fills no
+  cell, silently.
+
+
+  Found by the judge that re-earned locations.travel.evidence-by-key on
+  2026-09-05 (run 2026-09-05T23-31-34Z-local-01, PASS): its first record carried
+  `base_url: localhost:4801`, the copy it had genuinely judged, and did not
+  become the agent cell until the address was changed to :4700. That is
+  status.derived.verdict-belongs-to-a-place working exactly as written — but the
+  trap is laid by walkdown itself, in the prompt it prints.
+
+
+  This is the same family as n-0191: a record that looks right, lints clean, and
+  fills nothing. There the missing field was `created`; here it is an address
+  the prompt supplied and the procedure then contradicted.
+
+
+  Three ways out, and the choice is not obvious enough for an agent to take:
+
+
+  The prompt could say what it means — that `base_url` names the address the
+  verdict is ABOUT, not the port you happen to serve a disposable copy on, and
+  that it should be left as printed. Cheapest, and it puts the burden back on
+  reading.
+
+
+  Or `walkdown judge` could take the serving port it already accepts (`--serve
+  <origin>`) and keep the two apart in the record explicitly, so a judge cannot
+  conflate them.
+
+
+  Or lint could say it: a record whose `base_url` matches no declared target is
+  a record that fills no cell, which is exactly the check added for undated
+  records and would have caught this one.
+
+
+  The scale matters here because the agent tier is prompt-driven now, and
+  scratch copies are mandatory for anything that writes — so every governance
+  rule is judged on a port that is not the declared one, by an agent following
+  instructions.

@@ -1,0 +1,66 @@
+id: n-0201
+kind: note
+author: topher
+via: agent
+created: 2026-09-05T23:46:26.932Z
+anchor:
+  rule: locations.keeping.moving-is-a-decision
+status: open
+body: >-
+  `walkdown move` relocates the records and only then tries to write the choice
+  down, so a personal config it cannot write leaves the ledger somewhere nothing
+  declares — and `walkdown where` names a directory that is gone.
+
+
+  Seen while judging 2026-09-05 (agent). Evidence
+  runs/evidence/2026-09-05T23-32-13Z/probe-1-move-not-written-down.txt, which
+  reproduces it from nothing in about ten lines.
+
+
+  Two preconditions reach it, and both are ordinary rather than contrived:
+
+
+  1. The personal config is not writable — a managed dotfile, a root-owned file,
+  a read-only mount. `rememberLocation` dies at its `writeFileSync` with a raw
+  EACCES stack trace (lib/locations.js:1494, called from
+  bin/commands/move.js:104).
+
+  2. The personal config does not parse. `resolveLocations` sets a broken
+  personal file aside and still resolves, so `move` runs; `String(doc)` then
+  throws 'Document with errors cannot be stringified' at the same line.
+
+
+  Either way the outcome is the same, and it is the one the rule's rationale is
+  about. In the reproduction three run records move from ledger-a to ledger-b;
+  the config still says `runs: .../ledger-a`; `walkdown where runs` reports
+  ledger-a, which no longer exists; and the records sit at ledger-b, declared by
+  nothing. Nothing is corrupted — but a person reading the board is told the
+  ledger is at an address it left, and the only way back is to have watched the
+  command's output before the stack trace scrolled past.
+
+
+  This is exactly n-0172, in the other mover. `relocateHome` was taught to read
+  both config files before it moves anything, and says so in a comment that
+  still stands over the loop: 'a move that cannot be written down is a move that
+  does not happen.' `walkdown move` never learned it. n-0185 later unified the
+  two on one `moveDir`; the pre-check did not come with it.
+
+
+  Suggested shape: before `moveDir`, do what `relocateHome` does — parse
+  `configPath()` and refuse in a sentence if it has errors, and confirm it is
+  writable (it is going to be rewritten in place, so an `accessSync(W_OK)`, or
+  the same open-for-append the write will do). Then nothing moves unless the
+  move can be recorded. The other three THENs hold up well under the same
+  probing: a cross-volume move onto a real second volume arrived byte for byte
+  across relative, absolute, dangling and directory symlinks, odd filenames,
+  modes and mtimes (probe-4), and every destination refusal and mid-copy failure
+  landed as a worded refusal with the source untouched (probe-2, probe-3).
+
+
+  Two smaller things found on the way, neither the ground of the verdict, both
+  'a crash where every neighbour refuses in a sentence' — the class n-0195
+  named. A destination that is a symlink to a directory dies with a raw ENOTDIR
+  from `renameSync` (moveDir catches only EXDEV/ENOTEMPTY/EEXIST); and a
+  destination whose parent path runs through a file dies with a raw ENOTDIR from
+  the `mkdirSync` at move.js:86. Both leave everything where it was. probe-2,
+  sections T7 and T10.

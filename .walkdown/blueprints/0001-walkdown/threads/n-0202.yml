@@ -1,0 +1,50 @@
+id: n-0202
+kind: note
+author: topher
+via: agent
+created: 2026-09-05T23:47:10.859Z
+anchor:
+  rule: status.evidence.agent-assumed
+status: open
+body: >-
+  Two judges driven in parallel on 2026-09-05 landed on each other's servers,
+  and one read the wrong board before noticing.
+
+
+  Reported by the judge re-earning locations.travel.evidence-by-key: its
+  `navigate` to localhost:4801 resolved, through the browser pane's proxied
+  origin, to a scratch copy belonging to a DIFFERENT session (judge-frw-0905).
+  It read that panel and clicked a rule row before checking. It recovered by
+  opening 127.0.0.1:4801 in a fresh tab and confirming /api/blueprint named its
+  own copy before drawing any conclusion, and it clicked no Pass/Fail/pin
+  control on the other server — but it could have.
+
+
+  The governance rails did their job at the ledger: each copy declares only
+  itself, so nothing could have been written to the real blueprint. What they do
+  not cover is a judge reading, and reporting on, a board that is not the one it
+  was asked about. A verdict earned against the wrong copy is indistinguishable
+  in the record from one earned against the right one.
+
+
+  Worth deciding, since prompt-driven judging plus mandatory scratch copies
+  means concurrent judges each serving their own port is now the ordinary case,
+  not an unusual one:
+
+
+  Whether the judge prompt should hand out a port rather than leaving each agent
+  to pick one, so two cannot collide.
+
+
+  Whether a served panel should say which copy it is in a way an agent must read
+  — `/api/blueprint` already names it, but nothing in the procedure says to
+  check it before trusting the page.
+
+
+  Whether the browser pane's origin reuse is something walkdown can defend
+  against at all, or whether the answer is simply 127.0.0.1 and a confirmed
+  identity as the first step of any judging session.
+
+
+  Filed rather than fixed because all three are decisions about the procedure,
+  and the procedure is the product now.
