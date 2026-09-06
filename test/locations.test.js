@@ -897,6 +897,42 @@ test('a nested directory sharing the name is its own project, never a merge into
   }
 });
 
+test('init one directory too deep names the blueprint already answering there @rule:locations.default.one-home-per-blueprint', () => {
+  /*
+   * Two packs in one repository each answering for themselves is deliberate,
+   * so this is not a refusal - the finding was the silence. `init` from a
+   * subdirectory of an inited repository printed a first-ever init word for
+   * word, and the person got a working second project rather than a
+   * correction; the two only diverge later, when the outer keeps its ledger
+   * and the inner starts empty (n-0214).
+   */
+  const s = scratch();
+  try {
+    const repo = join(s.root, 'repo');
+    mkdirSync(join(repo, 'app', 'web'), { recursive: true });
+    execFileSync('git', ['init', '-q', '.'], { cwd: repo });
+    walkdown(s.home, ['init', '--commit', 'spec'], repo);
+
+    const deep = walkdown(s.home, ['init', '--commit', 'spec'], join(repo, 'app', 'web'));
+    assert.match(deep, /already answers for this directory/, 'the outer blueprint is named');
+    assert.match(deep, /\brepo\b/, 'by its id');
+    assert.match(deep, /two projects/, 'and what the person now has is said plainly');
+
+    // Still a second project, because that is the deliberate case.
+    const where = walkdown(s.home, ['where'], join(repo, 'app', 'web'));
+    assert.match(where, /0001-web/, 'the inner one answers where it was made');
+
+    // And an unrelated repository says none of it.
+    const other = join(s.root, 'other');
+    mkdirSync(other, { recursive: true });
+    execFileSync('git', ['init', '-q', '.'], { cwd: other });
+    const fresh = walkdown(s.home, ['init', '--commit', 'spec'], other);
+    assert.doesNotMatch(fresh, /already answers/, 'a first init says nothing of the kind');
+  } finally {
+    s.cleanup();
+  }
+});
+
 test('a number the config still names is never minted again @rule:locations.default.one-home-per-blueprint', () => {
   /*
    * n-0170 (2): abandoning a default project is deleting its home. The next

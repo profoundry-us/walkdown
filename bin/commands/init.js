@@ -113,6 +113,21 @@ export async function run(args) {
     );
     return process.exit(2);
   }
+  /*
+   * A blueprint that already answers HERE, from a row rooted above this
+   * directory. Two packs in one repository each answering for themselves is
+   * deliberate, tested, and the reason the crossing guard exists - so this is
+   * not a refusal. The finding was the SILENCE: `init` one directory too deep
+   * printed a first-ever init, word for word, and the person got a working
+   * second project instead of a correction. The two only diverge later, when
+   * the outer one keeps its ledger and the inner one starts empty and
+   * `walkdown where` answers with the inner one, correctly and confusingly
+   * (n-0214). The neighbouring case - init twice at the SAME level - already
+   * says the right kind of thing by reporting every file up to date.
+   */
+  const answering = listed ? null : resolveLocations({ cwd: root });
+  const outer = answering?.spec?.path ? answering : null;
+
   const current = loc?.standard?.name ?? null;
   const commit = values.commit ?? current ?? 'none';
 
@@ -316,6 +331,18 @@ export async function run(args) {
           ? '  In the repository, so a clone brings them. `walkdown skills` re-installs them anywhere.'
           : "  Yours, not this project's — they work in every project on this machine, and this" +
               ' repository gets nothing. `walkdown skills --project` commits them here instead.',
+      ),
+    );
+  }
+  if (outer) {
+    const who = outer.project?.id ?? outer.spec.path;
+    console.log(yellow(`\n  note: \`${who}\` already answers for this directory.`));
+    console.log(dim(`  its spec ${outer.spec.path}`));
+    console.log(
+      dim(
+        '  You now have two projects, each with its own ledger — which is on purpose when this\n' +
+          '  directory is its own pack, and a directory too deep when it is not. To use the one\n' +
+          `  that was already here instead: \`walkdown project forget\` the new entry, and stand\n  where \`${who}\` is rooted.`,
       ),
     );
   }
