@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-06T01:31:45.104Z
 anchor:
   rule: locations.default.one-home-per-blueprint
-status: open
+status: addressed
 body: "`walkdown init` inside a repository that already has one starts a second
   project and never mentions the first. Reproduced 2026-09-06: init --commit
   spec at the root of a git repo, then init --commit spec again from app/web,
@@ -26,3 +26,28 @@ body: "`walkdown init` inside a repository that already has one starts a second
   Found in passing by the judge re-earning locations.default.in-repo-on-request,
   and anchored here rather than there because it is about which home answers,
   not about what the tree gets."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-06T13:22:27Z
+    body: >-
+      Fixed in the commit above. init now prints, when it is about to mint a
+      project in a directory some other row already answers for: the blueprint's
+      id, its spec path, and a plain statement that there are now two projects
+      each with their own ledger — 'on purpose when this directory is its own
+      pack, and a directory too deep when it is not' — plus how to back out of
+      it. Not a refusal, because the nested-pack case is deliberate and tested;
+      the finding was the silence and the silence is what closed.
+
+
+      I did not add a flag meaning 'yes, on purpose'. Your note suggested one
+      and I left it out: nested packs are already the supported case, so a flag
+      would be asking people to affirm the thing the tool is designed to do, and
+      the sentence names the alternative without demanding a ceremony. If you
+      want the flag anyway, say so and it is small.
+
+
+      Test: test/locations.test.js, 'init one directory too deep names the
+      blueprint already answering there' — asserts the outer id appears, that a
+      second project is still created (the deliberate case still works), and
+      that a first init in an unrelated repository says none of it.

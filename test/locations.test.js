@@ -1023,6 +1023,112 @@ test('blueprints claiming homes at the same moment get one each @rule:locations.
   }
 });
 
+test('racers with different names never share a number — the loser is refused in words @rule:locations.default.one-home-per-blueprint', async () => {
+  /*
+   * n-0210, the half the exclusive mkdir cannot see. The swap is on the
+   * NAME, so eight racers all called `app` collide and count again; eight
+   * with DIFFERENT names all mkdir successfully at the same number, and two
+   * blueprints end up in one home with a permanently split ledger.
+   *
+   * The answer taken (Topher, 2026-09-06) is to refuse rather than
+   * serialise: every design that lets concurrent init succeed has to write a
+   * spent number down somewhere permanent, and the tree is promised to hold
+   * nothing. So each racer looks again after its own mkdir lands. Neither
+   * can find itself alone — a racer reads only after it has appeared — so
+   * whoever reads last sees the other; if both read late, both refuse and
+   * nothing is minted. What must never happen is a number shared in silence.
+   */
+  const s = scratch();
+  try {
+    const go = join(s.root, 'go');
+    const claim = join(s.root, 'claim-named.mjs');
+    writeFileSync(
+      claim,
+      `import { existsSync } from 'node:fs';\n` +
+        `import { claimHome } from ${JSON.stringify(join(process.cwd(), 'lib', 'locations.js'))};\n` +
+        `while (!existsSync(${JSON.stringify(go)})) {}\n` +
+        `try {\n` +
+        `  process.stdout.write('OK ' + claimHome({ name: process.argv[2], walkdown: process.env.WALKDOWN_HOME }).dir);\n` +
+        `} catch (e) { process.stdout.write('REFUSED ' + e.message.split('\\n')[0]); }\n`,
+    );
+    const racers = Array.from({ length: 8 }, (_, i) =>
+      spawn(process.execPath, [claim, `r${i}`], { env: { ...process.env, WALKDOWN_HOME: s.home } }),
+    );
+    const settled = racers.map(
+      (p) =>
+        new Promise((done, fail) => {
+          let out = '';
+          p.stdout.on('data', (d) => (out += d));
+          p.on('error', fail);
+          p.on('close', () => done(out.trim()));
+        }),
+    );
+    await new Promise((r) => setTimeout(r, 400));
+    writeFileSync(go, '');
+    const results = await Promise.all(settled);
+
+    const numbers = readdirSync(join(s.home, 'blueprints')).map((d) => d.slice(0, 4));
+    assert.equal(
+      new Set(numbers).size,
+      numbers.length,
+      `two homes wearing one number: ${numbers.join(' ')}`,
+    );
+    // Every refusal says so in words, and names the retry.
+    for (const r of results.filter((r) => r.startsWith('REFUSED')))
+      assert.match(r, /at the same moment|Run init again|another `walkdown init`/);
+    // And the winners are exactly the homes standing on disk.
+    assert.equal(results.filter((r) => r.startsWith('OK')).length, numbers.length);
+  } finally {
+    s.cleanup();
+  }
+});
+
+test('a blueprint in the personal home answers, whatever sits above that home @rule:locations.answer.one-walkdown-answers', () => {
+  /*
+   * n-0213. The crossing guard asked walkdownRoot() which .walkdown answers
+   * for a spec, and walkdownRoot never returns the personal home — so a
+   * blueprint living IN the personal home was attributed to whatever
+   * .walkdown happened to sit above it, and the exemption the rule's own
+   * step describes was unreachable. It only looked like it held because the
+   * default ~/.walkdown has nothing above it.
+   *
+   * Put WALKDOWN_HOME inside a checkout — which is what this repo's own test
+   * runner does — and `init --commit none` made a project its own checkout
+   * could not see: init said "+ listed … as other" and everything after said
+   * nothing claims this directory. The tool contradicted itself in two
+   * commands.
+   */
+  const s = scratch();
+  try {
+    const app = join(s.root, 'app');
+    const other = join(s.root, 'other');
+    mkdirSync(app, { recursive: true });
+    mkdirSync(other, { recursive: true });
+    execFileSync('git', ['init', '-q', '.'], { cwd: app });
+    // The personal home lives INSIDE a checkout that declares its own.
+    const home = join(app, 'tmp-home');
+    walkdown(home, ['init', '--commit', 'spec'], app);
+
+    walkdown(home, ['init', '--commit', 'none'], other);
+    const listed = walkdown(home, ['projects'], other);
+    assert.match(listed, /\bother\b/, 'the project init said it listed is listed');
+
+    const where = walkdown(home, ['where'], other);
+    assert.doesNotMatch(where, /nothing declares|lies under/, where);
+    assert.match(where, /0001-other/, 'and its home is the one under the personal home');
+
+    // The guard it must not have broken: a pack carrying its own .walkdown is
+    // still nobody else's to declare.
+    const pack = join(app, 'packs', 'gamma');
+    mkdirSync(pack, { recursive: true });
+    walkdown(home, ['init', '--commit', 'spec'], pack);
+    const fromApp = walkdown(home, ['projects'], app);
+    assert.doesNotMatch(fromApp, /packs\/gamma\/\.walkdown\/blueprints/, fromApp);
+  } finally {
+    s.cleanup();
+  }
+});
+
 test('move writes into a pure-override row rather than beside it @rule:locations.keeping.moving-is-a-decision', () => {
   const s = scratch();
   try {
