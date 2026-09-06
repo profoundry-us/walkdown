@@ -1,8 +1,8 @@
-import { existsSync, mkdirSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, lstatSync, mkdirSync, readdirSync, realpathSync, statSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, resolve, sep } from 'node:path';
 import { parseArgs } from 'node:util';
-import { KINDS, rememberLocation, resolveLocations } from '../../lib/locations.js';
+import { canRemember, KINDS, rememberLocation, resolveLocations } from '../../lib/locations.js';
 import { dim, green, red } from '../../lib/report/tty.js';
 import { MoveFailed, moveDir } from '../../lib/standard.js';
 import { end } from './context.js';
@@ -83,7 +83,44 @@ export function run(args) {
     return end(2);
   }
 
-  mkdirSync(dirname(to), { recursive: true });
+  /*
+   * Can this be written down at all? Asked BEFORE anything moves, because a
+   * move that cannot be recorded is a move that must not happen: the records
+   * end up at the new address with the config still naming the old one, which
+   * no longer exists, and `walkdown where` names a directory that is gone
+   * (n-0201). `relocateHome` has read both files up front since n-0172; this
+   * door never inherited it, not even when n-0185 put both on one moveDir.
+   */
+  /*
+   * A destination that is a LINK to a directory. The guard above follows the
+   * link and sees a directory, quite rightly, and then rename will not have it
+   * and the copy refuses to write a directory over a symlink - a stack trace
+   * before, and after n-0196 a sentence that said "stopped part way" about an
+   * attempt that never started. Refused here instead, naming the target,
+   * because which of the two the person meant is theirs to say (n-0201).
+   */
+  if (existsSync(to) && lstatSync(to).isSymbolicLink()) {
+    console.error(red(`${to} is a link, not a directory.`));
+    console.error(dim(`  It points at ${statSync(to).isDirectory() ? realpathSync(to) : 'something else'}. Name the directory itself.`));
+    return end(2);
+  }
+
+  try {
+    canRemember(loc);
+  } catch (e) {
+    console.error(red(e.message));
+    return end(2);
+  }
+
+  try {
+    mkdirSync(dirname(to), { recursive: true });
+  } catch (e) {
+    // A parent path running through a FILE. Every neighbour here refuses in a
+    // sentence; this one died with a raw ENOTDIR (n-0201).
+    console.error(red(`${dirname(to)} cannot be made a directory (${e.code ?? e.message}).`));
+    console.error(dim('  Something on that path is a file. Nothing was moved.'));
+    return end(2);
+  }
   // Across volumes too, and into a destination holding only the dotfiles the
   // guard above ignores - `renameSync` alone refused both (n-0185).
   try {

@@ -5,6 +5,7 @@ import {
   chmodSync,
   existsSync,
   mkdirSync,
+  readdirSync,
   mkdtempSync,
   readFileSync,
   readlinkSync,
@@ -223,6 +224,109 @@ test('a copy that stops part way is a refusal, and leaves no debris behind @rule
     try {
       chmodSync(locked, 0o600);
     } catch {}
+    p.cleanup();
+  }
+});
+
+/*
+ * n-0201: a move that cannot be written down must not happen.
+ *
+ * `walkdown move` relocated the directory first and wrote the choice after, so
+ * a personal config it could not write left the records at the new address
+ * with the config still naming the old one — which no longer existed, and
+ * `walkdown where` named a directory that was gone. `relocateHome` has read
+ * both files up front since n-0172, with a standing comment saying exactly
+ * this; this door never inherited it.
+ */
+test('a move that cannot be recorded is refused before anything moves @rule:locations.keeping.moving-is-a-decision', () => {
+  const p = project();
+  const cfg = join(p.home, 'config.yml');
+  try {
+    const id = declareProject(p.home, p.bp, 'movable');
+    const before = readFileSync(cfg, 'utf8');
+    chmodSync(cfg, 0o400);
+
+    const dest = join(p.root, 'elsewhere', 'runs');
+    let out;
+    try {
+      run(p, ['move', 'runs', '--to', dest, '--project', id]);
+      assert.fail('a move that cannot be written down must be refused');
+    } catch (e) {
+      out = `${e.stdout ?? ''}${e.stderr ?? ''}`;
+      assert.equal(e.status, 2, 'a worded refusal, not a stack trace');
+    }
+    assert.match(out, /cannot be written/);
+    assert.ok(!/at Object\.|node:internal/.test(out), 'no stack trace');
+
+    // Nothing moved, and the ledger is still where the config says it is.
+    assert.ok(existsSync(join(p.runs, 'a.json')), 'the records stayed');
+    assert.ok(!existsSync(dest), 'and the destination was never made');
+    assert.equal(readFileSync(cfg, 'utf8'), before, 'the config is untouched');
+  } finally {
+    try {
+      chmodSync(cfg, 0o600);
+    } catch {}
+    p.cleanup();
+  }
+});
+
+test('a destination parent running through a file is refused in words @rule:locations.keeping.moving-is-a-decision', () => {
+  const p = project();
+  try {
+    const blocker = join(p.root, 'blocker');
+    writeFileSync(blocker, 'not a directory');
+    let out;
+    try {
+      run(p, [
+        'move',
+        'runs',
+        '--to',
+        join(blocker, 'deeper', 'runs'),
+        '--project',
+        declareProject(p.home, p.bp, 'movable'),
+      ]);
+      assert.fail('should have been refused');
+    } catch (e) {
+      out = `${e.stdout ?? ''}${e.stderr ?? ''}`;
+      assert.equal(e.status, 2);
+    }
+    assert.match(out, /cannot be made a directory/);
+    assert.ok(existsSync(join(p.runs, 'a.json')), 'nothing moved');
+  } finally {
+    p.cleanup();
+  }
+});
+
+/*
+ * And a destination that is a symlink TO a directory. The occupied-guard
+ * follows the link and sees a directory, quite rightly; renameSync then will
+ * not have it, and used to die with a raw ENOTDIR.
+ */
+test('a destination that is a link is refused, naming what it points at @rule:locations.keeping.moving-is-a-decision', () => {
+  const p = project();
+  try {
+    const real = join(p.root, 'elsewhere', 'real');
+    mkdirSync(real, { recursive: true });
+    const link = join(p.root, 'elsewhere', 'link');
+    symlinkSync(real, link);
+    const before = readFileSync(join(p.runs, 'a.json'), 'utf8');
+
+    let out;
+    try {
+      run(p, ['move', 'runs', '--to', link, '--project', declareProject(p.home, p.bp, 'movable')]);
+      assert.fail('should have been refused');
+    } catch (e) {
+      out = `${e.stdout ?? ''}${e.stderr ?? ''}`;
+      assert.equal(e.status, 2);
+    }
+    assert.match(out, /is a link, not a directory/);
+    assert.match(out, /Name the directory itself/);
+    // Refused BEFORE anything is attempted - so no "stopped part way" about a
+    // copy that never started, and the records are exactly where they were.
+    assert.doesNotMatch(out, /stopped part way/);
+    assert.equal(readFileSync(join(p.runs, 'a.json'), 'utf8'), before, 'nothing moved');
+    assert.deepEqual(readdirSync(real), [], 'and nothing arrived through the link');
+  } finally {
     p.cleanup();
   }
 });
