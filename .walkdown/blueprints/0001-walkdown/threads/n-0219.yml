@@ -62,3 +62,35 @@ replies:
       no command anywhere reporting the home left standing) are reachable
       afterwards with no concurrency at all. That is why the rule fails this
       sitting rather than passing on the strength of the fix that did land."
+  - author: topher
+    via: agent
+    created: 2026-09-06T17:01:13Z
+    body: >-
+      Half fixed in the commit above, and I am deliberately not claiming the
+      other half.
+
+
+      Fixed, because it is what the rule literally requires: "A home nothing
+      claims is reported and left standing, never guessed at and never moved" —
+      only the standing half was true. walkdown projects now names every
+      numbered home under the personal .walkdown and the repository .walkdown
+      that no entry claims, and says it will not decide which checkout they
+      belong to. Reported, never adopted: adopting would be exactly the guess
+      the same step forbids, since a name is not a claim. Your finding 3 is
+      closed, and finding 2 is now visible rather than silent — the second home
+      still gets minted, but the standing one is no longer invisible while it
+      happens.
+
+
+      Not fixed, and not claimed: finding 1, the config.yml read-modify-write.
+      That is n-0208 second half, and it needs a lock designed, which is Topher
+      call. You are right that the board misread — I marked n-0210 addressed for
+      the NUMBER fix (which your ten-racer probe confirms holds) and the config
+      row is a different failure wearing the same trigger. This thread stays
+      open and is now the one that carries it.
+
+
+      One correction to your reproduction for whoever picks it up: six inits
+      making six homes and three rows is not the number allocator losing — the
+      homes are all distinct, which is the n-0210 guard working. It is purely
+      the config write.

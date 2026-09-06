@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-09-06T16-51-07Z-local-01",
+  "created": "2026-09-06T16:51:07Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "1404351-dirty",
+  "tree_hash": "sha256:cd2c11bb25f6",
+  "spec_hash": "sha256:9666fe299538",
+  "results": [
+    {
+      "rule": "locations.answer.one-walkdown-answers",
+      "status": "pass",
+      "statement_hash": "sha256:b08354a355f7",
+      "evidence": [
+        "runs/evidence/2026-09-06T16-51-07Z/probe-transcript.txt"
+      ],
+      "reasoning": "Probed the CLI with throwaway repositories in temp directories, each under its own WALKDOWN_HOME, and cross-checked `projects`, `where`, `status` and `lint` after every setup so a tool answering the same question two ways would show up as a disagreement between them. The isolation holds in both directions and at depth: in a repository with .walkdown at the root (`repo`), one in packs/alpha (`alpha`) and a third in packs/alpha/inner/beta (`beta`), standing in any one of them made exactly that one visible to all four tools and the other two invisible - `beta` never saw `alpha` however many .walkdown lay above it, which is the 'no second repository config' half. Emptying the pack's config to `projects: []` did not fall through to the root: all four said nothing declares this directory and named the pack's own config as the one consulted, so the root's is genuinely never read rather than merely outranked. Reaching down was refused everywhere I tried to spell it. `project add` of the pack's blueprint from the root refused in words naming which .walkdown answers; so did the same path written with `..`, with a doubled slash and a trailing slash, and through a symlink planted at the repository root - the refusal resolved every spelling to the same answering .walkdown. `--ephemeral` on the original refused separately and correctly (q-0176), saying a copy means a copy. A hand-written committed row that reached down anyway was set aside on read, named on `where` with the directory that answers for it, reported by lint as a [locations] error, and invisible to `status --project` and to the server; the byte-equivalent row in the PERSONAL file was refused on exactly the same terms and by the same four tools (n-0188), with lint naming the personal file as its source and `where --json` carrying from:'personal' vs from:'repo' per row. The 'own .walkdown' allowance behaves as stated and is standpoint-dependent in the right way: a personal row naming a blueprint under repo/.walkdown was read while standing in that repository and refused - consistently by all four - while standing outside it or inside the pack. A blueprint kept in the personal home answered normally even with the personal home itself sitting inside a checkout that declares its own; a personal home literally named .walkdown was not double-counted as the answering repository config (`where` said only the personal config answers, and `status`/`lint` agreed nothing declares that directory); and a .walkdown holding homes but no config.yml declared nothing and answered for nothing, so a personal row naming a blueprint under it was that blueprint's only declaration and was read. For serving: a server started at the repository root offered only `repo` in /api/blueprint even after I moved its spec to a directory outside the repository entirely, and ?bp=alpha returned unknown project; a server started inside the pack offered only `alpha` and returned unknown project for `repo`, for a personal-config id, and on /api/threads - so the .walkdown where the server started is the scope, wherever the served blueprint sits. One presentation nit, not a contradiction: the text `where` groups all refusals at the end of the config block rather than under the file each row came from, so a personal-config refusal reads as if the repository's config held it - the --json shape attributes them correctly and lint names the file, so no two tools actually disagree. The rule's own checks tier also passes on this tree (four tagged tests in test/locations.test.js). Note that bin/commands/project.js was mid-edit by a concurrent session during part of this run and briefly crashed `walkdown projects` on a missing import; that is a Highball invariant, unrelated to this rule, and it had settled before the confirming re-run recorded in the evidence.",
+      "threads": []
+    }
+  ]
+}
