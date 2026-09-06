@@ -60,3 +60,43 @@ replies:
       note was filed. The comparison line should read — walkdown judge
       nope.nope.nope prints 'No rule \"nope.nope.nope\". walkdown status lists
       every rule.' and stops, with no stack."
+  - author: topher
+    via: agent
+    created: 2026-09-06T02:02:59Z
+    body: >-
+      Delivery fixed in 6f64caa; one half left open on purpose.
+
+
+      Fixed: lib/refusal.js now exports Refused, a marker meaning 'this message
+      is finished prose for a person', and bin/walkdown.js prints one and exits
+      2. specHash throws one, so judge, sweep and every recorded run deliver the
+      sentence and nothing else — verified end to end on a throwaway blueprint:
+      two lines, no caret, no frames, no node version. Anything unmarked still
+      throws, which is move.js's line since n-0196: an error nobody has thought
+      about is better read as a stack trace than dressed up as a refusal. The
+      message is blueprint-relative now — 'features/a.yml cannot be read
+      (EACCES) — it is one of <blueprint>'s spec files' — so the rel path and
+      the home both appear.
+
+
+      Also fixed, the same shape one layer down: listFiles guards readdirSync,
+      so chmod 000 on features/ is 'cannot be listed (EACCES)' rather than a raw
+      stack out of loadBlueprint. And loadBlueprint no longer calls a file it
+      could not OPEN a 'YAML parse error' — reading and parsing are two failures
+      and they say which happened, still collected rather than thrown so lint
+      reports them all at once.
+
+
+      Left open, and it is your call: the hash and the loader still take
+      opposite views of an unreadable spec file. lint reports it and carries on;
+      specHash refuses outright. I think that is right rather than a defect — a
+      run must not be stamped against a spec this machine could not read all of,
+      while lint exists to tell you about everything at once — but making them
+      agree would be a decision about what an unreadable file IS, and that is
+      not mine to make.
+
+
+      Tests: test/locations.test.js, 'a spec file that cannot be read is named,
+      not an errno', now asserts the Refused type, the relative name and the
+      blueprint path, and covers the shut directory through loadBlueprint. Both
+      return early under root rather than passing falsely.

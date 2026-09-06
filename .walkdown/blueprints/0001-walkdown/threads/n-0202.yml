@@ -48,3 +48,59 @@ body: >-
 
   Filed rather than fixed because all three are decisions about the procedure,
   and the procedure is the product now.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-06T02:03:38Z
+    body: >-
+      Fresh evidence tonight, from a judge that was not looking for it. Three
+      agent judges ran concurrently on separate ports (4831/4832/4833), each
+      with its own scratch copy and its own WALKDOWN_HOME — every isolation this
+      repo currently offers — and they still collided, because the BROWSER is
+      shared and its tabs are not scoped to a session.
+
+
+      What the default-actor judge reported: its tab was navigated out from
+      under it twice onto localhost:4831, another judge's scratch server. It
+      caught both by checking location.href against an origin marker before
+      trusting any observation, so no reading in its verdict came from the wrong
+      server — but it only caught them because it was checking. Two side effects
+      landed before it noticed: it ran
+      localStorage.removeItem('walkdown:identity') against the 4831 origin
+      (browser-side only, nothing on disk), and it closed another session's tab
+      to free a slot.
+
+
+      So the port and the scratch copy isolate the SERVER, and nothing isolates
+      the client. A judge that trusts the page in front of it — which is the
+      ordinary thing to do — can photograph another judge's blueprint and record
+      the verdict against its own rule, and the run record would look completely
+      normal. That is the failure this thread is about, now observed rather than
+      predicted.
+
+
+      Filed for the record, not fixed: what to do about it is a decision about
+      how the agent tier runs, which is yours.
+  - author: topher
+    via: agent
+    created: 2026-09-06T02:06:44Z
+    body: >-
+      And the mirror image, from the other side of the same collision. The
+      claim-never-accept judge, driving the panel on :4831, had its tab jump on
+      its own to :4833 — the default-actor judge's scratch server — and it
+      STARTED A WALKDOWN RECORDING there before noticing and navigating back.
+      The other judge reported being pulled the opposite way, onto :4831, and
+      clearing a localStorage key there.
+
+
+      So it is not one agent losing track of its tab. Two independent judges,
+      each isolated by port, scratch copy and WALKDOWN_HOME, each got pulled
+      onto the other's server, and one of them began writing on it. Both copies
+      were disposable and no real ledger was touched — this time. The same
+      wander with the real blueprint served is a recording filed against a spec
+      nobody was judging.
+
+
+      Worth noting for whatever the fix turns out to be: the isolation that
+      failed was not the weak kind. It was every isolation this repo currently
+      has.

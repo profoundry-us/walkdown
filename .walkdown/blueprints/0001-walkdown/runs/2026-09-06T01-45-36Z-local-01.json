@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-09-06T01-45-36Z-local-01",
+  "created": "2026-09-06T01:45:36Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "1114c51-dirty",
+  "tree_hash": "sha256:bc8ce72d0cd4",
+  "spec_hash": "sha256:9666fe299538",
+  "results": [
+    {
+      "rule": "threads.lifecycle.claim-never-accept",
+      "status": "pass",
+      "statement_hash": "sha256:482531dc241f",
+      "evidence": [
+        "runs/evidence/2026-09-06T01-45-36Z/cli-doors.txt",
+        "runs/evidence/2026-09-06T01-45-36Z/http-doors.txt",
+        "runs/evidence/2026-09-06T01-45-36Z/panel-doors.txt"
+      ],
+      "reasoning": "Judged by trying to break it, on scratch copy judge-cna-0906 served from inside itself on port 4831; GET /api/blueprint confirmed the served root was the copy and the only project, and the real ledger was never written to. Every probe restored the target thread to a pristine addressed note first and every verdict below is the status line read back from the thread FILE, not a response code. Three doors, three machines. (1) The CLI on a home declaring a person: --as-agent with --status verified, --verify, --status waived, --waive, and a reply carried alongside the transition are all refused with \"an agent may claim work on their behalf, never accept it\", and the reply never lands either. (2) The actor itself named agent, with no --as-agent: \"agent\", \"AGENT\", \"AgEnT\", \"  agent  \", \"agent \", tab- and newline-wrapped are all refused at both the CLI and the API, on notes and on questions. (3) A machine with only a git guess: refused at CLI, API and panel, with a message that names the config file and `identity:` and ends \"a login name is not a decision\" - it discloses the guess as a guess and never records under it. The same holds when identity is present but unusable: empty, whitespace-only, a number, a boolean, a list, a map, identity as a bare string, and name-without-username all read as nobody, each naming its own file. The API's provenance field is `via`, and its presence, not its spelling, is what refuses - agent, claude, bot, script, curl and a bare \"x\" all refuse verified and waived. n-0216's gap is closed: a via of 41 characters or more, the 79-character self-description that walked through before, an empty string, whitespace, 0, 1, false, [], {}, [\"agent\"] and {\"name\":\"agent\"} are now each a worded 400 at the door rather than a silent null, and 40 characters is still refused as provenance, so \"present but unusable\" can no longer arrive looking like absent. Nothing else opens a side door: /replies ignores a status field entirely, no client-supplied actor/author/by/as_agent key is honoured (the write is recorded under the server's own identity, verified_by: scratch-judge-cna-0906), and __proto__, duplicate keys, arrays and object statuses all refuse or are ignored. Claiming stayed open to a machine at all three doors throughout, so the refusals are the gate and not a broken setup. One gap I judged not a failure and filed as q-0218 rather than assume: the agent test folds case and trims whitespace but compares the exact ASCII word, so an identity of \"аgent\" (Cyrillic а), \"age​nt\" (zero-width space) or \"ágent\" accepts. It is a self-declaration gate, not authentication - writing a homoglyph into your own home config is no easier than writing a real person's name there - and tightening it far enough to catch confusables would start catching real people, since \"the-agent\", \"agents\" and \"claude\" are accepted today and should be. The question asks where that line is meant to sit.",
+      "threads": [
+        "q-0218"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+id: q-0218
+kind: question
+author: topher
+via: agent
+created: 2026-09-06T02:04:30.753Z
+anchor:
+  rule: threads.lifecycle.claim-never-accept
+status: open
+body: >-
+  How far does "an actor called agent in any spelling" reach? The gate folds
+  case and trims whitespace, so identity.username of "agent", "AGENT", "AgEnT",
+  "  agent  ", "agent ", "\tagent\t" and "agent\n" are all refused at every
+  door. Three spellings are NOT: "аgent" with a Cyrillic а (U+0430), "age​nt"
+  with a zero-width space, and "ágent". Each accepts verified and waived and
+  writes them to disk (runs/evidence/2026-09-06T01-45-36Z/cli-doors.txt, section
+  E).
+
+
+  I judged this a pass rather than a fail, and want that reasoning checked
+  rather than assumed. The gate is a self-declaration gate, not an
+  authentication boundary: anyone who can write a homoglyph into their own
+  ~/.walkdown/config.yml can just as easily write "topher" there, so the forgery
+  buys nothing a plain lie does not. And the same test cannot be tightened much
+  without catching real people — "the-agent", "agents" and "Agent Smith" are all
+  accepted today, and should be.
+
+
+  So the question is where the line is meant to sit. If "any spelling" means the
+  honest ones — an agent that names itself is refused — the behavior is already
+  right and this can be incorporated as a sentence in the steps saying so, which
+  would stop the next judge re-deriving it. If it is meant to catch confusables
+  too, that is a normalization pass (NFKC plus a confusable fold plus stripping
+  zero-width characters) on the actor before the comparison, and worth its own
+  note.
+
+
+  Judged on scratch copy judge-cna-0906; the real ledger was not written to.
