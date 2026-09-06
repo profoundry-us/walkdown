@@ -332,6 +332,183 @@
   };
 
   /*
+   * The vocabulary. One module, no dependencies, both runtimes.
+   *
+   * walkdown exists so that a term means one thing, and for its first month its
+   * own vocabulary was string literals in ten files across two runtimes. The
+   * panel's idea of a terminal thread agreed with the server's because two
+   * people typed the same words carefully — the panel's TERMINAL even listed
+   * them in a different order — and one typo would have disagreed silently, in
+   * the direction that matters: a status the panel cannot draw is invisible,
+   * not loud.
+   *
+   * So every LIST and TABLE lives here: the sets two files must agree on, the
+   * transition table, and what derives from them. The line is enumeration, not
+   * comparison — `status === 'open'` in a handler is fine, because a typo there
+   * fails the check that drives it, but naming the members of a set anywhere
+   * else is a second copy of this file waiting to drift.
+   *
+   * Browser-safe on purpose: no node imports, no I/O. The panel bundles it the
+   * way it bundles screen-match; the CLI and server import it like any module.
+   * Derivations (TERMINAL, statusesFor) are computed from FLOWS rather than
+   * written beside it, because two spellings of one fact is the disease this
+   * module treats.
+   */
+
+  // ---- threads --------------------------------------------------------------
+
+  const THREAD_KINDS = Object.freeze(['note', 'question']);
+
+  /** The id prefix a kind files under: n-0042 is a note, q-0042 a question. */
+  const threadPrefix = (kind) => (kind === 'question' ? 'q' : 'n');
+
+  /**
+   * Legal status transitions per thread kind — the lifecycle itself.
+   * Order is meaningful twice over: the keys are each kind's statuses in
+   * lifecycle order, and each list is the order actions are offered in.
+   */
+  const FLOWS = Object.freeze({
+    note: Object.freeze({
+      open: Object.freeze(['addressed', 'waived']),
+      addressed: Object.freeze(['verified', 'open', 'waived']),
+      verified: Object.freeze([]),
+      waived: Object.freeze([]),
+    }),
+    question: Object.freeze({
+      open: Object.freeze(['answered', 'waived']),
+      answered: Object.freeze(['incorporated', 'open', 'waived']),
+      incorporated: Object.freeze([]),
+      waived: Object.freeze([]),
+    }),
+  });
+
+  /** Every status a thread of this kind may hold. */
+  const statusesFor = (kind) => Object.freeze(Object.keys(FLOWS[kind] ?? FLOWS.note));
+
+  /**
+   * Statuses a thread never leaves. Derived, not listed: a status is terminal
+   * exactly when its kind's flow offers it nowhere to go, so this cannot
+   * disagree with FLOWS no matter who edits which.
+   */
+  const TERMINAL = Object.freeze([
+    ...new Set(
+      Object.values(FLOWS).flatMap((flow) =>
+        Object.entries(flow)
+          .filter(([, next]) => next.length === 0)
+          .map(([status]) => status),
+      ),
+    ),
+  ]);
+
+  /** May a `kind` thread move from `from` to `to`? The one answer, for every caller. */
+  const canTransition = (kind, from, to) => ((FLOWS[kind] ?? FLOWS.note)[from] ?? []).includes(to);
+
+  /**
+   * Statuses that mean "a person judged it". An agent claims work and never
+   * accepts it — blueprint/AGENTS.md states the law, threads.js enforces it,
+   * and the panel greys the buttons; all three read this list.
+   */
+  const HUMAN_ONLY = Object.freeze(['verified', 'waived']);
+
+  /**
+   * Transitions that must say why: waiving buries work and reopening un-buries
+   * it, and both are illegible a week later without a sentence attached.
+   */
+  const NEEDS_REASON = Object.freeze(['waived', 'open']);
+
+  /*
+   * How a status is drawn, wherever it is drawn. daisyUI badge classes rather
+   * than abstract tokens because every surface walkdown ships uses daisyUI -
+   * and the panel and the embed carrying separate copies of this map is how a
+   * status ends up amber on one surface and blue on the other.
+   */
+  const CHIP = Object.freeze({
+    open: 'badge-warning',
+    answered: 'badge-warning',
+    addressed: 'badge-info',
+    verified: 'badge-success',
+    incorporated: 'badge-success',
+    waived: 'badge-ghost',
+  });
+
+  // ---- verification ---------------------------------------------------------
+
+  /**
+   * The declarable verify tiers. `human` is not one: humans accept rules
+   * through signoff, not through a verify list (docs/02-blueprint-schema.md —
+   * the verify inversion).
+   */
+  const TIERS = Object.freeze(['checks', 'agent']);
+
+  /** Who can sign a rule off. */
+  const ROLES = Object.freeze(['eng', 'product', 'design']);
+
+  /**
+   * What one result in a run record may say. The last two are sign-off verdicts
+   * on unbuilt rules — a judgment of the spec, recorded by walkdown sessions
+   * only, and never build evidence (docs/05-runs-ledger.md).
+   */
+  const RESULT_STATUSES = Object.freeze([
+    'pass',
+    'fail',
+    'skipped',
+    'blocked',
+    'approved',
+    'refining',
+  ]);
+
+  /*
+   * Did this thread arrive during a session that started at `started`? By
+   * NUMBER, never by string: thread stamps carried seconds while session starts
+   * carried milliseconds, and the lexicographic compare counted the whole start
+   * second as "during" - a thread POSTed just before Start walkdown satisfied
+   * the fail gate (n-0132). Thread stamps carry milliseconds now; an older
+   * seconds-only stamp floors toward "before", which is the side a gate errs on.
+   */
+  function duringSession(created, started) {
+    const c = Date.parse(created ?? '');
+    const s = Date.parse(started ?? '');
+    return Number.isFinite(c) && Number.isFinite(s) && c >= s;
+  }
+
+  /*
+   * DID THIS ACTUALLY SAY ANYTHING?
+   *
+   * `String.prototype.trim()` strips ASCII and Unicode whitespace and stops
+   * there — it leaves the format characters, which have no visible content at
+   * all. A single U+200B walked through the panel's fail-requires-why gate and
+   * recorded the verdict: the box looked empty the whole time, and the "why" it
+   * filed was a note whose body on disk is three bytes and which renders on the
+   * board as an author, a timestamp and a blank line. That is precisely the
+   * state that rule's purpose clause exists to prevent, one keystroke away from
+   * the empty box it refuses (n-0203).
+   *
+   * So the test is not "is it whitespace" but "is there anything a reader could
+   * see": whitespace, the format category (Cf — zero-width space and joiners,
+   * the BOM, the bidi controls) and the control category (Cc) are all removed,
+   * and what remains is what was said. The text itself is never rewritten — a
+   * body that DOES say something keeps every character the person typed.
+   */
+  const NOTHING_TO_SEE = /[\s\p{Cf}\p{Cc}]/gu;
+  const saysSomething = (text) =>
+    Boolean(String(text ?? '').replace(NOTHING_TO_SEE, ''));
+
+  /*
+   * IS THIS NAME A MACHINE'S?
+   *
+   * The server's gate folds case and whitespace, because "Agent" and "  AGENT  "
+   * both stood on disk as accepters once (n-0130). The panel's three copies of
+   * the same test compared against the exact string `'agent'`, so the spelling
+   * `Agent` walked past the client check and was caught only by the server —
+   * which held, and left the defence a layer thinner than it read (n-0148's
+   * re-judging, 2026-09-05).
+   *
+   * Folding only, never substring: a person called `Agente` is not a machine,
+   * and locking them out would be a worse fault than the one this prevents.
+   */
+  const isMachineName = (actor) => !actor || String(actor).trim().toLowerCase() === 'agent';
+
+  /*
    * Which storyboard screen a location is — the one answer three separate
    * programs have to agree on.
    *
@@ -897,146 +1074,6 @@
   }
 
   /*
-   * The vocabulary. One module, no dependencies, both runtimes.
-   *
-   * walkdown exists so that a term means one thing, and for its first month its
-   * own vocabulary was string literals in ten files across two runtimes. The
-   * panel's idea of a terminal thread agreed with the server's because two
-   * people typed the same words carefully — the panel's TERMINAL even listed
-   * them in a different order — and one typo would have disagreed silently, in
-   * the direction that matters: a status the panel cannot draw is invisible,
-   * not loud.
-   *
-   * So every LIST and TABLE lives here: the sets two files must agree on, the
-   * transition table, and what derives from them. The line is enumeration, not
-   * comparison — `status === 'open'` in a handler is fine, because a typo there
-   * fails the check that drives it, but naming the members of a set anywhere
-   * else is a second copy of this file waiting to drift.
-   *
-   * Browser-safe on purpose: no node imports, no I/O. The panel bundles it the
-   * way it bundles screen-match; the CLI and server import it like any module.
-   * Derivations (TERMINAL, statusesFor) are computed from FLOWS rather than
-   * written beside it, because two spellings of one fact is the disease this
-   * module treats.
-   */
-
-  // ---- threads --------------------------------------------------------------
-
-  const THREAD_KINDS = Object.freeze(['note', 'question']);
-
-  /** The id prefix a kind files under: n-0042 is a note, q-0042 a question. */
-  const threadPrefix = (kind) => (kind === 'question' ? 'q' : 'n');
-
-  /**
-   * Legal status transitions per thread kind — the lifecycle itself.
-   * Order is meaningful twice over: the keys are each kind's statuses in
-   * lifecycle order, and each list is the order actions are offered in.
-   */
-  const FLOWS = Object.freeze({
-    note: Object.freeze({
-      open: Object.freeze(['addressed', 'waived']),
-      addressed: Object.freeze(['verified', 'open', 'waived']),
-      verified: Object.freeze([]),
-      waived: Object.freeze([]),
-    }),
-    question: Object.freeze({
-      open: Object.freeze(['answered', 'waived']),
-      answered: Object.freeze(['incorporated', 'open', 'waived']),
-      incorporated: Object.freeze([]),
-      waived: Object.freeze([]),
-    }),
-  });
-
-  /** Every status a thread of this kind may hold. */
-  const statusesFor = (kind) => Object.freeze(Object.keys(FLOWS[kind] ?? FLOWS.note));
-
-  /**
-   * Statuses a thread never leaves. Derived, not listed: a status is terminal
-   * exactly when its kind's flow offers it nowhere to go, so this cannot
-   * disagree with FLOWS no matter who edits which.
-   */
-  const TERMINAL = Object.freeze([
-    ...new Set(
-      Object.values(FLOWS).flatMap((flow) =>
-        Object.entries(flow)
-          .filter(([, next]) => next.length === 0)
-          .map(([status]) => status),
-      ),
-    ),
-  ]);
-
-  /** May a `kind` thread move from `from` to `to`? The one answer, for every caller. */
-  const canTransition = (kind, from, to) => ((FLOWS[kind] ?? FLOWS.note)[from] ?? []).includes(to);
-
-  /**
-   * Statuses that mean "a person judged it". An agent claims work and never
-   * accepts it — blueprint/AGENTS.md states the law, threads.js enforces it,
-   * and the panel greys the buttons; all three read this list.
-   */
-  const HUMAN_ONLY = Object.freeze(['verified', 'waived']);
-
-  /**
-   * Transitions that must say why: waiving buries work and reopening un-buries
-   * it, and both are illegible a week later without a sentence attached.
-   */
-  const NEEDS_REASON = Object.freeze(['waived', 'open']);
-
-  /*
-   * How a status is drawn, wherever it is drawn. daisyUI badge classes rather
-   * than abstract tokens because every surface walkdown ships uses daisyUI -
-   * and the panel and the embed carrying separate copies of this map is how a
-   * status ends up amber on one surface and blue on the other.
-   */
-  const CHIP = Object.freeze({
-    open: 'badge-warning',
-    answered: 'badge-warning',
-    addressed: 'badge-info',
-    verified: 'badge-success',
-    incorporated: 'badge-success',
-    waived: 'badge-ghost',
-  });
-
-  // ---- verification ---------------------------------------------------------
-
-  /**
-   * The declarable verify tiers. `human` is not one: humans accept rules
-   * through signoff, not through a verify list (docs/02-blueprint-schema.md —
-   * the verify inversion).
-   */
-  const TIERS = Object.freeze(['checks', 'agent']);
-
-  /** Who can sign a rule off. */
-  const ROLES = Object.freeze(['eng', 'product', 'design']);
-
-  /**
-   * What one result in a run record may say. The last two are sign-off verdicts
-   * on unbuilt rules — a judgment of the spec, recorded by walkdown sessions
-   * only, and never build evidence (docs/05-runs-ledger.md).
-   */
-  const RESULT_STATUSES = Object.freeze([
-    'pass',
-    'fail',
-    'skipped',
-    'blocked',
-    'approved',
-    'refining',
-  ]);
-
-  /*
-   * Did this thread arrive during a session that started at `started`? By
-   * NUMBER, never by string: thread stamps carried seconds while session starts
-   * carried milliseconds, and the lexicographic compare counted the whole start
-   * second as "during" - a thread POSTed just before Start walkdown satisfied
-   * the fail gate (n-0132). Thread stamps carry milliseconds now; an older
-   * seconds-only stamp floors toward "before", which is the side a gate errs on.
-   */
-  function duringSession(created, started) {
-    const c = Date.parse(created ?? '');
-    const s = Date.parse(started ?? '');
-    return Number.isFinite(c) && Number.isFinite(s) && c >= s;
-  }
-
-  /*
    * The panel's shared vocabulary: the small questions every pane asks of the
    * data, and the two class strings they all label with.
    *
@@ -1379,7 +1416,7 @@
      * which reads as a default and is a handoff.
      */
     const who = (actor ?? '').trim();
-    if (!who || who === 'agent') {
+    if (isMachineName(who)) {
       say('A reply is recorded under a person\u2019s name \u2014 set it in Settings (the gear).');
       openSettings();
       return false;
@@ -1426,9 +1463,9 @@
      * has a git email and a login name, and this bar used to offer Verify under
      * one of those with the click going through (n-0143).
      */
-    if (humanOnly && (!actor || actor === 'agent' || !iAmDeclared())) {
+    if (humanOnly && (isMachineName(actor) || !iAmDeclared())) {
       say(
-        !actor || actor === 'agent'
+        isMachineName(actor)
           ? 'Verify and waive are recorded under a person\u2019s name.'
           : `Verify and waive are recorded under a person\u2019s name, and this machine only has a guess (${actor}). Say who you are in ~/.walkdown/config.yml under \`identity:\`.`,
       );
@@ -1501,9 +1538,9 @@
     // The same gate one verify passes, because a sweep is only several of them:
     // a machine that has not been told who is sitting at it still has a login
     // name to offer, and accepting under one is the click n-0143 got through.
-    if (!actor || actor === 'agent' || !iAmDeclared()) {
+    if (isMachineName(actor) || !iAmDeclared()) {
       toast(
-        !actor || actor === 'agent'
+        isMachineName(actor)
           ? 'Verifying is recorded under a person\u2019s name.'
           : `Verifying is recorded under a person\u2019s name, and this machine only has a guess (${actor}). Say who you are in ~/.walkdown/config.yml under \`identity:\`.`,
         { tone: 'error' },
@@ -4983,7 +5020,13 @@
     {
       {
         const rule = S.selected.rule;
-        const text = (S.verdictNote ?? '').trim();
+        /*
+         * Not `trim()`: it leaves the format characters, and a single U+200B
+         * looked exactly like an empty box while opening the gate (n-0203).
+         * `saysSomething` asks whether a reader could see anything; the text
+         * that gets filed is still every character the person typed.
+         */
+        const text = saysSomething(S.verdictNote) ? String(S.verdictNote).trim() : '';
         // A refusal is work nobody can act on until it says why. Refine's why
         // is the text itself; a fail's may also be a pin on the page.
         if (status === 'refining' && !text)

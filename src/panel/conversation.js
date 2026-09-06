@@ -9,6 +9,7 @@
  * importing app.js back, which is the cycle this file was carved out of.
  */
 import { MSG } from '../../lib/message-stream.js';
+import { isMachineName } from '../../lib/vocab.js';
 import { openSettings, requestReload, requestRender } from './shell.js';
 import { D, identityOverride, S, store } from './state.js';
 import { toast } from './toast.js';
@@ -124,7 +125,7 @@ async function postReply(id, text, actor) {
    * which reads as a default and is a handoff.
    */
   const who = (actor ?? '').trim();
-  if (!who || who === 'agent') {
+  if (isMachineName(who)) {
     say('A reply is recorded under a person\u2019s name \u2014 set it in Settings (the gear).');
     openSettings();
     return false;
@@ -171,9 +172,9 @@ export async function threadAct(id, status) {
    * has a git email and a login name, and this bar used to offer Verify under
    * one of those with the click going through (n-0143).
    */
-  if (humanOnly && (!actor || actor === 'agent' || !iAmDeclared())) {
+  if (humanOnly && (isMachineName(actor) || !iAmDeclared())) {
     say(
-      !actor || actor === 'agent'
+      isMachineName(actor)
         ? 'Verify and waive are recorded under a person\u2019s name.'
         : `Verify and waive are recorded under a person\u2019s name, and this machine only has a guess (${actor}). Say who you are in ~/.walkdown/config.yml under \`identity:\`.`,
     );
@@ -246,9 +247,9 @@ export async function verifyAll(rule) {
   // The same gate one verify passes, because a sweep is only several of them:
   // a machine that has not been told who is sitting at it still has a login
   // name to offer, and accepting under one is the click n-0143 got through.
-  if (!actor || actor === 'agent' || !iAmDeclared()) {
+  if (isMachineName(actor) || !iAmDeclared()) {
     toast(
-      !actor || actor === 'agent'
+      isMachineName(actor)
         ? 'Verifying is recorded under a person\u2019s name.'
         : `Verifying is recorded under a person\u2019s name, and this machine only has a guess (${actor}). Say who you are in ~/.walkdown/config.yml under \`identity:\`.`,
       { tone: 'error' },

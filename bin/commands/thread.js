@@ -4,7 +4,7 @@ import { defaultActor } from '../../lib/identity.js';
 import { anchorText, paintStatus } from '../../lib/report/threads.js';
 import { dim } from '../../lib/report/tty.js';
 import { getThread } from '../../lib/threads.js';
-import { THREAD_KINDS } from '../../lib/vocab.js';
+import { saysSomething, THREAD_KINDS } from '../../lib/vocab.js';
 import { mutateThread, openThread } from '../../lib/writes.js';
 import { end, loadOrExit } from './context.js';
 
@@ -90,7 +90,9 @@ export function run(args) {
       console.error(`kind must be ${THREAD_KINDS.join(' or ')}`);
       process.exit(2);
     }
-    const body = values.body?.trim();
+    // Not `trim()` alone: a body of nothing but format characters is a thread
+    // that renders as a blank line, which is what n-0203 walked in through.
+    const body = saysSomething(values.body) ? values.body.trim() : '';
     if (!body) {
       console.error('a thread needs a body — say what was seen (--body <text>)');
       process.exit(2);

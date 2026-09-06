@@ -20,6 +20,7 @@
  */
 
 import { MSG } from '../../lib/message-stream.js';
+import { saysSomething } from '../../lib/vocab.js';
 /*
  * The two blocks that used to sit in the middle of this file as generated
  * copies — the shared screen matcher and the conversation model — are
@@ -1798,7 +1799,13 @@ async function giveVerdict(status) {
   {
     {
       const rule = S.selected.rule;
-      const text = (S.verdictNote ?? '').trim();
+      /*
+       * Not `trim()`: it leaves the format characters, and a single U+200B
+       * looked exactly like an empty box while opening the gate (n-0203).
+       * `saysSomething` asks whether a reader could see anything; the text
+       * that gets filed is still every character the person typed.
+       */
+      const text = saysSomething(S.verdictNote) ? String(S.verdictNote).trim() : '';
       // A refusal is work nobody can act on until it says why. Refine's why
       // is the text itself; a fail's may also be a pin on the page.
       if (status === 'refining' && !text)
