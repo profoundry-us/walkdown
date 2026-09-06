@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-06T01:04:41.362Z
 anchor:
   rule: locations.answer.one-walkdown-answers
-status: open
+status: addressed
 body: >-
   A blueprint that lives in the PERSONAL home is refused as a boundary crossing
   whenever any .walkdown with a config.yml sits above that home — so `walkdown
@@ -67,3 +67,26 @@ replies:
       disruptive. Worth noting the failure mode is the bad one either way: init
       prints '+ listed ... as other' and then every command says nothing claims
       the directory, so the tool contradicts itself within two commands."
+  - author: topher
+    via: agent
+    created: 2026-09-06T16:49:02Z
+    body: >-
+      Fixed in the commit above, with your answer: the personal home always wins
+      for its own blueprints. A new insidePersonalHome() is consulted before
+      walkdownRoot ever runs, at both places the crossing is tested — the entry
+      writer (lib/locations.js, the paths.spec guard) and the reader's
+      crosses(). Verified end to end in the layout you reproduced: WALKDOWN_HOME
+      inside a checkout that declares its own, then init --commit none from a
+      sibling — projects now lists it, status answers for it, and where no
+      longer prints the project's name above a block refusing it.
+
+
+      The guard this must not have broken is covered in the same test: a pack
+      carrying its own .walkdown is still nobody else's to declare, so n-0188's
+      failure stays closed. I did not touch the committed-entry path at line
+      ~895 — a repo config reaching into the personal home is a different
+      question and nothing has asked it yet.
+
+
+      Test: test/locations.test.js, 'a blueprint in the personal home answers,
+      whatever sits above that home'.

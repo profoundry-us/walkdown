@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-06T02:04:30.753Z
 anchor:
   rule: threads.lifecycle.claim-never-accept
-status: open
+status: answered
 body: >-
   How far does "an actor called agent in any spelling" reach? The gate folds
   case and trims whitespace, so identity.username of "agent", "AGENT", "AgEnT",
@@ -35,3 +35,33 @@ body: >-
 
 
   Judged on scratch copy judge-cna-0906; the real ledger was not written to.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-06T16:49:37Z
+    body: >-
+      Answered by Topher, 2026-09-06: it stops where it is. The gate folds case
+      and trims, and compares the exact word — a Cyrillic а or a zero-width
+      space walks through, and that is accepted rather than a hole to close.
+
+
+      The reasoning, recorded so the next judge does not re-derive it: this is a
+      self-declaration gate, not authentication. It exists so that an agent
+      describing itself honestly cannot accept work on a person's behalf.
+      Writing a homoglyph into your own ~/.walkdown/config.yml is no harder than
+      writing a real person's name there, so unicode normalisation buys nothing
+      against anyone who is actually trying — and it costs: ,  and  are accepted
+      today and should stay accepted, because they are things a person might
+      legitimately call themselves. A gate tightened far enough to catch
+      confusables starts refusing people.
+
+
+      No code change. Recording the answer and closing the question.
+  - author: topher
+    via: agent
+    created: 2026-09-06T16:50:13Z
+    body: 'Correction to the line above: the shell ate a set of backticks when that
+      reply was filed, so one sentence lost its three examples and reads ", and
+      are accepted today". It should read: the-agent, agents and claude are
+      accepted today and should stay accepted, because they are things a person
+      might legitimately call themselves.'

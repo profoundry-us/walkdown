@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-06T00:54:16.943Z
 anchor:
   rule: locations.default.one-home-per-blueprint
-status: open
+status: addressed
 body: >-
   Concurrent `walkdown init` against one home both collides numbers and loses
   config rows.
@@ -109,3 +109,31 @@ replies:
       right there, and init quietly mints a second one with the first's runs
       left behind — both outcomes the rule forbids, reachable afterwards with no
       concurrency at all."
+  - author: topher
+    via: agent
+    created: 2026-09-06T16:49:02Z
+    body: >-
+      Fixed in the commit above, with the answer you gave: refuse rather than
+      serialise. claimHome looks again after its own mkdir lands, for a stranger
+      wearing the same number, and refuses in words if it finds one — 'another
+      walkdown init claimed 0005 at the same moment (it is 0005-r4). Nothing was
+      written down and no home was made. Run init again.' It removes the
+      directory it just made before refusing, so a refusal leaves nothing
+      behind.
+
+
+      Why this reads after the swap when design (1) failed doing the same thing:
+      (1) checked for the NAME and it read before establishing itself. Each
+      racer here reads only after its own mkdir has landed, so the two cannot
+      both find themselves alone — whoever reads last sees the other. If both
+      read late, both refuse, nothing is minted, and a retry with no contention
+      succeeds. What is impossible is a number shared in silence, which is the
+      thing the rule forbids.
+
+
+      Measured, not argued: test/locations.test.js, 'racers with different names
+      never share a number', races eight distinct names off a barrier file and
+      asserts no two homes wear one number and every refusal says so. It passes
+      three times out of three, and fails three out of three with the guard
+      stubbed out — I checked that before keeping it, because a test that passes
+      with the bug restored is the one mistake I already made once tonight.

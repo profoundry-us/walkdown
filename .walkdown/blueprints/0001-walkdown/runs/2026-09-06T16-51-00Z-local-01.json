@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-09-06T16-51-00Z-local-01",
+  "created": "2026-09-06T16:51:00Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "1404351-dirty",
+  "tree_hash": "sha256:cd2c11bb25f6",
+  "spec_hash": "sha256:9666fe299538",
+  "results": [
+    {
+      "rule": "locations.default.one-home-per-blueprint",
+      "status": "fail",
+      "statement_hash": "sha256:c2e4b20e7f0d",
+      "evidence": [
+        "runs/evidence/2026-09-06T16-51-00Z/concurrent-init.md"
+      ],
+      "reasoning": "Probed the CLI directly with throwaway projects, each under its own WALKDOWN_HOME, never touching the real home. Most of the rule holds and holds well: asking allocates nothing (a hash over path/mtime/size of every file in a populated home was identical across `where`, `where --json` and `where spec`, and an empty WALKDOWN_HOME stayed empty after `where` in an undeclared directory); ten simultaneous inits from ten checkouts all named `z` produced ten distinct homes with no two processes claiming the same number, so the allocation-against-the-listing is genuinely sound under load; two checkouts sharing a basename became 0003-shared and 0004-shared and each `where` resolved by root; the personal/shared merge is keyed by where an entry is rooted and not by its id (two repositories both committing `id: app`, with a personal row rooted at one of them, moved evidence only for that one); a whole-tree copy of a committed home answered for the copy through its own .walkdown rather than adopting the original's; and a second init in the same directory reported `up to date` and allocated nothing. What fails is the config write beside that sound allocation. Six simultaneous inits left six homes on disk and three rows in config.yml; three simultaneous inits under distinct names left three homes and one row, three trials running; ten left ten homes and six rows. Every process exited 0 and printed a success block naming its own home, and nothing warned - the config is read-modify-write with no lock and the last writer wins. That is not merely untidy: I put a thread record into one of the row-less homes (0001-proj), and `where` in that checkout reported no entry and offered `walkdown init`, which allocated 0007-proj and listed it as proj-4. The checkout now has a second home with its records stranded in the first, which is the one thing the statement says never happens, and the home that already held records stopped answering for its blueprint. Compounding it, `projects` and `projects --stale` never mention a home no row claims - 0001, 0003 and 0005-proj appear in no output anywhere - so the step asking that an unclaimed home be reported and left standing is only half met: left standing yes, reported no, and it is the reporting half that would have turned this silent race into something a person could see. Filed as n-0219.",
+      "threads": ["n-0219"]
+    }
+  ]
+}

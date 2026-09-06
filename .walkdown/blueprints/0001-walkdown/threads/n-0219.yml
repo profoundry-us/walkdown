@@ -1,0 +1,64 @@
+id: n-0219
+kind: note
+author: topher
+via: agent
+created: 2026-09-06T16:54:34.564Z
+anchor:
+  rule: locations.default.one-home-per-blueprint
+status: open
+body: >-
+  Concurrent `init` from several checkouts loses config rows, and the homes it
+  made are stranded and unreported.
+
+
+  Probed on 2026-09-06 with throwaway projects, each with its own WALKDOWN_HOME
+  (evidence: runs/evidence/2026-09-06T16-51-00Z/concurrent-init.md).
+
+
+  Six simultaneous inits from six checkouts all named `proj` created six
+  distinct homes 0001-proj..0006-proj but left only three rows in config.yml.
+  Reproduced with three simultaneous inits under DIFFERENT names
+  (app1/app2/app3): three homes, one row, three times running; and with ten: ten
+  homes, six rows. Every process exited 0 and printed a success block naming its
+  own home. Nothing warned. The number allocation itself holds under load - no
+  two processes ever claimed the same number - so the defect is the
+  read-modify-write of config.yml with no lock: last writer wins.
+
+
+  The consequence is the sentence the rule forbids. In the six-way home I put a
+  thread record in the row-less home 0001-proj/threads/n-0001.yml. `where` in
+  that checkout says 'present, no entry for this project' and suggests `walkdown
+  init`; running it allocated 0007-proj and listed it as proj-4. That checkout
+  now has a second home with its records stranded in the first.
+
+
+  Second finding, separable: `projects` and `projects --stale` never mention a
+  home no row claims. Homes 0001/0003/0005-proj appear in no output at all. They
+  are left standing and never guessed at, which is right; 'is reported' is the
+  half that is missing, and it is the half that would have made the race visible
+  instead of silent.
+
+
+  Everything else in the rule held: asking writes nothing (byte-and-mtime
+  identical home before/after `where`, `where --json`, `where spec`; an empty
+  WALKDOWN_HOME stays empty); two checkouts sharing a basename got 0003-shared
+  and 0004-shared and resolve by root; the personal/shared merge is keyed by
+  root rather than id (two repos both committing 'id: app', a personal row
+  rooted at one of them moved only that one's evidence); a whole-tree copy of a
+  committed home answers for the copy through its own .walkdown; and a second
+  init in the same directory reuses the home rather than allocating.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-06T16:56:01Z
+    body: "Cross-reference, so this is not read as a fresh discovery: this is the
+      surviving half of n-0208 / n-0210. The number-collision half is genuinely
+      fixed and I re-measured it - ten simultaneous inits under ten distinct
+      names produced ten distinct numbers and no refusals. What is still live is
+      the unserialised read-modify-write of config.yml, which n-0210's own
+      replies name as open and leave to Topher. n-0210 is marked addressed, so
+      from the board this reads as settled; it is not, and the downstream
+      consequences (a second home minted for a checkout whose row was lost, and
+      no command anywhere reporting the home left standing) are reachable
+      afterwards with no concurrency at all. That is why the rule fails this
+      sitting rather than passing on the strength of the fix that did land."

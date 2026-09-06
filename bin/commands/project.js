@@ -25,8 +25,8 @@
  * rooted entry would shadow the real thing from the person's own working
  * directory.
  */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { basename, join, resolve } from 'node:path';
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { basename, dirname, join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import {
   canon,
@@ -301,6 +301,46 @@ export function list(args) {
         `\n  ${shadowed.length} personal entr${shadowed.length === 1 ? 'y' : 'ies'} shadowed here by this repository's: ${shadowed.join(', ')}`,
       ),
     );
+  /*
+   * And the homes standing in the .walkdown that no row names.
+   *
+   * "A home nothing claims is reported and left standing, never guessed at
+   * and never moved" is the rule's own step, and only the second half of it
+   * was true: an unclaimed home stood there and appeared in no output at all.
+   * That is what made the config's unserialised read-modify-write invisible -
+   * six concurrent inits made six homes and three rows, every process exited
+   * 0 saying which home was its own, and nothing anywhere afterwards
+   * mentioned the three with no row (n-0219).
+   *
+   * Reported, never adopted. Which checkout a stranded home belonged to is
+   * exactly the guess the same step forbids - a name is not a claim, and two
+   * projects can share one - so this says what is standing there and leaves
+   * the decision, `project add` included, to a person.
+   */
+  for (const [walkdown, label] of [
+    [walkdownHome(), 'your own'],
+    [config.repo?.path ? dirname(config.repo.path) : null, 'this repository'],
+  ]) {
+    const homes = walkdown ? join(walkdown, 'blueprints') : null;
+    if (!homes || !existsSync(homes)) continue;
+    const claimed = new Set(
+      all.map((p) => p.spec && canon(dirname(expand(String(p.spec))))).filter(Boolean),
+    );
+    const orphans = readdirSync(homes)
+      .filter((d) => /^\d{4}-/.test(d))
+      .filter((d) => !claimed.has(canon(join(homes, d))));
+    if (!orphans.length) continue;
+    console.log(
+      yellow(`\n  ${orphans.length} home(s) in ${label} .walkdown that no entry names:`),
+    );
+    for (const d of orphans) console.log(`    ${join(homes, d)}`);
+    console.log(
+      dim(
+        '    Left standing, and not guessed at — walkdown will not decide which checkout\n' +
+          '    they belong to. `walkdown project add <path>` lists one if you know.',
+      ),
+    );
+  }
   if (scratch.length) {
     console.log(`\n  ${dim('Ephemeral')}`);
     for (const p of scratch) {

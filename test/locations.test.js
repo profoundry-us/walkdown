@@ -1129,6 +1129,43 @@ test('a blueprint in the personal home answers, whatever sits above that home @r
   }
 });
 
+test('a home nothing claims is reported, and never guessed at @rule:locations.default.one-home-per-blueprint', () => {
+  /*
+   * "A home nothing claims is reported and left standing, never guessed at
+   * and never moved" is the rule's own step, and only the standing half was
+   * true: an unclaimed home appeared in no output anywhere. That is what
+   * made the config's unserialised read-modify-write invisible — concurrent
+   * inits made more homes than rows, every process exited 0 naming its own,
+   * and nothing afterwards mentioned the ones with no row (n-0219).
+   */
+  const s = scratch();
+  try {
+    const repo = join(s.root, 'repo');
+    mkdirSync(repo, { recursive: true });
+    execFileSync('git', ['init', '-q', '.'], { cwd: repo });
+    walkdown(s.home, ['init'], repo);
+
+    const before = walkdown(s.home, ['projects'], repo);
+    assert.doesNotMatch(before, /no entry names/, 'nothing to report yet');
+
+    // A home standing with records in it and no row anywhere — what a lost
+    // config write leaves behind.
+    const stranded = join(s.home, 'blueprints', '0009-stranded');
+    mkdirSync(join(stranded, 'threads'), { recursive: true });
+    writeFileSync(join(stranded, 'threads', 'n-0001.yml'), 'id: n-0001\nstatus: open\n');
+
+    const after = walkdown(s.home, ['projects'], repo);
+    assert.match(after, /no entry names/, after);
+    assert.match(after, /0009-stranded/, 'the home itself is named');
+    assert.match(after, /not guessed at/, 'and it says it will not be adopted');
+
+    // Reported, never adopted: the config is untouched by the reporting.
+    assert.doesNotMatch(readFileSync(join(s.home, 'config.yml'), 'utf8'), /0009-stranded/);
+  } finally {
+    s.cleanup();
+  }
+});
+
 test('move writes into a pure-override row rather than beside it @rule:locations.keeping.moving-is-a-decision', () => {
   const s = scratch();
   try {
