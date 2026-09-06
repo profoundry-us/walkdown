@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-09-06T17-14-32Z-local-01",
+  "created": "2026-09-06T17:14:32Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "c0cb3a9-dirty",
+  "tree_hash": "sha256:ad121762fe6a",
+  "spec_hash": "sha256:9666fe299538",
+  "results": [
+    {
+      "rule": "locations.default.one-home-per-blueprint",
+      "status": "pass",
+      "statement_hash": "sha256:c2e4b20e7f0d",
+      "evidence": [
+        "runs/evidence/2026-09-06T17-14-32Z/transcript.md",
+        "runs/evidence/2026-09-06T17-14-32Z/probe-race-noretry.sh",
+        "runs/evidence/2026-09-06T17-14-32Z/probe-race-retry.sh",
+        "runs/evidence/2026-09-06T17-14-32Z/probe-race-monorepo.sh",
+        "runs/evidence/2026-09-06T17-14-32Z/checks-locations.txt"
+      ],
+      "reasoning": "I drove the CLI in throwaway checkouts, each round under its own WALKDOWN_HOME, rather than trusting the board. Asking is inert: with a fresh checkout and a WALKDOWN_HOME that does not exist, `where`, `where runs`, `where --json`, `projects`, `status`, `threads` and `lint` left the tree byte-identical and never created the personal home, and asking again after `init` changed nothing either. Two checkouts in one `.walkdown` got `0001-alpha` and `0002-beta` with nothing added to either repository; re-running `init` kept the home that already held a run record. Names never decided anything: two checkouts both called `twin` got their own homes and ledgers; a repository with a committed `app` entry and a hand-written personal `app` entry rooted at a nested `packs/app` answered by where I stood, not by the shared id, and `walkdown projects` called the personal one shadowed rather than merging it; a server started at that root refused `?bp=app` with 409 and both candidates named by key; and `init --commit none` moved the home out whole, claimed a fresh number in the receiving `blueprints/`, carried its run record with it, and left the same-named personal row untouched instead of absorbing it. A home whose entry I forgot was reported by `projects` as unclaimed, left standing with its record, and never reused - the next `init` minted `0002-orph`. On concurrency I ran eight `init`s truly in parallel from eight separate checkouts, five rounds, both with distinct names and with all eight named `twin`: without retries exactly one wins and seven refuse in words at the config write, and - the part that matters - `homes=1` every round, so a loser leaves no half-claimed directory behind; with the retry the refusal asks for, three rounds of eight same-named checkouts each produced eight homes, eight config rows, no duplicate number, no shared spec, and a bijection from checkout to home. The repo's own 19 checks tagged for this rule pass. Two things I did not earn and will not claim: I could not provoke the different-names-same-number refusal through the CLI, because the config lock serialises `init` before the allocator is reached (only its check covers it), and I found no CLI door that allocates two homes into one *repository* `.walkdown`, so that allocator was raced only in the personal home. One caveat cuts against the last sentence of the statement: `defaults:` sits above the home's own layout in the resolution order, so an entry that names `home:` but whose `runs:` key has been deleted by hand resolves runs to a blanket default even though the home holds records - reachable only by two hand edits (writing a `defaults:` block and deleting a key that `init`, `project add` and `move` all always write), moving nothing and hiding nothing, and the sibling rule that once owned that ground is deliberately retired. I judged it a caveat worth a person's eye rather than a failure; it is written up in section 7 of the transcript.",
+      "threads": []
+    }
+  ]
+}
