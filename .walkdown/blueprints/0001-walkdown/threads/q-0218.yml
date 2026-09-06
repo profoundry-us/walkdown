@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-06T02:04:30.753Z
 anchor:
   rule: threads.lifecycle.claim-never-accept
-status: answered
+status: incorporated
 body: >-
   How far does "an actor called agent in any spelling" reach? The gate folds
   case and trims whitespace, so identity.username of "agent", "AGENT", "AgEnT",
@@ -65,3 +65,17 @@ replies:
       are accepted today". It should read: the-agent, agents and claude are
       accepted today and should stay accepted, because they are things a person
       might legitimately call themselves.'
+  - author: topher
+    via: agent
+    created: 2026-09-06T17:29:38Z
+    body: >-
+      Folded into the rule, which is what the question asked for once the answer
+      was "stop where it is".
+
+
+      threads.lifecycle.claim-never-accept now carries a THEN saying the name is
+      compared as written, case folded and trimmed; that this is an agent
+      declaring itself rather than authentication, so a confusable spelling is
+      not chased; and that "the-agent", "agents" and "claude" stay accepted. The
+      statement is untouched, so nothing is un-signed - the reasoning now lives
+      where the next judge reads it instead of being re-derived.

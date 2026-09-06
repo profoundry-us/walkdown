@@ -32,6 +32,7 @@ stories:
           then:
             - Each is rejected and the thread is unchanged - work can be claimed on somebody's behalf, and accepted only by them
             - The refusal says where to say who you are, and never fills the gap with a login name
+            - The name is compared as written, case folded and trimmed - this is an agent declaring itself, not authentication, so a confusable spelling is not chased and "the-agent", "agents" and "claude" stay accepted (q-0218)
           statement_hash: sha256:482531dc241f
 
       - id: threads.lifecycle.acts-for-a-person
