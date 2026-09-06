@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-09-06T00-44-13Z-local-01",
+  "created": "2026-09-06T00:44:13Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "53984c2-dirty",
+  "tree_hash": "sha256:fe560649419e",
+  "spec_hash": "sha256:9666fe299538",
+  "results": [
+    {
+      "rule": "threads.lifecycle.acts-for-a-person",
+      "status": "pass",
+      "statement_hash": "sha256:6790e9b3474c",
+      "evidence": [
+        "runs/evidence/2026-09-06T00-44-13Z/probes.txt",
+        "runs/evidence/2026-09-06T00-44-13Z/panel-report.txt"
+      ],
+      "reasoning": "Judged against a scratch copy served from inside itself with its own home, whose config declares scratch-judge-afp-0906, so any name that landed other than that one would be a name I had smuggled in. I tried every door I could find. Over HTTP, opening a thread, replying to it and moving it while passing author/actor/user/username/by all set to \"mallory\" recorded scratch-judge-afp-0906 every time, with via: agent beside it (n-0209 on disk); the draft and the run record written the same way carry the same actor, and an agent asking for \"verified\" was refused in the acceptance's own words rather than by dropping the name. At the CLI, --actor and --author do not exist as flags at all (unknown option), and WALKDOWN_ACTOR / WALKDOWN_USER / WALKDOWN_USERNAME / WALKDOWN_AUTHOR / USER / LOGNAME set to mallory together changed nothing; on a home that declares nobody, a GIT_CONFIG_COUNT/KEY/VALUE injection naming mallory was stripped and the write fell back to the machine's own git guess (topher), which is the fallback, not my string. The report names both at both surfaces: the CLI prints \"scratch-judge-afp-0906 · via agent\" on the opening message and on each reply, and the panel renders the author with a \"via agent\" chip beside it, while a write posted with no via renders as the person's own sentence with nothing beside it - so a machine's sentence is distinguishable from a person's. Two things I found and do not count as failures: via is free text a caller states, so via: topher renders as \"via topher\" (provenance, never attribution - the author stayed the machine's person, and a non-string via is dropped entirely); and WALKDOWN_HOME pointed at a config.yml declaring mallory does file under mallory, but that variable names a personal config file rather than a person, is the project's own documented relocation knob (the scratch-copy governance and both test suites depend on it), is unreachable through the HTTP door, and anyone who can set it can already edit the file it points at. Nothing a caller passes in reached the author field."
+    }
+  ]
+}

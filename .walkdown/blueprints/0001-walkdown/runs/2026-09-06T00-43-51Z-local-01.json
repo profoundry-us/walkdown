@@ -1,0 +1,29 @@
+{
+  "run_id": "2026-09-06T00-43-51Z-local-01",
+  "created": "2026-09-06T00:43:51Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "53984c2-dirty",
+  "tree_hash": "sha256:fe560649419e",
+  "spec_hash": "sha256:9666fe299538",
+  "results": [
+    {
+      "rule": "locations.default.one-home-per-blueprint",
+      "status": "fail",
+      "statement_hash": "sha256:c2e4b20e7f0d",
+      "evidence": [
+        "runs/evidence/2026-09-06T00-43-51Z/race-init.sh",
+        "runs/evidence/2026-09-06T00-43-51Z/race-init.txt",
+        "runs/evidence/2026-09-06T00-43-51Z/second-home.sh",
+        "runs/evidence/2026-09-06T00-43-51Z/second-home.txt",
+        "runs/evidence/2026-09-06T00-43-51Z/sequential.sh",
+        "runs/evidence/2026-09-06T00-43-51Z/sequential.txt",
+        "runs/evidence/2026-09-06T00-43-51Z/shared-name.txt"
+      ],
+      "reasoning": "Driven for real in throwaway git repositories with WALKDOWN_HOME redirected, every sequential clause of this rule held: three `walkdown where` calls before any project existed left the home empty (nothing allocated, not even a claim); two checkouts both named `myproj` got 0001-myproj and 0002-myproj with ids myproj and myproj-2, rooted by path; a home already holding runs kept answering on a second init with its records untouched; a cp -R copy sharing both directory name and in-repo id `shared` resolved through its own nearest .walkdown for `where` and `serve` while `project add` refused to reach into the checkout that answers for itself; and `move` refused a destination already holding records rather than interleaving two ledgers. It fails under concurrency. Six inits released together by a barrier file against one fresh home, seven trials: two blueprints were handed the SAME number in four trials (0005-r1 and 0005-r4; 0004-x1 and 0004-x2), because each allocator reads the blueprints listing and picks max+1 with nothing serialising them, and config.yml's unlocked read-modify-write clobbered rows in six of seven trials (3, 3, 4, 4, 4, 5 rows kept out of 6 inits). Four repositories all named `twin` raced into one home and produced four homes on disk against a single config row, leaving three projects unreachable. The stranded state is then invisible and gets worse on its own: from such a checkout `walkdown where` reports only \"nothing declares this directory\" and never mentions the home standing there, and `walkdown init` run again quietly creates a second home (0001-x1 -> 0006-x1) with the first one's runs left behind - the two outcomes this rule names outright, a second home with records stranded in the first, and an unclaimed home that is left standing but never reported. Filed as n-0210.",
+      "threads": ["n-0210"]
+    }
+  ]
+}

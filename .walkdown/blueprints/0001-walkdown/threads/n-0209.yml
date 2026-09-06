@@ -1,0 +1,24 @@
+id: n-0209
+kind: note
+author: topher
+via: agent
+created: 2026-09-06T00:49:09.532Z
+anchor:
+  rule: locations.default.in-repo-on-request
+status: open
+body: "Judging locations.pointer.placed-where-agents-read turned up a path
+  defect that belongs to this rule instead. When the pointer is placed from a
+  directory the blueprint home does not sit under - `walkdown pointer --into
+  CLAUDE.md` run in packages/web of a repo whose home is at the root's .walkdown
+  - the block names the blueprint by an absolute machine path
+  (`/private/var/folders/.../repo/.walkdown/blueprints/0001-repo/blueprint`)
+  rather than a relative one. From the root, and from a pack initialised with
+  --dir where the home is beneath it, the same command writes the relative
+  `.walkdown/blueprints/0001-repo/blueprint/`. This rule's THEN says the pointer
+  names the home by a relative path, and no-footprint's statement remembers a
+  home-directory path in shared history as the thing that got reversed - here
+  one lands in a file meant to be committed, and is wrong on every other
+  machine. Evidence: runs/evidence/2026-09-06T00-43-58Z/subdir-absolute-path.txt
+  (contrast in the same file),
+  runs/evidence/2026-09-06T00-43-58Z/pointer-homes-probe.txt section F.
+  Placement itself was correct throughout; only the path text is at issue."

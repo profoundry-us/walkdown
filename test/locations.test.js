@@ -1,6 +1,17 @@
 import assert from 'node:assert/strict';
 import { execFileSync, spawn, spawnSync } from 'node:child_process';
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  unlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import test from 'node:test';
@@ -424,6 +435,18 @@ test('a directory that happens to be named .yml is not a spec file @rule:locatio
     mkdirSync(join(bp, 'storyboard.yml'));
     assert.deepEqual(specFiles(bp), ['features/a.yml', 'walkdown.yml']);
     assert.match(specHash(bp), /^sha256:[0-9a-f]{12}$/);
+
+    /*
+     * And a link to nothing, which is the same question asked of the loader
+     * (n-0211): `statSync` threw ENOENT out of lint, status and judge alike,
+     * so no run could be recorded at all. A name ending in .yml is not a
+     * promise that anything is there.
+     */
+    symlinkSync(join(bp, 'features', 'gone.yml'), join(bp, 'features', 'dangling.yml'));
+    assert.deepEqual(specFiles(bp), ['features/a.yml', 'walkdown.yml']);
+    assert.match(specHash(bp), /^sha256:[0-9a-f]{12}$/);
+    // The loader's half of the same question is exercised through lint, in
+    // test/lint.test.js, where a blueprint is declared and can be loaded.
   } finally {
     s.cleanup();
   }
@@ -876,6 +899,14 @@ test('blueprints claiming homes at the same moment get one each @rule:locations.
         `while (!existsSync(${JSON.stringify(go)})) {}\n` +
         `process.stdout.write(claimHome({ name: 'app', walkdown: process.env.WALKDOWN_HOME }).home);\n`,
     );
+    /*
+     * All named the same, which is the ONLY case the current guard closes: an
+     * exclusive mkdir swaps on the directory name, so racers agreeing about
+     * the name collide on it. Eight DIFFERENT names still share numbers and
+     * still produce two blueprints in one home - n-0210, open, and not
+     * covered here because a red test is not a record of an open decision.
+     * The thread is.
+     */
     const racers = Array.from({ length: 8 }, () =>
       spawn(process.execPath, [claim], { env: { ...process.env, WALKDOWN_HOME: s.home } }),
     );

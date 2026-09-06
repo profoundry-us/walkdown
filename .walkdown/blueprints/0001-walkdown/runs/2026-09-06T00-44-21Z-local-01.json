@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-09-06T00-44-21Z-local-01",
+  "created": "2026-09-06T00:44:21Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "53984c2-dirty",
+  "tree_hash": "sha256:fe560649419e",
+  "spec_hash": "sha256:9666fe299538",
+  "results": [
+    {
+      "rule": "locations.answer.one-walkdown-answers",
+      "status": "fail",
+      "statement_hash": "sha256:b08354a355f7",
+      "evidence": [
+        "runs/evidence/2026-09-06T00-44-21Z/boundary-holds.txt",
+        "runs/evidence/2026-09-06T00-44-21Z/server-scope.txt",
+        "runs/evidence/2026-09-06T00-44-21Z/personal-home-refused.txt",
+        "runs/evidence/2026-09-06T00-44-21Z/mechanism.txt"
+      ],
+      "reasoning": "Driven for real in throwaway monorepo trees with redirected WALKDOWN_HOMEs, never by reading code. The pack/root boundary itself is sound: from the pack, from pack/src/deep, through a symlink to the pack and through a `src/..` spelling, `projects` and `where` name only the pack's `.walkdown` and the personal one; from the root, only the root's; a `.walkdown` two levels above is never a second repository config; `project add` of a pack blueprint is refused from the root under every spelling I tried (symlink, `..`, trailing slash) and `--ephemeral` is refused as the original rather than a copy; hand-written rows crossing the boundary are set aside on read, named on `where`, reported by lint from both the committed and the personal file, and invisible to `status`, `serve` and `--project`; a server started at the root offers only `repo` and answers `unknown project` to `?bp=` for the pack's blueprint (again under all three spellings) including on POST /api/threads, while the pack's server answers the same for the root's, and an in-scope POST wrote its thread into the selected blueprint's own home and nowhere else; a `.walkdown` holding homes but no config.yml declared nothing and a personal row naming a blueprint under it was read. What fails is the step blessing a row that names a blueprint under the personal home. `lib/locations.js:785` encodes that exemption (`t === mineToDeclare`), but `theirs` comes from `walkdownRoot()`, which by construction never returns the personal home (`resolve(mine) !== personal`, `lib/locations.js:604`) — so a spec inside the personal home is always attributed to the next `.walkdown` above it, and refused whenever that one carries a config.yml. Concretely, with WALKDOWN_HOME pointed at `<app>/tmp/test-home` (the shape this repo's own runner uses), `cd other && walkdown init --commit none` puts the new project in the personal home, prints that it listed it there, and then `projects`, `status`, `lint` and `serve` in that same checkout all report that nothing declares the directory, while `where` prints `walkdown where — other` above a block refusing `other` for lying under `<app>/.walkdown` — a directory it does not lie under. The exemption holds today only because the default `~/.walkdown` has nothing above it. Filed as n-0213.",
+      "threads": ["n-0213"]
+    }
+  ]
+}

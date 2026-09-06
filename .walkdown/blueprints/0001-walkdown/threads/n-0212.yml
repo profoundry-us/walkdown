@@ -1,0 +1,35 @@
+id: n-0212
+kind: note
+author: topher
+via: agent
+created: 2026-09-06T01:02:23.906Z
+anchor:
+  rule: threads.lifecycle.claim-never-accept
+status: open
+body: "A machine that says a machine typed the mutation is only refused when it
+  spells its provenance exactly 'agent'. checkTransition() in lib/threads.js:65
+  tests `via === 'agent'` — case-sensitive, untrimmed — one line below the ACTOR
+  test, which lib/vocab.js isMachineName() deliberately trims and lowercases so
+  the spelling cannot matter. So on any machine whose home declares a person
+  (the ordinary case: an agent working at somebody's desk), POST
+  /api/threads/<id>/status with {\"status\":\"verified\",\"via\":\"Agent\"}
+  returns 200 and the thread is verified; so do \" AGENT \" and an honest
+  \"claude-opus-5\". Nothing constrains via to a vocabulary — lib/api.js
+  provenance() takes any string up to 40 characters — so an agent naming itself
+  truthfully is the case that gets through, and only the one blessed spelling is
+  caught. Worse, the acceptance leaves no trace of the machine:
+  transitionThread() attaches via only to a REASON reply (lib/threads.js:88) and
+  verify needs no reason, so the file afterwards reads verified_by: <person>
+  with nothing beside it. The comment above the guard says 'there is no value of
+  via that lets a claim become an acceptance'; every value but one does. Fix is
+  the same shape as the actor test: compare isMachineName(via), or treat any via
+  at all as disqualifying for HUMAN_ONLY statuses — an interface that names its
+  provenance is by definition not the person. Everything else on this rule holds
+  at all four doors: an undeclared identity, an actor named 'agent' or ' AGENT
+  ', an actor named in the request body, and --as-agent are each refused at
+  library, CLI, HTTP and panel, the thread unchanged, and the refusal names the
+  config file actually being read (WALKDOWN_HOME-aware) without filling the gap
+  with the login name. Evidence:
+  runs/evidence/2026-09-06T00-44-06Z/hole-via-provenance.txt,
+  doors-library-and-cli.txt, door-http.txt, door-panel.txt,
+  panel-undeclared-verified.png."

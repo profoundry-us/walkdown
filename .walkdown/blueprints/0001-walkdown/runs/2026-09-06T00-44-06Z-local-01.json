@@ -1,0 +1,30 @@
+{
+  "run_id": "2026-09-06T00-44-06Z-local-01",
+  "created": "2026-09-06T00:44:06Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "53984c2-dirty",
+  "tree_hash": "sha256:fe560649419e",
+  "spec_hash": "sha256:9666fe299538",
+  "results": [
+    {
+      "rule": "threads.lifecycle.claim-never-accept",
+      "status": "fail",
+      "statement_hash": "sha256:482531dc241f",
+      "evidence": [
+        "runs/evidence/2026-09-06T00-44-06Z/hole-via-provenance.txt",
+        "runs/evidence/2026-09-06T00-44-06Z/doors-library-and-cli.txt",
+        "runs/evidence/2026-09-06T00-44-06Z/door-http.txt",
+        "runs/evidence/2026-09-06T00-44-06Z/door-panel.txt",
+        "runs/evidence/2026-09-06T00-44-06Z/panel-undeclared-verified.png",
+        "runs/evidence/2026-09-06T00-44-06Z/panel-undeclared-waived.png",
+        "runs/evidence/2026-09-06T00-44-06Z/panel-agent-named-verified.png",
+        "runs/evidence/2026-09-06T00-44-06Z/panel-agent-named-waived.png"
+      ],
+      "reasoning": "Judged on a scratch copy (tmp/scratch/judge-cna-0906) served from inside itself with its own home, at every door there is: writes.transition() called directly, `walkdown thread --verify/--waive`, POST /api/threads/<id>/status, and the panel driven in a browser. Three of the four WHENs hold everywhere. A home that declares nobody is refused at all four doors with the same sentence, and it names the config file actually being read - the redirected home-anon/config.yml, not a hardcoded ~/.walkdown - and says the login name is a guess rather than using it; the panel says the same thing under the buttons and opens the identity form instead of writing. An actor spelled 'agent' or ' AGENT ' is refused everywhere, trimming and case included. An actor named in the request body changes nothing: the CLI has no --actor or --author at all, and the API reads who is acting from the machine, so a body naming 'Topher Fangio' is refused exactly as the empty one is. --as-agent and {via:'agent'} are refused for both verified and waived. Every refused attempt left the thread byte-identical on disk (n-0010 a8a59322..., n-0205 a9e70576... before and after). But the fourth WHEN - a mutation marked as typed by a machine - is enforced only for one spelling. checkTransition() tests `via === 'agent'` (lib/threads.js:65), case-sensitive and untrimmed, one line below the actor test that lib/vocab.js deliberately trims and lowercases; api.js provenance() accepts any string up to 40 characters. So from a machine whose home declares a person - the ordinary case, an agent at somebody's desk - {status:'verified', via:'Agent'} returns HTTP 200 and verifies the thread, and so do ' AGENT ' and an honest 'claude-opus-5'. The machine's own statement that it typed the words is then thrown away: via rides only on a reason reply, and verify carries no reason, so the file afterwards reads verified_by: <person> with nothing beside it. A rule whose whole point is that a machine may claim and never accept is defeated by an agent that names its provenance truthfully instead of with the one blessed word. Failing, with n-0212 opened.",
+      "threads": ["n-0212"]
+    }
+  ]
+}

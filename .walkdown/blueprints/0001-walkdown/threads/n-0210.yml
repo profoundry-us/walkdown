@@ -1,0 +1,75 @@
+id: n-0210
+kind: note
+author: topher
+via: agent
+created: 2026-09-06T00:54:16.943Z
+anchor:
+  rule: locations.default.one-home-per-blueprint
+status: open
+body: >-
+  Concurrent `walkdown init` against one home both collides numbers and loses
+  config rows.
+
+
+  Six throwaway git repos with distinct directory names, each running `walkdown
+  init` with WALKDOWN_HOME pointed at one fresh home, released together by a
+  barrier file (runs/evidence/2026-09-06T00-43-51Z/race-init.sh). Seven trials,
+  six racers each:
+
+    - Two blueprints were given the SAME number in 4 of 7 trials (e.g. 0005-r1 and 0005-r4, 0004-x1 and 0004-x2). Each init reads the blueprints directory's listing and picks max+1, so simultaneous readers see the same listing and allocate the same number. The rule's 'the number is allocated against that directory's own listing rather than derived from a name' holds only against a listing nobody else is writing to.
+    - config.yml is a read-modify-write with no lock, so rows are clobbered: 6 of 7 trials kept fewer rows than inits (3, 3, 4, 4, 4, 5 of 6). Those checkouts have a home on disk holding a blueprint that nothing in config claims.
+
+  The stranded state is then invisible and self-worsening
+  (runs/evidence/2026-09-06T00-43-51Z/second-home.sh): from such a checkout,
+  `walkdown where` says only 'nothing declares this directory' and never
+  mentions the standing home, and `walkdown init` run again quietly creates a
+  SECOND home (0001-x1 -> 0006-x1) leaving the first one's runs behind. That is
+  exactly the two outcomes the rule forbids - 'one blueprint is never given a
+  second home with its records stranded in the first', and 'a home nothing
+  claims is reported and left standing'. It is left standing, but never
+  reported.
+
+
+  Same-named checkouts are hit hardest: four repositories all named 'twin' raced
+  into one home and produced four homes on disk (0001-twin..0004-twin) but a
+  single config row, so three of the four projects were unreachable by any
+  command while their homes sat there.
+
+
+  Driven one command at a time, everything else in the rule held: asking
+  allocates and writes nothing (an empty home after three `where` calls); two
+  same-named checkouts get 0001-myproj/0002-myproj and ids myproj/myproj-2; a
+  home holding records keeps answering on re-init; a cp -R copy sharing both
+  name and in-repo id resolves to its own .walkdown for where/serve, and
+  `project add` refuses to reach into a checkout that answers for itself; `move`
+  refuses a destination that already holds records. The defect is confined to
+  concurrency, but its result is a permanently split ledger that nothing
+  reports.
+
+
+  Evidence: runs/evidence/2026-09-06T00-43-51Z/race-init.txt, second-home.txt,
+  sequential.txt, shared-name.txt (and the .sh scripts that produced them).
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-06T00:57:29Z
+    body: >-
+      Mechanism, against the fix that is already in the tree (f22b091, an
+      ancestor of HEAD): claimHome's non-recursive mkdirSync is a
+      compare-and-swap on the whole directory NAME, `NNNN-slug`, not on the
+      number. Two racers with the SAME repository name do collide on the name
+      and one gets EEXIST and counts again - which is why four repositories all
+      called 'twin' came out as 0001-twin..0004-twin with no duplicate. Two
+      racers with DIFFERENT names that counted the same max+1 both mkdir
+      successfully, because 0005-r1 and 0005-r4 are different directories: no
+      EEXIST, no retry, one number for two blueprints. That is the residue of
+      n-0208, not a regression of it - the half that was fixed holds, and this
+      is the case its guard cannot see.
+
+
+      Separately, n-0208's second half (config.yml's unserialised
+      read-modify-write) is still open and is what produced the stranded homes
+      above; the reply on that thread says so and leaves the lock's design to
+      Topher. What this run adds is that the consequence is not only a missing
+      row: from a checkout whose row was lost, `walkdown where` never mentions
+      the home standing there, and `walkdown init` gives it a second one.

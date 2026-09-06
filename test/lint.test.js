@@ -91,6 +91,26 @@ test('a symlink out of the home is named; one pointing inside it is not', () => 
   assert.match(links[0].message, /resolves outside the home/);
 });
 
+test('a link to nothing is skipped, not thrown over @rule:locations.travel.judged-against-a-spec', () => {
+  /*
+   * n-0211: listFiles called `.isFile()` on the result of a name filter, so a
+   * DANGLING symlink among the spec files threw a raw `ENOENT ... stat` out of
+   * lint, status and judge alike - no walkdown sentence, and no run recordable
+   * at all. Sibling of n-0198, which was the same question asked of the hash:
+   * a name ending in .yml is not a promise that anything is there.
+   */
+  const h = writeFixture(join(root, 'dangling'));
+  symlinkSync(join(h.spec, 'features', 'never-written.yml'), join(h.spec, 'features', 'gone.yml'));
+
+  const { findings } = lint(load(h), { checks: false });
+  assert.ok(Array.isArray(findings), 'lint answered rather than throwing');
+  assert.equal(
+    findings.filter((f) => /ENOENT|stat/.test(f.message)).length,
+    0,
+    'and did not turn a node errno into a finding either',
+  );
+});
+
 /*
  * And it does not walk THROUGH the door it just reported. A linked directory
  * is named and not descended, so a link out of the tree is not a way to read

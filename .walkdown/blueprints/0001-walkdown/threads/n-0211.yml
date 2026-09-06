@@ -1,0 +1,21 @@
+id: n-0211
+kind: note
+author: topher
+via: agent
+created: 2026-09-06T01:02:21.872Z
+anchor:
+  rule: locations.travel.judged-against-a-spec
+status: open
+body: "Judging the spec hash turned up one rough edge next to it (the rule
+  itself passed). A blueprint file that is not a readable file takes down every
+  command with a raw Node stack trace instead of a walkdown message: put a
+  dangling symlink at blueprint/features/broken.yml and 'walkdown judge',
+  'walkdown lint' and 'walkdown status' all die with 'Error: ENOENT ... stat'
+  from listFiles in lib/blueprint.js, so no run can be recorded at all. Other
+  not-a-file entries are handled quietly and correctly - a directory named
+  dir.yml, a FIFO named fifo.yml and an uppercase BILLING.YML are all skipped by
+  both the loader and the hash, and a symlink to a real file outside the spec is
+  followed and hashed, moving the hash when its target is reworded. Only the
+  dangling link crashes. Evidence:
+  runs/evidence/2026-09-06T00-43-55Z/broken-symlink-crash.txt and
+  runs/evidence/2026-09-06T00-43-55Z/hash-probe.txt."

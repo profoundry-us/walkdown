@@ -186,6 +186,42 @@ test('a project with only an AGENTS.md gets the pointer there, not in a new CLAU
   );
 });
 
+test('the pointer names the blueprint relatively, from wherever the file sits @rule:locations.pointer.placed-where-agents-read', () => {
+  /*
+   * n-0209: the block measured "is the spec under here?" against the working
+   * DIRECTORY and fell back to an absolute path when it was not. Run from a
+   * subdirectory the home does not sit under, it wrote `/Users/somebody/...`
+   * into a file that gets committed and is wrong on every other machine.
+   *
+   * The path is read from beside the file it lands in, so that is what it is
+   * relative to, and both being in the same checkout is what makes a relative
+   * path mean anything - the code root is the test, not the cwd.
+   */
+  const repo = join(root, 'pointer-subdir');
+  const deep = join(repo, 'packages', 'web');
+  mkdirSync(deep, { recursive: true });
+  execFileSync('git', ['init', '-q', '.'], { cwd: repo });
+  const home = join(root, 'pointer-subdir-home');
+  const cli = (args, cwd) =>
+    execFileSync(process.execPath, [new URL('../bin/walkdown.js', import.meta.url).pathname, ...args], {
+      cwd,
+      env: { ...process.env, WALKDOWN_HOME: home, WALKDOWN_SKILLS_DIR: join(root, 'ps-skills') },
+      encoding: 'utf8',
+    });
+  cli(['init', '--commit', 'spec'], repo);
+
+  cli(['pointer', '--into', 'AGENTS.md'], deep);
+  const block = readFileSync(join(deep, 'AGENTS.md'), 'utf8');
+  assert.match(block, /\.\.\/\.\.\/\.walkdown\/blueprints\/0001-[^/]+\/blueprint\//);
+  assert.ok(!block.includes(root), `no machine path in a committed file:\n${block}`);
+
+  // And at the root, where it was always right, it stays a plain relative path.
+  cli(['pointer', '--into', 'CLAUDE.md'], repo);
+  const atRoot = readFileSync(join(repo, 'CLAUDE.md'), 'utf8');
+  assert.match(atRoot, /\.walkdown\/blueprints\/0001-[^/]+\/blueprint\//);
+  assert.ok(!atRoot.startsWith('/') && !atRoot.includes(root), atRoot);
+});
+
 /*
  * The pointer names where the spec is, and a spec can move. A block left
  * saying `blueprint/` after the spec moved out is worse than no block at all,

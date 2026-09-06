@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-09-06T00-43-55Z-local-01",
+  "created": "2026-09-06T00:43:55Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "53984c2-dirty",
+  "tree_hash": "sha256:fe560649419e",
+  "spec_hash": "sha256:9666fe299538",
+  "results": [
+    {
+      "rule": "locations.travel.judged-against-a-spec",
+      "status": "pass",
+      "statement_hash": "sha256:5014abd76d50",
+      "evidence": [
+        "runs/evidence/2026-09-06T00-43-55Z/hash-probe.txt",
+        "runs/evidence/2026-09-06T00-43-55Z/no-repo-and-in-repo.txt",
+        "runs/evidence/2026-09-06T00-43-55Z/panel-write-leaves-hash.txt",
+        "runs/evidence/2026-09-06T00-43-55Z/broken-symlink-crash.txt"
+      ],
+      "reasoning": "Judged by building throwaway blueprints under a redirected WALKDOWN_HOME and watching the spec hash move, never by reading the hashing code. Given a blueprint whose spec sits outside any repository, `judge --json` reports a spec_hash and repeats it exactly; appending a run to runs/, opening a thread (both by CLI and by POST /api/threads against a server run from inside the copy), writing a draft and saving evidence all left it on sha256:47124c92a7ed, and the ledger showed the run while the hash stood still - a run is what the spec produced, not part of it. Rewording one statement moved it to 9663a23de7bc and reverting brought it back; appending a bare comment moved it too, so the hash is over the blueprint's files rather than a paraphrase of them. The same words in a different feature file are a different spec: the identical bytes renamed onboarding.yml -> signup.yml hashed 6632944ddd9c instead of 47124c92a7ed, and two features swapped between alpha.yml and beta.yml gave da5735d53eab vs 13dd41efe80d. Attempts to break it all failed cleanly: no split-point ambiguity (the same bytes divided differently between a.yml and b.yml gave three distinct hashes, so the digest is not a naive concatenation); names with spaces, unicode and a leading dot each count and each move the hash; a directory named dir.yml, a FIFO named fifo.yml and an uppercase BILLING.YML are skipped by the loader and by the hash alike, so nothing walkdown treats as spec goes unhashed; a symlink to a file outside the blueprint is followed, hashed, and moves when its target is reworded. The claim about repositories holds both ways - a plain non-git directory still produced sha256:74635742eeff with no git_sha or tree_hash, and the byte-identical blueprint committed inside a repository under .walkdown/ produced the very same 74635742eeff, unchanged by a thread, a run, a draft, or committing the lot to git. One rough edge, filed as n-0211 rather than counted against this rule: a dangling symlink among the blueprint's files crashes judge, lint and status with a raw ENOENT stack trace from listFiles, which is loud rather than wrong but is not a walkdown message.",
+      "threads": ["n-0211"]
+    }
+  ]
+}

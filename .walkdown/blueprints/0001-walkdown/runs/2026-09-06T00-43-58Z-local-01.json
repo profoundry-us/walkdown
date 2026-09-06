@@ -1,0 +1,24 @@
+{
+  "run_id": "2026-09-06T00-43-58Z-local-01",
+  "created": "2026-09-06T00:43:58Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "53984c2-dirty",
+  "tree_hash": "sha256:fe560649419e",
+  "spec_hash": "sha256:9666fe299538",
+  "results": [
+    {
+      "rule": "locations.pointer.placed-where-agents-read",
+      "status": "pass",
+      "statement_hash": "sha256:66759d1c478c",
+      "evidence": [
+        "runs/evidence/2026-09-06T00-43-58Z/pointer-homes-probe.txt",
+        "runs/evidence/2026-09-06T00-43-58Z/pointer-homes-probe.sh",
+        "runs/evidence/2026-09-06T00-43-58Z/subdir-absolute-path.txt"
+      ],
+      "reasoning": "Judged by driving `walkdown init` and `walkdown pointer` for real in throwaway git repositories with WALKDOWN_HOME redirected, never by reading code. All three branches hold. With no agent-instruction file and the spec committed, init creates CLAUDE.md carrying the block and nothing else claims to be one. With exactly one it appends to that one and makes no competitor: AGENTS.md alone got the block and no CLAUDE.md appeared beside it, and the same held for GEMINI.md, CONVENTIONS.md and .github/copilot-instructions.md each on their own, including a zero-byte CLAUDE.md. With several it wrote to none and named them - `? several agent files - walkdown pointer --into <file>  CLAUDE.md, AGENTS.md` - leaving both files byte for byte as found, and `pointer --into AGENTS.md` afterwards let the person answer without touching CLAUDE.md. The uncommitted case in the GIVEN holds too: `init --commit none` left `git status` empty and said in words that not even a pointer was added, and moving a committed home back out removed the pointer from AGENTS.md while leaving the person's two lines intact. Break attempts: init run twice reported `up to date` and left the file's md5 unchanged; `pointer --into` twice in a row said `already current` and wrote nothing; a hand-edited section below the block survived a rewrite and the begin marker never appeared more than once; a CLAUDE.md appearing after the pointer already lived in AGENTS.md flipped the project into the several case, which named both and added no second block; in a monorepo `init --dir packs/billing` put the block in that pack's AGENTS.md and left the root CLAUDE.md untouched, which is the documented root-only-relative-to-the-root behavior rather than a miss; and where nothing is declared at all, both `pointer` and `pointer --into CLAUDE.md` refused with exit 2 and created no file. One thing found that this rule does not cover: placed from a subdirectory the home does not sit under, the block names the blueprint by an absolute machine path instead of a relative one - filed as n-0209 against locations.default.in-repo-on-request, whose THEN owns the relative-path promise. Placement, which is all this rule claims, was correct in every case tried."
+    }
+  ]
+}

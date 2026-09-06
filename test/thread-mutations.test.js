@@ -85,6 +85,32 @@ test('agents may claim, never accept: verified/waived need a named human @rule:t
   assert.throws(() => transitionThread(load(), 'n-1', { status: 'waived' }), /named human actor/);
 });
 
+test('provenance is refused by its presence, not its spelling @rule:threads.lifecycle.claim-never-accept', () => {
+  /*
+   * n-0212: this guard read `via === 'agent'` - case sensitive, untrimmed -
+   * one line below an actor test that deliberately folds case. On any machine
+   * whose home declares a person (an agent sitting at somebody's desk, which
+   * is the ordinary case) `via: 'Agent'` verified the thread. And folding case
+   * would not have closed it: `via` is free text, so an agent naming itself
+   * honestly was the one that would still have got through.
+   *
+   * `via` means something typed this FOR the person named, and a person's
+   * acceptance is the one thing nothing may type for them.
+   */
+  transitionThread(load(), 'n-1', { status: 'addressed', actor: 'agent' });
+  for (const via of ['agent', 'Agent', ' AGENT ', 'claude-opus-5', 'a helpful script'])
+    for (const status of ['verified', 'waived'])
+      assert.throws(
+        () => transitionThread(load(), 'n-1', { status, actor: 'Topher', reason: 'because', via }),
+        /claim work on their behalf/,
+        `${status} via ${JSON.stringify(via)}`,
+      );
+
+  // A person at a keyboard sends no provenance, and is unaffected.
+  const t = transitionThread(load(), 'n-1', { status: 'verified', actor: 'Topher' });
+  assert.equal(t.verified_by, 'Topher');
+});
+
 test('waiving records waived_by and the reason as a reply @rule:threads.lifecycle.reasoned-endings', () => {
   assert.throws(
     () => transitionThread(load(), 'n-1', { status: 'waived', actor: 'topher' }),

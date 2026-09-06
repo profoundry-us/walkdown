@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-09-06T00-44-17Z-local-01",
+  "created": "2026-09-06T00:44:17Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "53984c2-dirty",
+  "tree_hash": "sha256:fe560649419e",
+  "spec_hash": "sha256:9666fe299538",
+  "results": [
+    {
+      "rule": "locations.default.skills-are-yours-by-default",
+      "status": "pass",
+      "statement_hash": "sha256:62223922d07f",
+      "evidence": [
+        "runs/evidence/2026-09-06T00-44-17Z/probe-transcript.txt"
+      ],
+      "reasoning": "Judged by driving init and skills for real in throwaway git repositories with WALKDOWN_HOME and WALKDOWN_SKILLS_DIR both redirected at scratch directories, so nothing could reach the real home or ~/.claude/skills (the transcript ends with their mtimes, still Aug 31). All four THEN clauses held. `init` with nothing committed put five SKILL.md into the redirected personal directory and left `git status --porcelain` empty - the tree gained nothing, not even a pointer, and the same held in a directory that is not a repository at all. `init --commit spec` put them at `.claude/skills/` beside the committed home instead and wrote nothing to the personal directory. walkdown-sitting, whose first command is `tools/sitting.mjs` and exists only in this repository, is present in `lib/skills/` and was installed in none of the six destinations I created - SHIPPED lists five, and the survey counts five. An edited copy was reported `! kept (yours differs)` and its last line survived; `--force` then updated it, which is the door the message names. I tried to break it in the places the rule's edges are: `skills` with no flags surveyed both destinations, named which copies differ, refused without a terminal (exit 2) and wrote nothing - including against a personal directory that did not exist, which it did not create; `--project` from `deep/nested/` still chose the ROOT copy; `--project` outside a repository refused with exit 2 rather than guessing. The standard was changed in both directions: leaving to `--commit none` reinstalled to the personal directory, removed walkdown's four unedited copies from the repository (git shows them as deletions to commit), and kept and named the one I had edited, so \"this repository gets nothing\" is not a lie the transcript contradicts; going the other way, `--commit spec` on the personal project created the repository copies and left the personal set alone, which is right - they are the person's and work everywhere. I also checked n-0197's remedy is in place: this checkout's own `.claude/skills/*/SKILL.md` are real files now, not symlinks into `lib/skills/`, so `skills --project --force` here can no longer write through to the shipped sources; I did not run --force in this checkout to avoid touching source either way. The 69 rule-tagged checks in test/init-run.test.js and test/locations.test.js all pass.",
+      "threads": []
+    }
+  ]
+}

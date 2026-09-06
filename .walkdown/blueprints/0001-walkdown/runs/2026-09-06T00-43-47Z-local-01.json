@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-09-06T00-43-47Z-local-01",
+  "created": "2026-09-06T00:43:47Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "53984c2-dirty",
+  "tree_hash": "sha256:fe560649419e",
+  "spec_hash": "sha256:9666fe299538",
+  "results": [
+    {
+      "rule": "locations.keeping.moving-is-a-decision",
+      "status": "pass",
+      "statement_hash": "sha256:452142df8095",
+      "evidence": [
+        "runs/evidence/2026-09-06T00-43-47Z/move-probe.txt"
+      ],
+      "reasoning": "Judged by driving `walkdown move` for real, eighteen ways, in throwaway projects with WALKDOWN_HOME redirected, never against this ledger. A repository-committed runs directory holding a JSON record, a 300KB executable, a CRLF file, a file with NUL bytes and no trailing newline, a nested tree and a relative symlink moved out: destination manifest diffed byte for byte against the source manifest — same hashes, same modes (100755 stayed 100755), the symlink still a symlink pointing at the same relative target, the old directory gone, and the same diff came out IDENTICAL across a real filesystem boundary onto a separate 4MB HFS volume, where rename(2) cannot work and it must copy. The choice landed in the personal config and nothing else there was disturbed: a top-of-file comment, an inline comment on `identity.username`, a comment introducing `projects:`, a comment inside the project entry, a trailing comment on the `runs:` line itself and a bottom-of-file note all survived, with only the path value rewritten. Refusal held everywhere I pushed it: a destination holding a run record, a symlink to such a directory (it resolves rather than being fooled), a directory whose only content is an empty subdirectory, and one whose only records sit in a nested subdirectory were all refused with exit 2 and nothing moved; an existing regular file and a parent path running through a file were refused by shape (ENOTDIR), the current location was a no-op, and a destination inside the source was named as such. The two failure modes that could strand records both refuse before touching anything: a personal config that will not parse, and one that cannot be written (read-only file and directory) — in each case no destination was created, the records stayed put, and the config was left byte-identical. A copy that fails part way — 6MB of records onto the 4MB volume — reported ENOSPC, removed the partial copy, left the source whole and wrote nothing down, so a retry is clean. One soft spot, not a violation: occupancy is judged by visible entries, so a destination whose only content is a hidden file, or a hidden directory containing JSON, is accepted — walkdown never writes a ledger under a dot-directory, so no two ledgers of its own can interleave this way, but it is worth knowing. (Also noted and not reproducible: in my first sandbox a project's committed .walkdown/config.yml was absent at the point `move` reported nothing declared the directory; four clean replays of the same sequence could not reproduce it and no walkdown command was observed to remove that file, so I record it as unexplained rather than as a finding.)",
+      "threads": []
+    }
+  ]
+}

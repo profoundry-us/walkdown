@@ -1,0 +1,43 @@
+id: n-0213
+kind: note
+author: topher
+via: agent
+created: 2026-09-06T01:04:41.362Z
+anchor:
+  rule: locations.answer.one-walkdown-answers
+status: open
+body: >-
+  A blueprint that lives in the PERSONAL home is refused as a boundary crossing
+  whenever any .walkdown with a config.yml sits above that home — so `walkdown
+  init --commit none` can create a project its own checkout cannot then see.
+
+
+  Repro (runs/evidence/2026-09-06T00-44-21Z/personal-home-refused.txt): with
+  WALKDOWN_HOME redirected to <app>/tmp/test-home (the shape this repo's own
+  runner uses: `WALKDOWN_HOME=tmp/test-home`), `walkdown init --dir app --commit
+  spec` then `cd other && walkdown init --commit none`. init reports `+ listed
+  .../tmp/test-home/config.yml as \`other\`` and puts the home there. From
+  `other`, `walkdown projects` says "No projects", `status`/`lint`/`serve` all
+  say nothing claims this directory, and `where` prints "walkdown where — other"
+  above a block that refuses it: "its spec
+  .../tmp/test-home/blueprints/0001-other/blueprint lies under <app>/.walkdown,
+  which answers for it". The same happens when the personal home is itself named
+  .walkdown (lab2 shape): a personal home at <top>/home/.walkdown with a
+  .walkdown at <top> loses every blueprint it holds, in every checkout below
+  <top> except <app> itself.
+
+
+  The rule's own step says a row may name a blueprint under "the personal home,
+  whose config that file is" — and lib/locations.js:785 encodes exactly that (`t
+  === mineToDeclare`). It is unreachable: `theirs` comes from walkdownRoot(),
+  which skips the personal home by construction (lib/locations.js:604,
+  `resolve(mine) !== personal`), so a spec inside the personal home is always
+  attributed to the next .walkdown ABOVE it. The clause only appears to hold in
+  the default layout, where nothing sits above ~/.walkdown and walkdownRoot
+  returns null first. Two smaller consequences: the refusal names a directory
+  the spec does not actually lie under, and `where` prints the project's name in
+  its header while every row below says nothing declares it.
+
+
+  Everything else in the rule held under the same probing — see
+  runs/evidence/2026-09-06T00-44-21Z/boundary-holds.txt and server-scope.txt.

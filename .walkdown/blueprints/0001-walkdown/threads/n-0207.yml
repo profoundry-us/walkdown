@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-06T00:11:35.540Z
 anchor:
   rule: locations.pointer.placed-where-agents-read
-status: open
+status: addressed
 body: "`walkdown pointer` crashes with a raw stack trace where every other
   command answers in a sentence. Run it anywhere no blueprint is declared and
   resolveLocations() returns spec.path === null, which
@@ -21,3 +21,15 @@ body: "`walkdown pointer` crashes with a raw stack trace where every other
   passing by the judge re-earning locations.default.nothing-in-the-tree;
   anchored here rather than there because it belongs to the pointer, not to what
   init leaves in the tree."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-06T00:42:51Z
+    body: "Fixed in 53984c2. The refusal loadOrExit prints is now an exported
+      noBlueprintHere(loc, projectId) in bin/commands/context.js, and pointer
+      calls it after checking loc.spec?.path — it could not use loadOrExit
+      because it resolves by --dir rather than by project id, which is how it
+      came to have no refusal at all. Same two sentences as every other command,
+      one copy of them. Verified by hand in a bare git repository with a
+      redirected WALKDOWN_HOME: 'No blueprint here. Nothing in <config> claims
+      this directory.' then the init/project-add line, exit 2, no stack trace."

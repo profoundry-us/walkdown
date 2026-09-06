@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-06T00:05:10.903Z
 anchor:
   rule: locations.travel.judged-against-a-spec
-status: open
+status: addressed
 body: "The retired field is still being written, and the docs still describe the
   retirement as future work. spec_hash and tree_hash have shipped — the skeleton
   'walkdown judge' hands every judge carries git_sha, tree_hash and spec_hash
@@ -21,3 +21,18 @@ body: "The retired field is still being written, and the docs still describe the
   anyone arriving as an open design problem rather than a shipped decision. The
   fix is one line in the harness plus a past-tense rewrite of that section.
   Found by the provenance judge, 2026-09-05."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-06T00:42:51Z
+    body: "Fixed in 53984c2, and there was a third thing in the same function.
+      tools/sitting.mjs now stamps spec_hash(BP) instead of blueprint_sha, and
+      docs/08-locations.md says what shipped rather than describing the
+      conflation as an open problem — with a line saying blueprint_sha is
+      retired and that older records still carry it and are still read, because
+      the ledger is append-only and nothing rewrites them. The third thing:
+      'record' wrote into join(BP, 'runs'), which is blueprint/runs — a path
+      that stopped existing when a home became the spec with its four records as
+      SIBLINGS. It threw ENOENT rather than writing anywhere wrong, so no
+      verdict was ever lost to it, but none could be recorded either. It
+      resolves the runs directory now, the way everything else does."

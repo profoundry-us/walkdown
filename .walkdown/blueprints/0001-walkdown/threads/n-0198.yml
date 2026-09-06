@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-05T23:42:08.646Z
 anchor:
   rule: locations.travel.judged-against-a-spec
-status: open
+status: addressed
 body: >-
   `specHash` throws EISDIR on a directory named `<something>.yml` under
   `features/`, which would take down every run record and `walkdown judge` at
@@ -35,3 +35,17 @@ body: >-
   the way `serveFile` now does for the same class of mistake (n-0186). Worth
   deciding whether it should be skipped silently or named, since a directory
   called `features/thing.yml` is more likely a mistake than an intention.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-06T00:42:50Z
+    body: "Fixed in 53984c2. specFiles now filters isFile(), which is what
+      lib/blueprint.js's listFiles has always done — the two readers of that
+      directory agreeing is the point, since the hash is meant to cover what the
+      loader loads. Silently, as you asked: a directory is simply not a spec
+      file. Applied to the two named files as well as features/, because a
+      directory called walkdown.yml throws the same EISDIR. Covered by 'a
+      directory that happens to be named .yml is not a spec file' in
+      test/locations.test.js. And thank you for filing it despite it being an
+      observation rather than the ground of the verdict — you were right that it
+      would otherwise be rediscovered."
