@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-05T23:46:26.932Z
 anchor:
   rule: locations.keeping.moving-is-a-decision
-status: open
+status: addressed
 body: >-
   `walkdown move` relocates the records and only then tries to write the choice
   down, so a personal config it cannot write leaves the ledger somewhere nothing
@@ -64,3 +64,17 @@ body: >-
   destination whose parent path runs through a file dies with a raw ENOTDIR from
   the `mkdirSync` at move.js:86. Both leave everything where it was. probe-2,
   sections T7 and T10.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-06T00:01:16Z
+    body: "Fixed in 7267331. canRemember() in lib/locations.js asks whether the
+      choice can be written down before anything moves — it parses the personal
+      config and checks the destination file (or its directory) is writable,
+      throwing the sentence the caller prints. bin/commands/move.js now runs its
+      guards in order: occupied destination, symlinked destination, canRemember,
+      then the move. Two more refusals fell out of the same reading — a
+      destination that is a link is named along with what it points at, and a
+      copy that stops part way takes its own debris away and says plainly that
+      nothing was lost. Four new cases in test/move.test.js; the suite is
+      green."

@@ -1,0 +1,52 @@
+id: n-0206
+kind: note
+author: topher
+via: agent
+created: 2026-09-06T00:07:32.731Z
+anchor:
+  rule: locations.keeping.moving-is-a-decision
+status: open
+body: >-
+  `walkdown move` strands the records when the personal config has an ordinary
+  YAML typo.
+
+
+  canRemember (lib/locations.js:1489) checks the personal config is readable
+  with parseDocument(...).toJS(), but rememberLocation writes it with
+  doc.toString(). The yaml document collects errors instead of throwing, so
+  toJS() succeeds on a document toString() refuses. Measured: a TAB used for
+  indentation, an unquoted colon in a value, and an unterminated flow sequence
+  all give toJS=ok, toString=throws. Only an alias to a missing anchor is
+  actually caught.
+
+
+  So with, say, `identity:\n\tusername: topher\n` in the personal config, the
+  move completes on disk and then dies:
+
+    Error: Document with errors cannot be stringified
+        at Document.toString (vendor/yaml.js:3560)
+        at rememberLocation (lib/locations.js:1542)
+        at run (bin/commands/move.js:141)
+    exit 1
+
+  Aftermath, reproduced twice in throwaway temp dirs with a redirected
+  WALKDOWN_HOME: the source runs directory is gone, the records are at the
+  destination, the personal config is untouched, and `walkdown where runs` still
+  names the directory that no longer exists. That is exactly the outcome the
+  precheck's own comment (citing n-0201) says must not happen, and the sibling
+  case - a config that cannot be *written* - refuses cleanly in a sentence with
+  nothing moved.
+
+
+  The fix is presumably for canRemember to reject a document with errors (or to
+  round-trip toString()) rather than only toJS().
+
+
+  Everything else in the rule held: byte-for-byte arrival through both the
+  rename and the copy path (binary, no-final-newline, CRLF, mode 0600, relative
+  symlinks all preserved), comments in the personal config kept verbatim, and
+  refusals for an occupied destination, a symlinked destination, a parent path
+  through a file, and an unwritable config.
+
+
+  Evidence: runs/evidence/2026-09-06T00-03-14Z/probe-transcript.md

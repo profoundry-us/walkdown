@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-09-06T00-03-10Z-local-01",
+  "created": "2026-09-06T00:03:10Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "317ce95-dirty",
+  "tree_hash": "sha256:20ef9f73cc2d",
+  "spec_hash": "sha256:9666fe299538",
+  "results": [
+    {
+      "rule": "locations.default.one-home-per-blueprint",
+      "status": "fail",
+      "statement_hash": "sha256:c2e4b20e7f0d",
+      "evidence": [
+        "runs/evidence/2026-09-06T00-03-10Z/sequential-doors.txt",
+        "runs/evidence/2026-09-06T00-03-10Z/other-doors.txt",
+        "runs/evidence/2026-09-06T00-03-10Z/init-race-eight-same-named.txt"
+      ],
+      "reasoning": "Judged by driving the real CLI in throwaway repositories against redirected WALKDOWN_HOMEs, never by reading the code. Every sequential door held, and held well: asking in an undeclared directory reports that nothing declares it and leaves the home byte-for-byte untouched (I snapshotted mtimes and sizes across where/projects/status/lint and diffed clean); three repositories all named 'app' initialised one after another got 0001/0002/0003 and ids app/app-2/app-3; sweeps from each landed in its own runs/ despite identical filenames; re-init keeps the home it has; --commit spec moved a home whole with its records; deleting a home directory while its config row stands did not let the next same-named repository re-mint that number (n-0170); a renamed checkout is reported as undeclared rather than guessed at, and its old records stay reachable; an unclaimed home is left standing and its number skipped; a checkout that declares itself refuses to be listed personally by someone else, and a throwaway copy of it is listed as app-2; two config rows sharing the id 'app' but rooted differently stay two projects with two ledgers, while the same id at the same root is one project the personal half overrides; a server offered both under distinct keys, refused an ambiguous ?bp=app with the choices (n-0173), and routed a note posted by key into that key's own threads/; and 'move --project app' recorded against the row's root, leaving the unrelated 'app' alone. What breaks is simultaneity. claimHome() reads the blueprints/ listing, computes max+1 and only then mkdirs, so claims taken before either writes collide: eight repositories named 'app' released together by a barrier file produced seven homes for eight blueprints, w5 and w7 both handed 0003-app and now sharing one blueprint/, threads/ and runs/. Reproduced every attempt (a six-way run put two in 0002-app; a differently-named six-way run minted 0013 three times). The same race rewrites config.yml whole, so three of eight repositories ended with a home nobody claims and no entry - and re-initialising one of those mints a second home while its first stands there with its records. The rule's sentence that two blueprints never share one is unconditional, and I produced the sharing with nothing but the shipped init, so this is a fail rather than a caveat; details and the fix I would reach for are in n-0208.",
+      "threads": ["n-0208"]
+    }
+  ]
+}

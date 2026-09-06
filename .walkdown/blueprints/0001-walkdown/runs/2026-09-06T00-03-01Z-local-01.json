@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-09-06T00-03-01Z-local-01",
+  "created": "2026-09-06T00:03:01Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "317ce95-dirty",
+  "tree_hash": "sha256:20ef9f73cc2d",
+  "spec_hash": "sha256:9666fe299538",
+  "results": [
+    {
+      "rule": "locations.default.nothing-in-the-tree",
+      "status": "pass",
+      "statement_hash": "sha256:7a82184b4b5d",
+      "evidence": [
+        "runs/evidence/2026-09-06T00-03-01Z/probe-tree-untouched.txt",
+        "runs/evidence/2026-09-06T00-03-01Z/probe-tracked-answer.txt",
+        "runs/evidence/2026-09-06T00-03-01Z/probe-deletion-and-roundtrip.txt"
+      ],
+      "reasoning": "This rule has no screen, so I drove it in four throwaway git repositories, each with its own WALKDOWN_HOME and one with its own HOME as well, hashing every file in the tree before and after. A default `walkdown init` left the tree byte for byte as committed: no `.walkdown/`, no pointer, no CLAUDE.md edit even where a CLAUDE.md already existed, and `git status --porcelain --ignored` empty — nothing untracked and nothing hidden behind an ignore. I then recorded the three things the steps ask for — a note thread, a draft (POST /api/draft from a panel served inside that repo) and a walkdown run (POST /api/walkdowns) — and afterwards ran status, lint, hash, threads, claims, where, projects, judge, sweep and a thread reply, including from a subdirectory; the tree hashes were still identical. Everything the project produced landed in one numbered home, ~/.walkdown/blueprints/0001-repo, spec/threads/runs/evidence/drafts together; `walkdown where` reported evidence there too rather than in the tree. Deleting that home removed everything walkdown had made and left the repository untouched and clean; deleting only the numbered directory degrades gracefully, with `projects` marking the entry `(gone)`. Asked what is tracked, both the init summary and `walkdown where` answer \"nothing\" and say why (\"every path is outside the repository, where git never looks\", \"the home is in `~/.walkdown`, which git never sees\"). Two honest caveats, neither of which I read as breaking the statement: with a clean HOME, init also writes the agent skills to ~/.claude/skills — outside the repository, announced out loud in init's own summary, and machine-wide rather than project records — so it survives deleting ~/.walkdown; and ~/.walkdown/config.yml, the machine's project list, sits beside the numbered homes rather than inside one. The reversed design is genuinely reversible in both directions: `init --commit spec` adds .walkdown/, its .gitignore, CLAUDE.md and .claude/skills/ to the tree, and `init --commit none` moves the home back out leaving the tree byte for byte as it was, with no residue.",
+      "threads": []
+    }
+  ]
+}

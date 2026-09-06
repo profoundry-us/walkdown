@@ -1,0 +1,46 @@
+id: n-0208
+kind: note
+author: topher
+via: agent
+created: 2026-09-06T00:18:57.342Z
+anchor:
+  rule: locations.default.one-home-per-blueprint
+status: open
+body: >-
+  Two blueprints CAN share one home: `claimHome` is a read-then-write race, and
+  simultaneous `walkdown init` collides.
+
+
+  Every sequential door I could find holds - asking allocates nothing, three
+  same-named repos get 0001/0002/0003 with ids app/app-2/app-3, re-init keeps
+  the home it has, a deleted home directory does not get its number re-minted
+  (n-0170), a checkout that declares itself refuses to be listed personally, an
+  ambiguous ?bp=<name> is refused with the choices (n-0173), notes posted by key
+  land in that key's own ledger, and `move` writes against a row's root rather
+  than its id. Evidence: runs/evidence/2026-09-06T00-03-10Z/sequential-doors.txt
+  and runs/evidence/2026-09-06T00-03-10Z/other-doors.txt.
+
+
+  What breaks is concurrency. claimHome() in lib/locations.js reads
+  `blueprints/` (plus the numbers the config still names), computes max+1, and
+  only then mkdirs - so two inits that read before either writes compute the
+  same number. Eight repositories all called 'app', released together by a
+  barrier file against one WALKDOWN_HOME, produced seven homes for eight
+  blueprints: w5 and w7 were both handed 0003-app and now share one blueprint/,
+  one threads/ and one runs/. A six-way run of the same probe put w2 and w6 both
+  in 0002-app, and a six-way run of differently-named repos minted 0013 three
+  times and 0014 twice. Reproduced on every attempt. Evidence:
+  runs/evidence/2026-09-06T00-03-10Z/init-race-eight-same-named.txt.
+
+
+  The same race hits config.yml, which init rewrites whole: of the eight, only
+  five rows survived, so three repositories ended up with a home nobody claims
+  and no entry of their own - and re-running init in one of those mints a SECOND
+  home while its first stands there with its records.
+
+
+  The mechanism the rule leans on - 'the listing IS the record, there is nothing
+  to keep in step' - is only true if taking a number and appearing in the
+  listing are one step. They are two. A directory created with O_EXCL as the
+  claim (retrying on EEXIST), and a lock or read-modify-write guard around
+  config.yml, would close it.

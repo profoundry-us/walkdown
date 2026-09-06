@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-09-06T00-03-07Z-local-01",
+  "created": "2026-09-06T00:03:07Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "317ce95-dirty",
+  "tree_hash": "sha256:20ef9f73cc2d",
+  "spec_hash": "sha256:9666fe299538",
+  "results": [
+    {
+      "rule": "locations.default.in-repo-on-request",
+      "status": "pass",
+      "statement_hash": "sha256:d66c40335b64",
+      "evidence": [
+        "runs/evidence/2026-09-06T00-03-07Z/probe-in-repo-on-request.txt",
+        "runs/evidence/2026-09-06T00-03-07Z/probe-in-repo-on-request.sh",
+        "runs/evidence/2026-09-06T00-03-07Z/probe-home-number-collision.txt"
+      ],
+      "reasoning": "This rule has no screen, so I judged it by driving the behaviour in throwaway git repositories with WALKDOWN_HOME redirected at a scratch home, never by reading the resolver. Thirteen probes are in the evidence transcript. A default `init` put nothing at all in the repository; `--commit spec` moved the whole home into `.walkdown/`, wrote the pointer as relative paths (`spec: .walkdown/blueprints/0001-r1/blueprint`) into a committable `.walkdown/config.yml`, and wrote the standard `.walkdown/.gitignore` — and asking git per path confirmed the shape rather than trusting the prose: config, ignore file, blueprint and threads committable, runs, evidence and drafts ignored. `--commit all` removed the ignore file and nothing else; `--commit none` moved the home back out byte-for-byte identical (content hash unchanged across the move, runs and drafts included), left the repository as it found it, and said outright that nine files git had tracked under the departed `.walkdown` are now deletions to commit, naming them — the index is never touched. A second `--commit none` claimed no move. Then I tried to break it. A root `.gitignore` saying `.walkdown/` is caught and named under both standards, with different wording for each (spec: something other than `.walkdown/.gitignore` is doing the ignoring; all: the tree says everything is committed and git disagrees), and the same errors come back from `walkdown lint` under a `[tracking]` category. An emptied `.walkdown/.gitignore` is called out as present and keeping nothing out. A home piece moved out from under the rule (`walkdown move runs --to spec-runs`) produces \"the rule does not reach this home\". Crucially, a pattern placed only in `.git/info/exclude` — invisible to anyone reading ignore files — is detected and cited by file and line, which is the proof that the answer is asked of git and not read off walkdown's own file; the `--force` rewrite even reports files already in the index that a fresh rule cannot reach. Two edge cases behaved: a home whose number was already taken in the personal home was renumbered 0002 rather than clobbering the incumbent, and a person's own file left inside `.walkdown` stopped the directory being removed. A hand-edited partial ignore file is not silently overwritten, and the report stays honest about what that leaves tracked. I found nothing that prints success without changing the tree, and nothing that quietly commits screenshots.",
+      "threads": []
+    }
+  ]
+}

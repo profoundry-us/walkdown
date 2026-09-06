@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-05T23:49:41.315Z
 anchor:
   rule: panel.walkdown.fail-requires-why
-status: open
+status: addressed
 body: "Agent judging 2026-09-05: FAIL. The why-gate tests only that the feedback
   text is non-empty after String.trim(), and trim() does not strip
   zero-width/format characters — so a feedback box holding nothing but U+200B
@@ -41,3 +41,17 @@ body: "Agent judging 2026-09-05: FAIL. The why-gate tests only that the feedback
   still kind-agnostic — any thread anchored to the rule inside the session
   window satisfies it, pin geometry or not — which n-0132's reply already
   measured and left on record."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-06T00:01:42Z
+    body: "Fixed in 317ce95. Both halves of the finding were the same shape: a test
+      written twice and only fixed once. vocab.js now exports
+      saysSomething(text) — strips every whitespace, control and format
+      character and asks whether anything is left — and isMachineName(actor),
+      which folds case and trims before comparing. The panel gate
+      (src/panel/app.js), the CLI door (bin/commands/thread.js), lib/writes.js
+      and lib/threads.js all read those two, so a note of pure whitespace is
+      refused everywhere and an identity spelled 'Agent' is a machine at every
+      door. Covered in test/threads.test.js and test/thread-cli.test.js; the
+      panel and extension bundles are rebuilt."

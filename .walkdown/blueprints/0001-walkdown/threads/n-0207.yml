@@ -1,0 +1,23 @@
+id: n-0207
+kind: note
+author: topher
+via: agent
+created: 2026-09-06T00:11:35.540Z
+anchor:
+  rule: locations.pointer.placed-where-agents-read
+status: open
+body: "`walkdown pointer` crashes with a raw stack trace where every other
+  command answers in a sentence. Run it anywhere no blueprint is declared and
+  resolveLocations() returns spec.path === null, which
+  bin/commands/pointer.js:24 immediately calls .startsWith() on: 'TypeError:
+  Cannot read properties of null (reading startsWith)'. Reproduced 2026-09-06 in
+  a bare git repository with a redirected WALKDOWN_HOME — `walkdown pointer
+  --into AGENTS.md`, exit 1, stack trace, no sentence. Every sibling in this
+  position says what is wrong and what to do: 'No blueprint here. Nothing in
+  <config> claims this directory. walkdown init starts one…'. pointer is the one
+  door that does not, and it is the door a person reaches for precisely when
+  their project is not yet set up. The fix is a guard before the block is
+  composed, borrowing the wording the other commands already use. Found in
+  passing by the judge re-earning locations.default.nothing-in-the-tree;
+  anchored here rather than there because it belongs to the pointer, not to what
+  init leaves in the tree."

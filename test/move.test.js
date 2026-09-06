@@ -238,6 +238,68 @@ test('a copy that stops part way is a refusal, and leaves no debris behind @rule
  * both files up front since n-0172, with a standing comment saying exactly
  * this; this door never inherited it.
  */
+test('a config that will not write back is refused before anything moves @rule:locations.keeping.moving-is-a-decision', () => {
+  /*
+   * n-0206: the precheck asked whether the personal config could be READ and
+   * the writer asked whether it could be WRITTEN, and the yaml document
+   * answers those differently - it collects parse errors rather than throwing,
+   * so `.toJS()` reads a damaged file quite happily and `String(doc)` refuses
+   * it. The move went through, the write then died with a raw stack trace,
+   * and the records sat at an address the config still did not name.
+   *
+   * The blueprint is declared in the REPOSITORY's config here, because that
+   * is the only arrangement where the question arises: a personal file too
+   * damaged to parse takes its projects down with it and the move is refused
+   * far earlier, for a different reason. Committed declaration, damaged
+   * personal file - that is the shape that used to move first and fail after.
+   */
+  const root = mkdtempSync(join(tmpdir(), 'wd-move-'));
+  try {
+    const home = join(root, 'home');
+    const repo = join(root, 'repo');
+    mkdirSync(repo, { recursive: true });
+    mkdirSync(home, { recursive: true });
+    const git = (...a) => execFileSync('git', a, { cwd: repo, stdio: 'ignore' });
+    git('init');
+    const cli = (args, opts = {}) =>
+      execFileSync('node', [CLI, ...args], {
+        cwd: repo,
+        env: { ...process.env, WALKDOWN_HOME: home, WALKDOWN_SKILLS_DIR: join(root, 'skills') },
+        encoding: 'utf8',
+        ...opts,
+      });
+    cli(['init', '--commit', 'spec']);
+    const cfg = join(home, 'config.yml');
+    // A key said twice: the parser collects the error and hands back a
+    // document, and only stringifying it refuses.
+    writeFileSync(
+      cfg,
+      `${existsSync(cfg) ? readFileSync(cfg, 'utf8') : ''}identity:\n  username: one\nidentity:\n  username: two\n`,
+    );
+    const runs = join(repo, '.walkdown', 'blueprints', '0001-repo', 'runs');
+    mkdirSync(runs, { recursive: true });
+    writeFileSync(join(runs, 'a.json'), '{"run_id":"a"}');
+
+    const dest = join(root, 'elsewhere', 'runs');
+    let out;
+    try {
+      cli(['move', 'runs', '--to', dest]);
+      assert.fail('a move that cannot be written down must be refused');
+    } catch (e) {
+      out = `${e.stdout ?? ''}${e.stderr ?? ''}`;
+      assert.equal(e.status, 2, `a worded refusal, not a stack trace: ${out}`);
+    }
+    assert.match(out, /cannot be written back/);
+    assert.ok(!/cannot be stringified/.test(out), 'a raw yaml error is not a sentence');
+    assert.ok(!/at Object\.|node:internal/.test(out), 'no stack trace');
+
+    assert.ok(existsSync(join(runs, 'a.json')), 'the records stayed');
+    assert.ok(!existsSync(dest), 'and the destination was never made');
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test('a move that cannot be recorded is refused before anything moves @rule:locations.keeping.moving-is-a-decision', () => {
   const p = project();
   const cfg = join(p.home, 'config.yml');

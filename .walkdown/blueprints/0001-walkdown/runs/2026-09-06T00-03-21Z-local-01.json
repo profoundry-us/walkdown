@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-09-06T00-03-21Z-local-01",
+  "created": "2026-09-06T00:03:21Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "317ce95-dirty",
+  "tree_hash": "sha256:20ef9f73cc2d",
+  "spec_hash": "sha256:9666fe299538",
+  "results": [
+    {
+      "rule": "panel.walkdown.fail-requires-why",
+      "status": "pass",
+      "statement_hash": "sha256:9644c16756d8",
+      "evidence": [
+        "runs/evidence/2026-09-06T00-03-21Z/fail-requires-why-probe.md"
+      ],
+      "reasoning": "Judged against a scratch copy served from inside itself on port 4721, with a walkdown session open. With the rule's feedback box empty and nothing pinned, Fail was refused: no verdict moved (the counter stayed at 0 judged this session), and one amber 11px sentence appeared inside the viewport reading 'A fail needs a why - write it above, or turn on Pin mode and drop it on the page.' - naming both ways and turning on neither, which I checked rather than assumed: the Pin mode button stayed btn-outline with a transparent background and the textarea stayed empty. I then tried to sneak a why past it twice more - five spaces, and a box holding only U+200B, U+00A0, U+FEFF and U+2063 so it looks written-in but renders blank - and both were refused the same way. Across all three refusals the blueprint on disk was untouched: runs stayed at 247 files, threads at 201, and no drafts/ directory existed yet, so nothing landed anywhere. Both ways of giving a why then worked: typing real feedback and failing again recorded the fail and filed note n-0204 anchored to the rule, and on a second rule (embed.pin.settled-pins-leave) a pin dropped on the prototype surface during the session - filed as n-0205 anchored to that rule - let a fail through with the feedback box still empty. One honest caveat about the form of the evidence: screenshots were taken and read at every step but could not be written into the evidence folder as files, so what is filed there is the measured rendered state (text, computed colour, font size, on-screen rectangle, button state) and the disk deltas behind each screen.",
+      "threads": []
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "run_id": "2026-09-06T00-03-28Z-local-01",
+  "created": "2026-09-06T00:03:28Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "317ce95-dirty",
+  "tree_hash": "sha256:20ef9f73cc2d",
+  "spec_hash": "sha256:9666fe299538",
+  "results": [
+    {
+      "rule": "panel.dock.toolbar",
+      "status": "pass",
+      "statement_hash": "sha256:aaf28fbb5e0a",
+      "evidence": [
+        "runs/evidence/2026-09-06T00-03-28Z/01-bar-detecting-app.png",
+        "runs/evidence/2026-09-06T00-03-28Z/02-blueprint-clicked.png",
+        "runs/evidence/2026-09-06T00-03-28Z/03-blueprints-tab-is-the-chooser.png",
+        "runs/evidence/2026-09-06T00-03-28Z/04-surface-prototype.png",
+        "runs/evidence/2026-09-06T00-03-28Z/05-surface-app.png",
+        "runs/evidence/2026-09-06T00-03-28Z/06-screens-list-open.png",
+        "runs/evidence/2026-09-06T00-03-28Z/07-screen-picked-by-hand.png",
+        "runs/evidence/2026-09-06T00-03-28Z/08-list-marks-the-picked-row.png",
+        "runs/evidence/2026-09-06T00-03-28Z/09-back-to-detecting.png",
+        "runs/evidence/2026-09-06T00-03-28Z/10-detecting-label-after-a-same-screen-rule.png",
+        "runs/evidence/2026-09-06T00-03-28Z/11-list-mark-follows-too.png",
+        "runs/evidence/2026-09-06T00-03-28Z/12-pin-mode-on.png",
+        "runs/evidence/2026-09-06T00-03-28Z/13-pin-mode-off.png",
+        "runs/evidence/2026-09-06T00-03-28Z/14-detect-follows-page-back-to-review.png",
+        "runs/evidence/2026-09-06T00-03-28Z/15-list-mark-follows-page.png",
+        "runs/evidence/2026-09-06T00-03-28Z/toolbar-probe.txt"
+      ],
+      "reasoning": "Judged on the review screen against a scratch copy served on 4722 from inside the copy with its own home, with a second project declared in that copy so the server really did have siblings to not offer. The bar carries exactly the session-level controls the statement claims and nothing about the rule in hand: the project name, the screen picker, the Prototype/App slider and Pin mode. `panel.blueprint` reads \"walkdown\" as dim inert text beside the wordmark - a SPAN with tabIndex -1, no role, no handler, not inside a button; clicking it changed nothing on screen and left the panel's markup byte-identical, while the Blueprints tab does hold the actual chooser, listing walkdown and the sibling as radio options (01-03). `panel.screen-picker` reads \"The review page\" closed, so the screen is legible without opening anything, and opening it shows `panel.screens-list` with \"Detect from the page\" plus every storyboard screen (06). Picking Rule detail by hand moved both surfaces to that screen and visibly re-styled the control - a cyan outlined button titled \"Screen picked by hand\", against the plain ghost text of detection - and the reopened list marks the picked row (07, 08); choosing \"Detect from the page\" drops it back to the ghost style and the detected title (09). Detection reports rather than remembers: with the picker left detecting, opening a rule whose screen is review navigated the page back from rule-detail, the bar label changed from \"Rule detail (state...)\" to \"The review page\" on its own, and the reopened list's mark moved with it, from \"Detect from the page rule-detail\" to \"Detect from the page review\" (11, 14, 15 and probe lines B/C/D). The slider swaps which surface the page area draws - the review mockup for Prototype, the base_url page for App (04, 05) - and Pin mode toggles on and off in place, amber when armed and outlined when not (12, 13). Caveats a reader should have: the App surface here is the run's base_url on 4700, which answered with a stand-in placeholder rather than a built page, so the App evidence shows the swap happening and not a rendered app; and file 10 is named for a move that had not happened yet, which the probe file says out loud. Nothing in the statement went unexercised, so this is a pass.",
+      "threads": []
+    }
+  ]
+}

@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
-import { execFileSync, spawnSync } from 'node:child_process';
+import { execFileSync, spawn, spawnSync } from 'node:child_process';
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import test from 'node:test';
 import { parse } from '../vendor/yaml.js';
 import { formatHash, specFiles, specHash } from '../lib/hash.js';
-import { canon, expand, KINDS, readUserConfig, rememberProject, resolveLocations } from '../lib/locations.js';
+import { canon, claimHome, expand, KINDS, readUserConfig, rememberProject, resolveLocations } from '../lib/locations.js';
 import { deriveStatus } from '../lib/status.js';
 
 /*
@@ -820,6 +820,59 @@ test('a number the config still names is never minted again @rule:locations.defa
     assert.ok(first.spec.path.endsWith('/0001-app/blueprint'), first.spec.path);
     assert.ok(!existsSync(first.spec.path), 'the abandoned checkout answers with its own gone home, not with the new one');
     assert.throws(() => walkdown(s.home, ['status'], one));
+  } finally {
+    s.cleanup();
+  }
+});
+
+test('blueprints claiming homes at the same moment get one each @rule:locations.default.one-home-per-blueprint', async () => {
+  /*
+   * The race itself, run for real. Eight processes released together against
+   * one home used to produce seven homes for eight blueprints - two of them
+   * sharing a blueprint/, threads/ and runs/, which is the one thing this
+   * rule says unconditionally never happens.
+   *
+   * Every claim is its own process, because the failure is BETWEEN processes:
+   * inside one, the claims are serialised by the event loop and the bug is
+   * invisible. And every process waits on a barrier file before claiming,
+   * because node takes long enough to start that eight spawns would otherwise
+   * finish in turn and race nothing at all.
+   */
+  const s = scratch();
+  try {
+    const go = join(s.root, 'go');
+    const claim = join(s.root, 'claim.mjs');
+    writeFileSync(
+      claim,
+      `import { existsSync } from 'node:fs';\n` +
+        `import { claimHome } from ${JSON.stringify(join(process.cwd(), 'lib', 'locations.js'))};\n` +
+        `while (!existsSync(${JSON.stringify(go)})) {}\n` +
+        `process.stdout.write(claimHome({ name: 'app', walkdown: process.env.WALKDOWN_HOME }).home);\n`,
+    );
+    const racers = Array.from({ length: 8 }, () =>
+      spawn(process.execPath, [claim], { env: { ...process.env, WALKDOWN_HOME: s.home } }),
+    );
+    const settled = racers.map(
+      (p) =>
+        new Promise((done, fail) => {
+          let out = '';
+          let err = '';
+          p.stdout.on('data', (d) => (out += d));
+          p.stderr.on('data', (d) => (err += d));
+          p.on('error', fail);
+          p.on('close', (code) => (code === 0 ? done(out.trim()) : fail(new Error(err || `exit ${code}`))));
+        }),
+    );
+    // Let all eight reach the spin, then release them together.
+    await new Promise((r) => setTimeout(r, 400));
+    writeFileSync(go, '');
+    const claimed = await Promise.all(settled);
+    assert.equal(
+      new Set(claimed).size,
+      8,
+      `eight blueprints, ${new Set(claimed).size} homes: ${claimed.join(' ')}`,
+    );
+    assert.equal(readdirSync(join(s.home, 'blueprints')).length, 8);
   } finally {
     s.cleanup();
   }

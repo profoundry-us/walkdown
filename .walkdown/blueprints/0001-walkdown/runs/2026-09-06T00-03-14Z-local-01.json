@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-09-06T00-03-14Z-local-01",
+  "created": "2026-09-06T00:03:14Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "317ce95-dirty",
+  "tree_hash": "sha256:20ef9f73cc2d",
+  "spec_hash": "sha256:9666fe299538",
+  "results": [
+    {
+      "rule": "locations.keeping.moving-is-a-decision",
+      "status": "fail",
+      "statement_hash": "sha256:452142df8095",
+      "evidence": [
+        "runs/evidence/2026-09-06T00-03-14Z/probe-transcript.md"
+      ],
+      "reasoning": "I judged this by driving `walkdown move` for real in throwaway temp projects, each with its own WALKDOWN_HOME, never against the real ledger. Two of the three THEN clauses hold well. Files arrive byte for byte through both the rename path and the copy fallback (a destination holding only dotfiles forces the copy): 4KB of random bytes, a file with no trailing newline, a CRLF file in a subdirectory, mode 0600, and a relative symlink all came through with identical shasums, the mode kept and the symlink still a symlink; nothing was rewritten to suit its new address. A destination that already holds records is refused in a sentence at exit 2 with the source untouched, and so is one whose only occupant is a subdirectory of records; dotfiles alone are correctly not treated as records. The neighbouring refusals are solid too: a symlinked destination, a parent path running through a file, and a personal config that cannot be written all stop before anything moves. The second clause is where it fails. `canRemember` checks the personal config with `parseDocument(...).toJS()` but `rememberLocation` writes it with `doc.toString()`, and the yaml document collects errors rather than throwing, so a document toString() will refuse passes the precheck. With an ordinary typo in the personal config - a TAB used for indentation, or an unquoted colon in a value, or an unterminated flow sequence - the move completes on disk and then dies with a raw stack trace, `Document with errors cannot be stringified`, at exit 1. Reproduced twice, the aftermath is: the source runs directory gone, the records sitting at the destination, the personal config not updated, and `walkdown where runs` still naming a directory that no longer exists. The move was made and the choice was not remembered, which is precisely the outcome the precheck's own comment (citing n-0201) says must not happen, and which the sibling unwritable-config case refuses cleanly. Only an alias to a missing anchor is actually caught by the guard. Opened n-0206.",
+      "threads": ["n-0206"]
+    }
+  ]
+}

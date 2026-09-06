@@ -1,0 +1,23 @@
+id: n-0205
+kind: note
+author: topher
+via: agent
+created: 2026-09-06T00:05:10.903Z
+anchor:
+  rule: locations.travel.judged-against-a-spec
+status: open
+body: "The retired field is still being written, and the docs still describe the
+  retirement as future work. spec_hash and tree_hash have shipped — the skeleton
+  'walkdown judge' hands every judge carries git_sha, tree_hash and spec_hash
+  and no blueprint_sha at all. Two places did not follow: (1)
+  tools/sitting.mjs:1978 still writes 'blueprint_sha: sha + dirty' and no
+  spec_hash, so every record the scripted harness files answers 'when' where the
+  ledger now asks 'against what' — 107 of the 247 records in this blueprint's
+  runs carry blueprint_sha, 120 carry spec_hash, and the harness is why the two
+  sets are still both growing; (2) docs/08-locations.md:344 opens 'Runs
+  currently carry git_sha and blueprint_sha, and both are set to the same
+  thing', and :369 says blueprint_sha 'is wrong today in a way nobody has
+  noticed' — present tense for a conflation that was fixed, which reads to
+  anyone arriving as an open design problem rather than a shipped decision. The
+  fix is one line in the harness plus a past-tense rewrite of that section.
+  Found by the provenance judge, 2026-09-05."
