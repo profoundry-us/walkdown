@@ -1,0 +1,24 @@
+{
+  "run_id": "2026-09-05T23-31-43Z-local-01",
+  "created": "2026-09-05T23:31:43Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "93c8823",
+  "spec_hash": "sha256:9cf589d6656b",
+  "results": [
+    {
+      "rule": "locations.travel.provenance-not-currency",
+      "status": "pass",
+      "statement_hash": "sha256:c513160f49fc",
+      "evidence": [
+        "runs/evidence/2026-09-05T23-31-43Z/currency-holds.txt",
+        "runs/evidence/2026-09-05T23-31-43Z/currency-grounds.txt",
+        "runs/evidence/2026-09-05T23-31-43Z/provenance-points-at-the-code.txt"
+      ],
+      "reasoning": "Judged in two throwaway projects, each with its own WALKDOWN_HOME and its own git repositories, never against the real ledger. With a checks pass and an agent pass on the board, I landed commits that touch neither the rules nor the code they describe - a doc, a branch and a --no-ff merge, a new source file - then left the tree dirty, then detached HEAD three commits back: `walkdown status --json` came back byte-identical every time, and GET /api/blueprint from a served panel was identical across another commit. A verdict I planted carrying git_sha deadbee-dirty, a sha the repository has never held, still read as a pass and lint said nothing. The two original records still carried 8eae78d after the branch had moved on, so nothing re-stamps a run. Then I checked the other direction, with the code standing still: rewording the statement greyed exactly that rule's two cells and restoring it brought them back, rewording the OTHER rule left this one's cells identical though the spec hash moved, a sweep --tiers agent greyed the agent column and left the checks pass alone, and taking the @rule tag off the check greyed the checks cell and putting it back restored it. So all three grounds bite per cell and the sha is not a fourth: git_sha is written in three places and read in none - it is absent from status.js, serve.js, report/, src/panel and src/embed. Provenance holds too, in n-0192's shape: with the home in a git repository of its own at 11817e0 and the code at b22b0cd, both the judge prompt and writeRunRecord stamped b22b0cd, a dirty tree got b22b0cd-dirty plus a tree_hash, and two different dirty states hashed differently. Beside the verdict, tools/sitting.mjs still writes the retired blueprint_sha under the code's sha and no spec_hash, and docs/08-locations.md:336 still describes that conflation as current - mislabelled provenance in the interim harness, read by nothing, so no cell moves on it.",
+      "threads": []
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-09-05T23-32-13Z-local-01",
+  "created": "2026-09-05T23:32:13Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "93c8823",
+  "spec_hash": "sha256:9cf589d6656b",
+  "results": [
+    {
+      "rule": "locations.keeping.moving-is-a-decision",
+      "status": "fail",
+      "statement_hash": "sha256:452142df8095",
+      "evidence": [
+        "runs/evidence/2026-09-05T23-32-13Z/probe-1-move-not-written-down.txt",
+        "runs/evidence/2026-09-05T23-32-13Z/probe-2-destination-refusals.txt",
+        "runs/evidence/2026-09-05T23-32-13Z/probe-3-copy-path-failure-modes.txt",
+        "runs/evidence/2026-09-05T23-32-13Z/probe-4-byte-for-byte-and-comments.txt"
+      ],
+      "reasoning": "Judged headless against `walkdown move` in a throwaway project with its own WALKDOWN_HOME, with a 40MB APFS RAM disk standing in as a genuine second volume. THEN 1 holds and holds hard: a runs directory carrying relative, absolute, dangling and directory symlinks, a hardlinked pair, a NUL-bearing binary, a non-ASCII filename with a '#' in it, an empty subdirectory, and files pinned at 0444/0755 and 2019/2020 mtimes crossed the volume boundary with content, mode, mtime and every symlink target identical, and came back again unchanged (probe-4, probe-3 R1); the relative link still resolved at the new address. THEN 3 holds too, and refuses more than it was asked to: a destination holding a record, one holding only a subdirectory of records, and one reached through a symlink were all refused in a sentence at exit 2 with the other ledger untouched, while a destination holding only dotfiles was moved into without overwriting them; a source/destination dotfile collision, an unreadable record, a full destination volume and an unwritable destination each came back as a worded MoveFailed with every record still at the source, no debris at the destination, and nothing written to the config (probe-2, probe-3). THEN 2 is where it breaks. `walkdown move` relocates the directory first and only then tries to write the choice down, so a personal config it cannot write - read-only, or one that does not parse - leaves the records at the new address with the config still naming the old one: in probe-1 three records move from ledger-a to ledger-b, `walkdown where runs` reports ledger-a, ledger-a no longer exists, and the ledger at ledger-b is declared by nothing. The move happened and was not recorded, which is the one thing this THEN asks for, and the harm is the rule's own rationale - a person reading the board is pointed at an address the ledger has left. It is also a settled question in this codebase rather than a new one: `relocateHome` reads both config files before it moves anything precisely because of n-0172, and says so in a standing comment - 'a move that cannot be written down is a move that does not happen' - which `walkdown move` never inherited, not even when n-0185 unified the two on one `moveDir`. Filed as n-0201, with the fix shape (parse-and-writability check before `moveDir`) and two smaller crash-instead-of-a-sentence findings that are not the ground of this verdict: a destination that is a symlink to a directory, and a destination whose parent path runs through a file, both of which die as raw ENOTDIR stack traces while leaving everything where it was.",
+      "threads": ["n-0201"]
+    }
+  ]
+}

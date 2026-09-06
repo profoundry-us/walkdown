@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-09-05T23-31-54Z-local-01",
+  "created": "2026-09-05T23:31:54Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "93c8823",
+  "spec_hash": "sha256:9cf589d6656b",
+  "results": [
+    {
+      "rule": "threads.lifecycle.claim-never-accept",
+      "status": "pass",
+      "statement_hash": "sha256:482531dc241f",
+      "evidence": [
+        "runs/evidence/2026-09-05T23-31-54Z/claim-never-accept-cli-and-http.txt",
+        "runs/evidence/2026-09-05T23-31-54Z/claim-never-accept-panel.md"
+      ],
+      "reasoning": "Judged by making the system refuse at all three doors, on a scratch copy served from inside itself on :4805 - never the real ledger - with the probe's own WALKDOWN_HOME supplying each identity condition. All three conditions were driven at each door and every one was refused with the thread byte-identical afterwards (sha256 of n-0009 e7af6ee0 and n-0197 5de51231 unchanged across the whole sitting). Nobody written down: CLI --verify, --status verified and --waive --reason all exit 2 with \"...this machine only has a guess (topher, from git). Say who you are in ~/.walkdown/config.yml under `identity:` - a login name is not a decision\"; the HTTP transition refuses the same way even when the body supplies a name ('Some Person Who Never Sat Here', and 'topher', the machine's own git guess), which is exactly the hole the 2026-09-01 verdict failed this rule on and it is closed; in the panel the action bar reads 'as topher' and offers Verify, and pressing it refuses in a banner naming the file and the key, opening the identity popover that says 'Not written down - this is a guess, and accepting work is refused until identity: names you'. An actor called agent: refused at the CLI as 'agent', 'Agent' and '  AGENT  ', over HTTP with the server's home declaring username: agent, and in the panel both for a single thread and for the 'Verify all 3' sweep. Marked as typed by a machine: --as-agent is refused on --verify, --status verified, --waive and --status waived under a fully declared human identity, and via: 'agent' is refused over HTTP - 'an agent may claim work on their behalf, never accept it'. The gap is never filled with the login name: the machine's login is topherfangio and its git guess is topher, and neither ever appears as verified_by. Controls prove the refusals are the actor gate and not the state - the same transition from the same 'addressed' state succeeded for the declared person topher on n-0010 and n-0015, and a claim (a reply, a new thread) stays open to a machine throughout. Adversarial finding that did not change the verdict: the panel's own client-side check compares against the exact string 'agent', so the spelling 'Agent' walks past it - the server refuses it and the panel surfaces that refusal verbatim, so defence holds at the layer that matters, but the bulk 'Verify all' path swallows the reason into '0 of 3 verified - the rest are still open'.",
+      "threads": []
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+id: n-0203
+kind: note
+author: topher
+via: agent
+created: 2026-09-05T23:49:41.315Z
+anchor:
+  rule: panel.walkdown.fail-requires-why
+status: open
+body: "Agent judging 2026-09-05: FAIL. The why-gate tests only that the feedback
+  text is non-empty after String.trim(), and trim() does not strip
+  zero-width/format characters — so a feedback box holding nothing but U+200B
+  passes as a why. Driven headless (Playwright, own browser context) against a
+  scratch copy served from inside itself on :4806, evidence under
+  runs/evidence/2026-09-05T23-32-06Z/. From a fresh session with the rule open:
+  setting the box to a single U+200B and choosing Fail recorded the verdict with
+  no refusal — detail.say never appeared, detail.judged moved 0 to 1, the Fail
+  button went solid, and the box read empty on screen the whole time
+  (04-zwsp-fail.png, frw-probe.json). The fail's why was filed as note n-0200,
+  whose body on disk is the three bytes e2 80 8b and nothing else
+  (zwsp-note-n-0198.yml is the same thing from the first, hand-driven hit), and
+  the draft carried it as the fail's thread (zwsp-draft-recorded.json). On the
+  board that note renders as an author, a timestamp and a blank line —
+  08-blank-why-on-the-board.png shows n-0198 and n-0200 sitting on this rule
+  with no readable body at all. That is the state the statement's purpose clause
+  exists to prevent: a recorded fail whose why is work nobody can act on, and
+  one that looks identical to the empty box the panel refuses one keystroke
+  earlier. Reachable by paste (invisible characters ride along from chat and web
+  copy) and trivially by any agent driving the panel, which is how this board is
+  judged. Everything else the statement promises held under attack. The empty
+  box is refused with 'A fail needs a why — write it above, or turn on Pin mode
+  and drop it on the page', naming both ways with Pin mode still off and focus
+  left on the Fail button — neither way switched on (02-empty-fail-refused.png).
+  Whitespace-only text, including tabs and newlines, is refused (03). A thread
+  already sitting on the rule does not open the gate: n-0132 five days old and
+  n-0198 ten minutes old were both present while an empty Fail was refused (06).
+  A note anchored to a different rule during the session does not open it
+  (n-0199). Written text records and files the note (05, n-0201), and a why
+  landing on the rule during the session opens the gate for an empty-box Fail
+  (07, n-0202). The during-the-session boundary n-0132 broke a second at a time
+  did not reopen. Related, observed, not the ground of the verdict: the gate is
+  still kind-agnostic — any thread anchored to the rule inside the session
+  window satisfies it, pin geometry or not — which n-0132's reply already
+  measured and left on record."

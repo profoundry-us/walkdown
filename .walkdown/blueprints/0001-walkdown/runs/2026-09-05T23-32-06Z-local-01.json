@@ -1,0 +1,35 @@
+{
+  "run_id": "2026-09-05T23-32-06Z-local-01",
+  "created": "2026-09-05T23:32:06Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "93c8823",
+  "spec_hash": "sha256:9cf589d6656b",
+  "results": [
+    {
+      "rule": "panel.walkdown.fail-requires-why",
+      "status": "fail",
+      "statement_hash": "sha256:9644c16756d8",
+      "evidence": [
+        "runs/evidence/2026-09-05T23-32-06Z/01-rule-open-empty.png",
+        "runs/evidence/2026-09-05T23-32-06Z/02-empty-fail-refused.png",
+        "runs/evidence/2026-09-05T23-32-06Z/03-whitespace-fail-refused.png",
+        "runs/evidence/2026-09-05T23-32-06Z/04-zwsp-fail.png",
+        "runs/evidence/2026-09-05T23-32-06Z/05-text-fail-recorded.png",
+        "runs/evidence/2026-09-05T23-32-06Z/06-presession-thread-empty-fail-refused.png",
+        "runs/evidence/2026-09-05T23-32-06Z/07-pin-then-empty-fail-recorded.png",
+        "runs/evidence/2026-09-05T23-32-06Z/08-blank-why-on-the-board.png",
+        "runs/evidence/2026-09-05T23-32-06Z/frw-probe.json",
+        "runs/evidence/2026-09-05T23-32-06Z/frw-probe.mjs",
+        "runs/evidence/2026-09-05T23-32-06Z/frw-pin-probe.mjs",
+        "runs/evidence/2026-09-05T23-32-06Z/frw-blank-note-render.mjs",
+        "runs/evidence/2026-09-05T23-32-06Z/zwsp-draft-recorded.json",
+        "runs/evidence/2026-09-05T23-32-06Z/zwsp-note-n-0198.yml"
+      ],
+      "reasoning": "Judged on a scratch copy (judge-frw-0905) served from inside itself on :4806, driven headless in its own browser context. The gate holds everywhere I could reach it except one: it tests only that the feedback text is non-empty after String.trim(), and trim() leaves zero-width and other format characters standing, so a box holding nothing but U+200B reads as a why. From a fresh session with the rule open I set the box to a single U+200B and chose Fail: no refusal appeared, detail.judged went 0 to 1, the Fail button went solid, and the box was visibly empty throughout (04-zwsp-fail.png, frw-probe.json). The why was filed as note n-0200, whose body on disk is the three bytes e2 80 8b and nothing else, and the draft carried it as the fail's thread (zwsp-draft-recorded.json, zwsp-note-n-0198.yml from the first hand-driven hit). On the board that note renders as an author, a timestamp and a blank line (08-blank-why-on-the-board.png) - a recorded fail whose why is work nobody can act on, indistinguishable from the empty box the panel refuses one keystroke earlier, which is the state the statement's purpose clause exists to prevent. Reachable by paste and trivially by any agent driving the panel, which is how this board is judged. Everything else held under attack: the empty box is refused with copy naming both ways, Pin mode left off and focus left on the Fail button (02); whitespace, tabs and newlines are refused (03); threads already sitting on the rule do not open the gate - n-0132 five days old and n-0198 ten minutes old were both present while an empty Fail was refused (06); a note on a different rule during the session does not open it (n-0199); written text records and files the note (05, n-0201); a why landing on the rule during the session opens the gate for an empty-box Fail (07, n-0202); and the during-the-session boundary n-0132 once broke did not reopen. Filed as note n-0203.",
+      "threads": ["n-0203"]
+    }
+  ]
+}
