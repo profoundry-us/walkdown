@@ -1,0 +1,47 @@
+id: q-0220
+kind: question
+author: topher
+via: agent
+created: 2026-09-06T17:27:41.566Z
+anchor:
+  rule: locations.default.one-home-per-blueprint
+status: open
+body: >-
+  Does a `defaults:` block outrank the layout of a home that already holds
+  records?
+
+
+  Raised by the agent re-judging this rule on 2026-09-06 (run
+  2026-09-06T17-14-32Z-local-01, evidence
+  runs/evidence/2026-09-06T17-14-32Z/transcript.md section 7). It judged the
+  rule a pass and this a caveat for your eye rather than a failure; I agree it
+  is not a fail, and I am not deciding it either way.
+
+
+  What it found: `defaults:` sits above a home's own layout in the resolution
+  order. So an entry that names `home:` but whose `runs:` key has been deleted
+  by hand resolves runs to the blanket default, even though the home holds run
+  records. The statement says "A home that already holds records keeps answering
+  for its blueprint" — under those two hand edits, it stops.
+
+
+  Why it is arguably not a defect: it takes two deliberate hand edits — writing
+  a `defaults:` block AND deleting a key that `init`, `project add` and `move`
+  all always write. Nothing walkdown's own tools do produces that state, and it
+  moves and hides nothing on disk. That is also close to the line you drew on
+  q-0182: we care about our tools working well, and hand-written arrangements
+  are the writer's business.
+
+
+  Why it may still be worth a sentence: the sibling rule that used to own this
+  ground, locations.keeping.existing-outranks-preference, is deliberately
+  retired — so if "records already there win over a preference" is still true,
+  this rule is now the only place it could be said, and it is not said here. The
+  alternatives look like: leave it (a hand edit gets what it asked for); have
+  the resolver prefer a home that holds records over a default; or say plainly
+  in the statement that a `defaults:` block is a preference a person wrote and
+  it wins.
+
+
+  Your call which of those it is — the first is a perfectly good answer and
+  needs no code.
