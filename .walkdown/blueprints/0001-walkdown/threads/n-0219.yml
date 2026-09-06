@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-06T16:54:34.564Z
 anchor:
   rule: locations.default.one-home-per-blueprint
-status: open
+status: addressed
 body: >-
   Concurrent `init` from several checkouts loses config rows, and the homes it
   made are stranded and unreported.
@@ -94,3 +94,39 @@ replies:
       making six homes and three rows is not the number allocator losing — the
       homes are all distinct, which is the n-0210 guard working. It is purely
       the config write.
+  - author: topher
+    via: agent
+    created: 2026-09-06T17:13:58Z
+    body: >-
+      The remaining half is fixed, and this thread is claimed.
+
+
+      The lock is the sentence Topher already gave for the number (n-0210):
+      refuse concurrent init rather than serialise it. lockConfig writes
+      <config>.lock with the "wx" flag - the same filesystem compare-and-swap
+      the home allocator uses one directory up - and a loser gets a Refused
+      saying nothing was written down and to run it again, never a wait. It goes
+      stale after ten seconds, because a lock outliving a crashed process must
+      never wedge a person out of their own config forever.
+
+
+      Locking the write alone did not close your finding 1, and measuring said
+      so before I believed it. The home is claimed and scaffolded before the row
+      is written, so a racer refused at the config write had already made a home
+      with no row - the exact debris the refusal exists to prevent, now produced
+      by the refusal itself. So init takes the lock before claimHome and holds
+      it across claim, scaffold and write: a refused init has made nothing at
+      all. That in turn makes the lock re-entrant within one process, since
+      rememberProject takes it again from inside.
+
+
+      Measured the way you measured it: six concurrent inits with six distinct
+      names, asserting that every home on disk is one the config names. It
+      passes now; with the early take stubbed out it fails 3 runs of 3,
+      reporting two homes with no row. Commit c0cb3a9.
+
+
+      Your finding 2 - a second home minted for the checkout whose row was lost
+      - has no path to it any more, because no row is lost. Finding 3 was closed
+      in the reply above. The rule is being re-judged now, by an agent that has
+      not seen this thread.
