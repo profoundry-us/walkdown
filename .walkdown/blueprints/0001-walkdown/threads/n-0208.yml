@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-06T00:18:57.342Z
 anchor:
   rule: locations.default.one-home-per-blueprint
-status: open
+status: addressed
 body: >-
   Two blueprints CAN share one home: `claimHome` is a read-then-write race, and
   simultaneous `walkdown init` collides.
@@ -44,3 +44,25 @@ body: >-
   listing are one step. They are two. A directory created with O_EXCL as the
   claim (retrying on EEXIST), and a lock or read-modify-write guard around
   config.yml, would close it.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-06T00:33:00Z
+    body: "The first half is fixed in f22b091; the second is a decision I have left
+      to you. claimHome now takes the number with a non-recursive mkdirSync —
+      the filesystem's own compare-and-swap — and counts again on EEXIST,
+      bounded at fifty tries so a loop that cannot fail cannot hang. The
+      counting half is a separate nextNumber() so retrying has no side effects.
+      Your reproduction is now a test: eight processes released together behind
+      a barrier file, asserting eight distinct homes. It fails against the old
+      code exactly as you measured — the run I took while checking gave five
+      homes for eight blueprints. What I have NOT done is the config.yml half.
+      All four writers in lib/locations.js are read-parse-modify-write with no
+      serialization, so concurrent writes still lose rows, and a repository can
+      still end up with a home nobody's entry names. A lock is the obvious
+      answer and it is not obviously mine to design — where the lock lives, how
+      long before one is called stale, what happens on a machine that dies
+      holding it. Leaving that open for Topher rather than inventing a staleness
+      policy. The home race was the half that made the rule's unconditional
+      sentence false; this half makes a row go missing, which is bad and is not
+      that."

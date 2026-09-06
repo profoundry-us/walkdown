@@ -189,6 +189,19 @@ test('no door accepts work on a machine that only has a guess @rule:threads.life
     const out = await doors[name].verify(f);
     assert.equal(out.refused, true, `${name}: a guessed name is not a signature`);
     assert.match(out.why, /identity:/, `${name}: and every door says where to write one down`);
+    /*
+     * And names the file it actually reads. Every one of these sentences used
+     * to say `~/.walkdown/config.yml` as a literal while the config consulted
+     * came from configPath(), which honours WALKDOWN_HOME - so under a
+     * redirected home the instruction pointed somewhere nothing reads, and
+     * following it got you refused again with nothing to see (n-0204). This
+     * fixture's home IS redirected, which is what makes the assertion bite.
+     */
+    assert.match(
+      out.why,
+      new RegExp(f.home.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
+      `${name}: and names the config this machine actually reads`,
+    );
     assert.equal(f.thread().status, 'addressed', `${name}: the thread never moved`);
     assert.equal(f.thread().verified_by, undefined, `${name}: and nobody stood as accepter`);
   }

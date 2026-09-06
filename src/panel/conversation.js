@@ -14,7 +14,7 @@ import { openSettings, requestReload, requestRender } from './shell.js';
 import { D, identityOverride, S, store } from './state.js';
 import { toast } from './toast.js';
 import { api, esc } from './util.js';
-import { HUMAN_ONLY, iAmDeclared, NEEDS_REASON, TERMINAL, threadsFor, whoAmI } from './vocab.js';
+import { HUMAN_ONLY, iAmDeclared, NEEDS_REASON, TERMINAL, threadsFor, whereIdentityLives, whoAmI } from './vocab.js';
 
 /**
  * The handles that resolve to a full name, for every message on screen.
@@ -176,7 +176,7 @@ export async function threadAct(id, status) {
     say(
       isMachineName(actor)
         ? 'Verify and waive are recorded under a person\u2019s name.'
-        : `Verify and waive are recorded under a person\u2019s name, and this machine only has a guess (${actor}). Say who you are in ~/.walkdown/config.yml under \`identity:\`.`,
+        : `Verify and waive are recorded under a person\u2019s name, and this machine only has a guess (${actor}). Say who you are in ${whereIdentityLives()} under \`identity:\`.`,
     );
     return openSettings();
   }
@@ -251,7 +251,7 @@ export async function verifyAll(rule) {
     toast(
       isMachineName(actor)
         ? 'Verifying is recorded under a person\u2019s name.'
-        : `Verifying is recorded under a person\u2019s name, and this machine only has a guess (${actor}). Say who you are in ~/.walkdown/config.yml under \`identity:\`.`,
+        : `Verifying is recorded under a person\u2019s name, and this machine only has a guess (${actor}). Say who you are in ${whereIdentityLives()} under \`identity:\`.`,
       { tone: 'error' },
     );
     return openSettings();

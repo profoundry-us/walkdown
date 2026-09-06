@@ -402,6 +402,33 @@ test('the spec hash covers the spec and nothing the spec produces @rule:location
   }
 });
 
+test('a directory that happens to be named .yml is not a spec file @rule:locations.travel.judged-against-a-spec', () => {
+  /*
+   * n-0198: the loader has always filtered `.isFile()` and specFiles counted
+   * anything whose NAME ended in .yml, so a directory called
+   * `features/thing.yml` was invisible to one reader and a file to the other,
+   * and readFileSync threw EISDIR. Everything that stamps provenance calls
+   * specHash, so one mistyped `mkdir` took down writeRunRecord, writeSweep and
+   * `walkdown judge` at once, with a stack trace rather than a sentence.
+   */
+  const s = scratch();
+  try {
+    const bp = blueprint(join(s.root, 'bp'));
+    const before = specHash(bp);
+    mkdirSync(join(bp, 'features', 'thing.yml'), { recursive: true });
+    assert.deepEqual(specFiles(bp), ['features/a.yml', 'storyboard.yml', 'walkdown.yml']);
+    assert.equal(specHash(bp), before, 'a directory is not part of the spec');
+
+    // And at the top level, where the same mistake reaches the two named files.
+    rmSync(join(bp, 'storyboard.yml'));
+    mkdirSync(join(bp, 'storyboard.yml'));
+    assert.deepEqual(specFiles(bp), ['features/a.yml', 'walkdown.yml']);
+    assert.match(specHash(bp), /^sha256:[0-9a-f]{12}$/);
+  } finally {
+    s.cleanup();
+  }
+});
+
 test('the same words in a different feature file are a different spec @rule:locations.travel.judged-against-a-spec', () => {
   const s = scratch();
   try {

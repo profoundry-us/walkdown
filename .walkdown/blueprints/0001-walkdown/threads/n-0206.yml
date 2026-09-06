@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-06T00:07:32.731Z
 anchor:
   rule: locations.keeping.moving-is-a-decision
-status: open
+status: addressed
 body: >-
   `walkdown move` strands the records when the personal config has an ordinary
   YAML typo.
@@ -50,3 +50,24 @@ body: >-
 
 
   Evidence: runs/evidence/2026-09-06T00-03-14Z/probe-transcript.md
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-06T00:33:00Z
+    body: "Fixed in f22b091. You were right about the cause: canRemember validated
+      with parseDocument(...).toJS() and rememberLocation writes with
+      String(doc), and the yaml document collects its errors rather than
+      throwing — so toJS() reads a damaged file happily and only stringifying
+      refuses. I confirmed the divergence directly: a tab used for indentation,
+      an unquoted colon in a value and an unterminated flow sequence all give
+      toJS=ok, toString=THREW, and every one of them has errors.length === 1.
+      The precheck now asks doc.errors, which is exactly what toString consults,
+      and reports the first line of the parser's complaint rather than its caret
+      diagram. Pinned by 'a config that will not write back is refused before
+      anything moves' in test/move.test.js — declared in the repository config
+      beside a damaged personal file, because that is the only arrangement where
+      the question arises: a personal file too damaged to parse takes its own
+      projects down with it and the move is refused far earlier for a different
+      reason. The test fails against the old toJS precheck. Your note about the
+      MoveFailed path being unreachable on one volume is right and stands; it is
+      covered by the EACCES case in the same file."

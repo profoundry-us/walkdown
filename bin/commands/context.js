@@ -31,21 +31,33 @@ export function loadOrExit(projectId) {
   // has been deleted, and a directory nothing declares is not a project at
   // all. Both are "no blueprint" and both should say so the same way.
   const there = loc.spec?.path && existsSync(join(loc.spec.path, 'walkdown.yml'));
-  if (!there) {
-    const where = loc.config.repo?.path ?? loc.config.path;
-    console.error(
-      projectId
-        ? `No blueprint for \`${projectId}\` — either nothing declares it, or its spec is gone.`
-        : `No blueprint here. Nothing in ${where} claims this directory.`,
-    );
-    console.error(
-      projectId
-        ? '`walkdown projects` lists what is declared here.'
-        : '`walkdown init` starts one, `walkdown project add <path>` lists an existing one, and `walkdown where` shows what was consulted.',
-    );
-    process.exit(2);
-  }
+  if (!there) noBlueprintHere(loc, projectId);
   return loadBlueprint(loc.spec.path);
+}
+
+/*
+ * The words, apart from the loading.
+ *
+ * `walkdown pointer` resolves by --dir rather than by project id, so it could
+ * not call loadOrExit and grew no refusal of its own: with nothing declared,
+ * `loc.spec.path` was null and the command called `.startsWith` on it - a raw
+ * TypeError from the one door a person reaches for precisely when their
+ * project is not set up yet (n-0207). Every other command in this position
+ * says what is wrong and what to do, and now there is one copy of that to say.
+ */
+export function noBlueprintHere(loc, projectId) {
+  const where = loc.config.repo?.path ?? loc.config.path;
+  console.error(
+    projectId
+      ? `No blueprint for \`${projectId}\` — either nothing declares it, or its spec is gone.`
+      : `No blueprint here. Nothing in ${where} claims this directory.`,
+  );
+  console.error(
+    projectId
+      ? '`walkdown projects` lists what is declared here.'
+      : '`walkdown init` starts one, `walkdown project add <path>` lists an existing one, and `walkdown where` shows what was consulted.',
+  );
+  process.exit(2);
 }
 
 export { end };

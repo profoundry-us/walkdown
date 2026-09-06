@@ -67,25 +67,7 @@ import { threadFilterBar, threadsMatching, threadsPane } from './threads-list.js
 import { toast } from './toast.js';
 import { api, esc } from './util.js';
 import { frameLoading, hideVeil, placeVeil, screenLabel, veilIsUp } from './veil.js';
-import {
-  CHIP,
-  currentScreen,
-  declaredAnchors,
-  defaultScreen,
-  duringSession,
-  ghostSource,
-  hereLocation,
-  isHeadless,
-  needsYou,
-  owedRows,
-  pageSurface,
-  ruleScreen,
-  screenById,
-  screenInHand,
-  screenUrl,
-  TERMINAL,
-  whoAmI,
-} from './vocab.js';
+import { CHIP, currentScreen, declaredAnchors, defaultScreen, duringSession, ghostSource, hereLocation, isHeadless, needsYou, owedRows, pageSurface, ruleScreen, screenById, screenInHand, screenUrl, TERMINAL, whereIdentityLives, whoAmI } from './vocab.js';
 
 /*
  * Two layouts, one panel.
@@ -314,17 +296,17 @@ function buildDeskPanel() {
         S.data?.identity?.declared ? 'font-mono' : 'font-mono italic opacity-60'
       }" title="${
         S.data?.identity?.declared
-          ? 'Records are written under this username, from identity: in ~/.walkdown/config.yml'
+          ? `Records are written under this username, from identity: in ${whereIdentityLives()}`
           : 'This machine has not been told who you are — it is guessing from ' +
             esc(S.data?.identity?.source ?? 'this machine') +
-            '. Add identity: to ~/.walkdown/config.yml to accept work.'
+            `. Add identity: to ${whereIdentityLives()} to accept work.`
       }">${esc(S.data?.identity?.username ?? '')}</span>
     </div>
     <div class="mb-2 text-[11px] leading-snug opacity-60" data-testid="settings.actor-source">
       ${
         S.data?.identity?.declared
-          ? 'Set in <code>~/.walkdown/config.yml</code>, where <code>walkdown init</code> wrote it.'
-          : 'Not written down — this is a guess, and accepting work is refused until <code>identity:</code> names you in <code>~/.walkdown/config.yml</code>.'
+          ? `Set in <code>${esc(whereIdentityLives())}</code>, where <code>walkdown init</code> wrote it.`
+          : `Not written down — this is a guess, and accepting work is refused until <code>identity:</code> names you in <code>${esc(whereIdentityLives())}</code>.`
       }
     </div>
     <!-- The display name. Shown everywhere in the UI, recorded nowhere - so

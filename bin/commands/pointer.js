@@ -2,6 +2,7 @@ import { resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { resolveLocations } from '../../lib/locations.js';
 import { dim } from '../../lib/report/tty.js';
+import { noBlueprintHere } from './context.js';
 
 /*
  * Print the pointer, or put it somewhere.
@@ -19,7 +20,9 @@ export async function run(args) {
   });
   const { pointerBlock, pointerHomes, placePointer } = await import('../../lib/init.js');
   const root = resolve(values.dir ?? process.cwd());
-  const spec = resolveLocations({ cwd: root }).spec.path;
+  const loc = resolveLocations({ cwd: root });
+  const spec = loc.spec?.path;
+  if (!spec) noBlueprintHere(loc);
   const block = pointerBlock(
     spec.startsWith(root + '/') ? `${spec.slice(root.length + 1)}/` : spec,
   );

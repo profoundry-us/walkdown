@@ -126,6 +126,17 @@ export const whoAmI = () => (S.data?.identity?.username ?? '').trim();
  */
 export const iAmDeclared = () => Boolean(S.data?.identity?.declared);
 
+/*
+ * And WHICH file to say it in. Every sentence here used to name
+ * `~/.walkdown/config.yml` as a literal, and the file the server actually
+ * reads is configPath(), which honours WALKDOWN_HOME - so under a redirected
+ * home the panel sent people to edit a file nothing reads (n-0204). The
+ * browser cannot work the path out; the server sends it with the identity,
+ * and the literal is the fallback for a payload made before it did.
+ */
+export const whereIdentityLives = () =>
+  S.data?.identity?.config_path || '~/.walkdown/config.yml';
+
 /** The screen a rule is about: the end of its flow, or the one it names. */
 export const ruleScreen = (r) => screenById(r?.flow?.at(-1) ?? r?.screens?.[0]);
 

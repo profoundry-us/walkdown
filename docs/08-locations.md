@@ -342,19 +342,21 @@ reports it as the spec standard and names the file that decides.
 
 ## Identifying a spec: a content hash, not a git sha
 
-Runs currently carry `git_sha` and `blueprint_sha`, and both are set to the same thing:
-the repository's HEAD. That conflates two questions, and outside a repository it answers
-neither.
+Runs used to carry `git_sha` and `blueprint_sha`, both set to the same thing: the
+repository's HEAD. That conflated two questions, and outside a repository it answered
+neither. They are now two fields answering one question each:
 
-- **`git_sha`** — *what code was running?* Keep it, when there is a repository. Omit it
+- **`git_sha`** — *what code was running?* Present when there is a repository, omitted
   when there is not.
-- **`spec_hash`** — *which version of the spec was this run made against?* This should be
-  a hash of the spec's own content, and it should be that whether or not the spec lives in
-  a repository.
+- **`spec_hash`** — *which version of the spec was this run made against?* A hash of the
+  spec's own content, whether or not the spec lives in a repository.
 
-A content hash is a small amount of work, because the machinery already exists.
+`blueprint_sha` is retired. Records written before the change still carry it and are
+still read; nothing rewrites them, because the ledger is append-only.
+
+The content hash was a small amount of work, because the machinery already existed.
 `lib/hash.js` is thirty lines and already canonicalizes text before hashing so that
-re-wrapped YAML and folded scalars hash identically. A spec hash is the same idea one
+re-wrapped YAML and folded scalars hash identically. The spec hash is the same idea one
 level up:
 
 - take the blueprint's own files — `walkdown.yml`, `storyboard.yml`, `features/*.yml`
@@ -365,12 +367,12 @@ level up:
 Runs, threads, drafts and evidence are **not** part of it. They are what the spec produces,
 not the spec.
 
-This is worth doing even for projects that keep everything in the repository, because
-`blueprint_sha` is wrong today in a way nobody has noticed: it changes on every commit,
-including commits that do not touch the blueprint. It can tell you *when* a run happened
-but not *what it was judged against*, which is the only thing it was ever for. Per-rule
-`statement_hash` is unaffected — that answers a narrower question (has this rule's wording
-moved?) and keeps answering it.
+It was worth doing even for projects that keep everything in the repository, because
+`blueprint_sha` was wrong in a way nobody had noticed: it changed on every commit,
+including commits that did not touch the blueprint. It could tell you *when* a run
+happened but not *what it was judged against*, which is the only thing it was ever for.
+Per-rule `statement_hash` was unaffected — it answers a narrower question (has this
+rule's wording moved?) and goes on answering it.
 
 ### The code's sha, when the spec has moved away from it
 
@@ -379,9 +381,9 @@ care where the blueprint lives — only which directory it is asked about. That 
 `roots:` is for: it names the working trees a project answers for, so the sha describes
 **the code under test** while `spec_hash` describes the spec, wherever that sits.
 
-A dirty tree is the common case, not the edge one: most runs happen mid-edit. Today such a
-run records `abc123-dirty`, which means "some unknown superset of `abc123`" — you cannot
-check it out, and you cannot tell two dirty runs apart. So runs also carry:
+A dirty tree is the common case, not the edge one: most runs happen mid-edit. Such a run
+records `abc123-dirty` on its own, which means "some unknown superset of `abc123`" — you
+cannot check it out, and you cannot tell two dirty runs apart. So runs also carry:
 
 ```
 tree_hash: sha256 of `git diff HEAD`, when the tree is dirty

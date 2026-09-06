@@ -21,6 +21,7 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+import { specHash } from '../lib/hash.js';
 import { resolveLocations } from '../lib/locations.js';
 import { parse } from '../vendor/yaml.js';
 
@@ -1975,11 +1976,26 @@ function record(file) {
     target: input.target ?? 'local',
     base_url: input.base_url ?? BASE,
     git_sha: sha + dirty,
-    blueprint_sha: sha + dirty,
+    /*
+     * WHAT it was judged against, not when. `blueprint_sha` used to sit here
+     * set to the same value as `git_sha` - the repository's HEAD - which moved
+     * on every commit including the many that never touched the blueprint, and
+     * said nothing at all about the spec. specHash replaced it everywhere else
+     * (lib/hash.js, and the skeleton `walkdown judge` prints); this harness
+     * never followed, so it kept adding records in the retired shape (n-0205).
+     */
+    spec_hash: specHash(BP),
     ...(input.note && { note: input.note }),
     results: input.results,
   };
-  const out = join(BP, 'runs', `${run.run_id}.json`);
+  /*
+   * And into the runs directory the ledger actually keeps, which stopped
+   * being `blueprint/runs` when a home became the spec with its four records
+   * as SIBLINGS. This path has not existed since; recording threw ENOENT
+   * rather than writing anywhere wrong, which is why nobody lost a verdict to
+   * it - but nobody could record one either.
+   */
+  const out = join(resolveLocations({ spec: BP }).runs.path, `${run.run_id}.json`);
   if (existsSync(out)) {
     console.error(`${out} exists`);
     process.exit(1);
