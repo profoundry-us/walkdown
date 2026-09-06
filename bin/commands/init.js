@@ -5,8 +5,10 @@ import { defaultActor } from '../../lib/identity.js';
 import {
   canon,
   claimHome,
+  configPath,
   expand,
   homePaths,
+  lockConfig,
   readUserConfig,
   rememberIdentity,
   rememberProject,
@@ -177,6 +179,25 @@ export async function run(args) {
    * path - is scaffolded where it is and claims nothing.
    */
   const walkdown = commit === 'none' ? walkdownHome() : join(root, '.walkdown');
+  /*
+   * One init at a time against this config, taken BEFORE the home is claimed.
+   *
+   * Locking only the config write was not enough: the home is claimed and
+   * scaffolded first, so a racer refused at the write had already made a home
+   * with no row — the stranded home the refusal exists to prevent, now
+   * produced by the refusal itself (measured while fixing n-0219). Held
+   * across claim, scaffold and write, a refused init has made nothing at all.
+   */
+  const releaseConfig = lockConfig(
+    commit === 'none' ? configPath() : join(root, '.walkdown', 'config.yml'),
+  );
+  try {
+    return await build();
+  } finally {
+    releaseConfig();
+  }
+
+  async function build() {
   const claim = listed
     ? { home: listed.home ? String(listed.home) : null, dir: loc.homeDir }
     : claimHome({ name: basename(root), walkdown });
@@ -353,4 +374,5 @@ export async function run(args) {
     console.log(dim('`walkdown where` shows every path this project uses.'));
   }
   if (!existsSync(specDir)) console.error(red(`  the spec did not land at ${specDir}`));
+}
 }

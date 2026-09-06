@@ -14,7 +14,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { dirname, join, basename } from 'node:path';
 import test from 'node:test';
 import { parse } from '../vendor/yaml.js';
 import { loadBlueprint } from '../lib/blueprint.js';
@@ -1161,6 +1161,70 @@ test('a home nothing claims is reported, and never guessed at @rule:locations.de
 
     // Reported, never adopted: the config is untouched by the reporting.
     assert.doesNotMatch(readFileSync(join(s.home, 'config.yml'), 'utf8'), /0009-stranded/);
+  } finally {
+    s.cleanup();
+  }
+});
+
+test('concurrent init never loses a row: every home on disk is one the config names @rule:locations.default.one-home-per-blueprint', async () => {
+  /*
+   * n-0219 / the surviving half of n-0208. The homes were always distinct —
+   * that is the n-0210 guard — but config.yml is an unlocked
+   * read-modify-write, so six inits at once made six homes and three rows,
+   * every process exiting 0 and naming the home it thought it had listed.
+   * Three checkouts were left with records in a home no row mentioned, and
+   * `init` there would then mint a second one.
+   *
+   * The answer is the one already taken for the number: refuse rather than
+   * serialise. So the invariant is not "everybody succeeds" — it is that a
+   * home standing on disk is always a home the config names, and anybody who
+   * could not have that is told so.
+   */
+  const s = scratch();
+  try {
+    const go = join(s.root, 'go');
+    const runner = join(s.root, 'init-racer.mjs');
+    writeFileSync(
+      runner,
+      `import { existsSync } from 'node:fs';\n` +
+        `import { execFileSync } from 'node:child_process';\n` +
+        `while (!existsSync(${JSON.stringify(go)})) {}\n` +
+        `try {\n` +
+        `  execFileSync(process.execPath, [${JSON.stringify(CLI)}, 'init', '--dir', process.argv[2]], { stdio: 'pipe' });\n` +
+        `  process.stdout.write('OK');\n` +
+        `} catch { process.stdout.write('REFUSED'); }\n`,
+    );
+    const dirs = Array.from({ length: 6 }, (_, i) => join(s.root, `proj${i}`));
+    for (const d of dirs) mkdirSync(d, { recursive: true });
+    const racers = dirs.map((d) =>
+      spawn(process.execPath, [runner, d], { env: { ...process.env, WALKDOWN_HOME: s.home } }),
+    );
+    const settled = racers.map(
+      (p) =>
+        new Promise((done, fail) => {
+          let out = '';
+          p.stdout.on('data', (x) => (out += x));
+          p.on('error', fail);
+          p.on('close', () => done(out.trim()));
+        }),
+    );
+    await new Promise((r) => setTimeout(r, 400));
+    writeFileSync(go, '');
+    const results = await Promise.all(settled);
+
+    const homes = readdirSync(join(s.home, 'blueprints')).filter((d) => /^\d{4}-/.test(d));
+    const rows = parse(readFileSync(join(s.home, 'config.yml'), 'utf8')).projects ?? [];
+    const named = new Set(rows.map((r) => basename(String(r.home ?? ''))).filter(Boolean));
+
+    // The invariant: nothing is left standing that no row names.
+    assert.deepEqual(
+      homes.filter((h) => !named.has(h)),
+      [],
+      `homes with no row: ${homes.filter((h) => !named.has(h)).join(' ')} (rows: ${[...named].join(' ')})`,
+    );
+    // And what succeeded is what got a row — nobody exited 0 on a lost write.
+    assert.equal(results.filter((r) => r === 'OK').length, homes.length, results.join(' '));
+    assert.ok(homes.length >= 1, 'at least one racer gets through');
   } finally {
     s.cleanup();
   }
