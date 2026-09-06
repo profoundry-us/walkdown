@@ -1,0 +1,24 @@
+{
+  "run_id": "2026-09-06T01-24-59Z-local-01",
+  "created": "2026-09-06T01:24:59Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "30952d8-dirty",
+  "tree_hash": "sha256:62afc15ede75",
+  "spec_hash": "sha256:9666fe299538",
+  "results": [
+    {
+      "rule": "locations.travel.judged-against-a-spec",
+      "status": "fail",
+      "statement_hash": "sha256:5014abd76d50",
+      "evidence": [
+        "runs/evidence/2026-09-06T01-24-59Z/probe-log.txt",
+        "runs/evidence/2026-09-06T01-24-59Z/unreadable-spec-file.txt"
+      ],
+      "reasoning": "I judged this in throwaway blueprints with WALKDOWN_HOME redirected to a scratch directory, never the real ledger: one project outside any repository and a second git repository holding byte-identical blueprint files. Every ordinary claim held. A second run record, a new thread and a draft each left the spec hash exactly where it was (sha256:6ceb08d5843a throughout), which is what one expects when runs, threads, drafts and evidence are siblings of the blueprint rather than inside it; rewording a statement moved it; the same words in a renamed feature file were a different spec, because the relative path is fed into the digest beside the content; storyboard.yml and walkdown.yml edits move it, whitespace-only edits do not and a YAML comment does; and the blueprint outside a repository hashed identically to the same bytes committed inside one, with git_sha present in the second case and irrelevant to the hash. The odd files mostly behaved: a directory named *.yml, a dangling symlink, a FIFO, a symlink to a directory, a symlink loop, an uppercase .YML and a yml inside a features/ subdirectory are all ignored by both the hash and the loader without an errno; a symlink to a real feature file outside the blueprint, and a filename with spaces and unicode, are both loaded and hashed. I am recording a fail on one case: an unreadable spec file (chmod 000). specHash reads each file with an unguarded readFileSync (lib/hash.js:113), so `walkdown judge` dies with a raw node EACCES stack and records nothing, while `walkdown lint` reports the same file in words as a schema error and `walkdown status` and `walkdown hash` ignore it silently. The three readers therefore disagree about what counts as a spec file exactly where the disagreement is most costly, and because lib/run-record.js calls specHash on both of its write paths, a blueprint holding one unreadable .yml cannot record a verdict at all. Detail and repro in n-0215.",
+      "threads": ["n-0215"]
+    }
+  ]
+}

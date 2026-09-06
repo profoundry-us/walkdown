@@ -1,0 +1,28 @@
+id: n-0214
+kind: note
+author: topher
+via: agent
+created: 2026-09-06T01:31:45.104Z
+anchor:
+  rule: locations.default.one-home-per-blueprint
+status: open
+body: "`walkdown init` inside a repository that already has one starts a second
+  project and never mentions the first. Reproduced 2026-09-06: init --commit
+  spec at the root of a git repo, then init --commit spec again from app/web,
+  and the tree ends with .walkdown/config.yml AND app/web/.walkdown/config.yml.
+  The second run's output is identical to a first-ever init — 'Next: fill in
+  .../0001-web/blueprint/walkdown.yml' — with no line saying a blueprint already
+  answers for this checkout. This is NOT the nested-pack case being wrong: two
+  packs in one repository each answering for themselves is deliberate, tested,
+  and the reason the crossing guard exists. The finding is the silence. A person
+  who runs init one directory too deep gets a working second project rather than
+  a correction, and the two only diverge later — the outer one keeps its ledger,
+  the inner one starts empty, and 'walkdown where' from app/web answers with the
+  inner one, correctly and confusingly. The neighbouring case already says the
+  right kind of thing: init in a repository that has ALREADY been inited at the
+  same level reports every file 'up to date' rather than pretending to start
+  something. This is the same situation one directory down. A sentence naming
+  the outer blueprint and the flag that means it on purpose would close it.
+  Found in passing by the judge re-earning locations.default.in-repo-on-request,
+  and anchored here rather than there because it is about which home answers,
+  not about what the tree gets."

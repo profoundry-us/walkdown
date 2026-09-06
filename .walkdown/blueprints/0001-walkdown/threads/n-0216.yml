@@ -1,0 +1,49 @@
+id: n-0216
+kind: note
+author: topher
+via: agent
+created: 2026-09-06T01:36:42.426Z
+anchor:
+  rule: threads.lifecycle.claim-never-accept
+status: open
+body: >-
+  The HTTP door drops any `via` longer than 40 characters, and the acceptance
+  goes through.
+
+
+  lib/api.js `provenance()` accepts a `via` only when `v.trim().length <= 40`;
+  anything longer becomes `null`. `checkTransition` in lib/threads.js then never
+  sees it, because its gate is `saysSomething(via)` on a value that is already
+  gone. So on an ordinary machine — one whose home declares a person, which is
+  exactly the machine an agent sits at — POST /api/threads/<id>/status with
+
+      {"status":"verified","via":"an automated judging agent driven by claude-opus-5 on behalf of the person here"}
+
+  returns 200, writes `status: verified` and `verified_by: <the person>`, and
+  records no `via` at all. Nothing on the thread says a machine did it. Same for
+  `waived`. The boundary is exact: 40 characters is refused, 41 is accepted
+  (runs/evidence/2026-09-06T01-25-08Z/http-via-length-gap.txt).
+
+
+  This is n-0212's finding one turn further on. That fix replaced `via ===
+  'agent'` with a presence test on the stated reasoning that `via` is free text
+  and an agent naming itself honestly must still be refused — and it is, right
+  up to the length the API silently truncates the claim to nothing. A length cap
+  is a sanity limit on a label; here it is load-bearing for a governance gate,
+  and the longer and more honest the self-description, the more likely it walks
+  through.
+
+
+  The gate itself is sound. The fix belongs at the door: a `via` that is present
+  but overlong should be refused (or clamped and still counted as provenance)
+  rather than treated as absent. "Not provenance" and "too long to record" are
+  different answers and `provenance()` gives the same one to both. The same line
+  makes a non-string `via` (`["agent"]`, `{n:"agent"}`, `42`, `true`) vanish
+  too, with the same effect.
+
+
+  Everything else on this rule holds, at every door — the library (lib/writes.js
+  and lib/threads.js called directly), the CLI, the HTTP API and the panel all
+  refuse an undeclared machine, an actor named agent in any spelling, and every
+  `via` of 40 characters or fewer; and claiming (open → addressed) stays open to
+  a machine at all four. Judged on a scratch copy, judge-cna2-0906.

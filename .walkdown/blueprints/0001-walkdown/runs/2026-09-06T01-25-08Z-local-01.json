@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-09-06T01-25-08Z-local-01",
+  "created": "2026-09-06T01:25:08Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "30952d8-dirty",
+  "tree_hash": "sha256:62afc15ede75",
+  "spec_hash": "sha256:9666fe299538",
+  "results": [
+    {
+      "rule": "threads.lifecycle.claim-never-accept",
+      "status": "fail",
+      "statement_hash": "sha256:482531dc241f",
+      "evidence": [
+        "runs/evidence/2026-09-06T01-25-08Z/http-via-length-gap.txt",
+        "runs/evidence/2026-09-06T01-25-08Z/library-door.txt",
+        "runs/evidence/2026-09-06T01-25-08Z/cli-door.txt",
+        "runs/evidence/2026-09-06T01-25-08Z/undeclared-machine.txt",
+        "runs/evidence/2026-09-06T01-25-08Z/actor-declared-as-agent.txt",
+        "runs/evidence/2026-09-06T01-25-08Z/panel-refuses-undeclared-machine.png"
+      ],
+      "reasoning": "I made every door refuse, on a scratch copy (judge-cna2-0906) served from inside itself with its own home, and read the thread on disk after every attempt. Three of the four doors hold completely. The library — lib/writes.js and lib/threads.js called directly — refuses verified and waived on a machine whose home declares nobody (naming the config file and never falling back to the git-derived `topher`), refuses an actor spelled agent, Agent, ' AGENT ', AgEnT or empty, and refuses every `via` I could think of: agent, claude-opus-5, 'a helpful script', ai, bot, the panel, a 79-character self-description. The CLI refuses --as-agent on --verify, --waive, --status verified and --reply+--status verified, and has no --actor or --via to reach around it; the reply does not land when the transition is refused. The panel, driven on a server whose home declares nobody, left n-0200 addressed, said so in its own words and pointed at the config file (screenshot). A home that DECLARES itself ' AGENT ' is caught by the name gate at the HTTP door. And the other half holds everywhere: open → addressed went through at the library, the CLI (--as-agent), the HTTP API (via claude-opus-5) and the panel, recorded under the person with `via: agent` beside the name. The HTTP door fails on one line. lib/api.js `provenance()` returns the `via` only when `v.trim().length <= 40`; anything longer becomes null, so lib/threads.js `saysSomething(via)` is asked about a value already discarded. On the ordinary machine an agent sits at — home declares a person — POST /api/threads/<id>/status with via 'an automated judging agent driven by claude-opus-5 on behalf of the person here' returns 200, writes status: verified and verified_by: <the person>, and records no via at all: nothing on the thread says a machine did it. Waived the same. The boundary is exact — 40 characters refused, 41 accepted. That is precisely the case the rule names, a machine saying in words that it typed the mutation, and precisely the case n-0212's fix was written to close; the length cap re-opens it for any self-description honest enough to be long. The same line drops a non-string via with the same effect. Filed as n-0216.",
+      "threads": ["n-0216"]
+    }
+  ]
+}

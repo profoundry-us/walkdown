@@ -41,3 +41,29 @@ body: >-
 
   Everything else in the rule held under the same probing — see
   runs/evidence/2026-09-06T00-44-21Z/boundary-holds.txt and server-scope.txt.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-06T01:24:03Z
+    body: "Confirmed and not fixed — this needs a decision about what the exemption
+      is FOR, and I would rather ask than guess. Your mechanism reading is
+      right: lib/locations.js encodes it as `t === mineToDeclare` while `theirs`
+      comes from walkdownRoot(), which by construction never returns the
+      personal home — so the exemption is unreachable, and it only looks like it
+      holds because the default ~/.walkdown has nothing above it and
+      walkdownRoot returns null first. The reason I am not just widening the
+      test: the crossing guard exists so that one .walkdown never answers for a
+      blueprint living under another, and a personal home nested inside a
+      checkout is precisely the shape where 'which .walkdown answers' has two
+      defensible answers. The arrangement you reproduced — WALKDOWN_HOME inside
+      a repo, which is what this project's own test runner does — is common
+      enough that refusing it silently is bad, but so is having the pack's
+      .walkdown and the personal home both claim it. Two ways out, both design:
+      make the exemption reachable by testing against walkdownHome() before
+      walkdownRoot() ever runs, so a personal home always wins for its own
+      blueprints; or refuse a personal home nested under a declaring .walkdown
+      at init time, loudly, rather than accepting it and then answering 'nothing
+      claims this directory' forever after. The second is more honest and more
+      disruptive. Worth noting the failure mode is the bad one either way: init
+      prints '+ listed ... as other' and then every command says nothing claims
+      the directory, so the tool contradicts itself within two commands."

@@ -1,0 +1,74 @@
+id: n-0215
+kind: note
+author: topher
+via: agent
+created: 2026-09-06T01:34:47.661Z
+anchor:
+  rule: locations.travel.judged-against-a-spec
+status: open
+body: >-
+  specHash() reads spec files unguarded, so one unreadable .yml crashes judging
+  with a raw node errno — and the three readers disagree about that file.
+
+
+  Repro (throwaway blueprint, WALKDOWN_HOME redirected — never the real ledger):
+  create a project with one feature file, then `chmod 000
+  blueprint/features/<other>.yml`.
+
+    walkdown judge <rule>   dies: 'Error: EACCES: permission denied, open ...' with a node stack at
+                            lib/hash.js:113 (readFileSync inside specHash) called from
+                            bin/commands/judge.js:136. No walkdown sentence, no path relative to the
+                            blueprint, and the process exits without a verdict.
+    walkdown lint           answers in words: '[schema] blueprint/features/eps.yml: YAML parse error:
+                            EACCES ...' — an error, reported as one.
+    walkdown status         says nothing at all; it lists the remaining rules as if the file were absent.
+    walkdown hash           likewise silent.
+
+  So the file is simultaneously a hard error (lint), not a spec file (status,
+  hash), and a crash (judge).
+
+  lib/run-record.js calls specHash at both write paths (lines 205 and 264), so
+  the same unguarded read sits
+
+  under every recorded run, not only the judge prompt — a blueprint containing
+  one root-owned or
+
+  otherwise unreadable .yml cannot record a verdict at all, and the failure
+  surfaces as a node stack.
+
+
+  Everything else the rule claims held up: a run, a thread and a draft all left
+  the hash where it was; a
+
+  reworded statement moved it; the same words in a renamed feature file were a
+  different spec; and a
+
+  blueprint outside any repository hashed identically to the same bytes
+  committed inside a git repo. The
+
+  odd files were handled without an errno and the readers agreed on all of them:
+  a directory named *.yml,
+
+  a dangling symlink, a FIFO, a symlink to a directory, a symlink loop,
+  uppercase .YML and a yml inside a
+
+  features/ subdirectory are all ignored by hash and loader alike; a symlink to
+  a real feature file outside
+
+  the blueprint, and a name with spaces and unicode, are both loaded and hashed.
+  Only the unreadable file
+
+  breaks the pattern.
+
+
+  Suggested shape: give specHash the same treatment the loader has — read each
+  file inside a try, and
+
+  report an unreadable spec file as a walkdown sentence naming the
+  blueprint-relative path, with hash and
+
+  loader taking the same view of whether it counts as a spec file.
+
+
+  Evidence: runs/evidence/2026-09-06T01-24-59Z/unreadable-spec-file.txt,
+  runs/evidence/2026-09-06T01-24-59Z/probe-log.txt

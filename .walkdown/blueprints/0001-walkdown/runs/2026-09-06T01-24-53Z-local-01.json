@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-09-06T01-24-53Z-local-01",
+  "created": "2026-09-06T01:24:53Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "30952d8-dirty",
+  "tree_hash": "sha256:62afc15ede75",
+  "spec_hash": "sha256:9666fe299538",
+  "results": [
+    {
+      "rule": "locations.default.in-repo-on-request",
+      "status": "pass",
+      "statement_hash": "sha256:d66c40335b64",
+      "evidence": [
+        "runs/evidence/2026-09-06T01-24-53Z/probe-a-relative-and-ignore-shape.txt",
+        "runs/evidence/2026-09-06T01-24-53Z/probe-b-changing-standard.txt",
+        "runs/evidence/2026-09-06T01-24-53Z/probe-c-git-is-asked-not-the-file.txt",
+        "runs/evidence/2026-09-06T01-24-53Z/probe-g-default-and-idempotence.txt"
+      ],
+      "reasoning": "Judged by driving bin/walkdown.js in eight throwaway git repositories with WALKDOWN_HOME and WALKDOWN_SKILLS_DIR redirected into the scratchpad, never by reading code. Neither standard is the default (probe-g G1: plain `init` left the repository with nothing but README.md and put the home in the redirected ~/.walkdown), and each is one flag. `--commit spec` lays the home out under the repository's `.walkdown/blueprints/0001-<id>/` in the same shape as every home and writes `.walkdown/.gitignore`, `.walkdown/config.yml` and a CLAUDE.md pointer; every path written into those committed files is relative (`spec: .walkdown/blueprints/0001-pa/blueprint`, `home: 0001-pa`, `roots: [.]`) and a grep for the absolute scratch root across `.walkdown/`, `.claude/` and CLAUDE.md found nothing (probe-a A2). Run from `src/deeper`, a subdirectory the home does not sit under, `walkdown pointer` and `walkdown pointer --into AGENTS.md` both wrote `../../.walkdown/blueprints/0001-pa/blueprint/` — relative to the pointer file's own directory, not the home's; run from a subdirectory of a fresh repository, `init --commit spec` makes that directory the project root and writes the same all-relative config there. Correctness on another machine was tested for real: a clone of the repository at a different path, with an empty WALKDOWN_HOME, resolved spec/runs/threads/evidence/drafts/code and linted clean with nothing else run (A5). The ignore shape was asked of git per path rather than read off the file (A3): `.walkdown/.gitignore`, `.walkdown/config.yml`, the blueprint and threads are committable; runs, evidence and drafts are ignored. `--commit all` removes the ignore file and nothing else (probe-b B1: `git status` showed only the deletion; config.yml unchanged), and `--commit none` moves the home whole into ~/.walkdown, taking config, ignore file and pointer with it, leaving no `.walkdown` behind and no record edited; `--commit spec` again moves it back whole with runs/r.json, evidence/x/s.png, drafts/d.json and threads/t.json all intact (B2, B3). The report is git's answer, not the file's: n-0179 is fixed (leaving after committing everything now prints '10 file(s) git tracked under the .walkdown that left are now deletions to commit', with three named, instead of 'Nothing was added'); n-0180 case 1 is fixed (a root `.gitignore` holding `.walkdown/` reads 'tracked: nothing - .gitignore:1 `.walkdown/` hides the spec from git' and lint gives five errors, matching `git check-ignore -v`); n-0180 case 2 is fixed (an emptied `.walkdown/.gitignore` reads 'tracked: everything ... no rule keeps any of it out' plus a lint error 'present and keeps nothing out'); n-0181 is fixed (an ephemeral blueprint home-shaped at packs/0002-gamma reads 'tracked: everything' and lint errors three times that `blueprints/*/runs/` does not reach that home). Repeating the same command is honest rather than falsely triumphant: every file lists as 'up to date' and git status shows nothing new (G2, G3). One nuance short of the literal wording: files already in the index under runs/evidence/drafts, which the ignore rule cannot reach, are said outright by both init and `where` but are lint warnings, not errors — defensible, since walkdown never touches the index and `git rm --cached` is the person's call, but it is the one place the tree's promise and git's answer disagree without a lint error. Not fatal to any THEN clause, so: pass.",
+      "threads": []
+    }
+  ]
+}

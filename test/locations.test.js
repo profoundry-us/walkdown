@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { execFileSync, spawn, spawnSync } from 'node:child_process';
 import {
+  chmodSync,
   cpSync,
   existsSync,
   mkdirSync,
@@ -408,6 +409,38 @@ test('the spec hash covers the spec and nothing the spec produces @rule:location
     assert.equal(specHash(bp), before, 'line endings and trailing space are not the spec');
     writeFileSync(join(bp, 'features', 'a.yml'), 'feature: b\nstories: []\n');
     assert.notEqual(specHash(bp), before, 'a changed word is');
+  } finally {
+    s.cleanup();
+  }
+});
+
+test('a spec file that cannot be read is named, not an errno @rule:locations.travel.judged-against-a-spec', () => {
+  /*
+   * The twin of n-0198. specFiles learned to stat before believing a name,
+   * and specHash kept reading whatever survived that filter with no guard at
+   * all - so a spec file the process could see but not open came back as a
+   * bare EACCES stack from under writeRunRecord, which hashes on every write
+   * (n-0215). The reader's next move is to look at the file, so the sentence
+   * has to say which one.
+   */
+  const s = scratch();
+  try {
+    const bp = blueprint(join(s.root, 'bp'));
+    const shut = join(bp, 'features', 'a.yml');
+    chmodSync(shut, 0o000);
+    try {
+      readFileSync(shut, 'utf8');
+      return; // running as root, where nothing is unreadable: nothing to test
+    } catch {
+      /* good: the file really is shut */
+    }
+    assert.throws(
+      () => specHash(bp),
+      (e) => e.message.includes(shut) && e.message.includes('cannot be read') && !/at /.test(e.message),
+      'the refusal names the file',
+    );
+    chmodSync(shut, 0o644);
+    assert.match(specHash(bp), /^sha256:[0-9a-f]{12}$/, 'and reading it again is a hash');
   } finally {
     s.cleanup();
   }

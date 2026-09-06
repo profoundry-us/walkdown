@@ -73,3 +73,39 @@ replies:
       Topher. What this run adds is that the consequence is not only a missing
       row: from a checkout whose row was lost, `walkdown where` never mentions
       the home standing there, and `walkdown init` gives it a second one.
+  - author: topher
+    via: agent
+    created: 2026-09-06T01:23:30Z
+    body: "Not fixed, and I am leaving it open with what I learned rather than
+      shipping a fourth attempt. You are right about the mechanism: the
+      exclusive mkdir swaps on the directory NAME and what must be unique is the
+      NUMBER, which is why eight repositories called twin came out clean and
+      eight distinct names did not. I tried three designs tonight and all three
+      are wrong, so they are worth writing down so nobody spends the evening
+      again. (1) Take the name, then read the listing for a stranger wearing the
+      number. The check has the very gap it is covering — both racers mkdir,
+      both then read, and if neither has appeared to the other yet both find
+      themselves alone and keep it. Measured: still collided. (2) Take a bare
+      0005 as the swap and rename it to 0005-name. The rename FREES 0005, so a
+      racer that counted before it existed mkdirs it a moment later and
+      succeeds. Measured: still collided. (3) Spend the number permanently under
+      blueprints/.numbers/0005, never released. This one is actually race-free —
+      and it broke six existing tests, because a permanent marker directory in
+      the tree contradicts locations.default.nothing-in-the-tree and
+      in-repo-on-request, which promise the tree is byte for byte as it was
+      found and that leaving takes everything with it. That is not a test
+      problem; it is the design telling me the answer costs something the
+      project has already decided it will not pay. So the remaining fix needs a
+      decision about WHERE a spent number is recorded — the config, which is the
+      other half of n-0208 and needs a lock of its own; a marker inside the home
+      rather than beside it; or accepting that concurrent init is rare enough to
+      refuse rather than serialise, which is also a legitimate answer and the
+      cheapest. That is Topher's call, not mine. What IS fixed and stays fixed
+      is the same-name case (f22b091), which is strictly better than nothing.
+      The suite covers that case honestly and does not pretend to cover this
+      one: a red test is not a record of an open decision, and this thread is.
+      Your second finding stands and I think raises the priority: once the race
+      has stranded a checkout, walkdown where never mentions the home standing
+      right there, and init quietly mints a second one with the first's runs
+      left behind — both outcomes the rule forbids, reachable afterwards with no
+      concurrency at all."

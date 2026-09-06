@@ -973,6 +973,47 @@ test('OPTIONS preflight answers CORS and Private Network Access', async () => {
   assert.equal(res.headers.get('access-control-allow-private-network'), 'true');
 });
 
+test('a via the door cannot use is refused, never quietly erased @rule:threads.lifecycle.claim-never-accept', async () => {
+  /*
+   * The sanitizer dropped anything it did not like - a non-string, or a
+   * string over forty characters - to null, and null is how the acceptance
+   * gate spells "no machine was involved". So the agent that described
+   * itself honestly and at length walked straight through the gate that
+   * n-0212 had just closed: forty characters refused, forty-one accepted
+   * (n-0216). Erasure and absence must never be the same thing.
+   */
+  const post = (path, body) =>
+    fetch(`${base}${path}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  const opened = await post('/api/threads', {
+    kind: 'note',
+    body: 'Typed by a machine.',
+    via: 'agent',
+    anchor: { element: 'home.cta' },
+    url: 'http://localhost:3000/home',
+  }).then((r) => r.json());
+  const file = join(threads, `${opened.id}.yml`);
+  const before = readFileSync(file, 'utf8');
+  const long = 'an automated judging agent driven by claude-opus-5 on behalf of the person here';
+  assert.equal(long.length > 40, true);
+  for (const via of [long, ['agent'], { name: 'agent' }, 42, true, '   ']) {
+    for (const status of ['verified', 'waived']) {
+      const res = await post(`/api/threads/${opened.id}/status`, {
+        status,
+        reason: 'because I say so',
+        via,
+      });
+      assert.equal(res.status, 400, `${JSON.stringify(via)} → ${status} must be refused`);
+    }
+    const res = await post(`/api/threads/${opened.id}/replies`, { body: 'anything', via });
+    assert.equal(res.status, 400, `${JSON.stringify(via)} on a reply must be refused`);
+  }
+  assert.equal(readFileSync(file, 'utf8'), before, 'nothing refused may reach the disk');
+});
+
 test('via rides through the API on a note, a reply and a move @rule:status.attribution.username-is-the-record', async () => {
   /*
    * The CLI has always carried provenance (--as-agent); the HTTP door dropped
@@ -996,10 +1037,9 @@ test('via rides through the API on a note, a reply and a move @rule:status.attri
   const file = join(threads, `${id}.yml`);
   assert.equal(parse(readFileSync(file, 'utf8')).via, 'agent');
   await post(`/api/threads/${id}/replies`, { body: 'Also typed by a machine.', via: 'agent' });
-  await post(`/api/threads/${id}/replies`, { body: 'Typed by the person.', via: ['agent'] });
   const replies = parse(readFileSync(file, 'utf8')).replies;
   assert.equal(replies[0].via, 'agent');
-  assert.equal(replies[1].via, undefined, 'anything but a plain string is no provenance');
+  assert.equal(replies.length, 1);
   await post(`/api/threads/${id}/status`, { status: 'addressed', reason: 'done', via: 'agent' });
   const t = parse(readFileSync(file, 'utf8'));
   assert.equal(t.status, 'addressed');

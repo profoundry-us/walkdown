@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-06T00:49:09.532Z
 anchor:
   rule: locations.default.in-repo-on-request
-status: open
+status: addressed
 body: "Judging locations.pointer.placed-where-agents-read turned up a path
   defect that belongs to this rule instead. When the pointer is placed from a
   directory the blueprint home does not sit under - `walkdown pointer --into
@@ -22,3 +22,23 @@ body: "Judging locations.pointer.placed-where-agents-read turned up a path
   (contrast in the same file),
   runs/evidence/2026-09-06T00-43-58Z/pointer-homes-probe.txt section F.
   Placement itself was correct throughout; only the path text is at issue."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-06T01:22:53Z
+    body: "Fixed in 30952d8, and thank you for anchoring it here rather than on the
+      rule you were judging — it is in-repo-on-request's THEN that promises a
+      relative path, and putting it on placed-where-agents-read would have
+      muddied a rule that was passing. bin/commands/pointer.js measured 'is the
+      spec under here?' against the working directory; it now names the
+      blueprint relative to the directory of the FILE the block lands in, since
+      that is where it will be read from, and uses the code root rather than the
+      cwd as the test for whether a relative path means anything at all. A spec
+      genuinely outside the checkout still gets an absolute path, because it has
+      nothing relative to say — and that is the case that is personal rather
+      than committed. Reproduced your scenario before and after: from
+      packages/web of a repo whose home is at the root, the block now reads
+      ../../.walkdown/blueprints/0001-repo/blueprint/ with no machine path
+      anywhere in the file. Covered in test/init-run.test.js, which asserts both
+      the subdirectory case and that the root case still writes a plain relative
+      path."
