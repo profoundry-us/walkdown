@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-06T01:34:47.661Z
 anchor:
   rule: locations.travel.judged-against-a-spec
-status: open
+status: addressed
 body: >-
   specHash() reads spec files unguarded, so one unreadable .yml crashes judging
   with a raw node errno — and the three readers disagree about that file.
@@ -72,3 +72,16 @@ body: >-
 
   Evidence: runs/evidence/2026-09-06T01-24-59Z/unreadable-spec-file.txt,
   runs/evidence/2026-09-06T01-24-59Z/probe-log.txt
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-06T01:44:53Z
+    body: "Fixed in 1114c51. specHash in lib/hash.js wraps its readFileSync: an
+      unreadable spec file now throws a sentence naming the path and the errno,
+      saying that the spec hash covers every spec file so a run cannot be
+      stamped without it. That sits under writeRunRecord (lib/run-record.js:205,
+      :264), which hashes on every write. test/locations.test.js: 'a spec file
+      that cannot be read is named, not an errno' chmods a feature file to 000,
+      asserts the message names the file and carries no stack frame, then
+      restores it and hashes again. It returns early when readFileSync still
+      succeeds, so it is a no-op rather than a false pass under root."

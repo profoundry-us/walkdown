@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-09-06T01-46-24Z-local-01",
+  "created": "2026-09-06T01:46:24Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "1114c51-dirty",
+  "tree_hash": "sha256:bc8ce72d0cd4",
+  "spec_hash": "sha256:9666fe299538",
+  "results": [
+    {
+      "rule": "panel.identity.default-actor",
+      "status": "pass",
+      "statement_hash": "sha256:870f334762eb",
+      "evidence": [
+        "runs/evidence/2026-09-06T01-46-24Z/probe-transcript.txt",
+        "runs/evidence/2026-09-06T01-46-24Z/declared-identity.png",
+        "runs/evidence/2026-09-06T01-46-24Z/full-name-emptied.png",
+        "runs/evidence/2026-09-06T01-46-24Z/no-identity-declared.png",
+        "runs/evidence/2026-09-06T01-46-24Z/username-not-a-string.png",
+        "runs/evidence/2026-09-06T01-46-24Z/machine-shaped-name.png"
+      ],
+      "reasoning": "Earned again from scratch on a scratch copy served on :4833 with its own home, with /api/blueprint checked first so nothing here could reach the real ledger. I varied what the machine's home says about identity rather than reading the code that reads it. Told who is sitting there, the panel arrives filled in and asks nothing: panel.actor carries the full name with panel.actor-handle beside it, both genuinely visible (in the viewport, opacity 1, hit-testing to themselves), and a rule's Pass/Fail is reachable with no identity prompt anywhere in between. Settings shows settings.actor as a SPAN - there is nothing to type into - and settings.actor-source names the exact config file it came from. Told nothing at all, it still arrives filled in from the machine's guess and says so in words, that this is a guess and that accepting work is refused until the file names a person. A username that is not a string - number, list, map, boolean - counts as nobody in all four shapes: the server stays up and every record lands under the guessed username, never '42' or '[object Object]'. Nothing a request carries moves the author: four body shapes (author, actor, identity, username) and two headers all filed under the machine's username, checked in the thread YAML on disk and not merely in the response, and the same injection against POST /api/walkdowns wrote a run whose actor is the machine's username. The one field a browser can set is the full name, and it stays cosmetic: with it set to 'mallory' a thread filed seconds later still landed under the username. It applies to the running session without a reload, is remembered across one, and emptying it is kept as an answer - the strip then shows the username standing alone rather than reverting to the config's name. Two honesty notes. The judging browser could not deliver Backspace, Delete or cmd+x to any input on the page (a control test on panel.rules-search failed identically), so emptying the name was done by setting the input through its native value setter and dispatching the input/change events typing produces; typing itself worked. And the screenshots were re-photographed against the same running server with Playwright because the judging browser cannot write files - the visibility and occlusion judgments above were all made live in it.",
+      "threads": []
+    }
+  ]
+}

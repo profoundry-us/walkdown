@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-09-06T01-45-45Z-local-01",
+  "created": "2026-09-06T01:45:45Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "1114c51-dirty",
+  "tree_hash": "sha256:bc8ce72d0cd4",
+  "spec_hash": "sha256:9666fe299538",
+  "results": [
+    {
+      "rule": "locations.travel.judged-against-a-spec",
+      "status": "pass",
+      "statement_hash": "sha256:5014abd76d50",
+      "evidence": [
+        "runs/evidence/2026-09-06T01-45-45Z/probe-log.txt"
+      ],
+      "reasoning": "Probed against throwaway blueprints in a temp directory with WALKDOWN_HOME redirected, never the real ledger, and through all three readers that stamp provenance rather than the hash function alone. The three THEN clauses hold: a run json, a thread (n-0001) and a draft all left the hash at e285b3cb594a, and three successive writeRunRecord calls stamped that same value, so a verdict really is what the spec produced rather than part of it; rewording a statement moved it to 6067abba266f and restoring the words restored it exactly; the same words in a renamed feature file were a different spec, 8969171e28be. The same bytes hashed identically inside a git repo and in a directory with no repository, which is the clause about a verdict saying what it was measured against whether or not there is a sha to point at. Coverage is exactly walkdown.yml, storyboard.yml and features/*.yml: editing AGENTS.md, adding proposals/ or a non-yaml file, or dropping a feature file into a features/ subdirectory all left the hash alone, and status confirmed the loader could not see that nested rule either, so the two readers agree. Cosmetic churn as this code defines it survives - CRLF, trailing spaces on every line, extra blank lines at EOF all hashed to e285b3cb594a - while a new comment or a requoted scalar moves it, which lib/hash.js argues for deliberately on the grounds that a re-indent can change what a blueprint says. On odd shapes the hash and the loader took the same view of every case I could build: a directory named features/ghost.yml (with and without a file inside), a dangling symlink, a symlink to a directory, a self-referential symlink loop, a FIFO, an uppercase .YML, all ignored by both without an errno; a symlink to a real feature file outside the blueprint followed by both. A file vanishing mid-read, raced across two processes for twelve seconds with 217 losses observed, produced the named sentence with ENOENT every time and never a bare errno. The one shape still out of pattern is a spec file that exists and cannot be read: judge, sweep and writeRunRecord all refuse cleanly, writing nothing partial, and the message names the file and says why a run cannot be stamped - but it is thrown bare, so a person gets four stack frames and a node version banner where every other walkdown error is one sentence, and lint calls that file an error while status and hash carry on as if it were absent. That is delivery and reader disagreement rather than spec identity: no wrong hash is ever stamped, and every clause the rule actually makes held. Filed as n-0217 rather than counted against the rule. Same shape one layer down, also in n-0217 and outside this rule: chmod 000 on the features/ directory raws out of readdirSync in lib/blueprint.js before specHash is reached.",
+      "threads": ["n-0217"]
+    }
+  ]
+}

@@ -17,7 +17,9 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import test from 'node:test';
 import { parse } from '../vendor/yaml.js';
+import { loadBlueprint } from '../lib/blueprint.js';
 import { formatHash, specFiles, specHash } from '../lib/hash.js';
+import { Refused } from '../lib/refusal.js';
 import { canon, claimHome, expand, KINDS, readUserConfig, rememberProject, resolveLocations } from '../lib/locations.js';
 import { deriveStatus } from '../lib/status.js';
 
@@ -436,11 +438,27 @@ test('a spec file that cannot be read is named, not an errno @rule:locations.tra
     }
     assert.throws(
       () => specHash(bp),
-      (e) => e.message.includes(shut) && e.message.includes('cannot be read') && !/at /.test(e.message),
-      'the refusal names the file',
+      (e) =>
+        e instanceof Refused &&
+        e.message.includes('features/a.yml') &&
+        e.message.includes(bp) &&
+        e.message.includes('cannot be read'),
+      'the refusal names the file, relative to the blueprint that owns it',
     );
     chmodSync(shut, 0o644);
     assert.match(specHash(bp), /^sha256:[0-9a-f]{12}$/, 'and reading it again is a hash');
+
+    // And the same question of the directory, which comes out of the loader
+    // rather than the hash and so reaches every command, not only the ones
+    // that stamp (n-0217).
+    const dir = join(bp, 'features');
+    chmodSync(dir, 0o000);
+    assert.throws(
+      () => loadBlueprint(bp),
+      (e) => e instanceof Refused && e.message.includes(dir) && e.message.includes('cannot be listed'),
+      'a spec directory that cannot be listed is named too',
+    );
+    chmodSync(dir, 0o755);
   } finally {
     s.cleanup();
   }

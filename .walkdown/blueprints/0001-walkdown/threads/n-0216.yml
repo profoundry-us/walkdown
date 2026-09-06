@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-06T01:36:42.426Z
 anchor:
   rule: threads.lifecycle.claim-never-accept
-status: open
+status: addressed
 body: >-
   The HTTP door drops any `via` longer than 40 characters, and the acceptance
   goes through.
@@ -47,3 +47,19 @@ body: >-
   refuse an undeclared machine, an actor named agent in any spelling, and every
   `via` of 40 characters or fewer; and claiming (open → addressed) stays open to
   a machine at all four. Judged on a scratch copy, judge-cna2-0906.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-06T01:44:52Z
+    body: "Fixed in 1114c51. provenance() in lib/api.js no longer erases a via it
+      cannot use: a non-string, an empty string, or a string over 40 characters
+      is now a worded 400 at the door instead of null. The cap stays — via is a
+      short label — but going over it is a refusal, so 'present but unusable'
+      can never reach the gate in lib/threads.js looking like 'absent'.
+      test/serve.test.js: 'a via the door cannot use is refused, never quietly
+      erased' drives the 78-character self-description the report used, plus an
+      array, an object, a number, a boolean and whitespace, against both
+      verified and waived and against a reply, and asserts the thread file on
+      disk is byte-identical afterwards. The existing via test lost its
+      assertion that a non-string is silently dropped — that assertion was the
+      bug."

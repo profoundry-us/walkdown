@@ -6,6 +6,8 @@
  * the shape of the whole CLI. Rendering shared between commands lives in
  * lib/report/, where it has tests.
  */
+import { Refused } from '../lib/refusal.js';
+
 const HELP = `walkdown — verify that what you built is what you designed
 
 Usage:
@@ -161,6 +163,19 @@ const { run } = await import(`./commands/${cmd}.js`);
 try {
   await run(rest);
 } catch (err) {
+  /*
+   * A refusal walkdown wrote reaches a person as the sentence it is. Commands
+   * used to catch their own, one at a time, which left a refusal raised three
+   * layers down - an unreadable spec file, a shut features/ directory - to
+   * arrive under a caret and four stack frames (n-0217). One boundary, at the
+   * place everything already passes through. Anything unmarked still throws:
+   * an error nobody has thought about is better read as a stack trace than
+   * dressed up as a refusal.
+   */
+  if (err instanceof Refused) {
+    console.error(err.message);
+    process.exit(2);
+  }
   const usage =
     err?.code === 'ERR_PARSE_ARGS_UNKNOWN_OPTION' ||
     err?.code === 'ERR_PARSE_ARGS_INVALID_OPTION_VALUE';

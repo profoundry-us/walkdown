@@ -1,0 +1,62 @@
+id: n-0217
+kind: note
+author: topher
+via: agent
+created: 2026-09-06T01:55:12.496Z
+anchor:
+  rule: locations.travel.judged-against-a-spec
+status: open
+body: >-
+  n-0215's sentence landed, but it still reaches a person as a raw node stack,
+  and the readers still disagree about an unreadable spec file.
+
+
+  Repro (throwaway blueprint, WALKDOWN_HOME redirected — never the real ledger):
+  one feature file, then chmod 000 on a second one.
+
+    walkdown judge <rule>   exit 1. The new sentence is there — '<abs path> cannot be read (EACCES). The spec hash covers every spec file, so a run cannot be stamped without it.' — but it is thrown bare, so stdout carries 'file:///.../lib/hash.js:122', a caret, four stack frames and 'Node.js v26.0.0'.
+    walkdown sweep          exit 1, identical, from lib/run-record.js:264.
+    writeRunRecord()        exit 1, identical, from lib/run-record.js:205.
+    walkdown lint           a walkdown error line, as it always did.
+    walkdown status         silent — the board reads as if the file were absent.
+    walkdown hash           silent, likewise.
+
+  So the file is still simultaneously a hard error (lint), not a spec file
+  (status, hash) and a crash (judge, sweep, every recorded run). n-0215's
+  suggested shape asked for three things; one landed. The path in the message is
+  absolute, not blueprint-relative, and the hash and the loader still take
+  opposite views of whether the file counts. The test added with the fix asserts
+  the Error's own message carries no stack frame, which is true and is not what
+  a person sees.
+
+
+  Compare the CLI's convention one argument away: 'walkdown judge
+  nope.nope.nope' prints 'No rule "nope.nope.nope".  lists every rule.' and
+  stops.
+
+
+  Also found in the same pass, and the same shape one layer down: chmod 000 on
+  the features/ DIRECTORY produces a raw errno stack from readdirSync at
+  lib/blueprint.js:12, inside loadBlueprint — before specHash is ever reached,
+  so it hits every command, not only the ones that stamp.
+
+
+  Everything else the rule claims held, across every odd shape I could build: a
+  directory named *.yml, a dangling symlink, a symlink to a directory, a symlink
+  loop, a FIFO, uppercase .YML and a yml in a features/ subdirectory are all
+  ignored by hash and loader alike; a symlink to a real feature file outside the
+  blueprint is followed by both. A file vanishing mid-read — raced across two
+  processes, 217 losses observed — produced the walkdown sentence with ENOENT
+  every time, never a bare errno. So only the permission case is left, and only
+  in how it is delivered.
+
+
+  Evidence: runs/evidence/2026-09-06T01-45-45Z/probe-log.txt (sections E and F).
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-06T01:55:48Z
+    body: "Correction to one line above: the shell ate a backtick pair when this
+      note was filed. The comparison line should read — walkdown judge
+      nope.nope.nope prints 'No rule \"nope.nope.nope\". walkdown status lists
+      every rule.' and stops, with no stack."
