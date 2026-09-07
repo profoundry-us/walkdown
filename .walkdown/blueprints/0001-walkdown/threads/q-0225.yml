@@ -81,3 +81,68 @@ body: >-
   status.acceptance.signature-names-its-signer and
   panel.walkdown.who-signs-is-declared. Nothing existing is reworded, so no
   signature already given is disturbed.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-07T16:31:47Z
+    body: >-
+      Built, in a2eb533. Both rules this thread raised are implemented; neither
+      is judged, and both are yours to walk.
+
+
+      What the ledger does now. A run carries `signatures: [{role, signer}]`.
+      `actor` is untouched - who ran the walk, derived from the machine, never
+      nameable by a caller - so a signer who is not the actor is the whole
+      record of a proxy, per your call. Refused at the write: a role outside the
+      vocabulary, one role signed twice, a signature naming nobody, and a
+      machine as signer in any spelling the actor gate already refuses. Reading,
+      `status.js` handles three shapes - signatures, the older flat `roles`
+      where every role was the actor's own, and a record predating both, which
+      stays engineering's. `walkdown status <rule>` now says "signed by sam,
+      recorded by topher".
+
+
+      What the panel does now. Start walkdown asks first: a row per role, your
+      config's roles pre-ticked, each signer editable. Type somebody else's name
+      and that role records under them, with the summary saying so before you
+      start. Nothing ticked, no start. The answer rides in the session draft, so
+      a reload cannot re-sign a two-person sitting as whoever is at the
+      keyboard, and while a proxy is in force the strip carries it in warning
+      yellow for the sitting's whole length. It is never remembered into the
+      next one.
+
+
+      Settings lost the roles checkboxes. What is there now is what your config
+      says and where to change it, the same shape as the username line - and
+      `identityOverride` holds no roles at all, so nothing the browser remembers
+      decides what a record says.
+
+
+      Three things you should know, because I decided them by building and you
+      may want them different.
+
+
+      1. Your open question 1 is dodged rather than answered. The panel cannot
+      now file an empty role set, so the "reads as engineering" fallback only
+      ever meets records that predate signatures. I left the fallback alone: it
+      is what keeps the old ledger legible. If you want a run with no roles
+      refused outright at the door, that is still a decision waiting.
+
+
+      2. Your open question 2 is answered "yes" by what I built, and you may
+      disagree. The dialog offers every role the blueprint knows and lets you
+      sign any of them as yourself, whether or not your config grants it.
+      Constraining that would mean the config is a permission rather than a
+      default, which is a different claim than the one identity.js currently
+      makes.
+
+
+      3. `status.acceptance.roles-recorded-on-the-run` still describes the older
+      shape. It is not wrong - that shape is still accepted and still read - so
+      I left the statement alone rather than reword it and un-sign a rule for no
+      behaviour change. Worth a look when you next touch that group.
+
+
+      Not built, and still open from this thread: the same proxy on thread
+      `verified` (your point 4), and the run-id collision two people can hit
+      finishing in the same second in separate checkouts.
