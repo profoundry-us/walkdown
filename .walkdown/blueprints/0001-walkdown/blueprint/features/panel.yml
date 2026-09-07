@@ -819,6 +819,25 @@ stories:
             - Discarding instead of finishing writes nothing
           statement_hash: sha256:6cc28278f4a6
 
+      - id: panel.walkdown.who-signs-is-declared
+        origin: thread:q-0225
+        created_at: 2026-09-07
+        statement: Beginning a sitting asks who is signing it and in which roles, filled in from what this machine already knows about the person at it, and changeable before the sitting starts - including naming somebody else as the signer for a role, which is how one person drives a walk two people are doing. What was declared stays visible for the whole sitting, and a signature given for somebody else is never remembered into the next one.
+        signoff: [eng, product]
+        screens: [review]
+        steps:
+          given:
+            - A machine whose config declares who is sitting at it and the roles they sign in
+          when:
+            - A sitting is begun, and the question of who is signing is answered
+          then:
+            - The roles it offers are already ticked as the config declares them, so the common answer is to agree
+            - A role can be handed to somebody else by name, and that person is who the signature is recorded under
+            - Who this sitting is being signed as stays legible while it runs, so accepting on somebody's behalf cannot be forgotten half way through
+            - The next sitting starts from the config again - a role handed to somebody else is never the default a second time
+            - Nothing the browser remembers decides who a record is written under
+          statement_hash: sha256:36efe97a3acd
+
       - id: panel.walkdown.one-control-owns-the-sitting
         origin: walkdown
         statement: One control starts a sitting and ends it - the same button in the bar, because they are two halves of one act - while carrying on to the next rule sits beside the count of the rules already judged.

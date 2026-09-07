@@ -1,0 +1,83 @@
+id: q-0225
+kind: question
+author: topher
+via: agent
+created: 2026-09-07T15:20:08.310Z
+anchor:
+  rule: status.acceptance.role-comes-from-the-run
+status: open
+body: >-
+  Identity and role are conflated on a run: one actor, one flat list of roles.
+  Two things a team actually does need them separated.
+
+
+  Case 1, one walk, two people. Topher drives while Sam from product is on the
+  call. Topher signs eng for himself and product for Sam. Today the only way to
+  record that is for Topher to tick `product`, which files Sam's acceptance
+  under Topher's name and loses the fact that Sam is the one who accepted.
+
+
+  Case 2, two walks, one repository. Topher walks as eng and commits; Sam checks
+  out, walks as product, commits back. This already works - one file per run, no
+  shared index, latest-wins per role - and needs no new shape. Two smaller
+  things to watch: Sam's run must actually carry his roles (today an unticked
+  box records none and `status.js` reads none as eng, which is how 29 rules got
+  an eng signature nobody claimed on 2026-09-07T14-18-58Z-local-01), and two
+  people finishing in the same second in separate checkouts mint the same run id
+  and collide in git.
+
+
+  PROPOSED SHAPE - a run carries one signature per role, each naming who
+  accepted in it:
+
+    actor: topher
+    signatures:
+      - { role: eng,     signer: topher }
+      - { role: product, signer: sam }
+
+  `actor` keeps its current meaning exactly: who ran the walk, derived by the
+  server from the machine's own identity, never nameable by a caller (n-0142,
+  n-0143). A signature whose signer is not the actor IS the record of a proxy -
+  Topher typed it, Sam accepted it - so nothing else needs to be written down to
+  say so. An earlier draft of this carried a `recorded_by` field; Topher's call,
+  2026-09-07, is that it is redundant with `actor` and does not exist.
+
+
+  Legacy records adapt in one line: each role in `roles:` becomes a signature
+  signed by the run's actor.
+
+
+  DECIDED, so it is not re-litigated:
+
+  - `via` stays exactly what it is - a machine typed this - and keeps
+  subtracting authority at every gate. A proxy is a different fact and gets a
+  different field. Overloading `via` would have meant telling a human via from a
+  machine one, which is the confusable-spelling chase q-0218 deliberately
+  declined.
+
+
+  STILL OPEN, and each is a decision rather than a defect:
+
+  1. Does an empty role set stay "reads as engineering"? That fallback exists so
+  pre-roles records are not read as signed by nobody, but it cannot tell a
+  legacy record from one written today by somebody who ticked nothing - which is
+  the 29-rule case above. Options: refuse a walk with no role, gate the fallback
+  on records that predate roles, or leave it.
+
+  2. May somebody sign a role their own config does not grant? Their own
+  signature is arguably constrained by their config; a proxy signature names
+  somebody else and cannot be, or case 1 is impossible.
+
+  3. Is a proxy signature sticky? Suggest emphatically not: your own roles
+  default from config every walk, a proxy is per-walk and never remembered,
+  because a remembered proxy is the mechanism that silently signs for an absent
+  person next month.
+
+  4. Does the same proxy belong on thread `verified`? Same shape, but it touches
+  the human-only gate directly, so it is worth landing on runs first.
+
+
+  Two rules are added by this thread, both unbuilt:
+  status.acceptance.signature-names-its-signer and
+  panel.walkdown.who-signs-is-declared. Nothing existing is reworded, so no
+  signature already given is disturbed.

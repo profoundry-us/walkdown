@@ -159,6 +159,25 @@ stories:
             - An empty list is recorded as stated, not dropped
           statement_hash: sha256:e0e862978414
 
+      - id: status.acceptance.signature-names-its-signer
+        origin: thread:q-0225
+        created_at: 2026-09-07
+        statement: A recorded walkdown carries one signature per role, each naming the person who accepted in that role - so a walk driven by one person on behalf of another records the other's acceptance under the other's name. Who ran the walk is the run's actor, which a caller can never name, so a signature whose signer is not the actor is itself the record that somebody accepted through somebody else, and nothing further is written down to say so.
+        verify: [checks]
+        signoff: [eng, product]
+        steps:
+          given:
+            - One person driving a walkdown who signs engineering for themselves and product for somebody sitting beside them
+          when:
+            - The run is recorded, and acceptance derived from it
+          then:
+            - The record carries a signature for each role, naming the person who accepted in it
+            - Product's acceptance counts for the person who gave it, never for the person who typed it
+            - The driver stays the run's actor, so who typed it is on the record without a field of its own
+            - A run whose signers are all the actor is exactly the ordinary case, and reads as one
+            - A record written before signatures existed is read as its actor signing each role it named
+          statement_hash: sha256:d1c11a7e70ed
+
   - id: status.sweep
     title: Asking for the whole thing to be judged again
     statement: >
