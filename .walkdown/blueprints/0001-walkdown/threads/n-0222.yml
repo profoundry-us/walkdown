@@ -1,0 +1,22 @@
+id: n-0222
+kind: note
+author: topher
+created: 2026-09-07T14:12:23.478Z
+anchor:
+  rule: panel.dock.no-pin-mid-fade
+  screen: review
+  element: panel.fade
+  offset:
+    x: 129
+    y: 11
+  position:
+    x: 533
+    y: 18
+  surface: app
+  viewport:
+    name: desktop
+    width: 1050
+status: open
+body: Clicking the App or Prototype buttons should modify the fade slider to the
+  proper setting (all prototype or all app). Right now, it stays wherever you
+  put it even though only one is fully visible.

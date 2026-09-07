@@ -1,0 +1,8 @@
+id: n-0221
+kind: note
+author: topher
+created: 2026-09-07T14:02:54.083Z
+anchor:
+  rule: embed.pin.follows-the-visible-surface
+status: open
+body: This works, but I think the rule should say "prototype" instead of "design".

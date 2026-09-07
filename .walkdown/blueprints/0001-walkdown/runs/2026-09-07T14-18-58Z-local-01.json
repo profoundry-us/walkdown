@@ -1,0 +1,170 @@
+{
+  "run_id": "2026-09-07T14-18-58Z-local-01",
+  "created": "2026-09-07T14:18:58Z",
+  "actor": "topher",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "cb0b807-dirty",
+  "tree_hash": "sha256:fd88d215cc17",
+  "spec_hash": "sha256:18e51cc9170d",
+  "results": [
+    {
+      "rule": "embed.pin.anchored-target",
+      "status": "pass",
+      "statement_hash": "sha256:6feaf28d3505"
+    },
+    {
+      "rule": "embed.pin.right-project",
+      "status": "pass",
+      "statement_hash": "sha256:399853aef960"
+    },
+    {
+      "rule": "embed.pin.both-surfaces",
+      "status": "pass",
+      "statement_hash": "sha256:77fdab028ac1"
+    },
+    {
+      "rule": "embed.pin.follows-the-visible-surface",
+      "status": "pass",
+      "statement_hash": "sha256:7c9b1c0e3da1",
+      "threads": [
+        "n-0221"
+      ]
+    },
+    {
+      "rule": "embed.pin.own-skin",
+      "status": "pass",
+      "statement_hash": "sha256:1f3400a09629"
+    },
+    {
+      "rule": "embed.pin.viewport-recorded",
+      "status": "pass",
+      "statement_hash": "sha256:6971846eb2cc"
+    },
+    {
+      "rule": "embed.pin.settled-pins-leave",
+      "status": "pass",
+      "statement_hash": "sha256:c82607d3ac2e"
+    },
+    {
+      "rule": "embed.pin.tooltip-says-what-it-is",
+      "status": "pass",
+      "statement_hash": "sha256:50dfb40b9f83"
+    },
+    {
+      "rule": "embed.pin.form-at-the-spot",
+      "status": "pass",
+      "statement_hash": "sha256:5bb13509dc3b"
+    },
+    {
+      "rule": "embed.pin.form-is-chrome",
+      "status": "pass",
+      "statement_hash": "sha256:cac6da4be24f"
+    },
+    {
+      "rule": "embed.pin.surface-coordinates",
+      "status": "pass",
+      "statement_hash": "sha256:7d33bd0c80b2"
+    },
+    {
+      "rule": "embed.pin.coordinate-fallback",
+      "status": "pass",
+      "statement_hash": "sha256:3c6fb006c94b"
+    },
+    {
+      "rule": "panel.dock.toolbar",
+      "status": "pass",
+      "statement_hash": "sha256:aaf28fbb5e0a"
+    },
+    {
+      "rule": "panel.dock.surface-swap-is-instant",
+      "status": "pass",
+      "statement_hash": "sha256:c74a4c999299"
+    },
+    {
+      "rule": "panel.dock.controls-survive-use",
+      "status": "pass",
+      "statement_hash": "sha256:e55758ff63da"
+    },
+    {
+      "rule": "panel.dock.one-pin-mode",
+      "status": "pass",
+      "statement_hash": "sha256:a66c41a78d23"
+    },
+    {
+      "rule": "panel.dock.no-pin-mid-fade",
+      "status": "pass",
+      "statement_hash": "sha256:a25c933fc24f",
+      "threads": [
+        "n-0222"
+      ]
+    },
+    {
+      "rule": "panel.dock.own-skin",
+      "status": "pass",
+      "statement_hash": "sha256:93bfd901cfcd"
+    },
+    {
+      "rule": "panel.dock.chrome-not-a-pin-target",
+      "status": "pass",
+      "statement_hash": "sha256:466c5e212ed7"
+    },
+    {
+      "rule": "panel.desk.reads-as-paper",
+      "status": "pass",
+      "statement_hash": "sha256:60871d489f4d"
+    },
+    {
+      "rule": "panel.delivery.framed-isolation",
+      "status": "pass",
+      "statement_hash": "sha256:967abb13513f"
+    },
+    {
+      "rule": "panel.delivery.stale-copy-says-so",
+      "status": "pass",
+      "statement_hash": "sha256:124fa1fddaac"
+    },
+    {
+      "rule": "panel.delivery.anchors-still-required",
+      "status": "pass",
+      "statement_hash": "sha256:6cbc4017880c"
+    },
+    {
+      "rule": "panel.rules.detail-slide",
+      "status": "pass",
+      "statement_hash": "sha256:493a83d3f0bd"
+    },
+    {
+      "rule": "panel.rules.takes-you-there",
+      "status": "pass",
+      "statement_hash": "sha256:bc2cef92cdd3",
+      "threads": [
+        "n-0223"
+      ]
+    },
+    {
+      "rule": "panel.rules.one-pane-per-tab",
+      "status": "pass",
+      "statement_hash": "sha256:7cbb341f16bd"
+    },
+    {
+      "rule": "panel.rules.counts-legible",
+      "status": "pass",
+      "statement_hash": "sha256:669dfeb91eee"
+    },
+    {
+      "rule": "panel.rules.lifecycle-legible",
+      "status": "pass",
+      "statement_hash": "sha256:64336fe46850",
+      "threads": [
+        "n-0224"
+      ]
+    },
+    {
+      "rule": "panel.rules.search-the-list",
+      "status": "pass",
+      "statement_hash": "sha256:f183d0a96302"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+id: n-0224
+kind: note
+author: topher
+created: 2026-09-07T14:17:04.168Z
+anchor:
+  rule: panel.rules.lifecycle-legible
+status: open
+body: >-
+  Looks good, but remove this sentence from the rule, it is extraneous history
+  that can be read in the relevant thread.
+
+
+  " - because a lifecycle drawn in its own vocabulary put a lone mark where
+  every neighbouring row had three, and a rule whose only fault was not being
+  built yet read as an alarm."

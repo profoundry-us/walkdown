@@ -6,7 +6,7 @@ anchor:
   rule: panel.identity.attribution-visible
   screen: review
   element: panel.actor
-status: addressed
+status: verified
 body: 'Agent walkdown 2026-08-27: with the username emptied in Settings, the
   session strip still reads "Recording as <full name>" with no handle beside it
   - and then every attributed action is refused. The strip is naming a person
@@ -48,3 +48,4 @@ replies:
       no handle beside it. That is a wording question about what the strip
       should say when there is nothing to record under, and no agent should
       answer it.
+verified_by: topher
