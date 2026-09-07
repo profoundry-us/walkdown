@@ -536,6 +536,38 @@ test('a session drafts to disk and finishing seals it into one run', async () =>
   assert.equal(draft.draft, true);
   assert.equal(draft.actor, 'serve-person');
   assert.deepEqual(draft.verdicts, { 'demo.main.thing': 'approved' });
+
+  /*
+   * And who the sitting is being signed by, because the draft is what a
+   * reload restores FROM. Dropped at this door, a sitting declared as eng and
+   * product came back from a reload as eng alone - silently, mid-walkdown
+   * (n-0230).
+   */
+  await post({
+    started: '2026-08-24T00:00:00Z',
+    verdicts: { 'demo.main.thing': 'approved' },
+    signatures: [
+      { role: 'eng', signer: 'topher' },
+      { role: 'product', signer: 'sam' },
+    ],
+  });
+  draft = JSON.parse(readFileSync(draftFile, 'utf8'));
+  assert.deepEqual(draft.signatures, [
+    { role: 'eng', signer: 'topher' },
+    { role: 'product', signer: 'sam' },
+  ]);
+  // Validated here too, so a draft can never hold a signature the run door
+  // would refuse when the sitting is finished.
+  const refused = await fetch(`${base}/api/draft`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      started: '2026-08-24T00:00:00Z',
+      verdicts: { 'demo.main.thing': 'approved' },
+      signatures: [{ role: 'eng', signer: 'agent' }],
+    }),
+  });
+  assert.equal(refused.status, 400);
   // Not a run: no run id, and it is nowhere near runs/.
   assert.equal(draft.run_id, undefined);
   assert.ok(!readdirSync(runs).some((f) => f.includes('local.json')));

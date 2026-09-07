@@ -1,0 +1,66 @@
+id: n-0230
+kind: note
+author: topher
+via: agent
+created: 2026-09-07T19:16:38.525Z
+anchor:
+  rule: panel.walkdown.session-survives-reload
+status: addressed
+body: >-
+  The draft door drops `signatures`, so a reload re-signs a sitting as
+  engineering alone.
+
+
+  Found while Topher was mid-walkdown on 2026-09-07. He declared eng and product
+  in the dialog, the panel held both, and the strip said "as eng". The draft on
+  disk (drafts/local.json, 38 verdicts, both filed thread ids) had no
+  `signatures` key at all.
+
+
+  POST /api/draft destructured { target, started, verdicts, threads, discard }
+  and never carried `signatures`, though the panel sends it and `sessionDraft()`
+  includes it. So the field was dropped at the door, and `restoreSession` -
+  which reads the draft, since the project's copy outranks the browser's - fell
+  back to its default of [{role: eng, signer: you}]. The sitting was silently
+  narrowed by a reload, and the strip was then telling the truth about a session
+  that had already lost half its answer.
+
+
+  The consequence is a run recorded under one role when two were meant, which is
+  the thing signatures exist to prevent. Nothing warned: this is the same shape
+  as n-0226 (the panel not saying what landed) and n-0227 (a stale server), and
+  the third door in three days found to be quietly not carrying a field it was
+  handed.
+
+
+  Fix: the draft door carries signatures, validated with normalizeSignatures so
+  a draft cannot hold a signature the run door would later refuse.
+
+
+  Topher's own sitting was repaired by hand at his instruction, with his stated
+  intent (eng and product, both his own), and finished as
+  2026-09-07T19-15-43Z-local-01 carrying both signatures. The verdicts and
+  thread ids in that draft were untouched.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-07T19:19:21Z
+    body: >-
+      Fixed in the commit above, and it was two doors rather than one: POST
+      /api/draft never destructured `signatures`, and writeDraft would have
+      dropped it anyway - its draft object is built key by key, so a field
+      nobody names there does not survive. Both now carry it, validated with
+      normalizeSignatures so a draft cannot hold a signature the run door would
+      refuse at Finish. A draft that names no signers stays that way; absent is
+      still absent, because a sitting from before signatures existed did not
+      silently mean engineering.
+
+
+      Test: the draft round-trip in test/serve.test.js asserts the file holds
+      both signatures and that a machine as signer is refused with 400 at this
+      door too.
+
+
+      Topher finished the repaired sitting as 2026-09-07T19-15-43Z-local-01: 38
+      verdicts, signatures eng (topher) and product (topher), and the toast
+      named both.
