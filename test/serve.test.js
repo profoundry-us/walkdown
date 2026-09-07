@@ -27,6 +27,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, before, test } from 'node:test';
 import { readDraft } from '../lib/draft.js';
+import { SITTING_FIELDS } from '../lib/sitting.js';
 import { formatHash } from '../lib/hash.js';
 import { resolveLocations } from '../lib/locations.js';
 import { createWalkdownServer } from '../lib/serve.js';
@@ -508,6 +509,63 @@ test('the blueprint payload names the panel build it ships', async () => {
     .digest('hex')
     .slice(0, 12);
   assert.equal(payload.panelHash, shipped);
+});
+
+test('every field a sitting carries survives the door, the writer and the read back', async () => {
+  /*
+   * Field by field, driven by the schema itself rather than by a list typed
+   * here — the point is that a field added to lib/sitting.js is carried by
+   * this door without anybody remembering to teach it. Every silent drop this
+   * repo has had (roles twice, signatures twice) was a door that knew about a
+   * field one release later than the panel did, and none of them failed
+   * anywhere; they were found by reading JSON afterwards.
+   */
+  const draftsDir = resolveLocations({ spec: bp, cwd: root }).drafts.path;
+  const FULL = {
+    started: '2026-09-07T09:00:00Z',
+    signatures: [
+      { role: 'eng', signer: 'topher' },
+      { role: 'product', signer: 'sam' },
+    ],
+    verdicts: { 'demo.main.thing': 'pass' },
+    threads: { 'demo.main.thing': ['n-0001'] },
+  };
+  assert.deepEqual(Object.keys(FULL).sort(), [...SITTING_FIELDS].sort());
+
+  const posted = await fetch(`${base}/api/draft`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ target: 'local', ...FULL }),
+  }).then((r) => r.json());
+  const onDisk = JSON.parse(readFileSync(join(draftsDir, 'local.json'), 'utf8'));
+  const readBack = await (await fetch(`${base}/api/draft?target=local`)).json();
+  const payload = await (await fetch(`${base}/api/blueprint`)).json();
+
+  for (const field of SITTING_FIELDS) {
+    assert.deepEqual(posted.draft[field], FULL[field], `the door answered with no ${field}`);
+    assert.deepEqual(onDisk[field], FULL[field], `${field} never reached the file`);
+    assert.deepEqual(readBack.draft[field], FULL[field], `GET /api/draft dropped ${field}`);
+    // And on the payload the panel boots from, which is what a reload
+    // restores the sitting out of.
+    assert.deepEqual(payload.draft[field], FULL[field], `the blueprint payload dropped ${field}`);
+  }
+
+  // Then the last hop: the sitting is sealed, and what it was signed by is
+  // on the run rather than on nothing.
+  const sealed = await fetch(`${base}/api/walkdowns`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      target: 'local',
+      signatures: FULL.signatures,
+      results: [{ rule: 'demo.main.thing', status: 'pass' }],
+    }),
+  }).then((r) => r.json());
+  const record = JSON.parse(
+    readFileSync(join(runs, readdirSync(runs).find((f) => f.startsWith(sealed.run_id))), 'utf8'),
+  );
+  assert.deepEqual(record.signatures, FULL.signatures);
+  assert.equal(existsSync(join(draftsDir, 'local.json')), false);
 });
 
 test('a session drafts to disk and finishing seals it into one run', async () => {

@@ -332,6 +332,67 @@
   };
 
   /*
+   * What a sitting is made of. One list, every hop.
+   *
+   * A walkdown in progress crosses four hands before it reaches disk: the
+   * panel's `S.session`, `POST /api/draft`, `writes.saveDraft`, `writeDraft`.
+   * Each of them used to name the fields it carried, by hand, in its own
+   * object literal — and a field named in three of the four vanished at the
+   * fourth with nothing raised anywhere. That is not a hypothetical: roles went
+   * that way on 2026-08-24 and again on 2026-09-06, signatures at the run door
+   * on 2026-09-07, and signatures again at the draft door hours later (n-0230),
+   * where BOTH the handler and the writer had to be taught the same field
+   * separately. Four instances of one bug, none of which failed loudly.
+   *
+   * The cure is not a louder refusal at each door — it is for there to be one
+   * list. `sitting()` is the only thing that decides which keys a session
+   * carries; every hop passes its result through whole. Adding a field is one
+   * line here, and it then survives the whole path by construction rather than
+   * by four people remembering.
+   *
+   * Browser-safe, like vocab.js: no node imports, no I/O. The panel bundles it.
+   *
+   * What is NOT here: `target` (routing, not content), `actor` (stamped by
+   * lib/writes.js from the machine, never sent), and the bookkeeping a writer
+   * adds — `draft`, `updated`. A caller cannot name any of those, so they are
+   * not part of the shape a caller hands along.
+   */
+
+  /** The fields a session carries, in the order a draft on disk shows them. */
+  const SITTING_FIELDS = Object.freeze(['started', 'signatures', 'verdicts', 'threads']);
+
+  /*
+   * Empty is absent. A sitting that named no signers is a sitting from before
+   * signers existed, and writing `signatures: []` onto it would make an older
+   * draft claim it chose to have none. Same for threads: `{}` is noise in a
+   * file a person reads.
+   */
+  const CARRIED = {
+    started: (v) => typeof v === 'string' && v.trim() !== '',
+    signatures: (v) => Array.isArray(v) && v.length > 0,
+    verdicts: (v) => !!v && typeof v === 'object' && Object.keys(v).length > 0,
+    threads: (v) => !!v && typeof v === 'object' && Object.keys(v).length > 0,
+  };
+
+  /**
+   * The session fields of `source`, and nothing else. Keys that carry nothing
+   * are left out entirely, so `{ ...defaults, ...sitting(source) }` is how a
+   * hop applies its own defaults without a present-but-empty value silently
+   * overwriting one.
+   *
+   * @param {any} source anything session-shaped: a panel state, a request body,
+   *   a draft read back off disk.
+   */
+  function sitting(source) {
+    const out = /** @type {Record<string, any>} */ ({});
+    for (const field of SITTING_FIELDS) {
+      const value = source?.[field];
+      if (CARRIED[field](value)) out[field] = value;
+    }
+    return out;
+  }
+
+  /*
    * The vocabulary. One module, no dependencies, both runtimes.
    *
    * walkdown exists so that a term means one thing, and for its first month its
@@ -4206,16 +4267,19 @@
     if (S.session) return;
     const local = await store.get(SESSION_KEY()).catch(() => null);
     const saved = (S.data?.draft?.verdicts && S.data.draft) || local;
-    if (saved?.verdicts && Object.keys(saved.verdicts).length)
+    const carried = sitting(saved ?? {});
+    if (carried.verdicts)
       S.session = {
-        verdicts: saved.verdicts,
-        threads: saved.threads ?? {},
+        // Defaults first, what was saved over the top of them — so a field the
+        // draft carries always wins, and one it does not have falls back here.
+        // Who it is being signed by was answered when the sitting began; a
+        // reload must not quietly turn a walk signed for two people into one
+        // signed for whoever is at the keyboard now.
+        threads: {},
+        signatures: [{ role: 'eng', signer: saved.actor ?? whoAmI() }],
+        started: new Date().toISOString(),
+        ...carried,
         actor: saved.actor ?? whoAmI(),
-        // Who it is being signed by was answered when it began; a reload must
-        // not quietly turn a sitting signed for two people into one signed for
-        // whoever is at the keyboard now.
-        signatures: saved.signatures ?? [{ role: 'eng', signer: saved.actor ?? whoAmI() }],
-        started: saved.started ?? new Date().toISOString(),
       };
   }
 
@@ -4843,14 +4907,18 @@
   // the copy that still works when the server is not there. Neither is the
   // ledger: a run is appended once, at Finish, and never edited.
   const SESSION_KEY = () => `walkdown:session:${S.BP}`;
-  const sessionDraft = () =>
-    S.session && {
-      verdicts: S.session.verdicts,
-      threads: S.session.threads,
-      actor: S.session.actor,
-      signatures: S.session.signatures,
-      started: S.session.started,
-    };
+  /*
+   * What travels: the session's own fields, taken from the one list in
+   * lib/sitting.js rather than spelled out here. Spelled out here, this object
+   * was the first of four places a new field had to be added by hand, and the
+   * three sittings that recorded something nobody chose all began with one of
+   * the four not being told (n-0226, n-0230).
+   *
+   * `actor` rides along for the browser's own copy only. The server never reads
+   * it — writes.js stamps who is acting from the machine — so it is not part of
+   * the shape, and sending it changes nothing about what is filed.
+   */
+  const sessionDraft = () => S.session && { actor: S.session.actor, ...sitting(S.session) };
   function saveSession() {
     const draft = sessionDraft();
     store.set(SESSION_KEY(), draft);

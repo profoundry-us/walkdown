@@ -20,6 +20,7 @@
  */
 
 import { MSG } from '../../lib/message-stream.js';
+import { sitting } from '../../lib/sitting.js';
 import { saysSomething } from '../../lib/vocab.js';
 /*
  * The two blocks that used to sit in the middle of this file as generated
@@ -953,16 +954,19 @@ async function restoreSession() {
   if (S.session) return;
   const local = await store.get(SESSION_KEY()).catch(() => null);
   const saved = (S.data?.draft?.verdicts && S.data.draft) || local;
-  if (saved?.verdicts && Object.keys(saved.verdicts).length)
+  const carried = sitting(saved ?? {});
+  if (carried.verdicts)
     S.session = {
-      verdicts: saved.verdicts,
-      threads: saved.threads ?? {},
+      // Defaults first, what was saved over the top of them — so a field the
+      // draft carries always wins, and one it does not have falls back here.
+      // Who it is being signed by was answered when the sitting began; a
+      // reload must not quietly turn a walk signed for two people into one
+      // signed for whoever is at the keyboard now.
+      threads: {},
+      signatures: [{ role: 'eng', signer: saved.actor ?? whoAmI() }],
+      started: new Date().toISOString(),
+      ...carried,
       actor: saved.actor ?? whoAmI(),
-      // Who it is being signed by was answered when it began; a reload must
-      // not quietly turn a sitting signed for two people into one signed for
-      // whoever is at the keyboard now.
-      signatures: saved.signatures ?? [{ role: 'eng', signer: saved.actor ?? whoAmI() }],
-      started: saved.started ?? new Date().toISOString(),
     };
 }
 
@@ -1590,14 +1594,18 @@ export function setFade(share) {
 // the copy that still works when the server is not there. Neither is the
 // ledger: a run is appended once, at Finish, and never edited.
 const SESSION_KEY = () => `walkdown:session:${S.BP}`;
-const sessionDraft = () =>
-  S.session && {
-    verdicts: S.session.verdicts,
-    threads: S.session.threads,
-    actor: S.session.actor,
-    signatures: S.session.signatures,
-    started: S.session.started,
-  };
+/*
+ * What travels: the session's own fields, taken from the one list in
+ * lib/sitting.js rather than spelled out here. Spelled out here, this object
+ * was the first of four places a new field had to be added by hand, and the
+ * three sittings that recorded something nobody chose all began with one of
+ * the four not being told (n-0226, n-0230).
+ *
+ * `actor` rides along for the browser's own copy only. The server never reads
+ * it — writes.js stamps who is acting from the machine — so it is not part of
+ * the shape, and sending it changes nothing about what is filed.
+ */
+const sessionDraft = () => S.session && { actor: S.session.actor, ...sitting(S.session) };
 export function saveSession() {
   const draft = sessionDraft();
   store.set(SESSION_KEY(), draft);

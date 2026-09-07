@@ -1,0 +1,38 @@
+id: n-0231
+kind: note
+author: topher
+created: 2026-09-07T19:48:27.690Z
+anchor:
+  rule: panel.walkdown.draft-on-disk
+status: addressed
+body: >-
+  Four times in a fortnight a field was handed to a hop that did not carry it,
+  and nothing anywhere said so: roles at the run door (2026-08-24, again
+  2026-09-06), signatures at the run door (2026-09-07), signatures at BOTH
+  layers of the draft door hours later (n-0230). Each was found by a person
+  reading JSON on disk after a sitting had already recorded something nobody
+  chose.
+
+
+  The cause was not a missing refusal, it was four copies of one schema: the
+  panel's session literal, POST /api/draft's destructure, writeDraft's object,
+  and restoreSession's defaults each named the fields they carried by hand.
+  Adding a field meant remembering four places, and forgetting one was silent by
+  construction.
+
+
+  Fixed by making there be one list. lib/sitting.js owns SITTING_FIELDS
+  (started, signatures, verdicts, threads) and a sitting() that picks exactly
+  those; all four hops pass its result through whole, and none of them names a
+  field any more. Tests: test/sitting.test.js drives a fully-populated sitting
+  through sitting() and writeDraft field by field, with a completeness check so
+  a field added to the list with no fixture fails there; test/serve.test.js
+  pushes the same fixture through POST /api/draft -> disk -> GET /api/draft ->
+  the boot payload -> POST /api/walkdowns -> the run record, asserting every
+  field at every hop. Verified by regression: teaching writeDraft to spell its
+  own fields out again fails three tests.
+replies:
+  - author: topher
+    created: 2026-09-07T19:48:54Z
+    body: "Landed: lib/sitting.js is the one list, and lib/api.js, lib/draft.js and
+      src/panel/app.js all take their shape from it."
