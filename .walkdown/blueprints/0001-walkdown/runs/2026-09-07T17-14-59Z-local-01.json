@@ -1,0 +1,17 @@
+{
+  "run_id": "2026-09-07T17-14-59Z-local-01",
+  "created": "2026-09-07T17:14:59Z",
+  "actor": "topher",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "14dfb7e",
+  "spec_hash": "sha256:6a96410e940c",
+  "results": [
+    {
+      "rule": "embed.pin.anchored-target",
+      "status": "pass",
+      "statement_hash": "sha256:6feaf28d3505"
+    }
+  ]
+}

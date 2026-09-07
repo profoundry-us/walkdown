@@ -27,6 +27,7 @@
     "check:js": "mkdir -p tmp/build && rollup -c --silent -o tmp/build/panel.built.js && diff -q tmp/build/panel.built.js lib/viewer/panel.js && rollup -c rollup.embed.mjs --silent -o tmp/build/embed.built.js && diff -q tmp/build/embed.built.js lib/viewer/embed.js",
     "build:css": "tailwindcss -i styles/walkdown.css -o lib/viewer/walkdown.css --minify && cp lib/viewer/walkdown.css example/app/walkdown.css && cp lib/viewer/walkdown.css extension/walkdown.css",
     "watch:css": "tailwindcss -i styles/walkdown.css -o lib/viewer/walkdown.css --watch",
+    "dev": "node tools/dev.mjs",
     "prepack": "npm run build:js && npm run build:css && npm run build:yaml && npm run build:lit",
     "build:ext": "cp lib/viewer/embed.js lib/viewer/panel.js extension/vendor/",
     "build": "npm run build:sync && npm run build:js && npm run build:icons && npm run build:css && npm run build:ext",

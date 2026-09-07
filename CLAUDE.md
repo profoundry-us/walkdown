@@ -45,6 +45,28 @@ belong in walkdown's runs ledger, never in a Highball run.
 The hooks call the local binary directly — npx resolves the same package
 but intermittently stalls for minutes, which a per-edit hook cannot afford.
 
+## The dev loop: `npm run dev`
+
+A `walkdown serve` holds every module it imported at startup, so an edit to
+`lib/` reaches nobody until the process is restarted — and the symptom is
+never "the server is old". It is the panel sending a field the running door
+has never heard of, dropping it, and writing a record nobody chose. That has
+cost three afternoons: `roles` on 2026-08-24, `roles` again on 2026-09-06, and
+`signatures` on 2026-09-07, each found by reading JSON on disk rather than by
+anything saying so.
+
+    npm run dev -- --port 4788     # everything, watched
+
+One command, two watchers, because there are two kinds of source here:
+`src/panel` and `src/embed` are rebuilt by Rollup (the server reads the build
+from disk per request, so a rebuild needs no restart), and `lib/` and `bin/`
+restart the server under `node --watch`. Flags after `--` go to `serve`.
+Ctrl-C stops all of it; if either half dies, the other is stopped too, because
+a loop with rebuilds and no server — or a server and no rebuilds — lies.
+
+Prefer it over a bare `walkdown serve` whenever you are changing code. A plain
+serve is for looking at a tree you are not editing.
+
 ## The panel and the embed are built, not edited in place
 
 `lib/viewer/panel.js` and `lib/viewer/embed.js` are Rollup's output. Edit
