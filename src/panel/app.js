@@ -1381,6 +1381,14 @@ function renderBar() {
            ${icon('warning-fill', 'size-3.5')}Stale — reload the extension</span>`
         : null
     }
+    ${
+      STALE_SERVER()
+        ? html`<span class="badge badge-sm badge-error badge-dash gap-1 font-semibold"
+           data-testid="panel.stale-server"
+           title="The server is running code older than this tree — restart it (npm run dev, or stop and re-run walkdown serve). Until then a verdict may be recorded against yesterday's rules.">
+           ${icon('warning-fill', 'size-3.5')}Stale server — restart it</span>`
+        : null
+    }
     <span class="truncate text-[11.5px] opacity-50" data-testid="panel.blueprint">${S.data.project}</span>
     <!-- Which screen this page is. It reads as the answer, not as a way to
          ask the question: the button is labelled with the screen you are on,
@@ -1789,6 +1797,16 @@ const STALE_COPY = () =>
   Boolean(cfg.buildHash && S.data?.panelHash && cfg.buildHash !== S.data.panelHash);
 
 /*
+ * And the same question about the other half. The server holds the modules it
+ * imported when it started, so an edit to lib/ reaches nobody until it is
+ * restarted - and the symptom is never "the server is old", it is a field the
+ * running door has never heard of being dropped on the floor and a record
+ * saying something nobody chose (n-0227). The server answers it, because it
+ * is the only one who can see both its own start and the tree.
+ */
+const STALE_SERVER = () => Boolean(S.data?.server?.stale);
+
+/*
  * Go to a screen. `pick` is what the screen override should say once we are
  * there: null for every trip walkdown makes on its own (a rule's screen, the
  * blueprint's front door), and the screen's own id when a person chose it in
@@ -2037,8 +2055,23 @@ async function finishWalkdown() {
     S.view = 'list';
     selectRow(null);
     await load();
+    /*
+     * What LANDED, not what was sent. The door answers with the signatures it
+     * actually filed for exactly this reason, and the panel used to throw
+     * that away and report a count - so three sittings recorded something
+     * nobody chose and each was found later by reading JSON on disk
+     * (n-0226). A signature missing from this sentence is a signature
+     * missing from the ledger, in the second it happens.
+     */
+    const filed = out.signatures?.length
+      ? out.signatures
+          .map((sig) => `${esc(sig.role)} (${esc(sig.signer)})`)
+          .join(', ')
+      : out.roles?.length
+        ? out.roles.map((r) => esc(r)).join(', ')
+        : 'no role stated — the ledger reads it as engineering';
     toast(
-      `Recorded ${results.length} verdict${results.length === 1 ? '' : 's'} as <b>${esc(out.run_id)}</b>`,
+      `Recorded ${results.length} verdict${results.length === 1 ? '' : 's'} as <b>${esc(out.run_id)}</b> — ${filed}`,
       { tone: 'success' },
     );
   } catch {

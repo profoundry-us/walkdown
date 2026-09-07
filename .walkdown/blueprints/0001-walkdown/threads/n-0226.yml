@@ -1,0 +1,41 @@
+id: n-0226
+kind: note
+author: topher
+via: agent
+created: 2026-09-07T17:29:59.910Z
+anchor:
+  rule: panel.walkdown.records-to-ledger
+status: open
+body: >-
+  Finishing a walkdown says how many verdicts landed, and never says what was
+  actually recorded on them.
+
+
+  The response already carries the answer. POST /api/walkdowns returns { run_id,
+  roles, signatures }, and lib/api.js says in a comment why: "The roles come
+  back so the panel can say what it actually filed rather than what it hoped to
+  - an emptied list files none." The panel throws that away and toasts "Recorded
+  1 verdict as <run_id>".
+
+
+  Measured cost: three sittings recorded something nobody chose, and each was
+  found later by reading JSON on disk rather than by anything on screen.
+
+  - 2026-09-06, 29 rules: settings roles ticked, panel sent no roles field at
+  all, ledger read engineering.
+
+  - 2026-09-07 16:07, 1 rule: same.
+
+  - 2026-09-07 17:14, 1 rule: panel sent signatures to a server started before
+  signatures existed; the door dropped them.
+
+
+  Every one of those would have been a second's work to notice if the toast had
+  read "Recorded 1 verdict - eng (topher), product (sam)" from the response,
+  because the missing half would have been missing from the sentence.
+
+
+  This is not the same defect as the server being stale (see the note beside
+  this one); it is the panel declining to report what it was told. Fix: read
+  out.signatures and say who signed, and say plainly when the answer is nobody
+  in particular.

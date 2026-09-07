@@ -1,0 +1,42 @@
+id: n-0227
+kind: note
+author: topher
+via: agent
+created: 2026-09-07T17:30:36.115Z
+anchor:
+  rule: panel.delivery.stale-copy-says-so
+status: open
+body: >-
+  A running server older than the code it is serving says nothing, and the panel
+  has no way to find out.
+
+
+  A node process holds every module it imported at startup, so `walkdown serve`
+  keeps serving the lib/ it booted with. The panel is not stale in the same
+  situation - the server reads lib/viewer/panel.js from disk per request - so
+  the two halves drift apart silently and the symptom lands on whoever is
+  walking: the panel sends a field the running door has never heard of, the door
+  drops it, and the record says something nobody chose.
+
+
+  Measured, 2026-09-07: the server on :4700 started 09:00; lib/api.js gained
+  `signatures` at 11:31; a sitting at 17:14 filed a record with no signatures at
+  all. /panel.js and lib/viewer/panel.js hashed identically at the time, so the
+  panel was current and only the server was not. That is the third instance of
+  this exact shape (roles on 2026-08-24, roles again on 2026-09-06).
+
+
+  `npm run dev` (9936e67) fixes it for whoever remembers to use it, on the
+  machine where they remember. It is a habit, not a signal.
+
+
+  The rule this is anchored to already says the neighbouring thing one layer up:
+  a panel copy that has gone stale must say so plainly, because "an outdated
+  walkdown reviewing a moving spec quietly undermines every verdict". The same
+  sentence applies to the door that writes the verdicts down, and nothing says
+  it.
+
+
+  The server is the one that can answer it: it knows when it started, and it can
+  look at the tree it is serving from. A payload field, and the panel wears the
+  same badge it already wears for a stale extension.

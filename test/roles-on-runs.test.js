@@ -8,7 +8,15 @@
  */
 import { declaredHome } from '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  utimesSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, before, test } from 'node:test';
@@ -296,4 +304,50 @@ test('a signature is refused where nobody, or a machine, is named as the signer 
     results: [{ rule: 'demo.main.thing', status: 'pass' }],
   });
   assert.equal(bad.status, 400);
+});
+
+/*
+ * What the door answers with, because the panel says it back. Three sittings
+ * filed something nobody chose and none of them said so on screen; the
+ * response is where the panel gets the truth from (n-0226).
+ */
+test('the recording endpoint answers with the signatures it filed @rule:panel.walkdown.records-to-ledger', async () => {
+  const out = await (
+    await post({
+      signatures: [{ role: 'product', signer: 'sam' }],
+      results: [{ rule: 'demo.main.thing', status: 'pass' }],
+    })
+  ).json();
+  assert.deepEqual(out.signatures, [{ role: 'product', signer: 'sam' }]);
+  // And nothing stated comes back as nothing, rather than as a guess the
+  // panel would then report as fact.
+  const bare = await (
+    await post({ results: [{ rule: 'demo.main.thing', status: 'pass' }] })
+  ).json();
+  assert.equal(bare.signatures, null);
+  assert.equal(bare.roles, null);
+});
+
+/*
+ * A server older than its tree is the failure that produced n-0226's three
+ * cases; the payload is where it becomes visible (n-0227).
+ */
+test('the payload says whether the running server is older than the code @rule:panel.delivery.stale-copy-says-so', async () => {
+  const fresh = await (await fetch(`${base}/api/blueprint`)).json();
+  assert.equal(typeof fresh.server?.booted, 'string');
+  assert.equal(fresh.server.stale, false, 'a server started after the last edit is current');
+
+  // Touch a module this process would import if it started again. The server
+  // in hand booted before that, so it is now serving yesterday's code.
+  const target = new URL('../lib/api.js', import.meta.url).pathname;
+  const later = new Date(Date.now() + 60_000);
+  utimesSync(target, later, later);
+  try {
+    const after = await (await fetch(`${base}/api/blueprint`)).json();
+    assert.equal(after.server.stale, true, 'an edit after boot makes the running code stale');
+    assert.ok(after.server.changed, 'and it says when the tree moved');
+  } finally {
+    const now = new Date();
+    utimesSync(target, now, now);
+  }
 });

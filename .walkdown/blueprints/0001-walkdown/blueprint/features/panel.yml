@@ -311,6 +311,25 @@ stories:
             - The panel keeps up with the application - navigating inside it moves the panel to the screen the app landed on, including when the app moves without a page load
           statement_hash: sha256:967abb13513f
 
+      - id: panel.delivery.stale-server-says-so
+        origin: thread:n-0227
+        created_at: 2026-09-07
+        statement: A server keeps the code it started with, so one left running while the code moves is answering with yesterday's rules - and it says so itself, because it is the only party that can see both when it booted and what is on disk now. The panel wears that the same way it wears a stale copy of itself, since a walkdown recorded through an outdated door is undermined exactly as thoroughly as one recorded by an outdated panel.
+        signoff: [eng, product]
+        screens: [review]
+        steps:
+          given:
+            - A running server, and then an edit to the code it would load if it started again
+          when:
+            - The panel asks for the blueprint
+          then:
+            - The payload says the running code is older than the tree, and when the tree moved
+            - The panel says so plainly and names the fix, which is to restart it
+            - A server started after the last edit says nothing at all, so the warning keeps meaning something
+            - Rebuilding the panel or the embed does not make a server stale - those are read from disk per request, and crying wolf on every rebuild would teach a reviewer to ignore it
+            - A server that cannot read its own source reads as current rather than as an alarm nobody can act on
+          statement_hash: sha256:2ba91beef131
+
       - id: panel.delivery.one-switch
         origin: thread:n-0018
         statement: The extension's only control is the toolbar button - on or off for this site - and it shows which of those it is. Everything else is asked in the panel, where there is room to explain it.
@@ -817,6 +836,7 @@ stories:
             - A walkdown run record is appended with those verdicts and that actor
             - An unnamed or agent actor is refused before anything is written
             - Discarding instead of finishing writes nothing
+            - Finishing says what was RECORDED, from the door's own answer - which roles landed and under whose names - because a field the door dropped is invisible in a count of verdicts (n-0226)
           statement_hash: sha256:6cc28278f4a6
 
       - id: panel.walkdown.who-signs-is-declared
