@@ -195,8 +195,12 @@ function buildChrome() {
   D.signPanel = document.createElement('div');
   D.signPanel.dataset.testid = 'walkdown.signing';
   D.signPanel.dataset.theme = 'blueprint';
+  // A stated width, because without one the dialog grows to whatever its
+  // longest sentence is — which is how it came out nearly as wide as the
+  // panel itself. Two columns of content (a role and who signs it) want
+  // about this much and no more.
   D.signPanel.className =
-    'w-80 rounded-box border border-primary/45 bg-base-100 p-3 text-base-content shadow-xl';
+    'w-96 rounded-box border border-primary/45 bg-base-100 p-3 text-base-content shadow-xl';
   D.signPanel.style.cssText = `position:absolute; top:${TOP + GAP}px; left:50%; transform:translateX(-50%); display:none; pointer-events:auto; z-index:3;`;
   D.host.appendChild(D.signPanel);
 
@@ -1683,10 +1687,10 @@ function buildSignPanel() {
             : 'Signing for yourself.'
           : 'Pick at least one role — a walkdown is somebody accepting something.'
       }</p>
-    <div class="mt-2 flex gap-2">
-      <button class="btn btn-xs btn-primary flex-1" id="wdp-sign-go" data-testid="walkdown.signing.start"
+    <div class="mt-2 flex justify-end gap-2">
+      <button class="btn btn-xs btn-ghost w-28" id="wdp-sign-cancel" data-testid="walkdown.signing.cancel">Cancel</button>
+      <button class="btn btn-xs btn-primary w-28" id="wdp-sign-go" data-testid="walkdown.signing.start"
         ${answer.length ? '' : 'disabled'}>Start walkdown</button>
-      <button class="btn btn-xs btn-ghost" id="wdp-sign-cancel" data-testid="walkdown.signing.cancel">Cancel</button>
     </div>`;
   D.signPanel.querySelectorAll('input[data-testid="walkdown.signing.role"]').forEach((box) => {
     box.onchange = () => {

@@ -15,11 +15,16 @@
  *
  *   npm run dev -- --port 4788
  *
- * Two watchers, because this repo has two kinds of source:
+ * Three watchers, because this repo has three kinds of source:
  *
  *   src/panel, src/embed   built assets. Rollup rebuilds them; the server
  *                          reads the build from disk per request, so a rebuild
  *                          reaches the next reload with no restart at all.
+ *   styles/walkdown.css    the stylesheet, whose utilities are generated from
+ *                          the classes it finds in those sources. Left out of
+ *                          this loop, a `w-96` written in src/panel simply had
+ *                          no rule, and the element sized itself to its text -
+ *                          which reads as a layout bug, not a missing build.
  *   lib/, bin/             the server's own modules. `node --watch` restarts
  *                          the process, because nothing else can.
  *
@@ -39,6 +44,7 @@ const args = process.argv.slice(2);
 const kids = [
   ['rollup', ['-c', '-w'], 'panel'],
   ['rollup', ['-c', 'rollup.embed.mjs', '-w'], 'embed'],
+  ['npm', ['run', '--silent', 'watch:css'], 'css'],
   ['node', ['--watch', 'bin/walkdown.js', 'serve', ...args], 'serve'],
 ].map(([cmd, argv, label]) => {
   const kid = spawn(cmd, argv, { stdio: 'inherit', env: process.env });
