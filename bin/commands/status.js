@@ -108,7 +108,11 @@ function renderRuleDetail(blueprint, derived, ruleId, json) {
         stale: 'signed an older wording',
         none: 'not yet',
       }[a.state] ?? a.state;
-    const by = a.actor ? ` by ${a.actor}` : '';
+    // Who accepted, and - when somebody else drove the walk - who typed it.
+    // Both, because "signed by sam" and "signed by sam, recorded by topher"
+    // are different claims and only one of them is sam's own doing (q-0225).
+    const who = a.signer ?? a.actor;
+    const by = who ? ` by ${who}${a.recordedBy ? `, recorded by ${a.recordedBy}` : ''}` : '';
     const provenance = a.runId ? dim(`  ${a.runId}${a.created ? ` · ${a.created}` : ''}`) : '';
     console.log(`    ${a.role.padEnd(15)}${colour(`${glyph} ${label}${by}`)}${provenance}`);
     if (a.detail) console.log(dim(`                   ${truncate(a.detail, 90)}`));

@@ -181,6 +181,25 @@ function buildChrome() {
   D.host.appendChild(D.deskPanel);
 
   /*
+   * Who is signing this sitting. Built once and shown, like the tuner, and
+   * for the same reason: it holds inputs somebody is typing into.
+   *
+   * It is asked at the START of a sitting rather than kept in Settings,
+   * because it is a claim about this walk rather than a fact about the
+   * person - Topher signs eng for himself and product for Sam on one call,
+   * and next week signs only his own (panel.walkdown.who-signs-is-declared).
+   * Settings kept a copy of this once; nothing ever sent it, so the ticks
+   * said product while the ledger said engineering (q-0225).
+   */
+  D.signPanel = document.createElement('div');
+  D.signPanel.dataset.testid = 'walkdown.signing';
+  D.signPanel.dataset.theme = 'blueprint';
+  D.signPanel.className =
+    'w-80 rounded-box border border-primary/45 bg-base-100 p-3 text-base-content shadow-xl';
+  D.signPanel.style.cssText = `position:absolute; top:${TOP + GAP}px; left:50%; transform:translateX(-50%); display:none; pointer-events:auto; z-index:3;`;
+  D.host.appendChild(D.signPanel);
+
+  /*
    * Which screen this page is. It used to be a third tab in the sidebar and it
    * was never at home there: Blueprints and Rules answer "what did we agree to
    * build", and this answers "where am I standing", which is a session control
@@ -321,24 +340,17 @@ function buildDeskPanel() {
         value="${esc(identityOverride.name ?? S.data?.identity?.name ?? '')}"
         title="How you are shown in the panel. Records still carry the username.">
     </div>
-    <!-- Which hats you sign in. Checkboxes rather than a picker because
-         plenty of people are more than one thing - Topher signs as both eng
-         and product - and a control that made you choose would make the
-         board wrong about who has accepted what. The list is the roles this
-         blueprint's rules actually name, so a team that invents one gets it
-         here without anybody editing this file. -->
-    <div class="mb-2 flex items-start gap-2">
-      <span class="shrink-0 text-[12px] font-semibold">Signs as</span>
-      <span class="ml-auto flex w-36 flex-wrap gap-x-3 gap-y-1">
-        ${knownRoles()
-          .map(
-            (r) => `<label class="flex cursor-pointer items-center gap-1 text-[11.5px]">
-          <input type="checkbox" class="checkbox checkbox-xs" data-testid="settings.roles"
-            data-role="${esc(r)}" ${(identityOverride.roles ?? []).includes(r) ? 'checked' : ''}>
-          <span>${esc(r)}</span></label>`,
-          )
-          .join('')}
-      </span>
+    <!-- Which hats you sign in is NOT a setting: it is answered when a
+         sitting begins, where it can also be handed to somebody else for one
+         walk (panel.walkdown.who-signs-is-declared). This is the same shape
+         as the username above it - what your config says, and where to change
+         it - because a second editable copy of one answer is how the browser
+         came to hold a signing value nothing ever recorded (q-0225). -->
+    <div class="mb-2 flex items-center gap-2">
+      <span class="text-[12px] font-semibold">Signs as</span>
+      <span data-testid="settings.roles" class="ml-auto w-36 truncate text-right font-mono text-[12px]"
+        title="Offered when a sitting begins, and changeable there. Set in ${esc(whereIdentityLives())}."
+        >${esc((S.data?.identity?.roles ?? []).join(', ') || 'nothing said')}</span>
     </div>
     <p class="mb-1 text-[10.5px] leading-relaxed opacity-40">Records carry the
       username; the full name is only how you are shown. Clear either to go
@@ -393,19 +405,6 @@ function buildDeskPanel() {
    * what a request says, so a box here could only ever have lied about what
    * would be recorded (n-0142, n-0143).
    */
-  /*
-   * The roles are kept as a set, so unticking the last one leaves an empty
-   * array rather than nothing said - "I sign as none of these" is an answer.
-   * Nothing repaints: no run record reads this yet, and a panel that redrew
-   * itself would only be claiming otherwise.
-   */
-  const boxes = [...D.deskPanel.querySelectorAll('input[data-testid="settings.roles"]')];
-  boxes.forEach((box) => {
-    box.onchange = () => {
-      identityOverride.roles = boxes.filter((b) => b.checked).map((b) => b.dataset.role);
-      saveIdentity();
-    };
-  });
   const nam = D.deskPanel.querySelector('#wdp-set-name');
   nam.onchange = () => {
     // Emptied here means "show me by my username" - the honest answer for
@@ -959,6 +958,10 @@ async function restoreSession() {
       verdicts: saved.verdicts,
       threads: saved.threads ?? {},
       actor: saved.actor ?? whoAmI(),
+      // Who it is being signed by was answered when it began; a reload must
+      // not quietly turn a sitting signed for two people into one signed for
+      // whoever is at the keyboard now.
+      signatures: saved.signatures ?? [{ role: 'eng', signer: saved.actor ?? whoAmI() }],
       started: saved.started ?? new Date().toISOString(),
     };
 }
@@ -1087,6 +1090,11 @@ export function render() {
            7/7 when there is nothing left. Judging a rule that was not owed -
            one opened off the list that already passed - moves both numbers,
            which is honest: it was work the sitting did not set out to do. -->
+      <!-- And who it is being signed by, when that is not simply you. A
+           sitting where you are accepting on somebody else's behalf must say
+           so for its whole length: forgetting half way through is how a
+           signature ends up under the wrong name (panel.walkdown.who-signs-is-declared). -->
+      ${signingNote()}
       <span class="ml-auto" title="Judged in this sitting, of the rules owing you a verdict">${
         judged.size
       }/${judged.size + toSign + toWalk} judged</span>
@@ -1444,7 +1452,7 @@ function renderBar() {
            and belongs beside the count of the ones already judged. -->
       <!-- Start it, or end it: the same button, because it is the same sitting. -->
       <button class="btn btn-xs ${S.session || owedNow ? 'btn-warning' : 'btn-primary'}" id="wdp-walk" data-testid="panel.walk"
-        @click=${() => (S.session ? finishWalkdown() : startWalkdown())}
+        @click=${() => (S.session ? finishWalkdown() : openSigning())}
         title="${
           S.session
             ? 'Record this sitting to the runs ledger under your name'
@@ -1579,6 +1587,7 @@ const sessionDraft = () =>
     verdicts: S.session.verdicts,
     threads: S.session.threads,
     actor: S.session.actor,
+    signatures: S.session.signatures,
     started: S.session.started,
   };
 export function saveSession() {
@@ -1593,18 +1602,132 @@ export function saveSession() {
   }).catch(() => {});
 }
 
-function startWalkdown() {
+/*
+ * The signing question, and the answer while it is being given.
+ *
+ * `signing` is the draft answer: one row per role this blueprint knows, each
+ * either signed or not, and by whom. It starts from the config - which is
+ * what makes agreeing the one-click case - and every proxy is forgotten when
+ * the sitting ends, because a remembered "also signing for Sam" is how an
+ * absent person gets signed for next month.
+ */
+function openSigning() {
+  const mine = whoAmI();
+  const configured = S.data?.identity?.roles ?? [];
+  S.signing = knownRoles().map((role) => ({
+    role,
+    on: configured.includes(role),
+    signer: mine,
+  }));
+  buildSignPanel();
+  D.signPanel.style.display = '';
+  D.signPanel.querySelector('#wdp-sign-go')?.focus();
+}
+
+const closeSigning = () => {
+  S.signing = null;
+  D.signPanel.style.display = 'none';
+};
+
+/** The rows that would be written, or an empty list while nothing is ticked. */
+const signingAnswer = () =>
+  (S.signing ?? [])
+    .filter((r) => r.on && r.signer.trim())
+    .map((r) => ({ role: r.role, signer: r.signer.trim() }));
+
+function buildSignPanel() {
+  const mine = whoAmI();
+  const rows = (S.signing ?? [])
+    .map(
+      (r, i) => `
+      <label class="flex items-center gap-2 py-1 text-[12px]">
+        <input type="checkbox" class="checkbox checkbox-xs" data-testid="walkdown.signing.role"
+          data-i="${i}" data-role="${esc(r.role)}" ${r.on ? 'checked' : ''}>
+        <span class="w-16 font-semibold">${esc(r.role)}</span>
+        <input class="input input-xs ml-auto w-40 ${r.on && r.signer.trim() && r.signer.trim() !== mine ? 'input-warning' : ''}"
+          data-testid="walkdown.signing.signer" data-i="${i}" ${r.on ? '' : 'disabled'}
+          value="${esc(r.signer)}" placeholder="who signs ${esc(r.role)}"
+          title="Who accepts in this role. Somebody else's name records their acceptance, with you as who typed it.">
+      </label>`,
+    )
+    .join('');
+  const answer = signingAnswer();
+  const proxies = answer.filter((a) => a.signer !== mine);
+  D.signPanel.innerHTML = `
+    <div class="mb-1 text-[12px] font-semibold">Who is signing this walkdown?</div>
+    <p class="mb-2 text-[10.5px] leading-relaxed opacity-60">
+      Filled in from <code>${esc(whereIdentityLives())}</code>. Change a name to
+      record somebody else's acceptance — the run still says you typed it.</p>
+    ${rows}
+    <p class="mt-1 min-h-[14px] text-[10.5px] leading-relaxed ${proxies.length ? 'text-warning' : 'opacity-50'}"
+      data-testid="walkdown.signing.summary">${
+        answer.length
+          ? proxies.length
+            ? `Signing for ${proxies.map((pr) => `${esc(pr.signer)} (${esc(pr.role)})`).join(', ')}, recorded by you.`
+            : 'Signing for yourself.'
+          : 'Pick at least one role — a walkdown is somebody accepting something.'
+      }</p>
+    <div class="mt-2 flex gap-2">
+      <button class="btn btn-xs btn-primary flex-1" id="wdp-sign-go" data-testid="walkdown.signing.start"
+        ${answer.length ? '' : 'disabled'}>Start walkdown</button>
+      <button class="btn btn-xs btn-ghost" id="wdp-sign-cancel" data-testid="walkdown.signing.cancel">Cancel</button>
+    </div>`;
+  D.signPanel.querySelectorAll('input[data-testid="walkdown.signing.role"]').forEach((box) => {
+    box.onchange = () => {
+      S.signing[Number(box.dataset.i)].on = box.checked;
+      buildSignPanel();
+    };
+  });
+  D.signPanel.querySelectorAll('input[data-testid="walkdown.signing.signer"]').forEach((inp) => {
+    inp.oninput = () => {
+      S.signing[Number(inp.dataset.i)].signer = inp.value;
+    };
+    // Repainted on blur rather than per keystroke: the summary and the tint
+    // would otherwise rebuild the field somebody is still typing into.
+    inp.onblur = () => buildSignPanel();
+  });
+  D.signPanel.querySelector('#wdp-sign-cancel').onclick = closeSigning;
+  D.signPanel.querySelector('#wdp-sign-go').onclick = () => {
+    const signatures = signingAnswer();
+    if (!signatures.length) return;
+    closeSigning();
+    startWalkdown(signatures);
+  };
+}
+
+function startWalkdown(signatures) {
   // `started` marks the session so pins dropped during it can count as a
   // fail's why and ride into the run record; `threads` collects the notes
-  // the feedback box files, per rule.
+  // the feedback box files, per rule. `signatures` is who the sitting is
+  // being signed by, answered before it began and carried to the record.
   S.session = {
     verdicts: {},
     threads: {},
     actor: whoAmI(),
+    signatures: signatures ?? [{ role: 'eng', signer: whoAmI() }],
     started: new Date().toISOString(),
   };
   saveSession();
   render();
+}
+
+/*
+ * What this sitting is signing, in a phrase. Silent when it is the ordinary
+ * case - your own roles, your own name - because a strip that always says
+ * something says nothing; loud when a role is being signed for somebody else,
+ * which is the case worth interrupting for.
+ */
+function signingNote() {
+  const sigs = S.session?.signatures ?? [];
+  if (!sigs.length) return nothing;
+  const mine = recordingHandle();
+  const proxies = sigs.filter((sig) => sig.signer !== mine);
+  const roles = sigs.map((sig) => sig.role).join(', ');
+  return proxies.length
+    ? html`<span data-testid="panel.actor-signing" class="rounded bg-warning/30 px-1.5 py-0.5 font-semibold"
+        title="Recorded under their name, with yours as who typed it"
+        >for ${proxies.map((p) => `${p.signer} (${p.role})`).join(', ')}</span>`
+    : html`<span data-testid="panel.actor-signing" class="opacity-60">as ${roles}</span>`;
 }
 
 /** The username a sitting's records will carry: the one it was started under. */
@@ -1897,7 +2020,12 @@ async function finishWalkdown() {
     const res = await fetch(api('/api/walkdowns'), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ actor, target: 'local', results }),
+      body: JSON.stringify({
+        actor,
+        target: 'local',
+        results,
+        signatures: S.session.signatures ?? null,
+      }),
     });
     const out = await res.json();
     if (!res.ok) {
@@ -2636,10 +2764,9 @@ function boot() {
       // a record is written under any more, and a leftover override from
       // before that changed would show a name the server would not use.
       if (typeof saved.name === 'string') identityOverride.name = saved.name.trim();
-      // Same distinction one field over: an empty array is "none of these",
-      // and only a missing key means nothing was ever said.
-      if (Array.isArray(saved.roles))
-        identityOverride.roles = saved.roles.map((r) => String(r).trim()).filter(Boolean);
+      // A `roles` key here is from before signing moved onto the sitting. It
+      // is left where it lies and never read: what a record says is answered
+      // when the walk begins, not by what this browser remembers (q-0225).
       return;
     }
     /*

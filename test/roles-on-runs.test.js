@@ -13,7 +13,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, before, test } from 'node:test';
 import { defaultActor } from '../lib/identity.js';
-import { normalizeRoles, writeRunRecord } from '../lib/run-record.js';
+import { deriveStatus } from '../lib/status.js';
+import { normalizeRoles, normalizeSignatures, writeRunRecord } from '../lib/run-record.js';
 import { createWalkdownServer } from '../lib/serve.js';
 import { ROLES } from '../lib/vocab.js';
 
@@ -208,4 +209,91 @@ test('the identity the server derives carries roles, and the vocabulary to chang
   } finally {
     delete process.env.WALKDOWN_ROLES;
   }
+});
+
+/*
+ * The proxy case, end to end: one person drives, two people sign.
+ *
+ * This is the walk two people actually do - Topher driving while Sam accepts
+ * product beside him - and before signatures there was no honest way to write
+ * it down: ticking `product` filed Sam's acceptance under Topher's name.
+ */
+test('a walkdown signs per role, and a role signed for somebody else says whose it was @rule:status.acceptance.signature-names-its-signer', async () => {
+  const out = await (
+    await post({
+      target: 'local',
+      signatures: [
+        { role: 'eng', signer: 'roles-person' },
+        { role: 'product', signer: 'sam' },
+      ],
+      results: [{ rule: 'demo.main.thing', status: 'pass' }],
+    })
+  ).json();
+  assert.ok(out.run_id, JSON.stringify(out));
+  const record = recordFor(out.run_id);
+  assert.deepEqual(record.signatures, [
+    { role: 'eng', signer: 'roles-person' },
+    { role: 'product', signer: 'sam' },
+  ]);
+  // Who typed it is the actor, and it is the machine's answer rather than
+  // anything the request said - so the proxy needs no second field.
+  assert.equal(record.actor, 'roles-person');
+  assert.equal('roles' in record, false);
+
+  const rows = deriveStatus({
+    config: { runner: { targets: { local: {} } } },
+    features: [
+      {
+        file: 'features/demo.yml',
+        data: {
+          feature: 'demo',
+          stories: [
+            {
+              id: 'demo.main',
+              rules: [
+                {
+                  id: 'demo.main.thing',
+                  statement: 'The visitor can do the thing.',
+                  signoff: ['eng', 'product'],
+                },
+              ],
+            },
+          ],
+        },
+      },
+    ],
+    threads: [],
+    runs: [{ file: 'runs/r-0.json', data: record }],
+  }).rows;
+  const acceptance = rows[0].acceptance;
+  const product = acceptance.find((a) => a.role === 'product');
+  const eng = acceptance.find((a) => a.role === 'eng');
+  assert.equal(product.state, 'signed');
+  assert.equal(product.signer, 'sam', 'product counts for the person who accepted');
+  assert.equal(product.recordedBy, 'roles-person', 'and says who typed it');
+  assert.equal(eng.signer, 'roles-person');
+  assert.equal(eng.recordedBy, null, 'signing for yourself is not a proxy');
+});
+
+test('a signature is refused where nobody, or a machine, is named as the signer @rule:status.acceptance.signature-names-its-signer', async () => {
+  assert.deepEqual(normalizeSignatures(null), null);
+  // The signer defaults to whoever ran the walk, which is the ordinary case.
+  assert.deepEqual(normalizeSignatures([{ role: 'eng' }], { actor: 'topher' }), [
+    { role: 'eng', signer: 'topher' },
+  ]);
+  // Accepting is the one thing an agent may never do for somebody, in any
+  // spelling the actor gate already refuses.
+  assert.throws(() => normalizeSignatures([{ role: 'eng', signer: 'AGENT' }]), /never accept/);
+  assert.throws(() => normalizeSignatures([{ role: 'wizard', signer: 'sam' }]), /unknown role/);
+  assert.throws(
+    () => normalizeSignatures([{ role: 'eng', signer: 'a' }, { role: 'eng', signer: 'b' }]),
+    /signs once/,
+  );
+
+  // And the door refuses it too, rather than filing half of it.
+  const bad = await post({
+    signatures: [{ role: 'eng', signer: 'agent' }],
+    results: [{ rule: 'demo.main.thing', status: 'pass' }],
+  });
+  assert.equal(bad.status, 400);
 });

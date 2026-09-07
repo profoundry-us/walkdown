@@ -46,6 +46,8 @@ export const S = {
   view: 'list',
   selected: null,
   session: null,
+  signing: null, // the draft answer to "who is signing this sitting"
+
   ghost: null,
   ghostOpacity: 0.5,
   protoShare: null, // 0 = all app, 1 = all prototype; null = follow the page
@@ -219,19 +221,20 @@ export const HEAD = TOP;
  * them under one face (see `handles` in the identity payload).
  */
 /*
- * `roles` is the third field and the odd one out: it is not a name, it is
- * which hats this person signs in. It lives here because it is the same kind
- * of setting - per person, per machine, said once and remembered - and
- * because a signature's role has to be known before the signature is written.
- * null means nothing said; an empty array means "none of these", which is a
- * different answer and survives the reload the same way an emptied name does.
+ * `roles` used to be the third field here, and it was the wrong shape twice
+ * over: it lived in the browser, and nothing ever sent it - the ticks said
+ * product while every record said engineering (q-0225). Which hats are being
+ * signed is a claim about ONE sitting, not a setting, so it is asked when a
+ * sitting begins and travels on the session. What the browser keeps now is
+ * only how you are shown and how the desk is ruled, neither of which any
+ * record has ever carried.
  */
 export const ACTOR_KEY = 'walkdown:actor'; // legacy: one free-text name
-export const IDENTITY_KEY = 'walkdown:identity'; // { username, name, roles }
+export const IDENTITY_KEY = 'walkdown:identity'; // { name }
 // `username` is gone from this: what a record is written under is the
 // server's answer, not a value the browser keeps. What stays is what the
 // browser legitimately owns - how you are SHOWN, and which hats you are
 // signing in this sitting.
-export const identityOverride = { username: null, name: null, roles: null };
+export const identityOverride = { username: null, name: null };
 export const saveIdentity = () =>
-  store.set(IDENTITY_KEY, { name: identityOverride.name, roles: identityOverride.roles });
+  store.set(IDENTITY_KEY, { name: identityOverride.name });
