@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-07T17:30:36.115Z
 anchor:
   rule: panel.delivery.stale-copy-says-so
-status: open
+status: addressed
 body: >-
   A running server older than the code it is serving says nothing, and the panel
   has no way to find out.
@@ -40,3 +40,26 @@ body: >-
   The server is the one that can answer it: it knows when it started, and it can
   look at the tree it is serving from. A payload field, and the panel wears the
   same badge it already wears for a stale extension.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-07T17:35:35Z
+    body: >-
+      Built in f310783, as a rule of its own rather than a reword:
+      panel.delivery.stale-server-says-so sits beside the copy rule, so the
+      signed statement about the extension copy is left alone.
+
+
+      The server answers it, since it is the only party that can see both
+      halves: BOOTED_AT against the newest mtime under lib/ and bin/. Mtime
+      rather than a git sha because the case that bites is an uncommitted edit
+      two minutes old. lib/viewer is excluded - the panel and embed builds are
+      read from disk per request, so rebuilding them makes a server no more
+      stale than it was, and a badge that fires on every rebuild is one a
+      reviewer learns to ignore. A server that cannot stat its own source reads
+      as current: an alarm nobody can act on is worse than no alarm.
+
+
+      The panel wears the same badge it already wears for a stale extension
+      copy, naming the fix. Tested by touching lib/api.js under a running server
+      and asserting the payload flips.

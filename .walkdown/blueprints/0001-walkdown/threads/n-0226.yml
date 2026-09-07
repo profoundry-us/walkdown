@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-07T17:29:59.910Z
 anchor:
   rule: panel.walkdown.records-to-ledger
-status: open
+status: addressed
 body: >-
   Finishing a walkdown says how many verdicts landed, and never says what was
   actually recorded on them.
@@ -39,3 +39,16 @@ body: >-
   this one); it is the panel declining to report what it was told. Fix: read
   out.signatures and say who signed, and say plainly when the answer is nobody
   in particular.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-07T17:35:35Z
+    body: 'Built in f310783. The toast reads the door answer instead of counting:
+      "Recorded 1 verdict as <run_id> — eng (topher), product (sam)". Signatures
+      first, the older flat roles if that is what came back, and "no role stated
+      — the ledger reads it as engineering" when the answer is nothing, because
+      that is the sentence that would have caught all three cases. Covered by a
+      test asserting the endpoint answers with what it filed and answers null
+      for nothing stated, and the rule gained a step saying finishing reports
+      what was recorded rather than how many. The statement is untouched, so
+      nothing is un-signed.'
