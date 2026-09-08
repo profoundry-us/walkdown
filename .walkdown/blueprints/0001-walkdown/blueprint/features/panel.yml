@@ -421,6 +421,24 @@ stories:
             - The same list stays reachable later, so the choice can be changed without reinstalling anything
           statement_hash: sha256:6aa78c304c03
 
+      - id: panel.start.unclaimed-page-says-so
+        origin: walkdown
+        statement: On a page no blueprint claims, the panel says so and says how to claim it, rather than opening whichever blueprint it happens to hold - and it asks that question however many blueprints the server offers, because one blueprint on a server is not evidence that this page belongs to it.
+        signoff: [eng, product]
+        screens: [choose-blueprint]
+        steps:
+          given:
+            - A server offering one or more blueprints, and a page none of them claims - an ordinary site you have simply browsed to
+          when:
+            - The panel starts there
+          then:
+            - It says no blueprint claims this page, and names the address it asked about
+            - Nothing is opened by default - a server holding exactly one blueprint is answered the same way as one holding six, because the count of blueprints says nothing about who this page belongs to
+            - It says how to claim the address - the storyboard entry or the target base_url that would make this page part of a blueprint
+            - The blueprints the server does hold stay reachable, so opening one deliberately is still one step
+            - A page a blueprint claims, or one that declares its own, is never asked
+          statement_hash: sha256:3ac55c00c5a3
+
   - id: panel.rules
     title: The rules are one tap away, and so is the way back
     statement: As a reviewer, I can see every rule, open one for detail, and move between them without losing my place.

@@ -1,0 +1,39 @@
+id: n-0241
+kind: note
+author: topher
+via: agent
+created: 2026-09-08T03:26:42.683Z
+anchor:
+  rule: panel.rules.evidence-visible
+  screen: rule-detail
+  element: detail.screenshots-modal
+status: open
+body: >-
+  Evidence that is not a picture does not render. The screenshots modal builds
+  an <img> for every attached path (src/panel/shots.js, the figure it maps each
+  path into), so a run that attached a transcript gets a broken image and a
+  caption — the file is there, the reader just cannot read it.
+
+
+  It is not a rare case: the agent tier attaches transcripts routinely.
+  status.derived.latest-wins is the example Topher hit — its only agent evidence
+  is runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt — and
+  ownership.drift.design-requests-required carries two more .txt files beside
+  it. The control that opens them says 'Screenshots', which is also now the
+  wrong word for what a run attaches.
+
+
+  What it should do instead: render by what the file is. A .txt (and .log,
+  .json, .md) is served already — the evidence route hands back whatever is
+  under the evidence key space — so the modal can fetch it and show it as
+  monospace text in the same frame the images use, scrollable, with the same
+  caption underneath. Images keep their <img>. Anything else stays a link to the
+  file rather than a broken picture.
+
+
+  Worth deciding while doing it: whether the word 'Screenshots' becomes
+  'Evidence' in the button, the modal heading and the anchor names
+  (detail.screenshots, detail.screenshots-modal). The anchors are declared in
+  the storyboard and named in panel.rules.evidence-visible's steps, so renaming
+  them is a spec edit as well as a code one — which is why this note stops here
+  rather than assuming it.

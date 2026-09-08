@@ -1,0 +1,9 @@
+id: n-0238
+kind: note
+author: topher
+created: 2026-09-08T00:32:10.464Z
+anchor:
+  rule: locations.default.in-repo-on-request
+status: open
+body: This rule is working but is super-lengthy in wording. We should clean this
+  up a LOT.

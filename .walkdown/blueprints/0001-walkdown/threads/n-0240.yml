@@ -1,0 +1,9 @@
+id: n-0240
+kind: note
+author: topher
+created: 2026-09-08T03:09:34.872Z
+anchor:
+  rule: locations.pointer.placed-where-agents-read
+status: open
+body: This rule is just confusing as hell. I have no idea if we're doing this
+  because I can't understand it.

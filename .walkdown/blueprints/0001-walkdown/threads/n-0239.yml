@@ -1,0 +1,9 @@
+id: n-0239
+kind: note
+author: topher
+created: 2026-09-08T00:33:35.286Z
+anchor:
+  rule: locations.default.skills-are-yours-by-default
+status: open
+body: I'm not actually sure I agree with this; do we really need this to be
+  committed with the spec?
