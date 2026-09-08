@@ -1,0 +1,55 @@
+id: q-0237
+kind: question
+author: topher
+via: agent
+created: 2026-09-08T00:23:03.931Z
+anchor:
+  rule: panel.walkdown.one-control-owns-the-sitting
+  screen: review
+status: open
+body: >-
+  There is no way to skip a rule during a sitting, and the pass-advance actively
+  fights you if you try.
+
+
+  What Topher hit (2026-09-07, judging the panel.start rules): a rule he could
+  not judge yet — the screen was unreachable because of the broken Connect
+  button, n-0236 — so he stepped past it with the detail's next arrow. That
+  moves the selection but records nothing, so the rule stays owed. Then he
+  judged the following rule, and the pass carried him straight back to the
+  skipped one.
+
+
+  The mechanism is one line: src/panel/app.js:1979 (and :2005 for Continue)
+  takes owedRows()[0] — the FIRST rule still owing a verdict in rail order, not
+  the next one after where you are. So a rule you deliberately stepped over is,
+  by construction, the rule every subsequent pass returns you to. The rule's own
+  then-clause says carrying on opens 'the next rule still owing a verdict, which
+  is not always the next rule in the list', so this is the spec working as
+  written; what is missing is any way to say 'not this one, not now'.
+
+
+  Decisions this needs, which are Topher's:
+
+
+  1. How long does a skip last? For the sitting only (the honest default: it is
+  'I cannot judge this today', and the draft already carries per-sitting state),
+  or remembered until the rule changes?
+
+  2. Is a skip recorded in the ledger, or only in the draft? A skip is not a
+  verdict — nothing is claimed and nothing is accepted — so the ledger arguably
+  should not hear about it. But an unrecorded skip cannot answer 'why did this
+  sitting not cover that rule?', which a sweep's report does ask.
+
+  3. Does a skip want a reason? A skipped rule with 'blocked by n-0236' beside
+  it is a queue; a silently skipped one is indistinguishable from one nobody
+  reached.
+
+  4. Where does it live — a third button beside pass/fail/refine, or something
+  quieter on the stepper?
+
+
+  Whatever the shape, the fix to the trap itself is smaller than the feature:
+  the pass-advance could open the next owed rule AFTER the current position,
+  wrapping to the top, instead of always the first. That alone would let
+  stepping past a rule work the way Topher expected, without any new concept.
