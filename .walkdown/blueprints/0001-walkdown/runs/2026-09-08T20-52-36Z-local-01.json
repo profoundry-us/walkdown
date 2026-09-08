@@ -1,0 +1,41 @@
+{
+  "run_id": "2026-09-08T20-52-36Z-local-01",
+  "created": "2026-09-08T20:52:36Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "4afd704",
+  "spec_hash": "sha256:1e8005428148",
+  "results": [
+    {
+      "rule": "panel.delivery.stale-server-says-so",
+      "status": "pass",
+      "statement_hash": "sha256:2ba91beef131",
+      "evidence": [
+        "runs/evidence/2026-09-08T20-52-36Z/01-fresh-server-payload.json",
+        "runs/evidence/2026-09-08T20-52-36Z/02-baseline-mtimes.txt",
+        "runs/evidence/2026-09-08T20-52-36Z/03-rebuild-does-not-go-stale.txt",
+        "runs/evidence/2026-09-08T20-52-36Z/04-edit-makes-server-stale.txt",
+        "runs/evidence/2026-09-08T20-52-36Z/05-panel-stale-server-badge.png",
+        "runs/evidence/2026-09-08T20-52-36Z/06-panel-no-badge-when-current.png",
+        "runs/evidence/2026-09-08T20-52-36Z/07-unreadable-source-reads-as-current.txt"
+      ],
+      "threads": [],
+      "reasoning": "Judged against a scratch copy served on port 4906, driving the panel in a browser and reading /api/blueprint beside it. A server started after the last edit said nothing: stale:false, changed pointing at lib/serve.js's real mtime, and no badge in the bar (06). Touching lib/api.js flipped the same payload to stale:true with changed naming the moment the tree moved, and the reloaded panel wore 'Stale server - restart it' beside the project name rather than instead of it, with the title naming the fix ('restart it (npm run dev, or stop and re-run walkdown serve)') - so the payload carries when, and the panel carries what to do (04, 05). Stamping the built lib/viewer/panel.js five minutes into the future changed nothing at all, which is the promise that a rebuild does not cry wolf (03). The last THEN I could only half-measure: on an isolated copy of lib/ and bin/ I made bin/ unreadable and the payload still answered as current rather than as an alarm, but making lib/ unreadable never reaches the staleness question - the same request reads lib/viewer/panel.js for the build hash and returns 400 first (07). So no unreadable tree ever produced a false alarm, which is what the step is for, though the lib/ half of it is unobservable through this payload. I restored both mtimes to exactly what I found (lib/api.js 1788810611, lib/viewer/panel.js 1788896619) and git status was clean afterwards. Worth noting the ground: n-0253 fixed the suite that used to leave lib/api.js stamped now, and this judging saw no spurious staleness - every stale reading here was one I caused on purpose."
+    },
+    {
+      "rule": "panel.start.unclaimed-page-says-so",
+      "status": "fail",
+      "statement_hash": "sha256:3ac55c00c5a3",
+      "evidence": [
+        "runs/evidence/2026-09-08T20-52-38Z/01-nobody-claims-the-page.txt",
+        "runs/evidence/2026-09-08T20-52-38Z/02-one-blueprint-opens-unasked.png",
+        "runs/evidence/2026-09-08T20-52-38Z/03-two-blueprints-asks-which-not-whether.png",
+        "runs/evidence/2026-09-08T20-52-38Z/04-measured.txt"
+      ],
+      "threads": ["n-0256"],
+      "reasoning": "I started the panel knowing nothing (framed, /?bp=#<address>) on http://localhost:4907/, a plain page nothing claims - /api/whose answers match:null and `walkdown claims --url` says so too (01). Against a server offering ONE blueprint the panel simply opened it: the whole board over a page it does not claim, name in the bar, rules list, 113/129 verified, Start walkdown, and measured in the DOM there is no [data-testid^=\"start.\"] element and no text matching /no blueprint claims/ (02). Against a server offering TWO the panel stopped at 'Which blueprint?' and kept both reachable, so THEN 4 holds - but the gate asks which, not whether: its text never contains the address it asked about, never says nothing claims it, and offers no way to claim it (no `walkdown claims`, no `walkdown init`, no storyboard entry or target base_url); what it names is the panel's own origin as what the choice is remembered for (03, 04). One blueprint and two are therefore answered differently, which is the comparison THEN 2 forbids in as many words, and THEN 1 and 3 are unmet in both. src/panel/app.js start() agrees: every gate is behind `S.projects.length > 1`. I considered blocked, because q-0243 is an open design request saying the choose-blueprint screen has no drawing for this state (a sketch sits at proposals/choose-blueprint-unclaimed.html) - but the rule is judgeable without a drawing, since what it forbids is observable behaviour and the panel does it: it opens someone else's board on your page and says nothing. So the honest reading is fail, unbuilt rather than regressed. Filed as n-0256. No console messages or page errors were emitted in either case."
+    }
+  ]
+}
