@@ -1832,3 +1832,34 @@ test('a fade dragged onto an end opens pinning, and nothing throws on the way', 
   await expect(page.getByTestId('panel.pin-why')).toContainText(/half-faded/);
   expect(thrown, 'nothing threw while the bar was painted mid-drag').toEqual([]);
 });
+
+/*
+ * The first-run gate, driven rather than looked at. Its Connect button was
+ * once a second copy of the Blueprints tab's markup with the same ids and no
+ * handler, so the one screen whose whole job is reaching a server could not
+ * reach one (n-0236) — and nothing in this suite pressed it, which is why
+ * that survived. The caption is the design's own: the box says "Server",
+ * because a person who reads it as a folder types a path and gets nowhere.
+ */
+test('the start gate says how to open a blueprint, and its address box actually connects', {
+  tag: '@rule:panel.start.open-a-folder',
+}, async ({ page }) => {
+  // The panel loads from the real server but is told to talk to a port
+  // nothing is listening on, so it comes up as first-run.
+  await page.goto(fixtureFor({ srv: 'http://localhost:4999' }));
+  await expect(page.getByTestId('start.message')).toBeVisible();
+  await expect(page.getByTestId('start.message')).toContainText(/No blueprints open/);
+  // The command that opens them, named rather than described.
+  await expect(page.getByText('walkdown serve', { exact: true })).toBeVisible();
+
+  // Labelled as a server, visibly - not only to a screen reader.
+  const box = page.getByTestId('start.server');
+  const caption = page.getByText('Server', { exact: true });
+  await expect(caption, 'the box says what it wants: a server').toBeVisible();
+
+  // Retried without a reload: type the real address and press Connect.
+  await box.fill(WD_ORIGIN);
+  await page.getByTestId('start.connect').click();
+  await expect(page.getByTestId('panel.bar')).toBeVisible();
+  await expect(page.getByTestId('start.message')).toHaveCount(0);
+});

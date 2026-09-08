@@ -2,7 +2,7 @@
  * The Blueprints tab: which server, which blueprint, and what crossing to
  * another one does to a sitting already in progress.
  */
-import { html } from '../../vendor/lit.js';
+import { html, nothing } from '../../vendor/lit.js';
 import { S } from './state.js';
 import { fire } from './util.js';
 
@@ -21,18 +21,30 @@ import { fire } from './util.js';
  * reaching a server could not reach one (n-0236). One component, one
  * handler, drawn wherever it is needed.
  */
-export function serverRow(size = 'xs') {
+export function serverRow(size = 'xs', { caption = false } = {}) {
+  /*
+   * The caption is drawn where the design draws it - on the start screen,
+   * where the box arrives with no heading over it and the whole screen turns
+   * on knowing that the thing you type is a SERVER. On the Blueprints tab
+   * the row already sits under "walkdown server", and a second caption there
+   * would be the same word twice.
+   *
+   * A label rather than a span beside it, so the caption focuses the box, and
+   * the title is the design's sentence verbatim.
+   */
   return html`
-    <div class="flex items-center gap-2">
+    <label class="flex items-center gap-2">
+      ${caption ? html`<span class="shrink-0 text-xs opacity-60">Server</span>` : nothing}
       <input id="wdp-server" data-testid="start.server" class="input input-${size} flex-1" value="${S.SERVER}"
+             title="Where walkdown serve is listening — a server, not a folder"
              aria-label="walkdown server address">
       <button class="btn btn-${size} ${size === 'xs' ? 'btn-outline ' : ''}btn-primary" id="wdp-retry"
         data-testid="start.connect"
         @click=${(e) => {
-          const box = e.currentTarget.closest('div')?.querySelector('#wdp-server');
+          const box = e.currentTarget.closest('label')?.querySelector('#wdp-server');
           fire(e.currentTarget, 'connect', { server: (box?.value ?? '').trim() });
         }}>Connect</button>
-    </div>`;
+    </label>`;
 }
 
 export function blueprintsPane() {

@@ -2550,7 +2550,7 @@ function renderGate() {
              copy of the markup with the same ids and no handler, so the
              button on the one screen whose job is reaching a server did
              nothing at all (n-0236). -->
-        ${serverRow('sm')}
+        ${serverRow('sm', { caption: true })}
         <p class="text-[11.5px] opacity-40">Then every blueprint under that folder is listed here.</p>
       </div>`,
       D.side,

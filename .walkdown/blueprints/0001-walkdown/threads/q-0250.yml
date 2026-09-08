@@ -1,0 +1,37 @@
+id: q-0250
+kind: question
+author: topher
+via: agent
+created: 2026-09-08T19:37:32.844Z
+anchor:
+  rule: panel.walkdown.draft-on-disk
+status: open
+body: >-
+  A sitting nobody has judged anything in does not survive a reload - including
+  the signing it took to start it. Is that what we want?
+
+
+  Measured today, 2026-09-08: start a sitting, answer the who-signs dialog,
+  judge nothing, reload. GET /api/draft answers {"draft": null} from the moment
+  it starts - so there is nothing on disk to come back to - and the panel comes
+  up with no actor, in the same tab as well as in a fresh browser. Once a single
+  verdict exists everything works: the draft is on disk and the sitting resumes,
+  which is what the rule and its check already say.
+
+
+  So this is not a bug against the rule as written - the check asserts the null
+  draft on purpose, and "a sitting is real once something is judged" is a
+  defensible line. The question is whether the SIGNING should be on the near
+  side of that line. Answering who signs is a small act of bookkeeping a person
+  has already performed, and a reload throws it away silently; the second time
+  you start, you answer the same dialog again with nothing telling you why.
+
+
+  Two shapes if we want it kept: write the draft at the moment the sitting
+  starts rather than at the first verdict (the record already carries signatures
+  and a start), or keep only the answered dialog in browser storage and re-offer
+  it. The first makes an empty sitting visible to walkdown status, which may be
+  exactly what we do not want - hence a question rather than a note.
+
+
+  Noticed while judging panel.walkdown.draft-on-disk.

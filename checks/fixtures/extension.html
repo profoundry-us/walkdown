@@ -11,7 +11,12 @@
     const q = new URLSearchParams(location.search);
     const WD = q.get('wd') || 'http://localhost:4700';
     window.__walkdownConfig = {
-      server: WD,
+      // `wd` is where the panel's CODE comes from; `srv` is the address it
+      // will TALK to. They are the same thing until a check wants the
+      // first-run gate, which needs a panel that loaded fine and a server
+      // that answers nothing - pointing `wd` at a dead port just leaves a
+      // page with no panel on it.
+      server: q.get('srv') || WD,
       buildHash: q.get('build') || 'stale-build-hash',
       // The extension's content script runs on every page, so walkdown comes
       // back after a navigation. `reinjects=0` pretends to be a script tag.
