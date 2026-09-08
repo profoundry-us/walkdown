@@ -2437,9 +2437,17 @@ const typing = (e) => {
 };
 
 /*
+ * The address `/api/whose` was asked about, kept so the gate can name it.
+ * "No blueprint covers this page" without the address leaves you guessing
+ * WHICH address was asked about, and a port or a fragment is exactly what
+ * makes a claim miss - so the sentence is only useful with it.
+ */
+let askedAbout = null;
+
+/*
  * Three questions, asked once each and then not again: is there a server,
- * which blueprint is this site, and then the actual work. A script tag has
- * already answered the second, so it goes straight past the picker.
+ * whose page this is, and then the actual work. A script tag has already
+ * answered the second, so it goes straight past both gates.
  */
 export async function start() {
   let payload;
@@ -2461,14 +2469,25 @@ export async function start() {
    * lets this be an answer rather than a guess - `walkdown claims` is what
    * keeps it true.
    */
-  if (!S.BP && S.projects.length > 1) {
+  /*
+   * Asked at EVERY count, not only when several are listed. Behind
+   * `projects.length > 1` this question was never put on the commonest first
+   * meeting with walkdown - a server holding one blueprint, and an ordinary
+   * page you had simply browsed to - and the panel opened that blueprint's
+   * whole board over somebody else's site (n-0256). A count is not evidence:
+   * one blueprint on a server says nothing about who this page belongs to.
+   */
+  let answered = false;
+  if (!S.BP) {
     try {
       // Framed, the page under review is the one in the frame, not walkdown's
       // own address — asking about ourselves would answer about nothing.
-      const asking = S.frameUrl;
-      const whose = asking
-        ? await (await fetch(api(`/api/whose?url=${encodeURIComponent(asking)}`))).json()
-        : null;
+      const asking = S.frameUrl ?? location.href;
+      const whose = await (
+        await fetch(api(`/api/whose?url=${encodeURIComponent(asking)}`))
+      ).json();
+      answered = true;
+      askedAbout = asking;
       // By key, never by id: two listed blueprints may share a name, and the
       // one this page belongs to is one directory, not one name (n-0173).
       if (whose?.match?.key && S.projects.some((pr) => pr.key === whose.match.key))
@@ -2486,9 +2505,26 @@ export async function start() {
     const kept = byKey ?? (byId.length === 1 ? byId[0] : null);
     if (remembered && kept) S.BP = kept.key;
   }
-  if (!S.BP && S.projects.length > 1) {
-    S.phase = 'choose';
-    return renderGate();
+  if (!S.BP) {
+    /*
+     * Two different unknowns, and they are not the same sentence. When the
+     * server ANSWERED and nothing claims this page, that is a fact worth
+     * saying: no blueprint covers it, here is how to claim it, and here is
+     * what this server does hold if you want one anyway.
+     *
+     * When the server could not answer - an older one with no /api/whose, or
+     * a request that failed - nothing is known about this page, so the old
+     * picker stands. It asks which of several this site is, which is a
+     * different question from whether any of them is.
+     */
+    if (answered) {
+      S.phase = 'unclaimed';
+      return renderGate();
+    }
+    if (S.projects.length > 1) {
+      S.phase = 'choose';
+      return renderGate();
+    }
   }
   S.phase = 'ready';
   S.data = S.BP ? await (await fetch(api('/api/blueprint'))).json() : payload;
@@ -2552,6 +2588,60 @@ function renderGate() {
              nothing at all (n-0236). -->
         ${serverRow('sm', { caption: true })}
         <p class="text-[11.5px] opacity-40">Then every blueprint under that folder is listed here.</p>
+      </div>`,
+      D.side,
+    );
+    return;
+  }
+  if (S.phase === 'unclaimed') {
+    /*
+     * prototype/screens/unclaimed-page.html, in the panel's own skin. Four
+     * blocks, and each one is there for a reason the drawing gives:
+     *
+     *  - the fact, with the ADDRESS named, because "no blueprint" without it
+     *    leaves you guessing which address was asked about, and a port or a
+     *    fragment is exactly what makes a claim miss
+     *  - how to claim it, since knowing you cannot review this page is only
+     *    half an answer
+     *  - `walkdown init`, for a page that belongs to nothing yet
+     *  - and what this server does hold: reachable in one step, never opened
+     *    for you, however many there are
+     */
+    const here = askedAbout ?? S.frameUrl ?? location.href;
+    put(
+      html`
+      <div class="flex h-full flex-col overflow-y-auto">
+        <div class="flex flex-col gap-3 p-4">
+          <div class="flex flex-col gap-1" data-testid="start.unclaimed">
+            <div class="text-[15px] font-semibold">No blueprint covers this page</div>
+            <p class="break-all font-mono text-[11px] opacity-60">${here}</p>
+          </div>
+
+          <div class="flex flex-col gap-1.5" data-testid="start.claim">
+            <p class="text-[11px] uppercase tracking-wider opacity-50">To review this page</p>
+            <p class="text-[12.5px] leading-relaxed opacity-70">Add it to a blueprint's storyboard
+              as a screen's <span class="font-mono text-[11px]">app</span> address, or set it as a
+              target's <span class="font-mono text-[11px]">base_url</span> — then walkdown knows
+              this page is part of that blueprint.</p>
+            <code class="rounded-box bg-base-200 px-2 py-1.5 text-[11px] break-all"
+              >walkdown claims --url ${here}</code>
+            <p class="text-[11px] leading-relaxed opacity-50">says which blueprint, if any, claims
+              an address today.</p>
+          </div>
+
+          <div class="flex flex-col gap-1.5" data-testid="start.new">
+            <p class="text-[11px] uppercase tracking-wider opacity-50">Or start one for it</p>
+            <code class="rounded-box bg-base-200 px-2 py-1.5 text-[11px]">walkdown init</code>
+          </div>
+        </div>
+
+        <div class="border-t border-dashed border-base-content/20 pt-3">
+          <p class="px-3.5 pb-1 text-[11px] uppercase tracking-wider opacity-50">Open one anyway</p>
+          ${blueprintsPane({ server: false })}
+          <p class="px-3.5 pb-3 text-[11px] leading-relaxed opacity-40">Opening one here reviews it
+            against this page — a deliberate act, never a default, and the same question whether
+            the folder holds one blueprint or six.</p>
+        </div>
       </div>`,
       D.side,
     );

@@ -1,0 +1,50 @@
+id: q-0257
+kind: question
+author: topher
+via: agent
+created: 2026-09-08T22:35:59.140Z
+anchor:
+  rule: panel.start.choose-a-blueprint
+status: open
+body: >-
+  With the unclaimed gate built, does choose-blueprint still have a state to
+  draw?
+
+
+  Building panel.start.unclaimed-page-says-so today moved the question the panel
+  asks. It now asks /api/whose at every count, so a page a blueprint claims
+  opens without a question, and a page nothing claims gets the new
+  unclaimed-page screen - which lists every blueprint the server holds, by name
+  and by its own description, one click from opening one.
+
+
+  That leaves the old "Which blueprint?" picker reachable in exactly one case:
+  the server could not answer at all - one too old to have /api/whose, or a
+  request that failed. I kept it for that case deliberately, because it is a
+  real one and because retiring a drawn screen is not mine to do.
+
+
+  But it is worth your eye, because the two screens now overlap. Every THEN on
+  this rule is met by the unclaimed gate: every listed blueprint offered with
+  its name and description, choosing one loads it and remembers it for that
+  origin, a page that declares its blueprint is never asked, nothing offered
+  that nobody wrote down, and the same list reachable later from the Blueprints
+  tab. What the picker still has that the gate does not is its question - it
+  asks WHICH of several this site is, which only makes sense if one of them is.
+
+
+  Three ways this could settle:
+
+
+  - leave it as built: the picker is the "walkdown cannot tell" fallback, and
+  this rule is judged against that case
+
+  - retire choose-blueprint and let the unclaimed gate be the only asking
+  screen, rewording this rule to match
+
+  - keep both as first-class states and draw the difference, if asking WHICH is
+  a question you want the panel to keep asking on its own
+
+
+  Filed rather than chosen: the first is what shipped because it changes nothing
+  you did not ask for, but which of the three is right is a design decision.

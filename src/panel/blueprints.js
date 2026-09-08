@@ -47,15 +47,27 @@ export function serverRow(size = 'xs', { caption = false } = {}) {
     </label>`;
 }
 
-export function blueprintsPane() {
+/*
+ * `server: false` draws the list without the address row above it. The
+ * unclaimed-page gate needs the blueprints this server holds and nothing
+ * else - it is already connected, and a box for changing the address in the
+ * middle of "nothing here claims your page" answers a question nobody asked.
+ * The list itself stays this one function, so a blueprint offered in one
+ * place is offered the same way in the other.
+ */
+export function blueprintsPane({ server = true } = {}) {
   return html`
     <div class="px-3.5 pb-2 pt-1">
-      <div class="mb-1 text-[11px] font-bold uppercase tracking-wider opacity-50">walkdown server</div>
-      ${serverRow('xs')}
+      ${
+        server
+          ? html`<div class="mb-1 text-[11px] font-bold uppercase tracking-wider opacity-50">walkdown server</div>
+      ${serverRow('xs')}`
+          : nothing
+      }
       ${
         S.servedRoot
           ? html`<p class="mt-1.5 text-[11px] leading-relaxed opacity-50" data-testid="start.folder">Serving
-            <span class="font-mono opacity-80">${S.servedRoot}</span> \u2014 every blueprint
+            <span class="font-mono break-all opacity-80">${S.servedRoot}</span> \u2014 every blueprint
             under it is listed below.</p>`
           : html`<p class="mt-1.5 text-[11px] leading-relaxed opacity-40">Not connected. Run
             <code>walkdown serve</code> in the folder holding your blueprints.</p>`

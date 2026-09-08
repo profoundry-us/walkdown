@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-08T20:59:59.870Z
 anchor:
   rule: panel.start.unclaimed-page-says-so
-status: open
+status: addressed
 body: >-
   Judged 2026-09-08 against a scratch copy; the panel opens a blueprint on a
   page nothing claims, and never says the page is unclaimed.
@@ -71,3 +71,42 @@ replies:
 
       So this waits on q-0243 rather than on engineering. Recording it here so a
       later reader does not mistake an unbuilt rule for a neglected one.
+  - author: topher
+    via: agent
+    created: 2026-09-08T22:35:22Z
+    body: >-
+      Built, against the screen promoted from q-0243.
+
+
+      The question is now asked at EVERY count. `/api/whose` was only consulted
+      behind projects.length > 1, which is why one blueprint opened without
+      asking - the count was standing in for evidence it never was. Now: a page
+      that declares its own blueprint short-circuits before anything is asked;
+      otherwise the panel asks whose page this is, and only a real match opens
+      anything.
+
+
+      When the server answers and nothing claims the page, the panel draws the
+      promoted screen in its own skin: start.unclaimed names the fact AND the
+      address (a port or a fragment is what makes a claim miss, and the old gate
+      named the panel own origin instead), start.claim gives both ways to claim
+      it plus `walkdown claims --url <address>`, start.new gives `walkdown
+      init`, and start.options lists what the server does hold - one click to
+      open one, never opened for you, whatever the count.
+
+
+      One case deliberately left with the old picker: a server too old to answer
+      /api/whose, or a request that fails. Nothing is then known about the page,
+      so "which of these is this site" is still the honest question. That keeps
+      panel.start.choose-a-blueprint meaningful rather than retiring a drawn
+      screen on my own initiative - see the question I am filing beside this.
+
+
+      Two checks in checks/panel.spec.js, both failing on the build before this
+      one: a page nothing claims gets the gate, names its address, opens no
+      board, and its list is one click from opening a blueprint; and a page a
+      blueprint claims - or one that declares its own - is never asked at all.
+
+
+      Not claiming a verdict for it. An independent judge is being sent at the
+      rule now.

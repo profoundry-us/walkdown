@@ -4,7 +4,7 @@ author: topher
 created: 2026-09-08T04:04:15.866Z
 anchor:
   rule: panel.start.unclaimed-page-says-so
-status: open
+status: addressed
 body: Add the note from q-0243 when building it.
 replies:
   - author: topher
@@ -23,3 +23,10 @@ replies:
       whether. When the panel is built against the new screen, the note from
       q-0243 - the address named, the two ways to claim it, the blueprints
       reachable but never opened for you - is what to fold in.
+  - author: topher
+    via: agent
+    created: 2026-09-08T22:36:36Z
+    body: "Folded in. The gate the panel now draws carries what q-0243 asked for:
+      the fact with the address named, both ways to claim it, walkdown init for
+      a page that belongs to nothing yet, and the blueprints this server holds -
+      reachable in one click and never opened for you."

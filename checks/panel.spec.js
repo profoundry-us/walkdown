@@ -1863,3 +1863,65 @@ test('the start gate says how to open a blueprint, and its address box actually 
   await expect(page.getByTestId('panel.bar')).toBeVisible();
   await expect(page.getByTestId('start.message')).toHaveCount(0);
 });
+
+/*
+ * The page nobody claims.
+ *
+ * Behind `projects.length > 1` this question was never put on the commonest
+ * first meeting with walkdown - one blueprint on the server, and an ordinary
+ * page you had browsed to - so the panel opened that blueprint's whole board
+ * over somebody else's site and said nothing (n-0256). The count was never
+ * evidence: one blueprint on a server says nothing about who this page
+ * belongs to.
+ *
+ * `bp=` empty is a page that declares nothing, which is what an ordinary site
+ * with the extension on looks like.
+ */
+test('a page no blueprint claims is told so, and nothing is opened over it', {
+  tag: '@rule:panel.start.unclaimed-page-says-so',
+}, async ({ page }) => {
+  await page.goto(fixtureFor({ bp: '' }));
+
+  const said = page.getByTestId('start.unclaimed');
+  await expect(said, 'the panel says the page is not covered').toBeVisible();
+  await expect(said).toContainText(/No blueprint covers this page/);
+  // Named, because a claim misses on a port or a fragment and "no blueprint"
+  // without the address leaves you guessing which one was asked about.
+  await expect(said, 'and names the address it asked about').toContainText(WD_ORIGIN);
+
+  // How to claim it, both ways.
+  await expect(page.getByTestId('start.claim')).toContainText(/storyboard|base_url/);
+  await expect(page.getByTestId('start.claim')).toContainText('walkdown claims --url');
+  await expect(page.getByTestId('start.new')).toContainText('walkdown init');
+
+  // Nothing was opened: no board, no rules, no sitting to start.
+  await expect(page.getByTestId('panel.rules-list')).toHaveCount(0);
+  await expect(page.getByTestId('panel.walk')).toHaveCount(0);
+
+  // And what the server does hold is one step away, not hidden.
+  const options = page.getByTestId('start.options');
+  await expect(options.locator('[data-pick]').first()).toBeVisible();
+  await options.locator('[data-pick]').first().click();
+  await expect(page.getByTestId('panel.rules-list'), 'opening one is one click').toBeVisible();
+});
+
+/*
+ * The other half of the same rule, and the half that keeps it from being
+ * merely annoying: a page walkdown DOES know about is never asked.
+ */
+test('a page a blueprint claims, or one that declares its own, is never asked', {
+  tag: '@rule:panel.start.unclaimed-page-says-so',
+}, async ({ page }) => {
+  // Claimed by address: the frame is the app surface the blueprint declares.
+  // The browser resolves that address to this suite's own server (see
+  // declaredResolvesHere), but the question asked of /api/whose is the
+  // declared one, which is the address the storyboard actually names.
+  await page.goto(fixtureFor({ bp: '', frame: `${DECLARED_ORIGIN}/stand-in/review` }));
+  await expect(page.getByTestId('panel.rules-list'), 'a claimed page opens').toBeVisible();
+  await expect(page.getByTestId('start.unclaimed')).toHaveCount(0);
+
+  // Declaring your own blueprint answers the question before it is asked.
+  await review(page);
+  await expect(page.getByTestId('panel.rules-list')).toBeVisible();
+  await expect(page.getByTestId('start.unclaimed')).toHaveCount(0);
+});
