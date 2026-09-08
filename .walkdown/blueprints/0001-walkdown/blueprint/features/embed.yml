@@ -61,12 +61,12 @@ stories:
 
       - id: embed.pin.follows-the-visible-surface
         origin: thread:n-0025
-        statement: A pin lands on the surface you are actually looking at - so when the design is fully covering the app, the pin goes on the design, and whichever surface is in front is the one taking the click.
+        statement: A pin lands on the surface you are actually looking at - so when the prototype is fully covering the app, the pin goes on the prototype, and whichever surface is in front is the one taking the click.
         signoff: [eng, product]
         screens: [review]
         steps:
           given:
-            - A screen with a design on file, the panel docked, pin mode on
+            - A screen with a prototype on file, the panel docked, pin mode on
           when:
             - Take the fade all the way to one surface and pin something
           then:
@@ -75,7 +75,7 @@ stories:
             - The control says which surface a pin would land on before you place one
             - Pins already on that screen show on the surface they were placed on
             - A surface with no walkdown running inside it cannot be pinned, and says so rather than letting the pin fall through to the page underneath
-          statement_hash: sha256:7c9b1c0e3da1
+          statement_hash: sha256:005ee8fa7a1e
 
       - id: embed.pin.own-skin
         origin: thread:n-0027

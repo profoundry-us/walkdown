@@ -4,7 +4,7 @@ author: topher
 created: 2026-09-07T14:17:04.168Z
 anchor:
   rule: panel.rules.lifecycle-legible
-status: open
+status: addressed
 body: >-
   Looks good, but remove this sentence from the rule, it is extraneous history
   that can be read in the relevant thread.
@@ -13,3 +13,10 @@ body: >-
   " - because a lifecycle drawn in its own vocabulary put a lone mark where
   every neighbouring row had three, and a rule whose only fault was not being
   built yet read as an alarm."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-08T17:49:59Z
+    body: "panel.rules.lifecycle-legible: the trailing clause arguing why a
+      lifecycle drawn in its own vocabulary matters is gone. The history stays
+      readable in this thread, which is where it belongs."

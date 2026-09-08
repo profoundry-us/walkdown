@@ -41,7 +41,7 @@ stories:
 
       - id: locations.default.in-repo-on-request
         origin: prd
-        statement: A project that wants walkdown's files in version control says so, and there are two answers worth offering - commit the spec and the threads that go with it, or commit everything including the runs and the evidence. Neither is the default and each is one flag, and what was chosen is remembered nowhere - it is read off the tree. The home sits under the repository's `.walkdown/`, and a `.gitignore` beside it is the spec standard - delete the file and everything is committed, write it back and it is not. Changing your mind is the same command again, and it changes the tree to say so, moving the home whole in either direction, and reports what is tracked now and what is not - because a tool that quietly adds a project's screenshots to its history has not been polite, and one that prints success without changing anything is worse.
+        statement: "A project that wants walkdown's files in version control asks for it, and there are two answers: commit the spec and the threads that go with it, or commit everything, runs and evidence included. Neither is the default, each is one flag, and the choice is written down nowhere - it is read off the tree, where the home under the repository's `.walkdown/` and the `.gitignore` beside it say which answer is in force. Changing your mind is the same command again: it moves the tree to match, and reports what git actually holds now rather than what walkdown meant to arrange."
         verify: [checks]
         signoff: [eng, product]
         steps:
@@ -56,7 +56,7 @@ stories:
             - Asked again with a different standard, the tree changes to say so - the file is written or removed, or the home moves whole with no record edited
             - The command reports what is tracked now, in words, and how to change its mind later
             - What is tracked is asked of git, not read off the ignore file walkdown wrote - a root .gitignore hiding .walkdown, a rule that does not reach a blueprint standing elsewhere, an ignore file somebody emptied, and a home that left with its files still in the index are each said outright, and lint errors wherever the tree's promise and git's answer disagree (n-0179, n-0180, n-0181)
-          statement_hash: sha256:d66c40335b64
+          statement_hash: sha256:3be1e35e0956
 
       - id: locations.default.skills-are-yours-by-default
         origin: prd

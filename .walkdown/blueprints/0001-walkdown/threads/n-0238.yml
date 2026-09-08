@@ -4,6 +4,13 @@ author: topher
 created: 2026-09-08T00:32:10.464Z
 anchor:
   rule: locations.default.in-repo-on-request
-status: open
+status: addressed
 body: This rule is working but is super-lengthy in wording. We should clean this
   up a LOT.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-08T17:50:00Z
+    body: locations.default.in-repo-on-request cut by roughly two thirds. It now
+      names the two answers — the spec with its threads, or everything including
+      runs and evidence — without re-arguing either.

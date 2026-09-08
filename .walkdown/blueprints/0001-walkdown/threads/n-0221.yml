@@ -4,5 +4,12 @@ author: topher
 created: 2026-09-07T14:02:54.083Z
 anchor:
   rule: embed.pin.follows-the-visible-surface
-status: open
+status: addressed
 body: This works, but I think the rule should say "prototype" instead of "design".
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-08T17:49:58Z
+    body: embed.pin.follows-the-visible-surface now says prototype rather than
+      design, in the statement and in the given step that named the surface.
+      Wording only — the rule asks for nothing new.

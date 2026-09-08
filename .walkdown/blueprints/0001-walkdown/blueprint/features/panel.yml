@@ -463,7 +463,7 @@ stories:
 
       - id: panel.rules.takes-you-there
         origin: thread:n-0031
-        statement: Asking for something in the panel moves the surface to it - opening a rule goes to the screen that rule is about, picking a screen goes to that screen, and choosing a blueprint that says nothing about this page goes to one it does.
+        statement: Asking for something in the panel moves the surface to it - opening a rule goes to the screen that rule is about, picking a screen goes to that screen, and switching to a blueprint that does not claim the page you are on takes you to a page that blueprint does claim.
         verify: [checks]
         signoff: [eng, product]
         screens: [review]
@@ -480,7 +480,7 @@ stories:
             - A screen with no URL on either surface still does the one thing it can - record that this page is that screen
             - Where a move means a real page load rather than a frame, it stays something you ask for on the rule rather than something opening a rule does to you
             - Whether a trip that means a real page load is taken or merely offered depends on whether walkdown survives it - framed, walkdown owns the frame and goes; docked by the extension it also goes, because the extension re-injects itself into the next page; docked by a script tag it offers a link instead, because navigating would unload the very script drawing the panel and leave you on the other site with no walkdown at all
-          statement_hash: sha256:bc2cef92cdd3
+          statement_hash: sha256:708e2433c9b5
 
       - id: panel.rules.one-pane-per-tab
         origin: thread:n-0032
@@ -589,7 +589,7 @@ stories:
 
       - id: panel.rules.lifecycle-legible
         origin: thread:n-0054
-        statement: A rule's lifecycle is read off the same marks every other rule wears, never off a shape of its own - designed, approved, built-but-unwalked, verified and failing are all legible from how much of the strip is filled - because a lifecycle drawn in its own vocabulary put a lone mark where every neighbouring row had three, and a rule whose only fault was not being built yet read as an alarm.
+        statement: A rule's lifecycle is read off the same marks every other rule wears, never off a shape of its own - designed, approved, built-but-unwalked, verified and failing are all legible from how much of the strip is filled.
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -603,7 +603,7 @@ stories:
             - An approved rule is legible from its signature marks alone, with no separate glyph for it
             - A rule waiting on the reviewer is warning-tinted and its badge names the work - sign or walk
             - Each row's tooltip spells the state out in words
-          statement_hash: sha256:64336fe46850
+          statement_hash: sha256:a0f0ad3cb747
 
       - id: panel.rules.search-the-list
         origin: thread:n-0108
@@ -699,7 +699,7 @@ stories:
 
       - id: panel.rules.owed-apart-from-said
         origin: walkdown
-        statement: What a rule owes you and how much is being said about it are two columns, never one string - a count of conversations is context and a badge naming work is a claim on your time, and run together in one colour they read as a single quantity.
+        statement: A rule shows two different things down the edge of the list, and they get a column each. What the rule owes you is a claim on your time. How many conversations it carries is only context. Run together as one string in one colour they read as a single number, which is neither of them.
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -711,7 +711,7 @@ stories:
             - The work badge and the thread count occupy their own columns, each aligned down the list
             - The thread count is drawn in plain ink rather than in the colour that means work is owed
             - A rule with only one of the two leaves the other column empty rather than shifting the row
-          statement_hash: sha256:a59ee3d3b67c
+          statement_hash: sha256:10189a32c600
 
       - id: panel.rules.marks-carry-over
         origin: walkdown
@@ -1093,7 +1093,7 @@ stories:
     rules:
       - id: panel.signoff.spec-pair-derived
         origin: thread:n-0052
-        statement: Which verdict pair a rule shows is derived from the ledger - a rule with no build evidence (no pass or fail from checks or judgment) offers Approve and Refine, and sign-off records, skips and blocks never count as build evidence.
+        statement: "Which pair of verdict buttons a rule shows is read off the ledger rather than chosen. A rule nothing has built yet - the ledger holds no pass and no fail for it, from checks or from judging - offers Approve and Refine, which sign off the rule itself; every other rule offers Pass and Fail, which judge the build. An approval is not build evidence, and neither is a skip or a block: they record what somebody decided, not that something was made."
         verify: [checks]
         signoff: [eng, product]
         screens: [rule-detail]
@@ -1106,7 +1106,7 @@ stories:
             - The first shows Approve and Refine, labelled as signing off the rule rather than judging a build
             - The second shows Pass and Fail
             - Approving a rule does not flip it to the Pass/Fail pair - only build evidence does
-          statement_hash: sha256:d195df6ea5d8
+          statement_hash: sha256:24cc94442cf4
 
       - id: panel.signoff.refine-requires-feedback
         origin: thread:n-0052
