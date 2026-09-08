@@ -1,0 +1,45 @@
+id: n-0245
+kind: note
+author: topher
+via: agent
+created: 2026-09-08T04:10:36.478Z
+anchor:
+  rule: panel.rules.steps-not-an-appendix
+  screen: rule-detail
+  element: detail.technical-disclosure
+status: open
+body: >-
+  The check source is unreachable for exactly the rules whose check IS the
+  specification. The disclosure that shows it is nested inside the steps block:
+  src/panel/rule-detail.js renders `steps ? html`...`: nothing`, and the
+  `detail.technical-disclosure` details element sits inside that branch. A rule
+  with no steps therefore has no Steps block, so no disclosure, so no way in the
+  panel to see the check that verified it.
+
+
+  Found by Topher on 2026-09-07 reading
+  status.acceptance.signoff-defaults-to-eng: the rule says checks passed and
+  offers nothing to look at.
+
+
+  Nothing is missing from the data. That rule's run record carries checks:
+  ["test/lint.test.js:207", "test/lint.test.js:281", "test/tiers.test.js:59"],
+  and GET /api/checks?rule=status.acceptance.signoff-defaults-to-eng returns the
+  source with line numbers today. Only the rendering path is gated.
+
+
+  It bites precisely where it hurts most. All eleven stepless rules are verify:
+  [checks], screenless, headless derivation law — judged by reading a test
+  rather than by looking at a screen — so the test is the only place their
+  behaviour is written down in detail, and it is the one thing the panel will
+  not show. See the sibling note on those eleven.
+
+
+  The fix is to move the disclosure out of the steps branch: it hangs off the
+  rule's check refs, not off its steps, and checkRefs(r) is already what decides
+  whether to draw it at all. This rule's own then-clause — "The check source
+  stays behind anchor detail.technical-disclosure until opened" — is true where
+  there are steps and vacuous where there are not, which is how it stayed
+  unnoticed. panel.rules.evidence-visible is the other rule with an interest
+  here: the evidence a rule stands on should be readable from the detail, and
+  for these eleven it is not.

@@ -1,0 +1,49 @@
+id: n-0246
+kind: note
+author: topher
+via: agent
+created: 2026-09-08T04:11:18.894Z
+anchor:
+  rule: status.acceptance.signoff-defaults-to-eng
+status: open
+body: >-
+  Eleven rules carry a statement and nothing else — no given, no when, no then.
+  Raised by Topher on 2026-09-07, reading this one.
+
+    ownership.drift.design-requests-required
+    viewer.identity.default-actor
+    status.derived.latest-wins
+    status.derived.stale-never-passes
+    status.derived.human-tier-distinct
+    status.evidence.excuse-must-argue
+    status.acceptance.signoff-defaults-to-eng
+    status.acceptance.approval-covers-only-the-unbuilt
+    status.acceptance.sent-back-is-a-fail
+    status.attention.blocked-queues
+    status.attention.names-the-role
+
+  Nothing requires steps: lib/schema.js does not mention the field and lint does
+  not ask for it, so this is a drafting habit rather than a rule being broken.
+  The eleven share one shape — verify: [checks], no signoff line, no screens —
+  headless derivation law, judged by reading a test rather than by looking at
+  anything. Whoever wrote them let the statement carry the whole rule and the
+  tagged test stand in for the when and the then.
+  status.acceptance.role-comes-from-the-run sits two rules below
+  signoff-defaults-to-eng in the same file, is exactly the same kind of rule,
+  and has steps — so the line is not a policy anybody drew.
+
+
+  What it costs: a statement is one sentence and the steps are where the edge
+  cases live. "A sign-off list defaults to engineering and always contains it"
+  does not say, in the spec, that the report corrects the list AND lint flags
+  the file — the statement says it in passing, and the two tagged tests are
+  where it is actually pinned down. A reader who wants that detail has to find
+  the test, which for these eleven is also the thing the panel will not show
+  them (n-0245).
+
+
+  Deciding what to do here is spec authorship, not a fix, so it wants a person:
+  write steps for all eleven, write them only where the statement is carrying
+  more than one claim, or say plainly that a checks-only headless rule may stand
+  on its statement and let the test be its steps — in which case that convention
+  belongs in blueprint/AGENTS.md, where the next author will read it.
