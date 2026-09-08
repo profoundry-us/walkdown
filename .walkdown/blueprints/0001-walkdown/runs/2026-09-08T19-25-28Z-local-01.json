@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-09-08T19-25-28Z-local-01",
+  "created": "2026-09-08T19:25:28Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "746260a",
+  "spec_hash": "sha256:1e8005428148",
+  "results": [
+    {
+      "rule": "panel.dock.no-pin-mid-fade",
+      "status": "pass",
+      "statement_hash": "sha256:a25c933fc24f",
+      "evidence": [
+        "runs/evidence/2026-09-08T19-25-28Z/probe-no-pin-mid-fade.txt",
+        "runs/evidence/2026-09-08T19-25-28Z/probe-no-pin-mid-fade.mjs",
+        "runs/evidence/2026-09-08T19-25-28Z/a-app-end-pin-armed.png",
+        "runs/evidence/2026-09-08T19-25-28Z/b-mid-fade-by-drag-reason-open.png",
+        "runs/evidence/2026-09-08T19-25-28Z/c-prototype-end-by-drag.png",
+        "runs/evidence/2026-09-08T19-25-28Z/d-app-end-by-button.png",
+        "runs/evidence/2026-09-08T19-25-28Z/e-one-step-off-the-end.png",
+        "runs/evidence/2026-09-08T19-25-28Z/f-prototype-end-by-button.png"
+      ],
+      "reasoning": "Judged on the review screen with the panel docked, against a scratch copy served on :4902 from inside the copy with its own home; I drove the bar with a real pointer in the browser and watched the page's error and console events throughout. Moving the fade off an end by DRAGGING the slider (100 to 50, and 0 to 13) closes Pin mode: the control goes disabled, and a pin mode that was already running is turned off rather than left armed - not just in the button's colour but in the framed surface, where hovering an element stopped drawing the embed's pin outline the moment the fade left the end and drew it again at an end. One arrow-key step off the end (99) closes it too, so the gate is the whole interval and not a wide middle. The reason is reachable by the only means anybody would use: the sentence rides on the wrapper, elementFromPoint at the control's centre returns SPAN[panel.pin-why] rather than the disabled button, and hovering there opens \"Slide fully to the prototype or the app first - half-faded, a pin has no surface to belong to\". It keeps up rather than describing the previous state: held open under a motionless pointer while the fade was driven from 0 to 30 and on to 100, the same tooltip rewrote itself to the mid-fade sentence and back to \"it lands on the app\". Mid-fade the control cannot be entered by clicking it or by pressing Enter or Space on it. Landing fully on either end opens pinning again, reached both ways - by dragging (to 0, then back to 100) and by pressing the Prototype and App end buttons, each time with the reason naming the surface the pin would land on. No uncaught error, unhandled rejection or console error appeared at any point, including a 100-step run of the slider. A Playwright replay of the same sequence, saved as the probe with this evidence, reproduces every state independently. One caveat a reader should have: the copy's blueprint carries base_url http://localhost:4700, so the surfaces inside the frames were served by the machine's other walkdown while the panel under judgement was the scratch server's own build on :4902; nothing was written through those frames, and the ghost reported itself ready, which is what let both ends open pinning at all."
+    }
+  ]
+}
