@@ -11,6 +11,38 @@ stories:
         origin: prd
         statement: An undesigned screen with no open design-request thread is flagged by lint; filing the request clears it.
         verify: [checks]
+        steps:
+          given:
+            - "A storyboard screen with no design - `prototype: null` - and no thread anchored to it"
+          when:
+            - The blueprint is linted
+          then:
+            - The screen is named as having no design and no open design-request thread
+            - A thread anchored to that screen clears it, because the request is now somewhere design will see it
+            - A thread that has ended stops clearing it - a request is open work or it is nothing
+            - "A proposal sketch is not a request: a drawing nobody asked design for routes nothing"
+            - A retired screen is exempt, because it describes something we stopped meaning
+          statement_hash: sha256:1d8bdc7a98b6
+
+  - id: ownership.authoring
+    title: A rule is written so it can be built from
+    statement: As a team, we can hand a rule to whoever implements it - a person or an agent - and have them build the right thing without asking us what we meant.
+    rules:
+      - id: ownership.authoring.steps-are-required
+        origin: walkdown
+        statement: Every rule carries given/when/then steps, and a rule without them is an error rather than a note - the steps are what a check is built from, so a statement standing alone leaves whoever implements it to invent the detail and whoever judges it with nothing to judge against.
+        verify: [checks]
+        steps:
+          given:
+            - A rule carrying a statement and no steps, and a retired rule carrying neither
+          when:
+            - The blueprint is linted
+          then:
+            - The rule with no steps is an error, named in the file and at the rule
+            - A rule whose steps are present is silent, whatever else is true of it
+            - "A retired rule is exempt: it describes something we stopped meaning, and owes nothing but an id that still resolves"
+            - The error says why - a check is built from the steps - so the fix is obvious to whoever reads it
+          statement_hash: sha256:a0e7cc9e7139
 
   - id: ownership.writes
     title: The server writes specification, never implementation

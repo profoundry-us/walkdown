@@ -11,11 +11,33 @@ stories:
         origin: prd
         statement: A rule's status per target is its latest relevant run result; later runs supersede earlier ones and targets never bleed into each other.
         verify: [checks]
+        steps:
+          given:
+            - A ledger holding two runs on one rule at one target, and a third on another target
+          when:
+            - Status is derived
+          then:
+            - The later run is the rule's status at that target; the earlier one is history, never a second opinion
+            - Later is decided by the time the run recorded, not by file order or the order they were read
+            - A verdict on one target says nothing about another - each target carries its own latest
+            - A run carrying verdicts but no date fills no cell at all, because nothing can order it
+          statement_hash: sha256:fa42dccb0338
 
       - id: status.derived.stale-never-passes
         origin: prd
         statement: A pass recorded against an older wording of the rule renders as stale, never as passing.
         verify: [checks]
+        steps:
+          given:
+            - A pass recorded against a statement that has since been reworded
+          when:
+            - Status is derived
+          then:
+            - The cell reads stale rather than passing - the words that were judged are not the words on the page
+            - Stale is never counted as verified anywhere the report adds up
+            - A fresh verdict against the current wording clears it
+            - "The old run is untouched: it still says what it said, about the wording it said it about"
+          statement_hash: sha256:9b16ab78cd04
 
       - id: status.derived.verdict-belongs-to-a-place
         origin: thread:q-0070
@@ -64,6 +86,16 @@ stories:
         origin: prd
         statement: An agent's verdict is evidence, never acceptance - a role's signature can only be given by a person signing for that role, and no amount of green from the checks or the agent tier supplies it.
         verify: [checks]
+        steps:
+          given:
+            - A rule whose checks and agent tiers both pass, with no signature from any role
+          when:
+            - Status is derived
+          then:
+            - The rule's verdict is still pending - evidence is not acceptance
+            - Every role in the sign-off list reads as not yet signed, however green the tiers are
+            - An agent's run never fills a role's signature, whoever it was recorded under
+          statement_hash: sha256:88708d3d86fa
 
   - id: status.evidence
     title: Every tier is assumed, and skipping one is a written decision
@@ -100,6 +132,16 @@ stories:
         origin: walkdown
         statement: An excuse is refused as thin when it is a shrug - lint warns on a reason shorter than a sentence, on one filed against something that is not a tier, and on a rule that excuses both tiers at once, the last being legitimate but never accidental.
         verify: [checks]
+        steps:
+          given:
+            - Three rules excusing a tier - one with a shrug for a reason, one filed against a word that is not a tier, one excusing both tiers
+          when:
+            - The blueprint is linted
+          then:
+            - "A reason shorter than a sentence is named as thin: an excuse nobody can argue with is not an excuse"
+            - An excuse filed against something that is not a tier is an error - it removes nothing while reading as though it did
+            - A rule excusing both tiers is flagged though it may be right, because then nothing verifies it but a signature and that must be a decision somebody made
+          statement_hash: sha256:d4310da96c28
 
   - id: status.acceptance
     title: Acceptance is a set of people, not a kind of evidence
@@ -109,6 +151,17 @@ stories:
         origin: walkdown
         statement: A rule's sign-off list defaults to engineering and always contains it - somebody has to own that the thing was built right, and a rule nobody accepts is a rule nobody owns - so a list that omits eng is corrected in the report and flagged by lint as a file saying something the report will not do.
         verify: [checks]
+        steps:
+          given:
+            - A rule with no signoff line, and a rule whose signoff names only product
+          when:
+            - Status is derived, and the blueprint is linted
+          then:
+            - Both rules require an engineering signature - the derived list always contains eng
+            - "The file that omits eng is flagged: it describes a rule that does not exist"
+            - An empty list is flagged too, because omitting the field already means [eng]
+            - The report is never silently repaired and forgotten - the reader of the file is the one being misled
+          statement_hash: sha256:34a8a5bebfd8
       - id: status.acceptance.role-comes-from-the-run
         origin: walkdown
         statement: Acceptance is derived per role from the roles the run was recorded under, never from whoever the signer is today - people change teams and a signature does not stop meaning what it meant - and a run recorded before roles existed reads as engineering's, because the person signing a walkdown was historically the developer who built it.
@@ -127,10 +180,31 @@ stories:
         origin: walkdown
         statement: A role's approval of the wording discharges its queue while the rule is unbuilt, and stops covering it the moment the ledger holds a build to judge - approving a spec is not judging a build.
         verify: [checks]
+        steps:
+          given:
+            - A rule with no build verdict in the ledger, approved by a role
+          when:
+            - A build verdict is recorded, and status derived again
+          then:
+            - While it is unbuilt the approval discharges that role's queue - the wording is agreed and nobody is waiting
+            - "The rule still reads as unbuilt: approving a spec is not evidence that anything was built"
+            - The moment the ledger holds a build to judge, the approval stops covering it and the role is queued again
+            - Rewording the statement makes an approval stale, like any other verdict
+          statement_hash: sha256:178e50e23abc
       - id: status.acceptance.sent-back-is-a-fail
         origin: walkdown
         statement: A signer who looked and said not yet fails the rule's verdict rather than leaving it pending, and is not queued back to themselves - what the rule owes them is a fix, not another look.
         verify: [checks]
+        steps:
+          given:
+            - A rule a signer looked at and sent back
+          when:
+            - Status is derived
+          then:
+            - The rule's verdict is fail rather than pending - somebody looked and said not yet
+            - "It is not queued back to the signer who sent it: what it owes them is a fix, not another look"
+            - A fresh verdict is what clears it, so the fix is what moves the rule
+          statement_hash: sha256:e4eefb4e58a4
       - id: status.acceptance.verdict-needs-every-role
         origin: walkdown
         statement: A rule passes only when every evidence tier it asks for holds a current pass and every role it names has signed - one role's signature never speaks for another's, and the human walkdown is not counted a second time as a tier.
@@ -237,11 +311,32 @@ stories:
         origin: prd
         statement: Attention items are split by who is blocked - people get judge items, one for each role a rule is still waiting on a signature from, plus verify and answer items; agents get address, incorporate and cover items, cover being a rule that demands checks while no check claims it, which is an agent's work to write and never a person's to judge.
         verify: [checks]
+        steps:
+          given:
+            - A board holding rules owed signatures, open threads, and a rule demanding checks that no check claims
+          when:
+            - Attention is derived
+          then:
+            - People get judge items - one for each role a rule still waits on - plus verify and answer items
+            - Agents get address, incorporate and cover items
+            - "A cover item is a rule demanding checks while no check claims it: an agent writes the check, and it is never a person's to judge"
+            - Every item names who is blocked, so nothing sits in both queues at once
+          statement_hash: sha256:d51f57ea2c48
 
       - id: status.attention.names-the-role
         origin: walkdown
         statement: A judge item says which role a rule is waiting on rather than merely that it waits on a person - a queue two people both scroll past is a queue nobody works.
         verify: [checks]
+        steps:
+          given:
+            - A rule still waiting on signatures from two roles
+          when:
+            - The queue is read
+          then:
+            - Each judge item names the role it waits on, not merely that a person is owed something
+            - Two roles owed on one rule are two items, so neither reads as somebody else's job
+            - The word it names is the role from the sign-off list, so the queue and the rule cannot disagree
+          statement_hash: sha256:7320bf5dc8fd
 
   - id: status.attribution
     title: A record says whose judgment it was, and keeps saying so

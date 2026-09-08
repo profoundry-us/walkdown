@@ -23,6 +23,10 @@ notes), and the runs ledger. The blueprint is the single source of truth for
   design hasn't drawn: set `prototype: null` on the storyboard screen, put a
   sketch under `proposals/` if a picture helps, and file a design-request
   thread anchored to the screen. Lint enforces this routing.
+- **Every rule carries steps.** given/when/then is what a check gets built
+  from, so a statement standing alone leaves the detail to be invented and the
+  judgment with nothing to judge against. Lint errors on a rule without them;
+  only a retired rule is exempt.
 - The PRD is product's surface. Rules you introduce get
   `origin: thread:<id>` (or `walkdown`) so the drift report stays honest.
 

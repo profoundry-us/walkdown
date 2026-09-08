@@ -256,7 +256,24 @@ test('the in-repo example blueprint lints clean (without runner)', () => {
  * because a rule carrying three mistakes at once cannot show which finding
  * belongs to which.
  */
-function ruleHome(dir, body) {
+/*
+ * Every fixture rule carries steps, because a rule without them is now an
+ * error in its own right (a check is built FROM the given/when/then) and one
+ * fixture per mistake is the whole point of these homes - a missing-steps
+ * error in the middle of a signoff test says nothing about signoff. The rule
+ * with no steps has its own fixture, below.
+ */
+const FIXTURE_STEPS = [
+  '        steps:',
+  '          given:',
+  '            - A visitor on the page',
+  '          when:',
+  '            - They do the thing',
+  '          then:',
+  '            - The thing is done',
+];
+
+function ruleHome(dir, body, { steps = true } = {}) {
   const h = declaredHome(dir);
   mkdirSync(join(h.spec, 'features'), { recursive: true });
   writeFileSync(join(h.spec, 'walkdown.yml'), 'project: fixture\n');
@@ -269,12 +286,14 @@ function ruleHome(dir, body) {
       '    rules:',
       '      - id: demo.main.thing',
       '        statement: The visitor can do the thing.',
+      ...(steps ? FIXTURE_STEPS : []),
       ...body,
     ].join('\n'),
   );
   return h;
 }
-const ruleFixture = (dir, body) => lint(load(ruleHome(dir, body)), { checks: false }).findings;
+const ruleFixture = (dir, body, opts) =>
+  lint(load(ruleHome(dir, body, opts)), { checks: false }).findings;
 const REAL_EXCUSE = 'The control is the browser toolbar, which no tool an agent drives can reach.';
 
 test('a signoff list that omits eng is flagged as a file that lies @rule:status.acceptance.signoff-defaults-to-eng', () => {
@@ -349,6 +368,33 @@ test('a rule excusing both tiers is flagged, legitimately @rule:status.evidence.
   assert.equal(findings.length, 1, JSON.stringify(findings));
   assert.equal(findings[0].level, 'warn');
   assert.match(findings[0].message, /both tiers are excused/);
+});
+
+test('a rule with no steps is an error, because a check is built from them @rule:ownership.authoring.steps-are-required', () => {
+  // Eleven rules had drifted into statement-only before anybody noticed, all
+  // of them checks-only derivation law - exactly where the detail matters
+  // most, and exactly where the panel then shows no check either (n-0246).
+  const bare = ruleFixture(join(root, 'no-steps'), [], { steps: false }).filter(
+    (x) => x.category === 'schema',
+  );
+  assert.equal(bare.length, 1, JSON.stringify(bare));
+  assert.equal(bare[0].level, 'error');
+  assert.match(bare[0].message, /no steps/);
+
+  // With them, silence.
+  assert.deepEqual(
+    ruleFixture(join(root, 'with-steps'), []).filter((x) => x.category === 'schema'),
+    [],
+  );
+
+  // A retired rule owes nothing but a resolvable id: it describes something
+  // we stopped meaning, so it is registered and then left alone.
+  assert.deepEqual(
+    ruleFixture(join(root, 'retired-no-steps'), ['        retired: We stopped meaning this, in a whole sentence.'], {
+      steps: false,
+    }).filter((x) => x.category === 'schema'),
+    [],
+  );
 });
 
 test('verify no longer knows the word human @rule:status.acceptance.signoff-defaults-to-eng', () => {
