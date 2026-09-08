@@ -1,0 +1,62 @@
+{
+  "run_id": "2026-09-08T19-48-49Z-local-01",
+  "created": "2026-09-08T19:48:49Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "5111573",
+  "spec_hash": "sha256:1e8005428148",
+  "results": [
+    {
+      "rule": "locations.default.in-repo-on-request",
+      "status": "pass",
+      "statement_hash": "sha256:3be1e35e0956",
+      "evidence": [
+        "runs/evidence/2026-09-08T19-48-49Z/in-repo-on-request.txt",
+        "runs/evidence/2026-09-08T19-48-49Z/probe-in-repo-on-request.sh"
+      ],
+      "reasoning": "Judged headless in eight throwaway git repositories, each with its own WALKDOWN_HOME and HOME, never the real one. --commit spec puts the home under .walkdown/ laid out as every home is, writes .gitignore beside it keeping runs/evidence/drafts out, and leaves both that file and config.yml committable (git check-ignore exits 1 on them); the config names the spec by the relative path .walkdown/blueprints/0001-a/blueprint. --commit all writes no .gitignore at all, and no --commit puts nothing in the tree. Nothing anywhere records the choice: it is read back off the tree. Changing my mind spec -> all -> none -> spec removed the ignore file, moved the home whole to ~/.walkdown and back, and a marker file I had dropped in runs/ plus the blueprint's walkdown.yml came through all four moves byte-identical, so no record was edited. Every report names what is tracked in words and how to change it later, and says it asked git. I then tried to break the four confusions the last step names: a root .gitignore hiding .walkdown, an emptied .walkdown/.gitignore, a rule that no longer reaches records moved out to specs/elsewhere/runs, and a home that left with six files still in git's index. The first three are each said outright by `where` and are errors from `lint`; the fourth is reported by the move itself ('6 file(s) git tracked under the .walkdown that left are now deletions to commit'). I could not find a tree whose promise and git's answer disagreed without walkdown saying so."
+    },
+    {
+      "rule": "locations.default.skills-are-yours-by-default",
+      "status": "pass",
+      "statement_hash": "sha256:66bff6c2346e",
+      "evidence": [
+        "runs/evidence/2026-09-08T19-48-49Z/skills-and-pointer.txt",
+        "runs/evidence/2026-09-08T19-48-49Z/probe-skills-and-pointer.sh"
+      ],
+      "reasoning": "Exercised with HOME pointed at a throwaway directory, so I could watch where installs actually land. init put the skills in $HOME/.claude/skills whether the spec was committed (--commit spec) or not (no flag); in both cases the repository gained nothing skill-shaped - `git status` showed only .walkdown/ and CLAUDE.md, and a find for '.claude' or '*skill*' in the tree came back empty. The report says so in the same words the rule does. Five of the six packaged skills install; walkdown-sitting does not, and lib/init.js's SHIPPED list gives the reason the rule gives - it drives tools/sitting.mjs, a harness that exists only in walkdown's own repository. `walkdown skills` with no destination refused rather than picked: it listed the two candidate directories, exited 2 with 'Nothing written: there is no terminal to ask, and this never picks for you', and I confirmed neither $HOME/.claude/skills nor a repository .claude existed afterwards. --into <dir> then wrote exactly there. A skill file I edited by hand was reported '! kept (yours differs — --force to overwrite)' and my line survived; --force updated it, which is somebody asking. Finally I put a copy in a repository with `walkdown skills --project` and then ran init --commit none: the home left, the pointer walkdown had made was removed, and the repository's skills copy was untouched - leaving does not take away a copy somebody asked for."
+    },
+    {
+      "rule": "locations.pointer.placed-where-agents-read",
+      "status": "pass",
+      "statement_hash": "sha256:e10f6a000d16",
+      "evidence": [
+        "runs/evidence/2026-09-08T19-48-49Z/skills-and-pointer.txt",
+        "runs/evidence/2026-09-08T19-48-49Z/probe-skills-and-pointer.sh"
+      ],
+      "reasoning": "Five fresh repositories, initialised with the spec committed. With no agent-instruction file, walkdown created CLAUDE.md holding the one paragraph between walkdown:begin/end markers, and --commit all did the same. With exactly one such file the pointer was appended to it and no second file appeared: AGENTS.md in one repository, GEMINI.md in another (the candidate list in lib/init.js is CLAUDE.md, AGENTS.md, GEMINI.md, .github/copilot-instructions.md, CONVENTIONS.md, root-only and existing-files-only), and in both cases `ls` afterwards showed no new file competing with it and the file's own prior content intact above the block. With both AGENTS.md and CLAUDE.md present, walkdown wrote neither and reported '? several agent files — `walkdown pointer --into <file>`  CLAUDE.md, AGENTS.md', naming them all; both files were byte-unchanged and no third was made, and `walkdown pointer --into CLAUDE.md` then settled it. An uncommitted spec got no pointer at all - `git status` in that repository was empty, and the report said so explicitly rather than silently."
+    },
+    {
+      "rule": "ownership.authoring.steps-are-required",
+      "status": "pass",
+      "statement_hash": "sha256:a0e7cc9e7139",
+      "evidence": [
+        "runs/evidence/2026-09-08T19-48-49Z/steps-are-required.txt",
+        "runs/evidence/2026-09-08T19-48-49Z/probe-steps-are-required.sh"
+      ],
+      "reasoning": "Built a throwaway blueprint outside the repository holding, in one feature file, a rule with full steps, a rule with a statement and no steps, and a retired rule with neither. Lint made the stepless rule an error, not a warning, and named both the file and the rule: '[schema] blueprint/features/demo.yml › demo.one.no-steps: rule has no steps — given/when/then is what a check gets built from, and a statement alone leaves it to be invented'. The --json output carries the same at level 'error' with file and subject fields, so it is named in the file and at the rule in both surfaces, and the message says why, so the fix is obvious. The rule carrying steps was silent throughout. I tried to slip past it with an empty `steps:` key - still an error - and with a steps block holding only `given`, which lint passes; that matches the rule as written ('a rule whose steps are present is silent, whatever else is true of it') rather than contradicting it. Both retired rules stayed silent, the bare one and one I gave a statement but no steps, and both still resolve in `status --retired`. Restoring the steps dropped lint to zero errors."
+    },
+    {
+      "rule": "status.acceptance.signature-names-its-signer",
+      "status": "pass",
+      "statement_hash": "sha256:d1c11a7e70ed",
+      "evidence": [
+        "runs/evidence/2026-09-08T19-48-49Z/signature-names-its-signer.txt",
+        "runs/evidence/2026-09-08T19-48-49Z/probe-signature-names-its-signer.sh"
+      ],
+      "reasoning": "Judged through the shipped write door (POST /api/walkdowns in lib/api.js, which is what the panel posts to) against a throwaway blueprint in its own home, no server involved. A walk recorded by 'topher' signing eng for themselves and product for 'dana' beside them wrote one signature per role, each naming its signer, and `status` derived 'eng ✓ signed by topher' and 'product ✓ signed by dana, recorded by topher' - product's acceptance counted for the person who gave it, not the person who typed it. The record holds no second field saying a proxy happened: the only extra field the ledger gained was the signatures array, and 'recorded by' is derived from signer != actor rather than stored. The driver stayed the actor and a caller could not change that - posting actor:'dana' still filed the record under topher. The all-actor run reads as the ordinary case, with no 'recorded by' on either role. Two hand-written legacy records behaved as the rule says: one carrying roles [eng, product] and no signatures read as morgan accepting both, and one carrying neither read as morgan signing eng alone. Break attempts at the door were refused with reasons: 'agent' as a signer, an unknown role 'qa', two eng signatures on one walkdown, a blank signer, and a non-array signatures field. 'claude' and 'Claude Code' were accepted as signers, which surprised me, but the machine gate this rule inherits folds case on the exact word 'agent' by deliberate design (lib/vocab.js) and this rule's statement does not claim more than that, so I did not count it against it."
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+id: q-0251
+kind: question
+author: topher
+via: agent
+created: 2026-09-08T19:56:53.031Z
+anchor:
+  rule: status.acceptance.signature-names-its-signer
+status: open
+body: >-
+  The machine gate refuses "agent" in any casing, and nothing else. Is a
+  signature from "claude" one we want to take?
+
+
+  Found while judging this rule on 2026-09-08 (evidence
+  runs/evidence/2026-09-08T19-48-49Z/signature-names-its-signer.txt). The rule
+  itself holds - every refusal it names was earned through the shipped door:
+  "agent" as signer, an unknown role, two eng signatures, a blank signer, a
+  non-array signatures field, and a caller trying to name somebody else as
+  actor.
+
+
+  The observation sits beside it. lib/vocab.js folds case on the exact word
+  "agent" and says so on purpose - "folding only, never substring" - so "Agent"
+  and "AGENT" are refused and "claude", "Claude Code", "copilot" and "assistant"
+  are accepted as the name of a person who signed. Nothing in this statement
+  claims otherwise, which is why I judged it a pass rather than filing a
+  failure.
+
+
+  Whether that is the line you want is yours. Two shapes if it is not: a small
+  list of names the gate refuses the way it refuses "agent", or the harder
+  version - a signature has to match an identity the machine actually declares,
+  so any name nobody configured is refused whatever it is. The second is a
+  bigger change and would land on the identity rules rather than here.
+
+
+  Worth saying what the current line already protects: an agent cannot reach
+  this door under its own name, and it cannot name a signer by passing arguments
+  - the actor is stamped from the machine. So this is about a machine configured
+  with a misleading identity, not about an agent slipping past the gate.
