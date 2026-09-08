@@ -6101,11 +6101,15 @@
          * one that mattered most: the panel drew the resulting thread under a
          * name an inch above its own composer offering "set your name...".
          *
-         * The panel is the thing that knows who you are, so the panel names the
-         * pin. Refusing here rather than in the embed keeps the embed free of
-         * an identity it has no way to ask for.
+         * That reading of the message is gone: since n-0139/n-0142 no name
+         * arrives from outside at all - the door takes no author, and the
+         * server records under its own resolved identity - so a fallback to
+         * whoAmI() was standing in for a field nobody sends and nothing reads.
+         * What is left is the GATE, which still earns its place: a pin is
+         * attributed work, and the panel is the thing that can tell you your
+         * machine has no name on it before you write one (n-0121).
          */
-        const pinAuthor = (msg.author ?? '').trim() || whoAmI();
+        const pinAuthor = whoAmI();
         if (!pinAuthor || pinAuthor === 'agent') {
           toast(
             'A pin is recorded under a person\u2019s name \u2014 set it in Settings (the gear).',
@@ -6120,7 +6124,6 @@
           body: JSON.stringify({
             kind: msg.kind,
             body: msg.body,
-            author: pinAuthor,
             anchor: {
               ...(msg.element && { element: msg.element }),
               // The spot within the element, and the spot on the surface: both

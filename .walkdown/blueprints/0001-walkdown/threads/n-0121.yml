@@ -101,3 +101,13 @@ replies:
       '').trim() || whoAmI()`, and that fallback is now dead weight since the
       body's author is never read. Deleting it is safe; whether "an emptied
       field survives" should mean something else now is yours to say.
+  - author: topher
+    via: agent
+    created: 2026-09-08T18:10:35Z
+    body: "The dead half of your decision is gone: the pin relay no longer reads an
+      author off the message or falls back to whoAmI() for one, and it no longer
+      sends an author at all - the door takes none. What is left there is the
+      gate, which still earns its place, because the panel is the thing that can
+      tell you your machine has no name on it before you write one. Left open,
+      still yours: what 'an emptied field is an answer' should mean now that
+      identity is the server's rather than a field in the panel."
