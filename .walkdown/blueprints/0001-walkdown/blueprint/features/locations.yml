@@ -60,7 +60,7 @@ stories:
 
       - id: locations.default.skills-are-yours-by-default
         origin: prd
-        statement: The agent procedures walkdown ships install into the person's own skills directory, where they work in every project on the machine and add nothing to any repository - and a project that commits its spec gets them committed beside it instead, because skills follow the spec for the same reason its runs and threads do. A procedure whose harness the receiving project does not have is not shipped at all.
+        statement: The agent procedures walkdown ships install into the person's own skills directory, where they work in every project on the machine and add nothing to any repository - and committing the spec does not change that, because a committed skill is a copy of walkdown's own source that walkdown cannot keep right afterwards. A team that wants them shared asks for it outright, and that is the only way one reaches a repository. A procedure whose harness the receiving project does not have is not shipped at all.
         verify: [checks]
         signoff: [eng, product]
         steps:
@@ -69,11 +69,12 @@ stories:
           when:
             - The skills are installed, either by init or on their own
           then:
-            - With nothing committed they land in the person's own directory and the tree gains nothing
-            - With the spec committed they land beside it, to arrive with a clone
+            - They land in the person's own directory and the tree gains nothing, whether or not the spec is committed
+            - Setting up does not put a copy in the repository, and leaving does not take one away - a copy there is one somebody asked for
+            - Installing them on their own asks where they should go rather than picking, and writes nothing to a place nobody named
             - A skill that depends on a harness only walkdown's own repository has is not among them
             - A copy the person has edited is kept and reported rather than overwritten
-          statement_hash: sha256:62223922d07f
+          statement_hash: sha256:66bff6c2346e
 
       - id: locations.default.one-home-per-blueprint
         origin: thread:n-0124

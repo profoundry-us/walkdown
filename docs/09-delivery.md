@@ -88,11 +88,21 @@ machine and add nothing to any repository.
     walkdown skills                 # yours, every project
     walkdown skills --project       # ./.claude/skills, committed and shared
 
-`walkdown init` picks between those the same way it picks everywhere else —
-**skills follow the spec.** A spec committed to the repository is something the
-team shares, so the procedures for working on it should arrive with a clone; a
-spec kept outside is one person's, and so are their skills. One decision, not
-two.
+`walkdown init` always takes the first, whatever the spec did. Skills used to
+follow the spec — a committed spec is shared, so the procedures for working on
+it should arrive with a clone — and the argument is sound, but the coupling was
+not: **a committed skill is a vendored copy of walkdown's own source**, and
+walkdown cannot keep it right after writing it. It goes stale on the next
+upgrade with nothing to say so; this repository needs a Highball check to catch
+the same drift in its own copies. The bills came in one at a time — skills left
+staged in a repository just told it gets nothing (n-0166), two same-named sets
+one of which is stale (n-0184), copies that are symlinks the committed path
+does not model (n-0197) — and n-0239 decided it.
+
+A team that wants them committed still gets them, by asking: `walkdown skills
+--project`. What is gone is init deciding it on their behalf out of an
+unrelated answer — and, with it, init deleting them again on the way out, since
+a copy there is now one somebody chose.
 
 Not every skill ships. `walkdown-sitting` drives a harness that exists only in
 walkdown's own repository, and a skill whose first command is missing is worse

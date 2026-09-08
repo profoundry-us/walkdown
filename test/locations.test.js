@@ -732,12 +732,16 @@ test('tightening to spec says what git still tracks, and leaving takes the skill
     // Nothing new under those directories is staged, but the two stay in the index.
     assert.ok(git('ls-files').includes('.walkdown/blueprints/0001-repo/runs/r.json'));
 
-    assert.ok(existsSync(join(repo, '.claude', 'skills', 'walkdown-judge', 'SKILL.md')), 'skills went with the spec');
+    // A committed spec is not a reason to vendor the procedures beside it
+    // (n-0239): they are the person's, and the repository stays clean of them.
+    assert.equal(existsSync(join(repo, '.claude')), false, 'skills did not follow the spec in');
+
+    // And a copy somebody put there on purpose is theirs, so leaving the
+    // repository does not take it away - init never wrote it.
+    mkdirSync(join(repo, '.claude', 'skills', 'walkdown-judge'), { recursive: true });
     writeFileSync(join(repo, '.claude', 'skills', 'walkdown-judge', 'SKILL.md'), 'mine now\n');
-    const left = walkdown(s.home, ['init', '--commit', 'none'], repo);
-    assert.ok(!existsSync(join(repo, '.claude', 'skills', 'walkdown-sitting')), 'an unedited skill leaves with the spec');
+    walkdown(s.home, ['init', '--commit', 'none'], repo);
     assert.equal(readFileSync(join(repo, '.claude', 'skills', 'walkdown-judge', 'SKILL.md'), 'utf8'), 'mine now\n');
-    assert.match(left, /kept \(edited.*walkdown-judge/, left);
     assert.ok(!existsSync(join(repo, '.walkdown')));
     const personal = readFileSync(join(s.home, 'config.yml'), 'utf8');
     assert.match(personal, /^projects:\n  - /m, personal);

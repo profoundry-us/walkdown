@@ -21,6 +21,16 @@ import { runChecks } from '../lib/run-cmd.js';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-initrun-'));
 
+/*
+ * The personal skills directory, per suite. Skills go to the person now
+ * whatever the spec did, so every scaffold here reaches one - and the shared
+ * `tmp/test-home/skills` is a directory that outlives a run, which made these
+ * cases pass or fail on what an earlier run happened to leave in it.
+ */
+const PERSONAL_SKILLS = join(root, 'personal-skills');
+process.env.WALKDOWN_SKILLS_DIR = PERSONAL_SKILLS;
+const skillAt = (name, at = PERSONAL_SKILLS) => join(at, name, 'SKILL.md');
+
 /* Every path in a tree, so a test can say "and nothing else appeared". */
 const tree = (dir, prefix = '') =>
   readdirSync(dir, { withFileTypes: true })
@@ -73,10 +83,14 @@ test('init scaffolds a lint-clean blueprint with agent conventions', () => {
   for (const path of [rel(proj, 'walkdown.yml'), rel(proj, 'AGENTS.md'), 'CLAUDE.md'])
     assert.equal(actionOf(results, path), 'created', path);
   for (const skill of ['walkdown-judge', 'walkdown-incorporate', 'walkdown-formulate']) {
-    assert.equal(actionOf(results, `.claude/skills/${skill}/SKILL.md`), 'created', skill);
-    const content = readFileSync(join(proj, '.claude', 'skills', skill, 'SKILL.md'), 'utf8');
+    assert.equal(actionOf(results, skillAt(skill)), 'created', skill);
+    const content = readFileSync(skillAt(skill), 'utf8');
     assert.match(content, new RegExp(`^---\\nname: ${skill}\\ndescription: .+`));
   }
+  // And not into the repository, even though this spec is committed: skills
+  // are the person's, and a committed one is a vendored copy walkdown cannot
+  // keep right afterwards (n-0239).
+  assert.equal(existsSync(join(proj, '.claude')), false, 'the repository got no skills');
   assert.match(readFileSync(join(homeSpec(proj), 'walkdown.yml'), 'utf8'), /project: fresh/);
   // The pointer names wherever the spec actually went, which is not
   // necessarily inside the repository any more.
@@ -109,20 +123,17 @@ test('init is idempotent: rerun no-ops, customizations kept, --force updates own
   );
 
   writeFileSync(join(homeSpec(proj), 'walkdown.yml'), 'project: customized\n');
-  writeFileSync(join(proj, '.claude', 'skills', 'walkdown-judge', 'SKILL.md'), 'customized');
+  writeFileSync(skillAt('walkdown-judge'), 'customized');
   const third = scaffold(proj, spec(proj));
   assert.equal(actionOf(third, rel(proj, 'walkdown.yml')), 'kept');
-  assert.equal(actionOf(third, '.claude/skills/walkdown-judge/SKILL.md'), 'kept-differs');
-  assert.equal(
-    readFileSync(join(proj, '.claude', 'skills', 'walkdown-judge', 'SKILL.md'), 'utf8'),
-    'customized',
-  );
+  assert.equal(actionOf(third, skillAt('walkdown-judge')), 'kept-differs');
+  assert.equal(readFileSync(skillAt('walkdown-judge'), 'utf8'), 'customized');
 
   const forced = scaffold(proj, { ...spec(proj), force: true });
   assert.equal(actionOf(forced, rel(proj, 'walkdown.yml')), 'kept'); // user-owned: --force never touches it
-  assert.equal(actionOf(forced, '.claude/skills/walkdown-judge/SKILL.md'), 'updated');
+  assert.equal(actionOf(forced, skillAt('walkdown-judge')), 'updated');
   assert.match(
-    readFileSync(join(proj, '.claude', 'skills', 'walkdown-judge', 'SKILL.md'), 'utf8'),
+    readFileSync(skillAt('walkdown-judge'), 'utf8'),
     /^---\nname: walkdown-judge/,
   );
   assert.equal(
@@ -334,10 +345,17 @@ test('words left on the marker\'s line are kept, not swallowed @rule:locations.p
 
 /*
  * Skills are procedures a person carries between projects, not records this
- * project owns - so by default they go to the person, and the repository of
- * somebody merely trying walkdown gains nothing at all.
+ * project owns - so they go to the person, and the repository of somebody
+ * merely trying walkdown gains nothing at all.
+ *
+ * They used to follow the spec: committed spec, committed procedures, so a
+ * clone brought them. What that actually bought was a vendored copy of
+ * walkdown's own source sitting in somebody's repository, going stale on the
+ * next upgrade with nothing to say so (n-0166, n-0184, n-0197, and n-0239
+ * which decided it). A team that wants them committed asks: `walkdown skills
+ * --project`.
  */
-test('skills follow the spec: outside it by default, committed when it is @rule:locations.default.skills-are-yours-by-default', () => {
+test('skills are the person\'s, whatever the spec did @rule:locations.default.skills-are-yours-by-default', () => {
   const home = join(root, 'skills-home');
   const proj = join(root, 'skills-out');
   mkdirSync(proj, { recursive: true });
@@ -348,12 +366,14 @@ test('skills follow the spec: outside it by default, committed when it is @rule:
   assert.equal(existsSync(join(proj, '.claude')), false, 'and the repository did not');
   assert.deepEqual(tree(proj), [], 'nothing - not even a pointer, which is a committed spec\'s (n-0161)');
 
-  // Committed spec, committed procedures - they should arrive with a clone.
+  // And a committed spec changes none of that: the repository gets the spec,
+  // and the procedures stay where they work in every project.
   const shared = join(root, 'skills-in');
   mkdirSync(shared, { recursive: true });
   const results = scaffold(shared, { specDir: join(shared, 'blueprint'), commit: 'spec' });
-  assert.ok(existsSync(join(shared, '.claude', 'skills', 'walkdown-judge', 'SKILL.md')));
-  assert.equal(results.find((r) => r.action.startsWith('skills-'))?.action, 'skills-in-repo');
+  assert.equal(existsSync(join(shared, '.claude', 'skills')), false, 'no vendored copy');
+  assert.ok(existsSync(skillAt('walkdown-judge')), 'the person got them here too');
+  assert.equal(results.find((r) => r.action.startsWith('skills-'))?.action, 'skills-personal');
 });
 
 test('a skill whose harness only walkdown has is not shipped @rule:locations.default.skills-are-yours-by-default', () => {

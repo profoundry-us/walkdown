@@ -45,7 +45,7 @@ export async function run(args) {
     console.error('  all   the same, and the runs and evidence are committed too');
     return process.exit(2);
   }
-  const { removeSkills, scaffold } = await import('../../lib/init.js');
+  const { scaffold } = await import('../../lib/init.js');
   const root = resolve(values.dir ?? process.cwd());
 
   /*
@@ -229,9 +229,14 @@ export async function run(args) {
       if (what === 'removed') results.push({ path: rel, action: 'pointer-removed' });
       else if (what === 'deleted') results.push({ path: rel, action: 'pointer-file-deleted' });
     }
-    // The skills leave with the spec, or the "repository gets nothing" line lies.
-    for (const r of removeSkills(join(root, '.claude', 'skills')))
-      results.push({ path: relative(root, r.path), action: `skill-${r.action}` });
+    /*
+     * The skills stay. They used to leave with the spec, because init had put
+     * them in the repository and the "repository gets nothing" line would
+     * otherwise lie (n-0166) - but init no longer puts them there at all
+     * (n-0239), so a copy in `.claude/skills` is now one somebody asked for
+     * with `walkdown skills --project`. Deleting that on the way out would be
+     * walkdown taking away a decision it did not make.
+     */
   }
   /*
    * And who is sitting here, if nobody has said. Every record is written
@@ -340,18 +345,16 @@ export async function run(args) {
   }
   /*
    * And where the procedures went, which is the other half of "what did this
-   * just do to my repository". Skills follow the spec, so this line is usually
-   * a consequence of the one above rather than a separate decision - but it is
-   * the line a person scans for when they are worried about the answer.
+   * just do to my repository". The answer is the same every time now - the
+   * person's own directory - but it is the line somebody scans for when they
+   * are worried about it, so it is still printed rather than assumed.
    */
   if (skills) {
     console.log(`\n  skills: ${skills.path}`);
     console.log(
       dim(
-        skills.action === 'skills-in-repo'
-          ? '  In the repository, so a clone brings them. `walkdown skills` re-installs them anywhere.'
-          : "  Yours, not this project's — they work in every project on this machine, and this" +
-              ' repository gets nothing. `walkdown skills --project` commits them here instead.',
+        "  Yours, not this project's — they work in every project on this machine, and this" +
+          ' repository gets nothing. `walkdown skills --project` commits them here instead.',
       ),
     );
   }

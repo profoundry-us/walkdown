@@ -4,6 +4,56 @@ author: topher
 created: 2026-09-08T00:33:35.286Z
 anchor:
   rule: locations.default.skills-are-yours-by-default
-status: open
+status: addressed
 body: I'm not actually sure I agree with this; do we really need this to be
   committed with the spec?
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-08T17:05:50Z
+    body: >-
+      Decided: the coupling is gone. init now installs skills to the person's
+      own directory whatever the spec did, and a team that wants them committed
+      asks outright with `walkdown skills --project`, which already surveys both
+      places and refuses to pick for you.
+
+
+      The argument for committing them was real - a clone should bring the
+      procedures for the spec it carries. What it actually bought was a vendored
+      copy of walkdown's own source sitting in somebody's repository, going
+      stale on the next upgrade with nothing to say so. This repository needs a
+      Highball check to catch that drift in its own copies. Every note this rule
+      collected was a bill for it: n-0166 (skills left staged in a repository
+      just told it gets nothing), n-0184 (two same-named sets, one stale),
+      n-0197 (copies that are symlinks the committed path does not model).
+
+
+      What changed:
+
+
+      - lib/init.js scaffold() - skills go to skillsHome(), full stop; the
+      `skills` argument still names a directory outright for the callers that
+      have one.
+
+      - bin/commands/init.js - no removeSkills on the way out. Leaving the
+      repository used to delete the copies init had put there; init no longer
+      puts any there, so a copy in .claude/skills is now one somebody asked for,
+      and taking it away would be walkdown undoing a decision it did not make.
+      removeSkills itself is gone with its last caller.
+
+      - The rule's statement and steps say the new thing, and the checks moved
+      with them: test/init-run.test.js "skills are the person's, whatever the
+      spec did" now asserts a committed spec leaves .claude absent, and the
+      locations.test.js case asserts a hand-placed copy survives leaving.
+
+      - docs/09-delivery.md carries the reasoning, this thread included.
+
+
+      The statement hash moved, so both signatures come back to you - owed
+      anyway, since the rule was failing.
+
+
+      One thing worth knowing: the suite pinned a per-suite skills directory
+      while doing this. The shared tmp/test-home/skills outlives a run, and with
+      skills now always going there, these cases had started passing or failing
+      on what an earlier run happened to leave behind.
