@@ -4,6 +4,33 @@ author: topher
 created: 2026-09-08T03:09:34.872Z
 anchor:
   rule: locations.pointer.placed-where-agents-read
-status: open
+status: addressed
 body: This rule is just confusing as hell. I have no idea if we're doing this
   because I can't understand it.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-08T16:52:57Z
+    body: >-
+      Reworded. The behaviour is unchanged - the three tagged checks in
+      test/init-run.test.js still pass untouched - only the sentence describing
+      it moved.
+
+
+      What it was trying to say, plainly: when init runs in a repository whose
+      spec is committed, it leaves one paragraph saying a spec exists and where.
+      That paragraph goes wherever this project already keeps its agent
+      instructions, because a project that reads AGENTS.md will never see a
+      sentence put in CLAUDE.md. Three cases: no such file, so one is created
+      (CLAUDE.md); exactly one, so it goes there and no second file is made to
+      compete; more than one, so nothing is written and the report names them,
+      since a project keeping conventions in several files has made a choice
+      walkdown cannot read.
+
+
+      The old wording put those three cases in a semicolon list before saying
+      what they were cases OF, which is what made it unreadable.
+
+
+      The statement hash moved with it, so both signatures come back to you -
+      which they were owed anyway, since the rule was failing.

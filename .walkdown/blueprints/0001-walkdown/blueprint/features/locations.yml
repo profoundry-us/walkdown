@@ -187,16 +187,7 @@ stories:
       - id: locations.keeping.existing-outranks-preference
         origin: prd
         retired: >-
-          The rule was about records found INSIDE a blueprint - `blueprint/runs/`,
-          the layout every project had before homes - outranking a blanket
-          default. That layout is not read any more: every blueprint walkdown
-          answers for is declared, lives in a home, and its entry names the
-          records or the home they derive from, so there is no directory for
-          the resolver to discover and nothing for a preference to give way to
-          (2026-09-04, Topher's call to remove legacy support entirely). What
-          survives of it is locations.keeping.moving-is-a-decision: relocating
-          records is still something a person does, never something a default
-          does to them.
+          The rule was about records found INSIDE a blueprint - `blueprint/runs/`, the layout every project had before homes - outranking a blanket default. That layout is not read any more: every blueprint walkdown answers for is declared, lives in a home, and its entry names the records or the home they derive from, so there is no directory for the resolver to discover and nothing for a preference to give way to (2026-09-04, Topher's call to remove legacy support entirely). What survives of it is locations.keeping.moving-is-a-decision: relocating records is still something a person does, never something a default does to them.
         statement: A blanket default never points past records a blueprint already holds - an existing directory is a fact and a default is a preference, so the preference gives way and moving those records stays a decision somebody makes.
         verify: [checks]
         steps:
@@ -278,7 +269,7 @@ stories:
     rules:
       - id: locations.pointer.placed-where-agents-read
         origin: prd
-        statement: The pointer goes in a file this project already keeps its agent conventions in, and walkdown chooses only where there is no question - none, so it writes one; exactly one, so the project has already answered; several, so it names them and writes nothing. Which file agents read is a project's own business, and a sentence put in the wrong one is a sentence nobody reads.
+        statement: Initialising a repository leaves one paragraph saying a spec exists and where it is, and it goes in the file that repository already keeps its agent instructions in. With no such file, walkdown creates CLAUDE.md; with exactly one, the pointer goes there and no second file is made; with more than one, walkdown writes nothing and names them, because a project keeping conventions in several files has made a choice walkdown cannot read and guessing puts the sentence where nobody reads it.
         verify: [checks]
         signoff: [eng, product]
         steps:
@@ -287,10 +278,10 @@ stories:
           when:
             - It holds no agent-instruction file, or exactly one, or several
           then:
-            - With none, one is created carrying the pointer
-            - With one, the pointer goes into it and no second file is made to compete with it
-            - With several, none is written to and the report names them for a person to choose between
-          statement_hash: sha256:66759d1c478c
+            - With no agent-instruction file, CLAUDE.md is created carrying the pointer
+            - With exactly one, the pointer goes into that file, and no second file is made to compete with it
+            - With more than one, nothing is written and the report names them all, for a person to settle by naming the one they want
+          statement_hash: sha256:e10f6a000d16
 
       - id: locations.pointer.owns-only-its-block
         origin: prd
