@@ -1,0 +1,44 @@
+id: q-0254
+kind: question
+author: topher
+via: agent
+created: 2026-09-08T20:25:07.665Z
+anchor:
+  rule: screens.surfaces.stand-in-app
+status: open
+body: >-
+  A judging scratch copy still fetches its app surface from the human server.
+  Should the governance say so?
+
+
+  Reported by the judge of the sitting rules on 2026-09-08, and it is accurate:
+  the panel served from a scratch copy on 4903 loaded its stand-in frames from
+  http://localhost:4700/stand-in/review, because a screen app URL is base_url +
+  app.path and base_url comes from the blueprint own walkdown.yml. A targets
+  override in the copy machine config did not displace it.
+
+
+  Nothing was written through those frames - the writes all went to the copy own
+  server - so this is not the leak q-0149 was about. And keeping the declared
+  address declared is deliberate: a verdict is a claim about a place, so
+  rewriting the address in a throwaway copy would empty out every run record it
+  inherited. checks/panel.spec.js says exactly that at length, and solves it for
+  the suite with a browser-level redirect rather than a config change.
+
+
+  So the design is right and the judge was surprised by it, which makes this a
+  documentation question rather than a defect. Two options:
+
+
+  - add a sentence to the judging governance saying the app surface still
+  resolves to the declared address, that this is deliberate, and that a judge
+  who needs it isolated should redirect in the browser the way the suite does
+
+  - leave it, on the grounds that a judge who reads the checks file already
+  knows
+
+
+  I lean towards the first, since the whole point of the governance lines is
+  that a judge does not have to have read the suite. Not making the edit myself:
+  the governance lines are the spec, they ride into every future judge prompt,
+  and what they should say is yours.
