@@ -1,0 +1,48 @@
+id: n-0242
+kind: note
+author: topher
+via: agent
+created: 2026-09-08T03:31:37.533Z
+anchor:
+  rule: panel.rules.evidence-visible
+  screen: rule-detail
+  element: detail.screenshots
+status: open
+body: >-
+  Rename Screenshots to Evidence, everywhere the word appears. Topher's call,
+  2026-09-07, taken alongside n-0241 (a transcript rendering as a broken image):
+  what a run attaches has not been only pictures for some time — the agent tier
+  attaches transcripts as a matter of course — so the label describes the
+  commonest case wrongly and quietly tells a reader that a .txt does not belong
+  there.
+
+
+  Where the word lives, so nothing is missed:
+
+
+  - the control in the rule detail, its title text ('Open the N screenshots this
+  run attached') and the anchor detail.screenshots (src/panel/rule-detail.js,
+  the shots row)
+
+  - the modal's heading and the anchor detail.screenshots-modal
+  (src/panel/shots.js)
+
+  - both anchors as DECLARED in the storyboard for screen rule-detail, which is
+  what makes them nameable in a rule at all
+
+  - the two then-clauses in this rule's own steps, which quote both anchor names
+
+  - the prototype for rule-detail, if the word appears in the drawing — design's
+  to change, not ours
+
+
+  The anchors are the load-bearing part: they are carried verbatim from
+  prototype to implementation, they are named in the spec, and threads may be
+  anchored to them. Renaming is therefore a spec edit and a code edit that must
+  land together, and any thread anchored to the old anchor name needs to be
+  found first — lint reports an anchor nothing declares, which is how it would
+  surface.
+
+
+  Sequenced after n-0241 rather than before it: rendering by file type is the
+  fix a reader feels; this is the word for what they are then looking at.

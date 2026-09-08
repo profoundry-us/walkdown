@@ -1,0 +1,47 @@
+id: q-0243
+kind: question
+author: topher
+via: agent
+created: 2026-09-08T03:33:01.015Z
+anchor:
+  rule: panel.start.unclaimed-page-says-so
+  screen: choose-blueprint
+status: open
+body: >-
+  Design request: the choose-blueprint screen has no drawing for the state
+  panel.start.unclaimed-page-says-so describes — connected, and no blueprint
+  claims the page you are on. The existing mockup
+  (prototype/screens/choose-blueprint.html) draws only the case where the folder
+  holds several blueprints and one of them is this site; visiting an ordinary
+  page with the extension on is the case with nothing drawn, and it is the
+  commonest first experience of the tool.
+
+
+  Asked for by Topher on 2026-09-07, after visiting google.com with the
+  extension and getting walkdown's own board.
+
+
+  A sketch is at proposals/choose-blueprint-unclaimed.html, in the same
+  wireframe idiom so the argument is about content rather than styling. It
+  proposes four blocks:
+
+    start.unclaimed  the fact, with the address named — a claim misses because of a port or a fragment, so the address asked about has to be visible
+    start.claim      how to make this page part of a blueprint you already have (a screen's app address, or a target base_url), plus  to ask who claims an address today
+    start.new        , for when the page belongs to nothing yet
+    start.options    the blueprints this server does hold, reachable but not opened for you
+
+  I have not touched prototype/ — design owns it (blueprint/AGENTS.md). If the
+  shape is right, the drawing is Topher's to make or to tell me to promote.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-08T03:33:33Z
+    body: >-
+      Two lines above lost their command names: the shell ate the backticked
+      text when this note was filed. They should read:
+
+        start.claim   ... plus "walkdown claims --url <address>" to ask who claims an address today
+        start.new     "walkdown init", for when the page belongs to nothing yet
+
+      The sketch at proposals/choose-blueprint-unclaimed.html has both commands
+      in it correctly.

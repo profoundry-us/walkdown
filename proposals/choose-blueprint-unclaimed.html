@@ -1,0 +1,82 @@
+<!doctype html>
+<!-- A SKETCH, not a design. Proposed by the agent for
+     panel.start.unclaimed-page-says-so: the state where the panel is
+     connected and no blueprint claims the page you are on. The drawn design
+     (prototype/screens/choose-blueprint.html) covers only the case where the
+     folder holds several blueprints and one of them is this site; there is
+     no drawing for "this site is not any of them", which is what you get
+     visiting an ordinary page with the extension on.
+
+     Design owns prototype/. This lives under proposals/ so the shape can be
+     argued about without anybody's drawing being edited by a machine, and it
+     is deliberately in the same wireframe idiom so the difference under
+     discussion is the CONTENT, not the styling. -->
+<html lang="en" data-theme="wireframe">
+<head>
+<meta charset="utf-8">
+<title>Proposal — No blueprint claims this page</title>
+<link rel="stylesheet" href="/walkdown.css">
+</head>
+<body class="h-screen overflow-hidden bg-base-200 text-sm">
+  <header class="navbar min-h-0 gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5">
+    <button class="btn btn-xs btn-ghost btn-square" title="Settings">⚙</button>
+    <span class="font-extrabold tracking-tight">walkdown</span>
+  </header>
+
+  <main class="grid h-[calc(100vh-2.5rem)] place-items-center p-6">
+    <div class="card w-96 wire bg-base-100 shadow-lg">
+      <div class="card-body gap-3 p-5">
+
+        <!-- What is true, said as a fact about this page rather than as an
+             error. The address is named because "no blueprint" without it
+             leaves you guessing which address was actually asked about -
+             a fragment or a port is exactly what makes a claim miss. -->
+        <div class="flex flex-col gap-1" data-testid="start.unclaimed">
+          <p class="text-sm font-semibold">No blueprint covers this page</p>
+          <p class="font-mono text-[11px] opacity-60">https://www.google.com/</p>
+        </div>
+
+        <!-- How to claim it. Two ways, because there are two: this page
+             belongs to something you already have, or it belongs to
+             something that does not exist yet. -->
+        <div class="flex flex-col gap-1.5" data-testid="start.claim">
+          <p class="text-[11px] uppercase tracking-wider opacity-50">To review this page</p>
+          <p class="text-[12px] leading-relaxed opacity-70">Add it to a blueprint's storyboard as a
+            screen's <span class="font-mono text-[11px]">app</span> address, or set it as a
+            target's <span class="font-mono text-[11px]">base_url</span> — then walkdown knows
+            this page is part of that blueprint.</p>
+          <code class="rounded bg-base-200 px-2 py-1.5 text-[11px]">walkdown claims --url https://www.google.com/</code>
+          <p class="text-[11px] leading-relaxed opacity-50">says which blueprint, if any, claims an address today.</p>
+        </div>
+
+        <!-- Or it is a new thing entirely. -->
+        <div class="flex flex-col gap-1.5" data-testid="start.new">
+          <p class="text-[11px] uppercase tracking-wider opacity-50">Or start one for it</p>
+          <code class="rounded bg-base-200 px-2 py-1.5 text-[11px]">walkdown init</code>
+        </div>
+
+        <!-- The blueprints this server does hold stay one step away: not
+             opened for you, because the count of blueprints says nothing
+             about who this page belongs to, but never hidden either. -->
+        <div class="flex flex-col gap-1.5 border-t border-dashed border-base-content/20 pt-3"
+             data-testid="start.options">
+          <p class="text-[11px] uppercase tracking-wider opacity-50">Open one anyway</p>
+          <button class="wire flex flex-col items-start gap-0.5 rounded-lg p-2.5 text-left hover:bg-base-200">
+            <span class="text-sm font-semibold">○ checkout</span>
+            <span class="text-[11px] opacity-60">The storefront checkout flow — carts, payment, receipts.</span>
+          </button>
+          <button class="wire flex flex-col items-start gap-0.5 rounded-lg p-2.5 text-left hover:bg-base-200">
+            <span class="text-sm font-semibold">○ admin</span>
+            <span class="text-[11px] opacity-60">The back-office: orders, refunds, the waitlist.</span>
+          </button>
+          <p class="text-[11px] leading-relaxed opacity-40">Serving
+            <span class="font-mono">~/Development/acme-shop</span>. Opening one here reviews it
+            against this page, which is a deliberate act rather than a default.</p>
+        </div>
+
+      </div>
+    </div>
+  </main>
+  <script src="/embed.js" data-walkdown></script>
+</body>
+</html>
