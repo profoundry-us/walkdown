@@ -1023,19 +1023,35 @@
    * right; this is where you say otherwise, and where you see which screens
    * have a design on file to compare against at all.
    */
+  /*
+   * The address row: a box holding the server address and a button that goes
+   * there. It lives here because it is drawn in two places - this tab, and the
+   * start gate before any blueprint is open - and it was written out twice,
+   * with the SAME element ids and a handler on only one of them. The gate's
+   * copy was therefore inert: typing a live address into it and pressing
+   * Connect sent no request anywhere, so the one screen whose whole job is
+   * reaching a server could not reach one (n-0236). One component, one
+   * handler, drawn wherever it is needed.
+   */
+  function serverRow(size = 'xs') {
+    return b`
+    <div class="flex items-center gap-2">
+      <input id="wdp-server" data-testid="start.server" class="input input-${size} flex-1" value="${S.SERVER}"
+             aria-label="walkdown server address">
+      <button class="btn btn-${size} ${size === 'xs' ? 'btn-outline ' : ''}btn-primary" id="wdp-retry"
+        data-testid="start.connect"
+        @click=${(e) => {
+          const box = e.currentTarget.closest('div')?.querySelector('#wdp-server');
+          fire(e.currentTarget, 'connect', { server: (box?.value ?? '').trim() });
+        }}>Connect</button>
+    </div>`;
+  }
+
   function blueprintsPane() {
     return b`
     <div class="px-3.5 pb-2 pt-1">
       <div class="mb-1 text-[11px] font-bold uppercase tracking-wider opacity-50">walkdown server</div>
-      <div class="flex items-center gap-2">
-        <input id="wdp-server" class="input input-xs flex-1" value="${S.SERVER}"
-               aria-label="walkdown server address">
-        <button class="btn btn-xs btn-outline btn-primary" id="wdp-retry"
-          @click=${(e) => {
-            const box = e.currentTarget.closest('div')?.querySelector('#wdp-server');
-            fire(e.currentTarget, 'connect', { server: (box?.value ?? '').trim() });
-          }}>Connect</button>
-      </div>
+      ${serverRow('xs')}
       ${
         S.servedRoot
           ? b`<p class="mt-1.5 text-[11px] leading-relaxed opacity-50" data-testid="start.folder">Serving
@@ -2963,12 +2979,19 @@
       parts.push(s.slice(last));
       return parts;
     };
+    /*
+     * One bullet per clause. given/when/then are each an ARRAY in the data, and
+     * joining them with <br> made the whole phase read as a paragraph run: where
+     * one clause ended was legible only from where the line happened to break,
+     * and a clause long enough to wrap looked like two (n-0235). The phase label
+     * stays where it was; only the items under it become a list.
+     */
     const steps = r.steps
       ? Object.entries(r.steps).map(
           ([ph, items]) =>
-            b`<span class="${LBL} pt-1">${ph}</span><span>${items.map(
-            (s, i) => b`${i ? b`<br>` : A}${stepText(s)}`,
-          )}</span>`,
+            b`<span class="${LBL} pt-1">${ph}</span><ul class="list-disc pl-4">${items.map(
+            (s) => b`<li>${stepText(s)}</li>`,
+          )}</ul>`,
         )
       : null;
     const picked = S.session?.verdicts[r.rule];
@@ -3084,7 +3107,6 @@
             ? b`<div data-testid="detail.say" class="text-[11px] text-warning">${S.verdictSay}</div>`
             : A
         }
-        <div class="text-[11.5px] opacity-50" data-testid="detail.judged">${Object.keys(S.session.verdicts).length} judged this session</div>
       </div>`
           : A
       }
@@ -4492,7 +4514,11 @@
            so for its whole length: forgetting half way through is how a
            signature ends up under the wrong name (panel.walkdown.who-signs-is-declared). -->
       ${signingNote()}
-      <span class="ml-auto" title="Judged in this sitting, of the rules owing you a verdict">${
+      <!-- Named, because it is now the ONLY place a sitting's tally is said.
+           The rule detail used to repeat it under the verdict buttons, three
+           inches from here, and the second copy was the one nobody needed
+           (n-0232). -->
+      <span class="ml-auto" data-testid="panel.judged" title="Judged in this sitting, of the rules owing you a verdict">${
         judged.size
       }/${judged.size + toSign + toWalk} judged</span>
       <!-- Carrying on lives beside the tally, because they are the same
@@ -4548,7 +4574,7 @@
              to that tab (panel.rules.one-pane-per-tab), so the thread list
              opens into the seat beside it rather than sliding two panes over
              and flying past a rule detail nobody asked for. -->
-        <div class="wdp-pane flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col ${
+        <div class="wdp-pane wdp-detail flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col ${
           onThreads ? 'overflow-hidden' : 'overflow-y-auto'
         }" data-testid="${onThreads ? 'thread.panel' : A}">${
           onThreads ? threadPane() : detailPane()
@@ -4814,7 +4840,13 @@
       <button class="btn btn-xs btn-primary${share === 1 ? '' : ' btn-outline'}" data-surface="prototype"
         ?disabled=${!(canGhost || pageSurface() === 'prototype')}
         @click=${() => pickSurface('prototype')}>Prototype</button>
-      <input type="range" min="0" max="100" value="${value}" id="wdp-fade" data-testid="panel.fade"
+      <!-- The value goes through the live directive as a PROPERTY, not as a
+           value= attribute: once a person has dragged a range input the
+           element is dirty, and re-rendering the attribute leaves the thumb
+           exactly where they left it. So pressing App or Prototype moved the
+           surface and not the slider, which then disagreed with what was on
+           screen (n-0222). -->
+      <input type="range" min="0" max="100" .value=${l(String(value))} id="wdp-fade" data-testid="panel.fade"
         class="range range-xs range-primary w-28" ?disabled=${!canGhost}
         aria-label="Fade between the design and the running app"
         @input=${(e) => {
@@ -5504,9 +5536,21 @@
      * Either way, never when the rule is about the screen you are already on:
      * re-navigating throws away the page's state for nothing.
      */
+    /*
+     * A new rule starts at its top. lit updates the pane in place, which is what
+     * keeps a repaint from throwing away where you were reading - and is exactly
+     * why a DIFFERENT rule arrived scrolled to the last one's position, so
+     * pressing Pass after reading the steps left you looking at the middle of a
+     * rule you had not read (n-0233).
+     */
+    const toTop = () => {
+      const pane = D.host?.querySelector('.wdp-detail');
+      if (pane) pane.scrollTop = 0;
+    };
     const want = ruleScreen(S.selected);
-    if (want && want.id !== currentScreen()?.id && goTo(want)) return;
+    if (want && want.id !== currentScreen()?.id && goTo(want)) return toTop();
     render();
+    toTop();
   }
 
   /** The prototype for this screen, laid over the running app. */
@@ -5859,11 +5903,11 @@
             blueprints, run:</p>
         </div>
         <code class="rounded-box bg-base-200 px-3 py-2 text-[12px]">walkdown serve</code>
-        <div class="flex items-center gap-2">
-          <input id="wdp-server" data-testid="start.server" class="input input-sm flex-1" value="${S.SERVER}"
-                 aria-label="walkdown server address">
-          <button class="btn btn-sm btn-primary" id="wdp-retry" data-testid="start.connect">Connect</button>
-        </div>
+        <!-- The Blueprints tab's row, drawn here too. It used to be a second
+             copy of the markup with the same ids and no handler, so the
+             button on the one screen whose job is reaching a server did
+             nothing at all (n-0236). -->
+        ${serverRow('sm')}
         <p class="text-[11.5px] opacity-40">Then every blueprint under that folder is listed here.</p>
       </div>`,
         D.side,

@@ -85,8 +85,23 @@ test('the actor arrives filled in from the repository identity, and stays editab
  * a previous check left open rather than starting a new one.
  */
 async function ensureSession(page) {
-  if ((await page.getByTestId('panel.actor').count()) === 0)
+  if ((await page.getByTestId('panel.actor').count()) === 0) {
     await page.getByTestId('panel.walk').click();
+    /*
+     * Starting one asks who is signing before it begins
+     * (panel.walkdown.who-signs-is-declared). This helper predates that
+     * question, so every check that needed a sitting simply stopped at a
+     * dialog nobody answered — six of them, all failing on a missing
+     * `panel.actor` rather than on anything they were about.
+     */
+    const go = page.getByTestId('walkdown.signing.start');
+    await expect(go).toBeVisible();
+    // A machine whose config names no role has nothing ticked, and the
+    // dialog is right to refuse: pick one, since a sitting is somebody
+    // accepting something.
+    if (await go.isDisabled()) await page.getByTestId('walkdown.signing.role').first().check();
+    await go.click();
+  }
   await expect(page.getByTestId('panel.actor')).toBeVisible();
 }
 
@@ -126,13 +141,13 @@ test('the fail refusal names both ways to give a why, and dies with the rule it 
     await page.getByTestId('panel.rules-list').locator('button').nth(idx).click();
     await expect(page.getByTestId('detail.rule-id')).toBeVisible();
   }
-  const judged = await page.getByTestId('detail.judged').textContent();
+  const judged = await page.getByTestId('panel.judged').textContent();
   await page.locator('[data-v="fail"]').click();
   const say = page.getByTestId('detail.say');
   await expect(say).toBeVisible();
   await expect(say).toContainText('write it above');
   await expect(say).toContainText('Pin mode');
-  await expect(page.getByTestId('detail.judged')).toHaveText(judged ?? '', {
+  await expect(page.getByTestId('panel.judged')).toHaveText(judged ?? '', {
     useInnerText: true,
   }); // refused means refused: nothing recorded
   /*
@@ -154,7 +169,7 @@ test('a verdict is written to the project as it is given, and survives the brows
   expect(await draft(page)).toMatchObject({ draft: null });
 
   await page.getByTestId('detail.verdict').locator('button').first().click();
-  await expect(page.getByTestId('detail.judged')).toHaveText(/1 judged/);
+  await expect(page.getByTestId('panel.judged')).toHaveText(/^1\/\d+ judged$/);
 
   // On disk the moment it was given — not held in the tab until Finish.
   const d = await draft(page);
@@ -259,7 +274,7 @@ test('finishing appends a verdict under a named person; discarding records nothi
   await ensureSession(page);
   await openRuleForVerdict(page, rule);
   await page.getByTestId('detail.verdict').locator('button').first().click();
-  await expect(page.getByTestId('detail.judged')).toHaveText(/1 judged/);
+  await expect(page.getByTestId('panel.judged')).toHaveText(/^1\/\d+ judged$/);
   await page.getByTestId('panel.walk').click(); // the same control that started it
   await expect(page.getByTestId('panel.actor')).toBeHidden();
 

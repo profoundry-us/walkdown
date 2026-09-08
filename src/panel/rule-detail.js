@@ -248,12 +248,19 @@ export function detailPane() {
     parts.push(s.slice(last));
     return parts;
   };
+  /*
+   * One bullet per clause. given/when/then are each an ARRAY in the data, and
+   * joining them with <br> made the whole phase read as a paragraph run: where
+   * one clause ended was legible only from where the line happened to break,
+   * and a clause long enough to wrap looked like two (n-0235). The phase label
+   * stays where it was; only the items under it become a list.
+   */
   const steps = r.steps
     ? Object.entries(r.steps).map(
         ([ph, items]) =>
-          html`<span class="${LBL} pt-1">${ph}</span><span>${items.map(
-            (s, i) => html`${i ? html`<br>` : nothing}${stepText(s)}`,
-          )}</span>`,
+          html`<span class="${LBL} pt-1">${ph}</span><ul class="list-disc pl-4">${items.map(
+            (s) => html`<li>${stepText(s)}</li>`,
+          )}</ul>`,
       )
     : null;
   const picked = S.session?.verdicts[r.rule];
@@ -369,7 +376,6 @@ export function detailPane() {
             ? html`<div data-testid="detail.say" class="text-[11px] text-warning">${S.verdictSay}</div>`
             : nothing
         }
-        <div class="text-[11.5px] opacity-50" data-testid="detail.judged">${Object.keys(S.session.verdicts).length} judged this session</div>
       </div>`
           : nothing
       }

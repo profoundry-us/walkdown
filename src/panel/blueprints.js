@@ -11,19 +11,35 @@ import { fire } from './util.js';
  * right; this is where you say otherwise, and where you see which screens
  * have a design on file to compare against at all.
  */
+/*
+ * The address row: a box holding the server address and a button that goes
+ * there. It lives here because it is drawn in two places - this tab, and the
+ * start gate before any blueprint is open - and it was written out twice,
+ * with the SAME element ids and a handler on only one of them. The gate's
+ * copy was therefore inert: typing a live address into it and pressing
+ * Connect sent no request anywhere, so the one screen whose whole job is
+ * reaching a server could not reach one (n-0236). One component, one
+ * handler, drawn wherever it is needed.
+ */
+export function serverRow(size = 'xs') {
+  return html`
+    <div class="flex items-center gap-2">
+      <input id="wdp-server" data-testid="start.server" class="input input-${size} flex-1" value="${S.SERVER}"
+             aria-label="walkdown server address">
+      <button class="btn btn-${size} ${size === 'xs' ? 'btn-outline ' : ''}btn-primary" id="wdp-retry"
+        data-testid="start.connect"
+        @click=${(e) => {
+          const box = e.currentTarget.closest('div')?.querySelector('#wdp-server');
+          fire(e.currentTarget, 'connect', { server: (box?.value ?? '').trim() });
+        }}>Connect</button>
+    </div>`;
+}
+
 export function blueprintsPane() {
   return html`
     <div class="px-3.5 pb-2 pt-1">
       <div class="mb-1 text-[11px] font-bold uppercase tracking-wider opacity-50">walkdown server</div>
-      <div class="flex items-center gap-2">
-        <input id="wdp-server" class="input input-xs flex-1" value="${S.SERVER}"
-               aria-label="walkdown server address">
-        <button class="btn btn-xs btn-outline btn-primary" id="wdp-retry"
-          @click=${(e) => {
-            const box = e.currentTarget.closest('div')?.querySelector('#wdp-server');
-            fire(e.currentTarget, 'connect', { server: (box?.value ?? '').trim() });
-          }}>Connect</button>
-      </div>
+      ${serverRow('xs')}
       ${
         S.servedRoot
           ? html`<p class="mt-1.5 text-[11px] leading-relaxed opacity-50" data-testid="start.folder">Serving

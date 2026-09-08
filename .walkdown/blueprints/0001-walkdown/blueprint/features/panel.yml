@@ -935,7 +935,7 @@ stories:
 
       - id: panel.walkdown.verdicts-at-hand
         origin: walkdown
-        statement: While a walkdown is running, pass and fail sit directly under the selected rule's statement - on screen without scrolling - beside a count of how many rules the session has judged.
+        statement: While a walkdown is running, pass and fail are on screen without scrolling, under the selected rule's statement - with the feedback box the only thing between them and it.
         signoff: [eng, product]
         screens: [rule-detail]
         steps:
@@ -945,9 +945,9 @@ stories:
             - Reading anchor `detail.verdict` on screen `rule-detail`
           then:
             - Both verdict buttons are visible without scrolling any pane
-            - Anchor `detail.judged` says how many rules this session has judged
+            - The only thing between the statement and the buttons is anchor `detail.feedback`, which panel.walkdown.note-with-any-verdict puts there
             - The chosen verdict stays visibly chosen when the rule is revisited
-          statement_hash: sha256:10b43c02479d
+          statement_hash: sha256:d67304c4aae1
 
       - id: panel.walkdown.pass-advances
         origin: walkdown

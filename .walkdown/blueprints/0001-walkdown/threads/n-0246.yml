@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-08T04:11:18.894Z
 anchor:
   rule: status.acceptance.signoff-defaults-to-eng
-status: open
+status: addressed
 body: >-
   Eleven rules carry a statement and nothing else — no given, no when, no then.
   Raised by Topher on 2026-09-07, reading this one.
@@ -47,3 +47,12 @@ body: >-
   more than one claim, or say plainly that a checks-only headless rule may stand
   on its statement and let the test be its steps — in which case that convention
   belongs in blueprint/AGENTS.md, where the next author will read it.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-08T18:05:51Z
+    body: Steps are required of every rule now — lint errors on a rule without them
+      (ownership.authoring.steps-are-required), and the blueprint is clean at
+      138 rules, so all eleven of these carry given/when/then today. The
+      convention question this note put to a person has been settled by that
+      rule rather than by a line in AGENTS.md.

@@ -16,8 +16,16 @@ anchor:
   viewport:
     name: desktop
     width: 1050
-status: open
+status: addressed
 body: Sometimes when I pass, I scroll down to read the STEPS at the bottom. If I
   then click the "Pass" button, the rule detail changes, but I am still scrolled
   to the old position. Changing a rule (via the detail.stepper buttons or the
   pass / fail) should reset the scroll for that panel.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-08T18:05:50Z
+    body: Fixed. Opening a rule now puts the detail pane back to the top. lit
+      updates the pane in place, which is what stops an ordinary repaint from
+      losing your place — and is exactly why a DIFFERENT rule arrived still
+      scrolled to the last one's position.

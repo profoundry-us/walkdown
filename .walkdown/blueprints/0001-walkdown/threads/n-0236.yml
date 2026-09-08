@@ -6,7 +6,7 @@ anchor:
   rule: panel.start.open-a-folder
   screen: start
   element: '[data-testid="start.connect"]'
-status: open
+status: addressed
 body: >-
   The Connect button on the start screen does nothing, so the rule's second then
   — "The address it looks at can be changed and retried without a reload" — has
@@ -49,3 +49,11 @@ replies:
       --as-agent, so it carries his name and no via. The decision to file was
       his; the sentences were the machine's. This reply carries the via the
       first message should have had."
+  - author: topher
+    via: agent
+    created: 2026-09-08T18:05:51Z
+    body: Fixed. The start gate and the Blueprints tab were two copies of the
+      address row under the same element ids, and only the tab's copy had a
+      handler — so the gate's Connect button did nothing at all. There is one
+      serverRow component now, drawn in both places, so the gate's button fires
+      the same connect event and the typed address is read.

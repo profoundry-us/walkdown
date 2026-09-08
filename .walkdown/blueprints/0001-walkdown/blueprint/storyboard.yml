@@ -42,6 +42,7 @@ screens:
       - panel.threads-list
       - panel.thread-filter
       - panel.counts
+      - panel.judged
 
   - id: rule-detail
     title: Rule detail (state — open a rule on the Rules tab)
@@ -54,7 +55,6 @@ screens:
       - detail.rule-id
       - detail.statement
       - detail.verdict
-      - detail.judged
       - detail.feedback
       - detail.evidence
       - detail.setup

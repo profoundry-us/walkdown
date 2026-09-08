@@ -16,7 +16,16 @@ anchor:
   viewport:
     name: desktop
     width: 1050
-status: open
+status: addressed
 body: Clicking the App or Prototype buttons should modify the fade slider to the
   proper setting (all prototype or all app). Right now, it stays wherever you
   put it even though only one is fully visible.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-08T18:05:50Z
+    body: "Fixed. The fade slider's value went in as a value= attribute, and a range
+      input is dirty once dragged, so re-rendering never moved the thumb:
+      pressing App or Prototype changed the surface and left the slider where
+      you put it. It goes through lit's live directive as a property now, so
+      both buttons take the slider to their end."

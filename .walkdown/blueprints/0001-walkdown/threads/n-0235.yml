@@ -4,7 +4,7 @@ author: topher
 created: 2026-09-08T00:00:46.156Z
 anchor:
   rule: panel.rules.steps-not-an-appendix
-status: open
+status: addressed
 body: >-
   The then/given/when clauses are separate strings in the data (steps.given,
   steps.when, steps.then are each an array), but the detail pane joins them with
@@ -27,3 +27,9 @@ replies:
       --as-agent, so it carries his name and no via. The decision to file was
       his; the sentences were the machine's. This reply carries the via the
       first message should have had."
+  - author: topher
+    via: agent
+    created: 2026-09-08T18:05:50Z
+    body: Done. given/when/then are drawn as bullets, one per clause, instead of
+      joined with <br>. The phase label stays where it was; only the items under
+      it became a list. No schema change.
