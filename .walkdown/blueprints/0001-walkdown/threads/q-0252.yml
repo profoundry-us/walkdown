@@ -1,0 +1,48 @@
+id: q-0252
+kind: question
+author: topher
+via: agent
+created: 2026-09-08T19:58:08.941Z
+anchor:
+  rule: threads.lifecycle.reasoned-endings
+status: open
+body: >-
+  Renaming an anchor leaves every thread pointing at the old one warning
+  forever, and there is no door to fix it.
+
+
+  lint has carried three of these all day: n-0236 anchored to
+  [data-testid="start.connect"] rather than to start.connect, and n-0241/n-0242
+  anchored to detail.screenshots-modal and detail.screenshots - the two anchors
+  your own rename decision on 2026-09-07 turned into detail.evidence-modal and
+  detail.evidence. The threads are right about what they were about; the names
+  moved underneath them.
+
+
+  There is no way to correct one. thread <id> takes --reply, --status, --verify,
+  --reopen, --waive; thread new takes --screen and --element at creation and
+  never again. The only remaining route is editing the YAML by hand, which the
+  conventions rule out - and rightly, since it is how a status gets changed
+  without anyone recording that it was.
+
+
+  Leaving it be has a cost that compounds: every anchor rename adds a permanent
+  warning, so the warning list stops being a thing anybody reads. Three shapes,
+  and which one is right is a judgement call rather than something I should
+  pick:
+
+
+  - a door that re-anchors a thread and records the move as a reply, like every
+  other mutation
+
+  - lint resolving a renamed anchor through a rename recorded in the storyboard,
+  so the threads never need touching
+
+  - accepting it: a thread is a record of a moment, its anchor is part of that
+  record, and a stale one is history rather than an error - in which case lint
+  should say so more quietly than it does now
+
+
+  The third is defensible and would cost nothing to implement, which is why this
+  is a question. Filed after judging the headless rules; the warnings are
+  unrelated to that run.
