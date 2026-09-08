@@ -1,0 +1,60 @@
+{
+  "run_id": "2026-09-08T20-25-59Z-local-01",
+  "created": "2026-09-08T20:25:59Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "1d88a43",
+  "spec_hash": "sha256:1e8005428148",
+  "results": [
+    {
+      "rule": "panel.rules.takes-you-there",
+      "status": "pass",
+      "statement_hash": "sha256:708e2433c9b5",
+      "evidence": [
+        "runs/evidence/2026-09-08T20-25-59Z/probe-takes-you-there.txt"
+      ],
+      "reasoning": "Driven with a real pointer against a scratch copy served on :4905, with an iframe load counter installed so that \"did not re-navigate\" was a measurement rather than an impression. Opening panel.rules.marks-carry-over from the list moved the desk to /stand-in/rule-detail and the picker renamed itself to that screen; opening a second rule on the same screen left the frame untouched (loads 0, same iframe node), as did re-picking a screen already showing. Picking a screen went there and was reported. On the design side the trip stayed on the design: with the fade at 0, picking another screen loaded that screen's prototype and left the fade alone. To exercise the crossing-over and blueprint-change legs I added a throwaway second blueprint inside the copy, declaring screens with only one surface; from the app, picking a design-only screen crossed to the design, from the design, picking an app-only screen crossed to the app, switching to a blueprint that does not claim the current page moved to one it does claim, switching back to a blueprint that does claim it left the page alone (no reload), and a screen with no URL on either surface navigated nowhere but was still reported as where you are. Nothing was silently wrong underneath: window.onerror, unhandledrejection and console.error were hooked for the whole session and collected nothing. One step bullet could not be observed at all: the script-tag docked delivery it distinguishes was removed on 2026-08-26 (src/panel/app.js head), and loading a stand-in at top level confirms it - the page gets the embed and no panel - so that clause has no surface to be judged on, and the framed delivery, which the extension also uses, took every trip as the rule says it should."
+    },
+    {
+      "rule": "panel.rules.lifecycle-legible",
+      "status": "pass",
+      "statement_hash": "sha256:a0f0ad3cb747",
+      "evidence": [
+        "runs/evidence/2026-09-08T20-25-59Z/probe-lifecycle-legible.txt",
+        "runs/evidence/2026-09-08T20-25-59Z/lifecycle-states-in-the-list.png",
+        "runs/evidence/2026-09-08T20-25-59Z/rules-list-columns-and-marks.png"
+      ],
+      "reasoning": "Measured across all 129 rows of panel.rules-list rather than read off a screenshot: every row carries a panel.rule-tiers strip, and the measured left edges and widths of those strips collapse to a single value each, so built or not they are drawn in the same position. Every row has a title and every strip a tooltip element. Four lifecycle states were present in the blueprint at rest - verified (113), built-but-unwalked (10), approved (4) and failing (2) - and each is legible from the row's own marks plus a tooltip that spells it out in words. An approved rule wears no glyph of its own: its tiers read na and the state is carried entirely by half-filled signature dots. An unbuilt rule's tiers are drawn in full, at the same position, as very quiet marks whose tooltip says \"nothing to judge yet - the rule is not built\" against \"not applicable - this rule does not ask for it\", so neither reads as failing nor as absent, though the unbuilt mark is a faded check rather than a shape of its own and leans on the tooltip for the distinction. The designed state was absent at rest, so I produced it with a throwaway blueprint inside the copy holding one unsigned rule: it drew \"designed - awaiting your sign-off\" with a warning-coloured \"sign\" badge, and a second reading in which no recorded run matched gave 71 \"sign\" and 58 \"walk\" rows, both warning-tinted and both naming the work. No console errors at any point."
+    },
+    {
+      "rule": "panel.rules.owed-apart-from-said",
+      "status": "pass",
+      "statement_hash": "sha256:10189a32c600",
+      "evidence": [
+        "runs/evidence/2026-09-08T20-25-59Z/probe-owed-apart-from-said.txt",
+        "runs/evidence/2026-09-08T20-25-59Z/lifecycle-states-in-the-list.png",
+        "runs/evidence/2026-09-08T20-25-59Z/rules-list-columns-and-marks.png"
+      ],
+      "reasoning": "The question here is geometry, so I measured it rather than checked the DOM for two elements. Every one of the 129 rows ends in exactly two spans; the measured left and right edges of the work-badge span across the whole list collapse to one value (1509/1537) and those of the thread-count span to another (1545/1573), each 28px wide and fixed, so both are genuinely columns and not a string that happens to line up. The list holds all three cases the rule asks for - 8 rows with both, 2 with work only, 59 with a thread count only - and in every case both spans are still there at the same x with the same width, so a row missing one of them leaves an empty column instead of shifting. Colour separates them as the rule wants: the work badge is the warning colour at weight 600, the same colour the owed glyphs use, while the thread count is base-content at 45% opacity and weight 400 - plain ink. The screenshots show the two reading as two things rather than one number. No console errors."
+    },
+    {
+      "rule": "embed.pin.follows-the-visible-surface",
+      "status": "fail",
+      "statement_hash": "sha256:005ee8fa7a1e",
+      "evidence": [
+        "runs/evidence/2026-09-08T20-25-59Z/probe-pin-follows-the-visible-surface.txt",
+        "runs/evidence/2026-09-08T20-25-59Z/pin-placed-on-the-prototype.yml",
+        "runs/evidence/2026-09-08T20-25-59Z/pin-placed-on-the-app.yml",
+        "runs/evidence/2026-09-08T20-25-59Z/pin-why-prototype.png",
+        "runs/evidence/2026-09-08T20-25-59Z/pin-why-app.png",
+        "runs/evidence/2026-09-08T20-25-59Z/pin-refused-no-walkdown.png"
+      ],
+      "reasoning": "This one writes, so it was judged entirely inside a scratch copy, with the copy's target base_url repointed at the copy's own server so that both surfaces and every pin they file stayed in the copy; nothing was written through the real server. What the rule's statement claims holds and is the strongest part of the evidence: with the fade all the way to the prototype a pin landed as surface prototype, anchored to panel.tabs, at 1024,80 in the prototype's own coordinates, and with the fade all the way to the app a pin landed as surface app, anchored to panel.counts, at 1024,914 in the app's - both read back off the files on disk rather than trusted from the screen. Which surface takes the click was measured too: fully faded, the ghost stage computes to opacity 0 with pointer-events none, and fully ghosted to opacity 1 with pointer-events auto over the app. panel.pin-why names the surface before you place anything, and a surface with no walkdown inside it - a bare page ghosted over a stand-in that does run one - disables pin mode outright and says why, with nothing falling through. It fails on one step: \"Pins already on that screen show on the surface they were placed on\" does not hold. Reading each surface's own pin markers after placing the two pins, the app surface carries the prototype pin and the prototype ghost carries the app pin, because src/embed/index.js renderPins tests the surface only for a pin kept by position alone, and an anchored pin is drawn wherever an element with that anchor id exists. I am recording it as a fail rather than talking myself out of it, but the note says plainly that embed.pin.anchored-target's \"Later visitors see the pin on that element wherever it renders\" may be the intended behaviour, in which case it is the wording of one of the two rules that wants fixing rather than the code.",
+      "threads": [
+        "n-0255"
+      ]
+    }
+  ]
+}

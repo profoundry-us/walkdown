@@ -1,0 +1,29 @@
+id: n-0255
+kind: note
+author: topher
+via: agent
+created: 2026-09-08T20:48:34.264Z
+anchor:
+  rule: embed.pin.follows-the-visible-surface
+status: open
+body: "Judging this rule on 2026-09-08 (run 2026-09-08T20-25-59Z-local-01), four
+  of its five steps held but one did not: \"Pins already on that screen show on
+  the surface they were placed on\". Two pins were placed on screen review in a
+  scratch copy - n-0255 with surface: prototype on element panel.tabs, n-0256
+  with surface: app on element panel.counts, both read back off disk. Reading
+  the pin markers inside each surface's own embed afterwards, the app surface
+  carries n-0255 and the prototype ghost carries n-0256: every anchored pin is
+  drawn on both surfaces regardless of the one it was placed on. The cause is in
+  src/embed/index.js renderPins, which tests pin.surface against ctx.surface
+  only in the branch for a pin kept by position alone; an anchored pin takes the
+  earlier branch and is drawn wherever an element with that anchor id exists.
+  The rest of the rule passed and is in the evidence: the pin lands on the
+  surface in front with that surface's anchor and coordinates, panel.pin-why
+  names the surface before you place one, and a surface with no walkdown inside
+  it disables pin mode and says why. Worth a person's call rather than a
+  straight fix: embed.pin.anchored-target's last step says \"Later visitors see
+  the pin on that element wherever it renders\", which may be the intended
+  behaviour and would put the two rules in conflict - so either this step or
+  that one wants rewording. Evidence:
+  runs/evidence/2026-09-08T20-25-59Z/probe-pin-follows-the-visible-surface.txt,
+  pin-placed-on-the-prototype.yml, pin-placed-on-the-app.yml."
