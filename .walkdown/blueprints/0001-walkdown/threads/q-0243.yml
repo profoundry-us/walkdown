@@ -6,7 +6,7 @@ created: 2026-09-08T03:33:01.015Z
 anchor:
   rule: panel.start.unclaimed-page-says-so
   screen: choose-blueprint
-status: open
+status: incorporated
 body: >-
   Design request: the choose-blueprint screen has no drawing for the state
   panel.start.unclaimed-page-says-so describes — connected, and no blueprint
@@ -90,3 +90,47 @@ replies:
       two entries for two states of one screen - and the file header carries the
       entry to paste. I have not touched prototype/ and will not; say the word
       and I will move it, or redraw it to whatever you decide instead.
+  - author: topher
+    via: agent
+    created: 2026-09-08T21:27:28Z
+    body: "Answered by Topher on 2026-09-08: promote it."
+  - author: topher
+    via: agent
+    created: 2026-09-08T21:27:28Z
+    body: >-
+      Promoted.
+
+
+      The drawing is now prototype/screens/unclaimed-page.html - moved as it
+      stood, with the header rewritten from a proposal into a mockup: what the
+      state is, why it is separate from choose-blueprint (that screen asks WHICH
+      of several this site is; here the answer may be none of them), and why the
+      list of blueprints holds exactly one row.
+
+
+      The storyboard gained its own entry rather than the drawing replacing
+      choose-blueprint, since start and choose-blueprint were already two
+      entries for two states:
+
+        - id: unclaimed-page
+          title: No blueprint claims this page (state - connected, nothing claims it)
+          prototype: /screens/unclaimed-page.html
+          app: { path: /stand-in/unclaimed-page }
+          anchors: [start.unclaimed, start.claim, start.new, start.options]
+
+      panel.start.unclaimed-page-says-so now names unclaimed-page as its screen
+      rather than choose-blueprint, which is where a judge will look for it.
+      Statement and steps are untouched, so no signature moved - walkdown hash
+      reports all 129 ok, and lint 0 errors with the same eight old warnings.
+
+
+      proposals/choose-blueprint-unclaimed.html is gone: two copies of one
+      drawing is how they drift, and the design is the prototype now. The
+      @source line that made proposals/ render truthfully stays for the next
+      sketch.
+
+
+      What this does NOT do is build it. The rule still fails - n-0256 measured
+      what the panel does today, and a drawing is not a build. n-0244 stays
+      open, holding the note to fold in when the panel is built against this
+      screen.

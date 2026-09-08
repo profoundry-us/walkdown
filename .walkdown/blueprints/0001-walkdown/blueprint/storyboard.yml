@@ -88,6 +88,16 @@ screens:
       - start.server
       - start.connect
 
+  - id: unclaimed-page
+    title: No blueprint claims this page (state — connected, nothing claims it)
+    prototype: /screens/unclaimed-page.html
+    app: { path: /stand-in/unclaimed-page }
+    anchors:
+      - start.unclaimed
+      - start.claim
+      - start.new
+      - start.options
+
   - id: choose-blueprint
     title: Choose a blueprint (state — folder holds several)
     prototype: /screens/choose-blueprint.html

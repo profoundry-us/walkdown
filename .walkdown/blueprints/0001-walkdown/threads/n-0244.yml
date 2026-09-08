@@ -6,3 +6,20 @@ anchor:
   rule: panel.start.unclaimed-page-says-so
 status: open
 body: Add the note from q-0243 when building it.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-08T21:28:05Z
+    body: >-
+      The screen this waits on now exists:
+      prototype/screens/unclaimed-page.html, promoted from the sketch on
+      2026-09-08 and declared in the storyboard as `unclaimed-page`. q-0243 is
+      incorporated.
+
+
+      Leaving this open, because it is about the BUILD and nothing has been
+      built. n-0256 has what the panel does today, measured: one blueprint is
+      opened without asking, and the two-blueprint gate asks which rather than
+      whether. When the panel is built against the new screen, the note from
+      q-0243 - the address named, the two ways to claim it, the blueprints
+      reachable but never opened for you - is what to fold in.

@@ -1,47 +1,19 @@
 <!doctype html>
-<!-- A SKETCH, not a design. Proposed by the agent for
-     panel.start.unclaimed-page-says-so: the state where the panel is
-     connected and no blueprint claims the page you are on.
+<!-- Connected, and no blueprint claims the page you are on: the panel says so
+     and says how to claim it, rather than opening whichever blueprint it
+     happens to hold. This is the commonest first meeting with the tool -
+     browsing to an ordinary site with the extension on - and it is a separate
+     state from choose-blueprint, which asks WHICH of several this site is.
+     Here the answer may be none of them.
 
-     WHAT IS DRAWN ELSEWHERE. prototype/screens/choose-blueprint.html covers
-     one state - the folder holds several blueprints and one of them is this
-     site, so the panel asks WHICH. There is no drawing for "this site is not
-     any of them", which is what you get by visiting an ordinary page with the
-     extension on, and is the commonest first experience of the tool.
-
-     WHAT THE BUILD DOES TODAY, measured rather than assumed (n-0256, judged
-     2026-09-08): a server holding ONE blueprint opens it - the whole board,
-     rules list and all, over a page it does not claim. A server holding TWO
-     stops at the existing gate, but that gate asks which, never whether: it
-     never names the address it asked about, never says nothing claims it, and
-     offers no way to claim it. So of the rule's five THENs, only the fourth
-     holds today.
-
-     WHY THE LIST BELOW HAS EXACTLY ONE ROW. The rule turns on a count meaning
-     nothing: "one blueprint on a server is not evidence that this page
-     belongs to it". Drawing the several case would have let the asymmetry
-     hide - it is the SINGLE-blueprint card that the build currently skips
-     altogether. Six blueprints is this same card with five more rows.
-
-     TO PROMOTE THIS. It is one page in the wireframe idiom, so it can move to
-     prototype/screens/ as it stands. It wants its own storyboard entry rather
-     than replacing choose-blueprint, the way `start` and `choose-blueprint`
-     are already two entries for two states - something like:
-
-       - id: unclaimed-page
-         title: No blueprint claims this page (state - connected, nothing claims it)
-         prototype: /screens/unclaimed-page.html
-         app: { path: /stand-in/unclaimed-page }
-         anchors: [start.unclaimed, start.claim, start.new, start.options]
-
-     Design owns prototype/. This lives under proposals/ so the shape can be
-     argued about without anybody's drawing being edited by a machine, and it
-     is deliberately in the same wireframe idiom so the difference under
-     discussion is the CONTENT, not the styling. -->
+     The list of blueprints holds exactly one row on purpose. The rule this
+     draws turns on a count meaning nothing - one blueprint on a server is not
+     evidence that this page belongs to it - so the single-blueprint case is
+     the one that has to be drawn. Six is this same card with five more rows. -->
 <html lang="en" data-theme="wireframe">
 <head>
 <meta charset="utf-8">
-<title>Proposal — No blueprint claims this page</title>
+<title>Mockup — No blueprint claims this page</title>
 <link rel="stylesheet" href="/walkdown.css">
 </head>
 <body class="h-screen overflow-hidden bg-base-200 text-sm">
@@ -57,8 +29,7 @@
         <!-- What is true, said as a fact about this page rather than as an
              error. The address is named because "no blueprint" without it
              leaves you guessing which address was actually asked about - a
-             fragment or a port is exactly what makes a claim miss, and the
-             gate that exists today names the panel's own origin instead. -->
+             fragment or a port is exactly what makes a claim miss. -->
         <div class="flex flex-col gap-1" data-testid="start.unclaimed">
           <p class="text-sm font-semibold">No blueprint covers this page</p>
           <p class="font-mono text-[11px] opacity-60">https://www.google.com/</p>
@@ -85,8 +56,7 @@
 
         <!-- The blueprints this server does hold stay one step away: not
              opened for you, because the count of blueprints says nothing
-             about who this page belongs to, but never hidden either. ONE row
-             on purpose - see the note at the top of this file. -->
+             about who this page belongs to, but never hidden either. -->
         <div class="flex flex-col gap-1.5 border-t border-dashed border-base-content/20 pt-3"
              data-testid="start.options">
           <p class="text-[11px] uppercase tracking-wider opacity-50">Open one anyway</p>

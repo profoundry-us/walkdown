@@ -425,7 +425,7 @@ stories:
         origin: walkdown
         statement: On a page no blueprint claims, the panel says so and says how to claim it, rather than opening whichever blueprint it happens to hold - and it asks that question however many blueprints the server offers, because one blueprint on a server is not evidence that this page belongs to it.
         signoff: [eng, product]
-        screens: [choose-blueprint]
+        screens: [unclaimed-page]
         steps:
           given:
             - A server offering one or more blueprints, and a page none of them claims - an ordinary site you have simply browsed to
