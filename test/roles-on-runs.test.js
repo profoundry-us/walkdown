@@ -14,6 +14,7 @@ import {
   readdirSync,
   readFileSync,
   rmSync,
+  statSync,
   utimesSync,
   writeFileSync,
 } from 'node:fs';
@@ -340,6 +341,17 @@ test('the payload says whether the running server is older than the code @rule:p
   // Touch a module this process would import if it started again. The server
   // in hand booted before that, so it is now serving yesterday's code.
   const target = new URL('../lib/api.js', import.meta.url).pathname;
+  /*
+   * Put the mtime back to what it WAS, not to now. The file this test moves
+   * is the real lib/api.js, and every walkdown serve on this machine reads
+   * the same tree: leaving it stamped `now` told the human's own server, and
+   * a judge's scratch server, that the code had changed under them - so both
+   * put up "stale server, restart it" over a tree nobody had touched. The
+   * edit hook runs this suite after every change, so the false alarm arrived
+   * every few minutes and taught everyone to ignore the badge, which is the
+   * one thing the rule under test exists to prevent.
+   */
+  const was = statSync(target);
   const later = new Date(Date.now() + 60_000);
   utimesSync(target, later, later);
   try {
@@ -347,7 +359,6 @@ test('the payload says whether the running server is older than the code @rule:p
     assert.equal(after.server.stale, true, 'an edit after boot makes the running code stale');
     assert.ok(after.server.changed, 'and it says when the tree moved');
   } finally {
-    const now = new Date();
-    utimesSync(target, now, now);
+    utimesSync(target, was.atime, was.mtime);
   }
 });

@@ -1,0 +1,49 @@
+id: n-0253
+kind: note
+author: topher
+via: agent
+created: 2026-09-08T20:23:01.422Z
+anchor:
+  rule: panel.delivery.stale-copy-says-so
+status: addressed
+body: >-
+  The check for this rule was the thing making servers look stale. Fixed.
+
+
+  Found while judging the sitting rules on 2026-09-08. A judge reported the
+  panel showing "Stale server - restart it" throughout its sitting and blamed
+  the scratch copy, reasoning that the staleness clock counts any write in the
+  repository tree. That is not it: CODE_DIRS in lib/api.js is lib/ and bin/
+  only, and making and cleaning a scratch copy leaves both untouched - measured.
+
+
+  The real cause is our own suite. test/roles-on-runs.test.js proves this rule
+  by utimesSync-ing the REAL lib/api.js sixty seconds into the future, then
+  restoring it to `now` in its finally. Every walkdown serve on the machine
+  reads that same tree, so after every test run each running server sees code
+  newer than its own boot and says so. The edit hook runs the suite after every
+  change, so the badge appeared every few minutes over a tree nobody had touched
+  - and a badge that cries wolf is exactly what this rule exists to prevent.
+
+
+  Fixed by restoring the mtime the file HAD rather than stamping it with now:
+  the test still moves the clock forward and still proves the payload notices,
+  and it now leaves nothing behind. Measured before and after - a full npm test
+  run no longer changes any mtime under lib/ or bin/.
+
+
+  Also put lib/api.js back to its real last-edit time (its last commit), since
+  the accumulated fake stamps were a day newer than the file. Any server already
+  running was reading a lie; it will read the truth from now on.
+
+
+  Worth keeping in mind for the next judging: while this was live, "stale
+  server" during a sitting meant nothing at all, so any observation resting on
+  that badge between 2026-09-07 and today should be re-taken.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-08T20:23:30Z
+    body: Fix is in the same commit as this note - the test now restores the mtime
+      it found rather than stamping the file with now, and a full suite run
+      leaves lib/ and bin/ untouched.
