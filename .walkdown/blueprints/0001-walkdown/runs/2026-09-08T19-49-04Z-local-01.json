@@ -1,0 +1,53 @@
+{
+  "run_id": "2026-09-08T19-49-04Z-local-01",
+  "created": "2026-09-08T19:49:04Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "5111573",
+  "spec_hash": "sha256:1e8005428148",
+  "results": [
+    {
+      "rule": "panel.walkdown.who-signs-is-declared",
+      "status": "pass",
+      "statement_hash": "sha256:36efe97a3acd",
+      "evidence": [
+        "runs/evidence/2026-09-08T19-49-04Z/01-signing-gate-prefilled-from-config.png",
+        "runs/evidence/2026-09-08T19-49-04Z/02-product-handed-to-dana-product.png",
+        "runs/evidence/2026-09-08T19-49-04Z/03-sitting-strip-says-who-it-is-signed-as.png",
+        "runs/evidence/2026-09-08T19-49-04Z/04-poisoned-localstorage-changes-nothing.png",
+        "runs/evidence/2026-09-08T19-49-04Z/11-next-sitting-starts-from-config-again.png",
+        "runs/evidence/2026-09-08T19-49-04Z/12-strip-survives-a-reload-mid-sitting.png",
+        "runs/evidence/2026-09-08T19-49-04Z/13-config-declaring-only-eng-ticks-only-eng.png",
+        "runs/evidence/2026-09-08T19-49-04Z/probe-what-landed-on-disk.txt",
+        "runs/evidence/2026-09-08T19-49-04Z/probe-panel-capture.txt"
+      ],
+      "reasoning": "Judged against a scratch copy served from inside itself on port 4903, so every write landed in the copy. Pressing Start walkdown opens a gate that names the config file it read and comes pre-filled from it: with roles [eng, product] declared, both are ticked and both name boxes hold the declared username, so agreeing is one press; with the config narrowed to [eng] alone, both roles are still offered but only eng is ticked and product's name box is disabled, which is the difference between what is offered and what is declared. Typing dana-product into the product box changed the summary to \"Signing for dana-product (product), recorded by you\", the running sitting then carried a standing badge reading \"for dana-product (product)\" beside \"Recording as A scratch sitting (judge-0908)\", and that badge stayed through screen changes and a mid-sitting reload; the sealed run on disk records product under dana-product and eng under the config identity, with actor still the machine's declared person. Nothing the browser remembers decides it: the one localStorage key was rewritten to actor mallory with both signatures mallory's, and after a reload the strip and the sealed record still read the config identity and dana-product, while a POST to /api/walkdowns carrying \"actor\":\"mallory\" was written under scratch-judge-0908 with the forged actor dropped. Beginning the next sitting offered the config's names again with no trace of dana-product. Two boundaries worth a person's eye, neither of which I read as breaking the statement: a reload taken before any verdict has been given discards the whole sitting rather than restoring it, because the draft is only written on the first verdict - there is nothing recorded to forget at that point, but the declaration is silently lost; and the summary line only catches up with a retyped name on blur, not as you type. No uncaught error or console error appeared in any of it."
+    },
+    {
+      "rule": "panel.walkdown.verdicts-at-hand",
+      "status": "pass",
+      "statement_hash": "sha256:d67304c4aae1",
+      "evidence": [
+        "runs/evidence/2026-09-08T19-49-04Z/05-verdicts-at-hand-pass-and-fail-under-the-statement.png",
+        "runs/evidence/2026-09-08T19-49-04Z/06-chosen-verdict-stays-visibly-chosen.png",
+        "runs/evidence/2026-09-08T19-49-04Z/09-at-1280x600-the-buttons-are-clipped.png",
+        "runs/evidence/2026-09-08T19-49-04Z/probe-panel-capture.txt"
+      ],
+      "reasoning": "With a walkdown running and panel.walkdown.verdicts-at-hand open in the detail pane at 1440x900, I measured rather than eyeballed: the statement ends at y=334, detail.feedback occupies 346-426, and detail.verdict sits at 432-464, so sweeping every element in the pane whose box falls between the statement's bottom and the buttons' top returns detail.feedback and nothing else. Both buttons are inside the pane's own clip rect with the pane's scrollTop at 0 and the page unscrolled, and elementFromPoint at each button's centre returns the button itself, so they are reachable and not merely present in the DOM. Pressing Pass, letting the panel advance, and coming back to the rule leaves Pass drawn solid (btn-success) against an outlined Fail, so the choice reads as chosen. Where it stops holding is short windows: with the longest statement on the board the buttons are still fully inside the pane and under the pointer at 1280x660, are clipped by the pane edge at 1280x620 though still clickable at their centres, and at 1280x600 are cut off and no longer under the pointer at all. The statement names no viewport, and roughly 620px of viewport height is below any ordinary desktop window, so I read this as a pass with a floor worth knowing rather than a failure. Nothing threw, and the console carried no errors."
+    },
+    {
+      "rule": "panel.signoff.spec-pair-derived",
+      "status": "pass",
+      "statement_hash": "sha256:24cc94442cf4",
+      "evidence": [
+        "runs/evidence/2026-09-08T19-49-04Z/07-unbuilt-rule-offers-approve-and-refine.png",
+        "runs/evidence/2026-09-08T19-49-04Z/08-approving-does-not-flip-the-pair.png",
+        "runs/evidence/2026-09-08T19-49-04Z/05-verdicts-at-hand-pass-and-fail-under-the-statement.png",
+        "runs/evidence/2026-09-08T19-49-04Z/probe-what-landed-on-disk.txt"
+      ],
+      "reasoning": "I first read the copy's whole runs ledger to find the two cases rather than guessing: panel.walkdown.who-signs-is-declared holds one approved and no pass or fail, while panel.walkdown.verdicts-at-hand and panel.signoff.spec-pair-derived hold many passes. Opened in the panel, the first offers Approve and Refine under the caption \"No build evidence yet - you are signing off the rule, not judging a build\", with the feedback box's placeholder changed to \"What should change? Refine files this as the rule's feedback\"; the two built rules offer Pass and Fail with no such caption. Approving the unbuilt rule and returning to it leaves Approve drawn solid and the pair unchanged, so an approval is not treated as build evidence - and its existing approved verdict in the ledger had not flipped it either. I also tested the other two things the statement says are not build evidence by putting a run in the scratch ledger carrying blocked for panel.start.unclaimed-page-says-so and skipped for panel.delivery.one-switch: both rules still offered Approve and Refine with the same caption, and the detail pane reported the agent tier as never run. The pair is read off the ledger in every case I could construct. No uncaught errors."
+    }
+  ]
+}
