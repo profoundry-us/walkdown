@@ -1334,7 +1334,13 @@ function paintBar() {
   if (!pin) return;
   const pinning = PIN.isOn();
   pin.disabled = !pinSurface();
-  pin.title = pinHint();
+  const why = pinHint();
+  pin.title = why;
+  // The wrapper carries the same sentence (see the tooltip in the bar), and a
+  // paint that skipped it would leave the reason describing the fade the
+  // slider was at before this drag.
+  const tip = pin.closest('[data-testid="panel.pin-why"]')?.querySelector('.tooltip-content');
+  if (tip) tip.textContent = why;
   pin.classList.toggle('btn-warning', pinning);
   pin.classList.toggle('btn-outline', !pinning);
   pin.classList.toggle('btn-primary', !pinning);
@@ -1467,9 +1473,20 @@ function renderBar() {
         <button class="btn btn-xs join-item ${S.viewportW === 390 ? 'btn-primary' : 'btn-outline btn-primary'}"
           data-vp="390" @click=${() => setViewport(390)} title="Mobile — lay the page out at 390px">${icon('device-mobile', 'size-3.5')}</button>
       </span>
-      <button class="btn btn-xs gap-1 ${pinning ? 'btn-warning' : 'btn-outline btn-primary'}" id="wdp-pin" data-testid="panel.pin-mode"
-        ?disabled=${!pinSurface()} @click=${() => PIN.set(!PIN.isOn())}
-        title="${pinHint()}">${icon('map-pin', 'size-3.5')}Pin mode</button>
+      <!-- The reason rides on a WRAPPER, not on the button. A disabled button
+           computes pointer-events: none, so a title on it is unreachable by
+           the only means anybody would try - the pointer - and the reviewer
+           gets a greyed control and no sentence (n-0247). The wrapper still
+           takes the pointer, so the tooltip opens whether or not the control
+           beneath it can be pressed. -->
+      <span class="tooltip tooltip-bottom tooltip-end [--tt-trans:0] shrink-0"
+        data-testid="panel.pin-why">
+        <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug"
+          >${pinHint()}</span>
+        <button class="btn btn-xs gap-1 ${pinning ? 'btn-warning' : 'btn-outline btn-primary'}" id="wdp-pin" data-testid="panel.pin-mode"
+          ?disabled=${!pinSurface()} @click=${() => PIN.set(!PIN.isOn())}
+          title="${pinHint()}">${icon('map-pin', 'size-3.5')}Pin mode</button>
+      </span>
       <!-- One control owns the sitting from end to end: it starts one, and
            while one runs it is how you end it. Starting in the bar and
            finishing somewhere else made the two halves of one act look like
@@ -1620,16 +1637,45 @@ const SESSION_KEY = () => `walkdown:session:${S.BP}`;
  * the shape, and sending it changes nothing about what is filed.
  */
 const sessionDraft = () => S.session && { actor: S.session.actor, ...sitting(S.session) };
+/*
+ * The last refusal said out loud, so a sitting that the server will never
+ * keep says so once rather than on every verdict.
+ */
+let draftRefused = null;
+
 export function saveSession() {
   const draft = sessionDraft();
   store.set(SESSION_KEY(), draft);
-  // Fire and forget: a verdict must never wait on the network, and the local
-  // copy already holds it if this write does not land.
+  /*
+   * Fire and forget where the NETWORK is concerned: a verdict must never wait
+   * on it, and the local copy already holds it if this write does not land.
+   *
+   * A refusal is not a hiccup, though, and swallowing it was a lie the strip
+   * told - under an identity the ledger will not sign for, every verdict was
+   * counted on screen while drafts/ stayed empty and POST /api/draft answered
+   * 400 to each one (n-0248). The server has read the write and declined it;
+   * no retry changes that, so the only honest thing left is to say so.
+   */
   fetch(api('/api/draft'), {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ target: 'local', ...(draft ?? { discard: true }) }),
-  }).catch(() => {});
+  })
+    .then(async (res) => {
+      if (res.ok) {
+        draftRefused = null;
+        return;
+      }
+      const said = await res
+        .json()
+        .then((o) => o?.error)
+        .catch(() => null);
+      const why = said ?? `the server answered ${res.status}`;
+      if (why === draftRefused) return; // said once, not once per rule
+      draftRefused = why;
+      toast(`Nothing is being kept on disk - ${esc(why)}`, { tone: 'error', sticky: true });
+    })
+    .catch(() => {});
 }
 
 /*

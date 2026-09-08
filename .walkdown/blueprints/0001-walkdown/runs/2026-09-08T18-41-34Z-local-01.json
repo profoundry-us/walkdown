@@ -1,0 +1,105 @@
+{
+  "run_id": "2026-09-08T18-41-34Z-local-01",
+  "created": "2026-09-08T18:41:34Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "3e3499d-dirty",
+  "tree_hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "spec_hash": "sha256:80f89cf57c41",
+  "results": [
+    {
+      "rule": "panel.dock.no-pin-mid-fade",
+      "status": "fail",
+      "statement_hash": "sha256:a25c933fc24f",
+      "evidence": [
+        "runs/evidence/2026-09-08T18-18-26Z/probe-no-pin-mid-fade.txt",
+        "runs/evidence/2026-09-08T18-18-26Z/app-review.png",
+        "runs/evidence/2026-09-08T18-18-26Z/proto-review.png"
+      ],
+      "threads": ["n-0247"],
+      "reasoning": "Driven against a scratch copy served on :4899, with both surfaces on that origin. Two of the three THENs hold and n-0222 is genuinely fixed: with the fade at either end pin mode enters normally; a real click on the middle of panel.fade both disabled the control and turned a running pin mode off rather than leaving it armed over an ambiguous view; and pressing Prototype (or App) takes the slider all the way to that end, after which pinning opens again with the title naming the surface a pin would land on. What fails is 'the control says why rather than simply refusing'. The reason exists only as the disabled button's own title attribute, and I measured that a reviewer cannot reach it: while disabled the button computes pointer-events: none, so elementFromPoint at the centre of the button returns the wrapping span with an empty title, and hovering the control for two seconds produced no tooltip. So mid-fade the panel refuses silently — a greyed button and no sentence anywhere on screen. I am calling this fail rather than pass-with-a-quibble because the step is explicit about the difference between refusing and saying why, and because the fix is small (move the title onto a wrapper that still takes pointer events, or say it in the bar the way the stale badges do). Filed as n-0247."
+    },
+    {
+      "rule": "panel.delivery.stale-copy-says-so",
+      "status": "pass",
+      "statement_hash": "sha256:124fa1fddaac",
+      "evidence": [
+        "runs/evidence/2026-09-08T18-18-26Z/probe-stale-copy-says-so.txt",
+        "runs/evidence/2026-09-08T18-18-26Z/app-review-extension-stale-copy.png",
+        "runs/evidence/2026-09-08T18-18-26Z/app-review-extension-current-copy.png",
+        "runs/evidence/2026-09-08T18-18-26Z/app-review-docked-no-stale-badge.png",
+        "runs/evidence/2026-09-08T18-18-26Z/proto-review.png"
+      ],
+      "reasoning": "The only thing that makes a delivery the extension is that its bootstrap hands the panel the digest of the vendored copy it is running (extension/boot-host.js), so I booted the real panel three times against the same server, changing nothing but that one field. With a wrong digest the bar painted panel.stale at [126, 12, 205, 20] reading 'Stale — reload the extension', titled 'walkdown was updated — reload the extension at chrome://extensions, then reload this page, to run the current build' — it states the copy is older and names the fix in order, and it sits beside panel.blueprint rather than taking its slot, so the bar still says which board is being read. With the digest equal to the panelHash the server ships (f36a76db352f) the badge was absent. In the docked delivery — which I also drove live — window.__walkdownConfig carries no buildHash at all and the badge never appears, which is the point: a script tag fetches the panel fresh every load, so it can neither be stale nor claim to be current. All three THENs hold."
+    },
+    {
+      "rule": "panel.start.open-a-folder",
+      "status": "pass",
+      "statement_hash": "sha256:2a5e9a0925a7",
+      "evidence": [
+        "runs/evidence/2026-09-08T18-18-26Z/probe-start-open-a-folder.txt",
+        "runs/evidence/2026-09-08T18-18-26Z/app-start.png",
+        "runs/evidence/2026-09-08T18-18-26Z/proto-start.png"
+      ],
+      "reasoning": "I reached the no-server state the honest way, by typing a dead address into the Blueprints tab's start.server and pressing Connect; the panel dropped to the gate. It says 'No blueprints open', explains why a browser tab needs a local server, and names the command in a code block reading exactly 'walkdown serve', closing with 'Then every blueprint under that folder is listed here.' Nothing in the gate is toned as an error — no error copy, colour or alert role — so it reads as a first step. The box carries aria-label 'walkdown server address', holds a URL, and its button says Connect; on the Blueprints tab the same row sits under the visible heading 'WALKDOWN SERVER', and nothing anywhere calls it a folder. From inside the gate I typed the live address back and pressed Connect: it reconnected with no reload at all (navigation entries stayed at 1 across the whole sequence), which is n-0236 actually fixed — the gate's row used to be duplicate markup with no handler. Once connected, start.folder named the served folder verbatim, which is also how I kept confirming I was on the scratch copy rather than the real board. The only softness is that in the gate itself the label is the accessible name plus the URL-shaped value rather than a visible caption; it is not mislabelled, so the step holds."
+    },
+    {
+      "rule": "panel.rules.steps-not-an-appendix",
+      "status": "pass",
+      "statement_hash": "sha256:0609e516526f",
+      "evidence": [
+        "runs/evidence/2026-09-08T18-18-26Z/probe-steps-not-an-appendix.txt",
+        "runs/evidence/2026-09-08T18-18-26Z/app-rule-detail.png",
+        "runs/evidence/2026-09-08T18-18-26Z/proto-rule-detail.png"
+      ],
+      "reasoning": "Opening a rule from the list paints detail.steps immediately, fully expanded and with no disclosure around it — measured on two rules, display grid, visible, all of given/when/then in the rendered text. On a rule with recorded check refs the disclosure is present as a sibling below the steps, closed: detail.technical-disclosure.open is false, its summary reads 'Check source · checks/panel.spec.js:313, checks/panel.spec.js:558', and the body is genuinely not painted — its innerText is empty and elementFromPoint over its box lands on the evidence block behind it — until a real click on the summary opens it. Neither element contains the other, and a rule with no check refs (panel.dock.no-pin-mid-fade) still shows its steps while having no disclosure at all, so the disclosure hangs off check refs rather than off steps, which is the n-0245 fix standing. For the third THEN I opened panel.walkdown.note-with-any-verdict, whose steps name detail.feedback and detail.verdict: both are rendered as anchor chips, and hovering each one moved a highlight outline on the surface under review from the feedback textarea to the Pass/Fail row and back."
+    },
+    {
+      "rule": "panel.walkdown.records-to-ledger",
+      "status": "pass",
+      "statement_hash": "sha256:6cc28278f4a6",
+      "evidence": [
+        "runs/evidence/2026-09-08T18-18-26Z/probe-walkdown-session.txt",
+        "runs/evidence/2026-09-08T18-18-26Z/app-rule-detail.png",
+        "runs/evidence/2026-09-08T18-18-26Z/proto-rule-detail.png"
+      ],
+      "reasoning": "Everything below was driven against a disposable copy, never the real ledger. Finishing a sitting signed by eng and product appended exactly one file, runs/2026-09-08T18-32-09Z-local-01.json (278 files to 279), carrying both verdicts, actor scratch-judge-0908 and both signatures, with the thread the feedback box filed listed on its rule's result. The toast reported what LANDED rather than a count: 'Recorded 2 verdicts as 2026-09-08T18-32-09Z-local-01 — eng (scratch-judge-0908), product (scratch-judge-0908)', which is the n-0226 requirement — the roles that landed and the names they landed under, read back from the door's own answer. An agent actor is refused before anything is written: with the copy's identity set to username 'agent' I gave a verdict and pressed Finish, and got 'A walkdown is recorded under a person's name — set it in Settings (the gear)' with the settings pane opened and the runs directory unchanged. Discarding writes nothing: with one verdict given I crossed to a second blueprint, chose 'Discard it' from the panel's own offer, and runs, threads and drafts were all exactly as before. I also checked the same refusal from the other direction by stopping the server mid-Finish — nothing recorded, and the retry after restarting recorded once."
+    },
+    {
+      "rule": "panel.walkdown.session-survives-reload",
+      "status": "pass",
+      "statement_hash": "sha256:05503923167c",
+      "evidence": [
+        "runs/evidence/2026-09-08T18-18-26Z/probe-walkdown-session.txt",
+        "runs/evidence/2026-09-08T18-18-26Z/app-review.png",
+        "runs/evidence/2026-09-08T18-18-26Z/proto-review.png"
+      ],
+      "reasoning": "With two verdicts given and nothing finished, a real page reload brought the sitting back exactly as left: the same actor and display name, 'as eng, product' (the signatures were not quietly collapsed to whoever is at the keyboard), '2/9 judged', the footer's '+2' not yet recorded, the judged rule ticked in the list, and the bar reading Finish walkdown. Both refusal paths hand the button back rather than bricking the session. Offline: I stopped the server and pressed Finish, got 'walkdown server unreachable — nothing recorded', and the session stayed on screen with Finish still live; restarting the server and pressing Finish again recorded exactly one record and deleted the draft. Nameless: under an agent identity Finish was refused with a message and the sitting stayed intact. Finishing cleared the saved draft (drafts/ left holding only its .gitignore), and so did discarding via the blueprint-crossing offer. I did notice one thing worth saying plainly: a sitting started but never given a verdict is saved to localStorage yet is not restored on reload, which is consistent with the statement ('saved from the first verdict') but means the signing dialog's answers are lost if you reload before judging anything."
+    },
+    {
+      "rule": "panel.walkdown.draft-on-disk",
+      "status": "pass",
+      "statement_hash": "sha256:cfb0ee61cad3",
+      "evidence": [
+        "runs/evidence/2026-09-08T18-18-26Z/probe-walkdown-session.txt",
+        "runs/evidence/2026-09-08T18-18-26Z/app-rule-detail.png",
+        "runs/evidence/2026-09-08T18-18-26Z/proto-rule-detail.png"
+      ],
+      "threads": ["n-0248"],
+      "reasoning": "The first verdict created drafts/local.json in the project, holding that verdict, the actor and the signatures, marked 'draft': true; the second rewrote it in place with the second verdict and the thread the feedback box had filed. It is not a run by any reading: no run_id, it sits in drafts/ and not runs/, runs/ did not move while it existed, and walkdown status showed the rule still pending with only its old stale agent verdict. walkdown status on the same copy reported the sitting rather than the verdicts: '◐ walkdown in progress — 1 rule judged by scratch-judge-0908, unsealed since ...'. Finishing appended the one record and deleted the draft; discarding deleted it and wrote nothing at all. drafts/.gitignore is exactly '*' and '!.gitignore', so the directory ignores its own contents and cannot commit a draft by accident. Every step holds, so this passes. One thing I found while doing it does not fit any step and is filed as n-0248 rather than failed here: under an agent identity the draft door refuses with a 400 and the panel swallows it, so the strip counts a verdict the project never received."
+    },
+    {
+      "rule": "panel.walkdown.note-with-any-verdict",
+      "status": "pass",
+      "statement_hash": "sha256:f9043305838b",
+      "evidence": [
+        "runs/evidence/2026-09-08T18-18-26Z/probe-walkdown-session.txt",
+        "runs/evidence/2026-09-08T18-18-26Z/app-rule-detail.png",
+        "runs/evidence/2026-09-08T18-18-26Z/proto-rule-detail.png"
+      ],
+      "reasoning": "Measured on the live rule-detail pane during a sitting: detail.feedback occupies [1219, 346, 354, 80] and detail.verdict [1219, 432, 354, 32], so the box ends above the buttons begin — the why is asked for before the verdict, and its placeholder says as much. Typing into the box and then pressing Pass filed threads/n-0247.yml on the disposable copy: kind note, anchored to that exact rule, author scratch-judge-0908 (the session's actor, not the machine's), body identical to what I typed. The draft picked the id up immediately and the finished run record's result for that rule carries \"threads\": [\"n-0247\"]. Judging a different rule with the box empty filed nothing — the threads directory stayed at 244 files across that verdict. All four THENs hold."
+    }
+  ]
+}

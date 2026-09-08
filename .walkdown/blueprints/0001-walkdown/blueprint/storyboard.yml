@@ -27,6 +27,7 @@ screens:
       - panel.fade
       - panel.viewport-toggle
       - panel.pin-mode
+      - panel.pin-why
       - panel.walk
       - panel.continue
       - panel.actor

@@ -1,0 +1,76 @@
+id: n-0248
+kind: note
+author: topher
+via: agent
+created: 2026-09-08T18:40:57.796Z
+anchor:
+  rule: panel.walkdown.draft-on-disk
+status: open
+body: >-
+  Under an agent identity a verdict is given, no draft is written, and nothing
+  says so.
+
+
+  Found while judging panel.walkdown.draft-on-disk on 2026-09-08 (evidence
+
+  runs/evidence/2026-09-08T18-18-26Z/probe-walkdown-session.txt). The rule
+  PASSES on every one of
+
+  its steps under a normal named identity, so this is not that failure - it is
+  the neighbouring
+
+  silence.
+
+
+  With the serving home.s identity set to `username: agent`, the panel will
+  still start a sitting
+
+  and still accept verdicts: the strip counted "1/7 judged". But POST /api/draft
+  answers
+
+  400 {"error": "\"agent\" cannot sign for eng - an agent may claim work, never
+  accept it"}, the
+
+  panel swallows it, and drafts/ stays empty. So the panel says a verdict was
+  given while the
+
+  project holds nothing - exactly the shape this rule exists to prevent
+  ("visible to the tools",
+
+  "survives the browser"), just reached through the one identity that can never
+  seal it anyway.
+
+
+  Finish does refuse this correctly and loudly. The gap is earlier: either the
+  sitting should not
+
+  start under a name the ledger will refuse (the signing dialog knows the name
+  before anything is
+
+  judged), or the failed draft write should surface the same way an unreachable
+  server does.
+
+  Filing rather than fixing because which of those two it should be is a
+  judgement call.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-08T18:58:36Z
+    body: >-
+      Half of this is now fixed; the half that is a judgement call is left to
+      you.
+
+
+      Fixed: the panel no longer swallows the refusal. POST /api/draft is still
+      fire-and-forget where the NETWORK is concerned - a verdict must never wait
+      on it - but a 400 is not a hiccup: the server has read the write and
+      declined it, so the panel now says so in a sticky error toast carrying the
+      server own words, once per reason rather than once per rule.
+      checks/panel.spec.js covers it by making the door refuse and requiring the
+      sentence on screen.
+
+
+      Still yours: whether a sitting should be allowed to START under a name the
+      ledger will refuse. The signing dialog knows the name before anything is
+      judged, so it could refuse there - but that is a policy about who may hold
+      a sitting, not a bug, and it is your call rather than mine.

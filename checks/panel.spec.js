@@ -113,13 +113,18 @@ async function endSession(page) {
   }
 }
 
+/** Open the first rule in the list, whatever it happens to be. */
+async function firstRule(page) {
+  await page.getByTestId('panel.rules-list').locator('button').first().click();
+  await expect(page.getByTestId('detail.rule-id')).toBeVisible();
+  return page.getByTestId('detail.rule-id').textContent();
+}
+
 /** Start a session and open the first rule in the list. */
 async function session(page) {
   await review(page);
   await ensureSession(page);
-  await page.getByTestId('panel.rules-list').locator('button').first().click();
-  await expect(page.getByTestId('detail.rule-id')).toBeVisible();
-  return page.getByTestId('detail.rule-id').textContent();
+  return firstRule(page);
 }
 
 /** What the server currently holds as the unfinished sitting. */
@@ -1696,4 +1701,91 @@ test('a thread an agent filed says so in the list, not only once it is opened', 
     await hand.scrollIntoViewIfNeeded();
     await expect(hand.locator('.wd-via')).toHaveCount(0);
   }
+});
+
+/*
+ * Mid-fade the pin control closes, and a closed control that says nothing is
+ * indistinguishable from a broken one. The reason used to live in the
+ * button's own `title`, which a reviewer can never reach: a disabled button
+ * computes `pointer-events: none`, so the pointer lands on whatever is behind
+ * it and the browser has no title to open (n-0247).
+ *
+ * Measured the way a reviewer meets it - what is under the pointer, and what
+ * that element shows on hover - rather than by asking whether an attribute
+ * exists somewhere in the DOM. That question was the one the old title
+ * answered, and it answered it wrongly.
+ */
+test('mid-fade, the reason pinning is closed is reachable by the pointer', {
+  tag: '@rule:panel.dock.no-pin-mid-fade',
+}, async ({ page }) => {
+  await review(page);
+  const fade = page.getByTestId('panel.fade');
+  await expect(fade, 'this screen has a design to fade to').toBeEnabled();
+  await fade.fill('50'); // half way: both surfaces at once
+
+  const pin = page.getByTestId('panel.pin-mode');
+  await expect(pin, 'pinning is closed while neither surface owns the view').toBeDisabled();
+
+  // What the pointer actually hits at the button's centre carries the reason.
+  const box = await pin.boundingBox();
+  const hit = await page.evaluate(({ x, y }) => {
+    const host = document.querySelector('[data-walkdown-chrome]')?.shadowRoot ?? document;
+    const el = host.elementFromPoint(x, y);
+    return el?.closest('[data-testid="panel.pin-why"]') ? 'the reason' : (el?.tagName ?? 'nothing');
+  }, { x: box.x + box.width / 2, y: box.y + box.height / 2 });
+  expect(hit, 'the element under the pointer is the one carrying the reason').toBe('the reason');
+
+  const why = page.getByTestId('panel.pin-why');
+  await expect(why).toContainText(/half-faded/);
+  // And it opens: a tooltip whose content never becomes visible is a title
+  // attribute with extra steps.
+  await pin.hover({ force: true }); // force: the button beneath is disabled
+  const content = why.locator('.tooltip-content');
+  await expect
+    .poll(() => content.evaluate((el) => Number(getComputedStyle(el).opacity)))
+    .toBeGreaterThan(0.5);
+
+  // Landing on an end opens pinning again, and the sentence changes with it.
+  await fade.fill('100');
+  await expect(pin).toBeEnabled();
+  await expect(why).toContainText(/Click anything to attach a note/);
+});
+
+/*
+ * The other half of "on disk": what the panel does when the disk says no.
+ *
+ * Under an identity the ledger will not sign for, POST /api/draft answers 400
+ * to every verdict, the panel swallowed each one, and the strip went on
+ * counting "1/7 judged" over an empty drafts/ (n-0248). The refusal is
+ * simulated here rather than reached through a refused identity, because the
+ * panel's half of the bug is the same whatever the server's reason was: a
+ * write it was told did not land must not read as one that did.
+ */
+test('a draft the server refuses is said out loud, once, not swallowed', {
+  tag: '@rule:panel.walkdown.draft-on-disk',
+}, async ({ page }) => {
+  await review(page);
+  // The pattern carries the query: the panel names its blueprint on every
+  // call, and a bare `**/api/draft` matches nothing it actually sends.
+  await page.route(/\/api\/draft(\?|$)/, (route) =>
+    route.request().method() === 'POST'
+      ? route.fulfill({
+          status: 400,
+          contentType: 'application/json',
+          body: JSON.stringify({ error: '"agent" cannot sign for eng' }),
+        })
+      : route.continue(),
+  );
+  await ensureSession(page);
+  await firstRule(page);
+  await page.getByTestId('detail.verdict').locator('button').first().click();
+
+  const said = page.locator('.toast', { hasText: 'Nothing is being kept on disk' });
+  await expect(said, 'the reviewer is told the write did not land').toBeVisible();
+  await expect(said).toContainText('cannot sign for eng'); // the server's own words
+  // Said once for one reason: a sticky toast per rule would bury the panel.
+  await page.getByTestId('detail.back').click();
+  await firstRule(page);
+  await page.getByTestId('detail.verdict').locator('button').first().click();
+  await expect(page.locator('.toast')).toHaveCount(1);
 });

@@ -1,0 +1,79 @@
+id: n-0247
+kind: note
+author: topher
+via: agent
+created: 2026-09-08T18:40:23.697Z
+anchor:
+  rule: panel.dock.no-pin-mid-fade
+status: addressed
+body: >-
+  Mid-fade, Pin mode closes but never says why: the reason is unreachable.
+
+
+  Judged 2026-09-08 against a scratch copy on :4899 (evidence
+  runs/evidence/2026-09-08T18-18-26Z/probe-no-pin-mid-fade.txt).
+
+
+  Two of the three THENs hold. Moving the fade off either end disables
+  panel.pin-mode and turns a
+
+  running pin mode off rather than leaving it armed; landing fully on either end
+  opens pinning
+
+  again, and n-0222 is genuinely fixed - pressing App or Prototype now takes the
+  slider to that end.
+
+
+  The third does not: "the control says why rather than simply refusing". The
+  why is only the
+
+  button.s own title attribute (PIN_MID, src/panel/app.js:1287). While the
+  button carries
+
+  `disabled`, daisyUI gives it `pointer-events: none`, so the control is never
+  the hover target and
+
+  the browser never has a title to show. Measured rather than reasoned: with the
+  fade at 50,
+
+  getComputedStyle(pin).pointerEvents === "none", and root.elementFromPoint at
+  the centre of the
+
+  button returns the wrapping SPAN, which has no title. Hovering it for two
+  seconds produced no
+
+  tooltip. So a reviewer sees a greyed-out button and no sentence anywhere.
+
+
+  Smallest honest fixes: put the title on a wrapper that still takes pointer
+  events (the
+
+  `ml-auto flex` span, or a span around just this button), or keep the button
+  enabled and refuse on
+
+  click with the toast the panel already has, or draw the sentence in the bar
+  the way the stale
+
+  badges are drawn.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-08T18:58:05Z
+    body: >-
+      Fixed: the reason now rides on a wrapper the pointer can reach.
+
+
+      The sentence is a daisyUI tooltip on a span AROUND the button rather than
+      a title ON it, so it opens whether or not the control beneath it can be
+      pressed - which is the whole of what you measured. paintBar rewrites the
+      wrapper as well as the button, so the reason follows the slider mid-drag
+      instead of describing the fade it was at before.
+
+
+      Judged the way you judged it rather than by reading the DOM:
+      checks/panel.spec.js now takes the fade to 50, asks elementFromPoint what
+      is under the centre of the pin button, and requires that element to be the
+      one carrying the reason - then hovers and requires the tooltip to actually
+      reach opacity. Landing on an end opens pinning again and the sentence
+      changes with it. The anchor is panel.pin-why, now declared on the review
+      screen.

@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-09-08T18-55-39Z-local-01",
+  "created": "2026-09-08T18:55:39Z",
+  "actor": "checks-person",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "3e3499d-dirty",
+  "tree_hash": "sha256:e54cc7cd7935",
+  "spec_hash": "sha256:1e8005428148",
+  "results": [
+    {
+      "rule": "panel.walkdown.draft-on-disk",
+      "status": "pass",
+      "statement_hash": "sha256:cfb0ee61cad3",
+      "duration_ms": 2194,
+      "checks": [
+        "checks/panel.spec.js:1764"
+      ]
+    }
+  ]
+}

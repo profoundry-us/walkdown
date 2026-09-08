@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-09-08T18-53-30Z-local-01",
+  "created": "2026-09-08T18:53:30Z",
+  "actor": "checks-person",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "3e3499d-dirty",
+  "tree_hash": "sha256:6f30169489bd",
+  "spec_hash": "sha256:1e8005428148",
+  "results": [
+    {
+      "rule": "panel.walkdown.draft-on-disk",
+      "status": "fail",
+      "statement_hash": "sha256:cfb0ee61cad3",
+      "duration_ms": 6386,
+      "checks": [
+        "checks/panel.spec.js:1764"
+      ],
+      "evidence": [
+        "runs/evidence/2026-09-08T18-53-30Z/panel-a-draft-the-server-r-ca736-out-loud-once-not-swallowed-test-failed-1.png",
+        "runs/evidence/2026-09-08T18-53-30Z/panel-a-draft-the-server-r-ca736-out-loud-once-not-swallowed-error-context.md"
+      ]
+    }
+  ]
+}
