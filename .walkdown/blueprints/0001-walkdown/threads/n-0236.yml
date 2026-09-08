@@ -1,0 +1,51 @@
+id: n-0236
+kind: note
+author: topher
+created: 2026-09-08T00:12:34.995Z
+anchor:
+  rule: panel.start.open-a-folder
+  screen: start
+  element: '[data-testid="start.connect"]'
+status: open
+body: >-
+  The Connect button on the start screen does nothing, so the rule's second then
+  — "The address it looks at can be changed and retried without a reload" — has
+  no way to happen.
+
+
+  The same control exists twice under one id. In src/panel/blueprints.js:21 it
+  is wired: an @click that reads the sibling #wdp-server and fires the 'connect'
+  event, which the listener in src/panel/app.js:2530 picks up (it stores the
+  address and calls start()). The start gate's copy at src/panel/app.js:2476 is
+  plain markup with the same id and no handler at all, and nothing delegates
+  clicks by id anywhere in the panel — so on this screen the event is never
+  fired and the typed address is never read.
+
+
+  Observed rather than only read: with the panel loaded against a dead address
+  (server http://localhost:4796, nothing listening), typing
+  http://localhost:4795 into [data-testid="start.server"] and clicking
+  [data-testid="start.connect"] left the screen as it was and sent no request to
+  4795 — the only network activity was the refused connection to 4796.
+  Reproduced with the host page at scratchpad/start-state/index.html, which
+  rebuilds what extension/boot-host.js does: frames a page, loads panel.js from
+  a live server, points the panel's server at a dead one.
+
+
+  Knock-on: the fifth then — "Once connected, the panel names the folder that
+  server is serving" — is unreachable from this screen too, because that text
+  (anchor start.folder, "Serving <root>") lives in the Blueprints pane, which
+  you only see once connected.
+
+
+  Filed by the agent while building the state for Topher's walkdown of this
+  rule; the verdict is his.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-08T00:13:18Z
+    body: "Provenance correction: the opening note on this thread was typed by the
+      agent on Topher's instruction, not by Topher. It went in without
+      --as-agent, so it carries his name and no via. The decision to file was
+      his; the sentences were the machine's. This reply carries the via the
+      first message should have had."

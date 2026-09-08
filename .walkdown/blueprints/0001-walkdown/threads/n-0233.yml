@@ -1,0 +1,23 @@
+id: n-0233
+kind: note
+author: topher
+created: 2026-09-07T23:50:22.803Z
+anchor:
+  rule: panel.walkdown.note-with-any-verdict
+  screen: rule-detail
+  element: detail.verdict
+  offset:
+    x: 103
+    y: 11
+  position:
+    x: 866
+    y: 283
+  surface: prototype
+  viewport:
+    name: desktop
+    width: 1050
+status: open
+body: Sometimes when I pass, I scroll down to read the STEPS at the bottom. If I
+  then click the "Pass" button, the rule detail changes, but I am still scrolled
+  to the old position. Changing a rule (via the detail.stepper buttons or the
+  pass / fail) should reset the scroll for that panel.

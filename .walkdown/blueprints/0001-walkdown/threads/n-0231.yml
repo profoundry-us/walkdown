@@ -36,3 +36,11 @@ replies:
     created: 2026-09-07T19:48:54Z
     body: "Landed: lib/sitting.js is the one list, and lib/api.js, lib/draft.js and
       src/panel/app.js all take their shape from it."
+  - author: topher
+    via: agent
+    created: 2026-09-08T00:13:17Z
+    body: "Provenance correction: the opening note on this thread was typed by the
+      agent on Topher's instruction, not by Topher. It went in without
+      --as-agent, so it carries his name and no via. The decision to file was
+      his; the sentences were the machine's. This reply carries the via the
+      first message should have had."

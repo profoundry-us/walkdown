@@ -1,0 +1,18 @@
+id: n-0232
+kind: note
+author: topher
+created: 2026-09-07T23:47:35.915Z
+anchor:
+  rule: panel.walkdown.verdicts-at-hand
+status: open
+body: >-
+  This is working, but we don't actually need to see the "XX judged this
+  session" (detail.judged) under the button because it's already displayed in
+  the footer. Let's remove that and the part of the rule that states / requires
+  that.
+
+
+  Also, the rule says "directly under the selected rule's statement" but we
+  added the reply box in between. I think that exists in another rule, but it
+  may make sense to mention it here too so a judge doesn't fail this
+  erroneously.

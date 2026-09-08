@@ -1,0 +1,29 @@
+id: n-0235
+kind: note
+author: topher
+created: 2026-09-08T00:00:46.156Z
+anchor:
+  rule: panel.rules.steps-not-an-appendix
+status: open
+body: >-
+  The then/given/when clauses are separate strings in the data (steps.given,
+  steps.when, steps.then are each an array), but the detail pane joins them with
+  <br> — see src/panel/rule-detail.js around the steps builder. On screen they
+  read as a wrapped paragraph run, so where one clause ends and the next begins
+  is only legible by where the line happens to break, and a clause long enough
+  to wrap looks like two.
+
+
+  Topher wants them shown as bullet points, one bullet per clause. The data
+  supports it as-is: no schema change, no migration, just a list in place of the
+  <br> joins. Worth keeping the phase label (given/when/then) where it sits and
+  bulleting only the items under it.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-08T00:13:18Z
+    body: "Provenance correction: the opening note on this thread was typed by the
+      agent on Topher's instruction, not by Topher. It went in without
+      --as-agent, so it carries his name and no via. The decision to file was
+      his; the sentences were the machine's. This reply carries the via the
+      first message should have had."

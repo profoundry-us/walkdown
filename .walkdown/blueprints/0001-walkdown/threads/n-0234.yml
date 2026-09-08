@@ -1,0 +1,10 @@
+id: n-0234
+kind: note
+author: topher
+created: 2026-09-07T23:51:57.912Z
+anchor:
+  rule: panel.signoff.spec-pair-derived
+status: open
+body: "This rule is fine, but needs to be reworded; this part just doesn't make
+  sense to me: \"offers Approve and Refine, and sign-off records, skips and
+  blocks never count as build evidence.\""
