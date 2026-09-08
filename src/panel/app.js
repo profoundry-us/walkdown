@@ -1338,7 +1338,8 @@ function paintBar() {
   pin.title = why;
   // The wrapper carries the same sentence (see the tooltip in the bar), and a
   // paint that skipped it would leave the reason describing the fade the
-  // slider was at before this drag.
+  // slider was at before this drag. Safe to write because the render binds
+  // that same property rather than a child node - see the tooltip's own note.
   const tip = pin.closest('[data-testid="panel.pin-why"]')?.querySelector('.tooltip-content');
   if (tip) tip.textContent = why;
   pin.classList.toggle('btn-warning', pinning);
@@ -1481,8 +1482,15 @@ function renderBar() {
            beneath it can be pressed. -->
       <span class="tooltip tooltip-bottom tooltip-end [--tt-trans:0] shrink-0"
         data-testid="panel.pin-why">
+        <!-- The sentence is set as a PROPERTY, not written as a child. A
+             child is a text node lit owns, and paintBar rewrites this text
+             during a drag - so the next full render committed into a node
+             that no longer existed and threw, mid-drag, leaving pin mode
+             armed while the button still read as off (n-0249). Bound this
+             way, paintBar and lit are doing the same thing to the same
+             property and neither can surprise the other. -->
         <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug"
-          >${pinHint()}</span>
+          .textContent=${pinHint()}></span>
         <button class="btn btn-xs gap-1 ${pinning ? 'btn-warning' : 'btn-outline btn-primary'}" id="wdp-pin" data-testid="panel.pin-mode"
           ?disabled=${!pinSurface()} @click=${() => PIN.set(!PIN.isOn())}
           title="${pinHint()}">${icon('map-pin', 'size-3.5')}Pin mode</button>

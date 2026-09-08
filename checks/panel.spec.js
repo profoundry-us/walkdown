@@ -1789,3 +1789,46 @@ test('a draft the server refuses is said out loud, once, not swallowed', {
   await page.getByTestId('detail.verdict').locator('button').first().click();
   await expect(page.locator('.toast')).toHaveCount(1);
 });
+
+/*
+ * The same rule, reached by dragging rather than by pressing an end button.
+ *
+ * A drag is the only time the bar is PAINTED instead of rebuilt (the slider
+ * cannot survive having the element under the pointer replaced), so the
+ * painted path and the rendered path have to agree about the DOM they share.
+ * They did not: the paint rewrote a text node lit owned, the next full render
+ * committed into a node that was gone and threw — after PIN.set had already
+ * armed pin mode, so the mode was on and the control read as off (n-0249).
+ * A drag, then a press, then: nothing thrown.
+ */
+test('a fade dragged onto an end opens pinning, and nothing throws on the way', {
+  tag: '@rule:panel.dock.no-pin-mid-fade',
+}, async ({ page }) => {
+  const thrown = [];
+  page.on('pageerror', (e) => thrown.push(String(e)));
+  await review(page);
+
+  const fade = page.getByTestId('panel.fade');
+  await expect(fade).toBeEnabled();
+  const box = await fade.boundingBox();
+  const y = box.y + box.height / 2;
+  await page.mouse.move(box.x + 2, y);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width / 2, y, { steps: 8 }); // through the middle
+  await page.mouse.move(box.x + box.width - 2, y, { steps: 8 }); // and onto the far end
+  await page.mouse.up();
+
+  const pin = page.getByTestId('panel.pin-mode');
+  await expect(pin, 'an end was reached, so pinning is open again').toBeEnabled();
+  await pin.click();
+  await expect(pin, 'and the control shows the mode it just entered').toHaveClass(/btn-warning/);
+
+  // The paint and the render share the reason's DOM, so it has to survive
+  // both: paint it during a drag, then render it afterwards, and the sentence
+  // must still be the panel's to change. Clobbered, the render had nothing
+  // left to write into - the bar threw where the judge stood, and the words
+  // went stale here.
+  await page.getByTestId('panel.fade').fill('50');
+  await expect(page.getByTestId('panel.pin-why')).toContainText(/half-faded/);
+  expect(thrown, 'nothing threw while the bar was painted mid-drag').toEqual([]);
+});

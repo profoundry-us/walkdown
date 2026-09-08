@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-09-08T19-21-36Z-local-01",
+  "created": "2026-09-08T19:21:36Z",
+  "actor": "checks-person",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "a0cf775-dirty",
+  "tree_hash": "sha256:a4c57a2ab40a",
+  "spec_hash": "sha256:1e8005428148",
+  "results": [
+    {
+      "rule": "panel.dock.no-pin-mid-fade",
+      "status": "fail",
+      "statement_hash": "sha256:a25c933fc24f",
+      "duration_ms": 1244,
+      "checks": [
+        "checks/panel.spec.js:1804"
+      ],
+      "evidence": [
+        "runs/evidence/2026-09-08T19-21-36Z/panel-a-fade-dragged-onto--838ed-d-nothing-throws-on-the-way-test-failed-1.png",
+        "runs/evidence/2026-09-08T19-21-36Z/panel-a-fade-dragged-onto--838ed-d-nothing-throws-on-the-way-error-context.md"
+      ]
+    }
+  ]
+}

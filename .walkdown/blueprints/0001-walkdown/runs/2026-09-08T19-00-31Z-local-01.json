@@ -1,0 +1,29 @@
+{
+  "run_id": "2026-09-08T19-00-31Z-local-01",
+  "created": "2026-09-08T19:00:31Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "a0cf775",
+  "spec_hash": "sha256:1e8005428148",
+  "results": [
+    {
+      "rule": "panel.dock.no-pin-mid-fade",
+      "status": "fail",
+      "statement_hash": "sha256:a25c933fc24f",
+      "evidence": [
+        "runs/evidence/2026-09-08T19-00-31Z/probe-no-pin-mid-fade.txt",
+        "runs/evidence/2026-09-08T19-00-31Z/probe-no-pin-mid-fade.mjs",
+        "runs/evidence/2026-09-08T19-00-31Z/probe-render-crash-cause.txt",
+        "runs/evidence/2026-09-08T19-00-31Z/probe-render-crash-cause.mjs",
+        "runs/evidence/2026-09-08T19-00-31Z/b-mid-fade-reason-visible.png",
+        "runs/evidence/2026-09-08T19-00-31Z/d-prototype-end-press-does-nothing.png",
+        "runs/evidence/2026-09-08T19-00-31Z/e-app-end-press.png",
+        "runs/evidence/2026-09-08T19-00-31Z/f-control-buttons-only-pin-turns-on.png"
+      ],
+      "reasoning": "Judged against a scratch copy served on :4901, driving the panel with a real pointer and confirming every measurement twice - once by hand in a live browser, once in a scripted probe. Mid-fade the rule holds and holds well: dragging the slider to 50 disables the pin control, elementFromPoint at the centre of the button returns the span carrying panel.pin-why rather than a dead disabled button, and hovering there brings the sentence 'Slide fully to the prototype or the app first - half-faded, a pin has no surface to belong to' to opacity 1; pressing it anyway does nothing, and a pin mode already running is turned off as the fade leaves the end. The third THEN fails. Once the fade has been DRAGGED rather than jumped with the App/Prototype buttons, landing fully on an end does not open pinning again: fresh page, drag from the app end to the prototype end, press Pin mode, and the control stays off, while the page logs an uncaught TypeError 'Cannot set properties of null (setting data)' out of renderBar - thrown first from setFade as the drag crosses off an end and again from PIN.set. The control case rules out coincidence: the same end reached with the Prototype button instead of a drag turns pin mode on with no errors. The cause is isolated rather than guessed - paintBar assigns tip.textContent (src/panel/app.js:1343), replacing the text node lit's ChildPart holds inside .tooltip-content, so the next full renderBar commits into a node that is gone; clobbering that text by hand and forcing one full render reproduces the same throw, and a clean render throws nothing. It is worse than a dead button, because PIN.set assigns framedPinMode and pushes context to the frames before renderBar throws, so pin mode can be armed while the control still reads as off - which is the ambiguity this rule exists to prevent, arriving by a different door. Filed as n-0249.",
+      "threads": ["n-0249"]
+    }
+  ]
+}

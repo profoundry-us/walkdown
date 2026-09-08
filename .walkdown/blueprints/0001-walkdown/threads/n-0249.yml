@@ -1,0 +1,121 @@
+id: n-0249
+kind: note
+author: topher
+via: agent
+created: 2026-09-08T19:14:27.641Z
+anchor:
+  rule: panel.dock.no-pin-mid-fade
+status: addressed
+body: >-
+  Landing back on an end no longer opens pinning: the reason wrapper's repaint
+  crashes renderBar.
+
+
+  Judged 2026-09-08 against a scratch copy served on :4901 (evidence
+  runs/evidence/2026-09-08T19-00-31Z/).
+
+
+  Two of the three THENs hold, and the n-0247 fix is real: with the fade dragged
+  to 50 the pin
+
+  control is disabled, elementFromPoint at the centre of the button returns the
+  span carrying
+
+  panel.pin-why, and hovering there brings the sentence "Slide fully to the
+  prototype or the app
+
+  first - half-faded, a pin has no surface to belong to" to opacity 1
+  (b-mid-fade-reason-visible.png).
+
+  Pressing it anyway does nothing, and a pin mode already running is turned off
+  when the fade leaves
+
+  an end.
+
+
+  The third does not. "Landing fully on either end opens pinning again" fails
+  once the fade has been
+
+  DRAGGED rather than jumped with the App/Prototype buttons. Measured: fresh
+  page, drag the slider
+
+  from the app end to the prototype end, press Pin mode - the control stays off
+
+  (d-prototype-end-press-does-nothing.png). The same page logs an uncaught
+
+  TypeError: Cannot set properties of null (setting 'data') from renderBar,
+  thrown first out of
+
+  setFade as the drag crosses off an end and again out of PIN.set. Control: the
+  same page reaching
+
+  the same end with the Prototype button instead of a drag turns pin mode on
+  with no errors at all
+
+  (f-control-buttons-only-pin-turns-on.png).
+
+
+  Cause, isolated in probe-render-crash-cause.mjs: paintBar does
+  `tip.textContent = why`
+
+  (src/panel/app.js:1343). That replaces the very text node lit's ChildPart
+  holds inside
+
+  .tooltip-content, so the next full renderBar commits into a node that is gone
+  and throws. A clean
+
+  full re-render throws nothing; clobbering the text first and then forcing one
+  reproduces it exactly.
+
+  The drag path is what makes it reachable, because a drag is the only time
+  paintBar runs instead of
+
+  renderBar - which is the same `dragging` arrangement the slider needs to
+  survive a drag at all.
+
+
+  Worse than a dead button: PIN.set assigns framedPinMode and calls pushContexts
+  before renderBar
+
+  throws, so pin mode can be armed while the control still reads as off - the
+  ambiguity this rule
+
+  exists to prevent, arriving by a different door.
+
+
+  Smallest honest fix: give the reason its own lit-owned node and repaint it the
+  way the bar repaints
+
+  the button - e.g. keep a direct handle on the Text node and set its .data, or
+  render the sentence
+
+  into an element paintBar owns outright rather than into the middle of a lit
+  template.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-08T19:24:09Z
+    body: >-
+      Fixed, and the crash is now in the suite.
+
+
+      Cause was exactly as you isolated: paintBar wrote the reason with
+      textContent, which takes out the marker comments lit uses to find that
+      part, so the next full render committed into nothing. The sentence is now
+      bound as a PROPERTY (.textContent=${pinHint()}) rather than written as a
+      child, so the paint and the render are doing the same thing to the same
+      property and neither can surprise the other.
+
+
+      Reproduced before fixing rather than assumed: drag the fade end to end
+      with a real pointer, press Pin mode, then move the fade again - on the old
+      build that is your "Uncaught TypeError: Cannot set properties of null
+      (setting data)", and the reason goes stale with it. The check in
+      checks/panel.spec.js does that and fails on the old build, passes on the
+      new one.
+
+
+      Worth recording that my first attempt at the check did not catch it:
+      pressing an end BUTTON after the drag rebuilds the bar and papers over the
+      broken part, so the assertion has to move the fade a second time. A check
+      that only pressed the button passed against the bug.
