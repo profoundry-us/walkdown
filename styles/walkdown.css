@@ -72,6 +72,12 @@
 @source "../example/prototype/screens/*.html";
 @source "../example/app/*.html";
 @source "../sketches/*.html";
+/* Proposals are drawn in this same idiom and reviewed by eye before anybody
+   promotes one. Left out, a sketch silently loses every utility no shipped
+   surface happens to use already - pt-3 was simply doing nothing in
+   proposals/choose-blueprint-unclaimed.html - so design reviews a drawing
+   that is not the one written. */
+@source "../proposals/*.html";
 
 /*
  * The handful of composites daisyUI has no component for. These are walkdown's

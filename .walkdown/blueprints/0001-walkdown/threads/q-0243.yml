@@ -45,3 +45,48 @@ replies:
 
       The sketch at proposals/choose-blueprint-unclaimed.html has both commands
       in it correctly.
+  - author: topher
+    via: agent
+    created: 2026-09-08T21:19:10Z
+    body: >-
+      The sketch is standing and now renders truthfully. It is at
+      proposals/choose-blueprint-unclaimed.html - open it at
+      /proposals/choose-blueprint-unclaimed.html on any walkdown serve.
+
+
+      Two things changed today.
+
+
+      First, it was drawing itself wrong. Tailwind scans a fixed list of
+      surfaces (styles/walkdown.css) and proposals/ was not on it, so every
+      utility no shipped surface already happened to use was silently dropped -
+      pt-3 on the divider was doing nothing, and the section label sat on the
+      dashed rule. A sketch that renders differently from what it says is worse
+      than no sketch, since the review is by eye. proposals/ is on the list now,
+      beside sketches/.
+
+
+      Second, it has the measurements behind it. n-0256 judged the rule on
+      2026-09-08: a server holding ONE blueprint opens it - the whole board over
+      a page it does not claim - and a server holding two stops at the existing
+      gate, which asks which and never whether. Only the fourth THEN holds
+      today. That is why the sketch lists exactly one blueprint under "Open one
+      anyway": the single-blueprint card is the one the build skips entirely,
+      and drawing the several case would have let the asymmetry hide. Six
+      blueprints is the same card with five more rows.
+
+
+      The four blocks are unchanged in shape: start.unclaimed (the fact, with
+      the address named, because a claim misses on a port or a fragment and the
+      gate today names the panel own origin instead), start.claim (the
+      storyboard entry or the target base_url, plus walkdown claims --url to ask
+      who claims an address today), start.new (walkdown init), start.options
+      (what this server does hold, reachable but never opened for you).
+
+
+      To promote it: it is one page in the wireframe idiom and can move to
+      prototype/screens/ as it stands. It wants its own storyboard entry rather
+      than replacing choose-blueprint - start and choose-blueprint are already
+      two entries for two states of one screen - and the file header carries the
+      entry to paste. I have not touched prototype/ and will not; say the word
+      and I will move it, or redraw it to whatever you decide instead.
