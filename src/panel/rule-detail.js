@@ -8,7 +8,7 @@ import { html, live, nothing } from '../../vendor/lit.js';
 import { postRuleNote, sayFiling, verifyAll } from './conversation.js';
 import { tierMarks } from './rules-list.js';
 import { openSettings, requestReload, requestRender } from './shell.js';
-import { openShots } from './shots.js';
+import { openEvidence } from './evidence.js';
 import { S } from './state.js';
 import { threadCard } from './thread-pane.js';
 import { api, fire } from './util.js';
@@ -151,23 +151,26 @@ export function evidenceRows(row) {
       <span class="${cls}">${glyph} ${said}</span></div>`;
   };
   /*
-   * The screenshots an agent's run attached. They are that run's evidence,
-   * not a tier of their own, so they hang under the agent's row as a bullet
-   * rather than standing beside it as a fourth kind of verdict (n-0100) -
-   * and they are a link, because a count of pictures nobody can look at is
-   * not evidence.
+   * The files an agent's run attached. They are that run's evidence, not a
+   * tier of their own, so they hang under the agent's row as a bullet rather
+   * than standing beside it as a fourth kind of verdict (n-0100) - and they
+   * are a link, because a count of files nobody can open is not evidence.
+   *
+   * "Screenshots" until n-0242: what a run attaches has not been only
+   * pictures for a long time, and the word quietly told a reader that the
+   * transcript sitting in the list did not belong there.
    */
-  const shots = (cell) => {
-    const shot = cell?.evidence ?? [];
-    if (!shot.length) return '';
+  const attached = (cell) => {
+    const files = cell?.evidence ?? [];
+    if (!files.length) return '';
     return html`<div class="evrow evshot">
       <span class="src"></span>
-      <span class="opacity-70">• Screenshots —
-        <button class="link link-hover text-primary" data-testid="detail.screenshots"
-          data-shots="${JSON.stringify(shot)}"
-          title="Open the ${shot.length} screenshot${shot.length > 1 ? 's' : ''} this run attached"
-          @click=${() => openShots(shot)}
-          >open ${shot.length}</button></span></div>`;
+      <span class="opacity-70">• Evidence —
+        <button class="link link-hover text-primary" data-testid="detail.evidence-open"
+          data-evidence="${JSON.stringify(files)}"
+          title="Open the ${files.length} file${files.length > 1 ? 's' : ''} this run attached"
+          @click=${() => openEvidence(files)}
+          >open ${files.length}</button></span></div>`;
   };
   /*
    * A tier the rule declares it cannot honestly have, said in the row that
@@ -184,7 +187,7 @@ export function evidenceRows(row) {
       ? (S.data?.targets ?? []).map((t) => line(`checks/${t}`, row.cells?.[t]))
       : []),
     row.excuses?.checks ? excuse('checks', row.excuses.checks) : '',
-    ...(row.verify.includes('agent') ? [line('agent', row.agent), shots(row.agent)] : []),
+    ...(row.verify.includes('agent') ? [line('agent', row.agent), attached(row.agent)] : []),
     row.excuses?.agent ? excuse('agent', row.excuses.agent) : '',
     ...(row.verify.includes('human') ? [line('human', row.human)] : []),
   ].filter(Boolean);
@@ -396,28 +399,41 @@ export function detailPane() {
         steps
           ? html`<div><div class="${LBL} mb-1.5">Steps</div>
         <div class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-[13px] leading-relaxed"
-          data-testid="detail.steps">${steps}</div>
-        ${
-          checkRefs(r).length
-            ? html`<!-- The steps are the rule; the source that checks them is a
+          data-testid="detail.steps">${steps}</div></div>`
+          : nothing
+      }
+      ${
+        /*
+         * The check source, which hangs off the rule's CHECK REFS and not off
+         * its steps.
+         *
+         * It used to be drawn inside the Steps block, so a rule with no steps
+         * had no disclosure at all - and the rules with no steps were exactly
+         * the ones whose check IS the specification: screenless derivation
+         * law, judged by reading a test rather than by looking at a screen.
+         * The panel said "checks passed" and offered the one thing that says
+         * what passed nowhere at all (n-0245). Steps are now required of every
+         * rule, so this can no longer bite the same way, but the nesting was
+         * wrong on its own terms: these are two different things about a rule.
+         */
+        checkRefs(r).length
+          ? html`<!-- The steps are the rule; the source that checks them is a
              technical detail, so it waits behind a disclosure until asked for. -->
-          <details class="mt-2 rounded border border-base-300 bg-base-200/60 px-2 py-1 text-[11.5px]"
-            data-testid="detail.technical-disclosure" data-checks="${r.rule}" ?open=${S.srcOpenFor === r.rule}
-            @toggle=${(e) => {
-              // A pane rebuilt with the disclosure already open fires this
-              // too; only a real change is one.
-              const el = e.currentTarget;
-              if (el.open === (S.srcOpenFor === r.rule)) return;
-              S.srcOpenFor = el.open ? r.rule : null;
-              if (el.open) loadCheckSource(r.rule);
-            }}>
-            <summary class="cursor-pointer opacity-60">Check source · ${checkRefs(r).join(', ')}</summary>
-            <div class="wdp-check-src mt-1 opacity-70">${
-              S.srcCache.rule === r.rule && S.srcCache.view ? S.srcCache.view : 'Loading…'
-            }</div>
-          </details>`
-            : nothing
-        }</div>`
+        <details class="rounded border border-base-300 bg-base-200/60 px-2 py-1 text-[11.5px]"
+          data-testid="detail.technical-disclosure" data-checks="${r.rule}" ?open=${S.srcOpenFor === r.rule}
+          @toggle=${(e) => {
+            // A pane rebuilt with the disclosure already open fires this
+            // too; only a real change is one.
+            const el = e.currentTarget;
+            if (el.open === (S.srcOpenFor === r.rule)) return;
+            S.srcOpenFor = el.open ? r.rule : null;
+            if (el.open) loadCheckSource(r.rule);
+          }}>
+          <summary class="cursor-pointer opacity-60">Check source · ${checkRefs(r).join(', ')}</summary>
+          <div class="wdp-check-src mt-1 opacity-70">${
+            S.srcCache.rule === r.rule && S.srcCache.view ? S.srcCache.view : 'Loading…'
+          }</div>
+        </details>`
           : nothing
       }
       <div>

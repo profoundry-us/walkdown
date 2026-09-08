@@ -7,7 +7,7 @@ anchor:
   rule: panel.rules.evidence-visible
   screen: rule-detail
   element: detail.screenshots
-status: open
+status: addressed
 body: >-
   Rename Screenshots to Evidence, everywhere the word appears. Topher's call,
   2026-09-07, taken alongside n-0241 (a transcript rendering as a broken image):
@@ -46,3 +46,38 @@ body: >-
 
   Sequenced after n-0241 rather than before it: rendering by file type is the
   fix a reader feels; this is the word for what they are then looking at.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-08T17:35:35Z
+    body: >-
+      Done, all five places. The control reads "• Evidence — open N", its title
+      says "Open the N files this run attached", and the modal's heading is
+      Evidence. src/panel/shots.js is now src/panel/evidence.js, and its exports
+      say evidence rather than shots.
+
+
+      The anchors moved with it, and needed new names rather than the obvious
+      ones: detail.evidence was already taken by the tier-rows block in the same
+      pane. So detail.screenshots is now detail.evidence-open and
+      detail.screenshots-modal is detail.evidence-modal - the control and the
+      layer it opens, which is what they each are. Renamed in the storyboard, in
+      this rule's two then-clauses, in checks/panel.spec.js, and in the state
+      list in tools/sitting.mjs.
+
+
+      The prototype says nothing about screenshots - I checked before touching
+      anything - so there was no design request to raise.
+
+
+      Two loose ends, both visible in lint rather than hidden:
+
+
+      - This thread and n-0241 are themselves anchored to the old anchor names,
+      so lint now warns "anchored to undeclared anchor" for both. That is the
+      mechanism this note predicted, working. It clears when you verify them;
+      there is no command that re-anchors a thread, and inventing one to rewrite
+      history here would be the wrong trade.
+
+      - n-0100 is anchored to detail.screenshots too, but it is terminal, so it
+      is not linted.

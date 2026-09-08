@@ -122,7 +122,7 @@ test('evidence serving still refuses anything outside the evidence key space @ru
 
 /*
  * The prefix, not a file under it. `walkdown judge` prints the evidence key as
- * `runs/evidence/<stamp>/`, and src/panel/shots.js renders every cited key
+ * `runs/evidence/<stamp>/`, and src/panel/evidence.js renders every cited key
  * straight into an <img src>, so a record citing the directory it was handed is
  * a request the panel makes on its own. It used to kill the server: existsSync
  * says yes, readFileSync throws EISDIR after the 200 has gone out, the catch

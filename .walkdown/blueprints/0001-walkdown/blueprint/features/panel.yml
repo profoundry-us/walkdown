@@ -528,7 +528,7 @@ stories:
             - Reading anchor `detail.steps`
           then:
             - The steps are already expanded - they are the rule, not an appendix
-            - The check source stays behind anchor `detail.technical-disclosure` until opened
+            - "The check source stays behind anchor `detail.technical-disclosure` until opened, and stands on its own: it hangs off the rule's check refs, so it is there whether or not the rule has steps"
             - Hovering an anchor a step names highlights that element on the surface under review, so a step points at what it is talking about
           statement_hash: sha256:0609e516526f
 
@@ -562,8 +562,9 @@ stories:
             - Reading anchor `detail.evidence` on screen `rule-detail`
           then:
             - Each verify type shows its latest result, who or what produced it, and staleness
-            - Screenshots an agent's run attached hang under that run's row as `detail.screenshots`, not as a tier of their own
-            - "Anchor `detail.screenshots` opens them to look at, in `detail.screenshots-modal`"
+            - Files an agent's run attached hang under that run's row as `detail.evidence-open`, not as a tier of their own
+            - "Anchor `detail.evidence-open` opens them to look at, in `detail.evidence-modal`"
+            - "Each file is shown as what it is: a picture as a picture, a transcript as readable text, anything else as a link to open - never as a broken image"
             - A rule with no runs says so rather than showing nothing
           statement_hash: sha256:65b84178c291
 

@@ -44,7 +44,7 @@ import { checkRefs, detailPane, evidenceRows, loadCheckSource } from './rule-det
 import { legendControl, listPane, searchBox, tierMarks } from './rules-list.js';
 import { screensPane } from './screens.js';
 import { provideShell } from './shell.js';
-import { closeShots, openShots, shotsOpen } from './shots.js';
+import { closeEvidence, evidenceOpen, openEvidence } from './evidence.js';
 import {
   ACTOR_KEY,
   CHOICE,
@@ -2583,7 +2583,7 @@ function wireGlobals() {
    */
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
-    if (shotsOpen()) return closeShots();
+    if (evidenceOpen()) return closeEvidence();
     if (S.screensOpen) return closeScreenPanel();
     if (S.deskOpen) return closeDeskPanel();
     if (PIN.isOn()) PIN.set(false);

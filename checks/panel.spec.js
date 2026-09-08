@@ -877,7 +877,7 @@ async function ownRule(page, name, frame = null) {
   return page;
 }
 
-test("the evidence names every tier, and a run's screenshots hang under the run that took them", {
+test("the evidence names every tier, and a run's files hang under the run that took them", {
   tag: '@rule:panel.rules.evidence-visible',
 }, async ({ page }) => {
   await ownRule(page, 'evidence-visible');
@@ -895,22 +895,22 @@ test("the evidence names every tier, and a run's screenshots hang under the run 
   await expect(ev, 'acceptance is not an evidence tier any more').not.toContainText('human');
 
   /*
-   * The screenshots belong TO the agent's run, so they read as a line under
-   * it rather than as a tier of their own standing beside it (n-0100). The
-   * link is found by its anchor; only the question "what is the row above
+   * The attached files belong TO the agent's run, so they read as a line
+   * under it rather than as a tier of their own standing beside it (n-0100).
+   * The link is found by its anchor; only the question "what is the row above
    * this one" needs the DOM.
    */
-  const shots = page.getByTestId('detail.screenshots');
+  const shots = page.getByTestId('detail.evidence-open');
   await expect(shots).toBeVisible();
   const above = await shots.evaluate((el) =>
     (el.closest('.evrow')?.previousElementSibling?.textContent ?? '').trim(),
   );
-  expect(above, 'the screenshots hang under the agent row').toMatch(/^agent/);
+  expect(above, 'the attached files hang under the agent row').toMatch(/^agent/);
 
-  // And they open to be looked at: a count of pictures nobody can see is not
+  // And they open to be looked at: a count of files nobody can see is not
   // evidence, so the check insists the picture actually loaded.
   await shots.click();
-  const modal = page.getByTestId('detail.screenshots-modal');
+  const modal = page.getByTestId('detail.evidence-modal');
   await expect(modal).toBeVisible();
   await expect
     .poll(
@@ -928,6 +928,37 @@ test("the evidence names every tier, and a run's screenshots hang under the run 
   await expect(modal).toHaveCount(0);
 });
 
+test('evidence that is not a picture is readable rather than a broken image', {
+  tag: '@rule:panel.rules.evidence-visible',
+}, async ({ page }) => {
+  /*
+   * n-0241: every attached path was built into an <img>, so a run that
+   * attached a transcript handed the reader a broken picture with a caption
+   * under it. The file was there all along - the evidence route serves
+   * whatever is under the evidence key space - and only the rendering was
+   * wrong. It is not a rare case either: the agent tier attaches transcripts
+   * as a matter of course, and `latest-wins` has nothing else.
+   */
+  await ownRule(page, 'latest-wins');
+  await page.getByTestId('detail.evidence-open').click();
+  const modal = page.getByTestId('detail.evidence-modal');
+  await expect(modal).toBeVisible();
+
+  // The transcript, as text somebody can read - and its own caption, so the
+  // reader still knows which file they are looking at.
+  const text = modal.locator('.wdp-evidence-text').first();
+  await expect(text).toBeVisible();
+  await expect(text).not.toHaveText('Loading…', { timeout: 15000 });
+  expect((await text.textContent())?.trim().length ?? 0).toBeGreaterThan(0);
+  await expect(modal).toContainText('.txt');
+
+  // And nothing tried to be a picture that was never one.
+  await expect(modal.locator('img'), 'a transcript is not an image').toHaveCount(0);
+
+  await page.keyboard.press('Escape');
+  await expect(modal).toHaveCount(0);
+});
+
 test('the steps are read outright and the check source waits behind a disclosure', {
   tag: '@rule:panel.rules.steps-not-an-appendix',
 }, async ({ page }) => {
@@ -938,6 +969,17 @@ test('the steps are read outright and the check source waits behind a disclosure
   const src = page.getByTestId('detail.technical-disclosure');
   await expect(src).toBeVisible();
   await expect(src).toContainText('Check source');
+  /*
+   * And it stands on its own rather than inside the Steps block. It used to
+   * be nested there, so a rule with no steps had no disclosure at all - and
+   * the stepless rules were exactly the ones whose check IS the
+   * specification, judged by reading a test rather than by looking at a
+   * screen (n-0245). The disclosure hangs off the rule's check refs.
+   */
+  await expect(
+    src.locator('xpath=ancestor::*[@data-testid="detail.steps"]'),
+    'the check source is not nested inside the steps',
+  ).toHaveCount(0);
   await expect(src, 'the source is a technical detail, closed until asked for').not.toHaveAttribute(
     'open',
     /.*/,

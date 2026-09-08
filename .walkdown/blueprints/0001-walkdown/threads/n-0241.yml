@@ -7,7 +7,7 @@ anchor:
   rule: panel.rules.evidence-visible
   screen: rule-detail
   element: detail.screenshots-modal
-status: open
+status: addressed
 body: >-
   Evidence that is not a picture does not render. The screenshots modal builds
   an <img> for every attached path (src/panel/shots.js, the figure it maps each
@@ -37,3 +37,30 @@ body: >-
   the storyboard and named in panel.rules.evidence-visible's steps, so renaming
   them is a spec edit as well as a code one — which is why this note stops here
   rather than assuming it.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-08T17:35:35Z
+    body: >-
+      Fixed. The modal renders by what the file is: a picture in an <img>,
+      anything text-shaped (.txt .log .json .md .yml .csv .diff .patch) fetched
+      and shown as monospace text in the same frame, scrollable, with the same
+      caption underneath. Anything else is a link to open the file.
+
+
+      Unknown extensions deliberately fall to the LINK case rather than the
+      image case - guessing "image" is what produced the broken pictures in the
+      first place. A file that will not load says so in its own frame, naming
+      where it still is on disk, so the reader gets the difference between
+      "slow" and "gone" and the other files on the page are unaffected.
+
+
+      New check in checks/panel.spec.js, tagged to this rule: it opens
+      `latest-wins` - whose only agent evidence is a transcript - and asserts
+      the text is there, non-empty, no longer saying "Loading…", and that the
+      modal contains no <img> at all. Verified against the real board; four
+      checks on this rule and its sibling pass.
+
+
+      The word did become Evidence, as n-0242 asked - see that thread for the
+      anchor rename.

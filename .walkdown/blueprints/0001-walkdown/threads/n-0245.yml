@@ -7,7 +7,7 @@ anchor:
   rule: panel.rules.steps-not-an-appendix
   screen: rule-detail
   element: detail.technical-disclosure
-status: open
+status: addressed
 body: >-
   The check source is unreachable for exactly the rules whose check IS the
   specification. The disclosure that shows it is nested inside the steps block:
@@ -43,3 +43,28 @@ body: >-
   unnoticed. panel.rules.evidence-visible is the other rule with an interest
   here: the evidence a rule stands on should be readable from the detail, and
   for these eleven it is not.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-08T17:35:35Z
+    body: >-
+      Fixed. The disclosure is out of the Steps block: src/panel/rule-detail.js
+      now draws it as its own top-level slot keyed on checkRefs(r), which is
+      what always decided whether to draw it at all. A rule with no steps gets
+      its check source like any other.
+
+
+      Steps are required of every rule since this morning, so the original bite
+      - eleven stepless rules whose check IS the specification, offering nothing
+      to read - cannot recur that way. The nesting was still wrong on its own
+      terms: the steps and the source that checks them are two different things
+      about a rule, and one was standing inside the other.
+
+
+      The rule's then-clause said this vacuously ("stays behind
+      detail.technical-disclosure until opened" is true where there are no steps
+      by being about nothing), so it now says the load-bearing half too: it
+      hangs off the rule's check refs, and is there whether or not the rule has
+      steps. The check in checks/panel.spec.js asserts the disclosure has no
+      detail.steps ancestor - which is the assertion that would have failed
+      before.

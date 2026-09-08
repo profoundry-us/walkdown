@@ -149,7 +149,7 @@ const STATES = [
     ],
   },
   {
-    name: 'detail-screenshots-modal',
+    name: 'detail-evidence-modal',
     steps: [
       ['tab', 'rules'],
       [
@@ -159,7 +159,7 @@ const STATES = [
       ['wait', 900],
       [
         'sr',
-        "r => (r.querySelector('[data-testid=\"detail.screenshots\"]') ?? [...r.querySelectorAll('button')].find(x => /^open \\d+$/.test(x.textContent.trim())))?.click()",
+        "r => (r.querySelector('[data-testid=\"detail.evidence-open\"]') ?? [...r.querySelectorAll('button')].find(x => /^open \\d+$/.test(x.textContent.trim())))?.click()",
       ],
       ['wait', 1200],
     ],
