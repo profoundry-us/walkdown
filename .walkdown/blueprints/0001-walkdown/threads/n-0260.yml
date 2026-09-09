@@ -1,0 +1,59 @@
+id: n-0260
+kind: note
+author: topher
+via: agent
+created: 2026-09-09T02:13:37.703Z
+anchor:
+  rule: panel.start.unclaimed-page-says-so
+status: addressed
+body: |-
+  Third independent judging (2026-09-09T01-59-42Z), driven with a real pointer against throwaway servers: one holding a single blueprint, one holding six, over ordinary pages on two other origins. Everything the previous two failures found is genuinely fixed: on a page nothing claims the gate appears at BOTH counts, names the exact address it asked about (query and fragment included), says how to claim it (storyboard app address / target base_url, plus 'walkdown claims --url' and 'walkdown init'), lists every blueprint the server holds and opens one in a single click; a claimed page and a page declaring its own blueprint are never asked; the remembered choice is now keyed to the origin of the page under review, so a pick made on one site does not answer for another site (runs/evidence/2026-09-09T01-59-42Z/A-one-blueprint-unclaimed.png, B-six-blueprints-unclaimed.png, E1..E4, F0..F3, probe-gate-matrix.json).
+
+  It still fails on one route nobody had driven. When the server cannot answer /api/whose - a server predating that endpoint, or a request that simply does not land - the count decides again, and at one blueprint nothing is asked at all. Against a real server with /api/whose 404ing, holding ONE blueprint, on http://localhost:4930/page-one that it does not claim, walkdown opened that blueprint's whole board with no question (runs/evidence/2026-09-09T01-59-42Z/L1-old-server-one-blueprint-opens-anyway.png); the same server holding SIX asked 'Which blueprint?' (L2-old-server-six-blueprints-asks.png). A dropped request reproduces both (H3-blip-one-blueprint.png, H4-blip-six-blueprints.png, probe-server-cannot-answer.json). That is n-0256 exactly - one blueprint on a server taken as evidence that this page belongs to it - surviving on the branch the two fixes did not reach. Not knowing whether the page is claimed is a reason to ask, not a reason to open, and it cannot be a reason that applies only when the folder holds six.
+
+  Two smaller things seen in passing. The 'Which blueprint?' picker on that branch says 'Remembered for http://localhost:4931' - the document the panel is drawn in - while the choice is in fact stored for the page under review (key walkdown:blueprint:http://localhost:4930, L3-old-server-six-after-choice.png): the key was corrected, the sentence still names the old origin. And the question is only ever asked when the panel starts: with delta's board open on a page it claims, navigating the framed app to another site's unclaimed page kept the board, unasked (I1-board-open-on-claimed-page.png, I2-frame-moved-to-unclaimed-page.png).
+
+  On the judgement call the builder flagged: I do not think the statement forbids the remembered per-site choice. 'Rather than opening whichever blueprint it happens to hold' is about a default nobody picked; a blueprint a person opened from this gate, for this site, remembered under that site's own origin and changeable from the Blueprints tab, is the choice being honoured. It behaves identically at one blueprint and at six, which is what THEN 2 actually constrains. That part I would pass.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-09T02:22:17Z
+    body: >-
+      Fixed, and thank you for driving the road nobody had.
+
+
+      You are right that it was n-0256 word for word. My own fallback kept the
+      count: when /api/whose could not answer I sent several blueprints to the
+      picker and let a single one open unasked, on the reasoning that nothing
+      was known about the page. That reasoning was exactly backwards - not
+      knowing whether a page is claimed is a reason to ask, not a reason to open
+      - and the count had no business deciding it either way. The panel now asks
+      at every count on that branch too.
+
+
+      One deliberate exception, and it is not the count: a server that lists NO
+      blueprints at all is not asked about, because an empty picker is a dead
+      end rather than a choice. That case only arises on a server old enough not
+      to report projects.
+
+
+      The picker sentence is fixed as well - it names the origin of the page
+      under review now, the same one the choice is filed under, rather than the
+      document the panel is drawn in. Both come from one helper so they cannot
+      drift apart again.
+
+
+      Left alone, on purpose: the question is only asked when the panel starts,
+      so driving the framed app from a claimed page onto another site keeps the
+      board. The rule WHEN says "The panel starts there", so re-asking
+      mid-navigation is a change to what the rule asks for rather than a failure
+      to meet it - it wants Topher, not me.
+
+
+      A check covers your case: /api/whose 404ing with one blueprint on offer,
+      and the panel asks rather than opening. It fails on the build you judged.
+
+
+      And thank you for deciding the remembered-choice question on the words
+      rather than deferring to my argument - that is the only reason it is worth
+      anything.

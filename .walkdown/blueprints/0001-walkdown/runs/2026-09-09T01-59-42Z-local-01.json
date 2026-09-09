@@ -1,0 +1,40 @@
+{
+  "run_id": "2026-09-09T01-59-42Z-local-01",
+  "created": "2026-09-09T01:59:42Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "b279f46",
+  "spec_hash": "sha256:8c07814da8a2",
+  "results": [
+    {
+      "rule": "panel.start.unclaimed-page-says-so",
+      "status": "fail",
+      "statement_hash": "sha256:3ac55c00c5a3",
+      "evidence": [
+        "runs/evidence/2026-09-09T01-59-42Z/A-one-blueprint-unclaimed.png",
+        "runs/evidence/2026-09-09T01-59-42Z/B-six-blueprints-unclaimed.png",
+        "runs/evidence/2026-09-09T01-59-42Z/C-claimed-page-never-asked.png",
+        "runs/evidence/2026-09-09T01-59-42Z/D-declares-own-blueprint.png",
+        "runs/evidence/2026-09-09T01-59-42Z/E2-one-opened-in-one-step.png",
+        "runs/evidence/2026-09-09T01-59-42Z/E3-one-next-page-same-site.png",
+        "runs/evidence/2026-09-09T01-59-42Z/E4-one-another-site.png",
+        "runs/evidence/2026-09-09T01-59-42Z/F1-six-opened-in-one-step.png",
+        "runs/evidence/2026-09-09T01-59-42Z/F3-six-another-site.png",
+        "runs/evidence/2026-09-09T01-59-42Z/J-address-with-query-and-fragment.png",
+        "runs/evidence/2026-09-09T01-59-42Z/L1-old-server-one-blueprint-opens-anyway.png",
+        "runs/evidence/2026-09-09T01-59-42Z/L2-old-server-six-blueprints-asks.png",
+        "runs/evidence/2026-09-09T01-59-42Z/H3-blip-one-blueprint.png",
+        "runs/evidence/2026-09-09T01-59-42Z/H4-blip-six-blueprints.png",
+        "runs/evidence/2026-09-09T01-59-42Z/I2-frame-moved-to-unclaimed-page.png",
+        "runs/evidence/2026-09-09T01-59-42Z/probe-gate-matrix.json",
+        "runs/evidence/2026-09-09T01-59-42Z/probe-server-cannot-answer.json",
+        "runs/evidence/2026-09-09T01-59-42Z/probe-old-server.json",
+        "runs/evidence/2026-09-09T01-59-42Z/probe-adversarial.json"
+      ],
+      "reasoning": "Judged from scratch against two throwaway servers - one holding a single blueprint, one holding six - over ordinary pages on two other origins, with a real pointer and the network watched. Everything the earlier failures found is fixed: on a page nothing claims the gate appears at BOTH counts, names the exact address it asked about (query and fragment carried through), says how to claim it (storyboard app address or target base_url, with 'walkdown claims --url' and 'walkdown init'), lists every blueprint the server holds and opens one in a single click; a claimed page and a page declaring its own blueprint are never asked, and a page whose path merely resembles a claimed one still is; the remembered choice is now keyed to the origin of the page under review, so a pick on one site does not answer for another site or for another server. I do not read the statement as forbidding that memory: a blueprint a person opened from this gate for this site, remembered under that site's origin and changeable from the Blueprints tab, is a choice being honoured, not 'whichever blueprint it happens to hold', and it behaves identically at one blueprint and at six. It fails on a route nobody had driven: when the server cannot answer /api/whose - an older server without the endpoint, or a request that does not land - the count decides again. Against such a server holding ONE blueprint, on a page it does not claim, walkdown opened that blueprint's whole board with no question at all, while the same server holding SIX asked 'Which blueprint?'. That is exactly what this rule forbids - one blueprint taken as evidence that this page belongs to it - surviving on the branch the two previous fixes did not reach; not knowing whether a page is claimed is a reason to ask, not a reason to open. Two smaller things are in the note: that picker still says 'Remembered for <the panel's own document origin>' although the key is now the page's, and the question is only ever asked at start, so driving the framed app from a claimed page to another site's unclaimed page keeps the board unasked.",
+      "threads": ["n-0260"]
+    }
+  ]
+}

@@ -49,6 +49,7 @@ import {
   ACTOR_KEY,
   blueprintChoiceKey,
   CHOICE,
+  reviewedOrigin,
   cfg,
   D,
   GAP,
@@ -2531,7 +2532,20 @@ export async function start() {
       S.phase = 'unclaimed';
       return renderGate();
     }
-    if (S.projects.length > 1) {
+    /*
+     * And when it could not answer, ask anyway - at every count. Left as
+     * `projects.length > 1`, this branch was n-0256 all over again on the one
+     * road the earlier fixes did not reach: an older server with no
+     * /api/whose, or a request that simply did not land, and a folder holding
+     * a single blueprint opened it over a page nobody had claimed (n-0260).
+     * Not knowing whether the page is claimed is a reason to ask, not a
+     * reason to open, and it cannot be a reason that applies only at six.
+     *
+     * With nothing on offer there is no question to put: a server that lists
+     * no blueprints at all has only the one thing it serves, and an empty
+     * picker would be a dead end rather than a choice.
+     */
+    if (S.projects.length) {
       S.phase = 'choose';
       return renderGate();
     }
@@ -2661,8 +2675,12 @@ function renderGate() {
     html`
     <div class="p-4 pb-2">
       <div class="text-[15px] font-semibold">Which blueprint?</div>
+      <!-- The site under review, which is where the answer is filed. This
+           named the document the panel is drawn in long after the choice
+           itself moved to the page's own origin, so the sentence said one
+           place and the memory held another (n-0260). -->
       <p class="mt-1 text-[12.5px] leading-relaxed opacity-60">Remembered for
-        <b>${location.origin}</b>, and changeable later from the Blueprints tab.</p>
+        <b>${reviewedOrigin(S.frameUrl)}</b>, and changeable later from the Blueprints tab.</p>
     </div>
     <div class="flex-1 overflow-y-auto">${blueprintsPane()}</div>`,
     D.side,

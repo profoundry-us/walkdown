@@ -201,15 +201,15 @@ export const CHOICE = `walkdown:blueprint:${location.origin}`;
  * afterwards, on any site, which is the silence n-0256 was about reached by a
  * different road (n-0258). "Remembered for this site" has to mean the site.
  */
-export const blueprintChoiceKey = (url) => {
-  let origin = location.origin;
+export const reviewedOrigin = (url) => {
   try {
-    origin = new URL(url).origin;
+    return new URL(url).origin;
   } catch {
     /* docked, or nothing framed yet: this document IS the page under review */
+    return location.origin;
   }
-  return `walkdown:blueprint:${origin}`;
 };
+export const blueprintChoiceKey = (url) => `walkdown:blueprint:${reviewedOrigin(url)}`;
 // The extension ships the stylesheet itself; served, it comes off the server.
 export const STYLESHEET = cfg.stylesheet ?? S.SERVER + '/walkdown.css';
 
