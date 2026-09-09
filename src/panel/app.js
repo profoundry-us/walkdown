@@ -47,6 +47,7 @@ import { provideShell } from './shell.js';
 import { closeEvidence, evidenceOpen, openEvidence } from './evidence.js';
 import {
   ACTOR_KEY,
+  blueprintChoiceKey,
   CHOICE,
   cfg,
   D,
@@ -814,7 +815,9 @@ async function discardSitting() {
 function crossTo(nextBp) {
   S.session = null; // left behind, on disk, waiting to be resumed
   S.BP = nextBp;
-  store.set(CHOICE, S.BP);
+  // Remembered for the page under review, not for the document this panel is
+  // drawn in - see blueprintChoiceKey (n-0258).
+  store.set(blueprintChoiceKey(S.frameUrl), S.BP);
   S.listTab = 'rules';
   S.view = 'list';
   selectRow(null);
@@ -2496,8 +2499,15 @@ export async function start() {
       /* the server is old or unreachable; memory and the picker remain */
     }
   }
-  if (!S.BP && S.projects.length > 1) {
-    const remembered = await store.get(CHOICE);
+  if (!S.BP) {
+    /*
+     * Also at every count, and for the same reason the question above is.
+     * Read behind `projects.length > 1`, memory answered on a server holding
+     * six and was never consulted on one holding a single blueprint - so the
+     * two counts gave different answers on the same unclaimed page, which is
+     * the one thing this rule forbids (n-0258).
+     */
+    const remembered = await store.get(blueprintChoiceKey(askedAbout ?? S.frameUrl));
     // A choice remembered before keys existed is an id; it still counts
     // while exactly one listed blueprint carries it.
     const byKey = S.projects.find((pr) => pr.key === remembered);

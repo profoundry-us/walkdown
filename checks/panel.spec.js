@@ -763,7 +763,14 @@ test('threads have a view of their own, ended ones included', {
   // not a rule nobody opened.
   const first = list.locator('[data-open-thread]').first();
   const openedId = await first.getAttribute('data-open-thread');
-  await first.click();
+  /*
+   * Pressed at its top-left corner, not at its centre. Thread bodies render
+   * every thread id in them as a link to that thread, so a card whose body
+   * mentions another one has a live link somewhere in the middle of it - and
+   * a centre click lands on the link and opens the OTHER thread. That is the
+   * link doing its job; the card is what this check is about.
+   */
+  await first.click({ position: { x: 8, y: 6 } });
   const pane = page.getByTestId('thread.panel');
   await expect(pane).toBeVisible();
   await expect(pane.getByTestId('thread.provenance')).toContainText(openedId);
@@ -1924,4 +1931,42 @@ test('a page a blueprint claims, or one that declares its own, is never asked', 
   await review(page);
   await expect(page.getByTestId('panel.rules-list')).toBeVisible();
   await expect(page.getByTestId('start.unclaimed')).toHaveCount(0);
+});
+
+/*
+ * A remembered pick is remembered for THE SITE, not for the panel.
+ *
+ * The key was the origin of the document the panel is drawn in - which,
+ * framed, is walkdown's own review page - so one pick answered for every page
+ * reviewed afterwards, on any site. Worse, memory was read behind
+ * `projects.length > 1`, so a server holding six went quiet where one holding
+ * a single blueprint still asked: the same unclaimed page, two answers,
+ * decided by a count that means nothing (n-0258).
+ */
+test('a blueprint chosen on one site is not opened over the next one', {
+  tag: '@rule:panel.start.unclaimed-page-says-so',
+}, async ({ page }) => {
+  const frameOn = (origin, path) => fixtureFor({ bp: '', frame: `${origin}${path}` });
+
+  // An unclaimed page, and a deliberate pick from the gate.
+  await page.goto(frameOn(WD_ORIGIN, '/nothing-claims-this.html'));
+  await expect(page.getByTestId('start.unclaimed')).toBeVisible();
+  await page.getByTestId('start.options').locator('[data-pick]').first().click();
+  await expect(page.getByTestId('panel.rules-list')).toBeVisible();
+
+  // Another page on the SAME site: the choice was made for this site, so it
+  // stands, and the person is not asked again on every page they open.
+  await page.goto(frameOn(WD_ORIGIN, '/another-page-here.html'));
+  await expect(page.getByTestId('panel.rules-list'), 'the pick holds on its own site').toBeVisible();
+  await expect(page.getByTestId('start.unclaimed')).toHaveCount(0);
+
+  // A different site entirely: nothing was ever chosen for it, so it is asked
+  // about - whatever was picked somewhere else.
+  await page.goto(frameOn('http://localhost:4999', '/plain.html'));
+  await expect(
+    page.getByTestId('start.unclaimed'),
+    'another site is asked about on its own account',
+  ).toBeVisible();
+  await expect(page.getByTestId('start.unclaimed')).toContainText('localhost:4999');
+  await expect(page.getByTestId('panel.rules-list')).toHaveCount(0);
 });

@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-09-09T01-55-37Z-local-01",
+  "created": "2026-09-09T01:55:37Z",
+  "actor": "checks-person",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6b5942c-dirty",
+  "tree_hash": "sha256:0bf0f4c9eef7",
+  "spec_hash": "sha256:8c07814da8a2",
+  "results": [
+    {
+      "rule": "panel.threads.claim-never-accept",
+      "status": "pass",
+      "statement_hash": "sha256:7c4e1e2d1562",
+      "duration_ms": 4322,
+      "checks": [
+        "checks/panel.spec.js:563"
+      ]
+    }
+  ]
+}

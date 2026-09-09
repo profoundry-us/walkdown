@@ -1,0 +1,31 @@
+{
+  "run_id": "2026-09-08T22-37-25Z-local-01",
+  "created": "2026-09-08T22:37:25Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6b5942c",
+  "spec_hash": "sha256:8c07814da8a2",
+  "results": [
+    {
+      "rule": "panel.start.unclaimed-page-says-so",
+      "status": "fail",
+      "statement_hash": "sha256:3ac55c00c5a3",
+      "evidence": [
+        "runs/evidence/2026-09-08T22-37-25Z/A-one-blueprint-unclaimed.png",
+        "runs/evidence/2026-09-08T22-37-25Z/B-three-blueprints-unclaimed.png",
+        "runs/evidence/2026-09-08T22-37-25Z/C-one-step-opens-beta.png",
+        "runs/evidence/2026-09-08T22-37-25Z/D-claimed-page.png",
+        "runs/evidence/2026-09-08T22-37-25Z/E-declares-own-blueprint.png",
+        "runs/evidence/2026-09-08T22-37-25Z/I-same-path-other-origin.png",
+        "runs/evidence/2026-09-08T22-37-25Z/G-remembered-choice-preempts-question.png",
+        "runs/evidence/2026-09-08T22-37-25Z/H-one-blueprint-after-open.png",
+        "runs/evidence/2026-09-08T22-37-25Z/probe-remembered-choice.json",
+        "runs/evidence/2026-09-08T22-37-25Z/probe-claimed-then-unclaimed.json"
+      ],
+      "reasoning": "Driven framed, as the extension delivers it, against a scratch copy offering one blueprint and a throwaway sandbox offering three, with the reviewed pages on separate plain static origins. On a first visit to a page nothing claims, both servers answer identically and correctly: the gate names the address it asked about, says how to claim it (storyboard app address or a target base_url, and `walkdown claims --url <address>`), offers `walkdown init`, opens nothing, and lists every blueprint the server holds - one real click on a row opened that board, so they stay one step away. A claimed page, the same page with a query appended, and a page declaring its own blueprint by data-bp are never asked; the same path on a different origin is asked. No console or page errors anywhere. It fails on the clause the statement exists for. The remembered-choice fallback is still read behind `projects.length > 1` and is consulted before the unclaimed gate, so after one deliberate open from that gate the three-blueprint server stops asking: browsing to a second ordinary page that no blueprint claims opened beta's board silently, while the identical sequence on the one-blueprint server still asked. One and six are answered differently - the very thing the rule forbids, and the gate's own copy promises otherwise - and because the memory key is the host document's origin, which in the framed delivery is walkdown's own page, one pick carries to every page reviewed afterwards.",
+      "threads": ["n-0258"]
+    }
+  ]
+}

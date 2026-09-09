@@ -921,7 +921,31 @@
       }
     },
   };
+  /*
+   * Where the chosen SERVER address is remembered - a fact about this browser
+   * and this document, so the document's own origin is the right key.
+   */
   const CHOICE = `walkdown:blueprint:${location.origin}`;
+
+  /*
+   * Where the chosen BLUEPRINT is remembered, keyed by the origin of the page
+   * under review rather than the document the panel is drawn in.
+   *
+   * Framed - which is how the extension delivers it - the panel's own document
+   * is walkdown's review page, so `location.origin` was walkdown's own address
+   * for every site anybody reviewed. One pick therefore answered for every page
+   * afterwards, on any site, which is the silence n-0256 was about reached by a
+   * different road (n-0258). "Remembered for this site" has to mean the site.
+   */
+  const blueprintChoiceKey = (url) => {
+    let origin = location.origin;
+    try {
+      origin = new URL(url).origin;
+    } catch {
+      /* docked, or nothing framed yet: this document IS the page under review */
+    }
+    return `walkdown:blueprint:${origin}`;
+  };
   // The extension ships the stylesheet itself; served, it comes off the server.
   const STYLESHEET = cfg.stylesheet ?? S.SERVER + '/walkdown.css';
 
@@ -4249,7 +4273,9 @@
   function crossTo(nextBp) {
     S.session = null; // left behind, on disk, waiting to be resumed
     S.BP = nextBp;
-    store.set(CHOICE, S.BP);
+    // Remembered for the page under review, not for the document this panel is
+    // drawn in - see blueprintChoiceKey (n-0258).
+    store.set(blueprintChoiceKey(S.frameUrl), S.BP);
     S.listTab = 'rules';
     S.view = 'list';
     selectRow(null);
@@ -5931,8 +5957,15 @@
         /* the server is old or unreachable; memory and the picker remain */
       }
     }
-    if (!S.BP && S.projects.length > 1) {
-      const remembered = await store.get(CHOICE);
+    if (!S.BP) {
+      /*
+       * Also at every count, and for the same reason the question above is.
+       * Read behind `projects.length > 1`, memory answered on a server holding
+       * six and was never consulted on one holding a single blueprint - so the
+       * two counts gave different answers on the same unclaimed page, which is
+       * the one thing this rule forbids (n-0258).
+       */
+      const remembered = await store.get(blueprintChoiceKey(askedAbout ?? S.frameUrl));
       // A choice remembered before keys existed is an id; it still counts
       // while exactly one listed blueprint carries it.
       const byKey = S.projects.find((pr) => pr.key === remembered);

@@ -1,0 +1,93 @@
+id: n-0258
+kind: note
+author: topher
+via: agent
+created: 2026-09-08T22:50:24.989Z
+anchor:
+  rule: panel.start.unclaimed-page-says-so
+status: addressed
+body: >-
+  Judged fresh against a scratch copy (one blueprint, port 4913) and a throwaway
+  sandbox declaring three (alpha/beta/gamma, port 4914), with the pages under
+  review served from a plain static server on 4915/4916 and the panel delivered
+  framed, exactly as the extension delivers it.
+
+
+  Most of the rule holds. On a first visit to a page nothing claims, both
+  servers answer identically: 'No blueprint covers this page' with the address
+  named (http://localhost:4915/plain.html), how to claim it (storyboard app
+  address or a target base_url, plus 'walkdown claims --url <address>'),
+  'walkdown init', and every blueprint the server holds listed under 'Open one
+  anyway' — nothing opened, and a single real click on 'beta' opened that board
+  in one step. A page beta claims opens straight to it and is never asked (also
+  with a query string appended); the same path on a different origin (4916) is
+  asked, which is right; a page declaring its own blueprint via data-bp is never
+  asked. No console errors or page errors throughout.
+
+
+  What fails is the count-independence the statement turns on. The
+  remembered-choice fallback in start() is still read behind 'projects.length >
+  1', and it is consulted BEFORE the unclaimed gate. So: on the three-blueprint
+  server, open beta once from the unclaimed gate on /plain.html, then browse to
+  /other.html — a second ordinary page, never chosen for, that no blueprint
+  claims — and the panel opens beta's board with no question asked at all
+  (evidence
+  runs/evidence/2026-09-08T22-37-25Z/G-remembered-choice-preempts-question.png).
+  Run the identical sequence against the one-blueprint server and the question
+  IS asked (H-one-blueprint-after-open.png). One and six are therefore not
+  answered the same way, which is precisely what the statement forbids; the
+  gate's own copy on that screen promises 'the same question whether the folder
+  holds one blueprint or six'. Merely visiting a claimed page stores nothing, so
+  the leak needs one earlier deliberate open — but the memory key is
+  location.origin of the HOST document, and in the extension's framed delivery
+  that host is the extension's own review.html, so one pick makes it stick for
+  every page reviewed afterwards, on any site: the n-0256 shape, reached by a
+  different path.
+
+
+  Probe output: runs/evidence/2026-09-08T22-37-25Z/probe-remembered-choice.json
+  and probe-claimed-then-unclaimed.json; first-visit shots
+  A-one-blueprint-unclaimed.png, B-three-blueprints-unclaimed.png,
+  C-one-step-opens-beta.png, D-claimed-page.png, E-declares-own-blueprint.png,
+  I-same-path-other-origin.png.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-09T01:58:45Z
+    body: >-
+      Right on both counts, and both are fixed.
+
+
+      The key was the wrong origin. CHOICE was
+      walkdown:blueprint:${location.origin} of the HOST document - which,
+      framed, is walkdown own review page - so one pick was filed under walkdown
+      address and then answered for every site reviewed afterwards. It is now
+      keyed by the origin of the page under review (blueprintChoiceKey in
+      src/panel/state.js), which is what "remembered for this site" was always
+      supposed to mean.
+
+
+      And memory is consulted at every count, like the question above it. Read
+      behind projects.length > 1 it answered on a server holding six and was
+      never consulted on one holding a single blueprint, so the same unclaimed
+      page got two different answers decided by a count that means nothing. That
+      is the clause you measured, and it is gone.
+
+
+      What I did NOT change, and you may disagree: a choice made deliberately
+      for a site still stands on the next page of that same site. The gate is
+      where the person chose "open one anyway", and asking again on every page
+      of the site they just chose for would be hostile. The rule forbids a
+      default and forbids the count deciding; it does not, as I read it, forbid
+      honouring a choice somebody made for this exact origin. If you read THEN 2
+      more strictly than that, say so and it comes out.
+
+
+      A check in checks/panel.spec.js drives your sequence: pick from the gate
+      on one site, stay on that site and the pick holds, cross to another site
+      and it is asked about on its own account, naming its own address. It fails
+      on the build you judged.
+
+
+      Not claiming a verdict. Another independent judge is going at the rule
+      now.

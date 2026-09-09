@@ -1,0 +1,39 @@
+id: n-0259
+kind: note
+author: topher
+via: agent
+created: 2026-09-09T01:57:52.082Z
+anchor:
+  rule: panel.threads.claim-never-accept
+status: open
+body: >-
+  The check for this rule flakes: route.fetch reads ECONNRESET from the panel
+  API, twice today.
+
+
+  checks/panel.spec.js "a rule whose fixes all landed can be verified in one
+  pass, under a name" intercepts GET /api/blueprint with page.route and
+  re-issues it through route.fetch, so it can hand the panel a payload with the
+  threads it needs. Twice today - 2026-09-08, roughly 14:45 and 18:05 local -
+  that re-issued request died with "route.fetch: read ECONNRESET" against
+  http://localhost:4701/api/blueprint?bp=blueprint. Both times the test passed
+  immediately on its own afterwards, and both times the machine was busy (a
+  judging agent driving a second browser, or a long Playwright run in the
+  background).
+
+
+  Filing rather than fixing because the cause is not yet pinned down and a retry
+  would hide it. Two shapes worth weighing when somebody does look:
+
+
+  - the server closing a keep-alive connection while route.fetch is reusing it,
+  which is a real client-side race and would argue for retrying that one fetch
+  inside the route handler
+
+  - something in this suite exhausting sockets under load, which a retry would
+  paper over
+
+
+  What is NOT in doubt: the rule itself. When the request lands, the check
+  passes, and it has never failed on anything it actually asserts. This is a
+  note about the check, not about the panel refusing to accept work.
