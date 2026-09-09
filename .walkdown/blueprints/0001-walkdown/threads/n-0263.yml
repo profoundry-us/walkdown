@@ -1,0 +1,35 @@
+id: n-0263
+kind: note
+author: topher
+via: agent
+created: 2026-09-09T13:36:17.293Z
+anchor:
+  rule: panel.start.open-a-folder
+status: open
+body: >-
+  The served-root line names the current blueprint's own directory, not the
+  folder being served.
+
+
+  Found by an independent judging of panel.start.unclaimed-page-says-so (run
+  2026-09-09T13-18-32Z-local-01), which passed the rule it was judging and
+  reported this in passing. It sits under panel.start.open-a-folder instead,
+  whose 'then' says: once connected, the panel names the folder that server is
+  serving.
+
+
+  What was measured: with six blueprints declared in one served folder, the
+  lead-in above the list read 'Serving .../blueprints/0001-walkdown - every
+  blueprint under it is listed below'. That directory holds one of the six, not
+  the other five, so the sentence is false about the thing it is describing. The
+  rows themselves were right and complete; only the line above them is wrong.
+  The drawing's version, prototype/screens/unclaimed-page.html, reads 'Serving
+  ~/Development/acme-shop, which holds this one' - the served root, which is
+  what the payload's root actually is.
+
+
+  The line comes from the shared blueprints pane (src/panel/blueprints.js), so
+  wherever that pane is drawn the same sentence is drawn - the Blueprints tab as
+  well as the unclaimed gate. Worth a look before multi-blueprint servers become
+  ordinary; today one blueprint per server makes the two directories coincide,
+  which is why nobody has noticed.

@@ -1,0 +1,54 @@
+id: n-0264
+kind: note
+author: topher
+via: agent
+created: 2026-09-09T13:36:17.440Z
+anchor:
+  rule: status.derived.verdict-belongs-to-a-place
+status: open
+body: >-
+  A run recorded against the wrong address is discarded in silence - it lints,
+  it validates, and it fills no cell.
+
+
+  Hit by an independent judge today. It served a scratch copy on its own port
+  and wrote that port as the run's base_url, which is the honest thing to
+  record: it is where the judging actually happened. lib/status.js inPlace()
+  compares a run's base_url against the target's and drops the run when they
+  differ. The record was written,  reported 0 errors on it, and the rule's agent
+  cell stayed exactly as it had been. Nothing anywhere said why. The judge only
+  found it by noticing the cell had not moved, and recovered by rewriting
+  base_url to the target's.
+
+
+  Dropping the run is the rule working as written - a verdict counts only at the
+  address it was made against, and that is the point of it. The fault is that it
+  happens without a word. A record that fills no cell is indistinguishable from
+  one nobody wrote, which is the failure mode the ledger exists to prevent.
+
+
+  Two places could say so, and I have no view on which is right: lint could warn
+  when a run's base_url matches no declared target ('this record fills no
+  cell'), or  could count the runs it set aside. There is a related warning
+  already - the record with no  is called out for filling no cell - so the
+  vocabulary for saying it exists.
+
+
+  Also worth knowing, since it is what led here: a scratch copy's prototype/ is
+  a symlink to the real one, so fixture pages a judge writes under it land in
+  the repository. Today's judge cleaned up after itself.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-09T13:36:50Z
+    body: >-
+      Three words dropped out of the note above - my shell ate anything in
+      backticks. Restoring them so it reads:
+
+
+      - "The record was written, WALKDOWN LINT reported 0 errors on it..."
+
+      - "...or WALKDOWN STATUS could count the runs it set aside."
+
+      - "...the record with no CREATED field is called out for filling no
+      cell..."

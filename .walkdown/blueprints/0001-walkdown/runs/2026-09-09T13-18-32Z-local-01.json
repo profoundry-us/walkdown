@@ -1,0 +1,39 @@
+{
+  "run_id": "2026-09-09T13-18-32Z-local-01",
+  "created": "2026-09-09T13:18:32Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "89094e4",
+  "spec_hash": "sha256:8c07814da8a2",
+  "results": [
+    {
+      "rule": "panel.start.unclaimed-page-says-so",
+      "status": "pass",
+      "statement_hash": "sha256:3ac55c00c5a3",
+      "evidence": [
+        "runs/evidence/2026-09-09T13-18-32Z/01-one-blueprint-unclaimed-asks.png",
+        "runs/evidence/2026-09-09T13-18-32Z/02-six-blueprints-unclaimed-asks.png",
+        "runs/evidence/2026-09-09T13-18-32Z/03-claimed-page-never-asked.png",
+        "runs/evidence/2026-09-09T13-18-32Z/04-declares-own-never-asked.png",
+        "runs/evidence/2026-09-09T13-18-32Z/05-server-enumerates-nothing-still-asks.png",
+        "runs/evidence/2026-09-09T13-18-32Z/06-one-click-opens-a-blueprint.png",
+        "runs/evidence/2026-09-09T13-18-32Z/07-address-named-with-query-and-fragment.png",
+        "runs/evidence/2026-09-09T13-18-32Z/08-memory-a-asked-then-picked.png",
+        "runs/evidence/2026-09-09T13-18-32Z/09-memory-b-same-site-holds.png",
+        "runs/evidence/2026-09-09T13-18-32Z/10-memory-c-other-site-asked-again.png",
+        "runs/evidence/2026-09-09T13-18-32Z/11-whose-fails-projects-listed-connect-gate.png",
+        "runs/evidence/2026-09-09T13-18-32Z/12-whose-fails-projects-dropped-connect-gate.png",
+        "runs/evidence/2026-09-09T13-18-32Z/13-whose-fails-projects-empty-connect-gate.png",
+        "runs/evidence/2026-09-09T13-18-32Z/14-whose-500-projects-dropped-connect-gate.png",
+        "runs/evidence/2026-09-09T13-18-32Z/15-whose-slow-projects-dropped-nothing-opens.png",
+        "runs/evidence/2026-09-09T13-18-32Z/proto-unclaimed-page.png",
+        "runs/evidence/2026-09-09T13-18-32Z/app-unclaimed-page.png",
+        "runs/evidence/2026-09-09T13-18-32Z/probes.txt"
+      ],
+      "reasoning": "Judged against two scratch copies served from inside themselves on ports 4931 and 4941 (the record keeps the target's own base_url; the copies are what governance requires and are gone now), driven through an extension-shaped host page — server, bp: '', frame.url, the shape extension/boot-host.js uses — because the server's own review.html bakes ?bp= from the folder it was started on and so can never reach this gate, and the rule is about walkdown arriving at a page knowing nothing. Framing an ordinary page nothing claims, the panel stopped on the gate and opened nothing: start.unclaimed read 'No blueprint covers this page' with the address named verbatim (query and fragment included, checked with ?a=1#frag), start.claim named both roads to a claim — a screen's app address in a storyboard, or a target's base_url — and offered 'walkdown claims --url <that address>', start.new offered 'walkdown init', and start.options listed what the server holds without opening it. I measured rects and computed style out of the shadow root rather than asking whether nodes existed. The count question is where I pushed hardest: with exactly one blueprint declared the gate is identical to the gate with six (I declared five more inside the copy), all six rows listed and reachable in a scrolling pane, nothing opened at either count; zero is not a reachable state, since serve refuses to start with no project, so I simulated it at the payload level by rewriting /api/blueprint to drop and then to empty the projects list, and the gate still appeared and still opened nothing, with start.options simply absent. Because a count deciding whose page this is has failed here before at the far end — a server that does not enumerate — I ran a second pass injecting faults into /api/whose as well: whose throwing, whose returning 500, and whose never answering, each with projects listed, deleted and emptied. Every one of those landed on the connect gate or drew nothing at all; in none of them did a blueprint's board open over the unclaimed page. The negative half holds too: a page the blueprint does claim (target base_url repointed at my fixture origin, /stand-in/unclaimed-page, confirmed through /api/whose) went straight to its screen unasked, and a host declaring its own bp was never asked. One click on a listed row opened that blueprint's board and moved the frame — one step, as the rule asks; the 404 inside the frame in 06 is my fixture static server, not the panel. A remembered pick opens without asking on the same site but a different unclaimed site is asked again, which is a prior deliberate choice rather than the panel opening whichever blueprint it happens to hold. Copy matches prototype/screens/unclaimed-page.html block for block. One divergence, outside this rule's steps and recorded as an observation rather than a fail: the 'Serving <dir> — every blueprint under it is listed below' lead-in comes from the shared blueprints pane and names the current blueprint's own spec directory, so with six declared it named a directory that does not hold the other five, where the drawing says 'Serving ~/Development/acme-shop, which holds this one.' No page errors in any state. The screenshots were re-driven by a throwaway Playwright script over the same states and the same host pages I drove by hand, since the browser I judged in cannot write to disk; the judgment is what I drove and measured, and probes.txt carries the measurements. Both scratch copies were removed, the fixture pages that had to sit under the symlinked prototype/ were deleted, and the tree is clean.",
+      "threads": []
+    }
+  ]
+}
