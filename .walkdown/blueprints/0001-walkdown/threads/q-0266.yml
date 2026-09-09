@@ -1,0 +1,37 @@
+id: q-0266
+kind: question
+author: topher
+via: agent
+created: 2026-09-09T14:01:18.569Z
+anchor:
+  rule: panel.start.open-a-folder
+status: open
+body: >-
+  The start screen's words and the drawing's words are not the same, and I do
+  not know which of them is right.
+
+
+  An independent judge reported it while passing the rule (run
+  2026-09-09T13-43-55Z-local-01): the statement is satisfied by either wording,
+  so this is not a fail, but somebody should say which text wins.
+
+
+  The drawing, prototype/screens/start.html:
+    "No blueprints are open yet."
+    footnote: "A first step, not an error - the browser cannot open a folder; the server holds one open for it."
+
+  The build:
+    "No blueprints open"
+    then a longer paragraph folding that idea in - a browser tab cannot read your filesystem, walkdown reads blueprints and writes threads and runs back to them, so it works through a small local server. Connect sits inline rather than full-width.
+
+  Design owns the screen, so the drawing is the authority and the honest reading
+  is that the build has drifted. I have not changed it, because the longer
+  paragraph reads like somebody's deliberate second thought rather than an
+  accident, and because the rule is accepted by eng and product with these words
+  on screen - quietly rewriting accepted copy is not mine to do.
+
+
+  Three ways, and I have no view: bring the build back to the drawing; keep the
+  build's words and have the drawing catch up (a design request, not an edit by
+  me); or say the drawing is a sketch of intent here and the two are allowed to
+  differ in length.

@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-09-09T14-02-00Z-local-01",
+  "created": "2026-09-09T14:02:00Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "7036541-dirty",
+  "spec_hash": "sha256:8c07814da8a2",
+  "results": [
+    {
+      "rule": "panel.start.open-a-folder",
+      "status": "pass",
+      "statement_hash": "sha256:2a5e9a0925a7",
+      "evidence": [
+        "runs/evidence/2026-09-09T14-02-00Z/probe.txt",
+        "runs/evidence/2026-09-09T14-02-00Z/app-start-no-server.png",
+        "runs/evidence/2026-09-09T14-02-00Z/app-start-connected-a.png",
+        "runs/evidence/2026-09-09T14-02-00Z/app-start-crossed-to-b.png",
+        "runs/evidence/2026-09-09T14-02-00Z/app-start-crossed-to-b-blueprints-tab.png",
+        "runs/evidence/2026-09-09T14-02-00Z/app-start-lost-server.png",
+        "runs/evidence/2026-09-09T14-02-00Z/proto-start.png"
+      ],
+      "reasoning": "Drove the built panel the way the extension delivers it — a harness page setting window.__walkdownConfig exactly as extension/boot-host.js does and importing lib/viewer/panel.js (check:js clean) — against two scratch copies served from inside themselves (A on 4811, B on 4812, ids and folders deliberately different) and one address, 4899, with nothing behind it. Started with no server, the panel draws the gate and nothing else: 'No blueprints open', why a server is needed at all, the literal command `walkdown serve` in a code block, and a visible 213x40 box captioned 'Server', aria-labelled 'walkdown server address', titled 'Where walkdown serve is listening — a server, not a folder'. It is stated as a first step — normal foreground colour, no error tone, no 'failed' anywhere — and the framed page beside it renders normally rather than as an empty or broken review surface. Typing 4811 into that same box and pressing Connect connected in place with no reload (measured on the wire: /api/blueprint, /api/whose, then ?bp=<A's key>), and a deliberate garbage address first left it on the gate, uncrashed, still retryable. Once connected it names the folder, and the name is true: 'Serving ~/Development/profoundry/walkdown/tmp/scratch/judge-openfolder-a — every blueprint under it is listed below', character for character the root 4811/api/blueprint reports, over the one blueprint that server actually holds. Pressed the cross-server case both ways — booting the panel at B while carrying A's blueprint key, and typing B's address into a live sitting on A: B answers 404 for the key it does not have, the panel re-asks without it and switches its whole account over to B (folder judge-openfolder-b, blueprint 'other-project'), never once showing A's folder while talking to B. Pointing a connected panel back at a dead address returns it to the same gate with the same editable box. The prototype wireframe says the same four things in shorter words and adds a footnote the built panel drops ('A first step, not an error —'), which the built copy conveys by construction instead; I judged that a copy elaboration, not a miss. Note on evidence: my judgment is what I drove and saw in the browser; the PNGs were re-driven by a throwaway Playwright script that repeats those exact states, because the browser I drove cannot save shots to disk. Both scratch copies were removed afterwards.",
+      "threads": []
+    }
+  ]
+}
