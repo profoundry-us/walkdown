@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-09-09T02-44-53Z-local-01",
+  "created": "2026-09-09T02:44:53Z",
+  "actor": "checks-person",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "55ec15e-dirty",
+  "tree_hash": "sha256:b782fd438984",
+  "spec_hash": "sha256:8c07814da8a2",
+  "results": [
+    {
+      "rule": "panel.start.unclaimed-page-says-so",
+      "status": "pass",
+      "statement_hash": "sha256:3ac55c00c5a3",
+      "duration_ms": 1127,
+      "checks": [
+        "checks/panel.spec.js:2025"
+      ]
+    }
+  ]
+}

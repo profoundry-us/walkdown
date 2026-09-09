@@ -2441,14 +2441,6 @@ const typing = (e) => {
 };
 
 /*
- * The address `/api/whose` was asked about, kept so the gate can name it.
- * "No blueprint covers this page" without the address leaves you guessing
- * WHICH address was asked about, and a port or a fragment is exactly what
- * makes a claim miss - so the sentence is only useful with it.
- */
-let askedAbout = null;
-
-/*
  * Three questions, asked once each and then not again: is there a server,
  * whose page this is, and then the actual work. A script tag has already
  * answered the second, so it goes straight past both gates.
@@ -2464,6 +2456,11 @@ export async function start() {
   S.projects = payload.projects ?? [];
   S.servedRoot = payload.root ?? null;
   /*
+   * Framed, the page under review is the one in the frame, not walkdown's own
+   * address - asking about ourselves would answer about nothing.
+   */
+  const here = S.frameUrl ?? location.href;
+  /*
    * Ask the page first. A blueprint that claims this address is a fact about
    * where you are; a remembered choice is a fact about what you picked last,
    * somewhere else. Preferring memory is what made walkdown open its own
@@ -2472,83 +2469,52 @@ export async function start() {
    * A page belongs to exactly one blueprint, which is the constraint that
    * lets this be an answer rather than a guess - `walkdown claims` is what
    * keeps it true.
+   *
+   * Asked at every count. Behind `projects.length > 1` the question was never
+   * put on the commonest first meeting with walkdown - a server holding one
+   * blueprint and an ordinary page you had browsed to - and the panel opened
+   * that blueprint's whole board over somebody else's site (n-0256, n-0258,
+   * n-0260, n-0261, which were four roads to the one mistake: a count
+   * deciding whose page this is).
    */
-  /*
-   * Asked at EVERY count, not only when several are listed. Behind
-   * `projects.length > 1` this question was never put on the commonest first
-   * meeting with walkdown - a server holding one blueprint, and an ordinary
-   * page you had simply browsed to - and the panel opened that blueprint's
-   * whole board over somebody else's site (n-0256). A count is not evidence:
-   * one blueprint on a server says nothing about who this page belongs to.
-   */
-  let answered = false;
   if (!S.BP) {
+    let whose;
     try {
-      // Framed, the page under review is the one in the frame, not walkdown's
-      // own address — asking about ourselves would answer about nothing.
-      const asking = S.frameUrl ?? location.href;
-      const whose = await (
-        await fetch(api(`/api/whose?url=${encodeURIComponent(asking)}`))
-      ).json();
-      answered = true;
-      askedAbout = asking;
-      // By key, never by id: two listed blueprints may share a name, and the
-      // one this page belongs to is one directory, not one name (n-0173).
-      if (whose?.match?.key && S.projects.some((pr) => pr.key === whose.match.key))
-        S.BP = whose.match.key;
+      whose = await (await fetch(api(`/api/whose?url=${encodeURIComponent(here)}`))).json();
     } catch {
-      /* the server is old or unreachable; memory and the picker remain */
-    }
-  }
-  if (!S.BP) {
-    /*
-     * Also at every count, and for the same reason the question above is.
-     * Read behind `projects.length > 1`, memory answered on a server holding
-     * six and was never consulted on one holding a single blueprint - so the
-     * two counts gave different answers on the same unclaimed page, which is
-     * the one thing this rule forbids (n-0258).
-     */
-    const remembered = await store.get(blueprintChoiceKey(askedAbout ?? S.frameUrl));
-    // A choice remembered before keys existed is an id; it still counts
-    // while exactly one listed blueprint carries it.
-    const byKey = S.projects.find((pr) => pr.key === remembered);
-    const byId = S.projects.filter((pr) => pr.id === remembered);
-    const kept = byKey ?? (byId.length === 1 ? byId[0] : null);
-    if (remembered && kept) S.BP = kept.key;
-  }
-  if (!S.BP) {
-    /*
-     * Two different unknowns, and they are not the same sentence. When the
-     * server ANSWERED and nothing claims this page, that is a fact worth
-     * saying: no blueprint covers it, here is how to claim it, and here is
-     * what this server does hold if you want one anyway.
-     *
-     * When the server could not answer - an older one with no /api/whose, or
-     * a request that failed - nothing is known about this page, so the old
-     * picker stands. It asks which of several this site is, which is a
-     * different question from whether any of them is.
-     */
-    if (answered) {
-      S.phase = 'unclaimed';
+      /*
+       * It answered /api/blueprint a moment ago and cannot answer this, so it
+       * is not a server the panel can work through. There is no second way to
+       * find out whose page this is, and no honest screen to draw without an
+       * answer - every one of them would be asserting the thing that could
+       * not be found out. So this is the server's problem, and it says so.
+       */
+      S.phase = 'connect';
       return renderGate();
     }
-    /*
-     * And when it could not answer, ask anyway - at every count. Left as
-     * `projects.length > 1`, this branch was n-0256 all over again on the one
-     * road the earlier fixes did not reach: an older server with no
-     * /api/whose, or a request that simply did not land, and a folder holding
-     * a single blueprint opened it over a page nobody had claimed (n-0260).
-     * Not knowing whether the page is claimed is a reason to ask, not a
-     * reason to open, and it cannot be a reason that applies only at six.
-     *
-     * With nothing on offer there is no question to put: a server that lists
-     * no blueprints at all has only the one thing it serves, and an empty
-     * picker would be a dead end rather than a choice.
-     */
-    if (S.projects.length) {
-      S.phase = 'choose';
-      return renderGate();
-    }
+    // By key, never by id: two listed blueprints may share a name, and the
+    // one this page belongs to is one directory, not one name (n-0173).
+    if (whose?.match?.key && S.projects.some((pr) => pr.key === whose.match.key))
+      S.BP = whose.match.key;
+  }
+  /*
+   * Then what you picked last time for this site. Also at every count, and
+   * for the same reason the question above is.
+   */
+  if (!S.BP) {
+    const remembered = await store.get(blueprintChoiceKey(here));
+    if (remembered && S.projects.some((pr) => pr.key === remembered)) S.BP = remembered;
+  }
+  /*
+   * Nothing claims it and you have picked nothing: the panel says so, says
+   * how to claim it, and leaves what this server holds one press away. It
+   * does not open it, at any count - not at six, not at one, and not at zero,
+   * where the payload still carries a whole blueprint and "nothing to pick"
+   * would open exactly the board a count had chosen.
+   */
+  if (!S.BP) {
+    S.phase = 'unclaimed';
+    return renderGate();
   }
   S.phase = 'ready';
   S.data = S.BP ? await (await fetch(api('/api/blueprint'))).json() : payload;
@@ -2631,7 +2597,7 @@ function renderGate() {
      *  - and what this server does hold: reachable in one step, never opened
      *    for you, however many there are
      */
-    const here = askedAbout ?? S.frameUrl ?? location.href;
+    const here = S.frameUrl ?? location.href;
     put(
       html`
       <div class="flex h-full flex-col overflow-y-auto">
@@ -2659,13 +2625,19 @@ function renderGate() {
           </div>
         </div>
 
-        <div class="border-t border-dashed border-base-content/20 pt-3">
-          <p class="px-3.5 pb-1 text-[11px] uppercase tracking-wider opacity-50">Open one anyway</p>
-          ${blueprintsPane({ server: false })}
-          <p class="px-3.5 pb-3 text-[11px] leading-relaxed opacity-40">Opening one here reviews it
-            against this page — a deliberate act, never a default, and the same question whether
-            the folder holds one blueprint or six.</p>
-        </div>
+        ${
+          S.projects.length
+            ? html`<div class="border-t border-dashed border-base-content/20 pt-3"
+                data-testid="start.options">
+                <p class="px-3.5 pb-1 text-[11px] uppercase tracking-wider opacity-50">Open one
+                  anyway</p>
+                ${blueprintsPane({ server: false })}
+                <p class="px-3.5 pb-3 text-[11px] leading-relaxed opacity-40">Opening one here
+                  reviews it against this page — a deliberate act, never a default, and the same
+                  question whether the folder holds one blueprint or six.</p>
+              </div>`
+            : nothing
+        }
       </div>`,
       D.side,
     );

@@ -1,0 +1,99 @@
+id: n-0261
+kind: note
+author: topher
+via: agent
+created: 2026-09-09T02:40:56.873Z
+anchor:
+  rule: panel.start.unclaimed-page-says-so
+status: addressed
+body: >-
+  A fourth road to the same silence: a server that does not ENUMERATE its
+  blueprints still holds one, and the panel opens it over a page nothing claims,
+  unasked.
+
+
+  Driven, not read. A page nothing claims (http://localhost:4950/shop.html)
+  framed by an extension-shaped host, against a stand-in server that proxies a
+  real scratch walkdown and alters only the two things a server's AGE shows:
+  /api/blueprint answers with no `projects` field, and /api/whose is not there.
+  The panel opened the served blueprint's whole board over that page - 129
+  rules, 'walkdown' in the bar, 'Start walkdown' offered against somebody else's
+  site - with no gate and no question. Same outcome with `projects: []`.
+  Controls in the same pass: with `projects` listed and /api/whose still missing
+  the panel asks (n-0260's fix holds); one blueprint listed and six are answered
+  identically; a claimed page and a page declaring its own are never asked; a
+  slow /api/whose opens nothing while it waits; a /api/whose answering a key no
+  listed blueprint carries still asks.
+
+
+  This is the case start() calls by design - 'a server that lists no blueprints
+  at all has only the one thing it serves, and an empty picker would be a dead
+  end rather than a choice'. Measured, the sentence refutes itself: that
+  server's /api/blueprint carried 129 rules, 7 screens and 258 threads, which is
+  the one thing it serves and which is exactly what then opened. The reasoning
+  is also the one the rule forbids - a count deciding whose page this is, at
+  zero instead of at one. And 'nothing is on offer' is false as stated: the
+  panel had the served board in hand and could name it, and the unclaimed gate
+  already renders with an empty list ('Nothing found under that folder', seen on
+  a server answering /api/whose with projects: []).
+
+
+  Nor is the server hypothetical. `projects` arrived in 7f112de (2026-08-20) and
+  /api/whose in 455b8d9 (2026-08-25); anything older than the first serves a
+  full blueprint and enumerates none, and the extension carries its own vendored
+  panel against whatever walkdown is on :4700 - version skew the panel elsewhere
+  goes out of its way to warn about. A current server refuses to start with zero
+  projects, so the empty list is reachable today only from an old or
+  intermediary server; missing entirely is reachable from any pre-2026-08-20
+  one.
+
+
+  Evidence: runs/evidence/2026-09-09T02-23-11Z/ -
+  04-no-projects-no-whose-board-opens-unasked.png,
+  05-empty-projects-no-whose-board-opens-unasked.png, the controls
+  01/02/03/06/07, panel-start-outcomes.txt (measured outcomes per case) and
+  server-side-probes.txt (what the non-enumerating server still holds, and the
+  provenance above).
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-09T13:16:24Z
+    body: >-
+      Fixed, and the reason it kept coming back is gone with it.
+
+
+      The zero-projects exemption is removed: the gate now renders whatever the
+      count is, and what the server serves is a press, never a default. You were
+      right that 'by design' was measurably false - that payload carries the
+      whole blueprint.
+
+
+      Then Topher asked for the legacy accommodation to come out entirely, so
+      the rest of this mechanism went with it. The panel no longer has a road
+      for a server that cannot answer /api/whose or does not enumerate its
+      blueprints. It asks; if the ask fails, that is the server's problem and
+      the panel says so (the connect screen) rather than drawing a screen that
+      asserts something it failed to find out. Gone: the answered/askedAbout
+      hedging, the openedAnyway flag, the hedged 'cannot tell whose page this
+      is' copy, and the id-shaped remembered choice from before keys existed.
+
+
+      Three checks in checks/panel.spec.js, each proved failing against the
+      previous build before the fix landed:
+
+      - one blueprint on the server is not evidence that this page belongs to it
+
+      - a server that lists nothing still does not open itself over the page
+
+      - a server that cannot say whose page this is is a server problem, not a
+      board
+
+
+      npm run checks: 46 passed. highball run: all green.
+
+
+      One thing left for a person, filed separately: with the count road gone,
+      nothing sets the 'choose' phase any more, so
+      panel.start.choose-a-blueprint's screen is unreachable at start - and its
+      statement describes the count mechanism this rule forbids. That is a spec
+      collision, not mine to settle.

@@ -1,0 +1,34 @@
+{
+  "run_id": "2026-09-09T02-23-11Z-local-01",
+  "created": "2026-09-09T02:23:11Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "55ec15e",
+  "spec_hash": "sha256:8c07814da8a2",
+  "results": [
+    {
+      "rule": "panel.start.unclaimed-page-says-so",
+      "status": "fail",
+      "statement_hash": "sha256:3ac55c00c5a3",
+      "evidence": [
+        "runs/evidence/2026-09-09T02-23-11Z/01-one-blueprint-unclaimed-asks.png",
+        "runs/evidence/2026-09-09T02-23-11Z/02-two-blueprints-unclaimed-asks.png",
+        "runs/evidence/2026-09-09T02-23-11Z/03-claimed-page-never-asked.png",
+        "runs/evidence/2026-09-09T02-23-11Z/04-no-projects-no-whose-board-opens-unasked.png",
+        "runs/evidence/2026-09-09T02-23-11Z/05-empty-projects-no-whose-board-opens-unasked.png",
+        "runs/evidence/2026-09-09T02-23-11Z/06-projects-listed-no-whose-still-asks.png",
+        "runs/evidence/2026-09-09T02-23-11Z/07-odd-whose-body-still-asks.png",
+        "runs/evidence/2026-09-09T02-23-11Z/08-memory-a-asked-then-picked.png",
+        "runs/evidence/2026-09-09T02-23-11Z/09-memory-b-same-site-holds.png",
+        "runs/evidence/2026-09-09T02-23-11Z/10-memory-c-other-site-asked-again.png",
+        "runs/evidence/2026-09-09T02-23-11Z/panel-start-outcomes.txt",
+        "runs/evidence/2026-09-09T02-23-11Z/remembered-pick-scope.txt",
+        "runs/evidence/2026-09-09T02-23-11Z/server-side-probes.txt"
+      ],
+      "reasoning": "Judged against a scratch copy served from inside itself, with an extension-shaped host framing an ordinary page nothing claims. Every THEN holds on the roads the three earlier failures named: the gate names the address it asked about, opens nothing, gives both ways to claim it and `walkdown init`, and lists what the server holds one click away - identically whether one blueprint is listed or two (01, 02); a claimed page and a page declaring its own open straight through (03); a pick is remembered for the site under review, holds on that site and is not carried to the next one (08-10); a /api/whose that cannot answer still makes the panel ask, at any count (06); a slow answer opens nothing while it waits, and an answer naming a key no listed blueprint carries still asks (07). It fails on a fourth road the fix declares deliberate: when the server does not ENUMERATE blueprints - `projects` absent, as every walkdown before 7f112de (2026-08-20) served it, or empty - and /api/whose cannot answer, the panel opens the served board over the unclaimed page with no question at all (04, 05): 129 rules and 'Start walkdown' over somebody else's site. The stated reason, that such a server 'has only the one thing it serves', is measurably what makes it a fail - that same response carried 129 rules, 7 screens and 258 threads, and it is that board which opened - and the mechanism is the one the statement forbids by name: a count of listed blueprints deciding whose page this is, now at zero rather than at one. Filed as n-0261.",
+      "threads": ["n-0261"]
+    }
+  ]
+}

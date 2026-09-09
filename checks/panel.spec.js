@@ -1972,21 +1972,15 @@ test('a blueprint chosen on one site is not opened over the next one', {
 });
 
 /*
- * The road neither earlier fix reached: the server cannot answer at all.
+ * One blueprint on offer is the case that used to open unasked.
  *
- * An older walkdown has no /api/whose, and any request can simply fail to
- * land. Behind `projects.length > 1` that left a folder holding ONE blueprint
- * opening it over a page nobody had claimed, while six were asked about -
- * n-0256 word for word, surviving where nobody had driven (n-0260). Not
- * knowing whether a page is claimed is a reason to ask, not to open.
+ * Behind `projects.length > 1` a folder holding ONE opened it over a page
+ * nobody had claimed, while six were asked about (n-0256, n-0260). The count
+ * is not evidence, so it changes nothing about the question.
  */
-test('when the server cannot say whose page this is, the panel asks anyway', {
+test('one blueprint on the server is not evidence that this page belongs to it', {
   tag: '@rule:panel.start.unclaimed-page-says-so',
 }, async ({ page }) => {
-  // An older walkdown, imitated at the only two places the age shows: the
-  // endpoint is not there, and the checkspace's second blueprint is trimmed
-  // away, because ONE on offer is the case that used to open unasked.
-  await page.route(/\/api\/whose(\?|$)/, (route) => route.fulfill({ status: 404, body: 'nope' }));
   await page.route('**/api/blueprint*', async (route) => {
     const res = await route.fetch();
     const body = await res.json();
@@ -1995,16 +1989,55 @@ test('when the server cannot say whose page this is, the panel asks anyway', {
   });
   await page.goto(fixtureFor({ bp: '' }));
 
-  await expect(page.getByTestId('start.options'), 'it asks rather than opening').toBeVisible();
+  await expect(page.getByTestId('start.unclaimed'), 'it asks rather than opening').toBeVisible();
+  await expect(page.getByTestId('panel.rules-list')).toHaveCount(0);
   await expect(
     page.getByTestId('start.options').locator('[data-pick]'),
-    'and the one on offer is what it offers',
+    'and the one it holds is offered, never opened',
   ).toHaveCount(1);
-  await expect(page.getByTestId('panel.rules-list')).toHaveCount(0);
+});
 
-  // And the answer is filed against the site under review, so the sentence
-  // has to name that site - not the document the panel happens to be in.
-  const remembered = page.getByText(/Remembered for/);
-  await expect(remembered).toContainText(WD_ORIGIN);
-  await expect(remembered).not.toContainText(new URL(FIXTURE).origin);
+/*
+ * The fourth road: a server that lists NOTHING.
+ *
+ * "Nothing to pick, so no question to put" opened a full board over somebody
+ * else's site - the payload such a server sends still carries a whole
+ * blueprint, so what "no choice" opened was exactly the board a count had
+ * chosen, at zero instead of at one (n-0261). There is no count at which the
+ * panel may decide whose page this is.
+ */
+test('a server that lists nothing still does not open itself over the page', {
+  tag: '@rule:panel.start.unclaimed-page-says-so',
+}, async ({ page }) => {
+  await page.route('**/api/blueprint*', async (route) => {
+    const res = await route.fetch();
+    const body = await res.json();
+    body.projects = [];
+    await route.fulfill({ response: res, json: body });
+  });
+  await page.goto(fixtureFor({ bp: '' }));
+
+  const said = page.getByTestId('start.unclaimed');
+  await expect(said, 'it says something rather than opening').toBeVisible();
+  await expect(said).toContainText('No blueprint covers this page');
+  await expect(said, 'and it names the address it asked about').toContainText(WD_ORIGIN);
+  await expect(page.getByTestId('panel.rules-list')).toHaveCount(0);
+  // Nothing is listed, so nothing is offered: the section is absent rather
+  // than empty, because an empty "Open one anyway" is a promise of a door.
+  await expect(page.getByTestId('start.options')).toHaveCount(0);
+});
+
+/*
+ * And a server that cannot answer whose page this is at all. Every screen the
+ * panel could draw here asserts something it failed to find out, so the honest
+ * one is the server's: it answered a moment ago and cannot answer this.
+ */
+test('a server that cannot say whose page this is is a server problem, not a board', {
+  tag: '@rule:panel.start.unclaimed-page-says-so',
+}, async ({ page }) => {
+  await page.route(/\/api\/whose(\?|$)/, (route) => route.fulfill({ status: 500, body: 'no' }));
+  await page.goto(fixtureFor({ bp: '' }));
+
+  await expect(page.getByTestId('start.message')).toBeVisible();
+  await expect(page.getByTestId('panel.rules-list')).toHaveCount(0);
 });
