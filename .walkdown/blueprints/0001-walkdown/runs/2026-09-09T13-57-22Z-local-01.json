@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-09-09T13-57-22Z-local-01",
+  "created": "2026-09-09T13:57:22Z",
+  "actor": "checks-person",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "7ec4604-dirty",
+  "tree_hash": "sha256:6a2fc554edce",
+  "spec_hash": "sha256:8c07814da8a2",
+  "results": [
+    {
+      "rule": "panel.start.open-a-folder",
+      "status": "pass",
+      "statement_hash": "sha256:2a5e9a0925a7",
+      "duration_ms": 871,
+      "checks": [
+        "checks/panel.spec.js:2054"
+      ]
+    }
+  ]
+}

@@ -2041,3 +2041,27 @@ test('a server that cannot say whose page this is is a server problem, not a boa
   await expect(page.getByTestId('start.message')).toBeVisible();
   await expect(page.getByTestId('panel.rules-list')).toHaveCount(0);
 });
+
+/*
+ * A key from another server is not a reason to say there is no server.
+ *
+ * walkdown's own served review page bakes in the blueprint key of the server
+ * that served it, so typing a second server's address carried the first one's
+ * key across. That server answered 404, and the panel drew the screen for
+ * having no server at all - over a live server holding two blueprints
+ * (n-0265). A key this one does not have is a reason to ask it without one.
+ */
+test('a blueprint key this server does not have is dropped, not read as no server', {
+  tag: '@rule:panel.start.open-a-folder',
+}, async ({ page }) => {
+  await page.goto(fixtureFor({ bp: '/somewhere/else/blueprint' }));
+
+  await expect(
+    page.getByTestId('start.message'),
+    'a server that answers is never reported as absent',
+  ).toHaveCount(0);
+  // It asks about the page instead, which is what having no key means - and
+  // what this server holds is listed, so it plainly answered.
+  await expect(page.getByTestId('start.unclaimed')).toBeVisible();
+  await expect(page.getByTestId('start.options').locator('[data-pick]')).not.toHaveCount(0);
+});

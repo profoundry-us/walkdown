@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-09-09T13-43-55Z-local-01",
+  "created": "2026-09-09T13:43:55Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "7ec4604",
+  "spec_hash": "sha256:8c07814da8a2",
+  "results": [
+    {
+      "rule": "panel.start.open-a-folder",
+      "status": "pass",
+      "statement_hash": "sha256:2a5e9a0925a7",
+      "evidence": [
+        "runs/evidence/2026-09-09T13-43-55Z/probe-start-open-a-folder.txt",
+        "runs/evidence/2026-09-09T13-43-55Z/proto-start.png",
+        "runs/evidence/2026-09-09T13-43-55Z/app-start.png",
+        "runs/evidence/2026-09-09T13-43-55Z/app-start-connected.png"
+      ],
+      "reasoning": "I reached the no-server state by starting there rather than by breaking a connection: I pointed the panel's remembered server at a dead port and reloaded, so what I judged is what a first run shows. The panel says \"No blueprints open\", explains that a browser tab cannot read your filesystem and that walkdown works through a small local server, and prints `walkdown serve` in a code block under \"In the directory holding your blueprints, run:\" — no error colour (start.message is the normal foreground, oklch(0.93 0.02 230)), no icon, no \"failed\"; it reads as the first step, which is what the rule asks. The box is labelled a server in three places at once: the caption \"Server\", aria-label \"walkdown server address\", and the title \"Where walkdown serve is listening — a server, not a folder\". From that gate I typed a second server's address over the dead one and pressed Connect: the request went out and the panel re-rendered from the new server with no reload, so the gate's Connect is live and the address is retryable in place. Connected, the Blueprints tab names the folder — \"Serving ~/Development/profoundry/walkdown/tmp/scratch/judge-open-a-folder — every blueprint under it is listed below.\" — and I checked that this is the folder the SERVER serves rather than the current blueprint's own directory by standing up a synthetic sandbox declaring two blueprints in subfolders, serving it from inside alpha/, and seeing the panel name the sandbox root and list both alpha and beta; I drove that same reconnect in the extension-shaped delivery (a plain page carrying the panel with bp: '') and got the same. The design's copy differs from the build's — the prototype says \"No blueprints are open yet.\" with the footnote \"A first step, not an error…\", the build says \"No blueprints open\" and carries the same idea in a longer explanation with the Connect inline rather than full width — so this is judged against the statement, which the build satisfies, not against the mockup's wording. One thing does misreport, and it is outside this rule's given so I filed it rather than failed on it: walkdown's own served review page bakes in the blueprint key of the server that served it, so retyping another server's address there sends a stale bp, the other server 404s it, and the panel falls back to the no-server gate while that server is live and holding two blueprints (n-0265). I drove the panel myself in a browser at 1280x720; the PNGs were re-driven afterwards with a throwaway script because the browser I drove cannot write to disk, and they show the states I had already judged.",
+      "threads": ["n-0265"]
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+id: n-0265
+kind: note
+author: topher
+via: agent
+created: 2026-09-09T13:53:16.188Z
+anchor:
+  rule: panel.start.open-a-folder
+  screen: start
+status: addressed
+body: "Judging panel.start.open-a-folder (run 2026-09-09T13-43-55Z-local-01,
+  pass) I found one path where the panel reports no server while a server is
+  answering. On walkdown's own served review page (GET / from `walkdown serve`),
+  review.html bakes in the blueprint key of the server that served it. Retype
+  ANOTHER server's address into the Blueprints tab and that stale key rides
+  along: I served a scratch copy on 4821 and a two-blueprint sandbox on 4822,
+  typed http://localhost:4822 and pressed Connect, and 4822 answered GET
+  /api/blueprint?bp=<4821's blueprint path> with 404 (twice). The panel then
+  fell back to the 'No blueprints open' gate — the message for having no server
+  at all — while 4822 was live and holding two blueprints (alpha, beta). Driving
+  the same reconnect in the extension-shaped delivery (window.__walkdownConfig
+  with bp: '', on a plain page at 4823) works: the panel lists both and names
+  'Serving <sandbox> — every blueprint under it is listed below.' So the rule's
+  own path is unaffected and I did not fail it, but the served page tells a
+  reviewer something untrue about a running server, and a stale bp that 404s
+  looks like it should fall back to asking without one. Evidence:
+  runs/evidence/2026-09-09T13-43-55Z/probe-start-open-a-folder.txt, section D."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-09T14:00:32Z
+    body: >-
+      Fixed, in the two places it goes wrong.
+
+
+      A key belongs to the server that answered with it. So crossing to another
+      address now leaves it behind: the connect handler clears the blueprint
+      when the address actually changes, which is the case you drove.
+
+
+      And a key this server does not have is no longer read as no server at all.
+      start() retries /api/blueprint once without it when the first ask comes
+      back not-ok and a key was carried, which is the honest reading - not
+      knowing which blueprint is a reason to ask, and it was already the answer
+      everywhere else in this flow. That also covers the baked key surviving by
+      some other road, since the panel no longer depends on nobody ever handing
+      it a stale one.
+
+
+      Check in checks/panel.spec.js, "a blueprint key this server does not have
+      is dropped, not read as no server": the fixture is pointed at a key that
+      does not exist on the server it is talking to, and the panel must not draw
+      the no-server screen. Proved failing against the previous build first - it
+      drew exactly that screen, no start.unclaimed anywhere.
+
+
+      You were right not to fail the rule on this: the extension-shaped delivery
+      never carries a stale key, so the rule's own path stood. What was untrue
+      was the panel's account of a running server.
+
+
+      highball run green, npm run checks 47 passed.

@@ -2448,7 +2448,21 @@ const typing = (e) => {
 export async function start() {
   let payload;
   try {
-    payload = await (await fetch(api('/api/blueprint'))).json();
+    let res = await fetch(api('/api/blueprint'));
+    /*
+     * A blueprint key belongs to the server that answered with it. walkdown's
+     * own served review page bakes in the key of the server that served it,
+     * so typing a second server's address carried the first one's key across:
+     * that server answered 404, and the panel fell back to the screen for
+     * having no server at all while a live one held two blueprints (n-0265).
+     * A key this server does not have is not a reason to say there is no
+     * server - it is a reason to ask this one without it.
+     */
+    if (!res.ok && S.BP) {
+      S.BP = null;
+      res = await fetch(api('/api/blueprint'));
+    }
+    payload = await res.json();
   } catch {
     S.phase = 'connect';
     return renderGate();
@@ -2695,7 +2709,12 @@ function wireGlobals() {
   });
   on('connect', ({ server }) => {
     if (server) {
-      S.SERVER = server.replace(/\/+$/, '');
+      const next = server.replace(/\/+$/, '');
+      // Crossing to another server leaves its blueprint behind with it: a key
+      // is one server's directory, and carrying it over is how a live server
+      // came to look like no server at all (n-0265).
+      if (next !== S.SERVER) S.BP = null;
+      S.SERVER = next;
       store.set(CHOICE + ':server', S.SERVER);
     }
     S.phase = 'loading';
