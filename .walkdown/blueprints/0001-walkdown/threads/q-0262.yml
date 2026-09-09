@@ -49,3 +49,24 @@ body: >-
   omits the 'Open one anyway' section rather than showing it empty. The
   prototype draws that section with exactly one row on purpose, and does not say
   what it should be when there are none - so that is design's, not mine.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-09T15:32:00Z
+    body: >-
+      This question has moved under it, so it is worth reading with the new
+      shape in mind.
+
+
+      Topher has asked that picking a blueprint on the unclaimed page CLAIM the
+      page for it, rather than opening it and leaving the browser to remember.
+      Sketch at proposals/claim-this-page.html; the governance question that
+      gates it is q-0267.
+
+
+      That makes the unclaimed screen the one place a choice about whose page
+      this is gets made - and makes the choice permanent and shared rather than
+      local to a browser. Which strengthens the first of the three ways out
+      above: choose-blueprint's job was asking which of several a site is, and
+      that is now what the unclaimed screen asks, in the only situation where
+      the question arises.

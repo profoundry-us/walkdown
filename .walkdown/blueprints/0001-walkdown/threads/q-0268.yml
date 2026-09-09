@@ -1,0 +1,63 @@
+id: q-0268
+kind: question
+author: topher
+via: agent
+created: 2026-09-09T15:31:59.850Z
+anchor:
+  rule: panel.start.unclaimed-page-says-so
+  screen: unclaimed-page
+status: open
+body: >-
+  Design request: the blueprint list on this screen should CLAIM, not merely
+  open.
+
+
+  Topher's call today. As promoted, unclaimed-page.html ends with 'Open one
+  anyway' - a deliberate act that changes nothing on disk, after which the
+  browser quietly remembers what you picked. That leaves two kinds of memory
+  about one fact: what the project says, and what this browser recalls. They
+  disagree the moment you use another machine, and the board can see neither.
+  Pressing a blueprint should write the claim down in the project instead, so
+  there is one answer wherever the question is asked.
+
+
+  Sketched at proposals/claim-this-page.html. What changed from the promoted
+  screen, and why:
+
+
+  - 'Open one anyway' becomes 'Claim this page', because that is what pressing
+  it now does. The old words describe a choice with no consequence; the new ones
+  describe a write.
+
+  - A sentence under the list saying what the press will do before it is
+  pressed, naming the ORIGIN rather than the page - claiming is per site, so
+  every page on it is reviewed against that blueprint from then on.
+
+  - Two blueprints drawn rather than one. The offer has to read the same at any
+  count, since a count is never what decides.
+
+  - The undo is on the screen, as a line and not a button. A claim made in one
+  press should be unmade in one, and saying so is what makes the press safe to
+  make.
+
+  - 'walkdown init' stays, demoted to 'Or it belongs to nothing yet', and
+  'walkdown claims --url' moves into that block as the way to ask rather than a
+  thing to do.
+
+
+  The sketch is a sketch: the words and the shape are yours to change or
+  replace, and I have built none of it. It also depends on q-0267 - a claim
+  written from the browser is a specification write, which
+  ownership.writes.spec-never-implementation currently forbids - so this screen
+  cannot be built until that question is settled, whichever way.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-09T15:33:02Z
+    body: "One omission worth naming, since it is a whole block gone rather than a
+      rewording: the promoted screen's 'To review this page' paragraph - add the
+      address to a screen's app path or a target's base_url - is not in the
+      sketch. Claiming does that for you, so keeping instructions for doing it
+      by hand beside a button that does it reads as two competing offers. If you
+      would rather it stayed as the manual road for people who want to write it
+      themselves, it is one paragraph and I have no argument against it."

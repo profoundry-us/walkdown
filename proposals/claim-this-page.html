@@ -1,0 +1,93 @@
+<!doctype html>
+<!-- Picking a blueprint for a page IS claiming it.
+
+     The unclaimed page as promoted offers "Open one anyway": a deliberate act
+     that changes nothing on disk, and a choice the browser then remembers on
+     its own. That leaves walkdown with two kinds of memory about one fact -
+     what the project says, and what this browser happens to recall - and they
+     disagree the moment you sit at another machine. Topher's call (2026-09-09):
+     collapse them. The pick writes the claim, and there is one answer to
+     "whose page is this" wherever it is asked from.
+
+     Everything above the fold is unchanged from unclaimed-page.html; the
+     bottom section is what this proposal is about. Two blueprints are drawn
+     because the offer must read the same at any count - the count is never
+     what decides. -->
+<html lang="en" data-theme="wireframe">
+<head>
+<meta charset="utf-8">
+<title>Mockup — Claim this page for a blueprint</title>
+<link rel="stylesheet" href="/walkdown.css">
+</head>
+<body class="h-screen overflow-hidden bg-base-200 text-sm">
+  <header class="navbar min-h-0 gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5">
+    <button class="btn btn-xs btn-ghost btn-square" title="Settings">⚙</button>
+    <span class="font-extrabold tracking-tight">walkdown</span>
+  </header>
+
+  <main class="grid h-[calc(100vh-2.5rem)] place-items-center p-6">
+    <div class="card w-96 wire bg-base-100 shadow-lg">
+      <div class="card-body gap-3 p-5">
+
+        <!-- The fact, unchanged. -->
+        <div class="flex flex-col gap-1" data-testid="start.unclaimed">
+          <p class="text-sm font-semibold">No blueprint covers this page</p>
+          <p class="font-mono text-[11px] opacity-60">https://shop.acme.test/checkout</p>
+        </div>
+
+        <!-- THE CHANGE. Where the old screen said "Open one anyway" over a
+             list that opened and quietly remembered, this offers the thing
+             that actually settles it. The verb is claim, because that is what
+             pressing it does: the project records that this site is this
+             blueprint's, and every walkdown reading that project agrees. -->
+        <div class="flex flex-col gap-1.5" data-testid="start.claim-here">
+          <p class="text-[11px] uppercase tracking-wider opacity-50">Claim this page</p>
+          <p class="text-[12px] leading-relaxed opacity-70">Pick the blueprint this page belongs
+            to. walkdown writes it down in the project, so the answer holds on every machine and
+            for everyone - not just in this browser.</p>
+
+          <button class="wire flex w-full flex-col items-start gap-0.5 rounded-lg p-2.5 text-left hover:bg-base-200"
+            data-pick="checkout">
+            <span class="text-sm font-semibold">○ checkout</span>
+            <span class="text-[11px] opacity-60">The storefront checkout flow — carts, payment, receipts.</span>
+          </button>
+          <button class="wire flex w-full flex-col items-start gap-0.5 rounded-lg p-2.5 text-left hover:bg-base-200"
+            data-pick="admin">
+            <span class="text-sm font-semibold">○ admin</span>
+            <span class="text-[11px] opacity-60">Back office — orders, refunds, staff accounts.</span>
+          </button>
+
+          <!-- What the press does, said before it is pressed. A write into
+               the project is not a preference and should never feel like one;
+               naming the origin rather than the full address is the honest
+               scope, since claiming is per site, not per page. -->
+          <p class="text-[11px] leading-relaxed opacity-50">Claiming records
+            <span class="font-mono">https://shop.acme.test</span> as that blueprint's, and opens
+            it here. Every page on this site is reviewed against it from then on.</p>
+        </div>
+
+        <!-- The other road out, kept and demoted. Some pages belong to nothing
+             that exists yet, and this screen is where you learn that too. -->
+        <div class="flex flex-col gap-1.5 border-t border-dashed border-base-content/20 pt-3"
+             data-testid="start.new">
+          <p class="text-[11px] uppercase tracking-wider opacity-50">Or it belongs to nothing yet</p>
+          <code class="rounded bg-base-200 px-2 py-1.5 text-[11px]">walkdown init</code>
+          <p class="text-[11px] leading-relaxed opacity-40">Starts a blueprint for it. To see which
+            blueprint claims an address today, run
+            <span class="font-mono">walkdown claims --url &lt;address&gt;</span>.</p>
+        </div>
+
+        <!-- Undoing it belongs on this screen too, because a claim made in one
+             press should be unmade in one. Drawn as a line rather than a
+             button: it is not an offer, it is the reassurance that makes the
+             press above safe to make. -->
+        <p class="text-[11px] leading-relaxed opacity-40" data-testid="start.claim-undo">A claim can be
+          taken back from the Blueprints tab, or by editing the blueprint - it is written down in
+          the project like anything else, not hidden in this browser.</p>
+
+      </div>
+    </div>
+  </main>
+  <script src="/embed.js" data-walkdown></script>
+</body>
+</html>

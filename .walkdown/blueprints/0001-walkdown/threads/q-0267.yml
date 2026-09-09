@@ -1,0 +1,63 @@
+id: q-0267
+kind: question
+author: topher
+via: agent
+created: 2026-09-09T15:31:16.256Z
+anchor:
+  rule: ownership.writes.spec-never-implementation
+status: open
+body: >-
+  May the browser write a CLAIM? Topher has asked for the behaviour; this rule
+  is what stands in front of it.
+
+
+  The behaviour he asked for (2026-09-09): on a page nothing claims, the panel
+  lists the blueprints and clicking one CLAIMS the page for it, there and then.
+  Picking is claiming, so there is one kind of memory rather than two.
+
+
+  Why this is the rule's business. A claim is an origin plus a path - it comes
+  from a target's base_url and a screen's app address, both of which live in the
+  specification. So a one-press claim from the panel writes features or the
+  storyboard, which this rule calls a breach rather than a bug, on the grounds
+  that the browser captures intent and the agent structures it.
+
+
+  What it is fixing is real, and is the thing that made me raise it. Until today
+  a pick was remembered in the browser only. That is a second kind of memory
+  about one fact: the project says one thing, this browser profile says another,
+  and they part company the moment you sit at a different machine or somebody
+  else opens the same page. It is also invisible to the board, so nothing can
+  report it and nothing can be judged against it. Collapsing the two into one
+  written-down claim is the right direction whichever way this question goes.
+
+
+  Three shapes for the rule, and this is your call, not mine:
+
+
+  1. Narrow the exception to claims alone. The browser may record WHICH SITE A
+  BLUEPRINT COVERS and nothing else - not features, not steps, not screens'
+  contents. The argument: a claim says where the project lives, not what was
+  designed, and the rule's reason ('the browser captures intent and the agent
+  structures it') is about descriptions of a product, which a base_url is not.
+  Cost: the storyboard is spec by any reading, so if a claim ever has to name a
+  PATH rather than an origin, this line moves again.
+
+
+  2. Give claims a record of their own, beside threads, drafts and runs. The
+  browser writes a record, never the spec, and the rule stands as written. Cost:
+  a claim could then live in two places, which is the two-kinds-of-memory
+  problem in a new spelling - unless a recorded claim is defined as the only
+  kind the browser can make and the spec's own claims stay the agent's.
+
+
+  3. Leave the rule alone, and the press hands over the command instead of doing
+  it. Honest, one kind of memory, one extra step every single time - and the
+  screen goes back to being a page that tells you what to type.
+
+
+  I have not built any of it. The screen this changes is drawn at
+  proposals/claim-this-page.html for you to look at; the design request is filed
+  against the unclaimed-page screen. Related: q-0262, since the blueprint list
+  on that screen is now the place a choice is made, which bears on whether the
+  choose-blueprint screen still has a job.
