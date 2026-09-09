@@ -225,6 +225,52 @@ test('a server offers what the .walkdown where it was started declares, wherever
 });
 
 /*
+ * THE FOLDER IT SAYS IT IS SERVING IS THE ONE THE LIST CAME FROM.
+ *
+ * `root` is the sentence above the blueprint list - "Serving X, every
+ * blueprint under it is listed below" - and it was taken from the served
+ * spec's parent while the list was taken from the cwd's `.walkdown`. Those
+ * only agree while the spec sits beside the project. In a numbered home they
+ * do not, and the panel named a directory holding one of the blueprints it
+ * was listing (n-0263).
+ */
+test('the folder a server says it serves is the place its list came from @rule:panel.start.open-a-folder', async () => {
+  const s = scratch();
+  try {
+    const proj = join(s.root, 'proj');
+    mkdirSync(join(proj, '.git'), { recursive: true });
+    // The spec in a numbered home, which is where `init` puts it, and a
+    // second blueprint elsewhere in the project so the list has two.
+    const home = join(proj, '.walkdown', 'blueprints', '0001-proj');
+    blueprint(join(home, 'blueprint'), 'proj');
+    blueprint(join(proj, 'other', 'blueprint'), 'other');
+    writeFileSync(
+      join(proj, '.walkdown', 'config.yml'),
+      'projects:\n  - id: proj\n    roots: [.]\n    spec: .walkdown/blueprints/0001-proj/blueprint\n' +
+        '  - id: other\n    roots: [other]\n    spec: other/blueprint\n',
+    );
+
+    const server = createWalkdownServer(join(home, 'blueprint'), { cwd: proj });
+    await new Promise((r) => server.listen(0, '127.0.0.1', r));
+    const base = `http://127.0.0.1:${server.address().port}`;
+    try {
+      const payload = await (await fetch(`${base}/api/blueprint`)).json();
+      assert.deepEqual(payload.projects.map((p) => p.id).sort(), ['other', 'proj']);
+      assert.equal(payload.root, proj, 'the project, not the numbered home the spec sits in');
+      assert.ok(
+        !payload.root.includes('0001-proj'),
+        'a directory holding one of two listed blueprints cannot be what holds them',
+      );
+    } finally {
+      server.closeAllConnections();
+      server.close();
+    }
+  } finally {
+    s.cleanup();
+  }
+});
+
+/*
  * `move` WRITES TO THE ENTRY THAT RESOLVED. Standing in a directory nothing
  * declares, it used to find an entry by the directory's name and rewrite an
  * unrelated project's key (n-0153.1, n-0160).

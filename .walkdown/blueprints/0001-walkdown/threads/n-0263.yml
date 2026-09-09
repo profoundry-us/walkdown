@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-09T13:36:17.293Z
 anchor:
   rule: panel.start.open-a-folder
-status: open
+status: addressed
 body: >-
   The served-root line names the current blueprint's own directory, not the
   folder being served.
@@ -33,3 +33,33 @@ body: >-
   well as the unclaimed gate. Worth a look before multi-blueprint servers become
   ordinary; today one blueprint per server makes the two directories coincide,
   which is why nobody has noticed.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-09T13:42:29Z
+    body: >-
+      Fixed in lib/serve.js: the folder the payload names is now the place whose
+      .walkdown answered - the same place the projects list is built from -
+      instead of the served spec's parent.
+
+
+      They only agree while the spec sits beside the project. Since init started
+      putting specs in numbered homes they do not, which is what you measured:
+      dirname of .walkdown/blueprints/0001-walkdown/blueprint is the home
+      holding one blueprint, and the list beside it came from the repository
+      root holding all of them. One .walkdown answers for a place; the list and
+      the sentence above it now name that one place.
+
+
+      Test in test/standard.test.js, "the folder a server says it serves is the
+      place its list came from", proved failing first against the previous
+      lib/serve.js:
+
+        actual:   .../proj/.walkdown/blueprints/0001-proj
+        expected: .../proj
+
+      Nothing in src/panel changed - the panel was rendering payload.root
+      faithfully; the payload was wrong.
+
+
+      highball run green, npm run checks 46 passed.
