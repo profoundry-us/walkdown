@@ -1,0 +1,117 @@
+id: q-0269
+kind: question
+author: topher
+via: agent
+created: 2026-09-09T16:58:27.735Z
+anchor:
+  rule: screens.ownership.one-claimant
+status: open
+body: >-
+  Reopening the constraint this rule enforces: may a page belong to more than
+  one blueprint?
+
+
+  Topher, 2026-09-09: he expects one site to host several blueprints at various
+  paths (the monolith packs structure), and - the part this rule forbids -
+  several blueprints that claim the SAME path, because two of them may be about
+  different functionality of the same page. Recording it here rather than
+  deciding it, and flagging that two open questions are now sitting on an
+  assumption that may be about to move.
+
+
+  Where it came from. On 2026-08-24, in q-0019: 'a page belongs to exactly one
+  blueprint - a hard constraint, not a preference. The same page covered by two
+  blueprints is a case we do not want, so the picker never has to disambiguate
+  and a pin never has to ask which project it belongs to.' Everything since was
+  built on that.
+
+
+  What the constraint buys, in behaviour, and therefore what relaxing it costs:
+
+
+  - The panel opens without asking. With several claimants it has to ask which
+  one you are reviewing against - which is the picker this repo is one question
+  away from retiring (q-0262).
+
+  - A pin filed from a page carrying no walkdown tag lands in the right
+  project's threads, because its address is the only thing that can say where it
+  belongs. With several claimants that pin has to ask, or has to follow
+  whichever blueprint is open - which is fine, but only once opening is a
+  deliberate act.
+
+  - Collisions are currently reported as faults across the whole set. If two
+  claimants are legitimate, that check stops being a check and becomes an
+  inventory.
+
+
+  One thing that is NOT a problem, and is worth separating out: several
+  blueprints on one origin at different paths already work. A claim is an origin
+  plus a path, so a monolith whose packs each enumerate their own pages has no
+  collision today. Only the same origin AND the same path collides.
+
+
+  A reframe to react to, offered as a shape rather than a recommendation: today
+  one question is doing two jobs, and they could be split.
+
+  - WHICH BLUEPRINTS COULD THIS PAGE BELONG TO - a fact, read from claims, and
+  allowed to answer with several.
+
+  - WHICH ONE AM I REVIEWING IT AGAINST RIGHT NOW - a choice, held by the panel,
+  changeable, and remembered as a default rather than as a fact about the
+  project.
+
+  Under that split: claims never need to be exclusive; picking-is-claiming
+  (q-0267) applies only where there are no claimants at all; choosing among
+  several claimants is a session choice and not a write; and the picker gets a
+  job that is not a count.
+
+
+  Blocked on this: q-0262 (does the choose-blueprint screen still have a job)
+  and q-0267 (may the browser write a claim). Both were about to be settled on
+  the one-claimant assumption. q-0268, the design request for the unclaimed
+  screen, is unaffected where there are no claimants and would need a second
+  state where there are several.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-09T17:04:11Z
+    body: >-
+      Worked up as docs/12-page-ownership.md - the argument in full, so it can
+      be argued with rather than agreed to.
+
+
+      What is in it beyond the sketch above:
+
+
+      - A measurement that narrows the problem. Several blueprints on one site
+      at different paths already work and always did; the only thing genuinely
+      in question is two blueprints claiming the SAME page.
+
+      - One fact that changes how this must be built: blueprintForUrl does not
+      fail on ambiguity today, it RANKS - fragment beats path, longer path beats
+      shorter, highest score wins, no tie-break and no report. Relax the
+      constraint without touching that and the panel silently picks one, which
+      is the mistake four judgings this week were about.
+
+      - Each behaviour under the split - opening, filing a pin, reporting
+      collisions, remembering, judging - with what stays the same and what
+      changes. Filing never asks: with several claimants a pin follows the
+      blueprint you have open, because by then opening was a deliberate act.
+
+      - What it does to six existing rules, one line each. Two survive with a
+      case added, one narrows or retires, one gains a reason to exist that is
+      not a count.
+
+      - Three rejected alternatives with the reason, including the one that
+      looks tidiest - recording the choice as a claim too - which fails because
+      a preference held by one person at one moment does not belong in a file
+      everyone reads.
+
+      - The cost, and where the risk actually is: every road into this goes
+      through blueprintForUrl, it answers with one thing, and every caller is
+      written to that shape.
+
+
+      Four questions left open at the end, the first being whether the answer is
+      yes at all. If it is no, the document collapses to a paragraph and the
+      case is handled by splitting screens instead.
