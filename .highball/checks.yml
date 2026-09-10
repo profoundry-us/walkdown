@@ -122,12 +122,17 @@ checks:
     run: node --check lib/viewer/panel.js && node --check lib/viewer/embed.js
     fast: true
 
+  # PER-EDIT RUNNING IS OFF while ADR 0001 is built (2026-09-09, Topher's
+  # call: "fix / disable any highball checks that might interfere while you
+  # work"). A refactor this wide leaves the suite red between commits by
+  # construction - the rename lands before its callers do - and a failing
+  # suite dumped after every single edit is noise that hides the edit's own
+  # result. It still runs at turn end, which is where the tree has to be
+  # green. `fast: true` goes back the moment the ADR's step 6 is done.
   - id: unit-tests
     name: Unit tests
     run: npm test
-    fast: true      # ~14s for the whole suite, most of it CLI subprocesses and
-                    # servers; still worth paying per edit rather than finding
-                    # out at turn end
+    fast: false
 
   # OFF while ADR 0001 is built (2026-09-09). A page may now be claimed by
   # several blueprints, so "no two claim the same page" is no longer true and

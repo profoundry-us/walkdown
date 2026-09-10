@@ -27,6 +27,7 @@ Usage:
   walkdown claims [--project <id>] [--url <address>] [--json]
   walkdown where [<kind>] [--project <id>] [--json]
   walkdown projects [--stale]
+  walkdown import <path> [--all] [--only <ids>] [--json]
   walkdown project add <path> [--id <name>] [--ephemeral] [--why <reason>]
   walkdown project forget <id>
   walkdown move <kind> --to <path> [--project <id>]
@@ -48,6 +49,12 @@ Commands:
   projects
           Every blueprint declared here, with throwaway copies grouped under
           Ephemeral and marked when they are old enough to be worth clearing.
+  import  Take another project's blueprints into this machine's registry:
+          you name the directory, it shows you what that project declares,
+          and you say which to take (--all, or --only <ids>). Nothing arrives
+          by walking the tree, so a clone that happens to use walkdown stays
+          invisible until you ask for it. The entries carry no roots - they
+          are reachable by name and by the server, and shadow nothing.
   run     Run the project's checks via the runner contract (run_all, or
           run_for_rule with --rule), injecting the target's env and
           WALKDOWN_TARGET. The reporter/formatter records the run.
@@ -127,6 +134,7 @@ Options:
 
 const COMMANDS = new Set([
   'init',
+  'import',
   'run',
   'lint',
   'status',
