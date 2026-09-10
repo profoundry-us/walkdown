@@ -160,7 +160,7 @@ export default defineConfig({
       // disposable copy by standing in it rather than by naming a path, and
       // the real ledger is not merely un-chosen but unreachable from here
       // (locations.answer.one-walkdown-answers).
-      command: `node ../../bin/walkdown.js serve --project blueprint --port ${WD_PORT}`,
+      command: `node ../../bin/walkdown.js serve --blueprint blueprint --port ${WD_PORT}`,
       cwd: 'tmp/checkspace',
       url: `${WD_ORIGIN}/api/blueprint`,
       reuseExistingServer: false,

@@ -111,10 +111,10 @@ const doors = {
 
   cli: {
     async verify({ bp, home }) {
-      return run(['n-0001', '--verify', '--project', declareProject(home, bp)], home);
+      return run(['n-0001', '--verify', '--blueprint', declareProject(home, bp)], home);
     },
     async claim({ bp, home }) {
-      return run(['n-0001', '--reply', 'looked at it', '--project', declareProject(home, bp)], home);
+      return run(['n-0001', '--reply', 'looked at it', '--blueprint', declareProject(home, bp)], home);
     },
   },
 

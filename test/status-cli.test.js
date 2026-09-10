@@ -89,7 +89,7 @@ function fixture(name) {
 const run = (bp, args) =>
   execFileSync(
     process.execPath,
-    [CLI, 'status', ...args, '--project', declareProject(HOME, bp)],
+    [CLI, 'status', ...args, '--blueprint', declareProject(HOME, bp)],
     {
       encoding: 'utf8',
       env: { ...process.env, WALKDOWN_HOME: HOME },

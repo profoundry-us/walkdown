@@ -6,9 +6,9 @@ import { loadOrExit } from './context.js';
 export async function run(args) {
   const { values } = parseArgs({
     args,
-    options: { project: { type: 'string' }, target: { type: 'string' }, rule: { type: 'string' } },
+    options: { blueprint: { type: 'string' }, target: { type: 'string' }, rule: { type: 'string' } },
   });
-  const blueprint = loadOrExit(values.project);
+  const blueprint = loadOrExit(values.blueprint);
   const { runChecks } = await import('../../lib/run-cmd.js');
   /*
    * The RESOLVED runs directory, not `<spec>/runs`. They are the same path

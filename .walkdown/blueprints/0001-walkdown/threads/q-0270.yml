@@ -1,0 +1,49 @@
+id: q-0270
+kind: question
+author: topher
+via: agent
+created: 2026-09-10T03:25:04.660Z
+anchor:
+  rule: locations.answer.declared-not-discovered
+status: open
+body: >-
+  The config key still says "projects" and means blueprints (ADR 0001 step 5,
+  the half I did not do).
+
+
+  Step 5 renamed every surface that said "project" and meant blueprint: the
+  payload (`projects` -> `blueprints`, `project` -> `blueprint`), the CLI
+  (`walkdown project add|forget` -> `walkdown blueprint add|forget`, `walkdown
+  projects` -> `walkdown blueprints`), and `--project <id>` -> `--blueprint
+  <id>` on every command that takes it. `walkdown skills --project` keeps its
+  own flag: there it really does mean a repository.
+
+
+  Two surfaces are deliberately NOT renamed, because they are file formats with
+  data on disk rather than words on a screen:
+
+
+  1. The config key. `.walkdown/config.yml` and `~/.walkdown/config.yml` both
+  say `projects:` and both mean blueprints. It is the loudest remaining instance
+  of the confusion the ADR is about, and every clone, every adopter's repo and
+  your own personal config carry it.
+
+
+  2. `resolveLocations({ project })` and its neighbours in lib/locations.js,
+  where the internal option means a blueprint id. It is mechanical, and it is 56
+  call sites in the tests alone in the file this repository has paid the most
+  for.
+
+
+  What I would do if it were mine: rename the key to `blueprints:` with NO
+  fallback (q-0182 - we only support our own tools, and a dual-read is the "two
+  ways to answer one question" n-0156 abolished), add a one-liner that rewrites
+  a config in place, and do the locations.js parameter in the same commit so no
+  half-renamed state is ever committed. What stopped me doing it unasked is your
+  machine: ~/.walkdown/config.yml is yours, and a rename that silently makes
+  your walkdown blind until you rerun something is not a change an agent should
+  make on its own.
+
+
+  The glossary now defines both words and says this thread is where the key is
+  decided.

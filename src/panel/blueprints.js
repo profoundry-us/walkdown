@@ -62,7 +62,7 @@ export function serverRow(size = 'xs', { caption = false } = {}) {
  * question nobody asked.
  */
 export function blueprintsPane({ server = true, notice = null } = {}) {
-  const mine = S.project ? S.projects.filter((pr) => pr.project?.id === S.project) : S.projects;
+  const mine = S.project ? S.blueprints.filter((pr) => pr.project?.id === S.project) : S.blueprints;
   const claims = (pr) => S.claimants.some((m) => m.key === pr.key);
   const rows = [...mine.filter(claims), ...mine.filter((pr) => !claims(pr))];
   return html`

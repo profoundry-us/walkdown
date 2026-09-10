@@ -97,7 +97,7 @@ function fixture(name, governance = []) {
 }
 
 const cli = (args, dir) =>
-  execFileSync(process.execPath, [CLI, ...args, '--project', declareProject(HOME, dir)], {
+  execFileSync(process.execPath, [CLI, ...args, '--blueprint', declareProject(HOME, dir)], {
     encoding: 'utf8',
     env: { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: HOME },
   }).replace(/\x1b\[[0-9;]*m/g, '');

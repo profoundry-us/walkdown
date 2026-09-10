@@ -21,7 +21,7 @@ import { fire } from './util.js';
 export const projectIdOf = (bp) => bp?.project?.id ?? null;
 
 /** The blueprints this server holds for one project, in payload order. */
-export const blueprintsOf = (id) => S.projects.filter((bp) => projectIdOf(bp) === id);
+export const blueprintsOf = (id) => S.blueprints.filter((bp) => projectIdOf(bp) === id);
 
 /**
  * The projects this server holds, each with its blueprints and whichever of
@@ -33,7 +33,7 @@ export const blueprintsOf = (id) => S.projects.filter((bp) => projectIdOf(bp) ==
  */
 export function projectsHeld() {
   const byId = new Map();
-  for (const bp of S.projects) {
+  for (const bp of S.blueprints) {
     const id = projectIdOf(bp) ?? bp.key ?? bp.id;
     if (!byId.has(id)) byId.set(id, { id, root: bp.project?.root ?? null, blueprints: [], claims: [] });
     const row = byId.get(id);

@@ -1956,7 +1956,7 @@ test('two blueprints claiming one page is a question, asked with both named', {
   await page.route('**/api/blueprint*', async (route) => {
     const res = await route.fetch();
     const body = await res.json();
-    keys = (body.projects ?? []).map((p) => p.key);
+    keys = (body.blueprints ?? []).map((p) => p.key);
     await route.fulfill({ response: res, json: body });
   });
   await page.route(/\/api\/whose(\?|$)/, async (route) => {
@@ -2015,7 +2015,7 @@ test('one blueprint on the server is not evidence that this page belongs to it',
   await page.route('**/api/blueprint*', async (route) => {
     const res = await route.fetch();
     const body = await res.json();
-    body.projects = (body.projects ?? []).slice(0, 1);
+    body.blueprints = (body.blueprints ?? []).slice(0, 1);
     await route.fulfill({ response: res, json: body });
   });
   await page.goto(fixtureFor({ bp: '' }));
@@ -2043,7 +2043,7 @@ test('a server that lists nothing still does not open itself over the page', {
   await page.route('**/api/blueprint*', async (route) => {
     const res = await route.fetch();
     const body = await res.json();
-    body.projects = [];
+    body.blueprints = [];
     await route.fulfill({ response: res, json: body });
   });
   await page.goto(fixtureFor({ bp: '' }));

@@ -58,7 +58,7 @@ worth reading against this one.
 **Nothing committed — the default.** The home is `~/.walkdown/blueprints/NNNN-name/`. The
 repository gets *nothing*: no `.walkdown/`, no ignore rule, not even a pointer. Trying
 walkdown alters no tree, and abandoning it is deleting one directory in your own home.
-The entry that named it stays in your config and `walkdown projects` shows the home gone;
+The entry that named it stays in your config and `walkdown blueprints` shows the home gone;
 its number is never handed to the next same-named repository (n-0170).
 
 ```
@@ -188,7 +188,7 @@ roots or has no blueprint of its own (the pure-override shape — `id` and `evid
 nothing else). A personal entry with the same id rooted somewhere else — another checkout,
 or a directory nested inside this one that happens to share the name — is a different
 project: it answers from its own root, never merges into the repository's, and where the
-repository's row covers the same ground `walkdown projects` says it is shadowed (n-0160,
+repository's row covers the same ground `walkdown blueprints` says it is shadowed (n-0160,
 n-0170). An entry with no roots but a `spec` of its own — an ephemeral copy — is never an
 override of anything.
 
@@ -219,7 +219,7 @@ wrong on every machine but one.
 
 There is no `--dir`, and walkdown does not search the tree for `walkdown.yml`. A
 blueprint walkdown answers for is one somebody declared: `init` writes the entry for what
-it makes, `walkdown project add <path>` writes one for a blueprint that arrived — a clone,
+it makes, `walkdown blueprint add <path>` writes one for a blueprint that arrived — a clone,
 a copy, somebody else's checkout — and `--ephemeral` marks a throwaway copy, reachable by
 name, never by standing somewhere, and only ever in your own config. `walkdown project
 forget <id>` takes an entry off the list and touches no records.
@@ -251,8 +251,8 @@ a gap; a path reached without an entry needed a home derived from a name, which 
 the collisions came from (n-0133, q-0138, n-0156).
 
 Selection is by standing somewhere — the entry whose `roots` contain the working
-directory, the most specific when several do — or by `--project <id>`. Where two entries
-share an id, `--project` prefers the one rooted where you are, then the repository's.
+directory, the most specific when several do — or by `--blueprint <id>`. Where two entries
+share an id, `--blueprint` prefers the one rooted where you are, then the repository's.
 
 ## `config.yml`
 

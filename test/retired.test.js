@@ -91,7 +91,7 @@ test('the CLI answers for a retired rule instead of calling it unknown', async (
   const run = (args) =>
     execFileSync(
       process.execPath,
-      [cli, ...args, '--project', h.id],
+      [cli, ...args, '--blueprint', h.id],
       { encoding: 'utf8', cwd: h.root, env: { ...process.env, WALKDOWN_HOME: HOME } },
     );
 

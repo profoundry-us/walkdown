@@ -159,7 +159,7 @@ after(() => {
 
 test('GET /api/blueprint returns rows, storyboard, and config bits', async () => {
   const data = await (await fetch(`${base}/api/blueprint`)).json();
-  assert.equal(data.project, 'serve-fixture');
+  assert.equal(data.blueprint, 'serve-fixture');
   assert.equal(data.rows[0].rule, 'demo.main.thing');
   assert.equal(data.storyboard[0].id, 'home');
   assert.equal(data.anchorAttr, 'data-testid');
@@ -202,7 +202,7 @@ test('the review page bakes in nothing, and has no front door of its own', async
   assert.doesNotMatch(html, /__FRONT_DOOR__|__BLUEPRINT__/, 'no placeholder is left unsubstituted');
   assert.doesNotMatch(html, /prototype\/home\.html/, 'and none is substituted either');
   const home = await (await fetch(`${base}/api/blueprint`)).json();
-  const current = home.projects.find((p) => p.current);
+  const current = home.blueprints.find((p) => p.current);
   assert.ok(current.key, JSON.stringify(current));
   assert.ok(!html.includes(`'${current.key}'`), 'no blueprint is baked in');
   // The fragment is still how you point it at a page - that gesture is what
@@ -875,18 +875,18 @@ test('multi-project: sibling blueprints are discovered and ?bp= switches, member
   );
 
   const home = await (await fetch(`${base}/api/blueprint`)).json();
-  const ids = home.projects.map((p) => p.id).sort();
+  const ids = home.blueprints.map((p) => p.id).sort();
   // The config entry's id, not a path relative to wherever this server was
   // started — the same string on every machine.
   assert.deepEqual(ids, ['main', 'sibling']);
-  assert.ok(home.projects.find((p) => p.id === 'main').current);
+  assert.ok(home.blueprints.find((p) => p.id === 'main').current);
 
   const sibling = await (
     await fetch(`${base}/api/blueprint?bp=sibling`)
   ).json();
-  assert.equal(sibling.project, 'sibling-app');
+  assert.equal(sibling.blueprint, 'sibling-app');
   assert.equal(sibling.rows[0].rule, 'f.s.one');
-  assert.ok(sibling.projects.find((p) => p.id === 'sibling').current);
+  assert.ok(sibling.blueprints.find((p) => p.id === 'sibling').current);
 
   assert.equal((await fetch(`${base}/api/blueprint?bp=../../etc`)).status, 404);
 });
@@ -909,7 +909,7 @@ test('two listed blueprints sharing an id are told apart by key, and a bare ?bp=
   writeFileSync(cfg, before + `projects:\n  - id: sibling\n    roots: [${join(root, 'twin')}]\n    spec: ${join(root, 'twin', 'blueprint')}\n`);
   try {
     const home = await (await fetch(`${base}/api/blueprint`)).json();
-    const twins = home.projects.filter((p) => p.id === 'sibling');
+    const twins = home.blueprints.filter((p) => p.id === 'sibling');
     assert.equal(twins.length, 2);
     assert.notEqual(twins[0].key, twins[1].key);
     const refused = await fetch(`${base}/api/blueprint?bp=sibling`);
@@ -918,8 +918,8 @@ test('two listed blueprints sharing an id are told apart by key, and a bare ?bp=
     assert.equal(body.candidates.length, 2);
     const twin = twins.find((p) => p.key.endsWith('/twin/blueprint'));
     const picked = await (await fetch(`${base}/api/blueprint?bp=${encodeURIComponent(twin.key)}`)).json();
-    assert.equal(picked.project, 'the-twin');
-    assert.ok(picked.projects.find((p) => p.key === twin.key).current);
+    assert.equal(picked.blueprint, 'the-twin');
+    assert.ok(picked.blueprints.find((p) => p.key === twin.key).current);
     // A write through an ambiguous name lands nowhere.
     const write = await fetch(`${base}/api/threads?bp=sibling`, {
       method: 'POST',

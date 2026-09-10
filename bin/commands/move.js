@@ -19,7 +19,7 @@ export function run(args) {
   const { values, positionals } = parseArgs({
     args,
     allowPositionals: true,
-    options: { to: { type: 'string' }, project: { type: 'string' } },
+    options: { to: { type: 'string' }, blueprint: { type: 'string' } },
   });
   const kind = positionals[0];
   if (!KINDS.includes(kind)) {
@@ -31,7 +31,7 @@ export function run(args) {
     return end(2);
   }
 
-  const loc = resolveLocations({ project: values.project });
+  const loc = resolveLocations({ project: values.blueprint });
   /*
    * Only a listed project's records move. Standing in a directory nothing
    * declares, this used to fall through to an entry found BY NAME and rewrote
@@ -41,8 +41,8 @@ export function run(args) {
   if (!loc.project) {
     console.error(
       red(
-        values.project
-          ? `No project \`${values.project}\` — \`walkdown projects\` lists them.`
+        values.blueprint
+          ? `No project \`${values.blueprint}\` — \`walkdown projects\` lists them.`
           : 'Nothing declares this directory, so there is no entry to remember a move in.',
       ),
     );

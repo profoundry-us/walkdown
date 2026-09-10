@@ -438,7 +438,7 @@ test('run sees a record arrive in a runs directory a config moved @rule:location
     [
       new URL('../bin/walkdown.js', import.meta.url).pathname,
       'run',
-      '--project',
+      '--blueprint',
       'moved-ledger',
     ],
     { env: { ...process.env, WALKDOWN_HOME: home } },
@@ -594,7 +594,7 @@ test('skills outside a repository has only the one place to offer @rule:location
   assert.match(out, /One place to put them/);
   assert.doesNotMatch(out, /the repository —/);
 
-  // And --project says so rather than inventing a repository.
+  // And --blueprint says so rather than inventing a repository.
   const asked = skillsCli(here, home, ['--project']);
   assert.equal(asked.status, 2);
   assert.match(asked.out, /not in one/);

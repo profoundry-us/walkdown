@@ -17,12 +17,12 @@ export function run(args) {
     args,
     allowPositionals: true,
     options: {
-      project: { type: 'string' },
+      blueprint: { type: 'string' },
       json: { type: 'boolean', default: false },
     },
   });
 
-  const loc = resolveLocations({ project: values.project });
+  const loc = resolveLocations({ project: values.blueprint });
   if (values.json) {
     const { findings, words, why } = tracking(loc);
     console.log(JSON.stringify({ ...loc, tracking: { words, why, findings } }, null, 2));

@@ -86,7 +86,7 @@ default: the person's own directory, where they work in every project on the
 machine and add nothing to any repository.
 
     walkdown skills                 # yours, every project
-    walkdown skills --project       # ./.claude/skills, committed and shared
+    walkdown skills --blueprint       # ./.claude/skills, committed and shared
 
 `walkdown init` always takes the first, whatever the spec did. Skills used to
 follow the spec — a committed spec is shared, so the procedures for working on
@@ -100,7 +100,7 @@ one of which is stale (n-0184), copies that are symlinks the committed path
 does not model (n-0197) — and n-0239 decided it.
 
 A team that wants them committed still gets them, by asking: `walkdown skills
---project`. What is gone is init deciding it on their behalf out of an
+--blueprint`. What is gone is init deciding it on their behalf out of an
 unrelated answer — and, with it, init deleting them again on the way out, since
 a copy there is now one somebody chose.
 

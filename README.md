@@ -75,12 +75,12 @@ The first tooling slice — the two commands the hand-run milestone showed matte
 ```
 walkdown init [--dir <project-root>] [--commit none|spec|all]
 walkdown skills [--into <dir>] [--project] [--force]
-walkdown where [<kind>] [--project <id>] [--json]
+walkdown where [<kind>] [--blueprint <id>] [--json]
 walkdown pointer [--dir <project-root>] [--into <file>]
 walkdown run [--target <name>] [--rule <id>]
-walkdown status [<rule-id>] [--project <id>] [--target <name>] [--json]
-walkdown lint [--project <id>] [--no-checks] [--json]
-walkdown hash [--project <id>] [--write]
+walkdown status [<rule-id>] [--blueprint <id>] [--target <name>] [--json]
+walkdown lint [--blueprint <id>] [--no-checks] [--json]
+walkdown hash [--blueprint <id>] [--write]
 walkdown threads [--rule <id>] [--all] [--json]
 walkdown thread <id> [--json]
 ```

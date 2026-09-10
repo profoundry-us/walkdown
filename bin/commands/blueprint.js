@@ -1,5 +1,11 @@
 /*
- * `walkdown project add|forget`, and `walkdown projects`.
+ * `walkdown blueprint add|forget`, and `walkdown blueprints`.
+ *
+ * It was `walkdown project` until ADR 0001, which is exactly the confusion
+ * that ADR is about: what this declares is a BLUEPRINT - a specification with
+ * its own storyboard, rules, threads and runs - and what a person means by a
+ * project is the repository those live in. `walkdown import` is the command
+ * about projects.
  *
  * WHY THIS EXISTS AND `--dir` DOES NOT (n-0156, and the six threads before it).
  *
@@ -43,9 +49,9 @@ import { dim, green, red, yellow } from '../../lib/report/tty.js';
 import { parseDocument } from '../../vendor/yaml.js';
 import { end } from './context.js';
 
-const HELP = `walkdown project add <path> [--id <name>] [--ephemeral] [--why <reason>]
-walkdown project forget <id>
-walkdown projects [--stale]`;
+const HELP = `walkdown blueprint add <path> [--id <name>] [--ephemeral] [--why <reason>]
+walkdown blueprint forget <id>
+walkdown blueprints [--stale]`;
 
 /** How old an ephemeral entry has to be before it is worth mentioning. */
 const STALE_DAYS = 2;
@@ -70,7 +76,7 @@ function add(args) {
   });
   const at = positionals[0];
   if (!at) {
-    console.error('walkdown project add needs a path to a blueprint.');
+    console.error('walkdown blueprint add needs a path to a blueprint.');
     console.error(HELP);
     return end(2);
   }
@@ -237,7 +243,7 @@ function add(args) {
     });
   } catch (e) {
     console.error(red(e.message));
-    console.error(dim('  `walkdown project add <copy> --ephemeral` lists a throwaway copy in ~/.walkdown instead.'));
+    console.error(dim('  `walkdown blueprint add <copy> --ephemeral` lists a throwaway copy in ~/.walkdown instead.'));
     return end(2);
   }
   console.log(`  ${green('+ listed')}   ${spec}  ${dim(`as \`${written.id}\``)}`);
@@ -248,7 +254,7 @@ function add(args) {
 function forget(args) {
   const id = args[0];
   if (!id) {
-    console.error('walkdown project forget needs a project id.');
+    console.error('walkdown blueprint forget needs a project id.');
     return end(2);
   }
   let removed = false;
@@ -265,7 +271,7 @@ function forget(args) {
     removed = true;
   }
   if (!removed) {
-    console.error(`No project \`${id}\` in either config. \`walkdown projects\` lists them.`);
+    console.error(`No project \`${id}\` in either config. \`walkdown blueprints\` lists them.`);
     return end(2);
   }
   return end(0);
@@ -284,7 +290,7 @@ export function list(args) {
   const live = all.filter((p) => !p?.ephemeral);
   const scratch = all.filter((p) => p?.ephemeral);
   if (!all.length) {
-    console.log(dim('No projects. `walkdown init` starts one, `walkdown project add` lists one.'));
+    console.log(dim('No projects. `walkdown init` starts one, `walkdown blueprint add` lists one.'));
     return end(0);
   }
   const row = (p, pad = '  ') => {
@@ -337,7 +343,7 @@ export function list(args) {
     console.log(
       dim(
         '    Left standing, and not guessed at — walkdown will not decide which checkout\n' +
-          '    they belong to. `walkdown project add <path>` lists one if you know.',
+          '    they belong to. `walkdown blueprint add <path>` lists one if you know.',
       ),
     );
   }

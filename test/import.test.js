@@ -76,11 +76,11 @@ test('a project nobody imported is invisible, and importing it makes it reachabl
     ]);
     // Standing somewhere else entirely: the clone exists on disk and walkdown
     // does not know it.
-    const before = walkdown(s.home, ['projects'], s.root);
+    const before = walkdown(s.home, ['blueprints'], s.root);
     assert.doesNotMatch(before.stdout, /checkout/);
 
     walkdown(s.home, ['import', shop, '--all'], s.root);
-    const after = walkdown(s.home, ['projects'], s.root);
+    const after = walkdown(s.home, ['blueprints'], s.root);
     assert.match(after.stdout, /checkout/);
 
     // Written to the personal registry, with no roots: reachable by name and
@@ -222,7 +222,7 @@ test('the server routes across imported projects, and answers with all of them @
       // And every blueprint says which project it is in, so the panel can
       // group by project without deriving directories in a browser.
       const payload = await (await fetch(`${base}/api/blueprint`)).json();
-      const rows = Object.fromEntries(payload.projects.map((p) => [p.id, p.project?.id]));
+      const rows = Object.fromEntries(payload.blueprints.map((p) => [p.id, p.project?.id]));
       assert.deepEqual(rows, { checkout: 'acme-shop', campaigns: 'acme-marketing' });
     } finally {
       server.closeAllConnections();

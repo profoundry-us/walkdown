@@ -131,14 +131,14 @@ export function run(args) {
   const { values, positionals } = parseArgs({
     args,
     options: {
-      project: { type: 'string' },
+      blueprint: { type: 'string' },
       target: { type: 'string' },
       json: { type: 'boolean', default: false },
       retired: { type: 'boolean', default: false },
     },
     allowPositionals: true,
   });
-  const blueprint = loadOrExit(values.project);
+  const blueprint = loadOrExit(values.blueprint);
   if (values.retired) {
     const gone = retiredRules(blueprint);
     if (values.json) {

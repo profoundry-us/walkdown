@@ -794,9 +794,9 @@ function paintDesk(on) {
  * making that call for them.
  */
 function askAboutSitting(nextBp) {
-  const name = S.projects.find((p) => p.key === nextBp)?.name ?? nextBp;
+  const name = S.blueprints.find((p) => p.key === nextBp)?.name ?? nextBp;
   toast(
-    `A walkdown is running on <b>${esc(S.data.project)}</b>, with <b>${
+    `A walkdown is running on <b>${esc(S.data.blueprint)}</b>, with <b>${
       Object.keys(S.session.verdicts).length
     } judged</b>. It cannot come with you to ${esc(name)}.` +
       ` <button class="link" data-sitting="keep">Keep it as a draft</button>` +
@@ -831,7 +831,7 @@ function crossTo(nextBp) {
   S.BP = nextBp;
   // The blueprint carries its project with it: picking one from another
   // project's list is how you cross, and the bar must say where you landed.
-  S.project = projectIdOf(S.projects.find((pr) => pr.key === nextBp)) ?? S.project;
+  S.project = projectIdOf(S.blueprints.find((pr) => pr.key === nextBp)) ?? S.project;
   // Nothing is written down. A pick was remembered per site once, which is
   // the second kind of memory ADR 0001 §9 deleted rather than migrated.
   S.listTab = 'rules';
@@ -1461,7 +1461,7 @@ function renderBar() {
         : null
     }
     ${projectButton()}
-    <span class="min-w-0 truncate text-[11.5px] opacity-50" data-testid="panel.blueprint">${S.data.project}</span>
+    <span class="min-w-0 truncate text-[11.5px] opacity-50" data-testid="panel.blueprint">${S.data.blueprint}</span>
     <!-- Which screen this page is. It reads as the answer, not as a way to
          ask the question: the button is labelled with the screen you are on,
          so the common case costs no click at all. Outlined once a screen has
@@ -2525,7 +2525,7 @@ export async function start() {
     S.phase = 'connect';
     return renderGate();
   }
-  S.projects = payload.projects ?? [];
+  S.blueprints = payload.blueprints ?? [];
   S.servedRoot = payload.root ?? null;
   /*
    * Framed, the page under review is the one in the frame, not walkdown's own
@@ -2567,7 +2567,7 @@ export async function start() {
     }
     // By key, never by id: two listed blueprints may share a name, and the
     // one this page belongs to is one directory, not one name (n-0173).
-    S.claimants = (whose?.matches ?? []).filter((m) => S.projects.some((pr) => pr.key === m.key));
+    S.claimants = (whose?.matches ?? []).filter((m) => S.blueprints.some((pr) => pr.key === m.key));
   }
   /*
    * The routing table, in the order ADR 0001 §7 sets it out. Each row here is
@@ -2577,7 +2577,7 @@ export async function start() {
   if (!S.BP) {
     const projectsClaiming = [
       ...new Set(
-        S.claimants.map((m) => projectIdOf(S.projects.find((pr) => pr.key === m.key))),
+        S.claimants.map((m) => projectIdOf(S.blueprints.find((pr) => pr.key === m.key))),
       ),
     ];
     if (S.claimants.length === 1) {
@@ -2606,7 +2606,7 @@ export async function start() {
       return renderGate();
     }
   } else {
-    S.project = projectIdOf(S.projects.find((pr) => pr.key === S.BP)) ?? S.project;
+    S.project = projectIdOf(S.blueprints.find((pr) => pr.key === S.BP)) ?? S.project;
   }
   S.phase = 'ready';
   S.data = S.BP ? await (await fetch(api('/api/blueprint'))).json() : payload;

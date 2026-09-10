@@ -91,7 +91,7 @@ test('a rootless personal entry with a spec of its own is a different project, n
     walkdown(s.home, ['init', '--commit', 'spec'], repo);
     const copy = blueprint(join(s.root, 'elsewhere', 'blueprint'), 'copy');
     // An ephemeral copy that happens to take the same id.
-    walkdown(s.home, ['project', 'add', copy, '--id', 'repo', '--ephemeral', '--why', 'a sitting'], s.root);
+    walkdown(s.home, ['blueprint', 'add', copy, '--id', 'repo', '--ephemeral', '--why', 'a sitting'], s.root);
 
     const loc = resolveLocations({ cwd: repo });
     assert.equal(loc.spec.path, join(repo, '.walkdown', 'blueprints', '0001-repo', 'blueprint'));
@@ -204,7 +204,7 @@ test('a server offers what the .walkdown where it was started declares, wherever
        * the behaviour agree.
        */
       const home = await (await fetch(`${base}/api/blueprint?bp=root-proj`)).json();
-      assert.deepEqual(home.projects.map((p) => p.id).sort(), ['root-proj']);
+      assert.deepEqual(home.blueprints.map((p) => p.id).sort(), ['root-proj']);
       assert.equal((await fetch(`${base}/api/blueprint?bp=reach`)).status, 404, 'a refused entry is not on offer');
       assert.equal((await fetch(`${base}/api/blueprint?bp=alpha-two`)).status, 404, 'the pack\'s own is not on offer');
       assert.equal((await fetch(`${base}/api/blueprint?bp=root-proj`)).status, 200);
@@ -255,7 +255,7 @@ test('the folder a server says it serves is the place its list came from @rule:p
     const base = `http://127.0.0.1:${server.address().port}`;
     try {
       const payload = await (await fetch(`${base}/api/blueprint`)).json();
-      assert.deepEqual(payload.projects.map((p) => p.id).sort(), ['other', 'proj']);
+      assert.deepEqual(payload.blueprints.map((p) => p.id).sort(), ['other', 'proj']);
       assert.equal(payload.root, proj, 'the project, not the numbered home the spec sits in');
       assert.ok(
         !payload.root.includes('0001-proj'),

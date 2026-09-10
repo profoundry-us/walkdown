@@ -190,13 +190,13 @@ test('a project entry outranks the tree, and {id} expands in defaults', () => {
 });
 
 /*
- * `--project <id>` replaced `--dir <path>`, and the difference is the point.
+ * `--blueprint <id>` replaced `--dir <path>`, and the difference is the point.
  * A path named on the command line reached a blueprint that no config knew
  * about - so it had no entry, so its home had to be derived from a name, and
  * that derivation is the ancestor of every collision this file tests for
  * (n-0156). An id can only name something already written down.
  */
-test('--project selects a declared blueprint, and an unknown id is nothing at all', () => {
+test('--blueprint selects a declared blueprint, and an unknown id is nothing at all', () => {
   const s = scratch();
   try {
     const repo = join(s.root, 'repo');
@@ -234,7 +234,7 @@ test('--project selects a declared blueprint, and an unknown id is nothing at al
  * you are STANDING describes a different project, and letting it keep applying
  * reported one project's spec beside another's ledger.
  */
-test('--project does not inherit the ledger of whichever project you are standing in @rule:locations.answer.declared-not-discovered', () => {
+test('--blueprint does not inherit the ledger of whichever project you are standing in @rule:locations.answer.declared-not-discovered', () => {
   const s = scratch();
   try {
     const repo = join(s.root, 'repo');
@@ -362,7 +362,7 @@ test('an entry still answers where the tree has no blueprint to offer', () => {
   try {
     const repo = join(s.root, 'repo');
     mkdirSync(join(repo, 'src'), { recursive: true }); // no blueprint anywhere
-    const away = blueprint(join(s.home, 'projects', 'away', 'blueprint'), { project: 'away' });
+    const away = blueprint(join(s.home, 'blueprints', 'away', 'blueprint'), { project: 'away' });
     configure(s.home, `projects:\n  - id: away\n    roots: [${repo}]\n    spec: ${away}\n`);
     const loc = resolveLocations({ cwd: join(repo, 'src') });
     assert.equal(loc.spec.path, away, 'which is what an out-of-tree spec is for');
@@ -821,7 +821,7 @@ test('project add lists a home the config does not yet name, relative in the rep
     // one somebody moved in. It exists on disk; nothing names it yet.
     const two = join(repo, '.walkdown', 'blueprints', '0002-two');
     blueprint(join(two, 'blueprint'), { project: 'second' });
-    const out = walkdown(s.home, ['project', 'add', two], repo);
+    const out = walkdown(s.home, ['blueprint', 'add', two], repo);
     assert.match(out, /listed/);
     const cfg = parse(readFileSync(join(repo, '.walkdown', 'config.yml'), 'utf8'));
     const row = cfg.projects.find((p) => p.id === 'two');
@@ -832,29 +832,29 @@ test('project add lists a home the config does not yet name, relative in the rep
       assert.equal(row[k], `.walkdown/blueprints/0002-two/${k}`, k);
     for (const v of Object.values(row)) assert.ok(!String(v).startsWith('/'), `${v} is not absolute`);
     // Naming the blueprint inside it is the same ask, and lists it once.
-    assert.match(walkdown(s.home, ['project', 'add', join(two, 'blueprint')], repo), /already listed/);
+    assert.match(walkdown(s.home, ['blueprint', 'add', join(two, 'blueprint')], repo), /already listed/);
 
     // A directory with no blueprint in it at all is refused with the shape
     // spelled out, rather than being taken for a home and half-built.
     const notOne = join(repo, 'notes');
     mkdirSync(notOne, { recursive: true });
-    assert.throws(() => walkdown(s.home, ['project', 'add', notOne], repo), /lives in one/);
+    assert.throws(() => walkdown(s.home, ['blueprint', 'add', notOne], repo), /lives in one/);
 
     // And a home-shaped directory standing outside this `.walkdown`'s own
     // blueprints/ is a copy, whatever it holds.
     const bare = join(repo, 'old');
     blueprint(join(bare, 'blueprint'), { project: 'old' });
-    assert.throws(() => walkdown(s.home, ['project', 'add', bare], repo), /not one of/);
+    assert.throws(() => walkdown(s.home, ['blueprint', 'add', bare], repo), /not one of/);
 
     // A copy is what --ephemeral lists.
     const elsewhere = join(s.root, 'elsewhere', '0001-else');
     blueprint(join(elsewhere, 'blueprint'), { project: 'else' });
-    assert.throws(() => walkdown(s.home, ['project', 'add', elsewhere], repo), /not one of/);
+    assert.throws(() => walkdown(s.home, ['blueprint', 'add', elsewhere], repo), /not one of/);
     assert.ok(!existsSync(join(repo, '.walkdown', 'blueprints', '0003-else')));
 
     // Personally, it is spelled in full, has no root, and carries no home:
     // it is nobody's numbered home, which is the point of a throwaway.
-    walkdown(s.home, ['project', 'add', elsewhere, '--ephemeral', '--why', 'a copy'], repo);
+    walkdown(s.home, ['blueprint', 'add', elsewhere, '--ephemeral', '--why', 'a copy'], repo);
     const personal = parse(readFileSync(join(s.home, 'config.yml'), 'utf8')).projects;
     const mine = personal.find((p) => p.ephemeral);
     assert.ok(mine, `listed personally: ${JSON.stringify(personal)}`);
@@ -1114,7 +1114,7 @@ test('a blueprint in the personal home answers, whatever sits above that home @r
     walkdown(home, ['init', '--commit', 'spec'], app);
 
     walkdown(home, ['init', '--commit', 'none'], other);
-    const listed = walkdown(home, ['projects'], other);
+    const listed = walkdown(home, ['blueprints'], other);
     assert.match(listed, /\bother\b/, 'the project init said it listed is listed');
 
     const where = walkdown(home, ['where'], other);
@@ -1126,7 +1126,7 @@ test('a blueprint in the personal home answers, whatever sits above that home @r
     const pack = join(app, 'packs', 'gamma');
     mkdirSync(pack, { recursive: true });
     walkdown(home, ['init', '--commit', 'spec'], pack);
-    const fromApp = walkdown(home, ['projects'], app);
+    const fromApp = walkdown(home, ['blueprints'], app);
     assert.doesNotMatch(fromApp, /packs\/gamma\/\.walkdown\/blueprints/, fromApp);
   } finally {
     s.cleanup();
@@ -1149,7 +1149,7 @@ test('a home nothing claims is reported, and never guessed at @rule:locations.de
     execFileSync('git', ['init', '-q', '.'], { cwd: repo });
     walkdown(s.home, ['init'], repo);
 
-    const before = walkdown(s.home, ['projects'], repo);
+    const before = walkdown(s.home, ['blueprints'], repo);
     assert.doesNotMatch(before, /no entry names/, 'nothing to report yet');
 
     // A home standing with records in it and no row anywhere — what a lost
@@ -1158,7 +1158,7 @@ test('a home nothing claims is reported, and never guessed at @rule:locations.de
     mkdirSync(join(stranded, 'threads'), { recursive: true });
     writeFileSync(join(stranded, 'threads', 'n-0001.yml'), 'id: n-0001\nstatus: open\n');
 
-    const after = walkdown(s.home, ['projects'], repo);
+    const after = walkdown(s.home, ['blueprints'], repo);
     assert.match(after, /no entry names/, after);
     assert.match(after, /0009-stranded/, 'the home itself is named');
     assert.match(after, /not guessed at/, 'and it says it will not be adopted');
@@ -1267,7 +1267,7 @@ test('a committed entry never reaches under another .walkdown @rule:locations.an
     walkdown(s.home, ['init', '--commit', 'spec'], pack);
     const spec = join(pack, '.walkdown', 'blueprints', '0001-gamma', 'blueprint');
     const before = readFileSync(join(repo, '.walkdown', 'config.yml'), 'utf8');
-    assert.throws(() => walkdown(s.home, ['project', 'add', spec, '--id', 'reach'], repo), /lies under/);
+    assert.throws(() => walkdown(s.home, ['blueprint', 'add', spec, '--id', 'reach'], repo), /lies under/);
     assert.equal(readFileSync(join(repo, '.walkdown', 'config.yml'), 'utf8'), before, 'nothing written');
     assert.ok(!existsSync(join(repo, '.walkdown', 'blueprints', '0002-reach')), 'no home minted');
     // The same shape written by hand is a lint error naming both files.
@@ -1294,21 +1294,21 @@ test('a committed entry never reaches under another .walkdown @rule:locations.an
     const where = walkdown(s.home, ['where'], repo);
     assert.match(where, /refuses `reach`/, where);
     assert.match(where, /packs\/gamma\/\.walkdown/, where);
-    assert.doesNotMatch(walkdown(s.home, ['projects'], repo), /reach/);
-    assert.match(walkdown(s.home, ['where', '--project', 'reach'], repo), /no project `reach`/);
+    assert.doesNotMatch(walkdown(s.home, ['blueprints'], repo), /reach/);
+    assert.match(walkdown(s.home, ['where', '--blueprint', 'reach'], repo), /no project `reach`/);
     /*
      * A copy means a copy (q-0176). --ephemeral used to accept the pack's
      * live spec, and an ephemeral entry's records follow its spec, so the
      * "throwaway copy" was the pack's own ledger under a second name.
      */
     assert.throws(
-      () => walkdown(s.home, ['project', 'add', spec, '--ephemeral', '--why', 'a look'], repo),
+      () => walkdown(s.home, ['blueprint', 'add', spec, '--ephemeral', '--why', 'a look'], repo),
       /own blueprint.*throwaway COPY/s,
     );
     assert.ok(!existsSync(join(s.home, 'config.yml')) || !readFileSync(join(s.home, 'config.yml'), 'utf8').includes('ephemeral'));
     const copy = join(repo, '.walkdown', 'tmp', 'look', 'blueprint');
     cpSync(spec, copy, { recursive: true });
-    walkdown(s.home, ['project', 'add', copy, '--ephemeral', '--why', 'a look'], repo);
+    walkdown(s.home, ['blueprint', 'add', copy, '--ephemeral', '--why', 'a look'], repo);
     assert.ok(readFileSync(join(s.home, 'config.yml'), 'utf8').includes('ephemeral: true'));
   } finally {
     s.cleanup();
@@ -1339,7 +1339,7 @@ test('every path is reported with the decision that chose it @rule:locations.ans
     assert.match(loc.evidence.why, /config/);
     assert.match(loc.drafts.why, /walkdown/, 'the home its entry names');
 
-    const said = walkdown(s.home, ['where', '--project', 'demo'], repo);
+    const said = walkdown(s.home, ['where', '--blueprint', 'demo'], repo);
     for (const kind of ['spec', ...KINDS]) assert.match(said, new RegExp(`\\b${kind}\\b`), kind);
   } finally {
     s.cleanup();
@@ -1359,8 +1359,8 @@ test('asking where things live creates nothing at all @rule:locations.answer.ask
     const before = tree(s.root);
 
     const loc = resolveLocations({ cwd: repo });
-    const said = walkdown(s.home, ['where', '--project', 'demo'], repo);
-    walkdown(s.home, ['where', 'evidence', '--project', 'demo'], repo);
+    const said = walkdown(s.home, ['where', '--blueprint', 'demo'], repo);
+    walkdown(s.home, ['where', 'evidence', '--blueprint', 'demo'], repo);
 
     assert.match(said, new RegExp(loc.evidence.path), 'it names a directory that is not there');
     assert.ok(!existsSync(loc.evidence.path), 'and did not create it on being asked twice');
@@ -1638,7 +1638,7 @@ test('a legacy name-keyed home keeps answering until a person moves it @rule:loc
   try {
     const repo = join(s.root, 'repo');
     blueprint(join(repo, 'blueprint'));
-    const old = join(s.home, 'projects', 'demo', 'evidence');
+    const old = join(s.home, 'blueprints', 'demo', 'evidence');
     mkdirSync(old, { recursive: true });
     writeFileSync(join(old, 'shot.png'), 'x');
     /*
@@ -1980,7 +1980,7 @@ test('an unreadable personal config stops init before anything is claimed or mov
   }
 });
 
-test('--project from inside a nested same-named pack answers the pack, and projects does not call it shadowed @rule:locations.default.one-home-per-blueprint', () => {
+test('--blueprint from inside a nested same-named pack answers the pack, and projects does not call it shadowed @rule:locations.default.one-home-per-blueprint', () => {
   /* n-0173 (1): the first same-id row whose roots contained cwd was the root's. */
   const s = scratch();
   try {
@@ -1990,15 +1990,15 @@ test('--project from inside a nested same-named pack answers the pack, and proje
     walkdown(s.home, ['init', '--commit', 'spec'], repo);
     walkdown(s.home, ['init'], pack);
     const bare = JSON.parse(walkdown(s.home, ['where', '--json'], pack));
-    const named = JSON.parse(walkdown(s.home, ['where', '--project', 'app', '--json'], pack));
+    const named = JSON.parse(walkdown(s.home, ['where', '--blueprint', 'app', '--json'], pack));
     assert.equal(named.spec.path, bare.spec.path, 'one flag away from the bare command answers the same project');
     assert.ok(named.spec.path.includes('/home/blueprints/'), named.spec.path);
     rule(bare.spec.path);
-    walkdown(s.home, ['thread', 'new', '--project', 'app', '--rule', 'a.s.one', '--body', 'in the pack'], pack);
+    walkdown(s.home, ['thread', 'new', '--blueprint', 'app', '--rule', 'a.s.one', '--body', 'in the pack'], pack);
     assert.ok(existsSync(join(bare.threads.path, 'n-0001.yml')));
     assert.ok(!existsSync(join(repo, '.walkdown', 'blueprints', '0001-app', 'threads', 'n-0001.yml')));
-    assert.doesNotMatch(walkdown(s.home, ['projects'], pack), /shadowed/);
-    assert.match(walkdown(s.home, ['projects'], repo), /shadowed here by this repository's: app/);
+    assert.doesNotMatch(walkdown(s.home, ['blueprints'], pack), /shadowed/);
+    assert.match(walkdown(s.home, ['blueprints'], repo), /shadowed here by this repository's: app/);
   } finally {
     s.cleanup();
   }
@@ -2082,7 +2082,7 @@ test('a personal home: on an override of a committed entry is set aside, and tra
   }
 });
 
-test('the repository’s row is read from the committed file, defaults and stray roots are set aside, and --project names the id @rule:locations.answer.declared-not-discovered', () => {
+test('the repository’s row is read from the committed file, defaults and stray roots are set aside, and --blueprint names the id @rule:locations.answer.declared-not-discovered', () => {
   /* n-0175, four smaller doors of the same family. */
   const s = scratch();
   try {
@@ -2136,7 +2136,7 @@ test('the repository’s row is read from the committed file, defaults and stray
     assert.match(walkdown(s.home, ['where'], ghost), /is blank, not a path/);
     // (d) asked by id, the repository row is about the id, not the directory
     configure(s.home, '');
-    const text = walkdown(s.home, ['where', '--project', 'ghost'], join(repo, 'alpha'));
+    const text = walkdown(s.home, ['where', '--blueprint', 'ghost'], join(repo, 'alpha'));
     assert.match(text, /no project `ghost`/);
     assert.match(text, /no entry for this project/);
     assert.doesNotMatch(text, /names this project/);
@@ -2161,8 +2161,8 @@ test('a pack’s own blueprint named through another spelling of its path is alr
     const spec = join(pack, '.walkdown', 'blueprints', '0001-gamma', 'blueprint');
     const before = readFileSync(join(pack, '.walkdown', 'config.yml'), 'utf8');
     assert.notEqual(canon(spec), spec, 'the scratch root is reached through a symlink, which is the point');
-    assert.match(walkdown(s.home, ['project', 'add', spec], pack), /already listed/);
-    assert.match(walkdown(s.home, ['project', 'add', '.walkdown/blueprints/0001-gamma/blueprint'], pack), /already listed/);
+    assert.match(walkdown(s.home, ['blueprint', 'add', spec], pack), /already listed/);
+    assert.match(walkdown(s.home, ['blueprint', 'add', '.walkdown/blueprints/0001-gamma/blueprint'], pack), /already listed/);
     assert.equal(readFileSync(join(pack, '.walkdown', 'config.yml'), 'utf8'), before);
     assert.deepEqual(readdirSync(join(pack, '.walkdown', 'blueprints')), ['0001-gamma']);
   } finally {
@@ -2268,7 +2268,7 @@ test('the ignore file beside a .walkdown does not answer for a blueprint standin
  *
  * The committed half is refused above. Written into ~/.walkdown/config.yml the
  * identical row was honoured by every reader: `projects` listed it, `where
- * --project` resolved the pack's spec and ledger, the server offered it, and a
+ * --blueprint` resolved the pack's spec and ledger, the server offered it, and a
  * POST wrote a thread into the pack's own threads directory. `where` printed,
  * in one block, that it resolved the personal row and refused the byte-
  * identical committed one - a tool answering the same question two ways in the
@@ -2291,8 +2291,8 @@ test('a personal entry never reaches under another .walkdown either @rule:locati
     );
 
     // Not a project here: not listed, not resolvable, and named on the report.
-    assert.doesNotMatch(walkdown(s.home, ['projects'], repo), /pcross/);
-    assert.match(walkdown(s.home, ['where', '--project', 'pcross'], repo), /no project `pcross`/);
+    assert.doesNotMatch(walkdown(s.home, ['blueprints'], repo), /pcross/);
+    assert.match(walkdown(s.home, ['where', '--blueprint', 'pcross'], repo), /no project `pcross`/);
     const where = walkdown(s.home, ['where'], repo);
     assert.match(where, /refuses `pcross`/, where);
     assert.match(where, /--ephemeral/, where);

@@ -12,7 +12,7 @@ export function run(args) {
   const { values, positionals } = parseArgs({
     args,
     options: {
-      project: { type: 'string' },
+      blueprint: { type: 'string' },
       json: { type: 'boolean', default: false },
       reply: { type: 'string' },
       status: { type: 'string' },
@@ -37,7 +37,7 @@ export function run(args) {
     );
     process.exit(2);
   }
-  let blueprint = loadOrExit(values.project);
+  let blueprint = loadOrExit(values.blueprint);
 
   /*
    * Who this runs as is not an argument. There was a `--actor <name>` here,

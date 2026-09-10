@@ -810,7 +810,7 @@
      * another project something you can change your mind about (ADR 0001 §11).
      */
     phase: 'loading', // loading | connect | choose | ready
-    projects: [], // the BLUEPRINTS this server holds, each naming its project
+    blueprints: [], // what this server holds, each naming the project it is in
     /*
      * The project you are working in: a directory somebody imported, named by
      * the server on every blueprint it lists. Everything the panel scopes -
@@ -1107,7 +1107,7 @@
    * question nobody asked.
    */
   function blueprintsPane({ server = true, notice = null } = {}) {
-    const mine = S.project ? S.projects.filter((pr) => pr.project?.id === S.project) : S.projects;
+    const mine = S.project ? S.blueprints.filter((pr) => pr.project?.id === S.project) : S.blueprints;
     const claims = (pr) => S.claimants.some((m) => m.key === pr.key);
     const rows = [...mine.filter(claims), ...mine.filter((pr) => !claims(pr))];
     return b`
@@ -1179,7 +1179,7 @@
   const projectIdOf = (bp) => bp?.project?.id ?? null;
 
   /** The blueprints this server holds for one project, in payload order. */
-  const blueprintsOf = (id) => S.projects.filter((bp) => projectIdOf(bp) === id);
+  const blueprintsOf = (id) => S.blueprints.filter((bp) => projectIdOf(bp) === id);
 
   /**
    * The projects this server holds, each with its blueprints and whichever of
@@ -1191,7 +1191,7 @@
    */
   function projectsHeld() {
     const byId = new Map();
-    for (const bp of S.projects) {
+    for (const bp of S.blueprints) {
       const id = projectIdOf(bp) ?? bp.key ?? bp.id;
       if (!byId.has(id)) byId.set(id, { id, root: bp.project?.root ?? null, blueprints: [], claims: [] });
       const row = byId.get(id);
@@ -4446,9 +4446,9 @@
    * making that call for them.
    */
   function askAboutSitting(nextBp) {
-    const name = S.projects.find((p) => p.key === nextBp)?.name ?? nextBp;
+    const name = S.blueprints.find((p) => p.key === nextBp)?.name ?? nextBp;
     toast(
-      `A walkdown is running on <b>${esc(S.data.project)}</b>, with <b>${
+      `A walkdown is running on <b>${esc(S.data.blueprint)}</b>, with <b>${
       Object.keys(S.session.verdicts).length
     } judged</b>. It cannot come with you to ${esc(name)}.` +
         ` <button class="link" data-sitting="keep">Keep it as a draft</button>` +
@@ -4483,7 +4483,7 @@
     S.BP = nextBp;
     // The blueprint carries its project with it: picking one from another
     // project's list is how you cross, and the bar must say where you landed.
-    S.project = projectIdOf(S.projects.find((pr) => pr.key === nextBp)) ?? S.project;
+    S.project = projectIdOf(S.blueprints.find((pr) => pr.key === nextBp)) ?? S.project;
     // Nothing is written down. A pick was remembered per site once, which is
     // the second kind of memory ADR 0001 §9 deleted rather than migrated.
     S.listTab = 'rules';
@@ -5113,7 +5113,7 @@
         : null
     }
     ${projectButton()}
-    <span class="min-w-0 truncate text-[11.5px] opacity-50" data-testid="panel.blueprint">${S.data.project}</span>
+    <span class="min-w-0 truncate text-[11.5px] opacity-50" data-testid="panel.blueprint">${S.data.blueprint}</span>
     <!-- Which screen this page is. It reads as the answer, not as a way to
          ask the question: the button is labelled with the screen you are on,
          so the common case costs no click at all. Outlined once a screen has
@@ -6177,7 +6177,7 @@
       S.phase = 'connect';
       return renderGate();
     }
-    S.projects = payload.projects ?? [];
+    S.blueprints = payload.blueprints ?? [];
     S.servedRoot = payload.root ?? null;
     /*
      * Framed, the page under review is the one in the frame, not walkdown's own
@@ -6219,7 +6219,7 @@
       }
       // By key, never by id: two listed blueprints may share a name, and the
       // one this page belongs to is one directory, not one name (n-0173).
-      S.claimants = (whose?.matches ?? []).filter((m) => S.projects.some((pr) => pr.key === m.key));
+      S.claimants = (whose?.matches ?? []).filter((m) => S.blueprints.some((pr) => pr.key === m.key));
     }
     /*
      * The routing table, in the order ADR 0001 §7 sets it out. Each row here is
@@ -6229,7 +6229,7 @@
     if (!S.BP) {
       const projectsClaiming = [
         ...new Set(
-          S.claimants.map((m) => projectIdOf(S.projects.find((pr) => pr.key === m.key))),
+          S.claimants.map((m) => projectIdOf(S.blueprints.find((pr) => pr.key === m.key))),
         ),
       ];
       if (S.claimants.length === 1) {
@@ -6258,7 +6258,7 @@
         return renderGate();
       }
     } else {
-      S.project = projectIdOf(S.projects.find((pr) => pr.key === S.BP)) ?? S.project;
+      S.project = projectIdOf(S.blueprints.find((pr) => pr.key === S.BP)) ?? S.project;
     }
     S.phase = 'ready';
     S.data = S.BP ? await (await fetch(api('/api/blueprint'))).json() : payload;

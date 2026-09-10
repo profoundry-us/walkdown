@@ -12,25 +12,25 @@ const HELP = `walkdown — verify that what you built is what you designed
 
 Usage:
   walkdown init [--dir <project-root>] [--commit none|spec|all]
-  walkdown run [--target <name>] [--rule <id>] [--project <id>]
-  walkdown status [<rule-id>] [--project <id>] [--target <name>] [--json]
-  walkdown lint [--project <id>] [--no-checks] [--json]
-  walkdown hash [--project <id>] [--write]
-  walkdown judge <rule-id> [--target <name>] [--serve <origin>] [--project <id>] [--json]
-  walkdown sweep --why <reason> [--tiers checks,agent] [--project <id>] [--target <name>]
-  walkdown threads [--project <id>] [--rule <id>] [--all] [--json]
+  walkdown run [--target <name>] [--rule <id>] [--blueprint <id>]
+  walkdown status [<rule-id>] [--blueprint <id>] [--target <name>] [--json]
+  walkdown lint [--blueprint <id>] [--no-checks] [--json]
+  walkdown hash [--blueprint <id>] [--write]
+  walkdown judge <rule-id> [--target <name>] [--serve <origin>] [--blueprint <id>] [--json]
+  walkdown sweep --why <reason> [--tiers checks,agent] [--blueprint <id>] [--target <name>]
+  walkdown threads [--blueprint <id>] [--rule <id>] [--all] [--json]
   walkdown thread <id> [--reply <text>] [--status <s>|--verify|--reopen|--waive]
-                       [--reason <text>] [--as-agent] [--project <id>] [--json]
+                       [--reason <text>] [--as-agent] [--blueprint <id>] [--json]
   walkdown thread new --rule <id> --body <text> [--kind note|question]
-                      [--screen <id>] [--element <sel>] [--as-agent] [--project <id>] [--json]
-  walkdown serve [--project <id>] [--port <n>]
-  walkdown claims [--project <id>] [--url <address>] [--json]
-  walkdown where [<kind>] [--project <id>] [--json]
-  walkdown projects [--stale]
+                      [--screen <id>] [--element <sel>] [--as-agent] [--blueprint <id>] [--json]
+  walkdown serve [--blueprint <id>] [--port <n>]
+  walkdown claims [--blueprint <id>] [--url <address>] [--json]
+  walkdown where [<kind>] [--blueprint <id>] [--json]
+  walkdown blueprints [--stale]
   walkdown import <path> [--all] [--only <ids>] [--json]
-  walkdown project add <path> [--id <name>] [--ephemeral] [--why <reason>]
-  walkdown project forget <id>
-  walkdown move <kind> --to <path> [--project <id>]
+  walkdown blueprint add <path> [--id <name>] [--ephemeral] [--why <reason>]
+  walkdown blueprint forget <id>
+  walkdown move <kind> --to <path> [--blueprint <id>]
   walkdown pointer [--dir <project-root>] [--into <file>]
   walkdown skills [--into <dir>] [--project] [--force]
 
@@ -41,12 +41,12 @@ Commands:
           puts it in .walkdown/ with a .gitignore that keeps runs, evidence
           and drafts out, '--commit all' the same with no .gitignore. Run
           again with --commit to change your mind: the home moves whole.
-  project add <path> lists a blueprint walkdown did not create - a clone, a
+  blueprint add <path> lists a blueprint walkdown did not create - a clone, a
           copy, somebody else's checkout - so it becomes something every
           command can reach. --ephemeral marks a throwaway copy: reachable by
           name, never by standing somewhere, and only ever in your own config.
-          'project forget <id>' takes it off the list and touches no records.
-  projects
+          'blueprint forget <id>' takes it off the list and touches no records.
+  blueprints
           Every blueprint declared here, with throwaway copies grouped under
           Ephemeral and marked when they are old enough to be worth clearing.
   import  Take another project's blueprints into this machine's registry:
@@ -120,7 +120,7 @@ Commands:
           serves /embed.js and the pin/walkdown API.
 
 Options:
-  --project <id>   Which declared blueprint (default: the one claiming cwd)
+  --blueprint <id> Which declared blueprint (default: the one claiming cwd)
   --dir <path>     init/pointer only: the project root to set up
   --target <name>  status: only this target's checks column
   --rule <id>      threads: only threads anchored to this rule
@@ -141,8 +141,8 @@ const COMMANDS = new Set([
   'hash',
   'judge',
   'sweep',
-  'project',
-  'projects',
+  'blueprint',
+  'blueprints',
   'threads',
   'thread',
   'serve',

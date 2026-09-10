@@ -60,7 +60,7 @@ governance:
     the panel's chooser is driven. The verdict still goes in the real ledger.
     Take the copy away when done (node tools/scratch.mjs clean <label>).
   - >-
-    Never serve a copy with --project from the real repository, and never
+    Never serve a copy with --blueprint from the real repository, and never
     point WALKDOWN_HOME at the real home while serving one. Either way the
     real project stays declared for that server — its config is merged in,
     and its roots contain the copy — and the real ledger is one ?bp= away

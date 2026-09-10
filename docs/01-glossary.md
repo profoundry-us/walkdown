@@ -7,7 +7,8 @@ know Gherkin, and mapping to it measurably helps them.
 
 | Term | Definition | BDD ancestry |
 |---|---|---|
-| **Blueprint** | The whole artifact: the directory of files (`blueprint/`) that is the canonical statement of what we're building. | Executable specification / living documentation |
+| **Project** | A directory somebody imported — normally a repository. What a person means by "what I am working on". It may hold several blueprints; walkdown learns about one through `walkdown init` or `walkdown import`, and never by walking a tree (ADR 0001). | — |
+| **Blueprint** | The whole artifact: the directory of files (`blueprint/`) that is the canonical statement of what we're building, with its own storyboard, rules, threads and runs. A project may hold several; `walkdown blueprints` lists the ones this machine can reach. | Executable specification / living documentation |
 | **Feature** | Top-level grouping of stories. One file per feature. | Gherkin `Feature` |
 | **Story** | A user-goal within a feature. | User story (Example Mapping yellow card) |
 | **Rule** | A single verifiable statement — an acceptance criterion. The atomic unit everything else attaches to. | Gherkin `Rule` (Example Mapping blue card) |
@@ -52,3 +53,8 @@ Cucumber's discovery → formulation → automation maps onto the walkdown loop:
   *check* for the linkage and let each project call its own tests whatever it likes.
 - **walkthrough** — replaced by *walkdown* (session) so product name and ritual share one
   word.
+- **project** (meaning a blueprint) — it meant both for a year, in the payload, the CLI
+  and the config, and the day two blueprints had to share a page the ambiguity stopped
+  being survivable. A project is a directory; a blueprint is a specification inside one
+  (ADR 0001). The config key `projects:` is the last surface still saying the old word,
+  and q-0270 is where that is being decided.

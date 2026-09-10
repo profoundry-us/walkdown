@@ -65,7 +65,7 @@ const GUESSING = identity(null);
 
 /** Run the CLI, stripping colour so assertions read the words, not the escapes. */
 const run = (args, dir, home = SAID) =>
-  execFileSync(process.execPath, [CLI, 'thread', ...args, '--project', declareProject(home, dir)], {
+  execFileSync(process.execPath, [CLI, 'thread', ...args, '--blueprint', declareProject(home, dir)], {
     encoding: 'utf8',
     env: { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: home },
   }).replace(/\x1b\[[0-9;]*m/g, '');
@@ -369,7 +369,7 @@ test('ten concurrent filers get ten threads, none overwritten', async () => {
           '--body',
           `finding ${i}`,
           '--as-agent',
-          '--project',
+          '--blueprint',
           declareProject(SAID, bp),
         ],
         { env: { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: SAID } },

@@ -74,7 +74,7 @@ export const S = {
    * another project something you can change your mind about (ADR 0001 §11).
    */
   phase: 'loading', // loading | connect | choose | ready
-  projects: [], // the BLUEPRINTS this server holds, each naming its project
+  blueprints: [], // what this server holds, each naming the project it is in
   /*
    * The project you are working in: a directory somebody imported, named by
    * the server on every blueprint it lists. Everything the panel scopes -
