@@ -1887,7 +1887,7 @@ test('the start gate says how to open a blueprint, and its address box actually 
  * with the extension on looks like.
  */
 test('a page no blueprint claims asks which project, and opens nothing over it', {
-  tag: '@rule:panel.start.unclaimed-page-says-so',
+  tag: '@rule:panel.start.which-project',
 }, async ({ page }) => {
   await page.goto(fixtureFor({ bp: '' }));
 
@@ -1922,7 +1922,7 @@ test('a page no blueprint claims asks which project, and opens nothing over it',
  * merely annoying: a page walkdown DOES know about is never asked.
  */
 test('a page a blueprint claims, or one that declares its own, is never asked', {
-  tag: '@rule:panel.start.unclaimed-page-says-so',
+  tag: '@rule:panel.start.which-project',
 }, async ({ page }) => {
   // Claimed by address: the frame is the app surface the blueprint declares.
   // The browser resolves that address to this suite's own server (see
@@ -1983,7 +1983,7 @@ test('two blueprints claiming one page is a question, asked with both named', {
  * cheap; a wrong memory is not.
  */
 test('a blueprint picked for an unclaimed page is not remembered next time', {
-  tag: '@rule:panel.start.unclaimed-page-says-so',
+  tag: '@rule:panel.start.which-project',
 }, async ({ page }) => {
   const frameOn = (origin, path) => fixtureFor({ bp: '', frame: `${origin}${path}` });
 
@@ -2010,7 +2010,7 @@ test('a blueprint picked for an unclaimed page is not remembered next time', {
  * is not evidence, so it changes nothing about the question.
  */
 test('one blueprint on the server is not evidence that this page belongs to it', {
-  tag: '@rule:panel.start.unclaimed-page-says-so',
+  tag: '@rule:panel.start.which-project',
 }, async ({ page }) => {
   await page.route('**/api/blueprint*', async (route) => {
     const res = await route.fetch();
@@ -2038,7 +2038,7 @@ test('one blueprint on the server is not evidence that this page belongs to it',
  * panel may decide whose page this is.
  */
 test('a server that lists nothing still does not open itself over the page', {
-  tag: '@rule:panel.start.unclaimed-page-says-so',
+  tag: '@rule:panel.start.which-project',
 }, async ({ page }) => {
   await page.route('**/api/blueprint*', async (route) => {
     const res = await route.fetch();
@@ -2066,7 +2066,7 @@ test('a server that lists nothing still does not open itself over the page', {
  * one is the server's: it answered a moment ago and cannot answer this.
  */
 test('a server that cannot say whose page this is is a server problem, not a board', {
-  tag: '@rule:panel.start.unclaimed-page-says-so',
+  tag: '@rule:panel.start.which-project',
 }, async ({ page }) => {
   await page.route(/\/api\/whose(\?|$)/, (route) => route.fulfill({ status: 500, body: 'no' }));
   await page.goto(fixtureFor({ bp: '' }));

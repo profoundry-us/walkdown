@@ -28,19 +28,21 @@ stories:
 
       - id: embed.pin.right-project
         origin: thread:n-0012
-        statement: A pin files against the project the page belongs to, not whichever blueprint the server happens to be serving by default, so feedback never lands in a sibling project's threads.
+        statement: A pin files against the blueprint the panel has open, so feedback lands in the ledger of the thing you were reviewing - never in a sibling's, and never in whichever blueprint the server happens to be serving by default. The server does not work it out from the address - the caller names the blueprint, and by the time anything can be pinned the panel always has one.
         verify: [checks]
         signoff: [eng, product]
         screens: [review]
         steps:
           given:
-            - One server hosting sibling blueprints, and a page that declares its project
+            - One server offering sibling blueprints, and a page carrying no walkdown tag of its own - the ordinary case, reviewed through the extension
           when:
             - Pin an element on that page
           then:
-            - The thread is written to that project's threads/, not the server's default
-            - A page that declares no project still files against the default, unchanged
-          statement_hash: sha256:399853aef960
+            - The thread is written to the open blueprint's threads/, not the server's default
+            - The panel tells the embed in the frame which blueprint is open, because there is no script tag on somebody else's page to carry one
+            - The server never re-routes a write by looking the address up and overriding what the caller said - several blueprints may claim an address, and choosing between them at a door is the server deciding whose page you are on
+            - A page that declares its own blueprint still wins, because saying so was deliberate
+          statement_hash: sha256:8d8ef265ac6d
 
       - id: embed.pin.both-surfaces
         origin: thread:n-0003

@@ -23,6 +23,7 @@ screens:
       - panel.bar
       - panel.desk
       - panel.desk-tuner
+      - panel.project
       - panel.blueprint
       - panel.fade
       - panel.viewport-toggle
@@ -89,6 +90,12 @@ screens:
       - start.connect
 
   - id: unclaimed-page
+    retired: >-
+      Folded into project-modal (2026-09-09, ADR 0001 §7). "Nothing claims this
+      page" turned out to be one of three ways the address can fail to decide -
+      the others being several projects claiming it and there being no page to
+      route from at all - and three screens asking one question were three
+      places for the answer to differ.
     title: No blueprint claims this page (state — connected, nothing claims it)
     prototype: /screens/unclaimed-page.html
     app: { path: /stand-in/unclaimed-page }
@@ -97,6 +104,23 @@ screens:
       - start.claim
       - start.new
       - start.options
+
+  - id: project-modal
+    title: Which project? (state — the address cannot decide on its own)
+    # No design yet. The panel ships this screen; prototype/ has nothing to
+    # compare it against, and prototype/ is design's. The sketch is
+    # proposals/project-modal.html and the request is the thread anchored here
+    # (ownership.drift.design-requests-required).
+    prototype: null
+    anchors:
+      - project.modal
+      - project.address
+      - project.why
+      - project.commands
+      - project.new
+      - project.list
+      - project.claims
+      - project.close
 
   - id: choose-blueprint
     title: Choose a blueprint (state — folder holds several)

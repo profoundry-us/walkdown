@@ -145,7 +145,7 @@ stories:
 
       - id: locations.answer.one-walkdown-answers
         origin: walkdown
-        statement: Exactly one `.walkdown` directory answers for where you are standing - the nearest one at or above you - and it is merged with the personal `~/.walkdown` and with nothing else. A pack carrying its own `.walkdown` never sees the repository root's, and the root's never sees the pack's, because a monorepo is several projects that happen to share a checkout, and a tool that pooled them would let one pack's board list, serve and write to another pack's ledger. Only blueprints under the `.walkdown` that answered are listed, served or written to.
+        statement: Exactly one `.walkdown` directory answers for where you are standing - the nearest one at or above you - and it is merged with the personal `~/.walkdown` and with nothing else. What that forbids is INFERENCE - walkdown never works out from the tree that a neighbouring checkout's blueprints are yours, so a pack carrying its own `.walkdown` never sees the repository root's and the root's never sees the pack's. It does not forbid breadth - a blueprint you named yourself, with `walkdown import`, is reachable from anywhere, because you said so and nothing was guessed.
         verify: [checks]
         signoff: [eng, product]
         steps:
@@ -157,13 +157,14 @@ stories:
             - From the pack, the pack's own answers and the root's is not consulted at all
             - From the root, the root's answers and the pack's is invisible
             - Each is merged with the personal one, and with no second repository config however many lie above it
-            - A server started in one of them offers only the blueprints that `.walkdown` declares, wherever the blueprint it serves happens to sit
+            - A server offers what the registry holds - the blueprints that `.walkdown` declares, plus the ones this machine imported - and nothing that was merely lying nearby, wherever the blueprint it serves happens to sit
             - A committed entry whose spec lies under another `.walkdown` is refused when written and reported by lint when found - that `.walkdown` already answers for it (q-0168)
             - One that is there anyway is not read either - where names it as refused and says which directory answers for it, and status and serve never see it - and an ephemeral entry may not name it from outside, because a copy means a copy and this is the original (q-0176)
             - The same row in the PERSONAL file is refused on the same terms - set aside on read, named on the report, reported by lint - because a tool that resolved it while refusing the byte-identical committed one would answer the same question two ways in one breath (n-0188)
-            - A row may name a blueprint under its OWN `.walkdown` - the personal home, whose config that file is, or the one answering where you stand - so the way to a pack is to stand in its checkout, or to list a real copy of it
+            - A row may name a blueprint under its OWN `.walkdown` - the personal home, whose config that file is, or the one answering where you stand - so the way to a pack is to stand in its checkout, to list a real copy of it, or to import it by name
+            - An IMPORTED row is the one way across, and it is not an exception to the rule but the point of it - `walkdown import` is somebody naming a directory and being shown what it declares, so nothing about it was inferred (ADR 0001 §3)
             - A `.walkdown` holding homes but no config declares nothing and answers for nothing, so a row naming a blueprint under it is that blueprint's only declaration and is read
-          statement_hash: sha256:b08354a355f7
+          statement_hash: sha256:69f36d35a978
 
       - id: locations.answer.declared-not-discovered
         origin: thread:q-0138

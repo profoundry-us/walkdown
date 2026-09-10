@@ -122,26 +122,12 @@ checks:
     run: node --check lib/viewer/panel.js && node --check lib/viewer/embed.js
     fast: true
 
-  # PER-EDIT RUNNING IS OFF while ADR 0001 is built (2026-09-09, Topher's
-  # call: "fix / disable any highball checks that might interfere while you
-  # work"). A refactor this wide leaves the suite red between commits by
-  # construction - the rename lands before its callers do - and a failing
-  # suite dumped after every single edit is noise that hides the edit's own
-  # result. It still runs at turn end, which is where the tree has to be
-  # green. `fast: true` goes back the moment the ADR's step 6 is done.
+  # Back on per edit (2026-09-09). It was off for the length of ADR 0001,
+  # where a rename landing before its callers left the suite red between
+  # commits by construction and a failing suite after every edit hid the
+  # edit's own result. The ADR is built, so this is a per-edit check again.
   - id: unit-tests
     name: Unit tests
     run: npm test
-    fast: false
+    fast: true
 
-  # OFF while ADR 0001 is built (2026-09-09). A page may now be claimed by
-  # several blueprints, so "no two claim the same page" is no longer true and
-  # `walkdown claims` reports an inventory rather than a fault. The check is
-  # kept here, disabled, until the rules it enforced are retired and rewritten
-  # — at which point it is deleted rather than revived. See
-  # docs/adr/0001-projects-blueprints-and-routing.md, "How it gets built".
-  #
-  # - id: one-page-one-blueprint
-  #   name: No two blueprints claim the same page
-  #   run: node bin/walkdown.js claims
-  #   fast: true

@@ -70,10 +70,12 @@ stories:
           statement_hash: sha256:e8763cbea8b6
 
   - id: screens.ownership
-    title: A page belongs to exactly one blueprint
-    statement: As a team, we can point walkdown at a folder of projects and have it know which one any given page is, without anyone being asked to disambiguate.
+    title: Which blueprints a page belongs to is a fact about its address
+    statement: As a team, we can point walkdown at the projects we have imported and have it say which blueprints claim any given page - several, one, or none - without it ever choosing between them on our behalf.
     rules:
       - id: screens.ownership.one-claimant
+        retired: >-
+          Withdrawn by ADR 0001 (2026-09-09). A page may be claimed by several blueprints: two efforts about different functionality of one homepage are not two pages, and making the storyboard say otherwise put a lie in the spec to protect an invariant that existed for the tooling's convenience. What the constraint was really protecting - that nothing ever has to guess whose page this is - is kept by asking instead: `walkdown claims` reports shared pages as an inventory, and the panel puts the question to the person (screens.ownership.routes-by-page, panel.start.which-project).
         origin: thread:q-0019
         statement: No two blueprints claim the same page - a claim being an origin from a target's base_url plus a path, compared on path and fragment alone, so that two projects declaring the same path under different queries is still a collision while the same path on two different origins is not.
         verify: [checks]
@@ -90,19 +92,21 @@ stories:
 
       - id: screens.ownership.routes-by-page
         origin: thread:q-0019
-        statement: Which blueprint a page belongs to is answered from the page's own address rather than from whatever was chosen last - so the panel opens the project the page is part of, and a pin filed from a page that carries no walkdown tag at all still lands in that project's threads rather than in whichever blueprint the server happens to serve by default.
+        statement: Which blueprints a page belongs to is answered from the page's own address rather than from whatever was chosen last, and the answer is a LIST - one claimant is opened without asking, several are put to the person, and none is put to them too. The count of blueprints a server happens to hold is never evidence about any of it.
         verify: [checks]
-        screens: [choose-blueprint]
+        screens: [choose-blueprint, project-modal]
         steps:
           given:
-            - A server holding several blueprints, and a page belonging to one of them
+            - The projects this machine has imported, and a page that may belong to none, one, or several of their blueprints
           when:
-            - The panel starts there, or a pin is filed from there with no project named
+            - The panel starts there
           then:
-            - The blueprint claiming that address is the one used, without asking
-            - A caller that names a project explicitly is never overridden by this
-            - An address no blueprint claims is not guessed at - the picker still asks
-          statement_hash: sha256:5ad49373b1d0
+            - Every blueprint claiming that address is named, in no order of preference - a claim being an origin from a target's base_url plus a path, compared on path and fragment with the query dropped
+            - Exactly one claimant is opened, and nothing is asked
+            - Several claimants is a question for the person, never a rank - ordering survives WITHIN one blueprint, because that is how a screen is identified at all, and is abandoned across them
+            - An address no blueprint claims is not guessed at, whatever the server holds
+            - A caller that names a blueprint explicitly is never overridden by this
+          statement_hash: sha256:3021d25287e8
 
   - id: screens.surfaces
     title: Both surfaces, even when one of them is not a page

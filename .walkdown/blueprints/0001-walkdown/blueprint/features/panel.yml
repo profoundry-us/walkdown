@@ -405,23 +405,26 @@ stories:
 
       - id: panel.start.choose-a-blueprint
         origin: thread:n-0017
-        statement: When the config lists more than one blueprint, the panel asks which one this site is, showing each by name and by a description the blueprint itself carries.
+        statement: When more than one of the active project's blueprints claims the page you are on, the panel asks which, showing each by name and by the description the blueprint itself carries and marking the ones that claim this page. It is asked because there are several CLAIMANTS - never because a folder happens to hold several blueprints, which says nothing about the page you are looking at.
         signoff: [eng, product]
         screens: [choose-blueprint]
         steps:
           given:
-            - A config listing several blueprints
+            - A project whose blueprints claim the page under review more than once, or a project you crossed to that holds more than one
           when:
-            - The panel starts with no choice recorded for this origin
+            - The panel starts there, or you pick that project
           then:
-            - Every listed blueprint is offered, with its name and its own description
-            - Choosing one loads it and remembers the choice for that origin
-            - A page that declares its blueprint is never asked
-            - Nothing is offered that nobody wrote down - the list is the config's, so a fixture or a vendored copy is absent by never having been declared rather than by being filtered out
-            - The same list stays reachable later, so the choice can be changed without reinstalling anything
-          statement_hash: sha256:6aa78c304c03
+            - The project's blueprints are offered, with their names and their own descriptions
+            - The ones claiming this page come first and say so
+            - The reason for the question is said out loud - how many claim this page, and that nothing is remembered
+            - Choosing one loads it and writes nothing down; the same question is asked again next time
+            - Nothing is offered that nobody wrote down - the list is the registry's, so a fixture or a vendored copy is absent by never having been declared rather than by being filtered out
+            - The same list is the Blueprints tab, so the choice can be changed later without reinstalling anything
+          statement_hash: sha256:3ff33b8e9c41
 
       - id: panel.start.unclaimed-page-says-so
+        retired: >-
+          Folded into panel.start.which-project (2026-09-09, ADR 0001 §7). Everything it said still holds - nothing is opened over a page nobody claimed, and a count of blueprints is never evidence - but it said it about one of three cases where the address cannot decide, and the three are now one screen because they are one question.
         origin: walkdown
         statement: On a page no blueprint claims, the panel says so and says how to claim it, rather than opening whichever blueprint it happens to hold - and it asks that question however many blueprints the server offers, because one blueprint on a server is not evidence that this page belongs to it.
         signoff: [eng, product]
@@ -438,6 +441,27 @@ stories:
             - The blueprints the server does hold stay reachable, so opening one deliberately is still one step
             - A page a blueprint claims, or one that declares its own, is never asked
           statement_hash: sha256:3ac55c00c5a3
+
+      - id: panel.start.which-project
+        origin: thread:q-0269
+        statement: Where the address cannot decide - nothing claims this page, several projects do, or there is no page to route from at all because you are looking at walkdown's own root - the panel asks which project, in one modal over the whole of its own chrome. It names the address it asked about, and it puts how to make a page reviewable and how to bring a project in ABOVE the list, where a long list of projects cannot push them out of view.
+        signoff: [eng, product]
+        screens: [project-modal]
+        steps:
+          given:
+            - A machine with projects imported, and a page none of their blueprints claims - or one that several projects claim, or walkdown's own server root, where there is no page to route from
+          when:
+            - The panel starts there, or the project control in the bar is pressed at any time
+          then:
+            - One screen answers all of those cases, and it is drawn over the bar and the panel as well as the page - crossing projects from inside one project's board would read as something that board was doing
+            - It names the address it asked about, because a claim misses on a port or a fragment and "no blueprint" without the address leaves you guessing which one was asked
+            - How to make this page reviewable, and how to bring a project in, sit above the list - `walkdown claims --url`, `walkdown import`, `walkdown init`, named rather than described
+            - Neither of those ever runs from the browser - they write to a person's disk and to their personal config, and a button here would be walkdown adopting a directory on the strength of a click in a web page
+            - Projects claiming this page come first and name the blueprint that matched
+            - Nothing is opened by default, at any count - a machine holding exactly one blueprint is answered the same way as one holding six
+            - Choosing a project with one blueprint opens it; choosing one with several asks which, on the Blueprints tab
+            - A server that lists nothing offers no list at all rather than an empty one, and still says what to do about it
+          statement_hash: sha256:f218205cd807
 
   - id: panel.rules
     title: The rules are one tap away, and so is the way back

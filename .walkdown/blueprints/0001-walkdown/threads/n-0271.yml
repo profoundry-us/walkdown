@@ -1,0 +1,50 @@
+id: n-0271
+kind: note
+author: topher
+via: agent
+created: 2026-09-10T03:32:22.090Z
+anchor:
+  rule: panel.start.which-project
+  screen: project-modal
+status: open
+body: >-
+  Design request: the project modal has no drawing.
+
+
+  ADR 0001 §7 folded three screens into one - "nothing claims this page",
+  "several projects claim it", and "there is no page to route from because you
+  are looking at walkdown's own root" - and the panel ships that screen now.
+  prototype/screens/ has nothing to compare it against, so
+  panel.start.which-project cannot be judged against a design and
+  unclaimed-page.html is retired art.
+
+
+  proposals/project-modal.html is a sketch, not a request being answered - it is
+  there so the request is specific rather than a sentence. What it is trying to
+  hold, all of it Topher's on 2026-09-09:
+
+
+  - The modal covers the whole of walkdown's chrome, the bar and the panel
+  included. Crossing projects from inside one project's board would read as
+  something that board was doing.
+
+  - "Make this page reviewable" sits ABOVE the project list. A machine with
+  twenty projects would push it off the bottom, and it is the whole answer for
+  somebody whose project is not imported yet.
+
+  - The new/import case lives in the same block, because it is small and well
+  defined and does not deserve a screen of its own.
+
+  - A page on a stranger's site and walkdown's own server root get the exact
+  same modal; the only difference is the sentence at the top.
+
+  - Projects claiming the page come first and name the blueprint that matched.
+
+
+  Anchors the panel already draws: project.modal, project.address, project.why,
+  project.commands, project.new, project.list, project.claims, project.close.
+
+
+  Two things I could not settle and did not: what the modal does on a narrow
+  window, and whether the project rows want the blueprint count at all once a
+  project holds twenty.

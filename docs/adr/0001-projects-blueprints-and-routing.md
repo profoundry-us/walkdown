@@ -257,4 +257,21 @@ Checks that enforce the old model are disabled as they are reached rather than
 left failing, and are removed or replaced by the end. A check turned off is
 recorded here:
 
-- Highball `one-page-one-blueprint` — off from step 1, removed at step 6.
+- Highball `one-page-one-blueprint` — off from step 1, deleted at step 6
+  (2026-09-09), along with the rule it enforced.
+- Highball `unit-tests` ran at turn end only while the ADR was built, because a
+  rename lands before its callers and a suite dumped after every edit hides the
+  edit's own result. Back to per-edit at step 6.
+
+Two surfaces named in §2 were deliberately left saying the old word, and
+[q-0270](../../.walkdown/blueprints/0001-walkdown/threads/q-0270.yml) is where
+they are decided: the config key `projects:`, which is a file format with data
+in every clone and in the person's own `~/.walkdown/config.yml`, and
+`resolveLocations({ project })`. Renaming either is a compatibility decision
+rather than a tidy, and the second is 56 test call sites in the file this
+repository has paid the most for.
+
+The project modal ships without a design: `prototype/` is design's, the sketch
+is `proposals/project-modal.html`, and
+[n-0271](../../.walkdown/blueprints/0001-walkdown/threads/n-0271.yml) is the
+request.
