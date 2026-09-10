@@ -70,3 +70,18 @@ replies:
       above: choose-blueprint's job was asking which of several a site is, and
       that is now what the unclaimed screen asks, in the only situation where
       the question arises.
+  - author: topher
+    via: agent
+    created: 2026-09-10T03:38:10Z
+    body: >-
+      Answered by ADR 0001 §7 (2026-09-09). The rule keeps its job, and it is a
+      different one: it is asked when several of the ACTIVE PROJECT's blueprints
+      claim the page you are on - never because a folder happens to hold
+      several, which was the mechanism this thread objected to. The statement is
+      reworded to say so and is awaiting your acceptance.
+
+
+      The unreachable-screen half is gone with it:
+      panel.start.unclaimed-page-says-so is retired into
+      panel.start.which-project, so the two rules no longer describe the same
+      moment from two directions.

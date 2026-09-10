@@ -61,3 +61,23 @@ body: >-
   against the unclaimed-page screen. Related: q-0262, since the blueprint list
   on that screen is now the place a choice is made, which bears on whether the
   choose-blueprint screen still has a job.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-10T03:38:52Z
+    body: >-
+      Parked by ADR 0001 (2026-09-09), and the rule this thread stands in front
+      of is unchanged.
+
+
+      The behaviour that needed the write is withdrawn. §9 deletes the
+      remembered pick outright - nothing is remembered, per page or per site, so
+      there is no second kind of memory to collapse into a claim. §4 says `init`
+      and `import` are the only two ways a project enters the registry and
+      neither ever runs from the browser. So the browser writes no spec, and the
+      question is not "may it" but "it does not need to".
+
+
+      If claiming from the panel comes back, it comes back as a new question
+      with a new reason. Nothing here was decided against; it stopped being
+      asked.

@@ -115,3 +115,26 @@ replies:
       Four questions left open at the end, the first being whether the answer is
       yes at all. If it is no, the document collapses to a paragraph and the
       case is handled by splitting screens instead.
+  - author: topher
+    via: agent
+    created: 2026-09-10T03:38:10Z
+    body: >-
+      Answered by ADR 0001 (2026-09-09): yes, a page may be claimed by several
+      blueprints. The rule this thread is anchored to is retired, `walkdown
+      claims` reports shared pages as an inventory rather than a fault, and the
+      Highball check that enforced the constraint is deleted.
+
+
+      What replaced it is asking rather than guessing. `/api/whose` answers with
+      a LIST; ranking survives within one blueprint, because that is how a
+      screen is identified at all, and is abandoned across them. One claimant
+      opens; several in one project show that project's Blueprints with the ones
+      claiming this page marked and first; several across projects, or none, or
+      walkdown's own root, open the project modal.
+      screens.ownership.routes-by-page carries the behaviour now,
+      panel.start.which-project the screen.
+
+
+      Left for you: whether this thread ends here, and acceptance of the
+      reworded rules - four of them are visibly unsigned on the board because
+      their statements changed.

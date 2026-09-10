@@ -61,3 +61,19 @@ replies:
       by hand beside a button that does it reads as two competing offers. If you
       would rather it stayed as the manual road for people who want to write it
       themselves, it is one paragraph and I have no argument against it."
+  - author: topher
+    via: agent
+    created: 2026-09-10T03:38:52Z
+    body: >-
+      Superseded by ADR 0001 (2026-09-09). The screen this asks design to change
+      is retired: unclaimed-page folds into project-modal, and the list on it is
+      a list of PROJECTS rather than blueprints.
+
+
+      The reasoning survived - two kinds of memory about one fact is the thing
+      to abolish - but it was abolished from the other end. Instead of a pick
+      writing a claim, nothing is remembered at all (§9): ambiguity asks every
+      time, and a claim is the only durable answer to "could this page belong
+      here". proposals/claim-this-page.html is the sketch of the road not taken;
+      proposals/project-modal.html is the one shipped, and n-0271 is the design
+      request for it.
