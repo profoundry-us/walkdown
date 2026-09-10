@@ -1,9 +1,11 @@
 # 12 — Page ownership: one question doing two jobs
 
 Written 2026-09-09, when the constraint the routing was built on met a case it
-was never meant to hold. Nothing here is decided; it is the argument, laid out
-so it can be argued with. The decision lives on the board as
-[q-0269](../.walkdown/blueprints/0001-walkdown/threads/q-0269.yml).
+was never meant to hold. **This is the argument, not the decision** — it was
+settled the same day, and what was settled is
+[ADR 0001](adr/0001-projects-blueprints-and-routing.md), which goes further
+than anything proposed here. Kept because the reasoning is worth having when
+the ADR is questioned; where the two disagree, the ADR is what we did.
 
 ## The sentence everything rests on
 
