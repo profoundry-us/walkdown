@@ -8,7 +8,7 @@
  */
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -56,7 +56,12 @@ function project(root, blueprints) {
 }
 
 function scratch() {
-  const root = mkdtempSync(join(tmpdir(), 'wd-import-'));
+  /*
+   * Real, because the registry writes canonical paths and macOS hands out
+   * /var/... for a directory the process knows as /private/var/... - a server
+   * pointed at the uncanonical spelling then finds nothing declaring it.
+   */
+  const root = realpathSync(mkdtempSync(join(tmpdir(), 'wd-import-')));
   const home = join(root, 'home');
   mkdirSync(home, { recursive: true });
   writeFileSync(join(home, 'config.yml'), 'identity:\n  username: importer\n');
@@ -168,6 +173,61 @@ test('a directory declaring nothing is refused, and says how to start one', () =
     assert.equal(r.status, 2);
     assert.match(r.stderr, /declares a blueprint/);
     assert.match(r.stderr, /walkdown init/);
+  } finally {
+    s.cleanup();
+  }
+});
+
+test('the server routes across imported projects, and answers with all of them @rule:screens.ownership.routes-by-page', async () => {
+  const s = scratch();
+  try {
+    /*
+     * Two projects, two blueprints, one address between them - the case the
+     * one-claimant constraint forbade until ADR 0001. The server must answer
+     * with both and pick neither; picking is the person's, at the panel.
+     */
+    const shop = project(join(s.root, 'acme-shop'), [
+      { id: 'checkout', description: 'Cart.', origin: 'https://shop.test', paths: ['/', '/cart'] },
+    ]);
+    const marketing = project(join(s.root, 'acme-marketing'), [
+      { id: 'campaigns', description: 'Landing pages.', origin: 'https://shop.test', paths: ['/'] },
+    ]);
+    walkdown(s.home, ['import', shop, '--all'], s.root);
+    walkdown(s.home, ['import', marketing, '--all'], s.root);
+
+    process.env.WALKDOWN_HOME = s.home;
+    const { createWalkdownServer } = await import('../lib/serve.js');
+    const server = createWalkdownServer(
+      join(shop, '.walkdown', 'blueprints', '0001-checkout', 'blueprint'),
+      { cwd: s.root },
+    );
+    await new Promise((r) => server.listen(0, '127.0.0.1', r));
+    const base = `http://127.0.0.1:${server.address().port}`;
+    try {
+      const both = await (
+        await fetch(`${base}/api/whose?url=${encodeURIComponent('https://shop.test/')}`)
+      ).json();
+      assert.deepEqual(both.matches.map((m) => m.id).sort(), ['campaigns', 'checkout']);
+
+      const one = await (
+        await fetch(`${base}/api/whose?url=${encodeURIComponent('https://shop.test/cart')}`)
+      ).json();
+      assert.deepEqual(one.matches.map((m) => m.id), ['checkout']);
+
+      const none = await (
+        await fetch(`${base}/api/whose?url=${encodeURIComponent('https://nobody.test/')}`)
+      ).json();
+      assert.deepEqual(none.matches, []);
+
+      // And every blueprint says which project it is in, so the panel can
+      // group by project without deriving directories in a browser.
+      const payload = await (await fetch(`${base}/api/blueprint`)).json();
+      const rows = Object.fromEntries(payload.projects.map((p) => [p.id, p.project?.id]));
+      assert.deepEqual(rows, { checkout: 'acme-shop', campaigns: 'acme-marketing' });
+    } finally {
+      server.closeAllConnections();
+      server.close();
+    }
   } finally {
     s.cleanup();
   }
