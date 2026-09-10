@@ -1,0 +1,78 @@
+#!/usr/bin/env node
+// The fast lane: what can be known about the changed files in under two
+// seconds. Every changed JS file is parsed, and each changed module's own
+// unit tests run — `lib/threads.js` maps to `test/threads.test.js` and
+// `test/thread-*.test.js`, `bin/commands/status.js` to `test/status*.test.js`,
+// a changed test file runs itself. The panel and embed sources have no unit
+// tests (a browser is their test), so they are parsed and left to
+// `panel-built`.
+//
+// The files that build fixture blueprints and serve them, or spawn the CLI
+// at them, are the full suite's business at turn end: locations alone is
+// 18s, and no scoping makes a fresh server or CLI spawn cheap. They are
+// listed, not detected — a new slow suite should be a decision.
+//
+// The runner hands over the changed list (ADR 202608); this script never
+// touches git. Nothing changed, or nothing that maps to a test, is a pass.
+import { spawnSync } from "node:child_process";
+import { existsSync, readdirSync } from "node:fs";
+import { basename } from "node:path";
+
+const SLOW = new Set([
+  "locations", "thread-cli", "serve", "standard", "every-door", "move",
+  "judge-cli", "init-run", "import"
+]);
+
+const changed = (process.env.HIGHBALL_CHANGED_FILES ?? "")
+  .split("\n").map((line) => line.trim()).filter(Boolean);
+
+const scripts = changed.filter((file) => /\.(m?js)$/.test(file) && existsSync(file));
+const suites = readdirSync("test")
+  .map((file) => file.match(/^(.+)\.test\.js$/)?.[1])
+  .filter(Boolean);
+
+// A module's tests share its name: exact, or the name plus a suffix, or
+// (for a plural module and its singular commands) the name starting with
+// the suite's first word — threads → thread-cli, thread-mutations.
+const testsFor = (stem) => suites.filter((name) =>
+  name === stem || name.startsWith(`${stem}-`) || stem.startsWith(name.split("-")[0]));
+
+const tests = new Set();
+for (const file of changed) {
+  let stems = [];
+  if (/^lib\/[^/]+\.js$/.test(file)) stems = [ basename(file, ".js") ];
+  else if (/^bin\/commands\/[^/]+\.js$/.test(file)) stems = [ basename(file, ".js"), "cli-usage" ];
+  else if (/^bin\/walkdown\.js$/.test(file)) stems = [ "cli-usage" ];
+  else if (/^test\/[^/]+\.test\.js$/.test(file)) stems = [ basename(file, ".test.js") ];
+  for (const stem of stems) {
+    for (const name of testsFor(stem)) {
+      if (!SLOW.has(name)) tests.add(`test/${name}.test.js`);
+    }
+  }
+}
+
+let failed = false;
+if (scripts.length > 0) {
+  for (const file of scripts) {
+    const check = spawnSync(process.execPath, [ "--check", file ], { encoding: "utf8" });
+    if (check.status !== 0) {
+      failed = true;
+      process.stdout.write(`${file} does not parse:\n${check.stderr}`);
+    }
+  }
+  console.log(`parsed ${scripts.length} changed file(s)`);
+}
+if (tests.size > 0) {
+  const files = [ ...tests ].sort();
+  console.log(`unit tests for the changed modules: ${files.join(", ")}`);
+  const run = spawnSync(process.execPath, [ "--test", ...files ], {
+    encoding: "utf8",
+    env: { ...process.env, WALKDOWN_HOME: process.env.WALKDOWN_HOME ?? "tmp/test-home" },
+    stdio: [ "ignore", "pipe", "pipe" ]
+  });
+  process.stdout.write(run.stdout + run.stderr);
+  if (run.status !== 0) failed = true;
+} else {
+  console.log("no changed file maps to a unit test — the full suite runs at turn end");
+}
+process.exit(failed ? 1 : 0);

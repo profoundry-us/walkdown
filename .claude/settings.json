@@ -6,7 +6,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node_modules/.bin/highball run --fast --if-changed"
+            "command": "node_modules/.bin/highball run --fast --if-changed",
+            "timeout": 120
           }
         ]
       }

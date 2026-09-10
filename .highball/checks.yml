@@ -122,12 +122,24 @@ checks:
     run: node --check lib/viewer/panel.js && node --check lib/viewer/embed.js
     fast: true
 
-  # Back on per edit (2026-09-09). It was off for the length of ADR 0001,
-  # where a rename landing before its callers left the suite red between
-  # commits by construction and a failing suite after every edit hid the
-  # edit's own result. The ADR is built, so this is a per-edit check again.
+  # The fast lane for the code, scoped to what changed: every changed JS
+  # file parses, and each changed module's own unit tests pass. The suites
+  # that build and serve fixture blueprints, or spawn the CLI at them, are
+  # left to turn end — locations alone is 18s, and no scoping makes a fresh
+  # server cheap. The script lists them by name.
+  - id: changed-tests
+    name: Changed files parse and their unit tests pass
+    run: .highball/checks/tests-for-changed
+    fast: true
+
+  # The whole suite, at turn end. It runs 20-26s here; the target for a
+  # small project's full suite is 30s and the budget is the kill switch,
+  # with room for a loaded machine. One run on 2026-09-08 took 101s on an
+  # ECONNRESET inside roles-on-runs — that is the hang this exists to
+  # catch, not a reason to raise it. (Per edit from 2026-09-09 to 09-10,
+  # which was 22s after every edit; the fast lane above replaces that.)
   - id: unit-tests
     name: Unit tests
     run: npm test
-    fast: true
+    timeout: 45
 
