@@ -129,12 +129,14 @@ checks:
                     # servers; still worth paying per edit rather than finding
                     # out at turn end
 
-  # A page belongs to exactly one blueprint (docs/06 §2). `walkdown lint`
-  # validates one blueprint in isolation, so this constraint is only visible
-  # across the whole set — which is what `walkdown claims` looks at. It is the
-  # thing that makes "which project is this page" answerable at all, so it is
-  # checked rather than remembered.
-  - id: one-page-one-blueprint
-    name: No two blueprints claim the same page
-    run: node bin/walkdown.js claims
-    fast: true    # reads config and storyboards; no test framework involved
+  # OFF while ADR 0001 is built (2026-09-09). A page may now be claimed by
+  # several blueprints, so "no two claim the same page" is no longer true and
+  # `walkdown claims` reports an inventory rather than a fault. The check is
+  # kept here, disabled, until the rules it enforced are retired and rewritten
+  # — at which point it is deleted rather than revived. See
+  # docs/adr/0001-projects-blueprints-and-routing.md, "How it gets built".
+  #
+  # - id: one-page-one-blueprint
+  #   name: No two blueprints claim the same page
+  #   run: node bin/walkdown.js claims
+  #   fast: true

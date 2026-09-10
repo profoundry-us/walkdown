@@ -2508,8 +2508,13 @@ export async function start() {
     }
     // By key, never by id: two listed blueprints may share a name, and the
     // one this page belongs to is one directory, not one name (n-0173).
-    if (whose?.match?.key && S.projects.some((pr) => pr.key === whose.match.key))
-      S.BP = whose.match.key;
+    /*
+     * One claimant opens; several is a question, and until the panel has the
+     * screen to ask it (ADR 0001, step 4) it asks the way it already knows
+     * how - the gate, rather than a pick nobody made.
+     */
+    const claimed = (whose?.matches ?? []).filter((m) => S.projects.some((pr) => pr.key === m.key));
+    if (claimed.length === 1) S.BP = claimed[0].key;
   }
   /*
    * Then what you picked last time for this site. Also at every count, and

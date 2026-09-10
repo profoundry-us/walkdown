@@ -1,14 +1,18 @@
 import { parseArgs } from 'node:util';
 import { listedBlueprints, loadBlueprint } from '../../lib/blueprint.js';
 import { resolveLocations } from '../../lib/locations.js';
-import { blueprintForUrl, claimsOf, findCollisions } from '../../lib/claims.js';
+import { blueprintsForUrl, claimsOf, sharedPages } from '../../lib/claims.js';
 import { end } from './context.js';
 
 /*
  * Who claims what, across every blueprint under the served folder. Two jobs in
- * one place because they are one question: with `--url`, which blueprint a page
- * belongs to; without, whether any page is claimed by more than one, which is
- * the constraint that makes the first question answerable at all.
+ * one place because they are one question: with `--url`, which blueprints a
+ * page belongs to; without, which pages are covered by more than one.
+ *
+ * The second half was a constraint until 2026-09-09 and is an inventory now
+ * (ADR 0001). A shared page is a thing to know, not a thing to fix, so this
+ * exits 0 either way - the only failure left is asking about an address
+ * nothing claims.
  *
  * It lives outside `lint` on purpose - lint validates ONE blueprint, and this
  * is only visible across the set.
@@ -32,42 +36,39 @@ export function run(args) {
   }));
 
   if (values.url) {
-    const hit = blueprintForUrl(projects, values.url);
+    const hits = blueprintsForUrl(projects, values.url);
     if (values.json) {
-      console.log(JSON.stringify({ url: values.url, match: hit }, null, 2));
+      console.log(JSON.stringify({ url: values.url, matches: hits }, null, 2));
       return end(0);
     }
-    if (!hit) {
+    if (!hits.length) {
       console.log(`no blueprint claims ${values.url}`);
       return end(1);
     }
-    console.log(`${values.url}\n  ${hit.id} — screen ${hit.screen} (target ${hit.target})`);
+    // Every claimant, never a pick between them: the order is the config's
+    // and means nothing (ADR 0001).
+    console.log(values.url);
+    for (const hit of hits) console.log(`  ${hit.id} — screen ${hit.screen} (target ${hit.target})`);
+    if (hits.length > 1) console.log(`\n${hits.length} blueprints claim it. Opening one is a person's choice.`);
     return end(0);
   }
 
-  const clashes = findCollisions(projects);
+  const shared = sharedPages(projects);
+  const total = projects.reduce((n, p) => n + claimsOf(p.blueprint).length, 0);
   if (values.json) {
     console.log(
-      JSON.stringify({ projects: projects.map((p) => p.id), collisions: clashes }, null, 2),
-    );
-    return end(clashes.length ? 1 : 0);
-  }
-  if (!clashes.length) {
-    const total = projects.reduce((n, p) => n + claimsOf(p.blueprint).length, 0);
-    console.log(
-      `\u2713 ${projects.length} blueprint(s), ${total} claim(s) — no page claimed twice`,
+      JSON.stringify({ blueprints: projects.map((p) => p.id), shared }, null, 2),
     );
     return end(0);
   }
-  for (const c of clashes) {
-    console.log(
-      `\u2717 ${c.key} is claimed by ${new Set(c.claimants.map((x) => x.blueprint)).size} blueprints:`,
-    );
+  console.log(`${projects.length} blueprint(s), ${total} claim(s)`);
+  if (!shared.length) return end(0);
+  console.log(`\n${shared.length} page(s) covered by more than one blueprint:`);
+  for (const c of shared) {
+    console.log(`  ${c.key}`);
     for (const who of c.claimants)
       console.log(`    ${who.blueprint} — screen ${who.screen} (target ${who.target})`);
   }
-  console.log(
-    `\n${clashes.length} page(s) claimed more than once. A page belongs to exactly one blueprint.`,
-  );
-  return end(1);
+  console.log('\nwalkdown asks which one you mean when you open such a page.');
+  return end(0);
 }
