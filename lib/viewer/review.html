@@ -31,39 +31,31 @@
 <body>
 <script>
   /*
-   * Which page to review. The fragment wins when it names one - that is how
-   * you point walkdown at something the storyboard has never heard of, the
-   * same gesture the extension uses - and otherwise the blueprint's front
-   * door, which the server resolved on the way out.
+   * Which page to review: whatever the fragment names, and nothing else.
+   *
+   * This page used to be baked with the blueprint's front door and the key of
+   * the blueprint the server started in, so opening the server's own root
+   * framed one project's front page and opened its board over it - a server
+   * that serves every project this machine has imported (ADR 0001 §3) cannot
+   * have a front door of its own. With no fragment there is no page to route
+   * from, which is the modal's own case: the panel asks which project.
+   *
+   * `?bp=` still overrides, because naming one is a decision already made.
    */
-  const baked = (v) => (v.startsWith('__') ? '' : v);
   const asked = decodeURIComponent(location.hash.slice(1));
-  const target = asked || baked('__FRONT_DOOR__');
-  /*
-   * Which blueprint. A server started on a folder is already an answer, so the
-   * page it serves does not ask again - that gate is for the extension, which
-   * arrives at a page knowing nothing. `?bp=` still overrides, and the panel's
-   * Blueprints tab still switches.
-   */
-  const bp = new URLSearchParams(location.search).get('bp') ?? baked('__BLUEPRINT__');
+  const bp = new URLSearchParams(location.search).get('bp') ?? '';
 
-  if (!target) {
-    document.body.innerHTML = '<p class="say">walkdown: no page to review. This blueprint’s ' +
-      'storyboard names no screen with an address — give one in the fragment ' +
-      '(<code>/#http://localhost:3000/</code>) to review a page anyway.</p>';
-  } else {
-    const url = new URL(target, location.href).href;
-    window.__walkdownConfig = {
-      server: location.origin,
-      ...(bp ? { bp } : {}),
-      // What makes this the framed delivery rather than the docked one.
-      frame: { url },
-    };
-    document.title = `walkdown — ${new URL(url).host}`;
-    const s = document.createElement('script');
-    s.src = '/panel.js';
-    document.body.appendChild(s);
-  }
+  window.__walkdownConfig = {
+    server: location.origin,
+    ...(bp ? { bp } : {}),
+    // What makes this the framed delivery rather than the docked one. Without
+    // a page to frame it is the docked one, over walkdown's own root.
+    ...(asked ? { frame: { url: new URL(asked, location.href).href } } : {}),
+  };
+  document.title = asked ? `walkdown \u2014 ${new URL(asked, location.href).host}` : 'walkdown';
+  const s = document.createElement('script');
+  s.src = '/panel.js';
+  document.body.appendChild(s);
 </script>
 </body>
 </html>

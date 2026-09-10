@@ -1,0 +1,73 @@
+{
+  "run_id": "2026-09-10T03-15-55Z-local-01",
+  "created": "2026-09-10T03:15:55Z",
+  "actor": "checks-person",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6b6b090-dirty",
+  "tree_hash": "sha256:fe1886229a95",
+  "spec_hash": "sha256:8c07814da8a2",
+  "results": [
+    {
+      "rule": "panel.rules.takes-you-there",
+      "status": "pass",
+      "statement_hash": "sha256:708e2433c9b5",
+      "duration_ms": 1054,
+      "checks": [
+        "checks/panel.spec.js:374"
+      ]
+    },
+    {
+      "rule": "panel.rules.setup-says-how-to-arrive",
+      "status": "pass",
+      "statement_hash": "sha256:e41b088d8143",
+      "duration_ms": 1530,
+      "checks": [
+        "checks/panel.spec.js:628"
+      ]
+    },
+    {
+      "rule": "panel.start.open-a-folder",
+      "status": "pass",
+      "statement_hash": "sha256:2a5e9a0925a7",
+      "duration_ms": 1796,
+      "checks": [
+        "checks/panel.spec.js:1852",
+        "checks/panel.spec.js:2087"
+      ]
+    },
+    {
+      "rule": "panel.start.unclaimed-page-says-so",
+      "status": "pass",
+      "statement_hash": "sha256:3ac55c00c5a3",
+      "duration_ms": 5523,
+      "checks": [
+        "checks/panel.spec.js:1889",
+        "checks/panel.spec.js:1924",
+        "checks/panel.spec.js:1985",
+        "checks/panel.spec.js:2012",
+        "checks/panel.spec.js:2040",
+        "checks/panel.spec.js:2068"
+      ]
+    },
+    {
+      "rule": "panel.start.choose-a-blueprint",
+      "status": "pass",
+      "statement_hash": "sha256:6aa78c304c03",
+      "duration_ms": 633,
+      "checks": [
+        "checks/panel.spec.js:1952"
+      ]
+    },
+    {
+      "rule": "panel.dock.toolbar",
+      "status": "pass",
+      "statement_hash": "sha256:aaf28fbb5e0a",
+      "duration_ms": 884,
+      "checks": [
+        "checks/panel.spec.js:2108"
+      ]
+    }
+  ]
+}

@@ -37,6 +37,7 @@ import { saysSomething } from '../../lib/vocab.js';
 import { locationOfUrl, matchScreen } from '../../lib/screen-match.js';
 import { html, live, nothing, render as put } from '../../vendor/lit.js';
 import { blueprintsPane, serverRow } from './blueprints.js';
+import { blueprintsOf, projectIdOf, projectModal } from './projects.js';
 import { loadSeen, markSeen, openThreadView, postRuleNote, sayVerdict } from './conversation.js';
 import { DESK_DEFAULTS, DESK_KEY, drawDesk } from './desk.js';
 import { icon } from './icons.js';
@@ -47,9 +48,7 @@ import { provideShell } from './shell.js';
 import { closeEvidence, evidenceOpen, openEvidence } from './evidence.js';
 import {
   ACTOR_KEY,
-  blueprintChoiceKey,
   CHOICE,
-  reviewedOrigin,
   cfg,
   D,
   GAP,
@@ -226,6 +225,20 @@ function buildChrome() {
     'w-72 overflow-hidden rounded-box border border-primary/45 bg-base-100 py-1 text-base-content shadow-xl';
   D.screenPanel.style.cssText = `position:absolute; top:${TOP + GAP}px; left:${GAP * 2}px; display:none; pointer-events:auto; max-height:60vh; overflow-y:auto;`;
   D.host.appendChild(D.screenPanel);
+
+  /*
+   * Which project. Over the whole of walkdown's own chrome - the bar and the
+   * side panel included - because until it is answered there is nothing
+   * behind it worth reading, and because crossing projects from inside one
+   * project's board would read as something that board was doing.
+   *
+   * Above the sign panel's z-index, and it takes pointer events for the whole
+   * viewport: the dim behind the card is what makes it modal.
+   */
+  D.projectModal = document.createElement('div');
+  D.projectModal.style.cssText =
+    'position:absolute; inset:0; display:none; pointer-events:auto; z-index:5;';
+  D.host.appendChild(D.projectModal);
 }
 
 const DESK_DIALS = [
@@ -816,9 +829,11 @@ async function discardSitting() {
 function crossTo(nextBp) {
   S.session = null; // left behind, on disk, waiting to be resumed
   S.BP = nextBp;
-  // Remembered for the page under review, not for the document this panel is
-  // drawn in - see blueprintChoiceKey (n-0258).
-  store.set(blueprintChoiceKey(S.frameUrl), S.BP);
+  // The blueprint carries its project with it: picking one from another
+  // project's list is how you cross, and the bar must say where you landed.
+  S.project = projectIdOf(S.projects.find((pr) => pr.key === nextBp)) ?? S.project;
+  // Nothing is written down. A pick was remembered per site once, which is
+  // the second kind of memory ADR 0001 §9 deleted rather than migrated.
   S.listTab = 'rules';
   S.view = 'list';
   selectRow(null);
@@ -981,6 +996,7 @@ async function restoreSession() {
 // ---- render ---------------------------------------------------------------
 export function render() {
   if (!S.data) return;
+  syncProjectModal();
   // The thread screen without a thread is not a screen.
   if (S.view === 'thread' && !S.openThread) S.view = S.selected ? 'detail' : 'list';
   /*
@@ -1358,11 +1374,35 @@ const GEAR = () =>
       syncDeskPanel();
     }}>${icon('gear', 'size-3.5')}</button>`;
 
+/*
+ * The project, as a control rather than a label (ADR 0001 §11). It opens the
+ * modal, which is the only way to reach another project without changing the
+ * address or going back to the server's root - so the bar reads project /
+ * blueprint / screen, three answers narrowing from left to right.
+ *
+ * Drawn before there is a board as well as after: choosing a project is
+ * exactly what a person standing at a gate is trying to do.
+ */
+function projectButton() {
+  return html`<button class="btn btn-xs min-w-0 gap-1 px-1.5 font-normal ${
+    S.project ? 'btn-ghost' : 'btn-outline btn-primary'
+  }" data-testid="panel.project" id="wdp-project-btn"
+    title="Which project you are working in — open to switch"
+    @click=${() => {
+      S.picking = true;
+      S.phase === 'ready' ? render() : renderGate();
+    }}>
+    ${icon('bounding-box', 'size-3.5')}<span class="max-w-24 truncate">${
+      S.project ?? 'Pick a project'
+    }</span>${icon('caret-down', 'size-3')}</button>`;
+}
+
 function renderBar() {
   if (S.dragging) return paintBar();
   if (S.phase !== 'ready') {
     put(
-      html`${GEAR()}<span class="font-bold tracking-tight">walk<span class="text-primary">down</span></span>`,
+      html`${GEAR()}<span class="font-bold tracking-tight">walk<span class="text-primary">down</span></span>
+      ${S.phase === 'connect' ? nothing : projectButton()}`,
       D.bar,
     );
     return;
@@ -1382,8 +1422,16 @@ function renderBar() {
    */
   const owedNow = owedRows().length;
   const bar = html`
+    <!-- The left cluster: who you are working on, narrowing left to right -
+         project, blueprint, screen. It is CAPPED, and that is load-bearing:
+         the surface control below is centred absolutely, so a left side free
+         to grow runs under it and swallows the clicks meant for the screen
+         picker. Everything in here that can be shortened truncates; the gear,
+         the wordmark and the screen picker keep their size, and the cap
+         leaves the centre a clear 8.5rem on this side. -->
+    <span class="flex min-w-0 max-w-[calc(50%-8.5rem)] items-center gap-2">
     ${GEAR()}
-    <span class="font-bold tracking-tight">walk<span class="text-primary">down</span></span>
+    <span class="shrink-0 font-bold tracking-tight">walk<span class="text-primary">down</span></span>
     <!-- A stale copy sits BESIDE the project name, never instead of it.
          It belongs beside the logo because it is about walkdown itself, not
          about the project - and the sidebar could be put away, while a stale
@@ -1398,7 +1446,7 @@ function renderBar() {
          written. -->
     ${
       STALE_COPY()
-        ? html`<span class="badge badge-sm badge-error badge-dash gap-1 font-semibold"
+        ? html`<span class="badge badge-sm badge-error badge-dash min-w-0 gap-1 truncate font-semibold"
            data-testid="panel.stale"
            title="walkdown was updated — reload the extension at chrome://extensions, then reload this page, to run the current build.">
            ${icon('warning-fill', 'size-3.5')}Stale — reload the extension</span>`
@@ -1406,13 +1454,14 @@ function renderBar() {
     }
     ${
       STALE_SERVER()
-        ? html`<span class="badge badge-sm badge-error badge-dash gap-1 font-semibold"
+        ? html`<span class="badge badge-sm badge-error badge-dash min-w-0 gap-1 truncate font-semibold"
            data-testid="panel.stale-server"
            title="The server is running code older than this tree — restart it (npm run dev, or stop and re-run walkdown serve). Until then a verdict may be recorded against yesterday's rules.">
            ${icon('warning-fill', 'size-3.5')}Stale server — restart it</span>`
         : null
     }
-    <span class="truncate text-[11.5px] opacity-50" data-testid="panel.blueprint">${S.data.project}</span>
+    ${projectButton()}
+    <span class="min-w-0 truncate text-[11.5px] opacity-50" data-testid="panel.blueprint">${S.data.project}</span>
     <!-- Which screen this page is. It reads as the answer, not as a way to
          ask the question: the button is labelled with the screen you are on,
          so the common case costs no click at all. Outlined once a screen has
@@ -1434,6 +1483,7 @@ function renderBar() {
       ${icon('frame-corners', 'size-3.5')}<span class="max-w-32 truncate">${
         atScreen ? (atScreen.title ?? atScreen.id) : 'No screen'
       }</span>${icon('caret-down', 'size-3')}</button>
+    </span>
 
     <span class="absolute left-1/2 flex -translate-x-1/2 items-center gap-2"
       title="${canGhost ? 'Fade between the design and what shipped' : 'No design on file for this screen'}">
@@ -2405,6 +2455,14 @@ function pushContext(frame, surface, pinMode) {
       surface,
       pinMode,
       pins: pinsForScreen(sc?.id),
+      /*
+       * Which blueprint a pin from this surface files against. The embed in a
+       * frame is on somebody else's page - there is no script tag there to
+       * carry a blueprint - so the panel tells it, and the server no longer
+       * has to work it out from the address (ADR 0001 §12). It always has an
+       * answer by the time it draws anything.
+       */
+      bp: S.BP || null,
     },
     '*',
   );
@@ -2475,23 +2533,24 @@ export async function start() {
    */
   const here = S.frameUrl ?? location.href;
   /*
-   * Ask the page first. A blueprint that claims this address is a fact about
-   * where you are; a remembered choice is a fact about what you picked last,
-   * somewhere else. Preferring memory is what made walkdown open its own
-   * rules on somebody else's app and then stay there.
-   *
-   * A page belongs to exactly one blueprint, which is the constraint that
-   * lets this be an answer rather than a guess - `walkdown claims` is what
-   * keeps it true.
-   *
-   * Asked at every count. Behind `projects.length > 1` the question was never
-   * put on the commonest first meeting with walkdown - a server holding one
-   * blueprint and an ordinary page you had browsed to - and the panel opened
-   * that blueprint's whole board over somebody else's site (n-0256, n-0258,
-   * n-0260, n-0261, which were four roads to the one mistake: a count
-   * deciding whose page this is).
+   * Standing at the walkdown server's own root, with nothing framed, there is
+   * no page to route from: what is on screen is walkdown, not an application.
+   * That is the modal's sixth case, and it is the same modal (ADR 0001 §7).
    */
-  if (!S.BP) {
+  const atServerRoot = !S.frameUrl && originOf(S.SERVER) === location.origin;
+  /*
+   * Ask the page. A blueprint that claims this address is a fact about where
+   * you are, and it is the ONLY thing that decides on its own - the count of
+   * what a folder holds never was evidence (n-0256, n-0258, n-0260, n-0261),
+   * and a remembered pick is a fact about what you chose somewhere else.
+   *
+   * The answer is a LIST. Several blueprints may claim one page since ADR
+   * 0001, and the panel never narrows a list to one by ranking: that is
+   * walkdown deciding whose page you are on, which is the fault four judgings
+   * removed this week.
+   */
+  S.claimants = [];
+  if (!S.BP && !atServerRoot) {
     let whose;
     try {
       whose = await (await fetch(api(`/api/whose?url=${encodeURIComponent(here)}`))).json();
@@ -2508,32 +2567,46 @@ export async function start() {
     }
     // By key, never by id: two listed blueprints may share a name, and the
     // one this page belongs to is one directory, not one name (n-0173).
-    /*
-     * One claimant opens; several is a question, and until the panel has the
-     * screen to ask it (ADR 0001, step 4) it asks the way it already knows
-     * how - the gate, rather than a pick nobody made.
-     */
-    const claimed = (whose?.matches ?? []).filter((m) => S.projects.some((pr) => pr.key === m.key));
-    if (claimed.length === 1) S.BP = claimed[0].key;
+    S.claimants = (whose?.matches ?? []).filter((m) => S.projects.some((pr) => pr.key === m.key));
   }
   /*
-   * Then what you picked last time for this site. Also at every count, and
-   * for the same reason the question above is.
+   * The routing table, in the order ADR 0001 §7 sets it out. Each row here is
+   * one line of that table, and there is no row where the panel picks between
+   * two projects' claims for you.
    */
   if (!S.BP) {
-    const remembered = await store.get(blueprintChoiceKey(here));
-    if (remembered && S.projects.some((pr) => pr.key === remembered)) S.BP = remembered;
-  }
-  /*
-   * Nothing claims it and you have picked nothing: the panel says so, says
-   * how to claim it, and leaves what this server holds one press away. It
-   * does not open it, at any count - not at six, not at one, and not at zero,
-   * where the payload still carries a whole blueprint and "nothing to pick"
-   * would open exactly the board a count had chosen.
-   */
-  if (!S.BP) {
-    S.phase = 'unclaimed';
-    return renderGate();
+    const projectsClaiming = [
+      ...new Set(
+        S.claimants.map((m) => projectIdOf(S.projects.find((pr) => pr.key === m.key))),
+      ),
+    ];
+    if (S.claimants.length === 1) {
+      // One claimant: open it, activate its project, say nothing.
+      S.BP = S.claimants[0].key;
+      S.project = projectsClaiming[0] ?? null;
+    } else if (S.claimants.length > 1 && projectsClaiming.length === 1) {
+      /*
+       * Several, all in one project. The project is not in doubt, so the panel
+       * loads it and shows its blueprints with a notice saying how many claim
+       * this page - a question worth asking, and asked where the answer is.
+       */
+      S.project = projectsClaiming[0];
+      S.phase = 'choose';
+      return renderGate();
+    } else {
+      /*
+       * Nothing claims it, or several projects do, or there is no page to
+       * route from. One modal for all three: they are one question - which
+       * project am I working in - and three screens asking it were three
+       * places for the answer to differ.
+       */
+      S.project = null;
+      S.picking = true;
+      S.phase = 'choose';
+      return renderGate();
+    }
+  } else {
+    S.project = projectIdOf(S.projects.find((pr) => pr.key === S.BP)) ?? S.project;
   }
   S.phase = 'ready';
   S.data = S.BP ? await (await fetch(api('/api/blueprint'))).json() : payload;
@@ -2574,9 +2647,15 @@ export async function start() {
   pushContexts();
 }
 
-/** The two screens that come before there is anything to review. */
+/*
+ * What the panel draws before there is a board: no server, or a project whose
+ * blueprints you have not picked between yet. The third screen - the project
+ * modal - is drawn over the top of whatever this leaves behind, so it is not
+ * a phase and does not belong here.
+ */
 function renderGate() {
   renderBar();
+  syncProjectModal();
   if (S.phase === 'connect') {
     put(
       html`
@@ -2602,80 +2681,51 @@ function renderGate() {
     );
     return;
   }
-  if (S.phase === 'unclaimed') {
-    /*
-     * prototype/screens/unclaimed-page.html, in the panel's own skin. Four
-     * blocks, and each one is there for a reason the drawing gives:
-     *
-     *  - the fact, with the ADDRESS named, because "no blueprint" without it
-     *    leaves you guessing which address was asked about, and a port or a
-     *    fragment is exactly what makes a claim miss
-     *  - how to claim it, since knowing you cannot review this page is only
-     *    half an answer
-     *  - `walkdown init`, for a page that belongs to nothing yet
-     *  - and what this server does hold: reachable in one step, never opened
-     *    for you, however many there are
-     */
-    const here = S.frameUrl ?? location.href;
-    put(
-      html`
-      <div class="flex h-full flex-col overflow-y-auto">
-        <div class="flex flex-col gap-3 p-4">
-          <div class="flex flex-col gap-1" data-testid="start.unclaimed">
-            <div class="text-[15px] font-semibold">No blueprint covers this page</div>
-            <p class="break-all font-mono text-[11px] opacity-60">${here}</p>
-          </div>
-
-          <div class="flex flex-col gap-1.5" data-testid="start.claim">
-            <p class="text-[11px] uppercase tracking-wider opacity-50">To review this page</p>
-            <p class="text-[12.5px] leading-relaxed opacity-70">Add it to a blueprint's storyboard
-              as a screen's <span class="font-mono text-[11px]">app</span> address, or set it as a
-              target's <span class="font-mono text-[11px]">base_url</span> — then walkdown knows
-              this page is part of that blueprint.</p>
-            <code class="rounded-box bg-base-200 px-2 py-1.5 text-[11px] break-all"
-              >walkdown claims --url ${here}</code>
-            <p class="text-[11px] leading-relaxed opacity-50">says which blueprint, if any, claims
-              an address today.</p>
-          </div>
-
-          <div class="flex flex-col gap-1.5" data-testid="start.new">
-            <p class="text-[11px] uppercase tracking-wider opacity-50">Or start one for it</p>
-            <code class="rounded-box bg-base-200 px-2 py-1.5 text-[11px]">walkdown init</code>
-          </div>
-        </div>
-
-        ${
-          S.projects.length
-            ? html`<div class="border-t border-dashed border-base-content/20 pt-3"
-                data-testid="start.options">
-                <p class="px-3.5 pb-1 text-[11px] uppercase tracking-wider opacity-50">Open one
-                  anyway</p>
-                ${blueprintsPane({ server: false })}
-                <p class="px-3.5 pb-3 text-[11px] leading-relaxed opacity-40">Opening one here
-                  reviews it against this page — a deliberate act, never a default, and the same
-                  question whether the folder holds one blueprint or six.</p>
-              </div>`
-            : nothing
-        }
-      </div>`,
-      D.side,
-    );
-    return;
-  }
+  /*
+   * Several blueprints in one project claim this page, or you crossed to a
+   * project holding more than one. Either way the question is which of THIS
+   * project's blueprints, and the Blueprints tab is where that is answered -
+   * so this is that pane, with the reason it is being shown said out loud.
+   */
+  const claimed = S.claimants.length;
   put(
     html`
-    <div class="p-4 pb-2">
+    <div class="p-4 pb-1">
       <div class="text-[15px] font-semibold">Which blueprint?</div>
-      <!-- The site under review, which is where the answer is filed. This
-           named the document the panel is drawn in long after the choice
-           itself moved to the page's own origin, so the sentence said one
-           place and the memory held another (n-0260). -->
-      <p class="mt-1 text-[12.5px] leading-relaxed opacity-60">Remembered for
-        <b>${reviewedOrigin(S.frameUrl)}</b>, and changeable later from the Blueprints tab.</p>
     </div>
-    <div class="flex-1 overflow-y-auto">${blueprintsPane()}</div>`,
+    <div class="flex-1 overflow-y-auto">${blueprintsPane({
+      server: false,
+      notice: claimed
+        ? `${claimed} blueprints in this project claim this page. Nothing is remembered — walkdown asks each time rather than choosing for you.`
+        : 'This project holds more than one blueprint. Pick the one you are reviewing against.',
+    })}</div>`,
     D.side,
   );
+}
+
+/*
+ * The project modal, drawn over everything the panel has. It is an element of
+ * its own rather than a pane inside the sidebar because it must cover the
+ * chrome as well as the page (Topher, 2026-09-09): crossing projects is not a
+ * thing that happens in a corner of a board belonging to the project you are
+ * leaving.
+ */
+function syncProjectModal() {
+  if (!D.projectModal) return;
+  D.projectModal.style.display = S.picking ? 'block' : 'none';
+  if (!S.picking) return put(nothing, D.projectModal);
+  const framed = S.frameUrl ?? null;
+  const here = !framed && originOf(S.SERVER) === location.origin ? null : (framed ?? location.href);
+  put(projectModal({ here, closable: S.phase === 'ready' || Boolean(S.project) }), D.projectModal);
+}
+
+/** Its origin, or nothing at all where the address is not one. */
+function originOf(url) {
+  try {
+    return new URL(url).origin;
+  } catch {
+    return null;
+  }
 }
 
 /*
@@ -2712,13 +2762,40 @@ function wireGlobals() {
     if (S.session && id !== S.BP) return askAboutSitting(id);
     crossTo(id);
   });
+  /*
+   * A project chosen from the modal. One blueprint in it is not a question,
+   * so it opens; several is the Blueprints tab, which is where that question
+   * belongs (ADR 0001 §7).
+   */
+  on('pick-project', ({ id }) => {
+    S.picking = false;
+    S.project = id;
+    const held = blueprintsOf(id);
+    if (held.length === 1) {
+      const only = held[0].key ?? held[0].id;
+      if (S.session && only !== S.BP) return askAboutSitting(only);
+      return crossTo(only);
+    }
+    S.BP = null;
+    S.listTab = 'blueprints';
+    S.phase = 'choose';
+    renderGate();
+  });
+  on('close-projects', () => {
+    S.picking = false;
+    if (S.phase === 'ready') return render();
+    renderGate();
+  });
   on('connect', ({ server }) => {
     if (server) {
       const next = server.replace(/\/+$/, '');
       // Crossing to another server leaves its blueprint behind with it: a key
       // is one server's directory, and carrying it over is how a live server
       // came to look like no server at all (n-0265).
-      if (next !== S.SERVER) S.BP = null;
+      if (next !== S.SERVER) {
+        S.BP = null;
+        S.project = null;
+      }
       S.SERVER = next;
       store.set(CHOICE + ':server', S.SERVER);
     }

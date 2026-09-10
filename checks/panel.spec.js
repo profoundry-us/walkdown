@@ -381,12 +381,13 @@ test('choosing a blueprint about another page takes you there', {
   );
 
   await page.goto(fixtureFor({ build: 'stale', bp: '' }));
-  // The panel remembers a choice per origin; clear it where it was made.
-  await page.evaluate(() => localStorage.clear());
-  await page.reload();
-  // No blueprint declared and two on the server: the panel must ask.
-  await expect(page.getByText(/Which blueprint/i)).toBeVisible();
+  // No blueprint declared and nothing claiming this page: which project, then
+  // which of its blueprints. Nothing is remembered, so this is the same two
+  // questions every time (ADR 0001 §7, §9).
+  await expect(page.getByTestId('project.modal')).toBeVisible();
+  await page.getByTestId('project.list').locator('[data-project]').first().click();
   await page
+    .getByTestId('start.options')
     .getByText(/walkdown-example/i)
     .first()
     .click();
@@ -636,10 +637,10 @@ test('a screen that is a state, not an address, says how to get there', {
     r.fulfill({ contentType: 'text/html', body: '<h1>The other project</h1>' }),
   );
   await page.goto(FIXTURE + '&bp=&reinjects=0');
-  await page.evaluate(() => localStorage.clear());
-  await page.reload();
-  await expect(page.getByText(/Which blueprint/i)).toBeVisible();
+  await expect(page.getByTestId('project.modal')).toBeVisible();
+  await page.getByTestId('project.list').locator('[data-project]').first().click();
   await page
+    .getByTestId('start.options')
     .getByText(/walkdown-example/i)
     .first()
     .click();
@@ -1872,44 +1873,48 @@ test('the start gate says how to open a blueprint, and its address box actually 
 });
 
 /*
- * The page nobody claims.
+ * The page nobody claims, and every other case where the address cannot
+ * decide on its own: one modal, over the whole of walkdown's chrome.
  *
- * Behind `projects.length > 1` this question was never put on the commonest
+ * Behind `projects.length > 1` the question was never put on the commonest
  * first meeting with walkdown - one blueprint on the server, and an ordinary
  * page you had browsed to - so the panel opened that blueprint's whole board
  * over somebody else's site and said nothing (n-0256). The count was never
  * evidence: one blueprint on a server says nothing about who this page
- * belongs to.
+ * belongs to, and since ADR 0001 several may claim one page.
  *
  * `bp=` empty is a page that declares nothing, which is what an ordinary site
  * with the extension on looks like.
  */
-test('a page no blueprint claims is told so, and nothing is opened over it', {
+test('a page no blueprint claims asks which project, and opens nothing over it', {
   tag: '@rule:panel.start.unclaimed-page-says-so',
 }, async ({ page }) => {
   await page.goto(fixtureFor({ bp: '' }));
 
-  const said = page.getByTestId('start.unclaimed');
-  await expect(said, 'the panel says the page is not covered').toBeVisible();
-  await expect(said).toContainText(/No blueprint covers this page/);
+  const modal = page.getByTestId('project.modal');
+  await expect(modal, 'the panel asks rather than opening').toBeVisible();
   // Named, because a claim misses on a port or a fragment and "no blueprint"
   // without the address leaves you guessing which one was asked about.
-  await expect(said, 'and names the address it asked about').toContainText(WD_ORIGIN);
+  await expect(page.getByTestId('project.address'), 'it names the address').toContainText(WD_ORIGIN);
+  await expect(page.getByTestId('project.why')).toContainText(/No blueprint claims this page/i);
 
-  // How to claim it, both ways.
-  await expect(page.getByTestId('start.claim')).toContainText(/storyboard|base_url/);
-  await expect(page.getByTestId('start.claim')).toContainText('walkdown claims --url');
-  await expect(page.getByTestId('start.new')).toContainText('walkdown init');
+  // How to make it reviewable, and how to bring a project in - both at the
+  // top, where twenty projects cannot push them off the screen.
+  await expect(page.getByTestId('project.commands')).toContainText('walkdown claims --url');
+  await expect(page.getByTestId('project.new')).toContainText('walkdown import');
+  await expect(page.getByTestId('project.new')).toContainText('walkdown init');
 
   // Nothing was opened: no board, no rules, no sitting to start.
   await expect(page.getByTestId('panel.rules-list')).toHaveCount(0);
   await expect(page.getByTestId('panel.walk')).toHaveCount(0);
 
-  // And what the server does hold is one step away, not hidden.
-  const options = page.getByTestId('start.options');
-  await expect(options.locator('[data-pick]').first()).toBeVisible();
-  await options.locator('[data-pick]').first().click();
-  await expect(page.getByTestId('panel.rules-list'), 'opening one is one click').toBeVisible();
+  // And what this machine holds is one step away, never opened for you. This
+  // project holds two blueprints, so choosing it asks the second question
+  // rather than guessing between them.
+  await page.getByTestId('project.list').locator('[data-project]').first().click();
+  await expect(page.getByTestId('start.options').locator('[data-pick]').first()).toBeVisible();
+  await page.getByTestId('start.options').locator('[data-pick]').first().click();
+  await expect(page.getByTestId('panel.rules-list'), 'and then it opens').toBeVisible();
 });
 
 /*
@@ -1925,49 +1930,75 @@ test('a page a blueprint claims, or one that declares its own, is never asked', 
   // declared one, which is the address the storyboard actually names.
   await page.goto(fixtureFor({ bp: '', frame: `${DECLARED_ORIGIN}/stand-in/review` }));
   await expect(page.getByTestId('panel.rules-list'), 'a claimed page opens').toBeVisible();
-  await expect(page.getByTestId('start.unclaimed')).toHaveCount(0);
+  await expect(page.getByTestId('project.modal')).toHaveCount(0);
+  // And the bar says where you landed, project first.
+  await expect(page.getByTestId('panel.project')).toBeVisible();
 
   // Declaring your own blueprint answers the question before it is asked.
   await review(page);
   await expect(page.getByTestId('panel.rules-list')).toBeVisible();
-  await expect(page.getByTestId('start.unclaimed')).toHaveCount(0);
+  await expect(page.getByTestId('project.modal')).toHaveCount(0);
 });
 
 /*
- * A remembered pick is remembered for THE SITE, not for the panel.
+ * Several claimants in one project is a question, and it is asked where the
+ * answer is - the project's own Blueprints list, with the reason said out
+ * loud and the ones that claim this page marked and first.
  *
- * The key was the origin of the document the panel is drawn in - which,
- * framed, is walkdown's own review page - so one pick answered for every page
- * reviewed afterwards, on any site. Worse, memory was read behind
- * `projects.length > 1`, so a server holding six went quiet where one holding
- * a single blueprint still asked: the same unclaimed page, two answers,
- * decided by a count that means nothing (n-0258).
+ * The two claims are manufactured here because the server's own answer is
+ * covered by the unit suite (test/import.test.js): what is being judged is
+ * what the PANEL does with a list of two.
  */
-test('a blueprint chosen on one site is not opened over the next one', {
+test('two blueprints claiming one page is a question, asked with both named', {
+  tag: '@rule:panel.start.choose-a-blueprint',
+}, async ({ page }) => {
+  let keys = [];
+  await page.route('**/api/blueprint*', async (route) => {
+    const res = await route.fetch();
+    const body = await res.json();
+    keys = (body.projects ?? []).map((p) => p.key);
+    await route.fulfill({ response: res, json: body });
+  });
+  await page.route(/\/api\/whose(\?|$)/, async (route) => {
+    const url = new URL(route.request().url()).searchParams.get('url');
+    await route.fulfill({
+      json: { url, matches: keys.map((key) => ({ id: key, key, name: key, screen: 'review' })) },
+    });
+  });
+  await page.goto(fixtureFor({ bp: '' }));
+
+  // Not the modal: the project is not in doubt, only which of its blueprints.
+  await expect(page.getByTestId('project.modal')).toHaveCount(0);
+  await expect(page.getByTestId('start.notice')).toContainText(/2 blueprints/);
+  await expect(page.getByTestId('start.notice')).toContainText(/asks each time/i);
+  const marked = page.getByTestId('start.options').locator('[data-pick][data-claims]');
+  await expect(marked, 'both are marked as claiming it').toHaveCount(2);
+  await expect(page.getByTestId('panel.rules-list')).toHaveCount(0);
+});
+
+/*
+ * Nothing is remembered (ADR 0001 §9). A pick used to be kept per site in the
+ * browser, which is a second kind of memory about something the project
+ * already knows - your laptop knew, your teammate did not. Asking twice is
+ * cheap; a wrong memory is not.
+ */
+test('a blueprint picked for an unclaimed page is not remembered next time', {
   tag: '@rule:panel.start.unclaimed-page-says-so',
 }, async ({ page }) => {
   const frameOn = (origin, path) => fixtureFor({ bp: '', frame: `${origin}${path}` });
 
-  // An unclaimed page, and a deliberate pick from the gate.
   await page.goto(frameOn(WD_ORIGIN, '/nothing-claims-this.html'));
-  await expect(page.getByTestId('start.unclaimed')).toBeVisible();
+  await expect(page.getByTestId('project.modal')).toBeVisible();
+  await page.getByTestId('project.list').locator('[data-project]').first().click();
   await page.getByTestId('start.options').locator('[data-pick]').first().click();
   await expect(page.getByTestId('panel.rules-list')).toBeVisible();
 
-  // Another page on the SAME site: the choice was made for this site, so it
-  // stands, and the person is not asked again on every page they open.
-  await page.goto(frameOn(WD_ORIGIN, '/another-page-here.html'));
-  await expect(page.getByTestId('panel.rules-list'), 'the pick holds on its own site').toBeVisible();
-  await expect(page.getByTestId('start.unclaimed')).toHaveCount(0);
-
-  // A different site entirely: nothing was ever chosen for it, so it is asked
-  // about - whatever was picked somewhere else.
-  await page.goto(frameOn('http://localhost:4999', '/plain.html'));
+  // The same page again: nothing was written down, so it asks again.
+  await page.goto(frameOn(WD_ORIGIN, '/nothing-claims-this.html'));
   await expect(
-    page.getByTestId('start.unclaimed'),
-    'another site is asked about on its own account',
+    page.getByTestId('project.modal'),
+    'the pick was not remembered, here or anywhere',
   ).toBeVisible();
-  await expect(page.getByTestId('start.unclaimed')).toContainText('localhost:4999');
   await expect(page.getByTestId('panel.rules-list')).toHaveCount(0);
 });
 
@@ -1989,12 +2020,12 @@ test('one blueprint on the server is not evidence that this page belongs to it',
   });
   await page.goto(fixtureFor({ bp: '' }));
 
-  await expect(page.getByTestId('start.unclaimed'), 'it asks rather than opening').toBeVisible();
+  await expect(page.getByTestId('project.modal'), 'it asks rather than opening').toBeVisible();
   await expect(page.getByTestId('panel.rules-list')).toHaveCount(0);
-  await expect(
-    page.getByTestId('start.options').locator('[data-pick]'),
-    'and the one it holds is offered, never opened',
-  ).toHaveCount(1);
+  // The one it holds is offered, never opened - and choosing its project goes
+  // straight in, because one blueprint is not a question worth asking twice.
+  await page.getByTestId('project.list').locator('[data-project]').first().click();
+  await expect(page.getByTestId('panel.rules-list'), 'one blueprint opens on choosing').toBeVisible();
 });
 
 /*
@@ -2017,14 +2048,16 @@ test('a server that lists nothing still does not open itself over the page', {
   });
   await page.goto(fixtureFor({ bp: '' }));
 
-  const said = page.getByTestId('start.unclaimed');
-  await expect(said, 'it says something rather than opening').toBeVisible();
-  await expect(said).toContainText('No blueprint covers this page');
-  await expect(said, 'and it names the address it asked about').toContainText(WD_ORIGIN);
+  await expect(page.getByTestId('project.modal'), 'it says something rather than opening').toBeVisible();
+  await expect(page.getByTestId('project.address')).toContainText(WD_ORIGIN);
   await expect(page.getByTestId('panel.rules-list')).toHaveCount(0);
-  // Nothing is listed, so nothing is offered: the section is absent rather
-  // than empty, because an empty "Open one anyway" is a promise of a door.
-  await expect(page.getByTestId('start.options')).toHaveCount(0);
+  // Nothing is listed, so nothing is offered: the list is absent rather than
+  // empty, because an empty list of projects is a promise of a door.
+  await expect(page.getByTestId('project.list')).toHaveCount(0);
+  await expect(page.getByTestId('project.none')).toBeVisible();
+  // And what to do about it is still on screen, which is the whole reason the
+  // commands sit above the list.
+  await expect(page.getByTestId('project.new')).toContainText('walkdown import');
 });
 
 /*
@@ -2060,8 +2093,35 @@ test('a blueprint key this server does not have is dropped, not read as no serve
     page.getByTestId('start.message'),
     'a server that answers is never reported as absent',
   ).toHaveCount(0);
-  // It asks about the page instead, which is what having no key means - and
-  // what this server holds is listed, so it plainly answered.
-  await expect(page.getByTestId('start.unclaimed')).toBeVisible();
-  await expect(page.getByTestId('start.options').locator('[data-pick]')).not.toHaveCount(0);
+  // It asks which project instead, which is what having no key means - and
+  // what this machine holds is listed, so it plainly answered.
+  await expect(page.getByTestId('project.modal')).toBeVisible();
+  await expect(page.getByTestId('project.list').locator('[data-project]')).not.toHaveCount(0);
+});
+
+/*
+ * Crossing projects is a deliberate act, available at any time: the bar reads
+ * project / blueprint / screen, and the project is a control rather than a
+ * label (ADR 0001 §11). Without it there is no way to reach another project
+ * except by changing the address.
+ */
+test('the bar names the project you are in, and opens the switcher at will', {
+  tag: '@rule:panel.dock.toolbar',
+}, async ({ page }) => {
+  await review(page);
+  await expect(page.getByTestId('panel.rules-list')).toBeVisible();
+
+  const project = page.getByTestId('panel.project');
+  await expect(project, 'the bar names the project').toBeVisible();
+  // And the blueprint beside it, which is the narrower answer: project /
+  // blueprint / screen, in that order.
+  await expect(page.getByTestId('panel.blueprint')).toBeVisible();
+  await expect(page.getByTestId('panel.screen-picker')).toBeVisible();
+
+  await project.click();
+  await expect(page.getByTestId('project.modal'), 'it opens the same modal').toBeVisible();
+  // Over a board, it is something you can change your mind about.
+  await page.getByTestId('project.close').click();
+  await expect(page.getByTestId('project.modal')).toHaveCount(0);
+  await expect(page.getByTestId('panel.rules-list')).toBeVisible();
 });

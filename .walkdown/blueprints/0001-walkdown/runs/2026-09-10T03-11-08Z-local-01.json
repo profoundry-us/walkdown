@@ -1,0 +1,323 @@
+{
+  "run_id": "2026-09-10T03-11-08Z-local-01",
+  "created": "2026-09-10T03:11:08Z",
+  "actor": "checks-person",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6b6b090-dirty",
+  "tree_hash": "sha256:8723350a93f1",
+  "spec_hash": "sha256:8c07814da8a2",
+  "results": [
+    {
+      "rule": "embed.pin.anchored-target",
+      "status": "pass",
+      "statement_hash": "sha256:6feaf28d3505",
+      "duration_ms": 1536,
+      "checks": [
+        "checks/embed.spec.js:122"
+      ]
+    },
+    {
+      "rule": "embed.pin.viewport-recorded",
+      "status": "pass",
+      "statement_hash": "sha256:6971846eb2cc",
+      "duration_ms": 957,
+      "checks": [
+        "checks/embed.spec.js:148"
+      ]
+    },
+    {
+      "rule": "embed.pin.coordinate-fallback",
+      "status": "pass",
+      "statement_hash": "sha256:3c6fb006c94b",
+      "duration_ms": 845,
+      "checks": [
+        "checks/embed.spec.js:167"
+      ]
+    },
+    {
+      "rule": "embed.pin.surface-coordinates",
+      "status": "pass",
+      "statement_hash": "sha256:7d33bd0c80b2",
+      "duration_ms": 828,
+      "checks": [
+        "checks/embed.spec.js:181"
+      ]
+    },
+    {
+      "rule": "embed.pin.both-surfaces",
+      "status": "pass",
+      "statement_hash": "sha256:77fdab028ac1",
+      "duration_ms": 2786,
+      "checks": [
+        "checks/embed.spec.js:205"
+      ]
+    },
+    {
+      "rule": "embed.pin.right-project",
+      "status": "pass",
+      "statement_hash": "sha256:399853aef960",
+      "duration_ms": 790,
+      "checks": [
+        "checks/embed.spec.js:274"
+      ]
+    },
+    {
+      "rule": "embed.pin.tooltip-says-what-it-is",
+      "status": "pass",
+      "statement_hash": "sha256:50dfb40b9f83",
+      "duration_ms": 2810,
+      "checks": [
+        "checks/embed.spec.js:304"
+      ]
+    },
+    {
+      "rule": "panel.identity.default-actor",
+      "status": "pass",
+      "statement_hash": "sha256:870f334762eb",
+      "duration_ms": 2457,
+      "checks": [
+        "checks/panel.spec.js:65",
+        "checks/panel.spec.js:1341"
+      ]
+    },
+    {
+      "rule": "panel.walkdown.fail-requires-why",
+      "status": "pass",
+      "statement_hash": "sha256:9644c16756d8",
+      "duration_ms": 1791,
+      "checks": [
+        "checks/panel.spec.js:137"
+      ]
+    },
+    {
+      "rule": "panel.walkdown.draft-on-disk",
+      "status": "pass",
+      "statement_hash": "sha256:cfb0ee61cad3",
+      "duration_ms": 4501,
+      "checks": [
+        "checks/panel.spec.js:170",
+        "checks/panel.spec.js:1771"
+      ]
+    },
+    {
+      "rule": "panel.signoff.spec-pair-derived",
+      "status": "pass",
+      "statement_hash": "sha256:24cc94442cf4",
+      "duration_ms": 1761,
+      "checks": [
+        "checks/panel.spec.js:220"
+      ]
+    },
+    {
+      "rule": "panel.walkdown.records-to-ledger",
+      "status": "pass",
+      "statement_hash": "sha256:6cc28278f4a6",
+      "duration_ms": 2979,
+      "checks": [
+        "checks/panel.spec.js:260"
+      ]
+    },
+    {
+      "rule": "panel.delivery.stale-copy-says-so",
+      "status": "pass",
+      "statement_hash": "sha256:124fa1fddaac",
+      "duration_ms": 1244,
+      "checks": [
+        "checks/panel.spec.js:297"
+      ]
+    },
+    {
+      "rule": "panel.threads.claim-never-accept",
+      "status": "pass",
+      "statement_hash": "sha256:7c4e1e2d1562",
+      "duration_ms": 8607,
+      "checks": [
+        "checks/panel.spec.js:318",
+        "checks/panel.spec.js:563"
+      ]
+    },
+    {
+      "rule": "panel.rules.takes-you-there",
+      "status": "fail",
+      "statement_hash": "sha256:708e2433c9b5",
+      "duration_ms": 61355,
+      "checks": [
+        "checks/panel.spec.js:374",
+        "checks/panel.spec.js:403",
+        "checks/panel.spec.js:435"
+      ],
+      "evidence": [
+        "runs/evidence/2026-09-10T03-11-08Z/panel-choosing-a-blueprint-bb79d-nother-page-takes-you-there-test-failed-1.png",
+        "runs/evidence/2026-09-10T03-11-08Z/panel-choosing-a-blueprint-bb79d-nother-page-takes-you-there-error-context.md",
+        "runs/evidence/2026-09-10T03-11-08Z/panel-a-screen-you-are-already-on-is-not-navigated-to-again-test-failed-1.png",
+        "runs/evidence/2026-09-10T03-11-08Z/panel-a-screen-you-are-already-on-is-not-navigated-to-again-error-context.md",
+        "runs/evidence/2026-09-10T03-11-08Z/panel-the-frame-says-it-is-19386-ng-the-screen-you-just-left-test-failed-1.png",
+        "runs/evidence/2026-09-10T03-11-08Z/panel-the-frame-says-it-is-19386-ng-the-screen-you-just-left-error-context.md"
+      ]
+    },
+    {
+      "rule": "panel.dock.toolbar",
+      "status": "fail",
+      "statement_hash": "sha256:aaf28fbb5e0a",
+      "duration_ms": 91580,
+      "checks": [
+        "checks/panel.spec.js:479",
+        "checks/panel.spec.js:783",
+        "checks/panel.spec.js:823",
+        "checks/panel.spec.js:1291"
+      ],
+      "evidence": [
+        "runs/evidence/2026-09-10T03-11-08Z/panel-the-screen-picker-op-d2917-he-design-not-underneath-it-test-failed-1.png",
+        "runs/evidence/2026-09-10T03-11-08Z/panel-the-screen-picker-op-d2917-he-design-not-underneath-it-error-context.md",
+        "runs/evidence/2026-09-10T03-11-08Z/panel-a-screen-picked-by-h-a3fda-after-the-frame-lands-on-it-test-failed-1.png",
+        "runs/evidence/2026-09-10T03-11-08Z/panel-a-screen-picked-by-h-a3fda-after-the-frame-lands-on-it-error-context.md",
+        "runs/evidence/2026-09-10T03-11-08Z/panel-in-Detect-mode-the-p-5ec08-he-bar-and-in-the-open-list-test-failed-1.png",
+        "runs/evidence/2026-09-10T03-11-08Z/panel-in-Detect-mode-the-p-5ec08-he-bar-and-in-the-open-list-error-context.md"
+      ]
+    },
+    {
+      "rule": "panel.rules.setup-says-how-to-arrive",
+      "status": "fail",
+      "statement_hash": "sha256:e41b088d8143",
+      "duration_ms": 976,
+      "checks": [
+        "checks/panel.spec.js:627"
+      ],
+      "evidence": [
+        "runs/evidence/2026-09-10T03-11-08Z/panel-a-screen-that-is-a-s-bbc54-dress-says-how-to-get-there-test-failed-1.png",
+        "runs/evidence/2026-09-10T03-11-08Z/panel-a-screen-that-is-a-s-bbc54-dress-says-how-to-get-there-error-context.md"
+      ]
+    },
+    {
+      "rule": "panel.threads.own-view",
+      "status": "pass",
+      "statement_hash": "sha256:faade3b887d1",
+      "duration_ms": 1512,
+      "checks": [
+        "checks/panel.spec.js:686"
+      ]
+    },
+    {
+      "rule": "panel.dock.chrome-not-a-pin-target",
+      "status": "fail",
+      "statement_hash": "sha256:466c5e212ed7",
+      "duration_ms": 30162,
+      "checks": [
+        "checks/panel.spec.js:857"
+      ],
+      "evidence": [
+        "runs/evidence/2026-09-10T03-11-08Z/panel-Escape-leaves-pin-mo-f6aa1-is-more-local-than-pin-mode-test-failed-1.png",
+        "runs/evidence/2026-09-10T03-11-08Z/panel-Escape-leaves-pin-mo-f6aa1-is-more-local-than-pin-mode-error-context.md"
+      ]
+    },
+    {
+      "rule": "panel.rules.evidence-visible",
+      "status": "pass",
+      "statement_hash": "sha256:65b84178c291",
+      "duration_ms": 3626,
+      "checks": [
+        "checks/panel.spec.js:907",
+        "checks/panel.spec.js:958"
+      ]
+    },
+    {
+      "rule": "panel.rules.steps-not-an-appendix",
+      "status": "pass",
+      "statement_hash": "sha256:0609e516526f",
+      "duration_ms": 3485,
+      "checks": [
+        "checks/panel.spec.js:989",
+        "checks/panel.spec.js:1026"
+      ]
+    },
+    {
+      "rule": "panel.rules.search-the-list",
+      "status": "pass",
+      "statement_hash": "sha256:f183d0a96302",
+      "duration_ms": 1261,
+      "checks": [
+        "checks/panel.spec.js:1049"
+      ]
+    },
+    {
+      "rule": "panel.rules.tiers-at-a-glance",
+      "status": "pass",
+      "statement_hash": "sha256:cac7a0be0702",
+      "duration_ms": 1342,
+      "checks": [
+        "checks/panel.spec.js:1138",
+        "checks/panel.spec.js:1488"
+      ]
+    },
+    {
+      "rule": "panel.rules.grouped-by-screen",
+      "status": "pass",
+      "statement_hash": "sha256:54d2a03fa8e6",
+      "duration_ms": 1111,
+      "checks": [
+        "checks/panel.spec.js:1590"
+      ]
+    },
+    {
+      "rule": "threads.lifecycle.acts-for-a-person",
+      "status": "pass",
+      "statement_hash": "sha256:6790e9b3474c",
+      "duration_ms": 987,
+      "checks": [
+        "checks/panel.spec.js:1678"
+      ]
+    },
+    {
+      "rule": "panel.dock.no-pin-mid-fade",
+      "status": "pass",
+      "statement_hash": "sha256:a25c933fc24f",
+      "duration_ms": 1986,
+      "checks": [
+        "checks/panel.spec.js:1725",
+        "checks/panel.spec.js:1811"
+      ]
+    },
+    {
+      "rule": "panel.start.open-a-folder",
+      "status": "fail",
+      "statement_hash": "sha256:2a5e9a0925a7",
+      "duration_ms": 5981,
+      "checks": [
+        "checks/panel.spec.js:1851",
+        "checks/panel.spec.js:2054"
+      ],
+      "evidence": [
+        "runs/evidence/2026-09-10T03-11-08Z/panel-a-blueprint-key-this-cacd2-opped-not-read-as-no-server-test-failed-1.png",
+        "runs/evidence/2026-09-10T03-11-08Z/panel-a-blueprint-key-this-cacd2-opped-not-read-as-no-server-error-context.md"
+      ]
+    },
+    {
+      "rule": "panel.start.unclaimed-page-says-so",
+      "status": "fail",
+      "statement_hash": "sha256:3ac55c00c5a3",
+      "duration_ms": 27956,
+      "checks": [
+        "checks/panel.spec.js:1887",
+        "checks/panel.spec.js:1919",
+        "checks/panel.spec.js:1946",
+        "checks/panel.spec.js:1981",
+        "checks/panel.spec.js:2009",
+        "checks/panel.spec.js:2035"
+      ],
+      "evidence": [
+        "runs/evidence/2026-09-10T03-11-08Z/panel-a-page-no-blueprint--78ec8-d-nothing-is-opened-over-it-test-failed-1.png",
+        "runs/evidence/2026-09-10T03-11-08Z/panel-a-page-no-blueprint--78ec8-d-nothing-is-opened-over-it-error-context.md",
+        "runs/evidence/2026-09-10T03-11-08Z/panel-a-page-a-blueprint-c-d4422-ares-its-own-is-never-asked-test-failed-1.png",
+        "runs/evidence/2026-09-10T03-11-08Z/panel-a-page-a-blueprint-c-d4422-ares-its-own-is-never-asked-error-context.md",
+        "runs/evidence/2026-09-10T03-11-08Z/panel-a-blueprint-chosen-o-905d0-ot-opened-over-the-next-one-test-failed-1.png",
+        "runs/evidence/2026-09-10T03-11-08Z/panel-a-blueprint-chosen-o-905d0-ot-opened-over-the-next-one-error-context.md",
+        "runs/evidence/2026-09-10T03-11-08Z/panel-one-blueprint-on-the-b4a46-hat-this-page-belongs-to-it-test-failed-1.png",
+        "runs/evidence/2026-09-10T03-11-08Z/panel-one-blueprint-on-the-b4a46-hat-this-page-belongs-to-it-error-context.md",
+        "runs/evidence/2026-09-10T03-11-08Z/panel-a-server-that-lists--5772d-t-open-itself-over-the-page-test-failed-1.png",
+        "runs/evidence/2026-09-10T03-11-08Z/panel-a-server-that-lists--5772d-t-open-itself-over-the-page-error-context.md"
+      ]
+    }
+  ]
+}

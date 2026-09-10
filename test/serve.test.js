@@ -189,20 +189,25 @@ test('the panel and the embed are served as two files, neither carrying the othe
   assert.equal((await fetch(`${base}/walkdown.js`)).status, 404);
 });
 
-test('the review page is handed its front door and its blueprint', async () => {
+test('the review page bakes in nothing, and has no front door of its own', async () => {
   const html = await (await fetch(`${base}/`)).text();
-  // Whatever the page has to know before it can load the panel is baked in on
-  // the way out: it cannot ask the blueprint, because asking is what the panel
-  // it is about to load does.
-  assert.doesNotMatch(html, /__FRONT_DOOR__|__BLUEPRINT__/);
-  // No app base declared in this fixture, so the front door is the design.
-  assert.match(html, /'\/prototype\/home\.html'/);
-  // The blueprint's KEY, not its id: the one string that still tells two
-  // same-named blueprints apart (n-0173). The panel picks by it.
+  /*
+   * It used to be handed the blueprint's front door and the key of the
+   * blueprint the server started in, so walkdown's own root framed one
+   * project's front page and opened its board over it. A server offering
+   * every project this machine has imported has no front door (ADR 0001 §3),
+   * and its root is the project modal's case: nothing to route from, so the
+   * panel asks which project.
+   */
+  assert.doesNotMatch(html, /__FRONT_DOOR__|__BLUEPRINT__/, 'no placeholder is left unsubstituted');
+  assert.doesNotMatch(html, /prototype\/home\.html/, 'and none is substituted either');
   const home = await (await fetch(`${base}/api/blueprint`)).json();
   const current = home.projects.find((p) => p.current);
   assert.ok(current.key, JSON.stringify(current));
-  assert.ok(html.includes(`'${current.key}'`), html.slice(html.indexOf('const bp'), html.indexOf('const bp') + 200));
+  assert.ok(!html.includes(`'${current.key}'`), 'no blueprint is baked in');
+  // The fragment is still how you point it at a page - that gesture is what
+  // the extension uses too, and it is the only thing that frames anything.
+  assert.match(html, /location\.hash/);
 });
 
 test('POST /api/threads writes a thread file; screen resolved from URL', async () => {

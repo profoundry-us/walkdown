@@ -48,40 +48,61 @@ export function serverRow(size = 'xs', { caption = false } = {}) {
 }
 
 /*
- * `server: false` draws the list without the address row above it. The
- * unclaimed-page gate needs the blueprints this server holds and nothing
- * else - it is already connected, and a box for changing the address in the
- * middle of "nothing here claims your page" answers a question nobody asked.
- * The list itself stays this one function, so a blueprint offered in one
- * place is offered the same way in the other.
+ * The list is the ACTIVE PROJECT's blueprints, not the server's (ADR 0001
+ * §10). A server offers every project this machine has imported, and a tab
+ * listing all of them at once would be a filing cabinet rather than a place
+ * you are working; the project switcher in the bar is how you reach another.
+ *
+ * Blueprints claiming the page under review come first and say so, because
+ * that is the only thing on this screen the address can tell you.
+ *
+ * `server: false` draws the list without the address row above it - the
+ * several-claimants case is already connected, and a box for changing the
+ * address in the middle of "two blueprints claim this page" answers a
+ * question nobody asked.
  */
-export function blueprintsPane({ server = true } = {}) {
+export function blueprintsPane({ server = true, notice = null } = {}) {
+  const mine = S.project ? S.projects.filter((pr) => pr.project?.id === S.project) : S.projects;
+  const claims = (pr) => S.claimants.some((m) => m.key === pr.key);
+  const rows = [...mine.filter(claims), ...mine.filter((pr) => !claims(pr))];
   return html`
-    <div class="px-3.5 pb-2 pt-1">
+    ${
+      server
+        ? html`<div class="px-3.5 pb-2 pt-1">
+            <div class="mb-1 text-[11px] font-bold uppercase tracking-wider opacity-50">walkdown server</div>
+            ${serverRow('xs')}
+          </div>`
+        : nothing
+    }
+    <div class="px-3.5 pb-2 ${server ? '' : 'pt-1'}">
       ${
-        server
-          ? html`<div class="mb-1 text-[11px] font-bold uppercase tracking-wider opacity-50">walkdown server</div>
-      ${serverRow('xs')}`
-          : nothing
+        S.project
+          ? html`<p class="text-[11px] leading-relaxed opacity-50" data-testid="start.folder">Blueprints in
+            <span class="font-mono break-all opacity-80">${S.project}</span> — switch projects from the bar.</p>`
+          : html`<p class="text-[11px] leading-relaxed opacity-40">Not connected. Run
+            <code>walkdown serve</code>, then <code>walkdown import</code> the project you want.</p>`
       }
       ${
-        S.servedRoot
-          ? html`<p class="mt-1.5 text-[11px] leading-relaxed opacity-50" data-testid="start.folder">Serving
-            <span class="font-mono break-all opacity-80">${S.servedRoot}</span> \u2014 every blueprint
-            under it is listed below.</p>`
-          : html`<p class="mt-1.5 text-[11px] leading-relaxed opacity-40">Not connected. Run
-            <code>walkdown serve</code> in the folder holding your blueprints.</p>`
+        notice
+          ? html`<p class="mt-1.5 text-[12px] leading-relaxed opacity-70" data-testid="start.notice">${notice}</p>`
+          : nothing
       }
     </div>
     <div data-testid="start.options">${
-      S.projects.length
-        ? S.projects.map((pr) => {
+      rows.length
+        ? rows.map((pr) => {
             const on = pr.key === S.BP;
             return html`<button class="block w-full border-t border-base-300 px-3.5 py-2.5 text-left hover:bg-base-200"
-        data-pick="${pr.key ?? pr.id}" @click=${(e) => fire(e.currentTarget, 'pick-blueprint', { id: pr.key ?? pr.id })}>
+        data-pick="${pr.key ?? pr.id}" ?data-claims=${claims(pr)}
+        @click=${(e) => fire(e.currentTarget, 'pick-blueprint', { id: pr.key ?? pr.id })}>
         <span class="flex items-center gap-2">
           <span class="w-3.5 shrink-0 text-center ${on ? 'text-primary' : 'opacity-30'}">${on ? '\u25c9' : '\u25cb'}</span>
           <span class="text-[13px] font-semibold">${pr.name}</span>
+          ${
+            claims(pr)
+              ? html`<span class="badge badge-primary badge-xs" data-testid="start.claims">claims this page</span>`
+              : nothing
+          }
         </span>
         <span class="mt-0.5 block pl-5.5 text-[12px] leading-snug opacity-60">${
           pr.description ?? 'No description \u2014 add one to this blueprint\u2019s walkdown.yml.'
@@ -89,6 +110,6 @@ export function blueprintsPane({ server = true } = {}) {
         <span class="mt-0.5 block pl-5.5 font-mono text-[10.5px] opacity-35">${pr.id}</span>
       </button>`;
           })
-        : html`<p class="px-3.5 py-3 text-[12.5px] opacity-40">Nothing found under that folder.</p>`
+        : html`<p class="px-3.5 py-3 text-[12.5px] opacity-40">This project declares no blueprint walkdown can read.</p>`
     }</div>`;
 }

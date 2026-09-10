@@ -65,11 +65,30 @@ export const S = {
 
   /*
    * Which of the three things the panel is doing: finding a server, choosing
-   * a blueprint from the ones it found, or reviewing. The first two are not
-   * error states — a fresh install genuinely does not know either answer yet.
+   * a blueprint from the ones its project holds, or reviewing. The first two
+   * are not error states — a fresh install genuinely does not know either
+   * answer yet.
+   *
+   * The project modal is not a phase. It opens over whatever is behind it,
+   * including a whole board mid-sitting, which is what makes crossing to
+   * another project something you can change your mind about (ADR 0001 §11).
    */
   phase: 'loading', // loading | connect | choose | ready
-  projects: [],
+  projects: [], // the BLUEPRINTS this server holds, each naming its project
+  /*
+   * The project you are working in: a directory somebody imported, named by
+   * the server on every blueprint it lists. Everything the panel scopes -
+   * the Blueprints tab, what the bar says, where the modal starts - reads
+   * this rather than the server's whole registry.
+   */
+  project: null,
+  /*
+   * Which blueprints claim the page under review, as /api/whose answered.
+   * A LIST, and never narrowed to one by the panel: a silent pick between two
+   * projects' claims is walkdown deciding whose page you are on (ADR 0001 §6).
+   */
+  claimants: [],
+  picking: false, // the project modal is up
   jumpOnLoad: false, // set when a blueprint is chosen by hand, spent once it has loaded
   servedRoot: null, // the folder the server reports it is serving
   listTab: 'rules', // blueprints | rules | threads — what the side lists
@@ -150,6 +169,7 @@ export const D = {
   bar: null, // the tool bar across the top
   side: null, // the side panel
   deskPanel: null, // the desk tuner behind the gear
+  projectModal: null, // the project chooser, over everything else
   screenPanel: null, // the screen picker's list
   tab: null, // the WALKDOWN pull tab, shown when the chrome is put away
   swap: null, // the prototype/app cross beside it
@@ -192,24 +212,13 @@ export const store = cfg.store ?? {
 export const CHOICE = `walkdown:blueprint:${location.origin}`;
 
 /*
- * Where the chosen BLUEPRINT is remembered, keyed by the origin of the page
- * under review rather than the document the panel is drawn in.
- *
- * Framed - which is how the extension delivers it - the panel's own document
- * is walkdown's review page, so `location.origin` was walkdown's own address
- * for every site anybody reviewed. One pick therefore answered for every page
- * afterwards, on any site, which is the silence n-0256 was about reached by a
- * different road (n-0258). "Remembered for this site" has to mean the site.
+ * There is no remembered blueprint, by decision (ADR 0001 §9). A pick lived
+ * here, keyed by the page's origin, and it was a second kind of memory about
+ * something the project already knows: your laptop knew, your other machine
+ * did not, your teammate did not, and the board could not see it at all.
+ * Ambiguity asks every time now - asking twice is cheap, a wrong memory is
+ * not - and the storage was deleted rather than migrated.
  */
-export const reviewedOrigin = (url) => {
-  try {
-    return new URL(url).origin;
-  } catch {
-    /* docked, or nothing framed yet: this document IS the page under review */
-    return location.origin;
-  }
-};
-export const blueprintChoiceKey = (url) => `walkdown:blueprint:${reviewedOrigin(url)}`;
 // The extension ships the stylesheet itself; served, it comes off the server.
 export const STYLESHEET = cfg.stylesheet ?? S.SERVER + '/walkdown.css';
 

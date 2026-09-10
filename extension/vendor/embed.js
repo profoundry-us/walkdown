@@ -705,8 +705,16 @@
      * this script runs.
      */
     const ownBp = cfg.bp || document.currentScript?.dataset.bp || '';
+    /*
+     * Framed, the panel says which blueprint is open and that is the answer: a
+     * pin files against what the reviewer has open, never against whatever the
+     * server would guess from the address (ADR 0001 §12). Its own tag still
+     * wins where it has one, because a page that says which project it is has
+     * said so deliberately.
+     */
     const blueprintId = () =>
       ownBp ||
+      ctx.bp ||
       document.querySelector('script[src*="4700"][data-bp], script[data-walkdown][data-bp]')?.dataset
         .bp ||
       '';
@@ -730,7 +738,7 @@
        single marker covers everything either of them draws. */
     const CHROME = '[data-walkdown-chrome]';
 
-    let ctx = { screen: null, surface: null, pinMode: false, pins: [], viewport: null };
+    let ctx = { screen: null, surface: null, pinMode: false, pins: [], viewport: null, bp: null };
 
     // The surface's own viewport — what the document was laid out at, regardless
     // of how the viewer scaled it into a pane.
@@ -1336,6 +1344,7 @@
           ...ctx,
           screen: msg.screen ?? ctx.screen,
           surface: msg.surface ?? ctx.surface,
+          bp: msg.bp ?? ctx.bp,
           viewport: msg.viewport ?? ctx.viewport,
           pins: msg.pins ?? [],
         };
