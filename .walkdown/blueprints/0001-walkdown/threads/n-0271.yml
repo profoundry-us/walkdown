@@ -48,3 +48,28 @@ body: >-
   Two things I could not settle and did not: what the modal does on a narrow
   window, and whether the project rows want the blueprint count at all once a
   project holds twenty.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-10T13:05:21Z
+    body: >-
+      Promoted, at Topher's word (n-0271: "promote the design to prototype so we
+      can see it in a real walkdown").
+
+
+      proposals/project-modal.html is now prototype/screens/project-modal.html,
+      byte for byte — the sketch was not edited on the way in, so what design
+      gets to react to is what design was shown. The storyboard screen carries
+      prototype: /screens/project-modal.html and app: { path:
+      /stand-in/project-modal }, the same pairing every other panel screen has,
+      and the comment saying there is no design yet is gone.
+
+
+      Two consequences worth saying out loud. panel.start.which-project can be
+      walked down now — the agent tier had nothing to compare the panel against
+      and could only decline. And lint no longer warns that this screen is
+      undesigned (ownership.drift.design-requests-required), which is the
+      warning this thread existed to raise; the thread stays open because the
+      two questions in it are still open — what the modal does on a narrow
+      window, and whether the project rows want a blueprint count once a project
+      holds twenty. Promotion answered neither.

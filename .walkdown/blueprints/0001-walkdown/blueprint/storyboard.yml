@@ -107,11 +107,10 @@ screens:
 
   - id: project-modal
     title: Which project? (state — the address cannot decide on its own)
-    # No design yet. The panel ships this screen; prototype/ has nothing to
-    # compare it against, and prototype/ is design's. The sketch is
-    # proposals/project-modal.html and the request is the thread anchored here
-    # (ownership.drift.design-requests-required).
-    prototype: null
+    # Promoted from proposals/project-modal.html on 2026-09-10 (n-0271), so the
+    # screen can be walked down against a design rather than against nothing.
+    prototype: /screens/project-modal.html
+    app: { path: /stand-in/project-modal }
     anchors:
       - project.modal
       - project.address

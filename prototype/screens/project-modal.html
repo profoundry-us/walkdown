@@ -1,0 +1,109 @@
+<!doctype html>
+<!-- Which project? — the one screen for every case the address cannot decide.
+
+     ADR 0001 §7 collapses three questions into one. Nothing claims this page,
+     several projects claim it, or there is no page to route from at all
+     because you are looking at walkdown's own server root: all three are the
+     same question - which project am I working in - and three screens asking
+     it were three places for the answer to differ.
+
+     This is a PROPOSAL, not the design. It is drawn because the panel now
+     ships this screen and prototype/screens/ has nothing to compare it
+     against, which leaves a rule with no drawing to judge. n-0271 is the
+     request; prototype/ stays design's.
+
+     Four things it is trying to get right, each of them Topher's:
+
+      - the modal covers the whole chrome, panel included. Crossing projects
+        from inside one project's board would read as something that board was
+        doing.
+      - "Make this page reviewable" sits ABOVE the list. A machine with twenty
+        projects would push it off the bottom, and it is the whole answer for
+        somebody whose project is not imported yet.
+      - the new/import case lives in the same place, because it is small and
+        well defined and does not deserve a screen.
+      - the ycombinator case and the localhost:4700 case get the exact same
+        modal. The only difference is the sentence at the top. -->
+<html lang="en" data-theme="wireframe">
+<head>
+<meta charset="utf-8">
+<title>Mockup — Which project?</title>
+<link rel="stylesheet" href="/walkdown.css">
+</head>
+<body class="h-screen overflow-hidden bg-base-200 text-sm">
+  <!-- The chrome underneath, dimmed: the bar reads project / blueprint /
+       screen, and the project is the control that opened this. -->
+  <header class="navbar min-h-0 gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5 opacity-40">
+    <button class="btn btn-xs btn-ghost btn-square" title="Settings">⚙</button>
+    <span class="font-extrabold tracking-tight">walkdown</span>
+    <button class="btn btn-xs btn-outline btn-primary gap-1 px-1.5 font-normal">▣ Pick a project ▾</button>
+    <span class="opacity-50">—</span>
+    <button class="btn btn-xs btn-ghost gap-1 px-1.5 font-normal">⛶ No screen ▾</button>
+  </header>
+
+  <main class="relative h-[calc(100vh-2.5rem)]">
+    <div class="absolute inset-0 bg-base-300/70"></div>
+
+    <section class="absolute left-1/2 top-8 flex max-h-[80vh] w-[560px] -translate-x-1/2 flex-col
+                    overflow-hidden rounded-box border border-primary/45 bg-base-100 shadow-2xl">
+      <div class="flex flex-col gap-0.5 px-4 pt-3.5 pb-2.5">
+        <div class="text-[15px] font-semibold">Which project?</div>
+        <!-- Named, because a claim misses on a port or a fragment, and "no
+             blueprint" without the address leaves you guessing which one was
+             asked about. At the server's own root this line is absent and the
+             sentence below reads "There is no page to route from here". -->
+        <p class="break-all font-mono text-[11px] opacity-55">https://news.ycombinator.com/item?id=1</p>
+        <p class="text-[12px] leading-relaxed opacity-60">No blueprint claims this page.</p>
+      </div>
+
+      <!-- Above the list, and this is the part that is load-bearing. -->
+      <div class="flex flex-col gap-3 border-b border-base-300 px-4 py-3">
+        <div class="flex flex-col gap-1.5">
+          <p class="text-[11px] uppercase tracking-wider opacity-50">Make this page reviewable</p>
+          <p class="text-[12.5px] leading-relaxed opacity-70">Add its address to a blueprint's
+            storyboard as a screen's <span class="font-mono text-[11px]">app</span> path, or as a
+            target's <span class="font-mono text-[11px]">base_url</span> — then walkdown knows this
+            page is part of that blueprint.</p>
+          <code class="rounded-box bg-base-200 px-2 py-1.5 text-[11px]">walkdown claims --url https://news.ycombinator.com/item?id=1</code>
+          <p class="text-[11px] leading-relaxed opacity-50">says which blueprints, if any, claim an address today.</p>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <p class="text-[11px] uppercase tracking-wider opacity-50">Or bring a project in</p>
+          <code class="rounded-box bg-base-200 px-2 py-1.5 text-[11px]">walkdown import &lt;path&gt;</code>
+          <p class="text-[11px] leading-relaxed opacity-50">takes a repository's blueprints into this
+            machine's registry. <span class="font-mono">walkdown init</span> starts one where there is
+            nothing yet. Both are commands you run — walkdown never adopts a directory from a browser.</p>
+        </div>
+      </div>
+
+      <!-- Matching projects first, each saying WHICH blueprint matched. The
+           badge is the only thing on this screen the address can tell you. -->
+      <div class="overflow-y-auto">
+        <button class="block w-full border-b border-base-300 px-4 py-2.5 text-left hover:bg-base-200">
+          <span class="flex items-center gap-2">
+            <span class="text-[13px] font-semibold text-primary">acme-shop</span>
+            <span class="badge badge-primary badge-xs">claims this page</span>
+            <span class="ml-auto text-[11px] opacity-45">3 blueprints</span>
+          </span>
+          <span class="mt-0.5 block text-[11.5px] leading-snug opacity-65">via Checkout, Campaigns</span>
+          <span class="mt-0.5 block font-mono text-[10.5px] opacity-35">~/code/acme-shop</span>
+        </button>
+        <button class="block w-full border-b border-base-300 px-4 py-2.5 text-left hover:bg-base-200">
+          <span class="flex items-center gap-2">
+            <span class="text-[13px] font-semibold">walkdown</span>
+            <span class="ml-auto text-[11px] opacity-45">1 blueprint</span>
+          </span>
+          <span class="mt-0.5 block font-mono text-[10.5px] opacity-35">~/Development/profoundry/walkdown</span>
+        </button>
+        <button class="block w-full px-4 py-2.5 text-left hover:bg-base-200">
+          <span class="flex items-center gap-2">
+            <span class="text-[13px] font-semibold">acme-marketing</span>
+            <span class="ml-auto text-[11px] opacity-45">2 blueprints</span>
+          </span>
+          <span class="mt-0.5 block font-mono text-[10.5px] opacity-35">~/code/acme-marketing</span>
+        </button>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
