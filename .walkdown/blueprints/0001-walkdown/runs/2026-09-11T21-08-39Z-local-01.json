@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-09-11T21-08-39Z-local-01",
+  "created": "2026-09-11T21:08:39Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "f8e1aaf-dirty",
+  "spec_hash": "sha256:22a4af6c7b65",
+  "results": [
+    {
+      "rule": "locations.answer.registry-is-the-only-door",
+      "status": "pass",
+      "statement_hash": "sha256:20130d966a11",
+      "evidence": [
+        "runs/evidence/2026-09-11T21-08-39Z/01-hand-row-where-status-thread.txt",
+        "runs/evidence/2026-09-11T21-08-39Z/02-server-listing.txt",
+        "runs/evidence/2026-09-11T21-08-39Z/03-containment.txt",
+        "runs/evidence/2026-09-11T21-08-39Z/04-import-through-link.txt",
+        "runs/evidence/2026-09-11T21-08-39Z/05-read-side-canon.txt"
+      ],
+      "reasoning": "Built under a mkdtemp WALKDOWN_HOME (real ~/.walkdown/registry.yml sha256 unchanged before and after): a git repo with `init --commit spec` at its root (row `repo`) and again in packs/pack (row `pack`), a symlink repo/link -> the pack's home, and a row appended by hand (`id: link`, `home: <link>`, no `registered:`). Through that row: `where` set it aside and named it (`ignores registry: link ... written by hand`), `where --blueprint link` answered nothing, and `status --blueprint link` and `thread new --blueprint link --as-agent` both refused with exit 2; the pack's home held no threads/ or runs/ afterward (01). A server at the repo root on 4731 listed exactly `repo` and `pack` in GET /api/blueprint, and `?bp=link`, `?bp=<link>/blueprint` and POST /api/threads?bp=link all got 404 unknown project (02). With an unregistered .walkdown planted at repo/packs between the two rows, standing at repo and repo/packs reached `repo`, standing in packs/pack and packs/pack/src/deep reached `pack`, and the planted one never appeared in `walkdown blueprints` (03). After `blueprint forget pack` so the real home was registered nowhere, `import <link>` wrote one row under the real path (`.../packs/pack/.walkdown/blueprints/0001-pack`, registered by import); a second `import <link>`, `import <real home>` and `import <real project dir>` each said already listed, leaving exactly one row for that home and the hand row still set aside (04). One caveat a person should weigh: `registryEntry` runs realpath on every row at read time (lib/locations.js `canon`), so when I moved the registered home aside and left a symlink at its registered path, `where` printed the link's target (`<fx>/elsewhere-pack/blueprint`) rather than the registered spelling (05). The row consulted was still the registered one and the same directory is reached either way, so no unregistered path becomes reachable and I read this as comparison-time canonicalisation rather than a second door; but the statement's `never resolved again on read` is, taken literally, not what the code does, and the spelling a reader prints can follow a link planted after the add.",
+      "threads": []
+    }
+  ]
+}

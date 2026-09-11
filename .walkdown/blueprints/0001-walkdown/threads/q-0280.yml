@@ -1,0 +1,26 @@
+id: q-0280
+kind: question
+author: topher
+via: agent
+created: 2026-09-11T21:14:54.351Z
+anchor:
+  rule: locations.answer.registry-is-the-only-door
+status: open
+body: 'The agent re-judge (run 2026-09-11T21-08-39Z, evidence
+  05-read-side-canon.txt) passed the rule with one caveat worth a decision. The
+  statement says a path is looked at once, at the add, and never resolved again
+  on read. Every writer does canonicalise before writing (import, init, move all
+  write tilde(canon(path))), but registryEntry and the comparisons in
+  registryPick / rememberInRegistry still call canon() - realpathSync - on every
+  row at read time. For a registered row that is a no-op, unless the filesystem
+  changes underneath: with the registered home moved aside and a symlink left at
+  its spelling, `walkdown where` prints the link target rather than the
+  registered spelling. Same directory, same row, no unregistered path becomes
+  reachable, so I read it as comparison-time canonicalisation rather than a
+  second door. Two ways to make the words and the code agree: (a) narrow the
+  statement to "no path is resolved to FIND a row; a registered spelling is
+  canonicalised only to compare" or (b) drop canon() from the read side and
+  trust what the writers wrote, in which case a symlink planted at a registered
+  path is followed by the OS and printed as registered. (b) is a wider edit
+  across lib/locations.js than a re-judge should carry; (a) is a wording change
+  to the rule. Which?'
