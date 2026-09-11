@@ -445,11 +445,24 @@ In this order, each step leaving the tree green:
    so a registry row beside it would be a second personal row about the
    same checkout; it registers at step 3, when the walk goes and the
    registry is the only thing that can answer.
-2. **The default is picked by containment.** `resolveLocations` chooses
-   among registry rows by `within(cwd, row.project)`, asks when several,
-   prompts to import when none. The old walk still runs beside it and the
-   two answers are compared in the suite; any disagreement is a finding
-   before it is a change.
+2. **The default is picked by containment.** *(Landed 2026-09-11.)*
+   `registryPick()` computes the registry's answer for a directory - the
+   registered rows whose `project` contains it, deepest winning, a question
+   when several are registered for one project, a scratch copy never picked
+   by standing somewhere, and by id when one is named - on every resolve,
+   beside the walk's answer. `where` reports the two and says where they
+   differ; `--json` carries `config.registry.pick` with `agrees`, compared
+   by spec rather than by id since an imported row and the manifest it came
+   from name one directory under two provenances. It is *computed, not
+   chosen*: the walk still answers at this step, because switching before
+   step 3 would stop a committed manifest answering in a checkout nobody
+   has imported before the hooks and CI setup that step carries. The suite
+   states the agreement per scenario - personal init, a subdirectory of it,
+   an imported manifest, a project holding two blueprints (asks), a scratch
+   copy inside its original (skipped), a pack inside a registered
+   repository (deepest wins) - and names the one divergence: a committed
+   manifest nobody imported, where the registry would answer nothing, which
+   step 3 turns into the prompt to `walkdown import .`.
 3. **The walk goes.** `walkdownRoot()`, the crossing guard, the merge and
    the override set-asides are deleted with their tests. `.highball/checks.yml`
    and the example blueprint's checks gain their registry setup in the same

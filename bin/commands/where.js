@@ -90,6 +90,22 @@ export function run(args) {
           : dim('the registry — not present; `walkdown import` or `walkdown init` starts it')
       }`,
     );
+    /*
+     * ADR 0003 step 2: the registry's own answer, computed beside the walk's.
+     * Where they agree nothing more is said. Where they differ, this is the
+     * line that says so - a finding, before step 3 makes the registry's
+     * answer the only one.
+     */
+    const pick = reg.pick;
+    if (pick && !pick.agrees) {
+      console.log(
+        `  ${''.padEnd(9)} ${yellow(
+          pick.picked
+            ? `the registry would answer \`${pick.picked}\` (${pick.spec}) — ${pick.why}; the walk answered differently (ADR 0003 step 2)`
+            : `the registry would answer nothing here — ${pick.why}; after ADR 0003 step 3 this says \`walkdown import .\``,
+        )}`,
+      );
+    }
   }
   if (loc.config.repo) {
     console.log(`  ${''.padEnd(9)} ${loc.config.repo.path}`);

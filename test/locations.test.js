@@ -2333,3 +2333,86 @@ test('a personal entry never reaches under another .walkdown either @rule:locati
     s.cleanup();
   }
 });
+
+/*
+ * ADR 0003 STEP 2. The registry's own answer for a directory - the registered
+ * row whose project contains it - is computed beside the walk's on every
+ * resolve and reported by `where`. It is not the answer yet. This is the
+ * comparison the ADR asks for: wherever a row exists the two must agree (by
+ * spec, never by id), and the one place they cannot - a committed manifest
+ * nobody has registered - is named as the divergence step 3 turns into a
+ * prompt, not left to be discovered.
+ */
+test('the registry’s answer is computed beside the walk’s, and agrees wherever a row exists (ADR 0003 step 2)', () => {
+  const s = scratch();
+  const pickOf = (cwd, ...args) => JSON.parse(walkdown(s.home, ['where', '--json', ...args], cwd)).config.registry.pick;
+  try {
+    // 1. A personal init: one row, one project, the walk and the registry name one spec.
+    const alpha = join(s.root, 'alpha');
+    mkdirSync(alpha, { recursive: true });
+    walkdown(s.home, ['init'], alpha);
+    let pick = pickOf(alpha);
+    assert.equal(pick.picked, 'alpha');
+    assert.equal(pick.agrees, true, JSON.stringify(pick));
+    assert.match(pick.why, /registered project .*alpha contains this directory/);
+    // And from a subdirectory of it, the same.
+    mkdirSync(join(alpha, 'src', 'deep'), { recursive: true });
+    assert.equal(pickOf(join(alpha, 'src', 'deep')).picked, 'alpha');
+
+    // 2. A committed manifest nobody imported: the walk answers, the registry
+    //    has nothing - the divergence step 3 makes a prompt.
+    const beta = join(s.root, 'beta');
+    mkdirSync(beta, { recursive: true });
+    walkdown(s.home, ['init', '--commit', 'spec'], beta);
+    pick = pickOf(beta);
+    assert.equal(pick.picked, null);
+    assert.equal(pick.agrees, false);
+    assert.match(walkdown(s.home, ['where'], beta), /registry would answer nothing here[\s\S]*walkdown import \./);
+
+    // 3. Imported, the two agree - by spec, since the manifest and the row
+    //    name one directory under two provenances.
+    walkdown(s.home, ['import', beta, '--all'], s.root);
+    pick = pickOf(beta);
+    assert.equal(pick.picked, 'beta');
+    assert.equal(pick.agrees, true, JSON.stringify(pick));
+    assert.doesNotMatch(walkdown(s.home, ['where'], beta), /registry would answer/);
+
+    // 4. A project holding two blueprints: the registry asks, and says which two.
+    const gamma = join(s.root, 'gamma');
+    mkdirSync(join(gamma, '.walkdown'), { recursive: true });
+    for (const id of ['web', 'api']) blueprint(join(gamma, '.walkdown', 'blueprints', `000${id === 'web' ? 1 : 2}-${id}`, 'blueprint'), { name: id });
+    writeFileSync(
+      join(gamma, '.walkdown', 'config.yml'),
+      ['blueprints:', '  - id: web', '    roots: [.]', '    spec: .walkdown/blueprints/0001-web/blueprint',
+       '  - id: api', '    roots: [.]', '    spec: .walkdown/blueprints/0002-api/blueprint', ''].join('\n'),
+    );
+    walkdown(s.home, ['import', gamma, '--all'], s.root);
+    pick = pickOf(gamma);
+    assert.equal(pick.picked, null);
+    assert.deepEqual(pick.candidates.sort(), ['api', 'web']);
+    assert.match(pick.why, /2 blueprints are registered .*--blueprint says which/);
+    // Named, it is one of them, and it agrees with the walk's answer for that name.
+    pick = pickOf(gamma, '--blueprint', 'api');
+    assert.equal(pick.picked, 'api');
+    assert.equal(pick.agrees, true, JSON.stringify(pick));
+
+    // 5. A scratch copy registered inside its original is never picked by standing there.
+    const copy = join(alpha, 'tmp', '0001-alpha');
+    cpSync(join(s.home, 'blueprints', '0001-alpha'), copy, { recursive: true });
+    walkdown(s.home, ['import', copy, '--ephemeral', '--why', 'a look'], alpha);
+    pick = pickOf(alpha);
+    assert.equal(pick.picked, 'alpha', JSON.stringify(pick));
+    assert.equal(pick.agrees, true);
+
+    // 6. A pack registered inside a registered repository: the deepest project wins.
+    const pack = join(alpha, 'packs', 'inner');
+    mkdirSync(pack, { recursive: true });
+    walkdown(s.home, ['init'], pack);
+    pick = pickOf(pack);
+    assert.equal(pick.picked, 'inner');
+    assert.equal(pick.agrees, true, JSON.stringify(pick));
+    assert.equal(pickOf(alpha).picked, 'alpha');
+  } finally {
+    s.cleanup();
+  }
+});
