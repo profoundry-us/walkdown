@@ -1,0 +1,42 @@
+id: n-0279
+kind: note
+author: topher
+via: agent
+created: 2026-09-11T21:08:47.085Z
+anchor:
+  rule: panel.start.which-project
+  screen: project-modal
+  element: '[data-testid="project.modal"]'
+status: addressed
+body: 'Escape does not close the project switcher opened from the bar inside a
+  loaded project. The rule says the switcher "gives it back on Escape" and the
+  step reads "Escape or the backdrop gives them back unchanged"; only the
+  backdrop (and the Close button) do. Judged on a scratch copy served at :4732
+  with the frame on an unclaimed page (port miss): pressed the project control,
+  focused the Close button, pressed Escape - the modal stayed
+  (runs/evidence/2026-09-11T21-02-31Z/06-switcher-after-escape-still-open.png,
+  probe.txt). A backdrop click then gave the board back unchanged
+  (07-switcher-after-backdrop-click-board-back.png). Cause: the one Escape
+  handler in src/panel/app.js (document keydown, ~line 2919) handles evidence,
+  screen picker, desk tuner and pin mode but never fires close-projects;
+  src/panel/projects.js closes only on the backdrop click and the Close button.
+  The checks tagged to this rule in checks/panel.spec.js close it via
+  project.close, so none of them would have caught this. Everything else in the
+  rule held: one modal and one backdrop (blur(8px), no dim) across root, arrival
+  and switcher; root shows the desk alone with no Close and Escape/backdrop
+  inert; arrival keeps the frame and the panel with no tabs and the "Please
+  select a project..." line and cannot be dismissed; the address is named;
+  claims --url, import and init sit above a list that scrolls on its own;
+  nothing opens by default with one blueprint; picking the one-blueprint project
+  opens it.'
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-11T21:12:29Z
+    body: 'Fixed: the document Escape handler in src/panel/app.js now puts the
+      project modal away first, and only when it is a switcher (a board or a
+      chosen project behind it); at the root or on an unclaimed page Escape
+      leaves it standing. Two checks under this rule: "Escape closes the
+      switcher and gives the board back", and the root check now presses Escape
+      and expects the modal to stay. Built into lib/viewer/panel.js and
+      extension/vendor/. 53 browser checks green.'

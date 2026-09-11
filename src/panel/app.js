@@ -2758,7 +2758,22 @@ function syncProjectModal() {
   if (!S.picking) return put(nothing, D.projectModal);
   const framed = S.frameUrl ?? null;
   const here = !framed && originOf(S.SERVER) === location.origin ? null : (framed ?? location.href);
-  put(projectModal({ here, closable: S.phase === 'ready' || Boolean(S.project) }), D.projectModal);
+  put(projectModal({ here, closable: projectModalClosable() }), D.projectModal);
+}
+
+/*
+ * The modal can be put away only when there is a board to give back: opened
+ * as the switcher from the bar, or over a project already chosen. At the
+ * root, or on a page nothing claims, it is the whole screen and stays.
+ */
+function projectModalClosable() {
+  return S.phase === 'ready' || Boolean(S.project);
+}
+
+function closeProjects() {
+  S.picking = false;
+  if (S.phase === 'ready') return render();
+  renderGate();
 }
 
 /*
@@ -2849,11 +2864,7 @@ function wireGlobals() {
     S.phase = 'choose';
     renderGate();
   });
-  on('close-projects', () => {
-    S.picking = false;
-    if (S.phase === 'ready') return render();
-    renderGate();
-  });
+  on('close-projects', closeProjects);
   on('connect', ({ server }) => {
     if (server) {
       const next = server.replace(/\/+$/, '');
@@ -2918,6 +2929,10 @@ function wireGlobals() {
    */
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
+    // The switcher covers everything else, so it answers first - and only
+    // when it is a switcher; at the root or on an unclaimed page it is the
+    // whole screen and Escape leaves it standing (n-0279).
+    if (S.picking) return projectModalClosable() ? closeProjects() : undefined;
     if (evidenceOpen()) return closeEvidence();
     if (S.screensOpen) return closeScreenPanel();
     if (S.deskOpen) return closeDeskPanel();

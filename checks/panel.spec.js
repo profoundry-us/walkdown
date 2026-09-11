@@ -2127,6 +2127,23 @@ test('the bar names the project you are in, and opens the switcher at will', {
 });
 
 /*
+ * And Escape puts the switcher away too - the rule says so in as many words,
+ * and every check here had closed it with the button, which is how an Escape
+ * that did nothing went unnoticed (n-0279). The board comes back as it was.
+ */
+test('Escape closes the switcher and gives the board back', {
+  tag: '@rule:panel.start.which-project',
+}, async ({ page }) => {
+  await review(page);
+  await expect(page.getByTestId('panel.rules-list')).toBeVisible();
+  await page.getByTestId('panel.project').click();
+  await expect(page.getByTestId('project.modal')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByTestId('project.modal')).toHaveCount(0);
+  await expect(page.getByTestId('panel.rules-list')).toBeVisible();
+});
+
+/*
  * The modal's own root. `walkdown serve` opened with no fragment has no page
  * to route from - what is on screen is walkdown - and the panel used to refuse
  * to boot at all without a frame, so this row of ADR 0001 §7 was unreachable
@@ -2147,8 +2164,11 @@ test("walkdown's own root asks which project over the desk alone, and a pick bri
   const modal = page.getByTestId('project.modal');
   await expect(modal, 'the root is the modal').toBeVisible();
   await expect(page.getByTestId('project.why')).toContainText(/walkdown's own server/i);
-  // Nothing to go back to, so nothing to close it with.
+  // Nothing to go back to, so nothing to close it with - not a button, and
+  // not Escape either.
   await expect(page.getByTestId('project.close')).toHaveCount(0);
+  await page.keyboard.press('Escape');
+  await expect(modal, 'Escape leaves it standing').toBeVisible();
   // And nothing under it: no bar, no sheet - the desk ruling alone.
   await expect(page.getByTestId('panel.bar'), 'no bar at the bare root').toBeHidden();
   await expect(page.getByTestId('panel.app-frame'), 'no sheet at the bare root').toBeHidden();

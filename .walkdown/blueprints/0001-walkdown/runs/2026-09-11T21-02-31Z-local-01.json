@@ -1,0 +1,29 @@
+{
+  "run_id": "2026-09-11T21-02-31Z-local-01",
+  "created": "2026-09-11T21:02:31Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "216abb2-dirty",
+  "spec_hash": "sha256:22a4af6c7b65",
+  "results": [
+    {
+      "rule": "panel.start.which-project",
+      "status": "fail",
+      "statement_hash": "sha256:fb4343377bab",
+      "evidence": [
+        "runs/evidence/2026-09-11T21-02-31Z/01-root-desk-only.png",
+        "runs/evidence/2026-09-11T21-02-31Z/02-arrival-unclaimed.png",
+        "runs/evidence/2026-09-11T21-02-31Z/03-arrival-long-list-commands-stay-above.png",
+        "runs/evidence/2026-09-11T21-02-31Z/04-project-chosen-board.png",
+        "runs/evidence/2026-09-11T21-02-31Z/05-switcher-board-blurred.png",
+        "runs/evidence/2026-09-11T21-02-31Z/06-switcher-after-escape-still-open.png",
+        "runs/evidence/2026-09-11T21-02-31Z/07-switcher-after-backdrop-click-board-back.png",
+        "runs/evidence/2026-09-11T21-02-31Z/probe.txt"
+      ],
+      "reasoning": "Judged on a scratch copy (one registered project, one blueprint) served at :4732, driving the panel in a browser through all three cases. Root (/): the modal alone over the desk ruling, frame display:none, bar and panel visibility:hidden, no Close button, Escape and a backdrop click leave it standing (01). Arrival on an unclaimed page (the copy's blueprint claims :4700, so :4732/stand-in/project-modal misses on the port): the frame loads the page and the panel stands beside it with zero tabs and the one line 'Please select a project…', both blurred; the modal names the address, says 'No blueprint claims this page.', puts `walkdown claims --url <address>` under MAKE THIS PAGE REVIEWABLE and `walkdown import <path>` / `walkdown init` under OR BRING A PROJECT IN above the list, and cannot be dismissed (02). With 25 cloned rows the commands stay put and only the list scrolls (03). Nothing opened by default with a single blueprint; choosing it opened the board (04). The switcher from the bar reuses the same modal and the same backdrop - computed backdrop-filter blur(8px) with a transparent background in every case, no dim - with the board blurred behind it (05), and a backdrop click gives frame, tabs and rules list back byte-identical (07). The failure: Escape does not close the switcher. With the Close button focused, a real keypress and a synthesized keydown both left the modal open (06, probe.txt); the panel's single document Escape handler in src/panel/app.js covers evidence, screen picker, desk tuner and pin mode but never fires close-projects, and projects.js closes only on backdrop click or the Close button. The rule says the switcher 'gives it back on Escape' and the step names Escape explicitly, so that is a miss, not a nuance. Not exercised: several projects claiming one page and a server that lists nothing - with one registry entry the first is unreachable, and `walkdown serve` with an empty registry refuses to start at the CLI (it names init and import there), so the in-panel empty-list case has no live path from this setup. Filed as n-0279.",
+      "threads": ["n-0279"]
+    }
+  ]
+}
