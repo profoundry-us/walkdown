@@ -1,0 +1,31 @@
+{
+  "run_id": "2026-09-11T21-12-54Z-local-01",
+  "created": "2026-09-11T21:12:54Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "1b82552-dirty",
+  "spec_hash": "sha256:22a4af6c7b65",
+  "results": [
+    {
+      "rule": "panel.start.choose-a-blueprint",
+      "status": "pass",
+      "statement_hash": "sha256:3ff33b8e9c41",
+      "evidence": [
+        "runs/evidence/2026-09-11T21-12-54Z/01-two-claimants-asked.png",
+        "runs/evidence/2026-09-11T21-12-54Z/02-asked-again-after-pick.png",
+        "runs/evidence/2026-09-11T21-12-54Z/03-claimants-first-when-registry-lists-nonclaimant-first.png",
+        "runs/evidence/2026-09-11T21-12-54Z/04-crossed-to-project-holding-several.png",
+        "runs/evidence/2026-09-11T21-12-54Z/05-blueprints-tab-after-pick.png",
+        "runs/evidence/2026-09-11T21-12-54Z/probe-registry-and-whose.txt",
+        "runs/evidence/2026-09-11T21-12-54Z/probe-pick-writes-nothing.txt",
+        "runs/evidence/2026-09-11T21-12-54Z/probe-ordering.txt",
+        "runs/evidence/2026-09-11T21-12-54Z/probe-crossing.txt",
+        "runs/evidence/2026-09-11T21-12-54Z/probe-blueprints-tab-after-pick.txt"
+      ],
+      "reasoning": "Judged on a scratch copy served with its own home on :4733, where I built the real situation rather than mocking it: one project registering three blueprints - two (walkdown, walkdown-second) whose storyboards both claim /stand-in/choose-blueprint on the :4733 target, and a third (elsewhere) claiming only /elsewhere - plus a fourth blueprint folder on disk with no registry row and a fifth with a hand-written row lacking registered:. Framing the claimed page, the panel drew no project modal and asked 'Which blueprint?' with all three of the project's blueprints by name and by their own walkdown.yml descriptions, the two claimants first and badged 'claims this page', the third listed unmarked, and the notice '2 blueprints in this project claim this page. Nothing is remembered - walkdown asks each time rather than choosing for you' (01, probe-registry-and-whose). The unregistered folder and the hand-edited row appeared nowhere - /api/blueprint lists exactly the three registered rows, so absence is by never being declared. Restarting with the registry reordered to put the non-claimant first and the server started on it, the claimants still came first and nothing opened unasked (03, probe-ordering). Picking walkdown-second loaded it with its rules list, wrote nothing to localStorage, sessionStorage, the scratch home or its .walkdown (probe-pick-writes-nothing), and both a fresh browser and the same tab revisiting the page were asked again (02). Arriving on an unclaimed page and picking the project from the modal reached the same list with the honest 'This project holds more than one blueprint' notice and no false claim count (04, probe-crossing). After a pick the Blueprints tab shows the same three with the current one marked, so the choice can be changed there (05) - though it no longer badges the claimants, because start() clears S.claimants and skips /api/whose once a blueprint is set; the steps do not require the badge to survive the pick, so recorded as n-0281 rather than a fail. Every step observed as written; a person should still open 01 and 03 and read the notice for themselves.",
+      "threads": ["n-0281"]
+    }
+  ]
+}

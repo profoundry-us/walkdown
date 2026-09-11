@@ -81,3 +81,14 @@ replies:
       If claiming from the panel comes back, it comes back as a new question
       with a new reason. Nothing here was decided against; it stopped being
       asked.
+  - author: topher
+    via: agent
+    created: 2026-09-11T21:24:26Z
+    body: 'From the agent re-judge of panel.start.choose-a-blueprint (run
+      2026-09-11T21-12-54Z, pass): the prototype screen choose-blueprint.html
+      still reads "Chosen once, remembered for this site" and the storyboard
+      titles it "folder holds several", while the rule and ADR 0001 §9 say
+      nothing is remembered and the panel asks every time. The built panel
+      follows the rule. Whichever way this question lands, one of the two - the
+      rule or the design - is owed a change; noting it here so the design edit
+      rides on the decision rather than on a separate request.'

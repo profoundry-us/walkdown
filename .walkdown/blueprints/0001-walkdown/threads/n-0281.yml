@@ -1,0 +1,22 @@
+id: n-0281
+kind: note
+author: topher
+via: agent
+created: 2026-09-11T21:22:51.790Z
+anchor:
+  rule: panel.start.choose-a-blueprint
+  screen: choose-blueprint
+status: open
+body: "Observed while judging (run 2026-09-11T21-12-54Z-local-01, pass): the
+  chooser marks the claimants and puts them first, but the Blueprints tab drawn
+  after a pick shows the same three blueprints in registry order with no 'claims
+  this page' badge on any of them
+  (runs/evidence/2026-09-11T21-12-54Z/05-blueprints-tab-after-pick.png,
+  probe-blueprints-tab-after-pick.txt). Cause, from src/panel/app.js start():
+  S.claimants is reset to [] and /api/whose is only asked when S.BP is unset, so
+  once a blueprint is loaded the panel forgets who claims the page. The rule's
+  steps do not require the marks to survive the pick, so this is not a fail of
+  it - but blueprints.js says the marks are the one thing the address can tell
+  you on that screen, and after a pick they are gone from the tab that is
+  supposed to be the same list. Worth deciding whether the tab should keep
+  asking /api/whose for the framed page."
