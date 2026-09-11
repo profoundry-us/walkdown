@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-09-11T21-24-52Z-local-01",
+  "created": "2026-09-11T21:24:52Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "39b822f-dirty",
+  "spec_hash": "sha256:22a4af6c7b65",
+  "results": [
+    {
+      "rule": "embed.pin.right-project",
+      "status": "pass",
+      "statement_hash": "sha256:8d8ef265ac6d",
+      "evidence": [
+        "runs/evidence/2026-09-11T21-24-52Z/01-sibling-open-stand-in-pins.png",
+        "runs/evidence/2026-09-11T21-24-52Z/02-sibling-open-tagged-page-pin.png",
+        "runs/evidence/2026-09-11T21-24-52Z/03-project-modal-before-pinning.png",
+        "runs/evidence/2026-09-11T21-24-52Z/04-default-open-no-sibling-pins.png",
+        "runs/evidence/2026-09-11T21-24-52Z/05-probe.txt"
+      ],
+      "reasoning": "Served a scratch copy from inside itself with its own home on port 4734, registered a second blueprint (id sibling, home sibling/.walkdown/blueprints/0002-sibling) in that home so one server offered two siblings with 0001-walkdown as the default, then pinned three times with sibling open in the panel: (A) over the stand-in review page, whose embed tag names no blueprint, with ?bp= in the review address; (B) over a page under proposals/ whose tag says data-bp=\"blueprint\", i.e. the default, the wrong one; (C) over the stand-in with no bp anywhere, so the panel first showed the project modal and I picked sibling there. All three POSTs went to /api/threads?bp=<sibling key> and all three threads (n-0282, n-0284, n-0285) are on disk in the sibling's threads/; the default's threads/ gained only the one curl probe that explicitly named bp=blueprint, and the repo's real ledger stayed at 279 threads with git clean. A listener on the iframe window saw the panel's walkdown:context carrying bp=<sibling key>, which is how the embed in the frame learns it. Address lookups do not override the caller: /api/whose shows both blueprints claiming the storyboard's app address, yet bp=sibling landed in sibling and bp=blueprint in blueprint, and an unknown bp is refused with 404 rather than guessed. Judged against the served review page framing the app rather than the browser extension, but it is the same panel.js and the same postMessage path the extension uses, so the routing under test is the one exercised. Every screenshot is of the scratch copy on 4734, not of 4700.",
+      "threads": []
+    }
+  ]
+}
