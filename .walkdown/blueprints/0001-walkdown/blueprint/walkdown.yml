@@ -57,15 +57,14 @@ governance:
     refuses, pins or replies, make a scratch copy (node tools/scratch.mjs new
     <label> --why "..."), and serve it FROM INSIDE THE COPY with the copy's
     own home: cd <copy> && WALKDOWN_HOME=<copy>/home node <repo>/bin/walkdown.js
-    serve --port <n>. The copy carries its own .walkdown declaring only itself,
-    and the nearest .walkdown is the scope of everything a server offers — so
-    started there it cannot list, serve or write to the real ledger, however
-    the panel's chooser is driven. The verdict still goes in the real ledger.
-    Take the copy away when done (node tools/scratch.mjs clean <label>).
+    serve --port <n>. The copy's home holds a registry naming only the copy,
+    and the registry is the only thing a server consults (ADR 0003) — so
+    served with that home it cannot list, serve or write to the real ledger,
+    however the panel's chooser is driven. The verdict still goes in the real
+    ledger. Take the copy away when done (node tools/scratch.mjs clean <label>).
   - >-
     Never serve a copy with --blueprint from the real repository, and never
     point WALKDOWN_HOME at the real home while serving one. Either way the
-    real project stays declared for that server — its config is merged in,
-    and its roots contain the copy — and the real ledger is one ?bp= away
-    (q-0149). There is no --dir: everything walkdown answers for is declared,
-    and a scratch copy is declared to itself.
+    real project is registered for that server, and the real ledger is one
+    ?bp= away (q-0149). There is no --dir: everything walkdown answers for is
+    registered, and a scratch copy is registered in its own home.
