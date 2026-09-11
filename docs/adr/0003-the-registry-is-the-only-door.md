@@ -1,7 +1,8 @@
 # ADR 0003 — The registry is the only door
 
-- **Status:** proposed — drafted by the agent on 2026-09-11 from Topher's
-  framing on n-0275; nothing below is built until he accepts it
+- **Status:** accepted — drafted by the agent on 2026-09-11 from Topher's
+  framing on n-0275; accepted by Topher the same day, build started at
+  step 1
 - **Date:** 2026-09-11
 - **Deciders:** Topher (product, eng)
 - **Supersedes:** the "standing in a checkout" half of
@@ -422,11 +423,28 @@ five, grouped by project, exactly as ADR 0001 §3 says.
 
 In this order, each step leaving the tree green:
 
-1. **The registry file, and rows say how they arrived.** `registry.yml`
-   is introduced and `claims.json` moves under `cache/`; `import` and `init` write to it with `registered:`;
-   `blueprint add` becomes an alias of `import` and is removed from the
-   usage; `where` reports the file and the provenance. `config.yml`'s
-   `blueprints:` list is still read this step. Nothing is refused yet.
+1. **The registry file, and rows say how they arrived.** *(Landed
+   2026-09-11.)* `registry.yml` is introduced and `claims.json` moves under
+   `cache/`; every personal write - `import`, `init` without `--commit`,
+   `blueprint add`, `move` - goes to it with `registered:`; `blueprint add`
+   becomes an alias of `import` and leaves the usage; `where` reports the
+   file and the provenance. Registry rows are read as personal rows through
+   one translation (`registryEntry`), so the merge below them is untouched.
+   `config.yml`'s `blueprints:` list is still read this step. Nothing is
+   refused yet.
+
+   Two things landed here that the list above did not name, because the
+   suite named them. A `move` (of a record kind, or of the whole home with
+   `init --commit`) writes on the registry row and re-points it, rather than
+   reducing a config.yml row to the override shape - one row, written into,
+   which is n-0171's fix done properly; and when config.yml still holds a
+   row about the checkout being written, its machine-local keys fold into
+   the registry row and it leaves config.yml, since two rows about one
+   checkout is the thing n-0171 was. And `init --commit` does NOT register
+   yet: at this step the committed manifest still answers where you stand,
+   so a registry row beside it would be a second personal row about the
+   same checkout; it registers at step 3, when the walk goes and the
+   registry is the only thing that can answer.
 2. **The default is picked by containment.** `resolveLocations` chooses
    among registry rows by `within(cwd, row.project)`, asks when several,
    prompts to import when none. The old walk still runs beside it and the
@@ -443,5 +461,5 @@ In this order, each step leaving the tree green:
 6. **n-0275** is replied to at step 3 — the code it is about no longer
    exists — and its evidence fixture becomes the new rule's check.
 
-Nothing in this list is started until the status line above reads
-*accepted*.
+Nothing in this list was started until the status line above read
+*accepted* (2026-09-11).

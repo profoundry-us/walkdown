@@ -27,8 +27,7 @@ Usage:
   walkdown claims [--blueprint <id>] [--url <address>] [--json]
   walkdown where [<kind>] [--blueprint <id>] [--json]
   walkdown blueprints [--stale]
-  walkdown import <path> [--all] [--only <ids>] [--json]
-  walkdown blueprint add <path> [--id <name>] [--ephemeral] [--why <reason>]
+  walkdown import <path> [--all] [--only <ids>] [--id <name>] [--ephemeral] [--why <reason>] [--json]
   walkdown blueprint forget <id>
   walkdown move <kind> --to <path> [--blueprint <id>]
   walkdown pointer [--dir <project-root>] [--into <file>]
@@ -41,20 +40,20 @@ Commands:
           puts it in .walkdown/ with a .gitignore that keeps runs, evidence
           and drafts out, '--commit all' the same with no .gitignore. Run
           again with --commit to change your mind: the home moves whole.
-  blueprint add <path> lists a blueprint walkdown did not create - a clone, a
-          copy, somebody else's checkout - so it becomes something every
-          command can reach. --ephemeral marks a throwaway copy: reachable by
-          name, never by standing somewhere, and only ever in your own config.
-          'blueprint forget <id>' takes it off the list and touches no records.
   blueprints
-          Every blueprint declared here, with throwaway copies grouped under
-          Ephemeral and marked when they are old enough to be worth clearing.
-  import  Take another project's blueprints into this machine's registry:
-          you name the directory, it shows you what that project declares,
-          and you say which to take (--all, or --only <ids>). Nothing arrives
-          by walking the tree, so a clone that happens to use walkdown stays
-          invisible until you ask for it. The entries carry no roots - they
-          are reachable by name and by the server, and shadow nothing.
+          Every blueprint this machine knows about, with throwaway copies
+          grouped under Ephemeral and marked when they are old enough to be
+          worth clearing. 'blueprint forget <id>' takes one off the list and
+          touches no records.
+  import  The one way a blueprint joins this machine's registry (ADR 0003).
+          Name a project directory and it shows you what that project's
+          .walkdown/config.yml declares; you say which to take (--all, or
+          --only <ids>). Name a bare home - blueprint/ with threads, runs,
+          evidence and drafts beside it - and that one blueprint is
+          registered; --ephemeral marks it a throwaway copy, reachable by
+          name and never by standing somewhere. Nothing arrives by walking
+          the tree: a clone that happens to use walkdown stays invisible
+          until you import it.
   run     Run the project's checks via the runner contract (run_all, or
           run_for_rule with --rule), injecting the target's env and
           WALKDOWN_TARGET. The reporter/formatter records the run.

@@ -38,6 +38,9 @@ import {
   canon,
   configPath,
   expand,
+  forgetFromRegistry,
+  readRegistry,
+  registryPath,
   HOME_LAYOUT,
   KINDS,
   readUserConfig,
@@ -64,7 +67,7 @@ function load(path, header = '') {
   return doc;
 }
 
-function add(args) {
+export function add(args) {
   const { values, positionals } = parseArgs({
     args,
     allowPositionals: true,
@@ -215,6 +218,15 @@ function add(args) {
     console.log(`  ${dim('· already listed')} ${spec}  ${dim(`as \`${listed.get('id')}\``)}`);
     return end(0);
   }
+  // Personally, the registry is the list (ADR 0003): a home already
+  // registered under any spelling is already listed.
+  const registered = inRepo
+    ? null
+    : readRegistry().rows.find((r) => r.home && canon(expand(String(r.home))) === canon(homeDir));
+  if (registered) {
+    console.log(`  ${dim('· already listed')} ${spec}  ${dim(`as \`${registered.id}\``)}`);
+    return end(0);
+  }
   const name = values.id ?? basename(homeDir).replace(/^\d{4}-/, '');
   const taken = new Set(
     (readUserConfig().config.blueprints ?? []).map((p) => p?.id).filter(Boolean),
@@ -237,9 +249,8 @@ function add(args) {
       homeDir,
       home: values.ephemeral ? null : basename(homeDir),
       inRepo,
-      ...(values.ephemeral
-        ? { extra: { ephemeral: true, declared: new Date().toISOString(), why: values.why ?? '' } }
-        : {}),
+      by: 'import',
+      ...(values.ephemeral ? { ephemeral: { why: values.why ?? '' } } : {}),
     });
   } catch (e) {
     console.error(red(e.message));
@@ -258,6 +269,12 @@ function forget(args) {
     return end(2);
   }
   let removed = false;
+  // The registry first: that is where a row written since ADR 0003 lives.
+  if (forgetFromRegistry({ id })) {
+    console.log(`  ${green('- forgotten')} \`${id}\`  ${dim(registryPath())}`);
+    console.log(dim('            Its records are untouched — only the registration is gone.'));
+    removed = true;
+  }
   for (const path of [configPath(), walkdownRoot() && join(walkdownRoot(), 'config.yml')]) {
     if (!path || !existsSync(path)) continue;
     const doc = load(path);

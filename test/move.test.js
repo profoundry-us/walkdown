@@ -53,9 +53,10 @@ test('move relocates the files, records the choice, and edits no record @rule:lo
     );
     assert.ok(!existsSync(join(p.runs, 'a.json')), 'and is not left behind');
 
-    const cfg = readFileSync(join(p.home, 'config.yml'), 'utf8');
-    assert.match(cfg, /id: movable/);
-    assert.match(cfg, new RegExp(`runs: ${dest.replace(/[/\\-]/g, '\\$&')}`));
+    // Recorded on the registry row (ADR 0003 §6): the move is a fact about this disk.
+    const reg = readFileSync(join(p.home, 'registry.yml'), 'utf8');
+    assert.match(reg, /id: movable/);
+    assert.match(reg, new RegExp(`runs: ${dest.replace(/[/\\-]/g, '\\$&')}`));
 
     // And the resolver now agrees, which is the only thing that makes it real.
     const where = run(p, ['where', 'runs', '--blueprint', declareProject(p.home, p.bp, 'movable')]).trim();
@@ -302,7 +303,9 @@ test('a config that will not write back is refused before anything moves @rule:l
 
 test('a move that cannot be recorded is refused before anything moves @rule:locations.keeping.moving-is-a-decision', () => {
   const p = project();
-  const cfg = join(p.home, 'config.yml');
+  // The registry is what the move writes to (ADR 0003), so that is the file
+  // that has to be writable.
+  const cfg = join(p.home, 'registry.yml');
   try {
     const id = declareProject(p.home, p.bp, 'movable');
     const before = readFileSync(cfg, 'utf8');

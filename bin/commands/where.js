@@ -74,6 +74,23 @@ export function run(args) {
         `ignores \`${ig.key}: ${ig.value}\`${ig.id ? ` in entry \`${ig.id}\`` : ''} — ${ig.why ?? 'a relative path means nothing in this file; write it in full'}`,
       )}`,
     );
+  if (loc.config.registry) {
+    const reg = loc.config.registry;
+    console.log(`  ${''.padEnd(9)} ${reg.path}`);
+    console.log(
+      `  ${''.padEnd(9)} ${
+        reg.exists
+          ? reg.error
+            ? red(`unreadable — ${reg.error}`)
+            : reg.matched
+              ? green(
+                  `the registry — names this project, registered by ${reg.registeredBy ?? 'walkdown'}`,
+                )
+              : dim('the registry — what this machine knows about; no row for this project')
+          : dim('the registry — not present; `walkdown import` or `walkdown init` starts it')
+      }`,
+    );
+  }
   if (loc.config.repo) {
     console.log(`  ${''.padEnd(9)} ${loc.config.repo.path}`);
     const shared = "this repository's, shared";

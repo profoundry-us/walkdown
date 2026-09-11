@@ -8,7 +8,7 @@
  */
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -83,13 +83,14 @@ test('a project nobody imported is invisible, and importing it makes it reachabl
     const after = walkdown(s.home, ['blueprints'], s.root);
     assert.match(after.stdout, /checkout/);
 
-    // Written to the personal registry, with no roots: reachable by name and
-    // by the server, shadowing nothing where a person stands.
-    const cfg = parse(readFileSync(join(s.home, 'config.yml'), 'utf8'));
-    const row = cfg.blueprints.find((p) => p.id === 'checkout');
-    assert.ok(row, 'listed');
-    assert.equal(row.roots, undefined);
-    assert.ok(row.imported?.project?.endsWith('acme-shop'), 'says where it came from');
+    // Written to the registry (ADR 0003), never to config.yml: the row says
+    // which project it came from and how it arrived.
+    const reg = parse(readFileSync(join(s.home, 'registry.yml'), 'utf8'));
+    const row = reg.blueprints.find((p) => p.id === 'checkout');
+    assert.ok(row, 'registered');
+    assert.ok(row.project?.endsWith('acme-shop'), 'says where it came from');
+    assert.equal(row.registered?.by, 'import', 'and how');
+    assert.doesNotMatch(readFileSync(join(s.home, 'config.yml'), 'utf8'), /checkout/);
   } finally {
     s.cleanup();
   }
@@ -103,7 +104,8 @@ test('import writes the claims index, so routing never loads a spec @rule:screen
     ]);
     walkdown(s.home, ['import', shop, '--all'], s.root);
 
-    const index = JSON.parse(readFileSync(join(s.home, 'claims.json'), 'utf8'));
+    // Under cache/: derived from the registry, rebuilt on demand (ADR 0003 §7).
+    const index = JSON.parse(readFileSync(join(s.home, 'cache', 'claims.json'), 'utf8'));
     const bp = index.blueprints.find((b) => b.id === 'checkout');
     assert.ok(bp, 'the blueprint is in the index');
     assert.deepEqual(
@@ -131,11 +133,11 @@ test('a project declaring several asks which, and takes nothing unasked', () => 
     assert.match(asked.stdout + asked.stderr, /checkout/);
     assert.match(asked.stdout + asked.stderr, /admin/);
     assert.match(asked.stderr, /--all|--only/);
-    assert.doesNotMatch(readFileSync(join(s.home, 'config.yml'), 'utf8'), /checkout/);
+    assert.ok(!existsSync(join(s.home, 'registry.yml')), 'nothing registered');
 
     walkdown(s.home, ['import', shop, '--only', 'admin'], s.root);
-    const cfg = parse(readFileSync(join(s.home, 'config.yml'), 'utf8'));
-    assert.deepEqual(cfg.blueprints.map((p) => p.id), ['admin'], 'only what was asked for');
+    const reg = parse(readFileSync(join(s.home, 'registry.yml'), 'utf8'));
+    assert.deepEqual(reg.blueprints.map((p) => p.id), ['admin'], 'only what was asked for');
   } finally {
     s.cleanup();
   }
@@ -155,10 +157,10 @@ test('importing twice is a no-op, and two projects sharing a name are told apart
     assert.match(again.stdout, /already imported/);
 
     walkdown(s.home, ['import', other, '--all'], s.root);
-    const cfg = parse(readFileSync(join(s.home, 'config.yml'), 'utf8'));
+    const reg = parse(readFileSync(join(s.home, 'registry.yml'), 'utf8'));
     // The project's directory disambiguates before a number does: a name that
     // says where it came from beats `checkout-2`, which says nothing.
-    assert.deepEqual(cfg.blueprints.map((p) => p.id).sort(), ['acme-marketing-checkout', 'checkout']);
+    assert.deepEqual(reg.blueprints.map((p) => p.id).sort(), ['acme-marketing-checkout', 'checkout']);
   } finally {
     s.cleanup();
   }
@@ -228,6 +230,64 @@ test('the server routes across imported projects, and answers with all of them @
       server.closeAllConnections();
       server.close();
     }
+  } finally {
+    s.cleanup();
+  }
+});
+
+/*
+ * ONE ADD (ADR 0003 §3). `blueprint add` folded into `import`: a directory
+ * with no manifest that is itself a home is registered as one row, and
+ * --ephemeral marks it a copy. The old spelling still works as an alias.
+ */
+test('a bare home imports as one row, and --ephemeral marks it a copy', () => {
+  const s = scratch();
+  try {
+    const shop = project(join(s.root, 'acme-shop'), [
+      { id: 'checkout', description: 'Cart.', origin: 'https://shop.test', paths: ['/cart'] },
+    ]);
+    // A copy of the home, standing where nothing declares it.
+    const copy = join(s.root, 'scratch', '0001-checkout');
+    cpSync(join(shop, '.walkdown', 'blueprints', '0001-checkout'), copy, { recursive: true });
+
+    const said = walkdown(s.home, ['import', copy, '--ephemeral', '--why', 'a look'], s.root);
+    assert.match(said.stdout, /listed/);
+    const reg = parse(readFileSync(join(s.home, 'registry.yml'), 'utf8'));
+    const row = reg.blueprints.find((p) => p.ephemeral);
+    assert.ok(row, JSON.stringify(reg));
+    assert.equal(row.project, null, 'a copy is picked by name, never by standing somewhere');
+    assert.equal(row.ephemeral.why, 'a look');
+    assert.equal(row.registered.by, 'import');
+    assert.ok(row.home.endsWith('/scratch/0001-checkout'), row.home);
+
+    // Registered, so every command can reach it by name.
+    const where = walkdown(s.home, ['where', '--blueprint', 'checkout'], s.root).stdout;
+    assert.match(where, /scratch\/0001-checkout\/blueprint/);
+    assert.match(where, /the registry — names this project, registered by import/);
+
+    // And the old spelling is the same door.
+    const again = walkdown(s.home, ['blueprint', 'add', copy, '--ephemeral', '--why', 'a look'], s.root);
+    assert.match(again.stdout, /already listed/);
+  } finally {
+    s.cleanup();
+  }
+});
+
+test('a project imported twice under two spellings of its path is one row', () => {
+  const s = scratch();
+  try {
+    const shop = project(join(s.root, 'acme-shop'), [
+      { id: 'checkout', description: 'Cart.', origin: 'https://shop.test', paths: ['/cart'] },
+    ]);
+    symlinkSync(shop, join(s.root, 'shop-link'));
+    walkdown(s.home, ['import', shop, '--all'], s.root);
+    // Through the link: the same directory, canonicalised at add time (ADR
+    // 0003 §3), so it is already there rather than registered a second time.
+    const again = walkdown(s.home, ['import', join(s.root, 'shop-link'), '--all'], s.root);
+    assert.match(again.stdout, /already imported/);
+    const reg = parse(readFileSync(join(s.home, 'registry.yml'), 'utf8'));
+    assert.equal(reg.blueprints.length, 1);
+    assert.ok(!reg.blueprints[0].home.includes('shop-link'), 'the real path, not the spelling typed');
   } finally {
     s.cleanup();
   }

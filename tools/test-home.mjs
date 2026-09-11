@@ -69,23 +69,25 @@ export function declareProject(home, spec, id = 'fixture') {
     throw new Error(`declareProject: ${spec} is not a home's blueprint/ — fixtures are laid out as homes now`);
   const homeDir = dirname(spec);
   for (const kind of ['threads', 'runs', 'evidence', 'drafts']) mkdirSync(join(homeDir, kind), { recursive: true });
+  /*
+   * Into the registry (ADR 0003), the way `import` would write it: a fixture
+   * is a blueprint this test's machine knows about, and a row in config.yml
+   * is a hand-written one, which is the shape that stops being read.
+   */
   mkdirSync(home, { recursive: true });
-  const path = join(home, 'config.yml');
+  const path = join(home, 'registry.yml');
   const doc = existsSync(path) ? (parse(readFileSync(path, 'utf8')) ?? {}) : {};
   const listed = doc.blueprints ?? [];
-  const already = listed.find((p) => p?.spec === spec);
+  const already = listed.find((p) => p?.home === homeDir);
   if (already) return already.id;
   const taken = new Set(listed.map((p) => p?.id).filter(Boolean));
   let pick = id;
   for (let n = 2; taken.has(pick); n++) pick = `${id}-${n}`;
   listed.push({
     id: pick,
-    roots: [homeDir],
-    spec,
-    threads: join(homeDir, 'threads'),
-    runs: join(homeDir, 'runs'),
-    evidence: join(homeDir, 'evidence'),
-    drafts: join(homeDir, 'drafts'),
+    project: homeDir,
+    home: homeDir,
+    registered: { by: 'import', at: new Date().toISOString() },
   });
   doc.blueprints = listed;
   writeFileSync(path, stringify(doc));

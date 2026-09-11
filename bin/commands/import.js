@@ -34,13 +34,18 @@ import {
 import { refreshIndex } from '../../lib/registry.js';
 import { dim, green, red, yellow } from '../../lib/report/tty.js';
 import { parse } from '../../vendor/yaml.js';
+import { add as addHome } from './blueprint.js';
 import { end } from './context.js';
 
-const HELP = `walkdown import <path> [--all] [--only <ids>] [--json]
+const HELP = `walkdown import <path> [--all] [--only <ids>] [--id <name>] [--ephemeral] [--why <reason>] [--json]
 
-  <path>   a project directory holding a .walkdown that declares blueprints
-  --all    take every blueprint it declares, without asking
-  --only   take these ids only, comma separated`;
+  <path>       a project directory holding a .walkdown that declares blueprints,
+               or one bare home (blueprint/ with threads, runs, evidence, drafts beside it)
+  --all        take every blueprint the project declares, without asking
+  --only       take these ids only, comma separated
+  --id         the id to register a bare home under (default: its directory's name)
+  --ephemeral  a throwaway copy of a home: reachable by name, never by standing somewhere
+  --why        what the copy is for, kept beside it`;
 
 /** What a directory declares: its own `.walkdown/config.yml`, and only that. */
 function declaredIn(dir) {
@@ -88,6 +93,9 @@ export async function run(args) {
       all: { type: 'boolean', default: false },
       only: { type: 'string' },
       json: { type: 'boolean', default: false },
+      id: { type: 'string' },
+      ephemeral: { type: 'boolean', default: false },
+      why: { type: 'string' },
     },
   });
   const at = positionals[0];
@@ -108,9 +116,25 @@ export async function run(args) {
     console.error(red(e.message));
     return end(2);
   }
+  /*
+   * ONE ADD (ADR 0003 §3). A directory with no manifest that is itself a home
+   * - `blueprint/walkdown.yml` inside it, or the blueprint directory named
+   * outright - is the case `blueprint add` used to take: a clone, a copy, a
+   * scratch copy with --ephemeral. Same refusals, same writer, one door.
+   */
+  const bareHome =
+    existsSync(join(dir, HOME_LAYOUT.spec, 'walkdown.yml')) || existsSync(join(dir, 'walkdown.yml'));
+  if ((found === null || values.ephemeral) && bareHome) {
+    return addHome([
+      at,
+      ...(values.id ? ['--id', values.id] : []),
+      ...(values.ephemeral ? ['--ephemeral'] : []),
+      ...(values.why ? ['--why', values.why] : []),
+    ]);
+  }
   if (found === null) {
     console.error(
-      red(`Nothing at ${at} declares a blueprint — there is no .walkdown/config.yml there.`),
+      red(`Nothing at ${at} declares a blueprint — there is no .walkdown/config.yml there, and it is not a home.`),
     );
     console.error(dim('  `walkdown init` inside that project starts one.'));
     return end(2);
@@ -203,11 +227,11 @@ export async function run(args) {
     try {
       const row = rememberBlueprint({
         id,
-        root: null, // reachable by name and by the server; it shadows nothing
+        root: dir, // the project it came from: what the working directory is compared against
         homeDir,
         home: null,
         inRepo: false,
-        extra: { imported: { project: tilde(dir), at: new Date().toISOString() } },
+        by: 'import',
       });
       written.push({ ...bp, id: row.id, path: row.path });
     } catch (e) {

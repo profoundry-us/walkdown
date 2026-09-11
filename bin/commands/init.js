@@ -67,6 +67,7 @@ export async function run(args) {
   const cfg = readUserConfig({ cwd: root });
   for (const [file, error] of [
     [cfg.path, cfg.error],
+    [cfg.registry?.path, cfg.registry?.error],
     [cfg.repo?.path, cfg.repo?.error],
   ])
     if (error) {
@@ -218,6 +219,7 @@ export async function run(args) {
         homeDir: claim.dir,
         home: claim.home,
         inRepo: commit !== 'none',
+        by: 'init',
       });
   const ignore = commit === 'none' || !claim.dir ? null : setIgnore(walkdown, commit, { force: values.force });
   if (commit === 'none' && moved) {

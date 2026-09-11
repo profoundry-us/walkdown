@@ -6,7 +6,7 @@
  */
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -17,7 +17,10 @@ import { declaringFiles, readUserConfig, resolveLocations } from '../lib/locatio
 const CLI = new URL('../bin/walkdown.js', import.meta.url).pathname;
 
 function scratch() {
-  const root = mkdtempSync(join(tmpdir(), 'wd-std-'));
+  // Real, because the registry writes canonical paths (ADR 0003 §3) and macOS
+  // spells a temp directory two ways; a test comparing the other spelling
+  // against what the registry wrote would fail on the spelling alone.
+  const root = realpathSync(mkdtempSync(join(tmpdir(), 'wd-std-')));
   const home = join(root, 'home');
   mkdirSync(home, { recursive: true });
   process.env.WALKDOWN_HOME = home;
