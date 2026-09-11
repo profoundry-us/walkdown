@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-09-11T20-59-03Z-local-01",
+  "created": "2026-09-11T20:59:03Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "216abb2-dirty",
+  "spec_hash": "sha256:22a4af6c7b65",
+  "results": [
+    {
+      "rule": "locations.answer.registry-is-the-only-door",
+      "status": "fail",
+      "statement_hash": "sha256:20130d966a11",
+      "evidence": [
+        "runs/evidence/2026-09-11T20-59-03Z/01-fixture.txt",
+        "runs/evidence/2026-09-11T20-59-03Z/02-through-the-link-row.txt",
+        "runs/evidence/2026-09-11T20-59-03Z/03-server-lists.txt",
+        "runs/evidence/2026-09-11T20-59-03Z/04-import-through-link.txt",
+        "runs/evidence/2026-09-11T20-59-03Z/05-import-follows-hand-row.txt",
+        "runs/evidence/2026-09-11T20-59-03Z/06-standing.txt"
+      ],
+      "reasoning": "Built under a temp WALKDOWN_HOME: a repo with a root home (`repo`), a pack inside it with its own (`pack`), a symlink outside the pack at $T/link pointing at the pack's home, and a hand-written row `link` (no `registered:`, project = the tree between, home = the link) appended to registry.yml (01). Three of the four THEN clauses held. `where --blueprint link` sets the row aside and says it was written by hand; `status` and `thread new --as-agent` through it exit 2 with no blueprint for `link`, and no thread or run file appeared anywhere under the fixture (02). A server at the repo root on 4731 listed exactly `repo` and `pack`, answered 404 to `?bp=link` and to the link's path spelled as a key, and refused POST /api/threads through both, again writing nothing (03). Standing at the root reaches `repo`, in the pack (and deeper) reaches `pack`, and standing in the tree between - where I planted an unregistered .walkdown declaring `between`, and which the hand row's project names - reaches `repo`; `--blueprint between` finds nothing (06). The import clause failed: with the hand row present, `walkdown import $T/link` (four spellings, including relative and trailing slash) and even `walkdown import <the real home path>` all print `already listed ... as \\`link\\`` and register nothing, so `walkdown blueprints` shows only `repo` and standing in the pack reaches the root's row, while every import insists the pack is listed (04, 05). The already-listed check in the bare-home add (bin/commands/blueprint.js ~148) and in rememberInRegistry (lib/locations.js ~445) searches every row rather than the registered ones and compares canon(expand(r.home)) - resolving the hand row's link on read and following it. With the hand row removed, the same import registers the pack once under its real path and a second import says already listed, so the mechanism is right and only the set-aside row leaks into it. Filed as n-0278.",
+      "threads": ["n-0278"]
+    }
+  ]
+}

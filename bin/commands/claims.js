@@ -25,7 +25,7 @@ export function run(args) {
   const at = resolveLocations({ blueprint: values.blueprint });
   const dir = at.spec?.missing ? null : at.spec?.path;
   if (!dir) {
-    console.error(`No blueprint here. Nothing in ${at.config.registry.path} claims this directory.`);
+    console.error(`No blueprint here. Nothing registered in ${at.config.registry.path} contains this directory.`);
     return end(2);
   }
   // The set the `.walkdown` here declares - not the one beside wherever the

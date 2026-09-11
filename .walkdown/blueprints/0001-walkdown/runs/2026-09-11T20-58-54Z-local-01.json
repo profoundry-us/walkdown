@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-09-11T20-58-54Z-local-01",
+  "created": "2026-09-11T20:58:54Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "216abb2-dirty",
+  "spec_hash": "sha256:22a4af6c7b65",
+  "results": [
+    {
+      "rule": "locations.answer.declared-not-discovered",
+      "status": "pass",
+      "statement_hash": "sha256:d6788490af67",
+      "evidence": [
+        "runs/evidence/2026-09-11T20-58-54Z/declared-not-discovered.txt",
+        "runs/evidence/2026-09-11T20-58-54Z/declared-not-discovered-break.txt"
+      ],
+      "reasoning": "Built a git repo with three packs under a temp WALKDOWN_HOME: alpha (`init --dir packs/alpha --commit spec`, home in the tree), beta (`init --dir packs/beta`, home in WALKDOWN_HOME), and gamma initialised against a different throwaway home so its checkout declares `gamma` in packs/gamma/.walkdown/config.yml with a full home beside it but no row in the registry under judgment. `where` from inside alpha and from a subdirectory of beta each answered with its own row (`the registry - names this project, registered by init on 2026-09-11`), its own spec and its own home for runs and threads; `--blueprint beta` from inside alpha named beta outright. From inside gamma, and from inside gamma's own blueprint directory, nothing answered: spec is `-` and the why names the manifest and the exact `walkdown import <path>` command; `--blueprint gamma` says no such registered blueprint; `walkdown blueprints` lists only alpha and beta; status, threads and `thread new` from gamma refuse with exit 2 and write nothing into gamma's home. Attempts to bring gamma in without importing failed: a `blueprints:` list in the personal config.yml restating id, roots, spec, home, all four record kinds and even a `registered:` block was set aside and named per entry (`ignores blueprints: gamma in entry gamma - config.yml registers nothing since ADR 0003 ...`), and the same list's `evidence:` override for the registered alpha did not leak into alpha's answer; a hand-written registry row with no `registered:` was likewise set aside and named (`written by hand - no registered: says how it arrived`). Filing a note under the same rule id in each of alpha, beta and (once imported) gamma produced three separate n-0001 files in three separate thread directories, and `threads` from each pack listed only its own; from the repo root, which no row covers, it refused. `import packs/gamma --all` then made gamma answer (`registered by import`), and `blueprint forget gamma` put it back to not-a-project with its threads left on disk and unreached. One wart short of failure: the refusal printed by status/threads/thread new says `Nothing in .../config.yml claims this directory`, naming the file that registers nothing rather than the registry that was actually consulted - `where` gets this right, and the behaviour is correct, but the sentence is stale from before ADR 0003.",
+      "threads": []
+    }
+  ]
+}

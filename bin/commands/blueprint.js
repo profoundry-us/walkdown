@@ -143,9 +143,11 @@ export function add(args) {
   }
   for (const kind of KINDS) mkdirSync(join(homeDir, HOME_LAYOUT[kind]), { recursive: true });
   // The registry is the list (ADR 0003): a home already registered under any
-  // spelling is already listed.
+  // spelling is already listed. A row without `registered:` was written by
+  // hand and is set aside everywhere else — it cannot say a home is listed
+  // either (n-0278).
   const registered = readRegistry().rows.find(
-    (r) => r.home && canon(expand(String(r.home))) === canon(homeDir),
+    (r) => r.registered && r.home && canon(expand(String(r.home))) === canon(homeDir),
   );
   if (registered) {
     console.log(`  ${dim('· already listed')} ${spec}  ${dim(`as \`${registered.id}\``)}`);

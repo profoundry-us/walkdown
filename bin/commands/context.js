@@ -46,15 +46,15 @@ export function loadOrExit(blueprintId) {
  * says what is wrong and what to do, and now there is one copy of that to say.
  */
 export function noBlueprintHere(loc, blueprintId) {
-  const where = loc.config.repo?.path ?? loc.config.path;
+  const where = loc.config.registry?.path ?? loc.config.path;
   console.error(
     blueprintId
-      ? `No blueprint for \`${blueprintId}\` — either nothing declares it, or its spec is gone.`
-      : `No blueprint here. Nothing in ${where} claims this directory.`,
+      ? `No blueprint for \`${blueprintId}\` — either nothing registered it, or its spec is gone.`
+      : `No blueprint here. Nothing registered in ${where} contains this directory.`,
   );
   console.error(
     blueprintId
-      ? '`walkdown blueprints` lists what is declared here.'
+      ? '`walkdown blueprints` lists what is registered.'
       : '`walkdown init` starts one, `walkdown import <project>` registers an existing one, and `walkdown where` shows what was consulted.',
   );
   process.exit(2);

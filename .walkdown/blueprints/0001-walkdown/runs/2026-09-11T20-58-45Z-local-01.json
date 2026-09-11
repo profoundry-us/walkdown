@@ -1,0 +1,32 @@
+{
+  "run_id": "2026-09-11T20-58-45Z-local-01",
+  "created": "2026-09-11T20:58:45Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "216abb2-dirty",
+  "spec_hash": "sha256:22a4af6c7b65",
+  "results": [
+    {
+      "rule": "locations.answer.says-why",
+      "status": "pass",
+      "statement_hash": "sha256:fd21bba75c2e",
+      "evidence": [
+        "runs/evidence/2026-09-11T20-58-45Z/where-says-why-probes.txt",
+        "runs/evidence/2026-09-11T20-58-45Z/01-default-home.txt",
+        "runs/evidence/2026-09-11T20-58-45Z/02-after-move.txt",
+        "runs/evidence/2026-09-11T20-58-45Z/03-config-defaults.txt",
+        "runs/evidence/2026-09-11T20-58-45Z/04-named-blueprint.txt",
+        "runs/evidence/2026-09-11T20-58-45Z/05-json.txt",
+        "runs/evidence/2026-09-11T20-58-45Z/06-one-kind.txt",
+        "runs/evidence/2026-09-11T20-58-45Z/07-commit-spec.txt",
+        "runs/evidence/2026-09-11T20-58-45Z/08-ephemeral.txt",
+        "runs/evidence/2026-09-11T20-58-45Z/09-hand-row.txt",
+        "runs/evidence/2026-09-11T20-58-45Z/unit-tests-says-why.txt"
+      ],
+      "reasoning": "Under a temp WALKDOWN_HOME I built two projects (one home in ~/.walkdown via `init`, one in the repo via `init --commit spec`), then mixed the decisions the rule names: `walkdown move evidence --to <elsewhere>` wrote a per-kind key on the registry row, a `defaults:` block in config.yml (runs with `{id}`, drafts without) covered two kinds, and the rest fell to the home's layout. In every arrangement `walkdown where` printed a reason under each of spec, runs, threads, evidence, drafts and code, and the reasons distinguish the decisions rather than merely announcing one: a moved kind reads `this machine's registry (repo)` while the untouched kinds beside it read `the home this machine registered (repo)`, a defaulted kind reads `the config default`, and code reads `this machine's registry, which says which project the blueprint came from` — with the registry line above naming how the row arrived (`registered by init on 2026-09-11`, `by import` for the ephemeral copy). `--json` carries the same `why` per kind; `where <kind>` prints a bare path, which is the documented scripting form rather than a missing reason. A named blueprint from an unrelated cwd, an ephemeral copy with no project (code falls to `no git repository — runs will carry no git_sha`), an unregistered directory, and a hand-written registry row all still explain every empty cell. Two asides, neither a breach of this rule: `named on the command line` is a resolver branch nothing on the CLI can reach today (no per-kind flag on any command), and `the config default` names the mechanism but not the `defaults.<kind>` key or file — a reader has to connect it to the config line above. The ephemeral copy's `tracked` row also reads `null is not a git repository`, a wording slip on a row this rule does not cover. The four unit tests tagged with this rule pass.",
+      "threads": []
+    }
+  ]
+}

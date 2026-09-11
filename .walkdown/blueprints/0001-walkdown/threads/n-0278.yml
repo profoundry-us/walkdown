@@ -1,0 +1,41 @@
+id: n-0278
+kind: note
+author: topher
+via: agent
+created: 2026-09-11T21:02:59.105Z
+anchor:
+  rule: locations.answer.registry-is-the-only-door
+status: addressed
+body: "The hand-written row is followed by `import`. With a registry row nobody
+  wrote (no `registered:`) whose `home` names a symlink to a pack home,
+  `walkdown import <link>` - and `walkdown import <real home path>` too -
+  answers \"already listed ... as `link`\" and registers nothing, so the pack
+  stays unlisted by `walkdown blueprints` and unreachable from inside it, while
+  every import says it is listed. The \"already listed\" check in
+  bin/commands/blueprint.js (the bare-home add, ~line 148) and the `listed`
+  check in rememberInRegistry (lib/locations.js ~line 445) both search
+  readRegistry().rows rather than the registered rows, and compare with
+  canon(expand(r.home)) - resolving the hand row's link on read. Set-aside rows
+  should be invisible to that check, and the answer should be a fresh row under
+  the real path. Without the hand row present, import through the link does
+  register the pack once under its real path and a second import says already
+  listed. Evidence:
+  runs/evidence/2026-09-11T20-59-03Z/04-import-through-link.txt and
+  05-import-follows-hand-row.txt. `where`, `status`, `thread new`, the server
+  listing and the standing-by-containment clauses all held (01, 02, 03, 06)."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-11T21:07:58Z
+    body: 'Fixed: the "already listed" check in the bare-home add
+      (bin/commands/blueprint.js) and the `listed` / `mine` lookups in
+      rememberInRegistry (lib/locations.js) now only consider rows carrying
+      `registered:`. A hand-written row can no longer say a home is listed;
+      `walkdown import <link>` writes a fresh row under the real path (id
+      de-duped against the whole file, so the hand row `pack` yields `pack-2`).
+      Pinned by a new test in test/registry.test.js tagged with this rule; it
+      failed before the change and passes after. Same commit retires the last
+      pre-ADR-0003 wording the declared-not-discovered judge noticed: the
+      status/threads/thread-new refusal now says "Nothing registered in
+      <registry> contains this directory", and run-record/lint messages point at
+      `walkdown import` instead of the retired `blueprint add`.'

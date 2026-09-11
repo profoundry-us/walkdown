@@ -199,3 +199,40 @@ test('a hand-written row naming a symlink is set aside, and import through the l
   assert.equal(rows.filter((r) => realpathSync(r.home) === realpathSync(packHome)).length, 1, JSON.stringify(rows));
   assert.ok(rows.every((r) => !String(r.home).includes('linkpack')), 'no row names the link');
 });
+
+/*
+ * n-0278. Same shape, but nobody has registered the pack: only the hand row
+ * names it, through the link. "Already listed" used to look at that row too
+ * - and resolve its symlink to find the match - so import printed `already
+ * listed as viasymlink` and registered nothing, while every reader set the
+ * row aside. A row nothing wrote cannot say a home is listed.
+ */
+test('a hand-written row does not make a home "already listed" — import still registers it @rule:locations.answer.registry-is-the-only-door', () => {
+  const { home, root } = clone();
+  const mono = join(root, 'mono');
+  const pack = join(mono, 'packs', 'pack');
+  mkdirSync(join(mono, '.git'), { recursive: true });
+  mkdirSync(pack, { recursive: true });
+  assert.equal(walkdown(home, ['init', '--commit', 'spec'], pack).status, 0);
+  const packHome = join(pack, '.walkdown', 'blueprints', '0001-pack');
+  // Un-register what init wrote, leaving the manifest, and put the hand row in its place.
+  const lab = join(root, 'lab');
+  mkdirSync(lab, { recursive: true });
+  const link = join(lab, 'linkpack');
+  symlinkSync(packHome, link, 'dir');
+  writeFileSync(join(home, 'registry.yml'), `blueprints:\n  - id: pack\n    project: ${lab}\n    home: ${link}\n`);
+  assert.equal(resolveLocations({ cwd: pack }).blueprint, null, 'the hand row is not a door');
+
+  const r = walkdown(home, ['import', link], lab);
+  assert.equal(r.status, 0, r.stderr);
+  assert.doesNotMatch(r.stdout, /already listed/, r.stdout);
+  const rows = readRegistry().rows.filter((r) => r.registered && r.home);
+  assert.equal(rows.filter((r) => realpathSync(r.home) === realpathSync(packHome)).length, 1, JSON.stringify(rows));
+  assert.equal(resolveLocations({ cwd: pack }).id, rows.find((r) => realpathSync(r.home) === realpathSync(packHome)).id);
+  // Ids stay unique across the file, hand rows included: the new row is not `pack`.
+  assert.notEqual(rows.find((r) => realpathSync(r.home) === realpathSync(packHome)).id, 'pack');
+  // And a second import, from the real path, is the one that says already listed.
+  const again = walkdown(home, ['import', packHome], pack);
+  assert.equal(again.status, 0, again.stderr);
+  assert.match(again.stdout, /already listed/);
+});
