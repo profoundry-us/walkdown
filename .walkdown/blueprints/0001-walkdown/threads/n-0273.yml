@@ -1,0 +1,41 @@
+id: n-0273
+kind: note
+author: topher
+via: agent
+created: 2026-09-10T13:16:14.871Z
+anchor:
+  rule: panel.start.choose-a-blueprint
+  screen: choose-blueprint
+status: open
+body: "Agent walkdown 2026-09-10: crossing to another project keeps the OLD
+  project's claimant count, so the panel says out loud a reason that is false.
+  Repro on a scratch copy (four blueprints in the served project, two of them —
+  alpha \"Checkout redesign\" and beta \"Payments hardening\" — claiming
+  /stand-in/choose-blueprint; a second imported project \"other\" holding delta
+  and epsilon, whose only target is http://localhost:9999 so neither claims
+  anything here). Start the panel on the claimed page: correct — 'Which
+  blueprint?', the two claimants first with 'claims this page' badges, notice '2
+  blueprints in this project claim this page. Nothing is remembered...'. Now
+  open the project switcher and cross to 'other'. The pane redraws as that
+  project's two blueprints, NEITHER carrying a claims badge, and /api/whose
+  still returns only alpha and beta — yet the notice still reads '2 blueprints
+  in this project claim this page.' Zero claim it. The screen contradicts
+  itself: a stated reason of two claimants over a list where nothing claims
+  anything. This is exactly what the statement's second sentence forbids — the
+  question is being asked because that folder happens to hold several
+  blueprints, and the panel dresses it up as several claimants. Cause:
+  src/panel/app.js, the 'pick-project' handler sets S.project/S.phase and calls
+  renderGate() without recomputing or narrowing S.claimants, which is only ever
+  populated in boot(); renderGate() reads 'const claimed = S.claimants.length'.
+  The honest fallback text already exists in the same expression ('This project
+  holds more than one blueprint. Pick the one you are reviewing against.') and
+  is unreachable after any crossing from a claimed page. Evidence:
+  runs/evidence/2026-09-10T13-12-00Z/choose-a-blueprint-app-crossed-false-notic\
+  e.png and choose-a-blueprint-probe.txt (sections A, F, G). Everything else in
+  the rule held: names and own descriptions, claimants first and badged,
+  choosing loads it and writes nothing (checksum over the copy's home, config
+  and every declared blueprint identical before and after; localStorage and
+  sessionStorage empty), the same question on reload, an undeclared blueprint
+  sitting in the folder never offered, one claimant among four never asked
+  about, and the same list on the Blueprints tab with the choice changeable
+  there."

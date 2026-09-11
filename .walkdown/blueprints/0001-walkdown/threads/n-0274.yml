@@ -1,0 +1,34 @@
+id: n-0274
+kind: note
+author: topher
+via: agent
+created: 2026-09-10T13:16:53.138Z
+anchor:
+  rule: embed.pin.right-project
+  screen: review
+status: open
+body: "Agent walkdown 2026-09-10 (run 2026-09-10T13-13-00Z-local-01): the fourth
+  THEN does not hold in the framed delivery. On a scratch server offering two
+  blueprints (default 'blueprint', plus a copy 'sibling'), with the panel open
+  on 'sibling', a pin dropped on a third-party page whose own tag says
+  data-bp=\"blueprint\" filed to the SIBLING: the only write was POST
+  /api/threads?bp=sibling, and the thread landed in 0002-sibling/threads
+  (evidence
+  runs/evidence/2026-09-10T13-13-00Z/pin-b-declared-page-landed-in-sibling.yml).
+  The page's deliberate declaration was never consulted, because framed,
+  src/embed/index.js submitPin() does not use its own api() - it postMessages
+  walkdown:new-pin to the panel, which files it with S.BP. The embed's
+  blueprintId() (ownBp || ctx.bp), whose comment says the page's own tag still
+  wins, governs only requests the embed itself makes. The two halves then
+  disagree about the same page: a reply, which the embed does send through
+  api(), goes to the declared blueprint, where the thread its own pin created
+  does not exist - POST /api/threads/n-0273/replies?bp=blueprint returned
+  {\"error\":\"no thread n-0273\"} while ?bp=sibling succeeded. The other three
+  THENs held: a pin on a page carrying no tag filed to the open blueprint and
+  not the server default
+  (runs/evidence/2026-09-10T13-13-00Z/pin-a-plain-page-landed-in-sibling.yml),
+  the panel supplied the bp on that write, and the server filed by what the
+  caller named for an address both blueprints describe
+  (runs/evidence/2026-09-10T13-13-00Z/embed-pin-right-project-probes.md). Not
+  fixed - filed for a decision on which side should win when a framed page
+  declares a blueprint of its own."

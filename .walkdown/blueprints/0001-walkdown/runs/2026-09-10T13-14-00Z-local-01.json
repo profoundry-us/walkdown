@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-09-10T13-14-00Z-local-01",
+  "created": "2026-09-10T13:14:00Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "3e67522-dirty",
+  "tree_hash": "sha256:e8cd61e386a0",
+  "spec_hash": "sha256:395f1d241f0b",
+  "results": [
+    {
+      "rule": "locations.answer.one-walkdown-answers",
+      "status": "fail",
+      "statement_hash": "sha256:69f36d35a978",
+      "evidence": [
+        "runs/evidence/2026-09-10T13-14-00Z/scope-probes.txt",
+        "runs/evidence/2026-09-10T13-14-00Z/boundary-refusals.txt",
+        "runs/evidence/2026-09-10T13-14-00Z/symlink-bypass.txt"
+      ],
+      "reasoning": "I built a throwaway monorepo under a temp dir with a temp WALKDOWN_HOME (the real home was never pointed at): mono/ with a .walkdown at its root, packs/pack/ and packs/pack/inner/ with their own, packs/neighbour/ never imported, packs/nocfg/ holding homes but no config.yml, and a personal home beside them. Nearly everything the rule claims held under pushing. From inside the pack only `pack` is listed and mono's committed row - roots: [.], which covers the pack on disk - is invisible; from the root only `mono`, with the pack and the neighbour unseen; three nesting levels each answer for themselves; a committed `defaults: evidence:` in mono does not reach the pack even when the pack declares no evidence key of its own. Both halves of the crossing refusal work: `blueprint add` on the pack's own blueprint is refused, and refused again with --ephemeral because a copy means a copy and this is the original; a hand-written committed row and the byte-equivalent personal row are each set aside on read, named by `where` in text and in --json .config.refused, errored by lint, and invisible to `status` and to a server; the same personal row is read when I stand inside the pack, a row under the personal home is read, an imported row is reachable by name from anywhere and shadows nothing, a .walkdown with homes but no config declares nothing so a row naming a blueprint under it is read, and a server started at the root offers exactly the registry - never the neighbour that was merely lying there. What fails is the spelling of the boundary. I made a link outside the pack, lab/linkpack -> lab/mono/packs/pack/.walkdown/blueprints/0001-pack, and hand-wrote a personal row (no imported:) naming spec/threads/runs under it. Standing at the repository root that row is not set aside, not named on the report, and not linted; `status --blueprint viasymlink` resolved the pack's own spec; `thread new --blueprint viasymlink` wrote n-0001 into the pack's OWN threads directory; and the server started at the root offered it as a second door to the pack's blueprint - the n-0188 harm reproduced with nobody having imported anything. Worse, `blueprint add` on that identical link path refuses it, plainly and again with --ephemeral, because the writer canonicalises: the tool answers the same question two ways in one breath, which is the contradiction n-0188 said was worse than being merely strict. The cause is one call: crosses() and its committed twin ask walkdownRoot(dirname(expand(spec))), and walkdownRoot() resolve()s rather than canon()s, so the walk up from lab/linkpack/ never meets .../packs/pack/.walkdown; a symlinked ancestor (lab/monolink -> lab/mono) is caught, so only a link that jumps past the boundary escapes. Nothing was inferred from the tree in any probe, which is the rule's headline, but the steps that say a row naming a spec under another `.walkdown` is set aside on read, named on the report and reported by lint are not true of that row, so I am recording this as a fail. Filed as n-0275. One thing I could not judge and am noting rather than counting against it: walkdownRoot gives up after 24 levels, so a working directory more than 24 directories below its `.walkdown` with no `.git` between finds no answer at all - silence rather than a crossing.",
+      "threads": ["n-0275"]
+    }
+  ]
+}

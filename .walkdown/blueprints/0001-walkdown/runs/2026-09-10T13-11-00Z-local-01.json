@@ -1,0 +1,39 @@
+{
+  "run_id": "2026-09-10T13-11-00Z-local-01",
+  "created": "2026-09-10T13:11:00Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "3e67522-dirty",
+  "tree_hash": "sha256:e8cd61e386a0",
+  "spec_hash": "sha256:395f1d241f0b",
+  "results": [
+    {
+      "rule": "screens.ownership.routes-by-page",
+      "status": "pass",
+      "statement_hash": "sha256:3021d25287e8",
+      "evidence": [
+        "runs/evidence/2026-09-10T13-11-00Z/routes-by-page-summary.json",
+        "runs/evidence/2026-09-10T13-11-00Z/one-claimant-opens.png",
+        "runs/evidence/2026-09-10T13-11-00Z/one-claimant-opens.json",
+        "runs/evidence/2026-09-10T13-11-00Z/several-one-project-asks.png",
+        "runs/evidence/2026-09-10T13-11-00Z/several-one-project-asks.json",
+        "runs/evidence/2026-09-10T13-11-00Z/several-one-project-query-dropped.json",
+        "runs/evidence/2026-09-10T13-11-00Z/fragment-ranks-within-blueprint.json",
+        "runs/evidence/2026-09-10T13-11-00Z/several-projects-asks.png",
+        "runs/evidence/2026-09-10T13-11-00Z/several-projects-asks.json",
+        "runs/evidence/2026-09-10T13-11-00Z/no-claimant-not-guessed.png",
+        "runs/evidence/2026-09-10T13-11-00Z/no-claimant-not-guessed.json",
+        "runs/evidence/2026-09-10T13-11-00Z/explicit-bp-not-overridden.png",
+        "runs/evidence/2026-09-10T13-11-00Z/explicit-bp-not-overridden.json",
+        "runs/evidence/2026-09-10T13-11-00Z/sole-blueprint-still-not-guessed.png",
+        "runs/evidence/2026-09-10T13-11-00Z/sole-blueprint-still-not-guessed.json",
+        "runs/evidence/2026-09-10T13-11-00Z/sole-blueprint-claimed-opens.png",
+        "runs/evidence/2026-09-10T13-11-00Z/sole-blueprint-claimed-opens.json"
+      ],
+      "reasoning": "Judged against a scratch copy served on an ephemeral port, with fixture blueprints declared inside the copy so a page could be claimed by none, one, or several of them across two projects, and a fixture app serving the pages themselves. Every case came out as the statement asks. One claimant opens with nothing asked, the bar reading project / blueprint / screen (one-claimant-opens). Several claimants inside one project draw \"Which blueprint?\", both claimants marked \"claims this page\" and neither ranked above the other, with the notice saying nothing is remembered (several-one-project-asks). Several claimants across two projects draw \"Which project?\", naming each project and the blueprint that matched, both badged, no order of preference (several-projects-asks). An address nobody claims is not guessed at: the modal says \"No blueprint claims this page\" and offers the two commands that would make it reviewable, and it does the same on a second server holding exactly one blueprint - the count is not evidence (no-claimant-not-guessed, sole-blueprint-still-not-guessed), while that same sole blueprint opens straight away on a page it does claim (sole-blueprint-claimed-opens). A caller naming ?bp= explicitly is not overridden: opening a page claimed only by alpha-one with beta-one named opened beta-one, screen \"No screen\" (explicit-bp-not-overridden). /api/whose answers a list in index order with one entry per blueprint, the query dropped (?ref=email matched the same two) and the fragment ranking surviving only within a blueprint - #deep picked alpha-one's fragment screen over its bare one while still leaving alpha-two beside it rather than beneath it (fragment-ranks-within-blueprint). The one thing I would not call clean, and it is outside this rule: on the gate behind the modal the blueprints pane still explains itself by a count, reading \"This project holds more than one blueprint\" on a server that holds exactly one, and \"Not connected. Run walkdown serve\" while connected. Nothing routed on either sentence - the decision on screen was correct every time - so this rule stands, but that copy belongs to whoever owns the chooser's wording.",
+      "threads": []
+    }
+  ]
+}

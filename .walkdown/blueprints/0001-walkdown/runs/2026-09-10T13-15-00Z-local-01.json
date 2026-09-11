@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-09-10T13-15-00Z-local-01",
+  "created": "2026-09-10T13:15:00Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "3e67522-dirty",
+  "tree_hash": "sha256:e8cd61e386a0",
+  "spec_hash": "sha256:395f1d241f0b",
+  "results": [
+    {
+      "rule": "panel.start.which-project",
+      "status": "fail",
+      "statement_hash": "sha256:f218205cd807",
+      "evidence": [
+        "runs/evidence/2026-09-10T13-15-00Z/panel-server-root.png",
+        "runs/evidence/2026-09-10T13-15-00Z/panel-unclaimed-page.png",
+        "runs/evidence/2026-09-10T13-15-00Z/panel-after-pick.png",
+        "runs/evidence/2026-09-10T13-15-00Z/panel-bar-control.png",
+        "runs/evidence/2026-09-10T13-15-00Z/prototype-project-modal.png",
+        "runs/evidence/2026-09-10T13-15-00Z/probe-panel-start-which-project.txt"
+      ],
+      "reasoning": "Judged against a scratch copy of this repo, declared to itself and served from inside itself on an ephemeral port, with a page on a separate static server standing in for an application no blueprint claims. Two of the rule's three cases hold and one does not. On the unclaimed page the panel draws the modal over the whole of its own chrome - elementFromPoint at the bar, at the side panel and at the page all return the dim, so nothing behind it is reachable - names the address it asked about in monospace, says 'No blueprint claims this page.', and keeps 'Make this page reviewable' and 'Or bring a project in' above the list, naming `walkdown claims --url <address>`, `walkdown import <path>` and `walkdown init` as text with no button anywhere in that block, so nothing here writes to disk from the browser. The single project is listed with its blueprint count and root and nothing is opened by default even at a count of one; choosing it opens its one blueprint, and the project control in the bar reopens the same modal afterwards, then with a Close. The failing case is walkdown's own server root, which the statement names explicitly: loaded with no fragment the panel logs '[walkdown] no page to review - the panel needs a frame url' and returns from boot() before building any chrome, leaving a blank painted background with no bar, no panel and no modal. It is not a styling miss but an unreachable branch - boot() refuses unconditionally on a missing cfg.frame.url, lib/serve.js's review page deliberately sends no frame when there is no fragment (its own comment calls that the docked delivery over walkdown's own root), and extension/boot-host.js always sends one, so the atServerRoot branch in app.js and the 'There is no page to route from here' sentence the modal carries can never be shown. Against prototype/screens/project-modal.html at the same 1280x720 viewport the two agree line for line on structure, wording, order and the badge; the visible difference is that the prototype dims the chrome behind the card to 40% while the panel's dim over the dark theme leaves the side panel fully legible beside it, modal in behaviour but not reading as covered. Filed as n-0272.",
+      "threads": ["n-0272"]
+    }
+  ]
+}

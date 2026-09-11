@@ -1,0 +1,57 @@
+id: n-0275
+kind: note
+author: topher
+via: agent
+created: 2026-09-10T13:19:24.811Z
+anchor:
+  rule: locations.answer.one-walkdown-answers
+status: open
+body: >-
+  A symlink walks straight through the one-walkdown boundary on the READ side,
+  while the write side refuses the identical path.
+
+
+  Fixture (temp dir, temp WALKDOWN_HOME; the real home was never used): mono/
+  with .walkdown at its root and mono/packs/pack/ with its own .walkdown, plus a
+  link created outside the pack: lab/linkpack ->
+  lab/mono/packs/pack/.walkdown/blueprints/0001-pack. A hand-written PERSONAL
+  row (no imported:) then names spec/threads/runs under lab/linkpack/.
+
+
+  Standing at the repository root, that row is not set aside on read, not named
+  by `where` (text or --json .config.refused), and not reported by lint; `status
+  --blueprint viasymlink` resolved the pack's own spec; `thread new --blueprint
+  viasymlink` wrote n-0001 into the pack's OWN threads directory; and a server
+  started at the repository root offered it as a second door to the pack's
+  blueprint. That is the n-0188 harm exactly - two boards listing, serving and
+  writing to one ledger with nobody having imported anything. The
+  byte-equivalent row written without the link IS refused on all four counts, so
+  the guard is real and only the spelling escapes it.
+
+
+  The contradiction n-0188 named is back in one breath: `walkdown blueprint add
+  lab/linkpack/blueprint` refuses the path (and --ephemeral refuses it too,
+  'this is the original'), because the writer canonicalises, while the reader
+  accepts it.
+
+
+  Cause: lib/locations.js crosses() and its committed twin call
+  walkdownRoot(dirname(expand(spec))), and walkdownRoot() resolve()s rather than
+  canon()s, so the upward walk from lab/linkpack/ never passes through
+  .../packs/pack/.walkdown. A symlinked ANCESTOR (lab/monolink -> lab/mono) is
+  caught, because that walk still meets the pack's .walkdown; only a link that
+  jumps past the boundary escapes.
+
+
+  Evidence: runs/evidence/2026-09-10T13-14-00Z/symlink-bypass.txt, with the
+  refusals that do hold in boundary-refusals.txt and the scope probes in
+  scope-probes.txt.
+
+
+  Everything else the rule claims held under probing: nearest-and-stop at three
+  nesting levels, the root's roots:[.] invisible from inside the pack, no
+  defaults leakage, committed and personal crossing rows refused/named/linted
+  and invisible to status and serve, ephemeral refused on the original, rows
+  under their own .walkdown read, imported rows reachable by name and shadowing
+  nothing, a .walkdown with homes but no config declaring nothing, and a
+  neighbouring undeclared checkout invisible to both CLI and server.

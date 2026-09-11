@@ -1,0 +1,52 @@
+id: n-0272
+kind: note
+author: topher
+via: agent
+created: 2026-09-10T13:15:00.089Z
+anchor:
+  rule: panel.start.which-project
+  screen: project-modal
+status: open
+body: >-
+  At walkdown's own server root the panel draws nothing at all, so the modal's
+  third case is unreachable.
+
+
+  Judged 2026-09-10 against a scratch copy served on an ephemeral port (evidence
+  runs/evidence/2026-09-10T13-15-00Z/).
+
+
+  What happens: load the review page with no fragment — the case the page's own
+  comment calls "the docked one, over walkdown's own root", where there is no
+  page to route from. The panel logs '[walkdown] no page to review — the panel
+  needs a frame url' and returns from boot() before building any chrome. The
+  document keeps its two script tags and nothing else: no bar, no side panel, no
+  modal, just the pre-paint background
+  (runs/evidence/2026-09-10T13-15-00Z/panel-server-root.png, and the console
+  line in probe-panel-start-which-project.txt).
+
+
+  Why it is unreachable rather than merely unstyled: src/panel/app.js boot()
+  refuses unconditionally on a missing cfg.frame.url, and every delivery that
+  could supply the server-root case supplies no frame — lib/serve.js's review
+  page deliberately omits frame when there is no fragment, and
+  extension/boot-host.js always sets one. So the atServerRoot branch further
+  down in app.js (S.frameUrl null, origin === server origin) can never run, and
+  with it the 'There is no page to route from here — this is walkdown's own
+  server' sentence the modal carries.
+
+
+  The other cases hold. On a page no blueprint claims the modal is drawn, names
+  the address, says why, keeps 'Make this page reviewable' and 'Or bring a
+  project in' above the list with commands named and no buttons, lists the
+  project with its blueprint count, opens nothing by default, and covers the bar
+  and the side panel as well as the page (elementFromPoint over all three
+  returns the dim). Choosing the one-blueprint project opens it; the bar's
+  project control reopens the modal afterwards with a Close.
+
+
+  One smaller difference against prototype/screens/project-modal.html at the
+  same viewport: the prototype dims the chrome behind the card to 40% opacity,
+  and the panel's bg-base-300/70 over the dark blueprint theme leaves the side
+  panel fully legible beside the card. It is modal in behaviour but does not
+  read as covered.

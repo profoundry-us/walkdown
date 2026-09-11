@@ -1,0 +1,31 @@
+{
+  "run_id": "2026-09-10T13-12-00Z-local-01",
+  "created": "2026-09-10T13:12:00Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "3e67522-dirty",
+  "tree_hash": "sha256:e8cd61e386a0",
+  "spec_hash": "sha256:395f1d241f0b",
+  "results": [
+    {
+      "rule": "panel.start.choose-a-blueprint",
+      "status": "fail",
+      "statement_hash": "sha256:3ff33b8e9c41",
+      "evidence": [
+        "runs/evidence/2026-09-10T13-12-00Z/choose-a-blueprint-app-two-claimants.png",
+        "runs/evidence/2026-09-10T13-12-00Z/choose-a-blueprint-app-chosen.png",
+        "runs/evidence/2026-09-10T13-12-00Z/choose-a-blueprint-app-asked-again.png",
+        "runs/evidence/2026-09-10T13-12-00Z/choose-a-blueprint-app-one-claimant-not-asked.png",
+        "runs/evidence/2026-09-10T13-12-00Z/choose-a-blueprint-app-blueprints-tab.png",
+        "runs/evidence/2026-09-10T13-12-00Z/choose-a-blueprint-app-project-modal.png",
+        "runs/evidence/2026-09-10T13-12-00Z/choose-a-blueprint-app-crossed-false-notice.png",
+        "runs/evidence/2026-09-10T13-12-00Z/choose-a-blueprint-proto-choose-blueprint.png",
+        "runs/evidence/2026-09-10T13-12-00Z/choose-a-blueprint-probe.txt"
+      ],
+      "reasoning": "Judged in a browser against a scratch copy served from inside itself, declaring four blueprints of its own — two of which (alpha \"Checkout redesign\", beta \"Payments hardening\") claim /stand-in/choose-blueprint, one (gamma) claims a different page, one (walkdown) claims a different origin — plus an undeclared blueprint sitting in the same folder and a second imported project holding two more. Started on the claimed page the panel is right about everything the statement asks: it asks 'Which blueprint?', offers the project's four by name and by each blueprint's own description, puts the two claimants first with a 'claims this page' badge, and says the reason out loud — '2 blueprints in this project claim this page. Nothing is remembered — walkdown asks each time rather than choosing for you.' Choosing one loads it and writes nothing: a checksum over the copy's personal home, its .walkdown config and every declared blueprint was byte-identical before and after, and localStorage and sessionStorage stayed empty; reloading asks again. The undeclared blueprint is absent by never being declared — /api/whose does not name it and no filter mentions it — and the same list, same component, is the Blueprints tab, current row marked, with the choice changeable there afterwards. The negative case holds too: a page claimed by exactly one of four is opened silently, so a folder holding several is never itself the trigger. It fails on the crossing half of the rule's own GIVEN. Cross to another project from the switcher and the pane redraws as that project's two blueprints, neither of which claims this page and neither of which is badged — while the notice still reads '2 blueprints in this project claim this page.' /api/whose still returns only alpha and beta, so the count is the project you left. The stated reason is false, and it is false in exactly the direction the statement forbids: the question is being asked because that folder happens to hold several blueprints, and the panel presents it as several claimants. Cause is src/panel/app.js's 'pick-project' handler, which sets the new project and calls renderGate() without recomputing S.claimants (populated only in boot()); renderGate() then reads that stale length, and the honest alternative wording already sitting in the same expression is unreachable after any crossing from a claimed page. Filed as n-0273.",
+      "threads": ["n-0273"]
+    }
+  ]
+}

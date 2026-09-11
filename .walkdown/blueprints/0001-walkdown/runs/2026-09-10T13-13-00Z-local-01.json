@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-09-10T13-13-00Z-local-01",
+  "created": "2026-09-10T13:13:00Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "3e67522-dirty",
+  "tree_hash": "sha256:e8cd61e386a0",
+  "spec_hash": "sha256:395f1d241f0b",
+  "results": [
+    {
+      "rule": "embed.pin.right-project",
+      "status": "fail",
+      "statement_hash": "sha256:8d8ef265ac6d",
+      "evidence": [
+        "runs/evidence/2026-09-10T13-13-00Z/embed-pin-right-project-probes.md",
+        "runs/evidence/2026-09-10T13-13-00Z/pin-a-plain-page-landed-in-sibling.yml",
+        "runs/evidence/2026-09-10T13-13-00Z/pin-b-declared-page-landed-in-sibling.yml",
+        "runs/evidence/2026-09-10T13-13-00Z/scratch-two-blueprints-config.yml"
+      ],
+      "reasoning": "Judged on a scratch copy served from inside itself, its config given a second blueprint so one server offered siblings: 'blueprint' (the spec the server was started on, so its default) and 'sibling'. Two pages on a different origin stood in for somebody else's page reviewed through the extension, one carrying no blueprint on its tag and one declaring data-bp=\"blueprint\". With the panel open on 'sibling' and framing the plain page, pinning page.card produced exactly one write, POST /api/threads?bp=sibling, and the thread was written to 0002-sibling/threads/n-0272.yml with nothing new under the default's threads/ - so a pin does file against the blueprint the panel has open rather than the server's default, and the bp on that write is the panel telling the embed which one is open, since the page's tag carried none. The server also files by what the caller names and nothing else: a command-line pin naming bp=blueprint landed in the default even though its url was the sibling-framed page, and one naming bp=sibling landed in the sibling for /prototype/screens/review.html, an address both copies describe; lib/serve.js hands the handler the selected blueprint outright and never consults /api/whose. The fourth THEN is where it breaks. Repeating the same pin on the page that declares data-bp=\"blueprint\", still with 'sibling' open, the only write was again POST /api/threads?bp=sibling and the pin landed in the sibling's ledger (n-0273): the page's deliberate declaration was overruled, not obeyed. Framed, src/embed/index.js submitPin() never uses its own api() - it postMessages walkdown:new-pin to the panel, which files with S.BP - so the embed's blueprintId() (ownBp || ctx.bp), whose comment promises that a page's own tag still wins, governs only requests the embed makes itself. The two halves then disagree about one page: a reply, which the embed does send through api(), addresses the declared blueprint, and POST /api/threads/n-0273/replies?bp=blueprint came back {\"error\":\"no thread n-0273\"} while ?bp=sibling recorded it. Three of the four THENs hold and the headline claim holds; a framed page that says which project it is does not win, so I record this as a fail and filed n-0274 rather than fixing anything.",
+      "threads": ["n-0274"]
+    }
+  ]
+}
