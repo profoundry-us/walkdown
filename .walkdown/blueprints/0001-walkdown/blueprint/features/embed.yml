@@ -41,7 +41,7 @@ stories:
             - The thread is written to the open blueprint's threads/, not the server's default
             - The panel tells the embed in the frame which blueprint is open, because there is no script tag on somebody else's page to carry one
             - The server never re-routes a write by looking the address up and overriding what the caller said - several blueprints may claim an address, and choosing between them at a door is the server deciding whose page you are on
-            - A page that declares its own blueprint still wins, because saying so was deliberate
+            - A tag on the page naming a blueprint does not redirect a write - the panel has one open, and that is the thing being reviewed; a tag is a fact about the page, goes stale when the blueprint moves, and used to send a reply to a blueprint where the pin it answered did not exist
           statement_hash: sha256:8d8ef265ac6d
 
       - id: embed.pin.both-surfaces

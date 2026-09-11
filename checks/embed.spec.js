@@ -301,6 +301,43 @@ test('a pin files against the project the page belongs to, not the server defaul
   expect(thread.anchor.element).toBe('waitlist.email');
 });
 
+/*
+ * The other half of the same rule: a tag ON THE PAGE naming a blueprint does
+ * not redirect a write. The panel has one open, and that is the thing being
+ * reviewed. The embed used to read its own tag first for the requests it made
+ * itself, while pins went through the panel - so a page carrying a tag had
+ * its pin filed in one blueprint and its reply sent to another, where the
+ * thread did not exist (n-0274).
+ *
+ * Every write the framed page makes is watched, not only the pin: the tag
+ * names a blueprint this server really holds, so a request that did read the
+ * tag would succeed silently rather than 404.
+ */
+test('a tag on the page naming another blueprint does not redirect a write', {
+  tag: '@rule:embed.pin.right-project',
+}, async ({ page }) => {
+  const { blueprints } = await (await fetch(`${WD_ORIGIN}/api/blueprint`)).json();
+  const open = 'blueprint'; // what the fixture's panel opens
+  const other = blueprints.map((b) => b.key).find((k) => k !== open);
+  expect(other, 'the server must hold a second blueprint for this to be about anything').toBeTruthy();
+
+  const writes = [];
+  page.on('request', (r) => {
+    if (r.method() === 'POST' && r.url().includes('/api/')) writes.push(new URL(r.url()));
+  });
+
+  await pinning(page, { bp: other }); // the framed page's own tag names the other one
+  const cta = app(page).getByTestId('host.cta');
+  const box = await cta.boundingBox();
+  const { thread } = await pinAt(page, Math.round(box.x + 8), Math.round(box.y + 8));
+  expect(thread.anchor.element).toBe('host.cta');
+
+  expect(writes.length).toBeGreaterThan(0);
+  for (const u of writes) {
+    expect(u.searchParams.get('bp'), `${u.pathname} filed against what the panel has open`).toBe(open);
+  }
+});
+
 test('a pin says what it is on contact, and says nothing until then', {
   tag: '@rule:embed.pin.tooltip-says-what-it-is',
 }, async ({ page }) => {

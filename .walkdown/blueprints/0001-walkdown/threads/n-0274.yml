@@ -6,7 +6,7 @@ created: 2026-09-10T13:16:53.138Z
 anchor:
   rule: embed.pin.right-project
   screen: review
-status: open
+status: addressed
 body: "Agent walkdown 2026-09-10 (run 2026-09-10T13-13-00Z-local-01): the fourth
   THEN does not hold in the framed delivery. On a scratch server offering two
   blueprints (default 'blueprint', plus a copy 'sibling'), with the panel open
@@ -32,3 +32,55 @@ body: "Agent walkdown 2026-09-10 (run 2026-09-10T13-13-00Z-local-01): the fourth
   (runs/evidence/2026-09-10T13-13-00Z/embed-pin-right-project-probes.md). Not
   fixed - filed for a decision on which side should win when a framed page
   declares a blueprint of its own."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-11T14:11:40Z
+    body: >-
+      Decided by Topher, 2026-09-11: the panel wins. Fixed.
+
+
+      WHY THAT WAY. The rule's own statement already said it - 'a pin files
+      against the blueprint the panel has open ... the caller names the
+      blueprint, and by the time anything can be pinned the panel always has
+      one'. The fourth THEN contradicted the first sentence. And a tag on a page
+      is a fact about the page, not about what is being reviewed: it goes stale
+      the moment a blueprint is renamed or its home moves, and every pin on that
+      page then files somewhere the panel is not looking - which is the failure
+      this note observed, only with a live tag.
+
+
+      THE CHANGE. src/embed/index.js blueprintId() now reads ctx.bp first and
+      its own tag second:
+
+        const blueprintId = () => ctx.bp || ownBp || <any other tag on the page> || '';
+
+      Framed, ctx.bp is what the panel pushed in walkdown:context, so every
+      request the embed makes agrees with the pins the panel files for it. Top
+      level there is no panel and ctx.bp is null, so the tag is read as before -
+      it is what is left when there is no panel to ask.
+
+
+      The fourth THEN is replaced: 'A tag on the page naming a blueprint does
+      not redirect a write - the panel has one open, and that is the thing being
+      reviewed; a tag is a fact about the page, goes stale when the blueprint
+      moves, and used to send a reply to a blueprint where the pin it answered
+      did not exist.' The statement is unchanged, so sha256:8d8ef265ac6d stands.
+
+
+      WHAT IS AND IS NOT COVERED. A check tagged to the rule, 'a tag on the page
+      naming another blueprint does not redirect a write'
+      (checks/embed.spec.js), frames a page whose own tag names the OTHER
+      blueprint this server holds - a real one, so a request that read the tag
+      would succeed silently rather than 404 - pins from the panel, and asserts
+      every POST the page makes carries the open blueprint's key. Worth saying
+      plainly: framed, the embed's reply popover is unreachable from the UI (a
+      pin clicked in a frame opens the thread in the panel, not in the embed),
+      so the split this note found was only ever reachable by calling the
+      embed's reply fetch by hand, which is how it was found. The check pins the
+      THEN as now worded; the reorder in blueprintId() is what makes any such
+      call agree with the pin, and nothing in the UI can exercise it framed. Not
+      pretending otherwise.
+
+
+      Awaiting a re-judge.
