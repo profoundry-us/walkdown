@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-10T13:19:24.811Z
 anchor:
   rule: locations.answer.one-walkdown-answers
-status: open
+status: addressed
 body: >-
   A symlink walks straight through the one-walkdown boundary on the READ side,
   while the write side refuses the identical path.
@@ -77,10 +77,10 @@ replies:
       (docs/adr/0003-the-registry-is-the-only-door.md), status PROPOSED -
       nothing is built until he accepts it. In short: the CLI joins the server
       in answering from ~/.walkdown/config.yml and nothing else; a committed
-      .walkdown/config.yml is a manifest that only walkdown import reads; a path is canonicalised once at add time;
-      the working directory picks among registered rows by containment and finds
-      nothing else; every row says how it arrived and a hand-written one is set
-      aside.
+      .walkdown/config.yml is a manifest that only walkdown import reads; a path
+      is canonicalised once at add time; the working directory picks among
+      registered rows by containment and finds nothing else; every row says how
+      it arrived and a hand-written one is set aside.
 
 
       What that does to this note: the code it is about - walkdownRoot() on the
@@ -94,3 +94,35 @@ replies:
 
       If the ADR is NOT accepted, the one-line fix above is the fallback and
       this note reopens for it. Left open until then.
+  - author: topher
+    via: agent
+    created: 2026-09-11T20:26:56Z
+    body: >-
+      Addressed by ADR 0003, built and landed 2026-09-11 (63fcb25 step 3,
+      f83f4bb step 5).
+
+
+      The code this note is about is gone rather than fixed. walkdownRoot(),
+      crosses() and its committed twin, the two-file merge and the walk the link
+      jumped over were deleted at step 3; resolveLocations answers from
+      registryPick() and nothing else. A path is looked at once, when it is
+      added, and import canonicalises it - so there is no read-side spelling
+      left to fool.
+
+
+      The fixture here is now the check for the new rule
+      locations.answer.registry-is-the-only-door (test/registry.test.js, "a
+      hand-written row naming a symlink is set aside…"): mono with its own home,
+      the pack with its own, lab/linkpack -> the pack's home, and a hand-written
+      registry row (no registered:) naming the link. `walkdown where` names the
+      row as set aside and written by hand; `where --blueprint viasymlink` says
+      no registered blueprint; `status` and `thread new` through it refuse and
+      nothing lands in the pack's threads; a server at the root lists mono and
+      pack and 404s the link's id; `walkdown import lab/linkpack` says already
+      listed and the registry holds one row for that home under its real path.
+      Passing on the checks tier (run 2026-09-11T20-25-01Z).
+
+
+      locations.answer.one-walkdown-answers, which this note is anchored to, is
+      retired with the reason written on it; the rule that replaces the boundary
+      is the one above.

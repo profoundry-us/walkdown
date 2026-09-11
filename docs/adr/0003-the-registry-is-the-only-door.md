@@ -497,11 +497,18 @@ In this order, each step leaving the tree green:
    machine-local keys (a port, a moved evidence directory) into itself and
    takes the row out of config.yml, so a decision made before the registry
    is not lost on the way.
-5. **The rules:** retire, reword, add, as listed. Statement hashes
-   rewritten, acceptance requeued. docs/08-locations.md rewritten around one
-   file.
-6. **n-0275** is replied to at step 5 — the code it is about no longer
-   exists — and its evidence fixture becomes the new rule's check.
+5. **The rules:** *(Landed 2026-09-11.)* `one-walkdown-answers` retired
+   with the reason on it; `declared-not-discovered` and `says-why` reworded;
+   `locations.answer.registry-is-the-only-door` added, with n-0275's fixture
+   as its check (test/registry.test.js). Statement hashes rewritten,
+   acceptance requeued. docs/08-locations.md rewritten around one file.
+   Two things the step forced: the runner stops pinning `WALKDOWN_HOME` on
+   the unit half, because every suite pins its own scratch home now and the
+   reporter in the main process needs the real registry to find the
+   blueprint of record; and a registry row with no `registered:` is set
+   aside and named under the registry's own line on the report (§5).
+6. **n-0275** *(Addressed 2026-09-11.)* Replied to with what replaced the
+   code it was about; its evidence fixture is the new rule's check.
 
 Nothing in this list was started until the status line above read
 *accepted* (2026-09-11).
