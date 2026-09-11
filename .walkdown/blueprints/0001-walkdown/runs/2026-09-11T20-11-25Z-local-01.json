@@ -1,0 +1,77 @@
+{
+  "run_id": "2026-09-11T20-11-25Z-local-01",
+  "created": "2026-09-11T20:11:25Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "3e922f9-dirty",
+  "tree_hash": "sha256:f3042ab7446e",
+  "spec_hash": "sha256:df250c34efe3",
+  "results": [
+    {
+      "rule": "embed.pin.anchored-target",
+      "status": "pass",
+      "statement_hash": "sha256:6feaf28d3505",
+      "duration_ms": 1182,
+      "checks": [
+        "checks/embed.spec.js:122"
+      ]
+    },
+    {
+      "rule": "embed.pin.viewport-recorded",
+      "status": "pass",
+      "statement_hash": "sha256:6971846eb2cc",
+      "duration_ms": 852,
+      "checks": [
+        "checks/embed.spec.js:148"
+      ]
+    },
+    {
+      "rule": "embed.pin.coordinate-fallback",
+      "status": "pass",
+      "statement_hash": "sha256:3c6fb006c94b",
+      "duration_ms": 896,
+      "checks": [
+        "checks/embed.spec.js:167"
+      ]
+    },
+    {
+      "rule": "embed.pin.surface-coordinates",
+      "status": "pass",
+      "statement_hash": "sha256:7d33bd0c80b2",
+      "duration_ms": 1334,
+      "checks": [
+        "checks/embed.spec.js:181"
+      ]
+    },
+    {
+      "rule": "embed.pin.both-surfaces",
+      "status": "pass",
+      "statement_hash": "sha256:77fdab028ac1",
+      "duration_ms": 2712,
+      "checks": [
+        "checks/embed.spec.js:205"
+      ]
+    },
+    {
+      "rule": "embed.pin.right-project",
+      "status": "pass",
+      "statement_hash": "sha256:8d8ef265ac6d",
+      "duration_ms": 1768,
+      "checks": [
+        "checks/embed.spec.js:274",
+        "checks/embed.spec.js:316"
+      ]
+    },
+    {
+      "rule": "embed.pin.tooltip-says-what-it-is",
+      "status": "pass",
+      "statement_hash": "sha256:50dfb40b9f83",
+      "duration_ms": 3111,
+      "checks": [
+        "checks/embed.spec.js:341"
+      ]
+    }
+  ]
+}

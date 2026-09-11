@@ -1,5 +1,6 @@
 /*
- * `walkdown blueprint add|forget`, and `walkdown blueprints`.
+ * `walkdown blueprint forget`, `walkdown blueprints`, and the bare-home half
+ * of `walkdown import` (`add`, called from import.js).
  *
  * It was `walkdown project` until ADR 0001, which is exactly the confusion
  * that ADR is about: what this declares is a BLUEPRINT - a specification with
@@ -31,12 +32,11 @@
  * rooted entry would shadow the real thing from the person's own working
  * directory.
  */
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import {
   canon,
-  configPath,
   expand,
   forgetFromRegistry,
   readRegistry,
@@ -46,26 +46,19 @@ import {
   readUserConfig,
   rememberBlueprint,
   walkdownHome,
-  walkdownRoot,
 } from '../../lib/locations.js';
 import { dim, green, red, yellow } from '../../lib/report/tty.js';
-import { parseDocument } from '../../vendor/yaml.js';
 import { end } from './context.js';
 
-const HELP = `walkdown blueprint add <path> [--id <name>] [--ephemeral] [--why <reason>]
-walkdown blueprint forget <id>
-walkdown blueprints [--stale]`;
+const HELP = `walkdown blueprint forget <id>
+walkdown blueprints [--stale]
+
+(\`walkdown import <path>\` is how a blueprint joins the registry — a project, or one bare home.)`;
 
 /** How old an ephemeral entry has to be before it is worth mentioning. */
 const STALE_DAYS = 2;
 
 const days = (iso) => (Date.now() - Date.parse(iso ?? '')) / 86400000;
-
-function load(path, header = '') {
-  const doc = existsSync(path) ? parseDocument(readFileSync(path, 'utf8')) : parseDocument(header);
-  if (!doc.get('blueprints')) doc.set('blueprints', doc.createNode([]));
-  return doc;
-}
 
 export function add(args) {
   const { values, positionals } = parseArgs({
@@ -116,145 +109,65 @@ export function add(args) {
     return end(2);
   }
   /*
-   * Which `.walkdown` takes it. An ephemeral copy always goes in the personal
-   * one: it is a fact about this afternoon on this disk, and a clone should
-   * never inherit somebody's scratch directory. Anything else goes in the
-   * `.walkdown` that answers where you are standing, so a declaration a team
-   * shares travels with the checkout.
+   * Where the home stands says what it is (ADR 0003 §3). A numbered home
+   * under some `<project>/.walkdown/blueprints/` is that project's - the
+   * row carries the project, and standing in the checkout reaches it. A
+   * home standing anywhere else is a copy, and a copy is what `--ephemeral`
+   * lists: no project, reachable by name only.
    */
+  const project = /\/\.walkdown\/blueprints\/\d{4}-[^/]+$/.test(homeDir)
+    ? resolve(homeDir, '..', '..', '..')
+    : null;
   /*
-   * A blueprint whose own checkout declares it is already a project there,
-   * and listing it again from outside minted a second entry and an empty
-   * second home for the same spec (n-0170, G2). Say so and stop; standing in
-   * that checkout is how it is reached.
+   * A COPY MEANS A COPY. `--ephemeral` used to accept an original, and an
+   * ephemeral entry's records follow its spec - so the "throwaway copy" was
+   * the live ledger with a second name, and a root server's pin landed in it
+   * (q-0176). A project's own numbered home is refused; a path no project
+   * owns, such as a copy under `.walkdown/tmp/`, is what this flag is for.
    */
-  const own = walkdownRoot(homeDir);
-  const here = walkdownRoot();
-  /*
-   * Compared canonically: `own` is walked from the spelling the person
-   * typed and `here` from process.cwd(), which is the real path, and on
-   * macOS /tmp is /private/tmp - so naming a pack's own blueprint through
-   * the other spelling refused it as lying under itself (n-0177).
-   */
-  const same = (a, b) => Boolean(a) && Boolean(b) && canon(a) === canon(b);
-  const listedIn = (walkdown) => {
-    const rows = load(join(walkdown, 'config.yml')).get('blueprints');
-    return (rows?.items ?? []).find(
-      (it) =>
-        String(it.get?.('spec') ?? '') &&
-        canon(expand(String(it.get('spec')), resolve(walkdown, '..'))) === canon(spec),
-    );
-  };
-  if (own && !values.ephemeral && !same(own, here)) {
-    const there = listedIn(own);
-    /*
-     * That `.walkdown` is the one that answers for it, listed there already
-     * or not (q-0168): a committed entry from here would be the boundary
-     * crossing one-walkdown-answers forbids, so it is refused rather than
-     * written and contained.
-     */
+  if (project && values.ephemeral) {
     console.error(
       red(
-        `${spec} lies under ${own}, which answers for it${there ? ` (listed there as \`${there.get('id')}\`)` : ''} — stand in that checkout to use it, declare it there, or list a throwaway COPY of it with --ephemeral.`,
+        `${spec} is ${project}'s own blueprint — an ephemeral entry is for a throwaway COPY, and this is the original. Copy it somewhere no project owns (${join(project, '.walkdown', 'tmp', '<label>')}, say) and list the copy.`,
       ),
     );
     return end(2);
   }
-  /*
-   * A COPY MEANS A COPY. `--ephemeral` used to accept the very spec the
-   * refusal above pointed away from, and an ephemeral entry's records follow
-   * its spec - so for a pack that keeps its ledger inside its blueprint, the
-   * "throwaway copy" was the pack's live ledger with a second name, and a
-   * root server's pin landed in it (q-0176). A blueprint some `.walkdown`
-   * declares - listed in its config, or standing in one of its numbered
-   * homes - is refused; a path nothing declares, such as a copy under
-   * `.walkdown/tmp/`, is what this flag is for.
-   */
-  if (own && values.ephemeral) {
-    const there = listedIn(own);
-    const inHome = spec.startsWith(join(own, 'blueprints') + '/');
-    if (there || inHome) {
-      console.error(
-        red(
-          `${spec} is ${own}'s own blueprint${there ? ` (listed there as \`${there.get('id')}\`)` : ''} — an ephemeral entry is for a throwaway COPY, and this is the original. Copy it somewhere nothing declares (${join(own, 'tmp', '<label>', 'blueprint')}, say) and list the copy.`,
-        ),
-      );
-      return end(2);
-    }
-  }
-  const wd = values.ephemeral ? walkdownHome() : (here ?? walkdownHome());
-  const inRepo = !values.ephemeral && wd !== walkdownHome();
-  /*
-   * A listed home is a numbered one under the `.walkdown` that answers for
-   * it - that is what `home:` in the entry names, and what every other
-   * writer keeps. A home standing anywhere else is a copy, and a copy is
-   * what `--ephemeral` lists.
-   */
-  if (!values.ephemeral && canon(resolve(homeDir, '..')) !== canon(join(wd, 'blueprints'))) {
+  if (!project && !values.ephemeral) {
     console.error(
       red(
-        `${homeDir} is not one of ${join(wd, 'blueprints')}'s homes — a listed blueprint lives in a numbered home there (\`walkdown init\` lays one out). A copy standing elsewhere is listed with --ephemeral.`,
+        `${homeDir} is not a numbered home under any project's .walkdown/blueprints/ — a registered blueprint lives in one (\`walkdown init\` lays one out, \`walkdown import <project>\` registers what a checkout declares). A copy standing elsewhere is listed with --ephemeral.`,
       ),
     );
     return end(2);
   }
   for (const kind of KINDS) mkdirSync(join(homeDir, HOME_LAYOUT[kind]), { recursive: true });
-  const target = join(wd, 'config.yml');
-  const doc = load(target);
-  const listedRows = doc.get('blueprints');
-  /*
-   * Against the file's own base - the repository for a committed file, and
-   * nothing for the personal one, whose paths are absolute. Expanded against
-   * the `.walkdown` directory, `.walkdown/blueprints/...` became
-   * `.walkdown/.walkdown/blueprints/...` and a blueprint the file already
-   * listed was listed again (n-0178).
-   */
-  const listed = (listedRows.items ?? []).find(
-    (it) =>
-      String(it.get?.('spec') ?? '') &&
-      canon(expand(String(it.get('spec')), inRepo ? resolve(wd, '..') : undefined)) === canon(spec),
+  // The registry is the list (ADR 0003): a home already registered under any
+  // spelling is already listed.
+  const registered = readRegistry().rows.find(
+    (r) => r.home && canon(expand(String(r.home))) === canon(homeDir),
   );
-  if (listed) {
-    console.log(`  ${dim('· already listed')} ${spec}  ${dim(`as \`${listed.get('id')}\``)}`);
-    return end(0);
-  }
-  // Personally, the registry is the list (ADR 0003): a home already
-  // registered under any spelling is already listed.
-  const registered = inRepo
-    ? null
-    : readRegistry().rows.find((r) => r.home && canon(expand(String(r.home))) === canon(homeDir));
   if (registered) {
     console.log(`  ${dim('· already listed')} ${spec}  ${dim(`as \`${registered.id}\``)}`);
     return end(0);
   }
   const name = values.id ?? basename(homeDir).replace(/^\d{4}-/, '');
-  const taken = new Set(
-    (readUserConfig().config.blueprints ?? []).map((p) => p?.id).filter(Boolean),
-  );
+  const taken = new Set(readRegistry().rows.map((r) => r?.id).filter(Boolean));
   let id = name;
   for (let n = 2; taken.has(id); n++) id = `${name}-${n}`;
-  /*
-   * Written by the same hand as init's entry, which is what keeps a
-   * committed entry relative to its repository and a personal one spelled
-   * with `~` (n-0169). The home implies every record path; nothing is
-   * claimed, since the directory already stands, and an ephemeral copy
-   * carries no `home:` because it is nobody's numbered home.
-   */
   let written;
   try {
     written = rememberBlueprint({
       id,
-      root: values.ephemeral ? null : resolve(wd, '..'),
-      base: inRepo ? resolve(wd, '..') : null,
+      root: project,
       homeDir,
-      home: values.ephemeral ? null : basename(homeDir),
-      inRepo,
+      home: project ? basename(homeDir) : null,
+      inRepo: false,
       by: 'import',
       ...(values.ephemeral ? { ephemeral: { why: values.why ?? '' } } : {}),
     });
   } catch (e) {
     console.error(red(e.message));
-    console.error(dim('  `walkdown blueprint add <copy> --ephemeral` lists a throwaway copy in ~/.walkdown instead.'));
     return end(2);
   }
   console.log(`  ${green('+ listed')}   ${spec}  ${dim(`as \`${written.id}\``)}`);
@@ -268,46 +181,25 @@ function forget(args) {
     console.error('walkdown blueprint forget needs a blueprint id.');
     return end(2);
   }
-  let removed = false;
-  // The registry first: that is where a row written since ADR 0003 lives.
-  if (forgetFromRegistry({ id })) {
-    console.log(`  ${green('- forgotten')} \`${id}\`  ${dim(registryPath())}`);
-    console.log(dim('            Its records are untouched — only the registration is gone.'));
-    removed = true;
-  }
-  for (const path of [configPath(), walkdownRoot() && join(walkdownRoot(), 'config.yml')]) {
-    if (!path || !existsSync(path)) continue;
-    const doc = load(path);
-    const listedRows = doc.get('blueprints');
-    const i = (listedRows.items ?? []).findIndex((it) => String(it.get?.('id') ?? '') === id);
-    if (i < 0) continue;
-    listedRows.delete(i);
-    writeFileSync(path, String(doc));
-    console.log(`  ${green('- forgotten')} \`${id}\`  ${dim(path)}`);
-    console.log(dim('            Its records are untouched — only the declaration is gone.'));
-    removed = true;
-  }
-  if (!removed) {
-    console.error(`No blueprint \`${id}\` in either config. \`walkdown blueprints\` lists them.`);
+  // The registry is the only door (ADR 0003): a row there is the whole
+  // registration, and taking it away is the whole forgetting.
+  if (!forgetFromRegistry({ id })) {
+    console.error(`No blueprint \`${id}\` in ${registryPath()}. \`walkdown blueprints\` lists them.`);
     return end(2);
   }
+  console.log(`  ${green('- forgotten')} \`${id}\`  ${dim(registryPath())}`);
+  console.log(dim('            Its records are untouched — only the registration is gone.'));
   return end(0);
 }
 
 export function list(args) {
   const { values } = parseArgs({ args, options: { stale: { type: 'boolean', default: false } } });
-  const { config, shadowed } = readUserConfig();
-  /*
-   * An entry with no spec is not a blueprint: it is a personal override of a
-   * repository's entry - evidence on this disk, a port - and it lists as that
-   * repository's blueprint wherever that repository answers. Standing anywhere
-   * else there is nothing to list under it.
-   */
+  const { config } = readUserConfig();
   const all = (config.blueprints ?? []).filter((p) => p?.spec);
   const live = all.filter((p) => !p?.ephemeral);
   const scratch = all.filter((p) => p?.ephemeral);
   if (!all.length) {
-    console.log(dim('No blueprints. `walkdown init` starts one, `walkdown blueprint add` lists one.'));
+    console.log(dim('No blueprints. `walkdown init` starts one, `walkdown import <project>` registers one.'));
     return end(0);
   }
   const row = (p, pad = '  ') => {
@@ -315,15 +207,6 @@ export function list(args) {
     console.log(`${pad}${String(p.id).padEnd(14)} ${expand(p.spec ?? '')}${missing}`);
   };
   if (!values.stale) for (const p of live) row(p);
-  // A personal entry sharing a name with one this repository declares, and
-  // rooted elsewhere: a different project, reachable from its own checkout,
-  // and not silently merged into this one (n-0160).
-  if (shadowed?.length && !values.stale)
-    console.log(
-      dim(
-        `\n  ${shadowed.length} personal entr${shadowed.length === 1 ? 'y' : 'ies'} shadowed here by this repository's: ${shadowed.join(', ')}`,
-      ),
-    );
   /*
    * And the homes standing in the .walkdown that no row names.
    *
@@ -340,14 +223,22 @@ export function list(args) {
    * blueprints can share one - so this says what is standing there and leaves
    * the decision, `blueprint add` included, to a person.
    */
+  const projects = [...new Set(all.map((p) => p.project).filter(Boolean))];
   for (const [walkdown, label] of [
     [walkdownHome(), 'your own'],
-    [config.repo?.path ? dirname(config.repo.path) : null, 'this repository'],
+    ...projects.map((root) => [join(root, '.walkdown'), `${root}'s`]),
   ]) {
     const homes = walkdown ? join(walkdown, 'blueprints') : null;
     if (!homes || !existsSync(homes)) continue;
+    // A home is claimed by the row whose spec it holds - or by a row that
+    // moved one kind of record into it (`evidence: ~/.walkdown/blueprints/
+    // 0001-x/evidence` on a row whose home is in a checkout is that home's
+    // claim on the directory, not a stranded home).
     const claimed = new Set(
-      all.map((p) => p.spec && canon(dirname(expand(String(p.spec))))).filter(Boolean),
+      all.flatMap((p) => [
+        p.spec && canon(dirname(expand(String(p.spec)))),
+        ...KINDS.map((k) => p[k] && canon(dirname(expand(String(p[k]))))),
+      ]).filter(Boolean),
     );
     const orphans = readdirSync(homes)
       .filter((d) => /^\d{4}-/.test(d))
@@ -360,7 +251,7 @@ export function list(args) {
     console.log(
       dim(
         '    Left standing, and not guessed at — walkdown will not decide which checkout\n' +
-          '    they belong to. `walkdown blueprint add <path>` lists one if you know.',
+          '    they belong to. `walkdown import <home>` registers one if you know.',
       ),
     );
   }
@@ -380,8 +271,14 @@ export function list(args) {
 
 export function run(args) {
   const [verb, ...rest] = args;
-  if (verb === 'add') return add(rest);
   if (verb === 'forget') return forget(rest);
+  // ONE ADD (ADR 0003 §3): `import` takes a project or a bare home, and
+  // `blueprint add` was the second door to the same registry.
+  if (verb === 'add') {
+    console.error(red('`walkdown blueprint add` is `walkdown import <path>` now — one door into the registry.'));
+    console.error(HELP);
+    return end(2);
+  }
   if (!verb) {
     console.error(HELP);
     return end(2);

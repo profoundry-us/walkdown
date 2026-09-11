@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { createWalkdownServer } from '../lib/serve.js';
 import { declaredHome } from '../tools/test-home.mjs';
+import { parse, stringify } from '../vendor/yaml.js';
 
 /*
  * Evidence is recorded in the ledger as a logical key - "runs/evidence/<run>/
@@ -33,13 +34,15 @@ async function withServer(f, fn) {
  */
 function fixture() {
   const root = mkdtempSync(join(tmpdir(), 'wd-ev-'));
+  // The personal home first: the registry lives in it (ADR 0003), and
+  // declaredHome registers into whichever home is pinned.
+  const home = join(root, 'home');
+  mkdirSync(home, { recursive: true });
+  process.env.WALKDOWN_HOME = home;
   const h = declaredHome(root, 'ev-fixture');
   mkdirSync(join(h.spec, 'features'), { recursive: true });
   writeFileSync(join(h.spec, 'walkdown.yml'), 'blueprint: ev-fixture\n');
   writeFileSync(join(h.spec, 'storyboard.yml'), 'screens: []\n');
-  const home = join(root, 'home');
-  mkdirSync(home, { recursive: true });
-  process.env.WALKDOWN_HOME = home;
   return { root, bp: h.spec, h, home, cleanup: () => rmSync(root, { recursive: true, force: true }) };
 }
 
@@ -76,14 +79,14 @@ test('with evidence moved out, the same recorded key finds it at the new root @r
      * share one home. The rule under test is unchanged: a recorded key still
      * finds its screenshot at the configured root.
      */
-    writeFileSync(
-      join(f.home, 'config.yml'),
-      // A pure personal override on the declared entry - the shape
-      // `walkdown move evidence --to <path>` writes. It names no spec and no
-      // roots: the repository's entry says where the blueprint is, and this
-      // says only where THIS machine keeps its screenshots.
-      `blueprints:\n  - id: ev-fixture\n    evidence: ${join(f.home, 'projects', 'ev-fixture', 'evidence')}\n`,
-    );
+    // An `evidence:` override on the registry row - the shape `walkdown
+    // move evidence --to <path>` writes (ADR 0003): the home says where
+    // the blueprint is, and this says only where THIS machine keeps its
+    // screenshots.
+    const reg = join(f.home, 'registry.yml');
+    const doc = parse(readFileSync(reg, 'utf8'));
+    doc.blueprints.find((r) => r.id === 'ev-fixture').evidence = join(f.home, 'projects', 'ev-fixture', 'evidence');
+    writeFileSync(reg, stringify(doc));
     const out = join(f.home, 'projects', 'ev-fixture', 'evidence', 'r1');
     mkdirSync(out, { recursive: true });
     writeFileSync(join(out, 'shot.png'), 'MOVED-OUT');

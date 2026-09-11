@@ -26,24 +26,21 @@ const root = mkdtempSync(join(tmpdir(), 'wd-reporter-'));
 const bp = join(root, 'blueprint');
 mkdirSync(join(bp, 'features'), { recursive: true });
 /*
- * Declared in the pinned home, with every record named. The reporter resolves
- * where a run goes from the config, and a blueprint nothing declares has
- * nowhere to file one - so a fixture that skipped this would be testing a
- * door that no longer opens.
+ * Registered in the pinned home (ADR 0003). The reporter resolves where a
+ * run goes from the registry, and a blueprint nothing registers has nowhere
+ * to file one - so a fixture that skipped this would be testing a door that
+ * no longer opens. The home is the fixture root: `blueprint/` with the four
+ * record directories beside it.
  */
+writeFileSync(join(home, 'config.yml'), 'identity:\n  username: A Person\n');
 writeFileSync(
-  join(home, 'config.yml'),
+  join(home, 'registry.yml'),
   [
-    'identity:',
-    '  username: A Person',
     'blueprints:',
     '  - id: reporter-fixture',
-    `    roots: [${root}]`,
-    `    spec: ${bp}`,
-    `    threads: ${join(root, 'threads')}`,
-    `    runs: ${join(root, 'runs')}`,
-    `    evidence: ${join(root, 'evidence')}`,
-    `    drafts: ${join(root, 'drafts')}`,
+    `    project: ${root}`,
+    `    home: ${root}`,
+    "    registered: { by: import, at: '2026-01-01T00:00:00Z' }",
     '',
   ].join('\n'),
 );

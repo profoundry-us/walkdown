@@ -43,7 +43,7 @@ after(() => {
  * the code is once the spec has stopped sitting next to it.
  */
 function apart({ runner = {}, withEntry = true } = {}) {
-  const root = mkdtempSync(join(tmpdir(), 'wd-coderoot-'));
+  const root = realpathSync(mkdtempSync(join(tmpdir(), 'wd-coderoot-')));
   roots.push(root);
   const home = join(root, 'home');
   mkdirSync(home, { recursive: true });
@@ -73,10 +73,10 @@ function apart({ runner = {}, withEntry = true } = {}) {
   );
   if (withEntry)
     writeFileSync(
-      join(home, 'config.yml'),
-      // A real home: `home:` is what every record path derives from, and an
-      // entry naming a spec but no home is a hand edit lint now refuses.
-      `blueprints:\n  - id: apart\n    roots: [${code}]\n    home: 0001-apart\n    spec: ${spec}\n`,
+      join(home, 'registry.yml'),
+      // A registry row (ADR 0003): the home is where every record path
+      // derives from, and the project is the code the spec describes.
+      `blueprints:\n  - id: apart\n    project: ${code}\n    home: ${join(home, 'blueprints', '0001-apart')}\n    registered: { by: init, at: '2026-01-01T00:00:00Z' }\n`,
     );
   return { root, home, code, spec };
 }
@@ -169,7 +169,7 @@ test('a blueprint no entry declares is refused, never resolved from the caller',
   assert.throws(
     () => loadBlueprint(spec),
     (err) => {
-      assert.match(err.message, /nothing declares/);
+      assert.match(err.message, /nothing registered/);
       assert.ok(!err.message.includes('walkdown/lib'), 'and never this process’s repository');
       return true;
     },

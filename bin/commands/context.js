@@ -55,7 +55,7 @@ export function noBlueprintHere(loc, blueprintId) {
   console.error(
     blueprintId
       ? '`walkdown blueprints` lists what is declared here.'
-      : '`walkdown init` starts one, `walkdown project add <path>` lists an existing one, and `walkdown where` shows what was consulted.',
+      : '`walkdown init` starts one, `walkdown import <project>` registers an existing one, and `walkdown where` shows what was consulted.',
   );
   process.exit(2);
 }

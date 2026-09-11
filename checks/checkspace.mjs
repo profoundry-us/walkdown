@@ -137,12 +137,6 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
    * a pin placed there would vanish the moment it was filed.
    */
   /*
-   * Declare the copies. The server used to WALK the checkspace for
-   * `walkdown.yml` files; it reads a config now (n-0133), and without one
-   * here the walk upward finds walkdown's OWN committed config instead - so
-   * the panel would list the real blueprint beside the disposable one and
-   * `?bp=` could select the ledger this suite exists not to touch.
-   *
    * Ids match what the discovery used to produce, because the fixture page
    * defaults `data-bp` to `blueprint`.
    */
@@ -158,26 +152,26 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
     ['identity:', '  username: checks-person', '  name: A Checks Person', ''].join('\n'),
   );
 
-  mkdirSync(join(CHECKSPACE, '.walkdown'), { recursive: true });
+  /*
+   * Registered in the pinned home (ADR 0003): the two copies are rows in the
+   * checkspace's own registry, written the way `walkdown import` would write
+   * them, and nothing else on this machine is on offer. Both rows name the
+   * checkspace as their project: one project holding two blueprints is the
+   * shape the project modal's second question exists for, and what the
+   * checks drive.
+   */
   writeFileSync(
-    join(CHECKSPACE, '.walkdown', 'config.yml'),
+    join(process.env.WALKDOWN_HOME, 'registry.yml'),
     [
       'blueprints:',
       '  - id: blueprint',
-      '    roots: [.]',
-      `    spec: ${HOME}/blueprint`,
-      `    threads: ${HOME}/threads`,
-      `    runs: ${HOME}/runs`,
-      `    evidence: ${HOME}/evidence`,
-      `    drafts: ${HOME}/drafts`,
-      '    home: 0001-walkdown',
+      `    project: ${CHECKSPACE}`,
+      `    home: ${join(CHECKSPACE, HOME)}`,
+      "    registered: { by: import, at: '2026-01-01T00:00:00Z' }",
       '  - id: example/blueprint',
-      '    roots: [example]',
-      '    spec: example/blueprint',
-      '    threads: example/threads',
-      '    runs: example/runs',
-      '    evidence: example/evidence',
-      '    drafts: example/drafts',
+      `    project: ${CHECKSPACE}`,
+      `    home: ${join(CHECKSPACE, 'example')}`,
+      "    registered: { by: import, at: '2026-01-01T00:00:00Z' }",
       '',
     ].join('\n'),
   );

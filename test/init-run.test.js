@@ -1,4 +1,4 @@
-import '../tools/test-home.mjs';
+import { register } from '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import {
@@ -55,23 +55,15 @@ const spec = (proj) => ({ specDir: homeSpec(proj), commit: 'spec' });
 const rel = (proj, ...parts) =>
   join('.walkdown', 'blueprints', `0001-${basename(proj)}`, 'blueprint', ...parts);
 function declare(proj, name = basename(proj)) {
-  const home = join('.walkdown', 'blueprints', `0001-${name}`);
+  const home = join(proj, '.walkdown', 'blueprints', `0001-${name}`);
   mkdirSync(join(proj, '.walkdown'), { recursive: true });
   writeFileSync(
     join(proj, '.walkdown', 'config.yml'),
-    [
-      'blueprints:',
-      `  - id: ${name}`,
-      '    roots: [.]',
-      `    home: 0001-${name}`,
-      `    spec: ${join(home, 'blueprint')}`,
-      `    threads: ${join(home, 'threads')}`,
-      `    runs: ${join(home, 'runs')}`,
-      `    evidence: ${join(home, 'evidence')}`,
-      `    drafts: ${join(home, 'drafts')}`,
-      '',
-    ].join('\n'),
+    ['blueprints:', `  - id: ${name}`, `    home: 0001-${name}`, ''].join('\n'),
   );
+  // The manifest above is what the checkout declares; the registry row is
+  // what a reader goes through (ADR 0003).
+  register({ id: name, project: proj, homeDir: home });
   return homeSpec(proj, name);
 }
 
@@ -409,15 +401,15 @@ test('run sees a record arrive in a runs directory a config moved @rule:location
   const runsAway = join(home, 'elsewhere', 'runs');
   mkdirSync(join(proj, 'blueprint'), { recursive: true });
   mkdirSync(home, { recursive: true });
+  writeFileSync(join(home, 'config.yml'), ['defaults:', `  runs: ${runsAway}`, ''].join('\n'));
   writeFileSync(
-    join(home, 'config.yml'),
+    join(home, 'registry.yml'),
     [
-      'defaults:',
-      `  runs: ${runsAway}`,
       'blueprints:',
       '  - id: moved-ledger',
-      `    roots: [${proj}]`,
-      `    spec: ${join(proj, 'blueprint')}`,
+      `    project: ${proj}`,
+      `    home: ${proj}`,
+      "    registered: { by: import, at: '2026-01-01T00:00:00Z' }",
       '',
     ].join('\n'),
   );
@@ -455,21 +447,7 @@ test('run substitutes {id}, injects target env and WALKDOWN_TARGET, propagates e
    * for - and `runChecks` reaches it through the same resolver everything
    * else does.
    */
-  mkdirSync(join(proj, '.walkdown'), { recursive: true });
-  writeFileSync(
-    join(proj, '.walkdown', 'config.yml'),
-    [
-      'blueprints:',
-      '  - id: runner',
-      '    roots: [.]',
-      '    spec: blueprint',
-      '    threads: threads',
-      '    runs: runs',
-      '    evidence: evidence',
-      '    drafts: drafts',
-      '',
-    ].join('\n'),
-  );
+  register({ id: 'runner', project: proj, homeDir: proj });
   const probe = `node -e "require('fs').writeFileSync('probe.txt', process.env.WALKDOWN_TARGET + ':' + process.env.APP_HOST + ':' + (process.env.RULE_ARG || ''))"`;
   writeFileSync(
     join(proj, 'blueprint', 'walkdown.yml'),

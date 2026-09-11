@@ -62,9 +62,16 @@ export const WD_ORIGIN = `http://localhost:${WD_PORT}`;
  */
 const prePin = process.env.WALKDOWN_HOME;
 delete process.env.WALKDOWN_HOME;
-const EVIDENCE = RECORD
-  ? resolveLocations({ spec: new URL(`./${HOME}/blueprint`, import.meta.url).pathname }).evidence.path
-  : null;
+const SPEC = new URL(`./${HOME}/blueprint`, import.meta.url).pathname;
+const OF_RECORD = RECORD ? resolveLocations({ spec: SPEC }) : null;
+const EVIDENCE = OF_RECORD?.evidence.path ?? null;
+/*
+ * And the blueprint the run is recorded against, resolved here for the same
+ * reason: the reporter runs under the checkspace pin, where the registry
+ * names the throwaway copy and not this checkout (ADR 0003), so left to
+ * resolve on its own it would find nothing of record to file into.
+ */
+const RECORD_DIR = OF_RECORD?.spec.path ?? null;
 if (prePin !== undefined) process.env.WALKDOWN_HOME = prePin;
 
 /*
@@ -134,7 +141,9 @@ export default defineConfig({
   globalSetup: './checks/global-setup.mjs',
   // Adopters write ['walkdown/reporter']; inside the package itself that alias
   // cannot self-resolve from Playwright's own module scope, so point at the file.
-  reporter: RECORD ? [['list'], ['./lib/playwright-reporter.js', { baseUrl: DECLARED, evidenceDir: EVIDENCE }]] : [['list']],
+  reporter: RECORD
+    ? [['list'], ['./lib/playwright-reporter.js', { dir: RECORD_DIR, home: prePin ?? null, baseUrl: DECLARED, evidenceDir: EVIDENCE }]]
+    : [['list']],
   use: {
     /*
      * The system under test is walkdown itself, so this is walkdown's own

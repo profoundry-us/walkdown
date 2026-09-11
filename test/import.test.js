@@ -265,8 +265,8 @@ test('a bare home imports as one row, and --ephemeral marks it a copy', () => {
     assert.match(where, /scratch\/0001-checkout\/blueprint/);
     assert.match(where, /the registry — names this project, registered by import/);
 
-    // And the old spelling is the same door.
-    const again = walkdown(s.home, ['blueprint', 'add', copy, '--ephemeral', '--why', 'a look'], s.root);
+    // And asked again, it is the same row.
+    const again = walkdown(s.home, ['import', copy, '--ephemeral', '--why', 'a look'], s.root);
     assert.match(again.stdout, /already listed/);
   } finally {
     s.cleanup();

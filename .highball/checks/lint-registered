@@ -1,0 +1,36 @@
+#!/usr/bin/env node
+/*
+ * Lint one of this repository's two blueprints from a home of the hook's own.
+ *
+ * The registry is the only door (ADR 0003): `walkdown lint` answers for the
+ * blueprint the registry names for the directory it stands in, and nothing
+ * else. Run against the developer's real ~/.walkdown that is a check whose
+ * verdict depends on whose laptop ran it - registered here, unregistered on
+ * a fresh clone, and a clone's first hook would fail on "nothing registered
+ * contains this directory" with the blueprint untouched. So the hook pins a
+ * home under tmp/ and imports the checkout into it first, the same way a
+ * person's first `walkdown import .` does, and only then lints. Idempotent:
+ * an import of a checkout already in the registry is "already imported".
+ *
+ *     .highball/checks/lint-registered .          walkdown's own blueprint
+ *     .highball/checks/lint-registered example    the example's
+ */
+import { spawnSync } from "node:child_process";
+import { mkdirSync } from "node:fs";
+import { resolve } from "node:path";
+
+const root = resolve(import.meta.dirname, "..", "..");
+const dir = resolve(root, process.argv[2] ?? ".");
+const home = resolve(root, "tmp", "hook-home");
+mkdirSync(home, { recursive: true });
+const env = { ...process.env, WALKDOWN_HOME: home, NO_COLOR: "1" };
+const cli = resolve(root, "bin", "walkdown.js");
+
+const imported = spawnSync(process.execPath, [cli, "import", dir, "--all"], { cwd: root, env, encoding: "utf8" });
+if (imported.status !== 0) {
+  process.stdout.write(imported.stdout + imported.stderr);
+  process.exit(imported.status ?? 1);
+}
+const lint = spawnSync(process.execPath, [cli, "lint"], { cwd: dir, env, encoding: "utf8" });
+process.stdout.write(lint.stdout + lint.stderr);
+process.exit(lint.status ?? 1);

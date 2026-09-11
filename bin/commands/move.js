@@ -2,7 +2,7 @@ import { existsSync, lstatSync, mkdirSync, readdirSync, realpathSync, statSync }
 import { homedir } from 'node:os';
 import { dirname, resolve, sep } from 'node:path';
 import { parseArgs } from 'node:util';
-import { canRemember, KINDS, rememberLocation, resolveLocations } from '../../lib/locations.js';
+import { canon, canRemember, KINDS, rememberLocation, resolveLocations } from '../../lib/locations.js';
 import { dim, green, red } from '../../lib/report/tty.js';
 import { MoveFailed, moveDir } from '../../lib/standard.js';
 import { end } from './context.js';
@@ -43,10 +43,10 @@ export function run(args) {
       red(
         values.blueprint
           ? `No blueprint \`${values.blueprint}\` — \`walkdown blueprints\` lists them.`
-          : 'Nothing declares this directory, so there is no entry to remember a move in.',
+          : 'Nothing registered contains this directory, so there is no row to remember a move in.',
       ),
     );
-    console.error(dim('`walkdown init` starts a project here; `walkdown project add <path>` lists one.'));
+    console.error(dim('`walkdown init` starts a blueprint here; `walkdown import <project>` registers one that exists.'));
     return end(2);
   }
   const from = loc[kind].path;
@@ -68,7 +68,9 @@ export function run(args) {
     console.error(`${kind} is a directory of records. Name a directory to keep them in.`);
     return end(2);
   }
-  if (to.startsWith(from + sep)) {
+  // Compared canonically: `from` comes out of the registry as a real path,
+  // and the person may have typed the other spelling of the same directory.
+  if (canon(to).startsWith(canon(from) + sep)) {
     console.error(red(`${to} is inside ${from}.`));
     console.error('A directory cannot be moved into itself. Pick a destination beside it.');
     return end(2);

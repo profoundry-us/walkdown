@@ -48,95 +48,43 @@ export function run(args) {
 
   console.log(`walkdown where — ${loc.id}\n`);
   /*
-   * Each file answers for ITSELF. The two rows used to share one flag, which
-   * was computed over the merge - so a repository declaring the project lit
-   * up the personal file's row as "names this project" even where the
-   * personal file had never heard of it, and the alternative wording was
-   * unreachable whenever a repo config claimed the project (n-0144). Two
-   * files with two authors get two answers; that is the question this command
-   * exists to answer.
+   * Two files, each answering for itself. config.yml is the person's -
+   * identity and defaults - and registers nothing since ADR 0003; the
+   * registry is what this machine knows about, and the only thing consulted.
    */
-  const names = loc.config.matchedIn;
   const cfg = loc.config.exists
     ? loc.config.error
       ? red(`unreadable — ${loc.config.error}`)
-      : names === 'personal' || names === 'both'
-        ? green('names this project')
-        : dim('present, no entry for this project')
+      : dim('yours — identity and defaults; registers nothing')
     : dim('not present — every default applies');
   console.log(`  ${'config'.padEnd(9)} ${loc.config.path}`);
   console.log(`  ${''.padEnd(9)} ${cfg}`);
-  // A relative path has no base in a file that sits in ~/.walkdown and is
-  // about every project on the disk; it was set aside, and this says so.
+  // A row this file no longer reads - a `blueprints:` list from before the
+  // registry, or a relative path in a file about every project on the disk
+  // - was set aside, and this says so.
   for (const ig of loc.config.ignored ?? [])
     console.log(
       `  ${''.padEnd(9)} ${yellow(
-        `ignores \`${ig.key}: ${ig.value}\`${ig.id ? ` in entry \`${ig.id}\`` : ''} — ${ig.why ?? 'a relative path means nothing in this file; write it in full'}`,
+        `ignores \`${ig.key}: ${typeof ig.value === 'string' ? ig.value : ig.id ?? '…'}\`${ig.id && typeof ig.value === 'string' ? ` in entry \`${ig.id}\`` : ''} — ${ig.why ?? 'a relative path means nothing in this file; write it in full'}`,
       )}`,
     );
-  if (loc.config.registry) {
-    const reg = loc.config.registry;
-    console.log(`  ${''.padEnd(9)} ${reg.path}`);
+  const reg = loc.config.registry;
+  console.log(`  ${''.padEnd(9)} ${reg.path}`);
+  console.log(
+    `  ${''.padEnd(9)} ${
+      reg.exists
+        ? reg.error
+          ? red(`unreadable — ${reg.error}`)
+          : reg.matched
+            ? green(`the registry — names this project, registered by ${reg.registeredBy ?? 'walkdown'}`)
+            : dim('the registry — what this machine knows about; no row for this project')
+        : dim('the registry — not present; `walkdown import` or `walkdown init` starts it')
+    }`,
+  );
+  if (loc.ambiguous)
     console.log(
-      `  ${''.padEnd(9)} ${
-        reg.exists
-          ? reg.error
-            ? red(`unreadable — ${reg.error}`)
-            : reg.matched
-              ? green(
-                  `the registry — names this project, registered by ${reg.registeredBy ?? 'walkdown'}`,
-                )
-              : dim('the registry — what this machine knows about; no row for this project')
-          : dim('the registry — not present; `walkdown import` or `walkdown init` starts it')
-      }`,
-    );
-    /*
-     * ADR 0003 step 2: the registry's own answer, computed beside the walk's.
-     * Where they agree nothing more is said. Where they differ, this is the
-     * line that says so - a finding, before step 3 makes the registry's
-     * answer the only one.
-     */
-    const pick = reg.pick;
-    if (pick && !pick.agrees) {
-      console.log(
-        `  ${''.padEnd(9)} ${yellow(
-          pick.picked
-            ? `the registry would answer \`${pick.picked}\` (${pick.spec}) — ${pick.why}; the walk answered differently (ADR 0003 step 2)`
-            : `the registry would answer nothing here — ${pick.why}; after ADR 0003 step 3 this says \`walkdown import .\``,
-        )}`,
-      );
-    }
-  }
-  if (loc.config.repo) {
-    console.log(`  ${''.padEnd(9)} ${loc.config.repo.path}`);
-    const shared = "this repository's, shared";
-    console.log(
-      `  ${''.padEnd(9)} ${
-        loc.config.repo.error
-          ? red(`unreadable — ${loc.config.repo.error}`)
-          : loc.config.repo.matched
-            ? green(
-                names === 'both'
-                  ? `${shared} — names this project too; the personal config above wins where they disagree`
-                  : `${shared} — names this project`,
-              )
-            : dim(`${shared} — no entry for this project`)
-      }`,
-    );
-  }
-  /*
-   * An entry reaching under another `.walkdown` is not read, from EITHER file:
-   * that directory answers for the spec (q-0168, n-0188). Printed outside the
-   * block above because the personal file is consulted whether or not a
-   * committed one exists - and because `where` resolving a personal row while
-   * refusing the byte-identical committed one, in this same block, was the
-   * contradiction that settled the decision.
-   */
-  for (const r of loc.config.refused ?? [])
-    console.log(
-      `  ${''.padEnd(9)} ${red(
-        `refuses \`${r.id}\` — its spec ${r.spec} lies under ${r.under}, which answers for it; ` +
-          `declare it there${r.from === 'personal' ? ', stand in that checkout, or list a copy with --ephemeral' : ''}`,
+      `  ${''.padEnd(9)} ${yellow(
+        `several registered blueprints stand here (${(reg.candidates ?? []).join(', ')}) — say which with --blueprint`,
       )}`,
     );
   /*

@@ -28,25 +28,18 @@ test('node:test reporter records tagged tests as a hash-stamped run', () => {
     ].join('\n'),
   );
   /*
-   * Declared, because the reporter resolves through the config now rather
-   * than walking up for a `walkdown.yml` (n-0133). A repository config beside
-   * the fixture, which is what a project shipping its own blueprint has.
+   * Registered, because the reporter resolves through the registry (ADR
+   * 0003) rather than walking up for a `walkdown.yml` (n-0133). The fixture
+   * root is the home: `blueprint/` with the records beside it.
    */
-  mkdirSync(join(root, '.walkdown'), { recursive: true });
   writeFileSync(
-    join(root, '.walkdown', 'config.yml'),
-    // Naming every record, because the entry is what says where they go:
-    // a blueprint keeping runs inside itself is the layout from before homes
-    // and the resolver does not answer for it.
+    join(home, 'registry.yml'),
     [
       'blueprints:',
       '  - id: node-fixture',
-      '    roots: [.]',
-      '    spec: blueprint',
-      '    threads: threads',
-      '    runs: runs',
-      '    evidence: evidence',
-      '    drafts: drafts',
+      `    project: ${root}`,
+      `    home: ${root}`,
+      "    registered: { by: import, at: '2026-01-01T00:00:00Z' }",
       '',
     ].join('\n'),
   );

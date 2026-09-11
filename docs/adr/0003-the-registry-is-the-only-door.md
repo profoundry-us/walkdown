@@ -463,15 +463,44 @@ In this order, each step leaving the tree green:
    repository (deepest wins) - and names the one divergence: a committed
    manifest nobody imported, where the registry would answer nothing, which
    step 3 turns into the prompt to `walkdown import .`.
-3. **The walk goes.** `walkdownRoot()`, the crossing guard, the merge and
-   the override set-asides are deleted with their tests. `.highball/checks.yml`
-   and the example blueprint's checks gain their registry setup in the same
-   commit.
+3. **The walk goes.** *(Landed 2026-09-11.)* `walkdownRoot()`, the
+   crossing guard, the merge and the per-key set-asides are gone with their
+   tests; `resolveLocations` answers from `registryPick()` alone, and where
+   nothing is registered it names the manifest it can see and says
+   `walkdown import .`. `init` registers on every path (`--commit` too, and
+   a checkout whose manifest the registry has not met is registered rather
+   than set up a second time); `blueprint add` refuses and points at
+   `import`, which is the one add. The server lists the registry - every
+   blueprint this machine knows about, wherever it was started - and its
+   "serving" line is the registered project containing the cwd.
+   `.highball/checks.yml` lints from a home of the hook's own
+   (`tmp/hook-home`, imported first, so a fresh clone's first hook does not
+   fail on an unregistered checkout); the Playwright checkspace registers
+   its two copies as rows; the reporter is handed the blueprint of record
+   and the real home, since under the checkspace pin the registry names
+   the copy. Each test file gets a home of its own under `tmp/test-home`
+   (parallel suites sharing one registry was a read-modify-write race).
+
+   Two decisions the suite forced. A registry id is unique on the machine:
+   a second checkout called `app` registers as `app-2`, and `--blueprint
+   app` names the first - the manifest's `id` and the registry's can
+   differ, and the registry's is the handle. And a home outside any
+   `.walkdown` (a legacy pack keeping records inside its blueprint) has no
+   ignore file to be held to; `tracked` reports what git does and lint
+   has no promise to check, where the walk used to hold it to the
+   repository's `.gitignore` above.
 4. **Hand-written rows are set aside** (§5) and named on the report.
+   *(Landed with step 3.)* A `blueprints:` list in `~/.walkdown/config.yml`
+   is not read: each row is reported as ignored, with the sentence that
+   `walkdown import` registers it and the row can go. One transition: the
+   first registry row written about a checkout folds that row's
+   machine-local keys (a port, a moved evidence directory) into itself and
+   takes the row out of config.yml, so a decision made before the registry
+   is not lost on the way.
 5. **The rules:** retire, reword, add, as listed. Statement hashes
    rewritten, acceptance requeued. docs/08-locations.md rewritten around one
    file.
-6. **n-0275** is replied to at step 3 — the code it is about no longer
+6. **n-0275** is replied to at step 5 — the code it is about no longer
    exists — and its evidence fixture becomes the new rule's check.
 
 Nothing in this list was started until the status line above read

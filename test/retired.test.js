@@ -1,7 +1,8 @@
 import { declaredHome, suiteHome } from '../tools/test-home.mjs';
 
-/** This file's own personal home — declaring into a shared one races. */
+/** This file's own personal home, with an identity; the fixtures register into it. */
 const HOME = suiteHome('retired');
+process.env.WALKDOWN_HOME = HOME;
 import assert from 'node:assert/strict';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';

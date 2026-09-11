@@ -10,9 +10,8 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync,
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
-import { parse } from '../vendor/yaml.js';
 import { createWalkdownServer } from '../lib/serve.js';
-import { declaringFiles, readUserConfig, resolveLocations } from '../lib/locations.js';
+import { readRegistry, resolveLocations } from '../lib/locations.js';
 
 const CLI = new URL('../bin/walkdown.js', import.meta.url).pathname;
 
@@ -51,13 +50,13 @@ const walkdown = (home, args, cwd, ok = true) => {
 };
 
 /*
- * THE MERGE IS SCOPED, NOT NAMED. A personal entry overrides a repository's
- * only when it is about that checkout: same id, and a root inside it, or no
- * blueprint of its own at all. Two checkouts called `app`, one listed
- * personally, used to become one project - `thread new` in one filed into the
- * other's ledger (n-0160).
+ * TWO CHECKOUTS, ONE NAME, TWO ROWS. Two checkouts called `app` used to
+ * become one project through the merge - `thread new` in one filed into the
+ * other's ledger (n-0160). The registry keys nothing by name: each checkout
+ * is a row with its own project, standing in one reaches that one, and the
+ * second `app` takes the next free id on this machine (ADR 0003).
  */
-test('a personal entry rooted in another checkout never merges into this repository’s @rule:locations.default.one-home-per-blueprint', () => {
+test('two checkouts sharing a name are two rows, and each answers for itself @rule:locations.default.one-home-per-blueprint', () => {
   const s = scratch();
   try {
     const one = join(s.root, 'one', 'app');
@@ -70,11 +69,11 @@ test('a personal entry rooted in another checkout never merges into this reposit
     const locOne = resolveLocations({ cwd: one });
     const locTwo = resolveLocations({ cwd: two });
     assert.equal(locOne.id, 'app');
-    assert.equal(locTwo.id, 'app', 'both are called app, and that is allowed');
+    assert.match(locTwo.id, /^app/, 'both are called app, and the registry tells them apart');
+    assert.notEqual(locOne.id, locTwo.id);
     assert.notEqual(locOne.spec.path, locTwo.spec.path);
     assert.ok(locTwo.spec.path.startsWith(join(two, '.walkdown') + '/'), 'two answers with its own');
-    assert.equal(declaringFiles(locTwo.blueprint), 'repo', 'and the personal `app` is not merged into it');
-    assert.deepEqual(readUserConfig({ cwd: two }).shadowed, ['app'], 'it is reported as shadowed here');
+    assert.equal(readRegistry().rows.filter((r) => r.project === one || r.project === two).length, 2);
 
     // The write door: a note filed standing in `two` lands in `two`.
     const filed = walkdown(s.home, ['thread', 'new', '--rule', 'a.s.one', '--body', 'here', '--as-agent'], two, false);
@@ -86,25 +85,33 @@ test('a personal entry rooted in another checkout never merges into this reposit
   }
 });
 
-test('a rootless personal entry with a spec of its own is a different project, not an override @rule:locations.default.one-home-per-blueprint', () => {
+test('an ephemeral copy taking a registered id is a different row, not an override @rule:locations.default.one-home-per-blueprint', () => {
   const s = scratch();
   try {
     const repo = join(s.root, 'repo');
     mkdirSync(join(repo, '.git'), { recursive: true });
     walkdown(s.home, ['init', '--commit', 'spec'], repo);
     const copy = blueprint(join(s.root, 'elsewhere', 'blueprint'), 'copy');
-    // An ephemeral copy that happens to take the same id.
-    walkdown(s.home, ['blueprint', 'add', copy, '--id', 'repo', '--ephemeral', '--why', 'a sitting'], s.root);
+    // An ephemeral copy that asks for the same id, and gets the next one.
+    const said = walkdown(s.home, ['import', copy, '--id', 'repo', '--ephemeral', '--why', 'a sitting'], s.root).stdout;
+    assert.match(said, /as `repo-2`/);
 
     const loc = resolveLocations({ cwd: repo });
     assert.equal(loc.spec.path, join(repo, '.walkdown', 'blueprints', '0001-repo', 'blueprint'));
-    assert.equal(declaringFiles(loc.blueprint), 'repo');
+    assert.equal(loc.config.registry.matched, true);
+    assert.equal(resolveLocations({ cwd: repo, blueprint: 'repo-2' }).spec.path, copy);
   } finally {
     s.cleanup();
   }
 });
 
-test('a personal entry with no blueprint of its own is the override it always was', () => {
+/*
+ * CONFIG.YML REGISTERS NOTHING (ADR 0003 §4). A `blueprints:` row there -
+ * the override shape `walkdown move` used to write, or a hand-written entry
+ * from before the registry - is set aside and named, never merged: the
+ * registry row is the only row, and a moved kind is a key on it.
+ */
+test('a blueprints row in config.yml is set aside and named; the registry row carries the override', () => {
   const s = scratch();
   try {
     const repo = join(s.root, 'repo');
@@ -115,45 +122,16 @@ test('a personal entry with no blueprint of its own is the override it always wa
       `identity:\n  username: std-person\nblueprints:\n  - id: repo\n    evidence: ${join(s.root, 'ev')}\n`,
     );
     const loc = resolveLocations({ cwd: repo });
-    assert.equal(loc.evidence.path, join(s.root, 'ev'));
-    assert.equal(declaringFiles(loc.blueprint), 'both');
-  } finally {
-    s.cleanup();
-  }
-});
-
-/*
- * WHICH FILE DECLARED IT is a fact of its own. Computed from the per-key
- * marks, a personal entry restating every key the repository declared left
- * no key marked 'repo', and the report denied the committed file had an entry
- * it was the only reason for (n-0151).
- */
-test('restating every key personally does not erase the repository’s declaration @rule:locations.answer.declared-not-discovered', () => {
-  const s = scratch();
-  try {
-    const repo = join(s.root, 'repo');
-    mkdirSync(join(repo, '.git'), { recursive: true });
-    walkdown(s.home, ['init', '--commit', 'spec'], repo);
-    const committed = parse(readFileSync(join(repo, '.walkdown', 'config.yml'), 'utf8')).blueprints[0];
-    const restated = Object.fromEntries(
-      Object.entries(committed).map(([k, v]) => [
-        k,
-        k === 'roots' ? [repo] : k === 'home' || k === 'id' ? v : join(repo, v),
-      ]),
-    );
-    writeFileSync(
-      join(s.home, 'config.yml'),
-      'identity:\n  username: std-person\nblueprints:\n  - ' +
-        Object.entries(restated)
-          .map(([k, v]) => `${k}: ${Array.isArray(v) ? `[${v.join(', ')}]` : v}`)
-          .join('\n    ') +
-        '\n',
-    );
-    const loc = resolveLocations({ cwd: repo });
-    assert.equal(declaringFiles(loc.blueprint), 'both');
-    assert.equal(loc.config.repo.matched, true, 'the committed file still names it');
+    assert.equal(loc.evidence.path, join(repo, '.walkdown', 'blueprints', '0001-repo', 'evidence'), 'the row is not read');
+    assert.ok(loc.config.ignored.some((ig) => ig.key === 'blueprints' && /registers nothing/.test(ig.why)));
     const said = walkdown(s.home, ['where'], repo).stdout;
-    assert.match(said, /names this project too/);
+    assert.match(said, /registers nothing/);
+
+    // The same decision made through the door that exists lands on the row.
+    walkdown(s.home, ['move', 'evidence', '--to', join(s.root, 'ev')], repo);
+    assert.equal(resolveLocations({ cwd: repo }).evidence.path, join(s.root, 'ev'));
+    const row = readRegistry().rows.find((r) => r.project === repo);
+    assert.equal(row.evidence, join(s.root, 'ev'));
   } finally {
     s.cleanup();
   }
@@ -170,47 +148,35 @@ test('a server offers what the .walkdown where it was started declares, wherever
   try {
     const mono = join(s.root, 'mono');
     mkdirSync(join(mono, '.git'), { recursive: true });
-    blueprint(join(mono, 'blueprint'), 'root-proj');
     const alpha = join(mono, 'packs', 'alpha');
-    blueprint(join(alpha, 'blueprint'), 'alpha');
     blueprint(join(alpha, 'blueprint2'), 'alpha-two');
-    mkdirSync(join(mono, '.walkdown'), { recursive: true });
-    writeFileSync(
-      join(mono, '.walkdown', 'config.yml'),
-      'blueprints:\n  - id: root-proj\n    roots: [.]\n    spec: blueprint\n  - id: reach\n    roots: [packs/alpha]\n    spec: packs/alpha/blueprint\n',
-    );
-    mkdirSync(join(alpha, '.walkdown'), { recursive: true });
-    writeFileSync(
-      join(alpha, '.walkdown', 'config.yml'),
-      'blueprints:\n  - id: alpha\n    roots: [.]\n    spec: blueprint\n  - id: alpha-two\n    roots: [.]\n    spec: blueprint2\n',
-    );
+    // Registered: mono's own blueprint, and alpha's. Nothing registers the
+    // second blueprint in alpha, and nothing reaches it by standing above it.
+    walkdown(s.home, ['init'], mono);
+    walkdown(s.home, ['init'], alpha);
 
-    const server = createWalkdownServer(join(alpha, 'blueprint'), { cwd: mono });
+    const server = createWalkdownServer(join(alpha, 'blueprint2'), { cwd: mono });
     await new Promise((r) => server.listen(0, '127.0.0.1', r));
     const base = `http://127.0.0.1:${server.address().port}`;
     try {
       /*
-       * The served spec is alpha's, and mono's `.walkdown` - the one that
-       * answers where this server was started - does not declare it: `reach`
-       * names it, and a committed entry reaching under another `.walkdown`
-       * is refused. So the default selection is a misconfiguration, said
+       * The served spec is one nothing registered: a misconfiguration, said
        * outright on the request rather than by the server dying on it.
        */
       const dflt = await fetch(`${base}/api/blueprint`);
       assert.equal(dflt.status, 409);
-      assert.match((await dflt.json()).error, /nothing declares/);
+      assert.match((await dflt.json()).error, /nothing registered/);
       /*
-       * And the LIST is still the cwd's. `reach` is a hand-written committed
-       * entry naming a spec the pack's own `.walkdown` answers for. Lint
-       * reports it; and since q-0176 it is not read either, so the server
-       * never lists, serves or writes to it while it stands - the report and
-       * the behaviour agree.
+       * And the LIST is the registry's (ADR 0003): what this machine knows
+       * about, whatever directory the server was started in - and nothing
+       * else, so an unregistered blueprint is never listed, served or
+       * written to.
        */
-      const home = await (await fetch(`${base}/api/blueprint?bp=root-proj`)).json();
-      assert.deepEqual(home.blueprints.map((p) => p.id).sort(), ['root-proj']);
-      assert.equal((await fetch(`${base}/api/blueprint?bp=reach`)).status, 404, 'a refused entry is not on offer');
-      assert.equal((await fetch(`${base}/api/blueprint?bp=alpha-two`)).status, 404, 'the pack\'s own is not on offer');
-      assert.equal((await fetch(`${base}/api/blueprint?bp=root-proj`)).status, 200);
+      const home = await (await fetch(`${base}/api/blueprint?bp=mono`)).json();
+      assert.deepEqual(home.blueprints.map((p) => p.id).sort(), ['alpha', 'mono']);
+      assert.equal((await fetch(`${base}/api/blueprint?bp=reach`)).status, 404, 'an unregistered id is not on offer');
+      assert.equal((await fetch(`${base}/api/blueprint?bp=alpha-two`)).status, 404, 'the unregistered blueprint is not on offer');
+      assert.equal((await fetch(`${base}/api/blueprint?bp=mono`)).status, 200);
       const write = await fetch(`${base}/api/threads?bp=alpha-two`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
@@ -247,11 +213,8 @@ test('the folder a server says it serves is the place its list came from @rule:p
     const home = join(proj, '.walkdown', 'blueprints', '0001-proj');
     blueprint(join(home, 'blueprint'), 'proj');
     blueprint(join(proj, 'other', 'blueprint'), 'other');
-    writeFileSync(
-      join(proj, '.walkdown', 'config.yml'),
-      'blueprints:\n  - id: proj\n    roots: [.]\n    spec: .walkdown/blueprints/0001-proj/blueprint\n' +
-        '  - id: other\n    roots: [other]\n    spec: other/blueprint\n',
-    );
+    walkdown(s.home, ['import', home], s.root);
+    walkdown(s.home, ['import', join(proj, 'other'), '--ephemeral', '--why', 'a second on the list'], s.root);
 
     const server = createWalkdownServer(join(home, 'blueprint'), { cwd: proj });
     await new Promise((r) => server.listen(0, '127.0.0.1', r));
@@ -285,12 +248,12 @@ test('move refuses a directory nothing declares, and touches nobody else’s ent
     const stranger = join(s.root, 'two', 'app');
     for (const r of [listed, stranger]) mkdirSync(join(r, '.git'), { recursive: true });
     walkdown(s.home, ['init'], listed);
-    const before = readFileSync(join(s.home, 'config.yml'), 'utf8');
+    const before = readFileSync(join(s.home, 'registry.yml'), 'utf8');
 
     const r = walkdown(s.home, ['move', 'drafts', '--to', join(stranger, 'dr')], stranger, false);
     assert.equal(r.status, 2, r.stdout);
-    assert.match(r.stderr, /Nothing declares this directory/);
-    assert.equal(readFileSync(join(s.home, 'config.yml'), 'utf8'), before, 'the listed project is untouched');
+    assert.match(r.stderr, /Nothing registered contains this directory/);
+    assert.equal(readFileSync(join(s.home, 'registry.yml'), 'utf8'), before, 'the listed project is untouched');
     assert.equal(existsSync(join(stranger, 'dr')), false);
 
     // And from inside the listed one, it moves the listed one's.

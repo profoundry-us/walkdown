@@ -12,7 +12,7 @@
  * If you are here to make a red rule green, write the browser check. Do not
  * re-tag one of these.
  */
-import '../tools/test-home.mjs';
+import { register } from '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import {
   existsSync,
@@ -50,6 +50,16 @@ const DECLARED_HOME = join(root, 'home-declared');
 const GUESSING_HOME = join(root, 'home-guessing');
 let base;
 let server;
+/*
+ * A home that names nobody - but knows the same blueprints. The registry
+ * lives in the home (ADR 0003), so a home swapped in for its missing
+ * identity has to carry the registry with it, or the refusal under test is
+ * "nothing registered" rather than "nobody named".
+ */
+const guessing = () => {
+  writeFileSync(join(GUESSING_HOME, 'registry.yml'), readFileSync(join(DECLARED_HOME, 'registry.yml'), 'utf8'));
+  process.env.WALKDOWN_HOME = GUESSING_HOME;
+};
 
 before(async () => {
   mkdirSync(DECLARED_HOME, { recursive: true });
@@ -114,35 +124,14 @@ before(async () => {
   );
 
   /*
-   * Declared, not discovered. The server used to walk the fixture root for
-   * `walkdown.yml` files; it reads the list now, so the fixture writes one -
-   * a repository config beside the blueprints it describes (n-0133, n-0140).
+   * Registered, not discovered. The server used to walk the fixture root for
+   * `walkdown.yml` files, then read a committed list; it reads the registry
+   * now (ADR 0003), so the fixture registers its two homes the way
+   * `walkdown import` would - each home is `blueprint/` with the records
+   * beside it, and each is its own project.
    */
-  mkdirSync(join(root, '.walkdown'), { recursive: true });
-  writeFileSync(
-    join(root, '.walkdown', 'config.yml'),
-    [
-      // Every record named. A blueprint keeping its ledger inside itself was
-      // the layout before homes, and the resolver does not answer for it - an
-      // entry that names a spec and nothing else has nowhere to write.
-      'blueprints:',
-      '  - id: main',
-      '    roots: [.]',
-      '    spec: blueprint',
-      '    threads: threads',
-      '    runs: runs',
-      '    evidence: evidence',
-      '    drafts: drafts',
-      '  - id: sibling',
-      '    roots: [sibling]',
-      '    spec: sibling/blueprint',
-      '    threads: sibling/threads',
-      '    runs: sibling/runs',
-      '    evidence: sibling/evidence',
-      '    drafts: sibling/drafts',
-      '',
-    ].join('\n'),
-  );
+  register({ id: 'main', project: root, homeDir: root });
+  register({ id: 'sibling', project: join(root, 'sibling'), homeDir: join(root, 'sibling') });
 
   // Started IN the fixture: the `.walkdown` that answers where a server is
   // started is the scope of what it offers, never the served blueprint's
@@ -436,15 +425,16 @@ test('the blueprint payload carries a default actor @rule:status.attribution.use
   }
   // And inference is never a signature: a home that says nothing reports the
   // guess it made AS a guess, which is what the accept gate reads.
-  const guessing = defaultActor(process.cwd());
   process.env.WALKDOWN_HOME = GUESSING_HOME;
+  let guessed;
   try {
-    assert.equal(defaultActor(process.cwd()).declared, false);
-    assert.notEqual(defaultActor(process.cwd()).source, 'config');
+    guessed = defaultActor(process.cwd());
+    assert.equal(guessed.declared, false);
+    assert.notEqual(guessed.source, 'config');
   } finally {
     process.env.WALKDOWN_HOME = DECLARED_HOME;
   }
-  assert.ok(guessing.username.length > 0, 'though it still always has a name to offer');
+  assert.ok(guessed.username.length > 0, 'though it still always has a name to offer');
 
   // Identity and display name are two fields. `actor` - the one thing records
   // are written under - is the username, never the full name.
@@ -739,7 +729,7 @@ test('thread reply and status endpoints mutate through the validated path', asyn
    * cannot do now is have a declared identity to act under, so the refusal
    * that stands here is the one for a machine nobody has named.
    */
-  process.env.WALKDOWN_HOME = GUESSING_HOME;
+  guessing();
   const guessVerify = await post('/api/threads/n-0001/status', { status: 'verified' });
   process.env.WALKDOWN_HOME = DECLARED_HOME;
   assert.equal(guessVerify.status, 400);
@@ -780,21 +770,7 @@ test('a drifted check ref hands display to the tree and keeps the stale line as 
   mkdirSync(join(bp2, 'features'), { recursive: true });
   mkdirSync(join(root2, 'threads'), { recursive: true });
   mkdirSync(runs2, { recursive: true });
-  mkdirSync(join(root2, '.walkdown'), { recursive: true });
-  writeFileSync(
-    join(root2, '.walkdown', 'config.yml'),
-    [
-      'blueprints:',
-      '  - id: drift-fixture',
-      '    roots: [.]',
-      '    spec: blueprint',
-      '    threads: threads',
-      '    runs: runs',
-      '    evidence: evidence',
-      '    drafts: drafts',
-      '',
-    ].join('\n'),
-  );
+  register({ id: 'drift-fixture', project: root2, homeDir: root2 });
   writeFileSync(
     join(bp2, 'walkdown.yml'),
     'blueprint: drift-fixture\nauthoring: { location: [suite/] }\n',
@@ -904,9 +880,15 @@ test('two listed blueprints sharing an id are told apart by key, and a bare ?bp=
     join(root, 'twin', 'blueprint', 'features', 'f.yml'),
     'feature: f\nstories:\n  - id: f.s\n    rules:\n      - id: f.s.twin\n        statement: Twin.\n        verify: [checks]\n',
   );
-  const cfg = join(DECLARED_HOME, 'config.yml');
+  // A second row under the SAME id, written by hand into the registry: the
+  // writer de-duplicates ids, and this is the collision the key exists for.
+  const cfg = join(DECLARED_HOME, 'registry.yml');
   const before = readFileSync(cfg, 'utf8');
-  writeFileSync(cfg, before + `blueprints:\n  - id: sibling\n    roots: [${join(root, 'twin')}]\n    spec: ${join(root, 'twin', 'blueprint')}\n`);
+  writeFileSync(
+    cfg,
+    before +
+      `  - id: sibling\n    project: ${join(root, 'twin')}\n    home: ${join(root, 'twin')}\n    registered: { by: import, at: '2026-01-01T00:00:00Z' }\n`,
+  );
   try {
     const home = await (await fetch(`${base}/api/blueprint`)).json();
     const twins = home.blueprints.filter((p) => p.id === 'sibling');
@@ -1019,7 +1001,7 @@ test('a machine that only has a guess is refused, at this door too @rule:threads
    * and the panel offered Verify under one of those with the click going
    * through (n-0143). The refusal the CLI gives belongs here too.
    */
-  process.env.WALKDOWN_HOME = GUESSING_HOME;
+  guessing();
   try {
     const refused = await fetch(`${base}/api/threads/${note.id}/status`, {
       method: 'POST',

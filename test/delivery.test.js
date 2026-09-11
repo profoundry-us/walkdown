@@ -7,7 +7,7 @@
  * who cloned it. So this reads the package manifest and the source rather
  * than trusting that today's suite would have noticed.
  */
-import '../tools/test-home.mjs';
+import { register } from '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import {
@@ -84,6 +84,9 @@ test('the CLI runs from a tree with no node_modules @rule:delivery.install.clone
       cpSync(join(root, d), join(away, d), { recursive: true });
     cpSync(join(root, 'package.json'), join(away, 'package.json'));
     assert.equal(existsSync(join(away, 'node_modules')), false);
+    // This repository's own blueprint, registered in the suite's home the
+    // way `walkdown import .` would put it there (ADR 0003).
+    register({ id: 'walkdown', project: root.replace(/\/$/, ''), homeDir: join(root, '.walkdown', 'blueprints', '0001-walkdown') });
 
     const out = execFileSync(process.execPath, [
       join(away, 'bin', 'walkdown.js'),

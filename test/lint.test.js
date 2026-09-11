@@ -1,8 +1,8 @@
-import { declaredHome } from '../tools/test-home.mjs';
+import { declaredHome, register } from '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { after, test } from 'node:test';
 import { loadBlueprint } from '../lib/blueprint.js';
 import { formatHash } from '../lib/hash.js';
@@ -227,8 +227,10 @@ test('an undesigned screen without a design-request thread warns; with one it pa
 test('the in-repo example blueprint lints clean (without runner)', () => {
   // The example is a project of its own, declared by its own .walkdown - so it
   // is read as if standing in example/, where that .walkdown answers.
-  const example = new URL('../example', import.meta.url).pathname;
+  const example = new URL('../example', import.meta.url).pathname.replace(/\/$/, '');
   const bp = join(example, '.walkdown', 'blueprints', '0001-example', 'blueprint');
+  // Registered in this suite's home, as `walkdown import example` would.
+  register({ id: 'example', project: example, homeDir: dirname(bp) });
   const { findings, exitCode } = lint(loadBlueprint(bp, { cwd: example }), { checks: false });
   /*
    * One warning stands on purpose. waitlist-confirm and waitlist-already are

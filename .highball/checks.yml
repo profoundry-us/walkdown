@@ -20,16 +20,20 @@ checks:
   # a check referencing a rule that does not exist, or leaves an answered
   # thread unincorporated, has broken the spec while the code still runs.
   # Nothing else in the repo would say so.
+  #
+  # From a home of the hook's own (tmp/hook-home), imported first: the
+  # registry is the only door (ADR 0003), and a lint that read the
+  # developer's real registry would pass or fail on whose laptop ran it.
   - id: blueprint-lint
     name: The blueprint lints
-    run: node bin/walkdown.js lint
+    run: .highball/checks/lint-registered .
     fast: true
 
   # The example is not a demo we can let rot — it is the fixture the
   # integration tests run against, so its blueprint drifting is a real failure.
   - id: example-blueprint-lint
     name: The example blueprint lints
-    run: cd example && node ../bin/walkdown.js lint
+    run: .highball/checks/lint-registered example
     fast: true
 
   # The panel and the embed ship self-contained down two delivery paths, so

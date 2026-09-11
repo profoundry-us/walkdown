@@ -47,8 +47,13 @@ const HELP = `walkdown import <path> [--all] [--only <ids>] [--id <name>] [--eph
   --ephemeral  a throwaway copy of a home: reachable by name, never by standing somewhere
   --why        what the copy is for, kept beside it`;
 
-/** What a directory declares: its own `.walkdown/config.yml`, and only that. */
-function declaredIn(dir) {
+/**
+ * What a directory declares: its own `.walkdown/config.yml`, and only that.
+ * A row names its home (`home: 0001-x`, the numbered directory under
+ * `.walkdown/blueprints/`) or, from before homes were the whole story, its
+ * spec; either spelling is read, and the spec is what comes back.
+ */
+export function declaredIn(dir) {
   const config = join(dir, '.walkdown', 'config.yml');
   if (!existsSync(config)) return null;
   let parsed;
@@ -59,8 +64,12 @@ function declaredIn(dir) {
   }
   const out = [];
   for (const entry of parsed?.blueprints ?? []) {
-    if (!entry?.id || !entry?.spec) continue;
-    const spec = canon(expand(String(entry.spec), dir));
+    if (!entry?.id || !(entry?.spec || entry?.home)) continue;
+    const spec = canon(
+      entry.spec
+        ? expand(String(entry.spec), dir)
+        : join(dir, '.walkdown', 'blueprints', String(entry.home), HOME_LAYOUT.spec),
+    );
     if (!existsSync(join(spec, 'walkdown.yml'))) continue;
     let name = entry.id;
     let description = '';

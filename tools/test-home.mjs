@@ -19,12 +19,27 @@
  * `tmp/test-home` keeps working, and a suite that pins its own scratch
  * home per case (locations.test.js) is unaffected either way.
  */
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join } from 'node:path';
 import { parse, stringify } from '../vendor/yaml.js';
 
-process.env.WALKDOWN_HOME ??= mkdtempSync(join(tmpdir(), 'walkdown-test-home-'));
+/*
+ * One home PER PROCESS, under whatever the caller pinned. The registry is the
+ * only door now (ADR 0003): every fixture a suite reaches is a row in
+ * `$WALKDOWN_HOME/registry.yml`, and `node --test` runs files in parallel
+ * processes - so two suites sharing one home are a read-modify-write race on
+ * the registry, the last writer wins, and a fixture vanishes only when
+ * another suite happens to be running beside it. `npm test` still pins
+ * `tmp/test-home`; each suite gets a directory of its own inside it.
+ */
+const pinned = process.env.WALKDOWN_HOME ?? tmpdir();
+mkdirSync(pinned, { recursive: true });
+process.env.WALKDOWN_HOME = mkdtempSync(join(pinned, 'suite-'));
+// And taken away when the suite is done: forty of these per `npm test`
+// would otherwise pile up under tmp/test-home between runs.
+const own = process.env.WALKDOWN_HOME;
+process.on('exit', () => rmSync(own, { recursive: true, force: true }));
 
 /*
  * And the SKILLS home, for the same reason one directory over.
@@ -124,7 +139,42 @@ export function declaredHome(root, id = 'fixture') {
   });
   doc.blueprints = listed;
   writeFileSync(path, stringify(doc));
-  return { root, wd, id, home, homeDir, ...paths };
+  /*
+   * And registered, the way `walkdown import <root>` would: the manifest
+   * above is what a checkout declares, and the registry is the only door
+   * a reader goes through (ADR 0003). This process's home is its own, so
+   * the row races with nobody.
+   */
+  const rid = register({ id, project: root, homeDir });
+  return { root, wd, id: rid, home, homeDir, ...paths };
+}
+
+/**
+ * A registry row, written the way `import` writes one. `project` is what
+ * standing somewhere reaches; null (an ephemeral copy) is reached by name
+ * only. The id comes back, de-duplicated within the registry.
+ */
+export function register({ id, project, homeDir, ephemeral = null }) {
+  const home = process.env.WALKDOWN_HOME;
+  mkdirSync(home, { recursive: true });
+  const path = join(home, 'registry.yml');
+  const doc = existsSync(path) ? (parse(readFileSync(path, 'utf8')) ?? {}) : {};
+  const listed = doc.blueprints ?? [];
+  const already = listed.find((p) => p?.home === homeDir);
+  if (already) return already.id;
+  const taken = new Set(listed.map((p) => p?.id).filter(Boolean));
+  let pick = id;
+  for (let n = 2; taken.has(pick); n++) pick = `${id}-${n}`;
+  listed.push({
+    id: pick,
+    project: project ?? null,
+    home: homeDir,
+    registered: { by: 'import', at: new Date().toISOString() },
+    ...(ephemeral ? { ephemeral } : {}),
+  });
+  doc.blueprints = listed;
+  writeFileSync(path, stringify(doc));
+  return pick;
 }
 
 /**

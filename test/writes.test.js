@@ -8,6 +8,7 @@ import {
   mkdtempSync,
   readdirSync,
   readFileSync,
+  realpathSync,
   rmSync,
   statSync,
   writeFileSync,
@@ -18,13 +19,14 @@ import test from 'node:test';
 import { loadBlueprint } from '../lib/blueprint.js';
 import { declaredHome } from '../tools/test-home.mjs';
 import { createWalkdownServer } from '../lib/serve.js';
+import { parse, stringify } from '../vendor/yaml.js';
 
 /*
  * A project of its own per test, with WALKDOWN_HOME pinned - and pinned
  * FIRST, before anything resolves a location and caches it.
  */
 function project({ movedThreads = false } = {}) {
-  const root = mkdtempSync(join(tmpdir(), 'wd-writes-'));
+  const root = realpathSync(mkdtempSync(join(tmpdir(), 'wd-writes-')));
   const home = join(root, 'home');
   mkdirSync(home, { recursive: true });
   const threadsDir = join(home, 'moved-threads');
@@ -34,19 +36,20 @@ function project({ movedThreads = false } = {}) {
    * is refused outright on a machine that has only a login name to go on - so
    * a fixture with no identity cannot exercise the write paths at all.
    *
-   * `movedThreads` is a PERSONAL OVERRIDE on the declared entry - the shape
-   * `walkdown move threads --to <path>` writes. A blanket `defaults:` would
-   * not do it any more: the entry names its threads outright, because every
-   * blueprint lives in a home whose layout the entry records, and a named key
-   * outranks a blanket one.
+   * `movedThreads` is a `threads:` override on the registry row - the shape
+   * `walkdown move threads --to <path>` writes (ADR 0003). A blanket
+   * `defaults:` would not do it: the home implies where threads live, and a
+   * named key on the row outranks a blanket one.
    */
-  writeFileSync(
-    join(home, 'config.yml'),
-    'identity:\n  username: writes-person\n' +
-      (movedThreads ? `blueprints:\n  - id: writes-fixture\n    threads: ${threadsDir}\n` : ''),
-  );
+  writeFileSync(join(home, 'config.yml'), 'identity:\n  username: writes-person\n');
   process.env.WALKDOWN_HOME = home;
   const h = declaredHome(join(root, 'proj'), 'writes-fixture');
+  if (movedThreads) {
+    const reg = join(home, 'registry.yml');
+    const doc = parse(readFileSync(reg, 'utf8'));
+    doc.blueprints.find((r) => r.id === 'writes-fixture').threads = threadsDir;
+    writeFileSync(reg, stringify(doc));
+  }
   const bp = h.spec;
   mkdirSync(join(bp, 'features'), { recursive: true });
   writeFileSync(join(bp, 'walkdown.yml'), 'blueprint: writes-fixture\n');

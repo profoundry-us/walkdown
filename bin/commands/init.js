@@ -5,17 +5,19 @@ import { defaultActor } from '../../lib/identity.js';
 import {
   canon,
   claimHome,
-  configPath,
+  within,
   expand,
   homePaths,
   lockConfig,
   readUserConfig,
+  registryPath,
   rememberIdentity,
   rememberBlueprint,
   resolveLocations,
   walkdownHome,
 } from '../../lib/locations.js';
 import { gitView, relocateHome, removePointer, setIgnore, STANDARDS, tracking } from '../../lib/standard.js';
+import { declaredIn } from './import.js';
 import { dim, green, red, yellow } from '../../lib/report/tty.js';
 
 /*
@@ -64,11 +66,10 @@ export async function run(args) {
    * the person's real one, and `--commit none` moved the home and then died
    * on the write, leaving the tree declaring a home that had gone (n-0172).
    */
-  const cfg = readUserConfig({ cwd: root });
+  const cfg = readUserConfig();
   for (const [file, error] of [
     [cfg.path, cfg.error],
     [cfg.registry?.path, cfg.registry?.error],
-    [cfg.repo?.path, cfg.repo?.error],
   ])
     if (error) {
       console.error(red(`${file} does not parse — ${error}`));
@@ -76,9 +77,30 @@ export async function run(args) {
       return process.exit(2);
     }
   const exact = () =>
-    (readUserConfig({ cwd: root }).config.blueprints ?? []).find((p) =>
+    (readUserConfig().config.blueprints ?? []).find((p) =>
       [p?.roots ?? []].flat().some((r) => r && canon(expand(r)) === canon(root)),
     );
+  /*
+   * A checkout that declares a blueprint the registry has not met - a fresh
+   * clone, or this machine before ADR 0003 - is registered here rather than
+   * set up a second time. The registry is the only door (ADR 0003), and
+   * `init` is one of the three hands that write it: what the manifest
+   * declares and what stands in the tree agree, so there is nothing to ask.
+   */
+  if (!exact()) {
+    let declared = [];
+    try {
+      declared = declaredIn(root) ?? [];
+    } catch (e) {
+      console.error(red(e.message));
+      return process.exit(2);
+    }
+    for (const b of declared) {
+      const homeDir = resolve(b.spec, '..');
+      if (!/\/\.walkdown\/blueprints\/\d{4}-[^/]+$/.test(homeDir) || !within(homeDir, root)) continue;
+      rememberBlueprint({ id: b.id, root, homeDir, home: basename(homeDir), inRepo: false, by: 'init' });
+    }
+  }
   /*
    * An entry rooted here that resolves to NO spec - a row holding only a
    * port override, say, after its paths left with a relocation - is not a
@@ -91,13 +113,13 @@ export async function run(args) {
     console.error(
       red(
         `\`${entry.id}\` is listed at this directory but names no spec and no home — nothing to build into. ` +
-          `Add \`spec:\` or \`home:\` to the entry, or \`walkdown project forget ${entry.id}\` and run init again.`,
+          `Add \`spec:\` or \`home:\` to the entry, or \`walkdown blueprint forget ${entry.id}\` and run init again.`,
       ),
     ) ?? console.error(dim(`  the entry: ${at}`));
   let listed = exact();
   let loc = listed ? resolveLocations({ cwd: root, blueprint: listed.id }) : null;
   if (listed && !loc.spec.path) {
-    noSpec(listed, loc.config.matchedIn === 'repo' ? loc.config.repo.path : loc.config.path);
+    noSpec(listed, loc.config.registry.path);
     return process.exit(2);
   }
   /*
@@ -111,7 +133,7 @@ export async function run(args) {
     console.error(
       red(
         `\`${listed.id}\` is listed at this directory but names no home — its spec ${loc.spec.path} stands outside any numbered home, so there is no tree to set a standard on. ` +
-          `\`walkdown project forget ${listed.id}\`, copy the blueprint into a home \`walkdown init\` lays out, and list that.`,
+          `\`walkdown blueprint forget ${listed.id}\`, copy the blueprint into a home \`walkdown init\` lays out, and list that.`,
       ),
     );
     return process.exit(2);
@@ -190,7 +212,7 @@ export async function run(args) {
    * across claim, scaffold and write, a refused init has made nothing at all.
    */
   const releaseConfig = lockConfig(
-    commit === 'none' ? configPath() : join(root, '.walkdown', 'config.yml'),
+    commit === 'none' ? registryPath() : join(root, '.walkdown', 'config.yml'),
   );
   try {
     return await build();
@@ -221,6 +243,14 @@ export async function run(args) {
         inRepo: commit !== 'none',
         by: 'init',
       });
+  /*
+   * A committed home is written down twice, on purpose: the manifest says
+   * what the checkout declares, for every machine that clones it, and the
+   * registry says this machine knows it (ADR 0003 §3). Only the registry is
+   * read; the manifest is what `walkdown import` reads on the next machine.
+   */
+  if (commit !== 'none' && !listed)
+    rememberBlueprint({ id: entry.id, root, homeDir: claim.dir, home: claim.home, inRepo: false, by: 'init' });
   const ignore = commit === 'none' || !claim.dir ? null : setIgnore(walkdown, commit, { force: values.force });
   if (commit === 'none' && moved) {
     for (const rel of ['CLAUDE.md', 'AGENTS.md', 'GEMINI.md', '.github/copilot-instructions.md', 'CONVENTIONS.md']) {
