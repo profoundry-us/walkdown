@@ -1,0 +1,281 @@
+# ADR 0003 — The registry is the only door
+
+- **Status:** proposed — drafted by the agent on 2026-09-11 from Topher's
+  framing on n-0275; nothing below is built until he accepts it
+- **Date:** 2026-09-11
+- **Deciders:** Topher (product, eng)
+- **Supersedes:** the "standing in a checkout" half of
+  [docs/08-locations.md](../08-locations.md) ("The two `.walkdown`
+  directories, and which one answers", "How the two configs merge"), and the
+  rule `locations.answer.one-walkdown-answers`
+- **Builds on:** [ADR 0001](0001-projects-blueprints-and-routing.md) §3–§5,
+  which made the registry the server's only source and left the CLI with a
+  second one
+- **Threads:** n-0275 (the symlink that walked through the boundary),
+  n-0188, q-0168, q-0176, n-0213, q-0182
+
+## Context
+
+A blueprint becomes known to walkdown in one of two ways today.
+
+1. **The registry.** `~/.walkdown/config.yml`, one file per machine, with
+   `claims.json` derived from it. `walkdown import` writes a row for each
+   blueprint a named directory declares; `walkdown init` writes a row for the
+   home it creates; `blueprint add --ephemeral` writes a row for a scratch
+   copy. Since ADR 0001 §3 the server answers from this file and from nothing
+   else: it offers every project the machine has been told about, whatever
+   directory it was started in.
+
+2. **Standing in a checkout.** The CLI walks up from the working directory to
+   the nearest `.walkdown`, reads the committed `config.yml` inside it
+   directly, and merges personal rows onto it by id and roots. This is how
+   `walkdown status` answers in a checkout nobody imported, and how a
+   personal row carrying only `roots:` and a port means anything.
+
+The second door is the only place walkdown *discovers* a path rather than
+being *told* one, and everything that makes discovery safe hangs off it:
+`walkdownRoot()` and its stop-at-the-repository and never-the-personal-home
+guards; the crossing guard that refuses a row reaching under somebody else's
+`.walkdown`, on both the committed and the personal side; the rule that a
+personal row overrides a committed one only when it is *about that checkout*;
+the set-aside of relative paths, `~name`, blank values and `home:` on
+overrides; the carve-out for a `.walkdown` holding homes but no config. Each
+of those is a thread — n-0156, n-0159, n-0160, n-0167, n-0170, n-0173,
+n-0174, n-0175, n-0177, n-0188, n-0213, q-0168, q-0176 — and each was a real
+defect in the merge, found after it had listed, served or written to the
+wrong ledger.
+
+n-0275 is the latest. A symlink created outside a monorepo pack, pointing at
+the pack's blueprint, walks straight through the crossing guard on the read
+side: `walkdownRoot()` resolves the path as a string, so the upward walk from
+the link never passes through the pack's own `.walkdown`. A hand-written
+personal row naming that link is read, resolved, served as a second door to
+the pack's ledger, and written to — while `walkdown blueprint add` refuses
+the byte-identical path, because the writer canonicalises first. The
+contradiction n-0188 named is back: the same question answered two ways in
+one breath.
+
+The instance is a one-line fix (`canon(start)` in the walk). The class is
+not. Every reader that consults a path it did not register has to decide
+whose that path is, and a filesystem offers more spellings of a place than
+any guard will enumerate.
+
+Topher's framing, 2026-09-11: *every walkdown we know about should be in our
+registry — personal ones, scratch copies, all of them. Then we consult the
+registry every time and stop worrying about walkdown paths. The only time to
+worry about a path is when someone is asking to add one.*
+
+This ADR is that, written down.
+
+## Decision
+
+### 1. A reader consults the registry, and nothing else
+
+Every command that needs a blueprint — `status`, `run`, `lint`, `judge`,
+`thread`, `threads`, `where`, `hash`, `sweep`, `serve`, `claims`, the API
+behind the panel — answers from the rows in `~/.walkdown/config.yml`. No
+command walks the working tree, reads a `.walkdown/config.yml` it did not
+register, or merges two files. The server already works this way (ADR 0001
+§3); the CLI joins it.
+
+`walkdownRoot()` and the crossing guard have no callers on the read side and
+are deleted. The merge (`about()`, `repoRooted`, the per-key provenance
+marks, the set-asides on override rows) has nothing to merge and is deleted.
+`locations.answer.one-walkdown-answers` and its eleven THENs go with it; what
+they protected against cannot happen when nothing is read from where you
+stand.
+
+### 2. A committed `.walkdown/config.yml` is a manifest
+
+It stays committed, and it stays the way a project tells the world what it
+declares: its blueprints, their homes, their specs, their targets. What
+changes is who reads it. `walkdown import <dir>` reads it — as it already
+does (`bin/commands/import.js` `declaredIn`) — and writes a registry row per
+blueprint the person chooses. Nothing else opens it.
+
+The consequence is the point of ADR 0001 §4 said again: a clone of a
+repository that uses walkdown shows you nothing until you import it. That
+was already true of the server. It becomes true of the CLI.
+
+### 3. A path is handled once, at add time, canonically
+
+Three commands add a row: `import`, `init`, `blueprint add`. Each takes a
+path, canonicalises it (`realpathSync`, via `canon()`), refuses what it
+should refuse — a directory declaring nothing, a spec that is not a home, a
+spec already registered under another spelling — and writes the canonical
+path. That is the only moment walkdown asks whose a path is. A symlink
+resolves to its real place there, is compared against the rows already held,
+and is either the same blueprint (already registered, say so) or a new one.
+After that, every reader holds real paths and compares real paths.
+
+### 4. The working directory picks among registered rows, and only among them
+
+Without `--blueprint`, a command needs a default. It is the row whose
+project directory contains the working directory — `within(cwd, row.project)`,
+canonically, against rows already in hand. This is the one path comparison
+that survives on the read side, and it is named here so nobody later
+mistakes it for discovery: it never opens a directory, it never finds
+anything not already registered, and it never walks up.
+
+- Exactly one row contains `cwd`: that one answers, and `where` says so.
+- Several contain it (a project holding several blueprints, or a scratch
+  copy registered inside its original): the command asks, with the
+  candidates named, exactly as `?bp=` refuses a bare id two blueprints
+  answer to (n-0173). `--blueprint` settles it.
+- None contains it: the command says what it found, if anything, and how to
+  add it — *"this directory declares `checkout` in `.walkdown/config.yml`;
+  `walkdown import .` to use it"*, or *"nothing here declares a blueprint;
+  `walkdown init` starts one"*. That is a path question, and it is an
+  add-time prompt, which is where the decision says path questions live.
+
+`roots:` on a registry row is therefore the project directory, singular, set
+by the adding command. A row has a spec and a project it came from; it does
+not need a list of places it is "about".
+
+### 5. Every row says how it arrived
+
+`import` already writes `imported: { project, at }`; `blueprint add
+--ephemeral` writes `ephemeral: true, declared, why`. `init` and a plain
+`blueprint add` write the equivalent — `declared: { by: init | add, at }`.
+A row with none of these was hand-written, and per q-0182 walkdown does not
+support hand-written rows: it is not read, and `where` names it as set aside
+with that reason. This replaces the crossing guard's role of telling a
+tool-written row from a hand-written one by where its spec sits.
+
+### 6. One personal row per blueprint, no overrides
+
+A personal row carrying only `id` and `roots:` and a port — the
+pure-override shape, which meant something merged onto a committed entry —
+has nothing to merge onto and is retired. Machine-local facts (the port,
+where evidence goes on this disk) are fields on the registered row, written
+by the adding command's flags or by `walkdown move`. The row is the whole
+answer.
+
+## Consequences
+
+### Good
+
+- The class of n-0275 goes, not the instance. There is no read-side code
+  that could be fooled by a spelling, because there is no read-side code that
+  resolves a spelling.
+- `lib/locations.js` loses the merge, the crossing guard, the override
+  set-asides and the walk — the greater part of its 1300 lines, and the part
+  thirteen threads were about. What remains is: read the registry, canonicalise
+  at add time, pick by containment, report why.
+- The CLI and the server answer from one source. Today a server started in a
+  checkout and a `walkdown status` run in the same checkout can disagree
+  about what exists; after this they cannot.
+- The committed file has one reader and one job. A person editing it is
+  editing a manifest for `import`, not a live config with merge semantics
+  they have to hold in their head.
+- "Every walkdown we know about is in one file" is a sentence a person can
+  check by opening the file.
+
+### Bad, and accepted
+
+- **A fresh clone does nothing until imported.** A teammate clones a repo
+  and runs `walkdown status`; it tells them to `walkdown import .` and stops.
+  One step, prompted, once per checkout. The server has worked this way since
+  ADR 0001 and nobody has asked for it back.
+- **CI and hooks need a registry.** This repository's own Highball hooks run
+  `walkdown lint` by standing here. In a hook or a CI job the registry is the
+  machine's, so a job that starts clean needs `WALKDOWN_HOME=<tmp>` and
+  `walkdown import . --all` before anything else. The example blueprint's
+  checks and this repository's `.highball/checks.yml` are updated as part of
+  the build, not left to be discovered.
+- **Existing personal files migrate by hand, once.** A pure-override row
+  (Topher's own `~/.walkdown/config.yml` holds exactly one, `walkdown` with
+  `roots:` and no spec) stops meaning anything. `walkdown import .` in the
+  checkout writes the full row; `where` names the old one as set aside and
+  says why. No automatic migration — the file is a person's, and rewriting it
+  unasked is the kind of thing ADR 0001 §9 deleted.
+- **The n-0213 carve-out goes.** A monorepo pack that holds homes but no
+  `config.yml`, kept personally by a hand-written row, was read; it will not
+  be. The way in is to declare it (`init` or `blueprint add` inside the
+  pack) and import it. Same tools, one more step, no inference.
+- **Tests churn.** Every locations and CLI test that builds a `.walkdown` and
+  stands in it gains an import step or a registry fixture. The nine
+  `walkdownRoot()` call sites and their tests are deleted rather than
+  rewritten.
+
+### Deferred, deliberately
+
+- **Whether `import` should be implicit inside a checkout that declares
+  exactly one blueprint.** It would remove the one-step cost in the common
+  case. It would also be inference — walkdown adopting a directory because
+  you stood in it — which is the thing the registry exists to refuse. Not
+  now; revisit if the prompt turns out to be the thing people trip on.
+- **Sync of the registry across machines.** The file is per machine on
+  purpose (paths are per machine). Nothing here changes that.
+
+## Rules affected
+
+- `locations.answer.one-walkdown-answers` — **retired.** Its statement is
+  about which of two files answers; there is one file. The half that
+  survives — no inference, nothing merely lying nearby is a project — is
+  already `locations.answer.declared-not-discovered`, reworded to say
+  *registered* where it says *written down in the `.walkdown` that answers
+  for where you are standing*.
+- `locations.answer.declared-not-discovered` — reworded as above; its
+  third THEN ("the shared config and the personal one are both consulted")
+  becomes "the registry is consulted, and the report says which row
+  answered and how it arrived".
+- `locations.answer.says-why` — holds; the reasons a path can be chosen for
+  lose "this repository's config" and gain "registered by import / init /
+  add on <date>".
+- `locations.default.in-repo-on-request` — holds; `init --commit` still
+  writes the manifest into the repository, and registers the row.
+- `locations.keeping.*`, `locations.travel.*`, `locations.pointer.*` — hold.
+- `screens.ownership.routes-by-page` and the ADR 0001 panel rules — hold;
+  the server was already registry-only.
+- A new rule under `locations.answer`: **the registry is the only door** —
+  a reader never opens a `.walkdown` it did not register, a path is
+  canonicalised once at add time, and the working directory picks among
+  registered rows and finds nothing else. Its checks are n-0275's fixture
+  turned around: the link, the hand-written row, and the assertion that
+  `where`, `status`, `thread new` and `serve` all say *set aside, not
+  registered* — and that `import` through the link registers the real path
+  once.
+
+## Alternatives considered
+
+- **Fix the instance.** `walkdownRoot()` walks from `canon(start)`; the
+  personal-home guard compares canonically. One line, and n-0275 closes.
+  Rejected because the guard has been patched thirteen times for thirteen
+  spellings of "whose directory is this", and a filesystem has more.
+- **Decide by provenance, keep the second door.** Refuse any personal row
+  without `imported:`/`ephemeral:`/under-the-personal-home, and keep reading
+  the committed file where you stand. Closes the hole without the walk.
+  Rejected as a half-measure: it still leaves two sources to merge, and the
+  merge is where n-0160/0167/0175 lived. It is §5 of this decision without
+  §1, and §1 is what makes §5 sufficient.
+- **Make the committed file the registry, per repository.** Readers open
+  the nearest one; there is no personal file. Rejected: it is door 2 alone,
+  which still walks, still crosses packs, and puts machine-local facts
+  (ports, evidence paths) in a committed file — the mistake
+  docs/08-locations.md opens by refusing.
+
+## How it gets built
+
+In this order, each step leaving the tree green:
+
+1. **Rows say how they arrived.** `init` and `blueprint add` write
+   `declared:`; `where` reports it. Nothing is refused yet.
+2. **The default is picked by containment.** `resolveLocations` chooses
+   among registry rows by `within(cwd, row.project)`, asks when several,
+   prompts to import when none. The old walk still runs beside it and the
+   two answers are compared in the suite; any disagreement is a finding
+   before it is a change.
+3. **The walk goes.** `walkdownRoot()`, the crossing guard, the merge and
+   the override set-asides are deleted with their tests. `.highball/checks.yml`
+   and the example blueprint's checks gain their registry setup in the same
+   commit.
+4. **Hand-written rows are set aside** (§5) and named on the report.
+5. **The rules:** retire, reword, add, as listed. Statement hashes
+   rewritten, acceptance requeued. docs/08-locations.md rewritten around one
+   file.
+6. **n-0275** is replied to at step 3 — the code it is about no longer
+   exists — and its evidence fixture becomes the new rule's check.
+
+Nothing in this list is started until the status line above reads
+*accepted*.
