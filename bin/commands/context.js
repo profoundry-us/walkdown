@@ -25,13 +25,13 @@ const end = (code) => {
  * while `where` reported it correctly (n-0133). The config is the list now,
  * so there is one place to look and one thing to say when it is empty.
  */
-export function loadOrExit(projectId) {
-  const loc = resolveLocations({ project: projectId });
+export function loadOrExit(blueprintId) {
+  const loc = resolveLocations({ blueprint: blueprintId });
   // The file is the test, not the declaration: an entry can name a spec that
   // has been deleted, and a directory nothing declares is not a project at
   // all. Both are "no blueprint" and both should say so the same way.
   const there = loc.spec?.path && existsSync(join(loc.spec.path, 'walkdown.yml'));
-  if (!there) noBlueprintHere(loc, projectId);
+  if (!there) noBlueprintHere(loc, blueprintId);
   return loadBlueprint(loc.spec.path);
 }
 
@@ -45,16 +45,16 @@ export function loadOrExit(projectId) {
  * project is not set up yet (n-0207). Every other command in this position
  * says what is wrong and what to do, and now there is one copy of that to say.
  */
-export function noBlueprintHere(loc, projectId) {
+export function noBlueprintHere(loc, blueprintId) {
   const where = loc.config.repo?.path ?? loc.config.path;
   console.error(
-    projectId
-      ? `No blueprint for \`${projectId}\` — either nothing declares it, or its spec is gone.`
+    blueprintId
+      ? `No blueprint for \`${blueprintId}\` — either nothing declares it, or its spec is gone.`
       : `No blueprint here. Nothing in ${where} claims this directory.`,
   );
   console.error(
-    projectId
-      ? '`walkdown projects` lists what is declared here.'
+    blueprintId
+      ? '`walkdown blueprints` lists what is declared here.'
       : '`walkdown init` starts one, `walkdown project add <path>` lists an existing one, and `walkdown where` shows what was consulted.',
   );
   process.exit(2);

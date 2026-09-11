@@ -14,7 +14,7 @@ test('node:test reporter records tagged tests as a hash-stamped run', () => {
   mkdirSync(home, { recursive: true });
   writeFileSync(join(home, 'config.yml'), 'identity:\n  username: A Person\n');
   mkdirSync(join(root, 'blueprint', 'features'), { recursive: true });
-  writeFileSync(join(root, 'blueprint', 'walkdown.yml'), 'project: node-fixture\n');
+  writeFileSync(join(root, 'blueprint', 'walkdown.yml'), 'blueprint: node-fixture\n');
   writeFileSync(
     join(root, 'blueprint', 'features', 'demo.yml'),
     [
@@ -39,7 +39,7 @@ test('node:test reporter records tagged tests as a hash-stamped run', () => {
     // a blueprint keeping runs inside itself is the layout from before homes
     // and the resolver does not answer for it.
     [
-      'projects:',
+      'blueprints:',
       '  - id: node-fixture',
       '    roots: [.]',
       '    spec: blueprint',

@@ -40,7 +40,7 @@ function fixture(name) {
   const runs = join(root, name, 'runs');
   mkdirSync(join(bp, 'features'), { recursive: true });
   mkdirSync(runs, { recursive: true });
-  writeFileSync(join(bp, 'walkdown.yml'), 'project: cli-fixture\n');
+  writeFileSync(join(bp, 'walkdown.yml'), 'blueprint: cli-fixture\n');
   writeFileSync(
     join(bp, 'features', 'demo.yml'),
     [

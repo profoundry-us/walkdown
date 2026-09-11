@@ -4,7 +4,7 @@
 
 ```
 blueprint/
-  walkdown.yml          # project config (see 03-runner-contract.md)
+  walkdown.yml          # blueprint config (see 03-runner-contract.md)
   storyboard.yml        # screen registry
   features/             # edit-in-place documents (human/agent authored)
     checkout.yml

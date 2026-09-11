@@ -195,7 +195,7 @@ export function run(args) {
   const say = (...l) => lines.push(...l);
 
   say(
-    `You are judging one rule of the "${config?.project ?? 'walkdown'}" blueprint against the running system. Decide for yourself how to earn the verdict — navigate, look, and try to break it. You are producing evidence a person can trust, never their acceptance.`,
+    `You are judging one rule of the "${config?.blueprint ?? 'walkdown'}" blueprint against the running system. Decide for yourself how to earn the verdict — navigate, look, and try to break it. You are producing evidence a person can trust, never their acceptance.`,
     '',
     `RULE ${id}`,
     rule.statement ?? '(no statement — the blueprint fails lint; judge nothing until it says what it means)',

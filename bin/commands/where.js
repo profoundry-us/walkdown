@@ -22,7 +22,7 @@ export function run(args) {
     },
   });
 
-  const loc = resolveLocations({ project: values.blueprint });
+  const loc = resolveLocations({ blueprint: values.blueprint });
   if (values.json) {
     const { findings, words, why } = tracking(loc);
     console.log(JSON.stringify({ ...loc, tracking: { words, why, findings } }, null, 2));

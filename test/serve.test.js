@@ -62,7 +62,7 @@ before(async () => {
   mkdirSync(join(bp, 'features'), { recursive: true });
   mkdirSync(threads, { recursive: true });
   mkdirSync(join(root, 'proto'), { recursive: true });
-  writeFileSync(join(bp, 'walkdown.yml'), 'project: serve-fixture\nprototype: { root: proto/ }\n');
+  writeFileSync(join(bp, 'walkdown.yml'), 'blueprint: serve-fixture\nprototype: { root: proto/ }\n');
   writeFileSync(
     join(bp, 'storyboard.yml'),
     'screens:\n  - id: home\n    prototype: /home.html\n    app: { path: /home }\n    anchors: [home.cta]\n',
@@ -125,7 +125,7 @@ before(async () => {
       // Every record named. A blueprint keeping its ledger inside itself was
       // the layout before homes, and the resolver does not answer for it - an
       // entry that names a spec and nothing else has nowhere to write.
-      'projects:',
+      'blueprints:',
       '  - id: main',
       '    roots: [.]',
       '    spec: blueprint',
@@ -784,7 +784,7 @@ test('a drifted check ref hands display to the tree and keeps the stale line as 
   writeFileSync(
     join(root2, '.walkdown', 'config.yml'),
     [
-      'projects:',
+      'blueprints:',
       '  - id: drift-fixture',
       '    roots: [.]',
       '    spec: blueprint',
@@ -797,7 +797,7 @@ test('a drifted check ref hands display to the tree and keeps the stale line as 
   );
   writeFileSync(
     join(bp2, 'walkdown.yml'),
-    'project: drift-fixture\nauthoring: { location: [suite/] }\n',
+    'blueprint: drift-fixture\nauthoring: { location: [suite/] }\n',
   );
   writeFileSync(
     join(bp2, 'features', 'd.yml'),
@@ -866,9 +866,9 @@ test('a drifted check ref hands display to the tree and keeps the stale line as 
   }
 });
 
-test('multi-project: sibling blueprints are discovered and ?bp= switches, membership-validated', async () => {
+test('multi-blueprint: sibling blueprints are discovered and ?bp= switches, membership-validated', async () => {
   mkdirSync(join(root, 'sibling', 'blueprint', 'features'), { recursive: true });
-  writeFileSync(join(root, 'sibling', 'blueprint', 'walkdown.yml'), 'project: sibling-app\n');
+  writeFileSync(join(root, 'sibling', 'blueprint', 'walkdown.yml'), 'blueprint: sibling-app\n');
   writeFileSync(
     join(root, 'sibling', 'blueprint', 'features', 'f.yml'),
     'feature: f\nstories:\n  - id: f.s\n    rules:\n      - id: f.s.one\n        statement: One.\n        verify: [checks]\n',
@@ -899,14 +899,14 @@ test('two listed blueprints sharing an id are told apart by key, and a bare ?bp=
    * names two is refused with the choices rather than resolved to the first.
    */
   mkdirSync(join(root, 'twin', 'blueprint', 'features'), { recursive: true });
-  writeFileSync(join(root, 'twin', 'blueprint', 'walkdown.yml'), 'project: the-twin\n');
+  writeFileSync(join(root, 'twin', 'blueprint', 'walkdown.yml'), 'blueprint: the-twin\n');
   writeFileSync(
     join(root, 'twin', 'blueprint', 'features', 'f.yml'),
     'feature: f\nstories:\n  - id: f.s\n    rules:\n      - id: f.s.twin\n        statement: Twin.\n        verify: [checks]\n',
   );
   const cfg = join(DECLARED_HOME, 'config.yml');
   const before = readFileSync(cfg, 'utf8');
-  writeFileSync(cfg, before + `projects:\n  - id: sibling\n    roots: [${join(root, 'twin')}]\n    spec: ${join(root, 'twin', 'blueprint')}\n`);
+  writeFileSync(cfg, before + `blueprints:\n  - id: sibling\n    roots: [${join(root, 'twin')}]\n    spec: ${join(root, 'twin', 'blueprint')}\n`);
   try {
     const home = await (await fetch(`${base}/api/blueprint`)).json();
     const twins = home.blueprints.filter((p) => p.id === 'sibling');

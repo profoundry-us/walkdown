@@ -22,7 +22,7 @@ export function run(args) {
     args,
     options: { blueprint: { type: 'string' }, url: { type: 'string' }, json: { type: 'boolean' } },
   });
-  const at = resolveLocations({ project: values.blueprint });
+  const at = resolveLocations({ blueprint: values.blueprint });
   const dir = at.spec?.missing ? null : at.spec?.path;
   if (!dir) {
     console.error(`No blueprint here. Nothing in ${at.config.repo?.path ?? at.config.path} claims this directory.`);
@@ -30,13 +30,13 @@ export function run(args) {
   }
   // The set the `.walkdown` here declares - not the one beside wherever the
   // spec sits, which may be another project's (n-0159).
-  const projects = listedBlueprints({ cwd: process.cwd() }).map((p) => ({
+  const listed = listedBlueprints({ cwd: process.cwd() }).map((p) => ({
     id: p.id,
     blueprint: loadBlueprint(p.dir),
   }));
 
   if (values.url) {
-    const hits = blueprintsForUrl(projects, values.url);
+    const hits = blueprintsForUrl(listed, values.url);
     if (values.json) {
       console.log(JSON.stringify({ url: values.url, matches: hits }, null, 2));
       return end(0);
@@ -53,15 +53,15 @@ export function run(args) {
     return end(0);
   }
 
-  const shared = sharedPages(projects);
-  const total = projects.reduce((n, p) => n + claimsOf(p.blueprint).length, 0);
+  const shared = sharedPages(listed);
+  const total = listed.reduce((n, p) => n + claimsOf(p.blueprint).length, 0);
   if (values.json) {
     console.log(
-      JSON.stringify({ blueprints: projects.map((p) => p.id), shared }, null, 2),
+      JSON.stringify({ blueprints: listed.map((p) => p.id), shared }, null, 2),
     );
     return end(0);
   }
-  console.log(`${projects.length} blueprint(s), ${total} claim(s)`);
+  console.log(`${listed.length} blueprint(s), ${total} claim(s)`);
   if (!shared.length) return end(0);
   console.log(`\n${shared.length} page(s) covered by more than one blueprint:`);
   for (const c of shared) {

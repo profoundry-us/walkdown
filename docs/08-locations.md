@@ -6,9 +6,9 @@ A blueprint says what the project must be true of. A config says where that proj
 files sit and who is sitting at it. Those are different kinds of fact and they belong in
 different files:
 
-- **`blueprint/walkdown.yml`** — committed, shared, and about the project. What the
+- **`blueprint/walkdown.yml`** — committed, shared, and about the blueprint. What the
   runner is, which targets exist, where the prototype root is *relative to the blueprint*.
-- **`~/.walkdown/config.yml`** — personal, per-machine. Which projects this person has,
+- **`~/.walkdown/config.yml`** — personal, per-machine. Which blueprints this person has,
   where each one's home is on this disk, which ports this machine serves on, and who you
   are.
 - **`<repo>/.walkdown/config.yml`** — committed, shared. Which blueprints this repository
@@ -41,7 +41,7 @@ is what lets a three-line `.gitignore` say which siblings git gets.
 The number is allocated against the listing of the `blueprints/` directory the home is
 made in, and the listing *is* the record: there is nothing to keep in step. The name after
 the dash is only so `ls` reads well. Nothing walkdown resolves is keyed by a name two
-projects could share — that derivation, in each of six costumes, was the ancestor of every
+blueprints could share — that derivation, in each of six costumes, was the ancestor of every
 collision this module has had (n-0124 through n-0160). Why numbering works here when the
 deleted registry's numbering did not is n-0155: an allocator only works when every
 claimant can see the others' claims, and two committed configs in two repositories cannot
@@ -149,8 +149,8 @@ than a misconfiguration.
 ## The two `.walkdown` directories, and which one answers
 
 **`~/.walkdown/`** — personal. Per machine, per person, never synced. `config.yml` with
-your identity and your list of projects; `blueprints/` with the homes of projects that
-commit nothing.
+your identity and your list of blueprints; `blueprints/` with the homes of blueprints
+that commit nothing.
 
 **`<repo>/.walkdown/`** — the repository's, and there may be several: a monorepo pack can
 carry its own. Committed or ignored as the arrangement above says.
@@ -160,7 +160,7 @@ one at or above the working directory — and it is merged with the personal one
 nothing else. The walk stops at the first `.walkdown` it finds, or at the top of the
 repository, and it never mistakes `~/.walkdown` for a project's. A pack with its own
 `.walkdown` therefore never sees the root's list and the root never sees the pack's; a
-monorepo is several projects that happen to share a checkout, and a tool that pooled them
+monorepo is several blueprints that happen to share a checkout, and a tool that pooled them
 would let one pack's board list, serve and write to another pack's ledger (n-0156,
 n-0159). A server offers what the `.walkdown` *where it was started* declares, wherever
 the blueprint it happens to serve sits.
@@ -187,7 +187,7 @@ shares the id, and either has one of its `roots` equal to one of the repository 
 roots or has no blueprint of its own (the pure-override shape — `id` and `evidence:` and
 nothing else). A personal entry with the same id rooted somewhere else — another checkout,
 or a directory nested inside this one that happens to share the name — is a different
-project: it answers from its own root, never merges into the repository's, and where the
+blueprint: it answers from its own root, never merges into the repository's, and where the
 repository's row covers the same ground `walkdown blueprints` says it is shadowed (n-0160,
 n-0170). An entry with no roots but a `spec` of its own — an ephemeral copy — is never an
 override of anything.
@@ -266,7 +266,7 @@ identity:
   name: Topher Fangio       # what the UI shows; recorded nowhere
   roles: [eng, product]     # the roles this person may sign for
 
-projects:
+blueprints:
   - id: acme
     roots: [~/src/acme]                              # which working trees answer as this project
     spec:     ~/.walkdown/blueprints/0001-acme/blueprint
@@ -281,7 +281,7 @@ projects:
 
 ```yaml
 # <repo>/.walkdown/config.yml
-projects:
+blueprints:
   - id: acme
     roots: [.]
     spec:     .walkdown/blueprints/0001-acme/blueprint
@@ -298,7 +298,7 @@ that says where things are, and a person reading it should not need to know the 
 Resolution order for any record kind, first hit wins:
 
 1. an explicit flag (per-kind overrides)
-2. the matching `projects[]` entry's own key
+2. the matching `blueprints[]` entry's own key
 3. **a directory the blueprint already has inside it** — `blueprint/runs`,
    `blueprint/threads`, `blueprint/drafts`, `blueprint/runs/evidence` — the shape every
    blueprint had before homes, kept answering so an upgrade is never a data loss
@@ -367,7 +367,7 @@ level up:
 Runs, threads, drafts and evidence are **not** part of it. They are what the spec produces,
 not the spec.
 
-It was worth doing even for projects that keep everything in the repository, because
+It was worth doing even for blueprints that keep everything in the repository, because
 `blueprint_sha` was wrong in a way nobody had noticed: it changed on every commit,
 including commits that did not touch the blueprint. It could tell you *when* a run
 happened but not *what it was judged against*, which is the only thing it was ever for.
@@ -472,7 +472,7 @@ exists to prevent — it is not made honest by being convenient.
 
 Every blueprint walkdown answers for is declared, and every declared blueprint lives in a
 home. There is no second shape and no compatibility path: a bare `<dir>/blueprint` keeping
-its runs and threads inside itself was how projects looked before homes, and the resolver
+its runs and threads inside itself was how blueprints looked before homes, and the resolver
 does not answer for it — an undeclared path resolves to no spec and a sentence saying how
 to declare one, and `walkdown lint` errors when a declared entry names no home or leaves a
 record kind pointing nowhere. That is the alarm for a config that does not match what the

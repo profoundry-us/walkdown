@@ -35,13 +35,13 @@ function project(root, blueprints) {
         `  - id: ${b.id}\n    roots: [.]\n    spec: .walkdown/blueprints/000${i + 1}-${b.id}/blueprint\n`,
     )
     .join('');
-  writeFileSync(join(root, '.walkdown', 'config.yml'), `projects:\n${rows}`);
+  writeFileSync(join(root, '.walkdown', 'config.yml'), `blueprints:\n${rows}`);
   blueprints.forEach((b, i) => {
     const spec = join(root, '.walkdown', 'blueprints', `000${i + 1}-${b.id}`, 'blueprint');
     mkdirSync(join(spec, 'features'), { recursive: true });
     writeFileSync(
       join(spec, 'walkdown.yml'),
-      `project: ${b.id}\ndescription: ${b.description}\nrunner:\n  targets:\n    local: { base_url: ${b.origin} }\n`,
+      `blueprint: ${b.id}\ndescription: ${b.description}\nrunner:\n  targets:\n    local: { base_url: ${b.origin} }\n`,
     );
     writeFileSync(
       join(spec, 'storyboard.yml'),
@@ -86,7 +86,7 @@ test('a project nobody imported is invisible, and importing it makes it reachabl
     // Written to the personal registry, with no roots: reachable by name and
     // by the server, shadowing nothing where a person stands.
     const cfg = parse(readFileSync(join(s.home, 'config.yml'), 'utf8'));
-    const row = cfg.projects.find((p) => p.id === 'checkout');
+    const row = cfg.blueprints.find((p) => p.id === 'checkout');
     assert.ok(row, 'listed');
     assert.equal(row.roots, undefined);
     assert.ok(row.imported?.project?.endsWith('acme-shop'), 'says where it came from');
@@ -135,7 +135,7 @@ test('a project declaring several asks which, and takes nothing unasked', () => 
 
     walkdown(s.home, ['import', shop, '--only', 'admin'], s.root);
     const cfg = parse(readFileSync(join(s.home, 'config.yml'), 'utf8'));
-    assert.deepEqual(cfg.projects.map((p) => p.id), ['admin'], 'only what was asked for');
+    assert.deepEqual(cfg.blueprints.map((p) => p.id), ['admin'], 'only what was asked for');
   } finally {
     s.cleanup();
   }
@@ -158,7 +158,7 @@ test('importing twice is a no-op, and two projects sharing a name are told apart
     const cfg = parse(readFileSync(join(s.home, 'config.yml'), 'utf8'));
     // The project's directory disambiguates before a number does: a name that
     // says where it came from beats `checkout-2`, which says nothing.
-    assert.deepEqual(cfg.projects.map((p) => p.id).sort(), ['acme-marketing-checkout', 'checkout']);
+    assert.deepEqual(cfg.blueprints.map((p) => p.id).sort(), ['acme-marketing-checkout', 'checkout']);
   } finally {
     s.cleanup();
   }

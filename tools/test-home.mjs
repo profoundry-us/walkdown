@@ -72,13 +72,13 @@ export function declareProject(home, spec, id = 'fixture') {
   mkdirSync(home, { recursive: true });
   const path = join(home, 'config.yml');
   const doc = existsSync(path) ? (parse(readFileSync(path, 'utf8')) ?? {}) : {};
-  const projects = doc.projects ?? [];
-  const already = projects.find((p) => p?.spec === spec);
+  const listed = doc.blueprints ?? [];
+  const already = listed.find((p) => p?.spec === spec);
   if (already) return already.id;
-  const taken = new Set(projects.map((p) => p?.id).filter(Boolean));
+  const taken = new Set(listed.map((p) => p?.id).filter(Boolean));
   let pick = id;
   for (let n = 2; taken.has(pick); n++) pick = `${id}-${n}`;
-  projects.push({
+  listed.push({
     id: pick,
     roots: [homeDir],
     spec,
@@ -87,7 +87,7 @@ export function declareProject(home, spec, id = 'fixture') {
     evidence: join(homeDir, 'evidence'),
     drafts: join(homeDir, 'drafts'),
   });
-  doc.projects = projects;
+  doc.blueprints = listed;
   writeFileSync(path, stringify(doc));
   return pick;
 }
@@ -107,20 +107,20 @@ export function declaredHome(root, id = 'fixture') {
   const wd = join(root, '.walkdown');
   const path = join(wd, 'config.yml');
   const doc = existsSync(path) ? (parse(readFileSync(path, 'utf8')) ?? {}) : {};
-  const projects = doc.projects ?? [];
-  const n = String(projects.length + 1).padStart(4, '0');
+  const listed = doc.blueprints ?? [];
+  const n = String(listed.length + 1).padStart(4, '0');
   const home = `${n}-${id}`;
   const homeDir = join(wd, 'blueprints', home);
   const kinds = { spec: 'blueprint', threads: 'threads', runs: 'runs', evidence: 'evidence', drafts: 'drafts' };
   const paths = Object.fromEntries(Object.entries(kinds).map(([k, d]) => [k, join(homeDir, d)]));
   for (const p of Object.values(paths)) mkdirSync(p, { recursive: true });
-  projects.push({
+  listed.push({
     id,
     roots: ['.'],
     home,
     ...Object.fromEntries(Object.entries(kinds).map(([k, d]) => [k, join('.walkdown', 'blueprints', home, d)])),
   });
-  doc.projects = projects;
+  doc.blueprints = listed;
   writeFileSync(path, stringify(doc));
   return { root, wd, id, home, homeDir, ...paths };
 }

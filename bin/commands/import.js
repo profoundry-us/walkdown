@@ -28,7 +28,7 @@ import {
   expand,
   HOME_LAYOUT,
   readUserConfig,
-  rememberProject,
+  rememberBlueprint,
   tilde,
 } from '../../lib/locations.js';
 import { refreshIndex } from '../../lib/registry.js';
@@ -53,7 +53,7 @@ function declaredIn(dir) {
     throw new Error(`${config} cannot be read (${e.message}). Fix that file and import again.`);
   }
   const out = [];
-  for (const entry of parsed?.projects ?? []) {
+  for (const entry of parsed?.blueprints ?? []) {
     if (!entry?.id || !entry?.spec) continue;
     const spec = canon(expand(String(entry.spec), dir));
     if (!existsSync(join(spec, 'walkdown.yml'))) continue;
@@ -61,7 +61,7 @@ function declaredIn(dir) {
     let description = '';
     try {
       const cfg = parse(readFileSync(join(spec, 'walkdown.yml'), 'utf8'));
-      name = cfg?.project ?? entry.id;
+      name = cfg?.blueprint ?? entry.id;
       description = cfg?.description ?? '';
     } catch {
       /* unnamed, which is a lint problem there and not an import problem here */
@@ -73,7 +73,7 @@ function declaredIn(dir) {
 
 /** Ids already in the personal registry, and the specs behind them. */
 function alreadyHere() {
-  const rows = readUserConfig().config.projects ?? [];
+  const rows = readUserConfig().config.blueprints ?? [];
   return {
     ids: new Set(rows.map((p) => p?.id).filter(Boolean)),
     specs: new Set(rows.filter((p) => p?.spec).map((p) => canon(expand(String(p.spec))))),
@@ -201,7 +201,7 @@ export async function run(args) {
     for (let n = 2; taken.has(id); n++) id = `${basename(dir)}-${bp.id}-${n}`;
     taken.add(id);
     try {
-      const row = rememberProject({
+      const row = rememberBlueprint({
         id,
         root: null, // reachable by name and by the server; it shadows nothing
         homeDir,
@@ -235,6 +235,6 @@ export async function run(args) {
   for (const k of known) console.log(`  ${dim(`· already listed  ${k.id}`)}`);
   const skipped = fresh.filter((b) => !written.some((w) => w.spec === b.spec));
   for (const s of skipped) console.log(`  ${dim(`· not imported    ${s.id}`)}`);
-  console.log(dim(`\n  ${index.blueprints.length} blueprint(s) indexed · walkdown projects lists them`));
+  console.log(dim(`\n  ${index.blueprints.length} blueprint(s) indexed · walkdown blueprints lists them`));
   return end(0);
 }

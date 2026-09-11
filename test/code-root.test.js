@@ -63,7 +63,7 @@ function apart({ runner = {}, withEntry = true } = {}) {
   mkdirSync(join(spec, 'features'), { recursive: true });
   writeFileSync(
     join(spec, 'walkdown.yml'),
-    ['project: apart', 'authoring:', '  location: [spec/workflows/]', 'runner:', ...runner.lines]
+    ['blueprint: apart', 'authoring:', '  location: [spec/workflows/]', 'runner:', ...runner.lines]
       .join('\n')
       .concat('\n'),
   );
@@ -76,7 +76,7 @@ function apart({ runner = {}, withEntry = true } = {}) {
       join(home, 'config.yml'),
       // A real home: `home:` is what every record path derives from, and an
       // entry naming a spec but no home is a hand edit lint now refuses.
-      `projects:\n  - id: apart\n    roots: [${code}]\n    home: 0001-apart\n    spec: ${spec}\n`,
+      `blueprints:\n  - id: apart\n    roots: [${code}]\n    home: 0001-apart\n    spec: ${spec}\n`,
     );
   return { root, home, code, spec };
 }

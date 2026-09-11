@@ -56,5 +56,6 @@ Cucumber's discovery → formulation → automation maps onto the walkdown loop:
 - **project** (meaning a blueprint) — it meant both for a year, in the payload, the CLI
   and the config, and the day two blueprints had to share a page the ambiguity stopped
   being survivable. A project is a directory; a blueprint is a specification inside one
-  (ADR 0001). The config key `projects:` is the last surface still saying the old word,
-  and q-0270 is where that is being decided.
+  (ADR 0001). q-0270 settled the last of it: the config key is `blueprints:` and a
+  blueprint's own `walkdown.yml` opens `blueprint:`. Nothing walkdown writes says the old
+  word any more; the threads that argued it out still do, because the ledger is history.

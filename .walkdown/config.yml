@@ -13,7 +13,7 @@
 # machines whose layouts have nothing in common. walkdown's own home is laid
 # out like anybody's - blueprint/ threads/ runs/ evidence/ drafts/ under a
 # numbered directory - and .walkdown/.gitignore says which of those git gets.
-projects:
+blueprints:
   - id: walkdown
     roots: [.]
     spec: .walkdown/blueprints/0001-walkdown/blueprint

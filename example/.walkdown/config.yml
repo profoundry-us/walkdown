@@ -9,7 +9,7 @@
 # `walkdown init --commit spec` lays a project out. It is a project of its own:
 # stand in example/ and every walkdown command answers for it, and the
 # repository above never sees it (locations.answer.one-walkdown-answers).
-projects:
+blueprints:
   - id: example
     roots: [.]
     spec: .walkdown/blueprints/0001-example/blueprint

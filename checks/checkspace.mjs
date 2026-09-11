@@ -162,7 +162,7 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
   writeFileSync(
     join(CHECKSPACE, '.walkdown', 'config.yml'),
     [
-      'projects:',
+      'blueprints:',
       '  - id: blueprint',
       '    roots: [.]',
       `    spec: ${HOME}/blueprint`,

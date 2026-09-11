@@ -51,7 +51,7 @@ function fixture({ declared = true } = {}) {
   const threads = join(root, 'threads');
   mkdirSync(join(bp, 'features'), { recursive: true });
   mkdirSync(threads, { recursive: true });
-  writeFileSync(join(bp, 'walkdown.yml'), 'project: doors\n');
+  writeFileSync(join(bp, 'walkdown.yml'), 'blueprint: doors\n');
   writeFileSync(join(bp, 'storyboard.yml'), 'screens: []\n');
   writeFileSync(
     join(bp, 'features', 'f.yml'),

@@ -11,7 +11,7 @@ import {
   lockConfig,
   readUserConfig,
   rememberIdentity,
-  rememberProject,
+  rememberBlueprint,
   resolveLocations,
   walkdownHome,
 } from '../../lib/locations.js';
@@ -75,7 +75,7 @@ export async function run(args) {
       return process.exit(2);
     }
   const exact = () =>
-    (readUserConfig({ cwd: root }).config.projects ?? []).find((p) =>
+    (readUserConfig({ cwd: root }).config.blueprints ?? []).find((p) =>
       [p?.roots ?? []].flat().some((r) => r && canon(expand(r)) === canon(root)),
     );
   /*
@@ -94,7 +94,7 @@ export async function run(args) {
       ),
     ) ?? console.error(dim(`  the entry: ${at}`));
   let listed = exact();
-  let loc = listed ? resolveLocations({ cwd: root, project: listed.id }) : null;
+  let loc = listed ? resolveLocations({ cwd: root, blueprint: listed.id }) : null;
   if (listed && !loc.spec.path) {
     noSpec(listed, loc.config.matchedIn === 'repo' ? loc.config.repo.path : loc.config.path);
     return process.exit(2);
@@ -147,7 +147,7 @@ export async function run(args) {
       return process.exit(2);
     }
     listed = exact();
-    loc = resolveLocations({ cwd: root, project: listed.id });
+    loc = resolveLocations({ cwd: root, blueprint: listed.id });
     if (!loc.spec.path) {
       noSpec(listed, moved.config);
       return process.exit(2);
@@ -212,7 +212,7 @@ export async function run(args) {
    */
   const entry = listed
     ? { action: 'kept', id: listed.id }
-    : rememberProject({
+    : rememberBlueprint({
         id: basename(root),
         root,
         homeDir: claim.dir,
@@ -330,7 +330,7 @@ export async function run(args) {
      * and where git and the tree disagree it is said here in colour and lint
      * refuses it.
      */
-    const after = resolveLocations({ cwd: root, project: entry.id ?? listed?.id });
+    const after = resolveLocations({ cwd: root, blueprint: entry.id ?? listed?.id });
     const t = tracking(after);
     console.log(`  tracked: ${t.words}  ${dim(t.why)}`);
     for (const f of t.findings)
@@ -359,14 +359,14 @@ export async function run(args) {
     );
   }
   if (outer) {
-    const who = outer.project?.id ?? outer.spec.path;
+    const who = outer.blueprint?.id ?? outer.spec.path;
     console.log(yellow(`\n  note: \`${who}\` already answers for this directory.`));
     console.log(dim(`  its spec ${outer.spec.path}`));
     console.log(
       dim(
-        '  You now have two projects, each with its own ledger — which is on purpose when this\n' +
+        '  You now have two blueprints, each with its own ledger — which is on purpose when this\n' +
           '  directory is its own pack, and a directory too deep when it is not. To use the one\n' +
-          `  that was already here instead: \`walkdown project forget\` the new entry, and stand\n  where \`${who}\` is rooted.`,
+          `  that was already here instead: \`walkdown blueprint forget\` the new entry, and stand\n  where \`${who}\` is rooted.`,
       ),
     );
   }

@@ -22,7 +22,7 @@ beforeEach(() => {
   rmSync(h.threads, { recursive: true, force: true });
   mkdirSync(h.threads, { recursive: true });
   mkdirSync(bp, { recursive: true });
-  writeFileSync(join(bp, 'walkdown.yml'), 'project: mut\n');
+  writeFileSync(join(bp, 'walkdown.yml'), 'blueprint: mut\n');
   writeFileSync(
     join(h.threads, 'n-1.yml'),
     'id: n-1\nkind: note\nstatus: open\nbody: Fix the button.\n',

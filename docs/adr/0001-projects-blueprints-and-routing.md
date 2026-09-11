@@ -264,12 +264,16 @@ recorded here:
   edit's own result. Back to per-edit at step 6.
 
 Two surfaces named in §2 were deliberately left saying the old word, and
-[q-0270](../../.walkdown/blueprints/0001-walkdown/threads/q-0270.yml) is where
-they are decided: the config key `projects:`, which is a file format with data
-in every clone and in the person's own `~/.walkdown/config.yml`, and
-`resolveLocations({ project })`. Renaming either is a compatibility decision
-rather than a tidy, and the second is 56 test call sites in the file this
-repository has paid the most for.
+[q-0270](../../.walkdown/blueprints/0001-walkdown/threads/q-0270.yml) decided
+them: rename everything. So the config key is `blueprints:`, the argument is
+`resolveLocations({ blueprint })`, and — read out of the same answer — a
+blueprint's own `walkdown.yml` now opens `blueprint:` rather than `project:`.
+That third surface was not named in the question, and it is the one worth
+saying out loud: it is a spec file format, so every walkdown.yml on disk was
+rewritten with the code, and nothing reads the old key. Configs already written
+by hand elsewhere say the old word and will not be understood; per
+[q-0182](../../.walkdown/blueprints/0001-walkdown/threads/q-0182.yml) that is
+accepted rather than papered over with a fallback.
 
 The project modal ships without a design: `prototype/` is design's, the sketch
 is `proposals/project-modal.html`, and

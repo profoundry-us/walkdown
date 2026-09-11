@@ -43,7 +43,7 @@ flag checks written against an older wording.
 
 ```yaml
 # blueprint/walkdown.yml
-project: acme-store
+blueprint: acme-store
 prototype:
   root: prototype/          # storyboard `prototype:` paths resolve against this;
                             # `walkdown serve` mounts it at /prototype/ on its own port

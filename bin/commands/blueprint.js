@@ -41,7 +41,7 @@ import {
   HOME_LAYOUT,
   KINDS,
   readUserConfig,
-  rememberProject,
+  rememberBlueprint,
   walkdownHome,
   walkdownRoot,
 } from '../../lib/locations.js';
@@ -60,7 +60,7 @@ const days = (iso) => (Date.now() - Date.parse(iso ?? '')) / 86400000;
 
 function load(path, header = '') {
   const doc = existsSync(path) ? parseDocument(readFileSync(path, 'utf8')) : parseDocument(header);
-  if (!doc.get('projects')) doc.set('projects', doc.createNode([]));
+  if (!doc.get('blueprints')) doc.set('blueprints', doc.createNode([]));
   return doc;
 }
 
@@ -135,7 +135,7 @@ function add(args) {
    */
   const same = (a, b) => Boolean(a) && Boolean(b) && canon(a) === canon(b);
   const listedIn = (walkdown) => {
-    const rows = load(join(walkdown, 'config.yml')).get('projects');
+    const rows = load(join(walkdown, 'config.yml')).get('blueprints');
     return (rows?.items ?? []).find(
       (it) =>
         String(it.get?.('spec') ?? '') &&
@@ -198,7 +198,7 @@ function add(args) {
   for (const kind of KINDS) mkdirSync(join(homeDir, HOME_LAYOUT[kind]), { recursive: true });
   const target = join(wd, 'config.yml');
   const doc = load(target);
-  const projects = doc.get('projects');
+  const listedRows = doc.get('blueprints');
   /*
    * Against the file's own base - the repository for a committed file, and
    * nothing for the personal one, whose paths are absolute. Expanded against
@@ -206,7 +206,7 @@ function add(args) {
    * `.walkdown/.walkdown/blueprints/...` and a blueprint the file already
    * listed was listed again (n-0178).
    */
-  const listed = (projects.items ?? []).find(
+  const listed = (listedRows.items ?? []).find(
     (it) =>
       String(it.get?.('spec') ?? '') &&
       canon(expand(String(it.get('spec')), inRepo ? resolve(wd, '..') : undefined)) === canon(spec),
@@ -217,7 +217,7 @@ function add(args) {
   }
   const name = values.id ?? basename(homeDir).replace(/^\d{4}-/, '');
   const taken = new Set(
-    (readUserConfig().config.projects ?? []).map((p) => p?.id).filter(Boolean),
+    (readUserConfig().config.blueprints ?? []).map((p) => p?.id).filter(Boolean),
   );
   let id = name;
   for (let n = 2; taken.has(id); n++) id = `${name}-${n}`;
@@ -230,7 +230,7 @@ function add(args) {
    */
   let written;
   try {
-    written = rememberProject({
+    written = rememberBlueprint({
       id,
       root: values.ephemeral ? null : resolve(wd, '..'),
       base: inRepo ? resolve(wd, '..') : null,
@@ -254,24 +254,24 @@ function add(args) {
 function forget(args) {
   const id = args[0];
   if (!id) {
-    console.error('walkdown blueprint forget needs a project id.');
+    console.error('walkdown blueprint forget needs a blueprint id.');
     return end(2);
   }
   let removed = false;
   for (const path of [configPath(), walkdownRoot() && join(walkdownRoot(), 'config.yml')]) {
     if (!path || !existsSync(path)) continue;
     const doc = load(path);
-    const projects = doc.get('projects');
-    const i = (projects.items ?? []).findIndex((it) => String(it.get?.('id') ?? '') === id);
+    const listedRows = doc.get('blueprints');
+    const i = (listedRows.items ?? []).findIndex((it) => String(it.get?.('id') ?? '') === id);
     if (i < 0) continue;
-    projects.delete(i);
+    listedRows.delete(i);
     writeFileSync(path, String(doc));
     console.log(`  ${green('- forgotten')} \`${id}\`  ${dim(path)}`);
     console.log(dim('            Its records are untouched — only the declaration is gone.'));
     removed = true;
   }
   if (!removed) {
-    console.error(`No project \`${id}\` in either config. \`walkdown blueprints\` lists them.`);
+    console.error(`No blueprint \`${id}\` in either config. \`walkdown blueprints\` lists them.`);
     return end(2);
   }
   return end(0);
@@ -283,14 +283,14 @@ export function list(args) {
   /*
    * An entry with no spec is not a blueprint: it is a personal override of a
    * repository's entry - evidence on this disk, a port - and it lists as that
-   * repository's project wherever that repository answers. Standing anywhere
+   * repository's blueprint wherever that repository answers. Standing anywhere
    * else there is nothing to list under it.
    */
-  const all = (config.projects ?? []).filter((p) => p?.spec);
+  const all = (config.blueprints ?? []).filter((p) => p?.spec);
   const live = all.filter((p) => !p?.ephemeral);
   const scratch = all.filter((p) => p?.ephemeral);
   if (!all.length) {
-    console.log(dim('No projects. `walkdown init` starts one, `walkdown blueprint add` lists one.'));
+    console.log(dim('No blueprints. `walkdown init` starts one, `walkdown blueprint add` lists one.'));
     return end(0);
   }
   const row = (p, pad = '  ') => {
@@ -320,8 +320,8 @@ export function list(args) {
    *
    * Reported, never adopted. Which checkout a stranded home belonged to is
    * exactly the guess the same step forbids - a name is not a claim, and two
-   * projects can share one - so this says what is standing there and leaves
-   * the decision, `project add` included, to a person.
+   * blueprints can share one - so this says what is standing there and leaves
+   * the decision, `blueprint add` included, to a person.
    */
   for (const [walkdown, label] of [
     [walkdownHome(), 'your own'],
@@ -369,7 +369,7 @@ export function run(args) {
     console.error(HELP);
     return end(2);
   }
-  console.error(`walkdown project: no such action "${verb}".`);
+  console.error(`walkdown blueprint: no such action "${verb}".`);
   console.error(HELP);
   return end(2);
 }

@@ -60,7 +60,7 @@ function declare(proj, name = basename(proj)) {
   writeFileSync(
     join(proj, '.walkdown', 'config.yml'),
     [
-      'projects:',
+      'blueprints:',
       `  - id: ${name}`,
       '    roots: [.]',
       `    home: 0001-${name}`,
@@ -91,7 +91,7 @@ test('init scaffolds a lint-clean blueprint with agent conventions', () => {
   // are the person's, and a committed one is a vendored copy walkdown cannot
   // keep right afterwards (n-0239).
   assert.equal(existsSync(join(proj, '.claude')), false, 'the repository got no skills');
-  assert.match(readFileSync(join(homeSpec(proj), 'walkdown.yml'), 'utf8'), /project: fresh/);
+  assert.match(readFileSync(join(homeSpec(proj), 'walkdown.yml'), 'utf8'), /blueprint: fresh/);
   // The pointer names wherever the spec actually went, which is not
   // necessarily inside the repository any more.
   const pointer = readFileSync(join(proj, 'CLAUDE.md'), 'utf8');
@@ -122,7 +122,7 @@ test('init is idempotent: rerun no-ops, customizations kept, --force updates own
     JSON.stringify(rerun),
   );
 
-  writeFileSync(join(homeSpec(proj), 'walkdown.yml'), 'project: customized\n');
+  writeFileSync(join(homeSpec(proj), 'walkdown.yml'), 'blueprint: customized\n');
   writeFileSync(skillAt('walkdown-judge'), 'customized');
   const third = scaffold(proj, spec(proj));
   assert.equal(actionOf(third, rel(proj, 'walkdown.yml')), 'kept');
@@ -138,7 +138,7 @@ test('init is idempotent: rerun no-ops, customizations kept, --force updates own
   );
   assert.equal(
     readFileSync(join(homeSpec(proj), 'walkdown.yml'), 'utf8'),
-    'project: customized\n',
+    'blueprint: customized\n',
   );
 });
 
@@ -414,7 +414,7 @@ test('run sees a record arrive in a runs directory a config moved @rule:location
     [
       'defaults:',
       `  runs: ${runsAway}`,
-      'projects:',
+      'blueprints:',
       '  - id: moved-ledger',
       `    roots: [${proj}]`,
       `    spec: ${join(proj, 'blueprint')}`,
@@ -428,7 +428,7 @@ test('run sees a record arrive in a runs directory a config moved @rule:location
     `fs.writeFileSync('${runsAway}/probe-run.json','{}')"`;
   writeFileSync(
     join(proj, 'blueprint', 'walkdown.yml'),
-    ['project: moved-ledger', 'runner:', `  run_all: "${probe.replaceAll('"', '\\"')}"`, ''].join(
+    ['blueprint: moved-ledger', 'runner:', `  run_all: "${probe.replaceAll('"', '\\"')}"`, ''].join(
       '\n',
     ),
   );
@@ -459,7 +459,7 @@ test('run substitutes {id}, injects target env and WALKDOWN_TARGET, propagates e
   writeFileSync(
     join(proj, '.walkdown', 'config.yml'),
     [
-      'projects:',
+      'blueprints:',
       '  - id: runner',
       '    roots: [.]',
       '    spec: blueprint',
@@ -474,7 +474,7 @@ test('run substitutes {id}, injects target env and WALKDOWN_TARGET, propagates e
   writeFileSync(
     join(proj, 'blueprint', 'walkdown.yml'),
     [
-      'project: runner',
+      'blueprint: runner',
       'runner:',
       `  run_all: "${probe.replaceAll('"', '\\"')}"`,
       `  run_for_rule: "RULE_ARG={id} ${probe.replaceAll('"', '\\"')}"`,
@@ -499,7 +499,7 @@ test('run substitutes {id}, injects target env and WALKDOWN_TARGET, propagates e
 
   writeFileSync(
     join(proj, 'blueprint', 'walkdown.yml'),
-    'project: runner\nrunner: { run_all: "node -e \\"process.exit(3)\\"" }\n',
+    'blueprint: runner\nrunner: { run_all: "node -e \\"process.exit(3)\\"" }\n',
   );
   const failing = runChecks(loadBlueprint(join(proj, 'blueprint'), { cwd: proj }), { stdio: 'pipe' });
   assert.equal(failing.code, 3);

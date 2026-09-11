@@ -28,7 +28,7 @@ function scratch() {
 
 function blueprint(at, project = 'demo') {
   mkdirSync(join(at, 'features'), { recursive: true });
-  writeFileSync(join(at, 'walkdown.yml'), `project: ${project}\n`);
+  writeFileSync(join(at, 'walkdown.yml'), `blueprint: ${project}\n`);
   writeFileSync(join(at, 'storyboard.yml'), 'screens: []\n');
   writeFileSync(
     join(at, 'features', 'a.yml'),
@@ -70,7 +70,7 @@ test('a personal entry rooted in another checkout never merges into this reposit
     assert.equal(locTwo.id, 'app', 'both are called app, and that is allowed');
     assert.notEqual(locOne.spec.path, locTwo.spec.path);
     assert.ok(locTwo.spec.path.startsWith(join(two, '.walkdown') + '/'), 'two answers with its own');
-    assert.equal(declaringFiles(locTwo.project), 'repo', 'and the personal `app` is not merged into it');
+    assert.equal(declaringFiles(locTwo.blueprint), 'repo', 'and the personal `app` is not merged into it');
     assert.deepEqual(readUserConfig({ cwd: two }).shadowed, ['app'], 'it is reported as shadowed here');
 
     // The write door: a note filed standing in `two` lands in `two`.
@@ -95,7 +95,7 @@ test('a rootless personal entry with a spec of its own is a different project, n
 
     const loc = resolveLocations({ cwd: repo });
     assert.equal(loc.spec.path, join(repo, '.walkdown', 'blueprints', '0001-repo', 'blueprint'));
-    assert.equal(declaringFiles(loc.project), 'repo');
+    assert.equal(declaringFiles(loc.blueprint), 'repo');
   } finally {
     s.cleanup();
   }
@@ -109,11 +109,11 @@ test('a personal entry with no blueprint of its own is the override it always wa
     walkdown(s.home, ['init', '--commit', 'spec'], repo);
     writeFileSync(
       join(s.home, 'config.yml'),
-      `identity:\n  username: std-person\nprojects:\n  - id: repo\n    evidence: ${join(s.root, 'ev')}\n`,
+      `identity:\n  username: std-person\nblueprints:\n  - id: repo\n    evidence: ${join(s.root, 'ev')}\n`,
     );
     const loc = resolveLocations({ cwd: repo });
     assert.equal(loc.evidence.path, join(s.root, 'ev'));
-    assert.equal(declaringFiles(loc.project), 'both');
+    assert.equal(declaringFiles(loc.blueprint), 'both');
   } finally {
     s.cleanup();
   }
@@ -131,7 +131,7 @@ test('restating every key personally does not erase the repository’s declarati
     const repo = join(s.root, 'repo');
     mkdirSync(join(repo, '.git'), { recursive: true });
     walkdown(s.home, ['init', '--commit', 'spec'], repo);
-    const committed = parse(readFileSync(join(repo, '.walkdown', 'config.yml'), 'utf8')).projects[0];
+    const committed = parse(readFileSync(join(repo, '.walkdown', 'config.yml'), 'utf8')).blueprints[0];
     const restated = Object.fromEntries(
       Object.entries(committed).map(([k, v]) => [
         k,
@@ -140,14 +140,14 @@ test('restating every key personally does not erase the repository’s declarati
     );
     writeFileSync(
       join(s.home, 'config.yml'),
-      'identity:\n  username: std-person\nprojects:\n  - ' +
+      'identity:\n  username: std-person\nblueprints:\n  - ' +
         Object.entries(restated)
           .map(([k, v]) => `${k}: ${Array.isArray(v) ? `[${v.join(', ')}]` : v}`)
           .join('\n    ') +
         '\n',
     );
     const loc = resolveLocations({ cwd: repo });
-    assert.equal(declaringFiles(loc.project), 'both');
+    assert.equal(declaringFiles(loc.blueprint), 'both');
     assert.equal(loc.config.repo.matched, true, 'the committed file still names it');
     const said = walkdown(s.home, ['where'], repo).stdout;
     assert.match(said, /names this project too/);
@@ -174,12 +174,12 @@ test('a server offers what the .walkdown where it was started declares, wherever
     mkdirSync(join(mono, '.walkdown'), { recursive: true });
     writeFileSync(
       join(mono, '.walkdown', 'config.yml'),
-      'projects:\n  - id: root-proj\n    roots: [.]\n    spec: blueprint\n  - id: reach\n    roots: [packs/alpha]\n    spec: packs/alpha/blueprint\n',
+      'blueprints:\n  - id: root-proj\n    roots: [.]\n    spec: blueprint\n  - id: reach\n    roots: [packs/alpha]\n    spec: packs/alpha/blueprint\n',
     );
     mkdirSync(join(alpha, '.walkdown'), { recursive: true });
     writeFileSync(
       join(alpha, '.walkdown', 'config.yml'),
-      'projects:\n  - id: alpha\n    roots: [.]\n    spec: blueprint\n  - id: alpha-two\n    roots: [.]\n    spec: blueprint2\n',
+      'blueprints:\n  - id: alpha\n    roots: [.]\n    spec: blueprint\n  - id: alpha-two\n    roots: [.]\n    spec: blueprint2\n',
     );
 
     const server = createWalkdownServer(join(alpha, 'blueprint'), { cwd: mono });
@@ -246,7 +246,7 @@ test('the folder a server says it serves is the place its list came from @rule:p
     blueprint(join(proj, 'other', 'blueprint'), 'other');
     writeFileSync(
       join(proj, '.walkdown', 'config.yml'),
-      'projects:\n  - id: proj\n    roots: [.]\n    spec: .walkdown/blueprints/0001-proj/blueprint\n' +
+      'blueprints:\n  - id: proj\n    roots: [.]\n    spec: .walkdown/blueprints/0001-proj/blueprint\n' +
         '  - id: other\n    roots: [other]\n    spec: other/blueprint\n',
     );
 

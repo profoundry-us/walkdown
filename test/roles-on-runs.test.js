@@ -53,7 +53,7 @@ before(async () => {
   h = declaredHome(join(root, 'proj'), 'roles-fixture');
   bp = h.spec;
   mkdirSync(join(bp, 'features'), { recursive: true });
-  writeFileSync(join(bp, 'walkdown.yml'), 'project: roles-fixture\n');
+  writeFileSync(join(bp, 'walkdown.yml'), 'blueprint: roles-fixture\n');
   writeFileSync(
     join(bp, 'features', 'demo.yml'),
     [

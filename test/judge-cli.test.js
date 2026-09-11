@@ -34,7 +34,7 @@ function fixture(name, governance = []) {
   writeFileSync(
     join(bp, 'walkdown.yml'),
     [
-      'project: judge-fixture',
+      'blueprint: judge-fixture',
       'runner:',
       '  targets:',
       '    local:',

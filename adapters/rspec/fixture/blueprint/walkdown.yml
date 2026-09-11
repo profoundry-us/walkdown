@@ -1,4 +1,4 @@
-project: walkdown-rspec-fixture
+blueprint: walkdown-rspec-fixture
 runner:
   run_all: "rspec"
   run_for_rule: "rspec --tag 'rule:{id}'"

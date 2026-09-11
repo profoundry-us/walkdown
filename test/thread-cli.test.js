@@ -29,7 +29,7 @@ function fixture(name, thread) {
   const bp = join(root, name, 'blueprint');
   mkdirSync(bp, { recursive: true });
   mkdirSync(threadsOf(bp), { recursive: true });
-  writeFileSync(join(bp, 'walkdown.yml'), 'project: thread-cli-fixture\n');
+  writeFileSync(join(bp, 'walkdown.yml'), 'blueprint: thread-cli-fixture\n');
   writeFileSync(
     join(threadsOf(bp), `${thread.id}.yml`),
     [
@@ -212,7 +212,7 @@ function ruleFixture(name) {
   const bp = join(root, name, 'blueprint');
   mkdirSync(join(bp, 'features'), { recursive: true });
   mkdirSync(threadsOf(bp), { recursive: true });
-  writeFileSync(join(bp, 'walkdown.yml'), 'project: thread-cli-fixture\n');
+  writeFileSync(join(bp, 'walkdown.yml'), 'blueprint: thread-cli-fixture\n');
   writeFileSync(
     join(bp, 'features', 'f.yml'),
     [

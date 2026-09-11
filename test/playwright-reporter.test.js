@@ -36,7 +36,7 @@ writeFileSync(
   [
     'identity:',
     '  username: A Person',
-    'projects:',
+    'blueprints:',
     '  - id: reporter-fixture',
     `    roots: [${root}]`,
     `    spec: ${bp}`,
@@ -47,7 +47,7 @@ writeFileSync(
     '',
   ].join('\n'),
 );
-writeFileSync(join(bp, 'walkdown.yml'), 'project: reporter-fixture\n');
+writeFileSync(join(bp, 'walkdown.yml'), 'blueprint: reporter-fixture\n');
 writeFileSync(
   join(bp, 'features', 'd.yml'),
   'feature: d\nstories:\n  - id: d.s\n    rules:\n      - id: d.s.thing\n        statement: The thing.\n        verify: [checks]\n',

@@ -1,4 +1,4 @@
-project: walkdown
+blueprint: walkdown
 description: The tool itself — the panel, the embed, and the governance that keeps a verdict honest.
 
 # walkdown's own blueprint — the tool specified with itself. docs/ holds the

@@ -35,7 +35,7 @@ function fixture() {
   const root = mkdtempSync(join(tmpdir(), 'wd-ev-'));
   const h = declaredHome(root, 'ev-fixture');
   mkdirSync(join(h.spec, 'features'), { recursive: true });
-  writeFileSync(join(h.spec, 'walkdown.yml'), 'project: ev-fixture\n');
+  writeFileSync(join(h.spec, 'walkdown.yml'), 'blueprint: ev-fixture\n');
   writeFileSync(join(h.spec, 'storyboard.yml'), 'screens: []\n');
   const home = join(root, 'home');
   mkdirSync(home, { recursive: true });
@@ -82,7 +82,7 @@ test('with evidence moved out, the same recorded key finds it at the new root @r
       // `walkdown move evidence --to <path>` writes. It names no spec and no
       // roots: the repository's entry says where the blueprint is, and this
       // says only where THIS machine keeps its screenshots.
-      `projects:\n  - id: ev-fixture\n    evidence: ${join(f.home, 'projects', 'ev-fixture', 'evidence')}\n`,
+      `blueprints:\n  - id: ev-fixture\n    evidence: ${join(f.home, 'projects', 'ev-fixture', 'evidence')}\n`,
     );
     const out = join(f.home, 'projects', 'ev-fixture', 'evidence', 'r1');
     mkdirSync(out, { recursive: true });
@@ -104,7 +104,7 @@ test('with evidence moved out, the same recorded key finds it at the new root @r
 test('evidence serving still refuses anything outside the evidence key space @rule:locations.travel.evidence-by-key', async () => {
   const f = fixture();
   try {
-    writeFileSync(join(f.bp, 'walkdown.yml'), 'project: ev-fixture\n');
+    writeFileSync(join(f.bp, 'walkdown.yml'), 'blueprint: ev-fixture\n');
     await withServer(f, async (base) => {
       for (const path of [
         '/evidence/walkdown.yml',

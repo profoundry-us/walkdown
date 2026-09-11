@@ -31,18 +31,18 @@ export function run(args) {
     return end(2);
   }
 
-  const loc = resolveLocations({ project: values.blueprint });
+  const loc = resolveLocations({ blueprint: values.blueprint });
   /*
    * Only a listed project's records move. Standing in a directory nothing
    * declares, this used to fall through to an entry found BY NAME and rewrote
    * an unrelated project's drafts key from a repository that merely shared
    * its basename (n-0153, n-0160). No entry, no move.
    */
-  if (!loc.project) {
+  if (!loc.blueprint) {
     console.error(
       red(
         values.blueprint
-          ? `No project \`${values.blueprint}\` — \`walkdown projects\` lists them.`
+          ? `No blueprint \`${values.blueprint}\` — \`walkdown blueprints\` lists them.`
           : 'Nothing declares this directory, so there is no entry to remember a move in.',
       ),
     );

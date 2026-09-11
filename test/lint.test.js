@@ -22,7 +22,7 @@ after(() => rmSync(root, { recursive: true, force: true }));
 function writeFixture(dir, { goodHash = true, badScreen = false, threads = [] } = {}) {
   const h = declaredHome(dir);
   mkdirSync(join(h.spec, 'features'), { recursive: true });
-  writeFileSync(join(h.spec, 'walkdown.yml'), 'project: fixture\n');
+  writeFileSync(join(h.spec, 'walkdown.yml'), 'blueprint: fixture\n');
   writeFileSync(
     join(h.spec, 'storyboard.yml'),
     [
@@ -276,7 +276,7 @@ const FIXTURE_STEPS = [
 function ruleHome(dir, body, { steps = true } = {}) {
   const h = declaredHome(dir);
   mkdirSync(join(h.spec, 'features'), { recursive: true });
-  writeFileSync(join(h.spec, 'walkdown.yml'), 'project: fixture\n');
+  writeFileSync(join(h.spec, 'walkdown.yml'), 'blueprint: fixture\n');
   writeFileSync(
     join(h.spec, 'features', 'demo.yml'),
     [

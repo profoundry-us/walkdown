@@ -127,7 +127,7 @@ function make(label, why) {
     [
       '# A scratch copy for judging. Serve it from inside this directory, with',
       '# WALKDOWN_HOME pointed at its home/, and it answers for itself alone.',
-      'projects:',
+      'blueprints:',
       '  - id: blueprint',
       '    roots: [.]',
       `    spec: ${HOME}/blueprint`,

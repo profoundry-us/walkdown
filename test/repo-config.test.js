@@ -36,7 +36,7 @@ function project({ repoYaml = null, personalYaml = null } = {}) {
   const repo = join(root, 'repo');
   mkdirSync(join(repo, '.git'), { recursive: true });
   mkdirSync(join(repo, 'blueprint', 'features'), { recursive: true });
-  writeFileSync(join(repo, 'blueprint', 'walkdown.yml'), 'project: shared\n');
+  writeFileSync(join(repo, 'blueprint', 'walkdown.yml'), 'blueprint: shared\n');
   writeFileSync(join(repo, 'blueprint', 'features', 'a.yml'), 'feature: a\nstories: []\n');
   mkdirSync(join(repo, 'deep', 'nested'), { recursive: true });
 
@@ -50,7 +50,7 @@ function project({ repoYaml = null, personalYaml = null } = {}) {
 
 test('the repository config carries the list, and a clone needs nothing else', () => {
   const { repo } = project({
-    repoYaml: 'projects:\n  - id: shared\n    roots: [.]\n    spec: blueprint\n',
+    repoYaml: 'blueprints:\n  - id: shared\n    roots: [.]\n    spec: blueprint\n',
   });
   const loc = resolveLocations({ cwd: repo });
   assert.equal(loc.id, 'shared');
@@ -66,7 +66,7 @@ test('the repository config carries the list, and a clone needs nothing else', (
  */
 test('relative paths in the repository config resolve against the repository', () => {
   const { repo } = project({
-    repoYaml: 'projects:\n  - id: shared\n    roots: [.]\n    spec: blueprint\n',
+    repoYaml: 'blueprints:\n  - id: shared\n    roots: [.]\n    spec: blueprint\n',
   });
   const fromRoot = resolveLocations({ cwd: repo });
   const fromDeep = resolveLocations({ cwd: join(repo, 'deep', 'nested') });
@@ -77,8 +77,8 @@ test('relative paths in the repository config resolve against the repository', (
 
 test('the personal config wins, and merges into the entry rather than replacing it', () => {
   const { repo, home } = project({
-    repoYaml: 'projects:\n  - id: shared\n    roots: [.]\n    spec: blueprint\n',
-    personalYaml: `projects:\n  - id: shared\n    evidence: ${join('/tmp', 'my-evidence')}\n`,
+    repoYaml: 'blueprints:\n  - id: shared\n    roots: [.]\n    spec: blueprint\n',
+    personalYaml: `blueprints:\n  - id: shared\n    evidence: ${join('/tmp', 'my-evidence')}\n`,
   });
   const loc = resolveLocations({ cwd: repo });
   assert.equal(loc.evidence.path, join('/tmp', 'my-evidence'), 'the person overrides');
@@ -92,7 +92,7 @@ test('the personal config wins, and merges into the entry rather than replacing 
 
 test('identity is never taken from the repository config', () => {
   const { repo } = project({
-    repoYaml: 'identity:\n  username: committed-person\n  name: Committed Person\nprojects: []\n',
+    repoYaml: 'identity:\n  username: committed-person\n  name: Committed Person\nblueprints: []\n',
     personalYaml: 'identity:\n  username: me\n',
   });
   const { config } = readUserConfig({ cwd: repo });
@@ -100,13 +100,13 @@ test('identity is never taken from the repository config', () => {
 
   // And with no personal identity at all, the committed one still does not leak.
   const bare = project({
-    repoYaml: 'identity:\n  username: committed-person\nprojects: []\n',
+    repoYaml: 'identity:\n  username: committed-person\nblueprints: []\n',
   });
   assert.equal(readUserConfig({ cwd: bare.repo }).config.identity, undefined);
 });
 
 test('with no repository config, only the personal one answers', () => {
-  const { repo } = project({ personalYaml: 'projects: []\n' });
+  const { repo } = project({ personalYaml: 'blueprints: []\n' });
   const { repo: found } = readUserConfig({ cwd: repo });
   assert.equal(found, null, 'a team that shares nothing has nothing to find');
 });
@@ -120,19 +120,19 @@ test('with no repository config, only the personal one answers', () => {
 test('the search stops at the repository and never mistakes the personal config for a shared one', () => {
   const { repo, home } = project({});
   // The personal config exists, at the walkdown home, above this repository.
-  writeFileSync(join(home, 'config.yml'), 'projects: []\n');
+  writeFileSync(join(home, 'config.yml'), 'blueprints: []\n');
   assert.equal(repoConfigPath(join(repo, 'deep', 'nested')), null);
 
   // A config ABOVE the repository is out of reach: the walk stops at the top
   // of the checkout it started in.
   const outer = join(repo, '..');
   mkdirSync(join(outer, '.walkdown'), { recursive: true });
-  writeFileSync(join(outer, '.walkdown', 'config.yml'), 'projects: []\n');
+  writeFileSync(join(outer, '.walkdown', 'config.yml'), 'blueprints: []\n');
   assert.equal(repoConfigPath(join(repo, 'deep', 'nested')), null, 'not the parent directory’s');
 
   // But the repository's own is found from any depth inside it.
   mkdirSync(join(repo, '.walkdown'), { recursive: true });
-  writeFileSync(join(repo, '.walkdown', 'config.yml'), 'projects: []\n');
+  writeFileSync(join(repo, '.walkdown', 'config.yml'), 'blueprints: []\n');
   assert.equal(
     repoConfigPath(join(repo, 'deep', 'nested')),
     join(repo, '.walkdown', 'config.yml'),
@@ -153,7 +153,7 @@ test('the search stops at the repository and never mistakes the personal config 
 test('the report credits the config that actually answered @rule:locations.answer.declared-not-discovered', () => {
   const { repo, home } = project({
     repoYaml:
-      'projects:\n  - id: alpha\n    roots: [alpha]\n    spec: alpha/blueprint\n  - id: beta\n    roots: [beta]\n    spec: beta/blueprint\n',
+      'blueprints:\n  - id: alpha\n    roots: [alpha]\n    spec: alpha/blueprint\n  - id: beta\n    roots: [beta]\n    spec: beta/blueprint\n',
   });
   for (const id of ['alpha', 'beta'])
     mkdirSync(join(repo, id, 'blueprint'), { recursive: true });
@@ -161,7 +161,7 @@ test('the report credits the config that actually answered @rule:locations.answe
   // has no entry at all for alpha, which is the case that used to be misread.
   writeFileSync(
     join(home, 'config.yml'),
-    `projects:\n  - id: beta\n    roots: [${join(repo, 'beta')}]\n  - id: solo\n    roots: [/nowhere]\n`,
+    `blueprints:\n  - id: beta\n    roots: [${join(repo, 'beta')}]\n  - id: solo\n    roots: [/nowhere]\n`,
   );
 
   const alpha = resolveLocations({ cwd: join(repo, 'alpha') });
@@ -196,8 +196,8 @@ test('the report credits the config that actually answered @rule:locations.answe
  */
 test('each path row names the file that supplied that key', () => {
   const { repo, home } = project({
-    repoYaml: 'projects:\n  - id: shared\n    roots: [.]\n    spec: blueprint\n',
-    personalYaml: `projects:\n  - id: shared\n    evidence: ${join('/tmp', 'mine')}\n`,
+    repoYaml: 'blueprints:\n  - id: shared\n    roots: [.]\n    spec: blueprint\n',
+    personalYaml: `blueprints:\n  - id: shared\n    evidence: ${join('/tmp', 'mine')}\n`,
   });
   const loc = resolveLocations({ cwd: repo });
   assert.match(loc.spec.why, /this repository's config \(shared\)/, 'the repo declared the spec');
@@ -217,8 +217,8 @@ test('each path row names the file that supplied that key', () => {
  */
 test('a parse failure is reported against the file that has it @rule:locations.answer.declared-not-discovered', () => {
   const broken = project({
-    repoYaml: 'projects:\n  - id: alpha\n   roots: [alpha]\n',
-    personalYaml: 'projects:\n  - id: solo\n    roots: [/nowhere]\n',
+    repoYaml: 'blueprints:\n  - id: alpha\n   roots: [alpha]\n',
+    personalYaml: 'blueprints:\n  - id: solo\n    roots: [/nowhere]\n',
   });
   const cfg = readUserConfig({ cwd: broken.repo });
   assert.equal(cfg.error, null, 'the personal file parses, and says so');
@@ -248,8 +248,8 @@ test('a parse failure is reported against the file that has it @rule:locations.a
   // The control, which is the direction that always worked and is exactly why
   // the other one went unnoticed.
   const other = project({
-    repoYaml: 'projects: []\n',
-    personalYaml: 'projects: [oops\n',
+    repoYaml: 'blueprints: []\n',
+    personalYaml: 'blueprints: [oops\n',
   });
   const flip = readUserConfig({ cwd: other.repo });
   assert.ok(flip.error);

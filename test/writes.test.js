@@ -43,13 +43,13 @@ function project({ movedThreads = false } = {}) {
   writeFileSync(
     join(home, 'config.yml'),
     'identity:\n  username: writes-person\n' +
-      (movedThreads ? `projects:\n  - id: writes-fixture\n    threads: ${threadsDir}\n` : ''),
+      (movedThreads ? `blueprints:\n  - id: writes-fixture\n    threads: ${threadsDir}\n` : ''),
   );
   process.env.WALKDOWN_HOME = home;
   const h = declaredHome(join(root, 'proj'), 'writes-fixture');
   const bp = h.spec;
   mkdirSync(join(bp, 'features'), { recursive: true });
-  writeFileSync(join(bp, 'walkdown.yml'), 'project: writes-fixture\n');
+  writeFileSync(join(bp, 'walkdown.yml'), 'blueprint: writes-fixture\n');
   writeFileSync(join(bp, 'storyboard.yml'), 'screens: []\n');
   writeFileSync(
     join(bp, 'features', 'demo.yml'),

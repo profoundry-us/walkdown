@@ -27,7 +27,7 @@ function project() {
   mkdirSync(join(bp, 'features'), { recursive: true });
   mkdirSync(runs, { recursive: true });
   mkdirSync(home, { recursive: true });
-  writeFileSync(join(bp, 'walkdown.yml'), 'project: movable\n');
+  writeFileSync(join(bp, 'walkdown.yml'), 'blueprint: movable\n');
   writeFileSync(join(bp, 'storyboard.yml'), 'screens: []\n');
   writeFileSync(join(runs, 'a.json'), '{"run_id":"a"}');
   return { root, home, bp, runs, cleanup: () => rmSync(root, { recursive: true, force: true }) };
