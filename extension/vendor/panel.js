@@ -4280,7 +4280,9 @@
    */
   function buildAppFrame() {
     D.appFrame = document.createElement('iframe');
-    D.appFrame.src = S.frameUrl;
+    // At the server root there is nothing to frame yet; a null src would be
+    // asked for as the address "null", which the server would 404.
+    if (S.frameUrl) D.appFrame.src = S.frameUrl;
     D.appFrame.dataset.testid = 'panel.app-frame';
     D.appFrame.setAttribute('title', 'the application under review');
     // Whatever the frame lands on - our navigation or the app's own - the wait
@@ -4330,6 +4332,16 @@
 
   function placeAppFrame(on) {
     if (!D.appFrame) return;
+    /*
+     * Bare at the root: nothing framed and nothing picked, so there is no sheet
+     * to draw - the desk ruling alone under the modal. Once a project is picked
+     * the sheet appears, empty, because choosing between that project's
+     * blueprints happens on the panel beside a frame with nothing in it yet.
+     */
+    if (bareRoot()) {
+      D.appFrame.style.cssText = 'display:none';
+      return;
+    }
     // The veil is pinned to the frame's box, so it follows every move of it.
     if (veilIsUp()) requestAnimationFrame(placeVeil);
     const { availW, availH, scale } = frameSpace();
@@ -4658,6 +4670,7 @@
   function render() {
     if (!S.data) return;
     syncProjectModal();
+    syncBareRoot();
     // The thread screen without a thread is not a screen.
     if (S.view === 'thread' && !S.openThread) S.view = S.selected ? 'detail' : 'list';
     /*
@@ -5621,9 +5634,12 @@
      * frame reloaded for a screen it was already showing.
      */
     if (!sameAddress(S.frameUrl, url)) {
+      const first = !S.frameUrl;
       S.frameUrl = url;
       frameLoading(url, `Loading ${screenLabel(screen)}…`);
       D.appFrame.src = url;
+      // The root's first page: the sheet was not drawn until now.
+      if (first) syncBareRoot();
     }
     /*
      * The screen override describes where we are going, not where we have
@@ -6198,7 +6214,7 @@
      * no page to route from: what is on screen is walkdown, not an application.
      * That is the modal's sixth case, and it is the same modal (ADR 0001 §7).
      */
-    const atServerRoot = !S.frameUrl && originOf(S.SERVER) === location.origin;
+    const atRoot = atServerRoot();
     /*
      * Ask the page. A blueprint that claims this address is a fact about where
      * you are, and it is the ONLY thing that decides on its own - the count of
@@ -6211,7 +6227,7 @@
      * removed this week.
      */
     S.claimants = [];
-    if (!S.BP && !atServerRoot) {
+    if (!S.BP && !atRoot) {
       let whose;
       try {
         whose = await (await fetch(api(`/api/whose?url=${encodeURIComponent(here)}`))).json();
@@ -6317,6 +6333,7 @@
   function renderGate() {
     renderBar();
     syncProjectModal();
+    syncBareRoot();
     if (S.phase === 'connect') {
       D$1(
         b`
@@ -6343,12 +6360,36 @@
       return;
     }
     /*
+     * The modal is up and nothing is chosen yet. The panel has nothing true to
+     * say until it is, and a panel reciting a state it is not in - "not
+     * connected" while connected, "which blueprint?" while the modal asks which
+     * project - is worse than an empty one (n-0276). So one line, no tabs. It
+     * is a fallback rather than the design: what a reviewer reads if the blur
+     * over it does not paint.
+     */
+    if (S.picking && !S.project) {
+      D$1(
+        b`<div class="flex flex-1 items-center justify-center p-6 text-center text-[12.5px] opacity-50"
+        data-testid="start.pick-a-project">Please select a project…</div>`,
+        D.side,
+      );
+      return;
+    }
+    /*
      * Several blueprints in one project claim this page, or you crossed to a
      * project holding more than one. Either way the question is which of THIS
      * project's blueprints, and the Blueprints tab is where that is answered -
      * so this is that pane, with the reason it is being shown said out loud.
+     *
+     * Counted within THIS project, not across the page. The claimants are
+     * gathered once at boot, for the page; crossing to another project kept
+     * the old count and the pane said "2 blueprints in this project claim this
+     * page" over a list where none did (n-0273). The count is only a reason
+     * when it is about the blueprints being listed.
      */
-    const claimed = S.claimants.length;
+    const claimed = S.claimants.filter(
+      (m) => projectIdOf(S.blueprints.find((pr) => pr.key === m.key)) === S.project,
+    ).length;
     D$1(
       b`
     <div class="p-4 pb-1">
@@ -6378,6 +6419,32 @@
     const framed = S.frameUrl ?? null;
     const here = !framed && originOf(S.SERVER) === location.origin ? null : (framed ?? location.href);
     D$1(projectModal({ here, closable: S.phase === 'ready' || Boolean(S.project) }), D.projectModal);
+  }
+
+  /*
+   * Standing at the walkdown server's own root, with nothing framed: what is on
+   * screen is walkdown, not an application, so there is no page to route from.
+   * Every delivery that frames a page says so before boot; only walkdown's own
+   * review page, opened with no fragment, arrives here.
+   */
+  function atServerRoot() {
+    return !S.frameUrl && originOf(S.SERVER) === location.origin;
+  }
+
+  /*
+   * The root before anything is picked. The rule draws nothing here but the
+   * desk ruling and the modal - no bar, no panel, no sheet - and the moment a
+   * project is chosen the chrome comes back so the choice can continue on it.
+   */
+  function bareRoot() {
+    return atServerRoot() && !S.project;
+  }
+
+  /** Hide the chrome at the bare root, and show it again the moment it is owed. */
+  function syncBareRoot() {
+    const bare = bareRoot();
+    for (const el of [D.bar, D.side, D.tab]) if (el) el.style.visibility = bare ? 'hidden' : '';
+    placeAppFrame(S.docked);
   }
 
   /** Its origin, or nothing at all where the address is not one. */
@@ -6663,10 +6730,14 @@
 
     /*
      * The panel reviews a page by framing it, and a page cannot frame itself - so
-     * there is always a frame, and whoever started us said which. The extension's
-     * bootstrap and walkdown's own review page both refuse to load us without one.
+     * whoever started us normally said which. The one place there is honestly
+     * nothing to frame is walkdown's own server root, where the page on screen
+     * IS walkdown: that is the modal's own case (ADR 0001 §7), and refusing it
+     * here left the case unreachable from every door (n-0272). The extension
+     * always names a frame, and its origin is never the server's, so a missing
+     * frame anywhere else is still a bootstrap that forgot.
      */
-    if (!cfg.frame?.url) {
+    if (!cfg.frame?.url && !atServerRoot()) {
       console.warn('[walkdown] no page to review — the panel needs a frame url');
       return;
     }

@@ -6,7 +6,7 @@ created: 2026-09-10T13:15:00.089Z
 anchor:
   rule: panel.start.which-project
   screen: project-modal
-status: open
+status: addressed
 body: >-
   At walkdown's own server root the panel draws nothing at all, so the modal's
   third case is unreachable.
@@ -50,3 +50,42 @@ body: >-
   and the panel's bg-base-300/70 over the dark blueprint theme leaves the side
   panel fully legible beside the card. It is modal in behaviour but does not
   read as covered.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-11T14:00:28Z
+    body: >-
+      Fixed, 2026-09-11, to Topher's answer on what the root becomes once a
+      project is picked.
+
+
+      boot() no longer refuses on a missing frame when the panel is standing at
+      the server's own origin - that is the one delivery where there is honestly
+      nothing to frame, and the extension's origin is never the server's, so a
+      missing frame anywhere else is still a bootstrap that forgot and still
+      refuses (src/panel/app.js, the guard at the top of boot; atServerRoot()
+      beside originOf). The frame is not given a src until there is one, since a
+      null src was asked for as the address 'null'.
+
+
+      What it draws now, per the reworded panel.start.which-project - bareRoot()
+      / syncBareRoot() in app.js:
+
+        bare root        desk ruling alone. Bar, side panel, put-away tab and sheet all hidden; the modal on top, with no Close, because there is nothing behind it to go back to.
+        project picked   the chrome comes back. A project holding one blueprint opens it and, the root having no page of its own to keep, goes to the first screen that blueprint claims (panel.rules.takes-you-there - jumpOnLoad was already the mechanism). A project holding several shows the panel with 'Which blueprint?' beside a sheet with nothing in it yet, and the blueprint picked there does the same trip.
+
+      Seen in the browser on localhost:4730/: the modal over the ruling, then
+      the walkdown blueprint picked, then the board over the review-page
+      stand-in. Covered by a check tagged to the rule - "walkdown's own root
+      asks which project over the desk alone, and a pick brings the board"
+      (checks/panel.spec.js) - which asserts the modal at /, no Close, bar and
+      sheet hidden, then bar and sheet back after the pick, then the frame at
+      the claimed page.
+
+
+      The smaller difference this note ended on - the dim not reading as covered
+      - turned out to be the dim not painting at all, and is n-0276.
+
+
+      Awaiting a re-judge of the rule; its statement changed on 2026-09-10 so
+      every earlier verdict on it is stale anyway.

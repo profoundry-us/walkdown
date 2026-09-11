@@ -6,7 +6,7 @@ created: 2026-09-10T13:16:14.871Z
 anchor:
   rule: panel.start.choose-a-blueprint
   screen: choose-blueprint
-status: open
+status: addressed
 body: "Agent walkdown 2026-09-10: crossing to another project keeps the OLD
   project's claimant count, so the panel says out loud a reason that is false.
   Repro on a scratch copy (four blueprints in the served project, two of them —
@@ -39,3 +39,42 @@ body: "Agent walkdown 2026-09-10: crossing to another project keeps the OLD
   sitting in the folder never offered, one claimant among four never asked
   about, and the same list on the Blueprints tab with the choice changeable
   there."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-11T14:00:28Z
+    body: >-
+      Fixed, 2026-09-11, with the plain fallback sentence as Topher asked - no
+      two-clause notice.
+
+
+      renderGate() in src/panel/app.js now counts claimants WITHIN the current
+      project rather than across the page:
+
+        const claimed = S.claimants.filter((m) => projectIdOf(S.blueprints.find((pr) => pr.key === m.key)) === S.project).length;
+
+      so crossing from a project with two claimants to one with none reads 'This
+      project holds more than one blueprint. Pick the one you are reviewing
+      against.' - the sentence that was already in the ternary and unreachable.
+      S.claimants itself is untouched: it is still the page's list, gathered
+      once at boot, and the modal still uses the page-wide count for 'N
+      blueprints claim this page, in more than one project', which is the right
+      count there.
+
+
+      The same wrong read was behind the three false statements in the pane
+      behind the project modal (n-0276); that pane is now one centred line with
+      no tabs while the modal is up and nothing is chosen, per the reworded
+      panel.start.which-project.
+
+
+      Covered by a check tagged to this rule - 'crossing to a project that
+      claims nothing here does not keep the old count' (checks/panel.spec.js) -
+      which manufactures a second project holding two blueprints that claim
+      nothing, starts on a page two of the served project's blueprints claim,
+      asserts the '2 blueprints in this project claim' notice with both badged,
+      crosses from the bar, and asserts two rows, zero badges, the fallback
+      sentence and no 'claim this page'.
+
+
+      Everything the note said held still holds. Awaiting a re-judge.

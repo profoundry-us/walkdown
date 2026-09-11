@@ -2125,3 +2125,94 @@ test('the bar names the project you are in, and opens the switcher at will', {
   await expect(page.getByTestId('project.modal')).toHaveCount(0);
   await expect(page.getByTestId('panel.rules-list')).toBeVisible();
 });
+
+/*
+ * The modal's own root. `walkdown serve` opened with no fragment has no page
+ * to route from - what is on screen is walkdown - and the panel used to refuse
+ * to boot at all without a frame, so this row of ADR 0001 §7 was unreachable
+ * from every door (n-0272). Nothing is drawn there but the desk and the
+ * modal, which cannot be dismissed because there is nothing behind it to go
+ * back to; the chrome appears the moment a project is picked, and a blueprint
+ * picked then takes you to a page it claims, since the root has none of its
+ * own.
+ */
+test("walkdown's own root asks which project over the desk alone, and a pick brings the board", {
+  tag: '@rule:panel.start.which-project',
+}, async ({ page }) => {
+  await page.route('**/index.html', (r) =>
+    r.fulfill({ contentType: 'text/html', body: '<h1>The other project</h1>' }),
+  );
+  await page.goto(`${WD_ORIGIN}/`);
+
+  const modal = page.getByTestId('project.modal');
+  await expect(modal, 'the root is the modal').toBeVisible();
+  await expect(page.getByTestId('project.why')).toContainText(/walkdown's own server/i);
+  // Nothing to go back to, so nothing to close it with.
+  await expect(page.getByTestId('project.close')).toHaveCount(0);
+  // And nothing under it: no bar, no sheet - the desk ruling alone.
+  await expect(page.getByTestId('panel.bar'), 'no bar at the bare root').toBeHidden();
+  await expect(page.getByTestId('panel.app-frame'), 'no sheet at the bare root').toBeHidden();
+
+  // The project holds two blueprints, so picking it asks which - on the
+  // panel, beside a sheet with nothing in it yet.
+  await page.getByTestId('project.list').locator('[data-project]').first().click();
+  await expect(page.getByTestId('start.options').locator('[data-pick]').first()).toBeVisible();
+  await expect(page.getByTestId('panel.bar'), 'the bar is back').toBeVisible();
+  await expect(page.getByTestId('panel.app-frame'), 'and an empty sheet').toBeVisible();
+  await expect(page.getByTestId('project.modal')).toHaveCount(0);
+
+  // A blueprint picked from the root has no page under it to keep, so it goes
+  // to one it claims (panel.rules.takes-you-there).
+  await page.getByTestId('start.options').getByText(/walkdown-example/i).first().click();
+  await expect(page.getByTestId('panel.rules-list')).toBeVisible();
+  await expect
+    .poll(() => page.frames().some((f) => f.url().includes('index.html')), { timeout: 10000 })
+    .toBe(true);
+});
+
+/*
+ * The reason the Blueprints pane gives is about the blueprints it is listing.
+ * The claimants are gathered once, for the page; crossing to another project
+ * kept that count, and the pane said "2 blueprints in this project claim this
+ * page" over a list where none did (n-0273).
+ */
+test('crossing to a project that claims nothing here does not keep the old count', {
+  tag: '@rule:panel.start.choose-a-blueprint',
+}, async ({ page }) => {
+  let keys = [];
+  await page.route('**/api/blueprint*', async (route) => {
+    const res = await route.fetch();
+    const body = await res.json();
+    keys = (body.blueprints ?? []).map((p) => p.key);
+    // A second project this machine holds, whose blueprints claim nothing on
+    // this page. Two of them, so picking it asks rather than opening one.
+    const other = { id: 'other', root: '~/elsewhere' };
+    body.blueprints.push(
+      { id: 'delta', key: '/elsewhere/0001-delta/blueprint', name: 'delta', project: other },
+      { id: 'epsilon', key: '/elsewhere/0002-epsilon/blueprint', name: 'epsilon', project: other },
+    );
+    await route.fulfill({ response: res, json: body });
+  });
+  await page.route(/\/api\/whose(\?|$)/, async (route) => {
+    const url = new URL(route.request().url()).searchParams.get('url');
+    await route.fulfill({
+      json: { url, matches: keys.map((key) => ({ id: key, key, name: key, screen: 'review' })) },
+    });
+  });
+  await page.goto(fixtureFor({ bp: '' }));
+
+  // Two claimants in one project: the question, with the reason.
+  await expect(page.getByTestId('start.notice')).toContainText(/2 blueprints in this project claim/);
+  await expect(page.getByTestId('start.options').locator('[data-pick][data-claims]')).toHaveCount(2);
+
+  // Cross to the other project from the bar.
+  await page.getByTestId('panel.project').click();
+  await page.getByTestId('project.list').locator('[data-project="other"]').click();
+
+  // Its two blueprints, neither claiming this page - and the notice says
+  // that, rather than the count it gathered for the project you left.
+  await expect(page.getByTestId('start.options').locator('[data-pick]')).toHaveCount(2);
+  await expect(page.getByTestId('start.options').locator('[data-pick][data-claims]')).toHaveCount(0);
+  await expect(page.getByTestId('start.notice')).toContainText(/holds more than one blueprint/);
+  await expect(page.getByTestId('start.notice')).not.toContainText(/claim this page/);
+});
