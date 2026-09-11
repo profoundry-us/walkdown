@@ -11,7 +11,7 @@
  */
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
@@ -125,4 +125,77 @@ test('a parse failure is reported against the file that has it @rule:locations.a
   const r = walkdown(broken.home, ['import', '.'], broken.repo);
   assert.equal(r.status, 2);
   assert.match(r.stderr, /does not parse/);
+});
+
+/*
+ * n-0275, turned around. A link created OUTSIDE a pack, pointing at the
+ * pack's home, and a row written by hand naming the link: the walk used to
+ * follow the link on the read side while the writer refused the same path,
+ * so a second board listed, served and wrote to the pack's ledger with
+ * nobody having imported anything. There is no walk now, and a row nothing
+ * wrote is not a door: the only moment a path is looked at is the add, and
+ * the add canonicalises.
+ */
+test('a hand-written row naming a symlink is set aside, and import through the link registers the real path once @rule:locations.answer.registry-is-the-only-door', async () => {
+  const { home, root } = clone();
+  const mono = join(root, 'mono');
+  const pack = join(mono, 'packs', 'pack');
+  mkdirSync(join(mono, '.git'), { recursive: true });
+  mkdirSync(pack, { recursive: true });
+  assert.equal(walkdown(home, ['init', '--commit', 'spec'], mono).status, 0);
+  assert.equal(walkdown(home, ['init', '--commit', 'spec'], pack).status, 0);
+  const packHome = join(pack, '.walkdown', 'blueprints', '0001-pack');
+  writeFileSync(
+    join(packHome, 'blueprint', 'features', 'a.yml'),
+    'feature: a\nstories:\n  - id: a.s\n    rules:\n      - id: a.s.one\n        statement: One.\n        verify: [checks]\n',
+  );
+  const lab = join(root, 'lab');
+  mkdirSync(lab, { recursive: true });
+  const link = join(lab, 'linkpack');
+  symlinkSync(packHome, link, 'dir');
+
+  // The row, by hand: no `registered:`, and the home spelled through the link.
+  const registry = join(home, 'registry.yml');
+  writeFileSync(registry, readFileSync(registry, 'utf8') + `  - id: viasymlink\n    project: ${lab}\n    home: ${link}\n`);
+
+  // Set aside on read, and named under the file it is in.
+  const where = walkdown(home, ['where'], mono).stdout;
+  assert.match(where, /ignores `registry: viasymlink`.*written by hand/, where);
+  const byName = walkdown(home, ['where', '--blueprint', 'viasymlink'], mono);
+  assert.match(byName.stdout + byName.stderr, /no registered blueprint `viasymlink`/);
+  assert.equal(JSON.parse(walkdown(home, ['where', '--json'], mono).stdout).config.ignored.map((i) => i.id).join(), 'viasymlink');
+  // Nothing goes through it: not a status, not a thread, and the pack's ledger is untouched.
+  assert.notEqual(walkdown(home, ['status', '--blueprint', 'viasymlink'], mono).status, 0);
+  const filed = walkdown(home, ['thread', 'new', '--blueprint', 'viasymlink', '--rule', 'a.s.one', '--body', 'through the link', '--as-agent'], mono);
+  assert.notEqual(filed.status, 0, filed.stdout);
+  assert.ok(!existsSync(join(packHome, 'threads', 'n-0001.yml')), 'nothing landed in the pack');
+  // And standing in the lab, where the row's project would contain you, it is still nothing.
+  assert.equal(resolveLocations({ cwd: lab }).blueprint, null);
+
+  // A server at the root lists what is registered - both rows - and never the link's.
+  const { createWalkdownServer } = await import('../lib/serve.js');
+  const server = createWalkdownServer(join(mono, '.walkdown', 'blueprints', '0001-mono', 'blueprint'), { cwd: mono });
+  await new Promise((r) => server.listen(0, '127.0.0.1', r));
+  try {
+    const base = `http://127.0.0.1:${server.address().port}`;
+    const payload = await (await fetch(`${base}/api/blueprint`)).json();
+    assert.deepEqual(payload.blueprints.map((p) => p.id).sort(), ['mono', 'pack']);
+    assert.equal((await fetch(`${base}/api/blueprint?bp=viasymlink`)).status, 404);
+  } finally {
+    server.closeAllConnections();
+    server.close();
+  }
+
+  // Standing in the pack reaches the pack's row; at the root, the root's.
+  assert.equal(resolveLocations({ cwd: pack }).id, 'pack');
+  assert.equal(resolveLocations({ cwd: mono }).id, 'mono');
+
+  // Through the link, import is the one add - and it is the pack's home,
+  // canonicalised, already listed once.
+  const again = walkdown(home, ['import', link], lab);
+  assert.equal(again.status, 0, again.stderr);
+  assert.match(again.stdout, /already listed/);
+  const rows = readRegistry().rows.filter((r) => r.registered && r.home);
+  assert.equal(rows.filter((r) => realpathSync(r.home) === realpathSync(packHome)).length, 1, JSON.stringify(rows));
+  assert.ok(rows.every((r) => !String(r.home).includes('linkpack')), 'no row names the link');
 });

@@ -10,13 +10,16 @@ description: The tool itself — the panel, the embed, and the governance that k
 # ledger's own laws, which no browser can reach. Each reporter appends its own
 # run record; they cover disjoint rules, so the ledger reads them as one.
 runner:
-  # WALKDOWN_HOME pinned on the unit half only: several suites build fixture
-  # blueprints and personal configs, and unpinned they write into the real one
-  # (thirteen dead home entries got allocated there on 2026-09-01, back when a
-  # registry allocated them). The browser half pins its own scratch home
-  # inside checks/global-setup.mjs and must keep it.
-  run_all: "WALKDOWN_HOME=tmp/test-home node --test --test-reporter=./lib/node-test-reporter.js --test-reporter-destination=stdout && npx playwright test"
-  run_for_rule: "WALKDOWN_HOME=tmp/test-home node --test --test-name-pattern='{id}' --test-reporter=./lib/node-test-reporter.js --test-reporter-destination=stdout && npx playwright test --grep '@rule:{id}'"
+  # WALKDOWN_HOME is NOT pinned here, on purpose. Every suite gives itself a
+  # scratch home per process (tools/test-home.mjs) whether or not one is
+  # pinned, so nothing a test builds can reach the real one - and the
+  # reporter, which runs in the main process, has to read the real registry
+  # to find the blueprint of record (ADR 0003): pinned at an empty home it
+  # says "no blueprint found" and records nothing. `npm test` still pins
+  # tmp/test-home so the scratch stays under tmp/; the browser half pins its
+  # own inside checks/checkspace.mjs and hands the reporter the real home.
+  run_all: "node --test --test-reporter=./lib/node-test-reporter.js --test-reporter-destination=stdout && npx playwright test"
+  run_for_rule: "node --test --test-name-pattern='{id}' --test-reporter=./lib/node-test-reporter.js --test-reporter-destination=stdout && npx playwright test --grep '@rule:{id}'"
   list: "grep -rn '@rule:' test/ checks/"
   results: native
   targets:

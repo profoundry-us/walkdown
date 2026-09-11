@@ -113,28 +113,22 @@ function make(label, why) {
   mkdirSync(join(path, HOME, 'evidence'), { recursive: true });
   for (const entry of shared) symlinkSync(join(real, entry), join(path, HOME, 'evidence', entry));
   /*
-   * A `.walkdown` of its own, and a personal home of its own, so that a server
-   * started INSIDE the copy answers for the copy and nothing else. The nearest
-   * `.walkdown` is the scope of everything a server offers - but the personal
-   * config is merged with it, and the real project is rooted at a directory
-   * that contains this one, so from the real home the real ledger is still one
-   * `?bp=` away (q-0149). Pinning WALKDOWN_HOME inside the copy is what closes
-   * that, and it is what checks/checkspace.mjs has always done.
+   * A personal home of its own, with a registry naming the copy and nothing
+   * else, so that a server started with WALKDOWN_HOME pointed at it answers
+   * for the copy alone (ADR 0003). The real project's row lives in the real
+   * registry; a server reading this one cannot see it, so the real ledger is
+   * not one `?bp=` away (q-0149) - which is what checks/checkspace.mjs has
+   * always done. The copy carries a manifest too, so it is what a checkout
+   * looks like; `import` would register it from this file.
    */
   mkdirSync(join(path, '.walkdown'), { recursive: true });
   writeFileSync(
     join(path, '.walkdown', 'config.yml'),
     [
-      '# A scratch copy for judging. Serve it from inside this directory, with',
-      '# WALKDOWN_HOME pointed at its home/, and it answers for itself alone.',
+      '# A scratch copy for judging. Serve it with WALKDOWN_HOME pointed at its',
+      '# home/, whose registry names this copy and nothing else.',
       'blueprints:',
       '  - id: blueprint',
-      '    roots: [.]',
-      `    spec: ${HOME}/blueprint`,
-      `    threads: ${HOME}/threads`,
-      `    runs: ${HOME}/runs`,
-      `    evidence: ${HOME}/evidence`,
-      `    drafts: ${HOME}/drafts`,
       '    home: 0001-walkdown',
       '',
     ].join('\n'),
@@ -143,6 +137,19 @@ function make(label, why) {
   writeFileSync(
     join(path, 'home', 'config.yml'),
     `identity:\n  username: scratch-${label}\n  name: A scratch sitting (${label})\n`,
+  );
+  writeFileSync(
+    join(path, 'home', 'registry.yml'),
+    [
+      'blueprints:',
+      '  - id: blueprint',
+      `    project: ${path}`,
+      `    home: ${join(path, HOME)}`,
+      // Not `ephemeral:` - a scratch row is reached by standing in the copy,
+      // which an ephemeral row never is; the home it lives in is the throwaway.
+      `    registered: { by: import, at: '${new Date().toISOString()}' }`,
+      '',
+    ].join('\n'),
   );
   writeFileSync(
     join(path, STAMP),
@@ -160,7 +167,7 @@ function make(label, why) {
 
   console.log(path);
   console.error(
-    `\nA disposable copy, declared to itself. Serve it FROM INSIDE IT, with its own home:\n` +
+    `\nA disposable copy, registered to itself. Serve it with its own home:\n` +
       `  cd ${path} && WALKDOWN_HOME=${join(path, 'home')} node ${join(root, 'bin', 'walkdown.js')} serve --port <n>\n` +
       `Started there it offers this copy and nothing else - not the real ledger.\n` +
       (shared.length

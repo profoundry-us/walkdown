@@ -62,12 +62,13 @@ export function run(args) {
   // A row this file no longer reads - a `blueprints:` list from before the
   // registry, or a relative path in a file about every project on the disk
   // - was set aside, and this says so.
-  for (const ig of loc.config.ignored ?? [])
+  const ignores = (ig) =>
     console.log(
       `  ${''.padEnd(9)} ${yellow(
         `ignores \`${ig.key}: ${typeof ig.value === 'string' ? ig.value : ig.id ?? '…'}\`${ig.id && typeof ig.value === 'string' ? ` in entry \`${ig.id}\`` : ''} — ${ig.why ?? 'a relative path means nothing in this file; write it in full'}`,
       )}`,
     );
+  for (const ig of loc.config.ignored ?? []) if (ig.key !== 'registry') ignores(ig);
   const reg = loc.config.registry;
   console.log(`  ${''.padEnd(9)} ${reg.path}`);
   console.log(
@@ -81,6 +82,9 @@ export function run(args) {
         : dim('the registry — not present; `walkdown import` or `walkdown init` starts it')
     }`,
   );
+  // A row in the registry nothing wrote (ADR 0003 §5): set aside, and said
+  // under the file it is in.
+  for (const ig of loc.config.ignored ?? []) if (ig.key === 'registry') ignores(ig);
   if (loc.ambiguous)
     console.log(
       `  ${''.padEnd(9)} ${yellow(
@@ -90,7 +94,7 @@ export function run(args) {
   /*
    * Which `.walkdown` answered, before any path it answered with - the one
    * fact every row below is relative to, and the one a person in a monorepo
-   * most needs to see (locations.answer.one-walkdown-answers).
+   * most needs to see (locations.answer.registry-is-the-only-door).
    */
   console.log(`  ${'answers'.padEnd(9)} ${loc.walkdown.path ?? dim('—')}`);
   console.log(`  ${''.padEnd(9)} ${dim(loc.walkdown.why)}`);

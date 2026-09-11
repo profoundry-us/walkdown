@@ -101,7 +101,7 @@ stories:
     rules:
       - id: locations.answer.says-why
         origin: prd
-        statement: Every path walkdown reports comes with the reason it was chosen - named on the command line, this machine's config, already in the blueprint, the built-in default - because a person who disagrees with where something is needs to know which decision to argue with.
+        statement: Every path walkdown reports comes with the reason it was chosen - named on the command line, this machine's registry and how the row arrived, the home the row names, the built-in default - because a person who disagrees with where something is needs to know which decision to argue with.
         verify: [checks]
         steps:
           given:
@@ -111,7 +111,7 @@ stories:
           then:
             - Each of the spec, runs, threads, evidence, drafts and code carries its reason
             - The reason names the rule that decided it, not merely that a decision was made
-          statement_hash: sha256:971e878234f9
+          statement_hash: sha256:fd21bba75c2e
 
       - id: locations.answer.asking-writes-nothing
         origin: prd
@@ -145,6 +145,8 @@ stories:
 
       - id: locations.answer.one-walkdown-answers
         origin: walkdown
+        retired: >-
+          Its statement is about which of two files answers, and there is one file now (ADR 0003, accepted 2026-09-11): a reader consults ~/.walkdown/registry.yml and nothing else, a committed .walkdown/config.yml is a manifest that only `walkdown import` reads, and no `.walkdown` is ever found by walking. Every mechanism this rule named - the nearest-and-stop walk, the merge with the personal file, the crossing guard on both files - was deleted at step 3 of that ADR, after n-0275 showed a symlink walking through the guard on the read side while the write side refused the same path. The half that survives - no inference, nothing merely lying nearby is a project - is locations.answer.declared-not-discovered; what replaces the boundary is locations.answer.registry-is-the-only-door.
         statement: Exactly one `.walkdown` directory answers for where you are standing - the nearest one at or above you - and it is merged with the personal `~/.walkdown` and with nothing else. What that forbids is INFERENCE - walkdown never works out from the tree that a neighbouring checkout's blueprints are yours, so a pack carrying its own `.walkdown` never sees the repository root's and the root's never sees the pack's. It does not forbid breadth - a blueprint you named yourself, with `walkdown import`, is reachable from anywhere, because you said so and nothing was guessed.
         verify: [checks]
         signoff: [eng, product]
@@ -168,19 +170,37 @@ stories:
 
       - id: locations.answer.declared-not-discovered
         origin: thread:q-0138
-        statement: Every blueprint walkdown answers for is one somebody wrote down - in the `.walkdown` that answers for where you are standing, or in the person's own - and never one it went looking for, so a repository may hold several without them bleeding into each other.
+        statement: Every blueprint walkdown answers for is one somebody registered on this machine - with `walkdown import`, or by `walkdown init` making it - and never one it went looking for, so a repository may hold several without them bleeding into each other, and a checkout that declares a blueprint nobody has imported is not a project here until somebody does.
         verify: [checks]
         signoff: [eng, product]
         steps:
           given:
-            - A repository holding two blueprints, each declared, and a third nobody declared
+            - A repository holding two blueprints, each registered, and a third nobody registered
           when:
             - The location is resolved from inside each of them, and one is named outright
           then:
-            - Each declared blueprint answers for itself, with its own runs and threads
-            - The undeclared one is not a project at all, however much it looks like one from the outside
-            - The shared config and the personal one are both consulted, and the report says which answered - however many keys the person restated
-          statement_hash: sha256:dd87f8781211
+            - Each registered blueprint answers for itself, with its own runs and threads
+            - The unregistered one is not a project at all, however much it looks like one from the outside - and where its checkout declares it, the answer names the manifest and says `walkdown import`
+            - The registry is consulted, and the report says which row answered and how it arrived - a `blueprints:` list in the personal config.yml is set aside and named, however many keys it restates
+          statement_hash: sha256:d6788490af67
+
+      - id: locations.answer.registry-is-the-only-door
+        origin: thread:n-0275
+        statement: A reader consults the registry and nothing else - never a `.walkdown` it did not register, never a path it was not handed at add time - so the working directory picks among registered rows by containment and finds nothing else, a path is canonicalised once when it is added and never resolved again on read, and a row nothing wrote is set aside and named rather than followed. What a spelling can fool is the one moment a path is looked at, and that moment is the add.
+        verify: [checks]
+        signoff: [eng, product]
+        steps:
+          given:
+            - A repository with a registered home at its root and a pack inside it with its own, and a symlink outside the pack pointing at the pack's home
+            - A row written by hand into the registry, with no `registered:`, naming the link
+          when:
+            - The location is asked for through the link's row, a thread is filed through it, and a server is started at the repository root
+          then:
+            - "`walkdown where` sets the row aside and says it was written by hand; `walkdown status` and `walkdown thread new` through it refuse, and nothing lands in the pack's ledger"
+            - The server lists every registered blueprint and never the link's row
+            - "`walkdown import` through the link registers the pack's home once, under its real path, and a second import says it is already listed"
+            - Standing in the pack reaches the pack's row; standing at the root reaches the root's; nothing about the tree between them is consulted
+          statement_hash: sha256:20130d966a11
 
   - id: locations.keeping
     title: A ledger already written is never orphaned or edited
