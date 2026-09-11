@@ -6,7 +6,7 @@ created: 2026-09-11T21:22:51.790Z
 anchor:
   rule: panel.start.choose-a-blueprint
   screen: choose-blueprint
-status: open
+status: addressed
 body: "Observed while judging (run 2026-09-11T21-12-54Z-local-01, pass): the
   chooser marks the claimants and puts them first, but the Blueprints tab drawn
   after a pick shows the same three blueprints in registry order with no 'claims
@@ -20,3 +20,13 @@ body: "Observed while judging (run 2026-09-11T21-12-54Z-local-01, pass): the
   you on that screen, and after a pick they are gone from the tab that is
   supposed to be the same list. Worth deciding whether the tab should keep
   asking /api/whose for the framed page."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-11T21:49:43Z
+    body: "Same root as n-0282, fixed with it: start() dropped S.claimants once a
+      blueprint was set, so the Blueprints tab after a pick had nothing to mark.
+      The list is now asked for on every start (and again when the switcher
+      opens), so the marks survive the pick. Whether the tab should carry them
+      at all is still the question this note asked; the behaviour now matches
+      what blueprints.js says."

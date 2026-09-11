@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-09-11T21-46-03Z-local-01",
+  "created": "2026-09-11T21:46:03Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2ab8680-dirty",
+  "tree_hash": "sha256:70bb99ebf395",
+  "spec_hash": "sha256:22a4af6c7b65",
+  "results": [
+    {
+      "rule": "panel.start.choose-a-blueprint",
+      "status": "fail",
+      "statement_hash": "sha256:3ff33b8e9c41",
+      "duration_ms": 942,
+      "checks": [
+        "checks/panel.spec.js:2199"
+      ],
+      "evidence": [
+        "runs/evidence/2026-09-11T21-46-03Z/panel-crossing-to-a-projec-46e6b-does-not-keep-the-old-count-test-failed-1.png",
+        "runs/evidence/2026-09-11T21-46-03Z/panel-crossing-to-a-projec-46e6b-does-not-keep-the-old-count-error-context.md"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "run_id": "2026-09-11T21-33-29Z-local-01",
+  "created": "2026-09-11T21:33:29Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2ab8680-dirty",
+  "spec_hash": "sha256:22a4af6c7b65",
+  "results": [
+    {
+      "rule": "panel.start.which-project",
+      "status": "fail",
+      "statement_hash": "sha256:fb4343377bab",
+      "evidence": [
+        "runs/evidence/2026-09-11T21-33-29Z/01-root-modal-over-desk.png",
+        "runs/evidence/2026-09-11T21-33-29Z/02-root-after-escape-stays.png",
+        "runs/evidence/2026-09-11T21-33-29Z/03-unclaimed-arrival-blurred-page-behind.png",
+        "runs/evidence/2026-09-11T21-33-29Z/04-unclaimed-picked-second-opens.png",
+        "runs/evidence/2026-09-11T21-33-29Z/05-two-projects-claim-arrival.png",
+        "runs/evidence/2026-09-11T21-33-29Z/06-picked-project-board-on-same-page.png",
+        "runs/evidence/2026-09-11T21-33-29Z/07-switcher-from-bar-same-address.png",
+        "runs/evidence/2026-09-11T21-33-29Z/08-switcher-escape-board-back.png",
+        "runs/evidence/2026-09-11T21-33-29Z/09-server-lists-nothing.png",
+        "runs/evidence/2026-09-11T21-33-29Z/probe.txt"
+      ],
+      "reasoning": "Judged on a scratch copy (judge-which-project-2) served from inside the copy with its own home on :4735, with a `judge` target added on that port so the copy's claims land where the server is, and a second project registered in the scratch home whose blueprint claims the same pages, so every case the rule names was reachable. Most of it holds. The server root is the modal over the desk ruling alone - bar visibility:hidden, no frame, no close button, no address line - and a real keyboard Escape and a backdrop click both leave it standing (01, 02). An unclaimed page loads in the frame behind a blur(8px) backdrop with a transparent background and nothing else painted; the panel carries no tabs and one centred line, \"Please select a project…\"; the modal names the address and cannot be dismissed by Escape or backdrop (03). A page two projects claim is asked with \"2 blueprints claim this page, in more than one project\", both projects marked, first, and named via their blueprint (05); choosing a project with one blueprint opens it, on the same page when it claims that page (06) and on a claimed page when it does not (04); nothing opens by default at any count. The commands `walkdown claims --url`, `walkdown import` and `walkdown init` sit above the list with no button among them. The switcher from the bar leaves the board blurred behind the same modal, and both Escape and the backdrop give the frame, the rules list and the bar back byte-identical (08, probe.txt). A server listing nothing shows no list, says it holds no projects, and still names `walkdown import` (09 - the list was emptied at the browser, since the server has no door to that state). It fails on one clause, and not a small one: the switcher opened from the bar on http://localhost:4735/stand-in/review - the very address the arrival modal had just said two projects claim - names that address and says \"No blueprint claims this page\", marking neither project (07), while /api/whose for it lists both (probe.txt). The cause reads directly in src/panel/app.js: pick-project -> crossTo() -> start(), and start() empties S.claimants and skips /api/whose whenever a blueprint is already set, so the claimant list is dropped on every cross and never re-asked; the same stale answer appears after the board takes you to a claimed page from the root. The rule says the switcher is the one modal, that it names the address it asked about, and that projects claiming this page come first naming the blueprint that matched; here it names an address it did not ask about and reports the opposite of the server's answer. Filed as n-0282.",
+      "threads": ["n-0282"]
+    }
+  ]
+}

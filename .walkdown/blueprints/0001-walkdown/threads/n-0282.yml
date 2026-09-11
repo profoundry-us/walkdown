@@ -1,0 +1,63 @@
+id: n-0282
+kind: note
+author: topher
+via: agent
+created: 2026-09-11T21:41:16.547Z
+anchor:
+  rule: panel.start.which-project
+  screen: project-modal
+status: addressed
+body: >-
+  The switcher opened from the bar says "No blueprint claims this page" about a
+  page two projects claim.
+
+
+  Judged on a scratch copy (judge-which-project-2) served on :4735 with a second
+  registered project whose blueprint claims the same pages. Arriving at
+  http://localhost:4735/#/stand-in/review the modal is right: "2 blueprints
+  claim this page, in more than one project", both projects marked and named via
+  their blueprint
+  (runs/evidence/2026-09-11T21-33-29Z/05-two-projects-claim-arrival.png). Pick
+  judge-which-project-2, the board opens on that same page
+  (06-picked-project-board-on-same-page.png), press the project control in the
+  bar: the same modal names the same address,
+  http://localhost:4735/stand-in/review, and now says "No blueprint claims this
+  page" with neither project marked (07-switcher-from-bar-same-address.png). The
+  server disagrees: /api/whose for that address lists both (probe.txt, "server
+  /api/whose for the switcher address"). The rule says the switcher is the same
+  modal, that it names the address it asked about, and that projects claiming
+  this page come first and name the blueprint that matched - here it names an
+  address it never asked about and reports the opposite of the answer. A person
+  who follows the modal's own advice and runs `walkdown claims --url` gets two
+  claimants and a contradiction.
+
+
+  Where it comes from, reading src/panel/app.js: pick-project -> crossTo() ->
+  start(), and start() sets S.claimants = [] and skips /api/whose whenever S.BP
+  is set, so the claimant list is emptied on every cross and never asked again.
+  The same happens after the board takes you to a claimed page from the root or
+  from an unclaimed page (04-unclaimed-picked-second-opens.png lands on
+  /stand-in/review, which both projects claim, and the switcher there also says
+  nothing claims it). The rest of the rule held: root is the modal over the desk
+  alone with no close and Escape/backdrop leave it (01, 02); an unclaimed
+  arrival loads the page blurred behind, panel with no tabs and one centred
+  "Please select a project…" line, undismissable (03); backdrop is blur(8px)
+  with transparent background everywhere; commands sit above the list; a project
+  with one blueprint opens on choosing; the switcher's Escape and backdrop give
+  the board back byte-identical (08); a server listing nothing shows no list,
+  says so, and still names walkdown import (09, with the list emptied at the
+  browser since the server has no door for it).
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-11T21:49:43Z
+    body: "Fixed: start() in src/panel/app.js now asks /api/whose whenever there is
+      a page, not only when no blueprint is open - the list is a fact about the
+      address; what a set blueprint changes is only that nothing routes on it.
+      Opening the switcher from the bar asks again about the page as it is now,
+      so the address it names and the claims it reports cannot disagree after
+      the frame has moved. The crossing check in checks/panel.spec.js now picks
+      a blueprint after the cross and opens the switcher, asserting the original
+      project is still marked as claiming the page; it fails before the change
+      and passes after, and is tagged under this rule and choose-a-blueprint. 53
+      browser checks green."

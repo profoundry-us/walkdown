@@ -2197,7 +2197,7 @@ test("walkdown's own root asks which project over the desk alone, and a pick bri
  * page" over a list where none did (n-0273).
  */
 test('crossing to a project that claims nothing here does not keep the old count', {
-  tag: '@rule:panel.start.choose-a-blueprint',
+  tag: ['@rule:panel.start.choose-a-blueprint', '@rule:panel.start.which-project'],
 }, async ({ page }) => {
   let keys = [];
   await page.route('**/api/blueprint*', async (route) => {
@@ -2235,4 +2235,19 @@ test('crossing to a project that claims nothing here does not keep the old count
   await expect(page.getByTestId('start.options').locator('[data-pick][data-claims]')).toHaveCount(0);
   await expect(page.getByTestId('start.notice')).toContainText(/holds more than one blueprint/);
   await expect(page.getByTestId('start.notice')).not.toContainText(/claim this page/);
+
+  // Pick one of them, so a blueprint is open - and then the switcher, opened
+  // again on the same page, still knows whose page it is: once a blueprint
+  // was set the answer was dropped, and the modal named the address it had
+  // just been asked about and said nothing claimed it (n-0282).
+  await page.getByTestId('panel.project').click();
+  await page.getByTestId('project.list').locator('[data-project]:not([data-project="other"])').click();
+  await page.getByTestId('start.options').locator('[data-pick]').first().click();
+  await expect(page.getByTestId('panel.rules-list')).toBeVisible();
+  await page.getByTestId('panel.project').click();
+  const list = page.getByTestId('project.list');
+  await expect(list.locator('[data-project][data-claims]')).toHaveCount(1);
+  await expect(list.locator('[data-project][data-claims]').first()).not.toHaveAttribute('data-project', 'other');
+  await expect(page.getByTestId('project.why')).not.toContainText(/No blueprint claims this page/);
+  await page.keyboard.press('Escape');
 });

@@ -5062,7 +5062,10 @@
     S.project ? 'btn-ghost' : 'btn-outline btn-primary'
   }" data-testid="panel.project" id="wdp-project-btn"
     title="Which project you are working in — open to switch"
-    @click=${() => {
+    @click=${async () => {
+      // The switcher names the page and says who claims it, so it asks about
+      // the page as it is now - the frame may have moved since boot (n-0282).
+      if (!atServerRoot()) await askWhose(S.frameUrl ?? location.href);
       S.picking = true;
       S.phase === 'ready' ? render() : renderGate();
     }}>
@@ -6176,6 +6179,22 @@
   };
 
   /*
+   * Whose page is this? By key, never by id: two listed blueprints may share a
+   * name, and the one this page belongs to is one directory, not one name
+   * (n-0173). False when the server could not say.
+   */
+  async function askWhose(here) {
+    let whose;
+    try {
+      whose = await (await fetch(api(`/api/whose?url=${encodeURIComponent(here)}`))).json();
+    } catch {
+      return false;
+    }
+    S.claimants = (whose?.matches ?? []).filter((m) => S.blueprints.some((pr) => pr.key === m.key));
+    return true;
+  }
+
+  /*
    * Three questions, asked once each and then not again: is there a server,
    * whose page this is, and then the actual work. A script tag has already
    * answered the second, so it goes straight past both gates.
@@ -6226,25 +6245,25 @@
      * walkdown deciding whose page you are on, which is the fault four judgings
      * removed this week.
      */
+    /*
+     * Asked whenever there is a page, not only when nothing is open yet. The
+     * list is a fact about the address; what changes once a blueprint is set is
+     * only that nothing below ROUTES on it. Asked only at boot, a cross dropped
+     * it and the switcher then named the page it had just been asked about and
+     * said nothing claimed it (n-0282), and the Blueprints tab lost its marks
+     * after a pick (n-0281).
+     */
     S.claimants = [];
-    if (!S.BP && !atRoot) {
-      let whose;
-      try {
-        whose = await (await fetch(api(`/api/whose?url=${encodeURIComponent(here)}`))).json();
-      } catch {
-        /*
-         * It answered /api/blueprint a moment ago and cannot answer this, so it
-         * is not a server the panel can work through. There is no second way to
-         * find out whose page this is, and no honest screen to draw without an
-         * answer - every one of them would be asserting the thing that could
-         * not be found out. So this is the server's problem, and it says so.
-         */
-        S.phase = 'connect';
-        return renderGate();
-      }
-      // By key, never by id: two listed blueprints may share a name, and the
-      // one this page belongs to is one directory, not one name (n-0173).
-      S.claimants = (whose?.matches ?? []).filter((m) => S.blueprints.some((pr) => pr.key === m.key));
+    if (!atRoot && !(await askWhose(here))) {
+      /*
+       * It answered /api/blueprint a moment ago and cannot answer this, so it
+       * is not a server the panel can work through. There is no second way to
+       * find out whose page this is, and no honest screen to draw without an
+       * answer - every one of them would be asserting the thing that could
+       * not be found out. So this is the server's problem, and it says so.
+       */
+      S.phase = 'connect';
+      return renderGate();
     }
     /*
      * The routing table, in the order ADR 0001 §7 sets it out. Each row here is
@@ -6381,11 +6400,10 @@
      * project's blueprints, and the Blueprints tab is where that is answered -
      * so this is that pane, with the reason it is being shown said out loud.
      *
-     * Counted within THIS project, not across the page. The claimants are
-     * gathered once at boot, for the page; crossing to another project kept
-     * the old count and the pane said "2 blueprints in this project claim this
-     * page" over a list where none did (n-0273). The count is only a reason
-     * when it is about the blueprints being listed.
+     * Counted within THIS project, not across the page. Crossing to another
+     * project once kept the old count and the pane said "2 blueprints in this
+     * project claim this page" over a list where none did (n-0273). The count
+     * is only a reason when it is about the blueprints being listed.
      */
     const claimed = S.claimants.filter(
       (m) => projectIdOf(S.blueprints.find((pr) => pr.key === m.key)) === S.project,
