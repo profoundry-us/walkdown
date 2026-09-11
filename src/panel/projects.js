@@ -93,13 +93,21 @@ function commands(here) {
  * The project modal. Drawn over everything, including the panel, because
  * until this is answered there is nothing behind it worth reading.
  *
+ * The backdrop is a BLUR and nothing else. It was `bg-base-300/70` until
+ * n-0276, which painted nothing at all - the scrim renders outside the
+ * panel's themed subtree, so `--color-base-300` resolved empty, the
+ * `color-mix()` was invalid at computed-value time, and the declaration was
+ * dropped in silence. `backdrop-filter` depends on no custom property, so it
+ * paints from exactly where the dim could not, and a blur says "suspended"
+ * without a dim's cost of hiding what is behind it.
+ *
  * @param {{ here: string|null, closable: boolean }} opts
  */
 export function projectModal({ here, closable }) {
   const rows = rankedProjects();
   const claimed = S.claimants.length;
   return html`
-    <div class="absolute inset-0 bg-base-300/70" @click=${(e) => closable && fire(e.currentTarget, 'close-projects')}></div>
+    <div class="absolute inset-0 backdrop-blur-sm" @click=${(e) => closable && fire(e.currentTarget, 'close-projects')}></div>
     <div class="absolute left-1/2 top-12 flex max-h-[80vh] w-[min(560px,92vw)] -translate-x-1/2 flex-col
                 overflow-hidden rounded-box border border-primary/45 bg-base-100 text-base-content shadow-2xl"
          data-theme="blueprint" data-testid="project.modal">

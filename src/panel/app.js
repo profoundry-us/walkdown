@@ -233,7 +233,8 @@ function buildChrome() {
    * project's board would read as something that board was doing.
    *
    * Above the sign panel's z-index, and it takes pointer events for the whole
-   * viewport: the dim behind the card is what makes it modal.
+   * viewport: the backdrop behind the card is what makes it modal - it
+   * swallows the clicks, and blurs what it covers so that is visible.
    */
   D.projectModal = document.createElement('div');
   D.projectModal.style.cssText =

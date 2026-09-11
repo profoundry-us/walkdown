@@ -444,7 +444,7 @@ stories:
 
       - id: panel.start.which-project
         origin: thread:q-0269
-        statement: Where the address cannot decide - nothing claims this page, several projects do, or there is no page to route from at all because you are looking at walkdown's own root - the panel asks which project, in one modal over the whole of its own chrome. It names the address it asked about, and it puts how to make a page reviewable and how to bring a project in ABOVE the list, where a long list of projects cannot push them out of view.
+        statement: Where the address cannot decide - nothing claims this page, several projects do, or there is no page to route from at all because you are looking at walkdown's own root - the panel asks which project, in one modal. One modal and one backdrop serve every case and only what sits behind them changes - an arrival leaves the page and the panel standing but blurred, walkdown's own root has nothing behind the modal but the desk ruling, and the switcher pressed inside a loaded project leaves that project's board exactly where it was and gives it back on Escape. It names the address it asked about, and it puts how to make a page reviewable and how to bring a project in ABOVE the list, where a long list of projects cannot push them out of view.
         signoff: [eng, product]
         screens: [project-modal]
         steps:
@@ -453,15 +453,21 @@ stories:
           when:
             - The panel starts there, or the project control in the bar is pressed at any time
           then:
-            - One screen answers all of those cases, and it is drawn over the bar and the panel as well as the page - crossing projects from inside one project's board would read as something that board was doing
+            - One modal and one backdrop answer every case, and only the substrate underneath differs - crossing projects from inside one project's board would read as something that board was doing
+            - The backdrop is a blur and nothing else - blurring says the board is suspended without hiding it, and a dim on top of it buys legibility the blur already bought
+            - Arriving on a page nothing claims, the page still loads in the frame and the panel still opens - but the panel carries no tabs and one centred line where the rules would be, because until a project is chosen the panel has nothing true to say and a panel reciting a state it is not in is worse than an empty one
+            - That line is a fallback, not the design - it is what a reviewer reads if the blur does not paint, so it says plainly that a project has to be picked
+            - Arriving that way, the modal cannot be dismissed, there being nothing behind it to go back to
+            - On walkdown's own server root there is no frame, no panel and no bar - the desk ruling alone - and the backdrop blurs nothing there, because nothing is behind the modal to blur
+            - The switcher pressed inside a loaded project leaves the frame and the panel exactly as they were, blurred, and Escape or the backdrop gives them back unchanged
             - It names the address it asked about, because a claim misses on a port or a fragment and "no blueprint" without the address leaves you guessing which one was asked
             - How to make this page reviewable, and how to bring a project in, sit above the list - `walkdown claims --url`, `walkdown import`, `walkdown init`, named rather than described
             - Neither of those ever runs from the browser - they write to a person's disk and to their personal config, and a button here would be walkdown adopting a directory on the strength of a click in a web page
             - Projects claiming this page come first and name the blueprint that matched
             - Nothing is opened by default, at any count - a machine holding exactly one blueprint is answered the same way as one holding six
-            - Choosing a project with one blueprint opens it; choosing one with several asks which, on the Blueprints tab
+            - Choosing a project with one blueprint opens it; choosing one with several asks which, on the Blueprints tab - and several blueprints inside a single project never reach this modal at all, because the project is not in question there
             - A server that lists nothing offers no list at all rather than an empty one, and still says what to do about it
-          statement_hash: sha256:f218205cd807
+          statement_hash: sha256:fb4343377bab
 
   - id: panel.rules
     title: The rules are one tap away, and so is the way back

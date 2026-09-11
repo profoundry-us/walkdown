@@ -47,3 +47,25 @@ body: >-
 
   The glossary now defines both words and says this thread is where the key is
   decided.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-11T01:47:27Z
+    body: >-
+      Topher, asked directly on 2026-09-10: keep the walkdown.yml spec key
+      rename.
+
+
+      The question named the config key. The spec key `project:` -> `blueprint:`
+      was my reading of "reword everything; I'm good with a big tidy up", and I
+      flagged it as an inference rather than an instruction. Put to him as three
+      options - keep it, revert just the spec key, or keep it with the old key
+      still parsing as a fallback - he took the first. So `blueprint:` is the
+      only spelling walkdown writes or reads, and the fallback was declined: two
+      live spellings would have been the old word surviving in the place a
+      person is most likely to look for the new one, and q-0182 already settled
+      what happens to hand-written configs.
+
+
+      Shipped in 9a8208b. This thread is still open because answering it is his
+      to do, not mine.

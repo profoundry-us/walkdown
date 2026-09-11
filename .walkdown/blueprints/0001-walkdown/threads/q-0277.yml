@@ -1,0 +1,64 @@
+id: q-0277
+kind: question
+author: topher
+via: agent
+created: 2026-09-11T02:40:28.442Z
+anchor:
+  rule: panel.start.which-project
+  screen: project-modal
+status: open
+body: >-
+  Design request - the drawing and the build now disagree about this screen in
+  three ways, and none of them is a build defect.
+
+
+  panel.start.which-project was reworded today (statement_hash
+  sha256:fb4343377bab) to say what Topher settled on 2026-09-10.
+  prototype/screens/project-modal.html was promoted from
+  proposals/project-modal.html on 2026-09-10 (n-0271) and still draws the
+  earlier idea. prototype/ is design's, so this is a request rather than an
+  edit.
+
+
+  WHAT THE DRAWING SAYS NOW. A dimmed empty-state bar across the top, a flat
+  bg-base-300/70 scrim under the card, and nothing else - no framed page, no
+  side panel.
+
+
+  WHAT THE RULE SAYS NOW.
+
+
+  1. The backdrop is a blur and nothing else. The dim is gone - it was
+  bg-base-300/70, it painted nothing at all (n-0276), and the decision was to
+  drop it rather than repair it, because a dim over a blur buys legibility the
+  blur already bought. The build is on backdrop-blur-sm and it paints.
+
+
+  2. There are three substrates under one modal, not one. Arriving on a page
+  nothing claims leaves the page loaded in the frame and the panel open, both
+  blurred. Walkdown's own server root has no frame, no panel and no bar - the
+  desk ruling alone, and nothing behind the modal to blur. The switcher pressed
+  inside a loaded project leaves that project's board exactly as it was,
+  blurred, and gives it back on Escape. The drawing currently shows something
+  close to none of these - a bar with no page and no panel under it.
+
+
+  3. The panel in the arrival case has no tabs and one centred line, "Please
+  select a project...". It is explicitly a fallback rather than the design -
+  what a reviewer reads if the blur does not paint - so it needs to be drawn as
+  something quiet, not as a feature. It replaces a pane that presently asserts
+  three things that are false in that state ("Not connected" while connected,
+  "This project holds more than one blueprint" while listing one, "Which
+  blueprint?" while the modal asks which project).
+
+
+  WHAT WOULD SETTLE IT. Either one drawing showing the arrival case with the
+  frame and the blurred empty panel behind it, plus a second showing the server
+  root on the ruling alone - the switcher case being the arrival case with a
+  real board behind it - or a decision that the promoted drawing covers the
+  server root only and the other two are drawn separately.
+
+
+  I have not touched prototype/ or proposals/. Say the word and I will put a
+  proposal up for the two cases rather than leaving design to start from the
+  reworded prose.

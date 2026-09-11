@@ -1,0 +1,122 @@
+id: n-0276
+kind: note
+author: topher
+via: agent
+created: 2026-09-11T02:26:16.249Z
+anchor:
+  rule: panel.start.which-project
+  screen: project-modal
+status: open
+body: >-
+  The modal's dim is not dim: the scrim paints nothing at all, because the theme
+  variables are out of scope where it renders.
+
+
+  Found by Topher looking at the running panel on 2026-09-10 and saying he could
+  not see any dimming. He is right, and it is not a matter of degree - the
+  computed background is fully transparent.
+
+
+  MEASURED, on the panel at /#<framed page>, viewport 1280x720:
+
+    the element        <div class="absolute inset-0 bg-base-300/70"> (src/panel/projects.js:102)
+    its rect           [0, 0, 1280, 720] - it does cover the whole viewport, and it is on top
+    computed bg        rgba(0, 0, 0, 0)
+
+  The rule is present and correct in the built stylesheet:
+
+    .bg-base-300\/70{background-color:color-mix(in oklab, var(--color-base-300) 70%, transparent)}
+
+  so this is not a missing utility. It is scope. Walking the scrim's ancestors,
+  --color-base-300 is EMPTY at every one of them - the scrim, its parent, the
+  panel wrapper, BODY, HTML. A few nodes away, on the panel's own ASIDE, the
+  same property resolves to oklch(41% .055 242). The theme variables are defined
+  inside the panel's themed subtree (the first element where they resolve is a
+  HEADER carrying text-base-content), and the scrim is rendered OUTSIDE that
+  subtree, so it inherits none of them. color-mix(in oklab, <empty> 70%,
+  transparent) is invalid at computed-value time, the declaration is dropped,
+  and the element paints nothing. No console error, no visual hint that a rule
+  died.
+
+
+  Which is why the promoted design looks dimmed and the build does not, using
+  the IDENTICAL class: prototype/screens/project-modal.html loads /walkdown.css
+  into the ordinary document, where the theme is in scope.
+
+
+  WHY THE AGENT TIER MISSED IT. The judge that failed panel.start.which-project
+  (run 2026-09-10T13-15-00Z-local-01, n-0272) reported 'the prototype dims the
+  chrome behind the card to 40% while the panel's dim over the dark theme leaves
+  the side panel fully legible', which reads as an opacity difference. It
+  hit-tested elementFromPoint at the bar, the panel and the page, got this
+  element back at all three, and concluded 'modal in behaviour but not reading
+  as covered'. The behaviour half is true - the scrim does swallow clicks, which
+  is why the pane behind cannot be interacted with. But it never asked what the
+  scrim PAINTS. walkdown-sitting's own procedure warns about exactly this
+  ('Measure, do not query. Is the element in the DOM answers a different
+  question from can the reviewer see it'), and the judge fell into it while
+  standing beside the warning. Worth carrying into the skill: a verdict about
+  something being covered needs a computed style or a pixel, not a hit test.
+
+
+  SCOPE. Filed separately from n-0272 at Topher's direction. n-0272 is the
+  server-root branch being unreachable; this is the scrim painting nothing in
+  the branch that IS reachable. They share a screen and nothing else.
+
+
+  NOT FIXED, and there is a decision in front of it: what belongs behind this
+  modal at all. Dimming as it stands would hide the pane behind, which currently
+  says 'Not connected' while connected and 'This project holds more than one
+  blueprint' while holding one - so dimming would conceal a lie rather than
+  remove it. Order matters: decide what survives behind the modal first, then
+  how hard to obscure whatever does.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-11T02:40:00Z
+    body: >-
+      Fixed by removing the dim rather than repairing it. Topher's call - the
+      blur is sufficient, and a dim over a blur buys legibility the blur already
+      bought.
+
+
+      src/panel/projects.js:110 now reads
+
+        <div class="absolute inset-0 backdrop-blur-sm" @click=...>
+
+      MEASURED at the same viewport, on the same page
+      (localhost:4730/#https://example.com/):
+
+        rect            [0, 0, 1280, 720] - unchanged, still covers, still swallows clicks
+        backdrop-filter blur(8px)          - resolved, not dropped
+        background      rgba(0,0,0,0)      - deliberately, there is no dim any more
+
+      And it paints - the framed page and the panel behind both read as blurred,
+      the card crisp on top.
+
+
+      WHY THIS ONE RESOLVES WHERE THE DIM DID NOT. backdrop-filter takes no
+      daisyUI theme variable. It does take one Tailwind variable -
+      blur(var(--blur-sm)) - which is the same shape of trap, so it is worth
+      saying why it does not bite. --color-base-300 is declared on
+      [data-theme=...], a selector nothing above the scrim matches. --blur-sm is
+      declared on ':root,:host', and custom properties inherit through a shadow
+      boundary from the host, so it resolves inside the panel's shadow tree at
+      8px wherever the scrim sits. Confirmed by reading it off the scrim itself.
+
+
+      The lesson from this thread still stands and is not fixed by this change -
+      a color-mix() over an unresolved var() fails silently, and nothing in the
+      build says so. Any future themed utility used outside the themed subtree
+      will do the same thing.
+
+
+      panel.start.which-project has been reworded to say the backdrop is a blur
+      and nothing else; its statement_hash is now sha256:fb4343377bab, so every
+      prior verdict on it reads stale and the rule must be re-judged.
+
+
+      Design has not been updated: prototype/screens/project-modal.html still
+      draws bg-base-300/70, so the design and the build now disagree on the
+      backdrop. Filed separately as a design request - prototype/ is design's to
+      change.
