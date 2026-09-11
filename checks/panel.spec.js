@@ -2248,6 +2248,9 @@ test('crossing to a project that claims nothing here does not keep the old count
   const list = page.getByTestId('project.list');
   await expect(list.locator('[data-project][data-claims]')).toHaveCount(1);
   await expect(list.locator('[data-project][data-claims]').first()).not.toHaveAttribute('data-project', 'other');
-  await expect(page.getByTestId('project.why')).not.toContainText(/No blueprint claims this page/);
+  // And counted right in both dimensions: two blueprints, one project. A
+  // singly-claimed page once read "1 blueprints claim this page, in more
+  // than one project" (n-0283).
+  await expect(page.getByTestId('project.why')).toHaveText('2 blueprints claim this page, in one project.');
   await page.keyboard.press('Escape');
 });

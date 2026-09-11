@@ -1264,6 +1264,18 @@
   function projectModal({ here, closable }) {
     const rows = rankedProjects();
     const claimed = S.claimants.length;
+    const projects = rows.filter((p) => p.claims.length).length;
+    /*
+     * Counted in both dimensions, since the count is the reason the question
+     * is being asked. "1 blueprints claim this page, in more than one project"
+     * was one number read as the other (n-0283).
+     */
+    const why =
+      claimed === 0
+        ? 'No blueprint claims this page.'
+        : claimed === 1
+          ? '1 blueprint claims this page.'
+          : `${claimed} blueprints claim this page, in ${projects > 1 ? 'more than one project' : 'one project'}.`;
     return b`
     <div class="absolute inset-0 backdrop-blur-sm" @click=${(e) => closable && fire(e.currentTarget, 'close-projects')}></div>
     <div class="absolute left-1/2 top-12 flex max-h-[80vh] w-[min(560px,92vw)] -translate-x-1/2 flex-col
@@ -1275,11 +1287,7 @@
           ${
             here
               ? b`<p class="break-all font-mono text-[11px] opacity-55" data-testid="project.address">${here}</p>
-                <p class="text-[12px] leading-relaxed opacity-60" data-testid="project.why">${
-                  claimed
-                    ? `${claimed} blueprints claim this page, in more than one project.`
-                    : 'No blueprint claims this page.'
-                }</p>`
+                <p class="text-[12px] leading-relaxed opacity-60" data-testid="project.why">${why}</p>`
               : b`<p class="text-[12px] leading-relaxed opacity-60" data-testid="project.why">There is no page
                   to route from here — this is walkdown's own server. Pick what you are working on.</p>`
           }

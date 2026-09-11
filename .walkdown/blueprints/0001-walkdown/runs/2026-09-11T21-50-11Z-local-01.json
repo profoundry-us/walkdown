@@ -1,0 +1,34 @@
+{
+  "run_id": "2026-09-11T21-50-11Z-local-01",
+  "created": "2026-09-11T21:50:11Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "31028e6-dirty",
+  "spec_hash": "sha256:22a4af6c7b65",
+  "results": [
+    {
+      "rule": "panel.start.which-project",
+      "status": "pass",
+      "statement_hash": "sha256:fb4343377bab",
+      "evidence": [
+        "runs/evidence/2026-09-11T21-50-11Z/01-root-desk-only.png",
+        "runs/evidence/2026-09-11T21-50-11Z/01b-root-after-escape-and-backdrop-click.png",
+        "runs/evidence/2026-09-11T21-50-11Z/02-arrive-two-projects-claim.png",
+        "runs/evidence/2026-09-11T21-50-11Z/03-arrival-long-list-commands-stay-above.png",
+        "runs/evidence/2026-09-11T21-50-11Z/04-picked-two-blueprint-project-asks-which.png",
+        "runs/evidence/2026-09-11T21-50-11Z/05-picked-one-blueprint-project-board-open.png",
+        "runs/evidence/2026-09-11T21-50-11Z/06-switcher-same-page-board-blurred.png",
+        "runs/evidence/2026-09-11T21-50-11Z/07-switcher-after-escape-board-back.png",
+        "runs/evidence/2026-09-11T21-50-11Z/08-switcher-after-backdrop-click-board-back.png",
+        "runs/evidence/2026-09-11T21-50-11Z/09-switcher-after-frame-moved-one-claimant.png",
+        "runs/evidence/2026-09-11T21-50-11Z/10-switcher-after-frame-moved-unclaimed.png",
+        "runs/evidence/2026-09-11T21-50-11Z/11-arrive-unclaimed-page.png",
+        "runs/evidence/2026-09-11T21-50-11Z/probe.txt"
+      ],
+      "reasoning": "Judged on a scratch copy served from inside the copy with its own home at :4736, with two registered projects - the copy (one blueprint, 'walkdown') and a second project directory inside it holding two blueprints ('walkdown-second', 'walkdown-second-b') - every blueprint carrying a target whose base_url is :4736, and the second project's settings screen moved to another path so that /stand-in/project-modal is claimed by both projects, /stand-in/settings by one, and /stand-in/nothing-here by none. Driven interactively in the built-in browser and reproduced by a Playwright script for the PNGs and probe.txt. Root (/): the modal alone over the desk ruling, frame display:none, bar and the pick line visibility:hidden, no Close button, and Escape plus a backdrop click leave it standing (01, 01b). Arriving on the doubly-claimed page: the frame loads it and the panel stands beside it with zero tabs and the one line 'Please select a project...', both blurred behind the modal; the modal names http://localhost:4736/stand-in/project-modal, puts `walkdown claims --url <address>` under MAKE THIS PAGE REVIEWABLE and `walkdown import <path>` / `walkdown init` under OR BRING A PROJECT IN above the list, marks both projects 'claims this page' naming the matching blueprints ('via walkdown'; 'via walkdown-second, walkdown-second-b'), agrees with /api/whose (three matches, two projects), opens nothing by default, and cannot be dismissed by Escape or a backdrop click (02). With 26 rows the commands stay in view and only the list (overflow-y:auto) scrolls (03). Picking 'second' (two blueprints) opens no board and asks 'Which blueprint?' in the panel's Blueprints pane, whose own text says projects are switched from the bar (04); picking the one-blueprint project opens its board (05). The switcher from the bar on that same page is the same modal and the same backdrop - computed backdrop-filter blur(8px) with a transparent background in every case, no dim - with a Close button now, the same address line and the same claim marks first, the board blurred behind it (06); Escape (07) and a backdrop click (08) each give the frame, tabs and rules list back byte-identical to a hash taken before the switcher opened. Moving the frame to /stand-in/settings and pressing the switcher again re-answers: the address line reads the new page and only the copy's project is marked, via 'walkdown', matching /api/whose's single match (09). Arriving on the unclaimed page: 'No blueprint claims this page.', the address named, the frame loaded, no tabs, the fallback line, undismissable (11). A server that lists nothing never reaches the browser: `walkdown serve` over an empty registry refuses at the CLI and names init and import there (probe.txt). Two things to know. First, the reason line under the address misreports the single-claimant case - '1 blueprints claim this page, in more than one project.' (09) - because projects.js writes it from the claimant count alone; every clause the rule names still held, so this is recorded as pass with n-0283 attached rather than as a fail, and a reader who reads that line as part of 'names the address it asked about' should overrule this verdict. Second, when the frame moves to a page carrying no embed (the 404 text at /stand-in/nothing-here), the panel is never told and the switcher keeps naming /stand-in/settings (10) - by design, since the embed inside the frame is how the panel learns where it is, but it means the address named is the last one announced rather than the one in the frame.",
+      "threads": ["n-0283"]
+    }
+  ]
+}

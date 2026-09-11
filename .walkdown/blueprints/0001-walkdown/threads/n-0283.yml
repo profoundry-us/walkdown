@@ -1,0 +1,39 @@
+id: n-0283
+kind: note
+author: topher
+via: agent
+created: 2026-09-11T22:00:14.338Z
+anchor:
+  rule: panel.start.which-project
+  screen: project-modal
+  element: '[data-testid="project.why"]'
+status: addressed
+body: "The project modal's reason line misreports the case whenever the switcher
+  is opened on a page exactly one project claims: it reads \"1 blueprints claim
+  this page, in more than one project.\" Judged on a scratch copy served at
+  :4736 with two registered projects; the frame was moved from
+  /stand-in/project-modal (claimed by both) to /stand-in/settings (claimed by
+  one project, one blueprint - /api/whose returns a single match) and the
+  project control in the bar was pressed
+  (runs/evidence/2026-09-11T21-50-11Z/09-switcher-after-frame-moved-one-claiman\
+  t.png, probe.txt step 09). The address line, the badge and the \"via
+  walkdown\" line are all correct; only project.why is wrong, and it is wrong in
+  both number and fact. Cause: src/panel/projects.js renders the line from
+  S.claimants.length alone - `${claimed} blueprints claim this page, in more
+  than one project.` for any count above zero - and never asks how many projects
+  the claimants span; the plural is hard-coded too. Not a failure of
+  panel.start.which-project's named clauses (every one held in this judging), so
+  the verdict stands as pass with this note attached, but a modal whose reason
+  for asking is untrue on a page that can decide is the kind of state-reciting
+  the rule warns against. The same line will also say \"3 blueprints ... in more
+  than one project\" when all three sit in one project, which is a case the rule
+  says never reaches this modal - worth a check that it does not."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-11T22:03:33Z
+    body: 'Fixed in src/panel/projects.js: the reason line now counts blueprints and
+      projects separately - "1 blueprint claims this page.", "N blueprints claim
+      this page, in one project." or "... in more than one project." - instead
+      of reading one number as the other. The crossing check asserts the
+      two-in-one-project wording. Built and 53 browser checks green.'
