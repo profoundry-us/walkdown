@@ -179,16 +179,23 @@ personal config. `~/.walkdown/` becomes:
       config.yml      who is sitting here, and this machine's defaults - a
                       person's file, edited by hand
       registry.yml    every blueprint this machine knows about - walkdown's
-                      file, written by import and init, never by hand
-      claims.json     the address index derived from the registry, rebuilt by
-                      import and serve - a cache, deletable
+                      file, written by import and init, never by hand, and
+                      NOT a cache: after this ADR it is the only record of
+                      what this machine knows
+      cache/          derived from the above, rebuilt on demand, deletable
+        claims.json   the address index, rebuilt by import and serve
       blueprints/     the homes of blueprints kept out of any repository
       backups/        as now
 
-Splitting them makes the hand-edit rule enforceable by file rather than by
-key: `config.yml` is yours, `registry.yml` is walkdown's, and a row that
-appears in the second without `registered:` is by definition not walkdown's.
-YAML rather than JSON because a person will open it to check "what does this
+Three kinds of file, told apart by directory and header rather than by
+knowing which is which: `config.yml` is yours; `registry.yml` is walkdown's
+state, and a row in it without `registered:` is by definition not
+walkdown's; anything under `cache/` is walkdown's *scratch*, and `rm -rf
+~/.walkdown/cache` loses nothing. The registry deliberately does not live
+under `cache/` - it is the one file whose loss means re-importing every
+project, and a directory named cache says the opposite.
+
+YAML for the registry because a person will open it to check "what does this
 machine know about", and everything else walkdown writes for people is YAML;
 `claims.json` stays JSON because nobody reads it.
 
@@ -416,7 +423,7 @@ five, grouped by project, exactly as ADR 0001 §3 says.
 In this order, each step leaving the tree green:
 
 1. **The registry file, and rows say how they arrived.** `registry.yml`
-   is introduced; `import` and `init` write to it with `registered:`;
+   is introduced and `claims.json` moves under `cache/`; `import` and `init` write to it with `registered:`;
    `blueprint add` becomes an alias of `import` and is removed from the
    usage; `where` reports the file and the provenance. `config.yml`'s
    `blueprints:` list is still read this step. Nothing is refused yet.
