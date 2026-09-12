@@ -6,7 +6,7 @@ created: 2026-09-11T21:41:16.547Z
 anchor:
   rule: panel.start.which-project
   screen: project-modal
-status: addressed
+status: verified
 body: >-
   The switcher opened from the bar says "No blueprint claims this page" about a
   page two projects claim.
@@ -61,3 +61,4 @@ replies:
       project is still marked as claiming the page; it fails before the change
       and passes after, and is tagged under this rule and choose-a-blueprint. 53
       browser checks green."
+verified_by: topher

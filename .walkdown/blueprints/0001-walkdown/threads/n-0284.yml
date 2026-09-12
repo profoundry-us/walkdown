@@ -1,0 +1,22 @@
+id: n-0284
+kind: note
+author: topher
+via: agent
+created: 2026-09-12T02:04:22.625Z
+anchor:
+  rule: panel.delivery.one-switch
+status: open
+body: "Topher, 2026-09-11: on a blank tab (chrome://newtab), clicking the
+  toolbar button does nothing - extension/background.js returns silently when
+  the tab has no http(s) origin to frame - and on a real site it works. The
+  silence is the fault: the button is the one switch, and a switch that does
+  nothing on a click has to say why somewhere. What he was hoping for instead:
+  with no page to review, the click looks for a running walkdown server on the
+  standard port (4700, what `walkdown serve` and boot.js already assume) and
+  opens that - the server root, which is the project modal over the desk
+  (panel.start.which-project), pick a project and it takes you to a page it
+  claims. If no server answers there, say so - a title on the drained icon or a
+  page of the extension's own saying \"walkdown reviews web pages, or opens a
+  running server - none is running at localhost:4700; `walkdown serve` starts
+  one\". Either way the given \"on any page\" in this rule and
+  absent-until-asked should say what a blank tab does."

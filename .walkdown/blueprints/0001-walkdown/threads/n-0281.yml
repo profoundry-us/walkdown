@@ -6,7 +6,7 @@ created: 2026-09-11T21:22:51.790Z
 anchor:
   rule: panel.start.choose-a-blueprint
   screen: choose-blueprint
-status: addressed
+status: verified
 body: "Observed while judging (run 2026-09-11T21-12-54Z-local-01, pass): the
   chooser marks the claimants and puts them first, but the Blueprints tab drawn
   after a pick shows the same three blueprints in registry order with no 'claims
@@ -30,3 +30,4 @@ replies:
       opens), so the marks survive the pick. Whether the tab should carry them
       at all is still the question this note asked; the behaviour now matches
       what blueprints.js says."
+verified_by: topher

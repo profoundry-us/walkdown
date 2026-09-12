@@ -7,7 +7,7 @@ anchor:
   rule: panel.start.which-project
   screen: project-modal
   element: '[data-testid="project.modal"]'
-status: addressed
+status: verified
 body: 'Escape does not close the project switcher opened from the bar inside a
   loaded project. The rule says the switcher "gives it back on Escape" and the
   step reads "Escape or the backdrop gives them back unchanged"; only the
@@ -40,3 +40,4 @@ replies:
       switcher and gives the board back", and the root check now presses Escape
       and expects the modal to stay. Built into lib/viewer/panel.js and
       extension/vendor/. 53 browser checks green.'
+verified_by: topher

@@ -42,6 +42,11 @@ belong in walkdown's runs ledger, never in a Highball run.
     node_modules/.bin/highball run          # what the turn-end hook runs
     node_modules/.bin/highball runs [n]     # local run history
 
+Both hooks carry `--if-changed`: the stamp behind it is per kind of run, so
+an edit gets its fast run at once and its full run at turn end, and a turn
+that edited nothing pays for neither. Before 0.7.1 the stamp was shared and
+the full suite ran on every turn end, ~23s of it unit tests.
+
 The hooks call the local binary directly — npx resolves the same package
 but intermittently stalls for minutes, which a per-edit hook cannot afford.
 

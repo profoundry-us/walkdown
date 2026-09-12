@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-11T21:02:59.105Z
 anchor:
   rule: locations.answer.registry-is-the-only-door
-status: addressed
+status: verified
 body: "The hand-written row is followed by `import`. With a registry row nobody
   wrote (no `registered:`) whose `home` names a symlink to a pack home,
   `walkdown import <link>` - and `walkdown import <real home path>` too -
@@ -39,3 +39,4 @@ replies:
       status/threads/thread-new refusal now says "Nothing registered in
       <registry> contains this directory", and run-record/lint messages point at
       `walkdown import` instead of the retired `blueprint add`.'
+verified_by: topher
