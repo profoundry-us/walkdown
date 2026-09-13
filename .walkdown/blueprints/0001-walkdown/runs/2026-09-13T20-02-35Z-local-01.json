@@ -1,0 +1,30 @@
+{
+  "run_id": "2026-09-13T20-02-35Z-local-01",
+  "created": "2026-09-13T20:02:35Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "43c7fc2-dirty",
+  "spec_hash": "sha256:fd2105c44209",
+  "results": [
+    {
+      "rule": "embed.pin.follows-the-visible-surface",
+      "status": "pass",
+      "statement_hash": "sha256:005ee8fa7a1e",
+      "evidence": [
+        "runs/evidence/2026-09-13T20-02-35Z/probe-pin-follows-the-visible-surface.txt",
+        "runs/evidence/2026-09-13T20-02-35Z/pin-placed-on-the-prototype.yml",
+        "runs/evidence/2026-09-13T20-02-35Z/pin-placed-on-the-app.yml",
+        "runs/evidence/2026-09-13T20-02-35Z/pins-on-prototype-surface.png",
+        "runs/evidence/2026-09-13T20-02-35Z/pins-on-app-surface.png",
+        "runs/evidence/2026-09-13T20-02-35Z/pin-why-prototype.png",
+        "runs/evidence/2026-09-13T20-02-35Z/pin-why-app.png",
+        "runs/evidence/2026-09-13T20-02-35Z/pin-refused-no-walkdown.png",
+        "runs/evidence/2026-09-13T20-02-35Z/evidence-script.log"
+      ],
+      "reasoning": "Re-judged after n-0255's fix, entirely inside a scratch copy served from inside the copy with its own home on :4732 (the chooser offered the copy and nothing else) and with the copy's base_url repointed at :4732, so both surfaces and both pins stayed in the copy. Driven by hand in the Claude Browser at a 1:1 1020x944 frame. With the fade all the way to the prototype and pin mode on, the top-document hit test at panel.tabs resolved to the prototype ghost iframe and a real click there filed n-0285 as surface prototype, element panel.tabs, position 863,79 in the prototype's own coordinates; with the fade all the way to the app the same frame point resolved to panel.app-frame and the click - dispatched as a MouseEvent on the app document's element under that point, because the browser tool's own frame router refused to press through the ghost's pointer-events:none stage - filed n-0286 as surface app, element panel.tabs, 863,79 in the app's. Both read back off the files on disk: the same anchor id on both surfaces, each record naming its own surface. Which surface takes the click was measured: fully faded the ghost stage is opacity 0 and pointer-events none, fully ghosted in pin mode it is opacity 1 and pointer-events auto over the app. panel.pin-why reads 'it lands on the app' at one end and 'it lands on the prototype' at the other before anything is placed. The step that failed last time now holds: after a full reload and a fresh ghost, the app surface's embed drew n-0286 and not n-0285, and the prototype ghost's embed drew n-0285 and not n-0286, both at the same spot on their own surface, with Playwright's independent read from a second browser matching; the pre-existing surface-less pins draw on both, as the renderPins comment says they should. A bare page loading no embed.js, ghosted fully over the stand-in, disabled pin mode with 'walkdown is not running inside this surface, so a pin here would land on the page underneath it', the control stayed off when pressed, and a click routed through to the app beneath opened no composer and filed nothing - the copy's threads gained exactly the two pins across the whole sitting. No window errors, rejections or console errors were collected. One thing outside the rule for whoever judges the marker rules: with pin mode off the fully-ghosted prototype keeps pointer-events none by design, so its pin markers cannot be hovered or opened until pin mode is on.",
+      "threads": []
+    }
+  ]
+}
