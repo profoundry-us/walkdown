@@ -9,7 +9,7 @@ stories:
     rules:
       - id: embed.pin.anchored-target
         origin: walkdown
-        statement: In pin mode, hovering highlights any element that carries an anchor, and a pin placed on one is recorded against that anchor - the note follows the element, not the pixel - while the spot it was placed at is recorded too, so the pin draws where the reviewer was pointing rather than at a corner of the element.
+        statement: In pin mode, hovering highlights any element that carries an anchor, and a pin placed on one is recorded against that anchor on the surface it was placed on - the note follows the element, not the pixel, and stays on the surface the reviewer was looking at - while the spot it was placed at is recorded too, so the pin draws where the reviewer was pointing rather than at a corner of the element.
         verify: [checks]
         signoff: [eng, product]
         screens: [review]
@@ -23,8 +23,8 @@ stories:
             - The exact spot is saved with it - the point on the surface, and where within the element that point was
             - The pin draws at that spot, and follows the element when the element moves, because the spot is replayed against wherever the element is now
             - The anchor is the optional part - a spot with no anchored element under it is still a pin, kept by position alone
-            - Later visitors see the pin on that element wherever it renders
-          statement_hash: sha256:6feaf28d3505
+            - Later visitors see the pin on that element wherever it renders on that surface - the prototype and the app carry the same anchor ids, and a pin placed on one never draws on the other
+          statement_hash: sha256:c59f178ebedf
 
       - id: embed.pin.right-project
         origin: thread:n-0012

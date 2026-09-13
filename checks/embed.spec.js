@@ -203,7 +203,7 @@ test('positions are recorded in the surface coordinate space, not the screen', {
 });
 
 test('the same anchors exist on both surfaces, and a pin records which it was placed on', {
-  tag: '@rule:embed.pin.both-surfaces',
+  tag: ['@rule:embed.pin.both-surfaces', '@rule:embed.pin.anchored-target', '@rule:embed.pin.follows-the-visible-surface'],
 }, async ({ page }) => {
   /*
    * Reviewing walkdown with walkdown: the review screen is a DRAWING of this
@@ -269,6 +269,25 @@ test('the same anchors exist on both surfaces, and a pin records which it was pl
   expect(onApp.anchor.surface).toBe('app');
   // Same screen, both times — the surface is what differs, not the screen.
   expect(onApp.anchor.screen).toBe(onProto.anchor.screen);
+
+  /*
+   * And each stays where it was put. The anchor exists on both surfaces, so
+   * an anchored pin used to draw on both - a note about the design's frame
+   * showing up on the app's (n-0255). Surface wins: the pin is about what
+   * the reviewer was looking at, and the anchor only says where on it.
+   */
+  const drawn = async (url) => {
+    await carryWalkdown(page, url, 'blueprint');
+    await page.waitForLoadState('networkidle');
+    await expect(app(page).getByTestId(ANCHOR)).toBeVisible();
+    return (id) => app(page).locator(`[data-testid="pin.marker"][data-thread="${id}"]`);
+  };
+  const onProtoAgain = await drawn(`${WD_ORIGIN}/prototype/screens/review.html`);
+  await expect(onProtoAgain(onProto.id)).toBeVisible();
+  await expect(onProtoAgain(onApp.id)).toHaveCount(0);
+  const onAppAgain = await drawn(`${WD_ORIGIN}/stand-in/review`);
+  await expect(onAppAgain(onApp.id)).toBeVisible();
+  await expect(onAppAgain(onProto.id)).toHaveCount(0);
 });
 
 test('a pin files against the project the page belongs to, not the server default', {

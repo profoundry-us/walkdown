@@ -271,6 +271,15 @@ import { icon } from './icons.js';
   function renderPins() {
     root.querySelectorAll('.wd-pin').forEach((p) => p.remove());
     for (const pin of ctx.pins) {
+      /*
+       * A pin belongs to the surface it was placed on, anchored or not. The
+       * prototype and the app carry the same anchor ids, so an anchored pin
+       * used to draw on both - a note about the design's tab bar showing up
+       * on the app's (n-0255). The surface is what the reviewer was looking
+       * at, and the anchor only says where on it. Pins from before the
+       * surface was recorded carry none and still draw wherever they match.
+       */
+      if (pin.surface && ctx.surface && pin.surface !== ctx.surface) continue;
       const el =
         pin.element && document.querySelector(`[${ANCHOR_ATTR}="${CSS.escape(pin.element)}"]`);
       /*
@@ -295,9 +304,6 @@ import { icon } from './icons.js';
         spotX = window.scrollX + rect.right - 3;
         spotY = window.scrollY + rect.top + 12;
       } else if (pin.position) {
-        // A positioned pin belongs to the surface it was placed on — the same
-        // coordinates would mean something else in the other surface.
-        if (pin.surface && ctx.surface && pin.surface !== ctx.surface) continue;
         spotX = pin.position.x;
         spotY = pin.position.y;
       } else continue;

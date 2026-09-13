@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-08T20:48:34.264Z
 anchor:
   rule: embed.pin.follows-the-visible-surface
-status: open
+status: addressed
 body: "Judging this rule on 2026-09-08 (run 2026-09-08T20-25-59Z-local-01), four
   of its five steps held but one did not: \"Pins already on that screen show on
   the surface they were placed on\". Two pins were placed on screen review in a
@@ -27,3 +27,18 @@ body: "Judging this rule on 2026-09-08 (run 2026-09-08T20-25-59Z-local-01), four
   that one wants rewording. Evidence:
   runs/evidence/2026-09-08T20-25-59Z/probe-pin-follows-the-visible-surface.txt,
   pin-placed-on-the-prototype.yml, pin-placed-on-the-app.yml."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-13T20:02:08Z
+    body: "Topher, 2026-09-13: surface wins. renderPins in src/embed/index.js now
+      sets a pin aside whenever it carries a surface other than the one drawing
+      - anchored or not - so a note on the prototype's frame never shows on the
+      app's and vice versa; pins from before surfaces were recorded carry none
+      and draw wherever their anchor is. embed.pin.anchored-target reworded to
+      say the anchor is on the surface it was placed on and its last step now
+      reads \"wherever it renders on that surface - the prototype and the app
+      carry the same anchor ids, and a pin placed on one never draws on the
+      other\"; hash rewritten. The both-surfaces check now reloads each surface
+      after pinning both and asserts only its own pin draws; it is tagged under
+      this rule and anchored-target, failed before the change and passes after."

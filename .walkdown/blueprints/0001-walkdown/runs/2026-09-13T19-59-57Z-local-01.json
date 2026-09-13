@@ -1,0 +1,52 @@
+{
+  "run_id": "2026-09-13T19-59-57Z-local-01",
+  "created": "2026-09-13T19:59:57Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "94bf8c6-dirty",
+  "tree_hash": "sha256:baf9c0550181",
+  "spec_hash": "sha256:fd2105c44209",
+  "results": [
+    {
+      "rule": "embed.pin.both-surfaces",
+      "status": "fail",
+      "statement_hash": "sha256:77fdab028ac1",
+      "duration_ms": 9345,
+      "checks": [
+        "checks/embed.spec.js:205"
+      ],
+      "evidence": [
+        "runs/evidence/2026-09-13T19-59-57Z/embed-the-same-anchors-exi-3fe30-ords-which-it-was-placed-on-test-failed-1.png",
+        "runs/evidence/2026-09-13T19-59-57Z/embed-the-same-anchors-exi-3fe30-ords-which-it-was-placed-on-error-context.md"
+      ]
+    },
+    {
+      "rule": "embed.pin.anchored-target",
+      "status": "fail",
+      "statement_hash": "sha256:c59f178ebedf",
+      "duration_ms": 9345,
+      "checks": [
+        "checks/embed.spec.js:205"
+      ],
+      "evidence": [
+        "runs/evidence/2026-09-13T19-59-57Z/embed-the-same-anchors-exi-3fe30-ords-which-it-was-placed-on-test-failed-1.png",
+        "runs/evidence/2026-09-13T19-59-57Z/embed-the-same-anchors-exi-3fe30-ords-which-it-was-placed-on-error-context.md"
+      ]
+    },
+    {
+      "rule": "embed.pin.follows-the-visible-surface",
+      "status": "fail",
+      "statement_hash": "sha256:005ee8fa7a1e",
+      "duration_ms": 9345,
+      "checks": [
+        "checks/embed.spec.js:205"
+      ],
+      "evidence": [
+        "runs/evidence/2026-09-13T19-59-57Z/embed-the-same-anchors-exi-3fe30-ords-which-it-was-placed-on-test-failed-1.png",
+        "runs/evidence/2026-09-13T19-59-57Z/embed-the-same-anchors-exi-3fe30-ords-which-it-was-placed-on-error-context.md"
+      ]
+    }
+  ]
+}
