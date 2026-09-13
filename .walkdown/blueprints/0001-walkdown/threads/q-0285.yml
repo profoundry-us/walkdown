@@ -1,0 +1,22 @@
+id: q-0285
+kind: question
+author: topher
+via: agent
+created: 2026-09-13T20:15:31.194Z
+anchor:
+  rule: embed.pin.tooltip-says-what-it-is
+  screen: review
+status: open
+body: "Observed while re-judging embed.pin.follows-the-visible-surface (run
+  2026-09-13T20-02-35Z, pass): with the fade all the way to the prototype and
+  pin mode OFF, the ghost stays pointer-events: none (ghostHasReach() in
+  src/panel/app.js requires PIN.isOn()), so the prototype's pin markers cannot
+  be hovered or clicked - the pointer falls through to the app underneath. The
+  tooltip and the click-to-open in this rule work on the prototype only while
+  pin mode is on. The design reason is sound (the ghost must not swallow the
+  app's pointer while you are using the app), but a reviewer looking at the
+  prototype at full fade and resting on a pin gets nothing, and the pins are
+  visible. Options: (a) the ghost takes the pointer at fade 1 whether or not pin
+  mode is on - at full fade the app is invisible anyway and cannot be used; (b)
+  leave it and have this rule's given say \"pin mode on\" for the prototype
+  surface. Which?"

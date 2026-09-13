@@ -121,6 +121,12 @@ The stamp exists because six unstamped copies once sat in `tmp/scratch` for
 weeks, and by the time anyone found them nobody could say which sitting had
 made which.
 
+A copy's `prototype/` is a symlink to the real one, so a throwaway page
+written "into the copy" lands in `prototype/screens/` for real (a judge did
+this on 2026-09-13 and had to clean up). A fixture that needs a page of its
+own goes in a second throwaway blueprint or under the copy's `stand-in`,
+never under `prototype/`.
+
 To make "did we skip any?" answerable, declare a sweep first:
 
     node bin/walkdown.js sweep --tiers agent --why "..."
