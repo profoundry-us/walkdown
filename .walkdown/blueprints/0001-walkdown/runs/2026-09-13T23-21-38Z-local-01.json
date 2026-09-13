@@ -1,0 +1,50 @@
+{
+  "run_id": "2026-09-13T23-21-38Z-local-01",
+  "created": "2026-09-13T23:21:38Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "5b4697d-dirty",
+  "tree_hash": "sha256:83badf0133fa",
+  "spec_hash": "sha256:a6e8d6448056",
+  "results": [
+    {
+      "rule": "panel.threads.claim-never-accept",
+      "status": "pass",
+      "statement_hash": "sha256:9d263352d2ff",
+      "duration_ms": 8597,
+      "checks": [
+        "checks/panel.spec.js:318",
+        "checks/panel.spec.js:564"
+      ]
+    },
+    {
+      "rule": "panel.threads.own-view",
+      "status": "pass",
+      "statement_hash": "sha256:09bd656d03f9",
+      "duration_ms": 1963,
+      "checks": [
+        "checks/panel.spec.js:687"
+      ]
+    },
+    {
+      "rule": "threads.conversation.written-in-markdown",
+      "status": "pass",
+      "statement_hash": "sha256:b8ec06681f9a",
+      "duration_ms": 1549,
+      "checks": [
+        "checks/panel.spec.js:790"
+      ]
+    },
+    {
+      "rule": "threads.lifecycle.acts-for-a-person",
+      "status": "pass",
+      "statement_hash": "sha256:df8e11a02202",
+      "duration_ms": 1114,
+      "checks": [
+        "checks/panel.spec.js:1786"
+      ]
+    }
+  ]
+}
