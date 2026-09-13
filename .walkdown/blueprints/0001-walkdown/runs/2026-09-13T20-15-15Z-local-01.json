@@ -1,0 +1,34 @@
+{
+  "run_id": "2026-09-13T20-15-15Z-local-01",
+  "created": "2026-09-13T20:15:15Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "3c2650e-dirty",
+  "spec_hash": "sha256:fd2105c44209",
+  "results": [
+    {
+      "rule": "embed.pin.anchored-target",
+      "status": "pass",
+      "statement_hash": "sha256:c59f178ebedf",
+      "evidence": [
+        "runs/evidence/2026-09-13T20-15-15Z/probe-live-browser.txt",
+        "runs/evidence/2026-09-13T20-15-15Z/pin-record-app-anchored.yml",
+        "runs/evidence/2026-09-13T20-15-15Z/pin-record-app-unanchored.yml",
+        "runs/evidence/2026-09-13T20-15-15Z/pin-record-prototype-anchored.yml",
+        "runs/evidence/2026-09-13T20-15-15Z/hover-highlight-app.png",
+        "runs/evidence/2026-09-13T20-15-15Z/hover-highlight-prototype.png",
+        "runs/evidence/2026-09-13T20-15-15Z/counts-row-app.png",
+        "runs/evidence/2026-09-13T20-15-15Z/counts-row-prototype.png",
+        "runs/evidence/2026-09-13T20-15-15Z/pins-after-reload-app.png",
+        "runs/evidence/2026-09-13T20-15-15Z/pins-after-reload-prototype.png",
+        "runs/evidence/2026-09-13T20-15-15Z/pins-at-1440-app.png",
+        "runs/evidence/2026-09-13T20-15-15Z/pins-at-1440-prototype.png",
+        "runs/evidence/2026-09-13T20-15-15Z/probe-anchored-target.json"
+      ],
+      "reasoning": "Judged on a scratch copy (tools/scratch.mjs new judge-anchored) served from inside the copy with its own home on port 4733, with the copy's walkdown.yml base_url pointed at 4733 so the App surface was the scratch server's stand-in rather than the real server on 4700; the real ledger's threads still end at q-0285 and git status is unchanged. Driving the built-in browser at 1400x900 with the surface laid out at 980px: with pin mode on over the App surface, hovering inside panel.counts put .wd-hover on that element with a 2px rgb(75,184,221) outline, and hovering a point under bare MAIN with no anchored ancestor highlighted nothing. Clicking panel.counts near its right end (frame point 921,817; element rect left 681.5 top 797.5) opened the form titled panel.counts with the placeholder tip at exactly the click point, and saving wrote n-0285 with element panel.counts, offset {240,20}, position {921,817}, surface app. After a fresh page load the marker's tip sat at (921.5,817.5) = element left+240, top+20 - the spot, where the corner fallback would have been (963.5,809.5) - and laying the page out at 1440px moved the element to (1141.5,1193.5) and the marker to (1381.5,1213.5), the same offset replayed. A click on the unanchored MAIN point opened a form saying 'unanchored spot - pinned by position' and wrote n-0286 with position {251,51} and no element, and it draws at (251,51) after reload. Fading to Prototype and pinning panel.counts near its left end wrote n-0287 with offset {19,13}, position {700,810}, surface prototype. Reading each surface's embed after a fresh load: the app document draws n-0285 and n-0286 and not n-0287; the prototype document draws n-0287 at (700.5,810.5) and neither n-0285 nor n-0286, and at 1440px n-0287 rides to left+19, top+13. The PNGs were taken by a headless Playwright pass against the same scratch server reading the same persisted pins (the browser pane cannot write files), and its probe JSON agrees with the live numbers to the pixel. Every step holds; nothing had to be dispatched around a pointer-events overlay.",
+      "threads": []
+    }
+  ]
+}
