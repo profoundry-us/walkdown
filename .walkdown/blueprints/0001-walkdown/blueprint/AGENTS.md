@@ -10,8 +10,11 @@ notes), and the runs ledger. The blueprint is the single source of truth for
 - `walkdown status --json` gives per-rule verification state, drift, and your
   work queue: `attention` items with `who: "agent"`.
 - A rule's plain-language `statement` is authoritative; its `steps` elaborate
-  it. If they disagree, the statement wins. After editing any statement, run
-  `walkdown hash --write` so staleness detection keeps working.
+  it. If they disagree, the statement wins. The statement is the claim alone;
+  the reason lives in `because` and what happened in `history`, and neither
+  is hashed. After editing a statement or a step, run `walkdown hash --write`
+  so staleness detection keeps working - with `--reword "<why>"` when only
+  the words changed, so the verdicts stay current.
 - If a rule is ambiguous, do not guess. File a question thread anchored to the
   rule/screen/element (`walkdown thread new --kind question --rule <id>
   --body <text>`, or `POST /api/threads` via `walkdown serve`) and say what

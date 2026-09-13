@@ -172,18 +172,29 @@ test('hash --write repairs a stale hash and lint then passes', () => {
  * The hash pinned the statement alone until 2026-09-13. A file still carrying
  * that form is not stale - every verdict ever recorded carries it too - it is
  * legacy: reported as such, re-stamped on --write, and nothing goes stale for
- * the change itself.
+ * the change itself. The legacy hash is KEPT under reworded: it matches by
+ * the statement alone today, but the first rewording after the re-stamp
+ * would break that, and every verdict from before the change carries it.
  */
-test('a statement-only hash is legacy, not stale: it lints, and --write re-stamps it without a reword', () => {
+test('a statement-only hash is legacy, not stale: it lints, and --write re-stamps it keeping the old form', () => {
   const h = writeFixture(join(root, 'legacy'));
   assert.equal(lint(load(h), { checks: false }).exitCode, 0);
   const first = runHashCommand(load(h));
   assert.equal(first.rows[0].status, 'legacy');
   assert.equal(first.exitCode, 0);
+  const legacy = load(h).features[0].data.stories[0].rules[0].steps.statement_hash;
   const wrote = runHashCommand(load(h), { write: true });
   assert.equal(wrote.rows[0].status, 'written');
-  assert.ok(!readFileSync(join(h.spec, 'features', 'demo.yml'), 'utf8').includes('reworded'));
+  const rule = load(h).features[0].data.stories[0].rules[0];
   assert.equal(runHashCommand(load(h)).rows[0].status, 'ok');
+  assert.equal(rule.steps.reworded.length, 1);
+  assert.equal(rule.steps.reworded[0].hash, legacy);
+  assert.match(rule.steps.reworded[0].why, /statement alone/);
+  // Reworded later, a verdict carrying the legacy hash still counts.
+  const file = join(h.spec, 'features', 'demo.yml');
+  writeFileSync(file, readFileSync(file, 'utf8').replace('The visitor can do the thing.', 'The visitor can do the thing, plainly.'));
+  runHashCommand(load(h), { write: true, reword: 'plainer' });
+  assert.ok(hashMatches(legacy, load(h).features[0].data.stories[0].rules[0]));
 });
 
 /*
@@ -203,10 +214,12 @@ test('hash --write --reword keeps the old hash and says why; without it the old 
   const reworded = runHashCommand(load(h), { write: true, reword: 'plainer English, same rule' });
   assert.equal(reworded.rows[0].status, 'reworded');
   const rule = load(h).features[0].data.stories[0].rules[0];
-  assert.equal(rule.steps.reworded.length, 1);
-  assert.equal(rule.steps.reworded[0].hash, old);
-  assert.equal(rule.steps.reworded[0].why, 'plainer English, same rule');
-  assert.match(rule.steps.reworded[0].at, /^\d{4}-\d{2}-\d{2}$/);
+  // Two kept: the legacy statement-only hash from the first re-stamp, and
+  // the hash the rewording replaced.
+  assert.equal(rule.steps.reworded.length, 2);
+  assert.equal(rule.steps.reworded[1].hash, old);
+  assert.equal(rule.steps.reworded[1].why, 'plainer English, same rule');
+  assert.match(rule.steps.reworded[1].at, /^\d{4}-\d{2}-\d{2}$/);
   assert.ok(hashMatches(old, rule), 'the old hash still names the rule');
   assert.equal(lint(load(h), { checks: false }).exitCode, 0);
 
@@ -215,7 +228,7 @@ test('hash --write --reword keeps the old hash and says why; without it the old 
   const current = rule.steps.statement_hash;
   runHashCommand(load(h), { write: true });
   const again = load(h).features[0].data.stories[0].rules[0];
-  assert.equal(again.steps.reworded.length, 1, 'the plain write adds nothing to the list');
+  assert.equal(again.steps.reworded.length, 2, 'the plain write adds nothing to the list');
   assert.equal(hashMatches(current, again), false, 'the meaning moved, so the old hash is gone');
 });
 

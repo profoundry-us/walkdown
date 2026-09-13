@@ -9,7 +9,8 @@ stories:
     rules:
       - id: embed.pin.anchored-target
         origin: walkdown
-        statement: In pin mode, hovering highlights any element that carries an anchor, and a pin placed on one is recorded against that anchor on the surface it was placed on - the note follows the element, not the pixel, and stays on the surface the reviewer was looking at - while the spot it was placed at is recorded too, so the pin draws where the reviewer was pointing rather than at a corner of the element.
+        statement: In pin mode, hovering highlights any element that carries an anchor, and a pin placed on one is recorded against that anchor on the surface it was placed on, with the spot it was placed at recorded too.
+        because: The note follows the element, not the pixel, and stays on the surface the reviewer was looking at - while the spot keeps the pin drawn where they were pointing rather than at a corner of the element.
         verify: [checks]
         signoff: [eng, product]
         screens: [review]
@@ -24,11 +25,19 @@ stories:
             - The pin draws at that spot, and follows the element when the element moves, because the spot is replayed against wherever the element is now
             - The anchor is the optional part - a spot with no anchored element under it is still a pin, kept by position alone
             - Later visitors see the pin on that element wherever it renders on that surface - the prototype and the app carry the same anchor ids, and a pin placed on one never draws on the other
-          statement_hash: sha256:56bdca60495d
+          statement_hash: sha256:53f47b01acea
+          reworded:
+            - hash: sha256:c59f178ebedf
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:56bdca60495d
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: embed.pin.right-project
         origin: thread:n-0012
-        statement: A pin files against the blueprint the panel has open, so feedback lands in the ledger of the thing you were reviewing - never in a sibling's, and never in whichever blueprint the server happens to be serving by default. The server does not work it out from the address - the caller names the blueprint, and by the time anything can be pinned the panel always has one.
+        statement: A pin files against the blueprint the panel has open - never a sibling's, and never whichever blueprint the server happens to be serving by default. The caller names the blueprint; the server does not work it out from the address.
+        because: Feedback has to land in the ledger of the thing you were reviewing, and by the time anything can be pinned the panel always has one open.
         verify: [checks]
         signoff: [eng, product]
         screens: [review]
@@ -42,7 +51,14 @@ stories:
             - The panel tells the embed in the frame which blueprint is open, because there is no script tag on somebody else's page to carry one
             - The server never re-routes a write by looking the address up and overriding what the caller said - several blueprints may claim an address, and choosing between them at a door is the server deciding whose page you are on
             - A tag on the page naming a blueprint does not redirect a write - the panel has one open, and that is the thing being reviewed; a tag is a fact about the page, goes stale when the blueprint moves, and used to send a reply to a blueprint where the pin it answered did not exist
-          statement_hash: sha256:3609f1573878
+          statement_hash: sha256:6f6dcac974a9
+          reworded:
+            - hash: sha256:8d8ef265ac6d
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:3609f1573878
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: embed.pin.both-surfaces
         origin: thread:n-0003
@@ -60,10 +76,14 @@ stories:
             - The saved note records surface app; a prototype pin records surface prototype
             - Both pins show on the rule, distinguished by the surface they came from
           statement_hash: sha256:4c64071b699d
+          reworded:
+            - hash: sha256:77fdab028ac1
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
 
       - id: embed.pin.follows-the-visible-surface
         origin: thread:n-0025
-        statement: A pin lands on the surface you are actually looking at - so when the prototype is fully covering the app, the pin goes on the prototype, and whichever surface is in front is the one taking the click.
+        statement: "A pin lands on the surface you are actually looking at: when the prototype fully covers the app the pin goes on the prototype, and whichever surface is in front is the one taking the click."
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -77,11 +97,18 @@ stories:
             - The control says which surface a pin would land on before you place one
             - Pins already on that screen show on the surface they were placed on
             - A surface with no walkdown running inside it cannot be pinned, and says so rather than letting the pin fall through to the page underneath
-          statement_hash: sha256:771cd68f690f
+          statement_hash: sha256:6f170a1e2778
+          reworded:
+            - hash: sha256:005ee8fa7a1e
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:771cd68f690f
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: embed.pin.own-skin
         origin: thread:n-0027
-        statement: Everything walkdown draws into somebody else's application wears walkdown's own skin and reaches nothing outside itself - one theme across the panel and the feedback layer alike, and not a stroke of it applied to the host page.
+        statement: Everything walkdown draws into somebody else's application wears walkdown's own skin and reaches nothing outside itself - one theme across the panel and the feedback layer, and not a stroke of it applied to the host page.
         signoff: [eng, product]
         screens: [review, thread-panel]
         steps:
@@ -94,11 +121,19 @@ stories:
             - They wear the same blueprint theme as the panel, from the same stylesheet, not a hand-rolled lookalike
             - The host page's own buttons, headings and form controls are untouched
             - Everything with a surface of its own lives in a shadow root; only what must style the host's own elements - what a pinnable thing looks like under the cursor - is added to the page
-          statement_hash: sha256:4e1bdc231fd0
+          statement_hash: sha256:e34255353d94
+          reworded:
+            - hash: sha256:1f3400a09629
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:4e1bdc231fd0
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: embed.pin.viewport-recorded
         origin: thread:n-0005
-        statement: A pin records the viewport it was placed at, so feedback about a layout is never read against the wrong width.
+        statement: A pin records the viewport it was placed at.
+        because: Feedback about a layout must never be read against the wrong width.
         verify: [checks]
         signoff: [eng, product]
         screens: [review]
@@ -110,11 +145,19 @@ stories:
           then:
             - The saved note records the viewport name and width in use
             - The panel shows that viewport alongside the note's other provenance
-          statement_hash: sha256:7a12fb0d24f7
+          statement_hash: sha256:85503fb1eb9b
+          reworded:
+            - hash: sha256:6971846eb2cc
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:7a12fb0d24f7
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: embed.pin.settled-pins-leave
         origin: walkdown
-        statement: A pin stands on the page only while its thread is unsettled - verifying, waiving or incorporating it takes the pin off the surface there and then, without waiting for a reload - because a page still carrying pins for finished conversations reads as work that is still owed.
+        statement: A pin stands on the page only while its thread is unsettled - verifying, waiving or incorporating it takes the pin off the surface there and then, without waiting for a reload.
+        because: A page still carrying pins for finished conversations reads as work that is still owed.
         signoff: [eng, product]
         screens: [review, thread-panel]
         steps:
@@ -126,11 +169,19 @@ stories:
             - The pin leaves the surface immediately, on both the page and the ghosted copy of the other one
             - Nothing else about the page moves, and the other pins stay where they are
             - The thread itself is not gone - it is in the ledger and reachable, just no longer standing on the page
-          statement_hash: sha256:9e777d797a94
+          statement_hash: sha256:9f24cae46d18
+          reworded:
+            - hash: sha256:c82607d3ac2e
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:9e777d797a94
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: embed.pin.tooltip-says-what-it-is
         origin: walkdown
-        statement: Hovering a pin says what it is in three short lines - which thread and what state, the rule and screen it belongs to (or that it belongs to no rule), and enough of the note to recognise it - so a page of pins can be read without spending a click on each one.
+        statement: Hovering a pin says what it is in three short lines - which thread and what state, the rule and screen it belongs to (or that it belongs to no rule), and enough of the note to recognise it.
+        because: A page of pins should be readable without spending a click on each one.
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -145,11 +196,19 @@ stories:
             - It shows the start of the note, truncated - a tooltip that has to be read is one nobody reads
             - It opens away from whatever edge the pin is near - down near the top, up near the bottom, and towards the side with the room - so it is never half off the surface
             - Clicking it still opens the thread's own screen, wherever you were
-          statement_hash: sha256:cbaf0007bc64
+          statement_hash: sha256:7dacc9350895
+          reworded:
+            - hash: sha256:50dfb40b9f83
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:cbaf0007bc64
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: embed.pin.form-at-the-spot
         origin: walkdown
-        statement: The pin form opens at the spot that was clicked - just below it, or just above when the spot is near the bottom of the surface - and a placeholder pin stands on that spot while the form is open, so what you are writing about stays in view and where the pin will land is never in doubt.
+        statement: The pin form opens at the spot that was clicked - just below it, or just above when the spot is near the bottom of the surface - and a placeholder pin stands on that spot while the form is open.
+        because: What you are writing about stays in view, and where the pin will land is never in doubt.
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -162,7 +221,14 @@ stories:
             - Near the bottom it opens above the spot instead, so it is never half off the surface, and it never runs off the side
             - A placeholder pin marks the spot the whole time the form is open, and changes its mark when the form switches between note and question
             - Cancelling or pressing Escape takes the placeholder with the form; filing replaces it with the real pin in the same place
-          statement_hash: sha256:19fb19983eaf
+          statement_hash: sha256:5de485741d96
+          reworded:
+            - hash: sha256:5bb13509dc3b
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:19fb19983eaf
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: embed.pin.form-is-chrome
         origin: thread:n-0004
@@ -178,10 +244,15 @@ stories:
             - The cursor is a pointer over controls and a caret over text, never the crosshair
             - Clicking a control acts on the form and never places another pin
           statement_hash: sha256:67822b8df3f5
+          reworded:
+            - hash: sha256:cac6da4be24f
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
 
       - id: embed.pin.surface-coordinates
         origin: thread:n-0005
-        statement: A pin's position is recorded in the surface's own coordinate space - CSS pixels of the document as rendered at its viewport - never in the panel's screen pixels, so pins stay on their spot when the frame is resized, the fade moves, or the surface is zoomed.
+        statement: A pin's position is recorded in the surface's own coordinate space - CSS pixels of the document as rendered at its viewport - never in the panel's screen pixels.
+        because: Pins have to stay on their spot when the frame is resized, the fade moves, or the surface is zoomed.
         verify: [checks]
         signoff: [eng, product]
         screens: [review]
@@ -193,11 +264,19 @@ stories:
           then:
             - The pin stays on the same spot of the surface it was placed on
             - The recorded position is unchanged by any of those actions
-          statement_hash: sha256:fa24e63fbe8b
+          statement_hash: sha256:759df2c0e0ed
+          reworded:
+            - hash: sha256:7d33bd0c80b2
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:fa24e63fbe8b
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: embed.pin.coordinate-fallback
         origin: thread:n-0001
-        statement: A pin dropped where no anchored element sits is still placed, recorded by its x/y position within the surface - feedback is never blocked by a missing anchor.
+        statement: A pin dropped where no anchored element sits is still placed, recorded by its x/y position within the surface.
+        because: Feedback is never blocked by a missing anchor.
         verify: [checks]
         signoff: [eng, product]
         screens: [review]
@@ -209,7 +288,14 @@ stories:
           then:
             - The pin form opens at the click point
             - The saved note records the screen and position; later visitors see the pin at that spot
-          statement_hash: sha256:7899d763ed1f
+          statement_hash: sha256:bc91613d4b86
+          reworded:
+            - hash: sha256:3c6fb006c94b
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:7899d763ed1f
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
   - id: embed.threads
     title: A thread you can read at a glance
@@ -230,6 +316,10 @@ stories:
             - Anchor `thread.provenance` fits on one line and never pushes the note below the fold
             - A long reply history collapses behind a count rather than growing the popover
           statement_hash: sha256:b4e6177d8153
+          reworded:
+            - hash: sha256:870249ed1a7a
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
 
       - id: embed.threads.actions-in-context
         origin: walkdown
@@ -246,3 +336,7 @@ stories:
             - Choosing waive or reopen asks for the reason then; other actions never mention it
             - Actions a person may not take are absent, not shown and refused
           statement_hash: sha256:a473c0119449
+          reworded:
+            - hash: sha256:9878eb8459f2
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone

@@ -249,18 +249,23 @@ export function detailPane() {
     return parts;
   };
   /*
-   * One bullet per clause. given/when/then are each an ARRAY in the data, and
-   * joining them with <br> made the whole phase read as a paragraph run: where
-   * one clause ended was legible only from where the line happened to break,
-   * and a clause long enough to wrap looked like two (n-0235). The phase label
-   * stays where it was; only the items under it become a list.
+   * Given and when are the situation and the act - read as prose beside
+   * their label. Then is the list of things to look for: one bullet per
+   * clause (a run-on paragraph hid where one ended, n-0235), dropped BELOW
+   * its label rather than beside it, because the clauses are the long part
+   * and a narrow column beside a label wraps every one of them (Topher,
+   * 2026-09-13).
    */
   const steps = r.steps
-    ? Object.entries(r.steps).map(
-        ([ph, items]) =>
-          html`<span class="${LBL} pt-1">${ph}</span><ul class="list-disc pl-4">${items.map(
-            (s) => html`<li>${stepText(s)}</li>`,
-          )}</ul>`,
+    ? Object.entries(r.steps).map(([ph, items]) =>
+        ph === 'then'
+          ? html`<div class="col-span-2 pt-1"><div class="${LBL}">${ph}</div>
+              <ul class="list-disc pl-4 pt-0.5" data-testid="detail.then">${items.map(
+                (s) => html`<li>${stepText(s)}</li>`,
+              )}</ul></div>`
+          : html`<span class="${LBL} pt-1">${ph}</span><div data-testid="detail.${ph}">${items.map(
+              (s, i) => html`${i ? html`<br />` : nothing}${stepText(s)}`,
+            )}</div>`,
       )
     : null;
   const picked = S.session?.verdicts[r.rule];
@@ -344,6 +349,19 @@ export function detailPane() {
           <div class="break-all font-mono text-[11px] opacity-40" data-testid="detail.rule-id">${r.rule}</div>
         </div>
         <p class="text-[15px] leading-relaxed" data-testid="detail.statement">${r.statement}</p>
+        <!-- The reason and the story behind it, under the claim and quieter
+             than it: read when you want to argue with the rule, skipped when
+             you want to judge it. Neither is hashed, so neither is the rule. -->
+        ${
+          r.because
+            ? html`<p class="pt-1.5 text-[13px] leading-relaxed opacity-70" data-testid="detail.because"><span class="${LBL}">because</span> ${r.because}</p>`
+            : nothing
+        }
+        ${
+          r.history
+            ? html`<p class="pt-1 text-[12.5px] leading-relaxed opacity-55" data-testid="detail.history"><span class="${LBL}">history</span> ${r.history}</p>`
+            : nothing
+        }
         ${elsewhere(r)}
       </div>
       ${

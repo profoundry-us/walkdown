@@ -22,6 +22,10 @@ stories:
             - A fragment nobody has enumerated still resolves to the screen at that path, so an app is usable before every route is written down
             - The state is reachable by its URL on load, not only by clicking - a state you can only click your way to cannot be walked down
           statement_hash: sha256:b0bbdbe721cb
+          reworded:
+            - hash: sha256:ac30c2879d52
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
 
       - id: screens.identity.query-is-not-identity
         origin: thread:n-0020
@@ -37,10 +41,15 @@ stories:
             - A declared query is honoured, and the more specific of the two wins
             - The constraint that a page belongs to exactly one blueprint is still read on path and fragment alone
           statement_hash: sha256:88e5a4d85423
+          reworded:
+            - hash: sha256:9b8b3c9e5881
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
 
       - id: screens.identity.one-matcher
         origin: thread:n-0020
-        statement: The panel, the embed and the server answer "which screen is this?" with one implementation rather than three lookalikes, because a pin filed under one screen here and another there is worse than no pin at all.
+        statement: The panel, the embed and the server answer "which screen is this?" with one implementation rather than three lookalikes.
+        because: A pin filed under one screen here and another there is worse than no pin at all.
         verify: [checks]
         unverifiable:
           agent: The claim is that one implementation answers the question, and that cannot be seen from outside the code. An agent can watch the panel, the embed and the server agree, but agreement is what follows from the rule rather than the rule itself - three lookalikes that happen to match today would look identical. The checks tier reads the source.
@@ -52,11 +61,18 @@ stories:
           then:
             - Each browser file carries a generated copy, not a hand-written one
             - A copy that has drifted from the source fails the build rather than shipping
-          statement_hash: sha256:8481b0cbb2e4
+          statement_hash: sha256:94c5e18bf909
+          reworded:
+            - hash: sha256:c7d51f5c89d3
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:8481b0cbb2e4
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: screens.identity.follows-navigation
         origin: thread:n-0020
-        statement: When the URL changes without the page reloading, walkdown notices and re-answers which screen this is - and it says so honestly for the one kind of navigation it cannot be told about.
+        statement: When the URL changes without the page reloading, walkdown notices and re-answers which screen this is - and says so honestly for the one kind of navigation it cannot be told about.
         steps:
           given:
             - walkdown on a single-page app, on a screen the storyboard knows
@@ -67,7 +83,14 @@ stories:
             - The embed re-resolves too, so a pin placed after the navigation files against the screen you are actually on
             - An answer a person gave about the previous page - which screen it was, whose art to ghost - does not carry across the navigation
             - pushState announces nothing and the extension cannot patch the page's own History, so that case is caught by watching rather than left to pretend it was heard
-          statement_hash: sha256:10cd6346d20b
+          statement_hash: sha256:e0ed85a9e4ac
+          reworded:
+            - hash: sha256:e8763cbea8b6
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:10cd6346d20b
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
   - id: screens.ownership
     title: Which blueprints a page belongs to is a fact about its address
@@ -92,7 +115,8 @@ stories:
 
       - id: screens.ownership.routes-by-page
         origin: thread:q-0019
-        statement: Which blueprints a page belongs to is answered from the page's own address rather than from whatever was chosen last, and the answer is a LIST - one claimant is opened without asking, several are put to the person, and none is put to them too. The count of blueprints a server happens to hold is never evidence about any of it.
+        statement: Which blueprints a page belongs to is answered from the page's own address rather than from whatever was chosen last, and the answer is a list - one claimant is opened without asking, several are put to the person, and none is put to them too. The count of blueprints a server holds is never evidence about any of it.
+        history: A folder holding exactly one blueprint used to open it over any page, claimed or not, and a folder holding several asked about pages none of them claimed (n-0256, n-0258, n-0260, n-0261).
         verify: [checks]
         screens: [choose-blueprint, project-modal]
         steps:
@@ -106,7 +130,14 @@ stories:
             - Several claimants is a question for the person, never a rank - ordering survives WITHIN one blueprint, because that is how a screen is identified at all, and is abandoned across them
             - An address no blueprint claims is not guessed at, whatever the server holds
             - A caller that names a blueprint explicitly is never overridden by this
-          statement_hash: sha256:c2308bf1988a
+          statement_hash: sha256:a32c2a668e6d
+          reworded:
+            - hash: sha256:3021d25287e8
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:c2308bf1988a
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
   - id: screens.surfaces
     title: Both surfaces, even when one of them is not a page
@@ -114,7 +145,8 @@ stories:
     rules:
       - id: screens.surfaces.stand-in-app
         origin: walkdown
-        statement: A screen whose app is not a page - because the thing being built is chrome, or is not built yet - can declare a stand-in, and walkdown serves that screen's own design back as the app, visibly marked as a stand-in, so fading, ghosting and pinning on the app surface all work while nobody can mistake it for the build.
+        statement: A screen whose app is not a page can declare a stand-in, and walkdown serves that screen's own design back as the app, visibly marked as a stand-in, so fading, ghosting and pinning on the app surface all work.
+        because: Some of what is built is chrome rather than a URL, and some is not built yet - and nobody must be able to mistake a stand-in for the build.
         verify: [checks]
         signoff: [eng, product]
         screens: [review]
@@ -128,4 +160,11 @@ stories:
             - It announces itself on its own face - a marked edge and a corner label - and wears a theme of neither the mockups nor walkdown's chrome
             - The anchors are the design's own, so a pin lands on the same element on either surface, and is recorded against the app
             - It is not evidence - what it shows is the design, so a verdict given against it is a verdict about the design
-          statement_hash: sha256:079c4dd0164a
+          statement_hash: sha256:2a72bd1318f4
+          reworded:
+            - hash: sha256:8c976257c8c0
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:079c4dd0164a
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)

@@ -993,6 +993,23 @@ test('the steps are read outright and the check source waits behind a disclosure
   await ownRule(page, 'steps-not-an-appendix');
   // The steps are the rule: nothing is clicked to read them.
   await expect(page.getByTestId('detail.steps')).toBeVisible();
+  /*
+   * Given and when are prose; then is the list. The then clauses are the long
+   * part, so the list sits BELOW its label with the pane's whole width, not
+   * beside it in the label's narrow neighbour column (n-0286).
+   */
+  const steps = page.getByTestId('detail.steps');
+  await expect(steps.getByTestId('detail.given').locator('li')).toHaveCount(0);
+  await expect(steps.getByTestId('detail.when').locator('li')).toHaveCount(0);
+  const then = steps.getByTestId('detail.then');
+  expect(await then.locator('li').count()).toBeGreaterThan(1);
+  const [labelBox, listBox] = await Promise.all([
+    then.locator('xpath=preceding-sibling::*[1]').boundingBox(),
+    then.boundingBox(),
+  ]);
+  expect(listBox.y, 'the then list starts below its label').toBeGreaterThanOrEqual(labelBox.y + labelBox.height - 1);
+  const stepsBox = await steps.boundingBox();
+  expect(listBox.width, 'and takes the width the steps have').toBeGreaterThan(stepsBox.width * 0.8);
 
   const src = page.getByTestId('detail.technical-disclosure');
   await expect(src).toBeVisible();
@@ -1045,6 +1062,37 @@ test('hovering an anchor a step names points at it on the surface', {
   // at the last thing anyone read.
   await page.getByTestId('detail.statement').hover();
   await expect(surface).not.toHaveClass(/wd-hover/);
+});
+
+/*
+ * The claim, then the reason, then what happened - apart, and in that order
+ * of weight. A statement that argued for itself was the norm until n-0286.
+ */
+test('a rule leads with its claim and sets the reason and history beneath it', {
+  tag: '@rule:panel.rules.claim-then-reason',
+}, async ({ page }) => {
+  await ownRule(page, 'claim-then-reason');
+  const statement = page.getByTestId('detail.statement');
+  const because = page.getByTestId('detail.because');
+  await expect(because).toBeVisible();
+  await expect(because).toContainText(/argues for itself/);
+  await expect(because).toContainText(/because/i);
+  const [sBox, bBox] = await Promise.all([statement.boundingBox(), because.boundingBox()]);
+  expect(bBox.y).toBeGreaterThan(sBox.y);
+  const size = (loc) => loc.evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+  expect(await size(because)).toBeLessThan(await size(statement));
+  // No history on this rule, so no history label either.
+  await expect(page.getByTestId('detail.history')).toHaveCount(0);
+
+  // And one that carries both: history under because, lighter again.
+  await ownRule(page, 'nothing-in-the-tree');
+  const history = page.getByTestId('detail.history');
+  await expect(history).toBeVisible();
+  await expect(history).toContainText(/history/i);
+  const [b2, h2] = await Promise.all([page.getByTestId('detail.because').boundingBox(), history.boundingBox()]);
+  expect(h2.y).toBeGreaterThan(b2.y);
+  const opacity = (loc) => loc.evaluate((el) => parseFloat(getComputedStyle(el).opacity));
+  expect(await opacity(history)).toBeLessThan(await opacity(page.getByTestId('detail.because')));
 });
 
 test('the rule list is filtered from a box that stays above it', {

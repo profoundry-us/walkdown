@@ -49,7 +49,7 @@ stories:
 
       - id: panel.dock.toolbar
         origin: thread:n-0015
-        statement: A bar across the top carries the controls that are about the session rather than the rule in hand - which screen, which surface, and pin mode - and it names the project all of them are about, without being where the project is chosen.
+        statement: A bar across the top carries the controls that are about the session rather than the rule in hand - which screen, which surface, and pin mode - and names the project all of them are about, without being where the project is chosen.
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -64,11 +64,19 @@ stories:
             - Detecting, the control reports the page rather than remembering an answer, so the label in the bar and the row the open list marks both follow the page when it moves
             - Prototype and App switch which of the two the page area shows
             - Pin mode can be turned on and off there
-          statement_hash: sha256:d1fa86f02626
+          statement_hash: sha256:d4d83635d936
+          reworded:
+            - hash: sha256:aaf28fbb5e0a
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:d1fa86f02626
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: panel.dock.surface-swap-is-instant
         origin: walkdown
-        statement: Swapping between the design and the app costs no page load - the ghosted copy is kept between looks and only reloaded when what it should show has actually changed - because comparing two surfaces means going back and forth, and a reload on every crossing flashes the thing you are trying to compare.
+        statement: Swapping between the design and the app costs no page load.
+        because: Comparing two surfaces means going back and forth, and a reload on every crossing flashes the thing you are trying to compare.
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -82,11 +90,19 @@ stories:
             - Resizing the window re-measures the copy rather than reloading it
             - What does reload it - a different screen, a different surface, a viewport preset, the end of a sketch detour - reloads it, so what you compare is never the wrong page
             - The copy is as old as its last load, and reloading walkdown refreshes it
-          statement_hash: sha256:9481b0c2deef
+          statement_hash: sha256:e13f6a1e1d6c
+          reworded:
+            - hash: sha256:c74a4c999299
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:9481b0c2deef
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: panel.dock.controls-survive-use
         origin: thread:n-0022
-        statement: A control in the bar survives being used - the fade slider can be grabbed and dragged the whole way, because nothing rebuilds the element the pointer is holding until the pointer lets go.
+        statement: A control in the bar survives being used - the fade slider can be grabbed and dragged the whole way.
+        history: The bar was rebuilt on every state change, which replaced the slider under the pointer mid-drag.
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -99,7 +115,14 @@ stories:
             - The drag is not dropped after the first movement
             - Clicking a spot on the track still jumps there, and the arrow keys still step
             - What the drag settles on is what the bar shows once it ends
-          statement_hash: sha256:26a643eecf8c
+          statement_hash: sha256:b98abe2d27a3
+          reworded:
+            - hash: sha256:e55758ff63da
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:26a643eecf8c
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: panel.dock.above-the-app
         retired: The docked delivery is withdrawn (2026-08-26). Framed, the application cannot paint outside its own frame, so nothing has to climb into the top layer to stay above it.
@@ -134,10 +157,15 @@ stories:
             - Escape ends pin mode, and the button and the cursor both follow
             - The bar's button is the only way to turn pin mode on, so there is no second control to fall out of step
           statement_hash: sha256:83dcb4f2e6c2
+          reworded:
+            - hash: sha256:a66c41a78d23
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
 
       - id: panel.dock.no-pin-mid-fade
         origin: thread:n-0023
-        statement: While the fade sits between the two surfaces, pinning is closed - both are on screen at once, so a pin has no honest answer to which one it is about.
+        statement: While the fade sits between the two surfaces, pinning is closed.
+        because: Both surfaces are on screen at once, so a pin has no honest answer to which one it is about.
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -149,11 +177,19 @@ stories:
             - Pin mode cannot be entered, and the control says why rather than simply refusing
             - Pin mode already running is turned off, not left armed over an ambiguous view
             - Landing fully on either end opens pinning again
-          statement_hash: sha256:fe75bc55788c
+          statement_hash: sha256:8326821fbcee
+          reworded:
+            - hash: sha256:a25c933fc24f
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:fe75bc55788c
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: panel.dock.own-skin
         origin: thread:n-0015
-        statement: walkdown's chrome wears its own theme - drafting blue, pale ink, flat surfaces - so it is never mistaken for the application it is inspecting, whatever that application looks like.
+        statement: walkdown's chrome wears its own theme - drafting blue, pale ink, flat surfaces.
+        because: It must never be mistaken for the application it is inspecting, whatever that application looks like.
         signoff: [eng, product]
         screens: [review, settings]
         steps:
@@ -165,7 +201,14 @@ stories:
             - The chrome is visibly a different surface from the app
             - The skin is a theme definition, so retuning it is one block and no component knows about it
             - Prototype screens keep their own wireframe skin, distinct from both
-          statement_hash: sha256:fb65bfe894b1
+          statement_hash: sha256:1e93098c1dea
+          reworded:
+            - hash: sha256:93bfd901cfcd
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:fb65bfe894b1
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
       - id: panel.dock.host-isolation
         retired: The docked delivery is withdrawn (2026-08-26). The panel no longer runs inside anybody else’s document. The embed still does, and embed.pin.own-skin still governs that.
         origin: walkdown
@@ -197,6 +240,10 @@ stories:
             - Controls stay usable in pin mode - the slider still drags, buttons still fire
             - Escape closes an open pin form, and leaves pin mode when none is open
           statement_hash: sha256:65b74be89995
+          reworded:
+            - hash: sha256:466c5e212ed7
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
 
   - id: panel.desk
     title: The desk the work lies on
@@ -217,10 +264,15 @@ stories:
             - It lies at an angle, as paper on a desk does
             - The perspective is a real 3D transform, falling back to something flat only where that is unavailable
           statement_hash: sha256:7824cf252425
+          reworded:
+            - hash: sha256:60871d489f4d
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
 
       - id: panel.desk.tuner
         origin: thread:n-0076
-        statement: How the paper lies is the reviewer's own taste - a gear in the bar tunes it live, the choice persists across sessions, and none of it changes what gets verified.
+        statement: A gear in the bar tunes how the paper lies, live; the choice persists across sessions, and none of it changes what gets verified.
+        because: How the paper lies is the reviewer's own taste.
         signoff: [eng, product]
         screens: [settings]
         steps:
@@ -235,11 +287,19 @@ stories:
             - Nothing about it reaches the ledger - no verdict, no run, no thread
             - The tuner closes on Escape or on a click anywhere outside it, the gear excluded since its own click already toggles it
             - It sits clear of the app's corner rather than flush against it, by the same distance on both axes, so it reads as something on the desk rather than part of the app's layout
-          statement_hash: sha256:04ab90372c93
+          statement_hash: sha256:a2132cfbe9b9
+          reworded:
+            - hash: sha256:09636342aada
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:04ab90372c93
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: panel.desk.peek
         origin: thread:n-0076
-        statement: A checkbox dims everything lying on the desk to a peek rather than hiding it outright, so the ruling can be judged against everything that would otherwise sit on top of it - a way of looking, not a preference.
+        statement: A checkbox dims everything lying on the desk to a peek rather than hiding it outright.
+        because: The ruling is judged against everything that would otherwise sit on top of it - this is a way of looking, not a preference.
         signoff: [eng, product]
         screens: [settings]
         steps:
@@ -252,7 +312,14 @@ stories:
             - The bar stays at full strength throughout, its buttons and the gear still working
             - Adjusting a dial does not undo the peek
             - It always starts unchecked, and closing the tuner ends it
-          statement_hash: sha256:35c73a3a20ec
+          statement_hash: sha256:c1c00e394894
+          reworded:
+            - hash: sha256:9b19ad4a2f80
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:35c73a3a20ec
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
   - id: panel.delivery
     title: walkdown reaches the page, however the page was built
@@ -293,10 +360,15 @@ stories:
             - Clicking again returns to the page itself, at the URL it had reached rather than the one the review started from
             - Nothing about the review outlives it - not the framing, not the headers it needed removed
           statement_hash: sha256:7e8666198401
+          reworded:
+            - hash: sha256:f7a1627079f4
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
 
       - id: panel.delivery.framed-isolation
         origin: thread:n-0030
-        statement: The extension reviews an application by giving it a viewport of its own inside walkdown's page, so the application lays itself out against that viewport and nothing it draws can paint over walkdown's chrome.
+        statement: The extension reviews an application by giving it a viewport of its own inside walkdown's page.
+        because: The application lays itself out against that viewport, and nothing it draws can paint over walkdown's chrome.
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -309,12 +381,20 @@ stories:
             - Nothing the app draws paints over walkdown, and nothing it opens makes walkdown unusable
             - A page that refuses framing is reviewed anyway, by removing the header that refuses - for that tab only, and only while it is being reviewed
             - The panel keeps up with the application - navigating inside it moves the panel to the screen the app landed on, including when the app moves without a page load
-          statement_hash: sha256:0a724efb0d5d
+          statement_hash: sha256:3ae6e9260f6c
+          reworded:
+            - hash: sha256:967abb13513f
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:0a724efb0d5d
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: panel.delivery.stale-server-says-so
         origin: thread:n-0227
         created_at: 2026-09-07
-        statement: A server keeps the code it started with, so one left running while the code moves is answering with yesterday's rules - and it says so itself, because it is the only party that can see both when it booted and what is on disk now. The panel wears that the same way it wears a stale copy of itself, since a walkdown recorded through an outdated door is undermined exactly as thoroughly as one recorded by an outdated panel.
+        statement: A server left running while the code moves says so itself, and the panel wears that the same way it wears a stale copy of itself.
+        because: A server keeps the code it started with, so it is answering with yesterday's rules - and it is the only party that can see both when it booted and what is on disk now. A walkdown recorded through an outdated door is undermined exactly as thoroughly as one recorded by an outdated panel.
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -328,11 +408,19 @@ stories:
             - A server started after the last edit says nothing at all, so the warning keeps meaning something
             - Rebuilding the panel or the embed does not make a server stale - those are read from disk per request, and crying wolf on every rebuild would teach a reviewer to ignore it
             - A server that cannot read its own source reads as current rather than as an alarm nobody can act on
-          statement_hash: sha256:34c0eee005b6
+          statement_hash: sha256:e24275abff33
+          reworded:
+            - hash: sha256:2ba91beef131
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:34c0eee005b6
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: panel.delivery.one-switch
         origin: thread:n-0018
-        statement: The extension's only control is the toolbar button - on or off for this site - and it shows which of those it is. Everything else is asked in the panel, where there is room to explain it.
+        statement: The extension's only control is the toolbar button - on or off for this site - and it shows which of those it is. Everything else is asked in the panel.
+        because: The panel has room to explain; browser chrome does not.
         unverifiable:
           agent: The control is the browser's own toolbar button, which is browser chrome rather than part of the page - no tool an agent drives reaches it, and its icon is not something an agent can see.
           checks: The same button, for the same reason - a test that drives a page cannot click something that is not in the page.
@@ -346,11 +434,19 @@ stories:
             - Clicking starts it, clicking again stops it - there is no second place to look
             - The button wears the state as its own icon, colour for on and drained for off, rather than a badge pinned to it
             - Server and blueprint are chosen in the panel, not in browser chrome
-          statement_hash: sha256:bed2a74ca17d
+          statement_hash: sha256:608a242984fb
+          reworded:
+            - hash: sha256:84bda3b30c1d
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:bed2a74ca17d
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: panel.delivery.stale-copy-says-so
         origin: thread:n-0062
-        statement: The extension's vendored copy of walkdown only updates when the extension is reloaded - so the panel compares the copy it is running against what the server ships, and says plainly when it has gone stale, because an outdated walkdown reviewing a moving spec quietly undermines every verdict.
+        statement: The panel compares the copy of walkdown it is running against what the server ships, and says plainly when it has gone stale.
+        because: The extension's vendored copy only updates when the extension is reloaded, and an outdated walkdown reviewing a moving spec quietly undermines every verdict.
         verify: [checks]
         signoff: [eng, product]
         screens: [review]
@@ -363,11 +459,18 @@ stories:
             - A banner states the extension is running an older walkdown and names the fix - reload the extension, then the page
             - A current copy shows nothing
             - The docked delivery never shows it, because a script tag always runs what the server ships
-          statement_hash: sha256:78fe49a20815
+          statement_hash: sha256:5ba123b01d1c
+          reworded:
+            - hash: sha256:124fa1fddaac
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:78fe49a20815
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: panel.delivery.anchors-still-required
         origin: thread:q-0016
-        statement: A page that carries no anchors can still be reviewed - a pin dropped on it is recorded by where it sits on the screen rather than against an element, and pages that do carry anchors are unaffected.
+        statement: A page that carries no anchors can still be reviewed - a pin dropped on it is recorded by where it sits on the screen rather than against an element - and pages that do carry anchors are unaffected.
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -379,7 +482,14 @@ stories:
             - The pin is recorded against its coordinates and the thread is written
             - It renders as a positioned pin, not an anchored one
             - Anchored pins keep working wherever anchors do exist
-          statement_hash: sha256:af221a75aa10
+          statement_hash: sha256:21a93770a9c1
+          reworded:
+            - hash: sha256:6cbc4017880c
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:af221a75aa10
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
   - id: panel.start
     title: A fresh install knows nothing, and says so
@@ -402,10 +512,15 @@ stories:
             - The box you type into is labelled as a server address, not as a folder
             - Once connected, the panel names the folder that server is serving
           statement_hash: sha256:5ace895ac628
+          reworded:
+            - hash: sha256:2a5e9a0925a7
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
 
       - id: panel.start.choose-a-blueprint
         origin: thread:n-0017
-        statement: When more than one of the active project's blueprints claims the page you are on, the panel asks which, showing each by name and by the description the blueprint itself carries and marking the ones that claim this page. It is asked because there are several CLAIMANTS - never because a folder happens to hold several blueprints, which says nothing about the page you are looking at.
+        statement: When more than one of the active project's blueprints claims the page you are on, the panel asks which, showing each by name and by the description the blueprint itself carries and marking the ones that claim this page. It asks when there are several claimants - never when a folder merely happens to hold several blueprints.
+        because: What a folder holds says nothing about the page you are looking at.
         signoff: [eng, product]
         screens: [choose-blueprint]
         steps:
@@ -420,7 +535,14 @@ stories:
             - Choosing one loads it and writes nothing down; the same question is asked again next time
             - Nothing is offered that nobody wrote down - the list is the registry's, so a fixture or a vendored copy is absent by never having been declared rather than by being filtered out
             - The same list is the Blueprints tab, so the choice can be changed later without reinstalling anything
-          statement_hash: sha256:d535c64dd41b
+          statement_hash: sha256:f2c3915679bc
+          reworded:
+            - hash: sha256:3ff33b8e9c41
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:d535c64dd41b
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: panel.start.unclaimed-page-says-so
         retired: >-
@@ -444,7 +566,8 @@ stories:
 
       - id: panel.start.which-project
         origin: thread:q-0269
-        statement: Where the address cannot decide - nothing claims this page, several projects do, or there is no page to route from at all because you are looking at walkdown's own root - the panel asks which project, in one modal. One modal and one backdrop serve every case and only what sits behind them changes - an arrival leaves the page and the panel standing but blurred, walkdown's own root has nothing behind the modal but the desk ruling, and the switcher pressed inside a loaded project leaves that project's board exactly where it was and gives it back on Escape. It names the address it asked about, and it puts how to make a page reviewable and how to bring a project in ABOVE the list, where a long list of projects cannot push them out of view.
+        statement: Where the address cannot decide - nothing claims this page, several projects do, or there is no page to route from at all, at walkdown's own root - the panel asks which project, in one modal with one backdrop, naming the address it asked about. Only what sits behind the modal changes between the cases, and how to make a page reviewable and how to bring a project in sit above the list.
+        because: Three screens asking one question were three places for the answer to differ, and a long list of projects must not push the way out of view.
         signoff: [eng, product]
         screens: [project-modal]
         steps:
@@ -467,7 +590,14 @@ stories:
             - Nothing is opened by default, at any count - a machine holding exactly one blueprint is answered the same way as one holding six
             - Choosing a project with one blueprint opens it; choosing one with several asks which, on the Blueprints tab - and several blueprints inside a single project never reach this modal at all, because the project is not in question there
             - A server that lists nothing offers no list at all rather than an empty one, and still says what to do about it
-          statement_hash: sha256:fbc01fc45771
+          statement_hash: sha256:7ab5408640e8
+          reworded:
+            - hash: sha256:fb4343377bab
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:fbc01fc45771
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
   - id: panel.rules
     title: The rules are one tap away, and so is the way back
@@ -490,6 +620,10 @@ stories:
             - The Blueprints / Rules / Threads tabs are sized to their labels and centred in the sidebar, not stretched to its full width
             - Each of the three tabs carries its own icon, from the same Phosphor set as the rest of the panel's chrome, sized and padded to read clearly at tab size rather than as an inline glyph shrunk to fit
           statement_hash: sha256:7fb2ea6d8a22
+          reworded:
+            - hash: sha256:493a83d3f0bd
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
 
       - id: panel.rules.takes-you-there
         origin: thread:n-0031
@@ -511,6 +645,10 @@ stories:
             - Where a move means a real page load rather than a frame, it stays something you ask for on the rule rather than something opening a rule does to you
             - Whether a trip that means a real page load is taken or merely offered depends on whether walkdown survives it - framed, walkdown owns the frame and goes; docked by the extension it also goes, because the extension re-injects itself into the next page; docked by a script tag it offers a link instead, because navigating would unload the very script drawing the panel and leave you on the other site with no walkdown at all
           statement_hash: sha256:0df515aeceb7
+          reworded:
+            - hash: sha256:708e2433c9b5
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
 
       - id: panel.rules.one-pane-per-tab
         origin: thread:n-0032
@@ -527,6 +665,10 @@ stories:
             - Returning to Rules shows the list, from which the rule can be opened again
             - A tab that opens something of its own opens it into the same seat the rule detail uses, so no tab slides past another tab's detail to reach its own
           statement_hash: sha256:5e37dcb079ac
+          reworded:
+            - hash: sha256:7cbb341f16bd
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
 
       - id: panel.rules.step-between
         origin: walkdown
@@ -544,6 +686,10 @@ stories:
             - Each control's tooltip names the rule it will open
             - At either end the control is disabled and says there is nothing further
           statement_hash: sha256:b43e16d7e113
+          reworded:
+            - hash: sha256:56a26420e1f3
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
 
       - id: panel.rules.steps-not-an-appendix
         origin: thread:n-0007
@@ -560,11 +706,38 @@ stories:
             - The steps are already expanded - they are the rule, not an appendix
             - "The check source stays behind anchor `detail.technical-disclosure` until opened, and stands on its own: it hangs off the rule's check refs, so it is there whether or not the rule has steps"
             - Hovering an anchor a step names highlights that element on the surface under review, so a step points at what it is talking about
-          statement_hash: sha256:12064cd8cf0c
+            - Given and when read as prose beside their labels; only then is a list, one bullet per clause, set below its label rather than beside it
+          statement_hash: sha256:01925131df2f
+          reworded:
+            - hash: sha256:0609e516526f
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:12064cd8cf0c
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+
+      - id: panel.rules.claim-then-reason
+        origin: thread:n-0286
+        statement: A rule's detail leads with the claim and sets its reason and its history beneath, each labelled and quieter than the claim, so what is judged and why it was asked for are read apart.
+        because: A statement that argues for itself invites a judge to agree with the reasoning rather than test the claim, and rewording the reasoning should never put a rule back on the queue.
+        verify: [checks]
+        signoff: [eng, product]
+        screens: [rule-detail]
+        steps:
+          given:
+            - A rule carrying a `because` and a `history`, open in the detail pane on screen `rule-detail`
+          when:
+            - Reading under anchor `detail.statement`
+          then:
+            - The reason stands under the statement at anchor `detail.because`, labelled, in a smaller and lighter type than the claim
+            - The history stands under that at anchor `detail.history`, labelled, lighter again
+            - A rule carrying neither shows neither - no empty label stands in for a sentence nobody wrote
+          statement_hash: sha256:6549e76ae19b
 
       - id: panel.rules.setup-says-how-to-arrive
         origin: thread:n-0093
-        statement: When a rule's screen is a state rather than an address - it carries a setup - the panel says what to do on arrival, above the steps, because an address alone cannot always put the app into the state it names.
+        statement: When a rule's screen is a state rather than an address - it carries a setup - the panel says what to do on arrival, above the steps.
+        because: An address alone cannot always put the app into the state it names.
         verify: [checks]
         signoff: [eng, product]
         screens: [rule-detail]
@@ -577,11 +750,19 @@ stories:
             - Anchor `detail.setup` says how to get the app into that state
             - The block is labelled Setup, the storyboard's own word for the field
             - A rule whose screen has no setup shows nothing there - an empty instruction is worse than none
-          statement_hash: sha256:0fe412b95c9a
+          statement_hash: sha256:fdb917769b7f
+          reworded:
+            - hash: sha256:e41b088d8143
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:0fe412b95c9a
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: panel.rules.evidence-visible
         origin: walkdown
-        statement: A rule's detail shows the evidence behind its standing - the latest ledger result for each of its verify types - so the chain of trust is read where the rule is judged.
+        statement: A rule's detail shows the evidence behind its standing - the latest ledger result for each of its verify types.
+        because: The chain of trust is read where the rule is judged.
         verify: [checks]
         signoff: [eng, product]
         screens: [rule-detail]
@@ -596,7 +777,14 @@ stories:
             - "Anchor `detail.evidence-open` opens them to look at, in `detail.evidence-modal`"
             - "Each file is shown as what it is: a picture as a picture, a transcript as readable text, anything else as a link to open - never as a broken image"
             - A rule with no runs says so rather than showing nothing
-          statement_hash: sha256:890e7391a2ee
+          statement_hash: sha256:e6a5efd7ff2e
+          reworded:
+            - hash: sha256:65b84178c291
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:890e7391a2ee
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: panel.rules.counts-legible
         origin: thread:n-0002
@@ -616,6 +804,10 @@ stories:
             - A tab holding nothing for you draws no badge at all, because a badge saying none is a claim on the eye about nothing
             - The Rules badge is the same warning colour the rule glyphs and their badges use, because it is the same claim they make - this is waiting on you - and it is the loudest thing in the strip, since walking the rules is the work the tool exists for. Other tabs count their own work in their own colour rather than a second yellow beside it
           statement_hash: sha256:c48d3e5f64b0
+          reworded:
+            - hash: sha256:669dfeb91eee
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
 
       - id: panel.rules.lifecycle-legible
         origin: thread:n-0054
@@ -634,10 +826,15 @@ stories:
             - A rule waiting on the reviewer is warning-tinted and its badge names the work - sign or walk
             - Each row's tooltip spells the state out in words
           statement_hash: sha256:860df1bc1ed8
+          reworded:
+            - hash: sha256:a0f0ad3cb747
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
 
       - id: panel.rules.search-the-list
         origin: thread:n-0108
-        statement: The rule list carries a search box fixed above it, and typing in it filters the list as you type - a query naming a story keeps every rule in it, a query naming a screen keeps every rule judged on it, a query naming one rule keeps that rule alone, and both headings a surviving rule sits under are always drawn, so the hierarchy stays readable while the list is filtered.
+        statement: The rule list carries a search box fixed above it, and typing in it filters the list as you type - a query naming a story keeps every rule in it, a query naming a screen keeps every rule judged on it, a query naming one rule keeps that rule alone, and both headings a surviving rule sits under are always drawn.
+        because: The hierarchy has to stay readable while the list is filtered.
         verify: [checks]
         signoff: [eng, product]
         screens: [review]
@@ -654,10 +851,18 @@ stories:
             - A query naming a screen leaves standing every rule judged on that screen
             - Every rule still listed is drawn under both of its headings - the screen it is judged on and the story it belongs to
             - Emptying the box brings the whole list back
-          statement_hash: sha256:912d467e4543
+          statement_hash: sha256:49bbef1b8eb8
+          reworded:
+            - hash: sha256:f183d0a96302
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:912d467e4543
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
       - id: panel.rules.tiers-at-a-glance
         origin: thread:n-0109
-        statement: Every rule shows one mark per evidence tier - checks then agent - and beside them one dot per role that must sign, so which evidence a rule rests on, and whose signature it is still waiting for, can be read off the list rather than opened one rule at a time.
+        statement: Every rule shows one mark per evidence tier - checks then agent - and beside them one dot per role that must sign.
+        because: Which evidence a rule rests on, and whose signature it is still waiting for, should be read off the list rather than opened one rule at a time.
         verify: [checks]
         signoff: [eng, product]
         screens: [review]
@@ -673,10 +878,18 @@ stories:
             - A tier the rule does not ask for, and a tier with nothing to judge because the rule is unbuilt, are the quietest mark on the strip - and the tooltip says which of the two it is
             - Beside the tiers, one slot per role the rule names, in a fixed order, filled to the extent that role has signed
             - One tooltip covers the whole strip and names every tier and every role in words
-          statement_hash: sha256:752cbfc547a3
+          statement_hash: sha256:42318366ff86
+          reworded:
+            - hash: sha256:cac7a0be0702
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:752cbfc547a3
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
       - id: panel.rules.grouped-by-screen
         origin: walkdown
-        statement: The rail is grouped by the screen a rule is judged on, in storyboard order, each screen named as the storyboard names it and wearing the same icon the bar's picker wears - and the story beneath keeps only what the screen has not already said. A screen's heading stays in view while its own rules are scrolled, because a group forty rules long outlives the heading that named it. Rules belonging to no screen are a group of their own at the end, because a blueprint can be a third ledger law and that is read rather than looked at.
+        statement: The rail is grouped by the screen a rule is judged on, in storyboard order, each screen named as the storyboard names it and wearing the same icon the bar's picker wears, with the story beneath keeping only what the screen has not already said. A screen's heading stays in view while its own rules are scrolled. Rules belonging to no screen are a group of their own at the end.
+        because: A group forty rules long outlives the heading that named it, and a blueprint can be a third ledger law - read rather than looked at.
         verify: [checks]
         signoff: [eng, product]
         screens: [review]
@@ -691,11 +904,19 @@ stories:
             - A rule the storyboard does not place is grouped with the others that have none, after every screen
             - The detail's stepper and the walk move in this order too, so the arrows and Continue follow what the list shows rather than what the file happens to hold
             - Scrolling deep into a screen's rules leaves that screen's heading at the top of the list, naming what is being read
-          statement_hash: sha256:c21b11cee6a2
+          statement_hash: sha256:f554615bd01a
+          reworded:
+            - hash: sha256:54d2a03fa8e6
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:c21b11cee6a2
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: panel.rules.headless-says-so
         origin: thread:n-0061
-        statement: Opening a rule that has no screen clears the surface under review - an unmistakable cover in walkdown's own voice takes the sheet's place - because a lingering page reads as the rule's screen, and the reviewer cannot tell a right screen from a rule that has none.
+        statement: Opening a rule that has no screen clears the surface under review - an unmistakable cover in walkdown's own voice takes the sheet's place.
+        because: A lingering page reads as the rule's screen, and the reviewer cannot tell a right screen from a rule that has none.
         signoff: [eng, product]
         screens: [rule-detail]
         steps:
@@ -708,11 +929,19 @@ stories:
             - The cover says the page underneath is untouched - it covers, never navigates, so the application keeps its state
             - The detail pane carries the same note beside the statement
             - Opening a screened rule or returning to the list lifts the cover
-          statement_hash: sha256:313a2f5c11b5
+          statement_hash: sha256:efedd2d20f70
+          reworded:
+            - hash: sha256:5bb6c7d6142a
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:313a2f5c11b5
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: panel.rules.legend-on-demand
         origin: walkdown
-        statement: The rail's whole vocabulary is explained in one place, reachable from the list itself - every evidence mark, every signature shape, and what colour means - because a mark a reader cannot decode is worse than no mark, and six tooltips read one at a time never assemble into a picture of how the rail works.
+        statement: The rail's whole vocabulary is explained in one place, reachable from the list itself - every evidence mark, every signature shape, and what colour means.
+        because: A mark a reader cannot decode is worse than no mark, and six tooltips read one at a time never assemble into a picture of how the rail works.
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -725,11 +954,20 @@ stories:
             - Every state a signature slot can take is listed with the shape that draws it
             - What warning colour means, and what the sign, walk and thread badges mean, are said in the same place
             - It is built from the same vocabulary the rail draws from, so it cannot describe marks the rail no longer uses
-          statement_hash: sha256:36417be07500
+          statement_hash: sha256:ad00ec97fa8a
+          reworded:
+            - hash: sha256:58cbf78e318c
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:36417be07500
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: panel.rules.owed-apart-from-said
         origin: walkdown
-        statement: A rule shows two different things down the edge of the list, and they get a column each. What the rule owes you is a claim on your time. How many conversations it carries is only context. Run together as one string in one colour they read as a single number, which is neither of them.
+        statement: What a rule owes you and how many conversations it carries are two columns down the edge of the list, never one string.
+        because: What the rule owes you is a claim on your time; how many conversations it carries is only context.
+        history: Run together as one string in one colour they read as a single number, which was neither of them.
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -741,11 +979,19 @@ stories:
             - The work badge and the thread count occupy their own columns, each aligned down the list
             - The thread count is drawn in plain ink rather than in the colour that means work is owed
             - A rule with only one of the two leaves the other column empty rather than shifting the row
-          statement_hash: sha256:84bf34874d7c
+          statement_hash: sha256:e0613aa19dc7
+          reworded:
+            - hash: sha256:10189a32c600
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:84bf34874d7c
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: panel.rules.marks-carry-over
         origin: walkdown
-        statement: Opening a rule keeps the marks you opened it for - the detail leads with the same evidence and signature strip the list drew, in the same order - so the row and the page it opens never have to be compared from memory.
+        statement: Opening a rule keeps the marks you opened it for - the detail leads with the same evidence and signature strip the list drew, in the same order.
+        because: The row and the page it opens should never have to be compared from memory.
         signoff: [eng, product]
         screens: [rule-detail]
         steps:
@@ -756,11 +1002,19 @@ stories:
           then:
             - The detail draws the same strip, in the same order, saying the same thing
             - It is the list's own drawing rather than a second one, so the two cannot disagree
-          statement_hash: sha256:ec4ad798ac84
+          statement_hash: sha256:c2794bb86d6c
+          reworded:
+            - hash: sha256:53b22fd6a5a4
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:ec4ad798ac84
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: panel.rules.names-its-screen
         origin: walkdown
-        statement: A rule's detail says which screen it is about, above its steps and in the storyboard's own words - because a rule pointed at the wrong screen is a quiet and common error, and it cannot be corrected by somebody who cannot see what was chosen.
+        statement: A rule's detail says which screen it is about, above its steps and in the storyboard's own words.
+        because: A rule pointed at the wrong screen is a quiet and common error, and it cannot be corrected by somebody who cannot see what was chosen.
         signoff: [eng, product]
         screens: [rule-detail]
         steps:
@@ -773,11 +1027,19 @@ stories:
             - A flow is drawn as the chain it is, ending on the screen the rule is judged against
             - A rule naming no screen says so rather than leaving the section out
             - A screen id the storyboard does not know is marked as unknown rather than printed as though it resolved
-          statement_hash: sha256:ae3042822558
+          statement_hash: sha256:2021f5d5e207
+          reworded:
+            - hash: sha256:4a90d439391b
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:ae3042822558
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: panel.rules.talk-without-a-sitting
         origin: walkdown
-        statement: A conversation can be started on any rule at any time, not only during a walkdown - a rule read on an ordinary afternoon deserves the same record as one judged in a sitting - and the note is filed under the same name the panel already shows as you, never one it has not displayed.
+        statement: A conversation can be started on any rule at any time, not only during a walkdown, and the note is filed under the same name the panel already shows as you - never one it has not displayed.
+        because: A rule read on an ordinary afternoon deserves the same record as one judged in a sitting.
         signoff: [eng, product]
         screens: [rule-detail]
         steps:
@@ -790,7 +1052,14 @@ stories:
             - It is attributed to whoever the panel is recording as, shown above the composer before it is used
             - An empty identity refuses the filing and offers the place to set one, rather than letting the server choose a name
             - Starting a thread records no verdict and begins no sitting
-          statement_hash: sha256:1feb59efdd65
+          statement_hash: sha256:96af529203d5
+          reworded:
+            - hash: sha256:d66e49c63ed9
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:1feb59efdd65
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
   - id: panel.threads
     title: Feedback is answered where it is read
@@ -811,6 +1080,10 @@ stories:
             - A reply can be written and posted, and appears without a page reload
             - Only the transitions legal for that kind and status are offered
           statement_hash: sha256:24dc190cf4f7
+          reworded:
+            - hash: sha256:a0dd8bb2f5b9
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
 
       - id: panel.threads.claim-never-accept
         origin: walkdown
@@ -827,10 +1100,15 @@ stories:
             - Nothing is recorded and the panel asks for a person's name
             - Waiving or reopening without a reason is refused until one is written
           statement_hash: sha256:9d263352d2ff
+          reworded:
+            - hash: sha256:7c4e1e2d1562
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
 
       - id: panel.threads.show-the-sketch
         origin: thread:n-0010
-        statement: When a thread's screen has a proposal on file, the panel can show it over the running app, badged as a proposal so a sketch is never mistaken for the design.
+        statement: When a thread's screen has a proposal on file, the panel can show it over the running app, badged as a proposal.
+        because: A sketch must never be mistaken for the design.
         signoff: [eng, product]
         screens: [rule-detail]
         steps:
@@ -844,7 +1122,14 @@ stories:
             - Screens with a real prototype still ghost the prototype
             - Looking at it is a detour - which screen the panel thinks this page is does not change, and the picker still swaps screens
             - The detour is named while it lasts, and turning the ghost off ends it
-          statement_hash: sha256:693cf5703fb8
+          statement_hash: sha256:7763b1dccd96
+          reworded:
+            - hash: sha256:8244263349d7
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:693cf5703fb8
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: panel.threads.own-view
         origin: thread:n-0094
@@ -865,6 +1150,10 @@ stories:
             - Opening one shows the conversation beside the list, and the way back from it is the list of threads rather than a rule nobody opened
             - How many threads are waiting on a person is carried on the tab itself, so it is legible from whichever tab is open
           statement_hash: sha256:09bd656d03f9
+          reworded:
+            - hash: sha256:faade3b887d1
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
 
   - id: panel.walkdown
     title: A walkdown from the panel is a walkdown
@@ -887,11 +1176,16 @@ stories:
             - Discarding instead of finishing writes nothing
             - Finishing says what was RECORDED, from the door's own answer - which roles landed and under whose names - because a field the door dropped is invisible in a count of verdicts (n-0226)
           statement_hash: sha256:33f8130bbd75
+          reworded:
+            - hash: sha256:6cc28278f4a6
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
 
       - id: panel.walkdown.who-signs-is-declared
         origin: thread:q-0225
         created_at: 2026-09-07
-        statement: Beginning a sitting asks who is signing it and in which roles, filled in from what this machine already knows about the person at it, and changeable before the sitting starts - including naming somebody else as the signer for a role, which is how one person drives a walk two people are doing. What was declared stays visible for the whole sitting, and a signature given for somebody else is never remembered into the next one.
+        statement: Beginning a sitting asks who is signing it and in which roles, filled in from what this machine already knows about the person at it and changeable before the sitting starts - including naming somebody else as the signer for a role. What was declared stays visible for the whole sitting, and a signature given for somebody else is never remembered into the next one.
+        because: Naming somebody else is how one person drives a walk two people are doing.
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -905,11 +1199,19 @@ stories:
             - Who this sitting is being signed as stays legible while it runs, so accepting on somebody's behalf cannot be forgotten half way through
             - The next sitting starts from the config again - a role handed to somebody else is never the default a second time
             - Nothing the browser remembers decides who a record is written under
-          statement_hash: sha256:b0336010e7d5
+          statement_hash: sha256:f5cc1065f3f5
+          reworded:
+            - hash: sha256:36efe97a3acd
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:b0336010e7d5
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: panel.walkdown.one-control-owns-the-sitting
         origin: walkdown
-        statement: One control starts a sitting and ends it - the same button in the bar, because they are two halves of one act - while carrying on to the next rule sits beside the count of the rules already judged.
+        statement: One control starts a sitting and ends it - the same button in the bar - while carrying on to the next rule sits beside the count of the rules already judged.
+        because: Starting and ending are two halves of one act.
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -926,11 +1228,19 @@ stories:
             - Both controls wear the panel's warning colour, the one it already uses for work owed to you, so the sitting reads as one thing from the tab's count through to the record - the ending filled and carrying on outlined, since two solid yellows would argue about which is the act
             - Beginning wears it too when rules are owed, so the blueprint says there is work before being asked; with nothing owed it drops back to the ordinary action colour, because a control that is always loud says nothing
             - Every one of these counts comes from a single list - the rules owing you a verdict, less the ones judged this sitting - so the tab's number, the footer's kinds, the tally's denominator and the rule Continue opens cannot drift apart
-          statement_hash: sha256:8a7122b87a96
+          statement_hash: sha256:ac216e33f70b
+          reworded:
+            - hash: sha256:c74a54acc395
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:8a7122b87a96
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: panel.walkdown.session-survives-reload
         origin: thread:n-0066
-        statement: An unfinished session is real judging work - it is saved from the first verdict and restored after a page or extension reload, and a refused or failed Finish hands the button back instead of silently bricking the session.
+        statement: An unfinished session is saved from the first verdict and restored after a page or extension reload, and a refused or failed Finish hands the button back instead of silently bricking the session.
+        because: An unfinished session is real judging work.
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -942,11 +1252,19 @@ stories:
             - The session comes back - verdicts, judged count, and actor - exactly as left
             - Finishing then records once; a refused attempt, nameless or offline, can be retried after fixing the cause
             - Finishing or discarding clears the saved draft
-          statement_hash: sha256:6371c4770618
+          statement_hash: sha256:c73c8f26293e
+          reworded:
+            - hash: sha256:05503923167c
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:6371c4770618
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: panel.walkdown.draft-on-disk
         origin: walkdown
-        statement: Every verdict is written to the project as it is given - a draft session on disk, outside the runs ledger - so an unfinished sitting survives the browser and is visible to the tools, while the ledger still gains exactly one record, at Finish, that is never edited.
+        statement: Every verdict is written to the project as it is given - a draft session on disk, outside the runs ledger - while the ledger still gains exactly one record, at Finish, that is never edited.
+        because: An unfinished sitting should survive the browser and be visible to the tools.
         verify: [checks]
         signoff: [eng, product]
         screens: [review, rule-detail]
@@ -961,7 +1279,14 @@ stories:
             - walkdown status reports the sitting as in progress rather than as verdicts
             - Finishing appends the one run record and deletes the draft; discarding deletes it and writes nothing
             - A draft is never committed by accident - the directory ignores its own contents
-          statement_hash: sha256:208e1062b8c7
+          statement_hash: sha256:35e52538a664
+          reworded:
+            - hash: sha256:cfb0ee61cad3
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:208e1062b8c7
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: panel.walkdown.verdicts-at-hand
         origin: walkdown
@@ -978,10 +1303,15 @@ stories:
             - The only thing between the statement and the buttons is anchor `detail.feedback`, which panel.walkdown.note-with-any-verdict puts there
             - The chosen verdict stays visibly chosen when the rule is revisited
           statement_hash: sha256:230135783bdb
+          reworded:
+            - hash: sha256:d67304c4aae1
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
 
       - id: panel.walkdown.pass-advances
         origin: walkdown
-        statement: A pass moves the session to the next rule owing a verdict; a fail stays put, so the reason can be given where the rule is - and no verdict switches a mode on by itself.
+        statement: A pass moves the session to the next rule owing a verdict; a fail stays put; and no verdict switches a mode on by itself.
+        because: The reason for a fail is given where the rule is.
         signoff: [eng, product]
         screens: [rule-detail]
         steps:
@@ -994,7 +1324,14 @@ stories:
             - The fail keeps the rule open, and pin mode is left exactly as it was found
             - Judging the last owed rule returns to the list rather than a dead end
             - Carrying on from a rule you stayed on is asked for rather than done to you - the sitting's own next step sits beside the tally
-          statement_hash: sha256:f8832132ec51
+          statement_hash: sha256:e35194ca2dbb
+          reworded:
+            - hash: sha256:017026c31543
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:f8832132ec51
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: panel.walkdown.note-with-any-verdict
         origin: thread:n-0050
@@ -1012,10 +1349,15 @@ stories:
             - Judging with the box empty files no thread
             - The box sits above anchor `detail.verdict`, so the why is asked for before the verdict
           statement_hash: sha256:b08fe1ef5a23
+          reworded:
+            - hash: sha256:f9043305838b
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
 
       - id: panel.walkdown.fail-requires-why
         origin: thread:n-0051
-        statement: A fail is refused until it has a why - feedback text or a pin dropped on the rule during the session - because a fail with no why is work nobody can act on.
+        statement: A fail is refused until it has a why - feedback text or a pin dropped on the rule during the session.
+        because: A fail with no why is work nobody can act on.
         verify: [checks]
         signoff: [eng, product]
         screens: [rule-detail]
@@ -1027,7 +1369,14 @@ stories:
           then:
             - No verdict is recorded, and the panel names both ways to give a why - write it, or pin it - without turning either on
             - Writing feedback or dropping a pin on the rule, then failing again, records it
-          statement_hash: sha256:6c3cf9029f3e
+          statement_hash: sha256:64c2b537af07
+          reworded:
+            - hash: sha256:9644c16756d8
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:6c3cf9029f3e
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
   - id: panel.identity.retired
     title: The viewer already knew who you are
@@ -1050,7 +1399,8 @@ stories:
     rules:
       - id: panel.identity.default-actor
         origin: thread:n-0008
-        statement: The identity arrives filled in - the username records are written under, and the full name to show alongside it - so no attributed action ever asks who you are. The username is the machine's answer and is shown rather than typed, because a name a browser can set is a name it can invent; the full name is only ever displayed, so it stays yours to change, from empty.
+        statement: The identity arrives filled in - the username records are written under, and the full name to show alongside it - so no attributed action ever asks who you are. The username is the machine's answer and is shown rather than typed; the full name is only ever displayed, and stays yours to change, from empty.
+        because: A name a browser can set is a name it can invent.
         verify: [checks]
         signoff: [eng, product]
         screens: [review, settings]
@@ -1064,11 +1414,19 @@ stories:
             - Settings shows both - anchor `settings.actor` for the username records carry, anchor `settings.display-name` for the name the panel shows - and says where the username comes from
             - The username cannot be typed here, and nothing a request carries can change what a record is written under
             - The full name is editable from empty, applies to the running session, and is remembered across reloads; emptying it is an answer too, leaving the username standing alone
-          statement_hash: sha256:f50536277d5c
+          statement_hash: sha256:22dc9f1e14e4
+          reworded:
+            - hash: sha256:870f334762eb
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:f50536277d5c
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: panel.identity.attribution-visible
         origin: thread:n-0008
-        statement: A defaulted identity is always visible before it is used - a walkdown verdict or a thread action shows the name it will be recorded under, so nobody is attributed silently.
+        statement: A defaulted identity is always visible before it is used - a walkdown verdict or a thread action shows the name it will be recorded under.
+        because: Nobody is attributed silently.
         signoff: [eng, product]
         screens: [review, rule-detail]
         steps:
@@ -1079,7 +1437,14 @@ stories:
           then:
             - The name being recorded is on screen at the moment of the action - the username itself, beside the full name shown for it
             - Correcting it before acting records the corrected name
-          statement_hash: sha256:cd8b6d78f53a
+          statement_hash: sha256:48e53151d829
+          reworded:
+            - hash: sha256:1b6a789fde73
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:cd8b6d78f53a
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
   - id: panel.viewport
     title: The frame renders at real device sizes
@@ -1087,7 +1452,8 @@ stories:
     rules:
       - id: panel.viewport.device-presets
         origin: thread:n-0005
-        statement: Framed, a bar control sizes the app's frame like a real device - desktop or mobile - and the ghost renders at the same viewport, so the comparison stays honest.
+        statement: Framed, a bar control sizes the app's frame like a real device - desktop or mobile - and the ghost renders at the same viewport.
+        because: The comparison stays honest only when both surfaces answer to one width.
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -1100,11 +1466,19 @@ stories:
             - The frame re-renders narrow and a responsive app shows its mobile layout
             - The ghost renders at that same viewport; the two never disagree
             - Switching back to desktop restores both
-          statement_hash: sha256:ae6986d9aed8
+          statement_hash: sha256:e5e7ef826604
+          reworded:
+            - hash: sha256:2ded288a785a
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:ae6986d9aed8
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: panel.viewport.zoom-to-fit
         origin: thread:n-0005
-        statement: A viewport wider than the space the frame has scales down whole to fit, so a desktop layout is seen as a desktop layout rather than reflowed to a narrow column - and the current scale is visible.
+        statement: A viewport wider than the space the frame has scales down whole to fit, and the current scale is visible.
+        because: A desktop layout is seen as a desktop layout rather than reflowed to a narrow column.
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -1115,7 +1489,14 @@ stories:
           then:
             - The app lays out at the chosen width and is scaled down whole - no reflow
             - The current scale is shown in anchor `panel.zoom`
-          statement_hash: sha256:336df83a67ec
+          statement_hash: sha256:2e05a82ab041
+          reworded:
+            - hash: sha256:8beb5dbadbe0
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:336df83a67ec
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
   - id: panel.signoff
     title: Unbuilt rules are signed off, not judged
@@ -1123,7 +1504,8 @@ stories:
     rules:
       - id: panel.signoff.spec-pair-derived
         origin: thread:n-0052
-        statement: "Which pair of verdict buttons a rule shows is read off the ledger rather than chosen. A rule nothing has built yet - the ledger holds no pass and no fail for it, from checks or from judging - offers Approve and Refine, which sign off the rule itself; every other rule offers Pass and Fail, which judge the build. An approval is not build evidence, and neither is a skip or a block: they record what somebody decided, not that something was made."
+        statement: "Which pair of verdict buttons a rule shows is read off the ledger rather than chosen. A rule nothing has built yet - no pass and no fail from checks or from judging - offers Approve and Refine, which sign off the rule itself; every other rule offers Pass and Fail, which judge the build."
+        because: "An approval is not build evidence, and neither is a skip or a block: they record what somebody decided, not that something was made."
         verify: [checks]
         signoff: [eng, product]
         screens: [rule-detail]
@@ -1136,11 +1518,19 @@ stories:
             - The first shows Approve and Refine, labelled as signing off the rule rather than judging a build
             - The second shows Pass and Fail
             - Approving a rule does not flip it to the Pass/Fail pair - only build evidence does
-          statement_hash: sha256:7c8498e59582
+          statement_hash: sha256:19acfbb2b494
+          reworded:
+            - hash: sha256:24cc94442cf4
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:7c8498e59582
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: panel.signoff.refine-requires-feedback
         origin: thread:n-0052
-        statement: Refine is the feedback - it is refused until the box says what should change, and the text is filed as a note thread on the rule while the session stays put.
+        statement: Refine is refused until the box says what should change, and the text is filed as a note thread on the rule while the session stays put.
+        because: Refine is the feedback.
         signoff: [eng, product]
         screens: [rule-detail]
         steps:
@@ -1152,11 +1542,19 @@ stories:
             - The empty refine is refused with the reason; nothing is recorded
             - The written refine files the note, records a refining result, and stays on the rule
             - The refine and its note arrive linked in the finished run record
-          statement_hash: sha256:a08fc4115ac6
+          statement_hash: sha256:1ccdf682f200
+          reworded:
+            - hash: sha256:cc9c4f5148e1
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:a08fc4115ac6
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: panel.signoff.approved-recorded
         origin: thread:n-0052
-        statement: Approve appends an `approved` result to the ledger, hash-stamped like a pass so it goes stale when the statement moves - and it never stands in for a role's signature, because approving a spec is not judging a build.
+        statement: Approve appends an `approved` result to the ledger, hash-stamped like a pass so it goes stale when the statement moves - and it never stands in for a role's signature.
+        because: Approving a spec is not judging a build.
         verify: [checks]
         signoff: [eng, product]
         screens: [rule-detail]
@@ -1170,4 +1568,11 @@ stories:
             - The rule still shows as pending and still owes a human verdict once built
             - Rewording the statement renders the approval as stale, asking for a fresh sign-off
             - Approving moves the session on to the next rule owing a verdict
-          statement_hash: sha256:2895f3d084e2
+          statement_hash: sha256:8d9981cdafc3
+          reworded:
+            - hash: sha256:9dc2fa81ced5
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:2895f3d084e2
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)

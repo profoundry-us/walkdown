@@ -50,6 +50,8 @@ function renderRuleDetail(blueprint, derived, ruleId, json) {
   ];
   console.log(`${row.rule} · ${verdictWord}`);
   console.log(`  ${row.statement ?? dim('(no statement)')}`);
+  if (row.because) console.log(`  ${dim('because')} ${row.because}`);
+  if (row.history) console.log(`  ${dim('history')} ${row.history}`);
   console.log(
     dim(
       `  story ${row.story} · verify ${row.verify.join(', ') || 'nothing'}` +
@@ -58,11 +60,15 @@ function renderRuleDetail(blueprint, derived, ruleId, json) {
     ),
   );
 
+  // given and when read as prose; then is the list of things to look for.
   if (row.steps) {
     console.log(`\n  ${dim('STEPS')}`);
-    for (const [phase, items] of Object.entries(row.steps))
-      for (const [i, step] of items.entries())
-        console.log(`    ${dim((i === 0 ? phase : '').padEnd(6))}${step}`);
+    for (const [phase, items] of Object.entries(row.steps)) {
+      if (phase === 'then') {
+        console.log(`    ${dim('then')}`);
+        for (const step of items) console.log(`      - ${step}`);
+      } else console.log(`    ${dim(phase.padEnd(6))}${items.join(' ')}`);
+    }
   }
 
   console.log(`\n  ${dim('EVIDENCE')}`);

@@ -9,7 +9,8 @@ stories:
     rules:
       - id: delivery.install.clone-is-the-install
         origin: prd
-        statement: walkdown runs from a clone with nothing installed - no package registry, no build step, no network - because the projects that most need their requirements made legible are the governed ones, where installing anything is a conversation rather than a command. A tool that can only arrive through a package manager cannot be evaluated by the person who needs it most.
+        statement: walkdown runs from a clone with nothing installed - no package registry, no build step, no network.
+        because: The projects that most need their requirements made legible are the governed ones, where installing anything is a conversation rather than a command; a tool that can only arrive through a package manager cannot be evaluated by the person who needs it most.
         verify: [checks]
         signoff: [eng, product]
         steps:
@@ -21,4 +22,11 @@ stories:
             - Every command works - init, where, lint, status, serve - and the panel and embed are served
             - Nothing walkdown ships at runtime resolves outside itself or Node's own library
             - Third-party code it carries is committed, attributed, and built from a named source rather than edited by hand
-          statement_hash: sha256:2b4abf917202
+          statement_hash: sha256:7ca49cecc74b
+          reworded:
+            - hash: sha256:ffbb7cd667c2
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:2b4abf917202
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)

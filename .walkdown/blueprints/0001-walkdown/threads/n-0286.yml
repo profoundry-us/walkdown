@@ -1,0 +1,19 @@
+id: n-0286
+kind: note
+author: topher
+via: agent
+created: 2026-09-13T21:57:07.170Z
+anchor:
+  rule: panel.rules.steps-not-an-appendix
+  screen: rule-detail
+status: open
+body: "Topher, 2026-09-13, on reviewing every rule statement: the statements
+  carry five kinds of content tangled together - the claim, the reason (because
+  / so that), the negative, what happened that produced the rule, and how the
+  code does it. Split them: `statement` is the claim alone (hashed with the
+  steps), `because` the reason and `history` what happened, neither hashed, so
+  rewording either never puts a rule back on the queue. Migrate all 128 in one
+  pass. The rule detail shows because and history under the statement, quieter
+  than it. And the steps layout: given and when read as prose beside their
+  label, only then is a bulleted list - dropped below its label rather than
+  beside it, since the then clauses are the long part."

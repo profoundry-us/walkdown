@@ -51,6 +51,8 @@ stories:
     rules:
       - id: checkout.guest.email-required
         statement: A guest must provide a valid email before payment is attempted.
+        because: A payment attempt with no way to reach the buyer is one nobody can follow up.
+        history: Two orders a week shipped to nobody before the field was required.   # optional
         verify: [checks]           # required evidence: checks | agent | human (all listed required)
         screens: [checkout-payment]
         environments: [local, staging]   # where this rule is verifiable (default: all)
@@ -94,9 +96,19 @@ stories:
   regenerated**. Rewording a statement keeps the ID. Splitting a rule creates new IDs and
   retires the old one (`superseded_by:`) rather than reusing it. Everything downstream —
   checks, threads, run results — keys off these IDs.
-- **The statement is canonical.** Steps are derived (usually agent-written) and carry
-  `statement_hash`. `walkdown lint` flags a rule whose hash no longer matches its
-  statement: the steps are stale and must be regenerated or re-approved.
+- **The statement is the claim, and nothing else.** One or two sentences saying what
+  is true of the built thing, present tense. The reason it was asked for goes in
+  **`because`**, and what happened that produced it - the bug, the reversal, the
+  afternoon it cost - in **`history`** (optional; the `origin:` thread usually carries
+  it, and a sentence here is for when the rule does not make sense at a glance
+  without one). Neither is hashed: rewording either never puts a rule back on the
+  queue. How the code does it belongs in a code comment, not in any of the three.
+  Lint warns on a statement carrying a "because".
+- **The hash pins the statement and the steps.** Steps carry `statement_hash`, computed
+  over both; `walkdown lint` flags a rule whose hash no longer matches: the wording moved
+  and every verdict on it reads stale. `walkdown hash --write` re-stamps it; add
+  `--reword "<why>"` when only the words changed, and the old hash is kept under
+  `steps.reworded` so the verdicts stand.
 - **`verify`** lists the evidence required to establish "done" — every listed type must
   have a passing latest result. Three evidence types:
   - `checks` — deterministic tests in the project's own suite
