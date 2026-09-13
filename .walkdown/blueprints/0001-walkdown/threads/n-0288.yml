@@ -1,0 +1,20 @@
+id: n-0288
+kind: note
+author: topher
+via: agent
+created: 2026-09-13T22:51:35.309Z
+anchor:
+  rule: threads.conversation.one-stream
+status: open
+body: "Markdown in thread bodies - investigated 2026-09-13, held. What the 664
+  messages use today: paragraphs (248), backticks (162), dash and numbered lists
+  (52), thread refs (176), rule ids (241), file paths (238), evidence keys
+  (123); no headings, bold or italic. All of it renders through one function,
+  MSG.body in lib/message-stream.js (escape, then link refs, pre-wrap).
+  Decision, Topher: hold the renderer for now; when it is built, use a VENDORED
+  library bundled through Rollup the way lit and yaml are - not a hand-written
+  subset - with sanitising in front of it, since bodies arrive from the browser.
+  And the existing threads are not rewritten: threads.conversation.append-only
+  makes editing 664 bodies an edit of the record, and render-time formatting
+  (lists, code spans, autolinked paths and evidence keys) gives the old bodies
+  the same reading without a byte on disk changing."
