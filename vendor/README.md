@@ -3,7 +3,7 @@
 Third-party code, committed rather than installed, so that **cloning walkdown
 is the whole install**.
 
-Two files, neither ever edited by hand:
+Three bundles, none ever edited by hand:
 
 - `yaml.js` — the [`yaml`][yaml] package, bundled by `npm run build:yaml`
   (`rollup.vendor.mjs`, which also explains why it is bundled from yaml's
@@ -12,6 +12,12 @@ Two files, neither ever edited by hand:
   (`rollup.lit.mjs`) from the curated entry `src/vendor-entries/lit.js`, so
   the bundle carries exactly what the panel uses. Terms in `LICENSE-lit`
   (BSD-3-Clause).
+- `markdown.js` — [`marked`][marked] and [`DOMPurify`][dompurify], bundled by
+  `npm run build:markdown` (`rollup.markdown.mjs`) from
+  `src/vendor-entries/markdown.js`. Thread bodies are markdown; marked parses
+  them and DOMPurify decides what of the result may reach the page, since a
+  body arrives from the browser. Terms in `LICENSE-marked` (MIT) and
+  `LICENSE-dompurify` (Apache-2.0 / MPL-2.0).
 
 ## Why
 
@@ -41,8 +47,12 @@ the right side of that trade.
 ## Terms
 
 `yaml` is ISC, by Eemeli Aro (`LICENSE`); `lit-html` is BSD-3-Clause, by
-Google (`LICENSE-lit`). Each licence file is copied verbatim, and each bundle
-carries a header pointing back here.
+Google (`LICENSE-lit`); `marked` is MIT (`LICENSE-marked`) and `DOMPurify` is
+Apache-2.0 or MPL-2.0 at your option, by Cure53 (`LICENSE-dompurify`). Each
+licence file is copied verbatim, and each bundle carries a header pointing
+back here.
 
 [yaml]: https://github.com/eemeli/yaml
 [lit]: https://lit.dev
+[marked]: https://marked.js.org
+[dompurify]: https://github.com/cure53/DOMPurify

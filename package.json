@@ -28,7 +28,7 @@
     "build:css": "tailwindcss -i styles/walkdown.css -o lib/viewer/walkdown.css --minify && cp lib/viewer/walkdown.css example/app/walkdown.css && cp lib/viewer/walkdown.css extension/walkdown.css",
     "watch:css": "tailwindcss -i styles/walkdown.css -o lib/viewer/walkdown.css --watch",
     "dev": "node tools/dev.mjs",
-    "prepack": "npm run build:js && npm run build:css && npm run build:yaml && npm run build:lit",
+    "prepack": "npm run build:js && npm run build:css && npm run build:yaml && npm run build:lit && npm run build:markdown",
     "build:ext": "cp lib/viewer/embed.js lib/viewer/panel.js extension/vendor/",
     "build": "npm run build:sync && npm run build:js && npm run build:icons && npm run build:css && npm run build:ext",
     "build:sync": "node tools/sync-phosphor.mjs",
@@ -42,7 +42,9 @@
     "check:format": "biome check .",
     "check:types": "tsc -p jsconfig.json",
     "build:lit": "rollup -c rollup.lit.mjs --silent",
-    "check:lit": "mkdir -p tmp/build && rollup -c rollup.lit.mjs --silent -o tmp/build/lit.built.js && diff -q tmp/build/lit.built.js vendor/lit.js"
+    "check:lit": "mkdir -p tmp/build && rollup -c rollup.lit.mjs --silent -o tmp/build/lit.built.js && diff -q tmp/build/lit.built.js vendor/lit.js",
+    "build:markdown": "rollup -c rollup.markdown.mjs --silent",
+    "check:markdown": "mkdir -p tmp/build && rollup -c rollup.markdown.mjs --silent -o tmp/build/markdown.built.js && diff -q tmp/build/markdown.built.js vendor/markdown.js"
   },
   "keywords": [
     "bdd",
@@ -62,7 +64,9 @@
     "@tailwindcss/cli": "^4.3.3",
     "@types/node": "^26.4.0",
     "daisyui": "^5.7.20",
+    "dompurify": "^3.4.15",
     "lit-html": "^3.3.3",
+    "marked": "^18.0.13",
     "rollup": "^4.63.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",

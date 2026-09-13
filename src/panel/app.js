@@ -2912,10 +2912,16 @@ function wireGlobals() {
    * one delegated listener at the root answers for whatever it prints.
    */
   D.host.addEventListener('click', (e) => {
-    const ref = e.target.closest?.('[data-thread-ref], [data-rule-ref], [data-open-thread]');
+    const ref = e.target.closest?.(
+      '[data-thread-ref], [data-rule-ref], [data-open-thread], [data-evidence-ref]',
+    );
     if (!ref) return;
     e.stopPropagation();
+    e.preventDefault();
     if (ref.dataset.ruleRef) return open(ref.dataset.ruleRef);
+    // An evidence key in a body opens the file, the way the detail's own
+    // evidence rows do - the server resolves the key for this machine.
+    if (ref.dataset.evidenceRef) return openEvidence([ref.dataset.evidenceRef]);
     // The replies line a card draws is MSG markup too, and it is the door
     // into a thread listed under a rule.
     if (ref.dataset.openThread) return openThreadView(ref.dataset.openThread);

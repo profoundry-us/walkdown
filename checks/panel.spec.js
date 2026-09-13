@@ -781,6 +781,65 @@ test('threads have a view of their own, ended ones included', {
   await expect(list).toBeVisible();
 });
 
+/*
+ * Markdown, sanitised. The body below is what a hostile or careless author
+ * might type: a list and a code span (should render), a web link (should be
+ * a link), a javascript: link and an image with a handler (must not be),
+ * a heading (not on the list), and a thread id both in prose and in code.
+ */
+test('a message is read as the markdown it was written in, and nothing else reaches the page', {
+  tag: '@rule:threads.conversation.written-in-markdown',
+}, async ({ page }) => {
+  const body = [
+    'Two things, and a `code span with n-0001 inside`:',
+    '',
+    '- first, see n-0001',
+    '- second, [the docs](https://example.com/docs)',
+    '',
+    '# not a heading',
+    '',
+    '[nope](javascript:alert(1)) <img src=x onerror="alert(1)"> <script>alert(1)</script>',
+    '',
+    'plain line one',
+    'plain line two',
+  ].join('\n');
+  const res = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
+    data: { kind: 'note', body, anchor: { rule: 'threads.conversation.written-in-markdown' } },
+  });
+  expect(res.ok()).toBeTruthy();
+  const { id } = await res.json();
+
+  await page.goto(fixtureFor({ bp: 'blueprint' }));
+  await expect(page.getByTestId('panel.bar')).toBeVisible();
+  await page.waitForLoadState('networkidle');
+  await page.getByTestId('panel.tabs').getByText(/Threads/).click();
+  await page.getByTestId('panel.threads-list').locator(`[data-open-thread="${id}"]`).first().click({ position: { x: 8, y: 6 } });
+  const text = page.getByTestId('thread.body').locator('.wd-text').first();
+  await expect(text).toBeVisible();
+
+  // Structure, not the characters that asked for it.
+  await expect(text.locator('ul > li')).toHaveCount(2);
+  await expect(text.locator('code').first()).toHaveText('code span with n-0001 inside');
+  await expect(text).not.toContainText('- first');
+  await expect(text).not.toContainText('`code');
+  // A heading is not on the list, so the marker stays as text - a reply is not a document.
+  await expect(text.locator('h1, h2, h3')).toHaveCount(0);
+  // The web link is a link that leaves the pane; the javascript: one is not a link at all.
+  const docs = text.locator('a[href="https://example.com/docs"]');
+  await expect(docs).toHaveText('the docs');
+  await expect(docs).toHaveAttribute('target', '_blank');
+  await expect(text.locator('a[href^="javascript"]')).toHaveCount(0);
+  // Nothing runs, loads or styles.
+  await expect(text.locator('img, script, style')).toHaveCount(0);
+  expect(await text.innerHTML()).not.toMatch(/onerror/);
+  // The id in prose is a link; the same id inside the code span is plain.
+  await expect(text.locator('li [data-thread-ref="n-0001"]')).toHaveCount(1);
+  await expect(text.locator('code [data-thread-ref]')).toHaveCount(0);
+  // And the plain lines are still two lines.
+  const plain = await text.locator('p').last().innerHTML();
+  expect(plain).toMatch(/plain line one<br>\s*plain line two/);
+});
+
 test('the screen picker opens over the design, not underneath it', {
   tag: '@rule:panel.dock.toolbar',
 }, async ({ page }) => {

@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-09-13T22-57-14Z-local-01",
+  "created": "2026-09-13T22:57:14Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "54a109a-dirty",
+  "tree_hash": "sha256:093d1faf5fa8",
+  "spec_hash": "sha256:a6e8d6448056",
+  "results": [
+    {
+      "rule": "threads.conversation.written-in-markdown",
+      "status": "fail",
+      "statement_hash": "sha256:b8ec06681f9a",
+      "duration_ms": 2381,
+      "checks": [
+        "checks/panel.spec.js:790"
+      ],
+      "evidence": [
+        "runs/evidence/2026-09-13T22-57-14Z/panel-a-message-is-read-as-d6533-thing-else-reaches-the-page-test-failed-1.png",
+        "runs/evidence/2026-09-13T22-57-14Z/panel-a-message-is-read-as-d6533-thing-else-reaches-the-page-error-context.md"
+      ]
+    }
+  ]
+}

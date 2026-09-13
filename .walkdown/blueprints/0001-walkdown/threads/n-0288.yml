@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-13T22:51:35.309Z
 anchor:
   rule: threads.conversation.one-stream
-status: open
+status: addressed
 body: "Markdown in thread bodies - investigated 2026-09-13, held. What the 664
   messages use today: paragraphs (248), backticks (162), dash and numbered lists
   (52), thread refs (176), rule ids (241), file paths (238), evidence keys
@@ -18,3 +18,22 @@ body: "Markdown in thread bodies - investigated 2026-09-13, held. What the 664
   makes editing 664 bodies an edit of the record, and render-time formatting
   (lists, code spans, autolinked paths and evidence keys) gives the old bodies
   the same reading without a byte on disk changing."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-13T23:00:23Z
+    body: 'Built (Topher: "build the renderer" - the hold was autocorrect).
+      vendor/markdown.js bundles marked + DOMPurify from
+      src/vendor-entries/markdown.js (rollup.markdown.mjs, build:markdown /
+      check:markdown, Highball check, licences and README beside lit and yaml).
+      MSG.body in lib/message-stream.js parses the body as GFM with line breaks
+      kept, sanitises to a closed list (p, br, em, strong, code, pre, lists,
+      blockquote, a with http(s) only, del, hr - no headings), then links thread
+      ids, rule ids and evidence keys on text nodes only, so an id inside a code
+      span stays as typed; an evidence key opens the file the way the detail
+      rows do. Node gets escaped text back, since there is no document there.
+      Rule threads.conversation.written-in-markdown with a check that files a
+      hostile body through the API and reads it back rendered. The embed grew
+      from 68K to 257K carrying the bundle - the cost of vendoring, said out
+      loud. Existing threads untouched; they read better because their lists and
+      backticks now render.'

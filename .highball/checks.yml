@@ -89,6 +89,11 @@ checks:
     run: npm run --silent check:lit
     fast: true
 
+  - id: vendor-markdown-built
+    name: The vendored markdown bundle matches its source
+    run: npm run --silent check:markdown
+    fast: true
+
   # And the extension carries its own copy of the two viewer files. Editing
   # lib/viewer without rebuilding leaves the extension a version behind, which
   # shows up as behaviour that works in one delivery and not the other — the

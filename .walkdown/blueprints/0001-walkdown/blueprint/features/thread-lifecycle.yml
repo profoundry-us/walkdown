@@ -141,6 +141,27 @@ stories:
             - hash: sha256:6b387227a957
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+      - id: threads.conversation.written-in-markdown
+        origin: thread:n-0288
+        statement: A message is written in markdown and read as it was written - paragraphs, lists, code spans and blocks, emphasis, quotes and links to the web - and nothing else in it reaches the page. Thread ids, rule ids and evidence keys in the prose are still the links they were, and inside a code span they are left as typed.
+        because: The bodies were already written that way - lists, backticks, paragraphs - and read as one pre-wrapped block; rendering what is there makes 664 messages easier to read without a byte on disk changing. And a body arrives from the browser, so what it may contain is a closed list.
+        verify: [checks]
+        signoff: [eng, product]
+        screens: [thread-panel]
+        steps:
+          given:
+            - A thread whose body carries a list, a code span, a link and raw HTML that would run
+          when:
+            - Open it on screen `thread-panel` and read anchor `thread.body`
+          then:
+            - The list is a list and the code span is code, not the markdown characters that made them
+            - A link to the web opens in a new tab; a link to anything else is not a link
+            - The raw HTML is text or gone - nothing in a body can run, load or style
+            - A heading is not offered - a reply is not a document
+            - A thread id in the prose is still a link to that thread, and the same id inside a code span is plain text
+            - Plain text with line breaks reads as it did before - one line per line, no markup needed
+          statement_hash: sha256:b8ec06681f9a
+
       - id: threads.conversation.composer-stays
         origin: walkdown
         statement: The reply box stands at the bottom of an open thread and never moves - Enter sends and Shift-Enter breaks the line, the message appears before the server answers, and the reply is attributed to whoever you are recording as rather than to a name typed again.
