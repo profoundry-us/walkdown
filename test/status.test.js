@@ -19,7 +19,7 @@ const STATEMENT = 'The visitor can do the thing.';
 // a recorded statement hash to walkdown's stale-check scanner
 const BOGUS_HASH = 'sha256:' + '0'.repeat(12);
 
-function blueprint({ runs = [], threads = [], verify = ['checks'], environments, targets } = {}) {
+function blueprint({ runs = [], threads = [], verify = ['checks'], environments, targets, steps } = {}) {
   return {
     config: { runner: { targets: targets ?? { local: {}, staging: {} } } },
     features: [
@@ -35,6 +35,7 @@ function blueprint({ runs = [], threads = [], verify = ['checks'], environments,
                   id: 'demo.main.thing',
                   statement: STATEMENT,
                   verify,
+                  ...(steps && { steps }),
                   ...(environments && { environments }),
                 },
               ],
@@ -107,6 +108,20 @@ test('a pass with an outdated statement_hash renders stale, not passing @rule:st
   );
   assert.equal(rows[0].cells.local.state, 'stale');
   assert.equal(rows[0].verdict, 'pending');
+});
+
+/*
+ * A person said the words changed and the rule did not (`walkdown hash
+ * --write --reword`): the hash the verdict carries sits in steps.reworded,
+ * and the verdict is current. Any other old hash is still stale.
+ */
+test('a pass against a hash the rule lists as reworded is current, not stale @rule:status.derived.stale-never-passes', () => {
+  const OLD = 'sha256:' + 'a'.repeat(12);
+  const steps = { given: ['x'], when: ['y'], then: ['z'], reworded: [{ hash: OLD, at: '2026-09-13', why: 'plainer' }] };
+  const kept = deriveStatus(blueprint({ steps, runs: [checksRun('2026-01-01', 'local', 'pass', OLD)] }));
+  assert.equal(kept.rows[0].cells.local.state, 'pass');
+  const other = deriveStatus(blueprint({ steps, runs: [checksRun('2026-01-01', 'local', 'pass', BOGUS_HASH)] }));
+  assert.equal(other.rows[0].cells.local.state, 'stale');
 });
 
 test('environments scope targets; agent pass does not satisfy human @rule:status.derived.human-tier-distinct', () => {

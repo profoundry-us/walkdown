@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-09-13T20-58-01Z-local-01",
+  "created": "2026-09-13T20:58:01Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "b3a0002-dirty",
+  "tree_hash": "sha256:df4c8d443027",
+  "spec_hash": "sha256:c2314e048a40",
+  "results": [
+    {
+      "rule": "status.derived.stale-never-passes",
+      "status": "pass",
+      "statement_hash": "sha256:56103ee8cbd4",
+      "duration_ms": 2,
+      "checks": [
+        "test/status.test.js:105",
+        "test/status.test.js:118"
+      ]
+    }
+  ]
+}

@@ -24,7 +24,7 @@ stories:
             - The pin draws at that spot, and follows the element when the element moves, because the spot is replayed against wherever the element is now
             - The anchor is the optional part - a spot with no anchored element under it is still a pin, kept by position alone
             - Later visitors see the pin on that element wherever it renders on that surface - the prototype and the app carry the same anchor ids, and a pin placed on one never draws on the other
-          statement_hash: sha256:c59f178ebedf
+          statement_hash: sha256:56bdca60495d
 
       - id: embed.pin.right-project
         origin: thread:n-0012
@@ -42,7 +42,7 @@ stories:
             - The panel tells the embed in the frame which blueprint is open, because there is no script tag on somebody else's page to carry one
             - The server never re-routes a write by looking the address up and overriding what the caller said - several blueprints may claim an address, and choosing between them at a door is the server deciding whose page you are on
             - A tag on the page naming a blueprint does not redirect a write - the panel has one open, and that is the thing being reviewed; a tag is a fact about the page, goes stale when the blueprint moves, and used to send a reply to a blueprint where the pin it answered did not exist
-          statement_hash: sha256:8d8ef265ac6d
+          statement_hash: sha256:3609f1573878
 
       - id: embed.pin.both-surfaces
         origin: thread:n-0003
@@ -59,7 +59,7 @@ stories:
             - The pin form opens and the note is anchored to that element id
             - The saved note records surface app; a prototype pin records surface prototype
             - Both pins show on the rule, distinguished by the surface they came from
-          statement_hash: sha256:77fdab028ac1
+          statement_hash: sha256:4c64071b699d
 
       - id: embed.pin.follows-the-visible-surface
         origin: thread:n-0025
@@ -77,7 +77,7 @@ stories:
             - The control says which surface a pin would land on before you place one
             - Pins already on that screen show on the surface they were placed on
             - A surface with no walkdown running inside it cannot be pinned, and says so rather than letting the pin fall through to the page underneath
-          statement_hash: sha256:005ee8fa7a1e
+          statement_hash: sha256:771cd68f690f
 
       - id: embed.pin.own-skin
         origin: thread:n-0027
@@ -94,7 +94,7 @@ stories:
             - They wear the same blueprint theme as the panel, from the same stylesheet, not a hand-rolled lookalike
             - The host page's own buttons, headings and form controls are untouched
             - Everything with a surface of its own lives in a shadow root; only what must style the host's own elements - what a pinnable thing looks like under the cursor - is added to the page
-          statement_hash: sha256:1f3400a09629
+          statement_hash: sha256:4e1bdc231fd0
 
       - id: embed.pin.viewport-recorded
         origin: thread:n-0005
@@ -110,7 +110,7 @@ stories:
           then:
             - The saved note records the viewport name and width in use
             - The panel shows that viewport alongside the note's other provenance
-          statement_hash: sha256:6971846eb2cc
+          statement_hash: sha256:7a12fb0d24f7
 
       - id: embed.pin.settled-pins-leave
         origin: walkdown
@@ -126,7 +126,7 @@ stories:
             - The pin leaves the surface immediately, on both the page and the ghosted copy of the other one
             - Nothing else about the page moves, and the other pins stay where they are
             - The thread itself is not gone - it is in the ledger and reachable, just no longer standing on the page
-          statement_hash: sha256:c82607d3ac2e
+          statement_hash: sha256:9e777d797a94
 
       - id: embed.pin.tooltip-says-what-it-is
         origin: walkdown
@@ -145,7 +145,7 @@ stories:
             - It shows the start of the note, truncated - a tooltip that has to be read is one nobody reads
             - It opens away from whatever edge the pin is near - down near the top, up near the bottom, and towards the side with the room - so it is never half off the surface
             - Clicking it still opens the thread's own screen, wherever you were
-          statement_hash: sha256:50dfb40b9f83
+          statement_hash: sha256:cbaf0007bc64
 
       - id: embed.pin.form-at-the-spot
         origin: walkdown
@@ -162,7 +162,7 @@ stories:
             - Near the bottom it opens above the spot instead, so it is never half off the surface, and it never runs off the side
             - A placeholder pin marks the spot the whole time the form is open, and changes its mark when the form switches between note and question
             - Cancelling or pressing Escape takes the placeholder with the form; filing replaces it with the real pin in the same place
-          statement_hash: sha256:5bb13509dc3b
+          statement_hash: sha256:19fb19983eaf
 
       - id: embed.pin.form-is-chrome
         origin: thread:n-0004
@@ -177,7 +177,7 @@ stories:
           then:
             - The cursor is a pointer over controls and a caret over text, never the crosshair
             - Clicking a control acts on the form and never places another pin
-          statement_hash: sha256:cac6da4be24f
+          statement_hash: sha256:67822b8df3f5
 
       - id: embed.pin.surface-coordinates
         origin: thread:n-0005
@@ -193,7 +193,7 @@ stories:
           then:
             - The pin stays on the same spot of the surface it was placed on
             - The recorded position is unchanged by any of those actions
-          statement_hash: sha256:7d33bd0c80b2
+          statement_hash: sha256:fa24e63fbe8b
 
       - id: embed.pin.coordinate-fallback
         origin: thread:n-0001
@@ -209,7 +209,7 @@ stories:
           then:
             - The pin form opens at the click point
             - The saved note records the screen and position; later visitors see the pin at that spot
-          statement_hash: sha256:3c6fb006c94b
+          statement_hash: sha256:7899d763ed1f
 
   - id: embed.threads
     title: A thread you can read at a glance
@@ -229,7 +229,7 @@ stories:
             - Anchor `thread.body` is the most prominent text in the popover
             - Anchor `thread.provenance` fits on one line and never pushes the note below the fold
             - A long reply history collapses behind a count rather than growing the popover
-          statement_hash: sha256:870249ed1a7a
+          statement_hash: sha256:b4e6177d8153
 
       - id: embed.threads.actions-in-context
         origin: walkdown
@@ -245,4 +245,4 @@ stories:
             - The reply box in anchor `thread.reply` reads simply as a reply box
             - Choosing waive or reopen asks for the reason then; other actions never mention it
             - Actions a person may not take are absent, not shown and refused
-          statement_hash: sha256:9878eb8459f2
+          statement_hash: sha256:a473c0119449

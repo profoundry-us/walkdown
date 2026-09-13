@@ -21,23 +21,26 @@ stories:
             - Later is decided by the time the run recorded, not by file order or the order they were read
             - A verdict on one target says nothing about another - each target carries its own latest
             - A run carrying verdicts but no date fills no cell at all, because nothing can order it
-          statement_hash: sha256:fa42dccb0338
+          statement_hash: sha256:86b6383b8db6
 
       - id: status.derived.stale-never-passes
         origin: prd
-        statement: A pass recorded against an older wording of the rule renders as stale, never as passing.
+        statement: A pass recorded against an older wording of the rule - its statement or its steps - renders as stale, never as passing, unless a person declared the rewording one of words and not of meaning, in which case the old wording still names the rule and the pass stands.
         verify: [checks]
         steps:
           given:
-            - A pass recorded against a statement that has since been reworded
+            - A pass recorded against a statement or steps that have since changed
           when:
             - Status is derived
           then:
             - The cell reads stale rather than passing - the words that were judged are not the words on the page
+            - A step changing stales it the same as the statement changing - the steps are what was driven
             - Stale is never counted as verified anywhere the report adds up
             - A fresh verdict against the current wording clears it
             - "The old run is untouched: it still says what it said, about the wording it said it about"
-          statement_hash: sha256:9b16ab78cd04
+            - A rewording declared as such (`walkdown hash --write --reword "<why>"`) keeps the old hash on the rule with when and why, and a pass against it stays a pass - better English is not a new rule
+            - A hash from before the steps were part of it still matches while the statement holds, so the change itself stales nothing
+          statement_hash: sha256:56103ee8cbd4
 
       - id: status.derived.verdict-belongs-to-a-place
         origin: thread:q-0070
@@ -52,7 +55,7 @@ stories:
             - Every rule verified only at the old address reads as never verified, not as passing
             - No run file is edited or deleted - the ledger stays append-only
             - Pointing the target back restores the earlier evidence unchanged
-          statement_hash: sha256:da085af63ed8
+          statement_hash: sha256:63d6c64e3b91
 
       - id: status.derived.addressless-runs-count
         origin: thread:q-0070
@@ -65,7 +68,7 @@ stories:
             - Status is derived for a target that has an address configured
           then:
             - That run still fills its cells rather than being discarded
-          statement_hash: sha256:f14146c27ed9
+          statement_hash: sha256:14004462b9bd
 
       - id: status.derived.unbacked-pass-goes-stale
         origin: thread:q-0070
@@ -80,7 +83,7 @@ stories:
             - The cell reads stale, not passing
             - Matching is by rule id, so a check moving down its file changes nothing
             - A caller that supplies no inventory of checks sees the older behaviour, since silence is not proof the suite is empty
-          statement_hash: sha256:ed0482e00322
+          statement_hash: sha256:dc38db74790f
 
       - id: status.derived.human-tier-distinct
         origin: prd
@@ -95,7 +98,7 @@ stories:
             - The rule's verdict is still pending - evidence is not acceptance
             - Every role in the sign-off list reads as not yet signed, however green the tiers are
             - An agent's run never fills a role's signature, whoever it was recorded under
-          statement_hash: sha256:88708d3d86fa
+          statement_hash: sha256:06dfc2348400
 
   - id: status.evidence
     title: Every tier is assumed, and skipping one is a written decision
@@ -114,7 +117,7 @@ stories:
             - The agent tier is required of it
             - The checks tier is not, because a check must be authored
             - An excuse filed against the agent tier removes it, and nothing else does
-          statement_hash: sha256:21038677e83f
+          statement_hash: sha256:3e43f70d538d
       - id: status.evidence.excuse-says-why
         origin: walkdown
         statement: An excused tier shows its reason where its verdict would have been, in every report - never as an empty cell - because a tier nobody asked for and a tier somebody decided against look identical otherwise, and only one of them is a decision anyone can argue with.
@@ -127,7 +130,7 @@ stories:
           then:
             - The reason stands in the row that tier's evidence would have filled
             - It is legible as a decision, not as an absence
-          statement_hash: sha256:6023a6db07cd
+          statement_hash: sha256:84676ca40c48
       - id: status.evidence.excuse-must-argue
         origin: walkdown
         statement: An excuse is refused as thin when it is a shrug - lint warns on a reason shorter than a sentence, on one filed against something that is not a tier, and on a rule that excuses both tiers at once, the last being legitimate but never accidental.
@@ -141,7 +144,7 @@ stories:
             - "A reason shorter than a sentence is named as thin: an excuse nobody can argue with is not an excuse"
             - An excuse filed against something that is not a tier is an error - it removes nothing while reading as though it did
             - A rule excusing both tiers is flagged though it may be right, because then nothing verifies it but a signature and that must be a decision somebody made
-          statement_hash: sha256:d4310da96c28
+          statement_hash: sha256:09d778ea6920
 
   - id: status.acceptance
     title: Acceptance is a set of people, not a kind of evidence
@@ -161,7 +164,7 @@ stories:
             - "The file that omits eng is flagged: it describes a rule that does not exist"
             - An empty list is flagged too, because omitting the field already means [eng]
             - The report is never silently repaired and forgotten - the reader of the file is the one being misled
-          statement_hash: sha256:34a8a5bebfd8
+          statement_hash: sha256:1e52a4780f20
       - id: status.acceptance.role-comes-from-the-run
         origin: walkdown
         statement: Acceptance is derived per role from the roles the run was recorded under, never from whoever the signer is today - people change teams and a signature does not stop meaning what it meant - and a run recorded before roles existed reads as engineering's, because the person signing a walkdown was historically the developer who built it.
@@ -175,7 +178,7 @@ stories:
             - The first counts only for the role it named
             - The second counts for engineering
             - Changing the signer's roles today moves neither
-          statement_hash: sha256:4841808f1a8b
+          statement_hash: sha256:71c38cd6f904
       - id: status.acceptance.approval-covers-only-the-unbuilt
         origin: walkdown
         statement: A role's approval of the wording discharges its queue while the rule is unbuilt, and stops covering it the moment the ledger holds a build to judge - approving a spec is not judging a build.
@@ -190,7 +193,7 @@ stories:
             - "The rule still reads as unbuilt: approving a spec is not evidence that anything was built"
             - The moment the ledger holds a build to judge, the approval stops covering it and the role is queued again
             - Rewording the statement makes an approval stale, like any other verdict
-          statement_hash: sha256:178e50e23abc
+          statement_hash: sha256:917ace17580a
       - id: status.acceptance.sent-back-is-a-fail
         origin: walkdown
         statement: A signer who looked and said not yet fails the rule's verdict rather than leaving it pending, and is not queued back to themselves - what the rule owes them is a fix, not another look.
@@ -204,7 +207,7 @@ stories:
             - The rule's verdict is fail rather than pending - somebody looked and said not yet
             - "It is not queued back to the signer who sent it: what it owes them is a fix, not another look"
             - A fresh verdict is what clears it, so the fix is what moves the rule
-          statement_hash: sha256:e4eefb4e58a4
+          statement_hash: sha256:5219b52da8b6
       - id: status.acceptance.verdict-needs-every-role
         origin: walkdown
         statement: A rule passes only when every evidence tier it asks for holds a current pass and every role it names has signed - one role's signature never speaks for another's, and the human walkdown is not counted a second time as a tier.
@@ -217,7 +220,7 @@ stories:
           then:
             - The verdict is pending, not pass
             - It turns pass when the second signs, and nothing else supplies that signature
-          statement_hash: sha256:1a9be6432a5b
+          statement_hash: sha256:8cc573479687
       - id: status.acceptance.roles-recorded-on-the-run
         origin: walkdown
         statement: A recorded walkdown carries the roles its signer was acting in; a role outside the vocabulary is refused rather than filed, because a role nothing recognises is a signature that satisfies nothing while looking exactly like one - and an emptied list is recorded as none stated rather than as a distinction the ledger does not honour.
@@ -231,7 +234,7 @@ stories:
             - The run carries the roles, not the signer's current profile
             - A role the vocabulary does not know is refused
             - An empty list is recorded as stated, not dropped
-          statement_hash: sha256:e0e862978414
+          statement_hash: sha256:03dad36cc0d8
 
       - id: status.acceptance.signature-names-its-signer
         origin: thread:q-0225
@@ -250,7 +253,7 @@ stories:
             - The driver stays the run's actor, so who typed it is on the record without a field of its own
             - A run whose signers are all the actor is exactly the ordinary case, and reads as one
             - A record written before signatures existed is read as its actor signing each role it named
-          statement_hash: sha256:d1c11a7e70ed
+          statement_hash: sha256:8abea3348e9f
 
   - id: status.sweep
     title: Asking for the whole thing to be judged again
@@ -271,7 +274,7 @@ stories:
             - A rule judged again after the sweep reads pass once more
             - The superseded run files are untouched - the ledger stays append-only
             - Tiers the sweep does not name are unaffected
-          statement_hash: sha256:b0073c10a38b
+          statement_hash: sha256:dcee39004281
 
       - id: status.sweep.deliberate
         origin: walkdown
@@ -286,7 +289,7 @@ stories:
             - No sweep is written by any of them
             - Declaring one requires the command, and the command requires a reason
             - The reason is kept with the marker, so a later reader knows what prompted it
-          statement_hash: sha256:5b9d65fba614
+          statement_hash: sha256:06bb801f2628
 
       - id: status.sweep.says-what-is-left
         origin: walkdown
@@ -301,7 +304,7 @@ stories:
             - The report names the sweep, when it was declared and why
             - It gives the count judged since, and the count still owed
             - The owed rules are listed as work, not merely counted
-          statement_hash: sha256:108b3015acc9
+          statement_hash: sha256:b4f0bf714cb6
 
   - id: status.attention
     title: The board says who is blocking what
@@ -321,7 +324,7 @@ stories:
             - Agents get address, incorporate and cover items
             - "A cover item is a rule demanding checks while no check claims it: an agent writes the check, and it is never a person's to judge"
             - Every item names who is blocked, so nothing sits in both queues at once
-          statement_hash: sha256:d51f57ea2c48
+          statement_hash: sha256:5a12308a4617
 
       - id: status.attention.names-the-role
         origin: walkdown
@@ -336,7 +339,7 @@ stories:
             - Each judge item names the role it waits on, not merely that a person is owed something
             - Two roles owed on one rule are two items, so neither reads as somebody else's job
             - The word it names is the role from the sign-off list, so the queue and the rule cannot disagree
-          statement_hash: sha256:7320bf5dc8fd
+          statement_hash: sha256:fe9626ecbb8c
 
   - id: status.attribution
     title: A record says whose judgment it was, and keeps saying so
@@ -355,4 +358,4 @@ stories:
             - What is written down is the username; the full name is shown and never stored
             - The identity offered names every handle that machine has signed with - the username, the operating system name, and the full name
             - A record already written under a full name is still attributed to that person, and is never edited to match the newer shape
-          statement_hash: sha256:14fb4e39b993
+          statement_hash: sha256:db434f923352

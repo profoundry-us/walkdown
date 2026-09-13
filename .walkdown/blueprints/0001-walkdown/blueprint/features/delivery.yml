@@ -21,4 +21,4 @@ stories:
             - Every command works - init, where, lint, status, serve - and the panel and embed are served
             - Nothing walkdown ships at runtime resolves outside itself or Node's own library
             - Third-party code it carries is committed, attributed, and built from a named source rather than edited by hand
-          statement_hash: sha256:ffbb7cd667c2
+          statement_hash: sha256:2b4abf917202

@@ -22,7 +22,7 @@ stories:
             - A thread that has ended stops clearing it - a request is open work or it is nothing
             - "A proposal sketch is not a request: a drawing nobody asked design for routes nothing"
             - A retired screen is exempt, because it describes something we stopped meaning
-          statement_hash: sha256:1d8bdc7a98b6
+          statement_hash: sha256:0c30b51be702
 
   - id: ownership.authoring
     title: A rule is written so it can be built from
@@ -42,7 +42,7 @@ stories:
             - A rule whose steps are present is silent, whatever else is true of it
             - "A retired rule is exempt: it describes something we stopped meaning, and owes nothing but an id that still resolves"
             - The error says why - a check is built from the steps - so the fix is obvious to whoever reads it
-          statement_hash: sha256:a0e7cc9e7139
+          statement_hash: sha256:511aa1c28355
 
   - id: ownership.writes
     title: The server writes specification, never implementation
@@ -62,7 +62,7 @@ stories:
             - Everything that changed on disk is under the resolved threads, drafts or runs directories
             - Nothing under features, the storyboard, the prototype root, source or checks moved by a byte
             - The one module every write passes through names the author policy once, so a new writer cannot re-invent it
-          statement_hash: sha256:a966a60dc9bc
+          statement_hash: sha256:67ee12c8ddd0
 
   - id: ownership.evidence
     title: A check is evidence only for what it actually exercises

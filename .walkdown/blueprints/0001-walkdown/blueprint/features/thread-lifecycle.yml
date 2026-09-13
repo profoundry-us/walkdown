@@ -18,7 +18,7 @@ stories:
             - A transition not in that flow is attempted (e.g. open straight to verified)
           then:
             - The mutation is rejected with the illegal transition named, and the file is unchanged
-          statement_hash: sha256:102a0b235d5a
+          statement_hash: sha256:733b7e7f8958
 
       - id: threads.lifecycle.claim-never-accept
         origin: prd
@@ -33,7 +33,7 @@ stories:
             - Each is rejected and the thread is unchanged - work can be claimed on somebody's behalf, and accepted only by them
             - The refusal says where to say who you are, and never fills the gap with a login name
             - The name is compared as written, case folded and trimmed - this is an agent declaring itself, not authentication, so a confusable spelling is not chased and "the-agent", "agents" and "claude" stay accepted (q-0218)
-          statement_hash: sha256:482531dc241f
+          statement_hash: sha256:7ea67873e7a5
 
       - id: threads.lifecycle.acts-for-a-person
         origin: thread:n-0139
@@ -49,7 +49,7 @@ stories:
             - The record carries that person as the author, and the agent as the provenance beside it
             - The report names both, so a reader can tell a sentence a person wrote from one a machine did
             - No argument and no environment variable can name somebody else
-          statement_hash: sha256:6790e9b3474c
+          statement_hash: sha256:0306cfdcd747
 
       - id: threads.lifecycle.reasoned-endings
         origin: prd
@@ -64,7 +64,7 @@ stories:
             - The transition is attempted without a reason
           then:
             - It is rejected; with a reason, the reason is appended as a reply and waived_by records the person
-          statement_hash: sha256:24591753abaa
+          statement_hash: sha256:e93d45c639b7
 
       - id: threads.lifecycle.says-what-it-did
         origin: walkdown
@@ -80,7 +80,7 @@ stories:
             - A reply with no transition says the status did not move, rather than staying silent and letting a reader assume it did
             - Reading a thread with no flags still prints the whole conversation - reading is a different ask from changing
             - A refused change says why on the error stream and exits non-zero, so a loop over several threads can stop on the first one rather than plunging on
-          statement_hash: sha256:224b3a652a3a
+          statement_hash: sha256:0c1f3dff50e4
 
   - id: threads.conversation
     title: A thread reads as a conversation
@@ -104,7 +104,7 @@ stories:
             - Line breaks written into a message survive, and a day boundary is drawn between messages
             - The two deliveries render a thread the same way, from one shared implementation rather than two lookalikes
             - Thread and rule ids written inside a message are links to the thing they name
-          statement_hash: sha256:e58134b3796f
+          statement_hash: sha256:6b387227a957
       - id: threads.conversation.composer-stays
         origin: walkdown
         statement: The reply box stands at the bottom of an open thread and never moves - Enter sends and Shift-Enter breaks the line, the message appears before the server answers, and the reply is attributed to whoever you are recording as rather than to a name typed again.
@@ -120,7 +120,7 @@ stories:
             - A refused reply is marked as not sent and the text comes back, so nothing written is lost
             - The box asks for no name - it says who you are recording as, and that link leads to Settings
             - Typing survives a repaint - the caret is where it was
-          statement_hash: sha256:fc8772c1687a
+          statement_hash: sha256:3559d463e994
       - id: threads.conversation.new-since-you-looked
         origin: walkdown
         statement: A thread remembers where your reading stopped, marking what arrived since as new, so returning to a conversation the agent has added to shows what to read rather than asking you to find it.
@@ -136,7 +136,7 @@ stories:
             - Opening it draws a line above the first message you have not seen, and the line stays put while you read
             - Your own reply is never marked new to you
             - The mark is remembered per blueprint, and survives a reload
-          statement_hash: sha256:e3e890cf2091
+          statement_hash: sha256:4dce0214cbdd
       - id: threads.conversation.append-only
         origin: walkdown
         statement: A conversation is append-only - messages cannot be edited or deleted, there are no reactions standing in for a verdict, and a thread that reached a terminal state offers no way back - because a thread is the record of what was said, and the ledger is where judgment is recorded.
@@ -152,7 +152,7 @@ stories:
             - Nothing offers a reaction that would mean addressed or approved without recording it
             - The ended thread shows how it ended and by whom, and offers no reopen, because the lifecycle has none
             - Replying to an ended thread is still possible - the record continues, the state does not
-          statement_hash: sha256:06a879b1032c
+          statement_hash: sha256:f9bd0d576c3f
 
       - id: threads.conversation.thread-is-a-screen
         origin: walkdown
@@ -171,4 +171,4 @@ stories:
             - The screen is never a dead end - a thread that is gone still leaves the way back
             - The surface under review does not move - reading a conversation is not a walkdown step
             - A pin clicked on the page opens the same screen, wherever you were
-          statement_hash: sha256:9971d7aaef65
+          statement_hash: sha256:bfa90fd6ebab

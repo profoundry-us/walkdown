@@ -111,7 +111,7 @@ export function run(args) {
   const created = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
   const stamp = created.replaceAll(':', '-');
   const evidenceKey = `runs/evidence/${stamp}/`;
-  const hash = rule.statement ? formatHash(rule.statement) : null;
+  const hash = rule.statement ? formatHash(rule) : null;
 
   /*
    * The record, with everything a hand-written one used to lose already in it.
@@ -256,7 +256,7 @@ export function run(args) {
       .split('\n')
       .map((l) => `  ${l}`),
     ...(hash
-      ? ['', `  The statement_hash above holds only while the statement reads exactly as printed.`]
+      ? ['', `  The statement_hash above holds only while the statement and steps read exactly as printed.`]
       : []),
     '',
     'GOVERNANCE',

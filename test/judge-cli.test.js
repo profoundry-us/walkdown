@@ -23,6 +23,16 @@ const root = mkdtempSync(join(tmpdir(), 'walkdown-judge-cli-'));
 after(() => rmSync(root, { recursive: true, force: true }));
 
 const STATEMENT = 'Submitting the form lands the visitor on the done screen.';
+// The hash the prompt stamps pins the statement AND the steps, as the record
+// the board reads back will be compared against both.
+const RULE = {
+  statement: STATEMENT,
+  steps: {
+    given: ['The visitor is on screen `form`'],
+    when: ['Click anchor `form.submit`'],
+    then: ['The visitor is on screen `done`'],
+  },
+};
 
 function fixture(name, governance = []) {
   const bp = join(root, name, 'blueprint');
@@ -120,8 +130,8 @@ test('the prompt carries everything a judging agent needs to start', () => {
   assert.match(out, /ANCHORS the steps name: form\.submit/);
   assert.match(
     out,
-    new RegExp(formatHash(STATEMENT)),
-    'the hash to stamp is computed from the statement, not copied from anywhere',
+    new RegExp(formatHash(RULE)),
+    'the hash to stamp is computed from the statement and steps, not copied from anywhere',
   );
   assert.match(out, /runs\/evidence\//, 'evidence goes under the logical key');
   assert.match(out, /Never write "verified" or "waived"/, 'governance rides along');
@@ -180,7 +190,7 @@ test('--json is the same assembly, structured', () => {
   const bp = fixture('json');
   const doc = JSON.parse(run(['demo.main.walks', '--json'], bp));
   assert.equal(doc.rule, 'demo.main.walks');
-  assert.equal(doc.statement_hash, formatHash(STATEMENT));
+  assert.equal(doc.statement_hash, formatHash(RULE));
   assert.equal(doc.base_url, 'http://localhost:9999');
   assert.deepEqual(doc.anchors, ['form.submit']);
   assert.deepEqual(

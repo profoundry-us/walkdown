@@ -64,7 +64,7 @@ stories:
             - Detecting, the control reports the page rather than remembering an answer, so the label in the bar and the row the open list marks both follow the page when it moves
             - Prototype and App switch which of the two the page area shows
             - Pin mode can be turned on and off there
-          statement_hash: sha256:aaf28fbb5e0a
+          statement_hash: sha256:d1fa86f02626
 
       - id: panel.dock.surface-swap-is-instant
         origin: walkdown
@@ -82,7 +82,7 @@ stories:
             - Resizing the window re-measures the copy rather than reloading it
             - What does reload it - a different screen, a different surface, a viewport preset, the end of a sketch detour - reloads it, so what you compare is never the wrong page
             - The copy is as old as its last load, and reloading walkdown refreshes it
-          statement_hash: sha256:c74a4c999299
+          statement_hash: sha256:9481b0c2deef
 
       - id: panel.dock.controls-survive-use
         origin: thread:n-0022
@@ -99,7 +99,7 @@ stories:
             - The drag is not dropped after the first movement
             - Clicking a spot on the track still jumps there, and the arrow keys still step
             - What the drag settles on is what the bar shows once it ends
-          statement_hash: sha256:e55758ff63da
+          statement_hash: sha256:26a643eecf8c
 
       - id: panel.dock.above-the-app
         retired: The docked delivery is withdrawn (2026-08-26). Framed, the application cannot paint outside its own frame, so nothing has to climb into the top layer to stay above it.
@@ -133,7 +133,7 @@ stories:
             - The page under review takes a crosshair cursor while pin mode is on, and drops it when pin mode ends
             - Escape ends pin mode, and the button and the cursor both follow
             - The bar's button is the only way to turn pin mode on, so there is no second control to fall out of step
-          statement_hash: sha256:a66c41a78d23
+          statement_hash: sha256:83dcb4f2e6c2
 
       - id: panel.dock.no-pin-mid-fade
         origin: thread:n-0023
@@ -149,7 +149,7 @@ stories:
             - Pin mode cannot be entered, and the control says why rather than simply refusing
             - Pin mode already running is turned off, not left armed over an ambiguous view
             - Landing fully on either end opens pinning again
-          statement_hash: sha256:a25c933fc24f
+          statement_hash: sha256:fe75bc55788c
 
       - id: panel.dock.own-skin
         origin: thread:n-0015
@@ -165,7 +165,7 @@ stories:
             - The chrome is visibly a different surface from the app
             - The skin is a theme definition, so retuning it is one block and no component knows about it
             - Prototype screens keep their own wireframe skin, distinct from both
-          statement_hash: sha256:93bfd901cfcd
+          statement_hash: sha256:fb65bfe894b1
       - id: panel.dock.host-isolation
         retired: The docked delivery is withdrawn (2026-08-26). The panel no longer runs inside anybody else’s document. The embed still does, and embed.pin.own-skin still governs that.
         origin: walkdown
@@ -196,7 +196,7 @@ stories:
             - No pin form opens; the click does what the control says
             - Controls stay usable in pin mode - the slider still drags, buttons still fire
             - Escape closes an open pin form, and leaves pin mode when none is open
-          statement_hash: sha256:466c5e212ed7
+          statement_hash: sha256:65b74be89995
 
   - id: panel.desk
     title: The desk the work lies on
@@ -216,7 +216,7 @@ stories:
             - The ruling is faint rather than a grid of hard lines
             - It lies at an angle, as paper on a desk does
             - The perspective is a real 3D transform, falling back to something flat only where that is unavailable
-          statement_hash: sha256:60871d489f4d
+          statement_hash: sha256:7824cf252425
 
       - id: panel.desk.tuner
         origin: thread:n-0076
@@ -235,7 +235,7 @@ stories:
             - Nothing about it reaches the ledger - no verdict, no run, no thread
             - The tuner closes on Escape or on a click anywhere outside it, the gear excluded since its own click already toggles it
             - It sits clear of the app's corner rather than flush against it, by the same distance on both axes, so it reads as something on the desk rather than part of the app's layout
-          statement_hash: sha256:09636342aada
+          statement_hash: sha256:04ab90372c93
 
       - id: panel.desk.peek
         origin: thread:n-0076
@@ -252,7 +252,7 @@ stories:
             - The bar stays at full strength throughout, its buttons and the gear still working
             - Adjusting a dial does not undo the peek
             - It always starts unchecked, and closing the tuner ends it
-          statement_hash: sha256:9b19ad4a2f80
+          statement_hash: sha256:35c73a3a20ec
 
   - id: panel.delivery
     title: walkdown reaches the page, however the page was built
@@ -292,7 +292,7 @@ stories:
             - The click begins a review of that page, and the button says which of the two states it is in
             - Clicking again returns to the page itself, at the URL it had reached rather than the one the review started from
             - Nothing about the review outlives it - not the framing, not the headers it needed removed
-          statement_hash: sha256:f7a1627079f4
+          statement_hash: sha256:7e8666198401
 
       - id: panel.delivery.framed-isolation
         origin: thread:n-0030
@@ -309,7 +309,7 @@ stories:
             - Nothing the app draws paints over walkdown, and nothing it opens makes walkdown unusable
             - A page that refuses framing is reviewed anyway, by removing the header that refuses - for that tab only, and only while it is being reviewed
             - The panel keeps up with the application - navigating inside it moves the panel to the screen the app landed on, including when the app moves without a page load
-          statement_hash: sha256:967abb13513f
+          statement_hash: sha256:0a724efb0d5d
 
       - id: panel.delivery.stale-server-says-so
         origin: thread:n-0227
@@ -328,7 +328,7 @@ stories:
             - A server started after the last edit says nothing at all, so the warning keeps meaning something
             - Rebuilding the panel or the embed does not make a server stale - those are read from disk per request, and crying wolf on every rebuild would teach a reviewer to ignore it
             - A server that cannot read its own source reads as current rather than as an alarm nobody can act on
-          statement_hash: sha256:2ba91beef131
+          statement_hash: sha256:34c0eee005b6
 
       - id: panel.delivery.one-switch
         origin: thread:n-0018
@@ -346,7 +346,7 @@ stories:
             - Clicking starts it, clicking again stops it - there is no second place to look
             - The button wears the state as its own icon, colour for on and drained for off, rather than a badge pinned to it
             - Server and blueprint are chosen in the panel, not in browser chrome
-          statement_hash: sha256:84bda3b30c1d
+          statement_hash: sha256:bed2a74ca17d
 
       - id: panel.delivery.stale-copy-says-so
         origin: thread:n-0062
@@ -363,7 +363,7 @@ stories:
             - A banner states the extension is running an older walkdown and names the fix - reload the extension, then the page
             - A current copy shows nothing
             - The docked delivery never shows it, because a script tag always runs what the server ships
-          statement_hash: sha256:124fa1fddaac
+          statement_hash: sha256:78fe49a20815
 
       - id: panel.delivery.anchors-still-required
         origin: thread:q-0016
@@ -379,7 +379,7 @@ stories:
             - The pin is recorded against its coordinates and the thread is written
             - It renders as a positioned pin, not an anchored one
             - Anchored pins keep working wherever anchors do exist
-          statement_hash: sha256:6cbc4017880c
+          statement_hash: sha256:af221a75aa10
 
   - id: panel.start
     title: A fresh install knows nothing, and says so
@@ -401,7 +401,7 @@ stories:
             - It is stated as a first step, not as an error
             - The box you type into is labelled as a server address, not as a folder
             - Once connected, the panel names the folder that server is serving
-          statement_hash: sha256:2a5e9a0925a7
+          statement_hash: sha256:5ace895ac628
 
       - id: panel.start.choose-a-blueprint
         origin: thread:n-0017
@@ -420,7 +420,7 @@ stories:
             - Choosing one loads it and writes nothing down; the same question is asked again next time
             - Nothing is offered that nobody wrote down - the list is the registry's, so a fixture or a vendored copy is absent by never having been declared rather than by being filtered out
             - The same list is the Blueprints tab, so the choice can be changed later without reinstalling anything
-          statement_hash: sha256:3ff33b8e9c41
+          statement_hash: sha256:d535c64dd41b
 
       - id: panel.start.unclaimed-page-says-so
         retired: >-
@@ -467,7 +467,7 @@ stories:
             - Nothing is opened by default, at any count - a machine holding exactly one blueprint is answered the same way as one holding six
             - Choosing a project with one blueprint opens it; choosing one with several asks which, on the Blueprints tab - and several blueprints inside a single project never reach this modal at all, because the project is not in question there
             - A server that lists nothing offers no list at all rather than an empty one, and still says what to do about it
-          statement_hash: sha256:fb4343377bab
+          statement_hash: sha256:fbc01fc45771
 
   - id: panel.rules
     title: The rules are one tap away, and so is the way back
@@ -489,7 +489,7 @@ stories:
             - "\"All rules\" slides back to the list"
             - The Blueprints / Rules / Threads tabs are sized to their labels and centred in the sidebar, not stretched to its full width
             - Each of the three tabs carries its own icon, from the same Phosphor set as the rest of the panel's chrome, sized and padded to read clearly at tab size rather than as an inline glyph shrunk to fit
-          statement_hash: sha256:493a83d3f0bd
+          statement_hash: sha256:7fb2ea6d8a22
 
       - id: panel.rules.takes-you-there
         origin: thread:n-0031
@@ -510,7 +510,7 @@ stories:
             - A screen with no URL on either surface still does the one thing it can - record that this page is that screen
             - Where a move means a real page load rather than a frame, it stays something you ask for on the rule rather than something opening a rule does to you
             - Whether a trip that means a real page load is taken or merely offered depends on whether walkdown survives it - framed, walkdown owns the frame and goes; docked by the extension it also goes, because the extension re-injects itself into the next page; docked by a script tag it offers a link instead, because navigating would unload the very script drawing the panel and leave you on the other site with no walkdown at all
-          statement_hash: sha256:708e2433c9b5
+          statement_hash: sha256:0df515aeceb7
 
       - id: panel.rules.one-pane-per-tab
         origin: thread:n-0032
@@ -526,7 +526,7 @@ stories:
             - That tab's own content is what shows
             - Returning to Rules shows the list, from which the rule can be opened again
             - A tab that opens something of its own opens it into the same seat the rule detail uses, so no tab slides past another tab's detail to reach its own
-          statement_hash: sha256:7cbb341f16bd
+          statement_hash: sha256:5e37dcb079ac
 
       - id: panel.rules.step-between
         origin: walkdown
@@ -543,7 +543,7 @@ stories:
             - Stepping to a rule is opening it, so it takes the surface to that rule's screen exactly as opening it from the list does
             - Each control's tooltip names the rule it will open
             - At either end the control is disabled and says there is nothing further
-          statement_hash: sha256:56a26420e1f3
+          statement_hash: sha256:b43e16d7e113
 
       - id: panel.rules.steps-not-an-appendix
         origin: thread:n-0007
@@ -560,7 +560,7 @@ stories:
             - The steps are already expanded - they are the rule, not an appendix
             - "The check source stays behind anchor `detail.technical-disclosure` until opened, and stands on its own: it hangs off the rule's check refs, so it is there whether or not the rule has steps"
             - Hovering an anchor a step names highlights that element on the surface under review, so a step points at what it is talking about
-          statement_hash: sha256:0609e516526f
+          statement_hash: sha256:12064cd8cf0c
 
       - id: panel.rules.setup-says-how-to-arrive
         origin: thread:n-0093
@@ -577,7 +577,7 @@ stories:
             - Anchor `detail.setup` says how to get the app into that state
             - The block is labelled Setup, the storyboard's own word for the field
             - A rule whose screen has no setup shows nothing there - an empty instruction is worse than none
-          statement_hash: sha256:e41b088d8143
+          statement_hash: sha256:0fe412b95c9a
 
       - id: panel.rules.evidence-visible
         origin: walkdown
@@ -596,7 +596,7 @@ stories:
             - "Anchor `detail.evidence-open` opens them to look at, in `detail.evidence-modal`"
             - "Each file is shown as what it is: a picture as a picture, a transcript as readable text, anything else as a link to open - never as a broken image"
             - A rule with no runs says so rather than showing nothing
-          statement_hash: sha256:65b84178c291
+          statement_hash: sha256:890e7391a2ee
 
       - id: panel.rules.counts-legible
         origin: thread:n-0002
@@ -615,7 +615,7 @@ stories:
             - The Rules tab carries how many rules a walkdown would take you through - the footer's two kinds together, counted the way the walkdown itself picks the next rule, so it empties as the sitting goes on
             - A tab holding nothing for you draws no badge at all, because a badge saying none is a claim on the eye about nothing
             - The Rules badge is the same warning colour the rule glyphs and their badges use, because it is the same claim they make - this is waiting on you - and it is the loudest thing in the strip, since walking the rules is the work the tool exists for. Other tabs count their own work in their own colour rather than a second yellow beside it
-          statement_hash: sha256:669dfeb91eee
+          statement_hash: sha256:c48d3e5f64b0
 
       - id: panel.rules.lifecycle-legible
         origin: thread:n-0054
@@ -633,7 +633,7 @@ stories:
             - An approved rule is legible from its signature marks alone, with no separate glyph for it
             - A rule waiting on the reviewer is warning-tinted and its badge names the work - sign or walk
             - Each row's tooltip spells the state out in words
-          statement_hash: sha256:a0f0ad3cb747
+          statement_hash: sha256:860df1bc1ed8
 
       - id: panel.rules.search-the-list
         origin: thread:n-0108
@@ -654,7 +654,7 @@ stories:
             - A query naming a screen leaves standing every rule judged on that screen
             - Every rule still listed is drawn under both of its headings - the screen it is judged on and the story it belongs to
             - Emptying the box brings the whole list back
-          statement_hash: sha256:f183d0a96302
+          statement_hash: sha256:912d467e4543
       - id: panel.rules.tiers-at-a-glance
         origin: thread:n-0109
         statement: Every rule shows one mark per evidence tier - checks then agent - and beside them one dot per role that must sign, so which evidence a rule rests on, and whose signature it is still waiting for, can be read off the list rather than opened one rule at a time.
@@ -673,7 +673,7 @@ stories:
             - A tier the rule does not ask for, and a tier with nothing to judge because the rule is unbuilt, are the quietest mark on the strip - and the tooltip says which of the two it is
             - Beside the tiers, one slot per role the rule names, in a fixed order, filled to the extent that role has signed
             - One tooltip covers the whole strip and names every tier and every role in words
-          statement_hash: sha256:cac7a0be0702
+          statement_hash: sha256:752cbfc547a3
       - id: panel.rules.grouped-by-screen
         origin: walkdown
         statement: The rail is grouped by the screen a rule is judged on, in storyboard order, each screen named as the storyboard names it and wearing the same icon the bar's picker wears - and the story beneath keeps only what the screen has not already said. A screen's heading stays in view while its own rules are scrolled, because a group forty rules long outlives the heading that named it. Rules belonging to no screen are a group of their own at the end, because a blueprint can be a third ledger law and that is read rather than looked at.
@@ -691,7 +691,7 @@ stories:
             - A rule the storyboard does not place is grouped with the others that have none, after every screen
             - The detail's stepper and the walk move in this order too, so the arrows and Continue follow what the list shows rather than what the file happens to hold
             - Scrolling deep into a screen's rules leaves that screen's heading at the top of the list, naming what is being read
-          statement_hash: sha256:54d2a03fa8e6
+          statement_hash: sha256:c21b11cee6a2
 
       - id: panel.rules.headless-says-so
         origin: thread:n-0061
@@ -708,7 +708,7 @@ stories:
             - The cover says the page underneath is untouched - it covers, never navigates, so the application keeps its state
             - The detail pane carries the same note beside the statement
             - Opening a screened rule or returning to the list lifts the cover
-          statement_hash: sha256:5bb6c7d6142a
+          statement_hash: sha256:313a2f5c11b5
 
       - id: panel.rules.legend-on-demand
         origin: walkdown
@@ -725,7 +725,7 @@ stories:
             - Every state a signature slot can take is listed with the shape that draws it
             - What warning colour means, and what the sign, walk and thread badges mean, are said in the same place
             - It is built from the same vocabulary the rail draws from, so it cannot describe marks the rail no longer uses
-          statement_hash: sha256:58cbf78e318c
+          statement_hash: sha256:36417be07500
 
       - id: panel.rules.owed-apart-from-said
         origin: walkdown
@@ -741,7 +741,7 @@ stories:
             - The work badge and the thread count occupy their own columns, each aligned down the list
             - The thread count is drawn in plain ink rather than in the colour that means work is owed
             - A rule with only one of the two leaves the other column empty rather than shifting the row
-          statement_hash: sha256:10189a32c600
+          statement_hash: sha256:84bf34874d7c
 
       - id: panel.rules.marks-carry-over
         origin: walkdown
@@ -756,7 +756,7 @@ stories:
           then:
             - The detail draws the same strip, in the same order, saying the same thing
             - It is the list's own drawing rather than a second one, so the two cannot disagree
-          statement_hash: sha256:53b22fd6a5a4
+          statement_hash: sha256:ec4ad798ac84
 
       - id: panel.rules.names-its-screen
         origin: walkdown
@@ -773,7 +773,7 @@ stories:
             - A flow is drawn as the chain it is, ending on the screen the rule is judged against
             - A rule naming no screen says so rather than leaving the section out
             - A screen id the storyboard does not know is marked as unknown rather than printed as though it resolved
-          statement_hash: sha256:4a90d439391b
+          statement_hash: sha256:ae3042822558
 
       - id: panel.rules.talk-without-a-sitting
         origin: walkdown
@@ -790,7 +790,7 @@ stories:
             - It is attributed to whoever the panel is recording as, shown above the composer before it is used
             - An empty identity refuses the filing and offers the place to set one, rather than letting the server choose a name
             - Starting a thread records no verdict and begins no sitting
-          statement_hash: sha256:d66e49c63ed9
+          statement_hash: sha256:1feb59efdd65
 
   - id: panel.threads
     title: Feedback is answered where it is read
@@ -810,7 +810,7 @@ stories:
             - Its replies are shown, oldest context first, with author and age
             - A reply can be written and posted, and appears without a page reload
             - Only the transitions legal for that kind and status are offered
-          statement_hash: sha256:a0dd8bb2f5b9
+          statement_hash: sha256:24dc190cf4f7
 
       - id: panel.threads.claim-never-accept
         origin: walkdown
@@ -826,7 +826,7 @@ stories:
           then:
             - Nothing is recorded and the panel asks for a person's name
             - Waiving or reopening without a reason is refused until one is written
-          statement_hash: sha256:7c4e1e2d1562
+          statement_hash: sha256:9d263352d2ff
 
       - id: panel.threads.show-the-sketch
         origin: thread:n-0010
@@ -844,7 +844,7 @@ stories:
             - Screens with a real prototype still ghost the prototype
             - Looking at it is a detour - which screen the panel thinks this page is does not change, and the picker still swaps screens
             - The detour is named while it lasts, and turning the ghost off ends it
-          statement_hash: sha256:8244263349d7
+          statement_hash: sha256:693cf5703fb8
 
       - id: panel.threads.own-view
         origin: thread:n-0094
@@ -864,7 +864,7 @@ stories:
             - Asking for all of them reaches a thread that has ended, which nothing else in the panel can do
             - Opening one shows the conversation beside the list, and the way back from it is the list of threads rather than a rule nobody opened
             - How many threads are waiting on a person is carried on the tab itself, so it is legible from whichever tab is open
-          statement_hash: sha256:faade3b887d1
+          statement_hash: sha256:09bd656d03f9
 
   - id: panel.walkdown
     title: A walkdown from the panel is a walkdown
@@ -886,7 +886,7 @@ stories:
             - An unnamed or agent actor is refused before anything is written
             - Discarding instead of finishing writes nothing
             - Finishing says what was RECORDED, from the door's own answer - which roles landed and under whose names - because a field the door dropped is invisible in a count of verdicts (n-0226)
-          statement_hash: sha256:6cc28278f4a6
+          statement_hash: sha256:33f8130bbd75
 
       - id: panel.walkdown.who-signs-is-declared
         origin: thread:q-0225
@@ -905,7 +905,7 @@ stories:
             - Who this sitting is being signed as stays legible while it runs, so accepting on somebody's behalf cannot be forgotten half way through
             - The next sitting starts from the config again - a role handed to somebody else is never the default a second time
             - Nothing the browser remembers decides who a record is written under
-          statement_hash: sha256:36efe97a3acd
+          statement_hash: sha256:b0336010e7d5
 
       - id: panel.walkdown.one-control-owns-the-sitting
         origin: walkdown
@@ -926,7 +926,7 @@ stories:
             - Both controls wear the panel's warning colour, the one it already uses for work owed to you, so the sitting reads as one thing from the tab's count through to the record - the ending filled and carrying on outlined, since two solid yellows would argue about which is the act
             - Beginning wears it too when rules are owed, so the blueprint says there is work before being asked; with nothing owed it drops back to the ordinary action colour, because a control that is always loud says nothing
             - Every one of these counts comes from a single list - the rules owing you a verdict, less the ones judged this sitting - so the tab's number, the footer's kinds, the tally's denominator and the rule Continue opens cannot drift apart
-          statement_hash: sha256:c74a54acc395
+          statement_hash: sha256:8a7122b87a96
 
       - id: panel.walkdown.session-survives-reload
         origin: thread:n-0066
@@ -942,7 +942,7 @@ stories:
             - The session comes back - verdicts, judged count, and actor - exactly as left
             - Finishing then records once; a refused attempt, nameless or offline, can be retried after fixing the cause
             - Finishing or discarding clears the saved draft
-          statement_hash: sha256:05503923167c
+          statement_hash: sha256:6371c4770618
 
       - id: panel.walkdown.draft-on-disk
         origin: walkdown
@@ -961,7 +961,7 @@ stories:
             - walkdown status reports the sitting as in progress rather than as verdicts
             - Finishing appends the one run record and deletes the draft; discarding deletes it and writes nothing
             - A draft is never committed by accident - the directory ignores its own contents
-          statement_hash: sha256:cfb0ee61cad3
+          statement_hash: sha256:208e1062b8c7
 
       - id: panel.walkdown.verdicts-at-hand
         origin: walkdown
@@ -977,7 +977,7 @@ stories:
             - Both verdict buttons are visible without scrolling any pane
             - The only thing between the statement and the buttons is anchor `detail.feedback`, which panel.walkdown.note-with-any-verdict puts there
             - The chosen verdict stays visibly chosen when the rule is revisited
-          statement_hash: sha256:d67304c4aae1
+          statement_hash: sha256:230135783bdb
 
       - id: panel.walkdown.pass-advances
         origin: walkdown
@@ -994,7 +994,7 @@ stories:
             - The fail keeps the rule open, and pin mode is left exactly as it was found
             - Judging the last owed rule returns to the list rather than a dead end
             - Carrying on from a rule you stayed on is asked for rather than done to you - the sitting's own next step sits beside the tally
-          statement_hash: sha256:017026c31543
+          statement_hash: sha256:f8832132ec51
 
       - id: panel.walkdown.note-with-any-verdict
         origin: thread:n-0050
@@ -1011,7 +1011,7 @@ stories:
             - The finished run's result for the rule carries the thread id
             - Judging with the box empty files no thread
             - The box sits above anchor `detail.verdict`, so the why is asked for before the verdict
-          statement_hash: sha256:f9043305838b
+          statement_hash: sha256:b08fe1ef5a23
 
       - id: panel.walkdown.fail-requires-why
         origin: thread:n-0051
@@ -1027,7 +1027,7 @@ stories:
           then:
             - No verdict is recorded, and the panel names both ways to give a why - write it, or pin it - without turning either on
             - Writing feedback or dropping a pin on the rule, then failing again, records it
-          statement_hash: sha256:9644c16756d8
+          statement_hash: sha256:6c3cf9029f3e
 
   - id: panel.identity.retired
     title: The viewer already knew who you are
@@ -1064,7 +1064,7 @@ stories:
             - Settings shows both - anchor `settings.actor` for the username records carry, anchor `settings.display-name` for the name the panel shows - and says where the username comes from
             - The username cannot be typed here, and nothing a request carries can change what a record is written under
             - The full name is editable from empty, applies to the running session, and is remembered across reloads; emptying it is an answer too, leaving the username standing alone
-          statement_hash: sha256:870f334762eb
+          statement_hash: sha256:f50536277d5c
 
       - id: panel.identity.attribution-visible
         origin: thread:n-0008
@@ -1079,7 +1079,7 @@ stories:
           then:
             - The name being recorded is on screen at the moment of the action - the username itself, beside the full name shown for it
             - Correcting it before acting records the corrected name
-          statement_hash: sha256:1b6a789fde73
+          statement_hash: sha256:cd8b6d78f53a
 
   - id: panel.viewport
     title: The frame renders at real device sizes
@@ -1100,7 +1100,7 @@ stories:
             - The frame re-renders narrow and a responsive app shows its mobile layout
             - The ghost renders at that same viewport; the two never disagree
             - Switching back to desktop restores both
-          statement_hash: sha256:2ded288a785a
+          statement_hash: sha256:ae6986d9aed8
 
       - id: panel.viewport.zoom-to-fit
         origin: thread:n-0005
@@ -1115,7 +1115,7 @@ stories:
           then:
             - The app lays out at the chosen width and is scaled down whole - no reflow
             - The current scale is shown in anchor `panel.zoom`
-          statement_hash: sha256:8beb5dbadbe0
+          statement_hash: sha256:336df83a67ec
 
   - id: panel.signoff
     title: Unbuilt rules are signed off, not judged
@@ -1136,7 +1136,7 @@ stories:
             - The first shows Approve and Refine, labelled as signing off the rule rather than judging a build
             - The second shows Pass and Fail
             - Approving a rule does not flip it to the Pass/Fail pair - only build evidence does
-          statement_hash: sha256:24cc94442cf4
+          statement_hash: sha256:7c8498e59582
 
       - id: panel.signoff.refine-requires-feedback
         origin: thread:n-0052
@@ -1152,7 +1152,7 @@ stories:
             - The empty refine is refused with the reason; nothing is recorded
             - The written refine files the note, records a refining result, and stays on the rule
             - The refine and its note arrive linked in the finished run record
-          statement_hash: sha256:cc9c4f5148e1
+          statement_hash: sha256:a08fc4115ac6
 
       - id: panel.signoff.approved-recorded
         origin: thread:n-0052
@@ -1170,4 +1170,4 @@ stories:
             - The rule still shows as pending and still owes a human verdict once built
             - Rewording the statement renders the approval as stale, asking for a fresh sign-off
             - Approving moves the session on to the next rule owing a verdict
-          statement_hash: sha256:9dc2fa81ced5
+          statement_hash: sha256:2895f3d084e2

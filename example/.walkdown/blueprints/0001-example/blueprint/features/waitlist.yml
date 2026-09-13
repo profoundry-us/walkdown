@@ -14,7 +14,7 @@ stories:
         verify: [checks]
         screens: [waitlist-join]
         steps:
-          statement_hash: "sha256:2fd5ce31a84c"
+          statement_hash: "sha256:eded49ca7724"
           given:
             - A visitor on screen `waitlist-join`
           when:
@@ -30,7 +30,7 @@ stories:
         verify: [checks]
         screens: [waitlist-join, waitlist-confirm]
         steps:
-          statement_hash: "sha256:8f7e3fe03fdf"
+          statement_hash: "sha256:45b1e3aaccfb"
           given:
             - A visitor on screen `waitlist-join`
           when:
@@ -56,7 +56,7 @@ stories:
             - The visitor is on screen `waitlist-already`
             - Anchor `waitlist.already-message` reads "you're already on the list"
             - Anchor `waitlist.confirmed-email` shows the submitted email
-          statement_hash: sha256:1857ab02c7c3
+          statement_hash: sha256:663824d8d73b
 
       - id: waitlist.join.confirm-requires-email
         origin: thread:n-0003
@@ -70,7 +70,7 @@ stories:
             - Navigate directly to screen `waitlist-confirm` without an email
           then:
             - The visitor is redirected to screen `waitlist-join`
-          statement_hash: sha256:09cacb110a8f
+          statement_hash: sha256:7575f1028012
 
       - id: waitlist.join.visual-match
         origin: prototype
@@ -80,7 +80,7 @@ stories:
           checks: Whether one screen resembles another is a judgment about how it looks. A check can assert that every element is present and still pass on a page nobody would call a match, so the cheapest tier here is the one most able to lie. The agent looks, and a person signs.
         screens: [waitlist-join, waitlist-confirm]
         steps:
-          statement_hash: "sha256:837d34b83fb1"
+          statement_hash: "sha256:bb8fc4a8fd6e"
           given:
             - The app on screens `waitlist-join` and `waitlist-confirm`, with the prototype ghost faded over each
           when:
@@ -107,4 +107,4 @@ stories:
             - Anchor `waitlist.export-note` is readable immediately, saying what the screen is and that the wait is deliberate
             - The page's own browser load event is what waits - seconds, not milliseconds - so anything watching the frame sees the wait, walkdown's loading veil included
             - Anchor `waitlist.export-report` arrives with that load event, not before it
-          statement_hash: sha256:cc8894566f6f
+          statement_hash: sha256:868720bf3419

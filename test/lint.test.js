@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { after, test } from 'node:test';
 import { loadBlueprint } from '../lib/blueprint.js';
-import { formatHash } from '../lib/hash.js';
+import { formatHash, hashMatches } from '../lib/hash.js';
 import { runHashCommand } from '../lib/hash-cmd.js';
 import { lint } from '../lib/lint.js';
 
@@ -158,13 +158,73 @@ test('hash --write repairs a stale hash and lint then passes', () => {
   assert.equal(first.exitCode, 1);
   const wrote = runHashCommand(load(h), { write: true });
   assert.equal(wrote.changedFiles, 1);
-  assert.ok(
-    readFileSync(join(h.spec, 'features', 'demo.yml'), 'utf8').includes(
-      formatHash('The visitor can do the thing.'),
-    ),
-  );
+  // The hash written pins the statement AND the steps, so it is the rule's
+  // own, not the statement's alone.
+  const rule = load(h).features[0].data.stories[0].rules[0];
+  assert.ok(readFileSync(join(h.spec, 'features', 'demo.yml'), 'utf8').includes(formatHash(rule)));
+  assert.notEqual(formatHash(rule), formatHash(rule.statement));
+  assert.ok(runHashCommand(load(h)).rows.every((r) => r.status === 'ok'));
   const { exitCode } = lint(load(h), { checks: false });
   assert.equal(exitCode, 0);
+});
+
+/*
+ * The hash pinned the statement alone until 2026-09-13. A file still carrying
+ * that form is not stale - every verdict ever recorded carries it too - it is
+ * legacy: reported as such, re-stamped on --write, and nothing goes stale for
+ * the change itself.
+ */
+test('a statement-only hash is legacy, not stale: it lints, and --write re-stamps it without a reword', () => {
+  const h = writeFixture(join(root, 'legacy'));
+  assert.equal(lint(load(h), { checks: false }).exitCode, 0);
+  const first = runHashCommand(load(h));
+  assert.equal(first.rows[0].status, 'legacy');
+  assert.equal(first.exitCode, 0);
+  const wrote = runHashCommand(load(h), { write: true });
+  assert.equal(wrote.rows[0].status, 'written');
+  assert.ok(!readFileSync(join(h.spec, 'features', 'demo.yml'), 'utf8').includes('reworded'));
+  assert.equal(runHashCommand(load(h)).rows[0].status, 'ok');
+});
+
+/*
+ * Better English is not a new rule. A re-stamp with --reword keeps the old
+ * hash under steps.reworded, with when and why, so a verdict that named the
+ * old words still names the rule (test/status.test.js reads it back).
+ */
+test('hash --write --reword keeps the old hash and says why; without it the old hash is gone', () => {
+  const h = writeFixture(join(root, 'reword'));
+  runHashCommand(load(h), { write: true }); // current form first
+  const file = join(h.spec, 'features', 'demo.yml');
+  const old = load(h).features[0].data.stories[0].rules[0].steps.statement_hash;
+  writeFileSync(file, readFileSync(file, 'utf8').replace('The visitor can do the thing.', 'The visitor can do the thing, plainly.'));
+  assert.equal(runHashCommand(load(h)).rows[0].status, 'stale');
+  assert.equal(lint(load(h), { checks: false }).exitCode, 1);
+
+  const reworded = runHashCommand(load(h), { write: true, reword: 'plainer English, same rule' });
+  assert.equal(reworded.rows[0].status, 'reworded');
+  const rule = load(h).features[0].data.stories[0].rules[0];
+  assert.equal(rule.steps.reworded.length, 1);
+  assert.equal(rule.steps.reworded[0].hash, old);
+  assert.equal(rule.steps.reworded[0].why, 'plainer English, same rule');
+  assert.match(rule.steps.reworded[0].at, /^\d{4}-\d{2}-\d{2}$/);
+  assert.ok(hashMatches(old, rule), 'the old hash still names the rule');
+  assert.equal(lint(load(h), { checks: false }).exitCode, 0);
+
+  // And the plain re-stamp, which is what a change of meaning gets.
+  writeFileSync(file, readFileSync(file, 'utf8').replace('do the thing, plainly.', 'do the other thing.'));
+  const current = rule.steps.statement_hash;
+  runHashCommand(load(h), { write: true });
+  const again = load(h).features[0].data.stories[0].rules[0];
+  assert.equal(again.steps.reworded.length, 1, 'the plain write adds nothing to the list');
+  assert.equal(hashMatches(current, again), false, 'the meaning moved, so the old hash is gone');
+});
+
+test('changing a step stales the hash the same as changing the statement', () => {
+  const h = writeFixture(join(root, 'stepmove'));
+  runHashCommand(load(h), { write: true });
+  const file = join(h.spec, 'features', 'demo.yml');
+  writeFileSync(file, readFileSync(file, 'utf8').replace('Click anchor `home.cta`', 'Click anchor `home.other`'));
+  assert.equal(runHashCommand(load(h)).rows[0].status, 'stale');
 });
 
 test('two screens claiming one address on a surface: the loser of the tie is named', () => {

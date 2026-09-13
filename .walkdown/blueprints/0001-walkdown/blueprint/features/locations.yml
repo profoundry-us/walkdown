@@ -22,7 +22,7 @@ stories:
             - Everything walkdown made sits in one numbered home under `~/.walkdown/blueprints/`
             - Deleting that one directory removes everything walkdown made
             - Asked what is tracked, walkdown answers nothing, and says why
-          statement_hash: sha256:7a82184b4b5d
+          statement_hash: sha256:59933a1c240f
 
       - id: locations.default.records-follow-the-spec
         origin: prd
@@ -37,7 +37,7 @@ stories:
             - The spec and the four records resolve as siblings in one home
             - No kind of record sits inside another
             - Moving the home moves all five together and edits none of them
-          statement_hash: sha256:3272ecc28575
+          statement_hash: sha256:e937f53b5102
 
       - id: locations.default.in-repo-on-request
         origin: prd
@@ -56,7 +56,7 @@ stories:
             - Asked again with a different standard, the tree changes to say so - the file is written or removed, or the home moves whole with no record edited
             - The command reports what is tracked now, in words, and how to change its mind later
             - What is tracked is asked of git, not read off the ignore file walkdown wrote - a root .gitignore hiding .walkdown, a rule that does not reach a blueprint standing elsewhere, an ignore file somebody emptied, and a home that left with its files still in the index are each said outright, and lint errors wherever the tree's promise and git's answer disagree (n-0179, n-0180, n-0181)
-          statement_hash: sha256:3be1e35e0956
+          statement_hash: sha256:eb28707b6f77
 
       - id: locations.default.skills-are-yours-by-default
         origin: prd
@@ -74,7 +74,7 @@ stories:
             - Installing them on their own asks where they should go rather than picking, and writes nothing to a place nobody named
             - A skill that depends on a harness only walkdown's own repository has is not among them
             - A copy the person has edited is kept and reported rather than overwritten
-          statement_hash: sha256:66bff6c2346e
+          statement_hash: sha256:2be84df9d5f8
 
       - id: locations.default.one-home-per-blueprint
         origin: thread:n-0124
@@ -93,7 +93,7 @@ stories:
             - Two checkouts that share a name, one listed personally, stay two projects with two ledgers
             - A home that already holds a blueprint's records keeps answering for it
             - A home nothing claims is reported and left standing, never guessed at and never moved
-          statement_hash: sha256:c2e4b20e7f0d
+          statement_hash: sha256:90679f4f6194
 
   - id: locations.answer
     title: Anyone can ask where this project's pieces are
@@ -111,7 +111,7 @@ stories:
           then:
             - Each of the spec, runs, threads, evidence, drafts and code carries its reason
             - The reason names the rule that decided it, not merely that a decision was made
-          statement_hash: sha256:fd21bba75c2e
+          statement_hash: sha256:26757965fbdd
 
       - id: locations.answer.asking-writes-nothing
         origin: prd
@@ -125,7 +125,7 @@ stories:
           then:
             - It answers in full, naming directories that do not exist yet
             - The disk is exactly as it was found, including the personal home
-          statement_hash: sha256:0ba6f381a575
+          statement_hash: sha256:47b87b883d14
 
       - id: locations.answer.nearest-blueprint-wins
         retired: >-
@@ -182,7 +182,7 @@ stories:
             - Each registered blueprint answers for itself, with its own runs and threads
             - The unregistered one is not a project at all, however much it looks like one from the outside - and where its checkout declares it, the answer names the manifest and says `walkdown import`
             - The registry is consulted, and the report says which row answered and how it arrived - a `blueprints:` list in the personal config.yml is set aside and named, however many keys it restates
-          statement_hash: sha256:d6788490af67
+          statement_hash: sha256:251a2b83c9b6
 
       - id: locations.answer.registry-is-the-only-door
         origin: thread:n-0275
@@ -200,7 +200,7 @@ stories:
             - The server lists every registered blueprint and never the link's row
             - "`walkdown import` through the link registers the pack's home once, under its real path, and a second import says it is already listed"
             - Standing in the pack reaches the pack's row; standing at the root reaches the root's; nothing about the tree between them is consulted
-          statement_hash: sha256:20130d966a11
+          statement_hash: sha256:40116907d7ab
 
   - id: locations.keeping
     title: A ledger already written is never orphaned or edited
@@ -235,7 +235,7 @@ stories:
             - Every file arrives byte for byte, and none is rewritten to suit its new address
             - The personal config records where they went, keeping whatever the person had already written in it
             - A destination that already holds records is refused rather than merged into
-          statement_hash: sha256:452142df8095
+          statement_hash: sha256:797a6afe9cc9
 
   - id: locations.travel
     title: A record means the same thing on somebody else's machine
@@ -254,7 +254,7 @@ stories:
             - The same key still resolves, and the picture still opens
             - No run file was edited to make that true
             - A key that climbs out of the evidence directory is refused
-          statement_hash: sha256:a7bc7cd07be3
+          statement_hash: sha256:4254ee8a1f3d
 
       - id: locations.travel.judged-against-a-spec
         origin: prd
@@ -269,7 +269,7 @@ stories:
             - The three writes leave the spec hash exactly where it was
             - The rewording moves it
             - The same words in a different feature file are a different spec
-          statement_hash: sha256:5014abd76d50
+          statement_hash: sha256:39d6a730c5d8
 
       - id: locations.travel.provenance-not-currency
         origin: prd
@@ -283,7 +283,7 @@ stories:
           then:
             - Every cell reads exactly as it did before
             - The runs still carry the shas they were recorded with, for anyone who wants to look
-          statement_hash: sha256:c513160f49fc
+          statement_hash: sha256:6e10186c5b9c
 
   - id: locations.pointer
     title: An agent arriving in the repository finds the spec
@@ -303,7 +303,7 @@ stories:
             - With no agent-instruction file, CLAUDE.md is created carrying the pointer
             - With exactly one, the pointer goes into that file, and no second file is made to compete with it
             - With more than one, nothing is written and the report names them all, for a person to settle by naming the one they want
-          statement_hash: sha256:e10f6a000d16
+          statement_hash: sha256:b3c24bacbf43
 
       - id: locations.pointer.owns-only-its-block
         origin: prd
@@ -318,4 +318,4 @@ stories:
             - The block names the new place, and appears exactly once
             - Every line outside the markers is untouched
             - Placing it twice in a row changes nothing the second time
-          statement_hash: sha256:ec57ac3e3cc3
+          statement_hash: sha256:dda1404e46d5

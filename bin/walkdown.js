@@ -15,7 +15,7 @@ Usage:
   walkdown run [--target <name>] [--rule <id>] [--blueprint <id>]
   walkdown status [<rule-id>] [--blueprint <id>] [--target <name>] [--json]
   walkdown lint [--blueprint <id>] [--no-checks] [--json]
-  walkdown hash [--blueprint <id>] [--write]
+  walkdown hash [--blueprint <id>] [--write [--reword <why>]]
   walkdown judge <rule-id> [--target <name>] [--serve <origin>] [--blueprint <id>] [--json]
   walkdown sweep --why <reason> [--tiers checks,agent] [--blueprint <id>] [--target <name>]
   walkdown threads [--blueprint <id>] [--rule <id>] [--all] [--json]
@@ -64,8 +64,12 @@ Commands:
           who has signed and who has not, threads).
   lint    Validate the blueprint: schema, ids, storyboard refs, staleness,
           check coverage (via runner.list), threads, and runs.
-  hash    Report statement_hash status for every rule; --write updates
-          missing/stale hashes in place (formatting preserved).
+  hash    Report statement_hash status for every rule - the hash pins the
+          statement and the steps; --write updates missing/stale hashes in
+          place (formatting preserved), and every verdict on a re-stamped
+          rule reads stale. --reword "<why>" keeps the old hash under
+          steps.reworded so the verdicts stay current: the words changed,
+          the rule did not.
   judge   Print the judging prompt for one rule — statement, steps, setup,
           screens with real addresses, where evidence goes and how a verdict
           is recorded — ready to paste into any agent with a browser. The
@@ -126,6 +130,7 @@ Options:
   --all            threads: include terminal (incorporated/verified/waived)
   --no-checks      lint: skip running the runner.list command
   --write          hash: write missing/stale hashes back to feature files
+  --reword <why>   hash --write: keep the old hash, the meaning did not change
   --why <reason>   sweep: why the whole thing is being asked for again (required)
   --tiers <list>   sweep: comma-separated tiers to sweep (default: checks,agent)
   --json           status/lint/threads/thread: machine-readable output

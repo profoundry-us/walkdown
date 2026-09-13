@@ -21,7 +21,7 @@ stories:
           then:
             - Anchor `waitlist.confirm-batch` names the exact number of people
             - Nothing is sent until the confirmation is accepted
-          statement_hash: sha256:b53232b37a56
+          statement_hash: sha256:2d2e364e70f1
 
       - id: invites.batch.cancel-sends-nothing
         origin: prototype
@@ -36,7 +36,7 @@ stories:
           then:
             - No invitation is sent and no row changes status
             - The same rows remain selected in anchor `waitlist.table`
-          statement_hash: sha256:e59dd55de17c
+          statement_hash: sha256:27cc49669a2e
 
   - id: invites.list
     title: An operator sees who has been invited
@@ -54,4 +54,4 @@ stories:
             - Scanning anchor `waitlist.table`
           then:
             - Invited and waiting rows are told apart by more than wording alone
-          statement_hash: sha256:03471c770657
+          statement_hash: sha256:c884d38804d8
