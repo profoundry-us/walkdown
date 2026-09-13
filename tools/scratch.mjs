@@ -15,7 +15,7 @@
  * deletes, so every space made here is stamped with who asked for it and why,
  * and `clean --stale` will take any that outlived their sitting.
  *
- *   node tools/scratch.mjs new <label> --why "..."   make one, print its path
+ *   node tools/scratch.mjs new <label> --why "..." [--port <n>]   make one, print its path
  *   node tools/scratch.mjs list                      what is lying around
  *   node tools/scratch.mjs clean <label>             take yours away
  *   node tools/scratch.mjs clean --stale             and anything abandoned
@@ -72,9 +72,10 @@ function spaces() {
     .sort((a, b) => a.touched - b.touched);
 }
 
-function make(label, why) {
+function make(label, why, port) {
   if (!label || !/^[a-z0-9][a-z0-9-]*$/i.test(label))
-    die('usage: scratch new <label> --why "..."   (label: letters, digits, dashes)');
+    die('usage: scratch new <label> --why "..." [--port <n>]   (label: letters, digits, dashes)');
+  if (port != null && !/^\d{2,5}$/.test(String(port))) die(`--port wants a number, not ${port}`);
   const path = join(TMP, label);
   /*
    * A collision is refused rather than reused. Two agents judging at once is
@@ -151,12 +152,31 @@ function make(label, why) {
       '',
     ].join('\n'),
   );
+  /*
+   * The app surface follows the copy. The blueprint's `local` target names
+   * the real server's port, and the panel builds the app frame from it - so a
+   * copy served on another port still framed the REAL server's stand-in,
+   * whose embed would have pinned into the real ledger. Every browser judge
+   * found this and edited the copy's walkdown.yml by hand; with --port the
+   * copy is retargeted here, once, and the serve line below matches.
+   */
+  if (port != null) {
+    const yml = join(path, HOME, 'blueprint', 'walkdown.yml');
+    const before = readFileSync(yml, 'utf8');
+    const after = before.replace(
+      /^(\s*base_url:\s*http:\/\/localhost:)\d+/gm,
+      `$1${port}`,
+    );
+    if (after === before) die(`${yml} has no localhost base_url to retarget`);
+    writeFileSync(yml, after);
+  }
   writeFileSync(
     join(path, STAMP),
     JSON.stringify(
       {
         label,
         why: why ?? null,
+        port: port != null ? Number(port) : null,
         created: new Date().toISOString(),
         pid: process.pid,
       },
@@ -168,8 +188,11 @@ function make(label, why) {
   console.log(path);
   console.error(
     `\nA disposable copy, registered to itself. Serve it with its own home:\n` +
-      `  cd ${path} && WALKDOWN_HOME=${join(path, 'home')} node ${join(root, 'bin', 'walkdown.js')} serve --port <n>\n` +
+      `  cd ${path} && WALKDOWN_HOME=${join(path, 'home')} node ${join(root, 'bin', 'walkdown.js')} serve --port ${port ?? '<n>'}\n` +
       `Started there it offers this copy and nothing else - not the real ledger.\n` +
+      (port != null
+        ? `Its local target points at :${port} too, so the app surface is this server's, not the real one's.\n`
+        : `Its local target still names the REAL server's port: pass --port <n> so the app surface is this server's.\n`) +
       (shared.length
         ? `Evidence is the exception: its ${shared.length} existing entries are LINKS to the real ones, so\n` +
           `read them freely and move or delete none of them. Anything you save lands in the copy.\n`
@@ -220,9 +243,10 @@ const flag = (name) => {
 };
 if (cmd === 'new')
   make(
-    rest.find((a) => !a.startsWith('--') && a !== flag('why')),
+    rest.find((a) => !a.startsWith('--') && a !== flag('why') && a !== flag('port')),
     flag('why'),
+    flag('port'),
   );
 else if (cmd === 'list') list();
 else if (cmd === 'clean') clean(rest);
-else die('usage: scratch new <label> --why "..." | list | clean <label>… | clean --stale');
+else die('usage: scratch new <label> --why "..." [--port <n>] | list | clean <label>… | clean --stale');

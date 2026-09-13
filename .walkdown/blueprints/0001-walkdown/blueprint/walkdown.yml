@@ -55,13 +55,18 @@ governance:
     very blueprint it serves — this working tree's blueprint is the real
     ledger, not a disposable environment. Before judging anything that files,
     refuses, pins or replies, make a scratch copy (node tools/scratch.mjs new
-    <label> --why "..."), and serve it FROM INSIDE THE COPY with the copy's
-    own home: cd <copy> && WALKDOWN_HOME=<copy>/home node <repo>/bin/walkdown.js
-    serve --port <n>. The copy's home holds a registry naming only the copy,
-    and the registry is the only thing a server consults (ADR 0003) — so
-    served with that home it cannot list, serve or write to the real ledger,
-    however the panel's chooser is driven. The verdict still goes in the real
-    ledger. Take the copy away when done (node tools/scratch.mjs clean <label>).
+    <label> --why "..." --port <n>), and serve it FROM INSIDE THE COPY with the
+    copy's own home on that port: cd <copy> && WALKDOWN_HOME=<copy>/home node
+    <repo>/bin/walkdown.js serve --port <n>. The copy's home holds a registry
+    naming only the copy, and the registry is the only thing a server consults
+    (ADR 0003) — so served with that home it cannot list, serve or write to the
+    real ledger, however the panel's chooser is driven. --port also retargets
+    the copy's local target, so the app surface the panel frames is this
+    server's stand-in and not the real server's — without it, a pin placed on
+    the app surface would post to the real ledger through the real embed. The
+    verdict still goes in the real ledger. Take the copy away when done (node
+    tools/scratch.mjs clean <label>). The copy's prototype/ is a link to the
+    real one: write nothing under it.
   - >-
     Never serve a copy with --blueprint from the real repository, and never
     point WALKDOWN_HOME at the real home while serving one. Either way the

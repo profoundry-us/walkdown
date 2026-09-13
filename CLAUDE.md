@@ -113,7 +113,7 @@ anything that files, refuses or pins needs a scratch copy first. The shipped
 skills no longer say so — this blueprint's own `governance:` lines in
 `.walkdown/blueprints/0001-walkdown/blueprint/walkdown.yml` do, and every judge prompt carries them:
 
-    node tools/scratch.mjs new sitting-0830 --why "..."   # a copy, stamped
+    node tools/scratch.mjs new sitting-0830 --why "..." --port 4730   # a copy, stamped, app surface on 4730
     node tools/scratch.mjs list                           # what is lying about
     node tools/scratch.mjs clean sitting-0830             # or --stale
 
