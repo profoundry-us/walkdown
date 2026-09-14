@@ -1,4 +1,4 @@
-# ADR 0004 — A rule is read by a stranger
+# ADR 0004 — Rules are easy to understand
 
 - **Status:** accepted — drafted by the agent on 2026-09-13 from a walk
   through the board with Topher the same day; accepted by Topher, the
