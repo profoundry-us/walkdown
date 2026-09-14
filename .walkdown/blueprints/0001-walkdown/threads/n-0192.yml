@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-05T02:19:56.592Z
 anchor:
   rule: locations.travel.provenance-not-currency
-status: addressed
+status: verified
 body: >-
   A run's git_sha is taken from the BLUEPRINT directory, so where the home and
   the code are different repositories it names the wrong one — provenance that
@@ -52,3 +52,11 @@ replies:
       The documentation contradiction is fixed too — docs/05-runs-ledger.md no
       longer says a pass at an older `git_sha` renders stale, and now says
       plainly that it does not, and why.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on locations.travel.provenance-not-currency
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-02T18:33:02.830Z
 anchor:
   rule: locations.default.one-home-per-blueprint
-status: addressed
+status: recorded
 body: >-
   Why numbered homes came back, and why numbering works now when the registry's
   did not.
@@ -59,3 +59,4 @@ replies:
       The mechanism it describes (allocation against the blueprints/ listing,
       where the listing IS the record) was already there; what was missing
       beside it was the reason the previous two attempts failed."
+reason: decision

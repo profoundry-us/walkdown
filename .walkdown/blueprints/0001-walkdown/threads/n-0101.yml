@@ -52,3 +52,4 @@ replies:
 
       No new rule and no new check: which tab a status strip appears on is not a
       behaviour the spec states, and a check on it would be brittle.
+reason: request

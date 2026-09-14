@@ -4,7 +4,7 @@ author: topher
 created: 2026-09-07T19:00:20.683Z
 anchor:
   rule: panel.rules.owed-apart-from-said
-status: addressed
+status: verified
 body: This is good, but the rule wording is very confusing and hard to read as a
   human
 replies:
@@ -13,3 +13,11 @@ replies:
     created: 2026-09-08T17:49:59Z
     body: panel.rules.owed-apart-from-said rewritten in plain sentences — owed and
       said are two columns, and the statement now just says so.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.rules.owed-apart-from-said
+      (2026-09-14T19-03-44Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-14T19-03-44Z-local-01

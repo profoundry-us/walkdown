@@ -74,3 +74,4 @@ replies:
       ledger will refuse. The signing dialog knows the name before anything is
       judged, so it could refuse there - but that is a policy about who may hold
       a sitting, not a bug, and it is your call rather than mine.
+reason: finding

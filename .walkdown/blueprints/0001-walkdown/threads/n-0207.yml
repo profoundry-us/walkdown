@@ -33,3 +33,4 @@ replies:
       one copy of them. Verified by hand in a bare git repository with a
       redirected WALKDOWN_HOME: 'No blueprint here. Nothing in <config> claims
       this directory.' then the init/project-add line, exit 2, no stack trace."
+reason: observation

@@ -4,7 +4,7 @@ author: topher
 created: 2026-09-07T14:17:04.168Z
 anchor:
   rule: panel.rules.lifecycle-legible
-status: addressed
+status: verified
 body: >-
   Looks good, but remove this sentence from the rule, it is extraneous history
   that can be read in the relevant thread.
@@ -20,3 +20,11 @@ replies:
     body: "panel.rules.lifecycle-legible: the trailing clause arguing why a
       lifecycle drawn in its own vocabulary matters is gone. The history stays
       readable in this thread, which is where it belongs."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.rules.lifecycle-legible
+      (2026-09-14T19-03-44Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-14T19-03-44Z-local-01

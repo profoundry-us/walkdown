@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-01T20:14:09.640Z
 anchor:
   rule: threads.lifecycle.claim-never-accept
-status: addressed
+status: verified
 body: 'Not a failure of this rule — every THEN held under probing (see run
   2026-09-01T20-03-03Z). Found beside it: a personal config whose
   `identity.username` is not a string crashes lib/identity.js defaultActor
@@ -36,3 +36,11 @@ replies:
       generic 'say who you are' sentence, so the person is pointed at the line.
       Test: test/identity.test.js 'a username that is not a string counts as
       nobody and names its file'."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on threads.lifecycle.claim-never-accept
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

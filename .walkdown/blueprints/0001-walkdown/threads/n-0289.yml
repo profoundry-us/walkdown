@@ -15,3 +15,4 @@ replies:
       sentences now, one per scenario - "A rule with no build evidence yet
       offers Approve and Refine, which sign off the rule itself. A rule that has
       been built offers Pass and Fail, which judge the build."'
+reason: finding

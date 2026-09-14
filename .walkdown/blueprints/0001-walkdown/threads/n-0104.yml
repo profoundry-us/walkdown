@@ -82,3 +82,4 @@ replies:
 
       DESIGN — prototype/screens/settings.html draws one 'Record as' row, so the
       build now disagrees with the drawing. Filed as n-0114 rather than edited.
+reason: finding

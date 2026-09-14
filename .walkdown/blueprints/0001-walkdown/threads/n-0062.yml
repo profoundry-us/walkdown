@@ -26,3 +26,4 @@ replies:
       panel and present in the vendored bytes) but your extension was running
       the pre-notice copy - reload it once and both the notice and the banner
       protection are live."
+reason: feedback

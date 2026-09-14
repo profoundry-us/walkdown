@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-04T21:08:13.391Z
 anchor:
   rule: locations.answer.one-walkdown-answers
-status: addressed
+status: verified
 body: >-
   A hand-written PERSONAL entry crosses the boundary the committed one is
   refused for, and one .walkdown's server then lists, serves and writes to
@@ -120,3 +120,11 @@ replies:
       blueprint is absent from `projects`, unresolvable by `--project`, named on
       `where` with the ephemeral hint, and a lint error against the personal
       file — while standing in the pack still simply works.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on locations.answer.one-walkdown-answers
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

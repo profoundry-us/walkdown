@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-06T01:04:41.362Z
 anchor:
   rule: locations.answer.one-walkdown-answers
-status: addressed
+status: verified
 body: >-
   A blueprint that lives in the PERSONAL home is refused as a boundary crossing
   whenever any .walkdown with a config.yml sits above that home — so `walkdown
@@ -90,3 +90,11 @@ replies:
 
       Test: test/locations.test.js, 'a blueprint in the personal home answers,
       whatever sits above that home'.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on locations.answer.one-walkdown-answers
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

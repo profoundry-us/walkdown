@@ -42,3 +42,4 @@ replies:
       pin tooltip also gained an anchor, pin.tip, so the check selects it by
       anchor rather than by class. node --test 93 pass, WALKDOWN_RECORD=0 npm
       run checks:dev 23 pass, walkdown lint 0 errors."
+reason: request

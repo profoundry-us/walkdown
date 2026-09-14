@@ -34,3 +34,4 @@ replies:
       (which staled the earlier agent pass, as it should); fresh agent pass
       recorded with a screenshot. Reload the extension once more to pick it up -
       the new staleness banner will remind you from now on."
+reason: feedback

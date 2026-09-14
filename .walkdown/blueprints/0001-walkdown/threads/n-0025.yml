@@ -4,7 +4,7 @@ author: topher
 created: 2026-08-24T03:59:03Z
 anchor:
   rule: embed.pin.both-surfaces
-status: addressed
+status: verified
 body: If the prototype is fully visible, then pinning should pin on the
   prototype; if the app is fully visible, then pinning should happen on the app.
   We need to find a way to swap which one is in the foreground so that it can
@@ -39,3 +39,11 @@ replies:
       a thread with surface: prototype, screen: waitlist-admin, and a position
       in the prototype's own coordinates. Pinning back on the app records
       surface: app. Specced as embed.pin.follows-the-visible-surface.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on embed.pin.both-surfaces
+      (2026-09-07T19-15-43Z-local-01).
+reason: feedback
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-01T11:55:47.793Z
 anchor:
   rule: threads.lifecycle.claim-never-accept
-status: addressed
+status: verified
 body: "Judged 2026-09-01 against a running panel and its HTTP API; the statement
   as amended fails on the panel/HTTP door. The CLI is solid: with WALKDOWN_HOME
   pointing at a config with no identity: block (identity {username: topher,
@@ -90,3 +90,11 @@ replies:
       environment, not yours. n-0139 is verified clean — status: addressed, no
       verified_by, empty git diff. The containment gap is worth its own note and
       I have not filed one yet.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on threads.lifecycle.claim-never-accept
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

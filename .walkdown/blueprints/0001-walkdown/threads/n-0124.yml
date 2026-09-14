@@ -53,3 +53,4 @@ replies:
       tagged checks, documented in docs/08-locations.md. Migrate ran on this
       machine: projects/walkdown → blueprints/0001-walkdown with the config
       re-pointed; projects/serve-fixture reported unclaimed and left."
+reason: observation

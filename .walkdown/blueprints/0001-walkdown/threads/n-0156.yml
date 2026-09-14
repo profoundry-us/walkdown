@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-02T18:33:27.019Z
 anchor:
   rule: locations.answer.one-walkdown-answers
-status: addressed
+status: recorded
 body: >-
   Why exactly one .walkdown answers, and never two.
 
@@ -59,3 +59,4 @@ replies:
       carries the same reasoning as steps, and gained three more today from
       n-0188 and q-0176/q-0182: the personal file is now held to the same
       boundary as the committed one.'
+reason: decision

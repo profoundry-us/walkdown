@@ -4,7 +4,7 @@ author: topher
 created: 2026-08-24T05:40:55Z
 anchor:
   rule: panel.rules.detail-slide
-status: addressed
+status: verified
 body: Make the Blueprints / Rules / Screens tabs not take up the full width of
   the aside; centre them horizontally instead.
 replies:
@@ -15,3 +15,11 @@ replies:
       content and centres in the cross axis instead of filling it. Verified:
       equal margin on both sides (88px each at the sidebars 384px width) in both
       layouts."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.rules.detail-slide
+      (2026-09-07T19-15-43Z-local-01).
+reason: feedback
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

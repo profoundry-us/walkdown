@@ -6,7 +6,7 @@ anchor:
   rule: panel.rules.legend-on-demand
   screen: review
   element: panel.legend
-status: addressed
+status: verified
 body: >-
   Agent walkdown 2026-08-29: the legend does not list every state an evidence
   mark can take.
@@ -58,3 +58,11 @@ replies:
 
       Re-judged against a disposable copy: eight evidence rows where there were
       seven, every other row unchanged.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.rules.legend-on-demand
+      (2026-09-07T19-15-43Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

@@ -4,7 +4,7 @@ author: topher
 created: 2026-09-07T23:51:57.912Z
 anchor:
   rule: panel.signoff.spec-pair-derived
-status: addressed
+status: verified
 body: "This rule is fine, but needs to be reworded; this part just doesn't make
   sense to me: \"offers Approve and Refine, and sign-off records, skips and
   blocks never count as build evidence.\""
@@ -15,3 +15,11 @@ replies:
     body: "panel.signoff.spec-pair-derived rewritten: the pair of verdict buttons
       comes from the spec, and an approval, a skip or a block records what
       somebody decided rather than that something was built."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.signoff.spec-pair-derived
+      (2026-09-14T19-03-44Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-14T19-03-44Z-local-01

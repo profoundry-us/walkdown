@@ -4,7 +4,7 @@ author: topher
 created: 2026-08-24T04:45:43Z
 anchor:
   rule: panel.rules.step-between
-status: addressed
+status: verified
 body: After selecting a rule, the next and previous buttons do not change the
   page, though going back to All rules and selecting that same rule does. It
   just needs to be wired up to select the rule.
@@ -33,3 +33,11 @@ replies:
     body: 'Correction to the reply above: a word was eaten writing it. The sentence
       should read "next and previous assigned the selected row directly and
       re-rendered".'
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.rules.step-between
+      (2026-09-08T16-38-59Z-local-01).
+reason: feedback
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

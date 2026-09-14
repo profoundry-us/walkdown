@@ -6,7 +6,7 @@ anchor:
   rule: panel.rules.names-its-screen
   screen: rule-detail
   element: detail.screen
-status: addressed
+status: verified
 body: >-
   Agent walkdown 2026-08-29: an unknown screen id is marked only by colour, and
   by the wrong colour.
@@ -52,3 +52,11 @@ replies:
       storyboard does not carry, in a disposable copy of the blueprint. Also
       checked the case the fix could have broken - a known screen still draws
       its storyboard title with the id chip beside it.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.rules.names-its-screen
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

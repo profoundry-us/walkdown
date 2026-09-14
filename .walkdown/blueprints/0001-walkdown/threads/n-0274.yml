@@ -6,7 +6,7 @@ created: 2026-09-10T13:16:53.138Z
 anchor:
   rule: embed.pin.right-project
   screen: review
-status: addressed
+status: verified
 body: "Agent walkdown 2026-09-10 (run 2026-09-10T13-13-00Z-local-01): the fourth
   THEN does not hold in the framed delivery. On a scratch server offering two
   blueprints (default 'blueprint', plus a copy 'sibling'), with the panel open
@@ -84,3 +84,11 @@ replies:
 
 
       Awaiting a re-judge.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on embed.pin.right-project
+      (2026-09-14T19-03-44Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-14T19-03-44Z-local-01

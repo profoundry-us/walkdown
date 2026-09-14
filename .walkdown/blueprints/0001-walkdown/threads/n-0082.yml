@@ -4,7 +4,7 @@ author: Topher Fangio
 created: 2026-08-26T03:31:58Z
 anchor:
   rule: panel.start.open-a-folder
-status: addressed
+status: verified
 body: I think this is working, but I don't know what it means by "while naming
   the folder the server is holding open". I don't think we name any folders
   anywhere in the app, and I don't think we need to.
@@ -26,3 +26,11 @@ replies:
       entirely, that is a code change and I have not made one this wave; say the
       word and it becomes its own note. Statement rehashed; verdict awaits your
       re-judgement."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.start.open-a-folder
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

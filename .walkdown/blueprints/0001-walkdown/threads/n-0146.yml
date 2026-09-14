@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-01T20:11:31.755Z
 anchor:
   rule: locations.answer.declared-not-discovered
-status: addressed
+status: verified
 body: |-
   The last THEN still fails, in a different place: when the REPOSITORY config is the broken one, `walkdown where` blames the personal file for the repository's parse error — and does not say the personal file answered, though it did.
 
@@ -69,3 +69,11 @@ replies:
 
 
       Claiming, not accepting.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on locations.answer.declared-not-discovered
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

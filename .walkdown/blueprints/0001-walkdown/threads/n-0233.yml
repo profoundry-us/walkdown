@@ -29,3 +29,4 @@ replies:
       updates the pane in place, which is what stops an ordinary repaint from
       losing your place — and is exactly why a DIFFERENT rule arrived still
       scrolled to the last one's position.
+reason: finding

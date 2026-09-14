@@ -57,3 +57,4 @@ replies:
       while doing this. The shared tmp/test-home/skills outlives a run, and with
       skills now always going there, these cases had started passing or failing
       on what an earlier run happened to leave behind.
+reason: finding

@@ -6,7 +6,7 @@ anchor:
   rule: panel.walkdown.fail-requires-why
   screen: rule-detail
   element: detail.verdict
-status: addressed
+status: verified
 body: "Agent judging 2026-09-01: FAIL on the during-the-session clause. The
   why-gate counts a thread that predates the session when both land in the same
   wall-clock second, so an empty-box Fail records silently. Driven on a scratch
@@ -66,3 +66,11 @@ replies:
       (3.3s after start) does open it — judged within the statement's purpose
       clause (an actionable why that arrived during the session), so measured
       and left on record here rather than failed."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.walkdown.fail-requires-why
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

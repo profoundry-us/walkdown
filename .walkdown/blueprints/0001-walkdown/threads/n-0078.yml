@@ -22,3 +22,4 @@ replies:
       out: the rule's fourth THEN step still described 'one panel and one badge,
       not two' - the badge that n-0058 removed - so retiring cleared a stale
       step as well. Lint 0 errors, node --test 93/93."
+reason: finding

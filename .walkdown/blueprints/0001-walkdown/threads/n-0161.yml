@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-02T19:58:45.178Z
 anchor:
   rule: locations.pointer.owns-only-its-block
-status: addressed
+status: verified
 body: >-
   Default `walkdown init` (--commit none) writes the pointer as an ABSOLUTE
   path, so the one file version control receives is machine-specific.
@@ -69,3 +69,11 @@ replies:
       it held. Checks: test/locations.test.js nothing-in-the-tree asserts the
       tree is byte for byte as found; in-repo-on-request asserts the relative
       pointer and its removal. Claiming, not accepting.'
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on locations.pointer.owns-only-its-block
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-01T01:18:29.288Z
 anchor:
   rule: locations.default.one-home-per-blueprint
-status: addressed
+status: verified
 body: "Observed while judging this rule (run 2026-09-01T01-06-46Z-local-01),
   distinct from the n-0129 migrate finding: in a repository whose first pack has
   already claimed an out-of-tree blueprint, a second 'walkdown init --dir
@@ -34,3 +34,11 @@ replies:
       packs/b/.walkdown/blueprints/0001-b; 'walkdown where spec' from each of
       the three directories names its own. Nothing attaches silently to a
       sibling any more."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on locations.default.one-home-per-blueprint
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

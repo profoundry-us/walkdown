@@ -4,7 +4,7 @@ author: Topher Fangio
 created: 2026-08-27T02:16:50Z
 anchor:
   rule: panel.dock.toolbar
-status: addressed
+status: verified
 body: I can select a different screen, and it changes; but when I open the panel
   again, it's still showing the "Detect" option as selected no matter what
   screen I select.
@@ -29,3 +29,11 @@ replies:
       picking Detect again hands it back. The check fails on the unfixed panel.
       Full suite: node --test 93 pass, WALKDOWN_RECORD=0 npm run checks:dev 23
       pass, walkdown lint 0 errors."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.dock.toolbar
+      (2026-09-07T19-15-43Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

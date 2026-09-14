@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-03T02:56:30.479Z
 anchor:
   rule: locations.answer.declared-not-discovered
-status: addressed
+status: verified
 body: |-
   Three smaller doors of the same family as n-0167 - a base-less value resolved where you stand, or a row computed over the merge instead of over the file it describes. None is the fail on its own; they are here so the next fix can close them together.
 
@@ -31,3 +31,11 @@ replies:
       names the id the committed row carries. Test: 'the repository's row is
       read from the committed file, defaults and stray roots are set aside, and
       --project names the id'."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on locations.answer.declared-not-discovered
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

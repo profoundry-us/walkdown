@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-01T11:52:17.378Z
 anchor:
   rule: threads.lifecycle.acts-for-a-person
-status: addressed
+status: verified
 body: >-
   Judged 2026-09-01 against a scratch copy served at :4744 (home identity:
   scratch-person). Two clauses fail.
@@ -85,3 +85,11 @@ replies:
 
       Not addressed, and not yours to chase: the RSpec adapter you found clean
       stayed clean.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on threads.lifecycle.acts-for-a-person
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

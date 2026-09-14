@@ -36,3 +36,4 @@ replies:
       The every-door test now asserts the refusal names the fixture's own
       redirected home, which is what makes the assertion bite rather than just
       matching the word identity."
+reason: observation

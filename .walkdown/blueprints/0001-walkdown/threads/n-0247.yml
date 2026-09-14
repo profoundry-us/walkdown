@@ -77,3 +77,4 @@ replies:
       reach opacity. Landing on an end opens pinning again and the sentence
       changes with it. The anchor is panel.pin-why, now declared on the review
       screen.
+reason: finding

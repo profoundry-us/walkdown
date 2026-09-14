@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-03T02:57:27.769Z
 anchor:
   rule: locations.answer.one-walkdown-answers
-status: addressed
+status: verified
 body: "Seen while judging 2026-09-03 (run 2026-09-03T02-45-46Z-local-01, PASS -
   not the reason for any verdict). The q-0168 refusal misfires on a symlinked
   path: standing inside packs/gamma and naming gamma's own blueprint through
@@ -29,3 +29,11 @@ replies:
       listed rather than as lying under itself. Test: 'a pack's own blueprint
       named through another spelling of its path is already listed, not
       refused'."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on locations.answer.one-walkdown-answers
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

@@ -119,3 +119,4 @@ replies:
       pressing an end BUTTON after the drag rebuilds the bar and papers over the
       broken part, so the assertion has to move the fade a second time. A check
       that only pressed the button passed against the bug.
+reason: finding

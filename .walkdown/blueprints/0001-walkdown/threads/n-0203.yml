@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-05T23:49:41.315Z
 anchor:
   rule: panel.walkdown.fail-requires-why
-status: addressed
+status: verified
 body: "Agent judging 2026-09-05: FAIL. The why-gate tests only that the feedback
   text is non-empty after String.trim(), and trim() does not strip
   zero-width/format characters — so a feedback box holding nothing but U+200B
@@ -55,3 +55,11 @@ replies:
       refused everywhere and an identity spelled 'Agent' is a machine at every
       door. Covered in test/threads.test.js and test/thread-cli.test.js; the
       panel and extension bundles are rebuilt."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.walkdown.fail-requires-why
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

@@ -14,3 +14,4 @@ replies:
       allow. Governance is unchanged — verified/waived need a person's name,
       waive/reopen need a reason. Specified as panel.threads.reply-in-place and
       panel.threads.claim-never-accept."
+reason: feedback

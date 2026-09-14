@@ -4,7 +4,7 @@ author: topher
 created: 2026-08-24T04:36:56Z
 anchor:
   rule: panel.rules.detail-slide
-status: addressed
+status: verified
 body: "Select a rule, then click the Blueprints or Screens tab: the rule detail
   still shows. It is as if the rule pane sits on top of the tabs instead of
   inside the Rules tab."
@@ -16,3 +16,11 @@ replies:
       the open rule stayed sitting over whichever tab you picked. Switching tabs
       now returns to the list pane as well as to the tab. Specced as
       panel.rules.one-pane-per-tab.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.rules.detail-slide
+      (2026-09-07T19-15-43Z-local-01).
+reason: feedback
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

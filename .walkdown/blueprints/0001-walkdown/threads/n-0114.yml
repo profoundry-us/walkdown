@@ -15,8 +15,9 @@ body: >-
   n-0104 split one identity into two: a USERNAME, which every record is written
   under, and a FULL NAME, which is only ever shown. Settings therefore carries
   two fields where prototype/screens/settings.html draws one "Record as" row —
-  `settings.actor` is now the username, and a second row, `settings.display-name`,
-  holds the full name, with a line under the pair saying which is which.
+  `settings.actor` is now the username, and a second row,
+  `settings.display-name`, holds the full name, with a line under the pair
+  saying which is which.
 
 
   The review screen changed with it: the session strip shows the full name and,
@@ -30,3 +31,4 @@ body: >-
   Both anchors are declared in the storyboard and carried as data-testid. What
   is wanted from design is the drawing catching up: the second Settings row, and
   the handle beside the name in the strip.
+reason: request

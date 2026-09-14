@@ -25,3 +25,4 @@ replies:
       show a pointer, the textarea shows a caret, and clicks inside the form
       never place another pin. Verified live — the form's button computes
       cursor: pointer while pin mode is on. Rule embed.pin.form-is-chrome."
+reason: feedback

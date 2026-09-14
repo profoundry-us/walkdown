@@ -4,7 +4,7 @@ author: Topher Fangio
 created: 2026-09-01T05:27:34.007Z
 anchor:
   rule: locations.default.records-follow-the-spec
-status: addressed
+status: recorded
 body: >-
   Decision: two config files, and which one a team uses IS the decision about
   whether the spec is shared.
@@ -75,3 +75,4 @@ replies:
       shared is read off the tree - where the home sits and whether
       .walkdown/.gitignore exists - never recorded in either file. A team with
       no repo config keeps everything personal, exactly as decided here."
+reason: decision

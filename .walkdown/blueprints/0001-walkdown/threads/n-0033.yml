@@ -4,7 +4,7 @@ author: topher
 created: 2026-08-24T04:39:34Z
 anchor:
   rule: panel.dock.own-skin
-status: addressed
+status: verified
 body: At some point we lost the fun blueprint background behind the page. Add it
   back.
 replies:
@@ -22,3 +22,11 @@ replies:
       transparent; paintDesk also clears whatever a host page put on body, so
       nothing else can cover it the same way later. The docked layout was never
       affected - there the page IS body, and it is meant to cover the desk.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.dock.own-skin
+      (2026-09-07T19-15-43Z-local-01).
+reason: feedback
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

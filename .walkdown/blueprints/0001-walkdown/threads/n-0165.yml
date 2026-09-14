@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-03T01:31:37.489Z
 anchor:
   rule: locations.default.in-repo-on-request
-status: addressed
+status: verified
 body: >-
   Moving the home back out of the repository rewrites the personal config in
   YAML flow style.
@@ -38,3 +38,11 @@ replies:
       before an entry is added, so a list a relocation emptied to `projects: []`
       comes back as `projects:\\n  - id: ...`. Covered by the same test as
       n-0164, which reads the personal file after moving the home back out."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on locations.default.in-repo-on-request
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

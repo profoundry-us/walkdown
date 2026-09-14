@@ -47,3 +47,4 @@ replies:
     body: Fix is in the same commit as this note - the test now restores the mtime
       it found rather than stamping the file with now, and a full suite run
       leaves lib/ and bin/ untouched.
+reason: observation

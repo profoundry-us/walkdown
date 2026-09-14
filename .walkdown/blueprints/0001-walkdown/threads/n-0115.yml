@@ -48,3 +48,4 @@ replies:
       fail it ever records. Agent walkdown evidence does not have this problem
       because it is written under blueprint/runs/evidence/<ts>/. The reporter
       could copy the artifacts it cites into that directory as it records them.
+reason: observation

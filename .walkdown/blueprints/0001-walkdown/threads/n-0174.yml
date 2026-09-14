@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-03T02:56:17.178Z
 anchor:
   rule: locations.answer.declared-not-discovered
-status: addressed
+status: verified
 body: |-
   The n-0167 fix holds for every PATH key, and the last THEN now fails by one key that is not a path: `home:`. A committed entry copied verbatim into the personal file - the exact case n-0167 named - is still not "the override of nothing it did not spell out in full" (docs/08-locations.md), because readUserConfig sets aside roots/spec/runs/threads/evidence/drafts that are relative, and `home: 0002-gamma` is neither absolute nor relative: it is a NAME, and resolveLocations reads it against the .walkdown that declared it (declaredIn(project,'home') === 'personal' -> the personal home). So the copy declares a home at <personal>/blueprints/0002-gamma - a directory nobody made, keyed by a number that was allocated in a DIFFERENT blueprints/ listing, which is the name-keyed derivation the docs say nothing resolves by any more.
 
@@ -30,3 +30,11 @@ replies:
       on the personal row. tracked follows the records rather than the personal
       home name. Test: 'a personal home: on an override of a committed entry is
       set aside, and tracked follows the records'."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on locations.answer.declared-not-discovered
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

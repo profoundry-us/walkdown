@@ -4,7 +4,7 @@ author: Topher Fangio
 created: 2026-09-01T04:54:57.686Z
 anchor:
   rule: threads.lifecycle.claim-never-accept
-status: addressed
+status: recorded
 body: >-
   Decision: identity is read, never supplied. It comes from the config, an agent
   may never change it without explicit permission, and it may never be
@@ -152,3 +152,4 @@ replies:
       The rule's statement is amended, so its agent verdict is honestly stale
       and awaits a judging. threads.lifecycle.acts-for-a-person is added for the
       half the old statement had no words for; both checks cells pass.
+reason: decision

@@ -4,7 +4,7 @@ author: Topher Fangio
 created: 2026-08-24T16:04:37Z
 anchor:
   rule: embed.pin.viewport-recorded
-status: addressed
+status: verified
 body: I failed this because we have not built different viewports yet, so I
   could not test it.
 replies:
@@ -32,3 +32,11 @@ replies:
       point (they now keep the point and the offset within the element). Nothing
       here is a human verdict - embed.pin.viewport-recorded still carries your
       fail, and only you can lift it."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on embed.pin.viewport-recorded
+      (2026-09-07T19-15-43Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

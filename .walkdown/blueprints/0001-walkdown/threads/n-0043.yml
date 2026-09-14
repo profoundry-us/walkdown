@@ -4,7 +4,7 @@ author: topher
 created: 2026-08-24T05:42:00Z
 anchor:
   rule: panel.rules.detail-slide
-status: addressed
+status: verified
 body: Give each of the Blueprints / Rules / Screens tabs its own icon.
 replies:
   - author: agent
@@ -14,3 +14,11 @@ replies:
       browser for Screens. Synced through tools/sync-phosphor.mjs like the rest
       of the panel's icons, so there's one source rather than three hand-pasted
       svgs.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.rules.detail-slide
+      (2026-09-07T19-15-43Z-local-01).
+reason: feedback
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

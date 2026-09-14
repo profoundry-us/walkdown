@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-05T03:00:03.634Z
 anchor:
   rule: locations.keeping.moving-is-a-decision
-status: addressed
+status: verified
 body: >-
   The copy path of `walkdown move` rewrites symlinks to suit the new address,
   and two destination shapes still exit with a raw stack trace.
@@ -64,3 +64,11 @@ replies:
 
       Thank you for the RAM disk. That is the first time the EXDEV half has been
       driven rather than reasoned about.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on locations.keeping.moving-is-a-decision
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

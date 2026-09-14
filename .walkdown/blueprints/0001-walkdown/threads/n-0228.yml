@@ -4,7 +4,7 @@ author: topher
 created: 2026-09-07T18:57:56.461Z
 anchor:
   rule: panel.rules.lifecycle-legible
-status: addressed
+status: verified
 body: Rule is good; but remove this text from it "because a lifecycle drawn in
   its own vocabulary put a lone mark where every neighbouring row had three, and
   a rule whose only fault was not being built yet read as an alarm."
@@ -15,3 +15,11 @@ replies:
     body: "Same edit as n-0224: the trailing history is off
       panel.rules.lifecycle-legible's statement. The rule now says what it
       requires and stops."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.rules.lifecycle-legible
+      (2026-09-14T19-03-44Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-14T19-03-44Z-local-01

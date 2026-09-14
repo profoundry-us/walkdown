@@ -4,7 +4,7 @@ author: topher
 created: 2026-09-07T19:48:27.690Z
 anchor:
   rule: panel.walkdown.draft-on-disk
-status: addressed
+status: verified
 body: >-
   Four times in a fortnight a field was handed to a hop that did not carry it,
   and nothing anywhere said so: roles at the run door (2026-08-24, again
@@ -44,3 +44,11 @@ replies:
       --as-agent, so it carries his name and no via. The decision to file was
       his; the sentences were the machine's. This reply carries the via the
       first message should have had."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.walkdown.draft-on-disk
+      (2026-09-08T16-38-59Z-local-01).
+reason: feedback
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

@@ -32,3 +32,4 @@ replies:
       going nowhere. The tagged check in checks/panel.spec.js now asserts no
       hrefless <a> survives and the link text still reads. (The rule did have a
       check; it lives in checks/, which the grep of test/ missed.)"
+reason: finding

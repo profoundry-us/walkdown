@@ -5,7 +5,7 @@ created: 2026-08-31T04:11:53Z
 anchor:
   rule: panel.walkdown.note-with-any-verdict
   screen: rule-detail
-status: addressed
+status: verified
 body: "Agent sitting 2026-08-31: FAIL — the feedback box is not emptied by the
   verdict that files it. The panel clears its own copy (S.verdictNote = '' in
   giveVerdict) and re-renders, but the textarea's dirtied value survives the lit
@@ -57,3 +57,11 @@ replies:
       rule's scope: the detail.say refusal message survives rule changes and
       shows on panes it does not belong to, including the sign pair which has no
       Fail button."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.walkdown.note-with-any-verdict
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

@@ -13,3 +13,4 @@ replies:
       docked panel — is excluded from pin targeting via a shared marker, and
       Escape closes an open form then leaves pin mode. Specified as
       panel.dock.chrome-not-a-pin-target."
+reason: feedback

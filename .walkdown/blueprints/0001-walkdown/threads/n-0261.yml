@@ -97,3 +97,4 @@ replies:
       panel.start.choose-a-blueprint's screen is unreachable at start - and its
       statement describes the count mechanism this rule forbids. That is a spec
       collision, not mine to settle.
+reason: finding

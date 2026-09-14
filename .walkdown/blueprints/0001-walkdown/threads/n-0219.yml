@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-06T16:54:34.564Z
 anchor:
   rule: locations.default.one-home-per-blueprint
-status: addressed
+status: verified
 body: >-
   Concurrent `init` from several checkouts loses config rows, and the homes it
   made are stranded and unreported.
@@ -130,3 +130,11 @@ replies:
       - has no path to it any more, because no row is lost. Finding 3 was closed
       in the reply above. The rule is being re-judged now, by an agent that has
       not seen this thread.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on locations.default.one-home-per-blueprint
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

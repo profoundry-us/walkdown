@@ -4,7 +4,7 @@ author: topher
 created: 2026-08-24T05:30:02Z
 anchor:
   rule: panel.dock.own-skin
-status: addressed
+status: verified
 body: "Add a left-aligned checkbox at the bottom of the desk tuner, \"Hide app
   temporarily\", label to the right of the box, that dims the app to 10% opacity
   so the ruling can be judged against it rather than against nothing. It should
@@ -46,3 +46,11 @@ replies:
       Folded into panel.dock.own-skin as two more steps rather than a new rule -
       both are about the same thing the existing steps already cover, how the
       reviewer tunes their own desk.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.dock.own-skin
+      (2026-09-07T19-15-43Z-local-01).
+reason: feedback
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

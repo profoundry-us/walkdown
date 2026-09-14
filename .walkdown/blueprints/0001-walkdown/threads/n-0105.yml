@@ -64,3 +64,4 @@ replies:
 
       No new rule and no check: which colour a transient message wears is
       cosmetic, and asserting on it would be brittle.
+reason: request

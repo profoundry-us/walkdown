@@ -4,7 +4,7 @@ author: Topher Fangio
 created: 2026-08-26T03:15:59Z
 anchor:
   rule: panel.delivery.framed-isolation
-status: addressed
+status: verified
 body: "This is working fine, but again the rule verbiage doesn't make a lot of
   sense; needs rewording: \"because that is the only arrangement in which what
   the app draws cannot reach walkdown, and the one thing only an extension can
@@ -22,3 +22,11 @@ replies:
       panel follows the app to whatever screen it navigates to, including
       without a page load. Statement rehashed; verdict awaits your
       re-judgement."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.delivery.framed-isolation
+      (2026-09-07T19-15-43Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

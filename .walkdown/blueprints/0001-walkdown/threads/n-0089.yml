@@ -4,7 +4,7 @@ author: Topher Fangio
 created: 2026-08-26T15:05:18Z
 anchor:
   rule: panel.desk.tuner
-status: addressed
+status: verified
 body: working as intended
 replies:
   - author: agent
@@ -62,3 +62,11 @@ replies:
       run 2026-08-27T06-25-29Z-local-01, evidence under
       runs/evidence/2026-08-27T06-25-29Z/. Marking this addressed — accepting it
       is still yours.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.desk.tuner
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

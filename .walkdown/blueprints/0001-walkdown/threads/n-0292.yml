@@ -29,3 +29,4 @@ replies:
       checks/fixtures/extension.html defaulted buildHash to a hash matching
       nothing, so every check ran with a stale badge in the bar - it now sets
       one only when a check names it."
+reason: finding

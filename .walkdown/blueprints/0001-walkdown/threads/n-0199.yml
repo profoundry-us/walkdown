@@ -50,3 +50,4 @@ body: >-
   Playwright `webServer` binds an ephemeral port would record that port as the
   place its verdict belongs to, which is exactly what this rule's second clause
   forbids.
+reason: observation

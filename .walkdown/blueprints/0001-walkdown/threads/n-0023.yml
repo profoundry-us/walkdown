@@ -23,3 +23,4 @@ replies:
       Verified in the browser: with pin mode on, a drag off the end turned it
       off, dropped the crosshair and disabled the control; a drag back to the
       end re-enabled it. Specced as panel.dock.no-pin-mid-fade.
+reason: feedback

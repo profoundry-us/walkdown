@@ -4,7 +4,7 @@ author: topher
 created: 2026-09-07T23:47:35.915Z
 anchor:
   rule: panel.walkdown.verdicts-at-hand
-status: addressed
+status: verified
 body: >-
   This is working, but we don't actually need to see the "XX judged this
   session" (detail.judged) under the button because it's already displayed in
@@ -26,3 +26,11 @@ replies:
       the count, and its steps now say that the feedback box is the only thing
       between the statement and the buttons, so a judge reading the rule is not
       surprised by panel.walkdown.note-with-any-verdict's box.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.walkdown.verdicts-at-hand
+      (2026-09-14T19-03-44Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-14T19-03-44Z-local-01

@@ -4,7 +4,7 @@ author: Topher Fangio
 created: 2026-08-27T02:25:48Z
 anchor:
   rule: panel.rules.setup-says-how-to-arrive
-status: addressed
+status: verified
 body: Instead of "To Get Here" let's just name it "Setup"
 replies:
   - author: agent
@@ -16,3 +16,11 @@ replies:
       text (checks/panel.spec.js, @rule:panel.rules.setup-says-how-to-arrive).
       Verified: it fails against the old \"To get here\" and passes now, in
       recorded run 2026-08-27T05-00-07Z-local-01."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.rules.setup-says-how-to-arrive
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

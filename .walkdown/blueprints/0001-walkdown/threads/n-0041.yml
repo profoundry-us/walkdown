@@ -4,7 +4,7 @@ author: topher
 created: 2026-08-24T05:40:55Z
 anchor:
   rule: panel.dock.own-skin
-status: addressed
+status: verified
 body: Clicking outside of the tuner or hitting escape should close the tuner.
   Also position the tuner further down and to the right - it currently lines up
   exactly with the app's own corner and looks like it belongs to the app rather
@@ -35,3 +35,11 @@ replies:
       Verified in both layouts: opening, clicking a dial (stays open), clicking
       the checkbox (stays open), clicking outside on the app or the desk
       (closes), Escape (closes), and the gear toggling normally throughout.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.dock.own-skin
+      (2026-09-07T19-15-43Z-local-01).
+reason: feedback
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

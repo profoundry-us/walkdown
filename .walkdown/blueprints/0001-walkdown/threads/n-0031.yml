@@ -4,7 +4,7 @@ author: topher
 created: 2026-08-24T04:36:56Z
 anchor:
   rule: panel.rules.detail-slide
-status: addressed
+status: verified
 body: Nothing in the panel moves the surface. Changing the blueprint does not
   change the URL that is loaded; selecting a rule does not navigate to its page
   in the prototype or the app; selecting a screen on the Screens tab does
@@ -43,3 +43,11 @@ replies:
       invites.batch.confirm-count moved it to waitlist-admin; switching from the
       example blueprint to walkdown's own moved the frame to that blueprint's
       first screen. Specced as panel.rules.takes-you-there.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.rules.detail-slide
+      (2026-09-07T19-15-43Z-local-01).
+reason: feedback
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

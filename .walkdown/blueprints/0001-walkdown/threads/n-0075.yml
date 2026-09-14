@@ -4,7 +4,7 @@ author: Topher Fangio
 created: 2026-08-26T03:06:44Z
 anchor:
   rule: panel.dock.one-pin-mode
-status: addressed
+status: verified
 body: See my newest comment; I think this is working fine except for the fact
   that we don't need the badge anymore.
 replies:
@@ -24,3 +24,11 @@ replies:
       and the button and cursor both follow; and the bar's button is the only
       way in, so there is no second control to fall out of step. Both badge
       steps are deleted. Statement rehashed; verdict awaits your re-judgement."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.dock.one-pin-mode
+      (2026-09-07T19-15-43Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

@@ -44,3 +44,4 @@ replies:
       One test was leaning on the developer's git config to decide what
       identity.source should say, and failed under that probe. It now pins a
       home with a declared identity and asserts the order outright.
+reason: observation
