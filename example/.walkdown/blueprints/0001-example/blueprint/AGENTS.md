@@ -67,6 +67,41 @@ notes), and the runs ledger. The blueprint is the single source of truth for
   is current, the bundle has no top-level imports, every name resolves — are
   Highball's, not walkdown's.
 
+## Writing a rule
+
+**A statement is written for a stranger.** Someone who has never seen this
+blueprint reads it alone, with no steps, no because and no history, and knows
+what the rule wants. (ADR 0004 has the reasoning and the before/after pairs.)
+
+- **One or two sentences, present tense, saying what is true of the built
+  thing.** Past 45 words or two sentences it is almost always restating its
+  steps; lint warns.
+- **The steps carry the detail.** If a sentence could be pasted into `then:`,
+  it belongs there. The statement does not enumerate the cases the steps
+  enumerate.
+- **Name the thing, not the category.** "Three kinds of record: a thread, a
+  draft, a run", not "specification". "Which commit it saw", not
+  "provenance".
+- **When something is shown, kept, read or recorded, say where.** The
+  session strip. Every record. The files themselves. Steps name the anchor;
+  the statement names the place in plain words.
+- **Plain words over house words.** A glossary term is fine when the sentence
+  still reads without knowing it.
+- **No dash-clauses.** A dash is where a second thought got bolted on. Give
+  it a sentence, move it to a step, or cut it.
+- **One exception per sentence.** "…reads as stale, unless a person declared
+  the rewording as words only." Not an unless, then an "in which case", then
+  a dash.
+- **This rule's claim only.** A sentence that would still be true with this
+  rule deleted belongs to another rule.
+- **`because` is the reason the rule is worth having, in one breath.** Not
+  the mechanism (a code comment), not a neighbour's reason, not a general
+  principle. Past 35 words it is usually carrying `history`; lint warns.
+- **`history` is what happened, with its date or count.** A past tense, a
+  thread id, a number. Optional; the `origin:` thread usually carries it.
+- **Rewording is `walkdown hash --write --reword "<why>"`.** The old hash is
+  kept and no verdict goes stale. Better English is never a new rule.
+
 ## Writing code here
 
 `docs/10-house-style.md` is how code in this repository is written - it is

@@ -36,20 +36,28 @@ derives from it.
      by id** — never URLs or CSS. Steps double as the human walkthrough
      script, so write them clickable.
 
-4. **Hash.** `walkdown hash --write` stamps every statement.
+4. **Read each statement alone.** Cover the steps, the because and the
+   history, and read the statement as a stranger would. Does it say what the
+   rule wants, in one or two sentences, in words a product or design reader
+   would use? If it lists cases, they are steps. If it argues, that is
+   `because`. If it has a dash-clause, that is a second sentence or a cut.
+   The template AGENTS.md has the checklist ("Writing a rule"); ADR 0004
+   has the before/after pairs.
 
-5. **Questions, not guesses.** Everything the source doesn't answer (empty
+5. **Hash.** `walkdown hash --write` stamps every statement.
+
+6. **Questions, not guesses.** Everything the source doesn't answer (empty
    states, error copy, edge flows) becomes a question thread anchored to the
    rule/screen — do not invent product decisions. Proceeding on an assumption
    is allowed only if the thread records the assumption.
 
-6. **Lint early.** `walkdown lint --no-checks` until the structure is clean.
+7. **Lint early.** `walkdown lint --no-checks` until the structure is clean.
 
-7. **Checks.** One test per `checks` rule, in the project's own framework,
+8. **Checks.** One test per `checks` rule, in the project's own framework,
    tagged with the rule id, selecting by anchor. Then `walkdown run` and a
    full `walkdown lint`.
 
-8. **Report.** `walkdown status` — say what's verified, what awaits judgment
+9. **Report.** `walkdown status` — say what's verified, what awaits judgment
    (`agent`/`human` rules), what questions are open, and any drift (screens
    awaiting design).
 

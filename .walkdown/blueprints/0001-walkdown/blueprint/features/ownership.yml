@@ -56,6 +56,25 @@ stories:
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
+      - id: ownership.authoring.statement-reads-at-a-glance
+        origin: walkdown
+        created_at: 2026-09-13
+        statement: A statement is one or two sentences a stranger can read without the steps. Lint names a statement that has grown into a paragraph, and a reason that has grown into a story.
+        because: A rule is read by product and design before it is built, and a statement restating its own steps hides what it wants.
+        history: Twenty-two of 132 statements had grown past forty-five words, every one restating its then-steps, and were reworded in one sitting (ADR 0004, 2026-09-13).
+        verify: [checks]
+        steps:
+          given:
+            - A rule whose statement runs past forty-five words or three sentences, and one whose because runs past thirty-five words
+          when:
+            - The blueprint is linted
+          then:
+            - The long statement is a warning that says what a statement is for, not only what number it crossed
+            - The long because is a warning that says what belongs in history
+            - A statement under the line is silent, whatever else is true of it
+            - Both are warnings, never errors, because length is a symptom and a person decides
+          statement_hash: sha256:97f1bacfb270
+
   - id: ownership.writes
     title: The server writes specification, never implementation
     statement: As a team, we can let a browser talk to the review server because the only things a request can create are the things review is FOR - feedback, sittings, verdicts - and never the product itself.

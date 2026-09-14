@@ -103,7 +103,9 @@ stories:
   it, and a sentence here is for when the rule does not make sense at a glance
   without one). Neither is hashed: rewording either never puts a rule back on the
   queue. How the code does it belongs in a code comment, not in any of the three.
-  Lint warns on a statement carrying a "because".
+  Lint warns on a statement carrying a "because", on one grown past forty-five
+  words, and on a `because` past thirty-five. How a statement reads when it is
+  right, with before/after pairs: [ADR 0004](adr/0004-rules-are-easy-to-understand.md).
 - **The hash pins the statement and the steps.** Steps carry `statement_hash`, computed
   over both; `walkdown lint` flags a rule whose hash no longer matches: the wording moved
   and every verdict on it reads stale. `walkdown hash --write` re-stamps it; add

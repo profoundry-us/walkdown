@@ -554,7 +554,7 @@ test('a run holding verdicts but no date is named as filling no cell', () => {
  * usually carrying what happened, which is history (ADR 0004). Warnings,
  * not errors: length is a symptom and a person decides.
  */
-test('a statement the length of a paragraph, and a because carrying history, are named', () => {
+test('a statement the length of a paragraph, and a because carrying history, are named @rule:ownership.authoring.statement-reads-at-a-glance', () => {
   const h = writeFixture(join(root, 'paragraph'));
   const file = join(h.spec, 'features', 'demo.yml');
   const long = Array.from({ length: 46 }, (_, i) => `word${i}`).join(' ');
@@ -569,6 +569,9 @@ test('a statement the length of a paragraph, and a because carrying history, are
   assert.ok(codes.includes('statement-reads-as-a-paragraph'), codes.join(','));
   assert.ok(codes.includes('because-carries-history'), codes.join(','));
   assert.match(findings.find((f) => f.category === 'statement-reads-as-a-paragraph').message, /46 words/);
+  // The message says what the field is for, not only what number it crossed.
+  assert.match(findings.find((f) => f.category === 'statement-reads-as-a-paragraph').message, /goal in one breath/);
+  assert.match(findings.find((f) => f.category === 'because-carries-history').message, /history/);
   // Three short sentences trip it too - the count is of breaths, not words.
   writeFileSync(file, readFileSync(file, 'utf8').replace(`${long}.`, 'One thing. Then another. And a third.'));
   const again = lint(load(h), { checks: false }).findings.map((f) => f.category);
