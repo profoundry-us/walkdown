@@ -84,8 +84,8 @@ stories:
 
       - id: status.derived.addressless-runs-count
         origin: thread:q-0070
-        statement: A run that recorded no `base_url` still counts in the status as one of this system's runs. A result carrying no `statement_hash` is already treated the same way.
-        because: It cannot be shown to belong to a system other than this one.
+        statement: A run that recorded no `base_url` still counts in the status as one of this system's runs.
+        because: A run with no `base_url` cannot be shown to belong to any other system, so it is counted as this one's, just as a result with no `statement_hash` already is.
         verify: [checks]
         steps:
           given:
@@ -94,7 +94,7 @@ stories:
             - Status is derived for a target that has an address configured
           then:
             - That run still fills its cells rather than being discarded
-          statement_hash: sha256:22d2d7ff7f6b
+          statement_hash: sha256:4a35f16299d7
           reworded:
             - hash: sha256:f14146c27ed9
               at: 2026-09-13
@@ -105,6 +105,9 @@ stories:
             - hash: sha256:1b70ce2039de
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:22d2d7ff7f6b
+              at: 2026-09-14T04:24:19Z
+              why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
 
       - id: status.derived.unbacked-pass-goes-stale
         origin: thread:q-0070
@@ -336,7 +339,7 @@ stories:
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
       - id: status.acceptance.verdict-needs-every-role
         origin: walkdown
-        statement: A rule passes only when every evidence tier it asks for holds a current pass and every role it names has signed. One role's signature never counts for another role, and the human walkdown is not counted again as a tier.
+        statement: A rule passes only when every kind of evidence it asks for has a current pass and every role it names has signed. One role's signature never counts for another, and the human walkdown is those signatures, not a second kind of evidence on top.
         verify: [checks]
         steps:
           given:
@@ -346,7 +349,7 @@ stories:
           then:
             - The verdict is pending, not pass
             - It turns pass when the second signs, and nothing else supplies that signature
-          statement_hash: sha256:50cdccf6a1cd
+          statement_hash: sha256:fb010aa75b4e
           reworded:
             - hash: sha256:1a9be6432a5b
               at: 2026-09-13
@@ -354,10 +357,13 @@ stories:
             - hash: sha256:8cc573479687
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:50cdccf6a1cd
+              at: 2026-09-14T04:24:19Z
+              why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
       - id: status.acceptance.roles-recorded-on-the-run
         origin: walkdown
         statement: A recorded walkdown carries the roles its signer was acting in. A role the project does not recognise is refused rather than recorded, and an empty list is recorded as no roles stated.
-        because: A role nothing recognises looks exactly like a signature but satisfies nothing, and a signer who stated no roles should be recorded as exactly that, not as something else.
+        because: A role the project does not recognise looks like a real signature but counts for nothing, and a signer who stated no roles must not be recorded as having stated some.
         verify: [checks]
         steps:
           given:
@@ -500,7 +506,7 @@ stories:
     rules:
       - id: status.attention.blocked-queues
         origin: prd
-        statement: Attention items are split by who is blocked. People get judge items, one for each role whose signature a rule still waits on, plus verify and answer items; agents get address, incorporate and cover items.
+        statement: The status report splits its attention items by who is blocked. People get judge items, one for each role whose signature a rule still waits on, plus verify and answer items, while agents get address, incorporate and cover items.
         because: Cover - a rule that demands checks while no check claims it - is an agent's work to write and never a person's to judge.
         verify: [checks]
         steps:
@@ -513,7 +519,7 @@ stories:
             - Agents get address, incorporate and cover items
             - "A cover item is a rule demanding checks while no check claims it: an agent writes the check, and it is never a person's to judge"
             - Every item names who is blocked, so nothing sits in both queues at once
-          statement_hash: sha256:0d1dfd67e1ff
+          statement_hash: sha256:3bda00e699f8
           reworded:
             - hash: sha256:d51f57ea2c48
               at: 2026-09-13
@@ -524,6 +530,9 @@ stories:
             - hash: sha256:1cf36d2794b9
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:0d1dfd67e1ff
+              at: 2026-09-14T04:24:19Z
+              why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
 
       - id: status.attention.names-the-role
         origin: walkdown
@@ -558,7 +567,7 @@ stories:
       - id: status.attribution.username-is-the-record
         origin: thread:n-0104
         statement: Every record is written under the username of the person who made it, never under their display name. When one person has written under more than one username, all of those usernames are read as that one person.
-        because: Records made before identity and display name were told apart stay attributed without being rewritten.
+        because: Records made before the username and the display name were separate things keep their attribution without being rewritten.
         verify: [checks]
         steps:
           given:

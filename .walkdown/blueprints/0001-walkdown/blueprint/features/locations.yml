@@ -154,7 +154,7 @@ stories:
     rules:
       - id: locations.answer.says-why
         origin: prd
-        statement: "Every path walkdown reports says why it was chosen: named on the command line, found in this machine's registry (and how that entry got there), the home a registry entry names, or the built-in default."
+        statement: "Every path walkdown reports says why it was chosen: named on the command line, found in this machine's registry, the home a registry entry names, or the built-in default. When the reason is a registry entry, the report also says how that entry got there."
         because: A person who disagrees with where something is needs to know which decision to argue with.
         verify: [checks]
         steps:
@@ -165,7 +165,7 @@ stories:
           then:
             - Each of the spec, runs, threads, evidence, drafts and code carries its reason
             - The reason names the rule that decided it, not merely that a decision was made
-          statement_hash: sha256:50638c8edeb8
+          statement_hash: sha256:738bca8657bc
           reworded:
             - hash: sha256:fd21bba75c2e
               at: 2026-09-13
@@ -176,6 +176,9 @@ stories:
             - hash: sha256:cb01c6594b8f
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:50638c8edeb8
+              at: 2026-09-14T04:24:19Z
+              why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
 
       - id: locations.answer.asking-writes-nothing
         origin: prd
@@ -206,7 +209,7 @@ stories:
         retired: >-
           Answered by deleting the question (2026-09-01, q-0138). Walkdown no longer searches the tree for blueprints, so there is no tree answer to arbitrate against a configured one and no precedence left to state. The half of this that survived - a repository may hold several blueprints without them bleeding into each other - is now locations.answer.declared-not-discovered, which carries it without the contest.
         origin: prd
-        statement: A blueprint found inside the working tree wins over a registered project rooted higher up the tree. A blueprint asked for by name is answered only by the registered project that owns it, or by none.
+        statement: A blueprint found inside the working tree answers for that tree before a registered project rooted higher up does. A blueprint asked for by name is answered only by the registered project that owns it, or by none.
         because: A repository can hold several blueprints. A project registered at the whole tree would otherwise answer for its siblings and show one project's spec beside another project's ledger.
         verify: [checks]
         steps:
@@ -223,7 +226,7 @@ stories:
         origin: walkdown
         retired: >-
           Its statement is about which of two files answers, and there is one file now (ADR 0003, accepted 2026-09-11): a reader consults ~/.walkdown/registry.yml and nothing else, a committed .walkdown/config.yml is a manifest that only `walkdown import` reads, and no `.walkdown` is ever found by walking. Every mechanism this rule named - the nearest-and-stop walk, the merge with the personal file, the crossing guard on both files - was deleted at step 3 of that ADR, after n-0275 showed a symlink walking through the guard on the read side while the write side refused the same path. The half that survives - no inference, nothing merely lying nearby is a project - is locations.answer.declared-not-discovered; what replaces the boundary is locations.answer.registry-is-the-only-door.
-        statement: The nearest `.walkdown` at or above you is the only one that answers for where you stand, merged with your personal `~/.walkdown` and nothing else. walkdown never guesses that a neighbouring checkout's blueprints are yours, but a blueprint you registered with `walkdown import` is reachable from anywhere.
+        statement: "walkdown reads only two places for the directory you are in: the nearest `.walkdown` at or above it, and your personal `~/.walkdown`. A neighbouring checkout's blueprints are never taken for yours, but a blueprint registered with `walkdown import` is reachable from anywhere."
         verify: [checks]
         signoff: [eng, product]
         steps:
@@ -324,7 +327,7 @@ stories:
 
       - id: locations.keeping.moving-is-a-decision
         origin: prd
-        statement: Moving records relocates the files unchanged, remembers the choice in the personal config beside the person's own comments, and refuses a destination that already holds records.
+        statement: Moving records relocates the files unchanged and remembers the choice in the personal config, the same file that holds the person's own comments. A destination that already holds records is refused.
         because: The records are append-only, and dropping one set into a directory that already holds another would change both.
         verify: [checks]
         steps:
@@ -336,7 +339,7 @@ stories:
             - Every file arrives byte for byte, and none is rewritten to suit its new address
             - The personal config records where they went, keeping whatever the person had already written in it
             - A destination that already holds records is refused rather than merged into
-          statement_hash: sha256:f650bd21c46f
+          statement_hash: sha256:af8538a1091f
           reworded:
             - hash: sha256:452142df8095
               at: 2026-09-13
@@ -344,6 +347,9 @@ stories:
             - hash: sha256:797a6afe9cc9
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:f650bd21c46f
+              at: 2026-09-14T04:24:19Z
+              why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
 
   - id: locations.travel
     title: A record means the same thing on somebody else's machine

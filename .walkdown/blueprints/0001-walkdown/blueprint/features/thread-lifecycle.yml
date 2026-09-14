@@ -26,7 +26,7 @@ stories:
 
       - id: threads.lifecycle.claim-never-accept
         origin: prd
-        statement: Only a person who has said who they are can set a thread to verified or waived. A name the machine guessed, an actor named "agent" in any spelling, or a change a machine claims to have typed are all rejected.
+        statement: Only a person who has said who they are can set a thread to verified or waived. A name the machine guessed, an actor named "agent" in any spelling, or a change a machine says it typed are all rejected.
         verify: [checks]
         steps:
           given:
@@ -37,7 +37,7 @@ stories:
             - Each is rejected and the thread is unchanged - work can be claimed on somebody's behalf, and accepted only by them
             - The refusal says where to say who you are, and never fills the gap with a login name
             - The name is compared as written, case folded and trimmed - this is an agent declaring itself, not authentication, so a confusable spelling is not chased and "the-agent", "agents" and "claude" stay accepted (q-0218)
-          statement_hash: sha256:176058816e54
+          statement_hash: sha256:1c0b2e99daa0
           reworded:
             - hash: sha256:482531dc241f
               at: 2026-09-13
@@ -45,6 +45,9 @@ stories:
             - hash: sha256:7ea67873e7a5
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:176058816e54
+              at: 2026-09-14T04:24:19Z
+              why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
 
       - id: threads.lifecycle.acts-for-a-person
         origin: thread:n-0139
