@@ -297,8 +297,8 @@ stories:
 
       - id: panel.desk.tuner
         origin: thread:n-0076
-        statement: A gear in the top bar opens settings that change how the page is laid out on the desk, and the desk updates as a setting moves. The choice is kept across sessions and never changes what is verified.
-        because: How the page is laid out on the desk is each reviewer's own taste.
+        statement: A gear in the top bar opens dials that set the desk's angle and perspective, and the desk changes as a dial moves. The choice is kept across sessions and never changes what is verified.
+        because: The desk's angle and perspective are each reviewer's own taste.
         signoff: [eng, product]
         screens: [settings]
         steps:
@@ -313,7 +313,7 @@ stories:
             - Nothing about it reaches the ledger - no verdict, no run, no thread
             - The tuner closes on Escape or on a click anywhere outside it, the gear excluded since its own click already toggles it
             - It sits clear of the app's corner rather than flush against it, by the same distance on both axes, so it reads as something on the desk rather than part of the app's layout
-          statement_hash: sha256:4abca9a31981
+          statement_hash: sha256:e54d1b750069
           reworded:
             - hash: sha256:09636342aada
               at: 2026-09-13
@@ -326,6 +326,9 @@ stories:
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
             - hash: sha256:a8c8826e3bff
               at: 2026-09-14T04:24:19Z
+              why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
+            - hash: sha256:4abca9a31981
+              at: 2026-09-14T04:25:47Z
               why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
 
       - id: panel.desk.peek
