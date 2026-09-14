@@ -1,15 +1,15 @@
 # ADR 0004 — Rules are easy to understand
 
 - **Status:** accepted. Drafted by the agent on 2026-09-13 from a walk
-  through the board with Topher. The reword pass was done in the same
-  sitting.
+    through the board with Topher. The reword pass was done in the same
+    sitting.
 - **Date:** 2026-09-13
 - **Deciders:** Topher (product, eng)
 - **Builds on:** the statement / because / history split (n-0286) and
-  `walkdown hash --write --reword`, which keeps a verdict when only the
-  words change.
+    `walkdown hash --write --reword`, which keeps a verdict when only the
+    words change.
 - **Threads:** n-0286 (the split), n-0288 (the rule whose statement started
-  this), n-0290 (the first rule written in the new shape)
+    this), n-0290 (the first rule written in the new shape)
 
 ## Context
 
@@ -43,70 +43,70 @@ six faults.
 
 1. **The statement restated its own then-steps.**
 
-   This was the biggest cause of length. A statement made its claim, then
-   appended each step as a clause after a dash.
+    This was the biggest cause of length. A statement made its claim, then
+    appended each step as a clause after a dash.
 
-   **Example (bad):** …a query naming a story keeps every rule in it, a
-   query naming a screen keeps every rule judged on it, a query naming one
-   rule keeps that rule alone.
+    **Example (bad):** …a query naming a story keeps every rule in it, a
+    query naming a screen keeps every rule judged on it, a query naming one
+    rule keeps that rule alone.
 
-   *(Steps 3, 4 and 5 of the same rule.)*
+    *(Steps 3, 4 and 5 of the same rule.)*
 
 2. **A concept stood where the reader wanted a thing.**
 
-   Each time, Topher asked a one-word question: where? under what? which
-   list? Each time, the fix was a concrete noun.
+    Each time, Topher asked a one-word question: where? under what? which
+    list? Each time, the fix was a concrete noun.
 
-   **Example (bad):** the username records are written under
+    **Example (bad):** the username records are written under
 
-   **Example (good):** every record carries your username
+    **Example (good):** every record carries your username
 
-   **Example (bad):** what was declared stays visible for the whole sitting
+    **Example (bad):** what was declared stays visible for the whole sitting
 
-   **Example (good):** the session strip shows that answer for as long as
-   the sitting runs
+    **Example (good):** the session strip shows that answer for as long as
+    the sitting runs
 
 3. **House jargon.**
 
-   A rule is read by product and design, and by whoever is deciding whether
-   to adopt the tool. A word only this codebase uses stops them.
+    A rule is read by product and design, and by whoever is deciding whether
+    to adopt the tool. A word only this codebase uses stops them.
 
-   **Example (bad):** read off the tree
+    **Example (bad):** read off the tree
 
-   **Example (bad):** provenance, never currency
+    **Example (bad):** provenance, never currency
 
-   **Example (bad):** a third ledger law
+    **Example (bad):** a third ledger law
 
 4. **A dash-clause was where the sentence went wrong.**
 
-   The dash marks the point where a second thought was bolted on instead of
-   given its own sentence or moved to a step.
+    The dash marks the point where a second thought was bolted on instead of
+    given its own sentence or moved to a step.
 
-   **Example (bad):** The counts say what they count and reconcile with the
-   list - verified is a count of rules, the work owed to a person is named,
-   each owed rule carries a mark so the total can be counted back, and the
-   tab carries that total so it is legible from whichever tab is open.
+    **Example (bad):** The counts say what they count and reconcile with the
+    list - verified is a count of rules, the work owed to a person is named,
+    each owed rule carries a mark so the total can be counted back, and the
+    tab carries that total so it is legible from whichever tab is open.
 
 5. **The statement defined its neighbour.**
 
-   A sentence that would still be true if this rule were deleted belongs to
-   some other rule.
+    A sentence that would still be true if this rule were deleted belongs to
+    some other rule.
 
-   **Example (bad):** Whether a verdict counts is answered per cell, by the
-   statement it was made against, the check that still claims it, and any
-   sweep since.
+    **Example (bad):** Whether a verdict counts is answered per cell, by the
+    statement it was made against, the check that still claims it, and any
+    sweep since.
 
-   *(True, and `status.derived.*`'s claim, not `provenance-not-currency`'s.)*
+    *(True, and `status.derived.*`'s claim, not `provenance-not-currency`'s.)*
 
 6. **A long `because` was carrying something else.**
 
-   Mechanism, the neighbour's reason, an analogy, or a general principle.
+    Mechanism, the neighbour's reason, an analogy, or a general principle.
 
-   **Example (bad):** …allocated against that directory's own listing
-   *(mechanism)*
+    **Example (bad):** …allocated against that directory's own listing
+    *(mechanism)*
 
-   **Example (bad):** …a file saying something the report will not do is a
-   file that lies *(a reason for lint, not for this rule)*
+    **Example (bad):** …a file saying something the report will not do is a
+    file that lies *(a reason for lint, not for this rule)*
 
 None of this is a schema problem. The schema doc says what each field is
 for. The template AGENTS.md says the statement is authoritative. The
@@ -124,109 +124,109 @@ test.
 ### What a statement is
 
 - **One or two sentences, present tense, saying what is true of the built
-  thing.**
+    thing.**
 
-  The median on this board is 29 words. A statement past 45 words or past
-  two sentences is almost always restating its steps.
+    The median on this board is 29 words. A statement past 45 words or past
+    two sentences is almost always restating its steps.
 
 - **The steps carry the detail.**
 
-  If a sentence could be pasted into `then:`, it belongs there. Usually it
-  is already there.
+    If a sentence could be pasted into `then:`, it belongs there. Usually it
+    is already there.
 
 - **Name the thing, not the category.**
 
-  **Example (bad):** a browser can write specification
+    **Example (bad):** a browser can write specification
 
-  **Example (good):** a browser can write three kinds of record: a thread,
-  a draft, a run
+    **Example (good):** a browser can write three kinds of record: a thread,
+    a draft, a run
 
 - **When something is shown, kept, read or recorded, say where.**
 
-  The steps name the anchor. The statement names the place in plain words.
+    The steps name the anchor. The statement names the place in plain words.
 
-  **Example (good):** the session strip shows your full name
+    **Example (good):** the session strip shows your full name
 
 - **Plain words over house words.**
 
-  A glossary term is fine when the sentence still reads without knowing
-  it. "Registry" passed. "Closed list" and "currency" did not.
+    A glossary term is fine when the sentence still reads without knowing
+    it. "Registry" passed. "Closed list" and "currency" did not.
 
 - **No dash-clauses.**
 
-  Give the second thought its own sentence, move it to a step, or cut it.
+    Give the second thought its own sentence, move it to a step, or cut it.
 
 - **One exception per sentence.**
 
-  **Example (good):** …reads as stale, unless a person declared the
-  rewording as words only.
+    **Example (good):** …reads as stale, unless a person declared the
+    rewording as words only.
 
-  **Example (bad):** …renders as stale, never as passing, unless a person
-  declared the rewording one of words and not of meaning, in which case
-  the old wording still names the rule and the pass stands.
+    **Example (bad):** …renders as stale, never as passing, unless a person
+    declared the rewording one of words and not of meaning, in which case
+    the old wording still names the rule and the pass stands.
 
 - **This rule's claim only.**
 
-  What another rule requires is that rule's statement.
+    What another rule requires is that rule's statement.
 
 ### What a `because` is
 
 - **The reason the rule is worth having, in one breath.**
 
-  The median on this board is 17 words. Past 35 it is usually carrying one
-  of the three below.
+    The median on this board is 17 words. Past 35 it is usually carrying one
+    of the three below.
 
 - **Not the mechanism.**
 
-  How the code does it is a code comment.
+    How the code does it is a code comment.
 
 - **Not the neighbour's reason.**
 
-  A rule about layout does not explain what git commits.
+    A rule about layout does not explain what git commits.
 
 - **Not a general principle.**
 
-  "A file that lies" justifies lint as a whole, not one rule lint enforces.
+    "A file that lies" justifies lint as a whole, not one rule lint enforces.
 
 - **The stranger test applies here too.**
 
-  **Example (bad):** a blueprint can be a third ledger law, read rather
-  than looked at
+    **Example (bad):** a blueprint can be a third ledger law, read rather
+    than looked at
 
 ### What a `history` is
 
 - **What happened, with its date or count.**
 
-  A past-tense sentence, a thread id, a number, an afternoon it cost. If a
-  `because` has any of those, that part is history.
+    A past-tense sentence, a thread id, a number, an afternoon it cost. If a
+    `because` has any of those, that part is history.
 
 - **Optional.**
 
-  The `origin:` thread usually carries it. Write one when the rule does
-  not make sense at a glance without it.
+    The `origin:` thread usually carries it. Write one when the rule does
+    not make sense at a glance without it.
 
 ### What the tooling does
 
 - **Lint warns on the shape.**
 
-  `statement-reads-as-a-paragraph` fires past 45 words or three sentences.
-  `because-carries-history` fires past 35 words. Both are warnings. Length
-  is a symptom, and a person decides.
+    `statement-reads-as-a-paragraph` fires past 45 words or three sentences.
+    `because-carries-history` fires past 35 words. Both are warnings. Length
+    is a symptom, and a person decides.
 
 - **Rewording is a `--reword`.**
 
-  Every change in this ADR kept its old hash under `steps.reworded`, so no
-  verdict went stale.
+    Every change in this ADR kept its old hash under `steps.reworded`, so no
+    verdict went stale.
 
 - **The guidance lives where agents read.**
 
-  A "Writing a rule" section in the template AGENTS.md, a stranger-test
-  step in `walkdown-formulate`, and the schema doc pointing here.
+    A "Writing a rule" section in the template AGENTS.md, a stranger-test
+    step in `walkdown-formulate`, and the schema doc pointing here.
 
 - **walkdown holds itself to it.**
 
-  A rule on this board, `ownership.authoring.statement-reads-at-a-glance`,
-  is verified by the lint test.
+    A rule on this board, `ownership.authoring.statement-reads-at-a-glance`,
+    is verified by the lint test.
 
 ## What a rule looks like
 
@@ -312,30 +312,30 @@ Short is not the same as clear. This one was 24 words and unreadable.
 
 - **Twenty-two statements and seven becauses were reworded on 2026-09-13.**
 
-  The median statement went from 31 words to 29. The longest went from 85
-  to 44. No cell on the board changed.
+    The median statement went from 31 words to 29. The longest went from 85
+    to 44. No cell on the board changed.
 
 - **The number is a tripwire, not a target.**
 
-  `stale-server-says-so` was 24 words and unreadable. `which-project` is 37
-  and fine. Lint catches the shape. The stranger test catches the rest, and
-  it needs a person.
+    `stale-server-says-so` was 24 words and unreadable. `which-project` is 37
+    and fine. Lint catches the shape. The stranger test catches the rest, and
+    it needs a person.
 
 - **Reading a rule aloud to someone is the review.**
 
-  Every fault in the pass was found by a one-word question from Topher. The
-  author could not have asked it, having written the sentence.
+    Every fault in the pass was found by a one-word question from Topher. The
+    author could not have asked it, having written the sentence.
 
 - **Nothing was deleted.**
 
-  What left the statements was already in the steps, or was moved there.
+    What left the statements was already in the steps, or was moved there.
 
 - **Two rules may want splitting.**
 
-  `panel.start.which-project` has fourteen then-steps.
-  `locations.default.skills-are-yours-by-default` hides a second concern in
-  a step. A split is a new id and a retirement, not a reword, and is left
-  for its own decision.
+    `panel.start.which-project` has fourteen then-steps.
+    `locations.default.skills-are-yours-by-default` hides a second concern in
+    a step. A split is a new id and a retirement, not a reword, and is left
+    for its own decision.
 
 ## Rules affected
 
@@ -374,32 +374,32 @@ Added: `ownership.authoring.statement-reads-at-a-glance`.
 
 - **Leave it to taste.**
 
-  One author and one agent, with the schema doc open, wrote 22 paragraphs
-  out of 132 statements. Every clause added feels like precision, so taste
-  alone drifts long.
+    One author and one agent, with the schema doc open, wrote 22 paragraphs
+    out of 132 statements. Every clause added feels like precision, so taste
+    alone drifts long.
 
 - **A hard word limit as a lint error.**
 
-  Length is a symptom. An error would force rewording under time pressure,
-  which is how paragraphs get written.
+    Length is a symptom. An error would force rewording under time pressure,
+    which is how paragraphs get written.
 
 - **Shorten the steps to match.**
 
-  The steps are what a check is built from and what a judge drives. They
-  are meant to enumerate. The statement is what a person reads first.
-  Different readers, different lengths.
+    The steps are what a check is built from and what a judge drives. They
+    are meant to enumerate. The statement is what a person reads first.
+    Different readers, different lengths.
 
 - **Guidance in the schema doc only.**
 
-  Nobody editing a rule reads the schema doc. The template AGENTS.md is
-  read at the start of every session, and the formulate skill at the moment
-  a rule is drafted.
+    Nobody editing a rule reads the schema doc. The template AGENTS.md is
+    read at the start of every session, and the formulate skill at the moment
+    a rule is drafted.
 
 - **Smarter lint.**
 
-  Restatement of steps could be measured and may be worth doing later.
-  Jargon and dashes are judgment. The cheap warning catches the shape they
-  all arrive in.
+    Restatement of steps could be measured and may be worth doing later.
+    Jargon and dashes are judgment. The cheap warning catches the shape they
+    all arrive in.
 
 ## How it gets built
 
