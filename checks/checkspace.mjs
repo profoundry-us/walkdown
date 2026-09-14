@@ -149,7 +149,9 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
    */
   writeFileSync(
     join(process.env.WALKDOWN_HOME, 'config.yml'),
-    ['identity:', '  username: checks-person', '  name: A Checks Person', ''].join('\n'),
+    // A declared zone, and not the one the suite's laptop is in, so a
+    // clock read in it is provably the config's and not the browser's.
+    ['identity:', '  username: checks-person', '  name: A Checks Person', '  timezone: Asia/Tokyo', ''].join('\n'),
   );
 
   /*

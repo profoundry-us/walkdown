@@ -4,6 +4,7 @@ import { defaultActor } from '../../lib/identity.js';
 import { anchorText, paintStatus } from '../../lib/report/threads.js';
 import { dim } from '../../lib/report/tty.js';
 import { getThread } from '../../lib/threads.js';
+import { whenIn } from '../../lib/time.js';
 import { saysSomething, THREAD_KINDS } from '../../lib/vocab.js';
 import { mutateThread, openThread } from '../../lib/writes.js';
 import { end, loadOrExit } from './context.js';
@@ -228,7 +229,9 @@ export function run(args) {
    * unannotated; a machine typing says so.
    */
   const saidVia = (m) => (m?.via ? dim(` · via ${m.via}`) : '');
-  console.log(dim(`  ${t.author ?? 'unknown'}`) + saidVia(t) + dim(` · ${t.created ?? 'undated'}`));
+  // The record holds UTC; the reader's clock is theirs (n-0290).
+  const at = (m) => dim(` · ${m?.created ? whenIn(m.created, who.timezone) : 'undated'}`);
+  console.log(dim(`  ${t.author ?? 'unknown'}`) + saidVia(t) + at(t));
   console.log(
     `\n  ${String(t.body ?? '')
       .trim()
@@ -236,7 +239,7 @@ export function run(args) {
   );
   for (const r of t.replies ?? []) {
     console.log(
-      dim(`\n  ↳ ${r.author ?? 'unknown'}`) + saidVia(r) + dim(` · ${r.created ?? 'undated'}`),
+      dim(`\n  ↳ ${r.author ?? 'unknown'}`) + saidVia(r) + at(r),
     );
     console.log(
       `    ${String(r.body ?? '')

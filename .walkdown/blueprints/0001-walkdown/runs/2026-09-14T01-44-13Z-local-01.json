@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-09-14T01-44-13Z-local-01",
+  "created": "2026-09-14T01:44:13Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "aadb96b-dirty",
+  "tree_hash": "sha256:e59567a8b962",
+  "spec_hash": "sha256:230626f9ddb9",
+  "results": [
+    {
+      "rule": "time.records.read-in-your-zone",
+      "status": "pass",
+      "statement_hash": "sha256:d7979f516afd",
+      "duration_ms": 3880,
+      "checks": [
+        "checks/panel.spec.js:2397"
+      ]
+    }
+  ]
+}

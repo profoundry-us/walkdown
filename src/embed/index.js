@@ -796,6 +796,7 @@ import { icon } from './icons.js';
         .then((data) => {
           blueprint = data;
           identity = data.identity ?? null;
+          MSG.zone = identity?.timezone ?? null;
           resolve();
         })
         .catch(() => {}); // server not running — embed stays dormant

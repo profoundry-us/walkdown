@@ -1,0 +1,45 @@
+feature: time
+title: When things happened
+source:
+  prd: docs/08-locations.md (the personal config)
+stories:
+  - id: time.records
+    title: Every clock reads right
+    statement: As a team across time zones, a record means the same moment to all of us, and each of us reads it on our own clock.
+    rules:
+      - id: time.records.stored-as-utc
+        origin: thread:n-0290
+        created_at: 2026-09-13
+        statement: Every time walkdown writes is an instant in UTC - ISO 8601 with a Z - and a record never carries a zone.
+        because: A stamp that depends on where it was written means a different moment on every machine that reads it, and a bare date says nothing about which day it meant.
+        history: "`walkdown hash --write --reword` stamped `at: 2026-09-14` under an entry whose reason said 2026-09-13 - the UTC date, sliced bare, at one in the morning (n-0290)."
+        verify: [checks]
+        signoff: [eng]
+        steps:
+          given:
+            - Any write that stamps when it happened - a thread, a reply, a run, a draft, a sweep, a registry row, a reworded hash
+          when:
+            - The record is read back
+          then:
+            - The stamp parses as an instant and ends in Z
+            - No stamp is a bare date or a local time, and no record names a zone
+          statement_hash: sha256:5040dfedc0c3
+      - id: time.records.read-in-your-zone
+        origin: thread:n-0290
+        created_at: 2026-09-13
+        statement: Times are shown in the reader's own zone - the one declared once as `identity.timezone` in the personal config, or the machine's until it is said - and the CLI and the panel agree on it.
+        because: The person reading a record is the only one whose clock matters to them, and saying it once beside their name beats converting in their head every time.
+        verify: [checks]
+        signoff: [eng, product]
+        screens: [settings, thread-panel]
+        steps:
+          given:
+            - A personal config that declares a timezone under identity, and a thread with a known UTC stamp
+          when:
+            - Read the thread in the CLI, and open Settings on screen `settings`
+          then:
+            - The CLI prints the stamp as a clock in that zone, with the zone's abbreviation beside it
+            - Anchor `settings.timezone` names the zone and where it was set; unsaid, it names the machine's zone and says how to set yours
+            - A zone the machine does not know falls back to the machine's and says so, rather than taking the panel down
+            - Anchor `thread.body`'s messages carry their hover stamp in that zone
+          statement_hash: sha256:d7979f516afd

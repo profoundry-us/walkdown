@@ -202,7 +202,7 @@ test('a statement-only hash is legacy, not stale: it lints, and --write re-stamp
  * hash under steps.reworded, with when and why, so a verdict that named the
  * old words still names the rule (test/status.test.js reads it back).
  */
-test('hash --write --reword keeps the old hash and says why; without it the old hash is gone', () => {
+test('hash --write --reword keeps the old hash and says why; without it the old hash is gone @rule:time.records.stored-as-utc', () => {
   const h = writeFixture(join(root, 'reword'));
   runHashCommand(load(h), { write: true }); // current form first
   const file = join(h.spec, 'features', 'demo.yml');
@@ -219,7 +219,9 @@ test('hash --write --reword keeps the old hash and says why; without it the old 
   assert.equal(rule.steps.reworded.length, 2);
   assert.equal(rule.steps.reworded[1].hash, old);
   assert.equal(rule.steps.reworded[1].why, 'plainer English, same rule');
-  assert.match(rule.steps.reworded[1].at, /^\d{4}-\d{2}-\d{2}$/);
+  // An instant, not a bare date: at one in the morning UTC the date alone
+  // said tomorrow under a why that said today (n-0290).
+  assert.match(rule.steps.reworded[1].at, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/);
   assert.ok(hashMatches(old, rule), 'the old hash still names the rule');
   assert.equal(lint(load(h), { checks: false }).exitCode, 0);
 

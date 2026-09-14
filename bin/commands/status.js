@@ -13,9 +13,13 @@ import { anchorLabel, paintStatus } from '../../lib/report/threads.js';
 import { dim, green, red, truncate, yellow } from '../../lib/report/tty.js';
 import { deriveStatus, retiredRules } from '../../lib/status.js';
 import { listThreads } from '../../lib/threads.js';
+import { whenIn } from '../../lib/time.js';
+import { defaultActor } from '../../lib/identity.js';
 import { end, loadOrExit } from './context.js';
 
 function renderRuleDetail(blueprint, derived, ruleId, json) {
+  // Stamps are UTC on disk and the reader's clock on screen (n-0290).
+  const zone = defaultActor(blueprint.codeRoot ?? blueprint.projectRoot).timezone;
   const row = derived.rows.find((r) => r.rule === ruleId);
   if (!row) {
     /*
@@ -79,7 +83,7 @@ function renderRuleDetail(blueprint, derived, ruleId, json) {
   for (const [label, cell] of sources) {
     const state = (paint[cell.state] ?? ((s) => s))(cellText(cell));
     const provenance = cell.runId
-      ? dim(`  ${cell.runId}${cell.created ? ` · ${cell.created}` : ''}`)
+      ? dim(`  ${cell.runId}${cell.created ? ` · ${whenIn(cell.created, zone)}` : ''}`)
       : '';
     console.log(`    ${label.padEnd(15)}${state}${provenance}`);
     if (cell.detail) console.log(dim(`                   ${truncate(cell.detail, 90)}`));

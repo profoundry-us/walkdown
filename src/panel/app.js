@@ -361,6 +361,22 @@ function buildDeskPanel() {
         value="${esc(identityOverride.name ?? S.data?.identity?.name ?? '')}"
         title="How you are shown in the panel. Records still carry the username.">
     </div>
+    <!-- The zone times are read in. Records carry UTC; this is the reader's
+         clock, said once in the personal config beside the name, and the
+         machine's own until it is said (n-0290). Shown, not edited, for the
+         same reason the username is: one answer, written where it lives. -->
+    <div class="mb-2 flex items-center gap-2">
+      <span class="text-[12px] font-semibold">Times in</span>
+      <span data-testid="settings.timezone" class="ml-auto w-36 truncate text-right font-mono text-[12px] ${
+        S.data?.identity?.timezone_source === 'config' ? '' : 'italic opacity-60'
+      }" title="${
+        S.data?.identity?.timezone_problem
+          ? esc(S.data.identity.timezone_problem)
+          : S.data?.identity?.timezone_source === 'config'
+            ? `Set as identity.timezone in ${esc(whereIdentityLives())}`
+            : `The server's own zone. Set identity.timezone in ${esc(whereIdentityLives())} to read times in yours.`
+      }">${esc(S.data?.identity?.timezone ?? '')}</span>
+    </div>
     <!-- Which hats you sign in is NOT a setting: it is answered when a
          sitting begins, where it can also be handed to somebody else for one
          walk (panel.walkdown.who-signs-is-declared). This is the same shape
@@ -968,6 +984,7 @@ function hereChanged() {
 async function load() {
   const res = await fetch(api('/api/blueprint'));
   S.data = await res.json();
+  MSG.zone = S.data?.identity?.timezone ?? null;
   // Re-resolve against the reloaded data: the old object is a stale copy, so
   // holding it would show yesterday's verdict and threads.
   if (S.selected) selectRow(S.data.rows.find((r) => r.rule === S.selected.rule) ?? null);
@@ -2646,6 +2663,8 @@ export async function start() {
   }
   S.phase = 'ready';
   S.data = S.BP ? await (await fetch(api('/api/blueprint'))).json() : payload;
+  // Every clock in the panel reads in the zone the person declared (n-0290).
+  MSG.zone = S.data?.identity?.timezone ?? null;
   await loadSeen();
   await restoreSession();
   if (S.jumpOnLoad) {

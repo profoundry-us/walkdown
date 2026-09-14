@@ -2873,6 +2873,14 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       return `oklch(52% 0.10 ${h})`;
     },
 
+    /**
+     * The zone every clock here is read in. Records carry UTC and nothing
+     * else; the panel sets this from the identity the server hands it, which
+     * is what the person declared in their config or, unsaid, the machine the
+     * server runs on (n-0290). Null reads in the browser's own zone.
+     */
+    zone: /** @type {string | null} */ (null),
+
     /** "12m ago" / "3h ago" / "2d ago" — short enough to sit beside a name. */
     ago(iso) {
       const then = Date.parse(iso ?? '');
@@ -2887,19 +2895,27 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     /** The full stamp, for the hover title — "2h ago" is never the whole answer. */
     stamp(iso) {
       const at = new Date(iso ?? '');
-      return Number.isFinite(at.getTime()) ? at.toLocaleString() : '';
+      if (!Number.isFinite(at.getTime())) return '';
+      return at.toLocaleString(undefined, { timeZone: this.zone ?? undefined, timeZoneName: 'short' });
     },
 
     /** Today / Yesterday / a weekday-and-date, for the divider between days. */
     day(iso) {
       const at = new Date(iso ?? '');
       if (!Number.isFinite(at.getTime())) return '';
-      const midnight = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-      const days = Math.round((midnight(new Date()) - midnight(at)) / 86400000);
+      // "Today" is the reader's today: the calendar date in THEIR zone, not
+      // the browser's midnight, or a reply at 7pm Chicago reads as tomorrow's.
+      const tz = this.zone ?? undefined;
+      const ymd = (d) => new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
+      const asUtc = (s) => {
+        const [y, m, d] = s.split('-').map(Number);
+        return Date.UTC(y, m - 1, d);
+      };
+      const days = Math.round((asUtc(ymd(new Date())) - asUtc(ymd(at))) / 86400000);
       if (days === 0) return 'Today';
       if (days === 1) return 'Yesterday';
-      if (days < 7) return at.toLocaleDateString(undefined, { weekday: 'long' });
-      return at.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+      if (days < 7) return at.toLocaleDateString(undefined, { timeZone: tz, weekday: 'long' });
+      return at.toLocaleDateString(undefined, { timeZone: tz, month: 'short', day: 'numeric' });
     },
 
     /** The opening note and its replies as one list. The note is message zero. */
@@ -3146,7 +3162,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     lastReply(iso) {
       const at = new Date(iso ?? '');
       if (!Number.isFinite(at.getTime())) return '';
-      const clock = at.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+      const clock = at.toLocaleTimeString(undefined, { timeZone: this.zone ?? undefined, hour: 'numeric', minute: '2-digit' });
       const day = this.day(iso);
       return `${day === 'Today' ? 'today' : day === 'Yesterday' ? 'yesterday' : day} at ${clock}`;
     },
@@ -4363,6 +4379,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
           .then((data) => {
             blueprint = data;
             identity = data.identity ?? null;
+            MSG.zone = identity?.timezone ?? null;
             resolve();
           })
           .catch(() => {}); // server not running — embed stays dormant

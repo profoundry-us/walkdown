@@ -1,0 +1,35 @@
+id: n-0290
+kind: note
+author: topher
+via: agent
+created: 2026-09-14T01:36:10.197Z
+anchor:
+  rule: panel.identity.default-actor
+status: addressed
+body: "Time, Topher (2026-09-13): every date walkdown writes is stored as UTC,
+  and a person sets their timezone once in their personal config so every time
+  reads correctly in their own zone - CLI and panel alike. This should be a
+  rule. What prompted it: `walkdown hash --write --reword` stamped `at:
+  2026-09-14` under a reworded entry whose `why` said 2026-09-13 - the stamp was
+  the UTC date sliced bare, with no zone to say which day it meant. Where things
+  stand: threads, runs, drafts, sweeps and the registry already write ISO
+  instants with Z; `reworded[].at` is the bare-date exception; the CLI prints
+  the raw UTC string and the panel formats in whatever zone the browser has."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-14T01:47:52Z
+    body: 'Built (2026-09-13). Two rules under a new story, time.records:
+      stored-as-utc and read-in-your-zone. lib/time.js is the one place stamps
+      are made (isoNow) and read (readerZone, whenIn, dateIn); hash-cmd, threads
+      and writes stamp through it, and `reworded[].at` is an instant now - the
+      bare-date entries already written stay as history. `identity.timezone` in
+      the personal config is the zone times are READ in; identity carries it to
+      the CLI (thread and status print `Sep 13, 2026, 8:36 PM CDT`), the panel
+      and the embed (MSG.zone), and Settings shows it under "Times in" with
+      where it came from - or, unsaid, the machine zone and how to set yours. An
+      unknown name falls back and says so rather than throwing out of a config
+      read. Nothing on disk changed shape; a thread opened from the panel keeps
+      its milliseconds (n-0132). Not done: `created_at` on a rule stays a
+      calendar date - it is a date a person wrote, not an instant anything
+      stamped.'

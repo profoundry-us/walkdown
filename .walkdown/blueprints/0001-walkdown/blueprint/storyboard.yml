@@ -147,5 +147,6 @@ screens:
       - settings.panel
       - settings.actor
       - settings.display-name
+      - settings.timezone
       - settings.dials
       - settings.hide

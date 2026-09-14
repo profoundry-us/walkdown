@@ -62,6 +62,12 @@ function identity(username) {
 }
 const SAID = identity('A Person');
 const GUESSING = identity(null);
+/** A person who has said where they are. The stamps on disk stay UTC. */
+const IN_TOKYO = (() => {
+  const home = identity('A Person');
+  writeFileSync(join(home, 'config.yml'), 'identity:\n  username: A Person\n  timezone: Asia/Tokyo\n');
+  return home;
+})();
 
 /** Run the CLI, stripping colour so assertions read the words, not the escapes. */
 const run = (args, dir, home = SAID) =>
@@ -385,4 +391,29 @@ test('ten concurrent filers get ten threads, none overwritten', async () => {
       bodies.some((b) => b.includes(`finding ${i}`)),
       `finding ${i} survived - nothing was overwritten`,
     );
+});
+
+/*
+ * The record holds UTC; the clock on screen is the reader's (n-0290). The
+ * fixture's thread was opened at midnight UTC on New Year's Day, which is
+ * nine in the morning in Tokyo - and the zone rides beside the time, so a
+ * stamp copied out of a terminal still says which clock read it.
+ */
+test('a thread is read in the zone the person declared, and the file still says UTC @rule:time.records.read-in-your-zone @rule:time.records.stored-as-utc', () => {
+  const bp = fixture('zoned', { id: 'n-0009', status: 'open' });
+  const out = run(['n-0009'], bp, IN_TOKYO);
+  assert.match(out, /Jan 1, 2026, 9:00 AM GMT\+9/, 'midnight UTC is nine in the morning in Tokyo');
+  assert.doesNotMatch(out, /2026-01-01T00:00:00Z/, 'the raw UTC string is what the file says, not what a person reads');
+  assert.match(readFileSync(join(threadsOf(bp), 'n-0009.yml'), 'utf8'), /created: 2026-01-01T00:00:00Z/);
+});
+
+test('a zone the machine does not know falls back to its own and says so @rule:time.records.read-in-your-zone', () => {
+  const home = identity('A Person');
+  writeFileSync(join(home, 'config.yml'), 'identity:\n  username: A Person\n  timezone: Mars/Olympus_Mons\n');
+  const bp = fixture('unzoned', { id: 'n-0010', status: 'open' });
+  // Reads rather than throws - a typo in the personal config must never take
+  // a command down (n-0148) - and the stamp is still a clock, not a raw Z.
+  const out = run(['n-0010'], bp, home);
+  assert.match(out, /Jan 1, 2026|Dec 31, 2025/);
+  assert.doesNotMatch(out, /2026-01-01T00:00:00Z/);
 });

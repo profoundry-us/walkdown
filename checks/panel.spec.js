@@ -2387,3 +2387,39 @@ test('crossing to a project that claims nothing here does not keep the old count
   await expect(page.getByTestId('project.why')).toHaveText('2 blueprints claim this page, in one project.');
   await page.keyboard.press('Escape');
 });
+
+/*
+ * Records carry UTC; the clock on screen is the reader's, said once in the
+ * personal config (n-0290). The checks home declares Asia/Tokyo - not where
+ * any laptop running this suite is - so a stamp read in it is provably the
+ * config's zone and not the browser's.
+ */
+test('times read in the zone the person declared, and Settings says which @rule:time.records.read-in-your-zone', {
+  tag: '@rule:time.records.read-in-your-zone',
+}, async ({ page }) => {
+  // A thread with a stamp whose Tokyo reading and UTC reading differ in date.
+  const filed = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
+    data: { kind: 'note', body: 'when was this', anchor: { rule: 'panel.rules.steps-not-an-appendix' } },
+  });
+  expect(filed.ok()).toBeTruthy();
+  const { id, thread } = await filed.json();
+  expect(thread.created, 'the file says UTC').toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/);
+  await review(page);
+  await ensureSession(page);
+  await page.getByTestId('panel.actor-name').click();
+  const zone = page.getByTestId('settings.timezone');
+  await expect(zone).toHaveText('Asia/Tokyo');
+  await expect(zone).toHaveAttribute('title', /config\.yml/);
+  await expect(zone).not.toHaveJSProperty('tagName', 'INPUT');
+  await page.keyboard.press('Escape');
+
+  // The message's hover stamp carries the zone, and the hour is Tokyo's.
+  await page.getByTestId('panel.tabs').getByText(/Threads/).click();
+  await page.getByTestId('panel.threads-list').locator(`[data-open-thread="${id}"]`).first().click({ position: { x: 8, y: 6 } });
+  const at = page.getByTestId('thread.body').locator('.wd-at[title]').first();
+  await expect(at).toBeVisible();
+  const title = await at.getAttribute('title');
+  expect(title, 'the stamp says which clock read it').toMatch(/GMT\+9/);
+  const [h, m] = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Tokyo', hour: 'numeric', minute: '2-digit' }).format(new Date(thread.created)).split(/[: ]/);
+  expect(title, 'and the hour is Tokyo\'s, whatever zone the browser is in').toMatch(new RegExp(`\\b${h}:${m}:`));
+});

@@ -253,6 +253,7 @@ identity:
   username: topher          # what records are written under, forever
   name: Topher Fangio       # what the UI shows; recorded nowhere
   roles: [eng, product]     # the roles this person may sign for
+  timezone: America/Chicago # the zone times are READ in; records carry UTC
 ```
 
 ```yaml

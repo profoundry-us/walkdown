@@ -1,0 +1,36 @@
+{
+  "run_id": "2026-09-14T01-43-16Z-local-01",
+  "created": "2026-09-14T01:43:16Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "aadb96b-dirty",
+  "tree_hash": "sha256:abafeb71dfa0",
+  "spec_hash": "sha256:230626f9ddb9",
+  "results": [
+    {
+      "rule": "panel.identity.default-actor",
+      "status": "pass",
+      "statement_hash": "sha256:22dc9f1e14e4",
+      "duration_ms": 2933,
+      "checks": [
+        "checks/panel.spec.js:65",
+        "checks/panel.spec.js:1475"
+      ]
+    },
+    {
+      "rule": "time.records.read-in-your-zone",
+      "status": "fail",
+      "statement_hash": "sha256:d7979f516afd",
+      "duration_ms": 60290,
+      "checks": [
+        "checks/panel.spec.js:2397"
+      ],
+      "evidence": [
+        "runs/evidence/2026-09-14T01-43-16Z/panel-times-read-in-the-zo-72880-e-records-read-in-your-zone-test-failed-1.png",
+        "runs/evidence/2026-09-14T01-43-16Z/panel-times-read-in-the-zo-72880-e-records-read-in-your-zone-error-context.md"
+      ]
+    }
+  ]
+}
