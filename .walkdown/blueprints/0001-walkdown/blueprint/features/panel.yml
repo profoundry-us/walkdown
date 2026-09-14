@@ -16,6 +16,7 @@ stories:
         retired: The docked delivery is withdrawn (2026-08-26). walkdown frames the page it reviews; there is no longer a layout that renders beside it.
         origin: walkdown
         statement: Docked into a page's own document, the panel renders beside what it reviews rather than framing it - a script tag cannot put its own page in a frame, so the docked delivery works within the application's document and pushes it aside instead of covering it.
+        history: Docking by script tag is what the agent tier uses for testing; a real sitting goes through the Chrome extension, which never docks into the page and so never met this rule.
         screens: [docked]
         steps:
           given:
@@ -49,7 +50,7 @@ stories:
 
       - id: panel.dock.toolbar
         origin: thread:n-0015
-        statement: A bar across the top carries the controls that are about the session rather than the rule in hand - which screen, which surface, and pin mode - and names the project all of them are about, without being where the project is chosen.
+        statement: "A toolbar across the top of the panel holds the controls that belong to the session rather than to any one rule: which project, which screen, which surface, and pin mode. Which of a project's blueprints is in hand is chosen on the Blueprints tab."
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -58,13 +59,13 @@ stories:
           when:
             - Read the bar
           then:
-            - Anchor `panel.blueprint` names the project this session is against; it says which one, and is not a control - choosing a different one is the Blueprints tab's job, since n-0017 took the selector off the bar on purpose
+            - Anchor `panel.project` is the project switcher; anchor `panel.blueprint` names the blueprint in hand and is not a control - choosing a different blueprint is the Blueprints tab's job, since n-0017 took that selector off the bar on purpose
             - Anchor `panel.screen-picker` says which screen this page is without being opened, and opens anchor `panel.screens-list` to pick a different one or to go back to detecting it
             - A screen picked by hand is marked as picked, because it outranks detection and the difference has to be readable from the bar
             - Detecting, the control reports the page rather than remembering an answer, so the label in the bar and the row the open list marks both follow the page when it moves
             - Prototype and App switch which of the two the page area shows
             - Pin mode can be turned on and off there
-          statement_hash: sha256:d4d83635d936
+          statement_hash: sha256:4725cfa2fe18
           reworded:
             - hash: sha256:aaf28fbb5e0a
               at: 2026-09-13
@@ -72,6 +73,12 @@ stories:
             - hash: sha256:d1fa86f02626
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:d4d83635d936
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:ce78ef9239cc
+              at: 2026-09-14T16:05:26Z
+              why: the project switcher lives in the bar now (ADR 0001, n-0283); what the bar does not choose is the blueprint within a project
 
       - id: panel.dock.surface-swap-is-instant
         origin: walkdown
@@ -101,7 +108,7 @@ stories:
 
       - id: panel.dock.controls-survive-use
         origin: thread:n-0022
-        statement: A control in the bar survives being used - the fade slider can be grabbed and dragged the whole way.
+        statement: A control in the bar keeps working for as long as you are using it. The fade slider can be grabbed and dragged the whole way without being replaced under the pointer.
         history: The bar was rebuilt on every state change, which replaced the slider under the pointer mid-drag.
         signoff: [eng, product]
         screens: [review]
@@ -115,7 +122,7 @@ stories:
             - The drag is not dropped after the first movement
             - Clicking a spot on the track still jumps there, and the arrow keys still step
             - What the drag settles on is what the bar shows once it ends
-          statement_hash: sha256:b98abe2d27a3
+          statement_hash: sha256:065ce87e41c5
           reworded:
             - hash: sha256:e55758ff63da
               at: 2026-09-13
@@ -123,6 +130,9 @@ stories:
             - hash: sha256:26a643eecf8c
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:b98abe2d27a3
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: panel.dock.above-the-app
         retired: The docked delivery is withdrawn (2026-08-26). Framed, the application cannot paint outside its own frame, so nothing has to climb into the top layer to stay above it.
@@ -143,7 +153,7 @@ stories:
 
       - id: panel.dock.one-pin-mode
         origin: thread:n-0015
-        statement: There is one control for pin mode - the bar's Pin mode button - and one state behind it, so whatever turns pin mode on or off, the whole review agrees about whether it is on.
+        statement: Pin mode has one control, the bar's Pin mode button, and one state behind it. Whichever way pin mode is turned on or off, every part of the review agrees on whether it is on.
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -156,15 +166,21 @@ stories:
             - The page under review takes a crosshair cursor while pin mode is on, and drops it when pin mode ends
             - Escape ends pin mode, and the button and the cursor both follow
             - The bar's button is the only way to turn pin mode on, so there is no second control to fall out of step
-          statement_hash: sha256:83dcb4f2e6c2
+          statement_hash: sha256:d3ba0fc1202c
           reworded:
             - hash: sha256:a66c41a78d23
               at: 2026-09-13
               why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:83dcb4f2e6c2
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:d4d252913f0c
+              at: 2026-09-14T04:24:19Z
+              why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
 
       - id: panel.dock.no-pin-mid-fade
         origin: thread:n-0023
-        statement: While the fade sits between the two surfaces, pinning is closed.
+        statement: While the panel is still fading from one of its two surfaces to the other, nothing can be pinned.
         because: Both surfaces are on screen at once, so a pin has no honest answer to which one it is about.
         signoff: [eng, product]
         screens: [review]
@@ -177,7 +193,7 @@ stories:
             - Pin mode cannot be entered, and the control says why rather than simply refusing
             - Pin mode already running is turned off, not left armed over an ambiguous view
             - Landing fully on either end opens pinning again
-          statement_hash: sha256:8326821fbcee
+          statement_hash: sha256:014e0ac5f915
           reworded:
             - hash: sha256:a25c933fc24f
               at: 2026-09-13
@@ -185,10 +201,13 @@ stories:
             - hash: sha256:fe75bc55788c
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:8326821fbcee
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: panel.dock.own-skin
         origin: thread:n-0015
-        statement: walkdown's chrome wears its own theme - drafting blue, pale ink, flat surfaces.
+        statement: "The walkdown panel has a theme of its own: drafting blue, pale ink, flat surfaces."
         because: It must never be mistaken for the application it is inspecting, whatever that application looks like.
         signoff: [eng, product]
         screens: [review, settings]
@@ -201,7 +220,7 @@ stories:
             - The chrome is visibly a different surface from the app
             - The skin is a theme definition, so retuning it is one block and no component knows about it
             - Prototype screens keep their own wireframe skin, distinct from both
-          statement_hash: sha256:1e93098c1dea
+          statement_hash: sha256:f00b306d484d
           reworded:
             - hash: sha256:93bfd901cfcd
               at: 2026-09-13
@@ -209,6 +228,9 @@ stories:
             - hash: sha256:fb65bfe894b1
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:1e93098c1dea
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
       - id: panel.dock.host-isolation
         retired: The docked delivery is withdrawn (2026-08-26). The panel no longer runs inside anybody else’s document. The embed still does, and embed.pin.own-skin still governs that.
         origin: walkdown
@@ -227,7 +249,7 @@ stories:
 
       - id: panel.dock.chrome-not-a-pin-target
         origin: thread:n-0011
-        statement: In pin mode, walkdown's own chrome - the bar, an open form, an existing pin, the docked panel - is never treated as a place to put a pin, and Escape leaves pin mode.
+        statement: "In pin mode, walkdown's own chrome is never a place to put a pin: not the bar, an open form, an existing pin, or the docked panel. Escape leaves pin mode."
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -239,11 +261,14 @@ stories:
             - No pin form opens; the click does what the control says
             - Controls stay usable in pin mode - the slider still drags, buttons still fire
             - Escape closes an open pin form, and leaves pin mode when none is open
-          statement_hash: sha256:65b74be89995
+          statement_hash: sha256:081fc3d92080
           reworded:
             - hash: sha256:466c5e212ed7
               at: 2026-09-13
               why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:65b74be89995
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
   - id: panel.desk
     title: The desk the work lies on
@@ -251,7 +276,7 @@ stories:
     rules:
       - id: panel.desk.reads-as-paper
         origin: thread:n-0076
-        statement: The desk under the page reads as drafting paper rather than as a spreadsheet - ruled faintly and lying at an angle, drawn with a real perspective rather than a flat skew.
+        statement: The desk under the page looks like drafting paper, not a spreadsheet. It is ruled faintly and lies at an angle, drawn in real perspective rather than a flat skew.
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -263,16 +288,19 @@ stories:
             - The ruling is faint rather than a grid of hard lines
             - It lies at an angle, as paper on a desk does
             - The perspective is a real 3D transform, falling back to something flat only where that is unavailable
-          statement_hash: sha256:7824cf252425
+          statement_hash: sha256:23b43c1536ff
           reworded:
             - hash: sha256:60871d489f4d
               at: 2026-09-13
               why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:7824cf252425
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: panel.desk.tuner
         origin: thread:n-0076
-        statement: A gear in the bar tunes how the paper lies, live; the choice persists across sessions, and none of it changes what gets verified.
-        because: How the paper lies is the reviewer's own taste.
+        statement: A gear in the top bar opens dials that set the desk's angle and perspective, and the desk changes as a dial moves. The choice is kept across sessions and never changes what is verified.
+        because: The desk's angle and perspective are each reviewer's own taste.
         signoff: [eng, product]
         screens: [settings]
         steps:
@@ -287,7 +315,7 @@ stories:
             - Nothing about it reaches the ledger - no verdict, no run, no thread
             - The tuner closes on Escape or on a click anywhere outside it, the gear excluded since its own click already toggles it
             - It sits clear of the app's corner rather than flush against it, by the same distance on both axes, so it reads as something on the desk rather than part of the app's layout
-          statement_hash: sha256:a2132cfbe9b9
+          statement_hash: sha256:e54d1b750069
           reworded:
             - hash: sha256:09636342aada
               at: 2026-09-13
@@ -295,11 +323,20 @@ stories:
             - hash: sha256:04ab90372c93
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:a2132cfbe9b9
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:a8c8826e3bff
+              at: 2026-09-14T04:24:19Z
+              why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
+            - hash: sha256:4abca9a31981
+              at: 2026-09-14T04:25:47Z
+              why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
 
       - id: panel.desk.peek
         origin: thread:n-0076
-        statement: A checkbox dims everything lying on the desk to a peek rather than hiding it outright.
-        because: The ruling is judged against everything that would otherwise sit on top of it - this is a way of looking, not a preference.
+        statement: A checkbox in the panel dims everything on the desk instead of hiding it, so what lies underneath shows through.
+        because: The ruling is judged against everything that would otherwise sit on top of it, so both must stay visible at once. Dimming is a way of looking, not a preference.
         signoff: [eng, product]
         screens: [settings]
         steps:
@@ -312,7 +349,7 @@ stories:
             - The bar stays at full strength throughout, its buttons and the gear still working
             - Adjusting a dial does not undo the peek
             - It always starts unchecked, and closing the tuner ends it
-          statement_hash: sha256:c1c00e394894
+          statement_hash: sha256:194a40e90c69
           reworded:
             - hash: sha256:9b19ad4a2f80
               at: 2026-09-13
@@ -320,6 +357,12 @@ stories:
             - hash: sha256:35c73a3a20ec
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:c1c00e394894
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:aff39ea2420f
+              at: 2026-09-14T04:24:19Z
+              why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
 
   - id: panel.delivery
     title: walkdown reaches the page, however the page was built
@@ -422,7 +465,7 @@ stories:
 
       - id: panel.delivery.one-switch
         origin: thread:n-0018
-        statement: The extension's only control is the toolbar button - on or off for this site - and it shows which of those it is. Everything else is asked in the panel.
+        statement: "The extension has one control: the toolbar button, which turns it on or off for this site and shows which it is. Every other choice is made in the panel."
         because: The panel has room to explain; browser chrome does not.
         unverifiable:
           agent: The control is the browser's own toolbar button, which is browser chrome rather than part of the page - no tool an agent drives reaches it, and its icon is not something an agent can see.
@@ -437,7 +480,7 @@ stories:
             - Clicking starts it, clicking again stops it - there is no second place to look
             - The button wears the state as its own icon, colour for on and drained for off, rather than a badge pinned to it
             - Server and blueprint are chosen in the panel, not in browser chrome
-          statement_hash: sha256:608a242984fb
+          statement_hash: sha256:b95edcaea474
           reworded:
             - hash: sha256:84bda3b30c1d
               at: 2026-09-13
@@ -445,6 +488,9 @@ stories:
             - hash: sha256:bed2a74ca17d
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:608a242984fb
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: panel.delivery.stale-copy-says-so
         origin: thread:n-0062
@@ -473,7 +519,7 @@ stories:
 
       - id: panel.delivery.anchors-still-required
         origin: thread:q-0016
-        statement: A page that carries no anchors can still be reviewed - a pin dropped on it is recorded by where it sits on the screen rather than against an element - and pages that do carry anchors are unaffected.
+        statement: A page with no anchors can still be reviewed. A pin dropped on it is recorded by where it sits on the screen, not against an element, and pages that do carry anchors are unaffected.
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -485,7 +531,7 @@ stories:
             - The pin is recorded against its coordinates and the thread is written
             - It renders as a positioned pin, not an anchored one
             - Anchored pins keep working wherever anchors do exist
-          statement_hash: sha256:21a93770a9c1
+          statement_hash: sha256:fe71b784e96e
           reworded:
             - hash: sha256:6cbc4017880c
               at: 2026-09-13
@@ -493,6 +539,9 @@ stories:
             - hash: sha256:af221a75aa10
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:21a93770a9c1
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
   - id: panel.start
     title: A fresh install knows nothing, and says so
@@ -614,7 +663,7 @@ stories:
     rules:
       - id: panel.rules.detail-slide
         origin: walkdown
-        statement: Opening a rule slides the panel from the list to that rule's detail, and one control comes back - only one of the two panes is ever visible.
+        statement: Opening a rule slides the panel from the list to that rule's detail, and a single control brings the list back. Only one of the two panes is ever visible.
         signoff: [eng, product]
         screens: [review, rule-detail]
         steps:
@@ -628,11 +677,14 @@ stories:
             - "\"All rules\" slides back to the list"
             - The Blueprints / Rules / Threads tabs are sized to their labels and centred in the sidebar, not stretched to its full width
             - Each of the three tabs carries its own icon, from the same Phosphor set as the rest of the panel's chrome, sized and padded to read clearly at tab size rather than as an inline glyph shrunk to fit
-          statement_hash: sha256:7fb2ea6d8a22
+          statement_hash: sha256:4dd6fe8938f7
           reworded:
             - hash: sha256:493a83d3f0bd
               at: 2026-09-13
               why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:7fb2ea6d8a22
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: panel.rules.takes-you-there
         origin: thread:n-0031
@@ -664,7 +716,8 @@ stories:
 
       - id: panel.rules.one-pane-per-tab
         origin: thread:n-0032
-        statement: A rule's detail belongs to the tab that lists rules - switching to another tab shows that tab's own content.
+        statement: A rule's detail stays in the tab that lists rules. Switching to another tab shows only that tab's own content.
+        history: "Selecting a rule and then clicking the Blueprints or Screens tab still showed the rule's detail: the two panes rode one sliding track, and switching tabs swapped the list underneath without sliding the track back (n-0032, 2026-08-24)."
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -676,11 +729,14 @@ stories:
             - That tab's own content is what shows
             - Returning to Rules shows the list, from which the rule can be opened again
             - A tab that opens something of its own opens it into the same seat the rule detail uses, so no tab slides past another tab's detail to reach its own
-          statement_hash: sha256:5e37dcb079ac
+          statement_hash: sha256:0442854e332b
           reworded:
             - hash: sha256:7cbb341f16bd
               at: 2026-09-13
               why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:5e37dcb079ac
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: panel.rules.step-between
         origin: walkdown
@@ -705,7 +761,7 @@ stories:
 
       - id: panel.rules.steps-not-an-appendix
         origin: thread:n-0007
-        statement: A rule's given/when/then steps are visible without being asked for; only the recorded check source sits behind a collapsed disclosure.
+        statement: The panel shows a rule's given/when/then steps open, with no click needed. Only the recorded check source sits behind a collapsed disclosure.
         verify: [checks]
         signoff: [eng, product]
         screens: [rule-detail]
@@ -720,7 +776,7 @@ stories:
             - Hovering an anchor a step names highlights that element on the surface under review, so a step points at what it is talking about
             - Given and when read as prose beside their labels; only then is a list, one bullet per clause, set below its label rather than beside it
             - The statement, its reason, its history and every step are markdown, read through the renderer a thread body is read through, so a backticked anchor is code wearing the same wash on the rule as in a conversation - and nothing in a rule's words reaches the page as markup
-          statement_hash: sha256:93da194ee8f3
+          statement_hash: sha256:64152f558d3f
           reworded:
             - hash: sha256:0609e516526f
               at: 2026-09-13
@@ -728,11 +784,14 @@ stories:
             - hash: sha256:12064cd8cf0c
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:93da194ee8f3
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: panel.rules.claim-then-reason
         origin: thread:n-0286
-        statement: A rule's detail leads with the claim and sets its reason and its history beneath, each labelled and quieter than the claim, so what is judged and why it was asked for are read apart.
-        because: A statement that argues for itself invites a judge to agree with the reasoning rather than test the claim, and rewording the reasoning should never put a rule back on the queue.
+        statement: In the panel, a rule's detail shows the statement first. Its reason and its history sit beneath it, each with a label and less prominent than the statement, so a reader sees what is judged apart from why it was asked for.
+        because: A statement that argues for itself invites a judge to agree with the reasoning rather than test the claim. Kept apart, the reason can be reworded without making the rule need judging again.
         verify: [checks]
         signoff: [eng, product]
         screens: [rule-detail]
@@ -745,11 +804,15 @@ stories:
             - The reason stands under the statement at anchor `detail.because`, labelled, in a smaller and lighter type than the claim
             - The history stands under that at anchor `detail.history`, labelled, lighter again
             - A rule carrying neither shows neither - no empty label stands in for a sentence nobody wrote
-          statement_hash: sha256:6549e76ae19b
+          statement_hash: sha256:98f006506a44
+          reworded:
+            - hash: sha256:6549e76ae19b
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: panel.rules.setup-says-how-to-arrive
         origin: thread:n-0093
-        statement: When a rule's screen is a state rather than an address - it carries a setup - the panel says what to do on arrival, above the steps.
+        statement: Some rules point at a state of the app rather than a page address, and those rules carry a setup saying how to reach that state. For such a rule the panel shows the setup above the steps.
         because: An address alone cannot always put the app into the state it names.
         verify: [checks]
         signoff: [eng, product]
@@ -763,7 +826,7 @@ stories:
             - Anchor `detail.setup` says how to get the app into that state
             - The block is labelled Setup, the storyboard's own word for the field
             - A rule whose screen has no setup shows nothing there - an empty instruction is worse than none
-          statement_hash: sha256:fdb917769b7f
+          statement_hash: sha256:ab0ab2469263
           reworded:
             - hash: sha256:e41b088d8143
               at: 2026-09-13
@@ -771,11 +834,14 @@ stories:
             - hash: sha256:0fe412b95c9a
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:fdb917769b7f
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: panel.rules.evidence-visible
         origin: walkdown
-        statement: A rule's detail shows the evidence behind its standing - the latest ledger result for each of its verify types.
-        because: The chain of trust is read where the rule is judged.
+        statement: A rule's detail view in the panel shows the evidence behind its standing. For each way the rule is verified, it shows the latest result recorded in the ledger.
+        because: Someone judging a rule should see the results its standing rests on in the same place, without going back to the list.
         verify: [checks]
         signoff: [eng, product]
         screens: [rule-detail]
@@ -790,7 +856,7 @@ stories:
             - "Anchor `detail.evidence-open` opens them to look at, in `detail.evidence-modal`"
             - "Each file is shown as what it is: a picture as a picture, a transcript as readable text, anything else as a link to open - never as a broken image"
             - A rule with no runs says so rather than showing nothing
-          statement_hash: sha256:e6a5efd7ff2e
+          statement_hash: sha256:dcbb494ff51d
           reworded:
             - hash: sha256:65b84178c291
               at: 2026-09-13
@@ -798,6 +864,9 @@ stories:
             - hash: sha256:890e7391a2ee
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:e6a5efd7ff2e
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: panel.rules.counts-legible
         origin: thread:n-0002
@@ -827,7 +896,7 @@ stories:
 
       - id: panel.rules.lifecycle-legible
         origin: thread:n-0054
-        statement: A rule's lifecycle is read off the same marks every other rule wears, never off a shape of its own - designed, approved, built-but-unwalked, verified and failing are all legible from how much of the strip is filled.
+        statement: Every rule in the panel has one lifecycle strip, and the panel never adds a separate display for a rule's lifecycle. How full that strip is tells you whether the rule is designed, approved, built but not yet walked down, verified, or failing.
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -841,11 +910,17 @@ stories:
             - An approved rule is legible from its signature marks alone, with no separate glyph for it
             - A rule waiting on the reviewer is warning-tinted and its badge names the work - sign or walk
             - Each row's tooltip spells the state out in words
-          statement_hash: sha256:860df1bc1ed8
+          statement_hash: sha256:412ddd1f59a6
           reworded:
             - hash: sha256:a0f0ad3cb747
               at: 2026-09-13
               why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:860df1bc1ed8
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:f96164fbd622
+              at: 2026-09-14T04:24:19Z
+              why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
 
       - id: panel.rules.search-the-list
         origin: thread:n-0108
@@ -880,8 +955,8 @@ stories:
               why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
       - id: panel.rules.tiers-at-a-glance
         origin: thread:n-0109
-        statement: Every rule shows one mark per evidence tier - checks then agent - and beside them one dot per role that must sign.
-        because: Which evidence a rule rests on, and whose signature it is still waiting for, should be read off the list rather than opened one rule at a time.
+        statement: In the rules list, every rule shows one mark for each tier of evidence, checks first and then agent. Beside those marks sits one dot for each role that must sign.
+        because: You should be able to see which evidence a rule rests on, and whose signature it still waits for, from the list itself, without opening each rule.
         verify: [checks]
         signoff: [eng, product]
         screens: [review]
@@ -897,7 +972,7 @@ stories:
             - A tier the rule does not ask for, and a tier with nothing to judge because the rule is unbuilt, are the quietest mark on the strip - and the tooltip says which of the two it is
             - Beside the tiers, one slot per role the rule names, in a fixed order, filled to the extent that role has signed
             - One tooltip covers the whole strip and names every tier and every role in words
-          statement_hash: sha256:42318366ff86
+          statement_hash: sha256:a8d625714a1c
           reworded:
             - hash: sha256:cac7a0be0702
               at: 2026-09-13
@@ -905,6 +980,9 @@ stories:
             - hash: sha256:752cbfc547a3
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:42318366ff86
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
       - id: panel.rules.grouped-by-screen
         origin: walkdown
         statement: The rule list is grouped by the screen each rule is judged on, in the storyboard's order. A screen's heading stays in view while its rules scroll past.
@@ -937,7 +1015,7 @@ stories:
 
       - id: panel.rules.headless-says-so
         origin: thread:n-0061
-        statement: Opening a rule that has no screen clears the surface under review - an unmistakable cover in walkdown's own voice takes the sheet's place.
+        statement: Opening a rule that has no screen clears the page under review. In its place the panel shows a cover that plainly says this rule has no screen.
         because: A lingering page reads as the rule's screen, and the reviewer cannot tell a right screen from a rule that has none.
         signoff: [eng, product]
         screens: [rule-detail]
@@ -951,7 +1029,7 @@ stories:
             - The cover says the page underneath is untouched - it covers, never navigates, so the application keeps its state
             - The detail pane carries the same note beside the statement
             - Opening a screened rule or returning to the list lifts the cover
-          statement_hash: sha256:efedd2d20f70
+          statement_hash: sha256:4cc73e82bdb7
           reworded:
             - hash: sha256:5bb6c7d6142a
               at: 2026-09-13
@@ -959,10 +1037,13 @@ stories:
             - hash: sha256:313a2f5c11b5
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:efedd2d20f70
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: panel.rules.legend-on-demand
         origin: walkdown
-        statement: The rail's whole vocabulary is explained in one place, reachable from the list itself - every evidence mark, every signature shape, and what colour means.
+        statement: "One legend, opened from the rules list, explains every mark the rail shows: each evidence mark, each signature shape, and what each colour means."
         because: A mark a reader cannot decode is worse than no mark, and six tooltips read one at a time never assemble into a picture of how the rail works.
         signoff: [eng, product]
         screens: [review]
@@ -976,7 +1057,7 @@ stories:
             - Every state a signature slot can take is listed with the shape that draws it
             - What warning colour means, and what the sign, walk and thread badges mean, are said in the same place
             - It is built from the same vocabulary the rail draws from, so it cannot describe marks the rail no longer uses
-          statement_hash: sha256:ad00ec97fa8a
+          statement_hash: sha256:356d0682ce72
           reworded:
             - hash: sha256:58cbf78e318c
               at: 2026-09-13
@@ -984,10 +1065,13 @@ stories:
             - hash: sha256:36417be07500
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:ad00ec97fa8a
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: panel.rules.owed-apart-from-said
         origin: walkdown
-        statement: What a rule owes you and how many conversations it carries are two columns down the edge of the list, never one string.
+        statement: "The rules list keeps two separate columns at its edge: what a rule still owes you, and how many conversations it carries. They are never run together into one figure."
         because: What the rule owes you is a claim on your time; how many conversations it carries is only context.
         history: Run together as one string in one colour they read as a single number, which was neither of them.
         signoff: [eng, product]
@@ -1001,7 +1085,7 @@ stories:
             - The work badge and the thread count occupy their own columns, each aligned down the list
             - The thread count is drawn in plain ink rather than in the colour that means work is owed
             - A rule with only one of the two leaves the other column empty rather than shifting the row
-          statement_hash: sha256:e0613aa19dc7
+          statement_hash: sha256:1e4e613bdbb9
           reworded:
             - hash: sha256:10189a32c600
               at: 2026-09-13
@@ -1009,10 +1093,13 @@ stories:
             - hash: sha256:84bf34874d7c
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:e0613aa19dc7
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: panel.rules.marks-carry-over
         origin: walkdown
-        statement: Opening a rule keeps the marks you opened it for - the detail leads with the same evidence and signature strip the list drew, in the same order.
+        statement: Opening a rule from the list shows the same evidence and signature marks its row showed. They sit at the top of the rule's detail, in the same order the row used.
         because: The row and the page it opens should never have to be compared from memory.
         signoff: [eng, product]
         screens: [rule-detail]
@@ -1024,7 +1111,7 @@ stories:
           then:
             - The detail draws the same strip, in the same order, saying the same thing
             - It is the list's own drawing rather than a second one, so the two cannot disagree
-          statement_hash: sha256:c2794bb86d6c
+          statement_hash: sha256:c2c7866804a9
           reworded:
             - hash: sha256:53b22fd6a5a4
               at: 2026-09-13
@@ -1032,6 +1119,9 @@ stories:
             - hash: sha256:ec4ad798ac84
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:c2794bb86d6c
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: panel.rules.names-its-screen
         origin: walkdown
@@ -1060,7 +1150,7 @@ stories:
 
       - id: panel.rules.talk-without-a-sitting
         origin: walkdown
-        statement: A conversation can be started on any rule at any time, not only during a walkdown, and the note is filed under the same name the panel already shows as you - never one it has not displayed.
+        statement: You can start a conversation on any rule at any time, not only during a walkdown. The note it files carries the name the panel already shows as yours, and no other.
         because: A rule read on an ordinary afternoon deserves the same record as one judged in a sitting.
         signoff: [eng, product]
         screens: [rule-detail]
@@ -1074,7 +1164,7 @@ stories:
             - It is attributed to whoever the panel is recording as, shown above the composer before it is used
             - An empty identity refuses the filing and offers the place to set one, rather than letting the server choose a name
             - Starting a thread records no verdict and begins no sitting
-          statement_hash: sha256:96af529203d5
+          statement_hash: sha256:92f43230c576
           reworded:
             - hash: sha256:d66e49c63ed9
               at: 2026-09-13
@@ -1082,6 +1172,12 @@ stories:
             - hash: sha256:1feb59efdd65
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:96af529203d5
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:73a5451b5f13
+              at: 2026-09-14T04:24:19Z
+              why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
 
   - id: panel.threads
     title: Feedback is answered where it is read
@@ -1109,7 +1205,7 @@ stories:
 
       - id: panel.threads.claim-never-accept
         origin: walkdown
-        statement: The panel obeys the same governance as everywhere else - it will not record verified or waived without a named person, and it asks for the reason the transition requires.
+        statement: The panel never records a thread as verified or waived without a named person, and it asks for the reason before it writes either. In this it holds to the same rules as the rest of walkdown.
         verify: [checks]
         signoff: [eng, product]
         screens: [rule-detail]
@@ -1121,11 +1217,17 @@ stories:
           then:
             - Nothing is recorded and the panel asks for a person's name
             - Waiving or reopening without a reason is refused until one is written
-          statement_hash: sha256:9d263352d2ff
+          statement_hash: sha256:2b8daa31373b
           reworded:
             - hash: sha256:7c4e1e2d1562
               at: 2026-09-13
               why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:9d263352d2ff
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:f1610126f057
+              at: 2026-09-14T04:24:19Z
+              why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
 
       - id: panel.threads.show-the-sketch
         origin: thread:n-0010
@@ -1155,7 +1257,7 @@ stories:
 
       - id: panel.threads.own-view
         origin: thread:n-0094
-        statement: Threads are a view of their own and not only something hanging off a rule - the panel lists every thread on the blueprint, filtered to what is live, what is waiting on me, or all of it, including the conversations that have ended.
+        statement: The panel has a threads view of its own, not only threads shown under a rule. It lists every thread on the blueprint, filtered to live threads, threads waiting on you, or all of them, closed ones included.
         verify: [checks]
         signoff: [eng, product]
         screens: [review, thread-panel]
@@ -1171,11 +1273,14 @@ stories:
             - Asking for all of them reaches a thread that has ended, which nothing else in the panel can do
             - Opening one shows the conversation beside the list, and the way back from it is the list of threads rather than a rule nobody opened
             - How many threads are waiting on a person is carried on the tab itself, so it is legible from whichever tab is open
-          statement_hash: sha256:09bd656d03f9
+          statement_hash: sha256:33d5dea89fc2
           reworded:
             - hash: sha256:faade3b887d1
               at: 2026-09-13
               why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:09bd656d03f9
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
   - id: panel.walkdown
     title: A walkdown from the panel is a walkdown
@@ -1183,7 +1288,7 @@ stories:
     rules:
       - id: panel.walkdown.records-to-ledger
         origin: walkdown
-        statement: Finishing a walkdown in the panel appends a run record under a named person; discarding one records nothing.
+        statement: Finishing a walkdown in the panel appends a run record to the runs ledger, attributed to a named person. Discarding one writes nothing.
         verify: [checks]
         signoff: [eng, product]
         screens: [review, rule-detail]
@@ -1197,11 +1302,14 @@ stories:
             - An unnamed or agent actor is refused before anything is written
             - Discarding instead of finishing writes nothing
             - Finishing says what was RECORDED, from the door's own answer - which roles landed and under whose names - because a field the door dropped is invisible in a count of verdicts (n-0226)
-          statement_hash: sha256:33f8130bbd75
+          statement_hash: sha256:d9e0e66da1d8
           reworded:
             - hash: sha256:6cc28278f4a6
               at: 2026-09-13
               why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:33f8130bbd75
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: panel.walkdown.who-signs-is-declared
         origin: thread:q-0225
@@ -1235,7 +1343,7 @@ stories:
 
       - id: panel.walkdown.one-control-owns-the-sitting
         origin: walkdown
-        statement: One control starts a sitting and ends it - the same button in the bar - while carrying on to the next rule sits beside the count of the rules already judged.
+        statement: The same button in the bar starts a sitting and ends it. The control that carries on to the next rule sits beside the count of rules already judged.
         because: Starting and ending are two halves of one act.
         signoff: [eng, product]
         screens: [review]
@@ -1253,7 +1361,7 @@ stories:
             - Both controls wear the panel's warning colour, the one it already uses for work owed to you, so the sitting reads as one thing from the tab's count through to the record - the ending filled and carrying on outlined, since two solid yellows would argue about which is the act
             - Beginning wears it too when rules are owed, so the blueprint says there is work before being asked; with nothing owed it drops back to the ordinary action colour, because a control that is always loud says nothing
             - Every one of these counts comes from a single list - the rules owing you a verdict, less the ones judged this sitting - so the tab's number, the footer's kinds, the tally's denominator and the rule Continue opens cannot drift apart
-          statement_hash: sha256:ac216e33f70b
+          statement_hash: sha256:36797b702778
           reworded:
             - hash: sha256:c74a54acc395
               at: 2026-09-13
@@ -1261,10 +1369,13 @@ stories:
             - hash: sha256:8a7122b87a96
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:ac216e33f70b
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: panel.walkdown.session-survives-reload
         origin: thread:n-0066
-        statement: An unfinished session is saved from the first verdict and restored after a page or extension reload, and a refused or failed Finish hands the button back instead of silently bricking the session.
+        statement: The panel keeps an unfinished session from its first verdict and restores it after a page or extension reload. A Finish that is refused or fails still leaves the Finish button on the panel, so the session can be finished later.
         because: An unfinished session is real judging work.
         signoff: [eng, product]
         screens: [review]
@@ -1277,7 +1388,7 @@ stories:
             - The session comes back - verdicts, judged count, and actor - exactly as left
             - Finishing then records once; a refused attempt, nameless or offline, can be retried after fixing the cause
             - Finishing or discarding clears the saved draft
-          statement_hash: sha256:c73c8f26293e
+          statement_hash: sha256:5cd0d76da115
           reworded:
             - hash: sha256:05503923167c
               at: 2026-09-13
@@ -1285,11 +1396,17 @@ stories:
             - hash: sha256:6371c4770618
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:c73c8f26293e
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:4e2689329994
+              at: 2026-09-14T04:24:19Z
+              why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
 
       - id: panel.walkdown.draft-on-disk
         origin: walkdown
-        statement: Every verdict is written to the project as it is given - a draft session on disk, outside the runs ledger - while the ledger still gains exactly one record, at Finish, that is never edited.
-        because: An unfinished sitting should survive the browser and be visible to the tools.
+        statement: Every verdict is saved to disk the moment it is given, as a draft session outside the runs ledger. The ledger still gains exactly one record, written at Finish and never edited afterwards.
+        because: A judging session that is not yet finished should survive the browser closing and stay visible to the tools.
         verify: [checks]
         signoff: [eng, product]
         screens: [review, rule-detail]
@@ -1304,7 +1421,7 @@ stories:
             - walkdown status reports the sitting as in progress rather than as verdicts
             - Finishing appends the one run record and deletes the draft; discarding deletes it and writes nothing
             - A draft is never committed by accident - the directory ignores its own contents
-          statement_hash: sha256:35e52538a664
+          statement_hash: sha256:c1cd43e94e52
           reworded:
             - hash: sha256:cfb0ee61cad3
               at: 2026-09-13
@@ -1312,10 +1429,13 @@ stories:
             - hash: sha256:208e1062b8c7
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:35e52538a664
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: panel.walkdown.verdicts-at-hand
         origin: walkdown
-        statement: While a walkdown is running, pass and fail are on screen without scrolling, under the selected rule's statement - with the feedback box the only thing between them and it.
+        statement: While a walkdown is running, pass and fail sit on screen without scrolling, under the selected rule's statement. Only the feedback box lies between the statement and them.
         signoff: [eng, product]
         screens: [rule-detail]
         steps:
@@ -1327,16 +1447,19 @@ stories:
             - Both verdict buttons are visible without scrolling any pane
             - The only thing between the statement and the buttons is anchor `detail.feedback`, which panel.walkdown.note-with-any-verdict puts there
             - The chosen verdict stays visibly chosen when the rule is revisited
-          statement_hash: sha256:230135783bdb
+          statement_hash: sha256:81e423350563
           reworded:
             - hash: sha256:d67304c4aae1
               at: 2026-09-13
               why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:230135783bdb
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: panel.walkdown.pass-advances
         origin: walkdown
-        statement: A pass moves the session to the next rule owing a verdict; a fail stays put; and no verdict switches a mode on by itself.
-        because: The reason for a fail is given where the rule is.
+        statement: A pass moves the session on to the next rule that still needs a verdict, and a fail leaves the session where it is. Recording a verdict never turns pin mode on by itself.
+        because: The reason for a fail is written at the rule it failed, so the session should stay there instead of moving on.
         signoff: [eng, product]
         screens: [rule-detail]
         steps:
@@ -1349,7 +1472,7 @@ stories:
             - The fail keeps the rule open, and pin mode is left exactly as it was found
             - Judging the last owed rule returns to the list rather than a dead end
             - Carrying on from a rule you stayed on is asked for rather than done to you - the sitting's own next step sits beside the tally
-          statement_hash: sha256:e35194ca2dbb
+          statement_hash: sha256:7cb7c371065f
           reworded:
             - hash: sha256:017026c31543
               at: 2026-09-13
@@ -1357,10 +1480,13 @@ stories:
             - hash: sha256:f8832132ec51
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:e35194ca2dbb
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: panel.walkdown.note-with-any-verdict
         origin: thread:n-0050
-        statement: A feedback box rides above the verdict buttons - write first, then judge - and anything written is filed as a note thread on the rule and linked into the run result; an empty box files nothing.
+        statement: A feedback box sits above the verdict buttons, so you write before you judge. Anything written is filed as a note thread on the rule and linked into the run result; an empty box files nothing.
         signoff: [eng, product]
         screens: [rule-detail]
         steps:
@@ -1373,15 +1499,18 @@ stories:
             - The finished run's result for the rule carries the thread id
             - Judging with the box empty files no thread
             - The box sits above anchor `detail.verdict`, so the why is asked for before the verdict
-          statement_hash: sha256:b08fe1ef5a23
+          statement_hash: sha256:90a2e254463d
           reworded:
             - hash: sha256:f9043305838b
               at: 2026-09-13
               why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:b08fe1ef5a23
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: panel.walkdown.fail-requires-why
         origin: thread:n-0051
-        statement: A fail is refused until it has a why - feedback text or a pin dropped on the rule during the session.
+        statement: The panel refuses a fail that gives no reason. A reason is feedback text, or a pin dropped on the rule during the session.
         because: A fail with no why is work nobody can act on.
         verify: [checks]
         signoff: [eng, product]
@@ -1394,7 +1523,7 @@ stories:
           then:
             - No verdict is recorded, and the panel names both ways to give a why - write it, or pin it - without turning either on
             - Writing feedback or dropping a pin on the rule, then failing again, records it
-          statement_hash: sha256:64c2b537af07
+          statement_hash: sha256:9d81f874218f
           reworded:
             - hash: sha256:9644c16756d8
               at: 2026-09-13
@@ -1402,6 +1531,9 @@ stories:
             - hash: sha256:6c3cf9029f3e
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:64c2b537af07
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
   - id: panel.identity.retired
     title: The viewer already knew who you are
@@ -1453,7 +1585,7 @@ stories:
 
       - id: panel.identity.attribution-visible
         origin: thread:n-0008
-        statement: A defaulted identity is always visible before it is used - a walkdown verdict or a thread action shows the name it will be recorded under.
+        statement: Before you file a walkdown verdict or a thread action, the panel shows the name it will be recorded under. A name filled in for you is never used before you have seen it.
         because: Nobody is attributed silently.
         signoff: [eng, product]
         screens: [review, rule-detail]
@@ -1465,7 +1597,7 @@ stories:
           then:
             - The name being recorded is on screen at the moment of the action - the username itself, beside the full name shown for it
             - Correcting it before acting records the corrected name
-          statement_hash: sha256:48e53151d829
+          statement_hash: sha256:b038b84f6c73
           reworded:
             - hash: sha256:1b6a789fde73
               at: 2026-09-13
@@ -1473,6 +1605,12 @@ stories:
             - hash: sha256:cd8b6d78f53a
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:48e53151d829
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:6a65afc9d32e
+              at: 2026-09-14T04:24:19Z
+              why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
 
   - id: panel.viewport
     title: The frame renders at real device sizes
@@ -1480,8 +1618,8 @@ stories:
     rules:
       - id: panel.viewport.device-presets
         origin: thread:n-0005
-        statement: Framed, a bar control sizes the app's frame like a real device - desktop or mobile - and the ghost renders at the same viewport.
-        because: The comparison stays honest only when both surfaces answer to one width.
+        statement: When the app is shown inside a frame, a control in the panel's bar sets that frame to the size of a real device, desktop or mobile. The ghost renders at that same viewport.
+        because: Comparing the app against the ghost is only fair when both are rendered at the same width.
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -1494,7 +1632,7 @@ stories:
             - The frame re-renders narrow and a responsive app shows its mobile layout
             - The ghost renders at that same viewport; the two never disagree
             - Switching back to desktop restores both
-          statement_hash: sha256:e5e7ef826604
+          statement_hash: sha256:96ca21b6396f
           reworded:
             - hash: sha256:2ded288a785a
               at: 2026-09-13
@@ -1502,10 +1640,13 @@ stories:
             - hash: sha256:ae6986d9aed8
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:e5e7ef826604
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: panel.viewport.zoom-to-fit
         origin: thread:n-0005
-        statement: A viewport wider than the space the frame has scales down whole to fit, and the current scale is visible.
+        statement: A viewport wider than the frame is scaled down whole to fit, and the bar shows the current scale.
         because: A desktop layout is seen as a desktop layout rather than reflowed to a narrow column.
         signoff: [eng, product]
         screens: [review]
@@ -1517,7 +1658,7 @@ stories:
           then:
             - The app lays out at the chosen width and is scaled down whole - no reflow
             - The current scale is shown in anchor `panel.zoom`
-          statement_hash: sha256:2e05a82ab041
+          statement_hash: sha256:c6d295a4d13e
           reworded:
             - hash: sha256:8beb5dbadbe0
               at: 2026-09-13
@@ -1525,6 +1666,9 @@ stories:
             - hash: sha256:336df83a67ec
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:2e05a82ab041
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
   - id: panel.signoff
     title: Unbuilt rules are signed off, not judged
@@ -1560,8 +1704,8 @@ stories:
 
       - id: panel.signoff.refine-requires-feedback
         origin: thread:n-0052
-        statement: Refine is refused until the box says what should change, and the text is filed as a note thread on the rule while the session stays put.
-        because: Refine is the feedback.
+        statement: Pressing Refine is refused until its text box says what should change. That text is filed as a note thread on the rule, and the session stays where it is.
+        because: Asking to refine a rule is only useful if it says what should change; an empty request tells nobody anything.
         signoff: [eng, product]
         screens: [rule-detail]
         steps:
@@ -1573,7 +1717,7 @@ stories:
             - The empty refine is refused with the reason; nothing is recorded
             - The written refine files the note, records a refining result, and stays on the rule
             - The refine and its note arrive linked in the finished run record
-          statement_hash: sha256:1ccdf682f200
+          statement_hash: sha256:536c173387c1
           reworded:
             - hash: sha256:cc9c4f5148e1
               at: 2026-09-13
@@ -1581,10 +1725,16 @@ stories:
             - hash: sha256:a08fc4115ac6
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:1ccdf682f200
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:09dad1d70adc
+              at: 2026-09-14T04:24:19Z
+              why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
 
       - id: panel.signoff.approved-recorded
         origin: thread:n-0052
-        statement: Approve appends an `approved` result to the ledger, hash-stamped like a pass so it goes stale when the statement moves - and it never stands in for a role's signature.
+        statement: Approving a rule appends an `approved` result to the runs ledger, stamped with the rule's hash like a pass, so it reads as stale once the statement is reworded. An approval never counts as a role's signature.
         because: Approving a spec is not judging a build.
         verify: [checks]
         signoff: [eng, product]
@@ -1599,7 +1749,7 @@ stories:
             - The rule still shows as pending and still owes a human verdict once built
             - Rewording the statement renders the approval as stale, asking for a fresh sign-off
             - Approving moves the session on to the next rule owing a verdict
-          statement_hash: sha256:8d9981cdafc3
+          statement_hash: sha256:95480ac5b8ed
           reworded:
             - hash: sha256:9dc2fa81ced5
               at: 2026-09-13
@@ -1607,3 +1757,9 @@ stories:
             - hash: sha256:2895f3d084e2
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:8d9981cdafc3
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:44f8fc42e6d1
+              at: 2026-09-14T04:24:19Z
+              why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"

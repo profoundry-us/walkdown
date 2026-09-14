@@ -36,7 +36,7 @@ stories:
 
       - id: embed.pin.right-project
         origin: thread:n-0012
-        statement: A pin files against the blueprint the panel has open - never a sibling's, and never whichever blueprint the server happens to be serving by default. The caller names the blueprint; the server does not work it out from the address.
+        statement: A pin is filed in the blueprint the panel has open, never in another blueprint and never in the one the server serves by default. The panel names that blueprint in the request; the server does not work it out from the page address.
         because: Feedback has to land in the ledger of the thing you were reviewing, and by the time anything can be pinned the panel always has one open.
         verify: [checks]
         signoff: [eng, product]
@@ -51,7 +51,7 @@ stories:
             - The panel tells the embed in the frame which blueprint is open, because there is no script tag on somebody else's page to carry one
             - The server never re-routes a write by looking the address up and overriding what the caller said - several blueprints may claim an address, and choosing between them at a door is the server deciding whose page you are on
             - A tag on the page naming a blueprint does not redirect a write - the panel has one open, and that is the thing being reviewed; a tag is a fact about the page, goes stale when the blueprint moves, and used to send a reply to a blueprint where the pin it answered did not exist
-          statement_hash: sha256:6f6dcac974a9
+          statement_hash: sha256:292c89ee776a
           reworded:
             - hash: sha256:8d8ef265ac6d
               at: 2026-09-13
@@ -59,10 +59,13 @@ stories:
             - hash: sha256:3609f1573878
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:6f6dcac974a9
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: embed.pin.both-surfaces
         origin: thread:n-0003
-        statement: Pins can be placed on the app exactly as on the prototype - the same anchors exist in both - and a pin records which surface it was placed on.
+        statement: The same anchors exist on the app as on the prototype, so a pin can be placed on either surface in the same way. Each pin records which surface it was placed on.
         verify: [checks]
         signoff: [eng, product]
         screens: [review]
@@ -75,15 +78,18 @@ stories:
             - The pin form opens and the note is anchored to that element id
             - The saved note records surface app; a prototype pin records surface prototype
             - Both pins show on the rule, distinguished by the surface they came from
-          statement_hash: sha256:4c64071b699d
+          statement_hash: sha256:8dcf85fbee90
           reworded:
             - hash: sha256:77fdab028ac1
               at: 2026-09-13
               why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:4c64071b699d
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: embed.pin.follows-the-visible-surface
         origin: thread:n-0025
-        statement: "A pin lands on the surface you are actually looking at: when the prototype fully covers the app the pin goes on the prototype, and whichever surface is in front is the one taking the click."
+        statement: "A pin lands on the surface in front, the one that would take your click. When the prototype fully covers the app, that surface is the prototype."
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -97,7 +103,7 @@ stories:
             - The control says which surface a pin would land on before you place one
             - Pins already on that screen show on the surface they were placed on
             - A surface with no walkdown running inside it cannot be pinned, and says so rather than letting the pin fall through to the page underneath
-          statement_hash: sha256:6f170a1e2778
+          statement_hash: sha256:3bd7a904fa1b
           reworded:
             - hash: sha256:005ee8fa7a1e
               at: 2026-09-13
@@ -105,10 +111,13 @@ stories:
             - hash: sha256:771cd68f690f
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:6f170a1e2778
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: embed.pin.own-skin
         origin: thread:n-0027
-        statement: Everything walkdown draws into somebody else's application wears walkdown's own skin and reaches nothing outside itself - one theme across the panel and the feedback layer, and not a stroke of it applied to the host page.
+        statement: The panel and the feedback layer walkdown draws into a host application share one theme, and it is walkdown's own. None of that styling touches the host page.
         signoff: [eng, product]
         screens: [review, thread-panel]
         steps:
@@ -121,7 +130,7 @@ stories:
             - They wear the same blueprint theme as the panel, from the same stylesheet, not a hand-rolled lookalike
             - The host page's own buttons, headings and form controls are untouched
             - Everything with a surface of its own lives in a shadow root; only what must style the host's own elements - what a pinnable thing looks like under the cursor - is added to the page
-          statement_hash: sha256:e34255353d94
+          statement_hash: sha256:7a85f116b73d
           reworded:
             - hash: sha256:1f3400a09629
               at: 2026-09-13
@@ -129,6 +138,9 @@ stories:
             - hash: sha256:4e1bdc231fd0
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:e34255353d94
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: embed.pin.viewport-recorded
         origin: thread:n-0005
@@ -156,7 +168,7 @@ stories:
 
       - id: embed.pin.settled-pins-leave
         origin: walkdown
-        statement: A pin stands on the page only while its thread is unsettled - verifying, waiving or incorporating it takes the pin off the surface there and then, without waiting for a reload.
+        statement: A pin stays on the page only while its thread is unsettled. Verifying, waiving or incorporating the thread takes the pin off the page at once, without waiting for a reload.
         because: A page still carrying pins for finished conversations reads as work that is still owed.
         signoff: [eng, product]
         screens: [review, thread-panel]
@@ -169,7 +181,7 @@ stories:
             - The pin leaves the surface immediately, on both the page and the ghosted copy of the other one
             - Nothing else about the page moves, and the other pins stay where they are
             - The thread itself is not gone - it is in the ledger and reachable, just no longer standing on the page
-          statement_hash: sha256:9f24cae46d18
+          statement_hash: sha256:79224f400eb4
           reworded:
             - hash: sha256:c82607d3ac2e
               at: 2026-09-13
@@ -177,10 +189,13 @@ stories:
             - hash: sha256:9e777d797a94
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:9f24cae46d18
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: embed.pin.tooltip-says-what-it-is
         origin: walkdown
-        statement: Hovering a pin says what it is in three short lines - which thread and what state, the rule and screen it belongs to (or that it belongs to no rule), and enough of the note to recognise it.
+        statement: "Hovering a pin shows a tooltip of three short lines: what the thread is, where it belongs, and enough of the note to recognise it."
         because: A page of pins should be readable without spending a click on each one.
         signoff: [eng, product]
         screens: [review]
@@ -196,7 +211,7 @@ stories:
             - It shows the start of the note, truncated - a tooltip that has to be read is one nobody reads
             - It opens away from whatever edge the pin is near - down near the top, up near the bottom, and towards the side with the room - so it is never half off the surface
             - Clicking it still opens the thread's own screen, wherever you were
-          statement_hash: sha256:7dacc9350895
+          statement_hash: sha256:c5847b11a900
           reworded:
             - hash: sha256:50dfb40b9f83
               at: 2026-09-13
@@ -204,10 +219,16 @@ stories:
             - hash: sha256:cbaf0007bc64
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:7dacc9350895
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:7d2deb9991b0
+              at: 2026-09-14T16:05:24Z
+              why: the statement now summarises the three lines; what each line holds was already in the steps
 
       - id: embed.pin.form-at-the-spot
         origin: walkdown
-        statement: The pin form opens at the spot that was clicked - just below it, or just above when the spot is near the bottom of the surface - and a placeholder pin stands on that spot while the form is open.
+        statement: The pin form opens just below the spot that was clicked, or just above it when the spot is near the bottom of the surface. A placeholder pin stands on that spot while the form is open.
         because: What you are writing about stays in view, and where the pin will land is never in doubt.
         signoff: [eng, product]
         screens: [review]
@@ -221,7 +242,7 @@ stories:
             - Near the bottom it opens above the spot instead, so it is never half off the surface, and it never runs off the side
             - A placeholder pin marks the spot the whole time the form is open, and changes its mark when the form switches between note and question
             - Cancelling or pressing Escape takes the placeholder with the form; filing replaces it with the real pin in the same place
-          statement_hash: sha256:5de485741d96
+          statement_hash: sha256:f8bbc8411ce9
           reworded:
             - hash: sha256:5bb13509dc3b
               at: 2026-09-13
@@ -229,10 +250,13 @@ stories:
             - hash: sha256:19fb19983eaf
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:5de485741d96
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: embed.pin.form-is-chrome
         origin: thread:n-0004
-        statement: The pin form is ordinary UI - inside it the cursor and clicks behave normally, and pin mode does not reach through it to the surface underneath.
+        statement: The pin form is ordinary UI. Inside it the cursor and clicks behave normally, and pin mode does not act on the surface underneath it.
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -243,16 +267,19 @@ stories:
           then:
             - The cursor is a pointer over controls and a caret over text, never the crosshair
             - Clicking a control acts on the form and never places another pin
-          statement_hash: sha256:67822b8df3f5
+          statement_hash: sha256:5ad17108eb3c
           reworded:
             - hash: sha256:cac6da4be24f
               at: 2026-09-13
               why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:67822b8df3f5
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: embed.pin.surface-coordinates
         origin: thread:n-0005
-        statement: A pin's position is recorded in the surface's own coordinate space - CSS pixels of the document as rendered at its viewport - never in the panel's screen pixels.
-        because: Pins have to stay on their spot when the frame is resized, the fade moves, or the surface is zoomed.
+        statement: A pin's position is recorded in the surface's own coordinate space, as CSS pixels of the document rendered at its viewport. It is never recorded in the panel's screen pixels.
+        because: Pins have to stay on their spot when the frame is resized, the panel's fade moves, or the surface is zoomed.
         verify: [checks]
         signoff: [eng, product]
         screens: [review]
@@ -264,7 +291,7 @@ stories:
           then:
             - The pin stays on the same spot of the surface it was placed on
             - The recorded position is unchanged by any of those actions
-          statement_hash: sha256:759df2c0e0ed
+          statement_hash: sha256:669bb14b197a
           reworded:
             - hash: sha256:7d33bd0c80b2
               at: 2026-09-13
@@ -272,6 +299,9 @@ stories:
             - hash: sha256:fa24e63fbe8b
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:759df2c0e0ed
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: embed.pin.coordinate-fallback
         origin: thread:n-0001
@@ -303,7 +333,7 @@ stories:
     rules:
       - id: embed.threads.note-first
         origin: walkdown
-        statement: The thread popover leads with the note's own words; its provenance - id, kind, status, rule, screen, element, author, age - is condensed to a compact line rather than stacked sentences.
+        statement: The thread popover shows the note's text first. Its id, kind, status, rule, screen, element, author and age follow on one compact line rather than as stacked sentences.
         signoff: [eng, product]
         screens: [thread-panel]
         steps:
@@ -315,15 +345,18 @@ stories:
             - Anchor `thread.body` is the most prominent text in the popover
             - Anchor `thread.provenance` fits on one line and never pushes the note below the fold
             - A long reply history collapses behind a count rather than growing the popover
-          statement_hash: sha256:b4e6177d8153
+          statement_hash: sha256:24c2d4094356
           reworded:
             - hash: sha256:870249ed1a7a
               at: 2026-09-13
               why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:b4e6177d8153
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: embed.threads.actions-in-context
         origin: walkdown
-        statement: The popover's actions are short verbs on one row, and an action that needs a reason asks for it when chosen - the reply box carries no standing instructions.
+        statement: The thread popover's actions are short verbs on one row. An action that needs a reason asks for it when chosen, and the reply box carries no instructions of its own.
         signoff: [eng, product]
         screens: [thread-panel]
         steps:
@@ -335,8 +368,11 @@ stories:
             - The reply box in anchor `thread.reply` reads simply as a reply box
             - Choosing waive or reopen asks for the reason then; other actions never mention it
             - Actions a person may not take are absent, not shown and refused
-          statement_hash: sha256:a473c0119449
+          statement_hash: sha256:85de92088c3d
           reworded:
             - hash: sha256:9878eb8459f2
               at: 2026-09-13
               why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:a473c0119449
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"

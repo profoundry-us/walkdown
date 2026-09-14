@@ -9,7 +9,7 @@ stories:
     rules:
       - id: status.derived.latest-wins
         origin: prd
-        statement: A rule's status per target is its latest relevant run result; later runs supersede earlier ones and targets never bleed into each other.
+        statement: A rule's status for a target is the result of its latest run against that target. A newer run replaces an older one, and a run against one target never changes the status of another.
         verify: [checks]
         steps:
           given:
@@ -21,11 +21,14 @@ stories:
             - Later is decided by the time the run recorded, not by file order or the order they were read
             - A verdict on one target says nothing about another - each target carries its own latest
             - A run carrying verdicts but no date fills no cell at all, because nothing can order it
-          statement_hash: sha256:86b6383b8db6
+          statement_hash: sha256:321c83ca466e
           reworded:
             - hash: sha256:fa42dccb0338
               at: 2026-09-13
               why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:86b6383b8db6
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: status.derived.stale-never-passes
         origin: prd
@@ -81,8 +84,8 @@ stories:
 
       - id: status.derived.addressless-runs-count
         origin: thread:q-0070
-        statement: A run that recorded no base_url is taken at face value - the same courtesy already extended to a result carrying no statement_hash.
-        because: It cannot be shown to belong to a system other than this one.
+        statement: A run that recorded no `base_url` still counts in the status as one of this system's runs.
+        because: A run with no `base_url` cannot be shown to belong to any other system, so it is counted as this one's, just as a result with no `statement_hash` already is.
         verify: [checks]
         steps:
           given:
@@ -91,7 +94,7 @@ stories:
             - Status is derived for a target that has an address configured
           then:
             - That run still fills its cells rather than being discarded
-          statement_hash: sha256:1b70ce2039de
+          statement_hash: sha256:4a35f16299d7
           reworded:
             - hash: sha256:f14146c27ed9
               at: 2026-09-13
@@ -99,10 +102,16 @@ stories:
             - hash: sha256:14004462b9bd
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:1b70ce2039de
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:22d2d7ff7f6b
+              at: 2026-09-14T04:24:19Z
+              why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
 
       - id: status.derived.unbacked-pass-goes-stale
         origin: thread:q-0070
-        statement: A checks pass survives only while a check still claims the rule - if the suite no longer references it, whether the check was deleted, renamed, or untagged, the pass renders as stale rather than passing.
+        statement: A pass earned by a check stands only while some check in the suite still claims the rule. Once no check references it, whether the check was deleted, renamed or untagged, status shows the rule as stale, not as passing.
         because: An append-only ledger otherwise keeps reporting green long after anything tests it - including for a check untagged because it never exercised the rule it claimed.
         verify: [checks]
         steps:
@@ -114,7 +123,7 @@ stories:
             - The cell reads stale, not passing
             - Matching is by rule id, so a check moving down its file changes nothing
             - A caller that supplies no inventory of checks sees the older behaviour, since silence is not proof the suite is empty
-          statement_hash: sha256:e515683d3948
+          statement_hash: sha256:c3d9169bc7f4
           reworded:
             - hash: sha256:ed0482e00322
               at: 2026-09-13
@@ -122,10 +131,13 @@ stories:
             - hash: sha256:dc38db74790f
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:e515683d3948
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: status.derived.human-tier-distinct
         origin: prd
-        statement: An agent's verdict is evidence, never acceptance - a role's signature can only be given by a person signing for that role, and no amount of green from the checks or the agent tier supplies it.
+        statement: An agent's verdict is evidence, never acceptance. Only a person signing for a role can give that role's signature, and no number of passing checks or agent verdicts supplies it.
         verify: [checks]
         steps:
           given:
@@ -136,11 +148,14 @@ stories:
             - The rule's verdict is still pending - evidence is not acceptance
             - Every role in the sign-off list reads as not yet signed, however green the tiers are
             - An agent's run never fills a role's signature, whoever it was recorded under
-          statement_hash: sha256:06dfc2348400
+          statement_hash: sha256:511948134e22
           reworded:
             - hash: sha256:88708d3d86fa
               at: 2026-09-13
               why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:06dfc2348400
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
   - id: status.evidence
     title: Every tier is assumed, and skipping one is a written decision
@@ -170,7 +185,7 @@ stories:
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
       - id: status.evidence.excuse-says-why
         origin: walkdown
-        statement: An excused tier shows its reason where its verdict would have been, in every report - never as an empty cell.
+        statement: An excused tier shows its reason where its verdict would have been, in every report. That cell is never empty.
         because: A tier nobody asked for and a tier somebody decided against look identical otherwise, and only one of them is a decision anyone can argue with.
         verify: [checks]
         steps:
@@ -181,7 +196,7 @@ stories:
           then:
             - The reason stands in the row that tier's evidence would have filled
             - It is legible as a decision, not as an absence
-          statement_hash: sha256:07a43a9f9cbc
+          statement_hash: sha256:64dd303baabc
           reworded:
             - hash: sha256:6023a6db07cd
               at: 2026-09-13
@@ -189,10 +204,13 @@ stories:
             - hash: sha256:84676ca40c48
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:07a43a9f9cbc
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
       - id: status.evidence.excuse-must-argue
         origin: walkdown
-        statement: An excuse is refused as thin when it is a shrug - lint warns on a reason shorter than a sentence, on one filed against something that is not a tier, and on a rule that excuses both tiers at once.
-        because: Excusing both tiers is legitimate but never accidental.
+        statement: Lint refuses an excuse that does not argue its case. It warns when the reason is shorter than a sentence, when the excuse is filed against something that is not a tier, and when one rule excuses both tiers at once.
+        because: A one-word excuse tells nobody why a rule was set aside, and excusing both tiers at once is a real choice that should be argued, not an accident nobody noticed.
         verify: [checks]
         steps:
           given:
@@ -203,7 +221,7 @@ stories:
             - "A reason shorter than a sentence is named as thin: an excuse nobody can argue with is not an excuse"
             - An excuse filed against something that is not a tier is an error - it removes nothing while reading as though it did
             - A rule excusing both tiers is flagged though it may be right, because then nothing verifies it but a signature and that must be a decision somebody made
-          statement_hash: sha256:aa78063f8a54
+          statement_hash: sha256:d7a9cd1761c3
           reworded:
             - hash: sha256:d4310da96c28
               at: 2026-09-13
@@ -211,6 +229,9 @@ stories:
             - hash: sha256:09d778ea6920
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:aa78063f8a54
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
   - id: status.acceptance
     title: Acceptance is a set of people, not a kind of evidence
@@ -241,7 +262,7 @@ stories:
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
       - id: status.acceptance.role-comes-from-the-run
         origin: walkdown
-        statement: Acceptance is derived per role from the roles the run was recorded under, never from whoever the signer is today, and a run recorded before roles existed reads as engineering's.
+        statement: A run counts toward acceptance for the roles it was recorded under, not for whatever roles its signer holds today. A run recorded before roles existed counts as engineering's.
         because: People change teams and a signature does not stop meaning what it meant.
         history: Before roles were recorded, the person signing a walkdown was the developer who built it.
         verify: [checks]
@@ -254,7 +275,7 @@ stories:
             - The first counts only for the role it named
             - The second counts for engineering
             - Changing the signer's roles today moves neither
-          statement_hash: sha256:09cfad7a68aa
+          statement_hash: sha256:e64863cf2fd8
           reworded:
             - hash: sha256:4841808f1a8b
               at: 2026-09-13
@@ -262,9 +283,12 @@ stories:
             - hash: sha256:71c38cd6f904
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:09cfad7a68aa
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
       - id: status.acceptance.approval-covers-only-the-unbuilt
         origin: walkdown
-        statement: A role's approval of the wording discharges its queue while the rule is unbuilt, and stops covering it the moment the ledger holds a build to judge.
+        statement: While a rule is unbuilt, a role's approval of its wording clears the rule from that role's queue. Once the ledger holds a build to judge, that approval no longer clears it.
         because: Approving a spec is not judging a build.
         verify: [checks]
         steps:
@@ -277,7 +301,7 @@ stories:
             - "The rule still reads as unbuilt: approving a spec is not evidence that anything was built"
             - The moment the ledger holds a build to judge, the approval stops covering it and the role is queued again
             - Rewording the statement makes an approval stale, like any other verdict
-          statement_hash: sha256:124da2946d36
+          statement_hash: sha256:7578ef132c6b
           reworded:
             - hash: sha256:178e50e23abc
               at: 2026-09-13
@@ -285,9 +309,12 @@ stories:
             - hash: sha256:917ace17580a
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:124da2946d36
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
       - id: status.acceptance.sent-back-is-a-fail
         origin: walkdown
-        statement: A signer who looked and said not yet fails the rule's verdict rather than leaving it pending, and is not queued back to themselves.
+        statement: When a signer sends a rule back, its verdict reads as a fail, not as pending. The rule does not return to that signer's own queue.
         because: What the rule owes them is a fix, not another look.
         verify: [checks]
         steps:
@@ -299,7 +326,7 @@ stories:
             - The rule's verdict is fail rather than pending - somebody looked and said not yet
             - "It is not queued back to the signer who sent it: what it owes them is a fix, not another look"
             - A fresh verdict is what clears it, so the fix is what moves the rule
-          statement_hash: sha256:2796865a828b
+          statement_hash: sha256:cf99aa23e4a8
           reworded:
             - hash: sha256:e4eefb4e58a4
               at: 2026-09-13
@@ -307,9 +334,12 @@ stories:
             - hash: sha256:5219b52da8b6
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:2796865a828b
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
       - id: status.acceptance.verdict-needs-every-role
         origin: walkdown
-        statement: A rule passes only when every evidence tier it asks for holds a current pass and every role it names has signed - one role's signature never speaks for another's, and the human walkdown is not counted a second time as a tier.
+        statement: A rule passes only when every kind of evidence it asks for has a current pass and every role it names has signed. One role's signature never counts for another, and the human walkdown is those signatures, not a second kind of evidence on top.
         verify: [checks]
         steps:
           given:
@@ -319,15 +349,21 @@ stories:
           then:
             - The verdict is pending, not pass
             - It turns pass when the second signs, and nothing else supplies that signature
-          statement_hash: sha256:8cc573479687
+          statement_hash: sha256:fb010aa75b4e
           reworded:
             - hash: sha256:1a9be6432a5b
               at: 2026-09-13
               why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:8cc573479687
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:50cdccf6a1cd
+              at: 2026-09-14T04:24:19Z
+              why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
       - id: status.acceptance.roles-recorded-on-the-run
         origin: walkdown
-        statement: A recorded walkdown carries the roles its signer was acting in; a role outside the vocabulary is refused rather than filed, and an emptied list is recorded as none stated.
-        because: A role nothing recognises is a signature that satisfies nothing while looking exactly like one, and "none stated" is not a distinction the ledger honours.
+        statement: A recorded walkdown carries the roles its signer was acting in. A role the project does not recognise is refused rather than recorded, and an empty list is recorded as no roles stated.
+        because: A role the project does not recognise looks like a real signature but counts for nothing, and a signer who stated no roles must not be recorded as having stated some.
         verify: [checks]
         steps:
           given:
@@ -338,7 +374,7 @@ stories:
             - The run carries the roles, not the signer's current profile
             - A role the vocabulary does not know is refused
             - An empty list is recorded as stated, not dropped
-          statement_hash: sha256:fd42a02dc9d6
+          statement_hash: sha256:1d24bfe00266
           reworded:
             - hash: sha256:e0e862978414
               at: 2026-09-13
@@ -346,6 +382,9 @@ stories:
             - hash: sha256:03dad36cc0d8
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:fd42a02dc9d6
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: status.acceptance.signature-names-its-signer
         origin: thread:q-0225
@@ -384,7 +423,7 @@ stories:
     rules:
       - id: status.sweep.declares-a-floor
         origin: walkdown
-        statement: A sweep is a dated marker in the ledger saying that from here the tiers it names must earn their verdicts again - every verdict recorded before it reads as stale, and the runs it supersedes are neither edited nor deleted.
+        statement: A sweep is a dated marker in the ledger saying that, from here, the tiers it names must earn their verdicts again. Every verdict recorded before it reads as stale, and the runs it supersedes are neither edited nor deleted.
         because: A rule nobody has got back to should be legible as unfinished rather than as passing.
         verify: [checks]
         steps:
@@ -397,7 +436,7 @@ stories:
             - A rule judged again after the sweep reads pass once more
             - The superseded run files are untouched - the ledger stays append-only
             - Tiers the sweep does not name are unaffected
-          statement_hash: sha256:73aa31336327
+          statement_hash: sha256:09aee8e39b46
           reworded:
             - hash: sha256:b0073c10a38b
               at: 2026-09-13
@@ -405,10 +444,13 @@ stories:
             - hash: sha256:dcee39004281
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:73aa31336327
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: status.sweep.deliberate
         origin: walkdown
-        statement: A sweep is never a side effect - it is written only when somebody asks for one outright and says why.
+        statement: A sweep is never a side effect. It is written only when somebody asks for one outright and says why.
         because: It puts work back on the queue for every rule at once; that is a decision, not a consequence of running the suite.
         verify: [checks]
         steps:
@@ -420,7 +462,7 @@ stories:
             - No sweep is written by any of them
             - Declaring one requires the command, and the command requires a reason
             - The reason is kept with the marker, so a later reader knows what prompted it
-          statement_hash: sha256:4c116babf3f5
+          statement_hash: sha256:bd83ebeb2a0e
           reworded:
             - hash: sha256:5b9d65fba614
               at: 2026-09-13
@@ -428,10 +470,13 @@ stories:
             - hash: sha256:06bb801f2628
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:4c116babf3f5
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: status.sweep.says-what-is-left
         origin: walkdown
-        statement: While a sweep is open the report says how much of it is done - how many rules in each named tier have been judged since it was declared and how many have not.
+        statement: While a sweep is open, the status report says how much of it is done. For each tier the sweep names, it counts the rules judged since the sweep was declared and the rules not yet judged.
         because: The question "did we miss any?" should be answered by reading, never by remembering.
         verify: [checks]
         steps:
@@ -443,7 +488,7 @@ stories:
             - The report names the sweep, when it was declared and why
             - It gives the count judged since, and the count still owed
             - The owed rules are listed as work, not merely counted
-          statement_hash: sha256:a1fbe9c81190
+          statement_hash: sha256:8f76421439bf
           reworded:
             - hash: sha256:108b3015acc9
               at: 2026-09-13
@@ -451,6 +496,9 @@ stories:
             - hash: sha256:b4f0bf714cb6
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:a1fbe9c81190
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
   - id: status.attention
     title: The board says who is blocking what
@@ -458,7 +506,7 @@ stories:
     rules:
       - id: status.attention.blocked-queues
         origin: prd
-        statement: Attention items are split by who is blocked - people get judge items, one for each role a rule is still waiting on a signature from, plus verify and answer items; agents get address, incorporate and cover items.
+        statement: Every item in the status report's attention list is for an agent or a person. Agents are asked to address notes, incorporate answers, cover unchecked rules and re-judge claimed fixes; people to judge in a role they have not signed, verify fixes and answer questions.
         because: Cover - a rule that demands checks while no check claims it - is an agent's work to write and never a person's to judge.
         verify: [checks]
         steps:
@@ -467,11 +515,11 @@ stories:
           when:
             - Attention is derived
           then:
-            - People get judge items - one for each role a rule still waits on - plus verify and answer items
-            - Agents get address, incorporate and cover items
+            - "An agent is asked to address an open note, to incorporate an answered question into its rule, to cover a rule that demands checks while no check claims it, and to re-judge a rule whose fix was claimed after its last pass"
+            - "A person is asked to judge a built rule once for each role that has not signed it, to verify a thread whose fix is claimed, and to answer an open question"
             - "A cover item is a rule demanding checks while no check claims it: an agent writes the check, and it is never a person's to judge"
             - Every item names who is blocked, so nothing sits in both queues at once
-          statement_hash: sha256:1cf36d2794b9
+          statement_hash: sha256:0efeddc8ca3c
           reworded:
             - hash: sha256:d51f57ea2c48
               at: 2026-09-13
@@ -479,10 +527,22 @@ stories:
             - hash: sha256:5a12308a4617
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:1cf36d2794b9
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:0d1dfd67e1ff
+              at: 2026-09-14T04:24:19Z
+              why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
+            - hash: sha256:3bda00e699f8
+              at: 2026-09-14T16:05:26Z
+              why: agents and people in two sentences, agents first, in the order the tiers run
+            - hash: sha256:b58b9d124384
+              at: 2026-09-14T17:15:34Z
+              why: each queue's items named by the verb asked of you; re-judge added since the code has queued it to agents since unjudgedFix landed
 
       - id: status.attention.names-the-role
         origin: walkdown
-        statement: A judge item says which role a rule is waiting on rather than merely that it waits on a person.
+        statement: An attention item waiting on a person's signature names the role it waits on, not merely that it waits on a person.
         because: A queue two people both scroll past is a queue nobody works.
         verify: [checks]
         steps:
@@ -494,7 +554,7 @@ stories:
             - Each judge item names the role it waits on, not merely that a person is owed something
             - Two roles owed on one rule are two items, so neither reads as somebody else's job
             - The word it names is the role from the sign-off list, so the queue and the rule cannot disagree
-          statement_hash: sha256:193e85715e1d
+          statement_hash: sha256:827f89ed0df2
           reworded:
             - hash: sha256:7320bf5dc8fd
               at: 2026-09-13
@@ -502,6 +562,12 @@ stories:
             - hash: sha256:fe9626ecbb8c
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:193e85715e1d
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:27a2894883da
+              at: 2026-09-14T16:05:27Z
+              why: judge could be read as the agent tier; it is a person's signature
 
   - id: status.attribution
     title: A record says whose judgment it was, and keeps saying so
@@ -509,8 +575,8 @@ stories:
     rules:
       - id: status.attribution.username-is-the-record
         origin: thread:n-0104
-        statement: A record is written under the actor's username, never the display name shown for it, and every handle a person's machine has signed with resolves to that one person.
-        because: Records made before identity and display name were told apart stay attributed without being rewritten.
+        statement: Every record is written under the username of the person who made it, never under their display name. When one person has written under more than one username, all of those usernames are read as that one person.
+        because: Records made before the username and the display name were separate things keep their attribution without being rewritten.
         verify: [checks]
         steps:
           given:
@@ -521,7 +587,7 @@ stories:
             - What is written down is the username; the full name is shown and never stored
             - The identity offered names every handle that machine has signed with - the username, the operating system name, and the full name
             - A record already written under a full name is still attributed to that person, and is never edited to match the newer shape
-          statement_hash: sha256:8542fbc7bedf
+          statement_hash: sha256:be08ebbb3f59
           reworded:
             - hash: sha256:14fb4e39b993
               at: 2026-09-13
@@ -529,3 +595,6 @@ stories:
             - hash: sha256:db434f923352
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:8542fbc7bedf
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
