@@ -3187,7 +3187,12 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     .wd-at { font-size: 10px; opacity: .45; }
     .wd-msg.cont .wd-at { visibility: hidden; }
     .wd-msg.cont:hover .wd-at { visibility: visible; }
-    .wd-text { font-size: 12.5px; line-height: 1.45; overflow-wrap: anywhere; }
+    .wd-text { overflow-wrap: anywhere; }
+    /* The chat's size is for the chat. A rule's statement and steps read
+       through the same renderer but keep the size the detail gave them - and
+       a size utility on the element must win, so this is the rule that
+       steps aside rather than one that overrides. */
+    .wd-text:not(.wd-inherit) { font-size: 12.5px; line-height: 1.45; }
     /* Markdown's blocks, spaced as paragraphs in a chat rather than sections
        in a document: a little air between them, none above the first or
        below the last, so a one-line reply sits exactly where plain text did. */
@@ -6129,30 +6134,46 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     <div class="px-3.5 pt-1 text-[12.5px] opacity-60">This thread is not attached to a rule.</div>`;
     const threads = threadsFor(r.rule);
     /*
+     * The rule's own words - statement, because, history, and the steps - are
+     * markdown, read through the same renderer a thread body is (n-0288): a
+     * backticked path is code, a list is a list, and both sides of the panel
+     * spell an anchor the same way (Topher, 2026-09-13). Most fields are one
+     * paragraph and sit inline beside a label, so a lone <p> is unwrapped.
+     *
      * A step writes the things it is about in backticks - anchors and screen
      * ids, the same tokens lint scans for. An anchor among them is a pointer:
      * hovering it lights the element up on the surface under review, so
      * reading a step and finding what it means are one act rather than a hunt
      * (n-0087). Only DECLARED anchors get the treatment; anything else in
-     * backticks is a screen id or prose and stays plain type.
+     * backticks is a screen id or prose and stays plain type. The hover is
+     * delegated from the field, since the code spans are rendered as HTML
+     * rather than as templates.
      */
     const anchors = declaredAnchors();
-    const token = (tok) =>
-      anchors.has(tok)
-        ? b`<code class="wdp-anchor cursor-help rounded bg-base-200 px-1 text-xs underline decoration-dotted underline-offset-2" data-anchor="${tok}" title="Show this on the surface"
-          @mouseenter=${(e) => fire(e.currentTarget, 'highlight', { anchor: tok })}
-          @mouseleave=${(e) => fire(e.currentTarget, 'highlight', { anchor: null })}>${tok}</code>`
-        : b`<code class="rounded bg-base-200 px-1 text-xs">${tok}</code>`;
-    const stepText = (s) => {
-      const parts = [];
-      let last = 0;
-      for (const m of String(s).matchAll(/`([^`]+)`/g)) {
-        parts.push(s.slice(last, m.index), token(m[1]));
-        last = m.index + m[0].length;
+    const known = (S.data?.rows ?? []).map((x) => x.rule);
+    const prose = (text) => {
+      const tpl = document.createElement('template');
+      tpl.innerHTML = MSG.body(text, { rules: known });
+      for (const c of tpl.content.querySelectorAll('code')) {
+        const tok = c.textContent;
+        if (!anchors.has(tok) || c.closest('pre')) continue;
+        c.classList.add('wdp-anchor', 'cursor-help', 'underline', 'decoration-dotted', 'underline-offset-2');
+        c.dataset.anchor = tok;
+        c.title = 'Show this on the surface';
       }
-      parts.push(s.slice(last));
-      return parts;
+      const kids = tpl.content.children;
+      return o$1(kids.length === 1 && kids[0].tagName === 'P' ? kids[0].innerHTML : tpl.innerHTML);
     };
+    const anchorOf = (e) => e.target?.closest?.('code[data-anchor]');
+    const hoverIn = (e) => {
+      const c = anchorOf(e);
+      if (c) fire(c, 'highlight', { anchor: c.dataset.anchor });
+    };
+    const hoverOut = (e) => {
+      if (anchorOf(e)) fire(e.currentTarget, 'highlight', { anchor: null });
+    };
+    // The inherit variant keeps the field's own size; .wd-text alone is a chat line.
+    const TEXT = 'wd-text wd-inherit';
     /*
      * Given and when are the situation and the act - read as prose beside
      * their label. Then is the list of things to look for: one bullet per
@@ -6165,11 +6186,11 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       ? Object.entries(r.steps).map(([ph, items]) =>
           ph === 'then'
             ? b`<div class="col-span-2 pt-1"><div class="${LBL}">${ph}</div>
-              <ul class="list-disc pl-4 pt-0.5" data-testid="detail.then">${items.map(
-                (s) => b`<li>${stepText(s)}</li>`,
+              <ul class="${TEXT} list-disc pl-4 pt-0.5" data-testid="detail.then" @mouseover=${hoverIn} @mouseenter=${hoverIn} @mouseout=${hoverOut}>${items.map(
+                (s) => b`<li>${prose(s)}</li>`,
               )}</ul></div>`
-            : b`<span class="${LBL} pt-1">${ph}</span><div data-testid="detail.${ph}">${items.map(
-              (s, i) => b`${i ? b`<br />` : A}${stepText(s)}`,
+            : b`<span class="${LBL} pt-1">${ph}</span><div class="${TEXT}" data-testid="detail.${ph}" @mouseover=${hoverIn} @mouseenter=${hoverIn} @mouseout=${hoverOut}>${items.map(
+              (s, i) => b`${i ? b`<br />` : A}${prose(s)}`,
             )}</div>`,
         )
       : null;
@@ -6253,18 +6274,18 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
           ${tierMarks(r, needsYou(r.rule))}
           <div class="break-all font-mono text-[11px] opacity-40" data-testid="detail.rule-id">${r.rule}</div>
         </div>
-        <p class="text-[15px] leading-relaxed" data-testid="detail.statement">${r.statement}</p>
+        <p class="${TEXT} text-[15px] leading-relaxed" data-testid="detail.statement" @mouseover=${hoverIn} @mouseenter=${hoverIn} @mouseout=${hoverOut}>${prose(r.statement)}</p>
         <!-- The reason and the story behind it, under the claim and quieter
              than it: read when you want to argue with the rule, skipped when
              you want to judge it. Neither is hashed, so neither is the rule. -->
         ${
           r.because
-            ? b`<p class="pt-1.5 text-[13px] leading-relaxed opacity-70" data-testid="detail.because"><span class="${LBL}">because</span> ${r.because}</p>`
+            ? b`<p class="${TEXT} pt-1.5 text-[13px] leading-relaxed opacity-70" data-testid="detail.because" @mouseover=${hoverIn} @mouseenter=${hoverIn} @mouseout=${hoverOut}><span class="${LBL}">because</span> ${prose(r.because)}</p>`
             : A
         }
         ${
           r.history
-            ? b`<p class="pt-1 text-[12.5px] leading-relaxed opacity-55" data-testid="detail.history"><span class="${LBL}">history</span> ${r.history}</p>`
+            ? b`<p class="${TEXT} pt-1 text-[12.5px] leading-relaxed opacity-55" data-testid="detail.history" @mouseover=${hoverIn} @mouseenter=${hoverIn} @mouseout=${hoverOut}><span class="${LBL}">history</span> ${prose(r.history)}</p>`
             : A
         }
         ${elsewhere$1(r)}

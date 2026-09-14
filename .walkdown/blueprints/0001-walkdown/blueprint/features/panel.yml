@@ -707,7 +707,8 @@ stories:
             - "The check source stays behind anchor `detail.technical-disclosure` until opened, and stands on its own: it hangs off the rule's check refs, so it is there whether or not the rule has steps"
             - Hovering an anchor a step names highlights that element on the surface under review, so a step points at what it is talking about
             - Given and when read as prose beside their labels; only then is a list, one bullet per clause, set below its label rather than beside it
-          statement_hash: sha256:01925131df2f
+            - The statement, its reason, its history and every step are markdown, read through the renderer a thread body is read through, so a backticked anchor is code wearing the same wash on the rule as in a conversation - and nothing in a rule's words reaches the page as markup
+          statement_hash: sha256:93da194ee8f3
           reworded:
             - hash: sha256:0609e516526f
               at: 2026-09-13

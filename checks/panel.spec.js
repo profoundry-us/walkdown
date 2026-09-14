@@ -1070,6 +1070,32 @@ test('the steps are read outright and the check source waits behind a disclosure
   const stepsBox = await steps.boundingBox();
   expect(listBox.width, 'and takes the width the steps have').toBeGreaterThan(stepsBox.width * 0.8);
 
+  /*
+   * The rule's words go through the thread body's renderer, so an anchor
+   * written in backticks is a code span here exactly as it is in a
+   * conversation - same element, same colour - rather than two lookalike
+   * treatments that drift (Topher, 2026-09-13). This rule names
+   * `detail.steps` in its own steps, so its own detail is the fixture.
+   */
+  const anchor = steps.locator('code[data-anchor="detail.steps"]');
+  await expect(anchor, 'a declared anchor is a code span that knows what it points at').toHaveCount(1);
+  await expect(steps.getByTestId('detail.when')).not.toContainText('`');
+  const colour = (loc) => loc.evaluate((el) => getComputedStyle(el).color);
+  const stepCode = await colour(anchor);
+  const stmt = page.getByTestId('detail.statement');
+  await expect(stmt.locator('p'), 'a one-paragraph statement is not boxed in a paragraph of its own').toHaveCount(0);
+  const body = await page.evaluate(() => {
+    const root = [...document.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot;
+    const probe = document.createElement('div');
+    probe.className = 'wd-text';
+    probe.innerHTML = '<code>x</code>';
+    root.querySelector('[data-testid="detail.steps"]').append(probe);
+    const c = getComputedStyle(probe.firstChild).color;
+    probe.remove();
+    return c;
+  });
+  expect(stepCode, 'the anchor is coloured as a thread body colours code').toBe(body);
+
   const src = page.getByTestId('detail.technical-disclosure');
   await expect(src).toBeVisible();
   await expect(src).toContainText('Check source');
