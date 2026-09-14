@@ -9,7 +9,7 @@ stories:
     rules:
       - id: ownership.drift.design-requests-required
         origin: prd
-        statement: An undesigned screen with no open design-request thread is flagged by lint; filing the request clears it.
+        statement: Lint flags any screen that has no design and no open design-request thread. Filing the request clears the flag.
         verify: [checks]
         steps:
           given:
@@ -22,11 +22,14 @@ stories:
             - A thread that has ended stops clearing it - a request is open work or it is nothing
             - "A proposal sketch is not a request: a drawing nobody asked design for routes nothing"
             - A retired screen is exempt, because it describes something we stopped meaning
-          statement_hash: sha256:0c30b51be702
+          statement_hash: sha256:388852348271
           reworded:
             - hash: sha256:1d8bdc7a98b6
               at: 2026-09-13
               why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:0c30b51be702
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
   - id: ownership.authoring
     title: A rule is written so it can be built from
@@ -34,7 +37,7 @@ stories:
     rules:
       - id: ownership.authoring.steps-are-required
         origin: walkdown
-        statement: Every rule carries given/when/then steps, and a rule without them is an error rather than a note.
+        statement: Every rule carries given/when/then steps. A rule without them is reported as an error, not as a warning.
         because: The steps are what a check is built from; a statement standing alone leaves whoever implements it to invent the detail and whoever judges it with nothing to judge against.
         verify: [checks]
         steps:
@@ -47,7 +50,7 @@ stories:
             - A rule whose steps are present is silent, whatever else is true of it
             - "A retired rule is exempt: it describes something we stopped meaning, and owes nothing but an id that still resolves"
             - The error says why - a check is built from the steps - so the fix is obvious to whoever reads it
-          statement_hash: sha256:5215a4e2b046
+          statement_hash: sha256:3227ee91ac45
           reworded:
             - hash: sha256:a0e7cc9e7139
               at: 2026-09-13
@@ -55,6 +58,9 @@ stories:
             - hash: sha256:511aa1c28355
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:5215a4e2b046
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: ownership.authoring.statement-reads-at-a-glance
         origin: walkdown
@@ -113,7 +119,8 @@ stories:
       - id: ownership.evidence.same-surface
         retired: The ledger tracks behaviour a person can see, and this is a rule about how the test suite is written (2026-08-26, thread n-0074) - it lives in blueprint/AGENTS.md, and its mechanical half is already carried by status.derived.unbacked-pass-goes-stale.
         origin: thread:q-0070
-        statement: A check may only claim a rule whose behaviour it actually exercises - a rule describing what the panel or the embed does is not verified by a test that drives the server they talk to, because such a test passes in full while the described surface is broken, which makes the cheapest and most-trusted tier the one most able to lie.
+        statement: A check may only claim a rule whose behaviour it actually exercises. A rule about what the panel or the embed does is not verified by a test that only drives the server they talk to.
+        because: A server test passes in full while the panel or embed it stands in for is broken, so the cheapest and most-trusted kind of check becomes the one most able to lie.
         steps:
           given:
             - A rule whose statement describes something a person sees or does

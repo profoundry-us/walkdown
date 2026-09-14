@@ -26,7 +26,7 @@ stories:
 
       - id: threads.lifecycle.claim-never-accept
         origin: prd
-        statement: Setting a thread to verified or waived requires a person who has said who they are - a name this machine merely guessed at, an actor called "agent" in any spelling, and any mutation a machine says it typed are all rejected.
+        statement: Only a person who has said who they are can set a thread to verified or waived. A name the machine guessed, an actor named "agent" in any spelling, or a change a machine claims to have typed are all rejected.
         verify: [checks]
         steps:
           given:
@@ -37,16 +37,19 @@ stories:
             - Each is rejected and the thread is unchanged - work can be claimed on somebody's behalf, and accepted only by them
             - The refusal says where to say who you are, and never fills the gap with a login name
             - The name is compared as written, case folded and trimmed - this is an agent declaring itself, not authentication, so a confusable spelling is not chased and "the-agent", "agents" and "claude" stay accepted (q-0218)
-          statement_hash: sha256:7ea67873e7a5
+          statement_hash: sha256:176058816e54
           reworded:
             - hash: sha256:482531dc241f
               at: 2026-09-13
               why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:7ea67873e7a5
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: threads.lifecycle.acts-for-a-person
         origin: thread:n-0139
         created_at: 2026-09-01
-        statement: An agent working on a person's behalf records under that person's name and says beside it that a machine typed the words. Who a write is recorded under is never something a caller can pass in.
+        statement: When an agent writes a record on a person's behalf, the record carries that person's username and a mark beside it saying a machine typed the words. No request can choose whose name a record is written under.
         because: The instruction was the person's; the typing was not.
         verify: [checks]
         steps:
@@ -58,7 +61,7 @@ stories:
             - The record carries that person as the author, and the agent as the provenance beside it
             - The report names both, so a reader can tell a sentence a person wrote from one a machine did
             - No argument and no environment variable can name somebody else
-          statement_hash: sha256:df8e11a02202
+          statement_hash: sha256:bd13e11ce4db
           reworded:
             - hash: sha256:6790e9b3474c
               at: 2026-09-13
@@ -66,10 +69,13 @@ stories:
             - hash: sha256:0306cfdcd747
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:df8e11a02202
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: threads.lifecycle.reasoned-endings
         origin: prd
-        statement: Waiving records who waived and why, and reopening requires a reason; both reasons land as replies.
+        statement: Waiving a thread records who waived it and why, and reopening one requires a reason. Both reasons are kept as replies on the thread.
         verify: [checks]
         unverifiable:
           agent: The passing case needs a completed waive, and waiving is a human-only transition an agent may never perform (blueprint/AGENTS.md). The reopen half could be walked; the waive half cannot, so the tier cannot honestly hold.
@@ -80,15 +86,18 @@ stories:
             - The transition is attempted without a reason
           then:
             - It is rejected; with a reason, the reason is appended as a reply and waived_by records the person
-          statement_hash: sha256:e93d45c639b7
+          statement_hash: sha256:a886c7f1111c
           reworded:
             - hash: sha256:24591753abaa
               at: 2026-09-13
               why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:e93d45c639b7
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: threads.lifecycle.says-what-it-did
         origin: walkdown
-        statement: A command that changes a thread reports the change - the status it left, the status it reached, who it was recorded under, and how many replies landed - rather than printing the thread back.
+        statement: A command that changes a thread reports what changed rather than printing the thread back. It says which status the thread left, which status it reached, whose name the change was recorded under, and how many replies landed.
         because: Output that looks the same whether or not anything happened is output nobody can act on.
         verify: [checks]
         steps:
@@ -101,7 +110,7 @@ stories:
             - A reply with no transition says the status did not move, rather than staying silent and letting a reader assume it did
             - Reading a thread with no flags still prints the whole conversation - reading is a different ask from changing
             - A refused change says why on the error stream and exits non-zero, so a loop over several threads can stop on the first one rather than plunging on
-          statement_hash: sha256:da7cbe35b72d
+          statement_hash: sha256:ea3c4135ac21
           reworded:
             - hash: sha256:224b3a652a3a
               at: 2026-09-13
@@ -109,6 +118,9 @@ stories:
             - hash: sha256:0c1f3dff50e4
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:da7cbe35b72d
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
   - id: threads.conversation
     title: A thread reads as a conversation
@@ -116,7 +128,7 @@ stories:
     rules:
       - id: threads.conversation.one-stream
         origin: walkdown
-        statement: A thread is one stream of messages - the opening note is simply the first, by a person, at a time - and consecutive messages from one author collapse under a single name.
+        statement: A thread is one stream of messages. The opening note is the first of them, with an author and a time like any other, and consecutive messages from one author show under a single name.
         because: A long exchange should read as talking rather than as filing.
         signoff: [eng, product]
         screens: [thread-panel, rule-detail]
@@ -133,7 +145,7 @@ stories:
             - Line breaks written into a message survive, and a day boundary is drawn between messages
             - The two deliveries render a thread the same way, from one shared implementation rather than two lookalikes
             - Thread and rule ids written inside a message are links to the thing they name
-          statement_hash: sha256:38f76ce52560
+          statement_hash: sha256:ac7dee24993b
           reworded:
             - hash: sha256:e58134b3796f
               at: 2026-09-13
@@ -141,6 +153,9 @@ stories:
             - hash: sha256:6b387227a957
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:38f76ce52560
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
       - id: threads.conversation.written-in-markdown
         origin: thread:n-0288
         statement: A message is markdown, rendered from a short list of allowed elements; anything else in it is plain text.
@@ -216,7 +231,7 @@ stories:
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
       - id: threads.conversation.append-only
         origin: walkdown
-        statement: A conversation is append-only - messages cannot be edited or deleted, there are no reactions standing in for a verdict, and a thread that reached a terminal state offers no way back.
+        statement: A conversation is append-only. A message cannot be edited or deleted, no reaction stands in for a verdict, and a thread that has reached its final state cannot be reopened.
         because: A thread is the record of what was said; the ledger is where judgment is recorded.
         signoff: [eng, product]
         screens: [thread-panel]
@@ -230,7 +245,7 @@ stories:
             - Nothing offers a reaction that would mean addressed or approved without recording it
             - The ended thread shows how it ended and by whom, and offers no reopen, because the lifecycle has none
             - Replying to an ended thread is still possible - the record continues, the state does not
-          statement_hash: sha256:13405960e940
+          statement_hash: sha256:33102006683e
           reworded:
             - hash: sha256:06a879b1032c
               at: 2026-09-13
@@ -238,10 +253,13 @@ stories:
             - hash: sha256:f9bd0d576c3f
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:13405960e940
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: threads.conversation.thread-is-a-screen
         origin: walkdown
-        statement: Opening a thread slides to a screen of its own, one step to the right of the rule it belongs to, and the way back names where it goes.
+        statement: Opening a thread slides the panel to a screen of its own, one step to the right of the rule it belongs to. The way back is labelled with the name of where it leads.
         because: A conversation deserves the width, and reading one should never cost you your place.
         signoff: [eng, product]
         screens: [rule-detail, thread-panel]
@@ -257,7 +275,7 @@ stories:
             - The screen is never a dead end - a thread that is gone still leaves the way back
             - The surface under review does not move - reading a conversation is not a walkdown step
             - A pin clicked on the page opens the same screen, wherever you were
-          statement_hash: sha256:6d4f25afd8de
+          statement_hash: sha256:033a338bf6bb
           reworded:
             - hash: sha256:9971d7aaef65
               at: 2026-09-13
@@ -265,3 +283,6 @@ stories:
             - hash: sha256:bfa90fd6ebab
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:6d4f25afd8de
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"

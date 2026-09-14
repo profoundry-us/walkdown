@@ -9,7 +9,7 @@ stories:
     rules:
       - id: screens.identity.fragment-is-identity
         origin: thread:n-0020
-        statement: A screen is identified by origin, path and fragment, so a state the URL fragment expresses - a modal, a drawer, a tab, an SPA route - is a screen in its own right and not a footnote on the page behind it.
+        statement: A screen is identified by its origin, path and fragment. So a state the URL fragment expresses, such as a modal, a drawer, a tab or an SPA route, is a screen in its own right and not a footnote on the page behind it.
         verify: [checks]
         steps:
           given:
@@ -21,15 +21,18 @@ stories:
             - A declared fragment must match exactly - a different fragment is a different screen, never a near miss
             - A fragment nobody has enumerated still resolves to the screen at that path, so an app is usable before every route is written down
             - The state is reachable by its URL on load, not only by clicking - a state you can only click your way to cannot be walked down
-          statement_hash: sha256:b0bbdbe721cb
+          statement_hash: sha256:9484646bb993
           reworded:
             - hash: sha256:ac30c2879d52
               at: 2026-09-13
               why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:b0bbdbe721cb
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: screens.identity.query-is-not-identity
         origin: thread:n-0020
-        statement: A query string is data, not identity - the same screen showing page two is the same screen - but a query written into the storyboard still tells two screens sharing a path apart.
+        statement: "A query string is data, not identity, so the same screen showing page two is still the same screen. A query written into the storyboard is the exception: it still tells two screens sharing one path apart."
         verify: [checks]
         steps:
           given:
@@ -40,11 +43,14 @@ stories:
             - An undeclared query changes nothing about which screen you are on
             - A declared query is honoured, and the more specific of the two wins
             - The constraint that a page belongs to exactly one blueprint is still read on path and fragment alone
-          statement_hash: sha256:88e5a4d85423
+          statement_hash: sha256:56d83a30a6b1
           reworded:
             - hash: sha256:9b8b3c9e5881
               at: 2026-09-13
               why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:88e5a4d85423
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: screens.identity.one-matcher
         origin: thread:n-0020
@@ -72,7 +78,7 @@ stories:
 
       - id: screens.identity.follows-navigation
         origin: thread:n-0020
-        statement: When the URL changes without the page reloading, walkdown notices and re-answers which screen this is - and says so honestly for the one kind of navigation it cannot be told about.
+        statement: When the URL changes without the page reloading, walkdown notices and works out again which screen this is. The one navigation it cannot be told about, pushState, it catches by watching the address, and says so.
         steps:
           given:
             - walkdown on a single-page app, on a screen the storyboard knows
@@ -83,7 +89,7 @@ stories:
             - The embed re-resolves too, so a pin placed after the navigation files against the screen you are actually on
             - An answer a person gave about the previous page - which screen it was, whose art to ghost - does not carry across the navigation
             - pushState announces nothing and the extension cannot patch the page's own History, so that case is caught by watching rather than left to pretend it was heard
-          statement_hash: sha256:e0ed85a9e4ac
+          statement_hash: sha256:1519a942634a
           reworded:
             - hash: sha256:e8763cbea8b6
               at: 2026-09-13
@@ -91,6 +97,9 @@ stories:
             - hash: sha256:10cd6346d20b
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:e0ed85a9e4ac
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
   - id: screens.ownership
     title: Which blueprints a page belongs to is a fact about its address
@@ -100,7 +109,7 @@ stories:
         retired: >-
           Withdrawn by ADR 0001 (2026-09-09). A page may be claimed by several blueprints: two efforts about different functionality of one homepage are not two pages, and making the storyboard say otherwise put a lie in the spec to protect an invariant that existed for the tooling's convenience. What the constraint was really protecting - that nothing ever has to guess whose page this is - is kept by asking instead: `walkdown claims` reports shared pages as an inventory, and the panel puts the question to the person (screens.ownership.routes-by-page, panel.start.which-project).
         origin: thread:q-0019
-        statement: No two blueprints claim the same page - a claim being an origin from a target's base_url plus a path, compared on path and fragment alone, so that two projects declaring the same path under different queries is still a collision while the same path on two different origins is not.
+        statement: No two blueprints claim the same page, where a page is an origin from a target's `base_url` plus a path. Two claims collide when their path and fragment match, even with different queries, and never when their origins differ.
         verify: [checks]
         steps:
           given:
@@ -149,7 +158,7 @@ stories:
     rules:
       - id: screens.surfaces.stand-in-app
         origin: walkdown
-        statement: A screen whose app is not a page can declare a stand-in, and walkdown serves that screen's own design back as the app, visibly marked as a stand-in, so fading, ghosting and pinning on the app surface all work.
+        statement: A screen whose app is not a page can declare a stand-in. Walkdown then shows that screen's own design in place of the app, visibly marked as a stand-in, and fading, ghosting and pinning work on it as on any app surface.
         because: Some of what is built is chrome rather than a URL, and some is not built yet - and nobody must be able to mistake a stand-in for the build.
         verify: [checks]
         signoff: [eng, product]
@@ -164,7 +173,7 @@ stories:
             - It announces itself on its own face - a marked edge and a corner label - and wears a theme of neither the mockups nor walkdown's chrome
             - The anchors are the design's own, so a pin lands on the same element on either surface, and is recorded against the app
             - It is not evidence - what it shows is the design, so a verdict given against it is a verdict about the design
-          statement_hash: sha256:2a72bd1318f4
+          statement_hash: sha256:1d809c5c6f9f
           reworded:
             - hash: sha256:8c976257c8c0
               at: 2026-09-13
@@ -172,3 +181,6 @@ stories:
             - hash: sha256:079c4dd0164a
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:2a72bd1318f4
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"

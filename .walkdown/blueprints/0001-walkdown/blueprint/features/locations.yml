@@ -9,7 +9,7 @@ stories:
     rules:
       - id: locations.default.nothing-in-the-tree
         origin: prd
-        statement: With nothing configured, walkdown adds nothing to the repository - no `.walkdown/`, not so much as a pointer. The home holding the spec, the threads, the runs, the evidence and the drafts lives in the person's own `~/.walkdown/blueprints/`.
+        statement: With nothing configured, walkdown writes no `.walkdown/` directory into the repository, and no pointer to one either. The spec, threads, runs, evidence and drafts live in the person's own `~/.walkdown/blueprints/`.
         because: Trying the tool should commit a project to nothing, and abandoning it should mean deleting one directory.
         history: "A `.walkdown/` beside the code was tried and reversed: however well ignored, it was still a thing git had to be told about, and the pointer it needed carried a home-directory path into shared history."
         verify: [checks]
@@ -24,7 +24,7 @@ stories:
             - Everything walkdown made sits in one numbered home under `~/.walkdown/blueprints/`
             - Deleting that one directory removes everything walkdown made
             - Asked what is tracked, walkdown answers nothing, and says why
-          statement_hash: sha256:7795aa37a650
+          statement_hash: sha256:a2ac0f932c99
           reworded:
             - hash: sha256:7a82184b4b5d
               at: 2026-09-13
@@ -32,6 +32,9 @@ stories:
             - hash: sha256:59933a1c240f
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:7795aa37a650
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: locations.default.records-follow-the-spec
         origin: prd
@@ -151,7 +154,7 @@ stories:
     rules:
       - id: locations.answer.says-why
         origin: prd
-        statement: Every path walkdown reports comes with the reason it was chosen - named on the command line, this machine's registry and how the row arrived, the home the row names, the built-in default.
+        statement: "Every path walkdown reports says why it was chosen: named on the command line, found in this machine's registry (and how that entry got there), the home a registry entry names, or the built-in default."
         because: A person who disagrees with where something is needs to know which decision to argue with.
         verify: [checks]
         steps:
@@ -162,7 +165,7 @@ stories:
           then:
             - Each of the spec, runs, threads, evidence, drafts and code carries its reason
             - The reason names the rule that decided it, not merely that a decision was made
-          statement_hash: sha256:cb01c6594b8f
+          statement_hash: sha256:50638c8edeb8
           reworded:
             - hash: sha256:fd21bba75c2e
               at: 2026-09-13
@@ -170,10 +173,13 @@ stories:
             - hash: sha256:26757965fbdd
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:cb01c6594b8f
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: locations.answer.asking-writes-nothing
         origin: prd
-        statement: Asking where something lives creates nothing - no directory, no config file, no placeholder.
+        statement: "Asking where something lives creates nothing: no directory, no config file, no placeholder."
         because: The command a confused person reaches for first must not itself change what they were confused about.
         verify: [checks]
         steps:
@@ -184,7 +190,7 @@ stories:
           then:
             - It answers in full, naming directories that do not exist yet
             - The disk is exactly as it was found, including the personal home
-          statement_hash: sha256:bc8314186c2a
+          statement_hash: sha256:7d27e6b8d5a3
           reworded:
             - hash: sha256:0ba6f381a575
               at: 2026-09-13
@@ -192,12 +198,16 @@ stories:
             - hash: sha256:47b87b883d14
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:bc8314186c2a
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: locations.answer.nearest-blueprint-wins
         retired: >-
           Answered by deleting the question (2026-09-01, q-0138). Walkdown no longer searches the tree for blueprints, so there is no tree answer to arbitrate against a configured one and no precedence left to state. The half of this that survived - a repository may hold several blueprints without them bleeding into each other - is now locations.answer.declared-not-discovered, which carries it without the contest.
         origin: prd
-        statement: A blueprint found in the working tree beats a configured entry rooted above it, and a blueprint named outright is answered by the entry that owns that blueprint or by none at all - because a repository can hold several, and an entry rooted at the whole tree would otherwise answer for its own siblings and report one project's spec beside another project's ledger.
+        statement: A blueprint found inside the working tree wins over a registered project rooted higher up the tree. A blueprint asked for by name is answered only by the registered project that owns it, or by none.
+        because: A repository can hold several blueprints. A project registered at the whole tree would otherwise answer for its siblings and show one project's spec beside another project's ledger.
         verify: [checks]
         steps:
           given:
@@ -213,7 +223,7 @@ stories:
         origin: walkdown
         retired: >-
           Its statement is about which of two files answers, and there is one file now (ADR 0003, accepted 2026-09-11): a reader consults ~/.walkdown/registry.yml and nothing else, a committed .walkdown/config.yml is a manifest that only `walkdown import` reads, and no `.walkdown` is ever found by walking. Every mechanism this rule named - the nearest-and-stop walk, the merge with the personal file, the crossing guard on both files - was deleted at step 3 of that ADR, after n-0275 showed a symlink walking through the guard on the read side while the write side refused the same path. The half that survives - no inference, nothing merely lying nearby is a project - is locations.answer.declared-not-discovered; what replaces the boundary is locations.answer.registry-is-the-only-door.
-        statement: Exactly one `.walkdown` directory answers for where you are standing - the nearest one at or above you - and it is merged with the personal `~/.walkdown` and with nothing else. What that forbids is INFERENCE - walkdown never works out from the tree that a neighbouring checkout's blueprints are yours, so a pack carrying its own `.walkdown` never sees the repository root's and the root's never sees the pack's. It does not forbid breadth - a blueprint you named yourself, with `walkdown import`, is reachable from anywhere, because you said so and nothing was guessed.
+        statement: The nearest `.walkdown` at or above you is the only one that answers for where you stand, merged with your personal `~/.walkdown` and nothing else. walkdown never guesses that a neighbouring checkout's blueprints are yours, but a blueprint you registered with `walkdown import` is reachable from anywhere.
         verify: [checks]
         signoff: [eng, product]
         steps:
@@ -299,7 +309,8 @@ stories:
         origin: prd
         retired: >-
           The rule was about records found INSIDE a blueprint - `blueprint/runs/`, the layout every project had before homes - outranking a blanket default. That layout is not read any more: every blueprint walkdown answers for is declared, lives in a home, and its entry names the records or the home they derive from, so there is no directory for the resolver to discover and nothing for a preference to give way to (2026-09-04, Topher's call to remove legacy support entirely). What survives of it is locations.keeping.moving-is-a-decision: relocating records is still something a person does, never something a default does to them.
-        statement: A blanket default never points past records a blueprint already holds - an existing directory is a fact and a default is a preference, so the preference gives way and moving those records stays a decision somebody makes.
+        statement: A default location never overrides a directory that already holds a blueprint's records. The existing directory wins, and moving those records is a decision a person makes.
+        because: An existing directory is a fact and a default is only a preference.
         verify: [checks]
         steps:
           given:
@@ -314,7 +325,7 @@ stories:
       - id: locations.keeping.moving-is-a-decision
         origin: prd
         statement: Moving records relocates the files unchanged, remembers the choice in the personal config beside the person's own comments, and refuses a destination that already holds records.
-        because: Two ledgers interleaved into one directory is an edit of both, and this ledger is append-only.
+        because: The records are append-only, and dropping one set into a directory that already holds another would change both.
         verify: [checks]
         steps:
           given:
@@ -364,7 +375,7 @@ stories:
       - id: locations.travel.judged-against-a-spec
         origin: prd
         statement: Every run records a content hash of the spec it was judged against, computed from the blueprint's own files, and recording a verdict never changes that hash.
-        because: A verdict has to say what it was measured against whether or not the project has a repository - and a run is what the spec produced, not part of it.
+        because: A verdict has to say what it was measured against even when the project has no repository. A run is the spec's output, not part of it, so recording one cannot change the hash.
         verify: [checks]
         steps:
           given:
@@ -442,7 +453,7 @@ stories:
 
       - id: locations.pointer.owns-only-its-block
         origin: prd
-        statement: "walkdown owns the fenced block and nothing else in that file: it rewrites what lies between its own markers, leaves every other line as it was, and updates the block when the spec moves."
+        statement: "walkdown owns the fenced pointer block and nothing else in the file that holds it. It rewrites what lies between its own markers, leaves every other line as it was, and updates the block when the spec moves."
         because: A pointer still naming a directory the spec has left is worse than no pointer at all - an agent believes it and goes looking.
         verify: [checks]
         steps:
@@ -454,7 +465,7 @@ stories:
             - The block names the new place, and appears exactly once
             - Every line outside the markers is untouched
             - Placing it twice in a row changes nothing the second time
-          statement_hash: sha256:6319b8194496
+          statement_hash: sha256:8178c7c18d59
           reworded:
             - hash: sha256:ec57ac3e3cc3
               at: 2026-09-13
@@ -462,3 +473,6 @@ stories:
             - hash: sha256:dda1404e46d5
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:6319b8194496
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
