@@ -36,7 +36,7 @@ stories:
       - id: locations.default.records-follow-the-spec
         origin: prd
         statement: A home holds the spec and its four kinds of record as siblings - `blueprint/`, `threads/`, `runs/`, `evidence/`, `drafts/` - in one layout wherever the home sits. Which siblings git sees is the commit standard's business, not the layout's.
-        because: A home moves between the personal `.walkdown` and a repository's as one directory, and nothing in it needs rewriting; runs, evidence and drafts are what a machine or one person produced, and a committed spec keeps them out unless everything was asked for.
+        because: A home moves as one directory, and nothing inside it needs rewriting when it does.
         verify: [checks]
         steps:
           given:
@@ -58,7 +58,7 @@ stories:
 
       - id: locations.default.in-repo-on-request
         origin: prd
-        statement: "A project that wants walkdown's files in version control asks for it, and there are two answers: commit the spec and the threads that go with it, or commit everything. Neither is the default, each is one flag, and the choice is read off the tree - the home under the repository's `.walkdown/` and the `.gitignore` beside it - rather than written down anywhere. Changing your mind is the same command again."
+        statement: A project's walkdown files stay out of version control unless asked; asking is one flag for the spec and its threads, another for everything, and what was chosen is visible in the files themselves rather than recorded in a setting.
         because: The tree is the only place the answer cannot drift from the truth, and the command reports what git actually holds rather than what walkdown meant to arrange.
         verify: [checks]
         signoff: [eng, product]
@@ -74,7 +74,7 @@ stories:
             - Asked again with a different standard, the tree changes to say so - the file is written or removed, or the home moves whole with no record edited
             - The command reports what is tracked now, in words, and how to change its mind later
             - What is tracked is asked of git, not read off the ignore file walkdown wrote - a root .gitignore hiding .walkdown, a rule that does not reach a blueprint standing elsewhere, an ignore file somebody emptied, and a home that left with its files still in the index are each said outright, and lint errors wherever the tree's promise and git's answer disagree (n-0179, n-0180, n-0181)
-          statement_hash: sha256:bca2161d6157
+          statement_hash: sha256:7310851da84e
           reworded:
             - hash: sha256:3be1e35e0956
               at: 2026-09-13
@@ -82,10 +82,13 @@ stories:
             - hash: sha256:eb28707b6f77
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:bca2161d6157
+              at: 2026-09-14T02:20:43Z
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
       - id: locations.default.skills-are-yours-by-default
         origin: prd
-        statement: The agent procedures walkdown ships install into the person's own skills directory and add nothing to any repository, whether or not the spec is committed. A team that wants them shared asks for it outright, and a procedure whose harness the receiving project does not have is not shipped at all.
+        statement: The agent procedures walkdown ships install into your own skills directory and never into a repository unless a team asks for it.
         because: In the personal directory they work in every project on the machine; a committed skill is a copy of walkdown's own source that walkdown cannot keep right afterwards.
         verify: [checks]
         signoff: [eng, product]
@@ -100,7 +103,7 @@ stories:
             - Installing them on their own asks where they should go rather than picking, and writes nothing to a place nobody named
             - A skill that depends on a harness only walkdown's own repository has is not among them
             - A copy the person has edited is kept and reported rather than overwritten
-          statement_hash: sha256:ac83e3dcb35a
+          statement_hash: sha256:a1c19031d710
           reworded:
             - hash: sha256:66bff6c2346e
               at: 2026-09-13
@@ -108,11 +111,14 @@ stories:
             - hash: sha256:2be84df9d5f8
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:ac83e3dcb35a
+              at: 2026-09-14T02:20:43Z
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
       - id: locations.default.one-home-per-blueprint
         origin: thread:n-0124
-        statement: Every blueprint gets a numbered home of its own inside the `.walkdown` that answers for it - `.walkdown/blueprints/0002-name/` - and two blueprints never share one. No path walkdown resolves is keyed by a name somebody else could also choose, and which two config rows are one project is answered by where an entry is rooted, never by its id alone. Asking where things live allocates nothing; a home that already holds records keeps answering for its blueprint; moving one is a decision a person makes.
-        because: The number is allocated against that directory's own listing rather than derived from a name two projects can both have, so one blueprint is never given a second home with its records stranded in the first.
+        statement: Every blueprint has a numbered home of its own, and no path walkdown resolves is keyed by a name two projects could share.
+        because: A name two projects can both have is not an address; a number allocated once is.
         verify: [checks]
         signoff: [eng, product]
         steps:
@@ -127,7 +133,7 @@ stories:
             - Two checkouts that share a name, one listed personally, stay two projects with two ledgers
             - A home that already holds a blueprint's records keeps answering for it
             - A home nothing claims is reported and left standing, never guessed at and never moved
-          statement_hash: sha256:195a0540e150
+          statement_hash: sha256:43e88185b989
           reworded:
             - hash: sha256:c2e4b20e7f0d
               at: 2026-09-13
@@ -135,6 +141,9 @@ stories:
             - hash: sha256:90679f4f6194
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:195a0540e150
+              at: 2026-09-14T02:20:43Z
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
   - id: locations.answer
     title: Anyone can ask where this project's pieces are
@@ -227,7 +236,7 @@ stories:
 
       - id: locations.answer.declared-not-discovered
         origin: thread:q-0138
-        statement: Every blueprint walkdown answers for is one somebody registered on this machine - with `walkdown import`, or by `walkdown init` making it - and never one it went looking for. A checkout that declares a blueprint nobody has imported is not a project here until somebody does.
+        statement: walkdown answers only for blueprints somebody registered on this machine; it never goes looking for one.
         because: A repository may hold several blueprints without them bleeding into each other.
         verify: [checks]
         signoff: [eng, product]
@@ -240,7 +249,7 @@ stories:
             - Each registered blueprint answers for itself, with its own runs and threads
             - The unregistered one is not a project at all, however much it looks like one from the outside - and where its checkout declares it, the answer names the manifest and says `walkdown import`
             - The registry is consulted, and the report says which row answered and how it arrived - a `blueprints:` list in the personal config.yml is set aside and named, however many keys it restates
-          statement_hash: sha256:715be4b0e9c9
+          statement_hash: sha256:f1df66c74dac
           reworded:
             - hash: sha256:d6788490af67
               at: 2026-09-13
@@ -248,10 +257,13 @@ stories:
             - hash: sha256:251a2b83c9b6
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:715be4b0e9c9
+              at: 2026-09-14T02:20:43Z
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
       - id: locations.answer.registry-is-the-only-door
         origin: thread:n-0275
-        statement: A reader consults the registry and nothing else - never a `.walkdown` it did not register, never a path it was not handed at add time. The working directory picks among registered rows by containment and finds nothing else; a path is canonicalised once when it is added and never resolved again on read; a row nothing wrote is set aside and named rather than followed.
+        statement: walkdown reads only the registry. A `.walkdown` folder nobody registered, or a path nobody added, is not consulted.
         because: What a spelling can fool is the one moment a path is looked at, and that moment is the add.
         history: A symlink created outside a pack, pointing at the pack's home, was followed on the read side while the writer refused the same path - so a second board listed, served and wrote to the pack's ledger with nobody having imported anything (n-0275, ADR 0003).
         verify: [checks]
@@ -267,7 +279,7 @@ stories:
             - The server lists every registered blueprint and never the link's row
             - "`walkdown import` through the link registers the pack's home once, under its real path, and a second import says it is already listed"
             - Standing in the pack reaches the pack's row; standing at the root reaches the root's; nothing about the tree between them is consulted
-          statement_hash: sha256:e40318fd68f9
+          statement_hash: sha256:6e50a37dc531
           reworded:
             - hash: sha256:20130d966a11
               at: 2026-09-13
@@ -275,6 +287,9 @@ stories:
             - hash: sha256:40116907d7ab
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:e40318fd68f9
+              at: 2026-09-14T02:30:30Z
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
   - id: locations.keeping
     title: A ledger already written is never orphaned or edited
@@ -371,7 +386,7 @@ stories:
 
       - id: locations.travel.provenance-not-currency
         origin: prd
-        statement: "What code a run saw - the repository's sha, and a hash of the working tree when it was dirty - is provenance, never currency: it never decides whether a verdict still counts. Whether a verdict counts is answered per cell, by the statement it was made against, the check that still claims it, and any sweep since."
+        statement: A run records which commit it saw so a person can look it up later. A newer commit never makes an older verdict stop counting.
         because: Provenance tells a person digging into a verdict where to look; an unrelated commit must not turn a board from green to grey.
         verify: [checks]
         steps:
@@ -382,7 +397,7 @@ stories:
           then:
             - Every cell reads exactly as it did before
             - The runs still carry the shas they were recorded with, for anyone who wants to look
-          statement_hash: sha256:d5257f44d2df
+          statement_hash: sha256:b1efe71a4d3b
           reworded:
             - hash: sha256:c513160f49fc
               at: 2026-09-13
@@ -390,6 +405,9 @@ stories:
             - hash: sha256:6e10186c5b9c
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:d5257f44d2df
+              at: 2026-09-14T02:30:30Z
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
   - id: locations.pointer
     title: An agent arriving in the repository finds the spec
@@ -397,7 +415,7 @@ stories:
     rules:
       - id: locations.pointer.placed-where-agents-read
         origin: prd
-        statement: Initialising a repository leaves one paragraph saying a spec exists and where it is, in the file that repository already keeps its agent instructions in. With no such file walkdown creates CLAUDE.md; with exactly one the pointer goes there; with more than one walkdown writes nothing and names them.
+        statement: Initialising a repository adds one paragraph, saying where the spec is, to the file that repository already keeps its agent instructions in. If several files could be that one, walkdown writes nothing and names them.
         because: A project keeping conventions in several files has made a choice walkdown cannot read, and guessing puts the sentence where nobody reads it.
         verify: [checks]
         signoff: [eng, product]
@@ -410,7 +428,7 @@ stories:
             - With no agent-instruction file, CLAUDE.md is created carrying the pointer
             - With exactly one, the pointer goes into that file, and no second file is made to compete with it
             - With more than one, nothing is written and the report names them all, for a person to settle by naming the one they want
-          statement_hash: sha256:b9b4fd11bd71
+          statement_hash: sha256:c74747fd201e
           reworded:
             - hash: sha256:e10f6a000d16
               at: 2026-09-13
@@ -418,6 +436,9 @@ stories:
             - hash: sha256:b3c24bacbf43
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:b9b4fd11bd71
+              at: 2026-09-14T02:30:30Z
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
       - id: locations.pointer.owns-only-its-block
         origin: prd

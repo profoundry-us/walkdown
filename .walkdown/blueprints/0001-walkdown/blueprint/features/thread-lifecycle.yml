@@ -169,7 +169,7 @@ stories:
 
       - id: threads.conversation.composer-stays
         origin: walkdown
-        statement: The reply box stands at the bottom of an open thread and never moves - Enter sends and Shift-Enter breaks the line, the message appears before the server answers, and the reply is attributed to whoever you are recording as rather than to a name typed again.
+        statement: The reply box stays at the bottom of an open thread. Enter sends, Shift-Enter breaks the line, and the reply is filed under whoever you are recording as.
         signoff: [eng, product]
         screens: [thread-panel, rule-detail]
         steps:
@@ -182,11 +182,14 @@ stories:
             - A refused reply is marked as not sent and the text comes back, so nothing written is lost
             - The box asks for no name - it says who you are recording as, and that link leads to Settings
             - Typing survives a repaint - the caret is where it was
-          statement_hash: sha256:3559d463e994
+          statement_hash: sha256:4b045e0c4e80
           reworded:
             - hash: sha256:fc8772c1687a
               at: 2026-09-13
               why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:3559d463e994
+              at: 2026-09-14T02:53:55Z
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
       - id: threads.conversation.new-since-you-looked
         origin: walkdown
         statement: A thread remembers where your reading stopped and marks what arrived since as new.

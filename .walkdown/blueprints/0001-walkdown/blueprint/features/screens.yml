@@ -115,7 +115,8 @@ stories:
 
       - id: screens.ownership.routes-by-page
         origin: thread:q-0019
-        statement: Which blueprints a page belongs to is answered from the page's own address rather than from whatever was chosen last, and the answer is a list - one claimant is opened without asking, several are put to the person, and none is put to them too. The count of blueprints a server holds is never evidence about any of it.
+        statement: Which blueprints a page belongs to is decided by the page's address, not by what was chosen last time or by what the server happens to hold.
+        because: A server holding one blueprint is not evidence that this page belongs to it.
         history: A folder holding exactly one blueprint used to open it over any page, claimed or not, and a folder holding several asked about pages none of them claimed (n-0256, n-0258, n-0260, n-0261).
         verify: [checks]
         screens: [choose-blueprint, project-modal]
@@ -130,7 +131,7 @@ stories:
             - Several claimants is a question for the person, never a rank - ordering survives WITHIN one blueprint, because that is how a screen is identified at all, and is abandoned across them
             - An address no blueprint claims is not guessed at, whatever the server holds
             - A caller that names a blueprint explicitly is never overridden by this
-          statement_hash: sha256:a32c2a668e6d
+          statement_hash: sha256:015ebac2b063
           reworded:
             - hash: sha256:3021d25287e8
               at: 2026-09-13
@@ -138,6 +139,9 @@ stories:
             - hash: sha256:c2308bf1988a
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:a32c2a668e6d
+              at: 2026-09-14T02:50:03Z
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
   - id: screens.surfaces
     title: Both surfaces, even when one of them is not a page

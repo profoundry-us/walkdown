@@ -62,7 +62,7 @@ stories:
     rules:
       - id: ownership.writes.spec-never-implementation
         origin: thread:q-0019
-        statement: Through the review server a browser can write specification and only specification - a thread, a draft, a run record. No request can create or modify features, prototypes, source or checks, and a write that lands anywhere but the resolved threads, drafts and runs directories is a breach, not a bug.
+        statement: "The review server lets a browser write three kinds of record: a thread, a draft, a run. Anything it writes outside those three directories is a breach, not a bug."
         because: The browser captures intent and the agent structures it; the product is never written from a web page.
         verify: [checks]
         signoff: [eng, product]
@@ -75,7 +75,7 @@ stories:
             - Everything that changed on disk is under the resolved threads, drafts or runs directories
             - Nothing under features, the storyboard, the prototype root, source or checks moved by a byte
             - The one module every write passes through names the author policy once, so a new writer cannot re-invent it
-          statement_hash: sha256:40dc9f5b5b37
+          statement_hash: sha256:037b0d10dcea
           reworded:
             - hash: sha256:a966a60dc9bc
               at: 2026-09-13
@@ -83,6 +83,9 @@ stories:
             - hash: sha256:67ee12c8ddd0
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:40dc9f5b5b37
+              at: 2026-09-14T02:30:43Z
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
   - id: ownership.evidence
     title: A check is evidence only for what it actually exercises

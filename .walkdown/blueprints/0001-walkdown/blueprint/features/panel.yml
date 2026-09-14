@@ -393,8 +393,8 @@ stories:
       - id: panel.delivery.stale-server-says-so
         origin: thread:n-0227
         created_at: 2026-09-07
-        statement: A server left running while the code moves says so itself, and the panel wears that the same way it wears a stale copy of itself.
-        because: A server keeps the code it started with, so it is answering with yesterday's rules - and it is the only party that can see both when it booted and what is on disk now. A walkdown recorded through an outdated door is undermined exactly as thoroughly as one recorded by an outdated panel.
+        statement: A server still running on code that has since changed says so, and the panel shows that with the same badge it uses for a stale copy of itself.
+        because: A running server keeps the code it started with, and it is the only party that can see both when it started and what is on disk now.
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -408,7 +408,7 @@ stories:
             - A server started after the last edit says nothing at all, so the warning keeps meaning something
             - Rebuilding the panel or the embed does not make a server stale - those are read from disk per request, and crying wolf on every rebuild would teach a reviewer to ignore it
             - A server that cannot read its own source reads as current rather than as an alarm nobody can act on
-          statement_hash: sha256:e24275abff33
+          statement_hash: sha256:930942690e23
           reworded:
             - hash: sha256:2ba91beef131
               at: 2026-09-13
@@ -416,6 +416,9 @@ stories:
             - hash: sha256:34c0eee005b6
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:e24275abff33
+              at: 2026-09-14T03:07:39Z
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
       - id: panel.delivery.one-switch
         origin: thread:n-0018
@@ -519,7 +522,7 @@ stories:
 
       - id: panel.start.choose-a-blueprint
         origin: thread:n-0017
-        statement: When more than one of the active project's blueprints claims the page you are on, the panel asks which, showing each by name and by the description the blueprint itself carries and marking the ones that claim this page. It asks when there are several claimants - never when a folder merely happens to hold several blueprints.
+        statement: When several of a project's blueprints claim the page you are on, the panel asks which one. Holding several blueprints is not a reason to ask.
         because: What a folder holds says nothing about the page you are looking at.
         signoff: [eng, product]
         screens: [choose-blueprint]
@@ -535,7 +538,7 @@ stories:
             - Choosing one loads it and writes nothing down; the same question is asked again next time
             - Nothing is offered that nobody wrote down - the list is the registry's, so a fixture or a vendored copy is absent by never having been declared rather than by being filtered out
             - The same list is the Blueprints tab, so the choice can be changed later without reinstalling anything
-          statement_hash: sha256:f2c3915679bc
+          statement_hash: sha256:f89c8ffc710e
           reworded:
             - hash: sha256:3ff33b8e9c41
               at: 2026-09-13
@@ -543,6 +546,9 @@ stories:
             - hash: sha256:d535c64dd41b
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:f2c3915679bc
+              at: 2026-09-14T02:38:10Z
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
       - id: panel.start.unclaimed-page-says-so
         retired: >-
@@ -566,7 +572,7 @@ stories:
 
       - id: panel.start.which-project
         origin: thread:q-0269
-        statement: Where the address cannot decide - nothing claims this page, several projects do, or there is no page to route from at all, at walkdown's own root - the panel asks which project, in one modal with one backdrop, naming the address it asked about. Only what sits behind the modal changes between the cases, and how to make a page reviewable and how to bring a project in sit above the list.
+        statement: When the address alone cannot say which project this page belongs to, the panel asks. Whether nothing claims the page, several projects do, or there is no page at all, the same modal asks the same question.
         because: Three screens asking one question were three places for the answer to differ, and a long list of projects must not push the way out of view.
         signoff: [eng, product]
         screens: [project-modal]
@@ -590,7 +596,7 @@ stories:
             - Nothing is opened by default, at any count - a machine holding exactly one blueprint is answered the same way as one holding six
             - Choosing a project with one blueprint opens it; choosing one with several asks which, on the Blueprints tab - and several blueprints inside a single project never reach this modal at all, because the project is not in question there
             - A server that lists nothing offers no list at all rather than an empty one, and still says what to do about it
-          statement_hash: sha256:7ab5408640e8
+          statement_hash: sha256:8927716089a7
           reworded:
             - hash: sha256:fb4343377bab
               at: 2026-09-13
@@ -598,6 +604,9 @@ stories:
             - hash: sha256:fbc01fc45771
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:7ab5408640e8
+              at: 2026-09-14T02:38:10Z
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
   - id: panel.rules
     title: The rules are one tap away, and so is the way back
@@ -627,7 +636,7 @@ stories:
 
       - id: panel.rules.takes-you-there
         origin: thread:n-0031
-        statement: Asking for something in the panel moves the surface to it - opening a rule goes to the screen that rule is about, picking a screen goes to that screen, and switching to a blueprint that does not claim the page you are on takes you to a page that blueprint does claim.
+        statement: Asking for something in the panel takes you to it. Opening a rule, picking a screen, or switching blueprints each moves the surface to the screen asked for.
         verify: [checks]
         signoff: [eng, product]
         screens: [review]
@@ -644,11 +653,14 @@ stories:
             - A screen with no URL on either surface still does the one thing it can - record that this page is that screen
             - Where a move means a real page load rather than a frame, it stays something you ask for on the rule rather than something opening a rule does to you
             - Whether a trip that means a real page load is taken or merely offered depends on whether walkdown survives it - framed, walkdown owns the frame and goes; docked by the extension it also goes, because the extension re-injects itself into the next page; docked by a script tag it offers a link instead, because navigating would unload the very script drawing the panel and leave you on the other site with no walkdown at all
-          statement_hash: sha256:0df515aeceb7
+          statement_hash: sha256:9e04008bfcdf
           reworded:
             - hash: sha256:708e2433c9b5
               at: 2026-09-13
               why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:0df515aeceb7
+              at: 2026-09-14T02:38:10Z
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
       - id: panel.rules.one-pane-per-tab
         origin: thread:n-0032
@@ -789,7 +801,7 @@ stories:
 
       - id: panel.rules.counts-legible
         origin: thread:n-0002
-        statement: The counts say what they count and reconcile with the list - verified is a count of rules, the work owed to a person is named, each owed rule carries a mark so the total can be counted back, and the tab carries that total so it is legible from whichever tab is open.
+        statement: Every count in the panel says what it counts. The totals in the footer and on the Rules tab match the badges on the rules themselves, so a reader can add them up and get the same number.
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -804,11 +816,14 @@ stories:
             - The Rules tab carries how many rules a walkdown would take you through - the footer's two kinds together, counted the way the walkdown itself picks the next rule, so it empties as the sitting goes on
             - A tab holding nothing for you draws no badge at all, because a badge saying none is a claim on the eye about nothing
             - The Rules badge is the same warning colour the rule glyphs and their badges use, because it is the same claim they make - this is waiting on you - and it is the loudest thing in the strip, since walking the rules is the work the tool exists for. Other tabs count their own work in their own colour rather than a second yellow beside it
-          statement_hash: sha256:c48d3e5f64b0
+          statement_hash: sha256:a9f041207429
           reworded:
             - hash: sha256:669dfeb91eee
               at: 2026-09-13
               why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:c48d3e5f64b0
+              at: 2026-09-14T02:38:10Z
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
       - id: panel.rules.lifecycle-legible
         origin: thread:n-0054
@@ -834,7 +849,7 @@ stories:
 
       - id: panel.rules.search-the-list
         origin: thread:n-0108
-        statement: The rule list carries a search box fixed above it, and typing in it filters the list as you type - a query naming a story keeps every rule in it, a query naming a screen keeps every rule judged on it, a query naming one rule keeps that rule alone, and both headings a surviving rule sits under are always drawn.
+        statement: A search box sits above the rule list and filters it as you type. A rule that matches keeps both of its headings, so the list stays readable while filtered.
         because: The hierarchy has to stay readable while the list is filtered.
         verify: [checks]
         signoff: [eng, product]
@@ -852,7 +867,7 @@ stories:
             - A query naming a screen leaves standing every rule judged on that screen
             - Every rule still listed is drawn under both of its headings - the screen it is judged on and the story it belongs to
             - Emptying the box brings the whole list back
-          statement_hash: sha256:49bbef1b8eb8
+          statement_hash: sha256:045a4998ef7a
           reworded:
             - hash: sha256:f183d0a96302
               at: 2026-09-13
@@ -860,6 +875,9 @@ stories:
             - hash: sha256:912d467e4543
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:49bbef1b8eb8
+              at: 2026-09-14T02:44:30Z
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
       - id: panel.rules.tiers-at-a-glance
         origin: thread:n-0109
         statement: Every rule shows one mark per evidence tier - checks then agent - and beside them one dot per role that must sign.
@@ -889,8 +907,8 @@ stories:
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
       - id: panel.rules.grouped-by-screen
         origin: walkdown
-        statement: The rail is grouped by the screen a rule is judged on, in storyboard order, each screen named as the storyboard names it and wearing the same icon the bar's picker wears, with the story beneath keeping only what the screen has not already said. A screen's heading stays in view while its own rules are scrolled. Rules belonging to no screen are a group of their own at the end.
-        because: A group forty rules long outlives the heading that named it, and a blueprint can be a third ledger law - read rather than looked at.
+        statement: The rule list is grouped by the screen each rule is judged on, in the storyboard's order. A screen's heading stays in view while its rules scroll past.
+        because: A group forty rules long scrolls its heading out of view, and then nobody knows what they are reading.
         verify: [checks]
         signoff: [eng, product]
         screens: [review]
@@ -905,7 +923,7 @@ stories:
             - A rule the storyboard does not place is grouped with the others that have none, after every screen
             - The detail's stepper and the walk move in this order too, so the arrows and Continue follow what the list shows rather than what the file happens to hold
             - Scrolling deep into a screen's rules leaves that screen's heading at the top of the list, naming what is being read
-          statement_hash: sha256:f554615bd01a
+          statement_hash: sha256:1634141c7864
           reworded:
             - hash: sha256:54d2a03fa8e6
               at: 2026-09-13
@@ -913,6 +931,9 @@ stories:
             - hash: sha256:c21b11cee6a2
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:f554615bd01a
+              at: 2026-09-14T02:44:30Z
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
       - id: panel.rules.headless-says-so
         origin: thread:n-0061
@@ -1185,7 +1206,7 @@ stories:
       - id: panel.walkdown.who-signs-is-declared
         origin: thread:q-0225
         created_at: 2026-09-07
-        statement: Beginning a sitting asks who is signing it and in which roles, filled in from what this machine already knows about the person at it and changeable before the sitting starts - including naming somebody else as the signer for a role. What was declared stays visible for the whole sitting, and a signature given for somebody else is never remembered into the next one.
+        statement: Starting a sitting asks who is signing it and in which roles, pre-filled from the machine's config and changeable before it starts. The session strip shows that answer for as long as the sitting runs.
         because: Naming somebody else is how one person drives a walk two people are doing.
         signoff: [eng, product]
         screens: [review]
@@ -1200,7 +1221,7 @@ stories:
             - Who this sitting is being signed as stays legible while it runs, so accepting on somebody's behalf cannot be forgotten half way through
             - The next sitting starts from the config again - a role handed to somebody else is never the default a second time
             - Nothing the browser remembers decides who a record is written under
-          statement_hash: sha256:f5cc1065f3f5
+          statement_hash: sha256:aa1e6c5e6556
           reworded:
             - hash: sha256:36efe97a3acd
               at: 2026-09-13
@@ -1208,6 +1229,9 @@ stories:
             - hash: sha256:b0336010e7d5
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:f5cc1065f3f5
+              at: 2026-09-14T02:44:30Z
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
       - id: panel.walkdown.one-control-owns-the-sitting
         origin: walkdown
@@ -1400,7 +1424,7 @@ stories:
     rules:
       - id: panel.identity.default-actor
         origin: thread:n-0008
-        statement: The identity arrives filled in - the username records are written under, and the full name to show alongside it - so no attributed action ever asks who you are. The username is the machine's answer and is shown rather than typed; the full name is only ever displayed, and stays yours to change, from empty.
+        statement: The panel already knows who you are. Every record carries your username, the strip shows your full name beside it, and no action ever asks you to type either.
         because: A name a browser can set is a name it can invent.
         verify: [checks]
         signoff: [eng, product]
@@ -1415,7 +1439,7 @@ stories:
             - Settings shows both - anchor `settings.actor` for the username records carry, anchor `settings.display-name` for the name the panel shows - and says where the username comes from
             - The username cannot be typed here, and nothing a request carries can change what a record is written under
             - The full name is editable from empty, applies to the running session, and is remembered across reloads; emptying it is an answer too, leaving the username standing alone
-          statement_hash: sha256:22dc9f1e14e4
+          statement_hash: sha256:3645bdcb734b
           reworded:
             - hash: sha256:870f334762eb
               at: 2026-09-13
@@ -1423,6 +1447,9 @@ stories:
             - hash: sha256:f50536277d5c
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:22dc9f1e14e4
+              at: 2026-09-14T02:44:30Z
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
       - id: panel.identity.attribution-visible
         origin: thread:n-0008
@@ -1505,7 +1532,7 @@ stories:
     rules:
       - id: panel.signoff.spec-pair-derived
         origin: thread:n-0052
-        statement: "Which pair of verdict buttons a rule shows is read off the ledger rather than chosen. A rule nothing has built yet - no pass and no fail from checks or from judging - offers Approve and Refine, which sign off the rule itself; every other rule offers Pass and Fail, which judge the build."
+        statement: A rule with no build evidence yet offers Approve and Refine, which sign off the rule itself. A rule that has been built offers Pass and Fail, which judge the build.
         because: "An approval is not build evidence, and neither is a skip or a block: they record what somebody decided, not that something was made."
         verify: [checks]
         signoff: [eng, product]
@@ -1519,7 +1546,7 @@ stories:
             - The first shows Approve and Refine, labelled as signing off the rule rather than judging a build
             - The second shows Pass and Fail
             - Approving a rule does not flip it to the Pass/Fail pair - only build evidence does
-          statement_hash: sha256:19acfbb2b494
+          statement_hash: sha256:f5c753ec1d9b
           reworded:
             - hash: sha256:24cc94442cf4
               at: 2026-09-13
@@ -1527,6 +1554,9 @@ stories:
             - hash: sha256:7c8498e59582
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:19acfbb2b494
+              at: 2026-09-14T02:50:03Z
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
       - id: panel.signoff.refine-requires-feedback
         origin: thread:n-0052

@@ -29,7 +29,7 @@ stories:
 
       - id: status.derived.stale-never-passes
         origin: prd
-        statement: A pass recorded against an older wording of the rule - its statement or its steps - renders as stale, never as passing, unless a person declared the rewording one of words and not of meaning, in which case the old wording still names the rule and the pass stands.
+        statement: A pass recorded against older wording of a rule reads as stale, unless a person declared the rewording as words only, with the meaning unchanged.
         verify: [checks]
         steps:
           given:
@@ -44,15 +44,18 @@ stories:
             - "The old run is untouched: it still says what it said, about the wording it said it about"
             - A rewording declared as such (`walkdown hash --write --reword "<why>"`) keeps the old hash on the rule with when and why, and a pass against it stays a pass - better English is not a new rule
             - A hash from before the steps were part of it still matches while the statement holds, so the change itself stales nothing
-          statement_hash: sha256:56103ee8cbd4
+          statement_hash: sha256:b686591f5ca6
           reworded:
             - hash: sha256:9b16ab78cd04
               at: 2026-09-13
               why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:56103ee8cbd4
+              at: 2026-09-14T02:50:03Z
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
       - id: status.derived.verdict-belongs-to-a-place
         origin: thread:q-0070
-        statement: "A verdict counts only for the address it was made against: every run records the base_url of the system it verified, and a target fills its cells only from runs made against where that target currently points. The address is the deployment under review as the run declares it, never the port a harness happened to bind to stand one up."
+        statement: A verdict counts only at the address it was made against. Point a target somewhere new and its evidence empties; point it back and the evidence returns.
         because: Aiming a target at a new system should empty its evidence and ask for the walkdown again, rather than inherit a pass earned somewhere that no longer exists.
         verify: [checks]
         steps:
@@ -64,7 +67,7 @@ stories:
             - Every rule verified only at the old address reads as never verified, not as passing
             - No run file is edited or deleted - the ledger stays append-only
             - Pointing the target back restores the earlier evidence unchanged
-          statement_hash: sha256:3583e19f4d9a
+          statement_hash: sha256:0480062a68a2
           reworded:
             - hash: sha256:da085af63ed8
               at: 2026-09-13
@@ -72,6 +75,9 @@ stories:
             - hash: sha256:63d6c64e3b91
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:3583e19f4d9a
+              at: 2026-09-14T02:50:03Z
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
       - id: status.derived.addressless-runs-count
         origin: thread:q-0070
@@ -143,7 +149,7 @@ stories:
       - id: status.evidence.agent-assumed
         origin: walkdown
         statement: The agent tier is assumed on every rule rather than declared - a rule is judged by the agent unless it carries an excuse saying why it cannot be.
-        because: A tier that must be authored is opt-in while a tier that costs only a run is an obligation, and skipping the walkdown that earns a person's attention should be a decision somebody wrote down rather than a line somebody forgot to type.
+        because: A tier that must be authored is opt-in; a tier that costs only a run is an obligation. Skipping it should be a decision written down, not a line forgotten.
         verify: [checks]
         steps:
           given:
@@ -213,7 +219,7 @@ stories:
       - id: status.acceptance.signoff-defaults-to-eng
         origin: walkdown
         statement: A rule's sign-off list defaults to engineering and always contains it; a list that omits eng is corrected in the report and flagged by lint.
-        because: Somebody has to own that the thing was built right - a rule nobody accepts is a rule nobody owns - and a file saying something the report will not do is a file that lies.
+        because: Somebody has to own that the implementation matches the rule; a rule nobody accepts is a rule nobody owns.
         verify: [checks]
         steps:
           given:
@@ -344,7 +350,7 @@ stories:
       - id: status.acceptance.signature-names-its-signer
         origin: thread:q-0225
         created_at: 2026-09-07
-        statement: A recorded walkdown carries one signature per role, each naming the person who accepted in that role, so a walk driven by one person on behalf of another records the other's acceptance under the other's name. Who ran the walk is the run's actor, which a caller can never name.
+        statement: A recorded walkdown carries one signature per role, naming the person who accepted in that role. Who typed it is the run's actor, and the two can be different people.
         because: A signature whose signer is not the actor is itself the record that somebody accepted through somebody else; nothing further needs writing down.
         verify: [checks]
         signoff: [eng, product]
@@ -359,7 +365,7 @@ stories:
             - The driver stays the run's actor, so who typed it is on the record without a field of its own
             - A run whose signers are all the actor is exactly the ordinary case, and reads as one
             - A record written before signatures existed is read as its actor signing each role it named
-          statement_hash: sha256:1787bf174b1f
+          statement_hash: sha256:8ceb93202dcc
           reworded:
             - hash: sha256:d1c11a7e70ed
               at: 2026-09-13
@@ -367,6 +373,9 @@ stories:
             - hash: sha256:8abea3348e9f
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:1787bf174b1f
+              at: 2026-09-14T02:53:55Z
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
   - id: status.sweep
     title: Asking for the whole thing to be judged again

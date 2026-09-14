@@ -10,7 +10,7 @@ stories:
       - id: delivery.install.clone-is-the-install
         origin: prd
         statement: walkdown runs from a clone with nothing installed - no package registry, no build step, no network.
-        because: The projects that most need their requirements made legible are the governed ones, where installing anything is a conversation rather than a command; a tool that can only arrive through a package manager cannot be evaluated by the person who needs it most.
+        because: The projects that most need their requirements made legible are the governed ones, where installing anything is a conversation rather than a command.
         verify: [checks]
         signoff: [eng, product]
         steps:

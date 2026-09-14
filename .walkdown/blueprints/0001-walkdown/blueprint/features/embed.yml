@@ -10,7 +10,7 @@ stories:
       - id: embed.pin.anchored-target
         origin: walkdown
         statement: In pin mode, hovering highlights any element that carries an anchor, and a pin placed on one is recorded against that anchor on the surface it was placed on, with the spot it was placed at recorded too.
-        because: The note follows the element, not the pixel, and stays on the surface the reviewer was looking at - while the spot keeps the pin drawn where they were pointing rather than at a corner of the element.
+        because: A note follows the element it was placed on, not a position on the page; the spot keeps the pin drawn where the reviewer pointed.
         verify: [checks]
         signoff: [eng, product]
         screens: [review]
