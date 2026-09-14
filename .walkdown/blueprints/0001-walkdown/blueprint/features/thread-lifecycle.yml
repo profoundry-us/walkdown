@@ -144,7 +144,8 @@ stories:
       - id: threads.conversation.written-in-markdown
         origin: thread:n-0288
         statement: A message is markdown, rendered from a short list of allowed elements; anything else in it is plain text.
-        because: The bodies were already written that way - lists, backticks, paragraphs - and read as one pre-wrapped block; rendering what is there makes 664 messages easier to read without a byte on disk changing. And a body arrives from the browser, so what it may contain is a closed list.
+        because: What people write reads better as they wrote it, and a body arrives from the browser, so what it may contain has to be a closed list.
+        history: The 664 messages on file were already written as markdown - lists, backticks, paragraphs - and read as one pre-wrapped block; rendering them touched no byte on disk (n-0288).
         verify: [checks]
         signoff: [eng, product]
         screens: [thread-panel]
