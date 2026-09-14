@@ -14,7 +14,7 @@ import { deriveStatus } from '../lib/status.js';
 const STATEMENT = 'The visitor can do the thing.';
 const HASH = formatHash(STATEMENT);
 
-function blueprint({ runs = [], signoff, verify = ['checks'] } = {}) {
+function blueprint({ runs = [], signoff, verify = ['checks'], threads = [] } = {}) {
   return {
     config: { runner: { targets: { local: {} } } },
     features: [
@@ -38,10 +38,22 @@ function blueprint({ runs = [], signoff, verify = ['checks'] } = {}) {
         },
       },
     ],
-    threads: [],
+    threads: threads.map((data, i) => ({ file: `threads/t-${i}.yml`, data })),
     runs: runs.map((data, i) => ({ file: `runs/r-${i}.json`, data })),
   };
 }
+
+/** A note on the rule, addressed: the fix was claimed in a reply at `at`. */
+const addressedNote = (id, at) => ({
+  id,
+  kind: 'note',
+  status: 'addressed',
+  author: 'topher',
+  created: '2026-01-03T12:00:00Z',
+  anchor: { rule: 'demo.main.thing' },
+  body: 'not yet',
+  replies: [{ author: 'agent', created: at, body: 'fixed' }],
+});
 
 /** A person's walkdown, signed in the roles given (or in none at all). */
 const signed = (created, actor, status, roles, hash = HASH) => ({
@@ -190,6 +202,55 @@ test('a rule sent back fails, and is not queued to the person who sent it @rule:
       status,
     );
   }
+});
+
+test('a sent-back rule returns to its signer once the fix is claimed and judged @rule:status.acceptance.sent-back-is-a-fail', () => {
+  const sentBack = signed('2026-01-03', 'topher', 'refining', ['product']);
+  const judge = (bp) =>
+    bp.attention.filter((i) => i.action === 'judge' && i.role === 'product').map((i) => i.after ?? true);
+
+  // Fix claimed, but the agent tier has not looked since: still nothing for
+  // the signer, and the re-judge is the agent's item.
+  const claimed = deriveStatus(
+    blueprint({
+      signoff: ['product'],
+      verify: ['checks', 'agent'],
+      runs: [checksRun('2026-01-01', 'pass'), agentRun('2026-01-02', 'pass'), sentBack],
+      threads: [addressedNote('n-0001', '2026-01-04T00:00:00Z')],
+    }),
+  );
+  assert.equal(states(claimed.rows[0]).product, 'sent-back');
+  assert.deepEqual(judge(claimed), []);
+  assert.equal(claimed.attention.some((i) => i.action === 'rejudge'), true);
+
+  // The agent has judged the fix: now the signer is asked, and the item says
+  // which fix it follows.
+  const judged = deriveStatus(
+    blueprint({
+      signoff: ['product'],
+      verify: ['checks', 'agent'],
+      runs: [
+        checksRun('2026-01-01', 'pass'),
+        agentRun('2026-01-02', 'pass'),
+        sentBack,
+        agentRun('2026-01-05', 'pass'),
+      ],
+      threads: [addressedNote('n-0001', '2026-01-04T00:00:00Z')],
+    }),
+  );
+  assert.equal(states(judged.rows[0]).product, 'sent-back');
+  assert.equal(judged.rows[0].verdict, 'fail');
+  assert.deepEqual(judge(judged), ['n-0001']);
+
+  // And a claim from BEFORE the send-back is not a fix for it.
+  const stale = deriveStatus(
+    blueprint({
+      signoff: ['product'],
+      runs: [checksRun('2026-01-01', 'pass'), sentBack],
+      threads: [addressedNote('n-0001', '2026-01-02T00:00:00Z')],
+    }),
+  );
+  assert.deepEqual(judge(stale), []);
 });
 
 test('a verdict needs every tier AND every role @rule:status.acceptance.verdict-needs-every-role', () => {

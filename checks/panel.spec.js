@@ -305,6 +305,14 @@ test('the panel says plainly when the copy it is running has gone stale', {
   const notice = page.getByTestId('panel.stale');
   await expect(notice).toBeVisible();
   await expect(notice).toContainText(/reload the extension/i);
+  // Said WHOLE, at a laptop's width: the badge is the one thing in the bar's
+  // left cluster that never gives way. At 1280 it once read "reload the ex"
+  // (n-0292).
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await expect(notice).toBeVisible();
+  const whole = await notice.evaluate((el) => el.scrollWidth <= el.clientWidth + 1);
+  expect(whole, 'the stale badge is clipped at 1280').toBe(true);
+  await expect(notice).toContainText(/^\s*Stale — reload the extension/);
 
   // And a copy that matches says nothing — a warning that is always on is
   // a warning nobody reads.
@@ -829,6 +837,10 @@ test('a message is read as the markdown it was written in, and nothing else reac
   await expect(docs).toHaveText('the docs');
   await expect(docs).toHaveAttribute('target', '_blank');
   await expect(text.locator('a[href^="javascript"]')).toHaveCount(0);
+  // Not a link at all: not an underlined <a> with no address either. The
+  // sanitizer drops the href; the words it wrapped stay as words (n-0291).
+  await expect(text.locator('a:not([href])')).toHaveCount(0);
+  await expect(text).toContainText('nope');
   // Nothing runs, loads or styles.
   await expect(text.locator('img, script, style')).toHaveCount(0);
   expect(await text.innerHTML()).not.toMatch(/onerror/);
@@ -2403,7 +2415,9 @@ test('times read in the zone the person declared, and Settings says which @rule:
   });
   expect(filed.ok()).toBeTruthy();
   const { id, thread } = await filed.json();
-  expect(thread.created, 'the file says UTC').toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/);
+  // An instant with a Z, whole seconds or not: the door stamps milliseconds,
+  // other writers do not, and the rule asks for neither in particular.
+  expect(thread.created, 'the file says UTC').toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/);
   await review(page);
   await ensureSession(page);
   await page.getByTestId('panel.actor-name').click();

@@ -413,3 +413,64 @@ test('a pin says what it is on contact, and says nothing until then', {
     .poll(async () => Number(await tip.evaluate((el) => getComputedStyle(el).opacity)))
     .toBeGreaterThan(0.9);
 });
+
+/*
+ * The standalone popover — the embed with no panel around it, which is the
+ * script-tag delivery — renders a message through the same MSG as the panel,
+ * so its ids arrive marked as refs. It has no rule screen and no thread
+ * screen of its own to open them on, and a ref that does nothing when clicked
+ * is what n-0294 found. Here a thread id opens that thread when it is a pin
+ * on this page, an evidence key is a link to the file, and a rule id is the
+ * words the author typed.
+ */
+test('beside the pin, an id is a link only where the popover can open it', {
+  tag: '@rule:threads.conversation.one-stream',
+}, async ({ page }) => {
+  // Two pins on the stand-in, filed through the door: the second refers to
+  // the first, to a rule, and to an evidence key.
+  const file = async (body) => {
+    const res = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
+      data: {
+        kind: 'note',
+        body,
+        anchor: { screen: 'review', element: 'panel.bar', surface: 'app', position: { x: 40, y: 20 } },
+      },
+    });
+    expect(res.ok()).toBeTruthy();
+    return (await res.json()).id;
+  };
+  const first = await file('The first pin, referred to by the second.');
+  const second = await file(
+    `Refs: ${first}, rule threads.conversation.one-stream, and runs/evidence/2026-09-14T19-09-05Z/one-stream-source-check.txt`,
+  );
+
+  // The stand-in on its own, top-level: no panel, so the dot opens the
+  // embed's popover rather than handing the thread across a frame.
+  await page.goto(`${WD_ORIGIN}/stand-in/review`);
+  const chrome = page.locator('[data-walkdown-chrome]');
+  await expect(chrome).toBeAttached();
+  const dot = page.locator(`[data-testid="pin.marker"][data-thread="${second}"] .wd-dot`);
+  await expect(dot).toBeVisible();
+  await dot.click();
+  const popover = page.getByTestId('thread.panel');
+  await expect(popover).toBeVisible();
+  await expect(popover).toContainText(second);
+
+  // The evidence key is a real link to the file the server resolves it to.
+  const ev = popover.locator('[data-evidence-ref]');
+  await expect(ev).toHaveAttribute('href', /\/evidence\/runs\/evidence\/2026-09-14T19-09-05Z\//);
+  await expect(ev).toHaveAttribute('target', '_blank');
+  // The rule id is prose here: nothing in this popover can open a rule.
+  await expect(popover.locator('[data-rule-ref]')).toHaveCount(0);
+  await expect(popover).toContainText('threads.conversation.one-stream');
+  // The other pin's id opens that pin's conversation, in the same popover.
+  const ref = popover.locator(`[data-thread-ref="${first}"]`);
+  await expect(ref).toHaveCount(1);
+  await ref.click();
+  await expect(page.getByTestId('thread.panel')).toContainText('The first pin');
+  await expect(page.getByTestId('thread.panel')).not.toContainText(second);
+  // And it opened on the page, not past its edge.
+  const box = await page.getByTestId('thread.panel').boundingBox();
+  const width = await page.evaluate(() => window.innerWidth);
+  expect(box.x + box.width).toBeLessThanOrEqual(width);
+});

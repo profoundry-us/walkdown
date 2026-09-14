@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-14T20:51:53.552Z
 anchor:
   rule: threads.conversation.one-stream
-status: open
+status: addressed
 body: "Re-judged 2026-09-14 after n-0288 (markdown bodies), on the scratch copy
   sitting-0914 at :4730. FAIL, on the last THEN and only beside the pin: in the
   embed's standalone popover, thread and rule ids written inside a message are
@@ -40,3 +40,15 @@ body: "Re-judged 2026-09-14 after n-0288 (markdown bodies), on the scratch copy
   -view.png, runs/evidence/2026-09-14T19-09-05Z/one-stream-source-check.txt,
   runs/evidence/2026-09-14T19-09-05Z/one-stream-panel-ref-clicks.json,
   runs/evidence/2026-09-14T19-09-05Z/one-stream-panel-thread-n-0294.png"
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-14T23:11:38Z
+    body: "Fixed in src/embed/index.js openThreadPopover: the stream gets the
+      blueprint rule ids so a rule id is recognised; after render, an evidence
+      key becomes a real link to /evidence/<key> (new tab), a thread id opens
+      that thread when it is a pin on this page, and any ref the popover cannot
+      open is put back to the words the author typed - no link that does
+      nothing. The popover is also clamped to the viewport like the pin form
+      (the right-column aside). New check in checks/embed.spec.js drives the
+      standalone popover top-level and asserts all four."

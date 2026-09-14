@@ -112,6 +112,9 @@ import { icon } from './icons.js';
   // so a handle recorded in a thread can be shown as the name that person goes
   // by, whichever of their handles the record happens to carry.
   let identity = null;
+  // The rule ids this blueprint knows, so a rule named in a message can be
+  // told from prose (MSG.linkRefs). Filled with the blueprint.
+  let ruleIds = [];
 
   const $anchors = () => [...document.querySelectorAll(`[${ANCHOR_ATTR}]`)];
   const anchorId = (el) => el.getAttribute(ANCHOR_ATTR);
@@ -382,7 +385,13 @@ import { icon } from './icons.js';
     overlay = document.createElement('div');
     overlay.className = FORM;
     overlay.dataset.testid = 'thread.panel';
-    overlay.style.left = dot.style.left;
+    // Beside the pin, and on the page: a pin in the right-hand column used
+    // to open its conversation past the viewport's edge (seen re-judging
+    // one-stream, 2026-09-14). Same clamp as the pin form below.
+    overlay.style.left = `${Math.max(
+      window.scrollX + 8,
+      Math.min(parseFloat(dot.style.left), window.scrollX + window.innerWidth - 268),
+    )}px`;
     overlay.style.top = `${parseFloat(dot.style.top) + 24}px`;
     overlay.innerHTML = `
       <div class="flex items-center gap-1.5">
@@ -394,6 +403,7 @@ import { icon } from './icons.js';
       <div class="wd-stream mt-1 max-h-64 overflow-y-auto">${MSG.stream(pin, {
         pending,
         names: MSG.nameMap(identity),
+        rules: ruleIds,
       })}</div>
       <textarea class="textarea textarea-sm mt-2 h-14 w-full" placeholder="Reply…"></textarea>
       <div class="mt-1 flex items-center gap-2">
@@ -401,6 +411,33 @@ import { icon } from './icons.js';
         <button class="btn btn-xs btn-primary wd-primary ml-auto">Reply</button>
       </div>`;
     root.appendChild(overlay);
+    /*
+     * The ids in a message are links only where this popover can open what
+     * they name (n-0294). It has no rule screen and no thread screen of its
+     * own - those are the panel's - so here a thread id opens that thread
+     * when it is a pin on this page, an evidence key opens the file the
+     * server resolves it to, and anything else goes back to being the words
+     * the author typed. A link that does nothing is worse than none.
+     */
+    for (const ref of overlay.querySelectorAll('[data-thread-ref], [data-rule-ref], [data-evidence-ref]')) {
+      if (ref.dataset.evidenceRef) {
+        ref.href = api('/evidence/' + ref.dataset.evidenceRef);
+        ref.target = '_blank';
+        ref.rel = 'noopener noreferrer';
+        continue;
+      }
+      const other = ref.dataset.threadRef && ctx.pins.find((p) => p.id === ref.dataset.threadRef);
+      const wrap = other && root.querySelector(`.wd-pin[data-thread="${CSS.escape(other.id)}"]`);
+      if (other && wrap) {
+        ref.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          openThreadPopover(other, wrap);
+        };
+        continue;
+      }
+      ref.replaceWith(ref.textContent);
+    }
     // Open at the newest message, the way you left a conversation - reading a
     // thread from its top means scrolling past what you already know.
     const stream = overlay.querySelector('.wd-stream');
@@ -796,6 +833,7 @@ import { icon } from './icons.js';
         .then((data) => {
           blueprint = data;
           identity = data.identity ?? null;
+          ruleIds = (data.rows ?? []).map((r) => r.rule);
           MSG.zone = identity?.timezone ?? null;
           resolve();
         })

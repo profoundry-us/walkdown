@@ -1463,7 +1463,7 @@ function renderBar() {
          picker. Everything in here that can be shortened truncates; the gear,
          the wordmark and the screen picker keep their size, and the cap
          leaves the centre a clear 8.5rem on this side. -->
-    <span class="flex min-w-0 max-w-[calc(50%-8.5rem)] items-center gap-2">
+    <span class="flex min-w-0 max-w-[calc(50%-8.5rem)] items-center gap-2 overflow-hidden">
     ${GEAR()}
     <span class="shrink-0 font-bold tracking-tight">walk<span class="text-primary">down</span></span>
     <!-- A stale copy sits BESIDE the project name, never instead of it.
@@ -1477,10 +1477,19 @@ function renderBar() {
          project this session is against at exactly the moment a reviewer most
          needed to know which board they were reading. Topher's decision on
          n-0117: a stale panel gives up neither slot, and the rule stands as
-         written. -->
+         written.
+
+         And it never gives way: shrink-0, because the one thing in this
+         cluster that must be read whole is the warning. With the project
+         button in the group, a truncating badge was the element that lost
+         width, and at 1440 it read "tale — reload the extensi" (n-0292). The
+         project name and the blueprint give way instead - they are named
+         again in the sidebar - and the cluster clips (overflow-hidden) so a
+         badge that will not shrink can never push the group under the
+         centred surface control, which is what the cap is for. -->
     ${
       STALE_COPY()
-        ? html`<span class="badge badge-sm badge-error badge-dash min-w-0 gap-1 truncate font-semibold"
+        ? html`<span class="badge badge-sm badge-error badge-dash shrink-0 gap-1 whitespace-nowrap font-semibold"
            data-testid="panel.stale"
            title="walkdown was updated — reload the extension at chrome://extensions, then reload this page, to run the current build.">
            ${icon('warning-fill', 'size-3.5')}Stale — reload the extension</span>`
@@ -1488,7 +1497,7 @@ function renderBar() {
     }
     ${
       STALE_SERVER()
-        ? html`<span class="badge badge-sm badge-error badge-dash min-w-0 gap-1 truncate font-semibold"
+        ? html`<span class="badge badge-sm badge-error badge-dash shrink-0 gap-1 whitespace-nowrap font-semibold"
            data-testid="panel.stale-server"
            title="The server is running code older than this tree — restart it (npm run dev, or stop and re-run walkdown serve). Until then a verdict may be recorded against yesterday's rules.">
            ${icon('warning-fill', 'size-3.5')}Stale server — restart it</span>`

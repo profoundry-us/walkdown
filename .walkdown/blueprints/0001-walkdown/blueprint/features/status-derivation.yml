@@ -314,7 +314,8 @@ stories:
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
       - id: status.acceptance.sent-back-is-a-fail
         origin: walkdown
-        statement: When a signer sends a rule back, its verdict reads as a fail, not as pending. The rule does not return to that signer's own queue.
+        statement: When a signer sends a rule back, its verdict reads as a fail, not as pending. The rule returns to that signer's queue only once a fix is claimed and the agent tier has judged it.
+        history: Two rules sent back on 2026-09-08 were fixed and re-judged the same day and then waited six days, because nothing asked the signer to look again (n-0239, n-0240).
         because: What the rule owes them is a fix, not another look.
         verify: [checks]
         steps:
@@ -324,9 +325,10 @@ stories:
             - Status is derived
           then:
             - The rule's verdict is fail rather than pending - somebody looked and said not yet
-            - "It is not queued back to the signer who sent it: what it owes them is a fix, not another look"
-            - A fresh verdict is what clears it, so the fix is what moves the rule
-          statement_hash: sha256:cf99aa23e4a8
+            - "It is not queued back to the signer while nothing has changed: what it owes them is a fix, not another look"
+            - Once a thread on the rule is addressed after the send-back and the agent tier has passed the fix, the signer is asked to look again, and the item names the thread that claimed the fix
+            - Their fresh verdict is what clears it
+          statement_hash: sha256:1aef4eaeadde
           reworded:
             - hash: sha256:e4eefb4e58a4
               at: 2026-09-13
