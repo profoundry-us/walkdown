@@ -506,7 +506,7 @@ stories:
     rules:
       - id: status.attention.blocked-queues
         origin: prd
-        statement: The status report splits its attention items by who is blocked. People get judge items, one for each role whose signature a rule still waits on, plus verify and answer items, while agents get address, incorporate and cover items.
+        statement: In the status report, agents get address, incorporate and cover attention items. People get a judge item for each role whose signature a rule still waits on, plus verify and answer items.
         because: Cover - a rule that demands checks while no check claims it - is an agent's work to write and never a person's to judge.
         verify: [checks]
         steps:
@@ -519,7 +519,7 @@ stories:
             - Agents get address, incorporate and cover items
             - "A cover item is a rule demanding checks while no check claims it: an agent writes the check, and it is never a person's to judge"
             - Every item names who is blocked, so nothing sits in both queues at once
-          statement_hash: sha256:3bda00e699f8
+          statement_hash: sha256:b58b9d124384
           reworded:
             - hash: sha256:d51f57ea2c48
               at: 2026-09-13
@@ -533,10 +533,13 @@ stories:
             - hash: sha256:0d1dfd67e1ff
               at: 2026-09-14T04:24:19Z
               why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
+            - hash: sha256:3bda00e699f8
+              at: 2026-09-14T16:05:26Z
+              why: agents and people in two sentences, agents first, in the order the tiers run
 
       - id: status.attention.names-the-role
         origin: walkdown
-        statement: An attention item waiting on a judge names the role it waits on, not merely that it waits on a person.
+        statement: An attention item waiting on a person's signature names the role it waits on, not merely that it waits on a person.
         because: A queue two people both scroll past is a queue nobody works.
         verify: [checks]
         steps:
@@ -548,7 +551,7 @@ stories:
             - Each judge item names the role it waits on, not merely that a person is owed something
             - Two roles owed on one rule are two items, so neither reads as somebody else's job
             - The word it names is the role from the sign-off list, so the queue and the rule cannot disagree
-          statement_hash: sha256:27a2894883da
+          statement_hash: sha256:827f89ed0df2
           reworded:
             - hash: sha256:7320bf5dc8fd
               at: 2026-09-13
@@ -559,6 +562,9 @@ stories:
             - hash: sha256:193e85715e1d
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:27a2894883da
+              at: 2026-09-14T16:05:27Z
+              why: judge could be read as the agent tier; it is a person's signature
 
   - id: status.attribution
     title: A record says whose judgment it was, and keeps saying so

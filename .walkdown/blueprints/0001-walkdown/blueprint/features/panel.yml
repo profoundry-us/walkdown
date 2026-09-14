@@ -16,6 +16,7 @@ stories:
         retired: The docked delivery is withdrawn (2026-08-26). walkdown frames the page it reviews; there is no longer a layout that renders beside it.
         origin: walkdown
         statement: Docked into a page's own document, the panel renders beside what it reviews rather than framing it - a script tag cannot put its own page in a frame, so the docked delivery works within the application's document and pushes it aside instead of covering it.
+        history: Docking by script tag is what the agent tier uses for testing; a real sitting goes through the Chrome extension, which never docks into the page and so never met this rule.
         screens: [docked]
         steps:
           given:
@@ -49,7 +50,7 @@ stories:
 
       - id: panel.dock.toolbar
         origin: thread:n-0015
-        statement: "A toolbar across the top of the panel holds the controls that belong to the session rather than to any one rule: which screen, which surface, and pin mode. It also names the project those controls act on, but the project is not chosen there."
+        statement: "A toolbar across the top of the panel holds the controls that belong to the session rather than to any one rule: which project, which screen, which surface, and pin mode. Which of a project's blueprints is in hand is chosen on the Blueprints tab."
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -58,13 +59,13 @@ stories:
           when:
             - Read the bar
           then:
-            - Anchor `panel.blueprint` names the project this session is against; it says which one, and is not a control - choosing a different one is the Blueprints tab's job, since n-0017 took the selector off the bar on purpose
+            - Anchor `panel.project` is the project switcher; anchor `panel.blueprint` names the blueprint in hand and is not a control - choosing a different blueprint is the Blueprints tab's job, since n-0017 took that selector off the bar on purpose
             - Anchor `panel.screen-picker` says which screen this page is without being opened, and opens anchor `panel.screens-list` to pick a different one or to go back to detecting it
             - A screen picked by hand is marked as picked, because it outranks detection and the difference has to be readable from the bar
             - Detecting, the control reports the page rather than remembering an answer, so the label in the bar and the row the open list marks both follow the page when it moves
             - Prototype and App switch which of the two the page area shows
             - Pin mode can be turned on and off there
-          statement_hash: sha256:ce78ef9239cc
+          statement_hash: sha256:4725cfa2fe18
           reworded:
             - hash: sha256:aaf28fbb5e0a
               at: 2026-09-13
@@ -75,6 +76,9 @@ stories:
             - hash: sha256:d4d83635d936
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:ce78ef9239cc
+              at: 2026-09-14T16:05:26Z
+              why: the project switcher lives in the bar now (ADR 0001, n-0283); what the bar does not choose is the blueprint within a project
 
       - id: panel.dock.surface-swap-is-instant
         origin: walkdown
@@ -713,6 +717,7 @@ stories:
       - id: panel.rules.one-pane-per-tab
         origin: thread:n-0032
         statement: A rule's detail stays in the tab that lists rules. Switching to another tab shows only that tab's own content.
+        history: "Selecting a rule and then clicking the Blueprints or Screens tab still showed the rule's detail: the two panes rode one sliding track, and switching tabs swapped the list underneath without sliding the track back (n-0032, 2026-08-24)."
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -836,7 +841,7 @@ stories:
       - id: panel.rules.evidence-visible
         origin: walkdown
         statement: A rule's detail view in the panel shows the evidence behind its standing. For each way the rule is verified, it shows the latest result recorded in the ledger.
-        because: Someone judging a rule should see the results its standing rests on in the same place, without going to look for them.
+        because: Someone judging a rule should see the results its standing rests on in the same place, without going back to the list.
         verify: [checks]
         signoff: [eng, product]
         screens: [rule-detail]

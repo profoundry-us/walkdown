@@ -325,7 +325,7 @@ stories:
 
       - id: locations.keeping.moving-is-a-decision
         origin: prd
-        statement: Moving records relocates the files unchanged and remembers the choice in the personal config, the same file that holds the person's own comments. A destination that already holds records is refused.
+        statement: Moving records relocates the files unchanged and writes the new place on the blueprint's row in this machine's registry. A destination that already holds records is refused.
         because: The records are append-only, and dropping one set into a directory that already holds another would change both.
         verify: [checks]
         steps:
@@ -335,9 +335,9 @@ stories:
             - They are moved somewhere else
           then:
             - Every file arrives byte for byte, and none is rewritten to suit its new address
-            - The personal config records where they went, keeping whatever the person had already written in it
+            - The blueprint's row in this machine's registry records where they went, and nothing else on that row or any other changes
             - A destination that already holds records is refused rather than merged into
-          statement_hash: sha256:af8538a1091f
+          statement_hash: sha256:1422c8dcbeae
           reworded:
             - hash: sha256:452142df8095
               at: 2026-09-13
@@ -348,6 +348,9 @@ stories:
             - hash: sha256:f650bd21c46f
               at: 2026-09-14T04:24:19Z
               why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
+            - hash: sha256:af8538a1091f
+              at: 2026-09-14T16:05:25Z
+              why: the move has been recorded on the registry row since ADR 0003, not in the personal config; the words now say what the code does
 
   - id: locations.travel
     title: A record means the same thing on somebody else's machine
@@ -457,7 +460,7 @@ stories:
 
       - id: locations.pointer.owns-only-its-block
         origin: prd
-        statement: "walkdown owns the fenced pointer block and nothing else in the file that holds it. It rewrites what lies between its own markers, leaves every other line as it was, and updates the block when the spec moves."
+        statement: "walkdown owns one fenced block in the repository's agent-instruction file, the paragraph telling an agent where the spec is, and nothing else in that file. It rewrites only what lies between its own markers, and updates the block when the spec moves."
         because: A pointer still naming a directory the spec has left is worse than no pointer at all - an agent believes it and goes looking.
         verify: [checks]
         steps:
@@ -469,7 +472,7 @@ stories:
             - The block names the new place, and appears exactly once
             - Every line outside the markers is untouched
             - Placing it twice in a row changes nothing the second time
-          statement_hash: sha256:8178c7c18d59
+          statement_hash: sha256:48cecd33295b
           reworded:
             - hash: sha256:ec57ac3e3cc3
               at: 2026-09-13
@@ -480,3 +483,6 @@ stories:
             - hash: sha256:6319b8194496
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:8178c7c18d59
+              at: 2026-09-14T16:05:25Z
+              why: names the file the block lives in and what the block is for

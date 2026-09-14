@@ -78,7 +78,7 @@ stories:
 
       - id: screens.identity.follows-navigation
         origin: thread:n-0020
-        statement: When the page's URL changes without a reload, walkdown notices and works out again which screen it is on. A `pushState` navigation raises no event, so walkdown catches it by watching the address, and it says that is how it knew.
+        statement: When the page's URL changes without a reload, walkdown notices and works out again which screen it is on. A `pushState` navigation raises no event, so walkdown catches it by checking the address on a timer.
         steps:
           given:
             - walkdown on a single-page app, on a screen the storyboard knows
@@ -88,8 +88,8 @@ stories:
             - The panel re-resolves the screen and redraws against it
             - The embed re-resolves too, so a pin placed after the navigation files against the screen you are actually on
             - An answer a person gave about the previous page - which screen it was, whose art to ghost - does not carry across the navigation
-            - pushState announces nothing and the extension cannot patch the page's own History, so that case is caught by watching rather than left to pretend it was heard
-          statement_hash: sha256:327979bf4aad
+            - pushState announces nothing and the extension cannot patch the page's own History, so the address is checked every 400ms and a change found that way is handled exactly like one an event announced
+          statement_hash: sha256:5b51c16f7b2b
           reworded:
             - hash: sha256:e8763cbea8b6
               at: 2026-09-13
@@ -103,6 +103,9 @@ stories:
             - hash: sha256:1519a942634a
               at: 2026-09-14T04:24:19Z
               why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
+            - hash: sha256:327979bf4aad
+              at: 2026-09-14T16:05:25Z
+              why: dropped 'says that is how it knew' - nothing user-facing says it; the statement now says the address is checked on a timer and the step says how often
 
   - id: screens.ownership
     title: Which blueprints a page belongs to is a fact about its address
