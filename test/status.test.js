@@ -210,7 +210,17 @@ test('attention: human vs agent queues derived from rows and threads @rule:statu
     verify: ['agent', 'human'],
     runs: [walkdownRun('2026-01-01', 'agent', 'pass')],
     threads: [
-      { id: 'n-1', kind: 'note', status: 'addressed', anchor: { rule: 'demo.main.thing' } },
+      // Two of the person's own notes, answered: ONE verify item, on the rule
+      // (ADR 0005 §6) - the look that clears both is a verdict on the rule.
+      { id: 'n-1', kind: 'note', reason: 'feedback', status: 'addressed', anchor: { rule: 'demo.main.thing' } },
+      { id: 'n-4', kind: 'note', status: 'addressed', anchor: { rule: 'demo.main.thing' } }, // no reason: feedback
+      // A judge's finding, addressed, waits on the next signed pass and on
+      // nobody's verify; a settled observation and a decision wait on nothing.
+      { id: 'n-5', kind: 'note', reason: 'finding', status: 'addressed', anchor: { rule: 'demo.main.thing' } },
+      { id: 'n-6', kind: 'note', reason: 'observation', status: 'settled', anchor: { rule: 'demo.main.thing' } },
+      { id: 'n-7', kind: 'note', reason: 'decision', status: 'recorded', anchor: { rule: 'demo.main.thing' } },
+      // Feedback with no rule stands on its own.
+      { id: 'n-8', kind: 'note', reason: 'feedback', status: 'addressed', anchor: { screen: 'main' } },
       { id: 'n-2', kind: 'note', status: 'open', anchor: { rule: 'demo.main.thing' } },
       { id: 'q-1', kind: 'question', status: 'open', anchor: {} },
       { id: 'q-2', kind: 'question', status: 'answered', anchor: {} },
@@ -220,8 +230,10 @@ test('attention: human vs agent queues derived from rows and threads @rule:statu
   const { attention } = deriveStatus(bp);
   const byWho = (who) =>
     attention.filter((i) => i.who === who).map((i) => `${i.action}:${i.thread ?? i.rule}`);
-  assert.deepEqual(byWho('human'), ['judge:demo.main.thing', 'verify:n-1', 'answer:q-1']);
+  assert.deepEqual(byWho('human'), ['judge:demo.main.thing', 'verify:n-8', 'answer:q-1', 'verify:demo.main.thing']);
   assert.deepEqual(byWho('agent'), ['address:n-2', 'incorporate:q-2']);
+  const perRule = attention.find((i) => i.action === 'verify' && i.rule === 'demo.main.thing');
+  assert.deepEqual(perRule.threads, ['n-1', 'n-4']);
 });
 
 test('open threads listed; terminal ones excluded', () => {

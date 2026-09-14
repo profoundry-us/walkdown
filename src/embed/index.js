@@ -408,8 +408,15 @@ import { icon } from './icons.js';
       <textarea class="textarea textarea-sm mt-2 h-14 w-full" placeholder="Reply…"></textarea>
       <div class="mt-1 flex items-center gap-2">
         <span class="text-[10px] opacity-40"><b>Enter</b> sends</span>
-        <button class="btn btn-xs btn-primary wd-primary ml-auto">Reply</button>
-      </div>`;
+        ${
+          canVerify(pin)
+            ? `<button class="btn btn-xs btn-outline btn-success wd-verify ml-auto" data-testid="thread.verify"
+                 title="Verify ${pin.id} under your name, ${identity.username}">✓ Verify</button>
+               <button class="btn btn-xs btn-primary wd-primary">Reply</button>`
+            : `<button class="btn btn-xs btn-primary wd-primary ml-auto">Reply</button>`
+        }
+      </div>
+      <div class="wd-say mt-1 hidden text-[11px] text-warning" data-testid="thread.say"></div>`;
     root.appendChild(overlay);
     /*
      * The ids in a message are links only where this popover can open what
@@ -470,12 +477,62 @@ import { icon } from './icons.js';
         });
     };
     overlay.querySelector('.wd-primary').onclick = send;
+    /*
+     * Verify, beside the pin (ADR 0005 §7). The pin is where you are already
+     * looking at the thing the thread is about, so the acceptance is offered
+     * here - under the same law as everywhere: only a person the config
+     * declares, only on a thread waiting for one, and the server validates
+     * the transition exactly as it does for the panel. Waive stays off this
+     * row: it needs a reason, and this reply box carries no instructions.
+     */
+    const verify = overlay.querySelector('.wd-verify');
+    if (verify)
+      verify.onclick = () => {
+        verify.disabled = true;
+        fetch(api(`/api/threads/${pin.id}/status`), {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ status: 'verified' }),
+        })
+          .then((r) => r.json())
+          .then((data) => {
+            if (!data.thread) throw new Error(data.error ?? 'refused');
+            Object.assign(pin, { status: data.thread.status, replies: data.thread.replies });
+            // A verified pin leaves the page - it is settled - the way every
+            // other terminal thread does on the next render.
+            ctx.pins = ctx.pins.filter((p) => p.id !== pin.id);
+            closeForm();
+            renderPins();
+          })
+          .catch((err) => {
+            verify.disabled = false;
+            const say = overlay?.querySelector('.wd-say');
+            if (say) {
+              say.textContent = String(err?.message ?? 'not verified');
+              say.classList.remove('hidden');
+            }
+          });
+      };
     box.onkeydown = (e) => {
       if (e.key !== 'Enter' || e.shiftKey || e.isComposing) return;
       e.preventDefault();
       send();
     };
     box.focus();
+  }
+
+  /*
+   * Whether this popover may offer Verify on this pin: a declared person -
+   * never a guess, never a machine - and a note at `addressed` whose reason a
+   * person closes. A finding is offered too, for the person who wants to
+   * close it before the rule's next pass would; an observation is the
+   * agent's to settle and a question is answered, not verified.
+   */
+  function canVerify(pin) {
+    if (!identity?.declared || !identity?.username || String(identity.username).trim().toLowerCase() === 'agent')
+      return false;
+    if (pin.kind !== 'note' || pin.status !== 'addressed') return false;
+    return ['feedback', 'request', 'finding'].includes(pin.reason ?? 'feedback');
   }
 
   // --- pin creation -----------------------------------------------------------
@@ -807,6 +864,7 @@ import { icon } from './icons.js';
               id: t.id,
               kind: t.kind,
               status: t.status,
+              reason: t.reason ?? null,
               element: t.anchor?.element,
               position: t.anchor?.position,
               surface: t.anchor?.surface,

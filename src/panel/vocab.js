@@ -224,6 +224,7 @@ export const declaredAnchors = () =>
 const VERB = {
   addressed: 'Addressed',
   verified: '\u2713 Verify',
+  settled: 'Settled',
   answered: 'Answer',
   incorporated: 'Incorporated',
   open: 'Reopen',
@@ -233,7 +234,12 @@ const VERB = {
 /** Short verbs, and only the transitions this kind and status allow. */
 export function threadActions(t) {
   return (
-    (FLOWS[t.kind] ?? FLOWS.note)[t.status]?.map((next) => [
+    (FLOWS[t.kind] ?? FLOWS.note)[t.status]
+      // Settling is an observation's ending and nobody else's (ADR 0005 §2);
+      // the server refuses it elsewhere, and a button it would refuse is
+      // absent, not shown.
+      ?.filter((next) => next !== 'settled' || t.reason === 'observation')
+      .map((next) => [
       VERB[next],
       // Answering is a reply that carries the transition, not a bare status
       // change — the panel routes it through the reply box.

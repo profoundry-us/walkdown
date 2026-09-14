@@ -132,8 +132,17 @@ rather than adding to it.
 
 ## Threads
 
+- A note says why it exists, and that decides where it closes (ADR 0005):
+  `feedback` is a person's words, closed by that person's next verdict on the
+  rule; `finding` is a judge's fail, closed by the next signed pass on the
+  rule; `observation` is something you noticed in passing, which you settle
+  yourself; `request` goes to design; `decision` is a record, filed closed.
+  File yours with `--reason finding` from a judge run and `--reason
+  observation` otherwise; a finding or an observation is authored `agent`,
+  never under the person whose machine it ran on.
 - Work your queue: `address` open notes; `incorporate` answered questions —
-  fold the answer into the rule's statement/steps, then mark the thread.
+  fold the answer into the rule's statement/steps, then mark the thread;
+  `settled` an observation once the change is named.
 - Mutate threads only through `walkdown thread <id> --as-agent
   --reply "..." --status <s>` — never raw YAML edits — so transitions stay
   validated. You record under the person you are working for; `--as-agent` is
@@ -141,7 +150,9 @@ rather than adding to it.
 - After fixing what a note asks: reply with what you changed and which run
   re-verified it, then `--status addressed`.
 - You may **never** set `verified` or `waived`. Those are human judgments —
-  you claim work; a person accepts it.
+  you claim work; a person accepts it. A person's signed pass on a rule
+  verifies the findings and feedback addressed on it; that is their look,
+  not yours.
 
 ## Quick reference
 

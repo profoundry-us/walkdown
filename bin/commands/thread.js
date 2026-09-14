@@ -34,7 +34,7 @@ export function run(args) {
   if (!id) {
     console.error(
       'Usage: walkdown thread <id> [--reply <text>] [--status <s>|--verify|--reopen|--waive] [--reason <text>] [--as-agent]\n' +
-        '       walkdown thread new --rule <id> --body <text> [--kind note|question] [--screen <id>] [--element <sel>] [--as-agent]',
+        '       walkdown thread new --rule <id> --body <text> [--kind note|question] [--reason feedback|finding|observation|request|decision] [--screen <id>] [--element <sel>] [--as-agent]',
     );
     process.exit(2);
   }
@@ -112,7 +112,12 @@ export function run(args) {
       ...(values.screen ? { screen: values.screen } : {}),
       ...(values.element ? { element: values.element } : {}),
     };
-    const { id: opened, thread } = openThread(blueprint, { kind, body, anchor, via });
+    // A judge files a finding, an agent in passing an observation, a person
+    // feedback, a request, or a decision (ADR 0005 §1). Left unsaid, a machine's
+    // note is an observation and a person's is feedback. The same flag that
+    // carries a waive's sentence carries this one word on `new`.
+    const reason = values.reason ?? null;
+    const { id: opened, thread } = openThread(blueprint, { kind, body, anchor, via, reason });
     if (values.json) {
       console.log(
         JSON.stringify({ id: opened, kind, status: thread.status, by: actor, ...(via ? { via } : {}), anchor }),

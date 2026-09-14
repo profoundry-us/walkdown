@@ -403,11 +403,14 @@ test('a pin says what it is on contact, and says nothing until then', {
   const shown = await reviewed.evaluate(() => window.__tipShown);
   expect(shown, 'a pin showed its tooltip with no pointer on it').toBe(0);
 
-  // On contact it is there, and it says which thread and what state.
-  const marker = pins.first();
+  // On contact it is there, and it says which thread and what state. The
+  // LAST pin drawn: two of the project's own pins share a spot, and the one
+  // underneath cannot be touched - which is a fact about the pins, not the
+  // tooltip.
+  const marker = pins.last();
   const thread = await marker.getAttribute('data-thread');
   await marker.hover();
-  const tip = app(page).getByTestId('pin.tip').first();
+  const tip = app(page).locator(`[data-testid="pin.marker"][data-thread="${thread}"] [data-testid="pin.tip"]`);
   await expect(tip).toContainText(thread);
   await expect
     .poll(async () => Number(await tip.evaluate((el) => getComputedStyle(el).opacity)))
@@ -473,4 +476,77 @@ test('beside the pin, an id is a link only where the popover can open it', {
   const box = await page.getByTestId('thread.panel').boundingBox();
   const width = await page.evaluate(() => window.innerWidth);
   expect(box.x + box.width).toBeLessThanOrEqual(width);
+});
+
+/*
+ * ADR 0005 §5: the standalone popover offers Verify beside the pin - only to
+ * a declared person, only on an answered note that waits on one - and
+ * pressing it closes the thread under that name and takes the pin away. The
+ * checks home declares `checks-person`, so the button is offered; the pins
+ * are filed through the door so the reason is the door's.
+ */
+test('beside the pin, Verify is offered to a declared person on an answered note, and closes it', {
+  tag: '@rule:embed.threads.actions-in-context',
+}, async ({ page }) => {
+  // Each pin at its own offset along the bar: a marker stacked on another
+  // swallows the click meant for the one beneath.
+  let x = 0;
+  const file = async (body, extra = {}) => {
+    x += 140;
+    const res = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
+      data: {
+        kind: 'note',
+        body,
+        anchor: { screen: 'review', element: 'panel.bar', surface: 'app', offset: { x, y: 14 } },
+        ...extra,
+      },
+    });
+    expect(res.ok()).toBeTruthy();
+    return (await res.json()).id;
+  };
+  const answered = await file('Feedback, answered.');
+  const claim = await page.request.post(`${WD_ORIGIN}/api/threads/${answered}/status?bp=blueprint`, {
+    data: { status: 'addressed', via: 'agent', reason: 'Done.' },
+  });
+  expect(claim.ok()).toBeTruthy();
+  const open = await file('Feedback, not answered.');
+  const observed = await file('Something the agent noticed.', { via: 'agent', reason: 'observation' });
+  const settled = await page.request.post(`${WD_ORIGIN}/api/threads/${observed}/status?bp=blueprint`, {
+    data: { status: 'settled', via: 'agent', reason: 'Tidied.' },
+  });
+  expect(settled.ok()).toBeTruthy();
+
+  await page.goto(`${WD_ORIGIN}/stand-in/review`);
+  await expect(page.locator('[data-walkdown-chrome]')).toBeAttached();
+  const openPin = async (id) => {
+    await page.keyboard.press('Escape');
+    const dot = page.locator(`[data-testid="pin.marker"][data-thread="${id}"] .wd-dot`);
+    await expect(dot).toBeVisible();
+    await dot.click();
+    const popover = page.getByTestId('thread.panel');
+    await expect(popover).toBeVisible();
+    await expect(popover).toContainText(id);
+    return popover;
+  };
+
+  // Not offered where nothing waits on a person: an open note, or an
+  // observation the agent already settled (whose pin has left the page).
+  await expect(page.locator(`[data-testid="pin.marker"][data-thread="${observed}"]`)).toHaveCount(0);
+  await expect((await openPin(open)).getByTestId('thread.verify')).toHaveCount(0);
+
+  // Offered on the answered one, under the declared name.
+  const popover = await openPin(answered);
+  const verify = popover.getByTestId('thread.verify');
+  await expect(verify).toBeVisible();
+  await expect(verify).toHaveAttribute('title', /checks-person/);
+  await verify.click();
+
+  // The pin leaves the page, and the ledger has the thread verified under
+  // the person - never a machine.
+  await expect(page.locator(`[data-testid="pin.marker"][data-thread="${answered}"]`)).toHaveCount(0);
+  await expect(page.getByTestId('thread.panel')).toHaveCount(0);
+  const { threads } = await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json();
+  const t = threads.find((x) => x.id === answered);
+  expect(t.status).toBe('verified');
+  expect(t.verified_by).toBe('checks-person');
 });

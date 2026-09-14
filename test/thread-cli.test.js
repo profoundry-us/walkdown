@@ -235,8 +235,10 @@ function ruleFixture(name) {
 
 test('thread new opens an anchored thread and reports under whom @rule:threads.lifecycle.says-what-it-did @rule:threads.lifecycle.acts-for-a-person', () => {
   const bp = ruleFixture('new-note');
+  // A person's words the agent typed: `--reason feedback` says so. Without
+  // it, an agent's note is the machine's own observation (ADR 0005 §1).
   const out = run(
-    ['new', '--kind', 'note', '--rule', 'f.s.rule', '--body', 'Seen: a thing.', '--as-agent'],
+    ['new', '--kind', 'note', '--rule', 'f.s.rule', '--body', 'Seen: a thing.', '--as-agent', '--reason', 'feedback'],
     bp,
   );
   assert.match(out, /n-0001 opened · note · by A Person/);

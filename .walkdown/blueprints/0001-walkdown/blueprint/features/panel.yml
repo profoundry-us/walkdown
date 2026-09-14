@@ -1164,7 +1164,8 @@ stories:
             - It is attributed to whoever the panel is recording as, shown above the composer before it is used
             - An empty identity refuses the filing and offers the place to set one, rather than letting the server choose a name
             - Starting a thread records no verdict and begins no sitting
-          statement_hash: sha256:92f43230c576
+            - The composer asks what the note is - feedback, a decision, or a request - and files it as that
+          statement_hash: sha256:952ad4a6d7cf
           reworded:
             - hash: sha256:d66e49c63ed9
               at: 2026-09-13
@@ -1484,6 +1485,24 @@ stories:
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
+      - id: panel.walkdown.pass-verifies-feedback
+        origin: walkdown
+        created_at: 2026-09-14
+        statement: During a walkdown, the rule detail lists the answered notes of yours that a Pass on the rule will verify, above the verdict buttons. When the session is finished, the message that names the run also names every thread it verified.
+        because: An acceptance given in passing is still one you should have seen, before and after.
+        signoff: [eng, product]
+        verify: [checks]
+        screens: [rule-detail]
+        steps:
+          given:
+            - A session in progress, on a built rule carrying an answered note of yours and a judge's answered finding
+          when:
+            - Reading under anchor `detail.feedback`, then passing the rule and finishing
+          then:
+            - Anchor `detail.pass-verifies` lists your note by id with its first line, and not the finding - that was never yours to read
+            - A rule with no answered note of yours shows no such block
+            - After Finish, the confirmation names the run and the threads the passes verified
+          statement_hash: sha256:b22e4b1fad97
       - id: panel.walkdown.note-with-any-verdict
         origin: thread:n-0050
         statement: A feedback box sits above the verdict buttons, so you write before you judge. Anything written is filed as a note thread on the rule and linked into the run result; an empty box files nothing.

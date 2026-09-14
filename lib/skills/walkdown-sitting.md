@@ -75,8 +75,9 @@ start.
 
 5. **Fails spawn threads.** A failing rule gets a note anchored to the exact
    rule and element, citing the evidence (`walkdown thread new --kind note
-   --rule <id> --body <text> --as-agent`), and its id goes in that
-   result's `threads`.
+   --rule <id> --body <text> --as-agent --reason finding`), and its id goes
+   in that result's `threads`. Something you noticed that is not a fail is
+   an `--reason observation`, which you settle yourself once it is fixed.
 
 6. **Close out.** `walkdown lint`, then `walkdown status`. If you swept, the
    report says how much of the sweep is done; **finish it or say plainly what

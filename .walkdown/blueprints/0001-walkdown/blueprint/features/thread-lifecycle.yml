@@ -64,7 +64,8 @@ stories:
             - The record carries that person as the author, and the agent as the provenance beside it
             - The report names both, so a reader can tell a sentence a person wrote from one a machine did
             - No argument and no environment variable can name somebody else
-          statement_hash: sha256:bd13e11ce4db
+            - A finding or an observation is the machine's own account, authored by the agent with no person named, so the mark keeps meaning what it says
+          statement_hash: sha256:614945dff74c
           reworded:
             - hash: sha256:6790e9b3474c
               at: 2026-09-13
@@ -98,6 +99,45 @@ stories:
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
+      - id: threads.lifecycle.says-why-it-exists
+        origin: walkdown
+        created_at: 2026-09-14
+        statement: "A note says why it exists: feedback, a finding, an observation, a request, or a decision. A finding or an observation is signed by the agent, and a decision is filed closed."
+        because: Why a note exists decides whose look closes it, and a machine's account of what it saw is not a person's words.
+        history: "Of 185 notes waiting on Topher's verify on 2026-09-14, 105 had nothing human in them and 90 wore his name over a judge's finding (ADR 0005)."
+        verify: [checks]
+        signoff: [eng, product]
+        steps:
+          given:
+            - A machine whose personal config says who is sitting at it
+          when:
+            - A note is filed from the CLI or the browser, with a reason or without one
+          then:
+            - The note carries the reason it was given; a word walkdown does not know is refused
+            - Left unsaid, a machine's note is an observation and a person's is feedback
+            - A finding or an observation is authored by the agent, with no mark saying it was typed for a person
+            - A decision is filed already recorded, a status nothing transitions out of
+            - A question carries no reason and refuses one
+          statement_hash: sha256:5bb935c7abc6
+      - id: threads.lifecycle.closes-where-it-was-asked
+        origin: walkdown
+        created_at: 2026-09-14
+        statement: A person's signed pass on a rule verifies the findings and the feedback that were addressed on it before the pass, under that person's name. An observation is settled by the agent that made it, and asks nothing of anyone.
+        because: The person's acceptance already exists as their verdict on the rule, and demanding the same look a second time, thread by thread, is what made the verify queue one nobody worked.
+        verify: [checks]
+        signoff: [eng, product]
+        steps:
+          given:
+            - A rule with an addressed finding and an addressed note of the person's own, a request, and a note on another rule
+          when:
+            - The person records a walkdown signed in a role, passing the rule
+          then:
+            - The finding and the feedback on that rule read as verified, named for the signer, with the run that closed them and a reply saying so
+            - The request still waits on a person; the other rule's note is untouched
+            - A note addressed after the pass stays addressed - that fix is not what the person looked at
+            - A fail, a walkdown signed in no role, or a machine's pass closes nothing
+            - An observation is settled on the agent's word; feedback, a finding and a request refuse that ending
+          statement_hash: sha256:3048447b9d59
       - id: threads.lifecycle.says-what-it-did
         origin: walkdown
         statement: A command that changes a thread reports what changed rather than printing the thread back. It says which status the thread left, which status it reached, whose name the change was recorded under, and how many replies landed.
