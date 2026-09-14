@@ -143,7 +143,7 @@ stories:
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
       - id: threads.conversation.written-in-markdown
         origin: thread:n-0288
-        statement: A message is written in markdown and read as it was written - paragraphs, lists, code spans and blocks, emphasis, quotes and links to the web - and nothing else in it reaches the page. Thread ids, rule ids and evidence keys in the prose are still the links they were, and inside a code span they are left as typed.
+        statement: A message is markdown, rendered from a short list of allowed elements; anything else in it is plain text.
         because: The bodies were already written that way - lists, backticks, paragraphs - and read as one pre-wrapped block; rendering what is there makes 664 messages easier to read without a byte on disk changing. And a body arrives from the browser, so what it may contain is a closed list.
         verify: [checks]
         signoff: [eng, product]
@@ -160,7 +160,11 @@ stories:
             - A heading is not offered - a reply is not a document
             - A thread id in the prose is still a link to that thread, and the same id inside a code span is plain text
             - Plain text with line breaks reads as it did before - one line per line, no markup needed
-          statement_hash: sha256:b8ec06681f9a
+          statement_hash: sha256:de2e900e6c17
+          reworded:
+            - hash: sha256:b8ec06681f9a
+              at: 2026-09-14
+              why: the statement is the goal in a sentence; the element list, the links and the code-span detail were the then-steps said twice (Topher, 2026-09-13)
 
       - id: threads.conversation.composer-stays
         origin: walkdown

@@ -1,0 +1,9 @@
+id: n-0289
+kind: note
+author: topher
+created: 2026-09-14T01:24:59.859Z
+anchor:
+  rule: panel.signoff.spec-pair-derived
+status: open
+body: Looks good, but let's use bullet points to show the two different
+  scenarios instead of the emdash.
