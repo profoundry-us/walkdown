@@ -1,0 +1,33 @@
+{
+  "run_id": "2026-09-14T19-08-59Z-local-01",
+  "created": "2026-09-14T19:08:59Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2fa9b57-dirty",
+  "tree_hash": "sha256:bd073afd41cb",
+  "spec_hash": "sha256:192b6857e70e",
+  "results": [
+    {
+      "rule": "panel.start.choose-a-blueprint",
+      "status": "pass",
+      "statement_hash": "sha256:f89c8ffc710e",
+      "evidence": [
+        "runs/evidence/2026-09-14T19-08-59Z/01-one-claimant-of-two-opens-unasked.png",
+        "runs/evidence/2026-09-14T19-08-59Z/02-blueprints-tab-after-start-marks-claimant.png",
+        "runs/evidence/2026-09-14T19-08-59Z/03-blueprints-tab-after-pick-keeps-mark.png",
+        "runs/evidence/2026-09-14T19-08-59Z/04a-switcher-names-the-page.png",
+        "runs/evidence/2026-09-14T19-08-59Z/04-project-picked-chooser-with-notice.png",
+        "runs/evidence/2026-09-14T19-08-59Z/05-reload-routes-by-address-not-by-pick.png",
+        "runs/evidence/2026-09-14T19-08-59Z/probe-setup.txt",
+        "runs/evidence/2026-09-14T19-08-59Z/probe-registry-and-whose.txt",
+        "runs/evidence/2026-09-14T19-08-59Z/probe-panel-states-and-pick-writes-nothing.txt",
+        "runs/evidence/2026-09-14T19-08-59Z/probe-pick-writes-nothing.txt",
+        "runs/evidence/2026-09-14T19-08-59Z/probe-coverage-note.txt"
+      ],
+      "reasoning": "Re-judged after the n-0281/n-0282 fix, on the scratch copy sitting-0914 served with its own home at :4730 (the :4700 base_url above is the prompt's; nothing on :4700 was touched). I gave the copy's project a second registered blueprint (walkdown-second, imported --ephemeral with its own description, a copy of the first so its storyboard claims the same pages) and a third folder on disk that nobody registered (probe-setup). /api/blueprint lists exactly the two registered rows and never the unregistered folder, so absence is by never being declared (probe-registry-and-whose). Starting on /stand-in/choose-blueprint with the project holding two and one claiming, the panel opened walkdown unasked with no chooser and no modal (01) - holding several is not a reason to ask. The Blueprints tab then listed both by name and own description with walkdown first and badged 'claims this page' (02); after picking walkdown-second the tab still badged walkdown and marked walkdown-second current (03), which is the fix under re-judge holding - the marks survive the pick because start() now asks /api/whose whenever there is a page. Opening the switcher named the page and its claimant (04a) and picking the project holding two drew 'Which blueprint?' with both names, their own descriptions, the claimant first and badged, and a notice giving the claim count and that nothing is remembered (04). Picking from the chooser loaded walkdown-second, sent no non-GET request, changed none of the copy's 741 files by md5, and left local and session storage empty (probe-pick-writes-nothing); a real reload of the same address routed by the page again to walkdown (05), a fresh browser context did the same, and picking the project again asked again (probe-panel-states 05b, 06). Coverage caveat (probe-coverage-note): the server's claims index is built once at startup, so the two-claimants notice and ordering could not be re-observed without a restart I was told not to do; that branch was observed passing on 2026-09-11 and the fix does not touch it. One thing worth a person's eye: with one claimant among two, the crossing notice reads '1 blueprints in this project claim this page ... rather than choosing for you', which is not the reason it is asking and contradicts the unasked open at start; the honest 'holds more than one' sentence exists but is only used at zero claimants. The steps as written ask for the count and the not-remembered line and get both, so it is n-0293, not a fail. No test/ file is tagged for this rule; the tagged Playwright check writes to the real ledger and was not run from here.",
+      "threads": ["n-0293"]
+    }
+  ]
+}

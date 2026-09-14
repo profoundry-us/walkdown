@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-09-14T19-08-57Z-local-01",
+  "created": "2026-09-14T19:08:57Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2fa9b57-dirty",
+  "tree_hash": "sha256:bd073afd41cb",
+  "spec_hash": "sha256:192b6857e70e",
+  "results": [
+    {
+      "rule": "time.records.read-in-your-zone",
+      "status": "pass",
+      "statement_hash": "sha256:d7979f516afd",
+      "evidence": [
+        "runs/evidence/2026-09-14T19-08-57Z/cli-thread-zones.txt",
+        "runs/evidence/2026-09-14T19-08-57Z/panel-settings-timezone.txt",
+        "runs/evidence/2026-09-14T19-08-57Z/panel-thread-zones.txt",
+        "runs/evidence/2026-09-14T19-08-57Z/test-time.txt",
+        "runs/evidence/2026-09-14T19-08-57Z/test-thread-cli.txt"
+      ],
+      "reasoning": "Judged on the scratch copy sitting-0914 served at :4730, against thread n-0291 whose file holds created: 2026-09-14T19:11:14.035Z. CLI (WALKDOWN_HOME at the copy's home): with no identity.timezone, `walkdown thread n-0291` printed the stamp as the machine's clock with its abbreviation under each TZ tried (2:11 PM CDT, 4:11 AM GMT+9 for Tokyo, 7:11 PM UTC); with identity.timezone: America/New_York and TZ=America/Los_Angeles it printed 3:11 PM EDT, so the declared zone wins over the machine's; with Mars/Olympus_Mons it fell back to 2:11 PM CDT and exited 0; the file on disk still said the UTC stamp throughout. Panel (the copy's server re-reads the config per request, so all three states were driven live): Settings' settings.timezone read \"America/Chicago\" in italics with a title saying it is the server's own zone and where to set yours when unsaid; \"America/New_York\" upright with a title naming the config file when declared; and under the unknown zone the panel loaded and worked, the anchor showed America/Chicago in italics with the title carrying the problem text and the config path. thread.body's messages carried hover titles \"9/14/2026, 3:11:14 PM EDT\" under the declared zone and \"2:11:14 PM CDT\" under the fallback - the same clock and abbreviation the CLI printed for the same config. All five tagged unit tests pass. Two observations short of a failure: the CLI is silent about an unknown zone (the step's \"says so\" is about the panel, which does), and the CLI and panel use different date formats around the same clock and zone.",
+      "threads": []
+    }
+  ]
+}

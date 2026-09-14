@@ -1,0 +1,29 @@
+{
+  "run_id": "2026-09-14T19-08-54Z-local-01",
+  "created": "2026-09-14T19:08:54Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2fa9b57-dirty",
+  "tree_hash": "sha256:bd073afd41cb",
+  "spec_hash": "sha256:192b6857e70e",
+  "results": [
+    {
+      "rule": "threads.conversation.written-in-markdown",
+      "status": "fail",
+      "statement_hash": "sha256:de2e900e6c17",
+      "evidence": [
+        "runs/evidence/2026-09-14T19-08-54Z/written-in-markdown-probe-body.md",
+        "runs/evidence/2026-09-14T19-08-54Z/written-in-markdown-thread-panel.png",
+        "runs/evidence/2026-09-14T19-08-54Z/written-in-markdown-thread-body.png",
+        "runs/evidence/2026-09-14T19-08-54Z/written-in-markdown-threads-list.png",
+        "runs/evidence/2026-09-14T19-08-54Z/written-in-markdown-dom-probe.json",
+        "runs/evidence/2026-09-14T19-08-54Z/written-in-markdown-link-click-probe.txt",
+        "runs/evidence/2026-09-14T19-08-54Z/written-in-markdown-tagged-tests-grep.txt"
+      ],
+      "reasoning": "Judged on the scratch copy sitting-0914 served at :4730, never :4700. I filed thread n-0292 in the copy (via the CLI, --as-agent) whose body carries bullet and numbered lists, a code span, a web link, javascript:/file:/mailto: links, two headings, a <script>, an <img onerror>, a <style>, a styled <div onclick>, an <a onclick>, an <iframe>, a thread id and a rule id both in prose and in code spans, three plain lines, and a fenced block, then opened it on thread-panel and read anchor thread.body in the DOM. The lists are <ul>/<ol>, the code span is <code>, the web link carries target=_blank rel=noopener, the raw HTML is gone or text (no script/style/img/iframe/h1/h2 or style/onclick attributes survive; window.__probe_ran never set, title and background untouched), the headings collapse to plain text, the prose n-0288 is a ref that opened thread n-0288 while the code-span n-0288 is plain, and the three plain lines render one per line. One then-step fails: a link to javascript:, file: or mailto: is emitted as an hrefless <a> that the pane underlines in the same colour as the real link (only the cursor differs); it cannot be followed, but it reads as a dead link rather than plain text, which is not what 'is not a link' promises a reader. Note n-0291 filed. No test in test/ carries the rule's tag although verify is [checks], so nothing was run.",
+      "threads": ["n-0291"]
+    }
+  ]
+}

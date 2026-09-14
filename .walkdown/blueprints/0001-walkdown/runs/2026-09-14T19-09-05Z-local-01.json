@@ -1,0 +1,39 @@
+{
+  "run_id": "2026-09-14T19-09-05Z-local-01",
+  "created": "2026-09-14T19:09:05Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2fa9b57-dirty",
+  "tree_hash": "sha256:bd073afd41cb",
+  "spec_hash": "sha256:192b6857e70e",
+  "results": [
+    {
+      "rule": "threads.conversation.one-stream",
+      "status": "fail",
+      "statement_hash": "sha256:ac7dee24993b",
+      "evidence": [
+        "runs/evidence/2026-09-14T19-09-05Z/one-stream-panel-rule-detail-collapsed.png",
+        "runs/evidence/2026-09-14T19-09-05Z/one-stream-panel-rule-detail-collapsed.json",
+        "runs/evidence/2026-09-14T19-09-05Z/one-stream-panel-thread-n-0294.png",
+        "runs/evidence/2026-09-14T19-09-05Z/one-stream-panel-thread-n-0294.json",
+        "runs/evidence/2026-09-14T19-09-05Z/one-stream-panel-thread-n-0294-hover.png",
+        "runs/evidence/2026-09-14T19-09-05Z/one-stream-panel-hover-cont.json",
+        "runs/evidence/2026-09-14T19-09-05Z/one-stream-panel-ref-clicks.json",
+        "runs/evidence/2026-09-14T19-09-05Z/one-stream-panel-after-thread-ref-click.png",
+        "runs/evidence/2026-09-14T19-09-05Z/one-stream-panel-after-rule-ref-click.png",
+        "runs/evidence/2026-09-14T19-09-05Z/one-stream-panel-thread-n-0133.png",
+        "runs/evidence/2026-09-14T19-09-05Z/one-stream-panel-thread-n-0133.json",
+        "runs/evidence/2026-09-14T19-09-05Z/one-stream-embed-popover-n-0295.json",
+        "runs/evidence/2026-09-14T19-09-05Z/one-stream-embed-popover-n-0295-moved-into-view.png",
+        "runs/evidence/2026-09-14T19-09-05Z/one-stream-embed-popover-n-0105.png",
+        "runs/evidence/2026-09-14T19-09-05Z/one-stream-source-check.txt"
+      ],
+      "reasoning": "Re-judged after n-0288 on the scratch copy sitting-0914 served at :4730, with two fixtures filed into the copy through the CLI: n-0294 (two speakers, consecutive messages, line breaks, a thread id, a rule id, an id inside a code span, an evidence key) and n-0295, the same shape pinned to the stand-in rule-detail so it could be opened beside its pin. In the panel every step holds: the collapsed row is the first message with face, name, via, time, the faces of the people in it, the reply count and when it was last touched, and rows share one surface split by a 1px hairline with no card, rail or tint (probed computed styles); the opening note is message zero in the same shape as every reply; the second and third messages from one speaker drop name and tile and show their time only under the cursor, a change of provenance starts a new run, and in n-0133 a 4m26s gap groups while a 5m00s gap does not; line breaks survive as <br> and blank lines as paragraphs, day dividers are drawn (Aug 31 / Sep 1 / Sep 2); n-0133 and threads.conversation.append-only opened what they name when clicked while the id inside a code span stayed plain. Both deliveries import lib/message-stream.js and the embed popover renders the identical grouping, dividers and markdown. It fails on the last step beside the pin: the embed calls MSG.stream without a rules list, so a rule id in a message is plain prose there, and nothing in the embed reads the data-thread-ref / data-evidence-ref the shared renderer sets, so n-0288 is drawn as a link-styled button that does nothing when clicked (same popover element before and after, location unchanged) - a link that leads nowhere is worse than no link. Framed inside the panel the dot hands the thread to the panel, so the gap is the standalone and extension delivery only. Noted in passing, outside this rule: that popover opens past the right edge of the viewport for a pin in the stand-in right column. Filed as n-0294 in the real ledger (not the scratch fixture of the same number).",
+      "threads": [
+        "n-0294"
+      ]
+    }
+  ]
+}

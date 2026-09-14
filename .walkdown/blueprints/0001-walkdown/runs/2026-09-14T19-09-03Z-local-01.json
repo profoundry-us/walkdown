@@ -1,0 +1,30 @@
+{
+  "run_id": "2026-09-14T19-09-03Z-local-01",
+  "created": "2026-09-14T19:09:03Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2fa9b57-dirty",
+  "tree_hash": "sha256:bd073afd41cb",
+  "spec_hash": "sha256:192b6857e70e",
+  "results": [
+    {
+      "rule": "panel.identity.default-actor",
+      "status": "pass",
+      "statement_hash": "sha256:3645bdcb734b",
+      "evidence": [
+        "runs/evidence/2026-09-14T19-09-03Z/declared-identity-strip.png",
+        "runs/evidence/2026-09-14T19-09-03Z/settings-from-gear.png",
+        "runs/evidence/2026-09-14T19-09-03Z/full-name-emptied.png",
+        "runs/evidence/2026-09-14T19-09-03Z/after-reload-empty-remembered.png",
+        "runs/evidence/2026-09-14T19-09-03Z/screenshot-anchors.txt",
+        "runs/evidence/2026-09-14T19-09-03Z/forged-actor-probe.txt",
+        "runs/evidence/2026-09-14T19-09-03Z/records-on-disk.txt",
+        "runs/evidence/2026-09-14T19-09-03Z/identity-unit-tests.txt"
+      ],
+      "reasoning": "Re-judged after n-0290 (time/zone in Settings) on the scratch copy sitting-0914 served at :4730 with its own home, whose config declares username scratch-sitting-0914 and name 'A scratch sitting (sitting-0914)'. Starting a walkdown never asked for a name: the signing dialog came prefilled with the username, and the session strip (panel.actor) then read 'Recording as A scratch sitting (sitting-0914)' with the handle scratch-sitting-0914 beside it in panel.actor-handle, whose title says verdicts and thread actions are recorded under it. The gear opens Settings with settings.actor as a non-editable span (the only text input in the panel is settings.display-name plus the desk sliders), settings.actor-source naming the copy's home/config.yml as where the username comes from, and the new 'Times in' row (settings.timezone) reading America/Chicago, marked as the machine's zone with the config path to set your own. Typing a new full name updated the strip on change without touching the handle; it was stored as walkdown:identity {name} and came back after a reload; clearing it was stored as an empty string, survived the reload as empty rather than falling back to the config name, and the strip then drew the username alone with no handle span. On the server side, POST /api/threads, /api/threads/<id>/replies, /api/draft and /api/walkdowns each sent with actor/author/username 'mallory' in body and X-headers wrote records on disk (n-0293, run 2026-09-14T20-36-01Z-local-01) whose author/actor is scratch-sitting-0914; with identity: removed from the config (read per request) the run door refused with the 'a login name is not a decision' message instead of guessing from git, and the config was put back. The tagged unit test (a username that is not a string counts as nobody) passes. Observations, not failures: the Record as value truncates in Settings' 144px column for this long scratch username (the full value is in its tooltip and the strip), and openActorSettings still tries to focus a #wdp-set-actor that no longer exists, harmlessly.",
+      "threads": []
+    }
+  ]
+}

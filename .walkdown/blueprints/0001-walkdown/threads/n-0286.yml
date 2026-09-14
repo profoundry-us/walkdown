@@ -6,7 +6,7 @@ created: 2026-09-13T21:57:07.170Z
 anchor:
   rule: panel.rules.steps-not-an-appendix
   screen: rule-detail
-status: open
+status: addressed
 body: "Topher, 2026-09-13, on reviewing every rule statement: the statements
   carry five kinds of content tangled together - the claim, the reason (because
   / so that), the negative, what happened that produced the rule, and how the
@@ -17,3 +17,12 @@ body: "Topher, 2026-09-13, on reviewing every rule statement: the statements
   than it. And the steps layout: given and when read as prose beside their
   label, only then is a bulleted list - dropped below its label rather than
   beside it, since the then clauses are the long part."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-14T19:07:49Z
+    body: "Done in PR #9 (merged 2026-09-14, b8bc459): statement/because/history
+      split across every live rule, 113 judged by an independent Fable judge
+      against ADR 0004, hashes kept as rewords so no verdict moved. The rule
+      detail draws because and history under the statement; the steps layout is
+      panel.rules.steps-not-an-appendix."

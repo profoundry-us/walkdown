@@ -1,0 +1,18 @@
+id: n-0292
+kind: note
+author: topher
+via: agent
+created: 2026-09-14T19:43:31.414Z
+anchor:
+  rule: panel.delivery.stale-copy-says-so
+status: open
+body: |-
+  The stale-copy badge is clipped at ordinary laptop widths, and at 1280 the word "Stale" is gone.
+
+  Found re-judging panel.delivery.stale-copy-says-so on the scratch copy sitting-0914 (:4730), 2026-09-14. The comparison itself is right: a buildHash that differs from the server's panelHash puts up panel.stale with the text "Stale — reload the extension" and the two-step fix in its title; a matching hash shows nothing; the served delivery, which publishes no buildHash, shows nothing. The n-0253 fix also holds - a full run of the tagged suite leaves lib/api.js's mtime alone and the running server stays not-stale.
+
+  What fails is the saying-so. Since the project button (n-0281/n-0283) joined the capped left group of the bar (max-w calc(50%-8.5rem), src/panel/app.js ~1466), the badge is the element that gives way: measured against a stale-copy boot, the badge loses 51px at a 1280 window, 21px at 1440, 7px at 1512, and fits only from ~1536. Because it is an inline-flex badge with `truncate`, overflow clips both ends and draws no ellipsis - at 1440 the bar reads "tale — reload the extensi", at 1280 it reads "reload the ex". The banner then neither states that the copy is older nor legibly names the fix, and nothing shows that text is missing. The 2026-09-08 pass measured at 1600, where it still fits.
+
+  Evidence: runs/evidence/2026-09-14T19-08-58Z/probe-stale-copy-says-so.txt, runs/evidence/2026-09-14T19-08-58Z/probe-stale-badge-widths.txt, runs/evidence/2026-09-14T19-08-58Z/app-review-extension-stale-copy-1280-bar.png, runs/evidence/2026-09-14T19-08-58Z/app-review-extension-stale-copy-1440-bar.png, runs/evidence/2026-09-14T19-08-58Z/app-review-extension-stale-copy-1600-bar.png.
+
+  Likely shape of a fix: give the badge shrink-0 (it is loud on purpose; the project name and blueprint already truncate) or let it drop to a second line / the sidebar below some width, rather than letting the one thing that must be read whole be the thing that gives.

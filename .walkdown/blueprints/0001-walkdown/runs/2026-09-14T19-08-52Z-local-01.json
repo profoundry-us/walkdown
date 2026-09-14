@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-09-14T19-08-52Z-local-01",
+  "created": "2026-09-14T19:08:52Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2fa9b57-dirty",
+  "tree_hash": "sha256:bd073afd41cb",
+  "spec_hash": "sha256:192b6857e70e",
+  "results": [
+    {
+      "rule": "ownership.authoring.statement-reads-at-a-glance",
+      "status": "pass",
+      "statement_hash": "sha256:97f1bacfb270",
+      "evidence": [
+        "runs/evidence/2026-09-14T19-08-52Z/lint-probe.txt",
+        "runs/evidence/2026-09-14T19-08-52Z/lint-probe.json",
+        "runs/evidence/2026-09-14T19-08-52Z/lint-baseline.txt",
+        "runs/evidence/2026-09-14T19-08-52Z/probe-edits.diff",
+        "runs/evidence/2026-09-14T19-08-52Z/probe-import.txt",
+        "runs/evidence/2026-09-14T19-08-52Z/lint-tests.txt"
+      ],
+      "reasoning": "Judged headless on the scratch copy sitting-0914: a throwaway copy of its blueprint was registered ephemerally as `lint-probe` in the copy's own home (probe-import.txt), edited (probe-edits.diff) and linted with `node bin/walkdown.js lint --blueprint lint-probe --no-checks`, then forgotten and deleted. Baseline lint of the untouched copy raised no length finding (lint-baseline.txt). With edits: a 50-word one-sentence statement and a 40-word because on ownership.authoring.steps-are-required drew `statement-reads-as-a-paragraph` (\"the statement is 50 words in 1 sentence(s) — say the goal in one breath and let the steps carry the rest\") and `because-carries-history` (\"a reason is timeless; what happened, with its date or count, belongs in `history:`\") — each says what the field is for, not only the number crossed; a 9-word three-sentence statement drew the paragraph warning on sentence count alone; a 45-word one-sentence statement with a 35-word because, and a 44-word two-sentence statement, stayed silent even though those same rules carried stale-steps errors and drift warnings. All three findings are level `warn` in the JSON (lint-probe.json); the only errors were pre-existing tracking errors plus the stale-steps the edits themselves caused. The tagged test in test/lint.test.js passes (lint-tests.txt, 21/21).",
+      "threads": []
+    }
+  ]
+}

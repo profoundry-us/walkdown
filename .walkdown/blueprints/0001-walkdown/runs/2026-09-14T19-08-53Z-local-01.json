@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-09-14T19-08-53Z-local-01",
+  "created": "2026-09-14T19:08:53Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2fa9b57-dirty",
+  "tree_hash": "sha256:bd073afd41cb",
+  "spec_hash": "sha256:192b6857e70e",
+  "results": [
+    {
+      "rule": "panel.rules.claim-then-reason",
+      "status": "pass",
+      "statement_hash": "sha256:98f006506a44",
+      "evidence": [
+        "runs/evidence/2026-09-14T19-08-53Z/claim-then-reason-both.txt",
+        "runs/evidence/2026-09-14T19-08-53Z/claim-then-reason-neither.txt",
+        "runs/evidence/2026-09-14T19-08-53Z/claim-then-reason-tests.txt"
+      ],
+      "reasoning": "Judged on the scratch copy sitting-0914 at :4730 (its chooser lists only sitting-0914, so the real ledger was out of reach). Opened panel.rules.owed-apart-from-said, which carries both a because and a history: the statement renders first at 15px, full opacity; directly beneath it detail.because at 13px, opacity 0.7, opening with a small uppercase muted 'because' label; beneath that detail.history at 12.5px, opacity 0.55, opening with 'history' - DOM order and bounding boxes (statement 187-285, because 285-333, history 333-377) agree, so each is under the last and lighter than the one above. For the negative case, panel.dock.toolbar carries neither and shows neither anchor and no stray 'because'/'history' label - the statement runs straight into SCREEN; panel.dock.controls-survive-use carries history only and shows the history line with no empty because label. No test in test/ is tagged with this rule, so the verdict rests on the browser probes. The rule-detail prototype mockup predates this rule and shows no because/history section at all, which is noted in the evidence but does not bear on the panel's behaviour.",
+      "threads": []
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "run_id": "2026-09-14T19-08-55Z-local-01",
+  "created": "2026-09-14T19:08:55Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2fa9b57-dirty",
+  "tree_hash": "sha256:bd073afd41cb",
+  "spec_hash": "sha256:192b6857e70e",
+  "results": [
+    {
+      "rule": "time.records.stored-as-utc",
+      "status": "pass",
+      "statement_hash": "sha256:5040dfedc0c3",
+      "evidence": [
+        "runs/evidence/2026-09-14T19-08-55Z/cli-probe.txt",
+        "runs/evidence/2026-09-14T19-08-55Z/draft-run-hash-probe.txt",
+        "runs/evidence/2026-09-14T19-08-55Z/run-reword-probe.txt",
+        "runs/evidence/2026-09-14T19-08-55Z/stamp-shape-scan.txt",
+        "runs/evidence/2026-09-14T19-08-55Z/time-test.txt",
+        "runs/evidence/2026-09-14T19-08-55Z/thread-cli-test.txt",
+        "runs/evidence/2026-09-14T19-08-55Z/lint-test.txt"
+      ],
+      "reasoning": "Judged headless on the scratch copy sitting-0914 served at :4730, with the shell pinned to TZ=America/Chicago (14:11 CDT) so any local-time leak would show as a 14:xx or a -05:00. Every kind of write the steps name was exercised and read back from disk: a thread filed with `thread new --as-agent` (created 2026-09-14T19:11:14.035Z), a reply on it (2026-09-14T19:11:14Z), a sweep run (created 2026-09-14T19:11:14Z), a draft via POST /api/draft (started/updated 2026-09-14T19:11:34Z in drafts/local.json, discarded cleanly afterwards), a checks run written by the node test reporter (2026-09-14T19:11:57Z), a reworded hash after editing a statement in the copy's own feature file (`at: 2026-09-14T19:11:57Z`), and the registry row the copy was imported with (registered.at 2026-09-14T19:08:34.319Z). All parse as instants, all end in Z, none carry an offset, and no thread names a zone; the tagged checks in test/time.test.js, test/thread-cli.test.js and test/lint.test.js all pass, including the blanket scan of this blueprint's 500+ stamps. Two things a person should know: stamps mix millisecond (thread `created`, registry) and whole-second precision, which the rule allows but is worth noticing; and the features still hold 225 bare-date `reworded.at` entries (224 from 2026-09-13, one 2026-09-14) plus authored `created_at` dates - the former are the pre-n-0290 history the rule's own `history:` line and its check deliberately leave in place, the latter is a hand-written spec field, not a stamp walkdown writes, so neither counts against the rule as stated.",
+      "threads": []
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "run_id": "2026-09-14T19-03-44Z-local-01",
+  "created": "2026-09-14T19:03:44Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2fa9b57-dirty",
+  "spec_hash": "sha256:192b6857e70e",
+  "results": [
+    {
+      "rule": "embed.pin.right-project",
+      "status": "pass",
+      "statement_hash": "sha256:292c89ee776a"
+    },
+    {
+      "rule": "embed.pin.anchored-target",
+      "status": "pass",
+      "statement_hash": "sha256:53f47b01acea"
+    },
+    {
+      "rule": "embed.pin.follows-the-visible-surface",
+      "status": "pass",
+      "statement_hash": "sha256:3bd7a904fa1b"
+    },
+    {
+      "rule": "panel.delivery.stale-server-says-so",
+      "status": "pass",
+      "statement_hash": "sha256:930942690e23"
+    },
+    {
+      "rule": "panel.rules.takes-you-there",
+      "status": "pass",
+      "statement_hash": "sha256:9e04008bfcdf"
+    },
+    {
+      "rule": "panel.rules.lifecycle-legible",
+      "status": "pass",
+      "statement_hash": "sha256:412ddd1f59a6"
+    },
+    {
+      "rule": "panel.rules.owed-apart-from-said",
+      "status": "pass",
+      "statement_hash": "sha256:1e4e613bdbb9"
+    },
+    {
+      "rule": "panel.walkdown.who-signs-is-declared",
+      "status": "pass",
+      "statement_hash": "sha256:aa1e6c5e6556"
+    },
+    {
+      "rule": "panel.rules.claim-then-reason",
+      "status": "pass",
+      "statement_hash": "sha256:98f006506a44"
+    },
+    {
+      "rule": "panel.walkdown.verdicts-at-hand",
+      "status": "pass",
+      "statement_hash": "sha256:81e423350563"
+    },
+    {
+      "rule": "panel.signoff.spec-pair-derived",
+      "status": "pass",
+      "statement_hash": "sha256:f5c753ec1d9b",
+      "threads": [
+        "n-0289"
+      ]
+    }
+  ]
+}

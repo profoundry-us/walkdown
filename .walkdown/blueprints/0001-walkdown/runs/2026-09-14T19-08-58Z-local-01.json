@@ -1,0 +1,36 @@
+{
+  "run_id": "2026-09-14T19-08-58Z-local-01",
+  "created": "2026-09-14T19:08:58Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2fa9b57-dirty",
+  "tree_hash": "sha256:bd073afd41cb",
+  "spec_hash": "sha256:192b6857e70e",
+  "results": [
+    {
+      "rule": "panel.delivery.stale-copy-says-so",
+      "status": "fail",
+      "statement_hash": "sha256:5ba123b01d1c",
+      "evidence": [
+        "runs/evidence/2026-09-14T19-08-58Z/probe-stale-copy-says-so.txt",
+        "runs/evidence/2026-09-14T19-08-58Z/probe-stale-copy-states.txt",
+        "runs/evidence/2026-09-14T19-08-58Z/probe-stale-badge-widths.txt",
+        "runs/evidence/2026-09-14T19-08-58Z/probe-stale-copy-fix-holds.txt",
+        "runs/evidence/2026-09-14T19-08-58Z/test-roles-on-runs-stale-copy.txt",
+        "runs/evidence/2026-09-14T19-08-58Z/app-review-extension-stale-copy-1600.png",
+        "runs/evidence/2026-09-14T19-08-58Z/app-review-extension-stale-copy-1600-bar.png",
+        "runs/evidence/2026-09-14T19-08-58Z/app-review-extension-stale-copy-1440.png",
+        "runs/evidence/2026-09-14T19-08-58Z/app-review-extension-stale-copy-1440-bar.png",
+        "runs/evidence/2026-09-14T19-08-58Z/app-review-extension-stale-copy-1280.png",
+        "runs/evidence/2026-09-14T19-08-58Z/app-review-extension-stale-copy-1280-bar.png",
+        "runs/evidence/2026-09-14T19-08-58Z/app-review-extension-current-copy-1600.png",
+        "runs/evidence/2026-09-14T19-08-58Z/app-review-served-no-buildhash-1600.png",
+        "runs/evidence/2026-09-14T19-08-58Z/proto-review.png"
+      ],
+      "reasoning": "Re-judged after n-0253 on the scratch copy sitting-0914 at :4730 (the record's base_url is as the prompt printed it; :4700 was never touched). The claimed fix holds: the tagged suite passes, leaves lib/api.js's mtime where it was, and the scratch server still answers server.stale=false afterwards - so no false stale-server badge muddies this rule any more. The comparison this rule is about is right in both the code and the running page: the server hashes lib/viewer/panel.js into panelHash (62d4323d5f73, equal to the file on disk and to GET /panel.js), the extension bootstrap hashes its vendored copy into __walkdownConfig.buildHash, and the panel shows panel.stale only when both exist and differ. Since the real extension cannot load here, each state was driven by supplying that one field exactly as the bootstrap does - live in the Claude browser and again from a cold boot with playwright - and both agreed: a mismatching hash puts up 'Stale — reload the extension' with the two-step fix in its title, beside the project name; a matching hash shows nothing; the served review page, which publishes no buildHash, shows nothing, and the embed-only stand-in carries no panel at all. What fails is the saying-so. Since the project button joined the bar's capped left group (after the 2026-09-08 pass, which measured at 1600), the badge is the element that gives way, and being an inline-flex badge with truncate it clips both ends with no ellipsis: at 1440 the bar reads 'tale — reload the extensi', at 1280 'reload the ex' - the word Stale is gone, so the banner neither states that the copy is older nor legibly names the fix, and nothing signals that text is missing. It reads whole only from about 1536 wide. Filed as n-0292.",
+      "threads": ["n-0292"]
+    }
+  ]
+}

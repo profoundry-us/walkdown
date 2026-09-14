@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-09-14T19-09-04Z-local-01",
+  "created": "2026-09-14T19:09:04Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2fa9b57-dirty",
+  "tree_hash": "sha256:bd073afd41cb",
+  "spec_hash": "sha256:192b6857e70e",
+  "results": [
+    {
+      "rule": "status.acceptance.signoff-defaults-to-eng",
+      "status": "pass",
+      "statement_hash": "sha256:8dd40d6249dc",
+      "evidence": [
+        "runs/evidence/2026-09-14T19-09-04Z/signoff-defaults-lint.txt",
+        "runs/evidence/2026-09-14T19-09-04Z/signoff-defaults-status.json",
+        "runs/evidence/2026-09-14T19-09-04Z/signoff-defaults-status-extract.txt",
+        "runs/evidence/2026-09-14T19-09-04Z/signoff-defaults-tiers-test.txt",
+        "runs/evidence/2026-09-14T19-09-04Z/signoff-defaults-lint-test.txt"
+      ],
+      "reasoning": "Re-judged headless on the scratch copy sitting-0914 (WALKDOWN_HOME=<copy>/home, no server touched). In the copy's feature YAML I removed the signoff line from time.records.stored-as-utc, set time.records.read-in-your-zone to `signoff: [product]`, and set status.derived.latest-wins to `signoff: []`. `status --json` (signoff-defaults-status-extract.txt) derives acceptance roles of [eng], [eng, product] and [eng] respectively - every list contains eng, and the declared product role is kept beside it rather than dropped. `lint` (signoff-defaults-lint.txt) raises a [signoff] warning on the product-only file ('omits eng, but engineering always signs - the file says something the report will not do') and a separate [signoff] warning on the empty list ('omit it to mean [eng], which is what it means anyway'), so neither misleading file is silently repaired; the rule with no signoff line draws no finding, as it should. The tagged tests in test/tiers.test.js and test/lint.test.js pass (3/3 for this rule) and cover default, order preservation, eng insertion, the omits-eng warning and the unknown-role case. The copy's edits were reverted after judging.",
+      "threads": []
+    }
+  ]
+}

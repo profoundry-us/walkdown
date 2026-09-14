@@ -1,0 +1,31 @@
+{
+  "run_id": "2026-09-14T19-09-01Z-local-01",
+  "created": "2026-09-14T19:09:01Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2fa9b57-dirty",
+  "tree_hash": "sha256:bd073afd41cb",
+  "spec_hash": "sha256:192b6857e70e",
+  "results": [
+    {
+      "rule": "panel.rules.evidence-visible",
+      "status": "pass",
+      "statement_hash": "sha256:dcbb494ff51d",
+      "evidence": [
+        "runs/evidence/2026-09-14T19-09-01Z/detail-evidence-rows.png",
+        "runs/evidence/2026-09-14T19-09-01Z/detail-evidence-modal-top.png",
+        "runs/evidence/2026-09-14T19-09-01Z/detail-evidence-modal-bottom.png",
+        "runs/evidence/2026-09-14T19-09-01Z/detail-evidence-modal-transcript-only.png",
+        "runs/evidence/2026-09-14T19-09-01Z/detail-evidence-stale-row.png",
+        "runs/evidence/2026-09-14T19-09-01Z/detail-evidence-never-run.png",
+        "runs/evidence/2026-09-14T19-09-01Z/panel-probe.json",
+        "runs/evidence/2026-09-14T19-09-01Z/scratch-cli-status.txt",
+        "runs/evidence/2026-09-14T19-09-01Z/scratch-fixture-runs.txt"
+      ],
+      "reasoning": "Re-judged after n-0241/n-0242 on the scratch copy sitting-0914 at :4730 (port 4700 untouched). Because the copy's target is :4730 and status filters runs by base_url, every agent run copied from the real ledger read 'never run' there, so two fixture runs were written into the scratch ledger only (scratch-fixture-runs.txt says exactly what): one before the copy's 19:11 agent sweep so a row reads stale, and one attaching five mixed files to this rule. The detail pane's `detail.evidence` block then agreed with the scratch CLI line for line: 'checks/local ○ never run', 'agent ✓ pass · agent · 1h ago' with the run id in the row's title, and beneath it '• Evidence — open 5' as `detail.evidence-open` whose previous row is the agent row, not a tier of its own; latest-wins showed 'checks/local ✓ pass · topher · 3d ago' over 'agent ~ stale · agent · 1h ago', detail-slide's pre-sweep run read '~ stale', and panel.dock.toolbar with nothing recorded said 'agent ○ never run' rather than an empty box. Opening the five files in `detail.evidence-modal` (heading 'Evidence', Close button, Escape dismisses and leaves the detail open): the .png is one <img> with naturalWidth 1280; the 16,560-char transcript and the .json are <pre> text in the same captioned frame, the transcript scrolling inside it (scrollHeight 3249 vs clientHeight 558, overflow auto); the .har is an 'Open …' link with target=_blank that the evidence route serves 200; and the nonexistent .txt draws no <img> at all but says 'Could not read this file (404)' in its own frame while the other four are unaffected - one <img> in the whole modal, so nothing is a broken image. The transcript-only case n-0241 named (status.derived.latest-wins) opens with zero <img> and the transcript readable under its .txt caption. One wording nit, not a failure of any then-clause: on a 404 the frame still asserts 'It is still on disk at <key>', which for a missing file is untrue - the honest reading would be 'the ledger names it at <key>'.",
+      "threads": []
+    }
+  ]
+}

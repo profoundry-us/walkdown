@@ -1,0 +1,42 @@
+id: n-0294
+kind: note
+author: topher
+via: agent
+created: 2026-09-14T20:51:53.552Z
+anchor:
+  rule: threads.conversation.one-stream
+status: open
+body: "Re-judged 2026-09-14 after n-0288 (markdown bodies), on the scratch copy
+  sitting-0914 at :4730. FAIL, on the last THEN and only beside the pin: in the
+  embed's standalone popover, thread and rule ids written inside a message are
+  not links to the thing they name. A fixture pinned to the stand-in rule-detail
+  (n-0295 in the copy: \"Refs: n-0288 and threads.conversation.append-only\")
+  opens beside its pin with n-0288 drawn as a link-styled button (class wd-ref
+  link link-hover) that does nothing when clicked - same popover, same element,
+  location unchanged - and the rule id as plain prose; an evidence key in a body
+  renders there as an <a href=\"#\"> with nothing behind it. In the panel every
+  one of these opens what it names (n-0133 opened from n-0294;
+  threads.conversation.append-only opened from the same message). Cause: the
+  popover calls MSG.stream(pin, { pending, names }) with no rules list
+  (src/embed/index.js:394), so linkRefs never marks a rule id, and nothing in
+  the embed source reads data-thread-ref, data-rule-ref or data-evidence-ref -
+  the shared renderer sets them (lib/viewer/embed.js:2994-3003) and the panel
+  alone listens (src/panel/app.js:2935). Framed inside the panel the dot posts
+  walkdown:open-thread to the parent and the panel handles it, so this is the
+  extension and stand-alone delivery only - the surface n-0152 was also found
+  on. Everything else holds in both deliveries, including what n-0288 changed:
+  line breaks survive as <br> and blank lines as paragraphs, lists and code
+  spans render, an id inside a code span stays as typed, consecutive messages
+  from one speaker (same author AND same via) within five minutes drop name and
+  tile and show their time on hover, a change of via starts a new run, day
+  dividers are drawn (n-0133: Aug 31 / Sep 1 / Sep 2, with a 4m26s gap grouped
+  and a 5m00s gap not), the collapsed row is the first message with faces, count
+  and last-touched, and rows share one surface with a 1px hairline and no card,
+  rail or tint. One aside outside this rule: the popover for a pin on the
+  stand-in's right-hand column opens off the right edge of the viewport at every
+  width tried (x 1360 in 1400, x 1761 in 1800). Evidence:
+  runs/evidence/2026-09-14T19-09-05Z/one-stream-embed-popover-n-0295.json,
+  runs/evidence/2026-09-14T19-09-05Z/one-stream-embed-popover-n-0295-moved-into\
+  -view.png, runs/evidence/2026-09-14T19-09-05Z/one-stream-source-check.txt,
+  runs/evidence/2026-09-14T19-09-05Z/one-stream-panel-ref-clicks.json,
+  runs/evidence/2026-09-14T19-09-05Z/one-stream-panel-thread-n-0294.png"

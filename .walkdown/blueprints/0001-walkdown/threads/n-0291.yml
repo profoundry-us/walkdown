@@ -1,0 +1,24 @@
+id: n-0291
+kind: note
+author: topher
+via: agent
+created: 2026-09-14T19:27:27.669Z
+anchor:
+  rule: threads.conversation.written-in-markdown
+status: open
+body: 'Judged 2026-09-14 on the scratch copy sitting-0914 (:4730), run
+  2026-09-14T19-08-54Z-local-01. Lists, code spans, web links, raw HTML,
+  headings, id refs and line breaks all render as the steps say. One then-step
+  does not hold: "a link to anything else is not a link". A markdown link whose
+  address is `javascript:`, `file:` or `mailto:` comes out of DOMPurify as an
+  `<a>` with no href but still carrying `target=_blank rel=noopener`, and the
+  pane underlines it in the same colour as a real link - only the cursor
+  differs. It cannot be followed (`:any-link` is false, clicking it does
+  nothing), but it reads as a link that is dead rather than as plain text;
+  either unwrap the hrefless `<a>` to its text after sanitising, or style only
+  `a[href]`. See
+  runs/evidence/2026-09-14T19-08-54Z/written-in-markdown-thread-body.png and
+  runs/evidence/2026-09-14T19-08-54Z/written-in-markdown-link-click-probe.txt.
+  Aside: the rule says verify: [checks] but no test in test/ carries
+  @rule:threads.conversation.written-in-markdown
+  (runs/evidence/2026-09-14T19-08-54Z/written-in-markdown-tagged-tests-grep.txt).'

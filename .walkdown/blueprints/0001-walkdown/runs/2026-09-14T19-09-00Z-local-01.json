@@ -1,0 +1,38 @@
+{
+  "run_id": "2026-09-14T19-09-00Z-local-01",
+  "created": "2026-09-14T19:09:00Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2fa9b57-dirty",
+  "tree_hash": "sha256:bd073afd41cb",
+  "spec_hash": "sha256:192b6857e70e",
+  "results": [
+    {
+      "rule": "panel.start.which-project",
+      "status": "pass",
+      "statement_hash": "sha256:8927716089a7",
+      "evidence": [
+        "runs/evidence/2026-09-14T19-09-00Z/01-root-desk-only.png",
+        "runs/evidence/2026-09-14T19-09-00Z/01b-root-after-escape-and-backdrop-click.png",
+        "runs/evidence/2026-09-14T19-09-00Z/02-arrive-unclaimed-page.png",
+        "runs/evidence/2026-09-14T19-09-00Z/02b-arrive-unclaimed-after-escape-and-backdrop.png",
+        "runs/evidence/2026-09-14T19-09-00Z/03-arrive-claimed-board-open.png",
+        "runs/evidence/2026-09-14T19-09-00Z/04-switcher-inside-project-board-blurred.png",
+        "runs/evidence/2026-09-14T19-09-00Z/05-switcher-after-escape-board-back.png",
+        "runs/evidence/2026-09-14T19-09-00Z/06-switcher-after-backdrop-click-board-back.png",
+        "runs/evidence/2026-09-14T19-09-00Z/07-crossed-to-judge-second-same-page.png",
+        "runs/evidence/2026-09-14T19-09-00Z/08-switcher-after-cross-still-names-claimant.png",
+        "runs/evidence/2026-09-14T19-09-00Z/09-switcher-after-frame-moved-names-new-address.png",
+        "runs/evidence/2026-09-14T19-09-00Z/10-picked-two-blueprint-project-asks-which.png",
+        "runs/evidence/2026-09-14T19-09-00Z/11-picked-one-blueprint-project-board-open.png",
+        "runs/evidence/2026-09-14T19-09-00Z/12-server-lists-nothing-no-list.png",
+        "runs/evidence/2026-09-14T19-09-00Z/measurements.json",
+        "runs/evidence/2026-09-14T19-09-00Z/probe.txt"
+      ],
+      "reasoning": "Re-judged after the n-0282 and n-0283 fixes, on the scratch copy sitting-0914 served at :4730 with its own home, plus a throwaway second project (judge-second, first one and then two blueprints) imported into that copy's registry for the judging and forgotten afterwards. Every case the rule names is the same modal over the same backdrop, and the backdrop measures backdrop-filter blur(8px) with background rgba(0,0,0,0) covering the viewport in all of them (measurements.json). At the server root the bar and the panel are visibility:hidden, the frame is display:none, there is no Close, and Escape and a backdrop click leave the modal in place (01, 01b). Arriving on /stand-in/nowhere the frame loads that address behind the blur, the panel opens with zero tabs and one centred 'Please select a project…' line, the modal names the address, says 'No blueprint claims this page.', has no Close and survives Escape and the backdrop (02, 02b). Inside a loaded project the bar's control opens the same modal over the blurred board, and Escape and the backdrop each give the board back with the aside markup and the frame src byte-for-byte what they were (04-06). The claimed fixes hold: the reason line reads '1 blueprint claims this page.' rather than the old '1 blueprints … in more than one project' (04, 08, 09); after crossing to judge-second on the same page the switcher still names that address and still marks sitting-0914 'claims this page · via walkdown', where before the fix it said nothing claimed it (08); after the frame moves to /stand-in/settings the switcher names the new address (09). Commands sit above the list in the order claims, import, init, all as text with no links or buttons (order indices in measurements.json); the claiming project is listed first with its blueprint named; nothing opens by default at one project or two; picking the one-blueprint project opens its board (11) and picking the two-blueprint project asks 'Which blueprint?' on the Blueprints tab with the project modal gone (10); a server listing nothing shows no list and the line 'This server holds no projects. Import one above.' with import and init still above it (12, emptied at the browser since the server has no door for it). One state could not be observed on this server: two projects claiming one page, because /api/whose answers from a claims index built once at startup when the registry named only the copy, so the second project's claims never enter it; the multi-claimant wording and marking are covered only by the tagged crossing check in checks/panel.spec.js, which was not run here. Nothing here was verified or waived by a person; this is the judge's claim.",
+      "threads": []
+    }
+  ]
+}
