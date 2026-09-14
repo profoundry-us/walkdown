@@ -112,7 +112,7 @@ stories:
         retired: >-
           Withdrawn by ADR 0001 (2026-09-09). A page may be claimed by several blueprints: two efforts about different functionality of one homepage are not two pages, and making the storyboard say otherwise put a lie in the spec to protect an invariant that existed for the tooling's convenience. What the constraint was really protecting - that nothing ever has to guess whose page this is - is kept by asking instead: `walkdown claims` reports shared pages as an inventory, and the panel puts the question to the person (screens.ownership.routes-by-page, panel.start.which-project).
         origin: thread:q-0019
-        statement: No two blueprints claim the same page, where a page is an origin from a target's `base_url` plus a path. Two claims collide when their path and fragment match, even with different queries, and never when their origins differ.
+        statement: No two blueprints claim the same page - a claim being an origin from a target's base_url plus a path, compared on path and fragment alone, so that two projects declaring the same path under different queries is still a collision while the same path on two different origins is not.
         verify: [checks]
         steps:
           given:

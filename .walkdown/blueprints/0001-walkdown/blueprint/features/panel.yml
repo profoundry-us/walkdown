@@ -15,8 +15,7 @@ stories:
       - id: panel.dock.no-framing
         retired: The docked delivery is withdrawn (2026-08-26). walkdown frames the page it reviews; there is no longer a layout that renders beside it.
         origin: walkdown
-        statement: When the panel is docked into a page, it sits inside that page's own document, beside the content it reviews. It pushes the page aside instead of covering it or wrapping it in a frame.
-        because: A script tag cannot put its own page in a frame, so a docked panel has to work inside the application's document rather than around it.
+        statement: Docked into a page's own document, the panel renders beside what it reviews rather than framing it - a script tag cannot put its own page in a frame, so the docked delivery works within the application's document and pushes it aside instead of covering it.
         screens: [docked]
         steps:
           given:
@@ -33,7 +32,7 @@ stories:
       - id: panel.dock.wraps-the-page
         retired: The docked delivery is withdrawn (2026-08-26). Nothing insets the host document any more - the page under review is a frame on walkdown’s own desk.
         origin: thread:n-0015
-        statement: The panel shows the page under review inset on every side, with rounded corners and a shadow, like a sheet lying on a desk. It reads as the thing being examined, not as part of walkdown itself.
+        statement: The page under review is presented as a sheet lying on walkdown's desk - inset on every side, with rounded corners and a shadow - so it reads as the thing being examined rather than as part of the tool.
         screens: [docked]
         steps:
           given:
@@ -134,8 +133,7 @@ stories:
       - id: panel.dock.above-the-app
         retired: The docked delivery is withdrawn (2026-08-26). Framed, the application cannot paint outside its own frame, so nothing has to climb into the top layer to stay above it.
         origin: thread:n-0028
-        statement: Nothing the application draws paints over walkdown's own chrome. The panel stays readable even when the app is showing a modal or the exact state you came to judge.
-        because: "You judge the app by looking at its states, and the ones most worth judging are the ones that cover the screen. A panel the app can hide is useless at exactly that moment."
+        statement: Nothing the application draws paints over walkdown's own chrome, because the tool has to stay readable exactly when the app is showing the state you came to judge - and a z-index cannot promise that, since a modal joins a layer painted above every z-index there is.
         screens: [docked]
         steps:
           given:
@@ -369,8 +367,7 @@ stories:
       - id: panel.delivery.one-implementation
         retired: How walkdown's own files are packaged is an implementation detail with no surface a reviewer can see (2026-08-26, thread n-0078); the byte-for-byte comparison stays as a node test.
         origin: thread:q-0016
-        statement: The panel and the embed are two separate files, and neither carries a copy of the other. The embed loads into the application being reviewed; the panel loads only into walkdown's own page above it.
-        because: They load into two different documents, so one file cannot serve both.
+        statement: The panel and the embed stay two files because they load into two documents - the embed into the application being reviewed, the panel only into walkdown's own page above it - and neither carries a copy of the other.
         verify: [checks]
         steps:
           given:
@@ -602,8 +599,7 @@ stories:
         retired: >-
           Folded into panel.start.which-project (2026-09-09, ADR 0001 §7). Everything it said still holds - nothing is opened over a page nobody claimed, and a count of blueprints is never evidence - but it said it about one of three cases where the address cannot decide, and the three are now one screen because they are one question.
         origin: walkdown
-        statement: On a page no blueprint claims, the panel says so and says how to claim it, instead of opening whichever blueprint it happens to hold. It does this even when the server offers only one blueprint.
-        because: One blueprint on a server is not evidence that this page belongs to it.
+        statement: On a page no blueprint claims, the panel says so and says how to claim it, rather than opening whichever blueprint it happens to hold - and it asks that question however many blueprints the server offers, because one blueprint on a server is not evidence that this page belongs to it.
         signoff: [eng, product]
         screens: [unclaimed-page]
         steps:
@@ -1546,7 +1542,7 @@ stories:
       - id: viewer.identity.default-actor
         retired: The dual-pane viewer was withdrawn (2026-08-24). The same behaviour is specified for the panel as panel.identity.default-actor.
         origin: thread:n-0008
-        statement: The actor field is already filled in with the repository's git identity, or with the operating system username when there is no git identity. It stays editable, and an edit is remembered.
+        statement: The actor field arrives filled in from the repository's git identity, falling back to the operating system username; it stays editable and an edit is remembered.
         verify: [checks]
 
   - id: panel.identity

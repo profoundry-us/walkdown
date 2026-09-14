@@ -209,8 +209,7 @@ stories:
         retired: >-
           Answered by deleting the question (2026-09-01, q-0138). Walkdown no longer searches the tree for blueprints, so there is no tree answer to arbitrate against a configured one and no precedence left to state. The half of this that survived - a repository may hold several blueprints without them bleeding into each other - is now locations.answer.declared-not-discovered, which carries it without the contest.
         origin: prd
-        statement: A blueprint found inside the working tree answers for that tree before a registered project rooted higher up does. A blueprint asked for by name is answered only by the registered project that owns it, or by none.
-        because: A repository can hold several blueprints. A project registered at the whole tree would otherwise answer for its siblings and show one project's spec beside another project's ledger.
+        statement: A blueprint found in the working tree beats a configured entry rooted above it, and a blueprint named outright is answered by the entry that owns that blueprint or by none at all - because a repository can hold several, and an entry rooted at the whole tree would otherwise answer for its own siblings and report one project's spec beside another project's ledger.
         verify: [checks]
         steps:
           given:
@@ -226,7 +225,7 @@ stories:
         origin: walkdown
         retired: >-
           Its statement is about which of two files answers, and there is one file now (ADR 0003, accepted 2026-09-11): a reader consults ~/.walkdown/registry.yml and nothing else, a committed .walkdown/config.yml is a manifest that only `walkdown import` reads, and no `.walkdown` is ever found by walking. Every mechanism this rule named - the nearest-and-stop walk, the merge with the personal file, the crossing guard on both files - was deleted at step 3 of that ADR, after n-0275 showed a symlink walking through the guard on the read side while the write side refused the same path. The half that survives - no inference, nothing merely lying nearby is a project - is locations.answer.declared-not-discovered; what replaces the boundary is locations.answer.registry-is-the-only-door.
-        statement: "walkdown reads only two places for the directory you are in: the nearest `.walkdown` at or above it, and your personal `~/.walkdown`. A neighbouring checkout's blueprints are never taken for yours, but a blueprint registered with `walkdown import` is reachable from anywhere."
+        statement: "Exactly one `.walkdown` directory answers for where you are standing - the nearest one at or above you - and it is merged with the personal `~/.walkdown` and with nothing else. What that forbids is INFERENCE - walkdown never works out from the tree that a neighbouring checkout's blueprints are yours, so a pack carrying its own `.walkdown` never sees the repository root's and the root's never sees the pack's. It does not forbid breadth - a blueprint you named yourself, with `walkdown import`, is reachable from anywhere, because you said so and nothing was guessed."
         verify: [checks]
         signoff: [eng, product]
         steps:
@@ -312,8 +311,7 @@ stories:
         origin: prd
         retired: >-
           The rule was about records found INSIDE a blueprint - `blueprint/runs/`, the layout every project had before homes - outranking a blanket default. That layout is not read any more: every blueprint walkdown answers for is declared, lives in a home, and its entry names the records or the home they derive from, so there is no directory for the resolver to discover and nothing for a preference to give way to (2026-09-04, Topher's call to remove legacy support entirely). What survives of it is locations.keeping.moving-is-a-decision: relocating records is still something a person does, never something a default does to them.
-        statement: A default location never overrides a directory that already holds a blueprint's records. The existing directory wins, and moving those records is a decision a person makes.
-        because: An existing directory is a fact and a default is only a preference.
+        statement: A blanket default never points past records a blueprint already holds - an existing directory is a fact and a default is a preference, so the preference gives way and moving those records stays a decision somebody makes.
         verify: [checks]
         steps:
           given:
