@@ -1,0 +1,34 @@
+{
+  "run_id": "2026-09-15T02-35-01Z-local-01",
+  "created": "2026-09-15T02:35:01Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "80c9abf-dirty",
+  "spec_hash": "sha256:42b7ec7ed988",
+  "results": [
+    {
+      "rule": "threads.conversation.one-stream",
+      "status": "fail",
+      "statement_hash": "sha256:ac7dee24993b",
+      "evidence": [
+        "runs/evidence/2026-09-15T02-35-01Z/one-stream-embed-popover-n-0313-top.png",
+        "runs/evidence/2026-09-15T02-35-01Z/one-stream-embed-popover-after-click-n-0309.png",
+        "runs/evidence/2026-09-15T02-35-01Z/one-stream-embed-popover-n-0313-hover-cont.png",
+        "runs/evidence/2026-09-15T02-35-01Z/one-stream-embed-popover-probe.json",
+        "runs/evidence/2026-09-15T02-35-01Z/one-stream-panel-rule-detail-collapsed.png",
+        "runs/evidence/2026-09-15T02-35-01Z/one-stream-panel-thread-n-0294.png",
+        "runs/evidence/2026-09-15T02-35-01Z/one-stream-panel-thread-n-0133-from-ref.png",
+        "runs/evidence/2026-09-15T02-35-01Z/one-stream-panel-after-rule-ref-click.png",
+        "runs/evidence/2026-09-15T02-35-01Z/one-stream-panel-thread-n-0313-from-pin.png",
+        "runs/evidence/2026-09-15T02-35-01Z/one-stream-panel-probe.json",
+        "runs/evidence/2026-09-15T02-35-01Z/one-stream-source-check.txt"
+      ],
+      "reasoning": "Judged 2026-09-15 on the scratch copy judge-0915 at :4730, in both deliveries, with two position-pinned fixtures filed on the copy's stand-in review page (n-0309, and n-0313 whose body names n-0309, n-0133, a rule id and an evidence key, with line breaks, plus three replies). The n-0294 fix holds for what it claims: beside the pin, n-0309 is a live ref that swaps the popover to that pin beside its own dot, the evidence key is a real link the server answers with 200 image/png, nothing dead is left to click, and the popover stays inside the viewport. Everything else the statement claims holds in both deliveries from the one shared lib/message-stream.js: collapsed rows are the first message with face, name, time and text, and faces, reply count and last-touched underneath, on one surface with a 1px hairline and no card, radius, shadow or rail; every message is who/when/what with the opening note one of them; a same-author same-via follow-up within five minutes drops name and tile and shows its time on hover (visibility hidden to visible, measured), a change of via starts a new run, n-0133 groups a 4m26s gap and not a 5m00s one; two line breaks and a blank-line paragraph survive; n-0133 draws Aug 31, Sep 1 and Sep 2 dividers; in the panel n-0133 opened from a message, a rule id opened its detail, and the dot in the framed app opened n-0313. FAIL narrowly on the last THEN, beside the pin only: a rule id and a thread id not pinned on that page are put back to plain words by design (src/embed/index.js:446, and checks/embed.spec.js asserts it), which is the same observable n-0294 named, while the statement still says such ids are links to the thing they name and was not amended; the panel has no URL that opens a rule or thread, so either a link out or a narrower statement is a person's call, filed as n-0297. Aside, not in the verdict: a thread id in prose is a link-hover button in the prose colour with no underline at rest, so it cannot be told from text until hovered.",
+      "threads": [
+        "n-0297"
+      ]
+    }
+  ]
+}

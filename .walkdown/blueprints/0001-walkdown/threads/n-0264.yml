@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-09T13:36:17.440Z
 anchor:
   rule: status.derived.verdict-belongs-to-a-place
-status: open
+status: settled
 body: >-
   A run recorded against the wrong address is discarded in silence - it lints,
   it validates, and it fills no cell.
@@ -52,4 +52,11 @@ replies:
 
       - "...the record with no CREATED field is called out for filling no
       cell..."
+  - author: topher
+    via: agent
+    created: 2026-09-15T02:37:12Z
+    body: "lint now warns: recorded against <addr>, and target local points at
+      <addr> - a verdict belongs to a place, so this record fills no cell. One
+      historic run (2026-08-25T21-25-43Z, :4712) shows it today. Dropping the
+      run stays the rule; the silence is gone."
 reason: observation

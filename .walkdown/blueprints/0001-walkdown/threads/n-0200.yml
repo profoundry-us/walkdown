@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-05T23:46:21.549Z
 anchor:
   rule: status.derived.verdict-belongs-to-a-place
-status: open
+status: settled
 body: >-
   The judge prompt hands every judge `base_url: http://localhost:4700` and, in
   the same breath, tells it to serve its scratch copy on a port of its own. A
@@ -50,3 +50,12 @@ body: >-
   rule is judged on a port that is not the declared one, by an agent following
   instructions.
 reason: observation
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-15T02:37:12Z
+    body: "The prompt now says it: keep base_url exactly as printed (the target
+      address), say the port you drove in reasoning, or the record lints clean
+      and fills no cell. bin/commands/judge.js, GOVERNANCE block. Lint also now
+      warns on a run recorded at an address its target does not point at
+      (n-0264), so the trap has a sign at both ends."

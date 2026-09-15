@@ -1,0 +1,29 @@
+{
+  "run_id": "2026-09-15T02-25-36Z-local-01",
+  "created": "2026-09-15T02:25:36Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "80c9abf-dirty",
+  "spec_hash": "sha256:42b7ec7ed988",
+  "results": [
+    {
+      "rule": "panel.delivery.stale-copy-says-so",
+      "status": "pass",
+      "statement_hash": "sha256:5ba123b01d1c",
+      "evidence": [
+        "runs/evidence/2026-09-15T02-25-36Z/probe.txt",
+        "runs/evidence/2026-09-15T02-25-36Z/stale-1440.png",
+        "runs/evidence/2026-09-15T02-25-36Z/stale-1280.png",
+        "runs/evidence/2026-09-15T02-25-36Z/stale-1024.png",
+        "runs/evidence/2026-09-15T02-25-36Z/stale-912.png",
+        "runs/evidence/2026-09-15T02-25-36Z/stale-900.png",
+        "runs/evidence/2026-09-15T02-25-36Z/current-1280.png",
+        "runs/evidence/2026-09-15T02-25-36Z/no-hash-1280.png"
+      ],
+      "reasoning": "Judged on the scratch copy at :4730, with the extension-delivery fixture (checks/fixtures/extension.html, served from a static host on :4761) pretending to be build deadbeef against the copy's panel. The bar shows a red dashed badge 'Stale — reload the extension' beside the walkdown logo, whose title names the full fix (reload the extension at chrome://extensions, then reload the page). Measured with Playwright, not just queried: at 1440, 1280 and 1024 the badge spans x 126–332 with scrollWidth equal to clientWidth (203) and sits wholly inside the left cluster's clip edge (584, 504, 376), so the words read whole — the n-0292 clipping at 1280 is gone. The cluster's cap (calc(50% - 8.5rem)) only reaches the badge below ~912px, where 900 reads 'reload the extensio'; that is under any laptop width and the fix is still legible. The negatives hold: with build set to the server's own panelHash (240759eb97d4) the badge is absent, and with no build hash at all (the script-tag delivery's shape) it is absent too. During the sitting the served panel.js was rebuilt under me (panelHash 2a180ff91d26 -> 240759eb97d4) and a hash that had matched became stale — the badge appeared for exactly the reason the rule exists. One side observation, not this rule's failure: at 1280 with the badge present, the cluster cap clips the screen picker to its icon, since the badge never gives way.",
+      "threads": []
+    }
+  ]
+}

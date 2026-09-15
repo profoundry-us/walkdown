@@ -1,0 +1,31 @@
+{
+  "run_id": "2026-09-15T02-27-40Z-local-01",
+  "created": "2026-09-15T02:27:40Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "80c9abf-dirty",
+  "spec_hash": "sha256:42b7ec7ed988",
+  "results": [
+    {
+      "rule": "panel.walkdown.pass-verifies-feedback",
+      "status": "fail",
+      "statement_hash": "sha256:b22e4b1fad97",
+      "evidence": [
+        "runs/evidence/2026-09-15T02-27-40Z/01-signing.png",
+        "runs/evidence/2026-09-15T02-27-40Z/02-rule-detail-in-session.png",
+        "runs/evidence/2026-09-15T02-27-40Z/03-pass-verifies-block.png",
+        "runs/evidence/2026-09-15T02-27-40Z/04-control-rule-no-block.png",
+        "runs/evidence/2026-09-15T02-27-40Z/05-after-pass.png",
+        "runs/evidence/2026-09-15T02-27-40Z/06-finish-toast.png",
+        "runs/evidence/2026-09-15T02-27-40Z/probe.json",
+        "runs/evidence/2026-09-15T02-27-40Z/threads-after-finish.txt"
+      ],
+      "reasoning": "Judged on the scratch copy at :4730, driven by Playwright at 1400x900 with the same states looked at in the in-app browser. Staged three addressed notes on the built rule panel.signoff.approved-recorded: my feedback n-0311, an agent finding n-0312, and my request n-0325. In a sitting the detail drew detail.pass-verifies between detail.feedback (bottom 461px) and detail.verdict (top 537px), named n-0311 by id with only its first line, left out the finding, and drew no block on panel.walkdown.fail-requires-why, which carries no answered note of mine. Pass then Finish produced a toast naming the run 2026-09-15T02-30-32Z-local-01 and the two threads verified (n-0311, n-0312), matching the copy's files. It fails on the statement's own words: the block also listed n-0325 as a note the pass would verify, and the pass did not - the request stayed addressed and the toast never named it, because the panel filters by feedback|request while the door closes feedback|finding. Filed as finding n-0296.",
+      "threads": [
+        "n-0296"
+      ]
+    }
+  ]
+}

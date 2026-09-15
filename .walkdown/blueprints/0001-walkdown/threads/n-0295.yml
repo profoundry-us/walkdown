@@ -1,0 +1,38 @@
+id: n-0295
+kind: note
+reason: finding
+author: agent
+created: 2026-09-15T02:25:02.580Z
+anchor:
+  rule: threads.lifecycle.says-why-it-exists
+status: addressed
+body: "An empty reason files a note that says nothing about why it exists, and a
+  machine's becomes the person's feedback. Judged on the scratch copy at :4730.
+  `walkdown thread new --reason \"\"` (CLI) and POST /api/threads with `reason:
+  \"\"` both file a note with NO reason field: openThread's `reason ??
+  defaultReason(...)` keeps the empty string, and the vocabulary check is
+  skipped because `why` is falsy. A person's note then lands reason-less (n-0302
+  on the copy) and is read as feedback only by the legacy fallback. Worse, an
+  agent's: `--as-agent --reason \"\"` filed n-0310 authored under the person
+  with `via: agent` and no reason - readers treat it as feedback, so a machine's
+  note enters the person's verify queue signed by the person, exactly the mark
+  the rule says a machine's note must not carry. Same through the API (n-0318 on
+  the copy). Whitespace-only `--reason '   '` IS refused, so the gap is the
+  empty string alone; a script passing `--reason \"$REASON\"` with it unset
+  walks through. Every other case held: known words carried as given, bogus and
+  Finding refused, question-with-reason refused, finding/observation authored
+  agent with no via, decision filed recorded and refused three transitions out.
+  Two smaller things seen in passing: the CLI refuses with an uncaught stack
+  trace rather than a sentence, and its --json echo says `by: <person>` for a
+  finding whose file says `author: agent`. Evidence:
+  runs/evidence/2026-09-15T02-24-47Z/probe-cli-blank-reason-and-recorded.txt,
+  runs/evidence/2026-09-15T02-24-47Z/probe-api-threads.txt (A7),
+  runs/evidence/2026-09-15T02-24-47Z/probe-cli-records-on-disk.txt (n-0302)."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-15T02:37:13Z
+    body: 'An empty or blank reason is now unsaid: lib/writes.js trims it and lets
+      the default answer, so --as-agent --reason "" files an observation
+      authored agent with no via, on both doors. test/thread-reasons.test.js
+      covers the blank case for a machine and for a person.'

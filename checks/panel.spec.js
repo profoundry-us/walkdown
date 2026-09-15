@@ -2472,6 +2472,15 @@ test('a pass verifies the answered feedback on the rule, and says so first', {
     data: { kind: 'note', body: 'Not fixed yet.', anchor: { rule } },
   });
   const open = (await still.json()).id;
+  // And an answered request: a person's to verify from its own screen, so
+  // the block must not promise it (n-0296).
+  const asked = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
+    data: { kind: 'note', body: 'Could the design show this?', anchor: { rule }, reason: 'request' },
+  });
+  const request = (await asked.json()).id;
+  expect((await page.request.post(`${WD_ORIGIN}/api/threads/${request}/status?bp=blueprint`, {
+    data: { status: 'addressed', via: 'agent', reason: 'Drawn.' },
+  })).ok()).toBeTruthy();
 
   // Opened after the filing, so the panel is reading the threads as they are.
   await review(page);
@@ -2483,6 +2492,7 @@ test('a pass verifies the answered feedback on the rule, and says so first', {
   await expect(says).toBeVisible();
   await expect(says).toContainText(id);
   await expect(says).not.toContainText(open);
+  await expect(says).not.toContainText(request);
   await expect(says).toContainText(/Pass verifies 1 answered note/);
 
   await page.getByTestId('detail.verdict').locator('button').first().click();
@@ -2506,4 +2516,47 @@ test('a pass verifies the answered feedback on the rule, and says so first', {
   expect(closed.verified_via).toMatch(/\S/);
   expect(closed.replies.at(-1).via).toBe('verdict');
   expect(after.find((t) => t.id === open).status).toBe('open');
+  expect(after.find((t) => t.id === request).status).toBe('addressed');
+});
+
+/*
+ * One claimant is never the reason a chooser is shown - the panel opens a
+ * lone claimant unasked - so a project holding two blueprints of which one
+ * claims the page asks the "which of several" question, not "1 blueprints in
+ * this project claim this page ... rather than choosing for you" (n-0293).
+ */
+test('a project with one claimant among several is asked the several question, in the singular', {
+  tag: '@rule:panel.start.choose-a-blueprint',
+}, async ({ page }) => {
+  // A second blueprint in THIS project, claiming nothing: the project's
+  // lone claimant opens unasked at start, and picking the project again
+  // from the switcher is what puts the chooser up.
+  let keys = [];
+  await page.route('**/api/blueprint*', async (route) => {
+    const res = await route.fetch();
+    const body = await res.json();
+    if (Array.isArray(body.blueprints) && body.blueprints.length) {
+      const mine = body.blueprints[0];
+      keys = [mine.key];
+      body.blueprints.push({ ...mine, id: 'sibling', key: `${mine.key}-sibling`, name: 'sibling' });
+    }
+    await route.fulfill({ response: res, json: body });
+  });
+  await page.route(/\/api\/whose(\?|$)/, async (route) => {
+    const url = new URL(route.request().url()).searchParams.get('url');
+    await route.fulfill({ json: { url, matches: keys.map((key) => ({ id: key, key, name: key, screen: 'review' })) } });
+  });
+  await review(page);
+  await page.getByTestId('panel.project').click();
+  await page.getByTestId('project.list').locator('[data-project]').first().click();
+
+  // Two to choose from, one marked as claiming - and the reason given is
+  // that there are two, never a count of one presented as a refusal to pick.
+  expect(await page.getByTestId('start.options').locator('[data-pick]').count()).toBeGreaterThan(1);
+  await expect(page.getByTestId('start.options').locator('[data-pick][data-claims]')).toHaveCount(1);
+  const notice = page.getByTestId('start.notice');
+  await expect(notice).toContainText(/holds more than one blueprint/);
+  await expect(notice).not.toContainText(/1 blueprints/);
+  await expect(notice).not.toContainText(/choosing for you/);
+  await page.unrouteAll({ behavior: 'ignoreErrors' });
 });

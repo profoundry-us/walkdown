@@ -83,6 +83,14 @@ test('a note says why it exists, and the machine signs its own @rule:threads.lif
     assert.throws(() => openThread(p.load(), { kind: 'question', body: 'x?', anchor: { rule: RULE }, reason: 'feedback' }), /question carries no reason/);
     const q = openThread(p.load(), { kind: 'question', body: 'x?', anchor: { rule: RULE } });
     assert.equal(q.thread.reason, undefined);
+    // An empty reason is no reason: the default answers, and a machine's
+    // note still signs as the machine (n-0295).
+    const blank = openThread(p.load(), { kind: 'note', body: 'blank', anchor: { rule: RULE }, via: 'agent', reason: '  ' });
+    assert.equal(blank.thread.reason, 'observation');
+    assert.equal(blank.thread.author, 'agent');
+    assert.equal(blank.thread.via, undefined);
+    const blankPerson = openThread(p.load(), { kind: 'note', body: 'blank', anchor: { rule: RULE }, reason: '' });
+    assert.equal(blankPerson.thread.reason, 'feedback');
   } finally {
     p.cleanup();
   }

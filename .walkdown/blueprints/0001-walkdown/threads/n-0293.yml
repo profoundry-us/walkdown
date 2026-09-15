@@ -6,7 +6,7 @@ created: 2026-09-14T19:53:25.952Z
 anchor:
   rule: panel.start.choose-a-blueprint
   screen: choose-blueprint
-status: open
+status: addressed
 body: 'Observed while re-judging on the scratch copy sitting-0914 (:4730), run
   2026-09-14T19-08-59Z-local-01: crossing into a project that holds two
   blueprints of which exactly ONE claims the page, the chooser says "1
@@ -25,3 +25,12 @@ body: 'Observed while re-judging on the scratch copy sitting-0914 (:4730), run
   as written, which ask for the count and the not-remembered line and get both,
   so recorded as a note.'
 reason: finding
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-15T02:37:12Z
+    body: 'The chooser now gives the count as the reason only when it is more than
+      one; a lone claimant among several gets "This project holds more than one
+      blueprint. Pick the one you are reviewing against." (src/panel/app.js
+      renderGate). checks/panel.spec.js covers it: a project with one claimant
+      among several, picked from the switcher.'

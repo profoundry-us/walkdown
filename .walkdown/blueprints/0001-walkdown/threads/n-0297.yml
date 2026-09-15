@@ -1,0 +1,49 @@
+id: n-0297
+kind: note
+reason: finding
+author: agent
+created: 2026-09-15T02:35:24.023Z
+anchor:
+  rule: threads.conversation.one-stream
+status: open
+body: "Re-judged 2026-09-15 after the n-0294 fix, on the scratch copy judge-0915
+  at :4730. The fix holds for everything its reply claims: beside a pin on the
+  standalone stand-in, a fixture (n-0313 in the copy, position-pinned, no
+  element) opens in the popover with the other pin's id n-0309 as a live ref
+  that swaps the popover to that pin beside its own dot, an evidence key as a
+  real <a> to /evidence/<key> (target _blank; the server answers 200 image/png),
+  and nothing dead to click; the popover sits inside the viewport. FAIL,
+  narrowly, on the last THEN and only beside the pin: a rule id written in a
+  message (threads.conversation.append-only) and a thread id not pinned on that
+  page (n-0133) are put back to the words the author typed
+  (src/embed/index.js:446, ref.replaceWith) - which is the same observable
+  n-0294 named ('the rule id as plain prose') - and checks/embed.spec.js now
+  asserts [data-rule-ref] has count 0 there, so the code and the statement
+  disagree in one spot and the statement was not amended. In the panel the same
+  message links every one of them (n-0133 opened from n-0294's body;
+  threads.conversation.append-only opened the rule detail; n-0313 opened from
+  its dot in the framed app). The panel has no URL that opens a rule or a
+  thread, so a link out from the standalone popover (the way the evidence key
+  goes out to a new tab) would be new work; the other resolution is to say in
+  the statement that beside a pin an id is a link only where that surface can
+  open it. Either is a person's call, and the rule cannot read as met until one
+  of them lands. Everything else holds in both deliveries from the one shared
+  renderer (lib/message-stream.js): collapsed rows are the first message with
+  face, name, time, text, and faces, '1 reply' and 'Last reply today at 6:11 PM'
+  underneath, on one surface with a 1px 10% hairline and no card, radius, shadow
+  or rail; every message is who/when/what and the opening note is one of them; a
+  follow-up from the same author and via within five minutes drops name and tile
+  and shows its time on hover (visibility hidden -> visible measured, both
+  deliveries; a change of via starts a new run; n-0133 groups a 4m26s gap and
+  not a 5m00s one); two line breaks and a blank-line paragraph survive as <br>
+  and <p>; n-0133 draws Aug 31 / Sep 1 / Sep 2. One aside outside the verdict: a
+  thread id in prose is a link-hover button in the prose colour with no
+  underline at rest, so it reads as plain text until hovered, while rule ids and
+  evidence keys are washed blue; deliberate since 6f92272, but a reader cannot
+  tell n-0309 is clickable by looking. Evidence:
+  runs/evidence/2026-09-15T02-35-01Z/one-stream-embed-popover-n-0313-top.png,
+  runs/evidence/2026-09-15T02-35-01Z/one-stream-embed-popover-after-click-n-030\
+  9.png, runs/evidence/2026-09-15T02-35-01Z/one-stream-embed-popover-probe.json,
+  runs/evidence/2026-09-15T02-35-01Z/one-stream-panel-thread-n-0313-from-pin.pn\
+  g, runs/evidence/2026-09-15T02-35-01Z/one-stream-panel-probe.json,
+  runs/evidence/2026-09-15T02-35-01Z/one-stream-source-check.txt"
