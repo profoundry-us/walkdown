@@ -7,7 +7,7 @@ created: 2026-09-15T16:38:09.178Z
 anchor:
   rule: threads.conversation.one-stream
   screen: thread-panel
-status: open
+status: addressed
 body: "Topher, 2026-09-15, on choosing the routable address for n-0297: an id
   that links out of the popover (and the panel) should probably show a small
   tooltip before you click - a little about the thing it names, the way a PR
@@ -17,3 +17,20 @@ body: "Topher, 2026-09-15, on choosing the routable address for n-0297: an id
   one tooltip would serve both. Filed as a design request rather than built:
   what the card holds, and whether it is a hover or a focus affordance, is a
   design decision."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-15T17:37:21Z
+    body: "Built: one card, shared by the panel and the embed through
+      MSG.hoverCards, shown under the cursor after a short rest and at once
+      under keyboard focus (both, since a pointer and a keyboard owe the same
+      answer; Escape takes it away). A rule shows its id, verdict chip,
+      statement and open-thread count; a thread its id, reason and status chips,
+      author with `via`, age, reply count and the first paragraph as plain
+      words. A link that leaves the page says so in the card foot, and the embed
+      no longer sets a browser title on it. Read from the board at show time, so
+      it says what is true now. Spec: a new then-step on
+      threads.conversation.one-stream (hash re-stamped), checked in
+      checks/panel.spec.js and checks/embed.spec.js, unit-tested in
+      test/message-stream.test.js. Not done: a thread filed from the embed after
+      the page loaded has no card until the blueprint is fetched again."

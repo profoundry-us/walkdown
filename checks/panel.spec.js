@@ -2596,3 +2596,58 @@ test("walkdown's own address opens the rule or thread it names, once", {
   await expect(page.locator('.toast', { hasText: 'No rule no.such.rule here' })).toBeVisible();
   await expect.poll(() => page.locator('.wdp-track').evaluate((el) => el.style.transform)).toMatch(/translateX\(0%\)/);
 });
+
+/*
+ * n-0298: an id in a message says what it names before you follow it - a
+ * card under the cursor, and under keyboard focus, with the rule's statement
+ * and verdict or the thread's status, author and first line. Read at show
+ * time from the board, so it says what is true now.
+ */
+test('an id in a message previews what it names, under the cursor and under focus', {
+  tag: '@rule:threads.conversation.one-stream',
+}, async ({ page }) => {
+  const { rows, threads } = await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json();
+  const about = rows.find((r) => r.rule === 'threads.conversation.one-stream');
+  // Any thread whose opening line is plain prose, so the card's first line
+  // is the body's first words verbatim.
+  const other = threads.find((t) => t.anchor?.rule && /^[A-Z][a-z][^`*_[\n]{40}/.test(t.body ?? ''));
+  const res = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
+    data: {
+      kind: 'note',
+      body: `See ${other.id} and ${about.rule} before answering.`,
+      anchor: { rule: about.rule, screen: 'thread-panel' },
+    },
+  });
+  expect(res.ok()).toBeTruthy();
+  const { id } = await res.json();
+
+  await page.goto(`${WD_ORIGIN}/?bp=blueprint&thread=${id}`);
+  const body = page.getByTestId('thread.body');
+  await expect(body).toContainText(other.id);
+  const card = page.getByTestId('ref.preview');
+  await expect(card).toBeHidden();
+
+  // Under the cursor: the thread, as it stands.
+  await body.locator(`[data-thread-ref="${other.id}"]`).hover();
+  await expect(card).toBeVisible();
+  await expect(card).toContainText(other.id);
+  await expect(card).toContainText(other.status);
+  await expect(card).toContainText(other.body.slice(0, 30));
+  // The rule: its statement and where its verdict stands.
+  await body.locator(`[data-rule-ref="${about.rule}"]`).hover();
+  await expect(card).toContainText(about.rule);
+  await expect(card).toContainText(about.verdict);
+  await expect(card).toContainText(about.statement.slice(0, 40));
+  // Away from any id, no card.
+  await page.getByTestId('thread.provenance').hover();
+  await expect(card).toBeHidden();
+
+  // Under keyboard focus, the same card; Escape takes it away.
+  await body.locator(`[data-thread-ref="${other.id}"]`).focus();
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Shift+Tab');
+  await expect(card).toBeVisible();
+  await expect(card).toContainText(other.id);
+  await page.keyboard.press('Escape');
+  await expect(card).toBeHidden();
+});

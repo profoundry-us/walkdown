@@ -118,6 +118,11 @@ import { icon } from './icons.js';
   // The key of the blueprint the server answered with, for a link out from a
   // page that never said which one it belongs to.
   let blueprintKey = '';
+  // What the ids in a message name, for the card under the cursor (n-0298):
+  // every rule and every thread the server answered with, not only the pins
+  // on this screen, because a message here can name any of them.
+  let blueprintRows = [];
+  let blueprintThreads = [];
 
   const $anchors = () => [...document.querySelectorAll(`[${ANCHOR_ATTR}]`)];
   const anchorId = (el) => el.getAttribute(ANCHOR_ATTR);
@@ -155,6 +160,13 @@ import { icon } from './icons.js';
   root.style.cssText =
     'position:absolute; top:0; left:0; width:0; height:0; letter-spacing:normal; word-spacing:normal; text-transform:none; font-variant:normal; font-style:normal; text-indent:0; text-shadow:none; white-space:normal; word-break:normal; text-align:left; direction:ltr; text-decoration:none;';
   lr.appendChild(root);
+  // The preview under a reference, shared with the panel: what an id names,
+  // before you follow it out of here (n-0298).
+  MSG.hoverCards(root, {
+    rows: () => blueprintRows,
+    threads: () => blueprintThreads,
+    names: () => MSG.nameMap(identity),
+  });
   (document.body ?? document.documentElement).appendChild(layer);
 
   /*
@@ -468,7 +480,8 @@ import { icon } from './icons.js';
       a.rel = 'noopener noreferrer';
       if (ref.dataset.ruleRef) a.dataset.ruleRef = ref.dataset.ruleRef;
       else a.dataset.threadRef = ref.dataset.threadRef;
-      a.title = `Open ${ref.textContent} in walkdown`;
+      // No title: the card under the cursor says what it is and that it
+      // leaves the page (n-0298), and a browser tooltip on top would fight it.
       ref.replaceWith(a);
     }
     // Open at the newest message, the way you left a conversation - reading a
@@ -919,6 +932,8 @@ import { icon } from './icons.js';
           identity = data.identity ?? null;
           ruleIds = (data.rows ?? []).map((r) => r.rule);
           blueprintKey = data.key ?? '';
+          blueprintRows = data.rows ?? [];
+          blueprintThreads = data.threads ?? [];
           MSG.zone = identity?.timezone ?? null;
           resolve();
         })

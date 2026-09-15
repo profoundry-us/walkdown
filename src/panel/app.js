@@ -38,7 +38,7 @@ import { locationOfUrl, matchScreen } from '../../lib/screen-match.js';
 import { html, live, nothing, render as put } from '../../vendor/lit.js';
 import { blueprintsPane, serverRow } from './blueprints.js';
 import { blueprintsOf, projectIdOf, projectModal } from './projects.js';
-import { loadSeen, markSeen, openThreadView, postRuleNote, sayVerdict } from './conversation.js';
+import { loadSeen, markSeen, names, openThreadView, postRuleNote, sayVerdict } from './conversation.js';
 import { DESK_DEFAULTS, DESK_KEY, drawDesk } from './desk.js';
 import { icon } from './icons.js';
 import { checkRefs, detailPane, evidenceRows, loadCheckSource } from './rule-detail.js';
@@ -3002,6 +3002,13 @@ function wireGlobals() {
     if (th?.anchor?.rule)
       selectRow(S.data.rows.find((r) => r.rule === th.anchor.rule) ?? S.selected);
     openThreadView(id);
+  });
+  // And under the cursor, before the click: what the id names (n-0298).
+  // Read from state at show time, so a card never describes a stale row.
+  MSG.hoverCards(D.host, {
+    rows: () => S.data?.rows ?? [],
+    threads: () => S.data?.threads ?? [],
+    names,
   });
 
   document.addEventListener(

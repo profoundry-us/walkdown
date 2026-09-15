@@ -189,7 +189,8 @@ stories:
             - The two deliveries render a thread the same way, from one shared implementation rather than two lookalikes
             - Thread and rule ids written inside a message are links to the thing they name
             - Beside a pin, an id the popover cannot open itself links out to walkdown's own page at that thing's address, in a new tab - never a link that does nothing
-          statement_hash: sha256:6da491b71591
+            - Before you follow an id, it says what it names - under the cursor or keyboard focus, a card with the rule's statement and verdict, or the thread's status, author, age and first line, and whether the link leaves the page
+          statement_hash: sha256:d3d0b129a2e7
           reworded:
             - hash: sha256:e58134b3796f
               at: 2026-09-13

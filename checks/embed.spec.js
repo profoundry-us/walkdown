@@ -476,6 +476,25 @@ test('beside the pin, an id is a link only where the popover can open it', {
   const away = popover.locator('[data-thread-ref="n-0001"]');
   await expect(away).toHaveJSProperty('tagName', 'A');
   await expect(away).toHaveAttribute('href', new RegExp(`^${WD_ORIGIN}/\\?bp=.*&thread=n-0001$`));
+  // Before the click, under the cursor: what the id names, and that the
+  // link leaves (n-0298) - the rule's statement and verdict, the thread's
+  // status, author and first line. A pin this popover can open itself
+  // gets the same card, without the leaving line.
+  const card = chrome.locator('[data-testid="ref.preview"]');
+  await ruleRef.hover();
+  await expect(card).toBeVisible();
+  await expect(card).toContainText('threads.conversation.one-stream');
+  await expect(card).toContainText('one stream');
+  await expect(card).toContainText('Opens in walkdown');
+  await away.hover();
+  await expect(card).toContainText('n-0001');
+  await expect(card.locator('.badge')).not.toHaveCount(0);
+  await expect(card).toContainText('Opens in walkdown');
+  await popover.locator(`[data-thread-ref="${first}"]`).hover();
+  await expect(card).toContainText('The first pin, referred to by the second.');
+  await expect(card).not.toContainText('Opens in walkdown');
+  await popover.locator('h3, .wd-stream').first().hover();
+  await expect(card).toBeHidden();
   // And the address the link names opens the thing: the panel, on that rule.
   const ruleHref = await ruleRef.getAttribute('href');
   const there = await page.context().newPage();
