@@ -104,4 +104,13 @@ replies:
       Worth noting for whatever the fix turns out to be: the isolation that
       failed was not the weak kind. It was every isolation this repo currently
       has.
+  - author: topher
+    via: agent
+    created: 2026-09-15T02:37:12Z
+    body: "One of the three landed: the judge prompt now tells every judge to GET
+      /api/blueprint on the origin it is driving and confirm the project it
+      names is its copy before trusting any page (bin/commands/judge.js). The
+      other two - whether the prompt hands out a port, and whether the shared
+      browser pane can be defended against at all - are still yours; left open
+      for that."
 reason: observation

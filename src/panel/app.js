@@ -2802,7 +2802,10 @@ function renderGate() {
     </div>
     <div class="flex-1 overflow-y-auto">${blueprintsPane({
       server: false,
-      notice: claimed
+      // One claimant is never the reason: the panel opens that one unasked
+      // (n-0293), so the question here is which of the project's several -
+      // the same sentence as none claiming (n-0273).
+      notice: claimed > 1
         ? `${claimed} blueprints in this project claim this page. Nothing is remembered — walkdown asks each time rather than choosing for you.`
         : 'This project holds more than one blueprint. Pick the one you are reviewing against.',
     })}</div>`,

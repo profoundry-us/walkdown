@@ -221,9 +221,10 @@ async function postNote(button, rule) {
  * read, and the rule is what you are judging.
  */
 function passVerifies(rule) {
-  const mine = threadsFor(rule).filter(
-    (t) => t.status === 'addressed' && ['feedback', 'request'].includes(t.reason ?? 'feedback'),
-  );
+  // Feedback only - what the door actually closes on a pass. A request is
+  // a person's to verify from its own screen, and listing it here promised
+  // an acceptance the ledger never made (n-0296).
+  const mine = threadsFor(rule).filter((t) => t.status === 'addressed' && (t.reason ?? 'feedback') === 'feedback');
   if (!mine.length) return nothing;
   return html`<div class="rounded-box border border-success/40 bg-success/5 px-2 py-1.5 text-[11.5px]" data-testid="detail.pass-verifies">
     <div class="${LBL} mb-0.5">Pass verifies ${mine.length} answered note${mine.length === 1 ? '' : 's'} of yours</div>

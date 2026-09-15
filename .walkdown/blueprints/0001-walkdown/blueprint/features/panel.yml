@@ -480,7 +480,8 @@ stories:
             - Clicking starts it, clicking again stops it - there is no second place to look
             - The button wears the state as its own icon, colour for on and drained for off, rather than a badge pinned to it
             - Server and blueprint are chosen in the panel, not in browser chrome
-          statement_hash: sha256:b95edcaea474
+            - On a tab with no page to review, the click opens the running walkdown server at its standard port - its root, where a project is picked - and when none answers, a page of the extension's own says so; the click is never silent
+          statement_hash: sha256:2a7b364ef850
           reworded:
             - hash: sha256:84bda3b30c1d
               at: 2026-09-13
@@ -797,18 +798,21 @@ stories:
         screens: [rule-detail]
         steps:
           given:
-            - A rule carrying a `because` and a `history`, open in the detail pane on screen `rule-detail`
+            - A rule carrying a because and a history, open in the detail pane on screen `rule-detail`
           when:
             - Reading under anchor `detail.statement`
           then:
             - The reason stands under the statement at anchor `detail.because`, labelled, in a smaller and lighter type than the claim
             - The history stands under that at anchor `detail.history`, labelled, lighter again
             - A rule carrying neither shows neither - no empty label stands in for a sentence nobody wrote
-          statement_hash: sha256:98f006506a44
+          statement_hash: sha256:0736d9aa5027
           reworded:
             - hash: sha256:6549e76ae19b
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:98f006506a44
+              at: 2026-09-15T02:34:55Z
+              why: lint read the backticked field names as screen ids; the words are the same
 
       - id: panel.rules.setup-says-how-to-arrive
         origin: thread:n-0093

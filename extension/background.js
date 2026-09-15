@@ -10,6 +10,9 @@
  */
 const REVIEWS = 'walkdown:reviews'; // tabId -> the url being reviewed
 const RULE_BASE = 9000; // one session rule per reviewed tab
+// The standard port - what `walkdown serve` and boot.js assume - and the only
+// address a click on a page-less tab can try, since nothing has asked yet.
+const SERVER = 'http://localhost:4700';
 
 const httpOrigin = (url) => {
   try {
@@ -85,7 +88,7 @@ async function paint(tabId, url) {
         ? 'walking this page down — click to go back to it'
         : here
           ? `walkdown — click to walk ${here.origin} down`
-          : 'walkdown runs on http and https pages',
+          : `walkdown reviews web pages — click to open a running walkdown server (${SERVER})`,
     });
   } catch {
     // the tab went away mid-flight; nothing to paint
@@ -104,7 +107,20 @@ chrome.action.onClicked.addListener(async (tab) => {
     return chrome.tabs.update(tab.id, { url: back });
   }
   const here = httpOrigin(tab.url);
-  if (!here) return;
+  /*
+   * No page to review - a blank tab, the browser's own pages. The click
+   * used to do nothing at all, and a switch that does nothing on a click has
+   * to say why somewhere (n-0284). With nothing to frame, it opens the
+   * running walkdown server instead: its root is the project modal over the
+   * desk, pick a project and it takes you to a page it claims. No server
+   * answering is said on a page of the extension's own, not swallowed.
+   */
+  if (!here) {
+    const up = await fetch(`${SERVER}/api/blueprint`, { signal: AbortSignal.timeout(1500) })
+      .then((r) => r.ok)
+      .catch(() => false);
+    return chrome.tabs.update(tab.id, { url: up ? `${SERVER}/` : chrome.runtime.getURL('no-page.html') });
+  }
   reviews[tab.id] = tab.url;
   await writeReviews(reviews);
   await allowFraming(tab.id, true);

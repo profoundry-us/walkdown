@@ -6,7 +6,7 @@ created: 2026-09-11T02:26:16.249Z
 anchor:
   rule: panel.start.which-project
   screen: project-modal
-status: open
+status: addressed
 body: >-
   The modal's dim is not dim: the scrim paints nothing at all, because the theme
   variables are out of scope where it renders.
@@ -120,4 +120,10 @@ replies:
       draws bg-base-300/70, so the design and the build now disagree on the
       backdrop. Filed separately as a design request - prototype/ is design's to
       change.
+  - author: topher
+    via: agent
+    created: 2026-09-15T02:37:11Z
+    body: "Marking what the reply above already says: the scrim was removed in
+      favour of the blur (src/panel/projects.js), measured then and unchanged
+      since. Nothing further to do here."
 reason: observation

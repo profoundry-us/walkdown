@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-09-15T02-26-54Z-local-01",
+  "created": "2026-09-15T02:26:54Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "80c9abf-dirty",
+  "spec_hash": "sha256:42b7ec7ed988",
+  "results": [
+    {
+      "rule": "threads.conversation.written-in-markdown",
+      "status": "pass",
+      "statement_hash": "sha256:de2e900e6c17",
+      "evidence": [
+        "runs/evidence/2026-09-15T02-26-54Z/written-in-markdown-thread-body.png",
+        "runs/evidence/2026-09-15T02-26-54Z/written-in-markdown-panel.png",
+        "runs/evidence/2026-09-15T02-26-54Z/written-in-markdown-after-ref-click.png",
+        "runs/evidence/2026-09-15T02-26-54Z/written-in-markdown-probe.txt"
+      ],
+      "reasoning": "Judged on the scratch copy at :4730 (judge-0915), with the classic panel loaded through the checks/fixtures extension.html shell on :4742 pointed at wd=:4730. Filed thread n-0308 on the copy carrying a list, a code span holding n-0002, prose refs n-0001/n-0003, https and http links, an ATX and a setext heading, javascript:/mailto:/file: links plus a reference-style javascript link, an <img onerror>, <script>, <style>, an <a onclick>, an <iframe>, a style= span, a link whose text and address both carry ids, and three plain lines. Opened it on thread-panel and measured thread.body: three <li> in one <ul> and one <code> span, with no '- first', backtick or '#' left in the text; both web links are <a href> with target=_blank rel=noopener noreferrer and clicking 'the docs' opened https://example.com/docs in a new tab while the panel stayed put; the four non-web links came out as bare words in a <p> (a:not([href]) = 0, text-decoration none, cursor auto, same colour as body) and clicking each changed nothing (no navigation, no dialog, no popup) - the n-0291 unwrap holds; no img/script/style/iframe, no style attribute, no on* attribute survived, no dialog fired, and the page background was untouched by the injected <style>; no h1-h6 exists, both heading texts read as ordinary body-size text; n-0001 and n-0003 in prose are wd-ref buttons and clicking n-0003 opened thread n-0003, while n-0002 inside the code span and n-0004 inside link text stayed plain; the three plain lines are one <p> with <br> between them, measured at y=379/397/415. Two asides, neither a then-step: the two heading blocks lose their markers and run together on one line (marked makes the h1, DOMPurify drops the tag and leaves a bare text node with no paragraph of its own), and the copy's panel bar showed 'Stale server - restart it', which is about the sitting's :4730 process, not the rendering, which happens in the served panel.js bundle that carries the fix.",
+      "threads": []
+    }
+  ]
+}

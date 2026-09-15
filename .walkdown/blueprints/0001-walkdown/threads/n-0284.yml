@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-12T02:04:22.625Z
 anchor:
   rule: panel.delivery.one-switch
-status: open
+status: addressed
 body: "Topher, 2026-09-11: on a blank tab (chrome://newtab), clicking the
   toolbar button does nothing - extension/background.js returns silently when
   the tab has no http(s) origin to frame - and on a real site it works. The
@@ -21,3 +21,15 @@ body: "Topher, 2026-09-11: on a blank tab (chrome://newtab), clicking the
   one\". Either way the given \"on any page\" in this rule and
   absent-until-asked should say what a blank tab does."
 reason: feedback
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-15T02:37:13Z
+    body: Built as you described. On a tab with no http(s) page the toolbar click
+      fetches http://localhost:4700/api/blueprint; if it answers, the tab opens
+      the server root (the project modal over the desk), and if not, a page of
+      the extension (extension/no-page.html) says walkdown reviews web pages,
+      that it looked for a server at :4700, and that walkdown serve starts one.
+      The drained icon title says the same. panel.delivery.one-switch gained a
+      step for it (fresh hash - the claim grew), so it will ask for your
+      sign-off again.

@@ -1,0 +1,27 @@
+<!doctype html>
+<!--
+  Where a click lands when there is no page to review and no server to open:
+  a blank tab, the browser's own pages. The button is the one switch, and a
+  switch that does nothing on a click has to say why somewhere (n-0284).
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>walkdown — nothing to review here</title>
+<style>
+  html { background: #10161f; color: #d6dde6; font: 15px/1.5 system-ui, sans-serif; }
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px; box-sizing: border-box; }
+  main { max-width: 34rem; }
+  h1 { font-size: 17px; margin: 0 0 8px; }
+  p { margin: 0 0 12px; opacity: .85; }
+  code { font: 13px ui-monospace, monospace; background: #1b2430; padding: 2px 6px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Nothing to review here</h1>
+  <p>walkdown reviews web pages: open one and click the button again to walk it down.</p>
+  <p>With no page open, the click looks for a running walkdown server at <code>http://localhost:4700</code> and opens it — pick a project there and it takes you to a page it claims. None is answering right now; <code>walkdown serve</code> in the project starts one.</p>
+</main>
+</body>
+</html>

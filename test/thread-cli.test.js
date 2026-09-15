@@ -253,6 +253,19 @@ test('thread new opens an anchored thread and reports under whom @rule:threads.l
   assert.match(q, /q-0002 opened · question/, 'questions take their own prefix');
 });
 
+test('thread new records an anchor as the element id, never the selector for it', () => {
+  const bp = ruleFixture('new-anchor');
+  // Judges wrote the selector they had been driving, and every such thread
+  // read as anchored to something the storyboard never declared.
+  run(['new', '--rule', 'f.s.rule', '--body', 'x', '--element', '[data-testid="start.connect"]'], bp);
+  const disk = readFileSync(join(threadsOf(bp), 'n-0001.yml'), 'utf8');
+  assert.match(disk, /element: start\.connect$/m);
+  assert.doesNotMatch(disk, /data-testid/);
+  // Anything that is not that one form is kept as typed.
+  run(['new', '--rule', 'f.s.rule', '--body', 'x', '--element', '#by-css > .path'], bp);
+  assert.match(readFileSync(join(threadsOf(bp), 'n-0002.yml'), 'utf8'), /element: "#by-css > \.path"/);
+});
+
 test('thread new refuses an unknown rule, an empty body, and a strange kind', () => {
   const bp = ruleFixture('new-refuse');
   for (const args of [

@@ -1,0 +1,37 @@
+id: n-0296
+kind: note
+reason: finding
+author: agent
+created: 2026-09-15T02:31:25.534Z
+anchor:
+  rule: panel.walkdown.pass-verifies-feedback
+status: addressed
+body: >-
+  Judged on the scratch copy at :4730 (run 2026-09-15T02-27-40Z-local-01). The
+  stepped scenario holds: in a sitting, `detail.pass-verifies` sat between
+  `detail.feedback` and `detail.verdict`, listed my addressed feedback n-0311 by
+  id with its first line only, left out the agent finding n-0312, drew nothing
+  on a rule with no answered note of mine, and the Finish toast named the run
+  and both threads the pass verified (n-0311, n-0312) — evidence
+  runs/evidence/2026-09-15T02-27-40Z/02-rule-detail-in-session.png,
+  06-finish-toast.png, probe.json.
+
+
+  Where it breaks: the block also listed my addressed `request` note n-0325
+  under "Pass verifies 2 answered notes of yours", and the pass did not verify
+  it — the door left it `addressed` and the toast did not name it
+  (runs/evidence/2026-09-15T02-27-40Z/threads-after-finish.txt). The panel
+  builds the block from the waits-on-a-person set (feedback, request) in
+  src/panel/rule-detail.js passVerifies, while lib/vocab.js closesOnVerdict
+  closes only feedback and finding. The block should name exactly what the pass
+  will close; a request note is design's and never closes on a verdict (ADR
+  0005), so listing it is a promise the ledger does not keep.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-15T02:37:13Z
+    body: The block lists feedback only now - what the door closes on a pass. A
+      request stays a person to verify from its own screen and is no longer
+      promised (src/panel/rule-detail.js passVerifies). checks/panel.spec.js
+      stages an addressed request beside the feedback and asserts it is absent
+      from the block and still addressed after Finish.

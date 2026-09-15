@@ -264,6 +264,20 @@ export function run(args) {
     '  - A fail needs a note thread anchored to this rule citing the evidence, filed with',
     '    `--reason finding` (authored agent; it closes on the rule\'s next signed pass); put its id in the result.',
     `  - The ledger is append-only: one new record, at the end, and no record ever edited.`,
+    // n-0200: the record above names the TARGET's address while the copy
+    // is served elsewhere, and a verdict recorded at the copy's port fills
+    // no cell (status.derived.verdict-belongs-to-a-place). Said here, in
+    // the prompt that lays the trap.
+    '  - Keep `base_url` exactly as printed above: it is where the target points, and a verdict',
+    '    belongs to that place. A scratch copy served on another port is still a judgment of this',
+    '    target - say the port you drove in your reasoning, never in `base_url`, or the record',
+    '    lints clean and fills no cell.',
+    // n-0202: two judges on separate ports still read each other's boards
+    // through a shared browser. The board names itself; read it first.
+    '  - Before trusting any page you open, confirm it is yours: GET /api/blueprint on the origin',
+    '    you are driving and check the project it names is your copy. A shared browser can put',
+    '    another judge\'s server in your tab; a verdict earned against the wrong copy is',
+    '    indistinguishable in the record from one earned against the right one.',
     ...governance.flatMap(bullet),
   );
 

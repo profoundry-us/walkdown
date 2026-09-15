@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-09-15T02-47-56Z-local-01",
+  "created": "2026-09-15T02:47:56Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "0e9eeff-dirty",
+  "spec_hash": "sha256:54a6f3b4cdc1",
+  "results": [
+    {
+      "rule": "panel.walkdown.pass-verifies-feedback",
+      "status": "pass",
+      "statement_hash": "sha256:b22e4b1fad97",
+      "evidence": [
+        "runs/evidence/2026-09-15T02-47-56Z/02-rule-detail-in-session.png",
+        "runs/evidence/2026-09-15T02-47-56Z/03-pass-verifies-block.png",
+        "runs/evidence/2026-09-15T02-47-56Z/04-control-rule-no-block.png",
+        "runs/evidence/2026-09-15T02-47-56Z/06-finish-toast.png",
+        "runs/evidence/2026-09-15T02-47-56Z/probe.json",
+        "runs/evidence/2026-09-15T02-47-56Z/threads-after-finish.txt"
+      ],
+      "reasoning": "Re-judge of n-0296 on the scratch copy rejudge-0915 at :4730 (GET /api/blueprint named that copy; the sitting signed as eng scratch-rejudge-0915 after clearing a stale walkdown:identity localStorage entry from an earlier copy on the same origin). Staged on the built rule panel.signoff.approved-recorded: my addressed feedback n-0314 (two-line body), an agent's addressed finding n-0321, and my addressed request n-0315 - the case n-0296 failed on. In the sitting, detail.pass-verifies sat between detail.feedback (bottom 461) and detail.verdict (top 520) at 467-514, headed 'Pass verifies 1 answered note of yours', and listed n-0314 by id with its first line only: the second line, the finding n-0321 and the request n-0315 were all absent (probe.json, 03-pass-verifies-block.png). The control rule panel.walkdown.fail-requires-why, built with no notes of mine, drew no block between its feedback box and verdict buttons. Passing and finishing produced the toast 'Recorded 1 verdict as 2026-09-15T02-46-47Z-local-01 - eng (scratch-rejudge-0915) - verified 2 threads (n-0314, n-0321)', and the copy's ledger shows n-0314 and n-0321 verified by scratch-rejudge-0915 via that run while n-0315 stays addressed (threads-after-finish.txt) - so the block now promises exactly what the pass closes on the person's behalf, which is the fix n-0296's reply claims, and it holds. The toast names the finding n-0321 the block did not list; the statement's third THEN asks that the confirmation name every thread verified, and it does. One aside outside the verdict: the block filters on status and reason only (src/panel/rule-detail.js passVerifies), so another person's addressed feedback on the rule would also be listed under 'of yours' - and the door closes it under the signer too (lib/threads.js closeByVerdict), so block and ledger agree; whether that wording is right is a person's call and not what this rule's steps test.",
+      "threads": []
+    }
+  ]
+}

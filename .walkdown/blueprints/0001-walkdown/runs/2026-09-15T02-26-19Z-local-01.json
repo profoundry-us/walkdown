@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-09-15T02-26-19Z-local-01",
+  "created": "2026-09-15T02:26:19Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "80c9abf-dirty",
+  "spec_hash": "sha256:42b7ec7ed988",
+  "results": [
+    {
+      "rule": "threads.lifecycle.closes-where-it-was-asked",
+      "status": "pass",
+      "statement_hash": "sha256:3048447b9d59",
+      "evidence": [
+        "runs/evidence/2026-09-15T02-26-19Z/closes-where-it-was-asked-checks.txt",
+        "runs/evidence/2026-09-15T02-26-19Z/closes-where-it-was-asked-signed-pass.txt",
+        "runs/evidence/2026-09-15T02-26-19Z/closes-where-it-was-asked-fail-and-unsigned-close-nothing.txt",
+        "runs/evidence/2026-09-15T02-26-19Z/closes-where-it-was-asked-machine-pass-probe.txt",
+        "runs/evidence/2026-09-15T02-26-19Z/closes-where-it-was-asked-addressed-after-the-pass.txt",
+        "runs/evidence/2026-09-15T02-26-19Z/closes-where-it-was-asked-observation-settles.txt"
+      ],
+      "reasoning": "Judged on the scratch copy at :4730 (its own home), through the CLI and the POST /api/walkdowns door, reading the thread files back from the copy's disk. The four tagged checks pass. Live: on delivery.install.clone-is-the-install an agent finding, the person's own feedback, a request and an open finding, plus a finding on another rule, were filed and the first four addressed; a walkdown sealed as scratch-judge-0915 signed in role eng with a pass closed exactly the finding and the feedback (n-0321, n-0322): both read status verified, verified_by the signer, verified_via the run id, with a via: verdict reply saying so; the request (n-0305), the other rule's note (n-0306) and the open finding (n-0323) were untouched. A signed fail and an unsigned pass through the same door each returned closed: [] and moved nothing. A finding addressed after the pass (n-0324) stayed addressed when the closing step was replayed with the earlier pass's timestamp, and closed only for a later one. An observation was settled by the agent from the CLI; feedback, a finding and a request each refused with 'only an observation is settled', exit 2. The machine gate is by name and folds only 'agent': an in-process call with the invented signer 'checks' would close threads, but no door supplies such a name - the closing step runs only from finishWalkdown, which stamps the declared identity, and checks and judge run records are written without entering it - so I read that as a defence one layer thinner than the sentence, not a failure of the claim. One reading worth a person's eye, not a fail: the statement closes 'the feedback' on the rule, and the code closes any feedback thread there, not only the signer's own, while the GIVEN speaks of the person's own note.",
+      "threads": []
+    }
+  ]
+}
