@@ -285,12 +285,22 @@ export function run(args) {
     // Named, because "needs a human" was never the question - the question is
     // whether it needs PRODUCT or engineering, and a queue that cannot say
     // which is a queue two people both scroll past.
-    judge: (i) => `walk down ${i.rule} — ${i.role ?? 'nobody'} has not accepted it yet`,
+    judge: (i) =>
+      i.after
+        ? `walk down ${i.rule} again — ${i.role ?? 'nobody'} sent it back, and the fix ${i.after} claims is judged`
+        : `walk down ${i.rule} — ${i.role ?? 'nobody'} has not accepted it yet`,
+    // Per rule when the notes have one (ADR 0005 §6): the look that clears
+    // them is a verdict on the rule, so the item says which rule to walk and
+    // how many of your own notes were answered there.
     verify: (i) =>
-      `verify ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — ` +
-      (i.unjudged
-        ? yellow('fix claimed, but nothing has judged it yet')
-        : 'fix claimed, awaiting your judgment'),
+      i.threads
+        ? `walk down ${i.rule} — ${i.threads.length} note${i.threads.length === 1 ? '' : 's'} of yours answered` +
+          dim(` (${i.threads.join(', ')})`) +
+          (i.unjudged ? yellow(' — a fix nothing has judged yet') : '')
+        : `verify ${i.thread} — ` +
+          (i.unjudged
+            ? yellow('fix claimed, but nothing has judged it yet')
+            : 'fix claimed, awaiting your judgment'),
     answer: (i) => `answer ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''}`,
     address: (i) => `address ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — open note`,
     incorporate: (i) =>

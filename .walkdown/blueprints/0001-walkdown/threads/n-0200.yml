@@ -49,3 +49,4 @@ body: >-
   scratch copies are mandatory for anything that writes — so every governance
   rule is judged on a port that is not the declared one, by an agent following
   instructions.
+reason: observation

@@ -272,7 +272,7 @@ export async function verifyAll(rule) {
   );
 }
 
-export async function postRuleNote(rule, body) {
+export async function postRuleNote(rule, body, reason = 'feedback') {
   /*
    * Refuse rather than let the server choose a name for us.
    *
@@ -309,7 +309,9 @@ export async function postRuleNote(rule, body) {
   const res = await fetch(api('/api/threads'), {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ kind: 'note', author, body, anchor: { rule } }),
+    // Why the note exists (ADR 0005 §1): a person's words are feedback
+    // unless they say they are a decision or a request to design.
+    body: JSON.stringify({ kind: 'note', author, body, reason, anchor: { rule } }),
   });
   const out = await res.json().catch(() => ({}));
   if (!res.ok) {

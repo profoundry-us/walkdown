@@ -4,7 +4,7 @@ author: topher
 created: 2026-08-22T23:23:19Z
 anchor:
   rule: panel.threads.show-the-sketch
-status: addressed
+status: verified
 body: After clicking "View the proposed sketch" I could no longer swap screens
   with the dropdown at the bottom of the panel, or by selecting a rule.
 replies:
@@ -20,3 +20,11 @@ replies:
       scroll, so clicking a control near the bottom of a long thread threw you
       to the top; and a rule on another screen now says so and offers the trip,
       since the panel deliberately does not move the page under it."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.threads.show-the-sketch
+      (2026-09-08T16-38-59Z-local-01).
+reason: feedback
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

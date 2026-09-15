@@ -17,7 +17,10 @@
       // that answers nothing - pointing `wd` at a dead port just leaves a
       // page with no panel on it.
       server: q.get('srv') || WD,
-      buildHash: q.get('build') || 'stale-build-hash',
+      // Only when a check names one: the default used to be a hash that
+      // matched nothing, so every check ran with a stale badge in the bar,
+      // and the badge's width was quietly part of every layout it measured.
+      ...(q.get('build') ? { buildHash: q.get('build') } : {}),
       // The extension's content script runs on every page, so walkdown comes
       // back after a navigation. `reinjects=0` pretends to be a script tag.
       reinjects: q.get('reinjects') !== '0',

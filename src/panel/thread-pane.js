@@ -16,6 +16,19 @@ import { icon } from './icons.js';
 import { openSettings, requestRender } from './shell.js';
 import { S } from './state.js';
 import { fire } from './util.js';
+
+
+/*
+ * Why the note exists, beside its status (ADR 0005 §1): a finding is a
+ * judge's, feedback is yours, a decision is a record. Read at a glance,
+ * because which of these it is decides who it is waiting on. A question
+ * has none, and a legacy note with none reads as feedback everywhere else,
+ * so nothing is drawn for it here either.
+ */
+const reasonChip = (t) =>
+  t.kind === 'note' && t.reason && t.reason !== 'feedback'
+    ? html`<span class="badge badge-xs badge-outline opacity-70" data-testid="thread.reason">${t.reason}</span>`
+    : nothing;
 import {
   CHIP,
   ghostSource,
@@ -63,6 +76,7 @@ export function threadCard(t, where = null) {
           <span class="wd-at font-mono">${t.id}</span>
           <span class="ml-auto flex shrink-0 items-center gap-1">
             ${unread ? html`<span class="badge badge-xs badge-error">${unread} new</span>` : nothing}
+            ${reasonChip(t)}
             <span class="badge badge-xs ${CHIP[t.status] ?? 'badge-ghost'}">${t.status}</span>
           </span>
         </div>
@@ -145,6 +159,7 @@ export function threadPane() {
       <button class="wdp-thread-back btn btn-ghost btn-xs text-primary" data-testid="thread.close" @click=${leaveThread}>← ${backFromThread(row)}</button>
       <span class="ml-auto flex items-center gap-1 pr-1.5 text-[11px]" data-testid="thread.provenance">
         <b class="opacity-60">${t.id}</b>
+        ${reasonChip(t)}
         <span class="badge badge-xs ${CHIP[t.status] ?? 'badge-ghost'}">${t.status}</span>
       </span>
     </div>

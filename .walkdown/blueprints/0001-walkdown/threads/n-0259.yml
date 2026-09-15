@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-09T01:57:52.082Z
 anchor:
   rule: panel.threads.claim-never-accept
-status: open
+status: settled
 body: >-
   The check for this rule flakes: route.fetch reads ECONNRESET from the panel
   API, twice today.
@@ -37,3 +37,14 @@ body: >-
   What is NOT in doubt: the rule itself. When the request lands, the check
   passes, and it has never failed on anything it actually asserts. This is a
   note about the check, not about the panel refusing to accept work.
+reason: observation
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-14T23:59:34Z
+    body: "Root cause, not the check: Node closes an idle keep-alive socket after
+      five seconds, and a client reusing it in that instant reads ECONNRESET.
+      lib/serve.js now keeps sockets for 65s (keepAliveTimeout) with
+      headersTimeout a second past it. Two full check runs since, no reset. The
+      routing check also unroutes at its end, so a fetch in flight when it ends
+      is no longer reported as the next test failing."

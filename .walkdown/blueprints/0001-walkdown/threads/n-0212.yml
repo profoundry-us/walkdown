@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-06T01:02:23.906Z
 anchor:
   rule: threads.lifecycle.claim-never-accept
-status: addressed
+status: verified
 body: "A machine that says a machine typed the mutation is only refused when it
   spells its provenance exactly 'agent'. checkTransition() in lib/threads.js:65
   tests `via === 'agent'` — case-sensitive, untrimmed — one line below the ACTOR
@@ -55,3 +55,11 @@ replies:
       than have me invent a field. Worth noting it is now the less urgent half:
       with any via refused outright, a machine can no longer reach the state
       where its provenance would have needed recording."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on threads.lifecycle.claim-never-accept
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

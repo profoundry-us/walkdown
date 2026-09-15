@@ -4,7 +4,7 @@ author: agent
 created: 2026-08-31T04:11:53Z
 anchor:
   rule: threads.lifecycle.says-what-it-did
-status: addressed
+status: verified
 body: "Agent sitting 2026-08-31: FAIL on the recorded-under clause. The
   statement promises a mutation report says who the change was recorded under;
   live against the scratch copy, a transition prints '✓ n-0093 open → addressed
@@ -158,3 +158,11 @@ replies:
       (tagged-checks.txt). The two truthful-but-silent flag edges from round
       four remain and I concur they do not violate the statement. Marking
       addressed; verification is a human's call."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on threads.lifecycle.says-what-it-did
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

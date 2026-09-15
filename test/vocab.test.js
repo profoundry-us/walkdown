@@ -27,7 +27,7 @@ test('terminal is derived from the flows, so the two cannot disagree', () => {
   // Four hand-written copies of this list existed before vocab.js, in three
   // orderings. The derivation is the fix: a status is terminal exactly when
   // its flow offers nowhere to go.
-  assert.deepEqual([...TERMINAL].sort(), ['incorporated', 'verified', 'waived']);
+  assert.deepEqual([...TERMINAL].sort(), ['incorporated', 'recorded', 'settled', 'verified', 'waived']);
   for (const status of TERMINAL)
     for (const flow of Object.values(FLOWS))
       assert.deepEqual(flow[status] ?? [], [], `${status} must offer no exit`);

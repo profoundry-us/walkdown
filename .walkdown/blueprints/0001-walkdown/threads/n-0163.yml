@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-02T20:45:59.284Z
 anchor:
   rule: locations.default.nothing-in-the-tree
-status: addressed
+status: recorded
 body: >-
   Why the home went back to ~/.walkdown, and what the three arrangements are now
   (supersedes n-0154 and n-0157).
@@ -69,3 +69,4 @@ replies:
       supersedes n-0154 and n-0157. The arrangements themselves were already
       documented; the citation is what makes the decision findable from the doc
       rather than only from the ledger.
+reason: decision

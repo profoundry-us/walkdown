@@ -41,3 +41,4 @@ replies:
       and expects the modal to stay. Built into lib/viewer/panel.js and
       extension/vendor/. 53 browser checks green.'
 verified_by: topher
+reason: finding

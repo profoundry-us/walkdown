@@ -51,3 +51,4 @@ replies:
       blueprint already answering there' — asserts the outer id appears, that a
       second project is still created (the deliberate case still works), and
       that a first init in an unrelated repository says none of it.
+reason: observation

@@ -205,11 +205,35 @@ async function postNote(button, rule) {
   const text = (S.ruleNote ?? '').trim();
   if (!text) return sayFiling('Write something first — a thread opens with what you have to say.');
   button.disabled = true;
-  const tid = await postRuleNote(rule, text);
+  const tid = await postRuleNote(rule, text, S.ruleNoteReason ?? 'feedback');
   button.disabled = false;
   if (!tid) return; // the refusal is on screen
   S.ruleNote = '';
+  S.ruleNoteReason = 'feedback';
   await requestReload(); // pull the new thread into the lists and repaint
+}
+
+/*
+ * The answered notes of yours that a Pass on this rule will verify in the
+ * same gesture (ADR 0005 §3) - shown before you press anything, so the
+ * acceptance is a thing you saw, not a thing that happened. A judge's
+ * findings close the same way but are not listed: they were never yours to
+ * read, and the rule is what you are judging.
+ */
+function passVerifies(rule) {
+  const mine = threadsFor(rule).filter(
+    (t) => t.status === 'addressed' && ['feedback', 'request'].includes(t.reason ?? 'feedback'),
+  );
+  if (!mine.length) return nothing;
+  return html`<div class="rounded-box border border-success/40 bg-success/5 px-2 py-1.5 text-[11.5px]" data-testid="detail.pass-verifies">
+    <div class="${LBL} mb-0.5">Pass verifies ${mine.length} answered note${mine.length === 1 ? '' : 's'} of yours</div>
+    ${mine.map(
+      (t) => html`<div class="flex min-w-0 gap-1.5">
+        <button class="link link-hover shrink-0 font-mono" data-open-thread="${t.id}">${t.id}</button>
+        <span class="truncate opacity-70">${(t.body ?? '').split('\n')[0]}</span>
+      </div>`,
+    )}
+  </div>`;
 }
 
 export function detailPane() {
@@ -393,6 +417,7 @@ export function detailPane() {
         @input=${(e) => {
           S.verdictNote = e.currentTarget.value;
         }}></textarea>
+        ${r.built ? passVerifies(r.rule) : nothing}
         ${
           r.built
             ? html`<div class="flex gap-2" data-testid="detail.verdict">
@@ -529,7 +554,19 @@ export function detailPane() {
           }}></textarea>
         <div class="mt-1 flex items-center gap-2">
           <span class="text-[10px] opacity-40">as <button id="wdp-nactor" class="link" @click=${openSettings}>${whoAmI() || 'set your name…'}</button></span>
-          <button class="btn btn-xs btn-outline ml-auto" data-testid="detail.new-thread-post"
+          <!-- What this note is (ADR 0005 §1): feedback waits on your own
+               next look; a decision is filed closed; a request goes to
+               design. Asked here because the composer cannot tell. -->
+          <select class="select select-xs ml-auto" data-testid="detail.new-thread-reason"
+            .value=${live(S.ruleNoteReason ?? 'feedback')}
+            @change=${(e) => {
+              S.ruleNoteReason = e.currentTarget.value;
+            }}>
+            <option value="feedback">feedback</option>
+            <option value="decision">decision</option>
+            <option value="request">request</option>
+          </select>
+          <button class="btn btn-xs btn-outline" data-testid="detail.new-thread-post"
             data-note-rule="${r.rule}" @click=${(e) => postNote(e.currentTarget, r.rule)}>Start thread</button>
         </div>
         ${

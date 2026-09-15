@@ -305,6 +305,14 @@ test('the panel says plainly when the copy it is running has gone stale', {
   const notice = page.getByTestId('panel.stale');
   await expect(notice).toBeVisible();
   await expect(notice).toContainText(/reload the extension/i);
+  // Said WHOLE, at a laptop's width: the badge is the one thing in the bar's
+  // left cluster that never gives way. At 1280 it once read "reload the ex"
+  // (n-0292).
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await expect(notice).toBeVisible();
+  const whole = await notice.evaluate((el) => el.scrollWidth <= el.clientWidth + 1);
+  expect(whole, 'the stale badge is clipped at 1280').toBe(true);
+  await expect(notice).toContainText(/^\s*Stale — reload the extension/);
 
   // And a copy that matches says nothing — a warning that is always on is
   // a warning nobody reads.
@@ -320,8 +328,11 @@ test('the panel will not accept work without a named person, and asks for the re
 }, async ({ page }) => {
   await review(page);
   await endSession(page);
-  const { threads } = await payload(page);
-  const addressed = (threads ?? []).find((t) => t.status === 'addressed' && t.anchor?.rule);
+  const { threads, rows } = await payload(page);
+  // On a rule the list draws: a retired rule keeps its threads and loses its
+  // row, and the ADR 0005 migration left one of those the first addressed.
+  const listed = new Set((rows ?? []).filter((r) => !r.retired).map((r) => r.rule));
+  const addressed = (threads ?? []).find((t) => t.status === 'addressed' && listed.has(t.anchor?.rule));
   expect(addressed, 'the blueprint needs an addressed thread to accept').toBeTruthy();
 
   await openRule(page, addressed.anchor.rule);
@@ -623,6 +634,9 @@ test('a rule whose fixes all landed can be verified in one pass, under a name', 
         ).length,
     )
     .toBe(0);
+  // The panel refetches once the pile is gone, and a route still in flight
+  // when the test ends is reported as the NEXT test's failure (n-0259).
+  await page.unrouteAll({ behavior: 'ignoreErrors' });
 });
 
 test('a screen that is a state, not an address, says how to get there', {
@@ -829,6 +843,10 @@ test('a message is read as the markdown it was written in, and nothing else reac
   await expect(docs).toHaveText('the docs');
   await expect(docs).toHaveAttribute('target', '_blank');
   await expect(text.locator('a[href^="javascript"]')).toHaveCount(0);
+  // Not a link at all: not an underlined <a> with no address either. The
+  // sanitizer drops the href; the words it wrapped stay as words (n-0291).
+  await expect(text.locator('a:not([href])')).toHaveCount(0);
+  await expect(text).toContainText('nope');
   // Nothing runs, loads or styles.
   await expect(text.locator('img, script, style')).toHaveCount(0);
   expect(await text.innerHTML()).not.toMatch(/onerror/);
@@ -1817,7 +1835,7 @@ test('a thread an agent filed says so in the list, not only once it is opened', 
   // Live ones only: the list does not draw terminal threads, so a verified
   // thread would be a card that is legitimately absent rather than a card
   // missing its line.
-  const LIVE = (t) => !['verified', 'incorporated', 'waived'].includes(t.status);
+  const LIVE = (t) => !['verified', 'incorporated', 'waived', 'settled', 'recorded'].includes(t.status);
   const byAgent = (threads ?? []).find((t) => t.via && LIVE(t));
   expect(byAgent, 'the ledger holds a live thread some machine typed').toBeTruthy();
   const plain = (threads ?? []).find((t) => !t.via && LIVE(t));
@@ -2403,7 +2421,9 @@ test('times read in the zone the person declared, and Settings says which @rule:
   });
   expect(filed.ok()).toBeTruthy();
   const { id, thread } = await filed.json();
-  expect(thread.created, 'the file says UTC').toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/);
+  // An instant with a Z, whole seconds or not: the door stamps milliseconds,
+  // other writers do not, and the rule asks for neither in particular.
+  expect(thread.created, 'the file says UTC').toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/);
   await review(page);
   await ensureSession(page);
   await page.getByTestId('panel.actor-name').click();
@@ -2422,4 +2442,68 @@ test('times read in the zone the person declared, and Settings says which @rule:
   expect(title, 'the stamp says which clock read it').toMatch(/GMT\+9/);
   const [h, m] = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Tokyo', hour: 'numeric', minute: '2-digit' }).format(new Date(thread.created)).split(/[: ]/);
   expect(title, 'and the hour is Tokyo\'s, whatever zone the browser is in').toMatch(new RegExp(`\\b${h}:${m}:`));
+});
+
+/*
+ * ADR 0005 §3: a person's Pass on a rule verifies the answered notes of theirs
+ * on it, and the pane says so before they press anything. Filed through the
+ * door, answered by an agent, then judged in a signed sitting - the thread
+ * ends `verified` under the signer's name and the Finish toast names it.
+ */
+test('a pass verifies the answered feedback on the rule, and says so first', {
+  tag: '@rule:panel.walkdown.pass-verifies-feedback',
+}, async ({ page }) => {
+  const { rows } = await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json();
+  const rule = rows.find((r) => r.built).rule;
+
+  // Feedback under the person, answered by the machine: what a pass verifies.
+  const filed = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
+    data: { kind: 'note', body: 'The label reads wrong here.', anchor: { rule } },
+  });
+  expect(filed.ok()).toBeTruthy();
+  const { id, thread } = await filed.json();
+  expect(thread.reason).toBe('feedback');
+  const answered = await page.request.post(`${WD_ORIGIN}/api/threads/${id}/status?bp=blueprint`, {
+    data: { status: 'addressed', via: 'agent', reason: 'Reworded it.' },
+  });
+  expect(answered.ok()).toBeTruthy();
+  // And one that is not answered yet: a pass has nothing of it to accept.
+  const still = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
+    data: { kind: 'note', body: 'Not fixed yet.', anchor: { rule } },
+  });
+  const open = (await still.json()).id;
+
+  // Opened after the filing, so the panel is reading the threads as they are.
+  await review(page);
+  await endSession(page);
+  await ensureSession(page);
+  await openRuleForVerdict(page, rule);
+  // Said before the press: the answered note, by id, and not the open one.
+  const says = page.getByTestId('detail.pass-verifies');
+  await expect(says).toBeVisible();
+  await expect(says).toContainText(id);
+  await expect(says).not.toContainText(open);
+  await expect(says).toContainText(/Pass verifies 1 answered note/);
+
+  await page.getByTestId('detail.verdict').locator('button').first().click();
+  await expect(page.getByTestId('panel.judged')).toHaveText(/^1\/\d+ judged$/);
+  await page.getByTestId('panel.walk').click(); // the same control that started it
+  // Whatever the panel said first: a refusal names itself in the failure,
+  // rather than reading as a sitting that simply would not end.
+  const said = page.locator('.toast').first();
+  await expect(said).toBeVisible();
+  expect(await said.textContent()).toMatch(/Recorded 1 verdict/);
+  await expect(page.getByTestId('panel.actor')).toBeHidden();
+
+  // The toast names what the pass closed; the ledger has it closed under
+  // the signer, with the run that carried the pass.
+  await expect(said).toContainText(`verified 1 thread (${id})`);
+  const after = (await payload(page)).threads;
+  const closed = after.find((t) => t.id === id);
+  expect(closed.status).toBe('verified');
+  expect(closed.verified_by).toBeTruthy();
+  expect(closed.verified_by).not.toBe('agent');
+  expect(closed.verified_via).toMatch(/\S/);
+  expect(closed.replies.at(-1).via).toBe('verdict');
+  expect(after.find((t) => t.id === open).status).toBe('open');
 });

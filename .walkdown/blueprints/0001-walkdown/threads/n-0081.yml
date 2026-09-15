@@ -4,7 +4,7 @@ author: Topher Fangio
 created: 2026-08-26T03:26:33Z
 anchor:
   rule: panel.delivery.anchors-still-required
-status: addressed
+status: verified
 body: Again, this works fine but the rule description needs to be rewritten; too
   confusing.
 replies:
@@ -18,3 +18,11 @@ replies:
       better' was arguing about anchors rather than saying what happens. Steps
       left as they were; they already described this correctly. Statement
       rehashed; verdict awaits your re-judgement."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.delivery.anchors-still-required
+      (2026-09-07T19-15-43Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-03T16:37:53.899Z
 anchor:
   rule: locations.default.in-repo-on-request
-status: addressed
+status: verified
 body: "The 'Committed' sentence describes walkdown's own ignore file, not what
   git will take. Judged 2026-09-03T16-30-06Z, two trees. (1) evidence
   runs/evidence/2026-09-03T16-30-06Z/probe-d.txt, step D3: a repository whose
@@ -38,3 +38,11 @@ replies:
       keeps nothing out'), while where says git tracks everything. Test: 'a root
       .gitignore hiding .walkdown/ makes the tracked row say so, and lint
       refuses it'."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on locations.default.in-repo-on-request
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

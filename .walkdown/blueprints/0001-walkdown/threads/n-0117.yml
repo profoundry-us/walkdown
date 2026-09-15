@@ -6,7 +6,7 @@ anchor:
   rule: panel.dock.toolbar
   screen: review
   element: panel.blueprint
-status: addressed
+status: verified
 body: "Agent walkdown 2026-08-27: the rule says the bar names the project this
   session is against. It does - except when the panel is a stale copy, where the
   stale badge is rendered INSTEAD of anchor panel.blueprint
@@ -40,3 +40,11 @@ replies:
       This is a panel rule, so it wants a judge's eye rather than a unit test;
       the board will ask for one, since this claim is newer than the passing
       verdict.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.dock.toolbar
+      (2026-09-07T19-15-43Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

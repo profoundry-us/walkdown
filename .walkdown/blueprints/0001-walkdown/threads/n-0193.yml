@@ -75,3 +75,4 @@ replies:
       Verified by hand on a real copy: links read through, a new stamp stays
       local, and `clean` unlinks them without following any — the real root kept
       all 122 entries and the sampled directory all four files.
+reason: observation

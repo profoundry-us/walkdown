@@ -23,7 +23,7 @@ know Gherkin, and mapping to it measurably helps them.
 | **Run** | One append-only record of verification: who/what verified, against which target, at which commit, with per-rule results. | Test run |
 | **walkdown** (session) | A judgment-based run: a human (in the panel) or an AI agent steps through rules, comparing app against prototype, and records verdicts. Named for the engineering practice of walking a site to verify construction matches drawings. Only human sessions satisfy a `human` verify requirement. | Walkthrough |
 | **Target** | A named environment a run executed against (`local`, `staging`), defined in project config. | — |
-| **Note** | Human feedback pinned to a rule/screen/element via the embed. | — |
+| **Note** | A remark pinned to a rule/screen/element, carrying a **reason** that says what closes it: a person's `feedback` (closed by their next signed pass on the rule), a judge's `finding` (closed the same way), an agent's `observation` (the agent settles it), a `request` to design (a person verifies or waives), or a `decision` (filed `recorded`, in no queue). ADR 0005. | Punch-list item |
 | **Question** | A clarification request — from an agent *or* a human — anchored the same way as a note. Lifecycle ends at **incorporated**: the answer must land in the rule's statement/steps; the thread remains as provenance. | Example Mapping red card |
 | **Thread** | The container for a note or question and its replies. | — |
 | **Waived** | Terminal thread status: reviewed and deliberately not acted on — the construction term for a punch-list item accepted as-is. Requires a person and a reason; agents may propose but never waive. | — |

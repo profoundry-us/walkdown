@@ -100,3 +100,4 @@ replies:
       not an errno', now asserts the Refused type, the relative name and the
       blueprint path, and covers the shut directory through loadBlueprint. Both
       return early under root rather than passing falsely.
+reason: finding

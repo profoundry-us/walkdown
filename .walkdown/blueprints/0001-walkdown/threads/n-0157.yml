@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-02T18:33:27.143Z
 anchor:
   rule: locations.default.in-repo-on-request
-status: addressed
+status: recorded
 body: >-
   Why two commit standards rather than one flag.
 
@@ -60,3 +60,4 @@ replies:
       distinguishes them — a filesystem fact rather than a flag, which is the
       part this note was reaching for. Kept rather than closed, for the same
       reason n-0154 is.
+reason: decision

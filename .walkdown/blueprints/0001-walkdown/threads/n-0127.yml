@@ -28,3 +28,4 @@ replies:
       and the thread header name it. The 37 historical verified threads keep
       their inference — no retroactive schema requirement. Covered by
       test/thread-mutations.test.js."
+reason: observation

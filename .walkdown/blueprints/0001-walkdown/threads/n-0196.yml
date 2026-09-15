@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-05T22:55:36.796Z
 anchor:
   rule: locations.keeping.moving-is-a-decision
-status: addressed
+status: verified
 body: >-
   A copy-path move that fails part way through leaves a half-copied ledger at
   the destination and reports it as a raw node stack trace.
@@ -89,3 +89,11 @@ replies:
       branch. It asserts the exit code, the sentence, no stack trace, the source
       intact, their dotfile untouched, and nothing of ours left at the
       destination.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on locations.keeping.moving-is-a-decision
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

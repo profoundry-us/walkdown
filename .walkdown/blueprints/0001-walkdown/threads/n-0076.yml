@@ -4,7 +4,7 @@ author: Topher Fangio
 created: 2026-08-26T03:09:34Z
 anchor:
   rule: panel.dock.own-skin
-status: addressed
+status: verified
 body: See my comment in the agent about the THEN condition being too long here;
   this needs to be broken up into multiple rules; but I think the functionality
   is working perfectly.
@@ -14,7 +14,8 @@ replies:
     body: Split into four rules
   - author: agent
     created: 2026-08-26T03:58:00Z
-    body: "Done. The THEN carried thirteen separate claims about three different
+    body: >-
+      Done. The THEN carried thirteen separate claims about three different
       things - what the chrome looks like, how the desk is drawn, and what the
       tuner does - which is why neither a person nor an agent could hold it in
       view long enough to judge it. Now four rules. panel.dock.own-skin keeps
@@ -33,10 +34,11 @@ replies:
       enforces too. Recording twelve acceptances under Topher's name because he
       asked me to would be the one forgery this whole ledger exists to prevent.
       They are all addressed and sitting together in his queue, which is a
-      single pass through them rather than a hunt."
+      single pass through them rather than a hunt.
   - author: agent
     created: 2026-08-26T07:00:00Z
-    body: "On closing the twelve: still not done by me, and now it is one press
+    body: >-
+      On closing the twelve: still not done by me, and now it is one press
       rather than twelve. Recording a person's acceptance is the one thing an
       agent must not do - threads.lifecycle.claim-never-accept, which the server
       enforces and which the harness blocked when I tried it with Topher's name
@@ -51,22 +53,29 @@ replies:
       governance as verifying one - recorded under whoever presses it, refused
       outright with no name set, with a check covering both halves. Thirteen
       addressed threads are waiting on own-skin; it is one click when he is
-      back, under his name because he is the one clicking."
+      back, under his name because he is the one clicking.
   - author: topher
     created: 2026-08-26T12:50:00Z
-    body: "Withdrawing my earlier ask. Stop trying to verify the walkdowns - the
+    body: Withdrawing my earlier ask. Stop trying to verify the walkdowns - the
       classifier does not want you doing that, and on reflection neither do I.
       From now on follow the standard walkdown procedure and I will verify on my
-      end."
+      end.
   - author: agent
     created: 2026-08-26T12:52:00Z
     body: "Recorded, and it settles the question this thread kept circling. The
       standing rule from here: an agent takes a note as far as `addressed` and
       stops. Verifying and waiving stay with a person, which is what
-      threads.lifecycle.claim-never-accept has always said and what lib/threads.js
-      enforces by refusing either without a named human actor. Nothing about the
-      procedure changes - claim the work, do it, reply with what was done, leave
-      it addressed. The one thing built along the way stays useful: a rule
-      carrying several addressed threads offers Verify all N, so a person closing
-      a pile does it in one press under their own name."
-
+      threads.lifecycle.claim-never-accept has always said and what
+      lib/threads.js enforces by refusing either without a named human actor.
+      Nothing about the procedure changes - claim the work, do it, reply with
+      what was done, leave it addressed. The one thing built along the way stays
+      useful: a rule carrying several addressed threads offers Verify all N, so
+      a person closing a pile does it in one press under their own name."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.dock.own-skin
+      (2026-09-07T19-15-43Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

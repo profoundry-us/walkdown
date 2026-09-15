@@ -41,7 +41,7 @@ exactly what does not survive a rewrite.
 walkdown's entire thesis is that a term means one thing. Its own domain
 vocabulary is string literals scattered across two runtimes:
 
-- thread statuses (`open`, `addressed`, `answered`, `verified`, `waived`) in
+- thread statuses (`open`, `addressed`, `answered`, `verified`, `settled`, `recorded`, `waived`) in
   **10 files** across `lib/`, `src/panel/` and `lib/viewer/embed.js`
 - verify tiers (`checks`, `agent`) in **10 files**
 - roles, verdicts, run kinds, likewise

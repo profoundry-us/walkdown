@@ -1,0 +1,964 @@
+{
+  "run_id": "2026-09-14T23-37-30Z-local-01",
+  "created": "2026-09-14T23:37:30Z",
+  "actor": "topher",
+  "kind": "migration",
+  "target": "local",
+  "git_sha": "993c8c4-dirty",
+  "tree_hash": "sha256:e6021965abf5",
+  "spec_hash": "sha256:42b7ec7ed988",
+  "results": [],
+  "why": "ADR 0005 migration: every note says why it exists; findings a signed pass already looked at close under that pass.",
+  "classified": {
+    "finding": [
+      "n-0055",
+      "n-0057",
+      "n-0067",
+      "n-0068",
+      "n-0069",
+      "n-0074",
+      "n-0075",
+      "n-0076",
+      "n-0077",
+      "n-0078",
+      "n-0079",
+      "n-0080",
+      "n-0081",
+      "n-0082",
+      "n-0083",
+      "n-0084",
+      "n-0087",
+      "n-0088",
+      "n-0089",
+      "n-0090",
+      "n-0091",
+      "n-0098",
+      "n-0099",
+      "n-0100",
+      "n-0102",
+      "n-0103",
+      "n-0104",
+      "n-0110",
+      "n-0111",
+      "n-0113",
+      "n-0116",
+      "n-0117",
+      "n-0122",
+      "n-0123",
+      "n-0125",
+      "n-0126",
+      "n-0129",
+      "n-0130",
+      "n-0131",
+      "n-0132",
+      "n-0135",
+      "n-0141",
+      "n-0142",
+      "n-0143",
+      "n-0144",
+      "n-0145",
+      "n-0146",
+      "n-0147",
+      "n-0148",
+      "n-0150",
+      "n-0151",
+      "n-0152",
+      "n-0153",
+      "n-0158",
+      "n-0159",
+      "n-0160",
+      "n-0161",
+      "n-0164",
+      "n-0165",
+      "n-0166",
+      "n-0167",
+      "n-0169",
+      "n-0170",
+      "n-0171",
+      "n-0172",
+      "n-0173",
+      "n-0174",
+      "n-0175",
+      "n-0177",
+      "n-0178",
+      "n-0179",
+      "n-0180",
+      "n-0183",
+      "n-0184",
+      "n-0185",
+      "n-0186",
+      "n-0187",
+      "n-0188",
+      "n-0189",
+      "n-0190",
+      "n-0192",
+      "n-0194",
+      "n-0195",
+      "n-0196",
+      "n-0201",
+      "n-0203",
+      "n-0206",
+      "n-0208",
+      "n-0210",
+      "n-0211",
+      "n-0212",
+      "n-0213",
+      "n-0215",
+      "n-0216",
+      "n-0217",
+      "n-0219",
+      "n-0221",
+      "n-0222",
+      "n-0223",
+      "n-0224",
+      "n-0228",
+      "n-0229",
+      "n-0232",
+      "n-0233",
+      "n-0234",
+      "n-0235",
+      "n-0236",
+      "n-0238",
+      "n-0239",
+      "n-0240",
+      "n-0241",
+      "n-0242",
+      "n-0244",
+      "n-0245",
+      "n-0246",
+      "n-0247",
+      "n-0248",
+      "n-0249",
+      "n-0255",
+      "n-0256",
+      "n-0258",
+      "n-0260",
+      "n-0261",
+      "n-0265",
+      "n-0272",
+      "n-0273",
+      "n-0274",
+      "n-0275",
+      "n-0278",
+      "n-0279",
+      "n-0281",
+      "n-0282",
+      "n-0283",
+      "n-0289",
+      "n-0291",
+      "n-0292",
+      "n-0293",
+      "n-0294"
+    ],
+    "feedback": [
+      "n-0001",
+      "n-0002",
+      "n-0003",
+      "n-0004",
+      "n-0005",
+      "n-0006",
+      "n-0007",
+      "n-0008",
+      "n-0009",
+      "n-0010",
+      "n-0011",
+      "n-0012",
+      "n-0014",
+      "n-0015",
+      "n-0017",
+      "n-0018",
+      "n-0020",
+      "n-0022",
+      "n-0023",
+      "n-0024",
+      "n-0025",
+      "n-0026",
+      "n-0027",
+      "n-0028",
+      "n-0031",
+      "n-0032",
+      "n-0033",
+      "n-0034",
+      "n-0035",
+      "n-0036",
+      "n-0037",
+      "n-0038",
+      "n-0039",
+      "n-0040",
+      "n-0041",
+      "n-0042",
+      "n-0043",
+      "n-0044",
+      "n-0045",
+      "n-0046",
+      "n-0047",
+      "n-0048",
+      "n-0050",
+      "n-0051",
+      "n-0052",
+      "n-0054",
+      "n-0058",
+      "n-0059",
+      "n-0060",
+      "n-0061",
+      "n-0062",
+      "n-0063",
+      "n-0065",
+      "n-0066",
+      "n-0071",
+      "n-0072",
+      "n-0073",
+      "n-0094",
+      "n-0096",
+      "n-0231",
+      "n-0284",
+      "n-0286",
+      "n-0290"
+    ],
+    "observation": [
+      "n-0021",
+      "n-0029",
+      "n-0086",
+      "n-0112",
+      "n-0115",
+      "n-0118",
+      "n-0121",
+      "n-0124",
+      "n-0127",
+      "n-0133",
+      "n-0134",
+      "n-0136",
+      "n-0137",
+      "n-0181",
+      "n-0191",
+      "n-0193",
+      "n-0197",
+      "n-0198",
+      "n-0199",
+      "n-0200",
+      "n-0202",
+      "n-0204",
+      "n-0205",
+      "n-0207",
+      "n-0209",
+      "n-0214",
+      "n-0226",
+      "n-0227",
+      "n-0230",
+      "n-0253",
+      "n-0259",
+      "n-0263",
+      "n-0264",
+      "n-0276",
+      "n-0288"
+    ],
+    "request": [
+      "n-0049",
+      "n-0053",
+      "n-0056",
+      "n-0064",
+      "n-0093",
+      "n-0095",
+      "n-0097",
+      "n-0101",
+      "n-0105",
+      "n-0106",
+      "n-0107",
+      "n-0108",
+      "n-0109",
+      "n-0114",
+      "n-0271"
+    ],
+    "decision": [
+      "n-0030",
+      "n-0128",
+      "n-0139",
+      "n-0140",
+      "n-0154",
+      "n-0155",
+      "n-0156",
+      "n-0157",
+      "n-0163",
+      "n-0287"
+    ]
+  },
+  "recorded": [
+    "n-0128",
+    "n-0139",
+    "n-0140",
+    "n-0154",
+    "n-0155",
+    "n-0156",
+    "n-0157",
+    "n-0163",
+    "n-0287"
+  ],
+  "closed": [
+    {
+      "id": "n-0025",
+      "rule": "embed.pin.both-surfaces",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0065",
+      "rule": "embed.pin.both-surfaces",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0055",
+      "rule": "embed.pin.viewport-recorded",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0098",
+      "rule": "panel.dock.toolbar",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0117",
+      "rule": "panel.dock.toolbar",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0058",
+      "rule": "panel.dock.one-pin-mode",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0075",
+      "rule": "panel.dock.one-pin-mode",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0027",
+      "rule": "panel.dock.own-skin",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0033",
+      "rule": "panel.dock.own-skin",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0035",
+      "rule": "panel.dock.own-skin",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0036",
+      "rule": "panel.dock.own-skin",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0037",
+      "rule": "panel.dock.own-skin",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0038",
+      "rule": "panel.dock.own-skin",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0039",
+      "rule": "panel.dock.own-skin",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0040",
+      "rule": "panel.dock.own-skin",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0041",
+      "rule": "panel.dock.own-skin",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0044",
+      "rule": "panel.dock.own-skin",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0048",
+      "rule": "panel.dock.own-skin",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0076",
+      "rule": "panel.dock.own-skin",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0024",
+      "rule": "panel.dock.chrome-not-a-pin-target",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0077",
+      "rule": "panel.dock.chrome-not-a-pin-target",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0080",
+      "rule": "panel.delivery.framed-isolation",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0081",
+      "rule": "panel.delivery.anchors-still-required",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0026",
+      "rule": "panel.rules.detail-slide",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0031",
+      "rule": "panel.rules.detail-slide",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0032",
+      "rule": "panel.rules.detail-slide",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0042",
+      "rule": "panel.rules.detail-slide",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0043",
+      "rule": "panel.rules.detail-slide",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0045",
+      "rule": "panel.rules.detail-slide",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0046",
+      "rule": "panel.rules.detail-slide",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0047",
+      "rule": "panel.rules.detail-slide",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0071",
+      "rule": "panel.rules.takes-you-there",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0073",
+      "rule": "panel.rules.takes-you-there",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0122",
+      "rule": "panel.rules.legend-on-demand",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0103",
+      "rule": "panel.threads.own-view",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0066",
+      "rule": "panel.walkdown.records-to-ledger",
+      "run": "2026-09-07T19-15-43Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0231",
+      "rule": "panel.walkdown.draft-on-disk",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0034",
+      "rule": "panel.rules.step-between",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0084",
+      "rule": "panel.rules.steps-not-an-appendix",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0087",
+      "rule": "panel.rules.steps-not-an-appendix",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0099",
+      "rule": "panel.rules.setup-says-how-to-arrive",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0100",
+      "rule": "panel.rules.evidence-visible",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0123",
+      "rule": "panel.rules.names-its-screen",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0014",
+      "rule": "panel.threads.show-the-sketch",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0126",
+      "rule": "panel.walkdown.note-with-any-verdict",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0132",
+      "rule": "panel.walkdown.fail-requires-why",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0203",
+      "rule": "panel.walkdown.fail-requires-why",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0082",
+      "rule": "panel.start.open-a-folder",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0089",
+      "rule": "panel.desk.tuner",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0090",
+      "rule": "panel.desk.peek",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0169",
+      "rule": "locations.default.records-follow-the-spec",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0158",
+      "rule": "locations.default.in-repo-on-request",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0164",
+      "rule": "locations.default.in-repo-on-request",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0165",
+      "rule": "locations.default.in-repo-on-request",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0171",
+      "rule": "locations.default.in-repo-on-request",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0172",
+      "rule": "locations.default.in-repo-on-request",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0179",
+      "rule": "locations.default.in-repo-on-request",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0180",
+      "rule": "locations.default.in-repo-on-request",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0183",
+      "rule": "locations.default.in-repo-on-request",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0129",
+      "rule": "locations.default.one-home-per-blueprint",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0135",
+      "rule": "locations.default.one-home-per-blueprint",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0141",
+      "rule": "locations.default.one-home-per-blueprint",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0145",
+      "rule": "locations.default.one-home-per-blueprint",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0150",
+      "rule": "locations.default.one-home-per-blueprint",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0153",
+      "rule": "locations.default.one-home-per-blueprint",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0160",
+      "rule": "locations.default.one-home-per-blueprint",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0170",
+      "rule": "locations.default.one-home-per-blueprint",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0173",
+      "rule": "locations.default.one-home-per-blueprint",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0178",
+      "rule": "locations.default.one-home-per-blueprint",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0208",
+      "rule": "locations.default.one-home-per-blueprint",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0210",
+      "rule": "locations.default.one-home-per-blueprint",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0219",
+      "rule": "locations.default.one-home-per-blueprint",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0131",
+      "rule": "locations.answer.says-why",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0159",
+      "rule": "locations.answer.one-walkdown-answers",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0177",
+      "rule": "locations.answer.one-walkdown-answers",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0188",
+      "rule": "locations.answer.one-walkdown-answers",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0213",
+      "rule": "locations.answer.one-walkdown-answers",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0144",
+      "rule": "locations.answer.declared-not-discovered",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0146",
+      "rule": "locations.answer.declared-not-discovered",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0151",
+      "rule": "locations.answer.declared-not-discovered",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0167",
+      "rule": "locations.answer.declared-not-discovered",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0174",
+      "rule": "locations.answer.declared-not-discovered",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0175",
+      "rule": "locations.answer.declared-not-discovered",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0195",
+      "rule": "locations.keeping.moving-is-a-decision",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0196",
+      "rule": "locations.keeping.moving-is-a-decision",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0201",
+      "rule": "locations.keeping.moving-is-a-decision",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0206",
+      "rule": "locations.keeping.moving-is-a-decision",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0189",
+      "rule": "locations.travel.judged-against-a-spec",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0211",
+      "rule": "locations.travel.judged-against-a-spec",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0215",
+      "rule": "locations.travel.judged-against-a-spec",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0190",
+      "rule": "locations.travel.provenance-not-currency",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0192",
+      "rule": "locations.travel.provenance-not-currency",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0161",
+      "rule": "locations.pointer.owns-only-its-block",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0130",
+      "rule": "threads.lifecycle.claim-never-accept",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0143",
+      "rule": "threads.lifecycle.claim-never-accept",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0148",
+      "rule": "threads.lifecycle.claim-never-accept",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0212",
+      "rule": "threads.lifecycle.claim-never-accept",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0216",
+      "rule": "threads.lifecycle.claim-never-accept",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0142",
+      "rule": "threads.lifecycle.acts-for-a-person",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0147",
+      "rule": "threads.lifecycle.acts-for-a-person",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0152",
+      "rule": "threads.lifecycle.acts-for-a-person",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0125",
+      "rule": "threads.lifecycle.says-what-it-did",
+      "run": "2026-09-08T16-38-59Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0274",
+      "rule": "embed.pin.right-project",
+      "run": "2026-09-14T19-03-44Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0221",
+      "rule": "embed.pin.follows-the-visible-surface",
+      "run": "2026-09-14T19-03-44Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0255",
+      "rule": "embed.pin.follows-the-visible-surface",
+      "run": "2026-09-14T19-03-44Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0223",
+      "rule": "panel.rules.takes-you-there",
+      "run": "2026-09-14T19-03-44Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0224",
+      "rule": "panel.rules.lifecycle-legible",
+      "run": "2026-09-14T19-03-44Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0228",
+      "rule": "panel.rules.lifecycle-legible",
+      "run": "2026-09-14T19-03-44Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0229",
+      "rule": "panel.rules.owed-apart-from-said",
+      "run": "2026-09-14T19-03-44Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0232",
+      "rule": "panel.walkdown.verdicts-at-hand",
+      "run": "2026-09-14T19-03-44Z-local-01",
+      "signer": "topher"
+    },
+    {
+      "id": "n-0234",
+      "rule": "panel.signoff.spec-pair-derived",
+      "run": "2026-09-14T19-03-44Z-local-01",
+      "signer": "topher"
+    }
+  ]
+}

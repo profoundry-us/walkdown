@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-03T17:21:36.857Z
 anchor:
   rule: locations.default.in-repo-on-request
-status: addressed
+status: verified
 body: "init --commit spec|all on a blueprint that stands outside any numbered
   home prints the standard's canned sentence over a tree it did not change.
   Judged 2026-09-03 (agent), evidence
@@ -60,3 +60,11 @@ replies:
       errors on the same config independently (locations category), which is the
       alarm Topher asked for. Verified: 264 unit tests, 12 Highball checks, 35
       browser checks."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on locations.default.in-repo-on-request
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

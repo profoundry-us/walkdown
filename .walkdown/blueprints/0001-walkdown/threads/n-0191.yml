@@ -73,3 +73,4 @@ replies:
       (2026-09-05T02-10-31Z, 2026-09-05T02-10-33Z). evidence-by-key passes;
       provenance-not-currency reads `agent ✗ fail`, which is where the board had
       been showing a pass from 2026-08-31.
+reason: observation

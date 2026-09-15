@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-03T02:52:25.651Z
 anchor:
   rule: locations.default.in-repo-on-request
-status: addressed
+status: verified
 body: >-
   Leaving the repository with a personal port override splits the project in
   two, and the next change of mind scaffolds a second blueprint at
@@ -71,3 +71,11 @@ replies:
       also hands over any record kind the person had already moved outside the
       home, so it is not dropped on the way out. Test: 'leaving the repository
       with a port override kept writes the home back into that row'."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on locations.default.in-repo-on-request
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

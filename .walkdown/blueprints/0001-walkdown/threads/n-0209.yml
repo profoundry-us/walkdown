@@ -42,3 +42,4 @@ replies:
       anywhere in the file. Covered in test/init-run.test.js, which asserts both
       the subdirectory case and that the root case still writes a plain relative
       path."
+reason: observation

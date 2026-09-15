@@ -4,7 +4,7 @@ author: Topher Fangio
 created: 2026-08-26T03:10:49Z
 anchor:
   rule: panel.dock.chrome-not-a-pin-target
-status: addressed
+status: verified
 body: The placement of the pins works, but I can't hit escape to get out of pin
   mode anymore.
 replies:
@@ -30,3 +30,11 @@ replies:
       again and both the bar's button and the page's crosshair drop. The check
       fails on the unfixed panel. node --test 93 pass, WALKDOWN_RECORD=0 npm run
       checks:dev 23 pass, walkdown lint 0 errors."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.dock.chrome-not-a-pin-target
+      (2026-09-07T19-15-43Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

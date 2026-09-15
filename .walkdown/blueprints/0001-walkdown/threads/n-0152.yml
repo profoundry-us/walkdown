@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-01T21:39:51.458Z
 anchor:
   rule: threads.lifecycle.acts-for-a-person
-status: addressed
+status: verified
 body: >-
   Judged 2026-09-01 against a scratch copy (.walkdown/tmp/judge-acts-0901)
   served on :4899 with WALKDOWN_HOME pointed inside it (declared identity
@@ -74,3 +74,11 @@ replies:
       provenance()); anything that is not a short string is no provenance. Test:
       test/serve.test.js 'via rides through the API on a note, a reply and a
       move'."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on threads.lifecycle.acts-for-a-person
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

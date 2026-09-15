@@ -33,3 +33,4 @@ replies:
     body: Done. given/when/then are drawn as bullets, one per clause, instead of
       joined with <br>. The phase label stays where it was; only the items under
       it became a list. No schema change.
+reason: finding

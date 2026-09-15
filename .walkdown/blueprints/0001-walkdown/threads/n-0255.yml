@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-08T20:48:34.264Z
 anchor:
   rule: embed.pin.follows-the-visible-surface
-status: addressed
+status: verified
 body: "Judging this rule on 2026-09-08 (run 2026-09-08T20-25-59Z-local-01), four
   of its five steps held but one did not: \"Pins already on that screen show on
   the surface they were placed on\". Two pins were placed on screen review in a
@@ -42,3 +42,11 @@ replies:
       other\"; hash rewritten. The both-surfaces check now reloads each surface
       after pinning both and asserts only its own pin draws; it is tagged under
       this rule and anchored-target, failed before the change and passes after."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on embed.pin.follows-the-visible-surface
+      (2026-09-14T19-03-44Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-14T19-03-44Z-local-01

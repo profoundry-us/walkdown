@@ -82,3 +82,4 @@ replies:
       stale on your screen too, something else is going on and it would help to
       know whether that copy was the extension's vendored panel (the stale-copy
       badge would say) or the served one."
+reason: request

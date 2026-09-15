@@ -60,6 +60,7 @@ screens:
       - detail.history
       - detail.verdict
       - detail.feedback
+      - detail.pass-verifies
       - detail.evidence
       - detail.setup
       - detail.steps

@@ -4,7 +4,7 @@ author: topher
 created: 2026-08-24T03:59:03Z
 anchor:
   rule: panel.dock.own-skin
-status: addressed
+status: verified
 body: Can we make the pinning system use our same blueprint theme? Is it
   different because it's injected in the app?
 replies:
@@ -37,3 +37,11 @@ replies:
 
       Verified in both deliveries: docked beside the app, and standalone on a
       prototype. Specced as embed.pin.own-skin.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.dock.own-skin
+      (2026-09-07T19-15-43Z-local-01).
+reason: feedback
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

@@ -40,3 +40,4 @@ replies:
       the ignore file's `blueprints/*/runs/` does not reach this home. Test:
       'the ignore file beside a .walkdown does not answer for a blueprint
       standing elsewhere in the tree'."
+reason: observation

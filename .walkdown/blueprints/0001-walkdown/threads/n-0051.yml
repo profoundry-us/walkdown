@@ -21,3 +21,4 @@ replies:
       records, files the note, links it into the run result, and leaves pin mode
       on. Verified live: empty fail refused with pin mode armed and 0 judged;
       written fail recorded with its thread linked."
+reason: feedback

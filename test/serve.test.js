@@ -1108,6 +1108,7 @@ test('via rides through the API on a note, a reply and a move @rule:status.attri
     kind: 'note',
     body: 'Typed by a machine.',
     via: 'agent',
+    reason: 'feedback', // a person's words, typed for them - not the machine's own
     anchor: { element: 'home.cta' },
     url: 'http://localhost:3000/home',
   });

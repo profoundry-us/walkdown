@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-13T22:41:08.003Z
 anchor:
   rule: status.evidence.agent-assumed
-status: addressed
+status: recorded
 body: "Decision, Topher, 2026-09-13: the judge prompt keeps naming the anchors
   the steps name (the ANCHORS block in `walkdown judge`, there since
   2026-08-31). Considered dropping them so a judge has to find each control the
@@ -24,3 +24,4 @@ replies:
       block, and because/history stay out of it. Marking addressed so it leaves
       the agent queue; it stays readable under `walkdown threads --all` for
       whoever reopens the question."
+reason: decision

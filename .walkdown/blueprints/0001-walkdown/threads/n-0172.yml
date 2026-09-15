@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-03T02:52:40.832Z
 anchor:
   rule: locations.default.in-repo-on-request
-status: addressed
+status: verified
 body: >-
   A personal config that does not parse makes init treat the project as
   unlisted: none->spec mints a fresh empty home in the repository beside the
@@ -49,3 +49,11 @@ replies:
       unlisted. Tests: 'an unreadable personal config stops init before anything
       is claimed or moved' and 'init refuses an entry that resolves to no spec
       instead of scaffolding into the tree'."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on locations.default.in-repo-on-request
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

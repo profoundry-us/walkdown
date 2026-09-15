@@ -25,3 +25,4 @@ replies:
       walkdown. Mockup and the default-actor rule's steps updated to match.
       Verified headless: prefill from git, strip shows the edited name as text
       with no input, click-through reopens Settings focused."
+reason: request

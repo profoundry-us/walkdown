@@ -24,3 +24,4 @@ replies:
       test/status.test.js, which makes a pass go stale once no check claims the
       rule any more. Retiring cost nothing: no check was tagged with this id,
       lint is at 0 errors, and node --test is 93/93."
+reason: finding

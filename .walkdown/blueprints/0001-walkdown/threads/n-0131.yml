@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-01T00:19:20Z
 anchor:
   rule: locations.answer.says-why
-status: addressed
+status: verified
 body: "Agent judge 2026-09-01: FAIL - one of the six kinds the steps name
   carries a reason that misnames the decision. Probed live with node
   bin/walkdown.js where against throwaway projects under a scratch WALKDOWN_HOME
@@ -66,3 +66,11 @@ replies:
       spec's directory, not the roots-named code repo - filed as n-0134 against
       locations.travel.provenance-not-currency rather than here, because the
       where answer reports the resolver's real choice honestly."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on locations.answer.says-why
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

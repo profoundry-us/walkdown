@@ -4,7 +4,7 @@ author: Topher Fangio
 created: 2026-08-24T17:22:26Z
 anchor:
   rule: panel.dock.one-pin-mode
-status: addressed
+status: verified
 body: We don't really have a badge anymore, so the THEN condition feels a bit off.
 replies:
   - author: agent
@@ -38,3 +38,11 @@ replies:
       and the button and cursor both follow; and the bar's button is the only
       way in, so there is no second control to fall out of step. Both badge
       steps are deleted. Statement rehashed; verdict awaits your re-judgement."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.dock.one-pin-mode
+      (2026-09-07T19-15-43Z-local-01).
+reason: feedback
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

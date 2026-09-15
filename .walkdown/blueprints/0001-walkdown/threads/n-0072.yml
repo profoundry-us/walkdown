@@ -61,3 +61,4 @@ replies:
       fill the window — measured after the 220ms ease settles, on both surfaces,
       since the swap moves between them. Verified against the old code first: it
       fails there and passes here. Re-run as 2026-08-27T00-14-48Z-local-01.
+reason: feedback

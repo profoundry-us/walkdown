@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-14T19:27:27.669Z
 anchor:
   rule: threads.conversation.written-in-markdown
-status: open
+status: addressed
 body: 'Judged 2026-09-14 on the scratch copy sitting-0914 (:4730), run
   2026-09-14T19-08-54Z-local-01. Lists, code spans, web links, raw HTML,
   headings, id refs and line breaks all render as the steps say. One then-step
@@ -22,3 +22,14 @@ body: 'Judged 2026-09-14 on the scratch copy sitting-0914 (:4730), run
   Aside: the rule says verify: [checks] but no test in test/ carries
   @rule:threads.conversation.written-in-markdown
   (runs/evidence/2026-09-14T19-08-54Z/written-in-markdown-tagged-tests-grep.txt).'
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-14T23:11:38Z
+    body: "Fixed in lib/message-stream.js body(): an <a> the sanitizer stripped the
+      href from is unwrapped into the words it held, so a
+      javascript:/file:/mailto: link is plain text, not an underlined element
+      going nowhere. The tagged check in checks/panel.spec.js now asserts no
+      hrefless <a> survives and the link text still reads. (The rule did have a
+      check; it lives in checks/, which the grep of test/ missed.)"
+reason: finding

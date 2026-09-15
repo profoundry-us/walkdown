@@ -4,7 +4,7 @@ author: topher
 created: 2026-08-24T05:07:33Z
 anchor:
   rule: panel.dock.own-skin
-status: addressed
+status: verified
 body: Use a 3D transform for the desk ruling instead of the affine skew, falling
   back to what we have where the 3D transform is not available.
 replies:
@@ -35,3 +35,11 @@ replies:
       Verified in both layouts - framed harness and docked example admin - plus
       undocking, which removes the layer and restores the host page byte for
       byte.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.dock.own-skin
+      (2026-09-07T19-15-43Z-local-01).
+reason: feedback
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

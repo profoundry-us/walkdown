@@ -4,7 +4,7 @@ author: topher
 created: 2026-08-24T05:34:41Z
 anchor:
   rule: panel.dock.own-skin
-status: addressed
+status: verified
 body: Make the Tip dial go up to 60deg. And make Hide app temporarily also hide
   the aside (the rule list), but not the buttons in the header.
 replies:
@@ -33,3 +33,11 @@ replies:
 
 
       Folded into panel.dock.own-skin as two more steps.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.dock.own-skin
+      (2026-09-07T19-15-43Z-local-01).
+reason: feedback
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

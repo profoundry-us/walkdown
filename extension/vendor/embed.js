@@ -2955,8 +2955,15 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       });
       const tpl = document.createElement('template');
       tpl.innerHTML = clean;
-      // Links leave the pane: the panel lives inside somebody else's page.
       for (const a of tpl.content.querySelectorAll('a')) {
+        // A link to anything but http(s) lost its href to the sanitizer above
+        // and is not a link: it becomes the words it wrapped, not an underlined
+        // element that goes nowhere (n-0291).
+        if (!a.getAttribute('href')) {
+          a.replaceWith(...a.childNodes);
+          continue;
+        }
+        // Links leave the pane: the panel lives inside somebody else's page.
         a.setAttribute('target', '_blank');
         a.setAttribute('rel', 'noopener noreferrer');
       }
@@ -3426,9 +3433,16 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
    */
   const FLOWS = Object.freeze({
     note: Object.freeze({
-      open: Object.freeze(['addressed', 'waived']),
-      addressed: Object.freeze(['verified', 'open', 'waived']),
+      open: Object.freeze(['addressed', 'settled', 'waived']),
+      addressed: Object.freeze(['verified', 'settled', 'open', 'waived']),
       verified: Object.freeze([]),
+      // An observation's ending: the agent that noticed it says what changed
+      // and closes it, and no person is asked (ADR 0005 §2). Legal only on an
+      // observation - checkTransition reads the reason.
+      settled: Object.freeze([]),
+      // A decision's only status. Filed closed, never transitioned into: it is
+      // a record, not a task (ADR 0005 §4).
+      recorded: Object.freeze([]),
       waived: Object.freeze([]),
     }),
     question: Object.freeze({
@@ -3438,6 +3452,33 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       waived: Object.freeze([]),
     }),
   });
+
+  /*
+   * Why a note exists, which decides where it closes (ADR 0005 §1). A
+   * question needs none: a question is a person asking and a person
+   * incorporating.
+   *
+   *   feedback     a person's words on a rule; closed by that person's next
+   *                verdict on the rule, or by their explicit verify
+   *   finding      a judge's fail; closed by a later signed pass on the rule
+   *   observation  an agent noticed something in passing; settled by the agent
+   *   request      to design; a person closes it, as ever
+   *   decision     a record; filed closed
+   */
+  const THREAD_REASONS = Object.freeze(['feedback', 'finding', 'observation', 'request', 'decision']);
+
+  /** The reason a note gets when nobody said: a machine's own words are an observation, a person's are feedback. */
+  /** @param {{ kind?: string, via?: string|null, author?: string|null }} [t] */
+  const defaultReason = ({ kind, via = null, author = null } = {}) =>
+    kind === 'question' ? null : via || isMachineName(author) ? 'observation' : 'feedback';
+
+  /** Notes a signed pass on their rule closes (ADR 0005 §2, §3). Legacy notes with no reason are feedback: a person looks. */
+  const closesOnVerdict = (t) =>
+    t?.kind === 'note' && ['finding', 'feedback'].includes(t.reason ?? 'feedback');
+
+  /** Notes that still wait on a person's own verify - the only ones the verify queue holds (ADR 0005 §6). */
+  const waitsOnPerson = (t) =>
+    t?.kind === 'note' && ['feedback', 'request'].includes(t.reason ?? 'feedback');
 
   /** Every status a thread of this kind may hold. */
   const statusesFor = (kind) => Object.freeze(Object.keys(FLOWS[kind] ?? FLOWS.note));
@@ -3485,6 +3526,8 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     addressed: 'badge-info',
     verified: 'badge-success',
     incorporated: 'badge-success',
+    settled: 'badge-success',
+    recorded: 'badge-ghost',
     waived: 'badge-ghost',
   });
 
@@ -3695,6 +3738,9 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     // so a handle recorded in a thread can be shown as the name that person goes
     // by, whichever of their handles the record happens to carry.
     let identity = null;
+    // The rule ids this blueprint knows, so a rule named in a message can be
+    // told from prose (MSG.linkRefs). Filled with the blueprint.
+    let ruleIds = [];
 
     const $anchors = () => [...document.querySelectorAll(`[${ANCHOR_ATTR}]`)];
     const anchorId = (el) => el.getAttribute(ANCHOR_ATTR);
@@ -3965,7 +4011,13 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       overlay = document.createElement('div');
       overlay.className = FORM;
       overlay.dataset.testid = 'thread.panel';
-      overlay.style.left = dot.style.left;
+      // Beside the pin, and on the page: a pin in the right-hand column used
+      // to open its conversation past the viewport's edge (seen re-judging
+      // one-stream, 2026-09-14). Same clamp as the pin form below.
+      overlay.style.left = `${Math.max(
+      window.scrollX + 8,
+      Math.min(parseFloat(dot.style.left), window.scrollX + window.innerWidth - 268),
+    )}px`;
       overlay.style.top = `${parseFloat(dot.style.top) + 24}px`;
       overlay.innerHTML = `
       <div class="flex items-center gap-1.5">
@@ -3977,13 +4029,48 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       <div class="wd-stream mt-1 max-h-64 overflow-y-auto">${MSG.stream(pin, {
         pending,
         names: MSG.nameMap(identity),
+        rules: ruleIds,
       })}</div>
       <textarea class="textarea textarea-sm mt-2 h-14 w-full" placeholder="Reply…"></textarea>
       <div class="mt-1 flex items-center gap-2">
         <span class="text-[10px] opacity-40"><b>Enter</b> sends</span>
-        <button class="btn btn-xs btn-primary wd-primary ml-auto">Reply</button>
-      </div>`;
+        ${
+          canVerify(pin)
+            ? `<button class="btn btn-xs btn-outline btn-success wd-verify ml-auto" data-testid="thread.verify"
+                 title="Verify ${pin.id} under your name, ${identity.username}">✓ Verify</button>
+               <button class="btn btn-xs btn-primary wd-primary">Reply</button>`
+            : `<button class="btn btn-xs btn-primary wd-primary ml-auto">Reply</button>`
+        }
+      </div>
+      <div class="wd-say mt-1 hidden text-[11px] text-warning" data-testid="thread.say"></div>`;
       root.appendChild(overlay);
+      /*
+       * The ids in a message are links only where this popover can open what
+       * they name (n-0294). It has no rule screen and no thread screen of its
+       * own - those are the panel's - so here a thread id opens that thread
+       * when it is a pin on this page, an evidence key opens the file the
+       * server resolves it to, and anything else goes back to being the words
+       * the author typed. A link that does nothing is worse than none.
+       */
+      for (const ref of overlay.querySelectorAll('[data-thread-ref], [data-rule-ref], [data-evidence-ref]')) {
+        if (ref.dataset.evidenceRef) {
+          ref.href = api('/evidence/' + ref.dataset.evidenceRef);
+          ref.target = '_blank';
+          ref.rel = 'noopener noreferrer';
+          continue;
+        }
+        const other = ref.dataset.threadRef && ctx.pins.find((p) => p.id === ref.dataset.threadRef);
+        const wrap = other && root.querySelector(`.wd-pin[data-thread="${CSS.escape(other.id)}"]`);
+        if (other && wrap) {
+          ref.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            openThreadPopover(other, wrap);
+          };
+          continue;
+        }
+        ref.replaceWith(ref.textContent);
+      }
       // Open at the newest message, the way you left a conversation - reading a
       // thread from its top means scrolling past what you already know.
       const stream = overlay.querySelector('.wd-stream');
@@ -4016,12 +4103,62 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
           });
       };
       overlay.querySelector('.wd-primary').onclick = send;
+      /*
+       * Verify, beside the pin (ADR 0005 §7). The pin is where you are already
+       * looking at the thing the thread is about, so the acceptance is offered
+       * here - under the same law as everywhere: only a person the config
+       * declares, only on a thread waiting for one, and the server validates
+       * the transition exactly as it does for the panel. Waive stays off this
+       * row: it needs a reason, and this reply box carries no instructions.
+       */
+      const verify = overlay.querySelector('.wd-verify');
+      if (verify)
+        verify.onclick = () => {
+          verify.disabled = true;
+          fetch(api(`/api/threads/${pin.id}/status`), {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ status: 'verified' }),
+          })
+            .then((r) => r.json())
+            .then((data) => {
+              if (!data.thread) throw new Error(data.error ?? 'refused');
+              Object.assign(pin, { status: data.thread.status, replies: data.thread.replies });
+              // A verified pin leaves the page - it is settled - the way every
+              // other terminal thread does on the next render.
+              ctx.pins = ctx.pins.filter((p) => p.id !== pin.id);
+              closeForm();
+              renderPins();
+            })
+            .catch((err) => {
+              verify.disabled = false;
+              const say = overlay?.querySelector('.wd-say');
+              if (say) {
+                say.textContent = String(err?.message ?? 'not verified');
+                say.classList.remove('hidden');
+              }
+            });
+        };
       box.onkeydown = (e) => {
         if (e.key !== 'Enter' || e.shiftKey || e.isComposing) return;
         e.preventDefault();
         send();
       };
       box.focus();
+    }
+
+    /*
+     * Whether this popover may offer Verify on this pin: a declared person -
+     * never a guess, never a machine - and a note at `addressed` whose reason a
+     * person closes. A finding is offered too, for the person who wants to
+     * close it before the rule's next pass would; an observation is the
+     * agent's to settle and a question is answered, not verified.
+     */
+    function canVerify(pin) {
+      if (!identity?.declared || !identity?.username || String(identity.username).trim().toLowerCase() === 'agent')
+        return false;
+      if (pin.kind !== 'note' || pin.status !== 'addressed') return false;
+      return ['feedback', 'request', 'finding'].includes(pin.reason ?? 'feedback');
     }
 
     // --- pin creation -----------------------------------------------------------
@@ -4353,6 +4490,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
                 id: t.id,
                 kind: t.kind,
                 status: t.status,
+                reason: t.reason ?? null,
                 element: t.anchor?.element,
                 position: t.anchor?.position,
                 surface: t.anchor?.surface,
@@ -4379,6 +4517,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
           .then((data) => {
             blueprint = data;
             identity = data.identity ?? null;
+            ruleIds = (data.rows ?? []).map((r) => r.rule);
             MSG.zone = identity?.timezone ?? null;
             resolve();
           })

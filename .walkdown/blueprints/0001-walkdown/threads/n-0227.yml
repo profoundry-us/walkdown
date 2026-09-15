@@ -63,3 +63,4 @@ replies:
       The panel wears the same badge it already wears for a stale extension
       copy, naming the fix. Tested by touching lib/api.js under a running server
       and asserting the payload flips.
+reason: observation

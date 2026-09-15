@@ -261,7 +261,8 @@ export function run(args) {
     '',
     'GOVERNANCE',
     '  - You claim work; a person accepts it. Never write "verified" or "waived" anywhere.',
-    '  - A fail needs a note thread anchored to this rule citing the evidence; put its id in the result.',
+    '  - A fail needs a note thread anchored to this rule citing the evidence, filed with',
+    '    `--reason finding` (authored agent; it closes on the rule\'s next signed pass); put its id in the result.',
     `  - The ledger is append-only: one new record, at the end, and no record ever edited.`,
     ...governance.flatMap(bullet),
   );

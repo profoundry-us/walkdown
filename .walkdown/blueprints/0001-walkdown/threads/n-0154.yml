@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-02T18:33:02.692Z
 anchor:
   rule: locations.default.nothing-in-the-tree
-status: addressed
+status: recorded
 body: >-
   Why walkdown's files live beside the code, in .walkdown/, rather than in the
   home directory.
@@ -74,3 +74,4 @@ replies:
       this note explains is not the one walkdown has. Kept rather than closed,
       because the ledger is append-only and the reasoning is still worth reading
       against the current shape — which is why the doc names both."
+reason: decision

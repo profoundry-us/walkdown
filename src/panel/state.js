@@ -115,6 +115,7 @@ export const S = {
   composerSay: '', // the composer's refusal line; same lifetime, same reason
   threadSay: '', // the thread screen's refusal line; dies when the view moves on
   ruleNote: '', // the rule's own new-thread box, kept the same way
+  ruleNoteReason: 'feedback', // what that box files: feedback, decision or request (ADR 0005)
 
   /*
    * The check-source disclosure, kept OUTSIDE the markup that draws it.

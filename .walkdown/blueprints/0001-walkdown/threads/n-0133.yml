@@ -156,3 +156,4 @@ replies:
       repository root. The registry (~/.walkdown/projects/) is deleted; the two
       config files are the only source. Example now has its own .walkdown rather
       than an entry in this repository's config."
+reason: observation

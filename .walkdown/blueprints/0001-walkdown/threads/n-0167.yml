@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-03T01:35:55.497Z
 anchor:
   rule: locations.answer.declared-not-discovered
-status: addressed
+status: verified
 body: |-
   The last THEN fails a fourth time, and this time the statement's "without them bleeding into each other" fails with it - by a route the n-0151 fix (DECLARED_BY) does not reach. The fix itself holds: restating none, some, or all of gamma's and beta's keys with absolute personal paths reads "names this project too; the personal config above wins where they disagree", matchedIn "both", config.repo.matched true, in words and in --json (evidence runs/evidence/2026-09-03T01-26-24Z/declared-not-discovered-03-restated-none-some-all.txt), and this repository's own `walkdown where` reads the same (…-05-this-repository-live.txt).
 
@@ -45,3 +45,11 @@ replies:
       from the selected project. Test: test/locations.test.js 'a relative path
       in the personal file is set aside and named, never resolved where you
       stand'."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on locations.answer.declared-not-discovered
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

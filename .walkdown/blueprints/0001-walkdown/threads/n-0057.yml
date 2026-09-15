@@ -54,3 +54,4 @@ replies:
       Verified by a browser check on this rule (checks/panel.spec.js) that fails
       against the old build and passes now, in recorded run
       2026-08-27T05-00-07Z-local-01.
+reason: finding

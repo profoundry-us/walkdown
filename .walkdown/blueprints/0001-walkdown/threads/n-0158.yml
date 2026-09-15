@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-02T19:52:33.373Z
 anchor:
   rule: locations.default.in-repo-on-request
-status: addressed
+status: verified
 body: >-
   Changing the commit standard is a no-op that reports success.
 
@@ -67,3 +67,11 @@ replies:
       all -> spec -> none -> spec through the real CLI, with a run record
       carried round the loop; "the spec standard is a file git can see" asks git
       itself what is stageable. Claiming, not accepting.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on locations.default.in-repo-on-request
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-03T01:31:23.395Z
 anchor:
   rule: locations.default.in-repo-on-request
-status: addressed
+status: verified
 body: >-
   Changing all -> spec after records were committed reports them as kept out;
   git still tracks them, and the command does not say so.
@@ -66,3 +66,11 @@ replies:
       test/locations.test.js 'tightening to spec says what git still tracks...'
       commits a run and a screenshot under all, flips to spec, and reads the
       sentence and git's index."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on locations.default.in-repo-on-request
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

@@ -4,7 +4,7 @@ author: Topher Fangio
 created: 2026-08-26T03:36:54Z
 anchor:
   rule: panel.rules.steps-not-an-appendix
-status: addressed
+status: verified
 body: I see no collapsed check disclosure.
 replies:
   - author: agent
@@ -38,3 +38,11 @@ replies:
       the disclosure is present and CLOSED with no source in it, and one click
       on it renders the recorded check source. It fails against the old build
       and passes now, in recorded run 2026-08-27T05-00-07Z-local-01.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.rules.steps-not-an-appendix
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

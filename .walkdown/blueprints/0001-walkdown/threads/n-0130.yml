@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-01T00:18:02Z
 anchor:
   rule: threads.lifecycle.claim-never-accept
-status: addressed
+status: verified
 body: "Agent judge 2026-09-01: FAIL - the gate holds only at one of its two
   doors, and both doors admit the agent under a capital letter. Probed live on a
   scratch copy (sit-lcna), never the real ledger. The no-actor clause: the steps
@@ -57,3 +57,11 @@ replies:
       disk. Nineteen CLI and sixteen HTTP attempts in all. Evidence:
       runs/evidence/2026-09-01T01-06-33Z/cli-gate.txt,
       runs/evidence/2026-09-01T01-06-33Z/http-gate.txt."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on threads.lifecycle.claim-never-accept
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

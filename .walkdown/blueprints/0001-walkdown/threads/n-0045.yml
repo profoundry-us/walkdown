@@ -4,7 +4,7 @@ author: topher
 created: 2026-08-24T05:45:51Z
 anchor:
   rule: panel.rules.detail-slide
-status: addressed
+status: verified
 body: Use the blueprint icon for Blueprints and frame-corners for Screens (rules
   is good as checks), and make all three tab icons a little bigger.
 replies:
@@ -13,3 +13,11 @@ replies:
     body: Done - blueprint for Blueprints, frame-corners for Screens (checks stays
       for Rules), all at size-3.5 (up from size-3). Synced through
       tools/sync-phosphor.mjs.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.rules.detail-slide
+      (2026-09-07T19-15-43Z-local-01).
+reason: feedback
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

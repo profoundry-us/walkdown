@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-01T00:11:34Z
 anchor:
   rule: locations.default.one-home-per-blueprint
-status: addressed
+status: verified
 body: "Agent judging 2026-09-01: FAIL on the migrate clause. Every allocation
   promise up to it held under attack — asking allocated nothing, first writes
   claimed distinct numbers for two same-basename repos (0001/0002-myapp) and for
@@ -66,3 +66,11 @@ replies:
       so one blueprint never held two numbers. The rule passes; evidence at
       runs/evidence/2026-09-01T01-21-23Z/ (probe-06-migrate-all-shapes.txt and
       probe-07-post-migrate-state.txt carry the orphan measurement)."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on locations.default.one-home-per-blueprint
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

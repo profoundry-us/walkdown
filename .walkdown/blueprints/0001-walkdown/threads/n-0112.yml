@@ -75,3 +75,4 @@ replies:
       screen declares `app: { path: /app.html }`, which resolves against appBase
       to an address that serves no such page on either side of this fix. Nothing
       navigates it today, so it is latent.
+reason: observation

@@ -112,6 +112,9 @@ import { icon } from './icons.js';
   // so a handle recorded in a thread can be shown as the name that person goes
   // by, whichever of their handles the record happens to carry.
   let identity = null;
+  // The rule ids this blueprint knows, so a rule named in a message can be
+  // told from prose (MSG.linkRefs). Filled with the blueprint.
+  let ruleIds = [];
 
   const $anchors = () => [...document.querySelectorAll(`[${ANCHOR_ATTR}]`)];
   const anchorId = (el) => el.getAttribute(ANCHOR_ATTR);
@@ -382,7 +385,13 @@ import { icon } from './icons.js';
     overlay = document.createElement('div');
     overlay.className = FORM;
     overlay.dataset.testid = 'thread.panel';
-    overlay.style.left = dot.style.left;
+    // Beside the pin, and on the page: a pin in the right-hand column used
+    // to open its conversation past the viewport's edge (seen re-judging
+    // one-stream, 2026-09-14). Same clamp as the pin form below.
+    overlay.style.left = `${Math.max(
+      window.scrollX + 8,
+      Math.min(parseFloat(dot.style.left), window.scrollX + window.innerWidth - 268),
+    )}px`;
     overlay.style.top = `${parseFloat(dot.style.top) + 24}px`;
     overlay.innerHTML = `
       <div class="flex items-center gap-1.5">
@@ -394,13 +403,48 @@ import { icon } from './icons.js';
       <div class="wd-stream mt-1 max-h-64 overflow-y-auto">${MSG.stream(pin, {
         pending,
         names: MSG.nameMap(identity),
+        rules: ruleIds,
       })}</div>
       <textarea class="textarea textarea-sm mt-2 h-14 w-full" placeholder="Reply…"></textarea>
       <div class="mt-1 flex items-center gap-2">
         <span class="text-[10px] opacity-40"><b>Enter</b> sends</span>
-        <button class="btn btn-xs btn-primary wd-primary ml-auto">Reply</button>
-      </div>`;
+        ${
+          canVerify(pin)
+            ? `<button class="btn btn-xs btn-outline btn-success wd-verify ml-auto" data-testid="thread.verify"
+                 title="Verify ${pin.id} under your name, ${identity.username}">✓ Verify</button>
+               <button class="btn btn-xs btn-primary wd-primary">Reply</button>`
+            : `<button class="btn btn-xs btn-primary wd-primary ml-auto">Reply</button>`
+        }
+      </div>
+      <div class="wd-say mt-1 hidden text-[11px] text-warning" data-testid="thread.say"></div>`;
     root.appendChild(overlay);
+    /*
+     * The ids in a message are links only where this popover can open what
+     * they name (n-0294). It has no rule screen and no thread screen of its
+     * own - those are the panel's - so here a thread id opens that thread
+     * when it is a pin on this page, an evidence key opens the file the
+     * server resolves it to, and anything else goes back to being the words
+     * the author typed. A link that does nothing is worse than none.
+     */
+    for (const ref of overlay.querySelectorAll('[data-thread-ref], [data-rule-ref], [data-evidence-ref]')) {
+      if (ref.dataset.evidenceRef) {
+        ref.href = api('/evidence/' + ref.dataset.evidenceRef);
+        ref.target = '_blank';
+        ref.rel = 'noopener noreferrer';
+        continue;
+      }
+      const other = ref.dataset.threadRef && ctx.pins.find((p) => p.id === ref.dataset.threadRef);
+      const wrap = other && root.querySelector(`.wd-pin[data-thread="${CSS.escape(other.id)}"]`);
+      if (other && wrap) {
+        ref.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          openThreadPopover(other, wrap);
+        };
+        continue;
+      }
+      ref.replaceWith(ref.textContent);
+    }
     // Open at the newest message, the way you left a conversation - reading a
     // thread from its top means scrolling past what you already know.
     const stream = overlay.querySelector('.wd-stream');
@@ -433,12 +477,62 @@ import { icon } from './icons.js';
         });
     };
     overlay.querySelector('.wd-primary').onclick = send;
+    /*
+     * Verify, beside the pin (ADR 0005 §7). The pin is where you are already
+     * looking at the thing the thread is about, so the acceptance is offered
+     * here - under the same law as everywhere: only a person the config
+     * declares, only on a thread waiting for one, and the server validates
+     * the transition exactly as it does for the panel. Waive stays off this
+     * row: it needs a reason, and this reply box carries no instructions.
+     */
+    const verify = overlay.querySelector('.wd-verify');
+    if (verify)
+      verify.onclick = () => {
+        verify.disabled = true;
+        fetch(api(`/api/threads/${pin.id}/status`), {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ status: 'verified' }),
+        })
+          .then((r) => r.json())
+          .then((data) => {
+            if (!data.thread) throw new Error(data.error ?? 'refused');
+            Object.assign(pin, { status: data.thread.status, replies: data.thread.replies });
+            // A verified pin leaves the page - it is settled - the way every
+            // other terminal thread does on the next render.
+            ctx.pins = ctx.pins.filter((p) => p.id !== pin.id);
+            closeForm();
+            renderPins();
+          })
+          .catch((err) => {
+            verify.disabled = false;
+            const say = overlay?.querySelector('.wd-say');
+            if (say) {
+              say.textContent = String(err?.message ?? 'not verified');
+              say.classList.remove('hidden');
+            }
+          });
+      };
     box.onkeydown = (e) => {
       if (e.key !== 'Enter' || e.shiftKey || e.isComposing) return;
       e.preventDefault();
       send();
     };
     box.focus();
+  }
+
+  /*
+   * Whether this popover may offer Verify on this pin: a declared person -
+   * never a guess, never a machine - and a note at `addressed` whose reason a
+   * person closes. A finding is offered too, for the person who wants to
+   * close it before the rule's next pass would; an observation is the
+   * agent's to settle and a question is answered, not verified.
+   */
+  function canVerify(pin) {
+    if (!identity?.declared || !identity?.username || String(identity.username).trim().toLowerCase() === 'agent')
+      return false;
+    if (pin.kind !== 'note' || pin.status !== 'addressed') return false;
+    return ['feedback', 'request', 'finding'].includes(pin.reason ?? 'feedback');
   }
 
   // --- pin creation -----------------------------------------------------------
@@ -770,6 +864,7 @@ import { icon } from './icons.js';
               id: t.id,
               kind: t.kind,
               status: t.status,
+              reason: t.reason ?? null,
               element: t.anchor?.element,
               position: t.anchor?.position,
               surface: t.anchor?.surface,
@@ -796,6 +891,7 @@ import { icon } from './icons.js';
         .then((data) => {
           blueprint = data;
           identity = data.identity ?? null;
+          ruleIds = (data.rows ?? []).map((r) => r.rule);
           MSG.zone = identity?.timezone ?? null;
           resolve();
         })

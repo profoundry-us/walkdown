@@ -4,7 +4,7 @@ author: topher
 created: 2026-09-07T14:02:54.083Z
 anchor:
   rule: embed.pin.follows-the-visible-surface
-status: addressed
+status: verified
 body: This works, but I think the rule should say "prototype" instead of "design".
 replies:
   - author: topher
@@ -13,3 +13,11 @@ replies:
     body: embed.pin.follows-the-visible-surface now says prototype rather than
       design, in the statement and in the given step that named the surface.
       Wording only — the rule asks for nothing new.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on embed.pin.follows-the-visible-surface
+      (2026-09-14T19-03-44Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-14T19-03-44Z-local-01

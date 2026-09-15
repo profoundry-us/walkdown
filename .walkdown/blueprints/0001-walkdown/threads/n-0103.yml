@@ -4,7 +4,7 @@ author: Topher Fangio
 created: 2026-08-27T03:03:39Z
 anchor:
   rule: panel.threads.own-view
-status: addressed
+status: verified
 body: Looks pretty good, but the subtabs filtering should be docked to the top
   (maybe we just make it sticky; or change the wrapper element so it isn't part
   of the scroll).
@@ -64,3 +64,11 @@ replies:
       at scrollTop 0 and at 8929. This reply is also the sitting evidence for
       threads.conversation.composer-stays, which needed a send the server
       actually confirms."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.threads.own-view
+      (2026-09-07T19-15-43Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

@@ -1463,7 +1463,7 @@ function renderBar() {
          picker. Everything in here that can be shortened truncates; the gear,
          the wordmark and the screen picker keep their size, and the cap
          leaves the centre a clear 8.5rem on this side. -->
-    <span class="flex min-w-0 max-w-[calc(50%-8.5rem)] items-center gap-2">
+    <span class="flex min-w-0 max-w-[calc(50%-8.5rem)] items-center gap-2 overflow-hidden">
     ${GEAR()}
     <span class="shrink-0 font-bold tracking-tight">walk<span class="text-primary">down</span></span>
     <!-- A stale copy sits BESIDE the project name, never instead of it.
@@ -1477,10 +1477,19 @@ function renderBar() {
          project this session is against at exactly the moment a reviewer most
          needed to know which board they were reading. Topher's decision on
          n-0117: a stale panel gives up neither slot, and the rule stands as
-         written. -->
+         written.
+
+         And it never gives way: shrink-0, because the one thing in this
+         cluster that must be read whole is the warning. With the project
+         button in the group, a truncating badge was the element that lost
+         width, and at 1440 it read "tale — reload the extensi" (n-0292). The
+         project name and the blueprint give way instead - they are named
+         again in the sidebar - and the cluster clips (overflow-hidden) so a
+         badge that will not shrink can never push the group under the
+         centred surface control, which is what the cap is for. -->
     ${
       STALE_COPY()
-        ? html`<span class="badge badge-sm badge-error badge-dash min-w-0 gap-1 truncate font-semibold"
+        ? html`<span class="badge badge-sm badge-error badge-dash shrink-0 gap-1 whitespace-nowrap font-semibold"
            data-testid="panel.stale"
            title="walkdown was updated — reload the extension at chrome://extensions, then reload this page, to run the current build.">
            ${icon('warning-fill', 'size-3.5')}Stale — reload the extension</span>`
@@ -1488,7 +1497,7 @@ function renderBar() {
     }
     ${
       STALE_SERVER()
-        ? html`<span class="badge badge-sm badge-error badge-dash min-w-0 gap-1 truncate font-semibold"
+        ? html`<span class="badge badge-sm badge-error badge-dash shrink-0 gap-1 whitespace-nowrap font-semibold"
            data-testid="panel.stale-server"
            title="The server is running code older than this tree — restart it (npm run dev, or stop and re-run walkdown serve). Until then a verdict may be recorded against yesterday's rules.">
            ${icon('warning-fill', 'size-3.5')}Stale server — restart it</span>`
@@ -1739,6 +1748,15 @@ const sessionDraft = () => S.session && { actor: S.session.actor, ...sitting(S.s
  */
 let draftRefused = null;
 
+/*
+ * The draft writes, in the order they were asked for. A browser opens
+ * several sockets and a later POST can land first - so a verdict's draft
+ * could arrive after the Finish that cleared it, and the reload after Finish
+ * found a sitting on disk and brought it straight back. One chain keeps the
+ * order, and Finish waits on it before it reads the ledger again.
+ */
+let draftWrites = Promise.resolve();
+
 export function saveSession() {
   const draft = sessionDraft();
   store.set(SESSION_KEY(), draft);
@@ -1752,7 +1770,7 @@ export function saveSession() {
    * 400 to each one (n-0248). The server has read the write and declined it;
    * no retry changes that, so the only honest thing left is to say so.
    */
-  fetch(api('/api/draft'), {
+  draftWrites = draftWrites.then(() => fetch(api('/api/draft'), {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ target: 'local', ...(draft ?? { discard: true }) }),
@@ -1771,7 +1789,8 @@ export function saveSession() {
       draftRefused = why;
       toast(`Nothing is being kept on disk - ${esc(why)}`, { tone: 'error', sticky: true });
     })
-    .catch(() => {});
+    .catch(() => {}));
+  return draftWrites;
 }
 
 /*
@@ -2218,7 +2237,10 @@ async function finishWalkdown() {
       return toast(`Not recorded: ${esc(out.error ?? 'request failed')}`, { tone: 'error' });
     }
     S.session = null;
-    saveSession();
+    // The discard has landed before the ledger is read again: otherwise the
+    // reload can find the draft this Finish just cleared, written late by
+    // the verdict before it, and restore the sitting that just ended.
+    await saveSession();
     S.view = 'list';
     selectRow(null);
     await load();
@@ -2237,8 +2259,14 @@ async function finishWalkdown() {
       : out.roles?.length
         ? out.roles.map((r) => esc(r)).join(', ')
         : 'no role stated — the ledger reads it as engineering';
+    // And the threads those passes closed on your behalf (ADR 0005): said
+    // here, in the same breath as the verdicts, so nothing was accepted
+    // that you did not hear about.
+    const closed = Array.isArray(out.closed) && out.closed.length
+      ? ` — verified ${out.closed.length} thread${out.closed.length === 1 ? '' : 's'} (${out.closed.map((id) => esc(id)).join(', ')})`
+      : '';
     toast(
-      `Recorded ${results.length} verdict${results.length === 1 ? '' : 's'} as <b>${esc(out.run_id)}</b> — ${filed}`,
+      `Recorded ${results.length} verdict${results.length === 1 ? '' : 's'} as <b>${esc(out.run_id)}</b> — ${filed}${closed}`,
       { tone: 'success' },
     );
   } catch {

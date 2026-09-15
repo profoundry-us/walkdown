@@ -40,3 +40,4 @@ replies:
       <registry> contains this directory", and run-record/lint messages point at
       `walkdown import` instead of the retired `blueprint add`.'
 verified_by: topher
+reason: finding

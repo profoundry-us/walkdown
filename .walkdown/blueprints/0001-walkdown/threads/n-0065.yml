@@ -5,7 +5,7 @@ created: 2026-08-24T19:21:58Z
 anchor:
   rule: embed.pin.both-surfaces
   screen: review
-status: addressed
+status: verified
 body: Pinned n-0064 through the framed panel and could not open it afterwards -
   clicking the pin makes the scrollbar jump but nothing appears. Also the pin
   did not attach to the rule I had open. Framed pins must carry the open rule
@@ -28,3 +28,11 @@ replies:
       pin-instead-of-note path work framed. Your n-0064 recorded perfectly
       viewport-wise (mobile 390) and stays as-is; drop the next one with the
       rule open and it will thread into the rule's list too."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on embed.pin.both-surfaces
+      (2026-09-07T19-15-43Z-local-01).
+reason: feedback
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

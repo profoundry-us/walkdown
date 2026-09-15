@@ -368,7 +368,9 @@ stories:
             - The reply box in anchor `thread.reply` reads simply as a reply box
             - Choosing waive or reopen asks for the reason then; other actions never mention it
             - Actions a person may not take are absent, not shown and refused
-          statement_hash: sha256:85de92088c3d
+            - Verify is offered beside the pin when the config declares who is sitting here and the note is answered and waits on a person; never on an observation, a question, or under a guessed name
+            - Pressing it records the thread as verified under that name and the pin leaves the page; waiving still needs the panel or the CLI, where a reason can be given
+          statement_hash: sha256:6caaf490496b
           reworded:
             - hash: sha256:9878eb8459f2
               at: 2026-09-13

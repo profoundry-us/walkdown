@@ -4,7 +4,7 @@ author: topher
 created: 2026-09-07T14:15:05.861Z
 anchor:
   rule: panel.rules.takes-you-there
-status: addressed
+status: verified
 body: Looks good, but we need to reword "and choosing a blueprint that says
   nothing about this page goes to one it does." to be more clear.
 replies:
@@ -14,3 +14,11 @@ replies:
     body: "panel.rules.takes-you-there rewritten: the last clause now says plainly
       that switching to a blueprint which does not claim the page you are on
       takes you to a page that blueprint does claim. Wording only."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.rules.takes-you-there
+      (2026-09-14T19-03-44Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-14T19-03-44Z-local-01

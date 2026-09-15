@@ -222,7 +222,8 @@ anchor:
   screen: checkout-payment
   element: checkout.email      # anchor ID; optional
 status: open                   # questions: open | answered | incorporated | waived
-                               # notes:     open | addressed | verified | waived
+                               # notes:     open | addressed | verified | settled | recorded | waived
+reason: feedback               # notes only: feedback | finding | observation | request | decision
 body: >
   Should email validation fire on blur, or only on submit? The prototype shows an inline
   error but doesn't indicate when it appears.
@@ -236,9 +237,28 @@ replies:
   folded into the rule's statement or steps (here: a new `then` line about submit-time
   validation). The thread stays as provenance. `walkdown lint` lists threads stuck at
   `answered`.
-- Notes (human feedback pins from the embed) use the same shape with lifecycle
-  `open → addressed → verified`, and may carry `position` (click coordinates relative to
-  the anchored element) and a screenshot path as evidence.
+- Notes use the same shape with lifecycle `open → addressed → verified`, and may carry
+  `position` (click coordinates relative to the anchored element) and a screenshot path
+  as evidence.
+- **A note says why it exists** (`reason`, set when it is filed and never changed — ADR
+  0005), and the reason says what closes it:
+
+  | reason        | filed by                              | what closes it                                              |
+  |---------------|---------------------------------------|-------------------------------------------------------------|
+  | `feedback`    | a person, on a rule or during a sitting | that person's next signed **pass** on the rule, or an explicit verify |
+  | `finding`     | a judge, on a fail (authored `agent`)   | a later signed pass on the rule by a person                  |
+  | `observation` | an agent, in passing (authored `agent`) | the agent marking it `settled`, with the change named        |
+  | `request`     | anyone, to design                       | a person, as ever (`verified` or `waived`)                   |
+  | `decision`    | a person, or an agent typing one        | nothing — filed `recorded`, terminal, in no queue            |
+
+  A finding or observation is the machine's own account and is authored `agent`, never
+  filed under the person whose machine it is. A person's words an agent typed are
+  `feedback` under the person's name with `via: agent`. A question carries no reason.
+  When a person passes rule R in a signed walkdown, every `finding` and `feedback` on R
+  that was `addressed` before the pass is written `verified` under the signer's name,
+  with `verified_via: <run id>` and a reply `via: verdict` — the acceptance is theirs,
+  given on the rule rather than on the thread. A fix claimed after the pass waits for
+  the next look.
 - **`waived`** is the terminal "reviewed and deliberately not acting on this" state for
   both kinds — the construction term for a punch-list item accepted as-is. Waiving is a
   decision, not neglect: it requires `waived_by: <person>` and a reply stating the reason
@@ -246,13 +266,14 @@ replies:
   and stop counting against lint, but remain as provenance.
 - **Transitions are validated, and mutation goes through one path** (the `walkdown
   thread` CLI, the serve API, and the panel all use it): notes move
-  `open → addressed → verified | reopen | waived`, questions
+  `open → addressed → verified | settled | reopen | waived`, questions
   `open → answered → incorporated | reopen | waived`. Reopening (back to `open`) and
-  waiving require a reason, recorded as a reply. The governance rule that keeps the
-  ledger trustworthy: **agents may set `addressed`, `answered`, and `incorporated` —
-  the states that mean work was done. Only a named human may set `verified` or
-  `waived` — the states that mean a person judged it.** An agent can claim, never
-  self-accept.
+  waiving require a reason, recorded as a reply; only an `observation` may be
+  `settled`. The governance rule that keeps the ledger trustworthy: **agents may set
+  `addressed`, `settled`, `answered`, and `incorporated` — the states that mean work
+  was done. Only a named human may set `verified` or `waived` — the states that mean a
+  person judged it** — and a person's signed pass on the rule counts as that judgment
+  for the findings and feedback it answered. An agent can claim, never self-accept.
 
 ## Extraction is a merge
 

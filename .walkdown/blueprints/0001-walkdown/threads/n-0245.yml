@@ -68,3 +68,4 @@ replies:
       steps. The check in checks/panel.spec.js asserts the disclosure has no
       detail.steps ancestor - which is the assertion that would have failed
       before.
+reason: finding

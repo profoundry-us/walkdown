@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-03T01:37:16.598Z
 anchor:
   rule: locations.default.records-follow-the-spec
-status: addressed
+status: verified
 body: "Seen in passing while judging locations.answer.one-walkdown-answers (run
   2026-09-03T01-26-23Z-local-01); did not decide that verdict. 'walkdown project
   add blueprint2 --id alpha-two', run from inside a pack whose committed
@@ -39,3 +39,11 @@ replies:
       absolute path; --ephemeral lists it personally with ~-spelled paths and no
       root. Test: test/locations.test.js 'project add writes the entry the way
       init does'."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on locations.default.records-follow-the-spec
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

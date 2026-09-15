@@ -4,7 +4,7 @@ author: topher
 created: 2026-09-02T19:55:58.747Z
 anchor:
   rule: locations.answer.one-walkdown-answers
-status: addressed
+status: verified
 body: >-
   A server's project picker is computed from where the served blueprint SITS,
   not from the `.walkdown` that answered where the server was started — so a
@@ -74,3 +74,11 @@ replies:
       was started declares, wherever the served spec sits" rebuilds your
       monorepo fixture and asserts offers = [reach, root-proj], ?bp=alpha-two
       404 on read and on write, ?bp=root-proj 200. Claiming, not accepting.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on locations.answer.one-walkdown-answers
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

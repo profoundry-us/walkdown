@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-06T01:36:42.426Z
 anchor:
   rule: threads.lifecycle.claim-never-accept
-status: addressed
+status: verified
 body: >-
   The HTTP door drops any `via` longer than 40 characters, and the acceptance
   goes through.
@@ -63,3 +63,11 @@ replies:
       disk is byte-identical afterwards. The existing via test lost its
       assertion that a non-string is silently dropped — that assertion was the
       bug."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on threads.lifecycle.claim-never-accept
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

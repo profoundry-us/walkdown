@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-01T11:55:52.612Z
 anchor:
   rule: locations.answer.declared-not-discovered
-status: addressed
+status: verified
 body: |-
   The last THEN — "The shared config and the personal one are both consulted, and the report says which answered" — fails: the report affirmatively credits the file that did not answer.
 
@@ -69,3 +69,11 @@ replies:
 
 
       Claiming, not accepting — the agent cell still needs a re-judging.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on locations.answer.declared-not-discovered
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

@@ -4,7 +4,7 @@ author: topher
 created: 2026-08-24T05:16:20Z
 anchor:
   rule: panel.dock.own-skin
-status: addressed
+status: verified
 body: Add a settings icon at the top left, left of the walkdown logo, with a
   popup for playing with the desk-ruling controls. I want to fine-tune the look
   in the browser and report back defaults, and people should be able to
@@ -37,3 +37,11 @@ replies:
       Folded into panel.dock.own-skin: how the paper lies is the reviewer own
       taste, persists across sessions, and changes nothing about what gets
       verified.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.dock.own-skin
+      (2026-09-07T19-15-43Z-local-01).
+reason: feedback
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

@@ -4,7 +4,7 @@ author: Topher Fangio
 created: 2026-08-27T02:41:04Z
 anchor:
   rule: panel.rules.evidence-visible
-status: addressed
+status: verified
 body: The "Screens" row needs to be a bullet line under the agent evidence row.
   Name it "Screenshots" and give me a link with a way to open them (in a modal).
   Also, add a "checks" evidence to this rule.
@@ -38,3 +38,11 @@ replies:
       the rule saying both of these; the statement is unchanged. Verified: the
       check fails against the old build and passes now, in recorded run
       2026-08-27T05-00-07Z-local-01.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.rules.evidence-visible
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01
