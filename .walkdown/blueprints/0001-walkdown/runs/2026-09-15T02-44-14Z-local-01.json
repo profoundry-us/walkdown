@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-09-15T02-44-14Z-local-01",
+  "created": "2026-09-15T02:44:14Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "0e9eeff-dirty",
+  "spec_hash": "sha256:54a6f3b4cdc1",
+  "results": [
+    {
+      "rule": "threads.lifecycle.says-why-it-exists",
+      "status": "pass",
+      "statement_hash": "sha256:5bb935c7abc6",
+      "evidence": [
+        "runs/evidence/2026-09-15T02-44-14Z/probe-cli.txt",
+        "runs/evidence/2026-09-15T02-44-14Z/probe-cli-decision.txt",
+        "runs/evidence/2026-09-15T02-44-14Z/probe-api.txt",
+        "runs/evidence/2026-09-15T02-44-14Z/probe-api-decision.txt",
+        "runs/evidence/2026-09-15T02-44-14Z/probe-unit-test.txt"
+      ],
+      "reasoning": "Re-judge of n-0295 (an empty --reason slipped past the default and the vocabulary, so a machine's note landed reason-less under the person's name), done on the scratch copy rejudge-0915 served on :4730 with its own home; GET /api/blueprint named project rejudge-0915 before any write. The fix holds on both doors: from the CLI, --as-agent --reason \"\" (n-0301) and --reason \"   \" (n-0302) now file reason: observation, author: agent, no via, and a person's --reason \"\" (n-0300) files feedback under the person; through POST /api/threads the same four cases (n-0318, n-0319, n-0320, and reason: null n-0322) land identically on disk. Every other claim held as well: each of the five known words is carried as given; bogus and Finding are refused on both doors (CLI exit 1, API 400), and non-string reasons (0, false, an array) are refused with 'reason must be a word'; a finding or observation is authored agent with no via whether the person or the agent gave the word, while feedback dictated --as-agent keeps author person plus via: agent; a decision files status: recorded from both doors (n-0309, n-0328) and refuses open, addressed, verified, waived and recorded via CLI --status/--reopen/--verify/--waive and via /api/threads/<id>/status, staying recorded on disk; a question files with no reason field and refuses a given one on both doors (an empty reason on a question is treated as unsaid and accepted). test/thread-reasons.test.js, tagged to this rule, passes and asserts the blank case for a machine and a person. Two things n-0295 noted in passing still stand and are not this rule's claim: the CLI refuses with an uncaught stack trace rather than one sentence, and its --json echo prints by: <person> and via: agent for a note whose file says author: agent.",
+      "threads": []
+    }
+  ]
+}
