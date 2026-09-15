@@ -1,0 +1,51 @@
+{
+  "run_id": "2026-09-15T18-01-55Z-local-01",
+  "created": "2026-09-15T18:01:55Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "38f4213-dirty",
+  "spec_hash": "sha256:bab5836d4d22",
+  "results": [
+    {
+      "rule": "threads.conversation.one-stream",
+      "status": "pass",
+      "statement_hash": "sha256:d3d0b129a2e7",
+      "evidence": [
+        "runs/evidence/2026-09-15T18-01-55Z/probe-output.txt",
+        "runs/evidence/2026-09-15T18-01-55Z/probe-script.mjs.txt",
+        "runs/evidence/2026-09-15T18-01-55Z/panel-scroll-probe.txt",
+        "runs/evidence/2026-09-15T18-01-55Z/panel-scroll-probe-script.mjs.txt",
+        "runs/evidence/2026-09-15T18-01-55Z/embed-card-hover-rule-corner.png",
+        "runs/evidence/2026-09-15T18-01-55Z/embed-card-hover-rule-midpage.png",
+        "runs/evidence/2026-09-15T18-01-55Z/embed-card-hover-thread-away-corner.png",
+        "runs/evidence/2026-09-15T18-01-55Z/embed-card-hover-thread-away-midpage.png",
+        "runs/evidence/2026-09-15T18-01-55Z/embed-card-hover-thread-here.png",
+        "runs/evidence/2026-09-15T18-01-55Z/embed-card-focus-corner.png",
+        "runs/evidence/2026-09-15T18-01-55Z/embed-card-focus-midpage.png",
+        "runs/evidence/2026-09-15T18-01-55Z/embed-card-focus-after-scroll-long.png",
+        "runs/evidence/2026-09-15T18-01-55Z/embed-card-hidden-after-pointer-scroll.png",
+        "runs/evidence/2026-09-15T18-01-55Z/embed-card-escape-corner.png",
+        "runs/evidence/2026-09-15T18-01-55Z/embed-card-escape-midpage.png",
+        "runs/evidence/2026-09-15T18-01-55Z/embed-popover-n-0300-corner.png",
+        "runs/evidence/2026-09-15T18-01-55Z/embed-popover-n-0303-midpage.png",
+        "runs/evidence/2026-09-15T18-01-55Z/embed-popover-n-0305-long.png",
+        "runs/evidence/2026-09-15T18-01-55Z/embed-popover-n-0299-opened.png",
+        "runs/evidence/2026-09-15T18-01-55Z/embed-link-out-target.png",
+        "runs/evidence/2026-09-15T18-01-55Z/panel-thread-n-0300.png",
+        "runs/evidence/2026-09-15T18-01-55Z/panel-card-hover-thread.png",
+        "runs/evidence/2026-09-15T18-01-55Z/panel-card-hover-rule.png",
+        "runs/evidence/2026-09-15T18-01-55Z/panel-card-focus.png",
+        "runs/evidence/2026-09-15T18-01-55Z/panel-card-escape.png",
+        "runs/evidence/2026-09-15T18-01-55Z/panel-thread-n-0305-top.png",
+        "runs/evidence/2026-09-15T18-01-55Z/panel-card-focus-after-scroll.png",
+        "runs/evidence/2026-09-15T18-01-55Z/panel-cont-hover-time.png",
+        "runs/evidence/2026-09-15T18-01-55Z/panel-rule-detail-threads.png",
+        "runs/evidence/2026-09-15T18-01-55Z/panel-thread-n-0001-day-boundary.png"
+      ],
+      "reasoning": "Re-judged 2026-09-15 after the n-0299 fix (card z-order beside a pin; card surviving the scroll that focus causes), on the scratch copy rejudge-0298 served at :4730 (GET /api/blueprint names project rejudge-0298; the panel shows a 'Stale server' banner because the copy's server process predates the rebuild, but it reads panel.js and embed.js from disk per request and the measured styles are the rebuilt ones). Both halves of the fix hold. Beside a pin, the card is now z-index 2147483647 against the popover's 99999, both direct children of the shadow root so the same stacking context and DOM order no longer decides; measured on the standalone stand-in at 1280x800 the card still overlaps the popover by 83% (corner pin n-0300), 69% (mid-page n-0303) and 44% (n-0305), and in every screenshot it is the card that is readable in full and the popover's text and reply box that go beneath it (embed-card-hover-rule-corner.png, -midpage.png, embed-card-focus-after-scroll-long.png); card and popover share a background so pixel sampling proved nothing on its own and the screenshots carry the paint order. Focus that scrolls: on n-0305 (a 70-line body filed on the copy so its ids start out of view) Shift+Tab from the reply box onto n-0001 logs focusin, then the stream's scroll, then the card shown, on the popover (probe-output.txt, 'embed n-0305 events') and in the panel with its stream first scrolled to the top (panel-scroll-probe.txt); the card sits at the reference's edge after the scroll, and follows a second Shift+Tab onto n-0299. A card shown under a resting pointer still hides when a wheel scroll moves the id out from under it, on both surfaces. Everything else the statement claims reads as it did in 2026-09-15T17-38-09Z-local-01: the card carries id, verdict chip, statement and open-thread count for a rule, and id, reason and status chips, author, age, reply count and first paragraph for a thread, with 'Opens in walkdown, in a new tab' only on links that leave (panel ids are in-panel buttons and carry no such line); ~800 ms rest under the pointer, at once under keyboard focus; Escape hides the card and leaves focus and the popover alone; a rule id beside a pin is an <a target=_blank> to /?bp=<key>&rule=<id> and opens walkdown's own page on that rule in a new tab (embed-link-out-target.png), while n-0299, pinned on the same page, is a button that opens in the popover; the opening note is a wd-msg like every reply with avatar, name and relative time; the same author's second reply is a wd-msg.cont with avatar hidden, no name, and its time visibility:hidden at rest and visible on hover; paragraph and single line breaks in n-0300 survive; n-0001 draws 'Aug 20' and 'Today' day dividers; the rule-detail thread list is transparent rows split by a 1px hairline with no radius, shadow or rail. Fixtures n-0304 (an unpinned stray from a mis-shaped POST) and n-0305 were filed on the copy only; the previous judge's n-0299..n-0303 were reused. No finding filed.",
+      "threads": []
+    }
+  ]
+}
