@@ -115,6 +115,9 @@ import { icon } from './icons.js';
   // The rule ids this blueprint knows, so a rule named in a message can be
   // told from prose (MSG.linkRefs). Filled with the blueprint.
   let ruleIds = [];
+  // The key of the blueprint the server answered with, for a link out from a
+  // page that never said which one it belongs to.
+  let blueprintKey = '';
 
   const $anchors = () => [...document.querySelectorAll(`[${ANCHOR_ATTR}]`)];
   const anchorId = (el) => el.getAttribute(ANCHOR_ATTR);
@@ -443,7 +446,30 @@ import { icon } from './icons.js';
         };
         continue;
       }
-      ref.replaceWith(ref.textContent);
+      /*
+       * A rule, or a thread not pinned on this page: this popover has no
+       * screen for either, but the panel does, at an address of its own -
+       * walkdown's page with `?rule=` or `?thread=` - so the id links out
+       * to it, in a new tab, the way the evidence key does (n-0297). It
+       * was plain words before that address existed; now it names the
+       * thing and opens it.
+       */
+      const out = new URL(api('/'));
+      // Named by key even where this page never said which blueprint: the
+      // answer the server gave says which one it was.
+      if (!out.searchParams.get('bp') && blueprintKey) out.searchParams.set('bp', blueprintKey);
+      if (ref.dataset.ruleRef) out.searchParams.set('rule', ref.dataset.ruleRef);
+      else out.searchParams.set('thread', ref.dataset.threadRef);
+      const a = document.createElement('a');
+      a.className = ref.className;
+      a.textContent = ref.textContent;
+      a.href = out.href;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      if (ref.dataset.ruleRef) a.dataset.ruleRef = ref.dataset.ruleRef;
+      else a.dataset.threadRef = ref.dataset.threadRef;
+      a.title = `Open ${ref.textContent} in walkdown`;
+      ref.replaceWith(a);
     }
     // Open at the newest message, the way you left a conversation - reading a
     // thread from its top means scrolling past what you already know.
@@ -892,6 +918,7 @@ import { icon } from './icons.js';
           blueprint = data;
           identity = data.identity ?? null;
           ruleIds = (data.rows ?? []).map((r) => r.rule);
+          blueprintKey = data.key ?? '';
           MSG.zone = identity?.timezone ?? null;
           resolve();
         })

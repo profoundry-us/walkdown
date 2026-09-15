@@ -658,6 +658,26 @@ stories:
               at: 2026-09-14T02:38:10Z
               why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
+      - id: panel.start.address-opens-what-it-names
+        origin: thread:n-0297
+        created_at: 2026-09-15
+        statement: walkdown's own page opens what its address names - a rule, or a thread - so a link from outside the panel has somewhere to arrive.
+        because: An id beside a pin, or in a run record pasted anywhere, is only a link if there is an address that opens the thing it names.
+        history: The standalone popover put rule ids and unpinned thread ids back to plain words because the panel had no address for them (n-0294, n-0297); the address is what lets them be links again.
+        signoff: [eng, product]
+        screens: [rule-detail, thread-panel]
+        steps:
+          given:
+            - A running server, and a blueprint named by `?bp=` on walkdown's own page
+          when:
+            - Open that page with `?rule=<id>` or `?thread=<id>` in its address, with or without a page to review named in the fragment
+          then:
+            - With a rule named, the board opens on that rule's detail
+            - With a thread named, the board opens on that thread, over its rule's detail so Back lands somewhere that makes sense
+            - An id the blueprint does not know says so, rather than opening nothing
+            - Opened once on arrival - moving on inside the panel is not undone
+          statement_hash: sha256:682e1f446062
+
   - id: panel.rules
     title: The rules are one tap away, and so is the way back
     statement: As a reviewer, I can see every rule, open one for detail, and move between them without losing my place.

@@ -2560,3 +2560,39 @@ test('a project with one claimant among several is asked the several question, i
   await expect(notice).not.toContainText(/choosing for you/);
   await page.unrouteAll({ behavior: 'ignoreErrors' });
 });
+
+/*
+ * walkdown's own page opens what its address names (n-0297): `?rule=` lands
+ * on that rule, `?thread=` on that thread over its rule, an unknown id says
+ * so. The address is what lets an id beside a pin be a link out.
+ */
+test("walkdown's own address opens the rule or thread it names, once", {
+  tag: '@rule:panel.start.address-opens-what-it-names',
+}, async ({ page }) => {
+  const { rows, threads } = await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json();
+  const thread = threads.find((t) => t.anchor?.rule && rows.some((r) => r.rule === t.anchor.rule));
+  const rule = rows.find((r) => r.rule !== thread.anchor.rule).rule;
+
+  // A rule, with no page to review named: the board opens on it.
+  await page.goto(`${WD_ORIGIN}/?bp=blueprint&rule=${encodeURIComponent(rule)}`);
+  await expect(page.getByTestId('detail.rule-id')).toHaveText(rule);
+
+  // A thread: opened over its rule's detail, so Back lands there.
+  await page.goto(`${WD_ORIGIN}/?bp=blueprint&thread=${thread.id}`);
+  await expect(page.getByTestId('thread.provenance')).toContainText(thread.id);
+  await page.getByTestId('thread.close').click();
+  await expect(page.getByTestId('detail.rule-id')).toHaveText(thread.anchor.rule);
+
+  // Once: moving on inside the panel is not undone by the address. The
+  // panes slide, so "on the list" is the track standing at the list.
+  await page.getByTestId('detail.back').click();
+  const track = page.locator('.wdp-track');
+  await expect.poll(() => track.evaluate((el) => el.style.transform)).toMatch(/translateX\(0%\)/);
+  await page.waitForTimeout(500);
+  expect(await track.evaluate((el) => el.style.transform)).toMatch(/translateX\(0%\)/);
+
+  // An id the blueprint does not know is said, not silently nothing.
+  await page.goto(`${WD_ORIGIN}/?bp=blueprint&rule=no.such.rule`);
+  await expect(page.locator('.toast', { hasText: 'No rule no.such.rule here' })).toBeVisible();
+  await expect.poll(() => page.locator('.wdp-track').evaluate((el) => el.style.transform)).toMatch(/translateX\(0%\)/);
+});

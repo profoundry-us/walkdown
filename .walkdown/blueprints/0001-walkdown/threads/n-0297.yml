@@ -5,7 +5,7 @@ author: agent
 created: 2026-09-15T02:35:24.023Z
 anchor:
   rule: threads.conversation.one-stream
-status: open
+status: addressed
 body: "Re-judged 2026-09-15 after the n-0294 fix, on the scratch copy judge-0915
   at :4730. The fix holds for everything its reply claims: beside a pin on the
   standalone stand-in, a fixture (n-0313 in the copy, position-pinned, no
@@ -47,3 +47,17 @@ body: "Re-judged 2026-09-15 after the n-0294 fix, on the scratch copy judge-0915
   runs/evidence/2026-09-15T02-35-01Z/one-stream-panel-thread-n-0313-from-pin.pn\
   g, runs/evidence/2026-09-15T02-35-01Z/one-stream-panel-probe.json,
   runs/evidence/2026-09-15T02-35-01Z/one-stream-source-check.txt"
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-15T16:41:13Z
+    body: "Option 2, Topher's call 2026-09-15: the panel has an address now.
+      walkdown's own page opens what ?rule=<id> or ?thread=<id> names
+      (lib/viewer/review.html hands it to the panel, which opens it once on
+      arrival; an unknown id is said in a toast). Beside a pin, a rule id or a
+      thread not pinned on the page is an <a> to that address in a new tab,
+      named by the key the server answered with (GET /api/blueprint now carries
+      key). New rule panel.start.address-opens-what-it-names with a check;
+      one-stream gained a step for the link out (fresh hash);
+      checks/embed.spec.js now follows both links into the panel. The tooltip
+      you wanted before the click is filed as n-0298, a design request."

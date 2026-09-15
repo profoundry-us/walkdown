@@ -184,7 +184,12 @@ project containing its working directory. The server and the panel tell blueprin
 by **where the spec is**, never by id: each blueprint the server offers carries a `key`,
 the canonical spec directory; `?bp=` accepts a key, or an id when exactly one blueprint
 answers to it, and refuses a bare id two answer to with the candidates named rather than
-picking one (n-0173).
+picking one (n-0173). The same page opens what the rest of its address names:
+`?rule=<id>` lands on that rule's detail and `?thread=<id>` on that thread over its rule,
+with or without a page to review in the fragment — the address an id beside a pin, or in
+a run record pasted anywhere, links out to (n-0297). `GET /api/blueprint` answers with the
+`key` it resolved, so a page that never said which blueprint it belongs to can still name
+it when it links out.
 
 Identity is never taken from a manifest. A committed file naming a person would be wrong
 on every machine but one.

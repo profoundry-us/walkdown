@@ -444,7 +444,7 @@ test('beside the pin, an id is a link only where the popover can open it', {
   };
   const first = await file('The first pin, referred to by the second.');
   const second = await file(
-    `Refs: ${first}, rule threads.conversation.one-stream, and runs/evidence/2026-09-14T19-09-05Z/one-stream-source-check.txt`,
+    `Refs: ${first}, n-0001 (not pinned here), rule threads.conversation.one-stream, and runs/evidence/2026-09-14T19-09-05Z/one-stream-source-check.txt`,
   );
 
   // The stand-in on its own, top-level: no panel, so the dot opens the
@@ -463,9 +463,28 @@ test('beside the pin, an id is a link only where the popover can open it', {
   const ev = popover.locator('[data-evidence-ref]');
   await expect(ev).toHaveAttribute('href', /\/evidence\/runs\/evidence\/2026-09-14T19-09-05Z\//);
   await expect(ev).toHaveAttribute('target', '_blank');
-  // The rule id is prose here: nothing in this popover can open a rule.
-  await expect(popover.locator('[data-rule-ref]')).toHaveCount(0);
-  await expect(popover).toContainText('threads.conversation.one-stream');
+  // A rule id, and a thread not pinned on this page: nothing in this popover
+  // can open them, so they link OUT to the panel at its own address, in a
+  // new tab (n-0297) - never a link that does nothing.
+  const ruleRef = popover.locator('[data-rule-ref]');
+  await expect(ruleRef).toHaveCount(1);
+  await expect(ruleRef).toHaveJSProperty('tagName', 'A');
+  // Named by KEY, the one spelling the server never has to guess at, since
+  // this page never said which blueprint it belongs to.
+  await expect(ruleRef).toHaveAttribute('href', new RegExp(`^${WD_ORIGIN}/\\?bp=.*0001-walkdown.*&rule=threads\\.conversation\\.one-stream$`));
+  await expect(ruleRef).toHaveAttribute('target', '_blank');
+  const away = popover.locator('[data-thread-ref="n-0001"]');
+  await expect(away).toHaveJSProperty('tagName', 'A');
+  await expect(away).toHaveAttribute('href', new RegExp(`^${WD_ORIGIN}/\\?bp=.*&thread=n-0001$`));
+  // And the address the link names opens the thing: the panel, on that rule.
+  const ruleHref = await ruleRef.getAttribute('href');
+  const there = await page.context().newPage();
+  await there.goto(ruleHref);
+  await expect(there.getByTestId('detail.rule-id')).toHaveText('threads.conversation.one-stream');
+  await there.goto(await away.getAttribute('href'));
+  await expect(there.getByTestId('thread.body')).toBeVisible();
+  await expect(there.getByTestId('thread.provenance')).toContainText('n-0001');
+  await there.close();
   // The other pin's id opens that pin's conversation, in the same popover.
   const ref = popover.locator(`[data-thread-ref="${first}"]`);
   await expect(ref).toHaveCount(1);

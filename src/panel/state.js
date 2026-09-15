@@ -90,6 +90,7 @@ export const S = {
   claimants: [],
   picking: false, // the project modal is up
   jumpOnLoad: false, // set when a blueprint is chosen by hand, spent once it has loaded
+  openedFromAddress: false, // `?rule=` / `?thread=` on walkdown's own page, honoured once
   servedRoot: null, // the folder the server reports it is serving
   listTab: 'rules', // blueprints | rules | threads — what the side lists
 

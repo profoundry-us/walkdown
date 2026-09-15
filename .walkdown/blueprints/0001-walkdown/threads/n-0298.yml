@@ -1,0 +1,19 @@
+id: n-0298
+kind: note
+reason: request
+author: topher
+via: agent
+created: 2026-09-15T16:38:09.178Z
+anchor:
+  rule: threads.conversation.one-stream
+  screen: thread-panel
+status: open
+body: "Topher, 2026-09-15, on choosing the routable address for n-0297: an id
+  that links out of the popover (and the panel) should probably show a small
+  tooltip before you click - a little about the thing it names, the way a PR
+  link on GitHub previews the PR (title, state, who, how long ago). For a rule:
+  its statement and current verdict; for a thread: its kind, status, author and
+  first line. Both surfaces render ids through the one shared MSG renderer, so
+  one tooltip would serve both. Filed as a design request rather than built:
+  what the card holds, and whether it is a hover or a focus affordance, is a
+  design decision."

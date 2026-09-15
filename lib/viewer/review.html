@@ -43,11 +43,20 @@
    * `?bp=` still overrides, because naming one is a decision already made.
    */
   const asked = decodeURIComponent(location.hash.slice(1));
-  const bp = new URLSearchParams(location.search).get('bp') ?? '';
+  const params = new URLSearchParams(location.search);
+  const bp = params.get('bp') ?? '';
+  /*
+   * And what to open once the board is up: `?rule=<id>` lands on that rule's
+   * detail, `?thread=<id>` on that thread - the address a link from outside
+   * the panel can use, which is what lets an id beside a pin be a link to
+   * the thing it names (n-0297). Spent once the panel has opened it.
+   */
+  const open = { rule: params.get('rule') ?? '', thread: params.get('thread') ?? '' };
 
   window.__walkdownConfig = {
     server: location.origin,
     ...(bp ? { bp } : {}),
+    ...(open.rule || open.thread ? { open } : {}),
     // What makes this the framed delivery rather than the docked one. Without
     // a page to frame it is the docked one, over walkdown's own root.
     ...(asked ? { frame: { url: new URL(asked, location.href).href } } : {}),

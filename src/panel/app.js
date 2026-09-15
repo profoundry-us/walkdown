@@ -2695,6 +2695,26 @@ export async function start() {
   MSG.zone = S.data?.identity?.timezone ?? null;
   await loadSeen();
   await restoreSession();
+  /*
+   * The address named a rule or a thread (`?rule=`, `?thread=` on
+   * walkdown's own page): open it, once. A link from outside the panel - an
+   * id beside a pin, a run record pasted somewhere - has nowhere else to
+   * arrive. A thread opens on its rule's detail so Back lands somewhere
+   * sensible; an id the board does not know says so rather than opening
+   * nothing.
+   */
+  const asked = cfg.open;
+  if (asked && !S.openedFromAddress) {
+    S.openedFromAddress = true;
+    if (asked.thread) {
+      const th = (S.data?.threads ?? []).find((x) => x.id === asked.thread);
+      if (th?.anchor?.rule) open(th.anchor.rule);
+      openThreadView(asked.thread);
+    } else if (asked.rule) {
+      if (S.data?.rows?.some((r) => r.rule === asked.rule)) open(asked.rule);
+      else toast(`No rule ${esc(asked.rule)} here.`, { tone: 'error' });
+    }
+  }
   if (S.jumpOnLoad) {
     S.jumpOnLoad = false;
     /*

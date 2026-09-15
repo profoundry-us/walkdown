@@ -188,7 +188,8 @@ stories:
             - Line breaks written into a message survive, and a day boundary is drawn between messages
             - The two deliveries render a thread the same way, from one shared implementation rather than two lookalikes
             - Thread and rule ids written inside a message are links to the thing they name
-          statement_hash: sha256:ac7dee24993b
+            - Beside a pin, an id the popover cannot open itself links out to walkdown's own page at that thing's address, in a new tab - never a link that does nothing
+          statement_hash: sha256:6da491b71591
           reworded:
             - hash: sha256:e58134b3796f
               at: 2026-09-13
