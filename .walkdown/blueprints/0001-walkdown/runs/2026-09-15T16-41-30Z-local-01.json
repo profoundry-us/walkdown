@@ -1,0 +1,31 @@
+{
+  "run_id": "2026-09-15T16-41-30Z-local-01",
+  "created": "2026-09-15T16:41:30Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "d7008ff-dirty",
+  "spec_hash": "sha256:4a41f752f6cf",
+  "results": [
+    {
+      "rule": "threads.conversation.one-stream",
+      "status": "pass",
+      "statement_hash": "sha256:6da491b71591",
+      "evidence": [
+        "runs/evidence/2026-09-15T16-41-30Z/one-stream-embed-popover-n-0300-top.png",
+        "runs/evidence/2026-09-15T16-41-30Z/one-stream-embed-popover-n-0300-hover-cont.png",
+        "runs/evidence/2026-09-15T16-41-30Z/one-stream-embed-popover-after-ref-n-0299.png",
+        "runs/evidence/2026-09-15T16-41-30Z/one-stream-linkout-rule-lands-in-panel.png",
+        "runs/evidence/2026-09-15T16-41-30Z/one-stream-linkout-thread-lands-in-panel.png",
+        "runs/evidence/2026-09-15T16-41-30Z/one-stream-panel-thread-n-0300.png",
+        "runs/evidence/2026-09-15T16-41-30Z/one-stream-panel-thread-n-0133-top.png",
+        "runs/evidence/2026-09-15T16-41-30Z/one-stream-panel-rule-detail-collapsed-threads.png",
+        "runs/evidence/2026-09-15T16-41-30Z/one-stream-probe.json",
+        "runs/evidence/2026-09-15T16-41-30Z/one-stream-source-check.txt"
+      ],
+      "reasoning": "Re-judged 2026-09-15 after the n-0297 fix (its last reply: walkdown's own page opens ?rule=/?thread=, and beside a pin an id the popover cannot open links out there in a new tab), on the scratch copy rejudge-0297 served at :4730 (GET /api/blueprint named the copy before any page was trusted). Fixtures filed through the copy's API: n-0299 and n-0300 position-pinned on /stand-in/review, n-0300 naming n-0299, n-0133 (not pinned there), the rule threads.conversation.append-only and an evidence key, with three replies (two same-author, one via agent). Beside the pin, the popover renders n-0299 as a live ref (clicking it swaps the popover to that pin, with its single line break kept as one <br>), while n-0133 and the rule id are real <a target=_blank rel=noopener> elements titled 'Open ... in walkdown' whose hrefs are http://localhost:4730/?bp=<the key /api/blueprint answered with>&thread=n-0133 and &rule=threads.conversation.append-only; the evidence key is an <a> to /evidence/<key> (server answers 200). I followed both hrefs into new tabs of the in-app browser and again in a fresh headless context with no remembered pick: the rule address lands on the rule detail whose detail.rule-id reads threads.conversation.append-only, and the thread address opens n-0133 in the thread pane under '← nothing-in-the-tree' with Aug 31 / Sep 1 / Sep 2 day boundaries drawn - no link beside the pin does nothing. Everything else the statement claims holds, measured in both deliveries: rows are .wd-msg with face, name, time and text, and the opening note is the first of them with the same shape; the two same-author follow-ups are .wd-msg.cont with no .wd-who, tile and time visibility:hidden at rest, and a real hover on the second row flips only that row's time to visible (the via-agent reply starts a new run and shows name and tile again); a 'Today' day marker heads the fixture; n-0133's 7 messages render in file order with 4m26s gaps grouped and the 5m00s gap not. On the rule detail the collapsed rows are the first message with face, name, via, time, id, reason and status in words, faces, '6 replies' and 'Last reply Sep 2 at 8:30 PM' underneath, divided by a 1px oklch(... / 0.1) top hairline with transparent background, 0 radius, no shadow and no left rail. In the panel the same body makes every thread and rule id a live button (n-0133 opened its thread, the rule id opened its detail) and the evidence key opens the file in the panel's own viewer. Both deliveries import MSG from lib/message-stream.js (source-check.txt); the embed's replacement of an unopenable ref with the link is at src/embed/index.js:449-472. One thing seen and left out of the verdict: opened with the short ?bp=blueprint id in a fresh browser (no remembered pick) the panel stays at its bare root with the chrome hidden, whereas the full-key address the link emits renders at once - not a claim of this rule, and the link never emits the short form. The n-0299 in-prose ref still reads as plain text until hovered (n-0298, already filed).",
+      "threads": []
+    }
+  ]
+}
