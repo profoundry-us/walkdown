@@ -555,6 +555,28 @@ test('a pass older than the fix claimed on its rule is marked, and owed to the a
   assert.equal(attention.find((i) => i.action === 'verify')?.unjudged, true);
 });
 
+test('the verdict reply that closed a thread is not a fix the pass missed @rule:threads.lifecycle.closes-where-it-was-asked', () => {
+  // A signed pass on 02-03 closed the thread and wrote its own reply, dated
+  // after the agent's pass; the fix itself was claimed on 02-02, before it.
+  const closed = {
+    ...note('n-1', 'verified', '2026-02-02T00:00:00Z'),
+    verified_by: 'topher',
+    replies: [
+      { author: 'topher', created: '2026-02-02T00:00:00Z', body: 'fixed' },
+      { author: 'topher', via: 'verdict', created: '2026-02-04T00:00:00Z', body: "Verified by topher's pass." },
+    ],
+  };
+  const { rows, attention } = deriveStatus(
+    blueprint({
+      verify: ['agent'],
+      runs: [walkdownRun('2026-02-03T00:00:00Z', 'agent', 'pass')],
+      threads: [closed],
+    }),
+  );
+  assert.equal(rows[0].unjudgedFix, null);
+  assert.ok(!attention.some((i) => i.action === 'rejudge'));
+});
+
 test('a pass recorded after the claim is not marked', () => {
   const { rows, attention } = deriveStatus(
     blueprint({
