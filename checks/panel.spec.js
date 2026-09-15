@@ -2614,7 +2614,10 @@ test('an id in a message previews what it names, under the cursor and under focu
   const res = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
     data: {
       kind: 'note',
-      body: `See ${other.id} and ${about.rule} before answering.`,
+      // Long enough that the ids sit out of view once the stream opens at
+      // its newest message: focus has to scroll them in, and the card
+      // has to survive that scroll (n-0299).
+      body: `See ${other.id} and ${about.rule} before answering.\n\n${'A line of context.\n\n'.repeat(40)}That is all.`,
       anchor: { rule: about.rule, screen: 'thread-panel' },
     },
   });
@@ -2642,7 +2645,17 @@ test('an id in a message previews what it names, under the cursor and under focu
   await page.getByTestId('thread.provenance').hover();
   await expect(card).toBeHidden();
 
-  // Under keyboard focus, the same card; Escape takes it away.
+  // Under keyboard focus, the same card - and the ids are out of view, so
+  // the browser scrolls them in on the way, which must not take the card
+  // with it (n-0299). Escape takes it away.
+  await body.evaluate((el) => {
+    el.scrollTop = el.scrollHeight;
+  });
+  await expect.poll(() => body.locator(`[data-thread-ref="${other.id}"]`).evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    const b = el.closest('[data-testid="thread.body"]').getBoundingClientRect();
+    return r.bottom < b.top || r.top > b.bottom;
+  })).toBe(true);
   await body.locator(`[data-thread-ref="${other.id}"]`).focus();
   await page.keyboard.press('Tab');
   await page.keyboard.press('Shift+Tab');

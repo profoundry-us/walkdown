@@ -1,0 +1,43 @@
+{
+  "run_id": "2026-09-15T17-38-09Z-local-01",
+  "created": "2026-09-15T17:38:09Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "8400d5d-dirty",
+  "spec_hash": "sha256:bab5836d4d22",
+  "results": [
+    {
+      "rule": "threads.conversation.one-stream",
+      "status": "fail",
+      "statement_hash": "sha256:d3d0b129a2e7",
+      "evidence": [
+        "runs/evidence/2026-09-15T17-38-09Z/probe-output.txt",
+        "runs/evidence/2026-09-15T17-38-09Z/panel-thread-n-0300.png",
+        "runs/evidence/2026-09-15T17-38-09Z/panel-card-hover-thread.png",
+        "runs/evidence/2026-09-15T17-38-09Z/panel-card-hover-rule.png",
+        "runs/evidence/2026-09-15T17-38-09Z/panel-card-focus.png",
+        "runs/evidence/2026-09-15T17-38-09Z/panel-card-escape.png",
+        "runs/evidence/2026-09-15T17-38-09Z/panel-rule-detail-threads.png",
+        "runs/evidence/2026-09-15T17-38-09Z/panel-thread-n-0001-day-boundary.png",
+        "runs/evidence/2026-09-15T17-38-09Z/embed-popover-n-0300-corner.png",
+        "runs/evidence/2026-09-15T17-38-09Z/embed-card-hover-rule-corner.png",
+        "runs/evidence/2026-09-15T17-38-09Z/embed-card-hover-thread-away-corner.png",
+        "runs/evidence/2026-09-15T17-38-09Z/embed-card-hover-thread-here.png",
+        "runs/evidence/2026-09-15T17-38-09Z/embed-popover-n-0303-midpage.png",
+        "runs/evidence/2026-09-15T17-38-09Z/embed-card-hover-rule-midpage.png",
+        "runs/evidence/2026-09-15T17-38-09Z/embed-card-hover-thread-away-midpage.png",
+        "runs/evidence/2026-09-15T17-38-09Z/embed-card-focus-midpage.png",
+        "runs/evidence/2026-09-15T17-38-09Z/embed-card-escape-midpage.png",
+        "runs/evidence/2026-09-15T17-38-09Z/embed-focus-scroll-probe.txt",
+        "runs/evidence/2026-09-15T17-38-09Z/embed-link-out-probe.txt",
+        "runs/evidence/2026-09-15T17-38-09Z/embed-link-out-target.png",
+        "runs/evidence/2026-09-15T17-38-09Z/embed-popover-n-0299-opened.png",
+        "runs/evidence/2026-09-15T17-38-09Z/probe-script.mjs.txt"
+      ],
+      "reasoning": "Re-judge after n-0298 (the last then-step, the preview card under an id), driven on the scratch copy rejudge-0298 at :4730 (GET /api/blueprint named project rejudge-0298), with fixture threads n-0299..n-0303 filed on the copy only. The earlier steps still hold, re-seen: the rule-detail thread rows are separated by a 1px hairline at 10% opacity with no background, radius, shadow or left rail; the opening note and each reply share the wd-msg shape with face, name and time; a second message from the same author renders as wd-msg.cont with the name and tile dropped and the time visible on hover; a paragraph break and a single line break both survive; a reply 26 days after n-0001's note draws 'Aug 20' and 'Today' day markers; both bundles import lib/message-stream.js and call MSG.hoverCards; ids are links on both surfaces - in-panel buttons in the panel, and beside a pin a button for a thread pinned on the page (it opened n-0299 in the same popover) and an anchor with target=_blank and no title to walkdown's own page for a rule or a thread pinned elsewhere, and a real click opened a second page at ?rule=threads.conversation.one-stream showing detail.rule-id. The new step passes in the panel: the card is hidden at rest, appears ~350 ms after the pointer settles on an id and 4 ms after keyboard focus lands (real Tab), shows for a rule its id, 'pending' verdict chip (correct on the copy, the pass before the re-stamp being stale), statement and '4 open threads', for a thread its id, reason and status chips, author, age, reply count and an elided first paragraph, with 'Opens in walkdown, in a new tab' only on links that leave; Escape hides it and leaves focus on the id. Beside a pin it fails: the card is painted underneath the popover. Measured at 1280x800, card and popover both at z-index 99999 with the card earlier in the DOM, 83% of the card's area under the popover for the corner pin and 69% (rule) / 31% (thread) for the mid-page pin, under hover and under keyboard focus alike; the screenshots show only the strip past the popover's edge, so the card does not say what the id names before you follow it. Secondly, the card's capture-phase scroll listener hides it, so Shift+Tab onto an id that is out of view in the popover's scrolled stream fires focusin, scroll, hidden and no card ever shows, while the same keys with the id in view show it. Finding filed as n-0299.",
+      "threads": ["n-0299"]
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+id: n-0299
+kind: note
+reason: finding
+author: agent
+created: 2026-09-15T17:55:41.920Z
+anchor:
+  rule: threads.conversation.one-stream
+status: addressed
+body: >-
+  Re-judged 2026-09-15 after n-0298 (the preview card under an id), on the
+  scratch copy rejudge-0298 at :4730. The card itself is right on both surfaces
+  - id, verdict chip, statement and open-thread count for a rule; id, reason and
+  status chips, author, age, reply count and first paragraph for a thread;
+  "Opens in walkdown, in a new tab" only where the link leaves; ~350 ms rest
+  under the pointer, at once under keyboard focus, Escape takes it away and
+  leaves focus and the popover alone. The panel passes every step.
+
+
+  Beside a pin it fails: the card is painted UNDER the popover. `MSG.hoverCards`
+  appends the card to the shadow root before the popover overlay exists, places
+  it at the reference's left edge just below it, 304px wide, and gives it
+  z-index 99999 - the same as `.wd-form`, which comes later in the DOM and so
+  paints on top. Measured on the standalone stand-in at 1280x800: 83% of the
+  card's area under the popover for a corner pin
+  (runs/evidence/2026-09-15T17-38-09Z/embed-card-hover-rule-corner.png), 69% for
+  a mid-page pin (embed-card-hover-rule-midpage.png,
+  embed-card-hover-thread-away-midpage.png, embed-card-focus-midpage.png); only
+  the strip past the popover's edge is readable, and a card that overlaps the
+  popover entirely would be invisible. Numbers in probe-output.txt ("card vs
+  popover": coveredPct, cardZ, popoverZ, DOM order).
+
+
+  Smaller, same surface: the card's capture-phase `scroll` listener hides it, so
+  Tab or Shift+Tab onto an id that is out of view in the popover's scrolled
+  stream scrolls it into view and the card never appears
+  (embed-focus-scroll-probe.txt: focusin -> scroll -> hidden, versus the same
+  keys with the ref already in view -> shown). The panel's stream can scroll the
+  same way.
+
+
+  Not a finding, but seen: in the panel a thread id is `link link-hover` in the
+  body's own colour, so at rest it reads as prose and only underlines under the
+  pointer; rule ids are tinted. Fixtures n-0299..n-0303 were filed on the copy
+  only.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-15T18:01:32Z
+    body: Fixed both. The card now sits at z-index 2147483647 - above everything
+      either surface draws, since it is always the last thing summoned - and the
+      embed check asserts it stands above the popover. On scroll the card
+      follows a focused reference instead of hiding (a scroll under focus is the
+      browser bringing the reference into view), and a pending card is left
+      alone so a scroll that lands a reference under a resting pointer does not
+      cancel it; the panel check now files a body long enough that the ids start
+      out of view and asserts the card after focus. Hides on scroll only for a
+      card shown under the pointer, where the reference has moved out from under
+      it.

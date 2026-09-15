@@ -483,6 +483,12 @@ test('beside the pin, an id is a link only where the popover can open it', {
   const card = chrome.locator('[data-testid="ref.preview"]');
   await ruleRef.hover();
   await expect(card).toBeVisible();
+  // Over the popover it was summoned from, not under it (n-0299).
+  const above = await card.evaluate((el, pop) => {
+    const z = (n) => Number(getComputedStyle(n).zIndex) || 0;
+    return z(el) > z(pop);
+  }, await popover.elementHandle());
+  expect(above).toBe(true);
   await expect(card).toContainText('threads.conversation.one-stream');
   await expect(card).toContainText('one stream');
   await expect(card).toContainText('Opens in walkdown');
