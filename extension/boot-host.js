@@ -18,7 +18,14 @@ const target = decodeURIComponent(location.hash.slice(1));
  * pick here, so a reload of the tab comes back to the same board; the
  * button opens a fresh address with no `?bp=`, which asks.
  */
-const bp = new URLSearchParams(location.search).get('bp') ?? '';
+const params = new URLSearchParams(location.search);
+const bp = params.get('bp') ?? '';
+/*
+ * And what to open once the board is up: `?rule=<id>` lands on that rule,
+ * `?thread=<id>` on that thread - the same address the served page reads,
+ * so a link out of a pin's popover arrives here too. Spent once opened.
+ */
+const open = { rule: params.get('rule') ?? '', thread: params.get('thread') ?? '' };
 
 if (!target) {
   document.body.textContent = 'walkdown: no page to review.';
@@ -29,6 +36,7 @@ if (!target) {
     // Asked in the panel, where the descriptions are readable - unless the
     // address already says.
     bp,
+    ...(open.rule || open.thread ? { open } : {}),
     stylesheet: chrome.runtime.getURL('walkdown.css'),
     /*
      * The extension re-injects itself into whatever page loads next — its

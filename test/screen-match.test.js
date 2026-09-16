@@ -106,3 +106,22 @@ test('the extension ships the same panel and embed the server does @rule:panel.d
   const boot = readFileSync(join(root, 'extension', 'boot-host.js'), 'utf8');
   assert.match(boot, /__walkdownConfig/);
 });
+
+/*
+ * The two deliveries of walkdown's own page - the served review.html and the
+ * extension's boot-host.js - read the same address: the blueprint in ?bp=,
+ * what to open in ?rule= and ?thread=, the framed page after #. Each is its
+ * own bootstrap, so a parameter taught to one and not the other is a link
+ * that works from the server and does nothing from the extension - which is
+ * how ?rule= arrived on the extension's page on 2026-09-16 and opened
+ * nothing, while every check passed against the served page.
+ */
+test('both of walkdown\'s own pages read the same address @rule:panel.start.address-opens-what-it-names', () => {
+  const root = new URL('../', import.meta.url).pathname;
+  const served = readFileSync(join(root, 'lib', 'viewer', 'review.html'), 'utf8');
+  const extension = readFileSync(join(root, 'extension', 'boot-host.js'), 'utf8');
+  for (const read of [/\.get\('bp'\)/, /\.get\('rule'\)/, /\.get\('thread'\)/, /location\.hash/]) {
+    assert.match(served, read, `the served page does not read ${read}`);
+    assert.match(extension, read, `the extension's page does not read ${read}`);
+  }
+});
