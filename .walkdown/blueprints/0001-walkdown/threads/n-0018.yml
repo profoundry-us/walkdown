@@ -4,7 +4,7 @@ author: topher
 created: 2026-08-24T01:38:13Z
 anchor:
   rule: panel.delivery.one-switch
-status: addressed
+status: verified
 body: Now that choosing the server and the blueprint lives in the panel, get rid
   of the extension popup. The toolbar button should only show or hide the
   walkdown UI.
@@ -22,4 +22,11 @@ replies:
       Specified as panel.delivery.one-switch, and
       panel.delivery.absent-until-asked was reworded, since 'until a person has
       said which blueprint' is no longer how it gets turned on.
+  - author: topher
+    via: verdict
+    created: 2026-09-16T23:49:49Z
+    body: Verified by topher's pass on panel.delivery.one-switch
+      (2026-09-16T23-49-49Z-local-01).
 reason: feedback
+verified_by: topher
+verified_via: 2026-09-16T23-49-49Z-local-01

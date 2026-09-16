@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-09-16T23-49-49Z-local-01",
+  "created": "2026-09-16T23:49:49Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "f97e99c-dirty",
+  "tree_hash": "sha256:d01c06cf31f8",
+  "spec_hash": "sha256:6651106a58c2",
+  "results": [
+    {
+      "rule": "panel.delivery.one-switch",
+      "status": "pass",
+      "statement_hash": "sha256:2a7b364ef850"
+    }
+  ]
+}

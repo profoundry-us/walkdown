@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-12T02:04:22.625Z
 anchor:
   rule: panel.delivery.one-switch
-status: addressed
+status: verified
 body: "Topher, 2026-09-11: on a blank tab (chrome://newtab), clicking the
   toolbar button does nothing - extension/background.js returns silently when
   the tab has no http(s) origin to frame - and on a real site it works. The
@@ -33,3 +33,10 @@ replies:
       The drained icon title says the same. panel.delivery.one-switch gained a
       step for it (fresh hash - the claim grew), so it will ask for your
       sign-off again.
+  - author: topher
+    via: verdict
+    created: 2026-09-16T23:49:49Z
+    body: Verified by topher's pass on panel.delivery.one-switch
+      (2026-09-16T23-49-49Z-local-01).
+verified_by: topher
+verified_via: 2026-09-16T23-49-49Z-local-01
