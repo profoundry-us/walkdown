@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-14T01:36:10.197Z
 anchor:
   rule: panel.identity.default-actor
-status: addressed
+status: verified
 body: "Time, Topher (2026-09-13): every date walkdown writes is stored as UTC,
   and a person sets their timezone once in their personal config so every time
   reads correctly in their own zone - CLI and panel alike. This should be a
@@ -33,4 +33,11 @@ replies:
       its milliseconds (n-0132). Not done: `created_at` on a rule stays a
       calendar date - it is a date a person wrote, not an instant anything
       stamped.'
+  - author: topher
+    via: verdict
+    created: 2026-09-16T23:00:25Z
+    body: Verified by topher's pass on panel.identity.default-actor
+      (2026-09-16T23-00-25Z-local-01).
 reason: feedback
+verified_by: topher
+verified_via: 2026-09-16T23-00-25Z-local-01

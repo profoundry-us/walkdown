@@ -7,7 +7,7 @@ anchor:
   rule: panel.start.which-project
   screen: project-modal
   element: '[data-testid="project.why"]'
-status: addressed
+status: verified
 body: "The project modal's reason line misreports the case whenever the switcher
   is opened on a page exactly one project claims: it reads \"1 blueprints claim
   this page, in more than one project.\" Judged on a scratch copy served at
@@ -37,4 +37,11 @@ replies:
       this page, in one project." or "... in more than one project." - instead
       of reading one number as the other. The crossing check asserts the
       two-in-one-project wording. Built and 53 browser checks green.'
+  - author: topher
+    via: verdict
+    created: 2026-09-16T23:00:25Z
+    body: Verified by topher's pass on panel.start.which-project
+      (2026-09-16T23-00-25Z-local-01).
 reason: finding
+verified_by: topher
+verified_via: 2026-09-16T23-00-25Z-local-01

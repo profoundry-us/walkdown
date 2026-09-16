@@ -19,7 +19,7 @@ const STATEMENT = 'The visitor can do the thing.';
 // a recorded statement hash to walkdown's stale-check scanner
 const BOGUS_HASH = 'sha256:' + '0'.repeat(12);
 
-function blueprint({ runs = [], threads = [], verify = ['checks'], environments, targets, steps } = {}) {
+function blueprint({ runs = [], threads = [], verify = ['checks'], environments, targets, steps, unverifiable, retired } = {}) {
   return {
     config: { runner: { targets: targets ?? { local: {}, staging: {} } } },
     features: [
@@ -37,6 +37,8 @@ function blueprint({ runs = [], threads = [], verify = ['checks'], environments,
                   verify,
                   ...(steps && { steps }),
                   ...(environments && { environments }),
+                  ...(unverifiable && { unverifiable }),
+                  ...(retired && { retired }),
                 },
               ],
             },
@@ -291,6 +293,68 @@ test('sign-off is not build evidence: approved stays unbuilt and pending, and di
   );
   assert.equal(built.rows[0].built, true);
   assert.equal(owed(built.attention), true);
+});
+
+/*
+ * A rule nothing verifies but a signature - every evidence tier excused. It
+ * can never earn a build verdict, so "built" cannot come from the ledger,
+ * so a signature on it only ever read as approving the wording: pending for
+ * ever, its feedback closable by nobody (one-switch, 2026-09-16). Where the
+ * signature is the whole judgment, it is the verdict.
+ */
+test('where nothing verifies a rule but a signature, the signature is the verdict', () => {
+  const excused = { checks: 'the button is browser chrome', agent: 'no tool an agent drives reaches it' };
+  const signed = deriveStatus(
+    blueprint({
+      verify: [],
+      unverifiable: excused,
+      runs: [walkdownRun('2026-01-02T00:00:00Z', 'topher', 'approved')],
+    }),
+  );
+  assert.equal(signed.rows[0].built, true);
+  assert.deepEqual(signed.rows[0].acceptance.map((a) => [a.role, a.state]), [['eng', 'signed']]);
+  assert.equal(signed.rows[0].verdict, 'pass');
+  // Unsigned, the signature is owed - the one thing that can be.
+  const unsigned = deriveStatus(blueprint({ verify: [], unverifiable: excused }));
+  assert.equal(unsigned.rows[0].verdict, 'pending');
+  assert.ok(unsigned.attention.some((a) => a.who === 'human' && a.action === 'judge' && a.rule === 'demo.main.thing'));
+  // And a rule that is merely unbuilt is not this: agent is asked by default.
+  const unbuilt = deriveStatus(blueprint({ verify: [], runs: [walkdownRun('2026-01-02T00:00:00Z', 'topher', 'approved')] }));
+  assert.equal(unbuilt.rows[0].built, false);
+  assert.equal(unbuilt.rows[0].verdict, 'pending');
+});
+
+/*
+ * The verify queue groups a person's notes under their rule only where a
+ * verdict on the rule is what clears them. A request is verified from its
+ * own screen - a pass leaves it alone - and a note on a retired rule has no
+ * rule to walk; grouped under the rule, each kept the rule in the walk queue
+ * after every pass with nothing there to do (2026-09-16).
+ */
+test('a request, and a note on a retired rule, wait as threads rather than under the rule', () => {
+  const rule = 'demo.main.thing';
+  const live = deriveStatus(
+    blueprint({
+      verify: ['agent'],
+      runs: [walkdownRun('2026-01-01', 'agent', 'pass')],
+      threads: [
+        { id: 'n-1', kind: 'note', reason: 'feedback', status: 'addressed', anchor: { rule } },
+        { id: 'n-2', kind: 'note', reason: 'request', status: 'addressed', anchor: { rule } },
+      ],
+    }),
+  );
+  const verify = (st) => st.attention.filter((i) => i.who === 'human' && i.action === 'verify').map((i) => i.thread ?? `rule:${i.rule}`);
+  assert.deepEqual(verify(live), ['n-2', `rule:${rule}`]);
+  assert.deepEqual(live.attention.find((i) => i.rule === rule && i.action === 'verify' && !i.thread).threads, ['n-1']);
+
+  const retired = deriveStatus(
+    blueprint({
+      retired: '2026-01-01',
+      threads: [{ id: 'n-3', kind: 'note', reason: 'feedback', status: 'addressed', anchor: { rule } }],
+    }),
+  );
+  assert.equal(retired.rows.length, 0);
+  assert.deepEqual(verify(retired), ['n-3']);
 });
 
 test('a build verdict flips built; an approval goes stale when the statement moves', () => {

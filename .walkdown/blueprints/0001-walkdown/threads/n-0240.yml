@@ -4,7 +4,7 @@ author: topher
 created: 2026-09-08T03:09:34.872Z
 anchor:
   rule: locations.pointer.placed-where-agents-read
-status: addressed
+status: verified
 body: This rule is just confusing as hell. I have no idea if we're doing this
   because I can't understand it.
 replies:
@@ -34,4 +34,11 @@ replies:
 
       The statement hash moved with it, so both signatures come back to you -
       which they were owed anyway, since the rule was failing.
+  - author: topher
+    via: verdict
+    created: 2026-09-16T23:00:25Z
+    body: Verified by topher's pass on locations.pointer.placed-where-agents-read
+      (2026-09-16T23-00-25Z-local-01).
 reason: finding
+verified_by: topher
+verified_via: 2026-09-16T23-00-25Z-local-01

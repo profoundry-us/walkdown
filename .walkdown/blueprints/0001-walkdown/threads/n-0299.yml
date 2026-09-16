@@ -5,7 +5,7 @@ author: agent
 created: 2026-09-15T17:55:41.920Z
 anchor:
   rule: threads.conversation.one-stream
-status: addressed
+status: verified
 body: >-
   Re-judged 2026-09-15 after n-0298 (the preview card under an id), on the
   scratch copy rejudge-0298 at :4730. The card itself is right on both surfaces
@@ -56,3 +56,10 @@ replies:
       out of view and asserts the card after focus. Hides on scroll only for a
       card shown under the pointer, where the reference has moved out from under
       it.
+  - author: topher
+    via: verdict
+    created: 2026-09-16T23:00:25Z
+    body: Verified by topher's pass on threads.conversation.one-stream
+      (2026-09-16T23-00-25Z-local-01).
+verified_by: topher
+verified_via: 2026-09-16T23-00-25Z-local-01

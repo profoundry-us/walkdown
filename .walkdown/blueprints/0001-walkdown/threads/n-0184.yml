@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-04T20:53:12.911Z
 anchor:
   rule: locations.default.skills-are-yours-by-default
-status: addressed
+status: verified
 body: >-
   `walkdown skills` on its own never reads the project's standard, so in a
   project whose spec IS committed the on-their-own install lands in the person's
@@ -120,4 +120,11 @@ replies:
 
       Left for you: the eng signature. The prompt itself needs a terminal, so
       what the tests drive is the refusal path and the two explicit doors.
+  - author: topher
+    via: verdict
+    created: 2026-09-16T23:00:25Z
+    body: Verified by topher's pass on locations.default.skills-are-yours-by-default
+      (2026-09-16T23-00-25Z-local-01).
 reason: finding
+verified_by: topher
+verified_via: 2026-09-16T23-00-25Z-local-01

@@ -5,7 +5,7 @@ author: agent
 created: 2026-09-15T02:25:02.580Z
 anchor:
   rule: threads.lifecycle.says-why-it-exists
-status: addressed
+status: verified
 body: "An empty reason files a note that says nothing about why it exists, and a
   machine's becomes the person's feedback. Judged on the scratch copy at :4730.
   `walkdown thread new --reason \"\"` (CLI) and POST /api/threads with `reason:
@@ -36,3 +36,10 @@ replies:
       the default answer, so --as-agent --reason "" files an observation
       authored agent with no via, on both doors. test/thread-reasons.test.js
       covers the blank case for a machine and for a person.'
+  - author: topher
+    via: verdict
+    created: 2026-09-16T23:00:25Z
+    body: Verified by topher's pass on threads.lifecycle.says-why-it-exists
+      (2026-09-16T23-00-25Z-local-01).
+verified_by: topher
+verified_via: 2026-09-16T23-00-25Z-local-01

@@ -7,7 +7,7 @@ anchor:
   rule: panel.rules.steps-not-an-appendix
   screen: rule-detail
   element: detail.technical-disclosure
-status: addressed
+status: verified
 body: >-
   The check source is unreachable for exactly the rules whose check IS the
   specification. The disclosure that shows it is nested inside the steps block:
@@ -68,4 +68,11 @@ replies:
       steps. The check in checks/panel.spec.js asserts the disclosure has no
       detail.steps ancestor - which is the assertion that would have failed
       before.
+  - author: topher
+    via: verdict
+    created: 2026-09-16T23:00:25Z
+    body: Verified by topher's pass on panel.rules.steps-not-an-appendix
+      (2026-09-16T23-00-25Z-local-01).
 reason: finding
+verified_by: topher
+verified_via: 2026-09-16T23-00-25Z-local-01

@@ -188,6 +188,16 @@ is a verdict on the rule. `walkdown status` prints that count in the
 summary line and lists the rules. The threads tab keeps its list; it is
 not the queue.
 
+*2026-09-16:* per rule only where a verdict on the rule is what clears it.
+A `request` is verified from its own screen (§3 — a pass leaves it alone),
+and a note on a retired rule has no rule to walk; both were being grouped
+under the rule, which kept the rule in the walk queue after every pass with
+nothing there to do. They are per-thread items now, in the threads tab
+where Verify is. And a rule nothing verifies but a signature — every
+evidence tier excused — takes that signature as its verdict: it reads as
+built and signed, so the pass that closes its feedback is one a person can
+actually give (`one-switch` sat pending with two unclosable notes).
+
 ### 7. The pin popover offers Verify
 
 The embed's standalone popover is read-and-reply today; lifecycle actions

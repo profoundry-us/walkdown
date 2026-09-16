@@ -4,7 +4,7 @@ author: topher
 created: 2026-09-08T00:32:10.464Z
 anchor:
   rule: locations.default.in-repo-on-request
-status: addressed
+status: verified
 body: This rule is working but is super-lengthy in wording. We should clean this
   up a LOT.
 replies:
@@ -14,4 +14,11 @@ replies:
     body: locations.default.in-repo-on-request cut by roughly two thirds. It now
       names the two answers — the spec with its threads, or everything including
       runs and evidence — without re-arguing either.
+  - author: topher
+    via: verdict
+    created: 2026-09-16T23:00:25Z
+    body: Verified by topher's pass on locations.default.in-repo-on-request
+      (2026-09-16T23-00-25Z-local-01).
 reason: finding
+verified_by: topher
+verified_via: 2026-09-16T23-00-25Z-local-01

@@ -6,7 +6,7 @@ created: 2026-09-10T13:16:14.871Z
 anchor:
   rule: panel.start.choose-a-blueprint
   screen: choose-blueprint
-status: addressed
+status: verified
 body: "Agent walkdown 2026-09-10: crossing to another project keeps the OLD
   project's claimant count, so the panel says out loud a reason that is false.
   Repro on a scratch copy (four blueprints in the served project, two of them —
@@ -78,4 +78,11 @@ replies:
 
 
       Everything the note said held still holds. Awaiting a re-judge.
+  - author: topher
+    via: verdict
+    created: 2026-09-16T23:00:25Z
+    body: Verified by topher's pass on panel.start.choose-a-blueprint
+      (2026-09-16T23-00-25Z-local-01).
 reason: finding
+verified_by: topher
+verified_via: 2026-09-16T23-00-25Z-local-01

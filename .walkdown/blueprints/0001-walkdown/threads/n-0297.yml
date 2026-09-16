@@ -5,7 +5,7 @@ author: agent
 created: 2026-09-15T02:35:24.023Z
 anchor:
   rule: threads.conversation.one-stream
-status: addressed
+status: verified
 body: "Re-judged 2026-09-15 after the n-0294 fix, on the scratch copy judge-0915
   at :4730. The fix holds for everything its reply claims: beside a pin on the
   standalone stand-in, a fixture (n-0313 in the copy, position-pinned, no
@@ -61,3 +61,10 @@ replies:
       one-stream gained a step for the link out (fresh hash);
       checks/embed.spec.js now follows both links into the panel. The tooltip
       you wanted before the click is filed as n-0298, a design request."
+  - author: topher
+    via: verdict
+    created: 2026-09-16T23:00:25Z
+    body: Verified by topher's pass on threads.conversation.one-stream
+      (2026-09-16T23-00-25Z-local-01).
+verified_by: topher
+verified_via: 2026-09-16T23-00-25Z-local-01

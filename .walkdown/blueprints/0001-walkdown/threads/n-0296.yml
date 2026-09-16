@@ -5,7 +5,7 @@ author: agent
 created: 2026-09-15T02:31:25.534Z
 anchor:
   rule: panel.walkdown.pass-verifies-feedback
-status: addressed
+status: verified
 body: >-
   Judged on the scratch copy at :4730 (run 2026-09-15T02-27-40Z-local-01). The
   stepped scenario holds: in a sitting, `detail.pass-verifies` sat between
@@ -35,3 +35,10 @@ replies:
       promised (src/panel/rule-detail.js passVerifies). checks/panel.spec.js
       stages an addressed request beside the feedback and asserts it is absent
       from the block and still addressed after Finish.
+  - author: topher
+    via: verdict
+    created: 2026-09-16T23:00:25Z
+    body: Verified by topher's pass on panel.walkdown.pass-verifies-feedback
+      (2026-09-16T23-00-25Z-local-01).
+verified_by: topher
+verified_via: 2026-09-16T23-00-25Z-local-01

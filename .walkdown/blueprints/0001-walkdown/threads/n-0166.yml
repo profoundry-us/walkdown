@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-03T01:31:57.971Z
 anchor:
   rule: locations.default.skills-are-yours-by-default
-status: addressed
+status: verified
 body: >-
   Leaving the repository ('walkdown init --commit none' from spec or all) leaves
   .claude/skills/ behind while saying the repository gets nothing.
@@ -37,4 +37,11 @@ replies:
       this repository keeps it)'. The 'repository gets nothing' line is true
       again for the copies walkdown put there. Test in test/locations.test.js
       alongside n-0164's."
+  - author: topher
+    via: verdict
+    created: 2026-09-16T23:00:25Z
+    body: Verified by topher's pass on locations.default.skills-are-yours-by-default
+      (2026-09-16T23-00-25Z-local-01).
 reason: finding
+verified_by: topher
+verified_via: 2026-09-16T23-00-25Z-local-01

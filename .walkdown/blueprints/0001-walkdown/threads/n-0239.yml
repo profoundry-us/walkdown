@@ -4,7 +4,7 @@ author: topher
 created: 2026-09-08T00:33:35.286Z
 anchor:
   rule: locations.default.skills-are-yours-by-default
-status: addressed
+status: verified
 body: I'm not actually sure I agree with this; do we really need this to be
   committed with the spec?
 replies:
@@ -57,4 +57,11 @@ replies:
       while doing this. The shared tmp/test-home/skills outlives a run, and with
       skills now always going there, these cases had started passing or failing
       on what an earlier run happened to leave behind.
+  - author: topher
+    via: verdict
+    created: 2026-09-16T23:00:25Z
+    body: Verified by topher's pass on locations.default.skills-are-yours-by-default
+      (2026-09-16T23-00-25Z-local-01).
 reason: finding
+verified_by: topher
+verified_via: 2026-09-16T23-00-25Z-local-01

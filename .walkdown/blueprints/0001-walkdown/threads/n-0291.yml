@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-14T19:27:27.669Z
 anchor:
   rule: threads.conversation.written-in-markdown
-status: addressed
+status: verified
 body: 'Judged 2026-09-14 on the scratch copy sitting-0914 (:4730), run
   2026-09-14T19-08-54Z-local-01. Lists, code spans, web links, raw HTML,
   headings, id refs and line breaks all render as the steps say. One then-step
@@ -32,4 +32,11 @@ replies:
       going nowhere. The tagged check in checks/panel.spec.js now asserts no
       hrefless <a> survives and the link text still reads. (The rule did have a
       check; it lives in checks/, which the grep of test/ missed.)"
+  - author: topher
+    via: verdict
+    created: 2026-09-16T23:00:25Z
+    body: Verified by topher's pass on threads.conversation.written-in-markdown
+      (2026-09-16T23-00-25Z-local-01).
 reason: finding
+verified_by: topher
+verified_via: 2026-09-16T23-00-25Z-local-01

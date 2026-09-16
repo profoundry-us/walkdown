@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-14T20:51:53.552Z
 anchor:
   rule: threads.conversation.one-stream
-status: addressed
+status: verified
 body: "Re-judged 2026-09-14 after n-0288 (markdown bodies), on the scratch copy
   sitting-0914 at :4730. FAIL, on the last THEN and only beside the pin: in the
   embed's standalone popover, thread and rule ids written inside a message are
@@ -52,4 +52,11 @@ replies:
       nothing. The popover is also clamped to the viewport like the pin form
       (the right-column aside). New check in checks/embed.spec.js drives the
       standalone popover top-level and asserts all four."
+  - author: topher
+    via: verdict
+    created: 2026-09-16T23:00:25Z
+    body: Verified by topher's pass on threads.conversation.one-stream
+      (2026-09-16T23-00-25Z-local-01).
 reason: finding
+verified_by: topher
+verified_via: 2026-09-16T23-00-25Z-local-01

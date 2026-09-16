@@ -6,7 +6,7 @@ created: 2026-09-13T21:57:07.170Z
 anchor:
   rule: panel.rules.steps-not-an-appendix
   screen: rule-detail
-status: addressed
+status: verified
 body: "Topher, 2026-09-13, on reviewing every rule statement: the statements
   carry five kinds of content tangled together - the claim, the reason (because
   / so that), the negative, what happened that produced the rule, and how the
@@ -26,4 +26,11 @@ replies:
       against ADR 0004, hashes kept as rewords so no verdict moved. The rule
       detail draws because and history under the statement; the steps layout is
       panel.rules.steps-not-an-appendix."
+  - author: topher
+    via: verdict
+    created: 2026-09-16T23:00:25Z
+    body: Verified by topher's pass on panel.rules.steps-not-an-appendix
+      (2026-09-16T23-00-25Z-local-01).
 reason: feedback
+verified_by: topher
+verified_via: 2026-09-16T23-00-25Z-local-01
