@@ -2598,6 +2598,47 @@ test("walkdown's own address opens the rule or thread it names, once", {
 });
 
 /*
+ * The address says what you are looking at: the blueprint in `?bp=`, the
+ * page in the frame after `#`. Written as each settles, so a reload of the
+ * tab comes back to the same board on the same page - and only the address
+ * carries it: a fresh open with no `?bp=` still asks (ADR 0001 §9).
+ */
+test("walkdown's own address keeps the blueprint and the page, so a reload comes back to them", {
+  tag: '@rule:panel.start.address-keeps-the-pick',
+}, async ({ page }) => {
+  const { key } = await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json();
+  const frame = `${WD_ORIGIN}/stand-in/review`;
+  await page.goto(`${WD_ORIGIN}/?bp=blueprint#${frame}`);
+  await expect(page.getByTestId('panel.bar')).toBeVisible();
+  // Named by key now - the one spelling that is never ambiguous.
+  await expect.poll(() => new URL(page.url()).searchParams.get('bp')).toBe(key);
+
+  // Move the frame, by picking a screen: the address follows it.
+  await page.getByTestId('panel.screen-picker').click();
+  await page.getByTestId('panel.screens-list').locator('[data-screen="rule-detail"]').click();
+  await expect
+    .poll(() => decodeURIComponent(new URL(page.url()).hash.slice(1)), { timeout: 10000 })
+    .toMatch(new RegExp(`^${WD_ORIGIN}/stand-in/rule-detail`));
+
+  // Reload: no chooser, the same board, the frame on the same page.
+  await page.reload();
+  await expect(page.getByTestId('panel.bar')).toBeVisible();
+  await expect(page.getByTestId('panel.project')).not.toContainText('Pick a project');
+  await expect
+    .poll(() => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/stand-in/rule-detail`)), {
+      timeout: 10000,
+    })
+    .toBe(true);
+  expect(new URL(page.url()).searchParams.get('bp')).toBe(key);
+
+  // A blueprint this server does not have is dropped from the address too,
+  // rather than carried along as a name that opens nothing (n-0265).
+  await page.goto(`${WD_ORIGIN}/?bp=no.such.blueprint#${frame}`);
+  await expect(page.getByTestId('panel.bar')).toBeVisible();
+  await expect.poll(() => new URL(page.url()).searchParams.get('bp')).not.toBe('no.such.blueprint');
+});
+
+/*
  * n-0298: an id in a message says what it names before you follow it - a
  * card under the cursor, and under keyboard focus, with the rule's statement
  * and verdict or the thread's status, author and first line. Read at show

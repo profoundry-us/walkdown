@@ -199,6 +199,18 @@ test('the review page bakes in nothing, and has no front door of its own', async
   assert.match(html, /location\.hash/);
 });
 
+test('the page is served whatever ?bp= names; the API refuses a blueprint it does not have @rule:panel.start.address-keeps-the-pick', async () => {
+  // The address carries the pick so a reload comes back to it. A blueprint
+  // forgotten since is then a name that opens nothing: the page still comes,
+  // and it is the panel that hears the 404 and asks which project instead.
+  const page = await fetch(`${base}/?bp=no.such.blueprint`);
+  assert.equal(page.status, 200);
+  assert.match(await page.text(), /location\.hash/);
+  const api = await fetch(`${base}/api/blueprint?bp=no.such.blueprint`);
+  assert.equal(api.status, 404);
+  assert.match((await api.json()).error, /unknown project/);
+});
+
 test('POST /api/threads writes a thread file; screen resolved from URL', async () => {
   const res = await (
     await fetch(`${base}/api/threads`, {

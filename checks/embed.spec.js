@@ -336,7 +336,9 @@ test('a tag on the page naming another blueprint does not redirect a write', {
   tag: '@rule:embed.pin.right-project',
 }, async ({ page }) => {
   const { blueprints } = await (await fetch(`${WD_ORIGIN}/api/blueprint`)).json();
-  const open = 'blueprint'; // what the fixture's panel opens
+  // What the fixture's panel opens, by key - the panel names its blueprint
+  // by key from the moment the server answers, whatever form it was asked in.
+  const open = blueprints.find((b) => b.id === 'blueprint').key;
   const other = blueprints.map((b) => b.key).find((k) => k !== open);
   expect(other, 'the server must hold a second blueprint for this to be about anything').toBeTruthy();
 

@@ -13,6 +13,12 @@
  * application it is anchoring to, and boot.js puts it there.
  */
 const target = decodeURIComponent(location.hash.slice(1));
+/*
+ * The blueprint, when this address already names one. The panel writes its
+ * pick here, so a reload of the tab comes back to the same board; the
+ * button opens a fresh address with no `?bp=`, which asks.
+ */
+const bp = new URLSearchParams(location.search).get('bp') ?? '';
 
 if (!target) {
   document.body.textContent = 'walkdown: no page to review.';
@@ -20,8 +26,9 @@ if (!target) {
   window.__walkdownConfig = {
     // Only a starting point; the panel's Blueprints tab settles and remembers it.
     server: 'http://localhost:4700',
-    // Asked once in the panel, where the descriptions are readable.
-    bp: '',
+    // Asked in the panel, where the descriptions are readable - unless the
+    // address already says.
+    bp,
     stylesheet: chrome.runtime.getURL('walkdown.css'),
     /*
      * The extension re-injects itself into whatever page loads next — its

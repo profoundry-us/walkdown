@@ -191,6 +191,15 @@ a run record pasted anywhere, links out to (n-0297). `GET /api/blueprint` answer
 `key` it resolved, so a page that never said which blueprint it belongs to can still name
 it when it links out.
 
+The page also writes back what it is showing: the moment a blueprint is picked its key
+goes into `?bp=`, and the moment the frame moves the page in it goes after `#`, both by
+`history.replaceState` — so a reload of that tab comes back to the same board on the same
+page. That is the whole of it: nothing is stored in the browser (ADR 0001 §9 still holds),
+a fresh address with no `?bp=` asks as before, and inside somebody else's application the
+panel never touches that page's address. A `?bp=` naming a blueprint the server has since
+forgotten is dropped and the chooser asks; the server serves the page for any `?bp=` and
+refuses only the API.
+
 Identity is never taken from a manifest. A committed file naming a person would be wrong
 on every machine but one.
 

@@ -855,9 +855,35 @@ async function discardSitting() {
   }).catch(() => {});
 }
 
+/*
+ * The address says what you are looking at: `?bp=` the blueprint, `#` the
+ * page in the frame. Written whenever either settles, so a reload of this
+ * tab comes back to the same board on the same page instead of the chooser
+ * and the page you started on - and nothing else is written anywhere. ADR
+ * 0001 §9 still holds: the browser stores no choice. A fresh open (the
+ * extension's button, walkdown's bare root) carries no `?bp=` and asks.
+ *
+ * Only on walkdown's OWN page - framed, or at the server's root. Docked
+ * inside somebody's application the address is theirs, and the tab already
+ * stands where the application put it.
+ */
+function sayAddress() {
+  if (!cfg.frame?.url && !atServerRoot()) return;
+  try {
+    const url = new URL(location.href);
+    if (S.BP) url.searchParams.set('bp', S.BP);
+    else url.searchParams.delete('bp');
+    if (S.frameUrl) url.hash = encodeURIComponent(S.frameUrl);
+    if (url.href !== location.href) history.replaceState(history.state, '', url.href);
+  } catch {
+    /* an address that cannot be written is left as it was */
+  }
+}
+
 function crossTo(nextBp) {
   S.session = null; // left behind, on disk, waiting to be resumed
   S.BP = nextBp;
+  sayAddress();
   // The blueprint carries its project with it: picking one from another
   // project's list is how you cross, and the bar must say where you landed.
   S.project = projectIdOf(S.blueprints.find((pr) => pr.key === nextBp)) ?? S.project;
@@ -2015,6 +2041,7 @@ export function goTo(screen, surface = pageSurface(), pick = null) {
   if (!sameAddress(S.frameUrl, url)) {
     const first = !S.frameUrl;
     S.frameUrl = url;
+    sayAddress();
     frameLoading(url, `Loading ${screenLabel(screen)}…`);
     D.appFrame.src = url;
     // The root's first page: the sheet was not drawn until now.
@@ -2599,6 +2626,7 @@ export async function start() {
      */
     if (!res.ok && S.BP) {
       S.BP = null;
+      sayAddress();
       res = await fetch(api('/api/blueprint'));
     }
     payload = await res.json();
@@ -2608,6 +2636,17 @@ export async function start() {
   }
   S.blueprints = payload.blueprints ?? [];
   S.servedRoot = payload.root ?? null;
+  /*
+   * Named by key from here on. A short id in the address answers the same
+   * as its key while it is unambiguous, but everything below - the marks on
+   * the Blueprints tab, the project it belongs to, the address itself -
+   * compares by key, and the key is the one spelling that never becomes
+   * ambiguous when a second project brings the same id.
+   */
+  if (S.BP && payload.key && S.BP !== payload.key) {
+    S.BP = payload.key;
+    sayAddress();
+  }
   /*
    * Framed, the page under review is the one in the frame, not walkdown's own
    * address - asking about ourselves would answer about nothing.
@@ -2665,6 +2704,7 @@ export async function start() {
       // One claimant: open it, activate its project, say nothing.
       S.BP = S.claimants[0].key;
       S.project = projectsClaiming[0] ?? null;
+      sayAddress();
     } else if (S.claimants.length > 1 && projectsClaiming.length === 1) {
       /*
        * Several, all in one project. The project is not in doubt, so the panel
@@ -2948,6 +2988,7 @@ function wireGlobals() {
       return crossTo(only);
     }
     S.BP = null;
+    sayAddress();
     S.listTab = 'blueprints';
     S.phase = 'choose';
     renderGate();
@@ -3078,6 +3119,7 @@ function wireGlobals() {
        */
       const moved = msg.href && msg.href !== S.frameUrl;
       S.frameUrl = msg.href ?? S.frameUrl;
+      if (moved) sayAddress();
       pushContexts();
       return moved ? hereChanged() : render();
     }

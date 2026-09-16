@@ -147,6 +147,13 @@ migrated.
 This is a deliberate simplification and is expected to be revisited once the
 rest settles; asking twice is cheap, and a wrong memory is not.
 
+*2026-09-16:* the address carries the pick. walkdown's own page writes the
+chosen blueprint into its `?bp=` and the framed page after its `#`, so a
+reload of that tab comes back to the same board on the same page. This is not
+a remembered choice — the browser stores nothing, and a fresh address still
+asks — it is the address saying what the tab is showing, which is what an
+address is for (`panel.start.address-keeps-the-pick`).
+
 ### 10. The Blueprints tab shows the active project's blueprints
 
 Not the server's, and not the domain's. Blueprints claiming the current page
