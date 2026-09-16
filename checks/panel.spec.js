@@ -2630,6 +2630,13 @@ test('an id in a message previews what it names, under the cursor and under focu
   const card = page.getByTestId('ref.preview');
   await expect(card).toBeHidden();
 
+  // At rest, both ids read as links: the thread id wears the same tint as
+  // the rule id, not the prose's own colour (n-0299).
+  const colour = (loc) => loc.evaluate((el) => getComputedStyle(el).color);
+  const threadColour = await colour(body.locator(`[data-thread-ref="${other.id}"]`));
+  expect(threadColour).toBe(await colour(body.locator(`[data-rule-ref="${about.rule}"]`)));
+  expect(threadColour).not.toBe(await colour(body.locator('.wd-text p').first()));
+
   // Under the cursor: the thread, as it stands.
   await body.locator(`[data-thread-ref="${other.id}"]`).hover();
   await expect(card).toBeVisible();
