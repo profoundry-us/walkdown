@@ -1,0 +1,33 @@
+{
+  "run_id": "2026-09-16T20-26-40Z-local-01",
+  "created": "2026-09-16T20:26:40Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "3cef67a-dirty",
+  "spec_hash": "sha256:bab5836d4d22",
+  "results": [
+    {
+      "rule": "panel.start.address-opens-what-it-names",
+      "status": "pass",
+      "statement_hash": "sha256:682e1f446062",
+      "evidence": [
+        "runs/evidence/2026-09-16T20-26-40Z/address-rule-detail.png",
+        "runs/evidence/2026-09-16T20-26-40Z/address-rule-moved-on.png",
+        "runs/evidence/2026-09-16T20-26-40Z/address-thread-over-rule.png",
+        "runs/evidence/2026-09-16T20-26-40Z/address-thread-back-lands-on-rule.png",
+        "runs/evidence/2026-09-16T20-26-40Z/address-unknown-rule-toast.png",
+        "runs/evidence/2026-09-16T20-26-40Z/address-unknown-thread-toast.png",
+        "runs/evidence/2026-09-16T20-26-40Z/address-rule-framed.png",
+        "runs/evidence/2026-09-16T20-26-40Z/address-thread-no-rule-framed.png",
+        "runs/evidence/2026-09-16T20-26-40Z/standin-popover-n-0107-links.png",
+        "runs/evidence/2026-09-16T20-26-40Z/standin-link-out-lands-on-n-0098.png",
+        "runs/evidence/2026-09-16T20-26-40Z/standin-link-out-back-lands-on-toolbar.png",
+        "runs/evidence/2026-09-16T20-26-40Z/address-probe.json"
+      ],
+      "reasoning": "First judgment of this rule, written for n-0297 (Topher's option 2: the panel gets an address). Judged on the scratch copy judge-address served at :4730 (GET /api/blueprint names project judge-address; the copy's full blueprint key, URL-encoded, was the ?bp= in every address), by hand in the browser and then by a Playwright probe at 1280x800 that measured which pane of the panel's slide track lay inside its clipping column rather than asking the DOM what it meant to show. With a rule named (?bp=<key>&rule=locations.default.nothing-in-the-tree) the board arrived on the detail pane showing that rule id and '<- All rules'; pressing Back put the list pane in view and switching to the Threads tab, then waiting seven seconds through the panel's refresh, left the Threads list in place - the address opened its thing once and did not drag the panel back. With a thread named (&thread=n-0133) the board arrived on the thread pane headed n-0133 with Back reading '<- nothing-in-the-tree', and Back put the rule detail for locations.default.nothing-in-the-tree in view. A rule the copy does not have (&rule=nope.not.a-rule) and a thread it does not have (&thread=n-9999) each arrived on the list with a red toast, 'No rule nope.not.a-rule here.' and 'No thread n-9999 here.' respectively, rather than opening nothing. With a page named in the fragment (#http://localhost:4730/stand-in/review) a rule address still arrived on panel.dock.toolbar's detail with the page framed, and a thread with no rule anchor (n-0107) arrived on its thread pane with Back reading '<- All rules' and landing on the list, which is a sensible place given it has no rule. On the standalone stand-in (:4730/stand-in/review) the popover for pin n-0107 rendered the rule id panel.dock.toolbar and the thread id n-0098 (not pinned on that page) as real <a> elements, underlined in the link tint, each an href of the copy's own origin with ?bp=<the copy's key>&rule=... or &thread=..., target _blank with rel noopener noreferrer; clicking n-0098 fired a new-page event in Playwright (the in-app browser pane, which flattens _blank into its own tab, followed the same address) and the new page arrived on thread n-0098 with Back reading '<- toolbar', and Back landed on panel.dock.toolbar's detail. Nothing was filed, pinned or replied to; the probe only read the copy. One observation outside the verdict: the arrival is spent in memory (S.openedFromAddress) while the address keeps its ?rule=/?thread=, so a reload of the same tab opens the thing again - which reads as what a reload should do, and the statement's 'moving on inside the panel' does not cover it.",
+      "threads": []
+    }
+  ]
+}
