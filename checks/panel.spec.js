@@ -2458,7 +2458,9 @@ test('a pass verifies the answered feedback on the rule, and says so first', {
 
   // Feedback under the person, answered by the machine: what a pass verifies.
   const filed = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
-    data: { kind: 'note', body: 'The label reads wrong here.', anchor: { rule } },
+    // A first line longer than the pane is wide: the block cuts it short
+    // rather than letting it set the width of everything on the screen.
+    data: { kind: 'note', body: `The label reads wrong here, ${'and this note goes on at length about it '.repeat(6)}.`, anchor: { rule } },
   });
   expect(filed.ok()).toBeTruthy();
   const { id, thread } = await filed.json();
@@ -2494,6 +2496,14 @@ test('a pass verifies the answered feedback on the rule, and says so first', {
   await expect(says).not.toContainText(open);
   await expect(says).not.toContainText(request);
   await expect(says).toContainText(/Pass verifies 1 answered note/);
+  // Cut short, not run off the edge: the block, and the statement above it,
+  // end inside the panel. One unwrappable line used to set the width of
+  // every pane on the track, and the whole detail ran off the right.
+  const panel = await page.getByTestId('panel.bar').boundingBox();
+  for (const loc of [says, page.getByTestId('detail.statement')]) {
+    const box = await loc.boundingBox();
+    expect(box.x + box.width, 'wider than the panel').toBeLessThanOrEqual(panel.x + panel.width + 1);
+  }
 
   await page.getByTestId('detail.verdict').locator('button').first().click();
   await expect(page.getByTestId('panel.judged')).toHaveText(/^1\/\d+ judged$/);

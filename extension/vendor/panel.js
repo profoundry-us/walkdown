@@ -6415,7 +6415,11 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     ${mine.map(
       (t) => b`<div class="flex min-w-0 gap-1.5">
         <button class="link link-hover shrink-0 font-mono" data-open-thread="${t.id}">${t.id}</button>
-        <span class="truncate opacity-70">${(t.body ?? '').split('\n')[0]}</span>
+        <!-- min-w-0 as well as truncate: a flex item's floor is its content,
+             and a nowrap line of a note is wider than the pane - so without
+             it the pane took the note's width and everything on the screen
+             ran off the right edge. -->
+        <span class="min-w-0 truncate opacity-70">${(t.body ?? '').split('\n')[0]}</span>
       </div>`,
     )}
   </div>`;
@@ -8144,9 +8148,14 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
          offscreen pane paints over the app instead of sliding within the
          panel. flex-[0_0_300%], not flex-1: inside a row flex slot, flex-1
          means basis 0 and collapses every pane. The thread pane manages its
-         own scrolling, so its composer can stay pinned to the foot. -->
+         own scrolling, so its composer can stay pinned to the foot.
+         min-w-0 on the track as well: a flex item's floor is its content,
+         and one unwrappable line anywhere in a pane - a note's first line
+         cut short with nowrap - otherwise sets the track's width, every
+         pane grows to match, and the whole screen runs off the right edge
+         (seen 2026-09-16 on a rule whose answered note was long). -->
     <div class="flex min-h-0 flex-1 overflow-hidden">
-      <div class="wdp-track flex min-h-0 flex-[0_0_300%] transition-transform duration-300 ease-out">
+      <div class="wdp-track flex min-h-0 min-w-0 flex-[0_0_300%] transition-transform duration-300 ease-out">
         <!-- The first seat is a column, not a scroller: the search box sits
              ABOVE the scrolling part rather than inside it. Sticky was tried
              and is the wrong tool here - the pane itself is what scrolls, so

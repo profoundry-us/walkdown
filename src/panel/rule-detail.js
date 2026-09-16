@@ -231,7 +231,11 @@ function passVerifies(rule) {
     ${mine.map(
       (t) => html`<div class="flex min-w-0 gap-1.5">
         <button class="link link-hover shrink-0 font-mono" data-open-thread="${t.id}">${t.id}</button>
-        <span class="truncate opacity-70">${(t.body ?? '').split('\n')[0]}</span>
+        <!-- min-w-0 as well as truncate: a flex item's floor is its content,
+             and a nowrap line of a note is wider than the pane - so without
+             it the pane took the note's width and everything on the screen
+             ran off the right edge. -->
+        <span class="min-w-0 truncate opacity-70">${(t.body ?? '').split('\n')[0]}</span>
       </div>`,
     )}
   </div>`;
