@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-09-17T15-23-54Z-local-01",
+  "created": "2026-09-17T15:23:54Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "4e9c892-dirty",
+  "tree_hash": "sha256:b37fb61b9710",
+  "spec_hash": "sha256:12fcdb1424ee",
+  "results": [
+    {
+      "rule": "panel.signoff.spec-pair-derived",
+      "status": "pass",
+      "statement_hash": "sha256:f5c753ec1d9b",
+      "evidence": [
+        "runs/evidence/2026-09-17T15-23-54Z/unbuilt-approve-refine.png",
+        "runs/evidence/2026-09-17T15-23-54Z/approved-rule-still-sign-off-pair.png",
+        "runs/evidence/2026-09-17T15-23-54Z/built-pass-fail.png",
+        "runs/evidence/2026-09-17T15-23-54Z/built-by-pass-pass-fail.png",
+        "runs/evidence/2026-09-17T15-23-54Z/signoff-probe.json",
+        "runs/evidence/2026-09-17T15-23-54Z/signoff-probe-3.json"
+      ],
+      "reasoning": "Drove the scratch copy on port 4730 (GET /api/blueprint named project rejudge-0917) with headless Chromium at 1280x720, the panel docked beside /stand-in/rule-detail, and started a sitting from the bar's Start walkdown control (the bar then read Finish walkdown). On embed.pin.anchored-target, whose only ledger cell is an agent 'blocked' with no pass or fail, detail.verdict held exactly two buttons, data-v approved '\u270d\ufe0e Approve' and refining '\u270e\ufe0e Refine', captioned 'No build evidence yet - you are signing off the rule, not judging a build' (unbuilt-approve-refine.png). Clicking Approve advanced the pane to the next rule; coming back to the approved rule by the list and again by reloading its address in the same sitting showed the same Approve/Refine pair with Approve now filled, the caption unchanged, so approving did not flip it to Pass/Fail (approved-rule-still-sign-off-pair.png, signoff-probe-3.json). Rules the ledger does hold a verdict for showed data-v pass '\u2713 Pass' and fail '\u2717 Fail' with no sign-off caption: delivery.install.clone-is-the-install with a recorded checks pass, locations.default.in-repo-on-request with a recorded fail, and panel.delivery.absent-until-asked (built-pass-fail.png, built-by-pass-pass-fail.png). The approval and the sitting were written to the scratch copy's draft only.",
+      "threads": []
+    }
+  ]
+}

@@ -4452,7 +4452,10 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
    * `color-mix()` was invalid at computed-value time, and the declaration was
    * dropped in silence. `backdrop-filter` depends on no custom property, so it
    * paints from exactly where the dim could not, and a blur says "suspended"
-   * without a dim's cost of hiding what is behind it.
+   * without a dim's cost of hiding what is behind it. At walkdown's own root
+   * (`here` null) there is no frame, panel or bar behind the modal - only the
+   * desk ruling - and the blur is skipped so the ruling stays crisp rather
+   * than softening into blotches (n-0303).
    *
    * @param {{ here: string|null, closable: boolean }} opts
    */
@@ -4472,7 +4475,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
           ? '1 blueprint claims this page.'
           : `${claimed} blueprints claim this page, in ${projects > 1 ? 'more than one project' : 'one project'}.`;
     return b`
-    <div class="absolute inset-0 backdrop-blur-sm" @click=${(e) => closable && fire(e.currentTarget, 'close-projects')}></div>
+    <div class="absolute inset-0 ${here === null ? '' : 'backdrop-blur-sm'}" @click=${(e) => closable && fire(e.currentTarget, 'close-projects')}></div>
     <div class="absolute left-1/2 top-12 flex max-h-[80vh] w-[min(560px,92vw)] -translate-x-1/2 flex-col
                 overflow-hidden rounded-box border border-primary/45 bg-base-100 text-base-content shadow-2xl"
          data-theme="blueprint" data-testid="project.modal">

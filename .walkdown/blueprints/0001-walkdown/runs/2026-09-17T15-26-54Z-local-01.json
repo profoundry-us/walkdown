@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-09-17T15-26-54Z-local-01",
+  "created": "2026-09-17T15:26:54Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "4e9c892-dirty",
+  "tree_hash": "sha256:b37fb61b9710",
+  "spec_hash": "sha256:12fcdb1424ee",
+  "results": [
+    {
+      "rule": "status.evidence.agent-assumed",
+      "status": "pass",
+      "statement_hash": "sha256:3d15d8bae388",
+      "evidence": [
+        "runs/evidence/2026-09-17T15-26-54Z/tiers-feature.yml",
+        "runs/evidence/2026-09-17T15-26-54Z/derived-tiers.json",
+        "runs/evidence/2026-09-17T15-26-54Z/lint.txt",
+        "runs/evidence/2026-09-17T15-26-54Z/status-agent-excused.txt"
+      ],
+      "reasoning": "Headless rule, judged by the CLI against a throwaway blueprint under a throwaway WALKDOWN_HOME in my scratchpad (never the real home, never the scratch copy on 4730; no browser). Ten rules in one feature file, each declaring a different thing, and `walkdown status --json` read for the derived tiers: a rule saying nothing at all derives verify [agent]; verify: [] and a rule with only signoff: [eng, product] also derive [agent], so nothing short of an excuse removes it; verify: [checks] derives [checks, agent], and no rule got checks without asking (a check must be authored; lint warns that nothing claims it). An excuse under unverifiable.agent removes the tier (verify [] with the excuse shown in the EVIDENCE cell by `walkdown status <rule>`), an excuse under unverifiable.checks leaves agent required, and verify: [agent] beside an agent excuse still derives [] - the excuse wins. One edge worth knowing, kept here rather than failed because lint does surface it: unverifiable.agent set to an empty string or to null also removes the tier (verify []) while excuseFor reads it as no excuse, so that rule's EVIDENCE block prints nothing at all; lint warns 'too thin to argue with (got 0 characters)' but does not error, so a null key is an excuse that says nothing and still excuses. The claim as stated holds on every step.",
+      "threads": []
+    }
+  ]
+}

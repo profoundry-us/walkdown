@@ -6,7 +6,7 @@ created: 2026-09-10T03:32:22.090Z
 anchor:
   rule: panel.start.which-project
   screen: project-modal
-status: open
+status: addressed
 body: >-
   Design request: the project modal has no drawing.
 
@@ -73,4 +73,14 @@ replies:
       two questions in it are still open — what the modal does on a narrow
       window, and whether the project rows want a blueprint count once a project
       holds twenty. Promotion answered neither.
+  - author: topher
+    via: agent
+    created: 2026-09-17T15:10:04Z
+    body: "Addressed: the modal has a drawing now
+      (prototype/screens/project-modal.html, promoted at your word) and
+      panel.start.which-project has been judged against it. The two questions
+      left here are design's and unchanged: what the modal does on a narrow
+      window, and whether project rows want a blueprint count once a project
+      holds twenty. Verify if the current modal is right as it stands; the
+      questions can become requests when you want them drawn."
 reason: request

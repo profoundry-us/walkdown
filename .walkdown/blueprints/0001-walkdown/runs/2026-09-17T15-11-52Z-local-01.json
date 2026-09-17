@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-09-17T15-11-52Z-local-01",
+  "created": "2026-09-17T15:11:52Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "4e9c892-dirty",
+  "tree_hash": "sha256:b37fb61b9710",
+  "spec_hash": "sha256:12fcdb1424ee",
+  "results": [
+    {
+      "rule": "panel.desk.reads-as-paper",
+      "status": "pass",
+      "statement_hash": "sha256:23b43c1536ff",
+      "evidence": [
+        "runs/evidence/2026-09-17T15-11-52Z/desk-docked.png",
+        "runs/evidence/2026-09-17T15-11-52Z/desk-alone.png",
+        "runs/evidence/2026-09-17T15-11-52Z/desk-bottom-4x.png",
+        "runs/evidence/2026-09-17T15-11-52Z/desk-probe.json",
+        "runs/evidence/2026-09-17T15-11-52Z/desk-probe-2.json"
+      ],
+      "reasoning": "Drove the scratch copy on port 4730 (GET /api/blueprint named project rejudge-0917) with headless Chromium at 1280x720, docking the panel beside /stand-in/review. A panel.desk layer is present at z-index -1 and the root's own background is none, so the 3D path is the one in use. Its computed transform is a matrix3d with m34 = -0.00137 (DOMMatrix.is2D false), i.e. a true perspective, and projecting two plane points 60 desk-units apart gives a 19.7px span at the near edge against 45.6px at the far edge, so the ruling converges rather than staying parallel as a flat skew would (desk-probe-2.json). In desk-alone.png, with the page and card hidden in the tab only, the grid visibly lies at 35 degrees and its cells shrink toward the top right. Faintness measured in the bare gutter between page and panel: background luma 26, ruling peaks at 47, a contrast of 23 on a 0-255 scale, with the lines drawn at 10% of the theme ink; desk-bottom-4x.png shows them as hairlines, not a hard grid. The rule's three THENs hold.",
+      "threads": []
+    }
+  ]
+}

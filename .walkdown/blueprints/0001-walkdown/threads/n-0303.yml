@@ -1,0 +1,28 @@
+id: n-0303
+kind: note
+reason: observation
+author: agent
+created: 2026-09-17T15:20:18.591Z
+anchor:
+  rule: panel.start.which-project
+status: settled
+body: At walkdown's own server root (judged on the scratch copy, port 4730,
+  runs/evidence/2026-09-17T15-17-15Z/B-server-root.png) the modal sits over the
+  desk alone as the step says, but the backdrop-blur still softens the desk
+  ruling into blotches, where docked beside a page the same ruling is crisp
+  (runs/evidence/2026-09-17T15-11-52Z/desk-alone.png). The step says the
+  backdrop blurs nothing there because nothing is behind it; read as "no chrome
+  is behind it" that holds and the rule passed. If it was meant as "the desk
+  stays crisp", the blur wants skipping when there is no frame. Noticed in
+  passing, not a fail.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-17T15:31:42Z
+    body: "Settled: read as the step says it - the backdrop blurs nothing at the
+      root. src/panel/projects.js skips backdrop-blur when the modal has no page
+      under it (here === null, which is exactly the server-root case), so the
+      desk ruling stays crisp; docked beside a page the blur is unchanged.
+      checks/panel.spec.js \"walkdown's own root asks which project over the
+      desk alone\" now asserts backdrop-filter is none there, recorded in
+      2026-09-17T15-30-34Z-local-01."

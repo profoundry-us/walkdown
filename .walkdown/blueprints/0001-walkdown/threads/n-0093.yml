@@ -4,7 +4,7 @@ author: agent
 created: 2026-08-26T18:10:58Z
 anchor:
   screen: rule-detail
-status: open
+status: addressed
 body: "Design request — the rule detail needs somewhere to say how to reach a
   screen that has no address of its own. A storyboard screen may be a STATE (a
   filtered list, an open drawer, the second time you submit a form), and those
@@ -22,3 +22,12 @@ body: "Design request — the rule detail needs somewhere to say how to reach a
   as the half that makes a shared app path an honest spelling rather than a
   tolerated one."
 reason: request
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-17T15:10:02Z
+    body: "Built and standing: the rule detail draws a setup block (anchor
+      detail.setup, src/panel/rule-detail.js) above the steps whenever the
+      rule's screen carries app.setup, in the plain form this note proposed.
+      What is still open is design's: a drawing for the block. Verify closes
+      this if the plain form is enough; otherwise the drawing replaces it."

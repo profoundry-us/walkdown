@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-09-17T15-24-16Z-local-01",
+  "created": "2026-09-17T15:24:16Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "4e9c892-dirty",
+  "tree_hash": "sha256:b37fb61b9710",
+  "spec_hash": "sha256:12fcdb1424ee",
+  "results": [
+    {
+      "rule": "panel.identity.default-actor",
+      "status": "pass",
+      "statement_hash": "sha256:3645bdcb734b",
+      "evidence": [
+        "runs/evidence/2026-09-17T15-24-16Z/identity-probe.json",
+        "runs/evidence/2026-09-17T15-24-16Z/01-strip.png",
+        "runs/evidence/2026-09-17T15-24-16Z/02-settings.png",
+        "runs/evidence/2026-09-17T15-24-16Z/03-renamed.png",
+        "runs/evidence/2026-09-17T15-24-16Z/04-emptied.png"
+      ],
+      "reasoning": "Drove the scratch copy on port 4730 (rejudge-0917 by /api/blueprint; its home config declares username scratch-rejudge-0917, name 'A scratch sitting (rejudge-0917)') with headless Playwright at 1280x720, docked beside the framed review stand-in. Start walkdown opened the signing dialog with the signer already filled in ('Signing for yourself'); after Start, panel.actor read 'Recording as A scratch sitting (rejudge-0917)' with panel.actor-handle 'scratch-rejudge-0917' in mono beside it. A Pass verdict and a reply asked for no name anywhere (no visible name input on the page) and drafts/local.json carried actor scratch-rejudge-0917. Settings from the gear: settings.actor is a SPAN, not an input, showing scratch-rejudge-0917, and settings.actor-source says it is set in the copy's home/config.yml where walkdown init wrote it; settings.display-name is the one editable box, prefilled with the config name. Typing 'Judge B Probe' there changed the strip at once and survived a reload with the handle still beside it; emptying it left the strip reading 'Recording as scratch-rejudge-0917' with no separate handle drawn, and that too survived a reload. Requests carrying a forged author changed nothing: a reply POSTed with author/actor/username 'mallory' landed on n-0096 in the copy as author scratch-rejudge-0917; a new thread POSTed as 'mallory' was filed n-0304 authored agent (its reason was observation); a draft POSTed with actor 'mallory' was written with actor scratch-rejudge-0917, keeping only the declared signer name in signatures, which is the signing-for-somebody-else feature and not the record's actor. Every step holds; nothing touched the real ledger.",
+      "threads": []
+    }
+  ]
+}

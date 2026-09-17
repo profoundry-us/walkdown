@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-09-17T15-20-45Z-local-01",
+  "created": "2026-09-17T15:20:45Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "4e9c892-dirty",
+  "tree_hash": "sha256:b37fb61b9710",
+  "spec_hash": "sha256:12fcdb1424ee",
+  "results": [
+    {
+      "rule": "panel.rules.steps-not-an-appendix",
+      "status": "pass",
+      "statement_hash": "sha256:64152f558d3f",
+      "evidence": [
+        "runs/evidence/2026-09-17T15-20-45Z/steps-open-disclosure-closed.png",
+        "runs/evidence/2026-09-17T15-20-45Z/hover-anchor-lights-surface.png",
+        "runs/evidence/2026-09-17T15-20-45Z/ref-rule-disclosure-closed.png",
+        "runs/evidence/2026-09-17T15-20-45Z/ref-rule-disclosure-open.png",
+        "runs/evidence/2026-09-17T15-20-45Z/thread-code-wash.png",
+        "runs/evidence/2026-09-17T15-20-45Z/steps-probe.json"
+      ],
+      "reasoning": "Drove the scratch copy on port 4730 (GET /api/blueprint named project rejudge-0917) with headless Chromium at 1280x720, the panel docked beside /stand-in/rule-detail and opened by address on this rule. detail.steps was visible on arrival with no click, a 354x463 box outside any details element, given and when rendered as prose on the same row as their labels (label x 899, field x 946, equal y), and then as a UL with list-style disc, five li, set 17px below its label at the label's own x (steps-probe.json). Every backticked token in the steps came through as a code element in ui-monospace with background oklch(0.78 0.125 215 / 0.13), identical to the code wash measured on thread n-0003's body, and the two tokens that are declared anchors carried data-anchor while the screen id rule-detail stayed plain code; the steps' innerText holds no raw tags. Hovering the detail.steps code put wd-hover and a solid 2px rgb(75,184,221) outline on exactly the [data-testid=detail.steps] element inside the framed surface and nothing else, and leaving removed it (hover-anchor-lights-surface.png). In this copy the rule's own checks cell reads never, so it carries no check refs and draws no disclosure, which is the step's own claim that the disclosure hangs off refs; on panel.start.address-keeps-the-pick, whose cell does carry a ref, detail.technical-disclosure was present, closed (open false, body hidden), below and outside the steps, with its summary naming test/serve.test.js:202, and opening it showed the source note while the steps stayed put (ref-rule-disclosure-open.png).",
+      "threads": []
+    }
+  ]
+}

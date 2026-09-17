@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-09-17T15-16-37Z-local-01",
+  "created": "2026-09-17T15:16:37Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "4e9c892-dirty",
+  "tree_hash": "sha256:b37fb61b9710",
+  "spec_hash": "sha256:12fcdb1424ee",
+  "results": [
+    {
+      "rule": "locations.travel.judged-against-a-spec",
+      "status": "pass",
+      "statement_hash": "sha256:20d85cac1943",
+      "evidence": [
+        "runs/evidence/2026-09-17T15-16-37Z/spec-hash-probe.json"
+      ],
+      "reasoning": "Headless rule, judged by the CLI against a throwaway blueprint (two rules in features/checkout.yml) initialised under a throwaway WALKDOWN_HOME in my scratchpad, never the real home or the scratch copy on 4730. Baseline spec hash sha256:3ec2e75140e3. Then a verdict was recorded through lib/run-record.js writeRunRecord (the reporter's own path) and a second run through the CLI's `walkdown sweep`, a thread through `walkdown thread new --as-agent`, and a draft through lib/draft.js writeDraft: after each write specHash read exactly 3ec2e75140e3, and both run records on disk carry that same spec_hash. Rewording one statement (adding the word 'any') moved the hash to b4295fe784cf before restamping and 77bdc72283b0 after `hash --write --reword`, and a run recorded then carries 77bdc72283b0, so a verdict says which spec it saw. Moving the receipt rule byte-for-byte into features/receipt.yml moved the hash again (17b60fae0d98), and renaming that file to receipt2.yml with identical bytes moved it once more (2a56ae6d004b): the relative path is part of the spec, as the rule claims. One aside outside this rule: writeDraft dropped a drafts/.gitignore into a home initialised with --commit all, and lint then errors on it as a tracking disagreement.",
+      "threads": []
+    }
+  ]
+}

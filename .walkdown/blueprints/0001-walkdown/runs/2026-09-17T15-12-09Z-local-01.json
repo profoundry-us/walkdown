@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-09-17T15-12-09Z-local-01",
+  "created": "2026-09-17T15:12:09Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "4e9c892-dirty",
+  "tree_hash": "sha256:b37fb61b9710",
+  "spec_hash": "sha256:12fcdb1424ee",
+  "results": [
+    {
+      "rule": "embed.threads.note-first",
+      "status": "pass",
+      "statement_hash": "sha256:24c2d4094356",
+      "evidence": [
+        "runs/evidence/2026-09-17T15-12-09Z/panel-thread-n-0107.png",
+        "runs/evidence/2026-09-17T15-12-09Z/panel-thread-q-0070.png",
+        "runs/evidence/2026-09-17T15-12-09Z/embed-popover-n-0107.png",
+        "runs/evidence/2026-09-17T15-12-09Z/note-first-probe.json"
+      ],
+      "reasoning": "Drove the scratch copy on port 4730 (GET /api/blueprint names rejudge-0917) with headless Playwright at 1280x720. Docked the panel beside the framed review stand-in and clicked the open pin n-0107 in the frame: the panel's thread screen opened with thread.provenance as one 11px line 173px wide ('n-0107 · request · addressed', 1 line by height/line-height), the where-line ('not attached to a rule · The review page · panel.bar · desktop 1050') as one more 11px caption, and thread.body starting at y=169 of 720 with the note's words at 12.5px, the largest text in the pane (author names 12px, badges 10-11px), so the note is what you read. A long history does not grow the pane: q-0070's 14 messages scroll inside a fixed 393px body (scrollHeight 5815) and the pane's box stayed 382x570 for both a 4-message and a 14-message thread; nothing collapses behind a count in the open view (the count lives on the threads-list card), so the step's outcome holds by a scroll box rather than by the mechanism it names. The standalone embed popover on the unframed stand-in shows the same hierarchy (header 10-11.5px, body 12.5px, stream capped at 256px, popover 256x426) but carries no thread.body or thread.provenance anchors and opens scrolled to the newest message, so the note's own words are above the fold of the scroll box rather than in view; neither breaks the rule's claim and both are noted here for the next person.",
+      "threads": []
+    }
+  ]
+}

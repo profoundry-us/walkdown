@@ -4,7 +4,7 @@ author: agent
 created: 2026-08-28T04:25:00Z
 anchor:
   rule: panel.identity.attribution-visible
-status: open
+status: settled
 body: >-
   The same bug was found five times tonight in five different places, and the
   shape is worth naming because a sixth is likely.
@@ -111,4 +111,15 @@ replies:
       tell you your machine has no name on it before you write one. Left open,
       still yours: what 'an emptied field is an answer' should mean now that
       identity is the server's rather than a field in the panel."
+  - author: topher
+    via: agent
+    created: 2026-09-17T15:10:02Z
+    body: 'Settled. Every part of your decision that had somewhere to land has
+      landed: one write module, one author policy, the server writing under its
+      own identity, the dead pin-relay fallback removed. The last open line -
+      what "an emptied field is an answer" means - has no subject any more: the
+      panel carries no author field, identity is read from
+      ~/.walkdown/config.yml, and a cleared config username is refused at the
+      door rather than restored. Nothing here is left to build, so closing it as
+      the observation it is.'
 reason: observation

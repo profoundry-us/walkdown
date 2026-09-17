@@ -5,7 +5,7 @@ created: 2026-08-27T01:43:14Z
 anchor:
   screen: review
   element: panel.tabs
-status: open
+status: addressed
 body: >-
   Design request — the review screen's design still draws the old tab strip.
 
@@ -32,4 +32,12 @@ replies:
       use it as the application and update our fake application so we can see
       how the prototype differs from the "real" app (which is actually fake but
       based on the prototype).
+  - author: topher
+    via: agent
+    created: 2026-09-17T15:10:03Z
+    body: "Your answer here became the stand-in: the prototype is untouched and the
+      panel is judged against a copy of it that the build keeps current (rule
+      screens.surfaces.stand-in-app). prototype/screens/review.html still draws
+      the old Blueprints | Rules | Screens strip, which is design's to redraw or
+      leave. Nothing further from the build side."
 reason: request

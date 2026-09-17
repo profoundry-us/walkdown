@@ -1,0 +1,34 @@
+{
+  "run_id": "2026-09-17T15-17-15Z-local-01",
+  "created": "2026-09-17T15:17:15Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "4e9c892-dirty",
+  "tree_hash": "sha256:b37fb61b9710",
+  "spec_hash": "sha256:12fcdb1424ee",
+  "results": [
+    {
+      "rule": "panel.start.which-project",
+      "status": "pass",
+      "statement_hash": "sha256:8927716089a7",
+      "evidence": [
+        "runs/evidence/2026-09-17T15-17-15Z/A-unclaimed-modal.png",
+        "runs/evidence/2026-09-17T15-17-15Z/A-unclaimed-behind-modal.png",
+        "runs/evidence/2026-09-17T15-17-15Z/A-after-pick.png",
+        "runs/evidence/2026-09-17T15-17-15Z/B-server-root.png",
+        "runs/evidence/2026-09-17T15-17-15Z/C-switcher-over-board.png",
+        "runs/evidence/2026-09-17T15-17-15Z/C-restored.png",
+        "runs/evidence/2026-09-17T15-17-15Z/D-several-projects.png",
+        "runs/evidence/2026-09-17T15-17-15Z/E-nothing-listed.png",
+        "runs/evidence/2026-09-17T15-17-15Z/which-probe.json",
+        "runs/evidence/2026-09-17T15-17-15Z/which-probe-2.json"
+      ],
+      "reasoning": "Drove the scratch copy on port 4730 (GET /api/blueprint named project rejudge-0917) with headless Chromium at 1280x720 through every case the steps name. Unclaimed page: docked beside /prototype/screens/review.html, which /api/whose answers with no matches, the page still loaded in the frame (iframe src confirmed, 860px wide), the modal came up naming that exact address with 'No blueprint claims this page', the panel side carried no tabs and one centred line 'Please select a project...' (A-unclaimed-behind-modal.png shows it with the modal hidden in the tab only), Escape and a backdrop click both left the modal standing, the registry's single blueprint was not opened by default, and picking that one-blueprint project opened its rules list. The backdrop's computed style is backdrop-filter blur(8px) with a transparent background, so a blur and nothing else. Server root: the modal alone over the desk ruling, its sentence 'There is no page to route from here', no close control, bar and sheet not visible (display none on the frame, isVisible false on the bar), the address line and 'make this page reviewable' block absent. Switcher inside a loaded project: same modal over the board, '1 blueprint claims this page' with the project marked and 'via walkdown', and after Escape the frame and panel regions differed from the untouched board by 2 and 0 pixels (which-probe-2.json; the 271 changed bar pixels are the project control's focus state). Commands block sits above the list in every case, names walkdown claims --url, walkdown import and walkdown init as code, and holds zero buttons, links or inputs. Several projects claiming, manufactured at my browser's network layer as the recorded checks do: claimants first with their blueprint named, the non-claimant last, '2 blueprints claim this page, in more than one project'. A server listing nothing, likewise manufactured: no list element at all, project.none saying to import one, the commands still above. One caveat filed as observation n-0303: at the root the blur still softens the desk ruling; read as 'no chrome is behind it' the step holds.",
+      "threads": [
+        "n-0303"
+      ]
+    }
+  ]
+}

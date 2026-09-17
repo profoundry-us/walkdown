@@ -1,0 +1,22 @@
+id: q-0302
+kind: question
+author: topher
+via: agent
+created: 2026-09-17T15:09:30.312Z
+anchor:
+  rule: status.derived.verdict-belongs-to-a-place
+status: open
+body: >-
+  Should a target with NO base_url count nothing, rather than every verdict ever
+  made against it?
+
+
+  Deleting a target's address today resurrects all of them at once (n-0199
+  measured 116 agent and 54 human passes filling the same cells the moment the
+  address was removed). Addressless RUNS counting is deliberate and stays either
+  way - an old record made before addresses existed should not be thrown away.
+  This asks only about an addressless TARGET. The safe direction is "counts
+  nothing"; the current direction is "counts everything". The other two items
+  from n-0199 are handled: a trailing slash or uppercased host no longer empties
+  the board (lib/status.js samePlace), and the reporter's baseURL fallback is an
+  adopter concern already noted in lib/playwright-reporter.js.

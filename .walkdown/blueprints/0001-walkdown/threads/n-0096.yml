@@ -25,3 +25,25 @@ body: >-
   thread references an image or embeds it, and what the panel shows in the
   stream — a thumbnail that opens, most likely. Not designed.
 reason: feedback
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-17T15:10:03Z
+    body: "Not built, and reclassified as a request rather than feedback so a pass
+      on embed.threads.note-first cannot close it silently while nothing exists.
+      The three open questions in it are design's and still open: where the
+      bytes live (runs/evidence/ is the only precedent), reference versus embed,
+      and what the stream shows. Yours to waive or to draw."
+  - author: topher
+    via: agent
+    created: 2026-09-17T15:10:03Z
+    body: request
+  - author: topher
+    via: agent
+    created: 2026-09-17T15:10:44Z
+    body: "Reopened on purpose: this is filed as feedback, and feedback closes on
+      your next pass of embed.threads.note-first - which would mark
+      screenshots-on-pins verified while nothing is built. A note's reason
+      cannot be changed after filing, so it stays open here rather than in the
+      walk queue. Yours to waive (it is an idea, not a defect) or to keep as the
+      reminder it is."

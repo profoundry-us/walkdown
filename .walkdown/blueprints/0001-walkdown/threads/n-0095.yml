@@ -5,7 +5,7 @@ created: 2026-08-27T00:01:06Z
 anchor:
   screen: review
   element: panel.tabs
-status: open
+status: addressed
 body: 'Idea, not yet fleshed out: a storyboard view of the screens - small
   compressed screenshots laid out so you can take in the whole product at a
   glance and see how the screens relate, rather than reading a list of ids. That
@@ -23,4 +23,12 @@ replies:
       view no longer has to displace anything to exist; the strip has three tabs
       and the room this idea needed is not the constraint any more. Left open —
       the idea itself is still unfleshed.'
+  - author: topher
+    via: agent
+    created: 2026-09-17T15:10:02Z
+    body: "Nothing built - this is your parked idea, and it is not yet specific
+      enough to build from. Recording where it stands so it stops reading as
+      owed: the Screens tab it would have displaced is gone, so a storyboard
+      view has a free slot whenever it is drawn. Yours to waive, or to turn into
+      a design request when you want it."
 reason: request

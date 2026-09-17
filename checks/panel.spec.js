@@ -2323,6 +2323,12 @@ test("walkdown's own root asks which project over the desk alone, and a pick bri
   // And nothing under it: no bar, no sheet - the desk ruling alone.
   await expect(page.getByTestId('panel.bar'), 'no bar at the bare root').toBeHidden();
   await expect(page.getByTestId('panel.app-frame'), 'no sheet at the bare root').toBeHidden();
+  // And the backdrop blurs nothing there: only the desk ruling is behind the
+  // modal, and a blur softened it into blotches (n-0303).
+  const backdrop = modal.locator('xpath=preceding-sibling::div[1]');
+  await expect
+    .poll(() => backdrop.evaluate((el) => getComputedStyle(el).backdropFilter))
+    .toBe('none');
 
   // The project holds two blueprints, so picking it asks which - on the
   // panel, beside a sheet with nothing in it yet.

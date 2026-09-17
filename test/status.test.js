@@ -421,6 +421,21 @@ test('a verdict counts only at the address it was made against @rule:status.deri
   assert.equal(back.agent.state, 'pass');
 });
 
+test('a cosmetic edit to the address is the same place @rule:status.derived.verdict-belongs-to-a-place', () => {
+  // A trailing slash and an uppercased host: the same system, and exact
+  // string equality emptied every cell over it (n-0199).
+  const runs = [at(walkdownRun('2026-01-01T00:00:00Z', 'agent', 'pass'), 'https://pr-1.review.app')];
+  for (const base_url of ['https://pr-1.review.app/', 'https://PR-1.review.app']) {
+    const row = deriveStatus(blueprint({ runs, verify: ['agent'], targets: { local: { base_url } } })).rows[0];
+    assert.equal(row.agent.state, 'pass', base_url);
+  }
+  // A different path is a different place still.
+  const other = deriveStatus(
+    blueprint({ runs, verify: ['agent'], targets: { local: { base_url: 'https://pr-1.review.app/v2' } } }),
+  ).rows[0];
+  assert.equal(other.agent.state, 'never');
+});
+
 test('a run with no recorded address is taken at face value @rule:status.derived.addressless-runs-count', () => {
   const runs = [walkdownRun('2026-01-01T00:00:00Z', 'agent', 'pass')]; // no base_url, as a unit-test runner writes
   const row = deriveStatus(

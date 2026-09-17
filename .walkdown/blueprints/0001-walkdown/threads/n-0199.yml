@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-05T23:45:11.512Z
 anchor:
   rule: status.derived.verdict-belongs-to-a-place
-status: open
+status: settled
 body: >-
   Deleting a target's `base_url` resurrects every verdict ever made against it,
   all at once.
@@ -51,3 +51,15 @@ body: >-
   place its verdict belongs to, which is exactly what this rule's second clause
   forbids.
 reason: observation
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-17T15:10:02Z
+    body: 'Settled: the cosmetic half is fixed - the target address is compared as a
+      place now (origin plus path, trailing slash and host case ignored:
+      lib/status.js samePlace, test/status.test.js "a cosmetic edit to the
+      address is the same place"), so repointing to the same system with a slash
+      on the end no longer empties the board. The decision this note carried -
+      whether an addressless TARGET counts nothing or everything - was buried
+      here where nothing could answer it, so it is q-0302 now. The reporter
+      baseURL fallback stays as documented for adopters.'

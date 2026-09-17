@@ -6,7 +6,7 @@ anchor:
   rule: panel.identity.default-actor
   screen: settings
   element: settings.actor
-status: open
+status: addressed
 body: >-
   Design request — the build now disagrees with the drawing, and the drawing
   owns this screen, so this is a request rather than an edit.
@@ -32,3 +32,12 @@ body: >-
   is wanted from design is the drawing catching up: the second Settings row, and
   the handle beside the name in the strip.
 reason: request
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-17T15:10:03Z
+    body: "The build side is done and unchanged since: two Settings rows
+      (settings.actor for the username, settings.display-name for the full name)
+      and the handle beside the name in the session strip (panel.actor-handle).
+      What remains is the drawing catching up, which is design's. Verify if the
+      build is right as it stands."

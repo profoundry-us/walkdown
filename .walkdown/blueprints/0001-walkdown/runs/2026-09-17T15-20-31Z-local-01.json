@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-09-17T15-20-31Z-local-01",
+  "created": "2026-09-17T15:20:31Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "4e9c892-dirty",
+  "tree_hash": "sha256:b37fb61b9710",
+  "spec_hash": "sha256:12fcdb1424ee",
+  "results": [
+    {
+      "rule": "panel.walkdown.draft-on-disk",
+      "status": "pass",
+      "statement_hash": "sha256:c1cd43e94e52",
+      "evidence": [
+        "runs/evidence/2026-09-17T15-20-31Z/draft-probe.json",
+        "runs/evidence/2026-09-17T15-20-31Z/draft-probe-3.json",
+        "runs/evidence/2026-09-17T15-20-31Z/02-first-verdict.png",
+        "runs/evidence/2026-09-17T15-20-31Z/03-after-reload.png",
+        "runs/evidence/2026-09-17T15-20-31Z/07-second-verdict.png",
+        "runs/evidence/2026-09-17T15-20-31Z/08-finished.png"
+      ],
+      "reasoning": "Drove the scratch copy on port 4730 (project rejudge-0917 by /api/blueprint) with headless Playwright at 1280x720, reading the copy's drafts/ and runs/ on disk after every click. Start walkdown, sign as eng, Pass on delivery.install.clone-is-the-install: drafts/local.json appeared at once carrying draft: true, the actor, the signature and that one verdict, with no run_id, and runs/ stayed at its previous count. A reload restored the sitting from that file ('1/139 judged', button reads Finish walkdown), and `walkdown status` run in the copy with its own home printed '◐ walkdown in progress — 1 rule judged by scratch-rejudge-0917, unsealed since …' while the judged rule's own row still read pending, and the API rows said verdict 'pending' for both judged rules the whole time the draft existed. A second verdict (Fail with a why, on locations.default.in-repo-on-request) rewrote the same file in place with both verdicts and the note it filed (n-0303 in the copy); a Fail without a why was refused on screen and wrote nothing, which is the panel's rule, not this one's. Finish appended exactly one run record (449 to 450, both results in it, signed eng) and deleted local.json. In a further sitting a verdict was drafted and then discarded through the same POST /api/draft {discard:true} the panel's own Discard uses (the UI only offers it when leaving for another blueprint, and the copy has one): the draft vanished and runs/ did not move. drafts/.gitignore is exactly '*' and '!.gitignore'. Every step holds. One aside for q-0250's neighbourhood, not a fail: after that API-side discard the panel on reload still said Finish walkdown from its own local copy of the sitting, disk holding no draft.",
+      "threads": []
+    }
+  ]
+}

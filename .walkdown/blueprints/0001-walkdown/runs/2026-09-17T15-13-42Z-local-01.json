@@ -1,0 +1,30 @@
+{
+  "run_id": "2026-09-17T15-13-42Z-local-01",
+  "created": "2026-09-17T15:13:42Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "4e9c892-dirty",
+  "tree_hash": "sha256:b37fb61b9710",
+  "spec_hash": "sha256:12fcdb1424ee",
+  "results": [
+    {
+      "rule": "panel.start.choose-a-blueprint",
+      "status": "pass",
+      "statement_hash": "sha256:f89c8ffc710e",
+      "evidence": [
+        "runs/evidence/2026-09-17T15-13-42Z/chooser-at-start.png",
+        "runs/evidence/2026-09-17T15-13-42Z/chooser-after-pick.png",
+        "runs/evidence/2026-09-17T15-13-42Z/chooser-blueprints-tab.png",
+        "runs/evidence/2026-09-17T15-13-42Z/chooser-after-reload.png",
+        "runs/evidence/2026-09-17T15-13-42Z/chooser-control-one-blueprint.png",
+        "runs/evidence/2026-09-17T15-13-42Z/chooser-control-blueprints-tab.png",
+        "runs/evidence/2026-09-17T15-13-42Z/choose-probe.json",
+        "runs/evidence/2026-09-17T15-13-42Z/choose-control.json"
+      ],
+      "reasoning": "Drove the scratch copy on port 4730 (GET /api/blueprint named project rejudge-0917) with headless Chromium at 1280x720, the panel started over /stand-in/review with no blueprint chosen. The copy's registry holds one blueprint, so as the recorded checks do I manufactured the several-claimants case at my browser's network layer: /api/blueprint answered with a second blueprint in the same project and /api/whose named both as claiming the page (choose-probe.json records the registry's real list beside the manufactured one). The panel then asked rather than opening: no project modal, both blueprints listed with their names, their own descriptions and ids, both carrying the claims-this-page badge and data-claims, and the notice reading '2 blueprints in this project claim this page. Nothing is remembered - walkdown asks each time rather than choosing for you' (chooser-at-start.png). Picking the real one loaded its rules list with only GET requests and localStorage still empty; the Blueprints tab then showed the same two-entry list with the chosen one filled and the badges kept (chooser-blueprints-tab.png); reloading the same address asked the identical question again (chooser-after-reload.png). Picking the manufactured entry could not load because its key exists only in my route, which is the fixture's limit rather than the panel's, and the panel fell back to asking again instead of opening something else. A fresh context with no interception, against the real registry, opened the lone claimant unasked and its Blueprints tab listed exactly the registry's one key, nothing from the filesystem (choose-control.json). The step about the registry being the list is judged at the panel: it draws only what /api/blueprint returned, and the server side of that claim is the unit suite's.",
+      "threads": []
+    }
+  ]
+}
