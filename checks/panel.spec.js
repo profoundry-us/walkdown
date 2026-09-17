@@ -2501,8 +2501,14 @@ test('a pass verifies the answered feedback on the rule, and says so first', {
   // every pane on the track, and the whole detail ran off the right.
   const panel = await page.getByTestId('panel.bar').boundingBox();
   for (const loc of [says, page.getByTestId('detail.statement')]) {
-    const box = await loc.boundingBox();
-    expect(box.x + box.width, 'wider than the panel').toBeLessThanOrEqual(panel.x + panel.width + 1);
+    // Polled: the detail slides in over 300ms, and a box read mid-slide
+    // sits wherever the track was at that instant.
+    await expect
+      .poll(async () => {
+        const box = await loc.boundingBox();
+        return [box.x >= panel.x - 1, box.x + box.width <= panel.x + panel.width + 1];
+      }, { message: 'wider than the panel' })
+      .toEqual([true, true]);
   }
 
   await page.getByTestId('detail.verdict').locator('button').first().click();
