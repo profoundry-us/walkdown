@@ -90,6 +90,7 @@ stories:
       - id: embed.pin.follows-the-visible-surface
         origin: thread:n-0025
         statement: "A pin lands on the surface in front, the one that would take your click. When the prototype fully covers the app, that surface is the prototype."
+        verify: [checks]
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -197,6 +198,7 @@ stories:
         origin: walkdown
         statement: "Hovering a pin shows a tooltip of three short lines: what the thread is, where it belongs, and enough of the note to recognise it."
         because: A page of pins should be readable without spending a click on each one.
+        verify: [checks]
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -357,6 +359,7 @@ stories:
       - id: embed.threads.actions-in-context
         origin: walkdown
         statement: The thread popover's actions are short verbs on one row. An action that needs a reason asks for it when chosen, and the reply box carries no instructions of its own.
+        verify: [checks]
         signoff: [eng, product]
         screens: [thread-panel]
         steps:

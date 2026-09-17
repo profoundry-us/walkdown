@@ -22,6 +22,7 @@
   },
   "scripts": {
     "test": "WALKDOWN_HOME=tmp/test-home node --test",
+    "test:record": "WALKDOWN_HOME=tmp/test-home WALKDOWN_RECORD_HOME= node --test --test-reporter=./lib/node-test-reporter.js --test-reporter-destination=stdout",
     "lint": "biome lint .",
     "build:js": "rollup -c && rollup -c rollup.embed.mjs",
     "check:js": "mkdir -p tmp/build && rollup -c --silent -o tmp/build/panel.built.js && diff -q tmp/build/panel.built.js lib/viewer/panel.js && rollup -c rollup.embed.mjs --silent -o tmp/build/embed.built.js && diff -q tmp/build/embed.built.js lib/viewer/embed.js",

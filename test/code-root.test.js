@@ -129,6 +129,42 @@ test('{results} is absolute under the code root, and nameable in the blueprint',
   );
 });
 
+/*
+ * A check that counts for nothing, said by lint (2026-09-16: two rules built
+ * and checked read as unbuilt, and the person approved the wording where a
+ * pass was due, then had to come back). Tagged with a rule that does not ask
+ * for the checks tier: an error. Asked for, checked, and never recorded: a
+ * warning, until a recorded run of the suite fills the cell.
+ */
+test('a check for a rule that never asked for checks, or never recorded, is said', () => {
+  const { spec } = apart({ runner: { lines: [] } });
+  const feature = join(spec, 'features', 'd.yml');
+  const coverage = (bp) => lint(bp, { checks: false }).findings.filter((f) => f.category === 'coverage' && f.subject === 'd.s.thing');
+
+  // The fixture's rule asks for checks and has one - and no run yet.
+  let found = coverage(loadBlueprint(spec));
+  assert.equal(found.length, 1);
+  assert.equal(found[0].level, 'warn');
+  assert.match(found[0].message, /never recorded/);
+
+  // Recorded once: nothing to say.
+  mkdirSync(join(spec, '..', 'runs'), { recursive: true });
+  writeFileSync(
+    join(spec, '..', 'runs', '2026-01-02T00-00-00Z-local-01.json'),
+    JSON.stringify({ run_id: '2026-01-02T00-00-00Z-local-01', created: '2026-01-02T00:00:00Z', kind: 'checks', actor: 'ci', target: 'local', results: [{ rule: 'd.s.thing', status: 'pass' }] }),
+  );
+  assert.equal(coverage(loadBlueprint(spec)).length, 0);
+
+  // The tier taken off the rule while the check stays: an error, wherever
+  // the ledger stands.
+  writeFileSync(feature, readFileSync(feature, 'utf8').replace('        verify: [checks]\n', ''));
+  found = coverage(loadBlueprint(spec));
+  assert.equal(found.length, 1);
+  assert.equal(found[0].level, 'error');
+  assert.match(found[0].message, /does not ask for the checks tier/);
+  assert.match(found[0].message, /a_spec\.rb:1/);
+});
+
 test('authoring.location resolves into the code, so coverage sees the suite', () => {
   const { code, spec } = apart({ runner: { lines: [] } });
   const bp = loadBlueprint(spec);
@@ -142,10 +178,11 @@ test('authoring.location resolves into the code, so coverage sees the suite', ()
   // fully-covered project report every rule as uncovered.
   assert.equal(scanCheckFiles(bp.config, bp.projectRoot).length, 0);
 
-  // And the rule reads as covered rather than as a coverage warning.
+  // And the rule reads as covered rather than as a coverage warning. (It is
+  // still unrecorded, which is a different finding - the test above this.)
   const { findings } = lint(bp);
   assert.equal(
-    findings.filter((f) => f.category === 'coverage' && f.subject === 'd.s.thing').length,
+    findings.filter((f) => f.category === 'coverage' && f.subject === 'd.s.thing' && /no check references/.test(f.message)).length,
     0,
     'no "no check references this rule" for a rule whose check exists',
   );

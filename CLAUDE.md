@@ -50,6 +50,21 @@ the full suite ran on every turn end, ~23s of it unit tests.
 The hooks call the local binary directly — npx resolves the same package
 but intermittently stalls for minutes, which a per-edit hook cannot afford.
 
+## A rule is not built until the ledger says so
+
+Two suites verify rules here, and neither records anything unless asked:
+
+    npm run checks          # Playwright, recorded (checks:dev records nothing)
+    npm run test:record     # node --test, recorded (npm test records nothing)
+
+A rule you built and checked still reads as UNBUILT until a recorded run
+names it - and an unbuilt rule offers Topher "approve the wording" where
+Pass/Fail was due, so he approves, and then has to come back (2026-09-16,
+twice). Before saying a rule is built: `verify: [checks]` on the rule, one
+recorded run, and `walkdown status <rule>` showing the checks cell filled.
+Lint says both halves - a check on a rule that never asked for the tier is
+an error, a checked rule the ledger has never seen is a warning.
+
 ## The dev loop: `npm run dev`
 
 A `walkdown serve` holds every module it imported at startup, so an edit to

@@ -173,6 +173,7 @@ stories:
         origin: walkdown
         statement: A thread is one stream of messages. The opening note is the first of them, with an author and a time like any other, and consecutive messages from one author show under a single name.
         because: A long exchange should read as talking rather than as filing.
+        verify: [checks]
         signoff: [eng, product]
         screens: [thread-panel, rule-detail]
         steps:

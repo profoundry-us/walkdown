@@ -51,6 +51,7 @@ stories:
       - id: panel.dock.toolbar
         origin: thread:n-0015
         statement: "A toolbar across the top of the panel holds the controls that belong to the session rather than to any one rule: which project, which screen, which surface, and pin mode. Which of a project's blueprints is in hand is chosen on the Blueprints tab."
+        verify: [checks]
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -182,6 +183,7 @@ stories:
         origin: thread:n-0023
         statement: While the panel is still fading from one of its two surfaces to the other, nothing can be pinned.
         because: Both surfaces are on screen at once, so a pin has no honest answer to which one it is about.
+        verify: [checks]
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -250,6 +252,7 @@ stories:
       - id: panel.dock.chrome-not-a-pin-target
         origin: thread:n-0011
         statement: "In pin mode, walkdown's own chrome is never a place to put a pin: not the bar, an open form, an existing pin, or the docked panel. Escape leaves pin mode."
+        verify: [checks]
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -551,6 +554,7 @@ stories:
       - id: panel.start.open-a-folder
         origin: thread:n-0017
         statement: With no walkdown server to read blueprints from, the panel says so plainly and tells you how to start one, rather than rendering an empty or broken review surface. Once it connects, it shows which folder that server is serving.
+        verify: [checks]
         signoff: [eng, product]
         screens: [start]
         steps:
@@ -574,6 +578,7 @@ stories:
         origin: thread:n-0017
         statement: When several of a project's blueprints claim the page you are on, the panel asks which one. Holding several blueprints is not a reason to ask.
         because: What a folder holds says nothing about the page you are looking at.
+        verify: [checks]
         signoff: [eng, product]
         screens: [choose-blueprint]
         steps:
@@ -624,6 +629,7 @@ stories:
         origin: thread:q-0269
         statement: When the address alone cannot say which project this page belongs to, the panel asks. Whether nothing claims the page, several projects do, or there is no page at all, the same modal asks the same question.
         because: Three screens asking one question were three places for the answer to differ, and a long list of projects must not push the way out of view.
+        verify: [checks]
         signoff: [eng, product]
         screens: [project-modal]
         steps:
@@ -664,6 +670,7 @@ stories:
         statement: walkdown's own page opens what its address names - a rule, or a thread - so a link from outside the panel has somewhere to arrive.
         because: An id beside a pin, or in a run record pasted anywhere, is only a link if there is an address that opens the thing it names.
         history: The standalone popover put rule ids and unpinned thread ids back to plain words because the panel had no address for them (n-0294, n-0297); the address is what lets them be links again.
+        verify: [checks]
         signoff: [eng, product]
         screens: [rule-detail, thread-panel]
         steps:
