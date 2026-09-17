@@ -207,6 +207,7 @@ stories:
         statement: A question's first line is the question, and the thread draws it as the headline - above the context, in the list and on the thread's own screen - so what is being asked is read before anything else.
         because: A decision that needs a person is only ever answered if that person can find it.
         history: Two decisions of Topher's sat for eleven days in the middle of a note's third paragraph (n-0202), where nothing offered him a way to answer and nothing showed him the question.
+        verify: [checks]
         signoff: [eng, product]
         screens: [thread-panel]
         steps:
