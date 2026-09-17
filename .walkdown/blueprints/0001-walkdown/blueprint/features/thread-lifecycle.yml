@@ -201,6 +201,25 @@ stories:
             - hash: sha256:38f76ce52560
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
+      - id: threads.conversation.question-leads-with-the-question
+        origin: thread:n-0202
+        created_at: 2026-09-16
+        statement: A question's first line is the question, and the thread draws it as the headline - above the context, in the list and on the thread's own screen - so what is being asked is read before anything else.
+        because: A decision that needs a person is only ever answered if that person can find it.
+        history: Two decisions of Topher's sat for eleven days in the middle of a note's third paragraph (n-0202), where nothing offered him a way to answer and nothing showed him the question.
+        signoff: [eng, product]
+        screens: [thread-panel]
+        steps:
+          given:
+            - A question whose body is the question on its first line and the context under it
+          when:
+            - Meet it in the threads list, open it, and read a reply on it
+          then:
+            - The first line is the headline of the collapsed card and of the opened thread - bolder and larger than the context beneath it
+            - The context follows as the body, unchanged
+            - A reply is never headlined, and a note's opening message is drawn as before
+            - The preview card under the question's id leads with the same line
+          statement_hash: 'sha256:68c8184ae5c9'
       - id: threads.conversation.written-in-markdown
         origin: thread:n-0288
         statement: A message is markdown, rendered from a short list of allowed elements; anything else in it is plain text.

@@ -19,6 +19,13 @@ notes), and the runs ledger. The blueprint is the single source of truth for
   rule/screen/element (`walkdown thread new --kind question --rule <id>
   --body <text>`, or `POST /api/threads` via `walkdown serve`) and say what
   you assumed if you proceed.
+- Anything that needs a person's DECISION is a question, never a note. A note
+  says work was done or is owed; a question says an answer is owed, and it is
+  the only kind the panel offers Answer on. Write the question as the first
+  line of the body - one line, ending in a question mark - and the context
+  under it: the panel draws that first line as the headline, and a question
+  buried in a paragraph is a question nobody sees. Several decisions are
+  several questions.
 
 ## Ownership boundaries
 

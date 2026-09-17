@@ -81,7 +81,7 @@ export function threadCard(t, where = null) {
           </span>
         </div>
         <div class="wd-text wd-preview">${unsafeHTML(
-          MSG.body(t.body, { rules: (S.data?.rows ?? []).map((r) => r.rule) }),
+          MSG.opening(t.kind, t.body, { rules: (S.data?.rows ?? []).map((r) => r.rule) }),
         )}</div>
         ${unsafeHTML(MSG.repliesLine(t, names()))}
       </div>

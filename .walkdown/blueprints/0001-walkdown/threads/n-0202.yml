@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-05T23:47:10.859Z
 anchor:
   rule: status.evidence.agent-assumed
-status: open
+status: addressed
 body: >-
   Two judges driven in parallel on 2026-09-05 landed on each other's servers,
   and one read the wrong board before noticing.
@@ -113,4 +113,13 @@ replies:
       other two - whether the prompt hands out a port, and whether the shared
       browser pane can be defended against at all - are still yours; left open
       for that."
+  - author: topher
+    via: agent
+    created: 2026-09-17T00:11:22Z
+    body: "One of the three landed on 2026-09-14 (every judge prompt says to confirm
+      /api/blueprint names its copy before trusting a page). The other two were
+      decisions of yours buried in this note, where nothing offered you a way to
+      answer - so they are questions now, one each: q-0300 (should the prompt
+      hand out a port) and q-0301 (can the shared browser pane be defended
+      against at all). Nothing else here is owed."
 reason: observation

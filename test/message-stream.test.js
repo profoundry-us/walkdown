@@ -137,3 +137,25 @@ test('the first line of a body is its opening paragraph as plain words, cut to f
   assert.match(MSG.firstLine('x'.repeat(200)), /…$/);
   assert.equal(MSG.firstLine(null), '');
 });
+
+/*
+ * A question's first line is the question, and the thread draws it as the
+ * headline - a decision buried in a paragraph was a decision nobody saw
+ * (n-0202). A note's opening message is its body, unchanged.
+ */
+test('a question opens with its first line as the headline; a note does not @rule:threads.conversation.one-stream', () => {
+  const q = MSG.opening('question', 'Should the prompt hand out a port?\n\nContext: two judges collided.');
+  assert.match(q, /^<div class="wd-ask">/);
+  assert.match(q, /wd-ask">Should the prompt hand out a port\?<\/div>/);
+  assert.match(q, /Context: two judges collided\./);
+  assert.doesNotMatch(q, /wd-ask">[^<]*Context/);
+  // One line only: the whole of it is the question.
+  assert.equal(MSG.opening('question', 'Just this?'), '<div class="wd-ask">Just this?</div>');
+  assert.doesNotMatch(MSG.opening('note', 'First line.\n\nMore.'), /wd-ask/);
+  // And the stream draws it on the opening message alone, never a reply.
+  const html = MSG.stream({
+    kind: 'question', author: 'topher', created: '2026-01-01T00:00:00Z', body: 'Which?\nContext.',
+    replies: [{ author: 'agent', created: '2026-01-01T01:00:00Z', body: 'This one.\nBecause.' }],
+  });
+  assert.equal((html.match(/wd-ask/g) ?? []).length, 1);
+});

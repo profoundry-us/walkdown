@@ -2649,6 +2649,61 @@ test("walkdown's own address keeps the blueprint and the page, so a reload comes
 });
 
 /*
+ * A question's first line is the question, drawn as the headline of its
+ * card and its screen (n-0202: two decisions sat for eleven days in the
+ * third paragraph of a note). A reply is never headlined; a note's opening
+ * message is drawn as before.
+ */
+test("a question leads with its question, in the list and on its own screen", {
+  tag: '@rule:threads.conversation.question-leads-with-the-question',
+}, async ({ page }) => {
+  const rule = 'threads.conversation.one-stream';
+  const ask = 'Should the prompt hand out a port to each judge?';
+  const filed = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
+    data: { kind: 'question', body: `${ask}\n\nContext: two judges collided on the same port.`, anchor: { rule } },
+  });
+  expect(filed.ok()).toBeTruthy();
+  const { id } = await filed.json();
+  expect((await page.request.post(`${WD_ORIGIN}/api/threads/${id}/replies?bp=blueprint`, {
+    data: { body: 'Yes, hand one out.\nBecause collisions.', author: 'topher' },
+  })).ok()).toBeTruthy();
+  const noted = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
+    data: { kind: 'note', body: 'The label reads wrong.\n\nOn the second screen.', anchor: { rule } },
+  });
+  const note = (await noted.json()).id;
+
+  await page.goto(fixtureFor({ bp: 'blueprint' }));
+  await expect(page.getByTestId('panel.bar')).toBeVisible();
+  await page.getByTestId('panel.tabs').getByText(/Threads/).click();
+  const list = page.getByTestId('panel.threads-list');
+  const weight = (loc) => loc.evaluate((el) => Number(getComputedStyle(el).fontWeight));
+  const size = (loc) => loc.evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+
+  // In the list: the card leads with the question, bolder and larger than
+  // the context under it.
+  const card = list.locator(`[data-open-thread="${id}"]`).first();
+  await card.scrollIntoViewIfNeeded();
+  const cardAsk = card.locator('.wd-ask');
+  await expect(cardAsk).toHaveText(ask);
+  const cardBody = card.locator('.wd-text > p').first();
+  await expect(cardBody).toContainText('Context: two judges');
+  expect(await weight(cardAsk)).toBeGreaterThan(await weight(cardBody));
+  expect(await size(cardAsk)).toBeGreaterThan(await size(cardBody));
+  // A note's card has no headline.
+  await expect(list.locator(`[data-open-thread="${note}"]`).first().locator('.wd-ask')).toHaveCount(0);
+
+  // Opened: the same headline on the opening message, and none on the reply.
+  await card.click({ position: { x: 8, y: 6 } });
+  const body = page.getByTestId('thread.body');
+  const asks = body.locator('.wd-ask');
+  await expect(asks).toHaveCount(1);
+  await expect(asks).toHaveText(ask);
+  await expect(body.locator('.wd-msg').first().locator('.wd-ask')).toHaveCount(1);
+  await expect(body.locator('.wd-msg').last()).toContainText('Yes, hand one out.');
+  await expect(body.locator('.wd-msg').last().locator('.wd-ask')).toHaveCount(0);
+});
+
+/*
  * n-0298: an id in a message says what it names before you follow it - a
  * card under the cursor, and under keyboard focus, with the rule's statement
  * and verdict or the thread's status, author and first line. Read at show

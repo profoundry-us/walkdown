@@ -1,0 +1,17 @@
+id: q-0300
+kind: question
+author: topher
+via: agent
+created: 2026-09-17T00:11:04.934Z
+anchor:
+  rule: status.evidence.agent-assumed
+status: open
+body: >-
+  Should the judge prompt hand out a port, so two judges driven at once cannot
+  pick the same one?
+
+
+  Context: two judges collided on 2026-09-05 (n-0202) because each chose its own
+  port and the shared browser pane pulled tabs between them. Handing out the
+  port is the one half walkdown could own: `walkdown judge <rule> --port <n>`
+  printed into the prompt, and the scratch copy made on it.

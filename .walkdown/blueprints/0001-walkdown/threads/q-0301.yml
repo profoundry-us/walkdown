@@ -1,0 +1,20 @@
+id: q-0301
+kind: question
+author: topher
+via: agent
+created: 2026-09-17T00:11:22.483Z
+anchor:
+  rule: status.evidence.agent-assumed
+status: open
+body: >-
+  Is there anything to do about the shared browser pane pulling one judge's tab
+  onto another judge's server, or is the answer simply 127.0.0.1 plus confirming
+  /api/blueprint before trusting a page?
+
+
+  Context: on 2026-09-05 two judges, each isolated by port, scratch copy and
+  WALKDOWN_HOME, still had their tabs navigated onto each other's servers - one
+  started a recording on the wrong copy before noticing (n-0202). The
+  confirm-first step is in every judge prompt since 2026-09-14. What is left is
+  whether walkdown can defend the client side at all, or whether the procedure
+  is the whole answer.

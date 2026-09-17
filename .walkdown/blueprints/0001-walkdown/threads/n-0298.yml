@@ -7,7 +7,7 @@ created: 2026-09-15T16:38:09.178Z
 anchor:
   rule: threads.conversation.one-stream
   screen: thread-panel
-status: addressed
+status: verified
 body: "Topher, 2026-09-15, on choosing the routable address for n-0297: an id
   that links out of the popover (and the panel) should probably show a small
   tooltip before you click - a little about the thing it names, the way a PR
@@ -34,3 +34,4 @@ replies:
       checks/panel.spec.js and checks/embed.spec.js, unit-tested in
       test/message-stream.test.js. Not done: a thread filed from the embed after
       the page loaded has no card until the blueprint is fetched again."
+verified_by: topher
