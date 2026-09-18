@@ -1,0 +1,61 @@
+{
+  "review": {
+    "title": "the review page",
+    "redlines": [
+      "The design laid the panel beside a plain card; the build lays both on a ruled, tilted desk (<code>panel.desk</code>) and scales the frame to fit, with the zoom read out in the corner (<code>panel.zoom</code>).",
+      "The design's tabs were Blueprints / Rules / Screens. Built: Blueprints / Rules / Threads with counts, and the screens moved into the bar as a picker (<code>panel.screen-picker</code>) that names the page in the frame.",
+      "Rules are grouped under the screen they are about, with a sticky screen head, tier marks on the left and the ask &mdash; sign / asks / fixed / walk &mdash; as a coloured badge on the right (ADR 0006 &sect;4). The design had story headings and one <i>sign</i> / <i>walk</i> word.",
+      "The bar carries Start walkdown, the viewport presets and Pin mode; <i>Recording as</i> moved to the settings pop-over under the gear.",
+      "The footer counts verified rules and opens the Legend on demand; the design printed the legend inline."
+    ]
+  },
+  "rule-detail": {
+    "title": "rule detail",
+    "redlines": [
+      "The design had a verdict block at the top &mdash; a <i>why</i> box, Pass and Fail &mdash; and a separate Threads list with its own composer at the bottom. Built: one conversation, one composer under it (ADR 0006): the text box above the buttons, Waive alone on the left, Reply / Fail / Pass on the right.",
+      "The statement is followed by <i>because</i> and <i>history</i>, then the screen and the steps drawn as given / when / then with anchors as chips (ADR 0004). The design showed statement, evidence, steps, verify.",
+      "Evidence, acceptance and the check source sit below the conversation rather than above it.",
+      "The steppers (&larr; &rarr;) and <i>&larr; All rules</i> are where the design put them."
+    ]
+  },
+  "thread-panel": {
+    "title": "the thread screen",
+    "redlines": [
+      "The design's composer offered Answer and Waive under the box. Built: the box, then Reply &mdash; and on a thread that has ended, the closed banner above it says how it ended and that a fail on the rule reopens it (ADR 0006 &sect;3). Done / Reopen appear only on a thread no walkable rule owns.",
+      "The head names the author, the id and the reason (finding, feedback, request&hellip;) beside the status chip; the design had id and status alone.",
+      "This screen is reached from the Threads tab &mdash; which lists only threads no rule can be walked &mdash; or from a tag in a rule's conversation. The design reached it from a rule's Threads list.",
+      "Day dividers and the NEW line are as designed."
+    ]
+  },
+  "settings": {
+    "title": "settings",
+    "redlines": [
+      "The design drew a card: Record as, then the desk ruling. Built as a pop-over under the gear in the bar, over the page, with the actor's username, full name, timezone and roles read from <code>~/.walkdown/config.yml</code> and said so.",
+      "<i>Record as</i> is the username the records carry; the full name is only how you are shown. The design had one box.",
+      "The desk ruling &mdash; tilt, tip, depth, spacing, ink, hide &mdash; is as designed, with Reset."
+    ]
+  },
+  "start": {
+    "title": "first run",
+    "redlines": [
+      "As designed: a first step, not an error. The build explains why a server is needed (a browser tab cannot read the filesystem) before naming <code>walkdown serve</code>; the design said it in one line.",
+      "The server box and Connect are the Blueprints tab's own row, drawn here too (n-0236)."
+    ]
+  },
+  "project-modal": {
+    "title": "which project?",
+    "redlines": [
+      "Built from the proposal that was promoted on 2026-09-10 (n-0271): the modal covers the whole chrome, panel included, and the board behind it is blurred.",
+      "The address is named, then what is true of it (no blueprint claims it), then the two commands &mdash; <code>walkdown claims</code> and <code>walkdown import</code> &mdash; then every project this machine has, with its blueprint count.",
+      "This one screen also answers <i>several projects claim this page</i> and <i>no page to route from</i> (ADR 0001 &sect;7); the retired unclaimed-page drawing was one of the three it folded."
+    ]
+  },
+  "choose-blueprint": {
+    "title": "choose a blueprint",
+    "redlines": [
+      "The gate itself only rises when a project holds several blueprints and none is picked; this machine holds one per project, so what is drawn is the Blueprints tab, which lists the same rows with the same anchors (<code>start.folder</code>, <code>start.options</code>).",
+      "The design asked <i>which blueprint is this site?</i> with radio marks and a description per row. Built: the server row above, the folder named, and each blueprint as a row with its description &mdash; the one the page claims first.",
+      "Nothing is remembered for the site (ADR 0001 &sect;9); the address carries the pick instead."
+    ]
+  }
+}

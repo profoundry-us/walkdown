@@ -149,9 +149,16 @@ under either.
 panel's own markup in the `redline` theme, with a *Redlines* note per page
 saying where the build left the design. The storyboard's app paths point at
 it, so it is what the App side of the fade shows. When a screen changes
-shape, bring its as-built page along - by hand, or by recapturing it from
-the running panel and re-wrapping - and update its redlines. Nothing
-enforces this; a stale as-built is a drawing that has gone stale, and the
+shape, bring its as-built page along and update its redlines:
+
+    node tools/as-built.mjs                 # every screen, against a serve it starts
+    node tools/as-built.mjs rule-detail     # one screen
+    node tools/as-built.mjs --port 4700     # against the serve already running
+
+The states it drives are data at the top of the tool; the redlines are
+prose in `as-built/redlines.json`, kept across recaptures. The two retired
+screens are hand-written and the tool leaves them alone. Nothing enforces
+any of this; a stale as-built is a drawing that has gone stale, and the
 slider will show it.
 
 To make "did we skip any?" answerable, declare a sweep first:

@@ -141,8 +141,9 @@ with no build at all still has nothing truer than its design to show.
   decision, and if one arrives, the as-built stays useful as the drawing of
   record.
 - **Capturing as-builts for other projects.** The capture-and-clean pass that
-  made walkdown's pages is a script in a scratch directory, not a feature.
-  Whether it becomes `walkdown as-built capture` waits on somebody wanting it.
+  makes walkdown's pages is `tools/as-built.mjs`, a tool of this repository
+  and not a feature of walkdown. Whether it becomes `walkdown as-built
+  capture` waits on somebody wanting it.
 - **Whether an as-built should be judged at all.** A project may decide its
   human verdicts on such screens are only about the drawing and route the
   rest through checks; nothing here forces either.

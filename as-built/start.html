@@ -3,12 +3,12 @@
   AS-BUILT: first run
 
   A drawing of walkdown's panel as it was actually built - the panel's own
-  markup, captured from the running build on 2026-09-18 and kept by hand
-  since (ADR 0007). It is neither the design (prototype/screens/start.html,
-  which stays as it was drawn) nor the build (the panel you are holding, which
-  cannot frame itself). It exists so the App side of the fade has something
-  true to show, and so the distance between what was designed and what was
-  built is visible on the slider.
+  markup, captured from the running build by tools/as-built.mjs on 2026-09-18
+  and kept by hand since (ADR 0007). It is neither the design
+  (prototype/screens/start.html, which stays as it was drawn) nor the build
+  (the panel you are holding, which cannot frame itself). It exists so the
+  App side of the fade has something true to show, and so the distance
+  between what was designed and what was built is visible on the slider.
 
   Nothing here is evidence. A verdict given against this page is a verdict
   about a drawing of the build.
@@ -35,8 +35,8 @@
   .as-built-notes li { margin: 4px 0; }
   .as-built-notes li + li { border-top: 1px dotted oklch(41% 0.05 25); padding-top: 4px; }
 </style> 
-  </head> 
-  <body> 
+  </head>
+  <body>
     <div style="position: fixed; inset: 0px; z-index: 1; pointer-events: none; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0px; border: 0px; padding: 0px; background: transparent; overflow: visible;">
       <div class="h-full w-full text-sm" style="letter-spacing: normal; word-spacing: normal; text-transform: none; font-variant: normal; font-style: normal; text-indent: 0px; text-shadow: none; white-space: normal; word-break: normal; text-align: left; direction: ltr; text-decoration: none;">
         <header data-testid="panel.bar" data-theme="redline" class="flex items-center gap-2 px-3 text-base-content" style="position: absolute; top: 0px; left: 0px; right: 0px; height: 44px; pointer-events: auto; transition: transform 0.2s; background: transparent; transform: none;">
@@ -55,7 +55,7 @@
             blueprints, run:</p> 
             </div> <code class="rounded-box bg-base-200 px-3 py-2 text-[12px]">walkdown serve</code> 
             <label class="flex items-center gap-2"> <span class="shrink-0 text-xs opacity-60">Server</span> 
-              <input id="wdp-server" data-testid="start.server" title="Where walkdown serve is listening — a server, not a folder" aria-label="walkdown server address" class="input input-sm flex-1" value="http://localhost:4700" style=""> 
+              <input id="wdp-server" data-testid="start.server" title="Where walkdown serve is listening — a server, not a folder" aria-label="walkdown server address" class="input input-sm flex-1" value="http://localhost:4700"> 
               <button id="wdp-retry" data-testid="start.connect" class="btn btn-sm btn-primary">Connect</button> 
             </label> 
             <p class="text-[11.5px] opacity-40">Then every blueprint under that folder is listed here.</p> 
