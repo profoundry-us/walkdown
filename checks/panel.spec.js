@@ -2675,6 +2675,23 @@ test("walkdown's own address keeps the blueprint and the page, so a reload comes
     .toBe(true);
   expect(new URL(page.url()).searchParams.get('bp')).toBe(key);
 
+  // Open a rule: the address names it, and a reload comes back to it.
+  const rule = (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json()).rows[0].rule;
+  await page.getByTestId('panel.rules-list').locator(`[data-rule="${rule}"]`).first().click();
+  await expect(page.getByTestId('detail.rule-id')).toHaveText(rule);
+  await expect.poll(() => new URL(page.url()).searchParams.get('rule')).toBe(rule);
+  await page.reload();
+  await expect(page.getByTestId('detail.rule-id')).toHaveText(rule);
+
+  // Back to the list drops it, so the next reload lands on the list - not
+  // on the rule you had just left (Topher, 2026-09-18).
+  await page.getByTestId('detail.back').click();
+  await expect.poll(() => new URL(page.url()).searchParams.get('rule')).toBeNull();
+  await page.reload();
+  await expect(page.getByTestId('panel.bar')).toBeVisible();
+  await expect.poll(() => page.locator('.wdp-track').evaluate((el) => el.style.transform)).toMatch(/translateX\(0%\)/);
+  expect(new URL(page.url()).searchParams.get('rule')).toBeNull();
+
   // A blueprint this server does not have is dropped from the address too,
   // rather than carried along as a name that opens nothing (n-0265).
   await page.goto(`${WD_ORIGIN}/?bp=no.such.blueprint#${frame}`);

@@ -687,9 +687,9 @@ stories:
       - id: panel.start.address-keeps-the-pick
         origin: walkdown
         created_at: 2026-09-16
-        statement: walkdown's own page writes the blueprint you picked and the page in the frame into its own address, so a reload of that tab comes back to the same board on the same page - and the address is the only thing that carries it.
+        statement: walkdown's own page writes the blueprint, the open rule or thread, and the page in the frame into its own address, so a reload comes back to the same view - and the address is the only thing that carries it.
         because: A stored choice is a fact about what you chose somewhere else; the address is a fact about this tab, and reading it back on reload is not memory.
-        history: Nothing was remembered at all (ADR 0001 §9), so every reload of the extension's page brought the chooser back; the address took the pick on 2026-09-16.
+        history: Nothing was remembered at all (ADR 0001 §9), so every reload of the extension's page brought the chooser back; the address took the pick on 2026-09-16. A `?rule=` that arrived by link stayed after "All rules", so a reload went back to the rule you had just left; the address follows the view since 2026-09-18.
         signoff: [eng, product]
         verify: [checks]
         screens: [review]
@@ -697,13 +697,14 @@ stories:
           given:
             - walkdown's own page - framed by the extension, or served at the server's root - open on a page under review
           when:
-            - Pick a blueprint, then move the frame to another screen, then reload the tab
+            - Pick a blueprint, then move the frame to another screen, then open a rule, then reload the tab; then press All rules and reload again
           then:
-            - The address names the blueprint by key in `?bp=` from the moment it is picked, and the page in the frame after `#` from the moment it moves
-            - The reload comes back to that board on that page, with no chooser
+            - The address names the blueprint by key in `?bp=` from the moment it is picked, the page in the frame after `#` from the moment it moves, and the open rule in `?rule=` (or thread in `?thread=`) from the moment it opens
+            - The reload comes back to that board on that page, on that rule, with no chooser
+            - Back to the list drops `?rule=` from the address, so the second reload comes back to the list, not the rule
             - A `?bp=` naming a blueprint the server no longer has is dropped from the address, and the chooser asks instead of an error being shown where the page should be
             - Nothing is written to the browser's storage for this - opening a fresh address with no `?bp=` asks as before, and inside somebody else's application the panel never touches that page's address
-          statement_hash: sha256:4b8556e99706
+          statement_hash: sha256:1a3c30f1ce2e
 
   - id: panel.rules
     title: The rules are one tap away, and so is the way back
