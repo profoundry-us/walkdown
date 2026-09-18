@@ -125,6 +125,22 @@ export function askOf(row) {
   return row.built ? 'walk' : 'sign';
 }
 
+/*
+ * How each ask is drawn, so the kind of act a walkdown will take on the rule
+ * reads at a glance before the word does (Topher, 2026-09-18, from the
+ * canvas): the four asks are ADR 0006's kinds of conversation. Blue is "is
+ * this the right rule?" - a wording to sign, a question to answer; amber is
+ * "something is wrong" - a claimed fix to judge; green is a clean build
+ * owed nothing but your verdict. daisyUI badge classes, as CHIP uses for a
+ * thread's status, so the two vocabularies share a palette.
+ */
+export const ASK = Object.freeze({
+  sign: ['badge-info', 'a wording to approve or send back'],
+  asks: ['badge-info', 'a question on the rule to answer'],
+  fixed: ['badge-warning', 'a claimed fix to judge - pass ends the conversation, fail continues it'],
+  walk: ['badge-success', 'a build to judge'],
+});
+
 export const screenById = (id) => (S.data?.storyboard ?? []).find((s) => s.id === id) ?? null;
 
 export const LBL = 'text-[10.5px] font-bold uppercase tracking-widest opacity-40';

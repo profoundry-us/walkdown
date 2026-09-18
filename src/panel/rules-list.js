@@ -9,6 +9,7 @@ import { requestRender } from './shell.js';
 import { D, S } from './state.js';
 import { fire } from './util.js';
 import {
+  ASK,
   askOf,
   groupedRows,
   LBL,
@@ -476,7 +477,9 @@ function ruleRow(row) {
    * together in one warning-yellow string they read as one word - "walk 2"
    * looked like a quantity of walking. Fixed widths so both answers stack
    * into columns you can run an eye down; the thread count in plain ink at
-   * half strength, because it is context rather than a claim on you.
+   * half strength, because it is context rather than a claim on you. The
+   * owed word is a badge in the colour of its kind of ask (ASK), so which
+   * act the walk will take on the rule reads before the word does.
    */
   return html`<button class="flex w-full cursor-pointer items-center gap-2.5 px-3.5 py-2 text-left text-[14px] hover:bg-base-200"
       data-rule="${row.rule}" title="${row.rule} — ${why}"
@@ -495,7 +498,11 @@ function ruleRow(row) {
       }
       <span class="truncate">${shortName(row)}</span>
       <span class="ml-auto flex shrink-0 items-center gap-2 text-[11.5px] font-semibold">
-        <span class="w-9 text-right text-warning">${owes}</span>
+        <span class="flex w-12 justify-end">${
+          owes
+            ? html`<span class="badge badge-xs ${ASK[owes][0]} font-semibold uppercase tracking-wide" data-ask="${owes}" title="${ASK[owes][1]}">${owes}</span>`
+            : nothing
+        }</span>
         <span class="w-7 text-right font-normal text-base-content/45">${thr ? `${thr}⚑` : ''}</span>
       </span>
     </button>`;
@@ -599,7 +606,10 @@ export function legendControl() {
       ${head('Signatures — one slot per role')}${LEGEND_SIGNS.map(signLine)}
       ${head('And around them')}
       <span class="text-center text-warning">◆</span><span>Warning yellow anywhere means the rule is waiting on <b>you</b>.</span>
-      <span class="text-center text-warning">▪</span><span><b>sign</b> is a spec to accept; <b>walk</b> is a build to judge.</span>
+      ${Object.entries(ASK).map(
+        ([word, [cls, why]]) =>
+          html`<span class="flex justify-center"><span class="badge badge-xs ${cls} font-semibold uppercase tracking-wide">${word}</span></span><span>${why}.</span>`,
+      )}
       <span class="text-center opacity-45">⚑</span><span>Open conversations on the rule.</span>
     </span></span>
     <span class="flex cursor-help items-center gap-1 opacity-50">${icon('info', 'size-3.5')}Legend</span>
