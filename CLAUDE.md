@@ -136,11 +136,23 @@ The stamp exists because six unstamped copies once sat in `tmp/scratch` for
 weeks, and by the time anyone found them nobody could say which sitting had
 made which.
 
-A copy's `prototype/` is a symlink to the real one, so a throwaway page
-written "into the copy" lands in `prototype/screens/` for real (a judge did
-this on 2026-09-13 and had to clean up). A fixture that needs a page of its
-own goes in a second throwaway blueprint or under the copy's `stand-in`,
-never under `prototype/`.
+A copy's `prototype/` and `as-built/` are symlinks to the real ones, so a
+throwaway page written "into the copy" lands in the real folder (a judge did
+this to `prototype/screens/` on 2026-09-13 and had to clean up). A fixture
+that needs a page of its own goes in a second throwaway blueprint, never
+under either.
+
+## The as-built screens are ours to edit; the prototype is not
+
+`prototype/screens/` is the design as drawn and stays that way.
+`as-built/` is a drawing of the panel as built (ADR 0007): the
+panel's own markup in the `redline` theme, with a *Redlines* note per page
+saying where the build left the design. The storyboard's app paths point at
+it, so it is what the App side of the fade shows. When a screen changes
+shape, bring its as-built page along - by hand, or by recapturing it from
+the running panel and re-wrapping - and update its redlines. Nothing
+enforces this; a stale as-built is a drawing that has gone stale, and the
+slider will show it.
 
 To make "did we skip any?" answerable, declare a sweep first:
 

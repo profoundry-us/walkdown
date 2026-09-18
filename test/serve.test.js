@@ -702,6 +702,20 @@ test('a stand-in serves the design as the app, marked as one @rule:screens.surfa
   assert.equal((await fetch(`${base}/stand-in/nope`)).status, 404);
 });
 
+test("an as-built drawing is served as written, from the project's own folder @rule:screens.surfaces.as-built-drawing", async () => {
+  mkdirSync(join(root, 'as-built'), { recursive: true });
+  const page = '<!doctype html><html data-theme="redline"><body><h1 data-testid="home.cta">as built</h1></body></html>';
+  writeFileSync(join(root, 'as-built', 'home.html'), page);
+  const res = await fetch(`${base}/as-built/home.html`);
+  assert.equal(res.status, 200);
+  // Byte for byte: no theme swapped in, no ring, no label. What the drawing
+  // says about itself is the project's business (ADR 0007).
+  assert.equal(await res.text(), page);
+  assert.equal((await fetch(`${base}/as-built/nope.html`)).status, 404);
+  // The folder and nothing above it.
+  assert.equal((await fetch(`${base}/as-built/../blueprint/walkdown.yml`)).status, 404);
+});
+
 test('invalid writes are rejected with 400', async () => {
   const bad = await fetch(`${base}/api/walkdowns`, {
     method: 'POST',

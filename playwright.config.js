@@ -89,7 +89,7 @@ process.env.WALKDOWN_HOME = join(CHECKSPACE, 'home');
  * other delivery's fixture and went with it on 2026-08-26.
  */
 export const FIXTURE = `http://localhost:${FIXTURE_PORT}/extension.html?wd=${
-  encodeURIComponent(WD_ORIGIN)}&frame=${encodeURIComponent(WD_ORIGIN + '/stand-in/review')}`;
+  encodeURIComponent(WD_ORIGIN)}&frame=${encodeURIComponent(WD_ORIGIN + '/as-built/review.html')}`;
 
 /*
  * The address the blueprint declares — one source of truth, read from it.

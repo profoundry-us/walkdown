@@ -183,6 +183,26 @@ What it is not is evidence. What you are looking at is the design, so a verdict 
 against a stand-in is a verdict about the design — which is what the sign-off pair
 (Approve / Refine, [05-runs-ledger.md](05-runs-ledger.md)) is for.
 
+## The as-built drawing
+
+A stand-in shows the design twice. When the build exists but cannot be framed — browser
+chrome such as walkdown's own panel, a native mobile app — a project may keep a drawing
+of what it actually built under `as-built/` and name its pages as app paths:
+
+```yaml
+  - id: review
+    prototype: /screens/review.html
+    app: { path: /as-built/review.html }
+```
+
+`walkdown serve` serves the folder as written, the way it serves `proposals/`. An as-built
+page is an HTML page carrying the screen's anchors — this contract, nothing more — and it
+is engineering's to edit; `prototype/` stays design's. How the drawing is made, what it
+wears, and how often it is brought back in line with the build are the project's own
+business; walkdown neither checks nor enforces any of it. It should say on its face that
+it is a drawing of the build and not the build, because a verdict given against it is a
+verdict about that drawing. [ADR 0007](adr/0007-an-as-built-drawing-when-the-build-cannot-be-framed.md).
+
 ## What this contract does not ask for
 
 - **No walkdown-specific markup** beyond the anchor attribute. No wrapper elements, no

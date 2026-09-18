@@ -1,0 +1,316 @@
+<!doctype html>
+<!--
+  AS-BUILT: the thread screen
+
+  A drawing of walkdown's panel as it was actually built - the panel's own
+  markup, captured from the running build on 2026-09-18 and kept by hand
+  since (ADR 0007). It is neither the design (prototype/screens/thread-panel.html,
+  which stays as it was drawn) nor the build (the panel you are holding, which
+  cannot frame itself). It exists so the App side of the fade has something
+  true to show, and so the distance between what was designed and what was
+  built is visible on the slider.
+
+  Nothing here is evidence. A verdict given against this page is a verdict
+  about a drawing of the build.
+-->
+<html lang="en" data-theme="redline"> 
+  <head> 
+    <meta charset="utf-8"> 
+    <title>As-built &mdash; walkdown the thread screen</title> 
+    <link rel="stylesheet" href="/walkdown.css"> 
+    <style>
+  /* The as-built's own marks. Baked into the page rather than injected by the
+     server, because this is a file somebody keeps - not a trick. */
+  .as-built-ring { position: fixed; inset: 0; z-index: 10; pointer-events: none;
+    border: 2px solid oklch(72% 0.17 25); }
+  .as-built-label { position: fixed; left: 0; bottom: 0; z-index: 11; pointer-events: none;
+    padding: 3px 10px; font: 700 10.5px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: .08em; text-transform: uppercase; color: oklch(22% 0.045 25);
+    background: oklch(72% 0.17 25); border-top-right-radius: 6px; }
+  .as-built-notes { position: fixed; left: 12px; bottom: 34px; z-index: 11; width: 320px; max-height: 60vh; overflow-y: auto;
+    padding: 10px 12px; border: 1px dashed oklch(72% 0.17 25); border-radius: 6px;
+    background: oklch(26% 0.042 25 / .96); color: oklch(93% 0.015 40); font-size: 11.5px; line-height: 1.5; }
+  .as-built-notes summary { cursor: pointer; font-weight: 700; color: oklch(78% 0.15 30); letter-spacing: .04em; }
+  .as-built-notes ul { margin: 6px 0 0; padding-left: 16px; }
+  .as-built-notes li { margin: 4px 0; }
+  .as-built-notes li + li { border-top: 1px dotted oklch(41% 0.05 25); padding-top: 4px; }
+</style> 
+    <style>.wd-msg { display: grid; grid-template-columns: 1.6rem 1fr; gap: .45rem; padding: .18rem 0; }
+    .wd-msg.cont { padding-top: 0; }
+    /* Faces are discs, as a chat draws them (Topher, 2026-09-17). */
+    .wd-ava { width: 1.6rem; height: 1.6rem; border-radius: 50%; display: grid; place-items: center;
+      font-size: 10px; font-weight: 700; color: #fff; position: relative; }
+    .wd-msg.cont .wd-ava { visibility: hidden; height: 0; }
+    /* The agent's face: a robot, drawn in line, ringed rather than filled. */
+    .wd-bot { background: transparent; border: 1.5px dashed; box-sizing: border-box; }
+    .wd-bot svg { width: 72%; height: 72%; }
+    /* A person's face with a machine's mark: their words, typed for them. */
+    .wd-mark { position: absolute; right: -.2rem; bottom: -.2rem; width: .8rem; height: .8rem;
+      border-radius: 50%; background: var(--color-base-100, #0f1729); display: grid; place-items: center; }
+    .wd-mark svg { width: 70%; height: 70%; }
+    /* What the machine added beside the person's words, apart and named. */
+    .wd-added { margin-top: .35rem; padding: .3rem .5rem; border: 1px dashed; border-radius: .3rem;
+      opacity: .85; }
+    .wd-added summary { list-style: none; cursor: pointer; position: relative; }
+    /* Top right, a caret that says which way the box is: down closed, up open. */
+    .wd-added-caret { position: absolute; top: 0; right: 0; width: .9rem; height: .9rem;
+      opacity: .8; transition: transform .15s ease; }
+    .wd-added-caret svg { width: 100%; height: 100%; }
+    .wd-added[open] .wd-added-caret { transform: rotate(180deg); }
+    .wd-added summary::-webkit-details-marker { display: none; }
+    .wd-added-hint { font-weight: 400; letter-spacing: 0; text-transform: none; opacity: .7;
+      margin-left: .35rem; }
+    .wd-added-hint::before { content: '· show all'; }
+    .wd-added[open] .wd-added-hint::before { content: '· show less'; }
+    /* Closed, two lines of the words; open, the peek gives way to all of them. */
+    .wd-added-peek { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden; }
+    .wd-added[open] .wd-added-peek { display: none; }
+    .wd-added-by { display: inline-flex; align-items: center; gap: .25rem; font-size: 9.5px;
+      font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin-bottom: .15rem; }
+    .wd-added-by svg { width: .8rem; height: .8rem; }
+    .wd-head { display: flex; align-items: center; gap: .4rem; margin-bottom: .18rem; min-height: 1.15rem; }
+    .wd-head .badge { padding-inline: .5rem; margin-left: .15rem; }
+    .wd-who { font-weight: 600; font-size: 12px; }
+    /* Quieter than the name and louder than nothing: provenance is a fact
+       about the message, not a second author. */
+    .wd-via { font-size: 10px; opacity: .55; font-style: italic; }
+    .wd-tag { font-size: 10px; opacity: .55; font-family: ui-monospace, Menlo, monospace; }
+    .wd-tag[data-thread] { cursor: pointer; text-decoration: underline dotted; text-underline-offset: 2px; }
+    .wd-tag[data-thread]:hover { opacity: .9; }
+    .wd-at { font-size: 10px; opacity: .45; }
+    .wd-msg.cont .wd-at { visibility: hidden; }
+    .wd-msg.cont:hover .wd-at { visibility: visible; }
+    .wd-text { overflow-wrap: anywhere; }
+    /* The question, as the headline of its thread: what is being asked, read
+       before the context under it. Its own paragraph margin, so the body
+       below reads as the rest. */
+    .wd-ask { font-weight: 600; font-size: 1.06em; line-height: 1.35; }
+    .wd-ask + * { margin-top: .5em; }
+    /* The chat's size is for the chat. A rule's statement and steps read
+       through the same renderer but keep the size the detail gave them - and
+       a size utility on the element must win, so this is the rule that
+       steps aside rather than one that overrides. */
+    .wd-text:not(.wd-inherit) { font-size: 12.5px; line-height: 1.45; }
+    /* Markdown's blocks, spaced as paragraphs in a chat rather than sections
+       in a document: a little air between them, none above the first or
+       below the last, so a one-line reply sits exactly where plain text did. */
+    .wd-text &gt; *, .wd-added-text &gt; *, .wd-added-peek &gt; * { margin: 0; }
+    .wd-text &gt; * + *, .wd-added-text &gt; * + *, .wd-added-peek &gt; * + * { margin-top: .45em; }
+    .wd-text ul, .wd-text ol, .wd-added ul, .wd-added ol { padding-left: 1.25rem; }
+    .wd-text ul, .wd-added ul { list-style: disc; }
+    .wd-text ol, .wd-added ol { list-style: decimal; }
+    .wd-text li + li, .wd-added li + li { margin-top: .15em; }
+    .wd-text li &gt; p, .wd-added li &gt; p { margin: 0; }
+    /* Code wears a wash of the chrome's own blue - the primary, the colour
+       the links and the bar already speak in - so a path or an id stands
+       apart from the prose in more than typeface. Yellow was tried first and
+       read as yellow-on-yellow beside the warning badges. Tinted from the
+       theme token, so a delivery with no theme still gets a wash. */
+    .wd-text code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .92em;
+      padding: .05em .3em; border-radius: .25rem;
+      color: color-mix(in oklch, var(--color-primary, oklch(78% 0.10 235)) 88%, currentColor);
+      background: color-mix(in oklch, var(--color-primary, oklch(78% 0.10 235)) 13%, transparent); }
+    .wd-text pre { padding: .4rem .5rem; border-radius: .3rem; overflow-x: auto; white-space: pre;
+      background: color-mix(in oklch, var(--color-primary, oklch(78% 0.10 235)) 9%, transparent);
+      border: 1px solid color-mix(in oklch, var(--color-primary, oklch(78% 0.10 235)) 22%, transparent); }
+    .wd-text pre code { padding: 0; background: none; color: inherit; font-size: .88em; }
+    /* An id linked in the prose takes the same tint, rule and thread alike:
+       a thread id in the body's own colour read as prose until the pointer
+       found it, while the rule id beside it was already blue (n-0299). */
+    .wd-text .wd-ref { color: color-mix(in oklch, var(--color-primary, oklch(78% 0.10 235)) 88%, currentColor); }
+    .wd-text blockquote { padding-left: .6rem; border-left: 2px solid color-mix(in oklch, currentColor 25%, transparent); opacity: .85; }
+    .wd-text a { text-decoration: underline; text-underline-offset: 2px; }
+    .wd-text hr { border: 0; border-top: 1px solid color-mix(in oklch, currentColor 15%, transparent); }
+    /* A collapsed thread sits a little lower under its header, so the name and
+       the status read as the label of what follows rather than as part of it. */
+    .wd-row .wd-text { margin-top: .1rem; }
+    .wd-row { padding-block: .55rem; }
+    .wd-msg.pending { opacity: .55; }
+    .wd-msg.failed .wd-at { opacity: 1; color: oklch(72% 0.17 22); }
+    .wd-ref { font-size: inherit; }
+    /* Threads share one surface, like messages in a channel: no card, no rail,
+       just a hairline between them and a lift under the cursor. */
+    .wd-row + .wd-row { border-top: 1px solid color-mix(in oklch, currentColor 10%, transparent); }
+    .wd-row:hover { background: color-mix(in oklch, currentColor 5%, transparent); }
+    /* The collapsed thread: one message, then the way into the rest of it. */
+    .wd-preview { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .wd-replies { display: flex; align-items: center; gap: .35rem; margin-top: .2rem;
+      padding: .12rem .3rem .12rem .12rem; border-radius: .3rem; max-width: 100%; }
+    .wd-replies:hover { background: color-mix(in oklch, currentColor 8%, transparent);
+      outline: 1px solid color-mix(in oklch, currentColor 15%, transparent); }
+    .wd-faces { display: flex; }
+    .wd-face { width: 1.05rem; height: 1.05rem; border-radius: 50%; display: grid; place-items: center;
+      font-size: 7.5px; font-weight: 700; color: #fff; margin-right: -.2rem;
+      box-shadow: 0 0 0 1.5px color-mix(in oklch, currentColor 12%, transparent); }
+    .wd-count { font-size: 11.5px; font-weight: 600; color: var(--color-primary, currentColor); }
+    .wd-last { font-size: 10.5px; opacity: .45; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .wd-replies.empty { font-size: 11px; opacity: .4; padding-left: .3rem; }
+    .wd-day, .wd-new { display: flex; align-items: center; gap: .5rem; margin: .45rem 0 .3rem;
+      font-size: 9.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; opacity: .45; }
+    .wd-day span, .wd-new span { flex: 1; height: 1px; background: currentColor; opacity: .25; }
+    .wd-new { color: oklch(72% 0.17 22); opacity: .9; }
+    /* The preview under a reference (n-0298): fixed to the viewport so it
+       clears whatever pane the reference sits in, and never the pointer's -
+       it is for reading, and the click goes to the reference beneath. Above
+       everything either surface draws: the card is the last thing drawn
+       over the popover it was summoned from, and at the popover's own
+       z-index it painted underneath (n-0299). */
+    .wd-card { position: fixed; z-index: 2147483647; pointer-events: none; width: max-content; max-width: 19rem;
+      padding: .45rem .6rem; border-radius: .4rem; font-size: 11.5px; line-height: 1.35;
+      color: var(--color-base-content, currentColor); background: var(--color-base-100, #fff);
+      border: 1px solid color-mix(in oklch, currentColor 18%, transparent);
+      box-shadow: 0 6px 20px -6px rgba(0,0,0,.35); }
+    .wd-card-head { display: flex; align-items: center; gap: .35rem; margin-bottom: .2rem; }
+    .wd-card-head b { font-size: 11px; }
+    .wd-card-meta { font-size: 10.5px; opacity: .6; margin-bottom: .15rem; }
+    .wd-card-text { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+    .wd-card-foot { margin-top: .3rem; padding-top: .25rem; font-size: 10px; opacity: .5;
+      border-top: 1px solid color-mix(in oklch, currentColor 12%, transparent); }</style> 
+  </head> 
+  <body> 
+    <div style="position: fixed; inset: 0px; z-index: 1; pointer-events: none; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0px; border: 0px; padding: 0px; background: transparent; overflow: visible;">
+      <div class="h-full w-full text-sm" style="letter-spacing: normal; word-spacing: normal; text-transform: none; font-variant: normal; font-style: normal; text-indent: 0px; text-shadow: none; white-space: normal; word-break: normal; text-align: left; direction: ltr; text-decoration: none;">
+        <header data-testid="panel.bar" data-theme="redline" class="flex items-center gap-2 px-3 text-base-content" style="position: absolute; top: 0px; left: 0px; right: 0px; height: 44px; pointer-events: auto; transition: transform 0.2s; background: transparent; transform: none;"> <span class="flex min-w-0 max-w-[calc(50%-8.5rem)] items-center gap-2 overflow-hidden"> 
+            <button class="btn btn-xs btn-ghost" id="wdp-desk-btn" data-testid="panel.desk-tuner" title="Settings">
+              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-3.5"><path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm88-29.84q.06-2.16,0-4.32l14.92-18.64a8,8,0,0,0,1.48-7.06,107.21,107.21,0,0,0-10.88-26.25,8,8,0,0,0-6-3.93l-23.72-2.64q-1.48-1.56-3-3L186,40.54a8,8,0,0,0-3.94-6,107.71,107.71,0,0,0-26.25-10.87,8,8,0,0,0-7.06,1.49L130.16,40Q128,40,125.84,40L107.2,25.11a8,8,0,0,0-7.06-1.48A107.6,107.6,0,0,0,73.89,34.51a8,8,0,0,0-3.93,6L67.32,64.27q-1.56,1.49-3,3L40.54,70a8,8,0,0,0-6,3.94,107.71,107.71,0,0,0-10.87,26.25,8,8,0,0,0,1.49,7.06L40,125.84Q40,128,40,130.16L25.11,148.8a8,8,0,0,0-1.48,7.06,107.21,107.21,0,0,0,10.88,26.25,8,8,0,0,0,6,3.93l23.72,2.64q1.49,1.56,3,3L70,215.46a8,8,0,0,0,3.94,6,107.71,107.71,0,0,0,26.25,10.87,8,8,0,0,0,7.06-1.49L125.84,216q2.16.06,4.32,0l18.64,14.92a8,8,0,0,0,7.06,1.48,107.21,107.21,0,0,0,26.25-10.88,8,8,0,0,0,3.93-6l2.64-23.72q1.56-1.48,3-3L215.46,186a8,8,0,0,0,6-3.94,107.71,107.71,0,0,0,10.87-26.25,8,8,0,0,0-1.49-7.06Zm-16.1-6.5a73.93,73.93,0,0,1,0,8.68,8,8,0,0,0,1.74,5.48l14.19,17.73a91.57,91.57,0,0,1-6.23,15L187,173.11a8,8,0,0,0-5.1,2.64,74.11,74.11,0,0,1-6.14,6.14,8,8,0,0,0-2.64,5.1l-2.51,22.58a91.32,91.32,0,0,1-15,6.23l-17.74-14.19a8,8,0,0,0-5-1.75h-.48a73.93,73.93,0,0,1-8.68,0,8,8,0,0,0-5.48,1.74L100.45,215.8a91.57,91.57,0,0,1-15-6.23L82.89,187a8,8,0,0,0-2.64-5.1,74.11,74.11,0,0,1-6.14-6.14,8,8,0,0,0-5.1-2.64L46.43,170.6a91.32,91.32,0,0,1-6.23-15l14.19-17.74a8,8,0,0,0,1.74-5.48,73.93,73.93,0,0,1,0-8.68,8,8,0,0,0-1.74-5.48L40.2,100.45a91.57,91.57,0,0,1,6.23-15L69,82.89a8,8,0,0,0,5.1-2.64,74.11,74.11,0,0,1,6.14-6.14A8,8,0,0,0,82.89,69L85.4,46.43a91.32,91.32,0,0,1,15-6.23l17.74,14.19a8,8,0,0,0,5.48,1.74,73.93,73.93,0,0,1,8.68,0,8,8,0,0,0,5.48-1.74L155.55,40.2a91.57,91.57,0,0,1,15,6.23L173.11,69a8,8,0,0,0,2.64,5.1,74.11,74.11,0,0,1,6.14,6.14,8,8,0,0,0,5.1,2.64l22.58,2.51a91.32,91.32,0,0,1,6.23,15l-14.19,17.74A8,8,0,0,0,199.87,123.66Z"></svg>
+            </button> <span class="shrink-0 font-bold tracking-tight">walk<span class="text-primary">down</span></span> 
+            <button data-testid="panel.project" id="wdp-project-btn" title="Which project you are working in — open to switch" class="btn btn-xs min-w-0 gap-1 px-1.5 font-normal btn-ghost"> 
+              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-3.5"><path d="M208,96a16,16,0,0,0,16-16V48a16,16,0,0,0-16-16H176a16,16,0,0,0-16,16v8H96V48A16,16,0,0,0,80,32H48A16,16,0,0,0,32,48V80A16,16,0,0,0,48,96h8v64H48a16,16,0,0,0-16,16v32a16,16,0,0,0,16,16H80a16,16,0,0,0,16-16v-8h64v8a16,16,0,0,0,16,16h32a16,16,0,0,0,16-16V176a16,16,0,0,0-16-16h-8V96ZM176,48h32V80H176ZM48,48H80V63.9a.51.51,0,0,0,0,.2V80H48ZM80,208H48V176H80v15.9a.51.51,0,0,0,0,.2V208Zm128,0H176V176h32Zm-24-48h-8a16,16,0,0,0-16,16v8H96v-8a16,16,0,0,0-16-16H72V96h8A16,16,0,0,0,96,80V72h64v8a16,16,0,0,0,16,16h8Z"></svg><span class="max-w-24 truncate">walkdown</span>
+              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-3"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"></svg>
+            </button> <span class="min-w-0 truncate text-[11.5px] opacity-50" data-testid="panel.blueprint">walkdown</span> 
+            <button id="wdp-screen-btn" data-testid="panel.screen-picker" class="btn btn-xs shrink-0 gap-1 px-1.5 font-normal btn-ghost" title="Which screen this page is, detected from its address — open to pick one by hand"> 
+              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-3.5"><path d="M200,80v32a8,8,0,0,1-16,0V88H160a8,8,0,0,1,0-16h32A8,8,0,0,1,200,80ZM96,168H72V144a8,8,0,0,0-16,0v32a8,8,0,0,0,8,8H96a8,8,0,0,0,0-16ZM232,56V200a16,16,0,0,1-16,16H40a16,16,0,0,1-16-16V56A16,16,0,0,1,40,40H216A16,16,0,0,1,232,56ZM216,200V56H40V200H216Z"></svg><span class="max-w-32 truncate">No screen</span>
+              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-3"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"></svg>
+            </button> </span> <span class="absolute left-1/2 flex -translate-x-1/2 items-center gap-2" title="Fade between the design and what shipped"> 
+            <button data-surface="prototype" class="btn btn-xs btn-primary btn-outline">Prototype</button> 
+            <input type="range" min="0" max="100" id="wdp-fade" data-testid="panel.fade" class="range range-xs range-primary w-28" aria-label="Fade between the design and the running app" style=""> 
+            <button data-surface="app" class="btn btn-xs btn-primary">App</button> </span> <span class="ml-auto flex items-center gap-2"> <span class="join" data-testid="panel.viewport-toggle"> 
+              <button data-vp="0" title="Fit the frame to the space" class="btn btn-xs join-item btn-primary">Fit</button> 
+              <button data-vp="1440" title="Desktop — lay the page out at 1440px" class="btn btn-xs join-item btn-outline btn-primary">
+                <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-3.5"><path d="M208,40H48A24,24,0,0,0,24,64V176a24,24,0,0,0,24,24h72v16H96a8,8,0,0,0,0,16h64a8,8,0,0,0,0-16H136V200h72a24,24,0,0,0,24-24V64A24,24,0,0,0,208,40ZM48,56H208a8,8,0,0,1,8,8v80H40V64A8,8,0,0,1,48,56ZM208,184H48a8,8,0,0,1-8-8V160H216v16A8,8,0,0,1,208,184Z"></svg>
+              </button> 
+              <button data-vp="390" title="Mobile — lay the page out at 390px" class="btn btn-xs join-item btn-outline btn-primary">
+                <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-3.5"><path d="M176,16H80A24,24,0,0,0,56,40V216a24,24,0,0,0,24,24h96a24,24,0,0,0,24-24V40A24,24,0,0,0,176,16ZM72,64H184V192H72Zm8-32h96a8,8,0,0,1,8,8v8H72V40A8,8,0,0,1,80,32Zm96,192H80a8,8,0,0,1-8-8v-8H184v8A8,8,0,0,1,176,224Z"></svg>
+              </button> </span> <span class="tooltip tooltip-bottom tooltip-end [--tt-trans:0] shrink-0" data-testid="panel.pin-why"> <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug">Click anything to attach a note — it lands on the app</span> 
+              <button id="wdp-pin" data-testid="panel.pin-mode" class="btn btn-xs gap-1 btn-outline btn-primary" title="Click anything to attach a note — it lands on the app">
+                <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-3.5"><path d="M128,64a40,40,0,1,0,40,40A40,40,0,0,0,128,64Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,128Zm0-112a88.1,88.1,0,0,0-88,88c0,31.4,14.51,64.68,42,96.25a254.19,254.19,0,0,0,41.45,38.3,8,8,0,0,0,9.18,0A254.19,254.19,0,0,0,174,200.25c27.45-31.57,42-64.85,42-96.25A88.1,88.1,0,0,0,128,16Zm0,206c-16.53-13-72-60.75-72-118a72,72,0,0,1,144,0C200,161.23,144.53,209,128,222Z"></svg>Pin mode</button> </span> 
+            <button id="wdp-walk" data-testid="panel.walk" class="btn btn-xs btn-warning" title="Begin a sitting — 45 rules owe you a verdict">Start walkdown</button> 
+            <button class="btn btn-xs btn-ghost" id="wdp-undock" title="Put walkdown away">×</button> </span></header>
+        <aside data-theme="redline" class="flex flex-col overflow-hidden border border-primary/45 bg-base-100 text-base-content" style="position: absolute; top: 44px; right: 12px; bottom: 12px; width: 384px; pointer-events: auto; transition: transform 0.22s; border-radius: 10px; box-shadow: rgba(0, 0, 0, 0.28) 0px 1px 2px, rgba(0, 0, 0, 0.34) 0px 12px 32px; transform: none;"> 
+          <div role="tablist" class="tabs tabs-box tabs-sm m-2 shrink-0 self-center" data-testid="panel.tabs"> 
+            <button role="tab" class="tab px-3 gap-1" data-tab="blueprints"> 
+              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-4"><path d="M208,96a16,16,0,0,0,16-16V48a16,16,0,0,0-16-16H176a16,16,0,0,0-16,16v8H96V48A16,16,0,0,0,80,32H48A16,16,0,0,0,32,48V80A16,16,0,0,0,48,96h8v64H48a16,16,0,0,0-16,16v32a16,16,0,0,0,16,16H80a16,16,0,0,0,16-16v-8h64v8a16,16,0,0,0,16,16h32a16,16,0,0,0,16-16V176a16,16,0,0,0-16-16h-8V96ZM176,48h32V80H176ZM48,48H80V63.9a.51.51,0,0,0,0,.2V80H48ZM80,208H48V176H80v15.9a.51.51,0,0,0,0,.2V208Zm128,0H176V176h32Zm-24-48h-8a16,16,0,0,0-16,16v8H96v-8a16,16,0,0,0-16-16H72V96h8A16,16,0,0,0,96,80V72h64v8a16,16,0,0,0,16,16h8Z"></svg>Blueprints</button>
+            <button role="tab" class="tab px-3 gap-1" data-tab="rules"> 
+              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-4"><path d="M149.61,85.71l-89.6,88a8,8,0,0,1-11.22,0L10.39,136a8,8,0,1,1,11.22-11.41L54.4,156.79l84-82.5a8,8,0,1,1,11.22,11.42Zm96.1-11.32a8,8,0,0,0-11.32-.1l-84,82.5-18.83-18.5a8,8,0,0,0-11.21,11.42l24.43,24a8,8,0,0,0,11.22,0l89.6-88A8,8,0,0,0,245.71,74.39Z"></svg>Rules<span class="badge badge-xs badge-warning" title="45 rules a walkdown would take you through — 1 to sign — 44 to walk">45</span></button>
+            <button role="tab" class="tab px-3 gap-1 tab-active" data-tab="threads"> 
+              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-4"><path d="M232.07,186.76a80,80,0,0,0-62.5-114.17A80,80,0,1,0,23.93,138.76l-7.27,24.71a16,16,0,0,0,19.87,19.87l24.71-7.27a80.39,80.39,0,0,0,25.18,7.35,80,80,0,0,0,108.34,40.65l24.71,7.27a16,16,0,0,0,19.87-19.86ZM62,159.5a8.28,8.28,0,0,0-2.26.32L32,168l8.17-27.76a8,8,0,0,0-.63-6,64,64,0,1,1,26.26,26.26A8,8,0,0,0,62,159.5Zm153.79,28.73L224,216l-27.76-8.17a8,8,0,0,0-6,.63,64.05,64.05,0,0,1-85.87-24.88A79.93,79.93,0,0,0,174.7,89.71a64,64,0,0,1,41.75,92.48A8,8,0,0,0,215.82,188.23Z"></svg>Threads<span class="badge badge-xs badge-info" title="15 threads awaiting your judgment">15</span></button> 
+          </div> 
+          <div class="flex min-h-0 flex-1 overflow-hidden"> 
+            <div class="wdp-track flex min-h-0 min-w-0 flex-[0_0_300%] transition-transform duration-300 ease-out" style="transform: translateX(-33.3333%);"> 
+              <div class="flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col overflow-hidden">
+              </div> 
+              <div class="wdp-pane wdp-detail flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col overflow-hidden" data-testid="thread.panel"> 
+                <div class="flex items-center gap-1 px-2 pt-2"> 
+                  <button class="wdp-thread-back btn btn-ghost btn-xs text-primary" data-testid="thread.close">← All threads</button> <span class="ml-auto flex items-center gap-1 pr-1.5 text-[11px]" data-testid="thread.provenance"> 
+                    <button id="wdp-tactor" data-testid="thread.actor" class="link max-w-[8rem] truncate font-mono opacity-50 no-underline hover:underline" title="Replies and moves here are recorded under this name - change it in Settings">topher</button> <span class="opacity-30">·</span> <b class="opacity-60">n-0297</b> <span class="badge badge-xs badge-outline opacity-70" data-testid="thread.reason">finding</span> <span class="badge badge-xs badge-success">verified</span> </span> </div> 
+                <div class="min-h-0 flex-1 overflow-y-auto px-3.5 pb-2" data-testid="thread.body"> 
+                  <div class="wd-day"><span></span>Monday<span></span></div>
+                  <div class="wd-msg"> 
+                    <div class="wd-ava wd-bot" style="color:oklch(58% 0.16 255);border-color:oklch(58% 0.16 255)" title="Agent">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="8" width="16" height="12" rx="2.5"><path d="M12 8V4M9 4h6"><circle cx="9" cy="14" r="1.1" fill="currentColor" stroke="none"><circle cx="15" cy="14" r="1.1" fill="currentColor" stroke="none"><path d="M9.5 17.5h5"></svg>
+                    </div> 
+                    <div class="wd-col"> 
+                      <div class="wd-head"><span class="wd-who">Agent</span><span class="wd-at" title="9/14/2026, 9:35:24 PM CDT">4d ago</span></div> 
+                      <div class="wd-text">
+                        <p>Re-judged 2026-09-15 after the 
+                          <button class="wd-ref link link-hover" data-thread-ref="n-0294">n-0294</button> fix, on the scratch copy judge-0915 at :4730. The fix holds for everything its reply claims: beside a pin on the standalone stand-in, a fixture (
+                          <button class="wd-ref link link-hover" data-thread-ref="n-0313">n-0313</button> in the copy, position-pinned, no element) opens in the popover with the other pin's id 
+                          <button class="wd-ref link link-hover" data-thread-ref="n-0309">n-0309</button> as a live ref that swaps the popover to that pin beside its own dot, an evidence key as a real  to /evidence/ (target _blank; the server answers 200 image/png), and nothing dead to click; the popover sits inside the viewport. FAIL, narrowly, on the last THEN and only beside the pin: a rule id written in a message (
+                          <button class="wd-ref link link-hover font-mono" data-rule-ref="threads.conversation.append-only">threads.conversation.append-only</button>) and a thread id not pinned on that page (
+                          <button class="wd-ref link link-hover" data-thread-ref="n-0133">n-0133</button>) are put back to the words the author typed (src/embed/index.js:446, ref.replaceWith) - which is the same observable 
+                          <button class="wd-ref link link-hover" data-thread-ref="n-0294">n-0294</button> named ('the rule id as plain prose') - and checks/embed.spec.js now asserts [data-rule-ref] has count 0 there, so the code and the statement disagree in one spot and the statement was not amended. In the panel the same message links every one of them (
+                          <button class="wd-ref link link-hover" data-thread-ref="n-0133">n-0133</button> opened from 
+                          <button class="wd-ref link link-hover" data-thread-ref="n-0294">n-0294</button>'s body; 
+                          <button class="wd-ref link link-hover font-mono" data-rule-ref="threads.conversation.append-only">threads.conversation.append-only</button> opened the rule detail; 
+                          <button class="wd-ref link link-hover" data-thread-ref="n-0313">n-0313</button> opened from its dot in the framed app). The panel has no URL that opens a rule or a thread, so a link out from the standalone popover (the way the evidence key goes out to a new tab) would be new work; the other resolution is to say in the statement that beside a pin an id is a link only where that surface can open it. Either is a person's call, and the rule cannot read as met until one of them lands. Everything else holds in both deliveries from the one shared renderer (lib/message-stream.js): collapsed rows are the first message with face, name, time, text, and faces, '1 reply' and 'Last reply today at 6:11 PM' underneath, on one surface with a 1px 10% hairline and no card, radius, shadow or rail; every message is who/when/what and the opening note is one of them; a follow-up from the same author and via within five minutes drops name and tile and shows its time on hover (visibility hidden -&gt; visible measured, both deliveries; a change of via starts a new run; 
+                          <button class="wd-ref link link-hover" data-thread-ref="n-0133">n-0133</button> groups a 4m26s gap and not a 5m00s one); two line breaks and a blank-line paragraph survive as <br> and </p>
+                        <p>; 
+                          <button class="wd-ref link link-hover" data-thread-ref="n-0133">n-0133</button> draws Aug 31 / Sep 1 / Sep 2. One aside outside the verdict: a thread id in prose is a link-hover button in the prose colour with no underline at rest, so it reads as plain text until hovered, while rule ids and evidence keys are washed blue; deliberate since 6f92272, but a reader cannot tell 
+                          <button class="wd-ref link link-hover" data-thread-ref="n-0309">n-0309</button> is clickable by looking. Evidence: <a class="wd-ref link link-hover font-mono" data-evidence-ref="runs/evidence/2026-09-15T02-35-01Z/one-stream-embed-popover-n-0313-top.png" href="#">runs/evidence/2026-09-15T02-35-01Z/one-stream-embed-popover-n-0313-top.png</a>, <a class="wd-ref link link-hover font-mono" data-evidence-ref="runs/evidence/2026-09-15T02-35-01Z/one-stream-embed-popover-after-click-n-0309.png" href="#">runs/evidence/2026-09-15T02-35-01Z/one-stream-embed-popover-after-click-n-0309.png</a>, <a class="wd-ref link link-hover font-mono" data-evidence-ref="runs/evidence/2026-09-15T02-35-01Z/one-stream-embed-popover-probe.json" href="#">runs/evidence/2026-09-15T02-35-01Z/one-stream-embed-popover-probe.json</a>, <a class="wd-ref link link-hover font-mono" data-evidence-ref="runs/evidence/2026-09-15T02-35-01Z/one-stream-panel-thread-n-0313-from-pin.png" href="#">runs/evidence/2026-09-15T02-35-01Z/one-stream-panel-thread-n-0313-from-pin.png</a>, <a class="wd-ref link link-hover font-mono" data-evidence-ref="runs/evidence/2026-09-15T02-35-01Z/one-stream-panel-probe.json" href="#">runs/evidence/2026-09-15T02-35-01Z/one-stream-panel-probe.json</a>, <a class="wd-ref link link-hover font-mono" data-evidence-ref="runs/evidence/2026-09-15T02-35-01Z/one-stream-source-check.txt" href="#">runs/evidence/2026-09-15T02-35-01Z/one-stream-source-check.txt</a></p> 
+                      </div> 
+                    </div> 
+                  </div>
+                  <div class="wd-day"><span></span>Tuesday<span></span></div>
+                  <div class="wd-msg"> 
+                    <div class="wd-ava wd-relayed" style="background:oklch(52% 0.10 328)" title="Topher Fangio - typed by a machine">TF<span class="wd-mark" style="color:oklch(58% 0.16 255)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="8" width="16" height="12" rx="2.5"><path d="M12 8V4M9 4h6"><circle cx="9" cy="14" r="1.1" fill="currentColor" stroke="none"><circle cx="15" cy="14" r="1.1" fill="currentColor" stroke="none"><path d="M9.5 17.5h5"></svg></span></div> 
+                    <div class="wd-col"> 
+                      <div class="wd-head"><span class="wd-who">Topher Fangio</span><span class="wd-via">via agent</span><span class="wd-at" title="9/15/2026, 11:41:13 AM CDT">3d ago</span></div> 
+                      <div class="wd-text">
+                        <p>Option 2, Topher's call 2026-09-15: the panel has an address now. walkdown's own page opens what ?rule= or ?thread= names (lib/viewer/review.html hands it to the panel, which opens it once on arrival; an unknown id is said in a toast). Beside a pin, a rule id or a thread not pinned on the page is an  to that address in a new tab, named by the key the server answered with (GET /api/blueprint now carries key). New rule 
+                          <button class="wd-ref link link-hover font-mono" data-rule-ref="panel.start.address-opens-what-it-names">panel.start.address-opens-what-it-names</button> with a check; one-stream gained a step for the link out (fresh hash); checks/embed.spec.js now follows both links into the panel. The tooltip you wanted before the click is filed as 
+                          <button class="wd-ref link link-hover" data-thread-ref="n-0298">n-0298</button>, a design request.</p> 
+                      </div> 
+                    </div> 
+                  </div>
+                  <div class="wd-day"><span></span>Wednesday<span></span></div>
+                  <div class="wd-msg"> 
+                    <div class="wd-ava wd-relayed" style="background:oklch(52% 0.10 328)" title="Topher Fangio - typed by a machine">TF<span class="wd-mark" style="color:oklch(58% 0.16 255)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="8" width="16" height="12" rx="2.5"><path d="M12 8V4M9 4h6"><circle cx="9" cy="14" r="1.1" fill="currentColor" stroke="none"><circle cx="15" cy="14" r="1.1" fill="currentColor" stroke="none"><path d="M9.5 17.5h5"></svg></span></div> 
+                    <div class="wd-col"> 
+                      <div class="wd-head"><span class="wd-who">Topher Fangio</span><span class="wd-via">via verdict</span><span class="wd-at" title="9/16/2026, 6:00:25 PM CDT">2d ago</span></div> 
+                      <div class="wd-text">
+                        <p>Verified by topher's pass on 
+                          <button class="wd-ref link link-hover font-mono" data-rule-ref="threads.conversation.one-stream">threads.conversation.one-stream</button> (2026-09-16T23-00-25Z-local-01).</p> 
+                      </div> 
+                    </div> 
+                  </div> 
+                </div> 
+                <div class="shrink-0 border-t border-base-300 p-2"> 
+                  <div data-testid="thread.turn" class="relative mt-2 mb-1.5 rounded border border-dashed px-2 pt-2.5 pb-1.5 text-[11px] leading-snug border-success" data-party="closed"> <span class="absolute -top-[7px] left-2 rounded px-1 text-[9px] font-bold uppercase leading-[14px] tracking-wider bg-success text-success-content">Closed</span> <span class="opacity-75">Verified by Topher Fangio, 2d ago. Replies still land here; a fail on the rule reopens it.</span> </div> 
+                  <textarea id="wdp-note" data-testid="thread.reply" rows="2" class="textarea textarea-xs w-full resize-none" placeholder="Reply…" style=""></textarea> 
+                  <div class="mt-1 flex flex-wrap items-center justify-end gap-1"> 
+                    <button data-testid="thread.actions" class="btn btn-xs btn-outline border-base-300 text-base-content/70" data-act="__reply" data-tid="n-0297">Reply</button> 
+                  </div> 
+                </div>
+              </div> 
+              <div class="flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col overflow-hidden">
+              </div> 
+            </div> 
+          </div> 
+        </aside>
+        <div data-testid="settings.panel" data-theme="redline" class="w-64 rounded-box border border-primary/45 bg-base-100 p-3 text-base-content shadow-xl" style="position: absolute; top: 56px; left: 24px; display: none; pointer-events: auto;">
+        </div>
+        <div data-testid="walkdown.signing" data-theme="redline" class="w-96 rounded-box border border-primary/45 bg-base-100 p-3 text-base-content shadow-xl" style="position: absolute; top: 56px; left: 50%; transform: translateX(-50%); display: none; pointer-events: auto; z-index: 3;">
+        </div>
+        <div data-testid="panel.screens-list" data-theme="redline" class="w-72 overflow-hidden rounded-box border border-primary/45 bg-base-100 py-1 text-base-content shadow-xl" style="position: absolute; top: 56px; left: 24px; display: none; pointer-events: auto; max-height: 60vh; overflow-y: auto;">
+        </div>
+        <div style="position: absolute; inset: 0px; display: none; pointer-events: auto; z-index: 5;">
+        </div>
+      </div>
+    </div>
+    <button style="position: fixed; right: 0px; top: 50%; z-index: 1; transform: translateY(-50%); background: rgb(22, 24, 29); color: rgb(255, 255, 255); border: 0px; border-radius: 8px 0px 0px 8px; padding: 11px 7px; cursor: pointer; font: 600 11px / 1 -apple-system, sans-serif; writing-mode: vertical-rl; letter-spacing: 0.08em; display: none;">WALKDOWN</button>
+    <button data-testid="panel.tab-swap" style="position: fixed; right: 0px; top: 50%; z-index: 1; background: rgb(43, 48, 58); color: rgb(255, 255, 255); border: 0px; border-radius: 8px 0px 0px 8px; padding: 9px 7px; cursor: pointer; font: 600 10px / 1 -apple-system, sans-serif; writing-mode: vertical-rl; letter-spacing: 0.08em; display: none;">
+    </button>
+    <div data-testid="panel.app-frame" title="the application under review" class="grid place-items-center text-center text-[12px] leading-relaxed" style="position: fixed; top: 44px; left: 12px; width: calc(-420px + 100vw); height: calc(-56px + 100vh); border: 0px; border-radius: 10px; background: oklch(97% 0.01 40); transform: none; box-shadow: rgba(0, 0, 0, 0.28) 0px 1px 2px, rgba(0, 0, 0, 0.34) 0px 12px 32px; transition: width 0.22s, height 0.22s, top 0.22s, left 0.22s;; color: oklch(50% 0.03 25)"> 
+      <div>THE APP &mdash; the page under review, framed at the chosen viewport.<br>The as-built cannot frame a page: this box stands where the frame stands.</div> 
+    </div> 
+    <div class="as-built-ring" aria-hidden="true">
+    </div> 
+    <div class="as-built-label" aria-hidden="true">as-built &mdash; a drawing of the build, redlined after the fact</div> 
+    <details class="as-built-notes" open> 
+      <summary>Redlines &mdash; where the build left the design</summary> 
+      <ul> 
+        <li>The design's composer offered Answer and Waive under the box. Built: the box, then Reply &mdash; and on a thread that has ended, the closed banner above it says how it ended and that a fail on the rule reopens it (ADR 0006 &sect;3). Done / Reopen appear only on a thread no walkable rule owns.</li> 
+        <li>The head names the author, the id and the reason (finding, feedback, request&hellip;) beside the status chip; the design had id and status alone.</li> 
+        <li>This screen is reached from the Threads tab &mdash; which lists only threads no rule can be walked &mdash; or from a tag in a rule's conversation. The design reached it from a rule's Threads list.</li> 
+        <li>Day dividers and the NEW line are as designed.</li> 
+      </ul> 
+    </details> 
+    <script src="/embed.js" data-walkdown>
+    </script> 
+  </body>
+  <div data-testid="panel.desk" style="position: fixed; left: 50%; top: 50%; width: 320vmax; height: 320vmax; margin: -160vmax 0px 0px -160vmax; z-index: -1; pointer-events: none; background-image: repeating-linear-gradient(0deg, color-mix(in oklch, oklch(0.93 0.02 230) 10%, transparent) 0px, color-mix(in oklch, oklch(0.93 0.02 230) 10%, transparent) 1px, transparent 1px, transparent 60px), repeating-linear-gradient(90deg, color-mix(in oklch, oklch(0.93 0.02 230) 10%, transparent) 0px, color-mix(in oklch, oklch(0.93 0.02 230) 10%, transparent) 1px, transparent 1px, transparent 60px); transform: perspective(600px) rotateX(35deg) rotate(35deg);">
+  </div>
+</html>

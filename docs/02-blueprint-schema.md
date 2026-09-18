@@ -207,7 +207,10 @@ screens:
   ships the real screen, `prototype:` gets its path, the proposal is superseded, and the
   request thread is incorporated. Lint flags an undesigned screen with no open request
   (a proposal alone is not a request); `walkdown status` reports all drift — undesigned
-  screens and thread-born rules — until the sources catch up.
+  screens and thread-born rules — until the sources catch up. Engineering may also keep
+  an **as-built** drawing of a build that cannot be framed (an HTML page under
+  `as-built/`, named as a screen's `app.path`) — the drawing revised after construction,
+  never the design ([ADR 0007](adr/0007-an-as-built-drawing-when-the-build-cannot-be-framed.md)).
 
 ## Threads
 

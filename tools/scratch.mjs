@@ -90,8 +90,10 @@ function make(label, why, port) {
   // person's working state, and a copy of it is nobody's.
   for (const part of ['blueprint', 'threads', 'runs'])
     cpSync(join(root, HOME, part), join(path, HOME, part), { recursive: true });
-  // `prototype.root` resolves against the code root, which is this directory.
+  // `prototype.root` resolves against the code root, which is this directory;
+  // the as-built drawings the app paths name are served from it too.
   symlinkSync(join(root, 'prototype'), join(path, 'prototype'), 'dir');
+  symlinkSync(join(root, 'as-built'), join(path, 'as-built'), 'dir');
   /*
    * Evidence is linked, not copied. It lives outside the repository now
    * (docs/08-locations.md) and is two orders of magnitude larger than
@@ -155,7 +157,7 @@ function make(label, why, port) {
   /*
    * The app surface follows the copy. The blueprint's `local` target names
    * the real server's port, and the panel builds the app frame from it - so a
-   * copy served on another port still framed the REAL server's stand-in,
+   * copy served on another port still framed the REAL server's as-built page,
    * whose embed would have pinned into the real ledger. Every browser judge
    * found this and edited the copy's walkdown.yml by hand; with --port the
    * copy is retargeted here, once, and the serve line below matches.

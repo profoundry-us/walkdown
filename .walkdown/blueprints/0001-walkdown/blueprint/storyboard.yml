@@ -1,13 +1,14 @@
 # walkdown's own screens.
 #
 # walkdown has no running page to point the App surface at: the running build
-# IS the panel you are holding, which lives beside whatever page it rides. That
-# left the app side of every comparison empty - no fade, no ghost, no pin on
-# the app. So each screen's app path is a STAND-IN: the server serves the
-# screen's own design back under /stand-in/<id>, in a different theme and
-# marked as such (see lib/serve.js). It makes the comparison machinery usable
-# for judging the panel; it is not the build, and never evidence that one
-# exists.
+# IS the panel you are holding, which cannot frame itself. So each screen's
+# app path is an AS-BUILT drawing (ADR 0007): the panel's own markup as it was
+# actually built, kept under as-built/ in its own theme and marked on
+# its face, while prototype/ stays as design drew it - so the slider shows
+# the distance between what was designed and what was built. Until 2026-09-18
+# the app path was a stand-in, the design served back as the app; that
+# feature stays in walkdown for projects that want it. Neither is the build,
+# and neither is evidence that one exists.
 # Where a surface goes when nothing else says. A blueprint is about a product,
 # and a product has a front door — so crossing between the design and the build
 # is possible from anywhere, not only from a page walkdown already recognises.
@@ -17,7 +18,7 @@ screens:
   - id: review
     title: The review page
     prototype: /screens/review.html
-    app: { path: /stand-in/review }
+    app: { path: /as-built/review.html }
     anchors:
       - panel.legend
       - panel.bar
@@ -49,7 +50,7 @@ screens:
   - id: rule-detail
     title: Rule detail (state — open a rule on the Rules tab)
     prototype: /screens/rule-detail.html
-    app: { path: /stand-in/rule-detail }
+    app: { path: /as-built/rule-detail.html }
     anchors:
       - detail.screen
       - detail.back
@@ -74,7 +75,7 @@ screens:
   - id: thread-panel
     title: The thread screen (state — open a thread, or a pin)
     prototype: /screens/thread-panel.html
-    app: { path: /stand-in/thread-panel }
+    app: { path: /as-built/thread-panel.html }
     anchors:
       - thread.panel
       - thread.provenance
@@ -87,7 +88,7 @@ screens:
   - id: start
     title: First run (state — no server connected)
     prototype: /screens/start.html
-    app: { path: /stand-in/start }
+    app: { path: /as-built/start.html }
     anchors:
       - start.message
       - start.server
@@ -102,7 +103,7 @@ screens:
       places for the answer to differ.
     title: No blueprint claims this page (state — connected, nothing claims it)
     prototype: /screens/unclaimed-page.html
-    app: { path: /stand-in/unclaimed-page }
+    app: { path: /as-built/unclaimed-page.html }
     anchors:
       - start.unclaimed
       - start.claim
@@ -114,7 +115,7 @@ screens:
     # Promoted from proposals/project-modal.html on 2026-09-10 (n-0271), so the
     # screen can be walked down against a design rather than against nothing.
     prototype: /screens/project-modal.html
-    app: { path: /stand-in/project-modal }
+    app: { path: /as-built/project-modal.html }
     anchors:
       - project.modal
       - project.address
@@ -128,7 +129,7 @@ screens:
   - id: choose-blueprint
     title: Choose a blueprint (state — folder holds several)
     prototype: /screens/choose-blueprint.html
-    app: { path: /stand-in/choose-blueprint }
+    app: { path: /as-built/choose-blueprint.html }
     anchors:
       - start.folder
       - start.options
@@ -137,14 +138,14 @@ screens:
     retired: The docked delivery was withdrawn on 2026-08-26. walkdown frames the page it reviews; nothing renders beside it any more.
     title: The docked layout (withdrawn 2026-08-26)
     prototype: /screens/docked.html
-    app: { path: /stand-in/docked }
+    app: { path: /as-built/docked.html }
     anchors:
       - docked.page
 
   - id: settings
     title: Settings (state — open the gear)
     prototype: /screens/settings.html
-    app: { path: /stand-in/settings }
+    app: { path: /as-built/settings.html }
     anchors:
       - settings.panel
       - settings.actor

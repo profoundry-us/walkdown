@@ -261,7 +261,7 @@ test('the same anchors exist on both surfaces, and a pin records which it was pl
   // The design, and the running thing. The same anchor carries a pin on both
   // — which is what makes a note about the design answerable in the build.
   const onProto = await pinOnSurface(`${WD_ORIGIN}/prototype/screens/review.html`);
-  const onApp = await pinOnSurface(`${WD_ORIGIN}/stand-in/review`);
+  const onApp = await pinOnSurface(`${WD_ORIGIN}/as-built/review.html`);
 
   expect(onProto.anchor.element).toBe(ANCHOR);
   expect(onApp.anchor.element).toBe(ANCHOR);
@@ -285,7 +285,7 @@ test('the same anchors exist on both surfaces, and a pin records which it was pl
   const onProtoAgain = await drawn(`${WD_ORIGIN}/prototype/screens/review.html`);
   await expect(onProtoAgain(onProto.id)).toBeVisible();
   await expect(onProtoAgain(onApp.id)).toHaveCount(0);
-  const onAppAgain = await drawn(`${WD_ORIGIN}/stand-in/review`);
+  const onAppAgain = await drawn(`${WD_ORIGIN}/as-built/review.html`);
   await expect(onAppAgain(onApp.id)).toBeVisible();
   await expect(onAppAgain(onProto.id)).toHaveCount(0);
 });
@@ -401,7 +401,7 @@ test('a pin says what it is on contact, and says nothing until then', {
   await page.waitForTimeout(1500);
   const reviewed = page
     .frames()
-    .find((f) => f !== page.mainFrame() && f.url().includes('/stand-in/review'));
+    .find((f) => f !== page.mainFrame() && f.url().includes('/as-built/review.html'));
   const shown = await reviewed.evaluate(() => window.__tipShown);
   expect(shown, 'a pin showed its tooltip with no pointer on it').toBe(0);
 
@@ -431,7 +431,7 @@ test('a pin says what it is on contact, and says nothing until then', {
 test('beside the pin, an id is a link only where the popover can open it', {
   tag: '@rule:threads.conversation.one-stream',
 }, async ({ page }) => {
-  // Two pins on the stand-in, filed through the door: the second refers to
+  // Two pins on the as-built page, filed through the door: the second refers to
   // the first, to a rule, and to an evidence key.
   const file = async (body) => {
     const res = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
@@ -449,9 +449,9 @@ test('beside the pin, an id is a link only where the popover can open it', {
     `Refs: ${first}, n-0001 (not pinned here), rule threads.conversation.one-stream, and runs/evidence/2026-09-14T19-09-05Z/one-stream-source-check.txt`,
   );
 
-  // The stand-in on its own, top-level: no panel, so the dot opens the
+  // The as-built page on its own, top-level: no panel, so the dot opens the
   // embed's popover rather than handing the thread across a frame.
-  await page.goto(`${WD_ORIGIN}/stand-in/review`);
+  await page.goto(`${WD_ORIGIN}/as-built/review.html`);
   const chrome = page.locator('[data-walkdown-chrome]');
   await expect(chrome).toBeAttached();
   const dot = page.locator(`[data-testid="pin.marker"][data-thread="${second}"] .wd-dot`);
@@ -562,7 +562,7 @@ test('beside the pin, Verify is offered to a declared person on an answered note
   });
   expect(settled.ok()).toBeTruthy();
 
-  await page.goto(`${WD_ORIGIN}/stand-in/review`);
+  await page.goto(`${WD_ORIGIN}/as-built/review.html`);
   await expect(page.locator('[data-walkdown-chrome]')).toBeAttached();
   const openPin = async (id) => {
     await page.keyboard.press('Escape');

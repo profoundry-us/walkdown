@@ -62,8 +62,8 @@ governance:
     (ADR 0003) — so served with that home it cannot list, serve or write to the
     real ledger, however the panel's chooser is driven. --port also retargets
     the copy's local target, so the app surface the panel frames is this
-    server's stand-in and not the real server's — without it, a pin placed on
-    the app surface would post to the real ledger through the real embed. The
+    server's as-built page and not the real server's — without it, a pin placed
+    on the app surface would post to the real ledger through the real embed. The
     verdict still goes in the real ledger. Take the copy away when done (node
     tools/scratch.mjs clean <label>). The copy's prototype/ is a link to the
     real one: write nothing under it.

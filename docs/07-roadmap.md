@@ -13,7 +13,7 @@ file disagrees with the code, the code is right and this file is out of date.
 | 2 | Noticing when the PRD or prototype moves | **weakest** | Threads, `origin`, statement hashing. Nothing watches either source. |
 | 3 | A deterministic spec for agents | **solid** | `status --json`, `AGENTS.md`, the three skills, the attention queues. |
 | 4 | Why a decision was made | **partial** | Threads + `origin: thread:<id>` + the runs ledger. No way to say a source was superseded on purpose. |
-| 5 | How closely the build matches the design | **solid** | The panel: fade dial, ghosted design, viewport presets, element-anchored pins, stand-in app. One delivery since 2026-08-26 — the extension, framing the page. |
+| 5 | How closely the build matches the design | **solid** | The panel: fade dial, ghosted design, viewport presets, element-anchored pins, stand-in app, and an as-built drawing where the build cannot be framed (ADR 0007). One delivery since 2026-08-26 — the extension, framing the page. |
 | 6 | Design records changes, an agent makes them | **blocked** | Half works (screen-anchored threads, `proposals/`, lint routing). The other half is forbidden — see below. |
 | 7 | A QA pass that is more than eyeballing | **solid** | `verify: [checks, agent, human]`, `walkdown-judge`, an agent may never write `verified`. |
 | 8 | Feeding tickets and design docs | **not ours** | An agent reads the spec and drafts them. No feature. |

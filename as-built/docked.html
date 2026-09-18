@@ -1,0 +1,44 @@
+<!doctype html>
+<!--
+  AS-BUILT: the docked layout
+
+  There is no as-built for this screen, and that is the drawing. The docked
+  delivery - walkdown as a script tag inside the application's own document,
+  pushing the page aside as a sheet - was withdrawn on 2026-08-26. walkdown
+  frames the page it reviews; nothing renders beside it any more. The design
+  (prototype/screens/docked.html) stays as it was drawn, so what was designed
+  and not built is still visible on the slider (ADR 0007).
+-->
+<html lang="en" data-theme="redline">
+<head>
+<meta charset="utf-8">
+<title>As-built &mdash; walkdown docked (withdrawn)</title>
+<link rel="stylesheet" href="/walkdown.css">
+<style>
+  .as-built-ring { position: fixed; inset: 0; z-index: 10; pointer-events: none;
+    border: 2px solid oklch(72% 0.17 25); }
+  .as-built-label { position: fixed; left: 0; bottom: 0; z-index: 11; pointer-events: none;
+    padding: 3px 10px; font: 700 10.5px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: .08em; text-transform: uppercase; color: oklch(22% 0.045 25);
+    background: oklch(72% 0.17 25); border-top-right-radius: 6px; }
+</style>
+</head>
+<body class="h-screen overflow-hidden bg-base-200 text-base-content text-sm">
+  <main class="grid h-full place-items-center p-8" data-testid="docked.page">
+    <div class="max-w-md rounded-box border border-dashed border-primary/60 bg-base-100 p-6">
+      <div class="mb-1 text-[10.5px] font-bold uppercase tracking-widest text-primary">Withdrawn 2026-08-26</div>
+      <h1 class="text-[15px] font-semibold">Nothing was built here, on purpose.</h1>
+      <p class="mt-2 text-[12.5px] leading-relaxed opacity-70">The docked delivery &mdash; walkdown living
+        inside the application's own document and pushing it aside &mdash; was withdrawn. Anything the
+        application positioned against its viewport ignored the inset, and a native
+        <code>dialog</code> made everything outside it inert. walkdown frames the page it reviews
+        instead; see the review page.</p>
+      <p class="mt-2 text-[12.5px] leading-relaxed opacity-70">The design stays drawn so the distance
+        between it and this empty box is still on the slider.</p>
+    </div>
+  </main>
+  <div class="as-built-ring" aria-hidden="true"></div>
+  <div class="as-built-label" aria-hidden="true">as-built &mdash; a drawing of the build, redlined after the fact</div>
+  <script src="/embed.js" data-walkdown></script>
+</body>
+</html>

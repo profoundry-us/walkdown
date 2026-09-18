@@ -300,7 +300,7 @@ const STATES = [
     ],
   },
   /* Hovering an anchor a step names lights that element up on the surface.
-   * `panel.counts` is one the stand-in review page actually carries. */
+   * `panel.counts` is one the as-built review page actually carries. */
   {
     name: 'rules-anchor-hover-highlights',
     steps: [
@@ -497,7 +497,7 @@ const STATES = [
     steps: [
       ['sr', "r => r.querySelector('#wdp-screen-btn').click()"],
       ['wait', 500],
-      ['top', "(d, fr) => { fr.src = new URL('/stand-in/rule-detail', location.href).href; }"],
+      ['top', "(d, fr) => { fr.src = new URL('/as-built/rule-detail.html', location.href).href; }"],
       ['wait', 2500],
       [
         'probe',
@@ -526,7 +526,7 @@ const STATES = [
       ],
       [
         'top',
-        "(d, fr) => { fr.contentWindow.__spaMarker = 'set before pushState'; fr.contentWindow.history.pushState({}, '', '/stand-in/rule-detail'); }",
+        "(d, fr) => { fr.contentWindow.__spaMarker = 'set before pushState'; fr.contentWindow.history.pushState({}, '', '/as-built/rule-detail.html'); }",
       ],
       ['wait', 1600],
       [
@@ -1208,7 +1208,7 @@ const STATES = [
      * happened to start in.
      */
     name: 'embed-pin-files-against-the-page-project',
-    url: '/stand-in/review',
+    url: '/as-built/review.html',
     config: { bp: 'example/blueprint', server: BASE },
     steps: [
       ['no-writes'],
@@ -1232,7 +1232,7 @@ const STATES = [
     /* The other half of the same rule: a page that declares nothing must go
        on filing against the server's default, exactly as it did before. */
     name: 'embed-pin-files-against-the-default',
-    url: '/stand-in/review',
+    url: '/as-built/review.html',
     steps: [
       ['no-writes'],
       ['top', '(d) => d.defaultView.walkdownEmbed.setPinMode(true)'],

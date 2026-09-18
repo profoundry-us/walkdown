@@ -32,7 +32,9 @@ notes), and the runs ledger. The blueprint is the single source of truth for
 - **Never edit `prototype/`** — design owns it. If the spec needs a screen that
   design hasn't drawn: set `prototype: null` on the storyboard screen, put a
   sketch under `proposals/` if a picture helps, and file a design-request
-  thread anchored to the screen. Lint enforces this routing.
+  thread anchored to the screen. Lint enforces this routing. An `as-built/`
+  folder, where a project keeps one, is engineering's own drawing of what it
+  built and may be edited freely (ADR 0007).
 - **Every rule carries steps.** given/when/then is what a check gets built
   from, so a statement standing alone leaves the detail to be invented and the
   judgment with nothing to judge against. Lint errors on a rule without them;

@@ -1,0 +1,44 @@
+<!doctype html>
+<!--
+  AS-BUILT: no blueprint claims this page
+
+  Retired 2026-09-09 (ADR 0001 §7): "nothing claims this page" became one of
+  the three cases the project modal answers, and this screen's anchors
+  (start.unclaimed, start.claim, start.new, start.options) became project.*
+  on that modal. The as-built of this screen is therefore the modal's -
+  see project-modal.html. This page says so rather than drawing a second copy
+  that would drift from the first.
+-->
+<html lang="en" data-theme="redline">
+<head>
+<meta charset="utf-8">
+<title>As-built &mdash; walkdown unclaimed page (folded into the project modal)</title>
+<link rel="stylesheet" href="/walkdown.css">
+<style>
+  .as-built-ring { position: fixed; inset: 0; z-index: 10; pointer-events: none;
+    border: 2px solid oklch(72% 0.17 25); }
+  .as-built-label { position: fixed; left: 0; bottom: 0; z-index: 11; pointer-events: none;
+    padding: 3px 10px; font: 700 10.5px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: .08em; text-transform: uppercase; color: oklch(22% 0.045 25);
+    background: oklch(72% 0.17 25); border-top-right-radius: 6px; }
+</style>
+</head>
+<body class="h-screen overflow-hidden bg-base-200 text-base-content text-sm">
+  <main class="grid h-full place-items-center p-8" data-testid="start.unclaimed">
+    <div class="max-w-md rounded-box border border-dashed border-primary/60 bg-base-100 p-6">
+      <div class="mb-1 text-[10.5px] font-bold uppercase tracking-widest text-primary">Folded into the project modal, 2026-09-09</div>
+      <h1 class="text-[15px] font-semibold">Built as one of three answers to one question.</h1>
+      <p class="mt-2 text-[12.5px] leading-relaxed opacity-70">"No blueprint claims this page" was one of
+        three ways the address can fail to decide &mdash; several projects claiming it, and no page to
+        route from, being the others &mdash; and three screens asking <i>which project?</i> were three
+        places for the answer to differ (ADR 0001 &sect;7). The build asks it once.</p>
+      <p class="mt-2 text-[12.5px] leading-relaxed opacity-70">What was drawn here is built on
+        <a class="link link-primary" href="/as-built/project-modal.html">the project modal</a>:
+        the address named, the claim command, the import command, and the projects this machine has.</p>
+    </div>
+  </main>
+  <div class="as-built-ring" aria-hidden="true"></div>
+  <div class="as-built-label" aria-hidden="true">as-built &mdash; a drawing of the build, redlined after the fact</div>
+  <script src="/embed.js" data-walkdown></script>
+</body>
+</html>

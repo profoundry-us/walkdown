@@ -106,6 +106,10 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
   writeFileSync(exCfg, readFileSync(exCfg, 'utf8').replaceAll(EXAMPLE_DECLARED, EXAMPLE_ORIGIN));
   if (!existsSync(join(CHECKSPACE, 'prototype')))
     symlinkSync(join(root, 'prototype'), join(CHECKSPACE, 'prototype'), 'dir');
+  // And the as-built drawings the storyboard's app paths name (ADR 0007),
+  // served from the code root the same way.
+  if (!existsSync(join(CHECKSPACE, 'as-built')))
+    symlinkSync(join(root, 'as-built'), join(CHECKSPACE, 'as-built'), 'dir');
   /*
    * Evidence, linked rather than copied. It no longer lives in the repository,
    * so copying `blueprint/` no longer brings it - and one check opens a

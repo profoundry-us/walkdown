@@ -537,7 +537,7 @@ test('put away, the badge still crosses between the design and what shipped', {
    * origin is what keeps that from drifting back unnoticed.
    */
   await expect
-    .poll(() => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/stand-in/`)), {
+    .poll(() => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/as-built/`)), {
       message: 'the app surface is the walkdown this run started',
       timeout: 10000,
     })
@@ -887,7 +887,7 @@ test('the screen picker opens over the design, not underneath it', {
   // surface resolves against the served target's base_url, and matching on
   // the path alone was satisfied by a stranger's server on 4700 (n-0112).
   await expect
-    .poll(() => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/stand-in/review`)), {
+    .poll(() => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/as-built/review.html`)), {
       timeout: 10000,
     })
     .toBe(true);
@@ -930,7 +930,7 @@ test('a screen picked by hand stays picked after the frame lands on it', {
   // choice survives the landing rather than being reset by it (n-0098).
   await expect
     .poll(
-      () => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/stand-in/rule-detail`)),
+      () => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/as-built/rule-detail.html`)),
       { timeout: 10000 },
     )
     .toBe(true);
@@ -1482,12 +1482,12 @@ test('in Detect mode the picker reports the page, in the bar and in the open lis
   // Matched on the whole origin, not just the path: a path-only match is
   // satisfied by any stranger's server that happens to be listening on the
   // declared address, which is the ambient dependency n-0112 removed.
-  const app = page.frames().find((f) => f.url().startsWith(`${WD_ORIGIN}/stand-in/review`));
+  const app = page.frames().find((f) => f.url().startsWith(`${WD_ORIGIN}/as-built/review.html`));
   await app.evaluate(() => {
-    location.href = '/stand-in/settings';
+    location.href = '/as-built/settings.html';
   });
   await expect
-    .poll(() => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/stand-in/settings`)), {
+    .poll(() => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/as-built/settings.html`)), {
       timeout: 10000,
     })
     .toBe(true);
@@ -2095,7 +2095,7 @@ test('a page a blueprint claims, or one that declares its own, is never asked', 
   // The browser resolves that address to this suite's own server (see
   // declaredResolvesHere), but the question asked of /api/whose is the
   // declared one, which is the address the storyboard actually names.
-  await page.goto(fixtureFor({ bp: '', frame: `${DECLARED_ORIGIN}/stand-in/review` }));
+  await page.goto(fixtureFor({ bp: '', frame: `${DECLARED_ORIGIN}/as-built/review.html` }));
   await expect(page.getByTestId('panel.rules-list'), 'a claimed page opens').toBeVisible();
   await expect(page.getByTestId('project.modal')).toHaveCount(0);
   // And the bar says where you landed, project first.
@@ -2651,7 +2651,7 @@ test("walkdown's own address keeps the blueprint and the page, so a reload comes
   tag: '@rule:panel.start.address-keeps-the-pick',
 }, async ({ page }) => {
   const { key } = await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json();
-  const frame = `${WD_ORIGIN}/stand-in/review`;
+  const frame = `${WD_ORIGIN}/as-built/review.html`;
   await page.goto(`${WD_ORIGIN}/?bp=blueprint#${frame}`);
   await expect(page.getByTestId('panel.bar')).toBeVisible();
   // Named by key now - the one spelling that is never ambiguous.
@@ -2662,14 +2662,14 @@ test("walkdown's own address keeps the blueprint and the page, so a reload comes
   await page.getByTestId('panel.screens-list').locator('[data-screen="rule-detail"]').click();
   await expect
     .poll(() => decodeURIComponent(new URL(page.url()).hash.slice(1)), { timeout: 10000 })
-    .toMatch(new RegExp(`^${WD_ORIGIN}/stand-in/rule-detail`));
+    .toMatch(new RegExp(`^${WD_ORIGIN}/as-built/rule-detail.html`));
 
   // Reload: no chooser, the same board, the frame on the same page.
   await page.reload();
   await expect(page.getByTestId('panel.bar')).toBeVisible();
   await expect(page.getByTestId('panel.project')).not.toContainText('Pick a project');
   await expect
-    .poll(() => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/stand-in/rule-detail`)), {
+    .poll(() => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/as-built/rule-detail.html`)), {
       timeout: 10000,
     })
     .toBe(true);

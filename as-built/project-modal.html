@@ -1,0 +1,119 @@
+<!doctype html>
+<!--
+  AS-BUILT: which project?
+
+  A drawing of walkdown's panel as it was actually built - the panel's own
+  markup, captured from the running build on 2026-09-18 and kept by hand
+  since (ADR 0007). It is neither the design (prototype/screens/project-modal.html,
+  which stays as it was drawn) nor the build (the panel you are holding, which
+  cannot frame itself). It exists so the App side of the fade has something
+  true to show, and so the distance between what was designed and what was
+  built is visible on the slider.
+
+  Nothing here is evidence. A verdict given against this page is a verdict
+  about a drawing of the build.
+-->
+<html lang="en" data-theme="redline"> 
+  <head> 
+    <meta charset="utf-8"> 
+    <title>As-built &mdash; walkdown which project?</title> 
+    <link rel="stylesheet" href="/walkdown.css"> 
+    <style>
+  /* The as-built's own marks. Baked into the page rather than injected by the
+     server, because this is a file somebody keeps - not a trick. */
+  .as-built-ring { position: fixed; inset: 0; z-index: 10; pointer-events: none;
+    border: 2px solid oklch(72% 0.17 25); }
+  .as-built-label { position: fixed; left: 0; bottom: 0; z-index: 11; pointer-events: none;
+    padding: 3px 10px; font: 700 10.5px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: .08em; text-transform: uppercase; color: oklch(22% 0.045 25);
+    background: oklch(72% 0.17 25); border-top-right-radius: 6px; }
+  .as-built-notes { position: fixed; left: 12px; bottom: 34px; z-index: 11; width: 320px; max-height: 60vh; overflow-y: auto;
+    padding: 10px 12px; border: 1px dashed oklch(72% 0.17 25); border-radius: 6px;
+    background: oklch(26% 0.042 25 / .96); color: oklch(93% 0.015 40); font-size: 11.5px; line-height: 1.5; }
+  .as-built-notes summary { cursor: pointer; font-weight: 700; color: oklch(78% 0.15 30); letter-spacing: .04em; }
+  .as-built-notes ul { margin: 6px 0 0; padding-left: 16px; }
+  .as-built-notes li { margin: 4px 0; }
+  .as-built-notes li + li { border-top: 1px dotted oklch(41% 0.05 25); padding-top: 4px; }
+</style> 
+  </head> 
+  <body> 
+    <div style="position: fixed; inset: 0px; z-index: 1; pointer-events: none; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0px; border: 0px; padding: 0px; background: transparent; overflow: visible;">
+      <div class="h-full w-full text-sm" style="letter-spacing: normal; word-spacing: normal; text-transform: none; font-variant: normal; font-style: normal; text-indent: 0px; text-shadow: none; white-space: normal; word-break: normal; text-align: left; direction: ltr; text-decoration: none;">
+        <header data-testid="panel.bar" data-theme="redline" class="flex items-center gap-2 px-3 text-base-content" style="position: absolute; top: 0px; left: 0px; right: 0px; height: 44px; pointer-events: auto; transition: transform 0.2s; background: transparent; transform: none;">
+          <button class="btn btn-xs btn-ghost" id="wdp-desk-btn" data-testid="panel.desk-tuner" title="Settings">
+            <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-3.5"><path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm88-29.84q.06-2.16,0-4.32l14.92-18.64a8,8,0,0,0,1.48-7.06,107.21,107.21,0,0,0-10.88-26.25,8,8,0,0,0-6-3.93l-23.72-2.64q-1.48-1.56-3-3L186,40.54a8,8,0,0,0-3.94-6,107.71,107.71,0,0,0-26.25-10.87,8,8,0,0,0-7.06,1.49L130.16,40Q128,40,125.84,40L107.2,25.11a8,8,0,0,0-7.06-1.48A107.6,107.6,0,0,0,73.89,34.51a8,8,0,0,0-3.93,6L67.32,64.27q-1.56,1.49-3,3L40.54,70a8,8,0,0,0-6,3.94,107.71,107.71,0,0,0-10.87,26.25,8,8,0,0,0,1.49,7.06L40,125.84Q40,128,40,130.16L25.11,148.8a8,8,0,0,0-1.48,7.06,107.21,107.21,0,0,0,10.88,26.25,8,8,0,0,0,6,3.93l23.72,2.64q1.49,1.56,3,3L70,215.46a8,8,0,0,0,3.94,6,107.71,107.71,0,0,0,26.25,10.87,8,8,0,0,0,7.06-1.49L125.84,216q2.16.06,4.32,0l18.64,14.92a8,8,0,0,0,7.06,1.48,107.21,107.21,0,0,0,26.25-10.88,8,8,0,0,0,3.93-6l2.64-23.72q1.56-1.48,3-3L215.46,186a8,8,0,0,0,6-3.94,107.71,107.71,0,0,0,10.87-26.25,8,8,0,0,0-1.49-7.06Zm-16.1-6.5a73.93,73.93,0,0,1,0,8.68,8,8,0,0,0,1.74,5.48l14.19,17.73a91.57,91.57,0,0,1-6.23,15L187,173.11a8,8,0,0,0-5.1,2.64,74.11,74.11,0,0,1-6.14,6.14,8,8,0,0,0-2.64,5.1l-2.51,22.58a91.32,91.32,0,0,1-15,6.23l-17.74-14.19a8,8,0,0,0-5-1.75h-.48a73.93,73.93,0,0,1-8.68,0,8,8,0,0,0-5.48,1.74L100.45,215.8a91.57,91.57,0,0,1-15-6.23L82.89,187a8,8,0,0,0-2.64-5.1,74.11,74.11,0,0,1-6.14-6.14,8,8,0,0,0-5.1-2.64L46.43,170.6a91.32,91.32,0,0,1-6.23-15l14.19-17.74a8,8,0,0,0,1.74-5.48,73.93,73.93,0,0,1,0-8.68,8,8,0,0,0-1.74-5.48L40.2,100.45a91.57,91.57,0,0,1,6.23-15L69,82.89a8,8,0,0,0,5.1-2.64,74.11,74.11,0,0,1,6.14-6.14A8,8,0,0,0,82.89,69L85.4,46.43a91.32,91.32,0,0,1,15-6.23l17.74,14.19a8,8,0,0,0,5.48,1.74,73.93,73.93,0,0,1,8.68,0,8,8,0,0,0,5.48-1.74L155.55,40.2a91.57,91.57,0,0,1,15,6.23L173.11,69a8,8,0,0,0,2.64,5.1,74.11,74.11,0,0,1,6.14,6.14,8,8,0,0,0,5.1,2.64l22.58,2.51a91.32,91.32,0,0,1,6.23,15l-14.19,17.74A8,8,0,0,0,199.87,123.66Z"></svg>
+          </button><span class="font-bold tracking-tight">walk<span class="text-primary">down</span></span> 
+          <button data-testid="panel.project" id="wdp-project-btn" title="Which project you are working in — open to switch" class="btn btn-xs min-w-0 gap-1 px-1.5 font-normal btn-outline btn-primary"> 
+            <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-3.5"><path d="M208,96a16,16,0,0,0,16-16V48a16,16,0,0,0-16-16H176a16,16,0,0,0-16,16v8H96V48A16,16,0,0,0,80,32H48A16,16,0,0,0,32,48V80A16,16,0,0,0,48,96h8v64H48a16,16,0,0,0-16,16v32a16,16,0,0,0,16,16H80a16,16,0,0,0,16-16v-8h64v8a16,16,0,0,0,16,16h32a16,16,0,0,0,16-16V176a16,16,0,0,0-16-16h-8V96ZM176,48h32V80H176ZM48,48H80V63.9a.51.51,0,0,0,0,.2V80H48ZM80,208H48V176H80v15.9a.51.51,0,0,0,0,.2V208Zm128,0H176V176h32Zm-24-48h-8a16,16,0,0,0-16,16v8H96v-8a16,16,0,0,0-16-16H72V96h8A16,16,0,0,0,96,80V72h64v8a16,16,0,0,0,16,16h8Z"></svg><span class="max-w-24 truncate">Pick a project</span>
+            <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-3"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"></svg>
+          </button>
+        </header>
+        <aside data-theme="redline" class="flex flex-col overflow-hidden border border-primary/45 bg-base-100 text-base-content" style="position: absolute; top: 44px; right: 12px; bottom: 12px; width: 384px; pointer-events: auto; transition: transform 0.22s; border-radius: 10px; box-shadow: rgba(0, 0, 0, 0.28) 0px 1px 2px, rgba(0, 0, 0, 0.34) 0px 12px 32px; transform: none;">
+          <div class="flex flex-1 items-center justify-center p-6 text-center text-[12.5px] opacity-50" data-testid="start.pick-a-project">Please select a project…</div>
+        </aside>
+        <div data-testid="settings.panel" data-theme="redline" class="w-64 rounded-box border border-primary/45 bg-base-100 p-3 text-base-content shadow-xl" style="position: absolute; top: 56px; left: 24px; display: none; pointer-events: auto;">
+        </div>
+        <div data-testid="walkdown.signing" data-theme="redline" class="w-96 rounded-box border border-primary/45 bg-base-100 p-3 text-base-content shadow-xl" style="position: absolute; top: 56px; left: 50%; transform: translateX(-50%); display: none; pointer-events: auto; z-index: 3;">
+        </div>
+        <div data-testid="panel.screens-list" data-theme="redline" class="w-72 overflow-hidden rounded-box border border-primary/45 bg-base-100 py-1 text-base-content shadow-xl" style="position: absolute; top: 56px; left: 24px; display: none; pointer-events: auto; max-height: 60vh; overflow-y: auto;">
+        </div>
+        <div style="position: absolute; inset: 0px; display: block; pointer-events: auto; z-index: 5;"> 
+          <div class="absolute inset-0 backdrop-blur-sm">
+          </div> 
+          <div class="absolute left-1/2 top-12 flex max-h-[80vh] w-[min(560px,92vw)] -translate-x-1/2 flex-col
+                overflow-hidden rounded-box border border-primary/45 bg-base-100 text-base-content shadow-2xl" data-theme="redline" data-testid="project.modal"> 
+            <div class="flex items-start gap-3 px-4 pt-3.5 pb-2.5"> 
+              <div class="flex min-w-0 flex-1 flex-col gap-0.5"> 
+                <div class="text-[15px] font-semibold">Which project?</div> 
+                <p class="break-all font-mono text-[11px] opacity-55" data-testid="project.address">http://localhost:4700/nothing-declares-this</p> 
+                <p class="text-[12px] leading-relaxed opacity-60" data-testid="project.why">No blueprint claims this page.</p> 
+              </div> 
+            </div> 
+            <div class="flex flex-col gap-3 border-b border-base-300 px-4 py-3" data-testid="project.commands"> 
+              <div class="flex flex-col gap-1.5"> 
+                <p class="text-[11px] uppercase tracking-wider opacity-50">Make this page reviewable</p> 
+                <p class="text-[12.5px] leading-relaxed opacity-70">Add its address to a blueprint's
+                storyboard as a screen's <span class="font-mono text-[11px]">app</span> path, or as a
+                target's <span class="font-mono text-[11px]">base_url</span> — then walkdown knows
+                this page is part of that blueprint.</p> <code class="rounded-box bg-base-200 px-2 py-1.5 text-[11px] break-all">walkdown claims --url http://localhost:4700/nothing-declares-this</code> 
+                <p class="text-[11px] leading-relaxed opacity-50">says which blueprints, if any, claim
+                an address today.</p> 
+              </div> 
+              <div class="flex flex-col gap-1.5" data-testid="project.new"> 
+                <p class="text-[11px] uppercase tracking-wider opacity-50">Or bring a project in</p> <code class="rounded-box bg-base-200 px-2 py-1.5 text-[11px]">walkdown import &lt;path&gt;</code> 
+                <p class="text-[11px] leading-relaxed opacity-50">takes a repository's blueprints into this
+          machine's registry. <span class="font-mono">walkdown init</span> starts one where there is
+          nothing yet. Both are commands you run — walkdown never adopts a directory from a browser.</p> 
+              </div> 
+            </div> 
+            <div class="min-h-0 flex-1 overflow-y-auto" data-testid="project.list"> 
+              <button class="block w-full border-b border-base-300 px-4 py-2.5 text-left last:border-b-0 hover:bg-base-200" data-project="walkdown"> <span class="flex items-center gap-2"> <span class="text-[13px] font-semibold ">walkdown</span> <span class="ml-auto shrink-0 text-[11px] opacity-45">1 blueprint</span> </span> <span class="mt-0.5 block font-mono text-[10.5px] opacity-35">~/Development/profoundry/walkdown</span> </button> 
+              <button class="block w-full border-b border-base-300 px-4 py-2.5 text-left last:border-b-0 hover:bg-base-200" data-project="example"> <span class="flex items-center gap-2"> <span class="text-[13px] font-semibold ">example</span> <span class="ml-auto shrink-0 text-[11px] opacity-45">1 blueprint</span> </span> <span class="mt-0.5 block font-mono text-[10.5px] opacity-35">~/Development/profoundry/walkdown/example</span> </button>
+            </div> 
+          </div>
+        </div>
+      </div>
+    </div>
+    <button style="position: fixed; right: 0px; top: 50%; z-index: 1; transform: translateY(-50%); background: rgb(22, 24, 29); color: rgb(255, 255, 255); border: 0px; border-radius: 8px 0px 0px 8px; padding: 11px 7px; cursor: pointer; font: 600 11px / 1 -apple-system, sans-serif; writing-mode: vertical-rl; letter-spacing: 0.08em; display: none;">WALKDOWN</button>
+    <button data-testid="panel.tab-swap" style="position: fixed; right: 0px; top: 50%; z-index: 1; background: rgb(43, 48, 58); color: rgb(255, 255, 255); border: 0px; border-radius: 8px 0px 0px 8px; padding: 9px 7px; cursor: pointer; font: 600 10px / 1 -apple-system, sans-serif; writing-mode: vertical-rl; letter-spacing: 0.08em; display: none;">
+    </button>
+    <div data-testid="panel.app-frame" title="the application under review" class="grid place-items-center text-center text-[12px] leading-relaxed" style="position: fixed; top: 44px; left: 12px; width: calc(-420px + 100vw); height: calc(-56px + 100vh); border: 0px; border-radius: 10px; background: oklch(97% 0.01 40); transform: none; box-shadow: rgba(0, 0, 0, 0.28) 0px 1px 2px, rgba(0, 0, 0, 0.34) 0px 12px 32px; transition: width 0.22s, height 0.22s, top 0.22s, left 0.22s;; color: oklch(50% 0.03 25)"> 
+      <div>THE APP &mdash; the page under review, framed at the chosen viewport.<br>The as-built cannot frame a page: this box stands where the frame stands.</div> 
+    </div> 
+    <div class="as-built-ring" aria-hidden="true">
+    </div> 
+    <div class="as-built-label" aria-hidden="true">as-built &mdash; a drawing of the build, redlined after the fact</div> 
+    <details class="as-built-notes" open> 
+      <summary>Redlines &mdash; where the build left the design</summary> 
+      <ul> 
+        <li>Built from the proposal that was promoted on 2026-09-10 (n-0271): the modal covers the whole chrome, panel included, and the board behind it is blurred.</li> 
+        <li>The address is named, then what is true of it (no blueprint claims it), then the two commands &mdash; <code>walkdown claims</code> and <code>walkdown import</code> &mdash; then every project this machine has, with its blueprint count.</li> 
+        <li>This one screen also answers <i>several projects claim this page</i> and <i>no page to route from</i> (ADR 0001 &sect;7); the retired unclaimed-page drawing was one of the three it folded.</li> 
+      </ul> 
+    </details> 
+    <script src="/embed.js" data-walkdown>
+    </script> 
+  </body>
+  <div data-testid="panel.desk" style="position: fixed; left: 50%; top: 50%; width: 320vmax; height: 320vmax; margin: -160vmax 0px 0px -160vmax; z-index: -1; pointer-events: none; background-image: repeating-linear-gradient(0deg, color-mix(in oklch, oklch(0.93 0.02 230) 10%, transparent) 0px, color-mix(in oklch, oklch(0.93 0.02 230) 10%, transparent) 1px, transparent 1px, transparent 60px), repeating-linear-gradient(90deg, color-mix(in oklch, oklch(0.93 0.02 230) 10%, transparent) 0px, color-mix(in oklch, oklch(0.93 0.02 230) 10%, transparent) 1px, transparent 1px, transparent 60px); transform: perspective(600px) rotateX(35deg) rotate(35deg);">
+  </div>
+</html>
