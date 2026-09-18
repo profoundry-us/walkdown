@@ -39,7 +39,6 @@ screens:
       - panel.screen-picker
       - panel.screens-list
       - panel.rules-list
-      - panel.awaiting-you
       - panel.rules-search
       - panel.rule-tiers
       - panel.threads-list

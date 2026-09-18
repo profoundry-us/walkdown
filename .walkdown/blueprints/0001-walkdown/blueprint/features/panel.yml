@@ -1232,12 +1232,12 @@ stories:
               why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
 
       - id: panel.rules.awaiting-you-first
+        retired: Withdrawn the day it was built (2026-09-18). It repeated the list beneath it, and the walk already skips the rules that owe nothing - browsing wants the screen a rule is on, judging wants the walk, and a third list served neither (Topher).
         origin: walkdown
         created_at: 2026-09-18
         statement: The rules list opens with a group of every rule waiting on you, in the order a walkdown takes them, above the rules grouped by screen. Each row says in a word what kind of ask it is.
         because: The walk is the one queue, and it belongs at the top of the tab that walks it.
         history: What waited on a person was scattered between the Rules tab's marks and a Threads tab of 36, and Topher closed two threads from the wrong tab looking for his queue (2026-09-18, ADR 0006).
-        verify: [checks]
         signoff: [eng, product, design]
         screens: [review]
         steps:

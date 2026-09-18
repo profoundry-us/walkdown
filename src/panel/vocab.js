@@ -111,8 +111,8 @@ export const onWalkableRule = (t) =>
 
 /*
  * What kind of ask a rule is making of you, in one short word for the
- * list's owed column - the walk lists every rule that needs you, whatever
- * the ask, and the word says which (ADR 0006 §4). Read off the attention
+ * list's owed column - every rule that needs you is marked, whatever the
+ * ask, and the word says which (ADR 0006 §4). Read off the attention
  * items, never re-derived: `asks` when a question on the rule waits on an
  * answer, `fixed` when a claimed fix waits on the verdict, else the verdict
  * itself - `sign` a wording, `walk` a build.

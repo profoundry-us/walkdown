@@ -95,14 +95,16 @@ The composer on such a note offers a person Reply and Waive, whatever its
 status. Done is the rule's pass; Reopen is the rule's fail. The turn line
 says so.
 
-### 4. The walk is the queue, and it opens the Rules tab
+### 4. The walk is the queue; the list only marks it
 
-The rules list opens with an *Awaiting you* group: every rule owing you
-something, in the order Continue walks them, above the rules grouped by
-screen. Each row's owed column says which ask in a word — `asks`
-(a question to answer), `fixed` (a claimed fix to judge), `sign` (a
-wording), `walk` (a build). The group is the list the badge counts and the
-list Continue steps through, by construction.
+Every rule that needs you is marked in the list's owed column with a word
+for the ask — `asks` (a question to answer), `fixed` (a claimed fix to
+judge), `sign` (a wording), `walk` (a build). The list stays grouped by
+screen and nothing is listed twice: browsing wants to know which screen a
+rule is on, judging wants the walk, which already skips what owes nothing.
+(An *Awaiting you* group above the screens was built and withdrawn the
+same afternoon for repeating the list beneath it —
+`panel.rules.awaiting-you-first`, retired.)
 
 The Threads tab keeps its three filters. *Awaiting you* and *Active* list
 only what the walk cannot reach; *All* lists everything, rule
@@ -124,8 +126,8 @@ rule with nothing said, it is the skip. Neither of those two is built yet.
     `lib/threads.js`: `closeByVerdict` closes open notes too.
     `lib/status.js`: verify and answer items grouped per walkable rule.
     The panel: `detail.conversation`, `detail.stream`, `detail.turn`, the
-    one `detail.feedback` box and `detail.verdict` row; `panel.awaiting-you`
-    on the list; `onWalkableRule`, `askOf`, `sayOnRule`, `waiveOnRule`.
+    one `detail.feedback` box and `detail.verdict` row; the ask word on the
+    list; `onWalkableRule`, `askOf`, `sayOnRule`, `waiveOnRule`.
 - Rules changed as claims, stamped fresh:
     `threads.lifecycle.closes-where-it-was-asked`,
     `threads.conversation.says-whose-move`,
@@ -134,7 +136,8 @@ rule with nothing said, it is the skip. Neither of those two is built yet.
     `panel.walkdown.note-with-any-verdict`,
     `panel.walkdown.verdicts-at-hand`, `panel.rules.talk-without-a-sitting`,
     `panel.threads.own-view`, `panel.threads.claim-never-accept`. New:
-    `panel.rules.awaiting-you-first`, `panel.rules.one-conversation`.
+    `panel.rules.one-conversation` (and `panel.rules.awaiting-you-first`,
+    retired the same day).
 - The law holds: no agent writes `verified` or `waived`. §2 is the
     derivation reading a verdict a person signed.
 - `panel.walkdown.verdicts-at-hand` no longer claims the verdict is
@@ -168,4 +171,5 @@ rule with nothing said, it is the skip. Neither of those two is built yet.
     conversation per rule, where a new subject is a new message and two
     subjects that will not share a stream are a rule to split.
 - **A fifth Walk tab.** Drawn first on the canvas; it was the Rules tab
-    with a group at the top, and got the name back.
+    with a group at the top, and got the name back. The group itself went
+    next (§4).

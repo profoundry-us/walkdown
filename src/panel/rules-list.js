@@ -13,7 +13,6 @@ import {
   groupedRows,
   LBL,
   needsYou,
-  owedRows,
   screenById,
   screenIdOf,
   shortName,
@@ -457,13 +456,8 @@ function screenHeader(id) {
   </div>`;
 }
 
-/*
- * One rule, as the rail draws it. `owed` is the same row drawn in the
- * Awaiting-you group above the list: it carries `data-owed` where the list's
- * copy carries `data-rule`, so a count of rules is still a count of rules and
- * a check that finds a rule by id finds one row.
- */
-function ruleRow(row, { owed = false } = {}) {
+/** One rule, as the rail draws it. */
+function ruleRow(row) {
   const mine = needsYou(row.rule);
   /*
    * A verdict picked this sitting is the one thing that still draws its own
@@ -485,7 +479,7 @@ function ruleRow(row, { owed = false } = {}) {
    * half strength, because it is context rather than a claim on you.
    */
   return html`<button class="flex w-full cursor-pointer items-center gap-2.5 px-3.5 py-2 text-left text-[14px] hover:bg-base-200"
-      data-rule="${owed ? nothing : row.rule}" data-owed="${owed ? row.rule : nothing}" title="${row.rule} — ${why}"
+      data-rule="${row.rule}" title="${row.rule} — ${why}"
       @click=${(e) => fire(e.currentTarget, 'open-rule', { rule: row.rule })}>
       ${
         picked
@@ -522,31 +516,14 @@ export function listPane() {
   const rows = matchingRows();
   if (!rows.length)
     return html`<p class="p-3.5 text-[13.5px] opacity-40" data-testid="panel.rules-empty">No rule matches ${S.ruleQuery.trim()}.</p>`;
-  /*
-   * What waits on you, first (ADR 0006 §4): every rule owing you something,
-   * whatever the ask - a wording to sign, a build to walk, a claimed fix to
-   * accept, a question to answer - in the order Continue walks them, above
-   * the screen-grouped list, which goes on drawing every rule where it
-   * lives. The rule appears twice on purpose: once as work, once as a rule.
-   * It is the same list the tab's badge counts and the same one the walk
-   * steps through, so the three cannot disagree. Absent while you are
-   * searching: a search is a question about the list, not about you.
-   */
-  const owed = S.ruleQuery.trim() ? [] : owedRows();
-  const awaiting = owed.length
-    ? html`<div class="mx-3.5 mt-2 mb-1 rounded-box border border-warning/40 bg-warning/5 pb-1" data-testid="panel.awaiting-you">
-        <div class="px-3 pb-1 pt-2 ${LBL} text-warning opacity-80">Awaiting you \u00b7 ${owed.length}</div>
-        ${owed.map((row) => ruleRow(row, { owed: true }))}
-      </div>`
-    : nothing;
-  return html`${awaiting}${groupedRows(rows).map((group) => {
+  return groupedRows(rows).map((group) => {
     const labels = storyLabels(group.stories.map((g) => g.story));
     return html`${screenHeader(group.screen)}${group.stories.map(
       ({ story, rows: within }) =>
         html`<div class="px-3.5 pb-1 pt-2.5 ${LBL}" data-story="${story}">${labels.get(story)}</div>
           ${within.map((row) => ruleRow(row))}`,
     )}`;
-  })}`;
+  });
 }
 
 /*

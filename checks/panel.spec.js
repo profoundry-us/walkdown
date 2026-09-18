@@ -1594,53 +1594,6 @@ test('the identity is a username to record under and a full name to show, both e
   await endSession(page);
 });
 
-/*
- * ADR 0006 §4: the walk is the one queue, and it opens the Rules tab. The
- * group above the screens lists exactly the rules the badge counts, in the
- * order Continue walks them, each with a word for its ask - and the same
- * rules are still drawn under their screens below.
- */
-test('the rules list opens with what waits on you, in walk order, each row saying which ask', {
-  tag: '@rule:panel.rules.awaiting-you-first',
-}, async ({ page }) => {
-  await review(page);
-  await endSession(page);
-  const { attention, rows } = await payload(page);
-  const owedIds = new Set(
-    (attention ?? []).filter((i) => i.who === 'human' && !i.thread).map((i) => i.rule),
-  );
-  expect(owedIds.size, 'need rules waiting on a person').toBeGreaterThan(0);
-
-  const list = page.getByTestId('panel.rules-list');
-  const group = page.getByTestId('panel.awaiting-you');
-  await expect(group).toBeVisible();
-  const listed = await group.locator('[data-owed]').evaluateAll((els) => els.map((e) => e.dataset.owed));
-  expect(new Set(listed)).toEqual(owedIds);
-  // The badge on the tab is this list's length.
-  await expect(page.getByTestId('panel.tabs').locator('[data-tab="rules"] .badge')).toHaveText(String(listed.length));
-  // Each row says which ask, and the word agrees with the queue item behind it.
-  const byRule = new Map((rows ?? []).map((r) => [r.rule, r]));
-  for (const rule of listed.slice(0, 8)) {
-    const word = (await group.locator(`[data-owed="${rule}"] .text-warning`).textContent()).trim();
-    const items = (attention ?? []).filter((i) => i.who === 'human' && !i.thread && i.rule === rule);
-    const want = items.some((i) => i.action === 'answer')
-      ? 'asks'
-      : items.some((i) => i.action === 'verify')
-        ? 'fixed'
-        : byRule.get(rule)?.built
-          ? 'walk'
-          : 'sign';
-    expect(word, rule).toBe(want);
-  }
-  // The list of rules is still the list of rules: one `data-rule` row per rule, the group's copies aside.
-  expect(await list.locator('[data-rule]').count()).toBe((rows ?? []).length);
-  for (const rule of listed.slice(0, 3)) await expect(list.locator(`[data-rule="${rule}"]`)).toHaveCount(1);
-
-  // A search is a question about the list, not about you: the group leaves.
-  await page.getByTestId('panel.rules-search').fill(listed[0].split('.').at(-1));
-  await expect(group).toHaveCount(0);
-});
-
 /* ---- a rule's threads are one conversation --------------------------------- */
 
 /*
@@ -1860,11 +1813,8 @@ test('the rail groups by screen, in storyboard order, with the headless rules la
   // so the pane itself does not move and a sticky heading sticks to this.
   const scroller = page.getByTestId('panel.list-scroll');
   const box = await scroller.boundingBox();
-  // Measured from the first screen's heading, not the top of the pane: the
-  // Awaiting-you group sits above the screens and is as tall as the day's
-  // queue.
   await scroller.evaluate((el) => {
-    el.scrollTop = (el.querySelector('[data-testid="panel.rules-screen"]')?.offsetTop ?? 0) + 700;
+    el.scrollTop = 700;
   });
   await page.waitForTimeout(200);
   const pinned = await list.getByTestId('panel.rules-screen').evaluateAll(
