@@ -297,13 +297,18 @@ stories:
             - Above the box, one line names the party whose move it is - yours, the agent's, or a person's - and says in a sentence what that party does next
             - The line is coloured by the party, not the reader - amber for a person, blue and dashed for the agent, green for a thread that has ended - so the same thread reads the same from both seats
             - A person is offered Reply and Waive on a note the agent still owes; Reopen, Waive and Done on one it has addressed; Reply, Waive and Answer on an open question; Reply, Reopen and Waive on an answered one. Done and Answer are the filled primary, Waive is the one amber, the rest are quiet
+            - Waive stands alone at the far left of the row, apart from the buttons a hand reaches for, because it buries work
             - The agent is offered Reply and Done on what waits on it, and only Reply on what waits on a person. It is never offered Verify or Waive; a person is never offered Addressed, Settled or Incorporated
             - Done records what the seat means by it - verified for a person, addressed or incorporated for the agent - and the status chip keeps the record's own name
             - Enter sends what the box is for - the answer on a question that is yours to answer, a reply everywhere else - and the box says which
             - An ended thread offers a person Reply and Reopen, the agent Reply alone, and its line says how it ended and by whom
             - In the stream, the agent's face is a robot in a dashed ring in the agent's blue; a person's is their initials on a filled disc, marked in the corner when a machine typed their words for them - so who said what is told without reading the names
             - Nothing under the box says who you are or how to send - the name stands in the thread's header
-          statement_hash: sha256:a79d09343f13
+          statement_hash: sha256:d5ec9c857bf1
+          reworded:
+            - hash: sha256:a79d09343f13
+              at: 2026-09-18T03:58:38Z
+              why: Waive moved to the far left of the row; the offers are the same
       - id: threads.conversation.new-since-you-looked
         origin: walkdown
         statement: A thread remembers where your reading stopped and marks what arrived since as new.

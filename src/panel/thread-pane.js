@@ -258,10 +258,11 @@ export function threadPane() {
           const text = e.currentTarget.value.trim();
           if (S.openThread && text) threadAct(S.openThread, enterAct);
         }}>${S.threadNote}</textarea>
+      <!-- Waive stands alone at the far left; the rest gather on the right. -->
       <div class="mt-1 flex flex-wrap items-center justify-end gap-1">
         ${acts.map(
           ([label, act, tone]) =>
-            html`<button class="btn btn-xs ${TONE[tone]}"
+            html`<button class="btn btn-xs ${TONE[tone]}${tone === 'warn' ? ' mr-auto' : ''}"
             data-testid="thread.actions" data-act="${act}" data-tid="${t.id}"
             @click=${() => threadAct(t.id, act)}>${label}</button>`,
         )}

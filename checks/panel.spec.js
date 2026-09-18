@@ -2819,7 +2819,7 @@ test('the composer says whose move it is and offers only that reader’s moves',
   await expect(turn).toHaveAttribute('data-party', 'agent');
   await expect(turn).toContainText(/agent.s move/i);
   await expect(turn).toContainText(/hands it back to you/);
-  await expect(actions).toHaveText(['Reply', 'Waive']);
+  await expect(actions).toHaveText(['Waive', 'Reply']);
   // The person's face is initials on a tile; there is no robot yet.
   await expect(page.getByTestId('thread.body').locator('.wd-msg .wd-ava').first()).toHaveText('AC');
   await expect(page.getByTestId('thread.body').locator('.wd-bot')).toHaveCount(0);
@@ -2833,7 +2833,10 @@ test('the composer says whose move it is and offers only that reader’s moves',
   await page.reload();
   await expect(turn).toHaveAttribute('data-party', 'human');
   await expect(turn).toContainText(/your move/i);
-  await expect(actions).toHaveText(['Reopen', 'Waive', 'Done']);
+  await expect(actions).toHaveText(['Waive', 'Reopen', 'Done']);
+  // Waive stands apart at the far left: a clear gap between it and the next button.
+  const [w, r] = await Promise.all([actions.nth(0).boundingBox(), actions.nth(1).boundingBox()]);
+  expect(r.x - (w.x + w.width)).toBeGreaterThan(24);
   await expect(page.getByTestId('thread.actions').last()).toHaveAttribute('data-act', 'verified');
   await expect(box).toHaveAttribute('placeholder', /Reopen or Waive/);
   const bot = page.getByTestId('thread.body').locator('.wd-msg .wd-bot');
@@ -2875,13 +2878,13 @@ test('the composer says whose move it is and offers only that reader’s moves',
   const { id: q } = await post('/api/threads', { kind: 'question', body: 'Which port?', anchor: { rule } });
   await page.goto(`${WD_ORIGIN}/?bp=blueprint&thread=${q}`);
   await expect(turn).toHaveAttribute('data-party', 'human');
-  await expect(actions).toHaveText(['Reply', 'Waive', 'Answer']);
+  await expect(actions).toHaveText(['Waive', 'Reply', 'Answer']);
   await expect(box).toHaveAttribute('placeholder', /Answer/);
   await box.fill('4730.');
   await box.press('Enter');
   await expect(turn).toHaveAttribute('data-party', 'agent');
   await expect(turn).toContainText(/You answered/);
-  await expect(actions).toHaveText(['Reply', 'Reopen', 'Waive']);
+  await expect(actions).toHaveText(['Waive', 'Reply', 'Reopen']);
   const answered = (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json())
     .threads.find((t) => t.id === q);
   expect(answered.status).toBe('answered');

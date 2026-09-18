@@ -244,8 +244,10 @@ export { whoseMove } from '../../lib/vocab.js';
 
 /*
  * What the composer offers, by kind, status and the reader's role:
- * `[label, act, tone]`, in the order they are drawn - quiet ones first,
- * Waive (the one warning) beside them, the primary last. `act` is a status
+ * `[label, act, tone]`, in the order they are drawn - Waive first and
+ * alone at the far left, because it buries work and should not sit
+ * beside the buttons a hand reaches for (Topher, 2026-09-17); then the
+ * quiet ones, and the primary last on the right. `act` is a status
  * from FLOWS, or one of the composer's own two: `__reply` and `__answer`,
  * which are replies that may carry a transition.
  */
@@ -262,15 +264,15 @@ const ENDED = [REPLY, REOPEN];
 const OFFERS = {
   human: {
     note: {
-      open: [REPLY, WAIVE],
-      addressed: [REOPEN, WAIVE, ['Done', 'verified', 'primary']],
+      open: [WAIVE, REPLY],
+      addressed: [WAIVE, REOPEN, ['Done', 'verified', 'primary']],
       verified: ENDED,
       waived: ENDED,
       settled: ENDED,
     },
     question: {
-      open: [REPLY, WAIVE, ['Answer', '__answer', 'primary']],
-      answered: [REPLY, REOPEN, WAIVE],
+      open: [WAIVE, REPLY, ['Answer', '__answer', 'primary']],
+      answered: [WAIVE, REPLY, REOPEN],
       incorporated: ENDED,
       waived: ENDED,
     },
