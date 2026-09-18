@@ -101,7 +101,7 @@ export const S = {
    * is the one with work in it - `all` is for going back to a conversation
    * that ended, which is the thing that was impossible before this tab.
    */
-  threadFilter: 'active', // active | you | all
+  threadFilter: 'you', // you | active | all - what the tab's badge counts comes up first
 
   /*
    * What the rule search box says, and what the two note boxes say. Kept out

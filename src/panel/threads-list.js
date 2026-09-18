@@ -51,7 +51,10 @@ export function threadWhere(t) {
 }
 
 /*
- * The three questions over the thread list, drawn OUTSIDE the scrolling
+ * The three questions over the thread list, with the one the tab's badge
+ * counts - what waits on you - first and open by default, so the number on
+ * the tab and the list under it are the same list (Topher, 2026-09-18).
+ * They are drawn OUTSIDE the scrolling
  * wrapper as a sibling above it - the same shape as the rule list's search
  * box, and for the same reason. `position: sticky` is the reflex and the
  * wrong tool: the pane itself is what scrolls, so a sticky child sticks to a
@@ -78,8 +81,8 @@ export function threadFilterBar() {
       }}>${label}<span class="opacity-60">${counts[id]}</span></button>`;
   return html`<div class="flex shrink-0 justify-center border-b border-base-300 px-3.5 py-2">
     <div class="join" data-testid="panel.thread-filter">
-      ${pick('active', 'Active', 'Questions and notes still in play')}
       ${pick('you', 'Awaiting you', 'A fix claimed and unverified, or a question unanswered — the same queue walkdown status shows')}
+      ${pick('active', 'Active', 'Every thread not yet ended — yours and the agent\'s')}
       ${pick('all', 'All', 'Every thread ever filed on this blueprint, ended ones included')}
     </div>
   </div>`;

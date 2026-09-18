@@ -726,6 +726,18 @@ test('threads have a view of their own, ended ones included', {
   await expect(list).toBeVisible();
 
   /*
+   * The list opens on what waits on you - the same set the tab's badge
+   * counts - so the number and the list under it never disagree.
+   */
+  const filter = page.getByTestId('panel.thread-filter');
+  await expect(filter.locator('button').first()).toHaveText(/Awaiting you/);
+  await expect(filter.locator('button').first()).toHaveClass(/btn-primary/);
+  expect(
+    new Set(await list.locator('[data-open-thread]').evaluateAll((els) => els.map((e) => e.dataset.openThread))),
+  ).toEqual(owed);
+  await filter.getByText('Active', { exact: false }).click();
+
+  /*
    * Active is what is live — an ended conversation is not in it.
    *
    * Asked of the list's ENTRIES rather than of its text: a thread id is a
@@ -748,7 +760,6 @@ test('threads have a view of their own, ended ones included', {
   expect(await listed(gone)).toBe(0);
 
   // ...and All reaches it, which nothing else in the panel can do.
-  const filter = page.getByTestId('panel.thread-filter');
   await filter.getByText('All', { exact: false }).click();
   await expect.poll(() => listed(gone)).toBeGreaterThan(0);
 
@@ -826,6 +837,8 @@ test('a message is read as the markdown it was written in, and nothing else reac
   await expect(page.getByTestId('panel.bar')).toBeVisible();
   await page.waitForLoadState('networkidle');
   await page.getByTestId('panel.tabs').getByText(/Threads/).click();
+  // The list opens on what waits on a person; a note the agent still owes is under Active.
+  await page.getByTestId('panel.thread-filter').getByText('Active', { exact: false }).click();
   await page.getByTestId('panel.threads-list').locator(`[data-open-thread="${id}"]`).first().click({ position: { x: 8, y: 6 } });
   const text = page.getByTestId('thread.body').locator('.wd-text').first();
   await expect(text).toBeVisible();
@@ -2440,6 +2453,8 @@ test('times read in the zone the person declared, and Settings says which @rule:
 
   // The message's hover stamp carries the zone, and the hour is Tokyo's.
   await page.getByTestId('panel.tabs').getByText(/Threads/).click();
+  // The list opens on what waits on a person; a note the agent still owes is under Active.
+  await page.getByTestId('panel.thread-filter').getByText('Active', { exact: false }).click();
   await page.getByTestId('panel.threads-list').locator(`[data-open-thread="${id}"]`).first().click({ position: { x: 8, y: 6 } });
   const at = page.getByTestId('thread.body').locator('.wd-at[title]').first();
   await expect(at).toBeVisible();
@@ -2972,6 +2987,8 @@ test('a relayed message keeps the person\u2019s face and shows the agent\u2019s 
   // The list draws the same message the same way.
   await page.getByTestId('thread.close').click();
   await page.getByTestId('panel.tabs').getByText(/Threads/).click();
+  // The list opens on what waits on a person; a note the agent still owes is under Active.
+  await page.getByTestId('panel.thread-filter').getByText('Active', { exact: false }).click();
   const card = page.getByTestId('panel.threads-list').locator(`[data-open-thread="${id}"]`).first();
   await card.scrollIntoViewIfNeeded();
   await expect(card.locator('.wd-added')).toContainText('Seen at 375');
