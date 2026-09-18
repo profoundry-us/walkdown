@@ -1,7 +1,6 @@
 id: n-0197
 kind: note
-author: topher
-via: agent
+author: agent
 created: 2026-09-05T23:29:19.022Z
 anchor:
   rule: locations.default.skills-are-yours-by-default
@@ -15,8 +14,7 @@ body: |-
 
   The remedy that was taken for the other one applies here unchanged: make them real copies and let a Highball check keep the two identical, which is the drift protection the link was buying without the door. The lint warning added for n-0186 does not see these, because it walks the answering `.walkdown` and `.claude/` is outside it — worth deciding whether that check should cover every directory walkdown WRITES to rather than the home alone.
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-05T23:30:48Z
     body: >-
       Addressed in the commit that carries this reply, the same way n-0186 was.

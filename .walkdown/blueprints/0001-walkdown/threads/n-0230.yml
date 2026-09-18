@@ -7,6 +7,14 @@ anchor:
   rule: panel.walkdown.session-survives-reload
 status: addressed
 body: >-
+  I totally saw the dialog, but I only see "as eng". Can you fix this one to
+  have the signatures in the draft so I can finish it and it properly saves
+  before we do some more testing. I 100% meant to have this run be an eng /
+  product walkdown.
+
+
+  It worked, said eng and product — file the thread and commit
+added: >-
   The draft door drops `signatures`, so a reload re-signs a sitting as
   engineering alone.
 
@@ -42,8 +50,7 @@ body: >-
   2026-09-07T19-15-43Z-local-01 carrying both signatures. The verdicts and
   thread ids in that draft were untouched.
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-07T19:19:21Z
     body: >-
       Fixed in the commit above, and it was two doors rather than one: POST

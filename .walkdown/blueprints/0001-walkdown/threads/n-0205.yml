@@ -1,7 +1,6 @@
 id: n-0205
 kind: note
-author: topher
-via: agent
+author: agent
 created: 2026-09-06T00:05:10.903Z
 anchor:
   rule: locations.travel.judged-against-a-spec
@@ -22,8 +21,7 @@ body: "The retired field is still being written, and the docs still describe the
   fix is one line in the harness plus a past-tense rewrite of that section.
   Found by the provenance judge, 2026-09-05."
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-06T00:42:51Z
     body: "Fixed in 53984c2, and there was a third thing in the same function.
       tools/sitting.mjs now stamps spec_hash(BP) instead of blueprint_sha, and

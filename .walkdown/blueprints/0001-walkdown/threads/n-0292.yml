@@ -1,7 +1,6 @@
 id: n-0292
 kind: note
-author: topher
-via: agent
+author: agent
 created: 2026-09-14T19:43:31.414Z
 anchor:
   rule: panel.delivery.stale-copy-says-so
@@ -17,8 +16,7 @@ body: |-
 
   Likely shape of a fix: give the badge shrink-0 (it is loud on purpose; the project name and blueprint already truncate) or let it drop to a second line / the sidebar below some width, rather than letting the one thing that must be read whole be the thing that gives.
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-14T23:11:38Z
     body: "Fixed in src/panel/app.js: both stale badges are shrink-0
       whitespace-nowrap, and the bar left cluster is overflow-hidden so a badge

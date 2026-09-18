@@ -1,7 +1,6 @@
 id: n-0253
 kind: note
-author: topher
-via: agent
+author: agent
 created: 2026-09-08T20:23:01.422Z
 anchor:
   rule: panel.delivery.stale-copy-says-so
@@ -41,8 +40,7 @@ body: >-
   server" during a sitting meant nothing at all, so any observation resting on
   that badge between 2026-09-07 and today should be re-taken.
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-08T20:23:30Z
     body: Fix is in the same commit as this note - the test now restores the mtime
       it found rather than stamping the file with now, and a full suite run

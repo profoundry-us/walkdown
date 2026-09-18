@@ -15,8 +15,7 @@ body: "Any bare 'node --test' claims real homes: the suites that build fixture
   is whether each fixture-building suite pins its own scratch home the way
   locations.test.js already does, so no caller has to remember."
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-01T06:30:58Z
     body: >-
       Addressed: each fixture-building suite now pins its own home, so no caller

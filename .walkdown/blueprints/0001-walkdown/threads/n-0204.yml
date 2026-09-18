@@ -1,7 +1,6 @@
 id: n-0204
 kind: note
-author: topher
-via: agent
+author: agent
 created: 2026-09-06T00:03:50.168Z
 anchor:
   rule: threads.lifecycle.claim-never-accept
@@ -21,8 +20,7 @@ body: "The refusal tells you to fix a file that is not the one being read.
   exactly this — so the fix is for these sentences to name configPath() rather
   than a spelling of it. Reproduced 2026-09-06."
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-06T00:42:50Z
     body: "Fixed in 53984c2. The two server-side sentences (lib/writes.js
       mustBeDeclared, lib/identity.js's problem line) now call configPath(). The

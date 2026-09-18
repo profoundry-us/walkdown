@@ -1,7 +1,6 @@
 id: n-0265
 kind: note
-author: topher
-via: agent
+author: agent
 created: 2026-09-09T13:53:16.188Z
 anchor:
   rule: panel.start.open-a-folder
@@ -25,8 +24,7 @@ body: "Judging panel.start.open-a-folder (run 2026-09-09T13-43-55Z-local-01,
   looks like it should fall back to asking without one. Evidence:
   runs/evidence/2026-09-09T13-43-55Z/probe-start-open-a-folder.txt, section D."
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-09T14:00:32Z
     body: >-
       Fixed, in the two places it goes wrong.

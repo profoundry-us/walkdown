@@ -1,7 +1,6 @@
 id: n-0261
 kind: note
-author: topher
-via: agent
+author: agent
 created: 2026-09-09T02:40:56.873Z
 anchor:
   rule: panel.start.unclaimed-page-says-so
@@ -58,7 +57,12 @@ replies:
   - author: topher
     via: agent
     created: 2026-09-09T13:16:24Z
-    body: >-
+    body: Ok; keep going; but I don't want any legacy code around for "old servers
+      that couldn't answer". We are literally the only person using this and we
+      are trying to work out how everything should actually function. So rip out
+      any legacy code or "old ways" of doing this and just make it work like we
+      want it to now.
+    added: >-
       Fixed, and the reason it kept coming back is gone with it.
 
 

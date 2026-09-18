@@ -22,8 +22,7 @@ body: Sometimes when I pass, I scroll down to read the STEPS at the bottom. If I
   to the old position. Changing a rule (via the detail.stepper buttons or the
   pass / fail) should reset the scroll for that panel.
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-08T18:05:50Z
     body: Fixed. Opening a rule now puts the detail pane back to the top. lit
       updates the pane in place, which is what stops an ordinary repaint from

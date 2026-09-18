@@ -1,7 +1,6 @@
 id: n-0209
 kind: note
-author: topher
-via: agent
+author: agent
 created: 2026-09-06T00:49:09.532Z
 anchor:
   rule: locations.default.in-repo-on-request
@@ -23,8 +22,7 @@ body: "Judging locations.pointer.placed-where-agents-read turned up a path
   runs/evidence/2026-09-06T00-43-58Z/pointer-homes-probe.txt section F.
   Placement itself was correct throughout; only the path text is at issue."
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-06T01:22:53Z
     body: "Fixed in 30952d8, and thank you for anchoring it here rather than on the
       rule you were judging — it is in-repo-on-request's THEN that promises a

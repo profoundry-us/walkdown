@@ -1,11 +1,10 @@
 id: n-0248
 kind: note
-author: topher
-via: agent
+author: agent
 created: 2026-09-08T18:40:57.796Z
 anchor:
   rule: panel.walkdown.draft-on-disk
-status: addressed
+status: verified
 body: >-
   Under an agent identity a verdict is given, no draft is written, and nothing
   says so.
@@ -53,8 +52,7 @@ body: >-
   Filing rather than fixing because which of those two it should be is a
   judgement call.
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-08T18:58:36Z
     body: >-
       Half of this is now fixed; the half that is a judgement call is left to
@@ -74,8 +72,7 @@ replies:
       ledger will refuse. The signing dialog knows the name before anything is
       judged, so it could refuse there - but that is a policy about who may hold
       a sitting, not a bug, and it is your call rather than mine.
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-17T15:10:04Z
     body: "Addressed: the refused draft write is no longer swallowed - the panel
       shows the server's own sentence in a sticky toast, once per reason, and
@@ -85,3 +82,4 @@ replies:
       loudly. If you would rather the signing dialog refuse up front, say so and
       it is a small change."
 reason: finding
+verified_by: topher

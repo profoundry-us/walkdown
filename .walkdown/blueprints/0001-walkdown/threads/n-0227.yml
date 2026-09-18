@@ -7,6 +7,12 @@ anchor:
   rule: panel.delivery.stale-copy-says-so
 status: addressed
 body: >-
+  I just did one more walkdown with the new setup judging a single item. But it
+  doesn't look like it signed the product one. What happened?
+
+
+  Yes, file both and build them
+added: >-
   A running server older than the code it is serving says nothing, and the panel
   has no way to find out.
 
@@ -41,8 +47,7 @@ body: >-
   look at the tree it is serving from. A payload field, and the panel wears the
   same badge it already wears for a stale extension.
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-07T17:35:35Z
     body: >-
       Built in f310783, as a rule of its own rather than a reword:

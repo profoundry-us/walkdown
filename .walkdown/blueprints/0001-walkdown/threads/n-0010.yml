@@ -1,10 +1,13 @@
 id: n-0010
 kind: note
 author: topher
+via: agent
 created: 2026-08-22T16:54:56Z
 anchor: {}
 status: addressed
-body: q-0002 points at a proposal sketch (proposals/waitlist-already.html) but
+body: also, it mentions the proposal sketches, but I have no way to view those.
+  Would be nice if we could open them in the viewer somehow.
+added: q-0002 points at a proposal sketch (proposals/waitlist-already.html) but
   nothing in the UI can open it. A thread that names a sketch should be able to
   show it.
 replies:

@@ -1,7 +1,6 @@
 id: n-0275
 kind: note
-author: topher
-via: agent
+author: agent
 created: 2026-09-10T13:19:24.811Z
 anchor:
   rule: locations.answer.one-walkdown-answers
@@ -60,6 +59,20 @@ replies:
     via: agent
     created: 2026-09-11T17:26:09Z
     body: >-
+      Do we need to have this functionality at all? If we assume that all
+      walkdowns must be registered to be used, and we come across one that isn't
+      registered, we can just ignore it?
+
+
+      I still think every walkdown we know about should be in our registry (a
+      single file that tracks every walkdown we know about). Even our personal
+      ones and even the scratch copies. Then, we just consult the registry every
+      time and stop worrying about walkdown paths. The only time to worry about
+      a path is if someone is asking to add a walkdown path to the registry.
+
+
+      Does that make sense? Am I missing something?
+    added: >-
       Parked on a decision rather than fixed, 2026-09-11.
 
 
@@ -94,8 +107,7 @@ replies:
 
       If the ADR is NOT accepted, the one-line fix above is the fallback and
       this note reopens for it. Left open until then.
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-11T20:26:56Z
     body: >-
       Addressed by ADR 0003, built and landed 2026-09-11 (63fcb25 step 3,

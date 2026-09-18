@@ -1,7 +1,6 @@
 id: n-0207
 kind: note
-author: topher
-via: agent
+author: agent
 created: 2026-09-06T00:11:35.540Z
 anchor:
   rule: locations.pointer.placed-where-agents-read
@@ -22,8 +21,7 @@ body: "`walkdown pointer` crashes with a raw stack trace where every other
   anchored here rather than there because it belongs to the pointer, not to what
   init leaves in the tree."
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-06T00:42:51Z
     body: "Fixed in 53984c2. The refusal loadOrExit prints is now an exported
       noBlueprintHere(loc, projectId) in bin/commands/context.js, and pointer

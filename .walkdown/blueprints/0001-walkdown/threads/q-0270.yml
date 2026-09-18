@@ -1,7 +1,6 @@
 id: q-0270
 kind: question
-author: topher
-via: agent
+author: agent
 created: 2026-09-10T03:25:04.660Z
 anchor:
   rule: locations.answer.declared-not-discovered
@@ -48,8 +47,7 @@ body: >-
   The glossary now defines both words and says this thread is where the key is
   decided.
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-11T01:47:27Z
     body: >-
       Topher, asked directly on 2026-09-10: keep the walkdown.yml spec key

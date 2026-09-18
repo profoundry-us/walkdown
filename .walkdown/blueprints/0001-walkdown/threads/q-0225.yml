@@ -7,6 +7,43 @@ anchor:
   rule: status.acceptance.role-comes-from-the-run
 status: open
 body: >-
+  I just realized that we're conflating two things: identity and roles. And I
+  think we need to record them for every walkdown.
+
+
+  Here are two use-cases that I expect to happen and that we need to support.
+
+
+  1. I am on a zoom call with Sam from product and I am driving the walkdown on
+  behalf of both of us. I need to be able to mark that Sam is the product role
+  and I am marking things on his behalf (as well as myself for engineering)
+
+  2. I work through and pass all things as the engineer, commit to the repo, and
+  then Sam checks it out and does his own walkdown as the product person passing
+  / failing things, and then he commits to the repo so it comes back to me
+
+
+
+  I think I want to have a dialog popup every time you start a walkdown that
+  asks who you are signing as for THIS specific walkdown. It should
+  auto-populate the identity & roles from your config, but I should be allowed
+  to change it. And I think each role needs to have it's own identity so that I
+  can support the first case.
+
+
+  Help me think through this a bit.
+
+
+  Yes, keep via different than the signer.
+
+
+  Will `recorded_by` and `actor` ever be different? Isn't that essentially the
+  same field? If `signer != actor` that is essentially the signal that it was
+  recorded by someone else? Is there a reason to document that separately?
+
+
+  File the thread and create / update the relevant rules accordingly.
+added: >-
   Identity and role are conflated on a run: one actor, one flat list of roles.
   Two things a team actually does need them separated.
 
@@ -85,7 +122,11 @@ replies:
   - author: topher
     via: agent
     created: 2026-09-07T16:31:47Z
-    body: >-
+    body: Let's go ahead and get rid of the roles from the settings (keep the name /
+      desk dials as you described); update the relevant rules and build the new
+      dialog popup for a walkdown. I want to get this right before I continue
+      doing walkdowns.
+    added: >-
       Built, in a2eb533. Both rules this thread raised are implemented; neither
       is judged, and both are yours to walk.
 

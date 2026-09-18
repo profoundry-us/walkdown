@@ -1,13 +1,15 @@
 id: n-0236
 kind: note
 author: topher
+via: agent
 created: 2026-09-08T00:12:34.995Z
 anchor:
   rule: panel.start.open-a-folder
   screen: start
   element: '[data-testid="start.connect"]'
 status: addressed
-body: >-
+body: File the Connect-button finding as a note
+added: >-
   The Connect button on the start screen does nothing, so the rule's second then
   — "The address it looks at can be changed and retried without a reload" — has
   no way to happen.
@@ -41,16 +43,14 @@ body: >-
   Filed by the agent while building the state for Topher's walkdown of this
   rule; the verdict is his.
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-08T00:13:18Z
     body: "Provenance correction: the opening note on this thread was typed by the
       agent on Topher's instruction, not by Topher. It went in without
       --as-agent, so it carries his name and no via. The decision to file was
       his; the sentences were the machine's. This reply carries the via the
       first message should have had."
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-08T18:05:51Z
     body: Fixed. The start gate and the Blueprints tab were two copies of the
       address row under the same element ids, and only the tab's copy had a

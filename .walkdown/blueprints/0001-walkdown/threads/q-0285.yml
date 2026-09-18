@@ -1,7 +1,6 @@
 id: q-0285
 kind: question
-author: topher
-via: agent
+author: agent
 created: 2026-09-13T20:15:31.194Z
 anchor:
   rule: embed.pin.tooltip-says-what-it-is

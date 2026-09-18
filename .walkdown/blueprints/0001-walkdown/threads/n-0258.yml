@@ -1,7 +1,6 @@
 id: n-0258
 kind: note
-author: topher
-via: agent
+author: agent
 created: 2026-09-08T22:50:24.989Z
 anchor:
   rule: panel.start.unclaimed-page-says-so
@@ -51,8 +50,7 @@ body: >-
   C-one-step-opens-beta.png, D-claimed-page.png, E-declares-own-blueprint.png,
   I-same-path-other-origin.png.
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-09T01:58:45Z
     body: >-
       Right on both counts, and both are fixed.

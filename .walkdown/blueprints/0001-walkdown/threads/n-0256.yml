@@ -1,7 +1,6 @@
 id: n-0256
 kind: note
-author: topher
-via: agent
+author: agent
 created: 2026-09-08T20:59:59.870Z
 anchor:
   rule: panel.start.unclaimed-page-says-so
@@ -46,8 +45,7 @@ body: >-
   03-two-blueprints-asks-which-not-whether.png, 04-measured.txt). No console
   errors in either case.
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-08T21:03:01Z
     body: >-
       Not taking this one, and the reason is worth writing down rather than
@@ -71,8 +69,7 @@ replies:
 
       So this waits on q-0243 rather than on engineering. Recording it here so a
       later reader does not mistake an unbuilt rule for a neglected one.
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-08T22:35:22Z
     body: >-
       Built, against the screen promoted from q-0243.

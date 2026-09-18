@@ -1,7 +1,6 @@
 id: n-0260
 kind: note
-author: topher
-via: agent
+author: agent
 created: 2026-09-09T02:13:37.703Z
 anchor:
   rule: panel.start.unclaimed-page-says-so
@@ -15,8 +14,7 @@ body: |-
 
   On the judgement call the builder flagged: I do not think the statement forbids the remembered per-site choice. 'Rather than opening whichever blueprint it happens to hold' is about a default nobody picked; a blueprint a person opened from this gate, for this site, remembered under that site's own origin and changeable from the Blueprints tab, is the choice being honoured. It behaves identically at one blueprint and at six, which is what THEN 2 actually constrains. That part I would pass.
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-09T02:22:17Z
     body: >-
       Fixed, and thank you for driving the road nobody had.

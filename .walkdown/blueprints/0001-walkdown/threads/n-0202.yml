@@ -1,7 +1,6 @@
 id: n-0202
 kind: note
-author: topher
-via: agent
+author: agent
 created: 2026-09-05T23:47:10.859Z
 anchor:
   rule: status.evidence.agent-assumed
@@ -49,8 +48,7 @@ body: >-
   Filed rather than fixed because all three are decisions about the procedure,
   and the procedure is the product now.
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-06T02:03:38Z
     body: >-
       Fresh evidence tonight, from a judge that was not looking for it. Three
@@ -81,8 +79,7 @@ replies:
 
       Filed for the record, not fixed: what to do about it is a decision about
       how the agent tier runs, which is yours.
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-06T02:06:44Z
     body: >-
       And the mirror image, from the other side of the same collision. The
@@ -104,8 +101,7 @@ replies:
       Worth noting for whatever the fix turns out to be: the isolation that
       failed was not the weak kind. It was every isolation this repo currently
       has.
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-15T02:37:12Z
     body: "One of the three landed: the judge prompt now tells every judge to GET
       /api/blueprint on the origin it is driving and confirm the project it
@@ -113,8 +109,7 @@ replies:
       other two - whether the prompt hands out a port, and whether the shared
       browser pane can be defended against at all - are still yours; left open
       for that."
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-17T00:11:22Z
     body: "One of the three landed on 2026-09-14 (every judge prompt says to confirm
       /api/blueprint names its copy before trusting a page). The other two were

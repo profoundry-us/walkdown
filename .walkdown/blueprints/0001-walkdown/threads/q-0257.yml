@@ -1,7 +1,6 @@
 id: q-0257
 kind: question
-author: topher
-via: agent
+author: agent
 created: 2026-09-08T22:35:59.140Z
 anchor:
   rule: panel.start.choose-a-blueprint

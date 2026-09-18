@@ -21,8 +21,12 @@ body: "Sitting 2026-09-01, observed while judging this rule (run
   a say."
 replies:
   - author: Topher Fangio
+    via: agent
     created: 2026-09-01T04:41:44Z
-    body: >-
+    body: Make all of the walkdown commands align on where things live. If there is
+      a config entry, it should always win out even if there is a blueprint in
+      the repo. Document this but don't start working on anything yet.
+    added: >-
       Decision: every command resolves where things live through one answer —
       resolveLocations — so status, lint, serve, run, judge, sweep, thread,
       threads and hash agree with where, move and every record-writing path.
@@ -40,8 +44,14 @@ replies:
       locations.answer.nearest-blueprint-wins, which this contradicts and which
       must be answered first.
   - author: Topher Fangio
+    via: agent
     created: 2026-09-01T04:46:10Z
-    body: >-
+    body: "Let's do this: all blueprints must be listed in the config. We should
+      stop looking for blueprints outside of it; we literally have two projects
+      using this right now: ourselves and my work project which has exactly 1
+      blueprint. It's far too easy to change and make it all the same instead of
+      trying to make it smart and configuable"
+    added: >-
       Revising the decision above, which q-0138 now answers more simply. Not 'a
       config entry wins over the tree' — there is no tree answer to win against.
       Every blueprint is listed in the config, and walkdown stops looking for
@@ -74,8 +84,12 @@ replies:
       what it actually is — where an entry's out-of-tree records live, keyed by
       that entry — rather than a second directory of projects.
   - author: Topher Fangio
+    via: agent
     created: 2026-09-01T04:51:10Z
-    body: >-
+    body: Yes, delete the registry — the config entry carries its own home; and
+      agents are writing the config anyway, o there is no "hand-written"
+      anymore.
+    added: >-
       Third item settled, and further than 'demoted': the registry is deleted.
       ~/.walkdown/blueprints/index.yml goes, and the config entry carries its
       own home — one list, one file, nothing to keep in sync with anything.
@@ -101,8 +115,14 @@ replies:
       files split by bookkeeping, and only the second one is what we are
       deleting here.
   - author: Topher Fangio
+    via: agent
     created: 2026-09-01T04:55:04Z
-    body: "The identity boundary raised above is settled, and filed as n-0139
+    body: The config is generated at a human's request, so I find it perfectly
+      acceptable for the agent to build it based on the human that is running
+      it. But, the agent should never change the identity without explicit
+      permission, and it should never be able to override the identity by
+      passing arguments to the CLI / MCP.
+    added: "The identity boundary raised above is settled, and filed as n-0139
       because it outgrew this thread: identity is read from the config and never
       supplied by a caller. Generating the config is fine — it happens at a
       human's request and is built around whoever is running it — but an agent
@@ -111,8 +131,14 @@ replies:
       nothing reads it. So the config-only work includes making identity real,
       not just guarding it."
   - author: Topher Fangio
+    via: agent
     created: 2026-09-01T05:20:58Z
-    body: >-
+    body: |-
+      * Talk to me about `The shape of clone adoption`. I don't understand.
+      * Can we define `{results}`in the config too?
+      * `example/` should definitely get a config entry
+      * Reword the locations rule to match the new functionality
+    added: >-
       Three of the plan's open items answered.
 
 
@@ -146,8 +172,7 @@ replies:
       tiers went stale as they should, and all 33 tagged tests still pass, so no
       coverage was lost and nothing falsely claims the new wording. It will not
       need rewording again when the registry goes.
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-03T01:30:34Z
     body: "The decision here is implemented: every command reaches its blueprint
       through resolveLocations - status, lint, serve, run, judge, sweep, thread,

@@ -1,7 +1,6 @@
 id: n-0181
 kind: note
-author: topher
-via: agent
+author: agent
 created: 2026-09-03T16:40:07.126Z
 anchor:
   rule: locations.default.in-repo-on-request
@@ -30,8 +29,7 @@ body: "The `tracked` row of `walkdown where` is wrong for a blueprint the person
   it does not touch that rule's verdict, which is about which config answered.
   Claiming, not accepting."
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-03T17:13:45Z
     body: "Claimed in c62011a. The question is asked of the blueprint's own record
       paths, wherever they stand, so a personally declared blueprint in the tree

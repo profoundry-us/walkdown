@@ -7,6 +7,12 @@ anchor:
   rule: panel.walkdown.records-to-ledger
 status: addressed
 body: >-
+  I just did one more walkdown with the new setup judging a single item. But it
+  doesn't look like it signed the product one. What happened?
+
+
+  Yes, file both and build them
+added: >-
   Finishing a walkdown says how many verdicts landed, and never says what was
   actually recorded on them.
 
@@ -40,8 +46,7 @@ body: >-
   out.signatures and say who signed, and say plainly when the answer is nobody
   in particular.
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-07T17:35:35Z
     body: 'Built in f310783. The toast reads the door answer instead of counting:
       "Recorded 1 verdict as <run_id> — eng (topher), product (sam)". Signatures

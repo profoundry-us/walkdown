@@ -1,10 +1,40 @@
 id: q-0070
 kind: question
 author: topher
+via: agent
 created: 2026-08-25T16:40:00Z
 anchor: {}
 status: open
-body: "Three things about the verify model, recorded together because they turn
+body: >-
+  Let's think through 3 a bit. What does it look like for a user to "walkdown" a
+  staging or review app? What is it that we want to capture there and track?
+
+
+  * It seems like we'll want to see what's passing vs failing, make some fixes,
+  and then walkdown the failed pieces to make sure they work
+
+  * We might want an agent to walkdown everything beforehand to see if it finds
+  failures
+
+  * We might just want an agent to walkdown everything that passed the review
+  app the first time to make sure nothing broke after we made changes
+
+
+
+  The long-term goal is to be able to have humans only occasionally in the
+  process. We want to move as much of this work as possible over to agents.
+
+
+  But one thing I want to double-check here as well: earlier you mentioned
+  something about some checks needing a browser harness in order to actually
+  validate them as checks instead of agent / human. This is kinda the whole
+  point of the project, that we attach our rules to a specific integration test
+  in the repo so that we know it's been checked. There should be very few checks
+  that **don't** use the browser or Playwright since almost everything we're
+  doing here is user scenarios / behavior driven development. We have unit tests
+  for the underlying code, and that is totally separate and doesn't need to be
+  tracked here, we're really only focused on browser checks.
+added: "Three things about the verify model, recorded together because they turn
   out to be one subject. (1) The checks tier is for browser checks. Almost
   everything walkdown specifies is a user scenario, so a rule about the panel or
   the embed should be attached to an integration test that drives a browser -
@@ -14,26 +44,26 @@ body: "Three things about the verify model, recorded together because they turn
   loop I want is: see what passes and fails, fix, re-judge the failures; have an
   agent pre-screen everything before I look; and after a change, have an agent
   re-judge everything that passed the first time to be sure nothing broke. (3)
-  The long-term goal is humans only occasionally in the process - as much of this
-  as possible moves to agents."
+  The long-term goal is humans only occasionally in the process - as much of
+  this as possible moves to agents."
 replies:
   - author: agent
     created: 2026-08-25T16:40:00Z
-    body: "Confirmed, and it is worse than a misfiling. Fourteen panel.* and
-      embed.* rules currently PASS their checks tier, and every one of them is
-      satisfied by test/serve.test.js or test/status.test.js - server and
-      derivation tests, no browser. embed.pin.anchored-target is the clearest:
-      the statement is about hovering to highlight an anchored element, placing a
+    body: "Confirmed, and it is worse than a misfiling. Fourteen panel.* and embed.*
+      rules currently PASS their checks tier, and every one of them is satisfied
+      by test/serve.test.js or test/status.test.js - server and derivation
+      tests, no browser. embed.pin.anchored-target is the clearest: the
+      statement is about hovering to highlight an anchored element, placing a
       pin on it, and the pin drawing at the spot and following the element; the
       check POSTs {anchor: {element: home.cta}} to the API and asserts a YAML
-      file appeared. It hands the server an answer already filled in and verifies
-      the filing. None of the described behaviour is exercised. These are false
-      greens on the cheapest and most-trusted tier. The origin is my own reply on
-      q-0013: I read the missing browser harness as a fact to route around rather
-      than a gap to fill, marked those rules verify: [human], and later sessions
-      claimed checks on them anyway against the wrong tests. The governing
-      principle should be stated once and enforced: A CHECK MUST EXERCISE THE
-      SAME SURFACE THE RULE DESCRIBES."
+      file appeared. It hands the server an answer already filled in and
+      verifies the filing. None of the described behaviour is exercised. These
+      are false greens on the cheapest and most-trusted tier. The origin is my
+      own reply on q-0013: I read the missing browser harness as a fact to route
+      around rather than a gap to fill, marked those rules verify: [human], and
+      later sessions claimed checks on them anyway against the wrong tests. The
+      governing principle should be stated once and enforced: A CHECK MUST
+      EXERCISE THE SAME SURFACE THE RULE DESCRIBES."
   - author: agent
     created: 2026-08-25T16:40:01Z
     body: "One qualification on scope. Twelve of the 26 checks-verified rules are
@@ -41,36 +71,36 @@ replies:
       threads.lifecycle.claim-never-accept, status.derived.stale-never-passes,
       status.derived.latest-wins, ownership.drift.design-requests-required and
       their neighbours. These are the ledger's own laws: an agent may claim work
-      but never accept it; a stale pass is not a pass. They are product behaviour,
-      they are exactly what must not break silently, and no browser will ever
-      reach them. So the split is three ways, not two: browser checks for what a
-      person does, harness checks for what the ledger guarantees, and nothing
-      tracked at all for lib/ internals. The twelve honour the principle above;
-      the fourteen violate it."
+      but never accept it; a stale pass is not a pass. They are product
+      behaviour, they are exactly what must not break silently, and no browser
+      will ever reach them. So the split is three ways, not two: browser checks
+      for what a person does, harness checks for what the ledger guarantees, and
+      nothing tracked at all for lib/ internals. The twelve honour the principle
+      above; the fourteen violate it."
   - author: agent
     created: 2026-08-25T16:40:02Z
-    body: "Consequence for the staging and review-app question, which is why
-      these are one subject: once UI rules are Playwright checks, walking down a
+    body: "Consequence for the staging and review-app question, which is why these
+      are one subject: once UI rules are Playwright checks, walking down a
       review app is mostly not a walkdown. Point the harness at the URL and most
-      rules judge themselves in a minute. The agent tier then stops being a cheap
-      stand-in for automation we never wrote and becomes what it should be -
-      judgment about what an assertion cannot express, does this look right, does
-      this feel finished. The human sees only the residue. That is the path to
-      humans-only-occasionally, and it runs entirely through the checks fix.
+      rules judge themselves in a minute. The agent tier then stops being a
+      cheap stand-in for automation we never wrote and becomes what it should be
+      - judgment about what an assertion cannot express, does this look right,
+      does this feel finished. The human sees only the residue. That is the path
+      to humans-only-occasionally, and it runs entirely through the checks fix.
       Mapping the three scenarios: pass/fail then fix then re-judge is a checks
       run against that base_url; pre-screening is an agent walkdown scoped to
       rules Playwright cannot express; the regression sweep is the one that does
       not work today."
   - author: agent
     created: 2026-08-25T16:40:03Z
-    body: "The structural gap behind the regression sweep: git_sha is written
-      into every run record (lib/run-record.js) and never read by anything.
-      Staleness keys on statement_hash alone, so rewording a rule expires its
-      verdict but changing forty commits of code does not. 'Re-judge everything
-      that passed the first time' therefore has nothing to select on - the ledger
-      cannot say that a pass is about a build that no longer exists. Tolerable
-      while a human reviews occasionally and remembers; fatal for agents running
-      the loop unattended, where without it there is no regression sweep at all,
+    body: "The structural gap behind the regression sweep: git_sha is written into
+      every run record (lib/run-record.js) and never read by anything. Staleness
+      keys on statement_hash alone, so rewording a rule expires its verdict but
+      changing forty commits of code does not. 'Re-judge everything that passed
+      the first time' therefore has nothing to select on - the ledger cannot say
+      that a pass is about a build that no longer exists. Tolerable while a
+      human reviews occasionally and remembers; fatal for agents running the
+      loop unattended, where without it there is no regression sweep at all,
       only re-judging everything forever. A verdict is a claim about (rule,
       statement, code, address) and should expire when any of them moves."
   - author: agent
@@ -82,53 +112,73 @@ replies:
       APP IS AN ADDRESS, NOT A TARGET: a run against one records its environment
       class plus its actual base_url, which run records already carry. The
       ephemeral URL never becomes a standing obligation, the evidence outlives
-      the branch, and the App control lists addresses - including ad-hoc ones the
-      panel can hold without editing the blueprint. Two decisions still open for
-      Topher: whether the fourteen false greens fail loudly until the harness
-      covers them (agent recommends yes) or are quietly re-tiered to [agent,
-      human] now; and whether a code-change expiry applies to human verdicts too,
-      which risks burying him unless it is scoped to code that plausibly touches
-      the rule - a harder problem than it sounds."
+      the branch, and the App control lists addresses - including ad-hoc ones
+      the panel can hold without editing the blueprint. Two decisions still open
+      for Topher: whether the fourteen false greens fail loudly until the
+      harness covers them (agent recommends yes) or are quietly re-tiered to
+      [agent, human] now; and whether a code-change expiry applies to human
+      verdicts too, which risks burying him unless it is scoped to code that
+      plausibly touches the rule - a harder problem than it sounds."
   - author: topher
+    via: agent
     created: 2026-08-25T20:45:00Z
-    body: "Settling the environments question, and deliberately smaller than
-      where the discussion went. Rules are verified per environment - I want to
-      read 'the walkdown worked on dev' and '34 of 36 rules on review app
-      12345'. Old runs are never deleted, so we need to track that a run is
-      valid for one URL. If the review app changes, force a fresh walkdown of
-      all the rules. We considered letting a new address inherit part of an
-      older one's results - features X, Y and Z carried from review-app-1 while
-      only B, C and D are retested on review-app-2 - and we are NOT building
-      that. In general there is one review app per blueprint; work different
-      enough to need another gets its own blueprint. Keep it simple: invalidate
-      previous runs when the URL changes."
+    body: >-
+      Ok, let's back up: I think the rules need to be verified per environment.
+      Like, "the walkdown worked on dev" or "the walkdown passed 34 of 36 rules
+      on review app 12345". And at some point, we may want multiple review apps
+      (or dev or staging apps) to run against. I don't want to delete old runs,
+      so we need a way to track "this run is valid for this URL". If we change
+      the review app, we should force a new walkdown of all of the rules.
+
+
+      Honestly, we may be overthinking this too much. In general we will only
+      have 1 review app for a blueprint. If we're working on something very
+      different, it will have it's own blueprint and review app. I think for now
+      we keep it simple and just invalidate previous runs if the URL changes.
+
+
+      But let's keep some of the other parts we discussed like making sure this
+      is all documented in the blueprint.
+    added: "Settling the environments question, and deliberately smaller than where
+      the discussion went. Rules are verified per environment - I want to read
+      'the walkdown worked on dev' and '34 of 36 rules on review app 12345'. Old
+      runs are never deleted, so we need to track that a run is valid for one
+      URL. If the review app changes, force a fresh walkdown of all the rules.
+      We considered letting a new address inherit part of an older one's results
+      - features X, Y and Z carried from review-app-1 while only B, C and D are
+      retested on review-app-2 - and we are NOT building that. In general there
+      is one review app per blueprint; work different enough to need another
+      gets its own blueprint. Keep it simple: invalidate previous runs when the
+      URL changes."
   - author: agent
     created: 2026-08-25T20:50:00Z
     body: "Built, and it needed no schema change - docs/05-runs-ledger.md already
-      promised this ('target + base_url: which system was verified ... what makes
-      multiple verification runs against different URLs a first-class concept'),
-      and every run header already carried base_url. Derivation was throwing it
-      away. Two fixes in lib/status.js: cells are now filled only by runs made
-      against the address their target currently points at, and walkdown verdicts
-      are keyed by rule AND target instead of by rule alone. That second one was
-      a real bug - a walkdown on staging silently overwrote the verdict from a
-      walkdown on dev, so status.derived.latest-wins was claiming 'targets never
-      bleed into each other' while they did. Recorded as two new rules,
-      status.derived.verdict-belongs-to-a-place and
+      promised this ('target + base_url: which system was verified ... what
+      makes multiple verification runs against different URLs a first-class
+      concept'), and every run header already carried base_url. Derivation was
+      throwing it away. Two fixes in lib/status.js: cells are now filled only by
+      runs made against the address their target currently points at, and
+      walkdown verdicts are keyed by rule AND target instead of by rule alone.
+      That second one was a real bug - a walkdown on staging silently overwrote
+      the verdict from a walkdown on dev, so status.derived.latest-wins was
+      claiming 'targets never bleed into each other' while they did. Recorded as
+      two new rules, status.derived.verdict-belongs-to-a-place and
       status.derived.addressless-runs-count, both check-verified. Verified live:
       pointing the local target at a new URL turns 63 agent passes and 14 human
-      passes into never, with no run file touched; pointing it back restores them
-      exactly. A run with NO base_url is taken at face value - it cannot be shown
-      to belong elsewhere, the same courtesy the ledger extends to a result with
-      no statement_hash - which is what keeps unit-test runners working, since
-      the node:test reporter records no address while the Playwright one does.
-      Still open from earlier in this thread and untouched by this change: the
-      fourteen false-green checks claims, and whether a code change (git_sha,
-      written but still unread) should expire a verdict at an address that has
-      not moved."
+      passes into never, with no run file touched; pointing it back restores
+      them exactly. A run with NO base_url is taken at face value - it cannot be
+      shown to belong elsewhere, the same courtesy the ledger extends to a
+      result with no statement_hash - which is what keeps unit-test runners
+      working, since the node:test reporter records no address while the
+      Playwright one does. Still open from earlier in this thread and untouched
+      by this change: the fourteen false-green checks claims, and whether a code
+      change (git_sha, written but still unread) should expire a verdict at an
+      address that has not moved."
   - author: topher
+    via: agent
     created: 2026-08-25T20:55:00Z
-    body: "Decided on the false greens: fail them loudly. Do not quietly re-tier
+    body: Let's fix the false greens - fail them loudly
+    added: "Decided on the false greens: fail them loudly. Do not quietly re-tier
       them to agent and human - leave the checks demand standing so the gap is
       visible until a browser harness covers it."
   - author: agent
@@ -144,29 +194,31 @@ replies:
       page belongs to, and the check passed ?bp= explicitly, telling the server
       the answer. The resolution it claimed to verify does not exist anywhere -
       it is the same missing page-to-blueprint routing that makes the panel open
-      the wrong blueprint on localhost:4310. A false green was standing in for an
-      unbuilt feature. Removing the tags was not enough on its own: the ledger is
-      append-only, so the old passes still won and status still read verified. I
-      appended a checks run recording all twelve as blocked, each with the reason
-      its former check was not evidence, which is what a checks run honestly
-      finds today. They now read blocked with the reason beside the agent verdict
-      rather than passing. walkdown lint independently reports all twelve under
-      coverage. Recorded the governing principle as
+      the wrong blueprint on localhost:4310. A false green was standing in for
+      an unbuilt feature. Removing the tags was not enough on its own: the
+      ledger is append-only, so the old passes still won and status still read
+      verified. I appended a checks run recording all twelve as blocked, each
+      with the reason its former check was not evidence, which is what a checks
+      run honestly finds today. They now read blocked with the reason beside the
+      agent verdict rather than passing. walkdown lint independently reports all
+      twelve under coverage. Recorded the governing principle as
       ownership.evidence.same-surface. Two things left undone and deliberately
       not smuggled in: the attention queue routes these to Topher as judge, when
       what they need is an agent writing the check - there is no agent-facing
-      item for a rule that demands checks and has none; and the ledger cannot yet
-      notice on its own that the check behind a pass is gone, though every result
-      records the refs that would make that possible - embed.pin.anchored-target's
-      old pass still cites test/serve.test.js:71, which no longer tags it. That
-      staleness rule is the durable fix and would have made the blocked run
-      unnecessary."
+      item for a rule that demands checks and has none; and the ledger cannot
+      yet notice on its own that the check behind a pass is gone, though every
+      result records the refs that would make that possible -
+      embed.pin.anchored-target's old pass still cites test/serve.test.js:71,
+      which no longer tags it. That staleness rule is the durable fix and would
+      have made the blocked run unnecessary."
   - author: topher
+    via: agent
     created: 2026-08-25T21:05:00Z
-    body: "Fix all of those and do the browser harness."
+    body: Fix all of those and do the browser harness
   - author: agent
     created: 2026-08-25T21:30:00Z
-    body: "All three gaps closed and the harness exists. (1) Coverage staleness:
+    body: >-
+      All three gaps closed and the harness exists. (1) Coverage staleness:
       deriveStatus now takes the inventory of rule ids the check suite
       references, and a checks pass for a rule nothing references any more
       renders stale - matched on rule id, not the recorded refs, because those
@@ -184,8 +236,8 @@ replies:
       Building it turned up something the spec had promised and the build never
       delivered: the panel shipped ZERO anchors. The storyboard registers 43 and
       the prototype mockups carry them, but lib/viewer/panel.js had none, so no
-      check could be written the way this repo's own authoring rule demands -
-      by anchor, never by CSS path. Added them across the bar, the sidebar, the
+      check could be written the way this repo's own authoring rule demands - by
+      anchor, never by CSS path. Added them across the bar, the sidebar, the
       detail pane, Settings, and the embed's pin form and markers.
 
       Six of the twelve now pass on real browser evidence: anchored-target,
@@ -210,36 +262,43 @@ replies:
       own harness's evidence, correctly. The config was wrong, not the rule. The
       checks now run on the declared port and refuse to reuse an existing server
       there, since one already on 4700 is serving the real blueprint and these
-      checks write."
+      checks write.
   - author: topher
+    via: agent
     created: 2026-08-25T21:40:00Z
-    body: "Write the remaining five checks. And on running them independently: a
+    body: Write the remaining five checks; but for point 2, we should be able to
+      independently run those checks. In general, the expectation is that a
+      developer / agent might run the checks themselves while they are building,
+      and then we run them for the walkdown. Will that break here if we run them
+      independently?
+    added: "Write the remaining five checks. And on running them independently: a
       developer or an agent will run the checks themselves while building, and
       then we run them for the walkdown. Does that break here?"
   - author: agent
     created: 2026-08-25T22:05:00Z
-    body: "It broke, in two ways, both now fixed. First, the suite bound the
-      address the blueprint declares and refused to start when anything else
-      held it - so a developer with `walkdown serve` running could not run the
-      checks at all. Second, every ad-hoc run appended a run record, so a red
-      mid-build run flipped rules to fail in the project's own status. The split
-      follows Topher's own distinction: iterating while building is not
-      of-record, so `npm run checks:dev` binds a throwaway port and records
-      nothing, while `walkdown run` and CI bind the declared address and append.
-      Verified both: dev mode passes 11 checks beside a running server and
-      leaves the ledger at 35 runs untouched. The fixture takes the walkdown
-      origin as a parameter rather than hard-coding it, and the prototype pages
-      now load their embed origin-relative, which also stops a dev-mode run from
-      reaching across to a real server on 4700.
+    body: >-
+      It broke, in two ways, both now fixed. First, the suite bound the address
+      the blueprint declares and refused to start when anything else held it -
+      so a developer with `walkdown serve` running could not run the checks at
+      all. Second, every ad-hoc run appended a run record, so a red mid-build
+      run flipped rules to fail in the project's own status. The split follows
+      Topher's own distinction: iterating while building is not of-record, so
+      `npm run checks:dev` binds a throwaway port and records nothing, while
+      `walkdown run` and CI bind the declared address and append. Verified both:
+      dev mode passes 11 checks beside a running server and leaves the ledger at
+      35 runs untouched. The fixture takes the walkdown origin as a parameter
+      rather than hard-coding it, and the prototype pages now load their embed
+      origin-relative, which also stops a dev-mode run from reaching across to a
+      real server on 4700.
 
       All five written, so eleven browser checks now cover twelve of the
       fourteen rules that were falsely green. Only embed.pin.right-project is
       still uncovered, and honestly: it describes resolving which project a page
       belongs to, and that routing does not exist.
 
-      Three defects in my own checks, worth recording because each was the
-      check lying rather than the build: (1) tests raced each other - they drive
-      one server over one blueprint and several WRITE to it, so the suite is now
+      Three defects in my own checks, worth recording because each was the check
+      lying rather than the build: (1) tests raced each other - they drive one
+      server over one blueprint and several WRITE to it, so the suite is now
       single-worker; (2) a sitting left open by the draft check was inherited by
       the next one, whose Start-walkdown click actually FINISHED it, so sittings
       are now explicit through ensureSession and endSession; (3) the
@@ -252,5 +311,4 @@ replies:
       Anchors added along the way, since checks must select by anchor: the
       replies line, thread actions, the stale-copy banner, the pin badge, the
       pin form and markers, the detail pane's verdict pair, feedback box and
-      stepper. The storyboard's 43 promised anchors are now largely real."
-
+      stepper. The storyboard's 43 promised anchors are now largely real.

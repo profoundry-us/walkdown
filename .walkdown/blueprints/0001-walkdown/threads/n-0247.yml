@@ -1,7 +1,6 @@
 id: n-0247
 kind: note
-author: topher
-via: agent
+author: agent
 created: 2026-09-08T18:40:23.697Z
 anchor:
   rule: panel.dock.no-pin-mid-fade
@@ -56,8 +55,7 @@ body: >-
 
   badges are drawn.
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-08T18:58:05Z
     body: >-
       Fixed: the reason now rides on a wrapper the pointer can reach.

@@ -1,10 +1,14 @@
 id: n-0011
 kind: note
 author: topher
+via: agent
 created: 2026-08-22T16:54:56Z
 anchor: {}
 status: addressed
-body: "Pin mode had no way out: escape did nothing, and clicking the badge or
+body: 3. When I use the "W pin" button, there is no way to get out of the pin
+  mode; escape should get out, or clicking the button, or clicking the walkdown
+  badge on the side. Right now all of those try to add more pin
+added: "Pin mode had no way out: escape did nothing, and clicking the badge or
   the docked panel just tried to place another pin."
 replies:
   - author: agent

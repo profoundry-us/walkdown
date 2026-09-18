@@ -1,7 +1,6 @@
 id: q-0220
 kind: question
-author: topher
-via: agent
+author: agent
 created: 2026-09-06T17:27:41.566Z
 anchor:
   rule: locations.default.one-home-per-blueprint

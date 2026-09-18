@@ -1,7 +1,6 @@
 id: q-0251
 kind: question
-author: topher
-via: agent
+author: agent
 created: 2026-09-08T19:56:53.031Z
 anchor:
   rule: status.acceptance.signature-names-its-signer

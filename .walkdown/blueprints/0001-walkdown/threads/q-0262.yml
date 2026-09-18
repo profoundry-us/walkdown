@@ -1,7 +1,6 @@
 id: q-0262
 kind: question
-author: topher
-via: agent
+author: agent
 created: 2026-09-09T13:16:59.563Z
 anchor:
   rule: panel.start.choose-a-blueprint
@@ -50,8 +49,7 @@ body: >-
   prototype draws that section with exactly one row on purpose, and does not say
   what it should be when there are none - so that is design's, not mine.
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-09T15:32:00Z
     body: >-
       This question has moved under it, so it is worth reading with the new
@@ -70,8 +68,7 @@ replies:
       above: choose-blueprint's job was asking which of several a site is, and
       that is now what the unclaimed screen asks, in the only situation where
       the question arises.
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-10T03:38:10Z
     body: >-
       Answered by ADR 0001 §7 (2026-09-09). The rule keeps its job, and it is a

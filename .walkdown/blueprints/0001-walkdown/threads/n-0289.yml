@@ -8,8 +8,7 @@ status: addressed
 body: Looks good, but let's use bullet points to show the two different
   scenarios instead of the emdash.
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-14T19:07:49Z
     body: 'The em-dash went with the ADR 0004 pass (PR #9): the statement is two
       sentences now, one per scenario - "A rule with no build evidence yet

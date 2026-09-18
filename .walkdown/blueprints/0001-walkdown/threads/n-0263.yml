@@ -1,7 +1,6 @@
 id: n-0263
 kind: note
-author: topher
-via: agent
+author: agent
 created: 2026-09-09T13:36:17.293Z
 anchor:
   rule: panel.start.open-a-folder
@@ -34,8 +33,7 @@ body: >-
   ordinary; today one blueprint per server makes the two directories coincide,
   which is why nobody has noticed.
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-09T13:42:29Z
     body: >-
       Fixed in lib/serve.js: the folder the payload names is now the place whose

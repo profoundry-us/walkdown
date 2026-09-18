@@ -1,12 +1,17 @@
 id: n-0095
 kind: note
 author: Topher Fangio
+via: agent
 created: 2026-08-27T00:01:06Z
 anchor:
   screen: review
   element: panel.tabs
 status: addressed
-body: 'Idea, not yet fleshed out: a storyboard view of the screens - small
+body: Actually, now that I think about it; I eventually want a storyboard view
+  of the screens that maybe has small / compressed screenshots of each one so
+  you can kinda see an overview. Not sure where to keep this idea since it's not
+  fleshed out yet; maybe just a new thread for now.
+added: 'Idea, not yet fleshed out: a storyboard view of the screens - small
   compressed screenshots laid out so you can take in the whole product at a
   glance and see how the screens relate, rather than reading a list of ids. That
   is a different thing from the current Screens tab, which answers "which screen
@@ -23,8 +28,7 @@ replies:
       view no longer has to displace anything to exist; the strip has three tabs
       and the room this idea needed is not the constraint any more. Left open —
       the idea itself is still unfleshed.'
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-17T15:10:02Z
     body: "Nothing built - this is your parked idea, and it is not yet specific
       enough to build from. Recording where it stands so it stops reading as

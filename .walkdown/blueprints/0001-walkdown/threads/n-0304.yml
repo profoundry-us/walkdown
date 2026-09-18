@@ -7,7 +7,7 @@ created: 2026-09-18T04:02:21.398Z
 anchor:
   rule: threads.lifecycle.acts-for-a-person
   screen: thread-panel
-status: addressed
+status: verified
 body: I think you have way too many instances of "topher via agent". In general,
   if I type something, it should still appear as me (and my avatar) even if I
   said it in this chat instead of within Walkdown. I think the "via agent" is ok
@@ -28,3 +28,4 @@ replies:
     body: "Addressed by 84c1a05: attribution follows the words. Look at this thread
       on its own screen - the opening message is yours, marked; the box under it
       is mine; this reply is the robot. Done here records verified."
+verified_by: topher

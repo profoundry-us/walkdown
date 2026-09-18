@@ -33,8 +33,7 @@ body: >-
   the handle beside the name in the strip.
 reason: request
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-17T15:10:03Z
     body: "The build side is done and unchanged since: two Settings rows
       (settings.actor for the username, settings.display-name for the full name)

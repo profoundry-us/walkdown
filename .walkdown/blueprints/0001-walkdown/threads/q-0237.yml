@@ -7,7 +7,11 @@ anchor:
   rule: panel.walkdown.one-control-owns-the-sitting
   screen: review
 status: open
-body: >-
+body: We need a way to skip judging a rule. I'm trying to do
+  `panel.start.choose-a-blueprint` but I can't see the screen because of that
+  broken connect button. I can click the "next rule" arrow to go past it, but
+  when I pass the next rule, I jump back to this one.
+added: >-
   There is no way to skip a rule during a sitting, and the pass-advance actively
   fights you if you try.
 

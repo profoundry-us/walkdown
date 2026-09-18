@@ -8,6 +8,19 @@ anchor:
   screen: unclaimed-page
 status: open
 body: >-
+  "Nothing claims the page, but you've picked a blueprint on this site before."
+  - I don't like this state. If we "pick" a blueprint for a site, that action
+  should claim it. The "remembers" should be the claiming so we only have a
+  single way to "remember" things.
+
+
+  "Nothing claims the page, and you've never picked one here." - I guess this is
+  where I expected the "Pick a Blueprint" page to appear. Can we show the
+  blueprints and let you click one to claim it for that URL?
+
+
+  Yes, the first one - open the question and draft the proposal
+added: >-
   Design request: the blueprint list on this screen should CLAIM, not merely
   open.
 
@@ -51,8 +64,7 @@ body: >-
   ownership.writes.spec-never-implementation currently forbids - so this screen
   cannot be built until that question is settled, whichever way.
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-09T15:33:02Z
     body: "One omission worth naming, since it is a whole block gone rather than a
       rewording: the promoted screen's 'To review this page' paragraph - add the
@@ -61,8 +73,7 @@ replies:
       by hand beside a button that does it reads as two competing offers. If you
       would rather it stayed as the manual road for people who want to write it
       themselves, it is one paragraph and I have no argument against it."
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-10T03:38:52Z
     body: >-
       Superseded by ADR 0001 (2026-09-09). The screen this asks design to change

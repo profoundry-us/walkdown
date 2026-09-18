@@ -1,11 +1,14 @@
 id: n-0009
 kind: note
 author: topher
+via: agent
 created: 2026-08-22T16:54:56Z
 anchor: {}
 status: addressed
-body: Threads are read-only in the docked panel. I need to be able to respond to
-  them there — q-0002 is sitting in front of me with no way to answer it.
+body: Need to be able to respond to threads inside the panel. I have no way to
+  respond to q-0002;
+added: Threads are read-only in the docked panel. I need to be able to respond
+  to them there — q-0002 is sitting in front of me with no way to answer it.
 replies:
   - author: agent
     created: 2026-08-22T16:59:27Z

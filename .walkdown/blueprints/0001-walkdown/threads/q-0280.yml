@@ -1,7 +1,6 @@
 id: q-0280
 kind: question
-author: topher
-via: agent
+author: agent
 created: 2026-09-11T21:14:54.351Z
 anchor:
   rule: locations.answer.registry-is-the-only-door

@@ -1,11 +1,40 @@
 id: q-0019
 kind: question
 author: topher
+via: agent
 created: 2026-08-24T02:25:00Z
 anchor:
   rule: panel.start.choose-a-blueprint
 status: open
-body: "Five decisions from designing the authoring flow, recorded together
+body: >-
+  Dropping pins on a brand new site / prototype is definitely the right
+  approach, so we should plan for that to be the primary starting use-case.
+  Therefore, I think it's fine to have Walkdown create a new blueprint so long
+  as it's still only letting you write to the threads / runs. The thing we want
+  to prevent is having the extension write any actual tests / code or things
+  that we expect the agent to be doing. But if we don't have a PRD to import, we
+  very well may be starting from a blank slate / prototype and we may want the
+  nice UI to actually enter the starting info like prototype URL and URL under
+  test (defaulted to the current url). Actually,  for a small app / feature, the
+  flow is likely to be: "start with the prototype URL, talk through all of the
+  rules / screens with product and enter them into the UI as threads / pins that
+  the agent then groups / categorizes / splits as it sees fit.
+
+
+  One thing: does `walkdown init` create the blueprints, or just ready the repo
+  to be able to work / serve? I'm thinking we may want a `walkdown import
+  `command that creates a new blueprint (or updates an existing one).
+
+
+  Last thought: we probably want to build out some Claude skills so that it
+  knows better how to work with walkdown since most users of this tool will be
+  using it on their own repos and their agents won't have all of the knowledge
+  of how things are supposed to work that we do. And / or an MCP server that
+  helps it interact as well.
+
+
+  Give me your thoughts on all of this.
+added: "Five decisions from designing the authoring flow, recorded together
   because they interlock. (1) Naming: walkdown new <path> creates an empty
   blueprint; walkdown extract merges a source into one, as docs/00-vision.md
   already specifies. Init stays the one-per-repo scaffold it is. (2) Write
@@ -20,8 +49,29 @@ body: "Five decisions from designing the authoring flow, recorded together
   this."
 replies:
   - author: topher
+    via: agent
     created: 2026-08-24T02:25:14Z
-    body: "Two of these are settled. Routing: a page belongs to exactly one
+    body: >-
+      I think we should be able to scope a page to a single blueprint. I doubt
+      we'll want to have the same page covered by multiple blueprints, so let's
+      assume a page can only belong to one and make that a hard constraint.
+
+
+      On the prototypes: since we're building the prototypes, we can plan to
+      have it already include many anchors so that the pins work natively. Also,
+      right now the URLs that Claude Design generates for prototypes don't work
+      well because they have a wrapper that prevents the history navigation and
+      deep linking. So our current workaround is to share an HTML or zip file
+      with the contents and have Claude spin up a sever to host them at a URL.
+      This is the URL I'm thinking of for the prototypes, but if we can ever
+      work around the Claude Design issue, just pointing to a real URL would be
+      nice.
+
+
+      We might be able to have Claude Design output the screens as well into the
+      prototype if that's available / helpful. Especially if we can give it a
+      specification to follow that we know works with walkdown.
+    added: "Two of these are settled. Routing: a page belongs to exactly one
       blueprint — a hard constraint, not a preference. The same page covered by
       two blueprints is a case we do not want, so the picker never has to
       disambiguate and a pin never has to ask which project it belongs to.
@@ -68,4 +118,3 @@ replies:
       screens.ownership.one-claimant and screens.ownership.routes-by-page.
       Verified the browser check has teeth by removing the routing and watching
       it fail before recording it."
-

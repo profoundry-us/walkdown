@@ -1,7 +1,6 @@
 id: n-0191
 kind: note
-author: topher
-via: agent
+author: agent
 created: 2026-09-04T21:16:44.346Z
 anchor:
   rule: status.derived.verdict-belongs-to-a-place
@@ -46,8 +45,7 @@ body: >-
   the rule that owns which runs fill a target's cells; it may belong on a
   lint-side rule instead.
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-05T02:32:04Z
     body: >-
       Addressed in 568e55c and da05b6e.

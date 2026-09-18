@@ -32,8 +32,7 @@ replies:
       use it as the application and update our fake application so we can see
       how the prototype differs from the "real" app (which is actually fake but
       based on the prototype).
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-17T15:10:03Z
     body: "Your answer here became the stand-in: the prototype is untouched and the
       panel is judged against a copy of it that the build keeps current (rule

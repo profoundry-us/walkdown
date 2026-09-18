@@ -1,7 +1,6 @@
 id: q-0250
 kind: question
-author: topher
-via: agent
+author: agent
 created: 2026-09-08T19:37:32.844Z
 anchor:
   rule: panel.walkdown.draft-on-disk

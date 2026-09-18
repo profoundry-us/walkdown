@@ -1,7 +1,6 @@
 id: q-0254
 kind: question
-author: topher
-via: agent
+author: agent
 created: 2026-09-08T20:25:07.665Z
 anchor:
   rule: screens.surfaces.stand-in-app

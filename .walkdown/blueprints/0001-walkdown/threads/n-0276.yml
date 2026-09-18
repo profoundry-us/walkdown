@@ -8,6 +8,14 @@ anchor:
   screen: project-modal
 status: addressed
 body: >-
+  One last thing: this is what I see. I don't know what dimming you're talking
+  about, I don't think that's working properly. Perhaps that would be helpful
+  here? I might not have noticed the panel in the background if it was blurred /
+  dimmed behind the modal?
+
+
+  Its own thread.
+added: >-
   The modal's dim is not dim: the scrim paints nothing at all, because the theme
   variables are out of scope where it renders.
 
@@ -75,6 +83,12 @@ replies:
     via: agent
     created: 2026-09-11T02:40:00Z
     body: >-
+      Let's get rid of the dim since it seems to be causing issues, the blur
+      should be sufficient.
+
+
+      Yes, reword `panel.start.which-project`.
+    added: >-
       Fixed by removing the dim rather than repairing it. Topher's call - the
       blur is sufficient, and a dim over a blur buys legibility the blur already
       bought.
@@ -120,8 +134,7 @@ replies:
       draws bg-base-300/70, so the design and the build now disagree on the
       backdrop. Filed separately as a design request - prototype/ is design's to
       change.
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-15T02:37:11Z
     body: "Marking what the reply above already says: the scrim was removed in
       favour of the blur (src/panel/projects.js), measured then and unchanged

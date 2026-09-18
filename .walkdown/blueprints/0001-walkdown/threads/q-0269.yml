@@ -7,6 +7,20 @@ anchor:
   rule: screens.ownership.one-claimant
 status: open
 body: >-
+  So this definitely introduces an issue: I fully expect a single base_url to
+  host multiple blueprints at various paths in that URL (this is the whole
+  monolith repo packs structure we already talked about).
+
+
+  It is even possible that we may have multiple blueprints that claim the same
+  path (we might be testing different functionality of the homepage and want
+  different blueprints).
+
+
+  I'm honestly at a bit of a loss on how we should structure things with this in
+  mind; I feel like we went down a bit of a rabbit hole here and we need to go
+  back and rethink the architecture a bit.
+added: >-
   Reopening the constraint this rule enforces: may a page belong to more than
   one blueprint?
 
@@ -75,7 +89,8 @@ replies:
   - author: topher
     via: agent
     created: 2026-09-09T17:04:11Z
-    body: >-
+    body: Yes, work up the reframe
+    added: >-
       Worked up as docs/12-page-ownership.md - the argument in full, so it can
       be argued with rather than agreed to.
 
@@ -115,8 +130,7 @@ replies:
       Four questions left open at the end, the first being whether the answer is
       yes at all. If it is no, the document collapses to a paragraph and the
       case is handled by splitting screens instead.
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-10T03:38:10Z
     body: >-
       Answered by ADR 0001 (2026-09-09): yes, a page may be claimed by several

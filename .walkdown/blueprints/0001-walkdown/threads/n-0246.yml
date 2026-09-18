@@ -7,6 +7,12 @@ anchor:
   rule: status.acceptance.signoff-defaults-to-eng
 status: addressed
 body: >-
+  Why does `status.acceptance.signoff-defaults-to-eng` have no given / when /
+  then?
+
+
+  File both as notes
+added: >-
   Eleven rules carry a statement and nothing else — no given, no when, no then.
   Raised by Topher on 2026-09-07, reading this one.
 
@@ -51,7 +57,10 @@ replies:
   - author: topher
     via: agent
     created: 2026-09-08T18:05:51Z
-    body: Steps are required of every rule now — lint errors on a rule without them
+    body: All rules should have steps; they are the thing that the agent builds the
+      unit tests / checks from. So, our linter should error for any rules that
+      don't have steps. Let's build that first.
+    added: Steps are required of every rule now — lint errors on a rule without them
       (ownership.authoring.steps-are-required), and the blueprint is clean at
       138 rules, so all eleven of these carry given/when/then today. The
       convention question this note put to a person has been settled by that

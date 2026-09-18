@@ -1,7 +1,6 @@
 id: n-0217
 kind: note
-author: topher
-via: agent
+author: agent
 created: 2026-09-06T01:55:12.496Z
 anchor:
   rule: locations.travel.judged-against-a-spec
@@ -53,15 +52,13 @@ body: >-
 
   Evidence: runs/evidence/2026-09-06T01-45-45Z/probe-log.txt (sections E and F).
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-06T01:55:48Z
     body: "Correction to one line above: the shell ate a backtick pair when this
       note was filed. The comparison line should read — walkdown judge
       nope.nope.nope prints 'No rule \"nope.nope.nope\". walkdown status lists
       every rule.' and stops, with no stack."
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-06T02:02:59Z
     body: >-
       Delivery fixed in 6f64caa; one half left open on purpose.
@@ -100,8 +97,7 @@ replies:
       not an errno', now asserts the Refused type, the relative name and the
       blueprint path, and covers the shut directory through loadBlueprint. Both
       return early under root rather than passing falsely.
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-17T15:10:03Z
     body: "Addressed as far as the build goes: the permission case is delivered as a
       Refused sentence, blueprint-relative, from judge, sweep, every recorded

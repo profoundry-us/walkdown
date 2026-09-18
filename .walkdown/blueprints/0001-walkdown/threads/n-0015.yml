@@ -1,11 +1,29 @@
 id: n-0015
 kind: note
 author: topher
+via: agent
 created: 2026-08-23T23:33:27Z
 anchor:
   rule: panel.dock.no-framing
 status: addressed
-body: "Make the panel feel like it really wraps the page: margin, drop shadow
+body: >-
+  But first, let's do one small change to the panel view: Make it feel like it
+  really "wraps" the page.
+
+
+  1. Add a small bit of margin around the wrapped page and give it a drop shadow
+  (using Tailwind) and rounded corners so it feels like it "sits above" our
+  walkdown controls.
+
+  2. Add a small header section at the top across the entire screen where we can
+  add some additional tools / buttons (I'm thinking the project switcher, pin
+  mode, and some "Prototype / App" joined buttons (like our current "Prototype /
+  Split / App" but without the split
+
+  3. Let's reskin our walkdown theme to look more like a blueprint so it stands
+  out and is distinct from any app that we will be testing (make sure to use the
+  standard way of selecting theme colors that DaisyUI supports)
+added: "Make the panel feel like it really wraps the page: margin, drop shadow
   and rounded corners so the app sits above the walkdown controls; a header bar
   across the top for session-level tools (project switcher, pin mode,
   Prototype/App); and reskin walkdown so it is visibly not the app under test."

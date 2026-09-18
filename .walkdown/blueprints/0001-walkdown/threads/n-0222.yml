@@ -21,8 +21,7 @@ body: Clicking the App or Prototype buttons should modify the fade slider to the
   proper setting (all prototype or all app). Right now, it stays wherever you
   put it even though only one is fully visible.
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-08T18:05:50Z
     body: "Fixed. The fade slider's value went in as a value= attribute, and a range
       input is dirty once dragged, so re-rendering never moved the thumb:

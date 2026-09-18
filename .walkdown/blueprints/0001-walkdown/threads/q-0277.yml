@@ -8,6 +8,34 @@ anchor:
   screen: project-modal
 status: open
 body: >-
+  And let's do this:
+
+
+  1. If the user opens a page, and clicks the Walkdown extension, and we don't
+  know which project claims it, then:
+     1. The app-frame should load and show the requested page
+     2. The panel should load but have no tabs and have a simple "Please select a project..." message centered vertically and horizontally
+     3. We should then load the Project modal above that and use the `bg-blur` Tailwind class to make sure the app-frame and the panel are both blurred out, and we can add the dimmer if we think that helps too
+  2. If the user visits the walkdown server URL directly, then:
+     1. We load only the desk ruling background (no app frame, no panel, no top actions)
+     2. We load the project selector modal with the same bg-blur / dimmer as the other one
+  3. If the user is in a loaded project / blueprint and selects the project
+  switcher, then:
+     1. We show the app-frame as-is
+     2. We show the panel as-is
+     3. We load the project selector modal with the same bg-blur / dimmer as the other cases
+
+
+  Does this make sense? Did we miss anything? This is essentially saying it's
+  two pages, but it uses the same modal component (and bg component)?
+
+
+  Let's get rid of the dim since it seems to be causing issues, the blur should
+  be sufficient.
+
+
+  Yes, reword `panel.start.which-project`.
+added: >-
   Design request - the drawing and the build now disagree about this screen in
   three ways, and none of them is a build defect.
 

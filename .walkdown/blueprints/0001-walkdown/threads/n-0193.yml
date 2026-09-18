@@ -1,7 +1,6 @@
 id: n-0193
 kind: note
-author: topher
-via: agent
+author: agent
 created: 2026-09-05T02:23:06.062Z
 anchor:
   rule: locations.travel.evidence-by-key
@@ -59,8 +58,7 @@ body: >-
   is reached; the defect is in interim tooling (tools/scratch.mjs) rather than
   in shipped behaviour, so it may want to live somewhere else.
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-05T02:31:30Z
     body: >-
       Fixed in 214a1da. `tools/scratch.mjs` now makes the copy's `evidence/` a

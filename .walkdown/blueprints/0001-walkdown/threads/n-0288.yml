@@ -6,7 +6,14 @@ created: 2026-09-13T22:51:35.309Z
 anchor:
   rule: threads.conversation.one-stream
 status: addressed
-body: "Markdown in thread bodies - investigated 2026-09-13, held. What the 664
+body: >-
+  Investigate what it would take to add markdown support to the threads and to
+  go back and update all existing threads to add formatting that makes them
+  easier to read.
+
+
+  Hold the renderer, but use a vendored library so we don’t rebuild it.
+added: "Markdown in thread bodies - investigated 2026-09-13, held. What the 664
   messages use today: paragraphs (248), backticks (162), dash and numbered lists
   (52), thread refs (176), rule ids (241), file paths (238), evidence keys
   (123); no headings, bold or italic. All of it renders through one function,
@@ -22,7 +29,9 @@ replies:
   - author: topher
     via: agent
     created: 2026-09-13T23:00:23Z
-    body: 'Built (Topher: "build the renderer" - the hold was autocorrect).
+    body: Sorry, that was supposed to say “build the renderer”; autocorrect screwed
+      me.
+    added: 'Built (Topher: "build the renderer" - the hold was autocorrect).
       vendor/markdown.js bundles marked + DOMPurify from
       src/vendor-entries/markdown.js (rollup.markdown.mjs, build:markdown /
       check:markdown, Highball check, licences and README beside lit and yaml).

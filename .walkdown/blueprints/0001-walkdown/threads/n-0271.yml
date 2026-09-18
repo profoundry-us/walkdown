@@ -7,7 +7,11 @@ anchor:
   rule: panel.start.which-project
   screen: project-modal
 status: addressed
-body: >-
+body: The ycombinator and localhost:4700 ones should show the exact same modal.
+  But I think the "Make this page reviewable" should be at the top since you
+  might have lots of projects that would push it down and out of view. The "new
+  / import" case is small / well-defined and should live in the same place.
+added: >-
   Design request: the project modal has no drawing.
 
 
@@ -52,7 +56,9 @@ replies:
   - author: topher
     via: agent
     created: 2026-09-10T13:05:21Z
-    body: >-
+    body: "n-0271: Promote the design to prototype so we can see it in a real
+      walkdown"
+    added: >-
       Promoted, at Topher's word (n-0271: "promote the design to prototype so we
       can see it in a real walkdown").
 
@@ -73,8 +79,7 @@ replies:
       two questions in it are still open — what the modal does on a narrow
       window, and whether the project rows want a blueprint count once a project
       holds twenty. Promotion answered neither.
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-17T15:10:04Z
     body: "Addressed: the modal has a drawing now
       (prototype/screens/project-modal.html, promoted at your word) and

@@ -1,7 +1,6 @@
 id: n-0214
 kind: note
-author: topher
-via: agent
+author: agent
 created: 2026-09-06T01:31:45.104Z
 anchor:
   rule: locations.default.one-home-per-blueprint
@@ -27,8 +26,7 @@ body: "`walkdown init` inside a repository that already has one starts a second
   and anchored here rather than there because it is about which home answers,
   not about what the tree gets."
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-06T13:22:27Z
     body: >-
       Fixed in the commit above. init now prints, when it is about to mint a

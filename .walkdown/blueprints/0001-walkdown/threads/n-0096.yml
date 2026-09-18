@@ -1,12 +1,15 @@
 id: n-0096
 kind: note
 author: Topher Fangio
+via: agent
 created: 2026-08-27T00:15:09Z
 anchor:
   rule: embed.threads.note-first
   screen: thread-panel
 status: open
-body: >-
+body: Also, we probably need a way to attach screenshots to a pin or thread;
+  let's add that as a new thread somewhere relevant
+added: >-
   A pin should be able to carry a screenshot. Some feedback is a picture: this
   overlaps awkwardly, this is cut off, this is the wrong shade — and describing
   it in a sentence is slower and less exact than showing it. n-0072 is the case
@@ -26,20 +29,17 @@ body: >-
   stream — a thumbnail that opens, most likely. Not designed.
 reason: feedback
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-17T15:10:03Z
     body: "Not built, and reclassified as a request rather than feedback so a pass
       on embed.threads.note-first cannot close it silently while nothing exists.
       The three open questions in it are design's and still open: where the
       bytes live (runs/evidence/ is the only precedent), reference versus embed,
       and what the stream shows. Yours to waive or to draw."
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-17T15:10:03Z
     body: request
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-17T15:10:44Z
     body: "Reopened on purpose: this is filed as feedback, and feedback closes on
       your next pass of embed.threads.note-first - which would mark

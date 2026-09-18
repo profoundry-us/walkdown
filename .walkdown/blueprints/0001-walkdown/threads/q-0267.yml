@@ -7,6 +7,16 @@ anchor:
   rule: ownership.writes.spec-never-implementation
 status: open
 body: >-
+  "Nothing claims the page, but you've picked a blueprint on this site before."
+  - I don't like this state. If we "pick" a blueprint for a site, that action
+  should claim it. The "remembers" should be the claiming so we only have a
+  single way to "remember" things.
+
+
+  "Nothing claims the page, and you've never picked one here." - I guess this is
+  where I expected the "Pick a Blueprint" page to appear. Can we show the
+  blueprints and let you click one to claim it for that URL?
+added: >-
   May the browser write a CLAIM? Topher has asked for the behaviour; this rule
   is what stands in front of it.
 
@@ -62,8 +72,7 @@ body: >-
   on that screen is now the place a choice is made, which bears on whether the
   choose-blueprint screen still has a job.
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-10T03:38:52Z
     body: >-
       Parked by ADR 0001 (2026-09-09), and the rule this thread stands in front
@@ -81,8 +90,7 @@ replies:
       If claiming from the panel comes back, it comes back as a new question
       with a new reason. Nothing here was decided against; it stopped being
       asked.
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-11T21:24:26Z
     body: 'From the agent re-judge of panel.start.choose-a-blueprint (run
       2026-09-11T21-12-54Z, pass): the prototype screen choose-blueprint.html

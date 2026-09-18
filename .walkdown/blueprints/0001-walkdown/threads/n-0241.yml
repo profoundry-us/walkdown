@@ -9,6 +9,13 @@ anchor:
   element: detail.screenshots-modal
 status: addressed
 body: >-
+  Separate issue, and we should add a note, some rules have text files in their
+  "screenshots" area that don't render. We should support rendering the text
+  file instead of failing to render it as an image.
+
+
+  Example: `status.derived.latest-wins`
+added: >-
   Evidence that is not a picture does not render. The screenshots modal builds
   an <img> for every attached path (src/panel/shots.js, the figure it maps each
   path into), so a run that attached a transcript gets a broken image and a
@@ -38,8 +45,7 @@ body: >-
   them is a spec edit as well as a code one — which is why this note stops here
   rather than assuming it.
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-08T17:35:35Z
     body: >-
       Fixed. The modal renders by what the file is: a picture in an <img>,

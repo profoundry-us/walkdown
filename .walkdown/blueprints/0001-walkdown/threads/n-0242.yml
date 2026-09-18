@@ -8,7 +8,8 @@ anchor:
   screen: rule-detail
   element: detail.screenshots
 status: addressed
-body: >-
+body: File a note to rename it to Evidence;
+added: >-
   Rename Screenshots to Evidence, everywhere the word appears. Topher's call,
   2026-09-07, taken alongside n-0241 (a transcript rendering as a broken image):
   what a run attaches has not been only pictures for some time — the agent tier
@@ -47,8 +48,7 @@ body: >-
   Sequenced after n-0241 rather than before it: rendering by file type is the
   fix a reader feels; this is the word for what they are then looking at.
 replies:
-  - author: topher
-    via: agent
+  - author: agent
     created: 2026-09-08T17:35:35Z
     body: >-
       Done, all five places. The control reads "• Evidence — open N", its title
