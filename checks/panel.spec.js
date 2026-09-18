@@ -2952,6 +2952,23 @@ test('a relayed message keeps the person\u2019s face and shows the agent\u2019s 
   await expect(added).toContainText('Seen at 375');
   await expect(added.locator('.wd-added-by')).toHaveText(/agent added/i);
   expect(await added.evaluate((el) => getComputedStyle(el).borderStyle)).toBe('dashed');
+  // Collapsed to start - two lines of peek, the whole of it on a press, and
+  // back again - so a long addition costs the conversation two lines.
+  await expect(added).not.toHaveAttribute('open', /.*/);
+  await expect(added.locator('.wd-added-peek')).toBeVisible();
+  await expect(added.locator('.wd-added-text')).toBeHidden();
+  expect(await added.locator('.wd-added-peek').evaluate((el) => getComputedStyle(el).webkitLineClamp)).toBe('2');
+  // A caret in the corner points down while closed and up once open.
+  const caret = added.locator('.wd-added-caret');
+  await expect(caret).toBeVisible();
+  expect(await caret.evaluate((el) => getComputedStyle(el).transform)).toBe('none');
+  await added.locator('summary').click();
+  await expect(added).toHaveAttribute('open', /.*/);
+  await expect(caret).toHaveCSS('transform', 'matrix(-1, 0, 0, -1, 0, 0)');
+  await expect(added.locator('.wd-added-text')).toBeVisible();
+  await expect(added.locator('.wd-added-peek')).toBeHidden();
+  await added.locator('summary').click();
+  await expect(added.locator('.wd-added-text')).toBeHidden();
   // The list draws the same message the same way.
   await page.getByTestId('thread.close').click();
   await page.getByTestId('panel.tabs').getByText(/Threads/).click();
