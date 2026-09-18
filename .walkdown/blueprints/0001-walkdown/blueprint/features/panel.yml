@@ -1201,7 +1201,7 @@ stories:
 
       - id: panel.rules.talk-without-a-sitting
         origin: walkdown
-        statement: You can start a conversation on any rule at any time, not only during a walkdown. The note it files carries the name the panel already shows as yours, and no other.
+        statement: You can say something on any rule at any time, not only during a walkdown. It lands in the rule's conversation under the name the panel already shows as yours, and no other.
         because: A rule read on an ordinary afternoon deserves the same record as one judged in a sitting.
         signoff: [eng, product]
         screens: [rule-detail]
@@ -1209,14 +1209,14 @@ stories:
           given:
             - A rule open with no walkdown in progress
           when:
-            - Writing in the rule's own composer and starting a thread
+            - Writing in the rule's own composer and pressing Reply
           then:
-            - A note is filed against that rule and appears in its conversations without a reload
+            - With nothing live on the rule, a note is filed against it and appears in its conversation without a reload
+            - With a live note on the rule, the words land there as a reply
             - It is attributed to whoever the panel is recording as, shown above the composer before it is used
             - An empty identity refuses the filing and offers the place to set one, rather than letting the server choose a name
-            - Starting a thread records no verdict and begins no sitting
-            - The composer asks what the note is - feedback, a decision, or a request - and files it as that
-          statement_hash: sha256:952ad4a6d7cf
+            - Replying records no verdict and begins no sitting
+          statement_hash: sha256:1ec250ee0904
           reworded:
             - hash: sha256:d66e49c63ed9
               at: 2026-09-13
@@ -1231,6 +1231,47 @@ stories:
               at: 2026-09-14T04:24:19Z
               why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
 
+      - id: panel.rules.awaiting-you-first
+        origin: walkdown
+        created_at: 2026-09-18
+        statement: The rules list opens with a group of every rule waiting on you, in the order a walkdown takes them, above the rules grouped by screen. Each row says in a word what kind of ask it is.
+        because: The walk is the one queue, and it belongs at the top of the tab that walks it.
+        history: What waited on a person was scattered between the Rules tab's marks and a Threads tab of 36, and Topher closed two threads from the wrong tab looking for his queue (2026-09-18, ADR 0006).
+        verify: [checks]
+        signoff: [eng, product, design]
+        screens: [review]
+        steps:
+          given:
+            - A blueprint with rules owing a signature, a walk, a claimed fix and an answer, and rules owing nothing
+          when:
+            - Open the Rules tab and read anchor `panel.awaiting-you` at the top of anchor `panel.rules-list`
+          then:
+            - The group lists exactly the rules the tab's badge counts, in the order Continue walkdown steps through them
+            - Each row's owed column says which ask it is - asks for a question to answer, fixed for a claimed fix to judge, sign for a wording, walk for a build
+            - The same rule is still drawn under its screen below, so the list of rules stays the list of rules
+            - The group is absent while a search is typed, and absent when nothing waits on you
+          statement_hash: sha256:ebeb9ed558a9
+      - id: panel.rules.one-conversation
+        origin: walkdown
+        created_at: 2026-09-18
+        statement: A rule draws every thread ever filed on it as one conversation, in the order things were said, with one box under it for a reply, a waive's reason or a verdict's why.
+        because: A fail's why, the agent's fix and the pass that accepted it are one exchange, and it should be read in one place.
+        history: Threads were cards under the rule with their own Done, and the feedback box sat above everything; ADR 0006 made the rule the unit of conversation (2026-09-18).
+        verify: [checks]
+        signoff: [eng, product, design]
+        screens: [rule-detail]
+        steps:
+          given:
+            - A rule carrying several threads, some ended, one live
+          when:
+            - Open the rule and read anchor `detail.conversation`
+          then:
+            - Anchor `detail.stream` holds every message of every thread on the rule, oldest first, and the message that opened each thread carries a tag naming the thread, what it is and its status
+            - The tag opens the thread's own screen, which is still where a pin's sketch and a question's Answer live
+            - Anchor `detail.turn` above the box says whose move the rule is and what that party does next, in the thread screen's own colours
+            - Anchor `detail.feedback` is the one box, and anchor `detail.verdict` the one row - Waive alone at the far left when a note is live, Reply, and during a walkdown the verdict pair last
+            - Nothing under the rule repeats which rule a thread is on
+          statement_hash: sha256:10d4f193ff56
   - id: panel.threads
     title: Feedback is answered where it is read
     statement: As a reviewer, I can reply to a thread and move its lifecycle on from the panel, without leaving the app I am reviewing.
@@ -1263,13 +1304,14 @@ stories:
         screens: [rule-detail]
         steps:
           given:
-            - A thread the panel offers Verify or Waive on
+            - A thread the panel offers Verify or Waive on, and a rule whose composer offers Waive
           when:
             - Take that action with no name, or with the name agent
           then:
             - Nothing is recorded and the panel asks for a person's name
             - Waiving or reopening without a reason is refused until one is written
-          statement_hash: sha256:2b8daa31373b
+            - Waive on a rule's composer is the same act on the rule's live note, and refuses the same two ways
+          statement_hash: sha256:bed712993db3
           reworded:
             - hash: sha256:7c4e1e2d1562
               at: 2026-09-13
@@ -1309,7 +1351,7 @@ stories:
 
       - id: panel.threads.own-view
         origin: thread:n-0094
-        statement: The panel has a threads view of its own, not only threads shown under a rule. It lists every thread on the blueprint, filtered to live threads, threads waiting on you, or all of them, closed ones included.
+        statement: The panel has a threads view of its own. Its live filters list the threads the walk cannot reach - on no rule, or on a retired one - and All lists every thread on the blueprint, rule conversations and closed ones included.
         verify: [checks]
         signoff: [eng, product]
         screens: [review, thread-panel]
@@ -1319,13 +1361,14 @@ stories:
           when:
             - Open the Threads tab and read anchor `panel.threads-list`
           then:
-            - Every thread is listed with what it is anchored to, including one anchored to no rule at all
+            - Every thread listed says what it is anchored to, including one anchored to no rule at all
+            - A live thread on a rule the walk can reach is not under Active or Awaiting you - it is the rule's conversation, read under the rule - and is under All
             - Anchor `panel.thread-filter` asks the three questions the command line asks - active, awaiting you, all - and answers them the same way, because a second definition of "active" is a second thing to get wrong
             - The filter stays put at the top of the list however far the list is scrolled - it is a fixed head above what scrolls rather than the first thing to scroll away
             - Asking for all of them reaches a thread that has ended, which nothing else in the panel can do
             - Opening one shows the conversation beside the list, and the way back from it is the list of threads rather than a rule nobody opened
             - How many threads are waiting on a person is carried on the tab itself, so it is legible from whichever tab is open
-          statement_hash: sha256:33d5dea89fc2
+          statement_hash: sha256:c7308a0fa227
           reworded:
             - hash: sha256:faade3b887d1
               at: 2026-09-13
@@ -1487,7 +1530,8 @@ stories:
 
       - id: panel.walkdown.verdicts-at-hand
         origin: walkdown
-        statement: While a walkdown is running, pass and fail sit on screen without scrolling, under the selected rule's statement. Only the feedback box lies between the statement and them.
+        statement: While a walkdown is running, pass and fail sit at the foot of the selected rule, after its conversation, with the one box directly above them and Waive apart at the far left.
+        history: Sat under the statement, above everything, until ADR 0006 made the conversation the thing being judged and put the verdict after it (2026-09-18).
         signoff: [eng, product]
         screens: [rule-detail]
         steps:
@@ -1496,10 +1540,10 @@ stories:
           when:
             - Reading anchor `detail.verdict` on screen `rule-detail`
           then:
-            - Both verdict buttons are visible without scrolling any pane
-            - The only thing between the statement and the buttons is anchor `detail.feedback`, which panel.walkdown.note-with-any-verdict puts there
+            - The verdict buttons are the last of the row, after Reply; Waive stands alone at its far left
+            - The only thing between the conversation and the buttons is anchor `detail.feedback`, which panel.walkdown.note-with-any-verdict puts there
             - The chosen verdict stays visibly chosen when the rule is revisited
-          statement_hash: sha256:81e423350563
+          statement_hash: sha256:2bf91b66cee0
           reworded:
             - hash: sha256:d67304c4aae1
               at: 2026-09-13
@@ -1539,24 +1583,25 @@ stories:
       - id: panel.walkdown.pass-verifies-feedback
         origin: walkdown
         created_at: 2026-09-14
-        statement: During a walkdown, the rule detail lists the answered notes of yours that a Pass on the rule will verify, above the verdict buttons. When the session is finished, the message that names the run also names every thread it verified.
+        statement: During a walkdown, the line above the rule's composer says how many notes a Pass on the rule will end. When the session is finished, the message that names the run also names every thread it verified.
         because: An acceptance given in passing is still one you should have seen, before and after.
+        history: Listed only the person's own answered notes by id until ADR 0006 made the pass end every note on the rule (2026-09-18).
         signoff: [eng, product]
         verify: [checks]
         screens: [rule-detail]
         steps:
           given:
-            - A session in progress, on a built rule carrying an answered note of yours and a judge's answered finding
+            - A session in progress, on a built rule carrying an answered note of yours, a request, and a note nobody has answered
           when:
-            - Reading under anchor `detail.feedback`, then passing the rule and finishing
+            - Reading anchor `detail.turn` above anchor `detail.feedback`, then passing the rule and finishing
           then:
-            - Anchor `detail.pass-verifies` lists your note by id with its first line, and not the finding - that was never yours to read
-            - A rule with no answered note of yours shows no such block
+            - The line says your move, and that Pass ends this conversation, with the count of live notes it will end
+            - After Finish, every one of them reads as verified under the signer
             - After Finish, the confirmation names the run and the threads the passes verified
-          statement_hash: sha256:b22e4b1fad97
+          statement_hash: sha256:b8cae5781199
       - id: panel.walkdown.note-with-any-verdict
         origin: thread:n-0050
-        statement: A feedback box sits above the verdict buttons, so you write before you judge. Anything written is filed as a note thread on the rule and linked into the run result; an empty box files nothing.
+        statement: One box sits above the verdict buttons, so you write before you judge. Anything written joins the rule's conversation and is linked into the run result; an empty box files nothing.
         signoff: [eng, product]
         screens: [rule-detail]
         steps:
@@ -1565,11 +1610,12 @@ stories:
           when:
             - Write in anchor `detail.feedback`, then choose either verdict
           then:
-            - A note thread anchored to the rule is filed with the text, under the session's actor
+            - With nothing live on the rule, a note thread anchored to it is filed with the text, under the session's actor
+            - With a live note on the rule, the text lands there as a reply, and a fail or a send-back puts the note back to open so the agent is owed it again
             - The finished run's result for the rule carries the thread id
             - Judging with the box empty files no thread
             - The box sits above anchor `detail.verdict`, so the why is asked for before the verdict
-          statement_hash: sha256:90a2e254463d
+          statement_hash: sha256:7d8fa9eecfc8
           reworded:
             - hash: sha256:f9043305838b
               at: 2026-09-13

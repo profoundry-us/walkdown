@@ -6,7 +6,7 @@ import { html } from '../../vendor/lit.js';
 import { requestRender } from './shell.js';
 import { S } from './state.js';
 import { threadCard } from './thread-pane.js';
-import { screenById, TERMINAL, threadTouched } from './vocab.js';
+import { onWalkableRule, screenById, TERMINAL, threadTouched } from './vocab.js';
 
 /*
  * ---- the Threads tab -------------------------------------------------
@@ -37,7 +37,14 @@ export function threadsMatching(filter) {
     );
     return all.filter((t) => owed.has(t.id));
   }
-  return all.filter((t) => !TERMINAL.includes(t.status));
+  /*
+   * Active is every live thread that is NOT a rule's conversation: a thread
+   * on a rule the walk can reach lives under that rule (ADR 0006 §3), and
+   * listing it here too made the tab a second, longer copy of the walk. What
+   * is left is the rare thread with no rule to walk - a pin on a page, a
+   * question about the blueprint, a note on a retired rule.
+   */
+  return all.filter((t) => !TERMINAL.includes(t.status) && !onWalkableRule(t));
 }
 
 /** Where a thread is anchored, in words, for a list that is not scoped to one rule. */
@@ -81,9 +88,9 @@ export function threadFilterBar() {
       }}>${label}<span class="opacity-60">${counts[id]}</span></button>`;
   return html`<div class="flex shrink-0 justify-center border-b border-base-300 px-3.5 py-2">
     <div class="join" data-testid="panel.thread-filter">
-      ${pick('you', 'Awaiting you', 'A fix claimed and unverified, or a question unanswered — the same queue walkdown status shows')}
-      ${pick('active', 'Active', 'Every thread not yet ended — yours and the agent\'s')}
-      ${pick('all', 'All', 'Every thread ever filed on this blueprint, ended ones included')}
+      ${pick('you', 'Awaiting you', 'A question unanswered, or a fix to verify, on nothing the walk can reach — the same queue walkdown status shows')}
+      ${pick('active', 'Active', 'Every live thread that is not a rule\'s conversation — those live under their rule')}
+      ${pick('all', 'All', 'Every thread ever filed on this blueprint, rule conversations and ended ones included')}
     </div>
   </div>`;
 }
@@ -93,7 +100,7 @@ export function threadsPane() {
     threadTouched(b).localeCompare(threadTouched(a)),
   );
   const EMPTY = {
-    active: html`No live threads. Everything said here has been answered — <b>All</b> has them.`,
+    active: html`No live thread outside a rule. A rule's conversation lives under the rule — <b>All</b> has every thread.`,
     you: html`Nothing is waiting on you.`,
     all: html`No threads yet. Drop a pin on the page, or leave a note on a rule, to start one.`,
   };

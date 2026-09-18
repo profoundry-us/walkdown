@@ -3081,6 +3081,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
           }
           const cont =
             prev &&
+            !m.tag &&
             prev.author === m.author &&
             (prev.via ?? null) === (m.via ?? null) &&
             Math.abs(Date.parse(m.created ?? '') - Date.parse(prev.created ?? '')) < GROUP_MS;
@@ -3102,6 +3103,14 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
              * (n-0147).
              */
             !cont && m.via ? `<span class="wd-via">via ${this.esc(m.via)}</span>` : ''
+          }${
+            /*
+             * Which thread a message belongs to, when the stream is a rule's
+             * whole conversation rather than one thread's (ADR 0006 §1): the
+             * id and what the thread is, on the message that opened it. A
+             * stream of one thread never sets it.
+             */
+            m.tag ? `<span class="wd-tag"${m.thread ? ` data-thread="${this.esc(m.thread)}" title="Open this thread" role="link"` : ''}>${this.esc(m.tag)}</span>` : ''
           }<span
             class="wd-at" title="${this.esc(this.stamp(m.created))}">${
               m.failed ? 'not sent' : m.pending ? 'sending…' : this.esc(this.ago(m.created))
@@ -3463,6 +3472,9 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     /* Quieter than the name and louder than nothing: provenance is a fact
        about the message, not a second author. */
     .wd-via { font-size: 10px; opacity: .55; font-style: italic; }
+    .wd-tag { font-size: 10px; opacity: .55; font-family: ui-monospace, Menlo, monospace; }
+    .wd-tag[data-thread] { cursor: pointer; text-decoration: underline dotted; text-underline-offset: 2px; }
+    .wd-tag[data-thread]:hover { opacity: .9; }
     .wd-at { font-size: 10px; opacity: .45; }
     .wd-msg.cont .wd-at { visibility: hidden; }
     .wd-msg.cont:hover .wd-at { visibility: visible; }
@@ -3761,11 +3773,22 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
   const defaultReason = ({ kind, via = null, author = null } = {}) =>
     kind === 'question' ? null : via || isMachineName(author) ? 'observation' : 'feedback';
 
-  /** Notes a signed pass on their rule closes (ADR 0005 §2, §3). Legacy notes with no reason are feedback: a person looks. */
-  const closesOnVerdict = (t) =>
-    t?.kind === 'note' && ['finding', 'feedback'].includes(t.reason ?? 'feedback');
+  /*
+   * Notes a signed pass on their rule ends (ADR 0006 §2): every one that is
+   * still a task. Under ADR 0005 only a finding and feedback closed this way; a
+   * request waited on its own verify and an observation on the agent, and a
+   * rule Topher had just passed still carried live notes he was asked to go
+   * and press Done on (2026-09-18). A rule's conversation is what the pass
+   * ends. A decision was never open, so there is nothing for a pass to end.
+   * Legacy notes with no reason are feedback.
+   */
+  const closesOnVerdict = (t) => t?.kind === 'note' && (t.reason ?? 'feedback') !== 'decision';
 
-  /** Notes that still wait on a person's own verify - the only ones the verify queue holds (ADR 0005 §6). */
+  /*
+   * Notes that wait on a person's own verify from the thread's screen. Only
+   * where no rule can be walked: a thread on a live rule ends with the rule's
+   * verdict, and a person is never asked to accept it twice (ADR 0006 §3).
+   */
   const waitsOnPerson = (t) =>
     t?.kind === 'note' && ['feedback', 'request'].includes(t.reason ?? 'feedback');
 

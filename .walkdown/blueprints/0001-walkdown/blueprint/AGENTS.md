@@ -139,14 +139,24 @@ rather than adding to it.
 
 ## Threads
 
-- A note says why it exists, and that decides where it closes (ADR 0005):
-  `feedback` is a person's words, closed by that person's next verdict on the
-  rule; `finding` is a judge's fail, closed by the next signed pass on the
-  rule; `observation` is something you noticed in passing, which you settle
-  yourself; `request` goes to design; `decision` is a record, filed closed.
-  File yours with `--reason finding` from a judge run and `--reason
-  observation` otherwise; a finding or an observation is authored `agent`,
-  never under the person whose machine it ran on.
+- A rule the walk can reach is the unit of conversation (ADR 0006).
+  Everything said on it - a fail's why, your fix, a person's feedback - is
+  one stream under the rule, and the person's signed pass on the rule ends
+  it: every note still open or addressed on the rule reads as verified. Do
+  not open a second note on a rule that has a live one; reply on it. Two
+  live notes on one rule means the rule wants splitting - say so.
+- A note says why it exists (ADR 0005): `feedback` is a person's words;
+  `finding` is a judge's fail; `observation` is something you noticed in
+  passing, which you settle yourself; `request` is a rule that has not been
+  written yet; `decision` is a record, filed closed. On a walkable rule all
+  but a decision close on the pass. File yours with `--reason finding` from
+  a judge run and `--reason observation` otherwise; a finding or an
+  observation is authored `agent`, never under the person whose machine it
+  ran on.
+- Prefer a rule to a question. "Should X be so?" on a rule is the sign-off
+  act the rule already has: draft the rule or edit the wording, say why in
+  `because`, and the person approves or sends it back. Ask a `question` only
+  for what no rule edit can express, and put the question on its first line.
 - Work your queue: `address` open notes; `incorporate` answered questions —
   fold the answer into the rule's statement/steps, then mark the thread;
   `settled` an observation once the change is named.

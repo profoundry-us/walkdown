@@ -127,22 +127,23 @@ stories:
       - id: threads.lifecycle.closes-where-it-was-asked
         origin: walkdown
         created_at: 2026-09-14
-        statement: A person's signed pass on a rule verifies the findings and the feedback that were addressed on it before the pass, under that person's name. An observation is settled by the agent that made it, and asks nothing of anyone.
+        statement: A person's signed pass on a rule ends the rule's conversation, verifying every note still open or addressed on it before the pass under that person's name. An observation the agent made it may settle itself, and asks nothing of anyone.
         because: The person's acceptance already exists as their verdict on the rule, and demanding the same look a second time, thread by thread, is what made the verify queue one nobody worked.
+        history: Under ADR 0005 only a finding and feedback closed on the pass; a request and an open note stayed, and a rule just passed still queued its person to press Done (2026-09-18, ADR 0006).
         verify: [checks]
         signoff: [eng, product]
         steps:
           given:
-            - A rule with an addressed finding and an addressed note of the person's own, a request, and a note on another rule
+            - A rule with an addressed finding, an addressed note of the person's own, an addressed request, an open note nobody has addressed, and a note on another rule
           when:
             - The person records a walkdown signed in a role, passing the rule
           then:
-            - The finding and the feedback on that rule read as verified, named for the signer, with the run that closed them and a reply saying so
-            - The request still waits on a person; the other rule's note is untouched
-            - A note addressed after the pass stays addressed - that fix is not what the person looked at
+            - Every note on that rule reads as verified, the open one included, named for the signer, with the run that closed them and a reply saying so
+            - The other rule's note is untouched; a decision was never open and nothing happens to it
+            - A note spoken to after the pass stays as it was - that is not what the person looked at
             - A fail, a walkdown signed in no role, or a machine's pass closes nothing
             - An observation is settled on the agent's word; feedback, a finding and a request refuse that ending
-          statement_hash: sha256:3048447b9d59
+          statement_hash: sha256:7b9c7c47a41d
       - id: threads.lifecycle.says-what-it-did
         origin: walkdown
         statement: A command that changes a thread reports what changed rather than printing the thread back. It says which status the thread left, which status it reached, whose name the change was recorded under, and how many replies landed.
@@ -282,7 +283,7 @@ stories:
       - id: threads.conversation.says-whose-move
         origin: walkdown
         created_at: 2026-09-17
-        statement: An open thread says whose move it is and what that party does next, and its composer offers only the moves this reader takes from here. A person's Done records verified; the agent's Done records addressed or incorporated.
+        statement: An open thread says whose move it is and what that party does next, and its composer offers only the moves this reader takes from here. On a rule the walk can reach, a note's Done and Reopen are the rule's pass and fail.
         because: Every thread is waiting on exactly one of the two parties, and the composer should say which rather than offer both sides' buttons.
         history: Addressed stood beside Verify beside Waive on every thread, whoever was reading, and it read as a control panel with nothing saying which button was yours; Topher asked why a button he was never meant to press was there at all (2026-09-17). The design was settled on a canvas of every state from both seats before it was built.
         verify: [checks]
@@ -302,9 +303,10 @@ stories:
             - Done records what the seat means by it - verified for a person, addressed or incorporated for the agent - and the status chip keeps the record's own name
             - Enter sends what the box is for - the answer on a question that is yours to answer, a reply everywhere else - and the box says which
             - An ended thread offers a person Reply and Reopen, the agent Reply alone, and its line says how it ended and by whom
+            - A note on a rule the walk can reach offers a person Reply and Waive only, whatever its status, and its line says the rule's signed pass ends the conversation and a fail continues it
             - In the stream, the agent's face is a robot in a dashed ring in the agent's blue; a person's is their initials on a filled disc, marked in the corner when a machine typed their words for them - so who said what is told without reading the names
             - Nothing under the box says who you are or how to send - the name stands in the thread's header
-          statement_hash: sha256:d5ec9c857bf1
+          statement_hash: sha256:3e30a750e842
           reworded:
             - hash: sha256:a79d09343f13
               at: 2026-09-18T03:58:38Z

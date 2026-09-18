@@ -39,6 +39,7 @@ screens:
       - panel.screen-picker
       - panel.screens-list
       - panel.rules-list
+      - panel.awaiting-you
       - panel.rules-search
       - panel.rule-tiers
       - panel.threads-list
@@ -60,7 +61,9 @@ screens:
       - detail.history
       - detail.verdict
       - detail.feedback
-      - detail.pass-verifies
+      - detail.conversation
+      - detail.stream
+      - detail.turn
       - detail.evidence
       - detail.setup
       - detail.steps
@@ -68,7 +71,6 @@ screens:
       - detail.evidence-open
       - detail.evidence-modal
       - detail.verify
-      - detail.threads
 
   - id: thread-panel
     title: The thread screen (state — open a thread, or a pin)

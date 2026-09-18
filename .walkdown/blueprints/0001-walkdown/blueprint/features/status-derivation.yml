@@ -518,11 +518,11 @@ stories:
             - Attention is derived
           then:
             - "An agent is asked to address an open note, to incorporate an answered question into its rule, to cover a rule that demands checks while no check claims it, and to re-judge a rule whose fix was claimed after its last pass"
-            - "A person is asked to judge a built rule once for each role that has not signed it, to verify their own answered feedback and requests - one item per rule, naming the threads - and to answer an open question"
-            - A judge's finding never makes a verify item, since the rule's next signed pass closes it, and neither does an agent's observation, which the agent settles
+            - "A person is asked to judge a built rule once for each role that has not signed it, to verify the addressed notes on a rule the walk can reach - one item per rule, naming the threads, whatever their reason - and to answer an open question, one item per rule where the question is on one the walk can reach"
+            - A thread on no rule, or on a retired one, is its own item, and only a person's feedback or request makes a verify item there - a finding or an observation on a retired rule waits on nobody
             - "A cover item is a rule demanding checks while no check claims it: an agent writes the check, and it is never a person's to judge"
             - Every item names who is blocked, so nothing sits in both queues at once
-          statement_hash: sha256:b980593be826
+          statement_hash: sha256:e0430d35a542
           reworded:
             - hash: sha256:d51f57ea2c48
               at: 2026-09-13

@@ -14,7 +14,7 @@ import { openSettings, requestReload, requestRender } from './shell.js';
 import { D, identityOverride, S, store } from './state.js';
 import { toast } from './toast.js';
 import { api, esc } from './util.js';
-import { HUMAN_ONLY, iAmDeclared, NEEDS_REASON, TERMINAL, threadsFor, whereIdentityLives, whoAmI } from './vocab.js';
+import { HUMAN_ONLY, iAmDeclared, NEEDS_REASON, TERMINAL, threadsFor, threadTouched, whereIdentityLives, whoAmI } from './vocab.js';
 
 /**
  * The handles that resolve to a full name, for every message on screen.
@@ -238,38 +238,61 @@ export async function threadAct(id, status) {
 }
 
 /*
- * Verify every addressed thread on one rule. Same governance as verifying
- * one: it is recorded under the person pressing it, and refused outright
- * without a name, because an agent may claim work and never accept it.
+ * The live note on a rule, if there is one: the rule's conversation (ADR
+ * 0006 §1). Newest first, because a rule that somehow carries two live notes
+ * continues the one last spoken to - the other is the smell the ADR names,
+ * a rule that wants splitting, and nothing here papers over it.
  */
-export async function verifyAll(rule) {
+export const liveNoteOn = (rule) =>
+  threadsFor(rule)
+    .filter((t) => t.kind !== 'question')
+    .sort((a, b) => threadTouched(b).localeCompare(threadTouched(a)))[0] ?? null;
+
+/*
+ * Say something on a rule. If the rule has a live conversation the words go
+ * into it as a reply - and, when the verdict is a fail or a send-back, the
+ * conversation comes back to open so the agent is owed it again. Only a
+ * rule with nothing live on it starts a thread. Under ADR 0005 every fail
+ * filed a fresh note, and a rule failed three times carried three threads
+ * about one thing (2026-09-18). Returns the thread id the words landed in,
+ * null on refusal.
+ */
+export async function sayOnRule(rule, text, { reopen = false } = {}) {
+  const live = liveNoteOn(rule);
+  if (!live) return postRuleNote(rule, text, 'feedback');
   const actor = whoAmI();
-  // The same gate one verify passes, because a sweep is only several of them:
-  // a machine that has not been told who is sitting at it still has a login
-  // name to offer, and accepting under one is the click n-0143 got through.
+  if (!(await postReply(live.id, text, actor))) return null;
+  if (reopen && live.status === 'addressed') {
+    const back = await threadPost(`/api/threads/${live.id}/status`, { status: 'open', actor, reason: text });
+    if (!back) return null;
+  }
+  return live.id;
+}
+
+/*
+ * "Never mind" on a rule: waive its live conversation, with the reason. The
+ * same gate one waive passes - a person, named, with a reason - because a
+ * waive from the rule's composer is only the thread's waive pressed from a
+ * different seat.
+ */
+export async function waiveOnRule(rule, text) {
+  const live = liveNoteOn(rule);
+  if (!live) return sayFiling('Nothing is open on this rule to waive.');
+  if (!text) return sayFiling('Waiving is recorded with a reason \u2014 write it above, then press again.');
+  const actor = whoAmI();
   if (isMachineName(actor) || !iAmDeclared()) {
-    toast(
+    sayFiling(
       isMachineName(actor)
-        ? 'Verifying is recorded under a person\u2019s name.'
-        : `Verifying is recorded under a person\u2019s name, and this machine only has a guess (${actor}). Say who you are in ${whereIdentityLives()} under \`identity:\`.`,
-      { tone: 'error' },
+        ? 'Waiving is recorded under a person\u2019s name.'
+        : `Waiving is recorded under a person\u2019s name, and this machine only has a guess (${actor}). Say who you are in ${whereIdentityLives()} under \`identity:\`.`,
     );
     return openSettings();
   }
-  const pending = threadsFor(rule).filter((t) => t.status === 'addressed');
-  if (!pending.length) return;
-  let done = 0;
-  for (const t of pending)
-    if (await threadPost(`/api/threads/${t.id}/status`, { status: 'verified', actor })) done += 1;
-  await requestReload();
-  // All of them is the result asked for; a partial pass is not a failure but
-  // it is unfinished, and the colour is the difference.
-  toast(
-    done === pending.length
-      ? `<b>${done}</b> thread${done === 1 ? '' : 's'} verified on ${esc(rule)}.`
-      : `<b>${done}</b> of ${pending.length} verified \u2014 the rest are still open.`,
-    { tone: done === pending.length ? 'success' : 'warning' },
-  );
+  if (await threadPost(`/api/threads/${live.id}/status`, { status: 'waived', actor, reason: text })) {
+    S.verdictNote = '';
+    toast(`<b>${esc(live.id)}</b> waived \u2014 the rule\u2019s conversation is closed.`, { tone: 'success' });
+    await requestReload();
+  }
 }
 
 export async function postRuleNote(rule, body, reason = 'feedback') {

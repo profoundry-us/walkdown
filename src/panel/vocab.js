@@ -95,6 +95,35 @@ export const threadsFor = (rule) =>
   (S.data?.threads ?? []).filter(
     (t) => t.anchor?.rule === rule && !TERMINAL.includes(t.status),
   );
+/** Every thread ever filed on a rule, ended ones included: the rule's whole conversation. */
+export const conversationOf = (rule) =>
+  (S.data?.threads ?? []).filter((t) => t.anchor?.rule === rule);
+
+/*
+ * Is this thread on a rule the walk can still reach? Then it is that rule's
+ * conversation, and the rule's verdict is what it waits on (ADR 0006): the
+ * composer offers no Done or Reopen on it, the Threads tab leaves it to the
+ * walk, and the walk lists the rule once. A thread on no rule, or on a
+ * retired one, stands on its own as before.
+ */
+export const onWalkableRule = (t) =>
+  Boolean(t?.anchor?.rule) && (S.data?.rows ?? []).some((r) => r.rule === t.anchor.rule);
+
+/*
+ * What kind of ask a rule is making of you, in one short word for the
+ * list's owed column - the walk lists every rule that needs you, whatever
+ * the ask, and the word says which (ADR 0006 §4). Read off the attention
+ * items, never re-derived: `asks` when a question on the rule waits on an
+ * answer, `fixed` when a claimed fix waits on the verdict, else the verdict
+ * itself - `sign` a wording, `walk` a build.
+ */
+export function askOf(row) {
+  const mine = (S.data?.attention ?? []).filter((i) => i.who === 'human' && !i.thread && i.rule === row.rule);
+  if (!mine.length) return '';
+  if (mine.some((i) => i.action === 'answer')) return 'asks';
+  if (mine.some((i) => i.action === 'verify')) return 'fixed';
+  return row.built ? 'walk' : 'sign';
+}
 
 export const screenById = (id) => (S.data?.storyboard ?? []).find((s) => s.id === id) ?? null;
 
@@ -289,9 +318,28 @@ const OFFERS = {
   },
 };
 
+/*
+ * On a rule the walk can reach, a note is the rule's conversation and its
+ * endings are the rule's verdict: a pass ends it, a fail continues it, so a
+ * person is offered neither Done nor Reopen on it - only Reply, and Waive
+ * for "never mind" (ADR 0006 §3). The agent's offers do not change: it still
+ * addresses and settles, and a question is still answered in place.
+ */
+const ON_RULE = {
+  note: {
+    open: [WAIVE, REPLY],
+    addressed: [WAIVE, REPLY],
+    verified: [REPLY],
+    waived: [REPLY],
+    settled: [REPLY],
+  },
+};
+
 /** Short verbs, and only the moves this reader takes from this kind and status. */
-export function threadActions(t, role = myRole()) {
-  const offer = OFFERS[role]?.[t.kind === 'question' ? 'question' : 'note']?.[t.status];
+export function threadActions(t, role = myRole(), { onRule = onWalkableRule(t) } = {}) {
+  const kind = t.kind === 'question' ? 'question' : 'note';
+  const offer =
+    (role === 'human' && onRule ? ON_RULE[kind]?.[t.status] : null) ?? OFFERS[role]?.[kind]?.[t.status];
   const list = (typeof offer === 'function' ? offer(t) : offer) ?? [REPLY];
   // Never a button the server would refuse: the offers are written against
   // the lifecycle, and this is the seam that keeps them honest if it moves.
@@ -306,16 +354,17 @@ export function threadActions(t, role = myRole()) {
  * amber, the agent's is blue, an ended thread is green - and `label` says
  * "your move" when the party is the reader.
  */
-export function turnLine(t, role = myRole(), { person = 'the person', endedBy = null, endedAt = null } = {}) {
+export function turnLine(t, role = myRole(), { person = 'the person', endedBy = null, endedAt = null, onRule = onWalkableRule(t) } = {}) {
   const party = whoseMove(t);
+  const note = t.kind !== 'question';
   if (!party) {
     const how = t.status === 'waived' ? 'Waived' : t.status === 'recorded' ? 'Recorded' : t.status[0].toUpperCase() + t.status.slice(1);
+    // On a rule, the way back is a fail on the rule, not a Reopen here.
+    const back = role !== 'human' || t.status === 'recorded' ? '' : onRule && note ? '; a fail on the rule reopens it' : '; reopen if it comes back';
     return {
       party: 'closed',
       label: 'Closed',
-      text: `${how}${endedBy ? ` by ${endedBy}` : ''}${endedAt ? `, ${endedAt}` : ''}. Replies still land here${
-        role === 'human' && t.status !== 'recorded' ? '; reopen if it comes back' : ''
-      }.`,
+      text: `${how}${endedBy ? ` by ${endedBy}` : ''}${endedAt ? `, ${endedAt}` : ''}. Replies still land here${back}.`,
     };
   }
   const yours = party === role;
@@ -330,6 +379,8 @@ export function turnLine(t, role = myRole(), { person = 'the person', endedBy = 
     else if (t.status === 'open' && obs) text = 'It noticed this itself and closes it itself on its next run. It never comes back to you.';
     else if (t.status === 'open' && finding) text = 'A judge failed the rule on this. The agent fixes it on its next run; a signed pass on the rule closes it.';
     else if (t.status === 'open') text = 'It does what you asked here on its next run, then hands it back to you.';
+    // Addressed, on a rule: the verdict is the acceptance (ADR 0006 §3).
+    else if (onRule) text = 'The agent says this is done. Judge the rule: a signed pass ends this conversation, a fail continues it.';
     else if (finding) text = 'The agent says this is fixed. Judge the rule again - a signed pass closes it; Reopen if it is not.';
     else text = 'The agent says this is done. Look: Done if it is, Reopen if it is not.';
   } else {
@@ -343,8 +394,8 @@ export function turnLine(t, role = myRole(), { person = 'the person', endedBy = 
 }
 
 /** What the box invites, by state: the answer, the reason, or a reply. */
-export function composerPlaceholder(t, role = myRole()) {
-  const acts = threadActions(t, role).map(([, act]) => act);
+export function composerPlaceholder(t, role = myRole(), opts = {}) {
+  const acts = threadActions(t, role, opts).map(([, act]) => act);
   if (acts.includes('__answer')) return 'Answer\u2026';
   // A box whose only use is a reason says so; one that also replies is a
   // reply box first, and the reason is what the reply becomes if you press

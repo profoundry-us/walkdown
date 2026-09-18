@@ -38,7 +38,7 @@ import { locationOfUrl, matchScreen } from '../../lib/screen-match.js';
 import { html, live, nothing, render as put } from '../../vendor/lit.js';
 import { blueprintsPane, serverRow } from './blueprints.js';
 import { blueprintsOf, projectIdOf, projectModal } from './projects.js';
-import { loadSeen, markSeen, names, openThreadView, postRuleNote, sayVerdict } from './conversation.js';
+import { loadSeen, markSeen, names, openThreadView, sayOnRule, sayVerdict } from './conversation.js';
 import { DESK_DEFAULTS, DESK_KEY, drawDesk } from './desk.js';
 import { icon } from './icons.js';
 import { checkRefs, detailPane, evidenceRows, loadCheckSource } from './rule-detail.js';
@@ -2162,15 +2162,21 @@ async function giveVerdict(status) {
            * which is a tax on the commonest verdict in a hard sitting.
            */
           sayVerdict(
-            'A fail needs a why — write it above, or turn on Pin mode and drop it on the page.',
+            'A fail needs a why — write it in the box, or turn on Pin mode and drop it on the page.',
           );
           return;
         }
       }
       if (text) {
-        const tid = await postRuleNote(rule, text);
+        /*
+         * The why goes into the rule's conversation (ADR 0006 §2): a reply
+         * on the live note if there is one - reopened, since a fail or a
+         * send-back means the agent is owed it again - and a fresh note
+         * only when nothing is live. A pass with words is a reply too.
+         */
+        const tid = await sayOnRule(rule, text, { reopen: status === 'fail' || status === 'refining' });
         if (!tid) return; // the refusal is on screen; verdict stays unrecorded
-        (S.session.threads[rule] ??= []).push(tid);
+        if (!(S.session.threads[rule] ??= []).includes(tid)) S.session.threads[rule].push(tid);
         saveSession();
       }
       S.session.verdicts[rule] = status;

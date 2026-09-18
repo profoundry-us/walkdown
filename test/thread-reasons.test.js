@@ -125,7 +125,7 @@ test('an observation is settled by the agent; nothing else is @rule:threads.life
   }
 });
 
-test('a signed pass verifies the findings and feedback addressed before it @rule:threads.lifecycle.closes-where-it-was-asked', () => {
+test('a signed pass ends every task note on the rule that was said before it @rule:threads.lifecycle.closes-where-it-was-asked', () => {
   const p = project();
   try {
     const file = (reason, rule = RULE) =>
@@ -138,10 +138,10 @@ test('a signed pass verifies the findings and feedback addressed before it @rule
     for (const id of [finding, feedback, request, elsewhere])
       mutateThread(p.load(), id, { body: 'fixed', status: 'addressed', via: 'agent' });
 
-    // A walkdown signed in a role, passing the rule: the finding and the
-    // feedback on it close under the signer's name; the request waits on a
-    // person as ever, the other rule's finding is not this look, and an open
-    // note has no fix to accept.
+    // A walkdown signed in a role, passing the rule: the rule's conversation
+    // ends (ADR 0006 §2) - the finding, the feedback, the request and even
+    // the note nobody had addressed close under the signer's name, because
+    // the pass is the look. The other rule's finding is not this look.
     const record = finishWalkdown(p.load(), {
       target: 'local',
       baseUrl: null,
@@ -149,8 +149,8 @@ test('a signed pass verifies the findings and feedback addressed before it @rule
       signatures: [{ role: 'eng', signer: 'reasons-person' }],
       results: [{ rule: RULE, status: 'pass' }],
     });
-    assert.deepEqual([...record.closed].sort(), [feedback, finding].sort());
-    for (const id of [finding, feedback]) {
+    assert.deepEqual([...record.closed].sort(), [feedback, finding, request, stillOpen].sort());
+    for (const id of [finding, feedback, request, stillOpen]) {
       const t = p.onDisk(id);
       assert.equal(t.status, 'verified', id);
       assert.equal(t.verified_by, 'reasons-person');
@@ -158,9 +158,7 @@ test('a signed pass verifies the findings and feedback addressed before it @rule
       assert.match(t.replies.at(-1).body, /Verified by reasons-person's pass/);
       assert.equal(t.replies.at(-1).via, 'verdict');
     }
-    assert.equal(p.onDisk(request).status, 'addressed');
     assert.equal(p.onDisk(elsewhere).status, 'addressed');
-    assert.equal(p.onDisk(stillOpen).status, 'open');
 
     // A fix claimed AFTER the pass is not what the person looked at.
     const later = file('finding');

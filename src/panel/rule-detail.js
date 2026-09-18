@@ -5,14 +5,14 @@
  */
 import { MSG } from '../../lib/message-stream.js';
 import { html, live, nothing, unsafeHTML } from '../../vendor/lit.js';
-import { postRuleNote, sayFiling, verifyAll } from './conversation.js';
+import { liveNoteOn, names, openThreadView, pendingReplies, sayFiling, sayOnRule, waiveOnRule } from './conversation.js';
 import { tierMarks } from './rules-list.js';
 import { openSettings, requestReload, requestRender } from './shell.js';
 import { openEvidence } from './evidence.js';
 import { S } from './state.js';
-import { threadCard } from './thread-pane.js';
 import { api, fire } from './util.js';
 import {
+  conversationOf,
   currentScreen,
   declaredAnchors,
   isHeadless,
@@ -200,44 +200,148 @@ function backToList() {
   requestRender();
 }
 
-/** File the composer's text as a note thread on the rule, then refresh. */
-async function postNote(button, rule) {
-  const text = (S.ruleNote ?? '').trim();
-  if (!text) return sayFiling('Write something first — a thread opens with what you have to say.');
+/** Say the composer's text on the rule - into its conversation, or opening one - then refresh. */
+async function replyOnRule(button, rule) {
+  const text = (S.verdictNote ?? '').trim();
+  if (!text) return sayFiling('Write something first \u2014 a reply is what you have to say.');
   button.disabled = true;
-  const tid = await postRuleNote(rule, text, S.ruleNoteReason ?? 'feedback');
+  const tid = await sayOnRule(rule, text);
   button.disabled = false;
   if (!tid) return; // the refusal is on screen
-  S.ruleNote = '';
-  S.ruleNoteReason = 'feedback';
-  await requestReload(); // pull the new thread into the lists and repaint
+  S.verdictNote = '';
+  S.composerSay = '';
+  await requestReload(); // pull the reply into the stream and repaint
 }
 
 /*
- * The answered notes of yours that a Pass on this rule will verify in the
- * same gesture (ADR 0005 §3) - shown before you press anything, so the
- * acceptance is a thing you saw, not a thing that happened. A judge's
- * findings close the same way but are not listed: they were never yours to
- * read, and the rule is what you are judging.
+ * How the turn line is drawn, by whose move it is - the thread screen's
+ * palette, so a rule's line reads the same as a thread's: a person's move
+ * is amber, the agent's blue and dashed, nothing owed is green.
  */
-function passVerifies(rule) {
-  // Feedback only - what the door actually closes on a pass. A request is
-  // a person's to verify from its own screen, and listing it here promised
-  // an acceptance the ledger never made (n-0296).
-  const mine = threadsFor(rule).filter((t) => t.status === 'addressed' && (t.reason ?? 'feedback') === 'feedback');
-  if (!mine.length) return nothing;
-  return html`<div class="rounded-box border border-success/40 bg-success/5 px-2 py-1.5 text-[11.5px]" data-testid="detail.pass-verifies">
-    <div class="${LBL} mb-0.5">Pass verifies ${mine.length} answered note${mine.length === 1 ? '' : 's'} of yours</div>
-    ${mine.map(
-      (t) => html`<div class="flex min-w-0 gap-1.5">
-        <button class="link link-hover shrink-0 font-mono" data-open-thread="${t.id}">${t.id}</button>
-        <!-- min-w-0 as well as truncate: a flex item's floor is its content,
-             and a nowrap line of a note is wider than the pane - so without
-             it the pane took the note's width and everything on the screen
-             ran off the right edge. -->
-        <span class="min-w-0 truncate opacity-70">${(t.body ?? '').split('\n')[0]}</span>
-      </div>`,
-    )}
+const TURN = {
+  human: { line: 'border-warning', chip: 'bg-warning text-warning-content' },
+  agent: { line: 'border-info', chip: 'bg-info text-info-content' },
+  closed: { line: 'border-success', chip: 'bg-success text-success-content' },
+};
+
+/*
+ * Whose move the RULE is, and what that party does next - read off the
+ * attention items rather than re-derived, so the line under the rule agrees
+ * with the badge on the tab and the list on the Threads tab by construction
+ * (ADR 0006 §4). The rule is the unit: a claimed fix, an unanswered question
+ * and an unjudged build are all "your move" here, and the sentence says
+ * which.
+ */
+function ruleTurn(r) {
+  const items = (S.data?.attention ?? []).filter((i) => i.rule === r.rule);
+  const mine = items.filter((i) => i.who === 'human' && !i.thread);
+  const live = threadsFor(r.rule).filter((t) => t.kind !== 'question').length;
+  if (mine.length) {
+    const asks = mine.find((i) => i.action === 'answer');
+    const fixed = mine.find((i) => i.action === 'verify');
+    const parts = [];
+    if (asks) parts.push(`The agent asks ${asks.threads.length === 1 ? 'a question' : `${asks.threads.length} questions`} here \u2014 open it in the stream to answer.`);
+    if (fixed) parts.push(`The agent says its fix is done.`);
+    if (!S.session) parts.push(r.built ? 'Start a walkdown to judge the build.' : 'Start a walkdown to approve the wording, or send it back.');
+    else if (r.built) parts.push(`Pass ends this conversation${live ? ` (${live} note${live === 1 ? '' : 's'})` : ''}; Fail continues it with your why.`);
+    else parts.push('No build yet: Approve signs the wording; Refine sends it back with what should change.');
+    return { party: 'human', label: 'Your move', text: parts.join(' ') };
+  }
+  const theirs = items.filter((i) => i.who === 'agent');
+  if (theirs.length) {
+    const what = {
+      address: 'It has a note here to address.',
+      rejudge: 'It re-judges the claimed fix before you are asked to.',
+      cover: 'It owes this rule a check.',
+      incorporate: 'It folds your answer into the rule and closes the question.',
+    };
+    return { party: 'agent', label: "Agent's move", text: [...new Set(theirs.map((i) => what[i.action]).filter(Boolean))].join(' ') };
+  }
+  return { party: 'closed', label: 'Nothing owed', text: 'Nothing waits on anyone here. Replies still land; a fail reopens the conversation.' };
+}
+
+/*
+ * The rule's conversation: every thread ever filed on it, as ONE stream
+ * (ADR 0006 §1). A rule used to draw its threads as cards and its verdict
+ * box somewhere else, so the fail-why, the agent's fix and the pass that
+ * accepted it were three places to read one exchange. Here each thread's
+ * opening message carries a tag naming the thread and what it is; the tag
+ * is the door to the thread's own screen, which is still where a pin's
+ * sketch and a question's Answer live.
+ */
+function conversation(r, picked) {
+  const known = (S.data?.rows ?? []).map((x) => x.rule);
+  const all = conversationOf(r.rule);
+  const messages = all
+    .flatMap((t) =>
+      MSG.messages(t).map((m, i) =>
+        i ? m : { ...m, thread: t.id, tag: `${t.id} \u00b7 ${t.kind === 'question' ? 'question' : (t.reason ?? 'feedback')} \u00b7 ${t.status}` },
+      ),
+    )
+    .sort((a, b) => String(a.created ?? '').localeCompare(String(b.created ?? '')));
+  const note = liveNoteOn(r.rule);
+  const turn = ruleTurn(r);
+  const placeholder = S.session
+    ? r.built
+      ? 'Reply, or say why \u2014 for Fail or Waive\u2026'
+      : 'Reply, or say what should change \u2014 for Refine or Waive\u2026'
+    : note
+      ? 'Reply\u2026'
+      : 'Start a conversation about this rule\u2026';
+  const open = (e) => {
+    const tag = e.target?.closest?.('.wd-tag[data-thread]');
+    if (tag) openThreadView(tag.dataset.thread);
+  };
+  return html`<div class="-mx-3.5 border-t border-base-300 px-3.5 pt-2" data-testid="detail.conversation">
+    <div class="${LBL} mb-1">Conversation${all.length ? html` <span class="font-normal normal-case tracking-normal opacity-70">\u00b7 ${all.length} thread${all.length === 1 ? '' : 's'}</span>` : nothing}</div>
+    ${
+      messages.length
+        ? html`<div class="wd-stream" data-testid="detail.stream" @click=${open}>${unsafeHTML(
+            MSG.stream({ replies: messages }, { rules: known, pending: note ? (pendingReplies.get(note.id) ?? []) : [], names: names() }),
+          )}</div>`
+        : html`<p class="pb-1 text-[12.5px] opacity-50">Nothing said on this rule yet.</p>`
+    }
+    <div class="relative mt-3 mb-1.5 rounded border border-dashed px-2 pt-2.5 pb-1.5 text-[11px] leading-snug ${TURN[turn.party].line}"
+      data-testid="detail.turn" data-party="${turn.party}">
+      <span class="absolute -top-[7px] left-2 rounded px-1 text-[9px] font-bold uppercase leading-[14px] tracking-wider ${TURN[turn.party].chip}">${turn.label}</span>
+      <span class="opacity-75">${turn.text}</span>
+    </div>
+    <!-- One box for everything said on the rule: a reply, a fail's why, a
+         waive's reason. It rides ABOVE the buttons, so the why is typed
+         where the verdict is pressed (Topher, 2026-09-18). -->
+    <textarea id="wdp-vnote" data-testid="detail.feedback" rows="2" class="textarea textarea-xs w-full resize-none"
+      placeholder="${placeholder}"
+      .value=${live(S.verdictNote)}
+      @input=${(e) => {
+        S.verdictNote = e.currentTarget.value;
+      }}></textarea>
+    <!-- Waive alone at the far left, the reach-for buttons on the right,
+         the verdict last: the thread screen's row, on the rule. -->
+    <div class="mt-1 flex flex-wrap items-center gap-1" data-testid="detail.verdict">
+      ${
+        note
+          ? html`<button class="btn btn-xs btn-outline btn-warning mr-auto" data-v="waived" title="Never mind: close the rule\u2019s conversation with a reason"
+            @click=${() => waiveOnRule(r.rule, (S.verdictNote ?? '').trim())}>Waive</button>`
+          : nothing
+      }
+      <span class="text-[10px] opacity-40 ${note ? '' : 'mr-auto'}">as <button id="wdp-nactor" class="link" @click=${openSettings}>${whoAmI() || 'set your name\u2026'}</button></span>
+      <button class="btn btn-xs btn-outline border-base-300 text-base-content/70" data-v="reply" data-note-rule="${r.rule}"
+        @click=${(e) => replyOnRule(e.currentTarget, r.rule)}>Reply</button>
+      ${
+        !S.session
+          ? nothing
+          : r.built
+            ? html`<button class="btn btn-xs ${picked === 'fail' ? 'btn-error' : 'btn-outline btn-error'}" data-v="fail" @click=${(e) => fire(e.currentTarget, 'verdict', { status: 'fail' })}>\u2717 Fail</button>
+        <button class="btn btn-xs ${picked === 'pass' ? 'btn-success' : 'btn-outline btn-success'}" data-v="pass" @click=${(e) => fire(e.currentTarget, 'verdict', { status: 'pass' })}>\u2713 Pass</button>`
+            : html`<button class="btn btn-xs ${picked === 'refining' ? 'btn-warning' : 'btn-outline btn-warning'}" data-v="refining" @click=${(e) => fire(e.currentTarget, 'verdict', { status: 'refining' })}>\u270e\ufe0e Refine</button>
+        <button class="btn btn-xs ${picked === 'approved' ? 'btn-success' : 'btn-outline btn-success'}" data-v="approved" @click=${(e) => fire(e.currentTarget, 'verdict', { status: 'approved' })}>\u270d\ufe0e Approve</button>`
+      }
+    </div>
+    ${
+      S.verdictSay || S.composerSay
+        ? html`<div data-testid="detail.say" class="mt-1 text-[11px] text-warning">${S.verdictSay || S.composerSay}</div>`
+        : nothing
+    }
   </div>`;
 }
 
@@ -251,7 +355,6 @@ export function detailPane() {
       <button class="wdp-back btn btn-ghost btn-xs text-primary" data-testid="detail.back" @click=${backToList}>← All rules</button>
     </div>
     <div class="px-3.5 pt-1 text-[12.5px] opacity-60">This thread is not attached to a rule.</div>`;
-  const threads = threadsFor(r.rule);
   /*
    * The rule's own words - statement, because, history, and the steps - are
    * markdown, read through the same renderer a thread body is (n-0288): a
@@ -374,7 +477,6 @@ export function detailPane() {
         : nothing
     }`;
   };
-  const addressed = threads.filter((x) => x.status === 'addressed').length;
   return html`
     <div class="flex items-center px-2 pt-2">
       <button class="wdp-back btn btn-ghost btn-xs text-primary" data-testid="detail.back" @click=${backToList}>← All rules</button>
@@ -409,40 +511,6 @@ export function detailPane() {
         }
         ${elsewhere(r)}
       </div>
-      ${
-        S.session
-          ? html`<div class="flex flex-col gap-1.5">
-        <!-- The box rides ABOVE the buttons: write the why, then judge. -->
-        <textarea id="wdp-vnote" data-testid="detail.feedback" class="textarea textarea-xs h-14 w-full" placeholder="${
-          r.built
-            ? 'Why? Anything written here is filed as a note with your verdict.'
-            : 'What should change? Refine files this as the rule’s feedback.'
-        }"
-        .value=${live(S.verdictNote)}
-        @input=${(e) => {
-          S.verdictNote = e.currentTarget.value;
-        }}></textarea>
-        ${r.built ? passVerifies(r.rule) : nothing}
-        ${
-          r.built
-            ? html`<div class="flex gap-2" data-testid="detail.verdict">
-          <button class="btn btn-sm flex-1 ${picked === 'pass' ? 'btn-success' : 'btn-outline btn-success'}" data-v="pass" @click=${(e) => fire(e.currentTarget, 'verdict', { status: 'pass' })}>✓ Pass</button>
-          <button class="btn btn-sm flex-1 ${picked === 'fail' ? 'btn-error' : 'btn-outline btn-error'}" data-v="fail" @click=${(e) => fire(e.currentTarget, 'verdict', { status: 'fail' })}>✗ Fail</button>
-        </div>`
-            : html`<div class="flex gap-2" data-testid="detail.verdict">
-          <button class="btn btn-sm flex-1 ${picked === 'approved' ? 'btn-success' : 'btn-outline btn-success'}" data-v="approved" @click=${(e) => fire(e.currentTarget, 'verdict', { status: 'approved' })}>✍︎ Approve</button>
-          <button class="btn btn-sm flex-1 ${picked === 'refining' ? 'btn-warning' : 'btn-outline btn-warning'}" data-v="refining" @click=${(e) => fire(e.currentTarget, 'verdict', { status: 'refining' })}>✎︎ Refine</button>
-        </div>
-        <div class="text-[11px] opacity-50">No build evidence yet — you are signing off the rule, not judging a build.</div>`
-        }
-        ${
-          S.verdictSay
-            ? html`<div data-testid="detail.say" class="text-[11px] text-warning">${S.verdictSay}</div>`
-            : nothing
-        }
-      </div>`
-          : nothing
-      }
       ${
         setup
           ? html`<div>
@@ -514,71 +582,6 @@ export function detailPane() {
         <div class="${LBL} mb-1.5">Verify</div>
         <div class="text-[13px]" data-testid="detail.verify">${r.verify.join(', ')}</div>
       </div>
-      ${
-        threads.length
-          ? html`<div class="-mx-3.5" data-testid="detail.threads">
-        <div class="${LBL} mb-0.5 flex items-center gap-2 px-3.5">Threads
-          ${
-            addressed > 1
-              ? /*
-                 * A rule whose fixes all landed together is verified together.
-                 * Going through a dozen threads one at a time is the same
-                 * judgment repeated, and the repetition is what makes people
-                 * stop reading them - so the sweep is offered where the pile is,
-                 * and it is still a person pressing it.
-                 */
-                html`<button class="btn btn-xs btn-outline btn-success ml-auto" data-verify-all="${r.rule}"
-                 title="Verify every addressed thread on this rule, under your name"
-                 @click=${() => verifyAll(r.rule)}>
-                 Verify all ${addressed}</button>`
-              : nothing
-          }
-        </div>
-        ${threads.map((x) => threadCard(x))}</div>`
-          : nothing
-      }
-      <!--
-        A rule is a place to have a conversation, and until now it was only
-        that DURING a walkdown - the feedback box belongs to the sitting, and
-        outside one there was nowhere on a rule to say anything. So a note
-        about a rule you were only reading had to be filed as a pin on a page,
-        or not at all.
-
-        Deliberately below the threads rather than above them: this is how you
-        add to the conversation, and a composer that sits above what it
-        answers reads as a headline. Same shape and same words as the thread
-        composer, because it does the same thing.
-      -->
-      <div class="-mx-3.5 border-t border-base-300 px-3.5 pt-2" data-testid="detail.new-thread">
-        <textarea id="wdp-rulenote" data-testid="detail.new-thread-box" rows="2"
-          class="textarea textarea-xs w-full resize-none"
-          placeholder="Start a conversation about this rule…"
-          .value=${live(S.ruleNote)}
-          @input=${(e) => {
-            S.ruleNote = e.currentTarget.value;
-          }}></textarea>
-        <div class="mt-1 flex items-center gap-2">
-          <span class="text-[10px] opacity-40">as <button id="wdp-nactor" class="link" @click=${openSettings}>${whoAmI() || 'set your name…'}</button></span>
-          <!-- What this note is (ADR 0005 §1): feedback waits on your own
-               next look; a decision is filed closed; a request goes to
-               design. Asked here because the composer cannot tell. -->
-          <select class="select select-xs ml-auto" data-testid="detail.new-thread-reason"
-            .value=${live(S.ruleNoteReason ?? 'feedback')}
-            @change=${(e) => {
-              S.ruleNoteReason = e.currentTarget.value;
-            }}>
-            <option value="feedback">feedback</option>
-            <option value="decision">decision</option>
-            <option value="request">request</option>
-          </select>
-          <button class="btn btn-xs btn-outline" data-testid="detail.new-thread-post"
-            data-note-rule="${r.rule}" @click=${(e) => postNote(e.currentTarget, r.rule)}>Start thread</button>
-        </div>
-        ${
-          S.composerSay
-            ? html`<div class="mt-1 text-[11px] text-warning" data-testid="detail.new-thread-say">${S.composerSay}</div>`
-            : nothing
-        }
-      </div>
+      ${conversation(r, picked)}
     </div>`;
 }

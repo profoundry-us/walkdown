@@ -150,7 +150,7 @@ test('the fail refusal names both ways to give a why, and dies with the rule it 
   await page.locator('[data-v="fail"]').click();
   const say = page.getByTestId('detail.say');
   await expect(say).toBeVisible();
-  await expect(say).toContainText('write it above');
+  await expect(say).toContainText('write it in the box');
   await expect(say).toContainText('Pin mode');
   await expect(page.getByTestId('panel.judged')).toHaveText(judged ?? '', {
     useInnerText: true,
@@ -173,7 +173,7 @@ test('a verdict is written to the project as it is given, and survives the brows
   const rule = await session(page);
   expect(await draft(page)).toMatchObject({ draft: null });
 
-  await page.getByTestId('detail.verdict').locator('button').first().click();
+  await acceptVerdict(page).click();
   await expect(page.getByTestId('panel.judged')).toHaveText(/^1\/\d+ judged$/);
 
   // On disk the moment it was given — not held in the tab until Finish.
@@ -208,13 +208,22 @@ async function openRule(page, rule) {
 }
 
 /*
+ * The accepting verdict - Pass on a built rule, Approve on an unbuilt one.
+ * It is the LAST button of the row, not the first: the rule's composer puts
+ * Waive alone at the far left and Reply before the verdict pair (ADR 0006
+ * §4), so "the first button" stopped meaning the verdict.
+ */
+const acceptVerdict = (page) =>
+  page.getByTestId('detail.verdict').locator('[data-v="pass"], [data-v="approved"]');
+
+/*
  * The verdict pair only exists while a sitting is running, and the pane
  * re-renders once the session is in hand — so callers that read the pair wait
  * for it rather than the render that arrives a tick earlier without it.
  */
 async function openRuleForVerdict(page, rule) {
   await openRule(page, rule);
-  await expect(page.getByTestId('detail.verdict').locator('button').first()).toBeVisible();
+  await expect(acceptVerdict(page)).toBeVisible();
 }
 
 test('which verdict pair a rule shows is derived from the ledger, not fixed chrome', {
@@ -254,7 +263,7 @@ test('which verdict pair a rule shows is derived from the ledger, not fixed chro
   ).join(' ');
   expect(without).toMatch(/Approve/);
   expect(without).toMatch(/Refine/);
-  await expect(page.getByText(/No build evidence yet/)).toBeVisible();
+  await expect(page.getByTestId('detail.turn')).toContainText(/No build yet/);
 });
 
 test('finishing appends a verdict under a named person; discarding records nothing', {
@@ -278,7 +287,7 @@ test('finishing appends a verdict under a named person; discarding records nothi
   // Finished: the verdict given in the panel is what the ledger gains.
   await ensureSession(page);
   await openRuleForVerdict(page, rule);
-  await page.getByTestId('detail.verdict').locator('button').first().click();
+  await acceptVerdict(page).click();
   await expect(page.getByTestId('panel.judged')).toHaveText(/^1\/\d+ judged$/);
   await page.getByTestId('panel.walk').click(); // the same control that started it
   await expect(page.getByTestId('panel.actor')).toBeHidden();
@@ -329,15 +338,19 @@ test('the panel will not accept work without a named person, and asks for the re
   await review(page);
   await endSession(page);
   const { threads, rows } = await payload(page);
-  // On a rule the list draws: a retired rule keeps its threads and loses its
-  // row, and the ADR 0005 migration left one of those the first addressed.
-  const listed = new Set((rows ?? []).filter((r) => !r.retired).map((r) => r.rule));
-  const addressed = (threads ?? []).find((t) => t.status === 'addressed' && listed.has(t.anchor?.rule));
-  expect(addressed, 'the blueprint needs an addressed thread to accept').toBeTruthy();
+  // On nothing the walk can reach: a thread on a live rule is that rule's
+  // conversation and ends with the rule's verdict, never with a Done of its
+  // own (ADR 0006 §3) - so the one the panel offers Done on is a thread with
+  // no rule, or on a retired rule.
+  const listed = new Set((rows ?? []).map((r) => r.rule));
+  const addressed = (threads ?? []).find(
+    (t) => t.status === 'addressed' && t.kind !== 'question' && !listed.has(t.anchor?.rule),
+  );
+  expect(addressed, 'the blueprint needs an addressed thread the walk cannot reach').toBeTruthy();
 
-  await openRule(page, addressed.anchor.rule);
-  // Open the conversation: the thread is a screen of its own.
-  await page.locator(`[data-open-thread="${addressed.id}"]`).first().click();
+  // From the Threads tab, which opens on what waits on a person.
+  await page.getByTestId('panel.tabs').getByText(/Threads/).click();
+  await page.locator(`[data-open-thread="${addressed.id}"]`).first().click({ position: { x: 8, y: 6 } });
   // Done, from a person's seat, records verified - the button says what
   // pressing it means, the record keeps its name.
   const verify = page.locator('[data-testid="thread.actions"][data-act="verified"]').first();
@@ -363,8 +376,8 @@ test('the panel will not accept work without a named person, and asks for the re
     await route.fulfill({ response: res, json: body });
   });
   await page.reload();
-  await openRule(page, addressed.anchor.rule);
-  await page.locator(`[data-open-thread="${addressed.id}"]`).first().click();
+  await page.getByTestId('panel.tabs').getByText(/Threads/).click();
+  await page.locator(`[data-open-thread="${addressed.id}"]`).first().click({ position: { x: 8, y: 6 } });
   await verify.click();
   await expect(page.getByTestId('thread.say')).toBeVisible();
   await expect(page.getByTestId('thread.say')).toContainText(/name/i);
@@ -376,7 +389,7 @@ test('the panel will not accept work without a named person, and asks for the re
   // And the refusal belongs to the moment it refused: leave the screen and
   // come back, and it is gone rather than standing over the next reading.
   await page.getByTestId('thread.close').click();
-  await page.locator(`[data-open-thread="${addressed.id}"]`).first().click();
+  await page.locator(`[data-open-thread="${addressed.id}"]`).first().click({ position: { x: 8, y: 6 } });
   await expect(page.getByTestId('thread.actions').first()).toBeVisible();
   await expect(page.getByTestId('thread.say')).toHaveCount(0);
 });
@@ -571,38 +584,38 @@ test('put away, the badge still crosses between the design and what shipped', {
   }
 });
 
-test('a rule whose fixes all landed can be verified in one pass, under a name', {
+test('waiving a rule\u2019s conversation needs a person and a reason, like waiving anywhere', {
   tag: '@rule:panel.threads.claim-never-accept',
 }, async ({ page }) => {
   await review(page);
   await endSession(page);
   const { rows, threads } = await payload(page);
-  // A rule carrying more than one addressed thread — the pile the sweep is for.
-  // It also has to be a rule the list still DRAWS: a retired rule keeps its id
-  // so the threads anchored to it stay valid, and can therefore collect a pile
-  // like any other, but it has left the report and has no row to open. Which
-  // rule qualifies depends on the day's thread statuses, so this picked a
-  // retired one the first time a walkdown left one holding two.
+  // A listed rule carrying a live note: the conversation the composer's
+  // Waive would close (ADR 0006 §4). Which rule depends on the day's
+  // statuses, so it is found rather than named.
   const listed = new Set((rows ?? []).map((r) => r.rule));
-  const counts = {};
-  for (const t of threads ?? [])
-    if (t.status === 'addressed' && t.anchor?.rule)
-      counts[t.anchor.rule] = (counts[t.anchor.rule] ?? 0) + 1;
-  const rule = Object.keys(counts).find((r) => counts[r] > 1 && listed.has(r));
-  expect(rule, 'need a listed rule with several addressed threads').toBeTruthy();
-  const before = counts[rule];
+  const rule = (threads ?? []).find(
+    (t) => t.kind !== 'question' && ['open', 'addressed'].includes(t.status) && listed.has(t.anchor?.rule),
+  )?.anchor.rule;
+  expect(rule, 'need a listed rule with a live note').toBeTruthy();
+  const live = () =>
+    payload(page).then(({ threads: all }) =>
+      all.filter((t) => t.anchor?.rule === rule && t.kind !== 'question' && ['open', 'addressed'].includes(t.status)).length,
+    );
+  const before = await live();
 
   await openRule(page, rule);
-  const sweep = page.getByTestId('detail.threads').getByRole('button', { name: /Verify all/i });
-  await expect(sweep).toBeVisible();
+  const waive = page.getByTestId('detail.verdict').locator('[data-v="waived"]');
+  await expect(waive).toBeVisible();
 
   /*
    * On a machine nobody has been named on it must refuse, exactly as
-   * verifying one does: an agent may claim work and never accept it. Answered
-   * by intercepting the identity rather than by emptying a field, because the
-   * username is not a field any more - the server records under the config's
-   * identity whatever a request says (n-0142), so what the panel reads is
-   * whether that config DECLARES a person or is guessing from a login name.
+   * waiving from the thread's own screen does: an agent may claim work and
+   * never accept it. Answered by intercepting the identity rather than by
+   * emptying a field, because the username is not a field any more - the
+   * server records under the config's identity whatever a request says
+   * (n-0142), so what the panel reads is whether that config DECLARES a
+   * person or is guessing from a login name.
    */
   let declared = false;
   await page.route('**/api/blueprint*', async (route) => {
@@ -613,28 +626,18 @@ test('a rule whose fixes all landed can be verified in one pass, under a name', 
   });
   await page.reload();
   await openRule(page, rule);
-  await sweep.click();
+  await page.getByTestId('detail.feedback').fill('never mind this one');
+  await waive.click();
   await expect(page.getByTestId('settings.panel')).toBeVisible();
-  expect(
-    (await payload(page)).threads.filter((t) => t.anchor?.rule === rule && t.status === 'addressed')
-      .length,
-  ).toBe(before);
+  expect(await live()).toBe(before);
 
-  // And where the machine does say who is here, the whole pile goes at once.
+  // Named, but with nothing written: waiving is recorded with a reason.
   declared = true;
   await page.reload();
   await openRule(page, rule);
-  await sweep.click();
-  await expect
-    .poll(
-      async () =>
-        (await payload(page)).threads.filter(
-          (t) => t.anchor?.rule === rule && t.status === 'addressed',
-        ).length,
-    )
-    .toBe(0);
-  // The panel refetches once the pile is gone, and a route still in flight
-  // when the test ends is reported as the NEXT test's failure (n-0259).
+  await waive.click();
+  await expect(page.getByTestId('detail.say')).toContainText(/reason/);
+  expect(await live()).toBe(before);
   await page.unrouteAll({ behavior: 'ignoreErrors' });
 });
 
@@ -837,8 +840,8 @@ test('a message is read as the markdown it was written in, and nothing else reac
   await expect(page.getByTestId('panel.bar')).toBeVisible();
   await page.waitForLoadState('networkidle');
   await page.getByTestId('panel.tabs').getByText(/Threads/).click();
-  // The list opens on what waits on a person; a note the agent still owes is under Active.
-  await page.getByTestId('panel.thread-filter').getByText('Active', { exact: false }).click();
+  // The list opens on what waits on a person; a thread on a rule lives under the rule and is listed here only under All (ADR 0006 §3).
+  await page.getByTestId('panel.thread-filter').getByText('All', { exact: false }).click();
   await page.getByTestId('panel.threads-list').locator(`[data-open-thread="${id}"]`).first().click({ position: { x: 8, y: 6 } });
   const text = page.getByTestId('thread.body').locator('.wd-text').first();
   await expect(text).toBeVisible();
@@ -1591,22 +1594,66 @@ test('the identity is a username to record under and a full name to show, both e
   await endSession(page);
 });
 
-/* ---- a card says where it belongs only where that is not obvious --------- */
+/*
+ * ADR 0006 §4: the walk is the one queue, and it opens the Rules tab. The
+ * group above the screens lists exactly the rules the badge counts, in the
+ * order Continue walks them, each with a word for its ask - and the same
+ * rules are still drawn under their screens below.
+ */
+test('the rules list opens with what waits on you, in walk order, each row saying which ask', {
+  tag: '@rule:panel.rules.awaiting-you-first',
+}, async ({ page }) => {
+  await review(page);
+  await endSession(page);
+  const { attention, rows } = await payload(page);
+  const owedIds = new Set(
+    (attention ?? []).filter((i) => i.who === 'human' && !i.thread).map((i) => i.rule),
+  );
+  expect(owedIds.size, 'need rules waiting on a person').toBeGreaterThan(0);
+
+  const list = page.getByTestId('panel.rules-list');
+  const group = page.getByTestId('panel.awaiting-you');
+  await expect(group).toBeVisible();
+  const listed = await group.locator('[data-owed]').evaluateAll((els) => els.map((e) => e.dataset.owed));
+  expect(new Set(listed)).toEqual(owedIds);
+  // The badge on the tab is this list's length.
+  await expect(page.getByTestId('panel.tabs').locator('[data-tab="rules"] .badge')).toHaveText(String(listed.length));
+  // Each row says which ask, and the word agrees with the queue item behind it.
+  const byRule = new Map((rows ?? []).map((r) => [r.rule, r]));
+  for (const rule of listed.slice(0, 8)) {
+    const word = (await group.locator(`[data-owed="${rule}"] .text-warning`).textContent()).trim();
+    const items = (attention ?? []).filter((i) => i.who === 'human' && !i.thread && i.rule === rule);
+    const want = items.some((i) => i.action === 'answer')
+      ? 'asks'
+      : items.some((i) => i.action === 'verify')
+        ? 'fixed'
+        : byRule.get(rule)?.built
+          ? 'walk'
+          : 'sign';
+    expect(word, rule).toBe(want);
+  }
+  // The list of rules is still the list of rules: one `data-rule` row per rule, the group's copies aside.
+  expect(await list.locator('[data-rule]').count()).toBe((rows ?? []).length);
+  for (const rule of listed.slice(0, 3)) await expect(list.locator(`[data-rule="${rule}"]`)).toHaveCount(1);
+
+  // A search is a question about the list, not about you: the group leaves.
+  await page.getByTestId('panel.rules-search').fill(listed[0].split('.').at(-1));
+  await expect(group).toHaveCount(0);
+});
+
+/* ---- a rule's threads are one conversation --------------------------------- */
 
 /*
- * UNTAGGED, deliberately. This guards against one specific defect and claims
- * no rule, because there is no rule here to claim: nobody decided that a card
- * under a rule omits its anchor as a product commitment - it simply never
- * printed one until an argument arrived where the anchor goes. A rule written
- * to mark where a bug happened is a rule nobody would ever meaningfully sign,
- * and the board is not a bug log.
- *
- * What it is instead is a regression check: cheap, fast, and it fails loudly
- * if the arity mistake comes back.
+ * Began life untagged, guarding one arity mistake: `threads.map(threadCard)`
+ * handed each card its index as a `where`, so every card after the first
+ * printed its position as a provenance line. The cards are gone - a rule
+ * draws its threads as one stream now (ADR 0006 §1) - and what the check
+ * asserts is the claim that replaced them: every thread on the rule is in
+ * the stream, tagged, and nothing under the rule repeats which rule it is on.
  */
-test('threads name their anchor on the Threads tab and never under the rule itself', async ({
-  page,
-}) => {
+test('a rule draws its threads as one conversation, and never repeats which rule they are on', {
+  tag: '@rule:panel.rules.one-conversation',
+}, async ({ page }) => {
   await review(page);
   await endSession(page);
   const { rows, threads } = await payload(page);
@@ -1619,31 +1666,35 @@ test('threads name their anchor on the Threads tab and never under the rule itse
    * provenance line. Index 0 is falsy, so the first card looked right and
    * the list grew a one-based counter starting at the second thread.
    */
-  const TERMINAL = ['verified', 'incorporated', 'waived'];
   const listed = new Set((rows ?? []).map((r) => r.rule));
   const counts = {};
   for (const t of threads ?? [])
-    if (!TERMINAL.includes(t.status) && t.anchor?.rule)
-      counts[t.anchor.rule] = (counts[t.anchor.rule] ?? 0) + 1;
+    if (t.anchor?.rule) counts[t.anchor.rule] = (counts[t.anchor.rule] ?? 0) + 1;
   const rule = Object.keys(counts).find((r) => counts[r] > 1 && listed.has(r));
-  expect(rule, 'need a listed rule carrying several live threads').toBeTruthy();
+  expect(rule, 'need a listed rule carrying several threads').toBeTruthy();
 
   await openRule(page, rule);
-  const under = page.getByTestId('detail.threads');
-  await expect(under.locator('.wd-row').first(), 'the rule draws its threads').toBeVisible();
+  // The rule draws its threads as one stream (ADR 0006 §1): each thread's
+  // opening message carries a tag naming it, and nothing repeats the rule
+  // the conversation is already under.
+  const under = page.getByTestId('detail.conversation');
+  await expect(under.locator('.wd-tag[data-thread]').first(), 'the rule draws its threads').toBeVisible();
+  expect(await under.locator('.wd-tag[data-thread]').count()).toBe(counts[rule]);
   await expect(
     under.getByTestId('thread.where'),
-    'under a rule, no card repeats the rule it is anchored to',
+    'under a rule, nothing repeats the rule it is anchored to',
   ).toHaveCount(0);
 
-  // And the same card on the Threads tab, which is scoped to nothing, does
-  // carry it - otherwise this check would pass on a card that never draws
-  // the line at all.
+  // And a card on the Threads tab, which is scoped to nothing, does carry
+  // it - otherwise this check would pass on a card that never draws the
+  // line at all. Under All, because a rule's threads live under the rule
+  // and the tab's live filters no longer list them.
   await page.getByTestId('detail.back').click();
   await page
     .getByTestId('panel.tabs')
     .getByText(/Threads/)
     .click();
+  await page.getByTestId('panel.thread-filter').getByText('All', { exact: false }).click();
   await expect(
     page.getByTestId('panel.threads-list').getByTestId('thread.where').first(),
   ).toBeVisible();
@@ -1809,8 +1860,11 @@ test('the rail groups by screen, in storyboard order, with the headless rules la
   // so the pane itself does not move and a sticky heading sticks to this.
   const scroller = page.getByTestId('panel.list-scroll');
   const box = await scroller.boundingBox();
+  // Measured from the first screen's heading, not the top of the pane: the
+  // Awaiting-you group sits above the screens and is as tall as the day's
+  // queue.
   await scroller.evaluate((el) => {
-    el.scrollTop = 700;
+    el.scrollTop = (el.querySelector('[data-testid="panel.rules-screen"]')?.offsetTop ?? 0) + 700;
   });
   await page.waitForTimeout(200);
   const pinned = await list.getByTestId('panel.rules-screen').evaluateAll(
@@ -1949,7 +2003,7 @@ test('a draft the server refuses is said out loud, once, not swallowed', {
   );
   await ensureSession(page);
   await firstRule(page);
-  await page.getByTestId('detail.verdict').locator('button').first().click();
+  await acceptVerdict(page).click();
 
   const said = page.locator('.toast', { hasText: 'Nothing is being kept on disk' });
   await expect(said, 'the reviewer is told the write did not land').toBeVisible();
@@ -1957,7 +2011,7 @@ test('a draft the server refuses is said out loud, once, not swallowed', {
   // Said once for one reason: a sticky toast per rule would bury the panel.
   await page.getByTestId('detail.back').click();
   await firstRule(page);
-  await page.getByTestId('detail.verdict').locator('button').first().click();
+  await acceptVerdict(page).click();
   await expect(page.locator('.toast')).toHaveCount(1);
 });
 
@@ -2453,8 +2507,8 @@ test('times read in the zone the person declared, and Settings says which @rule:
 
   // The message's hover stamp carries the zone, and the hour is Tokyo's.
   await page.getByTestId('panel.tabs').getByText(/Threads/).click();
-  // The list opens on what waits on a person; a note the agent still owes is under Active.
-  await page.getByTestId('panel.thread-filter').getByText('Active', { exact: false }).click();
+  // The list opens on what waits on a person; a thread on a rule lives under the rule and is listed here only under All (ADR 0006 §3).
+  await page.getByTestId('panel.thread-filter').getByText('All', { exact: false }).click();
   await page.getByTestId('panel.threads-list').locator(`[data-open-thread="${id}"]`).first().click({ position: { x: 8, y: 6 } });
   const at = page.getByTestId('thread.body').locator('.wd-at[title]').first();
   await expect(at).toBeVisible();
@@ -2465,12 +2519,14 @@ test('times read in the zone the person declared, and Settings says which @rule:
 });
 
 /*
- * ADR 0005 §3: a person's Pass on a rule verifies the answered notes of theirs
- * on it, and the pane says so before they press anything. Filed through the
- * door, answered by an agent, then judged in a signed sitting - the thread
- * ends `verified` under the signer's name and the Finish toast names it.
+ * ADR 0006 §2: a person's Pass on a rule ends its conversation - every live
+ * note on it, whoever filed it and whether or not the agent got to it - and
+ * the line above the composer says so before they press anything. Filed
+ * through the door, answered by an agent, then judged in a signed sitting:
+ * the threads end `verified` under the signer's name and the Finish toast
+ * names them.
  */
-test('a pass verifies the answered feedback on the rule, and says so first', {
+test('a pass ends the rule\u2019s conversation, and says so first', {
   tag: '@rule:panel.walkdown.pass-verifies-feedback',
 }, async ({ page }) => {
   const { rows } = await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json();
@@ -2489,13 +2545,13 @@ test('a pass verifies the answered feedback on the rule, and says so first', {
     data: { status: 'addressed', via: 'agent', reason: 'Reworded it.' },
   });
   expect(answered.ok()).toBeTruthy();
-  // And one that is not answered yet: a pass has nothing of it to accept.
+  // And one that is not answered yet: the pass is the look, and ends it too.
   const still = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
     data: { kind: 'note', body: 'Not fixed yet.', anchor: { rule } },
   });
   const open = (await still.json()).id;
-  // And an answered request: a person's to verify from its own screen, so
-  // the block must not promise it (n-0296).
+  // And an answered request: under ADR 0005 a person's to verify from its
+  // own screen (n-0296); on a walkable rule it is the rule's conversation now.
   const asked = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
     data: { kind: 'note', body: 'Could the design show this?', anchor: { rule }, reason: 'request' },
   });
@@ -2509,18 +2565,19 @@ test('a pass verifies the answered feedback on the rule, and says so first', {
   await endSession(page);
   await ensureSession(page);
   await openRuleForVerdict(page, rule);
-  // Said before the press: the answered note, by id, and not the open one.
-  const says = page.getByTestId('detail.pass-verifies');
+  // Said before the press: how many notes the pass ends, above the box.
+  const says = page.getByTestId('detail.turn');
   await expect(says).toBeVisible();
-  await expect(says).toContainText(id);
-  await expect(says).not.toContainText(open);
-  await expect(says).not.toContainText(request);
-  await expect(says).toContainText(/Pass verifies 1 answered note/);
-  // Cut short, not run off the edge: the block, and the statement above it,
+  await expect(says).toContainText(/Pass ends this conversation \(\d+ notes?\)/);
+  const liveNow = (await payload(page)).threads.filter(
+    (t) => t.anchor?.rule === rule && t.kind !== 'question' && ['open', 'addressed'].includes(t.status),
+  ).length;
+  await expect(says).toContainText(`(${liveNow} note${liveNow === 1 ? '' : 's'})`);
+  // Cut short, not run off the edge: the stream, and the statement above it,
   // end inside the panel. One unwrappable line used to set the width of
   // every pane on the track, and the whole detail ran off the right.
   const panel = await page.getByTestId('panel.bar').boundingBox();
-  for (const loc of [says, page.getByTestId('detail.statement')]) {
+  for (const loc of [page.getByTestId('detail.stream'), page.getByTestId('detail.statement')]) {
     // Polled: the detail slides in over 300ms, and a box read mid-slide
     // sits wherever the track was at that instant.
     await expect
@@ -2531,7 +2588,7 @@ test('a pass verifies the answered feedback on the rule, and says so first', {
       .toEqual([true, true]);
   }
 
-  await page.getByTestId('detail.verdict').locator('button').first().click();
+  await acceptVerdict(page).click();
   await expect(page.getByTestId('panel.judged')).toHaveText(/^1\/\d+ judged$/);
   await page.getByTestId('panel.walk').click(); // the same control that started it
   // Whatever the panel said first: a refusal names itself in the failure,
@@ -2541,18 +2598,19 @@ test('a pass verifies the answered feedback on the rule, and says so first', {
   expect(await said.textContent()).toMatch(/Recorded 1 verdict/);
   await expect(page.getByTestId('panel.actor')).toBeHidden();
 
-  // The toast names what the pass closed; the ledger has it closed under
-  // the signer, with the run that carried the pass.
-  await expect(said).toContainText(`verified 1 thread (${id})`);
+  // The toast names what the pass closed; the ledger has every one of them
+  // closed under the signer, with the run that carried the pass.
+  await expect(said).toContainText(/verified \d+ threads? \(/);
   const after = (await payload(page)).threads;
-  const closed = after.find((t) => t.id === id);
-  expect(closed.status).toBe('verified');
-  expect(closed.verified_by).toBeTruthy();
-  expect(closed.verified_by).not.toBe('agent');
-  expect(closed.verified_via).toMatch(/\S/);
-  expect(closed.replies.at(-1).via).toBe('verdict');
-  expect(after.find((t) => t.id === open).status).toBe('open');
-  expect(after.find((t) => t.id === request).status).toBe('addressed');
+  for (const tid of [id, open, request]) {
+    await expect(said).toContainText(tid);
+    const closed = after.find((t) => t.id === tid);
+    expect(closed.status, tid).toBe('verified');
+    expect(closed.verified_by).toBeTruthy();
+    expect(closed.verified_by).not.toBe('agent');
+    expect(closed.verified_via).toMatch(/\S/);
+    expect(closed.replies.at(-1).via).toBe('verdict');
+  }
 });
 
 /*
@@ -2701,6 +2759,9 @@ test("a question leads with its question, in the list and on its own screen", {
   await page.goto(fixtureFor({ bp: 'blueprint' }));
   await expect(page.getByTestId('panel.bar')).toBeVisible();
   await page.getByTestId('panel.tabs').getByText(/Threads/).click();
+  // Under All: a question on a rule is the rule's to answer and is listed
+  // here only among everything (ADR 0006 §3).
+  await page.getByTestId('panel.thread-filter').getByText('All', { exact: false }).click();
   const list = page.getByTestId('panel.threads-list');
   const weight = (loc) => loc.evaluate((el) => Number(getComputedStyle(el).fontWeight));
   const size = (loc) => loc.evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
@@ -2816,6 +2877,13 @@ test('the composer says whose move it is and offers only that reader’s moves',
   tag: '@rule:threads.conversation.says-whose-move',
 }, async ({ page }) => {
   const rule = 'threads.conversation.says-whose-move';
+  /*
+   * Off the walk: a thread on a rule the walk can reach is that rule's
+   * conversation and ends with the rule's verdict, so Done and Reopen are
+   * never offered on it (ADR 0006 §3). The lifecycle this check walks is the
+   * one a thread on its own still has - a note on a screen, no rule.
+   */
+  const anchor = { screen: 'review' };
   const post = async (path, data) => {
     const res = await page.request.post(`${WD_ORIGIN}${path}?bp=blueprint`, { data });
     expect(res.ok(), `${path}: ${await res.text()}`).toBeTruthy();
@@ -2829,7 +2897,7 @@ test('the composer says whose move it is and offers only that reader’s moves',
   // A person's note, just filed: the agent's move. Nothing here is the
   // person's to press but Reply and Waive - no Done, because there is
   // nothing to accept yet.
-  const { id: note } = await post('/api/threads', { kind: 'note', body: 'The label reads wrong.', anchor: { rule } });
+  const { id: note } = await post('/api/threads', { kind: 'note', body: 'The label reads wrong.', anchor });
   await page.goto(`${WD_ORIGIN}/?bp=blueprint&thread=${note}`);
   await expect(turn).toHaveAttribute('data-party', 'agent');
   await expect(turn).toContainText(/agent.s move/i);
@@ -2888,9 +2956,20 @@ test('the composer says whose move it is and offers only that reader’s moves',
   expect(reopened.verified_by).toBe('checks-person');
   expect(reopened.replies.at(-1).body).toBe('It came back at 375.');
 
+  // On a rule the walk can reach, the same addressed note is the rule's
+  // conversation: the line says the verdict ends it, and a person is offered
+  // Reply and Waive only - the pass is the Done, the fail is the Reopen.
+  const { id: onRule } = await post('/api/threads', { kind: 'note', body: 'The label reads wrong here too.', anchor: { rule } });
+  await post(`/api/threads/${onRule}/status`, { status: 'addressed', via: 'agent' });
+  await page.goto(`${WD_ORIGIN}/?bp=blueprint&thread=${onRule}`);
+  await expect(turn).toHaveAttribute('data-party', 'human');
+  await expect(turn).toContainText(/signed pass ends this conversation/);
+  await expect(actions).toHaveText(['Waive', 'Reply']);
+  await expect(box).toHaveAttribute('placeholder', /Reply/);
+
   // A question is the person's move until they answer, and Enter IS the
   // answer: the reply lands and the status moves with it.
-  const { id: q } = await post('/api/threads', { kind: 'question', body: 'Which port?', anchor: { rule } });
+  const { id: q } = await post('/api/threads', { kind: 'question', body: 'Which port?', anchor });
   await page.goto(`${WD_ORIGIN}/?bp=blueprint&thread=${q}`);
   await expect(turn).toHaveAttribute('data-party', 'human');
   await expect(actions).toHaveText(['Waive', 'Reply', 'Answer']);
@@ -2914,7 +2993,7 @@ test('the composer says whose move it is and offers only that reader’s moves',
     if (body.identity) body.identity = { ...body.identity, username: 'agent', name: '', declared: false };
     await route.fulfill({ response: res, json: body });
   });
-  const { id: note2 } = await post('/api/threads', { kind: 'note', body: 'Second label.', anchor: { rule } });
+  const { id: note2 } = await post('/api/threads', { kind: 'note', body: 'Second label.', anchor });
   await page.goto(`${WD_ORIGIN}/?bp=blueprint&thread=${note2}`);
   await expect(turn).toHaveAttribute('data-party', 'agent');
   await expect(turn).toContainText(/your move/i);
@@ -2987,8 +3066,8 @@ test('a relayed message keeps the person\u2019s face and shows the agent\u2019s 
   // The list draws the same message the same way.
   await page.getByTestId('thread.close').click();
   await page.getByTestId('panel.tabs').getByText(/Threads/).click();
-  // The list opens on what waits on a person; a note the agent still owes is under Active.
-  await page.getByTestId('panel.thread-filter').getByText('Active', { exact: false }).click();
+  // The list opens on what waits on a person; a thread on a rule lives under the rule and is listed here only under All (ADR 0006 §3).
+  await page.getByTestId('panel.thread-filter').getByText('All', { exact: false }).click();
   const card = page.getByTestId('panel.threads-list').locator(`[data-open-thread="${id}"]`).first();
   await card.scrollIntoViewIfNeeded();
   await expect(card.locator('.wd-added')).toContainText('Seen at 375');

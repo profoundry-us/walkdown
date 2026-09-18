@@ -212,12 +212,12 @@ test('attention: human vs agent queues derived from rows and threads @rule:statu
     verify: ['agent', 'human'],
     runs: [walkdownRun('2026-01-01', 'agent', 'pass')],
     threads: [
-      // Two of the person's own notes, answered: ONE verify item, on the rule
-      // (ADR 0005 §6) - the look that clears both is a verdict on the rule.
+      // Every addressed note on a walkable rule is that rule's conversation:
+      // ONE verify item, on the rule, naming them all (ADR 0006 §3) - the
+      // look that clears them is a verdict on the rule. A settled
+      // observation and a decision wait on nothing.
       { id: 'n-1', kind: 'note', reason: 'feedback', status: 'addressed', anchor: { rule: 'demo.main.thing' } },
       { id: 'n-4', kind: 'note', status: 'addressed', anchor: { rule: 'demo.main.thing' } }, // no reason: feedback
-      // A judge's finding, addressed, waits on the next signed pass and on
-      // nobody's verify; a settled observation and a decision wait on nothing.
       { id: 'n-5', kind: 'note', reason: 'finding', status: 'addressed', anchor: { rule: 'demo.main.thing' } },
       { id: 'n-6', kind: 'note', reason: 'observation', status: 'settled', anchor: { rule: 'demo.main.thing' } },
       { id: 'n-7', kind: 'note', reason: 'decision', status: 'recorded', anchor: { rule: 'demo.main.thing' } },
@@ -235,7 +235,7 @@ test('attention: human vs agent queues derived from rows and threads @rule:statu
   assert.deepEqual(byWho('human'), ['judge:demo.main.thing', 'verify:n-8', 'answer:q-1', 'verify:demo.main.thing']);
   assert.deepEqual(byWho('agent'), ['address:n-2', 'incorporate:q-2']);
   const perRule = attention.find((i) => i.action === 'verify' && i.rule === 'demo.main.thing');
-  assert.deepEqual(perRule.threads, ['n-1', 'n-4']);
+  assert.deepEqual(perRule.threads, ['n-1', 'n-4', 'n-5']);
 });
 
 test('open threads listed; terminal ones excluded', () => {
@@ -325,13 +325,12 @@ test('where nothing verifies a rule but a signature, the signature is the verdic
 });
 
 /*
- * The verify queue groups a person's notes under their rule only where a
- * verdict on the rule is what clears them. A request is verified from its
- * own screen - a pass leaves it alone - and a note on a retired rule has no
- * rule to walk; grouped under the rule, each kept the rule in the walk queue
- * after every pass with nothing there to do (2026-09-16).
+ * A thread on a rule that can be walked is the rule's conversation, whatever
+ * its reason: a request on a live rule waits under the rule with the feedback
+ * (ADR 0006 §3). A note on a retired rule has no rule to walk, so it stands
+ * on its own where Verify is.
  */
-test('a request, and a note on a retired rule, wait as threads rather than under the rule', () => {
+test('every note on a walkable rule waits under the rule; one on a retired rule waits as a thread', () => {
   const rule = 'demo.main.thing';
   const live = deriveStatus(
     blueprint({
@@ -340,21 +339,30 @@ test('a request, and a note on a retired rule, wait as threads rather than under
       threads: [
         { id: 'n-1', kind: 'note', reason: 'feedback', status: 'addressed', anchor: { rule } },
         { id: 'n-2', kind: 'note', reason: 'request', status: 'addressed', anchor: { rule } },
+        { id: 'q-1', kind: 'question', status: 'open', anchor: { rule } },
       ],
     }),
   );
   const verify = (st) => st.attention.filter((i) => i.who === 'human' && i.action === 'verify').map((i) => i.thread ?? `rule:${i.rule}`);
-  assert.deepEqual(verify(live), ['n-2', `rule:${rule}`]);
-  assert.deepEqual(live.attention.find((i) => i.rule === rule && i.action === 'verify' && !i.thread).threads, ['n-1']);
+  assert.deepEqual(verify(live), [`rule:${rule}`]);
+  assert.deepEqual(live.attention.find((i) => i.rule === rule && i.action === 'verify' && !i.thread).threads, ['n-1', 'n-2']);
+  // And an open question on it is the rule's to answer, listed once under
+  // the rule rather than as a thread of its own.
+  const asks = live.attention.filter((i) => i.who === 'human' && i.action === 'answer');
+  assert.deepEqual(asks, [{ who: 'human', action: 'answer', rule, threads: ['q-1'] }]);
 
   const retired = deriveStatus(
     blueprint({
       retired: '2026-01-01',
-      threads: [{ id: 'n-3', kind: 'note', reason: 'feedback', status: 'addressed', anchor: { rule } }],
+      threads: [
+        { id: 'n-3', kind: 'note', reason: 'feedback', status: 'addressed', anchor: { rule } },
+        { id: 'q-2', kind: 'question', status: 'open', anchor: { rule } },
+      ],
     }),
   );
   assert.equal(retired.rows.length, 0);
   assert.deepEqual(verify(retired), ['n-3']);
+  assert.deepEqual(retired.attention.filter((i) => i.action === 'answer').map((i) => i.thread), ['q-2']);
 });
 
 test('a build verdict flips built; an approval goes stale when the statement moves', () => {
