@@ -1,0 +1,30 @@
+id: n-0304
+kind: note
+reason: feedback
+author: topher
+via: agent
+created: 2026-09-18T04:02:21.398Z
+anchor:
+  rule: threads.lifecycle.acts-for-a-person
+  screen: thread-panel
+status: addressed
+body: I think you have way too many instances of "topher via agent". In general,
+  if I type something, it should still appear as me (and my avatar) even if I
+  said it in this chat instead of within Walkdown. I think the "via agent" is ok
+  as a note, and maybe we just have some simple indicator to denote it instead
+  of changing to the robot avatar. Also, I think a lot of times you take my
+  words and put them in there, but then add additional context or parts to it.
+  So perhaps the answer is to mark my words as-typed in my own name / avatar,
+  but show a dashed "add-on" of whatever contents you added?
+added: "Said in the Claude session of 2026-09-17, after the composer landed.
+  This thread is itself the first use of what it asks for: your words above are
+  as typed, under your name with the mark; this box is mine. Built in 84c1a05 -
+  `--said`/`--added` on the CLI, `said`/`added` over the API, the disc with the
+  corner mark, and this dashed box. Rule reworded and its check walks it (run
+  2026-09-18T03-44-13Z)."
+replies:
+  - author: agent
+    created: 2026-09-18T04:02:33Z
+    body: "Addressed by 84c1a05: attribution follows the words. Look at this thread
+      on its own screen - the opening message is yours, marked; the box under it
+      is mine; this reply is the robot. Done here records verified."
