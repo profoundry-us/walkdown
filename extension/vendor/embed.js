@@ -2857,14 +2857,15 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
 
     /**
      * A stable colour per name. Recognising who is speaking should not require
-     * reading — and the agent is always the same green, so its voice is one
-     * thing you learn once.
+     * reading — and the agent is always the same blue, so its voice is one
+     * thing you learn once. The same blue as the agent's turn line in the
+     * composer: the party has one colour wherever it appears.
      */
     tint(name) {
       const who = String(name ?? '')
         .trim()
         .toLowerCase();
-      if (who === 'agent') return 'oklch(52% 0.09 165)';
+      if (who === 'agent') return 'oklch(58% 0.16 255)';
       // One tint per person: the first word is what a handle and a full name
       // have in common, so "topher" and "Topher Fangio" wear the same colour.
       const first = who.split(/[\s._-]+/)[0] || who;
@@ -3086,7 +3087,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
           prev = m;
           const who = this.displayName(m.author, names);
           out.push(`<div class="wd-msg${cont ? ' cont' : ''}${m.pending ? ' pending' : ''}${m.failed ? ' failed' : ''}">
-        <div class="wd-ava" style="background:${this.tint(who)}">${this.esc(this.initials(who))}</div>
+        ${this.avatar(who, 'wd-ava', Boolean(m.via) || this.isAgent(m.author))}
         <div class="wd-col">
           <div class="wd-head">${cont ? '' : `<span class="wd-who">${this.esc(who)}</span>`}${
             /*
@@ -3175,9 +3176,27 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       return seen;
     },
 
-    /** One initials tile. The same face for the same person, everywhere. */
-    avatar(name, cls = 'wd-ava') {
+    /*
+     * One face. The same face for the same person, everywhere: a person is a
+     * filled tile with their initials; a machine is a line-drawn robot inside
+     * a dashed ring, so its messages are told from a person's at a glance
+     * rather than by reading the name (Topher, 2026-09-17). The ring is
+     * dashed and blue like the agent's turn line in the composer - one party,
+     * one look.
+     *
+     * `machine` is whether a machine TYPED the message, which is not the same
+     * question as who it is attributed to: an agent acting for a person
+     * records under the person with `via` beside the name (n-0139), and the
+     * face answers the first question while the name answers the second. So
+     * "Topher via agent" wears the robot - the words were the person's
+     * instruction, the typing was the machine's.
+     */
+    isAgent: (name) => String(name ?? '').trim().toLowerCase() === 'agent',
+    ROBOT: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="8" width="16" height="12" rx="2.5"/><path d="M12 8V4M9 4h6"/><circle cx="9" cy="14" r="1.1" fill="currentColor" stroke="none"/><circle cx="15" cy="14" r="1.1" fill="currentColor" stroke="none"/><path d="M9.5 17.5h5"/></svg>`,
+    avatar(name, cls = 'wd-ava', machine = this.isAgent(name)) {
       const who = name || 'someone';
+      if (machine)
+        return `<div class="${cls} wd-bot" style="color:${this.tint('agent')};border-color:${this.tint('agent')}" title="${this.esc(who)}">${this.ROBOT}</div>`;
       return `<div class="${cls}" style="background:${this.tint(who)}" title="${this.esc(
       who,
     )}">${this.esc(this.initials(who))}</div>`;
@@ -3390,6 +3409,9 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     .wd-ava { width: 1.6rem; height: 1.6rem; border-radius: .3rem; display: grid; place-items: center;
       font-size: 10px; font-weight: 700; color: #fff; }
     .wd-msg.cont .wd-ava { visibility: hidden; height: 0; }
+    /* The agent's face: a robot, drawn in line, ringed rather than filled. */
+    .wd-bot { background: transparent; border: 1.5px dashed; box-sizing: border-box; }
+    .wd-bot svg { width: 72%; height: 72%; }
     .wd-head { display: flex; align-items: center; gap: .4rem; margin-bottom: .18rem; min-height: 1.15rem; }
     .wd-head .badge { padding-inline: .5rem; margin-left: .15rem; }
     .wd-who { font-weight: 600; font-size: 12px; }
@@ -3710,6 +3732,23 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       ),
     ),
   ]);
+
+  /*
+   * Whose move a thread is - the one reading of a status that decides what a
+   * composer offers and what its turn line says. Derived from the lifecycle
+   * rather than listed beside it: a person's note waits on the agent until it
+   * is addressed, then on the person; a question waits on the person until it
+   * is answered, then on the agent. An ended thread is nobody's move.
+   *
+   *   'agent'  the agent acts next (address, settle, incorporate)
+   *   'human'  a person acts next (verify or reopen, answer)
+   *   null     ended - replies still land, nothing is owed
+   */
+  const whoseMove = (t) => {
+    if (!t || TERMINAL.includes(t.status)) return null;
+    if (t.kind === 'question') return t.status === 'open' ? 'human' : 'agent';
+    return t.status === 'open' ? 'agent' : 'human';
+  };
 
   /** May a `kind` thread move from `from` to `to`? The one answer, for every caller. */
   const canTransition = (kind, from, to) => ((FLOWS[kind] ?? FLOWS.note)[from] ?? []).includes(to);

@@ -338,10 +338,9 @@ test('the panel will not accept work without a named person, and asks for the re
   await openRule(page, addressed.anchor.rule);
   // Open the conversation: the thread is a screen of its own.
   await page.locator(`[data-open-thread="${addressed.id}"]`).first().click();
-  const verify = page
-    .getByTestId('thread.actions')
-    .filter({ hasText: /Verify/ })
-    .first();
+  // Done, from a person's seat, records verified - the button says what
+  // pressing it means, the record keeps its name.
+  const verify = page.locator('[data-testid="thread.actions"][data-act="verified"]').first();
   await expect(verify).toBeVisible();
 
   /*
@@ -2788,4 +2787,120 @@ test('an id in a message previews what it names, under the cursor and under focu
   await expect(card).toContainText(other.id);
   await page.keyboard.press('Escape');
   await expect(card).toBeHidden();
+});
+
+/*
+ * The composer says whose move it is and offers only that reader's moves
+ * (Topher, 2026-09-17: it offered every legal transition to everyone -
+ * Addressed beside Verify beside Waive - and read as a control panel with
+ * nothing saying which button was yours). Walked from both seats: a
+ * person's, which the checks identity declares, and the agent's, stood in
+ * for by answering the identity question as a machine would.
+ */
+test('the composer says whose move it is and offers only that reader’s moves', {
+  tag: '@rule:threads.conversation.says-whose-move',
+}, async ({ page }) => {
+  const rule = 'threads.conversation.says-whose-move';
+  const post = async (path, data) => {
+    const res = await page.request.post(`${WD_ORIGIN}${path}?bp=blueprint`, { data });
+    expect(res.ok(), `${path}: ${await res.text()}`).toBeTruthy();
+    return res.json();
+  };
+  // The button row, as a list: toHaveText with an array asserts count and order.
+  const actions = page.getByTestId('thread.actions');
+  const turn = page.getByTestId('thread.turn');
+  const box = page.getByTestId('thread.reply');
+
+  // A person's note, just filed: the agent's move. Nothing here is the
+  // person's to press but Reply and Waive - no Done, because there is
+  // nothing to accept yet.
+  const { id: note } = await post('/api/threads', { kind: 'note', body: 'The label reads wrong.', anchor: { rule } });
+  await page.goto(`${WD_ORIGIN}/?bp=blueprint&thread=${note}`);
+  await expect(turn).toHaveAttribute('data-party', 'agent');
+  await expect(turn).toContainText(/agent.s move/i);
+  await expect(turn).toContainText(/hands it back to you/);
+  await expect(actions).toHaveText(['Reply', 'Waive']);
+  // The person's face is initials on a tile; there is no robot yet.
+  await expect(page.getByTestId('thread.body').locator('.wd-msg .wd-ava').first()).toHaveText('AC');
+  await expect(page.getByTestId('thread.body').locator('.wd-bot')).toHaveCount(0);
+
+  // The agent claims it. Now it is the person's move: Reopen, Waive, Done -
+  // Done last and primary, and Done RECORDS verified, whatever it is called.
+  // Over the API the author is always this machine's person; `via` is how
+  // a machine says it typed the words (n-0139). That is what the agent's
+  // replies really look like on a person's machine: "A Checks Person via agent".
+  await post(`/api/threads/${note}/replies`, { body: 'Fixed the label.', via: 'agent' });
+  await post(`/api/threads/${note}/status`, { status: 'addressed', via: 'agent' });
+  await page.reload();
+  await expect(turn).toHaveAttribute('data-party', 'human');
+  await expect(turn).toContainText(/your move/i);
+  await expect(actions).toHaveText(['Reopen', 'Waive', 'Done']);
+  await expect(page.getByTestId('thread.actions').last()).toHaveAttribute('data-act', 'verified');
+  await expect(box).toHaveAttribute('placeholder', /Reopen or Waive/);
+  // The machine-typed message wears the robot in a dashed ring under the
+  // person's name - the face says who typed, the name says who it counts
+  // for - and the ring is the turn line's own blue.
+  const bot = page.getByTestId('thread.body').locator('.wd-msg .wd-bot');
+  await expect(bot).toHaveCount(1);
+  expect(await bot.evaluate((el) => getComputedStyle(el).borderStyle)).toBe('dashed');
+  await expect(bot.locator('svg')).toHaveCount(1);
+  // No "as <name> · Enter sends" under the box; the name stands in the header.
+  await expect(page.getByTestId('thread.actor')).toHaveText('checks-person');
+  await expect(page.locator('#wdp-note ~ *')).not.toContainText(/Enter/);
+
+  // Done: the thread is verified, the screen slides back, and the record
+  // carries the person - not the word on the button.
+  await page.getByTestId('thread.actions').last().click();
+  await expect(turn).toHaveCount(0);
+  const verified = (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json())
+    .threads.find((t) => t.id === note);
+  expect(verified.status).toBe('verified');
+  expect(verified.verified_by).toBe('checks-person');
+  // Reopened as a screen: an ended thread is closed, offers only Reply, and
+  // says how it ended and by whom.
+  await page.goto(`${WD_ORIGIN}/?bp=blueprint&thread=${note}`);
+  await expect(turn).toHaveAttribute('data-party', 'closed');
+  await expect(turn).toContainText(/Verified by A Checks Person/);
+  await expect(actions).toHaveText(['Reply']);
+
+  // A question is the person's move until they answer, and Enter IS the
+  // answer: the reply lands and the status moves with it.
+  const { id: q } = await post('/api/threads', { kind: 'question', body: 'Which port?', anchor: { rule } });
+  await page.goto(`${WD_ORIGIN}/?bp=blueprint&thread=${q}`);
+  await expect(turn).toHaveAttribute('data-party', 'human');
+  await expect(actions).toHaveText(['Reply', 'Waive', 'Answer']);
+  await expect(box).toHaveAttribute('placeholder', /Answer/);
+  await box.fill('4730.');
+  await box.press('Enter');
+  await expect(turn).toHaveAttribute('data-party', 'agent');
+  await expect(turn).toContainText(/You answered/);
+  await expect(actions).toHaveText(['Reply', 'Reopen', 'Waive']);
+  const answered = (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json())
+    .threads.find((t) => t.id === q);
+  expect(answered.status).toBe('answered');
+  expect(answered.replies.at(-1).body).toBe('4730.');
+
+  // The agent's seat. It is offered its claims and never a person's
+  // acceptance: Reply and Done on what waits on it, and Done here RECORDS
+  // addressed or incorporated - the same word for its own kind of finished.
+  await page.route('**/api/blueprint*', async (route) => {
+    const res = await route.fetch();
+    const body = await res.json();
+    if (body.identity) body.identity = { ...body.identity, username: 'agent', name: '', declared: false };
+    await route.fulfill({ response: res, json: body });
+  });
+  const { id: note2 } = await post('/api/threads', { kind: 'note', body: 'Second label.', anchor: { rule } });
+  await page.goto(`${WD_ORIGIN}/?bp=blueprint&thread=${note2}`);
+  await expect(turn).toHaveAttribute('data-party', 'agent');
+  await expect(turn).toContainText(/your move/i);
+  await expect(turn).toContainText(/mark it Done/);
+  await expect(actions).toHaveText(['Reply', 'Done']);
+  await expect(page.getByTestId('thread.actions').last()).toHaveAttribute('data-act', 'addressed');
+  await page.goto(`${WD_ORIGIN}/?bp=blueprint&thread=${q}`);
+  await expect(actions).toHaveText(['Reply', 'Done']);
+  await expect(page.getByTestId('thread.actions').last()).toHaveAttribute('data-act', 'incorporated');
+  // And where it is the person's move, the agent only talks.
+  await page.goto(`${WD_ORIGIN}/?bp=blueprint&thread=${note}`);
+  await expect(actions).toHaveText(['Reply']);
+  await page.unrouteAll({ behavior: 'ignoreErrors' });
 });

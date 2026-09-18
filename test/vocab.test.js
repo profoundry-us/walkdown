@@ -18,6 +18,7 @@ import {
   ROLES,
   statusesFor,
   TERMINAL,
+  whoseMove,
   THREAD_KINDS,
   TIERS,
   threadPrefix,
@@ -100,4 +101,23 @@ test('the session gate compares by number, and the start second is not during @r
   );
   assert.equal(duringSession(undefined, started), false, 'no stamp is never during');
   assert.equal(duringSession('2026-09-01T00:22:52Z', undefined), false, 'no session, no during');
+});
+
+test('whose move is read off the lifecycle, and an ended thread is nobody’s @rule:threads.conversation.says-whose-move', () => {
+  const note = (status, reason = 'feedback') => ({ kind: 'note', status, reason });
+  const q = (status) => ({ kind: 'question', status });
+  // A person's note waits on the agent until it is addressed, then on the person.
+  assert.equal(whoseMove(note('open')), 'agent');
+  assert.equal(whoseMove(note('open', 'observation')), 'agent');
+  assert.equal(whoseMove(note('open', 'finding')), 'agent');
+  assert.equal(whoseMove(note('addressed')), 'human');
+  // A question waits on the person until it is answered, then on the agent.
+  assert.equal(whoseMove(q('open')), 'human');
+  assert.equal(whoseMove(q('answered')), 'agent');
+  // Ended: replies still land, nothing is owed.
+  for (const status of TERMINAL) {
+    assert.equal(whoseMove(note(status)), null, `${status} note`);
+    assert.equal(whoseMove(q(status)), null, `${status} question`);
+  }
+  assert.equal(whoseMove(null), null);
 });

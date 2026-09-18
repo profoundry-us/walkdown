@@ -31,13 +31,35 @@ const reasonChip = (t) =>
     : nothing;
 import {
   CHIP,
+  composerPlaceholder,
   ghostSource,
+  myRole,
   screenById,
   shortName,
   TERMINAL,
   threadActions,
+  turnLine,
   whoAmI,
 } from './vocab.js';
+
+/*
+ * How the turn line is drawn, by whose move it is. A person's move is amber,
+ * the agent's is blue and dashed like the agent's own face in the stream, an
+ * ended thread is green: the colour is the party, not the reader, so the
+ * same thread reads the same on both sides of the table.
+ */
+const TURN = {
+  human: { line: 'border-warning', chip: 'bg-warning text-warning-content' },
+  agent: { line: 'border-info', chip: 'bg-info text-info-content' },
+  closed: { line: 'border-success', chip: 'bg-success text-success-content' },
+};
+
+/* The button for a tone: the primary is filled, the warning outlined in amber, the rest quiet. */
+const TONE = {
+  primary: 'btn-primary',
+  warn: 'btn-outline btn-warning',
+  quiet: 'btn-outline border-base-300 text-base-content/70',
+};
 
 /*
  * A thread, collapsed: the opening message and the way into the rest of it.
@@ -61,7 +83,7 @@ export function threadCard(t, where = null) {
     data-open-thread="${where ? t.id : nothing}">
     ${where ? html`<div class="mb-1 truncate text-[11px] opacity-45" data-testid="thread.where">${where}</div>` : nothing}
     <div class="wd-msg">
-      ${unsafeHTML(MSG.avatar(who))}
+      ${unsafeHTML(MSG.avatar(who, 'wd-ava', Boolean(t.via) || MSG.isAgent(t.author)))}
       <div class="wd-col min-w-0">
         <div class="wd-head">
           <span class="wd-who">${who}</span>
@@ -139,7 +161,8 @@ export function threadPane() {
     t.anchor?.viewport ? `${t.anchor.viewport.name} ${t.anchor.viewport.width}` : '',
   ].filter(Boolean);
   const sketch = ghostSource(sc);
-  const acts = threadActions(t);
+  const role = myRole();
+  const acts = threadActions(t, role);
   const me = whoAmI();
   /*
    * Who ended the thread: the record first, the guess second. verified_by /
@@ -154,10 +177,30 @@ export function threadPane() {
     TERMINAL.includes(t.status) && (recordedBy || lastReply)
       ? { author: recordedBy ?? lastReply?.author, created: lastReply?.created }
       : null;
+  // The person on the other side of the table, for the agent's reading of
+  // the line: whoever opened the thread, unless a machine did.
+  const opener = MSG.displayName(t.author, names());
+  const turn = turnLine(t, role, {
+    person: /^agent$/i.test(t.author ?? '') ? 'the person' : opener,
+    endedBy: ended?.author ? MSG.displayName(ended.author, names()) : null,
+    endedAt: ended?.created ? MSG.ago(ended.created) : null,
+  });
+  // Enter sends what the box is for: the answer on a question that is
+  // yours to answer, and a reply everywhere else.
+  const enterAct = acts.some(([, act]) => act === '__answer') ? '__answer' : '__reply';
   return html`
     <div class="flex items-center gap-1 px-2 pt-2">
       <button class="wdp-thread-back btn btn-ghost btn-xs text-primary" data-testid="thread.close" @click=${leaveThread}>← ${backFromThread(row)}</button>
       <span class="ml-auto flex items-center gap-1 pr-1.5 text-[11px]" data-testid="thread.provenance">
+        <!-- Whose name a reply or a move here is recorded under. It stood
+             under the composer as "as topher · Enter sends" and read as
+             clutter (Topher, 2026-09-17); it lives up here now, quietly,
+             because panel.identity.attribution-visible still wants the name
+             on screen at the moment of the action, and outside a sitting
+             this screen has no other place that says it. -->
+        <button id="wdp-tactor" data-testid="thread.actor" class="link max-w-[8rem] truncate font-mono opacity-50 no-underline hover:underline"
+          title="Replies and moves here are recorded under this name - change it in Settings" @click=${openSettings}>${me || 'set your name\u2026'}</button>
+        <span class="opacity-30">\u00b7</span>
         <b class="opacity-60">${t.id}</b>
         ${reasonChip(t)}
         <span class="badge badge-xs ${CHIP[t.status] ?? 'badge-ghost'}">${t.status}</span>
@@ -180,14 +223,6 @@ export function threadPane() {
         }),
       )}
       ${
-        ended
-          ? html`<div class="mt-2 flex items-center gap-1.5 rounded border border-success/40 px-2 py-1 text-[11px]">
-        <span class="text-success">✓</span> ${t.status === 'waived' ? 'Waived' : t.status}${
-          ended.author ? html` by <b>${MSG.displayName(ended.author, names())}</b>` : nothing
-        }${ended.created ? html` · ${MSG.ago(ended.created)}` : nothing}</div>`
-          : nothing
-      }
-      ${
         sketch?.proposed
           ? html`<button class="btn btn-xs btn-outline mt-2 w-full" data-sketch="${t.anchor.screen}"
         @click=${(e) => fire(e.currentTarget, 'view-sketch', { screen: t.anchor.screen })}>
@@ -196,29 +231,34 @@ export function threadPane() {
       }
     </div>
     <!-- The composer stays put at the foot of the screen: type, press Enter,
-         the message is there. The name is not asked for again — it is
-         whoever you are recording as, changed in Settings like everywhere. -->
+         the message is there. Above it, one line says whose move this is
+         and what happens next; the buttons under it are only the moves this
+         reader takes from here. -->
     <div class="shrink-0 border-t border-base-300 p-2">
+      <div class="mb-1.5 flex items-start gap-1.5 rounded border border-dashed px-2 py-1 text-[11px] leading-snug ${TURN[turn.party].line}"
+        data-testid="thread.turn" data-party="${turn.party}">
+        <span class="mt-px shrink-0 rounded px-1 text-[9px] font-bold uppercase tracking-wider ${TURN[turn.party].chip}">${turn.label}</span>
+        <span class="opacity-75">${turn.text}</span>
+      </div>
       <textarea id="wdp-note" data-testid="thread.reply" rows="2" class="textarea textarea-xs w-full resize-none"
-        placeholder="Reply…"
+        placeholder="${composerPlaceholder(t, role)}"
         @input=${(e) => {
           S.threadNote = e.currentTarget.value;
         }}
         @keydown=${(e) => {
           // Enter sends, Shift+Enter breaks the line - the muscle memory
-          // everyone already has. The button stays for the pointer.
+          // everyone already has. The buttons stay for the pointer.
           if (e.key !== 'Enter' || e.shiftKey || e.isComposing) return;
           e.preventDefault();
           const text = e.currentTarget.value.trim();
-          if (S.openThread && text) threadAct(S.openThread, '__reply');
+          if (S.openThread && text) threadAct(S.openThread, enterAct);
         }}>${S.threadNote}</textarea>
-      <div class="mt-1 flex flex-wrap items-center gap-1">
-        <span class="text-[10px] opacity-40">as <button id="wdp-tactor" class="link" @click=${openSettings}>${me || 'set your name…'}</button> · <b>Enter</b> sends</span>
+      <div class="mt-1 flex flex-wrap items-center justify-end gap-1">
         ${acts.map(
-          ([label, st, quiet], i) =>
-            html`<button class="btn btn-xs${quiet ? ' btn-ghost opacity-60' : ''}${i === 0 ? ' ml-auto' : ''}"
-            data-testid="thread.actions" data-act="${st}" data-tid="${t.id}"
-            @click=${() => threadAct(t.id, st)}>${label}</button>`,
+          ([label, act, tone]) =>
+            html`<button class="btn btn-xs ${TONE[tone]}"
+            data-testid="thread.actions" data-act="${act}" data-tid="${t.id}"
+            @click=${() => threadAct(t.id, act)}>${label}</button>`,
         )}
       </div>
       ${

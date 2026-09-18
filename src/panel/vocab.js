@@ -8,7 +8,7 @@
  * next pane also needed, this is where it went.
  */
 import { locationOfUrl, matchScreen } from '../../lib/screen-match.js';
-import { FLOWS } from '../../lib/vocab.js';
+import { canTransition, isMachineName, whoseMove } from '../../lib/vocab.js';
 import { identityOverride, S } from './state.js';
 import { api } from './util.js';
 
@@ -220,32 +220,119 @@ export const declaredAnchors = () =>
  * This used to be a hand-copy of the whole FLOWS table with labels attached,
  * which is precisely the two-runtimes drift vocab.js exists to end: the menu
  * now cannot offer a move the server would refuse, or hide one it allows.
+ *
+ * It offered every legal move to everyone, and read as a control panel:
+ * Addressed beside Verify beside Waive, with nothing saying which of them
+ * was yours to press (Topher, 2026-09-17). What a composer offers now is
+ * WHOSE MOVE it is, in three words: the buttons are the ones this reader's
+ * role takes from this state, and a move that is legal but somebody else's
+ * is simply not drawn. A person is never offered the agent's claim
+ * (addressed, settled, incorporated) and the agent is never offered the
+ * person's acceptance (verified, waived) - the same law lib/threads.js
+ * enforces, read off the same tables.
+ *
+ * "Done" is deliberately one word for two records: a person's Done is
+ * verified, the agent's Done is addressed or incorporated. The record keeps
+ * its own name; the button says what pressing it means from where you sit.
  */
-const VERB = {
-  addressed: 'Addressed',
-  verified: '\u2713 Verify',
-  settled: 'Settled',
-  answered: 'Answer',
-  incorporated: 'Incorporated',
-  open: 'Reopen',
-  waived: 'Waive',
+
+/** Which side of the table this panel is sitting at. */
+export const myRole = () => (isMachineName(whoAmI()) ? 'agent' : 'human');
+
+/** Whose move a thread is, from the shared lifecycle. */
+export { whoseMove } from '../../lib/vocab.js';
+
+/*
+ * What the composer offers, by kind, status and the reader's role:
+ * `[label, act, tone]`, in the order they are drawn - quiet ones first,
+ * Waive (the one warning) beside them, the primary last. `act` is a status
+ * from FLOWS, or one of the composer's own two: `__reply` and `__answer`,
+ * which are replies that may carry a transition.
+ */
+const REPLY = ['Reply', '__reply', 'quiet'];
+const WAIVE = ['Waive', 'waived', 'warn'];
+const REOPEN = ['Reopen', 'open', 'quiet'];
+const OFFERS = {
+  human: {
+    note: {
+      open: [REPLY, WAIVE],
+      addressed: [REOPEN, WAIVE, ['Done', 'verified', 'primary']],
+    },
+    question: {
+      open: [REPLY, WAIVE, ['Answer', '__answer', 'primary']],
+      answered: [REPLY, REOPEN, WAIVE],
+    },
+  },
+  agent: {
+    note: {
+      // An observation is the agent's to settle; anything else it addresses
+      // and hands to a person (ADR 0005 §2). Both are Done from its seat.
+      open: (t) => [REPLY, ['Done', t.reason === 'observation' ? 'settled' : 'addressed', 'primary']],
+    },
+    question: {
+      answered: [REPLY, ['Done', 'incorporated', 'primary']],
+    },
+  },
 };
 
-/** Short verbs, and only the transitions this kind and status allow. */
-export function threadActions(t) {
-  return (
-    (FLOWS[t.kind] ?? FLOWS.note)[t.status]
-      // Settling is an observation's ending and nobody else's (ADR 0005 §2);
-      // the server refuses it elsewhere, and a button it would refuse is
-      // absent, not shown.
-      ?.filter((next) => next !== 'settled' || t.reason === 'observation')
-      .map((next) => [
-      VERB[next],
-      // Answering is a reply that carries the transition, not a bare status
-      // change — the panel routes it through the reply box.
-      t.kind === 'question' && next === 'answered' ? '__answer' : next,
-      // The one visually-marked action: waiving buries work.
-      next === 'waived' || undefined,
-    ]) ?? []
+/** Short verbs, and only the moves this reader takes from this kind and status. */
+export function threadActions(t, role = myRole()) {
+  const offer = OFFERS[role]?.[t.kind === 'question' ? 'question' : 'note']?.[t.status];
+  const list = (typeof offer === 'function' ? offer(t) : offer) ?? [REPLY];
+  // Never a button the server would refuse: the offers are written against
+  // the lifecycle, and this is the seam that keeps them honest if it moves.
+  return list.filter(
+    ([, act]) => act.startsWith('__') || canTransition(t.kind, t.status, act),
   );
+}
+
+/*
+ * The turn line: whose move it is, and what that party does next, from
+ * where THIS reader sits. `party` colours the line - a person's move is
+ * amber, the agent's is blue, an ended thread is green - and `label` says
+ * "your move" when the party is the reader.
+ */
+export function turnLine(t, role = myRole(), { person = 'the person', endedBy = null, endedAt = null } = {}) {
+  const party = whoseMove(t);
+  if (!party) {
+    const how = t.status === 'waived' ? 'Waived' : t.status === 'recorded' ? 'Recorded' : t.status[0].toUpperCase() + t.status.slice(1);
+    return {
+      party: 'closed',
+      label: 'Closed',
+      text: `${how}${endedBy ? ` by ${endedBy}` : ''}${endedAt ? `, ${endedAt}` : ''}. Replies still land here.`,
+    };
+  }
+  const yours = party === role;
+  const label = yours ? 'Your move' : party === 'agent' ? "Agent's move" : `${person}'s move`;
+  const q = t.kind === 'question';
+  const obs = t.reason === 'observation';
+  const finding = t.reason === 'finding';
+  let text;
+  if (role === 'human') {
+    if (q && t.status === 'open') text = 'The agent is asking you. Answer records your answer; Reply just talks.';
+    else if (q) text = 'You answered. It folds the answer into the rule on its next run and closes this.';
+    else if (t.status === 'open' && obs) text = 'It noticed this itself and closes it itself on its next run. It never comes back to you.';
+    else if (t.status === 'open' && finding) text = 'A judge failed the rule on this. The agent fixes it on its next run; a signed pass on the rule closes it.';
+    else if (t.status === 'open') text = 'It does what you asked here on its next run, then hands it back to you.';
+    else if (finding) text = 'The agent says this is fixed. Judge the rule again - a signed pass closes it; Reopen if it is not.';
+    else text = 'The agent says this is done. Look: Done if it is, Reopen if it is not.';
+  } else {
+    if (q && t.status === 'open') text = `${person} has not answered yet. Reply if there is more to ask.`;
+    else if (q) text = 'Fold the answer into the rule, say where it went, then mark it Done. That closes the question.';
+    else if (t.status === 'open' && obs) text = 'You noticed this. Say what changed, then mark it Done - nobody else is asked.';
+    else if (t.status === 'open') text = `Do what this asks, say what you did, then mark it Done. It goes back to ${person} to look.`;
+    else text = `${person} is looking at what you did. Reply if there is more to say.`;
+  }
+  return { party, label, text };
+}
+
+/** What the box invites, by state: the answer, the reason, or a reply. */
+export function composerPlaceholder(t, role = myRole()) {
+  const acts = threadActions(t, role).map(([, act]) => act);
+  if (acts.includes('__answer')) return 'Answer\u2026';
+  // A box whose only use is a reason says so; one that also replies is a
+  // reply box first, and the reason is what the reply becomes if you press
+  // Reopen or Waive instead of Enter.
+  const reasons = ['Reopen', 'Waive'].filter((v, i) => acts.includes(['open', 'waived'][i]));
+  return !acts.includes('__reply') && reasons.length ? `For ${reasons.join(' or ')}, say why\u2026` : 'Reply\u2026';
 }

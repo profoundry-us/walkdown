@@ -2857,14 +2857,15 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
 
     /**
      * A stable colour per name. Recognising who is speaking should not require
-     * reading — and the agent is always the same green, so its voice is one
-     * thing you learn once.
+     * reading — and the agent is always the same blue, so its voice is one
+     * thing you learn once. The same blue as the agent's turn line in the
+     * composer: the party has one colour wherever it appears.
      */
     tint(name) {
       const who = String(name ?? '')
         .trim()
         .toLowerCase();
-      if (who === 'agent') return 'oklch(52% 0.09 165)';
+      if (who === 'agent') return 'oklch(58% 0.16 255)';
       // One tint per person: the first word is what a handle and a full name
       // have in common, so "topher" and "Topher Fangio" wear the same colour.
       const first = who.split(/[\s._-]+/)[0] || who;
@@ -3086,7 +3087,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
           prev = m;
           const who = this.displayName(m.author, names);
           out.push(`<div class="wd-msg${cont ? ' cont' : ''}${m.pending ? ' pending' : ''}${m.failed ? ' failed' : ''}">
-        <div class="wd-ava" style="background:${this.tint(who)}">${this.esc(this.initials(who))}</div>
+        ${this.avatar(who, 'wd-ava', Boolean(m.via) || this.isAgent(m.author))}
         <div class="wd-col">
           <div class="wd-head">${cont ? '' : `<span class="wd-who">${this.esc(who)}</span>`}${
             /*
@@ -3175,9 +3176,27 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       return seen;
     },
 
-    /** One initials tile. The same face for the same person, everywhere. */
-    avatar(name, cls = 'wd-ava') {
+    /*
+     * One face. The same face for the same person, everywhere: a person is a
+     * filled tile with their initials; a machine is a line-drawn robot inside
+     * a dashed ring, so its messages are told from a person's at a glance
+     * rather than by reading the name (Topher, 2026-09-17). The ring is
+     * dashed and blue like the agent's turn line in the composer - one party,
+     * one look.
+     *
+     * `machine` is whether a machine TYPED the message, which is not the same
+     * question as who it is attributed to: an agent acting for a person
+     * records under the person with `via` beside the name (n-0139), and the
+     * face answers the first question while the name answers the second. So
+     * "Topher via agent" wears the robot - the words were the person's
+     * instruction, the typing was the machine's.
+     */
+    isAgent: (name) => String(name ?? '').trim().toLowerCase() === 'agent',
+    ROBOT: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="8" width="16" height="12" rx="2.5"/><path d="M12 8V4M9 4h6"/><circle cx="9" cy="14" r="1.1" fill="currentColor" stroke="none"/><circle cx="15" cy="14" r="1.1" fill="currentColor" stroke="none"/><path d="M9.5 17.5h5"/></svg>`,
+    avatar(name, cls = 'wd-ava', machine = this.isAgent(name)) {
       const who = name || 'someone';
+      if (machine)
+        return `<div class="${cls} wd-bot" style="color:${this.tint('agent')};border-color:${this.tint('agent')}" title="${this.esc(who)}">${this.ROBOT}</div>`;
       return `<div class="${cls}" style="background:${this.tint(who)}" title="${this.esc(
       who,
     )}">${this.esc(this.initials(who))}</div>`;
@@ -3390,6 +3409,9 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     .wd-ava { width: 1.6rem; height: 1.6rem; border-radius: .3rem; display: grid; place-items: center;
       font-size: 10px; font-weight: 700; color: #fff; }
     .wd-msg.cont .wd-ava { visibility: hidden; height: 0; }
+    /* The agent's face: a robot, drawn in line, ringed rather than filled. */
+    .wd-bot { background: transparent; border: 1.5px dashed; box-sizing: border-box; }
+    .wd-bot svg { width: 72%; height: 72%; }
     .wd-head { display: flex; align-items: center; gap: .4rem; margin-bottom: .18rem; min-height: 1.15rem; }
     .wd-head .badge { padding-inline: .5rem; margin-left: .15rem; }
     .wd-who { font-weight: 600; font-size: 12px; }
@@ -3651,6 +3673,23 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       ),
     ),
   ]);
+
+  /*
+   * Whose move a thread is - the one reading of a status that decides what a
+   * composer offers and what its turn line says. Derived from the lifecycle
+   * rather than listed beside it: a person's note waits on the agent until it
+   * is addressed, then on the person; a question waits on the person until it
+   * is answered, then on the agent. An ended thread is nobody's move.
+   *
+   *   'agent'  the agent acts next (address, settle, incorporate)
+   *   'human'  a person acts next (verify or reopen, answer)
+   *   null     ended - replies still land, nothing is owed
+   */
+  const whoseMove = (t) => {
+    if (!t || TERMINAL.includes(t.status)) return null;
+    if (t.kind === 'question') return t.status === 'open' ? 'human' : 'agent';
+    return t.status === 'open' ? 'agent' : 'human';
+  };
 
   /** May a `kind` thread move from `from` to `to`? The one answer, for every caller. */
   const canTransition = (kind, from, to) => ((FLOWS[kind] ?? FLOWS.note)[from] ?? []).includes(to);
@@ -4819,34 +4858,118 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
    * This used to be a hand-copy of the whole FLOWS table with labels attached,
    * which is precisely the two-runtimes drift vocab.js exists to end: the menu
    * now cannot offer a move the server would refuse, or hide one it allows.
+   *
+   * It offered every legal move to everyone, and read as a control panel:
+   * Addressed beside Verify beside Waive, with nothing saying which of them
+   * was yours to press (Topher, 2026-09-17). What a composer offers now is
+   * WHOSE MOVE it is, in three words: the buttons are the ones this reader's
+   * role takes from this state, and a move that is legal but somebody else's
+   * is simply not drawn. A person is never offered the agent's claim
+   * (addressed, settled, incorporated) and the agent is never offered the
+   * person's acceptance (verified, waived) - the same law lib/threads.js
+   * enforces, read off the same tables.
+   *
+   * "Done" is deliberately one word for two records: a person's Done is
+   * verified, the agent's Done is addressed or incorporated. The record keeps
+   * its own name; the button says what pressing it means from where you sit.
    */
-  const VERB = {
-    addressed: 'Addressed',
-    verified: '\u2713 Verify',
-    settled: 'Settled',
-    answered: 'Answer',
-    incorporated: 'Incorporated',
-    open: 'Reopen',
-    waived: 'Waive',
+
+  /** Which side of the table this panel is sitting at. */
+  const myRole = () => (isMachineName(whoAmI()) ? 'agent' : 'human');
+
+  /*
+   * What the composer offers, by kind, status and the reader's role:
+   * `[label, act, tone]`, in the order they are drawn - quiet ones first,
+   * Waive (the one warning) beside them, the primary last. `act` is a status
+   * from FLOWS, or one of the composer's own two: `__reply` and `__answer`,
+   * which are replies that may carry a transition.
+   */
+  const REPLY = ['Reply', '__reply', 'quiet'];
+  const WAIVE = ['Waive', 'waived', 'warn'];
+  const REOPEN = ['Reopen', 'open', 'quiet'];
+  const OFFERS = {
+    human: {
+      note: {
+        open: [REPLY, WAIVE],
+        addressed: [REOPEN, WAIVE, ['Done', 'verified', 'primary']],
+      },
+      question: {
+        open: [REPLY, WAIVE, ['Answer', '__answer', 'primary']],
+        answered: [REPLY, REOPEN, WAIVE],
+      },
+    },
+    agent: {
+      note: {
+        // An observation is the agent's to settle; anything else it addresses
+        // and hands to a person (ADR 0005 §2). Both are Done from its seat.
+        open: (t) => [REPLY, ['Done', t.reason === 'observation' ? 'settled' : 'addressed', 'primary']],
+      },
+      question: {
+        answered: [REPLY, ['Done', 'incorporated', 'primary']],
+      },
+    },
   };
 
-  /** Short verbs, and only the transitions this kind and status allow. */
-  function threadActions(t) {
-    return (
-      (FLOWS[t.kind] ?? FLOWS.note)[t.status]
-        // Settling is an observation's ending and nobody else's (ADR 0005 §2);
-        // the server refuses it elsewhere, and a button it would refuse is
-        // absent, not shown.
-        ?.filter((next) => next !== 'settled' || t.reason === 'observation')
-        .map((next) => [
-        VERB[next],
-        // Answering is a reply that carries the transition, not a bare status
-        // change — the panel routes it through the reply box.
-        t.kind === 'question' && next === 'answered' ? '__answer' : next,
-        // The one visually-marked action: waiving buries work.
-        next === 'waived' || undefined,
-      ]) ?? []
+  /** Short verbs, and only the moves this reader takes from this kind and status. */
+  function threadActions(t, role = myRole()) {
+    const offer = OFFERS[role]?.[t.kind === 'question' ? 'question' : 'note']?.[t.status];
+    const list = (typeof offer === 'function' ? offer(t) : offer) ?? [REPLY];
+    // Never a button the server would refuse: the offers are written against
+    // the lifecycle, and this is the seam that keeps them honest if it moves.
+    return list.filter(
+      ([, act]) => act.startsWith('__') || canTransition(t.kind, t.status, act),
     );
+  }
+
+  /*
+   * The turn line: whose move it is, and what that party does next, from
+   * where THIS reader sits. `party` colours the line - a person's move is
+   * amber, the agent's is blue, an ended thread is green - and `label` says
+   * "your move" when the party is the reader.
+   */
+  function turnLine(t, role = myRole(), { person = 'the person', endedBy = null, endedAt = null } = {}) {
+    const party = whoseMove(t);
+    if (!party) {
+      const how = t.status === 'waived' ? 'Waived' : t.status === 'recorded' ? 'Recorded' : t.status[0].toUpperCase() + t.status.slice(1);
+      return {
+        party: 'closed',
+        label: 'Closed',
+        text: `${how}${endedBy ? ` by ${endedBy}` : ''}${endedAt ? `, ${endedAt}` : ''}. Replies still land here.`,
+      };
+    }
+    const yours = party === role;
+    const label = yours ? 'Your move' : party === 'agent' ? "Agent's move" : `${person}'s move`;
+    const q = t.kind === 'question';
+    const obs = t.reason === 'observation';
+    const finding = t.reason === 'finding';
+    let text;
+    if (role === 'human') {
+      if (q && t.status === 'open') text = 'The agent is asking you. Answer records your answer; Reply just talks.';
+      else if (q) text = 'You answered. It folds the answer into the rule on its next run and closes this.';
+      else if (t.status === 'open' && obs) text = 'It noticed this itself and closes it itself on its next run. It never comes back to you.';
+      else if (t.status === 'open' && finding) text = 'A judge failed the rule on this. The agent fixes it on its next run; a signed pass on the rule closes it.';
+      else if (t.status === 'open') text = 'It does what you asked here on its next run, then hands it back to you.';
+      else if (finding) text = 'The agent says this is fixed. Judge the rule again - a signed pass closes it; Reopen if it is not.';
+      else text = 'The agent says this is done. Look: Done if it is, Reopen if it is not.';
+    } else {
+      if (q && t.status === 'open') text = `${person} has not answered yet. Reply if there is more to ask.`;
+      else if (q) text = 'Fold the answer into the rule, say where it went, then mark it Done. That closes the question.';
+      else if (t.status === 'open' && obs) text = 'You noticed this. Say what changed, then mark it Done - nobody else is asked.';
+      else if (t.status === 'open') text = `Do what this asks, say what you did, then mark it Done. It goes back to ${person} to look.`;
+      else text = `${person} is looking at what you did. Reply if there is more to say.`;
+    }
+    return { party, label, text };
+  }
+
+  /** What the box invites, by state: the answer, the reason, or a reply. */
+  function composerPlaceholder(t, role = myRole()) {
+    const acts = threadActions(t, role).map(([, act]) => act);
+    if (acts.includes('__answer')) return 'Answer\u2026';
+    // A box whose only use is a reason says so; one that also replies is a
+    // reply box first, and the reason is what the reply becomes if you press
+    // Reopen or Waive instead of Enter.
+    const reasons = ['Reopen', 'Waive'].filter((v, i) => acts.includes(['open', 'waived'][i]));
+    return !acts.includes('__reply') && reasons.length ? `For ${reasons.join(' or ')}, say why\u2026` : 'Reply\u2026';
   }
 
   /*
@@ -6043,6 +6166,25 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       : A;
 
   /*
+   * How the turn line is drawn, by whose move it is. A person's move is amber,
+   * the agent's is blue and dashed like the agent's own face in the stream, an
+   * ended thread is green: the colour is the party, not the reader, so the
+   * same thread reads the same on both sides of the table.
+   */
+  const TURN = {
+    human: { line: 'border-warning', chip: 'bg-warning text-warning-content' },
+    agent: { line: 'border-info', chip: 'bg-info text-info-content' },
+    closed: { line: 'border-success', chip: 'bg-success text-success-content' },
+  };
+
+  /* The button for a tone: the primary is filled, the warning outlined in amber, the rest quiet. */
+  const TONE = {
+    primary: 'btn-primary',
+    warn: 'btn-outline btn-warning',
+    quiet: 'btn-outline border-base-300 text-base-content/70',
+  };
+
+  /*
    * A thread, collapsed: the opening message and the way into the rest of it.
    * It reads the way a message with replies reads anywhere - a face, a name, a
    * time, what was said, and under it the people in the thread, the number of
@@ -6064,7 +6206,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     data-open-thread="${where ? t.id : A}">
     ${where ? b`<div class="mb-1 truncate text-[11px] opacity-45" data-testid="thread.where">${where}</div>` : A}
     <div class="wd-msg">
-      ${o$1(MSG.avatar(who))}
+      ${o$1(MSG.avatar(who, 'wd-ava', Boolean(t.via) || MSG.isAgent(t.author)))}
       <div class="wd-col min-w-0">
         <div class="wd-head">
           <span class="wd-who">${who}</span>
@@ -6142,7 +6284,8 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       t.anchor?.viewport ? `${t.anchor.viewport.name} ${t.anchor.viewport.width}` : '',
     ].filter(Boolean);
     const sketch = ghostSource(sc);
-    const acts = threadActions(t);
+    const role = myRole();
+    const acts = threadActions(t, role);
     const me = whoAmI();
     /*
      * Who ended the thread: the record first, the guess second. verified_by /
@@ -6157,10 +6300,30 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       TERMINAL.includes(t.status) && (recordedBy || lastReply)
         ? { author: recordedBy ?? lastReply?.author, created: lastReply?.created }
         : null;
+    // The person on the other side of the table, for the agent's reading of
+    // the line: whoever opened the thread, unless a machine did.
+    const opener = MSG.displayName(t.author, names());
+    const turn = turnLine(t, role, {
+      person: /^agent$/i.test(t.author ?? '') ? 'the person' : opener,
+      endedBy: ended?.author ? MSG.displayName(ended.author, names()) : null,
+      endedAt: ended?.created ? MSG.ago(ended.created) : null,
+    });
+    // Enter sends what the box is for: the answer on a question that is
+    // yours to answer, and a reply everywhere else.
+    const enterAct = acts.some(([, act]) => act === '__answer') ? '__answer' : '__reply';
     return b`
     <div class="flex items-center gap-1 px-2 pt-2">
       <button class="wdp-thread-back btn btn-ghost btn-xs text-primary" data-testid="thread.close" @click=${leaveThread}>← ${backFromThread(row)}</button>
       <span class="ml-auto flex items-center gap-1 pr-1.5 text-[11px]" data-testid="thread.provenance">
+        <!-- Whose name a reply or a move here is recorded under. It stood
+             under the composer as "as topher · Enter sends" and read as
+             clutter (Topher, 2026-09-17); it lives up here now, quietly,
+             because panel.identity.attribution-visible still wants the name
+             on screen at the moment of the action, and outside a sitting
+             this screen has no other place that says it. -->
+        <button id="wdp-tactor" data-testid="thread.actor" class="link max-w-[8rem] truncate font-mono opacity-50 no-underline hover:underline"
+          title="Replies and moves here are recorded under this name - change it in Settings" @click=${openSettings}>${me || 'set your name\u2026'}</button>
+        <span class="opacity-30">\u00b7</span>
         <b class="opacity-60">${t.id}</b>
         ${reasonChip(t)}
         <span class="badge badge-xs ${CHIP[t.status] ?? 'badge-ghost'}">${t.status}</span>
@@ -6183,14 +6346,6 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
         }),
       )}
       ${
-        ended
-          ? b`<div class="mt-2 flex items-center gap-1.5 rounded border border-success/40 px-2 py-1 text-[11px]">
-        <span class="text-success">✓</span> ${t.status === 'waived' ? 'Waived' : t.status}${
-          ended.author ? b` by <b>${MSG.displayName(ended.author, names())}</b>` : A
-        }${ended.created ? b` · ${MSG.ago(ended.created)}` : A}</div>`
-          : A
-      }
-      ${
         sketch?.proposed
           ? b`<button class="btn btn-xs btn-outline mt-2 w-full" data-sketch="${t.anchor.screen}"
         @click=${(e) => fire(e.currentTarget, 'view-sketch', { screen: t.anchor.screen })}>
@@ -6199,29 +6354,34 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       }
     </div>
     <!-- The composer stays put at the foot of the screen: type, press Enter,
-         the message is there. The name is not asked for again — it is
-         whoever you are recording as, changed in Settings like everywhere. -->
+         the message is there. Above it, one line says whose move this is
+         and what happens next; the buttons under it are only the moves this
+         reader takes from here. -->
     <div class="shrink-0 border-t border-base-300 p-2">
+      <div class="mb-1.5 flex items-start gap-1.5 rounded border border-dashed px-2 py-1 text-[11px] leading-snug ${TURN[turn.party].line}"
+        data-testid="thread.turn" data-party="${turn.party}">
+        <span class="mt-px shrink-0 rounded px-1 text-[9px] font-bold uppercase tracking-wider ${TURN[turn.party].chip}">${turn.label}</span>
+        <span class="opacity-75">${turn.text}</span>
+      </div>
       <textarea id="wdp-note" data-testid="thread.reply" rows="2" class="textarea textarea-xs w-full resize-none"
-        placeholder="Reply…"
+        placeholder="${composerPlaceholder(t, role)}"
         @input=${(e) => {
           S.threadNote = e.currentTarget.value;
         }}
         @keydown=${(e) => {
           // Enter sends, Shift+Enter breaks the line - the muscle memory
-          // everyone already has. The button stays for the pointer.
+          // everyone already has. The buttons stay for the pointer.
           if (e.key !== 'Enter' || e.shiftKey || e.isComposing) return;
           e.preventDefault();
           const text = e.currentTarget.value.trim();
-          if (S.openThread && text) threadAct(S.openThread, '__reply');
+          if (S.openThread && text) threadAct(S.openThread, enterAct);
         }}>${S.threadNote}</textarea>
-      <div class="mt-1 flex flex-wrap items-center gap-1">
-        <span class="text-[10px] opacity-40">as <button id="wdp-tactor" class="link" @click=${openSettings}>${me || 'set your name…'}</button> · <b>Enter</b> sends</span>
+      <div class="mt-1 flex flex-wrap items-center justify-end gap-1">
         ${acts.map(
-          ([label, st, quiet], i) =>
-            b`<button class="btn btn-xs${quiet ? ' btn-ghost opacity-60' : ''}${i === 0 ? ' ml-auto' : ''}"
-            data-testid="thread.actions" data-act="${st}" data-tid="${t.id}"
-            @click=${() => threadAct(t.id, st)}>${label}</button>`,
+          ([label, act, tone]) =>
+            b`<button class="btn btn-xs ${TONE[tone]}"
+            data-testid="thread.actions" data-act="${act}" data-tid="${t.id}"
+            @click=${() => threadAct(t.id, act)}>${label}</button>`,
         )}
       </div>
       ${

@@ -261,9 +261,9 @@ stories:
           then:
             - The message is on screen immediately, marked as sending, and settles when the server confirms it
             - A refused reply is marked as not sent and the text comes back, so nothing written is lost
-            - The box asks for no name - it says who you are recording as, and that link leads to Settings
+            - The box asks for no name - the name a reply is recorded under stands in the thread's header, and leads to Settings
             - Typing survives a repaint - the caret is where it was
-          statement_hash: sha256:4b045e0c4e80
+          statement_hash: sha256:5452b79a41b9
           reworded:
             - hash: sha256:fc8772c1687a
               at: 2026-09-13
@@ -271,6 +271,34 @@ stories:
             - hash: sha256:3559d463e994
               at: 2026-09-14T02:53:55Z
               why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
+            - hash: sha256:4b045e0c4e80
+              at: 2026-09-18T03:10:58Z
+              why: "composer-stays: the recorded name moved from under the box to the thread's header; the composer still asks for no name"
+      - id: threads.conversation.says-whose-move
+        origin: walkdown
+        created_at: 2026-09-17
+        statement: An open thread says whose move it is and what that party does next, and its composer offers only the moves this reader takes from here. A person's Done records verified; the agent's Done records addressed or incorporated.
+        because: Every thread is waiting on exactly one of the two parties, and the composer should say which rather than offer both sides' buttons.
+        history: Addressed stood beside Verify beside Waive on every thread, whoever was reading, and it read as a control panel with nothing saying which button was yours; Topher asked why a button he was never meant to press was there at all (2026-09-17). The design was settled on a canvas of every state from both seats before it was built.
+        verify: [checks]
+        signoff: [eng, product, design]
+        screens: [thread-panel]
+        steps:
+          given:
+            - A note the agent has not yet addressed, one it has, an open question, an answered one, and an ended thread
+          when:
+            - Open each on screen `thread-panel`, as a person and as the agent
+          then:
+            - Above the box, one line names the party whose move it is - yours, the agent's, or a person's - and says in a sentence what that party does next
+            - The line is coloured by the party, not the reader - amber for a person, blue and dashed for the agent, green for a thread that has ended - so the same thread reads the same from both seats
+            - A person is offered Reply and Waive on a note the agent still owes; Reopen, Waive and Done on one it has addressed; Reply, Waive and Answer on an open question; Reply, Reopen and Waive on an answered one. Done and Answer are the filled primary, Waive is the one amber, the rest are quiet
+            - The agent is offered Reply and Done on what waits on it, and only Reply on what waits on a person. It is never offered Verify or Waive; a person is never offered Addressed, Settled or Incorporated
+            - Done records what the seat means by it - verified for a person, addressed or incorporated for the agent - and the status chip keeps the record's own name
+            - Enter sends what the box is for - the answer on a question that is yours to answer, a reply everywhere else - and the box says which
+            - An ended thread offers Reply alone and its line says how it ended and by whom
+            - In the stream, the agent's face is a robot in a dashed ring in the agent's blue, a person's their initials on a filled tile, so a machine's messages are told from a person's without reading the name
+            - Nothing under the box says who you are or how to send - the name stands in the thread's header
+          statement_hash: sha256:9b1beb0433cc
       - id: threads.conversation.new-since-you-looked
         origin: walkdown
         statement: A thread remembers where your reading stopped and marks what arrived since as new.
