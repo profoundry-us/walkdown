@@ -83,7 +83,7 @@ export function threadCard(t, where = null) {
     data-open-thread="${where ? t.id : nothing}">
     ${where ? html`<div class="mb-1 truncate text-[11px] opacity-45" data-testid="thread.where">${where}</div>` : nothing}
     <div class="wd-msg">
-      ${unsafeHTML(MSG.avatar(who, 'wd-ava', Boolean(t.via) || MSG.isAgent(t.author)))}
+      ${unsafeHTML(MSG.avatar(who, 'wd-ava', Boolean(t.via)))}
       <div class="wd-col min-w-0">
         <div class="wd-head">
           <span class="wd-who">${who}</span>
@@ -105,6 +105,7 @@ export function threadCard(t, where = null) {
         <div class="wd-text wd-preview">${unsafeHTML(
           MSG.opening(t.kind, t.body, { rules: (S.data?.rows ?? []).map((r) => r.rule) }),
         )}</div>
+        ${t.added ? unsafeHTML(MSG.addition(t.added, { rules: (S.data?.rows ?? []).map((r) => r.rule) })) : nothing}
         ${unsafeHTML(MSG.repliesLine(t, names()))}
       </div>
     </div>

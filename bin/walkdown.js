@@ -20,8 +20,9 @@ Usage:
   walkdown sweep --why <reason> [--tiers checks,agent] [--blueprint <id>] [--target <name>]
   walkdown threads [--blueprint <id>] [--rule <id>] [--all] [--json]
   walkdown thread <id> [--reply <text>] [--status <s>|--verify|--reopen|--waive]
-                       [--reason <text>] [--as-agent] [--blueprint <id>] [--json]
-  walkdown thread new --rule <id> --body <text> [--kind note|question]
+                       [--reason <text>] [--as-agent [--said <text>] [--added <text>]]
+                       [--blueprint <id>] [--json]
+  walkdown thread new --rule <id> --body <text>|--said <text> [--added <text>] [--kind note|question]
                       [--screen <id>] [--element <sel>] [--as-agent] [--blueprint <id>] [--json]
   walkdown serve [--blueprint <id>] [--port <n>]
   walkdown claims [--blueprint <id>] [--url <address>] [--json]
@@ -86,14 +87,20 @@ Commands:
   thread  Show one thread in full: anchor, body, and replies. With --reply
           and/or a status flag, mutate it first: transitions are validated
           (notes: open → addressed → verified | reopen | waived; questions:
-          open → answered → incorporated | reopen | waived). "verified" and
-          "waived" require a named human actor, and are refused outright
-          with --as-agent. Waiving and reopening require --reason (recorded
-          as a reply). Who it records under is not an argument: it is the
-          identity in ~/.walkdown/config.yml. --as-agent adds provenance
-          beside that name — the person it was written for, and the fact
-          that a machine typed it. "thread new" opens one instead: --rule anchors it (--screen/--element sharpen the spot),
-          --kind picks note or question, --body says what was seen.
+          open → answered → incorporated | reopen | waived; every ending
+          may reopen). "verified" and "waived" require a named human actor,
+          and are refused outright with --as-agent, as is reopening a
+          thread a person verified or waived. Waiving and reopening require
+          --reason (recorded as a reply). Who it records under is not an
+          argument: it is the identity in ~/.walkdown/config.yml, and
+          attribution follows the words. --as-agent --reply is the
+          machine's own words, recorded as "agent"; --as-agent --said
+          carries a person's words as they typed them, under their name
+          with the machine marked beside it, and --added is what the
+          machine put beside those words, kept apart. "thread new" opens
+          one instead: --rule anchors it (--screen/--element sharpen the
+          spot), --kind picks note or question, --body says what was seen
+          (or --said what the person said).
   where   Print where this project's pieces live and why each was chosen -
           the spec, the runs, the threads, the evidence, the drafts, and the
           repository a run's git_sha comes from. With a kind (spec, code,

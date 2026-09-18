@@ -27,11 +27,14 @@ import {
 test('terminal is derived from the flows, so the two cannot disagree', () => {
   // Four hand-written copies of this list existed before vocab.js, in three
   // orderings. The derivation is the fix: a status is terminal exactly when
-  // its flow offers nowhere to go.
+  // its flow offers nowhere to go but back to open - an ending can be
+  // reopened, and that is the only move it offers.
   assert.deepEqual([...TERMINAL].sort(), ['incorporated', 'recorded', 'settled', 'verified', 'waived']);
   for (const status of TERMINAL)
     for (const flow of Object.values(FLOWS))
-      assert.deepEqual(flow[status] ?? [], [], `${status} must offer no exit`);
+      for (const next of flow[status] ?? []) assert.equal(next, 'open', `${status} may only reopen`);
+  // A decision is a record, not a task: it never reopens.
+  assert.deepEqual(FLOWS.note.recorded, []);
 });
 
 test('canTransition answers exactly what the flows table says', () => {

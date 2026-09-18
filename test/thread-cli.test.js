@@ -91,10 +91,26 @@ test('a reply with no transition says the status did not move @rule:threads.life
   const bp = fixture('replied', { id: 'n-0002', status: 'open' });
   const out = run(['n-0002', '--as-agent', '--reply', 'looking at it'], bp);
   assert.match(out, /still open/, 'silence about the status would imply it changed');
-  assert.match(out, /by A Person/, 'recorded under is named even when nothing moved');
-  assert.match(out, /via agent/, 'and a machine typing it is said beside the name, not instead');
+  // A machine's own words are the agent's - not the person's with a mark
+  // (2026-09-17: the board had filled with "topher via agent" over
+  // paragraphs Topher never wrote).
+  assert.match(out, /by agent/, 'recorded under is named even when nothing moved');
+  assert.doesNotMatch(out, /via agent/, 'the author IS the machine; no mark is needed beside it');
   assert.match(out, /\+1 reply/);
   assert.doesNotMatch(out, /→/, 'nothing moved, so nothing may be reported as having moved');
+  // Relaying a person's words is the case the mark exists for: their words
+  // under their name, the machine beside it, and what it added kept apart.
+  const relayed = run(['n-0002', '--as-agent', '--said', 'the label reads wrong', '--added', 'seen at 375 too'], bp);
+  assert.match(relayed, /by A Person/);
+  assert.match(relayed, /via agent/, 'a machine typing a person\'s words is said beside the name, not instead');
+  const disk = readFileSync(join(threadsOf(bp), 'n-0002.yml'), 'utf8');
+  assert.match(disk, /author: A Person\n\s+via: agent\n[^]*body: the label reads wrong\n\s+added: seen at 375 too/);
+  const read = run(['n-0002'], bp);
+  assert.match(read, /the label reads wrong\n[^]*agent added:[^]*seen at 375 too/, 'the read path draws the addition apart');
+  // --added without --said has nothing to sit beside; --said with --reply is two bodies.
+  assert.throws(() => run(['n-0002', '--as-agent', '--added', 'x'], bp), (e) => /--said/.test(String(e.stderr)));
+  assert.throws(() => run(['n-0002', '--as-agent', '--said', 'x', '--reply', 'y'], bp), (e) => /--added/.test(String(e.stderr)));
+  assert.throws(() => run(['n-0002', '--said', 'x'], bp), (e) => /--as-agent/.test(String(e.stderr)));
 });
 
 test('every mutation names who it was recorded under @rule:threads.lifecycle.says-what-it-did', () => {
@@ -153,8 +169,8 @@ test('a mutating --json call reports the change, never the thread @rule:threads.
   const doc = JSON.parse(run(['n-0008', '--as-agent', '--status', 'addressed', '--json'], bp));
   assert.equal(doc.was, 'open');
   assert.equal(doc.status, 'addressed');
-  assert.equal(doc.by, 'A Person', 'recorded-under survives into the machine format');
-  assert.equal(doc.via, 'agent', 'and so does the provenance beside it');
+  assert.equal(doc.by, 'agent', 'recorded-under survives into the machine format - a machine moves a thread as itself');
+  assert.equal(doc.via, undefined, 'and no mark beside it: the actor is the machine');
   assert.equal(doc.replies_added, 0);
   assert.equal(doc.body, undefined, 'a mutation must not print the conversation');
 });
@@ -177,7 +193,7 @@ test("a reply to a terminal thread is recorded under its own actor, not the stat
   // Round five (n-0125): the report named the waiver for someone else's
   // reply, putting another person's name on a change they did not make.
   const bp = fixture('terminal', { id: 'n-0010', status: 'waived', waived_by: 'Probe Human' });
-  const out = run(['n-0010', '--as-agent', '--reply', 'noting this for later'], bp);
+  const out = run(['n-0010', '--as-agent', '--said', 'noting this for later'], bp);
   assert.match(out, /still waived/);
   assert.match(out, /by A Person/, "the reply's author is who the change was recorded under");
   assert.doesNotMatch(out, /by Probe Human/, 'the status holder did not make this change');
@@ -235,14 +251,15 @@ function ruleFixture(name) {
 
 test('thread new opens an anchored thread and reports under whom @rule:threads.lifecycle.says-what-it-did @rule:threads.lifecycle.acts-for-a-person', () => {
   const bp = ruleFixture('new-note');
-  // A person's words the agent typed: `--reason feedback` says so. Without
-  // it, an agent's note is the machine's own observation (ADR 0005 §1).
+  // A person's words the agent relays: `--said` carries them as typed, and
+  // they are the person's feedback. A machine's own note is its own
+  // observation unless it says otherwise (ADR 0005 §1).
   const out = run(
-    ['new', '--kind', 'note', '--rule', 'f.s.rule', '--body', 'Seen: a thing.', '--as-agent', '--reason', 'feedback'],
+    ['new', '--kind', 'note', '--rule', 'f.s.rule', '--said', 'Seen: a thing.', '--as-agent'],
     bp,
   );
   assert.match(out, /n-0001 opened · note · by A Person/);
-  assert.match(out, /via agent/, 'a note an agent typed says so');
+  assert.match(out, /via agent/, 'a note an agent typed for a person says so');
   assert.doesNotMatch(out, /Seen: a thing/, 'a report, not the thread read back');
   const disk = readFileSync(join(threadsOf(bp), 'n-0001.yml'), 'utf8');
   assert.match(disk, /author: A Person/);

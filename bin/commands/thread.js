@@ -22,6 +22,8 @@ export function run(args) {
       waive: { type: 'boolean', default: false },
       reason: { type: 'string' },
       'as-agent': { type: 'boolean', default: false },
+      said: { type: 'string' },
+      added: { type: 'string' },
       kind: { type: 'string' },
       rule: { type: 'string' },
       screen: { type: 'string' },
@@ -33,8 +35,8 @@ export function run(args) {
   const id = positionals[0];
   if (!id) {
     console.error(
-      'Usage: walkdown thread <id> [--reply <text>] [--status <s>|--verify|--reopen|--waive] [--reason <text>] [--as-agent]\n' +
-        '       walkdown thread new --rule <id> --body <text> [--kind note|question] [--reason feedback|finding|observation|request|decision] [--screen <id>] [--element <sel>] [--as-agent]',
+      'Usage: walkdown thread <id> [--reply <text>] [--status <s>|--verify|--reopen|--waive] [--reason <text>] [--as-agent [--said <text>] [--added <text>]]\n' +
+        '       walkdown thread new --rule <id> --body <text> [--kind note|question] [--reason feedback|finding|observation|request|decision] [--screen <id>] [--element <sel>] [--as-agent [--said <text>] [--added <text>]]',
     );
     process.exit(2);
   }
@@ -59,6 +61,27 @@ export function run(args) {
   const who = defaultActor(blueprint.codeRoot ?? blueprint.projectRoot);
   const actor = who.username?.trim() || 'unknown';
   const via = values['as-agent'] ? 'agent' : null;
+  /*
+   * WHOSE WORDS. With --as-agent alone the words are the machine's own and
+   * record as `agent`. --said carries a person's words as they typed them,
+   * recorded under the person with the machine's mark beside them; --added
+   * is what the machine put beside those words, kept apart from them
+   * (lib/writes.js, whoseWords). Neither means anything without --as-agent,
+   * and --said is a reply of its own - --reply beside it would be two
+   * bodies for one message.
+   */
+  if ((values.said !== undefined || values.added !== undefined) && !via) {
+    console.error('--said and --added say what a machine relayed and added; they go with --as-agent');
+    process.exit(2);
+  }
+  if (values.added !== undefined && values.said === undefined) {
+    console.error('--added goes beside a person\'s words - say what they said with --said');
+    process.exit(2);
+  }
+  if (values.said !== undefined && values.reply !== undefined) {
+    console.error('--said is the message; what the machine adds to it goes in --added, not --reply');
+    process.exit(2);
+  }
   const status = values.verify
     ? 'verified'
     : values.reopen
@@ -72,7 +95,7 @@ export function run(args) {
    * while silently dropping the reply - is the round-three finding on
    * n-0125. An empty body reaches replyToThread and gets its refusal.
    */
-  const replying = values.reply !== undefined;
+  const replying = values.reply !== undefined || (id !== 'new' && values.said !== undefined);
 
   /*
    * `thread new` opens a thread from the CLI - the door that was missing.
@@ -93,7 +116,13 @@ export function run(args) {
     }
     // Not `trim()` alone: a body of nothing but format characters is a thread
     // that renders as a blank line, which is what n-0203 walked in through.
-    const body = saysSomething(values.body) ? values.body.trim() : '';
+    // A relayed thread's body is what the person said; --body beside --said
+    // would be two bodies for one message.
+    if (values.said !== undefined && values.body !== undefined) {
+      console.error('--said is the body of a relayed thread; what the machine adds goes in --added, not --body');
+      process.exit(2);
+    }
+    const body = saysSomething(values.body ?? values.said) ? (values.body ?? values.said).trim() : '';
     if (!body) {
       console.error('a thread needs a body — say what was seen (--body <text>)');
       process.exit(2);
@@ -117,14 +146,25 @@ export function run(args) {
     // note is an observation and a person's is feedback. The same flag that
     // carries a waive's sentence carries this one word on `new`.
     const reason = values.reason ?? null;
-    const { id: opened, thread } = openThread(blueprint, { kind, body, anchor, via, reason });
+    const { id: opened, thread } = openThread(blueprint, {
+      kind,
+      body,
+      anchor,
+      via,
+      reason,
+      said: values.said ?? null,
+      added: values.added ?? null,
+    });
+    // Whose name went on it is the record's answer, not this door's guess.
+    const by = thread.author;
+    const marked = thread.via ?? null;
     if (values.json) {
       console.log(
-        JSON.stringify({ id: opened, kind, status: thread.status, by: actor, ...(via ? { via } : {}), anchor }),
+        JSON.stringify({ id: opened, kind, status: thread.status, by, ...(marked ? { via: marked } : {}), anchor }),
       );
       return end(0);
     }
-    console.log(`✓ ${opened} opened · ${kind} · by ${actor}${via ? dim(` (via ${via})`) : ''}`);
+    console.log(`✓ ${opened} opened · ${kind} · by ${by}${marked ? dim(` (via ${marked})`) : ''}`);
     console.log(dim(`  ${anchorText(anchor)}`));
     console.log(dim(`  walkdown thread ${opened} reads it in full`));
     return end(0);
@@ -134,6 +174,10 @@ export function run(args) {
   // What it was before we touched it, so the command can say what it changed
   // rather than only what the thread now happens to say.
   const was = mutating ? getThread(blueprint, id) : null;
+  // Whose name the change went under - the record's answer, read back from
+  // the write rather than guessed here (n-0125; and since 2026-09-17 a
+  // machine's own words are the agent's, not the person's).
+  let under = actor;
   if (mutating) {
     try {
       /*
@@ -145,12 +189,14 @@ export function run(args) {
        * (ownership.writes.spec-never-implementation), and a second interface
        * now inherits it instead of rediscovering it (n-0125).
        */
-      mutateThread(blueprint, id, {
-        ...(replying ? { body: values.reply } : {}),
+      ({ as: under } = mutateThread(blueprint, id, {
+        ...(values.reply !== undefined ? { body: values.reply } : {}),
+        ...(values.said !== undefined ? { said: values.said } : {}),
+        ...(values.added !== undefined ? { added: values.added } : {}),
         ...(status ? { status } : {}),
         reason: values.reason,
         via,
-      });
+      }));
     } catch (err) {
       console.error(err.message);
       process.exit(2);
@@ -184,7 +230,9 @@ export function run(args) {
      * named the waiver for someone else's reply (n-0125, round five); the
      * holder belongs to the read path below, where it is the record.
      */
-    const under = actor;
+    // The mark beside the name is only drawn where the record carries it:
+    // a machine's own words are the agent's and need no "via".
+    const marked = via && under !== 'agent' ? via : null;
     if (values.json) {
       console.log(
         JSON.stringify({
@@ -193,7 +241,7 @@ export function run(args) {
           status: t.status,
           moved: Boolean(status),
           by: under,
-          ...(via ? { via } : {}),
+          ...(marked ? { via: marked } : {}),
           replies_added: added,
         }),
       );
@@ -209,7 +257,7 @@ export function run(args) {
      * status-gated, because a reopened thread still carries the old
      * waived_by; the actor is what this invocation ran under either way.
      */
-    parts.push(`by ${under}${via ? ` (via ${via})` : ''}`);
+    parts.push(`by ${under}${marked ? ` (via ${marked})` : ''}`);
     if (added > 0) parts.push(`+${added} ${added === 1 ? 'reply' : 'replies'}`);
     console.log(`✓ ${t.id} ${parts.join(' · ')}`);
     console.log(dim(`  ${anchorText(t.anchor)}`));
@@ -242,6 +290,11 @@ export function run(args) {
       .trim()
       .replace(/\n/g, '\n  ')}`,
   );
+  // What a machine added beside a person's words, apart from them and
+  // marked as its own.
+  const addition = (m, pad) =>
+    m?.added ? `\n${pad}${dim('┆ agent added:')}\n${pad}${dim('┆')} ${String(m.added).trim().replace(/\n/g, `\n${pad}${dim('┆')} `)}` : '';
+  console.log(addition(t, '  ').replace(/^\n/, ''));
   for (const r of t.replies ?? []) {
     console.log(
       dim(`\n  ↳ ${r.author ?? 'unknown'}`) + saidVia(r) + at(r),
@@ -249,7 +302,7 @@ export function run(args) {
     console.log(
       `    ${String(r.body ?? '')
         .trim()
-        .replace(/\n/g, '\n    ')}`,
+        .replace(/\n/g, '\n    ')}${addition(r, '    ')}`,
     );
   }
   return end(0);

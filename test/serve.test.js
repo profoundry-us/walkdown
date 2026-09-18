@@ -1103,12 +1103,16 @@ test('a via the door cannot use is refused, never quietly erased @rule:threads.l
   assert.equal(readFileSync(file, 'utf8'), before, 'nothing refused may reach the disk');
 });
 
-test('via rides through the API on a note, a reply and a move @rule:status.attribution.username-is-the-record', async () => {
+test('via rides through the API on a note, a reply and a move @rule:status.attribution.username-is-the-record @rule:threads.lifecycle.acts-for-a-person', async () => {
   /*
    * The CLI has always carried provenance (--as-agent); the HTTP door dropped
    * it, so an agent driving the panel or the embed filed under a person's
    * bare name, and the embed showed the opening note with no `via` while the
    * reply under it said `via agent` (n-0152).
+   *
+   * Since 2026-09-17 provenance follows the WORDS: a machine relaying what a
+   * person said (`said`) records it under the person with the mark beside
+   * them and its own addition apart; a machine's own words are the agent's.
    */
   const post = (path, body) =>
     fetch(`${base}${path}`, {
@@ -1118,24 +1122,44 @@ test('via rides through the API on a note, a reply and a move @rule:status.attri
     }).then((r) => r.json());
   const { id } = await post('/api/threads', {
     kind: 'note',
-    body: 'Typed by a machine.',
+    said: 'The label reads wrong.',
+    body: 'On the second screen, at 375.',
     via: 'agent',
-    reason: 'feedback', // a person's words, typed for them - not the machine's own
     anchor: { element: 'home.cta' },
     url: 'http://localhost:3000/home',
   });
   const file = join(threads, `${id}.yml`);
-  assert.equal(parse(readFileSync(file, 'utf8')).via, 'agent');
-  await post(`/api/threads/${id}/replies`, { body: 'Also typed by a machine.', via: 'agent' });
+  const opened = parse(readFileSync(file, 'utf8'));
+  assert.equal(opened.via, 'agent');
+  assert.equal(opened.author, 'serve-person', 'relayed words are the person\'s');
+  assert.equal(opened.body, 'The label reads wrong.', 'as they typed them');
+  assert.equal(opened.added, 'On the second screen, at 375.', 'and the machine\'s addition is apart');
+  assert.equal(opened.reason, 'feedback', 'a person\'s words, so feedback and not an observation');
+  await post(`/api/threads/${id}/replies`, { said: 'Still wrong.', added: 'Checked at 1440 too.', via: 'agent' });
+  await post(`/api/threads/${id}/replies`, { body: 'Fixed the label.', via: 'agent' });
   const replies = parse(readFileSync(file, 'utf8')).replies;
+  assert.equal(replies.length, 2);
   assert.equal(replies[0].via, 'agent');
-  assert.equal(replies.length, 1);
+  assert.equal(replies[0].author, 'serve-person');
+  assert.equal(replies[0].added, 'Checked at 1440 too.');
+  assert.equal(replies[1].author, 'agent', 'the machine\'s own words are its own');
+  assert.equal(replies[1].via, undefined, 'and need no mark - the author IS the machine');
+  assert.equal(replies[1].added, undefined);
   await post(`/api/threads/${id}/status`, { status: 'addressed', reason: 'done', via: 'agent' });
   const t = parse(readFileSync(file, 'utf8'));
   assert.equal(t.status, 'addressed');
-  // The reason is recorded as a reply, so the move's provenance sits there.
-  assert.equal(t.replies.at(-1).via, 'agent');
+  // The reason is the machine's sentence, recorded as its own reply.
+  assert.equal(t.replies.at(-1).author, 'agent');
   // What the embed and the panel read back carries it too.
   const listed = (await (await fetch(`${base}/api/blueprint`)).json()).threads.find((x) => x.id === id);
   assert.equal(listed.via, 'agent');
+  assert.equal(listed.added, 'On the second screen, at 375.');
+  // `added` without the person's words is refused: there is nothing for it
+  // to sit beside.
+  const bad = await fetch(`${base}/api/threads/${id}/replies`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ body: 'x', added: 'y', via: 'agent' }),
+  });
+  assert.equal(bad.status, 400);
 });

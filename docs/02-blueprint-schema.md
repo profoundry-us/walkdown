@@ -231,6 +231,15 @@ replies:
   - author: topher
     created: 2026-08-20T15:11:00Z
     body: On submit only. Blur validation felt naggy in user testing.
+  - author: topher              # the person's words, as typed - relayed by a machine
+    via: agent                  # ...which says so beside the name, never instead of it
+    created: 2026-08-20T15:20:00Z
+    body: And keep the error under the field, not in a toast.
+    added: >                    # what the machine put beside their words - drawn apart, named as the agent's
+      Seen in the chat of 2026-08-20; the toast is `checkout.toast` on the storyboard.
+  - author: agent               # the machine's own words are its own
+    created: 2026-08-20T16:02:00Z
+    body: Built; the error sits under the field. Run 2026-08-20T16-00-11Z re-verified it.
 ```
 
 - A question is **not done when answered**. It is done when **incorporated** — the answer
@@ -252,8 +261,11 @@ replies:
   | `decision`    | a person, or an agent typing one        | nothing — filed `recorded`, terminal, in no queue            |
 
   A finding or observation is the machine's own account and is authored `agent`, never
-  filed under the person whose machine it is. A person's words an agent typed are
-  `feedback` under the person's name with `via: agent`. A question carries no reason.
+  filed under the person whose machine it is. Attribution follows the words: a machine's
+  own words are authored `agent`; a person's words a machine relays (`--said`, or `said`
+  over the API) are `feedback` under the person's name, as typed, with `via: agent`
+  beside it and anything the machine added in `added`, kept apart. A question carries
+  no reason.
   When a person passes rule R in a signed walkdown, every `finding` and `feedback` on R
   that was `addressed` before the pass is written `verified` under the signer's name,
   with `verified_via: <run id>` and a reply `via: verdict` — the acceptance is theirs,
@@ -267,9 +279,12 @@ replies:
 - **Transitions are validated, and mutation goes through one path** (the `walkdown
   thread` CLI, the serve API, and the panel all use it): notes move
   `open → addressed → verified | settled | reopen | waived`, questions
-  `open → answered → incorporated | reopen | waived`. Reopening (back to `open`) and
-  waiving require a reason, recorded as a reply; only an `observation` may be
-  `settled`. The governance rule that keeps the ledger trustworthy: **agents may set
+  `open → answered → incorporated | reopen | waived`. Every ending may reopen (back
+  to `open`) - a thread that came back is the same thread, and the acceptance it
+  undoes stays on the file - except `recorded`, which is a record, not a task.
+  Reopening and waiving require a reason, recorded as a reply; only a person may
+  reopen a `verified` or `waived` thread, since that takes their acceptance back;
+  only an `observation` may be `settled`. The governance rule that keeps the ledger trustworthy: **agents may set
   `addressed`, `settled`, `answered`, and `incorporated` — the states that mean work
   was done. Only a named human may set `verified` or `waived` — the states that mean a
   person judged it** — and a person's signed pass on the rule counts as that judgment

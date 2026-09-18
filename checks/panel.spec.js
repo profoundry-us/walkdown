@@ -2826,9 +2826,8 @@ test('the composer says whose move it is and offers only that reader’s moves',
 
   // The agent claims it. Now it is the person's move: Reopen, Waive, Done -
   // Done last and primary, and Done RECORDS verified, whatever it is called.
-  // Over the API the author is always this machine's person; `via` is how
-  // a machine says it typed the words (n-0139). That is what the agent's
-  // replies really look like on a person's machine: "A Checks Person via agent".
+  // The agent's reply is its own words, so it is the agent's: the robot in a
+  // dashed ring, in the party's blue - the turn line's own.
   await post(`/api/threads/${note}/replies`, { body: 'Fixed the label.', via: 'agent' });
   await post(`/api/threads/${note}/status`, { status: 'addressed', via: 'agent' });
   await page.reload();
@@ -2837,12 +2836,10 @@ test('the composer says whose move it is and offers only that reader’s moves',
   await expect(actions).toHaveText(['Reopen', 'Waive', 'Done']);
   await expect(page.getByTestId('thread.actions').last()).toHaveAttribute('data-act', 'verified');
   await expect(box).toHaveAttribute('placeholder', /Reopen or Waive/);
-  // The machine-typed message wears the robot in a dashed ring under the
-  // person's name - the face says who typed, the name says who it counts
-  // for - and the ring is the turn line's own blue.
   const bot = page.getByTestId('thread.body').locator('.wd-msg .wd-bot');
   await expect(bot).toHaveCount(1);
   expect(await bot.evaluate((el) => getComputedStyle(el).borderStyle)).toBe('dashed');
+  expect(await bot.evaluate((el) => getComputedStyle(el).borderRadius)).toBe('50%');
   await expect(bot.locator('svg')).toHaveCount(1);
   // No "as <name> · Enter sends" under the box; the name stands in the header.
   await expect(page.getByTestId('thread.actor')).toHaveText('checks-person');
@@ -2856,12 +2853,22 @@ test('the composer says whose move it is and offers only that reader’s moves',
     .threads.find((t) => t.id === note);
   expect(verified.status).toBe('verified');
   expect(verified.verified_by).toBe('checks-person');
-  // Reopened as a screen: an ended thread is closed, offers only Reply, and
-  // says how it ended and by whom.
+  // Opened again: an ended thread is closed, offers a person Reply and
+  // Reopen, and says how it ended and by whom.
   await page.goto(`${WD_ORIGIN}/?bp=blueprint&thread=${note}`);
   await expect(turn).toHaveAttribute('data-party', 'closed');
   await expect(turn).toContainText(/Verified by A Checks Person/);
-  await expect(actions).toHaveText(['Reply']);
+  await expect(actions).toHaveText(['Reply', 'Reopen']);
+  // Reopening is append-only: the reason lands as a reply, the status goes
+  // back to open, and the acceptance it undoes stays on the file.
+  await box.fill('It came back at 375.');
+  await page.locator('[data-testid="thread.actions"][data-act="open"]').click();
+  await expect(turn).toHaveAttribute('data-party', 'agent');
+  const reopened = (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json())
+    .threads.find((t) => t.id === note);
+  expect(reopened.status).toBe('open');
+  expect(reopened.verified_by).toBe('checks-person');
+  expect(reopened.replies.at(-1).body).toBe('It came back at 375.');
 
   // A question is the person's move until they answer, and Enter IS the
   // answer: the reply lands and the status moves with it.
@@ -2899,8 +2906,54 @@ test('the composer says whose move it is and offers only that reader’s moves',
   await page.goto(`${WD_ORIGIN}/?bp=blueprint&thread=${q}`);
   await expect(actions).toHaveText(['Reply', 'Done']);
   await expect(page.getByTestId('thread.actions').last()).toHaveAttribute('data-act', 'incorporated');
-  // And where it is the person's move, the agent only talks.
+  // And where it is the person's move, or the thread has ended, the agent
+  // only talks: a person's acceptance is not a machine's to take back.
+  await post(`/api/threads/${note}/status`, { status: 'addressed', via: 'agent' });
   await page.goto(`${WD_ORIGIN}/?bp=blueprint&thread=${note}`);
   await expect(actions).toHaveText(['Reply']);
   await page.unrouteAll({ behavior: 'ignoreErrors' });
+});
+
+/*
+ * Attribution follows the words (2026-09-17). The board had filled with
+ * "topher via agent" over paragraphs Topher never wrote; now a relayed
+ * message keeps the person's words as typed under their own face, marked,
+ * and what the machine added sits apart in a dashed box named as the agent's.
+ */
+test('a relayed message keeps the person\u2019s face and shows the agent\u2019s addition apart', {
+  tag: '@rule:threads.lifecycle.acts-for-a-person',
+}, async ({ page }) => {
+  const rule = 'threads.lifecycle.acts-for-a-person';
+  const res = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
+    data: {
+      kind: 'note',
+      said: 'The toast overlaps the field.',
+      added: 'Seen at 375 on the confirmation screen; the rule names the field.',
+      via: 'agent',
+      anchor: { rule },
+    },
+  });
+  expect(res.ok(), await res.text()).toBeTruthy();
+  const { id } = await res.json();
+  await page.goto(`${WD_ORIGIN}/?bp=blueprint&thread=${id}`);
+  const body = page.getByTestId('thread.body');
+  const first = body.locator('.wd-msg').first();
+  // The person's face, marked - not the robot.
+  await expect(first.locator('.wd-ava')).toHaveText(/AC/);
+  await expect(first.locator('.wd-ava.wd-relayed .wd-mark')).toBeVisible();
+  await expect(first.locator('.wd-bot')).toHaveCount(0);
+  await expect(first.locator('.wd-via')).toHaveText(/via agent/);
+  // Their words as typed, and the addition apart, dashed and named.
+  await expect(first.locator('.wd-text').first()).toHaveText('The toast overlaps the field.');
+  const added = first.locator('.wd-added');
+  await expect(added).toContainText('Seen at 375');
+  await expect(added.locator('.wd-added-by')).toHaveText(/agent added/i);
+  expect(await added.evaluate((el) => getComputedStyle(el).borderStyle)).toBe('dashed');
+  // The list draws the same message the same way.
+  await page.getByTestId('thread.close').click();
+  await page.getByTestId('panel.tabs').getByText(/Threads/).click();
+  const card = page.getByTestId('panel.threads-list').locator(`[data-open-thread="${id}"]`).first();
+  await card.scrollIntoViewIfNeeded();
+  await expect(card.locator('.wd-added')).toContainText('Seen at 375');
+  await expect(card.locator('.wd-ava.wd-relayed')).toHaveCount(1);
 });

@@ -13,12 +13,12 @@ stories:
         verify: [checks]
         steps:
           given:
-            - A note (open > addressed > verified | reopen | waived) or a question (open > answered > incorporated | reopen | waived)
+            - A note (open > addressed > verified | reopen | waived) or a question (open > answered > incorporated | reopen | waived), where every ending may reopen and a recorded decision never moves
           when:
             - A transition not in that flow is attempted (e.g. open straight to verified)
           then:
             - The mutation is rejected with the illegal transition named, and the file is unchanged
-          statement_hash: sha256:733b7e7f8958
+          statement_hash: sha256:c2384ee386f5
           reworded:
             - hash: sha256:102a0b235d5a
               at: 2026-09-13
@@ -52,20 +52,24 @@ stories:
       - id: threads.lifecycle.acts-for-a-person
         origin: thread:n-0139
         created_at: 2026-09-01
-        statement: When an agent writes a record on a person's behalf, the record carries that person's username and a mark beside it saying a machine typed the words. No request can choose whose name a record is written under.
-        because: The instruction was the person's; the typing was not.
+        statement: Attribution follows the words - a machine's own are the agent's, and a person's words it relays stay theirs, as typed, marked as machine-typed, with what the machine added kept apart. No request chooses whose name a record carries.
+        because: A reader must be able to tell which sentences a person actually said, and a record that names them as author of a machine's paragraph says the opposite.
+        history: For a month every sentence an agent typed was filed under the person it worked for with `via agent` beside the name - and since nearly every sentence in a thread is one the agent typed, the board filled with "topher via agent" over paragraphs Topher never wrote (2026-09-17). `said` and `added` split a relayed message into the person's words and the machine's.
         verify: [checks]
         steps:
           given:
             - A machine whose personal config says who is sitting at it
           when:
-            - An agent opens a thread, replies, or moves one, saying that it is the one acting
+            - An agent opens a thread, replies, or moves one in its own words; and relays what the person said, with something of its own beside it
           then:
-            - The record carries that person as the author, and the agent as the provenance beside it
-            - The report names both, so a reader can tell a sentence a person wrote from one a machine did
+            - Its own words are recorded as the agent's - no person named, no mark needed
+            - The person's words are recorded under the person, exactly as typed, with the agent as the provenance beside the name
+            - What the machine added is a field of its own on the same message, never folded into the person's words, and every reader draws it apart and names it as the agent's
+            - An addition with no person's words to sit beside is refused
+            - The report and the stream name both, so a reader can tell a sentence a person wrote from one a machine did
             - No argument and no environment variable can name somebody else
-            - A finding or an observation is the machine's own account, authored by the agent with no person named, so the mark keeps meaning what it says
-          statement_hash: sha256:614945dff74c
+            - A finding or an observation is the machine's own account, authored by the agent with no person named
+          statement_hash: sha256:0306629cf026
           reworded:
             - hash: sha256:6790e9b3474c
               at: 2026-09-13
@@ -85,12 +89,13 @@ stories:
           agent: The passing case needs a completed waive, and waiving is a human-only transition an agent may never perform (blueprint/AGENTS.md). The reopen half could be walked; the waive half cannot, so the tier cannot honestly hold.
         steps:
           given:
-            - A thread being waived, or an addressed/answered thread being reopened
+            - A thread being waived, or an addressed, answered or ended thread being reopened
           when:
             - The transition is attempted without a reason
           then:
             - It is rejected; with a reason, the reason is appended as a reply and waived_by records the person
-          statement_hash: sha256:a886c7f1111c
+            - Reopening a verified or waived thread takes a person's acceptance back, so only a person may do it; a machine is refused and files a new thread instead
+          statement_hash: sha256:97912647f98b
           reworded:
             - hash: sha256:24591753abaa
               at: 2026-09-13
@@ -295,10 +300,10 @@ stories:
             - The agent is offered Reply and Done on what waits on it, and only Reply on what waits on a person. It is never offered Verify or Waive; a person is never offered Addressed, Settled or Incorporated
             - Done records what the seat means by it - verified for a person, addressed or incorporated for the agent - and the status chip keeps the record's own name
             - Enter sends what the box is for - the answer on a question that is yours to answer, a reply everywhere else - and the box says which
-            - An ended thread offers Reply alone and its line says how it ended and by whom
-            - In the stream, the agent's face is a robot in a dashed ring in the agent's blue, a person's their initials on a filled tile, so a machine's messages are told from a person's without reading the name
+            - An ended thread offers a person Reply and Reopen, the agent Reply alone, and its line says how it ended and by whom
+            - In the stream, the agent's face is a robot in a dashed ring in the agent's blue; a person's is their initials on a filled disc, marked in the corner when a machine typed their words for them - so who said what is told without reading the names
             - Nothing under the box says who you are or how to send - the name stands in the thread's header
-          statement_hash: sha256:9b1beb0433cc
+          statement_hash: sha256:a79d09343f13
       - id: threads.conversation.new-since-you-looked
         origin: walkdown
         statement: A thread remembers where your reading stopped and marks what arrived since as new.
@@ -325,8 +330,9 @@ stories:
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
       - id: threads.conversation.append-only
         origin: walkdown
-        statement: A conversation is append-only. A message cannot be edited or deleted, no reaction stands in for a verdict, and a thread that has reached its final state cannot be reopened.
-        because: A thread is the record of what was said; the ledger is where judgment is recorded.
+        statement: A conversation is append-only. A message cannot be edited or deleted, no reaction stands in for a verdict, and reopening an ended thread adds its reason and moves the status without unsaying anything.
+        because: A thread is the record of what was said, and a thread that ended and came back is the same conversation.
+        history: Ended and append-only were one clause for a month - "a thread that has reached its final state cannot be reopened" - until a verified thread regressed and the only honest move was a new thread that had to explain the old (Topher, 2026-09-17).
         signoff: [eng, product]
         screens: [thread-panel]
         steps:
@@ -337,9 +343,10 @@ stories:
           then:
             - No message offers editing or deletion
             - Nothing offers a reaction that would mean addressed or approved without recording it
-            - The ended thread shows how it ended and by whom, and offers no reopen, because the lifecycle has none
+            - The ended thread shows how it ended and by whom, and a person may reopen it with a reason - the reason lands as a reply, the status goes back to open, and verified_by or waived_by stays on the file as what once happened
             - Replying to an ended thread is still possible - the record continues, the state does not
-          statement_hash: sha256:33102006683e
+            - A recorded decision never reopens - it is a record, not a task
+          statement_hash: sha256:d5a522828937
           reworded:
             - hash: sha256:06a879b1032c
               at: 2026-09-13

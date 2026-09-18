@@ -159,3 +159,33 @@ test('a question opens with its first line as the headline; a note does not @rul
   });
   assert.equal((html.match(/wd-ask/g) ?? []).length, 1);
 });
+
+/*
+ * Attribution follows the words (2026-09-17). A machine's own words are the
+ * agent's and wear the robot; a person's words a machine relayed keep the
+ * person's face with a mark on it, and what the machine added beside them
+ * is drawn apart, dashed, and named as the agent's.
+ */
+test('a relayed message keeps the person’s face, and the machine’s addition sits apart @rule:threads.lifecycle.acts-for-a-person', () => {
+  const html = MSG.stream({
+    author: 'topher',
+    via: 'agent',
+    created: '2026-09-17T10:00:00Z',
+    body: 'The label reads wrong.',
+    added: 'Seen at 375 too, on the second screen.',
+    replies: [{ author: 'agent', created: '2026-09-17T10:05:00Z', body: 'Fixed the label.' }],
+  });
+  // The person's disc, marked; never the robot for their words.
+  const faces = html.match(/<div class="wd-ava[^"]*"/g);
+  assert.match(faces[0], /wd-relayed/, 'the relayed message is the person’s face with the mark');
+  assert.doesNotMatch(faces[0], /wd-bot/);
+  assert.match(html, /wd-mark/, 'and the mark is drawn');
+  // The addition, apart and named.
+  assert.match(html, /The label reads wrong\.[^]*class="wd-added"[^]*agent added[^]*Seen at 375 too/);
+  // The agent's own reply is the robot, and carries no addition of its own.
+  assert.match(faces[1], /wd-bot/);
+  assert.equal((html.match(/wd-added"/g) ?? []).length, 1);
+  // Nothing relayed, nothing marked.
+  const plain = MSG.stream({ author: 'topher', created: '2026-09-17T10:00:00Z', body: 'typed by hand' });
+  assert.doesNotMatch(plain, /wd-relayed|wd-mark|wd-added/);
+});

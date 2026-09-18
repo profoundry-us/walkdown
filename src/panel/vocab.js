@@ -8,7 +8,7 @@
  * next pane also needed, this is where it went.
  */
 import { locationOfUrl, matchScreen } from '../../lib/screen-match.js';
-import { canTransition, isMachineName, whoseMove } from '../../lib/vocab.js';
+import { canTransition, isMachineName, TERMINAL, whoseMove } from '../../lib/vocab.js';
 import { identityOverride, S } from './state.js';
 import { api } from './util.js';
 
@@ -93,7 +93,7 @@ export const needsYou = (rule) =>
   (S.data?.attention ?? []).some((i) => i.who === 'human' && !i.thread && i.rule === rule);
 export const threadsFor = (rule) =>
   (S.data?.threads ?? []).filter(
-    (t) => t.anchor?.rule === rule && !['incorporated', 'verified', 'waived'].includes(t.status),
+    (t) => t.anchor?.rule === rule && !TERMINAL.includes(t.status),
   );
 
 export const screenById = (id) => (S.data?.storyboard ?? []).find((s) => s.id === id) ?? null;
@@ -252,15 +252,27 @@ export { whoseMove } from '../../lib/vocab.js';
 const REPLY = ['Reply', '__reply', 'quiet'];
 const WAIVE = ['Waive', 'waived', 'warn'];
 const REOPEN = ['Reopen', 'open', 'quiet'];
+/*
+ * An ended thread offers a person Reply and Reopen: the conversation stays
+ * append-only - reopening adds its reason and moves the status, unsaying
+ * nothing - and a thread that regressed is the same thread. Only a person
+ * reopens an accepted one (lib/threads.js); the agent files afresh.
+ */
+const ENDED = [REPLY, REOPEN];
 const OFFERS = {
   human: {
     note: {
       open: [REPLY, WAIVE],
       addressed: [REOPEN, WAIVE, ['Done', 'verified', 'primary']],
+      verified: ENDED,
+      waived: ENDED,
+      settled: ENDED,
     },
     question: {
       open: [REPLY, WAIVE, ['Answer', '__answer', 'primary']],
       answered: [REPLY, REOPEN, WAIVE],
+      incorporated: ENDED,
+      waived: ENDED,
     },
   },
   agent: {
@@ -299,7 +311,9 @@ export function turnLine(t, role = myRole(), { person = 'the person', endedBy = 
     return {
       party: 'closed',
       label: 'Closed',
-      text: `${how}${endedBy ? ` by ${endedBy}` : ''}${endedAt ? `, ${endedAt}` : ''}. Replies still land here.`,
+      text: `${how}${endedBy ? ` by ${endedBy}` : ''}${endedAt ? `, ${endedAt}` : ''}. Replies still land here${
+        role === 'human' && t.status !== 'recorded' ? '; reopen if it comes back' : ''
+      }.`,
     };
   }
   const yours = party === role;

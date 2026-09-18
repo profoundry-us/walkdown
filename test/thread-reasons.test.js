@@ -70,10 +70,18 @@ test('a note says why it exists, and the machine signs its own @rule:threads.lif
     const fb = openThread(p.load(), { kind: 'note', body: 'hm', anchor: { rule: RULE } });
     assert.equal(fb.thread.reason, 'feedback');
     assert.equal(fb.thread.author, 'reasons-person');
-    // A person's words a machine typed keep the mark - that is what via is for.
-    const dictated = openThread(p.load(), { kind: 'note', body: 'said', anchor: { rule: RULE }, via: 'agent', reason: 'feedback' });
+    // A person's words a machine RELAYS keep the mark - that is what via is
+    // for - and what the machine added sits apart from what they said.
+    const dictated = openThread(p.load(), { kind: 'note', body: 'the label reads wrong', anchor: { rule: RULE }, via: 'agent', said: 'the label reads wrong', added: 'and the toast overlaps it' });
     assert.equal(dictated.thread.author, 'reasons-person');
     assert.equal(dictated.thread.via, 'agent');
+    assert.equal(dictated.thread.body, 'the label reads wrong', 'the body is what the person said, as typed');
+    assert.equal(dictated.thread.added, 'and the toast overlaps it', 'the machine\'s words are apart from theirs');
+    assert.equal(dictated.thread.reason, 'feedback', 'relayed words are the person\'s: feedback, not an observation');
+    // A machine's own words, filed as feedback on purpose, are still its own.
+    const own = openThread(p.load(), { kind: 'note', body: 'said', anchor: { rule: RULE }, via: 'agent', reason: 'request' });
+    assert.equal(own.thread.author, 'agent');
+    assert.equal(own.thread.via, undefined);
     // A decision is a record: filed closed, in no queue.
     const dec = openThread(p.load(), { kind: 'note', body: 'we decided', anchor: { rule: RULE }, reason: 'decision' });
     assert.equal(dec.thread.status, 'recorded');

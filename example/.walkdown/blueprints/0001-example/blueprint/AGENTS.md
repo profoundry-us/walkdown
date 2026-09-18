@@ -152,8 +152,12 @@ rather than adding to it.
   `settled` an observation once the change is named.
 - Mutate threads only through `walkdown thread <id> --as-agent
   --reply "..." --status <s>` — never raw YAML edits — so transitions stay
-  validated. You record under the person you are working for; `--as-agent` is
-  provenance, and it refuses `verified` and `waived` however it is spelled.
+  validated. Attribution follows the words: `--reply` is your own words and
+  records as `agent`. When you relay what the person said — in a chat, in a
+  message to you — carry it with `--said "<their words, as typed>"` and put
+  what you add beside them in `--added "..."`, so their words stay theirs and
+  yours read as yours. `--as-agent` refuses `verified` and `waived` however it
+  is spelled, and may not reopen a thread a person verified or waived.
 - After fixing what a note asks: reply with what you changed and which run
   re-verified it, then `--status addressed`.
 - You may **never** set `verified` or `waived`. Those are human judgments —

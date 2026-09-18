@@ -1,5 +1,6 @@
 import { declaredHome } from '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
+import { canTransition } from '../lib/vocab.js';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -139,4 +140,41 @@ test('reopening requires a reason; question answer/incorporate flow works @rule:
   transitionThread(load(), 'q-1', { status: 'answered', actor: 'topher' });
   transitionThread(load(), 'q-1', { status: 'incorporated', actor: 'agent' });
   assert.equal(onDisk('q-1').status, 'incorporated');
+});
+
+/*
+ * An ending can be reopened, and the conversation stays append-only: the
+ * reason lands as a reply, the status goes back, and the acceptance it
+ * undoes stays on the file. Only a person may take a person's acceptance
+ * back; a machine files a new thread instead (2026-09-17).
+ */
+test('an ended thread reopens append-only, and only a person reopens an accepted one @rule:threads.lifecycle.validated-transitions @rule:threads.lifecycle.reasoned-endings', () => {
+  transitionThread(load(), 'n-1', { status: 'addressed', actor: 'agent' });
+  transitionThread(load(), 'n-1', { status: 'verified', actor: 'topher' });
+  const before = onDisk('n-1');
+  // A machine may not, by name or by mark.
+  assert.throws(
+    () => transitionThread(load(), 'n-1', { status: 'open', actor: 'agent', reason: 'regressed' }),
+    /takes back a person's acceptance/,
+  );
+  assert.throws(
+    () => transitionThread(load(), 'n-1', { status: 'open', actor: 'topher', reason: 'regressed', via: 'agent' }),
+    /takes back a person's acceptance/,
+  );
+  assert.deepEqual(onDisk('n-1'), before, 'a refused reopen writes nothing');
+  // A person may, with a reason; nothing said is unsaid.
+  assert.throws(() => transitionThread(load(), 'n-1', { status: 'open', actor: 'topher' }), /requires a reason/);
+  transitionThread(load(), 'n-1', { status: 'open', actor: 'topher', reason: 'It came back at 375.' });
+  const after = onDisk('n-1');
+  assert.equal(after.status, 'open');
+  assert.equal(after.verified_by, 'topher', 'what once happened stays on the record');
+  assert.equal(after.replies.length, (before.replies ?? []).length + 1);
+  assert.equal(after.replies.at(-1).body, 'It came back at 375.');
+  // The agent's own endings, either party may reopen.
+  transitionThread(load(), 'q-1', { status: 'answered', actor: 'topher' });
+  transitionThread(load(), 'q-1', { status: 'incorporated', actor: 'agent' });
+  transitionThread(load(), 'q-1', { status: 'open', actor: 'agent', reason: 'the answer did not fit the rule' });
+  assert.equal(onDisk('q-1').status, 'open');
+  // A decision is a record, not a task: it never reopens.
+  assert.equal(canTransition('note', 'recorded', 'open'), false);
 });

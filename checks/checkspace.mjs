@@ -178,6 +178,32 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
     ].join('\n'),
   );
 
+  /*
+   * A rule nothing has ever verified, so the checks that read an UNBUILT
+   * rule always have one. They used to find one on the real board, and the
+   * day the board's last unbuilt rule got its recorded run (2026-09-17) two
+   * checks failed on a precondition the panel had nothing to do with. The
+   * copy owns its own, never recorded, never signed.
+   */
+  writeFileSync(
+    join(CHECKSPACE, HOME, 'blueprint', 'features', 'fixture.yml'),
+    [
+      'feature: fixture',
+      'title: Fixtures for the browser checks',
+      'stories:',
+      '  - id: fixture.unbuilt',
+      '    title: A rule nothing has verified',
+      '    statement: As the check suite, I need one rule with no build evidence to read.',
+      '    rules:',
+      '      - id: fixture.unbuilt.never-recorded',
+      '        origin: walkdown',
+      '        statement: This rule exists for the browser checks and no run has ever named it.',
+      '        verify: [checks]',
+      '        signoff: [eng]',
+      '',
+    ].join('\n'),
+  );
+
   const sb = join(CHECKSPACE, HOME, 'blueprint', 'storyboard.yml');
   writeFileSync(
     sb,
