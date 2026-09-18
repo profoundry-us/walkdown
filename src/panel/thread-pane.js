@@ -236,9 +236,13 @@ export function threadPane() {
          and what happens next; the buttons under it are only the moves this
          reader takes from here. -->
     <div class="shrink-0 border-t border-base-300 p-2">
-      <div class="mb-1.5 flex items-start gap-1.5 rounded border border-dashed px-2 py-1 text-[11px] leading-snug ${TURN[turn.party].line}"
+      <!-- The label floats on the top edge, the way a material input's does,
+           so the sentence takes the full width under it rather than sharing
+           the row with the chip (Topher, 2026-09-17). The top padding leaves
+           the chip room to sit on the border without touching the text. -->
+      <div class="relative mt-2 mb-1.5 rounded border border-dashed px-2 pt-2.5 pb-1.5 text-[11px] leading-snug ${TURN[turn.party].line}"
         data-testid="thread.turn" data-party="${turn.party}">
-        <span class="mt-px shrink-0 rounded px-1 text-[9px] font-bold uppercase tracking-wider ${TURN[turn.party].chip}">${turn.label}</span>
+        <span class="absolute -top-[7px] left-2 rounded px-1 text-[9px] font-bold uppercase leading-[14px] tracking-wider ${TURN[turn.party].chip}">${turn.label}</span>
         <span class="opacity-75">${turn.text}</span>
       </div>
       <textarea id="wdp-note" data-testid="thread.reply" rows="2" class="textarea textarea-xs w-full resize-none"
