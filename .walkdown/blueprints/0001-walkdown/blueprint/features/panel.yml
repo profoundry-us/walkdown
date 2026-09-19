@@ -702,9 +702,10 @@ stories:
             - The address names the blueprint by key in `?bp=` from the moment it is picked, the page in the frame after `#` from the moment it moves, and the open rule in `?rule=` (or thread in `?thread=`) from the moment it opens
             - The reload comes back to that board on that page, on that rule, with no chooser
             - Back to the list drops `?rule=` from the address, so the second reload comes back to the list, not the rule
+            - At the server's root with only `?bp=` named, the board opens on the storyboard's front door and the address then names that page, so a reload comes back to it
             - A `?bp=` naming a blueprint the server no longer has is dropped from the address, and the chooser asks instead of an error being shown where the page should be
             - Nothing is written to the browser's storage for this - opening a fresh address with no `?bp=` asks as before, and inside somebody else's application the panel never touches that page's address
-          statement_hash: sha256:1a3c30f1ce2e
+          statement_hash: sha256:f81b1c70e65f
 
   - id: panel.rules
     title: The rules are one tap away, and so is the way back

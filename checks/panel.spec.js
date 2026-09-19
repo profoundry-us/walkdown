@@ -2692,6 +2692,27 @@ test("walkdown's own address keeps the blueprint and the page, so a reload comes
   await expect.poll(() => page.locator('.wdp-track').evaluate((el) => el.style.transform)).toMatch(/translateX\(0%\)/);
   expect(new URL(page.url()).searchParams.get('rule')).toBeNull();
 
+  // The root with a blueprint named and no page: the board opens on its
+  // front door, and the address says so - the first trip from the root used
+  // to be the last thing written, so a reload came back to an empty sheet
+  // (Topher, 2026-09-18).
+  await page.goto(`${WD_ORIGIN}/?bp=blueprint`);
+  await expect(page.getByTestId('panel.bar')).toBeVisible();
+  await expect
+    .poll(() => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/as-built/review.html`)), {
+      timeout: 10000,
+    })
+    .toBe(true);
+  await expect.poll(() => decodeURIComponent(new URL(page.url()).hash.slice(1))).toMatch(
+    new RegExp(`^${WD_ORIGIN}/as-built/review.html`),
+  );
+  await page.reload();
+  await expect
+    .poll(() => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/as-built/review.html`)), {
+      timeout: 10000,
+    })
+    .toBe(true);
+
   // A blueprint this server does not have is dropped from the address too,
   // rather than carried along as a name that opens nothing (n-0265).
   await page.goto(`${WD_ORIGIN}/?bp=no.such.blueprint#${frame}`);

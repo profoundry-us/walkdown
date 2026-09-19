@@ -875,7 +875,14 @@ async function discardSitting() {
  * stands where the application put it.
  */
 function sayAddress() {
-  if (!cfg.frame?.url && !atServerRoot()) return;
+  /*
+   * Walkdown's own page is a fact about the delivery, not about whether a
+   * page is framed yet: judged by atServerRoot(), which is "no frame AND at
+   * the root", the very first trip from the root set the frame and every
+   * write after it returned here - so the address a reload came back to
+   * never carried the page (Topher, 2026-09-18).
+   */
+  if (!cfg.frame?.url && originOf(S.SERVER) !== location.origin) return;
   try {
     const url = new URL(location.href);
     if (S.BP) url.searchParams.set('bp', S.BP);
@@ -2788,16 +2795,25 @@ export async function start() {
       else toast(`No rule ${esc(asked.rule)} here.`, { tone: 'error' });
     }
   }
+  /*
+   * At walkdown's own root with a blueprint named and no page framed, the
+   * board is up and the sheet is empty. A pick from the modal lands on the
+   * front door; an address that already names the blueprint - a reload of
+   * that same tab - came back to the empty sheet instead, because only the
+   * pick asked for the trip (Topher, 2026-09-18). Both name a blueprint and
+   * no page, so both go.
+   */
+  if (atServerRoot() && !S.frameUrl && S.BP) S.jumpOnLoad = true;
   if (S.jumpOnLoad) {
     S.jumpOnLoad = false;
     /*
      * Only when the blueprint you have just chosen says nothing about the
      * page you are on. If it does cover this page, you are already where the
      * choice meant to put you, and moving would be the panel overruling you.
+     * The front door is the storyboard's `default_screen`, or failing that
+     * the first screen with a page.
      */
-    const first = (S.data.storyboard ?? []).find(
-      (sc) => screenUrl(sc, 'app') ?? screenUrl(sc, 'prototype'),
-    );
+    const first = defaultScreen();
     if (first && !currentScreen()) {
       /*
        * Three deliveries, two answers. Framed, walkdown owns the frame and
