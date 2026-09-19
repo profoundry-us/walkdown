@@ -255,21 +255,46 @@ export const liveNoteOn = (rule) =>
  * used to file a fresh note beside the question and leave it open, and the
  * walk brought the rule straight back (q-0254, n-0310).
  */
-export const openQuestionOn = (rule) =>
+/*
+ * The rule's asks, in the order they come round: what was asked first is
+ * asked first, and one put off with Later goes to the back - it is ordered
+ * by when it was deferred instead of when it was filed. Only the head of
+ * this list is drawn; the rest are the dots beside it.
+ */
+export const asksOn = (rule) =>
   threadsFor(rule)
     .filter((t) => t.kind === 'question' && t.status === 'open')
-    .sort((a, b) => threadTouched(a).localeCompare(threadTouched(b)))[0] ?? null;
+    .sort((a, b) => String(a.deferred ?? a.created ?? '').localeCompare(String(b.deferred ?? b.created ?? '')));
+export const openQuestionOn = (rule) => asksOn(rule)[0] ?? null;
 
-/** Answer the question a rule asks: the words go on it and it moves to answered, the agent's move. */
-export async function answerOnRule(rule, text) {
+/**
+ * Answer the question a rule asks: the choice picked (if it offered any)
+ * and the words go on it, it moves to answered - the agent's move - and
+ * the next ask on the rule, if there is one, is drawn in its place.
+ */
+export async function answerOnRule(rule, text, chosen = null) {
   const q = openQuestionOn(rule);
   if (!q) return null;
-  if (!text) return sayFiling('Write the answer first \u2014 anything you say here answers the question.');
+  if (!text && !chosen) return sayFiling(q.options?.length ? 'Pick one, or write the answer.' : 'Write the answer first \u2014 anything you say here answers the question.');
   const actor = whoAmI();
-  if (!(await postReply(q.id, text, actor))) return null;
-  if (!(await threadPost(`/api/threads/${q.id}/status`, { status: 'answered', actor }))) return null;
+  // The reply carries the words; a pick with no words is still an answer,
+  // and says so in the ledger as one line so the thread reads on its own.
+  if (!(await postReply(q.id, text || chosen, actor))) return null;
+  if (!(await threadPost(`/api/threads/${q.id}/status`, { status: 'answered', actor, ...(chosen ? { chosen } : {}) }))) return null;
   S.verdictNote = '';
-  toast(`<b>${esc(q.id)}</b> answered \u2014 the agent folds it in.`, { tone: 'success' });
+  S.askChoice = null;
+  const left = asksOn(rule).length - 1;
+  toast(`<b>${esc(q.id)}</b> answered \u2014 the agent folds it in.${left > 0 ? ` ${left} more on this rule.` : ''}`, { tone: 'success' });
+  await requestReload();
+  return q.id;
+}
+
+/** Put the rule's current ask off: it goes to the back of the rule's asks, and the next one is drawn. */
+export async function laterOnRule(rule) {
+  const q = openQuestionOn(rule);
+  if (!q) return null;
+  if (!(await threadPost(`/api/threads/${q.id}/later`, {}))) return null;
+  S.askChoice = null;
   await requestReload();
   return q.id;
 }

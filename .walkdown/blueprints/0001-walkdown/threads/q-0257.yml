@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-08T22:35:59.140Z
 anchor:
   rule: panel.start.choose-a-blueprint
-status: open
+status: incorporated
 body: >-
   With the unclaimed gate built, does choose-blueprint still have a state to
   draw?
@@ -47,3 +47,11 @@ body: >-
 
   Filed rather than chosen: the first is what shipped because it changes nothing
   you did not ask for, but which of the three is right is a design decision.
+replies:
+  - author: agent
+    created: 2026-09-19T23:26:34Z
+    body: Folded in. What shipped was the first way - the picker stays as the
+      fallback for a server that cannot answer /api/whose - and ADR 0001 §7 then
+      gave this rule its own job (asked when several of the active project's
+      blueprints claim the page), so the overlap this asked about no longer
+      exists. Nothing left to decide.

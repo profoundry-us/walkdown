@@ -1,0 +1,56 @@
+id: n-0311
+kind: note
+reason: decision
+author: topher
+via: agent
+created: 2026-09-19T23:26:10.084Z
+anchor:
+  rule: panel.start.choose-a-blueprint
+status: recorded
+body: >-
+  Dropping pins on a brand new site / prototype is definitely the right
+  approach, so we should plan for that to be the primary starting use-case.
+  Therefore, I think it's fine to have Walkdown create a new blueprint so long
+  as it's still only letting you write to the threads / runs. The thing we want
+  to prevent is having the extension write any actual tests / code or things
+  that we expect the agent to be doing. But if we don't have a PRD to import, we
+  very well may be starting from a blank slate / prototype and we may want the
+  nice UI to actually enter the starting info like prototype URL and URL under
+  test (defaulted to the current url). Actually,  for a small app / feature, the
+  flow is likely to be: "start with the prototype URL, talk through all of the
+  rules / screens with product and enter them into the UI as threads / pins that
+  the agent then groups / categorizes / splits as it sees fit.
+
+
+  One thing: does `walkdown init` create the blueprints, or just ready the repo
+  to be able to work / serve? I'm thinking we may want a `walkdown import
+  `command that creates a new blueprint (or updates an existing one).
+
+
+  Last thought: we probably want to build out some Claude skills so that it
+  knows better how to work with walkdown since most users of this tool will be
+  using it on their own repos and their agents won't have all of the knowledge
+  of how things are supposed to work that we do. And / or an MCP server that
+  helps it interact as well.
+
+
+  Give me your thoughts on all of this.
+added: >-
+  Five decisions from designing the authoring flow, recorded together because
+  they interlock. (1) Naming: walkdown new <path> creates an empty blueprint;
+  walkdown extract merges a source into one, as docs/00-vision.md already
+  specifies. Init stays the one-per-repo scaffold it is. (2) Write allowlist:
+  the server may write specification, never implementation - threads, runs, and
+  blueprint creation yes; features/, prototype/, source and tests no, because
+  the browser captures intent and the agent structures it. (3) Routing key: with
+  dozens of blueprints per repo the panel must route by page, not by origin,
+  which needs a light projects index rather than loading every blueprint. (4)
+  Prototype as a URL: prototype.root is a filesystem path and a hosted prototype
+  is not. (5) Skill distribution: skills only land if someone runs init, so an
+  adopter on an existing repo gets an agent that knows none of this.
+
+
+  Refiled from q-0019 on 2026-09-19: these were Topher's own thoughts (Aug 23),
+  relayed and filed as a question - a person is not asking themselves. The
+  decisions that came of them are the ones above; the exchange that followed
+  stays on q-0019.

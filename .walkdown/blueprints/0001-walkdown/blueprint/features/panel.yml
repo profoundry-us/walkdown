@@ -1272,10 +1272,11 @@ stories:
             - The tag opens the thread's own screen, which is still where a pin's sketch and a question's Answer live
             - Anchor `detail.turn` above the box says whose move the rule is and what that party does next, in the thread screen's own colours
             - Anchor `detail.feedback` is the one box, and anchor `detail.verdict` the one row - Waive alone at the far left when a note is live, Reply, and during a walkdown the verdict pair last
-            - While the rule asks an open question, the row offers Waive and Answer alone - anything said is the answer, it lands on the question and moves it to answered, and only then are Reply and the verdict pair offered
-            - While it asks, the question is quoted again inside `detail.turn`, above the box, whatever was said on the rule after it - and the thread's own screen quotes it the same way above its box
+            - While the rule asks, anchor `detail.ask` stands where the turn box would - one question at a time, oldest first, with its choices to pick, its own answer box, and a count of the rule's asks - and the row below is Reply alone until every ask is answered
+            - Answer puts the pick and the words on the question and moves it to answered, then draws the next ask; Later sends the current ask to the back of the rule's queue; Waive is never mind
+            - The ask card's tag is the door to the thread's own screen, which quotes the question the same way above its box
             - Nothing under the rule repeats which rule a thread is on
-          statement_hash: sha256:d8b5406ea240
+          statement_hash: sha256:768c5e799a41
   - id: panel.threads
     title: Feedback is answered where it is read
     statement: As a reviewer, I can reply to a thread and move its lifecycle on from the panel, without leaving the app I am reviewing.

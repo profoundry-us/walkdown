@@ -5,7 +5,7 @@
  */
 import { MSG } from '../../lib/message-stream.js';
 import { html, live, nothing, unsafeHTML } from '../../vendor/lit.js';
-import { answerOnRule, liveNoteOn, names, openQuestionOn, openThreadView, pendingReplies, sayFiling, sayOnRule, waiveOnRule } from './conversation.js';
+import { answerOnRule, asksOn, laterOnRule, liveNoteOn, names, openQuestionOn, openThreadView, pendingReplies, sayFiling, sayOnRule, waiveOnRule } from './conversation.js';
 import { tierMarks } from './rules-list.js';
 import { requestReload, requestRender } from './shell.js';
 import { openEvidence } from './evidence.js';
@@ -261,6 +261,71 @@ function ruleTurn(r) {
 }
 
 /*
+ * The rule asking, one question at a time. The agent files each decision
+ * it needs as its own question, with the ways out as options when it knows
+ * them; this draws the head of that queue - the question's first line, its
+ * context, the choices as something to pick - above its own answer box,
+ * with a count and a dot per ask on the rule. Answer moves the pick and
+ * the words onto the question and draws the next; Later sends this one to
+ * the back; Waive is never mind. The stream below stays in the order
+ * things were said, so a week of settled notes after the ask no longer
+ * buries it (q-0277), and the rule no longer reads as asking three
+ * questions when one was a person's own thoughts (q-0019, 2026-09-19).
+ */
+function askCard(r, asked, open) {
+  const queue = asksOn(r.rule);
+  // Done ones count for the dots, so "2 of 3" stays 3 as the asks go.
+  const done = threadsFor(r.rule).filter((t) => t.kind === 'question' && t.status === 'answered').length;
+  const total = queue.length + done;
+  const at = done + 1;
+  const first = { ...MSG.messages(asked)[0], options: undefined, thread: asked.id, tag: `${asked.id} \u00b7 question \u00b7 open` };
+  const pick = (label) => {
+    S.askChoice = S.askChoice === label ? null : label;
+    requestRender();
+  };
+  return html`<div class="relative mt-3 mb-1.5 rounded border border-primary/60 bg-primary/5 px-2 pt-2.5 pb-2 text-[11px] leading-snug"
+      data-testid="detail.ask" data-question="${asked.id}">
+    <span class="absolute -top-[7px] left-2 rounded bg-primary px-1 text-[9px] font-bold uppercase leading-[14px] tracking-wider text-primary-content">The agent asks</span>
+    <span class="absolute -top-[7px] right-2 flex items-center gap-1 rounded bg-base-100 px-1 text-[9px] leading-[14px] opacity-70" data-testid="detail.ask-count" title="${total} ask${total === 1 ? '' : 's'} on this rule">
+      ${at} of ${total}
+      ${Array.from({ length: total }, (_, i) => html`<i class="inline-block h-[6px] w-[6px] rounded-full ${i < done ? 'bg-success' : i === done ? 'bg-primary' : 'bg-base-300'}"></i>`)}
+    </span>
+    <div class="wd-stream max-h-56 overflow-y-auto" @click=${open}>${unsafeHTML(
+      MSG.stream({ replies: [first] }, { rules: (S.data?.rows ?? []).map((x) => x.rule), names: names() }),
+    )}</div>
+    ${
+      asked.options?.length
+        ? html`<div class="mt-1.5 flex flex-col gap-1" data-testid="detail.ask-options">${asked.options.map(
+            (o) => html`<button type="button" class="flex items-start gap-2 rounded border px-2 py-1 text-left ${S.askChoice === o.label ? 'border-primary bg-primary/15' : 'border-base-300 bg-base-100/60'}"
+                data-option="${o.label}" aria-pressed="${S.askChoice === o.label}" @click=${() => pick(o.label)}>
+                <span class="mt-[3px] inline-block h-3 w-3 shrink-0 rounded-full border ${S.askChoice === o.label ? 'border-primary bg-primary' : 'border-base-content/50'}"></span>
+                <span><b class="block text-[11.5px]">${o.label}</b>${o.why ? html`<span class="block opacity-70">${o.why}</span>` : nothing}</span>
+              </button>`,
+          )}</div>`
+        : nothing
+    }
+    <textarea id="wdp-answer" data-testid="detail.answer" rows="2" class="textarea textarea-xs mt-1.5 w-full resize-none"
+      placeholder="${asked.options?.length ? 'Anything to add, or a different answer\u2026' : 'Your answer\u2026'}"
+      .value=${live(S.verdictNote)}
+      @input=${(e) => {
+        S.verdictNote = e.currentTarget.value;
+      }}></textarea>
+    <div class="mt-1 flex flex-wrap items-center gap-1" data-testid="detail.ask-actions">
+      <button class="btn btn-xs btn-outline btn-warning" data-v="waived" title="Never mind: close this question with a reason"
+        @click=${() => waiveOnRule(r.rule, (S.verdictNote ?? '').trim())}>Waive</button>
+      ${
+        queue.length > 1
+          ? html`<button class="btn btn-xs btn-ghost" data-v="later" title="Put this one off: the next ask comes up, and this comes round again after it"
+              @click=${() => laterOnRule(r.rule)}>Later</button>`
+          : nothing
+      }
+      <button class="btn btn-xs btn-primary ml-auto" data-v="answer" data-question="${asked.id}"
+        @click=${() => answerOnRule(r.rule, (S.verdictNote ?? '').trim(), S.askChoice)}>${queue.length > 1 ? 'Answer \u2192 next' : 'Answer'}</button>
+    </div>
+  </div>`;
+}
+
+/*
  * The rule's conversation: every thread ever filed on it, as ONE stream
  * (ADR 0006 §1). A rule used to draw its threads as cards and its verdict
  * box somewhere else, so the fail-why, the agent's fix and the pass that
@@ -287,7 +352,7 @@ function conversation(r, picked) {
   const folding = threadsFor(r.rule).some((t) => t.kind === 'question' && t.status === 'answered');
   const turn = ruleTurn(r);
   const placeholder = asked
-    ? 'Answer, or say why you\u2019re waiving\u2026'
+    ? 'Reply\u2026'
     : folding
     ? 'Reply\u2026'
     : S.session
@@ -310,27 +375,15 @@ function conversation(r, picked) {
           )}</div>`
         : html`<p class="pb-1 text-[12.5px] opacity-50">Nothing said on this rule yet.</p>`
     }
-    <div class="relative mt-3 mb-1.5 rounded border border-dashed px-2 pt-2.5 pb-1.5 text-[11px] leading-snug ${TURN[turn.party].line}"
+    ${
+      asked
+        ? askCard(r, asked, open)
+        : html`<div class="relative mt-3 mb-1.5 rounded border border-dashed px-2 pt-2.5 pb-1.5 text-[11px] leading-snug ${TURN[turn.party].line}"
       data-testid="detail.turn" data-party="${turn.party}">
       <span class="absolute -top-[7px] left-2 rounded px-1 text-[9px] font-bold uppercase leading-[14px] tracking-wider ${TURN[turn.party].chip}">${turn.label}</span>
       <span class="opacity-75">${turn.text}</span>
-      ${
-        // The question itself, re-asked above the box you answer it in. The
-        // stream is in the order things were said, so a week of notes filed
-        // and settled after the ask buried it five threads up with only its
-        // tag to find it by - a rule that reads "Settled" last was still
-        // asking (q-0277; Topher, 2026-09-19). The tag is still the door to
-        // the thread.
-        asked
-          ? html`<div class="wd-stream mt-1.5 max-h-48 overflow-y-auto rounded bg-base-100/70 px-1.5 py-1" data-testid="detail.ask" data-question="${asked.id}" @click=${open}>${unsafeHTML(
-              MSG.stream(
-                { replies: [{ ...MSG.messages(asked)[0], thread: asked.id, tag: `${asked.id} \u00b7 question \u00b7 ${asked.status}` }] },
-                { rules: known, names: names() },
-              ),
-            )}</div>`
-          : nothing
-      }
-    </div>
+    </div>`
+    }
     <!-- One box for everything said on the rule: a reply, a fail's why, a
          waive's reason. It rides ABOVE the buttons, so the why is typed
          where the verdict is pressed (Topher, 2026-09-18). -->
@@ -347,21 +400,16 @@ function conversation(r, picked) {
          at the moment of an action (Topher, 2026-09-18). -->
     <div class="mt-1 flex flex-wrap items-center justify-end gap-1" data-testid="detail.verdict">
       ${
-        note || asked
+        // While the rule asks, Waive lives on the ask card with the answer;
+        // here the row is Reply alone, because a reply is the only thing
+        // this box does until the asks are answered.
+        note && !asked
           ? html`<button class="btn btn-xs btn-outline btn-warning mr-auto" data-v="waived" title="Never mind: close the rule\u2019s conversation with a reason"
             @click=${() => waiveOnRule(r.rule, (S.verdictNote ?? '').trim())}>Waive</button>`
           : nothing
       }
-      ${
-        // A rule that asks has one door: the answer. No Reply beside it,
-        // because anything said IS the answer, and no verdict until the
-        // question is off the rule (Topher, 2026-09-19).
-        asked
-          ? html`<button class="btn btn-xs btn-primary" data-v="answer" data-question="${asked.id}"
-              @click=${() => answerOnRule(r.rule, (S.verdictNote ?? '').trim())}>Answer</button>`
-          : html`<button class="btn btn-xs btn-outline border-base-300 text-base-content/70" data-v="reply" data-note-rule="${r.rule}"
-        @click=${(e) => replyOnRule(e.currentTarget, r.rule)}>Reply</button>`
-      }
+      <button class="btn btn-xs btn-outline border-base-300 text-base-content/70" data-v="reply" data-note-rule="${r.rule}"
+        @click=${(e) => replyOnRule(e.currentTarget, r.rule)}>Reply</button>
       ${
         !S.session || asked || folding
           ? nothing

@@ -228,6 +228,26 @@ stories:
             - A reply is never headlined, and a note's opening message is drawn as before
             - The preview card under the question's id leads with the same line
           statement_hash: 'sha256:68c8184ae5c9'
+      - id: threads.question.one-ask
+        origin: thread:q-0262
+        created_at: 2026-09-19
+        statement: A question asks one thing, and the ways out of it are data - the choices the agent offers, the one the answer took, and whether the person put it off - so a decision is answered by picking, never by finding the fork in a paragraph.
+        because: A question with three ways out written as prose is three questions nobody can answer with a press, and a person's own thoughts filed as a question is a question nobody asked.
+        history: q-0257 and q-0262 each carried three options in their third paragraph and were overtaken by events without being closed; q-0019 was Topher's own thoughts filed as a question, so the rule read as asking three questions while asking none (2026-09-19).
+        verify: [checks]
+        signoff: [eng, product]
+        screens: [rule-detail, thread-panel]
+        steps:
+          given:
+            - A question filed with two to six `options`, each a label and an optional why
+          when:
+            - It is answered with a `chosen` label, or put off with later
+          then:
+            - The options are stored as data on the thread, labels unique, and a note may carry none
+            - The answer records the label it chose beside the reply, and a label the question never offered is refused
+            - The stream draws the choices under the question and marks the one taken
+            - Later stamps the open question `deferred` and changes nothing else; an answered question cannot be put off
+          statement_hash: sha256:d856ec6ceea3
       - id: threads.conversation.written-in-markdown
         origin: thread:n-0288
         statement: A message is markdown, rendered from a short list of allowed elements; anything else in it is plain text.

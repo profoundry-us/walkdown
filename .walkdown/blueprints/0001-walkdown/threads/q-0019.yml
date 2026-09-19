@@ -5,7 +5,7 @@ via: agent
 created: 2026-08-24T02:25:00Z
 anchor:
   rule: panel.start.choose-a-blueprint
-status: open
+status: incorporated
 body: >-
   Dropping pins on a brand new site / prototype is definitely the right
   approach, so we should plan for that to be the primary starting use-case.
@@ -118,3 +118,9 @@ replies:
       screens.ownership.one-claimant and screens.ownership.routes-by-page.
       Verified the browser check has teeth by removing the routing and watching
       it fail before recording it."
+  - author: agent
+    created: 2026-09-19T23:26:33Z
+    body: "Not a question: these were Topher's own thoughts, relayed. Refiled as
+      n-0311, a decision record on the same rule; the five decisions in the
+      addendum stand and everything since (one page, one blueprint; claims
+      routing) shipped and is recorded there."

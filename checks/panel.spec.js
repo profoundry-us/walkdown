@@ -1654,65 +1654,94 @@ test('a rule draws its threads as one conversation, and never repeats which rule
 });
 
 /*
- * A rule that asks a question has one door: the answer. Reply on such a
- * rule used to file a fresh note beside the question and leave it open, so
- * the walk brought the rule straight back (q-0254, n-0310, 2026-09-19).
+ * A rule that asks does so one question at a time, with the ways out as
+ * choices: the head of its asks is a card above its own answer box, Answer
+ * takes the pick and the words and draws the next, Later sends one to the
+ * back. Reply on such a rule used to file a fresh note beside the question
+ * (q-0254, n-0310), and three prose questions with the fork in their third
+ * paragraph read as no question at all (q-0257, q-0262, 2026-09-19).
  */
-test('a rule that asks offers Answer and Waive alone, and the answer moves the question on', {
-  tag: '@rule:panel.rules.one-conversation',
+test('a rule that asks draws one ask at a time with its choices, and Answer moves to the next', {
+  tag: '@rule:panel.rules.one-conversation @rule:threads.question.one-ask',
 }, async ({ page }) => {
   await review(page);
   const { rows } = await payload(page);
   const rule = rows.find((r) => r.built && !r.retired).rule;
-  const filed = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
-    data: { kind: 'question', body: 'Should the sheet keep its shadow when the desk is hidden?', anchor: { rule } },
-  });
-  expect(filed.ok()).toBeTruthy();
-  const { id } = await filed.json();
+  const file = async (body, options) => {
+    const res = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
+      data: { kind: 'question', body, anchor: { rule }, via: 'agent', ...(options ? { options } : {}) },
+    });
+    expect(res.ok()).toBeTruthy();
+    return (await res.json()).id;
+  };
+  const q1 = await file('Should the sheet keep its shadow when the desk is hidden?\n\nThe ghost draws one today.', [
+    { label: 'Keep it', why: 'the shadow is what says it is a sheet' },
+    { label: 'Drop it' },
+  ]);
+  const q2 = await file('Does the ruling need a darker line every fifth row?');
   await page.reload();
   await expect(page.getByTestId('panel.bar')).toBeVisible();
   await ensureSession(page); // the verdict pair would be offered, were the rule not asking
   await openRule(page, rule);
 
-  const row = page.getByTestId('detail.verdict');
-  await expect(row.locator('[data-v="answer"]')).toBeVisible();
-  await expect(row.locator('[data-v="waived"]')).toBeVisible();
-  await expect(row.locator('[data-v="reply"], [data-v="pass"], [data-v="fail"]')).toHaveCount(0);
-  await expect(page.getByTestId('detail.turn')).toContainText(/anything you say below is the answer/i);
-  // The question is re-asked above the box, whatever was said after it -
-  // and it is still the door to its own thread, which asks it again there.
+  // One ask at a time: the older question first, its choices under it, a
+  // count of the rule's asks, and no verdict while any stand.
   const ask = page.getByTestId('detail.ask');
+  await expect(ask).toHaveAttribute('data-question', q1);
   await expect(ask).toContainText(/keep its shadow/);
+  await expect(page.getByTestId('detail.ask-count')).toContainText('1 of 2');
+  const options = ask.locator('[data-option]');
+  await expect(options).toHaveText([/Keep it/, /Drop it/]);
+  await expect(ask.locator('[data-v="later"]')).toBeVisible();
+  await expect(page.getByTestId('detail.verdict').locator('[data-v="pass"], [data-v="fail"], [data-v="answer"]')).toHaveCount(0);
+  await expect(page.getByTestId('detail.verdict').locator('[data-v="reply"]')).toBeVisible();
+  // The tag is still the door to the thread, which draws the same choices.
   await ask.locator('.wd-tag[data-thread]').click();
   await expect(page.getByTestId('thread.ask')).toContainText(/keep its shadow/);
+  await expect(page.getByTestId('thread.ask').locator('.wd-opt')).toHaveCount(2);
   await page.getByTestId('thread.close').click();
-  await expect(ask).toBeVisible();
 
-  // Anything said is the answer: it lands on the question, which moves to
-  // answered - the agent's move - and the rule stops asking.
-  await page.getByTestId('detail.feedback').fill('Yes - the shadow is what says it is a sheet.');
-  await row.locator('[data-v="answer"]').click();
-  await expect(row.locator('[data-v="answer"]')).toHaveCount(0);
-  // The rule is the agent's now, out of your queue, and a verdict waits with
-  // it: Reply is offered, Pass/Fail is not, and the turn line says so.
-  await expect(row.locator('[data-v="reply"]')).toBeVisible();
-  await expect(row.locator('[data-v="pass"], [data-v="fail"]')).toHaveCount(0);
+  // Later: the other ask comes up; this one comes round again after it.
+  await ask.locator('[data-v="later"]').click();
+  await expect(ask).toHaveAttribute('data-question', q2);
+  await expect(page.getByTestId('detail.ask-count')).toContainText('1 of 2');
+  await expect(ask.locator('[data-option]')).toHaveCount(0);
+  await ask.locator('[data-v="later"]').click();
+  await expect(ask).toHaveAttribute('data-question', q1);
+
+  // A pick and a word: both land on the question, which moves to answered
+  // and records the label; the next ask is drawn, still on the rule.
+  await options.filter({ hasText: 'Keep it' }).click();
+  await expect(options.filter({ hasText: 'Keep it' })).toHaveAttribute('aria-pressed', 'true');
+  await page.getByTestId('detail.answer').fill('Yes - the shadow is what says it is a sheet.');
+  await ask.locator('[data-v="answer"]').click();
+  await expect(ask).toHaveAttribute('data-question', q2);
+  await expect(page.getByTestId('detail.ask-count')).toContainText('2 of 2');
+  await expect.poll(() => page.locator('.wdp-track').evaluate((el) => el.style.transform)).toMatch(/translateX\(-33/);
+  const threads = async () => (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json()).threads;
+  const first = (await threads()).find((t) => t.id === q1);
+  expect(first.status).toBe('answered');
+  expect(first.chosen).toBe('Keep it');
+  expect(first.replies.at(-1).body).toMatch(/the shadow is what says/);
+  // Answered in the stream: the choice taken is marked.
+  await expect(page.getByTestId('detail.stream').locator('.wd-opt.chosen')).toHaveText(/Keep it/);
+
+  // The last ask, answered in words alone: the card goes, the rule is the
+  // agent's to fold in, and no verdict is offered until it has.
+  await page.getByTestId('detail.answer').fill('No.');
+  await ask.locator('[data-v="answer"]').click();
+  await expect(ask).toHaveCount(0);
   const turn = page.getByTestId('detail.turn');
   await expect(turn).toHaveAttribute('data-party', 'agent');
   await expect(turn).toContainText(/folds your answer/i);
+  await expect(page.getByTestId('detail.verdict').locator('[data-v="pass"], [data-v="fail"]')).toHaveCount(0);
   await expect(page.getByTestId('panel.rules-list').locator(`[data-rule="${rule}"] [data-ask]`)).toHaveCount(0);
-  // Still on the rule: answering is not a trip to the thread's screen.
-  await expect.poll(() => page.locator('.wdp-track').evaluate((el) => el.style.transform)).toMatch(/translateX\(-33/);
-  const after = (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json()).threads.find((t) => t.id === id);
-  expect(after.status).toBe('answered');
-  expect(after.replies.at(-1).body).toMatch(/the shadow is what says/);
-  // Folded in, so the rule is a person's again for the checks that follow:
-  // while it holds an answered question it is queued to nobody else
-  // (status.attention.blocked-queues), and a later check that opens the
-  // first built rule for its verdict would find no verdict offered.
-  expect((await page.request.post(`${WD_ORIGIN}/api/threads/${id}/status?bp=blueprint`, {
-    data: { status: 'incorporated', via: 'agent' },
-  })).ok()).toBeTruthy();
+  // Folded in, so the rule is a person's again for the checks that follow
+  // (status.attention.blocked-queues).
+  for (const id of [q1, q2])
+    expect((await page.request.post(`${WD_ORIGIN}/api/threads/${id}/status?bp=blueprint`, {
+      data: { status: 'incorporated', via: 'agent' },
+    })).ok()).toBeTruthy();
 });
 
 test('no two signature states are drawn the same way', {

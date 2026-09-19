@@ -29,6 +29,7 @@ export function run(args) {
       screen: { type: 'string' },
       element: { type: 'string' },
       body: { type: 'string' },
+      option: { type: 'string', multiple: true },
     },
     allowPositionals: true,
   });
@@ -36,7 +37,7 @@ export function run(args) {
   if (!id) {
     console.error(
       'Usage: walkdown thread <id> [--reply <text>] [--status <s>|--verify|--reopen|--waive] [--reason <text>] [--as-agent [--said <text>] [--added <text>]]\n' +
-        '       walkdown thread new --rule <id> --body <text> [--kind note|question] [--reason feedback|finding|observation|request|decision] [--screen <id>] [--element <sel>] [--as-agent [--said <text>] [--added <text>]]',
+        '       walkdown thread new --rule <id> --body <text> [--kind note|question] [--option "<label> :: <why>"]... [--reason feedback|finding|observation|request|decision] [--screen <id>] [--element <sel>] [--as-agent [--said <text>] [--added <text>]]',
     );
     process.exit(2);
   }
@@ -146,12 +147,21 @@ export function run(args) {
     // note is an observation and a person's is feedback. The same flag that
     // carries a waive's sentence carries this one word on `new`.
     const reason = values.reason ?? null;
+    // The choices a question offers, one flag each: "Retire it :: the other
+    // screen asks the same thing". The label is what the answer names.
+    const options = values.option?.length
+      ? values.option.map((o) => {
+          const [label, ...why] = String(o).split('::');
+          return { label: label.trim(), why: why.join('::').trim() };
+        })
+      : null;
     const { id: opened, thread } = openThread(blueprint, {
       kind,
       body,
       anchor,
       via,
       reason,
+      options,
       said: values.said ?? null,
       added: values.added ?? null,
     });
@@ -295,6 +305,10 @@ export function run(args) {
   const addition = (m, pad) =>
     m?.added ? `\n${pad}${dim('┆ agent added:')}\n${pad}${dim('┆')} ${String(m.added).trim().replace(/\n/g, `\n${pad}${dim('┆')} `)}` : '';
   console.log(addition(t, '  ').replace(/^\n/, ''));
+  // The choices a question offered, and the one the answer took.
+  for (const o of t.options ?? [])
+    console.log(`  ${t.chosen === o.label ? '◉' : '○'} ${o.label}${o.why ? dim(` — ${o.why}`) : ''}`);
+  if (t.deferred) console.log(dim(`  put off until later · ${whenIn(t.deferred, who.timezone)}`));
   for (const r of t.replies ?? []) {
     console.log(
       dim(`\n  ↳ ${r.author ?? 'unknown'}`) + saidVia(r) + at(r),

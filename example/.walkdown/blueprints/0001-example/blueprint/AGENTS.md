@@ -25,7 +25,11 @@ notes), and the runs ledger. The blueprint is the single source of truth for
   line of the body - one line, ending in a question mark - and the context
   under it: the panel draws that first line as the headline, and a question
   buried in a paragraph is a question nobody sees. Several decisions are
-  several questions.
+  several questions. When the ways out are known, offer them as choices -
+  `--option "Retire it :: which-project asks the same thing"`, two to six -
+  and the answer names one (`chosen`) or says something else. A person's
+  own words relayed with `--said` are a note, never a question: the person
+  is not asking themselves.
 
 ## Ownership boundaries
 

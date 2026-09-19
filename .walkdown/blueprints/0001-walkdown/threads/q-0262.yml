@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-09T13:16:59.563Z
 anchor:
   rule: panel.start.choose-a-blueprint
-status: open
+status: incorporated
 body: >-
   Does this rule still have a job, now that the panel asks whose page it is?
 
@@ -82,3 +82,8 @@ replies:
       panel.start.unclaimed-page-says-so is retired into
       panel.start.which-project, so the two rules no longer describe the same
       moment from two directions.
+  - author: agent
+    created: 2026-09-19T23:26:34Z
+    body: "Folded in: answered by ADR 0001 §7 as the reply above says - the rule
+      keeps its job, reworded, and unclaimed-page-says-so retired into
+      which-project. Closed now rather than left open beside its own answer."
