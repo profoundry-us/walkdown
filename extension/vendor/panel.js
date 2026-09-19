@@ -6666,15 +6666,17 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
         S.verdictNote = e.currentTarget.value;
       }}></textarea>
     <!-- Waive alone at the far left, the reach-for buttons on the right,
-         the verdict last: the thread screen's row, on the rule. -->
-    <div class="mt-1 flex flex-wrap items-center gap-1" data-testid="detail.verdict">
+         the verdict last: the thread screen's row, on the rule. No "as
+         <name>" beside them: who is recorded is chosen once, when a
+         walkdown starts and each role is signed for, and never re-offered
+         at the moment of an action (Topher, 2026-09-18). -->
+    <div class="mt-1 flex flex-wrap items-center justify-end gap-1" data-testid="detail.verdict">
       ${
         note || asked
           ? b`<button class="btn btn-xs btn-outline btn-warning mr-auto" data-v="waived" title="Never mind: close the rule\u2019s conversation with a reason"
             @click=${() => waiveOnRule(r.rule, (S.verdictNote ?? '').trim())}>Waive</button>`
           : A
       }
-      <span class="text-[10px] opacity-40 ${note || asked ? '' : 'mr-auto'}">as <button id="wdp-nactor" class="link" @click=${openSettings}>${whoAmI() || 'set your name\u2026'}</button></span>
       ${
         // A rule that asks has one door: the answer. No Reply beside it,
         // because anything said IS the answer, and no verdict until the
