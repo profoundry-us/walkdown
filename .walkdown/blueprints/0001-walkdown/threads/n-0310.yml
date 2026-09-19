@@ -1,0 +1,15 @@
+id: n-0310
+kind: note
+reason: feedback
+author: topher
+created: 2026-09-19T04:04:11.773Z
+anchor:
+  rule: screens.surfaces.stand-in-app
+status: waived
+body: Do the first.
+replies:
+  - author: topher
+    created: 2026-09-19T04:13:25Z
+    body: "Misfiled: the rule's composer filed this answer to q-0254 as a new note
+      (the composer routed Reply only to notes). The answer now sits on q-0254."
+waived_by: topher

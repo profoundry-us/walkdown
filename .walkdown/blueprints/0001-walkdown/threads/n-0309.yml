@@ -1,0 +1,27 @@
+id: n-0309
+kind: note
+reason: feedback
+author: topher
+created: 2026-09-19T03:59:41.381Z
+anchor:
+  rule: panel.walkdown.one-control-owns-the-sitting
+status: open
+body: >-
+  1. This sitting only
+
+  2. Record the skip
+
+  3. Yes, we need skip to be a valid option on a rule in any state and a user
+  may fill out additional details if they desire to provide additional context;
+  but the we should not require it.
+
+  4. Let's rework the top bar a bit that shows the current walkdown progress.
+  Remove the username after the "Recording as" since we already have the full
+  name (if we have no full name, then we can show the username instead). Remove
+  the "as" and "," from "as eng, product, design"; just list all roles being
+  signed, one on each line. Remove the "8/45 judged"; make the "+8" in the
+  bottom show "+8/45" with the same hover tooltip. Put a skip button to the left
+  of the continue button; make it a regular button similar to reply so it has
+  less visual priority. And remove the "37 walk" badge at the bottom right now
+  that we have more info directly in the list view. And move the Legend all the
+  way to the right.

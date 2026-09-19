@@ -1653,6 +1653,46 @@ test('a rule draws its threads as one conversation, and never repeats which rule
   ).toBeVisible();
 });
 
+/*
+ * A rule that asks a question has one door: the answer. Reply on such a
+ * rule used to file a fresh note beside the question and leave it open, so
+ * the walk brought the rule straight back (q-0254, n-0310, 2026-09-19).
+ */
+test('a rule that asks offers Answer and Waive alone, and the answer moves the question on', {
+  tag: '@rule:panel.rules.one-conversation',
+}, async ({ page }) => {
+  await review(page);
+  const { rows } = await payload(page);
+  const rule = rows.find((r) => r.built && !r.retired).rule;
+  const filed = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
+    data: { kind: 'question', body: 'Should the sheet keep its shadow when the desk is hidden?', anchor: { rule } },
+  });
+  expect(filed.ok()).toBeTruthy();
+  const { id } = await filed.json();
+  await page.reload();
+  await expect(page.getByTestId('panel.bar')).toBeVisible();
+  await ensureSession(page); // the verdict pair would be offered, were the rule not asking
+  await openRule(page, rule);
+
+  const row = page.getByTestId('detail.verdict');
+  await expect(row.locator('[data-v="answer"]')).toBeVisible();
+  await expect(row.locator('[data-v="waived"]')).toBeVisible();
+  await expect(row.locator('[data-v="reply"], [data-v="pass"], [data-v="fail"]')).toHaveCount(0);
+  await expect(page.getByTestId('detail.turn')).toContainText(/anything you say below is the answer/i);
+
+  // Anything said is the answer: it lands on the question, which moves to
+  // answered - the agent's move - and the rule stops asking.
+  await page.getByTestId('detail.feedback').fill('Yes - the shadow is what says it is a sheet.');
+  await row.locator('[data-v="answer"]').click();
+  await expect(row.locator('[data-v="answer"]')).toHaveCount(0);
+  await expect(row.locator('[data-v="pass"]')).toBeVisible();
+  // Still on the rule: answering is not a trip to the thread's screen.
+  await expect.poll(() => page.locator('.wdp-track').evaluate((el) => el.style.transform)).toMatch(/translateX\(-33/);
+  const after = (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json()).threads.find((t) => t.id === id);
+  expect(after.status).toBe('answered');
+  expect(after.replies.at(-1).body).toMatch(/the shadow is what says/);
+});
+
 test('no two signature states are drawn the same way', {
   tag: '@rule:panel.rules.tiers-at-a-glance',
 }, async ({ page }) => {

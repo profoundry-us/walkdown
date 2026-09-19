@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-08T20:25:07.665Z
 anchor:
   rule: screens.surfaces.stand-in-app
-status: open
+status: answered
 body: >-
   A judging scratch copy still fetches its app surface from the human server.
   Should the governance say so?
@@ -41,3 +41,8 @@ body: >-
   that a judge does not have to have read the suite. Not making the edit myself:
   the governance lines are the spec, they ride into every future judge prompt,
   and what they should say is yours.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-19T04:13:25Z
+    body: Do the first.

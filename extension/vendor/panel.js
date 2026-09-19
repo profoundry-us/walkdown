@@ -5378,6 +5378,32 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       .sort((a, b) => threadTouched(b).localeCompare(threadTouched(a)))[0] ?? null;
 
   /*
+   * The question a rule is asking you, if it is asking one: open, and so
+   * waiting on a person. While it stands, the rule's composer is the answer
+   * box - anything said is the answer (Topher, 2026-09-19) - so Reply here
+   * used to file a fresh note beside the question and leave it open, and the
+   * walk brought the rule straight back (q-0254, n-0310).
+   */
+  const openQuestionOn = (rule) =>
+    threadsFor(rule)
+      .filter((t) => t.kind === 'question' && t.status === 'open')
+      .sort((a, b) => threadTouched(a).localeCompare(threadTouched(b)))[0] ?? null;
+
+  /** Answer the question a rule asks: the words go on it and it moves to answered, the agent's move. */
+  async function answerOnRule(rule, text) {
+    const q = openQuestionOn(rule);
+    if (!q) return null;
+    if (!text) return sayFiling('Write the answer first \u2014 anything you say here answers the question.');
+    const actor = whoAmI();
+    if (!(await postReply(q.id, text, actor))) return null;
+    if (!(await threadPost(`/api/threads/${q.id}/status`, { status: 'answered', actor }))) return null;
+    S.verdictNote = '';
+    toast(`<b>${esc(q.id)}</b> answered \u2014 the agent folds it in.`, { tone: 'success' });
+    await requestReload();
+    return q.id;
+  }
+
+  /*
    * Say something on a rule. If the rule has a live conversation the words go
    * into it as a reply - and, when the verdict is a fail or a send-back, the
    * conversation comes back to open so the agent is owed it again. Only a
@@ -5405,7 +5431,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
    * different seat.
    */
   async function waiveOnRule(rule, text) {
-    const live = liveNoteOn(rule);
+    const live = openQuestionOn(rule) ?? liveNoteOn(rule);
     if (!live) return sayFiling('Nothing is open on this rule to waive.');
     if (!text) return sayFiling('Waiving is recorded with a reason \u2014 write it above, then press again.');
     const actor = whoAmI();
@@ -6560,8 +6586,9 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       const asks = mine.find((i) => i.action === 'answer');
       const fixed = mine.find((i) => i.action === 'verify');
       const parts = [];
-      if (asks) parts.push(`The agent asks ${asks.threads.length === 1 ? 'a question' : `${asks.threads.length} questions`} here \u2014 open it in the stream to answer.`);
+      if (asks) parts.push(`The rule asks ${asks.threads.length === 1 ? 'a question' : `${asks.threads.length} questions`} \u2014 anything you say below is the answer, and the agent folds it in.`);
       if (fixed) parts.push(`The agent says its fix is done.`);
+      if (asks) return { party: 'human', label: 'Your move', text: parts.join(' ') };
       if (!S.session) parts.push(r.built ? 'Start a walkdown to judge the build.' : 'Start a walkdown to approve the wording, or send it back.');
       else if (r.built) parts.push(`Pass ends this conversation${live ? ` (${live} note${live === 1 ? '' : 's'})` : ''}; Fail continues it with your why.`);
       else parts.push('No build yet: Approve signs the wording; Refine sends it back with what should change.');
@@ -6600,8 +6627,11 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       )
       .sort((a, b) => String(a.created ?? '').localeCompare(String(b.created ?? '')));
     const note = liveNoteOn(r.rule);
+    const asked = openQuestionOn(r.rule);
     const turn = ruleTurn(r);
-    const placeholder = S.session
+    const placeholder = asked
+      ? 'Answer, or say why you\u2019re waiving\u2026'
+      : S.session
       ? r.built
         ? 'Reply, or say why \u2014 for Fail or Waive\u2026'
         : 'Reply, or say what should change \u2014 for Refine or Waive\u2026'
@@ -6639,16 +6669,24 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
          the verdict last: the thread screen's row, on the rule. -->
     <div class="mt-1 flex flex-wrap items-center gap-1" data-testid="detail.verdict">
       ${
-        note
+        note || asked
           ? b`<button class="btn btn-xs btn-outline btn-warning mr-auto" data-v="waived" title="Never mind: close the rule\u2019s conversation with a reason"
             @click=${() => waiveOnRule(r.rule, (S.verdictNote ?? '').trim())}>Waive</button>`
           : A
       }
-      <span class="text-[10px] opacity-40 ${note ? '' : 'mr-auto'}">as <button id="wdp-nactor" class="link" @click=${openSettings}>${whoAmI() || 'set your name\u2026'}</button></span>
-      <button class="btn btn-xs btn-outline border-base-300 text-base-content/70" data-v="reply" data-note-rule="${r.rule}"
-        @click=${(e) => replyOnRule(e.currentTarget, r.rule)}>Reply</button>
+      <span class="text-[10px] opacity-40 ${note || asked ? '' : 'mr-auto'}">as <button id="wdp-nactor" class="link" @click=${openSettings}>${whoAmI() || 'set your name\u2026'}</button></span>
       ${
-        !S.session
+        // A rule that asks has one door: the answer. No Reply beside it,
+        // because anything said IS the answer, and no verdict until the
+        // question is off the rule (Topher, 2026-09-19).
+        asked
+          ? b`<button class="btn btn-xs btn-primary" data-v="answer" data-question="${asked.id}"
+              @click=${() => answerOnRule(r.rule, (S.verdictNote ?? '').trim())}>Answer</button>`
+          : b`<button class="btn btn-xs btn-outline border-base-300 text-base-content/70" data-v="reply" data-note-rule="${r.rule}"
+        @click=${(e) => replyOnRule(e.currentTarget, r.rule)}>Reply</button>`
+      }
+      ${
+        !S.session || asked
           ? A
           : r.built
             ? b`<button class="btn btn-xs ${picked === 'fail' ? 'btn-error' : 'btn-outline btn-error'}" data-v="fail" @click=${(e) => fire(e.currentTarget, 'verdict', { status: 'fail' })}>\u2717 Fail</button>

@@ -1,0 +1,12 @@
+id: n-0306
+kind: note
+reason: feedback
+author: topher
+created: 2026-09-19T03:37:05.618Z
+anchor:
+  rule: embed.pin.tooltip-says-what-it-is
+status: open
+body: If faded fully to the prototype, the prototype should accept interactions
+  including any pins that were attached to the prototype. If faded all the way
+  to the app, it should get interactions including pins. If faded part-way
+  between, neither app should accept actions including hovering pins.

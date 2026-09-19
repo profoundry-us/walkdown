@@ -1,0 +1,29 @@
+id: n-0307
+kind: note
+reason: feedback
+author: topher
+via: agent
+created: 2026-09-19T03:44:37.571Z
+anchor:
+  rule: panel.rules.tiers-at-a-glance
+  screen: rule-detail
+  element: panel.rule-tiers
+status: open
+body: When hovering the panel.rule-tiers, the popup gets cut off by the
+  "Recording as" panel. It might just be cut off from the list, but something we
+  should figure out.
+added: "Seen on rule detail during a walkdown on 2026-09-18: the tiers tooltip
+  (panel.rule-tiers-tip) opens upward from the detail head and its top rows
+  disappear under the 'Recording as … Continue' strip, so 'checks' and the start
+  of 'agent' cannot be read. Topher's own screenshot shows it; my headless
+  reproduction did not raise the tooltip, so the saved shot is only the area it
+  happens in - runs/evidence/2026-09-19T03-44-37Z/rule-tiers-tip-area.png.
+  Likely the strip stacks above the pane, or the tooltip's z-20 is scoped to the
+  scrolling pane. Noted, not fixed - Topher is mid-walkdown."
+replies:
+  - author: agent
+    created: 2026-09-19T03:58:47Z
+    body: "Topher's own screenshot, pulled from his Screenshots folder (2026-09-18
+      10:40 PM): runs/evidence/2026-09-19T03-44-37Z/rule-tiers-tip-clipped.png.
+      The tooltip's top rows - checks, and the head of agent - are under the
+      Recording-as strip. The placeholder area shot is withdrawn."

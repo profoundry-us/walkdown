@@ -4,7 +4,7 @@ author: agent
 created: 2026-08-28T03:40:00Z
 anchor:
   rule: panel.rules.tiers-at-a-glance
-status: addressed
+status: open
 body: >-
   A design question left open by a fix. The human tier's latest run can be a
   SIGN-OFF rather than a verdict - `approved` when somebody accepted the
@@ -70,4 +70,20 @@ replies:
       lifecycle (square designed, hand approved, pencil refining, circle built,
       check/cross verdict)'. Every glyph named there is now gone from the build.
       The prototype is design's to change.
+  - author: topher
+    created: 2026-09-19T03:47:29Z
+    body: I want the human sign-off to have a 2xN grid. When there are only two
+      roles to sign off, you see a single 2-tall column. When there are 3 or 4,
+      you see two 2-tall columns, showing only as many dots as are needed. So in
+      the case of 3, you still see two columns, but only 3 dots. The third and
+      lone dot should be middle-aligned vertically on the right making a sort of
+      triangle with the dots.
+  - author: topher
+    created: 2026-09-19T03:47:29Z
+    body: I want the human sign-off to have a 2xN grid. When there are only two
+      roles to sign off, you see a single 2-tall column. When there are 3 or 4,
+      you see two 2-tall columns, showing only as many dots as are needed. So in
+      the case of 3, you still see two columns, but only 3 dots. The third and
+      lone dot should be middle-aligned vertically on the right making a sort of
+      triangle with the dots.
 reason: observation

@@ -5,7 +5,7 @@
  */
 import { MSG } from '../../lib/message-stream.js';
 import { html, live, nothing, unsafeHTML } from '../../vendor/lit.js';
-import { liveNoteOn, names, openThreadView, pendingReplies, sayFiling, sayOnRule, waiveOnRule } from './conversation.js';
+import { answerOnRule, liveNoteOn, names, openQuestionOn, openThreadView, pendingReplies, sayFiling, sayOnRule, waiveOnRule } from './conversation.js';
 import { tierMarks } from './rules-list.js';
 import { openSettings, requestReload, requestRender } from './shell.js';
 import { openEvidence } from './evidence.js';
@@ -240,8 +240,9 @@ function ruleTurn(r) {
     const asks = mine.find((i) => i.action === 'answer');
     const fixed = mine.find((i) => i.action === 'verify');
     const parts = [];
-    if (asks) parts.push(`The agent asks ${asks.threads.length === 1 ? 'a question' : `${asks.threads.length} questions`} here \u2014 open it in the stream to answer.`);
+    if (asks) parts.push(`The rule asks ${asks.threads.length === 1 ? 'a question' : `${asks.threads.length} questions`} \u2014 anything you say below is the answer, and the agent folds it in.`);
     if (fixed) parts.push(`The agent says its fix is done.`);
+    if (asks) return { party: 'human', label: 'Your move', text: parts.join(' ') };
     if (!S.session) parts.push(r.built ? 'Start a walkdown to judge the build.' : 'Start a walkdown to approve the wording, or send it back.');
     else if (r.built) parts.push(`Pass ends this conversation${live ? ` (${live} note${live === 1 ? '' : 's'})` : ''}; Fail continues it with your why.`);
     else parts.push('No build yet: Approve signs the wording; Refine sends it back with what should change.');
@@ -280,8 +281,11 @@ function conversation(r, picked) {
     )
     .sort((a, b) => String(a.created ?? '').localeCompare(String(b.created ?? '')));
   const note = liveNoteOn(r.rule);
+  const asked = openQuestionOn(r.rule);
   const turn = ruleTurn(r);
-  const placeholder = S.session
+  const placeholder = asked
+    ? 'Answer, or say why you\u2019re waiving\u2026'
+    : S.session
     ? r.built
       ? 'Reply, or say why \u2014 for Fail or Waive\u2026'
       : 'Reply, or say what should change \u2014 for Refine or Waive\u2026'
@@ -319,16 +323,24 @@ function conversation(r, picked) {
          the verdict last: the thread screen's row, on the rule. -->
     <div class="mt-1 flex flex-wrap items-center gap-1" data-testid="detail.verdict">
       ${
-        note
+        note || asked
           ? html`<button class="btn btn-xs btn-outline btn-warning mr-auto" data-v="waived" title="Never mind: close the rule\u2019s conversation with a reason"
             @click=${() => waiveOnRule(r.rule, (S.verdictNote ?? '').trim())}>Waive</button>`
           : nothing
       }
-      <span class="text-[10px] opacity-40 ${note ? '' : 'mr-auto'}">as <button id="wdp-nactor" class="link" @click=${openSettings}>${whoAmI() || 'set your name\u2026'}</button></span>
-      <button class="btn btn-xs btn-outline border-base-300 text-base-content/70" data-v="reply" data-note-rule="${r.rule}"
-        @click=${(e) => replyOnRule(e.currentTarget, r.rule)}>Reply</button>
+      <span class="text-[10px] opacity-40 ${note || asked ? '' : 'mr-auto'}">as <button id="wdp-nactor" class="link" @click=${openSettings}>${whoAmI() || 'set your name\u2026'}</button></span>
       ${
-        !S.session
+        // A rule that asks has one door: the answer. No Reply beside it,
+        // because anything said IS the answer, and no verdict until the
+        // question is off the rule (Topher, 2026-09-19).
+        asked
+          ? html`<button class="btn btn-xs btn-primary" data-v="answer" data-question="${asked.id}"
+              @click=${() => answerOnRule(r.rule, (S.verdictNote ?? '').trim())}>Answer</button>`
+          : html`<button class="btn btn-xs btn-outline border-base-300 text-base-content/70" data-v="reply" data-note-rule="${r.rule}"
+        @click=${(e) => replyOnRule(e.currentTarget, r.rule)}>Reply</button>`
+      }
+      ${
+        !S.session || asked
           ? nothing
           : r.built
             ? html`<button class="btn btn-xs ${picked === 'fail' ? 'btn-error' : 'btn-outline btn-error'}" data-v="fail" @click=${(e) => fire(e.currentTarget, 'verdict', { status: 'fail' })}>\u2717 Fail</button>
