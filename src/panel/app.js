@@ -2388,6 +2388,13 @@ function sizeGhost() {
   frame.style.height = `${gs < 1 ? availH / gs : availH}px`;
   frame.style.transform = gs < 1 ? `scale(${gs})` : '';
   frame.style.transformOrigin = 'top center';
+  /*
+   * The same corner as the app frame, at the same size on screen: the app
+   * frame says 10px in its own scaled pixels (10 / scale) and this sheet
+   * lies exactly over it, so a square-cornered ghost mid-fade showed a
+   * notch of the other sheet at every corner (Topher, 2026-09-18).
+   */
+  frame.style.borderRadius = `${10 / gs}px`;
   frame.style.maxWidth = 'none';
   frame.style.maxHeight = 'none';
   frame.style.flex = 'none';

@@ -1,0 +1,27 @@
+id: n-0305
+kind: note
+reason: feedback
+author: topher
+via: agent
+created: 2026-09-19T02:35:24.460Z
+anchor:
+  rule: panel.dock.own-skin
+  screen: review
+  element: panel.app-frame
+status: addressed
+body: The rounded corners are broken a bit; I don't think this is a problem with
+  the as-built; I've noted it before.
+added: "Mid-fade at a scaled preset (Desktop at fit), the ghost's sheet had
+  square corners over the app frame's rounded ones: the app frame draws its
+  corner at 10 / scale so it reads as 10px after the transform, and the ghost
+  iframe inside its stage had no radius at all, so a notch of the other sheet
+  showed at every corner. Not the as-built's doing - the drawing is only what is
+  inside the frame."
+replies:
+  - author: agent
+    created: 2026-09-19T02:35:37Z
+    body: "Fixed in sizeGhost (src/panel/app.js): the ghost's iframe now carries
+      border-radius 10 / gs, the same rule the app frame follows, so the two
+      sheets share one corner at every scale. Checked at the Desktop preset
+      scaled to 60% with the fade at half: one clean arc at the frame's corner
+      (screenshot at 4x). No rule change - a tweak, as agreed."
