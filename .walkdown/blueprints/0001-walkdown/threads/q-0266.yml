@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-09T14:01:18.569Z
 anchor:
   rule: panel.start.open-a-folder
-status: open
+status: answered
 body: >-
   The start screen's words and the drawing's words are not the same, and I do
   not know which of them is right.
@@ -34,3 +34,11 @@ body: >-
   build's words and have the drawing catch up (a design request, not an edit by
   me); or say the drawing is a sketch of intent here and the two are allowed to
   differ in length.
+replies:
+  - author: topher
+    created: 2026-09-19T04:53:07Z
+    body: The built wording is closer to correct so we should use it, but we
+      recently changed things so people no longer `walkdown serve` in a
+      directory. We should update this wording / command note to show how to
+      init / add a blueprint and then serve from any directory (since everything
+      is now registered in their home directory).

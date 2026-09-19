@@ -281,9 +281,15 @@ function conversation(r, picked) {
     .sort((a, b) => String(a.created ?? '').localeCompare(String(b.created ?? '')));
   const note = liveNoteOn(r.rule);
   const asked = openQuestionOn(r.rule);
+  // Answered and not yet folded in: the rule is the agent's, and a verdict
+  // now would be on words about to move - so the pair waits with the rule
+  // (status.attention.blocked-queues; Topher, 2026-09-18).
+  const folding = threadsFor(r.rule).some((t) => t.kind === 'question' && t.status === 'answered');
   const turn = ruleTurn(r);
   const placeholder = asked
     ? 'Answer, or say why you\u2019re waiving\u2026'
+    : folding
+    ? 'Reply\u2026'
     : S.session
     ? r.built
       ? 'Reply, or say why \u2014 for Fail or Waive\u2026'
@@ -341,7 +347,7 @@ function conversation(r, picked) {
         @click=${(e) => replyOnRule(e.currentTarget, r.rule)}>Reply</button>`
       }
       ${
-        !S.session || asked
+        !S.session || asked || folding
           ? nothing
           : r.built
             ? html`<button class="btn btn-xs ${picked === 'fail' ? 'btn-error' : 'btn-outline btn-error'}" data-v="fail" @click=${(e) => fire(e.currentTarget, 'verdict', { status: 'fail' })}>\u2717 Fail</button>

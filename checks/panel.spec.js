@@ -1685,12 +1685,26 @@ test('a rule that asks offers Answer and Waive alone, and the answer moves the q
   await page.getByTestId('detail.feedback').fill('Yes - the shadow is what says it is a sheet.');
   await row.locator('[data-v="answer"]').click();
   await expect(row.locator('[data-v="answer"]')).toHaveCount(0);
-  await expect(row.locator('[data-v="pass"]')).toBeVisible();
+  // The rule is the agent's now, out of your queue, and a verdict waits with
+  // it: Reply is offered, Pass/Fail is not, and the turn line says so.
+  await expect(row.locator('[data-v="reply"]')).toBeVisible();
+  await expect(row.locator('[data-v="pass"], [data-v="fail"]')).toHaveCount(0);
+  const turn = page.getByTestId('detail.turn');
+  await expect(turn).toHaveAttribute('data-party', 'agent');
+  await expect(turn).toContainText(/folds your answer/i);
+  await expect(page.getByTestId('panel.rules-list').locator(`[data-rule="${rule}"] [data-ask]`)).toHaveCount(0);
   // Still on the rule: answering is not a trip to the thread's screen.
   await expect.poll(() => page.locator('.wdp-track').evaluate((el) => el.style.transform)).toMatch(/translateX\(-33/);
   const after = (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json()).threads.find((t) => t.id === id);
   expect(after.status).toBe('answered');
   expect(after.replies.at(-1).body).toMatch(/the shadow is what says/);
+  // Folded in, so the rule is a person's again for the checks that follow:
+  // while it holds an answered question it is queued to nobody else
+  // (status.attention.blocked-queues), and a later check that opens the
+  // first built rule for its verdict would find no verdict offered.
+  expect((await page.request.post(`${WD_ORIGIN}/api/threads/${id}/status?bp=blueprint`, {
+    data: { status: 'incorporated', via: 'agent' },
+  })).ok()).toBeTruthy();
 });
 
 test('no two signature states are drawn the same way', {

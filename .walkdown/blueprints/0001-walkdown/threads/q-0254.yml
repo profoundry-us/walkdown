@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-08T20:25:07.665Z
 anchor:
   rule: screens.surfaces.stand-in-app
-status: answered
+status: incorporated
 body: >-
   A judging scratch copy still fetches its app surface from the human server.
   Should the governance say so?
@@ -46,3 +46,9 @@ replies:
     via: agent
     created: 2026-09-19T04:13:25Z
     body: Do the first.
+  - author: agent
+    created: 2026-09-19T04:57:17Z
+    body: "Folded in - by the time this was answered the governance lines already
+      said it, the other way round: a scratch copy's --port retargets its local
+      target, so the app surface the panel frames is the copy's own as-built
+      page and never the real server's. The judge's surprise no longer arises."

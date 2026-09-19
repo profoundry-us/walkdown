@@ -68,7 +68,11 @@ test('node:test reporter records tagged tests as a hash-stamped run', () => {
     {
       cwd: root,
       encoding: 'utf8',
-      // strip the parent test-runner's env so the nested node --test runs standalone
+      // strip the parent test-runner's env so the nested node --test runs
+      // standalone. WALKDOWN_RECORD_HOME goes too: `npm run test:record` sets
+      // it empty for the outer run, and inherited by this nested one it sent
+      // the fixture's record to no blueprint at all - so the recorded suite
+      // exited 1 on this test while the plain one passed (2026-09-19).
       env: Object.fromEntries(
         Object.entries({
           ...process.env,
@@ -77,7 +81,7 @@ test('node:test reporter records tagged tests as a hash-stamped run', () => {
           // record under a name of its choosing (n-0139).
           WALKDOWN_HOME: home,
           WALKDOWN_TARGET: 'ci-lane',
-        }).filter(([k]) => !/^NODE_(TEST|OPTIONS)/.test(k)),
+        }).filter(([k]) => !/^NODE_(TEST|OPTIONS)|^WALKDOWN_RECORD_HOME$/.test(k)),
       ),
     },
   );

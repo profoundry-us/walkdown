@@ -238,6 +238,43 @@ test('attention: human vs agent queues derived from rows and threads @rule:statu
   assert.deepEqual(perRule.threads, ['n-1', 'n-4', 'n-5']);
 });
 
+/*
+ * An answered question hands the rule to the agent. Until it is folded in,
+ * the rule is nobody else's: a person answering it and then being offered
+ * Pass/Fail on the same rule is what this guards (2026-09-18).
+ */
+test('a rule holding an answered question waits on the fold-in and on nobody else @rule:status.attention.blocked-queues', () => {
+  const { attention } = deriveStatus(
+    blueprint({
+      verify: ['checks', 'human'],
+      runs: [checksRun('2026-01-03T00:00:00Z', 'local', 'pass')],
+      threads: [
+        { id: 'n-1', kind: 'note', reason: 'feedback', status: 'addressed', anchor: { rule: 'demo.main.thing' } },
+        { id: 'q-1', kind: 'question', status: 'answered', anchor: { rule: 'demo.main.thing' } },
+      ],
+    }),
+  );
+  assert.deepEqual(
+    attention.map((i) => `${i.who}:${i.action}:${i.thread ?? i.rule}`),
+    ['agent:incorporate:q-1'],
+  );
+  // Incorporated, and the rule is the person's again: the walk, and the note.
+  const after = deriveStatus(
+    blueprint({
+      verify: ['checks', 'human'],
+      runs: [checksRun('2026-01-03T00:00:00Z', 'local', 'pass')],
+      threads: [
+        { id: 'n-1', kind: 'note', reason: 'feedback', status: 'addressed', anchor: { rule: 'demo.main.thing' } },
+        { id: 'q-1', kind: 'question', status: 'incorporated', anchor: { rule: 'demo.main.thing' } },
+      ],
+    }),
+  );
+  assert.deepEqual(
+    after.attention.filter((i) => i.who === 'human').map((i) => `${i.action}:${i.rule}`),
+    ['judge:demo.main.thing', 'verify:demo.main.thing'],
+  );
+});
+
 test('open threads listed; terminal ones excluded', () => {
   const { rows } = deriveStatus(
     blueprint({

@@ -522,7 +522,8 @@ stories:
             - A thread on no rule, or on a retired one, is its own item, and only a person's feedback or request makes a verify item there - a finding or an observation on a retired rule waits on nobody
             - "A cover item is a rule demanding checks while no check claims it: an agent writes the check, and it is never a person's to judge"
             - Every item names who is blocked, so nothing sits in both queues at once
-          statement_hash: sha256:e0430d35a542
+            - A rule holding an answered question is the agent's to fold in and is queued to no person - not to judge, not to verify - until the question is incorporated
+          statement_hash: sha256:dca0c502a6fc
           reworded:
             - hash: sha256:d51f57ea2c48
               at: 2026-09-13
