@@ -25,3 +25,12 @@ replies:
       sheets share one corner at every scale. Checked at the Desktop preset
       scaled to 60% with the fade at half: one clean arc at the frame's corner
       (screenshot at 4x). No rule change - a tweak, as agreed."
+  - author: agent
+    created: 2026-09-19T02:54:42Z
+    body: "Second half: what remained at the corner with no fade at all was the
+      marker ring - the as-built's (and the stand-in's before it) was a 2px
+      square border flush to the edge, drawn inside the frame's rounded clip, so
+      the clip cut through it at every corner. It now stands 4px in with its own
+      10px corner, which survives the clip at any scale; the stand-in's ring in
+      lib/serve.js got the same. Checked at Fit and Desktop, with and without
+      the ghost, at 3x."

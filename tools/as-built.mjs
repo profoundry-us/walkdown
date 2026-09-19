@@ -134,9 +134,11 @@ const inRoot = (fn) =>
 
 const MARK_CSS = `
   /* The as-built's own marks. Baked into the page rather than injected by the
-     server, because this is a file somebody keeps - not a trick. */
-  .as-built-ring { position: fixed; inset: 0; z-index: 10; pointer-events: none;
-    border: 2px solid oklch(72% 0.17 25); }
+     server, because this is a file somebody keeps - not a trick. The ring
+     stands 4px in with its own corner: flush, it was a square inside the
+     frame's rounded clip, cut through at every corner (Topher, 2026-09-18). */
+  .as-built-ring { position: fixed; inset: 4px; z-index: 10; pointer-events: none;
+    border: 2px solid oklch(72% 0.17 25); border-radius: 10px; }
   .as-built-label { position: fixed; left: 0; bottom: 0; z-index: 11; pointer-events: none;
     padding: 3px 10px; font: 700 10.5px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
     letter-spacing: .08em; text-transform: uppercase; color: oklch(22% 0.045 25);
