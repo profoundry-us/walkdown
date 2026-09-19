@@ -7130,7 +7130,6 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     const sketch = ghostSource(sc);
     const role = myRole();
     const acts = threadActions(t, role);
-    const me = whoAmI();
     /*
      * Who ended the thread: the record first, the guess second. verified_by /
      * waived_by name whoever accepted; only a thread from before those were
@@ -7159,15 +7158,11 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     <div class="flex items-center gap-1 px-2 pt-2">
       <button class="wdp-thread-back btn btn-ghost btn-xs text-primary" data-testid="thread.close" @click=${leaveThread}>← ${backFromThread(row)}</button>
       <span class="ml-auto flex items-center gap-1 pr-1.5 text-[11px]" data-testid="thread.provenance">
-        <!-- Whose name a reply or a move here is recorded under. It stood
-             under the composer as "as topher · Enter sends" and read as
-             clutter (Topher, 2026-09-17); it lives up here now, quietly,
-             because panel.identity.attribution-visible still wants the name
-             on screen at the moment of the action, and outside a sitting
-             this screen has no other place that says it. -->
-        <button id="wdp-tactor" data-testid="thread.actor" class="link max-w-[8rem] truncate font-mono opacity-50 no-underline hover:underline"
-          title="Replies and moves here are recorded under this name - change it in Settings" @click=${openSettings}>${me || 'set your name\u2026'}</button>
-        <span class="opacity-30">\u00b7</span>
+        <!-- No name up here. "as topher" stood under the composer, then
+             here as a link into Settings; who a reply or a move is recorded
+             under is chosen once, when a walkdown starts and each role is
+             signed for, and is not re-offered at the action (Topher,
+             2026-09-18; panel.identity.attribution-visible). -->
         <b class="opacity-60">${t.id}</b>
         ${reasonChip(t)}
         <span class="badge badge-xs ${CHIP[t.status] ?? 'badge-ghost'}">${t.status}</span>

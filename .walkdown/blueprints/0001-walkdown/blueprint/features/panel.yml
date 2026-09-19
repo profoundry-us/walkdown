@@ -1704,19 +1704,20 @@ stories:
 
       - id: panel.identity.attribution-visible
         origin: thread:n-0008
-        statement: Before you file a walkdown verdict or a thread action, the panel shows the name it will be recorded under. A name filled in for you is never used before you have seen it.
-        because: Nobody is attributed silently.
+        statement: The name your verdicts and thread actions are recorded under is shown, and chosen, once - when a walkdown starts - and no later action offers to change it.
+        because: Nobody is attributed silently, and nobody is invited to act as someone else halfway through.
         signoff: [eng, product]
-        screens: [review, rule-detail]
+        screens: [review]
         steps:
           given:
             - An actor defaulted from git identity
           when:
-            - Starting a walkdown, or taking a thread action from a rule's detail
+            - Starting a walkdown and signing for its roles
           then:
-            - The name being recorded is on screen at the moment of the action - the username itself, beside the full name shown for it
-            - Correcting it before acting records the corrected name
-          statement_hash: sha256:b038b84f6c73
+            - The name being recorded is on screen before the walkdown begins - the username itself, beside the full name shown for it
+            - Correcting it there records the corrected name
+            - A rule's composer and a thread's screen carry no "as <name>" link; the name is not re-offered at the moment of a reply, a move or a verdict
+          statement_hash: sha256:fa46635c93e2
           reworded:
             - hash: sha256:1b6a789fde73
               at: 2026-09-13

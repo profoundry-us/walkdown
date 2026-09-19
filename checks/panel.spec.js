@@ -2955,8 +2955,9 @@ test('the composer says whose move it is and offers only that reader’s moves',
   expect(await bot.evaluate((el) => getComputedStyle(el).borderStyle)).toBe('dashed');
   expect(await bot.evaluate((el) => getComputedStyle(el).borderRadius)).toBe('50%');
   await expect(bot.locator('svg')).toHaveCount(1);
-  // No "as <name> · Enter sends" under the box; the name stands in the header.
-  await expect(page.getByTestId('thread.actor')).toHaveText('checks-person');
+  // No "as <name> · Enter sends" under the box, and no name in the header
+  // either: who is recorded was chosen when the walkdown started.
+  await expect(page.getByTestId('thread.actor')).toHaveCount(0);
   await expect(page.locator('#wdp-note ~ *')).not.toContainText(/Enter/);
 
   // Done: the thread is verified, the screen slides back, and the record
