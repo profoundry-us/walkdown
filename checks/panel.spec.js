@@ -1679,6 +1679,14 @@ test('a rule that asks offers Answer and Waive alone, and the answer moves the q
   await expect(row.locator('[data-v="waived"]')).toBeVisible();
   await expect(row.locator('[data-v="reply"], [data-v="pass"], [data-v="fail"]')).toHaveCount(0);
   await expect(page.getByTestId('detail.turn')).toContainText(/anything you say below is the answer/i);
+  // The question is re-asked above the box, whatever was said after it -
+  // and it is still the door to its own thread, which asks it again there.
+  const ask = page.getByTestId('detail.ask');
+  await expect(ask).toContainText(/keep its shadow/);
+  await ask.locator('.wd-tag[data-thread]').click();
+  await expect(page.getByTestId('thread.ask')).toContainText(/keep its shadow/);
+  await page.getByTestId('thread.close').click();
+  await expect(ask).toBeVisible();
 
   // Anything said is the answer: it lands on the question, which moves to
   // answered - the agent's move - and the rule stops asking.

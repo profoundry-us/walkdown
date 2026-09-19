@@ -1273,8 +1273,9 @@ stories:
             - Anchor `detail.turn` above the box says whose move the rule is and what that party does next, in the thread screen's own colours
             - Anchor `detail.feedback` is the one box, and anchor `detail.verdict` the one row - Waive alone at the far left when a note is live, Reply, and during a walkdown the verdict pair last
             - While the rule asks an open question, the row offers Waive and Answer alone - anything said is the answer, it lands on the question and moves it to answered, and only then are Reply and the verdict pair offered
+            - While it asks, the question is quoted again inside `detail.turn`, above the box, whatever was said on the rule after it - and the thread's own screen quotes it the same way above its box
             - Nothing under the rule repeats which rule a thread is on
-          statement_hash: sha256:9fac1498abc8
+          statement_hash: sha256:d8b5406ea240
   - id: panel.threads
     title: Feedback is answered where it is read
     statement: As a reviewer, I can reply to a thread and move its lifecycle on from the panel, without leaving the app I am reviewing.

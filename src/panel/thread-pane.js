@@ -238,6 +238,16 @@ export function threadPane() {
         data-testid="thread.turn" data-party="${turn.party}">
         <span class="absolute -top-[7px] left-2 rounded px-1 text-[9px] font-bold uppercase leading-[14px] tracking-wider ${TURN[turn.party].chip}">${turn.label}</span>
         <span class="opacity-75">${turn.text}</span>
+        ${
+          // An open question re-asks itself above the box: its opening
+          // message, however far up the stream the replies have pushed it
+          // (Topher, 2026-09-19; the rule's detail does the same).
+          t.kind === 'question' && t.status === 'open'
+            ? html`<div class="wd-stream mt-1.5 max-h-48 overflow-y-auto rounded bg-base-100/70 px-1.5 py-1" data-testid="thread.ask">${unsafeHTML(
+                MSG.stream({ replies: [MSG.messages(t)[0]] }, { rules: (S.data?.rows ?? []).map((r) => r.rule), names: names() }),
+              )}</div>`
+            : nothing
+        }
       </div>
       <textarea id="wdp-note" data-testid="thread.reply" rows="2" class="textarea textarea-xs w-full resize-none"
         placeholder="${composerPlaceholder(t, role)}"

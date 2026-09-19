@@ -6,7 +6,7 @@ created: 2026-09-11T02:40:28.442Z
 anchor:
   rule: panel.start.which-project
   screen: project-modal
-status: open
+status: waived
 body: >-
   And let's do this:
 
@@ -90,3 +90,8 @@ added: >-
   I have not touched prototype/ or proposals/. Say the word and I will put a
   proposal up for the two cases rather than leaving design to start from the
   reworded prose.
+replies:
+  - author: topher
+    created: 2026-09-19T05:18:32Z
+    body: This is working as desired; let's not do anything else here.
+waived_by: topher

@@ -314,6 +314,22 @@ function conversation(r, picked) {
       data-testid="detail.turn" data-party="${turn.party}">
       <span class="absolute -top-[7px] left-2 rounded px-1 text-[9px] font-bold uppercase leading-[14px] tracking-wider ${TURN[turn.party].chip}">${turn.label}</span>
       <span class="opacity-75">${turn.text}</span>
+      ${
+        // The question itself, re-asked above the box you answer it in. The
+        // stream is in the order things were said, so a week of notes filed
+        // and settled after the ask buried it five threads up with only its
+        // tag to find it by - a rule that reads "Settled" last was still
+        // asking (q-0277; Topher, 2026-09-19). The tag is still the door to
+        // the thread.
+        asked
+          ? html`<div class="wd-stream mt-1.5 max-h-48 overflow-y-auto rounded bg-base-100/70 px-1.5 py-1" data-testid="detail.ask" data-question="${asked.id}" @click=${open}>${unsafeHTML(
+              MSG.stream(
+                { replies: [{ ...MSG.messages(asked)[0], thread: asked.id, tag: `${asked.id} \u00b7 question \u00b7 ${asked.status}` }] },
+                { rules: known, names: names() },
+              ),
+            )}</div>`
+          : nothing
+      }
     </div>
     <!-- One box for everything said on the rule: a reply, a fail's why, a
          waive's reason. It rides ABOVE the buttons, so the why is typed
