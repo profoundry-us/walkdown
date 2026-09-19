@@ -3,7 +3,7 @@
   AS-BUILT: which project?
 
   A drawing of walkdown's panel as it was actually built - the panel's own
-  markup, captured from the running build by tools/as-built.mjs on 2026-09-18
+  markup, captured from the running build by tools/as-built.mjs on 2026-09-19
   and kept by hand since (ADR 0007). It is neither the design
   (prototype/screens/project-modal.html, which stays as it was drawn) nor the build
   (the panel you are holding, which cannot frame itself). It exists so the
@@ -20,7 +20,9 @@
     <link rel="stylesheet" href="/walkdown.css"> 
     <style>
   /* The as-built's own marks. Baked into the page rather than injected by the
-     server, because this is a file somebody keeps - not a trick. */
+     server, because this is a file somebody keeps - not a trick. The ring
+     stands 4px in with its own corner: flush, it was a square inside the
+     frame's rounded clip, cut through at every corner (Topher, 2026-09-18). */
   .as-built-ring { position: fixed; inset: 4px; z-index: 10; pointer-events: none;
     border: 2px solid oklch(72% 0.17 25); border-radius: 10px; }
   .as-built-label { position: fixed; left: 0; bottom: 0; z-index: 11; pointer-events: none;

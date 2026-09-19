@@ -104,7 +104,9 @@ the file, because the file is the thing somebody keeps.
 
 walkdown's nine screens moved from `/stand-in/<id>` to
 `/as-built/<id>.html` on 2026-09-18. Each page is the panel's own
-markup, captured from the running build and then kept by hand, in a fourth
+markup, captured from the running build over the example blueprint (so
+the drawing lists the waitlist's rules, never a second copy of the real
+panel's list beside it) and then kept by hand, in a fourth
 theme — `redline`, the blueprint's drafting look with the ink turned red —
 with a ring, a corner label and a *Redlines* note saying where the build left
 the design. The two retired screens (`docked`, `unclaimed-page`) are as-built

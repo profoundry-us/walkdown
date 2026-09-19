@@ -32,7 +32,19 @@ import { chromium } from 'playwright';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, 'as-built');
-const BP = join(ROOT, '.walkdown/blueprints/0001-walkdown/blueprint');
+/*
+ * Drawn over the EXAMPLE blueprint, not walkdown's own. A drawing of the
+ * panel listing walkdown's real rules, framed by the real panel listing the
+ * same rules, was two copies of one list a glance apart (Topher,
+ * 2026-09-18) - and the prototype has always mocked the example's waitlist
+ * for the same reason. Registered on this machine by `walkdown import
+ * example`, which the checks and the project modal already rely on.
+ */
+const BP = join(ROOT, 'example/.walkdown/blueprints/0001-example/blueprint');
+// What the frame holds while capturing: the example's design for its front
+// door, served by the same walkdown. The drawing replaces the frame with a
+// box either way; this only decides what the bar says it is looking at.
+const FRAME = (wd) => `${wd}/prototype/screens/waitlist-join.html?bp=${encodeURIComponent(BP)}`;
 const REDLINES = JSON.parse(readFileSync(join(OUT, 'redlines.json'), 'utf8'));
 
 const args = process.argv.slice(2);
@@ -48,8 +60,8 @@ const STATES = {
   review: { steps: [] },
   'rule-detail': {
     steps: [
-      ['fn', `r => r.querySelector('[data-rule="panel.walkdown.pass-verifies-feedback"]')`],
-      ['sr', `r => r.querySelector('[data-rule="panel.walkdown.pass-verifies-feedback"]').click()`],
+      ['fn', `r => r.querySelector('[data-rule="waitlist.join.confirmation"]')`],
+      ['sr', `r => r.querySelector('[data-rule="waitlist.join.confirmation"]').click()`],
       ['wait', 1500],
     ],
   },
@@ -59,7 +71,7 @@ const STATES = {
       ['wait', 400],
       ['sr', `r => r.querySelector('[data-tfilter="all"]').click()`],
       ['wait', 400],
-      ['sr', `r => (r.querySelector('[data-open-thread="n-0297"]') ?? r.querySelector('.wd-row[data-open-thread]')).click()`],
+      ['sr', `r => (r.querySelector('[data-open-thread="n-0004"]') ?? r.querySelector('.wd-row[data-open-thread]')).click()`],
       ['wait', 1500],
     ],
   },
@@ -89,12 +101,8 @@ const FLATTEN = `(() => {
   const roots = [document, ...[...document.querySelectorAll('*')].filter((e) => e.shadowRoot).map((e) => e.shadowRoot)];
   const q = (sel) => roots.flatMap((r) => [...r.querySelectorAll(sel)]);
   const trim = (parent, keep) => { if (!parent) return; while (parent.children.length > keep) parent.lastElementChild.remove(); };
-  // Rules: the first screen group, up to the second screen head.
-  for (const list of q('[data-testid="panel.list-scroll"]')) {
-    const kids = [...list.children];
-    const second = kids.findIndex((k, i) => i > 0 && k.dataset.testid === 'panel.rules-screen');
-    for (const k of kids.slice(second > 0 ? Math.min(second, 22) : 22)) k.remove();
-  }
+  // Rules: the example's whole list fits a drawing; a longer one is cut.
+  for (const list of q('[data-testid="panel.list-scroll"]')) for (const k of [...list.children].slice(30)) k.remove();
   for (const pane of q('[data-testid="panel.threads-list"]')) trim(pane, 6);
   for (const body of q('[data-testid="thread.body"], [data-testid="detail.stream"]')) trim(body, 8);
   for (const dd of q('[data-testid="ref.preview"]')) dd.remove();
@@ -297,7 +305,7 @@ function hostPage(wd, { srv, frame }) {
 window.__walkdownConfig = {
   server: ${JSON.stringify(srv ?? wd)},
   reinjects: true,
-  frame: { url: ${JSON.stringify(frame ?? `${wd}/as-built/review.html`)} },
+  frame: { url: ${JSON.stringify(frame ?? FRAME(wd))} },
 };
 const s = document.createElement('script'); s.src = ${JSON.stringify(`${wd}/panel.js`)}; s.setAttribute('data-bp', 'blueprint');
 document.body.appendChild(s);
@@ -345,7 +353,7 @@ async function main() {
       process.stdout.write(`${id} `);
       const url = st.host
         ? `${hostAt}/?${new URLSearchParams(st.host)}`
-        : `${wd}/?bp=${encodeURIComponent(BP)}#${encodeURIComponent(`${wd}/as-built/review.html`)}`;
+        : `${wd}/?bp=${encodeURIComponent(BP)}#${encodeURIComponent(FRAME(wd))}`;
       // Through blank first: the same address with a different hash is a
       // hash navigation, and the pruned panel from the last state would be
       // what this one captures.

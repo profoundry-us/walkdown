@@ -147,8 +147,10 @@ under either.
 `prototype/screens/` is the design as drawn and stays that way.
 `as-built/` is a drawing of the panel as built (ADR 0007): the
 panel's own markup in the `redline` theme, with a *Redlines* note per page
-saying where the build left the design. The storyboard's app paths point at
-it, so it is what the App side of the fade shows. When a screen changes
+saying where the build left the design. It is captured over the EXAMPLE
+blueprint, so the rules in the drawing are the waitlist's and never a second
+copy of the list in the real panel beside it. The storyboard's app paths
+point at it, so it is what the App side of the fade shows. When a screen changes
 shape, bring its as-built page along and update its redlines:
 
     node tools/as-built.mjs                 # every screen, against a serve it starts

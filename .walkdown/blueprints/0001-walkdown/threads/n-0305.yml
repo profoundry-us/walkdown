@@ -8,7 +8,7 @@ anchor:
   rule: panel.dock.own-skin
   screen: review
   element: panel.app-frame
-status: addressed
+status: verified
 body: The rounded corners are broken a bit; I don't think this is a problem with
   the as-built; I've noted it before.
 added: "Mid-fade at a scaled preset (Desktop at fit), the ghost's sheet had
@@ -34,3 +34,4 @@ replies:
       10px corner, which survives the clip at any scale; the stand-in's ring in
       lib/serve.js got the same. Checked at Fit and Desktop, with and without
       the ghost, at 3x."
+verified_by: topher
