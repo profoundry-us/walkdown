@@ -19,3 +19,9 @@ body: "Observed while re-judging embed.pin.follows-the-visible-surface (run
   mode is on - at full fade the app is invisible anyway and cannot be used; (b)
   leave it and have this rule's given say \"pin mode on\" for the prototype
   surface. Which?"
+options:
+  - label: Reach the prototype's pins whenever it is the visible surface
+    why: hover and click work with pin mode off; pin mode only decides whether a
+      click PLACES one
+  - label: Leave it - pin mode is the door
+    why: markers are reachable only while placing

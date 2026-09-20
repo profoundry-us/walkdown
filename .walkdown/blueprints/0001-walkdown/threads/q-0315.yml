@@ -1,0 +1,23 @@
+id: q-0315
+kind: question
+author: agent
+created: 2026-09-20T17:15:23.162Z
+anchor:
+  rule: panel.walkdown.one-control-owns-the-sitting
+  screen: review
+status: open
+body: >-
+  What is a skip, when a rule cannot be judged this sitting?
+
+
+  Stepping past a rule records nothing, so it stays owed and comes round again -
+  now after the others (the trap q-0237 hit is fixed). A skip proper would say
+  why the sitting did not cover the rule, which a sweep's report asks (q-0237).
+options:
+  - label: Sitting-only, in the draft, with a reason
+    why: "'blocked by n-0236' beside the rule; gone when the sitting ends; the
+      ledger never hears of it"
+  - label: Sitting-only, no reason
+    why: stepping past is the skip; nothing more to say
+  - label: Recorded in the run as skipped, with a reason
+    why: a sweep can then say why the sitting did not cover it

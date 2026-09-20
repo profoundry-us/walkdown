@@ -67,3 +67,9 @@ replies:
 
       Shipped in 9a8208b. This thread is still open because answering it is his
       to do, not mine.
+options:
+  - label: Rename the key to blueprints:, no fallback
+    why: with a one-liner that rewrites a config in place, and the locations.js
+      parameter in the same commit
+  - label: "Keep projects:"
+    why: a file format with data on disk; the ADR renamed the words on screen

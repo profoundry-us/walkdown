@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-09T15:31:16.256Z
 anchor:
   rule: ownership.writes.spec-never-implementation
-status: open
+status: incorporated
 body: >-
   "Nothing claims the page, but you've picked a blueprint on this site before."
   - I don't like this state. If we "pick" a blueprint for a site, that action
@@ -100,3 +100,8 @@ replies:
       follows the rule. Whichever way this question lands, one of the two - the
       rule or the design - is owed a change; noting it here so the design edit
       rides on the decision rather than on a separate request.'
+  - author: agent
+    created: 2026-09-20T17:15:21Z
+    body: "Parked by ADR 0001: the write this stood in front of was withdrawn and
+      the rule is unchanged. Closed; if claiming from the panel comes back it
+      comes back as a new question with a new reason."

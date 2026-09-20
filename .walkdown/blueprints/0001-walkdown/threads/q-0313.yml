@@ -1,0 +1,21 @@
+id: q-0313
+kind: question
+author: agent
+created: 2026-09-20T17:15:22.247Z
+anchor:
+  rule: status.acceptance.role-comes-from-the-run
+status: open
+body: >-
+  May somebody sign a role their own config does not grant?
+
+
+  Your own signature is arguably bounded by your config; a proxy signature names
+  somebody else and cannot be, or driving the walk for Sam on a call is
+  impossible (q-0225, case 1).
+options:
+  - label: Own signature from config; a proxy may name anyone
+    why: your roles are yours; naming Sam for product is what a proxy is for
+  - label: Any role, any signer
+    why: the config is a default, never a limit
+  - label: Config only, for both
+    why: a proxy needs the proxied person's roles known to this machine too

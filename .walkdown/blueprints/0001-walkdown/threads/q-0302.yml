@@ -19,3 +19,9 @@ body: >-
   from n-0199 are handled: a trailing slash or uppercased host no longer empties
   the board (lib/status.js samePlace), and the reporter's baseURL fallback is an
   adopter concern already noted in lib/playwright-reporter.js.
+options:
+  - label: Counts nothing
+    why: an addressless target is a target with no place, and a verdict belongs to a
+      place
+  - label: Counts every run
+    why: as today - removing the address resurrects them all

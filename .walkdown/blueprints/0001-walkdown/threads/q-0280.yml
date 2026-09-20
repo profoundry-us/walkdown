@@ -23,3 +23,9 @@ body: 'The agent re-judge (run 2026-09-11T21-08-39Z, evidence
   path is followed by the OS and printed as registered. (b) is a wider edit
   across lib/locations.js than a re-judge should carry; (a) is a wording change
   to the rule. Which?'
+options:
+  - label: Canonicalise on read too
+    why: registryEntry and the comparisons resolve the way the writers do, so a
+      hand-edited path still matches
+  - label: Leave it - looked at once, at the add
+    why: the statement holds as written; a hand-edited path is the writer's problem

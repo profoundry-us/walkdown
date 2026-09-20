@@ -27,7 +27,8 @@ notes), and the runs ledger. The blueprint is the single source of truth for
   buried in a paragraph is a question nobody sees. Several decisions are
   several questions. When the ways out are known, offer them as choices -
   `--option "Retire it :: which-project asks the same thing"`, two to six -
-  and the answer names one (`chosen`) or says something else. A person's
+  and the answer names one (`chosen`) or says something else; a question
+  already asked takes them once, while open (`walkdown thread <id> --option`). A person's
   own words relayed with `--said` are a note, never a question: the person
   is not asking themselves.
 

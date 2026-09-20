@@ -34,3 +34,10 @@ body: >-
 
 
   Noticed while judging panel.walkdown.draft-on-disk.
+options:
+  - label: Write the draft when the sitting starts
+    why: the signing survives a reload; an empty sitting becomes visible to status
+  - label: Keep the answered dialog in the browser only
+    why: re-offered on reload; nothing on disk until a verdict
+  - label: Leave it
+    why: a sitting is real once something is judged

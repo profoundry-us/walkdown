@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-09T16:58:27.735Z
 anchor:
   rule: screens.ownership.one-claimant
-status: open
+status: incorporated
 body: >-
   So this definitely introduces an issue: I fully expect a single base_url to
   host multiple blueprints at various paths in that URL (this is the whole
@@ -152,3 +152,8 @@ replies:
       Left for you: whether this thread ends here, and acceptance of the
       reworded rules - four of them are visibly unsigned on the board because
       their statements changed.
+  - author: agent
+    created: 2026-09-20T17:15:24Z
+    body: The reframe was worked up as docs/12-page-ownership.md; its first and
+      deciding question is re-asked as q-0317 with the two ways out as choices.
+      Closed as Topher's own words, refiled.

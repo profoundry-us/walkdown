@@ -17,3 +17,10 @@ body: >-
   confirm-first step is in every judge prompt since 2026-09-14. What is left is
   whether walkdown can defend the client side at all, or whether the procedure
   is the whole answer.
+options:
+  - label: The procedure is the answer
+    why: 127.0.0.1 plus confirming /api/blueprint before trusting a page, as every
+      judge prompt has said since 09-14
+  - label: Defend the client too
+    why: the panel refuses to record against a server whose blueprint key differs
+      from the one it opened with

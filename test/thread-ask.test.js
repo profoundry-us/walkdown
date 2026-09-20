@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { after, beforeEach, test } from 'node:test';
 import { loadBlueprint } from '../lib/blueprint.js';
 import { MSG } from '../lib/message-stream.js';
-import { defer, openThread, transition } from '../lib/writes.js';
+import { defer, offer, openThread, transition } from '../lib/writes.js';
 import { parse } from '../vendor/yaml.js';
 
 /*
@@ -84,4 +84,15 @@ test('later stamps the ask deferred and changes nothing else @rule:threads.quest
   // An answered question has no queue to leave.
   transition(load(), id, { status: 'answered', reason: 'Yes.' });
   assert.throws(() => defer(load(), id), /not an open question/);
+});
+
+test('choices go on a question already asked, once, while it is open @rule:threads.question.one-ask', () => {
+  const { id } = ask(null);
+  offer(load(), id, [{ label: 'Leave it', why: 'a hand edit gets what it asked for' }, { label: 'Say so in the rule' }]);
+  assert.deepEqual(onDisk(id).options.map((o) => o.label), ['Leave it', 'Say so in the rule']);
+  assert.throws(() => offer(load(), id, [{ label: 'A' }, { label: 'B' }]), /already offers/);
+  transition(load(), id, { status: 'answered', reason: 'The first.', chosen: 'Leave it' });
+  assert.equal(onDisk(id).chosen, 'Leave it');
+  const note = openThread(load(), { kind: 'note', body: 'A note.', anchor: { rule: 'demo.main.thing' } });
+  assert.throws(() => offer(load(), note.id, [{ label: 'A' }, { label: 'B' }]), /not an open question/);
 });

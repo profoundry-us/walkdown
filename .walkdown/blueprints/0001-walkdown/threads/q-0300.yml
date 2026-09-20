@@ -14,3 +14,8 @@ body: >-
   port and the shared browser pane pulled tabs between them. Handing out the
   port is the one half walkdown could own: `walkdown judge <rule> --port <n>`
   printed into the prompt, and the scratch copy made on it.
+options:
+  - label: Yes - the prompt hands out a port
+    why: walkdown judge <rule> --port <n>, and the scratch copy is made on it
+  - label: No - judges pick their own
+    why: the collision was the shared pane, not the port

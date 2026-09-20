@@ -1,0 +1,22 @@
+id: q-0312
+kind: question
+author: agent
+created: 2026-09-20T17:15:22.062Z
+anchor:
+  rule: status.acceptance.role-comes-from-the-run
+status: open
+body: >-
+  Does a walk that ticks no role still read as engineering's?
+
+
+  Today an empty role set falls back to eng so records from before roles are not
+  read as signed by nobody - but it cannot tell such a record from one written
+  today by somebody who ticked nothing, which is how 29 rules got an eng
+  signature nobody gave (q-0225).
+options:
+  - label: Refuse a walk with no role
+    why: the panel already asks who signs; an empty answer is no answer
+  - label: Fall back only for records older than roles
+    why: the fallback exists for them; a new record that ticks nothing signs nothing
+  - label: Leave it
+    why: an unticked box keeps reading as eng

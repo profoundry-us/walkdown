@@ -1,0 +1,24 @@
+{
+  "run_id": "2026-09-20T17-15-47Z-local-01",
+  "created": "2026-09-20T17:15:47Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "311e015-dirty",
+  "tree_hash": "sha256:7a8922b37e40",
+  "spec_hash": "sha256:fa2c05b6eb12",
+  "results": [
+    {
+      "rule": "threads.question.one-ask",
+      "status": "pass",
+      "statement_hash": "sha256:116b4f4dc582",
+      "duration_ms": 447,
+      "checks": [
+        "test/thread-ask.test.js:45",
+        "test/thread-ask.test.js:63",
+        "test/thread-ask.test.js:76",
+        "test/thread-ask.test.js:89"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+id: q-0317
+kind: question
+author: agent
+created: 2026-09-20T17:15:24.309Z
+anchor:
+  rule: screens.ownership.one-claimant
+status: open
+body: >-
+  May a page belong to more than one blueprint?
+
+
+  docs/12-page-ownership.md argues it in full. Several blueprints on one site at
+  different paths already work; only the same origin AND the same path is in
+  question. Today blueprintForUrl RANKS claimants and answers with one, silently
+  (q-0269).
+options:
+  - label: Yes - split the two questions
+    why: "'which blueprints could this page belong to' is a fact and may answer with
+      several; 'which am I reviewing against' is a session choice, remembered as
+      a default, never a claim"
+  - label: No - split screens instead
+    why: two blueprints about one page declare different screens on it; a second
+      claimant on the same path stays a fault

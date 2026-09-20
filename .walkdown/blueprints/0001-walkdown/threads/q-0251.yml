@@ -37,3 +37,10 @@ body: >-
   this door under its own name, and it cannot name a signer by passing arguments
   - the actor is stamped from the machine. So this is about a machine configured
   with a misleading identity, not about an agent slipping past the gate.
+options:
+  - label: Refuse a short list of machine names
+    why: claude, copilot, assistant - the way agent is refused
+  - label: A signature must match a declared identity
+    why: any name nobody configured is refused; lands on the identity rules
+  - label: Leave the line where it is
+    why: only agent is refused; the actor is stamped from the machine anyway

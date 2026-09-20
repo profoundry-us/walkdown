@@ -6,7 +6,7 @@ created: 2026-09-09T15:31:59.850Z
 anchor:
   rule: panel.start.unclaimed-page-says-so
   screen: unclaimed-page
-status: open
+status: incorporated
 body: >-
   "Nothing claims the page, but you've picked a blueprint on this site before."
   - I don't like this state. If we "pick" a blueprint for a site, that action
@@ -88,3 +88,8 @@ replies:
       here". proposals/claim-this-page.html is the sketch of the road not taken;
       proposals/project-modal.html is the one shipped, and n-0271 is the design
       request for it.
+  - author: agent
+    created: 2026-09-20T17:15:21Z
+    body: "Superseded by ADR 0001: the screen this asked design to change is retired
+      into project-modal, and nothing is remembered (§9). Closed as incorporated
+      - the reasoning survived, the request did not."

@@ -4,7 +4,7 @@ author: topher
 via: agent
 created: 2026-08-25T16:40:00Z
 anchor: {}
-status: open
+status: incorporated
 body: >-
   Let's think through 3 a bit. What does it look like for a user to "walkdown" a
   staging or review app? What is it that we want to capture there and track?
@@ -312,3 +312,10 @@ replies:
       replies line, thread actions, the stale-copy banner, the pin badge, the
       pin form and markers, the detail pane's verdict pair, feedback box and
       stepper. The storyboard's 43 promised anchors are now largely real.
+  - author: agent
+    created: 2026-09-20T17:15:20Z
+    body: Everything this discussed was built the same day - per-address verdicts,
+      the false greens failed loudly, the browser harness - and each step is
+      recorded in the replies above. Nothing is still asked; closed as the
+      record it is. (Filed as a question when it was Topher's own thinking - the
+      case threads.question.one-ask now names.)

@@ -247,7 +247,8 @@ stories:
             - The answer records the label it chose beside the reply, and a label the question never offered is refused
             - The stream draws the choices under the question and marks the one taken
             - Later stamps the open question `deferred` and changes nothing else; an answered question cannot be put off
-          statement_hash: sha256:d856ec6ceea3
+            - Choices may be put on a question already asked (`walkdown thread <id> --option`), once, while it is open - so a question asked before choices existed is not refiled to get them
+          statement_hash: sha256:116b4f4dc582
       - id: threads.conversation.written-in-markdown
         origin: thread:n-0288
         statement: A message is markdown, rendered from a short list of allowed elements; anything else in it is plain text.

@@ -1,0 +1,18 @@
+id: n-0316
+kind: note
+reason: observation
+author: agent
+created: 2026-09-20T17:15:23.352Z
+anchor:
+  rule: panel.walkdown.one-control-owns-the-sitting
+  screen: review
+status: settled
+body: "The pass-advance returned to the FIRST rule still owing a verdict, not
+  the next one after where you were - so a rule stepped past was the rule every
+  following pass came back to (q-0237, 2026-09-07). Fixed 2026-09-20: nextOwed()
+  in src/panel/app.js opens the next owed rule after the one you are on,
+  wrapping to the top; the rule's step says so."
+replies:
+  - author: agent
+    created: 2026-09-20T17:15:23Z
+    body: Settled with the fix above; nothing owed to a person here.

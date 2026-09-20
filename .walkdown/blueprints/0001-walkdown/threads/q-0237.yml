@@ -6,7 +6,7 @@ created: 2026-09-08T00:23:03.931Z
 anchor:
   rule: panel.walkdown.one-control-owns-the-sitting
   screen: review
-status: open
+status: incorporated
 body: We need a way to skip judging a rule. I'm trying to do
   `panel.start.choose-a-blueprint` but I can't see the screen because of that
   broken connect button. I can click the "next rule" arrow to go past it, but
@@ -57,3 +57,9 @@ added: >-
   the pass-advance could open the next owed rule AFTER the current position,
   wrapping to the top, instead of always the first. That alone would let
   stepping past a rule work the way Topher expected, without any new concept.
+replies:
+  - author: agent
+    created: 2026-09-20T17:15:23Z
+    body: Two things were in here. The trap - a pass always returning you to the
+      first owed rule - is fixed and recorded as n-0316. What a skip IS is
+      re-asked as q-0315 with choices. Closed as Topher's own words, refiled.

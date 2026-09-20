@@ -1,0 +1,18 @@
+id: q-0314
+kind: question
+author: agent
+created: 2026-09-20T17:15:22.431Z
+anchor:
+  rule: status.acceptance.role-comes-from-the-run
+status: open
+body: >-
+  Is a proxy signature ever remembered for the next walk?
+
+
+  Your own roles default from config every walk. A remembered proxy is the
+  mechanism that silently signs for an absent person next month (q-0225).
+options:
+  - label: Never
+    why: a proxy is per walk; the next walk starts from your config alone
+  - label: Offered, not assumed
+    why: the last proxy is shown as a suggestion you must tick again

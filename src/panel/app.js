@@ -69,7 +69,7 @@ import { threadFilterBar, threadsMatching, threadsPane } from './threads-list.js
 import { toast } from './toast.js';
 import { api, esc } from './util.js';
 import { frameLoading, hideVeil, placeVeil, screenLabel, veilIsUp } from './veil.js';
-import { CHIP, currentScreen, declaredAnchors, defaultScreen, duringSession, ghostSource, hereLocation, isHeadless, needsYou, owedRows, pageSurface, ruleScreen, screenById, screenInHand, screenUrl, TERMINAL, whereIdentityLives, whoAmI } from './vocab.js';
+import { CHIP, currentScreen, declaredAnchors, defaultScreen, duringSession, ghostSource, hereLocation, isHeadless, needsYou, orderedRows, owedRows, pageSurface, ruleScreen, screenById, screenInHand, screenUrl, TERMINAL, whereIdentityLives, whoAmI } from './vocab.js';
 
 /*
  * Two layouts, one panel.
@@ -2210,7 +2210,7 @@ async function giveVerdict(status) {
       // is the whole of it - pin mode is a tool you reach for, not a mode a
       // verdict puts you in.
       if (status === 'pass' || status === 'approved') {
-        const next = owedRows()[0];
+        const next = nextOwed();
         if (next) {
           open(next.rule);
           load();
@@ -2235,8 +2235,26 @@ async function giveVerdict(status) {
  * another blueprint and back, so "continue" is a real offer rather than a
  * word for "start over".
  */
+/*
+ * The next rule still owing a verdict AFTER the one you are on, wrapping to
+ * the top - never simply the first. The first was a trap: step past a rule
+ * you cannot judge yet, judge the one after it, and the pass carried you
+ * straight back to the one you stepped over, every time (q-0237, Topher,
+ * 2026-09-07). Nothing is skipped by this - an owed rule stays owed and
+ * comes round again - it just comes round after the others.
+ */
+function nextOwed() {
+  const owed = owedRows();
+  if (!owed.length) return null;
+  const here = S.view === 'detail' ? (S.selected?.rule ?? null) : null;
+  const order = orderedRows().map((r) => r.rule);
+  const at = here ? order.indexOf(here) : -1;
+  const after = owed.find((r) => order.indexOf(r.rule) > at);
+  return after ?? owed[0];
+}
+
 function continueWalkdown() {
-  const next = owedRows()[0];
+  const next = nextOwed();
   if (!next) {
     S.view = 'list';
     render();

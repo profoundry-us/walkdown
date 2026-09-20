@@ -44,3 +44,10 @@ body: >-
 
   Your call which of those it is — the first is a perfectly good answer and
   needs no code.
+options:
+  - label: Leave it
+    why: a hand edit gets what it asked for
+  - label: Say so in the rule
+    why: a home that holds records outranks defaults:, stated and checked
+  - label: Make the resolver prefer the home
+    why: records already there win over a preference, in code

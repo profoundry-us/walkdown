@@ -45,3 +45,10 @@ body: >-
   The third is defensible and would cost nothing to implement, which is why this
   is a question. Filed after judging the headless rules; the warnings are
   unrelated to that run.
+options:
+  - label: A door that re-anchors a thread, recorded as a reply
+    why: like every other mutation
+  - label: Lint resolves renames recorded in the storyboard
+    why: the threads are never touched
+  - label: Accept it, and say it quietly
+    why: a stale anchor is history, not an error

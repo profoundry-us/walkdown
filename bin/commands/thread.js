@@ -6,7 +6,7 @@ import { dim } from '../../lib/report/tty.js';
 import { getThread } from '../../lib/threads.js';
 import { whenIn } from '../../lib/time.js';
 import { saysSomething, THREAD_KINDS } from '../../lib/vocab.js';
-import { mutateThread, openThread } from '../../lib/writes.js';
+import { mutateThread, offer, openThread } from '../../lib/writes.js';
 import { end, loadOrExit } from './context.js';
 
 export function run(args) {
@@ -36,7 +36,7 @@ export function run(args) {
   const id = positionals[0];
   if (!id) {
     console.error(
-      'Usage: walkdown thread <id> [--reply <text>] [--status <s>|--verify|--reopen|--waive] [--reason <text>] [--as-agent [--said <text>] [--added <text>]]\n' +
+      'Usage: walkdown thread <id> [--reply <text>] [--status <s>|--verify|--reopen|--waive] [--reason <text>] [--option "<label> :: <why>"]... [--as-agent [--said <text>] [--added <text>]]\n' +
         '       walkdown thread new --rule <id> --body <text> [--kind note|question] [--option "<label> :: <why>"]... [--reason feedback|finding|observation|request|decision] [--screen <id>] [--element <sel>] [--as-agent [--said <text>] [--added <text>]]',
     );
     process.exit(2);
@@ -178,6 +178,30 @@ export function run(args) {
     console.log(dim(`  ${anchorText(anchor)}`));
     console.log(dim(`  walkdown thread ${opened} reads it in full`));
     return end(0);
+  }
+
+  // Choices put on a question already asked - the same flag `new` takes,
+  // on an open question that offered none yet.
+  if (values.option?.length) {
+    try {
+      const { thread } = offer(
+        blueprint,
+        id,
+        values.option.map((o) => {
+          const [label, ...why] = String(o).split('::');
+          return { label: label.trim(), why: why.join('::').trim() };
+        }),
+      );
+      if (values.json) console.log(JSON.stringify({ id, options: thread.options }));
+      else {
+        console.log(`✓ ${id} now offers ${thread.options.length} choices`);
+        for (const o of thread.options) console.log(`  ○ ${o.label}${o.why ? dim(` — ${o.why}`) : ''}`);
+      }
+    } catch (err) {
+      console.error(err.message);
+      return end(1);
+    }
+    if (!replying && !status) return end(0);
   }
 
   const mutating = Boolean(replying || status);

@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-07T15:20:08.310Z
 anchor:
   rule: status.acceptance.role-comes-from-the-run
-status: open
+status: incorporated
 body: >-
   I just realized that we're conflating two things: identity and roles. And I
   think we need to record them for every walkdown.
@@ -187,3 +187,9 @@ replies:
       Not built, and still open from this thread: the same proxy on thread
       `verified` (your point 4), and the run-id collision two people can hit
       finishing in the same second in separate checkouts.
+  - author: agent
+    created: 2026-09-20T17:15:22Z
+    body: "Signatures shipped: a run carries one per role, each naming its signer,
+      and a signer who is not the actor is the record of a proxy. The three
+      decisions this left open are re-asked one at a time, with choices: q-0312,
+      q-0313, q-0314. Closed here as Topher's own thinking, refiled."
