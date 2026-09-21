@@ -7,7 +7,7 @@ created: 2026-09-21T01:00:38.672Z
 anchor:
   rule: panel.rules.headless-says-so
   screen: rule-detail
-status: addressed
+status: verified
 body: We currently have two ways of showing that a rule is headless ("Headless -
   no screen belongs..." and "No screen - this rule is judged..."), and they live
   right next to each other which feels like unnecessary duplication.
@@ -21,3 +21,10 @@ replies:
       checks and recorded behaviour rather than by looking; what is on the desk
       is beside the point.' A step on panel.rules.headless-says-so says it is
       said once, and a check counts.
+  - author: topher
+    via: verdict
+    created: 2026-09-21T04:53:00Z
+    body: Verified by topher's pass on panel.rules.headless-says-so
+      (2026-09-21T04-53-00Z-local-01).
+verified_by: topher
+verified_via: 2026-09-21T04-53-00Z-local-01

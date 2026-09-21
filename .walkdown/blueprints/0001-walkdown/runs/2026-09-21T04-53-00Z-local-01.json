@@ -1,0 +1,128 @@
+{
+  "run_id": "2026-09-21T04-53-00Z-local-01",
+  "created": "2026-09-21T04:53:00Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    },
+    {
+      "role": "design",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "fab1103-dirty",
+  "tree_hash": "sha256:9c98168dcdea",
+  "spec_hash": "sha256:f9ceb78a26a8",
+  "results": [
+    {
+      "rule": "panel.rules.legend-on-demand",
+      "status": "fail",
+      "statement_hash": "sha256:356d0682ce72",
+      "threads": [
+        "n-0308"
+      ]
+    },
+    {
+      "rule": "panel.walkdown.one-control-owns-the-sitting",
+      "status": "fail",
+      "statement_hash": "sha256:2f34df9bf3b2",
+      "threads": [
+        "n-0327"
+      ]
+    },
+    {
+      "rule": "embed.pin.tooltip-says-what-it-is",
+      "status": "pass",
+      "statement_hash": "sha256:9ed8ebb2af0a"
+    },
+    {
+      "rule": "panel.dock.own-skin",
+      "status": "pass",
+      "statement_hash": "sha256:4e48a84dd51a"
+    },
+    {
+      "rule": "panel.rules.detail-slide",
+      "status": "fail",
+      "statement_hash": "sha256:1eb9f5ca82d3",
+      "threads": [
+        "n-0320"
+      ]
+    },
+    {
+      "rule": "panel.rules.tiers-at-a-glance",
+      "status": "pass",
+      "statement_hash": "sha256:363df4d92820"
+    },
+    {
+      "rule": "panel.rules.evidence-visible",
+      "status": "fail",
+      "statement_hash": "sha256:78f68901d77e",
+      "threads": [
+        "n-0318"
+      ]
+    },
+    {
+      "rule": "panel.rules.headless-says-so",
+      "status": "pass",
+      "statement_hash": "sha256:4f4c746e2d71"
+    },
+    {
+      "rule": "panel.rules.one-conversation",
+      "status": "pass",
+      "statement_hash": "sha256:4a029b66e6d1"
+    },
+    {
+      "rule": "embed.threads.note-first",
+      "status": "pass",
+      "statement_hash": "sha256:2d3685ac1da6"
+    },
+    {
+      "rule": "embed.threads.picture-on-a-pin",
+      "status": "fail",
+      "statement_hash": "sha256:7b9a728127e0",
+      "threads": [
+        "n-0328"
+      ]
+    },
+    {
+      "rule": "screens.anchors.renames-are-recorded",
+      "status": "fail",
+      "statement_hash": "sha256:f28e66197aef",
+      "threads": [
+        "n-0329"
+      ]
+    },
+    {
+      "rule": "panel.start.open-a-folder",
+      "status": "fail",
+      "statement_hash": "sha256:5ace895ac628",
+      "threads": [
+        "n-0265"
+      ]
+    },
+    {
+      "rule": "locations.answer.registry-is-the-only-door",
+      "status": "pass",
+      "statement_hash": "sha256:f6b76093bef6"
+    },
+    {
+      "rule": "ownership.authoring.statement-reads-at-a-glance",
+      "status": "pass",
+      "statement_hash": "sha256:97f1bacfb270"
+    },
+    {
+      "rule": "ownership.authoring.machine-words-pass-the-voice",
+      "status": "pass",
+      "statement_hash": "sha256:4c46fabe7d48"
+    }
+  ]
+}

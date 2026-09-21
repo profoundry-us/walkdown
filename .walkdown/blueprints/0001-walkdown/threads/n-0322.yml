@@ -6,7 +6,7 @@ via: agent
 created: 2026-09-21T01:00:38.866Z
 anchor:
   rule: locations.answer.registry-is-the-only-door
-status: addressed
+status: verified
 body: The Because block of "What a spelling can fool..." does not make a lot of
   sense and needs to be rewritten in a better voice.
 added: Filed from Topher's list, 2026-09-21. A wording pass under ADR 0004; the
@@ -18,3 +18,10 @@ replies:
       that trusts what the add wrote, so nothing a tree grows later can open a
       second door.' The old sentence is kept in the rule's history so the
       rewrite is on the record."
+  - author: topher
+    via: verdict
+    created: 2026-09-21T04:53:00Z
+    body: Verified by topher's pass on locations.answer.registry-is-the-only-door
+      (2026-09-21T04-53-00Z-local-01).
+verified_by: topher
+verified_via: 2026-09-21T04-53-00Z-local-01

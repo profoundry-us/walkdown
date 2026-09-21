@@ -6,7 +6,7 @@ via: agent
 created: 2026-09-21T01:00:39.055Z
 anchor:
   rule: ownership.authoring.statement-reads-at-a-glance
-status: addressed
+status: verified
 body: We may need to define a better voice for all text the agent stores in the
   blueprint (rules, because, given / when / then, etc) and build some sort of
   system that checks it against the rules before it is saved and presented to
@@ -28,3 +28,11 @@ replies:
       most of them mine; rewording them is a sitting of its own and I have not
       started it. Rule ownership.authoring.machine-words-pass-the-voice holds
       the checks."
+  - author: topher
+    via: verdict
+    created: 2026-09-21T04:53:00Z
+    body: Verified by topher's pass on
+      ownership.authoring.statement-reads-at-a-glance
+      (2026-09-21T04-53-00Z-local-01).
+verified_by: topher
+verified_via: 2026-09-21T04-53-00Z-local-01

@@ -8,7 +8,7 @@ anchor:
   rule: panel.rules.tiers-at-a-glance
   screen: rule-detail
   element: panel.rule-tiers
-status: addressed
+status: verified
 body: When hovering the panel.rule-tiers, the popup gets cut off by the
   "Recording as" panel. It might just be cut off from the list, but something we
   should figure out.
@@ -37,3 +37,10 @@ replies:
       under the Recording-as strip - it was the pane's overflow, not a z-index.
       A check hovers the strip on an open rule and asserts the bubble's box lies
       inside the pane's.
+  - author: topher
+    via: verdict
+    created: 2026-09-21T04:53:00Z
+    body: Verified by topher's pass on panel.rules.tiers-at-a-glance
+      (2026-09-21T04-53-00Z-local-01).
+verified_by: topher
+verified_via: 2026-09-21T04-53-00Z-local-01

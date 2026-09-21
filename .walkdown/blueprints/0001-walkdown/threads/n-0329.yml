@@ -1,0 +1,15 @@
+id: n-0329
+kind: note
+reason: feedback
+author: topher
+created: 2026-09-21T04:47:30.846Z
+anchor:
+  rule: screens.anchors.renames-are-recorded
+status: open
+body: >-
+  I think it's technically working, but I can't read the tooltip because of the
+  opacity and it's getting chopped off.
+
+
+  See /Users/topherfangio/Desktop/Desktop\ -\ iCloud/Screenshots/Screenshot\
+  2026-09-20\ at\ 11.46.14 PM.png for the issue.

@@ -1,0 +1,14 @@
+id: n-0328
+kind: note
+reason: feedback
+author: topher
+created: 2026-09-21T04:43:39.742Z
+anchor:
+  rule: embed.threads.picture-on-a-pin
+status: open
+body: >-
+  I don't want to paste a file in, I want to be able to drag & drop a file into
+  the composer (or the pin text box) and have it handle the file from there.
+
+
+  Keep the thumbnail preview and full size opening when you fix this.

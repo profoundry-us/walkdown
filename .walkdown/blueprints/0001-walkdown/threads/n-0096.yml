@@ -6,7 +6,7 @@ created: 2026-08-27T00:15:09Z
 anchor:
   rule: embed.threads.note-first
   screen: thread-panel
-status: addressed
+status: verified
 body: Also, we probably need a way to attach screenshots to a pin or thread;
   let's add that as a new thread somewhere relevant
 added: >-
@@ -59,3 +59,10 @@ replies:
       at most, under five megabytes each; anything else is refused in words.
       Rule embed.threads.picture-on-a-pin holds the checks (recorded
       2026-09-21T02-56-48Z).
+  - author: topher
+    via: verdict
+    created: 2026-09-21T04:53:00Z
+    body: Verified by topher's pass on embed.threads.note-first
+      (2026-09-21T04-53-00Z-local-01).
+verified_by: topher
+verified_via: 2026-09-21T04-53-00Z-local-01

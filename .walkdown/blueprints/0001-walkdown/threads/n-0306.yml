@@ -5,7 +5,7 @@ author: topher
 created: 2026-09-19T03:37:05.618Z
 anchor:
   rule: embed.pin.tooltip-says-what-it-is
-status: addressed
+status: verified
 body: If faded fully to the prototype, the prototype should accept interactions
   including any pins that were attached to the prototype. If faded all the way
   to the app, it should get interactions including pins. If faded part-way
@@ -23,3 +23,10 @@ replies:
       embed.pin.tooltip-says-what-it-is and a check that measures what the
       document says is under the pointer at 0, 50 and 100. This also answers
       q-0285 with its first option."
+  - author: topher
+    via: verdict
+    created: 2026-09-21T04:53:00Z
+    body: Verified by topher's pass on embed.pin.tooltip-says-what-it-is
+      (2026-09-21T04-53-00Z-local-01).
+verified_by: topher
+verified_via: 2026-09-21T04-53-00Z-local-01

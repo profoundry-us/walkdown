@@ -7,7 +7,7 @@ created: 2026-09-21T01:00:39.446Z
 anchor:
   rule: panel.dock.own-skin
   screen: review
-status: addressed
+status: verified
 body: Toast alerts need a max size; this one scrolled off the page when I
   finished a walkdown.
 added: Filed from Topher's list, 2026-09-21. The finish toast listed sixteen
@@ -20,3 +20,10 @@ replies:
       inside itself past it; long text wraps instead of running off the page.
       Both toast notes are steps on panel.dock.own-skin now, which asks for
       checks.
+  - author: topher
+    via: verdict
+    created: 2026-09-21T04:53:00Z
+    body: Verified by topher's pass on panel.dock.own-skin
+      (2026-09-21T04-53-00Z-local-01).
+verified_by: topher
+verified_via: 2026-09-21T04-53-00Z-local-01

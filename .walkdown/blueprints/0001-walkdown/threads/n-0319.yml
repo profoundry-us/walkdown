@@ -7,7 +7,7 @@ created: 2026-09-21T01:00:38.302Z
 anchor:
   rule: panel.rules.one-conversation
   screen: rule-detail
-status: addressed
+status: verified
 body: Having the full thread in the rule is far too much to scroll through;
   let's just show the last note with a button to click to open the entire
   history (slide it in from the right like the other ones do). Any questions
@@ -31,3 +31,10 @@ replies:
       panel.rules.one-conversation moved with it; the three checks that read the
       stream read the history now, and a new one answers from the thread screen.
       As-built pages and their redlines brought along."
+  - author: topher
+    via: verdict
+    created: 2026-09-21T04:53:00Z
+    body: Verified by topher's pass on panel.rules.one-conversation
+      (2026-09-21T04-53-00Z-local-01).
+verified_by: topher
+verified_via: 2026-09-21T04-53-00Z-local-01

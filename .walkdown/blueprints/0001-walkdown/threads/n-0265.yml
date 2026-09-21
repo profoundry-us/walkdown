@@ -5,7 +5,7 @@ created: 2026-09-09T13:53:16.188Z
 anchor:
   rule: panel.start.open-a-folder
   screen: start
-status: addressed
+status: open
 body: "Judging panel.start.open-a-folder (run 2026-09-09T13-43-55Z-local-01,
   pass) I found one path where the panel reports no server while a server is
   answering. On walkdown's own served review page (GET / from `walkdown serve`),
@@ -57,4 +57,28 @@ replies:
 
 
       highball run green, npm run checks 47 passed.
+  - author: topher
+    created: 2026-09-21T04:50:06Z
+    body: >-
+      It feels really weird to see "OR BRING IN A PROJECT" as the first header.
+      I think that header should be about starting a project and we need a
+      second "OR CHOOSE AN EXISTING PROJECT" down below this above the list of
+      available projects. Rethink the wording of this whole thing to make it
+      sound good and follow this outline.
+
+
+      See /Users/topherfangio/Desktop/Desktop\ -\ iCloud/Screenshots/Screenshot\
+      2026-09-20\ at\ 11.48.28 PM.png
+  - author: topher
+    created: 2026-09-21T04:50:07Z
+    body: >-
+      It feels really weird to see "OR BRING IN A PROJECT" as the first header.
+      I think that header should be about starting a project and we need a
+      second "OR CHOOSE AN EXISTING PROJECT" down below this above the list of
+      available projects. Rethink the wording of this whole thing to make it
+      sound good and follow this outline.
+
+
+      See /Users/topherfangio/Desktop/Desktop\ -\ iCloud/Screenshots/Screenshot\
+      2026-09-20\ at\ 11.48.28 PM.png
 reason: finding
