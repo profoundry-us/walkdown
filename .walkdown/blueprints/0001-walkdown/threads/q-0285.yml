@@ -35,3 +35,18 @@ replies:
     created: 2026-09-21T01:20:06Z
     body: Folded into embed.pin.tooltip-says-what-it-is as two steps, built and
       checked (run 2026-09-21T01-19-43Z).
+  - author: topher
+    created: 2026-09-21T03:22:50Z
+    body: When faded, neither app should have pointer events enabled. When fully to
+      the app side, pointer events on the app should be on the app surface. When
+      fully to the prototype, pointer events should be on for that surface. If
+      we need to make the "active" surface z-index higher than the other when we
+      switch so pins work on that surface, we should do that.
+  - author: agent
+    created: 2026-09-21T03:52:25Z
+    body: "Already built this way: part-way through the fade neither surface takes
+      the pointer, fully to the app the app does, fully to the design the design
+      does, pin mode on or off. The design overlay sits above the app frame, so
+      no z-index swap is needed. The two steps on
+      embed.pin.tooltip-says-what-it-is say it, the check passed in run
+      2026-09-21T02-44-23Z, and the rule waits on your verdict."
