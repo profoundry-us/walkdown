@@ -1634,7 +1634,8 @@ test('a rule draws its threads as one conversation, and never repeats which rule
   await expect(under.locator('.wd-tag[data-thread]').first(), 'the rule draws its threads').toBeVisible();
   // One opening tag per thread; a reply's "↳" tag names the thread it is on
   // where the stream changes thread, and is not a second listing of it.
-  expect(await under.locator('.wd-tag[data-thread]:not(:text-matches("^\\u21b3"))').count()).toBe(counts[rule]);
+  const opening = await under.locator('.wd-tag[data-thread]').evaluateAll((els) => els.filter((el) => !el.textContent.trim().startsWith('\u21b3')).length);
+  expect(opening).toBe(counts[rule]);
   await expect(
     under.getByTestId('thread.where'),
     'under a rule, nothing repeats the rule it is anchored to',
