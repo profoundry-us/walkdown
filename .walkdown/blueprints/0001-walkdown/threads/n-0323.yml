@@ -6,7 +6,7 @@ via: agent
 created: 2026-09-21T01:00:39.055Z
 anchor:
   rule: ownership.authoring.statement-reads-at-a-glance
-status: open
+status: addressed
 body: We may need to define a better voice for all text the agent stores in the
   blueprint (rules, because, given / when / then, etc) and build some sort of
   system that checks it against the rules before it is saved and presented to
@@ -15,3 +15,16 @@ body: We may need to define a better voice for all text the agent stores in the
 added: Filed from Topher's list, 2026-09-21. ADR 0004 and the rule-wording-judge
   agent are the progress made; what is asked is a gate before a save, not a
   judge after one.
+replies:
+  - author: agent
+    created: 2026-09-21T02:12:06Z
+    body: "The voice is written down in docs/13-voice.md and checked in two places.
+      Lint warns under the category voice on every rule field and step:
+      sentences past forty words, a second thought bolted on with a dash,
+      hedges, throat-clearing, house words, a rule in the first person, a
+      statement that restates a step. The thread doors refuse the machine's own
+      words that miss it, naming each fault, and --as-is files them unchanged. A
+      person's words are never gated. The board carries 65 voice warnings today,
+      most of them mine; rewording them is a sitting of its own and I have not
+      started it. Rule ownership.authoring.machine-words-pass-the-voice holds
+      the checks."

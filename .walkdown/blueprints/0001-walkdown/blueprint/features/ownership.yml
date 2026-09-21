@@ -81,6 +81,27 @@ stories:
             - Both are warnings, never errors, because length is a symptom and a person decides
           statement_hash: sha256:97f1bacfb270
 
+      - id: ownership.authoring.machine-words-pass-the-voice
+        origin: thread:n-0323
+        created_at: 2026-09-20
+        statement: The machine's own words are refused at the door when they miss the voice, with each fault named, and lint names the same faults in every rule already on the board. A person's words are never gated.
+        because: Most of the prose on a board is the machine's, and a sentence that failed a stranger is cheaper to fix before it is filed than to find after.
+        history: Twenty-one of the agent's own observations read as one paragraph each, dashes chaining three thoughts, and Topher asked for a voice and a check against it before anything is saved (n-0323, 2026-09-20).
+        verify: [checks]
+        steps:
+          given:
+            - A thread the machine is about to reply on, and a rule whose statement runs past forty words
+          when:
+            - The machine files a reply with a dash-chained sentence, then again with --as-is
+            - A person files the same words as their own
+            - The blueprint is linted
+          then:
+            - The first reply is refused and the refusal names the fault and the sentence, and nothing lands on disk
+            - The --as-is reply lands unchanged
+            - The person's reply lands unchanged, gated by nothing
+            - Lint warns on the long statement under the category `voice`, saying what to do, never an error
+          statement_hash: sha256:4c46fabe7d48
+
   - id: ownership.writes
     title: The server writes specification, never implementation
     statement: As a team, we can let a browser talk to the review server because the only things a request can create are the things review is FOR - feedback, sittings, verdicts - and never the product itself.

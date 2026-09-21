@@ -578,6 +578,33 @@ test('a statement the length of a paragraph, and a because carrying history, are
   assert.ok(again.includes('statement-reads-as-a-paragraph'), again.join(','));
 });
 
+test('the voice is linted field by field, as warnings that say what to do @rule:ownership.authoring.machine-words-pass-the-voice', () => {
+  const h = writeFixture(join(root, 'voice'));
+  const file = join(h.spec, 'features', 'demo.yml');
+  const long = Array.from({ length: 41 }, (_, i) => `word${i}`).join(' ');
+  writeFileSync(
+    file,
+    readFileSync(file, 'utf8')
+      .replace('statement: The visitor can do the thing.', `statement: ${long}.\n        because: We probably keep its provenance.`)
+      .replace(
+        'when: [Click anchor `home.cta`]',
+        'when: [Click anchor `home.cta`]\n          then:\n            - Note that it lands - somewhere the reader can see it, which is the point of the trip - and stays',
+      ),
+  );
+  const { findings } = lint(load(h), { checks: false });
+  const voice = findings.filter((f) => f.category === 'voice');
+  assert.ok(voice.every((f) => f.level === 'warn'), 'a voice fault is a person\'s call, never an error');
+  const said = voice.map((f) => f.message);
+  assert.ok(said.some((m) => /^statement: a sentence of 41 words/.test(m)), said.join('\n'));
+  assert.ok(said.some((m) => /^because: .*hedges/.test(m)), said.join('\n'));
+  assert.ok(said.some((m) => /^because: .*house word.*where it came from/.test(m)), said.join('\n'));
+  assert.ok(said.some((m) => /^because: .*first person/.test(m)), said.join('\n'));
+  assert.ok(said.some((m) => /^then step: .*throat/.test(m)), said.join('\n'));
+  assert.ok(said.some((m) => /^then step: .*dashes/.test(m)), said.join('\n'));
+  // Every message says what to do, not only what it saw.
+  assert.ok(voice.every((f) => /—/.test(f.message)), said.join('\n'));
+});
+
 /*
  * Anchors move; records do not (q-0252). A screen's `renames` says where an
  * anchor went, and a thread filed under the old name is read through it -

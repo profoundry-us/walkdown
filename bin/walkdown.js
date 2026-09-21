@@ -20,7 +20,7 @@ Usage:
   walkdown sweep --why <reason> [--tiers checks,agent] [--blueprint <id>] [--target <name>]
   walkdown threads [--blueprint <id>] [--rule <id>] [--all] [--json]
   walkdown thread <id> [--reply <text>] [--status <s>|--verify|--reopen|--waive]
-                       [--reason <text>] [--as-agent [--said <text>] [--added <text>]]
+                       [--reason <text>] [--as-agent [--said <text>] [--added <text>]] [--as-is]
                        [--blueprint <id>] [--json]
   walkdown thread new --rule <id> --body <text>|--said <text> [--added <text>] [--kind note|question]
                       [--screen <id>] [--element <sel>] [--as-agent] [--blueprint <id>] [--json]
@@ -97,7 +97,9 @@ Commands:
           machine's own words, recorded as "agent"; --as-agent --said
           carries a person's words as they typed them, under their name
           with the machine marked beside it, and --added is what the
-          machine put beside those words, kept apart. "thread new" opens
+          machine put beside those words, kept apart. The machine's own
+          words are refused when they miss the voice (docs/13-voice.md);
+          --as-is files them unchanged. "thread new" opens
           one instead: --rule anchors it (--screen/--element sharpen the
           spot), --kind picks note or question, --body says what was seen
           (or --said what the person said).

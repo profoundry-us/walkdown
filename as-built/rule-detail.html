@@ -269,7 +269,9 @@
                     <div class="text-[13px]" data-testid="detail.verify">checks, agent</div> 
                   </div> 
                   <div class="-mx-3.5 border-t border-base-300 px-3.5 pt-2" data-testid="detail.conversation"> 
-                    <div class="text-[10.5px] font-bold uppercase tracking-widest opacity-40 mb-1">Conversation <span class="font-normal normal-case tracking-normal opacity-70">· 1 thread</span></div> 
+                    <div class="text-[10.5px] font-bold uppercase tracking-widest opacity-40 mb-1 flex items-center">Conversation <span class="ml-1 font-normal normal-case tracking-normal opacity-70">· 1 thread</span>
+                      <button class="btn btn-ghost btn-xs ml-auto h-5 min-h-0 px-1.5 font-normal normal-case tracking-normal text-primary" data-testid="detail.history-open" title="Every message of every thread on this rule, oldest first">History · 3 →</button>
+                    </div> 
                     <div class="wd-stream" data-testid="detail.stream">
                       <div class="wd-day"><span></span>Aug 20<span></span></div>
                       <div class="wd-msg"> 
@@ -277,29 +279,7 @@
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="8" width="16" height="12" rx="2.5"><path d="M12 8V4M9 4h6"><circle cx="9" cy="14" r="1.1" fill="currentColor" stroke="none"><circle cx="15" cy="14" r="1.1" fill="currentColor" stroke="none"><path d="M9.5 17.5h5"></svg>
                         </div> 
                         <div class="wd-col"> 
-                          <div class="wd-head"><span class="wd-who">Agent</span><span class="wd-tag" data-thread="q-0001" title="Open this thread" role="link">q-0001 · question · incorporated</span><span class="wd-at" title="8/20/2026, 3:12:30 PM CDT">31d ago</span></div> 
-                          <div class="wd-text">
-                            <div class="wd-ask">
-                              <p>The prototype doesn't show what happens when an email that is already on the waitlist is submitted again. Should re-submission show the same confirmation, or a distinct "you're already on the list" state? If the latter, it needs a screen (or state) in the storyboard and likely a new rule.</p> 
-                            </div>
-                          </div> 
-                        </div> 
-                      </div>
-                      <div class="wd-msg"> 
-                        <div class="wd-ava" style="background:oklch(52% 0.10 328)" title="Topher Fangio">TF</div> 
-                        <div class="wd-col"> 
-                          <div class="wd-head"><span class="wd-who">Topher Fangio</span><span class="wd-at" title="8/20/2026, 6:45:50 PM CDT">31d ago</span></div> 
-                          <div class="wd-text">
-                            <p>make it say, "you're already on the list"</p> 
-                          </div> 
-                        </div> 
-                      </div>
-                      <div class="wd-msg"> 
-                        <div class="wd-ava wd-bot" style="color:oklch(58% 0.16 255);border-color:oklch(58% 0.16 255)" title="Agent">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="8" width="16" height="12" rx="2.5"><path d="M12 8V4M9 4h6"><circle cx="9" cy="14" r="1.1" fill="currentColor" stroke="none"><circle cx="15" cy="14" r="1.1" fill="currentColor" stroke="none"><path d="M9.5 17.5h5"></svg>
-                        </div> 
-                        <div class="wd-col"> 
-                          <div class="wd-head"><span class="wd-who">Agent</span><span class="wd-at" title="8/20/2026, 6:56:31 PM CDT">31d ago</span></div> 
+                          <div class="wd-head"><span class="wd-who">Agent</span><span class="wd-tag" data-thread="q-0001" title="Open this thread" role="link">↳ q-0001</span><span class="wd-at" title="8/20/2026, 6:56:31 PM CDT">31d ago</span></div> 
                           <div class="wd-text">
                             <p>Incorporated: new rule 
                               <button class="wd-ref link link-hover font-mono" data-rule-ref="waitlist.join.already-joined">waitlist.join.already-joined</button> ('you're already on the list' message per your answer), new screen waitlist-already in the storyboard, prototype screens/waitlist-already.html, app implementation (localStorage-backed), and a tagged check — passing in run 2026-08-20T23-56-21Z-local-01.</p> 
@@ -348,6 +328,7 @@
         <li>The statement is followed by <i>because</i> and <i>history</i>, then the screen and the steps drawn as given / when / then with anchors as chips (ADR 0004). The design showed statement, evidence, steps, verify.</li> 
         <li>Evidence, acceptance and the check source sit below the conversation rather than above it.</li> 
         <li>The steppers (&larr; &rarr;) and <i>&larr; All rules</i> are where the design put them.</li> 
+        <li>The conversation shows only the last thing said; the whole history is one slide to the right, behind <i>History</i> (n-0319). The design showed every thread in place.</li> 
       </ul> 
     </details> 
     <script src="/embed.js" data-walkdown>

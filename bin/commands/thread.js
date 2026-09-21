@@ -30,6 +30,7 @@ export function run(args) {
       element: { type: 'string' },
       body: { type: 'string' },
       option: { type: 'string', multiple: true },
+      'as-is': { type: 'boolean', default: false },
     },
     allowPositionals: true,
   });
@@ -164,6 +165,7 @@ export function run(args) {
       options,
       said: values.said ?? null,
       added: values.added ?? null,
+      asIs: values['as-is'],
     });
     // Whose name went on it is the record's answer, not this door's guess.
     const by = thread.author;
@@ -227,6 +229,7 @@ export function run(args) {
         ...(values.reply !== undefined ? { body: values.reply } : {}),
         ...(values.said !== undefined ? { said: values.said } : {}),
         ...(values.added !== undefined ? { added: values.added } : {}),
+        asIs: values['as-is'],
         ...(status ? { status } : {}),
         reason: values.reason,
         via,

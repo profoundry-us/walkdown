@@ -359,6 +359,33 @@ test('--as-agent may claim, and may never accept @rule:threads.lifecycle.claim-n
   assert.match(disk, /status: addressed/);
 });
 
+/*
+ * The machine's words pass the voice before they are filed (n-0323). The
+ * refusal names the fault, nothing lands, and --as-is is the loud way past
+ * it. A person's own words are never gated - the check is on what the
+ * machine writes, not on what it carries.
+ */
+test('the machine\'s words are refused when they miss the voice; --as-is files them; a person\'s words are never gated @rule:ownership.authoring.machine-words-pass-the-voice', () => {
+  const bp = fixture('voice', { id: 'n-0014', status: 'open' });
+  const chained = 'Looked at it - the pin sits where the step says it should, which is the whole of the claim - and the tooltip opens away from the edge.';
+  assert.throws(
+    () => run(['n-0014', '--as-agent', '--reply', chained], bp),
+    (err) => err.status === 2 && /do not pass the voice/.test(String(err.stderr)) && /dash-clause/.test(String(err.stderr)) && /--as-is/.test(String(err.stderr)),
+  );
+  let disk = readFileSync(join(threadsOf(bp), 'n-0014.yml'), 'utf8');
+  assert.doesNotMatch(disk, /Looked at it/, 'a refused reply never lands');
+  // What the machine adds beside a person's words is its own, and gated the same.
+  assert.throws(
+    () => run(['n-0014', '--as-agent', '--said', 'fix it', '--added', 'It is probably the ghost.'], bp),
+    (err) => err.status === 2 && /hedge/.test(String(err.stderr)),
+  );
+  assert.match(run(['n-0014', '--as-agent', '--reply', chained, '--as-is'], bp), /\+1 reply/);
+  assert.match(run(['n-0014', '--reply', 'Probably fine - I looked - and it is - honestly.'], bp), /\+1 reply/);
+  disk = readFileSync(join(threadsOf(bp), 'n-0014.yml'), 'utf8');
+  assert.match(disk, /Looked at it/);
+  assert.match(disk, /Probably fine/);
+});
+
 test('an identity literally called agent is refused too, in any spelling @rule:threads.lifecycle.claim-never-accept', () => {
   // The older half of the gate, which still has work to do: a config naming
   // its person "Agent" is not a way around the one above.

@@ -205,6 +205,7 @@ test('every write the API offers lands in threads, drafts or runs - and nowhere 
       const sealed = await post(base, '/api/walkdowns', {
         actor: 'tester',
         target: 'local',
+        signatures: [{ role: 'eng', signer: 'tester' }],
         results: [{ rule: 'demo.main.thing', status: 'pass' }],
       });
       assert.ok(sealed.ok, JSON.stringify(sealed.data));

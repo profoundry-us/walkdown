@@ -116,6 +116,14 @@ what the rule wants. (ADR 0004 has the reasoning and the before/after pairs.)
 - **Rewording is `walkdown hash --write --reword "<why>"`.** The old hash is
   kept and no verdict goes stale. Better English is never a new rule.
 
+## The voice
+
+`docs/13-voice.md` is how prose written into this blueprint sounds - one idea
+per sentence, no dash-clauses, no hedges, plain words, a rule never in the
+first person. `walkdown lint` warns where a field misses it, and the thread
+doors refuse the machine's own words that do: fix the sentence rather than
+reaching for `--as-is`, which files it unchanged and says so on the command.
+
 ## Writing code here
 
 `docs/10-house-style.md` is how code in this repository is written - it is
