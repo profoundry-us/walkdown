@@ -1,0 +1,44 @@
+{
+  "run_id": "2026-09-21T02-13-03Z-local-01",
+  "created": "2026-09-21T02:13:03Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "0f340e0",
+  "note": "Rejudge asked by n-0305 and n-0304 after the toast, strip and attribution work of 2026-09-20. Judged against a stamped scratch copy (tmp/scratch/rejudge-0921, served on 4730, its own home and identity; the address recorded here is the target's real one, as the verdict is about the board, and the scratch port is this note's), so every thread filed here landed in the copy and the real ledger holds only this record.",
+  "results": [
+    {
+      "rule": "panel.dock.own-skin",
+      "status": "pass",
+      "statement_hash": "sha256:4e48a84dd51a",
+      "evidence": [
+        "runs/evidence/2026-09-21T02-13-03Z/own-skin-review-app.png",
+        "runs/evidence/2026-09-21T02-13-03Z/own-skin-toast.png",
+        "runs/evidence/2026-09-21T02-13-03Z/own-skin-prototype-side.png",
+        "runs/evidence/2026-09-21T02-13-03Z/probes.txt"
+      ],
+      "reasoning": "The chrome is one drafting-blue skin (bar, rail, detail, footer) beside an app frame holding the as-built in its redline theme, and the two read as different surfaces at a glance; at the design end of the fade the prototype shows its greyscale wireframe, distinct from both (own-skin-prototype-side.png). The skin is one daisyUI theme block in styles/walkdown.css (the walkdown theme at line 27, the redline theme below it), and no panel module names a colour. Copying the rule id raised a toast that sat inside the app frame 12px from its right edge and 12px from its bottom, over neither desk nor panel, with max-height 160px and overflow-y auto measured on the container (probes.txt), so a long message scrolls inside it. I could not raise a message long enough to scroll from the UI alone; the cap is measured, not watched. n-0305's corners: at Fit and at the Desktop preset with the fade at half, the app frame's corner shows one arc with no notch of the other sheet.",
+      "threads": [
+        "n-0305",
+        "n-0324",
+        "n-0325"
+      ]
+    },
+    {
+      "rule": "threads.lifecycle.acts-for-a-person",
+      "status": "pass",
+      "statement_hash": "sha256:0306629cf026",
+      "evidence": [
+        "runs/evidence/2026-09-21T02-13-03Z/acts-cli-report.txt",
+        "runs/evidence/2026-09-21T02-13-03Z/acts-thread-relayed.png",
+        "runs/evidence/2026-09-21T02-13-03Z/acts-thread-own.png",
+        "runs/evidence/2026-09-21T02-13-03Z/probes.txt"
+      ],
+      "reasoning": "Against the copy's own identity (scratch-rejudge-0921): a thread opened with --as-agent --body landed with author agent and no person named (n-0326 in the copy), and its screen shows the robot disc and the word Agent, nothing else. --said with --added landed under the person, body exactly as typed, via: agent beside the name, and the addition in its own field; the CLI report and the thread screen both draw the person's line under their name with the via mark and the machine's words in a dashed AGENT ADDED box under it (acts-thread-relayed.png). --added with no --said was refused with the reason on stderr. WALKDOWN_ACTOR=somebody-else in the environment changed nothing: the record still said agent. A --reason finding thread with no --as-agent was authored agent, as a finding is the machine's own account. n-0304's ask, that a person's typed words stay under their name with a small mark and the machine's addition apart, is what the screen now does.",
+      "threads": [
+        "n-0304"
+      ]
+    }
+  ]
+}
