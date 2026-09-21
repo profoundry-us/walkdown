@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-17T15:09:30.312Z
 anchor:
   rule: status.derived.verdict-belongs-to-a-place
-status: answered
+status: incorporated
 body: >-
   Should a target with NO base_url count nothing, rather than every verdict ever
   made against it?
@@ -29,4 +29,10 @@ replies:
   - author: topher
     created: 2026-09-21T00:47:38Z
     body: Counts nothing
+  - author: agent
+    created: 2026-09-21T01:47:30Z
+    body: Built. A target with no address counts no run that recorded one; a run
+      with no address of its own is still taken at face value. A step on
+      status.derived.verdict-belongs-to-a-place and a unit test beside the
+      face-value one.
 chosen: Counts nothing

@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-06T17:27:41.566Z
 anchor:
   rule: locations.default.one-home-per-blueprint
-status: answered
+status: incorporated
 body: >-
   Does a `defaults:` block outrank the layout of a home that already holds
   records?
@@ -56,4 +56,10 @@ replies:
     created: 2026-09-21T00:25:40Z
     body: We need to stop caring about "hand edits". Perhaps we should include this
       in the governance we pass to a judging agent.
+  - author: agent
+    created: 2026-09-21T01:47:28Z
+    body: "Left as it is, and the governance now says why: walkdown.yml carries a
+      line, handed to every judge prompt, that hand-written arrangements are out
+      of scope - a state only a hand edit can produce is neither a defect nor a
+      question. The rule is unchanged."
 chosen: Leave it

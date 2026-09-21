@@ -73,3 +73,11 @@ governance:
     real project is registered for that server, and the real ledger is one
     ?bp= away (q-0149). There is no --dir: everything walkdown answers for is
     registered, and a scratch copy is registered in its own home.
+  - >-
+    Hand-written arrangements are out of scope (q-0182, q-0220). A state that
+    only a hand edit can produce - a key deleted from config.yml, a row typed
+    into the registry, a home's layout rearranged, a run file touched - is
+    neither a defect nor a question: walkdown supports what its own tools
+    write, and a hand edit gets what it asked for. Judge what init, import,
+    move, serve, the CLI and the panel produce, and file nothing about the
+    rest.

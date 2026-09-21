@@ -246,3 +246,14 @@ test('the skeleton it prints is a record the board reads back', () => {
   assert.equal(row.agent.state, 'pass', 'a record copied from the skeleton fills the cell');
   assert.equal(row.agent.runId, record.run_id);
 });
+
+/*
+ * Two judges driven at once collided on one port (n-0202). The prompt hands
+ * a port out - derived from the rule, or the one given - so nobody picks
+ * their own (q-0300).
+ */
+test('the prompt hands out a port, and takes the one it is given @rule:status.evidence.agent-assumed', () => {
+  const bp = fixture('port');
+  assert.match(run(['demo.main.walks'], bp), /Your port is 47\d\d\. Make the scratch copy with --port 47\d\d/);
+  assert.match(run(['demo.main.walks', '--port', '4799'], bp), /Your port is 4799\./);
+});

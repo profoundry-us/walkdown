@@ -41,6 +41,20 @@ import {
   turnLine,
 } from './vocab.js';
 
+/** Every name an anchor has had on a screen, oldest first - the filed name, then each rename. */
+export const renameChain = (sc, element) => {
+  const out = [element];
+  const seen = new Set([element]);
+  let cur = element;
+  while (sc?.renames?.[cur] && !seen.has(sc.renames[cur])) {
+    cur = String(sc.renames[cur]);
+    seen.add(cur);
+    out.push(cur);
+  }
+  return out;
+};
+
+
 /*
  * How the turn line is drawn, by whose move it is. A person's move is amber,
  * the agent's is blue and dashed like the agent's own face in the stream, an
@@ -154,7 +168,20 @@ export function threadPane() {
     t.anchor?.rule ? '' : 'not attached to a rule',
     sc?.title ?? t.anchor?.screen,
     t.anchor?.element
-      ? html`<span class="font-mono">${t.anchor.element}</span>`
+      ? (() => {
+          /*
+           * The name it was filed under, always - a thread is a record of a
+           * moment. When the storyboard says the anchor has since been
+           * renamed, the record says so beside it, and resting on it lists
+           * every name it has had (q-0252).
+           */
+          const chain = renameChain(sc, t.anchor.element);
+          return chain.length > 1
+            ? html`<span class="tooltip tooltip-bottom" data-tip="${chain.join(' → ')}"
+                ><span class="font-mono">${t.anchor.element}</span>
+                <span class="badge badge-xs badge-outline align-middle opacity-70" data-testid="thread.renamed">renamed</span></span>`
+            : html`<span class="font-mono">${t.anchor.element}</span>`;
+        })()
       : t.anchor?.position
         ? 'by position'
         : '',

@@ -3282,3 +3282,108 @@ test('Skip sets a rule aside for this sitting only: recorded as skipped, unchang
   expect(after.acceptance, 'a skip signs nothing and revokes nothing').toEqual(before.acceptance);
   expect(after.human?.state).toBe(before.human?.state);
 });
+
+/*
+ * A proxy is offered next time, never assumed (q-0314): the name comes back
+ * filled in with the box unticked, so signing for Sam again is one tick and
+ * signing for Sam by accident is impossible.
+ */
+test('the last proxy is offered on the next walk, unticked', {
+  tag: '@rule:panel.walkdown.who-signs-is-declared',
+}, async ({ page }) => {
+  await review(page);
+  await endSession(page);
+  await page.getByTestId('panel.walk').click();
+  const product = page.locator('input[data-testid="walkdown.signing.role"][data-role="product"]');
+  await expect(product).toBeVisible();
+  await product.check();
+  const i = await product.getAttribute('data-i');
+  const signer = page.locator(`input[data-testid="walkdown.signing.signer"][data-i="${i}"]`);
+  await signer.fill('sam');
+  await signer.blur();
+  await expect(page.getByTestId('walkdown.signing.summary')).toContainText('Signing for sam (product)');
+  await page.getByTestId('walkdown.signing.start').click();
+  await expect(page.getByTestId('panel.actor')).toBeVisible();
+  await expect(page.getByTestId('panel.actor-signing')).toContainText('product for sam');
+  await endSession(page); // no verdicts: nothing is recorded
+
+  await page.getByTestId('panel.walk').click();
+  await expect(product).toBeVisible();
+  await expect(product, 'offered, not assumed').not.toBeChecked();
+  await expect(signer).toHaveValue('sam');
+  await expect(signer).toBeDisabled();
+  await expect(page.locator(`[data-testid="walkdown.signing.offered"]`)).toBeVisible();
+  await page.getByTestId('walkdown.signing.cancel').click();
+});
+
+/*
+ * The board this panel opened is the only one it records against (q-0301).
+ * The blueprint's key is its home on disk; a server restarted on the same
+ * port for another copy answers with a different one, and a shared browser
+ * can hand a judge exactly that (n-0202). Simulated by rewriting the answer,
+ * because the panel's half is the same whatever put the other board there.
+ */
+test('a server answering for another blueprint ends the sitting, out loud', {
+  tag: '@rule:panel.walkdown.records-to-ledger',
+}, async ({ page }) => {
+  await session(page);
+  await page.route(/\/api\/blueprint(\?|$)/, async (route) => {
+    const res = await route.fetch();
+    const json = await res.json();
+    await route.fulfill({ response: res, json: { ...json, key: '/somewhere/else/entirely' } });
+  });
+  // The other board has no draft of ours - it is another board.
+  await page.route(/\/api\/draft(\?|$)/, (route) =>
+    route.request().method() === 'GET' ? route.fulfill({ json: { draft: null } }) : route.continue(),
+  );
+  // session() left the first rule open; its verdict pair arrives a tick later.
+  await expect(acceptVerdict(page)).toBeVisible();
+  await acceptVerdict(page).click();
+  await expect(page.locator('.alert-error')).toContainText(/no longer answering for the blueprint/);
+  await expect(page.getByTestId('panel.actor'), 'the sitting is gone').toBeHidden();
+  await page.unroute(/\/api\/blueprint(\?|$)/);
+  await page.unroute(/\/api\/draft(\?|$)/);
+  // Put the server back: the draft written before the answer changed is
+  // still on the real board, and the next check must not inherit it.
+  await page.reload();
+  await expect(page.getByTestId('panel.bar')).toBeVisible();
+  const walk = page.getByTestId('panel.walk');
+  if (/finish/i.test((await walk.textContent()) ?? '')) {
+    await walk.click();
+    await expect(walk).not.toHaveText(/finish/i);
+  }
+});
+
+/*
+ * Anchors move; records do not (q-0252). n-0241 was filed against
+ * detail.screenshots-modal on 2026-09-07 and the anchor became
+ * detail.evidence-modal the same day; the storyboard records the rename.
+ */
+test('a thread under a renamed anchor shows the name it was filed under, marked renamed', {
+  tag: '@rule:screens.anchors.renames-are-recorded',
+}, async ({ page }) => {
+  // Filed here under the OLD name, the way n-0241 was, so the check does not
+  // depend on which threads the fixture happens to carry.
+  const res = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
+    data: {
+      kind: 'note',
+      body: 'The modal clips its last row.',
+      anchor: { rule: 'panel.rules.evidence-visible', screen: 'rule-detail', element: 'detail.screenshots-modal' },
+    },
+  });
+  expect(res.ok()).toBeTruthy();
+  const { id } = await res.json();
+  const listed = (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json()).threads;
+  expect(listed.some((t) => t.id === id), 'the server lists what it just filed').toBeTruthy();
+  await page.goto(fixtureFor({ bp: 'blueprint' }));
+  await expect(page.getByTestId('panel.bar')).toBeVisible();
+  await page.waitForLoadState('networkidle');
+  await page.getByTestId('panel.tabs').getByText(/Threads/).click();
+  await page.getByTestId('panel.thread-filter').getByText('All', { exact: false }).click();
+  await page.getByTestId('panel.threads-list').locator(`[data-open-thread="${id}"]`).first().click({ position: { x: 8, y: 6 } });
+  const mark = page.getByTestId('thread.renamed');
+  await expect(mark).toBeVisible();
+  const where = mark.locator('xpath=..');
+  await expect(where.locator('.font-mono')).toHaveText('detail.screenshots-modal');
+  await expect(where).toHaveAttribute('data-tip', 'detail.screenshots-modal → detail.evidence-modal');
+});

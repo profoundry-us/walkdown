@@ -496,6 +496,23 @@ test('a run with no recorded address is taken at face value @rule:status.derived
   assert.equal(row.agent.state, 'pass');
 });
 
+/*
+ * The other half (q-0302): a TARGET with no address is a target with no
+ * place, so a run that named a place cannot fill its cells. Deleting a
+ * target's address used to resurrect every run ever made against it - 170
+ * verdicts at once (n-0199). The addressless RUN above still counts.
+ */
+test('an addressless target counts no run that named an address @rule:status.derived.verdict-belongs-to-a-place', () => {
+  const placed = at(walkdownRun('2026-01-01T00:00:00Z', 'agent', 'pass'), 'https://pr-1.review.app');
+  const row = deriveStatus(blueprint({ runs: [placed], verify: ['agent'], targets: { local: {} } })).rows[0];
+  assert.equal(row.agent.state, 'never');
+  const unplaced = walkdownRun('2026-01-01T00:00:00Z', 'agent', 'pass');
+  assert.equal(
+    deriveStatus(blueprint({ runs: [unplaced], verify: ['agent'], targets: { local: {} } })).rows[0].agent.state,
+    'pass',
+  );
+});
+
 test('a walkdown on one target does not answer for another @rule:status.derived.latest-wins', () => {
   const runs = [{ ...walkdownRun('2026-01-02T00:00:00Z', 'agent', 'pass'), target: 'staging' }];
   // The verdict was made on staging; local has never been judged.

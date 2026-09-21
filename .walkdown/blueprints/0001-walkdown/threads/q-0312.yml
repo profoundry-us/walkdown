@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-20T17:15:22.062Z
 anchor:
   rule: status.acceptance.role-comes-from-the-run
-status: answered
+status: incorporated
 body: >-
   Does a walk that ticks no role still read as engineering's?
 
@@ -24,4 +24,12 @@ replies:
   - author: topher
     created: 2026-09-21T00:49:38Z
     body: Refuse a walk with no role
+  - author: agent
+    created: 2026-09-21T01:47:30Z
+    body: Built. POST /api/walkdowns refuses a record that names no role and no
+      signature - 'a walkdown signs for at least one role' - and the panel will
+      not start a sitting from an empty answer (it reopens the question). The
+      two tests that asserted the old fallback now assert the refusal. Records
+      from before signatures existed are still read as their actor's, as the
+      rule's own step says; only new records are refused.
 chosen: Refuse a walk with no role

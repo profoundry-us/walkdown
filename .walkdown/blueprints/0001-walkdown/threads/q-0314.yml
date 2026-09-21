@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-20T17:15:22.431Z
 anchor:
   rule: status.acceptance.role-comes-from-the-run
-status: answered
+status: incorporated
 body: >-
   Is a proxy signature ever remembered for the next walk?
 
@@ -20,4 +20,12 @@ replies:
   - author: topher
     created: 2026-09-21T00:50:21Z
     body: Offered, not assumed
+  - author: agent
+    created: 2026-09-21T01:47:31Z
+    body: "Built. The proxies of your last sitting are kept per blueprint in the
+      browser and OFFERED next time: the name comes back filled in with the box
+      unticked and a 'last time' mark beside it, so signing for Sam again is one
+      tick and by accident is impossible. Steps on role-comes-from-the-run and
+      who-signs-is-declared, and a check that signs for sam, ends the sitting,
+      and reads the offer."
 chosen: Offered, not assumed

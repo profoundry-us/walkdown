@@ -1404,7 +1404,8 @@ stories:
             - An unnamed or agent actor is refused before anything is written
             - Discarding instead of finishing writes nothing
             - Finishing says what was RECORDED, from the door's own answer - which roles landed and under whose names - because a field the door dropped is invisible in a count of verdicts (n-0226)
-          statement_hash: sha256:d9e0e66da1d8
+            - The panel records only against the board it opened - the blueprint's key is its home on disk - and if the server behind its address starts answering for another, the sitting is dropped on the spot and the panel says so, rather than carrying a draft to a board nobody chose
+          statement_hash: sha256:c38684308429
           reworded:
             - hash: sha256:6cc28278f4a6
               at: 2026-09-13
@@ -1412,12 +1413,16 @@ stories:
             - hash: sha256:33f8130bbd75
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:d9e0e66da1d8
+              at: 2026-09-21T01:38:05Z
+              why: q-0312/0313/0314 (no role refused; any signer; proxies offered), q-0300 (the judge is handed a port), q-0301 (the panel records only against the board it opened)
 
       - id: panel.walkdown.who-signs-is-declared
         origin: thread:q-0225
         created_at: 2026-09-07
         statement: Starting a sitting asks who is signing it and in which roles, pre-filled from the machine's config and changeable before it starts. The session strip shows that answer for as long as the sitting runs.
         because: Naming somebody else is how one person drives a walk two people are doing.
+        verify: [checks]
         signoff: [eng, product]
         screens: [review]
         steps:
@@ -1431,7 +1436,8 @@ stories:
             - Who this sitting is being signed as stays legible while it runs, so accepting on somebody's behalf cannot be forgotten half way through
             - The next sitting starts from the config again - a role handed to somebody else is never the default a second time
             - Nothing the browser remembers decides who a record is written under
-          statement_hash: sha256:aa1e6c5e6556
+            - The last person you signed for is offered next time - name filled in, box unticked - never assumed (q-0314)
+          statement_hash: sha256:51cedbcf1de4
           reworded:
             - hash: sha256:36efe97a3acd
               at: 2026-09-13
@@ -1442,6 +1448,9 @@ stories:
             - hash: sha256:f5cc1065f3f5
               at: 2026-09-14T02:44:30Z
               why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
+            - hash: sha256:aa1e6c5e6556
+              at: 2026-09-21T01:40:05Z
+              why: the last proxy is offered, never assumed (q-0314); the rule now asks for checks
 
       - id: panel.walkdown.one-control-owns-the-sitting
         origin: walkdown

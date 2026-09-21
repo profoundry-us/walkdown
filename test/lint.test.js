@@ -577,3 +577,30 @@ test('a statement the length of a paragraph, and a because carrying history, are
   const again = lint(load(h), { checks: false }).findings.map((f) => f.category);
   assert.ok(again.includes('statement-reads-as-a-paragraph'), again.join(','));
 });
+
+/*
+ * Anchors move; records do not (q-0252). A screen's `renames` says where an
+ * anchor went, and a thread filed under the old name is read through it -
+ * no warning, and nothing in the thread touched. A rename that ends at no
+ * declared anchor is the thing worth a warning.
+ */
+test('a thread anchored under a renamed anchor resolves through the storyboard @rule:screens.anchors.renames-are-recorded', () => {
+  const h = writeFixture(join(root, 'renames'), {
+    threads: [
+      'id: n-1\nkind: note\nstatus: open\nanchor: { rule: demo.main.thing, screen: home, element: home.button }\nbody: x\n',
+    ],
+  });
+  const before = lint(load(h), { checks: false }).findings;
+  assert.ok(
+    before.some((f) => f.subject === 'n-1' && /undeclared anchor "home.button"/.test(f.message)),
+    'without a rename the old name is undeclared',
+  );
+  const sbPath = join(h.spec, 'storyboard.yml');
+  writeFileSync(sbPath, `${readFileSync(sbPath, 'utf8')}\n    renames: { home.button: home.cta, home.knob: home.dial }\n`);
+  const after = lint(load(h), { checks: false }).findings;
+  assert.ok(!after.some((f) => f.subject === 'n-1'), 'read through the rename, the thread is clean');
+  assert.ok(
+    after.some((f) => f.level === 'warn' && f.subject === 'home' && /home\.knob.*home\.dial.*not a declared anchor/.test(f.message)),
+    'a rename ending nowhere declared is the warning instead',
+  );
+});

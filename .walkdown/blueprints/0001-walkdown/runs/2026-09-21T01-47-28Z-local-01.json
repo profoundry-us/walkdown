@@ -1,0 +1,60 @@
+{
+  "run_id": "2026-09-21T01-47-28Z-local-01",
+  "created": "2026-09-21T01:47:28Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "f7e8f78-dirty",
+  "tree_hash": "sha256:f6295d8ca69e",
+  "spec_hash": "sha256:16425a177f5b",
+  "results": [
+    {
+      "rule": "panel.walkdown.records-to-ledger",
+      "status": "pass",
+      "statement_hash": "sha256:c38684308429",
+      "duration_ms": 8355,
+      "checks": [
+        "checks/panel.spec.js:269",
+        "checks/panel.spec.js:3326"
+      ]
+    },
+    {
+      "rule": "panel.identity.default-actor",
+      "status": "pass",
+      "statement_hash": "sha256:3645bdcb734b",
+      "duration_ms": 2042,
+      "checks": [
+        "checks/panel.spec.js:1508"
+      ]
+    },
+    {
+      "rule": "panel.start.open-a-folder",
+      "status": "pass",
+      "statement_hash": "sha256:5ace895ac628",
+      "duration_ms": 1634,
+      "checks": [
+        "checks/panel.spec.js:2126",
+        "checks/panel.spec.js:2361"
+      ]
+    },
+    {
+      "rule": "panel.walkdown.who-signs-is-declared",
+      "status": "pass",
+      "statement_hash": "sha256:51cedbcf1de4",
+      "duration_ms": 1138,
+      "checks": [
+        "checks/panel.spec.js:3291"
+      ]
+    },
+    {
+      "rule": "screens.anchors.renames-are-recorded",
+      "status": "pass",
+      "statement_hash": "sha256:f28e66197aef",
+      "duration_ms": 1988,
+      "checks": [
+        "checks/panel.spec.js:3362"
+      ]
+    }
+  ]
+}

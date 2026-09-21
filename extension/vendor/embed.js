@@ -3954,7 +3954,15 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
    * Folding only, never substring: a person called `Agente` is not a machine,
    * and locking them out would be a worse fault than the one this prevents.
    */
-  const isMachineName = (actor) => !actor || String(actor).trim().toLowerCase() === 'agent';
+  /*
+   * A short list, not just the one word (q-0251, Topher 2026-09-20): a machine
+   * configured with a misleading identity - "claude", "copilot" - was signing
+   * as a person. Still folding only: case and runs of whitespace, never a
+   * substring, so the list is what is refused and nothing else is.
+   */
+  const MACHINE_NAMES = Object.freeze(['agent', 'claude', 'claude code', 'copilot', 'assistant']);
+  const isMachineName = (actor) =>
+    !actor || MACHINE_NAMES.includes(String(actor).trim().toLowerCase().replace(/\s+/g, ' '));
 
   /*
    * The embed's one icon, generated the way the panel's are - see

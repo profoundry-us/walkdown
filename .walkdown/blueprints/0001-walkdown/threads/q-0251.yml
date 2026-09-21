@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-08T19:56:53.031Z
 anchor:
   rule: status.acceptance.signature-names-its-signer
-status: answered
+status: incorporated
 body: >-
   The machine gate refuses "agent" in any casing, and nothing else. Is a
   signature from "claude" one we want to take?
@@ -48,4 +48,11 @@ replies:
   - author: topher
     created: 2026-09-21T00:53:21Z
     body: Refuse a short list of machine names
+  - author: agent
+    created: 2026-09-21T01:47:28Z
+    body: "Built. lib/vocab.js keeps MACHINE_NAMES - agent, claude, claude code,
+      copilot, assistant - and isMachineName folds case and runs of whitespace
+      against that list, never a substring: Claudette still signs. A step on
+      status.acceptance.signature-names-its-signer says so; the unit test
+      refuses each name and accepts the near miss."
 chosen: Refuse a short list of machine names

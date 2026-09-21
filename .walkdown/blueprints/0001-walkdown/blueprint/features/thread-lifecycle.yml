@@ -239,16 +239,20 @@ stories:
         screens: [rule-detail, thread-panel]
         steps:
           given:
-            - A question filed with two to six `options`, each a label and an optional why
+            - A question filed with two to six options, each a label and an optional why
           when:
-            - It is answered with a `chosen` label, or put off with later
+            - It is answered with a chosen label, or put off with later
           then:
             - The options are stored as data on the thread, labels unique, and a note may carry none
             - The answer records the label it chose beside the reply, and a label the question never offered is refused
             - The stream draws the choices under the question and marks the one taken
-            - Later stamps the open question `deferred` and changes nothing else; an answered question cannot be put off
+            - Later stamps the open question deferred and changes nothing else; an answered question cannot be put off
             - Choices may be put on a question already asked (`walkdown thread <id> --option`), once, while it is open - so a question asked before choices existed is not refiled to get them
-          statement_hash: sha256:116b4f4dc582
+          statement_hash: sha256:0c49a7ef225d
+          reworded:
+            - hash: sha256:116b4f4dc582
+              at: 2026-09-21T01:38:05Z
+              why: q-0312/0313/0314 (no role refused; any signer; proxies offered), q-0300 (the judge is handed a port), q-0301 (the panel records only against the board it opened)
       - id: threads.conversation.written-in-markdown
         origin: thread:n-0288
         statement: A message is markdown, rendered from a short list of allowed elements; anything else in it is plain text.

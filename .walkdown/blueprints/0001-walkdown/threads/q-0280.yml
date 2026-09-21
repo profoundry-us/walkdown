@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-11T21:14:54.351Z
 anchor:
   rule: locations.answer.registry-is-the-only-door
-status: answered
+status: incorporated
 body: 'The agent re-judge (run 2026-09-11T21-08-39Z, evidence
   05-read-side-canon.txt) passed the rule with one caveat worth a decision. The
   statement says a path is looked at once, at the add, and never resolved again
@@ -33,4 +33,13 @@ replies:
   - author: topher
     created: 2026-09-21T00:45:39Z
     body: Canonicalise on read too
+  - author: agent
+    created: 2026-09-21T01:47:29Z
+    body: "Canonicalise on read too - which the readers already do (registryEntry,
+      registryPick and rememberInRegistry all canon() to compare), so the words
+      moved to meet the code: a step on
+      locations.answer.registry-is-the-only-door says a registered spelling is
+      canonicalised on read only to compare, and no path is ever resolved to
+      find a row that was not written. The because was rewritten at the same
+      time (n-0322)."
 chosen: Canonicalise on read too

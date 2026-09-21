@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-08T19:58:08.941Z
 anchor:
   rule: threads.lifecycle.reasoned-endings
-status: answered
+status: incorporated
 body: >-
   Renaming an anchor leaves every thread pointing at the old one warning
   forever, and there is no door to fix it.
@@ -58,3 +58,16 @@ replies:
     body: We should track the renames. The thread should show the original, but with
       some indicator that it's been renamed. And hovering the anchor should show
       a tooltip with all of the renames.
+  - author: agent
+    created: 2026-09-21T01:47:29Z
+    body: "Built as you said. A screen's storyboard entry can carry renames: { old:
+      new }; lint reads a thread's anchor through them (no warning) and warns
+      instead about a rename that ends at no declared anchor. The thread's
+      screen shows the anchor in the spelling it was filed under, with a
+      'renamed' mark, and resting on it lists every name it has had, oldest to
+      newest. Nothing in the thread file changes. rule-detail now records
+      detail.screenshots-modal -> detail.evidence-modal and detail.screenshots
+      -> detail.evidence, so n-0241 and n-0242 stopped warning; n-0236's
+      selector-shaped anchor was already read through anchorId. New rule
+      screens.anchors.renames-are-recorded, checked both by lint's unit test and
+      a panel check."

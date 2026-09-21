@@ -276,8 +276,8 @@ stories:
       - id: locations.answer.registry-is-the-only-door
         origin: thread:n-0275
         statement: walkdown reads only the registry. A `.walkdown` folder nobody registered, or a path nobody added, is not consulted.
-        because: What a spelling can fool is the one moment a path is looked at, and that moment is the add.
-        history: A symlink created outside a pack, pointing at the pack's home, was followed on the read side while the writer refused the same path - so a second board listed, served and wrote to the pack's ledger with nobody having imported anything (n-0275, ADR 0003).
+        because: A path is examined once, when it is added; every read after that trusts what the add wrote, so nothing a tree grows later can open a second door.
+        history: A symlink created outside a pack, pointing at the pack's home, was followed on the read side while the writer refused the same path - so a second board listed, served and wrote to the pack's ledger with nobody having imported anything (n-0275, ADR 0003). The `because` was rewritten on 2026-09-21 (n-0322); the first draft said the same thing in a voice nobody could hear.
         verify: [checks]
         signoff: [eng, product]
         steps:
@@ -291,7 +291,8 @@ stories:
             - The server lists every registered blueprint and never the link's row
             - "`walkdown import` through the link registers the pack's home once, under its real path, and a second import says it is already listed"
             - Standing in the pack reaches the pack's row; standing at the root reaches the root's; nothing about the tree between them is consulted
-          statement_hash: sha256:6e50a37dc531
+            - A registered spelling is canonicalised on read only to compare, the way the writers canonicalised it to write - a symlink planted at a registered path is the same directory and matches its row - and no path is ever resolved to find a row that was not written
+          statement_hash: sha256:f6b76093bef6
           reworded:
             - hash: sha256:20130d966a11
               at: 2026-09-13
@@ -302,6 +303,9 @@ stories:
             - hash: sha256:e40318fd68f9
               at: 2026-09-14T02:30:30Z
               why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
+            - hash: sha256:6e50a37dc531
+              at: 2026-09-21T01:30:46Z
+              why: q-0251 (machine names refused), q-0302 (an addressless target counts nothing placed), q-0280/n-0322 (canonicalised only to compare; the because rewritten)
 
   - id: locations.keeping
     title: A ledger already written is never orphaned or edited

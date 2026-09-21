@@ -158,27 +158,21 @@ test('the recording endpoint accepts roles and persists them @rule:status.accept
   assert.deepEqual(ok.roles, ['eng', 'product']);
   assert.deepEqual(recordFor(ok.run_id).roles, ['eng', 'product']);
 
-  // An emptied control files a run under no roles at all, which the ledger
-  // reads as engineering's - the historical default, stated once.
-  const empty = await (
-    await post({
-      actor: 'topher',
-      roles: [],
-      results: [{ rule: 'demo.main.thing', status: 'pass' }],
-    })
-  ).json();
-  assert.equal(empty.roles, null);
-  assert.equal('roles' in recordFor(empty.run_id), false);
-
-  // Omitting the field entirely is the same thing, so an older panel that
-  // has never heard of roles keeps working.
-  const legacy = await (
-    await post({
-      actor: 'topher',
-      results: [{ rule: 'demo.main.thing', status: 'pass' }],
-    })
-  ).json();
-  assert.equal('roles' in recordFor(legacy.run_id), false);
+  // An emptied control is refused (q-0312). It used to file a run under no
+  // roles at all, which the ledger read as engineering's - and 29 rules got
+  // an eng signature nobody gave (q-0225). Omitting the field is the same.
+  const empty = await post({
+    actor: 'topher',
+    roles: [],
+    results: [{ rule: 'demo.main.thing', status: 'pass' }],
+  });
+  assert.equal(empty.status, 400);
+  assert.match((await empty.json()).error, /at least one role/);
+  const legacy = await post({
+    actor: 'topher',
+    results: [{ rule: 'demo.main.thing', status: 'pass' }],
+  });
+  assert.equal(legacy.status, 400);
 
   // And a bad role is a 400 with nothing written, rather than a run nobody
   // can act on.
@@ -293,6 +287,14 @@ test('a signature is refused where nobody, or a machine, is named as the signer 
   // Accepting is the one thing an agent may never do for somebody, in any
   // spelling the actor gate already refuses.
   assert.throws(() => normalizeSignatures([{ role: 'eng', signer: 'AGENT' }]), /never accept/);
+  // And the short list beside it (q-0251): a machine configured with a
+  // person's slot is still a machine. Folding only - a name that merely
+  // contains one of them is a person.
+  for (const name of ['Claude', 'claude  code', 'Copilot', 'assistant'])
+    assert.throws(() => normalizeSignatures([{ role: 'eng', signer: name }]), /never accept/, name);
+  assert.deepEqual(normalizeSignatures([{ role: 'eng', signer: 'Claudette' }]), [
+    { role: 'eng', signer: 'Claudette' },
+  ]);
   assert.throws(() => normalizeSignatures([{ role: 'wizard', signer: 'sam' }]), /unknown role/);
   assert.throws(
     () => normalizeSignatures([{ role: 'eng', signer: 'a' }, { role: 'eng', signer: 'b' }]),
@@ -320,13 +322,10 @@ test('the recording endpoint answers with the signatures it filed @rule:panel.wa
     })
   ).json();
   assert.deepEqual(out.signatures, [{ role: 'product', signer: 'sam' }]);
-  // And nothing stated comes back as nothing, rather than as a guess the
-  // panel would then report as fact.
-  const bare = await (
-    await post({ results: [{ rule: 'demo.main.thing', status: 'pass' }] })
-  ).json();
-  assert.equal(bare.signatures, null);
-  assert.equal(bare.roles, null);
+  // And nothing stated is refused rather than filed as a guess the panel
+  // would then report as fact (q-0312).
+  const bare = await post({ results: [{ rule: 'demo.main.thing', status: 'pass' }] });
+  assert.equal(bare.status, 400);
 });
 
 /*

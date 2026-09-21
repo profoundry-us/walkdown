@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-10T03:25:04.660Z
 anchor:
   rule: locations.answer.declared-not-discovered
-status: answered
+status: incorporated
 body: >-
   The config key still says "projects" and means blueprints (ADR 0001 step 5,
   the half I did not do).
@@ -70,6 +70,14 @@ replies:
   - author: topher
     created: 2026-09-21T00:27:08Z
     body: Rename the key to blueprints:, no fallback
+  - author: agent
+    created: 2026-09-21T01:47:29Z
+    body: "Folded, and found already landed: the committed config says blueprints:
+      (this repository's .walkdown/config.yml does), the personal config carries
+      no list at all since the registry became the only door (ADR 0003), and
+      resolveLocations already takes blueprint rather than project. No projects:
+      key is read anywhere, so there is nothing on your machine to rewrite and
+      no one-liner to run. Nothing changed on disk for this one."
 options:
   - label: Rename the key to blueprints:, no fallback
     why: with a one-liner that rewrites a config in place, and the locations.js

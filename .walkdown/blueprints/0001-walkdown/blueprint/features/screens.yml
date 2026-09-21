@@ -209,3 +209,28 @@ stories:
             - hash: sha256:2a72bd1318f4
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
+
+  - id: screens.anchors
+    title: Anchors move; records do not
+    statement: As a reviewer, a thread I filed against an element still reads as the record I made when the element has since been renamed - and it says so, rather than warning forever or being rewritten.
+    rules:
+      - id: screens.anchors.renames-are-recorded
+        origin: thread:q-0252
+        created_at: 2026-09-21
+        statement: A storyboard records an anchor's renames, so a thread filed under the old name still resolves to the element, still shows the name it was filed under, and says it was renamed.
+        because: A thread is a record of a moment and its anchor is part of that record; the names move underneath it, and the record should say so.
+        history: Three threads warned for a fortnight after two anchors were renamed on 2026-09-07, with no door to fix them and the conventions rightly forbidding a hand edit (q-0252).
+        verify: [checks]
+        signoff: [eng, product]
+        screens: [thread-panel]
+        steps:
+          given:
+            - A screen whose storyboard entry lists renames from an old anchor to its new name, and a thread anchored under the old name
+          when:
+            - The blueprint is linted, and the thread is opened on its own screen
+          then:
+            - Lint reads the thread's anchor through the renames and raises no warning; a rename whose end is not a declared anchor is what it warns about instead
+            - The thread's screen shows the anchor as it was filed, in the original spelling, with a mark saying it was renamed
+            - Resting on the anchor lists every name it has had, oldest to newest
+            - Nothing in the thread's file is changed
+          statement_hash: sha256:f28e66197aef

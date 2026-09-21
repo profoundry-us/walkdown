@@ -3895,7 +3895,15 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
    * Folding only, never substring: a person called `Agente` is not a machine,
    * and locking them out would be a worse fault than the one this prevents.
    */
-  const isMachineName = (actor) => !actor || String(actor).trim().toLowerCase() === 'agent';
+  /*
+   * A short list, not just the one word (q-0251, Topher 2026-09-20): a machine
+   * configured with a misleading identity - "claude", "copilot" - was signing
+   * as a person. Still folding only: case and runs of whitespace, never a
+   * substring, so the list is what is refused and nothing else is.
+   */
+  const MACHINE_NAMES = Object.freeze(['agent', 'claude', 'claude code', 'copilot', 'assistant']);
+  const isMachineName = (actor) =>
+    !actor || MACHINE_NAMES.includes(String(actor).trim().toLowerCase().replace(/\s+/g, ' '));
 
   /*
    * Which storyboard screen a location is — the one answer three separate
@@ -4177,7 +4185,9 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     threadNote: '', // what the reply box says, kept across re-renders
     verdictNote: '', // the verdict feedback box, kept across re-renders
     verdictSay: '', // the verdict refusal line; dies with the rule it refused
-    askChoice: null, // the option picked on the rule's current ask, until it is answered
+    askChoice: null,
+    /** The blueprint key (its home on disk) this panel opened; the only board it records against (q-0301). */
+    board: null, // the option picked on the rule's current ask, until it is answered
     composerSay: '', // the composer's refusal line; same lifetime, same reason
     threadSay: '', // the thread screen's refusal line; dies when the view moves on
     ruleNote: '', // the rule's own new-thread box, kept the same way
@@ -7152,6 +7162,20 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       ? b`<span class="badge badge-xs badge-outline opacity-70" data-testid="thread.reason">${t.reason}</span>`
       : A;
 
+  /** Every name an anchor has had on a screen, oldest first - the filed name, then each rename. */
+  const renameChain = (sc, element) => {
+    const out = [element];
+    const seen = new Set([element]);
+    let cur = element;
+    while (sc?.renames?.[cur] && !seen.has(sc.renames[cur])) {
+      cur = String(sc.renames[cur]);
+      seen.add(cur);
+      out.push(cur);
+    }
+    return out;
+  };
+
+
   /*
    * How the turn line is drawn, by whose move it is. A person's move is amber,
    * the agent's is blue and dashed like the agent's own face in the stream, an
@@ -7265,7 +7289,20 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       t.anchor?.rule ? '' : 'not attached to a rule',
       sc?.title ?? t.anchor?.screen,
       t.anchor?.element
-        ? b`<span class="font-mono">${t.anchor.element}</span>`
+        ? (() => {
+            /*
+             * The name it was filed under, always - a thread is a record of a
+             * moment. When the storyboard says the anchor has since been
+             * renamed, the record says so beside it, and resting on it lists
+             * every name it has had (q-0252).
+             */
+            const chain = renameChain(sc, t.anchor.element);
+            return chain.length > 1
+              ? b`<span class="tooltip tooltip-bottom" data-tip="${chain.join(' → ')}"
+                ><span class="font-mono">${t.anchor.element}</span>
+                <span class="badge badge-xs badge-outline align-middle opacity-70" data-testid="thread.renamed">renamed</span></span>`
+              : b`<span class="font-mono">${t.anchor.element}</span>`;
+          })()
         : t.anchor?.position
           ? 'by position'
           : '',
@@ -8558,6 +8595,29 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
   async function load() {
     const res = await fetch(api('/api/blueprint'));
     S.data = await res.json();
+    /*
+     * The board this panel opened is the only one it records against (q-0301).
+     * The key is the blueprint's home on disk, so a server restarted on the
+     * same port serving another copy answers with a different one - and a
+     * shared browser can hand a judge exactly that (n-0202). The sitting is
+     * dropped here, before anything else reads it, and the panel says so
+     * rather than carrying a draft across to a board nobody chose.
+     */
+    if (S.board && S.data?.key && S.data.key !== S.board) {
+      S.session = null;
+      S.board = null;
+      S.BP = null;
+      sayAddress();
+      // Start over on whatever is there now - and say so AFTER, because
+      // starting over rebuilds the shell the toast would have hung off.
+      await start();
+      toast(
+        'This server is no longer answering for the blueprint this panel opened — the sitting was dropped, and nothing is recorded here until you pick a blueprint on it.',
+        { tone: 'error', sticky: true },
+      );
+      return;
+    }
+    S.board ??= S.data?.key ?? null;
     MSG.zone = S.data?.identity?.timezone ?? null;
     // Re-resolve against the reloaded data: the old object is a stale copy, so
     // holding it would show yesterday's verdict and threads.
@@ -9395,14 +9455,27 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
    * the sitting ends, because a remembered "also signing for Sam" is how an
    * absent person gets signed for next month.
    */
-  function openSigning() {
+  /** Where the last sitting's proxies are kept, per blueprint - offered, never assumed (q-0314). */
+  const PROXY_KEY = () => `walkdown:proxies:${S.BP}`;
+
+  async function openSigning() {
     const mine = whoAmI();
     const configured = S.data?.identity?.roles ?? [];
-    S.signing = knownRoles().map((role) => ({
-      role,
-      on: configured.includes(role),
-      signer: mine,
-    }));
+    /*
+     * The last proxy is OFFERED, not assumed (q-0314): the name is filled in
+     * and the box is left unticked, so signing for Sam again is one tick and
+     * signing for Sam by accident is impossible. Your own roles still pre-tick
+     * from config; a role you last signed for somebody else does not, even if
+     * config grants it to you, because last time's answer was theirs.
+     */
+    const offered = (await store.get(PROXY_KEY()).catch(() => null)) ?? [];
+    const lastFor = (role) => offered.find((o) => o?.role === role && o.signer && o.signer !== mine)?.signer ?? null;
+    S.signing = knownRoles().map((role) => {
+      const proxy = lastFor(role);
+      return proxy
+        ? { role, on: false, signer: proxy, offered: true }
+        : { role, on: configured.includes(role), signer: mine };
+    });
     buildSignPanel();
     D.signPanel.style.display = '';
     D.signPanel.querySelector('#wdp-sign-go')?.focus();
@@ -9428,6 +9501,11 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
         <input type="checkbox" class="checkbox checkbox-xs" data-testid="walkdown.signing.role"
           data-i="${i}" data-role="${esc(r.role)}" ${r.on ? 'checked' : ''}>
         <span class="w-16 font-semibold">${esc(r.role)}</span>
+        ${
+          r.offered && !r.on
+            ? `<span class="text-[10px] opacity-50" data-testid="walkdown.signing.offered" title="Who signed this role last time - tick it to sign for them again">last time</span>`
+            : ''
+        }
         <input class="input input-xs ml-auto w-40 ${r.on && r.signer.trim() && r.signer.trim() !== mine ? 'input-warning' : ''}"
           data-testid="walkdown.signing.signer" data-i="${i}" ${r.on ? '' : 'disabled'}
           value="${esc(r.signer)}" placeholder="who signs ${esc(r.role)}"
@@ -9480,6 +9558,12 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
   }
 
   function startWalkdown(signatures) {
+    // No role, no sitting (q-0312): the question was asked, and an empty
+    // answer is no answer - never engineering's by default.
+    if (!signatures?.length) return openSigning();
+    // Remembered only to OFFER next time (q-0314); the sitting itself carries
+    // the answer that was given.
+    store.set(PROXY_KEY(), signatures.filter((sig) => sig.signer !== whoAmI()));
     // `started` marks the session so pins dropped during it can count as a
     // fail's why and ride into the run record; `threads` collects the notes
     // the feedback box files, per rule. `signatures` is who the sitting is
@@ -9488,7 +9572,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       verdicts: {},
       threads: {},
       actor: whoAmI(),
-      signatures: signatures ?? [{ role: 'eng', signer: whoAmI() }],
+      signatures,
       started: new Date().toISOString(),
     };
     saveSession();
@@ -10255,6 +10339,9 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     }
     S.blueprints = payload.blueprints ?? [];
     S.servedRoot = payload.root ?? null;
+    // The board this panel opened, remembered from the first answer (q-0301);
+    // load() compares every later answer against it.
+    S.board ??= payload.key ?? null;
     /*
      * Named by key from here on. A short id in the address answers the same
      * as its key while it is unambiguous, but everything below - the marks on
@@ -10436,10 +10523,14 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
           <div class="text-[15px] font-semibold">No blueprints open</div>
           <p class="text-[12.5px] leading-relaxed opacity-60">A browser tab cannot read your
             filesystem, and walkdown both reads blueprints and writes threads and run records back
-            to them. So it works through a small local server, which is the thing that actually
-            holds the folder open.</p>
-          <p class="text-[12.5px] leading-relaxed opacity-60">In the directory holding your
-            blueprints, run:</p>
+            to them. So it works through a small local server, which answers for every blueprint
+            registered on this machine.</p>
+          <!-- The build's words won over the drawing's (q-0266), brought up
+               to date with ADR 0003: nothing is served from a directory any
+               more. Register once, from the project; serve from anywhere. -->
+          <p class="text-[12.5px] leading-relaxed opacity-60">Register a blueprint once, from its
+            project — <code>walkdown init</code> for a new one, <code>walkdown import &lt;path&gt;</code>
+            for one that exists — and then, from anywhere:</p>
         </div>
         <code class="rounded-box bg-base-200 px-3 py-2 text-[12px]">walkdown serve</code>
         <!-- The Blueprints tab's row, drawn here too. It used to be a second
@@ -10447,7 +10538,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
              button on the one screen whose job is reaching a server did
              nothing at all (n-0236). -->
         ${serverRow('sm', { caption: true })}
-        <p class="text-[11.5px] opacity-40">Then every blueprint under that folder is listed here.</p>
+        <p class="text-[11.5px] opacity-40">Every blueprint registered on this machine is listed here.</p>
       </div>`,
         D.side,
       );

@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { parseArgs } from 'node:util';
 import { collectRules, excuseFor, signoffList, verifyList } from '../../lib/blueprint.js';
 import { formatHash, specHash } from '../../lib/hash.js';
@@ -27,6 +28,7 @@ export function run(args) {
       blueprint: { type: 'string' },
       target: { type: 'string', default: 'local' },
       serve: { type: 'string' },
+      port: { type: 'string' },
       json: { type: 'boolean', default: false },
     },
     allowPositionals: true,
@@ -34,7 +36,7 @@ export function run(args) {
   const id = positionals[0];
   if (!id || positionals.length > 1) {
     console.error(
-      'Usage: walkdown judge <rule-id> [--target <name>] [--serve <origin>] [--dir <blueprint>] [--json]',
+      'Usage: walkdown judge <rule-id> [--target <name>] [--serve <origin>] [--port <n>] [--blueprint <id>] [--json]',
     );
     process.exit(2);
   }
@@ -81,6 +83,16 @@ export function run(args) {
     /\/+$/,
     '',
   );
+  /*
+   * The port this judge drives its scratch copy on, handed out here so two
+   * judges driven at once never pick the same one (n-0202, q-0300). Given
+   * with --port, or derived from the rule id - the same rule always lands
+   * on the same port, and different rules land apart - in the 4730s, the
+   * range this repository keeps for scratch copies.
+   */
+  const port =
+    values.port ??
+    String(4730 + (Number.parseInt(createHash('sha1').update(id).digest('hex').slice(0, 8), 16) % 60));
   const appUrl = (s) => (s.app?.path && baseUrl ? baseUrl + s.app.path : null);
   const protoUrl = (s) =>
     s.prototype ? serve + '/prototype' + s.prototype : s.proposal ? serve + '/proposals' + s.proposal : null;
@@ -272,6 +284,8 @@ export function run(args) {
     '    belongs to that place. A scratch copy served on another port is still a judgment of this',
     '    target - say the port you drove in your reasoning, never in `base_url`, or the record',
     '    lints clean and fills no cell.',
+    `  - Your port is ${port}. Make the scratch copy with --port ${port} and serve it there. Ports are`,
+    '    handed out, one per judge, so never pick your own (n-0202).',
     // n-0202: two judges on separate ports still read each other's boards
     // through a shared browser. The board names itself; read it first.
     '  - Before trusting any page you open, confirm it is yours: GET /api/blueprint on the origin',

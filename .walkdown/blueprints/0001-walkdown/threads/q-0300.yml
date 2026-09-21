@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-17T00:11:04.934Z
 anchor:
   rule: status.evidence.agent-assumed
-status: answered
+status: incorporated
 body: >-
   Should the judge prompt hand out a port, so two judges driven at once cannot
   pick the same one?
@@ -23,4 +23,12 @@ replies:
   - author: topher
     created: 2026-09-21T00:48:01Z
     body: Yes - the prompt hands out a port
+  - author: agent
+    created: 2026-09-21T01:47:30Z
+    body: Built. walkdown judge <rule> takes --port <n>; without it the port is
+      derived from the rule id in the 4730s, so two judges driven at once land
+      apart and the same rule always lands on the same one. The prompt says
+      'Your port is N. Make the scratch copy with --port N and serve it there'
+      in its governance block. A unit test drives both forms; a step on
+      status.evidence.agent-assumed says so.
 chosen: Yes - the prompt hands out a port

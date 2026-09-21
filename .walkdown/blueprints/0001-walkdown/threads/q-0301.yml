@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-17T00:11:22.483Z
 anchor:
   rule: status.evidence.agent-assumed
-status: answered
+status: incorporated
 body: >-
   Is there anything to do about the shared browser pane pulling one judge's tab
   onto another judge's server, or is the answer simply 127.0.0.1 plus confirming
@@ -28,4 +28,15 @@ replies:
   - author: topher
     created: 2026-09-21T00:48:43Z
     body: Defend the client too
+  - author: agent
+    created: 2026-09-21T01:47:30Z
+    body: Built. The panel remembers the key of the board it opened - the
+      blueprint's home on disk - and every later answer from /api/blueprint is
+      compared against it. A server that starts answering for another blueprint
+      (a restart on the same port for a different copy; the case a shared
+      browser hands a judge) drops the sitting on the spot, starts over on what
+      is there now, and says so in a sticky toast - nothing of the sitting is
+      carried to a board nobody chose. A step on
+      panel.walkdown.records-to-ledger and a check that rewrites the server's
+      answer.
 chosen: Defend the client too

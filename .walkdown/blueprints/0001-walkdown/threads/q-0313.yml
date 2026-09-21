@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-20T17:15:22.247Z
 anchor:
   rule: status.acceptance.role-comes-from-the-run
-status: answered
+status: incorporated
 body: >-
   May somebody sign a role their own config does not grant?
 
@@ -23,4 +23,10 @@ replies:
   - author: topher
     created: 2026-09-21T00:50:08Z
     body: Any role, any signer
+  - author: agent
+    created: 2026-09-21T01:47:31Z
+    body: "Any role, any signer - which the door and the dialog already allowed:
+      config pre-ticks your roles and never limits them, and a proxy may name
+      anyone. Written into status.acceptance.role-comes-from-the-run as a step;
+      no code moved."
 chosen: Any role, any signer

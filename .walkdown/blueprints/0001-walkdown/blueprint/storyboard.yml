@@ -21,6 +21,7 @@ screens:
     app: { path: /as-built/review.html }
     anchors:
       - panel.legend
+      - panel.skip
       - panel.bar
       - panel.desk
       - panel.desk-tuner
@@ -51,8 +52,15 @@ screens:
     title: Rule detail (state — open a rule on the Rules tab)
     prototype: /screens/rule-detail.html
     app: { path: /as-built/rule-detail.html }
+    # Anchors that moved (q-0252): a thread filed under the old name still
+    # resolves through here, still shows the name it was filed under, and
+    # says it was renamed. Oldest name on the left; chains are followed.
+    renames:
+      detail.screenshots-modal: detail.evidence-modal
+      detail.screenshots: detail.evidence
     anchors:
       - detail.screen
+      - detail.ask
       - detail.back
       - detail.stepper
       - detail.rule-id
