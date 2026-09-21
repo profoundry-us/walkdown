@@ -7877,38 +7877,41 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
   }
 
   /*
-   * The board: one card per screen in storyboard order, each a live frame of
-   * the screen laid out at a desktop width and scaled to the card - a small
-   * picture of the page as it is, from the same address the picker would take
-   * you to, rather than a capture that goes stale. The build is shown where it
-   * has a path, the design where it has none, so every card that can be drawn
-   * is. The frame takes no pointer: the card is the control. Its scripts run,
-   * so an application renders; what its copy of walkdown says to this window
-   * is ignored, since it is not one of the panel's own frames.
+   * The board: one card per screen in storyboard order, each a small picture
+   * of the page - photographed by the server once and kept until Redraw asks
+   * again (lib/screenshots.js). It was a live frame per screen first, and
+   * seven pages rendering inside the page reviewing them wreaked havoc on the
+   * host's CSS (Topher, 2026-09-21). The picture is of the build where the
+   * screen has a path, the design otherwise; a screen with neither says so.
    */
   const CARD_W = 196;
-  const LAID_OUT_W = 1280;
-  const LAID_OUT_H = 800;
+  const CARD_H = 122; // 1280 x 800, scaled
+  let redrawn = 0; // bumps the pictures' addresses so the browser asks again
   function board(screens, here) {
-    const scale = CARD_W / LAID_OUT_W;
     return b`<div class="grid grid-cols-3 gap-2 px-3.5 pb-2" data-testid="panel.screens-board">
     ${screens.map((sc) => {
       const on = S.pickedScreen === sc.id;
       const is = !S.pickedScreen && here?.id === sc.id;
       const design = ghostSource(sc);
-      const src = screenUrl(sc, 'app') ?? screenUrl(sc, 'prototype') ?? (design?.path ? api(design.path) : null);
-      return b`<button class="group flex flex-col gap-1 rounded-box border p-1.5 text-left hover:bg-base-200 ${
+      const drawable = Boolean(sc.app?.path || design);
+      const src = drawable ? api(`/api/screenshot?screen=${encodeURIComponent(sc.id)}${redrawn ? `&refresh=1&r=${redrawn}` : ''}`) : null;
+      return b`<button class="flex flex-col gap-1 rounded-box border p-1.5 text-left hover:bg-base-200 ${
         on || is ? 'border-primary' : 'border-base-300'
       }" data-screen="${sc.id}" data-testid="panel.screens-card" title="${sc.title ?? sc.id}"
         @click=${(e) => fire(e.currentTarget, 'pick-screen', { id: sc.id })}>
-        <span class="relative block overflow-hidden rounded bg-base-200" style="width:${CARD_W}px;height:${Math.round(LAID_OUT_H * scale)}px">
+        <span class="relative block overflow-hidden rounded bg-base-200" style="width:${CARD_W}px;height:${CARD_H}px">
           ${
             src
-              ? b`<iframe src="${src}" title="${sc.title ?? sc.id}" tabindex="-1" loading="lazy"
-                  sandbox="allow-scripts allow-same-origin"
-                  class="pointer-events-none absolute left-0 top-0 origin-top-left border-0 bg-base-100"
-                  style="width:${LAID_OUT_W}px;height:${LAID_OUT_H}px;transform:scale(${scale})"></iframe>`
-              : b`<span class="flex h-full items-center justify-center text-[10.5px] opacity-40">nothing to show</span>`
+              ? b`<img src="${src}" alt="${sc.title ?? sc.id}" loading="lazy" decoding="async" draggable="false"
+                  class="block h-full w-full object-cover object-top"
+                  @error=${(e) => {
+                    const gone = document.createElement('span');
+                    gone.className = 'flex h-full items-center justify-center px-2 text-center text-[10.5px] text-warning';
+                    gone.dataset.testid = 'panel.screens-card-undrawn';
+                    gone.textContent = 'could not draw it';
+                    e.currentTarget.replaceWith(gone);
+                  }}>`
+              : b`<span class="flex h-full items-center justify-center text-[10.5px] opacity-40">nothing to draw</span>`
           }
           ${on || is ? b`<span class="absolute right-1 top-1 rounded bg-primary px-1 text-[9px] font-bold uppercase text-primary-content">${on ? 'picked' : 'here'}</span>` : A}
         </span>
@@ -7923,6 +7926,16 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
         </span>
       </button>`;
     })}
+    <!-- The pictures are kept until asked for again: a page that changed shape
+         is redrawn from here, not by clearing anything. -->
+    <div class="col-span-3 flex justify-end">
+      <button class="btn btn-ghost btn-xs" data-testid="panel.screens-redraw" title="Photograph every screen again"
+        @click=${(e) => {
+          e.stopPropagation();
+          redrawn = Date.now();
+          fire(e.currentTarget, 'screens-view', { view: 'board' });
+        }}>Redraw</button>
+    </div>
   </div>`;
   }
 

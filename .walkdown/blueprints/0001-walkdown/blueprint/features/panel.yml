@@ -64,13 +64,14 @@ stories:
             - Anchor `panel.screen-picker` says which screen this page is without being opened, and opens anchor `panel.screens-list` to pick a different one or to go back to detecting it
             - The open list offers two views of the storyboard, List and Storyboard, and the one chosen is kept for this browser
             - The Storyboard view lays every screen out small, in storyboard order
-            - Each card is a live picture of the page from the address the pick would open, the build where it has one and the design otherwise, with its title, its id and whether a design is on file
+            - Each card is a picture of the page the pick would open, the build where it has one and the design otherwise, with its title, its id and whether a design is on file
+            - The pictures are photographed by the server and kept until Redraw asks again, never drawn as live pages inside the panel
             - The screen the page is, or the one picked, is marked, and a card picks its screen the way a row does
             - A screen picked by hand is marked as picked, because it outranks detection and the difference has to be readable from the bar
             - Detecting, the control reports the page rather than remembering an answer, so the label in the bar and the row the open list marks both follow the page when it moves
             - Prototype and App switch which of the two the page area shows
             - Pin mode can be turned on and off there
-          statement_hash: sha256:c66f9357083f
+          statement_hash: sha256:484be742dede
           reworded:
             - hash: sha256:aaf28fbb5e0a
               at: 2026-09-13
@@ -87,6 +88,9 @@ stories:
             - hash: sha256:5988b4f10584
               at: 2026-09-21T22:01:05Z
               why: "toolbar: the storyboard step split into three sentences for the voice; same meaning"
+            - hash: sha256:c66f9357083f
+              at: 2026-09-21T22:12:12Z
+              why: "toolbar: the storyboard's cards are photographed and kept, not live frames - Topher, 2026-09-21: live pages inside the panel wreaked havoc on the host's CSS"
 
       - id: panel.dock.surface-swap-is-instant
         origin: walkdown

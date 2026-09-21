@@ -3843,7 +3843,7 @@ test('a picture dropped while failing a rule goes with the why', {
  * screen laid out small as a live picture, picked the way a row is, and the
  * view kept for this browser.
  */
-test('the screen picker offers a storyboard of live pictures, and remembers the view', {
+test('the screen picker offers a storyboard of kept pictures, and remembers the view', {
   tag: '@rule:panel.dock.toolbar',
 }, async ({ page }) => {
   await review(page);
@@ -3861,12 +3861,26 @@ test('the screen picker offers a storyboard of live pictures, and remembers the 
   await expect(cards).toHaveCount(storyboard.length);
   // In storyboard order, each a frame of the page the pick would open.
   expect(await cards.evaluateAll((els) => els.map((e) => e.dataset.screen))).toEqual(storyboard.map((s) => s.id));
+  /*
+   * Each card is a PICTURE, photographed by the server and kept: not a live
+   * frame, which is what the first cut drew and what wreaked havoc on the
+   * host's CSS (Topher, 2026-09-21). Asked twice, the second answer comes
+   * from the cache.
+   */
+  await expect(board.locator('iframe')).toHaveCount(0);
   for (const sc of storyboard.filter((s) => s.app?.path)) {
-    const frame = board.locator(`[data-screen="${sc.id}"] iframe`);
-    await expect(frame).toHaveCount(1);
-    // The app surface resolves against the declared target, as the pick does.
-    expect(await frame.getAttribute("src")).toBe(`${DECLARED_ORIGIN}${sc.app.path}`);
+    const pic = board.locator(`[data-screen="${sc.id}"] img`);
+    await expect(pic).toHaveCount(1);
+    await expect.poll(() => pic.evaluate((i) => i.complete && i.naturalWidth > 0), { timeout: 30000 }).toBe(true);
   }
+  const again = await page.request.get(`${WD_ORIGIN}/api/screenshot?screen=review&bp=blueprint`);
+  expect(again.ok()).toBeTruthy();
+  expect(again.headers()['content-type']).toMatch(/image\/png/);
+  expect(again.headers()['x-walkdown-cache']).toBe('hit');
+  expect(again.headers()['x-walkdown-page']).toBe(`${DECLARED_ORIGIN}${storyboard.find((s) => s.id === 'review').app.path}`);
+  const fresh = await page.request.get(`${WD_ORIGIN}/api/screenshot?screen=review&refresh=1&bp=blueprint`);
+  expect(fresh.headers()['x-walkdown-cache']).toBe('miss');
+  expect((await page.request.get(`${WD_ORIGIN}/api/screenshot?screen=no-such&bp=blueprint`)).status()).toBe(404);
   // The board is wider than the list, and still on the stage.
   const wide = (await list.boundingBox()).width;
   expect(wide).toBeGreaterThan(500);

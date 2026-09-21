@@ -53,4 +53,12 @@ replies:
       are the fallback. Checked by 'the screen picker offers a storyboard of
       live pictures' in checks/panel.spec.js and looked at by the agent tier;
       panel.dock.toolbar gained the steps and waits on your signature again."
+  - author: agent
+    created: 2026-09-21T22:13:03Z
+    body: Pictures now, as asked. The server photographs each screen once with
+      Playwright's Chromium at 1280 by 800 and keeps the picture under the
+      machine's temp directory. That is a cache, not a record, so nothing lands
+      in the project or its home. The board shows the pictures, and a Redraw
+      button on it photographs every screen again. The live frames are gone. A
+      tree without Playwright gets a plain sentence on each card.
 reason: request

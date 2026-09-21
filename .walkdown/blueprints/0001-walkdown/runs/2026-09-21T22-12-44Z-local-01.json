@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-09-21T22-12-44Z-local-01",
+  "created": "2026-09-21T22:12:44Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "5d72544-dirty",
+  "spec_hash": "sha256:eee9c90539b0",
+  "note": "A second look at panel.dock.toolbar after the storyboard view switched from live frames to pictures photographed by the server and cached (Topher, 2026-09-21, on n-0095). Driven on a stamped scratch copy on 4730 (node tools/scratch.mjs new look-0921g) with an empty picture cache.",
+  "results": [
+    {
+      "rule": "panel.dock.toolbar",
+      "status": "pass",
+      "statement_hash": "sha256:484be742dede",
+      "threads": [
+        "n-0095"
+      ],
+      "evidence": [
+        "runs/evidence/2026-09-21T22-11-33Z/look.json",
+        "runs/evidence/2026-09-21T22-11-33Z/storyboard-open.png",
+        "runs/evidence/2026-09-21T22-11-33Z/picked-from-the-board.png"
+      ],
+      "reasoning": "Storyboard draws seven cards for the seven screens with no frame among them: each an img served by /api/screenshot for its screen, every one of them loaded at 1280x800 from an empty cache with none undrawn. Asked straight from the server, the first answer was a miss and the second a hit, both naming the page photographed; a screen the storyboard lacks is a 404. The cards are titled, labelled with id and design, the screen the page is wears HERE, a card picks its screen and the list closes; the view is kept across a reload and List brings the rows back at the narrower width."
+    }
+  ]
+}
