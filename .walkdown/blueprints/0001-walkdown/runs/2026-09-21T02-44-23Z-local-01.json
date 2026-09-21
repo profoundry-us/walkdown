@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-09-21T02-44-23Z-local-01",
+  "created": "2026-09-21T02:44:23Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6a799d3-dirty",
+  "tree_hash": "sha256:d45af2d31ad9",
+  "spec_hash": "sha256:0f7f5adb459d",
+  "results": [
+    {
+      "rule": "embed.pin.tooltip-says-what-it-is",
+      "status": "pass",
+      "statement_hash": "sha256:9ed8ebb2af0a",
+      "duration_ms": 5002,
+      "checks": [
+        "checks/embed.spec.js:362"
+      ]
+    }
+  ]
+}

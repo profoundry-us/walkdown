@@ -417,6 +417,33 @@ test('a pin says what it is on contact, and says nothing until then', {
   await expect
     .poll(async () => Number(await tip.evaluate((el) => getComputedStyle(el).opacity)))
     .toBeGreaterThan(0.9);
+
+  /*
+   * Every pin's card stays inside the frame, whichever edge the pin is near
+   * (n-0326): a pin in the bottom band used to draw its card from its own
+   * top and lose the last line under the frame's edge.
+   */
+  const frame = await page.getByTestId('panel.app-frame').boundingBox();
+  for (const pin of await pins.all()) {
+    const id = await pin.getAttribute('data-thread');
+    const at = await pin.boundingBox();
+    if (!at) continue;
+    await page.mouse.move(at.x + at.width / 2, at.y + at.height / 2);
+    const card = app(page).locator(`[data-testid="pin.marker"][data-thread="${id}"] [data-testid="pin.tip"]`);
+    // Two of the project's pins share a spot; the one underneath cannot be
+    // touched, so a card that never shows is skipped, not failed.
+    let shown = false;
+    for (let i = 0; i < 10 && !shown; i++) {
+      shown = Number(await card.evaluate((el) => getComputedStyle(el).opacity)) > 0.9;
+      if (!shown) await page.waitForTimeout(100);
+    }
+    if (!shown) continue;
+    const c = await card.boundingBox();
+    expect(c.y, `${id}: card top inside the frame`).toBeGreaterThanOrEqual(frame.y - 1);
+    expect(c.y + c.height, `${id}: card bottom inside the frame`).toBeLessThanOrEqual(frame.y + frame.height + 1);
+    expect(c.x, `${id}: card left inside the frame`).toBeGreaterThanOrEqual(frame.x - 1);
+    expect(c.x + c.width, `${id}: card right inside the frame`).toBeLessThanOrEqual(frame.x + frame.width + 1);
+  }
 });
 
 /*

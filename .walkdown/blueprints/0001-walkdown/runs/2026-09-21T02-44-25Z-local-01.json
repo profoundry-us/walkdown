@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-09-21T02-44-25Z-local-01",
+  "created": "2026-09-21T02:44:25Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6a799d3-dirty",
+  "note": "Rejudge of the pin tooltip after the cornered fallback fix (n-0326), on a stamped scratch copy (tmp/scratch/tooltip-0921 on 4734); the address recorded is the target's real one.",
+  "results": [
+    {
+      "rule": "embed.pin.tooltip-says-what-it-is",
+      "status": "pass",
+      "statement_hash": "sha256:9ed8ebb2af0a",
+      "evidence": [
+        "runs/evidence/2026-09-21T02-44-25Z/tooltip-hover.png",
+        "runs/evidence/2026-09-21T02-44-25Z/tooltip-last-pin.png",
+        "runs/evidence/2026-09-21T02-44-25Z/tooltip-fade-design.png",
+        "runs/evidence/2026-09-21T02-44-25Z/probes.txt"
+      ],
+      "reasoning": "The same four pins on the as-built review page, the same drive as run 2026-09-21T02-24-29Z. The first card appeared in 65ms with none visible before the hover, three lines as the steps ask, inside the frame. The pin 44px above the frame's bottom, which failed an hour ago, now opens its card upward with its right end on the pin, and every one of the four cards sits inside the frame (probes.txt, each). At the design end of the fade the design took the pointer, at half neither sheet, at the app end the page. One thing seen and not settled: in the screenshot the card for the pin at the top left is still drawn while the pointer rests on the bottom pin. The drive moves the pointer synthetically from pin to pin, and I did not reproduce it by hand, so it is noted here rather than filed.",
+      "threads": [
+        "n-0326"
+      ]
+    }
+  ]
+}
