@@ -5,7 +5,7 @@ author: topher
 created: 2026-09-21T18:46:20.140Z
 anchor:
   rule: embed.threads.picture-on-a-pin
-status: addressed
+status: verified
 body: >-
   We should reduce the drop zone to the conversation area. And it should start
   it's dashed highlight when a user is dragging the file anywhere on the app,
@@ -30,3 +30,10 @@ replies:
       checks/panel.spec.js and checks/embed.spec.js (recorded
       2026-09-21T18-52-37Z and 18-51-03Z) and looked at again by the agent tier
       on a scratch copy."
+  - author: topher
+    via: verdict
+    created: 2026-09-21T20:01:34Z
+    body: Verified by topher's pass on embed.threads.picture-on-a-pin
+      (2026-09-21T20-01-34Z-local-01).
+verified_by: topher
+verified_via: 2026-09-21T20-01-34Z-local-01
