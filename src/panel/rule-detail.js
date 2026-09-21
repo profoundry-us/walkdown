@@ -8,6 +8,7 @@ import { html, live, nothing, unsafeHTML } from '../../vendor/lit.js';
 import { answerOnRule, asksOn, laterOnRule, liveNoteOn, names, openQuestionOn, openThreadView, pendingReplies, sayFiling, sayOnRule, waiveOnRule } from './conversation.js';
 import { tierMarks } from './rules-list.js';
 import { requestReload, requestRender } from './shell.js';
+import { askOptions } from './ask.js';
 import { openEvidence } from './evidence.js';
 import { openSource } from './source.js';
 import { toast } from './toast.js';
@@ -279,10 +280,6 @@ function askCard(r, asked, open) {
   const total = queue.length + done;
   const at = done + 1;
   const first = { ...MSG.messages(asked)[0], options: undefined, thread: asked.id, tag: `${asked.id} \u00b7 question \u00b7 open` };
-  const pick = (label) => {
-    S.askChoice = S.askChoice === label ? null : label;
-    requestRender();
-  };
   return html`<div class="relative mt-3 mb-1.5 rounded border border-primary/60 bg-primary/5 px-2 pt-2.5 pb-2 text-[11px] leading-snug"
       data-testid="detail.ask" data-question="${asked.id}">
     <span class="absolute -top-[7px] left-2 rounded bg-primary px-1 text-[9px] font-bold uppercase leading-[14px] tracking-wider text-primary-content">The agent asks</span>
@@ -293,17 +290,7 @@ function askCard(r, asked, open) {
     <div class="wd-stream max-h-56 overflow-y-auto" @click=${open}>${unsafeHTML(
       MSG.stream({ replies: [first] }, { rules: (S.data?.rows ?? []).map((x) => x.rule), names: names() }),
     )}</div>
-    ${
-      asked.options?.length
-        ? html`<div class="mt-1.5 flex flex-col gap-1" data-testid="detail.ask-options">${asked.options.map(
-            (o) => html`<button type="button" class="flex items-start gap-2 rounded border px-2 py-1 text-left ${S.askChoice === o.label ? 'border-primary bg-primary/15' : 'border-base-300 bg-base-100/60'}"
-                data-option="${o.label}" aria-pressed="${S.askChoice === o.label}" @click=${() => pick(o.label)}>
-                <span class="mt-[3px] inline-block h-3 w-3 shrink-0 rounded-full border ${S.askChoice === o.label ? 'border-primary bg-primary' : 'border-base-content/50'}"></span>
-                <span><b class="block text-[11.5px]">${o.label}</b>${o.why ? html`<span class="block opacity-70">${o.why}</span>` : nothing}</span>
-              </button>`,
-          )}</div>`
-        : nothing
-    }
+    ${askOptions(asked)}
     <textarea id="wdp-answer" data-testid="detail.answer" rows="2" class="textarea textarea-xs mt-1.5 w-full resize-none"
       placeholder="${asked.options?.length ? 'Anything to add, or a different answer\u2026' : 'Your answer\u2026'}"
       .value=${live(S.verdictNote)}
@@ -334,8 +321,13 @@ function askCard(r, asked, open) {
  * is the door to the thread's own screen, which is still where a pin's
  * sketch and a question's Answer live.
  */
-function conversation(r, picked) {
-  const known = (S.data?.rows ?? []).map((x) => x.rule);
+/*
+ * Every message of every thread on the rule, oldest first, each tagged
+ * with the thread it is on where a reader would lose track (see below).
+ * Shared by the detail, which shows the last of them, and the history
+ * screen, which shows them all (n-0319).
+ */
+function ruleMessages(r) {
   const all = conversationOf(r.rule);
   /*
    * Which thread a message is on, said where a reader would lose track: a
@@ -359,6 +351,52 @@ function conversation(r, picked) {
     })
     .sort((a, b) => String(a.created ?? '').localeCompare(String(b.created ?? '')))
     .map((m, i, list) => (m.tag || i === 0 || list[i - 1].on === m.on ? m : { ...m, tag: `\u21b3 ${m.on}` }));
+  return { all, messages };
+}
+
+/** A click on a thread tag anywhere in a stream opens that thread's screen. */
+const openTagged = (e) => {
+  const tag = e.target?.closest?.('.wd-tag[data-thread]');
+  if (tag) openThreadView(tag.dataset.thread);
+};
+
+/*
+ * The whole conversation, one slide to the right of the rule (n-0319): the
+ * detail shows only the last thing said, because a rule that has been
+ * talked about for a fortnight is a page of scrolling before the box you
+ * came to type in. This is the same trip a thread's own screen makes, and
+ * the way back is the rule.
+ */
+export function historyPane() {
+  const r = S.selected;
+  if (!r) return nothing;
+  const { all, messages } = ruleMessages(r);
+  const known = (S.data?.rows ?? []).map((x) => x.rule);
+  const note = liveNoteOn(r.rule);
+  return html`<div class="flex items-center gap-2 px-2 pt-2">
+      <button class="btn btn-ghost btn-xs text-primary" data-testid="history.back"
+        @click=${() => {
+          S.view = 'detail';
+          requestRender();
+        }}>\u2190 ${shortName(r)}</button>
+    </div>
+    <div class="px-3.5 pt-1 pb-2">
+      <div class="${LBL} mb-1">Conversation \u00b7 ${all.length} thread${all.length === 1 ? '' : 's'} \u00b7 ${messages.length} message${messages.length === 1 ? '' : 's'}</div>
+    </div>
+    <div class="min-h-0 flex-1 overflow-y-auto px-3.5 pb-3">
+      ${
+        messages.length
+          ? html`<div class="wd-stream" data-testid="history.stream" @click=${openTagged}>${unsafeHTML(
+              MSG.stream({ replies: messages }, { rules: known, pending: note ? (pendingReplies.get(note.id) ?? []) : [], names: names() }),
+            )}</div>`
+          : html`<p class="text-[12.5px] opacity-50">Nothing said on this rule yet.</p>`
+      }
+    </div>`;
+}
+
+function conversation(r, picked) {
+  const known = (S.data?.rows ?? []).map((x) => x.rule);
+  const { all, messages } = ruleMessages(r);
   const note = liveNoteOn(r.rule);
   const asked = openQuestionOn(r.rule);
   // Answered and not yet folded in: the rule is the agent's, and a verdict
@@ -377,16 +415,29 @@ function conversation(r, picked) {
     : note
       ? 'Reply\u2026'
       : 'Start a conversation about this rule\u2026';
-  const open = (e) => {
-    const tag = e.target?.closest?.('.wd-tag[data-thread]');
-    if (tag) openThreadView(tag.dataset.thread);
-  };
+  const open = openTagged;
+  /*
+   * The last thing said, and a door to the rest (n-0319). The whole stream
+   * used to sit here, and on a rule talked about for a fortnight the box
+   * you came to type in was a page of scrolling away. The last message
+   * keeps its tag, so it still says which thread it is on.
+   */
+  const last = messages.at(-1);
   return html`<div class="-mx-3.5 border-t border-base-300 px-3.5 pt-2" data-testid="detail.conversation">
-    <div class="${LBL} mb-1">Conversation${all.length ? html` <span class="font-normal normal-case tracking-normal opacity-70">\u00b7 ${all.length} thread${all.length === 1 ? '' : 's'}</span>` : nothing}</div>
+    <div class="${LBL} mb-1 flex items-center">Conversation${all.length ? html` <span class="ml-1 font-normal normal-case tracking-normal opacity-70">\u00b7 ${all.length} thread${all.length === 1 ? '' : 's'}</span>` : nothing}${
+      messages.length > 1
+        ? html`<button class="btn btn-ghost btn-xs ml-auto h-5 min-h-0 px-1.5 font-normal normal-case tracking-normal text-primary" data-testid="detail.history-open"
+            title="Every message of every thread on this rule, oldest first"
+            @click=${() => {
+              S.view = 'history';
+              requestRender();
+            }}>History \u00b7 ${messages.length} \u2192</button>`
+        : nothing
+    }</div>
     ${
-      messages.length
+      last
         ? html`<div class="wd-stream" data-testid="detail.stream" @click=${open}>${unsafeHTML(
-            MSG.stream({ replies: messages }, { rules: known, pending: note ? (pendingReplies.get(note.id) ?? []) : [], names: names() }),
+            MSG.stream({ replies: [{ ...last, tag: last.tag ?? `\u21b3 ${last.on}` }] }, { rules: known, pending: note ? (pendingReplies.get(note.id) ?? []) : [], names: names() }),
           )}</div>`
         : html`<p class="pb-1 text-[12.5px] opacity-50">Nothing said on this rule yet.</p>`
     }

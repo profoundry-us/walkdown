@@ -41,7 +41,7 @@ import { blueprintsOf, projectIdOf, projectModal } from './projects.js';
 import { loadSeen, markSeen, names, openThreadView, sayOnRule, sayVerdict } from './conversation.js';
 import { DESK_DEFAULTS, DESK_KEY, drawDesk } from './desk.js';
 import { icon } from './icons.js';
-import { checkRefs, detailPane, evidenceRows, loadCheckSource } from './rule-detail.js';
+import { checkRefs, detailPane, evidenceRows, historyPane, loadCheckSource } from './rule-detail.js';
 import { legendControl, listPane, searchBox, tierMarks } from './rules-list.js';
 import { screensPane } from './screens.js';
 import { provideShell } from './shell.js';
@@ -1310,7 +1310,9 @@ export function render() {
         <!-- Third seat: the thread reached FROM a rule, which is a different
              trip - it keeps the rule behind it to come back to. -->
         <div class="flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col overflow-hidden"
-          data-testid="${onThreads ? nothing : 'thread.panel'}">${onThreads ? nothing : threadPane()}</div>
+          data-testid="${onThreads ? nothing : S.view === 'history' ? 'history.panel' : 'thread.panel'}">${
+            onThreads ? nothing : S.view === 'history' ? historyPane() : threadPane()
+          }</div>
       </div>
     </div>
     <!-- Every number here is derived from something, and a bare number told a
@@ -1384,7 +1386,7 @@ export function render() {
      * so the old transform is still on it and the browser animates from where
      * it actually is.
      */
-    const AT = { list: '0%', detail: '-33.3333%', thread: onThreads ? '-33.3333%' : '-66.6667%' };
+    const AT = { list: '0%', detail: '-33.3333%', thread: onThreads ? '-33.3333%' : '-66.6667%', history: '-66.6667%' };
     track.style.transform = `translateX(${AT[S.view] ?? '0%'})`;
   }
   /*

@@ -29,6 +29,7 @@ const reasonChip = (t) =>
   t.kind === 'note' && t.reason && t.reason !== 'feedback'
     ? html`<span class="badge badge-xs badge-outline opacity-70" data-testid="thread.reason">${t.reason}</span>`
     : nothing;
+import { askOptions } from './ask.js';
 import {
   CHIP,
   composerPlaceholder,
@@ -270,9 +271,15 @@ export function threadPane() {
           // message, however far up the stream the replies have pushed it
           // (Topher, 2026-09-19; the rule's detail does the same).
           t.kind === 'question' && t.status === 'open'
-            ? html`<div class="wd-stream mt-1.5 max-h-48 overflow-y-auto rounded bg-base-100/70 px-1.5 py-1" data-testid="thread.ask">${unsafeHTML(
-                MSG.stream({ replies: [MSG.messages(t)[0]] }, { rules: (S.data?.rows ?? []).map((r) => r.rule), names: names() }),
-              )}</div>`
+            ? html`<div class="mt-1.5 rounded bg-base-100/70 px-1.5 py-1" data-testid="thread.ask">
+                <div class="wd-stream max-h-48 overflow-y-auto">${unsafeHTML(
+                  MSG.stream({ replies: [{ ...MSG.messages(t)[0], options: undefined }] }, { rules: (S.data?.rows ?? []).map((r) => r.rule), names: names() }),
+                )}</div>
+                <!-- The choices, here too (n-0319): a question is answered
+                     from wherever it is read, and Answer below sends the
+                     pick with the words. -->
+                ${askOptions(t)}
+              </div>`
             : nothing
         }
       </div>

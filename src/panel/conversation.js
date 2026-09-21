@@ -199,12 +199,22 @@ export async function threadAct(id, status) {
     return;
   }
   if (status === '__answer') {
-    if (!text) return say('Write the answer first \u2014 answering a question records it.');
+    // A pick counts as an answer, the way it does on the rule (n-0319).
+    const chosen = t.options?.length ? S.askChoice : null;
+    if (!text && !chosen) return say(t.options?.length ? 'Pick one, or write the answer.' : 'Write the answer first \u2014 answering a question records it.');
     if (
-      (await postReply(id, text, actor)) &&
-      (await threadPost(`/api/threads/${id}/status`, { status: 'answered', actor }))
-    )
+      (await postReply(id, text || chosen, actor)) &&
+      (await threadPost(`/api/threads/${id}/status`, { status: 'answered', actor, ...(chosen ? { chosen } : {}) }))
+    ) {
+      S.askChoice = null;
       await requestReload();
+    }
+    return;
+  }
+  if (status === '__later') {
+    if (!(await threadPost(`/api/threads/${id}/later`, {}))) return;
+    S.askChoice = null;
+    await requestReload();
     return;
   }
   const needsReason = NEEDS_REASON.includes(status);

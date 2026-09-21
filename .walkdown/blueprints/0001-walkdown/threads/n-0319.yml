@@ -7,7 +7,7 @@ created: 2026-09-21T01:00:38.302Z
 anchor:
   rule: panel.rules.one-conversation
   screen: rule-detail
-status: open
+status: addressed
 body: Having the full thread in the rule is far too much to scroll through;
   let's just show the last note with a button to click to open the entire
   history (slide it in from the right like the other ones do). Any questions
@@ -17,3 +17,17 @@ added: Filed from Topher's list, 2026-09-21. The ask card already stands above
   the composer on the rule; this moves it to the foot of both screens and
   collapses the stream to its last message with the history a slide away - a
   change to the one-conversation rule's steps.
+replies:
+  - author: agent
+    created: 2026-09-21T02:01:48Z
+    body: "Built. The rule's conversation shows only the last thing said, tagged
+      with the thread it is on, and 'History · n →' beside the heading slides
+      the whole conversation in from the right like a thread's own screen -
+      every message of every thread, oldest first, with the tags that open each
+      thread. A question is answerable from either place now: its own screen
+      carries the same choices under the quoted question, and its foot has
+      Answer (which sends the pick with the words, and records the chosen label)
+      and Later (which sends it to the back of the rule's asks). Steps on
+      panel.rules.one-conversation moved with it; the three checks that read the
+      stream read the history now, and a new one answers from the thread screen.
+      As-built pages and their redlines brought along."

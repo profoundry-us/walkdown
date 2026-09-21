@@ -1629,19 +1629,23 @@ test('a rule draws its threads as one conversation, and never repeats which rule
   expect(rule, 'need a listed rule carrying several threads').toBeTruthy();
 
   await openRule(page, rule);
-  // The rule draws its threads as one stream (ADR 0006 §1): each thread's
-  // opening message carries a tag naming it, and nothing repeats the rule
-  // the conversation is already under.
-  const under = page.getByTestId('detail.conversation');
+  // The rule shows the last thing said, tagged with its thread, and the
+  // whole conversation is one slide to the right (n-0319): every message of
+  // every thread as one stream (ADR 0006 §1), each thread's opening message
+  // tagged with its name, and nothing repeating the rule it is under.
+  await expect(page.getByTestId('detail.stream').locator('.wd-tag[data-thread]').first(), 'the last message says which thread it is on').toBeVisible();
+  await page.getByTestId('detail.history-open').click();
+  const under = page.getByTestId('history.stream');
   await expect(under.locator('.wd-tag[data-thread]').first(), 'the rule draws its threads').toBeVisible();
   // One opening tag per thread; a reply's "↳" tag names the thread it is on
   // where the stream changes thread, and is not a second listing of it.
   const opening = await under.locator('.wd-tag[data-thread]').evaluateAll((els) => els.filter((el) => !el.textContent.trim().startsWith('\u21b3')).length);
   expect(opening).toBe(counts[rule]);
   await expect(
-    under.getByTestId('thread.where'),
+    page.getByTestId('history.panel').getByTestId('thread.where'),
     'under a rule, nothing repeats the rule it is anchored to',
   ).toHaveCount(0);
+  await page.getByTestId('history.back').click();
 
   // And a card on the Threads tab, which is scoped to nothing, does carry
   // it - otherwise this check would pass on a card that never draws the
@@ -1703,7 +1707,9 @@ test('a rule that asks draws one ask at a time with its choices, and Answer move
   // The tag is still the door to the thread, which draws the same choices.
   await ask.locator('.wd-tag[data-thread]').click();
   await expect(page.getByTestId('thread.ask')).toContainText(/keep its shadow/);
-  await expect(page.getByTestId('thread.ask').locator('.wd-opt')).toHaveCount(2);
+  await expect(page.getByTestId('thread.ask').locator('[data-option]')).toHaveCount(2);
+  await expect(page.getByTestId('thread.actions').filter({ hasText: 'Answer' })).toBeVisible();
+  await expect(page.getByTestId('thread.actions').filter({ hasText: 'Later' })).toBeVisible();
   await page.getByTestId('thread.close').click();
 
   // Later: the other ask comes up; this one comes round again after it.
@@ -1728,19 +1734,23 @@ test('a rule that asks draws one ask at a time with its choices, and Answer move
   expect(first.status).toBe('answered');
   expect(first.chosen).toBe('Keep it');
   expect(first.replies.at(-1).body).toMatch(/the shadow is what says/);
-  // Answered in the stream: the choice taken is marked, and the answer
-  // itself says which question it is on - tagged, cut to a few lines, and
-  // its tag is the way back to the question's own screen.
-  const stream = page.getByTestId('detail.stream');
+  // Answered in the whole conversation, one slide right: the choice taken
+  // is marked, and the answer itself says which question it is on -
+  // tagged, cut to a few lines, and its tag is the way back to the
+  // question's own screen. The detail itself shows the last message only.
+  await expect(page.getByTestId('detail.stream').locator('.wd-msg')).toHaveCount(1);
+  await page.getByTestId('detail.history-open').click();
+  const stream = page.getByTestId('history.stream');
   await expect(stream.locator('.wd-opt.chosen')).toHaveText(/Keep it/);
+  // A reply on another thread than the message before it says so too.
+  await expect(stream.locator('.wd-msg', { hasText: 'Does the ruling need a darker line' }).locator('.wd-tag')).toHaveText(`${q2} \u00b7 question \u00b7 open`);
   const answer = stream.locator('.wd-msg', { hasText: 'the shadow is what says it is a sheet.' }).last();
   await expect(answer.locator('.wd-tag')).toHaveText(`\u21b3 answer \u00b7 ${q1}`);
   await expect(answer.locator('.wd-text')).toHaveClass(/wd-clamp/);
   await answer.locator('.wd-tag[data-thread]').click();
   await expect(page.getByTestId('thread.provenance')).toContainText(q1);
   await page.getByTestId('thread.close').click();
-  // A reply on another thread than the message before it says so too.
-  await expect(stream.locator('.wd-msg', { hasText: 'Does the ruling need a darker line' }).locator('.wd-tag')).toHaveText(`${q2} \u00b7 question \u00b7 open`);
+  await expect(ask).toHaveAttribute('data-question', q2);
 
   // The last ask, answered in words alone: the card goes, the rule is the
   // agent's to fold in, and no verdict is offered until it has.
@@ -3443,4 +3453,41 @@ test('Check source opens the checks in a modal, with a GitHub link in a new tab'
   await expect(link).toHaveAttribute('href', /github\.com\/[^/]+\/[^/]+\/blob\/[0-9a-f]{40}\/[^#]+#L\d+-L\d+$/);
   await page.getByTestId('detail.source-close').click();
   await expect(modal).toHaveCount(0);
+});
+
+/*
+ * A question is answered from its own screen as well as from the rule
+ * (n-0319): the same choices under the quoted question, Answer sends the
+ * pick, Later sends it to the back of the rule's asks.
+ */
+test('a question on a rule is answerable from its own screen, choices and all', {
+  tag: ['@rule:panel.rules.one-conversation', '@rule:threads.question.one-ask'],
+}, async ({ page }) => {
+  await review(page);
+  const res = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
+    data: {
+      kind: 'question',
+      body: 'Should the legend open upward?',
+      anchor: { rule: 'panel.rules.legend-on-demand' },
+      options: [{ label: 'Upward', why: 'it is the last row' }, { label: 'Downward' }],
+    },
+  });
+  expect(res.ok()).toBeTruthy();
+  const { id } = await res.json();
+  await page.reload();
+  await expect(page.getByTestId('panel.bar')).toBeVisible();
+  await page.waitForLoadState('networkidle');
+  await page.getByTestId('panel.tabs').getByText(/Threads/).click();
+  await page.getByTestId('panel.thread-filter').getByText('All', { exact: false }).click();
+  await page.getByTestId('panel.threads-list').locator(`[data-open-thread="${id}"]`).first().click({ position: { x: 8, y: 6 } });
+  const ask = page.getByTestId('thread.ask');
+  await expect(ask).toContainText(/legend open upward/);
+  await ask.locator('[data-option]').filter({ hasText: 'Upward' }).click();
+  await page.getByTestId('thread.actions').filter({ hasText: 'Answer' }).click();
+  await expect.poll(async () => (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json()).threads.find((t) => t.id === id)?.status).toBe('answered');
+  const t = (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json()).threads.find((x) => x.id === id);
+  expect(t.chosen).toBe('Upward');
+  expect(t.replies.at(-1).body).toBe('Upward');
+  // Folded in, so the rule is a person's again for the checks that follow.
+  expect((await page.request.post(`${WD_ORIGIN}/api/threads/${id}/status?bp=blueprint`, { data: { status: 'incorporated', via: 'agent' } })).ok()).toBeTruthy();
 });

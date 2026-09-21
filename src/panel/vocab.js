@@ -349,6 +349,11 @@ const ON_RULE = {
     waived: [REPLY],
     settled: [REPLY],
   },
+  // A question on a rule is answered from its own screen too (n-0319), with
+  // the rule's Later beside Answer: it goes to the back of the rule's asks.
+  question: {
+    open: [WAIVE, REPLY, ['Later', '__later', 'quiet'], ['Answer', '__answer', 'primary']],
+  },
 };
 
 /** Short verbs, and only the moves this reader takes from this kind and status. */

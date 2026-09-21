@@ -61,6 +61,7 @@ screens:
     anchors:
       - detail.screen
       - detail.ask
+      - detail.history-open
       - detail.back
       - detail.stepper
       - detail.rule-id
