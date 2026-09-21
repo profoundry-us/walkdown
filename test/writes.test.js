@@ -4,6 +4,7 @@
  */
 import assert from 'node:assert/strict';
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readdirSync,
@@ -135,6 +136,46 @@ test('a pin on a fresh project creates the threads directory it needs', async ()
       });
       assert.ok(ok, JSON.stringify(data));
       assert.equal(loadBlueprint(p.bp, { cwd: p.h.root }).threads.length, 1);
+    });
+  } finally {
+    p.cleanup();
+  }
+});
+
+/*
+ * A status move's reason carries pictures the way a reply does: a fail's why
+ * reopens the note with its reason, and a picture dropped beside that why
+ * went nowhere (Topher, 2026-09-21, n-0328).
+ */
+test('a reopen\u2019s reason carries the pictures dropped with it @rule:embed.threads.picture-on-a-pin', async () => {
+  const p = project();
+  const png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+  try {
+    await serve(p, async (base) => {
+      const opened = await post(base, '/api/threads', { kind: 'note', body: 'The corner is clipped.', anchor: {} });
+      assert.ok(opened.ok, JSON.stringify(opened.data));
+      const id = opened.data.id;
+      assert.ok((await post(base, `/api/threads/${id}/status`, { status: 'addressed', via: 'agent', reason: 'Trimmed it.' })).ok);
+      const back = await post(base, `/api/threads/${id}/status`, {
+        status: 'open',
+        reason: 'Still clipped, see the picture.',
+        attachments: [{ name: 'after.png', type: 'image/png', data: `data:image/png;base64,${png}` }],
+      });
+      assert.ok(back.ok, JSON.stringify(back.data));
+      const t = back.data.thread; // the door answers with the thread as written
+      assert.equal(t.status, 'open');
+      const reason = t.replies.at(-1);
+      assert.equal(reason.body, 'Still clipped, see the picture.');
+      assert.deepEqual(reason.attachments, [{ file: `attachments/${id}-1.png`, name: 'after.png' }]);
+      assert.ok(existsSync(join(p.h.threads, 'attachments', `${id}-1.png`)), 'the bytes sit beside the threads');
+      // A move with no reason takes no pictures: nothing to hang them on.
+      const bare = await post(base, `/api/threads/${id}/status`, {
+        status: 'addressed',
+        via: 'agent',
+        attachments: [{ name: 'x.png', type: 'image/png', data: `data:image/png;base64,${png}` }],
+      });
+      assert.ok(bare.ok, JSON.stringify(bare.data));
+      assert.ok(!existsSync(join(p.h.threads, 'attachments', `${id}-2.png`)));
     });
   } finally {
     p.cleanup();

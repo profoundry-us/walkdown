@@ -32,3 +32,19 @@ replies:
       file. Checked by 'a screenshot dropped on the pin form goes on the pin' in
       checks/embed.spec.js (recorded 2026-09-21T15-02-00Z) and judged again by
       the agent tier (run 2026-09-21T15-04-43Z)."
+  - author: topher
+    created: 2026-09-21T15:59:49Z
+    body: Nope; still doesn't work when I'm trying to pass / fail a rule.
+  - author: agent
+    created: 2026-09-21T16:07:32Z
+    body: "Fixed for the rule's box: a picture dropped anywhere on the rule pane -
+      or pasted into its box - is held above the box and goes with the next
+      thing the box does: a fail's why, a pass's note, a reply, an answer, a
+      waive's reason. A fail on an addressed note reopens it with the reason,
+      and that reason now carries pictures like a reply does (the server did not
+      take them on a status move before). Moving to another rule drops what was
+      held. Checked by 'a picture dropped while failing a rule goes with the
+      why' in checks/panel.spec.js (recorded 2026-09-21T16-05-53Z) and 'a
+      reopen's reason carries the pictures dropped with it' in
+      test/writes.test.js (16-05-54Z); judged again by the agent tier on a
+      scratch copy."

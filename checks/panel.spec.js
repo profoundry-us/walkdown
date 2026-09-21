@@ -3752,3 +3752,50 @@ test('Enter on the rule\u2019s box says the words on the rule, and Shift-Enter b
   expect(await replies()).toHaveLength(1);
   expect(await draft(page)).toMatchObject({ draft: null });
 });
+
+/*
+ * A picture dropped on the rule's pane goes with the next thing the box
+ * does - the fail's why above all, which reopens the note with its reason
+ * (Topher, 2026-09-21, n-0328: "still doesn't work when I'm trying to
+ * pass / fail a rule"). Judged on disk: the reason reply names the file.
+ */
+test('a picture dropped while failing a rule goes with the why', {
+  tag: '@rule:embed.threads.picture-on-a-pin',
+}, async ({ page }) => {
+  const drop = (el) => {
+    const bytes = Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='), (c) => c.charCodeAt(0));
+    const dt = new DataTransfer();
+    dt.items.add(new File([bytes], 'shot.png', { type: 'image/png' }));
+    el.dispatchEvent(new DragEvent('dragover', { dataTransfer: dt, bubbles: true, cancelable: true }));
+    el.dispatchEvent(new DragEvent('drop', { dataTransfer: dt, bubbles: true, cancelable: true }));
+  };
+  const { rows } = await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json();
+  const rule = rows.find((r) => r.built).rule;
+  const { id } = await (await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
+    data: { kind: 'note', body: 'The corner is clipped.', anchor: { rule } },
+  })).json();
+  expect((await page.request.post(`${WD_ORIGIN}/api/threads/${id}/status?bp=blueprint`, {
+    data: { status: 'addressed', via: 'agent', reason: 'Trimmed it.' },
+  })).ok()).toBeTruthy();
+  const thread = async () =>
+    (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json()).threads.find((t) => t.id === id);
+  await review(page);
+  await endSession(page);
+  await ensureSession(page);
+  await openRuleForVerdict(page, rule);
+  // Dropped on the pane's words, nowhere near the box: held above it.
+  await page.getByTestId('detail.conversation').evaluate(drop);
+  await expect(page.getByTestId('detail.shots').locator('img'), 'held above the box until the verdict').toHaveCount(1);
+  expect(page.context().pages().length, 'no tab opened on the file').toBe(1);
+  await page.getByTestId('detail.feedback').fill('Still clipped, see the picture.');
+  await page.locator('[data-v="fail"]').click();
+  await expect.poll(async () => {
+    const t = await thread();
+    const why = (t?.replies ?? []).find((r) => r.body === 'Still clipped, see the picture.');
+    return [t?.status, why?.attachments?.map((a) => a.name) ?? null];
+  }).toEqual(['open', ['shot.png']]);
+  await expect(page.getByTestId('detail.shots')).toHaveCount(0);
+  // And the picture is drawn under the why in the rule's conversation.
+  await expect(page.getByTestId('detail.conversation').locator('[data-attachment] img')).toHaveCount(1);
+  await endSession(page);
+});

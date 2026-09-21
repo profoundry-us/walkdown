@@ -5,7 +5,7 @@ author: agent
 created: 2026-09-21T06:24:40.885Z
 anchor:
   rule: threads.conversation.composer-stays
-status: addressed
+status: verified
 body: "The reply box keeps its words after Enter has sent them. Seen on the
   scratch copy during the 2026-09-21 agent sitting: type a reply, press Enter,
   the message lands in the stream and the server has it, and the box still holds
@@ -42,3 +42,16 @@ replies:
       line; the ask box answers on Enter the same way. Checked by 'Enter on the
       rule's box says the words on the rule' (recorded 2026-09-21T15-01-54Z) and
       judged again by the agent tier (run 2026-09-21T15-04-43Z)."
+  - author: topher
+    created: 2026-09-21T16:00:03Z
+    body: Another test of the enter-to-send functionality.
+  - author: topher
+    created: 2026-09-21T16:00:10Z
+    body: It worked!
+  - author: topher
+    via: verdict
+    created: 2026-09-21T16:00:11Z
+    body: Verified by topher's pass on threads.conversation.composer-stays
+      (2026-09-21T16-00-11Z-local-01).
+verified_by: topher
+verified_via: 2026-09-21T16-00-11Z-local-01

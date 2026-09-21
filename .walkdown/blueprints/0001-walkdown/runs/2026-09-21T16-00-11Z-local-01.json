@@ -1,0 +1,48 @@
+{
+  "run_id": "2026-09-21T16-00-11Z-local-01",
+  "created": "2026-09-21T16:00:11Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    },
+    {
+      "role": "design",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2ee0bf2-dirty",
+  "tree_hash": "sha256:ed89b1434c66",
+  "spec_hash": "sha256:2d4781078c6e",
+  "results": [
+    {
+      "rule": "panel.rules.evidence-visible",
+      "status": "pass",
+      "statement_hash": "sha256:79686951989e"
+    },
+    {
+      "rule": "embed.threads.picture-on-a-pin",
+      "status": "fail",
+      "statement_hash": "sha256:965adfb3696b",
+      "threads": [
+        "n-0328"
+      ]
+    },
+    {
+      "rule": "threads.conversation.composer-stays",
+      "status": "pass",
+      "statement_hash": "sha256:bce50665dcd2",
+      "threads": [
+        "n-0332"
+      ]
+    }
+  ]
+}

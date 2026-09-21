@@ -116,8 +116,10 @@ export const S = {
   askChoice: null,
   /** The blueprint key (its home on disk) this panel opened; the only board it records against (q-0301). */
   board: null,
-  /** Pictures pasted into the thread composer, not yet sent: { name, type, data }. */
-  threadShots: [], // the option picked on the rule's current ask, until it is answered
+  /** Pictures pasted or dropped into the thread composer, not yet sent: { name, type, data }. */
+  threadShots: [],
+  /** The same, held on the rule's box: they go with whatever the box does next - a reply, a fail's why, an answer. */
+  ruleShots: [],
   composerSay: '', // the composer's refusal line; same lifetime, same reason
   threadSay: '', // the thread screen's refusal line; dies when the view moves on
   ruleNote: '', // the rule's own new-thread box, kept the same way

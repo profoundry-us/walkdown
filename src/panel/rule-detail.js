@@ -8,6 +8,7 @@ import { html, live, nothing, unsafeHTML } from '../../vendor/lit.js';
 import { answerOnRule, asksOn, laterOnRule, liveNoteOn, names, openQuestionOn, openThreadView, pendingReplies, sayFiling, sayOnRule, waiveOnRule } from './conversation.js';
 import { tierMarks } from './rules-list.js';
 import { requestReload, requestRender } from './shell.js';
+import { pastedShots, pasteShots } from './thread-pane.js';
 import { askOptions } from './ask.js';
 import { openEvidence } from './evidence.js';
 import { openSource } from './source.js';
@@ -304,6 +305,7 @@ function askCard(r, asked, open) {
       @input=${(e) => {
         S.verdictNote = e.currentTarget.value;
       }}
+      @paste=${(e) => pasteShots(e, 'ruleShots')}
       @keydown=${(e) => {
         // Enter answers, as it does on the thread screen; Shift+Enter breaks the line.
         if (!enterSends(e)) return;
@@ -465,12 +467,14 @@ function conversation(r, picked) {
     <!-- One box for everything said on the rule: a reply, a fail's why, a
          waive's reason. It rides ABOVE the buttons, so the why is typed
          where the verdict is pressed (Topher, 2026-09-18). -->
+    ${pastedShots('ruleShots', 'detail.shots')}
     <textarea id="wdp-vnote" data-testid="detail.feedback" rows="2" class="textarea textarea-xs w-full resize-none"
       placeholder="${placeholder}"
       .value=${live(S.verdictNote)}
       @input=${(e) => {
         S.verdictNote = e.currentTarget.value;
       }}
+      @paste=${(e) => pasteShots(e, 'ruleShots')}
       @keydown=${(e) => {
         /*
          * Enter says the words on the rule - a reply, never a verdict: a

@@ -7,7 +7,7 @@ created: 2026-09-21T01:00:38.115Z
 anchor:
   rule: panel.rules.evidence-visible
   screen: rule-detail
-status: addressed
+status: verified
 body: Change the "Check source" from a collapse into a clickable area that opens
   the source in a modal. The modal should show all of the contents, but also
   provide a link to GitHub if possible so a user can see it on a larger screen
@@ -73,3 +73,10 @@ replies:
       bold, larger than the 11px file names under it. Checked by 'Check source
       opens the checks in a modal' (recorded 2026-09-21T15-01-54Z) and judged
       again by the agent tier (run 2026-09-21T15-04-43Z)."
+  - author: topher
+    via: verdict
+    created: 2026-09-21T16:00:11Z
+    body: Verified by topher's pass on panel.rules.evidence-visible
+      (2026-09-21T16-00-11Z-local-01).
+verified_by: topher
+verified_via: 2026-09-21T16-00-11Z-local-01

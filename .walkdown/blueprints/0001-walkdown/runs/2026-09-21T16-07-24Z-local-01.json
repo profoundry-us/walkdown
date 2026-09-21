@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-09-21T16-07-24Z-local-01",
+  "created": "2026-09-21T16:07:24Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2ee0bf2-dirty",
+  "spec_hash": "sha256:2d4781078c6e",
+  "note": "A second look at embed.threads.picture-on-a-pin after Topher failed it again on 2026-09-21 (n-0328: a picture dropped while passing or failing a rule). Driven on a stamped scratch copy on 4730 (node tools/scratch.mjs new fix-0921c).",
+  "results": [
+    {
+      "rule": "embed.threads.picture-on-a-pin",
+      "status": "pass",
+      "statement_hash": "sha256:965adfb3696b",
+      "threads": [
+        "n-0328"
+      ],
+      "evidence": [
+        "runs/evidence/2026-09-21T16-06-59Z/look.json",
+        "runs/evidence/2026-09-21T16-06-59Z/held-above-the-box.png",
+        "runs/evidence/2026-09-21T16-06-59Z/why-with-picture-in-the-conversation.png",
+        "runs/evidence/2026-09-21T16-06-59Z/reopened-with-picture.png"
+      ],
+      "reasoning": "A picture dropped on the rule pane - on the steps, nowhere near the box - is held above the box as a thumbnail and no tab opens on the file. Fail with a why on the rule’s open note filed the why as a reply carrying the picture (attachments/n-0328-1.png) and the draft recorded the fail. With the note addressed by the agent, a second drop on the conversation and a fail reopened the note with the reason carrying its picture (n-0328-2.png), drawn under the words in the conversation. Moving to another rule drops what was held, so a picture never lands on a rule it was not dropped on. The thread screen and the pin form still take drops as before."
+    }
+  ]
+}

@@ -4209,8 +4209,10 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     askChoice: null,
     /** The blueprint key (its home on disk) this panel opened; the only board it records against (q-0301). */
     board: null,
-    /** Pictures pasted into the thread composer, not yet sent: { name, type, data }. */
-    threadShots: [], // the option picked on the rule's current ask, until it is answered
+    /** Pictures pasted or dropped into the thread composer, not yet sent: { name, type, data }. */
+    threadShots: [],
+    /** The same, held on the rule's box: they go with whatever the box does next - a reply, a fail's why, an answer. */
+    ruleShots: [],
     composerSay: '', // the composer's refusal line; same lifetime, same reason
     threadSay: '', // the thread screen's refusal line; dies when the view moves on
     ruleNote: '', // the rule's own new-thread box, kept the same way
@@ -5320,7 +5322,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
    * thread feel like a form. If the post is refused the message stays,
    * marked, and the text comes back to the composer so it can be sent again.
    */
-  async function postReply(id, text, actor) {
+  async function postReply(id, text, actor, key = 'threadShots') {
     /*
      * The same refusal postRuleNote makes, for the same reason.
      *
@@ -5345,9 +5347,10 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     const list = pendingReplies.get(id) ?? [];
     pendingReplies.set(id, [...list, msg]);
     S.threadNote = '';
-    // The pictures pasted into the composer go with the words (n-0096).
-    const shots = S.threadShots;
-    S.threadShots = [];
+    // The pictures pasted or dropped on the box go with the words (n-0096) -
+    // the thread screen's box, or the rule's (n-0328).
+    const shots = S[key];
+    S[key] = [];
     requestRender();
     const ok = await threadPost(`/api/threads/${id}/replies`, { author: who, body: text, ...(shots.length && { attachments: shots }) });
     if (ok) {
@@ -5365,7 +5368,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       msg.pending = false;
       msg.failed = true;
       S.threadNote = text;
-      S.threadShots = shots;
+      S[key] = shots;
       requestRender();
     }
     return ok;
@@ -5504,7 +5507,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     const actor = whoAmI();
     // The reply carries the words; a pick with no words is still an answer,
     // and says so in the ledger as one line so the thread reads on its own.
-    if (!(await postReply(q.id, text || chosen, actor))) return null;
+    if (!(await postReply(q.id, text || chosen, actor, 'ruleShots'))) return null;
     if (!(await threadPost(`/api/threads/${q.id}/status`, { status: 'answered', actor, ...(chosen ? { chosen } : {}) }))) return null;
     S.verdictNote = '';
     S.askChoice = null;
@@ -5537,6 +5540,9 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     const live = liveNoteOn(rule);
     if (!live) return postRuleNote(rule, text, 'feedback');
     const actor = whoAmI();
+    // The pictures held on the rule's box go with the words, whichever way
+    // they are filed; a refused filing hands them back (n-0328).
+    const shots = S.ruleShots;
     /*
      * Reopening files its reason as a reply on the server, so the words go
      * ONE way: as the reopen's reason when the conversation comes back to
@@ -5550,10 +5556,17 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
         openSettings();
         return null;
       }
-      const back = await threadPost(`/api/threads/${live.id}/status`, { status: 'open', actor, reason: text });
+      S.ruleShots = [];
+      const back = await threadPost(`/api/threads/${live.id}/status`, {
+        status: 'open',
+        actor,
+        reason: text,
+        ...(shots.length && { attachments: shots }),
+      });
+      if (!back) S.ruleShots = shots;
       return back ? live.id : null;
     }
-    if (!(await postReply(live.id, text, actor))) return null;
+    if (!(await postReply(live.id, text, actor, 'ruleShots'))) return null;
     return live.id;
   }
 
@@ -5576,11 +5589,13 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       );
       return openSettings();
     }
-    if (await threadPost(`/api/threads/${live.id}/status`, { status: 'waived', actor, reason: text })) {
+    const shots = S.ruleShots;
+    S.ruleShots = [];
+    if (await threadPost(`/api/threads/${live.id}/status`, { status: 'waived', actor, reason: text, ...(shots.length && { attachments: shots }) })) {
       S.verdictNote = '';
       toast(`<b>${esc(live.id)}</b> waived \u2014 the rule\u2019s conversation is closed.`, { tone: 'success' });
       await requestReload();
-    }
+    } else S.ruleShots = shots;
   }
 
   async function postRuleNote(rule, body, reason = 'feedback') {
@@ -5617,15 +5632,19 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       openSettings();
       return null;
     }
+    // The pictures on the rule's box open the note with it (n-0328).
+    const shots = S.ruleShots;
+    S.ruleShots = [];
     const res = await fetch(api('/api/threads'), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       // Why the note exists (ADR 0005 §1): a person's words are feedback
       // unless they say they are a decision or a request to design.
-      body: JSON.stringify({ kind: 'note', author, body, reason, anchor: { rule } }),
+      body: JSON.stringify({ kind: 'note', author, body, reason, anchor: { rule }, ...(shots.length && { attachments: shots }) }),
     });
     const out = await res.json().catch(() => ({}));
     if (!res.ok) {
+      S.ruleShots = shots;
       sayFiling(out.error ?? 'note not filed');
       return null;
     }
@@ -6435,6 +6454,366 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
   }
 
   /*
+   * One conversation, opened: the thread's own detail pane, and the card the
+   * lists draw for it.
+   */
+
+
+  /*
+   * Why the note exists, beside its status (ADR 0005 §1): a finding is a
+   * judge's, feedback is yours, a decision is a record. Read at a glance,
+   * because which of these it is decides who it is waiting on. A question
+   * has none, and a legacy note with none reads as feedback everywhere else,
+   * so nothing is drawn for it here either.
+   */
+  const reasonChip = (t) =>
+    t.kind === 'note' && t.reason && t.reason !== 'feedback'
+      ? b`<span class="badge badge-xs badge-outline opacity-70" data-testid="thread.reason">${t.reason}</span>`
+      : A;
+
+  /** Every name an anchor has had on a screen, oldest first - the filed name, then each rename. */
+  const renameChain = (sc, element) => {
+    const out = [element];
+    const seen = new Set([element]);
+    let cur = element;
+    while (sc?.renames?.[cur] && !seen.has(sc.renames[cur])) {
+      cur = String(sc.renames[cur]);
+      seen.add(cur);
+      out.push(cur);
+    }
+    return out;
+  };
+
+
+  /*
+   * How the turn line is drawn, by whose move it is. A person's move is amber,
+   * the agent's is blue and dashed like the agent's own face in the stream, an
+   * ended thread is green: the colour is the party, not the reader, so the
+   * same thread reads the same on both sides of the table.
+   */
+  const TURN$1 = {
+    human: { line: 'border-warning', chip: 'bg-warning text-warning-content' },
+    agent: { line: 'border-info', chip: 'bg-info text-info-content' },
+    closed: { line: 'border-success', chip: 'bg-success text-success-content' },
+  };
+
+  /* The button for a tone: the primary is filled, the warning outlined in amber, the rest quiet. */
+  const TONE = {
+    primary: 'btn-primary',
+    warn: 'btn-outline btn-warning',
+    quiet: 'btn-outline border-base-300 text-base-content/70',
+  };
+
+  /*
+   * A thread, collapsed: the opening message and the way into the rest of it.
+   * It reads the way a message with replies reads anywhere - a face, a name, a
+   * time, what was said, and under it the people in the thread, the number of
+   * replies, and when it was last touched. The count is the door; opening it
+   * slides the whole conversation in beside the rule.
+   */
+  function threadCard(t, where = null) {
+    const who = MSG.displayName(t.author, names());
+    const unread = unreadCount(t);
+    // No card, no rail: threads share one surface with the pane, the way
+    // messages share a channel. What is waiting on you is said in words - the
+    // status chip and the unread count - rather than by tinting a box.
+    //
+    // `where` is passed only by the Threads tab, which is not scoped to a rule
+    // and so has to say what each conversation is about. It also makes the
+    // whole row the way in: under a rule the reply line is enough, because the
+    // rule above it is already the context.
+    return b`<div class="wd-row px-3.5 py-2${where ? ' cursor-pointer' : ''}"
+    data-open-thread="${where ? t.id : A}">
+    ${where ? b`<div class="mb-1 truncate text-[11px] opacity-45" data-testid="thread.where">${where}</div>` : A}
+    <div class="wd-msg">
+      ${o$1(MSG.avatar(who, 'wd-ava', Boolean(t.via)))}
+      <div class="wd-col min-w-0">
+        <div class="wd-head">
+          <span class="wd-who">${who}</span>
+          <!-- Provenance beside the name, here too. This is where a reader
+               MEETS a thread, and an agent files under the person it acts
+               for - so a list that shows only the name says a person wrote
+               something a machine wrote (n-0147). -->
+          ${t.via ? b`<span class="wd-via">via ${t.via}</span>` : A}
+          <span class="wd-at" title="${MSG.stamp(t.created)}">${MSG.ago(t.created)}</span>
+          <!-- The id stays visible, quietly: a conversation you can name is a
+               conversation you can point at from a run record or a commit. -->
+          <span class="wd-at font-mono">${t.id}</span>
+          <span class="ml-auto flex shrink-0 items-center gap-1">
+            ${unread ? b`<span class="badge badge-xs badge-error">${unread} new</span>` : A}
+            ${reasonChip(t)}
+            <span class="badge badge-xs ${CHIP[t.status] ?? 'badge-ghost'}">${t.status}</span>
+          </span>
+        </div>
+        <div class="wd-text wd-preview">${o$1(
+          MSG.opening(t.kind, t.body, { rules: (S.data?.rows ?? []).map((r) => r.rule) }),
+        )}</div>
+        ${t.added ? o$1(MSG.addition(t.added, { rules: (S.data?.rows ?? []).map((r) => r.rule) })) : A}
+        ${o$1(MSG.repliesLine(t, names()))}
+      </div>
+    </div>
+  </div>`;
+  }
+
+  /*
+   * The thread itself: its own screen, one slide to the right of the rule it
+   * belongs to. A conversation deserves the width - reading and answering
+   * should not happen in a card wedged between a rule's steps and its verify
+   * list - and the way back is where you came from.
+   */
+  /**
+   * What the way out of a thread is called. On the Threads tab the thread is
+   * the tab's own detail, so the way back is the list of threads - naming a
+   * rule there would offer a trip nobody took.
+   */
+  const backFromThread = (row) =>
+    S.listTab === 'threads' ? 'All threads' : row ? shortName(row) : 'All rules';
+
+  /*
+   * Back where you came from: the rule, or the list for a pin that has none -
+   * and on the Threads tab always the thread list, because that is where you
+   * came from and no rule was ever opened.
+   */
+  function leaveThread() {
+    const t = (S.data?.threads ?? []).find((x) => x.id === S.openThread);
+    S.view = S.listTab !== 'threads' && t?.anchor?.rule && S.selected ? 'detail' : 'list';
+    S.openThread = null;
+    S.threadSay = '';
+    requestRender();
+  }
+
+  function threadPane() {
+    const t = (S.data?.threads ?? []).find((x) => x.id === S.openThread);
+    // Whatever became of the thread — ended, reloaded away, never there — this
+    // screen is never a dead end.
+    if (!t)
+      return b`
+    <div class="flex items-center px-2 pt-2">
+      <button class="wdp-thread-back btn btn-ghost btn-xs text-primary" @click=${leaveThread}>← ${backFromThread(S.selected)}</button>
+    </div>
+    <div class="px-3.5 pt-1 text-[12.5px] opacity-60">That thread is no longer open here.</div>`;
+    const row = t.anchor?.rule ? S.data.rows.find((r) => r.rule === t.anchor.rule) : null;
+    const sc = screenById(t.anchor?.screen);
+    const where = [
+      t.anchor?.rule ? '' : 'not attached to a rule',
+      sc?.title ?? t.anchor?.screen,
+      t.anchor?.element
+        ? (() => {
+            /*
+             * The name it was filed under, always - a thread is a record of a
+             * moment. When the storyboard says the anchor has since been
+             * renamed, the record says so beside it, and resting on it lists
+             * every name it has had (q-0252).
+             */
+            const chain = renameChain(sc, t.anchor.element);
+            /*
+             * The bubble opens down and to the right, from the left edge of
+             * the name: centred on it, it ran off the pane's left edge, and
+             * inside the line's own faded ink it was unreadable (n-0329). The
+             * line is faded part by part below, so the bubble is not.
+             */
+            return chain.length > 1
+              ? b`<span class="tooltip tooltip-bottom tooltip-start [--tt-trans:0]"
+                ><span class="tooltip-content z-50 whitespace-nowrap font-mono text-[11px]" data-testid="thread.renames">${chain.join(' → ')}</span
+                ><span class="font-mono opacity-45">${t.anchor.element}</span>
+                <span class="badge badge-xs badge-outline align-middle opacity-45" data-testid="thread.renamed">renamed</span></span>`
+              : b`<span class="font-mono opacity-45">${t.anchor.element}</span>`;
+          })()
+        : t.anchor?.position
+          ? 'by position'
+          : '',
+      t.anchor?.viewport ? `${t.anchor.viewport.name} ${t.anchor.viewport.width}` : '',
+    ].filter(Boolean);
+    const sketch = ghostSource(sc);
+    const role = myRole();
+    const acts = threadActions(t, role);
+    /*
+     * Who ended the thread: the record first, the guess second. verified_by /
+     * waived_by name whoever accepted; only a thread from before those were
+     * recorded falls back to the last reply's author, which once credited an
+     * agent's evidence post with a human's acceptance (n-0127).
+     */
+    const lastReply = (t.replies ?? []).at(-1);
+    const recordedBy =
+      t.status === 'verified' ? t.verified_by : t.status === 'waived' ? t.waived_by : null;
+    const ended =
+      TERMINAL.includes(t.status) && (recordedBy || lastReply)
+        ? { author: recordedBy ?? lastReply?.author, created: lastReply?.created }
+        : null;
+    // The person on the other side of the table, for the agent's reading of
+    // the line: whoever opened the thread, unless a machine did.
+    const opener = MSG.displayName(t.author, names());
+    const turn = turnLine(t, role, {
+      person: /^agent$/i.test(t.author ?? '') ? 'the person' : opener,
+      endedBy: ended?.author ? MSG.displayName(ended.author, names()) : null,
+      endedAt: ended?.created ? MSG.ago(ended.created) : null,
+    });
+    // Enter sends what the box is for: the answer on a question that is
+    // yours to answer, and a reply everywhere else.
+    const enterAct = acts.some(([, act]) => act === '__answer') ? '__answer' : '__reply';
+    /*
+     * A picture dropped anywhere on the thread screen is taken, the way the
+     * pin form takes one dropped anywhere on it. The box alone was the
+     * target, two rows tall, and a drop that missed it by a finger went to
+     * the browser, which opened the file in a new tab (Topher, 2026-09-21,
+     * n-0328). Both handlers here, since the wrapper is what the drop lands on.
+     */
+    return b`
+    <div class="flex h-full min-h-0 flex-col" data-testid="thread.screen"
+      @dragover=${(e) => {
+        if ([...(e.dataTransfer?.types ?? [])].includes('Files')) e.preventDefault();
+      }}
+      @drop=${(e) => pasteShots(e)}>
+    <div class="flex items-center gap-1 px-2 pt-2">
+      <button class="wdp-thread-back btn btn-ghost btn-xs text-primary" data-testid="thread.close" @click=${leaveThread}>← ${backFromThread(row)}</button>
+      <span class="ml-auto flex items-center gap-1 pr-1.5 text-[11px]" data-testid="thread.provenance">
+        <!-- No name up here. "as topher" stood under the composer, then
+             here as a link into Settings; who a reply or a move is recorded
+             under is chosen once, when a walkdown starts and each role is
+             signed for, and is not re-offered at the action (Topher,
+             2026-09-18; panel.identity.attribution-visible). -->
+        <b class="opacity-60">${t.id}</b>
+        ${reasonChip(t)}
+        <span class="badge badge-xs ${CHIP[t.status] ?? 'badge-ghost'}">${t.status}</span>
+      </span>
+    </div>
+    ${
+      where.length
+        ? b`<div class="px-3.5 pb-1 text-[11px]">${where.map(
+            (part, i) =>
+              b`${i ? b`<span class="opacity-45"> · </span>` : A}${
+                typeof part === 'string' ? b`<span class="opacity-45">${part}</span>` : part
+              }`,
+          )}</div>`
+        : A
+    }
+    <div class="min-h-0 flex-1 overflow-y-auto px-3.5 pb-2" data-testid="thread.body">
+      ${o$1(
+        MSG.stream(t, {
+          seenAt: seenAtOpen[t.id] ?? null,
+          rules: (S.data?.rows ?? []).map((r) => r.rule),
+          pending: pendingReplies.get(t.id) ?? [],
+          names: names(),
+        }),
+      )}
+      ${
+        sketch?.proposed
+          ? b`<button class="btn btn-xs btn-outline mt-2 w-full" data-sketch="${t.anchor.screen}"
+        @click=${(e) => fire(e.currentTarget, 'view-sketch', { screen: t.anchor.screen })}>
+        ⚠ View the proposed sketch</button>`
+          : A
+      }
+    </div>
+    <!-- The composer stays put at the foot of the screen: type, press Enter,
+         the message is there. Above it, one line says whose move this is
+         and what happens next; the buttons under it are only the moves this
+         reader takes from here. -->
+    <div class="shrink-0 border-t border-base-300 p-2">
+      <!-- The label floats on the top edge, the way a material input's does,
+           so the sentence takes the full width under it rather than sharing
+           the row with the chip (Topher, 2026-09-17). The top padding leaves
+           the chip room to sit on the border without touching the text. -->
+      <div class="relative mt-2 mb-1.5 rounded border border-dashed px-2 pt-2.5 pb-1.5 text-[11px] leading-snug ${TURN$1[turn.party].line}"
+        data-testid="thread.turn" data-party="${turn.party}">
+        <span class="absolute -top-[7px] left-2 rounded px-1 text-[9px] font-bold uppercase leading-[14px] tracking-wider ${TURN$1[turn.party].chip}">${turn.label}</span>
+        <span class="opacity-75">${turn.text}</span>
+        ${
+          // An open question re-asks itself above the box: its opening
+          // message, however far up the stream the replies have pushed it
+          // (Topher, 2026-09-19; the rule's detail does the same).
+          t.kind === 'question' && t.status === 'open'
+            ? b`<div class="mt-1.5 rounded bg-base-100/70 px-1.5 py-1" data-testid="thread.ask">
+                <div class="wd-stream max-h-48 overflow-y-auto">${o$1(
+                  MSG.stream({ replies: [{ ...MSG.messages(t)[0], options: undefined }] }, { rules: (S.data?.rows ?? []).map((r) => r.rule), names: names() }),
+                )}</div>
+                <!-- The choices, here too (n-0319): a question is answered
+                     from wherever it is read, and Answer below sends the
+                     pick with the words. -->
+                ${askOptions(t)}
+              </div>`
+            : A
+        }
+      </div>
+      ${pastedShots()}
+      <!-- The words are a live() property binding, as on the rule's composer,
+           not child text: child text only seeds a textarea, and a plain
+           .value binding compares against what lit last wrote rather than
+           what the box holds - typing renders nothing, so a send that
+           emptied the state found '' already committed and left the typed
+           reply in the box for the next Enter to post again (n-0332). -->
+      <textarea id="wdp-note" data-testid="thread.reply" rows="2" class="textarea textarea-xs w-full resize-none"
+        placeholder="${composerPlaceholder(t, role)}"
+        .value=${l(S.threadNote)}
+        @input=${(e) => {
+          S.threadNote = e.currentTarget.value;
+        }}
+        @paste=${(e) => pasteShots(e)}
+        @keydown=${(e) => {
+          // Enter sends, Shift+Enter breaks the line - the muscle memory
+          // everyone already has. The buttons stay for the pointer.
+          if (e.key !== 'Enter' || e.shiftKey || e.isComposing) return;
+          e.preventDefault();
+          const text = e.currentTarget.value.trim();
+          if (S.openThread && text) threadAct(S.openThread, enterAct);
+        }}></textarea>
+      <!-- Waive stands alone at the far left; the rest gather on the right. -->
+      <div class="mt-1 flex flex-wrap items-center justify-end gap-1">
+        ${acts.map(
+          ([label, act, tone]) =>
+            b`<button class="btn btn-xs ${TONE[tone]}${tone === 'warn' ? ' mr-auto' : ''}"
+            data-testid="thread.actions" data-act="${act}" data-tid="${t.id}"
+            @click=${() => threadAct(t.id, act)}>${label}</button>`,
+        )}
+      </div>
+      ${
+        S.threadSay
+          ? b`<div class="mt-1 text-[11px] text-warning" data-testid="thread.say">${S.threadSay}</div>`
+          : A
+      }
+    </div>
+    </div>`;
+  }
+
+
+  /*
+   * A picture pasted into the composer (n-0096): held until the reply is sent,
+   * shown small above the box with a way to drop it, and sent with the words.
+   * Paste is the door because that is where a screenshot already is.
+   */
+  function pasteShots(e, key = 'threadShots') {
+    // Paste and drop are the same door: a file from the clipboard, or one
+    // dragged from the desk onto the box (n-0328). `key` says which box holds
+    // them - the thread screen's, or the rule's (n-0328 again: a picture
+    // dropped while failing a rule had nowhere to go).
+    const files = [...(e.clipboardData?.files ?? e.dataTransfer?.files ?? [])].filter((f) => /^image\//.test(f.type));
+    if (!files.length) return;
+    e.preventDefault();
+    for (const f of files.slice(0, 4 - S[key].length)) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        S[key] = [...S[key], { name: f.name || 'pasted.png', type: f.type, data: String(reader.result) }];
+        requestRender();
+      };
+      reader.readAsDataURL(f);
+    }
+  }
+
+  /** The pictures held on a box, small, each with a way to drop it. */
+  function pastedShots(key = 'threadShots', testid = 'thread.shots') {
+    if (!S[key].length) return A;
+    return b`<div class="mb-1 flex flex-wrap gap-1" data-testid="${testid}">${S[key].map(
+    (s, i) => b`<span class="relative inline-block">
+      <img src="${s.data}" alt="${s.name}" class="h-12 rounded border border-base-300">
+      <button type="button" class="btn btn-circle btn-ghost btn-xs absolute -right-1 -top-1 h-4 min-h-0 w-4 bg-base-100 p-0 text-[10px]"
+        title="Drop this picture" @click=${() => {
+          S[key] = S[key].filter((_, j) => j !== i);
+          requestRender();
+        }}>✕</button>
+    </span>`,
+  )}</div>`;
+  }
+
+  /*
    * The evidence an agent walkdown left behind, shown over the whole desk.
    *
    * Not "screenshots": what a run attaches has not been only pictures for a
@@ -6837,7 +7216,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
    * palette, so a rule's line reads the same as a thread's: a person's move
    * is amber, the agent's blue and dashed, nothing owed is green.
    */
-  const TURN$1 = {
+  const TURN = {
     human: { line: 'border-warning', chip: 'bg-warning text-warning-content' },
     agent: { line: 'border-info', chip: 'bg-info text-info-content' },
     closed: { line: 'border-success', chip: 'bg-success text-success-content' },
@@ -6917,6 +7296,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       @input=${(e) => {
         S.verdictNote = e.currentTarget.value;
       }}
+      @paste=${(e) => pasteShots(e, 'ruleShots')}
       @keydown=${(e) => {
         // Enter answers, as it does on the thread screen; Shift+Enter breaks the line.
         if (!enterSends(e)) return;
@@ -7069,21 +7449,23 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     ${
       asked
         ? askCard(r, asked, open)
-        : b`<div class="relative mt-3 mb-1.5 rounded border border-dashed px-2 pt-2.5 pb-1.5 text-[11px] leading-snug ${TURN$1[turn.party].line}"
+        : b`<div class="relative mt-3 mb-1.5 rounded border border-dashed px-2 pt-2.5 pb-1.5 text-[11px] leading-snug ${TURN[turn.party].line}"
       data-testid="detail.turn" data-party="${turn.party}">
-      <span class="absolute -top-[7px] left-2 rounded px-1 text-[9px] font-bold uppercase leading-[14px] tracking-wider ${TURN$1[turn.party].chip}">${turn.label}</span>
+      <span class="absolute -top-[7px] left-2 rounded px-1 text-[9px] font-bold uppercase leading-[14px] tracking-wider ${TURN[turn.party].chip}">${turn.label}</span>
       <span class="opacity-75">${turn.text}</span>
     </div>`
     }
     <!-- One box for everything said on the rule: a reply, a fail's why, a
          waive's reason. It rides ABOVE the buttons, so the why is typed
          where the verdict is pressed (Topher, 2026-09-18). -->
+    ${pastedShots('ruleShots', 'detail.shots')}
     <textarea id="wdp-vnote" data-testid="detail.feedback" rows="2" class="textarea textarea-xs w-full resize-none"
       placeholder="${placeholder}"
       .value=${l(S.verdictNote)}
       @input=${(e) => {
         S.verdictNote = e.currentTarget.value;
       }}
+      @paste=${(e) => pasteShots(e, 'ruleShots')}
       @keydown=${(e) => {
         /*
          * Enter says the words on the rule - a reply, never a verdict: a
@@ -7419,363 +7801,6 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
         }</span>
       </button>`;
     })}`;
-  }
-
-  /*
-   * One conversation, opened: the thread's own detail pane, and the card the
-   * lists draw for it.
-   */
-
-
-  /*
-   * Why the note exists, beside its status (ADR 0005 §1): a finding is a
-   * judge's, feedback is yours, a decision is a record. Read at a glance,
-   * because which of these it is decides who it is waiting on. A question
-   * has none, and a legacy note with none reads as feedback everywhere else,
-   * so nothing is drawn for it here either.
-   */
-  const reasonChip = (t) =>
-    t.kind === 'note' && t.reason && t.reason !== 'feedback'
-      ? b`<span class="badge badge-xs badge-outline opacity-70" data-testid="thread.reason">${t.reason}</span>`
-      : A;
-
-  /** Every name an anchor has had on a screen, oldest first - the filed name, then each rename. */
-  const renameChain = (sc, element) => {
-    const out = [element];
-    const seen = new Set([element]);
-    let cur = element;
-    while (sc?.renames?.[cur] && !seen.has(sc.renames[cur])) {
-      cur = String(sc.renames[cur]);
-      seen.add(cur);
-      out.push(cur);
-    }
-    return out;
-  };
-
-
-  /*
-   * How the turn line is drawn, by whose move it is. A person's move is amber,
-   * the agent's is blue and dashed like the agent's own face in the stream, an
-   * ended thread is green: the colour is the party, not the reader, so the
-   * same thread reads the same on both sides of the table.
-   */
-  const TURN = {
-    human: { line: 'border-warning', chip: 'bg-warning text-warning-content' },
-    agent: { line: 'border-info', chip: 'bg-info text-info-content' },
-    closed: { line: 'border-success', chip: 'bg-success text-success-content' },
-  };
-
-  /* The button for a tone: the primary is filled, the warning outlined in amber, the rest quiet. */
-  const TONE = {
-    primary: 'btn-primary',
-    warn: 'btn-outline btn-warning',
-    quiet: 'btn-outline border-base-300 text-base-content/70',
-  };
-
-  /*
-   * A thread, collapsed: the opening message and the way into the rest of it.
-   * It reads the way a message with replies reads anywhere - a face, a name, a
-   * time, what was said, and under it the people in the thread, the number of
-   * replies, and when it was last touched. The count is the door; opening it
-   * slides the whole conversation in beside the rule.
-   */
-  function threadCard(t, where = null) {
-    const who = MSG.displayName(t.author, names());
-    const unread = unreadCount(t);
-    // No card, no rail: threads share one surface with the pane, the way
-    // messages share a channel. What is waiting on you is said in words - the
-    // status chip and the unread count - rather than by tinting a box.
-    //
-    // `where` is passed only by the Threads tab, which is not scoped to a rule
-    // and so has to say what each conversation is about. It also makes the
-    // whole row the way in: under a rule the reply line is enough, because the
-    // rule above it is already the context.
-    return b`<div class="wd-row px-3.5 py-2${where ? ' cursor-pointer' : ''}"
-    data-open-thread="${where ? t.id : A}">
-    ${where ? b`<div class="mb-1 truncate text-[11px] opacity-45" data-testid="thread.where">${where}</div>` : A}
-    <div class="wd-msg">
-      ${o$1(MSG.avatar(who, 'wd-ava', Boolean(t.via)))}
-      <div class="wd-col min-w-0">
-        <div class="wd-head">
-          <span class="wd-who">${who}</span>
-          <!-- Provenance beside the name, here too. This is where a reader
-               MEETS a thread, and an agent files under the person it acts
-               for - so a list that shows only the name says a person wrote
-               something a machine wrote (n-0147). -->
-          ${t.via ? b`<span class="wd-via">via ${t.via}</span>` : A}
-          <span class="wd-at" title="${MSG.stamp(t.created)}">${MSG.ago(t.created)}</span>
-          <!-- The id stays visible, quietly: a conversation you can name is a
-               conversation you can point at from a run record or a commit. -->
-          <span class="wd-at font-mono">${t.id}</span>
-          <span class="ml-auto flex shrink-0 items-center gap-1">
-            ${unread ? b`<span class="badge badge-xs badge-error">${unread} new</span>` : A}
-            ${reasonChip(t)}
-            <span class="badge badge-xs ${CHIP[t.status] ?? 'badge-ghost'}">${t.status}</span>
-          </span>
-        </div>
-        <div class="wd-text wd-preview">${o$1(
-          MSG.opening(t.kind, t.body, { rules: (S.data?.rows ?? []).map((r) => r.rule) }),
-        )}</div>
-        ${t.added ? o$1(MSG.addition(t.added, { rules: (S.data?.rows ?? []).map((r) => r.rule) })) : A}
-        ${o$1(MSG.repliesLine(t, names()))}
-      </div>
-    </div>
-  </div>`;
-  }
-
-  /*
-   * The thread itself: its own screen, one slide to the right of the rule it
-   * belongs to. A conversation deserves the width - reading and answering
-   * should not happen in a card wedged between a rule's steps and its verify
-   * list - and the way back is where you came from.
-   */
-  /**
-   * What the way out of a thread is called. On the Threads tab the thread is
-   * the tab's own detail, so the way back is the list of threads - naming a
-   * rule there would offer a trip nobody took.
-   */
-  const backFromThread = (row) =>
-    S.listTab === 'threads' ? 'All threads' : row ? shortName(row) : 'All rules';
-
-  /*
-   * Back where you came from: the rule, or the list for a pin that has none -
-   * and on the Threads tab always the thread list, because that is where you
-   * came from and no rule was ever opened.
-   */
-  function leaveThread() {
-    const t = (S.data?.threads ?? []).find((x) => x.id === S.openThread);
-    S.view = S.listTab !== 'threads' && t?.anchor?.rule && S.selected ? 'detail' : 'list';
-    S.openThread = null;
-    S.threadSay = '';
-    requestRender();
-  }
-
-  function threadPane() {
-    const t = (S.data?.threads ?? []).find((x) => x.id === S.openThread);
-    // Whatever became of the thread — ended, reloaded away, never there — this
-    // screen is never a dead end.
-    if (!t)
-      return b`
-    <div class="flex items-center px-2 pt-2">
-      <button class="wdp-thread-back btn btn-ghost btn-xs text-primary" @click=${leaveThread}>← ${backFromThread(S.selected)}</button>
-    </div>
-    <div class="px-3.5 pt-1 text-[12.5px] opacity-60">That thread is no longer open here.</div>`;
-    const row = t.anchor?.rule ? S.data.rows.find((r) => r.rule === t.anchor.rule) : null;
-    const sc = screenById(t.anchor?.screen);
-    const where = [
-      t.anchor?.rule ? '' : 'not attached to a rule',
-      sc?.title ?? t.anchor?.screen,
-      t.anchor?.element
-        ? (() => {
-            /*
-             * The name it was filed under, always - a thread is a record of a
-             * moment. When the storyboard says the anchor has since been
-             * renamed, the record says so beside it, and resting on it lists
-             * every name it has had (q-0252).
-             */
-            const chain = renameChain(sc, t.anchor.element);
-            /*
-             * The bubble opens down and to the right, from the left edge of
-             * the name: centred on it, it ran off the pane's left edge, and
-             * inside the line's own faded ink it was unreadable (n-0329). The
-             * line is faded part by part below, so the bubble is not.
-             */
-            return chain.length > 1
-              ? b`<span class="tooltip tooltip-bottom tooltip-start [--tt-trans:0]"
-                ><span class="tooltip-content z-50 whitespace-nowrap font-mono text-[11px]" data-testid="thread.renames">${chain.join(' → ')}</span
-                ><span class="font-mono opacity-45">${t.anchor.element}</span>
-                <span class="badge badge-xs badge-outline align-middle opacity-45" data-testid="thread.renamed">renamed</span></span>`
-              : b`<span class="font-mono opacity-45">${t.anchor.element}</span>`;
-          })()
-        : t.anchor?.position
-          ? 'by position'
-          : '',
-      t.anchor?.viewport ? `${t.anchor.viewport.name} ${t.anchor.viewport.width}` : '',
-    ].filter(Boolean);
-    const sketch = ghostSource(sc);
-    const role = myRole();
-    const acts = threadActions(t, role);
-    /*
-     * Who ended the thread: the record first, the guess second. verified_by /
-     * waived_by name whoever accepted; only a thread from before those were
-     * recorded falls back to the last reply's author, which once credited an
-     * agent's evidence post with a human's acceptance (n-0127).
-     */
-    const lastReply = (t.replies ?? []).at(-1);
-    const recordedBy =
-      t.status === 'verified' ? t.verified_by : t.status === 'waived' ? t.waived_by : null;
-    const ended =
-      TERMINAL.includes(t.status) && (recordedBy || lastReply)
-        ? { author: recordedBy ?? lastReply?.author, created: lastReply?.created }
-        : null;
-    // The person on the other side of the table, for the agent's reading of
-    // the line: whoever opened the thread, unless a machine did.
-    const opener = MSG.displayName(t.author, names());
-    const turn = turnLine(t, role, {
-      person: /^agent$/i.test(t.author ?? '') ? 'the person' : opener,
-      endedBy: ended?.author ? MSG.displayName(ended.author, names()) : null,
-      endedAt: ended?.created ? MSG.ago(ended.created) : null,
-    });
-    // Enter sends what the box is for: the answer on a question that is
-    // yours to answer, and a reply everywhere else.
-    const enterAct = acts.some(([, act]) => act === '__answer') ? '__answer' : '__reply';
-    /*
-     * A picture dropped anywhere on the thread screen is taken, the way the
-     * pin form takes one dropped anywhere on it. The box alone was the
-     * target, two rows tall, and a drop that missed it by a finger went to
-     * the browser, which opened the file in a new tab (Topher, 2026-09-21,
-     * n-0328). Both handlers here, since the wrapper is what the drop lands on.
-     */
-    return b`
-    <div class="flex h-full min-h-0 flex-col" data-testid="thread.screen"
-      @dragover=${(e) => {
-        if ([...(e.dataTransfer?.types ?? [])].includes('Files')) e.preventDefault();
-      }}
-      @drop=${(e) => pasteShots(e)}>
-    <div class="flex items-center gap-1 px-2 pt-2">
-      <button class="wdp-thread-back btn btn-ghost btn-xs text-primary" data-testid="thread.close" @click=${leaveThread}>← ${backFromThread(row)}</button>
-      <span class="ml-auto flex items-center gap-1 pr-1.5 text-[11px]" data-testid="thread.provenance">
-        <!-- No name up here. "as topher" stood under the composer, then
-             here as a link into Settings; who a reply or a move is recorded
-             under is chosen once, when a walkdown starts and each role is
-             signed for, and is not re-offered at the action (Topher,
-             2026-09-18; panel.identity.attribution-visible). -->
-        <b class="opacity-60">${t.id}</b>
-        ${reasonChip(t)}
-        <span class="badge badge-xs ${CHIP[t.status] ?? 'badge-ghost'}">${t.status}</span>
-      </span>
-    </div>
-    ${
-      where.length
-        ? b`<div class="px-3.5 pb-1 text-[11px]">${where.map(
-            (part, i) =>
-              b`${i ? b`<span class="opacity-45"> · </span>` : A}${
-                typeof part === 'string' ? b`<span class="opacity-45">${part}</span>` : part
-              }`,
-          )}</div>`
-        : A
-    }
-    <div class="min-h-0 flex-1 overflow-y-auto px-3.5 pb-2" data-testid="thread.body">
-      ${o$1(
-        MSG.stream(t, {
-          seenAt: seenAtOpen[t.id] ?? null,
-          rules: (S.data?.rows ?? []).map((r) => r.rule),
-          pending: pendingReplies.get(t.id) ?? [],
-          names: names(),
-        }),
-      )}
-      ${
-        sketch?.proposed
-          ? b`<button class="btn btn-xs btn-outline mt-2 w-full" data-sketch="${t.anchor.screen}"
-        @click=${(e) => fire(e.currentTarget, 'view-sketch', { screen: t.anchor.screen })}>
-        ⚠ View the proposed sketch</button>`
-          : A
-      }
-    </div>
-    <!-- The composer stays put at the foot of the screen: type, press Enter,
-         the message is there. Above it, one line says whose move this is
-         and what happens next; the buttons under it are only the moves this
-         reader takes from here. -->
-    <div class="shrink-0 border-t border-base-300 p-2">
-      <!-- The label floats on the top edge, the way a material input's does,
-           so the sentence takes the full width under it rather than sharing
-           the row with the chip (Topher, 2026-09-17). The top padding leaves
-           the chip room to sit on the border without touching the text. -->
-      <div class="relative mt-2 mb-1.5 rounded border border-dashed px-2 pt-2.5 pb-1.5 text-[11px] leading-snug ${TURN[turn.party].line}"
-        data-testid="thread.turn" data-party="${turn.party}">
-        <span class="absolute -top-[7px] left-2 rounded px-1 text-[9px] font-bold uppercase leading-[14px] tracking-wider ${TURN[turn.party].chip}">${turn.label}</span>
-        <span class="opacity-75">${turn.text}</span>
-        ${
-          // An open question re-asks itself above the box: its opening
-          // message, however far up the stream the replies have pushed it
-          // (Topher, 2026-09-19; the rule's detail does the same).
-          t.kind === 'question' && t.status === 'open'
-            ? b`<div class="mt-1.5 rounded bg-base-100/70 px-1.5 py-1" data-testid="thread.ask">
-                <div class="wd-stream max-h-48 overflow-y-auto">${o$1(
-                  MSG.stream({ replies: [{ ...MSG.messages(t)[0], options: undefined }] }, { rules: (S.data?.rows ?? []).map((r) => r.rule), names: names() }),
-                )}</div>
-                <!-- The choices, here too (n-0319): a question is answered
-                     from wherever it is read, and Answer below sends the
-                     pick with the words. -->
-                ${askOptions(t)}
-              </div>`
-            : A
-        }
-      </div>
-      ${pastedShots()}
-      <!-- The words are a live() property binding, as on the rule's composer,
-           not child text: child text only seeds a textarea, and a plain
-           .value binding compares against what lit last wrote rather than
-           what the box holds - typing renders nothing, so a send that
-           emptied the state found '' already committed and left the typed
-           reply in the box for the next Enter to post again (n-0332). -->
-      <textarea id="wdp-note" data-testid="thread.reply" rows="2" class="textarea textarea-xs w-full resize-none"
-        placeholder="${composerPlaceholder(t, role)}"
-        .value=${l(S.threadNote)}
-        @input=${(e) => {
-          S.threadNote = e.currentTarget.value;
-        }}
-        @paste=${(e) => pasteShots(e)}
-        @keydown=${(e) => {
-          // Enter sends, Shift+Enter breaks the line - the muscle memory
-          // everyone already has. The buttons stay for the pointer.
-          if (e.key !== 'Enter' || e.shiftKey || e.isComposing) return;
-          e.preventDefault();
-          const text = e.currentTarget.value.trim();
-          if (S.openThread && text) threadAct(S.openThread, enterAct);
-        }}></textarea>
-      <!-- Waive stands alone at the far left; the rest gather on the right. -->
-      <div class="mt-1 flex flex-wrap items-center justify-end gap-1">
-        ${acts.map(
-          ([label, act, tone]) =>
-            b`<button class="btn btn-xs ${TONE[tone]}${tone === 'warn' ? ' mr-auto' : ''}"
-            data-testid="thread.actions" data-act="${act}" data-tid="${t.id}"
-            @click=${() => threadAct(t.id, act)}>${label}</button>`,
-        )}
-      </div>
-      ${
-        S.threadSay
-          ? b`<div class="mt-1 text-[11px] text-warning" data-testid="thread.say">${S.threadSay}</div>`
-          : A
-      }
-    </div>
-    </div>`;
-  }
-
-
-  /*
-   * A picture pasted into the composer (n-0096): held until the reply is sent,
-   * shown small above the box with a way to drop it, and sent with the words.
-   * Paste is the door because that is where a screenshot already is.
-   */
-  function pasteShots(e) {
-    // Paste and drop are the same door: a file from the clipboard, or one
-    // dragged from the desk onto the box (n-0328).
-    const files = [...(e.clipboardData?.files ?? e.dataTransfer?.files ?? [])].filter((f) => /^image\//.test(f.type));
-    if (!files.length) return;
-    e.preventDefault();
-    for (const f of files.slice(0, 4 - S.threadShots.length)) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        S.threadShots = [...S.threadShots, { name: f.name || 'pasted.png', type: f.type, data: String(reader.result) }];
-        requestRender();
-      };
-      reader.readAsDataURL(f);
-    }
-  }
-
-  function pastedShots() {
-    if (!S.threadShots.length) return A;
-    return b`<div class="mb-1 flex flex-wrap gap-1" data-testid="thread.shots">${S.threadShots.map(
-    (s, i) => b`<span class="relative inline-block">
-      <img src="${s.data}" alt="${s.name}" class="h-12 rounded border border-base-300">
-      <button type="button" class="btn btn-circle btn-ghost btn-xs absolute -right-1 -top-1 h-4 min-h-0 w-4 bg-base-100 p-0 text-[10px]"
-        title="Drop this picture" @click=${() => {
-          S.threadShots = S.threadShots.filter((_, j) => j !== i);
-          requestRender();
-        }}>✕</button>
-    </span>`,
-  )}</div>`;
   }
 
   /*
@@ -9243,9 +9268,19 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
              to that tab (panel.rules.one-pane-per-tab), so the thread list
              opens into the seat beside it rather than sliding two panes over
              and flying past a rule detail nobody asked for. -->
+        <!-- A picture dropped anywhere on the rule's pane is held on its box,
+             to go with the next thing the box does - a fail's why most of all
+             (Topher, 2026-09-21, n-0328: "still doesn't work when I'm trying
+             to pass / fail a rule"). The thread seat has its own screen for it. -->
         <div class="wdp-pane wdp-detail flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col ${
           onThreads ? 'overflow-hidden' : 'overflow-y-auto'
-        }" data-testid="${onThreads ? 'thread.panel' : A}">${
+        }" data-testid="${onThreads ? 'thread.panel' : A}"
+          @dragover=${(e) => {
+            if (!onThreads && S.selected && [...(e.dataTransfer?.types ?? [])].includes('Files')) e.preventDefault();
+          }}
+          @drop=${(e) => {
+            if (!onThreads && S.selected) pasteShots(e, 'ruleShots');
+          }}>${
           onThreads ? threadPane() : detailPane()
         }</div>
         <!-- Third seat: the thread reached FROM a rule, which is a different
@@ -10377,6 +10412,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       S.verdictNote = '';
       S.verdictSay = '';
       S.composerSay = '';
+      S.ruleShots = [];
     }
     S.selected = row ?? null;
   }

@@ -64,7 +64,7 @@ import {
   TOP,
   W,
 } from './state.js';
-import { backFromThread, threadCard, threadPane } from './thread-pane.js';
+import { backFromThread, pasteShots, threadCard, threadPane } from './thread-pane.js';
 import { threadFilterBar, threadsMatching, threadsPane } from './threads-list.js';
 import { toast } from './toast.js';
 import { api, esc } from './util.js';
@@ -1327,9 +1327,19 @@ export function render() {
              to that tab (panel.rules.one-pane-per-tab), so the thread list
              opens into the seat beside it rather than sliding two panes over
              and flying past a rule detail nobody asked for. -->
+        <!-- A picture dropped anywhere on the rule's pane is held on its box,
+             to go with the next thing the box does - a fail's why most of all
+             (Topher, 2026-09-21, n-0328: "still doesn't work when I'm trying
+             to pass / fail a rule"). The thread seat has its own screen for it. -->
         <div class="wdp-pane wdp-detail flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col ${
           onThreads ? 'overflow-hidden' : 'overflow-y-auto'
-        }" data-testid="${onThreads ? 'thread.panel' : nothing}">${
+        }" data-testid="${onThreads ? 'thread.panel' : nothing}"
+          @dragover=${(e) => {
+            if (!onThreads && S.selected && [...(e.dataTransfer?.types ?? [])].includes('Files')) e.preventDefault();
+          }}
+          @drop=${(e) => {
+            if (!onThreads && S.selected) pasteShots(e, 'ruleShots');
+          }}>${
           onThreads ? threadPane() : detailPane()
         }</div>
         <!-- Third seat: the thread reached FROM a rule, which is a different
@@ -2461,6 +2471,7 @@ function selectRow(row) {
     S.verdictNote = '';
     S.verdictSay = '';
     S.composerSay = '';
+    S.ruleShots = [];
   }
   S.selected = row ?? null;
 }

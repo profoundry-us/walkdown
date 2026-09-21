@@ -109,7 +109,7 @@ export async function threadPost(path, body) {
  * thread feel like a form. If the post is refused the message stays,
  * marked, and the text comes back to the composer so it can be sent again.
  */
-async function postReply(id, text, actor) {
+async function postReply(id, text, actor, key = 'threadShots') {
   /*
    * The same refusal postRuleNote makes, for the same reason.
    *
@@ -134,9 +134,10 @@ async function postReply(id, text, actor) {
   const list = pendingReplies.get(id) ?? [];
   pendingReplies.set(id, [...list, msg]);
   S.threadNote = '';
-  // The pictures pasted into the composer go with the words (n-0096).
-  const shots = S.threadShots;
-  S.threadShots = [];
+  // The pictures pasted or dropped on the box go with the words (n-0096) -
+  // the thread screen's box, or the rule's (n-0328).
+  const shots = S[key];
+  S[key] = [];
   requestRender();
   const ok = await threadPost(`/api/threads/${id}/replies`, { author: who, body: text, ...(shots.length && { attachments: shots }) });
   if (ok) {
@@ -154,7 +155,7 @@ async function postReply(id, text, actor) {
     msg.pending = false;
     msg.failed = true;
     S.threadNote = text;
-    S.threadShots = shots;
+    S[key] = shots;
     requestRender();
   }
   return ok;
@@ -293,7 +294,7 @@ export async function answerOnRule(rule, text, chosen = null) {
   const actor = whoAmI();
   // The reply carries the words; a pick with no words is still an answer,
   // and says so in the ledger as one line so the thread reads on its own.
-  if (!(await postReply(q.id, text || chosen, actor))) return null;
+  if (!(await postReply(q.id, text || chosen, actor, 'ruleShots'))) return null;
   if (!(await threadPost(`/api/threads/${q.id}/status`, { status: 'answered', actor, ...(chosen ? { chosen } : {}) }))) return null;
   S.verdictNote = '';
   S.askChoice = null;
@@ -326,6 +327,9 @@ export async function sayOnRule(rule, text, { reopen = false } = {}) {
   const live = liveNoteOn(rule);
   if (!live) return postRuleNote(rule, text, 'feedback');
   const actor = whoAmI();
+  // The pictures held on the rule's box go with the words, whichever way
+  // they are filed; a refused filing hands them back (n-0328).
+  const shots = S.ruleShots;
   /*
    * Reopening files its reason as a reply on the server, so the words go
    * ONE way: as the reopen's reason when the conversation comes back to
@@ -339,10 +343,17 @@ export async function sayOnRule(rule, text, { reopen = false } = {}) {
       openSettings();
       return null;
     }
-    const back = await threadPost(`/api/threads/${live.id}/status`, { status: 'open', actor, reason: text });
+    S.ruleShots = [];
+    const back = await threadPost(`/api/threads/${live.id}/status`, {
+      status: 'open',
+      actor,
+      reason: text,
+      ...(shots.length && { attachments: shots }),
+    });
+    if (!back) S.ruleShots = shots;
     return back ? live.id : null;
   }
-  if (!(await postReply(live.id, text, actor))) return null;
+  if (!(await postReply(live.id, text, actor, 'ruleShots'))) return null;
   return live.id;
 }
 
@@ -365,11 +376,13 @@ export async function waiveOnRule(rule, text) {
     );
     return openSettings();
   }
-  if (await threadPost(`/api/threads/${live.id}/status`, { status: 'waived', actor, reason: text })) {
+  const shots = S.ruleShots;
+  S.ruleShots = [];
+  if (await threadPost(`/api/threads/${live.id}/status`, { status: 'waived', actor, reason: text, ...(shots.length && { attachments: shots }) })) {
     S.verdictNote = '';
     toast(`<b>${esc(live.id)}</b> waived \u2014 the rule\u2019s conversation is closed.`, { tone: 'success' });
     await requestReload();
-  }
+  } else S.ruleShots = shots;
 }
 
 export async function postRuleNote(rule, body, reason = 'feedback') {
@@ -406,15 +419,19 @@ export async function postRuleNote(rule, body, reason = 'feedback') {
     openSettings();
     return null;
   }
+  // The pictures on the rule's box open the note with it (n-0328).
+  const shots = S.ruleShots;
+  S.ruleShots = [];
   const res = await fetch(api('/api/threads'), {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     // Why the note exists (ADR 0005 §1): a person's words are feedback
     // unless they say they are a decision or a request to design.
-    body: JSON.stringify({ kind: 'note', author, body, reason, anchor: { rule } }),
+    body: JSON.stringify({ kind: 'note', author, body, reason, anchor: { rule }, ...(shots.length && { attachments: shots }) }),
   });
   const out = await res.json().catch(() => ({}));
   if (!res.ok) {
+    S.ruleShots = shots;
     sayFiling(out.error ?? 'note not filed');
     return null;
   }

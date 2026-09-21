@@ -351,30 +351,33 @@ export function threadPane() {
  * shown small above the box with a way to drop it, and sent with the words.
  * Paste is the door because that is where a screenshot already is.
  */
-export function pasteShots(e) {
+export function pasteShots(e, key = 'threadShots') {
   // Paste and drop are the same door: a file from the clipboard, or one
-  // dragged from the desk onto the box (n-0328).
+  // dragged from the desk onto the box (n-0328). `key` says which box holds
+  // them - the thread screen's, or the rule's (n-0328 again: a picture
+  // dropped while failing a rule had nowhere to go).
   const files = [...(e.clipboardData?.files ?? e.dataTransfer?.files ?? [])].filter((f) => /^image\//.test(f.type));
   if (!files.length) return;
   e.preventDefault();
-  for (const f of files.slice(0, 4 - S.threadShots.length)) {
+  for (const f of files.slice(0, 4 - S[key].length)) {
     const reader = new FileReader();
     reader.onload = () => {
-      S.threadShots = [...S.threadShots, { name: f.name || 'pasted.png', type: f.type, data: String(reader.result) }];
+      S[key] = [...S[key], { name: f.name || 'pasted.png', type: f.type, data: String(reader.result) }];
       requestRender();
     };
     reader.readAsDataURL(f);
   }
 }
 
-function pastedShots() {
-  if (!S.threadShots.length) return nothing;
-  return html`<div class="mb-1 flex flex-wrap gap-1" data-testid="thread.shots">${S.threadShots.map(
+/** The pictures held on a box, small, each with a way to drop it. */
+export function pastedShots(key = 'threadShots', testid = 'thread.shots') {
+  if (!S[key].length) return nothing;
+  return html`<div class="mb-1 flex flex-wrap gap-1" data-testid="${testid}">${S[key].map(
     (s, i) => html`<span class="relative inline-block">
       <img src="${s.data}" alt="${s.name}" class="h-12 rounded border border-base-300">
       <button type="button" class="btn btn-circle btn-ghost btn-xs absolute -right-1 -top-1 h-4 min-h-0 w-4 bg-base-100 p-0 text-[10px]"
         title="Drop this picture" @click=${() => {
-          S.threadShots = S.threadShots.filter((_, j) => j !== i);
+          S[key] = S[key].filter((_, j) => j !== i);
           requestRender();
         }}>✕</button>
     </span>`,
