@@ -4109,6 +4109,8 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
         width: window.innerWidth,
       };
     let overlay = null;
+    /** What the open form listened for on the window; run when it closes. */
+    let unlisten = [];
     /** The pin drawn at the spot while its form is open, and gone with it. */
     let placeholder = null;
     // Whose machine this is - the whole identity, username and full name both,
@@ -4675,10 +4677,79 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
         }
       };
       overlay.querySelector('textarea').addEventListener('paste', takeShots);
-      overlay.addEventListener('dragover', (e) => {
-        if ([...(e.dataTransfer?.types ?? [])].includes('Files')) e.preventDefault();
+      /*
+       * The form says it will take the picture (Topher, 2026-09-21): a dashed
+       * primary outline while a file is in the air anywhere over the page, a
+       * solid one with a tint while it is over the form. Only files. Enter and
+       * leave fire for every child crossed, so a depth count says when the
+       * pointer has really left.
+       */
+      const files = (e) => [...(e.dataTransfer?.types ?? [])].includes('Files');
+      const READY = ['outline-dashed', 'outline-2', '-outline-offset-2', 'outline-primary/50'];
+      // No tint on the form: its own ground is what keeps it legible over the page.
+      const OVER = ['outline', 'outline-2', '-outline-offset-2', 'outline-primary'];
+      let depth = 0;
+      const paint = (over) => {
+        overlay.classList.remove(...READY, ...OVER);
+        overlay.classList.add(...(over ? OVER : airborne ? READY : []));
+        overlay.dataset.drag = over ? 'over' : airborne ? 'ready' : '';
+      };
+      let airborne = false;
+      const inAir = (yes) => {
+        if (airborne === yes) return;
+        airborne = yes;
+        if (!yes) depth = 0;
+        paint(false);
+      };
+      // Counted, as on the form itself: Chrome leaves relatedTarget null on a
+      // dragleave inside the window too, so the pointer has left the window
+      // when the leaves have caught up with the enters.
+      let inWindow = 0;
+      const onEnter = (e) => {
+        if (!files(e)) return;
+        inWindow++;
+        inAir(true);
+      };
+      const onLeave = (e) => {
+        if (!files(e)) return;
+        if (--inWindow <= 0) {
+          inWindow = 0;
+          inAir(false);
+        }
+      };
+      const onEnd = () => {
+        inWindow = 0;
+        inAir(false);
+      };
+      window.addEventListener('dragenter', onEnter);
+      window.addEventListener('dragleave', onLeave);
+      window.addEventListener('drop', onEnd);
+      window.addEventListener('dragend', onEnd);
+      unlisten.push(() => {
+        window.removeEventListener('dragenter', onEnter);
+        window.removeEventListener('dragleave', onLeave);
+        window.removeEventListener('drop', onEnd);
+        window.removeEventListener('dragend', onEnd);
       });
-      overlay.addEventListener('drop', takeShots);
+      overlay.addEventListener('dragenter', (e) => {
+        if (!files(e)) return;
+        if (++depth === 1) paint(true);
+      });
+      overlay.addEventListener('dragleave', (e) => {
+        if (!files(e)) return;
+        if (--depth <= 0) {
+          depth = 0;
+          paint(false);
+        }
+      });
+      overlay.addEventListener('dragover', (e) => {
+        if (files(e)) e.preventDefault();
+      });
+      overlay.addEventListener('drop', (e) => {
+        depth = 0;
+        paint(false);
+        takeShots(e);
+      });
       overlay.querySelector('.wd-primary').onclick = () => {
         const body = overlay.querySelector('textarea').value.trim();
         const kind = overlay.querySelector('.wd-q').checked ? 'question' : 'note';
@@ -4714,6 +4785,8 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     function closeForm() {
       overlay?.remove();
       overlay = null;
+      for (const off of unlisten) off();
+      unlisten = [];
       placeholder?.remove();
       placeholder = null;
     }

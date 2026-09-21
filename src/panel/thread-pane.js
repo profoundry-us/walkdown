@@ -229,12 +229,10 @@ export function threadPane() {
    * the browser, which opened the file in a new tab (Topher, 2026-09-21,
    * n-0328). Both handlers here, since the wrapper is what the drop lands on.
    */
+  const zone = dropZone('thread', (e) => pasteShots(e));
   return html`
-    <div class="flex h-full min-h-0 flex-col" data-testid="thread.screen"
-      @dragover=${(e) => {
-        if ([...(e.dataTransfer?.types ?? [])].includes('Files')) e.preventDefault();
-      }}
-      @drop=${(e) => pasteShots(e)}>
+    <div class="flex h-full min-h-0 flex-col rounded-box ${dropZoneClass('thread')}" data-testid="thread.screen"
+      @dragenter=${zone.enter} @dragleave=${zone.leave} @dragover=${zone.over} @drop=${zone.drop}>
     <div class="flex items-center gap-1 px-2 pt-2">
       <button class="wdp-thread-back btn btn-ghost btn-xs text-primary" data-testid="thread.close" @click=${leaveThread}>← ${backFromThread(row)}</button>
       <span class="ml-auto flex items-center gap-1 pr-1.5 text-[11px]" data-testid="thread.provenance">
@@ -351,6 +349,55 @@ export function threadPane() {
  * shown small above the box with a way to drop it, and sent with the words.
  * Paste is the door because that is where a screenshot already is.
  */
+/** Whether a drag carries files - the only kind of drag a drop zone answers to. */
+export const dragFiles = (e) => [...(e.dataTransfer?.types ?? [])].includes('Files');
+
+/*
+ * A drop zone says it will take the picture (Topher, 2026-09-21): a dashed
+ * primary outline the moment a file is in the air anywhere over the window,
+ * and a solid one with a tint while the file is over the zone itself. Only
+ * files - dragging text across the panel lights nothing. The window-level
+ * half (S.dragFiles) is kept by the shell; each zone keeps its own
+ * enter/leave depth, because dragenter and dragleave fire for every child
+ * the pointer crosses.
+ */
+const depth = {};
+export const dropZoneClass = (key) =>
+  S.dragOver === key
+    ? 'outline outline-2 -outline-offset-2 outline-primary bg-primary/5'
+    : S.dragFiles
+      ? 'outline-dashed outline-2 -outline-offset-2 outline-primary/50'
+      : '';
+export function dropZone(key, take, allowed = () => true) {
+  const on = (e) => allowed() && dragFiles(e);
+  return {
+    enter: (e) => {
+      if (!on(e)) return;
+      depth[key] = (depth[key] ?? 0) + 1;
+      if (S.dragOver !== key) {
+        S.dragOver = key;
+        requestRender();
+      }
+    },
+    leave: (e) => {
+      if (!on(e)) return;
+      depth[key] = Math.max(0, (depth[key] ?? 0) - 1);
+      if (!depth[key] && S.dragOver === key) {
+        S.dragOver = null;
+        requestRender();
+      }
+    },
+    over: (e) => {
+      if (on(e)) e.preventDefault();
+    },
+    drop: (e) => {
+      depth[key] = 0;
+      if (S.dragOver === key) S.dragOver = null;
+      if (allowed()) take(e);
+    },
+  };
+}
+
 export function pasteShots(e, key = 'threadShots') {
   // Paste and drop are the same door: a file from the clipboard, or one
   // dragged from the desk onto the box (n-0328). `key` says which box holds

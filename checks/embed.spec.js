@@ -470,10 +470,31 @@ test('a screenshot dropped on the pin form goes on the pin, and opens from the s
     const bytes = Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='), (c) => c.charCodeAt(0));
     const dt = new DataTransfer();
     dt.items.add(new File([bytes], 'shot.png', { type: 'image/png' }));
-    el.dispatchEvent(new DragEvent('dragover', { dataTransfer: dt, bubbles: true, cancelable: true }));
-    el.dispatchEvent(new DragEvent('drop', { dataTransfer: dt, bubbles: true, cancelable: true }));
+    el.dispatchEvent(new DragEvent('dragover', { dataTransfer: dt, bubbles: true, cancelable: true, composed: true }));
+    el.dispatchEvent(new DragEvent('drop', { dataTransfer: dt, bubbles: true, cancelable: true, composed: true }));
   };
+  // The form says it will take the picture: ready while a file is in the
+  // air over the page, over while it is over the form, nothing for text
+  // (Topher, 2026-09-21).
+  const form = frame.getByTestId('pin.form');
+  const air = (el, [what, type]) => {
+    const dt = new DataTransfer();
+    if (type === 'Files') dt.items.add(new File([new Uint8Array([1])], 'x.png', { type: 'image/png' }));
+    else dt.setData('text/plain', 'words');
+    // composed: a native drag event crosses the embed's shadow root on its
+    // way to the window; a synthetic one only does when told to.
+    el.dispatchEvent(new DragEvent(what, { dataTransfer: dt, bubbles: true, cancelable: true, composed: true }));
+  };
+  await frame.locator('body').evaluate(air, ['dragenter', 'text']);
+  await expect(form).not.toHaveAttribute('data-drag', /ready|over/);
+  await frame.locator('body').evaluate(air, ['dragenter', 'Files']);
+  await expect(form).toHaveAttribute('data-drag', 'ready');
+  await form.evaluate(air, ['dragenter', 'Files']);
+  await expect(form).toHaveAttribute('data-drag', 'over');
+  await form.evaluate(air, ['dragleave', 'Files']);
+  await expect(form).toHaveAttribute('data-drag', 'ready');
   await note.evaluate(drop);
+  await expect(form).not.toHaveAttribute('data-drag', /ready|over/);
   await expect(frame.getByTestId('pin.shots').locator('img'), 'shown small before it is filed').toHaveCount(1);
   await note.fill('The corner is clipped, see the picture.');
   await frame.getByTestId('pin.save').click();

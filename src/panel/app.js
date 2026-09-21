@@ -44,7 +44,7 @@ import { icon } from './icons.js';
 import { checkRefs, detailPane, evidenceRows, historyPane, loadCheckSource } from './rule-detail.js';
 import { legendControl, listPane, searchBox, tierMarks } from './rules-list.js';
 import { screensPane } from './screens.js';
-import { provideShell } from './shell.js';
+import { provideShell, requestRender } from './shell.js';
 import { closeEvidence, evidenceOpen, openEvidence } from './evidence.js';
 import {
   ACTOR_KEY,
@@ -64,7 +64,10 @@ import {
   TOP,
   W,
 } from './state.js';
-import { backFromThread, pasteShots, threadCard, threadPane } from './thread-pane.js';
+import { backFromThread, dragFiles, dropZone, dropZoneClass, pasteShots, threadCard, threadPane } from './thread-pane.js';
+
+/* The rule pane as a drop zone: only with a rule open, and never while the seat shows the thread list. */
+const ruleZone = dropZone('rule', (e) => pasteShots(e, 'ruleShots'), () => S.tab !== 'threads' && Boolean(S.selected));
 import { threadFilterBar, threadsMatching, threadsPane } from './threads-list.js';
 import { toast } from './toast.js';
 import { api, esc } from './util.js';
@@ -1333,13 +1336,8 @@ export function render() {
              to pass / fail a rule"). The thread seat has its own screen for it. -->
         <div class="wdp-pane wdp-detail flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col ${
           onThreads ? 'overflow-hidden' : 'overflow-y-auto'
-        }" data-testid="${onThreads ? 'thread.panel' : nothing}"
-          @dragover=${(e) => {
-            if (!onThreads && S.selected && [...(e.dataTransfer?.types ?? [])].includes('Files')) e.preventDefault();
-          }}
-          @drop=${(e) => {
-            if (!onThreads && S.selected) pasteShots(e, 'ruleShots');
-          }}>${
+        } ${onThreads || !S.selected ? '' : dropZoneClass('rule')}" data-testid="${onThreads ? 'thread.panel' : nothing}"
+          @dragenter=${ruleZone.enter} @dragleave=${ruleZone.leave} @dragover=${ruleZone.over} @drop=${ruleZone.drop}>${
           onThreads ? threadPane() : detailPane()
         }</div>
         <!-- Third seat: the thread reached FROM a rule, which is a different
@@ -3288,6 +3286,40 @@ function wireGlobals() {
     if (S.deskOpen) return closeDeskPanel();
     if (PIN.isOn()) PIN.set(false);
   });
+  /*
+   * A file in the air anywhere over the window: every drop zone shows it
+   * will take it (Topher, 2026-09-21). dragleave with no relatedTarget is
+   * the pointer leaving the window; drop and dragend end it either way.
+   */
+  const airborne = (yes) => {
+    if (S.dragFiles === yes) return;
+    S.dragFiles = yes;
+    if (!yes) S.dragOver = null;
+    requestRender();
+  };
+  // Counted, not read off relatedTarget: enter and leave fire for every
+  // element the pointer crosses, and Chrome leaves relatedTarget null on a
+  // dragleave inside the window too, so "the pointer left the window" is
+  // when the leaves have caught up with the enters.
+  let inAir = 0;
+  addEventListener('dragenter', (e) => {
+    if (!dragFiles(e)) return;
+    inAir++;
+    airborne(true);
+  });
+  addEventListener('dragleave', (e) => {
+    if (!dragFiles(e)) return;
+    if (--inAir <= 0) {
+      inAir = 0;
+      airborne(false);
+    }
+  });
+  const landed = () => {
+    inAir = 0;
+    airborne(false);
+  };
+  addEventListener('drop', landed);
+  addEventListener('dragend', landed);
   addEventListener('resize', () => {
     placeAppFrame(S.docked);
     placeGhost(S.docked);

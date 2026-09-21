@@ -5,7 +5,7 @@ author: topher
 created: 2026-09-21T04:43:39.742Z
 anchor:
   rule: embed.threads.picture-on-a-pin
-status: addressed
+status: verified
 body: >-
   I don't want to paste a file in, I want to be able to drag & drop a file into
   the composer (or the pin text box) and have it handle the file from there.
@@ -48,3 +48,16 @@ replies:
       reopen's reason carries the pictures dropped with it' in
       test/writes.test.js (16-05-54Z); judged again by the agent tier on a
       scratch copy."
+  - author: topher
+    created: 2026-09-21T16:42:42Z
+    body: It works!
+    attachments:
+      - file: attachments/n-0328-1.png
+        name: Screenshot 2026-09-20 at 11.11.40_PM.png
+  - author: topher
+    via: verdict
+    created: 2026-09-21T16:42:45Z
+    body: Verified by topher's pass on embed.threads.picture-on-a-pin
+      (2026-09-21T16-42-45Z-local-01).
+verified_by: topher
+verified_via: 2026-09-21T16-42-45Z-local-01

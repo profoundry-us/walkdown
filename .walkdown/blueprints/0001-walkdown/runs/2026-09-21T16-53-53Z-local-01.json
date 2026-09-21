@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-09-21T16-53-53Z-local-01",
+  "created": "2026-09-21T16:53:53Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2cffb36-dirty",
+  "spec_hash": "sha256:48f530ae7ecf",
+  "note": "A look at the drop-zone feedback Topher asked for on 2026-09-21 (the zones show they will take a file in the air, louder when it is over them), driven on a stamped scratch copy on 4730 (node tools/scratch.mjs new look-0921d).",
+  "results": [
+    {
+      "rule": "embed.threads.picture-on-a-pin",
+      "status": "pass",
+      "statement_hash": "sha256:0f42990a24bc",
+      "evidence": [
+        "runs/evidence/2026-09-21T16-49-14Z/look.json",
+        "runs/evidence/2026-09-21T16-49-14Z/rule-pane-ready.png",
+        "runs/evidence/2026-09-21T16-49-14Z/rule-pane-over.png",
+        "runs/evidence/2026-09-21T16-49-14Z/thread-screen-over.png"
+      ],
+      "reasoning": "With text in the air the rule pane shows nothing. With a file in the air anywhere over the window the pane wears a dashed primary outline; with the file over the pane the outline goes solid and the pane tints; leaving the pane falls back to the dashed outline; the drag ending clears it. The thread screen does the same and a drop clears it. The pin form was judged by its recorded check rather than here - the scratch page did not open a form under the probe’s click - and the earlier tinted look at it was discarded, since the tint had replaced the form’s own ground and was taken back out. The drop itself still lands as before: the recorded checks of 16-53-12Z and 16-53-19Z pass."
+    }
+  ]
+}

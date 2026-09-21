@@ -120,6 +120,9 @@ export const S = {
   threadShots: [],
   /** The same, held on the rule's box: they go with whatever the box does next - a reply, a fail's why, an answer. */
   ruleShots: [],
+  /** A file is in the air over the window (Files in the drag), and which drop zone it is over, if any. */
+  dragFiles: false,
+  dragOver: null,
   composerSay: '', // the composer's refusal line; same lifetime, same reason
   threadSay: '', // the thread screen's refusal line; dies when the view moves on
   ruleNote: '', // the rule's own new-thread box, kept the same way

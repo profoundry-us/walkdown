@@ -3783,6 +3783,27 @@ test('a picture dropped while failing a rule goes with the why', {
   await endSession(page);
   await ensureSession(page);
   await openRuleForVerdict(page, rule);
+  // While a file is in the air anywhere over the window the pane says it
+  // will take it, and says it louder while the file is over the pane; text
+  // in the air lights nothing (Topher, 2026-09-21).
+  const pane = page.locator('.wdp-detail');
+  const air = (el, [what, type]) => {
+    const dt = new DataTransfer();
+    if (type === 'Files') dt.items.add(new File([new Uint8Array([1])], 'x.png', { type: 'image/png' }));
+    else dt.setData('text/plain', 'words');
+    el.dispatchEvent(new DragEvent(what, { dataTransfer: dt, bubbles: true, cancelable: true }));
+  };
+  await page.evaluate(() => document.body.dispatchEvent(new DragEvent('dragenter', { dataTransfer: (() => { const d = new DataTransfer(); d.setData('text/plain', 'w'); return d; })(), bubbles: true })));
+  await expect(pane).not.toHaveClass(/outline/);
+  await page.evaluate(() => document.body.dispatchEvent(new DragEvent('dragenter', { dataTransfer: (() => { const d = new DataTransfer(); d.items.add(new File([new Uint8Array([1])], 'x.png', { type: 'image/png' })); return d; })(), bubbles: true })));
+  await expect(pane).toHaveClass(/outline-dashed/);
+  await pane.evaluate(air, ['dragenter', 'Files']);
+  await expect(pane).toHaveClass(/bg-primary\/5/);
+  await pane.evaluate(air, ['dragleave', 'Files']);
+  await expect(pane).not.toHaveClass(/bg-primary\/5/);
+  await expect(pane).toHaveClass(/outline-dashed/);
+  await page.evaluate(() => window.dispatchEvent(new DragEvent('dragend', { bubbles: true })));
+  await expect(pane).not.toHaveClass(/outline/);
   // Dropped on the pane's words, nowhere near the box: held above it.
   await page.getByTestId('detail.conversation').evaluate(drop);
   await expect(page.getByTestId('detail.shots').locator('img'), 'held above the box until the verdict').toHaveCount(1);

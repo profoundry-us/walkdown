@@ -1,0 +1,35 @@
+{
+  "run_id": "2026-09-21T16-42-45Z-local-01",
+  "created": "2026-09-21T16:42:45Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    },
+    {
+      "role": "design",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2cffb36-dirty",
+  "tree_hash": "sha256:47449a6bcea0",
+  "spec_hash": "sha256:2d4781078c6e",
+  "results": [
+    {
+      "rule": "embed.threads.picture-on-a-pin",
+      "status": "pass",
+      "statement_hash": "sha256:965adfb3696b",
+      "threads": [
+        "n-0328"
+      ]
+    }
+  ]
+}

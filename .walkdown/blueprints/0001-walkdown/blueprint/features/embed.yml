@@ -379,12 +379,13 @@ stories:
           when:
             - Drag it onto anchor `pin.note`, or paste it there, write a word, and pin it
           then:
+            - While a file is in the air over the window, the form, the thread screen and the rule pane each show they will take it, and show it louder while the file is over them; dragged text lights nothing
             - The pasted picture shows small in the form before it is filed, with a way to drop it
             - The thread on disk names the picture under `attachments`, and the file sits in `attachments/` under the threads directory, never anywhere else
             - The message in the stream draws the picture under its words as a thumbnail that opens it full size
             - The same drop, or paste, into anchor `thread.reply` on screen `thread-panel` puts the picture on the reply
             - Anything that is not a picture, or is over five megabytes, is refused in words and nothing is written
-          statement_hash: sha256:965adfb3696b
+          statement_hash: sha256:0f42990a24bc
 
       - id: embed.threads.actions-in-context
         origin: walkdown
