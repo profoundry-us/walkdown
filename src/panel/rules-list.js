@@ -609,7 +609,9 @@ export function legendControl() {
   const signLine = (state) =>
     html`<span class="flex justify-center">${signoffDot({ role: '_', state }, true)}</span>
       <span>${SIGN_SAY[state]}</span>`;
-  return html`<span class="tooltip tooltip-top shrink-0" data-testid="panel.legend">
+  // tooltip-end: the legend sits at the right edge of the footer, and a
+  // bubble centred on it lost half its width off the pane (n-0308).
+  return html`<span class="tooltip tooltip-top tooltip-end shrink-0" data-testid="panel.legend">
     <!-- z-50 here is load-bearing, and unlike the rule strip's bubble it was
          measured rather than assumed: this one opens UPWARD across the whole
          scrolling list from the last row in the panel, and at daisyUI's own

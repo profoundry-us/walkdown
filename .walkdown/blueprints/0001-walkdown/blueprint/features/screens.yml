@@ -231,6 +231,6 @@ stories:
           then:
             - Lint reads the thread's anchor through the renames and raises no warning; a rename whose end is not a declared anchor is what it warns about instead
             - The thread's screen shows the anchor as it was filed, in the original spelling, with a mark saying it was renamed
-            - Resting on the anchor lists every name it has had, oldest to newest
+            - Resting on the anchor lists every name it has had, oldest to newest, in a bubble that is readable and stays inside the pane
             - Nothing in the thread's file is changed
-          statement_hash: sha256:f28e66197aef
+          statement_hash: sha256:a0495cc39a56

@@ -47,11 +47,12 @@ export function openEvidence(paths) {
   layer.dataset.theme = 'blueprint';
   layer.dataset.testid = 'detail.evidence-modal';
   layer.style.cssText = `position:fixed; inset:0; z-index:10; pointer-events:auto;
-    background:rgba(16,20,30,.72); display:flex; flex-direction:column; gap:10px;
+    background:rgba(16,20,30,.78); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+    display:flex; flex-direction:column; gap:10px;
     align-items:center; justify-content:flex-start; overflow:auto; padding:20px;`;
   const frame = (p, inner) => `<figure class="w-full max-w-4xl" data-evidence="${esc(p)}">
       ${inner}
-      <figcaption class="mt-1 font-mono text-[10.5px] text-base-100 opacity-70">${esc(p)}</figcaption>
+      <figcaption class="mt-1 inline-block rounded bg-neutral/90 px-1.5 py-0.5 font-mono text-[10.5px] text-neutral-content">${esc(p)}</figcaption>
     </figure>`;
   layer.innerHTML = `
     <div class="flex w-full max-w-4xl items-center gap-2 text-base-100">

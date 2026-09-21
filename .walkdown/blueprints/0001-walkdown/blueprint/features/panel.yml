@@ -737,8 +737,8 @@ stories:
             - "\"All rules\" slides back to the list"
             - The Blueprints / Rules / Threads tabs are sized to their labels and centred in the sidebar, not stretched to its full width
             - Each of the three tabs carries its own icon, from the same Phosphor set as the rest of the panel's chrome, sized and padded to read clearly at tab size rather than as an inline glyph shrunk to fit
-            - The rule id at the head of the detail is a button - pressing it copies the id and says so, because an id you can name is one you paste into a commit, a run or a message
-          statement_hash: sha256:1eb9f5ca82d3
+            - The rule id at the head of the detail is a button - pressing it copies the id and says so, because an id you can name is one you paste into a commit, a run or a message. It shows the ordinary pointer hand
+          statement_hash: sha256:bd567f0289e2
           reworded:
             - hash: sha256:493a83d3f0bd
               at: 2026-09-13
@@ -927,7 +927,8 @@ stories:
             - "Each file is shown as what it is: a picture as a picture, a transcript as readable text, anything else as a link to open - never as a broken image"
             - A rule with no runs says so rather than showing nothing
             - Check source is a button that opens the checks' source over the whole desk - each check in full, with a link that opens the same lines on GitHub in a new tab when the tree has a GitHub remote
-          statement_hash: sha256:78f68901d77e
+            - Behind the check source, and behind evidence, the desk blurs, and every file name sits on its own dark ground so it reads over whatever is beneath
+          statement_hash: sha256:79686951989e
           reworded:
             - hash: sha256:65b84178c291
               at: 2026-09-13
@@ -1141,7 +1142,8 @@ stories:
             - Every state a signature slot can take is listed with the shape that draws it
             - What warning colour means, and what the sign, walk and thread badges mean, are said in the same place
             - It is built from the same vocabulary the rail draws from, so it cannot describe marks the rail no longer uses
-          statement_hash: sha256:356d0682ce72
+            - It opens upward and towards the room from the right edge of the footer, so none of it is cut off by the pane
+          statement_hash: sha256:3a489f113413
           reworded:
             - hash: sha256:58cbf78e318c
               at: 2026-09-13
@@ -1308,7 +1310,8 @@ stories:
             - The ask card's tag is the door to the thread's own screen, which asks the question the same way above its box, choices and all
             - A reply that follows a message from another thread carries "↳ <id>"; an answer carries "↳ answer · <id>" wherever it falls, cut to a few lines, and its tag opens the question
             - Nothing under the rule repeats which rule a thread is on
-          statement_hash: sha256:4a029b66e6d1
+            - A fail's why lands on the conversation once. It is the reason the conversation reopens when it was addressed, and a reply otherwise
+          statement_hash: sha256:72d801697bb2
           reworded:
             - hash: sha256:cd9c17333cb0
               at: 2026-09-21T01:58:53Z
@@ -1508,12 +1511,13 @@ stories:
             - From a judged rule, or from the list, carrying on opens the next rule still owing a verdict after the one you are on, wrapping to the top. Never simply the first, so a rule you skipped comes round again after the others rather than every time
             - Beside Continue, and quieter than it, Skip sets the open rule aside for this sitting - it leaves the sitting's count, the run records it as skipped, and whatever was written in the box goes on the rule's conversation as the reason, which unlike a fail's is optional. On the board the rule is exactly what it was, signed or owed, so it comes round next sitting; a rule in any state can be skipped
             - The tally in the footer reads as a fraction - judged over judged plus still owed - so how far through the sitting is, and how much is left, are one glance rather than two
-            - The strip names who is recording by the name they go by - the username only when there is no full name - and lists each role being signed on a line of its own
+            - The strip names who is recording by the name they go by, the username only when there is no full name. Under the name, the roles being signed sit on one line, separated by commas
+            - With nothing left owing a verdict, Continue and Skip are disabled, and resting on the pair says the walkdown is what is left to finish
             - A pass or an approval carries you on by itself; a fail or a refine keeps you on the rule so the reason can be pinned, and this is the way onward from there
             - Both controls wear the panel's warning colour, the one it already uses for work owed to you, so the sitting reads as one thing from the tab's count through to the record - the ending filled and carrying on outlined, since two solid yellows would argue about which is the act
             - Beginning wears it too when rules are owed, so the blueprint says there is work before being asked; with nothing owed it drops back to the ordinary action colour, because a control that is always loud says nothing
             - Every one of these counts comes from a single list - the rules owing you a verdict, less the ones judged this sitting - so the tab's number, the footer's kinds, the tally's denominator and the rule Continue opens cannot drift apart
-          statement_hash: sha256:2f34df9bf3b2
+          statement_hash: sha256:3c61387a8bd2
           reworded:
             - hash: sha256:c74a54acc395
               at: 2026-09-13
@@ -1576,7 +1580,8 @@ stories:
             - walkdown status reports the sitting as in progress rather than as verdicts
             - Finishing appends the one run record and deletes the draft; discarding deletes it and writes nothing
             - A draft is never committed by accident - the directory ignores its own contents
-          statement_hash: sha256:c1cd43e94e52
+            - A sitting nobody has judged anything in leaves nothing on disk, and a reload asks who signs again. A sitting is real once something is judged (q-0250)
+          statement_hash: sha256:8517d3ecb2c9
           reworded:
             - hash: sha256:cfb0ee61cad3
               at: 2026-09-13

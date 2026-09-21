@@ -367,7 +367,7 @@ stories:
       - id: embed.threads.picture-on-a-pin
         origin: thread:n-0096
         created_at: 2026-09-21
-        statement: A screenshot pasted into the pin form, or into a thread's composer, goes on the message and is shown under its words as a small picture that opens full size. The bytes live beside the threads, and the record names the file.
+        statement: A screenshot dropped or pasted into the pin form, or into a thread's composer, goes on the message and is shown under its words as a small picture that opens full size. The bytes live beside the threads, and the record names the file.
         because: Some feedback is a picture, and describing a picture in a sentence is slower and less exact than showing it.
         history: Asked on 2026-08-26 after a geometry bug that was obvious in one image and would have taken a paragraph (n-0096, n-0072); built 2026-09-21 with the pictures under the threads directory, the one place beside the records a moved ledger takes with it.
         verify: [checks]
@@ -377,14 +377,14 @@ stories:
           given:
             - Pin mode on screen `review`, and a screenshot on the clipboard
           when:
-            - Paste it into anchor `pin.note`, write a word, and pin it
+            - Drag it onto anchor `pin.note`, or paste it there, write a word, and pin it
           then:
             - The pasted picture shows small in the form before it is filed, with a way to drop it
             - The thread on disk names the picture under `attachments`, and the file sits in `attachments/` under the threads directory, never anywhere else
             - The message in the stream draws the picture under its words as a thumbnail that opens it full size
-            - The same paste into anchor `thread.reply` on screen `thread-panel` puts the picture on the reply
+            - The same drop, or paste, into anchor `thread.reply` on screen `thread-panel` puts the picture on the reply
             - Anything that is not a picture, or is over five megabytes, is refused in words and nothing is written
-          statement_hash: sha256:7b9a728127e0
+          statement_hash: sha256:965adfb3696b
 
       - id: embed.threads.actions-in-context
         origin: walkdown

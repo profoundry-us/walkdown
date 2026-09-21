@@ -33,7 +33,8 @@ export async function openSource(rule) {
   layer.dataset.theme = 'blueprint';
   layer.dataset.testid = 'detail.source-modal';
   layer.style.cssText = `position:fixed; inset:0; z-index:10; pointer-events:auto;
-    background:rgba(16,20,30,.72); display:flex; flex-direction:column; gap:10px;
+    background:rgba(16,20,30,.78); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+    display:flex; flex-direction:column; gap:10px;
     align-items:center; justify-content:flex-start; overflow:auto; padding:20px;`;
   layer.innerHTML = `
     <div class="flex w-full max-w-4xl items-center gap-2 text-base-100">
@@ -59,12 +60,12 @@ export async function openSource(rule) {
           .map((c) => {
             const link = sourceLink(out.repo, c);
             return `<figure class="mb-3 w-full" data-check="${esc(c.ref)}">
-        <figcaption class="mb-1 flex items-center gap-2 font-mono text-[11px] text-base-100">
-          <span class="opacity-80">${esc(c.ref)}</span>${
+        <figcaption class="mb-1 flex items-center gap-2 rounded bg-neutral/90 px-2 py-1 font-mono text-[11px] text-neutral-content">
+          <span>${esc(c.ref)}</span>${
             c.recorded ? `<span class="text-warning">· was ${esc(c.recorded)} when last recorded</span>` : ''
           }${
             link
-              ? `<a class="link ml-auto font-sans text-[11px] no-underline opacity-80 hover:opacity-100" target="_blank" rel="noreferrer"
+              ? `<a class="link ml-auto font-sans text-[11px] no-underline" target="_blank" rel="noreferrer"
                  href="${esc(link)}" data-testid="detail.source-github">Open on GitHub ↗</a>`
               : ''
           }

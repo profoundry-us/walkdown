@@ -326,11 +326,23 @@ export async function sayOnRule(rule, text, { reopen = false } = {}) {
   const live = liveNoteOn(rule);
   if (!live) return postRuleNote(rule, text, 'feedback');
   const actor = whoAmI();
-  if (!(await postReply(live.id, text, actor))) return null;
+  /*
+   * Reopening files its reason as a reply on the server, so the words go
+   * ONE way: as the reopen's reason when the conversation comes back to
+   * open, as a plain reply otherwise. Posting the reply and then reopening
+   * with the same text as the reason wrote every fail's why twice, under
+   * the same second (n-0330, five threads on 2026-09-21).
+   */
   if (reopen && live.status === 'addressed') {
+    if (isMachineName(actor)) {
+      say('A reply is recorded under a person\u2019s name \u2014 set it in Settings (the gear).');
+      openSettings();
+      return null;
+    }
     const back = await threadPost(`/api/threads/${live.id}/status`, { status: 'open', actor, reason: text });
-    if (!back) return null;
+    return back ? live.id : null;
   }
+  if (!(await postReply(live.id, text, actor))) return null;
   return live.id;
 }
 

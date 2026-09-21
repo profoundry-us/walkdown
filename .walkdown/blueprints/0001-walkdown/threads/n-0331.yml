@@ -1,0 +1,21 @@
+id: n-0331
+kind: note
+reason: observation
+author: agent
+created: 2026-09-21T05:11:16.546Z
+anchor:
+  rule: panel.walkdown.draft-on-disk
+status: addressed
+body: "A sitting came back after Finish. A skip reloads the board without
+  waiting for the answer, and when that answer landed after Finish had cleared
+  the draft, the panel read the draft it carried and restored the sitting it had
+  just recorded. Seen while checking the end of a sitting on 2026-09-21: five
+  skips, Finish, and the strip stood again with the same five verdicts while the
+  ledger held the run and the draft was gone."
+replies:
+  - author: agent
+    created: 2026-09-21T05:15:41Z
+    body: Fixed. The last load wins. A reload overtaken by a later one drops its
+      answer, so a skip's late answer can no longer bring back the sitting
+      Finish just recorded. The end-of-sitting check finishes after five skips
+      and waits to see the sitting stay finished (run 2026-09-21T05-15-10Z).

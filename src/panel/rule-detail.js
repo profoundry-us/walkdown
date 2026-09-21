@@ -646,7 +646,7 @@ export function detailPane() {
                name is an id you paste into a commit, a run record or a
                message, and selecting eleven-pixel text by hand is nobody's
                idea of naming it. -->
-          <button type="button" class="cursor-copy break-all text-left font-mono text-[11px] opacity-40 hover:opacity-80"
+          <button type="button" class="cursor-pointer break-all text-left font-mono text-[11px] opacity-40 hover:opacity-80"
             data-testid="detail.rule-id" title="Copy the rule id"
             @click=${() =>
               navigator.clipboard

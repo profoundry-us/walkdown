@@ -656,8 +656,10 @@ import { icon } from './icons.js';
           drawShots();
         };
     };
-    overlay.querySelector('textarea').addEventListener('paste', (e) => {
-      const files = [...(e.clipboardData?.files ?? [])].filter((f) => /^image\//.test(f.type));
+    // Paste and drop are the same door: a file from the clipboard, or one
+    // dragged from the desk onto the box (n-0328).
+    const takeShots = (e) => {
+      const files = [...(e.clipboardData?.files ?? e.dataTransfer?.files ?? [])].filter((f) => /^image\//.test(f.type));
       if (!files.length) return;
       e.preventDefault();
       for (const f of files.slice(0, 4 - shots.length)) {
@@ -668,7 +670,12 @@ import { icon } from './icons.js';
         };
         reader.readAsDataURL(f);
       }
+    };
+    overlay.querySelector('textarea').addEventListener('paste', takeShots);
+    overlay.addEventListener('dragover', (e) => {
+      if ([...(e.dataTransfer?.types ?? [])].includes('Files')) e.preventDefault();
     });
+    overlay.addEventListener('drop', takeShots);
     overlay.querySelector('.wd-primary').onclick = () => {
       const body = overlay.querySelector('textarea').value.trim();
       const kind = overlay.querySelector('.wd-q').checked ? 'question' : 'note';

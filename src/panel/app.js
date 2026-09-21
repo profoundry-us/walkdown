@@ -1027,9 +1027,20 @@ function hereChanged() {
  * page it was reviewing; nothing here does.
  */
 
+/*
+ * The last load wins. A skip reloads the board without waiting for the
+ * answer, and one that landed after Finish had cleared the draft carried
+ * the draft it had just cleared - so the sitting just recorded stood again
+ * (n-0331). A load that a later one has overtaken drops its answer.
+ */
+let loadGen = 0;
+
 async function load() {
+  const gen = ++loadGen;
   const res = await fetch(api('/api/blueprint'));
-  S.data = await res.json();
+  const data = await res.json();
+  if (gen !== loadGen) return;
+  S.data = data;
   /*
    * The board this panel opened is the only one it records against (q-0301).
    * The key is the blueprint's home on disk, so a server restarted on the
@@ -1211,7 +1222,7 @@ export function render() {
            carries is a hover away and read in Settings, where it was shown
            before the sitting began. With no full name the two are one
            string and the username is what is drawn. -->
-      <span>Recording as
+      <span class="flex flex-col"><span>Recording as
         <button id="wdp-actor" data-testid="panel.actor-name" class="link font-semibold"
           title="${
             recordingHandle() && recordingHandle() !== recordingDisplay()
@@ -1219,6 +1230,7 @@ export function render() {
               : 'Change the name in Settings (the gear)'
           }"
           @click=${openActorSettings}>${recordingDisplay() || 'set your name…'}</button></span>
+      ${signingNote()}</span>
       <!-- Both halves of the same fact: how many you have judged, and how
            many the sitting has in it. The denominator is what you have done
            plus what is still owed, so it holds steady as you walk and reads
@@ -1229,7 +1241,6 @@ export function render() {
            sitting where you are accepting on somebody else's behalf must say
            so for its whole length: forgetting half way through is how a
            signature ends up under the wrong name (panel.walkdown.who-signs-is-declared). -->
-      ${signingNote()}
       <!-- The tally moved to the footer beside the verified count (n-0309):
            one place says how far the sitting has got, and it is the place
            that already counts rules. What stays here is the way onward.
@@ -1247,20 +1258,29 @@ export function render() {
            panel already uses for the work you owe. Outlined rather than
            filled because Finish walkdown is the solid one, and two solid
            yellows in view would argue about which is the act. -->
-      <span class="ml-auto flex items-center gap-1">
+      <!-- With nothing left owing a verdict, both controls are disabled and
+           one bubble over the pair says what is left to do: Finish. A
+           disabled button takes no hover, so the bubble is on the span
+           around them. -->
+      <span class="ml-auto flex items-center gap-1 ${
+        owedRows().length ? '' : 'tooltip tooltip-top tooltip-end [--tt-trans:0]'
+      }" data-testid="panel.onward" ?data-done=${!owedRows().length}
+        data-tip="Nothing left owing a verdict — finish the walkdown to record it">
         <button class="btn btn-xs btn-outline border-base-300 text-base-content/70" data-testid="panel.skip" id="wdp-skip"
-          ?disabled=${!(S.view === 'detail' && S.selected)}
+          ?disabled=${!(S.view === 'detail' && S.selected) || !owedRows().length}
           title="${
             S.view === 'detail' && S.selected
               ? 'Set this rule aside for this sitting — recorded as skipped, still owed, back next time'
               : 'Open a rule to skip it'
           }" @click=${() => giveVerdict('skipped')}>Skip</button>
         <button class="btn btn-xs btn-outline btn-warning" data-testid="panel.continue" id="wdp-continue"
-          ?disabled=${Boolean(unjudgedHere())}
+          ?disabled=${Boolean(unjudgedHere()) || !owedRows().length}
           title="${
-            unjudgedHere()
-              ? 'This rule owes you a verdict — pass, fail or skip it to carry on'
-              : 'Open the next rule still owing you a verdict'
+            !owedRows().length
+              ? ''
+              : unjudgedHere()
+                ? 'This rule owes you a verdict — pass, fail or skip it to carry on'
+                : 'Open the next rule still owing you a verdict'
           }" @click=${continueWalkdown}>Continue</button>
       </span>
     </div>`
@@ -2032,13 +2052,14 @@ function signingNote() {
   if (!sigs.length) return nothing;
   const mine = recordingHandle();
   const proxied = sigs.some((sig) => sig.signer !== mine);
-  // One role per line, no "as", no commas (n-0309): a list reads as a list.
-  // A role signed for somebody else says so on its own line.
-  return html`<span data-testid="panel.actor-signing" class="flex flex-col leading-tight ${
+  // One line under the name, the roles separated by commas (n-0327): a
+  // column of roles took more of the strip than the sitting did. A role
+  // signed for somebody else says so in its own words.
+  return html`<span data-testid="panel.actor-signing" class="block text-[11px] leading-tight ${
     proxied ? 'rounded bg-warning/30 px-1.5 py-0.5 font-semibold' : 'opacity-60'
-  }" title="${proxied ? 'Recorded under their name, with yours as who typed it' : 'The roles this sitting signs for'}">${sigs.map(
-    (sig) => html`<span>${sig.role}${sig.signer !== mine ? ` for ${sig.signer}` : ''}</span>`,
-  )}</span>`;
+  }" title="${proxied ? 'Recorded under their name, with yours as who typed it' : 'The roles this sitting signs for'}">${sigs
+    .map((sig) => `${sig.role}${sig.signer !== mine ? ` for ${sig.signer}` : ''}`)
+    .join(', ')}</span>`;
 }
 
 /** The username a sitting's records will carry: the one it was started under. */

@@ -6,7 +6,7 @@ via: agent
 created: 2026-09-21T04:01:17.160Z
 anchor:
   rule: panel.walkdown.one-control-owns-the-sitting
-status: open
+status: addressed
 body: Continue stays put on an unjudged rule. The only way to continue on a rule
   is to judge it, waive it, or skip it.
 added: Topher started a fresh sitting and pressed Continue a few times expecting
@@ -33,3 +33,9 @@ replies:
     created: 2026-09-21T04:09:01Z
     body: Instead of a role per line, let's separate they by commas and put them
       under the "Recording as Topher Fangio" so it takes up less space.
+  - author: agent
+    created: 2026-09-21T05:15:40Z
+    body: Done. The roles sit on one line under Recording as, separated by commas.
+      Also, with nothing left owing a verdict, Continue and Skip are disabled
+      and resting on them says to finish the walkdown. Both are steps on the
+      rule and both are checked (run 2026-09-21T05-15-10Z).

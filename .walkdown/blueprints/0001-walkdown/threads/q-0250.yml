@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-08T19:37:32.844Z
 anchor:
   rule: panel.walkdown.draft-on-disk
-status: answered
+status: incorporated
 body: >-
   A sitting nobody has judged anything in does not survive a reload - including
   the signing it took to start it. Is that what we want?
@@ -46,4 +46,9 @@ replies:
     created: 2026-09-21T04:09:40Z
     body: Leave it
     answer: true
+  - author: agent
+    created: 2026-09-21T05:01:29Z
+    body: "Folded in as a step on panel.walkdown.draft-on-disk: a sitting nobody has
+      judged anything in leaves nothing on disk, and a reload asks who signs
+      again. Left as it was, as you chose."
 chosen: Leave it

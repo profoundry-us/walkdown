@@ -1,0 +1,137 @@
+{
+  "run_id": "2026-09-21T05-15-10Z-local-01",
+  "created": "2026-09-21T05:15:10Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "59ad64b-dirty",
+  "tree_hash": "sha256:9b11ba5314ae",
+  "spec_hash": "sha256:5c9bf635a496",
+  "results": [
+    {
+      "rule": "embed.threads.picture-on-a-pin",
+      "status": "pass",
+      "statement_hash": "sha256:965adfb3696b",
+      "duration_ms": 3030,
+      "checks": [
+        "checks/embed.spec.js:455"
+      ]
+    },
+    {
+      "rule": "panel.walkdown.draft-on-disk",
+      "status": "pass",
+      "statement_hash": "sha256:8517d3ecb2c9",
+      "duration_ms": 11201,
+      "checks": [
+        "checks/panel.spec.js:174",
+        "checks/panel.spec.js:2060",
+        "checks/panel.spec.js:3381"
+      ]
+    },
+    {
+      "rule": "panel.rules.evidence-visible",
+      "status": "pass",
+      "statement_hash": "sha256:79686951989e",
+      "duration_ms": 5942,
+      "checks": [
+        "checks/panel.spec.js:1004",
+        "checks/panel.spec.js:1055",
+        "checks/panel.spec.js:3604"
+      ]
+    },
+    {
+      "rule": "panel.rules.one-conversation",
+      "status": "pass",
+      "statement_hash": "sha256:72d801697bb2",
+      "duration_ms": 10328,
+      "checks": [
+        "checks/panel.spec.js:1613",
+        "checks/panel.spec.js:3423",
+        "checks/panel.spec.js:3629"
+      ]
+    },
+    {
+      "rule": "panel.start.which-project",
+      "status": "pass",
+      "statement_hash": "sha256:8927716089a7",
+      "duration_ms": 11687,
+      "checks": [
+        "checks/panel.spec.js:2177",
+        "checks/panel.spec.js:2216",
+        "checks/panel.spec.js:2277",
+        "checks/panel.spec.js:2304",
+        "checks/panel.spec.js:2332",
+        "checks/panel.spec.js:2360",
+        "checks/panel.spec.js:2426",
+        "checks/panel.spec.js:2448",
+        "checks/panel.spec.js:2497"
+      ]
+    },
+    {
+      "rule": "panel.start.choose-a-blueprint",
+      "status": "pass",
+      "statement_hash": "sha256:f89c8ffc710e",
+      "duration_ms": 1762,
+      "checks": [
+        "checks/panel.spec.js:2497"
+      ]
+    },
+    {
+      "rule": "panel.rules.legend-on-demand",
+      "status": "pass",
+      "statement_hash": "sha256:3a489f113413",
+      "duration_ms": 1114,
+      "checks": [
+        "checks/panel.spec.js:3289"
+      ]
+    },
+    {
+      "rule": "panel.walkdown.one-control-owns-the-sitting",
+      "status": "pass",
+      "statement_hash": "sha256:3c61387a8bd2",
+      "duration_ms": 10961,
+      "checks": [
+        "checks/panel.spec.js:3318",
+        "checks/panel.spec.js:3347",
+        "checks/panel.spec.js:3381"
+      ]
+    },
+    {
+      "rule": "screens.anchors.renames-are-recorded",
+      "status": "pass",
+      "statement_hash": "sha256:a0495cc39a56",
+      "duration_ms": 2779,
+      "checks": [
+        "checks/panel.spec.js:3524"
+      ]
+    },
+    {
+      "rule": "panel.rules.detail-slide",
+      "status": "pass",
+      "statement_hash": "sha256:bd567f0289e2",
+      "duration_ms": 1464,
+      "checks": [
+        "checks/panel.spec.js:3567"
+      ]
+    },
+    {
+      "rule": "panel.dock.own-skin",
+      "status": "pass",
+      "statement_hash": "sha256:4e48a84dd51a",
+      "duration_ms": 1464,
+      "checks": [
+        "checks/panel.spec.js:3567"
+      ]
+    },
+    {
+      "rule": "threads.question.one-ask",
+      "status": "pass",
+      "statement_hash": "sha256:0c49a7ef225d",
+      "duration_ms": 4311,
+      "checks": [
+        "checks/panel.spec.js:3629"
+      ]
+    }
+  ]
+}

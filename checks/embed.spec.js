@@ -452,7 +452,7 @@ test('a pin says what it is on contact, and says nothing until then', {
  * words as a thumbnail that opens. The paste is a real ClipboardEvent with a
  * File on it, which is what a screenshot on the clipboard arrives as.
  */
-test('a screenshot pasted into the pin form goes on the pin, and opens from the stream', {
+test('a screenshot dropped on the pin form goes on the pin, and opens from the stream', {
   tag: '@rule:embed.threads.picture-on-a-pin',
 }, async ({ page }) => {
   await page.goto(FIXTURE);
@@ -464,13 +464,16 @@ test('a screenshot pasted into the pin form goes on the pin, and opens from the 
   await page.mouse.click(box.x + box.width * 0.6, box.y + box.height * 0.55);
   const note = frame.getByTestId('pin.note');
   await expect(note).toBeVisible();
-  // A 1x1 PNG, pasted as a file the way a screenshot is.
-  await note.evaluate((el) => {
+  // A 1x1 PNG, dragged from the desk and dropped on the box (n-0328): a
+  // real DragEvent with a File on its transfer, which is what a drop is.
+  const drop = (el) => {
     const bytes = Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='), (c) => c.charCodeAt(0));
     const dt = new DataTransfer();
     dt.items.add(new File([bytes], 'shot.png', { type: 'image/png' }));
-    el.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
-  });
+    el.dispatchEvent(new DragEvent('dragover', { dataTransfer: dt, bubbles: true, cancelable: true }));
+    el.dispatchEvent(new DragEvent('drop', { dataTransfer: dt, bubbles: true, cancelable: true }));
+  };
+  await note.evaluate(drop);
   await expect(frame.getByTestId('pin.shots').locator('img'), 'shown small before it is filed').toHaveCount(1);
   await note.fill('The corner is clipped, see the picture.');
   await frame.getByTestId('pin.save').click();
@@ -498,6 +501,10 @@ test('a screenshot pasted into the pin form goes on the pin, and opens from the 
   const modal = page.getByTestId('detail.evidence-modal');
   await expect(modal.locator('img')).toHaveCount(1);
   expect(await modal.locator('img').evaluate((i) => i.complete && i.naturalWidth > 0)).toBe(true);
+  await page.getByTestId('detail.evidence-close').click();
+  // The same drop on the thread's own composer puts the picture on the reply.
+  await page.getByTestId('thread.reply').evaluate(drop);
+  await expect(page.getByTestId('thread.shots').locator('img'), 'held above the box until sent').toHaveCount(1);
 });
 
 /*

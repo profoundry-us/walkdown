@@ -95,12 +95,16 @@ async function ensureSession(page) {
      * `panel.actor` rather than on anything they were about.
      */
     const go = page.getByTestId('walkdown.signing.start');
-    await expect(go).toBeVisible();
-    // A machine whose config names no role has nothing ticked, and the
-    // dialog is right to refuse: pick one, since a sitting is somebody
-    // accepting something.
-    if (await go.isDisabled()) await page.getByTestId('walkdown.signing.role').first().check();
-    await go.click();
+    // Or the sitting the last check left on disk comes back under the
+    // click, and there is nothing to answer.
+    await expect(go.or(page.getByTestId('panel.actor'))).toBeVisible();
+    if (await go.isVisible()) {
+      // A machine whose config names no role has nothing ticked, and the
+      // dialog is right to refuse: pick one, since a sitting is somebody
+      // accepting something.
+      if (await go.isDisabled()) await page.getByTestId('walkdown.signing.role').first().check();
+      await go.click();
+    }
   }
   await expect(page.getByTestId('panel.actor')).toBeVisible();
 }
@@ -2187,6 +2191,10 @@ test('a page no blueprint claims asks which project, and opens nothing over it',
   await expect(page.getByTestId('project.commands')).toContainText('walkdown claims --url');
   await expect(page.getByTestId('project.new')).toContainText('walkdown import');
   await expect(page.getByTestId('project.new')).toContainText('walkdown init');
+  // Starting reads as starting, and choosing has a header of its own over
+  // the list (n-0265).
+  await expect(page.getByTestId('project.new')).toContainText(/start a project/i);
+  await expect(page.getByTestId('project.choose')).toContainText(/choose an existing project/i);
 
   // Nothing was opened: no board, no rules, no sitting to start.
   await expect(page.getByTestId('panel.rules-list')).toHaveCount(0);
@@ -3286,6 +3294,11 @@ test('the legend keeps every mark clear of the words beside it', {
   await legend.hover();
   const tip = page.getByTestId('panel.legend-tip');
   await expect.poll(() => tip.evaluate((el) => Number(getComputedStyle(el).opacity))).toBeGreaterThan(0.5);
+  // From the right edge of the footer it opens towards the room, so none of
+  // it is off the pane (n-0308).
+  const [t, pane] = await Promise.all([tip.boundingBox(), page.getByTestId('panel.bar').boundingBox()]);
+  expect(t.x, 'inside the pane, from the left').toBeGreaterThanOrEqual(pane.x - 1);
+  expect(t.x + t.width, 'inside the pane, from the right').toBeLessThanOrEqual(pane.x + pane.width + 1);
   const badges = tip.locator('.badge');
   expect(await badges.count(), 'the legend explains the asks').toBeGreaterThan(0);
   for (const badge of await badges.all()) {
@@ -3357,6 +3370,79 @@ test('Continue stays put on an unjudged rule; a skip is the way past', {
   await expect(cont, 'judged this sitting, so Continue moves').toBeEnabled();
   await cont.click();
   await expect(page.getByTestId('detail.rule-id')).not.toHaveText(rule);
+  await endSession(page); // leave nothing on disk for the next check to trip over
+});
+
+/*
+ * With nothing left owing a verdict, Continue and Skip go quiet and one
+ * bubble over the pair says what is left: Finish. Reached by skipping every
+ * owed rule, which is the only way there that records nothing.
+ */
+test('with nothing left owing a verdict, Continue and Skip are disabled and point at Finish', {
+  tag: ['@rule:panel.walkdown.one-control-owns-the-sitting', '@rule:panel.walkdown.draft-on-disk'],
+}, async ({ page }) => {
+  test.setTimeout(180_000);
+  await review(page);
+  await ensureSession(page);
+  const onward = page.getByTestId('panel.onward');
+  const skip = page.getByTestId('panel.skip');
+  const cont = page.getByTestId('panel.continue');
+  const judged = async () => Number((await page.getByTestId('panel.judged').textContent()).match(/\+(\d+)\//)?.[1] ?? 0);
+  // Continue lands on the next owed rule and goes quiet there; Skip is the
+  // way past it. Round and round until nothing is owed.
+  for (let i = 0; i < 120; i++) {
+    if ((await onward.getAttribute('data-done')) !== null) break;
+    if ((await page.getByTestId('detail.rule-id').count()) && (await skip.isEnabled()) && (await cont.isDisabled())) {
+      const before = await judged();
+      await skip.click();
+      await expect.poll(judged).toBe(before + 1);
+      continue;
+    }
+    await expect(cont).toBeEnabled();
+    await cont.click();
+    await expect(page.getByTestId('detail.rule-id')).toBeVisible();
+  }
+  await expect(onward).toHaveAttribute('data-done', '');
+  await expect(page.getByTestId('panel.continue')).toBeDisabled();
+  await expect(page.getByTestId('panel.skip')).toBeDisabled();
+  await expect(onward).toHaveAttribute('data-tip', /finish the walkdown/i);
+  await expect(onward).toHaveClass(/tooltip/);
+  await page.getByTestId('panel.walk').click(); // Finish
+  // And it stays finished: the last skip's reload, landing late, must not
+  // bring the sitting back (n-0331).
+  await expect(page.getByTestId('panel.actor')).toBeHidden();
+  await page.waitForTimeout(1500);
+  await expect(page.getByTestId('panel.actor'), 'still finished after the late reload').toBeHidden();
+});
+
+/*
+ * A fail's why lands on the conversation once (n-0330): as the reason the
+ * conversation reopens when it was addressed. Posting it as a reply and then
+ * reopening with it as the reason wrote every why twice.
+ */
+test('a fail on an addressed conversation files its why once, as the reopen', {
+  tag: '@rule:panel.rules.one-conversation',
+}, async ({ page }) => {
+  const { rows } = await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json();
+  const rule = rows.find((r) => r.built).rule;
+  const filed = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
+    data: { kind: 'note', body: 'The label reads wrong.', anchor: { rule } },
+  });
+  const { id } = await filed.json();
+  expect((await page.request.post(`${WD_ORIGIN}/api/threads/${id}/status?bp=blueprint`, {
+    data: { status: 'addressed', via: 'agent', reason: 'Reworded it.' },
+  })).ok()).toBeTruthy();
+  await review(page);
+  await endSession(page);
+  await ensureSession(page);
+  await openRuleForVerdict(page, rule);
+  await page.getByTestId('detail.feedback').fill('Still wrong on the second line.');
+  await page.locator('[data-v="fail"]').click();
+  await expect.poll(async () => {
+    const t = (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json()).threads.find((x) => x.id === id);
+    return [t?.status, (t?.replies ?? []).filter((r) => r.body === 'Still wrong on the second line.').length];
+  }).toEqual(['open', 1]);
+  await endSession(page);
 });
 
 /*
@@ -3460,8 +3546,17 @@ test('a thread under a renamed anchor shows the name it was filed under, marked 
   const mark = page.getByTestId('thread.renamed');
   await expect(mark).toBeVisible();
   const where = mark.locator('xpath=..');
-  await expect(where.locator('.font-mono')).toHaveText('detail.screenshots-modal');
-  await expect(where).toHaveAttribute('data-tip', 'detail.screenshots-modal → detail.evidence-modal');
+  await expect(where.locator('.font-mono').last()).toHaveText('detail.screenshots-modal');
+  // Resting on it lists every name, in a bubble that reads and stays inside
+  // the pane (n-0329): measured, since a bubble half off the pane and at
+  // the line's faded opacity is exactly what was there before.
+  const tip = page.getByTestId('thread.renames');
+  await expect(tip).toHaveText('detail.screenshots-modal → detail.evidence-modal');
+  await where.hover();
+  await expect.poll(() => tip.evaluate((el) => Number(getComputedStyle(el).opacity))).toBeGreaterThan(0.9);
+  const [t, pane] = await Promise.all([tip.boundingBox(), page.getByTestId('thread.panel').boundingBox()]);
+  expect(t.x, 'inside the pane, from the left').toBeGreaterThanOrEqual(pane.x - 1);
+  expect(t.x + t.width, 'inside the pane, from the right').toBeLessThanOrEqual(pane.x + pane.width + 1);
 });
 
 /*
@@ -3475,6 +3570,7 @@ test('the rule id copies itself, and the toast sits inside the frame with a cap'
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await review(page);
   const rule = (await firstRule(page)).trim();
+  expect(await page.getByTestId('detail.rule-id').evaluate((el) => getComputedStyle(el).cursor), 'the ordinary pointer hand (n-0320)').toBe('pointer');
   await page.getByTestId('detail.rule-id').click();
   const toast = page.getByTestId('panel.toast');
   await expect(toast).toContainText('Copied');
@@ -3514,6 +3610,10 @@ test('Check source opens the checks in a modal, with a GitHub link in a new tab'
   const modal = page.getByTestId('detail.source-modal');
   await expect(modal).toBeVisible();
   await expect(modal.locator('pre').first()).toContainText(/test\(|expect\(/);
+  // The desk behind it blurs, and each file name sits on its own dark
+  // ground rather than in bare text over the app (n-0318).
+  expect(await modal.evaluate((el) => getComputedStyle(el).backdropFilter)).toMatch(/blur/);
+  expect(await modal.locator('figcaption').first().evaluate((el) => getComputedStyle(el).backgroundColor)).not.toBe('rgba(0, 0, 0, 0)');
   const link = modal.getByTestId('detail.source-github').first();
   await expect(link).toHaveAttribute('target', '_blank');
   await expect(link).toHaveAttribute('href', /github\.com\/[^/]+\/[^/]+\/blob\/[0-9a-f]{40}\/[^#]+#L\d+-L\d+$/);

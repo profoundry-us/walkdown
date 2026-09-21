@@ -5,7 +5,7 @@ author: topher
 created: 2026-09-21T04:47:30.846Z
 anchor:
   rule: screens.anchors.renames-are-recorded
-status: open
+status: addressed
 body: >-
   I think it's technically working, but I can't read the tooltip because of the
   opacity and it's getting chopped off.
@@ -13,3 +13,10 @@ body: >-
 
   See /Users/topherfangio/Desktop/Desktop\ -\ iCloud/Screenshots/Screenshot\
   2026-09-20\ at\ 11.46.14 PM.png for the issue.
+replies:
+  - author: agent
+    created: 2026-09-21T05:15:41Z
+    body: Fixed. The names bubble opens down and to the right from the left edge of
+      the anchor's name, so it stays inside the pane, and it is drawn at full
+      strength rather than in the line's faded ink. The check hovers it and
+      measures it against the pane (run 2026-09-21T05-15-10Z).

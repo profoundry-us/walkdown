@@ -1,0 +1,22 @@
+id: n-0330
+kind: note
+reason: observation
+author: agent
+created: 2026-09-21T05:00:52.433Z
+anchor:
+  rule: panel.rules.one-conversation
+status: addressed
+body: "A fail's why was filed twice. Every fail Topher gave on 2026-09-21 landed
+  on the rule's conversation as two identical replies under the same second:
+  n-0265, n-0308, n-0318, n-0320 and n-0327 each carry the pair. The panel
+  posted the why as a reply and then reopened the conversation with the same
+  text as the reason, and the server files a reopen's reason as a reply of its
+  own. The records stay as they are, since the ledger is append-only."
+replies:
+  - author: agent
+    created: 2026-09-21T05:15:41Z
+    body: Fixed. A fail's why now lands once. When the conversation was addressed it
+      goes as the reason the conversation reopens, and the server files that as
+      the one reply. Otherwise it goes as a plain reply. The five doubled
+      replies from tonight stay as they are. A check fails an addressed
+      conversation and counts the why once (run 2026-09-21T05-15-10Z).

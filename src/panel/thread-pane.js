@@ -177,11 +177,18 @@ export function threadPane() {
            * every name it has had (q-0252).
            */
           const chain = renameChain(sc, t.anchor.element);
+          /*
+           * The bubble opens down and to the right, from the left edge of
+           * the name: centred on it, it ran off the pane's left edge, and
+           * inside the line's own faded ink it was unreadable (n-0329). The
+           * line is faded part by part below, so the bubble is not.
+           */
           return chain.length > 1
-            ? html`<span class="tooltip tooltip-bottom" data-tip="${chain.join(' → ')}"
-                ><span class="font-mono">${t.anchor.element}</span>
-                <span class="badge badge-xs badge-outline align-middle opacity-70" data-testid="thread.renamed">renamed</span></span>`
-            : html`<span class="font-mono">${t.anchor.element}</span>`;
+            ? html`<span class="tooltip tooltip-bottom tooltip-start [--tt-trans:0]"
+                ><span class="tooltip-content z-50 whitespace-nowrap font-mono text-[11px]" data-testid="thread.renames">${chain.join(' → ')}</span
+                ><span class="font-mono opacity-45">${t.anchor.element}</span>
+                <span class="badge badge-xs badge-outline align-middle opacity-45" data-testid="thread.renamed">renamed</span></span>`
+            : html`<span class="font-mono opacity-45">${t.anchor.element}</span>`;
         })()
       : t.anchor?.position
         ? 'by position'
@@ -231,8 +238,11 @@ export function threadPane() {
     </div>
     ${
       where.length
-        ? html`<div class="px-3.5 pb-1 text-[11px] opacity-45">${where.map(
-            (part, i) => html`${i ? ' · ' : nothing}${part}`,
+        ? html`<div class="px-3.5 pb-1 text-[11px]">${where.map(
+            (part, i) =>
+              html`${i ? html`<span class="opacity-45"> · </span>` : nothing}${
+                typeof part === 'string' ? html`<span class="opacity-45">${part}</span>` : part
+              }`,
           )}</div>`
         : nothing
     }
@@ -290,6 +300,10 @@ export function threadPane() {
           S.threadNote = e.currentTarget.value;
         }}
         @paste=${(e) => pasteShots(e)}
+        @dragover=${(e) => {
+          if ([...(e.dataTransfer?.types ?? [])].includes('Files')) e.preventDefault();
+        }}
+        @drop=${(e) => pasteShots(e)}
         @keydown=${(e) => {
           // Enter sends, Shift+Enter breaks the line - the muscle memory
           // everyone already has. The buttons stay for the pointer.
@@ -322,7 +336,9 @@ export function threadPane() {
  * Paste is the door because that is where a screenshot already is.
  */
 export function pasteShots(e) {
-  const files = [...(e.clipboardData?.files ?? [])].filter((f) => /^image\//.test(f.type));
+  // Paste and drop are the same door: a file from the clipboard, or one
+  // dragged from the desk onto the box (n-0328).
+  const files = [...(e.clipboardData?.files ?? e.dataTransfer?.files ?? [])].filter((f) => /^image\//.test(f.type));
   if (!files.length) return;
   e.preventDefault();
   for (const f of files.slice(0, 4 - S.threadShots.length)) {

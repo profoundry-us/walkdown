@@ -79,12 +79,17 @@ function commands(here) {
             </div>`
           : nothing
       }
+      <!-- Starting comes first and reads as starting (n-0265): "or bring a
+           project in" as the opening header read as the second half of a
+           sentence nobody had begun. Choosing an existing one is its own
+           header, over the list. -->
       <div class="flex flex-col gap-1.5" data-testid="project.new">
-        <p class="text-[11px] uppercase tracking-wider opacity-50">Or bring a project in</p>
-        <code class="rounded-box bg-base-200 px-2 py-1.5 text-[11px]">walkdown import &lt;path&gt;</code>
-        <p class="text-[11px] leading-relaxed opacity-50">takes a repository's blueprints into this
-          machine's registry. <span class="font-mono">walkdown init</span> starts one where there is
-          nothing yet. Both are commands you run — walkdown never adopts a directory from a browser.</p>
+        <p class="text-[11px] uppercase tracking-wider opacity-50">${here ? 'Or start a project' : 'Start a project'}</p>
+        <code class="rounded-box bg-base-200 px-2 py-1.5 text-[11px]">walkdown init</code>
+        <p class="text-[11px] leading-relaxed opacity-50">starts a blueprint in the repository you are
+          in. A repository that already has one joins this machine with
+          <span class="font-mono">walkdown import &lt;path&gt;</span>. Both are commands you run —
+          walkdown never adopts a directory from a browser.</p>
       </div>
     </div>`;
 }
@@ -147,7 +152,8 @@ export function projectModal({ here, closable }) {
       ${commands(here)}
       ${
         rows.length
-          ? html`<div class="min-h-0 flex-1 overflow-y-auto" data-testid="project.list">${rows.map(
+          ? html`<p class="px-4 pt-3 pb-1 text-[11px] uppercase tracking-wider opacity-50" data-testid="project.choose">Or choose an existing project</p>
+            <div class="min-h-0 flex-1 overflow-y-auto" data-testid="project.list">${rows.map(
               (p) => html`
               <button class="block w-full border-b border-base-300 px-4 py-2.5 text-left last:border-b-0 hover:bg-base-200"
                 data-project="${p.id}" ?data-claims=${p.claims.length > 0}

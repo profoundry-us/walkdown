@@ -5,10 +5,18 @@ author: topher
 created: 2026-09-21T04:43:39.742Z
 anchor:
   rule: embed.threads.picture-on-a-pin
-status: open
+status: addressed
 body: >-
   I don't want to paste a file in, I want to be able to drag & drop a file into
   the composer (or the pin text box) and have it handle the file from there.
 
 
   Keep the thumbnail preview and full size opening when you fix this.
+replies:
+  - author: agent
+    created: 2026-09-21T05:15:40Z
+    body: Built. A picture dragged from the desk and dropped on the pin form, or on
+      a thread's composer, goes on the message the same way a paste did. Paste
+      still works too. The thumbnail and the full-size opening are unchanged.
+      The rule's steps say drop first, and the check drops a real file on both
+      boxes (run 2026-09-21T05-15-10Z).

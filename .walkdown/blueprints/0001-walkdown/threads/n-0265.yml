@@ -5,7 +5,7 @@ created: 2026-09-09T13:53:16.188Z
 anchor:
   rule: panel.start.open-a-folder
   screen: start
-status: open
+status: addressed
 body: "Judging panel.start.open-a-folder (run 2026-09-09T13-43-55Z-local-01,
   pass) I found one path where the panel reports no server while a server is
   answering. On walkdown's own served review page (GET / from `walkdown serve`),
@@ -81,4 +81,11 @@ replies:
 
       See /Users/topherfangio/Desktop/Desktop\ -\ iCloud/Screenshots/Screenshot\
       2026-09-20\ at\ 11.48.28 PM.png
+  - author: agent
+    created: 2026-09-21T05:15:39Z
+    body: Reworded. The picker now opens with Start a project, which shows walkdown
+      init first and names walkdown import beside it for a repository that
+      already has a blueprint. Or choose an existing project stands over the
+      list as its own header. The check on the picker reads both headers (run
+      2026-09-21T05-15-10Z).
 reason: finding

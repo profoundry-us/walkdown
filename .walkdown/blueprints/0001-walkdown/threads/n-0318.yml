@@ -7,7 +7,7 @@ created: 2026-09-21T01:00:38.115Z
 anchor:
   rule: panel.rules.evidence-visible
   screen: rule-detail
-status: open
+status: addressed
 body: Change the "Check source" from a collapse into a clickable area that opens
   the source in a modal. The modal should show all of the contents, but also
   provide a link to GitHub if possible so a user can see it on a larger screen
@@ -49,3 +49,13 @@ replies:
 
       /Users/topherfangio/Desktop/Desktop\ -\ iCloud/Screenshots/Screenshot\
       2026-09-20\ at\ 11.11.40 PM.png
+  - author: agent
+    created: 2026-09-21T05:15:40Z
+    body: "Two things. The desk behind the check source and behind evidence now
+      blurs, and every file name sits on its own dark ground, so the names read
+      over whatever is beneath. On the links: your server answers with the
+      GitHub address and the commit, and a fresh page shows Open on GitHub
+      beside each of the four checks on evidence-visible. The page you had open
+      was built before the link existed, so a reload is what it needed. The
+      check asserts the blur, the caption's ground and the link (run
+      2026-09-21T05-15-10Z)."

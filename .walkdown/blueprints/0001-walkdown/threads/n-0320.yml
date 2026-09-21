@@ -7,7 +7,7 @@ created: 2026-09-21T01:00:38.487Z
 anchor:
   rule: panel.rules.detail-slide
   screen: rule-detail
-status: open
+status: addressed
 body: The rule ID at the top of the Rule Detail page should be clickable and
   should copy the ID so I don't have to select the text and click command-c
   manually.
@@ -25,3 +25,7 @@ replies:
   - author: topher
     created: 2026-09-21T04:16:11Z
     body: "Use `cursor: pointer` instead of `cursor: copy`."
+  - author: agent
+    created: 2026-09-21T05:15:40Z
+    body: Done. The id shows the ordinary pointer hand, and the check reads the
+      cursor (run 2026-09-21T05-15-10Z).

@@ -4601,12 +4601,17 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
             </div>`
           : A
       }
+      <!-- Starting comes first and reads as starting (n-0265): "or bring a
+           project in" as the opening header read as the second half of a
+           sentence nobody had begun. Choosing an existing one is its own
+           header, over the list. -->
       <div class="flex flex-col gap-1.5" data-testid="project.new">
-        <p class="text-[11px] uppercase tracking-wider opacity-50">Or bring a project in</p>
-        <code class="rounded-box bg-base-200 px-2 py-1.5 text-[11px]">walkdown import &lt;path&gt;</code>
-        <p class="text-[11px] leading-relaxed opacity-50">takes a repository's blueprints into this
-          machine's registry. <span class="font-mono">walkdown init</span> starts one where there is
-          nothing yet. Both are commands you run — walkdown never adopts a directory from a browser.</p>
+        <p class="text-[11px] uppercase tracking-wider opacity-50">${here ? 'Or start a project' : 'Start a project'}</p>
+        <code class="rounded-box bg-base-200 px-2 py-1.5 text-[11px]">walkdown init</code>
+        <p class="text-[11px] leading-relaxed opacity-50">starts a blueprint in the repository you are
+          in. A repository that already has one joins this machine with
+          <span class="font-mono">walkdown import &lt;path&gt;</span>. Both are commands you run —
+          walkdown never adopts a directory from a browser.</p>
       </div>
     </div>`;
   }
@@ -4669,7 +4674,8 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       ${commands(here)}
       ${
         rows.length
-          ? b`<div class="min-h-0 flex-1 overflow-y-auto" data-testid="project.list">${rows.map(
+          ? b`<p class="px-4 pt-3 pb-1 text-[11px] uppercase tracking-wider opacity-50" data-testid="project.choose">Or choose an existing project</p>
+            <div class="min-h-0 flex-1 overflow-y-auto" data-testid="project.list">${rows.map(
               (p) => b`
               <button class="block w-full border-b border-base-300 px-4 py-2.5 text-left last:border-b-0 hover:bg-base-200"
                 data-project="${p.id}" ?data-claims=${p.claims.length > 0}
@@ -5531,11 +5537,23 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     const live = liveNoteOn(rule);
     if (!live) return postRuleNote(rule, text, 'feedback');
     const actor = whoAmI();
-    if (!(await postReply(live.id, text, actor))) return null;
+    /*
+     * Reopening files its reason as a reply on the server, so the words go
+     * ONE way: as the reopen's reason when the conversation comes back to
+     * open, as a plain reply otherwise. Posting the reply and then reopening
+     * with the same text as the reason wrote every fail's why twice, under
+     * the same second (n-0330, five threads on 2026-09-21).
+     */
     if (reopen && live.status === 'addressed') {
+      if (isMachineName(actor)) {
+        say('A reply is recorded under a person\u2019s name \u2014 set it in Settings (the gear).');
+        openSettings();
+        return null;
+      }
       const back = await threadPost(`/api/threads/${live.id}/status`, { status: 'open', actor, reason: text });
-      if (!back) return null;
+      return back ? live.id : null;
     }
+    if (!(await postReply(live.id, text, actor))) return null;
     return live.id;
   }
 
@@ -6365,7 +6383,9 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     const signLine = (state) =>
       b`<span class="flex justify-center">${signoffDot({ role: '_', state }, true)}</span>
       <span>${SIGN_SAY[state]}</span>`;
-    return b`<span class="tooltip tooltip-top shrink-0" data-testid="panel.legend">
+    // tooltip-end: the legend sits at the right edge of the footer, and a
+    // bubble centred on it lost half its width off the pane (n-0308).
+    return b`<span class="tooltip tooltip-top tooltip-end shrink-0" data-testid="panel.legend">
     <!-- z-50 here is load-bearing, and unlike the rule strip's bubble it was
          measured rather than assumed: this one opens UPWARD across the whole
          scrolling list from the last row in the panel, and at daisyUI's own
@@ -6461,11 +6481,12 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     layer$1.dataset.theme = 'blueprint';
     layer$1.dataset.testid = 'detail.evidence-modal';
     layer$1.style.cssText = `position:fixed; inset:0; z-index:10; pointer-events:auto;
-    background:rgba(16,20,30,.72); display:flex; flex-direction:column; gap:10px;
+    background:rgba(16,20,30,.78); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+    display:flex; flex-direction:column; gap:10px;
     align-items:center; justify-content:flex-start; overflow:auto; padding:20px;`;
     const frame = (p, inner) => `<figure class="w-full max-w-4xl" data-evidence="${esc(p)}">
       ${inner}
-      <figcaption class="mt-1 font-mono text-[10.5px] text-base-100 opacity-70">${esc(p)}</figcaption>
+      <figcaption class="mt-1 inline-block rounded bg-neutral/90 px-1.5 py-0.5 font-mono text-[10.5px] text-neutral-content">${esc(p)}</figcaption>
     </figure>`;
     layer$1.innerHTML = `
     <div class="flex w-full max-w-4xl items-center gap-2 text-base-100">
@@ -6559,7 +6580,8 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     layer.dataset.theme = 'blueprint';
     layer.dataset.testid = 'detail.source-modal';
     layer.style.cssText = `position:fixed; inset:0; z-index:10; pointer-events:auto;
-    background:rgba(16,20,30,.72); display:flex; flex-direction:column; gap:10px;
+    background:rgba(16,20,30,.78); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+    display:flex; flex-direction:column; gap:10px;
     align-items:center; justify-content:flex-start; overflow:auto; padding:20px;`;
     layer.innerHTML = `
     <div class="flex w-full max-w-4xl items-center gap-2 text-base-100">
@@ -6585,12 +6607,12 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
             .map((c) => {
               const link = sourceLink(out.repo, c);
               return `<figure class="mb-3 w-full" data-check="${esc(c.ref)}">
-        <figcaption class="mb-1 flex items-center gap-2 font-mono text-[11px] text-base-100">
-          <span class="opacity-80">${esc(c.ref)}</span>${
+        <figcaption class="mb-1 flex items-center gap-2 rounded bg-neutral/90 px-2 py-1 font-mono text-[11px] text-neutral-content">
+          <span>${esc(c.ref)}</span>${
             c.recorded ? `<span class="text-warning">· was ${esc(c.recorded)} when last recorded</span>` : ''
           }${
             link
-              ? `<a class="link ml-auto font-sans text-[11px] no-underline opacity-80 hover:opacity-100" target="_blank" rel="noreferrer"
+              ? `<a class="link ml-auto font-sans text-[11px] no-underline" target="_blank" rel="noreferrer"
                  href="${esc(link)}" data-testid="detail.source-github">Open on GitHub ↗</a>`
               : ''
           }
@@ -7231,7 +7253,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
                name is an id you paste into a commit, a run record or a
                message, and selecting eleven-pixel text by hand is nobody's
                idea of naming it. -->
-          <button type="button" class="cursor-copy break-all text-left font-mono text-[11px] opacity-40 hover:opacity-80"
+          <button type="button" class="cursor-pointer break-all text-left font-mono text-[11px] opacity-40 hover:opacity-80"
             data-testid="detail.rule-id" title="Copy the rule id"
             @click=${() =>
               navigator.clipboard
@@ -7522,11 +7544,18 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
              * every name it has had (q-0252).
              */
             const chain = renameChain(sc, t.anchor.element);
+            /*
+             * The bubble opens down and to the right, from the left edge of
+             * the name: centred on it, it ran off the pane's left edge, and
+             * inside the line's own faded ink it was unreadable (n-0329). The
+             * line is faded part by part below, so the bubble is not.
+             */
             return chain.length > 1
-              ? b`<span class="tooltip tooltip-bottom" data-tip="${chain.join(' → ')}"
-                ><span class="font-mono">${t.anchor.element}</span>
-                <span class="badge badge-xs badge-outline align-middle opacity-70" data-testid="thread.renamed">renamed</span></span>`
-              : b`<span class="font-mono">${t.anchor.element}</span>`;
+              ? b`<span class="tooltip tooltip-bottom tooltip-start [--tt-trans:0]"
+                ><span class="tooltip-content z-50 whitespace-nowrap font-mono text-[11px]" data-testid="thread.renames">${chain.join(' → ')}</span
+                ><span class="font-mono opacity-45">${t.anchor.element}</span>
+                <span class="badge badge-xs badge-outline align-middle opacity-45" data-testid="thread.renamed">renamed</span></span>`
+              : b`<span class="font-mono opacity-45">${t.anchor.element}</span>`;
           })()
         : t.anchor?.position
           ? 'by position'
@@ -7576,8 +7605,11 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     </div>
     ${
       where.length
-        ? b`<div class="px-3.5 pb-1 text-[11px] opacity-45">${where.map(
-            (part, i) => b`${i ? ' · ' : A}${part}`,
+        ? b`<div class="px-3.5 pb-1 text-[11px]">${where.map(
+            (part, i) =>
+              b`${i ? b`<span class="opacity-45"> · </span>` : A}${
+                typeof part === 'string' ? b`<span class="opacity-45">${part}</span>` : part
+              }`,
           )}</div>`
         : A
     }
@@ -7635,6 +7667,10 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
           S.threadNote = e.currentTarget.value;
         }}
         @paste=${(e) => pasteShots(e)}
+        @dragover=${(e) => {
+          if ([...(e.dataTransfer?.types ?? [])].includes('Files')) e.preventDefault();
+        }}
+        @drop=${(e) => pasteShots(e)}
         @keydown=${(e) => {
           // Enter sends, Shift+Enter breaks the line - the muscle memory
           // everyone already has. The buttons stay for the pointer.
@@ -7667,7 +7703,9 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
    * Paste is the door because that is where a screenshot already is.
    */
   function pasteShots(e) {
-    const files = [...(e.clipboardData?.files ?? [])].filter((f) => /^image\//.test(f.type));
+    // Paste and drop are the same door: a file from the clipboard, or one
+    // dragged from the desk onto the box (n-0328).
+    const files = [...(e.clipboardData?.files ?? e.dataTransfer?.files ?? [])].filter((f) => /^image\//.test(f.type));
     if (!files.length) return;
     e.preventDefault();
     for (const f of files.slice(0, 4 - S.threadShots.length)) {
@@ -8859,9 +8897,20 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
    * page it was reviewing; nothing here does.
    */
 
+  /*
+   * The last load wins. A skip reloads the board without waiting for the
+   * answer, and one that landed after Finish had cleared the draft carried
+   * the draft it had just cleared - so the sitting just recorded stood again
+   * (n-0331). A load that a later one has overtaken drops its answer.
+   */
+  let loadGen = 0;
+
   async function load() {
+    const gen = ++loadGen;
     const res = await fetch(api('/api/blueprint'));
-    S.data = await res.json();
+    const data = await res.json();
+    if (gen !== loadGen) return;
+    S.data = data;
     /*
      * The board this panel opened is the only one it records against (q-0301).
      * The key is the blueprint's home on disk, so a server restarted on the
@@ -9043,7 +9092,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
            carries is a hover away and read in Settings, where it was shown
            before the sitting began. With no full name the two are one
            string and the username is what is drawn. -->
-      <span>Recording as
+      <span class="flex flex-col"><span>Recording as
         <button id="wdp-actor" data-testid="panel.actor-name" class="link font-semibold"
           title="${
             recordingHandle() && recordingHandle() !== recordingDisplay()
@@ -9051,6 +9100,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
               : 'Change the name in Settings (the gear)'
           }"
           @click=${openActorSettings}>${recordingDisplay() || 'set your name…'}</button></span>
+      ${signingNote()}</span>
       <!-- Both halves of the same fact: how many you have judged, and how
            many the sitting has in it. The denominator is what you have done
            plus what is still owed, so it holds steady as you walk and reads
@@ -9061,7 +9111,6 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
            sitting where you are accepting on somebody else's behalf must say
            so for its whole length: forgetting half way through is how a
            signature ends up under the wrong name (panel.walkdown.who-signs-is-declared). -->
-      ${signingNote()}
       <!-- The tally moved to the footer beside the verified count (n-0309):
            one place says how far the sitting has got, and it is the place
            that already counts rules. What stays here is the way onward.
@@ -9079,20 +9128,29 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
            panel already uses for the work you owe. Outlined rather than
            filled because Finish walkdown is the solid one, and two solid
            yellows in view would argue about which is the act. -->
-      <span class="ml-auto flex items-center gap-1">
+      <!-- With nothing left owing a verdict, both controls are disabled and
+           one bubble over the pair says what is left to do: Finish. A
+           disabled button takes no hover, so the bubble is on the span
+           around them. -->
+      <span class="ml-auto flex items-center gap-1 ${
+        owedRows().length ? '' : 'tooltip tooltip-top tooltip-end [--tt-trans:0]'
+      }" data-testid="panel.onward" ?data-done=${!owedRows().length}
+        data-tip="Nothing left owing a verdict — finish the walkdown to record it">
         <button class="btn btn-xs btn-outline border-base-300 text-base-content/70" data-testid="panel.skip" id="wdp-skip"
-          ?disabled=${!(S.view === 'detail' && S.selected)}
+          ?disabled=${!(S.view === 'detail' && S.selected) || !owedRows().length}
           title="${
             S.view === 'detail' && S.selected
               ? 'Set this rule aside for this sitting — recorded as skipped, still owed, back next time'
               : 'Open a rule to skip it'
           }" @click=${() => giveVerdict('skipped')}>Skip</button>
         <button class="btn btn-xs btn-outline btn-warning" data-testid="panel.continue" id="wdp-continue"
-          ?disabled=${Boolean(unjudgedHere())}
+          ?disabled=${Boolean(unjudgedHere()) || !owedRows().length}
           title="${
-            unjudgedHere()
-              ? 'This rule owes you a verdict — pass, fail or skip it to carry on'
-              : 'Open the next rule still owing you a verdict'
+            !owedRows().length
+              ? ''
+              : unjudgedHere()
+                ? 'This rule owes you a verdict — pass, fail or skip it to carry on'
+                : 'Open the next rule still owing you a verdict'
           }" @click=${continueWalkdown}>Continue</button>
       </span>
     </div>`
@@ -9864,13 +9922,14 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     if (!sigs.length) return A;
     const mine = recordingHandle();
     const proxied = sigs.some((sig) => sig.signer !== mine);
-    // One role per line, no "as", no commas (n-0309): a list reads as a list.
-    // A role signed for somebody else says so on its own line.
-    return b`<span data-testid="panel.actor-signing" class="flex flex-col leading-tight ${
+    // One line under the name, the roles separated by commas (n-0327): a
+    // column of roles took more of the strip than the sitting did. A role
+    // signed for somebody else says so in its own words.
+    return b`<span data-testid="panel.actor-signing" class="block text-[11px] leading-tight ${
     proxied ? 'rounded bg-warning/30 px-1.5 py-0.5 font-semibold' : 'opacity-60'
-  }" title="${proxied ? 'Recorded under their name, with yours as who typed it' : 'The roles this sitting signs for'}">${sigs.map(
-    (sig) => b`<span>${sig.role}${sig.signer !== mine ? ` for ${sig.signer}` : ''}</span>`,
-  )}</span>`;
+  }" title="${proxied ? 'Recorded under their name, with yours as who typed it' : 'The roles this sitting signs for'}">${sigs
+    .map((sig) => `${sig.role}${sig.signer !== mine ? ` for ${sig.signer}` : ''}`)
+    .join(', ')}</span>`;
   }
 
   /** The username a sitting's records will carry: the one it was started under. */
