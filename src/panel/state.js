@@ -115,7 +115,9 @@ export const S = {
   verdictSay: '', // the verdict refusal line; dies with the rule it refused
   askChoice: null,
   /** The blueprint key (its home on disk) this panel opened; the only board it records against (q-0301). */
-  board: null, // the option picked on the rule's current ask, until it is answered
+  board: null,
+  /** Pictures pasted into the thread composer, not yet sent: { name, type, data }. */
+  threadShots: [], // the option picked on the rule's current ask, until it is answered
   composerSay: '', // the composer's refusal line; same lifetime, same reason
   threadSay: '', // the thread screen's refusal line; dies when the view moves on
   ruleNote: '', // the rule's own new-thread box, kept the same way

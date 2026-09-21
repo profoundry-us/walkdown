@@ -6,7 +6,7 @@ created: 2026-08-27T00:15:09Z
 anchor:
   rule: embed.threads.note-first
   screen: thread-panel
-status: open
+status: addressed
 body: Also, we probably need a way to attach screenshots to a pin or thread;
   let's add that as a new thread somewhere relevant
 added: >-
@@ -47,3 +47,15 @@ replies:
       cannot be changed after filing, so it stays open here rather than in the
       walk queue. Yours to waive (it is an idea, not a defect) or to keep as the
       reminder it is."
+  - author: agent
+    created: 2026-09-21T02:57:16Z
+    body: Built. A screenshot pasted into the pin form, or into a thread's composer
+      on its own screen, goes on the message. The bytes live in attachments/
+      under the threads directory, beside the records, so a moved ledger takes
+      them along. The record names the file and the name it was pasted with. The
+      stream draws the picture under the words as a thumbnail that opens full
+      size over the desk. The CLI takes --attach <file> on thread new and on a
+      reply, and lists the pictures when it reads a thread. Pictures only, four
+      at most, under five megabytes each; anything else is refused in words.
+      Rule embed.threads.picture-on-a-pin holds the checks (recorded
+      2026-09-21T02-56-48Z).

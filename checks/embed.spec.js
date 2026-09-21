@@ -447,6 +447,60 @@ test('a pin says what it is on contact, and says nothing until then', {
 });
 
 /*
+ * A screenshot pasted into the pin form goes on the pin (n-0096): shown
+ * small before filing, named on the record, served by name, drawn under the
+ * words as a thumbnail that opens. The paste is a real ClipboardEvent with a
+ * File on it, which is what a screenshot on the clipboard arrives as.
+ */
+test('a screenshot pasted into the pin form goes on the pin, and opens from the stream', {
+  tag: '@rule:embed.threads.picture-on-a-pin',
+}, async ({ page }) => {
+  await page.goto(FIXTURE);
+  await expect(page.getByTestId('panel.bar')).toBeVisible();
+  await page.waitForLoadState('networkidle');
+  await page.getByTestId('panel.pin-mode').click();
+  const frame = app(page);
+  const box = await page.getByTestId('panel.app-frame').boundingBox();
+  await page.mouse.click(box.x + box.width * 0.6, box.y + box.height * 0.55);
+  const note = frame.getByTestId('pin.note');
+  await expect(note).toBeVisible();
+  // A 1x1 PNG, pasted as a file the way a screenshot is.
+  await note.evaluate((el) => {
+    const bytes = Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='), (c) => c.charCodeAt(0));
+    const dt = new DataTransfer();
+    dt.items.add(new File([bytes], 'shot.png', { type: 'image/png' }));
+    el.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
+  });
+  await expect(frame.getByTestId('pin.shots').locator('img'), 'shown small before it is filed').toHaveCount(1);
+  await note.fill('The corner is clipped, see the picture.');
+  await frame.getByTestId('pin.save').click();
+
+  // On disk: the record names the picture, and the file is served by that name.
+  let thread;
+  await expect.poll(async () => {
+    const bp = await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json();
+    thread = bp.threads.find((t) => t.body === 'The corner is clipped, see the picture.');
+    return thread?.attachments?.length ?? 0;
+  }).toBe(1);
+  expect(thread.attachments[0].file).toMatch(/^attachments\/n-\d{4}-1\.png$/);
+  expect(thread.attachments[0].name).toBe('shot.png');
+  const served = await page.request.get(`${WD_ORIGIN}/${thread.attachments[0].file}?bp=blueprint`);
+  expect(served.status()).toBe(200);
+  expect(served.headers()['content-type']).toMatch(/image\/png/);
+  expect((await page.request.get(`${WD_ORIGIN}/attachments/../${thread.id}.yml?bp=blueprint`)).status()).toBe(404);
+
+  // In the stream: a thumbnail under the words, which opens the picture.
+  await page.getByTestId('panel.pin-mode').click();
+  await frame.locator(`[data-testid="pin.marker"][data-thread="${thread.id}"]`).click();
+  const shot = page.getByTestId('thread.panel').locator('[data-attachment]').first();
+  await expect(shot.locator('img')).toBeVisible();
+  await shot.click();
+  const modal = page.getByTestId('detail.evidence-modal');
+  await expect(modal.locator('img')).toHaveCount(1);
+  expect(await modal.locator('img').evaluate((i) => i.complete && i.naturalWidth > 0)).toBe(true);
+});
+
+/*
  * The standalone popover — the embed with no panel around it, which is the
  * script-tag delivery — renders a message through the same MSG as the panel,
  * so its ids arrive marked as refs. It has no rule screen and no thread

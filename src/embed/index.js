@@ -613,7 +613,8 @@ import { icon } from './icons.js';
     overlay.innerHTML = `
       <b class="font-mono text-[11.5px]">${el ? anchorId(el) : 'unanchored spot'}</b>
       ${el ? '' : '<div class="text-[11px] opacity-50">no anchored element here — pinned by position</div>'}
-      <textarea data-testid="pin.note" class="textarea textarea-sm mt-2 h-16 w-full" placeholder="What should change here?"></textarea>
+      <textarea data-testid="pin.note" class="textarea textarea-sm mt-2 h-16 w-full" placeholder="What should change here? Paste a screenshot to attach it."></textarea>
+      <div class="wd-shots-pending mt-1 flex flex-wrap gap-1" data-testid="pin.shots"></div>
       <label class="mt-1 flex items-center gap-2 text-[12px]">
         <input type="checkbox" data-testid="pin.kind" class="checkbox checkbox-xs wd-q"> question (not a note)</label>
       <div class="mt-2 flex gap-2">
@@ -634,6 +635,40 @@ import { icon } from './icons.js';
     };
     overlay.querySelector('textarea').focus();
     overlay.querySelector('.wd-cancel').onclick = () => closeForm();
+    /*
+     * A screenshot pasted into the form goes on the pin (n-0096). Paste is
+     * the door because that is where a screenshot already is; the picture
+     * is shown small under the words until the pin is filed, with a way to
+     * drop it.
+     */
+    const shots = [];
+    const strip = overlay.querySelector('.wd-shots-pending');
+    const drawShots = () => {
+      strip.innerHTML = shots
+        .map(
+          (s, i) => `<span class="relative inline-block"><img src="${s.data}" alt="${s.name}" class="h-12 rounded border border-base-300">
+            <button type="button" data-drop="${i}" title="Drop this picture" class="btn btn-circle btn-ghost btn-xs absolute -right-1 -top-1 h-4 min-h-0 w-4 bg-base-100 p-0 text-[10px]">✕</button></span>`,
+        )
+        .join('');
+      for (const b of strip.querySelectorAll('[data-drop]'))
+        b.onclick = () => {
+          shots.splice(Number(b.dataset.drop), 1);
+          drawShots();
+        };
+    };
+    overlay.querySelector('textarea').addEventListener('paste', (e) => {
+      const files = [...(e.clipboardData?.files ?? [])].filter((f) => /^image\//.test(f.type));
+      if (!files.length) return;
+      e.preventDefault();
+      for (const f of files.slice(0, 4 - shots.length)) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          shots.push({ name: f.name || 'pasted.png', type: f.type, data: String(reader.result) });
+          drawShots();
+        };
+        reader.readAsDataURL(f);
+      }
+    });
     overlay.querySelector('.wd-primary').onclick = () => {
       const body = overlay.querySelector('textarea').value.trim();
       const kind = overlay.querySelector('.wd-q').checked ? 'question' : 'note';
@@ -659,6 +694,7 @@ import { icon } from './icons.js';
         kind,
         surface: ctx.surface,
         viewport: currentViewport(),
+        ...(shots.length && { attachments: shots }),
       });
       closeForm();
     };
@@ -941,6 +977,7 @@ import { icon } from './icons.js';
           blueprintRows = data.rows ?? [];
           blueprintThreads = data.threads ?? [];
           MSG.zone = identity?.timezone ?? null;
+          MSG.href = (file) => api(`/${file}`);
           resolve();
         })
         .catch(() => {}); // server not running — embed stays dormant

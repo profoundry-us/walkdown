@@ -243,6 +243,9 @@ replies:
   - author: agent               # the machine's own words are its own
     created: 2026-08-20T16:02:00Z
     body: Built; the error sits under the field. Run 2026-08-20T16-00-11Z re-verified it.
+    attachments:                # pictures on the message (n-0096): pasted into the form or given with --attach
+      - file: attachments/q-0042-1.png   # under the threads directory, beside the records
+        name: after.png
 ```
 
 - A question is **not done when answered**. It is done when **incorporated** — the answer

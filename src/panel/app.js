@@ -3180,7 +3180,7 @@ function wireGlobals() {
    */
   D.host.addEventListener('click', (e) => {
     const ref = e.target.closest?.(
-      '[data-thread-ref], [data-rule-ref], [data-open-thread], [data-evidence-ref]',
+      '[data-thread-ref], [data-rule-ref], [data-open-thread], [data-evidence-ref], [data-attachment]',
     );
     if (!ref) return;
     e.stopPropagation();
@@ -3189,6 +3189,8 @@ function wireGlobals() {
     // An evidence key in a body opens the file, the way the detail's own
     // evidence rows do - the server resolves the key for this machine.
     if (ref.dataset.evidenceRef) return openEvidence([ref.dataset.evidenceRef]);
+    // A picture on a message opens the same way (n-0096).
+    if (ref.dataset.attachment) return openEvidence([ref.dataset.attachment]);
     // The replies line a card draws is MSG markup too, and it is the door
     // into a thread listed under a rule.
     if (ref.dataset.openThread) return openThreadView(ref.dataset.openThread);
@@ -3340,6 +3342,8 @@ function wireGlobals() {
         body: JSON.stringify({
           kind: msg.kind,
           body: msg.body,
+          // The pictures pasted into the pin form ride along (n-0096).
+          ...(msg.attachments?.length && { attachments: msg.attachments }),
           anchor: {
             ...(msg.element && { element: msg.element }),
             // The spot within the element, and the spot on the surface: both
@@ -3370,6 +3374,8 @@ function wireGlobals() {
 }
 
 function boot() {
+  // Pictures on messages are fetched from the server this panel talks to.
+  MSG.href = (file) => api(`/${file}`);
   /*
    * Once per page, across BOTH JavaScript worlds. A page can carry walkdown by
    * script tag while the extension injects it too, and those run in separate

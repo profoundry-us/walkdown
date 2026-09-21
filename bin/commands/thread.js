@@ -8,6 +8,8 @@ import { whenIn } from '../../lib/time.js';
 import { saysSomething, THREAD_KINDS } from '../../lib/vocab.js';
 import { mutateThread, offer, openThread } from '../../lib/writes.js';
 import { end, loadOrExit } from './context.js';
+import { readFileSync } from 'node:fs';
+import { basename, extname } from 'node:path';
 
 export function run(args) {
   const { values, positionals } = parseArgs({
@@ -31,6 +33,7 @@ export function run(args) {
       body: { type: 'string' },
       option: { type: 'string', multiple: true },
       'as-is': { type: 'boolean', default: false },
+      attach: { type: 'string', multiple: true },
     },
     allowPositionals: true,
   });
@@ -169,6 +172,7 @@ export function run(args) {
         said: values.said ?? null,
         added: values.added ?? null,
         asIs: values['as-is'],
+        attachments: attachFiles(values.attach),
       }));
     } catch (err) {
       // A refusal at the door (the voice, a missing body) is words, never a
@@ -239,6 +243,7 @@ export function run(args) {
         ...(values.said !== undefined ? { said: values.said } : {}),
         ...(values.added !== undefined ? { added: values.added } : {}),
         asIs: values['as-is'],
+        attachments: attachFiles(values.attach),
         ...(status ? { status } : {}),
         reason: values.reason,
         via,
@@ -341,6 +346,7 @@ export function run(args) {
   const addition = (m, pad) =>
     m?.added ? `\n${pad}${dim('┆ agent added:')}\n${pad}${dim('┆')} ${String(m.added).trim().replace(/\n/g, `\n${pad}${dim('┆')} `)}` : '';
   console.log(addition(t, '  ').replace(/^\n/, ''));
+  for (const a of t.attachments ?? []) console.log(dim(`  📎 ${a.name} · ${a.file}`));
   // The choices a question offered, and the one the answer took.
   for (const o of t.options ?? [])
     console.log(`  ${t.chosen === o.label ? '◉' : '○'} ${o.label}${o.why ? dim(` — ${o.why}`) : ''}`);
@@ -354,6 +360,23 @@ export function run(args) {
         .trim()
         .replace(/\n/g, '\n    ')}${addition(r, '    ')}`,
     );
+    for (const a of r.attachments ?? []) console.log(dim(`    📎 ${a.name} · ${a.file}`));
   }
   return end(0);
+}
+
+
+/*
+ * `--attach <file>`: a picture from disk goes on the message (n-0096). The
+ * same door the browser's paste uses, so the record is one shape whoever
+ * filed it.
+ */
+function attachFiles(paths) {
+  if (!paths?.length) return null;
+  return paths.map((p) => {
+    const ext = extname(p).toLowerCase().replace('.', '');
+    const type = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp' }[ext];
+    if (!type) throw new Error(`${p}: a picture goes on a message - png, jpg, gif or webp`);
+    return { name: basename(p), type, data: readFileSync(p).toString('base64') };
+  });
 }

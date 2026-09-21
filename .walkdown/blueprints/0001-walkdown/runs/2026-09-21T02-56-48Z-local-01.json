@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-09-21T02-56-48Z-local-01",
+  "created": "2026-09-21T02:56:48Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "57a994c-dirty",
+  "tree_hash": "sha256:20ed6ca821f1",
+  "spec_hash": "sha256:615704e16ba2",
+  "results": [
+    {
+      "rule": "embed.threads.picture-on-a-pin",
+      "status": "pass",
+      "statement_hash": "sha256:7b9a728127e0",
+      "duration_ms": 2947,
+      "checks": [
+        "checks/embed.spec.js:455"
+      ]
+    }
+  ]
+}

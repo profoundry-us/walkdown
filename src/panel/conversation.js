@@ -134,8 +134,11 @@ async function postReply(id, text, actor) {
   const list = pendingReplies.get(id) ?? [];
   pendingReplies.set(id, [...list, msg]);
   S.threadNote = '';
+  // The pictures pasted into the composer go with the words (n-0096).
+  const shots = S.threadShots;
+  S.threadShots = [];
   requestRender();
-  const ok = await threadPost(`/api/threads/${id}/replies`, { author: who, body: text });
+  const ok = await threadPost(`/api/threads/${id}/replies`, { author: who, body: text, ...(shots.length && { attachments: shots }) });
   if (ok) {
     pendingReplies.set(
       id,
@@ -151,6 +154,7 @@ async function postReply(id, text, actor) {
     msg.pending = false;
     msg.failed = true;
     S.threadNote = text;
+    S.threadShots = shots;
     requestRender();
   }
   return ok;

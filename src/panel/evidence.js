@@ -60,7 +60,8 @@ export function openEvidence(paths) {
     </div>
     ${paths
       .map((p) => {
-        const href = esc(api('/evidence/' + p));
+        // A picture on a message is served by its own name (n-0096); everything else is an evidence key.
+        const href = esc(p.startsWith('attachments/') ? api('/' + p) : api('/evidence/' + p));
         if (kindOf(p) === 'image')
           return frame(
             p,

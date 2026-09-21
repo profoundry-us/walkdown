@@ -283,11 +283,13 @@ export function threadPane() {
             : nothing
         }
       </div>
+      ${pastedShots()}
       <textarea id="wdp-note" data-testid="thread.reply" rows="2" class="textarea textarea-xs w-full resize-none"
         placeholder="${composerPlaceholder(t, role)}"
         @input=${(e) => {
           S.threadNote = e.currentTarget.value;
         }}
+        @paste=${(e) => pasteShots(e)}
         @keydown=${(e) => {
           // Enter sends, Shift+Enter breaks the line - the muscle memory
           // everyone already has. The buttons stay for the pointer.
@@ -311,4 +313,38 @@ export function threadPane() {
           : nothing
       }
     </div>`;
+}
+
+
+/*
+ * A picture pasted into the composer (n-0096): held until the reply is sent,
+ * shown small above the box with a way to drop it, and sent with the words.
+ * Paste is the door because that is where a screenshot already is.
+ */
+export function pasteShots(e) {
+  const files = [...(e.clipboardData?.files ?? [])].filter((f) => /^image\//.test(f.type));
+  if (!files.length) return;
+  e.preventDefault();
+  for (const f of files.slice(0, 4 - S.threadShots.length)) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      S.threadShots = [...S.threadShots, { name: f.name || 'pasted.png', type: f.type, data: String(reader.result) }];
+      requestRender();
+    };
+    reader.readAsDataURL(f);
+  }
+}
+
+function pastedShots() {
+  if (!S.threadShots.length) return nothing;
+  return html`<div class="mb-1 flex flex-wrap gap-1" data-testid="thread.shots">${S.threadShots.map(
+    (s, i) => html`<span class="relative inline-block">
+      <img src="${s.data}" alt="${s.name}" class="h-12 rounded border border-base-300">
+      <button type="button" class="btn btn-circle btn-ghost btn-xs absolute -right-1 -top-1 h-4 min-h-0 w-4 bg-base-100 p-0 text-[10px]"
+        title="Drop this picture" @click=${() => {
+          S.threadShots = S.threadShots.filter((_, j) => j !== i);
+          requestRender();
+        }}>✕</button>
+    </span>`,
+  )}</div>`;
 }
