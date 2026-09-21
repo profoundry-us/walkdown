@@ -315,6 +315,10 @@ export function run(args) {
     cover: (i) => `cover ${i.rule} — demands checks, and no check claims it`,
     rejudge: (i) =>
       `judge ${i.rule} again — ${i.thread} claims a fix newer than the passing verdict`,
+    // The machine's own observation, addressed by the machine: it closes it
+    // itself. Missing from this table for a day, so the queue crashed the
+    // moment one existed (2026-09-21).
+    settle: (i) => `settle ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — your own observation, addressed; close it`,
   };
   for (const [who, title] of [
     ['human', 'NEEDS A HUMAN'],

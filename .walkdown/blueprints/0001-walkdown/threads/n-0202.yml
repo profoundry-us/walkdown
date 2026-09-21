@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-05T23:47:10.859Z
 anchor:
   rule: status.evidence.agent-assumed
-status: addressed
+status: settled
 body: >-
   Two judges driven in parallel on 2026-09-05 landed on each other's servers,
   and one read the wrong board before noticing.
@@ -117,4 +117,12 @@ replies:
       answer - so they are questions now, one each: q-0300 (should the prompt
       hand out a port) and q-0301 (can the shared browser pane be defended
       against at all). Nothing else here is owed."
+  - author: agent
+    created: 2026-09-21T02:23:13Z
+    body: Settled. Two of the three asks have landed. Every judge prompt says to
+      confirm /api/blueprint names its copy before trusting a page (2026-09-14).
+      The prompt now hands each judge a port of its own, given with --port or
+      derived from the rule id, so two judges no longer share one (48bb807,
+      2026-09-20). The third, whether the browser pane should refuse a foreign
+      origin, was filed as a question of yours and stands there.
 reason: observation

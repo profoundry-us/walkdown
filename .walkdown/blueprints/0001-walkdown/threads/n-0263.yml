@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-09T13:36:17.293Z
 anchor:
   rule: panel.start.open-a-folder
-status: addressed
+status: settled
 body: >-
   The served-root line names the current blueprint's own directory, not the
   folder being served.
@@ -61,4 +61,9 @@ replies:
 
 
       highball run green, npm run checks 46 passed.
+  - author: agent
+    created: 2026-09-21T02:22:54Z
+    body: Settled. The served-root line has named the place whose registry answered
+      since 2026-09-09 (lib/serve.js), and the check on
+      panel.start.open-a-folder has walked it since. Nothing further to do here.
 reason: observation

@@ -474,6 +474,7 @@ test('POST /api/walkdowns writes a hash-stamped human run record', async () => {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         actor: 'topher',
+        signatures: [{ role: 'eng', signer: 'topher' }],
         results: [{ rule: 'demo.main.thing', status: 'pass' }],
       }),
     })
@@ -495,6 +496,7 @@ test('a sign-off records approved with its hash and threads @rule:panel.signoff.
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         actor: 'topher',
+        signatures: [{ role: 'eng', signer: 'topher' }],
         results: [{ rule: 'demo.main.thing', status: 'approved', threads: ['n-0001'] }],
       }),
     })
@@ -672,6 +674,7 @@ test('a session drafts to disk and finishing seals it into one run', async () =>
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         actor: 'topher',
+        signatures: [{ role: 'eng', signer: 'topher' }],
         results: [{ rule: 'demo.main.thing', status: 'pass' }],
       }),
     })
