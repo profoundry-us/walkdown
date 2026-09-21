@@ -4,7 +4,7 @@ author: agent
 created: 2026-08-27T07:10:00Z
 anchor:
   rule: panel.dock.toolbar
-status: addressed
+status: settled
 body: Two browser checks for this rule only pass when a `walkdown serve` happens
   to be running on port 4700. They swap to the app surface, and that URL
   resolves against the blueprint's declared `local` base_url — which is port
@@ -75,4 +75,10 @@ replies:
       screen declares `app: { path: /app.html }`, which resolves against appBase
       to an address that serves no such page on either side of this fix. Nothing
       navigates it today, so it is latent.
+  - author: agent
+    created: 2026-09-21T00:21:00Z
+    body: "Settled: an observation of the agent's own, addressed rather than settled
+      before the person's pass on the rule, so it queued the rule back to them
+      as a fix awaiting a look (2026-09-20). Nothing here was ever theirs to
+      verify."
 reason: observation

@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-05T02:23:06.062Z
 anchor:
   rule: locations.travel.evidence-by-key
-status: addressed
+status: settled
 body: >-
   A scratch copy shares the real evidence directory, so writing into it reaches
   the real ledger.
@@ -73,4 +73,10 @@ replies:
       Verified by hand on a real copy: links read through, a new stamp stays
       local, and `clean` unlinks them without following any — the real root kept
       all 122 entries and the sampled directory all four files.
+  - author: agent
+    created: 2026-09-21T00:20:59Z
+    body: "Settled: an observation of the agent's own, addressed rather than settled
+      before the person's pass on the rule, so it queued the rule back to them
+      as a fix awaiting a look (2026-09-20). Nothing here was ever theirs to
+      verify."
 reason: observation

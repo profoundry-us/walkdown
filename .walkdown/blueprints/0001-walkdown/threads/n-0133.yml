@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-01T01:05:28.925Z
 anchor:
   rule: locations.default.nothing-in-the-tree
-status: addressed
+status: settled
 body: "Sitting 2026-09-01, observed while judging this rule (run
   2026-09-01T00-11-44Z-local-01): after a default init, the out-of-tree spec is
   invisible to most of the CLI. `walkdown serve`, `status`, and `lint` run from
@@ -181,4 +181,10 @@ replies:
       repository root. The registry (~/.walkdown/projects/) is deleted; the two
       config files are the only source. Example now has its own .walkdown rather
       than an entry in this repository's config."
+  - author: agent
+    created: 2026-09-21T00:20:57Z
+    body: "Settled: an observation of the agent's own, addressed rather than settled
+      before the person's pass on the rule, so it queued the rule back to them
+      as a fix awaiting a look (2026-09-20). Nothing here was ever theirs to
+      verify."
 reason: observation

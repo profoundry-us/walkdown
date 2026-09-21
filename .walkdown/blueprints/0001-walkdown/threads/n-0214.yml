@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-06T01:31:45.104Z
 anchor:
   rule: locations.default.one-home-per-blueprint
-status: addressed
+status: settled
 body: "`walkdown init` inside a repository that already has one starts a second
   project and never mentions the first. Reproduced 2026-09-06: init --commit
   spec at the root of a git repo, then init --commit spec again from app/web,
@@ -49,4 +49,10 @@ replies:
       blueprint already answering there' — asserts the outer id appears, that a
       second project is still created (the deliberate case still works), and
       that a first init in an unrelated repository says none of it.
+  - author: agent
+    created: 2026-09-21T00:20:58Z
+    body: "Settled: an observation of the agent's own, addressed rather than settled
+      before the person's pass on the rule, so it queued the rule back to them
+      as a fix awaiting a look (2026-09-20). Nothing here was ever theirs to
+      verify."
 reason: observation

@@ -5,7 +5,7 @@ created: 2026-08-31T04:11:53Z
 anchor:
   rule: threads.lifecycle.claim-never-accept
   screen: thread-panel
-status: addressed
+status: settled
 body: "Agent sitting 2026-08-31, observed in passing while judging append-only —
   not a rule fail, but worth a decision. Verifying records no verified_by
   (lib/threads.js keeps the actor only for waived), so the name the gate demands
@@ -28,4 +28,10 @@ replies:
       and the thread header name it. The 37 historical verified threads keep
       their inference — no retroactive schema requirement. Covered by
       test/thread-mutations.test.js."
+  - author: agent
+    created: 2026-09-21T00:21:02Z
+    body: "Settled: an observation of the agent's own, addressed rather than settled
+      before the person's pass on the rule, so it queued the rule back to them
+      as a fix awaiting a look (2026-09-20). Nothing here was ever theirs to
+      verify."
 reason: observation

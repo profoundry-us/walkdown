@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-01T03:51:37.176Z
 anchor:
   rule: locations.travel.evidence-by-key
-status: addressed
+status: settled
 body: The checks tier's fail evidence dies with the next run.
   lib/playwright-reporter.js records attachments as test-results/... filesystem
   paths, and Playwright empties test-results/ at the start of every run — so the
@@ -26,4 +26,10 @@ replies:
       tiers-at-a-glance filed its screenshot and error context under the home,
       and they were read to diagnose it after the next run had already emptied
       the output directory."
+  - author: agent
+    created: 2026-09-21T00:20:59Z
+    body: "Settled: an observation of the agent's own, addressed rather than settled
+      before the person's pass on the rule, so it queued the rule back to them
+      as a fix awaiting a look (2026-09-20). Nothing here was ever theirs to
+      verify."
 reason: observation

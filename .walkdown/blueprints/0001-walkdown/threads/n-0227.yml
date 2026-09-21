@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-07T17:30:36.115Z
 anchor:
   rule: panel.delivery.stale-copy-says-so
-status: addressed
+status: settled
 body: >-
   I just did one more walkdown with the new setup judging a single item. But it
   doesn't look like it signed the product one. What happened?
@@ -68,4 +68,10 @@ replies:
       The panel wears the same badge it already wears for a stale extension
       copy, naming the fix. Tested by touching lib/api.js under a running server
       and asserting the payload flips.
+  - author: agent
+    created: 2026-09-21T00:21:00Z
+    body: "Settled: an observation of the agent's own, addressed rather than settled
+      before the person's pass on the rule, so it queued the rule back to them
+      as a fix awaiting a look (2026-09-20). Nothing here was ever theirs to
+      verify."
 reason: observation

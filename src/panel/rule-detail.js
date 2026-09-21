@@ -251,6 +251,7 @@ function ruleTurn(r) {
   if (theirs.length) {
     const what = {
       address: 'It has a note here to address.',
+      settle: 'It settles an observation of its own here.',
       rejudge: 'It re-judges the claimed fix before you are asked to.',
       cover: 'It owes this rule a check.',
       incorporate: 'It folds your answer into the rule and closes the question.',

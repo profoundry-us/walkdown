@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-05T23:42:08.646Z
 anchor:
   rule: locations.travel.judged-against-a-spec
-status: addressed
+status: settled
 body: >-
   `specHash` throws EISDIR on a directory named `<something>.yml` under
   `features/`, which would take down every run record and `walkdown judge` at
@@ -47,4 +47,10 @@ replies:
       test/locations.test.js. And thank you for filing it despite it being an
       observation rather than the ground of the verdict — you were right that it
       would otherwise be rediscovered."
+  - author: agent
+    created: 2026-09-21T00:20:59Z
+    body: "Settled: an observation of the agent's own, addressed rather than settled
+      before the person's pass on the rule, so it queued the rule back to them
+      as a fix awaiting a look (2026-09-20). Nothing here was ever theirs to
+      verify."
 reason: observation

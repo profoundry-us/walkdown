@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-06T00:49:09.532Z
 anchor:
   rule: locations.default.in-repo-on-request
-status: addressed
+status: settled
 body: "Judging locations.pointer.placed-where-agents-read turned up a path
   defect that belongs to this rule instead. When the pointer is placed from a
   directory the blueprint home does not sit under - `walkdown pointer --into
@@ -40,4 +40,10 @@ replies:
       anywhere in the file. Covered in test/init-run.test.js, which asserts both
       the subdirectory case and that the root case still writes a plain relative
       path."
+  - author: agent
+    created: 2026-09-21T00:20:58Z
+    body: "Settled: an observation of the agent's own, addressed rather than settled
+      before the person's pass on the rule, so it queued the rule back to them
+      as a fix awaiting a look (2026-09-20). Nothing here was ever theirs to
+      verify."
 reason: observation

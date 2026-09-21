@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-05T23:29:19.022Z
 anchor:
   rule: locations.default.skills-are-yours-by-default
-status: addressed
+status: settled
 body: |-
   This repository's own `.claude/skills/*/SKILL.md` are symlinks into `lib/skills/`, so `walkdown skills --project --force` run here writes THROUGH them and edits the shipped sources.
 
@@ -31,4 +31,10 @@ replies:
       home alone. It walks the answering `.walkdown`, so it could not see these,
       and `installSkills` is the second writer this year to reach a file nobody
       named. That wants a decision about scope, not another special case.
+  - author: agent
+    created: 2026-09-21T00:20:58Z
+    body: "Settled: an observation of the agent's own, addressed rather than settled
+      before the person's pass on the rule, so it queued the rule back to them
+      as a fix awaiting a look (2026-09-20). Nothing here was ever theirs to
+      verify."
 reason: observation

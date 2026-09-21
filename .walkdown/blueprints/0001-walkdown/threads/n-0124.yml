@@ -4,7 +4,7 @@ author: agent
 created: 2026-08-30T22:45:00Z
 anchor:
   rule: locations.default.nothing-in-the-tree
-status: addressed
+status: settled
 body: >-
   Filed while formulating this feature, because the rule above says every record
   lands outside the repository FILED BY PROJECT, and in one shape that is
@@ -53,4 +53,10 @@ replies:
       tagged checks, documented in docs/08-locations.md. Migrate ran on this
       machine: projects/walkdown → blueprints/0001-walkdown with the config
       re-pointed; projects/serve-fixture reported unclaimed and left."
+  - author: agent
+    created: 2026-09-21T00:20:57Z
+    body: "Settled: an observation of the agent's own, addressed rather than settled
+      before the person's pass on the rule, so it queued the rule back to them
+      as a fix awaiting a look (2026-09-20). Nothing here was ever theirs to
+      verify."
 reason: observation

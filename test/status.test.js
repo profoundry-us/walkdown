@@ -220,6 +220,9 @@ test('attention: human vs agent queues derived from rows and threads @rule:statu
       { id: 'n-4', kind: 'note', status: 'addressed', anchor: { rule: 'demo.main.thing' } }, // no reason: feedback
       { id: 'n-5', kind: 'note', reason: 'finding', status: 'addressed', anchor: { rule: 'demo.main.thing' } },
       { id: 'n-6', kind: 'note', reason: 'observation', status: 'settled', anchor: { rule: 'demo.main.thing' } },
+      // An addressed observation is the agent's to settle, never a person's
+      // to verify: it noticed it itself and closes it itself.
+      { id: 'n-9', kind: 'note', reason: 'observation', status: 'addressed', anchor: { rule: 'demo.main.thing' } },
       { id: 'n-7', kind: 'note', reason: 'decision', status: 'recorded', anchor: { rule: 'demo.main.thing' } },
       // Feedback with no rule stands on its own.
       { id: 'n-8', kind: 'note', reason: 'feedback', status: 'addressed', anchor: { screen: 'main' } },
@@ -233,7 +236,7 @@ test('attention: human vs agent queues derived from rows and threads @rule:statu
   const byWho = (who) =>
     attention.filter((i) => i.who === who).map((i) => `${i.action}:${i.thread ?? i.rule}`);
   assert.deepEqual(byWho('human'), ['judge:demo.main.thing', 'verify:n-8', 'answer:q-1', 'verify:demo.main.thing']);
-  assert.deepEqual(byWho('agent'), ['address:n-2', 'incorporate:q-2']);
+  assert.deepEqual(byWho('agent'), ['settle:n-9', 'address:n-2', 'incorporate:q-2']);
   const perRule = attention.find((i) => i.action === 'verify' && i.rule === 'demo.main.thing');
   assert.deepEqual(perRule.threads, ['n-1', 'n-4', 'n-5']);
 });

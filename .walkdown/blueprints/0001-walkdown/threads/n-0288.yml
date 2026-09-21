@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-13T22:51:35.309Z
 anchor:
   rule: threads.conversation.one-stream
-status: addressed
+status: settled
 body: >-
   Investigate what it would take to add markdown support to the threads and to
   go back and update all existing threads to add formatting that makes them
@@ -46,4 +46,10 @@ replies:
       from 68K to 257K carrying the bundle - the cost of vendoring, said out
       loud. Existing threads untouched; they read better because their lists and
       backticks now render.'
+  - author: agent
+    created: 2026-09-21T00:21:02Z
+    body: "Settled: an observation of the agent's own, addressed rather than settled
+      before the person's pass on the rule, so it queued the rule back to them
+      as a fix awaiting a look (2026-09-20). Nothing here was ever theirs to
+      verify."
 reason: observation

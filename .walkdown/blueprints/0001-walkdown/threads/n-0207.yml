@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-06T00:11:35.540Z
 anchor:
   rule: locations.pointer.placed-where-agents-read
-status: addressed
+status: settled
 body: "`walkdown pointer` crashes with a raw stack trace where every other
   command answers in a sentence. Run it anywhere no blueprint is declared and
   resolveLocations() returns spec.path === null, which
@@ -31,4 +31,10 @@ replies:
       one copy of them. Verified by hand in a bare git repository with a
       redirected WALKDOWN_HOME: 'No blueprint here. Nothing in <config> claims
       this directory.' then the init/project-add line, exit 2, no stack trace."
+  - author: agent
+    created: 2026-09-21T00:21:00Z
+    body: "Settled: an observation of the agent's own, addressed rather than settled
+      before the person's pass on the rule, so it queued the rule back to them
+      as a fix awaiting a look (2026-09-20). Nothing here was ever theirs to
+      verify."
 reason: observation

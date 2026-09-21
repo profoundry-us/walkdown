@@ -6,7 +6,7 @@ created: 2026-09-11T02:26:16.249Z
 anchor:
   rule: panel.start.which-project
   screen: project-modal
-status: addressed
+status: settled
 body: >-
   One last thing: this is what I see. I don't know what dimming you're talking
   about, I don't think that's working properly. Perhaps that would be helpful
@@ -139,4 +139,10 @@ replies:
     body: "Marking what the reply above already says: the scrim was removed in
       favour of the blur (src/panel/projects.js), measured then and unchanged
       since. Nothing further to do here."
+  - author: agent
+    created: 2026-09-21T00:21:00Z
+    body: "Settled: an observation of the agent's own, addressed rather than settled
+      before the person's pass on the rule, so it queued the rule back to them
+      as a fix awaiting a look (2026-09-20). Nothing here was ever theirs to
+      verify."
 reason: observation

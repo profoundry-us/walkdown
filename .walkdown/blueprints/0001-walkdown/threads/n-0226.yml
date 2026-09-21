@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-07T17:29:59.910Z
 anchor:
   rule: panel.walkdown.records-to-ledger
-status: addressed
+status: settled
 body: >-
   I just did one more walkdown with the new setup judging a single item. But it
   doesn't look like it signed the product one. What happened?
@@ -57,4 +57,10 @@ replies:
       for nothing stated, and the rule gained a step saying finishing reports
       what was recorded rather than how many. The statement is untouched, so
       nothing is un-signed.'
+  - author: agent
+    created: 2026-09-21T00:21:01Z
+    body: "Settled: an observation of the agent's own, addressed rather than settled
+      before the person's pass on the rule, so it queued the rule back to them
+      as a fix awaiting a look (2026-09-20). Nothing here was ever theirs to
+      verify."
 reason: observation

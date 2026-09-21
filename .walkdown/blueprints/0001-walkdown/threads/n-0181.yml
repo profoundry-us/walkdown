@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-03T16:40:07.126Z
 anchor:
   rule: locations.default.in-repo-on-request
-status: addressed
+status: settled
 body: "The `tracked` row of `walkdown where` is wrong for a blueprint the person
   declared that sits inside the repository but outside `.walkdown/`. Fixture: a
   repository whose root .walkdown/config.yml declares alpha and beta, plus
@@ -38,4 +38,10 @@ replies:
       the ignore file's `blueprints/*/runs/` does not reach this home. Test:
       'the ignore file beside a .walkdown does not answer for a blueprint
       standing elsewhere in the tree'."
+  - author: agent
+    created: 2026-09-21T00:20:57Z
+    body: "Settled: an observation of the agent's own, addressed rather than settled
+      before the person's pass on the rule, so it queued the rule back to them
+      as a fix awaiting a look (2026-09-20). Nothing here was ever theirs to
+      verify."
 reason: observation

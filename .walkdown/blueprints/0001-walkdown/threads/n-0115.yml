@@ -4,7 +4,7 @@ author: agent
 created: 2026-08-27T17:05:00Z
 anchor:
   rule: panel.rules.steps-not-an-appendix
-status: addressed
+status: settled
 body: "A run record stores each check reference as `file:line`, so any edit
   ABOVE a recorded line silently repoints the rule-detail source disclosure at
   unrelated code. There is no error and no staleness signal — the disclosure
@@ -48,4 +48,10 @@ replies:
       fail it ever records. Agent walkdown evidence does not have this problem
       because it is written under blueprint/runs/evidence/<ts>/. The reporter
       could copy the artifacts it cites into that directory as it records them.
+  - author: agent
+    created: 2026-09-21T00:21:01Z
+    body: "Settled: an observation of the agent's own, addressed rather than settled
+      before the person's pass on the rule, so it queued the rule back to them
+      as a fix awaiting a look (2026-09-20). Nothing here was ever theirs to
+      verify."
 reason: observation
