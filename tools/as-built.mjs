@@ -264,7 +264,7 @@ function wrap(id, raw, streamCss) {
   const marks = `
   <div class="as-built-ring" aria-hidden="true"></div>
   <div class="as-built-label" aria-hidden="true">as-built &mdash; a drawing of the build, redlined after the fact</div>
-  <details class="as-built-notes" open>
+  <details class="as-built-notes">
     <summary>Redlines &mdash; where the build left the design</summary>
     <ul>
 ${n.redlines.map((x) => `      <li>${x}</li>`).join('\n')}

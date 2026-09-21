@@ -8,7 +8,7 @@ anchor:
   rule: panel.rules.legend-on-demand
   screen: review
   element: panel.legend
-status: addressed
+status: open
 body: The legend's SIGN / ASKS / FIXED / WALK badges overlap their text.
 added: "From Topher's screenshot of 2026-09-18 10:57 PM
   (runs/evidence/2026-09-19T03-44-37Z/legend-ask-badges-overlap.png): in the
@@ -25,3 +25,13 @@ replies:
       every sentence starts after it. The rule now carries verify: [checks],
       with a check that opens the legend and asserts each badge's right edge
       sits before its sentence's left edge."
+  - author: topher
+    created: 2026-09-21T04:06:51Z
+    body: This mostly works, but the tooltip that pops us is center-aligned and now
+      that we moved the Legend to the right side, half of the tooltip is being
+      cut off. Fix the alignment.
+  - author: topher
+    created: 2026-09-21T04:06:51Z
+    body: This mostly works, but the tooltip that pops us is center-aligned and now
+      that we moved the Legend to the right side, half of the tooltip is being
+      cut off. Fix the alignment.

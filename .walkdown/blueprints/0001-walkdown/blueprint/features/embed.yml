@@ -340,19 +340,19 @@ stories:
     rules:
       - id: embed.threads.note-first
         origin: walkdown
-        statement: The thread popover shows the note's text first. Its id, kind, status, rule, screen, element, author and age follow on one compact line rather than as stacked sentences.
+        statement: The thread screen shows the note's text first. Its id, kind, status, rule, screen, element, author and age follow on one compact line rather than as stacked sentences.
         signoff: [eng, product]
         screens: [thread-panel]
         steps:
           given:
-            - A pinned note open on screen `thread-panel`
+            - A pinned note open on screen `thread-panel`, reached from the tag on its rule's conversation or from the Threads tab
           when:
             - Reading anchor `thread.panel`
           then:
-            - Anchor `thread.body` is the most prominent text in the popover
+            - Anchor `thread.body` is the most prominent text on the screen
             - Anchor `thread.provenance` fits on one line and never pushes the note below the fold
-            - A long reply history collapses behind a count rather than growing the popover
-          statement_hash: sha256:24c2d4094356
+            - A long reply history collapses behind a count rather than growing the screen
+          statement_hash: sha256:2d3685ac1da6
           reworded:
             - hash: sha256:870249ed1a7a
               at: 2026-09-13
@@ -360,6 +360,9 @@ stories:
             - hash: sha256:b4e6177d8153
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:24c2d4094356
+              at: 2026-09-21T04:39:22Z
+              why: the thread popover became the thread screen (n-0319, ADR 0006); the words moved, the meaning did not, and the given now names the tag as the way there
 
       - id: embed.threads.picture-on-a-pin
         origin: thread:n-0096

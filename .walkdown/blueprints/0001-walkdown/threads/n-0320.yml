@@ -7,7 +7,7 @@ created: 2026-09-21T01:00:38.487Z
 anchor:
   rule: panel.rules.detail-slide
   screen: rule-detail
-status: addressed
+status: open
 body: The rule ID at the top of the Rule Detail page should be clickable and
   should copy the ID so I don't have to select the text and click command-c
   manually.
@@ -19,3 +19,9 @@ replies:
       the id to the clipboard and a toast says 'Copied <id>'. Step on
       panel.rules.detail-slide, which now asks for checks; the check reads the
       clipboard back."
+  - author: topher
+    created: 2026-09-21T04:16:11Z
+    body: "Use `cursor: pointer` instead of `cursor: copy`."
+  - author: topher
+    created: 2026-09-21T04:16:11Z
+    body: "Use `cursor: pointer` instead of `cursor: copy`."

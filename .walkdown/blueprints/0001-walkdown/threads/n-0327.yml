@@ -6,7 +6,7 @@ via: agent
 created: 2026-09-21T04:01:17.160Z
 anchor:
   rule: panel.walkdown.one-control-owns-the-sitting
-status: addressed
+status: open
 body: Continue stays put on an unjudged rule. The only way to continue on a rule
   is to judge it, waive it, or skip it.
 added: Topher started a fresh sitting and pressed Continue a few times expecting
@@ -25,3 +25,11 @@ replies:
       passed in run 2026-09-21T04-03-55Z. The panel has no waive on a rule, so
       the ways past are a verdict and Skip. Your server on 4700 needs a page
       reload to pick up the rebuilt panel.
+  - author: topher
+    created: 2026-09-21T04:09:00Z
+    body: Instead of a role per line, let's separate they by commas and put them
+      under the "Recording as Topher Fangio" so it takes up less space.
+  - author: topher
+    created: 2026-09-21T04:09:01Z
+    body: Instead of a role per line, let's separate they by commas and put them
+      under the "Recording as Topher Fangio" so it takes up less space.
