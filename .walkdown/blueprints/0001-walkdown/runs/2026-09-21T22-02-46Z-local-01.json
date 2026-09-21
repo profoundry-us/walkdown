@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-09-21T22-02-46Z-local-01",
+  "created": "2026-09-21T22:02:46Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "ab21360-dirty",
+  "tree_hash": "sha256:4223d1c21109",
+  "spec_hash": "sha256:71f2095bd6d3",
+  "results": [
+    {
+      "rule": "panel.dock.toolbar",
+      "status": "pass",
+      "statement_hash": "sha256:c66f9357083f",
+      "duration_ms": 3263,
+      "checks": [
+        "checks/panel.spec.js:3846"
+      ]
+    }
+  ]
+}

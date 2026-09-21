@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-09-21T22-02-54Z-local-01",
+  "created": "2026-09-21T22:02:54Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "ab21360-dirty",
+  "spec_hash": "sha256:71f2095bd6d3",
+  "note": "A look at panel.dock.toolbar after the screen picker gained its Storyboard view (n-0095, Topher 2026-09-21). Driven on a stamped scratch copy on 4730 (node tools/scratch.mjs new look-0921f).",
+  "results": [
+    {
+      "rule": "panel.dock.toolbar",
+      "status": "pass",
+      "statement_hash": "sha256:c66f9357083f",
+      "threads": [
+        "n-0095"
+      ],
+      "evidence": [
+        "runs/evidence/2026-09-21T22-01-20Z/look.json",
+        "runs/evidence/2026-09-21T22-01-20Z/storyboard-open.png",
+        "runs/evidence/2026-09-21T22-01-20Z/picked-from-the-board.png"
+      ],
+      "reasoning": "The open picker offers List and Storyboard. Storyboard lays the seven screens out three to a row in storyboard order, each a live frame of its as-built page scaled to the card, titled and labelled with its id and whether a design is on file; the screen the page is wears HERE. The popover widens to 660px for it and narrows back to 288px for the list. A card picks its screen the way a row does: the list closes, the frame lands on rule-detail and the bar reads it as picked. After a reload the picker reopens on the Storyboard, and List brings the rows back. The rest of the bar - project, surface, pin mode - was not re-driven here; the recorded checks on the rule cover it."
+    }
+  ]
+}

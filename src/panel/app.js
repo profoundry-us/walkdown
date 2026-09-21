@@ -43,7 +43,7 @@ import { DESK_DEFAULTS, DESK_KEY, drawDesk } from './desk.js';
 import { icon } from './icons.js';
 import { checkRefs, detailPane, evidenceRows, historyPane, loadCheckSource } from './rule-detail.js';
 import { legendControl, listPane, searchBox, tierMarks } from './rules-list.js';
-import { screensPane } from './screens.js';
+import { loadScreensView, SCREENS_VIEW_KEY, screensPane } from './screens.js';
 import { provideShell, requestRender } from './shell.js';
 import { closeEvidence, evidenceOpen, openEvidence } from './evidence.js';
 import {
@@ -484,6 +484,10 @@ function syncScreenPanel() {
     // on every repaint, and a list that jumped back to the top whenever the
     // panel drew would be worse than one that lagged.
     const wasAt = D.screenPanel.scrollTop;
+    // The board is three cards wide; the list is a column. Sized before it
+    // is placed, so the clamp below measures the shape it will have.
+    D.screenPanel.classList.toggle('w-72', S.screensView !== 'board');
+    D.screenPanel.classList.toggle('w-[660px]', S.screensView === 'board');
     put(screensPane(), D.screenPanel);
     D.screenPanel.scrollTop = wasAt;
     const btn = D.bar.querySelector('#wdp-screen-btn');
@@ -2920,6 +2924,7 @@ export async function start() {
   // Every clock in the panel reads in the zone the person declared (n-0290).
   MSG.zone = S.data?.identity?.timezone ?? null;
   await loadSeen();
+  await loadScreensView();
   await restoreSession();
   /*
    * The address named a rule or a thread (`?rule=`, `?thread=` on
@@ -3160,6 +3165,12 @@ function wireGlobals() {
   on('highlight', ({ anchor }) => highlightAnchor(anchor));
   on('verdict', ({ status }) => giveVerdict(status));
   on('pick-screen', ({ id }) => pickScreen(id));
+  // List or storyboard: a way of looking, kept for this viewer (n-0095).
+  on('screens-view', ({ view }) => {
+    S.screensView = view === 'board' ? 'board' : 'list';
+    store.set(SCREENS_VIEW_KEY, S.screensView);
+    syncScreenPanel();
+  });
   on('pick-blueprint', ({ id }) => {
     /*
      * A walkdown belongs to the blueprint it was started in - its verdicts

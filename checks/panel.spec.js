@@ -3837,3 +3837,54 @@ test('a picture dropped while failing a rule goes with the why', {
   await expect(page.getByTestId('detail.conversation').locator('[data-attachment] img')).toHaveCount(1);
   await endSession(page);
 });
+
+/*
+ * The screen picker's second view (Topher, n-0095): the storyboard, every
+ * screen laid out small as a live picture, picked the way a row is, and the
+ * view kept for this browser.
+ */
+test('the screen picker offers a storyboard of live pictures, and remembers the view', {
+  tag: '@rule:panel.dock.toolbar',
+}, async ({ page }) => {
+  await review(page);
+  const { storyboard } = await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json();
+  await page.getByTestId('panel.screen-picker').click();
+  const list = page.getByTestId('panel.screens-list');
+  await expect(list).toBeVisible();
+  const views = page.getByTestId('panel.screens-view');
+  await expect(views).toHaveText(['List', 'Storyboard']);
+  await expect(views.filter({ hasText: 'List' })).toHaveAttribute('aria-selected', 'true');
+  await views.filter({ hasText: 'Storyboard' }).click();
+  const board = page.getByTestId('panel.screens-board');
+  await expect(board).toBeVisible();
+  const cards = board.getByTestId('panel.screens-card');
+  await expect(cards).toHaveCount(storyboard.length);
+  // In storyboard order, each a frame of the page the pick would open.
+  expect(await cards.evaluateAll((els) => els.map((e) => e.dataset.screen))).toEqual(storyboard.map((s) => s.id));
+  for (const sc of storyboard.filter((s) => s.app?.path)) {
+    const frame = board.locator(`[data-screen="${sc.id}"] iframe`);
+    await expect(frame).toHaveCount(1);
+    // The app surface resolves against the declared target, as the pick does.
+    expect(await frame.getAttribute("src")).toBe(`${DECLARED_ORIGIN}${sc.app.path}`);
+  }
+  // The board is wider than the list, and still on the stage.
+  const wide = (await list.boundingBox()).width;
+  expect(wide).toBeGreaterThan(500);
+  expect((await list.boundingBox()).x + wide).toBeLessThanOrEqual(page.viewportSize().width);
+  // The screen the page is wears its mark; a card picks its screen.
+  await expect(board.locator('[data-screen="review"] span.bg-primary')).toHaveText(/here/i);
+  await board.locator('[data-screen="rule-detail"]').click();
+  await expect(list).toBeHidden();
+  await expect
+    .poll(() => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/as-built/rule-detail.html`)), { timeout: 10000 })
+    .toBe(true);
+  // Kept for this browser: the picker reopens on the storyboard after a reload.
+  await page.reload();
+  await expect(page.getByTestId('panel.bar')).toBeVisible();
+  await page.getByTestId('panel.screen-picker').click();
+  await expect(page.getByTestId('panel.screens-board')).toBeVisible();
+  await expect(page.getByTestId('panel.screens-view').filter({ hasText: 'Storyboard' })).toHaveAttribute('aria-selected', 'true');
+  await page.getByTestId('panel.screens-view').filter({ hasText: 'List' }).click();
+  await expect(page.getByTestId('panel.screens-board')).toHaveCount(0);
+  await expect(list.locator('[data-screen="rule-detail"]')).toBeVisible();
+});

@@ -123,6 +123,8 @@ export const S = {
   /** A file is in the air over the window (Files in the drag), and which drop zone it is over, if any. */
   dragFiles: false,
   dragOver: null,
+  /** How the screen picker draws the storyboard: 'list' or 'board' (n-0095). A per-viewer convenience, remembered in the browser. */
+  screensView: 'list',
   composerSay: '', // the composer's refusal line; same lifetime, same reason
   threadSay: '', // the thread screen's refusal line; dies when the view moves on
   ruleNote: '', // the rule's own new-thread box, kept the same way

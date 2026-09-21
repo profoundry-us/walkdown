@@ -6,7 +6,7 @@ created: 2026-08-27T00:01:06Z
 anchor:
   screen: review
   element: panel.tabs
-status: open
+status: addressed
 body: Actually, now that I think about it; I eventually want a storyboard view
   of the screens that maybe has small / compressed screenshots of each one so
   you can kinda see an overview. Not sure where to keep this idea since it's not
@@ -39,4 +39,18 @@ replies:
     created: 2026-09-21T21:52:06Z
     body: Let's build the storyboard when you click the screen dropdown at the top.
       It should show a tab selector with the storyboard or list views.
+  - author: agent
+    created: 2026-09-21T22:03:01Z
+    body: "Built: the screen picker at the top of the bar now opens with a List |
+      Storyboard selector. Storyboard lays every screen out small in storyboard
+      order, each card a live frame of the page scaled down - the build where
+      the screen has an app path, the design otherwise - with its title, id and
+      whether a design is on file; the screen you are on wears HERE, a picked
+      one PICKED, and a card picks its screen the way a row does. The view you
+      choose is kept for your browser. Live frames rather than captured
+      screenshots, so the pictures never go stale and nothing has to be
+      photographed; if the frames turn out heavy for a big storyboard, captures
+      are the fallback. Checked by 'the screen picker offers a storyboard of
+      live pictures' in checks/panel.spec.js and looked at by the agent tier;
+      panel.dock.toolbar gained the steps and waits on your signature again."
 reason: request
