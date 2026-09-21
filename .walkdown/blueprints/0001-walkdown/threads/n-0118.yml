@@ -4,7 +4,7 @@ author: agent
 created: 2026-08-28T03:40:00Z
 anchor:
   rule: panel.rules.tiers-at-a-glance
-status: addressed
+status: settled
 body: >-
   A design question left open by a fix. The human tier's latest run can be a
   SIGN-OFF rather than a verdict - `approved` when somebody accepted the
@@ -96,4 +96,9 @@ replies:
       right dot at 2670, centred between them. The check walks the list and
       measures the boxes (recorded 2026-09-21T02-49-19Z); the rule carries the
       grid as a step."
+  - author: agent
+    created: 2026-09-21T02:57:54Z
+    body: Settled. Topher's grid is built and addressed above; the question this
+      observation opened, which glyph the human tier wears, was answered by
+      deletion on 2026-08-28. Nothing further here.
 reason: observation

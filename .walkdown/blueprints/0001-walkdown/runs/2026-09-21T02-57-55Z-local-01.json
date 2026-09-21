@@ -1,0 +1,39 @@
+{
+  "run_id": "2026-09-21T02-57-55Z-local-01",
+  "created": "2026-09-21T02:57:55Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "0cf2f5e-dirty",
+  "note": "Rejudge of the two rules the queue asked about after n-0118 and n-0096 were addressed. Read against the real server on 4700, which writes nothing for what was looked at: the rules list, and a pin's popover.",
+  "results": [
+    {
+      "rule": "panel.rules.tiers-at-a-glance",
+      "status": "pass",
+      "statement_hash": "sha256:363df4d92820",
+      "evidence": [
+        "runs/evidence/2026-09-21T02-57-55Z/tiers-three-roles.png",
+        "runs/evidence/2026-09-21T02-57-55Z/tiers-list.png",
+        "runs/evidence/2026-09-21T02-57-55Z/probes.txt"
+      ],
+      "reasoning": "The strip still draws checks then agent, then the signatures, now as the grid n-0118 asked for. panel.rules.one-conversation, signed by product, design and eng, draws two columns: two dots at x 750 (y 399 and 408) and the lone third at x 762, y 404, spanning both rows and centred between the two, a triangle (tiers-three-roles.png). panel.dock.own-skin, two roles, draws one column of two. Only as many dots as roles; never taller than two. The tooltip still names every tier and role in words, and the bubble on the rule detail still hangs inside its pane, measured in the sitting of 02:24Z.",
+      "threads": [
+        "n-0118"
+      ]
+    },
+    {
+      "rule": "embed.threads.note-first",
+      "status": "pass",
+      "statement_hash": "sha256:24c2d4094356",
+      "evidence": [
+        "runs/evidence/2026-09-21T02-57-55Z/note-first-popover.png",
+        "runs/evidence/2026-09-21T02-57-55Z/probes.txt"
+      ],
+      "reasoning": "Opening the pin for n-0308 on the review page: the thread's own screen shows the note's words at 14px directly under the name line, the most prominent text there, and the provenance line reads n-0308 \u00b7 addressed on one line with the rule, screen and element on the line under it, nothing stacked as sentences. n-0096's picture on a pin draws under the words in the same stream and moves none of this; the fixture check filed a pin with a picture and read it there (run 2026-09-21T02-56-48Z). The board on 4700 holds no thread with a picture yet, so that part is the check's word, not this screenshot's.",
+      "threads": [
+        "n-0096"
+      ]
+    }
+  ]
+}
