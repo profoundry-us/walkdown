@@ -386,7 +386,15 @@ function stripTip(tiers, acceptance) {
     }</span></span>`;
 }
 
-export function tierMarks(row, mine = false) {
+/**
+ * @param {object} row
+ * @param {boolean} [mine]
+ * @param {{ tipDown?: boolean }} [opts] `tipDown`: the bubble hangs from the
+ *   strip's top edge instead of centring on it. For the rule detail, where
+ *   the strip is the first thing in a scrolling pane: centred, the bubble's
+ *   top rows ran up out of the pane and under the Recording-as strip (n-0307).
+ */
+export function tierMarks(row, mine = false, opts = {}) {
   /*
    * An unbuilt rule has the same three slots as any other, both evidence
    * tiers reading "nothing to judge yet". It is not that the tiers are
@@ -410,8 +418,11 @@ export function tierMarks(row, mine = false) {
   // own native title, and a native tooltip is inherited from the nearest
   // ancestor that has one. An empty title stops that here, so hovering the
   // strip opens the strip's bubble and nothing else.
+  // daisyUI's own placement variables, so the bubble keeps its side and
+  // only its vertical anchor moves.
+  const hang = opts.tipDown ? '--tt-inset:0 auto; --tt-trans:0; --tt-tail-inset:.35rem auto' : '';
   return html`<span class="tooltip tooltip-right flex w-11 shrink-0 items-center justify-center gap-0.5 text-[12px] leading-none"
-    title="" data-testid="panel.rule-tiers" data-tiers="${tiers.map((t) => `${t[0]}:${t[1]}`).join(' ')}"
+    title="" style="${hang}" data-testid="panel.rule-tiers" data-tiers="${tiers.map((t) => `${t[0]}:${t[1]}`).join(' ')}"
     >${stripTip(tiers, row.acceptance)}${tiers.map(([, state, cell]) => {
       const [glyph, cls] = TIER_MARK[state] ?? TIER_MARK.na;
       // The panel's version of the terminal's star: the tick stays a tick,
@@ -601,7 +612,10 @@ export function legendControl() {
          within the list and needs nothing. -->
     <span class="tooltip-content z-50 w-72 whitespace-normal text-left text-[11.5px] leading-snug"
       data-testid="panel.legend-tip"
-      ><span class="grid grid-cols-[1.25rem_1fr] items-center gap-x-2 gap-y-0.5">
+      ><span class="grid grid-cols-[minmax(1.25rem,auto)_1fr] items-center gap-x-2 gap-y-0.5">
+      <!-- The mark column grows to its widest occupant: it was sized for one
+           glyph, and the ask badges added on 2026-09-18 drew over the first
+           word of their own lines (n-0308). -->
       ${head('Evidence — checks, then agent')}${LEGEND_TIERS.map(tierLine)}
       ${head('Signatures — one slot per role')}${LEGEND_SIGNS.map(signLine)}
       ${head('And around them')}

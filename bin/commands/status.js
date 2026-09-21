@@ -301,7 +301,14 @@ export function run(args) {
           (i.unjudged
             ? yellow('fix claimed, but nothing has judged it yet')
             : 'fix claimed, awaiting your judgment'),
-    answer: (i) => `answer ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''}`,
+    // Per rule when the questions have one, like verify: the ask is on the
+    // rule's own screen, one at a time, so the item names the rule and how
+    // many it asks.
+    answer: (i) =>
+      i.threads
+        ? `answer ${i.rule} — ${i.threads.length} question${i.threads.length === 1 ? '' : 's'}` +
+          dim(` (${i.threads.join(', ')})`)
+        : `answer ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''}`,
     address: (i) => `address ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — open note`,
     incorporate: (i) =>
       `incorporate ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — answered, fold it into the rule`,

@@ -1,0 +1,80 @@
+{
+  "run_id": "2026-09-21T01-19-43Z-local-01",
+  "created": "2026-09-21T01:19:43Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "a17a6a9-dirty",
+  "tree_hash": "sha256:fcc12b0f0b2e",
+  "spec_hash": "sha256:79d7ab99df2b",
+  "results": [
+    {
+      "rule": "embed.pin.both-surfaces",
+      "status": "pass",
+      "statement_hash": "sha256:8dcf85fbee90",
+      "duration_ms": 6174,
+      "checks": [
+        "checks/embed.spec.js:205"
+      ]
+    },
+    {
+      "rule": "embed.pin.anchored-target",
+      "status": "pass",
+      "statement_hash": "sha256:53f47b01acea",
+      "duration_ms": 6174,
+      "checks": [
+        "checks/embed.spec.js:205"
+      ]
+    },
+    {
+      "rule": "embed.pin.follows-the-visible-surface",
+      "status": "pass",
+      "statement_hash": "sha256:3bd7a904fa1b",
+      "duration_ms": 6174,
+      "checks": [
+        "checks/embed.spec.js:205"
+      ]
+    },
+    {
+      "rule": "embed.pin.tooltip-says-what-it-is",
+      "status": "pass",
+      "statement_hash": "sha256:9ed8ebb2af0a",
+      "duration_ms": 4277,
+      "checks": [
+        "checks/embed.spec.js:362",
+        "checks/panel.spec.js:3179"
+      ]
+    },
+    {
+      "rule": "panel.rules.tiers-at-a-glance",
+      "status": "pass",
+      "statement_hash": "sha256:a8d625714a1c",
+      "duration_ms": 3579,
+      "checks": [
+        "checks/panel.spec.js:1305",
+        "checks/panel.spec.js:1761",
+        "checks/panel.spec.js:3217"
+      ]
+    },
+    {
+      "rule": "panel.dock.no-pin-mid-fade",
+      "status": "pass",
+      "statement_hash": "sha256:014e0ac5f915",
+      "duration_ms": 2380,
+      "checks": [
+        "checks/panel.spec.js:1998",
+        "checks/panel.spec.js:2084"
+      ]
+    },
+    {
+      "rule": "panel.rules.legend-on-demand",
+      "status": "pass",
+      "statement_hash": "sha256:356d0682ce72",
+      "duration_ms": 1069,
+      "checks": [
+        "checks/panel.spec.js:3237"
+      ]
+    }
+  ]
+}

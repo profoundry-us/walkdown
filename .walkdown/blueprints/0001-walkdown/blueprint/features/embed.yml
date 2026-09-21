@@ -213,7 +213,9 @@ stories:
             - It shows the start of the note, truncated - a tooltip that has to be read is one nobody reads
             - It opens away from whatever edge the pin is near - down near the top, up near the bottom, and towards the side with the room - so it is never half off the surface
             - Clicking it still opens the thread's own screen, wherever you were
-          statement_hash: sha256:c5847b11a900
+            - The pins on whichever surface is in front answer the pointer, pin mode on or off - faded all the way to the design, the design's pins do; pin mode only decides whether a click places one
+            - Part-way between the two surfaces, neither one's pins answer, because a hover cannot say which surface it meant
+          statement_hash: sha256:9ed8ebb2af0a
           reworded:
             - hash: sha256:50dfb40b9f83
               at: 2026-09-13
@@ -227,6 +229,9 @@ stories:
             - hash: sha256:7d2deb9991b0
               at: 2026-09-14T16:05:24Z
               why: the statement now summarises the three lines; what each line holds was already in the steps
+            - hash: sha256:c5847b11a900
+              at: 2026-09-21T01:18:36Z
+              why: the pins in front answer the pointer with pin mode off, and mid-fade neither surface's do (n-0306, q-0285)
 
       - id: embed.pin.form-at-the-spot
         origin: walkdown

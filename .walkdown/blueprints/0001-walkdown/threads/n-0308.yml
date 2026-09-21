@@ -8,7 +8,7 @@ anchor:
   rule: panel.rules.legend-on-demand
   screen: review
   element: panel.legend
-status: open
+status: addressed
 body: The legend's SIGN / ASKS / FIXED / WALK badges overlap their text.
 added: "From Topher's screenshot of 2026-09-18 10:57 PM
   (runs/evidence/2026-09-19T03-44-37Z/legend-ask-badges-overlap.png): in the
@@ -17,3 +17,11 @@ added: "From Topher's screenshot of 2026-09-18 10:57 PM
   and FIXED sits over a two-line entry. The four badges were added to the legend
   on 2026-09-18 (69b968c) in the column the glyphs use, which is sized for a
   single glyph, not a badge. Noted, not fixed - Topher is mid-walkdown."
+replies:
+  - author: agent
+    created: 2026-09-21T01:19:44Z
+    body: "Fixed. The legend's mark column was a fixed 1.25rem, sized for one glyph;
+      it is now minmax(1.25rem, auto), so it widens to the widest badge and
+      every sentence starts after it. The rule now carries verify: [checks],
+      with a check that opens the legend and asserts each badge's right edge
+      sits before its sentence's left edge."

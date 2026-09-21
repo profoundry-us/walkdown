@@ -8,7 +8,7 @@ anchor:
   rule: panel.rules.tiers-at-a-glance
   screen: rule-detail
   element: panel.rule-tiers
-status: open
+status: addressed
 body: When hovering the panel.rule-tiers, the popup gets cut off by the
   "Recording as" panel. It might just be cut off from the list, but something we
   should figure out.
@@ -27,3 +27,13 @@ replies:
       10:40 PM): runs/evidence/2026-09-19T03-44-37Z/rule-tiers-tip-clipped.png.
       The tooltip's top rows - checks, and the head of agent - are under the
       Recording-as strip. The placeholder area shot is withdrawn."
+  - author: agent
+    created: 2026-09-21T01:19:44Z
+    body: Fixed. On the rule detail the strip's bubble now hangs from the strip's
+      top edge instead of centring on it (tierMarks takes tipDown, set only by
+      rule-detail, and sets daisyUI's own
+      --tt-inset/--tt-trans/--tt-tail-inset). The strip is the first thing in a
+      pane that scrolls, so a centred bubble ran up out of the pane's clip and
+      under the Recording-as strip - it was the pane's overflow, not a z-index.
+      A check hovers the strip on an open rule and asserts the bubble's box lies
+      inside the pane's.

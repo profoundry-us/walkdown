@@ -1098,6 +1098,7 @@ stories:
         origin: walkdown
         statement: "One legend, opened from the rules list, explains every mark the rail shows: each evidence mark, each signature shape, and what each colour means."
         because: A mark a reader cannot decode is worse than no mark, and six tooltips read one at a time never assemble into a picture of how the rail works.
+        verify: [checks]
         signoff: [eng, product]
         screens: [review]
         steps:

@@ -591,7 +591,7 @@ export function detailPane() {
              list's own function, not a copy: two drawings of one vocabulary
              is how the CLI and the panel came to disagree about ✍︎ (n-0118). -->
         <div class="flex items-center gap-2">
-          ${tierMarks(r, needsYou(r.rule))}
+          ${tierMarks(r, needsYou(r.rule), { tipDown: true })}
           <div class="break-all font-mono text-[11px] opacity-40" data-testid="detail.rule-id">${r.rule}</div>
         </div>
         <p class="${TEXT} text-[15px] leading-relaxed" data-testid="detail.statement" @mouseover=${hoverIn} @mouseenter=${hoverIn} @mouseout=${hoverOut}>${prose(r.statement)}</p>

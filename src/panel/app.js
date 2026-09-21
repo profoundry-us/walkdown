@@ -2433,6 +2433,7 @@ export function setGhost(on) {
     S.ghostReady = false; // whatever was in there is gone with it
     S.ghostOverride = null; // the detour ends with the overlay
     S.protoShare = null; // and the dial goes back to following the page
+    paintGhostReach(); // the page takes the pointer back
     render();
     return;
   }
@@ -2584,11 +2585,27 @@ function pinsForScreen(id) {
     }));
 }
 
-/** Whether the ghost currently takes the pointer instead of passing it through. */
-const ghostHasReach = () => Boolean(S.ghost) && S.ghostOpacity === 1 && S.ghostReady && PIN.isOn();
+/*
+ * Whether the ghost currently takes the pointer instead of passing it through.
+ *
+ * Fully faded to the ghost, it does - whether or not pin mode is on. The
+ * surface in front is the one you are looking at, and looking at a surface
+ * includes resting on its pins and clicking one open; pin mode only decides
+ * whether a click PLACES a pin. It used to take the pointer only while pin
+ * mode was armed, so at full fade the prototype's pins were scenery and the
+ * pointer fell through to an app you could not see (q-0285, n-0306).
+ */
+const ghostHasReach = () => Boolean(S.ghost) && S.ghostOpacity === 1;
 
+/*
+ * Who takes the pointer, both sheets at once. Part-way between, neither
+ * does: the two surfaces are on screen together and a hover or a click
+ * cannot say which one it meant (n-0306). The app frame is in the host
+ * document, so this is an inline style the way the ghost's is.
+ */
 function paintGhostReach() {
   if (S.ghost) S.ghost.style.pointerEvents = ghostHasReach() ? 'auto' : 'none';
+  if (D.appFrame) D.appFrame.style.pointerEvents = midFade() ? 'none' : '';
 }
 
 /*
@@ -2624,7 +2641,8 @@ function pushContext(frame, surface, pinMode) {
  * the one you are not looking at.
  */
 function pushContexts() {
-  pushContext(ghostFrame(), ghostSurface(), ghostHasReach());
+  // Placing needs walkdown running inside the copy; reaching its pins does not.
+  pushContext(ghostFrame(), ghostSurface(), PIN.isOn() && ghostHasReach() && S.ghostReady);
   if (D.appFrame) pushContext(D.appFrame, pageSurface(), PIN.isOn() && !ghostHasReach());
 }
 

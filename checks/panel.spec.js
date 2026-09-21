@@ -3167,3 +3167,86 @@ test('a relayed message keeps the person\u2019s face and shows the agent\u2019s 
   await expect(card.locator('.wd-added')).toContainText('Seen at 375');
   await expect(card.locator('.wd-ava.wd-relayed')).toHaveCount(1);
 });
+
+/*
+ * Whose pointer it is, sheet by sheet (n-0306). Fully faded to the design,
+ * the design is what you are looking at, so it is what you can touch - its
+ * pins included, whether or not pin mode is armed; pin mode only decides
+ * whether a click PLACES one (q-0285). Part-way between, both sheets are on
+ * screen at once and neither takes the pointer. Measured by what the
+ * document says is under the pointer, not by reading a style back.
+ */
+test('the surface in front takes the pointer, and mid-fade neither does', {
+  tag: '@rule:embed.pin.tooltip-says-what-it-is',
+}, async ({ page }) => {
+  await review(page);
+  const fade = page.getByTestId('panel.fade');
+  await expect(fade, 'this screen has a design to fade to').toBeEnabled();
+  // Pin mode stays OFF for the whole of this: reaching is not placing.
+  await expect(page.getByTestId('panel.pin-mode')).not.toHaveAttribute('aria-pressed', 'true');
+
+  const under = async () => {
+    const box = await page.getByTestId('panel.app-frame').boundingBox();
+    return page.evaluate(({ x, y }) => {
+      // The ghost lives in walkdown's own shadow root; the app frame is in
+      // the page. Ask the root first, then the document.
+      const root = document.querySelector('[data-walkdown-chrome]')?.shadowRoot;
+      const inRoot = root?.elementFromPoint(x, y);
+      if (inRoot?.closest?.('[data-walkdown-ghost]')) return 'ghost';
+      const el = document.elementFromPoint(x, y);
+      if (el?.dataset?.testid === 'panel.app-frame') return 'app';
+      return el?.tagName ?? 'nothing';
+    }, { x: box.x + box.width / 2, y: box.y + box.height / 2 });
+  };
+
+  // The slider reads 0 at the design and 100 at the app.
+  await fade.fill('0');
+  await expect.poll(under, 'fully faded to the design, the design takes the pointer').toBe('ghost');
+  await fade.fill('50');
+  await expect.poll(under, 'half way, neither sheet takes the pointer').not.toMatch(/^(ghost|app)$/);
+  await fade.fill('100');
+  await expect.poll(under, 'back on the page, the page takes the pointer').toBe('app');
+});
+
+/*
+ * The strip's bubble on the rule detail hangs DOWN from the strip (n-0307).
+ * The strip is the first thing in a pane that scrolls, and a bubble centred
+ * on it ran its top rows up out of the pane and under the Recording-as strip,
+ * where `checks` and the head of `agent` could not be read.
+ */
+test('the tiers bubble on a rule stays inside the pane that scrolls it', {
+  tag: '@rule:panel.rules.tiers-at-a-glance',
+}, async ({ page }) => {
+  await review(page);
+  await firstRule(page);
+  const pane = page.locator('.wdp-detail');
+  const strip = pane.getByTestId('panel.rule-tiers').first();
+  await strip.hover();
+  const tip = strip.getByTestId('panel.rule-tiers-tip');
+  await expect.poll(() => tip.evaluate((el) => Number(getComputedStyle(el).opacity))).toBeGreaterThan(0.5);
+  const [t, p] = await Promise.all([tip.boundingBox(), pane.boundingBox()]);
+  expect(t.y, 'the bubble starts no higher than the pane it is in').toBeGreaterThanOrEqual(p.y - 1);
+  expect(t.y + t.height, 'and it ends inside it').toBeLessThanOrEqual(p.y + p.height + 1);
+});
+
+/*
+ * The legend's ask badges sit beside their sentences, not on them (n-0308).
+ * The mark column was sized for one glyph and the badges are wider than
+ * that, so each was painted over the first word of its own line.
+ */
+test('the legend keeps every mark clear of the words beside it', {
+  tag: '@rule:panel.rules.legend-on-demand',
+}, async ({ page }) => {
+  await review(page);
+  const legend = page.getByTestId('panel.legend');
+  await legend.hover();
+  const tip = page.getByTestId('panel.legend-tip');
+  await expect.poll(() => tip.evaluate((el) => Number(getComputedStyle(el).opacity))).toBeGreaterThan(0.5);
+  const badges = tip.locator('.badge');
+  expect(await badges.count(), 'the legend explains the asks').toBeGreaterThan(0);
+  for (const badge of await badges.all()) {
+    const words = badge.locator('xpath=../following-sibling::span[1]');
+    const [b, w] = await Promise.all([badge.boundingBox(), words.boundingBox()]);
+    expect(b.x + b.width, `${await badge.textContent()} ends before its sentence starts`).toBeLessThanOrEqual(w.x + 0.5);
+  }
+});
