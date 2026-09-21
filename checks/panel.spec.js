@@ -3221,6 +3221,38 @@ test('the surface in front takes the pointer, and mid-fade neither does', {
 });
 
 /*
+ * The signatures are a grid two dots tall (n-0118): as many columns as the
+ * roles need, only as many dots as there are roles, and an odd last dot
+ * centred between the rows on the right. Measured from the boxes, since a
+ * grid class that resolved to nothing would still be a column.
+ */
+test('the sign-off dots stand two tall, in as many columns as the roles need', {
+  tag: '@rule:panel.rules.tiers-at-a-glance',
+}, async ({ page }) => {
+  await review(page);
+  const stacks = page.getByTestId('panel.rules-list').getByTestId('panel.rule-signoff');
+  await stacks.first().waitFor();
+  let odd = 0;
+  for (const stack of (await stacks.all()).slice(0, 40)) {
+    const n = ((await stack.getAttribute('data-signoff')) ?? '').split(' ').filter(Boolean).length;
+    expect(Number(await stack.getAttribute('data-columns'))).toBe(Math.ceil(n / 2));
+    const boxes = await stack.locator(':scope > span').evaluateAll((els) => els.map((el) => { const r = el.getBoundingClientRect(); return { x: r.x, y: r.y, h: r.height }; }));
+    expect(boxes.length, 'one dot per role, no more').toBe(n);
+    const rows = new Set(boxes.map((b) => Math.round(b.y)));
+    expect(rows.size, 'never taller than two dots').toBeLessThanOrEqual(2);
+    if (n % 2 === 1 && n > 1) {
+      odd++;
+      const last = boxes.at(-1);
+      const [top, bottom] = [boxes[0], boxes[1]];
+      expect(last.x, 'the lone dot is on the right').toBeGreaterThan(top.x);
+      const mid = (top.y + bottom.y + bottom.h) / 2;
+      expect(Math.abs(last.y + last.h / 2 - mid), 'centred between the rows').toBeLessThanOrEqual(1.5);
+    }
+  }
+  test.info().annotations.push({ type: 'odd-role-rules-seen', description: String(odd) });
+});
+
+/*
  * The strip's bubble on the rule detail hangs DOWN from the strip (n-0307).
  * The strip is the first thing in a pane that scrolls, and a bubble centred
  * on it ran its top rows up out of the pane and under the Recording-as strip,

@@ -1045,8 +1045,9 @@ stories:
             - A tier the rule asks for that no run has touched, and a pass whose statement has since moved, each keep a shape of their own - so a missing tier is legible as missing rather than as absent
             - A tier the rule does not ask for, and a tier with nothing to judge because the rule is unbuilt, are the quietest mark on the strip - and the tooltip says which of the two it is
             - Beside the tiers, one slot per role the rule names, in a fixed order, filled to the extent that role has signed
+            - The slots stand in a grid two dots tall - two roles are one column, three or four are two - with only as many dots as there are roles, and an odd last dot centred on the right so three read as a triangle
             - One tooltip covers the whole strip and names every tier and every role in words
-          statement_hash: sha256:a8d625714a1c
+          statement_hash: sha256:363df4d92820
           reworded:
             - hash: sha256:cac7a0be0702
               at: 2026-09-13
@@ -1057,6 +1058,9 @@ stories:
             - hash: sha256:42318366ff86
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:a8d625714a1c
+              at: 2026-09-21T02:47:48Z
+              why: "n-0118: the sign-off grid is a step, the marks and their meaning did not change"
       - id: panel.rules.grouped-by-screen
         origin: walkdown
         statement: The rule list is grouped by the screen each rule is judged on, in the storyboard's order. A screen's heading stays in view while its rules scroll past.

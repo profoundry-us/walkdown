@@ -4,7 +4,7 @@ author: agent
 created: 2026-08-28T03:40:00Z
 anchor:
   rule: panel.rules.tiers-at-a-glance
-status: open
+status: addressed
 body: >-
   A design question left open by a fix. The human tier's latest run can be a
   SIGN-OFF rather than a verdict - `approved` when somebody accepted the
@@ -86,4 +86,14 @@ replies:
       the case of 3, you still see two columns, but only 3 dots. The third and
       lone dot should be middle-aligned vertically on the right making a sort of
       triangle with the dots.
+  - author: agent
+    created: 2026-09-21T02:50:02Z
+    body: "Built as you drew it: the sign-off dots stand in a grid two tall, one
+      column for two roles, two columns for three or four, only as many dots as
+      there are roles. An odd last dot spans both rows on the right, so three
+      read as a triangle. On panel.rules.one-conversation, signed by eng,
+      product and design, the two left dots sit at 2665 and 2674 and the lone
+      right dot at 2670, centred between them. The check walks the list and
+      measures the boxes (recorded 2026-09-21T02-49-19Z); the rule carries the
+      grid as a step."
 reason: observation

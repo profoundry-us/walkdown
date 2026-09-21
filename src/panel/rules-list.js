@@ -313,23 +313,27 @@ function signoffDot(a, mine) {
  * spells out in full. Dropping from the middle rather than the end keeps the
  * two fixed slots fixed, which is the whole reason the stack reads.
  */
-const MAX_SLOTS = 3;
+/*
+ * The signatures are a grid two dots tall (n-0118, Topher 2026-09-18): two
+ * roles are one column, three or four are two columns, and only as many
+ * dots as there are roles. An odd last dot spans both rows and sits centred
+ * on the right, so three read as a triangle rather than as a column with a
+ * hole. Columns flow first, so the strip never grows taller than two dots
+ * and the eye can run down a list of ninety rules.
+ */
 function signoffStack(acceptance, mine) {
   const all = stackOrder(acceptance);
   if (!all.length) return nothing;
-  const slots =
-    all.length > MAX_SLOTS
-      ? [all[0], { role: '+', state: 'more', n: all.length - 2 }, all.at(-1)]
-      : all;
-  return html`<span class="flex w-4 shrink-0 flex-col items-center justify-center"
+  const cols = Math.ceil(all.length / 2);
+  const lone = all.length % 2 === 1;
+  return html`<span class="grid shrink-0 grid-flow-col grid-rows-2 items-center justify-center gap-x-[3px]"
     data-testid="panel.rule-signoff" data-signoff="${all.map((a) => `${a.role}:${a.state}`).join(' ')}"
-    >${slots.map(
-      (a) =>
-        html`<span class="flex h-[9px] items-center justify-center">${
-          a.state === 'more'
-            ? html`<span class="text-[8px] leading-none opacity-60">+${a.n}</span>`
-            : signoffDot(a, mine)
-        }</span>`,
+    data-columns="${cols}"
+    >${all.map(
+      (a, i) =>
+        html`<span class="flex h-[9px] w-[9px] items-center justify-center ${
+          lone && i === all.length - 1 ? 'row-span-2' : ''
+        }">${signoffDot(a, mine)}</span>`,
     )}</span>`;
 }
 
@@ -421,7 +425,7 @@ export function tierMarks(row, mine = false, opts = {}) {
   // daisyUI's own placement variables, so the bubble keeps its side and
   // only its vertical anchor moves.
   const hang = opts.tipDown ? '--tt-inset:0 auto; --tt-trans:0; --tt-tail-inset:.35rem auto' : '';
-  return html`<span class="tooltip tooltip-right flex w-11 shrink-0 items-center justify-center gap-0.5 text-[12px] leading-none"
+  return html`<span class="tooltip tooltip-right flex w-13 shrink-0 items-center justify-center gap-0.5 text-[12px] leading-none"
     title="" style="${hang}" data-testid="panel.rule-tiers" data-tiers="${tiers.map((t) => `${t[0]}:${t[1]}`).join(' ')}"
     >${stripTip(tiers, row.acceptance)}${tiers.map(([, state, cell]) => {
       const [glyph, cls] = TIER_MARK[state] ?? TIER_MARK.na;
