@@ -4,7 +4,7 @@ author: topher
 via: agent
 created: 2026-08-22T16:54:56Z
 anchor: {}
-status: addressed
+status: verified
 body: 3. When I use the "W pin" button, there is no way to get out of the pin
   mode; escape should get out, or clicking the button, or clicking the walkdown
   badge on the side. Right now all of those try to add more pin
@@ -18,3 +18,4 @@ replies:
       Escape closes an open form then leaves pin mode. Specified as
       panel.dock.chrome-not-a-pin-target."
 reason: feedback
+verified_by: topher

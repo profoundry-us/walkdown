@@ -4,7 +4,7 @@ author: topher
 via: agent
 created: 2026-08-22T16:54:56Z
 anchor: {}
-status: addressed
+status: verified
 body: Need to be able to respond to threads inside the panel. I have no way to
   respond to q-0002;
 added: Threads are read-only in the docked panel. I need to be able to respond
@@ -18,3 +18,4 @@ replies:
       waive/reopen need a reason. Specified as panel.threads.reply-in-place and
       panel.threads.claim-never-accept."
 reason: feedback
+verified_by: topher

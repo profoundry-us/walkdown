@@ -6,7 +6,7 @@ created: 2026-08-27T00:01:06Z
 anchor:
   screen: review
   element: panel.tabs
-status: addressed
+status: open
 body: Actually, now that I think about it; I eventually want a storyboard view
   of the screens that maybe has small / compressed screenshots of each one so
   you can kinda see an overview. Not sure where to keep this idea since it's not
@@ -35,4 +35,8 @@ replies:
       owed: the Screens tab it would have displaced is gone, so a storyboard
       view has a free slot whenever it is drawn. Yours to waive, or to turn into
       a design request when you want it."
+  - author: topher
+    created: 2026-09-21T21:52:06Z
+    body: Let's build the storyboard when you click the screen dropdown at the top.
+      It should show a tab selector with the storyboard or list views.
 reason: request

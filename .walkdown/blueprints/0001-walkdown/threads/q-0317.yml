@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-20T17:15:24.309Z
 anchor:
   rule: screens.ownership.one-claimant
-status: open
+status: answered
 body: >-
   May a page belong to more than one blueprint?
 
@@ -21,3 +21,9 @@ options:
   - label: No - split screens instead
     why: two blueprints about one page declare different screens on it; a second
       claimant on the same path stays a fault
+replies:
+  - author: topher
+    created: 2026-09-21T20:09:07Z
+    body: Yes - split the two questions
+    answer: true
+chosen: Yes - split the two questions

@@ -15,7 +15,7 @@ anchor:
   viewport:
     name: desktop
     width: 1050
-status: addressed
+status: verified
 body: With the prototype open, I can't use the screen selector. It is visible,
   but clicking it does nothing.
 replies:
@@ -83,3 +83,4 @@ replies:
       know whether that copy was the extension's vendored panel (the stale-copy
       badge would say) or the served one."
 reason: request
+verified_by: topher

@@ -11,7 +11,7 @@ anchor:
   viewport:
     name: desktop
     width: 1050
-status: addressed
+status: verified
 body: The toasts that appear in the bottom of the screen should utilize the
   warn, success, and danger colors where relevant.
 replies:
@@ -65,3 +65,4 @@ replies:
       No new rule and no check: which colour a transient message wears is
       cosmetic, and asserting on it would be brittle.
 reason: request
+verified_by: topher

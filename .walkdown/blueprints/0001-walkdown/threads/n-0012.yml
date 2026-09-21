@@ -3,7 +3,7 @@ kind: note
 author: agent
 created: 2026-08-22T16:54:56Z
 anchor: {}
-status: addressed
+status: verified
 body: The embed posted pins without a project, so feedback left on the example
   app filed into walkdown's own blueprint instead of the example's.
 replies:
@@ -14,3 +14,4 @@ replies:
       the example app lands in example/blueprint. Specified as
       embed.pin.right-project."
 reason: feedback
+verified_by: topher

@@ -5,7 +5,7 @@ via: agent
 created: 2026-08-23T23:33:27Z
 anchor:
   rule: panel.dock.no-framing
-status: addressed
+status: verified
 body: >-
   But first, let's do one small change to the panel view: Make it feel like it
   really "wraps" the page.
@@ -46,3 +46,4 @@ replies:
       viewer. Specified as panel.dock.wraps-the-page, .toolbar, .one-pin-mode
       and .own-skin."
 reason: feedback
+verified_by: topher

@@ -4,7 +4,7 @@ author: topher
 via: agent
 created: 2026-08-22T16:54:56Z
 anchor: {}
-status: addressed
+status: verified
 body: also, it mentions the proposal sketches, but I have no way to view those.
   Would be nice if we could open them in the viewer somehow.
 added: q-0002 points at a proposal sketch (proposals/waitlist-already.html) but
@@ -19,3 +19,4 @@ replies:
       Verified against q-0002 in the example. Specified as
       panel.threads.show-the-sketch."
 reason: feedback
+verified_by: topher

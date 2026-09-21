@@ -11,7 +11,7 @@ anchor:
   viewport:
     name: desktop
     width: 1050
-status: addressed
+status: verified
 body: There is still a bug where any pins on a page have their tooltips appear
   and then fade away very quickly when the page first loads. This appears to be
   from any load, whether a rule change, or the first load of the app /
@@ -43,3 +43,4 @@ replies:
       anchor rather than by class. node --test 93 pass, WALKDOWN_RECORD=0 npm
       run checks:dev 23 pass, walkdown lint 0 errors."
 reason: request
+verified_by: topher

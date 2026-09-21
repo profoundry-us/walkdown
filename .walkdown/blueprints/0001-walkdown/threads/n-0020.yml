@@ -5,7 +5,7 @@ via: agent
 created: 2026-08-24T02:36:44Z
 anchor:
   rule: panel.dock.no-framing
-status: addressed
+status: verified
 body: "Regarding the origin / path: many apps will be SPAs that use the `#` to
   denote different URLs (for things like models or drawers being open). Ideally
   we'd support this too as separate screens."
@@ -50,3 +50,4 @@ replies:
       #invite-batch in both the app and the prototype, and is its own screen
       waitlist-invite-batch.
 reason: feedback
+verified_by: topher
