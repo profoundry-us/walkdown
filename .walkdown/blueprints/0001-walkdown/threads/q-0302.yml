@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-17T15:09:30.312Z
 anchor:
   rule: status.derived.verdict-belongs-to-a-place
-status: open
+status: answered
 body: >-
   Should a target with NO base_url count nothing, rather than every verdict ever
   made against it?
@@ -25,3 +25,8 @@ options:
       place
   - label: Counts every run
     why: as today - removing the address resurrects them all
+replies:
+  - author: topher
+    created: 2026-09-21T00:47:38Z
+    body: Counts nothing
+chosen: Counts nothing

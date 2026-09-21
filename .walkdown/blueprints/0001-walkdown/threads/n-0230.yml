@@ -5,7 +5,7 @@ via: agent
 created: 2026-09-07T19:16:38.525Z
 anchor:
   rule: panel.walkdown.session-survives-reload
-status: addressed
+status: verified
 body: >-
   I totally saw the dialog, but I only see "as eng". Can you fix this one to
   have the signatures in the draft so I can finish it and it properly saves
@@ -71,4 +71,11 @@ replies:
       Topher finished the repaired sitting as 2026-09-07T19-15-43Z-local-01: 38
       verdicts, signatures eng (topher) and product (topher), and the toast
       named both.
+  - author: topher
+    via: verdict
+    created: 2026-09-21T00:57:46Z
+    body: Verified by topher's pass on panel.walkdown.session-survives-reload
+      (2026-09-21T00-57-46Z-local-01).
 reason: observation
+verified_by: topher
+verified_via: 2026-09-21T00-57-46Z-local-01

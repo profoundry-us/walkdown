@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-08T19:58:08.941Z
 anchor:
   rule: threads.lifecycle.reasoned-endings
-status: open
+status: answered
 body: >-
   Renaming an anchor leaves every thread pointing at the old one warning
   forever, and there is no door to fix it.
@@ -52,3 +52,9 @@ options:
     why: the threads are never touched
   - label: Accept it, and say it quietly
     why: a stale anchor is history, not an error
+replies:
+  - author: topher
+    created: 2026-09-21T00:56:21Z
+    body: We should track the renames. The thread should show the original, but with
+      some indicator that it's been renamed. And hovering the anchor should show
+      a tooltip with all of the renames.

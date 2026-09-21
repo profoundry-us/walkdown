@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-17T00:11:04.934Z
 anchor:
   rule: status.evidence.agent-assumed
-status: open
+status: answered
 body: >-
   Should the judge prompt hand out a port, so two judges driven at once cannot
   pick the same one?
@@ -19,3 +19,8 @@ options:
     why: walkdown judge <rule> --port <n>, and the scratch copy is made on it
   - label: No - judges pick their own
     why: the collision was the shared pane, not the port
+replies:
+  - author: topher
+    created: 2026-09-21T00:48:01Z
+    body: Yes - the prompt hands out a port
+chosen: Yes - the prompt hands out a port

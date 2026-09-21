@@ -1,0 +1,17 @@
+id: n-0318
+kind: note
+reason: request
+author: topher
+via: agent
+created: 2026-09-21T01:00:38.115Z
+anchor:
+  rule: panel.rules.evidence-visible
+  screen: rule-detail
+status: open
+body: Change the "Check source" from a collapse into a clickable area that opens
+  the source in a modal. The modal should show all of the contents, but also
+  provide a link to GitHub if possible so a user can see it on a larger screen
+  in full context (open in a new tab)
+added: Filed from Topher's list at the end of the 2026-09-21 walkdown. The
+  GitHub link needs the repository's remote and the run's git_sha, both of which
+  the ledger already records; the modal is the evidence modal's shape.

@@ -7,7 +7,7 @@ anchor:
   rule: panel.rules.evidence-visible
   screen: rule-detail
   element: detail.screenshots-modal
-status: addressed
+status: verified
 body: >-
   Separate issue, and we should add a note, some rules have text files in their
   "screenshots" area that don't render. We should support rendering the text
@@ -70,4 +70,11 @@ replies:
 
       The word did become Evidence, as n-0242 asked - see that thread for the
       anchor rename.
+  - author: topher
+    via: verdict
+    created: 2026-09-21T00:57:46Z
+    body: Verified by topher's pass on panel.rules.evidence-visible
+      (2026-09-21T00-57-46Z-local-01).
 reason: finding
+verified_by: topher
+verified_via: 2026-09-21T00-57-46Z-local-01

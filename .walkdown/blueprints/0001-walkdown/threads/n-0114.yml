@@ -6,7 +6,7 @@ anchor:
   rule: panel.identity.default-actor
   screen: settings
   element: settings.actor
-status: addressed
+status: verified
 body: >-
   Design request — the build now disagrees with the drawing, and the drawing
   owns this screen, so this is a request rather than an edit.
@@ -40,3 +40,10 @@ replies:
       and the handle beside the name in the session strip (panel.actor-handle).
       What remains is the drawing catching up, which is design's. Verify if the
       build is right as it stands."
+  - author: topher
+    via: verdict
+    created: 2026-09-21T00:57:46Z
+    body: Verified by topher's pass on panel.identity.default-actor
+      (2026-09-21T00-57-46Z-local-01).
+verified_by: topher
+verified_via: 2026-09-21T00-57-46Z-local-01

@@ -1,0 +1,14 @@
+id: n-0320
+kind: note
+reason: request
+author: topher
+via: agent
+created: 2026-09-21T01:00:38.487Z
+anchor:
+  rule: panel.rules.detail-slide
+  screen: rule-detail
+status: open
+body: The rule ID at the top of the Rule Detail page should be clickable and
+  should copy the ID so I don't have to select the text and click command-c
+  manually.
+added: Filed from Topher's list, 2026-09-21.

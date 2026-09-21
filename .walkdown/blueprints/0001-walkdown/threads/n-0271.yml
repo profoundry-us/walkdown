@@ -6,7 +6,7 @@ created: 2026-09-10T03:32:22.090Z
 anchor:
   rule: panel.start.which-project
   screen: project-modal
-status: addressed
+status: verified
 body: The ycombinator and localhost:4700 ones should show the exact same modal.
   But I think the "Make this page reviewable" should be at the top since you
   might have lots of projects that would push it down and out of view. The "new
@@ -88,4 +88,11 @@ replies:
       window, and whether project rows want a blueprint count once a project
       holds twenty. Verify if the current modal is right as it stands; the
       questions can become requests when you want them drawn."
+  - author: topher
+    via: verdict
+    created: 2026-09-21T00:57:46Z
+    body: Verified by topher's pass on panel.start.which-project
+      (2026-09-21T00-57-46Z-local-01).
 reason: request
+verified_by: topher
+verified_via: 2026-09-21T00-57-46Z-local-01

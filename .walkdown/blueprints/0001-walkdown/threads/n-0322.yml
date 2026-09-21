@@ -1,0 +1,13 @@
+id: n-0322
+kind: note
+reason: request
+author: topher
+via: agent
+created: 2026-09-21T01:00:38.866Z
+anchor:
+  rule: locations.answer.registry-is-the-only-door
+status: open
+body: The Because block of "What a spelling can fool..." does not make a lot of
+  sense and needs to be rewritten in a better voice.
+added: Filed from Topher's list, 2026-09-21. A wording pass under ADR 0004; the
+  rewording keeps the hash as a reword since the meaning does not move.

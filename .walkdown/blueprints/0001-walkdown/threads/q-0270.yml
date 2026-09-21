@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-10T03:25:04.660Z
 anchor:
   rule: locations.answer.declared-not-discovered
-status: open
+status: answered
 body: >-
   The config key still says "projects" and means blueprints (ADR 0001 step 5,
   the half I did not do).
@@ -67,9 +67,13 @@ replies:
 
       Shipped in 9a8208b. This thread is still open because answering it is his
       to do, not mine.
+  - author: topher
+    created: 2026-09-21T00:27:08Z
+    body: Rename the key to blueprints:, no fallback
 options:
   - label: Rename the key to blueprints:, no fallback
     why: with a one-liner that rewrites a config in place, and the locations.js
       parameter in the same commit
   - label: "Keep projects:"
     why: a file format with data on disk; the ADR renamed the words on screen
+chosen: Rename the key to blueprints:, no fallback

@@ -7,7 +7,7 @@ anchor:
   rule: panel.rules.evidence-visible
   screen: rule-detail
   element: detail.screenshots
-status: addressed
+status: verified
 body: File a note to rename it to Evidence;
 added: >-
   Rename Screenshots to Evidence, everywhere the word appears. Topher's call,
@@ -81,4 +81,11 @@ replies:
 
       - n-0100 is anchored to detail.screenshots too, but it is terminal, so it
       is not linted.
+  - author: topher
+    via: verdict
+    created: 2026-09-21T00:57:46Z
+    body: Verified by topher's pass on panel.rules.evidence-visible
+      (2026-09-21T00-57-46Z-local-01).
 reason: finding
+verified_by: topher
+verified_via: 2026-09-21T00-57-46Z-local-01

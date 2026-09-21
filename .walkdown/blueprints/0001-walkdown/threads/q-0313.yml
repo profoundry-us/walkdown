@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-20T17:15:22.247Z
 anchor:
   rule: status.acceptance.role-comes-from-the-run
-status: open
+status: answered
 body: >-
   May somebody sign a role their own config does not grant?
 
@@ -19,3 +19,8 @@ options:
     why: the config is a default, never a limit
   - label: Config only, for both
     why: a proxy needs the proxied person's roles known to this machine too
+replies:
+  - author: topher
+    created: 2026-09-21T00:50:08Z
+    body: Any role, any signer
+chosen: Any role, any signer

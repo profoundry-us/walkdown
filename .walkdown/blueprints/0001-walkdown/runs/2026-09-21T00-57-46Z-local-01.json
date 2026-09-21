@@ -1,0 +1,184 @@
+{
+  "run_id": "2026-09-21T00-57-46Z-local-01",
+  "created": "2026-09-21T00:57:46Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    },
+    {
+      "role": "design",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2394d14-dirty",
+  "tree_hash": "sha256:e0d61dc46a26",
+  "spec_hash": "sha256:bde8f61d9989",
+  "results": [
+    {
+      "rule": "embed.pin.tooltip-says-what-it-is",
+      "status": "fail",
+      "statement_hash": "sha256:c5847b11a900",
+      "threads": [
+        "n-0306"
+      ]
+    },
+    {
+      "rule": "panel.dock.toolbar",
+      "status": "pass",
+      "statement_hash": "sha256:4725cfa2fe18"
+    },
+    {
+      "rule": "panel.dock.no-pin-mid-fade",
+      "status": "pass",
+      "statement_hash": "sha256:014e0ac5f915"
+    },
+    {
+      "rule": "panel.desk.reads-as-paper",
+      "status": "pass",
+      "statement_hash": "sha256:23b43c1536ff"
+    },
+    {
+      "rule": "panel.delivery.stale-copy-says-so",
+      "status": "pass",
+      "statement_hash": "sha256:5ba123b01d1c"
+    },
+    {
+      "rule": "panel.start.address-keeps-the-pick",
+      "status": "pass",
+      "statement_hash": "sha256:f81b1c70e65f"
+    },
+    {
+      "rule": "panel.rules.tiers-at-a-glance",
+      "status": "fail",
+      "statement_hash": "sha256:a8d625714a1c",
+      "threads": [
+        "n-0118",
+        "n-0307"
+      ]
+    },
+    {
+      "rule": "panel.walkdown.records-to-ledger",
+      "status": "pass",
+      "statement_hash": "sha256:d9e0e66da1d8"
+    },
+    {
+      "rule": "panel.walkdown.one-control-owns-the-sitting",
+      "status": "fail",
+      "statement_hash": "sha256:cb5fbb165d7a",
+      "threads": [
+        "n-0309",
+        "n-0316",
+        "q-0315"
+      ]
+    },
+    {
+      "rule": "panel.walkdown.session-survives-reload",
+      "status": "pass",
+      "statement_hash": "sha256:5cd0d76da115"
+    },
+    {
+      "rule": "panel.walkdown.draft-on-disk",
+      "status": "pass",
+      "statement_hash": "sha256:c1cd43e94e52"
+    },
+    {
+      "rule": "panel.identity.default-actor",
+      "status": "pass",
+      "statement_hash": "sha256:3645bdcb734b"
+    },
+    {
+      "rule": "screens.surfaces.as-built-drawing",
+      "status": "pass",
+      "statement_hash": "sha256:21a9564025dc"
+    },
+    {
+      "rule": "panel.rules.steps-not-an-appendix",
+      "status": "pass",
+      "statement_hash": "sha256:64152f558d3f"
+    },
+    {
+      "rule": "panel.rules.evidence-visible",
+      "status": "pass",
+      "statement_hash": "sha256:dcbb494ff51d"
+    },
+    {
+      "rule": "panel.rules.one-conversation",
+      "status": "pass",
+      "statement_hash": "sha256:768c5e799a41"
+    },
+    {
+      "rule": "panel.walkdown.verdicts-at-hand",
+      "status": "pass",
+      "statement_hash": "sha256:2bf91b66cee0"
+    },
+    {
+      "rule": "panel.walkdown.pass-verifies-feedback",
+      "status": "pass",
+      "statement_hash": "sha256:b8cae5781199"
+    },
+    {
+      "rule": "panel.walkdown.note-with-any-verdict",
+      "status": "pass",
+      "statement_hash": "sha256:7d8fa9eecfc8"
+    },
+    {
+      "rule": "panel.signoff.spec-pair-derived",
+      "status": "pass",
+      "statement_hash": "sha256:f5c753ec1d9b"
+    },
+    {
+      "rule": "threads.conversation.one-stream",
+      "status": "pass",
+      "statement_hash": "sha256:d3d0b129a2e7"
+    },
+    {
+      "rule": "threads.conversation.says-whose-move",
+      "status": "pass",
+      "statement_hash": "sha256:3e30a750e842"
+    },
+    {
+      "rule": "panel.start.which-project",
+      "status": "pass",
+      "statement_hash": "sha256:8927716089a7"
+    },
+    {
+      "rule": "locations.default.nothing-in-the-tree",
+      "status": "pass",
+      "statement_hash": "sha256:a2ac0f932c99"
+    },
+    {
+      "rule": "locations.travel.judged-against-a-spec",
+      "status": "pass",
+      "statement_hash": "sha256:20d85cac1943"
+    },
+    {
+      "rule": "panel.delivery.absent-until-asked",
+      "status": "pass",
+      "statement_hash": "sha256:7e8666198401"
+    },
+    {
+      "rule": "status.acceptance.signoff-defaults-to-eng",
+      "status": "pass",
+      "statement_hash": "sha256:8dd40d6249dc"
+    },
+    {
+      "rule": "threads.lifecycle.closes-where-it-was-asked",
+      "status": "pass",
+      "statement_hash": "sha256:7b9c7c47a41d"
+    },
+    {
+      "rule": "threads.question.one-ask",
+      "status": "pass",
+      "statement_hash": "sha256:116b4f4dc582"
+    }
+  ]
+}

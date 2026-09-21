@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-14T19:43:31.414Z
 anchor:
   rule: panel.delivery.stale-copy-says-so
-status: addressed
+status: verified
 body: |-
   The stale-copy badge is clipped at ordinary laptop widths, and at 1280 the word "Stale" is gone.
 
@@ -27,4 +27,11 @@ replies:
       checks/fixtures/extension.html defaulted buildHash to a hash matching
       nothing, so every check ran with a stale badge in the bar - it now sets
       one only when a check names it."
+  - author: topher
+    via: verdict
+    created: 2026-09-21T00:57:46Z
+    body: Verified by topher's pass on panel.delivery.stale-copy-says-so
+      (2026-09-21T00-57-46Z-local-01).
 reason: finding
+verified_by: topher
+verified_via: 2026-09-21T00-57-46Z-local-01

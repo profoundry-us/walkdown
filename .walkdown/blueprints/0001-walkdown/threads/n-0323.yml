@@ -1,0 +1,17 @@
+id: n-0323
+kind: note
+reason: request
+author: topher
+via: agent
+created: 2026-09-21T01:00:39.055Z
+anchor:
+  rule: ownership.authoring.statement-reads-at-a-glance
+status: open
+body: We may need to define a better voice for all text the agent stores in the
+  blueprint (rules, because, given / when / then, etc) and build some sort of
+  system that checks it against the rules before it is saved and presented to
+  the user. I know we have made some progress here, we just need to refine it a
+  bit.
+added: Filed from Topher's list, 2026-09-21. ADR 0004 and the rule-wording-judge
+  agent are the progress made; what is asked is a gate before a save, not a
+  judge after one.

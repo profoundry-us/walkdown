@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-20T17:15:22.431Z
 anchor:
   rule: status.acceptance.role-comes-from-the-run
-status: open
+status: answered
 body: >-
   Is a proxy signature ever remembered for the next walk?
 
@@ -16,3 +16,8 @@ options:
     why: a proxy is per walk; the next walk starts from your config alone
   - label: Offered, not assumed
     why: the last proxy is shown as a suggestion you must tick again
+replies:
+  - author: topher
+    created: 2026-09-21T00:50:21Z
+    body: Offered, not assumed
+chosen: Offered, not assumed

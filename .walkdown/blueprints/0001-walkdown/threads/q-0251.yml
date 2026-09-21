@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-08T19:56:53.031Z
 anchor:
   rule: status.acceptance.signature-names-its-signer
-status: open
+status: answered
 body: >-
   The machine gate refuses "agent" in any casing, and nothing else. Is a
   signature from "claude" one we want to take?
@@ -44,3 +44,8 @@ options:
     why: any name nobody configured is refused; lands on the identity rules
   - label: Leave the line where it is
     why: only agent is refused; the actor is stamped from the machine anyway
+replies:
+  - author: topher
+    created: 2026-09-21T00:53:21Z
+    body: Refuse a short list of machine names
+chosen: Refuse a short list of machine names

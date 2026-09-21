@@ -16,7 +16,7 @@ anchor:
   viewport:
     name: desktop
     width: 1050
-status: addressed
+status: verified
 body: Clicking the App or Prototype buttons should modify the fade slider to the
   proper setting (all prototype or all app). Right now, it stays wherever you
   put it even though only one is fully visible.
@@ -28,4 +28,11 @@ replies:
       pressing App or Prototype changed the surface and left the slider where
       you put it. It goes through lit's live directive as a property now, so
       both buttons take the slider to their end."
+  - author: topher
+    via: verdict
+    created: 2026-09-21T00:57:46Z
+    body: Verified by topher's pass on panel.dock.no-pin-mid-fade
+      (2026-09-21T00-57-46Z-local-01).
 reason: finding
+verified_by: topher
+verified_via: 2026-09-21T00-57-46Z-local-01

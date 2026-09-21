@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-08T19:14:27.641Z
 anchor:
   rule: panel.dock.no-pin-mid-fade
-status: addressed
+status: verified
 body: >-
   Landing back on an end no longer opens pinning: the reason wrapper's repaint
   crashes renderBar.
@@ -117,4 +117,11 @@ replies:
       pressing an end BUTTON after the drag rebuilds the bar and papers over the
       broken part, so the assertion has to move the fade a second time. A check
       that only pressed the button passed against the bug.
+  - author: topher
+    via: verdict
+    created: 2026-09-21T00:57:46Z
+    body: Verified by topher's pass on panel.dock.no-pin-mid-fade
+      (2026-09-21T00-57-46Z-local-01).
 reason: finding
+verified_by: topher
+verified_via: 2026-09-21T00-57-46Z-local-01

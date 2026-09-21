@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-08T20:23:01.422Z
 anchor:
   rule: panel.delivery.stale-copy-says-so
-status: addressed
+status: verified
 body: >-
   The check for this rule was the thing making servers look stale. Fixed.
 
@@ -45,4 +45,11 @@ replies:
     body: Fix is in the same commit as this note - the test now restores the mtime
       it found rather than stamping the file with now, and a full suite run
       leaves lib/ and bin/ untouched.
+  - author: topher
+    via: verdict
+    created: 2026-09-21T00:57:46Z
+    body: Verified by topher's pass on panel.delivery.stale-copy-says-so
+      (2026-09-21T00-57-46Z-local-01).
 reason: observation
+verified_by: topher
+verified_via: 2026-09-21T00-57-46Z-local-01

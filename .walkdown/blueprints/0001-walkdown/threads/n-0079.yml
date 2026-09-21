@@ -4,7 +4,7 @@ author: Topher Fangio
 created: 2026-08-26T03:14:38Z
 anchor:
   rule: panel.delivery.absent-until-asked
-status: addressed
+status: verified
 body: "I think this is working exactly as desired, but the phrasing of this
   description is weird: \"and it never leaves itself running\" doesn't make
   sense to me. I think we just need to reword this to be more about how the
@@ -20,4 +20,11 @@ replies:
       THEN steps already say plainly (nothing outlives the review, and you are
       left at the URL the page had reached). Statement rehashed, so the recorded
       verdict is stale and awaits your re-judgement."
+  - author: topher
+    via: verdict
+    created: 2026-09-21T00:57:46Z
+    body: Verified by topher's pass on panel.delivery.absent-until-asked
+      (2026-09-21T00-57-46Z-local-01).
 reason: finding
+verified_by: topher
+verified_via: 2026-09-21T00-57-46Z-local-01

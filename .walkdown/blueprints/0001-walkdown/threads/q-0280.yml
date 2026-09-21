@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-11T21:14:54.351Z
 anchor:
   rule: locations.answer.registry-is-the-only-door
-status: open
+status: answered
 body: 'The agent re-judge (run 2026-09-11T21-08-39Z, evidence
   05-read-side-canon.txt) passed the rule with one caveat worth a decision. The
   statement says a path is looked at once, at the add, and never resolved again
@@ -29,3 +29,8 @@ options:
       hand-edited path still matches
   - label: Leave it - looked at once, at the add
     why: the statement holds as written; a hand-edited path is the writer's problem
+replies:
+  - author: topher
+    created: 2026-09-21T00:45:39Z
+    body: Canonicalise on read too
+chosen: Canonicalise on read too

@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-06T17:27:41.566Z
 anchor:
   rule: locations.default.one-home-per-blueprint
-status: open
+status: answered
 body: >-
   Does a `defaults:` block outrank the layout of a home that already holds
   records?
@@ -51,3 +51,9 @@ options:
     why: a home that holds records outranks defaults:, stated and checked
   - label: Make the resolver prefer the home
     why: records already there win over a preference, in code
+replies:
+  - author: topher
+    created: 2026-09-21T00:25:40Z
+    body: We need to stop caring about "hand edits". Perhaps we should include this
+      in the governance we pass to a judging agent.
+chosen: Leave it

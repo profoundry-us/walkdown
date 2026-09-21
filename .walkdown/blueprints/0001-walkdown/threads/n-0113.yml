@@ -4,7 +4,7 @@ author: Topher Fangio
 created: 2026-08-27T15:15:17Z
 anchor:
   rule: panel.desk.reads-as-paper
-status: addressed
+status: verified
 body: Looks amazing!
 reason: finding
 replies:
@@ -13,3 +13,10 @@ replies:
     body: Nothing asked of anyone here - a note of approval filed beside a pass.
       Claimed so it can close on the next signed pass of the rule rather than
       sit in the queue.
+  - author: topher
+    via: verdict
+    created: 2026-09-21T00:57:46Z
+    body: Verified by topher's pass on panel.desk.reads-as-paper
+      (2026-09-21T00-57-46Z-local-01).
+verified_by: topher
+verified_via: 2026-09-21T00-57-46Z-local-01
