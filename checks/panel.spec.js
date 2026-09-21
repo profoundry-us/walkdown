@@ -1710,8 +1710,11 @@ test('a rule that asks draws one ask at a time with its choices, and Answer move
   await expect(page.getByTestId('detail.verdict').locator('[data-v="reply"]')).toBeVisible();
   // The tag is still the door to the thread, which draws the same choices.
   await ask.locator('.wd-tag[data-thread]').click();
-  await expect(page.getByTestId('thread.ask')).toContainText(/keep its shadow/);
+  // The ask sits at the end of the scrolling stream, not in the fixed foot,
+  // so a long question leaves the stream its room (Topher, 2026-09-21).
+  await expect(page.getByTestId('thread.body').getByTestId('thread.ask')).toContainText(/keep its shadow/);
   await expect(page.getByTestId('thread.ask').locator('[data-option]')).toHaveCount(2);
+  await expect(page.getByTestId('thread.turn')).not.toContainText(/keep its shadow/);
   await expect(page.getByTestId('thread.actions').filter({ hasText: 'Answer' })).toBeVisible();
   await expect(page.getByTestId('thread.actions').filter({ hasText: 'Later' })).toBeVisible();
   await page.getByTestId('thread.close').click();

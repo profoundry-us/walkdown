@@ -273,6 +273,28 @@ export function threadPane() {
         ⚠ View the proposed sketch</button>`
           : nothing
       }
+      ${
+        /*
+         * An open question re-asks itself at the END of the stream, where
+         * the rule's detail puts its ask card: the opening message with its
+         * choices, however far up the replies have pushed it (Topher,
+         * 2026-09-19). It sat in the fixed foot above the box first, and a
+         * long question there left the stream a few lines to scroll in
+         * (Topher, 2026-09-21). Here it scrolls with the rest, and the foot
+         * keeps only the turn line, the box and the buttons.
+         */
+        t.kind === 'question' && t.status === 'open'
+          ? html`<div class="mt-3 rounded border border-primary/60 bg-primary/5 px-2 pt-2.5 pb-2 text-[11px] leading-snug" data-testid="thread.ask">
+              <div class="wd-stream">${unsafeHTML(
+                MSG.stream({ replies: [{ ...MSG.messages(t)[0], options: undefined }] }, { rules: (S.data?.rows ?? []).map((r) => r.rule), names: names() }),
+              )}</div>
+              <!-- The choices, here too (n-0319): a question is answered
+                   from wherever it is read, and Answer below sends the
+                   pick with the words. -->
+              ${askOptions(t)}
+            </div>`
+          : nothing
+      }
     </div>
     <!-- The composer stays put at the foot of the screen: type, press Enter,
          the message is there. Above it, one line says whose move this is
@@ -287,22 +309,6 @@ export function threadPane() {
         data-testid="thread.turn" data-party="${turn.party}">
         <span class="absolute -top-[7px] left-2 rounded px-1 text-[9px] font-bold uppercase leading-[14px] tracking-wider ${TURN[turn.party].chip}">${turn.label}</span>
         <span class="opacity-75">${turn.text}</span>
-        ${
-          // An open question re-asks itself above the box: its opening
-          // message, however far up the stream the replies have pushed it
-          // (Topher, 2026-09-19; the rule's detail does the same).
-          t.kind === 'question' && t.status === 'open'
-            ? html`<div class="mt-1.5 rounded bg-base-100/70 px-1.5 py-1" data-testid="thread.ask">
-                <div class="wd-stream max-h-48 overflow-y-auto">${unsafeHTML(
-                  MSG.stream({ replies: [{ ...MSG.messages(t)[0], options: undefined }] }, { rules: (S.data?.rows ?? []).map((r) => r.rule), names: names() }),
-                )}</div>
-                <!-- The choices, here too (n-0319): a question is answered
-                     from wherever it is read, and Answer below sends the
-                     pick with the words. -->
-                ${askOptions(t)}
-              </div>`
-            : nothing
-        }
       </div>
       ${pastedShots()}
       <!-- The words are a live() property binding, as on the rule's composer,
