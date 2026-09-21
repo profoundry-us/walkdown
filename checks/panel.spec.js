@@ -174,7 +174,7 @@ test('a verdict is written to the project as it is given, and survives the brows
   expect(await draft(page)).toMatchObject({ draft: null });
 
   await acceptVerdict(page).click();
-  await expect(page.getByTestId('panel.judged')).toHaveText(/^1\/\d+ judged$/);
+  await expect(page.getByTestId('panel.judged')).toHaveText(/^\+1\/\d+$/);
 
   // On disk the moment it was given — not held in the tab until Finish.
   const d = await draft(page);
@@ -288,7 +288,7 @@ test('finishing appends a verdict under a named person; discarding records nothi
   await ensureSession(page);
   await openRuleForVerdict(page, rule);
   await acceptVerdict(page).click();
-  await expect(page.getByTestId('panel.judged')).toHaveText(/^1\/\d+ judged$/);
+  await expect(page.getByTestId('panel.judged')).toHaveText(/^\+1\/\d+$/);
   await page.getByTestId('panel.walk').click(); // the same control that started it
   await expect(page.getByTestId('panel.actor')).toBeHidden();
 
@@ -1522,21 +1522,23 @@ test('the identity is a username to record under and a full name to show, both e
   const shown = page.getByTestId('panel.actor-name');
   const handle = page.getByTestId('panel.actor-handle');
   await expect(shown).toBeVisible();
-  await expect(handle).toBeVisible();
+  // The strip carries the name you go by and nothing beside it (n-0309);
+  // the username is a hover away on it, and read in Settings.
+  await expect(handle).toHaveCount(0);
   const fullName = (await shown.textContent()).trim();
-  const username = (await handle.textContent()).trim();
   expect(fullName).not.toBe('set your name…');
-  expect(username.length).toBeGreaterThan(0);
-  expect(username).not.toContain(' '); // a handle, not a full name
-  expect(username).not.toBe(fullName);
 
-  // Settings shows the same two, and says which is which - but only one of
-  // them is a field.
+  // Settings shows both, and says which is which - but only one of them is
+  // a field.
   await shown.click();
   const actorShown = page.getByTestId('settings.actor');
   const nameField = page.getByTestId('settings.display-name');
-  await expect(actorShown).toHaveText(username);
+  const username = (await actorShown.textContent()).trim();
+  expect(username.length).toBeGreaterThan(0);
+  expect(username).not.toContain(' '); // a handle, not a full name
+  expect(username).not.toBe(fullName);
   await expect(nameField).toHaveValue(fullName);
+  await expect(shown, 'the strip says which username it records').toHaveAttribute('title', new RegExp(username));
 
   /*
    * The username is READ. It was a text box once, and its value rode up on
@@ -1555,7 +1557,7 @@ test('the identity is a username to record under and a full name to show, both e
   await nameField.fill('Someone Else');
   await nameField.blur();
   await expect(shown).toHaveText('Someone Else');
-  await expect(handle).toHaveText(username);
+  await expect(shown).toHaveAttribute('title', new RegExp(username));
 
   /*
    * It takes an edit from empty, which is the case the split exists for:
@@ -1575,7 +1577,7 @@ test('the identity is a username to record under and a full name to show, both e
   await page.getByTestId('settings.display-name').fill('Someone Else');
   await page.getByTestId('settings.display-name').blur();
   await expect(shown).toHaveText('Someone Else');
-  await expect(page.getByTestId('panel.actor-handle')).toHaveText(username);
+  await expect(shown).toHaveAttribute('title', new RegExp(username));
 
   /*
    * And the edit outlives the page, while the username comes back from the
@@ -1589,7 +1591,7 @@ test('the identity is a username to record under and a full name to show, both e
   await expect(page.getByTestId('panel.bar')).toBeVisible();
   await ensureSession(page);
   await expect(page.getByTestId('panel.actor-name')).toHaveText('Someone Else');
-  await expect(page.getByTestId('panel.actor-handle')).toHaveText(username);
+  await expect(page.getByTestId('panel.actor-name')).toHaveAttribute('title', new RegExp(username));
 
   await endSession(page);
 });
@@ -2644,7 +2646,7 @@ test('a pass ends the rule\u2019s conversation, and says so first', {
   }
 
   await acceptVerdict(page).click();
-  await expect(page.getByTestId('panel.judged')).toHaveText(/^1\/\d+ judged$/);
+  await expect(page.getByTestId('panel.judged')).toHaveText(/^\+1\/\d+$/);
   await page.getByTestId('panel.walk').click(); // the same control that started it
   // Whatever the panel said first: a refusal names itself in the failure,
   // rather than reading as a sitting that simply would not end.
@@ -3249,4 +3251,34 @@ test('the legend keeps every mark clear of the words beside it', {
     const [b, w] = await Promise.all([badge.boundingBox(), words.boundingBox()]);
     expect(b.x + b.width, `${await badge.textContent()} ends before its sentence starts`).toBeLessThanOrEqual(w.x + 0.5);
   }
+});
+
+/*
+ * Skip (n-0309, q-0315): a rule set aside for THIS sitting. It leaves the
+ * sitting's count, the run records it as skipped, and on the board it is
+ * exactly what it was - a skip signs nothing and revokes nothing - so it
+ * comes round next sitting. Quieter than Continue, because stepping past is
+ * the exception.
+ */
+test('Skip sets a rule aside for this sitting only: recorded as skipped, unchanged on the board', {
+  tag: '@rule:panel.walkdown.one-control-owns-the-sitting',
+}, async ({ page }) => {
+  const rule = (await session(page)).trim();
+  const before = (await payload(page)).rows.find((r) => r.rule === rule);
+  const skip = page.getByTestId('panel.skip');
+  await expect(skip).toBeEnabled();
+  await expect(skip, 'quieter than Continue').not.toHaveClass(/btn-warning/);
+  await expect(page.getByTestId('panel.continue')).toHaveClass(/btn-warning/);
+
+  await skip.click();
+  await expect(page.getByTestId('panel.judged')).toHaveText(/^\+1\/\d+$/);
+  expect((await draft(page)).draft.verdicts[rule]).toBe('skipped');
+  // The row wears the sitting's own mark for it.
+  await expect(page.getByTestId('panel.rules-list').locator(`[data-rule="${rule}"]`).first()).toContainText('↷');
+
+  await page.getByTestId('panel.walk').click(); // Finish
+  await expect(page.getByTestId('panel.actor')).toBeHidden();
+  const after = (await payload(page)).rows.find((r) => r.rule === rule);
+  expect(after.acceptance, 'a skip signs nothing and revokes nothing').toEqual(before.acceptance);
+  expect(after.human?.state).toBe(before.human?.state);
 });

@@ -5,7 +5,7 @@ created: 2026-09-20T17:15:23.162Z
 anchor:
   rule: panel.walkdown.one-control-owns-the-sitting
   screen: review
-status: open
+status: incorporated
 body: >-
   What is a skip, when a rule cannot be judged this sitting?
 
@@ -21,3 +21,13 @@ options:
     why: stepping past is the skip; nothing more to say
   - label: Recorded in the run as skipped, with a reason
     why: a sweep can then say why the sitting did not cover it
+replies:
+  - author: agent
+    created: 2026-09-21T01:26:24Z
+    body: "Answered by Topher in n-0309: the skip is for this sitting only, it is
+      recorded in the run as skipped, it is valid on a rule in any state, and a
+      reason is welcome but never required."
+  - author: agent
+    created: 2026-09-21T01:26:25Z
+    body: Folded into panel.walkdown.one-control-owns-the-sitting and built with
+      n-0309.

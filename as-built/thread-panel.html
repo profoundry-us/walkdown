@@ -3,7 +3,7 @@
   AS-BUILT: the thread screen
 
   A drawing of walkdown's panel as it was actually built - the panel's own
-  markup, captured from the running build by tools/as-built.mjs on 2026-09-19
+  markup, captured from the running build by tools/as-built.mjs on 2026-09-21
   and kept by hand since (ADR 0007). It is neither the design
   (prototype/screens/thread-panel.html, which stays as it was drawn) nor the build
   (the panel you are holding, which cannot frame itself). It exists so the
@@ -84,11 +84,18 @@
     .wd-msg.cont .wd-at { visibility: hidden; }
     .wd-msg.cont:hover .wd-at { visibility: visible; }
     .wd-text { overflow-wrap: anywhere; }
+    /* An answer on a rule's stream is cut to a few lines; its tag is the way to the whole of it. */
+    .wd-clamp { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
     /* The question, as the headline of its thread: what is being asked, read
        before the context under it. Its own paragraph margin, so the body
        below reads as the rest. */
     .wd-ask { font-weight: 600; font-size: 1.06em; line-height: 1.35; }
     .wd-ask + * { margin-top: .5em; }
+    .wd-opts { margin: .5em 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 3px; }
+    .wd-opt { font-size: .95em; padding: 3px 7px; border: 1px solid currentColor; border-color: color-mix(in oklch, currentColor 22%, transparent); border-radius: 5px; }
+    .wd-opt span { opacity: .7; }
+    .wd-opt.chosen { border-color: oklch(70% .14 160); background: oklch(70% .14 160 / .12); }
+    .wd-opt.chosen b::before { content: '\2713 '; color: oklch(70% .14 160); }
     /* The chat's size is for the chat. A rule's statement and steps read
        through the same renderer but keep the size the detail gave them - and
        a size utility on the element must win, so this is the rule that
@@ -214,8 +221,7 @@
               </div> 
               <div class="wdp-pane wdp-detail flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col overflow-hidden" data-testid="thread.panel"> 
                 <div class="flex items-center gap-1 px-2 pt-2"> 
-                  <button class="wdp-thread-back btn btn-ghost btn-xs text-primary" data-testid="thread.close">← All threads</button> <span class="ml-auto flex items-center gap-1 pr-1.5 text-[11px]" data-testid="thread.provenance"> 
-                    <b class="opacity-60">n-0004</b> <span class="badge badge-xs badge-info">addressed</span> </span> </div> 
+                  <button class="wdp-thread-back btn btn-ghost btn-xs text-primary" data-testid="thread.close">← All threads</button> <span class="ml-auto flex items-center gap-1 pr-1.5 text-[11px]" data-testid="thread.provenance"> <b class="opacity-60">n-0004</b> <span class="badge badge-xs badge-info">addressed</span> </span> </div> 
                 <div class="px-3.5 pb-1 text-[11px] opacity-45">Waitlist export (slow on purpose)</div> 
                 <div class="min-h-0 flex-1 overflow-y-auto px-3.5 pb-2" data-testid="thread.body"> 
                   <div class="wd-day"><span></span>Aug 27<span></span></div>
@@ -224,7 +230,7 @@
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="8" width="16" height="12" rx="2.5"><path d="M12 8V4M9 4h6"><circle cx="9" cy="14" r="1.1" fill="currentColor" stroke="none"><circle cx="15" cy="14" r="1.1" fill="currentColor" stroke="none"><path d="M9.5 17.5h5"></svg>
                     </div> 
                     <div class="wd-col"> 
-                      <div class="wd-head"><span class="wd-who">Agent</span><span class="wd-at" title="8/27/2026, 11:10:00 AM CDT">22d ago</span></div> 
+                      <div class="wd-head"><span class="wd-who">Agent</span><span class="wd-at" title="8/27/2026, 11:10:00 AM CDT">24d ago</span></div> 
                       <div class="wd-text">
                         <p>Design request: screen <code>waitlist-export</code> has no drawing. It was added to the storyboard as the example project's deliberately slow page — it takes about three seconds to finish loading, so a reviewer framing it can watch walkdown's loading veil name the screen, hold, and lift. Two states want drawing if this is ever more than a fixture: the assembling state (what the operator sees while the export is being built) and the ready state with the download. Until then the built page stands alone and <code>prototype: null</code> says so honestly.</p> 
                       </div> 

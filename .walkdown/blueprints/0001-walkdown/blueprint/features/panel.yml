@@ -1445,25 +1445,28 @@ stories:
 
       - id: panel.walkdown.one-control-owns-the-sitting
         origin: walkdown
-        statement: The same button in the bar starts a sitting and ends it. The control that carries on to the next rule sits beside the count of rules already judged.
+        statement: The same button in the bar starts a sitting and ends it. The controls that carry on to the next rule - Continue, and a quieter Skip - sit in the sitting's strip, and the count of rules judged sits in the footer beside the verified count.
         because: Starting and ending are two halves of one act.
+        verify: [checks]
         signoff: [eng, product]
         screens: [review]
         steps:
           given:
             - The panel with no sitting running, then one running
           when:
-            - Read anchor `panel.walk` in the bar, and anchor `panel.continue` beside the tally in anchor `panel.actor`
+            - Read anchor `panel.walk` in the bar, anchors `panel.skip` and `panel.continue` in anchor `panel.actor`, and the tally `panel.judged` in the footer
           then:
             - With nothing running the bar's control begins a sitting; while one runs, the same control is how it is recorded, and it says so
-            - Carrying on is a different question from ending - it is about the next rule rather than the sitting as a whole - so it sits with the count of the ones already judged rather than in the bar
+            - Carrying on is a different question from ending - it is about the next rule rather than the sitting as a whole - so it sits in the sitting's strip rather than in the bar
             - Carrying on opens the next rule still owing a verdict after the one you are on, wrapping to the top - not always the next in the list, and never simply the first, so a rule you stepped past comes round again after the others rather than every time
-            - The tally beside it reads as a fraction - judged over judged plus still owed - so how far through the sitting is, and how much is left, are one glance rather than two
+            - Beside Continue, and quieter than it, Skip sets the open rule aside for this sitting - it leaves the sitting's count, the run records it as skipped, and whatever was written in the box goes on the rule's conversation as the reason, which unlike a fail's is optional. On the board the rule is exactly what it was, signed or owed, so it comes round next sitting; a rule in any state can be skipped
+            - The tally in the footer reads as a fraction - judged over judged plus still owed - so how far through the sitting is, and how much is left, are one glance rather than two
+            - The strip names who is recording by the name they go by - the username only when there is no full name - and lists each role being signed on a line of its own
             - A pass or an approval carries you on by itself; a fail or a refine keeps you on the rule so the reason can be pinned, and this is the way onward from there
             - Both controls wear the panel's warning colour, the one it already uses for work owed to you, so the sitting reads as one thing from the tab's count through to the record - the ending filled and carrying on outlined, since two solid yellows would argue about which is the act
             - Beginning wears it too when rules are owed, so the blueprint says there is work before being asked; with nothing owed it drops back to the ordinary action colour, because a control that is always loud says nothing
             - Every one of these counts comes from a single list - the rules owing you a verdict, less the ones judged this sitting - so the tab's number, the footer's kinds, the tally's denominator and the rule Continue opens cannot drift apart
-          statement_hash: sha256:cb5fbb165d7a
+          statement_hash: sha256:001bf8336d37
           reworded:
             - hash: sha256:c74a54acc395
               at: 2026-09-13
@@ -1474,6 +1477,9 @@ stories:
             - hash: sha256:ac216e33f70b
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:cb5fbb165d7a
+              at: 2026-09-21T01:24:47Z
+              why: Skip beside Continue, the tally in the footer, roles one per line, the username behind the name (n-0309)
 
       - id: panel.walkdown.session-survives-reload
         origin: thread:n-0066
@@ -1718,10 +1724,10 @@ stories:
           when:
             - Starting a walkdown and signing for its roles
           then:
-            - The name being recorded is on screen before the walkdown begins - the username itself, beside the full name shown for it
+            - The name being recorded is on screen before the walkdown begins - the username itself, read in Settings beside the full name shown for it - and the strip then carries the name you go by for the whole sitting, with the username a hover away
             - Correcting it there records the corrected name
             - A rule's composer and a thread's screen carry no "as <name>" link; the name is not re-offered at the moment of a reply, a move or a verdict
-          statement_hash: sha256:fa46635c93e2
+          statement_hash: sha256:f216e47c65c7
           reworded:
             - hash: sha256:1b6a789fde73
               at: 2026-09-13
@@ -1735,6 +1741,9 @@ stories:
             - hash: sha256:6a65afc9d32e
               at: 2026-09-14T04:24:19Z
               why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
+            - hash: sha256:fa46635c93e2
+              at: 2026-09-21T01:24:47Z
+              why: Skip beside Continue, the tally in the footer, roles one per line, the username behind the name (n-0309)
 
   - id: panel.viewport
     title: The frame renders at real device sizes

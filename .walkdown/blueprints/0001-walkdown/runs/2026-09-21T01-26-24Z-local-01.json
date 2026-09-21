@@ -1,0 +1,67 @@
+{
+  "run_id": "2026-09-21T01-26-24Z-local-01",
+  "created": "2026-09-21T01:26:24Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6f2ae40-dirty",
+  "tree_hash": "sha256:f5473da55439",
+  "spec_hash": "sha256:4459b4b199b6",
+  "results": [
+    {
+      "rule": "panel.walkdown.fail-requires-why",
+      "status": "pass",
+      "statement_hash": "sha256:9d81f874218f",
+      "duration_ms": 2294,
+      "checks": [
+        "checks/panel.spec.js:137"
+      ]
+    },
+    {
+      "rule": "panel.walkdown.draft-on-disk",
+      "status": "pass",
+      "statement_hash": "sha256:c1cd43e94e52",
+      "duration_ms": 3283,
+      "checks": [
+        "checks/panel.spec.js:170"
+      ]
+    },
+    {
+      "rule": "panel.walkdown.records-to-ledger",
+      "status": "pass",
+      "statement_hash": "sha256:d9e0e66da1d8",
+      "duration_ms": 3325,
+      "checks": [
+        "checks/panel.spec.js:269"
+      ]
+    },
+    {
+      "rule": "panel.identity.default-actor",
+      "status": "pass",
+      "statement_hash": "sha256:3645bdcb734b",
+      "duration_ms": 2013,
+      "checks": [
+        "checks/panel.spec.js:1508"
+      ]
+    },
+    {
+      "rule": "panel.walkdown.pass-verifies-feedback",
+      "status": "pass",
+      "statement_hash": "sha256:b8cae5781199",
+      "duration_ms": 3459,
+      "checks": [
+        "checks/panel.spec.js:2586"
+      ]
+    },
+    {
+      "rule": "panel.walkdown.one-control-owns-the-sitting",
+      "status": "pass",
+      "statement_hash": "sha256:001bf8336d37",
+      "duration_ms": 2583,
+      "checks": [
+        "checks/panel.spec.js:3263"
+      ]
+    }
+  ]
+}

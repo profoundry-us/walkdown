@@ -503,8 +503,9 @@ function ruleRow(row) {
                 fail: 'text-error',
                 approved: 'text-success',
                 refining: 'text-warning',
+                skipped: 'opacity-50', // set aside, not judged
               }[picked]
-            }">${{ pass: '✓', fail: '✗', approved: '✍︎', refining: '✎︎' }[picked]}</span>`
+            }">${{ pass: '✓', fail: '✗', approved: '✍︎', refining: '✎︎', skipped: '↷' }[picked]}</span>`
           : tierMarks(row, mine)
       }
       <span class="truncate">${shortName(row)}</span>

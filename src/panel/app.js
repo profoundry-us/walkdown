@@ -1184,13 +1184,18 @@ export function render() {
            panel.identity.attribution-visible, and showing only a full name
            while recording a handle would quietly break it. With no full name
            anywhere the two are the same string and only one is drawn. -->
+      <!-- The name you go by, alone (n-0309): the username the ledger
+           carries is a hover away and read in Settings, where it was shown
+           before the sitting began. With no full name the two are one
+           string and the username is what is drawn. -->
       <span>Recording as
-        <button id="wdp-actor" data-testid="panel.actor-name" class="link font-semibold" title="Change the name in Settings (the gear)"
-          @click=${openActorSettings}>${recordingDisplay() || 'set your name…'}</button>${
+        <button id="wdp-actor" data-testid="panel.actor-name" class="link font-semibold"
+          title="${
             recordingHandle() && recordingHandle() !== recordingDisplay()
-              ? html` <span data-testid="panel.actor-handle" class="font-mono opacity-60" title="Verdicts and thread actions are recorded under this username">${recordingHandle()}</span>`
-              : nothing
-          }</span>
+              ? `Recorded under the username ${recordingHandle()} — change the name in Settings (the gear)`
+              : 'Change the name in Settings (the gear)'
+          }"
+          @click=${openActorSettings}>${recordingDisplay() || 'set your name…'}</button></span>
       <!-- Both halves of the same fact: how many you have judged, and how
            many the sitting has in it. The denominator is what you have done
            plus what is still owed, so it holds steady as you walk and reads
@@ -1202,27 +1207,34 @@ export function render() {
            so for its whole length: forgetting half way through is how a
            signature ends up under the wrong name (panel.walkdown.who-signs-is-declared). -->
       ${signingNote()}
-      <!-- Named, because it is now the ONLY place a sitting's tally is said.
-           The rule detail used to repeat it under the verdict buttons, three
-           inches from here, and the second copy was the one nobody needed
-           (n-0232). -->
-      <span class="ml-auto" data-testid="panel.judged" title="Judged in this sitting, of the rules owing you a verdict">${
-        judged.size
-      }/${judged.size + toSign + toWalk} judged</span>
-      <!-- Carrying on lives beside the tally, because they are the same
-           thought: how far you have got, and the next one. A verdict of pass
-           already advances on its own; a fail parks you on the rule so you
-           can pin it, and this is the way out of that - the walk's own next
-           step rather than the stepper beside the back link, which reads the
-           list in order and is a different journey.
+      <!-- The tally moved to the footer beside the verified count (n-0309):
+           one place says how far the sitting has got, and it is the place
+           that already counts rules. What stays here is the way onward.
 
-           Warning yellow, outlined: it belongs to the same family as the
-           walk counts it sits above and the control that ends the sitting -
-           the colour this panel already uses for the work you owe. Outlined
-           rather than filled because Finish walkdown is the solid one, and
-           two solid yellows in view would argue about which is the act. -->
-      <button class="btn btn-xs btn-outline btn-warning" data-testid="panel.continue" id="wdp-continue"
-        title="Open the next rule still owing you a verdict" @click=${continueWalkdown}>Continue</button>
+           Two ways onward. Continue opens the next rule still owing a
+           verdict - a pass already advances on its own; a fail parks you on
+           the rule so you can pin it, and this is the way out of that. Skip
+           sets the OPEN rule aside for this sitting: it leaves the count,
+           the run records it as skipped, and it comes round next sitting.
+           Quieter than Continue on purpose - the plain outline Reply wears -
+           because stepping past is the exception, not the act.
+
+           Continue is warning yellow, outlined: the same family as the walk
+           counts and the control that ends the sitting - the colour this
+           panel already uses for the work you owe. Outlined rather than
+           filled because Finish walkdown is the solid one, and two solid
+           yellows in view would argue about which is the act. -->
+      <span class="ml-auto flex items-center gap-1">
+        <button class="btn btn-xs btn-outline border-base-300 text-base-content/70" data-testid="panel.skip" id="wdp-skip"
+          ?disabled=${!(S.view === 'detail' && S.selected)}
+          title="${
+            S.view === 'detail' && S.selected
+              ? 'Set this rule aside for this sitting — recorded as skipped, still owed, back next time'
+              : 'Open a rule to skip it'
+          }" @click=${() => giveVerdict('skipped')}>Skip</button>
+        <button class="btn btn-xs btn-outline btn-warning" data-testid="panel.continue" id="wdp-continue"
+          title="Open the next rule still owing you a verdict" @click=${continueWalkdown}>Continue</button>
+      </span>
     </div>`
         : nothing
     }
@@ -1299,25 +1311,32 @@ export function render() {
          child. The label carries its own. -->
     ${
       S.listTab === 'rules'
-        ? html`<div class="grid shrink-0 grid-cols-3 items-center border-t border-base-300 px-3.5 py-2 text-xs" data-testid="panel.counts">
-      <span class="flex items-center gap-2 justify-self-start">
+        ? html`<div class="flex shrink-0 items-center justify-between gap-2 border-t border-base-300 px-3.5 py-2 text-xs" data-testid="panel.counts">
+      <span class="flex items-center gap-2">
       <span class="tooltip tooltip-top tooltip-start [--tt-trans:0] shrink-0 whitespace-nowrap">
         <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug"
-          >Rules holding a current pass on every tier they ask for. The rest are the work counted at the right.</span>
+          >Rules holding a current pass on every tier they ask for. The rest are what a walkdown is for.</span>
         <span class="opacity-70"><b>${verified}/${total}</b> verified</span></span>${
-          judged.size
+          /*
+           * The sitting's tally, as a fraction: judged this sitting over
+           * judged plus still owed, so the denominator holds steady as you
+           * walk and reads n/n when nothing is left. Drawn for the whole
+           * sitting, from +0, because the denominator is news before the
+           * first verdict. It used to sit in the strip as "8/45 judged" with
+           * a lone "+8" here; one number, one place (n-0309).
+           */
+          S.session
             ? html`<span class="tooltip tooltip-top tooltip-start [--tt-trans:0] shrink-0 text-primary">
         <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug"
-          >Judged by you in this sitting. Nothing reaches the ledger until you press Finish walkdown.</span>
-        <b>+${judged.size}</b></span>`
+          >Judged by you in this sitting, of the rules owing you a verdict. Nothing reaches the ledger until you press Finish walkdown.</span>
+        <b data-testid="panel.judged">+${judged.size}/${judged.size + toSign + toWalk}</b></span>`
             : nothing
         }</span>
-      <!-- Centred, and in its own grid column so it stays centred whether or
-           not the two badges at the right are drawn. Every mark the rail uses
-           is explained here rather than in six tooltips nobody assembles into
-           a picture. -->
-      <span class="justify-self-center">${legendControl()}</span>
-      <span class="flex shrink-0 gap-1 justify-self-end">
+      <!-- The right edge holds the Legend, and the sign count when there is
+           one. The walk count went (n-0309): the rows say it themselves now,
+           each with its ask. Every mark the rail uses is explained in the
+           Legend rather than in six tooltips nobody assembles into a picture. -->
+      <span class="flex shrink-0 items-center gap-2">
         ${
           toSign
             ? html`<span class="tooltip tooltip-top tooltip-end [--tt-trans:0]">
@@ -1326,14 +1345,7 @@ export function render() {
           <span class="badge badge-xs badge-warning badge-outline">${toSign} sign</span></span>`
             : nothing
         }
-        ${
-          toWalk
-            ? html`<span class="tooltip tooltip-top tooltip-end [--tt-trans:0]">
-          <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug"
-            >${toWalk} rule${toWalk === 1 ? '' : 's'} built and unjudged by you. Open one and give it a pass or a fail.</span>
-          <span class="badge badge-xs badge-warning badge-outline">${toWalk} walk</span></span>`
-            : nothing
-        }
+        ${legendControl()}
       </span>
     </div>`
         : nothing
@@ -1965,13 +1977,14 @@ function signingNote() {
   const sigs = S.session?.signatures ?? [];
   if (!sigs.length) return nothing;
   const mine = recordingHandle();
-  const proxies = sigs.filter((sig) => sig.signer !== mine);
-  const roles = sigs.map((sig) => sig.role).join(', ');
-  return proxies.length
-    ? html`<span data-testid="panel.actor-signing" class="rounded bg-warning/30 px-1.5 py-0.5 font-semibold"
-        title="Recorded under their name, with yours as who typed it"
-        >for ${proxies.map((p) => `${p.signer} (${p.role})`).join(', ')}</span>`
-    : html`<span data-testid="panel.actor-signing" class="opacity-60">as ${roles}</span>`;
+  const proxied = sigs.some((sig) => sig.signer !== mine);
+  // One role per line, no "as", no commas (n-0309): a list reads as a list.
+  // A role signed for somebody else says so on its own line.
+  return html`<span data-testid="panel.actor-signing" class="flex flex-col leading-tight ${
+    proxied ? 'rounded bg-warning/30 px-1.5 py-0.5 font-semibold' : 'opacity-60'
+  }" title="${proxied ? 'Recorded under their name, with yours as who typed it' : 'The roles this sitting signs for'}">${sigs.map(
+    (sig) => html`<span>${sig.role}${sig.signer !== mine ? ` for ${sig.signer}` : ''}</span>`,
+  )}</span>`;
 }
 
 /** The username a sitting's records will carry: the one it was started under. */
@@ -2161,7 +2174,8 @@ const pinnedThisSession = (rule) =>
 async function giveVerdict(status) {
   {
     {
-      const rule = S.selected.rule;
+      const rule = S.selected?.rule;
+      if (!rule) return; // Skip is only offered on an open rule
       /*
        * Not `trim()`: it leaves the format characters, and a single U+200B
        * looked exactly like an empty box while opening the gate (n-0203).
@@ -2209,7 +2223,8 @@ async function giveVerdict(status) {
       // the reason can be written or pinned where the rule is. Staying put
       // is the whole of it - pin mode is a tool you reach for, not a mode a
       // verdict puts you in.
-      if (status === 'pass' || status === 'approved') {
+      // A skip moves you on too: it is stepping past, said out loud.
+      if (status === 'pass' || status === 'approved' || status === 'skipped') {
         const next = nextOwed();
         if (next) {
           open(next.rule);

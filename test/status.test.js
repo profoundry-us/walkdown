@@ -793,3 +793,29 @@ test('a fail is not marked either - it is loud already, and owes a fix rather th
   assert.equal(rows[0].agent.state, 'fail');
   assert.equal(rows[0].unjudgedFix, null);
 });
+
+/*
+ * A person's skip is a record of not judging (n-0309, q-0315): the sitting
+ * set the rule aside. It fills no cell and touches no signature, so a signed
+ * rule skipped next sitting is still signed, and an owed one is still owed
+ * and comes round again. The run keeps the skip; the board does not read it
+ * as a verdict of any kind.
+ */
+test('a human skip signs nothing and revokes nothing; the rule is what it was @rule:status.derived.latest-wins', () => {
+  const skippedAfterSigning = deriveStatus(
+    blueprint({
+      runs: [
+        walkdownRun('2026-01-01T00:00:00Z', 'topher', 'pass'),
+        walkdownRun('2026-01-02T00:00:00Z', 'topher', 'skipped'),
+      ],
+    }),
+  );
+  assert.deepEqual(skippedAfterSigning.rows[0].acceptance.map((a) => [a.role, a.state]), [['eng', 'signed']]);
+  assert.equal(skippedAfterSigning.rows[0].human.state, 'pass');
+
+  const skippedUnsigned = deriveStatus(
+    blueprint({ runs: [walkdownRun('2026-01-02T00:00:00Z', 'topher', 'skipped')] }),
+  );
+  assert.deepEqual(skippedUnsigned.rows[0].acceptance.map((a) => [a.role, a.state]), [['eng', 'none']]);
+  assert.equal(skippedUnsigned.rows[0].human.state, 'never');
+});
