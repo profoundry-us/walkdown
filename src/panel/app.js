@@ -1256,7 +1256,12 @@ export function render() {
               : 'Open a rule to skip it'
           }" @click=${() => giveVerdict('skipped')}>Skip</button>
         <button class="btn btn-xs btn-outline btn-warning" data-testid="panel.continue" id="wdp-continue"
-          title="Open the next rule still owing you a verdict" @click=${continueWalkdown}>Continue</button>
+          ?disabled=${Boolean(unjudgedHere())}
+          title="${
+            unjudgedHere()
+              ? 'This rule owes you a verdict — pass, fail or skip it to carry on'
+              : 'Open the next rule still owing you a verdict'
+          }" @click=${continueWalkdown}>Continue</button>
       </span>
     </div>`
         : nothing
@@ -2317,7 +2322,20 @@ function nextOwed() {
   return after ?? owed[0];
 }
 
+/*
+ * The open rule still owing a verdict, with none given this sitting - the
+ * one Continue must not walk past. A fresh sitting opened on the first owed
+ * rule, and Continue pressed a few times walked the whole board with
+ * nothing recorded, which read as skipping without Skip (n-0327). Now the
+ * only ways past such a rule are a verdict and Skip.
+ */
+const unjudgedHere = () =>
+  S.view === 'detail' && S.selected && needsYou(S.selected.rule) && !S.session?.verdicts?.[S.selected.rule]
+    ? S.selected.rule
+    : null;
+
 function continueWalkdown() {
+  if (unjudgedHere()) return; // the control is disabled; a stray call stays put too
   const next = nextOwed();
   if (!next) {
     S.view = 'list';

@@ -1,0 +1,27 @@
+id: n-0327
+kind: note
+reason: feedback
+author: topher
+via: agent
+created: 2026-09-21T04:01:17.160Z
+anchor:
+  rule: panel.walkdown.one-control-owns-the-sitting
+status: addressed
+body: Continue stays put on an unjudged rule. The only way to continue on a rule
+  is to judge it, waive it, or skip it.
+added: Topher started a fresh sitting and pressed Continue a few times expecting
+  to resume from the first owed rule. Instead it walked him around the 17 owed
+  rules with nothing recorded, which read as skipping without Skip. Continue on
+  an open rule that owes a verdict and has none this sitting should not move.
+  The panel offers no waive on a rule. Its verdicts are pass, approve, fail,
+  refine and skip, so waive is read as those.
+replies:
+  - author: agent
+    created: 2026-09-21T04:04:08Z
+    body: Built. Continue is disabled on an open rule that owes you a verdict and
+      has none this sitting, and its title says to pass, fail or skip it to
+      carry on. From a judged rule, or from the list, it moves to the next owed
+      rule as before. The rule's steps say so, and both checks on the rule
+      passed in run 2026-09-21T04-03-55Z. The panel has no waive on a rule, so
+      the ways past are a verdict and Skip. Your server on 4700 needs a page
+      reload to pick up the rebuilt panel.

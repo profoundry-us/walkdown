@@ -1504,7 +1504,8 @@ stories:
           then:
             - With nothing running the bar's control begins a sitting; while one runs, the same control is how it is recorded, and it says so
             - Carrying on is a different question from ending - it is about the next rule rather than the sitting as a whole - so it sits in the sitting's strip rather than in the bar
-            - Carrying on opens the next rule still owing a verdict after the one you are on, wrapping to the top - not always the next in the list, and never simply the first, so a rule you stepped past comes round again after the others rather than every time
+            - Carrying on from a rule that owes you a verdict and has none this sitting does not move - the control is disabled and says why - so the only ways past it are a verdict and Skip
+            - From a judged rule, or from the list, carrying on opens the next rule still owing a verdict after the one you are on, wrapping to the top. Never simply the first, so a rule you skipped comes round again after the others rather than every time
             - Beside Continue, and quieter than it, Skip sets the open rule aside for this sitting - it leaves the sitting's count, the run records it as skipped, and whatever was written in the box goes on the rule's conversation as the reason, which unlike a fail's is optional. On the board the rule is exactly what it was, signed or owed, so it comes round next sitting; a rule in any state can be skipped
             - The tally in the footer reads as a fraction - judged over judged plus still owed - so how far through the sitting is, and how much is left, are one glance rather than two
             - The strip names who is recording by the name they go by - the username only when there is no full name - and lists each role being signed on a line of its own
@@ -1512,7 +1513,7 @@ stories:
             - Both controls wear the panel's warning colour, the one it already uses for work owed to you, so the sitting reads as one thing from the tab's count through to the record - the ending filled and carrying on outlined, since two solid yellows would argue about which is the act
             - Beginning wears it too when rules are owed, so the blueprint says there is work before being asked; with nothing owed it drops back to the ordinary action colour, because a control that is always loud says nothing
             - Every one of these counts comes from a single list - the rules owing you a verdict, less the ones judged this sitting - so the tab's number, the footer's kinds, the tally's denominator and the rule Continue opens cannot drift apart
-          statement_hash: sha256:001bf8336d37
+          statement_hash: sha256:2f34df9bf3b2
           reworded:
             - hash: sha256:c74a54acc395
               at: 2026-09-13

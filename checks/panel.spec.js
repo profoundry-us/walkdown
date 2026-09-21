@@ -3326,6 +3326,40 @@ test('Skip sets a rule aside for this sitting only: recorded as skipped, unchang
 });
 
 /*
+ * Continue stays put on a rule that owes a verdict and has none this sitting
+ * (n-0327): a fresh sitting pressed Continue a few times and walked the whole
+ * board with nothing recorded, which read as skipping without Skip. A verdict
+ * or Skip is the only way past; from a judged rule Continue moves again.
+ */
+test('Continue stays put on an unjudged rule; a skip is the way past', {
+  tag: '@rule:panel.walkdown.one-control-owns-the-sitting',
+}, async ({ page }) => {
+  await review(page);
+  await ensureSession(page);
+  const list = page.getByTestId('panel.rules-list');
+  const owed = list.locator('[data-rule]:has([data-ask])').first();
+  await expect(owed, 'a rule owing a verdict to open').toBeVisible();
+  const rule = await owed.getAttribute('data-rule');
+  await owed.click();
+  await expect(page.getByTestId('detail.rule-id')).toHaveText(rule);
+
+  const cont = page.getByTestId('panel.continue');
+  await expect(cont, 'no verdict yet, so Continue does not move').toBeDisabled();
+  await expect(cont).toHaveAttribute('title', /verdict/);
+  await expect(page.getByTestId('panel.skip'), 'Skip is the way past').toBeEnabled();
+
+  await page.getByTestId('panel.skip').click();
+  await expect(page.getByTestId('detail.rule-id'), 'a skip moves on').not.toHaveText(rule);
+  // Back on the skipped rule, it is judged this sitting, so Continue moves again.
+  await page.getByTestId("detail.back").first().click();
+  await list.locator(`[data-rule="${rule}"]`).first().click();
+  await expect(page.getByTestId('detail.rule-id')).toHaveText(rule);
+  await expect(cont, 'judged this sitting, so Continue moves').toBeEnabled();
+  await cont.click();
+  await expect(page.getByTestId('detail.rule-id')).not.toHaveText(rule);
+});
+
+/*
  * A proxy is offered next time, never assumed (q-0314): the name comes back
  * filled in with the box unticked, so signing for Sam again is one tick and
  * signing for Sam by accident is impossible.
