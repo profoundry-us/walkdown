@@ -3125,7 +3125,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
             class="wd-at" title="${this.esc(this.stamp(m.created))}">${
               m.failed ? 'not sent' : m.pending ? 'sending…' : this.esc(this.ago(m.created))
             }</span></div>
-          <div class="wd-text">${m.opens ? this.opening(m.opens, m.body, { rules, options: m.options, chosen: m.chosen }) : this.body(m.body, { rules })}</div>
+          <div class="wd-text${m.clamp ? ' wd-clamp' : ''}">${m.opens ? this.opening(m.opens, m.body, { rules, options: m.options, chosen: m.chosen }) : this.body(m.body, { rules })}</div>
           ${this.addition(m.added, { rules })}
         </div>
       </div>`);
@@ -3489,6 +3489,8 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     .wd-msg.cont .wd-at { visibility: hidden; }
     .wd-msg.cont:hover .wd-at { visibility: visible; }
     .wd-text { overflow-wrap: anywhere; }
+    /* An answer on a rule's stream is cut to a few lines; its tag is the way to the whole of it. */
+    .wd-clamp { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
     /* The question, as the headline of its thread: what is being asked, read
        before the context under it. Its own paragraph margin, so the body
        below reads as the rest. */

@@ -338,13 +338,28 @@ function askCard(r, asked, open) {
 function conversation(r, picked) {
   const known = (S.data?.rows ?? []).map((x) => x.rule);
   const all = conversationOf(r.rule);
+  /*
+   * Which thread a message is on, said where a reader would lose track: a
+   * reply following a message from another thread carries "↳ n-0271"; an
+   * answer carries "↳ answer · q-0270" wherever it falls, cut to a few
+   * lines, and its tag opens the question (q-0270; Topher, 2026-09-21).
+   * Before this only opening messages were tagged, so an answer to a
+   * question five threads up read as a message on nothing.
+   */
+  const answerOf = (t) =>
+    (t.replies ?? []).find((m) => m.answer) ??
+    (t.chosen ? [...(t.replies ?? [])].reverse().find((m) => !MSG.isAgent(m.author)) : null);
   const messages = all
-    .flatMap((t) =>
-      MSG.messages(t).map((m, i) =>
-        i ? m : { ...m, thread: t.id, tag: `${t.id} \u00b7 ${t.kind === 'question' ? 'question' : (t.reason ?? 'feedback')} \u00b7 ${t.status}` },
-      ),
-    )
-    .sort((a, b) => String(a.created ?? '').localeCompare(String(b.created ?? '')));
+    .flatMap((t) => {
+      const answer = t.kind === 'question' ? answerOf(t) : null;
+      return MSG.messages(t).map((m, i) =>
+        i
+          ? { ...m, on: t.id, thread: t.id, ...(m === answer ? { tag: `\u21b3 answer \u00b7 ${t.id}`, clamp: true } : {}) }
+          : { ...m, on: t.id, thread: t.id, tag: `${t.id} \u00b7 ${t.kind === 'question' ? 'question' : (t.reason ?? 'feedback')} \u00b7 ${t.status}` },
+      );
+    })
+    .sort((a, b) => String(a.created ?? '').localeCompare(String(b.created ?? '')))
+    .map((m, i, list) => (m.tag || i === 0 || list[i - 1].on === m.on ? m : { ...m, tag: `\u21b3 ${m.on}` }));
   const note = liveNoteOn(r.rule);
   const asked = openQuestionOn(r.rule);
   // Answered and not yet folded in: the rule is the agent's, and a verdict

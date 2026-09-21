@@ -1632,7 +1632,9 @@ test('a rule draws its threads as one conversation, and never repeats which rule
   // the conversation is already under.
   const under = page.getByTestId('detail.conversation');
   await expect(under.locator('.wd-tag[data-thread]').first(), 'the rule draws its threads').toBeVisible();
-  expect(await under.locator('.wd-tag[data-thread]').count()).toBe(counts[rule]);
+  // One opening tag per thread; a reply's "↳" tag names the thread it is on
+  // where the stream changes thread, and is not a second listing of it.
+  expect(await under.locator('.wd-tag[data-thread]:not(:text-matches("^\\u21b3"))').count()).toBe(counts[rule]);
   await expect(
     under.getByTestId('thread.where'),
     'under a rule, nothing repeats the rule it is anchored to',
@@ -1723,8 +1725,19 @@ test('a rule that asks draws one ask at a time with its choices, and Answer move
   expect(first.status).toBe('answered');
   expect(first.chosen).toBe('Keep it');
   expect(first.replies.at(-1).body).toMatch(/the shadow is what says/);
-  // Answered in the stream: the choice taken is marked.
-  await expect(page.getByTestId('detail.stream').locator('.wd-opt.chosen')).toHaveText(/Keep it/);
+  // Answered in the stream: the choice taken is marked, and the answer
+  // itself says which question it is on - tagged, cut to a few lines, and
+  // its tag is the way back to the question's own screen.
+  const stream = page.getByTestId('detail.stream');
+  await expect(stream.locator('.wd-opt.chosen')).toHaveText(/Keep it/);
+  const answer = stream.locator('.wd-msg', { hasText: 'the shadow is what says it is a sheet.' }).last();
+  await expect(answer.locator('.wd-tag')).toHaveText(`\u21b3 answer \u00b7 ${q1}`);
+  await expect(answer.locator('.wd-text')).toHaveClass(/wd-clamp/);
+  await answer.locator('.wd-tag[data-thread]').click();
+  await expect(page.getByTestId('thread.provenance')).toContainText(q1);
+  await page.getByTestId('thread.close').click();
+  // A reply on another thread than the message before it says so too.
+  await expect(stream.locator('.wd-msg', { hasText: 'Does the ruling need a darker line' }).locator('.wd-tag')).toHaveText(`${q2} \u00b7 question \u00b7 open`);
 
   // The last ask, answered in words alone: the card goes, the rule is the
   // agent's to fold in, and no verdict is offered until it has.

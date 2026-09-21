@@ -1275,8 +1275,9 @@ stories:
             - While the rule asks, anchor `detail.ask` stands where the turn box would - one question at a time, oldest first, with its choices to pick, its own answer box, and a count of the rule's asks - and the row below is Reply alone until every ask is answered
             - Answer puts the pick and the words on the question and moves it to answered, then draws the next ask; Later sends the current ask to the back of the rule's queue; Waive is never mind
             - The ask card's tag is the door to the thread's own screen, which quotes the question the same way above its box
+            - A reply that follows a message from another thread carries "↳ <id>"; an answer carries "↳ answer · <id>" wherever it falls, cut to a few lines, and its tag opens the question
             - Nothing under the rule repeats which rule a thread is on
-          statement_hash: sha256:768c5e799a41
+          statement_hash: sha256:cd9c17333cb0
   - id: panel.threads
     title: Feedback is answered where it is read
     statement: As a reviewer, I can reply to a thread and move its lifecycle on from the panel, without leaving the app I am reviewing.

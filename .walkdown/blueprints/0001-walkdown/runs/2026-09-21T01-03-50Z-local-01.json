@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-09-21T01-03-50Z-local-01",
+  "created": "2026-09-21T01:03:50Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "cd06a35-dirty",
+  "tree_hash": "sha256:3b3aab13eae9",
+  "spec_hash": "sha256:5c0a490250e5",
+  "results": [
+    {
+      "rule": "panel.rules.one-conversation",
+      "status": "fail",
+      "statement_hash": "sha256:cd9c17333cb0",
+      "duration_ms": 1342,
+      "checks": [
+        "checks/panel.spec.js:1607"
+      ],
+      "evidence": [
+        "runs/evidence/2026-09-21T01-03-50Z/panel-a-rule-draws-its-thr-1652c-eats-which-rule-they-are-on-test-failed-1.png",
+        "runs/evidence/2026-09-21T01-03-50Z/panel-a-rule-draws-its-thr-1652c-eats-which-rule-they-are-on-error-context.md"
+      ]
+    }
+  ]
+}
