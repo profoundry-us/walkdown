@@ -38,8 +38,10 @@ function viewTabs() {
  * host's CSS (Topher, 2026-09-21). The picture is of the build where the
  * screen has a path, the design otherwise; a screen with neither says so.
  */
-const CARD_W = 196;
-const CARD_H = 122; // 1280 x 800, scaled
+// 1280 x 800 scaled to a size the page can be READ at: the first cut was 196
+// wide, and at that size nothing on the card could be made out (Topher, 2026-09-21).
+const CARD_W = 280;
+const CARD_H = 175;
 let redrawn = 0; // bumps the pictures' addresses so the browser asks again
 function board(screens, here) {
   return html`<div class="grid grid-cols-3 gap-2 px-3.5 pb-2" data-testid="panel.screens-board">
@@ -70,8 +72,8 @@ function board(screens, here) {
           ${on || is ? html`<span class="absolute right-1 top-1 rounded bg-primary px-1 text-[9px] font-bold uppercase text-primary-content">${on ? 'picked' : 'here'}</span>` : nothing}
         </span>
         <span class="min-w-0" style="width:${CARD_W}px">
-          <span class="block truncate text-[12px]">${sc.title ?? sc.id}</span>
-          <span class="flex items-center gap-1 font-mono text-[10px] opacity-40">
+          <span class="block truncate text-[13px]">${sc.title ?? sc.id}</span>
+          <span class="flex items-center gap-1 font-mono text-[10.5px] opacity-40">
             <span class="truncate">${sc.id}</span>
             <span class="ml-auto shrink-0 font-sans ${design ? '' : 'text-warning opacity-100'}">${
               design ? (design.proposed ? 'sketch' : 'design') : 'no design'

@@ -3881,9 +3881,11 @@ test('the screen picker offers a storyboard of kept pictures, and remembers the 
   const fresh = await page.request.get(`${WD_ORIGIN}/api/screenshot?screen=review&refresh=1&bp=blueprint`);
   expect(fresh.headers()['x-walkdown-cache']).toBe('miss');
   expect((await page.request.get(`${WD_ORIGIN}/api/screenshot?screen=no-such&bp=blueprint`)).status()).toBe(404);
-  // The board is wider than the list, and still on the stage.
+  // The board is wider than the list - three cards a page can be read at -
+  // and still on the stage.
   const wide = (await list.boundingBox()).width;
-  expect(wide).toBeGreaterThan(500);
+  expect(wide).toBeGreaterThan(900);
+  expect((await cards.first().locator('img').boundingBox()).width).toBeGreaterThanOrEqual(280);
   expect((await list.boundingBox()).x + wide).toBeLessThanOrEqual(page.viewportSize().width);
   // The screen the page is wears its mark; a card picks its screen.
   await expect(board.locator('[data-screen="review"] span.bg-primary')).toHaveText(/here/i);

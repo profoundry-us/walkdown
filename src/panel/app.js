@@ -484,10 +484,11 @@ function syncScreenPanel() {
     // on every repaint, and a list that jumped back to the top whenever the
     // panel drew would be worse than one that lagged.
     const wasAt = D.screenPanel.scrollTop;
-    // The board is three cards wide; the list is a column. Sized before it
-    // is placed, so the clamp below measures the shape it will have.
+    // The board is three cards wide (280px each, plus their frames and the
+    // gutters); the list is a column. Sized before it is placed, so the
+    // clamp below measures the shape it will have.
     D.screenPanel.classList.toggle('w-72', S.screensView !== 'board');
-    D.screenPanel.classList.toggle('w-[660px]', S.screensView === 'board');
+    D.screenPanel.classList.toggle('w-[930px]', S.screensView === 'board');
     put(screensPane(), D.screenPanel);
     D.screenPanel.scrollTop = wasAt;
     const btn = D.bar.querySelector('#wdp-screen-btn');
