@@ -64,10 +64,10 @@ import {
   TOP,
   W,
 } from './state.js';
-import { backFromThread, dragFiles, dropZone, dropZoneClass, pasteShots, threadCard, threadPane } from './thread-pane.js';
+import { backFromThread, dragFiles, threadCard, threadPane } from './thread-pane.js';
 
-/* The rule pane as a drop zone: only with a rule open, and never while the seat shows the thread list. */
-const ruleZone = dropZone('rule', (e) => pasteShots(e, 'ruleShots'), () => S.tab !== 'threads' && Boolean(S.selected));
+/** Set once the shell is up: the frame's word that a file is in the air over the application (n-0333). */
+let fileDragFromFrame = null;
 import { threadFilterBar, threadsMatching, threadsPane } from './threads-list.js';
 import { toast } from './toast.js';
 import { api, esc } from './util.js';
@@ -1330,14 +1330,9 @@ export function render() {
              to that tab (panel.rules.one-pane-per-tab), so the thread list
              opens into the seat beside it rather than sliding two panes over
              and flying past a rule detail nobody asked for. -->
-        <!-- A picture dropped anywhere on the rule's pane is held on its box,
-             to go with the next thing the box does - a fail's why most of all
-             (Topher, 2026-09-21, n-0328: "still doesn't work when I'm trying
-             to pass / fail a rule"). The thread seat has its own screen for it. -->
         <div class="wdp-pane wdp-detail flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col ${
           onThreads ? 'overflow-hidden' : 'overflow-y-auto'
-        } ${onThreads || !S.selected ? '' : dropZoneClass('rule')}" data-testid="${onThreads ? 'thread.panel' : nothing}"
-          @dragenter=${ruleZone.enter} @dragleave=${ruleZone.leave} @dragover=${ruleZone.over} @drop=${ruleZone.drop}>${
+        }" data-testid="${onThreads ? 'thread.panel' : nothing}">${
           onThreads ? threadPane() : detailPane()
         }</div>
         <!-- Third seat: the thread reached FROM a rule, which is a different
@@ -3291,12 +3286,19 @@ function wireGlobals() {
    * will take it (Topher, 2026-09-21). dragleave with no relatedTarget is
    * the pointer leaving the window; drop and dragend end it either way.
    */
-  const airborne = (yes) => {
-    if (S.dragFiles === yes) return;
-    S.dragFiles = yes;
-    if (!yes) S.dragOver = null;
+  // Two witnesses: this window, and the application's frame, which says so
+  // by message because a file over the frame is over its document and not
+  // this one (n-0333). Either lights the zones; both quiet clears them.
+  const air = { window: false, frame: false };
+  const airborne = (who, yes) => {
+    air[who] = yes;
+    const now = air.window || air.frame;
+    if (S.dragFiles === now) return;
+    S.dragFiles = now;
+    if (!now) S.dragOver = null;
     requestRender();
   };
+  fileDragFromFrame = (yes) => airborne('frame', yes);
   // Counted, not read off relatedTarget: enter and leave fire for every
   // element the pointer crosses, and Chrome leaves relatedTarget null on a
   // dragleave inside the window too, so "the pointer left the window" is
@@ -3305,18 +3307,19 @@ function wireGlobals() {
   addEventListener('dragenter', (e) => {
     if (!dragFiles(e)) return;
     inAir++;
-    airborne(true);
+    airborne('window', true);
   });
   addEventListener('dragleave', (e) => {
     if (!dragFiles(e)) return;
     if (--inAir <= 0) {
       inAir = 0;
-      airborne(false);
+      airborne('window', false);
     }
   });
   const landed = () => {
     inAir = 0;
-    airborne(false);
+    airborne('window', false);
+    airborne('frame', false);
   };
   addEventListener('drop', landed);
   addEventListener('dragend', landed);
@@ -3375,6 +3378,8 @@ function wireGlobals() {
      * click while pinning happens on the page.
      */
     if (msg.type === 'walkdown:page-click') return dismissPopovers();
+    // A file in the air over the application: the frame's word for it (n-0333).
+    if (msg.type === 'walkdown:file-drag') return fileDragFromFrame?.(msg.files === true);
 
     if (msg.type === 'walkdown:open-thread') {
       S.openThread = msg.id;

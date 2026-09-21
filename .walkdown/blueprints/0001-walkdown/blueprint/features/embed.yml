@@ -379,13 +379,22 @@ stories:
           when:
             - Drag it onto anchor `pin.note`, or paste it there, write a word, and pin it
           then:
-            - While a file is in the air over the window, the form, the thread screen and the rule pane each show they will take it, and show it louder while the file is over them; dragged text lights nothing
+            - While a file is in the air anywhere, over the panel or over the application's frame, the form, the thread screen and the rule's conversation each show they will take it
+            - The two zones in the panel wear a translucent cover saying what a drop does, and every zone shows it louder while the file is over it
+            - Dragged text lights nothing
             - The pasted picture shows small in the form before it is filed, with a way to drop it
             - The thread on disk names the picture under `attachments`, and the file sits in `attachments/` under the threads directory, never anywhere else
             - The message in the stream draws the picture under its words as a thumbnail that opens it full size
             - The same drop, or paste, into anchor `thread.reply` on screen `thread-panel` puts the picture on the reply
             - Anything that is not a picture, or is over five megabytes, is refused in words and nothing is written
-          statement_hash: sha256:0f42990a24bc
+          statement_hash: sha256:2f187f8ad2f5
+          reworded:
+            - hash: sha256:0f42990a24bc
+              at: 2026-09-21T18:51:12Z
+              why: "picture-on-a-pin: the drop-zone step now says the rule's zone is its conversation, that a file over the application's frame counts, and that the panel's zones wear a cover - the shape Topher asked for in n-0333 on 2026-09-21"
+            - hash: sha256:8de5e22cd2e7
+              at: 2026-09-21T18:51:48Z
+              why: "picture-on-a-pin: the drop-zone step split into three sentences for the voice; same meaning"
 
       - id: embed.threads.actions-in-context
         origin: walkdown

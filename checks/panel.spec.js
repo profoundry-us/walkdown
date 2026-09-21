@@ -3783,27 +3783,41 @@ test('a picture dropped while failing a rule goes with the why', {
   await endSession(page);
   await ensureSession(page);
   await openRuleForVerdict(page, rule);
-  // While a file is in the air anywhere over the window the pane says it
-  // will take it, and says it louder while the file is over the pane; text
-  // in the air lights nothing (Topher, 2026-09-21).
-  const pane = page.locator('.wdp-detail');
+  /*
+   * The zone is the conversation block, not the pane (n-0333). While a file
+   * is in the air anywhere - over the panel's own window, or over the
+   * application's frame, which says so by message - the block wears a
+   * dashed outline and a cover saying what a drop does; over the block the
+   * outline goes solid and the cover says "Drop it". Text in the air lights
+   * nothing (Topher, 2026-09-21).
+   */
+  const block = page.getByTestId('detail.conversation');
+  const cover = page.getByTestId('detail.drop-cover');
+  const frameBody = page.frameLocator('[data-testid="panel.app-frame"]').locator('body');
   const air = (el, [what, type]) => {
     const dt = new DataTransfer();
     if (type === 'Files') dt.items.add(new File([new Uint8Array([1])], 'x.png', { type: 'image/png' }));
     else dt.setData('text/plain', 'words');
-    el.dispatchEvent(new DragEvent(what, { dataTransfer: dt, bubbles: true, cancelable: true }));
+    // composed: the frame's embed listens on its window, past its shadow root.
+    el.dispatchEvent(new DragEvent(what, { dataTransfer: dt, bubbles: true, cancelable: true, composed: true }));
   };
-  await page.evaluate(() => document.body.dispatchEvent(new DragEvent('dragenter', { dataTransfer: (() => { const d = new DataTransfer(); d.setData('text/plain', 'w'); return d; })(), bubbles: true })));
-  await expect(pane).not.toHaveClass(/outline/);
-  await page.evaluate(() => document.body.dispatchEvent(new DragEvent('dragenter', { dataTransfer: (() => { const d = new DataTransfer(); d.items.add(new File([new Uint8Array([1])], 'x.png', { type: 'image/png' })); return d; })(), bubbles: true })));
-  await expect(pane).toHaveClass(/outline-dashed/);
-  await pane.evaluate(air, ['dragenter', 'Files']);
-  await expect(pane).toHaveClass(/bg-primary\/5/);
-  await pane.evaluate(air, ['dragleave', 'Files']);
-  await expect(pane).not.toHaveClass(/bg-primary\/5/);
-  await expect(pane).toHaveClass(/outline-dashed/);
-  await page.evaluate(() => window.dispatchEvent(new DragEvent('dragend', { bubbles: true })));
-  await expect(pane).not.toHaveClass(/outline/);
+  await frameBody.evaluate(air, ['dragenter', 'text']);
+  await page.waitForTimeout(150);
+  await expect(block).not.toHaveClass(/outline/);
+  await expect(cover).toHaveCount(0);
+  await frameBody.evaluate(air, ['dragenter', 'Files']);
+  await expect(block).toHaveClass(/outline-dashed/);
+  await expect(cover).toContainText(/Drop the picture here/);
+  await expect(page.locator('.wdp-detail')).not.toHaveClass(/outline/);
+  await block.evaluate(air, ['dragenter', 'Files']);
+  await expect(block).toHaveClass(/outline-primary$|outline-primary /);
+  await expect(cover).toContainText(/Drop it/);
+  await expect(cover).not.toContainText(/Drop the picture here/);
+  await block.evaluate(air, ['dragleave', 'Files']);
+  await expect(block).toHaveClass(/outline-dashed/);
+  await frameBody.evaluate(air, ['dragleave', 'Files']);
+  await expect(block).not.toHaveClass(/outline/);
+  await expect(cover).toHaveCount(0);
   // Dropped on the pane's words, nowhere near the box: held above it.
   await page.getByTestId('detail.conversation').evaluate(drop);
   await expect(page.getByTestId('detail.shots').locator('img'), 'held above the box until the verdict').toHaveCount(1);

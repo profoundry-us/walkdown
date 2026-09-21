@@ -231,8 +231,9 @@ export function threadPane() {
    */
   const zone = dropZone('thread', (e) => pasteShots(e));
   return html`
-    <div class="flex h-full min-h-0 flex-col rounded-box ${dropZoneClass('thread')}" data-testid="thread.screen"
+    <div class="relative flex h-full min-h-0 flex-col rounded-box ${dropZoneClass('thread')}" data-testid="thread.screen"
       @dragenter=${zone.enter} @dragleave=${zone.leave} @dragover=${zone.over} @drop=${zone.drop}>
+    ${dropCover('thread', 'It goes with your next reply.')}
     <div class="flex items-center gap-1 px-2 pt-2">
       <button class="wdp-thread-back btn btn-ghost btn-xs text-primary" data-testid="thread.close" @click=${leaveThread}>← ${backFromThread(row)}</button>
       <span class="ml-auto flex items-center gap-1 pr-1.5 text-[11px]" data-testid="thread.provenance">
@@ -364,10 +365,30 @@ export const dragFiles = (e) => [...(e.dataTransfer?.types ?? [])].includes('Fil
 const depth = {};
 export const dropZoneClass = (key) =>
   S.dragOver === key
-    ? 'outline outline-2 -outline-offset-2 outline-primary bg-primary/5'
+    ? 'outline outline-2 -outline-offset-2 outline-primary'
     : S.dragFiles
       ? 'outline-dashed outline-2 -outline-offset-2 outline-primary/50'
       : '';
+/*
+ * The cover a zone wears while a file is in the air (n-0333): a translucent
+ * ground over the conversation with a line saying what a drop here does,
+ * denser while the file is over it. It sits inside the zone, so the zone's
+ * own enter and leave count it like any child, and a drop on it is a drop
+ * on the zone.
+ */
+export const dropCover = (key, line) =>
+  S.dragFiles
+    ? html`<div class="pointer-events-none absolute inset-0 z-[5] flex items-center justify-center rounded-box backdrop-blur-[1.5px] ${
+        S.dragOver === key ? 'bg-primary/25' : 'bg-primary/15'
+      }" data-testid="${key === 'rule' ? 'detail.drop-cover' : 'thread.drop-cover'}">
+      <!-- The words on a ground of their own: over the conversation's text
+           they were unreadable (seen on the 2026-09-21 look). -->
+      <div class="flex max-w-[26ch] flex-col items-center gap-0.5 rounded-box border border-primary/60 bg-base-100 px-3 py-2 text-center shadow-lg">
+        <span class="text-[13px] font-semibold">${S.dragOver === key ? 'Drop it' : 'Drop the picture here'}</span>
+        <span class="text-[11px] opacity-80">${line}</span>
+      </div>
+    </div>`
+    : nothing;
 export function dropZone(key, take, allowed = () => true) {
   const on = (e) => allowed() && dragFiles(e);
   return {

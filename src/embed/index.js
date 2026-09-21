@@ -872,6 +872,44 @@ import { icon } from './icons.js';
       { capture: true, passive: true },
     );
 
+  /*
+   * A file dragged over the application is over this document, not the
+   * panel's, so the panel never saw one until the pointer crossed into its
+   * own chrome - and its drop zones lit for the split second before the
+   * drop (Topher, 2026-09-21, n-0333). The frame says so out loud, the way
+   * it reports a click: counted enters against leaves, since Chrome leaves
+   * relatedTarget null inside the window too, and cleared on drop or end.
+   * Only files; dragged text is nobody's business.
+   */
+  if (framed) {
+    const hasFiles = (e) => [...(e.dataTransfer?.types ?? [])].includes('Files');
+    let inAir = 0;
+    let said = false;
+    const say = (files) => {
+      if (said === files) return;
+      said = files;
+      window.parent.postMessage({ type: 'walkdown:file-drag', files }, '*');
+    };
+    window.addEventListener('dragenter', (e) => {
+      if (!hasFiles(e)) return;
+      inAir++;
+      say(true);
+    });
+    window.addEventListener('dragleave', (e) => {
+      if (!hasFiles(e)) return;
+      if (--inAir <= 0) {
+        inAir = 0;
+        say(false);
+      }
+    });
+    const landed = () => {
+      inAir = 0;
+      say(false);
+    };
+    window.addEventListener('drop', landed);
+    window.addEventListener('dragend', landed);
+  }
+
   // Escape is the way out of any mode: it closes the open form first, then
   // leaves pin mode. Without it the only exit was the bar's control, which
   // itself was swallowing.

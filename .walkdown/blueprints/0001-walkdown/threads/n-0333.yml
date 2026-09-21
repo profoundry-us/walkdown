@@ -1,0 +1,32 @@
+id: n-0333
+kind: note
+reason: feedback
+author: topher
+created: 2026-09-21T18:46:20.140Z
+anchor:
+  rule: embed.threads.picture-on-a-pin
+status: addressed
+body: >-
+  We should reduce the drop zone to the conversation area. And it should start
+  it's dashed highlight when a user is dragging the file anywhere on the app,
+  not just the thread area. Right now you only see the drop zone for a split
+  second as your cursor moves like 2px into the drop zone.
+
+
+  Additionally, it should have a semi-transparent background with some text that
+  notifies the user about the fact that they are uploading a file.
+replies:
+  - author: agent
+    created: 2026-09-21T18:53:08Z
+    body: "Done, all three: the rule's drop zone is its conversation block now, not
+      the whole pane. It lights the moment a file is dragged anywhere - the
+      application's frame tells the panel by message, since a file over the
+      frame is over the frame's document and the panel never saw it until the
+      pointer crossed into its own chrome, which is the split second you saw.
+      And while a file is in the air the zone wears a translucent cover with a
+      line saying what a drop does (Drop the picture here / It goes with the
+      next thing you say on this rule), denser and reading Drop it while the
+      file is over it; the thread screen does the same. Checked in
+      checks/panel.spec.js and checks/embed.spec.js (recorded
+      2026-09-21T18-52-37Z and 18-51-03Z) and looked at again by the agent tier
+      on a scratch copy."

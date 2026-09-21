@@ -8,7 +8,15 @@ import { html, live, nothing, unsafeHTML } from '../../vendor/lit.js';
 import { answerOnRule, asksOn, laterOnRule, liveNoteOn, names, openQuestionOn, openThreadView, pendingReplies, sayFiling, sayOnRule, waiveOnRule } from './conversation.js';
 import { tierMarks } from './rules-list.js';
 import { requestReload, requestRender } from './shell.js';
-import { pastedShots, pasteShots } from './thread-pane.js';
+import { dropCover, dropZone, dropZoneClass, pastedShots, pasteShots } from './thread-pane.js';
+
+/*
+ * The rule's conversation block is its drop zone (n-0333: it was the whole
+ * pane, which lit from the statement down and read as nowhere in
+ * particular). A picture dropped on it is held on the box, to go with the
+ * next thing the box does - a fail's why most of all (n-0328).
+ */
+const ruleZone = dropZone('rule', (e) => pasteShots(e, 'ruleShots'), () => Boolean(S.selected));
 import { askOptions } from './ask.js';
 import { openEvidence } from './evidence.js';
 import { openSource } from './source.js';
@@ -437,7 +445,9 @@ function conversation(r, picked) {
    * keeps its tag, so it still says which thread it is on.
    */
   const last = messages.at(-1);
-  return html`<div class="-mx-3.5 border-t border-base-300 px-3.5 pt-2" data-testid="detail.conversation">
+  return html`<div class="relative -mx-3.5 border-t border-base-300 px-3.5 pt-2 ${dropZoneClass('rule')}" data-testid="detail.conversation"
+    @dragenter=${ruleZone.enter} @dragleave=${ruleZone.leave} @dragover=${ruleZone.over} @drop=${ruleZone.drop}>
+    ${dropCover('rule', 'It goes with the next thing you say on this rule - a why, a reply, an answer.')}
     <div class="${LBL} mb-1 flex items-center">Conversation${all.length ? html` <span class="ml-1 font-normal normal-case tracking-normal opacity-70">\u00b7 ${all.length} thread${all.length === 1 ? '' : 's'}</span>` : nothing}${
       messages.length > 1
         ? html`<button class="btn btn-ghost btn-xs ml-auto h-5 min-h-0 px-1.5 font-normal normal-case tracking-normal text-primary" data-testid="detail.history-open"
