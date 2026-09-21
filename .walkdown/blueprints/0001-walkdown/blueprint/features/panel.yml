@@ -211,6 +211,7 @@ stories:
         origin: thread:n-0015
         statement: "The walkdown panel has a theme of its own: drafting blue, pale ink, flat surfaces."
         because: It must never be mistaken for the application it is inspecting, whatever that application looks like.
+        verify: [checks]
         signoff: [eng, product]
         screens: [review, settings]
         steps:
@@ -222,7 +223,9 @@ stories:
             - The chrome is visibly a different surface from the app
             - The skin is a theme definition, so retuning it is one block and no component knows about it
             - Prototype screens keep their own wireframe skin, distinct from both
-          statement_hash: sha256:f00b306d484d
+            - A toast sits inside the app frame, the same distance from the frame's bottom edge as from its right, never over the desk or the panel
+            - A toast has a size it cannot outgrow - past it the message scrolls inside the toast rather than running off the page
+          statement_hash: sha256:4e48a84dd51a
           reworded:
             - hash: sha256:93bfd901cfcd
               at: 2026-09-13
@@ -233,6 +236,12 @@ stories:
             - hash: sha256:1e93098c1dea
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:f00b306d484d
+              at: 2026-09-21T01:52:17Z
+              why: n-0318 source modal with a GitHub link, n-0320 the id copies itself, n-0321 headless said once, n-0324/n-0325 toasts inside the frame with a cap
+            - hash: sha256:c12ebc0d0488
+              at: 2026-09-21T01:53:08Z
+              why: n-0318 source modal with a GitHub link, n-0320 the id copies itself, n-0321 headless said once, n-0324/n-0325 toasts inside the frame with a cap
       - id: panel.dock.host-isolation
         retired: The docked delivery is withdrawn (2026-08-26). The panel no longer runs inside anybody else’s document. The embed still does, and embed.pin.own-skin still governs that.
         origin: walkdown
@@ -714,6 +723,7 @@ stories:
       - id: panel.rules.detail-slide
         origin: walkdown
         statement: Opening a rule slides the panel from the list to that rule's detail, and a single control brings the list back. Only one of the two panes is ever visible.
+        verify: [checks]
         signoff: [eng, product]
         screens: [review, rule-detail]
         steps:
@@ -727,7 +737,8 @@ stories:
             - "\"All rules\" slides back to the list"
             - The Blueprints / Rules / Threads tabs are sized to their labels and centred in the sidebar, not stretched to its full width
             - Each of the three tabs carries its own icon, from the same Phosphor set as the rest of the panel's chrome, sized and padded to read clearly at tab size rather than as an inline glyph shrunk to fit
-          statement_hash: sha256:4dd6fe8938f7
+            - The rule id at the head of the detail is a button - pressing it copies the id and says so, because an id you can name is one you paste into a commit, a run or a message
+          statement_hash: sha256:1eb9f5ca82d3
           reworded:
             - hash: sha256:493a83d3f0bd
               at: 2026-09-13
@@ -735,6 +746,12 @@ stories:
             - hash: sha256:7fb2ea6d8a22
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:4dd6fe8938f7
+              at: 2026-09-21T01:52:17Z
+              why: n-0318 source modal with a GitHub link, n-0320 the id copies itself, n-0321 headless said once, n-0324/n-0325 toasts inside the frame with a cap
+            - hash: sha256:2bd75a1bf4f7
+              at: 2026-09-21T01:53:08Z
+              why: n-0318 source modal with a GitHub link, n-0320 the id copies itself, n-0321 headless said once, n-0324/n-0325 toasts inside the frame with a cap
 
       - id: panel.rules.takes-you-there
         origin: thread:n-0031
@@ -909,7 +926,8 @@ stories:
             - "Anchor `detail.evidence-open` opens them to look at, in `detail.evidence-modal`"
             - "Each file is shown as what it is: a picture as a picture, a transcript as readable text, anything else as a link to open - never as a broken image"
             - A rule with no runs says so rather than showing nothing
-          statement_hash: sha256:dcbb494ff51d
+            - Check source is a button that opens the checks' source over the whole desk - each check in full, with a link that opens the same lines on GitHub in a new tab when the tree has a GitHub remote
+          statement_hash: sha256:78f68901d77e
           reworded:
             - hash: sha256:65b84178c291
               at: 2026-09-13
@@ -920,6 +938,9 @@ stories:
             - hash: sha256:e6a5efd7ff2e
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:dcbb494ff51d
+              at: 2026-09-21T01:52:17Z
+              why: n-0318 source modal with a GitHub link, n-0320 the id copies itself, n-0321 headless said once, n-0324/n-0325 toasts inside the frame with a cap
 
       - id: panel.rules.counts-legible
         origin: thread:n-0002
@@ -1070,6 +1091,7 @@ stories:
         origin: thread:n-0061
         statement: Opening a rule that has no screen clears the page under review. In its place the panel shows a cover that plainly says this rule has no screen.
         because: A lingering page reads as the rule's screen, and the reviewer cannot tell a right screen from a rule that has none.
+        verify: [checks]
         signoff: [eng, product]
         screens: [rule-detail]
         steps:
@@ -1082,7 +1104,8 @@ stories:
             - The cover says the page underneath is untouched - it covers, never navigates, so the application keeps its state
             - The detail pane carries the same note beside the statement
             - Opening a screened rule or returning to the list lifts the cover
-          statement_hash: sha256:4cc73e82bdb7
+            - It is said once, in the Screen block, where a reader looks for the screen - not a second time a line above it
+          statement_hash: sha256:4f4c746e2d71
           reworded:
             - hash: sha256:5bb6c7d6142a
               at: 2026-09-13
@@ -1093,6 +1116,9 @@ stories:
             - hash: sha256:efedd2d20f70
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:4cc73e82bdb7
+              at: 2026-09-21T01:52:17Z
+              why: n-0318 source modal with a GitHub link, n-0320 the id copies itself, n-0321 headless said once, n-0324/n-0325 toasts inside the frame with a cap
 
       - id: panel.rules.legend-on-demand
         origin: walkdown

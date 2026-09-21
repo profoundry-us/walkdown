@@ -9,6 +9,8 @@ import { answerOnRule, asksOn, laterOnRule, liveNoteOn, names, openQuestionOn, o
 import { tierMarks } from './rules-list.js';
 import { requestReload, requestRender } from './shell.js';
 import { openEvidence } from './evidence.js';
+import { openSource } from './source.js';
+import { toast } from './toast.js';
 import { S } from './state.js';
 import { api, fire } from './util.js';
 import {
@@ -44,12 +46,9 @@ import {
 function elsewhere(r) {
   const here = currentScreen();
   const want = ruleScreen(r);
-  // A headless rule must say so - otherwise whatever is on the desk reads
-  // as the rule's screen, and it is not.
-  if (!want && isHeadless(r))
-    return html`<div class="mt-1.5 text-[11.5px] opacity-60">Headless — no screen belongs to
-      this rule, so what is on the desk is beside the point. It is judged by its
-      checks and recorded behavior, not by looking.</div>`;
+  // A headless rule says so ONCE, in the Screen block below, which is where
+  // a reader looks for the screen. This used to add a second sentence here
+  // a line above the same fact (n-0321).
   if (!want || !here || want.id === here.id) return nothing;
   const can = Boolean(
     screenUrl(want, pageSurface()) ?? screenUrl(want, 'app') ?? screenUrl(want, 'prototype'),
@@ -592,7 +591,17 @@ export function detailPane() {
              is how the CLI and the panel came to disagree about ✍︎ (n-0118). -->
         <div class="flex items-center gap-2">
           ${tierMarks(r, needsYou(r.rule), { tipDown: true })}
-          <div class="break-all font-mono text-[11px] opacity-40" data-testid="detail.rule-id">${r.rule}</div>
+          <!-- The id is a button that copies itself (n-0320): an id you can
+               name is an id you paste into a commit, a run record or a
+               message, and selecting eleven-pixel text by hand is nobody's
+               idea of naming it. -->
+          <button type="button" class="cursor-copy break-all text-left font-mono text-[11px] opacity-40 hover:opacity-80"
+            data-testid="detail.rule-id" title="Copy the rule id"
+            @click=${() =>
+              navigator.clipboard
+                ?.writeText(r.rule)
+                .then(() => toast(`Copied <code>${r.rule}</code>`, { tone: 'success' }))
+                .catch(() => toast('Could not reach the clipboard.', { tone: 'error' }))}>${r.rule}</button>
         </div>
         <p class="${TEXT} text-[15px] leading-relaxed" data-testid="detail.statement" @mouseover=${hoverIn} @mouseenter=${hoverIn} @mouseout=${hoverOut}>${prose(r.statement)}</p>
         <!-- The reason and the story behind it, under the claim and quieter
@@ -628,7 +637,9 @@ export function detailPane() {
           ids.length
             ? ids.map((id, i) => html`${i ? sep : nothing}${name(id)}`)
             : html`<span class="opacity-50">${
-                isHeadless(r) ? 'No screen — this rule is judged without one.' : 'No screen named.'
+                isHeadless(r)
+                  ? 'No screen — this rule is judged without one, by its checks and recorded behaviour rather than by looking; what is on the desk is beside the point.'
+                  : 'No screen named.'
               }</span>`
         }</div>
       </div>
@@ -655,22 +666,15 @@ export function detailPane() {
          */
         checkRefs(r).length
           ? html`<!-- The steps are the rule; the source that checks them is a
-             technical detail, so it waits behind a disclosure until asked for. -->
-        <details class="rounded border border-base-300 bg-base-200/60 px-2 py-1 text-[11.5px]"
-          data-testid="detail.technical-disclosure" data-checks="${r.rule}" ?open=${S.srcOpenFor === r.rule}
-          @toggle=${(e) => {
-            // A pane rebuilt with the disclosure already open fires this
-            // too; only a real change is one.
-            const el = e.currentTarget;
-            if (el.open === (S.srcOpenFor === r.rule)) return;
-            S.srcOpenFor = el.open ? r.rule : null;
-            if (el.open) loadCheckSource(r.rule);
-          }}>
-          <summary class="cursor-pointer opacity-60">Check source · ${checkRefs(r).join(', ')}</summary>
-          <div class="wdp-check-src mt-1 opacity-70">${
-            S.srcCache.rule === r.rule && S.srcCache.view ? S.srcCache.view : 'Loading…'
-          }</div>
-        </details>`
+             technical detail, so it waits until asked for - and then it
+             opens over the whole desk rather than into a letterbox under the
+             steps (n-0318), with a link to the same lines on GitHub. -->
+        <button type="button" class="flex w-full items-center gap-1 rounded border border-base-300 bg-base-200/60 px-2 py-1 text-left text-[11.5px] hover:bg-base-200"
+          data-testid="detail.technical-disclosure" data-checks="${r.rule}" title="Read the checks that verify this rule"
+          @click=${() => openSource(r.rule)}>
+          <span class="opacity-60">Check source · ${checkRefs(r).join(', ')}</span>
+          <span class="ml-auto opacity-50">↗</span>
+        </button>`
           : nothing
       }
       <div>

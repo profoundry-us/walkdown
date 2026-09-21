@@ -4737,10 +4737,30 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
 
   function toast(html, { sticky = false, on = null, tone = 'neutral' } = {}) {
     const t = document.createElement('div');
-    t.className = 'toast toast-end pointer-events-auto';
+    // The container is the positioned box and the one with the cap, so what
+    // is measured against the frame is what was placed.
+    t.className = 'toast pointer-events-auto max-h-40 overflow-y-auto';
+    t.dataset.testid = 'panel.toast';
     t.dataset.theme = 'blueprint';
-    t.style.right = `${W + 18}px`;
-    t.innerHTML = `<div class="alert ${TOAST_TONE[tone] ?? TOAST_TONE.neutral} text-[13px]">${html}</div>`;
+    /*
+     * Inside the app frame, the same distance from its bottom edge as from
+     * its right (n-0324). The frame sits GAP in from the window's bottom and
+     * W + 2*GAP in from its right while the panel is out; put away, it is the
+     * window. It used to hang off the panel's edge, half over the desk.
+     */
+    const rect = D.appFrame?.getBoundingClientRect?.();
+    const inFrame = rect && rect.width > 0 && rect.height > 0;
+    // Measured from the frame as drawn - it is scaled to fit and centred on
+    // the desk, so its edges are not where the window's are.
+    const right = inFrame ? innerWidth - rect.right + GAP : (S.docked ? W + GAP * 2 : 0) + GAP * 2;
+    const bottom = inFrame ? innerHeight - rect.bottom + GAP : GAP * 2;
+    t.style.cssText = `right:${right}px; bottom:${bottom}px; max-width:min(24rem, 60vw);`;
+    /*
+     * And a size it cannot outgrow (n-0325): a Finish that closed sixteen
+     * threads listed every id and ran off the top of the page. Past the cap
+     * it scrolls, and a block (not a flex row) so long text wraps.
+     */
+    t.innerHTML = `<div class="alert ${TOAST_TONE[tone] ?? TOAST_TONE.neutral} block whitespace-normal text-[13px]">${html}</div>`;
     if (on)
       for (const [name, fn] of Object.entries(on))
         t.querySelector(`[data-sitting="${name}"]`)?.addEventListener('click', () => {
@@ -6349,11 +6369,11 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
   const TEXT = /\.(txt|log|json|md|ya?ml|csv|diff|patch)$/i;
   const kindOf = (p) => (IMAGE.test(p) ? 'image' : TEXT.test(p) ? 'text' : 'file');
 
-  let layer = null;
-  const evidenceOpen = () => Boolean(layer);
+  let layer$1 = null;
+  const evidenceOpen = () => Boolean(layer$1);
   function closeEvidence() {
-    layer?.remove();
-    layer = null;
+    layer$1?.remove();
+    layer$1 = null;
   }
 
   /*
@@ -6368,17 +6388,17 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
    */
   function openEvidence(paths) {
     closeEvidence();
-    layer = document.createElement('div');
-    layer.dataset.theme = 'blueprint';
-    layer.dataset.testid = 'detail.evidence-modal';
-    layer.style.cssText = `position:fixed; inset:0; z-index:10; pointer-events:auto;
+    layer$1 = document.createElement('div');
+    layer$1.dataset.theme = 'blueprint';
+    layer$1.dataset.testid = 'detail.evidence-modal';
+    layer$1.style.cssText = `position:fixed; inset:0; z-index:10; pointer-events:auto;
     background:rgba(16,20,30,.72); display:flex; flex-direction:column; gap:10px;
     align-items:center; justify-content:flex-start; overflow:auto; padding:20px;`;
     const frame = (p, inner) => `<figure class="w-full max-w-4xl" data-evidence="${esc(p)}">
       ${inner}
       <figcaption class="mt-1 font-mono text-[10.5px] text-base-100 opacity-70">${esc(p)}</figcaption>
     </figure>`;
-    layer.innerHTML = `
+    layer$1.innerHTML = `
     <div class="flex w-full max-w-4xl items-center gap-2 text-base-100">
       <span class="text-[12px] font-semibold uppercase tracking-widest opacity-80">Evidence</span>
       <button class="btn btn-xs ml-auto" data-testid="detail.evidence-close">Close</button>
@@ -6410,11 +6430,11 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     // The backdrop dismisses, the evidence does not: a click meant for a
     // picture - or a drag meant to select a line of a transcript - must not
     // close the thing it is looking at.
-    layer.onclick = (e) => {
-      if (e.target === layer) closeEvidence();
+    layer$1.onclick = (e) => {
+      if (e.target === layer$1) closeEvidence();
     };
-    layer.querySelector('[data-testid="detail.evidence-close"]').onclick = closeEvidence;
-    D.sr.appendChild(layer);
+    layer$1.querySelector('[data-testid="detail.evidence-close"]').onclick = closeEvidence;
+    D.sr.appendChild(layer$1);
 
     /*
      * And the text, fetched after the frame is up. A file that will not load
@@ -6423,7 +6443,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
      * files on the page are unaffected either way.
      */
     for (const p of paths.filter((x) => kindOf(x) === 'text')) {
-      const pre = layer.querySelector(`[data-evidence="${CSS.escape(p)}"] .wdp-evidence-text`);
+      const pre = layer$1.querySelector(`[data-evidence="${CSS.escape(p)}"] .wdp-evidence-text`);
       if (!pre) continue;
       fetch(api('/evidence/' + p))
         .then((r) => (r.ok ? r.text() : Promise.reject(new Error(`${r.status}`))))
@@ -6433,6 +6453,89 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
         .catch((err) => {
           pre.textContent = `Could not read this file (${err.message}). It is still on disk at ${p}.`;
         });
+    }
+  }
+
+  /*
+   * A check's source, over the whole desk (n-0318).
+   *
+   * The rule detail used to fold the source into a disclosure under the
+   * steps, in a pre eleven pixels tall; reading a forty-line check there was
+   * scrolling a letterbox. It is the evidence layer's own shape instead: the
+   * same backdrop, the same Close, Escape to dismiss - one way to read a
+   * thing that is bigger than the pane. Each check carries a link to the same
+   * lines on GitHub, opened in a new tab, when the tree has one.
+   */
+
+  let layer = null;
+  const sourceOpen = () => Boolean(layer);
+  function closeSource() {
+    layer?.remove();
+    layer = null;
+  }
+
+  /** GitHub's address for a check's lines, or null when the tree has no GitHub remote. */
+  const sourceLink = (repo, c) => {
+    if (!repo?.web || !repo.sha) return null;
+    const file = c.ref.replace(/:\d+$/, '');
+    const start = Number(c.startLine) || Number(c.ref.match(/:(\d+)$/)?.[1]) || 1;
+    const lines = String(c.source ?? '').split('\n').length;
+    return `${repo.web}/blob/${repo.sha}/${file}#L${start}-L${start + lines - 1}`;
+  };
+
+  async function openSource(rule) {
+    closeSource();
+    layer = document.createElement('div');
+    layer.dataset.theme = 'blueprint';
+    layer.dataset.testid = 'detail.source-modal';
+    layer.style.cssText = `position:fixed; inset:0; z-index:10; pointer-events:auto;
+    background:rgba(16,20,30,.72); display:flex; flex-direction:column; gap:10px;
+    align-items:center; justify-content:flex-start; overflow:auto; padding:20px;`;
+    layer.innerHTML = `
+    <div class="flex w-full max-w-4xl items-center gap-2 text-base-100">
+      <span class="text-[12px] font-semibold uppercase tracking-widest opacity-80">Check source</span>
+      <span class="font-mono text-[11px] opacity-70">${esc(rule)}</span>
+      <button class="btn btn-xs ml-auto" data-testid="detail.source-close">Close</button>
+    </div>
+    <div class="wdp-source w-full max-w-4xl text-base-100 opacity-80">Loading…</div>`;
+    layer.onclick = (e) => {
+      if (e.target === layer) closeSource();
+    };
+    layer.querySelector('[data-testid="detail.source-close"]').onclick = closeSource;
+    D.sr.appendChild(layer);
+
+    const box = layer.querySelector('.wdp-source');
+    try {
+      const res = await fetch(api(`/api/checks?rule=${encodeURIComponent(rule)}`));
+      const out = await res.json();
+      if (layer?.querySelector('.wdp-source') !== box) return; // closed, or another opened
+      const checks = out.checks ?? [];
+      box.innerHTML = checks.length
+        ? checks
+            .map((c) => {
+              const link = sourceLink(out.repo, c);
+              return `<figure class="mb-3 w-full" data-check="${esc(c.ref)}">
+        <figcaption class="mb-1 flex items-center gap-2 font-mono text-[11px] text-base-100">
+          <span class="opacity-80">${esc(c.ref)}</span>${
+            c.recorded ? `<span class="text-warning">· was ${esc(c.recorded)} when last recorded</span>` : ''
+          }${
+            link
+              ? `<a class="link ml-auto font-sans text-[11px] no-underline opacity-80 hover:opacity-100" target="_blank" rel="noreferrer"
+                 href="${esc(link)}" data-testid="detail.source-github">Open on GitHub ↗</a>`
+              : ''
+          }
+        </figcaption>
+        ${
+          c.missing
+            ? `<div class="rounded border border-warning bg-base-100 p-2 text-[12px] text-warning">No longer in the tree.</div>`
+            : `<pre class="max-h-[70vh] w-full overflow-auto rounded border border-base-300 bg-base-100 p-2 text-[11.5px] leading-relaxed text-base-content">${esc(c.source ?? '')}</pre>`
+        }
+      </figure>`;
+            })
+            .join('')
+        : '<div class="text-[12px]">No source recorded for this rule.</div>';
+    } catch {
+      if (layer?.querySelector('.wdp-source') === box) box.textContent = 'walkdown server unreachable.';
     }
   }
 
@@ -6459,12 +6562,9 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
   function elsewhere$1(r) {
     const here = currentScreen();
     const want = ruleScreen(r);
-    // A headless rule must say so - otherwise whatever is on the desk reads
-    // as the rule's screen, and it is not.
-    if (!want && isHeadless(r))
-      return b`<div class="mt-1.5 text-[11.5px] opacity-60">Headless — no screen belongs to
-      this rule, so what is on the desk is beside the point. It is judged by its
-      checks and recorded behavior, not by looking.</div>`;
+    // A headless rule says so ONCE, in the Screen block below, which is where
+    // a reader looks for the screen. This used to add a second sentence here
+    // a line above the same fact (n-0321).
     if (!want || !here || want.id === here.id) return A;
     const can = Boolean(
       screenUrl(want, pageSurface()) ?? screenUrl(want, 'app') ?? screenUrl(want, 'prototype'),
@@ -7007,7 +7107,17 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
              is how the CLI and the panel came to disagree about ✍︎ (n-0118). -->
         <div class="flex items-center gap-2">
           ${tierMarks(r, needsYou(r.rule), { tipDown: true })}
-          <div class="break-all font-mono text-[11px] opacity-40" data-testid="detail.rule-id">${r.rule}</div>
+          <!-- The id is a button that copies itself (n-0320): an id you can
+               name is an id you paste into a commit, a run record or a
+               message, and selecting eleven-pixel text by hand is nobody's
+               idea of naming it. -->
+          <button type="button" class="cursor-copy break-all text-left font-mono text-[11px] opacity-40 hover:opacity-80"
+            data-testid="detail.rule-id" title="Copy the rule id"
+            @click=${() =>
+              navigator.clipboard
+                ?.writeText(r.rule)
+                .then(() => toast(`Copied <code>${r.rule}</code>`, { tone: 'success' }))
+                .catch(() => toast('Could not reach the clipboard.', { tone: 'error' }))}>${r.rule}</button>
         </div>
         <p class="${TEXT} text-[15px] leading-relaxed" data-testid="detail.statement" @mouseover=${hoverIn} @mouseenter=${hoverIn} @mouseout=${hoverOut}>${prose(r.statement)}</p>
         <!-- The reason and the story behind it, under the claim and quieter
@@ -7043,7 +7153,9 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
           ids.length
             ? ids.map((id, i) => b`${i ? sep : A}${name(id)}`)
             : b`<span class="opacity-50">${
-                isHeadless(r) ? 'No screen — this rule is judged without one.' : 'No screen named.'
+                isHeadless(r)
+                  ? 'No screen — this rule is judged without one, by its checks and recorded behaviour rather than by looking; what is on the desk is beside the point.'
+                  : 'No screen named.'
               }</span>`
         }</div>
       </div>
@@ -7070,22 +7182,15 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
          */
         checkRefs(r).length
           ? b`<!-- The steps are the rule; the source that checks them is a
-             technical detail, so it waits behind a disclosure until asked for. -->
-        <details class="rounded border border-base-300 bg-base-200/60 px-2 py-1 text-[11.5px]"
-          data-testid="detail.technical-disclosure" data-checks="${r.rule}" ?open=${S.srcOpenFor === r.rule}
-          @toggle=${(e) => {
-            // A pane rebuilt with the disclosure already open fires this
-            // too; only a real change is one.
-            const el = e.currentTarget;
-            if (el.open === (S.srcOpenFor === r.rule)) return;
-            S.srcOpenFor = el.open ? r.rule : null;
-            if (el.open) loadCheckSource(r.rule);
-          }}>
-          <summary class="cursor-pointer opacity-60">Check source · ${checkRefs(r).join(', ')}</summary>
-          <div class="wdp-check-src mt-1 opacity-70">${
-            S.srcCache.rule === r.rule && S.srcCache.view ? S.srcCache.view : 'Loading…'
-          }</div>
-        </details>`
+             technical detail, so it waits until asked for - and then it
+             opens over the whole desk rather than into a letterbox under the
+             steps (n-0318), with a link to the same lines on GitHub. -->
+        <button type="button" class="flex w-full items-center gap-1 rounded border border-base-300 bg-base-200/60 px-2 py-1 text-left text-[11.5px] hover:bg-base-200"
+          data-testid="detail.technical-disclosure" data-checks="${r.rule}" title="Read the checks that verify this rule"
+          @click=${() => openSource(r.rule)}>
+          <span class="opacity-60">Check source · ${checkRefs(r).join(', ')}</span>
+          <span class="ml-auto opacity-50">↗</span>
+        </button>`
           : A
       }
       <div>

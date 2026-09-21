@@ -51,16 +51,17 @@
               <div class="text-[15px] font-semibold">No blueprints open</div> 
               <p class="text-[12.5px] leading-relaxed opacity-60">A browser tab cannot read your
             filesystem, and walkdown both reads blueprints and writes threads and run records back
-            to them. So it works through a small local server, which is the thing that actually
-            holds the folder open.</p> 
-              <p class="text-[12.5px] leading-relaxed opacity-60">In the directory holding your
-            blueprints, run:</p> 
+            to them. So it works through a small local server, which answers for every blueprint
+            registered on this machine.</p> 
+              <p class="text-[12.5px] leading-relaxed opacity-60">Register a blueprint once, from its
+            project — <code>walkdown init</code> for a new one, <code>walkdown import &lt;path&gt;</code>
+            for one that exists — and then, from anywhere:</p> 
             </div> <code class="rounded-box bg-base-200 px-3 py-2 text-[12px]">walkdown serve</code> 
             <label class="flex items-center gap-2"> <span class="shrink-0 text-xs opacity-60">Server</span> 
               <input id="wdp-server" data-testid="start.server" title="Where walkdown serve is listening — a server, not a folder" aria-label="walkdown server address" class="input input-sm flex-1" value="http://localhost:4700"> 
               <button id="wdp-retry" data-testid="start.connect" class="btn btn-sm btn-primary">Connect</button> 
             </label> 
-            <p class="text-[11.5px] opacity-40">Then every blueprint under that folder is listed here.</p> 
+            <p class="text-[11.5px] opacity-40">Every blueprint registered on this machine is listed here.</p> 
           </div>
         </aside>
         <div data-testid="settings.panel" data-theme="redline" class="w-64 rounded-box border border-primary/45 bg-base-100 p-3 text-base-content shadow-xl" style="position: absolute; top: 56px; left: 24px; display: none; pointer-events: auto;">

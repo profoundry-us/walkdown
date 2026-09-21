@@ -234,7 +234,7 @@
                 <div class="flex flex-col gap-3 px-3.5 pb-3.5 pt-1"> 
                   <div> 
                     <div class="flex items-center gap-2"> <span class="tooltip tooltip-right flex w-11 shrink-0 items-center justify-center gap-0.5 text-[12px] leading-none" title="" data-testid="panel.rule-tiers" style="--tt-inset:0 auto; --tt-trans:0; --tt-tail-inset:.35rem auto" data-tiers="checks:pass agent:never"><span class="tooltip-content z-20 w-60 whitespace-normal text-left text-[11px] leading-snug" data-testid="panel.rule-tiers-tip"><span class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5"><span class="opacity-60">checks</span><span>passed</span><span class="opacity-60">agent</span><span>required, but no run has touched it</span><span class="col-span-2 mt-0.5 opacity-40">accepted by</span><span class="opacity-60">eng</span><span>has not signed</span></span></span><span class="inline-block w-4 text-center text-success">✓</span><span class="inline-block w-4 text-center text-warning">○</span><span class="flex w-4 shrink-0 flex-col items-center justify-center" data-testid="panel.rule-signoff" data-signoff="eng:none"><span class="flex h-[9px] items-center justify-center"><span class="block rounded-full size-[6px] border border-current text-blue-400"></span></span></span></span> 
-                      <div class="break-all font-mono text-[11px] opacity-40" data-testid="detail.rule-id">waitlist.join.confirmation</div> 
+                      <button type="button" class="cursor-copy break-all text-left font-mono text-[11px] opacity-40 hover:opacity-80" data-testid="detail.rule-id" title="Copy the rule id">waitlist.join.confirmation</button> 
                     </div> 
                     <p data-testid="detail.statement" class="wd-text wd-inherit text-[15px] leading-relaxed">After submitting a valid email, the visitor sees a confirmation showing the email they joined with.</p> 
                   </div> 
@@ -256,10 +256,7 @@
                       </div>
                     </div>
                   </div> 
-                  <details class="rounded border border-base-300 bg-base-200/60 px-2 py-1 text-[11.5px]" data-testid="detail.technical-disclosure" data-checks="waitlist.join.confirmation"> 
-                    <summary class="cursor-pointer opacity-60">Check source · checks/waitlist.spec.ts:52</summary> 
-                    <div class="wdp-check-src mt-1 opacity-70">Loading…</div> 
-                  </details> 
+                  <button type="button" class="flex w-full items-center gap-1 rounded border border-base-300 bg-base-200/60 px-2 py-1 text-left text-[11.5px] hover:bg-base-200" data-testid="detail.technical-disclosure" title="Read the checks that verify this rule" data-checks="waitlist.join.confirmation"> <span class="opacity-60">Check source · checks/waitlist.spec.ts:52</span> <span class="ml-auto opacity-50">↗</span> </button> 
                   <div> 
                     <div class="text-[10.5px] font-bold uppercase tracking-widest opacity-40 mb-1.5">Evidence</div> 
                     <div data-testid="detail.evidence">

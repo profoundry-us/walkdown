@@ -7,8 +7,15 @@ created: 2026-09-21T01:00:38.487Z
 anchor:
   rule: panel.rules.detail-slide
   screen: rule-detail
-status: open
+status: addressed
 body: The rule ID at the top of the Rule Detail page should be clickable and
   should copy the ID so I don't have to select the text and click command-c
   manually.
 added: Filed from Topher's list, 2026-09-21.
+replies:
+  - author: agent
+    created: 2026-09-21T01:55:14Z
+    body: "Built. The id at the head of the detail is a button: pressing it copies
+      the id to the clipboard and a toast says 'Copied <id>'. Step on
+      panel.rules.detail-slide, which now asks for checks; the check reads the
+      clipboard back."

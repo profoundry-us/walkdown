@@ -7,7 +7,7 @@ created: 2026-09-21T01:00:38.115Z
 anchor:
   rule: panel.rules.evidence-visible
   screen: rule-detail
-status: open
+status: addressed
 body: Change the "Check source" from a collapse into a clickable area that opens
   the source in a modal. The modal should show all of the contents, but also
   provide a link to GitHub if possible so a user can see it on a larger screen
@@ -15,3 +15,13 @@ body: Change the "Check source" from a collapse into a clickable area that opens
 added: Filed from Topher's list at the end of the 2026-09-21 walkdown. The
   GitHub link needs the repository's remote and the run's git_sha, both of which
   the ledger already records; the modal is the evidence modal's shape.
+replies:
+  - author: agent
+    created: 2026-09-21T01:55:14Z
+    body: Built. Check source is a button now; it opens the rule's checks over the
+      whole desk in the evidence layer's own shape - each check in full, in a
+      pre you can read, with 'Open on GitHub' beside each ref that opens the
+      same lines (blob/<full sha>/<file>#Lstart-Lend) in a new tab. The server's
+      /api/checks answers with the repo's web address and commit when the tree's
+      origin is GitHub; otherwise the link is simply absent. Step added to
+      panel.rules.evidence-visible and a check drives it.

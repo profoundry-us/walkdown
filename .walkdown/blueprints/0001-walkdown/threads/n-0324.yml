@@ -7,9 +7,16 @@ created: 2026-09-21T01:00:39.255Z
 anchor:
   rule: panel.dock.own-skin
   screen: review
-status: open
+status: addressed
 body: The alert toast after an action is oddly aligned. It overlaps outside of
   the app-frame and just feels weird. Make it appear inside the app-frame equal
   distance from the bottom and right sides.
 added: Filed from Topher's list, 2026-09-21, with his screenshot of the q-0314
   toast straddling the frame's edge.
+replies:
+  - author: agent
+    created: 2026-09-21T01:55:15Z
+    body: Fixed. A toast is placed against the app frame as drawn - measured from
+      the frame's own rectangle, since it is scaled to fit and centred on the
+      desk - one gap in from its right edge and the same from its bottom. The
+      check measures both distances and asserts they match.

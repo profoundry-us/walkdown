@@ -1,0 +1,59 @@
+{
+  "run_id": "2026-09-21T01-53-57Z-local-01",
+  "created": "2026-09-21T01:53:57Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "48bb807-dirty",
+  "tree_hash": "sha256:bd84d9c0dda3",
+  "spec_hash": "sha256:c9edceded459",
+  "results": [
+    {
+      "rule": "panel.rules.evidence-visible",
+      "status": "pass",
+      "statement_hash": "sha256:78f68901d77e",
+      "duration_ms": 6097,
+      "checks": [
+        "checks/panel.spec.js:1000",
+        "checks/panel.spec.js:1051",
+        "checks/panel.spec.js:3432"
+      ]
+    },
+    {
+      "rule": "panel.rules.detail-slide",
+      "status": "fail",
+      "statement_hash": "sha256:1eb9f5ca82d3",
+      "duration_ms": 1474,
+      "checks": [
+        "checks/panel.spec.js:3396"
+      ],
+      "evidence": [
+        "runs/evidence/2026-09-21T01-53-57Z/panel-the-rule-id-copies-i-ed1bb-inside-the-frame-with-a-cap-test-failed-1.png",
+        "runs/evidence/2026-09-21T01-53-57Z/panel-the-rule-id-copies-i-ed1bb-inside-the-frame-with-a-cap-error-context.md"
+      ]
+    },
+    {
+      "rule": "panel.dock.own-skin",
+      "status": "fail",
+      "statement_hash": "sha256:4e48a84dd51a",
+      "duration_ms": 1474,
+      "checks": [
+        "checks/panel.spec.js:3396"
+      ],
+      "evidence": [
+        "runs/evidence/2026-09-21T01-53-57Z/panel-the-rule-id-copies-i-ed1bb-inside-the-frame-with-a-cap-test-failed-1.png",
+        "runs/evidence/2026-09-21T01-53-57Z/panel-the-rule-id-copies-i-ed1bb-inside-the-frame-with-a-cap-error-context.md"
+      ]
+    },
+    {
+      "rule": "panel.rules.headless-says-so",
+      "status": "pass",
+      "statement_hash": "sha256:4f4c746e2d71",
+      "duration_ms": 1021,
+      "checks": [
+        "checks/panel.spec.js:3419"
+      ]
+    }
+  ]
+}

@@ -7,9 +7,16 @@ created: 2026-09-21T01:00:39.446Z
 anchor:
   rule: panel.dock.own-skin
   screen: review
-status: open
+status: addressed
 body: Toast alerts need a max size; this one scrolled off the page when I
   finished a walkdown.
 added: Filed from Topher's list, 2026-09-21. The finish toast listed sixteen
   thread ids in one line; a toast wants a width cap and a count with the ids
   behind a click, not in the toast.
+replies:
+  - author: agent
+    created: 2026-09-21T01:55:15Z
+    body: Fixed. A toast has a cap (10rem tall, 24rem wide at most) and scrolls
+      inside itself past it; long text wraps instead of running off the page.
+      Both toast notes are steps on panel.dock.own-skin now, which asks for
+      checks.

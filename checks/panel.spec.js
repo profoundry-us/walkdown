@@ -3387,3 +3387,60 @@ test('a thread under a renamed anchor shows the name it was filed under, marked 
   await expect(where.locator('.font-mono')).toHaveText('detail.screenshots-modal');
   await expect(where).toHaveAttribute('data-tip', 'detail.screenshots-modal → detail.evidence-modal');
 });
+
+/*
+ * The id copies itself (n-0320), and the toast that says so lands inside
+ * the app frame, the same distance from its bottom as from its right, with
+ * a size it cannot outgrow (n-0324, n-0325).
+ */
+test('the rule id copies itself, and the toast sits inside the frame with a cap', {
+  tag: ['@rule:panel.rules.detail-slide', '@rule:panel.dock.own-skin'],
+}, async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await review(page);
+  const rule = (await firstRule(page)).trim();
+  await page.getByTestId('detail.rule-id').click();
+  const toast = page.getByTestId('panel.toast');
+  await expect(toast).toContainText('Copied');
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(rule);
+
+  const [t, f] = await Promise.all([toast.boundingBox(), page.getByTestId('panel.app-frame').boundingBox()]);
+  const right = f.x + f.width - (t.x + t.width);
+  const bottom = f.y + f.height - (t.y + t.height);
+  expect(right, 'inside the frame, from the right').toBeGreaterThan(0);
+  expect(bottom, 'inside the frame, from the bottom').toBeGreaterThan(0);
+  expect(Math.abs(right - bottom), 'the same distance both ways').toBeLessThanOrEqual(2);
+  const cap = await toast.evaluate((el) => ({ max: getComputedStyle(el).maxHeight, over: getComputedStyle(el).overflowY }));
+  expect(cap.max).not.toBe('none');
+  expect(cap.over).toBe('auto');
+});
+
+/* Headless is said once, in the Screen block, not twice (n-0321). */
+test('a headless rule says so once', {
+  tag: '@rule:panel.rules.headless-says-so',
+}, async ({ page }) => {
+  await review(page);
+  await openRule(page, 'status.derived.latest-wins');
+  const pane = page.locator('.wdp-detail');
+  await expect(page.getByTestId('detail.screen')).toContainText(/judged without one/);
+  const text = await pane.innerText();
+  expect(text.match(/judged without one/g)?.length ?? 0).toBe(1);
+  expect(text).not.toMatch(/Headless —/);
+});
+
+/* Check source opens over the desk, in full, with the same lines on GitHub a click away (n-0318). */
+test('Check source opens the checks in a modal, with a GitHub link in a new tab', {
+  tag: '@rule:panel.rules.evidence-visible',
+}, async ({ page }) => {
+  await review(page);
+  await firstRule(page);
+  await page.getByTestId('detail.technical-disclosure').click();
+  const modal = page.getByTestId('detail.source-modal');
+  await expect(modal).toBeVisible();
+  await expect(modal.locator('pre').first()).toContainText(/test\(|expect\(/);
+  const link = modal.getByTestId('detail.source-github').first();
+  await expect(link).toHaveAttribute('target', '_blank');
+  await expect(link).toHaveAttribute('href', /github\.com\/[^/]+\/[^/]+\/blob\/[0-9a-f]{40}\/[^#]+#L\d+-L\d+$/);
+  await page.getByTestId('detail.source-close').click();
+  await expect(modal).toHaveCount(0);
+});
