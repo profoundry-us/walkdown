@@ -7,7 +7,7 @@ anchor:
   rule: panel.start.open-a-folder
   screen: start
   element: '[data-testid="start.connect"]'
-status: addressed
+status: verified
 body: File the Connect-button finding as a note
 added: >-
   The Connect button on the start screen does nothing, so the rule's second then
@@ -57,4 +57,11 @@ replies:
       handler — so the gate's Connect button did nothing at all. There is one
       serverRow component now, drawn in both places, so the gate's button fires
       the same connect event and the typed address is read.
+  - author: topher
+    via: verdict
+    created: 2026-09-21T14:56:35Z
+    body: Verified by topher's pass on panel.start.open-a-folder
+      (2026-09-21T14-56-35Z-local-01).
 reason: finding
+verified_by: topher
+verified_via: 2026-09-21T14-56-35Z-local-01

@@ -30,3 +30,15 @@ replies:
   - author: agent
     created: 2026-09-21T06:37:09Z
     body: The second agent look is run 2026-09-21T06-36-55Z-local-01.
+  - author: topher
+    created: 2026-09-21T14:56:00Z
+    body: Enter is not currently sending when I am typing in the text box.
+  - author: agent
+    created: 2026-09-21T15:04:59Z
+    body: "Fixed: the rule's box sends on Enter too. The thread screen sent on
+      Enter, the rule's feedback box did not - the same words under a rule's
+      conversation did nothing until Reply was found. Enter there now says the
+      words on the rule, a reply and never a verdict; Shift-Enter breaks the
+      line; the ask box answers on Enter the same way. Checked by 'Enter on the
+      rule's box says the words on the rule' (recorded 2026-09-21T15-01-54Z) and
+      judged again by the agent tier (run 2026-09-21T15-04-43Z)."

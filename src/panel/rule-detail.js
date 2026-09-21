@@ -199,6 +199,13 @@ function backToList() {
   requestRender();
 }
 
+/** Enter, on its own, in a composer: the send key. Shift+Enter is a line break and a composing IME is left alone. */
+function enterSends(e) {
+  if (e.key !== 'Enter' || e.shiftKey || e.isComposing) return false;
+  e.preventDefault();
+  return true;
+}
+
 /** Say the composer's text on the rule - into its conversation, or opening one - then refresh. */
 async function replyOnRule(button, rule) {
   const text = (S.verdictNote ?? '').trim();
@@ -296,6 +303,11 @@ function askCard(r, asked, open) {
       .value=${live(S.verdictNote)}
       @input=${(e) => {
         S.verdictNote = e.currentTarget.value;
+      }}
+      @keydown=${(e) => {
+        // Enter answers, as it does on the thread screen; Shift+Enter breaks the line.
+        if (!enterSends(e)) return;
+        answerOnRule(r.rule, e.currentTarget.value.trim(), S.askChoice);
       }}></textarea>
     <div class="mt-1 flex flex-wrap items-center gap-1" data-testid="detail.ask-actions">
       <button class="btn btn-xs btn-outline btn-warning" data-v="waived" title="Never mind: close this question with a reason"
@@ -458,6 +470,18 @@ function conversation(r, picked) {
       .value=${live(S.verdictNote)}
       @input=${(e) => {
         S.verdictNote = e.currentTarget.value;
+      }}
+      @keydown=${(e) => {
+        /*
+         * Enter says the words on the rule - a reply, never a verdict: a
+         * pass or a fail is a press on its own button. The thread screen
+         * sent on Enter and this box did not, so the same words in the
+         * rule's box did nothing until Reply was found (Topher,
+         * 2026-09-21, n-0332). Shift+Enter breaks the line.
+         */
+        if (!enterSends(e)) return;
+        const reply = e.currentTarget.closest('.wdp-detail')?.querySelector('[data-v="reply"]');
+        if (reply) replyOnRule(reply, r.rule);
       }}></textarea>
     <!-- Waive alone at the far left, the reach-for buttons on the right,
          the verdict last: the thread screen's row, on the rule. No "as

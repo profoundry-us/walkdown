@@ -1,0 +1,89 @@
+{
+  "run_id": "2026-09-21T14-56-35Z-local-01",
+  "created": "2026-09-21T14:56:35Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    },
+    {
+      "role": "design",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "75ae16d-dirty",
+  "tree_hash": "sha256:f36bee84f3d4",
+  "spec_hash": "sha256:2d4781078c6e",
+  "results": [
+    {
+      "rule": "panel.rules.detail-slide",
+      "status": "pass",
+      "statement_hash": "sha256:bd567f0289e2"
+    },
+    {
+      "rule": "panel.rules.legend-on-demand",
+      "status": "pass",
+      "statement_hash": "sha256:3a489f113413"
+    },
+    {
+      "rule": "panel.walkdown.one-control-owns-the-sitting",
+      "status": "pass",
+      "statement_hash": "sha256:3c61387a8bd2"
+    },
+    {
+      "rule": "panel.walkdown.draft-on-disk",
+      "status": "pass",
+      "statement_hash": "sha256:8517d3ecb2c9"
+    },
+    {
+      "rule": "panel.rules.evidence-visible",
+      "status": "fail",
+      "statement_hash": "sha256:79686951989e",
+      "threads": [
+        "n-0318"
+      ]
+    },
+    {
+      "rule": "panel.rules.one-conversation",
+      "status": "pass",
+      "statement_hash": "sha256:72d801697bb2",
+      "threads": [
+        "n-0330"
+      ]
+    },
+    {
+      "rule": "embed.threads.picture-on-a-pin",
+      "status": "fail",
+      "statement_hash": "sha256:965adfb3696b",
+      "threads": [
+        "n-0328"
+      ]
+    },
+    {
+      "rule": "screens.anchors.renames-are-recorded",
+      "status": "pass",
+      "statement_hash": "sha256:a0495cc39a56"
+    },
+    {
+      "rule": "threads.conversation.composer-stays",
+      "status": "fail",
+      "statement_hash": "sha256:bce50665dcd2",
+      "threads": [
+        "n-0332"
+      ]
+    },
+    {
+      "rule": "panel.start.open-a-folder",
+      "status": "pass",
+      "statement_hash": "sha256:5ace895ac628"
+    }
+  ]
+}

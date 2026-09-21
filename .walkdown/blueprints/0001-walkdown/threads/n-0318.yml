@@ -59,3 +59,17 @@ replies:
       was built before the link existed, so a reload is what it needed. The
       check asserts the blur, the caption's ground and the link (run
       2026-09-21T05-15-10Z)."
+  - author: topher
+    created: 2026-09-21T14:52:14Z
+    body: >-
+      Looks good, but I can't see the "Check source
+
+      panel.rules.evidence-visible" at the top. It has no background so it is
+      very hard to read. It should stand out more than the file names.
+  - author: agent
+    created: 2026-09-21T15:04:59Z
+    body: "Fixed: the modal head - Check source and the rule id, and Evidence on the
+      evidence modal - now stands on a solid neutral bar at full opacity, 13px
+      bold, larger than the 11px file names under it. Checked by 'Check source
+      opens the checks in a modal' (recorded 2026-09-21T15-01-54Z) and judged
+      again by the agent tier (run 2026-09-21T15-04-43Z)."

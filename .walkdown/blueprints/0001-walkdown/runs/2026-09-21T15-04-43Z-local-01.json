@@ -1,0 +1,54 @@
+{
+  "run_id": "2026-09-21T15-04-43Z-local-01",
+  "created": "2026-09-21T15:04:43Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "75ae16d-dirty",
+  "spec_hash": "sha256:2d4781078c6e",
+  "note": "A second look at the three rules Topher failed on his 2026-09-21 afternoon walkdown (n-0318, n-0328, n-0332), after the fixes. Writes were driven on a stamped scratch copy on 4730 (node tools/scratch.mjs new fix-0921b); the Check source modal was read on the real board on 4700, since a scratch's target port fills no checks cell and so offers no Check source.",
+  "results": [
+    {
+      "rule": "threads.conversation.composer-stays",
+      "status": "pass",
+      "statement_hash": "sha256:bce50665dcd2",
+      "threads": [
+        "n-0332"
+      ],
+      "evidence": [
+        "runs/evidence/2026-09-21T15-02-34Z/look.json",
+        "runs/evidence/2026-09-21T15-02-34Z/rule-box-after-enter.png",
+        "runs/evidence/2026-09-21T15-02-34Z/thread-after-enter.png"
+      ],
+      "reasoning": "Topher's note was about the rule's box: Enter did nothing there while the thread screen sent. Now Enter in the rule's feedback box says the words on the rule - the reply count on the rule's threads went from 5 to 6, the box emptied, and no draft verdict was written by it; Shift-Enter put a line break in first. On the thread screen Enter still sends (6 to 7 replies) and empties the box, carrying the pictures dropped before it (2 attachments on the reply, none left above the box)."
+    },
+    {
+      "rule": "panel.rules.evidence-visible",
+      "status": "pass",
+      "statement_hash": "sha256:79686951989e",
+      "threads": [
+        "n-0318"
+      ],
+      "evidence": [
+        "runs/evidence/2026-09-21T15-02-34Z/look.json",
+        "runs/evidence/2026-09-21T15-02-34Z/check-source-head.png"
+      ],
+      "reasoning": "The Check source modal's head - the words Check source and the rule id - now stands on a solid neutral ground at full opacity, 13px bold against the 11px file names under it, rather than as bare pale text over the blurred desk that Topher could not read. The screenshot shows the head as a dark bar above the sources. The file-name caption's size was not measured by this probe because the sources had not yet loaded when it read; the recorded check compares the two and passes."
+    },
+    {
+      "rule": "embed.threads.picture-on-a-pin",
+      "status": "pass",
+      "statement_hash": "sha256:965adfb3696b",
+      "threads": [
+        "n-0328"
+      ],
+      "evidence": [
+        "runs/evidence/2026-09-21T15-02-34Z/look.json",
+        "runs/evidence/2026-09-21T15-02-34Z/thread-drop-off-the-box.png",
+        "runs/evidence/2026-09-21T15-02-34Z/thread-after-enter.png"
+      ],
+      "reasoning": "A picture dropped on the thread screen off the box - once on the messages, once on the header line - was taken as a pending picture each time (1 then 2 above the box), no new tab opened and the page stayed where it was; the pin form already took a drop anywhere on it. The two pictures went with the next reply on Enter."
+    }
+  ]
+}

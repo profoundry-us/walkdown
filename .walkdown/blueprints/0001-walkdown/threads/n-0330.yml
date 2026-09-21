@@ -5,7 +5,7 @@ author: agent
 created: 2026-09-21T05:00:52.433Z
 anchor:
   rule: panel.rules.one-conversation
-status: addressed
+status: verified
 body: "A fail's why was filed twice. Every fail Topher gave on 2026-09-21 landed
   on the rule's conversation as two identical replies under the same second:
   n-0265, n-0308, n-0318, n-0320 and n-0327 each carry the pair. The panel
@@ -20,3 +20,13 @@ replies:
       the one reply. Otherwise it goes as a plain reply. The five doubled
       replies from tonight stay as they are. A check fails an addressed
       conversation and counts the why once (run 2026-09-21T05-15-10Z).
+  - author: topher
+    created: 2026-09-21T14:52:50Z
+    body: This is just a test to make sure it's working.
+  - author: topher
+    via: verdict
+    created: 2026-09-21T14:56:35Z
+    body: Verified by topher's pass on panel.rules.one-conversation
+      (2026-09-21T14-56-35Z-local-01).
+verified_by: topher
+verified_via: 2026-09-21T14-56-35Z-local-01

@@ -37,9 +37,12 @@ export async function openSource(rule) {
     display:flex; flex-direction:column; gap:10px;
     align-items:center; justify-content:flex-start; overflow:auto; padding:20px;`;
   layer.innerHTML = `
-    <div class="flex w-full max-w-4xl items-center gap-2 text-base-100">
-      <span class="text-[12px] font-semibold uppercase tracking-widest opacity-80">Check source</span>
-      <span class="font-mono text-[11px] opacity-70">${esc(rule)}</span>
+    <!-- The head stands on its own ground, and reads above the file names
+         under it: bare text over the blurred desk was the one line in the
+         modal you could not read (Topher, 2026-09-21, n-0318). -->
+    <div class="flex w-full max-w-4xl items-center gap-3 rounded bg-neutral px-3 py-2 text-neutral-content shadow" data-testid="detail.modal-head">
+      <span class="text-[13px] font-bold uppercase tracking-widest">Check source</span>
+      <span class="font-mono text-[12px] font-semibold">${esc(rule)}</span>
       <button class="btn btn-xs ml-auto" data-testid="detail.source-close">Close</button>
     </div>
     <div class="wdp-source w-full max-w-4xl text-base-100 opacity-80">Loading…</div>`;

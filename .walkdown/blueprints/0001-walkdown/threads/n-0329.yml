@@ -5,7 +5,7 @@ author: topher
 created: 2026-09-21T04:47:30.846Z
 anchor:
   rule: screens.anchors.renames-are-recorded
-status: addressed
+status: verified
 body: >-
   I think it's technically working, but I can't read the tooltip because of the
   opacity and it's getting chopped off.
@@ -20,3 +20,10 @@ replies:
       the anchor's name, so it stays inside the pane, and it is drawn at full
       strength rather than in the line's faded ink. The check hovers it and
       measures it against the pane (run 2026-09-21T05-15-10Z).
+  - author: topher
+    via: verdict
+    created: 2026-09-21T14:56:35Z
+    body: Verified by topher's pass on screens.anchors.renames-are-recorded
+      (2026-09-21T14-56-35Z-local-01).
+verified_by: topher
+verified_via: 2026-09-21T14-56-35Z-local-01

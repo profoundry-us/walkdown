@@ -222,7 +222,19 @@ export function threadPane() {
   // Enter sends what the box is for: the answer on a question that is
   // yours to answer, and a reply everywhere else.
   const enterAct = acts.some(([, act]) => act === '__answer') ? '__answer' : '__reply';
+  /*
+   * A picture dropped anywhere on the thread screen is taken, the way the
+   * pin form takes one dropped anywhere on it. The box alone was the
+   * target, two rows tall, and a drop that missed it by a finger went to
+   * the browser, which opened the file in a new tab (Topher, 2026-09-21,
+   * n-0328). Both handlers here, since the wrapper is what the drop lands on.
+   */
   return html`
+    <div class="flex h-full min-h-0 flex-col" data-testid="thread.screen"
+      @dragover=${(e) => {
+        if ([...(e.dataTransfer?.types ?? [])].includes('Files')) e.preventDefault();
+      }}
+      @drop=${(e) => pasteShots(e)}>
     <div class="flex items-center gap-1 px-2 pt-2">
       <button class="wdp-thread-back btn btn-ghost btn-xs text-primary" data-testid="thread.close" @click=${leaveThread}>← ${backFromThread(row)}</button>
       <span class="ml-auto flex items-center gap-1 pr-1.5 text-[11px]" data-testid="thread.provenance">
@@ -307,10 +319,6 @@ export function threadPane() {
           S.threadNote = e.currentTarget.value;
         }}
         @paste=${(e) => pasteShots(e)}
-        @dragover=${(e) => {
-          if ([...(e.dataTransfer?.types ?? [])].includes('Files')) e.preventDefault();
-        }}
-        @drop=${(e) => pasteShots(e)}
         @keydown=${(e) => {
           // Enter sends, Shift+Enter breaks the line - the muscle memory
           // everyone already has. The buttons stay for the pointer.
@@ -333,6 +341,7 @@ export function threadPane() {
           ? html`<div class="mt-1 text-[11px] text-warning" data-testid="thread.say">${S.threadSay}</div>`
           : nothing
       }
+    </div>
     </div>`;
 }
 

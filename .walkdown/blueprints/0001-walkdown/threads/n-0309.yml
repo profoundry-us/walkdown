@@ -5,7 +5,7 @@ author: topher
 created: 2026-09-19T03:59:41.381Z
 anchor:
   rule: panel.walkdown.one-control-owns-the-sitting
-status: addressed
+status: verified
 body: >-
   1. This sitting only
 
@@ -42,3 +42,10 @@ replies:
       same explanation; the walk badge is gone and the Legend sits at the right
       edge. Rule steps updated, a check drives Skip end to end, a unit test
       covers the ledger half. Answers q-0315."
+  - author: topher
+    via: verdict
+    created: 2026-09-21T14:56:35Z
+    body: Verified by topher's pass on panel.walkdown.one-control-owns-the-sitting
+      (2026-09-21T14-56-35Z-local-01).
+verified_by: topher
+verified_via: 2026-09-21T14-56-35Z-local-01

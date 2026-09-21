@@ -5,7 +5,7 @@ author: agent
 created: 2026-09-21T05:11:16.546Z
 anchor:
   rule: panel.walkdown.draft-on-disk
-status: addressed
+status: verified
 body: "A sitting came back after Finish. A skip reloads the board without
   waiting for the answer, and when that answer landed after Finish had cleared
   the draft, the panel read the draft it carried and restored the sitting it had
@@ -19,3 +19,10 @@ replies:
       answer, so a skip's late answer can no longer bring back the sitting
       Finish just recorded. The end-of-sitting check finishes after five skips
       and waits to see the sitting stay finished (run 2026-09-21T05-15-10Z).
+  - author: topher
+    via: verdict
+    created: 2026-09-21T14:56:35Z
+    body: Verified by topher's pass on panel.walkdown.draft-on-disk
+      (2026-09-21T14-56-35Z-local-01).
+verified_by: topher
+verified_via: 2026-09-21T14-56-35Z-local-01

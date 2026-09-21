@@ -3614,6 +3614,15 @@ test('Check source opens the checks in a modal, with a GitHub link in a new tab'
   // ground rather than in bare text over the app (n-0318).
   expect(await modal.evaluate((el) => getComputedStyle(el).backdropFilter)).toMatch(/blur/);
   expect(await modal.locator('figcaption').first().evaluate((el) => getComputedStyle(el).backgroundColor)).not.toBe('rgba(0, 0, 0, 0)');
+  // The head - "Check source" and the rule - stands on its own ground too,
+  // and larger than the file names under it; bare text over the blurred
+  // desk was the one line you could not read (Topher, 2026-09-21, n-0318).
+  const head = modal.getByTestId('detail.modal-head');
+  await expect(head).toContainText(/Check source/);
+  expect(await head.evaluate((el) => getComputedStyle(el).backgroundColor)).not.toBe('rgba(0, 0, 0, 0)');
+  expect(await head.evaluate((el) => getComputedStyle(el).opacity)).toBe('1');
+  const px = (loc) => loc.evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+  expect(await px(head.locator('span').first())).toBeGreaterThan(await px(modal.locator('figcaption').first()));
   const link = modal.getByTestId('detail.source-github').first();
   await expect(link).toHaveAttribute('target', '_blank');
   await expect(link).toHaveAttribute('href', /github\.com\/[^/]+\/[^/]+\/blob\/[0-9a-f]{40}\/[^#]+#L\d+-L\d+$/);
@@ -3704,4 +3713,42 @@ test('a sent reply leaves the composer, and a second Enter posts nothing', {
   await page.waitForTimeout(500);
   expect(await replies(id)).toHaveLength(1);
   await expect(box).toHaveValue('');
+});
+
+/*
+ * Enter sends on the rule's box as it does on the thread screen: the same
+ * words typed under a rule's conversation did nothing until Reply was
+ * found (Topher, 2026-09-21, n-0332). A reply, never a verdict - a pass or
+ * a fail is a press on its own button.
+ */
+test('Enter on the rule\u2019s box says the words on the rule, and Shift-Enter breaks the line', {
+  tag: '@rule:threads.conversation.composer-stays',
+}, async ({ page }) => {
+  const { rows } = await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json();
+  const rule = rows.find((r) => r.built).rule;
+  const { id } = await (await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
+    data: { kind: 'note', body: 'The label reads wrong.', anchor: { rule } },
+  })).json();
+  const replies = async () =>
+    (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json())
+      .threads.find((t) => t.id === id).replies ?? [];
+  await review(page);
+  await endSession(page);
+  await openRule(page, rule);
+  const box = page.getByTestId('detail.feedback');
+  await box.click();
+  await page.keyboard.type('one line');
+  await page.keyboard.press('Shift+Enter');
+  await page.keyboard.type('and another');
+  await expect(box).toHaveValue('one line\nand another');
+  expect(await replies()).toHaveLength(0);
+  await page.keyboard.press('Enter');
+  await expect.poll(async () => (await replies()).map((r) => r.body)).toEqual(['one line\nand another']);
+  await expect(box).toHaveValue('');
+  await expect(page.getByTestId('detail.conversation')).toContainText('and another');
+  // Enter on the emptied box sends nothing, and no verdict was recorded by any of it.
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(400);
+  expect(await replies()).toHaveLength(1);
+  expect(await draft(page)).toMatchObject({ draft: null });
 });

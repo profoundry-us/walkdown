@@ -8,7 +8,7 @@ anchor:
   rule: panel.rules.legend-on-demand
   screen: review
   element: panel.legend
-status: addressed
+status: verified
 body: The legend's SIGN / ASKS / FIXED / WALK badges overlap their text.
 added: "From Topher's screenshot of 2026-09-18 10:57 PM
   (runs/evidence/2026-09-19T03-44-37Z/legend-ask-badges-overlap.png): in the
@@ -41,3 +41,10 @@ replies:
       right edge of the footer, where it now sits, so none of it is off the
       pane. The check measures the bubble against the pane's edges (run
       2026-09-21T05-15-10Z).
+  - author: topher
+    via: verdict
+    created: 2026-09-21T14:56:35Z
+    body: Verified by topher's pass on panel.rules.legend-on-demand
+      (2026-09-21T14-56-35Z-local-01).
+verified_by: topher
+verified_via: 2026-09-21T14-56-35Z-local-01

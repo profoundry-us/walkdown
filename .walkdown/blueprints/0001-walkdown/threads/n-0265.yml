@@ -5,7 +5,7 @@ created: 2026-09-09T13:53:16.188Z
 anchor:
   rule: panel.start.open-a-folder
   screen: start
-status: addressed
+status: verified
 body: "Judging panel.start.open-a-folder (run 2026-09-09T13-43-55Z-local-01,
   pass) I found one path where the panel reports no server while a server is
   answering. On walkdown's own served review page (GET / from `walkdown serve`),
@@ -88,4 +88,11 @@ replies:
       already has a blueprint. Or choose an existing project stands over the
       list as its own header. The check on the picker reads both headers (run
       2026-09-21T05-15-10Z).
+  - author: topher
+    via: verdict
+    created: 2026-09-21T14:56:35Z
+    body: Verified by topher's pass on panel.start.open-a-folder
+      (2026-09-21T14-56-35Z-local-01).
 reason: finding
+verified_by: topher
+verified_via: 2026-09-21T14-56-35Z-local-01

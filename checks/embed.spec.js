@@ -505,6 +505,12 @@ test('a screenshot dropped on the pin form goes on the pin, and opens from the s
   // The same drop on the thread's own composer puts the picture on the reply.
   await page.getByTestId('thread.reply').evaluate(drop);
   await expect(page.getByTestId('thread.shots').locator('img'), 'held above the box until sent').toHaveCount(1);
+  // And a drop that misses the box - on the messages above it - is taken
+  // by the screen the same way, rather than by the browser, which opened
+  // the file in a new tab (Topher, 2026-09-21, n-0328).
+  await page.getByTestId('thread.body').evaluate(drop);
+  await expect(page.getByTestId('thread.shots').locator('img'), 'the screen is the target, not the box').toHaveCount(2);
+  expect(page.context().pages().length, 'no tab opened on the file').toBe(1);
 });
 
 /*

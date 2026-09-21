@@ -55,8 +55,11 @@ export function openEvidence(paths) {
       <figcaption class="mt-1 inline-block rounded bg-neutral/90 px-1.5 py-0.5 font-mono text-[10.5px] text-neutral-content">${esc(p)}</figcaption>
     </figure>`;
   layer.innerHTML = `
-    <div class="flex w-full max-w-4xl items-center gap-2 text-base-100">
-      <span class="text-[12px] font-semibold uppercase tracking-widest opacity-80">Evidence</span>
+    <!-- The head stands on its own ground, and reads above the file names
+         under it: bare text over the blurred desk was the one line in the
+         modal you could not read (Topher, 2026-09-21, n-0318). -->
+    <div class="flex w-full max-w-4xl items-center gap-3 rounded bg-neutral px-3 py-2 text-neutral-content shadow" data-testid="detail.modal-head">
+      <span class="text-[13px] font-bold uppercase tracking-widest">Evidence</span>
       <button class="btn btn-xs ml-auto" data-testid="detail.evidence-close">Close</button>
     </div>
     ${paths

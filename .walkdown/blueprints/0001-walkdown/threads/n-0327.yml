@@ -6,7 +6,7 @@ via: agent
 created: 2026-09-21T04:01:17.160Z
 anchor:
   rule: panel.walkdown.one-control-owns-the-sitting
-status: addressed
+status: verified
 body: Continue stays put on an unjudged rule. The only way to continue on a rule
   is to judge it, waive it, or skip it.
 added: Topher started a fresh sitting and pressed Continue a few times expecting
@@ -39,3 +39,10 @@ replies:
       Also, with nothing left owing a verdict, Continue and Skip are disabled
       and resting on them says to finish the walkdown. Both are steps on the
       rule and both are checked (run 2026-09-21T05-15-10Z).
+  - author: topher
+    via: verdict
+    created: 2026-09-21T14:56:35Z
+    body: Verified by topher's pass on panel.walkdown.one-control-owns-the-sitting
+      (2026-09-21T14-56-35Z-local-01).
+verified_by: topher
+verified_via: 2026-09-21T14-56-35Z-local-01

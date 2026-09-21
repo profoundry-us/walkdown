@@ -20,3 +20,15 @@ replies:
       still works too. The thumbnail and the full-size opening are unchanged.
       The rule's steps say drop first, and the check drops a real file on both
       boxes (run 2026-09-21T05-15-10Z).
+  - author: topher
+    created: 2026-09-21T14:53:59Z
+    body: This appears to be working for the Pin mode, but not on a thread's
+      composer. It just opens the file in a new tab.
+  - author: agent
+    created: 2026-09-21T15:04:59Z
+    body: "Fixed: the whole thread screen takes a dropped picture now, the way the
+      pin form takes one dropped anywhere on it - the two-row box alone was the
+      target, and a drop that missed it went to the browser, which opened the
+      file. Checked by 'a screenshot dropped on the pin form goes on the pin' in
+      checks/embed.spec.js (recorded 2026-09-21T15-02-00Z) and judged again by
+      the agent tier (run 2026-09-21T15-04-43Z)."
