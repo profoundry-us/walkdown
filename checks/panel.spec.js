@@ -3657,3 +3657,51 @@ test('a question on a rule is answerable from its own screen, choices and all', 
   // Folded in, so the rule is a person's again for the checks that follow.
   expect((await page.request.post(`${WD_ORIGIN}/api/threads/${id}/status?bp=blueprint`, { data: { status: 'incorporated', via: 'agent' } })).ok()).toBeTruthy();
 });
+
+/*
+ * Enter sends and the box empties. Found by the 2026-09-21 agent sitting
+ * (n-0332): the composer's words were child text of the textarea, which only
+ * seeds it, so a send that emptied the state left the typed reply in the box
+ * and the next Enter posted it again. Judged from the server's side - how
+ * many replies the thread holds - because the box reading empty proves
+ * nothing about what a second Enter would do.
+ */
+test('a sent reply leaves the composer, and a second Enter posts nothing', {
+  tag: '@rule:threads.conversation.composer-stays',
+}, async ({ page }) => {
+  const post = async (path, data) => {
+    const res = await page.request.post(`${WD_ORIGIN}${path}?bp=blueprint`, { data });
+    expect(res.ok(), `${path}: ${await res.text()}`).toBeTruthy();
+    return res.json();
+  };
+  const replies = async (id) =>
+    (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json())
+      .threads.find((t) => t.id === id).replies ?? [];
+  const { id } = await post('/api/threads', { kind: 'note', body: 'The composer keeps its words.', anchor: { screen: 'review' } });
+  await page.goto(`${WD_ORIGIN}/?bp=blueprint&thread=${id}`);
+  const box = page.getByTestId('thread.reply');
+  await expect(box).toBeVisible();
+
+  // Shift-Enter breaks the line and sends nothing.
+  await box.click();
+  await page.keyboard.type('first line');
+  await page.keyboard.press('Shift+Enter');
+  await page.keyboard.type('second line');
+  await expect(box).toHaveValue('first line\nsecond line');
+  expect(await replies(id)).toHaveLength(0);
+
+  // Enter sends: the message is on screen at once and the box is empty.
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('thread.body')).toContainText('second line');
+  await expect(box).toHaveValue('');
+  await expect.poll(async () => (await replies(id)).length).toBe(1);
+  await expect(page.getByTestId('thread.body').locator('.wd-pending')).toHaveCount(0);
+
+  // A second Enter on the emptied box posts nothing - the words are gone,
+  // from the box and from the state behind it.
+  await box.click();
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(500);
+  expect(await replies(id)).toHaveLength(1);
+  await expect(box).toHaveValue('');
+});

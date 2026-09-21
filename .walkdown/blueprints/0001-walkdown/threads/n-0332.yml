@@ -1,0 +1,32 @@
+id: n-0332
+kind: note
+reason: finding
+author: agent
+created: 2026-09-21T06:24:40.885Z
+anchor:
+  rule: threads.conversation.composer-stays
+status: addressed
+body: "The reply box keeps its words after Enter has sent them. Seen on the
+  scratch copy during the 2026-09-21 agent sitting: type a reply, press Enter,
+  the message lands in the stream and the server has it, and the box still holds
+  the same text. A second Enter posts it again
+  (runs/evidence/2026-09-21T05-18-16Z/G-composer-clears.json shows two copies on
+  the server after two presses). The composer is bound as a child text node, so
+  emptying the state does not empty a textarea somebody has typed in. The pane
+  wants a live value binding, or the box cleared by hand when the send goes
+  out."
+replies:
+  - author: agent
+    created: 2026-09-21T06:36:55Z
+    body: "Fixed: the thread composer's words are now a lit live() binding, as the
+      rule composer's already were. A plain .value binding compared against what
+      lit last wrote rather than what the box held, and typing renders nothing,
+      so a send that emptied the state found '' already committed and left the
+      words in the box. Checked by 'a sent reply leaves the composer, and a
+      second Enter posts nothing' in checks/panel.spec.js (recorded
+      2026-09-21T06-34-15Z) and judged again by the agent tier (run
+      2026-09-21T06-3x). The rule gained a then-step saying so, re-stamped as a
+      rewording."
+  - author: agent
+    created: 2026-09-21T06:37:09Z
+    body: The second agent look is run 2026-09-21T06-36-55Z-local-01.

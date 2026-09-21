@@ -10,7 +10,7 @@ import { MSG } from '../../lib/message-stream.js';
  * MSG.esc. The boundary sits exactly at these call sites, and it retires if
  * the embed ever renders with lit.
  */
-import { html, nothing, unsafeHTML } from '../../vendor/lit.js';
+import { html, live, nothing, unsafeHTML } from '../../vendor/lit.js';
 import { names, pendingReplies, seenAtOpen, threadAct, unreadCount } from './conversation.js';
 import { icon } from './icons.js';
 import { requestRender } from './shell.js';
@@ -294,8 +294,15 @@ export function threadPane() {
         }
       </div>
       ${pastedShots()}
+      <!-- The words are a live() property binding, as on the rule's composer,
+           not child text: child text only seeds a textarea, and a plain
+           .value binding compares against what lit last wrote rather than
+           what the box holds - typing renders nothing, so a send that
+           emptied the state found '' already committed and left the typed
+           reply in the box for the next Enter to post again (n-0332). -->
       <textarea id="wdp-note" data-testid="thread.reply" rows="2" class="textarea textarea-xs w-full resize-none"
         placeholder="${composerPlaceholder(t, role)}"
+        .value=${live(S.threadNote)}
         @input=${(e) => {
           S.threadNote = e.currentTarget.value;
         }}
@@ -311,7 +318,7 @@ export function threadPane() {
           e.preventDefault();
           const text = e.currentTarget.value.trim();
           if (S.openThread && text) threadAct(S.openThread, enterAct);
-        }}>${S.threadNote}</textarea>
+        }}></textarea>
       <!-- Waive stands alone at the far left; the rest gather on the right. -->
       <div class="mt-1 flex flex-wrap items-center justify-end gap-1">
         ${acts.map(

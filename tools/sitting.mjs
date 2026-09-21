@@ -1715,6 +1715,7 @@ async function capture(only = []) {
     .map((s) => ({ id: s.id, path: s.prototype }));
 
   const browser = await chromium.launch();
+  const bpKey = (await (await fetch(`${BASE}/api/blueprint`)).json()).key;
   const errors = [];
   const watch = (pg) => {
     pg.on('pageerror', (e) => errors.push(`PAGEERROR ${e.message}`));
@@ -1842,15 +1843,31 @@ async function capture(only = []) {
      * storage keys are cleared, never git's answers - a fresh reviewer is
      * the machine's default identity, not nobody.
      */
-    await page.goto(state.url ? BASE + state.url : BASE, { waitUntil: 'load' });
+    /*
+     * The server root has no page to route from, so since the project picker
+     * (2026-09) a bare BASE lands on "Which project?" and every state after
+     * the first fails on a button that is not there. The blueprint is named
+     * in the address instead, the way a pick would have left it.
+     */
+    const at = new URL(state.url ? BASE + state.url : BASE);
+    if (!at.searchParams.has('bp')) at.searchParams.set('bp', bpKey);
+    await page.goto(at.href, { waitUntil: 'load' });
     await page.evaluate(() => {
       for (const k of Object.keys(localStorage))
         if (k.startsWith('walkdown:')) localStorage.removeItem(k);
     });
-    await page.goto(state.url ? BASE + state.url : BASE, { waitUntil: 'load' });
+    await page.goto(at.href, { waitUntil: 'load' });
     await page.waitForTimeout(2500);
     let spot = null;
     const probes = [];
+    /*
+     * A state that throws is a finding about that state, not a reason to
+     * lose the thirty after it: the sitting of 2026-09-21 died twice, once on
+     * the picker and once on a gate drawn without a shadow root, and each
+     * time every later state went uncaptured. The failure is written beside
+     * the picture, and the loop goes on.
+     */
+    try {
     for (const [op, arg] of state.steps) {
       if (op === 'sr') await inSr(arg);
       else if (op === 'tab')
@@ -1906,7 +1923,13 @@ async function capture(only = []) {
         }, arg ?? null);
       if (op === 'tab') await page.waitForTimeout(500);
     }
-    await page.screenshot({ path: join(dir, `${state.name}.png`) });
+    } catch (e) {
+      const line = `STATE ${state.name}: ${String(e.message ?? e).split('\n')[0]}`;
+      errors.push(line);
+      probes.push({ failed: line });
+      console.log(`  ${line}`);
+    }
+    await page.screenshot({ path: join(dir, `${state.name}.png`) }).catch(() => {});
     console.log(`  ${state.name}.png`);
     // A measurement is evidence too, and it goes beside the picture it explains.
     if (probes.length) {

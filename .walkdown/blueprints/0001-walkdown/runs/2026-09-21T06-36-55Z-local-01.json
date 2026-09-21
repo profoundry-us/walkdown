@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-09-21T06-36-55Z-local-01",
+  "created": "2026-09-21T06:36:55Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "71c8030-dirty",
+  "spec_hash": "sha256:2d4781078c6e",
+  "note": "A second look at threads.conversation.composer-stays after the fix for n-0332 (the reply box bound with lit live()), driven against the stamped scratch copy on 4730 as the 2026-09-21 sitting was.",
+  "results": [
+    {
+      "rule": "threads.conversation.composer-stays",
+      "status": "pass",
+      "statement_hash": "sha256:bce50665dcd2",
+      "threads": [
+        "n-0332"
+      ],
+      "evidence": [
+        "runs/evidence/2026-09-21T06-34-27Z/G-composer-clears.json",
+        "runs/evidence/2026-09-21T06-34-27Z/G-composer-clears-after-enter.png"
+      ],
+      "reasoning": "Driven again after the fix: a reply typed into the box and sent with Enter is on screen at once marked pending, settles within 600ms once the server holds it, and the box reads empty from 100ms after Enter on. A second Enter on the emptied box posts nothing - the thread held the same number of replies before and after. The box still sits at the foot of the thread and Shift-Enter still breaks the line; the composer asks for no name. The recorded check of the same name (2026-09-21T06-34-15Z) says the same from the checks tier."
+    }
+  ]
+}

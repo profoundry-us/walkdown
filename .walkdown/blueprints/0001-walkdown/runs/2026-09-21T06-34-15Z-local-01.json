@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-09-21T06-34-15Z-local-01",
+  "created": "2026-09-21T06:34:15Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "71c8030-dirty",
+  "tree_hash": "sha256:953232609ca5",
+  "spec_hash": "sha256:2d4781078c6e",
+  "results": [
+    {
+      "rule": "threads.conversation.composer-stays",
+      "status": "pass",
+      "statement_hash": "sha256:bce50665dcd2",
+      "duration_ms": 2834,
+      "checks": [
+        "checks/panel.spec.js:3669"
+      ]
+    }
+  ]
+}

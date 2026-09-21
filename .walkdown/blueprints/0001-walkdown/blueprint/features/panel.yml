@@ -955,12 +955,12 @@ stories:
             - Reading anchor `panel.counts` on screen `review`, then the marks in anchor `panel.rules-list`, then the Rules tab in anchor `panel.tabs`
           then:
             - Every number states its unit, so a reader can tell rules from pending actions
-            - The footer splits the owed work by kind - to sign and to walk - and each owed rule's badge says the same word
-            - The badges owed sum to the footer's counts, kind for kind
+            - The footer counts what waits on a signature - N sign - and the walk count lives on the rows and the Rules tab rather than in the footer, since the list already says which rule owes what (n-0309); every owed rule's badge names its kind - sign, walk, or fixed where a claimed fix is what waits
+            - The sign badges and the fixed badges on unbuilt rules sum to the footer's sign count, and every owed badge together to the Rules tab
             - The Rules tab carries how many rules a walkdown would take you through - the footer's two kinds together, counted the way the walkdown itself picks the next rule, so it empties as the sitting goes on
             - A tab holding nothing for you draws no badge at all, because a badge saying none is a claim on the eye about nothing
             - The Rules badge is the same warning colour the rule glyphs and their badges use, because it is the same claim they make - this is waiting on you - and it is the loudest thing in the strip, since walking the rules is the work the tool exists for. Other tabs count their own work in their own colour rather than a second yellow beside it
-          statement_hash: sha256:a9f041207429
+          statement_hash: sha256:015bea5b7206
           reworded:
             - hash: sha256:669dfeb91eee
               at: 2026-09-13
@@ -968,6 +968,9 @@ stories:
             - hash: sha256:c48d3e5f64b0
               at: 2026-09-14T02:38:10Z
               why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
+            - hash: sha256:a9f041207429
+              at: 2026-09-21T06:25:06Z
+              why: "2026-09-21 agent sitting: counts-legible's steps still named the footer's walk badge Topher removed under n-0309 - the rows and the Rules tab carry it now; excuse-must-argue's step called a not-a-tier excuse an error while the statement and lint both make it a warning. Same claims, words brought in line with what was decided."
 
       - id: panel.rules.lifecycle-legible
         origin: thread:n-0054

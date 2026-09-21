@@ -1,0 +1,1451 @@
+{
+  "run_id": "2026-09-21T06-30-50Z-local-01",
+  "created": "2026-09-21T06:30:50Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "71c8030-dirty",
+  "spec_hash": "sha256:5b0573fe2066",
+  "note": "The 2026-09-21 agent sitting under the sweep of 2026-09-21T05-16-03Z, after Topher's findings were fixed: 142 rules. Screen rules were driven against a stamped scratch copy served on 4730 (node tools/scratch.mjs new sitting-0921) so filing, verdicts and pins never touched this ledger; the real board on 4700 was read only. Headless rules were probed with the CLI and the API against throwaway homes. Evidence: this sitting's probes under runs/evidence/2026-09-21T05-18-16Z/ and the harness captures under 2026-09-21T05-33-54Z/ and 2026-09-21T05-37-40Z/.",
+  "results": [
+    {
+      "rule": "delivery.install.clone-is-the-install",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-sweep-attention-judge-hash-clone.txt"
+      ],
+      "reasoning": "A bare `git clone` with zero node_modules entries, imported into an empty home, ran where, lint (159 rules, 0 errors) and status, and served / , /panel.js, /embed.js and /api/blueprint on 4732 with 200s. No import in lib/ or bin/ leaves the tree except node:, and vendor/ carries lit, marked and yaml with their licences and a README naming the source (probe D7).",
+      "statement_hash": "sha256:7ca49cecc74b"
+    },
+    {
+      "rule": "embed.pin.anchored-target",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-37-40Z/embed-hover-anchored.json",
+        "runs/evidence/2026-09-21T05-37-40Z/embed-hover-anchored.png",
+        "runs/evidence/2026-09-21T05-37-40Z/embed-pin-filed-anchored.json"
+      ],
+      "reasoning": "In pin mode the anchored search box lights with a 2px outline and a crosshair on hover; the pin filed on panel.counts carries element, offset within it, the surface position, the viewport and the surface (harness embed-hover-anchored, embed-pin-filed-anchored).",
+      "statement_hash": "sha256:53f47b01acea"
+    },
+    {
+      "rule": "embed.pin.right-project",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-37-40Z/embed-pin-files-against-the-page-project.json",
+        "runs/evidence/2026-09-21T05-37-40Z/embed-pin-files-against-the-default.json"
+      ],
+      "reasoning": "A page declaring bp=example/blueprint files to /api/threads?bp=example%2Fblueprint, and a page declaring nothing files without a bp and lands in the server's default as the rule asks - the panel names the blueprint, the server never re-routes (harness embed-pin-files-against-*).",
+      "statement_hash": "sha256:292c89ee776a"
+    },
+    {
+      "rule": "embed.pin.both-surfaces",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-37-40Z/embed-pin-filed-on-the-prototype.json",
+        "runs/evidence/2026-09-21T05-37-40Z/embed-pin-filed-on-the-prototype.png"
+      ],
+      "reasoning": "With the ghost fully over the app the ghost is armed (wd-pinning) and the app is not, and the pin filed there records surface: prototype (harness embed-pin-filed-on-the-prototype).",
+      "statement_hash": "sha256:8dcf85fbee90"
+    },
+    {
+      "rule": "embed.pin.follows-the-visible-surface",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-37-40Z/embed-pin-filed-on-the-prototype.json",
+        "runs/evidence/2026-09-21T05-37-40Z/embed-pin-mid-fade-refused.json"
+      ],
+      "reasoning": "The surface in front takes the pin - the prototype when it fully covers the app - and mid-fade the pin button is disabled with \"Slide fully to the prototype or the app first\" (harness embed-pin-filed-on-the-prototype, embed-pin-mid-fade-refused).",
+      "statement_hash": "sha256:3bd7a904fa1b"
+    },
+    {
+      "rule": "embed.pin.own-skin",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-37-40Z/embed-pin-own-skin.json",
+        "runs/evidence/2026-09-21T05-37-40Z/embed-pin-own-skin.png"
+      ],
+      "reasoning": "The pin layer is a 0x0 shadow host with its own two sheets under data-theme blueprint; the only styles added to the host page are the .wd-hover and .wd-pinning cursor rules; the pin is walkdown's Phosphor marker with a kind disc (harness embed-pin-own-skin).",
+      "statement_hash": "sha256:7a85f116b73d"
+    },
+    {
+      "rule": "embed.pin.viewport-recorded",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-37-40Z/embed-pin-filed-at-mobile.json",
+        "runs/evidence/2026-09-21T05-37-40Z/embed-pin-filed-on-a-scaled-surface.json"
+      ],
+      "reasoning": "A pin at the 390 preset records viewport {name: mobile, width: 390} and one at 1440 records {desktop, 1440} (harness embed-pin-filed-at-mobile, embed-pin-filed-on-a-scaled-surface).",
+      "statement_hash": "sha256:85503fb1eb9b"
+    },
+    {
+      "rule": "embed.pin.settled-pins-leave",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-embed-settled-pins-leave.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-embed-settled-pins-leave-after-done.png"
+      ],
+      "reasoning": "Three pins stood on the review page (n-0097, n-0107, n-0308); Done on n-0097 from the panel verified it and the pin was gone from the app surface at once while the other two stayed at the same coordinates, and the thread stayed reachable in All (probe F embed-settled-pins-leave). The ghosted copy was not measured separately.",
+      "statement_hash": "sha256:79224f400eb4"
+    },
+    {
+      "rule": "embed.pin.tooltip-says-what-it-is",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-37-40Z/embed-pin-tooltip.json",
+        "runs/evidence/2026-09-21T05-37-40Z/embed-pin-tooltip.png"
+      ],
+      "reasoning": "Resting on a pin shows a daisy tooltip with the thread id, kind and status, then rule · screen · element, then the first line quoted, wholly on the surface with no title attribute (harness embed-pin-tooltip).",
+      "statement_hash": "sha256:9ed8ebb2af0a"
+    },
+    {
+      "rule": "embed.pin.form-at-the-spot",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-37-40Z/embed-form-below-the-spot.json",
+        "runs/evidence/2026-09-21T05-37-40Z/embed-form-above-near-the-bottom.json",
+        "runs/evidence/2026-09-21T05-37-40Z/embed-form-below-the-spot.png"
+      ],
+      "reasoning": "The form opens just below the spot (spot y 121, form top 139) and flips above it near the bottom (spot y 674, form top 464 with bottom 656 inside the 704 surface) (harness embed-form-below-the-spot, embed-form-above-near-the-bottom).",
+      "statement_hash": "sha256:f8bbc8411ce9"
+    },
+    {
+      "rule": "embed.pin.form-is-chrome",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-37-40Z/embed-form-is-chrome.json",
+        "runs/evidence/2026-09-21T05-37-40Z/embed-form-escape-takes-the-placeholder.json",
+        "runs/evidence/2026-09-21T05-37-40Z/embed-form-below-the-spot.json"
+      ],
+      "reasoning": "One form and one placeholder, the question tick turns the placeholder mark to ?, the controls wear pointer and text cursors, and Escape takes form and placeholder away while pin mode stays on (harness embed-form-*).",
+      "statement_hash": "sha256:5ad17108eb3c"
+    },
+    {
+      "rule": "embed.pin.surface-coordinates",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-37-40Z/embed-pin-filed-on-a-scaled-surface.json",
+        "runs/evidence/2026-09-21T05-37-40Z/embed-pin-spot-survives-zoom.json"
+      ],
+      "reasoning": "On a 1440 layout scaled to 0.597 the pin records surface coordinates (position 39,21 in a 1440x1179 viewport), and pins keep their surface spots across fit, 1440, fade and a resize (harness embed-pin-filed-on-a-scaled-surface, embed-pin-spot-survives-zoom).",
+      "statement_hash": "sha256:669bb14b197a"
+    },
+    {
+      "rule": "embed.pin.coordinate-fallback",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-37-40Z/embed-pin-filed-unanchored.json",
+        "runs/evidence/2026-09-21T05-37-40Z/embed-form-unanchored-spot.json",
+        "runs/evidence/2026-09-21T05-37-40Z/embed-form-unanchored-spot.png"
+      ],
+      "reasoning": "A pin on a spot with no anchored element records position and viewport only, the form says \"no anchored element here — pinned by position\", and the placeholder is a positioned pin (harness embed-pin-filed-unanchored, embed-form-unanchored-spot).",
+      "statement_hash": "sha256:bc91613d4b86"
+    },
+    {
+      "rule": "embed.threads.note-first",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-37-40Z/embed-thread-provenance.json",
+        "runs/evidence/2026-09-21T05-37-40Z/embed-thread-provenance.png",
+        "runs/evidence/2026-09-21T05-33-54Z/panel-thread-panel.png"
+      ],
+      "reasoning": "The thread screen leads with the body in 12.5px text with the provenance on one 11px line above it (lines: 1) and the where-line under it; a 4-reply history scrolls inside the body (scrollHeight 1635 in 405) rather than growing the screen (harness embed-thread-provenance).",
+      "statement_hash": "sha256:2d3685ac1da6"
+    },
+    {
+      "rule": "embed.threads.picture-on-a-pin",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-embed-picture-on-a-pin.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-embed-picture-on-a-pin-form-with-picture.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-embed-picture-on-a-pin-thread-with-picture.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-embed-picture-on-a-pin-full-size.png"
+      ],
+      "reasoning": "A PNG dropped on the pin form showed a thumbnail, the filed thread n-0340 carries attachments [{file: attachments/n-0340-1.png, name: probe-shot.png}], the thread screen shows it under the words at 133x80, and clicking opens it at 896x533 (probe F embed-picture-on-a-pin).",
+      "threads": [],
+      "statement_hash": "sha256:965adfb3696b"
+    },
+    {
+      "rule": "embed.threads.actions-in-context",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-37-40Z/embed-thread-waive-needs-a-reason.json",
+        "runs/evidence/2026-09-21T05-37-40Z/thread-terminal-verified.json",
+        "runs/evidence/2026-09-21T05-37-40Z/embed-thread-provenance.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-embed-settled-pins-leave.json"
+      ],
+      "reasoning": "The actions are short verbs on one row (Waive · Reopen · Done); Waive asks for its reason only when pressed (\"Waiving is recorded with a reason — write it above, then press again\"); a verified thread offers Reply alone; Done under the declared identity verified n-0097 and its pin left the page (harness embed-thread-*, thread-terminal-verified; probe F settled-pins-leave).",
+      "statement_hash": "sha256:6caaf490496b"
+    },
+    {
+      "rule": "locations.answer.says-why",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-locations.txt"
+      ],
+      "reasoning": "`walkdown where` names each location with the sentence that says why it is there - config yours and registering nothing, the registry naming the project and who registered it, the spec and runs under the home it registered (probe A, and C3 where a hand-written row is set aside with its reason).",
+      "statement_hash": "sha256:738bca8657bc"
+    },
+    {
+      "rule": "locations.answer.asking-writes-nothing",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-locations.txt"
+      ],
+      "reasoning": "Running `walkdown where` and `walkdown status` against a fresh home left the registry and the home byte-identical before and after (probe A: checksums unchanged, no new files).",
+      "statement_hash": "sha256:7d27e6b8d5a3"
+    },
+    {
+      "rule": "locations.answer.declared-not-discovered",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-locations.txt",
+        "runs/evidence/2026-09-21T05-18-16Z/probes-pointer-registry-lint-writes.txt"
+      ],
+      "reasoning": "A `.walkdown` folder nobody registered is not consulted: status in a directory with a stray .walkdown answers \"No blueprint here. Nothing registered in <registry> contains this directory\" (probe A), and a hand-written registry row without `registered:` is set aside by where and refused by status and thread new (probe C3).",
+      "statement_hash": "sha256:f1df66c74dac"
+    },
+    {
+      "rule": "locations.answer.registry-is-the-only-door",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-pointer-registry-lint-writes.txt",
+        "runs/evidence/2026-09-21T05-18-16Z/probes-registry-import-via-link.txt"
+      ],
+      "reasoning": "The hand-written row naming a symlink is set aside by `where` (\"written by hand\"), refused by status and thread new, and never served: a root server lists repo and pack only. Import through a symlink to the pack's home resolves to the real path and says it is already listed as `pack`, twice. Standing in the pack reaches the pack's row. The first attempt in probe C linked to the pack's .walkdown folder rather than its home and was rightly told nothing there declares a blueprint; the rerun is in probes-registry-import-via-link.txt.",
+      "statement_hash": "sha256:f6b76093bef6"
+    },
+    {
+      "rule": "locations.default.nothing-in-the-tree",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-locations.txt"
+      ],
+      "reasoning": "A plain `walkdown init` left the repository tree without a .walkdown folder; the home went under the machine's walkdown home and the registry named it (probe A).",
+      "statement_hash": "sha256:a2ac0f932c99"
+    },
+    {
+      "rule": "locations.default.records-follow-the-spec",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-locations.txt"
+      ],
+      "reasoning": "Threads, runs, evidence and drafts sit beside the spec under the home in every layout probed - default home, --commit spec and --commit all - and `where` reports them under the same home (probe A).",
+      "statement_hash": "sha256:bc12ec38993e"
+    },
+    {
+      "rule": "locations.default.in-repo-on-request",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-locations.txt"
+      ],
+      "reasoning": "`init --commit spec` put the home under the repository's .walkdown with a .gitignore keeping runs, evidence and drafts out; `--commit all` the same with no ignore; re-running with --commit moved the home whole and the registry followed (probe A).",
+      "statement_hash": "sha256:7310851da84e"
+    },
+    {
+      "rule": "locations.default.skills-are-yours-by-default",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-locations.txt"
+      ],
+      "reasoning": "`walkdown skills` wrote the skills under the user's own skills directory by default and into the project only with --project, saying where each went (probe A).",
+      "statement_hash": "sha256:a1c19031d710"
+    },
+    {
+      "rule": "locations.default.one-home-per-blueprint",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-locations.txt"
+      ],
+      "reasoning": "A second `init` in the same project refused to make a second home and pointed at the one already registered; a second blueprint got its own numbered home (probe A).",
+      "statement_hash": "sha256:43e88185b989"
+    },
+    {
+      "rule": "locations.keeping.moving-is-a-decision",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-locations.txt"
+      ],
+      "reasoning": "`walkdown move` relocated the home to the path asked for, rewrote the registry row, and nothing moved on its own: a stray copy of the home elsewhere in the tree was never adopted (probe A).",
+      "statement_hash": "sha256:1422c8dcbeae"
+    },
+    {
+      "rule": "locations.pointer.placed-where-agents-read",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-pointer-registry-lint-writes.txt"
+      ],
+      "reasoning": "On a repo with an AGENTS.md and no CLAUDE.md, init placed its block in AGENTS.md alone and created no CLAUDE.md; the block names where the blueprint is (probe C1).",
+      "statement_hash": "sha256:c74747fd201e"
+    },
+    {
+      "rule": "locations.pointer.owns-only-its-block",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-pointer-registry-lint-writes.txt"
+      ],
+      "reasoning": "A line of the person's own above the block and one below survived two more placings byte-identical (diff IDENTICAL, one walkdown:begin marker); after the spec moved (--commit none) the block was updated in place with the new path and the person's lines stayed (probe C2, C2b).",
+      "statement_hash": "sha256:48cecd33295b"
+    },
+    {
+      "rule": "locations.travel.evidence-by-key",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-sweep-attention-judge-hash-clone.txt",
+        "runs/evidence/2026-09-21T05-18-16Z/G-evidence-on-the-real-board-evidence-modal.png"
+      ],
+      "reasoning": "The judge prompt hands out a logical key `runs/evidence/<ts>/` and says which path this machine resolves it to, and tells the agent to cite the key never the path (probe D3); the evidence modal on the real board lists files by that key and resolves them to pictures and text (probe G).",
+      "statement_hash": "sha256:9a1654d1a68d"
+    },
+    {
+      "rule": "locations.travel.judged-against-a-spec",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-sweep-attention-judge-hash-clone.txt"
+      ],
+      "reasoning": "The spec hash was unchanged by a thread filed on a rule and moved by rewording one statement (sha256:1890b4c8c3b1 before and after the thread, sha256:415b1a885815 after the reword), and every run record this sitting carries spec_hash rather than a repository sha (probe D4).",
+      "statement_hash": "sha256:20d85cac1943"
+    },
+    {
+      "rule": "locations.travel.provenance-not-currency",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-locations.txt",
+        "runs/evidence/2026-09-21T05-18-16Z/probes-sweep-attention-judge-hash-clone.txt"
+      ],
+      "reasoning": "A run recorded on one machine reads on another without the record being edited: git_sha carries a -dirty suffix as provenance and spec_hash says what was judged, and the clone in probe D7 read the 515 inherited runs and reported them (probe A, D7).",
+      "statement_hash": "sha256:b1efe71a4d3b"
+    },
+    {
+      "rule": "ownership.authoring.steps-are-required",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-pointer-registry-lint-writes.txt"
+      ],
+      "reasoning": "Lint reports a rule with no steps as an error: \"rule has no steps — given/when/then is what a check gets built from, and a statement alone leaves it to be invented\" (probe C5).",
+      "statement_hash": "sha256:3227ee91ac45"
+    },
+    {
+      "rule": "ownership.authoring.statement-reads-at-a-glance",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-pointer-registry-lint-writes.txt"
+      ],
+      "reasoning": "A 58-word statement drew statement-reads-as-a-paragraph, statement-carries-why and the voice warning; a 39-word because drew because-carries-history (probe C5).",
+      "statement_hash": "sha256:97f1bacfb270"
+    },
+    {
+      "rule": "ownership.authoring.machine-words-pass-the-voice",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt"
+      ],
+      "reasoning": "An agent reply chaining three thoughts with dashes was refused by the voice gate, landed with --as-is, and the same words from a person landed unchallenged (probe B6).",
+      "statement_hash": "sha256:4c46fabe7d48"
+    },
+    {
+      "rule": "ownership.drift.design-requests-required",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-excuses-attention-design-requests.txt"
+      ],
+      "reasoning": "A screen with prototype: null drew the drift warning \"no design and no open design-request thread\"; filing a request thread on that screen cleared it; addressing it kept it clear; waiving it brought the warning back (probes D5 and E4).",
+      "statement_hash": "sha256:388852348271"
+    },
+    {
+      "rule": "ownership.writes.spec-never-implementation",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-pointer-registry-lint-writes.txt"
+      ],
+      "reasoning": "Every write the API offers - a thread, a reply, a status move, a draft, its discard and a finished walkdown - against the scratch server changed files only under threads/, drafts/ and runs/; nothing under the blueprint or the code moved, and all writes pass through lib/writes.js (probe C7).",
+      "statement_hash": "sha256:037b0d10dcea"
+    },
+    {
+      "rule": "panel.delivery.framed-isolation",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/H-probes.json",
+        "runs/evidence/2026-09-21T05-18-16Z/H-extension-connected.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-stale-and-isolation.json"
+      ],
+      "reasoning": "Through the extension page the app is an iframe of 860x704 inside a 1280x760 window, its document its own (cross-origin, unreadable from the host), and the panel lives in a shadow root beside it - a modal in the app can only cover that frame; navigating the frame moved the panel to the screen the app landed on (harness dock-list-follows-the-page, spa-pushstate-refollows). The header-stripping half needs Chrome's declarativeNetRequest and was not exercised here.",
+      "statement_hash": "sha256:3ae6e9260f6c"
+    },
+    {
+      "rule": "panel.delivery.stale-server-says-so",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-stale-and-isolation.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-stale-and-isolation-stale-server.png"
+      ],
+      "reasoning": "With the payload saying server.stale the bar shows \"Stale server — restart it\" with the fix named in its title, in the same badge style as the stale copy; with the real payload (stale: false, changed before booted) no badge shows. The server-side derivation was not made stale here; the panel's half was (probe F stale-and-isolation).",
+      "statement_hash": "sha256:930942690e23"
+    },
+    {
+      "rule": "panel.delivery.stale-copy-says-so",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-37-40Z/delivery-stale-copy-banner.json",
+        "runs/evidence/2026-09-21T05-37-40Z/delivery-stale-copy-banner.png"
+      ],
+      "reasoning": "A build hash of deadbeef0000 against the served panelHash draws \"Stale — reload the extension\" in the bar and the blueprint name gives way rather than the badge (harness delivery-stale-copy-banner).",
+      "statement_hash": "sha256:5ba123b01d1c"
+    },
+    {
+      "rule": "panel.delivery.anchors-still-required",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-37-40Z/embed-pin-filed-unanchored.json",
+        "runs/evidence/2026-09-21T05-37-40Z/embed-pin-filed-anchored.json"
+      ],
+      "reasoning": "A pin with no anchored element under it is recorded by position and drawn as a positioned pin, while a pin on an anchored element keeps its element and offset (harness embed-pin-filed-unanchored, embed-pin-filed-anchored).",
+      "statement_hash": "sha256:fe71b784e96e"
+    },
+    {
+      "rule": "panel.desk.reads-as-paper",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-33-54Z/panel-review.png",
+        "runs/evidence/2026-09-21T05-33-54Z/proto-review.png"
+      ],
+      "reasoning": "Under the page the desk is faintly ruled and lies at an angle in perspective, lines converging rather than a flat skew (harness panel-review against proto-review).",
+      "statement_hash": "sha256:23b43c1536ff"
+    },
+    {
+      "rule": "panel.desk.tuner",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-33-54Z/desk-tuner-typed.json",
+        "runs/evidence/2026-09-21T05-33-54Z/desk-tuner-typed.png"
+      ],
+      "reasoning": "Clicking a dial's number turns it into a number input; typing 24 and Enter sets the cell to 24px and the slider to 24 and leaves editing (harness desk-tuner-typed).",
+      "statement_hash": "sha256:e54d1b750069"
+    },
+    {
+      "rule": "panel.desk.peek",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-33-54Z/desk-peek-on.json",
+        "runs/evidence/2026-09-21T05-33-54Z/desk-peek-on.png"
+      ],
+      "reasoning": "\"Hide app temporarily\" drops the app and the sidebar to opacity 0.1 while the bar stays at 1 (harness desk-peek-on).",
+      "statement_hash": "sha256:194a40e90c69"
+    },
+    {
+      "rule": "panel.dock.toolbar",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-33-54Z/panel-screens-list.png",
+        "runs/evidence/2026-09-21T05-33-54Z/dock-screen-picked-by-hand.json",
+        "runs/evidence/2026-09-21T05-33-54Z/dock-list-follows-the-page.json",
+        "runs/evidence/2026-09-21T05-33-54Z/panel-put-away.png",
+        "runs/evidence/2026-09-21T05-18-16Z/K-two-claimants.json"
+      ],
+      "reasoning": "The bar holds project, screen, surface and pin mode; the screen picker opens over the design listing every screen with its id and Detect from the page; a hand pick stays picked and outlined after the frame lands; in Detect the label follows the page; put away, the badge crosses design and build (harness dock-*, panel-put-away).",
+      "statement_hash": "sha256:4725cfa2fe18"
+    },
+    {
+      "rule": "panel.dock.surface-swap-is-instant",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-37-40Z/dock-surface-swap-keeps-the-ghost.json"
+      ],
+      "reasoning": "Swapping to the prototype and back keeps the same ghost frame with no reload (noReload marker set on the first look survives) (harness dock-surface-swap-keeps-the-ghost).",
+      "statement_hash": "sha256:e13f6a1e1d6c"
+    },
+    {
+      "rule": "panel.dock.controls-survive-use",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-33-54Z/dock-fade-drag-midway.json",
+        "runs/evidence/2026-09-21T05-33-54Z/dock-fade-drag-settled.json",
+        "runs/evidence/2026-09-21T05-33-54Z/dock-fade-drag-midway.png"
+      ],
+      "reasoning": "Dragging the fade handle: part way the fade reads 50 with the ghost at opacity .5 while still held, and what it settled on is what the bar shows (harness dock-fade-drag-midway, dock-fade-drag-settled).",
+      "statement_hash": "sha256:065ce87e41c5"
+    },
+    {
+      "rule": "panel.dock.one-pin-mode",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-37-40Z/dock-escape-leaves-pin-mode.json",
+        "runs/evidence/2026-09-21T05-33-54Z/dock-chrome-gear-in-pin-mode.json",
+        "runs/evidence/2026-09-21T05-37-40Z/embed-hover-anchored.json"
+      ],
+      "reasoning": "Pin mode from the bar lights the button (btn-warning) and arms the page (wd-pinning, crosshair); Escape unlights it and disarms the page (harness dock-escape-leaves-pin-mode, dock-chrome-gear-in-pin-mode).",
+      "statement_hash": "sha256:d3ba0fc1202c"
+    },
+    {
+      "rule": "panel.dock.no-pin-mid-fade",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-37-40Z/embed-pin-mid-fade-refused.json",
+        "runs/evidence/2026-09-21T05-37-40Z/embed-pin-mid-fade-refused.png"
+      ],
+      "reasoning": "At fade 50 the Pin mode button is disabled and its title says \"Slide fully to the prototype or the app first — half-faded, a pin has no surface to belong to\"; neither surface is armed (harness embed-pin-mid-fade-refused).",
+      "statement_hash": "sha256:014e0ac5f915"
+    },
+    {
+      "rule": "panel.dock.own-skin",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-33-54Z/panel-review.png",
+        "runs/evidence/2026-09-21T05-33-54Z/proto-review.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting-finished.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-detail-anatomy.json"
+      ],
+      "reasoning": "The chrome is drafting blue with pale ink beside a cream as-built page and a white wireframe prototype; the copied-id toast sits inside the app frame at its bottom right (toast 591..860 x 689..736 within the frame 12..872 x 44..748) and the Finish toast likewise (probe F detail-anatomy copy, F-sitting-finished).",
+      "statement_hash": "sha256:4e48a84dd51a"
+    },
+    {
+      "rule": "panel.dock.chrome-not-a-pin-target",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-33-54Z/dock-chrome-gear-in-pin-mode.json",
+        "runs/evidence/2026-09-21T05-37-40Z/dock-escape-leaves-pin-mode.json"
+      ],
+      "reasoning": "With pin mode on, the gear opened the tuner rather than filing a pin (tuner true, formsInTheApp 0, placeholders 0), and Escape left pin mode (harness dock-chrome-gear-in-pin-mode).",
+      "statement_hash": "sha256:081fc3d92080"
+    },
+    {
+      "rule": "panel.identity.default-actor",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-attribution-and-zone.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-attribution-and-zone-settings.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting.json"
+      ],
+      "reasoning": "The strip shows the full name with the username a hover away (\"Recorded under the username scratch-sitting-0921 — change the name in Settings\"); Settings shows the username as an uneditable span, says it was set in config.yml, and the full name in an input; no action asked for either (probe F attribution, F sitting).",
+      "statement_hash": "sha256:3645bdcb734b"
+    },
+    {
+      "rule": "panel.identity.attribution-visible",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting-who-signs.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-attribution-and-zone.json"
+      ],
+      "reasoning": "Who is signing is shown before the sitting starts (the signing dialog names the username per role), the strip carries the name for the whole sitting, and neither the rule's composer nor a thread's foot carries an \"as <name>\" link (verdictRowLinks 0; under the box only the closed line and Reply) (probe F).",
+      "statement_hash": "sha256:f216e47c65c7"
+    },
+    {
+      "rule": "panel.rules.detail-slide",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-detail-anatomy.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-detail-anatomy-anatomy.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-threads-thread-screen.png"
+      ],
+      "reasoning": "Opening a rule slides the detail in and the list out (list x 503 against the sidebar at 895: off the pane); \"← All rules\" brings it back; the tabs are 109/117/128 wide and centred with an icon each; the id is a pointer-cursor button that copies and toasts \"Copied panel.rules.detail-slide\" (probe F detail-anatomy).",
+      "statement_hash": "sha256:bd567f0289e2"
+    },
+    {
+      "rule": "panel.rules.takes-you-there",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-takes-you-there.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-takes-you-there-moved.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-takes-you-there-picked-on-design.png",
+        "runs/evidence/2026-09-21T05-18-16Z/G-ghost-on-pick.json"
+      ],
+      "reasoning": "Opening a rule-detail rule moved the frame from review to rule-detail and the picker reported it, with a loading veil in between; opening another rule on the same screen did not reload the frame; picking thread-panel while on the design showed the design of it (probes F takes-you-there, G ghost-on-pick).",
+      "statement_hash": "sha256:9e04008bfcdf"
+    },
+    {
+      "rule": "panel.rules.one-pane-per-tab",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-detail-anatomy.json"
+      ],
+      "reasoning": "With a rule open, the Blueprints tab shows its own list and the detail is off screen; back on Rules the list shows with the rule openable again (probe F detail-anatomy: blueprints tab / back to rules).",
+      "statement_hash": "sha256:0442854e332b"
+    },
+    {
+      "rule": "panel.rules.step-between",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-33-54Z/rules-stepper-at-the-start.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-detail-anatomy.json"
+      ],
+      "reasoning": "From the first rule the previous control is disabled with \"No previous rule\" and next says \"Next rule: right-project\" and opens it; stepping from detail-slide opened takes-you-there and the frame followed to its screen (harness rules-stepper-at-the-start, probe F detail-anatomy stepped).",
+      "statement_hash": "sha256:b43e16d7e113"
+    },
+    {
+      "rule": "panel.rules.steps-not-an-appendix",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-33-54Z/rules-steps-and-shut-disclosure.png",
+        "runs/evidence/2026-09-21T05-18-16Z/G-evidence-on-the-real-board.json",
+        "runs/evidence/2026-09-21T05-18-16Z/G-evidence-on-the-real-board-check-source.png"
+      ],
+      "reasoning": "Given, when and then are read outright under STEPS; the check source waits behind \"Check source · checks/panel.spec.js:3567 ↗\" and opens as a modal with a GitHub link (harness rules-steps-and-shut-disclosure, probe G).",
+      "statement_hash": "sha256:64152f558d3f"
+    },
+    {
+      "rule": "panel.rules.claim-then-reason",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-33-54Z/panel-rule-detail.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-signoff-approve-refine.png"
+      ],
+      "reasoning": "The detail leads with the statement in large type, BECAUSE beneath it in smaller text, then SCREEN and STEPS (harness panel-rule-detail, probe F signoff screenshot).",
+      "statement_hash": "sha256:0736d9aa5027"
+    },
+    {
+      "rule": "panel.rules.setup-says-how-to-arrive",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-33-54Z/rules-setup-block.png",
+        "runs/evidence/2026-09-21T05-33-54Z/panel-screens-list.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-detail-anatomy.json"
+      ],
+      "reasoning": "A screen that is a state carries its \"(state — open a rule on the Rules tab)\" in the storyboard title and the detail names it in those words; the picker lists it the same way (harness rules-setup-block, probe F screen sections).",
+      "statement_hash": "sha256:ab0ab2469263"
+    },
+    {
+      "rule": "panel.rules.evidence-visible",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/G-evidence-on-the-real-board.json",
+        "runs/evidence/2026-09-21T05-18-16Z/G-evidence-on-the-real-board-evidence-block.png",
+        "runs/evidence/2026-09-21T05-18-16Z/G-evidence-on-the-real-board-evidence-modal.png",
+        "runs/evidence/2026-09-21T05-18-16Z/G-evidence-on-the-real-board-check-source.png"
+      ],
+      "reasoning": "On the real board detail-slide's EVIDENCE names checks/local (pass · topher · 59m ago) and agent (stale · 4h ago) with \"Evidence — open 3\"; the modal shows two pictures and probes.txt as readable text, captioned by logical key, and Escape closes it; Check source opens the modal with a GitHub link opening in a new tab (probe G, read-only on 4700).",
+      "statement_hash": "sha256:79686951989e"
+    },
+    {
+      "rule": "panel.rules.counts-legible",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting-strip.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-detail-anatomy.json"
+      ],
+      "reasoning": "Every number carries its unit and a tooltip saying what it counts (\"0/146 verified\", \"+0/145 judged by you\", \"71 sign\"); the Rules tab reads 145 = 68 sign + 6 fixed + 71 walk badges, and the footer's 71 sign = the 71 unbuilt owed rules (68 wearing sign, 3 wearing fixed). The then-step still described a footer walk badge Topher had removed under n-0309; it was brought in line this sitting and re-stamped as a rewording.",
+      "statement_hash": "sha256:015bea5b7206"
+    },
+    {
+      "rule": "panel.rules.lifecycle-legible",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-detail-anatomy.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-detail-anatomy-tiers-tip.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting-list-after-fail.png"
+      ],
+      "reasoning": "Every row draws the tiers strip in the same positions, unbuilt rules read \"nothing to judge yet — the rule is not built\", the approved rule is legible from its signature mark alone, owed rows are warning-tinted with a badge naming sign or walk, and each row's title spells the state (\"approved — spec signed off, awaiting build\", \"failing — the build was rejected\") (probe F detail-anatomy row tooltips).",
+      "statement_hash": "sha256:412ddd1f59a6"
+    },
+    {
+      "rule": "panel.rules.search-the-list",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-33-54Z/rules-search-filtered.png",
+        "runs/evidence/2026-09-21T05-33-54Z/rules-search-by-group.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-detail-anatomy.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-detail-anatomy-search.png"
+      ],
+      "reasoning": "Typing \"slide\" leaves 3 rows and \"ghost\" two under their screen and story headers; the box sits at the head of the list above the scrolling rows (harness rules-search-*, probe F search).",
+      "statement_hash": "sha256:045a4998ef7a"
+    },
+    {
+      "rule": "panel.rules.tiers-at-a-glance",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-33-54Z/panel-review.png",
+        "runs/evidence/2026-09-21T05-37-40Z/rules-legend-open.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-detail-anatomy.json"
+      ],
+      "reasoning": "Each row shows two tier marks, checks then agent, and a dot per signing role; passed is a green check, blocked ⊘, never-run a hollow circle, stale ~; the tooltip on the strip names every mark (harness panel-review, rules-legend-open; probe F row tooltips).",
+      "statement_hash": "sha256:363df4d92820"
+    },
+    {
+      "rule": "panel.rules.grouped-by-screen",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-33-54Z/panel-review.png",
+        "runs/evidence/2026-09-21T05-33-54Z/rules-search-filtered.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting-finished.png"
+      ],
+      "reasoning": "The list is headed by screen in storyboard order (The review page first, Rule detail, The thread screen, Settings) with story groups under each and \"No screen — judged without looking\" last (harness panel-review, probe F sitting-finished screenshot).",
+      "statement_hash": "sha256:1634141c7864"
+    },
+    {
+      "rule": "panel.rules.headless-says-so",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-33-54Z/rules-headless-cover.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-detail-anatomy.json"
+      ],
+      "reasoning": "A headless rule covers the desk once with \"No screen belongs to this rule — judged by its checks and recorded behavior\" and the detail's SCREEN section says the same in words (harness rules-headless-cover, probe F screen sections).",
+      "statement_hash": "sha256:4f4c746e2d71"
+    },
+    {
+      "rule": "panel.rules.legend-on-demand",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-37-40Z/rules-legend-open.json",
+        "runs/evidence/2026-09-21T05-37-40Z/rules-legend-open.png"
+      ],
+      "reasoning": "The legend is behind a footer button and opens as a tooltip listing evidence marks, signature slots, the warning colour and the four badges, every mark clear of its words (harness rules-legend-open).",
+      "statement_hash": "sha256:3a489f113413"
+    },
+    {
+      "rule": "panel.rules.owed-apart-from-said",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting-who-signs.png"
+      ],
+      "reasoning": "The work badge column sits at x 1175 on every owed row and the thread count (1⚑) in its own column in plain ink beside it; rows with only one leave the other empty (probe F badges sample, F-sitting-who-signs shows SIGN and 1⚑ apart).",
+      "statement_hash": "sha256:1e4e613bdbb9"
+    },
+    {
+      "rule": "panel.rules.marks-carry-over",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/G-chosen-verdict.json",
+        "runs/evidence/2026-09-21T05-18-16Z/G-chosen-verdict-revisited.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting.json"
+      ],
+      "reasoning": "The detail heads with the same panel.rule-tiers strip the row drew (data-tiers \"checks:pass agent:never\" on both) - one drawing, same order (probe G chosen-verdict, F sitting reopened).",
+      "statement_hash": "sha256:c2c7866804a9"
+    },
+    {
+      "rule": "panel.rules.names-its-screen",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-detail-anatomy.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-detail-anatomy-flow.png"
+      ],
+      "reasoning": "A single screen is named by title with its id (Rule detail … rule-detail); a flow is drawn as the chain \"The review page review, Rule detail … rule-detail\" ending where it is judged; a headless rule says \"No screen — this rule is judged without one\" (probe F screen sections).",
+      "statement_hash": "sha256:2021f5d5e207"
+    },
+    {
+      "rule": "panel.rules.talk-without-a-sitting",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-threads.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-threads-talked.png"
+      ],
+      "reasoning": "With no sitting running the rule's composer and Reply are offered; the words landed as a reply on the live note n-0331 under scratch-sitting-0921 and appeared in the stream without a reload; no draft or sitting began (probe F talk without sitting).",
+      "statement_hash": "sha256:1ec250ee0904"
+    },
+    {
+      "rule": "panel.rules.one-conversation",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-threads.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-threads-rule-conversation.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-threads-history.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-threads-question-open.png"
+      ],
+      "reasoning": "CONVERSATION · 5 threads shows the last thing said tagged ↳ n-0331 with History · 14 → opening every message oldest first, each opening message tagged with thread, kind and status; the tag opens the thread screen where a question carries its choices and Answer; the turn line says whose move; one box and one row with Waive far left (probe F threads).",
+      "statement_hash": "sha256:72d801697bb2"
+    },
+    {
+      "rule": "panel.signoff.spec-pair-derived",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-signoff.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-signoff-approve-refine.png"
+      ],
+      "reasoning": "An unbuilt rule offers Refine and Approve with \"No build yet: Approve signs the wording\"; a built one offers Fail and Pass; approving embed.pin.right-project left it unbuilt with Approve/Refine rather than flipping to Pass/Fail (probe F signoff).",
+      "statement_hash": "sha256:f5c753ec1d9b"
+    },
+    {
+      "rule": "panel.signoff.refine-requires-feedback",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-signoff.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-signoff-refined.png"
+      ],
+      "reasoning": "Refine with the box empty was refused (\"Refine is the feedback — write what should change first\") and nothing was drafted; with feedback it filed n-0336, drafted refining and stayed on the rule (probe F signoff).",
+      "statement_hash": "sha256:536c173387c1"
+    },
+    {
+      "rule": "panel.signoff.approved-recorded",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-signoff.json"
+      ],
+      "reasoning": "Finishing recorded an approved result with statementHash sha256:292c89ee776a; the row still reads built: false with an approved eng slot and no signature; approving moved the session on to embed.pin.both-surfaces (probe F signoff).",
+      "statement_hash": "sha256:95480ac5b8ed"
+    },
+    {
+      "rule": "panel.start.open-a-folder",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/H-probes.json",
+        "runs/evidence/2026-09-21T05-18-16Z/H-extension-gate.png",
+        "runs/evidence/2026-09-21T05-18-16Z/H-extension-connected.png"
+      ],
+      "reasoning": "The extension page told to use a dead server shows \"No blueprints open\" with the walkdown serve command and a box labelled Server; typing 4730 and Connect brings the bar naming project sitting-0921 and blueprint walkdown (probe H). walkdown's own root page with its config forced to a dead server drew nothing, but that page is served by the very server it would be told is dead.",
+      "statement_hash": "sha256:5ace895ac628"
+    },
+    {
+      "rule": "panel.start.choose-a-blueprint",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/K-two-claimants.json",
+        "runs/evidence/2026-09-21T05-18-16Z/K-two-claimants.png",
+        "runs/evidence/2026-09-21T05-18-16Z/K-picked-pack.png"
+      ],
+      "reasoning": "With two blueprints claiming the review page the modal says \"2 blueprints claim this page, in more than one project\", names both with \"claims this page\", opens no board behind it; picking pack lands on it with bp= in the address; the next visit asks again and nothing is in storage (probe K).",
+      "statement_hash": "sha256:f89c8ffc710e"
+    },
+    {
+      "rule": "panel.start.which-project",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-37-40Z/start-choose-blueprint.json",
+        "runs/evidence/2026-09-21T05-37-40Z/start-choose-blueprint.png",
+        "runs/evidence/2026-09-21T05-33-54Z/panel-review.png",
+        "runs/evidence/2026-09-21T05-18-16Z/K-two-claimants.json"
+      ],
+      "reasoning": "A page nobody claims asks \"Which project?\" over the desk alone, names the address, offers walkdown claims and init, and lists projects; a page one blueprint claims opens unasked; two claimants ask (harness start-choose-blueprint, probe K).",
+      "statement_hash": "sha256:8927716089a7"
+    },
+    {
+      "rule": "panel.start.address-opens-what-it-names",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-address.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-address-thread-address.png"
+      ],
+      "reasoning": "?rule= opened the rule's detail, ?thread=n-0331 opened the thread over its rule with Back reading \"← draft-on-disk\", ?rule=no.such.rule toasted \"No rule no.such.rule here.\", and Back after arrival dropped ?rule= (probe F address).",
+      "statement_hash": "sha256:682e1f446062"
+    },
+    {
+      "rule": "panel.start.address-keeps-the-pick",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-address.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-address-kept.png"
+      ],
+      "reasoning": "The address carries bp=, the framed page after # and ?rule= from the moment each happens; a reload came back to the rule on rule-detail with no chooser; only the seen marks are in storage; a bp the server does not have is dropped and the chooser asks (probe F address).",
+      "statement_hash": "sha256:f81b1c70e65f"
+    },
+    {
+      "rule": "panel.threads.reply-in-place",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-threads.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-threads-reply-landed.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-threads-thread-screen.png"
+      ],
+      "reasoning": "A thread opened from the rule shows its replies oldest first with author and age; a typed reply posted and appeared without a reload; an ended thread offers Reply alone and an addressed one Waive/Reopen/Done (probe F threads).",
+      "statement_hash": "sha256:24dc190cf4f7"
+    },
+    {
+      "rule": "panel.threads.claim-never-accept",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-claim-never-accept.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-claim-never-accept-refused.png"
+      ],
+      "reasoning": "With the identity undeclared, Done was refused with \"Verify and waive are recorded under a person's name, and this machine only has a guess (scratch-sitting-0921). Say who you are in …config.yml\", Settings opened, and the thread stayed addressed (probe F claim-never-accept).",
+      "statement_hash": "sha256:bed712993db3"
+    },
+    {
+      "rule": "panel.threads.show-the-sketch",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/J-sketch.json",
+        "runs/evidence/2026-09-21T05-18-16Z/J-sketch-thread.png",
+        "runs/evidence/2026-09-21T05-18-16Z/J-sketch-viewing.png"
+      ],
+      "reasoning": "A thread on a screen with only a proposal offers \"⚠ View the proposed sketch\"; pressing it ghosts the proposal over the app with \"Proposed sketch — not from design\" across its top, the screen picker still reads The review page and still opens, and switching to App ends it; a screen with a prototype still ghosts the prototype (probe J).",
+      "statement_hash": "sha256:7763b1dccd96"
+    },
+    {
+      "rule": "panel.threads.own-view",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-37-40Z/threads-filter-all.json",
+        "runs/evidence/2026-09-21T05-37-40Z/threads-filter-all.png",
+        "runs/evidence/2026-09-21T05-33-54Z/panel-tab-threads.png",
+        "runs/evidence/2026-09-21T05-18-16Z/I-threads-list-card.png"
+      ],
+      "reasoning": "The Threads tab has Awaiting you / Active / All; every card names its anchor (a rule, or \"not attached to a rule\"); a live note on a walkable rule is under All only; All reaches verified and incorporated threads; opening one shows it beside the list with \"← All threads\" as the way back (harness threads-filter-all, panel-tab-threads).",
+      "statement_hash": "sha256:c7308a0fa227"
+    },
+    {
+      "rule": "panel.viewport.device-presets",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-33-54Z/vp-mobile-390-ghost.json",
+        "runs/evidence/2026-09-21T05-33-54Z/vp-mobile-390-ghost.png",
+        "runs/evidence/2026-09-21T05-33-54Z/vp-desktop-1440.json"
+      ],
+      "reasoning": "The toggle is three icon buttons; mobile lays the frame out at 390 and the ghost at 390 in the same box; 1440 lays out at 1440 (harness vp-mobile-390-ghost, vp-desktop-1440).",
+      "statement_hash": "sha256:96ca21b6396f"
+    },
+    {
+      "rule": "panel.viewport.zoom-to-fit",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-33-54Z/vp-desktop-1440.json",
+        "runs/evidence/2026-09-21T05-33-54Z/vp-desktop-1440.png"
+      ],
+      "reasoning": "At 1440 in an 860 frame the app is laid out at 1440 and scaled 0.597 whole, and the bar shows \"1440px · fit 60%\" (harness vp-desktop-1440).",
+      "statement_hash": "sha256:c6d295a4d13e"
+    },
+    {
+      "rule": "panel.walkdown.records-to-ledger",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting-finished.png"
+      ],
+      "reasoning": "Finish appended run 2026-09-21T06-02-02Z-local-01 under actor scratch-sitting-0921 with the fail, the pass and the skip, and the toast said so; a sitting ended with nothing judged left the runs folder at 526 (probe F sitting ledger and discard).",
+      "statement_hash": "sha256:c38684308429"
+    },
+    {
+      "rule": "panel.walkdown.who-signs-is-declared",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting-who-signs.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting-strip.png"
+      ],
+      "reasoning": "Starting asks \"Who is signing this walkdown?\" with eng ticked as the config declares and product/design unticked, each with a name box, and says it is filled from config.yml; the strip then reads \"Recording as A scratch sitting (sitting-0921) eng\" for the sitting (probe F sitting).",
+      "statement_hash": "sha256:51cedbcf1de4"
+    },
+    {
+      "rule": "panel.walkdown.one-control-owns-the-sitting",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting-strip.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting-verdict-pair.png"
+      ],
+      "reasoning": "Start walkdown becomes Finish walkdown; Skip and Continue sit in the strip and +N/145 in the footer; on an owed unjudged rule Continue is disabled with \"This rule owes you a verdict — pass, fail or skip it to carry on\" and stays put; from a judged rule it opened the next owed one; Skip moved on and counted (probe F sitting).",
+      "statement_hash": "sha256:3c61387a8bd2"
+    },
+    {
+      "rule": "panel.walkdown.session-survives-reload",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting.json"
+      ],
+      "reasoning": "After a fail the page was reloaded and the strip, the actor and +1/145 came back with the draft still holding the verdict; Finish then recorded once and cleared the draft (probe F sitting after reload / ledger).",
+      "statement_hash": "sha256:5cd0d76da115"
+    },
+    {
+      "rule": "panel.walkdown.draft-on-disk",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting.json"
+      ],
+      "reasoning": "A refused fail wrote no draft; the fail with a why was on the server at once as a draft with verdicts and no run_id; it survived the reload and was gone after Finish (probe F sitting).",
+      "statement_hash": "sha256:8517d3ecb2c9"
+    },
+    {
+      "rule": "panel.walkdown.verdicts-at-hand",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting.json",
+        "runs/evidence/2026-09-21T05-18-16Z/G-chosen-verdict.json",
+        "runs/evidence/2026-09-21T05-18-16Z/G-chosen-verdict-revisited.png"
+      ],
+      "reasoning": "The row reads Waive · Reply · ✗ Fail · ✓ Pass with Waive at x 899 and Pass last; the feedback box is the only thing between the stream and the row (stream y 1083, box 1228, row 1312); a passed rule revisited shows Pass filled (btn-success) and Fail outlined (probes F sitting geometry, G chosen-verdict).",
+      "statement_hash": "sha256:2bf91b66cee0"
+    },
+    {
+      "rule": "panel.walkdown.pass-advances",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting-pass-advanced.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting-failed.png"
+      ],
+      "reasoning": "The pass on picture-on-a-pin opened actions-in-context and the count rose to +2; the fail kept clone-is-the-install open with pin mode still off; Continue sits beside the tally for carrying on from a rule you stayed on (probe F sitting).",
+      "statement_hash": "sha256:7cb7c371065f"
+    },
+    {
+      "rule": "panel.walkdown.pass-verifies-feedback",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting-pass-ends-conversation.png"
+      ],
+      "reasoning": "The turn line said \"Pass ends this conversation (2 notes)\" before the press; after Finish n-0339 (and n-0328) read verified with a via: verdict reply naming the run and verified_by the signer, and the toast listed both (probe F sitting).",
+      "statement_hash": "sha256:b8cae5781199"
+    },
+    {
+      "rule": "panel.walkdown.note-with-any-verdict",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting-failed.png"
+      ],
+      "reasoning": "The fail's why was filed as n-0338 on the rule under the actor at once; the pass with words landed as a reply on the live note; the earlier empty-box refusal filed nothing; the box sits above the row (probe F sitting).",
+      "statement_hash": "sha256:7d8fa9eecfc8"
+    },
+    {
+      "rule": "panel.walkdown.fail-requires-why",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting-fail-refused.png"
+      ],
+      "reasoning": "Fail with an empty box was refused with \"A fail needs a why — write it in the box, or turn on Pin mode and drop it on the page\", nothing drafted and pin mode untouched; with a why it recorded (probe F sitting).",
+      "statement_hash": "sha256:9d81f874218f"
+    },
+    {
+      "rule": "screens.anchors.renames-are-recorded",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-renames.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-renames-renamed.png"
+      ],
+      "reasoning": "A thread filed under detail.screenshots-modal shows that spelling with a \"renamed\" mark; resting on it shows \"detail.screenshots-modal → detail.evidence-modal\" at opacity 1 inside the pane (tip 899..1219 within 885..1267); the file still says element: detail.screenshots-modal (probe F renames).",
+      "statement_hash": "sha256:a0495cc39a56"
+    },
+    {
+      "rule": "screens.identity.fragment-is-identity",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-locations.txt"
+      ],
+      "reasoning": "A storyboard with a page and a fragment state of it: the bare path resolves to the page and the path with the fragment to the state; a different fragment is a different screen; an unlisted fragment falls to the page (probe A screen-match section).",
+      "statement_hash": "sha256:9484646bb993"
+    },
+    {
+      "rule": "screens.identity.query-is-not-identity",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-locations.txt"
+      ],
+      "reasoning": "A query string is dropped before matching: the same path with ?x=1 resolves to the same screen (probe A).",
+      "statement_hash": "sha256:56d83a30a6b1"
+    },
+    {
+      "rule": "screens.identity.follows-navigation",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-33-54Z/dock-list-follows-the-page.json",
+        "runs/evidence/2026-09-21T05-33-54Z/spa-pushstate-refollows.json"
+      ],
+      "reasoning": "Navigating the frame to rule-detail moved the picker to it; a pushState inside the app re-followed without a reload and Back followed again (harness dock-list-follows-the-page, spa-pushstate-refollows).",
+      "statement_hash": "sha256:5b51c16f7b2b"
+    },
+    {
+      "rule": "screens.ownership.routes-by-page",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-37-40Z/start-choose-blueprint.json",
+        "runs/evidence/2026-09-21T05-33-54Z/dock-list-follows-the-page.json",
+        "runs/evidence/2026-09-21T05-37-40Z/embed-pin-files-against-the-page-project.json",
+        "runs/evidence/2026-09-21T05-18-16Z/K-two-claimants.json"
+      ],
+      "reasoning": "An unclaimed address is asked about rather than guessed, one claimant opens unasked, two claimants are named in no order and asked, and a caller naming bp= is never overridden (harness start-choose-blueprint, probe K, embed-pin-files-against-the-page-project).",
+      "statement_hash": "sha256:015ebac2b063"
+    },
+    {
+      "rule": "screens.surfaces.as-built-drawing",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-as-built.txt"
+      ],
+      "reasoning": "/as-built/review.html is served byte-identical to the file on disk, a page the folder lacks is 404, and both a ../ and a %2e%2e climb above the folder are 404; the storyboard names the page as an app path and the panel frames it (probes-as-built.txt).",
+      "statement_hash": "sha256:21a9564025dc"
+    },
+    {
+      "rule": "screens.surfaces.stand-in-app",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-33-54Z/panel-review.png",
+        "runs/evidence/2026-09-21T05-37-40Z/embed-pin-filed-anchored.json"
+      ],
+      "reasoning": "The stand-in shows the design in the redline theme with a marked dashed edge and the corner label \"AS-BUILT — A DRAWING OF THE BUILD\"; fade, ghost and pin mode work on it and a pin on panel.counts lands on the same anchor and is recorded against the app surface (harness panel-review, embed-pin-filed-anchored).",
+      "statement_hash": "sha256:1d809c5c6f9f"
+    },
+    {
+      "rule": "status.acceptance.signoff-defaults-to-eng",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-pointer-registry-lint-writes.txt"
+      ],
+      "reasoning": "A rule with signoff: [product] warns that it omits eng and the report signs for eng anyway; an empty signoff warns and reads as [eng]; status prints \"signed by eng\" for a rule that said nothing (probes C5, C6).",
+      "statement_hash": "sha256:8dd40d6249dc"
+    },
+    {
+      "rule": "status.acceptance.role-comes-from-the-run",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt"
+      ],
+      "reasoning": "The POSTed walkdown carried signatures for eng and product and the acceptance cells read \"signed by probe-driver, recorded by scratch-sitting-0921\" per role, from the run rather than from config (probe B13).",
+      "statement_hash": "sha256:cbfacc9c1f27"
+    },
+    {
+      "rule": "status.acceptance.approval-covers-only-the-unbuilt",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-signoff.json"
+      ],
+      "reasoning": "Approving an unbuilt rule recorded an approved result with its statement hash; the row still reads built: false and its acceptance holds an approved eng slot, not a signature on a build (probe F signoff: approvedRow).",
+      "statement_hash": "sha256:7578ef132c6b"
+    },
+    {
+      "rule": "status.acceptance.sent-back-is-a-fail",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-signoff.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-signoff-refined.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-detail-anatomy.json"
+      ],
+      "reasoning": "A Refine recorded a refining result and the rule's row reads \"failing — the build was rejected\" with the ✗ sent-back mark (probe F signoff; detail-anatomy row tooltips).",
+      "statement_hash": "sha256:1aef4eaeadde"
+    },
+    {
+      "rule": "status.acceptance.verdict-needs-every-role",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt"
+      ],
+      "reasoning": "One agent pass and one eng signature leave product at \"not yet\" and the rule unverified; only the run signing both filled both (probes B12, B13).",
+      "statement_hash": "sha256:fb010aa75b4e"
+    },
+    {
+      "rule": "status.acceptance.roles-recorded-on-the-run",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt"
+      ],
+      "reasoning": "The recorded run carries its signatures array with role and signer per entry, and status reads roles from it (probe B13: run file shows role eng/signer probe-driver, role product/signer sam).",
+      "statement_hash": "sha256:1d24bfe00266"
+    },
+    {
+      "rule": "status.acceptance.signature-names-its-signer",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt"
+      ],
+      "reasoning": "\"Agent\" and \"agent\" are refused as signers (\"an agent may claim work, never accept it\"), an unknown role is refused, and an empty signatures list is refused with \"say who is signing before it is recorded\" (probe B13).",
+      "statement_hash": "sha256:7bcd0cdfbe9f"
+    },
+    {
+      "rule": "status.attention.blocked-queues",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-excuses-attention-design-requests.txt",
+        "runs/evidence/2026-09-21T05-18-16Z/probes-sweep-attention-judge-hash-clone.txt"
+      ],
+      "reasoning": "The real board's attention list has every item addressed to a party: humans to judge per unsigned role, to verify addressed notes, and to answer the open question q-0317; the agent to settle its own addressed observations (n-0330, n-0331). No item is for nobody (probes D2, E2).",
+      "statement_hash": "sha256:7a494a8c560c"
+    },
+    {
+      "rule": "status.attention.names-the-role",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-excuses-attention-design-requests.txt"
+      ],
+      "reasoning": "Every judge item names its role - eng, product or design - and none lacks one (probe E2: judge entries lacking a role: 0).",
+      "statement_hash": "sha256:827f89ed0df2"
+    },
+    {
+      "rule": "status.attribution.username-is-the-record",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-attribution-and-zone.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting.json"
+      ],
+      "reasoning": "Settings shows the username scratch-sitting-0921 as a plain span that cannot be typed into, says it was set in the home's config.yml, and the full name beside it; the run recorded by the sitting carries actor scratch-sitting-0921 while the strip showed \"A scratch sitting\" (probes F attribution, F sitting ledger).",
+      "statement_hash": "sha256:be08ebbb3f59"
+    },
+    {
+      "rule": "status.derived.latest-wins",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt"
+      ],
+      "reasoning": "Two crafted runs on one rule: the newer pass shows in the agent cell with its run id, the older fail is superseded (probe B10).",
+      "statement_hash": "sha256:321c83ca466e"
+    },
+    {
+      "rule": "status.derived.stale-never-passes",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt"
+      ],
+      "reasoning": "A pass whose statement_hash no longer matches reads \"~ stale\" in the agent cell, never pass (probe B11).",
+      "statement_hash": "sha256:b686591f5ca6"
+    },
+    {
+      "rule": "status.derived.verdict-belongs-to-a-place",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt"
+      ],
+      "reasoning": "A run recorded against http://localhost:4799 while the target points at 4730 fills no cell and status says so in a warning naming both addresses (probe B10).",
+      "statement_hash": "sha256:994ece7e6ab2"
+    },
+    {
+      "rule": "status.derived.addressless-runs-count",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt"
+      ],
+      "reasoning": "A run with no `created` fills no cell and ages against no sweep, and status says exactly that in its warning (probe B10).",
+      "statement_hash": "sha256:4a35f16299d7"
+    },
+    {
+      "rule": "status.derived.unbacked-pass-goes-stale",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt",
+        "runs/evidence/2026-09-21T05-18-16Z/probes-sweep-attention-judge-hash-clone.txt"
+      ],
+      "reasoning": "The agent passes from 2026-08-31 read as stale on every rule once the sweep of 2026-09-21T05-16-03Z was declared, and a stale-hash pass reads stale too (probes B11, D1).",
+      "statement_hash": "sha256:c3d9169bc7f4"
+    },
+    {
+      "rule": "status.derived.human-tier-distinct",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt"
+      ],
+      "reasoning": "An agent pass fills the agent cell and leaves every signature slot at \"not yet\"; only the signed walkdown in B13 filled eng and product (probes B12, B13).",
+      "statement_hash": "sha256:511948134e22"
+    },
+    {
+      "rule": "status.evidence.agent-assumed",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-excuses-attention-design-requests.txt",
+        "runs/evidence/2026-09-21T05-18-16Z/probes-sweep-attention-judge-hash-clone.txt"
+      ],
+      "reasoning": "Rules with no verify list carry the agent tier; the four rules carrying an agent excuse are the only ones without it, and the judge prompt for a screen rule names the served port and the screens to open (probes E1, D3).",
+      "statement_hash": "sha256:a4faaa41b234"
+    },
+    {
+      "rule": "status.evidence.excuse-says-why",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-excuses-attention-design-requests.txt"
+      ],
+      "reasoning": "Every excused rule shows \"· excused\" with the sentence given, in the cell where its verdict would be, in `walkdown status` (probe E1, E3).",
+      "statement_hash": "sha256:64dd303baabc"
+    },
+    {
+      "rule": "status.evidence.excuse-must-argue",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-excuses-attention-design-requests.txt"
+      ],
+      "reasoning": "A three-character excuse is named as too thin to argue with, an excuse against \"vibes\" is named as not a tier and removing nothing, and a rule excusing both tiers is flagged as a decision to be made on purpose (probe E3). The then-step called the not-a-tier case an error while the statement and lint both make it a warning; the step was brought in line with the statement this sitting and re-stamped as a rewording.",
+      "statement_hash": "sha256:3bc6240e9f9b"
+    },
+    {
+      "rule": "status.sweep.declares-a-floor",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-sweep-attention-judge-hash-clone.txt"
+      ],
+      "reasoning": "With the sweep of 2026-09-21T05-16-03Z open, every agent verdict older than it reads stale and status prints the floor with who declared it and why (probe D1).",
+      "statement_hash": "sha256:09aee8e39b46"
+    },
+    {
+      "rule": "status.sweep.deliberate",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-sweep-attention-judge-hash-clone.txt"
+      ],
+      "reasoning": "`walkdown sweep` without --why refused and wrote nothing (516 runs before and after); the only writer of a sweep record is the sweep command through lib/run-record.js (probe D1).",
+      "statement_hash": "sha256:bd83ebeb2a0e"
+    },
+    {
+      "rule": "status.sweep.says-what-is-left",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-sweep-attention-judge-hash-clone.txt"
+      ],
+      "reasoning": "Status prints \"SWEEP agent on local — 0/142 judged, 142 to go\" followed by every rule still owed, and the harness's owed listing reads the same marker (probe D1).",
+      "statement_hash": "sha256:8f76421439bf"
+    },
+    {
+      "rule": "threads.conversation.one-stream",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-37-40Z/thread-stream-grouped.json",
+        "runs/evidence/2026-09-21T05-37-40Z/thread-stream-grouped.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-threads.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-threads-verified-thread-markdown.png"
+      ],
+      "reasoning": "A 15-message thread shows day dividers (Aug 25, Yesterday), four continuations from the same author without a repeated name, the opening note as a message like any other, and the composer at the foot; ids in a message (n-0333) are links; the collapsed card shows face, name, time, replies and last touch (harness thread-stream-grouped, probe F). The hover preview card was not captured by the probe.",
+      "statement_hash": "sha256:d3d0b129a2e7"
+    },
+    {
+      "rule": "threads.conversation.question-leads-with-the-question",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-threads.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-threads-question-open.png"
+      ],
+      "reasoning": "q-0317 opens with its first line as a 600-weight headline above the context, and the list card leads with the same line in bold (probe F question opened; threads-filter-all card).",
+      "statement_hash": "sha256:68c8184ae5c9"
+    },
+    {
+      "rule": "threads.question.one-ask",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-one-ask.txt"
+      ],
+      "reasoning": "Options are stored as data with labels unique (duplicates refused), an answer with \"Sideways\" is refused naming the choices, an offered label records chosen: Left beside the answer reply, later stamps deferred on an open question and is refused on an answered one, the CLI draws ◉ Left / ○ Right, and choices go on a question asked without any once (probes-one-ask.txt).",
+      "statement_hash": "sha256:0c49a7ef225d"
+    },
+    {
+      "rule": "threads.conversation.written-in-markdown",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-threads.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-threads-verified-thread-markdown.png"
+      ],
+      "reasoning": "A reply with a list, a code span, a web link, a script tag, an img and a # line rendered as ul/li, code, a link with target _blank, no script or img and no heading, with the raw markers kept as text; window.__ran never set (probe F ended thread rendered).",
+      "statement_hash": "sha256:de2e900e6c17"
+    },
+    {
+      "rule": "threads.conversation.composer-stays",
+      "status": "fail",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/G-composer-clears.json",
+        "runs/evidence/2026-09-21T05-18-16Z/G-composer-clears-after-enter.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-threads.json"
+      ],
+      "reasoning": "The box stays at the foot, Enter sends and Shift-Enter breaks the line, and the reply lands under the recording name marked pending then settled. But the box keeps its words after a successful send: 3.5s after Enter the reply was on the server and the textarea still held the text, and a second Enter posted it again (two copies on the server). Nothing written is lost, but a sent reply is not cleared, so the next Enter re-sends it (probe G composer-clears).",
+      "threads": [
+        "n-0332"
+      ],
+      "statement_hash": "sha256:5452b79a41b9"
+    },
+    {
+      "rule": "threads.conversation.says-whose-move",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-threads.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-threads-question-open.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-threads-verified-thread-markdown.png",
+        "runs/evidence/2026-09-21T05-18-16Z/J-sketch-thread.png"
+      ],
+      "reasoning": "An open question says \"Your move — The agent is asking you. Answer records your answer; Reply just talks\" in amber with Waive far left and Reply/Answer; an open note says \"Agent's move\" in dashed blue; a verified thread says \"Closed — Verified by …\" in green with Reply alone; nothing under the box names the reader (probe F threads, probe J).",
+      "statement_hash": "sha256:3e30a750e842"
+    },
+    {
+      "rule": "threads.conversation.new-since-you-looked",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/H-probes.json",
+        "runs/evidence/2026-09-21T05-18-16Z/H-unread-opened.png",
+        "runs/evidence/2026-09-21T05-18-16Z/I-threads-list-card.png"
+      ],
+      "reasoning": "After reading n-0331, an agent reply filed through the CLI showed as \"1 new\" on the collapsed card and opening the thread drew the New line above that reply, with the mark remembered in storage across the reload; the sitting's own replies were never marked (probes H, I; probe G's replies were the reader's own).",
+      "statement_hash": "sha256:c115b84e8407"
+    },
+    {
+      "rule": "threads.conversation.append-only",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-threads.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-threads-verified-thread-markdown.png"
+      ],
+      "reasoning": "No message offers editing or deletion (editDelete: []), no reaction stands in for a verdict, a verified thread says how it ended and by whom and still takes a reply, and a recorded decision (n-0334) was refused reopening in probe B2 (probe F ended thread, probe B2).",
+      "statement_hash": "sha256:d5a522828937"
+    },
+    {
+      "rule": "threads.conversation.thread-is-a-screen",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-threads.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-threads-thread-screen.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-address.json"
+      ],
+      "reasoning": "The tag slid the panel to the thread screen occupying the whole column (pane 382 wide at x 885) with the composer at its foot; Back reads \"← draft-on-disk\"; the frame did not move (review.html before and after); a thread opened by address over its rule likewise names the rule (probe F threads, F address).",
+      "statement_hash": "sha256:033a338bf6bb"
+    },
+    {
+      "rule": "threads.lifecycle.validated-transitions",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt"
+      ],
+      "reasoning": "open→verified, open→answered on a note, and recorded→open on a decision are each refused as illegal transitions and the files are unchanged (probe B2).",
+      "statement_hash": "sha256:c2384ee386f5"
+    },
+    {
+      "rule": "threads.lifecycle.claim-never-accept",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt",
+        "runs/evidence/2026-09-21T05-18-16Z/F-claim-never-accept.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-claim-never-accept-refused.png"
+      ],
+      "reasoning": "The CLI refuses --verify as agent (\"agents may claim work, never accept it\"), and the panel refuses Done under a guessed name and opens Settings, leaving the thread addressed (probes B3, F claim-never-accept).",
+      "statement_hash": "sha256:1c0b2e99daa0"
+    },
+    {
+      "rule": "threads.lifecycle.acts-for-a-person",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt",
+        "runs/evidence/2026-09-21T05-37-40Z/threads-filter-all.png"
+      ],
+      "reasoning": "A --as-agent --said/--added reply lands under the person with via: agent and the addition kept apart; --added alone is refused; the env cannot name somebody else; the list marks a relayed message \"via agent\" and \"AGENT ADDED\" (probe B5, harness threads-filter-all).",
+      "statement_hash": "sha256:0306629cf026"
+    },
+    {
+      "rule": "threads.lifecycle.says-why-it-exists",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt"
+      ],
+      "reasoning": "A person's note with no reason reads feedback, the agent's reads observation, a decision is recorded, a question refuses a reason and \"whim\" is refused with the five reasons listed (probe B1).",
+      "statement_hash": "sha256:5bb935c7abc6"
+    },
+    {
+      "rule": "threads.lifecycle.closes-where-it-was-asked",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt",
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting.json"
+      ],
+      "reasoning": "The signed pass in B14 verified the open and addressed notes on its rule under the signer, and the sitting's pass in probe F closed n-0339 with a \"Verified by …'s pass on … (run)\" reply carrying via: verdict and verified_via naming the run (probes B14, F sitting ledger).",
+      "statement_hash": "sha256:7b9c7c47a41d"
+    },
+    {
+      "rule": "threads.lifecycle.says-what-it-did",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt"
+      ],
+      "reasoning": "A plain reply prints \"still verified · +1 reply\" without moving the status, and a refused move prints the illegal transition and exits without writing (probe B4).",
+      "statement_hash": "sha256:ea3c4135ac21"
+    },
+    {
+      "rule": "time.records.stored-as-utc",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt"
+      ],
+      "reasoning": "Every created stamp in the threads the probes wrote ends in Z, including the registry's registered.at (probe B7).",
+      "statement_hash": "sha256:5040dfedc0c3"
+    },
+    {
+      "rule": "time.records.read-in-your-zone",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt",
+        "runs/evidence/2026-09-21T05-18-16Z/F-attribution-and-zone-settings.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-attribution-and-zone.json",
+        "runs/evidence/2026-09-21T05-18-16Z/H-probes.json"
+      ],
+      "reasoning": "The CLI prints stamps as \"Sep 21, 2026, 12:25 AM CDT\" under a config zone of America/Chicago (probe B8); Settings names the zone; a message's hover stamp reads \"9/21/2026, 1:16:44 AM CDT\" (probe H).",
+      "statement_hash": "sha256:d7979f516afd"
+    }
+  ]
+}

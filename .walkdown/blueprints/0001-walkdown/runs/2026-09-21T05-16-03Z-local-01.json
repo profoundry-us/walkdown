@@ -1,0 +1,14 @@
+{
+  "run_id": "2026-09-21T05-16-03Z-local-01",
+  "created": "2026-09-21T05:16:03Z",
+  "actor": "topher",
+  "kind": "sweep",
+  "target": "local",
+  "tiers": [
+    "agent"
+  ],
+  "why": "Topher, 2026-09-21: re-run the agent tier on everything before it is ready for him. Seven findings from his second sitting fixed overnight, two more found on the way, the panel's strip, picker, legend, modals and thread screen all changed.",
+  "git_sha": "71c8030-dirty",
+  "spec_hash": "sha256:5c9bf635a496",
+  "results": []
+}

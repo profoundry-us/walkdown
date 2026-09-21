@@ -227,9 +227,9 @@ stories:
             - The blueprint is linted
           then:
             - "A reason shorter than a sentence is named as thin: an excuse nobody can argue with is not an excuse"
-            - An excuse filed against something that is not a tier is an error - it removes nothing while reading as though it did
+            - An excuse filed against something that is not a tier is named as such - it removes nothing while reading as though it did
             - A rule excusing both tiers is flagged though it may be right, because then nothing verifies it but a signature and that must be a decision somebody made
-          statement_hash: sha256:d7a9cd1761c3
+          statement_hash: sha256:3bc6240e9f9b
           reworded:
             - hash: sha256:d4310da96c28
               at: 2026-09-13
@@ -240,6 +240,9 @@ stories:
             - hash: sha256:aa78063f8a54
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
+            - hash: sha256:d7a9cd1761c3
+              at: 2026-09-21T06:25:06Z
+              why: "2026-09-21 agent sitting: counts-legible's steps still named the footer's walk badge Topher removed under n-0309 - the rows and the Rules tab carry it now; excuse-must-argue's step called a not-a-tier excuse an error while the statement and lint both make it a warning. Same claims, words brought in line with what was decided."
 
   - id: status.acceptance
     title: Acceptance is a set of people, not a kind of evidence
