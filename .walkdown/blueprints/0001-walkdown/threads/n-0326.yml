@@ -1,0 +1,17 @@
+id: n-0326
+kind: note
+reason: finding
+author: agent
+created: 2026-09-21T02:40:49.934Z
+anchor:
+  rule: embed.pin.tooltip-says-what-it-is
+  screen: review
+  element: pin.tip
+status: open
+body: A pin in the bottom band of the frame still opens its tooltip downward,
+  and the frame's edge cuts it. Measured on the scratch copy at 1100x720, with
+  the as-built review page in the frame. The pin for n-0308 sits 44px above the
+  frame's bottom edge. Its tooltip opens beside it from the pin's own top, 98px
+  tall, so its last line runs past the frame (tooltip-last-pin.png,
+  probes-2.txt). The three pins nearer the top open inside the frame. The step
+  says up near the bottom; this one is not far enough up.

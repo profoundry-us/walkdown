@@ -1,0 +1,84 @@
+{
+  "run_id": "2026-09-21T02-41-59Z-local-01",
+  "created": "2026-09-21T02:41:59Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "aaa7e38-dirty",
+  "tree_hash": "sha256:c47dbc4727fc",
+  "spec_hash": "sha256:0f7f5adb459d",
+  "results": [
+    {
+      "rule": "threads.lifecycle.says-what-it-did",
+      "status": "pass",
+      "statement_hash": "sha256:ea3c4135ac21",
+      "duration_ms": 2259,
+      "checks": [
+        "test/thread-cli.test.js:79",
+        "test/thread-cli.test.js:90",
+        "test/thread-cli.test.js:116",
+        "test/thread-cli.test.js:125",
+        "test/thread-cli.test.js:132",
+        "test/thread-cli.test.js:146",
+        "test/thread-cli.test.js:165",
+        "test/thread-cli.test.js:178",
+        "test/thread-cli.test.js:192",
+        "test/thread-cli.test.js:215",
+        "test/thread-cli.test.js:252"
+      ]
+    },
+    {
+      "rule": "threads.lifecycle.acts-for-a-person",
+      "status": "pass",
+      "statement_hash": "sha256:0306629cf026",
+      "duration_ms": 1039,
+      "checks": [
+        "test/thread-cli.test.js:90",
+        "test/thread-cli.test.js:178",
+        "test/thread-cli.test.js:252"
+      ]
+    },
+    {
+      "rule": "ownership.authoring.machine-words-pass-the-voice",
+      "status": "pass",
+      "statement_hash": "sha256:4c46fabe7d48",
+      "duration_ms": 647,
+      "checks": [
+        "test/thread-cli.test.js:286",
+        "test/thread-cli.test.js:378"
+      ]
+    },
+    {
+      "rule": "threads.lifecycle.claim-never-accept",
+      "status": "pass",
+      "statement_hash": "sha256:1c0b2e99daa0",
+      "duration_ms": 1088,
+      "checks": [
+        "test/thread-cli.test.js:327",
+        "test/thread-cli.test.js:341",
+        "test/thread-cli.test.js:358",
+        "test/thread-cli.test.js:399",
+        "test/thread-cli.test.js:415"
+      ]
+    },
+    {
+      "rule": "time.records.read-in-your-zone",
+      "status": "pass",
+      "statement_hash": "sha256:d7979f516afd",
+      "duration_ms": 212,
+      "checks": [
+        "test/thread-cli.test.js:471",
+        "test/thread-cli.test.js:479"
+      ]
+    },
+    {
+      "rule": "time.records.stored-as-utc",
+      "status": "pass",
+      "statement_hash": "sha256:5040dfedc0c3",
+      "duration_ms": 109,
+      "checks": [
+        "test/thread-cli.test.js:471"
+      ]
+    }
+  ]
+}

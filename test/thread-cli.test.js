@@ -283,6 +283,16 @@ test('thread new records an anchor as the element id, never the selector for it'
   assert.match(readFileSync(join(threadsOf(bp), 'n-0002.yml'), 'utf8'), /element: "#by-css > \.path"/);
 });
 
+test('thread new refuses the machine\'s words that miss the voice in words, and files nothing @rule:ownership.authoring.machine-words-pass-the-voice', () => {
+  const bp = ruleFixture('voice-new');
+  const long = Array.from({ length: 41 }, (_, i) => `word${i}`).join(' ');
+  assert.throws(
+    () => run(['new', '--rule', 'f.s.rule', '--body', `${long}.`, '--as-agent'], bp),
+    (err) => err.status === 2 && /long-sentence/.test(String(err.stderr)) && !/at .*writes\.js/.test(String(err.stderr)),
+  );
+  assert.throws(() => readFileSync(join(threadsOf(bp), 'n-0001.yml')), 'no refusal filed anything');
+});
+
 test('thread new refuses an unknown rule, an empty body, and a strange kind', () => {
   const bp = ruleFixture('new-refuse');
   for (const args of [

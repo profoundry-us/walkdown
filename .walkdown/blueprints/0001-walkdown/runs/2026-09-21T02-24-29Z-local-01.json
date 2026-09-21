@@ -1,0 +1,120 @@
+{
+  "run_id": "2026-09-21T02-24-29Z-local-01",
+  "created": "2026-09-21T02:24:29Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "aaa7e38",
+  "note": "The nine rules the agent queue asked to judge again after the fixes of 2026-09-20 (n-0306, n-0307, n-0308, n-0309, n-0318, n-0320, n-0321, n-0322, n-0323). Driven on a stamped scratch copy (tmp/scratch/sitting-0921 on 4732, its own home and identity) so the sitting's own start, pass, skip and finish landed in the copy; the address recorded is the target's real one. One rule, panel.rules.evidence-visible, was read against the real server on 4700 because the copy holds no run that counts at its own address, and reading a rule's evidence writes nothing.",
+  "results": [
+    {
+      "rule": "embed.pin.tooltip-says-what-it-is",
+      "status": "fail",
+      "statement_hash": "sha256:9ed8ebb2af0a",
+      "evidence": [
+        "runs/evidence/2026-09-21T02-24-29Z/tooltip-hover.png",
+        "runs/evidence/2026-09-21T02-24-29Z/tooltip-last-pin.png",
+        "runs/evidence/2026-09-21T02-24-29Z/tooltip-fade-design.png",
+        "runs/evidence/2026-09-21T02-24-29Z/probes-2.txt"
+      ],
+      "reasoning": "Four pins on the as-built review page. Hovering the first drew its tooltip in 56ms with none visible before the hover: three lines, the thread with its kind and status, no rule with the screen and element, and the start of the note cut with an ellipsis (tooltip-hover.png). At the design end of the fade the design took the pointer, at half neither sheet did, and at the app end the page did, pin mode off throughout. The pin nearest the bottom fails the edge step: it sits 44px above the frame's bottom and its tooltip opens beside it from the pin's top, 98px tall, so the last line is cut by the frame (tooltip-last-pin.png). n-0306's fix reached the top and sides, not a pin that low. Filed as n-0326.",
+      "threads": [
+        "n-0326",
+        "n-0306"
+      ]
+    },
+    {
+      "rule": "locations.answer.registry-is-the-only-door",
+      "status": "pass",
+      "statement_hash": "sha256:f6b76093bef6",
+      "evidence": [
+        "runs/evidence/2026-09-21T02-24-29Z/registry-probes.txt"
+      ],
+      "reasoning": "Standing in a directory holding a .walkdown nobody registered, with a personal home registering nothing, status said no blueprint here and named the registry it consulted, and where showed the config as not present with every default applying. A blueprints row written by hand into config.yml was set aside in words by where, which says config.yml registers nothing since ADR 0003 and points at import, and status still refused. The two tagged unit tests, a hand-written row naming a symlink set aside with import registering the real path once, and a hand-written row not making a home already listed, passed in the suite run at 02:28Z. n-0322 changed the because only; the behaviour is what the rule says.",
+      "threads": []
+    },
+    {
+      "rule": "ownership.authoring.statement-reads-at-a-glance",
+      "status": "pass",
+      "statement_hash": "sha256:97f1bacfb270",
+      "evidence": [
+        "runs/evidence/2026-09-21T02-24-29Z/lint-probes.txt"
+      ],
+      "reasoning": "A fixture with a 46-word statement and a 36-word because beside a one-line statement, imported as a numbered home and linted. The long statement warned under statement-reads-as-a-paragraph saying to say the goal in one breath and let the steps carry the rest; the because warned under because-carries-history naming history as where what happened belongs; the short rule was silent; all warnings, zero errors. The new voice category warns on the same statement a second time for length, which is two warnings for one fault and worth folding, but not this rule's claim.",
+      "threads": []
+    },
+    {
+      "rule": "panel.rules.detail-slide",
+      "status": "pass",
+      "statement_hash": "sha256:1eb9f5ca82d3",
+      "evidence": [
+        "runs/evidence/2026-09-21T02-24-29Z/detail-slide-open.png",
+        "runs/evidence/2026-09-21T02-24-29Z/detail-slide-back.png",
+        "runs/evidence/2026-09-21T02-24-29Z/probes.txt"
+      ],
+      "reasoning": "Clicking the first rule slid the detail into the sidebar's full 382px width and the list to 382px left of it, off the sidebar, with exactly one pane visible; All rules brought the list back to the same seat. The three tabs are 362px wide inside a 382px sidebar and centred to the pixel, each with its own svg icon. The rule id at the head is a button: pressing it put the id on the clipboard and raised the toast Copied embed.pin.anchored-target (probes.txt).",
+      "threads": []
+    },
+    {
+      "rule": "panel.rules.evidence-visible",
+      "status": "pass",
+      "statement_hash": "sha256:78f68901d77e",
+      "evidence": [
+        "runs/evidence/2026-09-21T02-24-29Z/evidence-rows.png",
+        "runs/evidence/2026-09-21T02-24-29Z/evidence-modal.png",
+        "runs/evidence/2026-09-21T02-24-29Z/evidence-source-modal.png",
+        "runs/evidence/2026-09-21T02-24-29Z/probes-3.txt"
+      ],
+      "reasoning": "On panel.dock.own-skin against the real server: the evidence block lists checks/local pass by topher and agent pass by agent, each with who and how long ago, and the agent row carries Evidence, open 4 as detail.evidence-open under it rather than as a tier. Opening it showed three screenshots as images with none broken and the probe text as readable text; Close took it away. Check source opened detail.source-modal over the whole desk with the check's source in a pre and a GitHub link, target _blank, to blob/<40-hex sha>/checks/panel.spec.js#L3406-L3428. One check tags this rule and the modal held that one in full.",
+      "threads": []
+    },
+    {
+      "rule": "panel.rules.tiers-at-a-glance",
+      "status": "pass",
+      "statement_hash": "sha256:a8d625714a1c",
+      "evidence": [
+        "runs/evidence/2026-09-21T02-24-29Z/tiers-list-tip.png",
+        "runs/evidence/2026-09-21T02-24-29Z/tiers-detail-bubble.png",
+        "runs/evidence/2026-09-21T02-24-29Z/probes.txt"
+      ],
+      "reasoning": "145 strips in the list. Every sampled strip draws two tier marks, checks then agent, and beside them one slot per signing role; the marks seen were pass, blocked, never (open ring), not-asked (dash) and unbuilt (the quiet check), each with words in the one tooltip covering the whole strip: checks passed, agent required but no run has touched it, accepted by product has not signed, eng has not signed. On the rule detail the bubble hangs down from the strip and its box sits inside the scrolling pane, top at 137 in a pane starting at 101 (tiers-detail-bubble.png), which is what n-0307 asked.",
+      "threads": []
+    },
+    {
+      "rule": "panel.rules.headless-says-so",
+      "status": "pass",
+      "statement_hash": "sha256:4f4c746e2d71",
+      "evidence": [
+        "runs/evidence/2026-09-21T02-24-29Z/headless-cover.png",
+        "runs/evidence/2026-09-21T02-24-29Z/probes-2.txt"
+      ],
+      "reasoning": "Opening status.derived.latest-wins over the review page put an opaque cover exactly over the app frame's box (12,44 680x664) reading No screen belongs to this rule, judged by its checks and recorded behavior, not by looking, the page underneath untouched; the frame's src stayed as-built/review.html. The detail's Screen block says it is judged without one, and the phrase appears once in the pane with no second Headless line above it (n-0321). All rules lifted the cover.",
+      "threads": []
+    },
+    {
+      "rule": "panel.rules.legend-on-demand",
+      "status": "pass",
+      "statement_hash": "sha256:356d0682ce72",
+      "evidence": [
+        "runs/evidence/2026-09-21T02-24-29Z/legend-open.png",
+        "runs/evidence/2026-09-21T02-24-29Z/probes.txt"
+      ],
+      "reasoning": "The Legend sits at the footer's right beside the counts; hovering it opened one bubble listing every evidence mark with its state (passed, failed, stale, never run, blocked, skipped, unbuilt, not applicable), every signature shape (signed the build, approved the wording, signed an older wording, has not signed, sent it back), what warning yellow means, the SIGN, ASKS, FIXED and WALK badges, and the flag for open conversations. The badges sit in their own column clear of their sentences (legend-open.png), which is n-0308's ask.",
+      "threads": []
+    },
+    {
+      "rule": "panel.walkdown.one-control-owns-the-sitting",
+      "status": "pass",
+      "statement_hash": "sha256:001bf8336d37",
+      "evidence": [
+        "runs/evidence/2026-09-21T02-24-29Z/sitting-started.png",
+        "runs/evidence/2026-09-21T02-24-29Z/sitting-after-pass-and-skip.png",
+        "runs/evidence/2026-09-21T02-24-29Z/sitting-finished.png",
+        "runs/evidence/2026-09-21T02-24-29Z/probes.txt"
+      ],
+      "reasoning": "With 145 rules owed the bar's control read Start walkdown in the warning colour; after signing it read Finish walkdown, the same button. The strip named the recorder by full name with the username in the title, and listed the one role signed on its own line. Skip wore btn-outline in the base colour and Continue btn-outline btn-warning, both in the strip. The footer tally read +0/145, a pass on the first rule opened the next owed rule and read +1/145, Skip on that one opened the third and read +2/145, the list marked the two rows with the signed and skipped glyphs, and Finish ended the sitting with the control reading Start walkdown again.",
+      "threads": []
+    }
+  ]
+}

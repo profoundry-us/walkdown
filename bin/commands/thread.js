@@ -156,17 +156,26 @@ export function run(args) {
           return { label: label.trim(), why: why.join('::').trim() };
         })
       : null;
-    const { id: opened, thread } = openThread(blueprint, {
-      kind,
-      body,
-      anchor,
-      via,
-      reason,
-      options,
-      said: values.said ?? null,
-      added: values.added ?? null,
-      asIs: values['as-is'],
-    });
+    let opened;
+    let thread;
+    try {
+      ({ id: opened, thread } = openThread(blueprint, {
+        kind,
+        body,
+        anchor,
+        via,
+        reason,
+        options,
+        said: values.said ?? null,
+        added: values.added ?? null,
+        asIs: values['as-is'],
+      }));
+    } catch (err) {
+      // A refusal at the door (the voice, a missing body) is words, never a
+      // stack trace - the same courtesy the mutating path already extends.
+      console.error(err.message);
+      return end(2);
+    }
     // Whose name went on it is the record's answer, not this door's guess.
     const by = thread.author;
     const marked = thread.via ?? null;
