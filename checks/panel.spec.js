@@ -878,7 +878,7 @@ test('a message is read as the markdown it was written in, and nothing else reac
 });
 
 test('the screen picker opens over the design, not underneath it', {
-  tag: '@rule:panel.dock.toolbar',
+  tag: '@rule:panel.dock.screen-picker',
 }, async ({ page }) => {
   // A screen with a design on file, so there is a prototype to raise over
   // the page: the picker's list hangs in exactly the area the ghosted
@@ -918,7 +918,7 @@ test('the screen picker opens over the design, not underneath it', {
 });
 
 test('a screen picked by hand stays picked after the frame lands on it', {
-  tag: '@rule:panel.dock.toolbar',
+  tag: '@rule:panel.dock.screen-picker',
 }, async ({ page }) => {
   await review(page);
   // Nothing picked yet: the bar says it is detecting, and the list agrees.
@@ -1460,7 +1460,7 @@ test('a built rule wears one mark per tier, and one dot per role that must sign'
 /* ---- appended for n-0107 (screen picker in Detect mode) ------------------ */
 
 test('in Detect mode the picker reports the page, in the bar and in the open list', {
-  tag: '@rule:panel.dock.toolbar',
+  tag: '@rule:panel.dock.screen-picker',
 }, async ({ page }) => {
   await review(page);
   const picker = page.getByTestId('panel.screen-picker');
@@ -3844,7 +3844,7 @@ test('a picture dropped while failing a rule goes with the why', {
  * view kept for this browser.
  */
 test('the screen picker offers a storyboard of kept pictures, and remembers the view', {
-  tag: '@rule:panel.dock.toolbar',
+  tag: '@rule:panel.dock.storyboard',
 }, async ({ page }) => {
   await review(page);
   const { storyboard } = await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json();

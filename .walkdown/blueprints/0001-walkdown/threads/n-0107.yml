@@ -3,6 +3,7 @@ kind: note
 author: topherfangio
 created: 2026-08-27T03:29:39Z
 anchor:
+  rule: panel.dock.screen-picker
   screen: review
   element: panel.bar
   offset:

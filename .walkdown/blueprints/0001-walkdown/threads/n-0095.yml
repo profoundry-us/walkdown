@@ -4,6 +4,7 @@ author: Topher Fangio
 via: agent
 created: 2026-08-27T00:01:06Z
 anchor:
+  rule: panel.dock.storyboard
   screen: review
   element: panel.tabs
 status: addressed

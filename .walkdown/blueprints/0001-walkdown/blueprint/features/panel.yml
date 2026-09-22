@@ -51,6 +51,7 @@ stories:
       - id: panel.dock.toolbar
         origin: thread:n-0015
         statement: "A toolbar across the top of the panel holds the controls that belong to the session rather than to any one rule: which project, which screen, which surface, and pin mode. Which of a project's blueprints is in hand is chosen on the Blueprints tab."
+        history: "Held the screen picker and the storyboard view in full until n-0334 (2026-09-21) found too much in one rule; they are panel.dock.screen-picker and panel.dock.storyboard now, and this rule is the bar itself."
         verify: [checks]
         signoff: [eng, product]
         screens: [review]
@@ -61,17 +62,9 @@ stories:
             - Read the bar
           then:
             - Anchor `panel.project` is the project switcher; anchor `panel.blueprint` names the blueprint in hand and is not a control - choosing a different blueprint is the Blueprints tab's job, since n-0017 took that selector off the bar on purpose
-            - Anchor `panel.screen-picker` says which screen this page is without being opened, and opens anchor `panel.screens-list` to pick a different one or to go back to detecting it
-            - The open list offers two views of the storyboard, List and Storyboard, and the one chosen is kept for this browser
-            - The Storyboard view lays every screen out small, in storyboard order
-            - Each card is a picture of the page the pick would open, the build where it has one and the design otherwise, with its title, its id and whether a design is on file
-            - The pictures are photographed by the server and kept until Redraw asks again, never drawn as live pages inside the panel
-            - The screen the page is, or the one picked, is marked, and a card picks its screen the way a row does
-            - A screen picked by hand is marked as picked, because it outranks detection and the difference has to be readable from the bar
-            - Detecting, the control reports the page rather than remembering an answer, so the label in the bar and the row the open list marks both follow the page when it moves
+            - Anchor `panel.screen-picker` says which screen this page is; what it does when opened is panel.dock.screen-picker's rule
             - Prototype and App switch which of the two the page area shows
             - Pin mode can be turned on and off there
-          statement_hash: sha256:484be742dede
           reworded:
             - hash: sha256:aaf28fbb5e0a
               at: 2026-09-13
@@ -91,6 +84,50 @@ stories:
             - hash: sha256:c66f9357083f
               at: 2026-09-21T22:12:12Z
               why: "toolbar: the storyboard's cards are photographed and kept, not live frames - Topher, 2026-09-21: live pages inside the panel wreaked havoc on the host's CSS"
+          statement_hash: sha256:7e9e52e85348
+
+      - id: panel.dock.screen-picker
+        origin: thread:n-0334
+        statement: The screen picker in the bar says which screen this page is without being opened, and opens a list to pick a different one or to go back to detecting it. A pick by hand outranks detection, and detecting follows the page.
+        because: The label is read far more often than the list is opened, and a hand pick is the one thing that overrides what the page says, so both have to be readable from the bar.
+        history: "Split out of panel.dock.toolbar on 2026-09-21 (n-0334). The picker was once drawn under a raised design and read as a button that did nothing (n-0107). The open list went on marking the screen the page had left (n-0107). A hand pick was lost when the frame landed (n-0098)."
+        verify: [checks]
+        signoff: [eng, product]
+        screens: [review]
+        steps:
+          given:
+            - walkdown framing a page of a blueprint with several screens
+          when:
+            - Read anchor `panel.screen-picker`, then open it
+          then:
+            - Shut, it names the screen this page is
+            - Open, anchor `panel.screens-list` offers every screen and a way back to detecting, and draws over the design when the design is raised
+            - A screen picked by hand is marked as picked, because it outranks detection and the difference has to be readable from the bar
+            - A hand pick survives the frame landing on the page it names
+            - Detecting, the control reports the page rather than remembering an answer, so the label in the bar and the row the open list marks both follow the page when it moves
+          statement_hash: sha256:b515f58c3a54
+
+      - id: panel.dock.storyboard
+        origin: thread:n-0095
+        statement: The open screen picker offers two views of the storyboard, List and Storyboard, and the Storyboard view lays every screen out as a kept picture large enough to read.
+        because: A list of names answers which screen this page is; a board of pictures answers what the whole product looks like, and both are asked of the same control (Topher, n-0095).
+        history: "Split out of panel.dock.toolbar on 2026-09-21 (n-0334). The first cut drew every screen as a live frame inside the panel, and seven pages rendering inside the page reviewing them wreaked havoc on the host's CSS (Topher, 2026-09-21); the cards have been server-kept pictures since. At 196 wide nothing on a card could be made out; they are 280 wide since the same day."
+        verify: [checks]
+        signoff: [eng, product]
+        screens: [review]
+        steps:
+          given:
+            - The screen picker open, on a blueprint whose screens have pages
+          when:
+            - Switch between List and Storyboard
+          then:
+            - The view chosen is kept for this browser and is the one the picker reopens on
+            - The Storyboard view lays every screen out in storyboard order, three cards to a row
+            - Each card is a picture of the page the pick would open, the build where it has one and the design otherwise, with its title, its id and whether a design is on file
+            - The pictures are photographed by the server and kept until Redraw asks again, never drawn as live pages inside the panel
+            - A card is large enough for the page on it to be made out
+            - The screen the page is, or the one picked, is marked, and a card picks its screen the way a row does
+          statement_hash: sha256:b465140e3667
 
       - id: panel.dock.surface-swap-is-instant
         origin: walkdown

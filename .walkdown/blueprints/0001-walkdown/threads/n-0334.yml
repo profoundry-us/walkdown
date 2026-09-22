@@ -1,0 +1,21 @@
+id: n-0334
+kind: note
+reason: feedback
+author: topher
+created: 2026-09-22T02:36:00.484Z
+anchor:
+  rule: panel.dock.storyboard
+status: addressed
+body: There is too much in this rule; we should split it out (and pull the
+  relevant threads over to the new rule).
+replies:
+  - author: agent
+    created: 2026-09-22T02:40:49Z
+    body: "Split three ways. panel.dock.toolbar is the bar itself now: project,
+      blueprint name, surfaces, pin mode. panel.dock.screen-picker is the
+      picker: named shut, opened to pick or detect, a hand pick marked,
+      detecting follows the page. It took n-0098 and n-0107.
+      panel.dock.storyboard is the two views and the kept pictures. It took
+      n-0095 and this note. The toolbar rule lost its signatures with the
+      narrowing and waits on you again. The two new rules have their checks
+      recorded and wait on you too."
