@@ -4,22 +4,34 @@ author: agent
 created: 2026-09-22T14:58:31.664Z
 anchor:
   rule: screens.ownership.one-claimant
-status: open
-body: |-
+status: incorporated
+body: >-
   Should the pick among several claimants be remembered per page?
 
-  Your answer to q-0317 says the second question, which blueprint am I reviewing against, is a session choice remembered as a default. Two things on the board say the opposite:
+
+  Your answer to q-0317 says the second question, which blueprint am I reviewing
+  against, is a session choice remembered as a default. Two things on the board
+  say the opposite:
+
 
   - ADR 0001 section 9: nothing is remembered.
-  - Rule `panel.start.choose-a-blueprint` has a step, and a check, saying a pick for an unclaimed page is not remembered next time.
+
+  - Rule `panel.start.choose-a-blueprint` has a step, and a check, saying a pick
+  for an unclaimed page is not remembered next time.
+
 
   If it is remembered:
 
+
   - this browser keeps the pick per page and honors it on the next visit
+
   - ADR 0001 gets a dated note
+
   - the step is reworded and the check changed
 
-  If not, the panel asks every time a page has several claimants, and q-0317 is incorporated as is.
+
+  If not, the panel asks every time a page has several claimants, and q-0317 is
+  incorporated as is.
 options:
   - label: Remember it
     why: this browser keeps the pick per page and honors it next visit; ADR 0001
@@ -28,3 +40,21 @@ options:
   - label: Ask every time
     why: the panel asks whenever a page has several claimants, nothing is
       remembered, and q-0317 is incorporated as is
+replies:
+  - author: topher
+    created: 2026-09-22T15:37:12Z
+    body: >-
+      I thought we reworked things to not "remember" anything in the session,
+      but to track everything via the URL. So if someone loads a specific URL,
+      we know what project / blueprint / rule - or thread to load.
+
+
+      If they load a base URL we know about, but there are multiple claims, we
+      should ask them which one they want.
+    answer: true
+  - author: agent
+    created: 2026-09-22T15:37:46Z
+    body: "Nothing to build. The address already carries the pick: a page with
+      several claimants asks, the answer goes into the URL, and a reload comes
+      back to it. ADR 0001 section 9 and the choose-a-blueprint step stand as
+      written."
