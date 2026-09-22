@@ -1,0 +1,41 @@
+{
+  "run_id": "2026-09-22T14-56-21Z-local-01",
+  "created": "2026-09-22T14:56:21Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    },
+    {
+      "role": "design",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "8d50893-dirty",
+  "spec_hash": "sha256:18699856ef88",
+  "results": [
+    {
+      "rule": "panel.dock.toolbar",
+      "status": "pass",
+      "statement_hash": "sha256:7e9e52e85348"
+    },
+    {
+      "rule": "panel.dock.screen-picker",
+      "status": "pass",
+      "statement_hash": "sha256:b515f58c3a54"
+    },
+    {
+      "rule": "panel.dock.storyboard",
+      "status": "pass",
+      "statement_hash": "sha256:b465140e3667"
+    }
+  ]
+}

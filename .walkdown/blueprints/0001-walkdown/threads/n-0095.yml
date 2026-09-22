@@ -7,7 +7,7 @@ anchor:
   rule: panel.dock.storyboard
   screen: review
   element: panel.tabs
-status: addressed
+status: verified
 body: Actually, now that I think about it; I eventually want a storyboard view
   of the screens that maybe has small / compressed screenshots of each one so
   you can kinda see an overview. Not sure where to keep this idea since it's not
@@ -62,4 +62,11 @@ replies:
       in the project or its home. The board shows the pictures, and a Redraw
       button on it photographs every screen again. The live frames are gone. A
       tree without Playwright gets a plain sentence on each card.
+  - author: topher
+    via: verdict
+    created: 2026-09-22T14:56:21Z
+    body: Verified by topher's pass on panel.dock.storyboard
+      (2026-09-22T14-56-21Z-local-01).
 reason: request
+verified_by: topher
+verified_via: 2026-09-22T14-56-21Z-local-01

@@ -1,0 +1,15 @@
+id: q-0335
+kind: question
+author: agent
+created: 2026-09-22T14:58:31.664Z
+anchor:
+  rule: screens.ownership.one-claimant
+status: open
+body: "Should the pick among several claimants be remembered per page? The
+  answer to q-0317 says the second question is a session choice, remembered as a
+  default. ADR 0001 section 9 says nothing is remembered, and the rule
+  panel.start.choose-a-blueprint has a step and a check saying a pick for an
+  unclaimed page is not remembered next time. Yes means: this browser keeps the
+  pick per page, honors it on the next visit, ADR 0001 gets a dated note, the
+  step is reworded and the check changed. No means: the panel asks every time a
+  page has several claimants, and q-0317 is incorporated as is."
