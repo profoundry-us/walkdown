@@ -144,8 +144,7 @@ No defaults, per page or per site. Ambiguity asks every time, and the browser
 stores no choice at all. The remembered-choice storage is deleted rather than
 migrated.
 
-This is a deliberate simplification and is expected to be revisited once the
-rest settles; asking twice is cheap, and a wrong memory is not.
+Asking twice is cheap, and a wrong memory is not.
 
 *2026-09-16:* the address carries the pick. walkdown's own page writes the
 chosen blueprint into its `?bp=` and the framed page after its `#`, so a
@@ -153,6 +152,13 @@ reload of that tab comes back to the same board on the same page. This is not
 a remembered choice — the browser stores nothing, and a fresh address still
 asks — it is the address saying what the tab is showing, which is what an
 address is for (`panel.start.address-keeps-the-pick`).
+
+*2026-09-22:* settled, not to be revisited (q-0317, q-0335). Several
+blueprints may claim one page. When they do, the panel always asks, and the
+answer is tracked in the address so the person is not asked on every load of
+that tab. No default is kept per page or per site, in the browser or anywhere
+else. A question proposing a remembered default has been asked twice and
+answered the same way both times; the answer is here.
 
 ### 10. The Blueprints tab shows the active project's blueprints
 

@@ -55,8 +55,9 @@ Today one question does two jobs, and they are not the same kind of thing:
 - **Which blueprints could this page belong to?** A *fact*, read from claims.
   It is allowed to answer with several, the way any honest index is.
 - **Which one am I reviewing it against right now?** A *choice*. It belongs to
-  the panel and the person holding it, it is changeable, and it is remembered
-  as a default rather than recorded as a fact about the project.
+  the panel and the person holding it, and it is changeable. *(This document
+  proposed remembering it as a default; the decision went the other way - the
+  address carries it and nothing else does. See "Remembering" below.)*
 
 The constraint exists because those two were one question. Split them and it
 stops being needed for its own sake — what it was really protecting is that the
@@ -69,8 +70,9 @@ second question always has an answer without anybody being asked.
 *Today:* zero claimants → the unclaimed screen. One claimant → it opens.
 
 *Split:* zero → unchanged. One → unchanged, and this stays the overwhelmingly
-common case. Several → the panel asks, naming the claimants, and remembers the
-answer as this person's default for that page.
+common case. Several → the panel asks, naming the claimants. *(As built, the
+answer goes into the address rather than into a remembered default; see
+"Remembering".)*
 
 That last line is a job for the picker — a real one, from the page's own
 claims, rather than from a count of what a folder happens to hold. It is a
@@ -114,6 +116,13 @@ which is the smallest possible change to the data and the thing that keeps the
 check honest. It is also the part most likely to be wrong on first draft.
 
 ### Remembering
+
+> **Superseded, 2026-09-22.** The "default" proposed below was rejected twice
+> (q-0317, q-0335). What was decided: when several blueprints claim a page the
+> panel always asks, and the answer is tracked in the address, so a reload of
+> that tab is not asked again. Nothing is remembered per page or per site, in
+> the browser or elsewhere (ADR 0001 §9). The paragraphs below are kept as the
+> argument that was made, not as the design.
 
 *Today:* a pick is remembered in the browser, which is the two-kinds-of-memory
 problem that started this — the project says one thing, a browser profile says
@@ -189,13 +198,15 @@ spent a fortnight paying for.
 
 ## What is still open
 
-1. May two blueprints claim the same page at all? Everything above assumes yes;
-   if the answer is no, this document is one paragraph and the case gets
-   handled by splitting screens.
+1. May two blueprints claim the same page at all? **Answered yes, 2026-09-21
+   (q-0317).** `screens.ownership.one-claimant` is retired; `walkdown claims`
+   reports shared pages as an inventory.
 2. If yes: must a shared claim be declared as shared, so an undeclared
-   collision stays a fault?
-3. Where does the default live — per page, or per site? Per page is more
-   precise and forgets more often; per site is what the old remembered choice
-   did and is wrong the moment one site has two claimed pages that differ.
+   collision stays a fault? *Still open; nothing declares it today.*
+3. Where does the default live — per page, or per site? **Answered nowhere,
+   2026-09-22 (q-0335).** There is no default. The panel asks whenever several
+   blueprints claim the page, and the pick is tracked in the address so the
+   same tab is not asked on every load (ADR 0001 §9, 2026-09-16 and
+   2026-09-22 notes).
 4. Does a pin ever ask? This document says never, on the strength of the
    sentence in q-0019. Worth confirming that still holds.
