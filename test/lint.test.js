@@ -631,3 +631,21 @@ test('a thread anchored under a renamed anchor resolves through the storyboard @
     'a rename ending nowhere declared is the warning instead',
   );
 });
+
+test('an open question with no choices warns; with choices, or once answered, it passes @rule:threads.question.one-ask', () => {
+  const h = writeFixture(join(root, 'choices'));
+  const at = (status, options) =>
+    `id: q-7\nkind: question\nstatus: ${status}\nanchor: { rule: demo.main.thing }\nbody: which way?\n${options}`;
+  writeFileSync(join(h.threads, 'q-7.yml'), at('open', ''));
+  let { findings } = lint(load(h), { checks: false });
+  assert.ok(findings.some((f) => f.category === 'question-without-choices' && f.subject === 'q-7'));
+
+  writeFileSync(join(h.threads, 'q-7.yml'), at('open', 'options:\n  - label: Left\n  - label: Right\n'));
+  ({ findings } = lint(load(h), { checks: false }));
+  assert.equal(findings.filter((f) => f.category === 'question-without-choices').length, 0);
+
+  // Asked before choices existed and already answered: nothing is owed on it.
+  writeFileSync(join(h.threads, 'q-7.yml'), at('answered', ''));
+  ({ findings } = lint(load(h), { checks: false }));
+  assert.equal(findings.filter((f) => f.category === 'question-without-choices').length, 0);
+});

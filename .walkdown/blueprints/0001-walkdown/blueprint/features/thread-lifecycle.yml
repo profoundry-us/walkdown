@@ -248,7 +248,8 @@ stories:
             - The stream draws the choices under the question and marks the one taken
             - Later stamps the open question deferred and changes nothing else; an answered question cannot be put off
             - Choices may be put on a question already asked (`walkdown thread <id> --option`), once, while it is open - so a question asked before choices existed is not refiled to get them
-          statement_hash: sha256:0c49a7ef225d
+            - Lint warns of an open question that offers no choices, so an ask nobody can answer with a press is caught before a walkdown meets it
+          statement_hash: sha256:0e82be8b206b
           reworded:
             - hash: sha256:116b4f4dc582
               at: 2026-09-21T01:38:05Z

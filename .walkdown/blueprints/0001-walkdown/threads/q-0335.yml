@@ -13,3 +13,11 @@ body: "Should the pick among several claimants be remembered per page? The
   pick per page, honors it on the next visit, ADR 0001 gets a dated note, the
   step is reworded and the check changed. No means: the panel asks every time a
   page has several claimants, and q-0317 is incorporated as is."
+options:
+  - label: Remember it
+    why: this browser keeps the pick per page and honors it next visit; ADR 0001
+      section 9 gets a dated note, the choose-a-blueprint step is reworded and
+      its check changed
+  - label: Ask every time
+    why: the panel asks whenever a page has several claimants, nothing is
+      remembered, and q-0317 is incorporated as is
