@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-08T20:59:59.870Z
 anchor:
   rule: panel.start.unclaimed-page-says-so
-status: addressed
+status: verified
 body: >-
   Judged 2026-09-08 against a scratch copy; the panel opens a blueprint on a
   page nothing claims, and never says the page is unclaimed.
@@ -108,3 +108,4 @@ replies:
       Not claiming a verdict for it. An independent judge is being sent at the
       rule now.
 reason: finding
+verified_by: topher

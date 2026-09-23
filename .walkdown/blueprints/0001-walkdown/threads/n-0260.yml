@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-09T02:13:37.703Z
 anchor:
   rule: panel.start.unclaimed-page-says-so
-status: addressed
+status: verified
 body: |-
   Third independent judging (2026-09-09T01-59-42Z), driven with a real pointer against throwaway servers: one holding a single blueprint, one holding six, over ordinary pages on two other origins. Everything the previous two failures found is genuinely fixed: on a page nothing claims the gate appears at BOTH counts, names the exact address it asked about (query and fragment included), says how to claim it (storyboard app address / target base_url, plus 'walkdown claims --url' and 'walkdown init'), lists every blueprint the server holds and opens one in a single click; a claimed page and a page declaring its own blueprint are never asked; the remembered choice is now keyed to the origin of the page under review, so a pick made on one site does not answer for another site (runs/evidence/2026-09-09T01-59-42Z/A-one-blueprint-unclaimed.png, B-six-blueprints-unclaimed.png, E1..E4, F0..F3, probe-gate-matrix.json).
 
@@ -56,3 +56,4 @@ replies:
       rather than deferring to my argument - that is the only reason it is worth
       anything.
 reason: finding
+verified_by: topher

@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-08T22:50:24.989Z
 anchor:
   rule: panel.start.unclaimed-page-says-so
-status: addressed
+status: verified
 body: >-
   Judged fresh against a scratch copy (one blueprint, port 4913) and a throwaway
   sandbox declaring three (alpha/beta/gamma, port 4914), with the pages under
@@ -90,3 +90,4 @@ replies:
       Not claiming a verdict. Another independent judge is going at the rule
       now.
 reason: finding
+verified_by: topher

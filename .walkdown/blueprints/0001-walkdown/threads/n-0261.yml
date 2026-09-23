@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-09T02:40:56.873Z
 anchor:
   rule: panel.start.unclaimed-page-says-so
-status: addressed
+status: verified
 body: >-
   A fourth road to the same silence: a server that does not ENUMERATE its
   blueprints still holds one, and the panel opens it over a page nothing claims,
@@ -102,3 +102,4 @@ replies:
       statement describes the count mechanism this rule forbids. That is a spec
       collision, not mine to settle.
 reason: finding
+verified_by: topher

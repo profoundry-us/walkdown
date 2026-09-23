@@ -1,0 +1,35 @@
+{
+  "run_id": "2026-09-23T19-57-35Z-local-01",
+  "created": "2026-09-23T19:57:35Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "ae4258e-dirty",
+  "spec_hash": "sha256:af74a3950e37",
+  "note": "Agent tier after q-0336 (Hold it back). Probed on a stamped scratch copy (hold-0923): panel.rules.counts-legible, signed by eng and product, was changed in meaning, given a fresh check pass at the new wording and an agent pass on the old one, recorded at the copy's own address.",
+  "results": [
+    {
+      "rule": "status.attention.agent-tier-queued",
+      "status": "pass",
+      "statement_hash": "sha256:b813158e0a11",
+      "evidence": [
+        "runs/evidence/2026-09-23T19-33-24Z/hold-back-status.txt",
+        "runs/evidence/2026-09-23T19-33-24Z/hold-back.json",
+        "runs/evidence/2026-09-23T19-33-24Z/hold-back-turn.png",
+        "runs/evidence/2026-09-23T19-33-24Z/hold-back-list.png"
+      ],
+      "reasoning": "With the rule built and its agent pass stale, the report named one item for it, judge in the agent queue, worded as stale and saying no signer is asked until it has; neither eng nor product was asked, though neither had signed the new wording. The panel agreed: the turn line read Agent's move, it judges the build first and you are asked to sign once it has, and the rule's row in the list carried no SIGN or WALK badge. An unbuilt neighbour in the same copy still showed SIGN for its wording, so the hold-back touches only built rules."
+    },
+    {
+      "rule": "status.attention.blocked-queues",
+      "status": "pass",
+      "statement_hash": "sha256:8e52f2c44ada",
+      "evidence": [
+        "runs/evidence/2026-09-23T19-33-24Z/hold-back-status.txt",
+        "runs/evidence/2026-09-23T19-33-24Z/hold-back.json"
+      ],
+      "reasoning": "The agent-owed rule sat in exactly one queue, the agent's, and nowhere in the person's, which is the new step and keeps nothing in both queues at once. The rest of the queue behaviour is unchanged: the browser checks for the turn line, the walk's Continue and Skip, the ask card and the signature dots all passed against this build, and the unit tests for address, incorporate, settle, verify and answer items pass with their fixtures now carrying an agent pass."
+    }
+  ]
+}

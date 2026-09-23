@@ -4,7 +4,7 @@ author: agent
 created: 2026-09-10T13:19:24.811Z
 anchor:
   rule: locations.answer.one-walkdown-answers
-status: addressed
+status: verified
 body: >-
   A symlink walks straight through the one-walkdown boundary on the READ side,
   while the write side refuses the identical path.
@@ -139,3 +139,4 @@ replies:
       retired with the reason written on it; the rule that replaces the boundary
       is the one above.
 reason: finding
+verified_by: topher

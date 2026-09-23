@@ -250,7 +250,9 @@ test('a rule holding an answered question waits on the fold-in and on nobody els
   const { attention } = deriveStatus(
     blueprint({
       verify: ['checks', 'human'],
-      runs: [checksRun('2026-01-03T00:00:00Z', 'local', 'pass')],
+      // Judged by the agent too: a rule it has not looked at is queued to
+      // no person at all (q-0336), which is not what this is about.
+      runs: [checksRun('2026-01-03T00:00:00Z', 'local', 'pass'), walkdownRun('2026-01-04T00:00:00Z', 'agent', 'pass')],
       threads: [
         { id: 'n-1', kind: 'note', reason: 'feedback', status: 'addressed', anchor: { rule: 'demo.main.thing' } },
         { id: 'q-1', kind: 'question', status: 'answered', anchor: { rule: 'demo.main.thing' } },
@@ -265,7 +267,9 @@ test('a rule holding an answered question waits on the fold-in and on nobody els
   const after = deriveStatus(
     blueprint({
       verify: ['checks', 'human'],
-      runs: [checksRun('2026-01-03T00:00:00Z', 'local', 'pass')],
+      // Judged by the agent too: a rule it has not looked at is queued to
+      // no person at all (q-0336), which is not what this is about.
+      runs: [checksRun('2026-01-03T00:00:00Z', 'local', 'pass'), walkdownRun('2026-01-04T00:00:00Z', 'agent', 'pass')],
       threads: [
         { id: 'n-1', kind: 'note', reason: 'feedback', status: 'addressed', anchor: { rule: 'demo.main.thing' } },
         { id: 'q-1', kind: 'question', status: 'incorporated', anchor: { rule: 'demo.main.thing' } },
@@ -332,7 +336,19 @@ test('sign-off is not build evidence: approved stays unbuilt and pending, and di
     }),
   );
   assert.equal(built.rows[0].built, true);
-  assert.equal(owed(built.attention), true);
+  // Built, and no agent has looked yet: held back from the person (q-0336).
+  assert.equal(owed(built.attention), false);
+  const looked = deriveStatus(
+    blueprint({
+      verify: ['checks', 'human'],
+      runs: [
+        walkdownRun('2026-01-02T00:00:00Z', 'topher', 'approved'),
+        checksRun('2026-01-03T00:00:00Z', 'local', 'pass'),
+        walkdownRun('2026-01-04T00:00:00Z', 'agent', 'pass'),
+      ],
+    }),
+  );
+  assert.equal(owed(looked.attention), true);
 });
 
 /*
@@ -871,4 +887,18 @@ test('a built rule the agent tier has not judged, or judged before it went stale
   assert.deepEqual(judge([built, walkdownRun('2026-01-02T00:00:00Z', 'agent', 'pass')]), []);
   // Unbuilt: nothing to look at yet.
   assert.deepEqual(judge([]), []);
+});
+
+/*
+ * Topher, q-0336: "Hold it back". A built rule the agent tier owes is the
+ * agent's alone until it is judged; no role is asked to sign it.
+ */
+test('a built rule the agent owes is held out of every signer\'s queue until it is judged @rule:status.attention.agent-tier-queued', () => {
+  const who = (runs) =>
+    deriveStatus(blueprint({ verify: ['checks', 'agent'], runs }))
+      .attention.filter((i) => i.rule === 'demo.main.thing')
+      .map((i) => `${i.who}:${i.action}`);
+  const built = checksRun('2026-01-03T00:00:00Z', 'local', 'pass');
+  assert.deepEqual(who([built]), ['agent:judge-first']);
+  assert.deepEqual(who([built, walkdownRun('2026-01-04T00:00:00Z', 'agent', 'pass')]), ['human:judge']);
 });

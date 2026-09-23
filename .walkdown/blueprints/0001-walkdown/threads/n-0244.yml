@@ -4,7 +4,7 @@ author: topher
 created: 2026-09-08T04:04:15.866Z
 anchor:
   rule: panel.start.unclaimed-page-says-so
-status: addressed
+status: verified
 body: Add the note from q-0243 when building it.
 replies:
   - author: agent
@@ -29,3 +29,4 @@ replies:
       a page that belongs to nothing yet, and the blueprints this server holds -
       reachable in one click and never opened for you."
 reason: finding
+verified_by: topher

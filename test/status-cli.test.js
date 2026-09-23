@@ -71,6 +71,19 @@ function fixture(name) {
       results: [{ rule: 'demo.main.waiting', status: 'pass', statement_hash: formatHash(WAITING) }],
     }),
   );
+  // An agent has looked, so a person is asked (q-0336 holds a rule back
+  // from signers until one has).
+  writeFileSync(
+    join(runs, '2026-01-01T12-00-00Z-local-01.json'),
+    JSON.stringify({
+      run_id: '2026-01-01T12-00-00Z-local-01',
+      created: '2026-01-01T12:00:00Z',
+      actor: 'agent',
+      kind: 'walkdown',
+      target: 'local',
+      results: [{ rule: 'demo.main.waiting', status: 'pass', statement_hash: formatHash(WAITING) }],
+    }),
+  );
   writeFileSync(
     join(runs, '2026-01-02T00-00-00Z-local-01.json'),
     JSON.stringify({

@@ -4,7 +4,7 @@ author: Topher Fangio
 created: 2026-08-26T03:12:56Z
 anchor:
   rule: panel.delivery.one-implementation
-status: addressed
+status: verified
 body: This is an implementation detail, not a behavior that "product" cares
   about. This should be a unit test or something similar.
 replies:
@@ -23,3 +23,4 @@ replies:
       not two' - the badge that n-0058 removed - so retiring cleared a stale
       step as well. Lint 0 errors, node --test 93/93."
 reason: finding
+verified_by: topher

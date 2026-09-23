@@ -1,0 +1,160 @@
+{
+  "run_id": "2026-09-23T19-55-11Z-local-01",
+  "created": "2026-09-23T19:55:11Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "ae4258e-dirty",
+  "tree_hash": "sha256:6503f40529cd",
+  "spec_hash": "sha256:af74a3950e37",
+  "results": [
+    {
+      "rule": "status.attention.names-the-role",
+      "status": "pass",
+      "statement_hash": "sha256:827f89ed0df2",
+      "duration_ms": 85,
+      "checks": [
+        "test/status-cli.test.js:112"
+      ]
+    },
+    {
+      "rule": "status.evidence.excuse-says-why",
+      "status": "pass",
+      "statement_hash": "sha256:64dd303baabc",
+      "duration_ms": 178,
+      "checks": [
+        "test/status-cli.test.js:127"
+      ]
+    },
+    {
+      "rule": "status.acceptance.verdict-needs-every-role",
+      "status": "pass",
+      "statement_hash": "sha256:fb010aa75b4e",
+      "duration_ms": 98,
+      "checks": [
+        "test/status-cli.test.js:145"
+      ]
+    },
+    {
+      "rule": "status.derived.latest-wins",
+      "status": "pass",
+      "statement_hash": "sha256:321c83ca466e",
+      "duration_ms": 6,
+      "checks": [
+        "test/status.test.js:87",
+        "test/status.test.js:532",
+        "test/status.test.js:718",
+        "test/status.test.js:857"
+      ]
+    },
+    {
+      "rule": "status.derived.stale-never-passes",
+      "status": "pass",
+      "statement_hash": "sha256:ba73225874b1",
+      "duration_ms": 1,
+      "checks": [
+        "test/status.test.js:107",
+        "test/status.test.js:120"
+      ]
+    },
+    {
+      "rule": "status.derived.human-tier-distinct",
+      "status": "pass",
+      "statement_hash": "sha256:511948134e22",
+      "duration_ms": 0,
+      "checks": [
+        "test/status.test.js:129"
+      ]
+    },
+    {
+      "rule": "status.attention.blocked-queues",
+      "status": "pass",
+      "statement_hash": "sha256:8e52f2c44ada",
+      "duration_ms": 0,
+      "checks": [
+        "test/status.test.js:210",
+        "test/status.test.js:249"
+      ]
+    },
+    {
+      "rule": "status.derived.verdict-belongs-to-a-place",
+      "status": "pass",
+      "statement_hash": "sha256:994ece7e6ab2",
+      "duration_ms": 0,
+      "checks": [
+        "test/status.test.js:455",
+        "test/status.test.js:488",
+        "test/status.test.js:521"
+      ]
+    },
+    {
+      "rule": "status.derived.addressless-runs-count",
+      "status": "pass",
+      "statement_hash": "sha256:4a35f16299d7",
+      "duration_ms": 0,
+      "checks": [
+        "test/status.test.js:503"
+      ]
+    },
+    {
+      "rule": "status.derived.unbacked-pass-goes-stale",
+      "status": "pass",
+      "statement_hash": "sha256:c3d9169bc7f4",
+      "duration_ms": 0,
+      "checks": [
+        "test/status.test.js:542",
+        "test/status.test.js:562",
+        "test/status.test.js:570"
+      ]
+    },
+    {
+      "rule": "status.sweep.declares-a-floor",
+      "status": "pass",
+      "statement_hash": "sha256:09aee8e39b46",
+      "duration_ms": 0,
+      "checks": [
+        "test/status.test.js:595",
+        "test/status.test.js:619",
+        "test/status.test.js:634",
+        "test/status.test.js:649"
+      ]
+    },
+    {
+      "rule": "status.sweep.says-what-is-left",
+      "status": "pass",
+      "statement_hash": "sha256:8f76421439bf",
+      "duration_ms": 0,
+      "checks": [
+        "test/status.test.js:664"
+      ]
+    },
+    {
+      "rule": "status.sweep.deliberate",
+      "status": "pass",
+      "statement_hash": "sha256:bd83ebeb2a0e",
+      "duration_ms": 0,
+      "checks": [
+        "test/status.test.js:682"
+      ]
+    },
+    {
+      "rule": "threads.lifecycle.closes-where-it-was-asked",
+      "status": "pass",
+      "statement_hash": "sha256:7b9c7c47a41d",
+      "duration_ms": 0,
+      "checks": [
+        "test/status.test.js:738"
+      ]
+    },
+    {
+      "rule": "status.attention.agent-tier-queued",
+      "status": "pass",
+      "statement_hash": "sha256:b813158e0a11",
+      "duration_ms": 0,
+      "checks": [
+        "test/status.test.js:876",
+        "test/status.test.js:896"
+      ]
+    }
+  ]
+}

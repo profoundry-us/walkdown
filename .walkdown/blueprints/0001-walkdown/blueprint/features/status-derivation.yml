@@ -515,9 +515,9 @@ stories:
       - id: status.attention.agent-tier-queued
         origin: walkdown
         created_at: 2026-09-23
-        statement: A built rule the agent tier has never judged, or judged before it went stale, is in the agent's queue.
-        because: An agent reads its queue to know what is left, and a rule missing from it gets handed to a person unjudged.
-        history: Five rules reached Topher's walkdown with the agent tier owed on 2026-09-23, and nothing in the status report had said so.
+        statement: A built rule the agent tier has never judged, or judged before it went stale, is in the agent's queue and in no signer's.
+        because: An agent reads its queue to know what is left, and a person handed a rule no agent has looked at does the agent's job.
+        history: Five rules reached Topher's walkdown with the agent tier owed on 2026-09-23, and nothing in the status report had said so. The agent item first sat beside the signers' until Topher chose to hold the rule back from them (q-0336), accepting that a new project's queue opens empty.
         verify: [checks]
         signoff: [eng, product]
         steps:
@@ -527,10 +527,11 @@ stories:
             - Attention is derived and the report is printed
           then:
             - The first two are each one agent item saying which rule to judge and whether it was never judged or has gone stale
-            - The passing rule is not queued to the agent
+            - Neither is in any person's queue to judge, whatever roles have not signed, until the agent has judged it
+            - The passing rule is not queued to the agent, and is queued to each role that has not signed it
             - A pass older than a claimed fix is the re-judge item instead, never both
             - An unbuilt rule is not queued for judging, since there is no build to look at
-          statement_hash: sha256:09fa17d00ecf
+          statement_hash: sha256:b813158e0a11
 
       - id: status.attention.blocked-queues
         origin: prd
@@ -548,9 +549,10 @@ stories:
             - An addressed observation on a walkable rule is the agent's to settle, never a person's to verify - it noticed it itself and closes it itself
             - A thread on no rule, or on a retired one, is its own item, and only a person's feedback or request makes a verify item there - a finding or an observation on a retired rule waits on nobody
             - "A cover item is a rule demanding checks while no check claims it: an agent writes the check, and it is never a person's to judge"
+            - A built rule the agent tier still owes is the agent's alone, so it is judged by an agent before any person is asked to sign it
             - Every item names who is blocked, so nothing sits in both queues at once
             - A rule holding an answered question is the agent's to fold in and is queued to no person - not to judge, not to verify - until the question is incorporated
-          statement_hash: sha256:7a494a8c560c
+          statement_hash: sha256:8e52f2c44ada
 
       - id: status.attention.names-the-role
         origin: walkdown

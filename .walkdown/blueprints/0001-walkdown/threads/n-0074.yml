@@ -4,7 +4,7 @@ author: Topher Fangio
 created: 2026-08-26T02:53:39Z
 anchor:
   rule: ownership.evidence.same-surface
-status: addressed
+status: verified
 body: This rule doesn't make sense to me and has no UI; so it likely shouldn't
   be a rule here. Perhaps this is a unit test or something else?
 replies:
@@ -25,3 +25,4 @@ replies:
       rule any more. Retiring cost nothing: no check was tagged with this id,
       lint is at 0 errors, and node --test is 93/93."
 reason: finding
+verified_by: topher
