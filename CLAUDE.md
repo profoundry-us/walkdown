@@ -106,6 +106,14 @@ the reasons are in `rollup.config.mjs` and both are load-bearing.
 not the builds, for the same reason. (`tools/sync-shared.mjs`, which pasted
 shared modules into the embed, retired when the embed got its bundler.)
 
+## The agent tier before the turn ends
+
+A rule built, split or reworded owes the agent tier, and Highball's turn-end
+run refuses to end the turn while any does (`.highball/checks/agent-tier-owed`,
+Topher, 2026-09-23). Judge it with `walkdown-judge` on a scratch copy, record
+the verdict, and `node tools/sitting.mjs owed` reads 0. A sweep is exempt: a
+cell stale only because of one waits on the sitting, not on this turn.
+
 ## Judging the whole board
 
 `walkdown-judge` is for a rule or the handful a change touched. For everything

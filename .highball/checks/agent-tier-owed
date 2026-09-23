@@ -1,0 +1,59 @@
+#!/usr/bin/env node
+/*
+ * Nothing is presented to Topher with the agent tier still owed on it.
+ *
+ * A rule built, split or reworded comes back never or stale in the agent
+ * column, and an agent that ends its turn there hands over work nobody has
+ * looked at. Topher found five such rules in his 2026-09-23 walkdown and asked
+ * for this gate. It runs at turn end, not per edit: owing the tier mid-change
+ * is normal, and ending a turn with it owed is what is refused.
+ *
+ * A sweep is exempt. `walkdown sweep --tiers agent` makes every verdict stale
+ * at once, on purpose, and the sitting that follows takes many turns; a gate
+ * that blocked every one of them would make sweeps impossible. So a cell
+ * stale ONLY because of a sweep is left to the sitting. One that was also
+ * reworded or lost its check is still owed. A fail is not counted: it was
+ * judged, and its thread says what is owed.
+ *
+ * From the hook's own home, imported first, for the reason lint-registered
+ * gives: the answer must not depend on whose laptop ran it.
+ */
+import { spawnSync } from "node:child_process";
+import { mkdirSync } from "node:fs";
+import { resolve } from "node:path";
+
+const root = resolve(import.meta.dirname, "..", "..");
+const home = resolve(root, "tmp", "hook-home");
+mkdirSync(home, { recursive: true });
+const env = { ...process.env, WALKDOWN_HOME: home, NO_COLOR: "1" };
+const cli = resolve(root, "bin", "walkdown.js");
+
+const imported = spawnSync(process.execPath, [cli, "import", root, "--all"], { cwd: root, env, encoding: "utf8" });
+if (imported.status !== 0) {
+  process.stdout.write(imported.stdout + imported.stderr);
+  process.exit(imported.status ?? 1);
+}
+// status exits non-zero whenever anything fails; the JSON is on stdout either way.
+const out = spawnSync(process.execPath, [cli, "status", "--json"], { cwd: root, env, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
+let report;
+try {
+  report = JSON.parse(out.stdout);
+} catch {
+  process.stdout.write(out.stdout + out.stderr);
+  process.exit(1);
+}
+const owed = report.rows
+  .filter((r) => (r.verify ?? []).includes("agent"))
+  .filter((r) => {
+    const a = r.agent ?? { state: "never" };
+    if (a.state === "never") return true;
+    if (a.state !== "stale") return false;
+    return !a.sweptBy || Boolean(a.staleBy);
+  });
+if (!owed.length) {
+  console.log("agent tier: nothing owed outside a sweep");
+  process.exit(0);
+}
+console.log(`agent tier: ${owed.length} rule(s) owed. Judge them before presenting the work (walkdown-judge, on a scratch copy):`);
+for (const r of owed) console.log(`  ${r.agent?.state ?? "never"}${r.agent?.staleBy ? ` (${r.agent.staleBy})` : ""}  ${r.rule}`);
+process.exit(1);

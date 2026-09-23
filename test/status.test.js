@@ -595,6 +595,26 @@ test('a sweep makes earlier verdicts stale, and the runs survive it @rule:status
   assert.equal(swept.rows[0].agent.runId, '2026-01-01T00:00:00Z');
 });
 
+/*
+ * Why a cell is stale, when a sweep is not the whole answer. The turn-end
+ * gate (.highball/checks/agent-tier-owed) leaves a cell stale only by a
+ * sweep to the sitting, and refuses one that was also reworded.
+ */
+test('a cell stale only by a sweep says so; one also reworded says that too @rule:status.sweep.declares-a-floor', () => {
+  const swept = deriveStatus(
+    blueprint({ runs: [walkdownRun('2026-01-01T00:00:00Z', 'agent', 'pass'), sweep('2026-02-01T00:00:00Z', ['agent'])], verify: ['checks', 'agent'] }),
+  );
+  assert.equal(swept.rows[0].agent.sweptBy, '2026-02-01T00:00:00Z');
+  assert.equal(swept.rows[0].agent.staleBy, undefined);
+
+  const reworded = { ...walkdownRun('2026-01-01T00:00:00Z', 'agent', 'pass') };
+  reworded.results = [{ ...reworded.results[0], statement_hash: 'sha256:000000000000' }];
+  const both = deriveStatus(blueprint({ runs: [reworded, sweep('2026-02-01T00:00:00Z', ['agent'])], verify: ['checks', 'agent'] }));
+  assert.equal(both.rows[0].agent.state, 'stale');
+  assert.equal(both.rows[0].agent.sweptBy, '2026-02-01T00:00:00Z');
+  assert.equal(both.rows[0].agent.staleBy, 'rewording');
+});
+
 test('judging again after a sweep clears it @rule:status.sweep.declares-a-floor', () => {
   const derived = deriveStatus(
     blueprint({

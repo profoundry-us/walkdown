@@ -1,0 +1,123 @@
+{
+  "run_id": "2026-09-23T19-00-08Z-local-01",
+  "created": "2026-09-23T19:00:08Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "4203459-dirty",
+  "tree_hash": "sha256:1b2445a43992",
+  "spec_hash": "sha256:8663e2c61811",
+  "results": [
+    {
+      "rule": "status.derived.latest-wins",
+      "status": "pass",
+      "statement_hash": "sha256:321c83ca466e",
+      "duration_ms": 6,
+      "checks": [
+        "test/status.test.js:87",
+        "test/status.test.js:516",
+        "test/status.test.js:702",
+        "test/status.test.js:841"
+      ]
+    },
+    {
+      "rule": "status.derived.stale-never-passes",
+      "status": "pass",
+      "statement_hash": "sha256:b686591f5ca6",
+      "duration_ms": 0,
+      "checks": [
+        "test/status.test.js:107",
+        "test/status.test.js:120"
+      ]
+    },
+    {
+      "rule": "status.derived.human-tier-distinct",
+      "status": "pass",
+      "statement_hash": "sha256:511948134e22",
+      "duration_ms": 1,
+      "checks": [
+        "test/status.test.js:129"
+      ]
+    },
+    {
+      "rule": "status.attention.blocked-queues",
+      "status": "pass",
+      "statement_hash": "sha256:7a494a8c560c",
+      "duration_ms": 0,
+      "checks": [
+        "test/status.test.js:210",
+        "test/status.test.js:249"
+      ]
+    },
+    {
+      "rule": "status.derived.verdict-belongs-to-a-place",
+      "status": "pass",
+      "statement_hash": "sha256:994ece7e6ab2",
+      "duration_ms": 0,
+      "checks": [
+        "test/status.test.js:439",
+        "test/status.test.js:472",
+        "test/status.test.js:505"
+      ]
+    },
+    {
+      "rule": "status.derived.addressless-runs-count",
+      "status": "pass",
+      "statement_hash": "sha256:4a35f16299d7",
+      "duration_ms": 0,
+      "checks": [
+        "test/status.test.js:487"
+      ]
+    },
+    {
+      "rule": "status.derived.unbacked-pass-goes-stale",
+      "status": "pass",
+      "statement_hash": "sha256:c3d9169bc7f4",
+      "duration_ms": 0,
+      "checks": [
+        "test/status.test.js:526",
+        "test/status.test.js:546",
+        "test/status.test.js:554"
+      ]
+    },
+    {
+      "rule": "status.sweep.declares-a-floor",
+      "status": "pass",
+      "statement_hash": "sha256:09aee8e39b46",
+      "duration_ms": 0,
+      "checks": [
+        "test/status.test.js:579",
+        "test/status.test.js:603",
+        "test/status.test.js:618",
+        "test/status.test.js:633"
+      ]
+    },
+    {
+      "rule": "status.sweep.says-what-is-left",
+      "status": "pass",
+      "statement_hash": "sha256:8f76421439bf",
+      "duration_ms": 0,
+      "checks": [
+        "test/status.test.js:648"
+      ]
+    },
+    {
+      "rule": "status.sweep.deliberate",
+      "status": "pass",
+      "statement_hash": "sha256:bd83ebeb2a0e",
+      "duration_ms": 0,
+      "checks": [
+        "test/status.test.js:666"
+      ]
+    },
+    {
+      "rule": "threads.lifecycle.closes-where-it-was-asked",
+      "status": "pass",
+      "statement_hash": "sha256:7b9c7c47a41d",
+      "duration_ms": 0,
+      "checks": [
+        "test/status.test.js:722"
+      ]
+    }
+  ]
+}
