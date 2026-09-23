@@ -202,7 +202,7 @@ test('a statement-only hash is legacy, not stale: it lints, and --write re-stamp
  * hash under steps.reworded, with when and why, so a verdict that named the
  * old words still names the rule (test/status.test.js reads it back).
  */
-test('hash --write --reword keeps the old hash and says why; without it the old hash is gone @rule:time.records.stored-as-utc', () => {
+test('hash --write --reword keeps the old hash and says why; without it the old hash is gone @rule:time.records.stored-as-utc @rule:status.derived.stale-never-passes', () => {
   const h = writeFixture(join(root, 'reword'));
   runHashCommand(load(h), { write: true }); // current form first
   const file = join(h.spec, 'features', 'demo.yml');
@@ -230,8 +230,11 @@ test('hash --write --reword keeps the old hash and says why; without it the old 
   const current = rule.steps.statement_hash;
   runHashCommand(load(h), { write: true });
   const again = load(h).features[0].data.stories[0].rules[0];
-  assert.equal(again.steps.reworded.length, 2, 'the plain write adds nothing to the list');
+  assert.equal(again.steps.reworded, undefined, 'a change of meaning ends the list');
   assert.equal(hashMatches(current, again), false, 'the meaning moved, so the old hash is gone');
+  // And so is every wording before it: a verdict on the pre-rewording words
+  // matched through the list, and went on matching after the meaning moved.
+  assert.equal(hashMatches(old, again), false, 'an older rewording no longer names the rule either');
 });
 
 test('changing a step stales the hash the same as changing the statement', () => {

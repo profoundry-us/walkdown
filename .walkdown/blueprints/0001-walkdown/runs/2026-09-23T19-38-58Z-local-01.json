@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-09-23T19-38-58Z-local-01",
+  "created": "2026-09-23T19:38:58Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "b4d1cec-dirty",
+  "spec_hash": "sha256:3e7ba1bc7657",
+  "note": "Agent tier for status.derived.stale-never-passes after its new step: a plain change of meaning ends the reworded list. Probed on a stamped scratch copy (hash-0923) against a real signed rule.",
+  "results": [
+    {
+      "rule": "status.derived.stale-never-passes",
+      "status": "pass",
+      "statement_hash": "sha256:ba73225874b1",
+      "evidence": [
+        "runs/evidence/2026-09-23T19-33-24Z/stale-after-rewording.txt"
+      ],
+      "reasoning": "panel.rules.counts-legible carried eng and product signatures from 2026-09-07, current through the first of three hashes in its reworded list. A declared rewording of one step kept both signatures, which is the words-only case. A second edit that changed the step's meaning, written without --reword, took the reworded list off the rule, and both signatures then read as signed an older wording. Before the fix the list survived that write and the 2026-09-07 signatures kept counting."
+    }
+  ]
+}

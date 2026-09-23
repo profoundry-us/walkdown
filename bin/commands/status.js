@@ -349,8 +349,18 @@ export function run(args) {
         `  ${yellow(d.screen)}: no design yet${d.proposal ? ' (proposal on file)' : ''}` +
           `${d.requests.length ? dim(` — request ${d.requests.join(', ')} open`) : red(' — no design request filed')}`,
       );
-    for (const s of drift.sources)
-      console.log(`  ${yellow(s.rule)} ← ${s.origin} ${dim('(source docs not yet updated)')}`);
+    /*
+     * One line, not one per rule. Every rule born of a thread or of walkdown
+     * itself is listed, nothing ever clears one, and on this project the list
+     * ran to 139 lines that buried the rest of the report (2026-09-23). The
+     * rules are in `status --json` under drift.sources for whoever updates
+     * the source documents.
+     */
+    if (drift.sources.length)
+      console.log(
+        `  ${drift.sources.length} rule${drift.sources.length === 1 ? '' : 's'} came from threads or from walkdown rather than a PRD or the design` +
+          dim(' — the source documents may not say so yet (status --json lists them)'),
+      );
   }
 
   const active = listThreads(blueprint);

@@ -19,10 +19,6 @@ stories:
           then:
             - The mutation is rejected with the illegal transition named, and the file is unchanged
           statement_hash: sha256:c2384ee386f5
-          reworded:
-            - hash: sha256:102a0b235d5a
-              at: 2026-09-13
-              why: the hash covers the steps now; this one named the statement alone
 
       - id: threads.lifecycle.claim-never-accept
         origin: prd
@@ -70,16 +66,6 @@ stories:
             - No argument and no environment variable can name somebody else
             - A finding or an observation is the machine's own account, authored by the agent with no person named
           statement_hash: sha256:0306629cf026
-          reworded:
-            - hash: sha256:6790e9b3474c
-              at: 2026-09-13
-              why: the hash covers the steps now; this one named the statement alone
-            - hash: sha256:0306cfdcd747
-              at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
-            - hash: sha256:df8e11a02202
-              at: 2026-09-14T04:15:34Z
-              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: threads.lifecycle.reasoned-endings
         origin: prd
@@ -96,13 +82,6 @@ stories:
             - It is rejected; with a reason, the reason is appended as a reply and waived_by records the person
             - Reopening a verified or waived thread takes a person's acceptance back, so only a person may do it; a machine is refused and files a new thread instead
           statement_hash: sha256:97912647f98b
-          reworded:
-            - hash: sha256:24591753abaa
-              at: 2026-09-13
-              why: the hash covers the steps now; this one named the statement alone
-            - hash: sha256:e93d45c639b7
-              at: 2026-09-14T04:15:34Z
-              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: threads.lifecycle.says-why-it-exists
         origin: walkdown
@@ -218,16 +197,7 @@ stories:
             - Beside a pin, an id the popover cannot open itself links out to walkdown's own page at that thing's address, in a new tab - never a link that does nothing
             - Before you follow an id, it says what it names - under the cursor or keyboard focus, a card with the rule's statement and verdict, or the thread's status, author, age and first line, and whether the link leaves the page
           statement_hash: sha256:d3d0b129a2e7
-          reworded:
-            - hash: sha256:e58134b3796f
-              at: 2026-09-13
-              why: the hash covers the steps now; this one named the statement alone
-            - hash: sha256:6b387227a957
-              at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
-            - hash: sha256:38f76ce52560
-              at: 2026-09-14T04:15:34Z
-              why: "ADR 0004 wording pass: the words moved, the meaning did not"
+
       - id: threads.conversation.question-leads-with-the-question
         origin: thread:n-0202
         created_at: 2026-09-16
@@ -270,10 +240,7 @@ stories:
             - Choices may be put on a question already asked (`walkdown thread <id> --option`), once, while it is open - so a question asked before choices existed is not refiled to get them
             - Lint warns of an open question that offers no choices, so an ask nobody can answer with a press is caught before a walkdown meets it
           statement_hash: sha256:0e82be8b206b
-          reworded:
-            - hash: sha256:116b4f4dc582
-              at: 2026-09-21T01:38:05Z
-              why: q-0312/0313/0314 (no role refused; any signer; proxies offered), q-0300 (the judge is handed a port), q-0301 (the panel records only against the board it opened)
+
       - id: threads.conversation.written-in-markdown
         origin: thread:n-0288
         statement: A message is markdown, rendered from a short list of allowed elements; anything else in it is plain text.
@@ -358,10 +325,7 @@ stories:
             - In the stream, the agent's face is a robot in a dashed ring in the agent's blue; a person's is their initials on a filled disc, marked in the corner when a machine typed their words for them - so who said what is told without reading the names
             - Nothing under the box says who you are or how to send - the name stands in the thread's header
           statement_hash: sha256:3e30a750e842
-          reworded:
-            - hash: sha256:a79d09343f13
-              at: 2026-09-18T03:58:38Z
-              why: Waive moved to the far left of the row; the offers are the same
+
       - id: threads.conversation.new-since-you-looked
         origin: walkdown
         statement: A thread remembers where your reading stopped and marks what arrived since as new.
@@ -405,16 +369,6 @@ stories:
             - Replying to an ended thread is still possible - the record continues, the state does not
             - A recorded decision never reopens - it is a record, not a task
           statement_hash: sha256:d5a522828937
-          reworded:
-            - hash: sha256:06a879b1032c
-              at: 2026-09-13
-              why: the hash covers the steps now; this one named the statement alone
-            - hash: sha256:f9bd0d576c3f
-              at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
-            - hash: sha256:13405960e940
-              at: 2026-09-14T04:15:34Z
-              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: threads.conversation.thread-is-a-screen
         origin: walkdown

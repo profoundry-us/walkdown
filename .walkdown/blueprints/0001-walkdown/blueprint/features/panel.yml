@@ -65,25 +65,6 @@ stories:
             - Anchor `panel.screen-picker` says which screen this page is; what it does when opened is panel.dock.screen-picker's rule
             - Prototype and App switch which of the two the page area shows
             - Pin mode can be turned on and off there
-          reworded:
-            - hash: sha256:aaf28fbb5e0a
-              at: 2026-09-13
-              why: the hash covers the steps now; this one named the statement alone
-            - hash: sha256:d1fa86f02626
-              at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
-            - hash: sha256:d4d83635d936
-              at: 2026-09-14T04:15:34Z
-              why: "ADR 0004 wording pass: the words moved, the meaning did not"
-            - hash: sha256:ce78ef9239cc
-              at: 2026-09-14T16:05:26Z
-              why: the project switcher lives in the bar now (ADR 0001, n-0283); what the bar does not choose is the blueprint within a project
-            - hash: sha256:5988b4f10584
-              at: 2026-09-21T22:01:05Z
-              why: "toolbar: the storyboard step split into three sentences for the voice; same meaning"
-            - hash: sha256:c66f9357083f
-              at: 2026-09-21T22:12:12Z
-              why: "toolbar: the storyboard's cards are photographed and kept, not live frames - Topher, 2026-09-21: live pages inside the panel wreaked havoc on the host's CSS"
           statement_hash: sha256:7e9e52e85348
 
       - id: panel.dock.screen-picker
@@ -544,16 +525,6 @@ stories:
             - Server and blueprint are chosen in the panel, not in browser chrome
             - On a tab with no page to review, the click opens the running walkdown server at its standard port - its root, where a project is picked - and when none answers, a page of the extension's own says so; the click is never silent
           statement_hash: sha256:2a7b364ef850
-          reworded:
-            - hash: sha256:84bda3b30c1d
-              at: 2026-09-13
-              why: the hash covers the steps now; this one named the statement alone
-            - hash: sha256:bed2a74ca17d
-              at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
-            - hash: sha256:608a242984fb
-              at: 2026-09-14T04:15:34Z
-              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: panel.delivery.stale-copy-says-so
         origin: thread:n-0062
@@ -789,19 +760,6 @@ stories:
             - Each of the three tabs carries its own icon, from the same Phosphor set as the rest of the panel's chrome, sized and padded to read clearly at tab size rather than as an inline glyph shrunk to fit
             - The rule id at the head of the detail is a button - pressing it copies the id and says so, because an id you can name is one you paste into a commit, a run or a message. It shows the ordinary pointer hand
           statement_hash: sha256:bd567f0289e2
-          reworded:
-            - hash: sha256:493a83d3f0bd
-              at: 2026-09-13
-              why: the hash covers the steps now; this one named the statement alone
-            - hash: sha256:7fb2ea6d8a22
-              at: 2026-09-14T04:15:34Z
-              why: "ADR 0004 wording pass: the words moved, the meaning did not"
-            - hash: sha256:4dd6fe8938f7
-              at: 2026-09-21T01:52:17Z
-              why: n-0318 source modal with a GitHub link, n-0320 the id copies itself, n-0321 headless said once, n-0324/n-0325 toasts inside the frame with a cap
-            - hash: sha256:2bd75a1bf4f7
-              at: 2026-09-21T01:53:08Z
-              why: n-0318 source modal with a GitHub link, n-0320 the id copies itself, n-0321 headless said once, n-0324/n-0325 toasts inside the frame with a cap
 
       - id: panel.rules.takes-you-there
         origin: thread:n-0031
@@ -979,19 +937,6 @@ stories:
             - Check source is a button that opens the checks' source over the whole desk - each check in full, with a link that opens the same lines on GitHub in a new tab when the tree has a GitHub remote
             - Behind the check source, and behind evidence, the desk blurs, and every file name sits on its own dark ground so it reads over whatever is beneath
           statement_hash: sha256:79686951989e
-          reworded:
-            - hash: sha256:65b84178c291
-              at: 2026-09-13
-              why: the hash covers the steps now; this one named the statement alone
-            - hash: sha256:890e7391a2ee
-              at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
-            - hash: sha256:e6a5efd7ff2e
-              at: 2026-09-14T04:15:34Z
-              why: "ADR 0004 wording pass: the words moved, the meaning did not"
-            - hash: sha256:dcbb494ff51d
-              at: 2026-09-21T01:52:17Z
-              why: n-0318 source modal with a GitHub link, n-0320 the id copies itself, n-0321 headless said once, n-0324/n-0325 toasts inside the frame with a cap
 
       - id: panel.rules.counts-legible
         origin: thread:n-0002
@@ -1197,16 +1142,6 @@ stories:
             - It is built from the same vocabulary the rail draws from, so it cannot describe marks the rail no longer uses
             - It opens upward and towards the room from the right edge of the footer, so none of it is cut off by the pane
           statement_hash: sha256:3a489f113413
-          reworded:
-            - hash: sha256:58cbf78e318c
-              at: 2026-09-13
-              why: the hash covers the steps now; this one named the statement alone
-            - hash: sha256:36417be07500
-              at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
-            - hash: sha256:ad00ec97fa8a
-              at: 2026-09-14T04:15:34Z
-              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: panel.rules.owed-apart-from-said
         origin: walkdown
@@ -1305,19 +1240,6 @@ stories:
             - An empty identity refuses the filing and offers the place to set one, rather than letting the server choose a name
             - Replying records no verdict and begins no sitting
           statement_hash: sha256:1ec250ee0904
-          reworded:
-            - hash: sha256:d66e49c63ed9
-              at: 2026-09-13
-              why: the hash covers the steps now; this one named the statement alone
-            - hash: sha256:1feb59efdd65
-              at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
-            - hash: sha256:96af529203d5
-              at: 2026-09-14T04:15:34Z
-              why: "ADR 0004 wording pass: the words moved, the meaning did not"
-            - hash: sha256:73a5451b5f13
-              at: 2026-09-14T04:24:19Z
-              why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
 
       - id: panel.rules.awaiting-you-first
         retired: Withdrawn the day it was built (2026-09-18). It repeated the list beneath it, and the walk already skips the rules that owe nothing - browsing wants the screen a rule is on, judging wants the walk, and a third list served neither (Topher).
@@ -1365,13 +1287,7 @@ stories:
             - Nothing under the rule repeats which rule a thread is on
             - A fail's why lands on the conversation once. It is the reason the conversation reopens when it was addressed, and a reply otherwise
           statement_hash: sha256:72d801697bb2
-          reworded:
-            - hash: sha256:cd9c17333cb0
-              at: 2026-09-21T01:58:53Z
-              why: the rule shows the last thing said and opens the whole history one slide right; a question is answerable from its own screen (n-0319)
-            - hash: sha256:d26a21707acc
-              at: 2026-09-21T02:00:37Z
-              why: the rule shows the last thing said and opens the whole history one slide right; a question is answerable from its own screen (n-0319)
+
   - id: panel.threads
     title: Feedback is answered where it is read
     statement: As a reviewer, I can reply to a thread and move its lifecycle on from the panel, without leaving the app I am reviewing.
@@ -1412,16 +1328,6 @@ stories:
             - Waiving or reopening without a reason is refused until one is written
             - Waive on a rule's composer is the same act on the rule's live note, and refuses the same two ways
           statement_hash: sha256:bed712993db3
-          reworded:
-            - hash: sha256:7c4e1e2d1562
-              at: 2026-09-13
-              why: the hash covers the steps now; this one named the statement alone
-            - hash: sha256:9d263352d2ff
-              at: 2026-09-14T04:15:34Z
-              why: "ADR 0004 wording pass: the words moved, the meaning did not"
-            - hash: sha256:f1610126f057
-              at: 2026-09-14T04:24:19Z
-              why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
 
       - id: panel.threads.show-the-sketch
         origin: thread:n-0010
@@ -1469,13 +1375,6 @@ stories:
             - Opening one shows the conversation beside the list, and the way back from it is the list of threads rather than a rule nobody opened
             - How many threads are waiting on a person is carried on the tab itself, so it is legible from whichever tab is open
           statement_hash: sha256:c7308a0fa227
-          reworded:
-            - hash: sha256:faade3b887d1
-              at: 2026-09-13
-              why: the hash covers the steps now; this one named the statement alone
-            - hash: sha256:09bd656d03f9
-              at: 2026-09-14T04:15:34Z
-              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
   - id: panel.walkdown
     title: A walkdown from the panel is a walkdown
@@ -1571,19 +1470,6 @@ stories:
             - Beginning wears it too when rules are owed, so the blueprint says there is work before being asked; with nothing owed it drops back to the ordinary action colour, because a control that is always loud says nothing
             - Every one of these counts comes from a single list - the rules owing you a verdict, less the ones judged this sitting - so the tab's number, the footer's kinds, the tally's denominator and the rule Continue opens cannot drift apart
           statement_hash: sha256:3c61387a8bd2
-          reworded:
-            - hash: sha256:c74a54acc395
-              at: 2026-09-13
-              why: the hash covers the steps now; this one named the statement alone
-            - hash: sha256:8a7122b87a96
-              at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
-            - hash: sha256:ac216e33f70b
-              at: 2026-09-14T04:15:34Z
-              why: "ADR 0004 wording pass: the words moved, the meaning did not"
-            - hash: sha256:cb5fbb165d7a
-              at: 2026-09-21T01:24:47Z
-              why: Skip beside Continue, the tally in the footer, roles one per line, the username behind the name (n-0309)
 
       - id: panel.walkdown.session-survives-reload
         origin: thread:n-0066
@@ -1635,16 +1521,6 @@ stories:
             - A draft is never committed by accident - the directory ignores its own contents
             - A sitting nobody has judged anything in leaves nothing on disk, and a reload asks who signs again. A sitting is real once something is judged (q-0250)
           statement_hash: sha256:8517d3ecb2c9
-          reworded:
-            - hash: sha256:cfb0ee61cad3
-              at: 2026-09-13
-              why: the hash covers the steps now; this one named the statement alone
-            - hash: sha256:208e1062b8c7
-              at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
-            - hash: sha256:35e52538a664
-              at: 2026-09-14T04:15:34Z
-              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: panel.walkdown.verdicts-at-hand
         origin: walkdown
@@ -1662,13 +1538,6 @@ stories:
             - The only thing between the conversation and the buttons is anchor `detail.feedback`, which panel.walkdown.note-with-any-verdict puts there
             - The chosen verdict stays visibly chosen when the rule is revisited
           statement_hash: sha256:2bf91b66cee0
-          reworded:
-            - hash: sha256:d67304c4aae1
-              at: 2026-09-13
-              why: the hash covers the steps now; this one named the statement alone
-            - hash: sha256:230135783bdb
-              at: 2026-09-14T04:15:34Z
-              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: panel.walkdown.pass-advances
         origin: walkdown
@@ -1734,13 +1603,6 @@ stories:
             - Judging with the box empty files no thread
             - The box sits above anchor `detail.verdict`, so the why is asked for before the verdict
           statement_hash: sha256:7d8fa9eecfc8
-          reworded:
-            - hash: sha256:f9043305838b
-              at: 2026-09-13
-              why: the hash covers the steps now; this one named the statement alone
-            - hash: sha256:b08fe1ef5a23
-              at: 2026-09-14T04:15:34Z
-              why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: panel.walkdown.fail-requires-why
         origin: thread:n-0051

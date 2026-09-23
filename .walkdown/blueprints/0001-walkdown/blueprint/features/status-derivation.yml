@@ -46,15 +46,9 @@ stories:
             - A fresh verdict against the current wording clears it
             - "The old run is untouched: it still says what it said, about the wording it said it about"
             - A rewording declared as such (`walkdown hash --write --reword "<why>"`) keeps the old hash on the rule with when and why, and a pass against it stays a pass - better English is not a new rule
+            - A change of meaning, written without `--reword`, ends that list, so a pass against any earlier wording reads stale, not only one against the wording it replaced
             - A hash from before the steps were part of it still matches while the statement holds, so the change itself stales nothing
-          statement_hash: sha256:b686591f5ca6
-          reworded:
-            - hash: sha256:9b16ab78cd04
-              at: 2026-09-13
-              why: the hash covers the steps now; this one named the statement alone
-            - hash: sha256:56103ee8cbd4
-              at: 2026-09-14T02:50:03Z
-              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
+          statement_hash: sha256:ba73225874b1
 
       - id: status.derived.verdict-belongs-to-a-place
         origin: thread:q-0070
@@ -346,16 +340,7 @@ stories:
             - Once a thread on the rule is addressed after the send-back and the agent tier has passed the fix, the signer is asked to look again, and the item names the thread that claimed the fix
             - Their fresh verdict is what clears it
           statement_hash: sha256:1aef4eaeadde
-          reworded:
-            - hash: sha256:e4eefb4e58a4
-              at: 2026-09-13
-              why: the hash covers the steps now; this one named the statement alone
-            - hash: sha256:5219b52da8b6
-              at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
-            - hash: sha256:2796865a828b
-              at: 2026-09-14T04:15:34Z
-              why: "ADR 0004 wording pass: the words moved, the meaning did not"
+
       - id: status.acceptance.verdict-needs-every-role
         origin: walkdown
         statement: A rule passes only when every kind of evidence it asks for has a current pass and every role it names has signed. One role's signature never counts for another, and the human walkdown is those signatures, not a second kind of evidence on top.
@@ -566,25 +551,6 @@ stories:
             - Every item names who is blocked, so nothing sits in both queues at once
             - A rule holding an answered question is the agent's to fold in and is queued to no person - not to judge, not to verify - until the question is incorporated
           statement_hash: sha256:7a494a8c560c
-          reworded:
-            - hash: sha256:d51f57ea2c48
-              at: 2026-09-13
-              why: the hash covers the steps now; this one named the statement alone
-            - hash: sha256:5a12308a4617
-              at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
-            - hash: sha256:1cf36d2794b9
-              at: 2026-09-14T04:15:34Z
-              why: "ADR 0004 wording pass: the words moved, the meaning did not"
-            - hash: sha256:0d1dfd67e1ff
-              at: 2026-09-14T04:24:19Z
-              why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
-            - hash: sha256:3bda00e699f8
-              at: 2026-09-14T16:05:26Z
-              why: agents and people in two sentences, agents first, in the order the tiers run
-            - hash: sha256:b58b9d124384
-              at: 2026-09-14T17:15:34Z
-              why: each queue's items named by the verb asked of you; re-judge added since the code has queued it to agents since unjudgedFix landed
 
       - id: status.attention.names-the-role
         origin: walkdown

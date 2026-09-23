@@ -414,10 +414,3 @@ stories:
             - Verify is offered beside the pin when the config declares who is sitting here and the note is answered and waits on a person; never on an observation, a question, or under a guessed name
             - Pressing it records the thread as verified under that name and the pin leaves the page; waiving still needs the panel or the CLI, where a reason can be given
           statement_hash: sha256:6caaf490496b
-          reworded:
-            - hash: sha256:9878eb8459f2
-              at: 2026-09-13
-              why: the hash covers the steps now; this one named the statement alone
-            - hash: sha256:a473c0119449
-              at: 2026-09-14T04:15:34Z
-              why: "ADR 0004 wording pass: the words moved, the meaning did not"

@@ -24,10 +24,3 @@ stories:
             - The config init writes names the clone's Playwright reporter by its file path, so a project with no walkdown package installed can record its checks
             - Third-party code it carries is committed, attributed, and built from a named source rather than edited by hand
           statement_hash: sha256:72ed038ac8f5
-          reworded:
-            - hash: sha256:ffbb7cd667c2
-              at: 2026-09-13
-              why: the hash covers the steps now; this one named the statement alone
-            - hash: sha256:2b4abf917202
-              at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
