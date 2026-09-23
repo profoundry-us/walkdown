@@ -1,0 +1,63 @@
+{
+  "run_id": "2026-09-23T18-51-18Z-local-01",
+  "created": "2026-09-23T18:51:18Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "cc85e1c-dirty",
+  "spec_hash": "sha256:8663e2c61811",
+  "note": "Agent tier for the rules Topher's 2026-09-23 walkdown left owed: the three halves of the toolbar split, threads.question.one-ask after its lint step, and the new threads.lifecycle.not-on-a-retired-rule. Screens were driven on a stamped scratch copy served on 4730 (look-0923); the retired-rule door was probed there by CLI and API.",
+  "results": [
+    {
+      "rule": "panel.dock.toolbar",
+      "status": "pass",
+      "statement_hash": "sha256:7e9e52e85348",
+      "evidence": [
+        "runs/evidence/2026-09-23T18-50-06Z/bar.png",
+        "runs/evidence/2026-09-23T18-50-06Z/look.json"
+      ],
+      "reasoning": "The bar reads left to right: project switcher naming look-0923, the blueprint named as plain text in a span and not a control, the screen picker naming The review page while shut, then Prototype and App either side of the slider and the Pin mode button. Every control the statement lists is in the bar and nothing rule-specific is. Choosing a blueprint is not offered there."
+    },
+    {
+      "rule": "panel.dock.screen-picker",
+      "status": "pass",
+      "statement_hash": "sha256:b515f58c3a54",
+      "evidence": [
+        "runs/evidence/2026-09-23T18-50-06Z/picker-list.png",
+        "runs/evidence/2026-09-23T18-50-06Z/picker-hand-picked.png",
+        "runs/evidence/2026-09-23T18-50-06Z/look.json"
+      ],
+      "reasoning": "Shut, the picker names The review page. Open, it lists Detect from the page with review beside it and every screen of the storyboard with its design mark. Picking Rule detail by hand closes the list, lands the frame on it, and the bar's picker takes an outlined highlight that the detected label did not have. Reopened, the list marks Rule detail rather than Detect. Going back to Detect with the frame still on rule-detail reports rule-detail, which is the page, not a remembered answer."
+    },
+    {
+      "rule": "panel.dock.storyboard",
+      "status": "pass",
+      "statement_hash": "sha256:b465140e3667",
+      "evidence": [
+        "runs/evidence/2026-09-23T18-50-06Z/storyboard.png",
+        "runs/evidence/2026-09-23T18-50-06Z/look.json"
+      ],
+      "reasoning": "The open picker offers List and Storyboard tabs. Storyboard draws seven cards for the seven screens in storyboard order, no iframes, each an img from the server's kept picture at 280 wide, in a 930-wide popover that stays on the 1280 stage. Titles, ids and design labels sit under each card, and the hand-picked rule-detail card wears PICKED. The pages on the cards can be made out at this size, which is what the rule now asks."
+    },
+    {
+      "rule": "threads.question.one-ask",
+      "status": "pass",
+      "statement_hash": "sha256:0e82be8b206b",
+      "evidence": [
+        "runs/evidence/2026-09-23T18-50-06Z/question-q-0317.png",
+        "runs/evidence/2026-09-23T18-50-06Z/look.json"
+      ],
+      "reasoning": "q-0317 on the thread screen leads with its question, then draws its two options as a numbered list of cards with the label in bold and the why beside it. The chosen one, Yes - split the two questions, is outlined green with a check, and Topher's reply records the same label. The lint half of the rule was exercised on the real board, where q-0335 was flagged until it was given choices and then went silent."
+    },
+    {
+      "rule": "threads.lifecycle.not-on-a-retired-rule",
+      "status": "pass",
+      "statement_hash": "sha256:b09baad89679",
+      "evidence": [
+        "runs/evidence/2026-09-23T18-50-06Z/retired-rule-probe.txt"
+      ],
+      "reasoning": "Tried to break it three ways on the scratch copy. A note by the CLI on screens.ownership.one-claimant, a question with two choices on panel.start.unclaimed-page-says-so, and a note by the API were all refused, each quoting that rule's retirement note, and the thread count stayed at 334. A reply on n-0244, already on a retired rule, landed. Reopening it made lint warn thread-on-retired-rule naming n-0244, and while it sat addressed lint said nothing."
+    }
+  ]
+}
