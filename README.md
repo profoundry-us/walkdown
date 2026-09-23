@@ -50,16 +50,20 @@ panel riding beside the running app and rendering those same files.
 walkdown is not on a registry, and does not need one. **The clone is the install:**
 
 ```
-git clone https://github.com/profoundry-us/walkdown.git ~/.walkdown/walkdown
+git clone --branch v0.1.0 https://github.com/profoundry-us/walkdown.git ~/.walkdown/walkdown
 node ~/.walkdown/walkdown/bin/walkdown.js --help
 ```
+
+`v0.1.0` is the latest tagged version, and a tag is the stable copy to grab. `main`
+moves daily; leave `--branch` off to follow it. walkdown is pre-1.0, so a minor version
+may still change the ledger, thread or registry formats.
 
 No `npm install`, no build, no network. The panel bundle, the stylesheet and walkdown's
 one dependency ([`vendor/yaml.js`](vendor/README.md)) are all committed; rollup, tailwind
 and playwright are build-time only. Then:
 
 ```
-walkdown skills                      # the agent procedures, into ~/.claude/skills
+walkdown skills --into ~/.claude/skills   # the agent procedures; init also installs them
 walkdown init --dir <your-project>   # spec, ledger and pointer — outside your repo by default
 ```
 

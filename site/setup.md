@@ -21,8 +21,13 @@ directory to delete, beside the records walkdown keeps — but a person with a
 `~/src` will usually want it there.
 
 ```
-git clone https://github.com/profoundry-us/walkdown.git ~/.walkdown/walkdown
+git clone --branch v0.1.0 https://github.com/profoundry-us/walkdown.git ~/.walkdown/walkdown
 ```
+
+That is the latest tagged version, the one to use unless the person asks for
+something else. Tags are the stable copies; `main` moves daily. To follow `main`
+instead, leave `--branch v0.1.0` off. `git -C ~/.walkdown/walkdown tag` lists
+the versions a clone knows about.
 
 ## 2. There is no step 2
 
@@ -41,10 +46,11 @@ ln -s ~/.walkdown/walkdown/bin/walkdown.js ~/.local/bin/walkdown   # if that is 
 ## 3. Install the procedures
 
 ```
-walkdown skills
+walkdown skills --into ~/.claude/skills
 ```
 
-This writes walkdown's skills into `~/.claude/skills`, where they work in every
+Name the directory: with no terminal to ask, a bare `walkdown skills` writes
+nothing. This writes walkdown's skills into `~/.claude/skills`, where they work in every
 project on this machine and add nothing to any repository. (`--project` puts
 them in `./.claude/skills` instead, for a team that wants them from a clone.)
 
