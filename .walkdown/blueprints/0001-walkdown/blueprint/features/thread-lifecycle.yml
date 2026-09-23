@@ -171,6 +171,26 @@ stories:
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
+      - id: threads.lifecycle.not-on-a-retired-rule
+        origin: thread:q-0335
+        created_at: 2026-09-22
+        statement: No new thread is filed on a retired rule.
+        because: A retired rule is a decision already recorded, and a thread on it re-opens that decision where no walk will reach it.
+        history: q-0317 and q-0335 were both filed on screens.ownership.one-claimant, which ADR 0001 had retired, and each asked again what its retirement note already said (2026-09-22).
+        verify: [checks]
+        signoff: [eng, product]
+        steps:
+          given:
+            - A rule marked retired, with a note saying where its concern lives now
+          when:
+            - Someone files a note or a question anchored to it, then lints the blueprint
+          then:
+            - The door refuses the new thread, note or question alike, and the refusal quotes the retirement note
+            - A reply or a status change on a thread already on the rule goes through, so its history stays reachable
+            - Lint warns of a thread on a retired rule that waits on an agent, open or answered, and says to move it or close it
+            - A thread there that waits on its person, or has ended, draws no warning
+          statement_hash: sha256:b09baad89679
+
   - id: threads.conversation
     title: A thread reads as a conversation
     statement: As a reviewer, reading and answering feedback feels like talking - I can see who said what and when, catch up on what is new, and reply without leaving the page under review.

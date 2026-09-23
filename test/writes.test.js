@@ -298,3 +298,39 @@ test('only writes.js may write: the request path imports no writer of its own @r
   for (const banned of ["'./threads.js'", "'./draft.js'", "'./run-record.js'", "'./writes.js'"])
     assert.ok(!serveSrc.includes(`from ${banned}`), `serve.js imports ${banned}`);
 });
+
+/*
+ * Two questions were filed on a rule ADR 0001 had already retired, and each
+ * re-opened what its retirement note recorded (q-0317, q-0335). The door
+ * refuses a new thread there and says where the concern lives now; a reply
+ * on a thread already there still goes through.
+ */
+test('a new thread on a retired rule is refused with the rule\'s note; a reply on one already there is not @rule:threads.lifecycle.not-on-a-retired-rule', async () => {
+  const p = project();
+  try {
+    const feat = join(p.bp, 'features', 'demo.yml');
+    writeFileSync(feat, readFileSync(feat, 'utf8') + '\n      - id: demo.main.gone\n        retired: Withdrawn; the concern lives on demo.main.thing now.\n        statement: The old thing.\n');
+    await serve(p, async (base) => {
+      // Filed while it lived: the thread outlasts the rule, and still takes a reply.
+      const dir = loadBlueprint(p.bp).at.threads.path;
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(join(dir, 'n-0900.yml'), 'id: n-0900\nkind: note\nauthor: writes-person\ncreated: 2026-09-01T00:00:00Z\nstatus: open\nanchor: { rule: demo.main.gone }\nbody: filed while it lived\n');
+      const reply = await post(base, '/api/threads/n-0900/replies', { body: 'moving this to the rule that carries it' });
+      assert.ok(reply.ok, JSON.stringify(reply.data));
+      for (const kind of ['note', 'question']) {
+        const r = await post(base, '/api/threads', {
+          kind,
+          body: kind === 'question' ? 'Should the old thing come back?' : 'the old thing is odd',
+          ...(kind === 'question' ? { options: [{ label: 'Yes' }, { label: 'No' }] } : {}),
+          anchor: { rule: 'demo.main.gone' },
+        });
+        assert.equal(r.ok, false, kind);
+        assert.match(JSON.stringify(r.data), /retired/);
+        assert.match(JSON.stringify(r.data), /lives on demo\.main\.thing now/);
+      }
+      assert.deepEqual(readdirSync(dir).filter((f) => f.endsWith('.yml')), ['n-0900.yml']);
+    });
+  } finally {
+    p.cleanup();
+  }
+});

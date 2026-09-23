@@ -649,3 +649,21 @@ test('an open question with no choices warns; with choices, or once answered, it
   ({ findings } = lint(load(h), { checks: false }));
   assert.equal(findings.filter((f) => f.category === 'question-without-choices').length, 0);
 });
+
+test('an open thread on a retired rule warns; an addressed one waits on its person and does not @rule:threads.lifecycle.not-on-a-retired-rule', () => {
+  const h = writeFixture(join(root, 'retired-anchor'));
+  const feat = readFileSync(join(h.spec, 'features', 'demo.yml'), 'utf8');
+  writeFileSync(
+    join(h.spec, 'features', 'demo.yml'),
+    feat.replace('        statement:', '        retired: Withdrawn, and the concern moved elsewhere.\n        statement:'),
+  );
+  const at = (status) => `id: n-7\nkind: note\nstatus: ${status}\nanchor: { rule: demo.main.thing }\nbody: about the thing\n`;
+  writeFileSync(join(h.threads, 'n-7.yml'), at('open'));
+  let { findings } = lint(load(h), { checks: false });
+  assert.ok(findings.some((f) => f.category === 'thread-on-retired-rule' && f.subject === 'n-7'));
+  for (const status of ['addressed', 'verified']) {
+    writeFileSync(join(h.threads, 'n-7.yml'), at(status));
+    ({ findings } = lint(load(h), { checks: false }));
+    assert.equal(findings.filter((f) => f.category === 'thread-on-retired-rule').length, 0, status);
+  }
+});

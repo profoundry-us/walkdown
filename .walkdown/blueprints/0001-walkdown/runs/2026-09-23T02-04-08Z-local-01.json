@@ -1,0 +1,151 @@
+{
+  "run_id": "2026-09-23T02-04-08Z-local-01",
+  "created": "2026-09-23T02:04:08Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "9811718-dirty",
+  "tree_hash": "sha256:8b44182262d2",
+  "spec_hash": "sha256:8663e2c61811",
+  "results": [
+    {
+      "rule": "locations.travel.judged-against-a-spec",
+      "status": "pass",
+      "statement_hash": "sha256:20d85cac1943",
+      "duration_ms": 13,
+      "checks": [
+        "test/lint.test.js:94"
+      ]
+    },
+    {
+      "rule": "time.records.stored-as-utc",
+      "status": "pass",
+      "statement_hash": "sha256:5040dfedc0c3",
+      "duration_ms": 33,
+      "checks": [
+        "test/lint.test.js:205"
+      ]
+    },
+    {
+      "rule": "ownership.drift.design-requests-required",
+      "status": "pass",
+      "statement_hash": "sha256:388852348271",
+      "duration_ms": 31,
+      "checks": [
+        "test/lint.test.js:264"
+      ]
+    },
+    {
+      "rule": "status.acceptance.signoff-defaults-to-eng",
+      "status": "pass",
+      "statement_hash": "sha256:8dd40d6249dc",
+      "duration_ms": 69,
+      "checks": [
+        "test/lint.test.js:376",
+        "test/lint.test.js:477"
+      ]
+    },
+    {
+      "rule": "status.evidence.excuse-must-argue",
+      "status": "pass",
+      "statement_hash": "sha256:3bc6240e9f9b",
+      "duration_ms": 53,
+      "checks": [
+        "test/lint.test.js:404",
+        "test/lint.test.js:436"
+      ]
+    },
+    {
+      "rule": "ownership.authoring.steps-are-required",
+      "status": "pass",
+      "statement_hash": "sha256:3227ee91ac45",
+      "duration_ms": 42,
+      "checks": [
+        "test/lint.test.js:450"
+      ]
+    },
+    {
+      "rule": "status.acceptance.roles-recorded-on-the-run",
+      "status": "pass",
+      "statement_hash": "sha256:1d24bfe00266",
+      "duration_ms": 14,
+      "checks": [
+        "test/lint.test.js:495"
+      ]
+    },
+    {
+      "rule": "ownership.authoring.statement-reads-at-a-glance",
+      "status": "pass",
+      "statement_hash": "sha256:97f1bacfb270",
+      "duration_ms": 29,
+      "checks": [
+        "test/lint.test.js:557"
+      ]
+    },
+    {
+      "rule": "ownership.authoring.machine-words-pass-the-voice",
+      "status": "pass",
+      "statement_hash": "sha256:4c46fabe7d48",
+      "duration_ms": 17,
+      "checks": [
+        "test/lint.test.js:581"
+      ]
+    },
+    {
+      "rule": "screens.anchors.renames-are-recorded",
+      "status": "pass",
+      "statement_hash": "sha256:a0495cc39a56",
+      "duration_ms": 28,
+      "checks": [
+        "test/lint.test.js:614"
+      ]
+    },
+    {
+      "rule": "threads.question.one-ask",
+      "status": "pass",
+      "statement_hash": "sha256:0e82be8b206b",
+      "duration_ms": 40,
+      "checks": [
+        "test/lint.test.js:635"
+      ]
+    },
+    {
+      "rule": "threads.lifecycle.not-on-a-retired-rule",
+      "status": "pass",
+      "statement_hash": "sha256:b09baad89679",
+      "duration_ms": 75,
+      "checks": [
+        "test/lint.test.js:653",
+        "test/writes.test.js:308"
+      ]
+    },
+    {
+      "rule": "locations.keeping.moving-is-a-decision",
+      "status": "pass",
+      "statement_hash": "sha256:1422c8dcbeae",
+      "duration_ms": 68,
+      "checks": [
+        "test/writes.test.js:100"
+      ]
+    },
+    {
+      "rule": "embed.threads.picture-on-a-pin",
+      "status": "pass",
+      "statement_hash": "sha256:2f187f8ad2f5",
+      "duration_ms": 108,
+      "checks": [
+        "test/writes.test.js:150"
+      ]
+    },
+    {
+      "rule": "ownership.writes.spec-never-implementation",
+      "status": "pass",
+      "statement_hash": "sha256:037b0d10dcea",
+      "duration_ms": 159,
+      "checks": [
+        "test/writes.test.js:212",
+        "test/writes.test.js:280"
+      ]
+    }
+  ]
+}
