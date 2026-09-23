@@ -37,6 +37,8 @@ usually want it there.
 `v0.1.0` is the latest tagged version: a tag is the stable copy, and `main`
 moves daily. Use the tag unless the person asks to follow `main`, in which case
 leave `--branch` off. `git -C <where> tag` lists the versions a clone knows.
+Git may warn that `refs/tags/v0.1.0` "is not a commit". That is how it
+announces an annotated tag; the clone is fine.
 
 **Do not run `npm install`.** walkdown has no runtime dependencies - the panel
 bundle, the stylesheet and its one library (`vendor/yaml.js`) are committed, so
