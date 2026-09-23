@@ -1,0 +1,69 @@
+{
+  "run_id": "2026-09-23T19-59-10Z-local-01",
+  "created": "2026-09-23T19:59:10Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "329fce2-dirty",
+  "tree_hash": "sha256:7dd49b4ed7ac",
+  "spec_hash": "sha256:af74a3950e37",
+  "results": [
+    {
+      "rule": "status.acceptance.role-comes-from-the-run",
+      "status": "pass",
+      "statement_hash": "sha256:cbfacc9c1f27",
+      "duration_ms": 8,
+      "checks": [
+        "test/acceptance.test.js:87",
+        "test/acceptance.test.js:125",
+        "test/acceptance.test.js:301"
+      ]
+    },
+    {
+      "rule": "status.acceptance.approval-covers-only-the-unbuilt",
+      "status": "pass",
+      "statement_hash": "sha256:7578ef132c6b",
+      "duration_ms": 0,
+      "checks": [
+        "test/acceptance.test.js:144"
+      ]
+    },
+    {
+      "rule": "status.acceptance.sent-back-is-a-fail",
+      "status": "pass",
+      "statement_hash": "sha256:1aef4eaeadde",
+      "duration_ms": 0,
+      "checks": [
+        "test/acceptance.test.js:178",
+        "test/acceptance.test.js:209"
+      ]
+    },
+    {
+      "rule": "status.acceptance.verdict-needs-every-role",
+      "status": "pass",
+      "statement_hash": "sha256:fb010aa75b4e",
+      "duration_ms": 0,
+      "checks": [
+        "test/acceptance.test.js:258"
+      ]
+    },
+    {
+      "rule": "status.attention.names-the-role",
+      "status": "pass",
+      "statement_hash": "sha256:827f89ed0df2",
+      "duration_ms": 0,
+      "checks": [
+        "test/acceptance.test.js:316"
+      ]
+    },
+    {
+      "rule": "status.evidence.agent-assumed",
+      "status": "pass",
+      "statement_hash": "sha256:a4faaa41b234",
+      "duration_ms": 0,
+      "checks": [
+        "test/acceptance.test.js:331"
+      ]
+    }
+  ]
+}

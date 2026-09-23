@@ -162,7 +162,9 @@ test('an approval covers an unbuilt rule and stops the moment there is a build @
   // build.
   const built = deriveStatus(
     blueprint({
-      runs: [signed('2026-01-01', 'topher', 'approved', ['eng']), checksRun('2026-01-02', 'pass')],
+      // An agent has looked too: a built rule it has not is held from every
+      // signer (q-0336), which is not what this is about.
+      runs: [signed('2026-01-01', 'topher', 'approved', ['eng']), checksRun('2026-01-02', 'pass'), agentRun('2026-01-03', 'pass')],
     }),
   );
   assert.equal(built.rows[0].built, true);
@@ -315,7 +317,7 @@ test('the queue names the role a rule waits on @rule:status.attention.names-the-
   const { attention } = deriveStatus(
     blueprint({
       signoff: ['eng', 'product', 'design'],
-      runs: [checksRun('2026-01-01', 'pass'), signed('2026-01-02', 'topher', 'pass', ['eng'])],
+      runs: [checksRun('2026-01-01', 'pass'), agentRun('2026-01-01T12:00:00Z', 'pass'), signed('2026-01-02', 'topher', 'pass', ['eng'])],
     }),
   );
   // "Somebody should look at this" was never the question. A queue that
