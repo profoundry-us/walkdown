@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-09-23T19-19-50Z-local-01",
+  "created": "2026-09-23T19:19:50Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "84e0e61-dirty",
+  "spec_hash": "sha256:8663e2c61811",
+  "note": "Corrects the composer-stays verdict in 2026-09-23T19-18-55Z-local-01: its reasoning read a reply count that could not move, because Enter on a rule with no live note files a new note, and it claimed a second Enter that was never pressed. Re-probed on a stamped scratch copy (enter-0923) counting notes and replies.",
+  "results": [
+    {
+      "rule": "threads.conversation.composer-stays",
+      "status": "pass",
+      "statement_hash": "sha256:bce50665dcd2",
+      "evidence": [
+        "runs/evidence/2026-09-23T19-12-55Z/enter/enter.json",
+        "runs/evidence/2026-09-23T19-12-55Z/enter/rule-box-enter-twice.png",
+        "runs/evidence/2026-09-23T19-12-55Z/look/thread-after-enter.png",
+        "runs/evidence/2026-09-23T19-12-55Z/look/look.json"
+      ],
+      "reasoning": "On the rule's box, Shift-Enter broke the line and Enter filed the two-line text as a new note: one thread and eight messages became two threads and nine, and the box emptied. A second Enter on the empty box changed nothing. A reply typed next went onto that note, nine messages to ten, the box emptied again, and one more Enter posted nothing. On an open thread's own screen Enter posted one reply carrying two held pictures and emptied the box. The box asks for no name."
+    }
+  ]
+}

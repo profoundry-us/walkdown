@@ -1,0 +1,62 @@
+{
+  "run_id": "2026-09-23T19-18-55Z-local-01",
+  "created": "2026-09-23T19:18:55Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "84e0e61-dirty",
+  "spec_hash": "sha256:8663e2c61811",
+  "note": "Rejudging four rules whose passing agent verdict predated a fix a thread claimed (n-0318, n-0330, n-0332, n-0333), after the turn-end gate was taught to count them. Driven on stamped scratch copies served on 4730 (rejudge-0923, then dup-0923 for a clean fail).",
+  "results": [
+    {
+      "rule": "embed.threads.picture-on-a-pin",
+      "status": "pass",
+      "statement_hash": "sha256:2f187f8ad2f5",
+      "evidence": [
+        "runs/evidence/2026-09-23T19-12-55Z/look4/file-over-the-app-frame.png",
+        "runs/evidence/2026-09-23T19-12-55Z/look4/file-over-the-conversation.png",
+        "runs/evidence/2026-09-23T19-12-55Z/look4/thread-screen-file-over-it.png",
+        "runs/evidence/2026-09-23T19-12-55Z/look4/held-after-drop.png",
+        "runs/evidence/2026-09-23T19-12-55Z/look4/look.json",
+        "runs/evidence/2026-09-23T19-12-55Z/look/thread-drop-off-the-box.png",
+        "runs/evidence/2026-09-23T19-12-55Z/look/look.json",
+        "runs/evidence/2026-09-23T19-12-55Z/look2/reopened-with-picture.png",
+        "runs/evidence/2026-09-23T19-12-55Z/look2/look.json"
+      ],
+      "reasoning": "With a file in the air over the app frame, the rule's conversation wore the dashed ready outline and its translucent cover saying a drop goes with the next thing said; over it the outline went solid and the cover said Drop it. The thread screen did the same. Leaving the frame cleared both. A drop on the thread body held the picture without opening a tab, a second drop held two, and Enter filed the reply carrying both. A fail on an addressed note reopened it with the dropped picture on the reason, drawn under its words. Dropping on the steps, outside the zone, held nothing, which is the zone as n-0333 reshaped it."
+    },
+    {
+      "rule": "panel.rules.evidence-visible",
+      "status": "pass",
+      "statement_hash": "sha256:79686951989e",
+      "evidence": [
+        "runs/evidence/2026-09-23T19-12-55Z/look/check-source-head.png",
+        "runs/evidence/2026-09-23T19-12-55Z/look/look.json"
+      ],
+      "reasoning": "Check source opens over the blurred desk with its head on a dark neutral ground at full opacity, the label bold at 13px, the rule id beside it and Close at the right, so the one line that could not be read over the desk now reads. The evidence layer is built from the same head markup in evidence.js; the look drove the check-source layer and I read the evidence one from source, not from a capture."
+    },
+    {
+      "rule": "panel.rules.one-conversation",
+      "status": "pass",
+      "statement_hash": "sha256:72d801697bb2",
+      "evidence": [
+        "runs/evidence/2026-09-23T19-12-55Z/one-fail-one-why.txt",
+        "runs/evidence/2026-09-23T19-12-55Z/look2/why-with-picture-in-the-conversation.png",
+        "runs/evidence/2026-09-23T19-12-55Z/look2/reopened-with-picture.png"
+      ],
+      "reasoning": "n-0330 was a fail's why landing twice. On a clean copy, a fail on a rule with no live note made exactly one POST to /api/threads and no reply; three reads over 24 seconds and a reload still showed the new note with no replies. On an open note the why went on as one reply, and on an addressed note it reopened the conversation with the why as the reason, once. The conversation drew each message once in order."
+    },
+    {
+      "rule": "threads.conversation.composer-stays",
+      "status": "pass",
+      "statement_hash": "sha256:bce50665dcd2",
+      "evidence": [
+        "runs/evidence/2026-09-23T19-12-55Z/look/thread-after-enter.png",
+        "runs/evidence/2026-09-23T19-12-55Z/look/rule-box-after-enter.png",
+        "runs/evidence/2026-09-23T19-12-55Z/look/look.json"
+      ],
+      "reasoning": "On an open thread, Enter posted the reply and emptied the box; the box read empty afterwards and a second Enter posted nothing, the reply count going from 0 to 1 only. On the rule's box, Shift-Enter broke the line and Enter sent the two-line text; the count held at 7 on a second Enter and no draft was left. The box asks for no name."
+    }
+  ]
+}

@@ -63,7 +63,8 @@ function owed() {
   const s = status();
   const sweep = (s.sweeps ?? []).find((x) => x.tier === 'agent');
   const rows = s.rows.filter((r) => (r.verify ?? []).includes('agent'));
-  const need = rows.filter((r) => ['never', 'stale', 'fail', 'blocked'].includes(r.agent?.state));
+  // A pass older than a fix a thread claims is a pass of the code before it.
+  const need = rows.filter((r) => ['never', 'stale', 'fail', 'blocked'].includes(r.agent?.state) || r.unjudgedFix);
   if (sweep)
     console.log(`sweep ${sweep.runId} — ${sweep.why}\n  ${sweep.done}/${sweep.of} judged since\n`);
   console.log(`${need.length} of ${rows.length} agent-tier rules owed:\n`);
@@ -74,7 +75,7 @@ function owed() {
     for (const r of byStory[story]) {
       const screens = [...new Set([...(r.flow ?? []), ...(r.screens ?? [])])];
       console.log(
-        `    ${r.agent.state.padEnd(7)} ${r.rule}${screens.length ? `  [${screens.join(' ')}]` : '  [headless]'}`,
+        `    ${(r.unjudgedFix ? 'fixed' : r.agent.state).padEnd(7)} ${r.rule}${screens.length ? `  [${screens.join(' ')}]` : '  [headless]'}`,
       );
     }
   }

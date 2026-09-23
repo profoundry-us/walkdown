@@ -13,7 +13,9 @@
  * that blocked every one of them would make sweeps impossible. So a cell
  * stale ONLY because of a sweep is left to the sitting. One that was also
  * reworded or lost its check is still owed. A fail is not counted: it was
- * judged, and its thread says what is owed.
+ * judged, and its thread says what is owed. A pass older than a fix a
+ * thread claims IS counted (`unjudgedFix`): the pass is of the code before
+ * the fix, and four such rules slipped past the first cut of this gate.
  *
  * From the hook's own home, imported first, for the reason lint-registered
  * gives: the answer must not depend on whose laptop ran it.
@@ -46,7 +48,7 @@ const owed = report.rows
   .filter((r) => (r.verify ?? []).includes("agent"))
   .filter((r) => {
     const a = r.agent ?? { state: "never" };
-    if (a.state === "never") return true;
+    if (a.state === "never" || r.unjudgedFix) return true;
     if (a.state !== "stale") return false;
     return !a.sweptBy || Boolean(a.staleBy);
   });
@@ -55,5 +57,8 @@ if (!owed.length) {
   process.exit(0);
 }
 console.log(`agent tier: ${owed.length} rule(s) owed. Judge them before presenting the work (walkdown-judge, on a scratch copy):`);
-for (const r of owed) console.log(`  ${r.agent?.state ?? "never"}${r.agent?.staleBy ? ` (${r.agent.staleBy})` : ""}  ${r.rule}`);
+for (const r of owed) {
+  const why = r.unjudgedFix ? `fix claimed in ${r.unjudgedFix.thread ?? r.unjudgedFix}` : r.agent?.staleBy ?? "";
+  console.log(`  ${r.agent?.state ?? "never"}${why ? ` (${why})` : ""}  ${r.rule}`);
+}
 process.exit(1);
