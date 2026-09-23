@@ -1,0 +1,24 @@
+{
+  "run_id": "2026-09-23T19-32-43Z-local-01",
+  "created": "2026-09-23T19:32:43Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "f393eaa-dirty",
+  "tree_hash": "sha256:01b19a4ce1d8",
+  "spec_hash": "sha256:3b8c0c8e07ab",
+  "results": [
+    {
+      "rule": "panel.dock.storyboard",
+      "status": "pass",
+      "statement_hash": "sha256:e5686fd9f31b",
+      "duration_ms": 2742,
+      "checks": [
+        "test/screenshots.test.js:15",
+        "test/screenshots.test.js:26",
+        "test/screenshots.test.js:54",
+        "test/screenshots.test.js:73"
+      ]
+    }
+  ]
+}

@@ -4,7 +4,7 @@ import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
-import { candidates, closeBrowser, elsewhere, pictureOf } from '../lib/screenshots.js';
+import { candidates, closeBrowser, elsewhere, openBrowser, pictureOf } from '../lib/screenshots.js';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-shots-'));
 after(async () => {
@@ -68,4 +68,22 @@ test('the browser is looked for in the project being served, after walkdown\'s o
   mkdirSync(bare);
   writeFileSync(join(bare, 'package.json'), '{"name":"b"}');
   assert.deepEqual(candidates(bare), ['playwright', '@playwright/test']);
+});
+
+test('a browser that dies between pictures is launched again, not held @rule:panel.dock.storyboard', async () => {
+  const server = createServer((req, res) => res.end('<!doctype html><h1>here</h1>'));
+  await new Promise((r) => server.listen(0, '127.0.0.1', r));
+  try {
+    const base = `http://127.0.0.1:${server.address().port}`;
+    await pictureOf(`${base}/one?${Date.now()}`, { refresh: true });
+    // Kill it the way a crash would, from outside the module's own close.
+    const first = openBrowser();
+    assert.ok(first?.isConnected());
+    await first.close();
+    const second = await pictureOf(`${base}/two?${Date.now()}`, { refresh: true });
+    assert.equal(second.hit, false);
+    assert.ok(existsSync(second.file));
+  } finally {
+    server.close();
+  }
 });
