@@ -49,7 +49,11 @@ Everywhere below, `walkdown` means whichever of those two forms works.
 
 ## 2. Install the skills
 
-    walkdown skills
+`walkdown init` in the next step installs them for you. To install them
+without setting a project up, name the directory - run by an agent there is
+no terminal to ask, and a bare `walkdown skills` writes nothing:
+
+    walkdown skills --into ~/.claude/skills
 
 This writes the procedures - formulate, judge, incorporate, backlog, and this
 one - into the person's own `~/.claude/skills`, where they work in every
@@ -80,6 +84,20 @@ With nothing committed there is no pointer; the person's own skills are how
 their agent knows to ask `walkdown where`.
 
 Finally, tell them where everything went, in one line each: `walkdown where`.
+
+### Recording checks from a clone
+
+`walkdown.yml` says which reporter to add to their Playwright config, by the
+clone's path: nothing puts a `walkdown` package in their `node_modules`, so
+`['walkdown/reporter']` would not resolve there. Copy the line init wrote.
+
+### Pictures on the storyboard
+
+The storyboard photographs each screen with Playwright, found beside walkdown
+or in the project. A project that already runs Playwright tests has it;
+otherwise the cards say they could not draw. The server's browser is not
+signed in, so an app behind a sign-in shows its login page, and each card
+says where the page landed.
 
 ## 4. Serve it
 

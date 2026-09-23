@@ -577,3 +577,21 @@ test('skills outside a repository has only the one place to offer @rule:location
   assert.equal(asked.status, 2);
   assert.match(asked.out, /not in one/);
 });
+
+/*
+ * The clone is the install, so nothing puts a `walkdown` package in the
+ * project's node_modules and `['walkdown/reporter']` resolves to nothing
+ * there. The config names the reporter by the path of the clone that wrote
+ * it (setup dry run, 2026-09-23).
+ */
+test('the config init writes names the reporter by a path that exists @rule:delivery.install.clone-is-the-install', () => {
+  const proj = join(root, 'reporter-path');
+  mkdirSync(proj);
+  scaffold(proj, spec(proj));
+  const yml = readFileSync(join(homeSpec(proj), 'walkdown.yml'), 'utf8');
+  const named = yml.match(/add \['([^']+)'\] to the reporter array/)?.[1];
+  assert.ok(named, 'the config names a reporter');
+  assert.ok(named.startsWith('/'), `an absolute path, not a package name: ${named}`);
+  assert.ok(existsSync(named), `the file is there: ${named}`);
+  assert.equal(named, new URL('../lib/playwright-reporter.js', import.meta.url).pathname);
+});

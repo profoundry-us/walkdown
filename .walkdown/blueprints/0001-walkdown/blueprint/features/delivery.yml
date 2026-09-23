@@ -21,8 +21,9 @@ stories:
           then:
             - Every command works - init, where, lint, status, serve - and the panel and embed are served
             - Nothing walkdown ships at runtime resolves outside itself or Node's own library
+            - The config init writes names the clone's Playwright reporter by its file path, so a project with no walkdown package installed can record its checks
             - Third-party code it carries is committed, attributed, and built from a named source rather than edited by hand
-          statement_hash: sha256:7ca49cecc74b
+          statement_hash: sha256:72ed038ac8f5
           reworded:
             - hash: sha256:ffbb7cd667c2
               at: 2026-09-13

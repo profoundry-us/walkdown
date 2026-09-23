@@ -1,0 +1,67 @@
+{
+  "run_id": "2026-09-23T19-30-46Z-local-01",
+  "created": "2026-09-23T19:30:46Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "1001b93-dirty",
+  "tree_hash": "sha256:ecb2fb0634f6",
+  "spec_hash": "sha256:3b8c0c8e07ab",
+  "results": [
+    {
+      "rule": "locations.pointer.placed-where-agents-read",
+      "status": "pass",
+      "statement_hash": "sha256:c74747fd201e",
+      "duration_ms": 339,
+      "checks": [
+        "test/init-run.test.js:156",
+        "test/init-run.test.js:179",
+        "test/init-run.test.js:192"
+      ]
+    },
+    {
+      "rule": "locations.pointer.owns-only-its-block",
+      "status": "pass",
+      "statement_hash": "sha256:48cecd33295b",
+      "duration_ms": 2,
+      "checks": [
+        "test/init-run.test.js:233",
+        "test/init-run.test.js:265",
+        "test/init-run.test.js:295",
+        "test/init-run.test.js:321"
+      ]
+    },
+    {
+      "rule": "locations.default.skills-are-yours-by-default",
+      "status": "pass",
+      "statement_hash": "sha256:a1c19031d710",
+      "duration_ms": 337,
+      "checks": [
+        "test/init-run.test.js:350",
+        "test/init-run.test.js:371",
+        "test/init-run.test.js:380",
+        "test/init-run.test.js:515",
+        "test/init-run.test.js:549",
+        "test/init-run.test.js:564"
+      ]
+    },
+    {
+      "rule": "locations.keeping.moving-is-a-decision",
+      "status": "pass",
+      "statement_hash": "sha256:1422c8dcbeae",
+      "duration_ms": 112,
+      "checks": [
+        "test/init-run.test.js:398"
+      ]
+    },
+    {
+      "rule": "delivery.install.clone-is-the-install",
+      "status": "pass",
+      "statement_hash": "sha256:72ed038ac8f5",
+      "duration_ms": 1,
+      "checks": [
+        "test/init-run.test.js:587"
+      ]
+    }
+  ]
+}
