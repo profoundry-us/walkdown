@@ -1,0 +1,33 @@
+{
+  "run_id": "2026-09-23T19-33-48Z-local-01",
+  "created": "2026-09-23T19:33:48Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2335073-dirty",
+  "spec_hash": "sha256:3b8c0c8e07ab",
+  "note": "Agent tier for the two rules the setup dry run changed. The dry run followed walkdown-setup against a throwaway app with HOME pointed at a scratch directory: a fresh clone from GitHub at 2335073 with no node_modules, init, a tagged Playwright test recording through the reporter by path, and the clone serving the panel on 4736 against a stand-in app on 4738 whose /dashboard redirects to /login. Nothing touched the real ~/.walkdown or ~/.claude.",
+  "results": [
+    {
+      "rule": "panel.dock.storyboard",
+      "status": "pass",
+      "statement_hash": "sha256:e5686fd9f31b",
+      "evidence": [
+        "runs/evidence/2026-09-23T19-33-24Z/storyboard-landed.png",
+        "runs/evidence/2026-09-23T19-33-24Z/look.json"
+      ],
+      "reasoning": "The clone has no node_modules and still drew both cards, using the Playwright the app project carries, which is the new lookup working where it matters. The Home card is the page with HERE on it. The Dashboard card shows the sign-in page with a warning band across its foot reading landed on /login?next=/dashboard, and its tooltip says what was asked for, where it went, and that the server's browser is not signed in. The List and Storyboard tabs, Redraw, titles, ids and design labels are as before."
+    },
+    {
+      "rule": "delivery.install.clone-is-the-install",
+      "status": "pass",
+      "statement_hash": "sha256:72ed038ac8f5",
+      "evidence": [
+        "runs/evidence/2026-09-23T19-33-24Z/setup-dry-run.txt",
+        "runs/evidence/2026-09-23T19-33-24Z/storyboard-landed.png"
+      ],
+      "reasoning": "From a clone with no node_modules, --help, init, where, status and serve all worked, and the panel was served. init wrote the project's config outside the repository and left the app's git tree clean. A Playwright config naming the clone's lib/playwright-reporter.js by path recorded a run into the project's home from a project that has no walkdown package; the passing run filled the rule's local cell. The line init now writes names that same file, which the unit test checks exists."
+    }
+  ]
+}
