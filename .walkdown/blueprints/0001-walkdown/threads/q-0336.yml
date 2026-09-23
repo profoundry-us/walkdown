@@ -1,0 +1,30 @@
+id: q-0336
+kind: question
+author: agent
+created: 2026-09-23T19:22:30.537Z
+anchor:
+  rule: status.attention.agent-tier-queued
+status: open
+body: >-
+  Should a rule the agent tier still owes be held out of your signing queue
+  until it is judged?
+
+
+  Today it is in both queues: the agent is told to judge it, and you are asked
+  to sign it.
+
+
+  - Holding it back means you only ever walk rules an agent has already looked
+  at.
+
+  - On a new project every rule starts unjudged by the agent, so your walk queue
+  would open empty until an agent has been through it.
+
+  - A sweep would empty your queue the same way until the sitting finishes.
+options:
+  - label: Hold it back
+    why: you never sign a rule the agent has not looked at; your queue fills as the
+      agent works through it
+  - label: Keep both
+    why: you can walk any built rule at once; the agent item sits beside yours and
+      the turn-end gate keeps agents honest

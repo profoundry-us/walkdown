@@ -151,6 +151,12 @@ rather than adding to it.
   in `~/.walkdown/config.yml`.
 - `walkdown lint` before you finish: coverage, staleness, storyboard refs,
   thread hygiene.
+- Before you hand work to a person, `walkdown status` lists nothing under
+  AGENT QUEUE for the rules you touched. A rule you built, reworded or fixed
+  owes the agent tier a fresh look (`judge <rule>` or `judge <rule> again`):
+  judge it with **walkdown-judge** and record the run. A person handed a rule
+  no agent has looked at is doing the agent's job, and finds what it would
+  have found.
 
 ## Threads
 

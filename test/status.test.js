@@ -856,3 +856,19 @@ test('a human skip signs nothing and revokes nothing; the rule is what it was @r
   assert.deepEqual(skippedUnsigned.rows[0].acceptance.map((a) => [a.role, a.state]), [['eng', 'none']]);
   assert.equal(skippedUnsigned.rows[0].human.state, 'never');
 });
+
+test('a built rule the agent tier has not judged, or judged before it went stale, is in the agent queue @rule:status.attention.agent-tier-queued', () => {
+  const judge = (runs) => deriveStatus(blueprint({ runs, verify: ['checks', 'agent'] })).attention.filter((i) => i.action === 'judge-first');
+  const built = walkdownRun('2026-01-01T00:00:00Z', 'checks', 'pass');
+  built.kind = 'checks';
+  // Never judged by the agent, but built by a check: queued, and says so.
+  assert.deepEqual(judge([built]).map((i) => [i.who, i.rule, i.state]), [['agent', 'demo.main.thing', 'never']]);
+  // A pass on the words before they moved: stale, and queued as stale.
+  const old = walkdownRun('2026-01-02T00:00:00Z', 'agent', 'pass');
+  old.results = [{ ...old.results[0], statement_hash: 'sha256:000000000000' }];
+  assert.deepEqual(judge([built, old]).map((i) => i.state), ['stale']);
+  // A current pass is owed nothing.
+  assert.deepEqual(judge([built, walkdownRun('2026-01-02T00:00:00Z', 'agent', 'pass')]), []);
+  // Unbuilt: nothing to look at yet.
+  assert.deepEqual(judge([]), []);
+});

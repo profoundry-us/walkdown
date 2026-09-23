@@ -527,6 +527,26 @@ stories:
     title: The board says who is blocking what
     statement: As a team, we each see the queue of items waiting on us specifically.
     rules:
+      - id: status.attention.agent-tier-queued
+        origin: walkdown
+        created_at: 2026-09-23
+        statement: A built rule the agent tier has never judged, or judged before it went stale, is in the agent's queue.
+        because: An agent reads its queue to know what is left, and a rule missing from it gets handed to a person unjudged.
+        history: Five rules reached Topher's walkdown with the agent tier owed on 2026-09-23, and nothing in the status report had said so.
+        verify: [checks]
+        signoff: [eng, product]
+        steps:
+          given:
+            - A built rule whose agent cell is never, another whose agent pass went stale, and a third passing
+          when:
+            - Attention is derived and the report is printed
+          then:
+            - The first two are each one agent item saying which rule to judge and whether it was never judged or has gone stale
+            - The passing rule is not queued to the agent
+            - A pass older than a claimed fix is the re-judge item instead, never both
+            - An unbuilt rule is not queued for judging, since there is no build to look at
+          statement_hash: sha256:09fa17d00ecf
+
       - id: status.attention.blocked-queues
         origin: prd
         statement: Every item in the status report's attention list is for an agent or a person. Agents are asked to address notes, incorporate answers, cover unchecked rules and re-judge claimed fixes; people to judge in an unsigned role, verify their own notes and answer questions.

@@ -313,6 +313,8 @@ export function run(args) {
     incorporate: (i) =>
       `incorporate ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — answered, fold it into the rule`,
     cover: (i) => `cover ${i.rule} — demands checks, and no check claims it`,
+    'judge-first': (i) =>
+      `judge ${i.rule} — the agent tier ${i.state === 'stale' ? 'is stale on it' : 'has never judged it'}; judge it before handing it to a person`,
     rejudge: (i) =>
       `judge ${i.rule} again — ${i.thread} claims a fix newer than the passing verdict`,
     // The machine's own observation, addressed by the machine: it closes it

@@ -13,7 +13,9 @@ you claim work, you never accept it.
 
 `walkdown status --json` → `attention` items with `who: "agent"`:
 `incorporate` (an answered question) or `address` (an open note). Read the full
-thread: `walkdown thread <id>`.
+thread: `walkdown thread <id>`. The same queue lists `judge-first` (a built
+rule the agent tier has not judged, or judged before it went stale) and
+`rejudge` (a fix claimed after the last pass); those are walkdown-judge's.
 
 ## Incorporating an answered question
 
@@ -34,6 +36,10 @@ thread: `walkdown thread <id>`.
    with the rule id, selecting by anchor. `walkdown run [--rule <id>]` —
    confirm a run record was appended.
 6. **Validate.** `walkdown lint` must be clean (coverage, hashes, refs).
+   Then **judge**: every rule you touched whose verify list includes `agent`
+   now shows a `judge-first` or `rejudge` item in `walkdown status`. Run
+   walkdown-judge on each until none is left. The person you hand this to
+   should never be the first to look at it.
 7. **Close the thread** — only via the CLI so the transition is validated:
    `walkdown thread <id> --as-agent --reply "<what changed, which files,
    which rule(s), which run re-verified it>" --status incorporated`. It records
@@ -45,7 +51,8 @@ thread: `walkdown thread <id>`.
 Same shape, smaller: understand exactly what the note's anchor points at →
 fix it (spec change? follow the incorporation steps; implementation-only?
 just fix, carrying anchors) → re-verify with a run (`walkdown run --rule ...`,
-or an agent walkdown via the walkdown-judge skill for judgment rules) →
+and an agent walkdown via the walkdown-judge skill whenever the rule asks for
+the agent tier, which is the default) →
 `walkdown thread <id> --as-agent --reply "<fix + evidence>"
 --status addressed`.
 
