@@ -32,12 +32,12 @@ Ask where. Recommend `~/.walkdown/walkdown` - it is one directory to delete and
 it sits beside the records walkdown keeps - but a person with a `~/src` will
 usually want it there.
 
-    git clone --branch v0.1.0 https://github.com/profoundry-us/walkdown.git <where>
+    git clone --branch v0.1.1 https://github.com/profoundry-us/walkdown.git <where>
 
-`v0.1.0` is the latest tagged version: a tag is the stable copy, and `main`
+`v0.1.1` is the latest tagged version: a tag is the stable copy, and `main`
 moves daily. Use the tag unless the person asks to follow `main`, in which case
 leave `--branch` off. `git -C <where> tag` lists the versions a clone knows.
-Git may warn that `refs/tags/v0.1.0` "is not a commit". That is how it
+Git may warn that `refs/tags/v0.1.1` "is not a commit". That is how it
 announces an annotated tag; the clone is fine.
 
 **Do not run `npm install`.** walkdown has no runtime dependencies - the panel

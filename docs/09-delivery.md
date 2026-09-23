@@ -37,7 +37,7 @@ blueprint parses, and the panel and the embed both answer 200.
 
 **1. Clone. That is the install.**
 
-    git clone --branch v0.1.0 https://github.com/profoundry-us/walkdown.git ~/.walkdown/walkdown
+    git clone --branch v0.1.1 https://github.com/profoundry-us/walkdown.git ~/.walkdown/walkdown
     node ~/.walkdown/walkdown/bin/walkdown.js --help
 
 No registry, no build, no network. This is what `vendor/yaml.js` buys, and it

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "walkdown (dev)",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Walk a running app down against its blueprint \u2014 on any page, not just ones you can edit.",
   "permissions": [
     "storage",
