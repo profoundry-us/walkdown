@@ -134,6 +134,33 @@ test('stale hash and unknown screen are errors', () => {
   assert.equal(exitCode, 1);
 });
 
+test('a declared anchor without a dot is an anchor, not an unknown screen (#6)', () => {
+  const h = writeFixture(join(root, 'dotless'));
+  writeFileSync(
+    join(h.spec, 'storyboard.yml'),
+    [
+      'screens:',
+      '  - id: home',
+      '    prototype: /home.html',
+      '    app: { path: / }',
+      '    anchors: [home.cta, level-icon-organization]',
+    ].join('\n'),
+  );
+  const feature = join(h.spec, 'features', 'demo.yml');
+  writeFileSync(
+    feature,
+    readFileSync(feature, 'utf8').replace(
+      "when: [Click anchor `home.cta`]",
+      'when: [Click anchor `home.cta`, Look at `level-icon-organization`, Visit `nowhere`, Press `nope.dotted`]',
+    ),
+  );
+  const said = lint(load(h), { checks: false }).findings.map((f) => f.message);
+  assert.ok(!said.some((m) => m.includes('level-icon-organization')), said.join('\n'));
+  // The dot still tells the two apart for tokens nobody declared.
+  assert.ok(said.some((m) => /unknown screen `nowhere`/.test(m)), said.join('\n'));
+  assert.ok(said.some((m) => /undeclared anchor `nope.dotted`/.test(m)), said.join('\n'));
+});
+
 test('answered question warns; waived without waived_by errors', () => {
   const h = writeFixture(join(root, 'threads'), {
     threads: [
