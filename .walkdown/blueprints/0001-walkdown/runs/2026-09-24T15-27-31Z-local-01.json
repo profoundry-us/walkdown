@@ -1,0 +1,46 @@
+{
+  "run_id": "2026-09-24T15-27-31Z-local-01",
+  "created": "2026-09-24T15:27:31Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    },
+    {
+      "role": "design",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "f781814-dirty",
+  "spec_hash": "sha256:b2908c85d8af",
+  "results": [
+    {
+      "rule": "screens.surfaces.app-address-is-resolved",
+      "status": "pass",
+      "statement_hash": "sha256:f5007e73e677"
+    },
+    {
+      "rule": "locations.default.prototype-beside-the-spec",
+      "status": "pass",
+      "statement_hash": "sha256:a30a7a594efd"
+    },
+    {
+      "rule": "locations.answer.adapters-file-where-walkdown-says",
+      "status": "pass",
+      "statement_hash": "sha256:7e1aecb8560b"
+    },
+    {
+      "rule": "locations.keeping.old-config-never-misfiles",
+      "status": "pass",
+      "statement_hash": "sha256:3ad02c787d78"
+    }
+  ]
+}
