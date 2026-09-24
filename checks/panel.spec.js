@@ -504,6 +504,43 @@ test('the frame says it is loading rather than showing the screen you just left'
   await expect(veil).toHaveCount(0);
 });
 
+test('a screen further down the same page is not left behind a veil', {
+  tag: '@rule:panel.rules.takes-you-there',
+}, async ({ page }) => {
+  // Hash screens on the application - a modal, a tab, an SPA route - picked
+  // one after another. The browser scrolls to a fragment of the document it
+  // already has and fires no load event, so a veil waiting on one said
+  // "Loading…" for good. This blueprint has no such pair, so two are added to
+  // the storyboard the panel is handed, on the fixture's plain application
+  // page: walkdown's own prototype pages answer at an address that is not
+  // quite the one asked for, which makes every trip to one a real load.
+  const page0 = new URL('/app.html', FIXTURE).href;
+  await page.route(/\/api\/blueprint(\?|$)/, async (route) => {
+    const res = await route.fetch();
+    const data = await res.json();
+    data.storyboard = [
+      ...(data.storyboard ?? []),
+      { id: 'review-part-way', title: 'Review, part way', app: { path: `${page0}#part-way` } },
+      { id: 'review-further-down', title: 'Review, further down', app: { path: `${page0}#further-down` } },
+    ];
+    await route.fulfill({ response: res, json: data });
+  });
+  await page.goto(fixtureFor({ build: 'stale', frame: page0 }));
+  await expect(page.getByTestId('panel.bar')).toBeVisible();
+
+  for (const [id, hash] of [
+    ['review-part-way', '#part-way'],
+    ['review-further-down', '#further-down'],
+  ]) {
+    await page.getByTestId('panel.screen-picker').click();
+    await page.locator(`[data-screen="${id}"]`).first().click();
+    await expect.poll(() => page.frames().some((f) => f.url().endsWith(hash))).toBe(true);
+    // Well past the veil's delay: had one been promised, it would be up by now.
+    await page.waitForTimeout(800);
+    await expect(page.getByTestId('panel.frame-loading')).toHaveCount(0);
+  }
+});
+
 test('put away, the badge still crosses between the design and what shipped', {
   tag: '@rule:panel.dock.toolbar',
 }, async ({ page }) => {

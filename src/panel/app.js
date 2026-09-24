@@ -2121,6 +2121,27 @@ function sameAddress(a, b) {
 }
 
 /*
+ * Whether going from one address to the other only moves within the page.
+ * A browser handed the same document with a fragment on it scrolls instead
+ * of loading, and fires no load event - so a veil promised for that trip was
+ * never taken down, and a hash screen picked from beside its page sat behind
+ * "Loading…" for good. Compared raw, `bp` and all, because that is how the
+ * browser decides: a different `bp` is a different document and does load.
+ */
+function withinPage(from, to) {
+  if (!from || !to || !String(to).includes('#')) return false;
+  try {
+    const a = new URL(from, location.href);
+    const b = new URL(to, location.href);
+    a.hash = '';
+    b.hash = '';
+    return a.href === b.href;
+  } catch {
+    return false;
+  }
+}
+
+/*
  * Is the copy we are running the one the server ships? Only the extension
  * can be stale — a script tag fetches the panel afresh every load — so a
  * delivery that publishes no build hash never claims to be current or not.
@@ -2163,9 +2184,10 @@ export function goTo(screen, surface = pageSurface(), pick = null) {
    */
   if (!sameAddress(S.frameUrl, url)) {
     const first = !S.frameUrl;
+    const scrollOnly = withinPage(S.frameUrl, url);
     S.frameUrl = url;
     sayAddress();
-    frameLoading(url, `Loading ${screenLabel(screen)}…`);
+    if (!scrollOnly) frameLoading(url, `Loading ${screenLabel(screen)}…`);
     D.appFrame.src = url;
     // The root's first page: the sheet was not drawn until now.
     if (first) syncBareRoot();
@@ -3372,6 +3394,11 @@ function wireGlobals() {
        * origins, and this is also how an SPA reports moving — so a hash route
        * or a pushState inside the frame re-answers which screen this is.
        */
+      /*
+       * Arriving where we asked is the end of the wait, whether or not a load
+       * event says so - the page reporting its address is the surer word.
+       */
+      if (msg.href && sameAddress(msg.href, S.frameUrl)) hideVeil();
       const moved = msg.href && msg.href !== S.frameUrl;
       S.frameUrl = msg.href ?? S.frameUrl;
       if (moved) sayAddress();
