@@ -95,7 +95,10 @@ Finally, tell them where everything went, in one line each: `walkdown where`.
 
 `walkdown.yml` says which reporter to add to their Playwright config, by the
 clone's path: nothing puts a `walkdown` package in their `node_modules`, so
-`['walkdown/reporter']` would not resolve there. Copy the line init wrote.
+`['walkdown/reporter']` would not resolve there. Copy the line init wrote. The
+RSpec lines load the formatter from the clone the same way (`-I <clone>/adapters/rspec/lib
+-r walkdown/formatter`), so there is no gem to add, and the formatter files its runs
+wherever `walkdown where` says, including a home outside the repository.
 
 ### Pictures on the storyboard
 

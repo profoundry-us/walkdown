@@ -234,7 +234,7 @@ export async function run(args) {
    * written where it belongs, and a clone reads it from the repository.
    */
   const entry = listed
-    ? { action: 'kept', id: listed.id }
+    ? { path: null, action: 'kept', id: listed.id }
     : rememberBlueprint({
         id: basename(root),
         root,
@@ -249,8 +249,10 @@ export async function run(args) {
    * registry says this machine knows it (ADR 0003 §3). Only the registry is
    * read; the manifest is what `walkdown import` reads on the next machine.
    */
-  if (commit !== 'none' && !listed)
-    rememberBlueprint({ id: entry.id, root, homeDir: claim.dir, home: claim.home, inRepo: false, by: 'init' });
+  const registered =
+    commit !== 'none' && !listed
+      ? rememberBlueprint({ id: entry.id, root, homeDir: claim.dir, home: claim.home, inRepo: false, by: 'init' })
+      : null;
   const ignore = commit === 'none' || !claim.dir ? null : setIgnore(walkdown, commit, { force: values.force });
   if (commit === 'none' && moved) {
     for (const rel of ['CLAUDE.md', 'AGENTS.md', 'GEMINI.md', '.github/copilot-instructions.md', 'CONVENTIONS.md']) {
@@ -325,6 +327,19 @@ export async function run(args) {
    */
   if (entry.action === 'written')
     console.log(`  ${green('+ listed')}   ${entry.path}  ${dim(`as \`${entry.id}\``)}`);
+  // The registry write is the one that folds a config.yml row in, and with
+  // the spec committed that is the second write, not the one reported above.
+  const fold =
+    ('folded' in entry ? entry.folded : null) ??
+    (registered && 'folded' in registered ? registered.folded : null);
+  if (fold) {
+    const took = Object.keys(fold.values);
+    console.log(
+      `  ${green('~ folded')}   ${fold.path}  ${dim(
+        `took \`${fold.id || '?'}\` out of \`${fold.from}:\`${took.length ? ` and kept its ${took.join(', ')}` : ''} — that file registers nothing now`,
+      )}`,
+    );
+  }
   else if (moved)
     console.log(`  ${green('~ listed')}   ${moved.config}  ${dim(`as \`${moved.id}\``)}`);
   if (me.action === 'written')

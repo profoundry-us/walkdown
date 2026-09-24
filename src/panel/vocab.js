@@ -7,7 +7,7 @@
  * reached from all of them without a cycle. When one pane needed a helper the
  * next pane also needed, this is where it went.
  */
-import { locationOfUrl, matchScreen } from '../../lib/screen-match.js';
+import { appUrlOf, locationOfUrl, matchScreen } from '../../lib/screen-match.js';
 import { canTransition, isMachineName, TERMINAL, whoseMove } from '../../lib/vocab.js';
 import { identityOverride, S } from './state.js';
 import { api } from './util.js';
@@ -220,7 +220,7 @@ export function screenUrl(screen, surface) {
   if (!screen) return null;
   if (surface === 'prototype')
     return screen.prototype && S.data?.hasPrototype ? api('/prototype' + screen.prototype) : null;
-  return screen.app?.path && S.data?.appBase ? S.data.appBase + screen.app.path : null;
+  return screen.app?.path && S.data?.appBase ? appUrlOf(screen.app.path, S.data.appBase) : null;
 }
 
 /*
@@ -247,7 +247,7 @@ export function ghostSource(screen) {
     // Standing on the design, the other surface is the running app — and it
     // lives at its own origin, so the ghost takes an absolute URL.
     return screen?.app?.path && S.data.appBase
-      ? { url: S.data.appBase + screen.app.path, proposed: false }
+      ? { url: appUrlOf(screen.app.path, S.data.appBase), proposed: false }
       : null;
   }
   if (screen?.prototype && S.data.hasPrototype)

@@ -2184,3 +2184,57 @@ test('the ignore file beside a .walkdown does not answer for a blueprint standin
   }
 });
 
+
+test('a pre-registry config is folded in and named, and a default that lands beside a home is set aside (#18) @rule:locations.keeping.old-config-never-misfiles', () => {
+  /*
+   * The config.yml an earlier walkdown wrote: a `projects:` list - the shape
+   * before `blueprints:` - with the checkout's targets on it, and per-kind
+   * defaults spelled for the layout before numbered homes. `init` used to
+   * leave both standing: the targets never reached the registry row, and
+   * the defaults filed nine questions in `~/.walkdown/blueprints/<slug>/`
+   * while the home's own readers looked in `0001-<slug>/` and saw nothing.
+   */
+  const s = scratch();
+  try {
+    const repo = join(s.root, 'hireart_main');
+    mkdirSync(repo, { recursive: true });
+    const old = join(s.home, 'blueprints');
+    configure(
+      s.home,
+      [
+        'defaults:',
+        `  spec: ${old}/{id}/blueprint`,
+        `  runs: ${old}/{id}/blueprint/runs`,
+        `  threads: ${old}/{id}/blueprint/threads`,
+        `  evidence: ${join(s.root, 'elsewhere')}/{id}/evidence`,
+        'projects:',
+        '  - id: hireart',
+        `    roots: [${repo}]`,
+        `    spec: ${old}/0001-hireart/blueprint`,
+        '    targets:',
+        '      local: { base_url: http://localhost:3000 }',
+        '',
+      ].join('\n'),
+    );
+    const said = walkdown(s.home, ['init'], repo);
+    assert.match(said, /~ folded.*took `hireart` out of `projects:` and kept its targets/, said);
+    assert.doesNotMatch(readFileSync(join(s.home, 'config.yml'), 'utf8'), /projects:/, 'the block left config.yml');
+    const row = parse(readFileSync(join(s.home, 'registry.yml'), 'utf8')).blueprints.find((b) => b.project?.endsWith('hireart_main'));
+    assert.equal(row.targets.local.base_url, 'http://localhost:3000', 'its targets reached the registry row');
+
+    const at = resolveLocations({ cwd: repo });
+    assert.equal(at.threads.path, join(at.homeDir, 'threads'), 'threads stay in the home');
+    assert.equal(at.runs.path, join(at.homeDir, 'runs'), 'runs stay in the home');
+    // A default aimed somewhere that is not beside a home is a choice, and stands.
+    assert.equal(at.evidence.path, join(s.root, 'elsewhere', 'hireart-main', 'evidence'));
+    const setAside = at.config.ignored.filter((ig) => ig.key.startsWith('defaults.')).map((ig) => ig.key).sort();
+    assert.deepEqual(setAside, ['defaults.runs', 'defaults.spec', 'defaults.threads']);
+    assert.match(walkdown(s.home, ['where'], repo), /ignores `defaults\.spec: .*` — a spec is never a default/);
+
+    assert.match(walkdown(s.home, ['where'], repo), /ignores `defaults\.threads: .*` .*lands beside this blueprint's home/);
+    const linted = spawnSync(process.execPath, [CLI, 'lint'], { cwd: repo, env: { ...process.env, WALKDOWN_HOME: s.home } });
+    assert.match(String(linted.stdout) + String(linted.stderr), /defaults\.runs: .* is not used — it lands beside this blueprint's home/);
+  } finally {
+    s.cleanup();
+  }
+});

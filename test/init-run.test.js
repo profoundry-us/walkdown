@@ -595,3 +595,17 @@ test('the config init writes names the reporter by a path that exists @rule:deli
   assert.ok(existsSync(named), `the file is there: ${named}`);
   assert.equal(named, new URL('../lib/playwright-reporter.js', import.meta.url).pathname);
 });
+
+test('the config init writes loads the RSpec formatter from the clone, not from a gem (#16) @rule:locations.answer.adapters-file-where-walkdown-says', () => {
+  const proj = join(root, 'rspec-path');
+  mkdirSync(proj);
+  scaffold(proj, spec(proj));
+  const yml = readFileSync(join(homeSpec(proj), 'walkdown.yml'), 'utf8');
+  const paths = [...yml.matchAll(/rspec \S+ -I (\S+) -r walkdown\/formatter/g)].map((m) => m[1]);
+  assert.equal(paths.length, 3, 'run_all, run_for_rule and list each load it');
+  for (const p of paths) {
+    assert.equal(p, new URL('../adapters/rspec/lib', import.meta.url).pathname);
+    assert.ok(existsSync(join(p, 'walkdown', 'formatter.rb')), `the formatter is there: ${p}`);
+  }
+  assert.doesNotMatch(yml, /walkdown-rspec gem/, 'no gem to install');
+});

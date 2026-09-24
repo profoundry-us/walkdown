@@ -112,7 +112,7 @@ directly — status, failure message, duration, screenshot/trace paths as eviden
   `ci` under CI and the configured identity otherwise — never an environment variable,
   because who acted is not something a caller gets to type (n-0139). It never fails the test run; with no blueprint
   or no tagged tests it prints a warning and records nothing.
-- **RSpec** ships as the `walkdown-rspec` gem (in-repo: `adapters/rspec/`):
+- **RSpec** ships in the clone at `adapters/rspec/`, loaded by path (`-I <clone>/adapters/rspec/lib -r walkdown/formatter`); it is also packaged as the `walkdown-rspec` gem:
   `--format Walkdown::Formatter` appends the identical record shape — statuses mapped
   (pending → skipped), first failure message captured, `evidence:` metadata attached,
   same hashing, git provenance, and env vars as the Playwright reporter. Its companion

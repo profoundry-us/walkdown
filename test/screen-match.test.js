@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { locationOfUrl, matchScreen, screenKey, splitScreenRef } from '../lib/screen-match.js';
+import { appUrlOf, locationOfUrl, matchScreen, screenKey, splitScreenRef } from '../lib/screen-match.js';
 
 const at = (url) => locationOfUrl('http://localhost:4310' + url);
 
@@ -62,12 +62,31 @@ test('a location off the storyboard matches nothing', () => {
 
 test('a ref splits into path, query and fragment; the fragment wins at the first #', () => {
   assert.deepEqual(splitScreenRef('/orders?tab=open#/order/1?zoom=2'), {
+    origin: '',
     path: '/orders',
     query: '?tab=open',
     fragment: '#/order/1?zoom=2',
   });
   assert.equal(screenKey('/confirm.html?email=a@b.c'), '/confirm.html');
   assert.equal(screenKey('/admin.html#invite-batch'), '/admin.html#invite-batch');
+});
+
+test('an app path written as a whole URL keeps its origin apart from its path (#15) @rule:screens.surfaces.stand-in-app', () => {
+  const standIn = 'http://localhost:4700/stand-in/party-id-types';
+  assert.deepEqual(splitScreenRef(standIn), {
+    origin: 'http://localhost:4700',
+    path: '/stand-in/party-id-types',
+    query: '',
+    fragment: '',
+  });
+  const screens = [{ id: 'party-id-types', app: { path: standIn } }, ...SCREENS];
+  const here = locationOfUrl(standIn);
+  assert.equal(matchScreen(screens, here).screen.id, 'party-id-types');
+  // The same path on the app's own origin is not the stand-in.
+  assert.equal(matchScreen(screens, locationOfUrl('http://localhost:3000/stand-in/party-id-types')), null);
+  // Its key carries the origin, so two blueprints' stand-ins at one path
+  // on different servers are not the same page.
+  assert.equal(screenKey(standIn), standIn);
 });
 
 test('the panel and the embed take the matcher from the module, never a copy @rule:screens.identity.one-matcher', () => {
@@ -124,4 +143,18 @@ test('both of walkdown\'s own pages read the same address @rule:panel.start.addr
     assert.match(served, read, `the served page does not read ${read}`);
     assert.match(extension, read, `the extension's page does not read ${read}`);
   }
+});
+
+test('an app path resolves against base_url the way a link does, so a whole URL is framed where it points (#15) @rule:screens.surfaces.app-address-is-resolved', () => {
+  const base = 'http://localhost:3000';
+  assert.equal(appUrlOf('/orders#/order/1', base), 'http://localhost:3000/orders#/order/1');
+  assert.equal(
+    appUrlOf('http://localhost:4700/stand-in/party-id-types', base),
+    'http://localhost:4700/stand-in/party-id-types',
+  );
+  assert.equal(appUrlOf(null, base), null);
+  assert.equal(appUrlOf('/orders', null), null);
+  // The panel's frame and the server's picture both take it from here.
+  for (const src of ['src/panel/vocab.js', 'lib/serve.js'])
+    assert.match(readFileSync(join(import.meta.dirname, '..', src), 'utf8'), /appUrlOf\(screen\.app\.path/, src);
 });

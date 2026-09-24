@@ -1,0 +1,54 @@
+{
+  "run_id": "2026-09-24T15-08-47Z-local-01",
+  "created": "2026-09-24T15:08:47Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "7a66546-dirty",
+  "spec_hash": "sha256:b2908c85d8af",
+  "note": "Agent tier for the four rules built from GitHub issues 15-18, driven on scratch copy judge-0924 (port 4741) and throwaway projects inside it.",
+  "results": [
+    {
+      "rule": "screens.surfaces.app-address-is-resolved",
+      "status": "pass",
+      "statement_hash": "sha256:f5007e73e677",
+      "evidence": [
+        "runs/evidence/2026-09-24T15-03-21Z/probe-urls.txt",
+        "runs/evidence/2026-09-24T15-03-21Z/probe-frame-and-claims.txt"
+      ],
+      "reasoning": "Served the scratch copy on 4741 with its local target moved to another origin (http://localhost:4738, standing in for the app) and the review screen's app path set to the whole URL http://localhost:4741/stand-in/review. In the panel (confirmed /api/blueprint named the copy), review opened on App and the frame's src and location were http://localhost:4741/stand-in/review, not the two addresses glued together as #15 reported; the stand-in's own band showed, and the screen picker read 'Detect from the page: review', so the framed page is recognised as that screen. Picking Rule detail, a root path, framed http://localhost:4738/as-built/rule-detail.html, the target's origin. /api/screenshot?meta=1 reported the same two addresses for the storyboard picture (the photograph itself failed because this machine's Playwright chromium build is not installed, which is not this rule). Over the copy's own storyboard the matcher gives review for 4741/stand-in/review and nothing for the same path on 4738, and claimsOf claims the stand-in at http://localhost:4741/stand-in/review, not at the target. The negative matching case could not be driven through the panel because a picked screen holds the frame, so that step rests on the matcher probe and its unit test.",
+      "threads": []
+    },
+    {
+      "rule": "locations.default.prototype-beside-the-spec",
+      "status": "pass",
+      "statement_hash": "sha256:a30a7a594efd",
+      "evidence": [
+        "runs/evidence/2026-09-24T15-03-21Z/probe-prototype-root.txt"
+      ],
+      "reasoning": "Initialised a fresh git project with walkdown init (home outside the repository, under its own WALKDOWN_HOME), set prototype.root to the relative prototype/, and put a page at <home>/blueprint/prototype/screens/a.html with a screen whose app path is the stand-in. Served on 4741: /prototype/screens/a.html and /stand-in/a both answered 200 with the page kept beside the spec, where #17 had them 404, and the storyboard picture's address was the stand-in. Removing the spec-side directory and putting prototype/ in the code instead, both routes answered 200 from the code, so the old layout still works. With both present, the one beside the spec won. The only thing git saw in the code was the prototype/ I added for the fallback case; nothing was written there by walkdown.",
+      "threads": []
+    },
+    {
+      "rule": "locations.answer.adapters-file-where-walkdown-says",
+      "status": "pass",
+      "statement_hash": "sha256:7e1aecb8560b",
+      "evidence": [
+        "runs/evidence/2026-09-24T15-03-21Z/probe-rspec-adapter.txt"
+      ],
+      "reasoning": "In a fresh project initialised with its home outside the repository, one rule and one tagged RSpec example, real rspec 3.13 recorded both ways with LANG unset: bare rspec in the code (no WALKDOWN_SPEC or WALKDOWN_RUNS) printed 'walkdown: recorded 1 rule result(s)' into <home>/runs, and walkdown run, with run_all loading the formatter from the clone by -I, recorded a second run there too; walkdown status then showed the checks cell passing from that run. The record names the rule and carries its statement hash. Unset LANG mattered: the first bare run on the unfixed formatter failed to parse where's output as US-ASCII, which is fixed and covered. A spec committed in the repository is found by the upward walk (unit test). A fresh init now writes the RSpec run_all, run_for_rule and list lines with -I <clone>/adapters/rspec/lib -r walkdown/formatter, and that file exists, so no gem is needed. git_sha was absent only because the probe repository had no commits.",
+      "threads": []
+    },
+    {
+      "rule": "locations.keeping.old-config-never-misfiles",
+      "status": "pass",
+      "statement_hash": "sha256:3ad02c787d78",
+      "evidence": [
+        "runs/evidence/2026-09-24T15-03-21Z/probe-old-config.txt"
+      ],
+      "reasoning": "Wrote the exact config.yml shape #18 reported (defaults for spec, runs, threads, evidence and drafts spelled with {id} under <home>/blueprints, and a projects: row about the checkout with targets) and ran walkdown init in a git project named hireart_main. init printed '~ folded ... took hireart out of projects: and kept its targets', the projects block left config.yml, and the new registry row carries targets.local.base_url http://localhost:3000. where resolved runs, threads, evidence and drafts all into 0001-hireart-main, and named each of the four defaults as landing beside the home, not in it, with the directory that answers instead; defaults.spec is named as never a default. lint warned on the same four lines. Nothing was created beside the home: blueprints/ holds only 0001-hireart-main. A default aimed elsewhere still applying is covered by the unit test (evidence on another directory resolves as written).",
+      "threads": []
+    }
+  ]
+}

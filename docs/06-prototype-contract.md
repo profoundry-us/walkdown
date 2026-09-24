@@ -154,6 +154,11 @@ need attention, which is information, not an error.
 Serve the export from `blueprint/prototype/` and `walkdown serve` mounts it at
 `/prototype/` with working paths and deep links. No second server, no build step.
 
+A relative `prototype.root` is looked for beside the spec first, then in the code. So
+`prototype: { root: prototype/ }` names `blueprint/prototype/` when that exists, which is
+the only place a home kept outside the repository can hold its design, and a
+repository's own `prototype/` otherwise, which is where walkdown keeps its own.
+
 A prototype hosted somewhere else is fine too, but note what breaks: share URLs that
 wrap the page in a viewer chrome usually intercept history navigation, which takes deep
 linking and fragment states with it — and those are two of the five things above.

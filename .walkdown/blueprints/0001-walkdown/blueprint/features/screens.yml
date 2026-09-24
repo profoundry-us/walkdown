@@ -210,6 +210,27 @@ stories:
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
+      - id: screens.surfaces.app-address-is-resolved
+        origin: walkdown
+        created_at: 2026-09-24
+        statement: A screen's app path is read against the target's address the way a browser reads a link, so a path written as a whole URL is shown where it points.
+        because: A stand-in for an unbuilt screen lives on walkdown's server while the target is the app, and the frame, the picture and the page's owner must agree on where it is.
+        history: "Found while setting walkdown up on a Rails app (GitHub issue #15). The panel glued the target's address to the path, so the frame for a stand-in was blank while the storyboard drew it correctly."
+        verify: [checks]
+        signoff: [eng]
+        screens: [review]
+        steps:
+          given:
+            - A target whose address is the app, and a screen whose app path is a whole URL on walkdown's own server
+          when:
+            - The screen is opened on the App surface
+          then:
+            - The frame loads that URL, the same page the storyboard photographs
+            - Framed there, the page is recognised as that screen, and the same path on the app's own server is not
+            - The page is claimed at its own address, not at the target's
+            - A path written from the root still lands on the target's address
+          statement_hash: sha256:f5007e73e677
+
   - id: screens.anchors
     title: Anchors move; records do not
     statement: As a reviewer, a thread I filed against an element still reads as the record I made when the element has since been renamed - and it says so, rather than warning forever or being rewritten.

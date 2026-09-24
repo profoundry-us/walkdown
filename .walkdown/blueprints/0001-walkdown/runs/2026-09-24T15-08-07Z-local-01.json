@@ -1,0 +1,219 @@
+{
+  "run_id": "2026-09-24T15-08-07Z-local-01",
+  "created": "2026-09-24T15:08:07Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "7a66546-dirty",
+  "tree_hash": "sha256:dc96bee4a1fa",
+  "spec_hash": "sha256:b2908c85d8af",
+  "results": [
+    {
+      "rule": "locations.pointer.placed-where-agents-read",
+      "status": "pass",
+      "statement_hash": "sha256:c74747fd201e",
+      "duration_ms": 365,
+      "checks": [
+        "test/init-run.test.js:156",
+        "test/init-run.test.js:179",
+        "test/init-run.test.js:192"
+      ]
+    },
+    {
+      "rule": "locations.pointer.owns-only-its-block",
+      "status": "pass",
+      "statement_hash": "sha256:48cecd33295b",
+      "duration_ms": 2,
+      "checks": [
+        "test/init-run.test.js:233",
+        "test/init-run.test.js:265",
+        "test/init-run.test.js:295",
+        "test/init-run.test.js:321"
+      ]
+    },
+    {
+      "rule": "locations.default.skills-are-yours-by-default",
+      "status": "pass",
+      "statement_hash": "sha256:a1c19031d710",
+      "duration_ms": 943,
+      "checks": [
+        "test/init-run.test.js:350",
+        "test/init-run.test.js:371",
+        "test/init-run.test.js:380",
+        "test/init-run.test.js:515",
+        "test/init-run.test.js:549",
+        "test/init-run.test.js:564",
+        "test/locations.test.js:670"
+      ]
+    },
+    {
+      "rule": "locations.keeping.moving-is-a-decision",
+      "status": "pass",
+      "statement_hash": "sha256:1422c8dcbeae",
+      "duration_ms": 818,
+      "checks": [
+        "test/init-run.test.js:398",
+        "test/locations.test.js:1163",
+        "test/locations.test.js:1943"
+      ]
+    },
+    {
+      "rule": "delivery.install.clone-is-the-install",
+      "status": "pass",
+      "statement_hash": "sha256:72ed038ac8f5",
+      "duration_ms": 1,
+      "checks": [
+        "test/init-run.test.js:587"
+      ]
+    },
+    {
+      "rule": "locations.answer.adapters-file-where-walkdown-says",
+      "status": "pass",
+      "statement_hash": "sha256:7e1aecb8560b",
+      "duration_ms": 732,
+      "checks": [
+        "test/init-run.test.js:599",
+        "test/rspec-adapter.test.js:61",
+        "test/rspec-adapter.test.js:75",
+        "test/rspec-adapter.test.js:83"
+      ]
+    },
+    {
+      "rule": "locations.default.records-follow-the-spec",
+      "status": "pass",
+      "statement_hash": "sha256:bc12ec38993e",
+      "duration_ms": 504,
+      "checks": [
+        "test/locations.test.js:134",
+        "test/locations.test.js:156",
+        "test/locations.test.js:723"
+      ]
+    },
+    {
+      "rule": "locations.answer.declared-not-discovered",
+      "status": "pass",
+      "statement_hash": "sha256:f1df66c74dac",
+      "duration_ms": 645,
+      "checks": [
+        "test/locations.test.js:232",
+        "test/locations.test.js:269",
+        "test/locations.test.js:1998",
+        "test/locations.test.js:2027"
+      ]
+    },
+    {
+      "rule": "locations.travel.judged-against-a-spec",
+      "status": "pass",
+      "statement_hash": "sha256:20d85cac1943",
+      "duration_ms": 9,
+      "checks": [
+        "test/locations.test.js:365",
+        "test/locations.test.js:388",
+        "test/locations.test.js:436",
+        "test/locations.test.js:475"
+      ]
+    },
+    {
+      "rule": "locations.default.nothing-in-the-tree",
+      "status": "pass",
+      "statement_hash": "sha256:a2ac0f932c99",
+      "duration_ms": 137,
+      "checks": [
+        "test/locations.test.js:522"
+      ]
+    },
+    {
+      "rule": "locations.default.in-repo-on-request",
+      "status": "pass",
+      "statement_hash": "sha256:7310851da84e",
+      "duration_ms": 4523,
+      "checks": [
+        "test/locations.test.js:565",
+        "test/locations.test.js:634",
+        "test/locations.test.js:670",
+        "test/locations.test.js:1824",
+        "test/locations.test.js:1864",
+        "test/locations.test.js:1889",
+        "test/locations.test.js:2095",
+        "test/locations.test.js:2117",
+        "test/locations.test.js:2150"
+      ]
+    },
+    {
+      "rule": "locations.default.one-home-per-blueprint",
+      "status": "pass",
+      "statement_hash": "sha256:43e88185b989",
+      "duration_ms": 6151,
+      "checks": [
+        "test/locations.test.js:793",
+        "test/locations.test.js:828",
+        "test/locations.test.js:864",
+        "test/locations.test.js:893",
+        "test/locations.test.js:954",
+        "test/locations.test.js:1062",
+        "test/locations.test.js:1099",
+        "test/locations.test.js:1363",
+        "test/locations.test.js:1418",
+        "test/locations.test.js:1451",
+        "test/locations.test.js:1473",
+        "test/locations.test.js:1506",
+        "test/locations.test.js:1532",
+        "test/locations.test.js:1553",
+        "test/locations.test.js:1691",
+        "test/locations.test.js:1731",
+        "test/locations.test.js:1760",
+        "test/locations.test.js:1910",
+        "test/locations.test.js:1968"
+      ]
+    },
+    {
+      "rule": "locations.answer.one-walkdown-answers",
+      "status": "pass",
+      "statement_hash": "sha256:3fc015800965",
+      "duration_ms": 1859,
+      "checks": [
+        "test/locations.test.js:1014",
+        "test/locations.test.js:1193",
+        "test/locations.test.js:2057"
+      ]
+    },
+    {
+      "rule": "locations.answer.says-why",
+      "status": "pass",
+      "statement_hash": "sha256:738bca8657bc",
+      "duration_ms": 78,
+      "checks": [
+        "test/locations.test.js:1240",
+        "test/locations.test.js:1583",
+        "test/locations.test.js:1637"
+      ]
+    },
+    {
+      "rule": "locations.answer.asking-writes-nothing",
+      "status": "pass",
+      "statement_hash": "sha256:7d27e6b8d5a3",
+      "duration_ms": 138,
+      "checks": [
+        "test/locations.test.js:1270"
+      ]
+    },
+    {
+      "rule": "locations.travel.provenance-not-currency",
+      "status": "pass",
+      "statement_hash": "sha256:b1efe71a4d3b",
+      "duration_ms": 1,
+      "checks": [
+        "test/locations.test.js:1299"
+      ]
+    },
+    {
+      "rule": "locations.keeping.old-config-never-misfiles",
+      "status": "pass",
+      "statement_hash": "sha256:3ad02c787d78",
+      "duration_ms": 1417,
+      "checks": [
+        "test/locations.test.js:2188"
+      ]
+    }
+  ]
+}

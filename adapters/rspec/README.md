@@ -15,19 +15,21 @@ it "requires a guest email before payment", rule: "checkout.guest.email-required
 end
 ```
 
-Run with the formatter (alongside your normal one):
+Run with the formatter (alongside your normal one), loaded from the walkdown clone by its
+path. The clone is the install, so there is no gem to add to your Gemfile:
 
 ```
-bundle exec rspec spec/workflows --format progress --format Walkdown::Formatter
+bundle exec rspec spec/workflows -I <clone>/adapters/rspec/lib -r walkdown/formatter \
+  --format progress --format Walkdown::Formatter
 ```
 
-In `blueprint/walkdown.yml`:
+In `blueprint/walkdown.yml` (`walkdown init` writes these with the clone's path filled in):
 
 ```yaml
 runner:
-  run_all: "bundle exec rspec spec/workflows --format progress --format Walkdown::Formatter"
-  run_for_rule: "bundle exec rspec spec/workflows --format progress --format Walkdown::Formatter --tag 'rule:{id}'"
-  list: "bundle exec rspec spec/workflows --dry-run --format Walkdown::ListFormatter"
+  run_all: "bundle exec rspec spec/workflows -I <clone>/adapters/rspec/lib -r walkdown/formatter --format progress --format Walkdown::Formatter"
+  run_for_rule: "bundle exec rspec spec/workflows -I <clone>/adapters/rspec/lib -r walkdown/formatter --format progress --format Walkdown::Formatter --tag 'rule:{id}'"
+  list: "bundle exec rspec spec/workflows -I <clone>/adapters/rspec/lib -r walkdown/formatter --dry-run --format Walkdown::ListFormatter"
   results: native
 ```
 
@@ -41,7 +43,12 @@ metadata: it dry-run-prints `rule:<id> <file>:<line>` per tagged example, which 
   `skipped`. Multiple examples per rule aggregate (fail > pass > skipped; durations sum).
 - Pass/fail results are stamped with the rule's current `statement_hash` (identical
   hashing to the JS CLI: sha256 of the whitespace-normalized statement, 12 hex chars).
-- `git_sha`/`blueprint_sha` recorded, with a `-dirty` suffix for an unclean tree.
+- Where the run is filed, first answer wins: `WALKDOWN_SPEC` and `WALKDOWN_RUNS`, which
+  `walkdown run` passes; then `walkdown where --json`, asked of the clone the formatter was
+  loaded from, which finds a home kept outside the repository; then a walk up from the
+  cwd for a spec committed in the repository.
+- `git_sha` is the code's (the cwd), `blueprint_sha` the spec's, each with a `-dirty`
+  suffix for an unclean tree.
 - Target: `WALKDOWN_TARGET` (default `local`). Who a run is recorded under is `ci`
   under CI and the `identity:` in `~/.walkdown/config.yml` otherwise — never an env
   var. `base_url`: `Capybara.app_host`, else `APP_HOST`.

@@ -280,9 +280,11 @@ blueprints:
 The home implies every record path: `blueprint/` and the four record directories are its
 siblings, and a row carries a per-kind path only where `walkdown move` put one outside
 the home. A `blueprints:` list in the personal `config.yml` — the shape from before the
-registry — is not read; each row is named on the report as set aside, and the first
-registry row written about the same checkout folds its machine-local keys in and takes it
-out.
+registry — is not read, and neither is `projects:`, the name it had before that. Each row
+is named on the report as set aside, and the first registry row written about the same
+checkout folds its machine-local keys in (its targets, say) and takes it out; `init` says
+so when it does. A `projects:` row is matched by its roots, since the id it carried was
+never one anyone chose.
 
 Resolution order for any record kind, first hit wins:
 
@@ -290,6 +292,12 @@ Resolution order for any record kind, first hit wins:
 2. the row's own key for that kind — a move this machine made
 3. `defaults`, with `{id}` substituted
 4. the home's layout — `<home>/<kind>`
+
+A default that would land in walkdown's own `blueprints/` directory but outside the home
+the row registered is set aside rather than used. That is the layout from before numbered
+homes (`~/.walkdown/blueprints/{id}/runs` beside `0001-{id}/`), and honouring it files
+records where the home's readers never look. `where` and `lint` both name the line. A
+default aimed anywhere else, such as evidence on another disk, applies as written.
 
 ### Where this stands
 

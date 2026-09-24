@@ -4,6 +4,7 @@ require 'digest'
 require 'etc'
 require 'fileutils'
 require 'json'
+require 'open3'
 require 'rspec/core'
 require 'rspec/core/formatters'
 require 'shellwords'
@@ -20,6 +21,10 @@ require 'yaml'
 #     prints "rule:<id> <file>:<line>" per tagged example — the `runner.list`
 #     command for walkdown lint's coverage check (RSpec's JSON formatter does
 #     not include custom metadata, so this lister is the reliable source).
+#
+# Where the run is filed, first answer wins: WALKDOWN_SPEC / WALKDOWN_RUNS,
+# which `walkdown run` passes; then `walkdown where`, asked of the clone this
+# file sits in; then a walk up from the cwd for a spec kept in the repository.
 #
 # Env: WALKDOWN_TARGET (default "local"), APP_HOST (base_url fallback;
 # Capybara.app_host
@@ -45,6 +50,45 @@ module Walkdown
     # keeps the sibling rule all the same.
     def runs_dir(blueprint_dir)
       File.join(File.dirname(File.expand_path(blueprint_dir)), 'runs')
+    end
+
+    # The spec and runs directories for this run, as { spec:, runs: }, or nil.
+    #
+    # The walk used to be the only answer, and it never reaches a home kept
+    # outside the repository - the default since `init` stopped writing into
+    # the project - so the run went unrecorded with a warning (#16). Every
+    # other reader asks the registry; this asks it through the same door.
+    def locate(start = Dir.pwd)
+      spec = ENV['WALKDOWN_SPEC'].to_s
+      unless spec.empty?
+        runs = ENV['WALKDOWN_RUNS'].to_s
+        return { spec: spec, runs: runs.empty? ? runs_dir(spec) : runs }
+      end
+      asked = ask_where(start)
+      return asked if asked
+
+      dir = find_blueprint_dir(start)
+      dir ? { spec: dir, runs: runs_dir(dir) } : nil
+    end
+
+    # `walkdown where --json`, from the clone this formatter was loaded out of.
+    # nil when there is no clone beside it (an installed gem) or no node.
+    def ask_where(start)
+      bin = File.expand_path('../../../../bin/walkdown.js', __dir__)
+      return nil unless File.exist?(bin)
+
+      out, status = Open3.capture2('node', bin, 'where', '--json', chdir: start, err: File::NULL)
+      return nil unless status.success?
+
+      # walkdown writes UTF-8 whatever the locale says; a shell with no LANG
+      # hands Ruby US-ASCII, and the first em dash ends the parse.
+      at = JSON.parse(out.dup.force_encoding(Encoding::UTF_8))
+      spec = at.dig('spec', 'path')
+      return nil if spec.nil? || at.dig('spec', 'missing')
+
+      { spec: spec, runs: at.dig('runs', 'path') || runs_dir(spec) }
+    rescue StandardError
+      nil
     end
 
     def find_blueprint_dir(start = Dir.pwd)
@@ -107,14 +151,17 @@ module Walkdown
     private
 
     def record_run(examples)
-      dir = Support.find_blueprint_dir
-      return warn('walkdown formatter: no blueprint (walkdown.yml) found — run not recorded') unless dir
+      at = Support.locate
+      unless at
+        return warn('walkdown formatter: no blueprint found — run not recorded. ' \
+                    '`walkdown where` says what this directory resolves to; `walkdown run` passes it along.')
+      end
 
       tagged = examples.select { |ex| ex.metadata[:rule] }
       return warn('walkdown formatter: no examples tagged rule: — run not recorded') if tagged.empty?
 
-      results = aggregate(tagged, Support.rules_by_id(dir))
-      file, record = write_record(dir, results)
+      results = aggregate(tagged, Support.rules_by_id(at[:spec]))
+      file, record = write_record(at, results)
       @output.puts "walkdown: recorded #{record['results'].length} rule result(s) → #{relative_to_pwd(file)}"
     end
 
@@ -163,8 +210,8 @@ module Walkdown
     # layout every project had before homes. Nothing reads that now: a home is
     # `blueprint/` with threads, runs, evidence and drafts as siblings, and a
     # run filed inside the spec is a run `walkdown status` never sees.
-    def write_record(dir, results)
-      runs_dir = Support.runs_dir(dir)
+    def write_record(at, results)
+      runs_dir = at[:runs]
       FileUtils.mkdir_p(runs_dir)
       now = Time.now.utc
       target = ENV['WALKDOWN_TARGET'] || 'local'
@@ -180,9 +227,13 @@ module Walkdown
         'target' => target
       }
       record['base_url'] = base_url if base_url
-      if (sha = Support.git_sha(dir))
+      # The code that ran is the cwd's; the spec may sit in another tree, or
+      # in none, once its home is outside the repository.
+      if (sha = Support.git_sha(Dir.pwd))
         record['git_sha'] = sha
-        record['blueprint_sha'] = sha
+      end
+      if (spec_sha = Support.git_sha(at[:spec]))
+        record['blueprint_sha'] = spec_sha
       end
       record['results'] = results
 

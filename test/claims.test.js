@@ -104,3 +104,13 @@ test('an enumerated fragment beats the page it lives on @rule:screens.ownership.
   );
   assert.equal(blueprintsForUrl([a], 'http://localhost:3000/admin.html')[0].screen, 'admin');
 });
+
+test('an app path written as a whole URL is claimed on its own origin, not glued to base_url (#15) @rule:screens.surfaces.stand-in-app', () => {
+  const standIn = 'http://localhost:4700/stand-in/party-id-types';
+  const [claim] = claimsOf(
+    bp('app', 'http://localhost:3000', [{ id: 'party-id-types', app: { path: standIn } }]).blueprint,
+  );
+  assert.equal(claim.key, standIn);
+  assert.equal(claim.origin, 'http://localhost:4700');
+  assert.equal(claim.path, '/stand-in/party-id-types');
+});

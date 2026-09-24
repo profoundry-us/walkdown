@@ -148,6 +148,25 @@ stories:
               at: 2026-09-14T02:20:43Z
               why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
+      - id: locations.default.prototype-beside-the-spec
+        origin: walkdown
+        created_at: 2026-09-24
+        statement: A relative `prototype.root` is looked for beside the spec first and in the code second, so a home kept outside the repository can hold its own design.
+        because: A home outside the repository can only keep its design beside the spec, and neither layout should need a path to one person's disk in the shared config.
+        history: "GitHub issue #17. With the home outside the repository, `prototype: { root: prototype/ }` looked in the repository, and every design page and stand-in was a 404."
+        verify: [checks]
+        signoff: [eng]
+        steps:
+          given:
+            - A blueprint whose prototype root is a relative path
+          when:
+            - A design page, a stand-in or a storyboard picture of the design is asked for
+          then:
+            - A directory by that name beside the spec answers when there is one
+            - Otherwise the directory by that name in the code answers, as it always has
+            - The design pages, the stand-ins and the storyboard all read the same directory
+          statement_hash: sha256:a30a7a594efd
+
   - id: locations.answer
     title: Anyone can ask where this project's pieces are
     statement: As someone standing in a repository, I can ask where every piece lives and why it was chosen there, and the asking never changes the answer.
@@ -307,6 +326,27 @@ stories:
               at: 2026-09-21T01:30:46Z
               why: q-0251 (machine names refused), q-0302 (an addressless target counts nothing placed), q-0280/n-0322 (canonicalised only to compare; the because rewritten)
 
+      - id: locations.answer.adapters-file-where-walkdown-says
+        origin: walkdown
+        created_at: 2026-09-24
+        statement: A test adapter files its run where `walkdown where` says runs go, including when the blueprint's home is outside the repository.
+        because: A run filed where nothing reads it is a pass nobody sees, and the adapter is the one place a person cannot watch.
+        history: "GitHub issue #16. The RSpec formatter found the blueprint by walking up from the code, never reached a home outside the repository, and recorded nothing while every spec passed."
+        verify: [checks]
+        signoff: [eng]
+        steps:
+          given:
+            - A blueprint whose home is outside the repository, and an RSpec suite in the code tagged with its rules
+          when:
+            - The suite runs through walkdown run, or as a bare rspec in the code
+          then:
+            - The run lands in the home's runs, where `walkdown status` counts it
+            - walkdown run hands the suite the spec and runs directories it resolved
+            - Run bare, the formatter asks walkdown where of the clone it was loaded from
+            - A spec committed in the repository is still found by looking up from the code
+            - The config init writes loads the formatter from the clone by its path, so no gem is needed
+          statement_hash: sha256:7e1aecb8560b
+
   - id: locations.keeping
     title: A ledger already written is never orphaned or edited
     statement: As a team with history in our blueprint, no preference of anyone's machine can make our records stop being found, and moving them stays something a person did on purpose.
@@ -355,6 +395,26 @@ stories:
             - hash: sha256:af8538a1091f
               at: 2026-09-14T16:05:25Z
               why: the move has been recorded on the registry row since ADR 0003, not in the personal config; the words now say what the code does
+
+      - id: locations.keeping.old-config-never-misfiles
+        origin: walkdown
+        created_at: 2026-09-24
+        statement: A personal config written before the registry never files a registered blueprint's records outside its home, and walkdown names each line of it that it no longer reads.
+        because: A record filed where its readers do not look is lost without a word. A line that is kept but not read waits to surprise someone.
+        history: "GitHub issue #18. On a machine with an older config, `init` left its `projects:` block and `defaults:` in place. Nine questions went to a directory beside the new home, and `walkdown threads` never saw them."
+        verify: [checks]
+        signoff: [eng]
+        steps:
+          given:
+            - A config.yml with a projects row about this checkout, and per-kind defaults spelled for the layout before numbered homes
+          when:
+            - The checkout is initialised, and its records are asked for
+          then:
+            - The row's machine-local keys, such as its targets, move to the registry row, the row leaves config.yml, and init says so
+            - A default that would land beside the home, not in it, is not used, and the home's own directory answers
+            - Both where and lint name that default and say why it is not used
+            - A default aimed anywhere else, such as evidence on another disk, still applies
+          statement_hash: sha256:3ad02c787d78
 
   - id: locations.travel
     title: A record means the same thing on somebody else's machine
