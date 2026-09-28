@@ -32,11 +32,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
 
-      # No lockfile is committed (.gitignore), so this resolves the ranges in
-      # package.json afresh on every run.
+      # Exactly what package-lock.json pins, so a dependency's new release
+      # cannot turn this red without a change here.
       - name: Install
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
       - name: Install the Playwright browser
         run: npx playwright install --with-deps chromium

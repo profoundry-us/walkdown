@@ -1,5 +1,4 @@
 node_modules/
-package-lock.json
 # Per-checkout working state: the checkspace, the test home, Playwright's
 # output, scratch copies for sittings, the build-check outputs. All of it
 # under tmp/, so .walkdown/ is this project's home like anybody else's and
