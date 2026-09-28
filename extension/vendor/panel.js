@@ -4237,8 +4237,8 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     verdictNote: '', // the verdict feedback box, kept across re-renders
     verdictSay: '', // the verdict refusal line; dies with the rule it refused
     askChoice: null,
-    /** The blueprint key (its home on disk) this panel opened; the only board it records against (q-0301). */
-    board: null,
+    /** The blueprint key (its home on disk) this panel opened; the only blueprint it records against (q-0301). */
+    openedBlueprint: null,
     /** Pictures pasted or dropped into the thread composer, not yet sent: { name, type, data }. */
     threadShots: [],
     /** The same, held on the rule's box: they go with whatever the box does next - a reply, a fail's why, an answer. */
@@ -9229,25 +9229,24 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     if (gen !== loadGen) return;
     S.data = data;
     /*
-     * The board this panel opened is the only one it records against (q-0301).
+     * The blueprint this panel opened is the only one it records against (q-0301).
      * The key is the blueprint's home on disk, so a server restarted on the
      * same port serving another copy answers with a different one - and a
      * shared browser can hand a judge exactly that (n-0202). The sitting is
      * dropped here, before anything else reads it, and the panel says so
-     * rather than carrying a draft across to a board nobody chose.
+     * rather than carrying a draft across to a blueprint nobody chose.
      */
-    if (S.board && S.data?.key && S.data.key !== S.board) {
+    if (S.openedBlueprint && S.data?.key && S.data.key !== S.openedBlueprint) {
       /*
        * This browser's copy of the sitting goes too, and only that copy -
-       * the draft on the server is some other board's business now. Left
-       * standing, restoreSession found it under the same key once start()
-       * re-read the blueprint from the address, and carried the sitting
-       * across after all; a slower CI runner lost that race every time
-       * (2026-09-28).
+       * the draft on the server is some other blueprint's business now. Left
+       * standing, restoreSession could find it under the same key once
+       * start() re-read the blueprint from the address, and carry the
+       * sitting across after all (2026-09-28).
        */
       store.set(SESSION_KEY(), null);
       S.session = null;
-      S.board = null;
+      S.openedBlueprint = null;
       S.BP = null;
       sayAddress();
       // Start over on whatever is there now - and say so AFTER, because
@@ -9259,7 +9258,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       );
       return;
     }
-    S.board ??= S.data?.key ?? null;
+    S.openedBlueprint ??= S.data?.key ?? null;
     MSG.zone = S.data?.identity?.timezone ?? null;
     // Re-resolve against the reloaded data: the old object is a stale copy, so
     // holding it would show yesterday's verdict and threads.
@@ -11034,9 +11033,9 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     }
     S.blueprints = payload.blueprints ?? [];
     S.servedRoot = payload.root ?? null;
-    // The board this panel opened, remembered from the first answer (q-0301);
+    // The blueprint this panel opened, remembered from the first answer (q-0301);
     // load() compares every later answer against it.
-    S.board ??= payload.key ?? null;
+    S.openedBlueprint ??= payload.key ?? null;
     /*
      * Named by key from here on. A short id in the address answers the same
      * as its key while it is unambiguous, but everything below - the marks on
@@ -11202,7 +11201,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
   }
 
   /*
-   * What the panel draws before there is a board: no server, or a project whose
+   * What the panel draws before there is a blueprint: no server, or a project whose
    * blueprints you have not picked between yet. The third screen - the project
    * modal - is drawn over the top of whatever this leaves behind, so it is not
    * a phase and does not belong here.

@@ -344,9 +344,9 @@ test('the panel will not accept work without a named person, and asks for the re
   // On nothing the walk can reach: a thread on a live rule is that rule's
   // conversation and ends with the rule's verdict, never with a Done of its
   // own (ADR 0006 §3) - so the one the panel offers Done on is a thread with
-  // no rule. Filed here rather than found on the board: the copy is of the
-  // real ledger, and once every such thread there was accepted this check
-  // had nothing to stand on (2026-09-27).
+  // no rule. Filed here rather than found in the copied ledger: once every
+  // such thread there was accepted this check had nothing to stand on
+  // (2026-09-27).
   const post = async (path, data) => {
     const res = await page.request.post(`${WD_ORIGIN}${path}?bp=blueprint`, { data });
     expect(res.ok(), `${path}: ${await res.text()}`).toBeTruthy();
@@ -641,8 +641,8 @@ test('waiving a rule\u2019s conversation needs a person and a reason, like waivi
   await endSession(page);
   // A listed rule carrying a live note: the conversation the composer's
   // Waive would close (ADR 0006 §4). This check's own rule, with a note
-  // filed on it here - finding one on the day's board left the check with
-  // nothing to stand on once the board was clean (2026-09-27).
+  // filed on it here - finding one in the copied ledger left the check with
+  // nothing to stand on once every such note was settled (2026-09-27).
   const rule = 'panel.threads.claim-never-accept';
   const filed = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
     data: { kind: 'note', body: 'The refusal could say which setting to change.', anchor: { rule } },
@@ -760,8 +760,9 @@ test('threads have a view of their own, ended ones included', {
   /*
    * Something waiting on a person, so the badge and "Awaiting you" have a
    * number to agree on: an addressed note on a screen with no rule is a
-   * person's to verify. Filed here - a clean board owes nobody anything, and
-   * then the tab rightly shows no count at all (2026-09-27).
+   * person's to verify. Filed here - a blueprint with nothing open owes
+   * nobody anything, and then the tab rightly shows no count at all
+   * (2026-09-27).
    */
   const post = async (path, data) => {
     const res = await page.request.post(`${WD_ORIGIN}${path}?bp=blueprint`, { data });
@@ -2040,8 +2041,8 @@ test('a thread an agent filed says so in the list, not only once it is opened', 
   // Two live notes on a screen and no rule - the kind the Threads tab lists
   // as active: a person's words a machine relayed (`said` with `via`, so
   // they stay the person's and carry the machine's mark), and a person's
-  // typed by hand. Filed here rather than found on the board, which had none
-  // left to find (2026-09-27).
+  // typed by hand. Filed here rather than found in the copied ledger, which
+  // had none left to find (2026-09-27).
   const file = async (data) => {
     const res = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
       data: { kind: 'note', anchor: { screen: 'review' }, ...data },
@@ -3574,7 +3575,11 @@ test('a server answering for another blueprint ends the sitting, out loud', {
   await page.route(/\/api\/blueprint(\?|$)/, async (route) => {
     const res = await route.fetch();
     const json = await res.json();
-    await route.fulfill({ response: res, json: { ...json, key: '/somewhere/else/entirely' } });
+    // Nor does its /api/blueprint answer carry our draft: left in,
+    // restoreSession found it there after the drop and the sitting came
+    // back - on a CI runner every time, here only when the timing fell that
+    // way (2026-09-28).
+    await route.fulfill({ response: res, json: { ...json, key: '/somewhere/else/entirely', draft: null } });
   });
   // The other board has no draft of ours - it is another board.
   await page.route(/\/api\/draft(\?|$)/, (route) =>

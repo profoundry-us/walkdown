@@ -114,8 +114,8 @@ export const S = {
   verdictNote: '', // the verdict feedback box, kept across re-renders
   verdictSay: '', // the verdict refusal line; dies with the rule it refused
   askChoice: null,
-  /** The blueprint key (its home on disk) this panel opened; the only board it records against (q-0301). */
-  board: null,
+  /** The blueprint key (its home on disk) this panel opened; the only blueprint it records against (q-0301). */
+  openedBlueprint: null,
   /** Pictures pasted or dropped into the thread composer, not yet sent: { name, type, data }. */
   threadShots: [],
   /** The same, held on the rule's box: they go with whatever the box does next - a reply, a fail's why, an answer. */
