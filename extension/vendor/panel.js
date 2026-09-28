@@ -9237,6 +9237,15 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
      * rather than carrying a draft across to a board nobody chose.
      */
     if (S.board && S.data?.key && S.data.key !== S.board) {
+      /*
+       * This browser's copy of the sitting goes too, and only that copy -
+       * the draft on the server is some other board's business now. Left
+       * standing, restoreSession found it under the same key once start()
+       * re-read the blueprint from the address, and carried the sitting
+       * across after all; a slower CI runner lost that race every time
+       * (2026-09-28).
+       */
+      store.set(SESSION_KEY(), null);
       S.session = null;
       S.board = null;
       S.BP = null;
