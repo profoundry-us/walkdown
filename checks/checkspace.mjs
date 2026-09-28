@@ -22,6 +22,7 @@ import {
   cpSync,
   existsSync,
   mkdirSync,
+  readdirSync,
   readFileSync,
   rmSync,
   symlinkSync,
@@ -121,7 +122,7 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
   if (realEvidence && existsSync(realEvidence) && !existsSync(evLink)) {
     mkdirSync(dirname(evLink), { recursive: true });
     symlinkSync(realEvidence, evLink, 'dir');
-  }
+  } else if (!existsSync(evLink)) placeholderEvidence(evLink);
   /*
    * And the two check suites, for the same reason: `authoring.location`
    * resolves against the blueprint's parent, so without them the copy is a
@@ -226,4 +227,35 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
         '',
       ].join('\n'),
   );
+}
+
+/*
+ * Stand-ins for evidence this machine does not have. The real screenshots
+ * are 259MB kept out of git beside the ledger, so a fresh clone - a CI runner
+ * above all - has the run records naming them and none of the files. The
+ * checks that open one ask whether a picture loads where a run says it left
+ * one, never what it shows, so a 1x1 image at each named path answers them.
+ * Written only when there is nothing real to link.
+ */
+const ONE_PIXEL = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+  'base64',
+);
+function placeholderEvidence(dir) {
+  const runs = join(CHECKSPACE, HOME, 'runs');
+  for (const f of readdirSync(runs).filter((n) => n.endsWith('.json'))) {
+    let run;
+    try {
+      run = JSON.parse(readFileSync(join(runs, f), 'utf8'));
+    } catch {
+      continue;
+    }
+    for (const res of run?.results ?? [])
+      for (const p of res?.evidence ?? []) {
+        if (typeof p !== 'string' || !p.startsWith('runs/evidence/') || !/\.(png|jpe?g)$/i.test(p)) continue;
+        const file = join(dir, p.slice('runs/evidence/'.length));
+        mkdirSync(dirname(file), { recursive: true });
+        writeFileSync(file, ONE_PIXEL);
+      }
+  }
 }

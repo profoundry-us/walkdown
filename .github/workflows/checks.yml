@@ -1,0 +1,56 @@
+# The unit tests and the Playwright checks, on every push and pull request.
+#
+# Highball is not run here: it is the local development harness (the Claude
+# Code hooks in .claude/settings.json), and what it enforces at turn end is
+# already covered by the two suites below.
+#
+# Nothing is recorded. `checks:dev` sets WALKDOWN_RECORD=0, because a CI
+# runner is not a place a verdict is earned - the ledger is committed by the
+# person who ran the suite (see CLAUDE.md, "A rule is not built until the
+# ledger says so").
+name: checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # No lockfile is committed (.gitignore), so this resolves the ranges in
+      # package.json afresh on every run.
+      - name: Install
+        run: npm install --no-audit --no-fund
+
+      - name: Install the Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Playwright checks
+        run: npm run checks:dev
+
+      - name: Keep the failures to look at
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: tmp/test-results/
+          retention-days: 14
