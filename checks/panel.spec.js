@@ -648,6 +648,10 @@ test('waiving a rule\u2019s conversation needs a person and a reason, like waivi
     data: { kind: 'note', body: 'The refusal could say which setting to change.', anchor: { rule } },
   });
   expect(filed.ok(), await filed.text()).toBeTruthy();
+  // Read again, so the panel knows the note it did not see arrive - waiting
+  // on its own refresh passed here and failed on a slower CI runner.
+  await page.reload();
+  await expect(page.getByTestId('panel.bar')).toBeVisible();
   const live = () =>
     payload(page).then(({ threads: all }) =>
       all.filter((t) => t.anchor?.rule === rule && t.kind !== 'question' && ['open', 'addressed'].includes(t.status)).length,
