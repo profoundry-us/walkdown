@@ -72,7 +72,9 @@ test('node:test reporter records tagged tests as a hash-stamped run', () => {
       // standalone. WALKDOWN_RECORD_HOME goes too: `npm run test:record` sets
       // it empty for the outer run, and inherited by this nested one it sent
       // the fixture's record to no blueprint at all - so the recorded suite
-      // exited 1 on this test while the plain one passed (2026-09-19).
+      // exited 1 on this test while the plain one passed (2026-09-19). And CI:
+      // a runner sets it, the reporter then records the actor as `ci` by
+      // design, and this test is about the configured identity (2026-09-28).
       env: Object.fromEntries(
         Object.entries({
           ...process.env,
@@ -81,7 +83,7 @@ test('node:test reporter records tagged tests as a hash-stamped run', () => {
           // record under a name of its choosing (n-0139).
           WALKDOWN_HOME: home,
           WALKDOWN_TARGET: 'ci-lane',
-        }).filter(([k]) => !/^NODE_(TEST|OPTIONS)|^WALKDOWN_RECORD_HOME$/.test(k)),
+        }).filter(([k]) => !/^NODE_(TEST|OPTIONS)|^WALKDOWN_RECORD_HOME$|^CI$/.test(k)),
       ),
     },
   );
