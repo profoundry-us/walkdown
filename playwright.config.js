@@ -171,6 +171,10 @@ export default defineConfig({
       // (locations.answer.one-walkdown-answers).
       command: `node ../../bin/walkdown.js serve --blueprint blueprint --port ${WD_PORT}`,
       cwd: 'tmp/checkspace',
+      // The server photographs screens at the declared address, and nothing
+      // this run starts listens there; its browser is pointed at this run's
+      // server the way the checks' own browser is (lib/screenshots.js).
+      env: { ...process.env, WALKDOWN_RESOLVE: `${new URL(DECLARED).origin}=${WD_ORIGIN}` },
       url: `${WD_ORIGIN}/api/blueprint`,
       reuseExistingServer: false,
       stdout: 'ignore',

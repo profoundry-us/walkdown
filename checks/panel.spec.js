@@ -341,16 +341,25 @@ test('the panel will not accept work without a named person, and asks for the re
 }, async ({ page }) => {
   await review(page);
   await endSession(page);
-  const { threads, rows } = await payload(page);
   // On nothing the walk can reach: a thread on a live rule is that rule's
   // conversation and ends with the rule's verdict, never with a Done of its
   // own (ADR 0006 §3) - so the one the panel offers Done on is a thread with
-  // no rule, or on a retired rule.
-  const listed = new Set((rows ?? []).map((r) => r.rule));
-  const addressed = (threads ?? []).find(
-    (t) => t.status === 'addressed' && t.kind !== 'question' && !listed.has(t.anchor?.rule),
-  );
-  expect(addressed, 'the blueprint needs an addressed thread the walk cannot reach').toBeTruthy();
+  // no rule. Filed here rather than found on the board: the copy is of the
+  // real ledger, and once every such thread there was accepted this check
+  // had nothing to stand on (2026-09-27).
+  const post = async (path, data) => {
+    const res = await page.request.post(`${WD_ORIGIN}${path}?bp=blueprint`, { data });
+    expect(res.ok(), `${path}: ${await res.text()}`).toBeTruthy();
+    return res.json();
+  };
+  const addressed = await post('/api/threads', {
+    kind: 'note',
+    body: 'The review screen crops its heading.',
+    anchor: { screen: 'review' },
+  });
+  await post(`/api/threads/${addressed.id}/replies`, { body: 'Uncropped it.', via: 'agent' });
+  await post(`/api/threads/${addressed.id}/status`, { status: 'addressed', via: 'agent' });
+  await page.reload();
 
   // From the Threads tab, which opens on what waits on a person.
   await page.getByTestId('panel.tabs').getByText(/Threads/).click();
@@ -630,15 +639,15 @@ test('waiving a rule\u2019s conversation needs a person and a reason, like waivi
 }, async ({ page }) => {
   await review(page);
   await endSession(page);
-  const { rows, threads } = await payload(page);
   // A listed rule carrying a live note: the conversation the composer's
-  // Waive would close (ADR 0006 §4). Which rule depends on the day's
-  // statuses, so it is found rather than named.
-  const listed = new Set((rows ?? []).map((r) => r.rule));
-  const rule = (threads ?? []).find(
-    (t) => t.kind !== 'question' && ['open', 'addressed'].includes(t.status) && listed.has(t.anchor?.rule),
-  )?.anchor.rule;
-  expect(rule, 'need a listed rule with a live note').toBeTruthy();
+  // Waive would close (ADR 0006 §4). This check's own rule, with a note
+  // filed on it here - finding one on the day's board left the check with
+  // nothing to stand on once the board was clean (2026-09-27).
+  const rule = 'panel.threads.claim-never-accept';
+  const filed = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
+    data: { kind: 'note', body: 'The refusal could say which setting to change.', anchor: { rule } },
+  });
+  expect(filed.ok(), await filed.text()).toBeTruthy();
   const live = () =>
     payload(page).then(({ threads: all }) =>
       all.filter((t) => t.anchor?.rule === rule && t.kind !== 'question' && ['open', 'addressed'].includes(t.status)).length,
@@ -744,6 +753,20 @@ test('a screen that is a state, not an address, says how to get there', {
 test('threads have a view of their own, ended ones included', {
   tag: '@rule:panel.threads.own-view',
 }, async ({ page }) => {
+  /*
+   * Something waiting on a person, so the badge and "Awaiting you" have a
+   * number to agree on: an addressed note on a screen with no rule is a
+   * person's to verify. Filed here - a clean board owes nobody anything, and
+   * then the tab rightly shows no count at all (2026-09-27).
+   */
+  const post = async (path, data) => {
+    const res = await page.request.post(`${WD_ORIGIN}${path}?bp=blueprint`, { data });
+    expect(res.ok(), `${path}: ${await res.text()}`).toBeTruthy();
+    return res.json();
+  };
+  const { id: waiting } = await post('/api/threads', { kind: 'note', body: 'The review screen crops its footer.', anchor: { screen: 'review' } });
+  await post(`/api/threads/${waiting}/replies`, { body: 'Uncropped it.', via: 'agent' });
+  await post(`/api/threads/${waiting}/status`, { status: 'addressed', via: 'agent' });
   await review(page);
 
   /*
@@ -1193,11 +1216,13 @@ test('the steps are read outright and the check source waits behind a disclosure
   await expect(src).not.toContainText('await ownRule(page,');
 
   // Opened, it is the source itself — this very check, fetched from the
-  // server by the ref the suite carries for this rule.
-  await src.locator('summary').click();
+  // server by the ref the suite carries for this rule. It opens over the
+  // desk now rather than into a letterbox under the steps (n-0318), so the
+  // source is read in the modal, not inside the disclosure.
+  await src.click();
   // Generous: opening it is a round trip to the server, which re-derives the
   // whole ledger to answer.
-  await expect(src).toContainText('await ownRule(page,', { timeout: 15000 });
+  await expect(page.getByTestId('detail.source-modal')).toContainText('await ownRule(page,', { timeout: 15000 });
 });
 
 test('hovering an anchor a step names points at it on the surface', {
@@ -2008,16 +2033,24 @@ test('a thread an agent filed says so in the list, not only once it is opened', 
   tag: '@rule:threads.lifecycle.acts-for-a-person',
 }, async ({ page }) => {
   await review(page);
-  const { threads } = await payload(page);
-  // Live ones only: the list does not draw terminal threads, so a verified
-  // thread would be a card that is legitimately absent rather than a card
-  // missing its line.
-  const LIVE = (t) => !['verified', 'incorporated', 'waived', 'settled', 'recorded'].includes(t.status);
-  const byAgent = (threads ?? []).find((t) => t.via && LIVE(t));
-  expect(byAgent, 'the ledger holds a live thread some machine typed').toBeTruthy();
-  const plain = (threads ?? []).find((t) => !t.via && LIVE(t));
+  // Two live notes on a screen and no rule - the kind the Threads tab lists
+  // as active: a person's words a machine relayed (`said` with `via`, so
+  // they stay the person's and carry the machine's mark), and a person's
+  // typed by hand. Filed here rather than found on the board, which had none
+  // left to find (2026-09-27).
+  const file = async (data) => {
+    const res = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
+      data: { kind: 'note', anchor: { screen: 'review' }, ...data },
+    });
+    expect(res.ok(), await res.text()).toBeTruthy();
+    return res.json();
+  };
+  const byAgent = { ...(await file({ said: 'The heading wraps at 1024px.', via: 'agent' })), via: 'agent' };
+  const plain = await file({ body: 'The heading wraps on my laptop.' });
+  await page.reload();
 
   await page.getByTestId('panel.tabs').getByText(/Threads/).click();
+  await page.locator('[data-tfilter="active"]').click();
   const list = page.getByTestId('panel.threads-list');
   // By the card's own id attribute, never by text: a thread whose BODY names
   // another thread matches a text selector for it, and .first() then picks
@@ -2935,12 +2968,17 @@ test("a question leads with its question, in the list and on its own screen", {
   // Opened: the same headline on the opening message, and none on the reply.
   await card.click({ position: { x: 8, y: 6 } });
   const body = page.getByTestId('thread.body');
-  const asks = body.locator('.wd-ask');
+  // Counted in the conversation itself: an open question also re-asks itself
+  // in a card at the end of the stream, beside the box that answers it
+  // (90ab98f), and that card leads with the same question.
+  const asks = body.locator('.wd-ask').and(page.locator(':not([data-testid="thread.ask"] .wd-ask)'));
   await expect(asks).toHaveCount(1);
   await expect(asks).toHaveText(ask);
-  await expect(body.locator('.wd-msg').first().locator('.wd-ask')).toHaveCount(1);
-  await expect(body.locator('.wd-msg').last()).toContainText('Yes, hand one out.');
-  await expect(body.locator('.wd-msg').last().locator('.wd-ask')).toHaveCount(0);
+  await expect(page.getByTestId('thread.ask').locator('.wd-ask')).toHaveText(ask);
+  const msgs = body.locator('.wd-msg').and(page.locator(':not([data-testid="thread.ask"] .wd-msg)'));
+  await expect(msgs.first().locator('.wd-ask')).toHaveCount(1);
+  await expect(msgs.last()).toContainText('Yes, hand one out.');
+  await expect(msgs.last().locator('.wd-ask')).toHaveCount(0);
 });
 
 /*

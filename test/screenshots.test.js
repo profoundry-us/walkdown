@@ -4,12 +4,21 @@ import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
-import { candidates, closeBrowser, elsewhere, openBrowser, pictureOf } from '../lib/screenshots.js';
+import { candidates, closeBrowser, elsewhere, openBrowser, pictureOf, resolvedVia } from '../lib/screenshots.js';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-shots-'));
 after(async () => {
   await closeBrowser();
   rmSync(root, { recursive: true, force: true });
+});
+
+test('an address can be answered elsewhere, origin for origin, and only that origin @rule:panel.dock.storyboard', () => {
+  const rules = 'http://localhost:4700=http://localhost:4713, http://app.test=http://127.0.0.1:9000';
+  assert.equal(resolvedVia('http://localhost:4700/as-built/review.html?x=1#top', rules), 'http://localhost:4713/as-built/review.html?x=1#top');
+  assert.equal(resolvedVia('http://app.test/login', rules), 'http://127.0.0.1:9000/login');
+  assert.equal(resolvedVia('http://localhost:4710/', rules), null);
+  assert.equal(resolvedVia('http://localhost:4700/', ''), null);
+  assert.equal(resolvedVia('http://localhost:4700/', 'nonsense, =http://x'), null);
 });
 
 test('where a page landed is said only when it left the address it was asked for @rule:panel.dock.storyboard', () => {
