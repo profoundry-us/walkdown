@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-09-30T03-38-50Z-local-01",
+  "created": "2026-09-30T03:38:50Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "3f49383-dirty",
+  "tree_hash": "sha256:0cf96162aef7",
+  "spec_hash": "sha256:b2908c85d8af",
+  "results": [
+    {
+      "rule": "panel.walkdown.records-to-ledger",
+      "status": "pass",
+      "statement_hash": "sha256:c38684308429",
+      "duration_ms": 4164,
+      "checks": [
+        "checks/panel.spec.js:3571"
+      ]
+    }
+  ]
+}
