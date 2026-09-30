@@ -205,6 +205,14 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
       '        statement: This rule exists for the browser checks and no run has ever named it.',
       '        verify: [checks]',
       '        signoff: [eng]',
+      // A second, so a walk through what is owed always has somewhere to
+      // go next. With one, a skip had nowhere to move on to, and the check
+      // for it passed only when an earlier check had left something owing.
+      '      - id: fixture.unbuilt.also-never-recorded',
+      '        origin: walkdown',
+      '        statement: This rule exists so the browser checks always find two rules owing a verdict.',
+      '        verify: [checks]',
+      '        signoff: [eng]',
       '',
     ].join('\n'),
   );

@@ -853,6 +853,7 @@ function askAboutSitting(nextBp) {
 /** End the sitting and take nothing with it. */
 async function discardSitting() {
   S.session = null;
+  dropLoadsInFlight();
   saveSession();
   await fetch(api('/api/draft'), {
     method: 'POST',
@@ -1040,6 +1041,17 @@ function hereChanged() {
  * (n-0331). A load that a later one has overtaken drops its answer.
  */
 let loadGen = 0;
+/*
+ * Ending a sitting is later than any load already on its way, too. Finish
+ * clears the session, then waits for the discard to land before loading
+ * again - and a skip's load arriving in that wait was not yet overtaken by
+ * anything, so it restored the sitting from the draft it had fetched before
+ * Finish. The next CI-slow machine lost that every so often; counting the
+ * end as a load makes every answer fetched before it drop (2026-09-29).
+ */
+const dropLoadsInFlight = () => {
+  loadGen++;
+};
 
 async function load() {
   const gen = ++loadGen;
@@ -2416,6 +2428,7 @@ async function finishWalkdown() {
   });
   if (!results.length) {
     S.session = null;
+    dropLoadsInFlight();
     saveSession();
     render();
     return;
@@ -2446,6 +2459,7 @@ async function finishWalkdown() {
       return toast(`Not recorded: ${esc(out.error ?? 'request failed')}`, { tone: 'error' });
     }
     S.session = null;
+    dropLoadsInFlight();
     // The discard has landed before the ledger is read again: otherwise the
     // reload can find the draft this Finish just cleared, written late by
     // the verdict before it, and restore the sitting that just ended.
