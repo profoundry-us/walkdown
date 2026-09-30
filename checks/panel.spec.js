@@ -572,7 +572,8 @@ test('put away, the badge still crosses between the design and what shipped', {
   const swap = page.getByTestId('panel.tab-swap');
   await expect(swap).toBeVisible();
   const first = (await swap.textContent()).trim();
-  expect(['APP', 'PROTOTYPE']).toContain(first);
+  // Named for the side it takes you to, as the bar's buttons are.
+  expect(['AS-BUILT', 'DESIGN']).toContain(first);
 
   await swap.click();
   await expect(swap).not.toHaveText(first); // it crossed; the offer flipped
@@ -980,6 +981,97 @@ test('the screen picker opens over the design, not underneath it', {
   await expect(list).toBeHidden();
   const hidden = await page.screenshot({ clip });
   expect(Buffer.compare(shown, hidden), 'the list opened behind the design').not.toBe(0);
+});
+
+test('the surface buttons are named for what each side shows, and a side with nothing is disabled', {
+  tag: '@rule:panel.dock.surfaces-say-what-they-show',
+}, async ({ page }) => {
+  await review(page);
+  const design = page.getByTestId('panel.surface-design');
+  const build = page.getByTestId('panel.surface-build');
+  const fade = page.getByTestId('panel.fade');
+  const pick = async (id) => {
+    await page.getByTestId('panel.screen-picker').click();
+    await page.getByTestId('panel.screens-list').locator(`[data-screen="${id}"]`).click();
+    await expect(page.getByTestId('panel.screen-picker')).toHaveAttribute('title', /picked by hand/i);
+  };
+
+  // walkdown's own review screen: a design, and an as-built drawing for its app.
+  await expect(design).toHaveText('Design');
+  await expect(build).toHaveText('As-built');
+  await expect(design).toBeEnabled();
+  await expect(build).toBeEnabled();
+  await expect(fade).toBeEnabled();
+
+  // A design and a running app.
+  await pick('fixture-app');
+  await expect(design).toHaveText('Design');
+  await expect(build).toHaveText('App');
+
+  // A stand-in for the app.
+  await pick('fixture-stand-in');
+  await expect(build).toHaveText('Stand-in');
+
+  // Only a proposal: named for it, in the warning colour the sketch's banner wears.
+  await pick('fixture-sketch');
+  await expect(design).toHaveText('Proposal');
+  await expect(design).toHaveClass(/btn-warning/);
+  await expect(design).toHaveAttribute('title', /not from design/);
+  await expect(fade).toBeEnabled();
+  // And raised, the sketch's banner wears the warning colour the button is
+  // drawn from, as the bar's theme resolves it. (Not the button's own pixels:
+  // a filled button shades its token for depth.)
+  const amber = await page.getByTestId('panel.bar').evaluate((bar) => {
+    const probe = document.createElement('span');
+    probe.style.background = 'var(--color-warning)';
+    bar.appendChild(probe);
+    const c = getComputedStyle(probe).backgroundColor;
+    probe.remove();
+    return c;
+  });
+  await design.click();
+  await expect
+    .poll(async () => {
+      const banner = await page.evaluate(() => {
+        const walk = (root) => {
+          const f = root.querySelector('[data-walkdown-sketch-flag]');
+          if (f) return getComputedStyle(f).backgroundColor;
+          for (const e of root.querySelectorAll('*')) if (e.shadowRoot) { const r = walk(e.shadowRoot); if (r) return r; }
+          return null;
+        };
+        return walk(document);
+      });
+      return banner === amber ? 'same' : `${banner} against ${amber}`;
+    })
+    .toBe('same');
+
+  // Neither: the design side is disabled and says how a design gets drawn,
+  // and there is nothing for the fade to move between.
+  await pick('fixture-undrawn');
+  await expect(design).toBeDisabled();
+  await expect(design).toHaveAttribute('title', /design request/);
+  await expect(fade).toBeDisabled();
+  await expect(build).toBeEnabled();
+});
+
+test('on a page that is no screen, nothing in the bar compares or takes you anywhere', {
+  tag: '@rule:panel.dock.surfaces-say-what-they-show',
+}, async ({ page }) => {
+  const u = new URL(FIXTURE);
+  u.searchParams.set('frame', `${WD_ORIGIN}/as-built/redlines.json`);
+  await page.goto(u.href);
+  await expect(page.getByTestId('panel.bar')).toBeVisible();
+  await expect(page.getByTestId('panel.screen-picker')).toContainText('No screen');
+
+  const design = page.getByTestId('panel.surface-design');
+  const build = page.getByTestId('panel.surface-build');
+  for (const control of [design, build, page.getByTestId('panel.fade')]) await expect(control).toBeDisabled();
+  await expect(design).toHaveAttribute('title', /screen picker/);
+  await expect(build).toHaveAttribute('title', /screen picker/);
+
+  // Put away, the swap has nothing to offer either.
+  await page.getByTestId('panel.bar').getByTitle(/Put walkdown away/i).click();
+  await expect(page.getByTestId('panel.tab-swap')).toBeHidden();
 });
 
 test('a screen picked by hand stays picked after the frame lands on it', {

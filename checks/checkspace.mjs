@@ -233,6 +233,26 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
         '      - host.card',
         '      - host.second',
         '',
+        /*
+         * One screen for each thing a surface button can be named
+         * (panel.dock.surfaces-say-what-they-show): a sketch and no design,
+         * neither a design nor a sketch, and a stand-in for the app. They
+         * are picked by hand, so their app pages need not exist.
+         */
+        '  - id: fixture-sketch',
+        '    title: Sketched, not designed (browser checks only)',
+        '    proposal: /fixture-sketch.html',
+        '    app: { path: /fixture-sketch-app.html }',
+        '',
+        '  - id: fixture-undrawn',
+        '    title: Neither designed nor sketched (browser checks only)',
+        '    app: { path: /fixture-undrawn-app.html }',
+        '',
+        '  - id: fixture-stand-in',
+        '    title: A stand-in for the app (browser checks only)',
+        '    prototype: /screens/review.html',
+        '    app: { path: /stand-in/fixture-stand-in }',
+        '',
       ].join('\n'),
   );
 }

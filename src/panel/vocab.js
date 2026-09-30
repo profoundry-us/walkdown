@@ -224,18 +224,48 @@ export function screenUrl(screen, surface) {
 }
 
 /*
- * Where a surface goes when the page is not a screen. Without this the fade
- * control was dead everywhere except the handful of pages walkdown happens to
- * recognise - so crossing between the design and the build, the single most
- * frequent thing a reviewer does, depended on where you already were.
+ * The storyboard's front door: the screen a blueprint opens on when the
+ * address names none. It once also answered for the fade on a page that was
+ * no screen, taking the reviewer to a different page when they pressed a
+ * surface button; that read as the button doing something it did not, and
+ * the bar now disables the comparison there instead
+ * (panel.dock.surfaces-say-what-they-show).
  */
 export const defaultScreen = () =>
   screenById(S.data?.defaultScreen) ??
   (S.data?.storyboard ?? []).find((sc) => screenUrl(sc, 'app') ?? screenUrl(sc, 'prototype')) ??
   null;
 
-/** The screen a surface control should act on: this page, or the front door. */
-export const screenInHand = () => screenById(S.ghostOverride) ?? currentScreen() ?? defaultScreen();
+/** The screen a surface control acts on: a sketch detour's, or this page's. */
+export const screenInHand = () => screenById(S.ghostOverride) ?? currentScreen();
+
+/**
+ * What each side of the fade shows on a screen, by the name the bar gives it
+ * (panel.dock.surfaces-say-what-they-show). The design side is the design,
+ * or a proposal where design has drawn nothing; the build side is the app,
+ * or a drawing standing in for it, told apart by the folder walkdown serves
+ * it from. A side with nothing to show is null.
+ *
+ * @returns {{ design: { label: string, proposed: boolean } | null, build: { label: string } | null }}
+ */
+export function surfaceSides(screen) {
+  if (!screen) return { design: null, build: null };
+  const surface = pageSurface();
+  const design =
+    (screen.prototype && S.data?.hasPrototype) || surface === 'prototype'
+      ? { label: 'Design', proposed: false }
+      : screen.proposal
+        ? { label: 'Proposal', proposed: true }
+        : null;
+  const path = screen.app?.path;
+  const build =
+    path && (S.data?.appBase || surface === 'app')
+      ? {
+          label: /\/as-built\//.test(path) ? 'As-built' : /\/stand-in\//.test(path) ? 'Stand-in' : 'App',
+        }
+      : null;
+  return { design, build };
+}
 
 /**
  * What the ghost should draw for a screen: the design if there is one, and

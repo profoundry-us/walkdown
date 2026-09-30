@@ -6,7 +6,8 @@
       "The design's tabs were Blueprints / Rules / Screens. Built: Blueprints / Rules / Threads with counts, and the screens moved into the bar as a picker (<code>panel.screen-picker</code>) that names the page in the frame.",
       "Rules are grouped under the screen they are about, with a sticky screen head, tier marks on the left and the ask &mdash; sign / asks / fixed / walk &mdash; as a coloured badge on the right (ADR 0006 &sect;4). The design had story headings and one <i>sign</i> / <i>walk</i> word.",
       "The bar carries Start walkdown, the viewport presets and Pin mode; <i>Recording as</i> moved to the settings pop-over under the gear.",
-      "The footer counts verified rules and opens the Legend on demand; the design printed the legend inline."
+      "The footer counts verified rules and opens the Legend on demand; the design printed the legend inline.",
+      "The design's bar read <i>Prototype</i> / <i>App</i> whatever was behind them. Built: each side is named for what it shows on the screen in hand &mdash; <i>Design</i> or <i>Proposal</i>, <i>App</i>, <i>As-built</i> or <i>Stand-in</i> &mdash; and a side with nothing to show is disabled, as is all of it on a page that is no screen (<code>panel.dock.surfaces-say-what-they-show</code>)."
     ]
   },
   "rule-detail": {

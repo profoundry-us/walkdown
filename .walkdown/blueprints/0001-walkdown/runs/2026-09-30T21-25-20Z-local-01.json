@@ -1,0 +1,73 @@
+{
+  "run_id": "2026-09-30T21-25-20Z-local-01",
+  "created": "2026-09-30T21:25:20Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "251b1d6-dirty",
+  "spec_hash": "sha256:db8d46605e62",
+  "note": "Judged on scratch copy surfaces-0930 served on :4731 (not the assigned :4755; the judging only reads the bar and opens pages, it files nothing but the observation n-0337 on the real ledger). The copy's storyboard gained judge-app, judge-sketch, judge-undrawn and judge-stand-in for the cases the real storyboard has none of.",
+  "results": [
+    {
+      "rule": "panel.dock.surfaces-say-what-they-show",
+      "status": "pass",
+      "statement_hash": "sha256:a1644c475eb8",
+      "evidence": [
+        "runs/evidence/2026-09-30T21-17-39Z/bar-review-as-built.png",
+        "runs/evidence/2026-09-30T21-17-39Z/bar-judge-app.png",
+        "runs/evidence/2026-09-30T21-17-39Z/bar-judge-stand-in.png",
+        "runs/evidence/2026-09-30T21-17-39Z/bar-judge-sketch.png",
+        "runs/evidence/2026-09-30T21-17-39Z/bar-judge-undrawn.png",
+        "runs/evidence/2026-09-30T21-17-39Z/bar-no-screen.png",
+        "runs/evidence/2026-09-30T21-17-39Z/judge-sketch-raised.png",
+        "runs/evidence/2026-09-30T21-17-39Z/no-screen-full.png",
+        "runs/evidence/2026-09-30T21-17-39Z/probes.json"
+      ],
+      "reasoning": "Driven in a fresh browser on each case and read off the bar's own shadow root, not the screenshot alone. The review screen reads Design / As-built; a design with a plain app path reads Design / App; a stand-in path reads Design / Stand-in; a proposal-only screen reads Proposal in btn-warning with the tooltip 'Show the proposal — a sketch, not from design', and raised, its banner is oklch(0.84 0.15 85), the theme's warning token the button is drawn from. That match is new: the banner was a fixed #d97706 until this sitting found it and it was changed to read the theme. A screen with neither design nor proposal disables Design with 'a design request is how one gets drawn' and disables the fade with the same words, the App side staying live. On a page that is no screen (as-built/redlines.json framed, no hand pick carried in) both buttons and the fade are disabled, all three tooltips point at the screen picker, and pressing both buttons left the address and the frame exactly where they were. Picking each screen renamed the buttons for it. Not covered by the steps and filed separately: below about 900px of window the build button slides under the viewport toggle (n-0337).",
+      "threads": [
+        "n-0337"
+      ]
+    },
+    {
+      "rule": "panel.dock.toolbar",
+      "status": "pass",
+      "statement_hash": "sha256:442274aaaa51",
+      "evidence": [
+        "runs/evidence/2026-09-30T21-17-39Z/review-full.png",
+        "runs/evidence/2026-09-30T21-17-39Z/bar-review-as-built.png",
+        "runs/evidence/2026-09-30T21-17-39Z/bar-width-1100.png",
+        "runs/evidence/2026-09-30T21-17-39Z/bar-width-960.png",
+        "runs/evidence/2026-09-30T21-17-39Z/bar-width-860.png"
+      ],
+      "reasoning": "At 1280 wide the bar holds, left to right, the project switcher (surfaces-0930), the blueprint named as text and not a control, the screen picker naming The review page, the two surface buttons either side of the fade, and Pin mode beside the viewport presets and Start walkdown. The surface buttons now read Design and As-built here and switch which side the page area shows; their naming is the other rule's and was judged there. Pin mode toggles from the bar. One thing the steps do not reach: at 860px of window the centred surface cluster runs under the viewport toggle and hides most of the build button (measured 491-553 against a toggle starting at 515); at 960 and 1100 it clears. Filed as observation n-0337 rather than a fail, because nothing in this rule's wording names a width.",
+      "threads": [
+        "n-0337"
+      ]
+    },
+    {
+      "rule": "screens.surfaces.stand-in-app",
+      "status": "pass",
+      "statement_hash": "sha256:6a69c42a5b6c",
+      "evidence": [
+        "runs/evidence/2026-09-30T21-17-39Z/judge-stand-in-full.png",
+        "runs/evidence/2026-09-30T21-17-39Z/bar-judge-stand-in.png",
+        "runs/evidence/2026-09-30T21-17-39Z/probes.json"
+      ],
+      "reasoning": "judge-stand-in's app path is /stand-in/judge-stand-in. With the surface switched to Stand-in (the button's new name, read off the bar), the frame shows the review screen's design, and it announces itself on its own face: a green ring round the frame and a corner label reading 'Stand-in app — the design, served as the app', in a theme that is neither the wireframe mockup's nor walkdown's chrome. The fade reads 'Fade between the design and the stand-in' and is live, and Pin mode is offered on the app side. The anchors are the design's own because the page is the design. The label says in so many words that what is shown is the design, which is the step about it not being evidence.",
+      "threads": []
+    },
+    {
+      "rule": "screens.surfaces.as-built-drawing",
+      "status": "pass",
+      "statement_hash": "sha256:098b9682020b",
+      "evidence": [
+        "runs/evidence/2026-09-30T21-17-39Z/as-built-serving.txt",
+        "runs/evidence/2026-09-30T21-17-39Z/review-full.png",
+        "runs/evidence/2026-09-30T21-17-39Z/bar-review-as-built.png"
+      ],
+      "reasoning": "GET /as-built/review.html from the scratch serve returns 200 and is byte-for-byte the file in as-built/ (compared with cmp), so nothing is swapped in or added. A page the folder does not hold is a 404, and both a literal ../ and an encoded ..%2F..%2F reaching for package.json above the folder are 404 too. The review screen names /as-built/review.html as its app path; the panel frames it as any app and the build-side button reads As-built, with the fade reading 'Fade between the design and the as-built'. The drawing's own face (its ring and corner label) is written in the file, as the rule leaves to the project.",
+      "threads": []
+    }
+  ]
+}

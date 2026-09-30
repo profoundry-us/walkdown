@@ -72,7 +72,7 @@ import { threadFilterBar, threadsMatching, threadsPane } from './threads-list.js
 import { toast } from './toast.js';
 import { api, esc } from './util.js';
 import { frameLoading, hideVeil, placeVeil, screenLabel, veilIsUp } from './veil.js';
-import { CHIP, currentScreen, declaredAnchors, defaultScreen, duringSession, ghostSource, hereLocation, isHeadless, needsYou, orderedRows, owedRows, pageSurface, ruleScreen, screenById, screenInHand, screenUrl, TERMINAL, whereIdentityLives, whoAmI } from './vocab.js';
+import { CHIP, currentScreen, declaredAnchors, defaultScreen, duringSession, ghostSource, surfaceSides, hereLocation, isHeadless, needsYou, orderedRows, owedRows, pageSurface, ruleScreen, screenById, screenInHand, screenUrl, TERMINAL, whereIdentityLives, whoAmI } from './vocab.js';
 
 /*
  * Two layouts, one panel.
@@ -620,11 +620,13 @@ function paintTabs() {
   if (!S.docked) {
     const tabH = D.tab.getBoundingClientRect().height || 96;
     D.tab.style.transform = `translateY(calc(-50% - ${Math.round(tabH / 2) + 4}px))`;
-    const canGhost = Boolean(ghostSource(screenInHand()));
+    const sides = surfaceSides(screenInHand());
+    const canGhost = Boolean(ghostSource(screenInHand())) && Boolean(sides.design && sides.build);
     D.swap.style.display = canGhost ? 'block' : 'none';
     const share = S.protoShare ?? (pageSurface() === 'prototype' ? 1 : 0);
-    const goingTo = share === 1 ? 'APP' : 'PROTOTYPE';
-    D.swap.textContent = goingTo;
+    // Named for the side it takes you to, as the bar's buttons are.
+    const goingTo = (share === 1 ? sides.build?.label : sides.design?.label) ?? '';
+    D.swap.textContent = goingTo.toUpperCase();
     D.swap.title = `Show the ${goingTo.toLowerCase()} instead`;
     const swapH = D.swap.getBoundingClientRect().height || 80;
     D.swap.style.transform = `translateY(calc(-50% + ${Math.round(swapH / 2) + 4}px))`;
@@ -1582,8 +1584,39 @@ function renderBar() {
     );
     return;
   }
-  const canGhost = Boolean(ghostSource(screenInHand()));
-  // Left is Prototype and right is App, matching the buttons on either side —
+  /*
+   * Each button is named for what its side shows on this screen, and a side
+   * with nothing to show is disabled and says what is missing
+   * (panel.dock.surfaces-say-what-they-show). On a page that is no screen
+   * there is nothing to compare, so all three are, and none of them opens
+   * another page.
+   */
+  const inHand = screenInHand();
+  const sides = surfaceSides(inHand);
+  const canGhost = Boolean(ghostSource(inHand)) && Boolean(sides.design && sides.build);
+  const designLabel = sides.design?.label ?? 'Design';
+  const buildLabel = sides.build?.label ?? 'App';
+  const noScreen = 'This page is no screen in the storyboard — pick one in the screen picker to compare';
+  const designTip = !inHand
+    ? noScreen
+    : !sides.design
+      ? 'No design or proposal on file for this screen — a design request is how one gets drawn'
+      : sides.design.proposed
+        ? 'Show the proposal — a sketch, not from design'
+        : 'Show the design';
+  const buildTip = !inHand
+    ? noScreen
+    : !sides.build
+      ? 'The storyboard names no app for this screen'
+      : `Show the ${buildLabel.toLowerCase()}`;
+  const fadeTip = !inHand
+    ? noScreen
+    : canGhost
+      ? `Fade between the ${designLabel.toLowerCase()} and the ${buildLabel.toLowerCase()}`
+      : !sides.design
+        ? designTip
+        : buildTip;
+  // Left is the design side and right the build side, matching the buttons on either side —
   // so the slider reads 100 at the App end and the value is inverted here.
   const share = S.protoShare ?? (pageSurface() === 'prototype' ? 1 : 0);
   const value = Math.round((1 - share) * 100);
@@ -1670,10 +1703,11 @@ function renderBar() {
     </span>
 
     <span class="absolute left-1/2 flex -translate-x-1/2 items-center gap-2"
-      title="${canGhost ? 'Fade between the design and what shipped' : 'No design on file for this screen'}">
-      <button class="btn btn-xs btn-primary${share === 1 ? '' : ' btn-outline'}" data-surface="prototype"
-        ?disabled=${!(canGhost || pageSurface() === 'prototype')}
-        @click=${() => pickSurface('prototype')}>Prototype</button>
+      title="${fadeTip}">
+      <button class="btn btn-xs ${sides.design?.proposed ? 'btn-warning' : 'btn-primary'}${share === 1 ? '' : ' btn-outline'}"
+        data-surface="prototype" data-testid="panel.surface-design" title="${designTip}"
+        ?disabled=${!sides.design}
+        @click=${() => pickSurface('prototype')}>${designLabel}</button>
       <!-- The value goes through the live directive as a PROPERTY, not as a
            value= attribute: once a person has dragged a range input the
            element is dirty, and re-rendering the attribute leaves the thumb
@@ -1682,7 +1716,7 @@ function renderBar() {
            screen (n-0222). -->
       <input type="range" min="0" max="100" .value=${live(String(value))} id="wdp-fade" data-testid="panel.fade"
         class="range range-xs range-primary w-28" ?disabled=${!canGhost}
-        aria-label="Fade between the design and the running app"
+        aria-label="${fadeTip}"
         @input=${(e) => {
           // input fires all through the drag and must not disturb the element;
           // change is when the pointer lets go, and that is where the bar is
@@ -1695,8 +1729,9 @@ function renderBar() {
           setFade(1 - e.currentTarget.value / 100);
         }}>
       <button class="btn btn-xs btn-primary${share === 0 ? '' : ' btn-outline'}" data-surface="app"
-        ?disabled=${!(canGhost || pageSurface() === 'app')}
-        @click=${() => pickSurface('app')}>App</button>
+        data-testid="panel.surface-build" title="${buildTip}"
+        ?disabled=${!sides.build}
+        @click=${() => pickSurface('app')}>${buildLabel}</button>
     </span>
 
     <span class="ml-auto flex items-center gap-2">
@@ -1800,21 +1835,9 @@ function pickScreen(id) {
  * nowhere in particular actually wants.
  */
 function pickSurface(want) {
-  if (!currentScreen() && !S.ghostOverride) {
-    const home = defaultScreen();
-    const url =
-      home && (screenUrl(home, want) ?? screenUrl(home, want === 'app' ? 'prototype' : 'app'));
-    /*
-     * Getting there means a real page load, so the same rule applies as
-     * everywhere else: framed walkdown owns the frame and goes, the
-     * extension goes because it comes back, and a script tag offers the
-     * trip rather than unloading the panel that is making it.
-     */
-    if (url) {
-      goTo(home, want);
-      return;
-    }
-  }
+  // A page that is no screen has nothing to compare, and the buttons are
+  // disabled there; nothing here takes the reviewer to another page.
+  if (!screenInHand()) return;
   setFade(want === 'prototype' ? 1 : 0);
 }
 
@@ -2680,12 +2703,22 @@ export function setGhost(on) {
   // stated at creation is the docked one.
   placeGhost(S.docked);
   // A proposal is an agent's sketch, not design's work. It says so on its
-  // face, so nobody walks a screen down against a drawing we made up.
+  // face, so nobody walks a screen down against a drawing we made up. In the
+  // theme's warning colour, the one the bar's Proposal button wears, so the
+  // button and the banner read as the same thing
+  // (panel.dock.surfaces-say-what-they-show).
   if (src.proposed) {
     const flag = document.createElement('div');
+    flag.dataset.walkdownSketchFlag = '';
     flag.textContent = '\u26a0 Proposed sketch \u2014 not from design';
+    // Read off the bar: the ghost sits outside the element the theme is set
+    // on, so a var() here would find nothing and fall back.
+    const themed = getComputedStyle(D.bar);
+    const warn = themed.getPropertyValue('--color-warning').trim() || '#d97706';
+    const onWarn = themed.getPropertyValue('--color-warning-content').trim() || '#fff';
     flag.style.cssText = `position:absolute; top:0; left:0; right:0; z-index:1; text-align:center;
-      background:#d97706; color:#fff; font:600 11px/1 -apple-system, sans-serif;
+      background:${warn}; color:${onWarn};
+      font:600 11px/1 -apple-system, sans-serif;
       letter-spacing:.06em; padding:6px 8px;`;
     S.ghost.appendChild(flag);
   }

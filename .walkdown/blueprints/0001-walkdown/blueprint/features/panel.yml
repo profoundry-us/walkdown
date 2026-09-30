@@ -63,9 +63,32 @@ stories:
           then:
             - Anchor `panel.project` is the project switcher; anchor `panel.blueprint` names the blueprint in hand and is not a control - choosing a different blueprint is the Blueprints tab's job, since n-0017 took that selector off the bar on purpose
             - Anchor `panel.screen-picker` says which screen this page is; what it does when opened is panel.dock.screen-picker's rule
-            - Prototype and App switch which of the two the page area shows
+            - The two surface buttons switch which side of the comparison the page area shows. What they are called and when they are disabled is panel.dock.surfaces-say-what-they-show's rule
             - Pin mode can be turned on and off there
-          statement_hash: sha256:7e9e52e85348
+          statement_hash: sha256:442274aaaa51
+
+      - id: panel.dock.surfaces-say-what-they-show
+        origin: walkdown
+        created_at: 2026-09-30
+        statement: The two buttons either side of the fade are named for what each side shows on the screen under review. A side with nothing to show is disabled, and its tooltip says what is missing.
+        because: A button named Prototype over a proposal sketch names a comparison the page is not making. A button that opens another page reads as doing something it did not.
+        history: "Before 2026-09-30 the buttons read Prototype and App whatever was behind them: a proposal sketch under Prototype, an as-built drawing under App. On a page that was no screen at all, pressing either one opened a different page (Topher, 2026-09-30)."
+        verify: [checks]
+        signoff: [eng, product]
+        screens: [review]
+        steps:
+          given:
+            - Screens covering each case (a design and a running app; only a proposal; neither a design nor a proposal; an as-built drawing as the app; a stand-in as the app), and a page that is no screen
+          when:
+            - Read the bar on each
+          then:
+            - The design side reads Design where a design is on file. Where only a proposal is on file it reads Proposal, in the same amber as the "not from design" banner the sketch carries
+            - The build side reads App for the running app, As-built for a drawing under `as-built/`, and Stand-in where the server shows the design in the app's place
+            - A side with nothing to show is disabled. With no design and no proposal, its tooltip says a design request is how one gets drawn
+            - The fade can be moved only while both sides have something to show
+            - On a page that is no screen, both buttons and the fade are disabled, and their tooltip points at the screen picker. Nothing in the bar opens another page
+            - Picking another screen renames the buttons for it
+          statement_hash: sha256:a1644c475eb8
 
       - id: panel.dock.screen-picker
         origin: thread:n-0334

@@ -179,8 +179,8 @@ stories:
           then:
             - The page is served exactly as written - no theme swapped in, no mark added; what it says about itself is the project's own
             - A page the folder does not hold is a 404, and nothing above the folder is reachable through it
-            - A storyboard screen may name such a page as its app path, and the panel frames it as it frames any app
-          statement_hash: sha256:21a9564025dc
+            - A storyboard screen may name such a page as its app path. The panel frames it as it frames any app, and the build-side button reads As-built
+          statement_hash: sha256:098b9682020b
       - id: screens.surfaces.stand-in-app
         origin: walkdown
         statement: A screen whose app is not a page can declare a stand-in. Walkdown then shows that screen's own design in place of the app, visibly marked as a stand-in, and fading, ghosting and pinning work on it as on any app surface.
@@ -192,23 +192,13 @@ stories:
           given:
             - A screen whose storyboard app path points at the server's stand-in for it
           when:
-            - Switch the surface to App
+            - Switch the surface to Stand-in
           then:
             - The app pane shows that screen's design, and the comparison controls come alive - fade, ghost, and pin mode on the app side
             - It announces itself on its own face - a marked edge and a corner label - and wears a theme of neither the mockups nor walkdown's chrome
             - The anchors are the design's own, so a pin lands on the same element on either surface, and is recorded against the app
             - It is not evidence - what it shows is the design, so a verdict given against it is a verdict about the design
-          statement_hash: sha256:1d809c5c6f9f
-          reworded:
-            - hash: sha256:8c976257c8c0
-              at: 2026-09-13
-              why: the hash covers the steps now; this one named the statement alone
-            - hash: sha256:079c4dd0164a
-              at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
-            - hash: sha256:2a72bd1318f4
-              at: 2026-09-14T04:15:34Z
-              why: "ADR 0004 wording pass: the words moved, the meaning did not"
+          statement_hash: sha256:6a69c42a5b6c
 
       - id: screens.surfaces.app-address-is-resolved
         origin: walkdown
