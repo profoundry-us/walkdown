@@ -34,10 +34,11 @@ export function closeEvidence() {
 /*
  * The evidence itself, over the whole desk.
  *
- * Deliberately NOT a native <dialog showModal()>: the shell is already a
- * manual popover in the browser's top layer, and promoting a second element
- * into it from inside the first is exactly the pairing that left the rule
- * list unable to take a wheel event at all (n-0086). A plain layer inside
+ * Deliberately NOT a native <dialog showModal()>. When the shell was a
+ * manual popover in the browser's top layer, promoting a second element
+ * into it from inside the first left the rule list unable to take a wheel
+ * event at all (n-0086), and a layer of our own has no need to climb
+ * anywhere now. A plain layer inside
  * the same shadow root is a modal by every behaviour that matters here -
  * it covers the surface, it takes the pointer, and Escape closes it.
  */

@@ -177,7 +177,7 @@ export const S = {
  * import graph decides evaluation order and no shard should care.
  */
 export const D = {
-  shell: null, // the popover over the whole viewport, host of the shadow root
+  shell: null, // the fixed sheet over the whole viewport, host of the shadow root
   sr: null, // that shadow root
   host: null, // the transparent carrier inside it
   bar: null, // the tool bar across the top

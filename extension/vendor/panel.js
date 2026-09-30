@@ -4300,7 +4300,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
    * import graph decides evaluation order and no shard should care.
    */
   const D = {
-    shell: null, // the popover over the whole viewport, host of the shadow root
+    shell: null, // the fixed sheet over the whole viewport, host of the shadow root
     sr: null, // that shadow root
     host: null, // the transparent carrier inside it
     bar: null, // the tool bar across the top
@@ -6956,10 +6956,11 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
   /*
    * The evidence itself, over the whole desk.
    *
-   * Deliberately NOT a native <dialog showModal()>: the shell is already a
-   * manual popover in the browser's top layer, and promoting a second element
-   * into it from inside the first is exactly the pairing that left the rule
-   * list unable to take a wheel event at all (n-0086). A plain layer inside
+   * Deliberately NOT a native <dialog showModal()>. When the shell was a
+   * manual popover in the browser's top layer, promoting a second element
+   * into it from inside the first left the rule list unable to take a wheel
+   * event at all (n-0086), and a layer of our own has no need to climb
+   * anywhere now. A plain layer inside
    * the same shadow root is a modal by every behaviour that matters here -
    * it covers the surface, it takes the pointer, and Escape closes it.
    */
@@ -8286,16 +8287,14 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     // as well as down the side. It is transparent and click-through; only the bar
     // and the panel take pointer events, so the page under it stays live.
     /*
-     * z-index is not enough, and this is the one thing a docked tool cannot do
-     * without: an application's own <dialog showModal()> (or any popover) is
-     * promoted to the browser's TOP LAYER, which is painted above every
-     * z-index there is — so the app's modal, and the backdrop that dims the
-     * whole viewport with it, would cover walkdown's chrome. The only way to be
-     * above the top layer is to be in it, so the shell is a manual popover.
-     *
-     * The UA stylesheet gives popovers a size, border, padding and background of
-     * their own; every one of those is overridden back to the transparent
-     * full-viewport sheet this has always been.
+     * A z-index is enough now. The application is framed, so its own
+     * <dialog showModal()> and popovers are promoted to the FRAME's top layer
+     * and cannot paint over this document. It was not enough while walkdown
+     * docked into the application's own page: the shell had to be a manual
+     * popover to sit in that page's top layer above the app's modals, and
+     * that went with the docked layout (32fadf3, 2026-08-26). The sizes,
+     * margins and background are still stated outright below - the
+     * transparent full-viewport sheet this has always been.
      */
     D.shell.style.cssText = `position:fixed; inset:0; z-index:2147483000; pointer-events:none;
     width:100%; height:100%; max-width:none; max-height:none; margin:0; border:0; padding:0;
@@ -10793,19 +10792,18 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     S.ghost.dataset.walkdownGhost = '';
     /*
      * The box is stated in pixels, not left to the four insets to work out.
-     * This element is promoted into the top layer, where the UA's own popover
-     * rules give it fit-content sizing, and it lives in a page we know nothing
-     * about — either can leave an inset-sized box collapsed, and a collapsed
-     * ghost shows a corner of the design over a full-size app, which reads as
-     * the design being cut off. The app frame has always said its size
-     * outright for the same reason; so does this now.
+     * An inset-sized box has collapsed before - back when this rode in the
+     * browser's top layer, whose popover rules size to fit-content - and a
+     * collapsed ghost shows a corner of the design over a full-size app,
+     * which reads as the design being cut off. The app frame has always said
+     * its size outright; so does this.
      */
     const box = frameSpace();
     /*
      * No z-index of its own, on purpose. It used to carry one from when it was
      * an overlay in the host document, and inside the shadow root that number
      * stopped meaning "above the app" - the app frame is in the page, and the
-     * shell that holds this is in the top layer above all of it - and started
+     * shell that holds this is above all of it - and started
      * meaning "above walkdown's own chrome". The bar's popovers (the screen
      * picker, the desk tuner) hang off an unpositioned wrapper and paint at
      * z-index auto and a ghost at 2147482000 buried them: the picker opened
@@ -10859,14 +10857,13 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     }
     /*
      * Into the panel's own shadow root, ahead of the chrome, rather than into
-     * the page beside it. The ghost still has to clear the app's modals, which
-     * live in the top layer - but the shell is already up there, so riding
-     * inside it gets the same height for free, and DOM order keeps the chrome
-     * above the design it is ghosting - which is now plain DOM order inside
-     * one shadow root, rather than an ordering in the browser's top layer.
-     * When it was the latter, promoting two elements in sequence left the
-     * panel's rule list unable to receive a wheel event at all until a reload
-     * (n-0086), and a fade slider dying mid-drag was the same failure (n-0068).
+     * the page beside it. The shell already sits above the framed app, so
+     * riding inside it puts the design over the app for free, and plain DOM
+     * order inside one shadow root keeps the chrome above the design it is
+     * ghosting. It used to be an ordering in the browser's top layer instead,
+     * and promoting two elements there in sequence left the panel's rule list
+     * unable to receive a wheel event at all until a reload (n-0086); a fade
+     * slider dying mid-drag was the same failure (n-0068).
      */
     D.sr.insertBefore(S.ghost, D.host);
     paintGhostReach();
