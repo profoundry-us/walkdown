@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-09-30T03-27-39Z-local-01",
+  "created": "2026-09-30T03:27:39Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "d0f0084-dirty",
+  "tree_hash": "sha256:439ac9c17595",
+  "spec_hash": "sha256:b2908c85d8af",
+  "results": [
+    {
+      "rule": "locations.default.prototype-beside-the-spec",
+      "status": "pass",
+      "statement_hash": "sha256:a30a7a594efd",
+      "duration_ms": 3,
+      "checks": [
+        "test/prototype-dir.test.js:16",
+        "test/prototype-dir.test.js:35",
+        "test/prototype-dir.test.js:43"
+      ]
+    }
+  ]
+}

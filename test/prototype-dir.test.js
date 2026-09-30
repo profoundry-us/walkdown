@@ -1,5 +1,6 @@
 /*
  * Where `prototype.root` is (#17): beside the spec first, in the code second.
+ * And `proposals/`, found the same way, so lint and serve agree on it.
  */
 import '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
@@ -7,7 +8,7 @@ import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
-import { prototypeDir } from '../lib/blueprint.js';
+import { proposalsDir, prototypeDir } from '../lib/blueprint.js';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-proto-'));
 after(() => rmSync(root, { recursive: true, force: true }));
@@ -37,4 +38,26 @@ test('the design pages, the stand-ins and the storyboard picture all read the on
   // Both routes that read files ask the helper; nothing resolves the root by hand.
   assert.equal(serve.match(/prototypeDir\(blueprint\)/g)?.length, 2);
   assert.doesNotMatch(serve, /resolve\([^)]*prototype\?\.root/);
+});
+
+test('proposals are found the way the prototype is: beside the spec first, then the code @rule:locations.default.prototype-beside-the-spec', async () => {
+  const code = join(root, 'sketches-app');
+  const spec = join(root, 'sketches-home', '0001-app', 'blueprint');
+  mkdirSync(join(code, 'proposals'), { recursive: true });
+  mkdirSync(spec, { recursive: true });
+  const bp = { dir: spec, codeRoot: code };
+
+  assert.equal(proposalsDir(bp), join(code, 'proposals'));
+  mkdirSync(join(spec, 'proposals'), { recursive: true });
+  assert.equal(proposalsDir(bp), join(spec, 'proposals'));
+
+  // Lint, which says a proposal is missing, and serve, which hands it to the
+  // panel, both ask the helper - they used to disagree the moment a home
+  // stood outside the repository.
+  const { readFileSync } = await import('node:fs');
+  for (const f of ['../lib/lint.js', '../lib/serve.js']) {
+    const src = readFileSync(new URL(f, import.meta.url), 'utf8');
+    assert.match(src, /proposalsDir\(blueprint\)/, f);
+    assert.doesNotMatch(src, /'proposals',/, f);
+  }
 });

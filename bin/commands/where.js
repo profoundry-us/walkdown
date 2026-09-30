@@ -1,7 +1,11 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { parseArgs } from 'node:util';
+import { proposalsDir, prototypeDir } from '../../lib/blueprint.js';
 import { KINDS, resolveLocations } from '../../lib/locations.js';
 import { dim, green, red, yellow } from '../../lib/report/tty.js';
 import { tracking } from '../../lib/standard.js';
+import { parse } from '../../vendor/yaml.js';
 import { end } from './context.js';
 
 /*
@@ -109,6 +113,12 @@ export function run(args) {
   for (const kind of KINDS) row(kind, loc[kind]);
   row('code', loc.code);
   /*
+   * The two design folders, which neither the registry nor a default names:
+   * each is looked for beside the spec, then in the code (#17), and a person
+   * whose design will not load needs to see which of the two answered.
+   */
+  for (const [label, cell] of designRows(loc)) row(label, cell);
+  /*
    * And what git sees of it, asked of git rather than of the ignore file
    * walkdown wrote: a home in `~/.walkdown` is nobody's diff, a `.gitignore`
    * beside a home in the repository says what stays out, and no such file
@@ -134,4 +144,31 @@ export function run(args) {
    */
   console.log(dim('\nNothing was written. See docs/08-locations.md for the resolution order.'));
   return end(0);
+}
+
+/** The prototype and proposals rows: where each resolved, and why there. */
+function designRows(loc) {
+  if (!loc.spec?.path) return [];
+  let config = {};
+  try {
+    config = parse(readFileSync(join(loc.spec.path, 'walkdown.yml'), 'utf8')) ?? {};
+  } catch {
+    // An unreadable walkdown.yml is lint's to report; here it declares nothing.
+  }
+  const bp = { dir: loc.spec.path, codeRoot: loc.codeRoot ?? loc.code?.path, config };
+  const cell = (path) => ({
+    path,
+    missing: !existsSync(path),
+    why: path.startsWith(join(loc.spec.path, '')) ? 'beside the spec' : 'in the code — nothing of that name beside the spec',
+  });
+  const proto = prototypeDir(bp);
+  return [
+    [
+      'prototype',
+      proto
+        ? { ...cell(proto), why: `\`prototype.root: ${config.prototype.root}\`, ${cell(proto).why}` }
+        : { path: null, why: 'walkdown.yml declares no `prototype.root`' },
+    ],
+    ['proposals', cell(proposalsDir(bp))],
+  ];
 }
