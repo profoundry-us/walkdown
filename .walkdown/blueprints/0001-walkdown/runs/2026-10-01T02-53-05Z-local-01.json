@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-10-01T02-53-05Z-local-01",
+  "created": "2026-10-01T02:53:05Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "b944b53-dirty",
+  "spec_hash": "sha256:fb238408c48d",
+  "note": "Judged on scratch copy serve-anywhere-1001 with its own home (a registry naming only the copy), served on the assigned :4738 from a temp directory with no .walkdown at or above it. Mid-run registration imported a copy of example/ into that home, never the real registry.",
+  "results": [
+    {
+      "rule": "locations.answer.serve-starts-anywhere",
+      "status": "pass",
+      "statement_hash": "sha256:8fc3f6d54231",
+      "evidence": [
+        "runs/evidence/2026-10-01T02-51-48Z/judging.txt",
+        "runs/evidence/2026-10-01T02-51-48Z/serve-stdout.txt",
+        "runs/evidence/2026-10-01T02-51-48Z/serve-inside-stdout.txt",
+        "runs/evidence/2026-10-01T02-51-48Z/serve-named-stdout.txt",
+        "runs/evidence/2026-10-01T02-51-48Z/root-chooser.png"
+      ],
+      "reasoning": "Started from a temp directory belonging to no project, walkdown serve came up and said 'every blueprint registered on this machine (1)' and that it was started outside a registered project. With no blueprint named, /api/blueprint answered key null with the one registered blueprint listed and no rows; the root page drew the Which project? chooser listing what was registered and no rules (root-chooser.png). /api/threads with no name was a 404 saying to name one with ?bp=<id>; ?bp=blueprint served all 156 rules as a server in that project would. A copy of the example project imported into the same home while the server ran was claimed for http://localhost:4310/index.html by the next whose lookup, having matched nothing before, and the chooser then listed both; a screen appended to that copy's storyboard while it ran was claimed on the very next lookup too. Restarted inside the scratch project, a request naming none got that project's blueprint; started outside with --blueprint example, it got the example's nine rules; --blueprint nobody refused with exit 2 and named walkdown blueprints. Every step held as worded.",
+      "threads": []
+    }
+  ]
+}

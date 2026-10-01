@@ -1187,7 +1187,7 @@ test('via rides through the API on a note, a reply and a move @rule:status.attri
  * nothing but a default - and with no default, a request naming no
  * blueprint gets the list to choose from, never a refusal to start.
  */
-test('a server started outside any project offers every registered blueprint, with no default', async () => {
+test('a server started outside any project offers every registered blueprint, with no default @rule:locations.answer.serve-starts-anywhere', async () => {
   process.env.WALKDOWN_HOME = DECLARED_HOME;
   const elsewhere = mkdtempSync(join(tmpdir(), 'walkdown-nowhere-'));
   const loose = createWalkdownServer(null, { cwd: elsewhere });
@@ -1216,6 +1216,11 @@ test('a server started outside any project offers every registered blueprint, wi
     const named = await (await fetch(`${at}/api/blueprint?bp=main`)).json();
     assert.equal(named.blueprint, 'serve-fixture');
     assert.ok(named.rows.some((r) => r.rule === 'demo.main.thing'));
+
+    // Started in a project instead, that blueprint answers a request naming none.
+    const defaulted = await (await fetch(`${base}/api/blueprint`)).json();
+    assert.equal(defaulted.key, named.key);
+    assert.equal(defaulted.blueprint, 'serve-fixture');
   } finally {
     loose.closeAllConnections();
     loose.close();
@@ -1223,7 +1228,7 @@ test('a server started outside any project offers every registered blueprint, wi
   }
 });
 
-test('`walkdown serve` starts outside any project rather than refusing', async () => {
+test('`walkdown serve` starts outside any project rather than refusing @rule:locations.answer.serve-starts-anywhere', async () => {
   process.env.WALKDOWN_HOME = DECLARED_HOME;
   const elsewhere = mkdtempSync(join(tmpdir(), 'walkdown-nowhere-'));
   const { spawn } = await import('node:child_process');
@@ -1256,11 +1261,44 @@ test('`walkdown serve` starts outside any project rather than refusing', async (
   } finally {
     child.removeAllListeners('exit');
     child.kill();
+  }
+
+  // With --blueprint, from the same place: that one is the default, and a
+  // name nothing registered is refused rather than served without it.
+  const run = (args) =>
+    new Promise((resolveRun) => {
+      const c = spawn(process.execPath, [bin, 'serve', '--port', '0', ...args], {
+        cwd: elsewhere,
+        env: { ...process.env, WALKDOWN_HOME: DECLARED_HOME, NO_COLOR: '1' },
+      });
+      let out = '';
+      const done = () => {
+        c.kill();
+        resolveRun(out);
+      };
+      const timer = setTimeout(done, 10_000);
+      c.stdout.on('data', (d) => {
+        out += d;
+        if (/review:/.test(out)) {
+          clearTimeout(timer);
+          done();
+        }
+      });
+      c.stderr.on('data', (d) => (out += d));
+      c.on('exit', () => {
+        clearTimeout(timer);
+        resolveRun(out);
+      });
+    });
+  try {
+    assert.match(await run(['--blueprint', 'main']), /a page naming none opens .*blueprint/);
+    assert.match(await run(['--blueprint', 'nobody']), /No blueprint for `nobody`/);
+  } finally {
     rmSync(elsewhere, { recursive: true, force: true });
   }
 });
 
-test('a blueprint registered or drawn after the server started is found from its own page, without a restart', async () => {
+test('a blueprint registered or drawn after the server started is found from its own page, without a restart @rule:locations.answer.serve-starts-anywhere', async () => {
   process.env.WALKDOWN_HOME = DECLARED_HOME;
   const late = join(root, 'late');
   mkdirSync(join(late, 'blueprint'), { recursive: true });

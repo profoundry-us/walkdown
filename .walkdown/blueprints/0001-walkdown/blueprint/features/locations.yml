@@ -326,6 +326,28 @@ stories:
               at: 2026-09-21T01:30:46Z
               why: q-0251 (machine names refused), q-0302 (an addressless target counts nothing placed), q-0280/n-0322 (canonicalised only to compare; the because rewritten)
 
+      - id: locations.answer.serve-starts-anywhere
+        origin: walkdown
+        created_at: 2026-09-30
+        statement: "`walkdown serve` starts from any directory and serves every blueprint registered on this machine. Which blueprint a page shows is named in its address, or chosen by the person when the address names none."
+        because: The server serves what the registry lists, not what the directory it was started in holds, so where it starts from decides nothing.
+        history: "Until 2026-09-30 it refused to start outside a registered project, and the setup skill told agents to pass `--blueprint`, so agents handed people one server per blueprint, started from its directory (GitHub issue #19). A blueprint registered, or a storyboard drawn, while it ran was not recognised from its pages until a restart."
+        verify: [checks]
+        signoff: [eng]
+        steps:
+          given:
+            - A machine with blueprints registered, and a directory that belongs to none of them
+          when:
+            - "`walkdown serve` is started there"
+          then:
+            - It starts, and says it serves every blueprint registered on this machine
+            - Its root, opened with no blueprint in the address, shows the registered blueprints to choose from, and no rules
+            - Named by id, any registered blueprint is served as it would be by a server started in its own project
+            - A request that needs a blueprint and names none is refused, and the refusal says how to name one
+            - Started instead inside a registered project, or with `--blueprint`, that blueprint is the one a page naming none shows
+            - A blueprint registered, or a storyboard edited, after the server started is recognised from its own app pages without a restart
+          statement_hash: sha256:8fc3f6d54231
+
       - id: locations.answer.adapters-file-where-walkdown-says
         origin: walkdown
         created_at: 2026-09-24
