@@ -110,10 +110,15 @@ says where the page landed.
 
 ## 4. Serve it
 
-    walkdown serve --blueprint <id>
+    walkdown serve
 
-Run it in the background and report the URL (`http://localhost:4700` unless
-taken). This is the panel: the rules, the threads, and the side-by-side review.
+One server answers for every blueprint on this machine, so if one is already
+running, there is nothing to start: it picks up a newly registered blueprint
+without a restart. Otherwise run it in the background, from any directory, and
+report the URL (`http://localhost:4700` unless taken). This is the panel: the
+rules, the threads, and the side-by-side review. The panel finds each page's
+blueprint from its address and asks when it cannot tell, so `--blueprint <id>`
+is never needed to reach one; it only picks what a page naming none opens.
 
 ## 5. The browser extension, which only they can install
 

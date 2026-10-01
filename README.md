@@ -131,7 +131,12 @@ statement, stored truncated (`sha256:` + 12 hex).
 
 ## walkdown serve — the panel and its APIs
 
-`walkdown serve` starts the local server (default port 4700, `127.0.0.1` only):
+`walkdown serve` starts the local server (default port 4700, `127.0.0.1` only). One server
+answers for every blueprint registered on this machine, so start it from anywhere: the
+panel finds a page's blueprint from its address, and asks when none or several claim it.
+Started inside a registered project, or with `--blueprint <id>`, that blueprint is also
+what a request naming none opens. A blueprint registered, or a storyboard edited, while it
+runs is picked up without a restart.
 
 - **The review page** — `/` is walkdown's own page: the panel, with the blueprint's front
   door framed inside it. Put a URL in the fragment (`/#http://localhost:3000/`) to review
@@ -151,8 +156,8 @@ statement, stored truncated (`sha256:` + 12 hex).
   pin mode (closing an open form first), as does clicking the badge again. Standalone
   pages (opened without the panel) resolve their screen from the URL and post to the
   same server — including HTTPS staging pages, via the Private-Network-Access preflight.
-  `data-bp` names the project when one server hosts sibling blueprints; omit it and pins
-  file against whichever blueprint `walkdown serve` started in.
+  `data-bp` names the blueprint; omit it and pins file against the blueprint `walkdown
+  serve` was started in, which a server started outside any project does not have.
 - **Human walkdowns** — Start walkdown (your name arrives from git identity), judge
   rules, Finish: the session is appended to `blueprint/runs/` as a hash-stamped
   `kind: walkdown` record, satisfying `human` verify requirements. A feedback box rides

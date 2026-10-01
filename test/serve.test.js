@@ -1180,3 +1180,116 @@ test('via rides through the API on a note, a reply and a move @rule:status.attri
   });
   assert.equal(bad.status, 400);
 });
+
+/*
+ * Started outside every registered project (GitHub issue #19). One server
+ * answers for every registered blueprint, so where it was started decides
+ * nothing but a default - and with no default, a request naming no
+ * blueprint gets the list to choose from, never a refusal to start.
+ */
+test('a server started outside any project offers every registered blueprint, with no default', async () => {
+  process.env.WALKDOWN_HOME = DECLARED_HOME;
+  const elsewhere = mkdtempSync(join(tmpdir(), 'walkdown-nowhere-'));
+  const loose = createWalkdownServer(null, { cwd: elsewhere });
+  await new Promise((r) => loose.listen(0, '127.0.0.1', r));
+  const at = `http://127.0.0.1:${loose.address().port}`;
+  try {
+    // Nothing named: the list, and no board.
+    const unnamed = await (await fetch(`${at}/api/blueprint`)).json();
+    assert.equal(unnamed.key, null);
+    assert.deepEqual(unnamed.blueprints.map((b) => b.id).sort(), ['main', 'sibling']);
+    assert.ok(unnamed.blueprints.every((b) => !b.current));
+    assert.equal(unnamed.rows, undefined, 'no blueprint, so no rules');
+
+    // The page, the scripts and whose page an address is need no blueprint.
+    for (const path of ['/', '/embed.js', '/panel.js', '/walkdown.css'])
+      assert.equal((await fetch(at + path)).status, 200, path);
+    const whose = await (await fetch(`${at}/api/whose?url=${encodeURIComponent('http://x.test/home')}`)).json();
+    assert.ok(Array.isArray(whose.matches));
+
+    // Everything else is asked by name, and says so when it is not.
+    const threads = await fetch(`${at}/api/threads`);
+    assert.equal(threads.status, 404);
+    assert.match((await threads.json()).error, /\?bp=/);
+
+    // Named, it is that blueprint's, as on any server.
+    const named = await (await fetch(`${at}/api/blueprint?bp=main`)).json();
+    assert.equal(named.blueprint, 'serve-fixture');
+    assert.ok(named.rows.some((r) => r.rule === 'demo.main.thing'));
+  } finally {
+    loose.closeAllConnections();
+    loose.close();
+    rmSync(elsewhere, { recursive: true, force: true });
+  }
+});
+
+test('`walkdown serve` starts outside any project rather than refusing', async () => {
+  process.env.WALKDOWN_HOME = DECLARED_HOME;
+  const elsewhere = mkdtempSync(join(tmpdir(), 'walkdown-nowhere-'));
+  const { spawn } = await import('node:child_process');
+  const bin = new URL('../bin/walkdown.js', import.meta.url).pathname;
+  const child = spawn(process.execPath, [bin, 'serve', '--port', '0'], {
+    cwd: elsewhere,
+    env: { ...process.env, WALKDOWN_HOME: DECLARED_HOME, NO_COLOR: '1' },
+  });
+  try {
+    const said = await new Promise((resolveSaid, reject) => {
+      let out = '';
+      const timer = setTimeout(() => reject(new Error(`no answer: ${out}`)), 10_000);
+      const take = (chunk) => {
+        out += chunk;
+        if (/review:/.test(out)) {
+          clearTimeout(timer);
+          resolveSaid(out);
+        }
+      };
+      child.stdout.on('data', take);
+      child.stderr.on('data', take);
+      child.on('exit', (code) => {
+        clearTimeout(timer);
+        reject(new Error(`exited ${code}: ${out}`));
+      });
+    });
+    assert.match(said, /every blueprint registered on this machine \(2\)/);
+    assert.match(said, /outside a registered project/);
+    assert.doesNotMatch(said, /No blueprint here/);
+  } finally {
+    child.removeAllListeners('exit');
+    child.kill();
+    rmSync(elsewhere, { recursive: true, force: true });
+  }
+});
+
+test('a blueprint registered or drawn after the server started is found from its own page, without a restart', async () => {
+  process.env.WALKDOWN_HOME = DECLARED_HOME;
+  const late = join(root, 'late');
+  mkdirSync(join(late, 'blueprint'), { recursive: true });
+  writeFileSync(
+    join(late, 'blueprint', 'walkdown.yml'),
+    'blueprint: late\nrunner:\n  targets:\n    local:\n      base_url: http://late.test\n',
+  );
+  writeFileSync(
+    join(late, 'blueprint', 'storyboard.yml'),
+    'screens:\n  - id: arrival\n    app: { path: /arrival }\n',
+  );
+  const whose = async () =>
+    (await (await fetch(`${base}/api/whose?url=${encodeURIComponent('http://late.test/arrival')}`)).json()).matches;
+  assert.deepEqual(await whose(), [], 'nothing claims it before it is registered');
+  register({ id: 'late', project: late, homeDir: late });
+  const after = await whose();
+  assert.equal(after.length, 1);
+  assert.equal(after[0].id, 'late');
+
+  // And a screen drawn after that - the order walkdown-formulate works in,
+  // registering at init and writing the storyboard later - is found too.
+  const later = `${base}/api/whose?url=${encodeURIComponent('http://late.test/departure')}`;
+  assert.deepEqual((await (await fetch(later)).json()).matches, []);
+  writeFileSync(
+    join(late, 'blueprint', 'storyboard.yml'),
+    'screens:\n  - id: arrival\n    app: { path: /arrival }\n  - id: departure\n    app: { path: /departure }\n',
+  );
+  const { utimesSync } = await import('node:fs');
+  const soon = new Date(Date.now() + 2000);
+  utimesSync(join(late, 'blueprint', 'storyboard.yml'), soon, soon);
+  assert.equal((await (await fetch(later)).json()).matches[0]?.screen, 'departure');
+});

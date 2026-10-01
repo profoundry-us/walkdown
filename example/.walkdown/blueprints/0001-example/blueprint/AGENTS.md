@@ -206,7 +206,8 @@ rather than adding to it.
     walkdown run [--target] [--rule]  run checks, record the run
     walkdown threads [--rule <id>]  active questions & notes
     walkdown thread <id> [...]      view / reply / transition
-    walkdown serve                  panel + embed + pin/walkdown APIs
+    walkdown serve                  panel + embed + pin/walkdown APIs, for every
+                                    registered blueprint; start it anywhere, once
 
 ## Procedures
 

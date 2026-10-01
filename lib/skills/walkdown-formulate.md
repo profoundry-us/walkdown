@@ -59,7 +59,11 @@ derives from it.
 
 9. **Report.** `walkdown status` — say what's verified, what awaits judgment
    (`agent`/`human` rules), what questions are open, and any drift (screens
-   awaiting design).
+   awaiting design). Then say how to walk it: a `walkdown serve` already
+   running anywhere on this machine serves the new blueprint as it is, with no
+   restart and no `--blueprint`; otherwise `walkdown serve` from any directory.
+   Clicking the extension on one of its pages opens it; `walkdown claims --url
+   <page>` confirms the page is claimed.
 
 Rules without screens are fine — headless rules (API behavior, CLI contracts,
 jobs, policies) get the full ledger without the UI layer. The guardrail: a
