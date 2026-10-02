@@ -223,7 +223,11 @@ test('attention: human vs agent queues derived from rows and threads @rule:statu
       // observation and a decision wait on nothing.
       { id: 'n-1', kind: 'note', reason: 'feedback', status: 'addressed', anchor: { rule: 'demo.main.thing' } },
       { id: 'n-4', kind: 'note', status: 'addressed', anchor: { rule: 'demo.main.thing' } }, // no reason: feedback
-      { id: 'n-5', kind: 'note', reason: 'finding', status: 'addressed', anchor: { rule: 'demo.main.thing' } },
+      // A note the agent wrote is the agent's to settle once its pass is
+      // newer than the fix, never a person's to verify (n-0338) - but a
+      // design request, whoever filed it, waits on a person.
+      { id: 'n-5', kind: 'note', reason: 'finding', author: 'agent', status: 'addressed', anchor: { rule: 'demo.main.thing' } },
+      { id: 'n-10', kind: 'note', reason: 'request', author: 'agent', status: 'addressed', anchor: { rule: 'demo.main.thing' } },
       { id: 'n-6', kind: 'note', reason: 'observation', status: 'settled', anchor: { rule: 'demo.main.thing' } },
       // An addressed observation is the agent's to settle, never a person's
       // to verify: it noticed it itself and closes it itself.
@@ -241,9 +245,35 @@ test('attention: human vs agent queues derived from rows and threads @rule:statu
   const byWho = (who) =>
     attention.filter((i) => i.who === who).map((i) => `${i.action}:${i.thread ?? i.rule}`);
   assert.deepEqual(byWho('human'), ['judge:demo.main.thing', 'verify:n-8', 'answer:q-1', 'verify:demo.main.thing']);
-  assert.deepEqual(byWho('agent'), ['settle:n-9', 'address:n-2', 'incorporate:q-2']);
+  assert.deepEqual(byWho('agent'), ['settle:n-5', 'settle:n-9', 'address:n-2', 'incorporate:q-2']);
   const perRule = attention.find((i) => i.action === 'verify' && i.rule === 'demo.main.thing');
-  assert.deepEqual(perRule.threads, ['n-1', 'n-4', 'n-5']);
+  assert.deepEqual(perRule.threads, ['n-1', 'n-4', 'n-10']);
+  // The request is counted apart, so the report never calls it the person's own.
+  assert.deepEqual(perRule.requests, ['n-10']);
+});
+
+test('the agent’s addressed note waits on its judgment, then on the agent, never on a person @rule:status.attention.blocked-queues', () => {
+  const bp = blueprint({
+    verify: ['agent', 'human'],
+    runs: [walkdownRun('2026-01-01', 'agent', 'pass')],
+    threads: [
+      {
+        id: 'n-1',
+        kind: 'note',
+        reason: 'finding',
+        author: 'agent',
+        status: 'addressed',
+        anchor: { rule: 'demo.main.thing' },
+        replies: [{ author: 'agent', created: '2026-02-01T00:00:00Z', body: 'fixed' }],
+      },
+    ],
+  });
+  const { attention } = deriveStatus(bp);
+  // The fix is newer than the pass: the rule is judged again first, and the
+  // note is not settled before then, nor ever a person's to verify.
+  assert.ok(attention.some((i) => i.who === 'agent' && i.action === 'rejudge' && i.thread === 'n-1'));
+  assert.ok(!attention.some((i) => i.action === 'settle'));
+  assert.ok(!attention.some((i) => i.who === 'human' && (i.thread === 'n-1' || i.threads?.includes('n-1'))));
 });
 
 /*

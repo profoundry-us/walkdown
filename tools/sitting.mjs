@@ -21,8 +21,10 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+import { loadBlueprint } from '../lib/blueprint.js';
 import { specHash } from '../lib/hash.js';
 import { resolveLocations } from '../lib/locations.js';
+import { settleByAgentPass } from '../lib/threads.js';
 import { parse } from '../vendor/yaml.js';
 
 const HERE = dirname(new URL(import.meta.url).pathname);
@@ -2027,6 +2029,15 @@ function record(file) {
   writeFileSync(out, JSON.stringify(run, null, 2) + '\n');
   console.log(`recorded ${run.run_id} — ${run.results.length} verdict(s)`);
   console.log(`  ${out}`);
+  // The agent's pass ends the notes it wrote on the rule and has now judged
+  // (threads.lifecycle.closes-where-it-was-asked); a person's stay for them.
+  const settled = [];
+  for (const r of run.results)
+    if (r.status === 'pass')
+      settled.push(
+        ...settleByAgentPass(loadBlueprint(BP), { rule: r.rule, runId: run.run_id, created: run.created }),
+      );
+  if (settled.length) console.log(`settled ${settled.join(', ')} — notes the agent wrote, judged by this pass`);
 }
 
 /* ----------------------------------------------------------------------- */

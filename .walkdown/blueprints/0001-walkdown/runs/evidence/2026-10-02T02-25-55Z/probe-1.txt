@@ -1,8 +1,0 @@
-== 1. thread new with no anchor
-a thread needs an anchor — name the rule it is about (--rule <id>), or the screen (--screen <id>)
-exit 2
-== 2. thread new on an unknown screen
-No screen "no-such". The storyboard lists every screen.
-exit 2
-== 3. lint before (drift lines)
-(end)

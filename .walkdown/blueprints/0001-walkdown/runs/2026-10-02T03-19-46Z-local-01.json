@@ -1,0 +1,34 @@
+{
+  "run_id": "2026-10-02T03-19-46Z-local-01",
+  "created": "2026-10-02T03:19:46Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "d14bb38-dirty",
+  "spec_hash": "sha256:bd2b4fd5a1f6",
+  "note": "Agent tier for the n-0338 change, judged headless by driving the CLI on scratch copy agent-notes-1001 (port 4761 assigned, nothing served) with its own WALKDOWN_HOME; the scratch agent pass in probe 4 was written to the copy's ledger only.",
+  "results": [
+    {
+      "rule": "threads.lifecycle.closes-where-it-was-asked",
+      "status": "pass",
+      "statement_hash": "",
+      "evidence": [
+        "runs/evidence/2026-10-02T03-18-09Z/probe-1.txt",
+        "runs/evidence/2026-10-02T03-18-09Z/probe-2.txt",
+        "runs/evidence/2026-10-02T03-18-09Z/probe-3.txt"
+      ],
+      "reasoning": "On the scratch copy I filed an agent finding (n-0339), a person's feedback (n-0340) and an agent-filed design request (n-0341) on this rule and addressed all three as the agent. Settling the feedback and the request was refused with 'only a note the agent wrote is settled' (probe-1, step 3). An agent pass newer than the fix listed 'settle n-0339' for the agent, and settleByAgentPass then settled n-0339 alone, with a 'Settled by the agent's pass' reply and no verified_by, leaving n-0340 and n-0341 addressed for the person (probe-2, steps 4-5). The agent also settled its own second finding by hand (probe-3). The person's signed pass closing the rest is covered by the recorded unit test and was not re-driven here."
+    },
+    {
+      "rule": "status.attention.blocked-queues",
+      "status": "pass",
+      "statement_hash": "",
+      "evidence": [
+        "runs/evidence/2026-10-02T03-18-09Z/probe-1.txt",
+        "runs/evidence/2026-10-02T03-18-09Z/probe-2.txt"
+      ],
+      "reasoning": "Before any new agent pass, the person's item for the rule named only n-0340 and n-0341, never the agent's finding n-0339, and no settle item existed while the agent tier still owed the rule; the agent queue held 'judge' for it (probe-1, step 2). After an agent pass newer than the fix, n-0339 appeared once, as 'settle n-0339 … a note you wrote, addressed; close it' in the agent queue, and still not in the person's item (probe-2, step 4). The person's line reads '1 note of yours answered, 1 design request drawn', so the agent-filed request is no longer called theirs. After the settle, n-0339 left every queue. Each item sat in exactly one queue."
+    }
+  ]
+}

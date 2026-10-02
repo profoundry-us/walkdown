@@ -274,7 +274,9 @@ export function run(args) {
     'GOVERNANCE',
     '  - You claim work; a person accepts it. Never write "verified" or "waived" anywhere.',
     '  - A fail needs a note thread anchored to this rule citing the evidence, filed with',
-    '    `--reason finding` (authored agent; it closes on the rule\'s next signed pass); put its id in the result.',
+    '    `--reason finding` (authored agent, and yours to settle once a later pass judges the fix); put its id in the result.',
+    '  - Then `walkdown status`: a note you wrote on this rule that your pass has now judged is',
+    '    listed for you to settle (`walkdown thread <id> --status settled --as-agent`).',
     `  - The ledger is append-only: one new record, at the end, and no record ever edited.`,
     // n-0200: the record above names the TARGET's address while the copy
     // is served elsewhere, and a verdict recorded at the copy's port fills

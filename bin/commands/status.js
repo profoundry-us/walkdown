@@ -281,7 +281,17 @@ export function run(args) {
     for (const rule of s.owed) console.log(`  ◇ ${rule}`);
   }
 
-  const HOWTO = {
+  const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+const verifyParts = (i) => {
+  const requests = i.requests?.length ?? 0;
+  const yours = i.threads.length - requests;
+  return [
+    ...(yours ? [`${plural(yours, 'note')} of yours answered`] : []),
+    ...(requests ? [`${plural(requests, 'design request')} drawn`] : []),
+  ].join(', ');
+};
+
+const HOWTO = {
     // Named, because "needs a human" was never the question - the question is
     // whether it needs PRODUCT or engineering, and a queue that cannot say
     // which is a queue two people both scroll past.
@@ -291,10 +301,11 @@ export function run(args) {
         : `walk down ${i.rule} — ${i.role ?? 'nobody'} has not accepted it yet`,
     // Per rule when the notes have one (ADR 0005 §6): the look that clears
     // them is a verdict on the rule, so the item says which rule to walk and
-    // how many of your own notes were answered there.
+    // what waits there - your own notes answered, and any design request
+    // drawn, whoever filed it (n-0338).
     verify: (i) =>
       i.threads
-        ? `walk down ${i.rule} — ${i.threads.length} note${i.threads.length === 1 ? '' : 's'} of yours answered` +
+        ? `walk down ${i.rule} — ${verifyParts(i)}` +
           dim(` (${i.threads.join(', ')})`) +
           (i.unjudged ? yellow(' — a fix nothing has judged yet') : '')
         : `verify ${i.thread} — ` +
@@ -320,7 +331,7 @@ export function run(args) {
     // The machine's own observation, addressed by the machine: it closes it
     // itself. Missing from this table for a day, so the queue crashed the
     // moment one existed (2026-09-21).
-    settle: (i) => `settle ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — your own observation, addressed; close it`,
+    settle: (i) => `settle ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — a note you wrote, addressed; close it`,
     // A design request (ADR 0009): design's to draw, never the building agent's.
     draw: (i) =>
       `draw ${i.screen ?? i.rule ?? 'what it asks for'} — design request ${i.thread}${i.rule && i.screen ? dim(` (${i.rule})`) : ''}`,

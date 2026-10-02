@@ -92,8 +92,10 @@ verify requirement).
    (`walkdown thread new --kind note --rule <id> --body <text> --as-agent
    --reason finding`, or POST `/api/threads` while serve runs). Put the
    thread id in that result's `threads` array. A finding is authored
-   `agent` and closes on the rule's next signed pass (ADR 0005); nobody has
-   to verify it by hand.
+   `agent` and is yours to close, never a person's: once the fix is made
+   and a later pass of yours judges it, `walkdown status` asks you to settle
+   it (`walkdown thread <id> --status settled --as-agent`). A person's
+   signed pass on the rule closes it too.
 
 8. **Close out.** `walkdown lint` (the record must validate), then
    `walkdown status` — confirm the AGENT column updated. Report what passed,

@@ -13,7 +13,7 @@ import { join } from 'node:path';
 import test from 'node:test';
 import { loadBlueprint } from '../lib/blueprint.js';
 import { createWalkdownServer } from '../lib/serve.js';
-import { closeByVerdict } from '../lib/threads.js';
+import { closeByVerdict, settleByAgentPass } from '../lib/threads.js';
 import { finishWalkdown, mutateThread, openThread } from '../lib/writes.js';
 import { declaredHome } from '../tools/test-home.mjs';
 import { parse } from '../vendor/yaml.js';
@@ -104,22 +104,62 @@ test('a note says why it exists, and the machine signs its own @rule:threads.lif
   }
 });
 
-test('an observation is settled by the agent; nothing else is @rule:threads.lifecycle.closes-where-it-was-asked', () => {
+test('the agent settles the notes it wrote, never a person’s or a design request @rule:threads.lifecycle.closes-where-it-was-asked', () => {
   const p = project();
   try {
-    const obs = openThread(p.load(), { kind: 'note', body: 'noticed', anchor: { rule: RULE }, via: 'agent', reason: 'observation' });
-    const done = mutateThread(p.load(), obs.id, { body: 'changed it', status: 'settled', via: 'agent' });
-    assert.equal(done.thread.status, 'settled');
-    assert.equal(p.onDisk(obs.id).status, 'settled');
-    // Feedback, a finding and a request wait on a person's look.
-    for (const reason of ['feedback', 'finding', 'request']) {
-      const t = openThread(p.load(), { kind: 'note', body: reason, anchor: { rule: RULE }, reason });
+    // An observation, and any other note the agent wrote: its own to end.
+    for (const reason of ['observation', 'finding', 'feedback']) {
+      const t = openThread(p.load(), { kind: 'note', body: reason, anchor: { rule: RULE }, via: 'agent', reason });
+      const done = mutateThread(p.load(), t.id, { body: 'changed it', status: 'settled', via: 'agent' });
+      assert.equal(done.thread.status, 'settled', reason);
+      assert.equal(p.onDisk(t.id).status, 'settled', reason);
+    }
+    // A person's notes wait on a person's look, and a design request does
+    // whoever filed it. (A finding is the agent's by construction.)
+    const refused = [
+      ...['feedback', 'request'].map((reason) => ({ reason })),
+      { reason: 'request', via: 'agent' },
+    ];
+    for (const { reason, via } of refused) {
+      const t = openThread(p.load(), { kind: 'note', body: reason, anchor: { rule: RULE }, reason, via });
       assert.throws(
         () => mutateThread(p.load(), t.id, { status: 'settled', via: 'agent' }),
-        /only an observation is settled/,
-        reason,
+        /only a note the agent wrote is settled/,
+        `${reason}${via ? ' by the agent' : ''}`,
       );
     }
+  } finally {
+    p.cleanup();
+  }
+});
+
+test('the agent’s pass settles the addressed notes it wrote, and nothing of a person’s @rule:threads.lifecycle.closes-where-it-was-asked', () => {
+  const p = project();
+  try {
+    const file = (reason, via, rule = RULE) =>
+      openThread(p.load(), { kind: 'note', body: reason, anchor: { rule }, reason, via }).id;
+    const finding = file('finding', 'agent');
+    const request = file('request', 'agent');
+    const persons = file('feedback', null);
+    const elsewhere = file('finding', 'agent', 'demo.main.other');
+    const unaddressed = file('finding', 'agent');
+    for (const id of [finding, request, persons, elsewhere])
+      mutateThread(p.load(), id, { body: 'fixed', status: 'addressed', via: 'agent' });
+
+    const settled = settleByAgentPass(p.load(), { rule: RULE, runId: 'agent-run', created: '2099-01-01T00:00:00Z' });
+    assert.deepEqual(settled, [finding]);
+    const t = p.onDisk(finding);
+    assert.equal(t.status, 'settled');
+    assert.equal(t.verified_by, undefined);
+    assert.match(t.replies.at(-1).body, /Settled by the agent's pass on .* \(agent-run\)/);
+    assert.equal(t.replies.at(-1).via, 'verdict');
+    for (const id of [request, persons, elsewhere]) assert.equal(p.onDisk(id).status, 'addressed', id);
+    assert.equal(p.onDisk(unaddressed).status, 'open');
+
+    // A fix claimed after the pass is not what the pass judged.
+    const later = file('finding', 'agent');
+    mutateThread(p.load(), later, { body: 'fixed', status: 'addressed', via: 'agent' });
+    assert.deepEqual(settleByAgentPass(p.load(), { rule: RULE, runId: 'old', created: '2020-01-01T00:00:00Z' }), []);
   } finally {
     p.cleanup();
   }
