@@ -8,7 +8,7 @@ import { declareProject } from '../tools/test-home.mjs';
  */
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { after, test } from 'node:test';
@@ -485,4 +485,57 @@ test('a zone the machine does not know falls back to its own and says so @rule:t
   const out = run(['n-0010'], bp, home);
   assert.match(out, /Jan 1, 2026|Dec 31, 2025/);
   assert.doesNotMatch(out, /2026-01-01T00:00:00Z/);
+});
+
+/*
+ * A design request on a screen alone (ADR 0009). The screen that most needs
+ * one is one design has not drawn, and it often has no rule yet - while
+ * AGENTS.md said to anchor the request to the screen, this command refused
+ * anything without --rule.
+ */
+test('a note filed on a screen alone is a design request, and answers for that screen @rule:ownership.design.request-on-a-screen', () => {
+  const bp = ruleFixture('screen-request');
+  writeFileSync(
+    join(bp, 'storyboard.yml'),
+    'screens:\n  - id: undrawn\n    prototype: null\n    app: { path: /undrawn }\n',
+  );
+  const lintSays = () => {
+    try {
+      return execFileSync(process.execPath, [CLI, 'lint', '--no-checks', '--blueprint', declareProject(SAID, bp)], {
+        encoding: 'utf8',
+        env: { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: SAID },
+      });
+    } catch (err) {
+      return String(err.stdout) + String(err.stderr);
+    }
+  };
+  assert.match(lintSays(), /undrawn.*no design and no open design request/s, 'flagged before');
+
+  const out = run(['new', '--screen', 'undrawn', '--body', 'This screen needs drawing.'], bp);
+  assert.match(out, /n-0001 opened · note/);
+  const disk = readFileSync(join(threadsOf(bp), 'n-0001.yml'), 'utf8');
+  assert.match(disk, /screen: undrawn/);
+  assert.doesNotMatch(disk, /rule:/, 'no rule was named, so none is recorded');
+  assert.match(disk, /reason: request/);
+  assert.doesNotMatch(lintSays(), /no design and no open design request/, 'the request answers for the screen');
+
+  // A reason given is the reason kept.
+  run(['new', '--screen', 'undrawn', '--body', 'An odd screen.', '--reason', 'feedback'], bp);
+  assert.match(readFileSync(join(threadsOf(bp), 'n-0002.yml'), 'utf8'), /reason: feedback/);
+});
+
+test('a thread with neither a rule nor a screen is refused, and so is a screen that does not exist @rule:ownership.design.request-on-a-screen', () => {
+  const bp = ruleFixture('screen-refused');
+  writeFileSync(join(bp, 'storyboard.yml'), 'screens:\n  - id: home\n    prototype: /home.html\n');
+  const refusal = (args) => {
+    try {
+      run(args, bp);
+      return null;
+    } catch (err) {
+      return String(err.stderr);
+    }
+  };
+  assert.match(refusal(['new', '--body', 'About what?']), /--rule <id>\), or the screen \(--screen <id>\)/);
+  assert.match(refusal(['new', '--screen', 'nowhere', '--body', 'x']), /No screen "nowhere"/);
+  assert.equal(readdirSync(threadsOf(bp)).length, 0, 'nothing was filed');
 });

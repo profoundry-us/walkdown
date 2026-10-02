@@ -321,9 +321,21 @@ export function run(args) {
     // itself. Missing from this table for a day, so the queue crashed the
     // moment one existed (2026-09-21).
     settle: (i) => `settle ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — your own observation, addressed; close it`,
+    // A design request (ADR 0009): design's to draw, never the building agent's.
+    draw: (i) =>
+      `draw ${i.screen ?? i.rule ?? 'what it asks for'} — design request ${i.thread}${i.rule && i.screen ? dim(` (${i.rule})`) : ''}`,
   };
+  /*
+   * Design's queue says who design is, from the blueprint's design.by: a
+   * designer is a person and reads it like one; a design agent is never the
+   * agent building the app, so it is not the AGENT QUEUE.
+   */
+  const designTitle = derived.attention.some((i) => i.who === 'design' && i.by === 'agent')
+    ? 'DESIGN QUEUE — for the design agent, never the agent building the app'
+    : 'DESIGN QUEUE — for the designer';
   for (const [who, title] of [
     ['human', 'NEEDS A HUMAN'],
+    ['design', designTitle],
     ['agent', 'AGENT QUEUE'],
   ]) {
     const items = derived.attention.filter((i) => i.who === who);

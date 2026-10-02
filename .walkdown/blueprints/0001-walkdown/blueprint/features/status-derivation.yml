@@ -535,24 +535,26 @@ stories:
 
       - id: status.attention.blocked-queues
         origin: prd
-        statement: Every item in the status report's attention list is for an agent or a person. Agents are asked to address notes, incorporate answers, cover unchecked rules and re-judge claimed fixes; people to judge in an unsigned role, verify their own notes and answer questions.
-        because: Cover - a rule that demands checks while no check claims it - is an agent's work to write and never a person's to judge.
+        statement: Every item in the status report's attention list is for an agent, a person, or design, and says which.
+        because: Writing a missing check is an agent's job; there is nothing yet for a person to judge. A design request is for design to draw, never for the agent building the app.
+        history: A design request was queued for the building agent, which is not allowed to act on it, so it either sat or was marked addressed without being addressed (GitHub issue #2, ADR 0009).
         verify: [checks]
         steps:
           given:
-            - A board holding rules owed signatures, open threads, and a rule demanding checks that no check claims
+            - A board holding rules owed signatures, open threads including a design request, and a rule demanding checks that no check claims
           when:
             - Attention is derived
           then:
-            - "An agent is asked to address an open note, to incorporate an answered question into its rule, to cover a rule that demands checks while no check claims it, and to re-judge a rule whose fix was claimed after its last pass"
+            - "An agent is asked to address an open note that is not a design request, to incorporate an answered question into its rule, to cover a rule that demands checks while no check claims it, and to re-judge a rule whose fix was claimed after its last pass"
             - "A person is asked to judge a built rule once for each role that has not signed it, to verify the addressed notes on a rule the walk can reach - one item per rule, naming the threads, whatever their reason but observation - and to answer an open question, one item per rule where the question is on one the walk can reach"
             - An addressed observation on a walkable rule is the agent's to settle, never a person's to verify - it noticed it itself and closes it itself
             - A thread on no rule, or on a retired one, is its own item, and only a person's feedback or request makes a verify item there - a finding or an observation on a retired rule waits on nobody
             - "A cover item is a rule demanding checks while no check claims it: an agent writes the check, and it is never a person's to judge"
             - A built rule the agent tier still owes is the agent's alone, so it is judged by an agent before any person is asked to sign it
-            - Every item names who is blocked, so nothing sits in both queues at once
+            - 'An open design request is design''s to draw and never the building agent''s to address. With design.by "agent" it is queued for the design agent, otherwise for the designer'
+            - Every item names who is blocked, so nothing sits in two queues at once
             - A rule holding an answered question is the agent's to fold in and is queued to no person - not to judge, not to verify - until the question is incorporated
-          statement_hash: sha256:8e52f2c44ada
+          statement_hash: sha256:9b3a0c26d360
 
       - id: status.attention.names-the-role
         origin: walkdown

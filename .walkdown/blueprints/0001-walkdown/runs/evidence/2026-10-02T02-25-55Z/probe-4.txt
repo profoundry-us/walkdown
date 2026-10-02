@@ -1,0 +1,7 @@
+== 10b. both requests settled; only the feedback note n-0339 stays open on the screen
+status: settled
+status: settled
+  ⚠ [drift] blueprint/storyboard.yml › probe-undrawn: screen has no design and no open design request — file one with `walkdown thread new --screen <id>` (a proposal alone is not a request)
+(end)
+(no design queue above = empty)
+  ◆ address n-0339 — open note

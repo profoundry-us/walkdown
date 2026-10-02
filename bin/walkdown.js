@@ -22,7 +22,7 @@ Usage:
   walkdown thread <id> [--reply <text>] [--status <s>|--verify|--reopen|--waive]
                        [--reason <text>] [--as-agent [--said <text>] [--added <text>]] [--as-is]
                        [--blueprint <id>] [--json]
-  walkdown thread new --rule <id> --body <text>|--said <text> [--added <text>] [--kind note|question]
+  walkdown thread new --rule <id> | --screen <id> --body <text>|--said <text> [--added <text>] [--kind note|question]
                       [--screen <id>] [--element <sel>] [--as-agent] [--blueprint <id>] [--json]
   walkdown serve [--blueprint <id>] [--port <n>]
   walkdown claims [--blueprint <id>] [--url <address>] [--json]

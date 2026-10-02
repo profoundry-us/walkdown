@@ -9,27 +9,64 @@ stories:
     rules:
       - id: ownership.drift.design-requests-required
         origin: prd
-        statement: Lint flags any screen that has no design and no open design-request thread. Filing the request clears the flag.
+        statement: Lint flags any screen that has no design and no open design request. Filing one clears the flag.
         verify: [checks]
         steps:
           given:
-            - "A storyboard screen with no design - `prototype: null` - and no thread anchored to it"
+            - "A storyboard screen with no design (`prototype: null`) and no note anchored to it"
           when:
             - The blueprint is linted
           then:
-            - The screen is named as having no design and no open design-request thread
-            - A thread anchored to that screen clears it, because the request is now somewhere design will see it
-            - A thread that has ended stops clearing it - a request is open work or it is nothing
+            - The screen is named as having no design and no open design request
+            - An open note with the reason "request", anchored to that screen, clears it, because a request is queued for design
+            - A note with any other reason does not clear it, because it is queued for the agent, where design will not see it
+            - "A note whose thread has ended stops clearing it: a request is open work or it is nothing"
             - "A proposal sketch is not a request: a drawing nobody asked design for routes nothing"
             - A retired screen is exempt, because it describes something we stopped meaning
-          statement_hash: sha256:388852348271
-          reworded:
-            - hash: sha256:1d8bdc7a98b6
-              at: 2026-09-13
-              why: the hash covers the steps now; this one named the statement alone
-            - hash: sha256:0c30b51be702
-              at: 2026-09-14T04:15:34Z
-              why: "ADR 0004 wording pass: the words moved, the meaning did not"
+          statement_hash: sha256:418069b7b1f6
+
+  - id: ownership.design
+    title: The design is drawn by someone other than the builder
+    statement: As a team, we get two perspectives on every screen, because whoever builds it never drew it.
+    rules:
+      - id: ownership.design.declared-per-blueprint
+        origin: walkdown
+        created_at: 2026-10-01
+        statement: A blueprint names who draws its design in its `walkdown.yml`, with `design.by` set to `person` or `agent`. When a blueprint says nothing, a person draws.
+        because: Who designs differs between projects. What holds on every one is that the builder does not draw.
+        history: Decided in ADR 0009 on 2026-10-01 (GitHub issue #2). On Topher's own projects an agent designs; at work a designer does.
+        verify: [checks]
+        signoff: [eng, product]
+        steps:
+          given:
+            - 'Blueprints declaring design.by "person", design.by "agent", nothing, and some other value, each with an open design request'
+          when:
+            - Each is linted and its status report's attention list read
+          then:
+            - With "person", or with nothing said, the request is queued for the designer, shown the way a person's queue is
+            - With "agent", it is queued for the design agent, never for the agent building the app
+            - Any other value is a lint error that names "person" and "agent" as the values allowed
+          statement_hash: sha256:e1ce6c441f53
+
+      - id: ownership.design.request-on-a-screen
+        origin: walkdown
+        created_at: 2026-10-01
+        statement: A design request can be filed on a screen alone, with `walkdown thread new --screen <id>`. A thread filed on a screen with no rule is a design request unless a `--reason` says otherwise.
+        because: The screen that most needs a request is one that design has not drawn, and it often has no rule yet to anchor to.
+        history: AGENTS.md told agents to file a design request anchored to the screen while `walkdown thread new` refused any thread without `--rule` (found 2026-09-29, deferred until ADR 0009 was decided).
+        verify: [checks]
+        signoff: [eng]
+        steps:
+          given:
+            - "A screen with `prototype: null` and no rule naming it"
+          when:
+            - "`walkdown thread new --screen <id> --body <text>` is run"
+          then:
+            - It is filed anchored to the screen, with no rule, and with the reason "request"
+            - It satisfies ownership.drift.design-requests-required for that screen
+            - Given `--reason <reason>`, the thread carries that reason
+            - With neither `--rule` nor `--screen`, it is refused, and the refusal says to name one
+          statement_hash: sha256:f073f61e1435
 
   - id: ownership.authoring
     title: A rule is written so it can be built from

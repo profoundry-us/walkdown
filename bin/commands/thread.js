@@ -41,7 +41,7 @@ export function run(args) {
   if (!id) {
     console.error(
       'Usage: walkdown thread <id> [--reply <text>] [--status <s>|--verify|--reopen|--waive] [--reason <text>] [--option "<label> :: <why>"]... [--as-agent [--said <text>] [--added <text>]]\n' +
-        '       walkdown thread new --rule <id> --body <text> [--kind note|question] [--option "<label> :: <why>"]... [--reason feedback|finding|observation|request|decision] [--screen <id>] [--element <sel>] [--as-agent [--said <text>] [--added <text>]]',
+        '       walkdown thread new --rule <id> | --screen <id> --body <text> [--kind note|question] [--option "<label> :: <why>"]... [--reason feedback|finding|observation|request|decision] [--screen <id>] [--element <sel>] [--as-agent [--said <text>] [--added <text>]]',
     );
     process.exit(2);
   }
@@ -133,24 +133,39 @@ export function run(args) {
       process.exit(2);
     }
     const rule = values.rule?.trim();
-    if (!rule) {
-      console.error('a thread needs an anchor — name the rule it is about (--rule <id>)');
+    const screen = values.screen?.trim();
+    /*
+     * A rule, a screen, or both. A screen alone is how a design request is
+     * filed: the screen that most needs one is one design has not drawn, and
+     * it often has no rule yet (ownership.design.request-on-a-screen). This
+     * refused anything without --rule while AGENTS.md told agents to anchor
+     * a request to the screen.
+     */
+    if (!rule && !screen) {
+      console.error(
+        'a thread needs an anchor — name the rule it is about (--rule <id>), or the screen (--screen <id>)',
+      );
       process.exit(2);
     }
-    if (!collectRules(blueprint.features).some((r) => r.rule?.id === rule)) {
+    if (rule && !collectRules(blueprint.features).some((r) => r.rule?.id === rule)) {
       console.error(`No rule "${rule}". \`walkdown status\` lists every rule.`);
       process.exit(2);
     }
+    if (screen && !(blueprint.storyboard?.screens ?? []).some((s) => s?.id === screen)) {
+      console.error(`No screen "${screen}". The storyboard lists every screen.`);
+      process.exit(2);
+    }
     const anchor = {
-      rule,
-      ...(values.screen ? { screen: values.screen } : {}),
+      ...(rule ? { rule } : {}),
+      ...(screen ? { screen } : {}),
       ...(values.element ? { element: values.element } : {}),
     };
     // A judge files a finding, an agent in passing an observation, a person
     // feedback, a request, or a decision (ADR 0005 §1). Left unsaid, a machine's
-    // note is an observation and a person's is feedback. The same flag that
-    // carries a waive's sentence carries this one word on `new`.
-    const reason = values.reason ?? null;
+    // note is an observation and a person's is feedback - except a note on a
+    // screen alone, which is a design request unless --reason says otherwise.
+    // The same flag that carries a waive's sentence carries this one word on `new`.
+    const reason = values.reason ?? (!rule && kind === 'note' ? 'request' : null);
     // The choices a question offers, one flag each: "Retire it :: the other
     // screen asks the same thing". The label is what the answer names.
     const options = values.option?.length

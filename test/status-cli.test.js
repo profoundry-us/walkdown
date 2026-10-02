@@ -155,3 +155,31 @@ test('the rule detail says who has signed and who has not @rule:status.acceptanc
   // Every tier green and one role short is pending, not verified.
   assert.match(detail, /demo\.main\.waiting · pending/);
 });
+
+test('the report gives design requests a queue of their own, named for who draws @rule:ownership.design.declared-per-blueprint @rule:status.attention.blocked-queues', () => {
+  const bp = fixture('design-queue');
+  const threads = join(root, 'design-queue', 'threads');
+  mkdirSync(threads, { recursive: true });
+  writeFileSync(
+    join(threads, 'n-0001.yml'),
+    'id: n-0001\nkind: note\nauthor: someone\ncreated: 2026-01-01T00:00:00Z\nreason: request\nanchor: { screen: undrawn }\nstatus: open\nbody: Draw this.\n',
+  );
+  const plain = (s) => s.replace(/\x1b\[[0-9;]*m/g, '');
+  const queues = (out) => {
+    const design = plain(out).split('DESIGN QUEUE')[1]?.split(/\n\s*\n/)[0] ?? '';
+    const agent = plain(out).split('AGENT QUEUE')[1]?.split(/\n\s*\n/)[0] ?? '';
+    return { design, agent, all: plain(out) };
+  };
+
+  // Nothing said: a person draws.
+  let q = queues(run(bp, []));
+  assert.match(q.all, /DESIGN QUEUE — for the designer/);
+  assert.match(q.design, /draw undrawn — design request n-0001/);
+  assert.doesNotMatch(q.agent, /n-0001/, 'never the building agent');
+
+  // An agent draws: still design's queue, never the AGENT QUEUE.
+  writeFileSync(join(bp, 'walkdown.yml'), 'blueprint: cli-fixture\ndesign:\n  by: agent\n');
+  q = queues(run(bp, []));
+  assert.match(q.all, /DESIGN QUEUE — for the design agent, never the agent building the app/);
+  assert.doesNotMatch(q.agent, /n-0001/);
+});

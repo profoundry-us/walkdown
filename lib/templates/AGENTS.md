@@ -36,8 +36,12 @@ notes), and the runs ledger. The blueprint is the single source of truth for
 
 - **Never edit `prototype/`** — design owns it. If the spec needs a screen that
   design hasn't drawn: set `prototype: null` on the storyboard screen, put a
-  sketch under `proposals/` if a picture helps, and file a design-request
-  thread anchored to the screen. Lint enforces this routing. An `as-built/`
+  sketch under `proposals/` if a picture helps, and file a design request
+  on the screen (`walkdown thread new --screen <id> --body <text>`). Lint
+  enforces this routing. Design work goes through a request, and a request
+  is for design, not for you: it waits in the DESIGN QUEUE, never in yours,
+  even where the blueprint's `design.by` is `agent` - that is a different
+  agent from the one building the app (ADR 0009). An `as-built/`
   folder, where a project keeps one, is engineering's own drawing of what it
   built and may be edited freely (ADR 0007).
 - **Every rule carries steps.** given/when/then is what a check gets built

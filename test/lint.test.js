@@ -304,13 +304,26 @@ test('an undesigned screen without a design-request thread warns; with one it pa
       (f) =>
         f.category === 'drift' &&
         f.subject === 'specborn' &&
-        /no open design-request/.test(f.message),
+        /no open design request/.test(f.message),
     ),
   );
 
+  // A thread on the screen that is not a design request clears nothing: a
+  // question or a note of any other reason is queued where design never sees it.
+  const undrawn = () => lint(load(h), { checks: false }).findings.some((f) => f.category === 'drift' && f.subject === 'specborn');
+  writeFileSync(
+    join(h.threads, 'q.yml'),
+    'id: q-9\nkind: question\nstatus: open\nanchor: { rule: demo.main.thing, screen: specborn }\nbody: what goes here?\n',
+  );
+  writeFileSync(
+    join(h.threads, 'fb.yml'),
+    'id: n-8\nkind: note\nreason: feedback\nstatus: open\nanchor: { screen: specborn }\nbody: this screen is odd\n',
+  );
+  assert.ok(undrawn(), 'a question or a feedback note is not a design request');
+
   writeFileSync(
     join(h.threads, 'req.yml'),
-    'id: q-9\nkind: question\nstatus: open\nanchor: { rule: demo.main.thing, screen: specborn }\nbody: design this\n',
+    'id: n-9\nkind: note\nreason: request\nstatus: open\nanchor: { screen: specborn }\nbody: design this\n',
   );
   ({ findings } = lint(load(h), { checks: false }));
   assert.deepEqual(
@@ -696,4 +709,20 @@ test('an open thread on a retired rule warns; an addressed one waits on its pers
     ({ findings } = lint(load(h), { checks: false }));
     assert.equal(findings.filter((f) => f.category === 'thread-on-retired-rule').length, 0, status);
   }
+});
+
+test('design.by is person or agent, and anything else is an error naming both @rule:ownership.design.declared-per-blueprint', () => {
+  const h = writeFixture(join(root, 'design-by'));
+  const cfg = readFileSync(join(h.spec, 'walkdown.yml'), 'utf8');
+  const errors = (by) => {
+    writeFileSync(join(h.spec, 'walkdown.yml'), by === undefined ? cfg : `${cfg}\ndesign:\n  by: ${by}\n`);
+    return lint(load(h), { checks: false }).findings.filter((f) => f.subject === 'design.by');
+  };
+  assert.deepEqual(errors(undefined), [], 'saying nothing is allowed: a person draws');
+  assert.deepEqual(errors('person'), []);
+  assert.deepEqual(errors('agent'), []);
+  const bad = errors('designer');
+  assert.equal(bad.length, 1);
+  assert.equal(bad[0].level, 'error');
+  assert.match(bad[0].message, /`person` or `agent`/);
 });

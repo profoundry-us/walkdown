@@ -1,0 +1,71 @@
+== 4. lint with an undrawn screen and no request
+  ⚠ [coverage] blueprint/features/time.yml › time.records.read-in-your-zone: verify includes checks but no check references this rule yet
+  ⚠ [storyboard] blueprint/storyboard.yml › probe-undrawn: app ref "/as-built/settings.html" is already claimed by screen `settings` — a tie is never matched, so this screen can only be reached by picking it by hand
+  ⚠ [drift] blueprint/storyboard.yml › probe-undrawn: screen has no design and no open design request — file one with `walkdown thread new --screen <id>` (a proposal alone is not a request)
+  ⚠ [threads] threads/n-0326.yml › n-0326: anchored to undeclared anchor "pin.tip"
+(end)
+== 5. a question note on the screen does not clear it
+unknown reason "question" — one of feedback, finding, observation, request, decision
+exit 2
+1
+== 6. thread new --screen with no reason files a request
+✓ n-0338 opened · note · by scratch-design-1001
+  screen probe-undrawn
+  walkdown thread n-0338 reads it in full
+exit 0
+q-0317.yml
+q-0335.yml
+q-0336.yml
+id: n-0338
+kind: note
+reason: request
+author: scratch-design-1001
+created: 2026-10-02T02:27:33.619Z
+anchor:
+  screen: probe-undrawn
+status: open
+body: Please draw the undrawn screen.
+== 7. lint after
+  ⚠ [storyboard] blueprint/storyboard.yml › probe-undrawn: app ref "/as-built/settings.html" is already claimed by screen `settings` — a tie is never matched, so this screen can only be reached by picking it by hand
+(end)
+== 8. status, design.by unset
+  DESIGN QUEUE — for the designer
+  ◆ draw probe-undrawn — design request n-0338
+
+  AGENT QUEUE
+  ◆ cover delivery.install.clone-is-the-install — demands checks, and no check claims it
+  ◆ cover embed.pin.anchored-target — demands checks, and no check claims it
+  ◆ cover embed.pin.right-project — demands checks, and no check claims it
+  ◆ cover embed.pin.both-surfaces — demands checks, and no check claims it
+  ◆ cover embed.pin.follows-the-visible-surface — demands checks, and no check claims it
+  ◆ cover embed.pin.viewport-recorded — demands checks, and no check claims it
+  ◆ cover embed.pin.tooltip-says-what-it-is — demands checks, and no check claims it
+  ◆ cover embed.pin.surface-coordinates — demands checks, and no check claims it
+  ◆ cover embed.pin.coordinate-fallback — demands checks, and no check claims it
+  ◆ cover embed.threads.picture-on-a-pin — demands checks, and no check claims it
+  ◆ cover embed.threads.actions-in-context — demands checks, and no check claims it
+  ◆ cover locations.default.nothing-in-the-tree — demands checks, and no check claims it
+  ◆ cover locations.default.records-follow-the-spec — demands checks, and no check claims it
+  ◆ cover locations.default.in-repo-on-request — demands checks, and no check claims it
+  ◆ cover locations.default.skills-are-yours-by-default — demands checks, and no check claims it
+  ◆ cover locations.default.one-home-per-blueprint — demands checks, and no check claims it
+  ◆ cover locations.default.prototype-beside-the-spec — demands checks, and no check claims it
+  ◆ cover locations.answer.says-why — demands checks, and no check claims it
+  ◆ cover locations.answer.asking-writes-nothing — demands checks, and no check claims it
+  ◆ cover locations.answer.declared-not-discovered — demands checks, and no check claims it
+  ◆ cover locations.answer.registry-is-the-only-door — demands checks, and no check claims it
+  ◆ cover locations.answer.serve-starts-anywhere — demands checks, and no check claims it
+  ◆ cover locations.answer.adapters-file-where-walkdown-says — demands checks, and no check claims it
+  ◆ cover locations.keeping.moving-is-a-decision — demands checks, and no check claims it
+  ◆ cover locations.keeping.old-config-never-misfiles — demands checks, and no check claims it
+  ◆ cover locations.travel.evidence-by-key — demands checks, and no check claims it
+  ◆ cover locations.travel.judged-against-a-spec — demands checks, and no check claims it
+  ◆ cover locations.travel.provenance-not-currency — demands checks, and no check claims it
+  ◆ cover locations.pointer.placed-where-agents-read — demands checks, and no check claims it
+  ◆ cover locations.pointer.owns-only-its-block — demands checks, and no check claims it
+  ◆ judge ownership.drift.design-requests-required — the agent tier is stale on it, and no signer is asked until it has
+  ◆ judge ownership.design.declared-per-blueprint — the agent tier has never judged it, and no signer is asked until it has
+  ◆ judge ownership.design.request-on-a-screen — the agent tier has never judged it, and no signer is asked until it has
+  ◆ cover ownership.authoring.steps-are-required — demands checks, and no check claims it
+  ◆ cover ownership.authoring.statement-reads-at-a-glance — demands checks, and no check claims it
+  ◆ cover ownership.authoring.machine-words-pass-the-voice — demands checks, and no check claims it

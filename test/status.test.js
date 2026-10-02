@@ -190,7 +190,12 @@ test('screenFlow: step order wins, consecutive repeats collapse, revisits show',
 
 test('drift: undesigned screens and thread-born rules are derived', () => {
   const bp = blueprint({
-    threads: [{ id: 'q-9', kind: 'question', status: 'open', anchor: { screen: 'extra' } }],
+    threads: [
+      { id: 'n-9', kind: 'note', reason: 'request', status: 'open', anchor: { screen: 'extra' } },
+      // Not a design request, so it answers for nothing: a question is a
+      // person's to answer, and design never sees it.
+      { id: 'q-9', kind: 'question', status: 'open', anchor: { screen: 'extra' } },
+    ],
   });
   bp.storyboard = {
     screens: [
@@ -200,7 +205,7 @@ test('drift: undesigned screens and thread-born rules are derived', () => {
   };
   bp.features[0].data.stories[0].rules[0].origin = 'thread:q-9';
   const { drift } = deriveStatus(bp);
-  assert.deepEqual(drift.design, [{ screen: 'extra', proposal: '/extra.html', requests: ['q-9'] }]);
+  assert.deepEqual(drift.design, [{ screen: 'extra', proposal: '/extra.html', requests: ['n-9'] }]);
   assert.deepEqual(drift.sources, [{ rule: 'demo.main.thing', origin: 'thread:q-9' }]);
 
   bp.features[0].data.stories[0].rules[0].origin = 'prototype';
@@ -901,4 +906,38 @@ test('a built rule the agent owes is held out of every signer\'s queue until it 
   const built = checksRun('2026-01-03T00:00:00Z', 'local', 'pass');
   assert.deepEqual(who([built]), ['agent:judge-first']);
   assert.deepEqual(who([built, walkdownRun('2026-01-04T00:00:00Z', 'agent', 'pass')]), ['human:judge']);
+});
+
+/*
+ * A design request is design's (ADR 0009 §3): the one party that must not
+ * draw it is the agent building the app, so it never lands in that queue.
+ */
+test('an open design request is queued for design, never for the building agent @rule:status.attention.blocked-queues', () => {
+  const bp = blueprint({
+    threads: [
+      { id: 'n-1', kind: 'note', reason: 'request', status: 'open', anchor: { screen: 'undrawn' } },
+      { id: 'n-2', kind: 'note', reason: 'feedback', status: 'open', anchor: { rule: 'demo.main.thing' } },
+    ],
+  });
+  const { attention } = deriveStatus(bp);
+  const request = attention.filter((i) => i.thread === 'n-1');
+  assert.deepEqual(request, [
+    { who: 'design', action: 'draw', thread: 'n-1', rule: null, screen: 'undrawn', by: 'person' },
+  ]);
+  assert.ok(!attention.some((i) => i.who === 'agent' && i.thread === 'n-1'), 'never the building agent');
+  assert.ok(attention.some((i) => i.who === 'agent' && i.action === 'address' && i.thread === 'n-2'), 'any other note still is');
+});
+
+test('design.by says who the design queue is for, and a person draws when it says nothing @rule:ownership.design.declared-per-blueprint', () => {
+  const thread = { id: 'n-1', kind: 'note', reason: 'request', status: 'open', anchor: { screen: 'undrawn' } };
+  const by = (design) => {
+    const bp = blueprint({ threads: [thread] });
+    if (design !== undefined) bp.config.design = design;
+    return deriveStatus(bp).attention.find((i) => i.thread === 'n-1');
+  };
+  assert.equal(by(undefined).by, 'person', 'nothing said: a person draws');
+  assert.equal(by({ by: 'person' }).by, 'person');
+  const agent = by({ by: 'agent' });
+  assert.equal(agent.by, 'agent');
+  assert.equal(agent.who, 'design', 'a design agent is still design, never the agent building the app');
 });
