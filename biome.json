@@ -19,7 +19,7 @@
       "!lib/viewer/**",
       "!vendor/**",
       "!extension/vendor/**",
-      "!lib/skills/**",
+      "!skills/**",
       "!src/panel/icons.js",
       "!src/embed/icons.js"
     ]

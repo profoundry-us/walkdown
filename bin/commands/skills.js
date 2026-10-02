@@ -32,6 +32,13 @@ const MARK = {
   updated: green('~ updated'),
   'up-to-date': dim('· up to date'),
   'kept-differs': yellow('! kept (yours differs — --force to overwrite)'),
+  linked: green('+ linked'),
+  removed: green('- removed (an earlier walkdown\'s copy)'),
+  duplicate: yellow('! duplicate (an earlier walkdown\'s copy — --force removes it)'),
+  'duplicate-edited': yellow('! duplicate (edited — kept even with --force; remove it yourself)'),
+  'kept-edited': yellow('! kept (an earlier copy, edited — remove it yourself)'),
+  'someone-elses-link': yellow("! left alone (a link walkdown did not make)"),
+  'someone-elses': yellow("! left alone (not walkdown's)"),
 };
 
 /*
@@ -42,6 +49,18 @@ const MARK = {
  */
 function survey(into, installSkills) {
   const rows = installSkills(into, { dry: true });
+  // Claude Code's own folder takes the plugin, one link, not five copies.
+  const link = rows.find((r) => r.path.endsWith('/walkdown'));
+  if (link) {
+    const dupes = rows.filter((r) => r.action.startsWith('duplicate')).length;
+    const said =
+      link.action === 'up-to-date'
+        ? dim('the walkdown plugin is linked here')
+        : link.action === 'linked'
+          ? dim('the walkdown plugin would be linked here')
+          : yellow('something else is already named walkdown here');
+    return dupes ? `${said} · ${yellow(`${dupes} copies from an earlier walkdown`)}` : said;
+  }
   const here = rows.filter((r) => r.action !== 'created').length;
   const differs = rows.filter((r) => r.action === 'kept-differs').length;
   if (!here) return dim('nothing here yet');
@@ -81,7 +100,7 @@ export async function run(args) {
      * is the same news as the question, minus the answer.
      */
     const places = [
-      [personal, 'yours — every project on this machine, and no repository touched'],
+      [personal, 'yours — Claude Code, as the walkdown plugin: one link to this clone, every project'],
       ...(repo ? [[repo, 'the repository — a clone brings them; commit them with the spec']] : []),
     ];
     const count = places.length === 1 ? 'One place' : `${places.length} places`;
@@ -113,15 +132,20 @@ export async function run(args) {
     console.log('');
   }
 
-  for (const r of installSkills(into, { force: values.force }))
-    console.log(`  ${MARK[r.action] ?? r.action}  ${r.path}`);
+  const rows = installSkills(into, { force: values.force });
+  for (const r of rows) console.log(`  ${MARK[r.action] ?? r.action}  ${r.path}${r.target ? dim(` → ${r.target}`) : ''}`);
   console.log(`\n  ${into}`);
+  const linked = rows.some((r) => r.target);
   console.log(
     dim(
       into === repo
         ? '  In the repository, so a clone brings them. Commit them with the spec.'
-        : '  Your own skills directory — every project on this machine.',
+        : linked
+          ? '  Claude Code loads the walkdown plugin from here: /walkdown:judge, /walkdown:lint and the rest.\n  Updating the clone updates them; there is nothing to copy again.'
+          : '  Copies, for an agent that is not Claude Code. Run this again after updating walkdown.',
     ),
   );
+  if (rows.some((r) => r.action.startsWith('duplicate')))
+    console.log(yellow('\n  Claude Code lists those skills twice until the old copies go: `walkdown skills --force` removes the ones walkdown released, and an edited one is yours to remove.'));
   return end(0);
 }

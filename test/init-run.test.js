@@ -7,6 +7,7 @@ import {
   mkdtempSync,
   readdirSync,
   readFileSync,
+  realpathSync,
   rmSync,
   writeFileSync,
 } from 'node:fs';
@@ -30,6 +31,10 @@ const root = mkdtempSync(join(tmpdir(), 'walkdown-initrun-'));
 const PERSONAL_SKILLS = join(root, 'personal-skills');
 process.env.WALKDOWN_SKILLS_DIR = PERSONAL_SKILLS;
 const skillAt = (name, at = PERSONAL_SKILLS) => join(at, name, 'SKILL.md');
+// The plugin's link, and a skill read through it (ADR 0010).
+const CLONE = realpathSync(new URL('..', import.meta.url).pathname);
+const pluginAt = (at = PERSONAL_SKILLS) => join(at, 'walkdown');
+const viaPlugin = (short, at = PERSONAL_SKILLS) => join(pluginAt(at), 'skills', short, 'SKILL.md');
 
 /* Every path in a tree, so a test can say "and nothing else appeared". */
 const tree = (dir, prefix = '') =>
@@ -74,11 +79,11 @@ test('init scaffolds a lint-clean blueprint with agent conventions', () => {
   const actionOf = (rs, path) => rs.find((r) => r.path === path)?.action;
   for (const path of [rel(proj, 'walkdown.yml'), rel(proj, 'AGENTS.md'), 'CLAUDE.md'])
     assert.equal(actionOf(results, path), 'created', path);
-  for (const skill of ['walkdown-judge', 'walkdown-incorporate', 'walkdown-formulate']) {
-    assert.equal(actionOf(results, skillAt(skill)), 'created', skill);
-    const content = readFileSync(skillAt(skill), 'utf8');
-    assert.match(content, new RegExp(`^---\\nname: ${skill}\\ndescription: .+`));
-  }
+  // Claude Code gets the plugin: one link to this clone, not five copies.
+  assert.equal(actionOf(results, pluginAt()), 'linked');
+  assert.equal(realpathSync(pluginAt()), CLONE);
+  for (const short of ['judge', 'incorporate', 'formulate'])
+    assert.match(readFileSync(viaPlugin(short), 'utf8'), new RegExp(`^---\\nname: ${short}\\ndescription: .+`));
   // And not into the repository, even though this spec is committed: skills
   // are the person's, and a committed one is a vendored copy walkdown cannot
   // keep right afterwards (n-0239).
@@ -115,19 +120,20 @@ test('init is idempotent: rerun no-ops, customizations kept, --force updates own
   );
 
   writeFileSync(join(homeSpec(proj), 'walkdown.yml'), 'blueprint: customized\n');
+  // An old copy beside the plugin, edited by its person: named, never removed.
+  mkdirSync(join(PERSONAL_SKILLS, 'walkdown-judge'), { recursive: true });
   writeFileSync(skillAt('walkdown-judge'), 'customized');
   const third = scaffold(proj, spec(proj));
   assert.equal(actionOf(third, rel(proj, 'walkdown.yml')), 'kept');
-  assert.equal(actionOf(third, skillAt('walkdown-judge')), 'kept-differs');
+  assert.equal(actionOf(third, join(PERSONAL_SKILLS, 'walkdown-judge')), 'duplicate-edited');
   assert.equal(readFileSync(skillAt('walkdown-judge'), 'utf8'), 'customized');
 
   const forced = scaffold(proj, { ...spec(proj), force: true });
   assert.equal(actionOf(forced, rel(proj, 'walkdown.yml')), 'kept'); // user-owned: --force never touches it
-  assert.equal(actionOf(forced, skillAt('walkdown-judge')), 'updated');
-  assert.match(
-    readFileSync(skillAt('walkdown-judge'), 'utf8'),
-    /^---\nname: walkdown-judge/,
-  );
+  assert.equal(actionOf(forced, join(PERSONAL_SKILLS, 'walkdown-judge')), 'kept-edited');
+  assert.equal(readFileSync(skillAt('walkdown-judge'), 'utf8'), 'customized');
+  assert.equal(actionOf(forced, pluginAt()), 'up-to-date');
+  rmSync(join(PERSONAL_SKILLS, 'walkdown-judge'), { recursive: true });
   assert.equal(
     readFileSync(join(homeSpec(proj), 'walkdown.yml'), 'utf8'),
     'blueprint: customized\n',
@@ -354,7 +360,7 @@ test('skills are the person\'s, whatever the spec did @rule:locations.default.sk
   const outside = join(root, 'away', 'blueprint');
   scaffold(proj, { specDir: outside, skills: home });
 
-  assert.ok(existsSync(join(home, 'walkdown-judge', 'SKILL.md')), 'the person got them');
+  assert.ok(existsSync(viaPlugin('judge', home)), 'the person got them, as the plugin');
   assert.equal(existsSync(join(proj, '.claude')), false, 'and the repository did not');
   assert.deepEqual(tree(proj), [], 'nothing - not even a pointer, which is a committed spec\'s (n-0161)');
 
@@ -364,7 +370,7 @@ test('skills are the person\'s, whatever the spec did @rule:locations.default.sk
   mkdirSync(shared, { recursive: true });
   const results = scaffold(shared, { specDir: join(shared, 'blueprint'), commit: 'spec' });
   assert.equal(existsSync(join(shared, '.claude', 'skills')), false, 'no vendored copy');
-  assert.ok(existsSync(skillAt('walkdown-judge')), 'the person got them here too');
+  assert.ok(existsSync(viaPlugin('judge')), 'the person got them here too');
   assert.equal(results.find((r) => r.action.startsWith('skills-'))?.action, 'skills-personal');
 });
 

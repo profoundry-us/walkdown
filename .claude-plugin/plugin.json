@@ -1,0 +1,12 @@
+{
+  "name": "walkdown",
+  "version": "0.2.0",
+  "description": "Verify that what you built is what you designed: rules, an agent walkdown, and a person's sign-off",
+  "author": {
+    "name": "Profoundry",
+    "email": "topher@profoundry.us"
+  },
+  "homepage": "https://walkdown.dev",
+  "repository": "https://github.com/profoundry-us/walkdown",
+  "license": "MIT"
+}

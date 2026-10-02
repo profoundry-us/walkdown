@@ -297,6 +297,13 @@ export async function run(args) {
     'up-to-date': dim('· up to date'),
     kept: dim('· kept'),
     'kept-differs': yellow('! kept (differs from packaged — --force to update)'),
+    linked: green('+ linked'),
+    removed: green("- removed (an earlier walkdown's copy)"),
+    duplicate: yellow("! duplicate (an earlier walkdown's copy — --force removes it)"),
+    'duplicate-edited': yellow('! duplicate (edited — kept even with --force; remove it yourself)'),
+    'kept-edited': yellow('! kept (an earlier copy, edited — remove it yourself)'),
+    'someone-elses-link': yellow('! left alone (a link walkdown did not make)'),
+    'someone-elses': yellow("! left alone (not walkdown's)"),
   };
   const summary = (r) => r.action.startsWith('spec-') || r.action.startsWith('skills-');
   const placed = results.filter((r) => r.action.startsWith('spec-'));
@@ -307,7 +314,7 @@ export async function run(args) {
     for (const g of moved.gone) console.log(`  ${green('- removed')}  ${g}`);
   }
   for (const r of results.filter((r) => !summary(r)))
-    console.log(`  ${MARK[r.action] ?? r.action}  ${r.path}`);
+    console.log(`  ${MARK[r.action] ?? r.action}  ${r.path}${r.target ? dim(` → ${r.target}`) : ''}`);
   if (ignore) {
     const IGN = {
       written: green('+ written'),
@@ -398,12 +405,18 @@ export async function run(args) {
    */
   if (skills) {
     console.log(`\n  skills: ${skills.path}`);
+    const linked = results.some((r) => r.target);
     console.log(
       dim(
-        "  Yours, not this project's — they work in every project on this machine, and this" +
-          ' repository gets nothing. `walkdown skills --project` commits them here instead.',
+        linked
+          ? "  Yours, not this project's — Claude Code loads them as the walkdown plugin (/walkdown:judge and the" +
+              ' rest) in every project, and updating the clone updates them. `walkdown skills --project` commits copies here instead.'
+          : "  Yours, not this project's — they work in every project on this machine, and this" +
+              ' repository gets nothing. `walkdown skills --project` commits them here instead.',
       ),
     );
+    if (results.some((r) => r.action.startsWith('duplicate')))
+      console.log(yellow('  Claude Code lists those skills twice until the old copies go: `walkdown skills --force` removes the ones walkdown released, and an edited one is yours to remove.'));
   }
   if (outer) {
     const who = outer.blueprint?.id ?? outer.spec.path;

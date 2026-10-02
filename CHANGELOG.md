@@ -9,9 +9,35 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
 
 ## [Unreleased]
 
+Upgrading from 0.2.0: see [UPGRADING.md](UPGRADING.md#from-020-to-030).
+
 ### Added
 
-- This changelog, and [UPGRADING.md](UPGRADING.md) with the steps from 0.1.x to 0.2.0.
+- The clone is a Claude Code plugin named `walkdown`
+  ([ADR 0010](docs/adr/0010-the-clone-is-a-claude-code-plugin.md)). Its skills are
+  `/walkdown:setup`, `/walkdown:formulate`, `/walkdown:judge`, `/walkdown:incorporate`
+  and `/walkdown:backlog`, and the repository is its own marketplace.
+- `/walkdown:lint` and `/walkdown:status`, which run the clone's CLI and report what it
+  said.
+- `lib/released-skills.json`, the hash of every skill copy walkdown has released,
+  written by `tools/released-skills.mjs` at release time.
+- This changelog, and [UPGRADING.md](UPGRADING.md) with the steps between versions.
+
+### Changed
+
+- `walkdown init` and `walkdown skills` install for Claude Code as one link,
+  `~/.claude/skills/walkdown`, to the clone, instead of five copies. Updating the clone
+  updates the skills.
+- With `--force`, installing for Claude Code removes the `walkdown-<name>` copies an
+  earlier version left, when they match a released version, and keeps any that were
+  edited. Without it, they are named as duplicates.
+- The skills moved from `lib/skills/walkdown-<name>.md` to `skills/<name>/SKILL.md`.
+  Copies for other agents keep the `walkdown-<name>` names.
+
+### Fixed
+
+- The skills installer never writes through a link, and leaves alone any link it did
+  not make.
 
 ## [0.2.0] - 2026-10-01
 

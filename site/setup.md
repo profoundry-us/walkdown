@@ -47,22 +47,31 @@ ln -s ~/.walkdown/walkdown/bin/walkdown.js ~/.local/bin/walkdown   # if that is 
 
 ## 3. Install the procedures
 
+The clone is also a Claude Code plugin named `walkdown`. Install it as one link:
+
 ```
 walkdown skills --into ~/.claude/skills
 ```
 
 Name the directory: with no terminal to ask, a bare `walkdown skills` writes
-nothing. This writes walkdown's skills into `~/.claude/skills`, where they work in every
-project on this machine and add nothing to any repository. (`--project` puts
-them in `./.claude/skills` instead, for a team that wants them from a clone.)
+nothing. Into `~/.claude/skills` this makes one link, `~/.claude/skills/walkdown`,
+pointing at the clone, so Claude Code lists walkdown's skills as
+`/walkdown:setup`, `/walkdown:judge` and the rest in every project, and updating
+the clone updates them. Nothing is added to any repository.
+
+For an agent other than Claude Code, name its skills directory instead and you
+get copies, named `walkdown-setup` and so on. (`--project` commits copies to
+`./.claude/skills`, for a team that wants them from a clone.)
 
 ## 4. Now run the wizard you just installed
 
-Invoke the **walkdown-setup** skill. It initialises this project — the spec,
-the ledger and the pointer — starts the panel, and gives the person the
-browser-extension steps. It knows steps 1 to 3 are already done.
+Invoke **`/walkdown:setup`**. Claude Code may not list a plugin linked during a
+session until the next one; if it is not listed yet, read
+`~/.walkdown/walkdown/skills/setup/SKILL.md` and follow it. It initialises this
+project — the spec, the ledger and the pointer — starts the panel, and gives
+the person the browser-extension steps. It knows steps 1 to 3 are already done.
 
-Everything after that is `walkdown-formulate`: turning what this project
+Everything after that is `/walkdown:formulate`: turning what this project
 already means to build into rules somebody can sign.
 
 ---

@@ -66,13 +66,13 @@ one dependency ([`vendor/yaml.js`](vendor/README.md)) are all committed; rollup,
 and playwright are build-time only. Then:
 
 ```
-walkdown skills --into ~/.claude/skills   # the agent procedures; init also installs them
+walkdown skills --into ~/.claude/skills   # links the walkdown plugin; init also does
 walkdown init --dir <your-project>   # spec, ledger and pointer — outside your repo by default
 ```
 
 Or hand the whole thing to an agent: **"visit https://walkdown.dev/setup and set walkdown
 up for this project"** — [site/setup.md](site/setup.md) is written to be followed, and the
-`walkdown-setup` skill takes it from there. [docs/09-delivery.md](docs/09-delivery.md) has
+setup skill (`/walkdown:setup`) takes it from there. [docs/09-delivery.md](docs/09-delivery.md) has
 the reasoning, including what it would take to remove the last package.
 
 ## CLI
@@ -96,12 +96,13 @@ walkdown thread <id> [--json]
 feature template, and **`blueprint/AGENTS.md`**: the conventions any AI agent working
 in the repo follows (read the blueprint first, carry anchors, tag checks with rule
 ids, work the agent queue, claim-never-accept, never touch `prototype/`), with a
-pointer added to CLAUDE.md. It also installs three **Claude Code skills** into
-`.claude/skills/` (skip-if-exists, so customized copies survive re-runs):
-`walkdown-judge` (the agent-walkdown ritual — evidence screenshots, judgment,
-run record, fail threads), `walkdown-incorporate` (fold answered questions into
-the blueprint; address notes), and `walkdown-formulate` (turn a design/PRD into
-storyboard + rules + checks). AGENTS.md carries the knowledge; skills carry the
+pointer added to CLAUDE.md. It also links the clone into Claude Code as the
+**`walkdown` plugin** (`~/.claude/skills/walkdown`, one link, so updating the
+clone updates it): `/walkdown:judge` (the agent-walkdown ritual — evidence
+screenshots, judgment, run record, fail threads), `/walkdown:incorporate` (fold
+answered questions into the blueprint; address notes), `/walkdown:formulate`
+(turn a design/PRD into storyboard + rules + checks), `/walkdown:setup` and
+`/walkdown:backlog`, plus `/walkdown:lint` and `/walkdown:status`. AGENTS.md carries the knowledge; skills carry the
 procedures. `run` executes the project's checks through the runner
 contract — `run_all`, or `run_for_rule` with `--rule` — injecting the target's env
 and `WALKDOWN_TARGET`, and confirms which run record the reporter appended.

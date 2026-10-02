@@ -158,7 +158,7 @@ rather than adding to it.
 - Before you hand work to a person, `walkdown status` lists nothing under
   AGENT QUEUE for the rules you touched. A rule you built, reworded or fixed
   owes the agent tier a fresh look (`judge <rule>` or `judge <rule> again`):
-  judge it with **walkdown-judge** and record the run. A person handed a rule
+  judge it with the judge skill (`/walkdown:judge`) and record the run. A person handed a rule
   no agent has looked at is doing the agent's job, and finds what it would
   have found.
 
@@ -215,9 +215,11 @@ rather than adding to it.
 
 ## Procedures
 
-Multi-step rituals are encoded as Claude Code skills in `.claude/skills/`
-(installed by `walkdown init`): **walkdown-judge** (agent walkdown — visual
-judgment with evidence and a run record), **walkdown-incorporate** (fold
-answered questions into the blueprint; address notes), **walkdown-formulate**
-(turn a design/PRD into storyboard + rules + checks). Prefer them over
-improvising the procedure.
+Multi-step rituals are encoded as skills. In Claude Code they are the
+`walkdown` plugin, linked by `walkdown init`: **`/walkdown:judge`** (agent
+walkdown — visual judgment with evidence and a run record),
+**`/walkdown:incorporate`** (fold answered questions into the blueprint;
+address notes), **`/walkdown:formulate`** (turn a design/PRD into storyboard +
+rules + checks), with `/walkdown:lint` and `/walkdown:status` beside them.
+Another agent has them as copies named `walkdown-judge` and so on. Prefer them
+over improvising the procedure.

@@ -1,0 +1,114 @@
+{
+  "run_id": "2026-10-02T04-54-05Z-local-01",
+  "created": "2026-10-02T04:54:05Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "e721eba-dirty",
+  "tree_hash": "sha256:1bfece95113c",
+  "spec_hash": "sha256:bc809d798c33",
+  "results": [
+    {
+      "rule": "locations.pointer.placed-where-agents-read",
+      "status": "pass",
+      "statement_hash": "sha256:c74747fd201e",
+      "duration_ms": 391,
+      "checks": [
+        "test/init-run.test.js:162",
+        "test/init-run.test.js:185",
+        "test/init-run.test.js:198"
+      ]
+    },
+    {
+      "rule": "locations.pointer.owns-only-its-block",
+      "status": "pass",
+      "statement_hash": "sha256:48cecd33295b",
+      "duration_ms": 2,
+      "checks": [
+        "test/init-run.test.js:239",
+        "test/init-run.test.js:271",
+        "test/init-run.test.js:301",
+        "test/init-run.test.js:327"
+      ]
+    },
+    {
+      "rule": "locations.default.skills-are-yours-by-default",
+      "status": "pass",
+      "statement_hash": "sha256:dd86f56c7d59",
+      "duration_ms": 355,
+      "checks": [
+        "test/init-run.test.js:356",
+        "test/init-run.test.js:377",
+        "test/init-run.test.js:386",
+        "test/init-run.test.js:521",
+        "test/init-run.test.js:555",
+        "test/init-run.test.js:570",
+        "test/plugin.test.js:184"
+      ]
+    },
+    {
+      "rule": "locations.keeping.moving-is-a-decision",
+      "status": "pass",
+      "statement_hash": "sha256:1422c8dcbeae",
+      "duration_ms": 119,
+      "checks": [
+        "test/init-run.test.js:404"
+      ]
+    },
+    {
+      "rule": "delivery.install.clone-is-the-install",
+      "status": "pass",
+      "statement_hash": "sha256:72ed038ac8f5",
+      "duration_ms": 1,
+      "checks": [
+        "test/init-run.test.js:593"
+      ]
+    },
+    {
+      "rule": "locations.answer.adapters-file-where-walkdown-says",
+      "status": "pass",
+      "statement_hash": "sha256:7e1aecb8560b",
+      "duration_ms": 1,
+      "checks": [
+        "test/init-run.test.js:605"
+      ]
+    },
+    {
+      "rule": "delivery.plugin.named-for-walkdown",
+      "status": "pass",
+      "statement_hash": "sha256:f528af8a645e",
+      "duration_ms": 2,
+      "checks": [
+        "test/plugin.test.js:34"
+      ]
+    },
+    {
+      "rule": "delivery.plugin.one-link",
+      "status": "pass",
+      "statement_hash": "sha256:d5fa92fb8b72",
+      "duration_ms": 91,
+      "checks": [
+        "test/plugin.test.js:81"
+      ]
+    },
+    {
+      "rule": "delivery.plugin.never-through-a-link",
+      "status": "pass",
+      "statement_hash": "sha256:a8b1fc5a9e59",
+      "duration_ms": 3,
+      "checks": [
+        "test/plugin.test.js:109"
+      ]
+    },
+    {
+      "rule": "delivery.plugin.old-copies-make-way",
+      "status": "pass",
+      "statement_hash": "sha256:05c5546a78f3",
+      "duration_ms": 82,
+      "checks": [
+        "test/plugin.test.js:143",
+        "test/plugin.test.js:171"
+      ]
+    }
+  ]
+}

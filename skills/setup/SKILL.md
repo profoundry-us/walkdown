@@ -1,5 +1,5 @@
 ---
-name: walkdown-setup
+name: setup
 description: Set walkdown up for a project from nothing - clone it, install it without a package registry, put the skills where the agent will find them, initialise the project's home outside the repository unless asked otherwise, start the panel, and hand the person the browser-extension steps. Use when asked to set up, install, or add walkdown to a project, or when walkdown.dev sends you here.
 ---
 
@@ -61,11 +61,23 @@ no terminal to ask, and a bare `walkdown skills` writes nothing:
 
     walkdown skills --into ~/.claude/skills
 
-This writes the procedures - formulate, judge, incorporate, backlog, and this
-one - into the person's own `~/.claude/skills`, where they work in every
-project and add nothing to any repository. `walkdown skills --project` commits
-them to this repository instead, which is right for a team that wants everyone
-to have them from a clone.
+The clone is a Claude Code plugin named `walkdown`, so into Claude Code's own
+folder this makes one link, `~/.claude/skills/walkdown`, to the clone: the
+skills appear as `/walkdown:setup`, `/walkdown:formulate`, `/walkdown:judge`,
+`/walkdown:incorporate` and `/walkdown:backlog`, with `/walkdown:lint` and
+`/walkdown:status` beside them, in every project. Updating the clone updates
+them; there is never anything to copy again. Claude Code may only list them
+from the next session.
+
+If it reports copies from an earlier walkdown (`walkdown-judge` and so on)
+beside the link, Claude Code lists every skill twice until they go:
+`walkdown skills --into ~/.claude/skills --force` removes the ones walkdown
+released and keeps any the person edited.
+
+For an agent other than Claude Code, name that agent's skills directory and it
+gets copies instead. `walkdown skills --project` commits copies to this
+repository, which is right for a team that wants everyone to have them from a
+clone.
 
 ## 3. Set the project up
 
@@ -136,7 +148,7 @@ extension exists at all when there is already a script tag.
 ## 6. Their first feature
 
 Setup ends with an empty blueprint, which is not yet worth anything. Say what
-they have, then offer the next step honestly: **walkdown-formulate** turns a
+they have, then offer the next step honestly: **`/walkdown:formulate`** turns a
 design, a PRD or a conversation into the first screens and rules. Do not invent
 their product's rules to fill the file - a blueprint full of guessed
 requirements is worse than an empty one, because somebody has to read it before

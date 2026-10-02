@@ -1,5 +1,5 @@
 ---
-name: walkdown-incorporate
+name: incorporate
 description: Work the walkdown agent queue - incorporate an answered question into the blueprint (fold the answer into rules and steps, route storyboard and design changes, add checks) or address an open note (fix, verify, reply). Use when status shows agent-queue items (incorporate or address), when a thread is answered awaiting incorporation, or when asked to handle a specific thread id.
 ---
 
@@ -15,7 +15,7 @@ you claim work, you never accept it.
 `incorporate` (an answered question) or `address` (an open note). Read the full
 thread: `walkdown thread <id>`. The same queue lists `judge-first` (a built
 rule the agent tier has not judged, or judged before it went stale) and
-`rejudge` (a fix claimed after the last pass); those are walkdown-judge's.
+`rejudge` (a fix claimed after the last pass); those are the judge skill's (`/walkdown:judge`).
 
 ## Incorporating an answered question
 
@@ -38,7 +38,7 @@ rule the agent tier has not judged, or judged before it went stale) and
 6. **Validate.** `walkdown lint` must be clean (coverage, hashes, refs).
    Then **judge**: every rule you touched whose verify list includes `agent`
    now shows a `judge-first` or `rejudge` item in `walkdown status`. Run
-   walkdown-judge on each until none is left. The person you hand this to
+   `/walkdown:judge` on each until none is left. The person you hand this to
    should never be the first to look at it.
 7. **Close the thread** — only via the CLI so the transition is validated:
    `walkdown thread <id> --as-agent --reply "<what changed, which files,
@@ -51,7 +51,7 @@ rule the agent tier has not judged, or judged before it went stale) and
 Same shape, smaller: understand exactly what the note's anchor points at →
 fix it (spec change? follow the incorporation steps; implementation-only?
 just fix, carrying anchors) → re-verify with a run (`walkdown run --rule ...`,
-and an agent walkdown via the walkdown-judge skill whenever the rule asks for
+and an agent walkdown via the judge skill (`/walkdown:judge`) whenever the rule asks for
 the agent tier, which is the default) →
 `walkdown thread <id> --as-agent --reply "<fix + evidence>"
 --status addressed`.

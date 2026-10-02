@@ -7,7 +7,7 @@ than a person: the intended use is somebody saying "visit walkdown.dev and set
 walkdown up for this project" and their agent doing it. It is deliberately
 markdown — an agent fetching a URL gets text reliably and a styled page
 unreliably — and it is deliberately short. It gets walkdown onto the machine
-and then hands over to the `walkdown-setup` skill, which is the real wizard.
+and then hands over to the setup skill (`/walkdown:setup`), which is the real wizard.
 
 That split is on purpose. The page must work when the machine has nothing, so
 it can only assume `git` and `node`; the skill runs after walkdown exists, so

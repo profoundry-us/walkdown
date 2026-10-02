@@ -11,5 +11,5 @@
     "types": ["node"]
   },
   "include": ["lib/**/*.js", "bin/**/*.js"],
-  "exclude": ["lib/viewer", "lib/skills"]
+  "exclude": ["lib/viewer", "skills"]
 }

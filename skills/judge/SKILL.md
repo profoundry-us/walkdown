@@ -1,5 +1,5 @@
 ---
-name: walkdown-judge
+name: judge
 description: Perform an agent walkdown - judge walkdown rules whose verify list includes "agent" against the running app, driving your own browser, then record a hash-stamped walkdown run and spawn note threads for failures. Use when asked to judge, visually verify, run an agent walkdown, or when status shows agent-verify rules pending or stale.
 ---
 

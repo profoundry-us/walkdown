@@ -1,0 +1,17 @@
+{
+  "name": "walkdown",
+  "owner": {
+    "name": "Profoundry",
+    "email": "topher@profoundry.us"
+  },
+  "metadata": {
+    "description": "walkdown's own marketplace: the walkdown plugin, from its clone"
+  },
+  "plugins": [
+    {
+      "name": "walkdown",
+      "source": "./",
+      "description": "Verify that what you built is what you designed"
+    }
+  ]
+}

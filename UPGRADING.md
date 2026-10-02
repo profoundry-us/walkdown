@@ -3,6 +3,47 @@
 Each section takes an install from one version to the next. What changed is in
 [CHANGELOG.md](CHANGELOG.md); this file is only what you have to do about it.
 
+## From 0.2.0 to 0.3.0
+
+*0.3.0 is not released yet; these are the steps it will need.*
+
+The skills stop being copies and become one link: the clone is now a Claude Code
+plugin named `walkdown` ([ADR 0010](docs/adr/0010-the-clone-is-a-claude-code-plugin.md)).
+No data moves.
+
+### 1. Update the clone
+
+```
+git -C ~/.walkdown/walkdown fetch --tags
+git -C ~/.walkdown/walkdown checkout v0.3.0
+```
+
+### 2. Swap the copies for the plugin
+
+```
+walkdown skills --into ~/.claude/skills --force
+```
+
+This makes `~/.claude/skills/walkdown`, a link to the clone, and removes the five
+`walkdown-<name>` copies an earlier walkdown left there. A copy you edited is kept and
+named; move what you changed into the clone (or somewhere of your own) and delete it,
+or Claude Code lists that skill twice.
+
+If you use `CLAUDE_CONFIG_DIR`, name that directory's `skills` folder instead.
+
+### 3. Start a new Claude Code session
+
+The skills are now `/walkdown:setup`, `/walkdown:formulate`, `/walkdown:judge`,
+`/walkdown:incorporate` and `/walkdown:backlog`, with `/walkdown:lint` and
+`/walkdown:status` beside them. `claude plugin list` shows `walkdown@skills-dir`.
+
+From now on, updating the clone (step 1) is the whole upgrade for the skills.
+
+### For agents other than Claude Code
+
+Copies are unchanged: `walkdown skills --into <that agent's skills directory> --force`
+refreshes them, still named `walkdown-<name>`.
+
 ## From 0.1.x to 0.2.0
 
 No data moves. Run records, threads and the registry keep their formats, and nothing in

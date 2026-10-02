@@ -1,5 +1,5 @@
 ---
-name: walkdown-backlog
+name: backlog
 description: Work the whole open backlog unattended - survey every open thread and failing rule, plan the order, and run it out through sub-agents, committing each wave locally. Use when asked to work through all open feedback, fix the failing rules, clear the backlog, or to keep going overnight without questions.
 ---
 
@@ -63,7 +63,7 @@ final report that you decided it and how to reverse it.
 7. **Evidence last.** Sub-agents run the browser suite in its record-nothing
    mode, so a night of fixes leaves the ledger untouched and the panel still
    showing the old story. Close with a wave that takes a run of record and an
-   agent walkdown (the `walkdown-judge` skill) over every tier now reading
+   agent walkdown (the judge skill, `/walkdown:judge`) over every tier now reading
    `never` or `stale`. Fixing the build without refreshing the ledger is half
    a night's work.
 

@@ -1,16 +1,16 @@
 ---
 name: walkdown-sitting
-description: Run a full agent sitting - judge EVERY rule whose verify list includes "agent" in one pass, optionally after declaring a sweep so that anything skipped is visible rather than quietly green. Use after a large refactor, before a release, or on a regular cadence of days - not after an ordinary change, where walkdown-judge on the affected rules is the right tool.
+description: Run a full agent sitting - judge EVERY rule whose verify list includes "agent" in one pass, optionally after declaring a sweep so that anything skipped is visible rather than quietly green. Use after a large refactor, before a release, or on a regular cadence of days - not after an ordinary change, where /walkdown:judge on the affected rules is the right tool.
 ---
 
 # A full agent sitting
 
-Read the blueprint's `AGENTS.md` (`walkdown where spec` names the directory) first. This is `walkdown-judge` taken across the
+Read the blueprint's `AGENTS.md` (`walkdown where spec` names the directory) first. This is `/walkdown:judge` taken across the
 whole blueprint at once, with a sweep for knowing what you missed.
 
 **Use this when the whole board needs re-earning**: a refactor that moved a lot
 of code, a release you are about to sign, or a cadence of every few days. For
-one rule, or the handful a change touched, use `walkdown-judge` — declaring a
+one rule, or the handful a change touched, use `/walkdown:judge` — declaring a
 sweep for a small change puts eighty rules back on the queue and the sitting
 gets abandoned half-done, which is worse than not having swept.
 

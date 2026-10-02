@@ -9,13 +9,13 @@ file disagrees with the code, the code is right and this file is out of date.
 
 | # | Problem | State | What carries it today |
 |---|---|---|---|
-| 1 | Remembering what we agreed to build | **partial** | Blueprint files; the `walkdown-formulate` skill; `lint`. No `extract`. |
+| 1 | Remembering what we agreed to build | **partial** | Blueprint files; the `/walkdown:formulate` skill; `lint`. No `extract`. |
 | 2 | Noticing when the PRD or prototype moves | **weakest** | Threads, `origin`, statement hashing. Nothing watches either source. |
 | 3 | A deterministic spec for agents | **solid** | `status --json`, `AGENTS.md`, the three skills, the attention queues. |
 | 4 | Why a decision was made | **partial** | Threads + `origin: thread:<id>` + the runs ledger. No way to say a source was superseded on purpose. |
 | 5 | How closely the build matches the design | **solid** | The panel: fade dial, ghosted design, viewport presets, element-anchored pins, stand-in app, and an as-built drawing where the build cannot be framed (ADR 0007). One delivery since 2026-08-26 — the extension, framing the page. |
 | 6 | Design records changes, an agent makes them | **partial** | ADR 0009: requests queue for design (`design.by` says whether a person or a design agent draws), never for the builder. Not yet: the design blueprint's copy step and the `walkdown-design` skill, which wait on the first design blueprint. |
-| 7 | A QA pass that is more than eyeballing | **solid** | `verify: [checks, agent, human]`, `walkdown-judge`, an agent may never write `verified`. |
+| 7 | A QA pass that is more than eyeballing | **solid** | `verify: [checks, agent, human]`, `/walkdown:judge`, an agent may never write `verified`. |
 | 8 | Feeding tickets and design docs | **not ours** | An agent reads the spec and drafts them. No feature. |
 | 9 | Phases and quarters | **planned** | Separate blueprints, which the server and panel already support. |
 

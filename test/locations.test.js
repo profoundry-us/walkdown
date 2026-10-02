@@ -535,7 +535,7 @@ test('a fresh project gets nothing in its tree at all @rule:locations.default.no
      * other machine (n-0161).
      */
     assert.deepEqual(tree(repo), before, 'the tree is exactly as it was found');
-    assert.ok(existsSync(join(s.skills, 'walkdown-judge', 'SKILL.md')), 'the skills went to the person');
+    assert.ok(existsSync(join(s.skills, 'walkdown', 'skills', 'judge', 'SKILL.md')), 'the skills went to the person');
 
     // Everything walkdown made is in the person's own home, in one numbered
     // directory, laid out as every home is.

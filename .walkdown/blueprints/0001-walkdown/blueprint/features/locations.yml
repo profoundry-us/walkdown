@@ -92,7 +92,7 @@ stories:
       - id: locations.default.skills-are-yours-by-default
         origin: prd
         statement: The agent procedures walkdown ships install into your own skills directory and never into a repository unless a team asks for it.
-        because: In the personal directory they work in every project on the machine; a committed skill is a copy of walkdown's own source that walkdown cannot keep right afterwards.
+        because: In your own skills directory they work in every project on the machine; a committed skill is a copy of walkdown's own source that walkdown cannot keep current afterwards.
         verify: [checks]
         signoff: [eng, product]
         steps:
@@ -101,22 +101,13 @@ stories:
           when:
             - The skills are installed, either by init or on their own
           then:
-            - They land in the person's own directory and the tree gains nothing, whether or not the spec is committed
+            - For Claude Code they arrive as one link to the clone (delivery.plugin.one-link); for any other agent, as copies in the directory named
+            - The tree gains nothing, whether or not the spec is committed
             - Setting up does not put a copy in the repository, and leaving does not take one away - a copy there is one somebody asked for
             - Installing them on their own asks where they should go rather than picking, and writes nothing to a place nobody named
             - A skill that depends on a harness only walkdown's own repository has is not among them
             - A copy the person has edited is kept and reported rather than overwritten
-          statement_hash: sha256:a1c19031d710
-          reworded:
-            - hash: sha256:66bff6c2346e
-              at: 2026-09-13
-              why: the hash covers the steps now; this one named the statement alone
-            - hash: sha256:2be84df9d5f8
-              at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
-            - hash: sha256:ac83e3dcb35a
-              at: 2026-09-14T02:20:43Z
-              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
+          statement_hash: sha256:dd86f56c7d59
 
       - id: locations.default.one-home-per-blueprint
         origin: thread:n-0124

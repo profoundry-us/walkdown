@@ -56,7 +56,7 @@ if (!owed.length) {
   console.log("agent tier: nothing owed outside a sweep");
   process.exit(0);
 }
-console.log(`agent tier: ${owed.length} rule(s) owed. Judge them before presenting the work (walkdown-judge, on a scratch copy):`);
+console.log(`agent tier: ${owed.length} rule(s) owed. Judge them before presenting the work (/walkdown:judge, on a scratch copy):`);
 for (const r of owed) {
   const why = r.unjudgedFix ? `fix claimed in ${r.unjudgedFix.thread ?? r.unjudgedFix}` : r.agent?.staleBy ?? "";
   console.log(`  ${r.agent?.state ?? "never"}${why ? ` (${why})` : ""}  ${r.rule}`);

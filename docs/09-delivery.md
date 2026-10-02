@@ -81,33 +81,58 @@ Three things this costs, none of them free:
 
 The procedures — formulate, judge, incorporate, backlog, setup — are markdown
 files an agent reads, and they are useful in a project long before anything
-else about walkdown is set up. They install to **`~/.claude/skills`** by
-default: the person's own directory, where they work in every project on the
-machine and add nothing to any repository.
+else about walkdown is set up.
 
-    walkdown skills                 # yours, every project
-    walkdown skills --blueprint       # ./.claude/skills, committed and shared
+**For Claude Code, the clone is a plugin** ([ADR 0010](adr/0010-the-clone-is-a-claude-code-plugin.md)).
+`.claude-plugin/plugin.json` names it `walkdown`, its skills live in `skills/`,
+and `commands/` adds `/walkdown:lint` and `/walkdown:status`. Installing it is
+one link from Claude Code's skills folder to the clone:
 
-`walkdown init` always takes the first, whatever the spec did. Skills used to
+    walkdown skills --into ~/.claude/skills   # ~/.claude/skills/walkdown -> the clone
+    walkdown skills --project                 # ./.claude/skills, committed copies
+
+The skills then read `/walkdown:judge` and so on, in every project, and
+updating the clone updates them: there is no copy to go stale and no refresh
+step to overwrite somebody's edits. Copies are what walkdown shipped until
+0.3.0; the 0.2.0 upgrade needed `init --force` to refresh them, and rehearsing
+it overwrote four of a person's copies. The installer never writes through a
+link, so n-0197 cannot recur, and `--force` removes an earlier walkdown's
+copies beside the link only when they match a version walkdown released
+(`lib/released-skills.json`, written at release time by
+`tools/released-skills.mjs`).
+
+An agent that is not Claude Code gets copies, named `walkdown-<name>`, in
+whatever directory is named. A copy is a snapshot, so run it again after
+updating walkdown.
+
+`walkdown init` always links, whatever the spec did. Skills used to
 follow the spec — a committed spec is shared, so the procedures for working on
 it should arrive with a clone — and the argument is sound, but the coupling was
 not: **a committed skill is a vendored copy of walkdown's own source**, and
-walkdown cannot keep it right after writing it. It goes stale on the next
-upgrade with nothing to say so; this repository needs a Highball check to catch
-the same drift in its own copies. The bills came in one at a time — skills left
-staged in a repository just told it gets nothing (n-0166), two same-named sets
-one of which is stale (n-0184), copies that are symlinks the committed path
-does not model (n-0197) — and n-0239 decided it.
+walkdown cannot keep it current after writing it. The bills came in one at a
+time — skills left staged in a repository just told it gets nothing (n-0166),
+two same-named sets one of which is stale (n-0184), copies that are symlinks
+the committed path does not model (n-0197) — and n-0239 decided it.
 
 A team that wants them committed still gets them, by asking: `walkdown skills
---blueprint`. What is gone is init deciding it on their behalf out of an
+--project`. What is gone is init deciding it on their behalf out of an
 unrelated answer — and, with it, init deleting them again on the way out, since
 a copy there is now one somebody chose.
 
 Not every skill ships. `walkdown-sitting` drives a harness that exists only in
 walkdown's own repository, and a skill whose first command is missing is worse
 than no skill: an agent follows it, fails, and improvises the procedure the
-skill existed to stop it improvising.
+skill existed to stop it improvising. It lives in this repository's own
+`.claude/skills/`, which the plugin does not read.
+
+## Releasing
+
+A release moves the version in `package.json` (and its lockfile),
+`.claude-plugin/plugin.json`, `extension/manifest.json` and every install
+instruction that clones the tag; runs `node tools/released-skills.mjs` so the
+tag carries its own skill hashes; adds the version's section to `CHANGELOG.md`
+and any steps to `UPGRADING.md`; then tags it, makes the GitHub release from
+the changelog section, and syncs and deploys walkdown.dev's `setup.md`.
 
 ## The extension needs the clone
 
@@ -129,7 +154,7 @@ deliberately split in two:
 - **`site/setup.md`** — fetched by an agent that has nothing. It can assume
   `git` and `node` and no more, so it does one thing: get walkdown onto the
   machine and the skills into the agent's own directory.
-- **the `walkdown-setup` skill** — runs after walkdown exists, so it can use
+- **the setup skill (`/walkdown:setup`)** — runs after walkdown exists, so it can use
   the tool to set the project up: initialise the spec outside the repository,
   ask which agent file the pointer belongs in, start the panel, and print the
   extension steps a person has to do themselves.
