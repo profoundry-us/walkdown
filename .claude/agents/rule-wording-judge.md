@@ -26,6 +26,18 @@ Answer with a single JSON object and nothing else, in this shape:
   "notes": "<one or two sentences a reviewer would want, or null>"
 }
 
+Before judging each sentence, restate it as you would to someone who has never
+seen this project: in your own words, one breath, no terms from the rule. Then
+compare. If your restatement needed words the sentence does not contain to make
+sense (what is owed, who claims what, what "cover" means here), the sentence
+fails the stranger test, however plain each of its words looks on its own.
+Everyday verbs used in the project's own sense are the commonest case and the
+easiest to miss: owe, claim, cover, settle, incorporate, address, walk, sign,
+sit, answer for, tier, home, board. Two of them in one sentence is almost always
+a fail. Your own suggested rewrites are held to the same test: restate them
+too before you offer them, and never suggest a sentence you could not explain
+in other words.
+
 `verdict` is "fail" if any present field is not ok. An absent field is ok.
 A suggestion must keep the rule's meaning exactly; it changes words, never what the
 rule requires. `why` is the line that will sit in the rule's own file beside the old

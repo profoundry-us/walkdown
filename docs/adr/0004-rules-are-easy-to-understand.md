@@ -152,6 +152,26 @@ test.
     A glossary term is fine when the sentence still reads without knowing
     it. "Registry" passed. "Closed list" and "currency" did not.
 
+- **An everyday word used in walkdown's own sense is a house word too.**
+
+    These are the hardest to see, because each word on its own is plain
+    English: a rule is *owed* checks, a check *claims* a rule, an agent
+    *covers* it, a note is *settled*, an answer *incorporated*, a rule
+    *walkable*. Stack two or three and the sentence means nothing to a
+    stranger, while reading fine to anyone who already knows the model.
+    The test: say the sentence to a newcomer in your own words. If the
+    explanation needs words the sentence does not have, use those words
+    instead.
+
+    **Example (bad):** A rule owed checks that none claims is the agent's to
+    cover, not a person's to judge.
+
+    **Example (good):** Writing a missing check is an agent's job; there is
+    nothing yet for a person to judge.
+
+    Added 2026-10-01, after the judge itself suggested the bad example and
+    passed it.
+
 - **No dash-clauses.**
 
     Give the second thought its own sentence, move it to a step, or cut it.
