@@ -58,7 +58,8 @@ node ~/.walkdown/walkdown/bin/walkdown.js --help
 moves daily; leave `--branch` off to follow it. walkdown is pre-1.0, so a minor version
 may still change the ledger, thread or registry formats.
 Git may warn that the tag "is not a commit"; that is how it announces an annotated tag,
-and the clone is fine.
+and the clone is fine. What changed between versions is in [CHANGELOG.md](CHANGELOG.md),
+and [UPGRADING.md](UPGRADING.md) says how to move an existing install to the next one.
 
 No `npm install`, no build, no network. The panel bundle, the stylesheet and walkdown's
 one dependency ([`vendor/yaml.js`](vendor/README.md)) are all committed; rollup, tailwind
