@@ -31,6 +31,7 @@ Usage:
   walkdown import <path> [--all] [--only <ids>] [--id <name>] [--ephemeral] [--why <reason>] [--json]
   walkdown blueprint forget <id>
   walkdown move <kind> --to <path> [--blueprint <id>]
+  walkdown rules move <rule|story|feature>... --to <blueprint> [--dry-run]
   walkdown pointer [--dir <project-root>] [--into <file>]
   walkdown skills [--into <dir>] [--project] [--force]
 
@@ -113,6 +114,11 @@ Commands:
           ~/.walkdown/config.yml. Moves files; never edits one. Refuses a
           destination that already holds records rather than interleaving
           two ledgers.
+  rules move
+          Move a rule, a story or a feature to another blueprint of the same
+          project, with its threads; the run records and evidence behind its
+          verdicts are copied, so nothing is judged or signed again. The
+          source's records are never edited. --dry-run says what would move.
   pointer Print the paragraph that tells an AI agent this project has a spec,
           or place it with --into <file>. Which file agents read is a
           project's own business - CLAUDE.md, AGENTS.md, a pack-level file in
@@ -162,6 +168,7 @@ const COMMANDS = new Set([
   'claims',
   'where',
   'move',
+  'rules',
   'pointer',
   'skills',
 ]);

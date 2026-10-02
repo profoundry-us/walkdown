@@ -95,6 +95,11 @@ has it. An id another project holds is refused, never suffixed.
 walkdown init --id billing
 ```
 
+Rules move between them with `walkdown rules move <rule|story|feature>... --to <id>`:
+their threads move, and the run records, sweeps and evidence behind their verdicts are
+copied, so nothing is judged or signed again. `--dry-run` first. The destination's
+targets must point where the verdicts were recorded, or the move refuses.
+
 With several, `status`, `lint`, `threads` and `where` report on every one, a section each,
 and `--json` answers `{ "blueprints": [ … ] }`. Everything that writes refuses until
 `--blueprint <id>` says which, except a thread id only one of them holds.

@@ -21,6 +21,13 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
   blueprint holds is named and recorded nowhere. This holds for the node:test and
   Playwright reporters and the RSpec formatter
   ([ADR 0013](docs/adr/foundational/202610_a_project_split_into_blueprints.md)).
+- `walkdown rules move <rule|story|feature>... --to <blueprint>` moves rules to another
+  blueprint of the same project, with their threads, and copies the run records,
+  sweeps and evidence behind their verdicts, so every verdict and signature reads the
+  same there. The source's records are never edited. `--dry-run` says what would move.
+  It refuses a destination outside the project, a rule the destination already has,
+  uncommitted feature changes, and a destination whose targets would leave a copied
+  verdict reading as never.
 
 ### Changed
 

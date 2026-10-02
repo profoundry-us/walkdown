@@ -1,0 +1,24 @@
+{
+  "run_id": "2026-10-02T23-19-04Z-local-01",
+  "created": "2026-10-02T23:19:04Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "d07ecbe-dirty",
+  "tree_hash": "sha256:0bca3bd0ec15",
+  "spec_hash": "sha256:55a1c12456f5",
+  "results": [
+    {
+      "rule": "locations.several.rules-move",
+      "status": "pass",
+      "statement_hash": "sha256:85fea46ae8b2",
+      "duration_ms": 4755,
+      "checks": [
+        "test/rules-move.test.js:123",
+        "test/rules-move.test.js:183",
+        "test/rules-move.test.js:192",
+        "test/rules-move.test.js:206"
+      ]
+    }
+  ]
+}

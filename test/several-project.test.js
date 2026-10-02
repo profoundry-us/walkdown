@@ -167,6 +167,23 @@ test('lint accepts a sibling blueprint\'s rule and thread, and still flags what 
   assert.deepEqual(about(bThread), [], 'b\'s thread is a thread');
   assert.equal(about('nobody.holds.this').filter((f) => f.level === 'error').length, 1, 'a tag nobody holds is still an error');
 
+  // A run record of a's with a result for a rule b now holds - a verdict
+  // that moved with its rule - and a thread of a's on a screen of b's.
+  writeFileSync(join(p.specOf('b'), 'storyboard.yml'), 'screens:\n  - id: cart\n    app: { path: /cart }\n');
+  mkdirSync(join(p.homeOf('a'), 'runs'), { recursive: true });
+  writeFileSync(
+    join(p.homeOf('a'), 'runs', '2026-10-01T00-00-00Z-local-01.json'),
+    JSON.stringify({ run_id: '2026-10-01T00-00-00Z-local-01', created: '2026-10-01T00:00:00Z', actor: 't', kind: 'checks', target: 'local', results: [{ rule: 'b.s.works', status: 'pass' }] }),
+  );
+  const onScreen = p.wd(['thread', 'new', '--blueprint', 'a', '--rule', 'a.s.works', '--body', 'seen on the cart', '--json']);
+  const sid = JSON.parse(onScreen.stdout).id;
+  const tf = join(p.homeOf('a'), 'threads', `${sid}.yml`);
+  writeFileSync(tf, readFileSync(tf, 'utf8').replace('  rule: a.s.works', '  rule: a.s.works\n  screen: cart'));
+  const withSiblings = JSON.parse(p.wd(['lint', '--blueprint', 'a', '--json']).stdout).findings;
+  assert.deepEqual(withSiblings.filter((f) => /unknown rule "b\.s\.works"|unknown screen "cart"/.test(f.message)), [], 'the project knows them');
+  writeFileSync(tf, readFileSync(tf, 'utf8').replace('screen: cart', 'screen: nowhere'));
+  assert.ok(JSON.parse(p.wd(['lint', '--blueprint', 'a', '--json']).stdout).findings.some((f) => f.message.includes('unknown screen "nowhere"')), 'a screen no blueprint has is still an error');
+
   writeFileSync(fa, readFileSync(fa, 'utf8').replace(`origin: thread:${bThread}`, 'origin: thread:n-9999'));
   p.wd(['hash', '--write', '--blueprint', 'a']);
   const again = JSON.parse(p.wd(['lint', '--blueprint', 'a', '--json']).stdout).findings;
