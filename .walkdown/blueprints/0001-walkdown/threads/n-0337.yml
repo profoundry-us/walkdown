@@ -6,7 +6,7 @@ via: agent
 created: 2026-09-30T21:24:44.689Z
 anchor:
   rule: panel.dock.toolbar
-status: open
+status: verified
 body: "Below about 900px of window, the bar's centred surface cluster runs under
   the viewport toggle and hides the build-side button: at 860 wide the As-built
   button spans 491-553px and the toggle starts at 515px. The cluster is
@@ -15,3 +15,11 @@ body: "Below about 900px of window, the bar's centred surface cluster runs under
   runs/evidence/2026-09-30T21-17-39Z/bar-width-860.png (and -960, -1100, where
   it clears). The as-built drawings show it too, since they are captured
   narrower than that."
+replies:
+  - author: topher
+    via: verdict
+    created: 2026-10-02T01:39:54Z
+    body: Verified by topher's pass on panel.dock.toolbar
+      (2026-10-02T01-39-54Z-local-01).
+verified_by: topher
+verified_via: 2026-10-02T01-39-54Z-local-01

@@ -1,0 +1,51 @@
+{
+  "run_id": "2026-10-02T01-39-54Z-local-01",
+  "created": "2026-10-02T01:39:54Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    },
+    {
+      "role": "design",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "c42e3bf-dirty",
+  "spec_hash": "sha256:fb238408c48d",
+  "results": [
+    {
+      "rule": "panel.dock.toolbar",
+      "status": "pass",
+      "statement_hash": "sha256:442274aaaa51"
+    },
+    {
+      "rule": "panel.dock.surfaces-say-what-they-show",
+      "status": "pass",
+      "statement_hash": "sha256:a1644c475eb8"
+    },
+    {
+      "rule": "screens.surfaces.as-built-drawing",
+      "status": "pass",
+      "statement_hash": "sha256:098b9682020b"
+    },
+    {
+      "rule": "screens.surfaces.stand-in-app",
+      "status": "pass",
+      "statement_hash": "sha256:6a69c42a5b6c"
+    },
+    {
+      "rule": "locations.answer.serve-starts-anywhere",
+      "status": "pass",
+      "statement_hash": "sha256:8fc3f6d54231"
+    }
+  ]
+}
