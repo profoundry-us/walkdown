@@ -9,7 +9,10 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
 
 ## [Unreleased]
 
-Upgrading from 0.2.0: see [UPGRADING.md](UPGRADING.md#from-020-to-030).
+Upgrading from 0.2.0: see [UPGRADING.md](UPGRADING.md#from-020-to-030). Two changes
+break what worked before: the skills are renamed (`/walkdown-judge` is now
+`/walkdown:judge`, and so on for every skill), and `walkdown init` links them for
+Claude Code instead of copying them.
 
 ### Added
 
@@ -31,13 +34,16 @@ Upgrading from 0.2.0: see [UPGRADING.md](UPGRADING.md#from-020-to-030).
 - With `--force`, installing for Claude Code removes the `walkdown-<name>` copies an
   earlier version left, when they match a released version, and keeps any that were
   edited. Without it, they are named as duplicates.
+- **Breaking:** in Claude Code the skills are `/walkdown:<name>`, no longer
+  `/walkdown-<name>`. Copies for other agents keep the `walkdown-<name>` names.
 - The skills moved from `lib/skills/walkdown-<name>.md` to `skills/<name>/SKILL.md`.
-  Copies for other agents keep the `walkdown-<name>` names.
 
 ### Fixed
 
 - The skills installer never writes through a link, and leaves alone any link it did
   not make.
+- Running walkdown's own test suite no longer installs skills into the developer's
+  `~/.claude/skills`.
 
 ## [0.2.0] - 2026-10-01
 
