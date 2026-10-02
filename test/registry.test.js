@@ -55,7 +55,8 @@ const walkdown = (home, args, cwd) =>
   spawnSync(process.execPath, [CLI, ...args], {
     cwd,
     encoding: 'utf8',
-    env: { ...process.env, WALKDOWN_HOME: home, NO_COLOR: '1' },
+    // init installs skills; into this home's folder, never the person's own.
+    env: { ...process.env, WALKDOWN_HOME: home, WALKDOWN_SKILLS_DIR: join(home, 'skills'), NO_COLOR: '1' },
   });
 
 test('a manifest registers nothing; import does, and the row answers from any depth @rule:locations.answer.declared-not-discovered', () => {
@@ -111,7 +112,7 @@ test('a parse failure is reported against the file that has it @rule:locations.a
   const report = execFileSync(process.execPath, [CLI, 'where'], {
     cwd: broken.repo,
     encoding: 'utf8',
-    env: { ...process.env, WALKDOWN_HOME: broken.home, NO_COLOR: '1' },
+    env: { ...process.env, WALKDOWN_HOME: broken.home, WALKDOWN_SKILLS_DIR: join(broken.home, 'skills'), NO_COLOR: '1' },
   });
   // Each file's verdict is the line UNDER its path, so the two are told
   // apart by position rather than by counting.

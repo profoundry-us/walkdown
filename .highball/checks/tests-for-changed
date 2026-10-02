@@ -67,7 +67,12 @@ if (tests.size > 0) {
   console.log(`unit tests for the changed modules: ${files.join(", ")}`);
   const run = spawnSync(process.execPath, [ "--test", ...files ], {
     encoding: "utf8",
-    env: { ...process.env, WALKDOWN_HOME: process.env.WALKDOWN_HOME ?? "tmp/test-home" },
+    env: {
+      ...process.env,
+      WALKDOWN_HOME: process.env.WALKDOWN_HOME ?? "tmp/test-home",
+      // init installs skills: never into the person's own folder.
+      WALKDOWN_SKILLS_DIR: process.env.WALKDOWN_SKILLS_DIR ?? "tmp/test-home/skills",
+    },
     stdio: [ "ignore", "pipe", "pipe" ]
   });
   process.stdout.write(run.stdout + run.stderr);
