@@ -1,4 +1,4 @@
-# ADR 0004 — Rules are easy to understand
+# ADR 0004 — Rule wording guidelines
 
 - **Status:** accepted. Drafted by the agent on 2026-09-13 from a walk
     through the board with Topher. The reword pass was done in the same

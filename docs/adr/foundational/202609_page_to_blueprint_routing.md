@@ -1,11 +1,11 @@
-# ADR 0001 — Projects, blueprints, and how a page finds them
+# ADR 0001 — Page to blueprint routing
 
 - **Status:** accepted
 - **Date:** 2026-09-09
 - **Deciders:** Topher (product, eng)
 - **Supersedes:** the routing half of q-0019 (2026-08-24), specifically the
   one-page-one-blueprint constraint
-- **Argument:** [docs/12-page-ownership.md](../12-page-ownership.md) is the
+- **Argument:** [docs/12-page-ownership.md](../../12-page-ownership.md) is the
   reasoning this decision came out of; this file is what was decided
 - **Threads:** q-0269 (reopening), q-0262, q-0267, q-0268
 
@@ -277,7 +277,7 @@ recorded here:
   edit's own result. Back to per-edit at step 6.
 
 Two surfaces named in §2 were deliberately left saying the old word, and
-[q-0270](../../.walkdown/blueprints/0001-walkdown/threads/q-0270.yml) decided
+[q-0270](../../../.walkdown/blueprints/0001-walkdown/threads/q-0270.yml) decided
 them: rename everything. So the config key is `blueprints:`, the argument is
 `resolveLocations({ blueprint })`, and — read out of the same answer — a
 blueprint's own `walkdown.yml` now opens `blueprint:` rather than `project:`.
@@ -285,10 +285,10 @@ That third surface was not named in the question, and it is the one worth
 saying out loud: it is a spec file format, so every walkdown.yml on disk was
 rewritten with the code, and nothing reads the old key. Configs already written
 by hand elsewhere say the old word and will not be understood; per
-[q-0182](../../.walkdown/blueprints/0001-walkdown/threads/q-0182.yml) that is
+[q-0182](../../../.walkdown/blueprints/0001-walkdown/threads/q-0182.yml) that is
 accepted rather than papered over with a fallback.
 
 The project modal ships without a design: `prototype/` is design's, the sketch
 is `proposals/project-modal.html`, and
-[n-0271](../../.walkdown/blueprints/0001-walkdown/threads/n-0271.yml) is the
+[n-0271](../../../.walkdown/blueprints/0001-walkdown/threads/n-0271.yml) is the
 request.

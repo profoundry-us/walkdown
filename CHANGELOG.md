@@ -12,7 +12,7 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
 ### Added
 
 - A project can hold several blueprints
-  ([ADR 0011](docs/adr/0011-a-project-holds-several-blueprints.md),
+  ([ADR 0011](docs/adr/foundational/202610_several_blueprints_per_project.md),
   [#20](https://github.com/profoundry-us/walkdown/issues/20)).
   `walkdown init --id <name>` gives a project that has a blueprint another one, in its
   own numbered home, and says which blueprints the project already holds.
@@ -43,7 +43,7 @@ Claude Code instead of copying them.
 ### Added
 
 - The clone is a Claude Code plugin named `walkdown`
-  ([ADR 0010](docs/adr/0010-the-clone-is-a-claude-code-plugin.md)). Its skills are
+  ([ADR 0010](docs/adr/foundational/202610_claude_code_skill_packaging.md)). Its skills are
   `/walkdown:setup`, `/walkdown:formulate`, `/walkdown:judge`, `/walkdown:incorporate`
   and `/walkdown:backlog`, and the repository is its own marketplace.
 - `/walkdown:lint` and `/walkdown:status`, which run the clone's CLI and report what it
@@ -79,7 +79,7 @@ Upgrading from 0.1.x: see [UPGRADING.md](UPGRADING.md#from-01x-to-020).
 
 - `design.by` in `walkdown.yml` says who draws a blueprint's design: `person` (the
   default) or `agent`. Lint reports any other value as an error
-  ([ADR 0009](docs/adr/0009-the-design-is-drawn-by-someone-other-than-the-builder.md)).
+  ([ADR 0009](docs/adr/foundational/202609_who_draws_the_design.md)).
 - A **design queue** in `walkdown status`, listed before the agent's. Its heading says
   whether it is for the designer or for the design agent.
 - `walkdown thread new --screen <id>` files a design request on the screen when no

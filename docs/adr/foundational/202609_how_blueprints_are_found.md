@@ -1,4 +1,4 @@
-# ADR 0003 — The registry is the only door
+# ADR 0003 — How blueprints are found
 
 - **Status:** accepted — drafted by the agent on 2026-09-11 from Topher's
   framing on n-0275; accepted by Topher the same day, build started at
@@ -6,10 +6,10 @@
 - **Date:** 2026-09-11
 - **Deciders:** Topher (product, eng)
 - **Supersedes:** the "standing in a checkout" half of
-  [docs/08-locations.md](../08-locations.md) ("The two `.walkdown`
+  [docs/08-locations.md](../../08-locations.md) ("The two `.walkdown`
   directories, and which one answers", "How the two configs merge"), and the
   rule `locations.answer.one-walkdown-answers`
-- **Builds on:** [ADR 0001](0001-projects-blueprints-and-routing.md) §3–§5,
+- **Builds on:** [ADR 0001](202609_page_to_blueprint_routing.md) §3–§5,
   which made the registry the server's only source and left the CLI with a
   second one
 - **Threads:** n-0275 (the symlink that walked through the boundary),

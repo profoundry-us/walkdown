@@ -105,7 +105,7 @@ stories:
   queue. How the code does it belongs in a code comment, not in any of the three.
   Lint warns on a statement carrying a "because", on one grown past forty-five
   words, and on a `because` past thirty-five. How a statement reads when it is
-  right, with before/after pairs: [ADR 0004](adr/0004-rules-are-easy-to-understand.md).
+  right, with before/after pairs: [ADR 0004](adr/foundational/202609_rule_wording_guidelines.md).
 - **The hash pins the statement and the steps.** Steps carry `statement_hash`, computed
   over both; `walkdown lint` flags a rule whose hash no longer matches: the wording moved
   and every verdict on it reads stale. `walkdown hash --write` re-stamps it; add
@@ -210,7 +210,7 @@ screens:
   screens and thread-born rules — until the sources catch up. Engineering may also keep
   an **as-built** drawing of a build that cannot be framed (an HTML page under
   `as-built/`, named as a screen's `app.path`) — the drawing revised after construction,
-  never the design ([ADR 0007](adr/0007-an-as-built-drawing-when-the-build-cannot-be-framed.md)).
+  never the design ([ADR 0007](adr/lightweight/202609_screens_that_cannot_be_framed.md)).
 
 ## Threads
 

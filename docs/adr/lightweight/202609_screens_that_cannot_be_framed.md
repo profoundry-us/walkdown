@@ -1,12 +1,12 @@
-# ADR 0007 — An as-built drawing, when the build cannot be framed
+# ADR 0007 — Screens that cannot be framed
 
 - **Status:** accepted 2026-09-18 by Topher; built the same day for walkdown's
     own blueprint.
 - **Date:** 2026-09-18
 - **Deciders:** Topher (product, eng)
 - **Builds on:** the stand-in app (`screens.surfaces.stand-in-app`,
-    [06-prototype-contract.md](../06-prototype-contract.md)), proposals as
-    shop drawings ([02-blueprint-schema.md](../02-blueprint-schema.md)),
+    [06-prototype-contract.md](../../06-prototype-contract.md)), proposals as
+    shop drawings ([02-blueprint-schema.md](../../02-blueprint-schema.md)),
     "never edit `prototype/`" (`AGENTS.md`), ADR 0001 §9 (the address carries
     the pick, the browser stores nothing).
 - **Threads:** none filed; decided in conversation.

@@ -1,4 +1,4 @@
-# ADR 0009 — The design is drawn by someone other than the builder
+# ADR 0009 — Who draws the design
 
 - **Status:** accepted 2026-10-01 by Topher. Not yet built; the rules it
     changes are drafted for his approval first.

@@ -1,4 +1,4 @@
-# ADR 0002 — Claude Desktop extensions, and why walkdown is not one yet
+# ADR 0002 — Claude Desktop extension support
 
 - **Status:** accepted
 - **Date:** 2026-09-10

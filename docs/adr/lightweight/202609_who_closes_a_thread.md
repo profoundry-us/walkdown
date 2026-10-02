@@ -1,4 +1,4 @@
-# ADR 0005 — A thread closes where it was asked
+# ADR 0005 — Who closes a thread
 
 - **Status:** accepted 2026-09-14 by Topher; not yet built. Drafted by
     the agent the same day, after the 2026-08-31 sweep finished and Topher

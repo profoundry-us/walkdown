@@ -1,4 +1,4 @@
-# ADR 0008 — Whose move a rule is, decided in one place
+# ADR 0008 — Whose turn a rule is
 
 - **Status:** proposed 2026-09-20, for Topher's review. Nothing built.
 - **Date:** 2026-09-20

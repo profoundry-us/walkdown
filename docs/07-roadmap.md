@@ -79,7 +79,7 @@ Two questions, and the second is the real one: where does a design request queue
 the ownership rule become conditional on who is staffing design — a person, an agent, or a
 person working with one? "Never" is easier to obey than "unless you are the design agent".
 
-Answered by [ADR 0009](adr/0009-the-design-is-drawn-by-someone-other-than-the-builder.md). The
+Answered by [ADR 0009](adr/foundational/202609_who_draws_the_design.md). The
 rule protects the *builder* from drawing, not agents; who designs is declared per blueprint;
 requests queue for design; a design agent draws in a blueprint of its own.
 

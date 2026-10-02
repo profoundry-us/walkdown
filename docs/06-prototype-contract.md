@@ -206,7 +206,7 @@ is engineering's to edit; `prototype/` stays design's. How the drawing is made, 
 wears, and how often it is brought back in line with the build are the project's own
 business; walkdown neither checks nor enforces any of it. It should say on its face that
 it is a drawing of the build and not the build, because a verdict given against it is a
-verdict about that drawing. [ADR 0007](adr/0007-an-as-built-drawing-when-the-build-cannot-be-framed.md).
+verdict about that drawing. [ADR 0007](adr/lightweight/202609_screens_that_cannot_be_framed.md).
 
 ## What this contract does not ask for
 

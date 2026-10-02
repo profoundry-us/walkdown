@@ -83,7 +83,7 @@ The procedures — formulate, judge, incorporate, backlog, setup — are markdow
 files an agent reads, and they are useful in a project long before anything
 else about walkdown is set up.
 
-**For Claude Code, the clone is a plugin** ([ADR 0010](adr/0010-the-clone-is-a-claude-code-plugin.md)).
+**For Claude Code, the clone is a plugin** ([ADR 0010](adr/foundational/202610_claude_code_skill_packaging.md)).
 `.claude-plugin/plugin.json` names it `walkdown`, its skills live in `skills/`,
 and `commands/` adds `/walkdown:lint` and `/walkdown:status`. Installing it is
 one link from Claude Code's skills folder to the clone:

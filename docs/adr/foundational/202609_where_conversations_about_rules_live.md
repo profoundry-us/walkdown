@@ -1,4 +1,4 @@
-# ADR 0006 — A rule is the conversation
+# ADR 0006 — Where conversations about rules live
 
 - **Status:** accepted 2026-09-18 by Topher; built the same day, to be
     felt before it is refined. Drafted by the agent after a conversation

@@ -1,11 +1,11 @@
-# ADR 0010 — The clone is a Claude Code plugin
+# ADR 0010 — Claude Code skill packaging
 
 - **Status:** accepted 2026-10-01 by Topher. Not yet built; the rules it changes are
     drafted for Topher's approval first.
 - **Date:** 2026-10-01
 - **Deciders:** Topher (product, eng)
 - **Builds on:** "the clone is the install" (`delivery.install.clone-is-the-install`,
-    [docs/09](../09-delivery.md)), skills are yours by default (n-0239,
+    [docs/09](../../09-delivery.md)), skills are yours by default (n-0239,
     `locations.default.skills-are-yours-by-default`), and n-0197, where an installer
     wrote through a link into walkdown's own source.
 - **Supersedes:** how skills reach Claude Code. Copies into other agents' directories,
@@ -123,9 +123,9 @@ copy or retires.
 - `delivery.install.clone-is-the-install` is unchanged. A link adds no registry, build
   step or network.
 - Docs that change: README, `site/setup.md` (and its copy in walkdown-site, deployed),
-  the setup skill, [docs/09](../09-delivery.md), and the release steps, which gain
+  the setup skill, [docs/09](../../09-delivery.md), and the release steps, which gain
   `plugin.json`'s version.
-- It ships as 0.3.0. [UPGRADING.md](../../UPGRADING.md) gains a section: check out the
+- It ships as 0.3.0. [UPGRADING.md](../../../UPGRADING.md) gains a section: check out the
   tag, then run `walkdown skills --force`, which removes the five old copies and makes
   the link.
 - `claude plugin validate` keeps one warning about `CLAUDE.md`, accepted.

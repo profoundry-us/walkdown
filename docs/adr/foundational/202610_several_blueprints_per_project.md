@@ -1,4 +1,4 @@
-# ADR 0011 — A project holds several blueprints
+# ADR 0011 — Several blueprints per project
 
 - **Status:** accepted 2026-10-02 (Topher), with its three rules in
     `locations.several`.
@@ -90,7 +90,7 @@ one more row to both.
 - `skills/setup` and `skills/formulate` say how to start another blueprint in a project
   that has one, and that writes take `--blueprint` once there are several. The template
   `AGENTS.md` quick reference says the same.
-- [docs/08](../08-locations.md) gains the second-blueprint path.
+- [docs/08](../../08-locations.md) gains the second-blueprint path.
 - It ships as 0.4.0: new functionality, and a changed `--json` shape for projects with
   several blueprints, which could not exist before. Single-blueprint output is
   unchanged.
