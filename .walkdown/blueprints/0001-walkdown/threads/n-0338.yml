@@ -1,0 +1,17 @@
+id: n-0338
+kind: note
+reason: observation
+author: agent
+created: 2026-10-02T02:58:59.811Z
+anchor:
+  rule: status.attention.blocked-queues
+status: open
+body: The person's queue says "walk down <rule> — N notes of yours answered" for
+  every addressed note on the rule, whoever wrote it. In the example on
+  2026-10-01, n-0004 was written by an agent and the report still called it
+  Topher's ("1 note of yours answered (n-0004)"). The line comes from
+  bin/commands/status.js (HOWTO verify). Either the queue should hold only a
+  person's own notes and say so truthfully, or it should hold every addressed
+  note and stop saying "of yours" (e.g. "N notes answered"). Which it is decides
+  whether an agent's addressed note waits on a person at all, so it wants a
+  decision before a wording change.

@@ -354,12 +354,17 @@ export function run(args) {
   }
 
   const { drift } = derived;
+  const active = listThreads(blueprint);
+  // A request that has not ended is still live, open or not; say which, so
+  // this line never calls "open" what ACTIVE THREADS below calls addressed.
+  const statusOf = new Map(active.map((t) => [t.id, t.status]));
+  const requestLabel = (id) => `${id} ${statusOf.get(id) ?? 'open'}`;
   if (drift.design.length || drift.sources.length) {
     console.log(`\n  ${dim('DRIFT — spec ahead of its sources')}`);
     for (const d of drift.design)
       console.log(
         `  ${yellow(d.screen)}: no design yet${d.proposal ? ' (proposal on file)' : ''}` +
-          `${d.requests.length ? dim(` — request ${d.requests.join(', ')} open`) : red(' — no design request filed')}`,
+          `${d.requests.length ? dim(` — request ${d.requests.map(requestLabel).join(', ')}`) : red(' — no design request filed')}`,
       );
     /*
      * One line, not one per rule. Every rule born of a thread or of walkdown
@@ -375,7 +380,6 @@ export function run(args) {
       );
   }
 
-  const active = listThreads(blueprint);
   if (active.length) {
     console.log(`\n  ${dim('ACTIVE THREADS')}`);
     for (const t of active.slice(0, 6))

@@ -6,7 +6,7 @@ anchor:
   rule: waitlist.export.says-why-it-waits
   screen: waitlist-export
 reason: request
-status: addressed
+status: open
 body: >
   Design request: screen `waitlist-export` has no drawing. It was added to the
   storyboard as the example project's deliberately slow page — it takes about
@@ -15,3 +15,9 @@ body: >
   is ever more than a fixture: the assembling state (what the operator sees
   while the export is being built) and the ready state with the download. Until
   then the built page stands alone and `prototype: null` says so honestly.
+replies:
+  - author: agent
+    created: 2026-10-02T02:58:43Z
+    body: "Nothing was drawn. This was marked addressed before design requests had a
+      queue of their own (issue #2); it is design's to draw, so it goes back to
+      open."
