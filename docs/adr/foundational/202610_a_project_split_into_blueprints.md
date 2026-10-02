@@ -1,7 +1,7 @@
 # ADR 0013 — A project split into blueprints
 
-- **Status:** proposed 2026-10-02, for Topher's review. Nothing is built; the rules it
-    adds and rewords are drafted for his approval.
+- **Status:** accepted 2026-10-02 by Topher. Nothing is built; the rules it adds and
+    rewords are drafted for his approval.
 - **Date:** 2026-10-02
 - **Deciders:** Topher (product, eng)
 - **Builds on:** ADR 0011 (several blueprints per project), ADR 0007 (as-built drawings),
@@ -160,7 +160,7 @@ Examples are `status-two-blueprints`, `writes-refused-among-several`, `init-anot
 
 - **Design (prototype side):** a page per screen showing the output as designed, as text
   in a terminal frame. Like the panel's prototype, it is the design and is never edited to
-  match the build. ADR 0009 governs who draws it.
+  match the build. A separate design agent draws it (ADR 0009, `design.by: agent`).
 - **App (stand-in side):** `tools/cli-captures.mjs` runs each screen's command against its
   fixture in a scratch home and writes the real output into the same frame. That gives an
   as-built drawing (ADR 0007), served by walkdown's own server, which a screen's app side
@@ -212,15 +212,13 @@ scenarios. Existing tests move over when their rule is next touched, not in one 
   5. ADR 0012, built inside `cli`.
 - It ships in 0.4.0 with ADRs 0011 and 0012.
 
-## Open questions
+## Decided on review
 
-- **Who draws the CLI's design?** For the panel it is Topher (`design.by: person`). For
-  the CLI the proposal is `design.by: agent`: the agent drafts the designed output, and
-  Topher approves it when he walks the screen. He may prefer to draw it himself.
-- **Should `rules move` be offered to other projects, or only kept for walkdown?** It is
-  written as a product command because every project that gains a second blueprint needs
-  it. The alternative is `tools/split-blueprint.mjs`, which would be faster to build and
-  which nobody else would get.
+- **The CLI's design is drawn by a separate design agent** (`design.by: agent` in
+  `cli`'s `walkdown.yml`), the same arrangement ADR 0009 made for the panel. Design
+  requests on a CLI screen go to that agent's queue. The agent that builds the CLI
+  never draws its own design, and Topher accepts the result when he walks the screen.
+- **`rules move` ships** as a product command, not a tool for walkdown alone.
 
 ## Alternatives considered
 
