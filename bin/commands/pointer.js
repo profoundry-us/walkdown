@@ -18,11 +18,11 @@ export async function run(args) {
     args,
     options: { dir: { type: 'string' }, into: { type: 'string' } },
   });
-  const { pointerBlock, pointerHomes, placePointer } = await import('../../lib/init.js');
+  const { pointerBlock, pointerHomes, placePointer, pointerTargets } = await import('../../lib/init.js');
   const root = resolve(values.dir ?? process.cwd());
   const loc = resolveLocations({ cwd: root });
-  const spec = loc.spec?.path;
-  if (!spec) noBlueprintHere(loc);
+  // Several blueprints in the project is not none: the block names them all.
+  if (!loc.spec?.path && !loc.ambiguous) noBlueprintHere(loc);
   /*
    * How the block should NAME the blueprint, from wherever it is being read.
    *
@@ -40,9 +40,7 @@ export async function run(args) {
    * that one is absolute because it has to be - it is also the one that is
    * personal rather than committed.
    */
-  const codeRoot = loc.code?.path;
-  const inside = (p) => codeRoot && (p === codeRoot || p.startsWith(`${codeRoot}/`));
-  const nameFrom = (base) => (inside(spec) && inside(base) ? `${relative(base, spec)}/` : spec);
+  const nameFrom = (base) => pointerTargets(root, base);
 
   if (values.into) {
     const file = resolve(root, values.into);

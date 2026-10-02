@@ -144,8 +144,9 @@ test('a project with one blueprint prints what it printed before @rule:locations
 
 test('writes refuse until --blueprint names one, and the refusal lists the ids @rule:locations.several.writes-name-one', () => {
   const m = twoBlueprints();
+  // `run` is not among them: it runs the project's suite and files each
+  // result by rule (several-project.test.js).
   const writes = [
-    ['run'],
     ['hash', '--write'],
     ['thread', 'new', '--screen', 'x', '--body', 'hello'],
     ['judge', 'some.rule'],

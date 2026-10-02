@@ -16,15 +16,29 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
   [#20](https://github.com/profoundry-us/walkdown/issues/20)).
   `walkdown init --id <name>` gives a project that has a blueprint another one, in its
   own numbered home, and says which blueprints the project already holds.
+- In a project with several blueprints, a recorded test run files each result in the
+  blueprint that holds its rule: one record per blueprint, sharing a run id. A tag no
+  blueprint holds is named and recorded nowhere. This holds for the node:test and
+  Playwright reporters and the RSpec formatter
+  ([ADR 0013](docs/adr/foundational/202610_a_project_split_into_blueprints.md)).
 
 ### Changed
 
 - In a project with several blueprints, `status`, `lint`, `threads` and `where` with no
   `--blueprint` report on every one, a section each, and `--json` answers
   `{ "blueprints": [ … ] }`. A project with one blueprint prints what it did before.
-- In a project with several blueprints, `run`, `hash`, `thread new`, `judge`, `sweep` and
+- In a project with several blueprints, `hash`, `thread new`, `judge`, `sweep` and
   `move` refuse until `--blueprint` names one, and list the ids. A thread id only one of
-  them holds needs no `--blueprint`.
+  them holds needs no `--blueprint`. `walkdown run` with no `--blueprint` runs the
+  project's suite once and files by rule; with one, it records only that blueprint's
+  results.
+- Lint accepts a check tagged with another blueprint's rule in the same project, and a
+  rule whose origin is another blueprint's thread.
+- A new thread's id is unique across every blueprint in its project.
+- The pointer paragraph lists every blueprint in the project, and says that commands
+  which write need `--blueprint`. A blueprint kept outside the repository is named by id,
+  never by a path on one machine. Moving one of several blueprints out of the repository
+  rewrites the pointer instead of removing it.
 - With several blueprints in a project, bare `walkdown init` reuses the one named for the
   project directory, and refuses if there is none; `--commit` needs `--id`.
 

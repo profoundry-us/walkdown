@@ -1,5 +1,5 @@
-import { existsSync } from 'node:fs';
-import { basename, join, relative, resolve } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
+import { basename, dirname, join, relative, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { defaultActor } from '../../lib/identity.js';
 import {
@@ -307,7 +307,12 @@ export async function run(args) {
       ? rememberBlueprint({ id: entry.id, root, homeDir: claim.dir, home: claim.home, inRepo: false, by: 'init' })
       : null;
   const ignore = commit === 'none' || !claim.dir ? null : setIgnore(walkdown, commit, { force: values.force });
-  if (commit === 'none' && moved) {
+  /*
+   * Leaving the repository takes the pointer with it - unless another
+   * blueprint of this project is still there, when the pointer is that
+   * one's too, and is rewritten below rather than removed (ADR 0013 §4).
+   */
+  if (commit === 'none' && moved && rootedHere().length <= 1) {
     for (const rel of ['CLAUDE.md', 'AGENTS.md', 'GEMINI.md', '.github/copilot-instructions.md', 'CONVENTIONS.md']) {
       // Said apart, because they are different things to have done to a
       // person's file: one gives the block back, the other takes the whole
@@ -388,6 +393,20 @@ export async function run(args) {
   if (entry.action === 'written')
     console.log(`  ${green('+ listed')}   ${entry.path}  ${dim(`as \`${entry.id}\``)}`);
   /*
+   * A pointer block already in an agent file names every blueprint once
+   * there are several (ADR 0013 §4) - the scaffold above wrote this one's,
+   * and left alone it would name only the newest.
+   */
+  if (rootedHere().length > 1) {
+    const { placePointer, pointerBlock, pointerHomes, pointerTargets, POINTER_BEGIN } = await import('../../lib/init.js');
+    for (const rel of pointerHomes(root)) {
+      const file = join(root, rel);
+      if (!readFileSync(file, 'utf8').includes(POINTER_BEGIN)) continue;
+      const action = placePointer(file, pointerBlock(pointerTargets(root, dirname(file))));
+      if (action === 'pointer-updated') console.log(`  ${green('~ pointer')}  ${rel}  ${dim('names every blueprint in this project')}`);
+    }
+  }
+  /*
    * Another blueprint for a project that has one is said as that, with the
    * others named: a mistyped `--id` is a second blueprint nobody meant, and
    * the moment to notice is now (ADR 0011 §1).
@@ -437,7 +456,11 @@ export async function run(args) {
     };
     // With several, the hint names this one: a bare `--commit` is refused.
     const idFlag = rootedHere().length > 1 ? ` --id ${entry.id ?? listed?.id}` : '';
-    console.log(dim(say[commit].replaceAll('`walkdown init --commit', `\`walkdown init${idFlag} --commit`)));
+    // Among several, the pointer is the project's and names this one too.
+    const said = idFlag
+      ? say[commit].replace(' Nothing was added to this repository, not even a pointer — `walkdown pointer --into CLAUDE.md` adds one for agents.', '')
+      : say[commit];
+    console.log(dim(said.replaceAll('`walkdown init --commit', `\`walkdown init${idFlag} --commit`)));
     /*
      * What git tracks NOW, asked of git rather than asserted from the file
      * just written. An ignore file rules only what git has not met: a run

@@ -12,7 +12,9 @@ verify requirement).
 
 ## Procedure
 
-1. **Scope.** `walkdown status --json`: collect rules whose `verify` includes
+1. **Scope.** `walkdown status --json` (with several blueprints in the project,
+   each is an entry of `blueprints`, and the rule's blueprint is the one to
+   pass as `--blueprint` from here on): collect rules whose `verify` includes
    `agent` and whose agent cell is `never`, `stale`, or worth re-judging after
    a change.
 

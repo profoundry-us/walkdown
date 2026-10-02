@@ -8,7 +8,10 @@ notes), and the runs ledger. The blueprint is the single source of truth for
 ## Before you build
 
 - `walkdown status --json` gives per-rule verification state, drift, and your
-  work queue: `attention` items with `who: "agent"`.
+  work queue: `attention` items with `who: "agent"`. In a project with several
+  blueprints it answers `{ "blueprints": [ … ] }`, one entry per blueprint with
+  its `id`; work in the one your task is about, and pass `--blueprint <id>` to
+  every command that writes.
 - A rule's plain-language `statement` is authoritative; its `steps` elaborate
   it. If they disagree, the statement wins. The statement is the claim alone;
   the reason lives in `because` and what happened in `history`, and neither

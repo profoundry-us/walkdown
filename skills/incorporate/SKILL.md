@@ -11,7 +11,9 @@ you claim work, you never accept it.
 
 ## Find the work
 
-`walkdown status --json` → `attention` items with `who: "agent"`:
+`walkdown status --json` → `attention` items with `who: "agent"` (in a project
+with several blueprints, under each entry of `blueprints`, and every write then
+takes `--blueprint <id>`):
 `incorporate` (an answered question) or `address` (an open note). Read the full
 thread: `walkdown thread <id>`. The same queue lists `judge-first` (a built
 rule the agent tier has not judged, or judged before it went stale) and

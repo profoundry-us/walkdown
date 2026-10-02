@@ -564,6 +564,25 @@ stories:
               at: 2026-09-14T16:05:25Z
               why: names the file the block lives in and what the block is for
 
+      - id: locations.pointer.names-every-blueprint
+        statement: In a project with several blueprints, the paragraph `walkdown pointer` writes lists each blueprint by id with where its spec is, and says that commands which write need `--blueprint`.
+        because: An agent arriving in the repository should find every spec in it, not only the first.
+        origin: walkdown
+        created_at: 2026-10-02
+        verify: [checks]
+        signoff: [eng]
+        steps:
+          given:
+            - A project with blueprints a and b, and one agent-instruction file
+          when:
+            - "`walkdown pointer` places the paragraph, then b is renamed or moved and it is placed again"
+          then:
+            - The paragraph names a and b, each with where its spec is
+            - It says that commands which write take `--blueprint <id>`
+            - Placed again, it says what is true now, and appears once
+            - With one blueprint the paragraph reads as before
+          statement_hash: sha256:fc78cb716fcc
+
   - id: locations.several
     title: A project holds several blueprints
     statement: As someone keeping two features' specs apart in one project, I can give each its own blueprint outside the repository, and still read them all from the project without naming one.
@@ -620,10 +639,93 @@ stories:
           given:
             - A project with blueprints a and b
           when:
-            - "`run`, `hash --write`, `thread new`, a change to a thread, `judge`, `sweep` and `move` are run with no `--blueprint`, then with `--blueprint b`"
+            - "`hash --write`, `thread new`, a change to a thread, `judge`, `sweep` and `move` are run with no `--blueprint`, then with `--blueprint b`"
           then:
             - Each exits with status 2, says several blueprints are registered here, names a and b, and says `--blueprint` picks one
             - With `--blueprint b`, each acts on b alone
             - A thread id that only one of them holds is changed without `--blueprint`
             - "\"No blueprint here\" is said only where none is registered"
-          statement_hash: sha256:8dbd0bae7822
+            - "`walkdown run` is not among them: it runs the project's suite and files each result by rule (locations.several.results-filed-by-rule)"
+          statement_hash: sha256:de5bdad5a7a4
+
+      - id: locations.several.results-filed-by-rule
+        statement: In a project with several blueprints, a recorded test run files each result in the blueprint that holds its rule, and `walkdown run` with no `--blueprint` runs the suite once for the whole project.
+        because: One test suite checks rules from every blueprint in a project, and a result filed in the wrong blueprint, or in none, leaves a built rule reading as unbuilt.
+        history: On 2026-10-02 a project with two blueprints recorded nothing at all, because the reporter could not tell which blueprint a run was for (ADR 0013).
+        origin: walkdown
+        created_at: 2026-10-02
+        verify: [checks]
+        signoff: [eng, product]
+        steps:
+          given:
+            - A project with blueprints a and b, and one test suite with a test tagged for a rule of each and a test tagged with a rule neither holds
+          when:
+            - The suite runs with walkdown's reporter, then `walkdown run` is run with no `--blueprint`, then with `--blueprint a`
+          then:
+            - a's runs hold a's result and b's runs hold b's, in two records sharing one run id
+            - The tag neither blueprint holds is named in the reporter's output and recorded nowhere
+            - "`walkdown run` with no `--blueprint` runs the suite once, or each distinct runner command once, and files results the same way"
+            - "With `--blueprint a`, only a's results are recorded, and b's are named as set aside"
+            - The node reporter, the Playwright reporter and the RSpec formatter all file this way
+            - A project with one blueprint records exactly as before
+          statement_hash: sha256:e6bc38c97ca2
+
+      - id: locations.several.lint-reads-the-project
+        statement: In a project with several blueprints, lint accepts a check tagged with another blueprint's rule, and a rule citing another blueprint's thread.
+        because: Sharing a test suite and citing each other's threads is normal for blueprints in one project, and lint that errors on every run for it teaches people to ignore lint.
+        origin: walkdown
+        created_at: 2026-10-02
+        verify: [checks]
+        signoff: [eng]
+        steps:
+          given:
+            - A project with blueprints a and b, a test tagged with a rule of b's, and a rule of a's whose history cites a thread of b's
+          when:
+            - "`walkdown lint` runs"
+          then:
+            - a reports no error for the test tagged with b's rule, and no warning for the thread of b's
+            - A tag that no blueprint in the project holds is still an error
+            - A thread id that no blueprint in the project holds is still a warning
+          statement_hash: sha256:7853732bbd28
+
+      - id: locations.several.thread-ids-unique
+        statement: A new thread's id is not used by any other thread in any blueprint of its project.
+        because: A rule or a commit message that cites a thread by id should name exactly one conversation.
+        origin: walkdown
+        created_at: 2026-10-02
+        verify: [checks]
+        signoff: [eng]
+        steps:
+          given:
+            - A project where blueprint a's threads run to n-0005 and blueprint b's to n-0002
+          when:
+            - A note is filed in b, then a question in a
+          then:
+            - b's new note is n-0006, and a's new question is q-0007
+            - Threads that already share an id keep it, and nothing is renumbered
+            - A project with one blueprint numbers its threads as before
+          statement_hash: sha256:edca96d77671
+
+      - id: locations.several.rules-move
+        statement: "`walkdown rules move <rule|story|feature> --to <blueprint>` moves rules to another blueprint in the same project, with their threads, and copies the run records and evidence behind their verdicts."
+        because: A project that grows a second blueprint should not lose the verdicts and signatures its rules already earned.
+        origin: walkdown
+        created_at: 2026-10-02
+        verify: [checks]
+        signoff: [eng, product]
+        steps:
+          given:
+            - A project with blueprints a and b, and a story in a whose rules have threads, checks, agent verdicts, signatures and a sweep
+          when:
+            - "`walkdown rules move <story> --to b --dry-run` is run, then the same without `--dry-run`"
+          then:
+            - The dry run lists the rules, threads, run records and evidence it would move or copy, and changes nothing
+            - The rules leave a's feature file and arrive in the feature file of the same name in b, with their statements, steps and hashes unchanged
+            - Their threads move to b and keep their ids
+            - Each run record holding a result for a moved rule is copied to b, keeping its run id, time and author, holding only the moved rules' results, and saying which blueprint and run it was copied from
+            - a's run records are unchanged
+            - Sweep markers and the evidence the copies cite are copied to b
+            - "`walkdown status` in b shows every moved rule with the verdicts and signatures it had in a"
+            - A destination outside the project, a rule id the destination already has, and uncommitted changes in either blueprint's features are each refused, and nothing moves
+            - It says how many rules and threads moved, and how many run records were copied
+          statement_hash: sha256:85fea46ae8b2

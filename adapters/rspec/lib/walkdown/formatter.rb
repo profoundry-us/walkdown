@@ -52,6 +52,47 @@ module Walkdown
       File.join(File.dirname(File.expand_path(blueprint_dir)), 'runs')
     end
 
+    # Where this run files, as { into: [{ id:, spec:, runs: }], project: [...] },
+    # or nil. `project` is every blueprint registered for the project standing
+    # here; `into` is the same list, or the one WALKDOWN_SPEC narrows it to
+    # (ADR 0013 §1: with several, each result goes to the blueprint holding
+    # its rule).
+    def targets(start = Dir.pwd)
+      project = ask_where_all(start) || []
+      spec = ENV['WALKDOWN_SPEC'].to_s
+      unless spec.empty?
+        runs = ENV['WALKDOWN_RUNS'].to_s
+        named = project.find { |b| File.expand_path(b[:spec]) == File.expand_path(spec) }
+        one = named || { id: nil, spec: spec, runs: runs.empty? ? runs_dir(spec) : runs }
+        one = one.merge(runs: runs) unless runs.empty?
+        return { into: [one], project: named ? project : [] }
+      end
+      return { into: project, project: project } unless project.empty?
+
+      dir = find_blueprint_dir(start)
+      dir ? { into: [{ id: nil, spec: dir, runs: runs_dir(dir) }], project: [] } : nil
+    end
+
+    # Every blueprint `walkdown where --json` answers with standing here: one,
+    # or each of several under `blueprints`.
+    def ask_where_all(start)
+      bin = File.expand_path('../../../../bin/walkdown.js', __dir__)
+      return nil unless File.exist?(bin)
+
+      out, status = Open3.capture2('node', bin, 'where', '--json', chdir: start, err: File::NULL)
+      return nil unless status.success?
+
+      at = JSON.parse(out.dup.force_encoding(Encoding::UTF_8))
+      (at['blueprints'] || [at]).filter_map do |b|
+        spec = b.dig('spec', 'path')
+        next if spec.nil? || b.dig('spec', 'missing')
+
+        { id: b['id'], spec: spec, runs: b.dig('runs', 'path') || runs_dir(spec) }
+      end
+    rescue StandardError
+      nil
+    end
+
     # The spec and runs directories for this run, as { spec:, runs: }, or nil.
     #
     # The walk used to be the only answer, and it never reaches a home kept
@@ -151,8 +192,8 @@ module Walkdown
     private
 
     def record_run(examples)
-      at = Support.locate
-      unless at
+      at = Support.targets
+      if at.nil? || at[:into].empty?
         return warn('walkdown formatter: no blueprint found — run not recorded. ' \
                     '`walkdown where` says what this directory resolves to; `walkdown run` passes it along.')
       end
@@ -160,9 +201,44 @@ module Walkdown
       tagged = examples.select { |ex| ex.metadata[:rule] }
       return warn('walkdown formatter: no examples tagged rule: — run not recorded') if tagged.empty?
 
-      results = aggregate(tagged, Support.rules_by_id(at[:spec]))
-      file, record = write_record(at, results)
-      @output.puts "walkdown: recorded #{record['results'].length} rule result(s) → #{relative_to_pwd(file)}"
+      # One blueprint in the project: everything goes to it, as it always did.
+      if at[:into].length == 1 && at[:project].length <= 1
+        one = at[:into].first
+        file, record = write_record(one, aggregate(tagged, Support.rules_by_id(one[:spec])))
+        return @output.puts "walkdown: recorded #{record['results'].length} rule result(s) → #{relative_to_pwd(file)}"
+      end
+
+      # Several: each result to the blueprint holding its rule, one run id.
+      held = at[:into].map { |b| [b, Support.rules_by_id(b[:spec])] }
+      others = (at[:project] - at[:into]).map { |b| Support.rules_by_id(b[:spec]) }
+      groups = Hash.new { |h, k| h[k] = [] }
+      set_aside = []
+      unheld = []
+      tagged.each do |ex|
+        id = ex.metadata[:rule].to_s
+        holder = held.find { |_, rules| rules.key?(id) }
+        if holder then groups[holder] << ex
+        elsif others.any? { |rules| rules.key?(id) } then set_aside |= [id]
+        else unheld |= [id]
+        end
+      end
+      now = Time.now.utc
+      run_id = held.map { |b, _| next_run_id(b[:runs], now) }.max
+      groups.each do |(b, rules), exs|
+        file, record = write_record(b, aggregate(exs, rules), run_id: run_id, now: now)
+        @output.puts "walkdown: recorded #{record['results'].length} rule result(s) for #{b[:id]} → #{relative_to_pwd(file)}"
+      end
+      unless set_aside.empty?
+        @output.puts "walkdown: set aside #{set_aside.length} result(s) for another blueprint in this project — #{set_aside.join(', ')}"
+      end
+      @output.puts "walkdown: no blueprint in this project holds #{unheld.join(', ')} — not recorded" unless unheld.empty?
+    end
+
+    def next_run_id(runs_dir, now)
+      target = ENV['WALKDOWN_TARGET'] || 'local'
+      prefix = "#{now.strftime('%Y-%m-%dT%H-%M-%SZ')}-#{target}-"
+      seq = Dir.glob(File.join(runs_dir, "#{prefix}*")).length + 1
+      format('%s%02d', prefix, seq)
     end
 
     def aggregate(examples, rules)
@@ -210,14 +286,11 @@ module Walkdown
     # layout every project had before homes. Nothing reads that now: a home is
     # `blueprint/` with threads, runs, evidence and drafts as siblings, and a
     # run filed inside the spec is a run `walkdown status` never sees.
-    def write_record(at, results)
+    def write_record(at, results, run_id: nil, now: Time.now.utc)
       runs_dir = at[:runs]
       FileUtils.mkdir_p(runs_dir)
-      now = Time.now.utc
       target = ENV['WALKDOWN_TARGET'] || 'local'
-      prefix = "#{now.strftime('%Y-%m-%dT%H-%M-%SZ')}-#{target}-"
-      seq = Dir.glob(File.join(runs_dir, "#{prefix}*")).length + 1
-      run_id = format('%s%02d', prefix, seq)
+      run_id ||= next_run_id(runs_dir, now)
 
       record = {
         'run_id' => run_id,
