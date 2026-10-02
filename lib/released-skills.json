@@ -19,5 +19,12 @@
     "walkdown-judge": "sha256:c8df8410356bad6eea48686bd80f8f5d02833efa062bc4ad9f92344bf1e0e91a",
     "walkdown-incorporate": "sha256:c6e9764b4ad8183d56b1f0b83e79b4dbd7ceb1f1b5a3893909188eed5c871032",
     "walkdown-backlog": "sha256:730569b52589f8b41767892b9f4cb0473a6dded24d8d593feb3f805f64119692"
+  },
+  "0.3.0": {
+    "walkdown-setup": "sha256:d2f0702981645ceac6032d84e3f46d96ffc7d972183c6f5758148f091ed6609d",
+    "walkdown-formulate": "sha256:00867316839fea9d009d94c7842ce472047a35002c533edc6412ba984621326f",
+    "walkdown-judge": "sha256:c8df8410356bad6eea48686bd80f8f5d02833efa062bc4ad9f92344bf1e0e91a",
+    "walkdown-incorporate": "sha256:c2d3c1f01562e0d577db9cac14ed3b7f375254f9103b2b7c9cb35d82b7e36061",
+    "walkdown-backlog": "sha256:c890d986a261d1c25f32adc0242ad71141934c394f53f3502447078e2e7d1818"
   }
 }

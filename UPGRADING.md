@@ -5,8 +5,6 @@ Each section takes an install from one version to the next. What changed is in
 
 ## From 0.2.0 to 0.3.0
 
-*0.3.0 is not released yet; these are the steps it will need.*
-
 The skills stop being copies and become one link: the clone is now a Claude Code
 plugin named `walkdown` ([ADR 0010](docs/adr/0010-the-clone-is-a-claude-code-plugin.md)).
 No data moves.

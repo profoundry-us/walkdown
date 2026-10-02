@@ -50,11 +50,11 @@ panel riding beside the running app and rendering those same files.
 walkdown is not on a registry, and does not need one. **The clone is the install:**
 
 ```
-git clone --branch v0.2.0 https://github.com/profoundry-us/walkdown.git ~/.walkdown/walkdown
+git clone --branch v0.3.0 https://github.com/profoundry-us/walkdown.git ~/.walkdown/walkdown
 node ~/.walkdown/walkdown/bin/walkdown.js --help
 ```
 
-`v0.2.0` is the latest tagged version, and a tag is the stable copy to grab. `main`
+`v0.3.0` is the latest tagged version, and a tag is the stable copy to grab. `main`
 moves daily; leave `--branch` off to follow it. walkdown is pre-1.0, so a minor version
 may still change the ledger, thread or registry formats.
 Git may warn that the tag "is not a commit"; that is how it announces an annotated tag,
