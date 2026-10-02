@@ -1,6 +1,7 @@
 # ADR 0009 — The design is drawn by someone other than the builder
 
-- **Status:** proposed 2026-09-29; awaiting Topher. Nothing here is built.
+- **Status:** accepted 2026-10-01 by Topher. Not yet built; the rules it
+    changes are drafted for his approval first.
 - **Date:** 2026-09-29
 - **Deciders:** Topher (product, eng, design)
 - **Builds on:** "never edit `prototype/`" (`AGENTS.md`, "Ownership
