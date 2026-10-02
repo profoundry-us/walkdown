@@ -1,0 +1,40 @@
+{
+  "run_id": "2026-10-02T18-13-35Z-local-01",
+  "created": "2026-10-02T18:13:35Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "3af4773-dirty",
+  "spec_hash": "sha256:51132eb910d8",
+  "note": "ADR 0011 (issue #20): the three locations.several rules, judged headless by driving the working tree's CLI in a throwaway WALKDOWN_HOME, with v0.3.0 extracted beside it for the one-blueprint comparison.",
+  "results": [
+    {
+      "rule": "locations.several.init-makes-another",
+      "status": "pass",
+      "statement_hash": "sha256:0ff494d94d74",
+      "evidence": [
+        "runs/evidence/2026-10-02T18-12-38Z/several-probe.txt"
+      ],
+      "reasoning": "In a project that already held `proj`, `init --id b` claimed 0002-b beside 0001-proj, registered it for the same project, and printed that b is another blueprint for this project, beside `proj`, with the commit hint naming `--id b`. Run again it created nothing: every file kept or up to date, no new home, no 'another' line. `init --id proj` and bare `init` both reused 0001-proj, since proj is the id init gives the project anyway. I tried to break it: `--id 'bad id'` was refused as not an id, `--id b` from a different project was refused naming the project that holds it with nothing claimed, bare `--commit spec` among two was refused naming proj and b and asking for --id, and the recorded check covers bare init refusing where neither blueprint carries the default id. The second blueprint's walkdown.yml is named b, not proj, which I found and fixed during the build. The checks also show `claims --url` reporting both blueprints for a page both claim, and `walkdown blueprints` listing both."
+    },
+    {
+      "rule": "locations.several.reads-cover-all",
+      "status": "pass",
+      "statement_hash": "sha256:b52ccdd8164e",
+      "evidence": [
+        "runs/evidence/2026-10-02T18-12-38Z/several-probe.txt"
+      ],
+      "reasoning": "With proj and b registered, I ran status, lint, threads and where from a subdirectory of the project. Each printed a section per blueprint headed by its id, proj first and b second, which is registration order. `where evidence` printed one line each, the id and its path. Each --json answered with the single key `blueprints`, ids proj and b, and every entry is the single answer's keys plus id; status's entry, for example, carries targets, rows, drift, attention, sweeps, drafts and activeThreads. With --blueprint b, lint reported on b alone with no section heading, and an unknown --blueprint still says so. The one-blueprint half was checked the hard way: the same home and project read by v0.3.0, extracted from the tag, and by the working tree gave byte-identical output for all nine forms - status, lint, threads and where, with and without --json, plus `where evidence`."
+    },
+    {
+      "rule": "locations.several.writes-name-one",
+      "status": "pass",
+      "statement_hash": "sha256:8dbd0bae7822",
+      "evidence": [
+        "runs/evidence/2026-10-02T18-12-38Z/several-probe.txt"
+      ],
+      "reasoning": "With proj and b registered, run, hash --write, thread new, judge, sweep and move each exited 2. Each said several blueprints are registered for the project, named proj and b, and said --blueprint picks one; none said 'No blueprint here', which the check confirms is still said where nothing is registered. With --blueprint, thread new filed into b and into proj separately, and the checks show a sweep landing in b's runs and not proj's. I tried to break the thread case by giving both blueprints a thread n-0001: a reply with no --blueprint was refused with both ids rather than guessed, and with --blueprint b it went to b's thread alone. The recorded check covers the other half: a thread id only one blueprint holds took a reply with no --blueprint."
+    }
+  ]
+}

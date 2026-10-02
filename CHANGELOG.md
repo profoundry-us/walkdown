@@ -9,6 +9,30 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
 
 ## [Unreleased]
 
+### Added
+
+- A project can hold several blueprints
+  ([ADR 0011](docs/adr/0011-a-project-holds-several-blueprints.md),
+  [#20](https://github.com/profoundry-us/walkdown/issues/20)).
+  `walkdown init --id <name>` gives a project that has a blueprint another one, in its
+  own numbered home, and says which blueprints the project already holds.
+
+### Changed
+
+- In a project with several blueprints, `status`, `lint`, `threads` and `where` with no
+  `--blueprint` report on every one, a section each, and `--json` answers
+  `{ "blueprints": [ … ] }`. A project with one blueprint prints what it did before.
+- In a project with several blueprints, `run`, `hash`, `thread new`, `judge`, `sweep` and
+  `move` refuse until `--blueprint` names one, and list the ids. A thread id only one of
+  them holds needs no `--blueprint`.
+- With several blueprints in a project, bare `walkdown init` reuses the one named for the
+  project directory, and refuses if there is none; `--commit` needs `--id`.
+
+### Fixed
+
+- Commands no longer say "No blueprint here" where several blueprints are registered;
+  they say which ones are.
+
 ## [0.3.0] - 2026-10-02
 
 Upgrading from 0.2.0: see [UPGRADING.md](UPGRADING.md#from-020-to-030). Two changes

@@ -7,7 +7,7 @@ import { getThread } from '../../lib/threads.js';
 import { whenIn } from '../../lib/time.js';
 import { saysSomething, THREAD_KINDS } from '../../lib/vocab.js';
 import { mutateThread, offer, openThread } from '../../lib/writes.js';
-import { end, loadOrExit } from './context.js';
+import { candidatesHere, end, loadOrExit } from './context.js';
 import { readFileSync } from 'node:fs';
 import { basename, extname } from 'node:path';
 
@@ -45,7 +45,7 @@ export function run(args) {
     );
     process.exit(2);
   }
-  let blueprint = loadOrExit(values.blueprint);
+  let blueprint = loadOrExit(values.blueprint ?? holderOf(id));
 
   /*
    * Who this runs as is not an argument. There was a `--actor <name>` here,
@@ -394,4 +394,19 @@ function attachFiles(paths) {
     if (!type) throw new Error(`${p}: a picture goes on a message - png, jpg, gif or webp`);
     return { name: basename(p), type, data: readFileSync(p).toString('base64') };
   });
+}
+
+/*
+ * Which blueprint holds a thread, among several registered for the project.
+ * A thread id that only one of them has names its blueprint on its own;
+ * there is nothing to guess (ADR 0011 §2). Anything else - a new thread, an
+ * id two hold or none does - leaves the choice where it was, and loadOrExit
+ * refuses with the ids.
+ */
+function holderOf(id) {
+  if (id === 'new') return undefined;
+  const ids = candidatesHere();
+  if (!ids.length) return undefined;
+  const holding = ids.filter((bp) => getThread(loadOrExit(bp), id));
+  return holding.length === 1 ? holding[0] : undefined;
 }

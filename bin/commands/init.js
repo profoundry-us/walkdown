@@ -38,6 +38,7 @@ export async function run(args) {
       dir: { type: 'string' },
       force: { type: 'boolean', default: false },
       commit: { type: 'string' },
+      id: { type: 'string' },
     },
   });
   if (values.commit && !STANDARDS.includes(values.commit)) {
@@ -76,10 +77,60 @@ export async function run(args) {
       console.error(dim('  Fix it first: init writes to it, and cannot tell what it already says.'));
       return process.exit(2);
     }
-  const exact = () =>
-    (readUserConfig().config.blueprints ?? []).find((p) =>
-      [p?.roots ?? []].flat().some((r) => r && canon(expand(r)) === canon(root)),
+  /*
+   * WHICH BLUEPRINT OF THE PROJECT'S (ADR 0011 §1). `init` is idempotent on
+   * the project and the id, not the project alone: a project may hold
+   * several blueprints, and `--id` names the one this run is about. With no
+   * `--id` it means the id it would give the project anyway, the directory's
+   * name - which, where the project has one blueprint, is that one whatever
+   * it is called, exactly as before.
+   */
+  const rootedHere = () =>
+    (readUserConfig().config.blueprints ?? []).filter(
+      (p) => !p?.ephemeral && [p?.roots ?? []].flat().some((r) => r && canon(expand(r)) === canon(root)),
     );
+  const wantId = values.id?.trim() || null;
+  const defaultId = basename(root);
+  const exact = () => {
+    const here = rootedHere();
+    if (wantId) return here.find((p) => String(p.id) === wantId);
+    if (here.length <= 1) return here[0];
+    return here.find((p) => String(p.id) === defaultId);
+  };
+  {
+    const here = rootedHere();
+    const ids = here.map((p) => String(p.id));
+    if (wantId !== null && !/^[a-z0-9][a-z0-9._-]*$/i.test(wantId)) {
+      console.error(red(`\`${values.id}\` is not an id — letters, digits, dots, dashes and underscores, starting with a letter or digit.`));
+      return process.exit(2);
+    }
+    /*
+     * An id is asked for by name, so one somebody else's project holds is
+     * refused rather than suffixed: `--id billing` quietly becoming
+     * `billing-2` is a blueprint nobody asked for, and every later
+     * `--blueprint billing` reaches the wrong one.
+     */
+    if (wantId && !ids.includes(wantId)) {
+      const elsewhere = (readUserConfig().config.blueprints ?? []).find((p) => String(p.id) === wantId);
+      if (elsewhere) {
+        const there = [elsewhere.roots ?? []].flat()[0];
+        console.error(red(`\`${wantId}\` is already registered${there ? ` for ${there}` : ''} — choose another id.`));
+        return process.exit(2);
+      }
+    }
+    if (!wantId && here.length > 1) {
+      if (!ids.includes(defaultId)) {
+        console.error(red(`This project holds several blueprints (${ids.join(', ')}) and none is \`${defaultId}\`.`));
+        console.error(dim(`  \`--id <id>\` says which one this init is about, or names a new one.`));
+        return process.exit(2);
+      }
+      if (values.commit) {
+        console.error(red(`This project holds several blueprints (${ids.join(', ')}); \`--commit\` moves one.`));
+        console.error(dim(`  \`--id <id>\` says which.`));
+        return process.exit(2);
+      }
+    }
+  }
   /*
    * A checkout that declares a blueprint the registry has not met - a fresh
    * clone, or this machine before ADR 0003 - is registered here rather than
@@ -150,7 +201,8 @@ export async function run(args) {
    * (n-0214). The neighbouring case - init twice at the SAME level - already
    * says the right kind of thing by reporting every file up to date.
    */
-  const answering = listed ? null : resolveLocations({ cwd: root });
+  const siblings = listed ? [] : rootedHere().map((p) => String(p.id));
+  const answering = listed || siblings.length ? null : resolveLocations({ cwd: root });
   const outer = answering?.spec?.path ? answering : null;
 
   const current = loc?.standard?.name ?? null;
@@ -223,9 +275,10 @@ export async function run(args) {
   async function build() {
   const claim = listed
     ? { home: listed.home ? String(listed.home) : null, dir: loc.homeDir }
-    : claimHome({ name: basename(root), walkdown });
+    : claimHome({ name: wantId ?? defaultId, walkdown });
   const specDir = listed ? loc.spec.path : homePaths(claim.dir).spec;
-  const results = scaffold(root, { force: values.force, specDir, commit });
+  // A second blueprint is named for its id, not for the project (ADR 0011).
+  const results = scaffold(root, { force: values.force, specDir, commit, name: listed ? null : wantId });
   /*
    * And write it down. Walkdown does not find blueprints by looking, so a
    * spec nobody declared is a directory rather than a project - init would
@@ -236,7 +289,7 @@ export async function run(args) {
   const entry = listed
     ? { path: null, action: 'kept', id: listed.id }
     : rememberBlueprint({
-        id: basename(root),
+        id: wantId ?? defaultId,
         root,
         homeDir: claim.dir,
         home: claim.home,
@@ -334,6 +387,15 @@ export async function run(args) {
    */
   if (entry.action === 'written')
     console.log(`  ${green('+ listed')}   ${entry.path}  ${dim(`as \`${entry.id}\``)}`);
+  /*
+   * Another blueprint for a project that has one is said as that, with the
+   * others named: a mistyped `--id` is a second blueprint nobody meant, and
+   * the moment to notice is now (ADR 0011 §1).
+   */
+  if (siblings.length)
+    console.log(
+      `  ${green('+ another')}  ${dim(`\`${entry.id}\` is another blueprint for this project, beside ${siblings.map((i) => `\`${i}\``).join(', ')} — commands that write take \`--blueprint <id>\` now`)}`,
+    );
   // The registry write is the one that folds a config.yml row in, and with
   // the spec committed that is the second write, not the one reported above.
   const fold =
@@ -373,7 +435,9 @@ export async function run(args) {
         " git's — and git keeps every version of every screenshot forever." +
         '\n  `walkdown init --commit spec` writes the ignore file back.',
     };
-    console.log(dim(say[commit]));
+    // With several, the hint names this one: a bare `--commit` is refused.
+    const idFlag = rootedHere().length > 1 ? ` --id ${entry.id ?? listed?.id}` : '';
+    console.log(dim(say[commit].replaceAll('`walkdown init --commit', `\`walkdown init${idFlag} --commit`)));
     /*
      * What git tracks NOW, asked of git rather than asserted from the file
      * just written. An ignore file rules only what git has not met: a run

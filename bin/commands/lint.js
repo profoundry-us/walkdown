@@ -1,7 +1,7 @@
 import { parseArgs } from 'node:util';
 import { lint } from '../../lib/lint.js';
 import { dim, green, red, yellow } from '../../lib/report/tty.js';
-import { end, loadOrExit } from './context.js';
+import { eachOrExit, end, sectionHead } from './context.js';
 
 export function run(args) {
   const { values } = parseArgs({
@@ -13,13 +13,35 @@ export function run(args) {
     },
     allowNegative: true,
   });
-  const blueprint = loadOrExit(values.blueprint);
-  const { findings, summary, exitCode } = lint(blueprint, { checks: values.checks });
-
+  const each = eachOrExit(values.blueprint);
+  const several = each.length > 1;
   if (values.json) {
-    console.log(JSON.stringify({ findings, summary }, null, 2));
-    return end(exitCode);
+    const answers = each.map(({ id, blueprint }) => {
+      const { findings, summary, exitCode } = lint(blueprint, { checks: values.checks });
+      return { id, findings, summary, exitCode };
+    });
+    const worst = Math.max(...answers.map((a) => a.exitCode));
+    const one = ({ findings, summary }) => ({ findings, summary });
+    console.log(
+      JSON.stringify(
+        several ? { blueprints: answers.map((a) => ({ id: a.id, ...one(a) })) } : one(answers[0]),
+        null,
+        2,
+      ),
+    );
+    return end(worst);
   }
+  let worst = 0;
+  each.forEach(({ id, blueprint }, i) => {
+    if (several) console.log(`${i ? '\n' : ''}${sectionHead(id)}\n`);
+    worst = Math.max(worst, report(blueprint, values));
+  });
+  return end(worst);
+}
+
+/* One blueprint's lint, printed; its exit code returned. */
+function report(blueprint, values) {
+  const { findings, summary, exitCode } = lint(blueprint, { checks: values.checks });
 
   console.log(dim(`walkdown lint — ${blueprint.dir}\n`));
   for (const level of ['error', 'warn']) {
@@ -40,5 +62,5 @@ export function run(args) {
   console.log(
     `${s.errors ? red('✗') : green('✓')} ${counts} — ${verdict}, ${s.warnings} warning(s)`,
   );
-  return end(exitCode);
+  return exitCode;
 }

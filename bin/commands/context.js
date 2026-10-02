@@ -5,7 +5,7 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadBlueprint } from '../../lib/blueprint.js';
-import { resolveLocations } from '../../lib/locations.js';
+import { resolveLocations, tilde } from '../../lib/locations.js';
 
 /*
  * How a command finishes. process.exit() tears the process down before Node
@@ -27,6 +27,7 @@ const end = (code) => {
  */
 export function loadOrExit(blueprintId) {
   const loc = resolveLocations({ blueprint: blueprintId });
+  if (loc.ambiguous) severalHere(loc);
   // The file is the test, not the declaration: an entry can name a spec that
   // has been deleted, and a directory nothing declares is not a project at
   // all. Both are "no blueprint" and both should say so the same way.
@@ -34,6 +35,48 @@ export function loadOrExit(blueprintId) {
   if (!there) noBlueprintHere(loc, blueprintId);
   return loadBlueprint(loc.spec.path);
 }
+
+/*
+ * EVERY BLUEPRINT STANDING HERE, for a command that only reads (ADR 0011
+ * §2). One blueprint, or one named with --blueprint, is a list of one and
+ * the command prints exactly what it always has; several registered for the
+ * project come back in the order they were registered, each with its id, so
+ * the command can print a section apiece. Nothing is guessed, because
+ * reading all of them chooses none.
+ *
+ * @returns {{ id: string, blueprint: any }[]}
+ */
+export function eachOrExit(blueprintId) {
+  const loc = resolveLocations({ blueprint: blueprintId });
+  if (!loc.ambiguous) return [{ id: loc.id, blueprint: loadOrExit(blueprintId), several: false }];
+  return loc.config.registry.candidates.map((id) => ({ id, blueprint: loadOrExit(id), several: true }));
+}
+
+/*
+ * The ids a write would have to choose between, or none. A thread command
+ * uses it to find the one blueprint holding a thread id before refusing.
+ */
+export function candidatesHere() {
+  const loc = resolveLocations({});
+  return loc.ambiguous ? loc.config.registry.candidates : [];
+}
+
+/*
+ * What a command that writes says where several blueprints stand. It used
+ * to fall through to "No blueprint here", which was false - two were
+ * registered - and sent the person looking for a problem they did not have
+ * (issue #20).
+ */
+export function severalHere(loc) {
+  const ids = loc.config.registry.candidates;
+  const project = loc.code?.path ? ` for ${tilde(loc.code.path)}` : '';
+  console.error(`Several blueprints are registered${project}: ${ids.join(', ')}.`);
+  console.error(`This command acts on one — \`--blueprint <id>\` says which (e.g. \`--blueprint ${ids[0]}\`).`);
+  process.exit(2);
+}
+
+/** A section heading for one blueprint among several. */
+export const sectionHead = (id) => `━━ ${id} ━━`;
 
 /*
  * The words, apart from the loading.

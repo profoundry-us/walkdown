@@ -85,6 +85,20 @@ clone receives.
 walkdown init --commit spec
 ```
 
+**Another blueprint in the same project.** A project can hold several, each in its own
+home (ADR 0011). `--id` names the one this run is about; it gets the next numbered home,
+and running the same command again changes nothing. With no `--id`, init means the id it
+would give the project anyway — the directory's name — and with several, refuses if none
+has it. An id another project holds is refused, never suffixed.
+
+```
+walkdown init --id billing
+```
+
+With several, `status`, `lint`, `threads` and `where` report on every one, a section each,
+and `--json` answers `{ "blueprints": [ … ] }`. Everything that writes refuses until
+`--blueprint <id>` says which, except a thread id only one of them holds.
+
 **Everything committed.** The same home, and no `.gitignore` at all. Runs and evidence
 arrive in pull requests, which is a thing a team can genuinely want and should not have
 to assemble by hand — a negation chain in git is easy to write wrong, and a wrong one
@@ -163,7 +177,8 @@ runs `walkdown import .` in it.
 up from where you stand; no path is resolved on read. Standing somewhere picks among the
 registered rows by containment — the rows whose `project` contains the working
 directory, the deepest winning where a pack is registered inside its repository, a
-question (answered with `--blueprint`) when several rows share one project. A scratch
+question (answered with `--blueprint`) when several rows share one project — asked by
+the commands that write; the ones that only read answer for every row. A scratch
 copy is never picked by standing somewhere. Naming a blueprint outright, with
 `--blueprint <id>`, picks its row. Nothing about the tree between the rows is consulted:
 a pack carrying its own `.walkdown` is its own row, and a checkout nobody registered is

@@ -11,7 +11,7 @@ import { Refused } from '../lib/refusal.js';
 const HELP = `walkdown — verify that what you built is what you designed
 
 Usage:
-  walkdown init [--dir <project-root>] [--commit none|spec|all]
+  walkdown init [--dir <project-root>] [--id <name>] [--commit none|spec|all]
   walkdown run [--target <name>] [--rule <id>] [--blueprint <id>]
   walkdown status [<rule-id>] [--blueprint <id>] [--target <name>] [--json]
   walkdown lint [--blueprint <id>] [--no-checks] [--json]

@@ -6,7 +6,7 @@ import { KINDS, resolveLocations } from '../../lib/locations.js';
 import { dim, green, red, yellow } from '../../lib/report/tty.js';
 import { tracking } from '../../lib/standard.js';
 import { parse } from '../../vendor/yaml.js';
-import { end } from './context.js';
+import { end, sectionHead } from './context.js';
 
 /*
  * `walkdown where`: the resolver's answer, in the order a person reads it.
@@ -27,28 +27,60 @@ export function run(args) {
   });
 
   const loc = resolveLocations({ blueprint: values.blueprint });
+  /*
+   * Several blueprints registered for the project: each answers, under its
+   * id, in the order they were registered (ADR 0011 §2). Asking writes
+   * nothing, so there is nothing to choose.
+   */
+  const each = loc.ambiguous
+    ? loc.config.registry.candidates.map((id) => ({ id, loc: resolveLocations({ blueprint: id }) }))
+    : [{ id: loc.id, loc }];
+  const answer = (l) => {
+    const { findings, words, why } = tracking(l);
+    return { ...l, tracking: { words, why, findings } };
+  };
   if (values.json) {
-    const { findings, words, why } = tracking(loc);
-    console.log(JSON.stringify({ ...loc, tracking: { words, why, findings } }, null, 2));
+    console.log(
+      JSON.stringify(
+        each.length > 1 ? { blueprints: each.map(({ id, loc: l }) => ({ ...answer(l), id })) } : answer(loc),
+        null,
+        2,
+      ),
+    );
     return end(0);
   }
 
   /*
    * One kind, one path, nothing else - so a script or a skill can ask
    * `walkdown where evidence` and use the answer directly instead of parsing a
-   * report meant for a person.
+   * report meant for a person. Among several, one line each: the id, a tab,
+   * the path.
    */
   const only = positionals[0];
   if (only) {
-    const cell =
-      only === 'spec' || only === 'code' ? loc[only] : KINDS.includes(only) ? loc[only] : null;
-    if (!cell) {
+    const cellOf = (l) => (only === 'spec' || only === 'code' || KINDS.includes(only) ? l[only] : null);
+    if (!cellOf(loc)) {
       console.error(`No such location "${only}". Try: spec, code, ${KINDS.join(', ')}.`);
       return end(2);
     }
-    console.log(cell.path ?? '');
-    return end(cell.path ? 0 : 1);
+    if (each.length > 1) {
+      for (const { id, loc: l } of each) console.log(`${id}\t${cellOf(l).path ?? ''}`);
+      return end(each.every(({ loc: l }) => cellOf(l).path) ? 0 : 1);
+    }
+    console.log(cellOf(loc).path ?? '');
+    return end(cellOf(loc).path ? 0 : 1);
   }
+
+  each.forEach(({ id, loc: l }, i) => {
+    if (each.length > 1) console.log(`${i ? '\n' : ''}${sectionHead(id)}\n`);
+    report(l);
+  });
+  console.log(dim('\nNothing was written. See docs/08-locations.md for the resolution order.'));
+  return end(0);
+}
+
+/* One blueprint's locations, printed for a person. */
+function report(loc) {
 
   console.log(`walkdown where — ${loc.id}\n`);
   /*
@@ -142,8 +174,6 @@ export function run(args) {
    * an older layout left behind into the config; the older layout is not
    * read any more, so there is nothing left to fold.
    */
-  console.log(dim('\nNothing was written. See docs/08-locations.md for the resolution order.'));
-  return end(0);
 }
 
 /** The prototype and proposals rows: where each resolved, and why there. */

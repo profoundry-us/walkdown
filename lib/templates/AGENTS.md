@@ -213,6 +213,11 @@ rather than adding to it.
     walkdown serve                  panel + embed + pin/walkdown APIs, for every
                                     registered blueprint; start it anywhere, once
 
+A project can hold several blueprints (`walkdown init --id <name>` adds one).
+Then `status`, `lint`, `threads` and `where` report on each, under its id, and
+every command that writes - `run`, `hash --write`, `thread new`, `judge`,
+`sweep`, `move` - needs `--blueprint <id>`. `walkdown where` lists the ids.
+
 ## Procedures
 
 Multi-step rituals are encoded as skills. In Claude Code they are the

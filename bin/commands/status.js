@@ -15,9 +15,9 @@ import { deriveStatus, retiredRules } from '../../lib/status.js';
 import { listThreads } from '../../lib/threads.js';
 import { whenIn } from '../../lib/time.js';
 import { defaultActor } from '../../lib/identity.js';
-import { end, loadOrExit } from './context.js';
+import { eachOrExit, end, sectionHead } from './context.js';
 
-function renderRuleDetail(blueprint, derived, ruleId, json) {
+function renderRuleDetail(blueprint, derived, ruleId, json, emit) {
   // Stamps are UTC on disk and the reader's clock on screen (n-0290).
   const zone = defaultActor(blueprint.codeRoot ?? blueprint.projectRoot).timezone;
   const row = derived.rows.find((r) => r.rule === ruleId);
@@ -31,7 +31,7 @@ function renderRuleDetail(blueprint, derived, ruleId, json) {
     const gone = retiredRules(blueprint).find((r) => r.rule === ruleId);
     if (gone) {
       if (json) {
-        console.log(JSON.stringify({ ...gone, state: 'retired' }, null, 2));
+        emit({ ...gone, state: 'retired' });
         return end(0);
       }
       console.log(`${gone.rule} · ${dim('retired')}`);
@@ -45,7 +45,7 @@ function renderRuleDetail(blueprint, derived, ruleId, json) {
   }
   const exitCode = row.verdict === 'fail' ? 1 : 0;
   if (json) {
-    console.log(JSON.stringify(row, null, 2));
+    emit(row);
     return end(exitCode);
   }
 
@@ -148,11 +148,46 @@ export function run(args) {
     },
     allowPositionals: true,
   });
-  const blueprint = loadOrExit(values.blueprint);
+  let each = eachOrExit(values.blueprint);
+  const ruleId = positionals[0];
+  /*
+   * One rule asked after, among several blueprints: it lives in one of them,
+   * and that one answers alone - a rule's page is not a report to section.
+   */
+  if (ruleId && each.length > 1) {
+    const knows = ({ blueprint }) =>
+      deriveStatus(blueprint, {}).rows.some((r) => r.rule === ruleId) ||
+      retiredRules(blueprint).some((r) => r.rule === ruleId);
+    const holding = each.filter(knows);
+    if (holding.length) each = holding.length === 1 ? [{ ...holding[0], several: false }] : holding;
+  }
+  const several = each.length > 1;
+  /*
+   * With several, the JSON answer is one object holding each blueprint's,
+   * which is the single answer plus its id (ADR 0011 §2). A list - the
+   * retired rules - rides under the name of what it is.
+   */
+  const answers = [];
+  let worst = 0;
+  each.forEach(({ id, blueprint }, i) => {
+    const emit = several
+      ? (obj) => answers.push(Array.isArray(obj) ? { id, retired: obj } : { id, ...obj })
+      : (obj) => console.log(JSON.stringify(obj, null, 2));
+    if (several && !values.json) console.log(`${i ? '\n' : ''}${sectionHead(id)}\n`);
+    process.exitCode = 0;
+    report(blueprint, values, ruleId, emit);
+    worst = Math.max(worst, Number(process.exitCode ?? 0));
+  });
+  if (several && values.json) console.log(JSON.stringify({ blueprints: answers }, null, 2));
+  return end(worst);
+}
+
+/* One blueprint's status, printed, or handed to `emit` as JSON. */
+function report(blueprint, values, ruleId, emit) {
   if (values.retired) {
     const gone = retiredRules(blueprint);
     if (values.json) {
-      console.log(JSON.stringify(gone, null, 2));
+      emit(gone);
       return end(0);
     }
     if (!gone.length) {
@@ -170,7 +205,7 @@ export function run(args) {
   });
   const { targets, rows } = derived;
 
-  if (positionals[0]) return renderRuleDetail(blueprint, derived, positionals[0], values.json);
+  if (ruleId) return renderRuleDetail(blueprint, derived, ruleId, values.json, emit);
 
   // Sittings that are underway but not yet sealed. They are not verdicts and
   // never count as any, but a queue that hides them tells you to go judge what
@@ -181,21 +216,15 @@ export function run(args) {
     // `sweeps` rides along because the JSON is the surface agents read
     // (blueprint/AGENTS.md), and it was the one place an open sweep - its
     // date, its reason, what it still owes - could not be seen at all.
-    console.log(
-      JSON.stringify(
-        {
-          targets,
-          rows,
-          drift: derived.drift,
-          attention: derived.attention,
-          sweeps: derived.sweeps,
-          drafts,
-          activeThreads: listThreads(blueprint),
-        },
-        null,
-        2,
-      ),
-    );
+    emit({
+      targets,
+      rows,
+      drift: derived.drift,
+      attention: derived.attention,
+      sweeps: derived.sweeps,
+      drafts,
+      activeThreads: listThreads(blueprint),
+    });
     return end(rows.some((r) => r.verdict === 'fail') ? 1 : 0);
   }
 

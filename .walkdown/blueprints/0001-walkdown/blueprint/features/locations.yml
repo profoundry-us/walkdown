@@ -563,3 +563,67 @@ stories:
             - hash: sha256:8178c7c18d59
               at: 2026-09-14T16:05:25Z
               why: names the file the block lives in and what the block is for
+
+  - id: locations.several
+    title: A project holds several blueprints
+    statement: As someone keeping two features' specs apart in one project, I can give each its own blueprint outside the repository, and still read them all from the project without naming one.
+    rules:
+      - id: locations.several.init-makes-another
+        statement: "`walkdown init --id <name>` gives a project that already has a blueprint a second one, in its own numbered folder outside the repository, and running the same command again changes nothing."
+        because: Two unrelated features in one project each want their own rules, threads and runs, kept out of the repository like the first.
+        history: On 2026-10-02 a project on Topher's work machine could not get a second blueprint without committing it to the repository (issue #20, ADR 0011).
+        origin: walkdown
+        created_at: 2026-10-02
+        verify: [checks]
+        signoff: [eng, product]
+        steps:
+          given:
+            - A project with blueprint a, kept outside the repository
+          when:
+            - "`walkdown init --dir` is run with `--id b`, then the same again, then with no `--id`"
+          then:
+            - The first creates a new numbered home for b, registers it for the project, and says it is another blueprint for this project, naming a
+            - The second reports everything up to date and creates nothing
+            - With no `--id`, init means the id it would give the project anyway, and reuses that blueprint; if none has that id, it refuses and names them
+            - An `--id` already registered for a different project is refused, not given a suffix
+            - "`--commit` with several blueprints in the project needs `--id`, and without it refuses and names the choices"
+            - "`walkdown serve` lists both, and `walkdown claims` reports both when both claim a page"
+          statement_hash: sha256:0ff494d94d74
+
+      - id: locations.several.reads-cover-all
+        statement: With several blueprints in a project, `status`, `lint`, `threads` and `where` run with no `--blueprint` report on every one, each under its id.
+        because: Adding a blueprint should not stop the first one's commands working.
+        origin: walkdown
+        created_at: 2026-10-02
+        verify: [checks]
+        signoff: [eng, product]
+        steps:
+          given:
+            - A project with blueprints a and b
+          when:
+            - Each command is run with no `--blueprint`, then with `--json`, then with `--blueprint b`
+          then:
+            - Each prints one section per blueprint, headed by its id, in the order they were registered
+            - "With `--json` the answer is `{ blueprints: [...] }`, each entry the single-blueprint answer plus its id"
+            - With `--blueprint b` it reports on b alone, as it does today
+            - A project with one blueprint prints exactly what it printed before
+          statement_hash: sha256:b52ccdd8164e
+
+      - id: locations.several.writes-name-one
+        statement: With several blueprints in a project, a command that writes or acts on one blueprint refuses until `--blueprint` names it, and the refusal lists the ids.
+        because: Guessing would file a thread or a verdict under the wrong blueprint.
+        origin: walkdown
+        created_at: 2026-10-02
+        verify: [checks]
+        signoff: [eng]
+        steps:
+          given:
+            - A project with blueprints a and b
+          when:
+            - "`run`, `hash --write`, `thread new`, a change to a thread, `judge`, `sweep` and `move` are run with no `--blueprint`, then with `--blueprint b`"
+          then:
+            - Each exits with status 2, says several blueprints are registered here, names a and b, and says `--blueprint` picks one
+            - With `--blueprint b`, each acts on b alone
+            - A thread id that only one of them holds is changed without `--blueprint`
+            - "\"No blueprint here\" is said only where none is registered"
+          statement_hash: sha256:8dbd0bae7822

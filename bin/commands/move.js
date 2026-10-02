@@ -5,7 +5,7 @@ import { parseArgs } from 'node:util';
 import { canon, canRemember, KINDS, rememberLocation, resolveLocations } from '../../lib/locations.js';
 import { dim, green, red } from '../../lib/report/tty.js';
 import { MoveFailed, moveDir } from '../../lib/standard.js';
-import { end } from './context.js';
+import { end, severalHere } from './context.js';
 
 /*
  * `walkdown move`: relocate one kind of record, and write down that you did.
@@ -32,6 +32,7 @@ export function run(args) {
   }
 
   const loc = resolveLocations({ blueprint: values.blueprint });
+  if (loc.ambiguous) severalHere(loc);
   /*
    * Only a listed project's records move. Standing in a directory nothing
    * declares, this used to fall through to an entry found BY NAME and rewrote

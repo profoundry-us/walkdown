@@ -98,6 +98,16 @@ read, and:
 
     walkdown pointer --dir <project-root> --into <that file>
 
+**A second blueprint in a project that has one** - an unrelated feature that
+wants its own rules, threads and runs - is `init` again with an id:
+
+    walkdown init --dir <project-root> --id <name>
+
+It gets its own numbered home and says which blueprints the project already
+holds; check the id is the one the person meant. From then on, every command
+that writes takes `--blueprint <id>`, and the reads report on each blueprint.
+Never pick one for the person when it is unclear which a rule belongs in - ask.
+
 With nothing committed there is no pointer; the person's own skills are how
 their agent knows to ask `walkdown where`.
 
