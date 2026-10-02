@@ -1,0 +1,60 @@
+{
+  "run_id": "2026-10-02T04-56-24Z-local-01",
+  "created": "2026-10-02T04:56:24Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "b0d7967-dirty",
+  "spec_hash": "sha256:bc809d798c33",
+  "note": "ADR 0010's five rules, judged headless at commit b0d7967 in throwaway folders with WALKDOWN_SKILLS_DIR and CLAUDE_CONFIG_DIR pointed away from the real ones; no blueprint was written, so no scratch copy was needed. Claude Code 2.1.220.",
+  "results": [
+    {
+      "rule": "delivery.plugin.named-for-walkdown",
+      "status": "pass",
+      "statement_hash": "sha256:f528af8a645e",
+      "evidence": [
+        "runs/evidence/2026-10-02T04-54-18Z/probe-plugin.txt"
+      ],
+      "reasoning": "`claude plugin validate` passed on the clone (1a). Linked into a throwaway skills folder it loaded as walkdown@skills-dir at version 0.2.0, with exactly seven components: backlog, formulate, incorporate, judge, setup, lint and status, and no agents, hooks or MCP servers, so neither walkdown-sitting nor this repository's .claude hooks and agents reached it (1b). A live headless session with the plugin listed walkdown:lint, walkdown:status, walkdown:backlog, walkdown:formulate, walkdown:incorporate, walkdown:judge and walkdown:setup (1c); the hyphenated walkdown-* it also saw are the real ~/.claude/skills copies and this repository's own walkdown-sitting, which is the duplication old-copies-make-way exists for. /walkdown:lint in example/ ran the clone's CLI and reported 0 errors and the one warning lint gives (1d), and /walkdown:status reported the counts and the person, design and agent queues as the report orders them (1e)."
+    },
+    {
+      "rule": "delivery.plugin.one-link",
+      "status": "pass",
+      "statement_hash": "sha256:d5fa92fb8b72",
+      "evidence": [
+        "runs/evidence/2026-10-02T04-54-18Z/probe-installer.txt",
+        "runs/evidence/2026-10-02T04-54-18Z/probe-plugin.txt"
+      ],
+      "reasoning": "`walkdown skills --into` a Claude Code folder made one link, walkdown -> the clone, said so with the target, and said updating the clone updates them; run again it read 'up to date' and ls showed only the link (probe-installer, 2). From a clone of b0d7967 the link was made to that clone; with an older commit checked out the judge skill read through the link ended on the older text, and with the newer commit checked out it ended on 'A line only the newer version has.', with nothing run in between; an edit made through the link showed as ' M skills/setup/SKILL.md' in the clone's git status (probe-plugin, 2b). init made the same link (probe-installer, 5)."
+    },
+    {
+      "rule": "delivery.plugin.never-through-a-link",
+      "status": "pass",
+      "statement_hash": "sha256:a8b1fc5a9e59",
+      "evidence": [
+        "runs/evidence/2026-10-02T04-54-18Z/probe-installer.txt"
+      ],
+      "reasoning": "A skills folder held a link named walkdown pointing at someone else's pack, and a walkdown-judge folder whose SKILL.md was a link to someone else's file. `walkdown skills --into ... --force` reported both as 'left alone (a link walkdown did not make)', the walkdown link still pointed at the pack, and a hash of both target files was identical before and after ('targets unchanged') (probe-installer, 3). Walkdown's own link reads 'up to date' (2)."
+    },
+    {
+      "rule": "delivery.plugin.old-copies-make-way",
+      "status": "pass",
+      "statement_hash": "sha256:05c5546a78f3",
+      "evidence": [
+        "runs/evidence/2026-10-02T04-54-18Z/probe-installer.txt"
+      ],
+      "reasoning": "The folder held walkdown-judge exactly as v0.2.0 shipped it (git show v0.2.0) and a walkdown-setup its person had rewritten. Without --force the link was made, walkdown-judge read 'duplicate (an earlier walkdown's copy - --force removes it)', walkdown-setup read 'duplicate (edited - kept even with --force; remove it yourself)', and the closing line gave `walkdown skills --force` as the command. With --force walkdown-judge was removed, walkdown-setup was kept and reported as edited with its own text intact, and the folder held only the link and walkdown-setup (probe-installer, 4). v0.2.0 is not the current version of that skill, so a copy matching any released version counts."
+    },
+    {
+      "rule": "locations.default.skills-are-yours-by-default",
+      "status": "pass",
+      "statement_hash": "sha256:dd86f56c7d59",
+      "evidence": [
+        "runs/evidence/2026-10-02T04-54-18Z/probe-installer.txt",
+        "runs/evidence/2026-10-02T04-54-18Z/probe-project.txt"
+      ],
+      "reasoning": "init on a fresh repository linked the plugin into the person's Claude Code folder and said the skills are theirs, not the project's, and the repository's git status showed no change at all (probe-installer, 5). Named another agent's directory, `walkdown skills` wrote the five copies as walkdown-backlog ... walkdown-setup and said they are copies to refresh after updating. Bare `walkdown skills` with no terminal wrote nothing and said to name a directory, and the folder it would have used does not exist afterwards. --project in a repository wrote copies into that repository's .claude/skills (probe-project). walkdown-sitting is not among any of them."
+    }
+  ]
+}
