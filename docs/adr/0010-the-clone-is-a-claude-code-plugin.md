@@ -1,6 +1,6 @@
 # ADR 0010 — The clone is a Claude Code plugin
 
-- **Status:** proposed 2026-10-01. Nothing is built; the rules it changes are
+- **Status:** accepted 2026-10-01 by Topher. Not yet built; the rules it changes are
     drafted for Topher's approval first.
 - **Date:** 2026-10-01
 - **Deciders:** Topher (product, eng)
