@@ -1,0 +1,51 @@
+{
+  "run_id": "2026-10-02T16-20-21Z-local-01",
+  "created": "2026-10-02T16:20:21Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    },
+    {
+      "role": "design",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "ef7a0ef-dirty",
+  "spec_hash": "sha256:bc809d798c33",
+  "results": [
+    {
+      "rule": "delivery.plugin.named-for-walkdown",
+      "status": "pass",
+      "statement_hash": "sha256:f528af8a645e"
+    },
+    {
+      "rule": "delivery.plugin.one-link",
+      "status": "pass",
+      "statement_hash": "sha256:d5fa92fb8b72"
+    },
+    {
+      "rule": "delivery.plugin.never-through-a-link",
+      "status": "pass",
+      "statement_hash": "sha256:a8b1fc5a9e59"
+    },
+    {
+      "rule": "delivery.plugin.old-copies-make-way",
+      "status": "pass",
+      "statement_hash": "sha256:05c5546a78f3"
+    },
+    {
+      "rule": "locations.default.skills-are-yours-by-default",
+      "status": "pass",
+      "statement_hash": "sha256:dd86f56c7d59"
+    }
+  ]
+}
