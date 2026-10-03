@@ -3,80 +3,46 @@ title: Which screen is this?
 source:
   prd: (docs/06-prototype-contract.md §2; thread n-0020)
 stories:
-  
+
   - id: screens.ownership
     title: Which blueprints a page belongs to is a fact about its address
-    statement: As a team, we can point walkdown at the projects we have imported and
-      have it say which blueprints claim any given page - several, one, or none
-      - without it ever choosing between them on our behalf.
+    statement: As a team, we can point walkdown at the projects we have imported and have it say which blueprints claim any given page - several, one, or none - without it ever choosing between them on our behalf.
     rules:
       - id: screens.ownership.one-claimant
         retired: >-
-          Withdrawn by ADR 0001 (2026-09-09). A page may be claimed by several
-          blueprints: two efforts about different functionality of one homepage
-          are not two pages, and making the storyboard say otherwise put a lie
-          in the spec to protect an invariant that existed for the tooling's
-          convenience. What the constraint was really protecting - that nothing
-          ever has to guess whose page this is - is kept by asking instead:
-          `walkdown claims` reports shared pages as an inventory, and the panel
-          puts the question to the person (screens.ownership.routes-by-page,
-          panel.start.which-project). Settled again 2026-09-22 (q-0317, q-0335):
-          several blueprints may claim one page; when they do the panel always
-          asks, and the answer is carried in the address, so a reload of that
-          tab is not asked again and nothing else remembers it (ADR 0001 §9,
-          panel.start.address-keeps-the-pick).
+          Withdrawn by ADR 0001 (2026-09-09). A page may be claimed by several blueprints: two efforts about different functionality of one homepage are not two pages, and making the storyboard say otherwise put a lie in the spec to protect an invariant that existed for the tooling's convenience. What the constraint was really protecting - that nothing ever has to guess whose page this is - is kept by asking instead: `walkdown claims` reports shared pages as an inventory, and the panel puts the question to the person (screens.ownership.routes-by-page, panel.start.which-project). Settled again 2026-09-22 (q-0317, q-0335): several blueprints may claim one page; when they do the panel always asks, and the answer is carried in the address, so a reload of that tab is not asked again and nothing else remembers it (ADR 0001 §9, panel.start.address-keeps-the-pick).
         origin: thread:q-0019
-        statement: No two blueprints claim the same page - a claim being an origin from
-          a target's base_url plus a path, compared on path and fragment alone,
-          so that two projects declaring the same path under different queries
-          is still a collision while the same path on two different origins is
-          not.
-        verify: [ checks ]
+        statement: No two blueprints claim the same page - a claim being an origin from a target's base_url plus a path, compared on path and fragment alone, so that two projects declaring the same path under different queries is still a collision while the same path on two different origins is not.
+        verify: [checks]
         steps:
           given:
             - A folder holding several blueprints
           when:
-            - The set is examined as a whole, which no single blueprint lint can
-              do
+            - The set is examined as a whole, which no single blueprint lint can do
           then:
-            - A page claimed by two blueprints is reported, naming both and the
-              screens involved
-            - One blueprint claiming a page under several queries is not a
-              collision - that is a page in two states
-            - The same path on two origins is not a collision, because a
-              target's base_url is part of the claim
+            - A page claimed by two blueprints is reported, naming both and the screens involved
+            - One blueprint claiming a page under several queries is not a collision - that is a page in two states
+            - The same path on two origins is not a collision, because a target's base_url is part of the claim
           statement_hash: sha256:b7fa784715cc
 
       - id: screens.ownership.routes-by-page
         origin: thread:q-0019
-        statement: Which blueprints a page belongs to is decided by the page's address,
-          not by what was chosen last time or by what the server happens to
-          hold.
-        because: A server holding one blueprint is not evidence that this page belongs
-          to it.
-        history: A folder holding exactly one blueprint used to open it over any page,
-          claimed or not, and a folder holding several asked about pages none of
-          them claimed (n-0256, n-0258, n-0260, n-0261).
-        verify: [ checks ]
-        screens: [ choose-blueprint, project-modal ]
+        statement: Which blueprints a page belongs to is decided by the page's address, not by what was chosen last time or by what the server happens to hold.
+        because: A server holding one blueprint is not evidence that this page belongs to it.
+        history: A folder holding exactly one blueprint used to open it over any page, claimed or not, and a folder holding several asked about pages none of them claimed (n-0256, n-0258, n-0260, n-0261).
+        verify: [checks]
+        screens: [choose-blueprint, project-modal]
         steps:
           given:
-            - The projects this machine has imported, and a page that may belong
-              to none, one, or several of their blueprints
+            - The projects this machine has imported, and a page that may belong to none, one, or several of their blueprints
           when:
             - The panel starts there
           then:
-            - Every blueprint claiming that address is named, in no order of
-              preference - a claim being an origin from a target's base_url plus
-              a path, compared on path and fragment with the query dropped
+            - Every blueprint claiming that address is named, in no order of preference - a claim being an origin from a target's base_url plus a path, compared on path and fragment with the query dropped
             - Exactly one claimant is opened, and nothing is asked
-            - Several claimants is a question for the person, never a rank -
-              ordering survives WITHIN one blueprint, because that is how a
-              screen is identified at all, and is abandoned across them
-            - An address no blueprint claims is not guessed at, whatever the
-              server holds
-            - A caller that names a blueprint explicitly is never overridden by
-              this
+            - Several claimants is a question for the person, never a rank - ordering survives WITHIN one blueprint, because that is how a screen is identified at all, and is abandoned across them
+            - An address no blueprint claims is not guessed at, whatever the server holds
+            - A caller that names a blueprint explicitly is never overridden by this
           statement_hash: sha256:015ebac2b063
           reworded:
             - hash: sha256:3021d25287e8
@@ -84,143 +50,95 @@ stories:
               why: the hash covers the steps now; this one named the statement alone
             - hash: sha256:c2308bf1988a
               at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and
-                what happened to `history` - same rule, split (n-0286,
-                2026-09-13)
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
             - hash: sha256:a32c2a668e6d
               at: 2026-09-14T02:50:03Z
-              why: the statement is the goal in a breath; what it restated of its own steps
-                went back to the steps (ADR 0004, walked with Topher 2026-09-13)
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
   - id: screens.surfaces
     title: Both surfaces, even when one of them is not a page
-    statement: As a reviewer, I can compare a design against the app on every screen
-      - including screens whose app is chrome rather than a URL, or is not built
-      yet.
+    statement: As a reviewer, I can compare a design against the app on every screen - including screens whose app is chrome rather than a URL, or is not built yet.
     rules:
       - id: screens.surfaces.as-built-drawing
         origin: walkdown
         created_at: 2026-09-18
-        statement: A project whose build cannot be framed may keep as-built drawings of
-          it under `as-built/`, and `walkdown serve` serves that folder as
-          written so the storyboard's app paths can name its pages.
-        because: Some builds are not pages - walkdown's own panel, a native app - and
-          the design served back as the app shows the design twice. A drawing of
-          what was built, kept by the project, gives the App side something true
-          to show while prototype/ stays as design drew it.
-        history: Decided in ADR 0007 on 2026-09-18, when walkdown's own screens moved
-          from the stand-in to as-built/. How the folder is made and kept is
-          deliberately the project's own business; walkdown only serves it.
-        verify: [ checks ]
-        signoff: [ eng, product ]
-        screens: [ review ]
+        statement: A project whose build cannot be framed may keep as-built drawings of it under `as-built/`, and `walkdown serve` serves that folder as written so the storyboard's app paths can name its pages.
+        because: Some builds are not pages - walkdown's own panel, a native app - and the design served back as the app shows the design twice. A drawing of what was built, kept by the project, gives the App side something true to show while prototype/ stays as design drew it.
+        history: Decided in ADR 0007 on 2026-09-18, when walkdown's own screens moved from the stand-in to as-built/. How the folder is made and kept is deliberately the project's own business; walkdown only serves it.
+        verify: [checks]
+        signoff: [eng, product]
+        screens: [review]
         steps:
           given:
-            - A project with an `as-built/` folder beside its blueprint, holding
-              an HTML page
+            - A project with an `as-built/` folder beside its blueprint, holding an HTML page
           when:
             - Request that page under `/as-built/` from `walkdown serve`
           then:
-            - The page is served exactly as written - no theme swapped in, no
-              mark added; what it says about itself is the project's own
-            - A page the folder does not hold is a 404, and nothing above the
-              folder is reachable through it
-            - A storyboard screen may name such a page as its app path. The
-              panel frames it as it frames any app, and the build-side button
-              reads As-built
+            - The page is served exactly as written - no theme swapped in, no mark added; what it says about itself is the project's own
+            - A page the folder does not hold is a 404, and nothing above the folder is reachable through it
+            - A storyboard screen may name such a page as its app path. The panel frames it as it frames any app, and the build-side button reads As-built
           statement_hash: sha256:098b9682020b
       - id: screens.surfaces.stand-in-app
         origin: walkdown
-        statement: A screen whose app is not a page can declare a stand-in. Walkdown
-          then shows that screen's own design in place of the app, visibly
-          marked as a stand-in, and fading, ghosting and pinning work on it as
-          on any app surface.
-        because: Some of what is built is browser chrome with no page of its own, and
-          some is not built yet. Nobody must be able to mistake a stand-in for
-          the build.
-        verify: [ checks ]
-        signoff: [ eng, product ]
-        screens: [ review ]
+        statement: A screen whose app is not a page can declare a stand-in. Walkdown then shows that screen's own design in place of the app, visibly marked as a stand-in, and fading, ghosting and pinning work on it as on any app surface.
+        because: Some of what is built is browser chrome with no page of its own, and some is not built yet. Nobody must be able to mistake a stand-in for the build.
+        verify: [checks]
+        signoff: [eng, product]
+        screens: [review]
         steps:
           given:
-            - A screen whose storyboard app path points at the server's stand-in
-              for it
+            - A screen whose storyboard app path points at the server's stand-in for it
           when:
             - Switch the surface to Stand-in
           then:
-            - The app pane shows that screen's design, and the comparison
-              controls come alive - fade, ghost, and pin mode on the app side
-            - It announces itself on its own face - a marked edge and a corner
-              label - and wears a theme of neither the mockups nor walkdown's
-              chrome
-            - The anchors are the design's own, so a pin lands on the same
-              element on either surface, and is recorded against the app
-            - It is not evidence - what it shows is the design, so a verdict
-              given against it is a verdict about the design
+            - The app pane shows that screen's design, and the comparison controls come alive - fade, ghost, and pin mode on the app side
+            - It announces itself on its own face - a marked edge and a corner label - and wears a theme of neither the mockups nor walkdown's chrome
+            - The anchors are the design's own, so a pin lands on the same element on either surface, and is recorded against the app
+            - It is not evidence - what it shows is the design, so a verdict given against it is a verdict about the design
           statement_hash: sha256:6a69c42a5b6c
 
       - id: screens.surfaces.app-address-is-resolved
         origin: walkdown
         created_at: 2026-09-24
-        statement: A screen's app path is read against the target's address the way a
-          browser reads a link, so a path written as a whole URL is shown where
-          it points.
-        because: A stand-in for an unbuilt screen lives on walkdown's server while the
-          target is the app, and the frame, the picture and the page's owner
-          must agree on where it is.
-        history: "Found while setting walkdown up on a Rails app (GitHub issue #15). The
-          panel glued the target's address to the path, so the frame for a
-          stand-in was blank while the storyboard drew it correctly."
-        verify: [ checks ]
-        signoff: [ eng ]
-        screens: [ review ]
+        statement: A screen's app path is read against the target's address the way a browser reads a link, so a path written as a whole URL is shown where it points.
+        because: A stand-in for an unbuilt screen lives on walkdown's server while the target is the app, and the frame, the picture and the page's owner must agree on where it is.
+        history: "Found while setting walkdown up on a Rails app (GitHub issue #15). The panel glued the target's address to the path, so the frame for a stand-in was blank while the storyboard drew it correctly."
+        verify: [checks]
+        signoff: [eng]
+        screens: [review]
         steps:
           given:
-            - A target whose address is the app, and a screen whose app path is
-              a whole URL on walkdown's own server
+            - A target whose address is the app, and a screen whose app path is a whole URL on walkdown's own server
           when:
             - The screen is opened on the App surface
           then:
             - The frame loads that URL, the same page the storyboard photographs
-            - Framed there, the page is recognised as that screen, and the same
-              path on the app's own server is not
+            - Framed there, the page is recognised as that screen, and the same path on the app's own server is not
             - The page is claimed at its own address, not at the target's
             - A path written from the root still lands on the target's address
           statement_hash: sha256:f5007e73e677
 
   - id: screens.anchors
     title: Anchors move; records do not
-    statement: As a reviewer, a thread I filed against an element still reads as the
-      record I made when the element has since been renamed - and it says so,
-      rather than warning forever or being rewritten.
+    statement: As a reviewer, a thread I filed against an element still reads as the record I made when the element has since been renamed - and it says so, rather than warning forever or being rewritten.
     rules:
       - id: screens.anchors.renames-are-recorded
         origin: thread:q-0252
         created_at: 2026-09-21
-        statement: A storyboard records an anchor's renames, so a thread filed under the
-          old name still resolves to the element, still shows the name it was
-          filed under, and says it was renamed.
-        because: A thread is a record of a moment and its anchor is part of that record;
-          the names move underneath it, and the record should say so.
-        history: Three threads warned for a fortnight after two anchors were renamed on
-          2026-09-07, with no door to fix them and the conventions rightly
-          forbidding a hand edit (q-0252).
-        verify: [ checks ]
-        signoff: [ eng, product ]
-        screens: [ thread-panel ]
+        statement: A storyboard records an anchor's renames, so a thread filed under the old name still resolves to the element, still shows the name it was filed under, and says it was renamed.
+        because: A thread is a record of a moment and its anchor is part of that record; the names move underneath it, and the record should say so.
+        history: Three threads warned for a fortnight after two anchors were renamed on 2026-09-07, with no door to fix them and the conventions rightly forbidding a hand edit (q-0252).
+        verify: [checks]
+        signoff: [eng, product]
+        screens: [thread-panel]
         steps:
           given:
-            - A screen whose storyboard entry lists renames from an old anchor
-              to its new name, and a thread anchored under the old name
+            - A screen whose storyboard entry lists renames from an old anchor to its new name, and a thread anchored under the old name
           when:
             - The blueprint is linted, and the thread is opened on its own screen
           then:
-            - Lint reads the thread's anchor through the renames and raises no
-              warning; a rename whose end is not a declared anchor is what it
-              warns about instead
-            - The thread's screen shows the anchor as it was filed, in the
-              original spelling, with a mark saying it was renamed
-            - Resting on the anchor lists every name it has had, oldest to
-              newest, in a bubble that is readable and stays inside the pane
+            - Lint reads the thread's anchor through the renames and raises no warning; a rename whose end is not a declared anchor is what it warns about instead
+            - The thread's screen shows the anchor as it was filed, in the original spelling, with a mark saying it was renamed
+            - Resting on the anchor lists every name it has had, oldest to newest, in a bubble that is readable and stays inside the pane
             - Nothing in the thread's file is changed
           statement_hash: sha256:a0495cc39a56

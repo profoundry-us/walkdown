@@ -2,48 +2,34 @@ feature: thread-lifecycle
 stories:
   - id: threads.lifecycle
     title: Feedback and questions move through validated, attributable states
-    statement: As a team, we can trust a thread's status because every transition is
-      validated and attributed.
+    statement: As a team, we can trust a thread's status because every transition is validated and attributed.
     rules:
       - id: threads.lifecycle.validated-transitions
         origin: prd
         statement: A thread status change outside its kind's lifecycle is rejected.
-        verify: [ checks ]
+        verify: [checks]
         steps:
           given:
-            - A note (open > addressed > verified | reopen | waived) or a
-              question (open > answered > incorporated | reopen | waived), where
-              every ending may reopen and a recorded decision never moves
+            - A note (open > addressed > verified | reopen | waived) or a question (open > answered > incorporated | reopen | waived), where every ending may reopen and a recorded decision never moves
           when:
-            - A transition not in that flow is attempted (e.g. open straight to
-              verified)
+            - A transition not in that flow is attempted (e.g. open straight to verified)
           then:
-            - The mutation is rejected with the illegal transition named, and
-              the file is unchanged
+            - The mutation is rejected with the illegal transition named, and the file is unchanged
           statement_hash: sha256:c2384ee386f5
 
       - id: threads.lifecycle.claim-never-accept
         origin: prd
-        statement: Only a person who has said who they are can set a thread to verified
-          or waived. A name the machine guessed, an actor named "agent" in any
-          spelling, or a change a machine says it typed are all rejected.
-        verify: [ checks ]
+        statement: Only a person who has said who they are can set a thread to verified or waived. A name the machine guessed, an actor named "agent" in any spelling, or a change a machine says it typed are all rejected.
+        verify: [checks]
         steps:
           given:
             - A thread in a state from which verified or waived is legal
           when:
-            - The transition is attempted where nobody has written down who is
-              sitting here, or under an actor named "agent", or marked as typed
-              by a machine
+            - The transition is attempted where nobody has written down who is sitting here, or under an actor named "agent", or marked as typed by a machine
           then:
-            - Each is rejected and the thread is unchanged - work can be claimed
-              on somebody's behalf, and accepted only by them
-            - The refusal says where to say who you are, and never fills the gap
-              with a login name
-            - The name is compared as written, case folded and trimmed - this is
-              an agent declaring itself, not authentication, so a confusable
-              spelling is not chased and "the-agent", "agents" and "claude" stay
-              accepted (q-0218)
+            - Each is rejected and the thread is unchanged - work can be claimed on somebody's behalf, and accepted only by them
+            - The refusal says where to say who you are, and never fills the gap with a login name
+            - The name is compared as written, case folded and trimmed - this is an agent declaring itself, not authentication, so a confusable spelling is not chased and "the-agent", "agents" and "claude" stay accepted (q-0218)
           statement_hash: sha256:1c0b2e99daa0
           reworded:
             - hash: sha256:482531dc241f
@@ -59,165 +45,98 @@ stories:
       - id: threads.lifecycle.acts-for-a-person
         origin: thread:n-0139
         created_at: 2026-09-01
-        statement: Attribution follows the words - a machine's own are the agent's, and
-          a person's words it relays stay theirs, as typed, marked as
-          machine-typed, with what the machine added kept apart. No request
-          chooses whose name a record carries.
-        because: A reader must be able to tell which sentences a person actually said,
-          and a record that names them as author of a machine's paragraph says
-          the opposite.
-        history: For a month every sentence an agent typed was filed under the person it
-          worked for with `via agent` beside the name - and since nearly every
-          sentence in a thread is one the agent typed, the board filled with
-          "topher via agent" over paragraphs Topher never wrote (2026-09-17).
-          `said` and `added` split a relayed message into the person's words and
-          the machine's.
-        verify: [ checks ]
+        statement: Attribution follows the words - a machine's own are the agent's, and a person's words it relays stay theirs, as typed, marked as machine-typed, with what the machine added kept apart. No request chooses whose name a record carries.
+        because: A reader must be able to tell which sentences a person actually said, and a record that names them as author of a machine's paragraph says the opposite.
+        history: For a month every sentence an agent typed was filed under the person it worked for with `via agent` beside the name - and since nearly every sentence in a thread is one the agent typed, the board filled with "topher via agent" over paragraphs Topher never wrote (2026-09-17). `said` and `added` split a relayed message into the person's words and the machine's.
+        verify: [checks]
         steps:
           given:
             - A machine whose personal config says who is sitting at it
           when:
-            - An agent opens a thread, replies, or moves one in its own words;
-              and relays what the person said, with something of its own beside
-              it
+            - An agent opens a thread, replies, or moves one in its own words; and relays what the person said, with something of its own beside it
           then:
-            - Its own words are recorded as the agent's - no person named, no
-              mark needed
-            - The person's words are recorded under the person, exactly as
-              typed, with the agent as the provenance beside the name
-            - What the machine added is a field of its own on the same message,
-              never folded into the person's words, and every reader draws it
-              apart and names it as the agent's
+            - Its own words are recorded as the agent's - no person named, no mark needed
+            - The person's words are recorded under the person, exactly as typed, with the agent as the provenance beside the name
+            - What the machine added is a field of its own on the same message, never folded into the person's words, and every reader draws it apart and names it as the agent's
             - An addition with no person's words to sit beside is refused
-            - The report and the stream name both, so a reader can tell a
-              sentence a person wrote from one a machine did
+            - The report and the stream name both, so a reader can tell a sentence a person wrote from one a machine did
             - No argument and no environment variable can name somebody else
-            - A finding or an observation is the machine's own account, authored
-              by the agent with no person named
+            - A finding or an observation is the machine's own account, authored by the agent with no person named
           statement_hash: sha256:0306629cf026
 
       - id: threads.lifecycle.reasoned-endings
         origin: prd
-        statement: Waiving a thread records who waived it and why, and reopening one
-          requires a reason. Both reasons are kept as replies on the thread.
-        verify: [ checks ]
+        statement: Waiving a thread records who waived it and why, and reopening one requires a reason. Both reasons are kept as replies on the thread.
+        verify: [checks]
         unverifiable:
-          agent: The passing case needs a completed waive, and waiving is a human-only
-            transition an agent may never perform (blueprint/AGENTS.md). The
-            reopen half could be walked; the waive half cannot, so the tier
-            cannot honestly hold.
+          agent: The passing case needs a completed waive, and waiving is a human-only transition an agent may never perform (blueprint/AGENTS.md). The reopen half could be walked; the waive half cannot, so the tier cannot honestly hold.
         steps:
           given:
-            - A thread being waived, or an addressed, answered or ended thread
-              being reopened
+            - A thread being waived, or an addressed, answered or ended thread being reopened
           when:
             - The transition is attempted without a reason
           then:
-            - It is rejected; with a reason, the reason is appended as a reply
-              and waived_by records the person
-            - Reopening a verified or waived thread takes a person's acceptance
-              back, so only a person may do it; a machine is refused and files a
-              new thread instead
+            - It is rejected; with a reason, the reason is appended as a reply and waived_by records the person
+            - Reopening a verified or waived thread takes a person's acceptance back, so only a person may do it; a machine is refused and files a new thread instead
           statement_hash: sha256:97912647f98b
 
       - id: threads.lifecycle.says-why-it-exists
         origin: walkdown
         created_at: 2026-09-14
-        statement: "A note says why it exists: feedback, a finding, an observation, a
-          request, or a decision. A finding or an observation is signed by the
-          agent, and a decision is filed closed."
-        because: Why a note exists decides whose look closes it, and a machine's account
-          of what it saw is not a person's words.
-        history: "Of 185 notes waiting on Topher's verify on 2026-09-14, 105 had nothing
-          human in them and 90 wore his name over a judge's finding (ADR 0005)."
-        verify: [ checks ]
-        signoff: [ eng, product ]
+        statement: "A note says why it exists: feedback, a finding, an observation, a request, or a decision. A finding or an observation is signed by the agent, and a decision is filed closed."
+        because: Why a note exists decides whose look closes it, and a machine's account of what it saw is not a person's words.
+        history: "Of 185 notes waiting on Topher's verify on 2026-09-14, 105 had nothing human in them and 90 wore his name over a judge's finding (ADR 0005)."
+        verify: [checks]
+        signoff: [eng, product]
         steps:
           given:
             - A machine whose personal config says who is sitting at it
           when:
-            - A note is filed from the CLI or the browser, with a reason or
-              without one
+            - A note is filed from the CLI or the browser, with a reason or without one
           then:
-            - The note carries the reason it was given; a word walkdown does not
-              know is refused
-            - Left unsaid, a machine's note is an observation and a person's is
-              feedback
-            - A finding or an observation is authored by the agent, with no mark
-              saying it was typed for a person
-            - A decision is filed already recorded, a status nothing transitions
-              out of
+            - The note carries the reason it was given; a word walkdown does not know is refused
+            - Left unsaid, a machine's note is an observation and a person's is feedback
+            - A finding or an observation is authored by the agent, with no mark saying it was typed for a person
+            - A decision is filed already recorded, a status nothing transitions out of
             - A question carries no reason and refuses one
           statement_hash: sha256:5bb935c7abc6
       - id: threads.lifecycle.closes-where-it-was-asked
         origin: walkdown
         created_at: 2026-09-14
-        statement: "A person's signed pass on a rule ends the rule's conversation: every
-          note on it not yet ended reads as verified in that person's name. A
-          note the agent wrote, other than a design request, is never a person's
-          to close: once the agent has done what the note asks, the agent's next
-          pass on the rule closes it as settled."
-        because: The person's acceptance already exists as their verdict on the rule;
-          asking for it again, note by note, asks for what they have given. A
-          note the person never wrote is not theirs to accept.
-        history: Under ADR 0005 only a finding and feedback closed on the pass; a
-          request and an open note stayed, and a rule just passed still queued
-          its person to press Done, and the verify queue was one nobody worked
-          (2026-09-18, ADR 0006). An agent's addressed note was then queued to
-          its person as one "of yours" to verify, though they had never read it
-          (n-0338, 2026-10-01).
-        verify: [ checks ]
-        signoff: [ eng, product ]
+        statement: "A person's signed pass on a rule ends the rule's conversation: every note on it not yet ended reads as verified in that person's name. A note the agent wrote, other than a design request, is never a person's to close: once the agent has done what the note asks, the agent's next pass on the rule closes it as settled."
+        because: The person's acceptance already exists as their verdict on the rule; asking for it again, note by note, asks for what they have given. A note the person never wrote is not theirs to accept.
+        history: Under ADR 0005 only a finding and feedback closed on the pass; a request and an open note stayed, and a rule just passed still queued its person to press Done, and the verify queue was one nobody worked (2026-09-18, ADR 0006). An agent's addressed note was then queued to its person as one "of yours" to verify, though they had never read it (n-0338, 2026-10-01).
+        verify: [checks]
+        signoff: [eng, product]
         steps:
           given:
-            - A rule with an addressed finding, an addressed note of the
-              person's own, an addressed request, an open note nobody has
-              addressed, and a note on another rule
-            - Another rule with an addressed finding and an addressed design
-              request, both written by the agent
+            - A rule with an addressed finding, an addressed note of the person's own, an addressed request, an open note nobody has addressed, and a note on another rule
+            - Another rule with an addressed finding and an addressed design request, both written by the agent
           when:
             - The person records a walkdown signed in a role, passing the rule
           then:
-            - Every note on that rule reads as verified, the open one included,
-              named for the signer, with the run that closed them and a reply
-              saying so
-            - The other rule's note is untouched; a decision was never open and
-              nothing happens to it
-            - A note spoken to after the pass stays as it was - that is not what
-              the person looked at
+            - Every note on that rule reads as verified, the open one included, named for the signer, with the run that closed them and a reply saying so
+            - The other rule's note is untouched; a decision was never open and nothing happens to it
+            - A note spoken to after the pass stays as it was - that is not what the person looked at
             - A fail or a walkdown signed in no role closes nothing
-            - "On the other rule, the agent's pass closes the agent's addressed
-              finding as settled, never as verified; the design request it wrote
-              stays for a person"
-            - The agent may settle its own observation, and any other note it
-              wrote but a design request; a person's feedback and any design
-              request refuse that ending
+            - "On the other rule, the agent's pass closes the agent's addressed finding as settled, never as verified; the design request it wrote stays for a person"
+            - The agent may settle its own observation, and any other note it wrote but a design request; a person's feedback and any design request refuse that ending
           statement_hash: sha256:dc294f733ed4
       - id: threads.lifecycle.says-what-it-did
         origin: walkdown
-        statement: A command that changes a thread reports what changed rather than
-          printing the thread back. It says which status the thread left, which
-          status it reached, whose name the change was recorded under, and how
-          many replies landed.
-        because: Output that looks the same whether or not anything happened is output
-          nobody can act on.
-        verify: [ checks ]
+        statement: A command that changes a thread reports what changed rather than printing the thread back. It says which status the thread left, which status it reached, whose name the change was recorded under, and how many replies landed.
+        because: Output that looks the same whether or not anything happened is output nobody can act on.
+        verify: [checks]
         steps:
           given:
-            - A thread, and a command that will reply to it, transition it, or
-              both
+            - A thread, and a command that will reply to it, transition it, or both
           when:
             - The command is run
           then:
-            - One line names the thread and both ends of the move, and waiving
-              names the person it was recorded under
-            - A reply with no transition says the status did not move, rather
-              than staying silent and letting a reader assume it did
-            - Reading a thread with no flags still prints the whole conversation
-              - reading is a different ask from changing
-            - A refused change says why on the error stream and exits non-zero,
-              so a loop over several threads can stop on the first one rather
-              than plunging on
+            - One line names the thread and both ends of the move, and waiving names the person it was recorded under
+            - A reply with no transition says the status did not move, rather than staying silent and letting a reader assume it did
+            - Reading a thread with no flags still prints the whole conversation - reading is a different ask from changing
+            - A refused change says why on the error stream and exits non-zero, so a loop over several threads can stop on the first one rather than plunging on
           statement_hash: sha256:ea3c4135ac21
           reworded:
             - hash: sha256:224b3a652a3a
@@ -225,9 +144,7 @@ stories:
               why: the hash covers the steps now; this one named the statement alone
             - hash: sha256:0c1f3dff50e4
               at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and
-                what happened to `history` - same rule, split (n-0286,
-                2026-09-13)
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
             - hash: sha256:da7cbe35b72d
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
@@ -236,27 +153,18 @@ stories:
         origin: thread:q-0335
         created_at: 2026-09-22
         statement: No new thread is filed on a retired rule.
-        because: A retired rule is a decision already recorded, and a thread on it
-          re-opens that decision where no walk will reach it.
-        history: q-0317 and q-0335 were both filed on screens.ownership.one-claimant,
-          which ADR 0001 had retired, and each asked again what its retirement
-          note already said (2026-09-22).
-        verify: [ checks ]
-        signoff: [ eng, product ]
+        because: A retired rule is a decision already recorded, and a thread on it re-opens that decision where no walk will reach it.
+        history: q-0317 and q-0335 were both filed on screens.ownership.one-claimant, which ADR 0001 had retired, and each asked again what its retirement note already said (2026-09-22).
+        verify: [checks]
+        signoff: [eng, product]
         steps:
           given:
-            - A rule marked retired, with a note saying where its concern lives
-              now
+            - A rule marked retired, with a note saying where its concern lives now
           when:
-            - Someone files a note or a question anchored to it, then lints the
-              blueprint
+            - Someone files a note or a question anchored to it, then lints the blueprint
           then:
-            - The door refuses the new thread, note or question alike, and the
-              refusal quotes the retirement note
-            - A reply or a status change on a thread already on the rule goes
-              through, so its history stays reachable
-            - Lint warns of a thread on a retired rule that waits on an agent,
-              open or answered, and says to move it or close it
-            - A thread there that waits on its person, or has ended, draws no
-              warning
+            - The door refuses the new thread, note or question alike, and the refusal quotes the retirement note
+            - A reply or a status change on a thread already on the rule goes through, so its history stays reachable
+            - Lint warns of a thread on a retired rule that waits on an agent, open or answered, and says to move it or close it
+            - A thread there that waits on its person, or has ended, draws no warning
           statement_hash: sha256:b09baad89679

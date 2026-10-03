@@ -66,7 +66,7 @@ function fixture({ commit = 'none' } = {}) {
       '    statement: As a shopper I pay.',
       '    rules:',
       '      - id: shop.pay.card',
-      '        statement: A card payment goes through.',
+      '        statement: A card payment goes through, whichever card it is, and the receipt names the card it went through on, by its last four digits.',
       '        verify: [checks]',
       '        steps:',
       '          then: [It is paid]',
@@ -122,7 +122,11 @@ function fixture({ commit = 'none' } = {}) {
 
 test('a story moves with its threads, and its verdicts and signatures read the same in the new blueprint @rule:locations.several.rules-move', () => {
   const f = fixture();
-  const before = { add: f.row('a', 'shop.cart.add'), remove: f.row('a', 'shop.cart.remove') };
+  const before = {
+    add: f.row('a', 'shop.cart.add'),
+    remove: f.row('a', 'shop.cart.remove'),
+    yaml: readFileSync(join(f.A.spec.path, 'features', 'shop.yml'), 'utf8'),
+  };
   // The fixture reads as intended: the sweep made the checks stale, the
   // agent's pass and the signature stand.
   assert.equal(before.add.checks, 'stale');
@@ -148,6 +152,11 @@ test('a story moves with its threads, and its verdicts and signatures read the s
   const bYaml = readFileSync(join(f.B.spec.path, 'features', 'shop.yml'), 'utf8');
   assert.doesNotMatch(aYaml, /shop\.cart/);
   assert.match(aYaml, /shop\.pay\.card/);
+  // Written as it was written: every line left in a, and every line that
+  // arrived in b, is a line of a's file before - none re-wrapped or re-padded.
+  for (const line of [...aYaml.split('\n'), ...bYaml.split('\n')].filter((l) => l.trim() && !/^(feature|stories):/.test(l)))
+    assert.ok(before.yaml.includes(`${line}\n`), `a line as it was written: ${JSON.stringify(line)}`);
+  assert.match(bYaml, /verify: \[checks, agent\]/);
   assert.match(bYaml, /^feature: shop$/m);
   assert.match(bYaml, /# The first thing anyone tries\.\n\s+- id: shop\.cart\.add/);
   assert.equal((bYaml.match(/statement_hash: sha256:/g) ?? []).length, 2);

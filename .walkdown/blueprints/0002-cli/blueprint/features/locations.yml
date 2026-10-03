@@ -2,34 +2,23 @@ feature: locations
 stories:
   - id: locations.default
     title: Adopting walkdown costs the repository nothing
-    statement: As a person trying walkdown on a repository I did not start, I can
-      run it without adding anything to the tree, and stop by deleting one
-      directory nobody else can see.
+    statement: As a person trying walkdown on a repository I did not start, I can run it without adding anything to the tree, and stop by deleting one directory nobody else can see.
     rules:
       - id: locations.default.nothing-in-the-tree
         origin: prd
-        statement: With nothing configured, walkdown writes no `.walkdown/` directory
-          into the repository, and no pointer to one either. The spec, threads,
-          runs, evidence and drafts live in the person's own
-          `~/.walkdown/blueprints/`.
-        because: Trying the tool should commit a project to nothing, and abandoning it
-          should mean deleting one directory.
-        history: "A `.walkdown/` beside the code was tried and reversed: however well
-          ignored, it was still a thing git had to be told about, and the
-          pointer it needed carried a home-directory path into shared history."
-        verify: [ checks ]
-        signoff: [ eng, product ]
+        statement: With nothing configured, walkdown writes no `.walkdown/` directory into the repository, and no pointer to one either. The spec, threads, runs, evidence and drafts live in the person's own `~/.walkdown/blueprints/`.
+        because: Trying the tool should commit a project to nothing, and abandoning it should mean deleting one directory.
+        history: "A `.walkdown/` beside the code was tried and reversed: however well ignored, it was still a thing git had to be told about, and the pointer it needed carried a home-directory path into shared history."
+        verify: [checks]
+        signoff: [eng, product]
         steps:
           given:
             - A repository that has never seen walkdown, and no personal config
           when:
-            - walkdown is initialised and a run, a thread and a draft are
-              recorded
+            - walkdown is initialised and a run, a thread and a draft are recorded
           then:
-            - The tree is byte for byte as it was - no `.walkdown/`, no pointer,
-              nothing for git to see
-            - Everything walkdown made sits in one numbered home under
-              `~/.walkdown/blueprints/`
+            - The tree is byte for byte as it was - no `.walkdown/`, no pointer, nothing for git to see
+            - Everything walkdown made sits in one numbered home under `~/.walkdown/blueprints/`
             - Deleting that one directory removes everything walkdown made
             - Asked what is tracked, walkdown answers nothing, and says why
           statement_hash: sha256:a2ac0f932c99
@@ -39,22 +28,16 @@ stories:
               why: the hash covers the steps now; this one named the statement alone
             - hash: sha256:59933a1c240f
               at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and
-                what happened to `history` - same rule, split (n-0286,
-                2026-09-13)
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
             - hash: sha256:7795aa37a650
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: locations.default.records-follow-the-spec
         origin: prd
-        statement: A home holds the spec and its four kinds of record as siblings -
-          `blueprint/`, `threads/`, `runs/`, `evidence/`, `drafts/` - in one
-          layout wherever the home sits. Which siblings git sees is the commit
-          standard's business, not the layout's.
-        because: A home moves as one directory, and nothing inside it needs rewriting
-          when it does.
-        verify: [ checks ]
+        statement: A home holds the spec and its four kinds of record as siblings - `blueprint/`, `threads/`, `runs/`, `evidence/`, `drafts/` - in one layout wherever the home sits. Which siblings git sees is the commit standard's business, not the layout's.
+        because: A home moves as one directory, and nothing inside it needs rewriting when it does.
+        verify: [checks]
         steps:
           given:
             - A blueprint in its home, wherever the home sits
@@ -71,45 +54,26 @@ stories:
               why: the hash covers the steps now; this one named the statement alone
             - hash: sha256:e937f53b5102
               at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and
-                what happened to `history` - same rule, split (n-0286,
-                2026-09-13)
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: locations.default.in-repo-on-request
         origin: prd
-        statement: A project's walkdown files stay out of version control unless asked;
-          asking is one flag for the spec and its threads, another for
-          everything, and what was chosen is visible in the files themselves
-          rather than recorded in a setting.
-        because: The tree is the only place the answer cannot drift from the truth, and
-          the command reports what git actually holds rather than what walkdown
-          meant to arrange.
-        verify: [ checks ]
-        signoff: [ eng, product ]
+        statement: A project's walkdown files stay out of version control unless asked; asking is one flag for the spec and its threads, another for everything, and what was chosen is visible in the files themselves rather than recorded in a setting.
+        because: The tree is the only place the answer cannot drift from the truth, and the command reports what git actually holds rather than what walkdown meant to arrange.
+        verify: [checks]
+        signoff: [eng, product]
         steps:
           given:
             - A project, fresh or already set up
           when:
-            - The person asks for the spec to be committed, for everything to
-              be, or for nothing to be again
+            - The person asks for the spec to be committed, for everything to be, or for nothing to be again
           then:
-            - The home sits under the repository's `.walkdown/`, laid out as
-              every home is, and the pointer names it by a relative path
-            - With the spec committed, a `.gitignore` beside the home keeps
-              runs, evidence and drafts out - and that file, and the config, are
-              themselves committable
+            - The home sits under the repository's `.walkdown/`, laid out as every home is, and the pointer names it by a relative path
+            - With the spec committed, a `.gitignore` beside the home keeps runs, evidence and drafts out - and that file, and the config, are themselves committable
             - With everything committed there is no `.gitignore` there at all
-            - Asked again with a different standard, the tree changes to say so
-              - the file is written or removed, or the home moves whole with no
-              record edited
-            - The command reports what is tracked now, in words, and how to
-              change its mind later
-            - What is tracked is asked of git, not read off the ignore file
-              walkdown wrote - a root .gitignore hiding .walkdown, a rule that
-              does not reach a blueprint standing elsewhere, an ignore file
-              somebody emptied, and a home that left with its files still in the
-              index are each said outright, and lint errors wherever the tree's
-              promise and git's answer disagree (n-0179, n-0180, n-0181)
+            - Asked again with a different standard, the tree changes to say so - the file is written or removed, or the home moves whole with no record edited
+            - The command reports what is tracked now, in words, and how to change its mind later
+            - What is tracked is asked of git, not read off the ignore file walkdown wrote - a root .gitignore hiding .walkdown, a rule that does not reach a blueprint standing elsewhere, an ignore file somebody emptied, and a home that left with its files still in the index are each said outright, and lint errors wherever the tree's promise and git's answer disagree (n-0179, n-0180, n-0181)
           statement_hash: sha256:7310851da84e
           reworded:
             - hash: sha256:3be1e35e0956
@@ -117,72 +81,49 @@ stories:
               why: the hash covers the steps now; this one named the statement alone
             - hash: sha256:eb28707b6f77
               at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and
-                what happened to `history` - same rule, split (n-0286,
-                2026-09-13)
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
             - hash: sha256:bca2161d6157
               at: 2026-09-14T02:20:43Z
-              why: the statement is the goal in a breath; what it restated of its own steps
-                went back to the steps (ADR 0004, walked with Topher 2026-09-13)
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
       - id: locations.default.skills-are-yours-by-default
         origin: prd
-        statement: The agent procedures walkdown ships install into your own skills
-          directory and never into a repository unless a team asks for it.
-        because: In your own skills directory they work in every project on the machine;
-          a committed skill is a copy of walkdown's own source that walkdown
-          cannot keep current afterwards.
-        verify: [ checks ]
-        signoff: [ eng, product ]
+        statement: The agent procedures walkdown ships install into your own skills directory and never into a repository unless a team asks for it.
+        because: In your own skills directory they work in every project on the machine; a committed skill is a copy of walkdown's own source that walkdown cannot keep current afterwards.
+        verify: [checks]
+        signoff: [eng, product]
         steps:
           given:
-            - A project being set up, and a machine with a personal skills
-              directory
+            - A project being set up, and a machine with a personal skills directory
           when:
             - The skills are installed, either by init or on their own
           then:
-            - For Claude Code they arrive as one link to the clone
-              (delivery.plugin.one-link); for any other agent, as copies in the
-              directory named
+            - For Claude Code they arrive as one link to the clone (delivery.plugin.one-link); for any other agent, as copies in the directory named
             - The tree gains nothing, whether or not the spec is committed
-            - Setting up does not put a copy in the repository, and leaving does
-              not take one away - a copy there is one somebody asked for
-            - Installing them on their own asks where they should go rather than
-              picking, and writes nothing to a place nobody named
-            - A skill that depends on a harness only walkdown's own repository
-              has is not among them
-            - A copy the person has edited is kept and reported rather than
-              overwritten
+            - Setting up does not put a copy in the repository, and leaving does not take one away - a copy there is one somebody asked for
+            - Installing them on their own asks where they should go rather than picking, and writes nothing to a place nobody named
+            - A skill that depends on a harness only walkdown's own repository has is not among them
+            - A copy the person has edited is kept and reported rather than overwritten
           statement_hash: sha256:dd86f56c7d59
 
       - id: locations.default.one-home-per-blueprint
         origin: thread:n-0124
-        statement: Every blueprint has a numbered home of its own, and no path walkdown
-          resolves is keyed by a name two projects could share.
-        because: A name two projects can both have is not an address; a number allocated
-          once is.
-        verify: [ checks ]
-        signoff: [ eng, product ]
+        statement: Every blueprint has a numbered home of its own, and no path walkdown resolves is keyed by a name two projects could share.
+        because: A name two projects can both have is not an address; a number allocated once is.
+        verify: [checks]
+        signoff: [eng, product]
         steps:
           given:
-            - Two blueprints in one `.walkdown`, and two repositories whose
-              directories share a name
+            - Two blueprints in one `.walkdown`, and two repositories whose directories share a name
           when:
             - Each is asked about, then written to for the first time
           then:
-            - Asking reports where records would go and writes nothing, not even
-              the claim on that home
-            - Each blueprint ends up with a numbered home of its own, and no two
-              ever coincide
-            - Nothing resolves through a name two projects could share,
-              whichever door does the resolving - not the config merge, not a
-              server's list, not a move
-            - Two checkouts that share a name, one listed personally, stay two
-              projects with two ledgers
-            - A home that already holds a blueprint's records keeps answering
-              for it
-            - A home nothing claims is reported and left standing, never guessed
-              at and never moved
+            - Asking reports where records would go and writes nothing, not even the claim on that home
+            - Each blueprint ends up with a numbered home of its own, and no two ever coincide
+            - Nothing resolves through a name two projects could share, whichever door does the resolving - not the config merge, not a server's list, not a move
+            - Two checkouts that share a name, one listed personally, stay two projects with two ledgers
+            - A home that already holds a blueprint's records keeps answering for it
+            - A home nothing claims is reported and left standing, never guessed at and never moved
           statement_hash: sha256:43e88185b989
           reworded:
             - hash: sha256:c2e4b20e7f0d
@@ -190,67 +131,47 @@ stories:
               why: the hash covers the steps now; this one named the statement alone
             - hash: sha256:90679f4f6194
               at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and
-                what happened to `history` - same rule, split (n-0286,
-                2026-09-13)
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
             - hash: sha256:195a0540e150
               at: 2026-09-14T02:20:43Z
-              why: the statement is the goal in a breath; what it restated of its own steps
-                went back to the steps (ADR 0004, walked with Topher 2026-09-13)
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
       - id: locations.default.prototype-beside-the-spec
         origin: walkdown
         created_at: 2026-09-24
-        statement: A relative `prototype.root` is looked for beside the spec first and
-          in the code second, so a home kept outside the repository can hold its
-          own design.
-        because: A home outside the repository can only keep its design beside the spec,
-          and neither layout should need a path to one person's disk in the
-          shared config.
-        history: "GitHub issue #17. With the home outside the repository, `prototype: {
-          root: prototype/ }` looked in the repository, and every design page
-          and stand-in was a 404."
-        verify: [ checks ]
-        signoff: [ eng ]
+        statement: A relative `prototype.root` is looked for beside the spec first and in the code second, so a home kept outside the repository can hold its own design.
+        because: A home outside the repository can only keep its design beside the spec, and neither layout should need a path to one person's disk in the shared config.
+        history: "GitHub issue #17. With the home outside the repository, `prototype: { root: prototype/ }` looked in the repository, and every design page and stand-in was a 404."
+        verify: [checks]
+        signoff: [eng]
         steps:
           given:
             - A blueprint whose prototype root is a relative path
           when:
-            - A design page, a stand-in or a storyboard picture of the design is
-              asked for
+            - A design page, a stand-in or a storyboard picture of the design is asked for
           then:
             - A directory by that name beside the spec answers when there is one
-            - Otherwise the directory by that name in the code answers, as it
-              always has
-            - The design pages, the stand-ins and the storyboard all read the
-              same directory
+            - Otherwise the directory by that name in the code answers, as it always has
+            - The design pages, the stand-ins and the storyboard all read the same directory
           statement_hash: sha256:a30a7a594efd
 
   - id: locations.answer
     title: Anyone can ask where this project's pieces are
-    statement: As someone standing in a repository, I can ask where every piece
-      lives and why it was chosen there, and the asking never changes the
-      answer.
+    statement: As someone standing in a repository, I can ask where every piece lives and why it was chosen there, and the asking never changes the answer.
     rules:
       - id: locations.answer.says-why
         origin: prd
-        statement: "Every path walkdown reports says why it was chosen: named on the
-          command line, found in this machine's registry, the home a registry
-          entry names, or the built-in default. When the reason is a registry
-          entry, the report also says how that entry got there."
-        because: A person who disagrees with where something is needs to know which
-          decision to argue with.
-        verify: [ checks ]
+        statement: "Every path walkdown reports says why it was chosen: named on the command line, found in this machine's registry, the home a registry entry names, or the built-in default. When the reason is a registry entry, the report also says how that entry got there."
+        because: A person who disagrees with where something is needs to know which decision to argue with.
+        verify: [checks]
         steps:
           given:
             - A project with some paths defaulted and some configured
           when:
             - walkdown is asked where things live
           then:
-            - Each of the spec, runs, threads, evidence, drafts and code carries
-              its reason
-            - The reason names the rule that decided it, not merely that a
-              decision was made
+            - Each of the spec, runs, threads, evidence, drafts and code carries its reason
+            - The reason names the rule that decided it, not merely that a decision was made
           statement_hash: sha256:738bca8657bc
           reworded:
             - hash: sha256:fd21bba75c2e
@@ -258,9 +179,7 @@ stories:
               why: the hash covers the steps now; this one named the statement alone
             - hash: sha256:26757965fbdd
               at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and
-                what happened to `history` - same rule, split (n-0286,
-                2026-09-13)
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
             - hash: sha256:cb01c6594b8f
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
@@ -270,11 +189,9 @@ stories:
 
       - id: locations.answer.asking-writes-nothing
         origin: prd
-        statement: "Asking where something lives creates nothing: no directory, no
-          config file, no placeholder."
-        because: The command a confused person reaches for first must not itself change
-          what they were confused about.
-        verify: [ checks ]
+        statement: "Asking where something lives creates nothing: no directory, no config file, no placeholder."
+        because: The command a confused person reaches for first must not itself change what they were confused about.
+        verify: [checks]
         steps:
           given:
             - A project with no personal config at all
@@ -290,135 +207,67 @@ stories:
               why: the hash covers the steps now; this one named the statement alone
             - hash: sha256:47b87b883d14
               at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and
-                what happened to `history` - same rule, split (n-0286,
-                2026-09-13)
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
             - hash: sha256:bc8314186c2a
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
       - id: locations.answer.nearest-blueprint-wins
         retired: >-
-          Answered by deleting the question (2026-09-01, q-0138). Walkdown no
-          longer searches the tree for blueprints, so there is no tree answer to
-          arbitrate against a configured one and no precedence left to state.
-          The half of this that survived - a repository may hold several
-          blueprints without them bleeding into each other - is now
-          locations.answer.declared-not-discovered, which carries it without the
-          contest.
+          Answered by deleting the question (2026-09-01, q-0138). Walkdown no longer searches the tree for blueprints, so there is no tree answer to arbitrate against a configured one and no precedence left to state. The half of this that survived - a repository may hold several blueprints without them bleeding into each other - is now locations.answer.declared-not-discovered, which carries it without the contest.
         origin: prd
-        statement: A blueprint found in the working tree beats a configured entry rooted
-          above it, and a blueprint named outright is answered by the entry that
-          owns that blueprint or by none at all - because a repository can hold
-          several, and an entry rooted at the whole tree would otherwise answer
-          for its own siblings and report one project's spec beside another
-          project's ledger.
-        verify: [ checks ]
+        statement: A blueprint found in the working tree beats a configured entry rooted above it, and a blueprint named outright is answered by the entry that owns that blueprint or by none at all - because a repository can hold several, and an entry rooted at the whole tree would otherwise answer for its own siblings and report one project's spec beside another project's ledger.
+        verify: [checks]
         steps:
           given:
-            - A repository holding two blueprints, and a config entry rooted at
-              the whole repository
+            - A repository holding two blueprints, and a config entry rooted at the whole repository
           when:
             - The location is resolved from inside the inner one
           then:
             - The inner blueprint answers, with its own runs and threads
-            - The outer entry still answers where the tree offers no blueprint,
-              which is what an out-of-tree spec is for
+            - The outer entry still answers where the tree offers no blueprint, which is what an out-of-tree spec is for
           statement_hash: sha256:8abbb2442baa
 
       - id: locations.answer.one-walkdown-answers
         origin: walkdown
         retired: >-
-          Its statement is about which of two files answers, and there is one
-          file now (ADR 0003, accepted 2026-09-11): a reader consults
-          ~/.walkdown/registry.yml and nothing else, a committed
-          .walkdown/config.yml is a manifest that only `walkdown import` reads,
-          and no `.walkdown` is ever found by walking. Every mechanism this rule
-          named - the nearest-and-stop walk, the merge with the personal file,
-          the crossing guard on both files - was deleted at step 3 of that ADR,
-          after n-0275 showed a symlink walking through the guard on the read
-          side while the write side refused the same path. The half that
-          survives - no inference, nothing merely lying nearby is a project - is
-          locations.answer.declared-not-discovered; what replaces the boundary
-          is locations.answer.registry-is-the-only-door.
-        statement: "Exactly one `.walkdown` directory answers for where you are standing
-          - the nearest one at or above you - and it is merged with the personal
-          `~/.walkdown` and with nothing else. What that forbids is INFERENCE -
-          walkdown never works out from the tree that a neighbouring checkout's
-          blueprints are yours, so a pack carrying its own `.walkdown` never
-          sees the repository root's and the root's never sees the pack's. It
-          does not forbid breadth - a blueprint you named yourself, with
-          `walkdown import`, is reachable from anywhere, because you said so and
-          nothing was guessed."
-        verify: [ checks ]
-        signoff: [ eng, product ]
+          Its statement is about which of two files answers, and there is one file now (ADR 0003, accepted 2026-09-11): a reader consults ~/.walkdown/registry.yml and nothing else, a committed .walkdown/config.yml is a manifest that only `walkdown import` reads, and no `.walkdown` is ever found by walking. Every mechanism this rule named - the nearest-and-stop walk, the merge with the personal file, the crossing guard on both files - was deleted at step 3 of that ADR, after n-0275 showed a symlink walking through the guard on the read side while the write side refused the same path. The half that survives - no inference, nothing merely lying nearby is a project - is locations.answer.declared-not-discovered; what replaces the boundary is locations.answer.registry-is-the-only-door.
+        statement: "Exactly one `.walkdown` directory answers for where you are standing - the nearest one at or above you - and it is merged with the personal `~/.walkdown` and with nothing else. What that forbids is INFERENCE - walkdown never works out from the tree that a neighbouring checkout's blueprints are yours, so a pack carrying its own `.walkdown` never sees the repository root's and the root's never sees the pack's. It does not forbid breadth - a blueprint you named yourself, with `walkdown import`, is reachable from anywhere, because you said so and nothing was guessed."
+        verify: [checks]
+        signoff: [eng, product]
         steps:
           given:
-            - A repository holding a `.walkdown` at its root and another inside
-              a pack, and a personal `~/.walkdown`
+            - A repository holding a `.walkdown` at its root and another inside a pack, and a personal `~/.walkdown`
           when:
-            - A location is resolved from inside the pack, and again from the
-              repository root
+            - A location is resolved from inside the pack, and again from the repository root
           then:
-            - From the pack, the pack's own answers and the root's is not
-              consulted at all
+            - From the pack, the pack's own answers and the root's is not consulted at all
             - From the root, the root's answers and the pack's is invisible
-            - Each is merged with the personal one, and with no second
-              repository config however many lie above it
-            - A server offers what the registry holds - the blueprints that
-              `.walkdown` declares, plus the ones this machine imported - and
-              nothing that was merely lying nearby, wherever the blueprint it
-              serves happens to sit
-            - A committed entry whose spec lies under another `.walkdown` is
-              refused when written and reported by lint when found - that
-              `.walkdown` already answers for it (q-0168)
-            - One that is there anyway is not read either - where names it as
-              refused and says which directory answers for it, and status and
-              serve never see it - and an ephemeral entry may not name it from
-              outside, because a copy means a copy and this is the original
-              (q-0176)
-            - The same row in the PERSONAL file is refused on the same terms -
-              set aside on read, named on the report, reported by lint - because
-              a tool that resolved it while refusing the byte-identical
-              committed one would answer the same question two ways in one
-              breath (n-0188)
-            - A row may name a blueprint under its OWN `.walkdown` - the
-              personal home, whose config that file is, or the one answering
-              where you stand - so the way to a pack is to stand in its
-              checkout, to list a real copy of it, or to import it by name
-            - An IMPORTED row is the one way across, and it is not an exception
-              to the rule but the point of it - `walkdown import` is somebody
-              naming a directory and being shown what it declares, so nothing
-              about it was inferred (ADR 0001 §3)
-            - A `.walkdown` holding homes but no config declares nothing and
-              answers for nothing, so a row naming a blueprint under it is that
-              blueprint's only declaration and is read
+            - Each is merged with the personal one, and with no second repository config however many lie above it
+            - A server offers what the registry holds - the blueprints that `.walkdown` declares, plus the ones this machine imported - and nothing that was merely lying nearby, wherever the blueprint it serves happens to sit
+            - A committed entry whose spec lies under another `.walkdown` is refused when written and reported by lint when found - that `.walkdown` already answers for it (q-0168)
+            - One that is there anyway is not read either - where names it as refused and says which directory answers for it, and status and serve never see it - and an ephemeral entry may not name it from outside, because a copy means a copy and this is the original (q-0176)
+            - The same row in the PERSONAL file is refused on the same terms - set aside on read, named on the report, reported by lint - because a tool that resolved it while refusing the byte-identical committed one would answer the same question two ways in one breath (n-0188)
+            - A row may name a blueprint under its OWN `.walkdown` - the personal home, whose config that file is, or the one answering where you stand - so the way to a pack is to stand in its checkout, to list a real copy of it, or to import it by name
+            - An IMPORTED row is the one way across, and it is not an exception to the rule but the point of it - `walkdown import` is somebody naming a directory and being shown what it declares, so nothing about it was inferred (ADR 0001 §3)
+            - A `.walkdown` holding homes but no config declares nothing and answers for nothing, so a row naming a blueprint under it is that blueprint's only declaration and is read
           statement_hash: sha256:69f36d35a978
 
       - id: locations.answer.declared-not-discovered
         origin: thread:q-0138
-        statement: walkdown answers only for blueprints somebody registered on this
-          machine; it never goes looking for one.
-        because: A repository may hold several blueprints without them bleeding into
-          each other.
-        verify: [ checks ]
-        signoff: [ eng, product ]
+        statement: walkdown answers only for blueprints somebody registered on this machine; it never goes looking for one.
+        because: A repository may hold several blueprints without them bleeding into each other.
+        verify: [checks]
+        signoff: [eng, product]
         steps:
           given:
-            - A repository holding two blueprints, each registered, and a third
-              nobody registered
+            - A repository holding two blueprints, each registered, and a third nobody registered
           when:
-            - The location is resolved from inside each of them, and one is
-              named outright
+            - The location is resolved from inside each of them, and one is named outright
           then:
-            - Each registered blueprint answers for itself, with its own runs
-              and threads
-            - The unregistered one is not a project at all, however much it
-              looks like one from the outside - and where its checkout declares
-              it, the answer names the manifest and says `walkdown import`
-            - The registry is consulted, and the report says which row answered
-              and how it arrived - a `blueprints:` list in the personal
-              config.yml is set aside and named, however many keys it restates
+            - Each registered blueprint answers for itself, with its own runs and threads
+            - The unregistered one is not a project at all, however much it looks like one from the outside - and where its checkout declares it, the answer names the manifest and says `walkdown import`
+            - The registry is consulted, and the report says which row answered and how it arrived - a `blueprints:` list in the personal config.yml is set aside and named, however many keys it restates
           statement_hash: sha256:f1df66c74dac
           reworded:
             - hash: sha256:d6788490af67
@@ -426,55 +275,30 @@ stories:
               why: the hash covers the steps now; this one named the statement alone
             - hash: sha256:251a2b83c9b6
               at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and
-                what happened to `history` - same rule, split (n-0286,
-                2026-09-13)
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
             - hash: sha256:715be4b0e9c9
               at: 2026-09-14T02:20:43Z
-              why: the statement is the goal in a breath; what it restated of its own steps
-                went back to the steps (ADR 0004, walked with Topher 2026-09-13)
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
       - id: locations.answer.registry-is-the-only-door
         origin: thread:n-0275
-        statement: walkdown reads only the registry. A `.walkdown` folder nobody
-          registered, or a path nobody added, is not consulted.
-        because: A path is examined once, when it is added; every read after that trusts
-          what the add wrote, so nothing a tree grows later can open a second
-          door.
-        history: A symlink created outside a pack, pointing at the pack's home, was
-          followed on the read side while the writer refused the same path - so
-          a second board listed, served and wrote to the pack's ledger with
-          nobody having imported anything (n-0275, ADR 0003). The `because` was
-          rewritten on 2026-09-21 (n-0322); the first draft said the same thing
-          in a voice nobody could hear.
-        verify: [ checks ]
-        signoff: [ eng, product ]
+        statement: walkdown reads only the registry. A `.walkdown` folder nobody registered, or a path nobody added, is not consulted.
+        because: A path is examined once, when it is added; every read after that trusts what the add wrote, so nothing a tree grows later can open a second door.
+        history: A symlink created outside a pack, pointing at the pack's home, was followed on the read side while the writer refused the same path - so a second board listed, served and wrote to the pack's ledger with nobody having imported anything (n-0275, ADR 0003). The `because` was rewritten on 2026-09-21 (n-0322); the first draft said the same thing in a voice nobody could hear.
+        verify: [checks]
+        signoff: [eng, product]
         steps:
           given:
-            - A repository with a registered home at its root and a pack inside
-              it with its own, and a symlink outside the pack pointing at the
-              pack's home
-            - A row written by hand into the registry, with no `registered:`,
-              naming the link
+            - A repository with a registered home at its root and a pack inside it with its own, and a symlink outside the pack pointing at the pack's home
+            - A row written by hand into the registry, with no `registered:`, naming the link
           when:
-            - The location is asked for through the link's row, a thread is
-              filed through it, and a server is started at the repository root
+            - The location is asked for through the link's row, a thread is filed through it, and a server is started at the repository root
           then:
-            - "`walkdown where` sets the row aside and says it was written by
-              hand; `walkdown status` and `walkdown thread new` through it
-              refuse, and nothing lands in the pack's ledger"
-            - The server lists every registered blueprint and never the link's
-              row
-            - "`walkdown import` through the link registers the pack's home
-              once, under its real path, and a second import says it is already
-              listed"
-            - Standing in the pack reaches the pack's row; standing at the root
-              reaches the root's; nothing about the tree between them is
-              consulted
-            - A registered spelling is canonicalised on read only to compare,
-              the way the writers canonicalised it to write - a symlink planted
-              at a registered path is the same directory and matches its row -
-              and no path is ever resolved to find a row that was not written
+            - "`walkdown where` sets the row aside and says it was written by hand; `walkdown status` and `walkdown thread new` through it refuse, and nothing lands in the pack's ledger"
+            - The server lists every registered blueprint and never the link's row
+            - "`walkdown import` through the link registers the pack's home once, under its real path, and a second import says it is already listed"
+            - Standing in the pack reaches the pack's row; standing at the root reaches the root's; nothing about the tree between them is consulted
+            - A registered spelling is canonicalised on read only to compare, the way the writers canonicalised it to write - a symlink planted at a registered path is the same directory and matches its row - and no path is ever resolved to find a row that was not written
           statement_hash: sha256:f6b76093bef6
           reworded:
             - hash: sha256:20130d966a11
@@ -482,141 +306,91 @@ stories:
               why: the hash covers the steps now; this one named the statement alone
             - hash: sha256:40116907d7ab
               at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and
-                what happened to `history` - same rule, split (n-0286,
-                2026-09-13)
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
             - hash: sha256:e40318fd68f9
               at: 2026-09-14T02:30:30Z
-              why: the statement is the goal in a breath; what it restated of its own steps
-                went back to the steps (ADR 0004, walked with Topher 2026-09-13)
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
             - hash: sha256:6e50a37dc531
               at: 2026-09-21T01:30:46Z
-              why: q-0251 (machine names refused), q-0302 (an addressless target counts
-                nothing placed), q-0280/n-0322 (canonicalised only to compare;
-                the because rewritten)
+              why: q-0251 (machine names refused), q-0302 (an addressless target counts nothing placed), q-0280/n-0322 (canonicalised only to compare; the because rewritten)
 
       - id: locations.answer.serve-starts-anywhere
         origin: walkdown
         created_at: 2026-09-30
-        statement: "`walkdown serve` starts from any directory and serves every
-          blueprint registered on this machine. Which blueprint a page shows is
-          named in its address, or chosen by the person when the address names
-          none."
-        because: The server serves what the registry lists, not what the directory it
-          was started in holds, so where it starts from decides nothing.
-        history: "Until 2026-09-30 it refused to start outside a registered project, and
-          the setup skill told agents to pass `--blueprint`, so agents handed
-          people one server per blueprint, started from its directory (GitHub
-          issue #19). A blueprint registered, or a storyboard drawn, while it
-          ran was not recognised from its pages until a restart."
-        verify: [ checks ]
-        signoff: [ eng ]
+        statement: "`walkdown serve` starts from any directory and serves every blueprint registered on this machine. Which blueprint a page shows is named in its address, or chosen by the person when the address names none."
+        because: The server serves what the registry lists, not what the directory it was started in holds, so where it starts from decides nothing.
+        history: "Until 2026-09-30 it refused to start outside a registered project, and the setup skill told agents to pass `--blueprint`, so agents handed people one server per blueprint, started from its directory (GitHub issue #19). A blueprint registered, or a storyboard drawn, while it ran was not recognised from its pages until a restart."
+        verify: [checks]
+        signoff: [eng]
         steps:
           given:
-            - A machine with blueprints registered, and a directory that belongs
-              to none of them
+            - A machine with blueprints registered, and a directory that belongs to none of them
           when:
             - "`walkdown serve` is started there"
           then:
-            - It starts, and says it serves every blueprint registered on this
-              machine
-            - Its root, opened with no blueprint in the address, shows the
-              registered blueprints to choose from, and no rules
-            - Named by id, any registered blueprint is served as it would be by
-              a server started in its own project
-            - A request that needs a blueprint and names none is refused, and
-              the refusal says how to name one
-            - Started instead inside a registered project, or with
-              `--blueprint`, that blueprint is the one a page naming none shows
-            - A blueprint registered, or a storyboard edited, after the server
-              started is recognised from its own app pages without a restart
+            - It starts, and says it serves every blueprint registered on this machine
+            - Its root, opened with no blueprint in the address, shows the registered blueprints to choose from, and no rules
+            - Named by id, any registered blueprint is served as it would be by a server started in its own project
+            - A request that needs a blueprint and names none is refused, and the refusal says how to name one
+            - Started instead inside a registered project, or with `--blueprint`, that blueprint is the one a page naming none shows
+            - A blueprint registered, or a storyboard edited, after the server started is recognised from its own app pages without a restart
           statement_hash: sha256:8fc3f6d54231
 
       - id: locations.answer.adapters-file-where-walkdown-says
         origin: walkdown
         created_at: 2026-09-24
-        statement: A test adapter files its run where `walkdown where` says runs go,
-          including when the blueprint's home is outside the repository.
-        because: A run filed where nothing reads it is a pass nobody sees, and the
-          adapter is the one place a person cannot watch.
-        history: "GitHub issue #16. The RSpec formatter found the blueprint by walking
-          up from the code, never reached a home outside the repository, and
-          recorded nothing while every spec passed."
-        verify: [ checks ]
-        signoff: [ eng ]
+        statement: A test adapter files its run where `walkdown where` says runs go, including when the blueprint's home is outside the repository.
+        because: A run filed where nothing reads it is a pass nobody sees, and the adapter is the one place a person cannot watch.
+        history: "GitHub issue #16. The RSpec formatter found the blueprint by walking up from the code, never reached a home outside the repository, and recorded nothing while every spec passed."
+        verify: [checks]
+        signoff: [eng]
         steps:
           given:
-            - A blueprint whose home is outside the repository, and an RSpec
-              suite in the code tagged with its rules
+            - A blueprint whose home is outside the repository, and an RSpec suite in the code tagged with its rules
           when:
             - The suite runs through walkdown run, or as a bare rspec in the code
           then:
             - The run lands in the home's runs, where `walkdown status` counts it
-            - walkdown run hands the suite the spec and runs directories it
-              resolved
-            - Run bare, the formatter asks walkdown where of the clone it was
-              loaded from
-            - A spec committed in the repository is still found by looking up
-              from the code
-            - The config init writes loads the formatter from the clone by its
-              path, so no gem is needed
+            - walkdown run hands the suite the spec and runs directories it resolved
+            - Run bare, the formatter asks walkdown where of the clone it was loaded from
+            - A spec committed in the repository is still found by looking up from the code
+            - The config init writes loads the formatter from the clone by its path, so no gem is needed
           statement_hash: sha256:7e1aecb8560b
 
   - id: locations.keeping
     title: A ledger already written is never orphaned or edited
-    statement: As a team with history in our blueprint, no preference of anyone's
-      machine can make our records stop being found, and moving them stays
-      something a person did on purpose.
+    statement: As a team with history in our blueprint, no preference of anyone's machine can make our records stop being found, and moving them stays something a person did on purpose.
     rules:
       - id: locations.keeping.existing-outranks-preference
         origin: prd
         retired: >-
-          The rule was about records found INSIDE a blueprint -
-          `blueprint/runs/`, the layout every project had before homes -
-          outranking a blanket default. That layout is not read any more: every
-          blueprint walkdown answers for is declared, lives in a home, and its
-          entry names the records or the home they derive from, so there is no
-          directory for the resolver to discover and nothing for a preference to
-          give way to (2026-09-04, Topher's call to remove legacy support
-          entirely). What survives of it is
-          locations.keeping.moving-is-a-decision: relocating records is still
-          something a person does, never something a default does to them.
-        statement: A blanket default never points past records a blueprint already holds
-          - an existing directory is a fact and a default is a preference, so
-          the preference gives way and moving those records stays a decision
-          somebody makes.
-        verify: [ checks ]
+          The rule was about records found INSIDE a blueprint - `blueprint/runs/`, the layout every project had before homes - outranking a blanket default. That layout is not read any more: every blueprint walkdown answers for is declared, lives in a home, and its entry names the records or the home they derive from, so there is no directory for the resolver to discover and nothing for a preference to give way to (2026-09-04, Topher's call to remove legacy support entirely). What survives of it is locations.keeping.moving-is-a-decision: relocating records is still something a person does, never something a default does to them.
+        statement: A blanket default never points past records a blueprint already holds - an existing directory is a fact and a default is a preference, so the preference gives way and moving those records stays a decision somebody makes.
+        verify: [checks]
         steps:
           given:
             - A blueprint whose runs directory already holds records
           when:
             - A personal config declares a different default for runs
           then:
-            - The existing directory is still the answer, and the report says it
-              is because the blueprint already holds it
+            - The existing directory is still the answer, and the report says it is because the blueprint already holds it
             - No record is moved, copied or hidden by the resolution
           statement_hash: sha256:c5603d183d94
 
       - id: locations.keeping.moving-is-a-decision
         origin: prd
-        statement: Moving records relocates the files unchanged and writes the new place
-          on the blueprint's row in this machine's registry. A destination that
-          already holds records is refused.
-        because: The records are append-only, and dropping one set into a directory that
-          already holds another would change both.
-        verify: [ checks ]
+        statement: Moving records relocates the files unchanged and writes the new place on the blueprint's row in this machine's registry. A destination that already holds records is refused.
+        because: The records are append-only, and dropping one set into a directory that already holds another would change both.
+        verify: [checks]
         steps:
           given:
             - A blueprint whose runs live in the repository
           when:
             - They are moved somewhere else
           then:
-            - Every file arrives byte for byte, and none is rewritten to suit
-              its new address
-            - The blueprint's row in this machine's registry records where they
-              went, and nothing else on that row or any other changes
-            - A destination that already holds records is refused rather than
-              merged into
+            - Every file arrives byte for byte, and none is rewritten to suit its new address
+            - The blueprint's row in this machine's registry records where they went, and nothing else on that row or any other changes
+            - A destination that already holds records is refused rather than merged into
           statement_hash: sha256:1422c8dcbeae
           reworded:
             - hash: sha256:452142df8095
@@ -624,60 +398,43 @@ stories:
               why: the hash covers the steps now; this one named the statement alone
             - hash: sha256:797a6afe9cc9
               at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and
-                what happened to `history` - same rule, split (n-0286,
-                2026-09-13)
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
             - hash: sha256:f650bd21c46f
               at: 2026-09-14T04:24:19Z
               why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
             - hash: sha256:af8538a1091f
               at: 2026-09-14T16:05:25Z
-              why: the move has been recorded on the registry row since ADR 0003, not in the
-                personal config; the words now say what the code does
+              why: the move has been recorded on the registry row since ADR 0003, not in the personal config; the words now say what the code does
 
       - id: locations.keeping.old-config-never-misfiles
         origin: walkdown
         created_at: 2026-09-24
-        statement: A personal config written before the registry never files a
-          registered blueprint's records outside its home, and walkdown names
-          each line of it that it no longer reads.
-        because: A record filed where its readers do not look is lost without a word. A
-          line that is kept but not read waits to surprise someone.
-        history: "GitHub issue #18. On a machine with an older config, `init` left its
-          `projects:` block and `defaults:` in place. Nine questions went to a
-          directory beside the new home, and `walkdown threads` never saw them."
-        verify: [ checks ]
-        signoff: [ eng ]
+        statement: A personal config written before the registry never files a registered blueprint's records outside its home, and walkdown names each line of it that it no longer reads.
+        because: A record filed where its readers do not look is lost without a word. A line that is kept but not read waits to surprise someone.
+        history: "GitHub issue #18. On a machine with an older config, `init` left its `projects:` block and `defaults:` in place. Nine questions went to a directory beside the new home, and `walkdown threads` never saw them."
+        verify: [checks]
+        signoff: [eng]
         steps:
           given:
-            - A config.yml with a projects row about this checkout, and per-kind
-              defaults spelled for the layout before numbered homes
+            - A config.yml with a projects row about this checkout, and per-kind defaults spelled for the layout before numbered homes
           when:
             - The checkout is initialised, and its records are asked for
           then:
-            - The row's machine-local keys, such as its targets, move to the
-              registry row, the row leaves config.yml, and init says so
-            - A default that would land beside the home, not in it, is not used,
-              and the home's own directory answers
+            - The row's machine-local keys, such as its targets, move to the registry row, the row leaves config.yml, and init says so
+            - A default that would land beside the home, not in it, is not used, and the home's own directory answers
             - Both where and lint name that default and say why it is not used
-            - A default aimed anywhere else, such as evidence on another disk,
-              still applies
+            - A default aimed anywhere else, such as evidence on another disk, still applies
           statement_hash: sha256:3ad02c787d78
 
   - id: locations.travel
     title: A record means the same thing on somebody else's machine
-    statement: As a second person cloning this project, the verdicts I read were
-      made against a spec I can identify and point at evidence I can actually
-      open, without anyone having to have used my directory layout.
+    statement: As a second person cloning this project, the verdicts I read were made against a spec I can identify and point at evidence I can actually open, without anyone having to have used my directory layout.
     rules:
       - id: locations.travel.evidence-by-key
         origin: prd
-        statement: A run names the evidence it left by a logical key rather than a
-          filesystem path, and the server resolves that key per machine.
-        because: A screenshot filed on one laptop must still be findable from another,
-          and no ledger entry should be pinned to the disk of whoever recorded
-          it.
-        verify: [ checks ]
+        statement: A run names the evidence it left by a logical key rather than a filesystem path, and the server resolves that key per machine.
+        because: A screenshot filed on one laptop must still be findable from another, and no ledger entry should be pinned to the disk of whoever recorded it.
+        verify: [checks]
         steps:
           given:
             - A run recorded while evidence lived in the repository
@@ -694,25 +451,18 @@ stories:
               why: the hash covers the steps now; this one named the statement alone
             - hash: sha256:4254ee8a1f3d
               at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and
-                what happened to `history` - same rule, split (n-0286,
-                2026-09-13)
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: locations.travel.judged-against-a-spec
         origin: prd
-        statement: Every run records a content hash of the spec it was judged against,
-          computed from the blueprint's own files, and recording a verdict never
-          changes that hash.
-        because: A verdict has to say what it was measured against even when the project
-          has no repository. A run is the spec's output, not part of it, so
-          recording one cannot change the hash.
-        verify: [ checks ]
+        statement: Every run records a content hash of the spec it was judged against, computed from the blueprint's own files, and recording a verdict never changes that hash.
+        because: A verdict has to say what it was measured against even when the project has no repository. A run is the spec's output, not part of it, so recording one cannot change the hash.
+        verify: [checks]
         steps:
           given:
             - A blueprint and a run recorded against it
           when:
-            - A verdict, a thread and a draft are written, then a rule is
-              reworded
+            - A verdict, a thread and a draft are written, then a rule is reworded
           then:
             - The three writes leave the spec hash exactly where it was
             - The rewording moves it
@@ -724,27 +474,21 @@ stories:
               why: the hash covers the steps now; this one named the statement alone
             - hash: sha256:39d6a730c5d8
               at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and
-                what happened to `history` - same rule, split (n-0286,
-                2026-09-13)
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
       - id: locations.travel.provenance-not-currency
         origin: prd
-        statement: A run records which commit it saw so a person can look it up later. A
-          newer commit never makes an older verdict stop counting.
-        because: Provenance tells a person digging into a verdict where to look; an
-          unrelated commit must not turn a board from green to grey.
-        verify: [ checks ]
+        statement: A run records which commit it saw so a person can look it up later. A newer commit never makes an older verdict stop counting.
+        because: Provenance tells a person digging into a verdict where to look; an unrelated commit must not turn a board from green to grey.
+        verify: [checks]
         steps:
           given:
             - A ledger of passing verdicts
           when:
-            - Commits land that touch neither the rules nor the code they
-              describe
+            - Commits land that touch neither the rules nor the code they describe
           then:
             - Every cell reads exactly as it did before
-            - The runs still carry the shas they were recorded with, for anyone
-              who wants to look
+            - The runs still carry the shas they were recorded with, for anyone who wants to look
           statement_hash: sha256:b1efe71a4d3b
           reworded:
             - hash: sha256:c513160f49fc
@@ -752,46 +496,30 @@ stories:
               why: the hash covers the steps now; this one named the statement alone
             - hash: sha256:6e10186c5b9c
               at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and
-                what happened to `history` - same rule, split (n-0286,
-                2026-09-13)
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
             - hash: sha256:d5257f44d2df
               at: 2026-09-14T02:30:30Z
-              why: the statement is the goal in a breath; what it restated of its own steps
-                went back to the steps (ADR 0004, walked with Topher 2026-09-13)
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
   - id: locations.pointer
     title: An agent arriving in the repository finds the spec
-    statement: As an AI agent cloning this project, I find one paragraph telling me
-      a spec exists and where it is - in the file this project actually keeps
-      its conventions in, saying where the spec is now rather than where it used
-      to be.
+    statement: As an AI agent cloning this project, I find one paragraph telling me a spec exists and where it is - in the file this project actually keeps its conventions in, saying where the spec is now rather than where it used to be.
     rules:
       - id: locations.pointer.placed-where-agents-read
         origin: prd
-        statement: Initialising a repository adds one paragraph, saying where the spec
-          is, to the file that repository already keeps its agent instructions
-          in. If several files could be that one, walkdown writes nothing and
-          names them.
-        because: A project keeping conventions in several files has made a choice
-          walkdown cannot read, and guessing puts the sentence where nobody
-          reads it.
-        verify: [ checks ]
-        signoff: [ eng, product ]
+        statement: Initialising a repository adds one paragraph, saying where the spec is, to the file that repository already keeps its agent instructions in. If several files could be that one, walkdown writes nothing and names them.
+        because: A project keeping conventions in several files has made a choice walkdown cannot read, and guessing puts the sentence where nobody reads it.
+        verify: [checks]
+        signoff: [eng, product]
         steps:
           given:
-            - A repository being initialised with its spec committed - an
-              uncommitted one gets no pointer, since the pointer would be the
-              one thing in the tree
+            - A repository being initialised with its spec committed - an uncommitted one gets no pointer, since the pointer would be the one thing in the tree
           when:
             - It holds no agent-instruction file, or exactly one, or several
           then:
-            - With no agent-instruction file, CLAUDE.md is created carrying the
-              pointer
-            - With exactly one, the pointer goes into that file, and no second
-              file is made to compete with it
-            - With more than one, nothing is written and the report names them
-              all, for a person to settle by naming the one they want
+            - With no agent-instruction file, CLAUDE.md is created carrying the pointer
+            - With exactly one, the pointer goes into that file, and no second file is made to compete with it
+            - With more than one, nothing is written and the report names them all, for a person to settle by naming the one they want
           statement_hash: sha256:c74747fd201e
           reworded:
             - hash: sha256:e10f6a000d16
@@ -799,27 +527,19 @@ stories:
               why: the hash covers the steps now; this one named the statement alone
             - hash: sha256:b3c24bacbf43
               at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and
-                what happened to `history` - same rule, split (n-0286,
-                2026-09-13)
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
             - hash: sha256:b9b4fd11bd71
               at: 2026-09-14T02:30:30Z
-              why: the statement is the goal in a breath; what it restated of its own steps
-                went back to the steps (ADR 0004, walked with Topher 2026-09-13)
+              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
 
       - id: locations.pointer.owns-only-its-block
         origin: prd
-        statement: "walkdown owns one fenced block in the repository's agent-instruction
-          file, the paragraph telling an agent where the spec is, and nothing
-          else in that file. It rewrites only what lies between its own markers,
-          and updates the block when the spec moves."
-        because: A pointer still naming a directory the spec has left is worse than no
-          pointer at all - an agent believes it and goes looking.
-        verify: [ checks ]
+        statement: "walkdown owns one fenced block in the repository's agent-instruction file, the paragraph telling an agent where the spec is, and nothing else in that file. It rewrites only what lies between its own markers, and updates the block when the spec moves."
+        because: A pointer still naming a directory the spec has left is worse than no pointer at all - an agent believes it and goes looking.
+        verify: [checks]
         steps:
           given:
-            - An agent-instruction file with a person's own words above and
-              below a walkdown block
+            - An agent-instruction file with a person's own words above and below a walkdown block
           when:
             - The spec moves and the pointer is placed again
           then:
@@ -833,9 +553,7 @@ stories:
               why: the hash covers the steps now; this one named the statement alone
             - hash: sha256:dda1404e46d5
               at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and
-                what happened to `history` - same rule, split (n-0286,
-                2026-09-13)
+              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
             - hash: sha256:6319b8194496
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
@@ -844,21 +562,17 @@ stories:
               why: names the file the block lives in and what the block is for
 
       - id: locations.pointer.names-every-blueprint
-        statement: In a project with several blueprints, the paragraph `walkdown
-          pointer` writes lists each blueprint by id with where its spec is, and
-          says that commands which write need `--blueprint`.
-        because: An agent arriving in the repository should find every spec in it, not
-          only the first.
+        statement: In a project with several blueprints, the paragraph `walkdown pointer` writes lists each blueprint by id with where its spec is, and says that commands which write need `--blueprint`.
+        because: An agent arriving in the repository should find every spec in it, not only the first.
         origin: walkdown
         created_at: 2026-10-02
-        verify: [ checks ]
-        signoff: [ eng ]
+        verify: [checks]
+        signoff: [eng]
         steps:
           given:
             - A project with blueprints a and b, and one agent-instruction file
           when:
-            - "`walkdown pointer` places the paragraph, then b is renamed or
-              moved and it is placed again"
+            - "`walkdown pointer` places the paragraph, then b is renamed or moved and it is placed again"
           then:
             - The paragraph names a and b, each with where its spec is
             - It says that commands which write take `--blueprint <id>`
@@ -868,171 +582,120 @@ stories:
 
   - id: locations.several
     title: A project holds several blueprints
-    statement: As someone keeping two features' specs apart in one project, I can
-      give each its own blueprint outside the repository, and still read them
-      all from the project without naming one.
+    statement: As someone keeping two features' specs apart in one project, I can give each its own blueprint outside the repository, and still read them all from the project without naming one.
     rules:
       - id: locations.several.init-makes-another
-        statement: "`walkdown init --id <name>` gives a project that already has a
-          blueprint a second one, in its own numbered folder outside the
-          repository, and running the same command again changes nothing."
-        because: Two unrelated features in one project each want their own rules,
-          threads and runs, kept out of the repository like the first.
-        history: On 2026-10-02 a project on Topher's work machine could not get a second
-          blueprint without committing it to the repository (issue #20, ADR 0011).
+        statement: "`walkdown init --id <name>` gives a project that already has a blueprint a second one, in its own numbered folder outside the repository, and running the same command again changes nothing."
+        because: Two unrelated features in one project each want their own rules, threads and runs, kept out of the repository like the first.
+        history: On 2026-10-02 a project on Topher's work machine could not get a second blueprint without committing it to the repository (issue #20, ADR 0011).
         origin: walkdown
         created_at: 2026-10-02
-        verify: [ checks ]
-        signoff: [ eng, product ]
+        verify: [checks]
+        signoff: [eng, product]
         steps:
           given:
             - A project with blueprint a, kept outside the repository
           when:
-            - "`walkdown init --dir` is run with `--id b`, then the same again,
-              then with no `--id`"
+            - "`walkdown init --dir` is run with `--id b`, then the same again, then with no `--id`"
           then:
-            - The first creates a new numbered home for b, registers it for the
-              project, and says it is another blueprint for this project, naming
-              a
+            - The first creates a new numbered home for b, registers it for the project, and says it is another blueprint for this project, naming a
             - The second reports everything up to date and creates nothing
-            - With no `--id`, init means the id it would give the project
-              anyway, and reuses that blueprint; if none has that id, it refuses
-              and names them
-            - An `--id` already registered for a different project is refused,
-              not given a suffix
-            - "`--commit` with several blueprints in the project needs `--id`,
-              and without it refuses and names the choices"
-            - "`walkdown serve` lists both, and `walkdown claims` reports both
-              when both claim a page"
+            - With no `--id`, init means the id it would give the project anyway, and reuses that blueprint; if none has that id, it refuses and names them
+            - An `--id` already registered for a different project is refused, not given a suffix
+            - "`--commit` with several blueprints in the project needs `--id`, and without it refuses and names the choices"
+            - "`walkdown serve` lists both, and `walkdown claims` reports both when both claim a page"
           statement_hash: sha256:0ff494d94d74
 
       - id: locations.several.reads-cover-all
-        statement: With several blueprints in a project, `status`, `lint`, `threads` and
-          `where` run with no `--blueprint` report on every one, each under its
-          id.
+        statement: With several blueprints in a project, `status`, `lint`, `threads` and `where` run with no `--blueprint` report on every one, each under its id.
         because: Adding a blueprint should not stop the first one's commands working.
         origin: walkdown
         created_at: 2026-10-02
-        verify: [ checks ]
-        signoff: [ eng, product ]
+        verify: [checks]
+        signoff: [eng, product]
         steps:
           given:
             - A project with blueprints a and b
           when:
-            - Each command is run with no `--blueprint`, then with `--json`,
-              then with `--blueprint b`
+            - Each command is run with no `--blueprint`, then with `--json`, then with `--blueprint b`
           then:
-            - Each prints one section per blueprint, headed by its id, in the
-              order they were registered
-            - "With `--json` the answer is `{ blueprints: [...] }`, each entry
-              the single-blueprint answer plus its id"
+            - Each prints one section per blueprint, headed by its id, in the order they were registered
+            - "With `--json` the answer is `{ blueprints: [...] }`, each entry the single-blueprint answer plus its id"
             - With `--blueprint b` it reports on b alone, as it does today
             - A project with one blueprint prints exactly what it printed before
           statement_hash: sha256:b52ccdd8164e
 
       - id: locations.several.writes-name-one
-        statement: With several blueprints in a project, a command that writes or acts
-          on one blueprint refuses until `--blueprint` names it, and the refusal
-          lists the ids.
+        statement: With several blueprints in a project, a command that writes or acts on one blueprint refuses until `--blueprint` names it, and the refusal lists the ids.
         because: Guessing would file a thread or a verdict under the wrong blueprint.
         origin: walkdown
         created_at: 2026-10-02
-        verify: [ checks ]
-        signoff: [ eng ]
+        verify: [checks]
+        signoff: [eng]
         steps:
           given:
             - A project with blueprints a and b
           when:
-            - "`hash --write`, `thread new`, a change to a thread, `judge`,
-              `sweep` and `move` are run with no `--blueprint`, then with
-              `--blueprint b`"
+            - "`hash --write`, `thread new`, a change to a thread, `judge`, `sweep` and `move` are run with no `--blueprint`, then with `--blueprint b`"
           then:
-            - Each exits with status 2, says several blueprints are registered
-              here, names a and b, and says `--blueprint` picks one
+            - Each exits with status 2, says several blueprints are registered here, names a and b, and says `--blueprint` picks one
             - With `--blueprint b`, each acts on b alone
-            - A thread id that only one of them holds is changed without
-              `--blueprint`
+            - A thread id that only one of them holds is changed without `--blueprint`
             - "\"No blueprint here\" is said only where none is registered"
-            - "`walkdown run` is not among them: it runs the project's suite and
-              files each result by rule
-              (locations.several.results-filed-by-rule)"
+            - "`walkdown run` is not among them: it runs the project's suite and files each result by rule (locations.several.results-filed-by-rule)"
           statement_hash: sha256:de5bdad5a7a4
 
       - id: locations.several.results-filed-by-rule
-        statement: In a project with several blueprints, a recorded test run files each
-          result in the blueprint that holds its rule, and `walkdown run` with
-          no `--blueprint` runs the suite once for the whole project.
-        because: One test suite checks rules from every blueprint in a project, and a
-          result filed in the wrong blueprint, or in none, leaves a built rule
-          reading as unbuilt.
-        history: On 2026-10-02 a project with two blueprints recorded nothing at all,
-          because the reporter could not tell which blueprint a run was for (ADR
-          0013).
+        statement: In a project with several blueprints, a recorded test run files each result in the blueprint that holds its rule, and `walkdown run` with no `--blueprint` runs the suite once for the whole project.
+        because: One test suite checks rules from every blueprint in a project, and a result filed in the wrong blueprint, or in none, leaves a built rule reading as unbuilt.
+        history: On 2026-10-02 a project with two blueprints recorded nothing at all, because the reporter could not tell which blueprint a run was for (ADR 0013).
         origin: walkdown
         created_at: 2026-10-02
-        verify: [ checks ]
-        signoff: [ eng, product ]
+        verify: [checks]
+        signoff: [eng, product]
         steps:
           given:
-            - A project with blueprints a and b, and one test suite with a test
-              tagged for a rule of each and a test tagged with a rule neither
-              holds
+            - A project with blueprints a and b, and one test suite with a test tagged for a rule of each and a test tagged with a rule neither holds
           when:
-            - The suite runs with walkdown's reporter, then `walkdown run` is
-              run with no `--blueprint`, then with `--blueprint a`
+            - The suite runs with walkdown's reporter, then `walkdown run` is run with no `--blueprint`, then with `--blueprint a`
           then:
-            - a's runs hold a's result and b's runs hold b's, in two records
-              sharing one run id
-            - The tag neither blueprint holds is named in the reporter's output
-              and recorded nowhere
-            - "`walkdown run` with no `--blueprint` runs the suite once, or each
-              distinct runner command once, and files results the same way"
-            - "With `--blueprint a`, only a's results are recorded, and b's are
-              named as set aside"
-            - The node reporter, the Playwright reporter and the RSpec formatter
-              all file this way
+            - a's runs hold a's result and b's runs hold b's, in two records sharing one run id
+            - The tag neither blueprint holds is named in the reporter's output and recorded nowhere
+            - "`walkdown run` with no `--blueprint` runs the suite once, or each distinct runner command once, and files results the same way"
+            - "With `--blueprint a`, only a's results are recorded, and b's are named as set aside"
+            - The node reporter, the Playwright reporter and the RSpec formatter all file this way
             - A project with one blueprint records exactly as before
           statement_hash: sha256:e6bc38c97ca2
 
       - id: locations.several.lint-reads-the-project
-        statement: In a project with several blueprints, lint accepts what names another
-          blueprint's rule, thread or screen.
-        because: Sharing a test suite and citing each other's threads is normal for
-          blueprints in one project, and lint that errors on every run for it
-          teaches people to ignore lint.
+        statement: In a project with several blueprints, lint accepts what names another blueprint's rule, thread or screen.
+        because: Sharing a test suite and citing each other's threads is normal for blueprints in one project, and lint that errors on every run for it teaches people to ignore lint.
         origin: walkdown
         created_at: 2026-10-02
-        verify: [ checks ]
-        signoff: [ eng ]
+        verify: [checks]
+        signoff: [eng]
         steps:
           given:
-            - A project with blueprints a and b, a test tagged with a rule of
-              b's, and a rule of a's whose history cites a thread of b's
+            - A project with blueprints a and b, a test tagged with a rule of b's, and a rule of a's whose history cites a thread of b's
           when:
             - "`walkdown lint` runs"
           then:
-            - a reports no error for the test tagged with b's rule, and no
-              warning for the thread of b's
+            - a reports no error for the test tagged with b's rule, and no warning for the thread of b's
             - A tag that no blueprint in the project holds is still an error
-            - A thread id that no blueprint in the project holds is still a
-              warning
-            - A run record's result for a rule another blueprint holds raises no
-              warning, and neither does a thread on another blueprint's screen
+            - A thread id that no blueprint in the project holds is still a warning
+            - A run record's result for a rule another blueprint holds raises no warning, and neither does a thread on another blueprint's screen
           statement_hash: sha256:a2090d8e2e07
 
       - id: locations.several.thread-ids-unique
-        statement: A new thread's id is not used by any other thread in any blueprint of
-          its project.
-        because: A rule or a commit message that cites a thread by id should name
-          exactly one conversation.
+        statement: A new thread's id is not used by any other thread in any blueprint of its project.
+        because: A rule or a commit message that cites a thread by id should name exactly one conversation.
         origin: walkdown
         created_at: 2026-10-02
-        verify: [ checks ]
-        signoff: [ eng ]
+        verify: [checks]
+        signoff: [eng]
         steps:
           given:
-            - A project where blueprint a's threads run to n-0005 and blueprint
-              b's to n-0002
+            - A project where blueprint a's threads run to n-0005 and blueprint b's to n-0002
           when:
             - A note is filed in b, then a question in a
           then:
@@ -1042,40 +705,25 @@ stories:
           statement_hash: sha256:edca96d77671
 
       - id: locations.several.rules-move
-        statement: "`walkdown rules move <rule|story|feature> --to <blueprint>` moves
-          rules to another blueprint in the same project, with their threads,
-          and copies the run records and evidence behind their verdicts."
-        because: A project that grows a second blueprint should not lose the verdicts
-          and signatures its rules already earned.
+        statement: "`walkdown rules move <rule|story|feature> --to <blueprint>` moves rules to another blueprint in the same project, with their threads, and copies the run records and evidence behind their verdicts."
+        because: A project that grows a second blueprint should not lose the verdicts and signatures its rules already earned.
         origin: walkdown
         created_at: 2026-10-02
-        verify: [ checks ]
-        signoff: [ eng, product ]
+        verify: [checks]
+        signoff: [eng, product]
         steps:
           given:
-            - A project with blueprints a and b, and a story in a whose rules
-              have threads, checks, agent verdicts, signatures and a sweep
+            - A project with blueprints a and b, and a story in a whose rules have threads, checks, agent verdicts, signatures and a sweep
           when:
-            - "`walkdown rules move <story> --to b --dry-run` is run, then the
-              same without `--dry-run`"
+            - "`walkdown rules move <story> --to b --dry-run` is run, then the same without `--dry-run`"
           then:
-            - The dry run lists the rules, threads, run records and evidence it
-              would move or copy, and changes nothing
-            - The rules leave a's feature file and arrive in the feature file of
-              the same name in b, with their statements, steps and hashes
-              unchanged
+            - The dry run lists the rules, threads, run records and evidence it would move or copy, and changes nothing
+            - The rules leave a's feature file and arrive in the feature file of the same name in b, with their statements, steps and hashes unchanged
             - Their threads move to b and keep their ids
-            - Each run record holding a result for a moved rule is copied to b,
-              keeping its run id, time and author, holding only the moved rules'
-              results, and saying which blueprint and run it was copied from
+            - Each run record holding a result for a moved rule is copied to b, keeping its run id, time and author, holding only the moved rules' results, and saying which blueprint and run it was copied from
             - a's run records are unchanged
             - Sweep markers and the evidence the copies cite are copied to b
-            - "`walkdown status` in b shows every moved rule with the verdicts
-              and signatures it had in a"
-            - A destination outside the project, a rule id the destination
-              already has, uncommitted changes in either blueprint's features,
-              and verdicts recorded at an address the destination's target does
-              not point at are each refused, and nothing moves
-            - It says how many rules and threads moved, and how many run records
-              were copied
+            - "`walkdown status` in b shows every moved rule with the verdicts and signatures it had in a"
+            - A destination outside the project, a rule id the destination already has, uncommitted changes in either blueprint's features, and verdicts recorded at an address the destination's target does not point at are each refused, and nothing moves
+            - It says how many rules and threads moved, and how many run records were copied
           statement_hash: sha256:7d24fcbae138
