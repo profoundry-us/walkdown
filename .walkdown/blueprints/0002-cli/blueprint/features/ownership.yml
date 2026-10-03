@@ -1,0 +1,263 @@
+feature: ownership
+stories:
+  - id: ownership.drift
+    title: Spec ahead of its sources is routed, never silent
+    statement: As a design team, we get a request in our queue whenever the spec
+      needs something we haven't drawn.
+    rules:
+      - id: ownership.drift.design-requests-required
+        origin: prd
+        statement: Lint flags any screen that has no design and no open design request.
+          Filing one clears the flag.
+        verify: [ checks ]
+        steps:
+          given:
+            - "A storyboard screen with no design (`prototype: null`) and no
+              note anchored to it"
+          when:
+            - The blueprint is linted
+          then:
+            - The screen is named as having no design and no open design request
+            - An open note with the reason "request", anchored to that screen,
+              clears it, because a request is queued for design
+            - A note with any other reason does not clear it, because it is
+              queued for the agent, where design will not see it
+            - "A note whose thread has ended stops clearing it: a request is
+              open work or it is nothing"
+            - "A proposal sketch is not a request: a drawing nobody asked design
+              for routes nothing"
+            - A retired screen is exempt, because it describes something we
+              stopped meaning
+          statement_hash: sha256:418069b7b1f6
+
+  - id: ownership.design
+    title: The design is drawn by someone other than the builder
+    statement: As a team, we get two perspectives on every screen, because whoever
+      builds it never drew it.
+    rules:
+      - id: ownership.design.declared-per-blueprint
+        origin: walkdown
+        created_at: 2026-10-01
+        statement: A blueprint names who draws its design in its `walkdown.yml`, with
+          `design.by` set to `person` or `agent`. When a blueprint says nothing,
+          a person draws.
+        because: Who designs differs between projects. What holds on every one is that
+          the builder does not draw.
+        history: Decided in ADR 0009 on 2026-10-01 (GitHub issue #2). On Topher's own projects an agent designs; at work a designer does.
+        verify: [ checks ]
+        signoff: [ eng, product ]
+        steps:
+          given:
+            - 'Blueprints declaring design.by "person", design.by "agent",
+              nothing, and some other value, each with an open design request'
+          when:
+            - Each is linted and its status report's attention list read
+          then:
+            - With "person", or with nothing said, the request is queued for the
+              designer, shown the way a person's queue is
+            - With "agent", it is queued for the design agent, never for the
+              agent building the app
+            - Any other value is a lint error that names "person" and "agent" as
+              the values allowed
+          statement_hash: sha256:e1ce6c441f53
+
+      - id: ownership.design.request-on-a-screen
+        origin: walkdown
+        created_at: 2026-10-01
+        statement: A design request can be filed on a screen alone, with `walkdown
+          thread new --screen <id>`. A thread filed on a screen with no rule is
+          a design request unless a `--reason` says otherwise.
+        because: The screen that most needs a request is one that design has not drawn,
+          and it often has no rule yet to anchor to.
+        history: AGENTS.md told agents to file a design request anchored to the screen
+          while `walkdown thread new` refused any thread without `--rule` (found
+          2026-09-29, deferred until ADR 0009 was decided).
+        verify: [ checks ]
+        signoff: [ eng ]
+        steps:
+          given:
+            - "A screen with `prototype: null` and no rule naming it"
+          when:
+            - "`walkdown thread new --screen <id> --body <text>` is run"
+          then:
+            - It is filed anchored to the screen, with no rule, and with the
+              reason "request"
+            - It satisfies ownership.drift.design-requests-required for that
+              screen
+            - Given `--reason <reason>`, the thread carries that reason
+            - With neither `--rule` nor `--screen`, it is refused, and the
+              refusal says to name one
+          statement_hash: sha256:f073f61e1435
+
+  - id: ownership.authoring
+    title: A rule is written so it can be built from
+    statement: As a team, we can hand a rule to whoever implements it - a person or
+      an agent - and have them build the right thing without asking us what we
+      meant.
+    rules:
+      - id: ownership.authoring.steps-are-required
+        origin: walkdown
+        statement: Every rule carries given/when/then steps. A rule without them is
+          reported as an error, not as a warning.
+        because: The steps are what a check is built from; a statement standing alone
+          leaves whoever implements it to invent the detail and whoever judges
+          it with nothing to judge against.
+        verify: [ checks ]
+        steps:
+          given:
+            - A rule carrying a statement and no steps, and a retired rule
+              carrying neither
+          when:
+            - The blueprint is linted
+          then:
+            - The rule with no steps is an error, named in the file and at the
+              rule
+            - A rule whose steps are present is silent, whatever else is true of
+              it
+            - "A retired rule is exempt: it describes something we stopped
+              meaning, and owes nothing but an id that still resolves"
+            - The error says why - a check is built from the steps - so the fix
+              is obvious to whoever reads it
+          statement_hash: sha256:3227ee91ac45
+          reworded:
+            - hash: sha256:a0e7cc9e7139
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:511aa1c28355
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and
+                what happened to `history` - same rule, split (n-0286,
+                2026-09-13)
+            - hash: sha256:5215a4e2b046
+              at: 2026-09-14T04:15:34Z
+              why: "ADR 0004 wording pass: the words moved, the meaning did not"
+
+      - id: ownership.authoring.statement-reads-at-a-glance
+        origin: walkdown
+        created_at: 2026-09-13
+        statement: A statement is one or two sentences a stranger can read without the
+          steps. Lint names a statement that has grown into a paragraph, and a
+          reason that has grown into a story.
+        because: A rule is read by product and design before it is built, and a
+          statement restating its own steps hides what it wants.
+        history: Twenty-two of 132 statements had grown past forty-five words, every one
+          restating its then-steps, and were reworded in one sitting (ADR 0004,
+          2026-09-13).
+        verify: [ checks ]
+        steps:
+          given:
+            - A rule whose statement runs past forty-five words or three
+              sentences, and one whose because runs past thirty-five words
+          when:
+            - The blueprint is linted
+          then:
+            - The long statement is a warning that says what a statement is for,
+              not only what number it crossed
+            - The long because is a warning that says what belongs in history
+            - A statement under the line is silent, whatever else is true of it
+            - Both are warnings, never errors, because length is a symptom and a
+              person decides
+          statement_hash: sha256:97f1bacfb270
+
+      - id: ownership.authoring.machine-words-pass-the-voice
+        origin: thread:n-0323
+        created_at: 2026-09-20
+        statement: The machine's own words are refused at the door when they miss the
+          voice, with each fault named, and lint names the same faults in every
+          rule already on the board. A person's words are never gated.
+        because: Most of the prose on a board is the machine's, and a sentence that
+          failed a stranger is cheaper to fix before it is filed than to find
+          after.
+        history: Twenty-one of the agent's own observations read as one paragraph each,
+          dashes chaining three thoughts, and Topher asked for a voice and a
+          check against it before anything is saved (n-0323, 2026-09-20).
+        verify: [ checks ]
+        steps:
+          given:
+            - A thread the machine is about to reply on, and a rule whose
+              statement runs past forty words
+          when:
+            - The machine files a reply with a dash-chained sentence, then again
+              with --as-is
+            - A person files the same words as their own
+            - The blueprint is linted
+          then:
+            - The first reply is refused and the refusal names the fault and the
+              sentence, and nothing lands on disk
+            - The --as-is reply lands unchanged
+            - The person's reply lands unchanged, gated by nothing
+            - Lint warns on the long statement under the category `voice`,
+              saying what to do, never an error
+          statement_hash: sha256:4c46fabe7d48
+
+  - id: ownership.writes
+    title: The server writes specification, never implementation
+    statement: As a team, we can let a browser talk to the review server because the
+      only things a request can create are the things review is FOR - feedback,
+      sittings, verdicts - and never the product itself.
+    rules:
+      - id: ownership.writes.spec-never-implementation
+        origin: thread:q-0019
+        statement: "The review server lets a browser write three kinds of record: a
+          thread, a draft, a run. Anything it writes outside those three
+          directories is a breach, not a bug."
+        because: The browser captures intent and the agent structures it; the product is
+          never written from a web page.
+        verify: [ checks ]
+        signoff: [ eng, product ]
+        steps:
+          given:
+            - A running review server, and a browser that can reach it
+          when:
+            - Every write the API offers is performed - a thread opened, a
+              reply, a transition, a draft saved and discarded, a walkdown
+              sealed
+          then:
+            - Everything that changed on disk is under the resolved threads,
+              drafts or runs directories
+            - Nothing under features, the storyboard, the prototype root, source
+              or checks moved by a byte
+            - The one module every write passes through names the author policy
+              once, so a new writer cannot re-invent it
+          statement_hash: sha256:037b0d10dcea
+          reworded:
+            - hash: sha256:a966a60dc9bc
+              at: 2026-09-13
+              why: the hash covers the steps now; this one named the statement alone
+            - hash: sha256:67ee12c8ddd0
+              at: 2026-09-13
+              why: the statement is the claim alone now; its reason moved to `because` and
+                what happened to `history` - same rule, split (n-0286,
+                2026-09-13)
+            - hash: sha256:40dc9f5b5b37
+              at: 2026-09-14T02:30:43Z
+              why: the statement is the goal in a breath; what it restated of its own steps
+                went back to the steps (ADR 0004, walked with Topher 2026-09-13)
+
+  - id: ownership.evidence
+    title: A check is evidence only for what it actually exercises
+    statement: As a team, we trust the checks column because a green cell means the
+      described behaviour was exercised, not that something adjacent to it was.
+    rules:
+      - id: ownership.evidence.same-surface
+        retired: The ledger tracks behaviour a person can see, and this is a rule about
+          how the test suite is written (2026-08-26, thread n-0074) - it lives
+          in blueprint/AGENTS.md, and its mechanical half is already carried by
+          status.derived.unbacked-pass-goes-stale.
+        origin: thread:q-0070
+        statement: A check may only claim a rule whose behaviour it actually exercises -
+          a rule describing what the panel or the embed does is not verified by
+          a test that drives the server they talk to, because such a test passes
+          in full while the described surface is broken, which makes the
+          cheapest and most-trusted tier the one most able to lie.
+        steps:
+          given:
+            - A rule whose statement describes something a person sees or does
+          when:
+            - A check is written and tagged with that rule id
+          then:
+            - The check drives the surface the statement describes, not a layer
+              beneath it
+            - If it cannot, the rule keeps demanding checks and reads as
+              unverified rather than borrowing a neighbour's pass
+          statement_hash: sha256:a77756271587

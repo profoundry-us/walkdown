@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-08-28T04-09-30Z-local-01",
+  "created": "2026-08-28T04:09:30Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "eeedc5a-dirty",
+  "blueprint_sha": "eeedc5a-dirty",
+  "note": "re-judged after tonight's fixes",
+  "results": [
+    {
+      "rule": "status.sweep.says-what-is-left",
+      "status": "pass",
+      "statement_hash": "sha256:108b3015acc9",
+      "evidence": [
+        "runs/evidence/2026-08-28T03-58-33Z/sweep-says-what-is-left.txt"
+      ],
+      "reasoning": "Both halves of the earlier fail are repaired. Judged on a scratch copy at .walkdown/tmp/refix-sweep-bp with the open agent sweep's created backdated to 2026-08-28T03:53:20Z, so four of tonight's six sitting runs fall after it and two before it - a partly worked sweep, which is the state the rule's GIVEN names. No sweep was declared against the real blueprint/ and nothing there was written. The report names the sweep by its run id, its actor and its reason, gives both counts in one line ('SWEEP agent on local - 45/71 judged, 26 to go') and repeats the outstanding count in the summary line above it, then lists every one of the 26 owed rules as a diamond. Counted from the output: 26 diamonds for 26 owed, and no '+N more' anywhere in the sweep block - the only truncation left in the report is the unrelated ACTIVE THREADS listing. status --json now carries a sweeps block at the top level alongside targets/rows/drift/attention, with runId, tier, target, created, why, actor, of, done and the full owed array; of - done equals the length of owed, so the counted and the listed answers agree by construction. The real blueprint's own sweeps block reads 71/71 with owed [], which is the same code path answering a complete sweep."
+    }
+  ],
+  "copied_from": {
+    "blueprint": "walkdown",
+    "run": "2026-08-28T04-09-30Z-local-01",
+    "at": "2026-10-03T00:41:15Z"
+  }
+}

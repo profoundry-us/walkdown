@@ -1,0 +1,30 @@
+feature: time
+stories:
+  - id: time.records
+    title: Every clock reads right
+    statement: As a team across time zones, a record means the same moment to all of
+      us, and each of us reads it on our own clock.
+    rules:
+      - id: time.records.stored-as-utc
+        origin: thread:n-0290
+        created_at: 2026-09-13
+        statement: Every time walkdown writes is an instant in UTC - ISO 8601 with a Z -
+          and a record never carries a zone.
+        because: A stamp that depends on where it was written means a different moment
+          on every machine that reads it, and a bare date says nothing about
+          which day it meant.
+        history: "`walkdown hash --write --reword` stamped `at: 2026-09-14` under an
+          entry whose reason said 2026-09-13 - the UTC date, sliced bare, at one
+          in the morning (n-0290)."
+        verify: [ checks ]
+        signoff: [ eng ]
+        steps:
+          given:
+            - Any write that stamps when it happened - a thread, a reply, a run,
+              a draft, a sweep, a registry row, a reworded hash
+          when:
+            - The record is read back
+          then:
+            - The stamp parses as an instant and ends in Z
+            - No stamp is a bare date or a local time, and no record names a zone
+          statement_hash: sha256:5040dfedc0c3

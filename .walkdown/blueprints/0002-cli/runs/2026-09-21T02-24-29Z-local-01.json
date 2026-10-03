@@ -1,0 +1,37 @@
+{
+  "run_id": "2026-09-21T02-24-29Z-local-01",
+  "created": "2026-09-21T02:24:29Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "aaa7e38",
+  "note": "The nine rules the agent queue asked to judge again after the fixes of 2026-09-20 (n-0306, n-0307, n-0308, n-0309, n-0318, n-0320, n-0321, n-0322, n-0323). Driven on a stamped scratch copy (tmp/scratch/sitting-0921 on 4732, its own home and identity) so the sitting's own start, pass, skip and finish landed in the copy; the address recorded is the target's real one. One rule, panel.rules.evidence-visible, was read against the real server on 4700 because the copy holds no run that counts at its own address, and reading a rule's evidence writes nothing.",
+  "results": [
+    {
+      "rule": "locations.answer.registry-is-the-only-door",
+      "status": "pass",
+      "statement_hash": "sha256:f6b76093bef6",
+      "evidence": [
+        "runs/evidence/2026-09-21T02-24-29Z/registry-probes.txt"
+      ],
+      "reasoning": "Standing in a directory holding a .walkdown nobody registered, with a personal home registering nothing, status said no blueprint here and named the registry it consulted, and where showed the config as not present with every default applying. A blueprints row written by hand into config.yml was set aside in words by where, which says config.yml registers nothing since ADR 0003 and points at import, and status still refused. The two tagged unit tests, a hand-written row naming a symlink set aside with import registering the real path once, and a hand-written row not making a home already listed, passed in the suite run at 02:28Z. n-0322 changed the because only; the behaviour is what the rule says.",
+      "threads": []
+    },
+    {
+      "rule": "ownership.authoring.statement-reads-at-a-glance",
+      "status": "pass",
+      "statement_hash": "sha256:97f1bacfb270",
+      "evidence": [
+        "runs/evidence/2026-09-21T02-24-29Z/lint-probes.txt"
+      ],
+      "reasoning": "A fixture with a 46-word statement and a 36-word because beside a one-line statement, imported as a numbered home and linted. The long statement warned under statement-reads-as-a-paragraph saying to say the goal in one breath and let the steps carry the rest; the because warned under because-carries-history naming history as where what happened belongs; the short rule was silent; all warnings, zero errors. The new voice category warns on the same statement a second time for length, which is two warnings for one fault and worth folding, but not this rule's claim.",
+      "threads": []
+    }
+  ],
+  "copied_from": {
+    "blueprint": "walkdown",
+    "run": "2026-09-21T02-24-29Z-local-01",
+    "at": "2026-10-03T00:41:15Z"
+  }
+}

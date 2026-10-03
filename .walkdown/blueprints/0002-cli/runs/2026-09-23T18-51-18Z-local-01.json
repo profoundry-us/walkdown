@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-09-23T18-51-18Z-local-01",
+  "created": "2026-09-23T18:51:18Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "cc85e1c-dirty",
+  "spec_hash": "sha256:8663e2c61811",
+  "note": "Agent tier for the rules Topher's 2026-09-23 walkdown left owed: the three halves of the toolbar split, threads.question.one-ask after its lint step, and the new threads.lifecycle.not-on-a-retired-rule. Screens were driven on a stamped scratch copy served on 4730 (look-0923); the retired-rule door was probed there by CLI and API.",
+  "results": [
+    {
+      "rule": "threads.lifecycle.not-on-a-retired-rule",
+      "status": "pass",
+      "statement_hash": "sha256:b09baad89679",
+      "evidence": [
+        "runs/evidence/2026-09-23T18-50-06Z/retired-rule-probe.txt"
+      ],
+      "reasoning": "Tried to break it three ways on the scratch copy. A note by the CLI on screens.ownership.one-claimant, a question with two choices on panel.start.unclaimed-page-says-so, and a note by the API were all refused, each quoting that rule's retirement note, and the thread count stayed at 334. A reply on n-0244, already on a retired rule, landed. Reopening it made lint warn thread-on-retired-rule naming n-0244, and while it sat addressed lint said nothing."
+    }
+  ],
+  "copied_from": {
+    "blueprint": "walkdown",
+    "run": "2026-09-23T18-51-18Z-local-01",
+    "at": "2026-10-03T00:41:15Z"
+  }
+}

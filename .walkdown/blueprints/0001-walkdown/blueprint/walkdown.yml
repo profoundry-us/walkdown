@@ -1,5 +1,5 @@
 blueprint: walkdown
-description: The tool itself — the panel, the embed, and the governance that keeps a verdict honest.
+description: The panel and the embed - walkdown as a reviewer sees it beside the page. The command line is `cli`.
 
 # walkdown's own blueprint — the tool specified with itself. docs/ holds the
 # design (why); this holds the verifiable what. Checks are the node:test suite,

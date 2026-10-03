@@ -1,0 +1,51 @@
+{
+  "run_id": "2026-10-02T03-04-32Z-local-01",
+  "created": "2026-10-02T03:04:32Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    },
+    {
+      "role": "design",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "7ea3beb-dirty",
+  "spec_hash": "sha256:10465e62b316",
+  "results": [
+    {
+      "rule": "ownership.drift.design-requests-required",
+      "status": "pass",
+      "statement_hash": "sha256:418069b7b1f6"
+    },
+    {
+      "rule": "ownership.design.declared-per-blueprint",
+      "status": "pass",
+      "statement_hash": "sha256:e1ce6c441f53"
+    },
+    {
+      "rule": "ownership.design.request-on-a-screen",
+      "status": "pass",
+      "statement_hash": "sha256:f073f61e1435"
+    },
+    {
+      "rule": "status.attention.blocked-queues",
+      "status": "pass",
+      "statement_hash": "sha256:9b3a0c26d360"
+    }
+  ],
+  "copied_from": {
+    "blueprint": "walkdown",
+    "run": "2026-10-02T03-04-32Z-local-01",
+    "at": "2026-10-03T00:41:15Z"
+  }
+}

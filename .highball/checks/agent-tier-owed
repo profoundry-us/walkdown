@@ -44,7 +44,10 @@ try {
   process.stdout.write(out.stdout + out.stderr);
   process.exit(1);
 }
-const owed = report.rows
+// With several blueprints the answer is one per blueprint (ADR 0011); this
+// repository has two since ADR 0013 split the CLI out of the panel's.
+const rows = (report.blueprints ?? [report]).flatMap((b) => b.rows ?? []);
+const owed = rows
   .filter((r) => (r.verify ?? []).includes("agent"))
   .filter((r) => {
     const a = r.agent ?? { state: "never" };

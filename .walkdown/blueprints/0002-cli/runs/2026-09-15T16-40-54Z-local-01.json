@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-09-15T16-40-54Z-local-01",
+  "created": "2026-09-15T16:40:54Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "b0aab9d-dirty",
+  "tree_hash": "sha256:2181b67921c9",
+  "spec_hash": "sha256:4a41f752f6cf",
+  "results": [
+    {
+      "rule": "threads.lifecycle.acts-for-a-person",
+      "status": "pass",
+      "statement_hash": "sha256:614945dff74c",
+      "duration_ms": 1204,
+      "checks": [
+        "checks/panel.spec.js:1830"
+      ]
+    }
+  ],
+  "copied_from": {
+    "blueprint": "walkdown",
+    "run": "2026-09-15T16-40-54Z-local-01",
+    "at": "2026-10-03T00:41:15Z"
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "run_id": "2026-10-02T18-12-18Z-local-01",
+  "created": "2026-10-02T18:12:18Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "3af4773-dirty",
+  "tree_hash": "sha256:53d291e02b09",
+  "spec_hash": "sha256:51132eb910d8",
+  "results": [
+    {
+      "rule": "locations.several.init-makes-another",
+      "status": "pass",
+      "statement_hash": "sha256:0ff494d94d74",
+      "duration_ms": 1055,
+      "checks": [
+        "test/several.test.js:47",
+        "test/several.test.js:97"
+      ]
+    },
+    {
+      "rule": "locations.several.reads-cover-all",
+      "status": "pass",
+      "statement_hash": "sha256:b52ccdd8164e",
+      "duration_ms": 10049,
+      "checks": [
+        "test/several.test.js:107",
+        "test/several.test.js:133"
+      ]
+    },
+    {
+      "rule": "locations.several.writes-name-one",
+      "status": "pass",
+      "statement_hash": "sha256:8dbd0bae7822",
+      "duration_ms": 1507,
+      "checks": [
+        "test/several.test.js:145",
+        "test/several.test.js:174",
+        "test/several.test.js:189"
+      ]
+    }
+  ],
+  "copied_from": {
+    "blueprint": "walkdown",
+    "run": "2026-10-02T18-12-18Z-local-01",
+    "at": "2026-10-03T00:41:15Z"
+  }
+}

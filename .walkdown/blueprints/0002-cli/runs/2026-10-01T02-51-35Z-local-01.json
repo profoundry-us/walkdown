@@ -1,0 +1,67 @@
+{
+  "run_id": "2026-10-01T02-51-35Z-local-01",
+  "created": "2026-10-01T02:51:35Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "b944b53-dirty",
+  "tree_hash": "sha256:b56b0c01eb54",
+  "spec_hash": "sha256:fb238408c48d",
+  "results": [
+    {
+      "rule": "status.attribution.username-is-the-record",
+      "status": "pass",
+      "statement_hash": "sha256:be08ebbb3f59",
+      "duration_ms": 222,
+      "checks": [
+        "test/serve.test.js:406",
+        "test/serve.test.js:1123"
+      ]
+    },
+    {
+      "rule": "locations.default.one-home-per-blueprint",
+      "status": "pass",
+      "statement_hash": "sha256:43e88185b989",
+      "duration_ms": 46,
+      "checks": [
+        "test/serve.test.js:899"
+      ]
+    },
+    {
+      "rule": "threads.lifecycle.acts-for-a-person",
+      "status": "pass",
+      "statement_hash": "sha256:0306629cf026",
+      "duration_ms": 196,
+      "checks": [
+        "test/serve.test.js:971",
+        "test/serve.test.js:1123"
+      ]
+    },
+    {
+      "rule": "threads.lifecycle.claim-never-accept",
+      "status": "pass",
+      "statement_hash": "sha256:1c0b2e99daa0",
+      "duration_ms": 211,
+      "checks": [
+        "test/serve.test.js:1013",
+        "test/serve.test.js:1082"
+      ]
+    },
+    {
+      "rule": "locations.answer.serve-starts-anywhere",
+      "status": "pass",
+      "statement_hash": "sha256:8fc3f6d54231",
+      "duration_ms": 365,
+      "checks": [
+        "test/serve.test.js:1190",
+        "test/serve.test.js:1231",
+        "test/serve.test.js:1301"
+      ]
+    }
+  ],
+  "copied_from": {
+    "blueprint": "walkdown",
+    "run": "2026-10-01T02-51-35Z-local-01",
+    "at": "2026-10-03T00:41:15Z"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "run_id": "2026-09-21T04-53-00Z-local-01",
+  "created": "2026-09-21T04:53:00Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    },
+    {
+      "role": "design",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "fab1103-dirty",
+  "tree_hash": "sha256:9c98168dcdea",
+  "spec_hash": "sha256:f9ceb78a26a8",
+  "results": [
+    {
+      "rule": "locations.answer.registry-is-the-only-door",
+      "status": "pass",
+      "statement_hash": "sha256:f6b76093bef6"
+    },
+    {
+      "rule": "ownership.authoring.statement-reads-at-a-glance",
+      "status": "pass",
+      "statement_hash": "sha256:97f1bacfb270"
+    },
+    {
+      "rule": "ownership.authoring.machine-words-pass-the-voice",
+      "status": "pass",
+      "statement_hash": "sha256:4c46fabe7d48"
+    }
+  ],
+  "copied_from": {
+    "blueprint": "walkdown",
+    "run": "2026-09-21T04-53-00Z-local-01",
+    "at": "2026-10-03T00:41:15Z"
+  }
+}

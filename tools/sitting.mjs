@@ -11,6 +11,12 @@
  *   node tools/sitting.mjs capture           drive every state, save the evidence
  *   node tools/sitting.mjs record <verdicts.json>   append the run
  *
+ * There are two blueprints here since ADR 0013: `walkdown`, the panel, and
+ * `cli`. `owed` lists both, a section each, and `--blueprint <id>` narrows
+ * it to one. `record` files each verdict in the blueprint holding its rule,
+ * one record per blueprint sharing a run id, as the reporters do. `capture`
+ * drives the panel, so it is the panel's blueprint whatever is named.
+ *
  * `owed` honours an open sweep: after `walkdown sweep --tiers agent` it lists
  * everything, which is the point of declaring one.
  *
@@ -33,6 +39,8 @@ const BP = join(ROOT, '.walkdown', 'blueprints', '0001-walkdown', 'blueprint');
 const BASE = process.env.WALKDOWN_SITTING_URL ?? 'http://localhost:4700';
 
 const [cmd, ...rest] = process.argv.slice(2);
+const named = rest.indexOf('--blueprint');
+const ONLY = named >= 0 ? rest.splice(named, 2)[1] : null;
 const stamp = () =>
   new Date()
     .toISOString()
@@ -47,7 +55,7 @@ const stamp = () =>
 const status = () => {
   try {
     return JSON.parse(
-      execFileSync('node', [join(ROOT, 'bin/walkdown.js'), 'status', '--json'], {
+      execFileSync('node', [join(ROOT, 'bin/walkdown.js'), 'status', '--json', ...(ONLY ? ['--blueprint', ONLY] : [])], {
         cwd: ROOT,
         encoding: 'utf8',
         maxBuffer: 64 * 1024 * 1024,
@@ -59,17 +67,40 @@ const status = () => {
   }
 };
 
+/* Every blueprint's board, each with its id: one answer with --blueprint. */
+const boards = () => {
+  const s = status();
+  return s.blueprints ?? [{ id: ONLY ?? 'walkdown', ...s }];
+};
+
+/* Where a blueprint's spec is, by id. */
+const specOf = (id) => resolveLocations({ blueprint: id, cwd: ROOT }).spec?.path ?? BP;
+
 /* ---- owed ------------------------------------------------------------- */
 
 function owed() {
-  const s = status();
+  const all = boards();
+  const screens = new Set();
+  let owing = 0;
+  let of = 0;
+  for (const s of all) {
+    const n = owedIn(s, all.length > 1, screens);
+    owing += n.owing;
+    of += n.of;
+  }
+  if (all.length > 1) console.log(`\n${owing} of ${of} agent-tier rules owed across ${all.map((b) => b.id).join(' and ')}`);
+  console.log(`\nscreens to capture: ${[...screens].join(', ') || '(none — all headless)'}`);
+}
+
+function owedIn(s, several, screens) {
+  if (several) console.log(`━━ ${s.id} ━━`);
   const sweep = (s.sweeps ?? []).find((x) => x.tier === 'agent');
   const rows = s.rows.filter((r) => (r.verify ?? []).includes('agent'));
   // A pass older than a fix a thread claims is a pass of the code before it.
   const need = rows.filter((r) => ['never', 'stale', 'fail', 'blocked'].includes(r.agent?.state) || r.unjudgedFix);
   if (sweep)
     console.log(`sweep ${sweep.runId} — ${sweep.why}\n  ${sweep.done}/${sweep.of} judged since\n`);
-  console.log(`${need.length} of ${rows.length} agent-tier rules owed:\n`);
+  console.log(`${need.length} of ${rows.length} agent-tier rules owed${need.length ? ':' : ''}\n`);
   const byStory = {};
   for (const r of need) (byStory[r.story] ??= []).push(r);
   for (const story of Object.keys(byStory).sort()) {
@@ -81,9 +112,9 @@ function owed() {
       );
     }
   }
-  const screens = new Set();
   for (const r of need) for (const x of [...(r.flow ?? []), ...(r.screens ?? [])]) screens.add(x);
-  console.log(`\nscreens to capture: ${[...screens].join(', ') || '(none — all headless)'}`);
+  if (several && need.length) console.log('');
+  return { owing: need.length, of: rows.length };
 }
 
 /* ---- capture ---------------------------------------------------------- */
@@ -1969,14 +2000,15 @@ async function capture(only = []) {
  */
 function record(file) {
   const input = JSON.parse(readFileSync(file, 'utf8'));
-  const s = status();
+  const all = boards();
+  const holder = (rule) => all.find((b) => b.rows.some((row) => row.rule === rule))?.id;
   const bad = [];
   for (const r of input.results ?? []) {
     if (!r.reasoning || r.reasoning.trim().length < 40) bad.push(`${r.rule}: reasoning too thin`);
     if (!['pass', 'fail', 'blocked', 'skipped'].includes(r.status))
       bad.push(`${r.rule}: bad status`);
     if (!(r.evidence ?? []).length) bad.push(`${r.rule}: no evidence`);
-    if (!s.rows.some((row) => row.rule === r.rule)) bad.push(`${r.rule}: no such rule`);
+    if (!holder(r.rule)) bad.push(`${r.rule}: no such rule`);
   }
   if (bad.length) {
     console.error('refusing to record:\n  ' + bad.join('\n  '));
@@ -1994,7 +2026,7 @@ function record(file) {
   }).trim()
     ? '-dirty'
     : '';
-  const run = {
+  const base = {
     run_id: `${ts}-local-01`,
     created: ts.replace(/T(\d\d)-(\d\d)-(\d\d)Z$/, (m, h, mi, sec) => `T${h}:${mi}:${sec}Z`),
     actor: 'agent',
@@ -2010,10 +2042,23 @@ function record(file) {
      * (lib/hash.js, and the skeleton `walkdown judge` prints); this harness
      * never followed, so it kept adding records in the retired shape (n-0205).
      */
-    spec_hash: specHash(BP),
     ...(input.note && { note: input.note }),
-    results: input.results,
   };
+  /*
+   * Each verdict goes to the blueprint holding its rule, one record per
+   * blueprint under one run id - what the reporters do (ADR 0013 §1). A
+   * sitting that judged a panel rule and a CLI rule is one sitting.
+   */
+  const byHolder = new Map();
+  for (const r of input.results) {
+    const id = holder(r.rule);
+    if (!byHolder.has(id)) byHolder.set(id, []);
+    byHolder.get(id).push(r);
+  }
+  const outs = [...byHolder].map(([id, results]) => {
+    const spec = specOf(id);
+    return { id, spec, run: { ...base, spec_hash: specHash(spec), results }, out: join(resolveLocations({ spec }).runs.path, `${base.run_id}.json`) };
+  });
   /*
    * And into the runs directory the ledger actually keeps, which stopped
    * being `blueprint/runs` when a home became the spec with its four records
@@ -2021,22 +2066,24 @@ function record(file) {
    * rather than writing anywhere wrong, which is why nobody lost a verdict to
    * it - but nobody could record one either.
    */
-  const out = join(resolveLocations({ spec: BP }).runs.path, `${run.run_id}.json`);
-  if (existsSync(out)) {
-    console.error(`${out} exists`);
-    process.exit(1);
-  }
-  writeFileSync(out, JSON.stringify(run, null, 2) + '\n');
-  console.log(`recorded ${run.run_id} — ${run.results.length} verdict(s)`);
-  console.log(`  ${out}`);
-  // The agent's pass ends the notes it wrote on the rule and has now judged
-  // (threads.lifecycle.closes-where-it-was-asked); a person's stay for them.
+  for (const { out } of outs)
+    if (existsSync(out)) {
+      console.error(`${out} exists`);
+      process.exit(1);
+    }
   const settled = [];
-  for (const r of run.results)
-    if (r.status === 'pass')
-      settled.push(
-        ...settleByAgentPass(loadBlueprint(BP), { rule: r.rule, runId: run.run_id, created: run.created }),
-      );
+  for (const { id, spec, run, out } of outs) {
+    writeFileSync(out, JSON.stringify(run, null, 2) + '\n');
+    console.log(`recorded ${run.run_id} — ${run.results.length} verdict(s)${outs.length > 1 ? ` for ${id}` : ''}`);
+    console.log(`  ${out}`);
+    // The agent's pass ends the notes it wrote on the rule and has now judged
+    // (threads.lifecycle.closes-where-it-was-asked); a person's stay for them.
+    for (const r of run.results)
+      if (r.status === 'pass')
+        settled.push(
+          ...settleByAgentPass(loadBlueprint(spec), { rule: r.rule, runId: run.run_id, created: run.created }),
+        );
+  }
   if (settled.length) console.log(`settled ${settled.join(', ')} — notes the agent wrote, judged by this pass`);
 }
 

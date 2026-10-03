@@ -1,0 +1,446 @@
+{
+  "run_id": "2026-08-31T04-12-15Z-local-01",
+  "created": "2026-08-31T04:12:15Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "f9ecad9-dirty",
+  "blueprint_sha": "f9ecad9-dirty",
+  "note": "Full agent sitting under sweep 2026-08-31T02-59-00Z-local-01 (the lit rebuild, architecture steps 0-5). All 118 owed rules judged: 116 pass, 2 fail (threads.lifecycle.says-what-it-did — the mutation report never names its actor outside the waive path, n-0125; panel.walkdown.note-with-any-verdict — the feedback box survives its own verdict and refiles the previous why on the next rule, n-0126). Two rules blocked in earlier sittings were driven this time: embed.pin.settled-pins-leave via an agent-legal incorporate of an answered pinned question, and panel.threads.show-the-sketch via a proposal-only screen fixture — both on the scratch copy, which also took the session, sign-off and discard journeys so the real ledger saw no junk writes. One finding filed without a fail: verified_by is never recorded and the thread footer infers the acceptor from the last reply, misattributing n-0102's acceptance to the agent (n-0127). Headless rules were judged from the verbatim tagged-test transcripts plus live CLI/API exercise recorded in runs/evidence/2026-08-31T03-01-00Z-sitting/. Page errors during capture: two connection-refused and two 404s, all from the deliberate dead-server and unclaimed-address states doing their jobs; no state produced an unexpected error.",
+  "results": [
+    {
+      "rule": "delivery.install.clone-is-the-install",
+      "status": "pass",
+      "statement_hash": "sha256:ffbb7cd667c2",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Re-executed the bare-clone suite live: 'the CLI runs from a tree with no node_modules' copies the tree, deletes node_modules and runs status; 'the third-party code it carries is attributed and machine-built' walks vendor/ for a LICENSE and a rebuild script per file; 'nothing walkdown ships at runtime resolves outside itself' walks the import graph from bin/ and lib/ refusing any bare specifier. All three passed in this sitting's run. The vendored lit and yaml are exactly the two files those checks walk, so the clone really is the whole install as of this tree."
+    },
+    {
+      "rule": "locations.default.nothing-in-the-tree",
+      "status": "pass",
+      "statement_hash": "sha256:0f57ef142318",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/locations-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Ran init on a fresh project live and photographed the output: the spec, storyboard, template, AGENTS.md and skills all landed under the personal home, and the tree afterwards holds exactly CLAUDE.md and src - the transcript shows the tree listing. The one file added is the pointer, which the rule's own feature carves out as conventions. Abandoning this project would leave a CLAUDE.md block and nothing else to clean up."
+    },
+    {
+      "rule": "locations.default.records-follow-the-spec",
+      "status": "pass",
+      "statement_hash": "sha256:8f5ed2817f93",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/locations-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "The live `walkdown where` for the fresh project reports runs and threads 'beside the spec, as runs and threads follow it' while evidence and drafts sit under the personal projects dir with 'the built-in default, outside the repository'. The tagged tests exercise both directions - a spec outside the repository takes runs and threads with it, and evidence/drafts stay out even when the spec is committed. Committing a spec is one decision: the records ride along, the binaries never do."
+    },
+    {
+      "rule": "locations.default.in-repo-on-request",
+      "status": "pass",
+      "statement_hash": "sha256:bbc38bb440e9",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/locations-transcript.txt"
+      ],
+      "reasoning": "The tagged test '--in-repo commits the spec and takes its conversations with it' runs init --in-repo and asserts the blueprint, runs and threads land inside the working tree. The live transcript shows the other half of the statement: the plain init names where the spec landed and says what that means ('Outside the repository, so walkdown has added nothing to your tree...') and offers `walkdown init --in-repo` and `walkdown move` by name - the politeness clause, verbatim on screen."
+    },
+    {
+      "rule": "locations.default.skills-are-yours-by-default",
+      "status": "pass",
+      "statement_hash": "sha256:62223922d07f",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/locations-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Live init put five skills under the personal skills dir and said why: 'Yours, not this project's - they work in every project on this machine, and this repository gets nothing', with --project offered for the committed alternative. The three tagged tests cover the rest: skills follow a committed spec into the repo, an edited skill is kept unless forced, and a skill whose harness only walkdown has is not shipped at all. The transcript shows walkdown-setup shipping and walkdown-sitting absent, which is that last clause in practice."
+    },
+    {
+      "rule": "locations.answer.says-why",
+      "status": "pass",
+      "statement_hash": "sha256:971e878234f9",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/locations-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Both live `walkdown where` runs print a reason under every path, and the reasons differ where the decisions differ: this repo's paths say 'this machine's config (walkdown)' while the fresh project's say 'named on the command line', 'beside the spec, as runs and threads follow it', 'the built-in default, outside the repository', and config itself reports 'not present - every default applies'. A person who disagrees with any path can see exactly which decision to argue with. The tagged test asserts a reason accompanies every reported path."
+    },
+    {
+      "rule": "locations.answer.asking-writes-nothing",
+      "status": "pass",
+      "statement_hash": "sha256:0ba6f381a575",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/locations-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Both `walkdown where` transcripts end with 'Nothing was written.' and the tagged test proves the sentence: it snapshots the filesystem, asks where things live for a project that does not exist yet, and asserts nothing appeared - no directory, no config, no placeholder. The command a confused person reaches for first is inert by test, not by promise."
+    },
+    {
+      "rule": "locations.answer.nearest-blueprint-wins",
+      "status": "pass",
+      "statement_hash": "sha256:8abbb2442baa",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Two tagged tests pin both halves of the statement: 'the nearest blueprint wins over an entry rooted at the whole tree' builds a repo whose configured entry roots the whole tree and a nested blueprint, and asserts the nested one answers for its own directory; '--dir does not inherit the ledger of whichever project you are standing in' names a blueprint outright and asserts the answer comes from the entry owning it or from none - not from the project the shell happens to be standing in. Both passed in this sitting's verbatim suite run."
+    },
+    {
+      "rule": "locations.keeping.existing-outranks-preference",
+      "status": "pass",
+      "statement_hash": "sha256:c5603d183d94",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "The tagged test 'a blanket default never orphans a ledger the blueprint already holds' creates records beside a spec, then sets a machine-wide default pointing elsewhere, and asserts resolution still answers with the existing directory - the fact outranks the preference and nothing moved. Passed in this sitting's run."
+    },
+    {
+      "rule": "locations.keeping.moving-is-a-decision",
+      "status": "pass",
+      "statement_hash": "sha256:452142df8095",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt"
+      ],
+      "reasoning": "Four tagged tests cover the statement clause by clause: 'move relocates the files, records the choice, and edits no record' diffs the files byte-for-byte across the move and finds the choice in the personal config; 'move refuses a destination that already holds records' is the two-ledgers refusal, also photographed live in the locations transcript ('Two ledgers merged into one directory is an edit of both. Pick an empty destination.'); 'a pin filed with the ledger moved lands where readers read' and 'run sees a record arrive in a runs directory a config moved' prove readers and writers share the resolved answer after the move."
+    },
+    {
+      "rule": "locations.travel.evidence-by-key",
+      "status": "pass",
+      "statement_hash": "sha256:a7bc7cd07be3",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Tagged tests: 'with evidence moved out, the same recorded key finds it at the new root' writes evidence, relocates the root, and asserts the identical runs/evidence/<ts> key still serves; 'evidence serving still refuses anything outside the evidence key space' asserts the resolver rejects keys outside runs/evidence/. This sitting is itself the rule exercised for real: every evidence key in this very record is logical, and the capture harness asked the resolver where to write rather than assuming the blueprint - the screenshots live outside the repository and serve through the same key space."
+    },
+    {
+      "rule": "locations.travel.judged-against-a-spec",
+      "status": "pass",
+      "statement_hash": "sha256:5014abd76d50",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Tagged tests: 'the spec hash covers the spec and nothing the spec produces' computes the blueprint content hash, appends a run record, and asserts the hash is unchanged - recording a verdict never changes what was judged; 'the same words in a different feature file are a different spec' moves a rule between files and asserts the hash moves. Both passed in this sitting's verbatim run."
+    },
+    {
+      "rule": "locations.travel.provenance-not-currency",
+      "status": "pass",
+      "statement_hash": "sha256:c513160f49fc",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "The tagged test 'a run made at another commit still counts' records a verdict under one sha, advances the repository, and asserts the cell still fills - the sha tells a reader where to look and never decides whether the verdict counts. Currency is decided per cell by statement hash, check claims and sweeps, which the status.derived tests in the same transcript exercise independently. Passed in this sitting's run."
+    },
+    {
+      "rule": "locations.pointer.placed-where-agents-read",
+      "status": "pass",
+      "statement_hash": "sha256:66759d1c478c",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/locations-transcript.txt"
+      ],
+      "reasoning": "Tagged tests: 'a project with only an AGENTS.md gets the pointer there, not in a new CLAUDE.md' - exactly one agent file means the project has answered, so no new file appears; 'several agent files: init writes no pointer and says which they are' - photographed live too: the transcript shows '? several agent files - `walkdown pointer --into <file>` CLAUDE.md, AGENTS.md' with both files at zero walkdown lines. The none case is the fresh-init transcript, where CLAUDE.md was created to hold the block."
+    },
+    {
+      "rule": "locations.pointer.owns-only-its-block",
+      "status": "pass",
+      "statement_hash": "sha256:ec57ac3e3cc3",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/locations-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Live transcript: `pointer --into` reports 'added to <tmp>/two/AGENTS.md', a second run reports 'already current' rather than duplicating, and the surrounding line '# also' survives untouched beside the walkdown:begin marker. The tagged test 'a moved spec rewrites its own block and nothing around it' moves the spec and asserts the block updates in place while every other line stays byte-identical - the stale-pointer clause, since the rewritten block names the new location."
+    },
+    {
+      "rule": "ownership.drift.design-requests-required",
+      "status": "pass",
+      "statement_hash": "sha256:1d8bdc7a98b6",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt"
+      ],
+      "reasoning": "The tagged test 'an undesigned screen without a design-request thread warns; with one it passes' runs lint over a storyboard screen with no prototype and asserts the finding appears, then files a design-request thread and asserts it clears. The transcript also carries the finding's exact wording from lib/lint.js: 'screen has no design and no open design-request thread - file one (a proposal alone is not a request)', which names the remedy in the sentence."
+    },
+    {
+      "rule": "ownership.writes.spec-never-implementation",
+      "status": "pass",
+      "statement_hash": "sha256:a966a60dc9bc",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Two tagged tests, both re-run live this sitting: 'every write the API offers lands in threads, drafts or runs - and nowhere else' snapshots the whole working tree, exercises every mutating endpoint the server offers, and diffs - the only paths that changed are under the resolved threads, drafts and runs directories; 'only writes.js may write: the request path imports no writer of its own' walks the import graph of the request path and asserts writes.js is the sole module touching the filesystem for mutation. The complete-list clause is enforced structurally, not by convention."
+    },
+    {
+      "rule": "screens.identity.fragment-is-identity",
+      "status": "pass",
+      "statement_hash": "sha256:ac30c2879d52",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/screens-claims-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Tagged tests run live in the screens transcript: 'a fragment is part of a screen's identity' resolves the same path under two enumerated fragments to two different screens, and 'an unenumerated fragment falls back to the screen at that path' keeps an undeclared #foo on the page rather than off the board. A modal or drawer the URL expresses is a screen of its own, and the matcher module is the single answerer (one-matcher passed alongside, checks tier)."
+    },
+    {
+      "rule": "screens.identity.query-is-not-identity",
+      "status": "pass",
+      "statement_hash": "sha256:9b8b3c9e5881",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/screens-claims-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Tagged tests: 'an undeclared query does not change which screen you are on' - page two is the same screen; 'a declared query breaks ties between screens sharing a path' - a query written into the storyboard still separates two screens on one path. Both directions of the statement passed in the live screens transcript run."
+    },
+    {
+      "rule": "screens.identity.follows-navigation",
+      "status": "pass",
+      "statement_hash": "sha256:e8763cbea8b6",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-32-45Z/spa-pushstate-refollows.json",
+        "runs/evidence/2026-08-31T03-32-45Z/spa-pushstate-refollows.png"
+      ],
+      "reasoning": "Drove the one navigation nobody announces, live: picked 'The review page' by hand (button btn-primary), then ran history.pushState inside the frame to /stand-in/rule-detail with a marker set on the frame's window first. After 1.6s the panel's screen button read 'Rule detail (state - open a rule on the Rules tab)', the class dropped to btn-ghost - the hand answer did not carry across - and the marker survived, proving no reload delivered the news: only the embed's slow poll could have. history.back() re-answered 'The review page', marker still intact. hashchange and popstate are the announced cases; the poll catching pushState is the honesty clause, photographed."
+    },
+    {
+      "rule": "status.derived.latest-wins",
+      "status": "pass",
+      "statement_hash": "sha256:fa42dccb0338",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Tagged tests: 'later run wins; per-target isolation' records two verdicts on one rule and asserts the later one is the cell, then records against another target and asserts neither bleeds; 'a walkdown on one target does not answer for another' pins the target scoping from the run side. Both passed in this sitting's verbatim suite run."
+    },
+    {
+      "rule": "status.derived.stale-never-passes",
+      "status": "pass",
+      "statement_hash": "sha256:9b16ab78cd04",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "The tagged test records a pass, rewords the statement, and asserts the cell renders stale rather than passing. This sitting is also the rule lived in: the sweep turned every pre-refactor agent pass on the board to stale, and `owed` listed all 118 - a pass recorded against an older wording (or an older floor) never quietly keeps counting."
+    },
+    {
+      "rule": "status.derived.verdict-belongs-to-a-place",
+      "status": "pass",
+      "statement_hash": "sha256:da085af63ed8",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "The tagged test 'a verdict counts only at the address it was made against' records a run with a base_url, then points the target elsewhere, and asserts the cell empties and asks for the walkdown again rather than inheriting the old pass. The address is the run's declared base_url, not a harness port - which is why this sitting's own record declares http://localhost:4700, the target's real address, while the scratch governance probes on 4790 were never recorded as verdicts at all."
+    },
+    {
+      "rule": "status.derived.addressless-runs-count",
+      "status": "pass",
+      "statement_hash": "sha256:f14146c27ed9",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "The tagged test 'a run with no recorded address is taken at face value' feeds derivation a run missing base_url and asserts the cell fills - it cannot be shown to belong to another system, the same courtesy a hashless result gets. Ran in both the sitting's live transcript and the verbatim suite run, passing in each."
+    },
+    {
+      "rule": "status.derived.unbacked-pass-goes-stale",
+      "status": "pass",
+      "statement_hash": "sha256:ed0482e00322",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt"
+      ],
+      "reasoning": "Three tagged tests: a checks pass whose suite no longer claims the rule renders stale; an empty inventory is NOT taken as proof the suite is empty (so a broken runner cannot stale the whole board); and coverage staleness never touches judgment tiers - an agent verdict does not evaporate because a grep changed. The first ran live in the sitting transcript as well; all passed."
+    },
+    {
+      "rule": "status.derived.human-tier-distinct",
+      "status": "pass",
+      "statement_hash": "sha256:88708d3d86fa",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "The tagged test 'environments scope targets; agent pass does not satisfy human' records a green agent cell and asserts the human requirement still stands unfilled. The live half of this sitting proves the boundary from the other side: the scratch server refused an agent 'verified' twice with '\"verified\" requires a named human actor - agents may claim work, never accept it', which is the same law enforced at the write path. Evidence, never acceptance."
+    },
+    {
+      "rule": "status.evidence.agent-assumed",
+      "status": "pass",
+      "statement_hash": "sha256:21038677e83f",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Tagged tests: 'the agent tier is assumed, and only an excuse removes it' derives verify for a rule that declares nothing and finds agent present; 'an excused tier is derived out of the sum entirely' asserts an excuse removes it from the denominator rather than leaving a hole. This sitting's own owed list is the rule at work - 118 rules owed the agent tier, none of them opted in; the handful excused (like screens.identity.one-matcher) carry written arguments."
+    },
+    {
+      "rule": "status.evidence.excuse-says-why",
+      "status": "pass",
+      "statement_hash": "sha256:6023a6db07cd",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Tagged tests: 'an excuse removes the tier it names, and says why' and 'an excused tier reads as excused, never as an empty cell' - the report renders the reason where the verdict would have sat, so a tier nobody asked for and a tier somebody argued against are distinguishable in every report. Both passed in the live sitting transcript run and again in the verbatim suite."
+    },
+    {
+      "rule": "status.evidence.excuse-must-argue",
+      "status": "pass",
+      "statement_hash": "sha256:d4310da96c28",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Tagged tests: 'a thin excuse is worse than none' lints an excuse shorter than a sentence into a warning; 'a rule excusing both tiers is flagged, legitimately' warns on the both-tiers case precisely because it is legitimate but never accidental. The unverifiable blocks in this blueprint (one-matcher, one-implementation) pass the same lint, which this sitting's close-out lint run re-confirms."
+    },
+    {
+      "rule": "status.acceptance.signoff-defaults-to-eng",
+      "status": "pass",
+      "statement_hash": "sha256:34a8a5bebfd8",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Tagged tests: 'engineering always signs, whatever the file says' derives the signoff set for a rule omitting eng and finds eng present; 'a signoff list that omits eng is flagged as a file that lies' makes the correction visible in lint rather than silent; 'verify no longer knows the word human' pins the vocabulary split that made roles possible. All passed in this sitting's verbatim run."
+    },
+    {
+      "rule": "status.acceptance.role-comes-from-the-run",
+      "status": "pass",
+      "statement_hash": "sha256:4841808f1a8b",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Tagged tests: acceptance derives per role from the roles the run recorded, not the signer's current team; 'a run recorded before roles existed reads as engineering' covers the historical ledger; 'rewording a statement un-signs it, per role' ties acceptance currency to the statement like every other tier. The first also ran live in the sitting transcript ('the identity the server derives carries roles, and the vocabulary to change them')."
+    },
+    {
+      "rule": "status.acceptance.approval-covers-only-the-unbuilt",
+      "status": "pass",
+      "statement_hash": "sha256:178e50e23abc",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "The tagged test 'an approval covers an unbuilt rule and stops the moment there is a build' records a wording approval, asserts the role's queue is discharged while no build evidence exists, then lands a build run and asserts the approval stops covering - approving a spec is not judging a build. Passed in this sitting's verbatim run."
+    },
+    {
+      "rule": "status.acceptance.sent-back-is-a-fail",
+      "status": "pass",
+      "statement_hash": "sha256:e4eefb4e58a4",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "The tagged test 'a rule sent back fails, and is not queued to the person who sent it' records a not-yet from a signer and asserts the rule's verdict is a fail rather than pending, and that the judge queue does not hand the rule back to the signer who just looked - what the rule owes them is a fix. Passed in this sitting's verbatim run."
+    },
+    {
+      "rule": "status.acceptance.verdict-needs-every-role",
+      "status": "pass",
+      "statement_hash": "sha256:1a9be6432a5b",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Tagged tests: 'a verdict needs every tier AND every role' holds a rule green on tiers with one of two roles signed and asserts no pass; 'the rule detail says who has signed and who has not' keeps the missing signature legible rather than summed away. The human walkdown is not double-counted as a tier - the derivation counts it once, as the role set. Passed in this sitting's run."
+    },
+    {
+      "rule": "status.acceptance.roles-recorded-on-the-run",
+      "status": "pass",
+      "statement_hash": "sha256:e0e862978414",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Five tagged tests, four of them re-run live in the sitting transcript: a run carries the roles its signer acted in; a role outside the vocabulary is refused rather than filed; the recording endpoint persists roles; the derived identity carries roles and the vocabulary to change them; a run signed under a nonexistent role is named in the report. The emptied-list clause records as none-stated rather than inventing a distinction the ledger does not honour."
+    },
+    {
+      "rule": "status.sweep.declares-a-floor",
+      "status": "pass",
+      "statement_hash": "sha256:b0073c10a38b",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Tagged tests: earlier verdicts go stale while the superseded runs survive untouched; only the named tiers are touched; judging again clears the debt. And this sitting is the floor lived end to end: the sweep declared at 02-59-00Z turned all 118 agent cells stale ('0/118 judged since' in the live transcript), the runs ledger kept every superseded record, and this very run is the earning-again. Nothing edited, nothing deleted."
+    },
+    {
+      "rule": "status.sweep.deliberate",
+      "status": "pass",
+      "statement_hash": "sha256:5b9d65fba614",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Tagged tests: a sweep refuses to be written without a reason; a written sweep carries its reason and no results; 'nothing but the sweep command writes a sweep' - the transcript also carries the source-level proof, a grep showing writeSweep referenced only by bin/commands/sweep.js and the record loader. This sitting's sweep was asked for outright by the human ('Run the sweep and sitting') and its why names the lit rebuild - the decision, written down."
+    },
+    {
+      "rule": "status.sweep.says-what-is-left",
+      "status": "pass",
+      "statement_hash": "sha256:108b3015acc9",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "The live transcript shows the open sweep reporting itself: 'SWEEP agent on local - 0/118 judged, 118 to go', with the declaration, who asked, and the why, plus the first owed rule marked. The tagged test 'a sweep counts what is still owed, never-judged rules included' pins the arithmetic - never-judged rules count toward the remainder rather than hiding. 'Did we miss any?' is answered by reading the report, which is how this sitting scoped itself."
+    },
+    {
+      "rule": "status.attention.blocked-queues",
+      "status": "pass",
+      "statement_hash": "sha256:d51f57ea2c48",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "The tagged test 'attention: human vs agent queues derived from rows and threads' builds a board with judge, verify, answer, address, incorporate and cover situations and asserts each lands in the right queue - people get judge (one per waiting role), verify and answer; agents get address, incorporate and cover, cover being a rule demanding checks that no check claims. Passed in this sitting's verbatim run."
+    },
+    {
+      "rule": "status.attention.names-the-role",
+      "status": "pass",
+      "statement_hash": "sha256:7320bf5dc8fd",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Tagged tests: 'the queue names the role a rule waits on' and 'the report names the role a rule is waiting on' - a judge item says which role, in both the derived queue and the rendered report, so two people cannot both scroll past assuming the other is meant. Passed in this sitting's verbatim run."
+    },
+    {
+      "rule": "status.attribution.username-is-the-record",
+      "status": "pass",
+      "statement_hash": "sha256:14fb4e39b993",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Four tagged tests: the record is written under the username, with display names resolved for showing only; every handle a person's machine has signed with resolves to that one person; the old single-name form still resolves so history stays attributed unrewritten; a machine with no full name is known by its username alone. The blueprint payload carrying a default actor is what the panel's Settings surface builds on. All passed in this sitting's run."
+    },
+    {
+      "rule": "threads.lifecycle.validated-transitions",
+      "status": "pass",
+      "statement_hash": "sha256:102a0b235d5a",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "The tagged test walks illegal transitions per kind and asserts each is rejected. The live half, against the scratch server and the scratch CLI: a nonsense transition was refused with its lifecycle named - 'illegal transition addressed → incorporated for a note' - both over the API and from the thread command, which exited 2. The vocabulary table and the enforcement cannot disagree because TERMINAL and canTransition are derived from the same FLOWS (the derivation tests alongside)."
+    },
+    {
+      "rule": "threads.lifecycle.claim-never-accept",
+      "status": "pass",
+      "statement_hash": "sha256:dbc5f4be5809",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "Made it refuse, live: an agent-actor 'verified' was rejected twice by the scratch server with '\"verified\" requires a named human actor - agents may claim work, never accept it', and the thread on disk kept its status. The tagged test asserts the same for waived. This sitting itself operates inside the rule - every verdict here is a claim, and nothing in this record touches verified or waived."
+    },
+    {
+      "rule": "threads.lifecycle.says-what-it-did",
+      "status": "fail",
+      "statement_hash": "sha256:224b3a652a3a",
+      "evidence": [
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt",
+        "runs/evidence/2026-08-31T03-01-00Z-sitting/unit-suite-transcript.txt"
+      ],
+      "reasoning": "The statement promises the report says 'who it was recorded under'. Exercised live against the scratch copy: a transition prints '✓ n-0093 open → addressed · +1 reply' and a bare reply prints '✓ n-0093 still addressed · +1 reply' - status left, status reached, replies counted, but the actor appears nowhere in either report. Only the waive path names its actor (thread.js appends 'by <waived_by>'). The omission matters precisely because the actor defaults to the machine username when --actor is forgotten: the one mistake the clause exists to surface is invisible in the output. The tagged tests pass because they only assert the actor on the waive path - the check under-asserts its statement. Refusal reporting and exit codes are correct; the rule fails on the recorded-under clause alone.",
+      "threads": [
+        "n-0125"
+      ]
+    }
+  ],
+  "copied_from": {
+    "blueprint": "walkdown",
+    "run": "2026-08-31T04-12-15Z-local-01",
+    "at": "2026-10-03T00:41:15Z"
+  }
+}

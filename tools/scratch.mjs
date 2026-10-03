@@ -15,10 +15,14 @@
  * deletes, so every space made here is stamped with who asked for it and why,
  * and `clean --stale` will take any that outlived their sitting.
  *
- *   node tools/scratch.mjs new <label> --why "..." [--port <n>]   make one, print its path
+ *   node tools/scratch.mjs new <label> --why "..." [--port <n>] [--blueprint cli]   make one, print its path
  *   node tools/scratch.mjs list                      what is lying around
  *   node tools/scratch.mjs clean <label>             take yours away
  *   node tools/scratch.mjs clean --stale             and anything abandoned
+ *
+ * A copy holds one blueprint: `walkdown`, the panel's, unless `--blueprint`
+ * names the other (ADR 0013 split `cli` out). Either way it is registered in
+ * the copy as `blueprint`, the id every sitting state already asks for.
  */
 import {
   cpSync,
@@ -31,14 +35,18 @@ import {
   symlinkSync,
   writeFileSync,
 } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { resolveLocations } from '../lib/locations.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const TMP = join(root, 'tmp', 'scratch');
-/** walkdown's own home, relative to either root. */
-const HOME = join('.walkdown', 'blueprints', '0001-walkdown');
+/** A blueprint's home, relative to either root: `walkdown`'s unless named. */
+const homeOf = (id) => {
+  const spec = resolveLocations({ blueprint: id, cwd: root }).spec?.path;
+  if (!spec) die(`no blueprint \`${id}\` is registered for this repository`);
+  return join('.walkdown', 'blueprints', basename(dirname(spec)));
+};
 const STAMP = '.scratch.json';
 /* Long enough for any sitting, short enough that a forgotten space is gone
  * before it is a mystery. */
@@ -72,7 +80,8 @@ function spaces() {
     .sort((a, b) => a.touched - b.touched);
 }
 
-function make(label, why, port) {
+function make(label, why, port, id = 'walkdown') {
+  const HOME = homeOf(id);
   if (!label || !/^[a-z0-9][a-z0-9-]*$/i.test(label))
     die('usage: scratch new <label> --why "..." [--port <n>]   (label: letters, digits, dashes)');
   if (port != null && !/^\d{2,5}$/.test(String(port))) die(`--port wants a number, not ${port}`);
@@ -132,7 +141,7 @@ function make(label, why, port) {
       '# home/, whose registry names this copy and nothing else.',
       'blueprints:',
       '  - id: blueprint',
-      '    home: 0001-walkdown',
+      `    home: ${basename(HOME)}`,
       '',
     ].join('\n'),
   );
@@ -179,6 +188,7 @@ function make(label, why, port) {
         label,
         why: why ?? null,
         port: port != null ? Number(port) : null,
+        blueprint: id,
         created: new Date().toISOString(),
         pid: process.pid,
       },
@@ -245,10 +255,11 @@ const flag = (name) => {
 };
 if (cmd === 'new')
   make(
-    rest.find((a) => !a.startsWith('--') && a !== flag('why') && a !== flag('port')),
+    rest.find((a) => !a.startsWith('--') && ![flag('why'), flag('port'), flag('blueprint')].includes(a)),
     flag('why'),
     flag('port'),
+    flag('blueprint') ?? undefined,
   );
 else if (cmd === 'list') list();
 else if (cmd === 'clean') clean(rest);
-else die('usage: scratch new <label> --why "..." [--port <n>] | list | clean <label>… | clean --stale');
+else die('usage: scratch new <label> --why "..." [--port <n>] [--blueprint <id>] | list | clean <label>… | clean --stale');

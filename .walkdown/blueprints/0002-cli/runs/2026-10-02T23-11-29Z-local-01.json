@@ -1,0 +1,64 @@
+{
+  "run_id": "2026-10-02T23-11-29Z-local-01",
+  "created": "2026-10-02T23:11:29Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "8e72c23-dirty",
+  "spec_hash": "sha256:55a1c12456f5",
+  "note": "ADR 0013 §1-§4, judged headless against a project 'shop' with blueprints checkout and search sharing one node:test suite, tagged for a rule of each and for nobody.holds.this. Driven from the working tree's CLI and reporters in a throwaway WALKDOWN_HOME.",
+  "results": [
+    {
+      "rule": "locations.several.results-filed-by-rule",
+      "status": "pass",
+      "statement_hash": "sha256:e6bc38c97ca2",
+      "evidence": [
+        "runs/evidence/2026-10-02T23-09-23Z/several-project-probe.txt"
+      ],
+      "reasoning": "I made search's test throw and ran the suite with walkdown's node reporter from a subdirectory. That is the awkward case: checkout's blueprint is committed in the repository and search's is kept in the personal home. checkout's runs got one record holding checkout.basics.works pass, and search's home got one holding search.basics.works fail, both with the run id 2026-10-02T23-11-02Z-local-01. The tag nobody holds was named ('no blueprint in this project holds nobody.holds.this — not recorded') and appears in neither record. Narrowed with WALKDOWN_SPEC, which is what run --blueprint passes, only search's result was recorded and checkout's was named as set aside. Bare walkdown run, in the recorded checks, ran the shared suite once and filed both. The checks also drive the Playwright reporter and the RSpec formatter (rspec 3 is installed here) on the same project, with the same split and one shared run id. A one-blueprint project still files a tag its blueprint does not hold into that blueprint, as before. My first attempt at this probe passed node --test a directory it does not expand and recorded nothing; that was my mistake, rerun and noted in the evidence."
+    },
+    {
+      "rule": "locations.several.lint-reads-the-project",
+      "status": "pass",
+      "statement_hash": "sha256:7853732bbd28",
+      "evidence": [
+        "runs/evidence/2026-10-02T23-09-23Z/several-project-probe.txt"
+      ],
+      "reasoning": "walkdown lint across shop reported, in each blueprint's section, exactly one error: the tag nobody.holds.this, which no blueprint holds. The test tagged with the other blueprint's rule, which before this change was an error in both sections, is no longer flagged. The recorded check covers the thread half. A rule of a's whose origin is a thread filed in b raises no warning, and the same rule pointed at n-9999, held by no blueprint, still warns 'unknown thread'. Running this repository's own lint after the change still reads 0 errors."
+    },
+    {
+      "rule": "locations.several.thread-ids-unique",
+      "status": "pass",
+      "statement_hash": "sha256:edca96d77671",
+      "evidence": [
+        "runs/evidence/2026-10-02T23-09-23Z/several-project-probe.txt"
+      ],
+      "reasoning": "Filing alternately in checkout, search and checkout gave n-0001, n-0002 and n-0003, landing as n-0001 and n-0003 in checkout and n-0002 in search, so numbering runs across the project rather than per blueprint. The recorded check goes further. a's notes run to n-0005, b's next note is n-0006, a's next question is q-0007 because notes and questions share the count, and a pair of threads already sharing n-0001 is left as it was while the next id skips past both. One thing the statement does not claim: two filings in the same instant in two different blueprints could still both take one number. The exclusive-create retry guards only within one directory. That matches the rule, which is about allocation, and is worth a note if it ever bites."
+    },
+    {
+      "rule": "locations.pointer.names-every-blueprint",
+      "status": "pass",
+      "statement_hash": "sha256:fc78cb716fcc",
+      "evidence": [
+        "runs/evidence/2026-10-02T23-09-23Z/several-project-probe.txt"
+      ],
+      "reasoning": "With checkout and search both committed, the block in CLAUDE.md lists each by id with its relative spec path, tells the agent to read the AGENTS.md of the blueprint it is working on, and says commands that write need --blueprint <id>. Placing it again reported 'already current', and it appears once. I tried to break it by moving search out of the repository with init --id search --commit none. The first time, that removed the whole pointer, checkout's included, and re-placing it wrote an absolute path into one person's home into a committed file. I fixed both before this verdict. The pointer now stays, is rewritten, and lists search as kept outside this repository with the  that finds it. No machine path appears, and init no longer says 'not even a pointer' over a pointer that names it. The evidence shows the block after the fix, and a recorded check covers the move-out case. A one-blueprint project's block is word for word what it was."
+    },
+    {
+      "rule": "locations.several.writes-name-one",
+      "status": "pass",
+      "statement_hash": "sha256:de5bdad5a7a4",
+      "evidence": [
+        "runs/evidence/2026-10-02T23-09-23Z/several-project-probe.txt",
+        "runs/evidence/2026-10-02T18-12-38Z/several-probe.txt"
+      ],
+      "reasoning": "Rejudged after its steps changed, because run left the list. hash --write, thread new, judge, sweep and move still exit 2 with 'Several blueprints are registered for … : proj, b.' and the --blueprint hint, in the recorded check and the earlier probe. A thread id only one blueprint holds is still changed without --blueprint. 'No blueprint here' is still said only where none is registered. walkdown run with no --blueprint no longer refuses: in the shop project it ran the shared suite and filed each result by rule, which is the new step pointing at results-filed-by-rule."
+    }
+  ],
+  "copied_from": {
+    "blueprint": "walkdown",
+    "run": "2026-10-02T23-11-29Z-local-01",
+    "at": "2026-10-03T00:41:15Z"
+  }
+}

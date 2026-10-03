@@ -1,0 +1,510 @@
+{
+  "run_id": "2026-09-21T06-30-50Z-local-01",
+  "created": "2026-09-21T06:30:50Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "71c8030-dirty",
+  "spec_hash": "sha256:5b0573fe2066",
+  "note": "The 2026-09-21 agent sitting under the sweep of 2026-09-21T05-16-03Z, after Topher's findings were fixed: 142 rules. Screen rules were driven against a stamped scratch copy served on 4730 (node tools/scratch.mjs new sitting-0921) so filing, verdicts and pins never touched this ledger; the real board on 4700 was read only. Headless rules were probed with the CLI and the API against throwaway homes. Evidence: this sitting's probes under runs/evidence/2026-09-21T05-18-16Z/ and the harness captures under 2026-09-21T05-33-54Z/ and 2026-09-21T05-37-40Z/.",
+  "results": [
+    {
+      "rule": "delivery.install.clone-is-the-install",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-sweep-attention-judge-hash-clone.txt"
+      ],
+      "reasoning": "A bare `git clone` with zero node_modules entries, imported into an empty home, ran where, lint (159 rules, 0 errors) and status, and served / , /panel.js, /embed.js and /api/blueprint on 4732 with 200s. No import in lib/ or bin/ leaves the tree except node:, and vendor/ carries lit, marked and yaml with their licences and a README naming the source (probe D7).",
+      "statement_hash": "sha256:7ca49cecc74b"
+    },
+    {
+      "rule": "locations.answer.says-why",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-locations.txt"
+      ],
+      "reasoning": "`walkdown where` names each location with the sentence that says why it is there - config yours and registering nothing, the registry naming the project and who registered it, the spec and runs under the home it registered (probe A, and C3 where a hand-written row is set aside with its reason).",
+      "statement_hash": "sha256:738bca8657bc"
+    },
+    {
+      "rule": "locations.answer.asking-writes-nothing",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-locations.txt"
+      ],
+      "reasoning": "Running `walkdown where` and `walkdown status` against a fresh home left the registry and the home byte-identical before and after (probe A: checksums unchanged, no new files).",
+      "statement_hash": "sha256:7d27e6b8d5a3"
+    },
+    {
+      "rule": "locations.answer.declared-not-discovered",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-locations.txt",
+        "runs/evidence/2026-09-21T05-18-16Z/probes-pointer-registry-lint-writes.txt"
+      ],
+      "reasoning": "A `.walkdown` folder nobody registered is not consulted: status in a directory with a stray .walkdown answers \"No blueprint here. Nothing registered in <registry> contains this directory\" (probe A), and a hand-written registry row without `registered:` is set aside by where and refused by status and thread new (probe C3).",
+      "statement_hash": "sha256:f1df66c74dac"
+    },
+    {
+      "rule": "locations.answer.registry-is-the-only-door",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-pointer-registry-lint-writes.txt",
+        "runs/evidence/2026-09-21T05-18-16Z/probes-registry-import-via-link.txt"
+      ],
+      "reasoning": "The hand-written row naming a symlink is set aside by `where` (\"written by hand\"), refused by status and thread new, and never served: a root server lists repo and pack only. Import through a symlink to the pack's home resolves to the real path and says it is already listed as `pack`, twice. Standing in the pack reaches the pack's row. The first attempt in probe C linked to the pack's .walkdown folder rather than its home and was rightly told nothing there declares a blueprint; the rerun is in probes-registry-import-via-link.txt.",
+      "statement_hash": "sha256:f6b76093bef6"
+    },
+    {
+      "rule": "locations.default.nothing-in-the-tree",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-locations.txt"
+      ],
+      "reasoning": "A plain `walkdown init` left the repository tree without a .walkdown folder; the home went under the machine's walkdown home and the registry named it (probe A).",
+      "statement_hash": "sha256:a2ac0f932c99"
+    },
+    {
+      "rule": "locations.default.records-follow-the-spec",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-locations.txt"
+      ],
+      "reasoning": "Threads, runs, evidence and drafts sit beside the spec under the home in every layout probed - default home, --commit spec and --commit all - and `where` reports them under the same home (probe A).",
+      "statement_hash": "sha256:bc12ec38993e"
+    },
+    {
+      "rule": "locations.default.in-repo-on-request",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-locations.txt"
+      ],
+      "reasoning": "`init --commit spec` put the home under the repository's .walkdown with a .gitignore keeping runs, evidence and drafts out; `--commit all` the same with no ignore; re-running with --commit moved the home whole and the registry followed (probe A).",
+      "statement_hash": "sha256:7310851da84e"
+    },
+    {
+      "rule": "locations.default.skills-are-yours-by-default",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-locations.txt"
+      ],
+      "reasoning": "`walkdown skills` wrote the skills under the user's own skills directory by default and into the project only with --project, saying where each went (probe A).",
+      "statement_hash": "sha256:a1c19031d710"
+    },
+    {
+      "rule": "locations.default.one-home-per-blueprint",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-locations.txt"
+      ],
+      "reasoning": "A second `init` in the same project refused to make a second home and pointed at the one already registered; a second blueprint got its own numbered home (probe A).",
+      "statement_hash": "sha256:43e88185b989"
+    },
+    {
+      "rule": "locations.keeping.moving-is-a-decision",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-locations.txt"
+      ],
+      "reasoning": "`walkdown move` relocated the home to the path asked for, rewrote the registry row, and nothing moved on its own: a stray copy of the home elsewhere in the tree was never adopted (probe A).",
+      "statement_hash": "sha256:1422c8dcbeae"
+    },
+    {
+      "rule": "locations.pointer.placed-where-agents-read",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-pointer-registry-lint-writes.txt"
+      ],
+      "reasoning": "On a repo with an AGENTS.md and no CLAUDE.md, init placed its block in AGENTS.md alone and created no CLAUDE.md; the block names where the blueprint is (probe C1).",
+      "statement_hash": "sha256:c74747fd201e"
+    },
+    {
+      "rule": "locations.pointer.owns-only-its-block",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-pointer-registry-lint-writes.txt"
+      ],
+      "reasoning": "A line of the person's own above the block and one below survived two more placings byte-identical (diff IDENTICAL, one walkdown:begin marker); after the spec moved (--commit none) the block was updated in place with the new path and the person's lines stayed (probe C2, C2b).",
+      "statement_hash": "sha256:48cecd33295b"
+    },
+    {
+      "rule": "locations.travel.evidence-by-key",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-sweep-attention-judge-hash-clone.txt",
+        "runs/evidence/2026-09-21T05-18-16Z/G-evidence-on-the-real-board-evidence-modal.png"
+      ],
+      "reasoning": "The judge prompt hands out a logical key `runs/evidence/<ts>/` and says which path this machine resolves it to, and tells the agent to cite the key never the path (probe D3); the evidence modal on the real board lists files by that key and resolves them to pictures and text (probe G).",
+      "statement_hash": "sha256:9a1654d1a68d"
+    },
+    {
+      "rule": "locations.travel.judged-against-a-spec",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-sweep-attention-judge-hash-clone.txt"
+      ],
+      "reasoning": "The spec hash was unchanged by a thread filed on a rule and moved by rewording one statement (sha256:1890b4c8c3b1 before and after the thread, sha256:415b1a885815 after the reword), and every run record this sitting carries spec_hash rather than a repository sha (probe D4).",
+      "statement_hash": "sha256:20d85cac1943"
+    },
+    {
+      "rule": "locations.travel.provenance-not-currency",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-locations.txt",
+        "runs/evidence/2026-09-21T05-18-16Z/probes-sweep-attention-judge-hash-clone.txt"
+      ],
+      "reasoning": "A run recorded on one machine reads on another without the record being edited: git_sha carries a -dirty suffix as provenance and spec_hash says what was judged, and the clone in probe D7 read the 515 inherited runs and reported them (probe A, D7).",
+      "statement_hash": "sha256:b1efe71a4d3b"
+    },
+    {
+      "rule": "ownership.authoring.steps-are-required",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-pointer-registry-lint-writes.txt"
+      ],
+      "reasoning": "Lint reports a rule with no steps as an error: \"rule has no steps — given/when/then is what a check gets built from, and a statement alone leaves it to be invented\" (probe C5).",
+      "statement_hash": "sha256:3227ee91ac45"
+    },
+    {
+      "rule": "ownership.authoring.statement-reads-at-a-glance",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-pointer-registry-lint-writes.txt"
+      ],
+      "reasoning": "A 58-word statement drew statement-reads-as-a-paragraph, statement-carries-why and the voice warning; a 39-word because drew because-carries-history (probe C5).",
+      "statement_hash": "sha256:97f1bacfb270"
+    },
+    {
+      "rule": "ownership.authoring.machine-words-pass-the-voice",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt"
+      ],
+      "reasoning": "An agent reply chaining three thoughts with dashes was refused by the voice gate, landed with --as-is, and the same words from a person landed unchallenged (probe B6).",
+      "statement_hash": "sha256:4c46fabe7d48"
+    },
+    {
+      "rule": "ownership.drift.design-requests-required",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-excuses-attention-design-requests.txt"
+      ],
+      "reasoning": "A screen with prototype: null drew the drift warning \"no design and no open design-request thread\"; filing a request thread on that screen cleared it; addressing it kept it clear; waiving it brought the warning back (probes D5 and E4).",
+      "statement_hash": "sha256:388852348271"
+    },
+    {
+      "rule": "ownership.writes.spec-never-implementation",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-pointer-registry-lint-writes.txt"
+      ],
+      "reasoning": "Every write the API offers - a thread, a reply, a status move, a draft, its discard and a finished walkdown - against the scratch server changed files only under threads/, drafts/ and runs/; nothing under the blueprint or the code moved, and all writes pass through lib/writes.js (probe C7).",
+      "statement_hash": "sha256:037b0d10dcea"
+    },
+    {
+      "rule": "screens.identity.fragment-is-identity",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-locations.txt"
+      ],
+      "reasoning": "A storyboard with a page and a fragment state of it: the bare path resolves to the page and the path with the fragment to the state; a different fragment is a different screen; an unlisted fragment falls to the page (probe A screen-match section).",
+      "statement_hash": "sha256:9484646bb993"
+    },
+    {
+      "rule": "screens.identity.query-is-not-identity",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-locations.txt"
+      ],
+      "reasoning": "A query string is dropped before matching: the same path with ?x=1 resolves to the same screen (probe A).",
+      "statement_hash": "sha256:56d83a30a6b1"
+    },
+    {
+      "rule": "screens.identity.follows-navigation",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-33-54Z/dock-list-follows-the-page.json",
+        "runs/evidence/2026-09-21T05-33-54Z/spa-pushstate-refollows.json"
+      ],
+      "reasoning": "Navigating the frame to rule-detail moved the picker to it; a pushState inside the app re-followed without a reload and Back followed again (harness dock-list-follows-the-page, spa-pushstate-refollows).",
+      "statement_hash": "sha256:5b51c16f7b2b"
+    },
+    {
+      "rule": "status.acceptance.signoff-defaults-to-eng",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-pointer-registry-lint-writes.txt"
+      ],
+      "reasoning": "A rule with signoff: [product] warns that it omits eng and the report signs for eng anyway; an empty signoff warns and reads as [eng]; status prints \"signed by eng\" for a rule that said nothing (probes C5, C6).",
+      "statement_hash": "sha256:8dd40d6249dc"
+    },
+    {
+      "rule": "status.acceptance.role-comes-from-the-run",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt"
+      ],
+      "reasoning": "The POSTed walkdown carried signatures for eng and product and the acceptance cells read \"signed by probe-driver, recorded by scratch-sitting-0921\" per role, from the run rather than from config (probe B13).",
+      "statement_hash": "sha256:cbfacc9c1f27"
+    },
+    {
+      "rule": "status.acceptance.approval-covers-only-the-unbuilt",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-signoff.json"
+      ],
+      "reasoning": "Approving an unbuilt rule recorded an approved result with its statement hash; the row still reads built: false and its acceptance holds an approved eng slot, not a signature on a build (probe F signoff: approvedRow).",
+      "statement_hash": "sha256:7578ef132c6b"
+    },
+    {
+      "rule": "status.acceptance.sent-back-is-a-fail",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-signoff.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-signoff-refined.png",
+        "runs/evidence/2026-09-21T05-18-16Z/F-detail-anatomy.json"
+      ],
+      "reasoning": "A Refine recorded a refining result and the rule's row reads \"failing — the build was rejected\" with the ✗ sent-back mark (probe F signoff; detail-anatomy row tooltips).",
+      "statement_hash": "sha256:1aef4eaeadde"
+    },
+    {
+      "rule": "status.acceptance.verdict-needs-every-role",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt"
+      ],
+      "reasoning": "One agent pass and one eng signature leave product at \"not yet\" and the rule unverified; only the run signing both filled both (probes B12, B13).",
+      "statement_hash": "sha256:fb010aa75b4e"
+    },
+    {
+      "rule": "status.acceptance.roles-recorded-on-the-run",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt"
+      ],
+      "reasoning": "The recorded run carries its signatures array with role and signer per entry, and status reads roles from it (probe B13: run file shows role eng/signer probe-driver, role product/signer sam).",
+      "statement_hash": "sha256:1d24bfe00266"
+    },
+    {
+      "rule": "status.acceptance.signature-names-its-signer",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt"
+      ],
+      "reasoning": "\"Agent\" and \"agent\" are refused as signers (\"an agent may claim work, never accept it\"), an unknown role is refused, and an empty signatures list is refused with \"say who is signing before it is recorded\" (probe B13).",
+      "statement_hash": "sha256:7bcd0cdfbe9f"
+    },
+    {
+      "rule": "status.attention.blocked-queues",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-excuses-attention-design-requests.txt",
+        "runs/evidence/2026-09-21T05-18-16Z/probes-sweep-attention-judge-hash-clone.txt"
+      ],
+      "reasoning": "The real board's attention list has every item addressed to a party: humans to judge per unsigned role, to verify addressed notes, and to answer the open question q-0317; the agent to settle its own addressed observations (n-0330, n-0331). No item is for nobody (probes D2, E2).",
+      "statement_hash": "sha256:7a494a8c560c"
+    },
+    {
+      "rule": "status.attention.names-the-role",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-excuses-attention-design-requests.txt"
+      ],
+      "reasoning": "Every judge item names its role - eng, product or design - and none lacks one (probe E2: judge entries lacking a role: 0).",
+      "statement_hash": "sha256:827f89ed0df2"
+    },
+    {
+      "rule": "status.attribution.username-is-the-record",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/F-attribution-and-zone.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting.json"
+      ],
+      "reasoning": "Settings shows the username scratch-sitting-0921 as a plain span that cannot be typed into, says it was set in the home's config.yml, and the full name beside it; the run recorded by the sitting carries actor scratch-sitting-0921 while the strip showed \"A scratch sitting\" (probes F attribution, F sitting ledger).",
+      "statement_hash": "sha256:be08ebbb3f59"
+    },
+    {
+      "rule": "status.derived.latest-wins",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt"
+      ],
+      "reasoning": "Two crafted runs on one rule: the newer pass shows in the agent cell with its run id, the older fail is superseded (probe B10).",
+      "statement_hash": "sha256:321c83ca466e"
+    },
+    {
+      "rule": "status.derived.stale-never-passes",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt"
+      ],
+      "reasoning": "A pass whose statement_hash no longer matches reads \"~ stale\" in the agent cell, never pass (probe B11).",
+      "statement_hash": "sha256:b686591f5ca6"
+    },
+    {
+      "rule": "status.derived.verdict-belongs-to-a-place",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt"
+      ],
+      "reasoning": "A run recorded against http://localhost:4799 while the target points at 4730 fills no cell and status says so in a warning naming both addresses (probe B10).",
+      "statement_hash": "sha256:994ece7e6ab2"
+    },
+    {
+      "rule": "status.derived.addressless-runs-count",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt"
+      ],
+      "reasoning": "A run with no `created` fills no cell and ages against no sweep, and status says exactly that in its warning (probe B10).",
+      "statement_hash": "sha256:4a35f16299d7"
+    },
+    {
+      "rule": "status.derived.unbacked-pass-goes-stale",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt",
+        "runs/evidence/2026-09-21T05-18-16Z/probes-sweep-attention-judge-hash-clone.txt"
+      ],
+      "reasoning": "The agent passes from 2026-08-31 read as stale on every rule once the sweep of 2026-09-21T05-16-03Z was declared, and a stale-hash pass reads stale too (probes B11, D1).",
+      "statement_hash": "sha256:c3d9169bc7f4"
+    },
+    {
+      "rule": "status.derived.human-tier-distinct",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt"
+      ],
+      "reasoning": "An agent pass fills the agent cell and leaves every signature slot at \"not yet\"; only the signed walkdown in B13 filled eng and product (probes B12, B13).",
+      "statement_hash": "sha256:511948134e22"
+    },
+    {
+      "rule": "status.evidence.agent-assumed",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-excuses-attention-design-requests.txt",
+        "runs/evidence/2026-09-21T05-18-16Z/probes-sweep-attention-judge-hash-clone.txt"
+      ],
+      "reasoning": "Rules with no verify list carry the agent tier; the four rules carrying an agent excuse are the only ones without it, and the judge prompt for a screen rule names the served port and the screens to open (probes E1, D3).",
+      "statement_hash": "sha256:a4faaa41b234"
+    },
+    {
+      "rule": "status.evidence.excuse-says-why",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-excuses-attention-design-requests.txt"
+      ],
+      "reasoning": "Every excused rule shows \"· excused\" with the sentence given, in the cell where its verdict would be, in `walkdown status` (probe E1, E3).",
+      "statement_hash": "sha256:64dd303baabc"
+    },
+    {
+      "rule": "status.evidence.excuse-must-argue",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-excuses-attention-design-requests.txt"
+      ],
+      "reasoning": "A three-character excuse is named as too thin to argue with, an excuse against \"vibes\" is named as not a tier and removing nothing, and a rule excusing both tiers is flagged as a decision to be made on purpose (probe E3). The then-step called the not-a-tier case an error while the statement and lint both make it a warning; the step was brought in line with the statement this sitting and re-stamped as a rewording.",
+      "statement_hash": "sha256:3bc6240e9f9b"
+    },
+    {
+      "rule": "status.sweep.declares-a-floor",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-sweep-attention-judge-hash-clone.txt"
+      ],
+      "reasoning": "With the sweep of 2026-09-21T05-16-03Z open, every agent verdict older than it reads stale and status prints the floor with who declared it and why (probe D1).",
+      "statement_hash": "sha256:09aee8e39b46"
+    },
+    {
+      "rule": "status.sweep.deliberate",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-sweep-attention-judge-hash-clone.txt"
+      ],
+      "reasoning": "`walkdown sweep` without --why refused and wrote nothing (516 runs before and after); the only writer of a sweep record is the sweep command through lib/run-record.js (probe D1).",
+      "statement_hash": "sha256:bd83ebeb2a0e"
+    },
+    {
+      "rule": "status.sweep.says-what-is-left",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-sweep-attention-judge-hash-clone.txt"
+      ],
+      "reasoning": "Status prints \"SWEEP agent on local — 0/142 judged, 142 to go\" followed by every rule still owed, and the harness's owed listing reads the same marker (probe D1).",
+      "statement_hash": "sha256:8f76421439bf"
+    },
+    {
+      "rule": "threads.lifecycle.validated-transitions",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt"
+      ],
+      "reasoning": "open→verified, open→answered on a note, and recorded→open on a decision are each refused as illegal transitions and the files are unchanged (probe B2).",
+      "statement_hash": "sha256:c2384ee386f5"
+    },
+    {
+      "rule": "threads.lifecycle.claim-never-accept",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt",
+        "runs/evidence/2026-09-21T05-18-16Z/F-claim-never-accept.json",
+        "runs/evidence/2026-09-21T05-18-16Z/F-claim-never-accept-refused.png"
+      ],
+      "reasoning": "The CLI refuses --verify as agent (\"agents may claim work, never accept it\"), and the panel refuses Done under a guessed name and opens Settings, leaving the thread addressed (probes B3, F claim-never-accept).",
+      "statement_hash": "sha256:1c0b2e99daa0"
+    },
+    {
+      "rule": "threads.lifecycle.acts-for-a-person",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt",
+        "runs/evidence/2026-09-21T05-37-40Z/threads-filter-all.png"
+      ],
+      "reasoning": "A --as-agent --said/--added reply lands under the person with via: agent and the addition kept apart; --added alone is refused; the env cannot name somebody else; the list marks a relayed message \"via agent\" and \"AGENT ADDED\" (probe B5, harness threads-filter-all).",
+      "statement_hash": "sha256:0306629cf026"
+    },
+    {
+      "rule": "threads.lifecycle.says-why-it-exists",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt"
+      ],
+      "reasoning": "A person's note with no reason reads feedback, the agent's reads observation, a decision is recorded, a question refuses a reason and \"whim\" is refused with the five reasons listed (probe B1).",
+      "statement_hash": "sha256:5bb935c7abc6"
+    },
+    {
+      "rule": "threads.lifecycle.closes-where-it-was-asked",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt",
+        "runs/evidence/2026-09-21T05-18-16Z/F-sitting.json"
+      ],
+      "reasoning": "The signed pass in B14 verified the open and addressed notes on its rule under the signer, and the sitting's pass in probe F closed n-0339 with a \"Verified by …'s pass on … (run)\" reply carrying via: verdict and verified_via naming the run (probes B14, F sitting ledger).",
+      "statement_hash": "sha256:7b9c7c47a41d"
+    },
+    {
+      "rule": "threads.lifecycle.says-what-it-did",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt"
+      ],
+      "reasoning": "A plain reply prints \"still verified · +1 reply\" without moving the status, and a refused move prints the illegal transition and exits without writing (probe B4).",
+      "statement_hash": "sha256:ea3c4135ac21"
+    },
+    {
+      "rule": "time.records.stored-as-utc",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-18-16Z/probes-threads-status.txt"
+      ],
+      "reasoning": "Every created stamp in the threads the probes wrote ends in Z, including the registry's registered.at (probe B7).",
+      "statement_hash": "sha256:5040dfedc0c3"
+    }
+  ],
+  "copied_from": {
+    "blueprint": "walkdown",
+    "run": "2026-09-21T06-30-50Z-local-01",
+    "at": "2026-10-03T00:41:15Z"
+  }
+}

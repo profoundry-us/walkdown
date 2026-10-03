@@ -1,0 +1,35 @@
+{
+  "run_id": "2026-08-25T14-53-32Z-local-01",
+  "created": "2026-08-25T14:53:32Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "20b0465-dirty",
+  "blueprint_sha": "20b0465-dirty",
+  "results": [
+    {
+      "rule": "screens.identity.fragment-is-identity",
+      "status": "pass",
+      "statement_hash": "sha256:ac30c2879d52",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/fragment-is-identity.png"
+      ],
+      "reasoning": "Docked on the example's admin prototype: the bare path resolved to waitlist-admin, and #invite-batch resolved to waitlist-invite-batch - a screen in its own right, not a footnote on the page behind it. A fragment nobody has enumerated fell back to the screen at that path rather than to nothing. Both states are reachable by URL on load, which is what makes them walkable at all."
+    },
+    {
+      "rule": "screens.identity.follows-navigation",
+      "status": "pass",
+      "statement_hash": "sha256:e8763cbea8b6",
+      "evidence": [
+        "runs/evidence/2026-08-25T14-53-32Z/fragment-is-identity.png"
+      ],
+      "reasoning": "The URL changed without a reload and walkdown re-answered every time: setting the hash moved the reported screen to waitlist-invite-batch, and pressing Back moved it home again. The panel's own answer follows, so a pin placed after the navigation files against the screen you are actually on. pushState remains the case it watches for rather than pretends to hear, as the rule says."
+    }
+  ],
+  "copied_from": {
+    "blueprint": "walkdown",
+    "run": "2026-08-25T14-53-32Z-local-01",
+    "at": "2026-10-03T00:41:15Z"
+  }
+}

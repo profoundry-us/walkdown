@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-10-02T23-24-43Z-local-01",
+  "created": "2026-10-02T23:24:43Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "d07ecbe-dirty",
+  "spec_hash": "sha256:55a1c12456f5",
+  "note": "ADR 0013 §5, judged on the hardest case available: walkdown's own 175-rule blueprint, split into walkdown and cli in a throwaway clone (HEAD plus the working tree's lib/ and bin/, with the real evidence copied in, in a throwaway home). Nothing in the real repository moved.",
+  "results": [
+    {
+      "rule": "locations.several.rules-move",
+      "status": "pass",
+      "statement_hash": "sha256:85fea46ae8b2",
+      "evidence": [
+        "runs/evidence/2026-10-02T23-23-58Z/split-in-a-clone.txt"
+      ],
+      "reasoning": "I moved walkdown's CLI rules (the features delivery, locations, ownership and status-derivation, the stories screens.identity and threads.lifecycle, and the rule time.records.stored-as-utc) into a new cli blueprint in one command. The dry run listed 79 rules, 120 threads, 308 run records, 3 sweeps and 631 pieces of evidence, and changed nothing. The move then did exactly that. All 75 moved rules on the board read identically before (in walkdown) and after (in cli): the same checks cell, agent cell, every role's signature and signer, and threads. That is 67 verified and 8 pending both times. walkdown's run records hashed the same before and after (83f74ce41e1fa7fc, 603 records), and both blueprints lint with 0 errors. The real data broke it three times before this pass, and each is fixed with a check. First, seven separate moves collided on runs that held results for rules in several features: the command now takes several selections, a later move writes a suffixed copy beside an earlier one, and a sweep is never copied twice. Second, every agent verdict and signature read as never, because cli's scaffolded target pointed at localhost:3000 and the verdicts were made at 4700. The move now refuses that, naming the 225 verdicts it would strand, until the targets agree. Third, two moved threads named a panel screen, and walkdown's untouched records held results for rules it no longer has. Lint now reads both against the project. Those last two go beyond the rule's current steps, and their wording goes to Topher. The recorded checks cover a dry run changing nothing, YAML moving node for node with its comments and hashes, threads keeping their ids and pictures, copies holding only the moved results with their run id, time and author and a copied_from, sweeps carrying staleness across, and refusals for an existing rule, a blueprint outside the project, stranded verdicts and uncommitted features."
+    }
+  ],
+  "copied_from": {
+    "blueprint": "walkdown",
+    "run": "2026-10-02T23-24-43Z-local-01",
+    "at": "2026-10-03T00:41:15Z"
+  }
+}

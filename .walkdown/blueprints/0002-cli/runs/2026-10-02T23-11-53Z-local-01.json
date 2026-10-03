@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-10-02T23-11-53Z-local-01",
+  "created": "2026-10-02T23:11:53Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "8e72c23-dirty",
+  "spec_hash": "sha256:55a1c12456f5",
+  "note": "Supersedes the pointer verdict in 2026-10-02T23-11-29Z-local-01, whose reasoning lost a command name to shell substitution when it was written. Same judgment, same evidence.",
+  "results": [
+    {
+      "rule": "locations.pointer.names-every-blueprint",
+      "status": "pass",
+      "statement_hash": "sha256:fc78cb716fcc",
+      "evidence": [
+        "runs/evidence/2026-10-02T23-09-23Z/several-project-probe.txt"
+      ],
+      "reasoning": "With checkout and search both committed, the block in CLAUDE.md lists each by id with its relative spec path, tells the agent to read the AGENTS.md of the blueprint it is working on, and says commands that write need --blueprint <id>. Placing it again reported 'already current', and it appears once. I tried to break it by moving search out of the repository with init --id search --commit none. The first time, that removed the whole pointer, checkout's included, and re-placing it wrote an absolute path into one person's home into a committed file. I fixed both before this verdict. The pointer now stays, is rewritten, and lists search as kept outside this repository with the 'walkdown where --blueprint search' that finds it. No machine path appears, and init no longer says 'not even a pointer' over a pointer that names it. The evidence shows the block after the fix, and a recorded check covers the move-out case. A one-blueprint project's block is word for word what it was."
+    }
+  ],
+  "copied_from": {
+    "blueprint": "walkdown",
+    "run": "2026-10-02T23-11-53Z-local-01",
+    "at": "2026-10-03T00:41:15Z"
+  }
+}

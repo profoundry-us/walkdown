@@ -11,6 +11,22 @@ folder of the blueprint you are working on. Commands that write - `run` aside -
 need `--blueprint <id>`; `walkdown where` shows where everything lives.
 <!-- walkdown:end -->
 
+## Two blueprints: `walkdown` and `cli`
+
+ADR 0013 split this project's spec in two. `walkdown` (0001) is the panel and
+the embed: the rules with screens, the storyboard, `prototype/` and
+`as-built/`. `cli` (0002) is what a person meets at a terminal and what the
+records guarantee: `delivery`, `locations`, `ownership`, `status`, and the
+headless stories of `screens`, `threads` and `time`. Its design is drawn by a
+separate agent (`design.by: agent`), never by the agent building it.
+
+There is still one test suite. Every recorded run files each result in the
+blueprint holding its rule, so `npm run test:record` and `npm run checks` are
+unchanged. Reads (`status`, `lint`, `threads`, `where`) cover both, a section
+each; anything that writes takes `--blueprint walkdown` or `--blueprint cli`.
+A rule changes blueprints with `walkdown rules move <rule> --to <id>`, which
+keeps its verdicts.
+
 ## Running walkdown's own CLI
 
 walkdown is not a dependency of itself, so `npx walkdown` and a bare `walkdown`
@@ -138,8 +154,9 @@ goes next").
 
 Here the panel under review writes to the blueprint it serves, so judging
 anything that files, refuses or pins needs a scratch copy first. The shipped
-skills no longer say so — this blueprint's own `governance:` lines in
-`.walkdown/blueprints/0001-walkdown/blueprint/walkdown.yml` do, and every judge prompt carries them:
+skills no longer say so — each blueprint's own `governance:` lines in its
+`walkdown.yml` do, and every judge prompt carries them. A copy holds one
+blueprint, the panel's unless `--blueprint cli` says otherwise:
 
     node tools/scratch.mjs new sitting-0830 --why "..." --port 4730   # a copy, stamped, app surface on 4730
     node tools/scratch.mjs list                           # what is lying about

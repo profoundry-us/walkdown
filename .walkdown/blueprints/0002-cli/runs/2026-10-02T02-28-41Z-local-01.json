@@ -1,0 +1,61 @@
+{
+  "run_id": "2026-10-02T02-28-41Z-local-01",
+  "created": "2026-10-02T02:28:41Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "0da417e-dirty",
+  "spec_hash": "sha256:10465e62b316",
+  "note": "ADR 0009's four rules, judged headless by driving the CLI on scratch copy design-1001 with its own WALKDOWN_HOME; an undrawn screen probe-undrawn was added to the copy's storyboard only.",
+  "results": [
+    {
+      "rule": "ownership.drift.design-requests-required",
+      "status": "pass",
+      "statement_hash": "sha256:418069b7b1f6",
+      "evidence": [
+        "runs/evidence/2026-10-02T02-25-55Z/probe-2.txt",
+        "runs/evidence/2026-10-02T02-25-55Z/probe-3.txt",
+        "runs/evidence/2026-10-02T02-25-55Z/probe-4.txt"
+      ],
+      "reasoning": "With probe-undrawn at prototype: null and nothing filed, lint names it: 'screen has no design and no open design request' (probe-2, step 4). Filing a request with thread new --screen cleared it (step 7, only the unrelated app-ref tie warning remained). After both requests were settled, an open feedback note n-0339 on the same screen did not clear it and the warning came back (probe-4, 10b), so a non-request note does not count and an ended request stops counting. One aside: the scratch status lists many 'cover' items because the copy has no checks/ tree; that is the copy, not this rule."
+    },
+    {
+      "rule": "ownership.design.declared-per-blueprint",
+      "status": "pass",
+      "statement_hash": "sha256:e1ce6c441f53",
+      "evidence": [
+        "runs/evidence/2026-10-02T02-25-55Z/probe-2.txt",
+        "runs/evidence/2026-10-02T02-25-55Z/probe-3.txt"
+      ],
+      "reasoning": "With design unset the status report heads the request 'DESIGN QUEUE — for the designer' (probe-2, step 8). With design.by: agent it reads 'DESIGN QUEUE — for the design agent, never the agent building the app', and lint is silent on design.by (probe-3, step 11). With design.by: robot lint errors under [config] naming person and agent as allowed values, and status falls back to the designer's queue (step 12). I did not probe design.by: person spelled out; it takes the same branch as unset in designBy()."
+    },
+    {
+      "rule": "ownership.design.request-on-a-screen",
+      "status": "pass",
+      "statement_hash": "sha256:f073f61e1435",
+      "evidence": [
+        "runs/evidence/2026-10-02T02-25-55Z/probe-1.txt",
+        "runs/evidence/2026-10-02T02-25-55Z/probe-2.txt",
+        "runs/evidence/2026-10-02T02-25-55Z/probe-3.txt"
+      ],
+      "reasoning": "thread new with no anchor is refused, exit 2, saying to name --rule or --screen; an unknown screen is refused by name (probe-1). thread new --screen probe-undrawn with no reason wrote n-0338 with anchor.screen only, no rule, reason: request, and lint's drift warning for that screen disappeared (probe-2, steps 6-7). Given --reason feedback on the same screen, n-0339 carried feedback and did not clear drift (probe-3/4). A note filed with --rule and no reason (n-0341) got the existing person default, feedback, not request, so the default is confined to screen-only threads."
+    },
+    {
+      "rule": "status.attention.blocked-queues",
+      "status": "pass",
+      "statement_hash": "sha256:9b3a0c26d360",
+      "evidence": [
+        "runs/evidence/2026-10-02T02-25-55Z/probe-2.txt",
+        "runs/evidence/2026-10-02T02-25-55Z/probe-3.txt",
+        "runs/evidence/2026-10-02T02-25-55Z/probe-4.txt"
+      ],
+      "reasoning": "The scratch report lists a DESIGN QUEUE ahead of the AGENT QUEUE, each item saying what to do: 'draw probe-undrawn — design request n-0338' under design, and 'address n-0339 — open note', 'address n-0341 (rule) — open note', 'cover <rule> — demands checks, and no check claims it', and 'judge <rule>' under the agent (probe-2, probe-3 step 9 and below). The request never appears as an agent item; the only other mentions of it are the drift summary and the recent-threads list. Once both requests were settled the design queue disappeared and the feedback note stayed with the agent (probe-4). Each item sits in exactly one queue."
+    }
+  ],
+  "copied_from": {
+    "blueprint": "walkdown",
+    "run": "2026-10-02T02-28-41Z-local-01",
+    "at": "2026-10-03T00:41:15Z"
+  }
+}

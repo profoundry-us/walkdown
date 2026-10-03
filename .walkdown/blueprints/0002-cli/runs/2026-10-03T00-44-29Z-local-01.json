@@ -1,0 +1,33 @@
+{
+  "run_id": "2026-10-03T00-44-29Z-local-01",
+  "created": "2026-10-03T00:44:29Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "899ffed-dirty",
+  "note": "Judged on walkdown's own split into walkdown and cli (ADR 0013 §6), done in this repository, plus a throwaway two-blueprint project for the refusals.",
+  "spec_hash": "sha256:996d1d13f553",
+  "results": [
+    {
+      "rule": "locations.several.lint-reads-the-project",
+      "status": "pass",
+      "statement_hash": "sha256:a2090d8e2e07",
+      "evidence": [
+        "runs/evidence/2026-10-03T00-44-14Z/split-in-the-repo.txt",
+        "runs/evidence/2026-10-03T00-44-14Z/probe-lint-and-targets.txt"
+      ],
+      "reasoning": "After the real split, walkdown's 608 run records still hold results for the 79 rules cli now holds, and its lint reports 0 errors with no run warning naming any of them; cli's threads n-0127 and n-0304 are anchored to the panel's thread-panel screen, which only walkdown's storyboard declares, and cli's lint is 0 errors with no thread warning. In a throwaway project with blueprints a and b: once shop.cart.add moved to b, a's run naming it raised nothing, while the same run's result for nowhere.at.all was still warned as an unknown rule; a thread in a on b's checkout screen raised nothing, and its copy on a screen named nowhere was an error. So lint accepts what a sibling holds and still flags what no blueprint holds, as the statement and the new step say."
+    },
+    {
+      "rule": "locations.several.rules-move",
+      "status": "pass",
+      "statement_hash": "sha256:7d24fcbae138",
+      "evidence": [
+        "runs/evidence/2026-10-03T00-44-14Z/split-in-the-repo.txt",
+        "runs/evidence/2026-10-03T00-44-14Z/probe-lint-and-targets.txt"
+      ],
+      "reasoning": "I ran the move for real on this repository: the dry run listed 79 rules, 120 threads, 313 run records, 3 sweeps and 632 pieces of evidence and changed nothing; the move then did exactly that, walkdown's runs checksum was 65ff1c7a153bbca4 before and after, and all 75 moved rules on the board read identically in cli (verdict, every cell, agent, each signature) to how they read in walkdown. For the new refusal step, in a throwaway project a verdict recorded at localhost:3000 with b's target at localhost:3001 was refused with exit 2, naming both addresses, and nothing moved; once the targets agreed the same move went through and reported 1 rule, 0 threads and 1 run record copied."
+    }
+  ]
+}
