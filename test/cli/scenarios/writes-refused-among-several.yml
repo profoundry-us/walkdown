@@ -1,0 +1,13 @@
+# A command that writes, with two blueprints standing here and none named.
+screen: writes-refused-among-several
+title: A write refused until --blueprint names one
+rule: locations.several.writes-name-one
+fixture: two-blueprints
+command: [sweep, --why, every check again]
+exit: 2
+expect:
+  - 'Several blueprints are registered'
+  - 'checkout, search'
+  - '--blueprint <id>'
+anchors:
+  - { id: cli.refusal, match: '^(Several blueprints|This command acts)' }

@@ -1,0 +1,17 @@
+id: n-0340
+kind: note
+reason: request
+author: topher
+via: agent
+created: 2026-10-03T00:52:00.382Z
+anchor:
+  screen: writes-refused-among-several
+status: open
+body: "Same as our other new solution: use a separate agent to design."
+added: "Draw the refusal a command that writes prints when two blueprints stand
+  here and none is named - `walkdown sweep --why ...`
+  (locations.several.writes-name-one): it exits 2, says several blueprints are
+  registered here, names them, and says `--blueprint` picks one. Anchors:
+  cli.prompt, cli.refusal, cli.exit. The frame is the terminal frame
+  tools/cli-captures.mjs --frame prints, so the design and the as-built line up
+  under the fade."

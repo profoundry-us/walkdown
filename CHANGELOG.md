@@ -39,8 +39,9 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
   them holds needs no `--blueprint`. `walkdown run` with no `--blueprint` runs the
   project's suite once and files by rule; with one, it records only that blueprint's
   results.
-- Lint accepts a check tagged with another blueprint's rule in the same project, and a
-  rule whose origin is another blueprint's thread.
+- Lint accepts what names another blueprint's rule, thread or screen in the same
+  project: a check tagged with its rule, a rule whose origin is its thread, a run
+  result for its rule, and a thread on its screen.
 - A new thread's id is unique across every blueprint in its project.
 - The pointer paragraph lists every blueprint in the project, and says that commands
   which write need `--blueprint`. A blueprint kept outside the repository is named by id,
@@ -53,6 +54,9 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
 
 - Commands no longer say "No blueprint here" where several blueprints are registered;
   they say which ones are.
+- `walkdown init --commit all` no longer deletes a `.walkdown/.gitignore` that other
+  blueprints in the same `.walkdown/` rely on, or one somebody edited; `--force` still
+  does. Giving walkdown its second blueprint deleted walkdown's own.
 
 ## [0.3.0] - 2026-10-02
 

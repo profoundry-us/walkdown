@@ -592,6 +592,7 @@ stories:
         created_at: 2026-10-02
         verify: [checks]
         signoff: [eng, product]
+        screens: [init-another]
         steps:
           given:
             - A project with blueprint a, kept outside the repository
@@ -613,6 +614,7 @@ stories:
         created_at: 2026-10-02
         verify: [checks]
         signoff: [eng, product]
+        screens: [status-two-blueprints, where-one-kind]
         steps:
           given:
             - A project with blueprints a and b
@@ -632,6 +634,7 @@ stories:
         created_at: 2026-10-02
         verify: [checks]
         signoff: [eng]
+        screens: [writes-refused-among-several]
         steps:
           given:
             - A project with blueprints a and b

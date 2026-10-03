@@ -27,6 +27,24 @@ each; anything that writes takes `--blueprint walkdown` or `--blueprint cli`.
 A rule changes blueprints with `walkdown rules move <rule> --to <id>`, which
 keeps its verdicts.
 
+## The CLI's screens are scenarios
+
+A `cli` screen is one moment at a terminal, written once as YAML in
+`test/cli/scenarios/`: fixture, command, exit code, expected lines, anchors.
+`test/cli.test.js` checks each against its rule; `tools/cli-captures.mjs`
+runs the same ones into `as-built/cli/`, the App side of the fade. New CLI
+rules are written as scenarios; an old test moves over when its rule is next
+touched.
+
+    node tools/cli-captures.mjs               # every screen, after a CLI change
+    node tools/cli-captures.mjs init-another  # one
+
+The design side is `prototype-cli/`, drawn by a separate design agent from
+the requests filed on each screen (ADR 0009). Never edit it: a screen that
+needs a new design gets a request (`walkdown thread new --blueprint cli
+--screen <id> --reason request`), and its drafts in `prototype-cli/drafts/`
+reach `prototype-cli/screens/` only when a person accepts one.
+
 ## Running walkdown's own CLI
 
 walkdown is not a dependency of itself, so `npx walkdown` and a bare `walkdown`

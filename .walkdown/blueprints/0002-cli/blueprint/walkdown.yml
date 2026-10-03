@@ -36,6 +36,12 @@ runner:
       # screens, so this is where they are looked at.
       base_url: http://localhost:4700
 
+# What each command should print, as the design agent drew it: a page per
+# screen in the same terminal frame the as-built uses (tools/cli-captures.mjs
+# --frame). Design owns this directory, as the panel's design owns prototype/.
+prototype:
+  root: prototype-cli/
+
 embed:
   anchor_attribute: data-testid
 

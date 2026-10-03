@@ -1,0 +1,16 @@
+# `walkdown status` where a project keeps two blueprints: one section each.
+screen: status-two-blueprints
+title: Status in a project with two blueprints
+rule: locations.several.reads-cover-all
+fixture: two-blueprints
+command: [status]
+exit: 0
+expect:
+  - '^━━ checkout ━━$'
+  - '^━━ search ━━$'
+  - 'checkout\.basics\.pays'
+  - 'search\.basics\.finds'
+anchors:
+  - { id: cli.status.section, match: '^━━ \S+ ━━$' }
+  - { id: cli.status.header, match: '^\s+RULE\s+LOCAL' }
+  - { id: cli.status.summary, match: '^\d+ verified, \d+ pending' }

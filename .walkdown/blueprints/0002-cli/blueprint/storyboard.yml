@@ -1,7 +1,53 @@
-# The screen registry: rules reference screens by id, never by URL.
-screens: []
-#  - id: home
-#    title: Home
-#    prototype: /screens/home.html   # null if not yet designed — then file a design-request thread
-#    app: { path: / }
-#    anchors: [home.cta]
+# The command line's screens (ADR 0013 §7).
+#
+# A screen here is one moment at a terminal: a command, the fixture it runs
+# against and what it prints. The design side is prototype-cli/screens/, drawn
+# by a separate design agent (design.by: agent) and never edited to match the
+# build. Its drafts wait in prototype-cli/drafts/ until a person accepts one,
+# when it is copied to prototype-cli/screens/ - never by the builder.
+#
+# The app side is as-built/cli/, written by tools/cli-captures.mjs from the
+# same scenario test/cli.test.js checks (test/cli/scenarios/). An anchor is a
+# line or block of output with the same data-testid on both sides; cli.prompt
+# and cli.exit are on every screen.
+
+screens:
+  - id: init-another
+    title: init gives the project another blueprint
+    prototype: null   # requested of design in n-0341; /screens/init-another.html once accepted
+    app: { path: /as-built/cli/init-another.html }
+    anchors:
+      - cli.prompt
+      - cli.init.created
+      - cli.init.another
+      - cli.init.spec
+      - cli.exit
+
+  - id: status-two-blueprints
+    title: Status in a project with two blueprints
+    prototype: null   # requested of design in n-0339; /screens/status-two-blueprints.html once accepted
+    app: { path: /as-built/cli/status-two-blueprints.html }
+    anchors:
+      - cli.prompt
+      - cli.status.section
+      - cli.status.header
+      - cli.status.summary
+      - cli.exit
+
+  - id: where-one-kind
+    title: where names one kind of path for every blueprint
+    prototype: null   # requested of design in n-0342; /screens/where-one-kind.html once accepted
+    app: { path: /as-built/cli/where-one-kind.html }
+    anchors:
+      - cli.prompt
+      - cli.where.row
+      - cli.exit
+
+  - id: writes-refused-among-several
+    title: A write refused until --blueprint names one
+    prototype: null   # requested of design in n-0340; /screens/writes-refused-among-several.html once accepted
+    app: { path: /as-built/cli/writes-refused-among-several.html }
+    anchors:
+      - cli.prompt
+      - cli.refusal
+      - cli.exit

@@ -1,0 +1,14 @@
+# `walkdown init --id` giving a project that has a blueprint a second one.
+screen: init-another
+title: init gives the project another blueprint
+rule: locations.several.init-makes-another
+fixture: one-blueprint
+command: [init, --id, search]
+exit: 0
+expect:
+  - '\+ created\s+~/\.walkdown/blueprints/0002-search/blueprint/walkdown\.yml'
+  - '\+ another\s+`search` is another blueprint for this project, beside `checkout`'
+anchors:
+  - { id: cli.init.created, match: '^\s+\+ created' }
+  - { id: cli.init.another, match: '^\s+\+ another' }
+  - { id: cli.init.spec, match: '^\s+spec:' }

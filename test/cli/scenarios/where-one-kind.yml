@@ -1,0 +1,12 @@
+# `walkdown where spec` with two blueprints: one line each, id then path.
+screen: where-one-kind
+title: where names one kind of path for every blueprint
+rule: locations.several.reads-cover-all
+fixture: two-blueprints
+command: [where, spec]
+exit: 0
+expect:
+  - '^checkout\t~/\.walkdown/blueprints/0001-checkout/blueprint$'
+  - '^search\t~/\.walkdown/blueprints/0002-search/blueprint$'
+anchors:
+  - { id: cli.where.row, match: '^\S+\t' }
