@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-10-03T00-56-43Z-local-01",
+  "created": "2026-10-03T00:56:43Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "1562e3d-dirty",
+  "tree_hash": "sha256:e25face88612",
+  "spec_hash": "sha256:34140e549852",
+  "results": [
+    {
+      "rule": "delivery.install.clone-is-the-install",
+      "status": "pass",
+      "statement_hash": "sha256:72ed038ac8f5",
+      "duration_ms": 345,
+      "checks": [
+        "test/delivery.test.js:39",
+        "test/delivery.test.js:63",
+        "test/delivery.test.js:80"
+      ]
+    }
+  ]
+}

@@ -84,9 +84,11 @@ test('the CLI runs from a tree with no node_modules @rule:delivery.install.clone
       cpSync(join(root, d), join(away, d), { recursive: true });
     cpSync(join(root, 'package.json'), join(away, 'package.json'));
     assert.equal(existsSync(join(away, 'node_modules')), false);
-    // This repository's own blueprint, registered in the suite's home the
-    // way `walkdown import .` would put it there (ADR 0003).
-    register({ id: 'walkdown', project: root.replace(/\/$/, ''), homeDir: join(root, '.walkdown', 'blueprints', '0001-walkdown') });
+    // This repository's own blueprints, registered in the suite's home the
+    // way `walkdown import .` would put them there (ADR 0003). Both: since
+    // ADR 0013 the suite tags rules of each, and lint reads the project.
+    for (const [id, home] of [['walkdown', '0001-walkdown'], ['cli', '0002-cli']])
+      register({ id, project: root.replace(/\/$/, ''), homeDir: join(root, '.walkdown', 'blueprints', home) });
 
     const out = execFileSync(process.execPath, [
       join(away, 'bin', 'walkdown.js'),
