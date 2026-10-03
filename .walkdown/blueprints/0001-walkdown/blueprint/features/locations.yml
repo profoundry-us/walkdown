@@ -671,7 +671,7 @@ stories:
           statement_hash: sha256:e6bc38c97ca2
 
       - id: locations.several.lint-reads-the-project
-        statement: In a project with several blueprints, lint accepts a check tagged with another blueprint's rule, and a rule citing another blueprint's thread.
+        statement: In a project with several blueprints, lint accepts what names another blueprint's rule, thread or screen.
         because: Sharing a test suite and citing each other's threads is normal for blueprints in one project, and lint that errors on every run for it teaches people to ignore lint.
         origin: walkdown
         created_at: 2026-10-02
@@ -686,7 +686,8 @@ stories:
             - a reports no error for the test tagged with b's rule, and no warning for the thread of b's
             - A tag that no blueprint in the project holds is still an error
             - A thread id that no blueprint in the project holds is still a warning
-          statement_hash: sha256:7853732bbd28
+            - A run record's result for a rule another blueprint holds raises no warning, and neither does a thread on another blueprint's screen
+          statement_hash: sha256:a2090d8e2e07
 
       - id: locations.several.thread-ids-unique
         statement: A new thread's id is not used by any other thread in any blueprint of its project.
@@ -726,6 +727,6 @@ stories:
             - a's run records are unchanged
             - Sweep markers and the evidence the copies cite are copied to b
             - "`walkdown status` in b shows every moved rule with the verdicts and signatures it had in a"
-            - A destination outside the project, a rule id the destination already has, and uncommitted changes in either blueprint's features are each refused, and nothing moves
+            - A destination outside the project, a rule id the destination already has, uncommitted changes in either blueprint's features, and verdicts recorded at an address the destination's target does not point at are each refused, and nothing moves
             - It says how many rules and threads moved, and how many run records were copied
-          statement_hash: sha256:85fea46ae8b2
+          statement_hash: sha256:7d24fcbae138
