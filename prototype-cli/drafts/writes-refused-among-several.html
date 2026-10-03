@@ -1,0 +1,40 @@
+<!doctype html>
+<!-- DESIGN DRAFT: writes-refused-among-several -->
+<!-- Drawn by the design agent for request n-0340. Not yet accepted. -->
+<!-- Intent: refuse plainly, say that nothing was written, and hand back the same command once per blueprint so the fix is a copy and paste. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>sweep refused, several blueprints</title>
+<style>
+:root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #14161a; }
+  .term { box-sizing: border-box; min-height: 100%; padding: 18px 22px 28px;
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #d7dae0; tab-size: 12; }
+  .term-bar { display: flex; align-items: center; gap: 7px; margin: 0 0 14px; color: #7d8590; font-size: 11.5px; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3f47; display: inline-block; }
+  .term-bar span { margin-left: 8px; }
+  .ln { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+  .prompt { color: #8fbcff; }
+  .prompt b { color: #7d8590; font-weight: 400; }
+  .exit { margin-top: 10px; color: #7d8590; }
+  .exit.bad { color: #f0a36b; }
+  [data-testid] { border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="term">
+  <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
+  <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown sweep --why "every check again"</div>
+  <div data-testid="cli.refusal">
+    <div class="ln">Several blueprints are registered here: checkout, search. Nothing was swept.</div>
+    <div class="ln">--blueprint picks one:</div>
+    <div class="ln">  walkdown sweep --why "every check again" --blueprint checkout</div>
+    <div class="ln">  walkdown sweep --why "every check again" --blueprint search</div>
+  </div>
+  <div class="ln exit bad" data-testid="cli.exit">[exit 2]</div>
+</div>
+</body>
+</html>
