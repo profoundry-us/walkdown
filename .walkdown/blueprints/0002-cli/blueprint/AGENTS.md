@@ -1,0 +1,233 @@
+# walkdown — agent conventions
+
+This project's spec lives in this directory - `walkdown where spec` names it: features, stories, and **rules**
+(acceptance criteria), plus the storyboard (screens), threads (questions &
+notes), and the runs ledger. The blueprint is the single source of truth for
+*what to build*. Read this before building, testing, or reviewing.
+
+## Before you build
+
+- `walkdown status --json` gives per-rule verification state, drift, and your
+  work queue: `attention` items with `who: "agent"`. In a project with several
+  blueprints it answers `{ "blueprints": [ … ] }`, one entry per blueprint with
+  its `id`; work in the one your task is about, and pass `--blueprint <id>` to
+  every command that writes.
+- A rule's plain-language `statement` is authoritative; its `steps` elaborate
+  it. If they disagree, the statement wins. The statement is the claim alone;
+  the reason lives in `because` and what happened in `history`, and neither
+  is hashed. After editing a statement or a step, run `walkdown hash --write`
+  so staleness detection keeps working - with `--reword "<why>"` when only
+  the words changed, so the verdicts stay current.
+- If a rule is ambiguous, do not guess. File a question thread anchored to the
+  rule/screen/element (`walkdown thread new --kind question --rule <id>
+  --body <text>`, or `POST /api/threads` via `walkdown serve`) and say what
+  you assumed if you proceed.
+- Anything that needs a person's DECISION is a question, never a note. A note
+  says work was done or is owed; a question says an answer is owed, and it is
+  the only kind the panel offers Answer on. Write the question as the first
+  line of the body - one line, ending in a question mark - and the context
+  under it: the panel draws that first line as the headline, and a question
+  buried in a paragraph is a question nobody sees. Several decisions are
+  several questions. When the ways out are known, offer them as choices -
+  `--option "Retire it :: which-project asks the same thing"`, two to six -
+  and the answer names one (`chosen`) or says something else; a question
+  already asked takes them once, while open (`walkdown thread <id> --option`). A person's
+  own words relayed with `--said` are a note, never a question: the person
+  is not asking themselves.
+
+## Ownership boundaries
+
+- **Never edit `prototype/`** — design owns it. If the spec needs a screen that
+  design hasn't drawn: set `prototype: null` on the storyboard screen, put a
+  sketch under `proposals/` if a picture helps, and file a design request
+  on the screen (`walkdown thread new --screen <id> --body <text>`). Lint
+  enforces this routing. Design work goes through a request, and a request
+  is for design, not for you: it waits in the DESIGN QUEUE, never in yours,
+  even where the blueprint's `design.by` is `agent` - that is a different
+  agent from the one building the app (ADR 0009). An `as-built/`
+  folder, where a project keeps one, is engineering's own drawing of what it
+  built and may be edited freely (ADR 0007).
+- **Every rule carries steps.** given/when/then is what a check gets built
+  from, so a statement standing alone leaves the detail to be invented and the
+  judgment with nothing to judge against. Lint errors on a rule without them;
+  only a retired rule is exempt.
+- The PRD is product's surface. Rules you introduce get
+  `origin: thread:<id>` (or `walkdown`) so the drift report stays honest.
+
+## Building
+
+- Carry anchors **verbatim** from prototype to implementation. The attribute is
+  `embed.anchor_attribute` in the blueprint's `walkdown.yml` (default
+  `data-testid`). Every element the spec references keeps its anchor.
+- Reference screens and anchors by id — never URLs, never CSS selectors.
+- Rules don't require screens: headless rules (API, CLI, jobs, policies) get the
+  full ledger without the UI layer. But not every test deserves a rule — a rule
+  is a behavior product would recognize as a requirement. Keep checks a small,
+  meaningful subset of the test suite.
+
+## Bugs, rules and checks
+
+**Default to bug. A rule needs a reason.**
+
+- A rule is a claim someone could have decided differently and would sign. If
+  the answer to "who would have wanted this another way?" is nobody, it is a
+  bug — write the check, skip the rule.
+- A bug is the code failing something already decided. Its check goes under
+  the rule it broke. A bug that fits no rule is usually still just a bug: a
+  rule written to mark where a defect happened is one nobody will ever
+  meaningfully sign, and the board is not a bug log.
+- Write the rule only when the fix changed what the product *claims*. Leave it
+  alone when the fix changed whether the product delivers a claim it had
+  already made.
+- Taste — sizes, spacing, the exact grey — is neither. Spec it and the spec
+  fails every time somebody nudges padding.
+- A fixed bug with a check needs no thread. Threads are for what is unfixed or
+  contested: a bug you are not fixing, or a fix that was a judgement call
+  somebody else should get a say in.
+- Engineering invariants nobody outside the codebase could notice — the build
+  is current, the bundle has no top-level imports, every name resolves — are
+  Highball's, not walkdown's.
+
+## Writing a rule
+
+**A statement is written for a stranger.** Someone who has never seen this
+blueprint reads it alone, with no steps, no because and no history, and knows
+what the rule wants. (ADR 0004 has the reasoning and the before/after pairs.)
+
+- **One or two sentences, present tense, saying what is true of the built
+  thing.** Past 45 words or two sentences it is almost always restating its
+  steps; lint warns.
+- **The steps carry the detail.** If a sentence could be pasted into `then:`,
+  it belongs there. The statement does not enumerate the cases the steps
+  enumerate.
+- **Name the thing, not the category.** "Three kinds of record: a thread, a
+  draft, a run", not "specification". "Which commit it saw", not
+  "provenance".
+- **When something is shown, kept, read or recorded, say where.** The
+  session strip. Every record. The files themselves. Steps name the anchor;
+  the statement names the place in plain words.
+- **Plain words over house words.** A glossary term is fine when the sentence
+  still reads without knowing it.
+- **No dash-clauses.** A dash is where a second thought got bolted on. Give
+  it a sentence, move it to a step, or cut it.
+- **One exception per sentence.** "…reads as stale, unless a person declared
+  the rewording as words only." Not an unless, then an "in which case", then
+  a dash.
+- **This rule's claim only.** A sentence that would still be true with this
+  rule deleted belongs to another rule.
+- **`because` is the reason the rule is worth having, in one breath.** Not
+  the mechanism (a code comment), not a neighbour's reason, not a general
+  principle. Past 35 words it is usually carrying `history`; lint warns.
+- **`history` is what happened, with its date or count.** A past tense, a
+  thread id, a number. Optional; the `origin:` thread usually carries it.
+- **Rewording is `walkdown hash --write --reword "<why>"`.** The old hash is
+  kept and no verdict goes stale. Better English is never a new rule.
+
+## The voice
+
+`docs/13-voice.md` is how prose written into this blueprint sounds - one idea
+per sentence, no dash-clauses, no hedges, plain words, a rule never in the
+first person. `walkdown lint` warns where a field misses it, and the thread
+doors refuse the machine's own words that do: fix the sentence rather than
+reaching for `--as-is`, which files it unchanged and says so on the command.
+
+## Writing code here
+
+`docs/10-house-style.md` is how code in this repository is written - it is
+mostly a description of what the repository already does, so the fastest way to
+follow it is to match the file you are editing. Two rules do the most work: a
+comment explains the decision and the failure it prevents, never the code; and
+a name that appears in `docs/01-glossary.md` appears nowhere else in another
+form. `docs/11-architecture.md` says which files are known to be wrong and what
+the fix is, so a change that touches one of them can move in that direction
+rather than adding to it.
+
+## Checks
+
+- Write tests in this project's own framework and house style. Tag each with
+  the rule id it claims — Playwright: `{ tag: '@rule:<id>' }`; RSpec:
+  `rule: "<id>"` metadata. One rule per test. Select by anchor
+  (`getByTestId`), never CSS paths.
+- A regression guard for a bug that fits no rule stays **untagged**, with a
+  comment saying why it claims none. Enforcement only ever runs rule → check:
+  lint errors on a check naming a rule that does not exist, and warns on a
+  rule asking for checks that nothing claims. An untagged check is never a
+  finding.
+- Run with `walkdown run [--target <t>] [--rule <id>]` — the
+  reporter/formatter appends the run record automatically, under the identity
+  in `~/.walkdown/config.yml`.
+- `walkdown lint` before you finish: coverage, staleness, storyboard refs,
+  thread hygiene.
+- Before you hand work to a person, `walkdown status` lists nothing under
+  AGENT QUEUE for the rules you touched. A rule you built, reworded or fixed
+  owes the agent tier a fresh look (`judge <rule>` or `judge <rule> again`):
+  judge it with the judge skill (`/walkdown:judge`) and record the run. A person handed a rule
+  no agent has looked at is doing the agent's job, and finds what it would
+  have found.
+
+## Threads
+
+- A rule the walk can reach is the unit of conversation (ADR 0006).
+  Everything said on it - a fail's why, your fix, a person's feedback - is
+  one stream under the rule, and the person's signed pass on the rule ends
+  it: every note still open or addressed on the rule reads as verified. Do
+  not open a second note on a rule that has a live one; reply on it. Two
+  live notes on one rule means the rule wants splitting - say so.
+- A note says why it exists (ADR 0005): `feedback` is a person's words;
+  `finding` is a judge's fail; `observation` is something you noticed in
+  passing, which you settle yourself; `request` is a rule that has not been
+  written yet; `decision` is a record, filed closed. On a walkable rule all
+  but a decision close on the pass. File yours with `--reason finding` from
+  a judge run and `--reason observation` otherwise; a finding or an
+  observation is authored `agent`, never under the person whose machine it
+  ran on.
+- Prefer a rule to a question. "Should X be so?" on a rule is the sign-off
+  act the rule already has: draft the rule or edit the wording, say why in
+  `because`, and the person approves or sends it back. Ask a `question` only
+  for what no rule edit can express, and put the question on its first line.
+- Work your queue: `address` open notes; `incorporate` answered questions —
+  fold the answer into the rule's statement/steps, then mark the thread;
+  `settled` an observation once the change is named.
+- Mutate threads only through `walkdown thread <id> --as-agent
+  --reply "..." --status <s>` — never raw YAML edits — so transitions stay
+  validated. Attribution follows the words: `--reply` is your own words and
+  records as `agent`. When you relay what the person said — in a chat, in a
+  message to you — carry it with `--said "<their words, as typed>"` and put
+  what you add beside them in `--added "..."`, so their words stay theirs and
+  yours read as yours. `--as-agent` refuses `verified` and `waived` however it
+  is spelled, and may not reopen a thread a person verified or waived.
+- After fixing what a note asks: reply with what you changed and which run
+  re-verified it, then `--status addressed`.
+- You may **never** set `verified` or `waived`. Those are human judgments —
+  you claim work; a person accepts it. A person's signed pass on a rule
+  verifies the findings and feedback addressed on it; that is their look,
+  not yours.
+
+## Quick reference
+
+    walkdown status [--json]        derived verification + queues + drift
+    walkdown status <rule-id>       one rule in full
+    walkdown status --retired       rules withdrawn from the report, and why
+    walkdown lint                   validate everything
+    walkdown hash --write           re-stamp statement hashes
+    walkdown run [--target] [--rule]  run checks, record the run
+    walkdown threads [--rule <id>]  active questions & notes
+    walkdown thread <id> [...]      view / reply / transition
+    walkdown serve                  panel + embed + pin/walkdown APIs, for every
+                                    registered blueprint; start it anywhere, once
+
+A project can hold several blueprints (`walkdown init --id <name>` adds one).
+Then `status`, `lint`, `threads` and `where` report on each, under its id, and
+every command that writes - `run`, `hash --write`, `thread new`, `judge`,
+`sweep`, `move` - needs `--blueprint <id>`. `walkdown where` lists the ids.
+
+## Procedures
+
+Multi-step rituals are encoded as skills. In Claude Code they are the
+`walkdown` plugin, linked by `walkdown init`: **`/walkdown:judge`** (agent
+walkdown — visual judgment with evidence and a run record),
+**`/walkdown:incorporate`** (fold answered questions into the blueprint;
+address notes), **`/walkdown:formulate`** (turn a design/PRD into storyboard +
+rules + checks), with `/walkdown:lint` and `/walkdown:status` beside them.
+Another agent has them as copies named `walkdown-judge` and so on. Prefer them
+over improvising the procedure.

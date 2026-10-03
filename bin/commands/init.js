@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { defaultActor } from '../../lib/identity.js';
@@ -306,7 +306,10 @@ export async function run(args) {
     commit !== 'none' && !listed
       ? rememberBlueprint({ id: entry.id, root, homeDir: claim.dir, home: claim.home, inRepo: false, by: 'init' })
       : null;
-  const ignore = commit === 'none' || !claim.dir ? null : setIgnore(walkdown, commit, { force: values.force });
+  const ignore =
+    commit === 'none' || !claim.dir
+      ? null
+      : setIgnore(walkdown, commit, { force: values.force, shared: otherHomes(walkdown, claim.dir) });
   /*
    * Leaving the repository takes the pointer with it - unless another
    * blueprint of this project is still there, when the pointer is that
@@ -380,6 +383,7 @@ export async function run(args) {
       removed: green('- removed'),
       absent: null,
       'kept-differs': yellow('! kept (yours differs from the spec standard — --force to rewrite)'),
+      'kept-shared': yellow(`! kept (it rules ${ignore.shared?.join(', ')} too — --force to change it for every one)`),
     };
     if (IGN[ignore.action]) console.log(`  ${IGN[ignore.action]}  ${ignore.path}`);
   }
@@ -457,7 +461,9 @@ export async function run(args) {
     // With several, the hint names this one: a bare `--commit` is refused.
     const idFlag = rootedHere().length > 1 ? ` --id ${entry.id ?? listed?.id}` : '';
     // Among several, the pointer is the project's and names this one too.
-    const said = idFlag
+    const said = ignore?.action?.startsWith('kept')
+      ? `  Committed, by the .gitignore already under .walkdown/ — it decides for every blueprint there, and was left as it is.`
+      : idFlag
       ? say[commit].replace(' Nothing was added to this repository, not even a pointer — `walkdown pointer --into CLAUDE.md` adds one for agents.', '')
       : say[commit];
     console.log(dim(said.replaceAll('`walkdown init --commit', `\`walkdown init${idFlag} --commit`)));
@@ -525,4 +531,13 @@ export async function run(args) {
   }
   if (!existsSync(specDir)) console.error(red(`  the spec did not land at ${specDir}`));
 }
+}
+
+/* The other blueprints' homes under this `.walkdown/`, by directory name. */
+function otherHomes(walkdown, mine) {
+  const dir = join(walkdown, 'blueprints');
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir, { withFileTypes: true })
+    .filter((d) => d.isDirectory() && resolve(dir, d.name) !== resolve(mine))
+    .map((d) => d.name);
 }

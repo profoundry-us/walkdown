@@ -1,0 +1,7 @@
+# The screen registry: rules reference screens by id, never by URL.
+screens: []
+#  - id: home
+#    title: Home
+#    prototype: /screens/home.html   # null if not yet designed — then file a design-request thread
+#    app: { path: / }
+#    anchors: [home.cta]

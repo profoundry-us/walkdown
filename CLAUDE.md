@@ -1,9 +1,14 @@
 <!-- walkdown:begin -->
 ## walkdown
 
-This project's spec is the walkdown blueprint in `.walkdown/blueprints/0001-walkdown/blueprint/`. Before building,
-testing, or reviewing, read and follow that folder's `AGENTS.md`. Run
-`walkdown where` to see where everything this project uses actually lives.
+This project's specs are walkdown blueprints, one for each part of it:
+
+- `walkdown` in `.walkdown/blueprints/0001-walkdown/blueprint/`
+- `cli` in `.walkdown/blueprints/0002-cli/blueprint/`
+
+Before building, testing, or reviewing, read and follow the `AGENTS.md` in the
+folder of the blueprint you are working on. Commands that write - `run` aside -
+need `--blueprint <id>`; `walkdown where` shows where everything lives.
 <!-- walkdown:end -->
 
 ## Running walkdown's own CLI

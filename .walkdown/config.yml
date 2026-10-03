@@ -22,6 +22,14 @@ blueprints:
     evidence: .walkdown/blueprints/0001-walkdown/evidence
     drafts: .walkdown/blueprints/0001-walkdown/drafts
     home: 0001-walkdown
+  - id: cli
+    roots: [.]
+    spec: .walkdown/blueprints/0002-cli/blueprint
+    threads: .walkdown/blueprints/0002-cli/threads
+    runs: .walkdown/blueprints/0002-cli/runs
+    evidence: .walkdown/blueprints/0002-cli/evidence
+    drafts: .walkdown/blueprints/0002-cli/drafts
+    home: 0002-cli
 
   # The example project that ships in example/ is NOT listed here. It carries
   # a .walkdown of its own, so it is a project of its own - stand in example/

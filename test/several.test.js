@@ -104,6 +104,23 @@ test('bare init refuses where several blueprints stand and none has the default 
   assert.deepEqual(m.homes(), ['0001-a', '0002-b']);
 });
 
+test('a second blueprint committed beside the first leaves the .gitignore they share as it is @rule:locations.several.init-makes-another', () => {
+  const m = machine();
+  assert.equal(m.wd(['init', '--id', 'a', '--commit', 'spec']).status, 0);
+  const ignore = join(m.proj, '.walkdown', '.gitignore');
+  const theirs = `${readFileSync(ignore, 'utf8')}# and ours\n`;
+  writeFileSync(ignore, theirs);
+  const all = m.wd(['init', '--id', 'b', '--commit', 'all']);
+  assert.equal(all.status, 0, all.stderr);
+  assert.equal(readFileSync(ignore, 'utf8'), theirs, 'not deleted for b');
+  assert.match(all.stdout, /kept \(it rules 0001-a too/);
+  assert.match(all.stdout, /by the \.gitignore already under \.walkdown\//);
+  assert.doesNotMatch(all.stdout, /no \.gitignore under \.walkdown/);
+  const forced = m.wd(['init', '--id', 'b', '--commit', 'all', '--force']);
+  assert.equal(forced.status, 0, forced.stderr);
+  assert.equal(existsSync(ignore), false, '--force changes it for every one');
+});
+
 test('reads report on every blueprint, each under its id, and on one when named @rule:locations.several.reads-cover-all', () => {
   const m = twoBlueprints();
   for (const cmd of [['status'], ['lint'], ['threads'], ['where']]) {

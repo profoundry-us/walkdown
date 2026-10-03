@@ -1,0 +1,90 @@
+blueprint: cli
+description: walkdown at a terminal - its commands, what they print, and what the records they keep guarantee.
+
+# The command line's half of walkdown, split from the panel's blueprint by
+# ADR 0013 so each surface's report reads as one product. The rules here are
+# judged by running commands and reading what they print; docs/ holds the why.
+#
+# The checks are the same two suites as the panel's, because walkdown has one
+# test suite: each reporter files every result in the blueprint that holds its
+# rule (ADR 0013 §1), so most of what lands here comes from test/.
+#
+# The design of what a command prints is drawn by a separate agent (ADR 0009,
+# decided on ADR 0013's review) - the agent that builds the CLI never draws
+# its own output, and Topher accepts it when he walks the screen.
+design:
+  by: agent
+
+runner:
+  # WALKDOWN_HOME is NOT pinned here, on purpose. Every suite gives itself a
+  # scratch home per process (tools/test-home.mjs) whether or not one is
+  # pinned, so nothing a test builds can reach the real one - and the
+  # reporter, which runs in the main process, has to read the real registry
+  # to find the blueprint of record (ADR 0003): pinned at an empty home it
+  # says "no blueprint found" and records nothing. `npm test` still pins
+  # tmp/test-home so the scratch stays under tmp/; the browser half pins its
+  # own inside checks/checkspace.mjs and hands the reporter the real home.
+  run_all: "node --test --test-reporter=./lib/node-test-reporter.js --test-reporter-destination=stdout && npx playwright test"
+  run_for_rule: "node --test --test-name-pattern='{id}' --test-reporter=./lib/node-test-reporter.js --test-reporter-destination=stdout && npx playwright test --grep '@rule:{id}'"
+  list: "grep -rn '@rule:' test/ checks/"
+  results: native
+  targets:
+    local:
+      # The panel's address, not a CLI's: these rules were judged while it was
+      # the only blueprint, and a verdict belongs to the place it was recorded
+      # (status matches by base_url). `walkdown serve` also draws the CLI's
+      # screens, so this is where they are looked at.
+      base_url: http://localhost:4700
+
+embed:
+  anchor_attribute: data-testid
+
+authoring:
+  location: [checks/, test/]
+  style: >
+    Two suites, and which one a rule belongs in is not a preference. A rule
+    describing what a person sees or does goes in checks/ as a Playwright test
+    driving the real panel or embed, selected by anchor, never by CSS path. A
+    rule describing what the ledger guarantees goes in test/ as node:test over
+    lib/. Nothing else is tracked - unit tests of internals are their own work
+    and do not belong in the ledger. Tag by appending " @rule:<id>" to a
+    node:test name, or `{ tag: '@rule:<id>' }` in Playwright. One rule per
+    test. A check may only claim a rule whose surface it actually exercises
+    (ownership.evidence.same-surface).
+
+# What a judging agent must be told here that no generic prompt can know: the
+# usual "your target is already disposable" does not hold, because the app
+# under review is walkdown's own panel and it writes to the blueprint it
+# serves. `walkdown judge` carries these lines into every prompt.
+governance:
+  - >-
+    The application under review is walkdown's own panel, and it writes to the
+    very blueprint it serves — this working tree's blueprint is the real
+    ledger, not a disposable environment. Before judging anything that files,
+    refuses, pins or replies, make a scratch copy (node tools/scratch.mjs new
+    <label> --why "..." --port <n>), and serve it FROM INSIDE THE COPY with the
+    copy's own home on that port: cd <copy> && WALKDOWN_HOME=<copy>/home node
+    <repo>/bin/walkdown.js serve --port <n>. The copy's home holds a registry
+    naming only the copy, and the registry is the only thing a server consults
+    (ADR 0003) — so served with that home it cannot list, serve or write to the
+    real ledger, however the panel's chooser is driven. --port also retargets
+    the copy's local target, so the app surface the panel frames is this
+    server's as-built page and not the real server's — without it, a pin placed
+    on the app surface would post to the real ledger through the real embed. The
+    verdict still goes in the real ledger. Take the copy away when done (node
+    tools/scratch.mjs clean <label>). The copy's prototype/ is a link to the
+    real one: write nothing under it.
+  - >-
+    Never serve a copy with --blueprint from the real repository, and never
+    point WALKDOWN_HOME at the real home while serving one. Either way the
+    real project is registered for that server, and the real ledger is one
+    ?bp= away (q-0149). There is no --dir: everything walkdown answers for is
+    registered, and a scratch copy is registered in its own home.
+  - >-
+    Hand-written arrangements are out of scope (q-0182, q-0220). A state that
+    only a hand edit can produce - a key deleted from config.yml, a row typed
+    into the registry, a home's layout rearranged, a run file touched - is
+    neither a defect nor a question: walkdown supports what its own tools
+    write, and a hand edit gets what it asked for. Judge what init, import,
+    move, serve, the CLI and the panel produce, and file nothing about the
+    rest.
