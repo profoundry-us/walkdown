@@ -20,7 +20,11 @@ import { basename } from "node:path";
 
 const SLOW = new Set([
   "locations", "thread-cli", "serve", "standard", "every-door", "move",
-  "judge-cli", "init-run", "import"
+  "judge-cli", "init-run", "import",
+  // ADR 0011 and 0013: each builds two blueprints and spawns the CLI across
+  // them - 3s to 11s apiece after their fixtures were trimmed, and before it
+  // the edit hook was killed at its budget on every change near init.
+  "several", "several-project", "rules-move", "cli"
 ]);
 
 const changed = (process.env.HIGHBALL_CHANGED_FILES ?? "")
