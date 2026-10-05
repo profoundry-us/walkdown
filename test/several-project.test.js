@@ -251,3 +251,45 @@ test('a project with one blueprint keeps its one-line pointer and files every re
   assert.match(out.stdout, /recorded 1 rule result\(s\) →/, 'held or not, filed in the one blueprint, as before');
   assert.doesNotMatch(out.stdout, /for solo|not recorded|set aside/);
 });
+
+/*
+ * A screen's page is loaded by the browser, in a frame, so its address can
+ * carry no `?bp=` - nor can anything that page loads. A server standing over
+ * several blueprints serves it when the file it names is one file, and names
+ * the blueprints when they disagree.
+ */
+test('a framed screen is served without ?bp= when its file is one file, and refused by name when it is two', async () => {
+  const p = project();
+  const { createWalkdownServer } = await import('../lib/serve.js');
+  mkdirSync(join(p.shop, 'as-built'), { recursive: true });
+  writeFileSync(join(p.shop, 'as-built', 'home.html'), '<p>as built</p>');
+  for (const id of ['a', 'b']) {
+    const cfg = join(p.specOf(id), 'walkdown.yml');
+    writeFileSync(cfg, `${readFileSync(cfg, 'utf8').replace(/^prototype:[\s\S]*?(?=^\S)/m, '')}\nprototype:\n  root: proto-${id}/\n`);
+    mkdirSync(join(p.shop, `proto-${id}`, 'screens'), { recursive: true });
+    writeFileSync(join(p.shop, `proto-${id}`, 'screens', 'both.html'), `<p>${id}</p>`);
+  }
+  writeFileSync(join(p.shop, 'proto-a', 'screens', 'only-a.html'), '<p>only a</p>');
+  const was = process.env.WALKDOWN_HOME;
+  process.env.WALKDOWN_HOME = p.home;
+  const server = createWalkdownServer(null, { cwd: p.shop });
+  await new Promise((r) => server.listen(0, '127.0.0.1', r));
+  const at = (path) => fetch(`http://127.0.0.1:${server.address().port}${path}`);
+  try {
+    const shared = await at('/as-built/home.html');
+    assert.equal(shared.status, 200, 'one as-built/ for both: nothing to choose');
+    assert.equal(await shared.text(), '<p>as built</p>');
+    const one = await at('/prototype/screens/only-a.html');
+    assert.equal(one.status, 200, 'only a has it');
+    assert.equal(await one.text(), '<p>only a</p>');
+    const two = await at('/prototype/screens/both.html');
+    assert.equal(two.status, 409);
+    assert.match((await two.json()).error, /different file in a and b/);
+    assert.equal((await at('/prototype/screens/nowhere.html')).status, 404);
+    assert.equal((await at('/as-built/home.html?bp=b')).status, 200, 'named, as ever');
+  } finally {
+    server.close();
+    if (was === undefined) delete process.env.WALKDOWN_HOME;
+    else process.env.WALKDOWN_HOME = was;
+  }
+});
