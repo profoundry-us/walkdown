@@ -1,0 +1,122 @@
+{
+  "run_id": "2026-10-05T01-39-16Z-local-01",
+  "created": "2026-10-05T01:39:16Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "4369e44-dirty",
+  "tree_hash": "sha256:9178d782fde8",
+  "spec_hash": "sha256:3b3c053cb61f",
+  "results": [
+    {
+      "rule": "locations.travel.judged-against-a-spec",
+      "status": "pass",
+      "statement_hash": "sha256:20d85cac1943",
+      "duration_ms": 13,
+      "checks": [
+        "test/lint.test.js:140"
+      ]
+    },
+    {
+      "rule": "time.records.stored-as-utc",
+      "status": "pass",
+      "statement_hash": "sha256:5040dfedc0c3",
+      "duration_ms": 34,
+      "checks": [
+        "test/lint.test.js:278"
+      ]
+    },
+    {
+      "rule": "status.derived.stale-never-passes",
+      "status": "pass",
+      "statement_hash": "sha256:ba73225874b1",
+      "duration_ms": 34,
+      "checks": [
+        "test/lint.test.js:278"
+      ]
+    },
+    {
+      "rule": "ownership.drift.design-requests-required",
+      "status": "pass",
+      "statement_hash": "sha256:418069b7b1f6",
+      "duration_ms": 56,
+      "checks": [
+        "test/lint.test.js:340"
+      ]
+    },
+    {
+      "rule": "status.acceptance.signoff-defaults-to-eng",
+      "status": "pass",
+      "statement_hash": "sha256:8dd40d6249dc",
+      "duration_ms": 66,
+      "checks": [
+        "test/lint.test.js:465",
+        "test/lint.test.js:566"
+      ]
+    },
+    {
+      "rule": "status.evidence.excuse-must-argue",
+      "status": "pass",
+      "statement_hash": "sha256:3bc6240e9f9b",
+      "duration_ms": 53,
+      "checks": [
+        "test/lint.test.js:493",
+        "test/lint.test.js:525"
+      ]
+    },
+    {
+      "rule": "ownership.authoring.steps-are-required",
+      "status": "pass",
+      "statement_hash": "sha256:3227ee91ac45",
+      "duration_ms": 41,
+      "checks": [
+        "test/lint.test.js:539"
+      ]
+    },
+    {
+      "rule": "status.acceptance.roles-recorded-on-the-run",
+      "status": "pass",
+      "statement_hash": "sha256:1d24bfe00266",
+      "duration_ms": 21,
+      "checks": [
+        "test/lint.test.js:584"
+      ]
+    },
+    {
+      "rule": "ownership.authoring.statement-reads-at-a-glance",
+      "status": "pass",
+      "statement_hash": "sha256:97f1bacfb270",
+      "duration_ms": 27,
+      "checks": [
+        "test/lint.test.js:646"
+      ]
+    },
+    {
+      "rule": "ownership.authoring.machine-words-pass-the-voice",
+      "status": "pass",
+      "statement_hash": "sha256:4c46fabe7d48",
+      "duration_ms": 14,
+      "checks": [
+        "test/lint.test.js:670"
+      ]
+    },
+    {
+      "rule": "threads.lifecycle.not-on-a-retired-rule",
+      "status": "pass",
+      "statement_hash": "sha256:b09baad89679",
+      "duration_ms": 64,
+      "checks": [
+        "test/lint.test.js:742"
+      ]
+    },
+    {
+      "rule": "ownership.design.declared-per-blueprint",
+      "status": "pass",
+      "statement_hash": "sha256:e1ce6c441f53",
+      "duration_ms": 53,
+      "checks": [
+        "test/lint.test.js:760"
+      ]
+    }
+  ]
+}

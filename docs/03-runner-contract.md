@@ -94,7 +94,9 @@ governance:
   files under `authoring.location`, which is cheap and works for any framework. Name a
   `list` only when tags are built at run time and the files cannot show them: RSpec's
   `Walkdown::ListFormatter`, or Playwright's `test --list`. It runs on every lint, and a
-  framework's own lister costs a second or more.
+  framework's own lister costs a second or more. The scan reads `@rule:<id>` in
+  JavaScript and TypeScript, where a bare `rule:` is code, and `rule: <id>` anywhere
+  else, such as RSpec metadata.
 
 ## Part 3 — Results ingestion: two tiers
 

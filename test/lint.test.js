@@ -70,7 +70,7 @@ test('clean fixture lints with no findings', () => {
  * authoring.location are what the suite claims. The scaffold used to name
  * Playwright's lister, a second or more a lint in a project without it.
  */
-test('with no list command, coverage reads the rule tags in the authoring files', () => {
+test('with no list command, coverage reads the rule tags in the authoring files, and a rule: key in JavaScript is not one', () => {
   const h = writeFixture(join(root, 'coverage'));
   writeFileSync(join(h.spec, 'walkdown.yml'), 'blueprint: fixture\nauthoring:\n  location: tests/\n');
   writeFileSync(
@@ -94,13 +94,19 @@ test('with no list command, coverage reads the rule tags in the authoring files'
   writeFileSync(
     join(h.root, 'tests', 'cov.test.js'),
     // The tag is assembled so this repository's own scan does not read it.
-    ['demo.cov.tagged', 'no.such.rule'].map((r) => `test('it holds ${'@rule' + ':'}${r}', () => {});`).join('\n'),
+    [
+      ...['demo.cov.tagged', 'no.such.rule'].map((r) => `test('it holds ${'@rule' + ':'}${r}', () => {});`),
+      // In JavaScript only `@rule:` is a tag; a `rule:` key is code.
+      "const fixture = { rule: 'demo.cov.untagged', other: 'rule: not.a.tag' };",
+    ].join('\n'),
   );
+  // In RSpec, `rule:` metadata is the tag.
+  writeFileSync(join(h.root, 'tests', 'cov_spec.rb'), "it 'holds', rule: 'demo.cov.ruby' do\nend\n");
   const { findings } = lint(load(h), { checks: true });
   const coverage = findings.filter((f) => f.category === 'coverage' && !/never recorded/.test(f.message));
   assert.deepEqual(
     coverage.map((f) => [f.level, f.subject]).sort(),
-    [['error', 'no.such.rule'], ['warn', 'demo.cov.untagged']].sort(),
+    [['error', 'demo.cov.ruby'], ['error', 'no.such.rule'], ['warn', 'demo.cov.untagged']].sort(),
     JSON.stringify(coverage),
   );
 });

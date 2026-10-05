@@ -26,7 +26,6 @@ runner:
   # own inside checks/checkspace.mjs and hands the reporter the real home.
   run_all: "node --test --test-reporter=./lib/node-test-reporter.js --test-reporter-destination=stdout && npx playwright test"
   run_for_rule: "node --test --test-name-pattern='{id}' --test-reporter=./lib/node-test-reporter.js --test-reporter-destination=stdout && npx playwright test --grep '@rule:{id}'"
-  list: "grep -rn '@rule:' test/ checks/"
   results: native
   targets:
     local:

@@ -1,0 +1,30 @@
+{
+  "run_id": "2026-10-05T01-39-16Z-local-01",
+  "created": "2026-10-05T01:39:16Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "4369e44-dirty",
+  "tree_hash": "sha256:9178d782fde8",
+  "spec_hash": "sha256:7d7e15c72a6e",
+  "results": [
+    {
+      "rule": "screens.anchors.renames-are-recorded",
+      "status": "pass",
+      "statement_hash": "sha256:a0495cc39a56",
+      "duration_ms": 42,
+      "checks": [
+        "test/lint.test.js:703"
+      ]
+    },
+    {
+      "rule": "threads.question.one-ask",
+      "status": "pass",
+      "statement_hash": "sha256:0e82be8b206b",
+      "duration_ms": 63,
+      "checks": [
+        "test/lint.test.js:724"
+      ]
+    }
+  ]
+}
