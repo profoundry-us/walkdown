@@ -31,6 +31,7 @@ is renamed.
 | 0011 | [Several blueprints per project](foundational/202610_several_blueprints_per_project.md) | foundational | accepted |
 | 0012 | [CLI command structure](foundational/202610_cli_command_structure.md) | foundational | accepted |
 | 0013 | [A project split into blueprints](foundational/202610_a_project_split_into_blueprints.md) | foundational | accepted |
+| 0014 | [How unique a blueprint id is](foundational/202610_how_unique_a_blueprint_id_is.md) | foundational | proposed |
 
 A new ADR takes the next number and the current month:
 `docs/adr/foundational/202610_<question>.md`, with `# ADR NNNN — <Question>` as its
