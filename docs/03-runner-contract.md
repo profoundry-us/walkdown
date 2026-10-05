@@ -90,9 +90,11 @@ governance:
 - **Targets** reuse whatever base-URL mechanism the project already has (Capybara
   `APP_HOST`, Playwright `baseURL` env). The target name flows into the run record, which
   is what powers multi-environment status ("passes locally, never passed on staging").
-- `list` powers coverage linting: RSpec's `--dry-run --format json` enumerates examples
-  with metadata; Playwright has `test --list`; the grep-for-magic-comment fallback covers
-  the rest.
+- `list` is optional. Without it, coverage linting reads the rule tags written in the
+  files under `authoring.location`, which is cheap and works for any framework. Name a
+  `list` only when tags are built at run time and the files cannot show them: RSpec's
+  `Walkdown::ListFormatter`, or Playwright's `test --list`. It runs on every lint, and a
+  framework's own lister costs a second or more.
 
 ## Part 3 — Results ingestion: two tiers
 
@@ -125,7 +127,8 @@ Either tier ends the same way: walkdown appends a run record to `blueprint/runs/
 
 ## Lint rules (`walkdown lint`)
 
-1. Every rule whose `verify` list includes `checks` has ≥ 1 check (via `list`).
+1. Every rule whose `verify` list includes `checks` has ≥ 1 check (via `list`, or the
+   tags in `authoring.location` when there is none).
 2. Every check references a rule ID that exists.
 3. Steps whose `statement_hash` no longer matches their statement → stale.
 4. Checks carrying a stale `statement_hash` → possibly-stale check.

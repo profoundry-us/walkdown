@@ -1,0 +1,85 @@
+{
+  "run_id": "2026-10-05T01-24-54Z-local-01",
+  "created": "2026-10-05T01:24:54Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "1f17906-dirty",
+  "tree_hash": "sha256:da4d56a04ac3",
+  "spec_hash": "sha256:34140e549852",
+  "results": [
+    {
+      "rule": "locations.several.results-filed-by-rule",
+      "status": "pass",
+      "statement_hash": "sha256:e6bc38c97ca2",
+      "duration_ms": 6035,
+      "checks": [
+        "test/several-project.test.js:86",
+        "test/several-project.test.js:101",
+        "test/several-project.test.js:116",
+        "test/several-project.test.js:133",
+        "test/several-project.test.js:236"
+      ]
+    },
+    {
+      "rule": "locations.several.lint-reads-the-project",
+      "status": "pass",
+      "statement_hash": "sha256:a2090d8e2e07",
+      "duration_ms": 1918,
+      "checks": [
+        "test/several-project.test.js:153"
+      ]
+    },
+    {
+      "rule": "locations.several.thread-ids-unique",
+      "status": "pass",
+      "statement_hash": "sha256:edca96d77671",
+      "duration_ms": 1978,
+      "checks": [
+        "test/several-project.test.js:193"
+      ]
+    },
+    {
+      "rule": "locations.pointer.names-every-blueprint",
+      "status": "pass",
+      "statement_hash": "sha256:fc78cb716fcc",
+      "duration_ms": 1915,
+      "checks": [
+        "test/several-project.test.js:212",
+        "test/several-project.test.js:236"
+      ]
+    },
+    {
+      "rule": "locations.several.init-makes-another",
+      "status": "pass",
+      "statement_hash": "sha256:0ff494d94d74",
+      "duration_ms": 1513,
+      "checks": [
+        "test/several.test.js:48",
+        "test/several.test.js:98",
+        "test/several.test.js:108"
+      ]
+    },
+    {
+      "rule": "locations.several.reads-cover-all",
+      "status": "pass",
+      "statement_hash": "sha256:b52ccdd8164e",
+      "duration_ms": 2478,
+      "checks": [
+        "test/several.test.js:125",
+        "test/several.test.js:151"
+      ]
+    },
+    {
+      "rule": "locations.several.writes-name-one",
+      "status": "pass",
+      "statement_hash": "sha256:de5bdad5a7a4",
+      "duration_ms": 1588,
+      "checks": [
+        "test/several.test.js:163",
+        "test/several.test.js:193",
+        "test/several.test.js:208"
+      ]
+    }
+  ]
+}

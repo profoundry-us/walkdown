@@ -41,22 +41,9 @@ function twoBlueprints() {
   const m = machine();
   assert.equal(m.wd(['init']).status, 0);
   assert.equal(m.wd(['init', '--id', 'b']).status, 0);
-  quickList(m, ['proj', 'b']);
   return m;
 }
 
-/*
- * The scaffold lists checks with `npx playwright test --list`, which costs
- * over a second in a project with no Playwright, once per blueprint per lint.
- * Nothing here is about coverage, so the list is a grep that finds nothing -
- * the suite ran 18s on that alone.
- */
-function quickList(m, ids) {
-  for (const id of ids) {
-    const yml = join(m.wd(['where', 'spec', '--blueprint', id]).stdout.trim(), 'walkdown.yml');
-    writeFileSync(yml, readFileSync(yml, 'utf8').replace(/^ {2}list: .*$/m, `  list: "grep -rn '@rule:' . || true"`));
-  }
-}
 
 test('init --id gives a project a second blueprint in its own numbered folder, and again changes nothing @rule:locations.several.init-makes-another', () => {
   const m = machine();
@@ -164,7 +151,6 @@ test('reads report on every blueprint, each under its id, and on one when named 
 test('a project with one blueprint prints what it printed before @rule:locations.several.reads-cover-all', () => {
   const m = machine();
   assert.equal(m.wd(['init']).status, 0);
-  quickList(m, ['proj']);
   for (const cmd of [['status'], ['lint'], ['threads'], ['where']]) {
     const r = m.wd(cmd);
     assert.equal(r.status, 0);

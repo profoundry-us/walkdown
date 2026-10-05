@@ -62,7 +62,7 @@ function project({ commit = 'none' } = {}) {
       cfg,
       readFileSync(cfg, 'utf8')
         .replace(/ {2}run_all: .*/, `  run_all: "node --test --test-reporter=${REPORTER} --test-reporter-destination=stdout"`)
-        .replace(/ {2}list: .*/, `  list: "grep -rn '@rule:' test/"`),
+        .replace(/^ {2}location: .*$/m, '  location: test/'),
     );
     assert.equal(wd(['hash', '--write', '--blueprint', id]).status, 0);
   }

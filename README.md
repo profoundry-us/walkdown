@@ -123,7 +123,8 @@ paths, and every thread anchored to it. `--json` is the agent-facing form.
 
 `lint` validates the blueprint end to end: schema and duplicate IDs, storyboard
 screen/anchor references (including anchors mentioned in steps), statement-hash staleness,
-check coverage via the project's own `runner.list` command, stale check comments, thread
+check coverage from the rule tags in your test files (or a `runner.list` command, if
+you name one), stale check comments, thread
 lifecycles (`answered`-but-not-incorporated, `waived` without `waived_by`), and run
 records. Errors exit 1; warnings don't.
 

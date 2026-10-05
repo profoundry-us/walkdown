@@ -66,6 +66,46 @@ test('clean fixture lints with no findings', () => {
 });
 
 /*
+ * Coverage with no `runner.list`: the tags written in the files under
+ * authoring.location are what the suite claims. The scaffold used to name
+ * Playwright's lister, a second or more a lint in a project without it.
+ */
+test('with no list command, coverage reads the rule tags in the authoring files', () => {
+  const h = writeFixture(join(root, 'coverage'));
+  writeFileSync(join(h.spec, 'walkdown.yml'), 'blueprint: fixture\nauthoring:\n  location: tests/\n');
+  writeFileSync(
+    join(h.spec, 'features', 'cov.yml'),
+    ['tagged', 'untagged']
+      .flatMap((id) => {
+        const statement = `The ${id} rule holds.`;
+        return [
+          `      - id: demo.cov.${id}`,
+          `        statement: ${statement}`,
+          '        verify: [checks]',
+          '        steps:',
+          `          statement_hash: "${formatHash(statement)}"`,
+          '          then: [It holds]',
+        ];
+      })
+      .reduce((lines, l) => [...lines, l], ['feature: cov', 'stories:', '  - id: demo.cov', '    rules:'])
+      .join('\n'),
+  );
+  mkdirSync(join(h.root, 'tests'), { recursive: true });
+  writeFileSync(
+    join(h.root, 'tests', 'cov.test.js'),
+    // The tag is assembled so this repository's own scan does not read it.
+    ['demo.cov.tagged', 'no.such.rule'].map((r) => `test('it holds ${'@rule' + ':'}${r}', () => {});`).join('\n'),
+  );
+  const { findings } = lint(load(h), { checks: true });
+  const coverage = findings.filter((f) => f.category === 'coverage' && !/never recorded/.test(f.message));
+  assert.deepEqual(
+    coverage.map((f) => [f.level, f.subject]).sort(),
+    [['error', 'no.such.rule'], ['warn', 'demo.cov.untagged']].sort(),
+    JSON.stringify(coverage),
+  );
+});
+
+/*
  * The door out of the home. Reading through a link is supported - a scratch
  * copy shares the real evidence directory by linking each entry into it - so
  * the check is about where the link POINTS, not that one exists: an inward
