@@ -607,15 +607,12 @@ stories:
           then:
             - The first creates a new numbered home for b, registers it for the project, and says it is another blueprint for this project, naming a
             - The second reports everything up to date and creates nothing
-            - With no `--id`, init means the id it would give the project anyway, and reuses that blueprint; if none has that id, it refuses and names them
-            - An `--id` already registered for a different project is refused, not given a suffix
-            - "`--commit` with several blueprints in the project needs `--id`, and without it refuses and names the choices"
+            - With no id, `blueprints new` means the id it would give the project anyway, and reuses that blueprint; if none has that id, it refuses and names them
+            - An id already registered for a different project is refused, not given a suffix
+            - "`blueprints commit` with several blueprints in the project needs `--blueprint`, and without it refuses and names the choices"
+            - "A second blueprint leaves a `.walkdown/.gitignore` that another blueprint shares as it is, unless `--force` is given"
             - "`walkdown serve` lists both, and `walkdown claims` reports both when both claim a page"
-          statement_hash: sha256:023502bfad97
-          reworded:
-            - hash: sha256:0ff494d94d74
-              at: 2026-10-05T02:28:57Z
-              why: ADR 0012 renamed the commands it quotes; what it asks of the build is unchanged
+          statement_hash: sha256:d6a63df0b1da
 
       - id: locations.several.reads-cover-all
         statement: With several blueprints in a project, `status`, `lint`, `threads` and `where` run with no `--blueprint` report on every one, each under its id.

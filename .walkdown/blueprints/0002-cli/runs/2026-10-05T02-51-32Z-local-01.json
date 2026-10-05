@@ -1,0 +1,162 @@
+{
+  "run_id": "2026-10-05T02-51-32Z-local-01",
+  "created": "2026-10-05T02:51:32Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "8de5390-dirty",
+  "tree_hash": "sha256:ebf76f27064b",
+  "spec_hash": "sha256:d8e1d95c9555",
+  "results": [
+    {
+      "rule": "commands.blueprints.new-makes-one",
+      "status": "pass",
+      "statement_hash": "sha256:68b77720e43d",
+      "duration_ms": 620,
+      "checks": [
+        "test/cli.test.js:16",
+        "test/commands.test.js:211"
+      ]
+    },
+    {
+      "rule": "commands.blueprints.rename",
+      "status": "pass",
+      "statement_hash": "sha256:0f7cfe575ce5",
+      "duration_ms": 2756,
+      "checks": [
+        "test/cli.test.js:16",
+        "test/commands.test.js:269"
+      ]
+    },
+    {
+      "rule": "commands.shape.help-by-noun",
+      "status": "pass",
+      "statement_hash": "sha256:db2770fb32c4",
+      "duration_ms": 326,
+      "checks": [
+        "test/cli.test.js:16",
+        "test/commands.test.js:124"
+      ]
+    },
+    {
+      "rule": "commands.init.this-machine-only",
+      "status": "pass",
+      "statement_hash": "sha256:9551966dc330",
+      "duration_ms": 1155,
+      "checks": [
+        "test/cli.test.js:16",
+        "test/commands.test.js:140"
+      ]
+    },
+    {
+      "rule": "locations.several.init-makes-another",
+      "status": "pass",
+      "statement_hash": "sha256:d6a63df0b1da",
+      "duration_ms": 2163,
+      "checks": [
+        "test/cli.test.js:16",
+        "test/several.test.js:48",
+        "test/several.test.js:104",
+        "test/several.test.js:114"
+      ]
+    },
+    {
+      "rule": "commands.init.names-what-is-missing",
+      "status": "pass",
+      "statement_hash": "sha256:cd70779d9a55",
+      "duration_ms": 484,
+      "checks": [
+        "test/cli.test.js:16",
+        "test/commands.test.js:183"
+      ]
+    },
+    {
+      "rule": "commands.shape.old-forms-say-the-new",
+      "status": "pass",
+      "statement_hash": "sha256:1a91b698c42f",
+      "duration_ms": 1396,
+      "checks": [
+        "test/cli.test.js:16",
+        "test/commands.test.js:94"
+      ]
+    },
+    {
+      "rule": "locations.several.reads-cover-all",
+      "status": "pass",
+      "statement_hash": "sha256:b52ccdd8164e",
+      "duration_ms": 5749,
+      "checks": [
+        "test/cli.test.js:16",
+        "test/several.test.js:131",
+        "test/several.test.js:157"
+      ]
+    },
+    {
+      "rule": "commands.threads.one-verb-per-change",
+      "status": "pass",
+      "statement_hash": "sha256:687a1c86cfdf",
+      "duration_ms": 4426,
+      "checks": [
+        "test/cli.test.js:16",
+        "test/commands.test.js:349"
+      ]
+    },
+    {
+      "rule": "locations.several.writes-name-one",
+      "status": "pass",
+      "statement_hash": "sha256:f0c27cd71949",
+      "duration_ms": 3553,
+      "checks": [
+        "test/cli.test.js:16",
+        "test/several.test.js:169",
+        "test/several.test.js:199",
+        "test/several.test.js:214"
+      ]
+    },
+    {
+      "rule": "commands.shape.noun-then-verb",
+      "status": "pass",
+      "statement_hash": "sha256:0e1ac5bc5c43",
+      "duration_ms": 2602,
+      "checks": [
+        "test/commands.test.js:64"
+      ]
+    },
+    {
+      "rule": "commands.init.one-skill-installer",
+      "status": "pass",
+      "statement_hash": "sha256:491cd8cc7d17",
+      "duration_ms": 325,
+      "checks": [
+        "test/commands.test.js:166"
+      ]
+    },
+    {
+      "rule": "commands.blueprints.commit-moves-the-home",
+      "status": "pass",
+      "statement_hash": "sha256:c5e229e499ef",
+      "duration_ms": 2103,
+      "checks": [
+        "test/commands.test.js:234"
+      ]
+    },
+    {
+      "rule": "commands.blueprints.import-and-forget-moved",
+      "status": "pass",
+      "statement_hash": "sha256:baaf4c96fd25",
+      "duration_ms": 642,
+      "checks": [
+        "test/commands.test.js:308"
+      ]
+    },
+    {
+      "rule": "commands.records.move",
+      "status": "pass",
+      "statement_hash": "sha256:93e58454e522",
+      "duration_ms": 391,
+      "checks": [
+        "test/commands.test.js:331"
+      ]
+    }
+  ]
+}

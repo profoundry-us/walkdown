@@ -278,7 +278,7 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
     : claimHome({ name: wantId ?? defaultId, walkdown });
   const specDir = listed ? loc.spec.path : homePaths(claim.dir).spec;
   // A second blueprint is named for its id, not for the project (ADR 0011).
-  const results = scaffold(root, { force: values.force, specDir, commit, name: listed ? null : wantId, skills: false });
+  const results = scaffold(root, { force: values.force, specDir, commit, name: listed ? String(listed.id) : wantId, skills: false });
   /*
    * And write it down. Walkdown does not find blueprints by looking, so a
    * spec nobody declared is a directory rather than a project - init would

@@ -45,7 +45,7 @@ function twoBlueprints() {
 }
 
 
-test('init --id gives a project a second blueprint in its own numbered folder, and again changes nothing @rule:locations.several.init-makes-another', () => {
+test('blueprints new <id> gives a project a second blueprint in its own numbered folder, and again changes nothing @rule:locations.several.init-makes-another', () => {
   const m = machine();
   assert.equal(m.wd(['blueprints', 'new']).status, 0);
   assert.deepEqual(m.homes(), ['0001-proj']);
@@ -58,19 +58,25 @@ test('init --id gives a project a second blueprint in its own numbered folder, a
   const again = m.wd(['blueprints', 'new', 'b']);
   assert.equal(again.status, 0, again.stderr);
   assert.doesNotMatch(again.stdout, /created|another/, 'everything up to date');
+  assert.doesNotMatch(again.stdout, /kept/, 'its own walkdown.yml reads as up to date, not as somebody\'s edit');
   assert.deepEqual(m.homes(), ['0001-proj', '0002-b']);
 
-  // No --id means the id init would give the project anyway: proj.
+  // No id means the id `blueprints new` would give the project anyway: proj.
   const bare = m.wd(['blueprints', 'new']);
   assert.equal(bare.status, 0, bare.stderr);
   assert.doesNotMatch(bare.stdout, /created/);
   assert.deepEqual(m.homes(), ['0001-proj', '0002-b']);
 
-  // --commit with several needs --id.
+  // Committing with several needs --blueprint, from either door.
   const commit = m.wd(['blueprints', 'new', '--commit', 'spec']);
   assert.equal(commit.status, 2);
   assert.match(commit.stderr, /several blueprints \(proj, b\).*blueprints commit/s);
   assert.match(commit.stderr, /--blueprint <id>/);
+  const moved = m.wd(['blueprints', 'commit', 'spec']);
+  assert.equal(moved.status, 2);
+  assert.match(moved.stderr, /several blueprints \(proj, b\)/);
+  assert.match(moved.stderr, /--blueprint <id>/);
+  assert.deepEqual(m.homes(), ['0001-proj', '0002-b'], 'and neither moved');
 
   // An id another project holds is refused, not suffixed.
   const other = join(m.root, 'other');
@@ -95,7 +101,7 @@ test('init --id gives a project a second blueprint in its own numbered folder, a
   assert.match(listed.stdout, /\bb\b/);
 });
 
-test('bare init refuses where several blueprints stand and none has the default id @rule:locations.several.init-makes-another', () => {
+test('a bare blueprints new refuses where several blueprints stand and none has the default id @rule:locations.several.init-makes-another', () => {
   const m = machine();
   assert.equal(m.wd(['blueprints', 'new', 'a']).status, 0);
   assert.equal(m.wd(['blueprints', 'new', 'b']).status, 0);

@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-10-05T02-51-53Z-local-01",
+  "created": "2026-10-05T02:51:53Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "8de5390-dirty",
+  "note": "locations.several.init-makes-another after its rewording and the shared .gitignore step (Topher, 2026-10-04); driven by hand on a throwaway machine.",
+  "spec_hash": "sha256:d8e1d95c9555",
+  "results": [
+    {
+      "rule": "locations.several.init-makes-another",
+      "status": "pass",
+      "statement_hash": "sha256:d6a63df0b1da",
+      "evidence": [
+        "runs/evidence/2026-10-05T02-51-00Z/init-makes-another.txt",
+        "runs/evidence/2026-10-05T02-51-00Z/steps/init-makes-another.zsh",
+        "runs/evidence/2026-10-05T02-51-00Z/drive.sh"
+      ],
+      "reasoning": "On a throwaway machine (temp HOME and ~/.walkdown) in git project shop holding blueprint a outside the repository: `walkdown blueprints new b` made 0002-b beside 0001-a, registered it, and said b is another blueprint for this project beside a. Running it again printed up to date for every file and created nothing. My first drive showed '· kept' for b's own walkdown.yml on that second run, because a rerun filled the template with the directory's name rather than the blueprint's id. That was fixed before this verdict (bin/commands/blueprints-new.js, with an assertion in test/several.test.js) and the re-drive reads up to date. A bare `blueprints new` refused and named a and b, since neither is `shop`. `blueprints new b` from another repository was refused as already registered for shop, not suffixed. A bare `blueprints commit spec` refused and asked for --blueprint. `claims` reported both when both storyboards claimed one page, and `blueprints` lists both. With a committed and its .gitignore edited, `blueprints commit all --blueprint b` kept that .gitignore (same shasum, '! kept (it rules 0001-a too')' and only `--force` removed it.",
+      "threads": []
+    }
+  ]
+}
