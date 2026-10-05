@@ -1,0 +1,73 @@
+{
+  "run_id": "2026-10-05T13-46-17Z-local-01",
+  "created": "2026-10-05T13:46:17Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "202640f-dirty",
+  "spec_hash": "sha256:3a9fed05d6cc",
+  "results": [
+    {
+      "rule": "locations.several.init-makes-another",
+      "status": "fail",
+      "statement_hash": "sha256:d6a63df0b1da",
+      "threads": [
+        "n-0355"
+      ]
+    },
+    {
+      "rule": "locations.several.reads-cover-all",
+      "status": "pass",
+      "statement_hash": "sha256:b52ccdd8164e"
+    },
+    {
+      "rule": "locations.several.writes-name-one",
+      "status": "fail",
+      "statement_hash": "sha256:f0c27cd71949",
+      "threads": [
+        "n-0356"
+      ]
+    },
+    {
+      "rule": "commands.shape.noun-then-verb",
+      "status": "pass",
+      "statement_hash": "sha256:0e1ac5bc5c43"
+    },
+    {
+      "rule": "commands.shape.help-by-noun",
+      "status": "pass",
+      "statement_hash": "sha256:db2770fb32c4"
+    },
+    {
+      "rule": "commands.shape.old-forms-say-the-new",
+      "status": "pass",
+      "statement_hash": "sha256:1a91b698c42f"
+    },
+    {
+      "rule": "commands.init.this-machine-only",
+      "status": "pass",
+      "statement_hash": "sha256:9551966dc330"
+    },
+    {
+      "rule": "commands.init.names-what-is-missing",
+      "status": "pass",
+      "statement_hash": "sha256:cd70779d9a55"
+    },
+    {
+      "rule": "commands.blueprints.new-makes-one",
+      "status": "pass",
+      "statement_hash": "sha256:68b77720e43d"
+    }
+  ]
+}

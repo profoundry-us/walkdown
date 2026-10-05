@@ -1,0 +1,10 @@
+id: n-0355
+kind: note
+reason: feedback
+author: topher
+created: 2026-10-05T12:47:17.208Z
+anchor:
+  rule: locations.several.init-makes-another
+status: open
+body: This rule title says `init-makes-another`, but it's about the `blueprint
+  new` command. I think we need to rename the rule?

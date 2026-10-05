@@ -1,0 +1,11 @@
+id: n-0356
+kind: note
+reason: feedback
+author: topher
+created: 2026-10-05T13:20:37.210Z
+anchor:
+  rule: locations.several.writes-name-one
+status: open
+body: The help phrase "This command acts on one ..." isn't how a human would
+  speak. Change it to say "Choose one with `--blueprint <id>` (e.g. `--blueprint
+  checkout`)."
