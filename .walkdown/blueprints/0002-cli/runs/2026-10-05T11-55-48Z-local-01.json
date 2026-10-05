@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-10-05T11-55-48Z-local-01",
+  "created": "2026-10-05T11:55:48Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6b8867f-dirty",
+  "note": "locations.several.serve-shows-each-screen, new (Topher, 2026-10-05); driven against a real walkdown serve on port 4791 on a throwaway machine.",
+  "spec_hash": "sha256:3a9fed05d6cc",
+  "results": [
+    {
+      "rule": "locations.several.serve-shows-each-screen",
+      "status": "pass",
+      "statement_hash": "sha256:623f1388325d",
+      "evidence": [
+        "runs/evidence/2026-10-05T11-56-00Z/serve-shows-each-screen.txt",
+        "runs/evidence/2026-10-05T11-56-00Z/steps/serve-shows-each-screen.zsh",
+        "runs/evidence/2026-10-05T11-56-00Z/drive.sh"
+      ],
+      "reasoning": "On a throwaway machine, project shop held blueprints a and b, sharing one as-built/, with prototype roots proto-a/ and proto-b/. I started `walkdown serve --port 4791` in shop with no blueprint named, and asked for each page with curl and no ?bp=. /as-built/home.html is one file for both and came back 200 with its contents. /prototype/screens/only-a.html exists only in a's root and came back 200 from a. /prototype/screens/both.html exists in both roots as different files and came back 409: 'is a different file in a and b - name one with ?bp=<id>'. /prototype/screens/nowhere.html came back 404. The same page with ?bp=b was served from b, and ?bp=a still serves as-built. One thing found and fixed before this verdict: the 404 used to say 'no blueprint named', which blamed the wrong thing. It now says the path 'is in no blueprint registered here', and the test asserts that.",
+      "threads": []
+    }
+  ]
+}

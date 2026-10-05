@@ -258,7 +258,7 @@ test('a project with one blueprint keeps its one-line pointer and files every re
  * several blueprints serves it when the file it names is one file, and names
  * the blueprints when they disagree.
  */
-test('a framed screen is served without ?bp= when its file is one file, and refused by name when it is two', async () => {
+test('a framed screen is served without ?bp= when its file is one file, and refused by name when it is two @rule:locations.several.serve-shows-each-screen', async () => {
   const p = project();
   const { createWalkdownServer } = await import('../lib/serve.js');
   mkdirSync(join(p.shop, 'as-built'), { recursive: true });
@@ -285,7 +285,9 @@ test('a framed screen is served without ?bp= when its file is one file, and refu
     const two = await at('/prototype/screens/both.html');
     assert.equal(two.status, 409);
     assert.match((await two.json()).error, /different file in a and b/);
-    assert.equal((await at('/prototype/screens/nowhere.html')).status, 404);
+    const none = await at('/prototype/screens/nowhere.html');
+    assert.equal(none.status, 404);
+    assert.match((await none.json()).error, /is in no blueprint registered here/);
     assert.equal((await at('/as-built/home.html?bp=b')).status, 200, 'named, as ever');
   } finally {
     server.close();

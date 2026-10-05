@@ -718,6 +718,25 @@ stories:
             - A project with one blueprint numbers its threads as before
           statement_hash: sha256:edca96d77671
 
+      - id: locations.several.serve-shows-each-screen
+        statement: "`walkdown serve` over several blueprints shows a screen's pages without being told which blueprint, and refuses by name when two blueprints have different files at one address."
+        because: A screen's page is loaded by the browser in a frame, so neither it nor anything it loads can say which blueprint it belongs to.
+        history: After walkdown's spec split in two on 2026-10-02, a server started at the repository root answered every framed screen with "no blueprint named" (Topher, 2026-10-05).
+        origin: walkdown
+        created_at: 2026-10-05
+        verify: [checks]
+        signoff: [eng]
+        steps:
+          given:
+            - "A project with blueprints a and b sharing one `as-built/`, each with its own prototype root, served from the project with no blueprint named"
+          when:
+            - "A page under `/as-built/`, `/proposals/` or `/prototype/` is asked for with no `?bp=`"
+          then:
+            - A file every blueprint that has it has as the same file is served
+            - A file only one blueprint has is served from that one
+            - "A file a and b each have, but as different files, is refused with status 409, naming a and b and saying `?bp=` picks one"
+            - A file no blueprint has is not found, and a request naming its blueprint is served as before
+          statement_hash: sha256:623f1388325d
       - id: locations.several.rules-move
         statement: "`walkdown rules move <rule|story|feature> --to <blueprint>` moves rules to another blueprint in the same project, with their threads, and copies the run records and evidence behind their verdicts."
         because: A project that grows a second blueprint should not lose the verdicts and signatures its rules already earned.
