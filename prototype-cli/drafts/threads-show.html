@@ -1,12 +1,12 @@
 <!doctype html>
-<!-- DESIGN DRAFT: init-another -->
-<!-- Drawn by the design agent for request n-0341, redrawn for `walkdown blueprints new search` (ADR 0012). Not yet accepted. -->
-<!-- Intent: say what was made and where, that it sits beside checkout rather than replacing it, and warn that commands which write now need --blueprint. -->
+<!-- DESIGN DRAFT: threads-show -->
+<!-- Drawn by the design agent for request n-0351. Not yet accepted. -->
+<!-- Intent: the id, kind and status on one line to read at a glance, then what it is about and who wrote it, then the body set apart and indented; a last line names the verb for answering, since showing is usually the step before replying. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>blueprints new, another blueprint</title>
+<title>threads show</title>
 <style>
 :root { color-scheme: dark; }
   html, body { margin: 0; height: 100%; background: #14161a; }
@@ -27,19 +27,21 @@
 <body>
 <div class="term">
   <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
-  <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown blueprints new search</div>
-  <div data-testid="cli.init.created">
-    <div class="ln">Created blueprint search at ~/.walkdown/blueprints/0002-search, registered for ~/shop.</div>
+  <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown threads show n-0001</div>
+  <div data-testid="cli.thread.head">
+    <div class="ln">n-0001  note  open</div>
+    <div class="ln">Sam, 2026-10-03 14:12</div>
   </div>
-  <div data-testid="cli.init.another">
-    <div class="ln">search is another blueprint for shop, beside checkout. Both are kept outside the repository.</div>
-  </div>
-  <div data-testid="cli.init.spec">
-    <div class="ln">Its spec is in ~/.walkdown/blueprints/0002-search/blueprint/</div>
+  <div data-testid="cli.thread.anchor">
+    <div class="ln">On rule search.empty-query, screen search-results</div>
   </div>
   <div class="ln"></div>
-  <div class="ln">Next: write search's first rule in its walkdown.yml.</div>
-  <div class="ln">Commands that write now need --blueprint checkout or --blueprint search.</div>
+  <div data-testid="cli.thread.body">
+    <div class="ln">  An empty search shows every product. It should say there is nothing</div>
+    <div class="ln">  to search for and leave the list as it was.</div>
+  </div>
+  <div class="ln"></div>
+  <div class="ln">No replies yet. Reply with: walkdown threads reply n-0001 "&lt;text&gt;"</div>
   <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
 </div>
 </body>

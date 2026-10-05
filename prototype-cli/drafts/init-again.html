@@ -1,0 +1,62 @@
+<!doctype html>
+<!-- DESIGN DRAFT: init-again -->
+<!-- Drawn by the design agent for request n-0347. Not yet accepted. -->
+<!-- Intent: the same checklist as the first run, each line now saying already, so a person sees at a glance that every piece was checked and nothing was made. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>init, run again</title>
+<style>
+:root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #14161a; }
+  .term { box-sizing: border-box; min-height: 100%; padding: 18px 22px 28px;
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #d7dae0; tab-size: 12; }
+  .term-bar { display: flex; align-items: center; gap: 7px; margin: 0 0 14px; color: #7d8590; font-size: 11.5px; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3f47; display: inline-block; }
+  .term-bar span { margin-left: 8px; }
+  .ln { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+  .prompt { color: #8fbcff; }
+  .prompt b { color: #7d8590; font-weight: 400; }
+  .exit { margin-top: 10px; color: #7d8590; }
+  .exit.bad { color: #f0a36b; }
+  [data-testid] { border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="term">
+  <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
+  <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown init</div>
+  <div data-testid="cli.init.home">
+    <div class="ln">Already in place: ~/.walkdown and its registry.</div>
+  </div>
+  <div data-testid="cli.init.you">
+    <div class="ln">You are Sam (sam@example.com), as before.</div>
+  </div>
+  <div data-testid="cli.init.skills">
+    <div class="ln">Skills for Claude Code, in ~/.claude/skills:</div>
+    <div class="ln">  already linked walkdown:setup</div>
+    <div class="ln">  already linked walkdown:formulate</div>
+    <div class="ln">  already linked walkdown:incorporate</div>
+    <div class="ln">  already linked walkdown:judge</div>
+    <div class="ln">  already linked walkdown:status</div>
+    <div class="ln">  already linked walkdown:lint</div>
+    <div class="ln">  already linked walkdown:backlog</div>
+    <div class="ln">  already linked walkdown-sitting</div>
+  </div>
+  <div data-testid="cli.init.needs">
+    <div class="ln">walkdown needs:</div>
+    <div class="ln">  node 20 or later      found 22.4.0</div>
+    <div class="ln">  git                   found 2.45.1</div>
+    <div class="ln">  Claude Code           found its skills folder</div>
+  </div>
+  <div class="ln"></div>
+  <div data-testid="cli.init.next">
+    <div class="ln">This machine was already ready. Nothing was created.</div>
+    <div class="ln">Next: walkdown blueprints new starts a spec for this project.</div>
+  </div>
+  <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
+</div>
+</body>
+</html>

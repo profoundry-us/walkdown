@@ -1,0 +1,51 @@
+<!doctype html>
+<!-- DESIGN DRAFT: help-one-noun -->
+<!-- Drawn by the design agent for request n-0344. Not yet accepted. -->
+<!-- Intent: the usage line first, then the five verbs as a table a person can scan and copy from, and last the one thing easy to miss: the noun alone runs list. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>threads help</title>
+<style>
+:root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #14161a; }
+  .term { box-sizing: border-box; min-height: 100%; padding: 18px 22px 28px;
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #d7dae0; tab-size: 12; }
+  .term-bar { display: flex; align-items: center; gap: 7px; margin: 0 0 14px; color: #7d8590; font-size: 11.5px; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3f47; display: inline-block; }
+  .term-bar span { margin-left: 8px; }
+  .ln { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+  .prompt { color: #8fbcff; }
+  .prompt b { color: #7d8590; font-weight: 400; }
+  .exit { margin-top: 10px; color: #7d8590; }
+  .exit.bad { color: #f0a36b; }
+  [data-testid] { border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="term">
+  <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
+  <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown threads help</div>
+  <div data-testid="cli.noun.usage">
+    <div class="ln">Usage: walkdown threads &lt;verb&gt; [arguments]</div>
+    <div class="ln">A thread is a note or a question on a rule or a screen.</div>
+  </div>
+  <div class="ln"></div>
+  <div data-testid="cli.noun.verbs">
+    <div class="ln">  list                                         list the open threads</div>
+    <div class="ln">  new --rule &lt;id&gt;|--screen &lt;id&gt; "&lt;text&gt;"       start a note or a question</div>
+    <div class="ln">  show &lt;thread&gt;                                print a thread and its replies</div>
+    <div class="ln">  reply &lt;thread&gt; "&lt;text&gt;"                      add a reply, status unchanged</div>
+    <div class="ln">  set &lt;thread&gt; --status &lt;status&gt; [--reply "&lt;text&gt;"]</div>
+    <div class="ln">                                               change its status, with a reply if given</div>
+  </div>
+  <div class="ln"></div>
+  <div data-testid="cli.noun.bare">
+    <div class="ln">walkdown threads on its own runs list.</div>
+  </div>
+  <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
+</div>
+</body>
+</html>

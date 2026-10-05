@@ -1,0 +1,89 @@
+<!doctype html>
+<!-- DESIGN DRAFT: help -->
+<!-- Drawn by the design agent for request n-0343. Not yet accepted. -->
+<!-- Intent: one line of what walkdown is and how a command is shaped, then six short groups in the order a person meets them; each group shows the noun alone listing, so the rule is seen before it is read. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>help</title>
+<style>
+:root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #14161a; }
+  .term { box-sizing: border-box; min-height: 100%; padding: 18px 22px 28px;
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #d7dae0; tab-size: 12; }
+  .term-bar { display: flex; align-items: center; gap: 7px; margin: 0 0 14px; color: #7d8590; font-size: 11.5px; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3f47; display: inline-block; }
+  .term-bar span { margin-left: 8px; }
+  .ln { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+  .prompt { color: #8fbcff; }
+  .prompt b { color: #7d8590; font-weight: 400; }
+  .exit { margin-top: 10px; color: #7d8590; }
+  .exit.bad { color: #f0a36b; }
+  [data-testid] { border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="term">
+  <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
+  <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown help</div>
+  <div data-testid="cli.help.intro">
+    <div class="ln">walkdown keeps a spec beside your project: rules, the threads about them, and the runs that check them.</div>
+    <div class="ln"></div>
+    <div class="ln">Usage: walkdown &lt;noun&gt; [verb] [arguments]</div>
+    <div class="ln">A noun on its own lists them. walkdown &lt;noun&gt; help shows one noun's verbs.</div>
+  </div>
+  <div class="ln"></div>
+  <div data-testid="cli.help.ready">
+    <div class="ln">Getting ready</div>
+    <div class="ln">  init                         get walkdown ready on this machine</div>
+    <div class="ln">  skills                       link walkdown's skills into Claude Code</div>
+    <div class="ln">  where                        show where each blueprint and its records live</div>
+  </div>
+  <div class="ln"></div>
+  <div data-testid="cli.help.blueprints">
+    <div class="ln">Blueprints</div>
+    <div class="ln">  blueprints                   list this project's blueprints</div>
+    <div class="ln">  blueprints new [&lt;id&gt;]        start a blueprint for this project</div>
+    <div class="ln">  blueprints import &lt;path&gt;     register blueprints a repository declares</div>
+    <div class="ln">  blueprints rename &lt;id&gt; &lt;new&gt; change a blueprint's id</div>
+    <div class="ln">  blueprints commit none|spec|all</div>
+    <div class="ln">                               keep a blueprint in the repository, or out</div>
+    <div class="ln">  blueprints forget &lt;id&gt;       take a blueprint off this machine's list</div>
+    <div class="ln">  pointer                      show which blueprint this project points at</div>
+  </div>
+  <div class="ln"></div>
+  <div data-testid="cli.help.records">
+    <div class="ln">Records</div>
+    <div class="ln">  records move &lt;kind&gt; --to &lt;path&gt;</div>
+    <div class="ln">                               keep runs, threads, evidence or drafts elsewhere</div>
+  </div>
+  <div class="ln"></div>
+  <div data-testid="cli.help.threads">
+    <div class="ln">Threads</div>
+    <div class="ln">  threads                      list open threads</div>
+    <div class="ln">  threads new|show|reply|set</div>
+    <div class="ln">                               start, read, answer or change a thread</div>
+  </div>
+  <div class="ln"></div>
+  <div data-testid="cli.help.verdicts">
+    <div class="ln">Rules and verdicts</div>
+    <div class="ln">  status [&lt;rule&gt;]              what passes, and who each waiting item is for</div>
+    <div class="ln">  lint                         check the blueprint for mistakes</div>
+    <div class="ln">  run                          record the results of a test run</div>
+    <div class="ln">  judge &lt;rule&gt;                 prepare a rule for an agent to judge</div>
+    <div class="ln">  sweep --why &lt;reason&gt;         mark every verdict so far as stale</div>
+    <div class="ln">  hash                         print each rule's wording hash</div>
+    <div class="ln">  rules move &lt;rule&gt; --to &lt;id&gt;  move a rule to another blueprint, verdicts and all</div>
+  </div>
+  <div class="ln"></div>
+  <div data-testid="cli.help.panel">
+    <div class="ln">The panel</div>
+    <div class="ln">  serve                        open the panel in your browser</div>
+    <div class="ln">  claims &lt;url&gt;                 which blueprint claims a page</div>
+  </div>
+  <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
+</div>
+</body>
+</html>
