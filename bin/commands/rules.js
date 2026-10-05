@@ -3,6 +3,7 @@ import { resolveLocations } from '../../lib/locations.js';
 import { dim, green, red } from '../../lib/report/tty.js';
 import { applyMove, planMove } from '../../lib/rules-move.js';
 import { end } from './context.js';
+import { dispatch } from './noun.js';
 
 /*
  * `walkdown rules move <rule|story|feature> --to <blueprint>` (ADR 0013 §5).
@@ -11,7 +12,7 @@ import { end } from './context.js';
  * another blueprint of the same project. Which blueprint they come from is
  * the one that holds them, so `--blueprint` is only needed where two do.
  */
-export function run(args) {
+function move(args) {
   const { values, positionals } = parseArgs({
     args,
     allowPositionals: true,
@@ -21,8 +22,8 @@ export function run(args) {
       'dry-run': { type: 'boolean', default: false },
     },
   });
-  const [verb, ...what] = positionals;
-  if (verb !== 'move' || !what.length || !values.to) {
+  const what = positionals;
+  if (!what.length || !values.to) {
     console.error('walkdown rules move <rule|story|feature>... --to <blueprint> [--dry-run] [--blueprint <from>]');
     return end(2);
   }
@@ -33,7 +34,7 @@ export function run(args) {
     .filter((b) => b.dir);
   if (project.length < 2) {
     console.error(red('This project has one blueprint, so there is nowhere to move rules to.'));
-    console.error(dim('`walkdown init --id <name>` gives it another.'));
+    console.error(dim('`walkdown blueprints new <name>` gives it another.'));
     return end(2);
   }
   const to = project.find((b) => b.id === values.to);
@@ -78,3 +79,14 @@ export function run(args) {
   console.log(dim(`\n${plan.from.id}'s run records are unchanged. \`walkdown status --blueprint ${plan.to.id}\` shows the moved rules with the verdicts they had.`));
   return end(0);
 }
+
+export const VERBS = {
+  move: {
+    usage: 'walkdown rules move <rule|story|feature>... --to <blueprint> [--dry-run] [--blueprint <from>]',
+    about:
+      "Move rules to another blueprint of the same project, with their threads. The run\nrecords and evidence behind their verdicts are copied, so nothing is judged or signed\nagain, and the source's records are never edited. --dry-run says what would move.",
+    run: move,
+  },
+};
+
+export const run = (args) => dispatch('rules', VERBS, args);

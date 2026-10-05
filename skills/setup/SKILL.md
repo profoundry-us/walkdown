@@ -53,13 +53,18 @@ Then check it runs, and offer to put it on their PATH:
 
 Everywhere below, `walkdown` means whichever of those two forms works.
 
-## 2. Install the skills
+## 2. Get the machine ready
 
-`walkdown init` in the next step installs them for you. To install them
-without setting a project up, name the directory - run by an agent there is
-no terminal to ask, and a bare `walkdown skills` writes nothing:
+    walkdown init
 
-    walkdown skills --into ~/.claude/skills
+It makes `~/.walkdown` and its registry, records who the person is, installs
+the skills, and names anything walkdown needs that this machine lacks (Node 20
+or later, git) - exit 1 if so, with where to get it. It touches no project and
+is safe to run again. To install the skills somewhere else, name the
+directory - run by an agent there is no terminal to ask, and a bare
+`walkdown skills` writes nothing:
+
+    walkdown skills --into <dir>
 
 The clone is a Claude Code plugin named `walkdown`, so into Claude Code's own
 folder this makes one link, `~/.claude/skills/walkdown`, to the clone: the
@@ -81,7 +86,7 @@ clone.
 
 ## 3. Set the project up
 
-    walkdown init --dir <project-root>
+    walkdown blueprints new --dir <project-root>
 
 By default the whole home - spec, threads, runs, evidence, drafts - lands in
 `~/.walkdown/blueprints/`, and the repository gets nothing at all, not even a
@@ -89,19 +94,19 @@ pointer. Ask whether they would rather commit it: `--commit spec` puts the home
 in `.walkdown/` with a `.gitignore` that keeps runs, evidence and drafts out;
 `--commit all` the same with no `.gitignore`. The honest recommendation is
 `spec` for a team and nothing for an evaluation, and it can be changed later
-by running `init --commit <standard>` again - the home moves whole.
+with `walkdown blueprints commit <standard>` - the home moves whole.
 
 With the spec committed, place the pointer deliberately. If the project has
 several agent files (`CLAUDE.md`, `AGENTS.md`, `.github/copilot-instructions.md`),
-init writes none of them and says so - ask which one their agents actually
+walkdown writes none of them and says so - ask which one their agents actually
 read, and:
 
     walkdown pointer --dir <project-root> --into <that file>
 
 **A second blueprint in a project that has one** - an unrelated feature that
-wants its own rules, threads and runs - is `init` again with an id:
+wants its own rules, threads and runs - is `blueprints new` again with an id:
 
-    walkdown init --dir <project-root> --id <name>
+    walkdown blueprints new <name> --dir <project-root>
 
 It gets its own numbered home and says which blueprints the project already
 holds; check the id is the one the person meant. From then on, every command
@@ -117,7 +122,7 @@ Finally, tell them where everything went, in one line each: `walkdown where`.
 
 `walkdown.yml` says which reporter to add to their Playwright config, by the
 clone's path: nothing puts a `walkdown` package in their `node_modules`, so
-`['walkdown/reporter']` would not resolve there. Copy the line init wrote. The
+`['walkdown/reporter']` would not resolve there. Copy the line `blueprints new` wrote. The
 RSpec lines load the formatter from the clone the same way (`-I <clone>/adapters/rspec/lib
 -r walkdown/formatter`), so there is no gem to add, and the formatter files its runs
 wherever `walkdown where` says, including a home outside the repository.

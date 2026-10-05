@@ -12,16 +12,18 @@
  *
  * Output is made steady before anyone reads it: the throwaway machine's paths
  * become `~/.walkdown` and `~/shop`, and times and run ids become fixed
- * placeholders, so a fade between the design and the build shows what changed
+ * placeholders - and so do the clone's own path, the versions of node and
+ * git, and a thread's printed date - so a fade between the design and the build shows what changed
  * and nothing else. Expected lines are matched against the steady text.
  */
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { tmpdir, userInfo } from 'node:os';
+import { dirname, join } from 'node:path';
 import { parse } from '../vendor/yaml.js';
 
 const CLI = new URL('../bin/walkdown.js', import.meta.url).pathname;
+const REPO = dirname(dirname(CLI));
 export const SCENARIOS = new URL('../test/cli/scenarios/', import.meta.url).pathname;
 
 /**
@@ -38,16 +40,35 @@ export function scenarios() {
     });
 }
 
-/* A machine of its own: a personal home, and a project called `shop`. */
-function machine() {
+/*
+ * A machine of its own: a personal home, and a project called `shop`. Git
+ * knows the person as Sam, from a config of the machine's own, so what
+ * `walkdown init` infers reads the same on every machine that runs it.
+ * `path: node-only` leaves nothing on the PATH but node - a machine without
+ * git, for the moment walkdown has to say so.
+ */
+export function machine({ path } = {}) {
   const root = realpathSync(mkdtempSync(join(tmpdir(), 'wd-cli-')));
   const home = join(root, 'home');
   const shop = join(root, 'shop');
   mkdirSync(join(shop, '.git'), { recursive: true });
   mkdirSync(home, { recursive: true });
+  mkdirSync(join(root, 'claude'), { recursive: true }); // Claude Code is installed
   writeFileSync(join(home, 'config.yml'), 'identity:\n  username: topher\n');
-  const env = { ...process.env, WALKDOWN_HOME: home, WALKDOWN_SKILLS_DIR: join(home, 'skills'), NO_COLOR: '1' };
-  for (const k of ['WALKDOWN_SPEC', 'WALKDOWN_RECORD_HOME', 'NODE_TEST_CONTEXT']) delete env[k];
+  writeFileSync(join(root, '.gitconfig'), '[user]\n\tname = Sam Shopper\n\temail = sam@example.com\n');
+  const env = {
+    ...process.env,
+    WALKDOWN_HOME: home,
+    WALKDOWN_SKILLS_DIR: join(root, 'claude', 'skills'),
+    // lib/identity.js sets GIT_CONFIG_* aside on purpose, so the machine's
+    // own git config is the one HOME points at.
+    HOME: root,
+    XDG_CONFIG_HOME: join(root, '.config'),
+    TZ: 'America/Chicago',
+    NO_COLOR: '1',
+  };
+  for (const k of ['WALKDOWN_SPEC', 'WALKDOWN_RECORD_HOME', 'NODE_TEST_CONTEXT', 'GIT_DIR', 'GIT_WORK_TREE', 'GIT_CONFIG_GLOBAL']) delete env[k];
+  if (path === 'node-only') env.PATH = dirname(process.execPath);
   const wd = (args, cwd = shop) => spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', env });
   const ok = (args) => {
     const r = wd(args);
@@ -55,7 +76,7 @@ function machine() {
     return r;
   };
   const specOf = (id) => ok(['where', 'spec', '--blueprint', id]).stdout.trim();
-  return { root, home, shop, wd, ok, specOf, done: () => rmSync(root, { recursive: true, force: true }) };
+  return { root, home, shop, env, wd, ok, specOf, done: () => rmSync(root, { recursive: true, force: true }) };
 }
 
 /* A feature with one story of the given rules, written into a blueprint. */
@@ -87,14 +108,29 @@ function feature(m, id, name, rules) {
  * where the scenario's command starts.
  */
 export const FIXTURES = {
+  /* Nothing at all: no ~/.walkdown, as on the day walkdown is installed. */
+  'fresh-machine'(m) {
+    rmSync(m.home, { recursive: true, force: true });
+  },
+  /* A machine `walkdown init` has already been run on. */
+  initialised(m) {
+    m.ok(['init']);
+  },
+  /* `checkout` with one rule and an open note on it, n-0001. */
+  'a-note'(m) {
+    m.ok(['blueprints', 'new', 'checkout']);
+    for (const f of readdirSync(join(m.specOf('checkout'), 'features'))) rmSync(join(m.specOf('checkout'), 'features', f));
+    feature(m, 'checkout', 'checkout', [['pays', 'A card payment goes through.']]);
+    m.ok(['threads', 'new', '--rule', 'checkout.basics.pays', '--body', 'The pay button does nothing on a declined card.']);
+  },
   /* `shop` with one blueprint, `checkout`. */
   'one-blueprint'(m) {
-    m.ok(['init', '--id', 'checkout']);
+    m.ok(['blueprints', 'new', 'checkout']);
   },
   /* `shop` with `checkout` and `search`, a rule or two each. */
   'two-blueprints'(m) {
-    m.ok(['init', '--id', 'checkout']);
-    m.ok(['init', '--id', 'search']);
+    m.ok(['blueprints', 'new', 'checkout']);
+    m.ok(['blueprints', 'new', 'search']);
     for (const id of ['checkout', 'search'])
       for (const f of readdirSync(join(m.specOf(id), 'features'))) rmSync(join(m.specOf(id), 'features', f));
     feature(m, 'checkout', 'checkout', [
@@ -109,10 +145,18 @@ export const FIXTURES = {
  * Text as anyone reading it should see it, whoever's machine ran it.
  *
  * @param {string} text
- * @param {{ home: string, shop: string }} m
+ * @param {{ root?: string, home: string, shop: string }} m
  */
 export function steady(text, m) {
-  return text
+  return (m.root ? text.replaceAll(join(m.root, 'claude'), '~/.claude') : text)
+    .replaceAll(REPO, '~/src/walkdown')
+    // HOME is the machine's root, so a path walkdown shortens itself reads
+    // ~/home - the same ~/.walkdown a person would see.
+    .replace(/~\/home\b/g, '~/.walkdown')
+    .replaceAll(`as \`${userInfo().username}\``, 'as `sam`')
+    .replace(/^(\s+· node\s+)\S+/m, '$124.0.0')
+    .replace(/^(\s+· git\s+)\S.*$/m, '$12.50.1')
+    .replace(/\b[A-Z][a-z]{2} \d{1,2}, \d{4}, \d{1,2}:\d\d [AP]M [A-Z]{3,4}\b/g, 'Oct 2, 2026, 9:00 AM CDT')
     .replaceAll(m.shop, '~/shop')
     .replaceAll(m.home, '~/.walkdown')
     .replace(/\d{4}-\d\d-\d\dT\d\d[-:]\d\d[-:]\d\d(\.\d+)?Z/g, '2026-10-02T00-00-00Z')
@@ -126,9 +170,9 @@ export function steady(text, m) {
  * @returns {{ status: number | null, text: string, stdout: string, stderr: string }}
  */
 export function run(scenario) {
-  const m = machine();
+  const m = machine({ path: scenario.path });
   try {
-    for (const name of [scenario.fixture].flat()) {
+    for (const name of [scenario.fixture ?? []].flat()) {
       if (!FIXTURES[name]) throw new Error(`${scenario.file}: no fixture "${name}"`);
       FIXTURES[name](m);
     }

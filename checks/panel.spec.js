@@ -2359,8 +2359,8 @@ test('a page no blueprint claims asks which project, and opens nothing over it',
   // How to make it reviewable, and how to bring a project in - both at the
   // top, where twenty projects cannot push them off the screen.
   await expect(page.getByTestId('project.commands')).toContainText('walkdown claims --url');
-  await expect(page.getByTestId('project.new')).toContainText('walkdown import');
-  await expect(page.getByTestId('project.new')).toContainText('walkdown init');
+  await expect(page.getByTestId('project.new')).toContainText('walkdown blueprints import');
+  await expect(page.getByTestId('project.new')).toContainText('walkdown blueprints new');
   // Starting reads as starting, and choosing has a header of its own over
   // the list (n-0265).
   await expect(page.getByTestId('project.new')).toContainText(/start a project/i);
@@ -2519,7 +2519,7 @@ test('a server that lists nothing still does not open itself over the page', {
   await expect(page.getByTestId('project.none')).toBeVisible();
   // And what to do about it is still on screen, which is the whole reason the
   // commands sit above the list.
-  await expect(page.getByTestId('project.new')).toContainText('walkdown import');
+  await expect(page.getByTestId('project.new')).toContainText('walkdown blueprints import');
 });
 
 /*

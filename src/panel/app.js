@@ -3088,7 +3088,7 @@ function renderGate() {
                to date with ADR 0003: nothing is served from a directory any
                more. Register once, from the project; serve from anywhere. -->
           <p class="text-[12.5px] leading-relaxed opacity-60">Register a blueprint once, from its
-            project — <code>walkdown init</code> for a new one, <code>walkdown import &lt;path&gt;</code>
+            project — <code>walkdown blueprints new</code> for a new one, <code>walkdown blueprints import &lt;path&gt;</code>
             for one that exists — and then, from anywhere:</p>
         </div>
         <code class="rounded-box bg-base-200 px-3 py-2 text-[12px]">walkdown serve</code>

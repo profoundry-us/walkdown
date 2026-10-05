@@ -1,0 +1,158 @@
+{
+  "run_id": "2026-10-05T02-37-24Z-local-01",
+  "created": "2026-10-05T02:37:24Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "010ac9b-dirty",
+  "note": "ADR 0012 build: the twelve commands rules, each driven by hand on throwaway machines (temp HOME, ~/.walkdown and ~/.claude); transcripts and the scripts that drove them are the evidence.",
+  "spec_hash": "sha256:fdd42cc60d75",
+  "results": [
+    {
+      "rule": "commands.shape.noun-then-verb",
+      "status": "pass",
+      "statement_hash": "sha256:0e1ac5bc5c43",
+      "evidence": [
+        "runs/evidence/2026-10-05T02-34-24Z/noun-then-verb.txt",
+        "runs/evidence/2026-10-05T02-34-24Z/steps/noun-then-verb.zsh",
+        "runs/evidence/2026-10-05T02-34-24Z/drive.sh"
+      ],
+      "reasoning": "Drove on a throwaway machine (temp HOME and ~/.walkdown) with one blueprint holding one rule and an open note. `walkdown blueprints`, `threads` and `records` bare were diffed against the same noun with `list`: identical output each time, and each lists something real (the blueprint, the note, the record paths). `blueprints help` names list, new, import, rename, commit and forget; `threads help` list, new, show, reply and set; `records help` list and move; `rules help` move. status, lint, hash, run, judge, sweep, where, claims, serve, pointer and skills each answer `--help` with a Usage line under their own name. An unknown verb (`threads shout`) is refused with the verbs there are. One thing found and fixed before this verdict: `rules help` claimed \"the bare noun is `walkdown rules move`\" while bare `rules` refuses; the line now appears only for a noun whose first verb lists.",
+      "threads": []
+    },
+    {
+      "rule": "commands.shape.old-forms-say-the-new",
+      "status": "pass",
+      "statement_hash": "sha256:1a91b698c42f",
+      "evidence": [
+        "runs/evidence/2026-10-05T02-34-24Z/old-forms.txt",
+        "runs/evidence/2026-10-05T02-34-24Z/steps/old-forms.zsh",
+        "runs/evidence/2026-10-05T02-34-24Z/drive.sh"
+      ],
+      "reasoning": "Every form the step names was run on a machine with a blueprint, a rule and an open note: `thread n-0001 --reply ok`, `move runs --to x`, `import .`, `blueprint forget a`, `init --id b`, plus `init --commit spec`, `thread n-0001 --status addressed --reply \"fixed in 1a2b3c\"` and bare `thread n-0001`. Each exited 2, said the old form is not a command any more, and printed the new one with its arguments carried over and quoted where a shell needs it (`walkdown threads reply n-0001 ok`, `walkdown threads set n-0001 --status addressed --reply \"fixed in 1a2b3c\"`, `walkdown blueprints new b`, `walkdown blueprints commit spec`). A shasum of every file in ~/.walkdown and the project before and after the eight runs is identical, so nothing was changed. Pasting the printed `threads reply` form then worked and landed the reply.",
+      "threads": []
+    },
+    {
+      "rule": "commands.shape.help-by-noun",
+      "status": "pass",
+      "statement_hash": "sha256:db2770fb32c4",
+      "evidence": [
+        "runs/evidence/2026-10-05T02-34-24Z/help-by-noun.txt",
+        "runs/evidence/2026-10-05T02-34-24Z/noun-then-verb.txt",
+        "runs/evidence/2026-10-05T02-34-24Z/steps/help-by-noun.zsh",
+        "runs/evidence/2026-10-05T02-34-24Z/drive.sh"
+      ],
+      "reasoning": "`walkdown help` prints its groups as Getting ready, Blueprints, Records, Threads, Rules and verdicts, The panel, in that order, each with the commands that act on it (init and skills; blueprints and pointer; records and where; threads; status, lint, hash, run, judge, sweep and rules move; serve and claims). `walkdown threads help` lists list, new, show, reply and set, each with its usage line and a sentence on what it does, then says what the bare noun runs. Read the as-built drawings help.html and help-one-noun.html too: they show the same text in the terminal frame, so the screens the storyboard names match what the command prints.",
+      "threads": []
+    },
+    {
+      "rule": "commands.init.this-machine-only",
+      "status": "pass",
+      "statement_hash": "sha256:9551966dc330",
+      "evidence": [
+        "runs/evidence/2026-10-05T02-34-24Z/this-machine-only.txt",
+        "runs/evidence/2026-10-05T02-34-24Z/steps/this-machine-only.zsh",
+        "runs/evidence/2026-10-05T02-34-24Z/drive.sh"
+      ],
+      "reasoning": "A throwaway machine with no ~/.walkdown, standing in a real git repository whose global git config names Sam Shopper <sam@example.com>. The first `walkdown init` printed \"+ created\" for ~/.walkdown and its registry and \"+ you ... as `sam`\", wrote `identity: username: sam, name: Sam Shopper` to config.yml, and left the registry with `blueprints: []`. `git status --porcelain` and `ls -a` in the project read the same before and after, so nothing was written there. The second run printed \"up to date\" for each line and \"already says who you are\", and a shasum of every file in ~/.walkdown is unchanged. Both runs end \"Ready. In a project, `walkdown blueprints new` starts a spec.\"",
+      "threads": []
+    },
+    {
+      "rule": "commands.init.one-skill-installer",
+      "status": "pass",
+      "statement_hash": "sha256:491cd8cc7d17",
+      "evidence": [
+        "runs/evidence/2026-10-05T02-34-24Z/one-skill-installer.txt",
+        "runs/evidence/2026-10-05T02-34-24Z/steps/one-skill-installer.zsh",
+        "runs/evidence/2026-10-05T02-34-24Z/drive.sh"
+      ],
+      "reasoning": "On one throwaway machine `walkdown init` linked ~/.claude/skills/walkdown to the clone and printed the \"+ linked\" row and the two lines about Claude Code loading the plugin. The folder was moved aside and `walkdown skills --into ~/.claude/skills` run on the same machine: it made the same single link to the same target and printed the same skill lines, character for character apart from nothing. In the code, init calls the `install` that `walkdown skills` itself calls (bin/commands/skills.js), so there is one installer and one set of messages, not two that agree today.",
+      "threads": []
+    },
+    {
+      "rule": "commands.init.names-what-is-missing",
+      "status": "pass",
+      "statement_hash": "sha256:cd70779d9a55",
+      "evidence": [
+        "runs/evidence/2026-10-05T02-34-24Z/names-what-is-missing.txt",
+        "runs/evidence/2026-10-05T02-34-24Z/steps/names-what-is-missing.zsh",
+        "runs/evidence/2026-10-05T02-34-24Z/drive.sh"
+      ],
+      "reasoning": "With PATH holding only the directory node lives in (/opt/homebrew/bin, checked to contain no git) and no ~/.claude, `walkdown init` printed \"✗ git not found\" with https://git-scm.com/downloads, \"? claude ... is not there\" with how another agent gets copies, and \"walkdown needs git and does not install it itself. Everything else above is set up.\", exiting 1. It installed nothing of git; ~/.walkdown, its registry, config and the skills link were all there afterwards. Run again with git on the PATH and still no Claude Code folder, it exited 0 with the \"? claude\" line: a missing Claude Code is a word, not a failure. Node older than 20 could not be driven here (this machine has 26), so that branch was read in the code rather than run: it names the version found and the one needed, with nodejs.org.",
+      "threads": []
+    },
+    {
+      "rule": "commands.blueprints.new-makes-one",
+      "status": "pass",
+      "statement_hash": "sha256:68b77720e43d",
+      "evidence": [
+        "runs/evidence/2026-10-05T02-34-24Z/new-makes-one.txt",
+        "runs/evidence/2026-10-05T02-34-24Z/steps/new-makes-one.zsh",
+        "runs/evidence/2026-10-05T02-34-24Z/drive.sh"
+      ],
+      "reasoning": "In git project `shop` on a machine that had run `walkdown init`: `walkdown blueprints new` created ~/.walkdown/blueprints/0001-shop and registered it as `shop`, and `git status --porcelain --ignored` and `ls -a` were the same before and after, so nothing was added to the repository. Running it again printed \"up to date\" for every file and created nothing. `walkdown blueprints new search` made 0002-search beside it, said \"`search` is another blueprint for this project, beside `shop` — commands that write take `--blueprint <id>` now\", and `walkdown blueprints` lists both. `--commit spec` and `--dir` act as init did: driven in the commit, rename and import transcripts, and covered by the locations suite, which now calls `blueprints new --dir`.",
+      "threads": []
+    },
+    {
+      "rule": "commands.blueprints.commit-moves-the-home",
+      "status": "pass",
+      "statement_hash": "sha256:c5e229e499ef",
+      "evidence": [
+        "runs/evidence/2026-10-05T02-34-24Z/commit-moves-the-home.txt",
+        "runs/evidence/2026-10-05T02-34-24Z/steps/commit-moves-the-home.zsh",
+        "runs/evidence/2026-10-05T02-34-24Z/drive.sh"
+      ],
+      "reasoning": "A blueprint kept outside the repository with a run record in its runs/. `walkdown blueprints commit spec` moved the whole home to shop/.walkdown/blueprints/0001-shop, \"no record edited\", and wrote .walkdown/.gitignore keeping runs, evidence and drafts out; `where` resolves every kind there and r.json came along. `walkdown blueprints commit none` moved it back to ~/.walkdown with r.json intact and removed .walkdown entirely, since nothing else stood in it. Then with shop and search both committed, a bare `commit none` exited 2 naming both and asking for `--blueprint <id>`, and `commit none --blueprint shop` moved shop out while the shared .gitignore kept the same shasum and search stayed.",
+      "threads": []
+    },
+    {
+      "rule": "commands.blueprints.rename",
+      "status": "pass",
+      "statement_hash": "sha256:0f7cfe575ce5",
+      "evidence": [
+        "runs/evidence/2026-10-05T02-34-24Z/rename.txt",
+        "runs/evidence/2026-10-05T02-34-24Z/steps/rename.zsh",
+        "runs/evidence/2026-10-05T02-34-24Z/drive.sh"
+      ],
+      "reasoning": "A project with `a` outside the repository and `b` committed, b holding a rule, an open note n-0001, a run record and a pointer in CLAUDE.md. `walkdown blueprints rename b search` renamed the folder 0001-b to 0001-search keeping its number, the registry row, `blueprint: search` in walkdown.yml, and the id and paths in .walkdown/config.yml; CLAUDE.md now lists `search` at its new path. A shasum of every file under the home except walkdown.yml matched byte for byte after mapping the folder name, and `walkdown status --blueprint search` printed exactly what `--blueprint b` had: the rule passing, never judged, n-0001 open. Renaming a to `search` was refused (\"already a blueprint on this machine\") and to \"Not An Id\" refused as not an id, both exit 2 with \"Nothing was renamed\", and the registry and folders were unchanged.",
+      "threads": []
+    },
+    {
+      "rule": "commands.blueprints.import-and-forget-moved",
+      "status": "pass",
+      "statement_hash": "sha256:baaf4c96fd25",
+      "evidence": [
+        "runs/evidence/2026-10-05T02-34-24Z/import-and-forget.txt",
+        "runs/evidence/2026-10-05T02-34-24Z/steps/import-and-forget.zsh",
+        "runs/evidence/2026-10-05T02-34-24Z/drive.sh"
+      ],
+      "reasoning": "A committed blueprint was forgotten so the project declared one this machine had not registered (`walkdown blueprints` said there were none). `walkdown blueprints import . --all` registered it with `registered: by: import`, as `walkdown import` did, and `walkdown blueprints forget shop` took the row off and said its records were untouched. A shasum of every file under the project's .walkdown before the import and after the forget is identical. The old spellings now refuse and point here (see the old-forms transcript), so these are the only doors.",
+      "threads": []
+    },
+    {
+      "rule": "commands.records.move",
+      "status": "pass",
+      "statement_hash": "sha256:93e58454e522",
+      "evidence": [
+        "runs/evidence/2026-10-05T02-34-24Z/records-move.txt",
+        "runs/evidence/2026-10-05T02-34-24Z/steps/records-move.zsh",
+        "runs/evidence/2026-10-05T02-34-24Z/drive.sh"
+      ],
+      "reasoning": "With shot.png in the blueprint's evidence directory, `walkdown records move evidence --to ~/elsewhere/evidence` printed from, to and \"recorded in ~/.walkdown/registry.yml\" and \"No record was edited\". `walkdown where evidence` then answered the new path, shot.png was there, and the registry row carries `evidence: ~/elsewhere/evidence` - the same output and effect `walkdown move` had, which the move suite (rerun under the new name and recorded) also shows. The bare noun prints where each record lives, with evidence at its new place.",
+      "threads": []
+    },
+    {
+      "rule": "commands.threads.one-verb-per-change",
+      "status": "pass",
+      "statement_hash": "sha256:687a1c86cfdf",
+      "evidence": [
+        "runs/evidence/2026-10-05T02-34-24Z/one-verb-per-change.txt",
+        "runs/evidence/2026-10-05T02-34-24Z/steps/one-verb-per-change.zsh",
+        "runs/evidence/2026-10-05T02-34-24Z/drive.sh"
+      ],
+      "reasoning": "An open note n-0001 and a question q-0002 on a real rule. `threads show n-0001` printed the thread and the threads directory shasum was unchanged. `threads reply n-0001 done` added a reply and the status stayed open. `threads set n-0001 --status addressed --reply \"fixed in 1a2b3c\"` moved it to addressed with that reply. After answering q-0002, `threads set q-0002 --status open --reply \"never mind\"` was refused (\"reopening requires a reason\"), and `threads set n-0001 --status verified --as-agent --reply done` was refused because agents never accept. Both said \"Nothing was changed, and the reply did not land\", and the shasum shows neither reply landed. `reply` refuses a status flag and `set` refuses a bare reply. `threads new` takes what `thread new` took. Fixed first: `threads reply <id> --as-agent \"text\"` lost the text when flags came before it.",
+      "threads": []
+    }
+  ]
+}

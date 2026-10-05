@@ -3,6 +3,56 @@
 Each section takes an install from one version to the next. What changed is in
 [CHANGELOG.md](CHANGELOG.md); this file is only what you have to do about it.
 
+## From 0.3.0 to the next release
+
+The command line became nouns and verbs
+([ADR 0012](docs/adr/foundational/202610_cli_command_structure.md)). No data moves;
+what changes is what you, your scripts and your agents type.
+
+### 1. Update the clone
+
+```
+git -C ~/.walkdown/walkdown pull
+```
+
+The skills are a link to the clone, so they speak the new commands as soon as it
+updates.
+
+### 2. Change what you type
+
+| Was | Now |
+|---|---|
+| `walkdown init` (in a project) | `walkdown blueprints new [<id>]` |
+| `walkdown init --dir <root>` | `walkdown blueprints new --dir <root>` |
+| `walkdown init --id <name>` | `walkdown blueprints new <name>` |
+| `walkdown init --commit <none\|spec\|all> [--id <x>]` | `walkdown blueprints commit <none\|spec\|all> [--blueprint <x>]` |
+| `walkdown import <path> …` | `walkdown blueprints import <path> …` |
+| `walkdown blueprint forget <id>` | `walkdown blueprints forget <id>` |
+| `walkdown move <kind> --to <path>` | `walkdown records move <kind> --to <path>` |
+| `walkdown thread new …` | `walkdown threads new …` |
+| `walkdown thread <id>` | `walkdown threads show <id>` |
+| `walkdown thread <id> --reply <text>` | `walkdown threads reply <id> <text>` |
+| `walkdown thread <id> --as-agent --said <t> --added <t>` | `walkdown threads reply <id> --as-agent --said <t> --added <t>` |
+| `walkdown thread <id> --status <s> [--reply <text>]` | `walkdown threads set <id> --status <s> [--reply <text>]` |
+| `walkdown thread <id> --verify \| --reopen \| --waive \| --option …` | `walkdown threads set <id> --verify \| …` |
+
+You do not have to learn the table: an old form exits 2, changes nothing, and prints
+the new one with your arguments in it, ready to copy.
+
+`walkdown init` now sets up the machine only. Run it once on each machine; it is safe
+to run again.
+
+### 3. Refresh each blueprint's AGENTS.md
+
+A blueprint's `AGENTS.md` names the commands agents use. Copy the shipped one over
+yours if you have not edited it:
+
+```
+cp ~/.walkdown/walkdown/lib/templates/AGENTS.md <spec>/AGENTS.md
+```
+
+`walkdown where spec` prints `<spec>`.
+
 ## From 0.2.0 to 0.3.0
 
 The skills stop being copies and become one link: the clone is now a Claude Code

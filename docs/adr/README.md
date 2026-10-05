@@ -29,7 +29,7 @@ is renamed.
 | 0009 | [Who draws the design](foundational/202609_who_draws_the_design.md) | foundational | accepted |
 | 0010 | [Claude Code skill packaging](foundational/202610_claude_code_skill_packaging.md) | foundational | accepted |
 | 0011 | [Several blueprints per project](foundational/202610_several_blueprints_per_project.md) | foundational | accepted |
-| 0012 | [CLI command structure](foundational/202610_cli_command_structure.md) | foundational | proposed |
+| 0012 | [CLI command structure](foundational/202610_cli_command_structure.md) | foundational | accepted |
 | 0013 | [A project split into blueprints](foundational/202610_a_project_split_into_blueprints.md) | foundational | accepted |
 
 A new ADR takes the next number and the current month:

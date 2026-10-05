@@ -1,0 +1,22 @@
+# `walkdown help`: every command, grouped under what it acts on.
+screen: help
+title: The help groups the commands under what they act on
+rule: commands.shape.help-by-noun
+command: [help]
+exit: 0
+expect:
+  - '^Getting ready$'
+  - '^Blueprints$'
+  - '^Records$'
+  - '^Threads$'
+  - '^Rules and verdicts$'
+  - '^The panel$'
+  - '^  walkdown blueprints rename <id> <new-id>$'
+anchors:
+  - { id: cli.help.intro, match: '^(walkdown —|A command is|`walkdown <noun>)' }
+  - { id: cli.help.ready, match: '^(Getting ready|  walkdown (init|skills))' }
+  - { id: cli.help.blueprints, match: '^(Blueprints|  walkdown (blueprints|pointer))' }
+  - { id: cli.help.records, match: '^(Records|  walkdown (records|where))' }
+  - { id: cli.help.threads, match: '^(Threads|  walkdown threads)' }
+  - { id: cli.help.verdicts, match: '^(Rules and verdicts|  walkdown (status|lint|hash|run|judge|sweep|rules))' }
+  - { id: cli.help.panel, match: '^(The panel|  walkdown (serve|claims))' }

@@ -15,6 +15,7 @@ import { after, test } from 'node:test';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-thread-cli-'));
 after(() => rmSync(root, { recursive: true, force: true }));
+import { newFormOf } from '../bin/commands/old-forms.js';
 const CLI = new URL('../bin/walkdown.js', import.meta.url).pathname;
 
 /*
@@ -70,8 +71,13 @@ const IN_TOKYO = (() => {
 })();
 
 /** Run the CLI, stripping colour so assertions read the words, not the escapes. */
+/*
+ * The cases here were written as `walkdown thread <id> --reply ... --status
+ * ...`; each runs as the threads verb that replaced it (ADR 0012), worked out
+ * by the same translation the old form's refusal prints.
+ */
 const run = (args, dir, home = SAID) =>
-  execFileSync(process.execPath, [CLI, 'thread', ...args, '--blueprint', declareProject(home, dir)], {
+  execFileSync(process.execPath, [CLI, ...newFormOf(['thread', ...args]), '--blueprint', declareProject(home, dir)], {
     encoding: 'utf8',
     env: { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: home },
   }).replace(/\x1b\[[0-9;]*m/g, '');
@@ -437,16 +443,7 @@ test('ten concurrent filers get ten threads, none overwritten', async () => {
         process.execPath,
         [
           CLI,
-          'thread',
-          'new',
-          '--rule',
-          'f.s.rule',
-          '--body',
-          `finding ${i}`,
-          '--as-agent',
-          '--blueprint',
-          declareProject(SAID, bp),
-        ],
+          'threads', 'new', '--rule', 'f.s.rule', '--body', `finding ${i}`, '--as-agent', '--blueprint', declareProject(SAID, bp)],
         { env: { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: SAID } },
       ),
     ),

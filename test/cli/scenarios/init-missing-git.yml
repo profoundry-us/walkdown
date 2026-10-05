@@ -1,0 +1,17 @@
+# `walkdown init` on a machine whose PATH has no git.
+screen: init-missing-git
+title: walkdown init names what the machine lacks
+rule: commands.init.names-what-is-missing
+fixture: fresh-machine
+path: node-only
+command: [init]
+exit: 1
+expect:
+  - '^  \+ created  ~/\.walkdown$'
+  - '^  ✗ git\s+not found — .*https://git-scm\.com/downloads$'
+  - '^  · node\s+'
+  - '^  walkdown needs git and does not install it itself\. Everything else above is set up\.$'
+anchors:
+  - { id: cli.init.home, match: '^  [+·] (created|up to date)  ~/\.walkdown' }
+  - { id: cli.init.needs, match: '^  [·✗?] (node|git|claude)' }
+  - { id: cli.init.next, match: '^(Ready\.|  walkdown needs)' }

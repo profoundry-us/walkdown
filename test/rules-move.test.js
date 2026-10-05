@@ -34,7 +34,7 @@ function fixture({ commit = 'none' } = {}) {
   const env = { ...process.env, WALKDOWN_HOME: home, WALKDOWN_SKILLS_DIR: join(home, 'skills'), NO_COLOR: '1' };
   delete env.WALKDOWN_SPEC;
   const wd = (args, cwd = shop) => spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', env });
-  for (const id of ['a', 'b']) assert.equal(wd(['init', '--id', id, ...(commit === 'none' ? [] : ['--commit', commit])]).status, 0);
+  for (const id of ['a', 'b']) assert.equal(wd(['blueprints', 'new', id, ...(commit === 'none' ? [] : ['--commit', commit])]).status, 0);
   const at = (id) => JSON.parse(wd(['where', '--blueprint', id, '--json']).stdout);
   const A = at('a');
   const B = at('b');
@@ -104,9 +104,9 @@ function fixture({ commit = 'none' } = {}) {
   // Threads: one on a moving rule with a picture, one on the rule that stays.
   const pic = join(root, 'seen.png');
   writeFileSync(pic, PNG);
-  const t1 = wd(['thread', 'new', '--blueprint', 'a', '--rule', 'shop.cart.add', '--body', 'The badge is late.', '--attach', pic, '--json']);
+  const t1 = wd(['threads', 'new', '--blueprint', 'a', '--rule', 'shop.cart.add', '--body', 'The badge is late.', '--attach', pic, '--json']);
   assert.equal(t1.status, 0, t1.stderr);
-  assert.equal(wd(['thread', 'new', '--blueprint', 'a', '--rule', 'shop.pay.card', '--body', 'Declines are quiet.']).status, 0);
+  assert.equal(wd(['threads', 'new', '--blueprint', 'a', '--rule', 'shop.pay.card', '--body', 'Declines are quiet.']).status, 0);
   if (commit !== 'none') {
     git('add', '-A');
     git('commit', '-qm', 'fixture');

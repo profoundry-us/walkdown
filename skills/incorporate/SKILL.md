@@ -15,7 +15,7 @@ you claim work, you never accept it.
 with several blueprints, under each entry of `blueprints`, and every write then
 takes `--blueprint <id>`):
 `incorporate` (an answered question) or `address` (an open note). Read the full
-thread: `walkdown thread <id>`. The same queue lists `judge-first` (a built
+thread: `walkdown threads show <id>`. The same queue lists `judge-first` (a built
 rule the agent tier has not judged, or judged before it went stale) and
 `rejudge` (a fix claimed after the last pass); those are the judge skill's (`/walkdown:judge`).
 
@@ -43,7 +43,7 @@ rule the agent tier has not judged, or judged before it went stale) and
    `/walkdown:judge` on each until none is left. The person you hand this to
    should never be the first to look at it.
 7. **Close the thread** — only via the CLI so the transition is validated:
-   `walkdown thread <id> --as-agent --reply "<what changed, which files,
+   `walkdown threads reply <id> --as-agent "<what changed, which files,
    which rule(s), which run re-verified it>" --status incorporated`. It records
    under the human you are working for — that is whose instruction it was —
    and `--as-agent` says a machine typed it.
@@ -55,7 +55,7 @@ fix it (spec change? follow the incorporation steps; implementation-only?
 just fix, carrying anchors) → re-verify with a run (`walkdown run --rule ...`,
 and an agent walkdown via the judge skill (`/walkdown:judge`) whenever the rule asks for
 the agent tier, which is the default) →
-`walkdown thread <id> --as-agent --reply "<fix + evidence>"
+`walkdown threads reply <id> --as-agent "<fix + evidence>"
 --status addressed`.
 
 ## Never

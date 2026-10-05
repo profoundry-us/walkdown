@@ -266,9 +266,9 @@ stories:
             - The location is resolved from inside each of them, and one is named outright
           then:
             - Each registered blueprint answers for itself, with its own runs and threads
-            - The unregistered one is not a project at all, however much it looks like one from the outside - and where its checkout declares it, the answer names the manifest and says `walkdown import`
+            - The unregistered one is not a project at all, however much it looks like one from the outside - and where its checkout declares it, the answer names the manifest and says `walkdown blueprints import`
             - The registry is consulted, and the report says which row answered and how it arrived - a `blueprints:` list in the personal config.yml is set aside and named, however many keys it restates
-          statement_hash: sha256:f1df66c74dac
+          statement_hash: sha256:b3b85bba918a
           reworded:
             - hash: sha256:d6788490af67
               at: 2026-09-13
@@ -279,6 +279,9 @@ stories:
             - hash: sha256:715be4b0e9c9
               at: 2026-09-14T02:20:43Z
               why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
+            - hash: sha256:f1df66c74dac
+              at: 2026-10-05T02:28:57Z
+              why: ADR 0012 renamed the commands it quotes; what it asks of the build is unchanged
 
       - id: locations.answer.registry-is-the-only-door
         origin: thread:n-0275
@@ -294,12 +297,12 @@ stories:
           when:
             - The location is asked for through the link's row, a thread is filed through it, and a server is started at the repository root
           then:
-            - "`walkdown where` sets the row aside and says it was written by hand; `walkdown status` and `walkdown thread new` through it refuse, and nothing lands in the pack's ledger"
+            - "`walkdown where` sets the row aside and says it was written by hand; `walkdown status` and `walkdown threads new` through it refuse, and nothing lands in the pack's ledger"
             - The server lists every registered blueprint and never the link's row
-            - "`walkdown import` through the link registers the pack's home once, under its real path, and a second import says it is already listed"
+            - "`walkdown blueprints import` through the link registers the pack's home once, under its real path, and a second import says it is already listed"
             - Standing in the pack reaches the pack's row; standing at the root reaches the root's; nothing about the tree between them is consulted
             - A registered spelling is canonicalised on read only to compare, the way the writers canonicalised it to write - a symlink planted at a registered path is the same directory and matches its row - and no path is ever resolved to find a row that was not written
-          statement_hash: sha256:f6b76093bef6
+          statement_hash: sha256:d5f34f3e8b36
           reworded:
             - hash: sha256:20130d966a11
               at: 2026-09-13
@@ -313,6 +316,9 @@ stories:
             - hash: sha256:6e50a37dc531
               at: 2026-09-21T01:30:46Z
               why: q-0251 (machine names refused), q-0302 (an addressless target counts nothing placed), q-0280/n-0322 (canonicalised only to compare; the because rewritten)
+            - hash: sha256:f6b76093bef6
+              at: 2026-10-05T02:28:57Z
+              why: ADR 0012 renamed the commands it quotes; what it asks of the build is unchanged
 
       - id: locations.answer.serve-starts-anywhere
         origin: walkdown
@@ -585,7 +591,7 @@ stories:
     statement: As someone keeping two features' specs apart in one project, I can give each its own blueprint outside the repository, and still read them all from the project without naming one.
     rules:
       - id: locations.several.init-makes-another
-        statement: "`walkdown init --id <name>` gives a project that already has a blueprint a second one, in its own numbered folder outside the repository, and running the same command again changes nothing."
+        statement: "`walkdown blueprints new <name>` gives a project that already has a blueprint a second one, in its own numbered folder outside the repository, and running the same command again changes nothing."
         because: Two unrelated features in one project each want their own rules, threads and runs, kept out of the repository like the first.
         history: On 2026-10-02 a project on Topher's work machine could not get a second blueprint without committing it to the repository (issue #20, ADR 0011).
         origin: walkdown
@@ -597,7 +603,7 @@ stories:
           given:
             - A project with blueprint a, kept outside the repository
           when:
-            - "`walkdown init --dir` is run with `--id b`, then the same again, then with no `--id`"
+            - "`walkdown blueprints new b --dir` is run, then the same again, then with no id"
           then:
             - The first creates a new numbered home for b, registers it for the project, and says it is another blueprint for this project, naming a
             - The second reports everything up to date and creates nothing
@@ -605,7 +611,11 @@ stories:
             - An `--id` already registered for a different project is refused, not given a suffix
             - "`--commit` with several blueprints in the project needs `--id`, and without it refuses and names the choices"
             - "`walkdown serve` lists both, and `walkdown claims` reports both when both claim a page"
-          statement_hash: sha256:0ff494d94d74
+          statement_hash: sha256:023502bfad97
+          reworded:
+            - hash: sha256:0ff494d94d74
+              at: 2026-10-05T02:28:57Z
+              why: ADR 0012 renamed the commands it quotes; what it asks of the build is unchanged
 
       - id: locations.several.reads-cover-all
         statement: With several blueprints in a project, `status`, `lint`, `threads` and `where` run with no `--blueprint` report on every one, each under its id.
@@ -639,14 +649,18 @@ stories:
           given:
             - A project with blueprints a and b
           when:
-            - "`hash --write`, `thread new`, a change to a thread, `judge`, `sweep` and `move` are run with no `--blueprint`, then with `--blueprint b`"
+            - "`hash --write`, `threads new`, a change to a thread, `judge`, `sweep` and `records move` are run with no `--blueprint`, then with `--blueprint b`"
           then:
             - Each exits with status 2, says several blueprints are registered here, names a and b, and says `--blueprint` picks one
             - With `--blueprint b`, each acts on b alone
             - A thread id that only one of them holds is changed without `--blueprint`
             - "\"No blueprint here\" is said only where none is registered"
             - "`walkdown run` is not among them: it runs the project's suite and files each result by rule (locations.several.results-filed-by-rule)"
-          statement_hash: sha256:de5bdad5a7a4
+          statement_hash: sha256:f0c27cd71949
+          reworded:
+            - hash: sha256:de5bdad5a7a4
+              at: 2026-10-05T02:28:57Z
+              why: ADR 0012 renamed the commands it quotes; what it asks of the build is unchanged
 
       - id: locations.several.results-filed-by-rule
         statement: In a project with several blueprints, a recorded test run files each result in the blueprint that holds its rule, and `walkdown run` with no `--blueprint` runs the suite once for the whole project.

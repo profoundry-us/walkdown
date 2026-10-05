@@ -41,7 +41,7 @@ touched.
 
 The design side is `prototype-cli/`, drawn by a separate design agent from
 the requests filed on each screen (ADR 0009). Never edit it: a screen that
-needs a new design gets a request (`walkdown thread new --blueprint cli
+needs a new design gets a request (`walkdown threads new --blueprint cli
 --screen <id> --reason request`), and its drafts in `prototype-cli/drafts/`
 reach `prototype-cli/screens/` only when a person accepts one.
 

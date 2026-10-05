@@ -1,7 +1,7 @@
 # ADR 0012 — CLI command structure
 
-- **Status:** proposed 2026-10-02. Nothing is built; the rules it rewords are drafted
-    for Topher's approval first.
+- **Status:** accepted 2026-10-04, with its rules (Topher). Built in the `cli`
+    blueprint, as ADR 0013 ordered. `rules move` (ADR 0013 §5) joins the nouns.
 - **Date:** 2026-10-02
 - **Deciders:** Topher (product, eng)
 - **Builds on:** ADR 0003 (the registry is the only door), ADR 0010 (the clone is a

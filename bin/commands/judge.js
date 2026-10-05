@@ -276,7 +276,7 @@ export function run(args) {
     '  - A fail needs a note thread anchored to this rule citing the evidence, filed with',
     '    `--reason finding` (authored agent, and yours to settle once a later pass judges the fix); put its id in the result.',
     '  - Then `walkdown status`: a note you wrote on this rule that your pass has now judged is',
-    '    listed for you to settle (`walkdown thread <id> --status settled --as-agent`).',
+    '    listed for you to settle (`walkdown threads set <id> --status settled --as-agent`).',
     `  - The ledger is append-only: one new record, at the end, and no record ever edited.`,
     // n-0200: the record above names the TARGET's address while the copy
     // is served elsewhere, and a verdict recorded at the copy's port fills

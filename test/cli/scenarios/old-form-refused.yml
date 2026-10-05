@@ -1,0 +1,14 @@
+# A form walkdown no longer takes: refused, with the one that replaced it.
+screen: old-form-refused
+title: An old command form says the new one
+rule: commands.shape.old-forms-say-the-new
+command: [thread, n-0001, --reply, fixed in 1a2b3c]
+exit: 2
+expect:
+  - '^`walkdown thread` is not a command any more \(ADR 0012\)\. It is now:$'
+  - '^  walkdown threads reply n-0001 "fixed in 1a2b3c"$'
+  - '^Nothing was changed\.'
+anchors:
+  - { id: cli.old.refusal, match: 'is not a command any more' }
+  - { id: cli.old.new-form, match: '^  walkdown ' }
+  - { id: cli.old.unchanged, match: '^Nothing was changed' }

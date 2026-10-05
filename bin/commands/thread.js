@@ -39,10 +39,7 @@ export function run(args) {
   });
   const id = positionals[0];
   if (!id) {
-    console.error(
-      'Usage: walkdown thread <id> [--reply <text>] [--status <s>|--verify|--reopen|--waive] [--reason <text>] [--option "<label> :: <why>"]... [--as-agent [--said <text>] [--added <text>]]\n' +
-        '       walkdown thread new --rule <id> | --screen <id> --body <text> [--kind note|question] [--option "<label> :: <why>"]... [--reason feedback|finding|observation|request|decision] [--screen <id>] [--element <sel>] [--as-agent [--said <text>] [--added <text>]]',
-    );
+    console.error('`walkdown threads help` lists show, reply, set and new.');
     process.exit(2);
   }
   let blueprint = loadOrExit(values.blueprint ?? holderOf(id));
@@ -103,7 +100,7 @@ export function run(args) {
   const replying = values.reply !== undefined || (id !== 'new' && values.said !== undefined);
 
   /*
-   * `thread new` opens a thread from the CLI - the door that was missing.
+   * `threads new` opens a thread from the CLI - the door that was missing.
    * Filing a finding used to take a running serve (POST /api/threads) or a
    * hand-edited YAML, and this project forbids the second; the mutation
    * commands and the creation belong behind the same front door. Opening is
@@ -111,7 +108,7 @@ export function run(args) {
    */
   if (id === 'new') {
     if (replying || status) {
-      console.error('thread new opens a thread; --reply and the status flags act on one that exists.');
+      console.error('threads new opens a thread; `threads reply` and `threads set` act on one that exists.');
       process.exit(2);
     }
     const kind = values.kind ?? 'note';
@@ -206,7 +203,7 @@ export function run(args) {
     }
     console.log(`✓ ${opened} opened · ${kind} · by ${by}${marked ? dim(` (via ${marked})`) : ''}`);
     console.log(dim(`  ${anchorText(anchor)}`));
-    console.log(dim(`  walkdown thread ${opened} reads it in full`));
+    console.log(dim(`  walkdown threads show ${opened} reads it in full`));
     return end(0);
   }
 
@@ -265,6 +262,9 @@ export function run(args) {
       }));
     } catch (err) {
       console.error(err.message);
+      // A refused change is refused whole: say so, so nobody goes looking
+      // for the reply (commands.threads.one-verb-per-change).
+      console.error(values.reply !== undefined ? 'Nothing was changed, and the reply did not land.' : 'Nothing was changed.');
       process.exit(2);
     }
     blueprint = loadBlueprint(blueprint.dir);
@@ -327,7 +327,7 @@ export function run(args) {
     if (added > 0) parts.push(`+${added} ${added === 1 ? 'reply' : 'replies'}`);
     console.log(`✓ ${t.id} ${parts.join(' · ')}`);
     console.log(dim(`  ${anchorText(t.anchor)}`));
-    console.log(dim(`  walkdown thread ${t.id} reads it in full`));
+    console.log(dim(`  walkdown threads show ${t.id} reads it in full`));
     return end(0);
   }
   console.log(

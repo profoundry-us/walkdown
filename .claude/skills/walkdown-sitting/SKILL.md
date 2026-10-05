@@ -74,7 +74,7 @@ start.
    sentence and is worth it.
 
 5. **Fails spawn threads.** A failing rule gets a note anchored to the exact
-   rule and element, citing the evidence (`walkdown thread new --kind note
+   rule and element, citing the evidence (`walkdown threads new --kind note
    --rule <id> --body <text> --as-agent --reason finding`), and its id goes
    in that result's `threads`. Something you noticed that is not a fail is
    an `--reason observation`, which you settle yourself once it is fixed.

@@ -1,0 +1,19 @@
+# `walkdown init` a second time: everything already in place.
+screen: init-again
+title: walkdown init again creates nothing
+rule: commands.init.this-machine-only
+fixture: initialised
+command: [init]
+exit: 0
+expect:
+  - '^  · up to date  ~/\.walkdown$'
+  - '^  · up to date  ~/\.walkdown/registry\.yml$'
+  - '^  · you\s+~/\.walkdown/config\.yml  already says who you are$'
+  - '^  · up to date  ~/\.claude/skills/walkdown'
+  - '^Ready\.'
+anchors:
+  - { id: cli.init.home, match: '^  [+·] (created|up to date)  ~/\.walkdown' }
+  - { id: cli.init.you, match: '^  [+·?] you' }
+  - { id: cli.init.skills, match: '^  ([+·!~] |~/\.claude)|^  (Claude Code|Updating|Copies)' }
+  - { id: cli.init.needs, match: '^  [·✗?] (node|git|claude)' }
+  - { id: cli.init.next, match: '^(Ready\.|  walkdown needs)' }

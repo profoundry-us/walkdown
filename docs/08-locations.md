@@ -65,7 +65,7 @@ The entry that named it stays in your config and `walkdown blueprints` shows the
 its number is never handed to the next same-named repository (n-0170).
 
 ```
-walkdown init
+walkdown blueprints new
 ```
 
 **The spec committed.** The home is `<repo>/.walkdown/blueprints/NNNN-name/`, and beside
@@ -82,17 +82,17 @@ file, and `config.yml` next to it, are themselves committed — the standard is 
 clone receives.
 
 ```
-walkdown init --commit spec
+walkdown blueprints commit spec
 ```
 
 **Another blueprint in the same project.** A project can hold several, each in its own
-home (ADR 0011). `--id` names the one this run is about; it gets the next numbered home,
-and running the same command again changes nothing. With no `--id`, init means the id it
+home (ADR 0011). An id names the one this run is about (`walkdown blueprints new billing`); it gets the next numbered home,
+and running the same command again changes nothing. With no id, `blueprints new` means the id it
 would give the project anyway — the directory's name — and with several, refuses if none
 has it. An id another project holds is refused, never suffixed.
 
 ```
-walkdown init --id billing
+walkdown blueprints new billing
 ```
 
 Rules move between them with `walkdown rules move <rule|story|feature>... --to <id>`:
@@ -110,7 +110,7 @@ to assemble by hand — a negation chain in git is easy to write wrong, and a wr
 silently commits nothing or everything.
 
 ```
-walkdown init --commit all
+walkdown blueprints commit all
 ```
 
 Nothing records which arrangement a project chose. **The tree is the answer**: a home
@@ -150,7 +150,7 @@ to run (n-0164).
 a promise; git holds the fact, and the two part company in ways no reading of the file can
 see: a root `.gitignore` that hides `.walkdown/` entirely, a rule that does not reach a
 blueprint standing elsewhere in the tree, an ignore file somebody emptied, a home that
-left the repository with its files still in the index. So `walkdown where` and `init`
+left the repository with its files still in the index. So `walkdown where` and `blueprints new`
 ask git about the spec and each record kind at the paths the resolver actually answered
 with — tracked, ignored by which file and line, or neither — and print that as the
 `tracked` row, beside what the tree promised. Leaving the repository says how many files
@@ -176,7 +176,7 @@ can rebuild (the claims index).
 carry its own. Committed or ignored as the arrangement above says. Its `config.yml` is a
 manifest: it declares what the checkout holds, and *a manifest registers nothing*. A
 fresh clone that declares a blueprint is not a project on this machine until somebody
-runs `walkdown import .` in it.
+runs `walkdown blueprints import .` in it.
 
 **A reader consults the registry and nothing else.** No `.walkdown` is found by walking
 up from where you stand; no path is resolved on read. Standing somewhere picks among the
@@ -229,11 +229,11 @@ There is no `--dir`, and walkdown does not search the tree for `walkdown.yml`. A
 blueprint walkdown answers for is one somebody registered on this machine. Three hands
 write the registry, and each row says which:
 
-- **`walkdown init`** registers what it makes — a home in `~/.walkdown` by default, or in
+- **`walkdown blueprints new`** registers what it makes — a home in `~/.walkdown` by default, or in
   the repository's `.walkdown` with `--commit`, where it also writes the manifest row for
   every other machine. Run in a checkout whose manifest the registry has not met, it
   registers what the manifest declares rather than setting the project up a second time.
-- **`walkdown import <project>`** registers what a checkout's manifest declares — one
+- **`walkdown blueprints import <project>`** registers what a checkout's manifest declares — one
   blueprint without asking, several with a question (`--all`, `--only`). `walkdown import
   <home>` registers one bare home: a numbered directory under some project's
   `.walkdown/blueprints/`, or, with `--ephemeral --why`, a throwaway copy standing
@@ -241,7 +241,7 @@ write the registry, and each row says which:
   `blueprint add` is gone.
 - **`walkdown move`** re-points a row when a home or one kind of record moves.
 
-`walkdown blueprint forget <id>` takes a row out and touches no records. `walkdown
+`walkdown blueprints forget <id>` takes a row out and touches no records. `walkdown
 blueprints` lists every row, and names any home standing under a `blueprints/` directory
 that no row claims — reported, never adopted, because which checkout a stranded home
 belonged to is exactly the guess the registry exists to stop.
@@ -302,7 +302,7 @@ siblings, and a row carries a per-kind path only where `walkdown move` put one o
 the home. A `blueprints:` list in the personal `config.yml` — the shape from before the
 registry — is not read, and neither is `projects:`, the name it had before that. Each row
 is named on the report as set aside, and the first registry row written about the same
-checkout folds its machine-local keys in (its targets, say) and takes it out; `init` says
+checkout folds its machine-local keys in (its targets, say) and takes it out; `blueprints new` says
 so when it does. A `projects:` row is matched by its roots, since the id it carried was
 never one anyone chose.
 
@@ -327,7 +327,7 @@ where <kind>` prints one path alone, for scripts. It has no write mode at all: t
 to be a `--fix` (and a `walkdown migrate` before it) that folded the homes an older layout
 had left behind into the config, and with that layout gone there is nothing left to fold.
 
-`walkdown move <kind> --to <path>` relocates one kind and records the choice on the row
+`walkdown records move <kind> --to <path>` relocates one kind and records the choice on the row
 that resolved — never one found by name (n-0153). A destination that already holds
 records is refused rather than merged, because two ledgers in one directory would be an
 edit of both. A directory nothing registered contains has no row to remember a move in,
@@ -489,7 +489,7 @@ to declare one, and `walkdown lint` errors when a declared entry names no home o
 record kind pointing nowhere. That is the alarm for a config that does not match what the
 tools write: an agent reading it can put the tree right.
 
-`walkdown move <kind> --to <where>` relocates one kind and rewrites the config, leaving
+`walkdown records move <kind> --to <where>` relocates one kind and rewrites the config, leaving
 every record's contents alone. It is the only thing that moves records, and a person asks
 for it.
 
@@ -510,13 +510,13 @@ one of these files with a person's own words in it. So:
   walkdown reads and rewrites what is between them and touches no other line. Rewriting
   rather than skipping is what lets a **moved spec correct its own pointer**; leaving the
   repository takes the block back out, and the file with it if the block was all it held.
-- **`walkdown init` places it only when there is no question.** No agent file, so nothing
+- **`walkdown blueprints new` places it only when there is no question.** No agent file, so nothing
   to disturb: it writes `CLAUDE.md`. Exactly one: it uses that one. Several: it names them
   and writes nothing.
 - **`walkdown pointer`** prints the block, and `--into <file>` places it idempotently
   anywhere. The path is relative whenever the spec is inside the repository.
 
-In a monorepo, point `init` at the pack: `walkdown init --dir packs/billing --commit spec`
+In a monorepo, point `init` at the pack: `walkdown blueprints new --dir packs/billing --commit spec`
 gives that pack its own `.walkdown`, which is then the only one that answers from inside
 it, and puts the pointer beside the code it describes.
 

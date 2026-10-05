@@ -85,10 +85,10 @@ function commands(here) {
            header, over the list. -->
       <div class="flex flex-col gap-1.5" data-testid="project.new">
         <p class="text-[11px] uppercase tracking-wider opacity-50">${here ? 'Or start a project' : 'Start a project'}</p>
-        <code class="rounded-box bg-base-200 px-2 py-1.5 text-[11px]">walkdown init</code>
+        <code class="rounded-box bg-base-200 px-2 py-1.5 text-[11px]">walkdown blueprints new</code>
         <p class="text-[11px] leading-relaxed opacity-50">starts a blueprint in the repository you are
           in. A repository that already has one joins this machine with
-          <span class="font-mono">walkdown import &lt;path&gt;</span>. Both are commands you run —
+          <span class="font-mono">walkdown blueprints import &lt;path&gt;</span>. Both are commands you run —
           walkdown never adopts a directory from a browser.</p>
       </div>
     </div>`;

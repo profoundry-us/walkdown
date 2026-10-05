@@ -23,7 +23,7 @@ export function run(args) {
   });
   const kind = positionals[0];
   if (!KINDS.includes(kind)) {
-    console.error(`walkdown move <kind> --to <path>\n  kind is one of: ${KINDS.join(', ')}`);
+    console.error(`walkdown records move <kind> --to <path>\n  kind is one of: ${KINDS.join(', ')}`);
     return end(2);
   }
   if (!values.to) {
@@ -47,7 +47,7 @@ export function run(args) {
           : 'Nothing registered contains this directory, so there is no row to remember a move in.',
       ),
     );
-    console.error(dim('`walkdown init` starts a blueprint here; `walkdown import <project>` registers one that exists.'));
+    console.error(dim('`walkdown blueprints new` starts a blueprint here; `walkdown blueprints import <project>` registers one that exists.'));
     return end(2);
   }
   const from = loc[kind].path;

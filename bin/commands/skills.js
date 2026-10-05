@@ -132,7 +132,21 @@ export async function run(args) {
     console.log('');
   }
 
-  const rows = installSkills(into, { force: values.force });
+  await install(into, { force: values.force, repo });
+  return end(0);
+}
+
+/**
+ * Install the skills into one place and say what happened there. The one
+ * installer: `walkdown init` calls this for the person's own folder, so
+ * there is one set of messages and nothing to drift (commands.init.one-skill-installer).
+ *
+ * @param {string} into
+ * @param {{ force?: boolean, repo?: string | null }} [opts]
+ */
+export async function install(into, { force = false, repo = null } = {}) {
+  const { installSkills } = await import('../../lib/init.js');
+  const rows = installSkills(into, { force });
   for (const r of rows) console.log(`  ${MARK[r.action] ?? r.action}  ${r.path}${r.target ? dim(` → ${r.target}`) : ''}`);
   console.log(`\n  ${into}`);
   const linked = rows.some((r) => r.target);
@@ -147,5 +161,5 @@ export async function run(args) {
   );
   if (rows.some((r) => r.action.startsWith('duplicate')))
     console.log(yellow('\n  Claude Code lists those skills twice until the old copies go: `walkdown skills --force` removes the ones walkdown released, and an edited one is yours to remove.'));
-  return end(0);
+  return rows;
 }

@@ -10,180 +10,105 @@ import { Refused } from '../lib/refusal.js';
 
 const HELP = `walkdown — verify that what you built is what you designed
 
-Usage:
-  walkdown init [--dir <project-root>] [--id <name>] [--commit none|spec|all]
-  walkdown run [--target <name>] [--rule <id>] [--blueprint <id>]
+A command is a noun and then a verb; the noun alone lists, and
+\`walkdown <noun> help\` lists its verbs. \`walkdown <command> --help\` says more.
+
+Getting ready
+  walkdown init [--force]
+  walkdown skills [--into <dir>] [--project] [--force]
+
+Blueprints
+  walkdown blueprints [list] [--stale]
+  walkdown blueprints new [<id>] [--dir <root>] [--commit none|spec|all]
+  walkdown blueprints import <path> [--all|--only <ids>] [--id <name>] [--ephemeral] [--why <reason>]
+  walkdown blueprints rename <id> <new-id>
+  walkdown blueprints commit <none|spec|all> [--blueprint <id>]
+  walkdown blueprints forget <id>
+  walkdown pointer [--dir <root>] [--into <file>]
+
+Records
+  walkdown records [list] [--blueprint <id>] [--json]
+  walkdown records move <kind> --to <path> [--blueprint <id>]
+  walkdown where [<kind>] [--blueprint <id>] [--json]
+
+Threads
+  walkdown threads [list] [--rule <id>] [--all] [--blueprint <id>] [--json]
+  walkdown threads new --rule <id> | --screen <id> --body <text> [--kind note|question] ...
+  walkdown threads show <id>
+  walkdown threads reply <id> <text> [--as-agent [--said <text>] [--added <text>]]
+  walkdown threads set <id> --status <s> | --verify | --reopen | --waive [--reason <text>] [--reply <text>]
+
+Rules and verdicts
   walkdown status [<rule-id>] [--blueprint <id>] [--target <name>] [--json]
   walkdown lint [--blueprint <id>] [--no-checks] [--json]
   walkdown hash [--blueprint <id>] [--write [--reword <why>]]
+  walkdown run [--target <name>] [--rule <id>] [--blueprint <id>]
   walkdown judge <rule-id> [--target <name>] [--serve <origin>] [--blueprint <id>] [--json]
   walkdown sweep --why <reason> [--tiers checks,agent] [--blueprint <id>] [--target <name>]
-  walkdown threads [--blueprint <id>] [--rule <id>] [--all] [--json]
-  walkdown thread <id> [--reply <text>] [--status <s>|--verify|--reopen|--waive]
-                       [--reason <text>] [--as-agent [--said <text>] [--added <text>]] [--as-is]
-                       [--blueprint <id>] [--json]
-  walkdown thread new --rule <id> | --screen <id> --body <text>|--said <text> [--added <text>] [--kind note|question]
-                      [--screen <id>] [--element <sel>] [--as-agent] [--blueprint <id>] [--json]
+  walkdown rules move <rule|story|feature>... --to <blueprint> [--dry-run]
+
+The panel
   walkdown serve [--blueprint <id>] [--port <n>]
   walkdown claims [--blueprint <id>] [--url <address>] [--json]
-  walkdown where [<kind>] [--blueprint <id>] [--json]
-  walkdown blueprints [--stale]
-  walkdown import <path> [--all] [--only <ids>] [--id <name>] [--ephemeral] [--why <reason>] [--json]
-  walkdown blueprint forget <id>
-  walkdown move <kind> --to <path> [--blueprint <id>]
-  walkdown rules move <rule|story|feature>... --to <blueprint> [--dry-run]
-  walkdown pointer [--dir <project-root>] [--into <file>]
-  walkdown skills [--into <dir>] [--project] [--force]
 
-Commands:
-  init    Set a project up: a numbered home holding the blueprint, its
-          threads, runs, evidence and drafts. By default the home is in
-          ~/.walkdown and the repository gets nothing at all; '--commit spec'
-          puts it in .walkdown/ with a .gitignore that keeps runs, evidence
-          and drafts out, '--commit all' the same with no .gitignore. Run
-          again with --commit to change your mind: the home moves whole.
-  blueprints
-          Every blueprint this machine knows about, with throwaway copies
-          grouped under Ephemeral and marked when they are old enough to be
-          worth clearing. 'blueprint forget <id>' takes one off the list and
-          touches no records.
-  import  The one way a blueprint joins this machine's registry (ADR 0003).
-          Name a project directory and it shows you what that project's
-          .walkdown/config.yml declares; you say which to take (--all, or
-          --only <ids>). Name a bare home - blueprint/ with threads, runs,
-          evidence and drafts beside it - and that one blueprint is
-          registered; --ephemeral marks it a throwaway copy, reachable by
-          name and never by standing somewhere. Nothing arrives by walking
-          the tree: a clone that happens to use walkdown stays invisible
-          until you import it.
-  run     Run the project's checks via the runner contract (run_all, or
-          run_for_rule with --rule), injecting the target's env and
-          WALKDOWN_TARGET. The reporter/formatter records the run.
-  status  Derived per-rule verification from the runs ledger: latest checks
-          per target, the latest agent walkdown, which roles have accepted the
-          rule, and open threads. With a rule id: that rule in full
-          (statement, evidence, the excuses for any tier it does not ask for,
-          who has signed and who has not, threads).
-  lint    Validate the blueprint: schema, ids, storyboard refs, staleness,
-          check coverage (via runner.list), threads, and runs.
-  hash    Report statement_hash status for every rule - the hash pins the
-          statement and the steps; --write updates missing/stale hashes in
-          place (formatting preserved), and every verdict on a re-stamped
-          rule reads stale. --reword "<why>" keeps the old hash under
-          steps.reworded so the verdicts stay current: the words changed,
-          the rule did not.
-  judge   Print the judging prompt for one rule — statement, steps, setup,
-          screens with real addresses, where evidence goes and how a verdict
-          is recorded — ready to paste into any agent with a browser. The
-          first step toward prompt-driven judging (docs/11-architecture.md):
-          the prompt ends where the reader begins, and this judges nothing.
-
-  sweep   Ask for the named tiers to be judged again from scratch. Verdicts
-          recorded before the sweep read as stale, so a rule nobody gets back
-          to is legible as unfinished rather than as passing. Nothing is
-          deleted - the ledger stays append-only and the marker says why.
-          Deliberate on purpose: nothing else in walkdown ever writes one.
-  threads List active threads (questions & notes); --all includes
-          incorporated/verified/waived, --rule filters by anchored rule.
-  thread  Show one thread in full: anchor, body, and replies. With --reply
-          and/or a status flag, mutate it first: transitions are validated
-          (notes: open → addressed → verified | reopen | waived; questions:
-          open → answered → incorporated | reopen | waived; every ending
-          may reopen). "verified" and "waived" require a named human actor,
-          and are refused outright with --as-agent, as is reopening a
-          thread a person verified or waived. Waiving and reopening require
-          --reason (recorded as a reply). Who it records under is not an
-          argument: it is the identity in ~/.walkdown/config.yml, and
-          attribution follows the words. --as-agent --reply is the
-          machine's own words, recorded as "agent"; --as-agent --said
-          carries a person's words as they typed them, under their name
-          with the machine marked beside it, and --added is what the
-          machine put beside those words, kept apart. The machine's own
-          words are refused when they miss the voice (docs/13-voice.md);
-          --as-is files them unchanged. "thread new" opens
-          one instead: --rule anchors it (--screen/--element sharpen the
-          spot), --kind picks note or question, --body says what was seen
-          (or --said what the person said).
-  where   Print where this project's pieces live and why each was chosen -
-          the spec, the runs, the threads, the evidence, the drafts, and the
-          repository a run's git_sha comes from. With a kind (spec, code,
-          runs, threads, evidence, drafts) prints that one path alone, for
-          scripts. Reads the personal config and the working tree, and
-          writes nothing at all.
-  move    Move one kind of record somewhere else and record the choice in
-          ~/.walkdown/config.yml. Moves files; never edits one. Refuses a
-          destination that already holds records rather than interleaving
-          two ledgers.
-  rules move
-          Move a rule, a story or a feature to another blueprint of the same
-          project, with its threads; the run records and evidence behind its
-          verdicts are copied, so nothing is judged or signed again. The
-          source's records are never edited. --dry-run says what would move.
-  pointer Print the paragraph that tells an AI agent this project has a spec,
-          or place it with --into <file>. Which file agents read is a
-          project's own business - CLAUDE.md, AGENTS.md, a pack-level file in
-          a monorepo - so walkdown asks rather than assuming. Idempotent: it
-          replaces its own marked block and touches no other line.
-  skills  Install the agent procedures walkdown ships - formulate, judge,
-          incorporate, backlog, setup. With no flags it shows every place they
-          can go and what is already in each, then ASKS - it never picks for
-          you, and with no terminal to ask it writes nothing and says so.
-          --into <dir> names a directory outright; --project is the
-          repository's one copy, at the root's .claude/skills wherever in the
-          tree you run it, to be committed and shared. Your own directory
-          (~/.claude/skills) works in every project and touches no repository.
-          A copy you have edited is kept, not overwritten, unless --force.
-  serve   Start the local viewer: status board, side-by-side prototype/app
-          with the embed (pinning), and human walkdown recording. Also
-          serves /embed.js and the pin/walkdown API.
-
-Options:
-  --blueprint <id> Which declared blueprint (default: the one claiming cwd)
-  --dir <path>     init/pointer only: the project root to set up
-  --target <name>  status: only this target's checks column
-  --rule <id>      threads: only threads anchored to this rule
-  --all            threads: include terminal (incorporated/verified/waived)
-  --no-checks      lint: skip running the runner.list command
-  --write          hash: write missing/stale hashes back to feature files
-  --reword <why>   hash --write: keep the old hash, the meaning did not change
-  --why <reason>   sweep: why the whole thing is being asked for again (required)
-  --tiers <list>   sweep: comma-separated tiers to sweep (default: checks,agent)
-  --json           status/lint/threads/thread: machine-readable output
+--blueprint <id> names one of several blueprints standing here: reads cover them
+all without it, and anything that writes asks for it.
 `;
 
-const COMMANDS = new Set([
-  'init',
-  'import',
-  'run',
-  'lint',
-  'status',
-  'hash',
-  'judge',
-  'sweep',
-  'blueprint',
-  'blueprints',
-  'threads',
-  'thread',
-  'serve',
-  'claims',
-  'where',
-  'move',
-  'rules',
-  'pointer',
-  'skills',
-]);
+/* What each command that is not a noun does, for `walkdown <command> --help`. */
+const ABOUT = {
+  run:
+    'Run the project\'s checks via the runner contract (run_all, or run_for_rule\nwith --rule), injecting the target\'s env and WALKDOWN_TARGET. The\nreporter/formatter records the run.',
+  status:
+    'Derived per-rule verification from the runs ledger: latest checks per target,\nthe latest agent walkdown, which roles have accepted the rule, and open\nthreads. With a rule id: that rule in full (statement, evidence, the excuses\nfor any tier it does not ask for, who has signed and who has not, threads).',
+  lint:
+    'Validate the blueprint: schema, ids, storyboard refs, staleness, check\ncoverage (the rule tags in the test files, or runner.list), threads, and runs.',
+  hash:
+    'Report statement_hash status for every rule - the hash pins the statement and\nthe steps; --write updates missing/stale hashes in place (formatting\npreserved), and every verdict on a re-stamped rule reads stale. --reword\n"<why>" keeps the old hash under steps.reworded so the verdicts stay current:\nthe words changed, the rule did not.',
+  judge:
+    'Print the judging prompt for one rule — statement, steps, setup, screens with\nreal addresses, where evidence goes and how a verdict is recorded — ready to\npaste into any agent with a browser. The first step toward prompt-driven\njudging (docs/11-architecture.md): the prompt ends where the reader begins,\nand this judges nothing.',
+  sweep:
+    'Ask for the named tiers to be judged again from scratch. Verdicts recorded\nbefore the sweep read as stale, so a rule nobody gets back to is legible as\nunfinished rather than as passing. Nothing is deleted - the ledger stays\nappend-only and the marker says why. Deliberate on purpose: nothing else in\nwalkdown ever writes one.',
+  where:
+    'Print where this project\'s pieces live and why each was chosen - the spec, the\nruns, the threads, the evidence, the drafts, and the repository a run\'s\ngit_sha comes from. With a kind (spec, code, runs, threads, evidence, drafts)\nprints that one path alone, for scripts. Reads the personal config and the\nworking tree, and writes nothing at all.',
+  pointer:
+    'Print the paragraph that tells an AI agent this project has a spec, or place\nit with --into <file>. Which file agents read is a project\'s own business -\nCLAUDE.md, AGENTS.md, a pack-level file in a monorepo - so walkdown asks\nrather than assuming. Idempotent: it replaces its own marked block and touches\nno other line.',
+  skills:
+    'Install the agent procedures walkdown ships - formulate, judge, incorporate,\nbacklog, setup. With no flags it shows every place they can go and what is\nalready in each, then ASKS - it never picks for you, and with no terminal to\nask it writes nothing and says so. --into <dir> names a directory outright;\n--project is the repository\'s one copy, at the root\'s .claude/skills wherever\nin the tree you run it, to be committed and shared. Your own directory\n(~/.claude/skills) works in every project and touches no repository. A copy\nyou have edited is kept, not overwritten, unless --force.',
+  serve:
+    'Start the local viewer: status board, side-by-side prototype/app with the\nembed (pinning), and human walkdown recording. Also serves /embed.js and the\npin/walkdown API.',
+};
+
+/* The nouns, each a table of verbs (bin/commands/noun.js). */
+const NOUNS = ['blueprints', 'records', 'threads', 'rules'];
+
+/* Forms ADR 0012 retired: refused with the form that replaced them. */
+const OLD = new Set(['thread', 'import', 'move', 'blueprint']);
+
+const COMMANDS = new Set(['init', 'skills', 'pointer', 'where', 'status', 'lint', 'hash', 'run', 'judge', 'sweep', 'serve', 'claims', ...NOUNS]);
 
 const [cmd, ...rest] = process.argv.slice(2);
+if (OLD.has(cmd)) {
+  const { oldForm } = await import('./commands/old-forms.js');
+  oldForm([cmd, ...rest]);
+  process.exit(2);
+}
 if (!COMMANDS.has(cmd)) {
+  if (cmd && cmd !== 'help' && cmd !== '--help' && cmd !== '-h') {
+    console.error(`walkdown: no command "${cmd}". \`walkdown help\` lists them.`);
+    process.exit(2);
+  }
   console.log(HELP);
-  process.exit(cmd && cmd !== 'help' && cmd !== '--help' ? 2 : 0);
+  process.exit(0);
 }
 
 // Asking a subcommand for help is the friendliest possible ask, and every
 // subcommand used to hand it straight to parseArgs, which answered with a
-// stack trace pointing at node internals. One answer, here, for all of them.
-if (rest.includes('--help') || rest.includes('-h')) {
-  console.log(HELP);
+// stack trace pointing at node internals. One answer, here, for all of them:
+// a noun lists its verbs (bin/commands/noun.js), anything else says what it does.
+if (!NOUNS.includes(cmd) && (rest.includes('--help') || rest.includes('-h'))) {
+  const usage = HELP.split('\n').filter((l) => l.startsWith(`  walkdown ${cmd} `) || l === `  walkdown ${cmd}`);
+  console.log(`${usage.map((l) => `Usage: ${l.trim()}`).join('\n')}\n\n${ABOUT[cmd] ?? ''}`.trim());
   process.exit(0);
 }
 

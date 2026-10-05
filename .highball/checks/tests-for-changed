@@ -24,7 +24,9 @@ const SLOW = new Set([
   // ADR 0011 and 0013: each builds two blueprints and spawns the CLI across
   // them - 3s to 11s apiece after their fixtures were trimmed, and before it
   // the edit hook was killed at its budget on every change near init.
-  "several", "several-project", "rules-move", "cli"
+  "several", "several-project", "rules-move", "cli",
+  // ADR 0012: every command spawned on throwaway machines, ~10s.
+  "commands"
 ]);
 
 const changed = (process.env.HIGHBALL_CHANGED_FILES ?? "")

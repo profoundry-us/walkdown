@@ -1,0 +1,14 @@
+# `walkdown blueprints rename`: an id put right without starting over.
+screen: blueprints-rename
+title: blueprints rename changes an id and nothing it holds
+rule: commands.blueprints.rename
+fixture: two-blueprints
+command: [blueprints, rename, search, find]
+exit: 0
+expect:
+  - '^  ~ folder  ~/\.walkdown/blueprints/0002-search  now 0002-find, keeping its number$'
+  - '^  ~ registry  ~/\.walkdown/registry\.yml  `search` is `find`$'
+  - '^✓ `search` is now `find`\. Its rules, threads and runs are as they were\.$'
+anchors:
+  - { id: cli.rename.changes, match: '^  ~ ' }
+  - { id: cli.rename.done, match: '^✓ ' }

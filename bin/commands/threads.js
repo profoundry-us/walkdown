@@ -1,54 +1,93 @@
-import { parseArgs } from 'node:util';
-import { anchorText, paintStatus } from '../../lib/report/threads.js';
-import { dim } from '../../lib/report/tty.js';
-import { listThreads } from '../../lib/threads.js';
-import { eachOrExit, end, sectionHead } from './context.js';
+import { end } from './context.js';
+import { dispatch } from './noun.js';
 
-export function run(args) {
-  const { values } = parseArgs({
-    args,
-    options: {
-      blueprint: { type: 'string' },
-      rule: { type: 'string' },
-      all: { type: 'boolean', default: false },
-      json: { type: 'boolean', default: false },
+/*
+ * `walkdown threads`: a thread read, answered and changed one verb at a time
+ * (ADR 0012 §4). `walkdown thread <id> --reply <t> --status <s>` was one
+ * command that read, replied and moved a thread at once; now `show` reads,
+ * `reply` says something and leaves the status alone, and `set` changes the
+ * status - with `--reply` when the two must land together or not at all,
+ * which is still decided where it lives, in mutateThread.
+ */
+
+/* The flags that change a thread's status; `set` takes them and nothing else does. */
+const SETS = ['--status', '--verify', '--reopen', '--waive', '--option'];
+const sets = (args) => args.filter((a) => SETS.some((s) => a === s || a.startsWith(`${s}=`)));
+const thread = async (args) => (await import('./thread.js')).run(args);
+
+export const VERBS = {
+  list: {
+    usage: 'walkdown threads [list] [--rule <id>] [--all] [--blueprint <id>] [--json]',
+    about: 'The open threads, questions and notes, newest first. --all includes the ended ones;\n--rule keeps those anchored to one rule.',
+    run: async (args) => (await import('./threads-list.js')).run(args),
+  },
+  new: {
+    usage:
+      'walkdown threads new --rule <id> | --screen <id> --body <text> [--kind note|question] [--element <sel>]\n' +
+      '                     [--reason <why>] [--option "<label> :: <why>"]... [--as-agent [--said <text>] [--added <text>]] [--blueprint <id>] [--json]',
+    about:
+      'Open a thread on a rule, or on a screen alone (a design request). --body says what was\nseen; with --as-agent, --said carries what the person said and --added what the\nmachine put beside it.',
+    run: (args) => thread(['new', ...args]),
+  },
+  show: {
+    usage: 'walkdown threads show <id> [--blueprint <id>] [--json]',
+    about: 'One thread in full: its anchor, its body and every reply. Changes nothing.',
+    run: (args) => {
+      const [id, ...rest] = args;
+      if (!id || id.startsWith('-')) return usage('show');
+      if (sets(rest).length || rest.some((a) => ['--reply', '--said', '--added'].includes(a))) {
+        console.error('threads show reads a thread and changes nothing — `walkdown threads reply` or `walkdown threads set` changes one.');
+        return end(2);
+      }
+      return thread([id, ...rest]);
     },
-  });
-  const each = eachOrExit(values.blueprint);
-  const of = (blueprint) => listThreads(blueprint, { rule: values.rule, all: values.all });
+  },
+  reply: {
+    usage: 'walkdown threads reply <id> <text> [--as-agent [--said <text>] [--added <text>]] [--as-is] [--attach <file>]... [--blueprint <id>] [--json]',
+    about:
+      "Say something on a thread and leave its status as it was. With --as-agent and --said,\nthe text is a person's words relayed; it is under their name with the machine marked.",
+    run: (args) => {
+      const [id, ...rest] = args;
+      if (!id || id.startsWith('-')) return usage('reply');
+      if (sets(rest).length) {
+        console.error(`threads reply leaves the status as it was — \`walkdown threads set ${id} ... --reply <text>\` changes it and says why together.`);
+        return end(2);
+      }
+      // The text is the one word no flag owns, wherever it stands.
+      const VALUED = ['--said', '--added', '--attach', '--blueprint', '--reply'];
+      let text;
+      for (let i = 0; i < rest.length; i++) {
+        if (VALUED.includes(rest[i])) i++;
+        else if (!rest[i].startsWith('-')) {
+          text = rest.splice(i, 1)[0];
+          break;
+        }
+      }
+      if (text === undefined && !rest.includes('--said') && !rest.includes('--added')) return usage('reply');
+      return thread([id, ...(text !== undefined ? ['--reply', text] : []), ...rest]);
+    },
+  },
+  set: {
+    usage:
+      'walkdown threads set <id> --status <s> | --verify | --reopen | --waive | --option "<label> :: <why>"...\n' +
+      '                     [--reason <text>] [--reply <text>] [--as-agent [--said <text>] [--added <text>]] [--blueprint <id>] [--json]',
+    about:
+      'Change a thread: its status, or the choices a question offers. Transitions are checked\n(a note: open → addressed → verified | reopen | waived; a question: open → answered →\nincorporated | reopen | waived). Verified and waived need a named person; waiving and\nreopening need --reason. --reply lands with the change, or neither lands.',
+    run: (args) => {
+      const [id, ...rest] = args;
+      if (!id || id.startsWith('-')) return usage('set');
+      if (!sets(rest).length) {
+        console.error(`threads set changes a thread's status — say how (${SETS.join(', ')}). \`walkdown threads reply\` only says something.`);
+        return end(2);
+      }
+      return thread([id, ...rest]);
+    },
+  },
+};
 
-  if (values.json) {
-    console.log(
-      JSON.stringify(
-        each.length > 1 ? { blueprints: each.map(({ id, blueprint }) => ({ id, threads: of(blueprint) })) } : of(each[0].blueprint),
-        null,
-        2,
-      ),
-    );
-    return end(0);
-  }
-  each.forEach(({ id, blueprint }, i) => {
-    if (each.length > 1) console.log(`${i ? '\n' : ''}${sectionHead(id)}\n`);
-    report(of(blueprint), values);
-  });
-  return end(0);
+function usage(verb) {
+  console.error(`Usage: ${VERBS[verb].usage}`);
+  return end(2);
 }
 
-/* One blueprint's threads, printed. */
-function report(threads, values) {
-  if (!threads.length) {
-    console.log(values.all ? 'No threads.' : 'No active threads. (--all includes resolved ones.)');
-    return;
-  }
-  console.log(dim(`walkdown threads — ${threads.length} ${values.all ? 'total' : 'active'}\n`));
-  for (const t of threads) {
-    const firstLine = String(t.body ?? '')
-      .trim()
-      .split('\n')[0];
-    console.log(
-      `  ${t.id}  ${t.kind.padEnd(8)} ${paintStatus(String(t.status).padEnd(12))} ${dim(anchorText(t.anchor))}`,
-    );
-    console.log(`      ${firstLine.length > 100 ? firstLine.slice(0, 97) + '…' : firstLine}\n`);
-  }
-  console.log(dim('  walkdown thread <id> shows a thread in full'));
-}
+export const run = (args) => dispatch('threads', VERBS, args);

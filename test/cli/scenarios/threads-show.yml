@@ -1,0 +1,15 @@
+# `walkdown threads show`: one thread in full, and nothing changed.
+screen: threads-show
+title: threads show reads a thread and changes nothing
+rule: commands.threads.one-verb-per-change
+fixture: a-note
+command: [threads, show, n-0001]
+exit: 0
+expect:
+  - '^n-0001 · note · open$'
+  - '^  rule checkout\.basics\.pays$'
+  - 'The pay button does nothing on a declined card\.'
+anchors:
+  - { id: cli.thread.head, match: '^n-0001 ·' }
+  - { id: cli.thread.anchor, match: '^  rule ' }
+  - { id: cli.thread.body, match: 'The pay button' }

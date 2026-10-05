@@ -43,7 +43,7 @@ test('move relocates the files, records the choice, and edits no record @rule:lo
   try {
     const dest = join(p.root, 'elsewhere', 'runs');
     const before = readFileSync(join(p.runs, 'a.json'), 'utf8');
-    run(p, ['move', 'runs', '--to', dest, '--blueprint', declareProject(p.home, p.bp, 'movable')]);
+    run(p, ['records', 'move', 'runs', '--to', dest, '--blueprint', declareProject(p.home, p.bp, 'movable')]);
 
     assert.ok(existsSync(join(dest, 'a.json')), 'the run moved');
     assert.equal(
@@ -78,7 +78,7 @@ test('move refuses a destination that already holds records @rule:locations.keep
     mkdirSync(dest, { recursive: true });
     writeFileSync(join(dest, 'someone-elses.json'), '{}');
     assert.throws(
-      () => run(p, ['move', 'runs', '--to', dest, '--blueprint', declareProject(p.home, p.bp, 'movable')]),
+      () => run(p, ['records', 'move', 'runs', '--to', dest, '--blueprint', declareProject(p.home, p.bp, 'movable')]),
       (e) => e.status === 2,
       'refused, and loudly enough to fail a script',
     );
@@ -107,7 +107,7 @@ test('a destination holding only the dotfiles the guard ignores is still moved i
     writeFileSync(join(dest, '.DS_Store'), 'finder');
     const before = readFileSync(join(p.runs, 'a.json'), 'utf8');
 
-    run(p, ['move', 'runs', '--to', dest, '--blueprint', declareProject(p.home, p.bp, 'movable')]);
+    run(p, ['records', 'move', 'runs', '--to', dest, '--blueprint', declareProject(p.home, p.bp, 'movable')]);
 
     assert.equal(readFileSync(join(dest, 'a.json'), 'utf8'), before, 'the record arrived unchanged');
     assert.ok(!existsSync(join(p.runs, 'a.json')), 'and did not stay behind');
@@ -140,7 +140,7 @@ test('a relative link is still relative on the other side @rule:locations.keepin
     mkdirSync(dest, { recursive: true });
     writeFileSync(join(dest, '.DS_Store'), 'finder'); // forces the copy path
 
-    run(p, ['move', 'runs', '--to', dest, '--blueprint', declareProject(p.home, p.bp, 'movable')]);
+    run(p, ['records', 'move', 'runs', '--to', dest, '--blueprint', declareProject(p.home, p.bp, 'movable')]);
 
     assert.equal(readlinkSync(join(dest, 'link.json')), 'real.json', 'the link reads as it was written');
     assert.equal(
@@ -164,13 +164,13 @@ test('a destination that is not a directory is refused in words @rule:locations.
     const file = join(p.root, 'not-a-dir');
     writeFileSync(file, 'i am a file');
     assert.throws(
-      () => run(p, ['move', 'runs', '--to', file, '--blueprint', declareProject(p.home, p.bp, 'movable')]),
+      () => run(p, ['records', 'move', 'runs', '--to', file, '--blueprint', declareProject(p.home, p.bp, 'movable')]),
       (e) => e.status === 2 && /is not a directory/.test(e.stderr),
     );
 
     const inside = join(p.runs, 'deeper');
     assert.throws(
-      () => run(p, ['move', 'runs', '--to', inside, '--blueprint', declareProject(p.home, p.bp, 'movable')]),
+      () => run(p, ['records', 'move', 'runs', '--to', inside, '--blueprint', declareProject(p.home, p.bp, 'movable')]),
       (e) => e.status === 2 && /inside/.test(e.stderr),
     );
 
@@ -205,7 +205,7 @@ test('a copy that stops part way is a refusal, and leaves no debris behind @rule
 
     let out;
     try {
-      run(p, ['move', 'runs', '--to', dest, '--blueprint', declareProject(p.home, p.bp, 'movable')]);
+      run(p, ['records', 'move', 'runs', '--to', dest, '--blueprint', declareProject(p.home, p.bp, 'movable')]);
       assert.fail('the move should have been refused');
     } catch (e) {
       out = `${e.stdout ?? ''}${e.stderr ?? ''}`;
@@ -269,7 +269,7 @@ test('a config that will not write back is refused before anything moves @rule:l
         encoding: 'utf8',
         ...opts,
       });
-    cli(['init', '--commit', 'spec']);
+    cli(['blueprints', 'new', '--commit', 'spec']);
     const cfg = join(home, 'config.yml');
     // A key said twice: the parser collects the error and hands back a
     // document, and only stringifying it refuses.
@@ -284,7 +284,7 @@ test('a config that will not write back is refused before anything moves @rule:l
     const dest = join(root, 'elsewhere', 'runs');
     let out;
     try {
-      cli(['move', 'runs', '--to', dest]);
+      cli(['records', 'move', 'runs', '--to', dest]);
       assert.fail('a move that cannot be written down must be refused');
     } catch (e) {
       out = `${e.stdout ?? ''}${e.stderr ?? ''}`;
@@ -314,7 +314,7 @@ test('a move that cannot be recorded is refused before anything moves @rule:loca
     const dest = join(p.root, 'elsewhere', 'runs');
     let out;
     try {
-      run(p, ['move', 'runs', '--to', dest, '--blueprint', id]);
+      run(p, ['records', 'move', 'runs', '--to', dest, '--blueprint', id]);
       assert.fail('a move that cannot be written down must be refused');
     } catch (e) {
       out = `${e.stdout ?? ''}${e.stderr ?? ''}`;
@@ -343,6 +343,7 @@ test('a destination parent running through a file is refused in words @rule:loca
     let out;
     try {
       run(p, [
+        'records',
         'move',
         'runs',
         '--to',
@@ -378,7 +379,7 @@ test('a destination that is a link is refused, naming what it points at @rule:lo
 
     let out;
     try {
-      run(p, ['move', 'runs', '--to', link, '--blueprint', declareProject(p.home, p.bp, 'movable')]);
+      run(p, ['records', 'move', 'runs', '--to', link, '--blueprint', declareProject(p.home, p.bp, 'movable')]);
       assert.fail('should have been refused');
     } catch (e) {
       out = `${e.stdout ?? ''}${e.stderr ?? ''}`;

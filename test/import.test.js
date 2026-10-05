@@ -79,7 +79,7 @@ test('a project nobody imported is invisible, and importing it makes it reachabl
     const before = walkdown(s.home, ['blueprints'], s.root);
     assert.doesNotMatch(before.stdout, /checkout/);
 
-    walkdown(s.home, ['import', shop, '--all'], s.root);
+    walkdown(s.home, ['blueprints', 'import', shop, '--all'], s.root);
     const after = walkdown(s.home, ['blueprints'], s.root);
     assert.match(after.stdout, /checkout/);
 
@@ -102,7 +102,7 @@ test('import writes the claims index, so routing never loads a spec @rule:screen
     const shop = project(join(s.root, 'acme-shop'), [
       { id: 'checkout', description: 'Cart.', origin: 'https://shop.test', paths: ['/cart', '/'] },
     ]);
-    walkdown(s.home, ['import', shop, '--all'], s.root);
+    walkdown(s.home, ['blueprints', 'import', shop, '--all'], s.root);
 
     // Under cache/: derived from the registry, rebuilt on demand (ADR 0003 §7).
     const index = JSON.parse(readFileSync(join(s.home, 'cache', 'claims.json'), 'utf8'));
@@ -128,14 +128,14 @@ test('a project declaring several asks which, and takes nothing unasked', () => 
     ]);
     // Not a terminal, and nobody said which: it shows the list and stops
     // rather than helping itself to both.
-    const asked = walkdown(s.home, ['import', shop], s.root, false);
+    const asked = walkdown(s.home, ['blueprints', 'import', shop], s.root, false);
     assert.equal(asked.status, 2);
     assert.match(asked.stdout + asked.stderr, /checkout/);
     assert.match(asked.stdout + asked.stderr, /admin/);
     assert.match(asked.stderr, /--all|--only/);
     assert.ok(!existsSync(join(s.home, 'registry.yml')), 'nothing registered');
 
-    walkdown(s.home, ['import', shop, '--only', 'admin'], s.root);
+    walkdown(s.home, ['blueprints', 'import', shop, '--only', 'admin'], s.root);
     const reg = parse(readFileSync(join(s.home, 'registry.yml'), 'utf8'));
     assert.deepEqual(reg.blueprints.map((p) => p.id), ['admin'], 'only what was asked for');
   } finally {
@@ -152,11 +152,11 @@ test('importing twice is a no-op, and two projects sharing a name are told apart
     const other = project(join(s.root, 'acme-marketing'), [
       { id: 'checkout', description: 'A different checkout entirely.', origin: 'https://acme.test', paths: ['/buy'] },
     ]);
-    walkdown(s.home, ['import', shop, '--all'], s.root);
-    const again = walkdown(s.home, ['import', shop, '--all'], s.root);
+    walkdown(s.home, ['blueprints', 'import', shop, '--all'], s.root);
+    const again = walkdown(s.home, ['blueprints', 'import', shop, '--all'], s.root);
     assert.match(again.stdout, /already imported/);
 
-    walkdown(s.home, ['import', other, '--all'], s.root);
+    walkdown(s.home, ['blueprints', 'import', other, '--all'], s.root);
     const reg = parse(readFileSync(join(s.home, 'registry.yml'), 'utf8'));
     // The project's directory disambiguates before a number does: a name that
     // says where it came from beats `checkout-2`, which says nothing.
@@ -171,10 +171,10 @@ test('a directory declaring nothing is refused, and says how to start one', () =
   try {
     const bare = join(s.root, 'not-a-project');
     mkdirSync(bare, { recursive: true });
-    const r = walkdown(s.home, ['import', bare], s.root, false);
+    const r = walkdown(s.home, ['blueprints', 'import', bare], s.root, false);
     assert.equal(r.status, 2);
     assert.match(r.stderr, /declares a blueprint/);
-    assert.match(r.stderr, /walkdown init/);
+    assert.match(r.stderr, /walkdown blueprints new/);
   } finally {
     s.cleanup();
   }
@@ -194,8 +194,8 @@ test('the server routes across imported projects, and answers with all of them @
     const marketing = project(join(s.root, 'acme-marketing'), [
       { id: 'campaigns', description: 'Landing pages.', origin: 'https://shop.test', paths: ['/'] },
     ]);
-    walkdown(s.home, ['import', shop, '--all'], s.root);
-    walkdown(s.home, ['import', marketing, '--all'], s.root);
+    walkdown(s.home, ['blueprints', 'import', shop, '--all'], s.root);
+    walkdown(s.home, ['blueprints', 'import', marketing, '--all'], s.root);
 
     process.env.WALKDOWN_HOME = s.home;
     const { createWalkdownServer } = await import('../lib/serve.js');
@@ -250,7 +250,7 @@ test('a bare home imports as one row, and --ephemeral marks it a copy', () => {
     const copy = join(s.root, 'scratch', '0001-checkout');
     cpSync(join(shop, '.walkdown', 'blueprints', '0001-checkout'), copy, { recursive: true });
 
-    const said = walkdown(s.home, ['import', copy, '--ephemeral', '--why', 'a look'], s.root);
+    const said = walkdown(s.home, ['blueprints', 'import', copy, '--ephemeral', '--why', 'a look'], s.root);
     assert.match(said.stdout, /listed/);
     const reg = parse(readFileSync(join(s.home, 'registry.yml'), 'utf8'));
     const row = reg.blueprints.find((p) => p.ephemeral);
@@ -266,7 +266,7 @@ test('a bare home imports as one row, and --ephemeral marks it a copy', () => {
     assert.match(where, /the registry — names this project, registered by import/);
 
     // And asked again, it is the same row.
-    const again = walkdown(s.home, ['import', copy, '--ephemeral', '--why', 'a look'], s.root);
+    const again = walkdown(s.home, ['blueprints', 'import', copy, '--ephemeral', '--why', 'a look'], s.root);
     assert.match(again.stdout, /already listed/);
   } finally {
     s.cleanup();
@@ -280,10 +280,10 @@ test('a project imported twice under two spellings of its path is one row', () =
       { id: 'checkout', description: 'Cart.', origin: 'https://shop.test', paths: ['/cart'] },
     ]);
     symlinkSync(shop, join(s.root, 'shop-link'));
-    walkdown(s.home, ['import', shop, '--all'], s.root);
+    walkdown(s.home, ['blueprints', 'import', shop, '--all'], s.root);
     // Through the link: the same directory, canonicalised at add time (ADR
     // 0003 §3), so it is already there rather than registered a second time.
-    const again = walkdown(s.home, ['import', join(s.root, 'shop-link'), '--all'], s.root);
+    const again = walkdown(s.home, ['blueprints', 'import', join(s.root, 'shop-link'), '--all'], s.root);
     assert.match(again.stdout, /already imported/);
     const reg = parse(readFileSync(join(s.home, 'registry.yml'), 'utf8'));
     assert.equal(reg.blueprints.length, 1);

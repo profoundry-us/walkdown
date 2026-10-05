@@ -51,3 +51,120 @@ screens:
       - cli.prompt
       - cli.refusal
       - cli.exit
+
+  - id: help
+    title: walkdown help, grouped by noun
+    prototype: null
+    app: { path: /as-built/cli/help.html }
+    anchors:
+      - cli.prompt
+      - cli.help.intro
+      - cli.help.ready
+      - cli.help.blueprints
+      - cli.help.records
+      - cli.help.threads
+      - cli.help.verdicts
+      - cli.help.panel
+      - cli.exit
+
+  - id: help-one-noun
+    title: One noun's verbs
+    prototype: null
+    app: { path: /as-built/cli/help-one-noun.html }
+    anchors:
+      - cli.prompt
+      - cli.noun.usage
+      - cli.noun.verbs
+      - cli.noun.bare
+      - cli.exit
+
+  - id: old-form-refused
+    title: An old form, refused with the new one
+    prototype: null
+    app: { path: /as-built/cli/old-form-refused.html }
+    anchors:
+      - cli.prompt
+      - cli.old.refusal
+      - cli.old.new-form
+      - cli.old.unchanged
+      - cli.exit
+
+  - id: init-fresh-machine
+    title: init on a fresh machine
+    prototype: null
+    app: { path: /as-built/cli/init-fresh-machine.html }
+    anchors:
+      - cli.prompt
+      - cli.init.home
+      - cli.init.you
+      - cli.init.skills
+      - cli.init.needs
+      - cli.init.next
+      - cli.exit
+
+  - id: init-again
+    title: init run again
+    prototype: null
+    app: { path: /as-built/cli/init-again.html }
+    anchors:
+      - cli.prompt
+      - cli.init.home
+      - cli.init.you
+      - cli.init.skills
+      - cli.init.needs
+      - cli.init.next
+      - cli.exit
+
+  - id: init-missing-git
+    title: init where git is missing
+    prototype: null
+    app: { path: /as-built/cli/init-missing-git.html }
+    anchors:
+      - cli.prompt
+      - cli.init.home
+      - cli.init.needs
+      - cli.init.next
+      - cli.exit
+
+  - id: blueprints-new
+    title: blueprints new in a project
+    prototype: null
+    app: { path: /as-built/cli/blueprints-new.html }
+    anchors:
+      - cli.prompt
+      - cli.new.created
+      - cli.new.spec
+      - cli.new.where
+      - cli.new.next
+      - cli.exit
+
+  - id: blueprints-rename
+    title: blueprints rename
+    prototype: null
+    app: { path: /as-built/cli/blueprints-rename.html }
+    anchors:
+      - cli.prompt
+      - cli.rename.changes
+      - cli.rename.done
+      - cli.exit
+
+  - id: threads-show
+    title: threads show
+    prototype: null
+    app: { path: /as-built/cli/threads-show.html }
+    anchors:
+      - cli.prompt
+      - cli.thread.head
+      - cli.thread.anchor
+      - cli.thread.body
+      - cli.exit
+
+  - id: threads-set-refused
+    title: threads set refused by the lifecycle
+    prototype: null
+    app: { path: /as-built/cli/threads-set-refused.html }
+    anchors:
+      - cli.prompt
+      - cli.refusal
+      - cli.unchanged
+      - cli.exit

@@ -27,6 +27,7 @@ import { loadBlueprint } from '../lib/blueprint.js';
 import { createWalkdownServer } from '../lib/serve.js';
 import * as writes from '../lib/writes.js';
 
+import { newFormOf } from '../bin/commands/old-forms.js';
 const CLI = new URL('../bin/walkdown.js', import.meta.url).pathname;
 const roots = [];
 after(() => {
@@ -130,7 +131,8 @@ const doors = {
 
 function run(args, home) {
   try {
-    execFileSync(process.execPath, [CLI, 'thread', ...args], {
+    // Written as `thread` asks; each runs as the threads verb that replaced it (ADR 0012).
+    execFileSync(process.execPath, [CLI, ...newFormOf(['thread', ...args])], {
       encoding: 'utf8',
       env: { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: home },
     });

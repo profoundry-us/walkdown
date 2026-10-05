@@ -48,7 +48,7 @@ stories:
       - id: ownership.design.request-on-a-screen
         origin: walkdown
         created_at: 2026-10-01
-        statement: A design request can be filed on a screen alone, with `walkdown thread new --screen <id>`. A thread filed on a screen with no rule is a design request unless a `--reason` says otherwise.
+        statement: A design request can be filed on a screen alone, with `walkdown threads new --screen <id>`. A thread filed on a screen with no rule is a design request unless a `--reason` says otherwise.
         because: The screen that most needs a request is one that design has not drawn, and it often has no rule yet to anchor to.
         history: AGENTS.md told agents to file a design request anchored to the screen while `walkdown thread new` refused any thread without `--rule` (found 2026-09-29, deferred until ADR 0009 was decided).
         verify: [checks]
@@ -57,13 +57,17 @@ stories:
           given:
             - "A screen with `prototype: null` and no rule naming it"
           when:
-            - "`walkdown thread new --screen <id> --body <text>` is run"
+            - "`walkdown threads new --screen <id> --body <text>` is run"
           then:
             - It is filed anchored to the screen, with no rule, and with the reason "request"
             - It satisfies ownership.drift.design-requests-required for that screen
             - Given `--reason <reason>`, the thread carries that reason
             - With neither `--rule` nor `--screen`, it is refused, and the refusal says to name one
-          statement_hash: sha256:f073f61e1435
+          statement_hash: sha256:d92cdf580877
+          reworded:
+            - hash: sha256:f073f61e1435
+              at: 2026-10-05T02:28:57Z
+              why: ADR 0012 renamed the commands it quotes; what it asks of the build is unchanged
 
   - id: ownership.authoring
     title: A rule is written so it can be built from

@@ -1,6 +1,6 @@
 /*
- * `walkdown blueprint forget`, `walkdown blueprints`, and the bare-home half
- * of `walkdown import` (`add`, called from import.js).
+ * `walkdown blueprints forget`, `walkdown blueprints list`, and the bare-home
+ * half of `walkdown blueprints import` (`add`, called from import.js).
  *
  * It was `walkdown project` until ADR 0001, which is exactly the confusion
  * that ADR is about: what this declares is a BLUEPRINT - a specification with
@@ -50,10 +50,7 @@ import {
 import { dim, green, red, yellow } from '../../lib/report/tty.js';
 import { end } from './context.js';
 
-const HELP = `walkdown blueprint forget <id>
-walkdown blueprints [--stale]
-
-(\`walkdown import <path>\` is how a blueprint joins the registry — a project, or one bare home.)`;
+const HELP = `walkdown blueprints import <path> [--id <name>] [--ephemeral] [--why <reason>]`;
 
 /** How old an ephemeral entry has to be before it is worth mentioning. */
 const STALE_DAYS = 2;
@@ -136,7 +133,7 @@ export function add(args) {
   if (!project && !values.ephemeral) {
     console.error(
       red(
-        `${homeDir} is not a numbered home under any project's .walkdown/blueprints/ — a registered blueprint lives in one (\`walkdown init\` lays one out, \`walkdown import <project>\` registers what a checkout declares). A copy standing elsewhere is listed with --ephemeral.`,
+        `${homeDir} is not a numbered home under any project's .walkdown/blueprints/ — a registered blueprint lives in one (\`walkdown init\` lays one out, \`walkdown blueprints import <project>\` registers what a checkout declares). A copy standing elsewhere is listed with --ephemeral.`,
       ),
     );
     return end(2);
@@ -177,10 +174,10 @@ export function add(args) {
   return end(0);
 }
 
-function forget(args) {
+export function forget(args) {
   const id = args[0];
   if (!id) {
-    console.error('walkdown blueprint forget needs a blueprint id.');
+    console.error('walkdown blueprints forget needs a blueprint id.');
     return end(2);
   }
   // The registry is the only door (ADR 0003): a row there is the whole
@@ -201,7 +198,7 @@ export function list(args) {
   const live = all.filter((p) => !p?.ephemeral);
   const scratch = all.filter((p) => p?.ephemeral);
   if (!all.length) {
-    console.log(dim('No blueprints. `walkdown init` starts one, `walkdown import <project>` registers one.'));
+    console.log(dim('No blueprints. `walkdown blueprints new` starts one, `walkdown blueprints import <project>` registers one.'));
     return end(0);
   }
   const row = (p, pad = '  ') => {
@@ -253,7 +250,7 @@ export function list(args) {
     console.log(
       dim(
         '    Left standing, and not guessed at — walkdown will not decide which checkout\n' +
-          '    they belong to. `walkdown import <home>` registers one if you know.',
+          '    they belong to. `walkdown blueprints import <home>` registers one if you know.',
       ),
     );
   }
@@ -269,23 +266,4 @@ export function list(args) {
     }
   }
   return end(0);
-}
-
-export function run(args) {
-  const [verb, ...rest] = args;
-  if (verb === 'forget') return forget(rest);
-  // ONE ADD (ADR 0003 §3): `import` takes a project or a bare home, and
-  // `blueprint add` was the second door to the same registry.
-  if (verb === 'add') {
-    console.error(red('`walkdown blueprint add` is `walkdown import <path>` now — one door into the registry.'));
-    console.error(HELP);
-    return end(2);
-  }
-  if (!verb) {
-    console.error(HELP);
-    return end(2);
-  }
-  console.error(`walkdown blueprint: no such action "${verb}".`);
-  console.error(HELP);
-  return end(2);
 }

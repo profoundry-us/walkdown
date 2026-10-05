@@ -47,7 +47,7 @@ function project({ commit = 'none' } = {}) {
   delete env.NODE_TEST_CONTEXT;
   const wd = (args, cwd = shop) => spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', env });
   for (const id of ['a', 'b']) {
-    const made = wd(['init', '--id', id, ...(commit === 'none' ? [] : ['--commit', commit])]);
+    const made = wd(['blueprints', 'new', id, ...(commit === 'none' ? [] : ['--commit', commit])]);
     assert.equal(made.status, 0, made.stderr);
   }
   const specOf = (id) => JSON.parse(wd(['where', '--blueprint', id, '--json']).stdout).spec.path;
@@ -153,7 +153,7 @@ test('the RSpec formatter files by rule too @rule:locations.several.results-file
 test('lint accepts a sibling blueprint\'s rule and thread, and still flags what no blueprint holds @rule:locations.several.lint-reads-the-project', () => {
   const p = project();
   // A rule of a's whose origin is a thread of b's.
-  const filed = p.wd(['thread', 'new', '--blueprint', 'b', '--rule', 'b.s.works', '--body', 'something seen', '--json']);
+  const filed = p.wd(['threads', 'new', '--blueprint', 'b', '--rule', 'b.s.works', '--body', 'something seen', '--json']);
   assert.equal(filed.status, 0, filed.stderr);
   const bThread = JSON.parse(filed.stdout).id;
   const fa = join(p.specOf('a'), 'features', 'a.yml');
@@ -175,7 +175,7 @@ test('lint accepts a sibling blueprint\'s rule and thread, and still flags what 
     join(p.homeOf('a'), 'runs', '2026-10-01T00-00-00Z-local-01.json'),
     JSON.stringify({ run_id: '2026-10-01T00-00-00Z-local-01', created: '2026-10-01T00:00:00Z', actor: 't', kind: 'checks', target: 'local', results: [{ rule: 'b.s.works', status: 'pass' }] }),
   );
-  const onScreen = p.wd(['thread', 'new', '--blueprint', 'a', '--rule', 'a.s.works', '--body', 'seen on the cart', '--json']);
+  const onScreen = p.wd(['threads', 'new', '--blueprint', 'a', '--rule', 'a.s.works', '--body', 'seen on the cart', '--json']);
   const sid = JSON.parse(onScreen.stdout).id;
   const tf = join(p.homeOf('a'), 'threads', `${sid}.yml`);
   writeFileSync(tf, readFileSync(tf, 'utf8').replace('  rule: a.s.works', '  rule: a.s.works\n  screen: cart'));
@@ -193,7 +193,7 @@ test('lint accepts a sibling blueprint\'s rule and thread, and still flags what 
 test('a new thread\'s id is unique across the project\'s blueprints @rule:locations.several.thread-ids-unique', () => {
   const p = project();
   const file = (bp, kind = 'note', extra = []) => {
-    const r = p.wd(['thread', 'new', '--blueprint', bp, '--rule', `${bp}.s.works`, '--body', 'seen', '--kind', kind, ...extra, '--json']);
+    const r = p.wd(['threads', 'new', '--blueprint', bp, '--rule', `${bp}.s.works`, '--body', 'seen', '--kind', kind, ...extra, '--json']);
     assert.equal(r.status, 0, r.stderr);
     return JSON.parse(r.stdout).id;
   };
@@ -225,7 +225,7 @@ test('the pointer names every blueprint, and says writes need --blueprint @rule:
 
   // b leaves the repository: the pointer stays, for a, and names b by id -
   // never by a path into one person's home.
-  const out = p.wd(['init', '--id', 'b', '--commit', 'none']);
+  const out = p.wd(['blueprints', 'new', 'b', '--commit', 'none']);
   assert.equal(out.status, 0, out.stderr);
   assert.match(block(), /- `a` in `\.walkdown\/blueprints\/0001-a\/blueprint\/`/);
   assert.match(block(), /- `b`, kept outside this repository - `walkdown where --blueprint b` finds it/);
@@ -243,7 +243,7 @@ test('a project with one blueprint keeps its one-line pointer and files every re
   delete env.NODE_TEST_CONTEXT;
   delete env.WALKDOWN_RECORD_HOME;
   delete env.WALKDOWN_SPEC;
-  assert.equal(spawnSync(process.execPath, [CLI, 'init', '--commit', 'spec'], { cwd: solo, env }).status, 0);
+  assert.equal(spawnSync(process.execPath, [CLI, 'blueprints', 'new', '--commit', 'spec'], { cwd: solo, env }).status, 0);
   assert.match(readFileSync(join(solo, 'CLAUDE.md'), 'utf8'), /This project's spec is the walkdown blueprint in `\.walkdown\/blueprints\/0001-solo\/blueprint\/`\./);
 
   writeFileSync(join(solo, 'x.test.js'), `import { test } from 'node:test';\ntest('t ${tag('not.in.this.blueprint')}', () => {});\n`);

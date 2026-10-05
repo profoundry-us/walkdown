@@ -19,7 +19,7 @@ notes), and the runs ledger. The blueprint is the single source of truth for
   so staleness detection keeps working - with `--reword "<why>"` when only
   the words changed, so the verdicts stay current.
 - If a rule is ambiguous, do not guess. File a question thread anchored to the
-  rule/screen/element (`walkdown thread new --kind question --rule <id>
+  rule/screen/element (`walkdown threads new --kind question --rule <id>
   --body <text>`, or `POST /api/threads` via `walkdown serve`) and say what
   you assumed if you proceed.
 - Anything that needs a person's DECISION is a question, never a note. A note
@@ -31,7 +31,7 @@ notes), and the runs ledger. The blueprint is the single source of truth for
   several questions. When the ways out are known, offer them as choices -
   `--option "Retire it :: which-project asks the same thing"`, two to six -
   and the answer names one (`chosen`) or says something else; a question
-  already asked takes them once, while open (`walkdown thread <id> --option`). A person's
+  already asked takes them once, while open (`walkdown threads set <id> --option`). A person's
   own words relayed with `--said` are a note, never a question: the person
   is not asking themselves.
 
@@ -40,7 +40,7 @@ notes), and the runs ledger. The blueprint is the single source of truth for
 - **Never edit `prototype/`** — design owns it. If the spec needs a screen that
   design hasn't drawn: set `prototype: null` on the storyboard screen, put a
   sketch under `proposals/` if a picture helps, and file a design request
-  on the screen (`walkdown thread new --screen <id> --body <text>`). Lint
+  on the screen (`walkdown threads new --screen <id> --body <text>`). Lint
   enforces this routing. Design work goes through a request, and a request
   is for design, not for you: it waits in the DESIGN QUEUE, never in yours,
   even where the blueprint's `design.by` is `agent` - that is a different
@@ -188,8 +188,9 @@ rather than adding to it.
 - Work your queue: `address` open notes; `incorporate` answered questions —
   fold the answer into the rule's statement/steps, then mark the thread;
   `settled` an observation once the change is named.
-- Mutate threads only through `walkdown thread <id> --as-agent
-  --reply "..." --status <s>` — never raw YAML edits — so transitions stay
+- Mutate threads only through `walkdown threads reply <id> "..." --as-agent`
+  and `walkdown threads set <id> --status <s> --as-agent` — never raw YAML
+  edits — so transitions stay
   validated. Attribution follows the words: `--reply` is your own words and
   records as `agent`. When you relay what the person said — in a chat, in a
   message to you — carry it with `--said "<their words, as typed>"` and put
@@ -212,14 +213,14 @@ rather than adding to it.
     walkdown hash --write           re-stamp statement hashes
     walkdown run [--target] [--rule]  run checks, record the run
     walkdown threads [--rule <id>]  active questions & notes
-    walkdown thread <id> [...]      view / reply / transition
+    walkdown threads show|reply|set <id>   view / reply / transition
     walkdown serve                  panel + embed + pin/walkdown APIs, for every
                                     registered blueprint; start it anywhere, once
 
-A project can hold several blueprints (`walkdown init --id <name>` adds one).
+A project can hold several blueprints (`walkdown blueprints new <name>` adds one).
 Then `status`, `lint`, `threads` and `where` report on each, under its id, and
-every command that writes - `run`, `hash --write`, `thread new`, `judge`,
-`sweep`, `move` - needs `--blueprint <id>`. `walkdown where` lists the ids.
+every command that writes - `run`, `hash --write`, `threads new`, `judge`,
+`sweep`, `records move` - needs `--blueprint <id>`. `walkdown where` lists the ids.
 
 ## Procedures
 

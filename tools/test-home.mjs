@@ -140,7 +140,7 @@ export function declaredHome(root, id = 'fixture') {
   doc.blueprints = listed;
   writeFileSync(path, stringify(doc));
   /*
-   * And registered, the way `walkdown import <root>` would: the manifest
+   * And registered, the way `walkdown blueprints import <root>` would: the manifest
    * above is what a checkout declares, and the registry is the only door
    * a reader goes through (ADR 0003). This process's home is its own, so
    * the row races with nobody.

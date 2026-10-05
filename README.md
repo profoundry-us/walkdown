@@ -66,8 +66,8 @@ one dependency ([`vendor/yaml.js`](vendor/README.md)) are all committed; rollup,
 and playwright are build-time only. Then:
 
 ```
-walkdown skills --into ~/.claude/skills   # links the walkdown plugin; init also does
-walkdown init --dir <your-project>   # spec, ledger and pointer — outside your repo by default
+walkdown init                                  # this machine: home, registry, you, the skills
+walkdown blueprints new --dir <your-project>   # a spec and its ledger — outside your repo by default
 ```
 
 Or hand the whole thing to an agent: **"visit https://walkdown.dev/setup and set walkdown
@@ -77,10 +77,13 @@ the reasoning, including what it would take to remove the last package.
 
 ## CLI
 
-The first tooling slice — the two commands the hand-run milestone showed matter most:
+A command is a noun and then a verb; the noun alone lists, and `walkdown <noun> help`
+lists its verbs ([ADR 0012](docs/adr/foundational/202610_cli_command_structure.md)).
+`walkdown help` has them all. The ones you reach for first:
 
 ```
-walkdown init [--dir <project-root>] [--commit none|spec|all]
+walkdown init [--force]
+walkdown blueprints new [<id>] [--dir <project-root>] [--commit none|spec|all]
 walkdown skills [--into <dir>] [--project] [--force]
 walkdown where [<kind>] [--blueprint <id>] [--json]
 walkdown pointer [--dir <project-root>] [--into <file>]
@@ -89,14 +92,14 @@ walkdown status [<rule-id>] [--blueprint <id>] [--target <name>] [--json]
 walkdown lint [--blueprint <id>] [--no-checks] [--json]
 walkdown hash [--blueprint <id>] [--write]
 walkdown threads [--rule <id>] [--all] [--json]
-walkdown thread <id> [--json]
+walkdown threads show <id> [--json]
 ```
 
-`init` scaffolds `blueprint/` in a project — config and storyboard templates, a
+`blueprints new` scaffolds `blueprint/` for a project — config and storyboard templates, a
 feature template, and **`blueprint/AGENTS.md`**: the conventions any AI agent working
 in the repo follows (read the blueprint first, carry anchors, tag checks with rule
-ids, work the agent queue, claim-never-accept, never touch `prototype/`), with a
-pointer added to CLAUDE.md. It also links the clone into Claude Code as the
+ids, work the agent queue, claim-never-accept, never touch `prototype/`);
+`walkdown pointer --into CLAUDE.md` tells agents where it is. `init` links the clone into Claude Code as the
 **`walkdown` plugin** (`~/.claude/skills/walkdown`, one link, so updating the
 clone updates it): `/walkdown:judge` (the agent-walkdown ritual — evidence
 screenshots, judgment, run record, fail threads), `/walkdown:incorporate` (fold
@@ -108,8 +111,8 @@ contract — `run_all`, or `run_for_rule` with `--rule` — injecting the target
 and `WALKDOWN_TARGET`, and confirms which run record the reporter appended.
 
 `threads` lists active questions and notes (newest first, with anchors and a body
-preview); `--all` includes resolved ones. `thread <id>` shows one in full — anchor,
-body, and replies. The status table shows at most two thread refs per rule and
+preview); `--all` includes resolved ones. `threads show <id>` shows one in full — anchor,
+body, and replies; `threads reply` and `threads set` answer and move one. The status table shows at most two thread refs per rule and
 truncates with `+N`; `threads --rule <id>` is the full list.
 
 `status` renders the derived per-rule verification table straight from the runs ledger:
@@ -184,8 +187,8 @@ runs is picked up without a restart.
   and Mark incorporated for questions). Transitions are validated server-side; `verified`
   and `waived` require a named human — agents claim work (`addressed`), never accept it.
   The same mutations are available from the terminal:
-  `walkdown thread n-0002 --as-agent --reply "fixed in run …" --status addressed`,
-  then `walkdown thread n-0002 --verify` as yourself. Who a mutation records under is
+  `walkdown threads reply n-0002 --as-agent "fixed in run …" --status addressed`,
+  then `walkdown threads set n-0002 --verify` as yourself. Who a mutation records under is
   never an argument — it is the `identity:` in your `~/.walkdown/config.yml`. An agent
   working for you records under *your* name, because it is your instruction; `--as-agent`
   adds the provenance beside it, and refuses `verified` and `waived` outright.

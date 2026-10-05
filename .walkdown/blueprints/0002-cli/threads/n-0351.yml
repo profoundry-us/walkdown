@@ -1,0 +1,17 @@
+id: n-0351
+kind: note
+reason: request
+author: topher
+via: agent
+created: 2026-10-05T02:27:27.786Z
+anchor:
+  screen: threads-show
+status: open
+body: ADR 0012 accepted, rules approved, build it
+added: "Draw what `walkdown threads show n-0001` prints
+  (commands.threads.one-verb-per-change): the thread's id, kind and status, its
+  anchor, who wrote it and when, and the body. Anchors: cli.prompt,
+  cli.thread.head, cli.thread.anchor, cli.thread.body, cli.exit. The frame is
+  the terminal frame tools/cli-captures.mjs --frame prints, so the design and
+  the as-built line up under the fade; /as-built/cli/threads-show.html shows
+  what the build prints today."

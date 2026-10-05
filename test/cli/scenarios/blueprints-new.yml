@@ -1,0 +1,16 @@
+# `walkdown blueprints new` in a project with no blueprint yet.
+screen: blueprints-new
+title: blueprints new makes a project's first blueprint
+rule: commands.blueprints.new-makes-one
+command: [blueprints, new]
+exit: 0
+expect:
+  - '^  \+ created  ~/\.walkdown/blueprints/0001-shop/blueprint/walkdown\.yml$'
+  - '^  \+ listed   ~/\.walkdown/registry\.yml  as `shop`$'
+  - 'Nothing was added to this repository'
+  - '`walkdown blueprints commit spec` moves the home into the repository'
+anchors:
+  - { id: cli.new.created, match: '^  \+ (created|listed)' }
+  - { id: cli.new.spec, match: '^  spec:' }
+  - { id: cli.new.where, match: '^  (In ~/\.walkdown|Prefer it committed)' }
+  - { id: cli.new.next, match: '^(Next:|first feature|`walkdown where`)' }

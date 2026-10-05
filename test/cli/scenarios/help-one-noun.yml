@@ -1,0 +1,16 @@
+# `walkdown threads help`: one noun's verbs, each with its usage.
+screen: help-one-noun
+title: A noun's help lists its verbs
+rule: commands.shape.help-by-noun
+command: [threads, help]
+exit: 0
+expect:
+  - '^Usage: walkdown threads <list\|new\|show\|reply\|set> \.\.\.$'
+  - '^  walkdown threads show <id>'
+  - '^  walkdown threads reply <id> <text>'
+  - '^  walkdown threads set <id> --status'
+  - '^The bare noun is `walkdown threads list`\.$'
+anchors:
+  - { id: cli.noun.usage, match: '^Usage:' }
+  - { id: cli.noun.verbs, match: '^\s+(walkdown threads|\S.*|\[)' }
+  - { id: cli.noun.bare, match: '^The bare noun' }

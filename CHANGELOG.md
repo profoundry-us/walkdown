@@ -11,10 +11,16 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
 
 ### Added
 
+- `walkdown blueprints rename <id> <new-id>` changes a blueprint's id in the registry,
+  its folder name (keeping the number), its `walkdown.yml`, the repository's
+  `.walkdown/config.yml` and the agent pointer. Rules, threads and runs are untouched.
+- `walkdown records list` says where each kind of record is kept.
+- A refused `walkdown threads set` says that nothing changed and that its reply did not
+  land.
 - A project can hold several blueprints
   ([ADR 0011](docs/adr/foundational/202610_several_blueprints_per_project.md),
   [#20](https://github.com/profoundry-us/walkdown/issues/20)).
-  `walkdown init --id <name>` gives a project that has a blueprint another one, in its
+  `walkdown blueprints new <name>` gives a project that has a blueprint another one, in its
   own numbered home, and says which blueprints the project already holds.
 - In a project with several blueprints, a recorded test run files each result in the
   blueprint that holds its rule: one record per blueprint, sharing a run id. A tag no
@@ -30,6 +36,30 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
   verdict reading as never.
 
 ### Changed
+
+- The command line is nouns and verbs
+  ([ADR 0012](docs/adr/foundational/202610_cli_command_structure.md)). A noun alone lists,
+  and `walkdown <noun> help` lists its verbs. `walkdown help` groups every command under
+  what it acts on. A retired form exits 2 and prints the form that replaced it, with its
+  arguments carried over; nothing runs. [UPGRADING.md](UPGRADING.md) has the full table.
+
+  | Was | Now |
+  |---|---|
+  | `walkdown init` (in a project) | `walkdown blueprints new [<id>]` |
+  | `walkdown init --id <name>` | `walkdown blueprints new <name>` |
+  | `walkdown init --commit <s>` | `walkdown blueprints commit <s>` |
+  | `walkdown import <path>` | `walkdown blueprints import <path>` |
+  | `walkdown blueprint forget <id>` | `walkdown blueprints forget <id>` |
+  | `walkdown move <kind> --to <path>` | `walkdown records move <kind> --to <path>` |
+  | `walkdown thread new …` | `walkdown threads new …` |
+  | `walkdown thread <id>` | `walkdown threads show <id>` |
+  | `walkdown thread <id> --reply <text>` | `walkdown threads reply <id> <text>` |
+  | `walkdown thread <id> --status <s> [--reply <text>]` | `walkdown threads set <id> --status <s> [--reply <text>]` |
+
+- `walkdown init` gets this machine ready and makes no blueprint: it creates
+  `~/.walkdown` and its registry, records who you are, installs the skills the way
+  `walkdown skills` does, and names anything walkdown needs that is missing (Node 20 or
+  later, git), exiting 1 if so. It writes nothing in a project and is safe to run again.
 
 - A new blueprint's `walkdown.yml` names no `runner.list`. Lint reads coverage from the
   rule tags in the files under `authoring.location`, which works for any framework and

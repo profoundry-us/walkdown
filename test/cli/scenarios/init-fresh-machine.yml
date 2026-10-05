@@ -1,0 +1,20 @@
+# `walkdown init` on the day walkdown is installed: no ~/.walkdown yet.
+screen: init-fresh-machine
+title: walkdown init gets a fresh machine ready
+rule: commands.init.this-machine-only
+fixture: fresh-machine
+command: [init]
+exit: 0
+expect:
+  - '^  \+ created  ~/\.walkdown$'
+  - '^  \+ created  ~/\.walkdown/registry\.yml$'
+  - '^  \+ you\s+~/\.walkdown/config\.yml  as `sam`$'
+  - '^  \+ linked\s+~/\.claude/skills/walkdown'
+  - '^  · git\s+'
+  - '^Ready\. In a project, `walkdown blueprints new` starts a spec\.$'
+anchors:
+  - { id: cli.init.home, match: '^  [+·] (created|up to date)  ~/\.walkdown' }
+  - { id: cli.init.you, match: '^  [+·?] you' }
+  - { id: cli.init.skills, match: '^  ([+·!~] |~/\.claude)|^  (Claude Code|Updating|Copies)' }
+  - { id: cli.init.needs, match: '^  [·✗?] (node|git|claude)' }
+  - { id: cli.init.next, match: '^(Ready\.|  walkdown needs)' }

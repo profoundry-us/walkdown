@@ -217,7 +217,7 @@ test('the pointer names the blueprint relatively, from wherever the file sits @r
       env: { ...process.env, WALKDOWN_HOME: home, WALKDOWN_SKILLS_DIR: join(root, 'ps-skills') },
       encoding: 'utf8',
     });
-  cli(['init', '--commit', 'spec'], repo);
+  cli(['blueprints', 'new', '--commit', 'spec'], repo);
 
   cli(['pointer', '--into', 'AGENTS.md'], deep);
   const block = readFileSync(join(deep, 'AGENTS.md'), 'utf8');

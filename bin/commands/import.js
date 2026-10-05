@@ -1,5 +1,5 @@
 /*
- * `walkdown import <path>` — take a project's blueprints into this machine's
+ * `walkdown blueprints import <path>` — take a project's blueprints into this machine's
  * registry.
  *
  * WHY THIS IS NOT `project add` (ADR 0001). `add` lists a blueprint that lives
@@ -37,7 +37,7 @@ import { parse } from '../../vendor/yaml.js';
 import { add as addHome } from './blueprint.js';
 import { end } from './context.js';
 
-const HELP = `walkdown import <path> [--all] [--only <ids>] [--id <name>] [--ephemeral] [--why <reason>] [--json]
+const HELP = `walkdown blueprints import <path> [--all] [--only <ids>] [--id <name>] [--ephemeral] [--why <reason>] [--json]
 
   <path>       a project directory holding a .walkdown that declares blueprints,
                or one bare home (blueprint/ with threads, runs, evidence, drafts beside it)
@@ -109,7 +109,7 @@ export async function run(args) {
   });
   const at = positionals[0];
   if (!at) {
-    console.error('walkdown import needs a path to a project.');
+    console.error('walkdown blueprints import needs a path to a project.');
     console.error(HELP);
     return end(2);
   }
@@ -145,7 +145,7 @@ export async function run(args) {
     console.error(
       red(`Nothing at ${at} declares a blueprint — there is no .walkdown/config.yml there, and it is not a home.`),
     );
-    console.error(dim('  `walkdown init` inside that project starts one.'));
+    console.error(dim('  `walkdown blueprints new` inside that project starts one.'));
     return end(2);
   }
   if (!found.length) {

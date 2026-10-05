@@ -39,43 +39,43 @@ function machine() {
 /* A project holding `proj` and `b`, each with one rule and one thread. */
 function twoBlueprints() {
   const m = machine();
-  assert.equal(m.wd(['init']).status, 0);
-  assert.equal(m.wd(['init', '--id', 'b']).status, 0);
+  assert.equal(m.wd(['blueprints', 'new']).status, 0);
+  assert.equal(m.wd(['blueprints', 'new', 'b']).status, 0);
   return m;
 }
 
 
 test('init --id gives a project a second blueprint in its own numbered folder, and again changes nothing @rule:locations.several.init-makes-another', () => {
   const m = machine();
-  assert.equal(m.wd(['init']).status, 0);
+  assert.equal(m.wd(['blueprints', 'new']).status, 0);
   assert.deepEqual(m.homes(), ['0001-proj']);
 
-  const first = m.wd(['init', '--id', 'b']);
+  const first = m.wd(['blueprints', 'new', 'b']);
   assert.equal(first.status, 0, first.stderr);
   assert.deepEqual(m.homes(), ['0001-proj', '0002-b'], 'a new numbered home for b');
   assert.match(first.stdout, /`b` is another blueprint for this project, beside `proj`/);
 
-  const again = m.wd(['init', '--id', 'b']);
+  const again = m.wd(['blueprints', 'new', 'b']);
   assert.equal(again.status, 0, again.stderr);
   assert.doesNotMatch(again.stdout, /created|another/, 'everything up to date');
   assert.deepEqual(m.homes(), ['0001-proj', '0002-b']);
 
   // No --id means the id init would give the project anyway: proj.
-  const bare = m.wd(['init']);
+  const bare = m.wd(['blueprints', 'new']);
   assert.equal(bare.status, 0, bare.stderr);
   assert.doesNotMatch(bare.stdout, /created/);
   assert.deepEqual(m.homes(), ['0001-proj', '0002-b']);
 
   // --commit with several needs --id.
-  const commit = m.wd(['init', '--commit', 'spec']);
+  const commit = m.wd(['blueprints', 'new', '--commit', 'spec']);
   assert.equal(commit.status, 2);
-  assert.match(commit.stderr, /several blueprints \(proj, b\).*--commit/s);
-  assert.match(commit.stderr, /--id <id>/);
+  assert.match(commit.stderr, /several blueprints \(proj, b\).*blueprints commit/s);
+  assert.match(commit.stderr, /--blueprint <id>/);
 
   // An id another project holds is refused, not suffixed.
   const other = join(m.root, 'other');
   mkdirSync(join(other, '.git'), { recursive: true });
-  const taken = m.wd(['init', '--id', 'b'], other);
+  const taken = m.wd(['blueprints', 'new', 'b'], other);
   assert.equal(taken.status, 2);
   assert.match(taken.stderr, /`b` is already registered for .*proj — choose another id/);
   assert.deepEqual(m.homes(), ['0001-proj', '0002-b'], 'and nothing claimed');
@@ -97,9 +97,9 @@ test('init --id gives a project a second blueprint in its own numbered folder, a
 
 test('bare init refuses where several blueprints stand and none has the default id @rule:locations.several.init-makes-another', () => {
   const m = machine();
-  assert.equal(m.wd(['init', '--id', 'a']).status, 0);
-  assert.equal(m.wd(['init', '--id', 'b']).status, 0);
-  const bare = m.wd(['init']);
+  assert.equal(m.wd(['blueprints', 'new', 'a']).status, 0);
+  assert.equal(m.wd(['blueprints', 'new', 'b']).status, 0);
+  const bare = m.wd(['blueprints', 'new']);
   assert.equal(bare.status, 2);
   assert.match(bare.stderr, /several blueprints \(a, b\) and none is `proj`/);
   assert.deepEqual(m.homes(), ['0001-a', '0002-b']);
@@ -107,17 +107,17 @@ test('bare init refuses where several blueprints stand and none has the default 
 
 test('a second blueprint committed beside the first leaves the .gitignore they share as it is @rule:locations.several.init-makes-another', () => {
   const m = machine();
-  assert.equal(m.wd(['init', '--id', 'a', '--commit', 'spec']).status, 0);
+  assert.equal(m.wd(['blueprints', 'new', 'a', '--commit', 'spec']).status, 0);
   const ignore = join(m.proj, '.walkdown', '.gitignore');
   const theirs = `${readFileSync(ignore, 'utf8')}# and ours\n`;
   writeFileSync(ignore, theirs);
-  const all = m.wd(['init', '--id', 'b', '--commit', 'all']);
+  const all = m.wd(['blueprints', 'new', 'b', '--commit', 'all']);
   assert.equal(all.status, 0, all.stderr);
   assert.equal(readFileSync(ignore, 'utf8'), theirs, 'not deleted for b');
   assert.match(all.stdout, /kept \(it rules 0001-a too/);
   assert.match(all.stdout, /by the \.gitignore already under \.walkdown\//);
   assert.doesNotMatch(all.stdout, /no \.gitignore under \.walkdown/);
-  const forced = m.wd(['init', '--id', 'b', '--commit', 'all', '--force']);
+  const forced = m.wd(['blueprints', 'new', 'b', '--commit', 'all', '--force']);
   assert.equal(forced.status, 0, forced.stderr);
   assert.equal(existsSync(ignore), false, '--force changes it for every one');
 });
@@ -150,7 +150,7 @@ test('reads report on every blueprint, each under its id, and on one when named 
 
 test('a project with one blueprint prints what it printed before @rule:locations.several.reads-cover-all', () => {
   const m = machine();
-  assert.equal(m.wd(['init']).status, 0);
+  assert.equal(m.wd(['blueprints', 'new']).status, 0);
   for (const cmd of [['status'], ['lint'], ['threads'], ['where']]) {
     const r = m.wd(cmd);
     assert.equal(r.status, 0);
@@ -166,10 +166,10 @@ test('writes refuse until --blueprint names one, and the refusal lists the ids @
   // result by rule (several-project.test.js).
   const writes = [
     ['hash', '--write'],
-    ['thread', 'new', '--screen', 'x', '--body', 'hello'],
+    ['threads', 'new', '--screen', 'x', '--body', 'hello'],
     ['judge', 'some.rule'],
     ['sweep', '--why', 'because'],
-    ['move', 'evidence', '--to', join(m.root, 'elsewhere')],
+    ['records', 'move', 'evidence', '--to', join(m.root, 'elsewhere')],
   ];
   for (const cmd of writes) {
     const r = m.wd(cmd);
@@ -180,7 +180,7 @@ test('writes refuse until --blueprint names one, and the refusal lists the ids @
   }
 
   // With --blueprint b, a write acts on b alone.
-  const filed = m.wd(['thread', 'new', '--blueprint', 'b', '--rule', 'x', '--body', 'hi']);
+  const filed = m.wd(['threads', 'new', '--blueprint', 'b', '--rule', 'x', '--body', 'hi']);
   assert.equal(filed.status, 2, 'b has no rule x - refused by b, not by the several');
   assert.match(filed.stderr, /No rule "x"/);
   const sweep = m.wd(['sweep', '--blueprint', 'b', '--why', 'because', '--tiers', 'agent']);
@@ -195,13 +195,13 @@ test('a thread id only one blueprint holds is changed without --blueprint @rule:
   // A design request on a screen of b's own.
   const sb = join(m.home, 'blueprints', '0002-b', 'blueprint', 'storyboard.yml');
   spawnSync('sh', ['-c', `printf 'screens:\\n  - id: home\\n    app: { path: /index.html }\\n' > "${sb}"`]);
-  const opened = m.wd(['thread', 'new', '--blueprint', 'b', '--screen', 'home', '--body', 'please draw this', '--json']);
+  const opened = m.wd(['threads', 'new', '--blueprint', 'b', '--screen', 'home', '--body', 'please draw this', '--json']);
   assert.equal(opened.status, 0, opened.stderr);
   const id = JSON.parse(opened.stdout).id;
 
-  const reply = m.wd(['thread', id, '--reply', 'on it']);
+  const reply = m.wd(['threads', 'reply', id, 'on it']);
   assert.equal(reply.status, 0, reply.stderr);
-  const shown = JSON.parse(m.wd(['thread', id, '--json']).stdout);
+  const shown = JSON.parse(m.wd(['threads', 'show', id, '--json']).stdout);
   assert.equal(shown.replies.at(-1).body, 'on it');
 });
 

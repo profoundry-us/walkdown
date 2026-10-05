@@ -1,0 +1,236 @@
+# The command line's shape (ADR 0012): a noun, then a verb, and the noun
+# alone lists. Each rule's screens are scenarios in test/cli/scenarios/.
+feature: commands
+stories:
+  - id: commands.shape
+    title: The command line reads as nouns and verbs
+    statement: As a person at a terminal, I can tell from the help what each command acts on.
+    rules:
+      - id: commands.shape.noun-then-verb
+        statement: "A command that acts on a kind of thing is that thing's plural noun followed by a verb, and the noun alone lists them."
+        because: "A person reading the help should see what each command acts on without knowing its history."
+        origin: walkdown
+        created_at: 2026-10-04
+        verify: [checks]
+        signoff: [eng, product]
+        screens: [help]
+        steps:
+          given:
+            - "Any machine with walkdown installed"
+          when:
+            - "`walkdown blueprints`, `walkdown threads` and `walkdown records` are run with no verb, then with `list`"
+          then:
+            - "Each bare noun prints what its `list` prints"
+            - "`blueprints` takes new, import, rename, commit and forget; `threads` takes new, show, reply and set; `records` takes move; `rules` takes move"
+            - "`status`, `lint`, `hash`, `run`, `judge`, `sweep`, `where`, `claims`, `serve`, `pointer` and `skills` keep their names"
+          statement_hash: sha256:0e1ac5bc5c43
+      - id: commands.shape.old-forms-say-the-new
+        statement: "A command in a form walkdown no longer takes exits with status 2 and prints the form that replaced it."
+        because: "A skill or a habit written for the old commands should fail where someone sees it, not do something else quietly."
+        origin: walkdown
+        created_at: 2026-10-04
+        verify: [checks]
+        signoff: [eng]
+        screens: [old-form-refused]
+        steps:
+          given:
+            - "Any machine with walkdown installed"
+          when:
+            - "`walkdown thread n-0001 --reply ok`, `walkdown move runs --to x`, `walkdown import .`, `walkdown blueprint forget a` and `walkdown init --id b` are run"
+          then:
+            - "Each exits with status 2 and changes nothing"
+            - "Each prints the new form with its arguments carried over, ready to copy, such as `walkdown threads reply n-0001 ok`"
+          statement_hash: sha256:1a91b698c42f
+      - id: commands.shape.help-by-noun
+        statement: "`walkdown help` groups the commands under what they act on, and `walkdown <noun> help` lists that noun's verbs."
+        because: "Nineteen commands in one list say nothing about which belong together."
+        origin: walkdown
+        created_at: 2026-10-04
+        verify: [checks]
+        signoff: [eng, product]
+        screens: [help, help-one-noun]
+        steps:
+          given:
+            - "Any machine with walkdown installed"
+          when:
+            - "`walkdown help` is run, then `walkdown threads help`"
+          then:
+            - "The help's groups are getting ready, blueprints, records, threads, rules and verdicts, and the panel, in that order"
+            - "`walkdown threads help` lists list, new, show, reply and set, each with its usage line"
+          statement_hash: sha256:db2770fb32c4
+
+  - id: commands.init
+    title: walkdown init gets this machine ready
+    statement: As a person installing walkdown, I set up my machine once, apart from any project.
+    rules:
+      - id: commands.init.this-machine-only
+        statement: "`walkdown init` gets walkdown ready on this machine, makes no blueprint, and changes nothing when run again."
+        because: "Setting up a machine and starting a spec are different decisions, made at different times, and one command doing both made each harder to explain."
+        origin: walkdown
+        created_at: 2026-10-04
+        verify: [checks]
+        signoff: [eng, product]
+        screens: [init-fresh-machine, init-again]
+        steps:
+          given:
+            - "A machine with no `~/.walkdown`, standing in a git project"
+          when:
+            - "`walkdown init` is run, then run again"
+          then:
+            - "The first creates `~/.walkdown`, its registry, and an identity in its config.yml if git knows one, and says what it created"
+            - "It registers no blueprint and writes nothing in the project"
+            - "The second reports everything already in place and creates nothing"
+            - "It ends by saying `walkdown blueprints new` starts a spec"
+          statement_hash: sha256:9551966dc330
+      - id: commands.init.one-skill-installer
+        statement: "`walkdown init` installs the skills by doing what `walkdown skills` does, with the same messages."
+        because: "Two installers drift apart, and a person who saw one set of messages should never meet another."
+        origin: walkdown
+        created_at: 2026-10-04
+        verify: [checks]
+        signoff: [eng]
+        steps:
+          given:
+            - "A machine with no walkdown skills installed"
+          when:
+            - "`walkdown init` is run, then `walkdown skills` on a second such machine"
+          then:
+            - "Both place the same links in the same place and print the same skill lines"
+          statement_hash: sha256:491cd8cc7d17
+      - id: commands.init.names-what-is-missing
+        statement: "`walkdown init` names anything walkdown needs that this machine lacks, says how to get it, and installs none of it itself."
+        because: "An install that fails later, deep inside another command, costs more than one that says up front what is missing."
+        origin: walkdown
+        created_at: 2026-10-04
+        verify: [checks]
+        signoff: [eng, product]
+        screens: [init-missing-git]
+        steps:
+          given:
+            - "A machine whose PATH has no git, or whose Node is older than 20"
+          when:
+            - "`walkdown init` is run"
+          then:
+            - "It names each missing thing and the version it needs, says how to get it, and exits with status 1"
+            - "It says whether Claude Code's skills folder exists, and does not fail when it does not"
+            - "What it could set up is still set up"
+          statement_hash: sha256:cd70779d9a55
+
+  - id: commands.blueprints
+    title: Blueprints are made, moved, renamed and forgotten under one noun
+    statement: As a person starting or reshaping a spec, every change to a blueprint is a blueprints command.
+    rules:
+      - id: commands.blueprints.new-makes-one
+        statement: "`walkdown blueprints new [<id>]` makes a blueprint for the project where it is run, with the id defaulting to the project directory's name, and running it again changes nothing."
+        because: "Starting a spec is its own decision, and it carries every rule a blueprint is made by today."
+        origin: walkdown
+        created_at: 2026-10-04
+        verify: [checks]
+        signoff: [eng, product]
+        screens: [blueprints-new, init-another]
+        steps:
+          given:
+            - "A git project `shop` with no blueprint, on a machine that has run `walkdown init`"
+          when:
+            - "`walkdown blueprints new` is run, then again, then `walkdown blueprints new search`"
+          then:
+            - "The first makes and registers `shop` in a numbered home outside the repository, and adds nothing to the repository"
+            - "The second reports everything up to date"
+            - "The third makes `search`, beside `shop`, and says commands that write now take `--blueprint`"
+            - "`--commit spec|all` and `--dir` act as they did on `init`"
+          statement_hash: sha256:68b77720e43d
+      - id: commands.blueprints.commit-moves-the-home
+        statement: "`walkdown blueprints commit <none|spec|all>` moves a blueprint's whole home into the repository or out of it, and with several blueprints it needs `--blueprint`."
+        because: "Whether a spec is committed is decided per blueprint, sometimes long after it was made."
+        origin: walkdown
+        created_at: 2026-10-04
+        verify: [checks]
+        signoff: [eng]
+        steps:
+          given:
+            - "A project with a blueprint kept outside the repository"
+          when:
+            - "`walkdown blueprints commit spec` is run, then `walkdown blueprints commit none`"
+          then:
+            - "The home moves into `.walkdown/` with the spec standard's ignore file, then back out, records and all"
+            - "A `.gitignore` other blueprints share is left as it is"
+          statement_hash: sha256:c5e229e499ef
+      - id: commands.blueprints.rename
+        statement: "`walkdown blueprints rename <id> <new-id>` changes a blueprint's id and leaves its rules, threads and runs as they were."
+        because: "An id chosen badly, by a person or an agent, should be put right without starting over."
+        origin: walkdown
+        created_at: 2026-10-04
+        verify: [checks]
+        signoff: [eng, product]
+        screens: [blueprints-rename]
+        steps:
+          given:
+            - "A project with blueprints `a` and `b`, b committed in the repository"
+          when:
+            - "`walkdown blueprints rename b search` is run, then `walkdown blueprints rename a search`, then `walkdown blueprints rename a Not An Id`"
+          then:
+            - "b is now `search` in the registry, in its walkdown.yml and in the repository's `.walkdown/config.yml`, and its folder is renamed keeping its number"
+            - "Its rules, threads and run records are byte for byte what they were, and `walkdown status --blueprint search` reads as b did"
+            - "The pointer names it by its new id"
+            - "Renaming a to an id the project already has, or to something that is not an id, is refused and changes nothing"
+          statement_hash: sha256:0f7cfe575ce5
+      - id: commands.blueprints.import-and-forget-moved
+        statement: "`walkdown blueprints import` and `walkdown blueprints forget` do what `walkdown import` and `walkdown blueprint forget` did."
+        because: "Registering and unregistering a blueprint act on a blueprint, so they belong under its noun."
+        origin: walkdown
+        created_at: 2026-10-04
+        verify: [checks]
+        signoff: [eng]
+        steps:
+          given:
+            - "A project whose `.walkdown/config.yml` declares a blueprint this machine has not registered"
+          when:
+            - "`walkdown blueprints import .` is run with `--all`, then `walkdown blueprints forget <id>`"
+          then:
+            - "The import registers it exactly as `walkdown import` did, and the forget takes it off the list and touches no records"
+          statement_hash: sha256:baaf4c96fd25
+
+  - id: commands.records
+    title: Records move under their own noun
+    statement: As a person keeping records somewhere else, I move them without moving the blueprint.
+    rules:
+      - id: commands.records.move
+        statement: "`walkdown records move <kind> --to <path>` does what `walkdown move` did."
+        because: "Moving runs, threads, evidence or drafts leaves the blueprint where it is, and a name under `blueprints` read as moving the whole blueprint."
+        origin: walkdown
+        created_at: 2026-10-04
+        verify: [checks]
+        signoff: [eng]
+        steps:
+          given:
+            - "A blueprint whose evidence is in its home"
+          when:
+            - "`walkdown records move evidence --to <path>` is run"
+          then:
+            - "The evidence moves and the registry says where, exactly as `walkdown move` did"
+          statement_hash: sha256:93e58454e522
+
+  - id: commands.threads
+    title: A thread is read, answered and changed one verb at a time
+    statement: As a person or an agent on a thread, I say what I mean to do to it.
+    rules:
+      - id: commands.threads.one-verb-per-change
+        statement: "`walkdown threads` takes `show`, `reply` and `set`, so reading a thread, saying something on it and changing its status are each their own command."
+        because: "One command that read, replied and changed status at once made every agent's call harder to read and to get right."
+        origin: walkdown
+        created_at: 2026-10-04
+        verify: [checks]
+        signoff: [eng, product]
+        screens: [threads-show, threads-set-refused]
+        steps:
+          given:
+            - "An open note n-0001 and an answered question q-0002"
+          when:
+            - "`walkdown threads show n-0001`, `walkdown threads reply n-0001 \"done\"`, then `walkdown threads set n-0001 --status addressed --reply \"fixed in 1a2b3c\"` and `walkdown threads set q-0002 --status open`"
+          then:
+            - "`show` prints the thread and changes nothing"
+            - "`reply` adds the message and leaves the status as it was"
+            - "`set` with `--reply` lands the reply and the change together"
+            - "A change the thread's lifecycle refuses is refused whole, and no reply lands with it"
+            - "`threads new` takes what `thread new` took"
+          statement_hash: sha256:687a1c86cfdf

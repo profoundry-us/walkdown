@@ -1,0 +1,17 @@
+id: n-0344
+kind: note
+reason: request
+author: topher
+via: agent
+created: 2026-10-05T02:27:26.708Z
+anchor:
+  screen: help-one-noun
+status: open
+body: ADR 0012 accepted, rules approved, build it
+added: "Draw what `walkdown threads help` prints (commands.shape.help-by-noun):
+  the noun's verbs - list, new, show, reply, set - each with its usage line and
+  what it does, and which verb the bare noun runs. Anchors: cli.prompt,
+  cli.noun.usage, cli.noun.verbs, cli.noun.bare, cli.exit. The frame is the
+  terminal frame tools/cli-captures.mjs --frame prints, so the design and the
+  as-built line up under the fade; /as-built/cli/help-one-noun.html shows what
+  the build prints today."

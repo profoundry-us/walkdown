@@ -2,7 +2,7 @@
 <!--
   AS-BUILT: init-another
 
-  What `walkdown init --id search` printed, run by tools/cli-captures.mjs
+  What `walkdown blueprints new search` printed, run by tools/cli-captures.mjs
   from test/cli/scenarios/init-another.yml - the same run test/cli.test.js
   checks against locations.several.init-makes-another. Paths, times and hashes are made steady so
   the fade shows what changed and nothing else. Regenerated, never edited: the
@@ -15,7 +15,7 @@
 <html lang="en" data-theme="redline">
 <head>
   <meta charset="utf-8">
-  <title>As-built &mdash; init gives the project another blueprint</title>
+  <title>As-built &mdash; blueprints new gives the project another blueprint</title>
   <style>
   :root { color-scheme: dark; }
   html, body { margin: 0; height: 100%; background: #14161a; }
@@ -50,14 +50,13 @@
 <body>
   <div class="term">
     <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
-    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown init --id search</div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown blueprints new search</div>
       <div data-testid="cli.init.created">
       <div class="ln">  + created  ~/.walkdown/blueprints/0002-search/blueprint/walkdown.yml</div>
       <div class="ln">  + created  ~/.walkdown/blueprints/0002-search/blueprint/storyboard.yml</div>
       <div class="ln">  + created  ~/.walkdown/blueprints/0002-search/blueprint/features/_template.yml</div>
       <div class="ln">  + created  ~/.walkdown/blueprints/0002-search/blueprint/AGENTS.md</div>
       </div>
-      <div class="ln">  · up to date  ~/.walkdown/skills/walkdown → /Users/topherfangio/Development/profoundry/walkdown</div>
       <div class="ln">  + listed   ~/.walkdown/registry.yml  as `search`</div>
       <div data-testid="cli.init.another">
       <div class="ln">  + another  `search` is another blueprint for this project, beside `checkout` — commands that write take `--blueprint &lt;id&gt;` now</div>
@@ -67,11 +66,8 @@
       <div class="ln">  spec: ~/.walkdown/blueprints/0002-search/blueprint</div>
       </div>
       <div class="ln">  In ~/.walkdown, which git never sees.</div>
-      <div class="ln">  Prefer it committed? `walkdown init --id search --commit spec` moves the home into the repository.</div>
+      <div class="ln">  Prefer it committed? `walkdown blueprints commit spec --blueprint search` moves the home into the repository.</div>
       <div class="ln">  tracked: nothing  ~/shop is not a git repository — there is nothing to track</div>
-      <div class="ln"></div>
-      <div class="ln">  skills: ~/.walkdown/skills</div>
-      <div class="ln">  Yours, not this project's — Claude Code loads them as the walkdown plugin (/walkdown:judge and the rest) in every project, and updating the clone updates them. `walkdown skills --project` commits copies here instead.</div>
       <div class="ln"></div>
       <div class="ln">Next: fill in ~/.walkdown/blueprints/0002-search/blueprint/walkdown.yml (runner commands, targets), sketch your</div>
       <div class="ln">first feature from its features/_template.yml, then `walkdown lint`.</div>

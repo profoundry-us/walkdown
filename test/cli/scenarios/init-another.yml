@@ -1,9 +1,9 @@
-# `walkdown init --id` giving a project that has a blueprint a second one.
+# `walkdown blueprints new <id>` giving a project that has a blueprint a second one.
 screen: init-another
-title: init gives the project another blueprint
+title: blueprints new gives the project another blueprint
 rule: locations.several.init-makes-another
 fixture: one-blueprint
-command: [init, --id, search]
+command: [blueprints, new, search]
 exit: 0
 expect:
   - '\+ created\s+~/\.walkdown/blueprints/0002-search/blueprint/walkdown\.yml'
