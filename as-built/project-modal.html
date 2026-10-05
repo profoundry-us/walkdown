@@ -3,7 +3,7 @@
   AS-BUILT: which project?
 
   A drawing of walkdown's panel as it was actually built - the panel's own
-  markup, captured from the running build by tools/as-built.mjs on 2026-09-30
+  markup, captured from the running build by tools/as-built.mjs on 2026-10-05
   and kept by hand since (ADR 0007). It is neither the design
   (prototype/screens/project-modal.html, which stays as it was drawn) nor the build
   (the panel you are holding, which cannot frame itself). It exists so the
@@ -82,16 +82,16 @@
                 an address today.</p> 
               </div> 
               <div class="flex flex-col gap-1.5" data-testid="project.new"> 
-                <p class="text-[11px] uppercase tracking-wider opacity-50">Or start a project</p> <code class="rounded-box bg-base-200 px-2 py-1.5 text-[11px]">walkdown init</code> 
+                <p class="text-[11px] uppercase tracking-wider opacity-50">Or start a project</p> <code class="rounded-box bg-base-200 px-2 py-1.5 text-[11px]">walkdown blueprints new</code> 
                 <p class="text-[11px] leading-relaxed opacity-50">starts a blueprint in the repository you are
           in. A repository that already has one joins this machine with
-          <span class="font-mono">walkdown import &lt;path&gt;</span>. Both are commands you run —
+          <span class="font-mono">walkdown blueprints import &lt;path&gt;</span>. Both are commands you run —
           walkdown never adopts a directory from a browser.</p> 
               </div> 
             </div> 
             <p class="px-4 pt-3 pb-1 text-[11px] uppercase tracking-wider opacity-50" data-testid="project.choose">Or choose an existing project</p> 
             <div class="min-h-0 flex-1 overflow-y-auto" data-testid="project.list"> 
-              <button class="block w-full border-b border-base-300 px-4 py-2.5 text-left last:border-b-0 hover:bg-base-200" data-project="walkdown"> <span class="flex items-center gap-2"> <span class="text-[13px] font-semibold ">walkdown</span> <span class="ml-auto shrink-0 text-[11px] opacity-45">1 blueprint</span> </span> <span class="mt-0.5 block font-mono text-[10.5px] opacity-35">~/Development/profoundry/walkdown</span> </button> 
+              <button class="block w-full border-b border-base-300 px-4 py-2.5 text-left last:border-b-0 hover:bg-base-200" data-project="walkdown"> <span class="flex items-center gap-2"> <span class="text-[13px] font-semibold ">walkdown</span> <span class="ml-auto shrink-0 text-[11px] opacity-45">2 blueprints</span> </span> <span class="mt-0.5 block font-mono text-[10.5px] opacity-35">~/Development/profoundry/walkdown</span> </button> 
               <button class="block w-full border-b border-base-300 px-4 py-2.5 text-left last:border-b-0 hover:bg-base-200" data-project="example"> <span class="flex items-center gap-2"> <span class="text-[13px] font-semibold ">example</span> <span class="ml-auto shrink-0 text-[11px] opacity-45">1 blueprint</span> </span> <span class="mt-0.5 block font-mono text-[10.5px] opacity-35">~/Development/profoundry/walkdown/example</span> </button>
             </div> 
           </div>

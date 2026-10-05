@@ -3,7 +3,7 @@
   AS-BUILT: rule detail
 
   A drawing of walkdown's panel as it was actually built - the panel's own
-  markup, captured from the running build by tools/as-built.mjs on 2026-09-30
+  markup, captured from the running build by tools/as-built.mjs on 2026-10-05
   and kept by hand since (ADR 0007). It is neither the design
   (prototype/screens/rule-detail.html, which stays as it was drawn) nor the build
   (the panel you are holding, which cannot frame itself). It exists so the
@@ -208,14 +208,14 @@
               </button> </span> <span class="tooltip tooltip-bottom tooltip-end [--tt-trans:0] shrink-0" data-testid="panel.pin-why"> <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug">Click anything to attach a note — it lands on the prototype</span> 
               <button id="wdp-pin" data-testid="panel.pin-mode" class="btn btn-xs gap-1 btn-outline btn-primary" title="Click anything to attach a note — it lands on the prototype">
                 <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-3.5"><path d="M128,64a40,40,0,1,0,40,40A40,40,0,0,0,128,64Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,128Zm0-112a88.1,88.1,0,0,0-88,88c0,31.4,14.51,64.68,42,96.25a254.19,254.19,0,0,0,41.45,38.3,8,8,0,0,0,9.18,0A254.19,254.19,0,0,0,174,200.25c27.45-31.57,42-64.85,42-96.25A88.1,88.1,0,0,0,128,16Zm0,206c-16.53-13-72-60.75-72-118a72,72,0,0,1,144,0C200,161.23,144.53,209,128,222Z"></svg>Pin mode</button> </span> 
-            <button id="wdp-walk" data-testid="panel.walk" class="btn btn-xs btn-warning" title="Begin a sitting — 5 rules owe you a verdict">Start walkdown</button> 
+            <button id="wdp-walk" data-testid="panel.walk" class="btn btn-xs btn-warning" title="Begin a sitting — 4 rules owe you a verdict">Start walkdown</button> 
             <button class="btn btn-xs btn-ghost" id="wdp-undock" title="Put walkdown away">×</button> </span></header>
         <aside data-theme="redline" class="flex flex-col overflow-hidden border border-primary/45 bg-base-100 text-base-content" style="position: absolute; top: 44px; right: 12px; bottom: 12px; width: 384px; pointer-events: auto; transition: transform 0.22s; border-radius: 10px; box-shadow: rgba(0, 0, 0, 0.28) 0px 1px 2px, rgba(0, 0, 0, 0.34) 0px 12px 32px; transform: none;"> 
           <div role="tablist" class="tabs tabs-box tabs-sm m-2 shrink-0 self-center" data-testid="panel.tabs"> 
             <button role="tab" class="tab px-3 gap-1" data-tab="blueprints"> 
               <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-4"><path d="M208,96a16,16,0,0,0,16-16V48a16,16,0,0,0-16-16H176a16,16,0,0,0-16,16v8H96V48A16,16,0,0,0,80,32H48A16,16,0,0,0,32,48V80A16,16,0,0,0,48,96h8v64H48a16,16,0,0,0-16,16v32a16,16,0,0,0,16,16H80a16,16,0,0,0,16-16v-8h64v8a16,16,0,0,0,16,16h32a16,16,0,0,0,16-16V176a16,16,0,0,0-16-16h-8V96ZM176,48h32V80H176ZM48,48H80V63.9a.51.51,0,0,0,0,.2V80H48ZM80,208H48V176H80v15.9a.51.51,0,0,0,0,.2V208Zm128,0H176V176h32Zm-24-48h-8a16,16,0,0,0-16,16v8H96v-8a16,16,0,0,0-16-16H72V96h8A16,16,0,0,0,96,80V72h64v8a16,16,0,0,0,16,16h8Z"></svg>Blueprints</button>
             <button role="tab" class="tab px-3 gap-1 tab-active" data-tab="rules"> 
-              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-4"><path d="M149.61,85.71l-89.6,88a8,8,0,0,1-11.22,0L10.39,136a8,8,0,1,1,11.22-11.41L54.4,156.79l84-82.5a8,8,0,1,1,11.22,11.42Zm96.1-11.32a8,8,0,0,0-11.32-.1l-84,82.5-18.83-18.5a8,8,0,0,0-11.21,11.42l24.43,24a8,8,0,0,0,11.22,0l89.6-88A8,8,0,0,0,245.71,74.39Z"></svg>Rules<span class="badge badge-xs badge-warning" title="5 rules a walkdown would take you through — 3 to sign — 2 to walk">5</span></button>
+              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-4"><path d="M149.61,85.71l-89.6,88a8,8,0,0,1-11.22,0L10.39,136a8,8,0,1,1,11.22-11.41L54.4,156.79l84-82.5a8,8,0,1,1,11.22,11.42Zm96.1-11.32a8,8,0,0,0-11.32-.1l-84,82.5-18.83-18.5a8,8,0,0,0-11.21,11.42l24.43,24a8,8,0,0,0,11.22,0l89.6-88A8,8,0,0,0,245.71,74.39Z"></svg>Rules<span class="badge badge-xs badge-warning" title="4 rules a walkdown would take you through — 3 to sign — 1 to walk">4</span></button>
             <button role="tab" class="tab px-3 gap-1" data-tab="threads"> 
               <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-4"><path d="M232.07,186.76a80,80,0,0,0-62.5-114.17A80,80,0,1,0,23.93,138.76l-7.27,24.71a16,16,0,0,0,19.87,19.87l24.71-7.27a80.39,80.39,0,0,0,25.18,7.35,80,80,0,0,0,108.34,40.65l24.71,7.27a16,16,0,0,0,19.87-19.86ZM62,159.5a8.28,8.28,0,0,0-2.26.32L32,168l8.17-27.76a8,8,0,0,0-.63-6,64,64,0,1,1,26.26,26.26A8,8,0,0,0,62,159.5Zm153.79,28.73L224,216l-27.76-8.17a8,8,0,0,0-6,.63,64.05,64.05,0,0,1-85.87-24.88A79.93,79.93,0,0,0,174.7,89.71a64,64,0,0,1,41.75,92.48A8,8,0,0,0,215.82,188.23Z"></svg>Threads</button> 
           </div> 
@@ -264,7 +264,7 @@
                   <div> 
                     <div class="text-[10.5px] font-bold uppercase tracking-widest opacity-40 mb-1.5">Evidence</div> 
                     <div data-testid="detail.evidence">
-                      <div class="evrow" title="2026-08-27T16-19-24Z-local-01"> <span class="src">checks/local</span> <span class="text-success">✓ pass · agent · 34d ago</span></div>
+                      <div class="evrow" title="2026-08-27T16-19-24Z-local-01"> <span class="src">checks/local</span> <span class="text-success">✓ pass · agent · 38d ago</span></div>
                       <div class="evrow" title=""> <span class="src">agent</span> <span class="opacity-50">○ never run</span></div>
                     </div> 
                   </div> 
@@ -283,7 +283,7 @@
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="8" width="16" height="12" rx="2.5"><path d="M12 8V4M9 4h6"><circle cx="9" cy="14" r="1.1" fill="currentColor" stroke="none"><circle cx="15" cy="14" r="1.1" fill="currentColor" stroke="none"><path d="M9.5 17.5h5"></svg>
                         </div> 
                         <div class="wd-col"> 
-                          <div class="wd-head"><span class="wd-who">Agent</span><span class="wd-tag" data-thread="q-0001" title="Open this thread" role="link">↳ q-0001</span><span class="wd-at" title="8/20/2026, 6:56:31 PM CDT">41d ago</span></div> 
+                          <div class="wd-head"><span class="wd-who">Agent</span><span class="wd-tag" data-thread="q-0001" title="Open this thread" role="link">↳ q-0001</span><span class="wd-at" title="8/20/2026, 6:56:31 PM CDT">45d ago</span></div> 
                           <div class="wd-text">
                             <p>Incorporated: new rule 
                               <button class="wd-ref link link-hover font-mono" data-rule-ref="waitlist.join.already-joined">waitlist.join.already-joined</button> ('you're already on the list' message per your answer), new screen waitlist-already in the storyboard, prototype screens/waitlist-already.html, app implementation (localStorage-backed), and a tagged check — passing in run 2026-08-20T23-56-21Z-local-01.</p> 

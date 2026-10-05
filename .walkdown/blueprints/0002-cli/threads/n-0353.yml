@@ -1,0 +1,14 @@
+id: n-0353
+kind: note
+reason: observation
+author: agent
+created: 2026-10-05T02:56:00.999Z
+anchor:
+  rule: commands.shape.noun-then-verb
+status: settled
+body: x
+replies:
+  - author: agent
+    created: 2026-10-05T02:56:13Z
+    body: "Filed by mistake: an empty note made while checking the voice rules.
+      n-0354 is the real one."

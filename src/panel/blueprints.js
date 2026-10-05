@@ -80,7 +80,7 @@ export function blueprintsPane({ server = true, notice = null } = {}) {
           ? html`<p class="text-[11px] leading-relaxed opacity-50" data-testid="start.folder">Blueprints in
             <span class="font-mono break-all opacity-80">${S.project}</span> — switch projects from the bar.</p>`
           : html`<p class="text-[11px] leading-relaxed opacity-40">Not connected. Run
-            <code>walkdown serve</code>, then <code>walkdown import</code> the project you want.</p>`
+            <code>walkdown serve</code>, then <code>walkdown blueprints import</code> the project you want.</p>`
       }
       ${
         notice
