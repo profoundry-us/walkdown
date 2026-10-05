@@ -31,6 +31,10 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
 
 ### Changed
 
+- A new blueprint's `walkdown.yml` names no `runner.list`. Lint reads coverage from the
+  rule tags in the files under `authoring.location`, which works for any framework and
+  costs nothing. It used to run `npx playwright test --list`, over a second on every lint
+  in a project without Playwright. A `list:` you named is still used.
 - In a project with several blueprints, `status`, `lint`, `threads` and `where` with no
   `--blueprint` report on every one, a section each, and `--json` answers
   `{ "blueprints": [ … ] }`. A project with one blueprint prints what it did before.
