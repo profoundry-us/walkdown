@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-10-06T03-48-58Z-local-01",
+  "created": "2026-10-06T03:48:58Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "3e44741-dirty",
+  "note": "Fourth sitting: one judge, ids-stay-here alone, after n-0391. Judged before the fix it led to.",
+  "spec_hash": "sha256:242f4e9d8408",
+  "results": [
+    {
+      "rule": "locations.registry.ids-stay-here",
+      "status": "fail",
+      "statement_hash": "sha256:f561ad6f21be",
+      "evidence": [
+        "runs/evidence/2026-10-06T03-33-17Z/ids-stay-here-fourth.txt"
+      ],
+      "reasoning": "The three earlier failures are fixed. A committed-home move picks up its row with `blueprints import . --all` (0001-hm-search kept), un-commit/re-commit changes only the path, a personal-only checkout with a remote re-points on `blueprints import .`, and with no remote the refusal names every gone checkout's `blueprints import . --project <label>`, which keeps the ID. Two gone checkouts are offered by name and nothing is guessed. A worktree of a moved checkout keeps the ID. Numbers are not handed out again after forget (next stays 3). `--blueprint` and `?bp=` take the ID. Threads, run records, the pointer and committed homes hold no ID. It still fails the THEN line 'moving the checkout changes the path on the row and keeps the ID' once the old path is a git repository again. mv hire hire2 (committed home), then git init hire. `blueprints` lists 0003-hr-search as (gone), because its home .../hire/.walkdown/blueprints/search no longer exists. But from hire2, `blueprints import . --all` and `--all --project hire` are refused: 'the project label `hire` is another project's on this machine'. The only way back is `--project hire2 --code h2`, which lists the same home as new ID 0004-h2-search and leaves 0003 gone. Personal-only with no remote is the same: mv deli deli2, git init deli. Then `blueprints import . --project deli` in deli2 says only 'Nothing at . is a blueprint', and the empty new repo at deli is the one `status` serves menu to. Re-pointing keys on the old checkout directory being gone, not on the row's home or project being gone.",
+      "threads": [
+        "078f4c23-27ee-4973-ab2c-f42688403bec"
+      ]
+    }
+  ]
+}

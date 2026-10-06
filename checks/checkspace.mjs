@@ -38,6 +38,8 @@ export const CHECKSPACE = join(root, 'tmp', 'checkspace');
 export const HOME = join('.walkdown', 'blueprints', '0001-walkdown');
 /** The example's home, relative to example/. */
 export const EXAMPLE_HOME = join('.walkdown', 'blueprints', '0001-example');
+/* The cli blueprint (ADR 0013), for the panel checks whose rules moved there. */
+export const CLI_HOME = join('.walkdown', 'blueprints', '0002-cli');
 
 /**
  * @param {{ exampleDeclared: string, exampleOrigin: string }} addresses
@@ -63,6 +65,7 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
   const pinned = process.env.WALKDOWN_HOME;
   delete process.env.WALKDOWN_HOME;
   const realEvidence = resolveLocations({ spec: join(root, HOME) }).evidence.path;
+  const realCliEvidence = resolveLocations({ spec: join(root, CLI_HOME) }).evidence.path;
   process.env.WALKDOWN_HOME = pinned ?? join(CHECKSPACE, 'home');
 
   rmSync(CHECKSPACE, { recursive: true, force: true });
@@ -77,6 +80,7 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
   const homeCopy = (from, to) =>
     cpSync(from, to, { recursive: true, filter: (src) => !/\/(evidence|drafts)(\/|$)/.test(src.slice(from.length)) });
   homeCopy(join(root, HOME), join(CHECKSPACE, HOME));
+  homeCopy(join(root, CLI_HOME), join(CHECKSPACE, CLI_HOME));
   /*
    * A sibling, so the server holds more than one project. Some rules are only
    * visible with a choice to make — which blueprint a page belongs to, and what
@@ -124,6 +128,8 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
     mkdirSync(dirname(evLink), { recursive: true });
     symlinkSync(realEvidence, evLink, 'dir');
   } else if (!existsSync(evLink)) placeholderEvidence(evLink);
+  const cliEv = join(CHECKSPACE, CLI_HOME, 'evidence');
+  if (realCliEvidence && existsSync(realCliEvidence) && !existsSync(cliEv)) symlinkSync(realCliEvidence, cliEv, 'dir');
   /*
    * And the two check suites, for the same reason: `authoring.location`
    * resolves against the code root, so without them the copy is a
@@ -172,7 +178,7 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
   writeFileSync(
     join(process.env.WALKDOWN_HOME, 'registry.yml'),
     [
-      'next: 3',
+      'next: 4',
       'blueprints:',
       '  - id: 0001-cs-blueprint',
       '    project: checkspace',
@@ -185,6 +191,12 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
       '    code: cs',
       `    checkout: ${CHECKSPACE}`,
       `    home: ${join(CHECKSPACE, 'example')}`,
+      "    registered: { by: import, at: '2026-01-01T00:00:00Z' }",
+      '  - id: 0003-cs-cli',
+      '    project: checkspace',
+      '    code: cs',
+      `    checkout: ${CHECKSPACE}`,
+      `    home: ${join(CHECKSPACE, CLI_HOME)}`,
       "    registered: { by: import, at: '2026-01-01T00:00:00Z' }",
       '',
     ].join('\n'),

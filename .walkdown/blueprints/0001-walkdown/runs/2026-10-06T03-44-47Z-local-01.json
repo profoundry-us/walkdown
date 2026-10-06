@@ -1,0 +1,73 @@
+{
+  "run_id": "2026-10-06T03-44-47Z-local-01",
+  "created": "2026-10-06T03:44:47Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "3e44741-dirty",
+  "tree_hash": "sha256:2f2448d01f09",
+  "spec_hash": "sha256:7181cb2e3f96",
+  "results": [
+    {
+      "rule": "panel.rules.evidence-visible",
+      "status": "fail",
+      "statement_hash": "sha256:79686951989e",
+      "duration_ms": 30137,
+      "checks": [
+        "checks/panel.spec.js:1212"
+      ],
+      "evidence": [
+        "runs/evidence/2026-10-06T03-44-47Z/panel-evidence-that-is-not-3d3dc--rather-than-a-broken-image-test-failed-1.png",
+        "runs/evidence/2026-10-06T03-44-47Z/panel-evidence-that-is-not-3d3dc--rather-than-a-broken-image-error-context.md"
+      ]
+    },
+    {
+      "rule": "panel.rules.claim-then-reason",
+      "status": "pass",
+      "statement_hash": "sha256:0736d9aa5027",
+      "duration_ms": 2924,
+      "checks": [
+        "checks/panel.spec.js:1353"
+      ]
+    },
+    {
+      "rule": "panel.start.choose-a-blueprint",
+      "status": "fail",
+      "statement_hash": "sha256:f89c8ffc710e",
+      "duration_ms": 10934,
+      "checks": [
+        "checks/panel.spec.js:2416",
+        "checks/panel.spec.js:2669"
+      ],
+      "evidence": [
+        "runs/evidence/2026-10-06T03-44-47Z/panel-two-blueprints-claim-e732e-stion-asked-with-both-named-test-failed-1.png",
+        "runs/evidence/2026-10-06T03-44-47Z/panel-two-blueprints-claim-e732e-stion-asked-with-both-named-error-context.md",
+        "runs/evidence/2026-10-06T03-44-47Z/panel-crossing-to-a-projec-46e6b-does-not-keep-the-old-count-test-failed-1.png",
+        "runs/evidence/2026-10-06T03-44-47Z/panel-crossing-to-a-projec-46e6b-does-not-keep-the-old-count-error-context.md"
+      ]
+    },
+    {
+      "rule": "panel.start.which-project",
+      "status": "fail",
+      "statement_hash": "sha256:7241796d7522",
+      "duration_ms": 5473,
+      "checks": [
+        "checks/panel.spec.js:2669"
+      ],
+      "evidence": [
+        "runs/evidence/2026-10-06T03-44-47Z/panel-crossing-to-a-projec-46e6b-does-not-keep-the-old-count-test-failed-1.png",
+        "runs/evidence/2026-10-06T03-44-47Z/panel-crossing-to-a-projec-46e6b-does-not-keep-the-old-count-error-context.md"
+      ]
+    },
+    {
+      "rule": "panel.rules.headless-says-so",
+      "status": "pass",
+      "statement_hash": "sha256:4f4c746e2d71",
+      "duration_ms": 1346,
+      "checks": [
+        "checks/panel.spec.js:3772"
+      ]
+    }
+  ]
+}

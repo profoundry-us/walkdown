@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T02:43:12.523Z
 anchor:
   rule: locations.default.in-repo-on-request
-status: addressed
+status: settled
 body: Agent judging found that saving a draft writes drafts/.gitignore with '*'
   and '!.gitignore'. After that, a home committed with `commit all` reports
   drafts kept out by git. `walkdown lint` exits 1 with a tracking error over a
@@ -16,3 +16,8 @@ replies:
     created: 2026-10-06T02:51:19Z
     body: A draft save no longer writes drafts/.gitignore; the home's own .gitignore
       decides. `walkdown upgrade` removes the one an earlier walkdown wrote.
+  - author: agent
+    via: verdict
+    created: 2026-10-06T03:32:51Z
+    body: Settled by the agent's pass on locations.default.in-repo-on-request
+      (2026-10-06T03-32-51Z-local-01).

@@ -25,6 +25,7 @@ import {
   describeFolder,
   expand,
   findHomes,
+  goneCheckouts,
   gitRoot,
   isHome,
   isOldHome,
@@ -163,13 +164,22 @@ export async function run(args) {
     console.error(red(`✗ ${tilde(n.inner)} is a blueprint inside ${tilde(n.outer)} — a home inside a home is refused, and not offered.`));
   if (!homes.length) {
     // A checkout that moved, whose blueprints are all kept on this machine.
-    const moved = top ? repointMovedCheckout(top) : null;
+    const moved = top ? repointMovedCheckout(top, values.project ?? null) : null;
     if (moved) {
       for (const id of moved.ids)
         console.log(`  ${green('~ moved')}    ${dim(`\`${id}\` belongs to ${tilde(top)} now, still as \`${id}\` — the row named ${tilde(moved.from)}, which is gone`)}`);
       return end(0);
     }
+    const here = top ? readRegistry().rows.filter((r) => r?.registered && r.checkout && canon(expand(String(r.checkout))) === top) : [];
+    if (here.length) {
+      console.log(`${dim('· already listed')} ${tilde(top)}: ${here.map((r) => `\`${r.id}\``).join(', ')}`);
+      return end(0);
+    }
     console.error(red(`Nothing at ${at} is a blueprint — no spec.yml there, and no .walkdown/blueprints/ holding one.`));
+    // A project whose checkout went missing may be this one, moved; the
+    // person says so, and nothing is guessed.
+    for (const g of top ? goneCheckouts() : [])
+      console.error(dim(`  \`${g.label}\`'s checkout ${g.checkout} is gone — if this is it, \`walkdown blueprints import ${at} --project ${g.label}\` points it here.`));
     console.error(dim('  `walkdown blueprints new` inside that project starts one.'));
     return end(2);
   }

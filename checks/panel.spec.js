@@ -1146,8 +1146,8 @@ test('Escape leaves pin mode, after whatever is more local than pin mode', {
  * panel itself, so they are read against walkdown's own storyboard. `frame`
  * puts a chosen surface under the panel; without it the fixture's own does.
  */
-async function ownRule(page, name, frame = null) {
-  await page.goto(fixtureFor({ bp: 'blueprint', ...(frame ? { frame } : {}) }));
+async function ownRule(page, name, frame = null, bp = 'blueprint') {
+  await page.goto(fixtureFor({ bp, ...(frame ? { frame } : {}) }));
   await expect(page.getByTestId('panel.bar')).toBeVisible();
   // The framed surface announces itself when it lands, and the panel repaints
   // on hearing it - so a pane opened before then is one that will be rebuilt
@@ -1218,9 +1218,10 @@ test('evidence that is not a picture is readable rather than a broken image', {
    * under it. The file was there all along - the evidence route serves
    * whatever is under the evidence key space - and only the rendering was
    * wrong. It is not a rare case either: the agent tier attaches transcripts
-   * as a matter of course, and `latest-wins` has nothing else.
+   * as a matter of course, and `latest-wins` has nothing else. It is the
+   * cli blueprint's since ADR 0013, so it is opened there (n-0357).
    */
-  await ownRule(page, 'latest-wins');
+  await ownRule(page, 'latest-wins', null, 'cli');
   await page.getByTestId('detail.evidence-open').click();
   const modal = page.getByTestId('detail.evidence-modal');
   await expect(modal).toBeVisible();
@@ -1365,8 +1366,9 @@ test('a rule leads with its claim and sets the reason and history beneath it', {
   // No history on this rule, so no history label either.
   await expect(page.getByTestId('detail.history')).toHaveCount(0);
 
-  // And one that carries both: history under because, lighter again.
-  await ownRule(page, 'nothing-in-the-tree');
+  // And one that carries both: history under because, lighter again - the
+  // cli blueprint's since ADR 0013 (n-0357).
+  await ownRule(page, 'nothing-in-the-tree', null, 'cli');
   const history = page.getByTestId('detail.history');
   await expect(history).toBeVisible();
   await expect(history).toContainText(/history/i);
@@ -2418,7 +2420,8 @@ test('two blueprints claiming one page is a question, asked with both named', {
   await page.route('**/api/blueprint*', async (route) => {
     const res = await route.fetch();
     const body = await res.json();
-    keys = (body.blueprints ?? []).map((p) => p.key);
+    // Two of the project's blueprints claim it; the checkspace holds three.
+    keys = (body.blueprints ?? []).filter((p) => !/0002-cli$/.test(p.key)).map((p) => p.key);
     await route.fulfill({ response: res, json: body });
   });
   await page.route(/\/api\/whose(\?|$)/, async (route) => {
@@ -2671,7 +2674,8 @@ test('crossing to a project that claims nothing here does not keep the old count
   await page.route('**/api/blueprint*', async (route) => {
     const res = await route.fetch();
     const body = await res.json();
-    keys = (body.blueprints ?? []).map((p) => p.key);
+    // Two of the project's blueprints claim it; the checkspace holds three.
+    keys = (body.blueprints ?? []).filter((p) => !/0002-cli$/.test(p.key)).map((p) => p.key);
     // A second project this machine holds, whose blueprints claim nothing on
     // this page. Two of them, so picking it asks rather than opening one.
     const other = { id: 'other', root: '~/elsewhere' };
@@ -3770,8 +3774,9 @@ test('the rule id copies itself, and the toast sits inside the frame with a cap'
 test('a headless rule says so once', {
   tag: '@rule:panel.rules.headless-says-so',
 }, async ({ page }) => {
-  await review(page);
-  await openRule(page, 'status.derived.latest-wins');
+  // The cli blueprint's since ADR 0013 (n-0357).
+  await ownRule(page, 'latest-wins', null, 'cli');
+  await expect(page.getByTestId('detail.rule-id')).toHaveText('status.derived.latest-wins');
   const pane = page.locator('.wdp-detail');
   await expect(page.getByTestId('detail.screen')).toContainText(/judged without one/);
   const text = await pane.innerText();

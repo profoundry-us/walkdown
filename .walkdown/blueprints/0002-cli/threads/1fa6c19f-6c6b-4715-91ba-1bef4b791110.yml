@@ -1,0 +1,13 @@
+id: n-0392
+uuid: 1fa6c19f-6c6b-4715-91ba-1bef4b791110
+kind: note
+reason: finding
+author: agent
+created: 2026-10-06T03:32:52.754Z
+anchor:
+  rule: locations.worktree.same-project
+status: open
+body: "Found in the third sitting: `blueprints new` run from
+  <repo>/.claude/worktrees/w of a repository with nothing registered registers
+  the worktree as its own checkout and project (label `w`). A worktree is never
+  a project, so it should be the repository's checkout, or refused."

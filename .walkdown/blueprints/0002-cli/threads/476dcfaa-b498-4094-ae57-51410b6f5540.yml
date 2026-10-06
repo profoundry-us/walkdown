@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T03:13:47.299Z
 anchor:
   rule: locations.answer.says-why
-status: addressed
+status: settled
 body: "Second sitting: a worktree made before the home was committed has no copy
   of it. Its runs, evidence and drafts still said 'this branch's copy — runs are
   committed, so they follow the checkout'. In the same directory `threads new`
@@ -16,3 +16,8 @@ replies:
     created: 2026-10-06T03:14:30Z
     body: A worktree reads the branch's copy only where the branch has one.
       Otherwise the spec and records are the registered home's, said as such.
+  - author: agent
+    via: verdict
+    created: 2026-10-06T03:32:51Z
+    body: Settled by the agent's pass on locations.answer.says-why
+      (2026-10-06T03-32-51Z-local-01).

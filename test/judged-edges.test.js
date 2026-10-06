@@ -249,3 +249,48 @@ test('a moved checkout whose blueprints are all kept on this machine keeps their
   assert.equal(after_[0].home, before[0].home);
   ok(m.cli(moved, 'status'));
 });
+
+test('a renamed checkout with no remote and only personal homes is re-pointed when the person names its project @rule:locations.registry.ids-stay-here', () => {
+  const m = machine();
+  const deli = m.repo('deli');
+  ok(m.cli(deli, 'blueprints', 'new', 'search', '--folder', 'search'));
+  const [row] = m.rows();
+  const renamed = join(root, `m${n}`, 'deli2');
+  renameSync(deli, renamed);
+  const asked = m.cli(renamed, 'blueprints', 'import', '.');
+  assert.equal(asked.status, 2);
+  assert.match(asked.stderr, /`deli`'s checkout .* is gone — if this is it, `walkdown blueprints import \. --project deli` points it here/);
+  assert.equal(m.rows()[0].checkout, row.checkout, 'nothing is guessed');
+  const r = ok(m.cli(renamed, 'blueprints', 'import', '.', '--project', 'deli'));
+  assert.match(r.stdout, new RegExp(`~ moved .*\`${row.id}\``));
+  assert.equal(m.rows()[0].id, row.id);
+  assert.equal(m.rows()[0].checkout.replace(/^~/, process.env.HOME), renamed);
+});
+
+test('a moved checkout keeps its IDs though something new now stands at its old path @rule:locations.registry.ids-stay-here', () => {
+  const m = machine();
+  // Committed: matched by the home that is gone from its place.
+  const hire = m.repo('hire');
+  ok(m.cli(hire, 'blueprints', 'new', 'search', '--commit', 'spec', '--folder', 'search'));
+  const [row] = m.rows();
+  const hire2 = join(root, `m${n}`, 'hire2');
+  renameSync(hire, hire2);
+  mkdirSync(hire);
+  git(hire, 'init', '-q');
+  assert.match(ok(m.cli(hire2, 'blueprints', 'import', '.', '--all')).stdout, new RegExp(`~ moved .*\`${row.id}\``));
+  assert.equal(m.rows()[0].id, row.id);
+  assert.equal(m.rows()[0].checkout.replace(/^~/, process.env.HOME), hire2);
+
+  // Personal, no remote: the person names it, and it moves.
+  const deli = m.repo('deli');
+  ok(m.cli(deli, 'blueprints', 'new', 'menu', '--folder', 'menu'));
+  const menu = m.rows().find((r) => r.id.endsWith('-menu'));
+  const deli2 = join(root, `m${n}`, 'deli2');
+  renameSync(deli, deli2);
+  mkdirSync(deli);
+  git(deli, 'init', '-q');
+  ok(m.cli(deli2, 'blueprints', 'import', '.', '--project', 'deli'));
+  assert.equal(m.rows().find((r) => r.id === menu.id).checkout.replace(/^~/, process.env.HOME), deli2);
+  assert.match(ok(m.cli(deli2, 'blueprints', 'import', '.', '--project', 'deli')).stdout, /already listed/);
+  assert.notEqual(m.cli(deli, 'status').status, 0, 'and the new repository at the old path is nobody\'s');
+});

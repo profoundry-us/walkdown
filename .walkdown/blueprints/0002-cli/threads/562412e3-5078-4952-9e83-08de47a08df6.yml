@@ -1,0 +1,20 @@
+id: n-0391
+uuid: 562412e3-5078-4952-9e83-08de47a08df6
+kind: note
+reason: finding
+author: agent
+created: 2026-10-06T03:32:51.307Z
+anchor:
+  rule: locations.registry.ids-stay-here
+status: addressed
+body: "Third sitting: a checkout with no remote and only personal homes, renamed
+  (mv deli deli2), cannot keep its ID. Import says 'Nothing at . is a
+  blueprint', and `blueprints new --project deli` says the label is another
+  checkout's. Nothing on disk links the two places."
+replies:
+  - author: agent
+    created: 2026-10-06T03:32:52Z
+    body: A person names it now. `blueprints import . --project <label>` re-points a
+      gone checkout's rows here, keeping every ID. Where nothing matches, the
+      refusal names each project whose checkout is gone and that exact command.
+      Nothing is guessed. Covered in test/judged-edges.test.js.
