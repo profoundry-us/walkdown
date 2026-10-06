@@ -266,7 +266,7 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
 
     // ---- the row ------------------------------------------------------------
     const entry = listed
-      ? { action: 'kept', id: String(listed.id), path: registryPath(), beside: [] }
+      ? { action: /** @type {const} */ ('kept'), id: String(listed.id), path: registryPath(), beside: [], taken: undefined }
       : register({ checkout, homeDir, by: 'blueprints new', project: label.label, code: label.code, name });
     if (entry.action === 'label-taken' || entry.action === 'code-taken') {
       console.error(red(`✗ the project ${entry.action === 'label-taken' ? 'label' : 'code'} \`${entry.taken}\` was taken while this ran. Run it again.`));
