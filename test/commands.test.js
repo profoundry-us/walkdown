@@ -77,7 +77,7 @@ test('a noun alone lists, and each noun takes its verbs @rule:commands.shape.nou
     assert.match(verbs('blueprints'), /<list\|new\|import\|rename\|commit\|forget>/);
     assert.match(verbs('threads'), /<list\|new\|show\|reply\|set>/);
     assert.match(verbs('records'), /<list\|move>/);
-    assert.match(verbs('rules'), /<move>/);
+    assert.match(verbs('rules'), /<move\|rename>/);
     for (const cmd of ['status', 'lint', 'hash', 'run', 'judge', 'sweep', 'where', 'claims', 'serve', 'pointer', 'skills']) {
       const r = m.wd([cmd, '--help']);
       assert.equal(r.status, 0, `${cmd} keeps its name`);
