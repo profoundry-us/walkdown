@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-10-06T19-16-10Z-local-01",
+  "created": "2026-10-06T19:16:10Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "f9bef77-dirty",
+  "note": "Agent-tier rejudge #3 of commands.blueprints.rename at f9bef77 (the n-0405 fix), driven in fresh mktemp trees with scratch WALKDOWN_HOMEs and real git repos.",
+  "spec_hash": "sha256:242f4e9d8408",
+  "results": [
+    {
+      "rule": "commands.blueprints.rename",
+      "status": "pass",
+      "statement_hash": "sha256:8877c6d6eba1",
+      "evidence": [
+        "runs/evidence/2026-10-06T19-15-43Z/rename-rejudge3.txt"
+      ],
+      "reasoning": "Every THEN line holds against everything I could build. The nesting repros are refused in both forms, personal and committed: into the home's own folder (the old EINVAL), into a sibling's home, and two levels into a sibling's home. Each exits 2 naming the home it would land inside, with registry, both trees and git byte for byte unchanged and no lock. A target that would hold another registered home (rename c or d to 'nest' or 'teams' while a or b sits beneath) is refused because the folder exists. Nested --folder is now read from the blueprints folder: nest/a to nest/a2, back out to 202610-a, and committed teams/b to teams/b2 (alongside a name change) all land where asked, and git shows only renames. The given/when/then passes again. `rename b search` changes only the name and leaves git clean. `--folder 202610-search` is 8 renames and nothing else. Records hash the same, and `status --blueprint search` matches `status --blueprint b` except for the path in its header line. `rename a search`, `rename a \"Not An Id\"`, `A`, and the ID-shaped `0002-sp-search` are all refused with nothing changed. n-0381 holds both ways. The cross-side `teams/cart` clash, a missing-parent nest, the leftover personal folder, ../ and absolute folders, and a full ID from outside the project all behave. Residuals that do not break a THEN line: a personal home can be renamed to `teams` while the checkout holds teams/b, and `blueprints commit spec` then refuses it cleanly with the rename hint. The same n-0381 class of clash survives when the other side holds the folder name as a directory rather than as a home. A personal home renamed to 202610-d/inner, under a committed home's folder name, is allowed, harmlessly, because commit flattens it to `inner`. The success line prints the new folder relative to the old parent ('now a2', 'now ../202610-a'), not as given. An emptied parent such as `nest/` is left behind."
+    }
+  ]
+}

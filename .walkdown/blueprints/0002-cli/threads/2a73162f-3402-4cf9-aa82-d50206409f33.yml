@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T02:50:47.665Z
 anchor:
   rule: commands.blueprints.rename
-status: addressed
+status: settled
 body: "Found while judging: `blueprints rename a a2 --folder 202610-search`
   succeeds although a committed sibling already has that folder name, so rename
   can make the clash lint now warns about."
@@ -17,3 +17,8 @@ replies:
       the project already holds on the other side: committed in the checkout for
       a home kept on this machine, or kept here for a committed one. Nothing is
       renamed. A judged-edges test drives both directions."
+  - author: agent
+    via: verdict
+    created: 2026-10-06T19:16:10Z
+    body: Settled by the agent's pass on commands.blueprints.rename
+      (2026-10-06T19-16-10Z-local-01).

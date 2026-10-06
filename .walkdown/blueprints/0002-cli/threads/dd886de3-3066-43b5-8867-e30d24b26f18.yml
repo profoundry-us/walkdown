@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T19:09:11.926Z
 anchor:
   rule: commands.blueprints.rename
-status: addressed
+status: settled
 body: "Two edges break rename. A name shaped like an ID is accepted: rename b
   0001-sp-a makes 0002-sp-0001-sp-a, and --blueprint 0001-sp-a then reaches
   blueprint a. And --folder nest/deeper crashes with ENOENT when nest/ does not
@@ -19,3 +19,8 @@ replies:
     body: rename now refuses a name shaped like an ID, makes the parent folders
       --folder names, and always checks the project's personal root as well as
       the checkout. A judged-edges test covers all three.
+  - author: agent
+    via: verdict
+    created: 2026-10-06T19:16:10Z
+    body: Settled by the agent's pass on commands.blueprints.rename
+      (2026-10-06T19-16-10Z-local-01).

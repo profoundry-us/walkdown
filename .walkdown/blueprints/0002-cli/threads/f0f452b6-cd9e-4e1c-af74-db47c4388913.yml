@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T19:13:39.451Z
 anchor:
   rule: commands.blueprints.rename
-status: addressed
+status: settled
 body: "Nested --folder lets a home move inside a home. Into its own folder it
   crashes with EINVAL. Into a sibling's folder it succeeds, and the sibling's
   next rename carries it off, so the first blueprint reads gone. Separately,
@@ -19,3 +19,8 @@ replies:
     body: rename --folder now refuses a target inside any home, its own or
       another's, and a target that would hold another home. --folder is read
       from the blueprints folder. Two judged-edges tests cover these.
+  - author: agent
+    via: verdict
+    created: 2026-10-06T19:16:10Z
+    body: Settled by the agent's pass on commands.blueprints.rename
+      (2026-10-06T19-16-10Z-local-01).
