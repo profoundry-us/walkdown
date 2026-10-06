@@ -1,0 +1,46 @@
+id: q-0280
+uuid: 8c000817-e482-4d6b-9ff4-1a59048a4e4f
+kind: question
+author: agent
+created: 2026-09-11T21:14:54.351Z
+anchor:
+  rule: locations.answer.registry-is-the-only-door
+status: incorporated
+body: 'The agent re-judge (run 2026-09-11T21-08-39Z, evidence
+  05-read-side-canon.txt) passed the rule with one caveat worth a decision. The
+  statement says a path is looked at once, at the add, and never resolved again
+  on read. Every writer does canonicalise before writing (import, init, move all
+  write tilde(canon(path))), but registryEntry and the comparisons in
+  registryPick / rememberInRegistry still call canon() - realpathSync - on every
+  row at read time. For a registered row that is a no-op, unless the filesystem
+  changes underneath: with the registered home moved aside and a symlink left at
+  its spelling, `walkdown where` prints the link target rather than the
+  registered spelling. Same directory, same row, no unregistered path becomes
+  reachable, so I read it as comparison-time canonicalisation rather than a
+  second door. Two ways to make the words and the code agree: (a) narrow the
+  statement to "no path is resolved to FIND a row; a registered spelling is
+  canonicalised only to compare" or (b) drop canon() from the read side and
+  trust what the writers wrote, in which case a symlink planted at a registered
+  path is followed by the OS and printed as registered. (b) is a wider edit
+  across lib/locations.js than a re-judge should carry; (a) is a wording change
+  to the rule. Which?'
+options:
+  - label: Canonicalise on read too
+    why: registryEntry and the comparisons resolve the way the writers do, so a
+      hand-edited path still matches
+  - label: Leave it - looked at once, at the add
+    why: the statement holds as written; a hand-edited path is the writer's problem
+replies:
+  - author: topher
+    created: 2026-09-21T00:45:39Z
+    body: Canonicalise on read too
+  - author: agent
+    created: 2026-09-21T01:47:29Z
+    body: "Canonicalise on read too - which the readers already do (registryEntry,
+      registryPick and rememberInRegistry all canon() to compare), so the words
+      moved to meet the code: a step on
+      locations.answer.registry-is-the-only-door says a registered spelling is
+      canonicalised on read only to compare, and no path is ever resolved to
+      find a row that was not written. The because was rewritten at the same
+      time (n-0322)."
+chosen: Canonicalise on read too

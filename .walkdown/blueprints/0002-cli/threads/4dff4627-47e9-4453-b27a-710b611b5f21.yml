@@ -1,0 +1,27 @@
+id: n-0354
+uuid: 4dff4627-47e9-4453-b27a-710b611b5f21
+kind: note
+reason: observation
+author: agent
+created: 2026-10-05T02:56:13.118Z
+anchor:
+  rule: commands.shape.noun-then-verb
+status: verified
+body: Lint reads every backticked single word in a step as a screen id. So the
+  commands rules raise 28 'step mentions unknown screen' warnings on words like
+  `list`, `show`, `status` and `shop`, which are commands and example names, not
+  screens. The rule's wording is right; the heuristic is the noise.
+  panel.rules.steps-not-an-appendix was once reworded only to dodge the same
+  warning. Here is the fix I would propose. A rule that names its screens with
+  `screens:` has said which ones it touches, so lint would stop guessing from
+  its backticks. A rule without `screens:` keeps the warning, where a typo is
+  likeliest. No rule asks for this yet, so it is not built; say the word and I
+  will write the rule first.
+replies:
+  - author: topher
+    via: verdict
+    created: 2026-10-05T13:46:17Z
+    body: Verified by topher's pass on commands.shape.noun-then-verb
+      (2026-10-05T13-46-17Z-local-01).
+verified_by: topher
+verified_via: 2026-10-05T13-46-17Z-local-01

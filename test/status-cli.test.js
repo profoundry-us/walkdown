@@ -8,7 +8,7 @@
  * the whole point: the derivation has been right the entire time the column
  * said "pending".
  */
-import { declareProject, suiteHome } from '../tools/test-home.mjs';
+import { declareProject, suiteHome, threadAt } from '../tools/test-home.mjs';
 
 /** This file's own personal home — declaring into a shared one races. */
 const HOME = suiteHome('status');
@@ -34,13 +34,13 @@ const CHECKS_EXCUSE =
   'click something that is not in the page.';
 
 function fixture(name) {
-  const bp = join(root, name, 'blueprint');
+  const bp = join(root, name);
   // Beside the spec, not inside it: the home's layout is the only one
   // walkdown answers for, and `declareProject` writes the entry to match.
   const runs = join(root, name, 'runs');
   mkdirSync(join(bp, 'features'), { recursive: true });
   mkdirSync(runs, { recursive: true });
-  writeFileSync(join(bp, 'walkdown.yml'), 'blueprint: cli-fixture\n');
+  writeFileSync(join(bp, 'spec.yml'), 'blueprint: cli-fixture\n');
   writeFileSync(
     join(bp, 'features', 'demo.yml'),
     [
@@ -161,7 +161,7 @@ test('the report gives design requests a queue of their own, named for who draws
   const threads = join(root, 'design-queue', 'threads');
   mkdirSync(threads, { recursive: true });
   writeFileSync(
-    join(threads, 'n-0001.yml'),
+    threadAt(threads, 'n-0001'),
     'id: n-0001\nkind: note\nauthor: someone\ncreated: 2026-01-01T00:00:00Z\nreason: request\nanchor: { screen: undrawn }\nstatus: open\nbody: Draw this.\n',
   );
   const plain = (s) => s.replace(/\x1b\[[0-9;]*m/g, '');
@@ -178,7 +178,7 @@ test('the report gives design requests a queue of their own, named for who draws
   assert.doesNotMatch(q.agent, /n-0001/, 'never the building agent');
 
   // An agent draws: still design's queue, never the AGENT QUEUE.
-  writeFileSync(join(bp, 'walkdown.yml'), 'blueprint: cli-fixture\ndesign:\n  by: agent\n');
+  writeFileSync(join(bp, 'spec.yml'), 'blueprint: cli-fixture\ndesign:\n  by: agent\n');
   q = queues(run(bp, []));
   assert.match(q.all, /DESIGN QUEUE — for the design agent, never the agent building the app/);
   assert.doesNotMatch(q.agent, /n-0001/);

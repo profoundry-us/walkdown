@@ -77,7 +77,7 @@ test('init scaffolds a lint-clean blueprint with agent conventions', () => {
   mkdirSync(proj);
   const results = scaffold(proj, spec(proj));
   const actionOf = (rs, path) => rs.find((r) => r.path === path)?.action;
-  for (const path of [rel(proj, 'walkdown.yml'), rel(proj, 'AGENTS.md'), 'CLAUDE.md'])
+  for (const path of [rel(proj, 'spec.yml'), rel(proj, 'AGENTS.md'), 'CLAUDE.md'])
     assert.equal(actionOf(results, path), 'created', path);
   // Claude Code gets the plugin: one link to this clone, not five copies.
   assert.equal(actionOf(results, pluginAt()), 'linked');
@@ -88,7 +88,7 @@ test('init scaffolds a lint-clean blueprint with agent conventions', () => {
   // are the person's, and a committed one is a vendored copy walkdown cannot
   // keep right afterwards (n-0239).
   assert.equal(existsSync(join(proj, '.claude')), false, 'the repository got no skills');
-  assert.match(readFileSync(join(homeSpec(proj), 'walkdown.yml'), 'utf8'), /blueprint: fresh/);
+  assert.match(readFileSync(join(homeSpec(proj), 'spec.yml'), 'utf8'), /blueprint: fresh/);
   // The pointer names wherever the spec actually went, which is not
   // necessarily inside the repository any more.
   const pointer = readFileSync(join(proj, 'CLAUDE.md'), 'utf8');
@@ -119,23 +119,23 @@ test('init is idempotent: rerun no-ops, customizations kept, --force updates own
     JSON.stringify(rerun),
   );
 
-  writeFileSync(join(homeSpec(proj), 'walkdown.yml'), 'blueprint: customized\n');
+  writeFileSync(join(homeSpec(proj), 'spec.yml'), 'blueprint: customized\n');
   // An old copy beside the plugin, edited by its person: named, never removed.
   mkdirSync(join(PERSONAL_SKILLS, 'walkdown-judge'), { recursive: true });
   writeFileSync(skillAt('walkdown-judge'), 'customized');
   const third = scaffold(proj, spec(proj));
-  assert.equal(actionOf(third, rel(proj, 'walkdown.yml')), 'kept');
+  assert.equal(actionOf(third, rel(proj, 'spec.yml')), 'kept');
   assert.equal(actionOf(third, join(PERSONAL_SKILLS, 'walkdown-judge')), 'duplicate-edited');
   assert.equal(readFileSync(skillAt('walkdown-judge'), 'utf8'), 'customized');
 
   const forced = scaffold(proj, { ...spec(proj), force: true });
-  assert.equal(actionOf(forced, rel(proj, 'walkdown.yml')), 'kept'); // user-owned: --force never touches it
+  assert.equal(actionOf(forced, rel(proj, 'spec.yml')), 'kept'); // user-owned: --force never touches it
   assert.equal(actionOf(forced, join(PERSONAL_SKILLS, 'walkdown-judge')), 'kept-edited');
   assert.equal(readFileSync(skillAt('walkdown-judge'), 'utf8'), 'customized');
   assert.equal(actionOf(forced, pluginAt()), 'up-to-date');
   rmSync(join(PERSONAL_SKILLS, 'walkdown-judge'), { recursive: true });
   assert.equal(
-    readFileSync(join(homeSpec(proj), 'walkdown.yml'), 'utf8'),
+    readFileSync(join(homeSpec(proj), 'spec.yml'), 'utf8'),
     'blueprint: customized\n',
   );
 });
@@ -407,7 +407,7 @@ test('run sees a record arrive in a runs directory a config moved @rule:location
   const runsAway = join(home, 'elsewhere', 'runs');
   mkdirSync(join(proj, 'blueprint'), { recursive: true });
   mkdirSync(home, { recursive: true });
-  writeFileSync(join(home, 'config.yml'), ['defaults:', `  runs: ${runsAway}`, ''].join('\n'));
+  writeFileSync(join(home, 'profile.yml'), ['defaults:', `  runs: ${runsAway}`, ''].join('\n'));
   writeFileSync(
     join(home, 'registry.yml'),
     [
@@ -425,7 +425,7 @@ test('run sees a record arrive in a runs directory a config moved @rule:location
     `node -e "const fs=require('fs');fs.mkdirSync('${runsAway}',{recursive:true});` +
     `fs.writeFileSync('${runsAway}/probe-run.json','{}')"`;
   writeFileSync(
-    join(proj, 'blueprint', 'walkdown.yml'),
+    join(proj, 'blueprint', 'spec.yml'),
     ['blueprint: moved-ledger', 'runner:', `  run_all: "${probe.replaceAll('"', '\\"')}"`, ''].join(
       '\n',
     ),
@@ -456,7 +456,7 @@ test('run substitutes {id}, injects target env and WALKDOWN_TARGET, propagates e
   register({ id: 'runner', project: proj, homeDir: proj });
   const probe = `node -e "require('fs').writeFileSync('probe.txt', process.env.WALKDOWN_TARGET + ':' + process.env.APP_HOST + ':' + (process.env.RULE_ARG || ''))"`;
   writeFileSync(
-    join(proj, 'blueprint', 'walkdown.yml'),
+    join(proj, 'blueprint', 'spec.yml'),
     [
       'blueprint: runner',
       'runner:',
@@ -482,7 +482,7 @@ test('run substitutes {id}, injects target env and WALKDOWN_TARGET, propagates e
   assert.throws(() => runChecks(blueprint, { target: 'nope', stdio: 'pipe' }), /unknown target/);
 
   writeFileSync(
-    join(proj, 'blueprint', 'walkdown.yml'),
+    join(proj, 'blueprint', 'spec.yml'),
     'blueprint: runner\nrunner: { run_all: "node -e \\"process.exit(3)\\"" }\n',
   );
   const failing = runChecks(loadBlueprint(join(proj, 'blueprint'), { cwd: proj }), { stdio: 'pipe' });
@@ -594,7 +594,7 @@ test('the config init writes names the reporter by a path that exists @rule:deli
   const proj = join(root, 'reporter-path');
   mkdirSync(proj);
   scaffold(proj, spec(proj));
-  const yml = readFileSync(join(homeSpec(proj), 'walkdown.yml'), 'utf8');
+  const yml = readFileSync(join(homeSpec(proj), 'spec.yml'), 'utf8');
   const named = yml.match(/add \['([^']+)'\] to the reporter array/)?.[1];
   assert.ok(named, 'the config names a reporter');
   assert.ok(named.startsWith('/'), `an absolute path, not a package name: ${named}`);
@@ -606,7 +606,7 @@ test('the config init writes loads the RSpec formatter from the clone, not from 
   const proj = join(root, 'rspec-path');
   mkdirSync(proj);
   scaffold(proj, spec(proj));
-  const yml = readFileSync(join(homeSpec(proj), 'walkdown.yml'), 'utf8');
+  const yml = readFileSync(join(homeSpec(proj), 'spec.yml'), 'utf8');
   const paths = [...yml.matchAll(/rspec \S+ -I (\S+) -r walkdown\/formatter/g)].map((m) => m[1]);
   assert.equal(paths.length, 3, 'run_all, run_for_rule and list each load it');
   for (const p of paths) {

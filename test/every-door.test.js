@@ -15,7 +15,7 @@
  * fails here immediately — which is the whole reason the door is one module
  * now, and the reason a third interface can be added without a fourth copy.
  */
-import { declareProject } from '../tools/test-home.mjs';
+import { declareProject, threadAt } from '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -41,18 +41,18 @@ function fixture({ declared = true } = {}) {
   const home = join(root, 'home');
   mkdirSync(home, { recursive: true });
   if (declared)
-    writeFileSync(join(home, 'config.yml'), 'identity:\n  username: door-person\n');
+    writeFileSync(join(home, 'profile.yml'), 'identity:\n  username: door-person\n');
   /*
    * A home: the spec is `blueprint/` and the ledger sits beside it. Declared
    * here rather than per door, because the library door loads the blueprint
    * in-process and every blueprint walkdown answers for is one somebody wrote
    * down - the CLI and HTTP doors just declare it again, which is a no-op.
    */
-  const bp = join(root, 'blueprint');
+  const bp = join(root);
   const threads = join(root, 'threads');
   mkdirSync(join(bp, 'features'), { recursive: true });
   mkdirSync(threads, { recursive: true });
-  writeFileSync(join(bp, 'walkdown.yml'), 'blueprint: doors\n');
+  writeFileSync(join(bp, 'spec.yml'), 'blueprint: doors\n');
   writeFileSync(join(bp, 'storyboard.yml'), 'screens: []\n');
   writeFileSync(
     join(bp, 'features', 'f.yml'),
@@ -66,7 +66,7 @@ function fixture({ declared = true } = {}) {
     ].join('\n'),
   );
   writeFileSync(
-    join(threads, 'n-0001.yml'),
+    threadAt(threads, 'n-0001'),
     [
       'id: n-0001',
       'kind: note',
@@ -78,7 +78,7 @@ function fixture({ declared = true } = {}) {
     ].join('\n'),
   );
   declareProject(home, bp);
-  return { root, home, bp, thread: () => parse(readFileSync(join(threads, 'n-0001.yml'), 'utf8')) };
+  return { root, home, bp, thread: () => parse(readFileSync(threadAt(threads, 'n-0001'), 'utf8')) };
 }
 
 /*

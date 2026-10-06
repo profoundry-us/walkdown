@@ -1,0 +1,64 @@
+id: n-0328
+uuid: a9661142-5722-47a6-8ba8-733b87b58430
+kind: note
+reason: feedback
+author: topher
+created: 2026-09-21T04:43:39.742Z
+anchor:
+  rule: embed.threads.picture-on-a-pin
+status: verified
+body: >-
+  I don't want to paste a file in, I want to be able to drag & drop a file into
+  the composer (or the pin text box) and have it handle the file from there.
+
+
+  Keep the thumbnail preview and full size opening when you fix this.
+replies:
+  - author: agent
+    created: 2026-09-21T05:15:40Z
+    body: Built. A picture dragged from the desk and dropped on the pin form, or on
+      a thread's composer, goes on the message the same way a paste did. Paste
+      still works too. The thumbnail and the full-size opening are unchanged.
+      The rule's steps say drop first, and the check drops a real file on both
+      boxes (run 2026-09-21T05-15-10Z).
+  - author: topher
+    created: 2026-09-21T14:53:59Z
+    body: This appears to be working for the Pin mode, but not on a thread's
+      composer. It just opens the file in a new tab.
+  - author: agent
+    created: 2026-09-21T15:04:59Z
+    body: "Fixed: the whole thread screen takes a dropped picture now, the way the
+      pin form takes one dropped anywhere on it - the two-row box alone was the
+      target, and a drop that missed it went to the browser, which opened the
+      file. Checked by 'a screenshot dropped on the pin form goes on the pin' in
+      checks/embed.spec.js (recorded 2026-09-21T15-02-00Z) and judged again by
+      the agent tier (run 2026-09-21T15-04-43Z)."
+  - author: topher
+    created: 2026-09-21T15:59:49Z
+    body: Nope; still doesn't work when I'm trying to pass / fail a rule.
+  - author: agent
+    created: 2026-09-21T16:07:32Z
+    body: "Fixed for the rule's box: a picture dropped anywhere on the rule pane -
+      or pasted into its box - is held above the box and goes with the next
+      thing the box does: a fail's why, a pass's note, a reply, an answer, a
+      waive's reason. A fail on an addressed note reopens it with the reason,
+      and that reason now carries pictures like a reply does (the server did not
+      take them on a status move before). Moving to another rule drops what was
+      held. Checked by 'a picture dropped while failing a rule goes with the
+      why' in checks/panel.spec.js (recorded 2026-09-21T16-05-53Z) and 'a
+      reopen's reason carries the pictures dropped with it' in
+      test/writes.test.js (16-05-54Z); judged again by the agent tier on a
+      scratch copy."
+  - author: topher
+    created: 2026-09-21T16:42:42Z
+    body: It works!
+    attachments:
+      - file: attachments/n-0328-1.png
+        name: Screenshot 2026-09-20 at 11.11.40_PM.png
+  - author: topher
+    via: verdict
+    created: 2026-09-21T16:42:45Z
+    body: Verified by topher's pass on embed.threads.picture-on-a-pin
+      (2026-09-21T16-42-45Z-local-01).
+verified_by: topher
+verified_via: 2026-09-21T16-42-45Z-local-01

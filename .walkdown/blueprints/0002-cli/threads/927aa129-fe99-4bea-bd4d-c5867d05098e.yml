@@ -1,0 +1,44 @@
+id: n-0204
+uuid: 927aa129-fe99-4bea-bd4d-c5867d05098e
+kind: note
+author: agent
+created: 2026-09-06T00:03:50.168Z
+anchor:
+  rule: threads.lifecycle.claim-never-accept
+status: settled
+body: "The refusal tells you to fix a file that is not the one being read.
+  mustBeDeclared() in lib/writes.js:79 prints 'Say who you are in
+  ~/.walkdown/config.yml under `identity:`' as a literal, and so do six more
+  sites (src/panel/conversation.js:179,254, src/panel/app.js:317,320,326,
+  bin/walkdown.js:81,92, lib/identity.js:107). But the config actually consulted
+  comes from configPath(), which is built on walkdownHome() —
+  'process.env.WALKDOWN_HOME || join(homedir(), \".walkdown\")' at
+  lib/locations.js:34. With WALKDOWN_HOME=/tmp/elsewhere-home, configPath() is
+  /tmp/elsewhere-home/config.yml, and the refusal still names the home
+  directory. Somebody following the instruction adds identity: to a file nothing
+  reads, is refused again, and has no way to see why. Everything else in
+  walkdown reports the path that actually answered — 'walkdown where' exists for
+  exactly this — so the fix is for these sentences to name configPath() rather
+  than a spelling of it. Reproduced 2026-09-06."
+replies:
+  - author: agent
+    created: 2026-09-06T00:42:50Z
+    body: "Fixed in 53984c2. The two server-side sentences (lib/writes.js
+      mustBeDeclared, lib/identity.js's problem line) now call configPath(). The
+      panel cannot — it runs in a browser — so defaultActor() puts config_path
+      on the identity object it already sends, and src/panel/vocab.js grew
+      whereIdentityLives() reading it, with the old literal as the fallback for
+      a payload made before the field existed; all five panel sites go through
+      it. bin/walkdown.js's two help lines still say the literal, and I have
+      left them: help text describes the default arrangement rather than this
+      machine's, and reading it does not follow an instruction that then fails.
+      The every-door test now asserts the refusal names the fixture's own
+      redirected home, which is what makes the assertion bite rather than just
+      matching the word identity."
+  - author: agent
+    created: 2026-09-21T00:21:02Z
+    body: "Settled: an observation of the agent's own, addressed rather than settled
+      before the person's pass on the rule, so it queued the rule back to them
+      as a fix awaiting a look (2026-09-20). Nothing here was ever theirs to
+      verify."
+reason: observation

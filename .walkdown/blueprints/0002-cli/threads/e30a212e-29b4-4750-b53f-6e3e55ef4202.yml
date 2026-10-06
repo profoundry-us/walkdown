@@ -1,0 +1,156 @@
+id: n-0139
+uuid: e30a212e-29b4-4750-b53f-6e3e55ef4202
+kind: note
+author: Topher Fangio
+created: 2026-09-01T04:54:57.686Z
+anchor:
+  rule: threads.lifecycle.claim-never-accept
+status: recorded
+body: >-
+  Decision: identity is read, never supplied. It comes from the config, an agent
+  may never change it without explicit permission, and it may never be
+  overridden by an argument to the CLI or the MCP. Generating the config in the
+  first place is fine — that happens at a human's request, and building it
+  around the human who is running it is the point.
+
+
+  This closes a hole n-0130 left standing. That fix made verified/waived require
+  an EXPLICIT actor, on the reasoning that the machine username is not a
+  decision. It made attribution deliberate but not authentic: the explicit name
+  is just a string the caller types, so any agent can type any human's. Three
+  paths supply one today, and all three go — --actor
+  (bin/commands/thread.js:51), WALKDOWN_ACTOR (same line, and
+  bin/commands/sweep.js:46), and body.actor over HTTP (lib/api.js:309).
+
+
+  Two things found while writing this down.
+
+
+  First, the identity block in ~/.walkdown/config.yml is read by nothing.
+  lib/identity.js defaultActor() derives the actor from git user.username,
+  github.user, the email local part, then the OS username, and roles from git
+  walkdown.roles. The config block looks like the source of truth and is inert.
+  Making identity come from the config is wiring it up for the first time, not
+  merely protecting it.
+
+
+  Second, and this is the part that still needs answering: removing the override
+  is necessary but not sufficient, and on its own it makes things worse. If the
+  actor always comes from the config and cannot be overridden, an agent running
+  'walkdown thread n-XXXX --verify' inherits the human's name automatically — no
+  flag, no marker, work accepted under their name with nothing said. Something
+  has to positively distinguish a human driving from an agent driving. Three
+  candidates: an interactive confirmation, which an agent running
+  non-interactively cannot satisfy and which is literally what 'explicit
+  permission' means; an agent self-declaration from the harness that can only
+  ever RESTRICT, so declaring yourself an agent removes verify and failing to
+  declare is the remaining hole; or the CLI simply cannot accept work at all and
+  the panel is the only surface where a human signs.
+
+
+  Recommendation: the first. Verify, waive, and any write to the identity block
+  require an interactive confirmation, and are refused outright when stdin is
+  not a TTY — the same mechanism for both, and explicit permission becomes
+  mechanical rather than honour-system.
+
+
+  Disclosed for the record: the replies filing today's decisions on n-0117,
+  n-0121, n-0133 and q-0138 were recorded by an agent passing --actor 'Topher
+  Fangio'. The attributions are true — those are the human's decisions, made in
+  conversation — but the mechanism is the one being removed here, and under the
+  new design relaying a human's decision needs a shape that does not involve
+  typing their name.
+replies:
+  - author: Topher Fangio
+    created: 2026-09-01T05:04:04Z
+    body: >-
+      Withdrawing the interactive-confirmation recommendation above. It modelled
+      the agent as an adversary; the right model is a delegate. An agent told to
+      record something is acting on the human's behalf, so recording it under
+      the human's identity is correct rather than a loophole — and the claim
+      that removing the override 'makes things worse' was wrong for the same
+      reason. There is nothing to make worse: the agent inheriting the human's
+      name IS the intended behaviour when the human asked for the thing.
+
+
+      So the shape is smaller than anything proposed here, and needs no new
+      mechanism at all. The actor comes from the config's identity, always. The
+      single deviation worth supporting is an agent marking something as its OWN
+      voice — a note or a question it originated rather than relayed — and that
+      is a boolean, not a name: --actor <name> becomes --as-agent,
+      WALKDOWN_ACTOR goes, body.actor over HTTP goes. You can never type a name;
+      you can only step down from the human to the agent.
+
+
+      What makes that safe is already built. checkTransition (lib/threads.js:40)
+      refuses verified and waived when the actor is 'agent', case-insensitively,
+      from the n-0130 fix. So the one flag an agent can set is precisely the one
+      that removes its ability to accept work: the marker can only ever subtract
+      authority, never claim it. Nothing else is needed.
+
+
+      One optional idea, recorded and not argued for, because it may be exactly
+      the cleverness this project is cutting: attribution and provenance are
+      different columns. 'Who decided' is the human; 'how it arrived' is the
+      agent session. A separate provenance field would let a record read
+      'verified by Topher Fangio, via agent' without the agent lying or the
+      human sitting at a TTY, and would make 'which verifies did a person type
+      themselves' answerable later. It is one field and it is not required by
+      anything above — worth a yes or no rather than a design.
+  - author: topher
+    via: agent
+    created: 2026-09-01T06:27:16Z
+    body: >-
+      Done, in the shape the reply above describes, plus the provenance field —
+      a yes.
+
+
+      Identity is read: lib/identity.js defaultActor() now consults the personal
+      config's identity: block first (username, name, roles) and falls back to
+      git and the OS only where it says nothing. The block was inert; it is the
+      source of truth now.
+
+
+      The overrides are gone: --actor and WALKDOWN_ACTOR from
+      bin/commands/thread.js, WALKDOWN_ACTOR from bin/commands/sweep.js, both
+      reporters, and the RSpec gem, which now reads the same config block.
+      --actor becomes --as-agent, a boolean.
+
+
+      Provenance is a separate column, as the optional idea proposed. The author
+      stays the human; via: agent sits beside it on the thread, on the reply,
+      and in the report. This reply is the first record written that way.
+
+
+      The gate moved with it. Once an agent records under the person it acts
+      for, actor can no longer answer "was a machine driving?", so
+      checkTransition now refuses verified/waived on via: agent as well as on an
+      actor spelled "agent" — the flag that says a machine typed this is the one
+      that removes its ability to accept. And n-0130's guess/said distinction
+      outlived the flag that expressed it: acceptance now requires a DECLARED
+      identity, so a machine that only has a login name to go on is refused and
+      told where to say who you are.
+
+
+      Two deviations you should know about, both mine to confirm or reverse:
+
+
+      body.actor over HTTP (lib/api.js:309) is still there. The panel is a
+      person sitting at a browser, and its identity control — an editable
+      username and full name, rule panel.identity.default-actor with two browser
+      checks — is that person naming themselves. Removing it makes the control
+      decorative. The CLI and MCP doors are shut, which is what the decision
+      named; the panel door is a human at a UI. Say if you want it shut too, and
+      the identity control becomes a config editor instead.
+
+
+      n-0121's open question is answered in passing: a write with no author is
+      refused rather than defaulted to the machine username. It was the one
+      policy with four defaulting bugs behind it, and refusing is the answer you
+      filed on that thread.
+
+
+      The rule's statement is amended, so its agent verdict is honestly stale
+      and awaits a judging. threads.lifecycle.acts-for-a-person is added for the
+      half the old statement had no words for; both checks cells pass.
+reason: decision

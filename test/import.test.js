@@ -37,10 +37,10 @@ function project(root, blueprints) {
     .join('');
   writeFileSync(join(root, '.walkdown', 'config.yml'), `blueprints:\n${rows}`);
   blueprints.forEach((b, i) => {
-    const spec = join(root, '.walkdown', 'blueprints', `000${i + 1}-${b.id}`, 'blueprint');
+    const spec = join(root, '.walkdown', 'blueprints', `000${i + 1}-${b.id}`);
     mkdirSync(join(spec, 'features'), { recursive: true });
     writeFileSync(
-      join(spec, 'walkdown.yml'),
+      join(spec, 'spec.yml'),
       `blueprint: ${b.id}\ndescription: ${b.description}\nrunner:\n  targets:\n    local: { base_url: ${b.origin} }\n`,
     );
     writeFileSync(
@@ -64,7 +64,7 @@ function scratch() {
   const root = realpathSync(mkdtempSync(join(tmpdir(), 'wd-import-')));
   const home = join(root, 'home');
   mkdirSync(home, { recursive: true });
-  writeFileSync(join(home, 'config.yml'), 'identity:\n  username: importer\n');
+  writeFileSync(join(home, 'profile.yml'), 'identity:\n  username: importer\n');
   return { root, home, cleanup: () => rmSync(root, { recursive: true, force: true }) };
 }
 
@@ -90,7 +90,7 @@ test('a project nobody imported is invisible, and importing it makes it reachabl
     assert.ok(row, 'registered');
     assert.ok(row.project?.endsWith('acme-shop'), 'says where it came from');
     assert.equal(row.registered?.by, 'import', 'and how');
-    assert.doesNotMatch(readFileSync(join(s.home, 'config.yml'), 'utf8'), /checkout/);
+    assert.doesNotMatch(readFileSync(join(s.home, 'profile.yml'), 'utf8'), /checkout/);
   } finally {
     s.cleanup();
   }
@@ -200,7 +200,7 @@ test('the server routes across imported projects, and answers with all of them @
     process.env.WALKDOWN_HOME = s.home;
     const { createWalkdownServer } = await import('../lib/serve.js');
     const server = createWalkdownServer(
-      join(shop, '.walkdown', 'blueprints', '0001-checkout', 'blueprint'),
+      join(shop, '.walkdown', 'blueprints', '0001-checkout'),
       { cwd: s.root },
     );
     await new Promise((r) => server.listen(0, '127.0.0.1', r));

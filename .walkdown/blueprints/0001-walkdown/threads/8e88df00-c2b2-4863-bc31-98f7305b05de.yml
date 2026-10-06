@@ -1,0 +1,22 @@
+id: n-0026
+uuid: 8e88df00-c2b2-4863-bc31-98f7305b05de
+kind: note
+author: topher
+created: 2026-08-24T03:59:03Z
+anchor:
+  rule: panel.rules.detail-slide
+status: verified
+body: Add tabs-sm to the Blueprints / Rules / Screens tabs to make them a bit
+  smaller.
+replies:
+  - author: agent
+    created: 2026-08-24T03:59:35Z
+    body: Added tabs-sm to the tab list.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.rules.detail-slide
+      (2026-09-07T19-15-43Z-local-01).
+reason: feedback
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

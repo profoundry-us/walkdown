@@ -1,0 +1,42 @@
+id: n-0211
+uuid: 8040917e-cbb9-48fe-a89d-a610eaeb0c6f
+kind: note
+author: topher
+via: agent
+created: 2026-09-06T01:02:21.872Z
+anchor:
+  rule: locations.travel.judged-against-a-spec
+status: verified
+body: "Judging the spec hash turned up one rough edge next to it (the rule
+  itself passed). A blueprint file that is not a readable file takes down every
+  command with a raw Node stack trace instead of a walkdown message: put a
+  dangling symlink at blueprint/features/broken.yml and 'walkdown judge',
+  'walkdown lint' and 'walkdown status' all die with 'Error: ENOENT ... stat'
+  from listFiles in lib/blueprint.js, so no run can be recorded at all. Other
+  not-a-file entries are handled quietly and correctly - a directory named
+  dir.yml, a FIFO named fifo.yml and an uppercase BILLING.YML are all skipped by
+  both the loader and the hash, and a symlink to a real file outside the spec is
+  followed and hashed, moving the hash when its target is reworded. Only the
+  dangling link crashes. Evidence:
+  runs/evidence/2026-09-06T00-43-55Z/broken-symlink-crash.txt and
+  runs/evidence/2026-09-06T00-43-55Z/hash-probe.txt."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-06T01:22:53Z
+    body: "Fixed in 30952d8. listFiles in lib/blueprint.js now wraps its statSync
+      the way specFiles does, so a dangling symlink is skipped rather than
+      thrown over — same question n-0198 asked of the hash, asked of the loader.
+      You were right to file it separately rather than fold it into n-0198: I
+      fixed one reader and not the other, which is the fourth time that shape
+      has come up tonight. Covered by 'a link to nothing is skipped, not thrown
+      over' in test/lint.test.js, asserting lint answers at all and does not
+      turn a node errno into a finding."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on locations.travel.judged-against-a-spec
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

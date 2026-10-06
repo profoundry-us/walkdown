@@ -12,6 +12,7 @@ import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpath
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
+import { threadAt } from '../tools/test-home.mjs';
 
 const CLI = new URL('../bin/walkdown.js', import.meta.url).pathname;
 const roots = [];
@@ -30,7 +31,7 @@ function fixture({ commit = 'none' } = {}) {
   mkdirSync(home, { recursive: true });
   const git = (...a) => spawnSync('git', ['-c', 'user.email=t@t', '-c', 'user.name=t', ...a], { cwd: shop, encoding: 'utf8' });
   git('init', '-q');
-  writeFileSync(join(home, 'config.yml'), 'identity:\n  username: topher\n');
+  writeFileSync(join(home, 'profile.yml'), 'identity:\n  username: topher\n');
   const env = { ...process.env, WALKDOWN_HOME: home, WALKDOWN_SKILLS_DIR: join(home, 'skills'), NO_COLOR: '1' };
   delete env.WALKDOWN_SPEC;
   const wd = (args, cwd = shop) => spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', env });
@@ -163,11 +164,11 @@ test('a story moves with its threads, and its verdicts and signatures read the s
   assert.equal(f.wd(['hash', '--blueprint', 'b']).stdout.includes('stale'), false, 'hashes still match their words');
 
   // Threads moved, ids kept, the picture with them; the other stayed.
-  assert.ok(existsSync(join(f.B.threads.path, `${f.thread}.yml`)));
-  assert.equal(existsSync(join(f.A.threads.path, `${f.thread}.yml`)), false);
-  const pic = readFileSync(join(f.B.threads.path, `${f.thread}.yml`), 'utf8').match(/attachments\/[\w.-]+/)[0];
+  assert.ok(existsSync(threadAt(f.B.threads.path, f.thread)));
+  assert.equal(existsSync(threadAt(f.A.threads.path, f.thread)), false);
+  const pic = readFileSync(threadAt(f.B.threads.path, f.thread), 'utf8').match(/attachments\/[\w.-]+/)[0];
   assert.ok(existsSync(join(f.B.threads.path, pic)));
-  assert.ok(existsSync(join(f.A.threads.path, 'n-0002.yml')));
+  assert.ok(existsSync(threadAt(f.A.threads.path, 'n-0002')));
 
   // Copied records: only the moved rules' results, saying whence.
   const copies = f.runsOf(f.B).map((n) => JSON.parse(readFileSync(join(f.B.runs.path, n), 'utf8')));
@@ -231,7 +232,7 @@ test('a move is refused, and nothing moves, when the rule is already there, the 
     join(f.A.runs.path, '2026-10-01T14-00-00Z-local-01.json'),
     JSON.stringify({ run_id: '2026-10-01T14-00-00Z-local-01', created: '2026-10-01T14:00:00Z', actor: 'agent', kind: 'walkdown', target: 'local', base_url: 'http://localhost:3000', results: [{ rule: 'shop.pay.card', status: 'pass' }] }),
   );
-  const bCfg = join(f.B.spec.path, 'walkdown.yml');
+  const bCfg = join(f.B.spec.path, 'spec.yml');
   writeFileSync(bCfg, readFileSync(bCfg, 'utf8').replace('base_url: http://localhost:3000', 'base_url: http://localhost:4999'));
   f.git('add', '-A');
   f.git('commit', '-qm', 'elsewhere');

@@ -1,0 +1,61 @@
+id: q-0168
+uuid: 03fa2f9e-6af9-464f-b0d1-bdac585852f1
+kind: question
+author: topher
+via: agent
+created: 2026-09-03T01:36:56.870Z
+anchor:
+  rule: locations.answer.one-walkdown-answers
+status: incorporated
+body: "Judged 2026-09-03 (run 2026-09-03T01-26-23Z-local-01, PASS). Every THEN
+  held in a fixture monorepo built with the real init: root .walkdown, a pack's,
+  a pack nested inside that pack, a legacy-layout pack, a .walkdown above the
+  git root, and a personal home with an override and a project of its own. From
+  each place exactly the nearest .walkdown answered, merged with the personal
+  one and nothing else; --project across the boundary is refused in both
+  directions; a server started in each place offers, serves and writes to only
+  what that .walkdown declares (evidence
+  runs/evidence/2026-09-03T01-26-23Z/locations-answer-probe.txt and
+  server-probe.txt). This question is about the one shape the statement's last
+  sentence leaves open, which n-0159's reply left standing as option (b),
+  'contained'. It is contained on the LIST, but not on the WRITE when the pack
+  keeps its records inside its blueprint directory: root config declares reach2
+  with spec: packs/gamma/blueprint, and packs/gamma/.walkdown declares gamma
+  with spec: blueprint and no threads: key. Both entries resolve threads to
+  packs/gamma/blueprint/threads. A server started at the ROOT with --project
+  reach2 offers only the root's list and refuses ?bp=gamma - and then a plain
+  POST /api/threads lands n-0001 in the pack's live ledger, which 'walkdown
+  threads' run inside packs/gamma lists (server-probe.txt, section S5). With
+  init's home layout the same write lands in <home>/blueprint/threads/, a
+  directory the pack's own entry never reads, so it is invisible rather than
+  shared - contained by accident of layout (locations-answer-probe.txt section
+  4, and server-probe S1/S3). I passed the rule because the root read only its
+  own config and step 4 says 'wherever the blueprint it serves happens to sit',
+  so this is a declaration a person wrote, not pooling. The question for a
+  person: is a spec: that lies under ANOTHER .walkdown a declaration walkdown
+  should refuse (n-0159's option b), or at least one 'lint' and 'project add'
+  should name? Today neither says a word."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-03T02:41:39Z
+    body: "Decision (Topher, 2026-09-02): refuse it. A blueprint that sits under its
+      own .walkdown already has one owner; a second committed declaration from a
+      .walkdown above is the same defect family as n-0160 and n-0170, written by
+      hand instead of merged by code. So: `project add` and every other writer
+      of a committed entry refuse a spec that lies under another .walkdown,
+      naming that .walkdown and pointing at --ephemeral for a throwaway copy;
+      `lint` reports a hand-written entry of that shape as an error, naming both
+      declaring files; and the rule gains a THEN saying so. Implementation
+      follows in this session."
+  - author: topher
+    via: agent
+    created: 2026-09-03T02:44:11Z
+    body: "Incorporated. The rule one-walkdown-answers gained a THEN: a committed
+      entry whose spec lies under another .walkdown is refused when written and
+      reported by lint when found. Code: rememberProject refuses it for every
+      committed writer, `project add` refuses it outright (listed there or not)
+      and points at --ephemeral, and lint reports a hand-written one as an error
+      naming the entry, both .walkdown directories and the way out. Test:
+      test/locations.test.js 'a committed entry never reaches under another
+      .walkdown'. docs/08 says the same."

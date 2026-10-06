@@ -1,4 +1,4 @@
-import { declaredHome } from '../tools/test-home.mjs';
+import { declaredHome, threadAt } from '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { canTransition } from '../lib/vocab.js';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -23,7 +23,7 @@ beforeEach(() => {
   rmSync(h.threads, { recursive: true, force: true });
   mkdirSync(h.threads, { recursive: true });
   mkdirSync(bp, { recursive: true });
-  writeFileSync(join(bp, 'walkdown.yml'), 'blueprint: mut\n');
+  writeFileSync(join(bp, 'spec.yml'), 'blueprint: mut\n');
   writeFileSync(
     join(h.threads, 'n-1.yml'),
     'id: n-1\nkind: note\nstatus: open\nbody: Fix the button.\n',
@@ -35,7 +35,7 @@ beforeEach(() => {
 });
 
 const load = () => loadBlueprint(bp, { cwd: h.root });
-const onDisk = (id) => parse(readFileSync(join(h.threads, `${id}.yml`), 'utf8'));
+const onDisk = (id) => parse(readFileSync(threadAt(h.threads, id), 'utf8'));
 
 test('replies append with author and timestamp', () => {
   replyToThread(load(), 'n-1', { author: 'agent', body: 'Fixed in abc123.' });

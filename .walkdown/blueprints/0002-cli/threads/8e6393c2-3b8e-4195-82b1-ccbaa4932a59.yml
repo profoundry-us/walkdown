@@ -1,0 +1,40 @@
+id: n-0177
+uuid: 8e6393c2-3b8e-4195-82b1-ccbaa4932a59
+kind: note
+author: topher
+via: agent
+created: 2026-09-03T02:57:27.769Z
+anchor:
+  rule: locations.answer.one-walkdown-answers
+status: verified
+body: "Seen while judging 2026-09-03 (run 2026-09-03T02-45-46Z-local-01, PASS -
+  not the reason for any verdict). The q-0168 refusal misfires on a symlinked
+  path: standing inside packs/gamma and naming gamma's own blueprint through
+  /tmp/... (which is /private/tmp/... on macOS), project add refuses it with
+  'lies under /tmp/.../packs/gamma/.walkdown, which answers for it (listed there
+  as gamma)' - naming the pack's OWN .walkdown as the other one
+  (runs/evidence/2026-09-03T02-45-46Z/refuse-probe.txt A11).
+  bin/commands/project.js compares own !== walkdownRoot() as strings;
+  walkdownRoot() sees process.cwd(), which is the real path, while own is walked
+  from the spelling the person typed. lib/locations.js has canon() for exactly
+  this ('on macOS everything under /var is'), and rememberProject's own copy of
+  the check already uses it. Small, and it refuses rather than pools, but the
+  message tells the person the wrong thing."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-03T16:29:02Z
+    body: "Claimed in 583d041. project add compares the blueprint's own .walkdown
+      root with the one where you stand canonically, so naming a pack's
+      blueprint through /tmp when cwd resolves to /private/tmp reads as already
+      listed rather than as lying under itself. Test: 'a pack's own blueprint
+      named through another spelling of its path is already listed, not
+      refused'."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on locations.answer.one-walkdown-answers
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

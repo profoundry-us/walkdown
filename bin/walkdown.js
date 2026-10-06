@@ -16,12 +16,13 @@ A command is a noun and then a verb; the noun alone lists, and
 Getting ready
   walkdown init [--force]
   walkdown skills [--into <dir>] [--project] [--force]
+  walkdown upgrade [--dry-run]
 
 Blueprints
   walkdown blueprints [list] [--stale]
-  walkdown blueprints new [<id>] [--dir <root>] [--commit none|spec|all]
-  walkdown blueprints import <path> [--all|--only <ids>] [--id <name>] [--ephemeral] [--why <reason>]
-  walkdown blueprints rename <id> <new-id>
+  walkdown blueprints new [<name>] [--folder <folder>] [--commit none|spec|all] [--project <label>] [--code <pc>]
+  walkdown blueprints import <path> [--all|--only <folders>] [--ephemeral] [--why <reason>]
+  walkdown blueprints rename <id> <new-name> [--folder <folder>]
   walkdown blueprints commit <none|spec|all> [--blueprint <id>]
   walkdown blueprints forget <id>
   walkdown pointer [--dir <root>] [--into <file>]
@@ -58,6 +59,8 @@ all without it, and anything that writes asks for it.
 
 /* What each command that is not a noun does, for `walkdown <command> --help`. */
 const ABOUT = {
+  upgrade:
+    "Move walkdown's files from the layout before ADR 0014 to the current one, once:\nthe profile, each home flattened around its spec.yml, registry rows given IDs\nand projects, threads given UUIDs. Folder names and verdicts are kept. With\n--dry-run it says what it would do and changes nothing.",
   run:
     'Run the project\'s checks via the runner contract (run_all, or run_for_rule\nwith --rule), injecting the target\'s env and WALKDOWN_TARGET. The\nreporter/formatter records the run.',
   status:
@@ -86,7 +89,7 @@ const NOUNS = ['blueprints', 'records', 'threads', 'rules'];
 /* Forms ADR 0012 retired: refused with the form that replaced them. */
 const OLD = new Set(['thread', 'import', 'move', 'blueprint']);
 
-const COMMANDS = new Set(['init', 'skills', 'pointer', 'where', 'status', 'lint', 'hash', 'run', 'judge', 'sweep', 'serve', 'claims', ...NOUNS]);
+const COMMANDS = new Set(['init', 'upgrade', 'skills', 'pointer', 'where', 'status', 'lint', 'hash', 'run', 'judge', 'sweep', 'serve', 'claims', ...NOUNS]);
 
 const [cmd, ...rest] = process.argv.slice(2);
 if (OLD.has(cmd)) {

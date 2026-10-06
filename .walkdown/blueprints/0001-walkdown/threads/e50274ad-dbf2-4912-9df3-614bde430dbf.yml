@@ -1,0 +1,33 @@
+id: n-0244
+uuid: e50274ad-dbf2-4912-9df3-614bde430dbf
+kind: note
+author: topher
+created: 2026-09-08T04:04:15.866Z
+anchor:
+  rule: panel.start.unclaimed-page-says-so
+status: verified
+body: Add the note from q-0243 when building it.
+replies:
+  - author: agent
+    created: 2026-09-08T21:28:05Z
+    body: >-
+      The screen this waits on now exists:
+      prototype/screens/unclaimed-page.html, promoted from the sketch on
+      2026-09-08 and declared in the storyboard as `unclaimed-page`. q-0243 is
+      incorporated.
+
+
+      Leaving this open, because it is about the BUILD and nothing has been
+      built. n-0256 has what the panel does today, measured: one blueprint is
+      opened without asking, and the two-blueprint gate asks which rather than
+      whether. When the panel is built against the new screen, the note from
+      q-0243 - the address named, the two ways to claim it, the blueprints
+      reachable but never opened for you - is what to fold in.
+  - author: agent
+    created: 2026-09-08T22:36:36Z
+    body: "Folded in. The gate the panel now draws carries what q-0243 asked for:
+      the fact with the address named, both ways to claim it, walkdown init for
+      a page that belongs to nothing yet, and the blueprints this server holds -
+      reachable in one click and never opened for you."
+reason: finding
+verified_by: topher

@@ -1,0 +1,196 @@
+id: q-0225
+uuid: 4b7dfc22-d4c1-471a-a093-763faec48808
+kind: question
+author: topher
+via: agent
+created: 2026-09-07T15:20:08.310Z
+anchor:
+  rule: status.acceptance.role-comes-from-the-run
+status: incorporated
+body: >-
+  I just realized that we're conflating two things: identity and roles. And I
+  think we need to record them for every walkdown.
+
+
+  Here are two use-cases that I expect to happen and that we need to support.
+
+
+  1. I am on a zoom call with Sam from product and I am driving the walkdown on
+  behalf of both of us. I need to be able to mark that Sam is the product role
+  and I am marking things on his behalf (as well as myself for engineering)
+
+  2. I work through and pass all things as the engineer, commit to the repo, and
+  then Sam checks it out and does his own walkdown as the product person passing
+  / failing things, and then he commits to the repo so it comes back to me
+
+
+
+  I think I want to have a dialog popup every time you start a walkdown that
+  asks who you are signing as for THIS specific walkdown. It should
+  auto-populate the identity & roles from your config, but I should be allowed
+  to change it. And I think each role needs to have it's own identity so that I
+  can support the first case.
+
+
+  Help me think through this a bit.
+
+
+  Yes, keep via different than the signer.
+
+
+  Will `recorded_by` and `actor` ever be different? Isn't that essentially the
+  same field? If `signer != actor` that is essentially the signal that it was
+  recorded by someone else? Is there a reason to document that separately?
+
+
+  File the thread and create / update the relevant rules accordingly.
+added: >-
+  Identity and role are conflated on a run: one actor, one flat list of roles.
+  Two things a team actually does need them separated.
+
+
+  Case 1, one walk, two people. Topher drives while Sam from product is on the
+  call. Topher signs eng for himself and product for Sam. Today the only way to
+  record that is for Topher to tick `product`, which files Sam's acceptance
+  under Topher's name and loses the fact that Sam is the one who accepted.
+
+
+  Case 2, two walks, one repository. Topher walks as eng and commits; Sam checks
+  out, walks as product, commits back. This already works - one file per run, no
+  shared index, latest-wins per role - and needs no new shape. Two smaller
+  things to watch: Sam's run must actually carry his roles (today an unticked
+  box records none and `status.js` reads none as eng, which is how 29 rules got
+  an eng signature nobody claimed on 2026-09-07T14-18-58Z-local-01), and two
+  people finishing in the same second in separate checkouts mint the same run id
+  and collide in git.
+
+
+  PROPOSED SHAPE - a run carries one signature per role, each naming who
+  accepted in it:
+
+    actor: topher
+    signatures:
+      - { role: eng,     signer: topher }
+      - { role: product, signer: sam }
+
+  `actor` keeps its current meaning exactly: who ran the walk, derived by the
+  server from the machine's own identity, never nameable by a caller (n-0142,
+  n-0143). A signature whose signer is not the actor IS the record of a proxy -
+  Topher typed it, Sam accepted it - so nothing else needs to be written down to
+  say so. An earlier draft of this carried a `recorded_by` field; Topher's call,
+  2026-09-07, is that it is redundant with `actor` and does not exist.
+
+
+  Legacy records adapt in one line: each role in `roles:` becomes a signature
+  signed by the run's actor.
+
+
+  DECIDED, so it is not re-litigated:
+
+  - `via` stays exactly what it is - a machine typed this - and keeps
+  subtracting authority at every gate. A proxy is a different fact and gets a
+  different field. Overloading `via` would have meant telling a human via from a
+  machine one, which is the confusable-spelling chase q-0218 deliberately
+  declined.
+
+
+  STILL OPEN, and each is a decision rather than a defect:
+
+  1. Does an empty role set stay "reads as engineering"? That fallback exists so
+  pre-roles records are not read as signed by nobody, but it cannot tell a
+  legacy record from one written today by somebody who ticked nothing - which is
+  the 29-rule case above. Options: refuse a walk with no role, gate the fallback
+  on records that predate roles, or leave it.
+
+  2. May somebody sign a role their own config does not grant? Their own
+  signature is arguably constrained by their config; a proxy signature names
+  somebody else and cannot be, or case 1 is impossible.
+
+  3. Is a proxy signature sticky? Suggest emphatically not: your own roles
+  default from config every walk, a proxy is per-walk and never remembered,
+  because a remembered proxy is the mechanism that silently signs for an absent
+  person next month.
+
+  4. Does the same proxy belong on thread `verified`? Same shape, but it touches
+  the human-only gate directly, so it is worth landing on runs first.
+
+
+  Two rules are added by this thread, both unbuilt:
+  status.acceptance.signature-names-its-signer and
+  panel.walkdown.who-signs-is-declared. Nothing existing is reworded, so no
+  signature already given is disturbed.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-07T16:31:47Z
+    body: Let's go ahead and get rid of the roles from the settings (keep the name /
+      desk dials as you described); update the relevant rules and build the new
+      dialog popup for a walkdown. I want to get this right before I continue
+      doing walkdowns.
+    added: >-
+      Built, in a2eb533. Both rules this thread raised are implemented; neither
+      is judged, and both are yours to walk.
+
+
+      What the ledger does now. A run carries `signatures: [{role, signer}]`.
+      `actor` is untouched - who ran the walk, derived from the machine, never
+      nameable by a caller - so a signer who is not the actor is the whole
+      record of a proxy, per your call. Refused at the write: a role outside the
+      vocabulary, one role signed twice, a signature naming nobody, and a
+      machine as signer in any spelling the actor gate already refuses. Reading,
+      `status.js` handles three shapes - signatures, the older flat `roles`
+      where every role was the actor's own, and a record predating both, which
+      stays engineering's. `walkdown status <rule>` now says "signed by sam,
+      recorded by topher".
+
+
+      What the panel does now. Start walkdown asks first: a row per role, your
+      config's roles pre-ticked, each signer editable. Type somebody else's name
+      and that role records under them, with the summary saying so before you
+      start. Nothing ticked, no start. The answer rides in the session draft, so
+      a reload cannot re-sign a two-person sitting as whoever is at the
+      keyboard, and while a proxy is in force the strip carries it in warning
+      yellow for the sitting's whole length. It is never remembered into the
+      next one.
+
+
+      Settings lost the roles checkboxes. What is there now is what your config
+      says and where to change it, the same shape as the username line - and
+      `identityOverride` holds no roles at all, so nothing the browser remembers
+      decides what a record says.
+
+
+      Three things you should know, because I decided them by building and you
+      may want them different.
+
+
+      1. Your open question 1 is dodged rather than answered. The panel cannot
+      now file an empty role set, so the "reads as engineering" fallback only
+      ever meets records that predate signatures. I left the fallback alone: it
+      is what keeps the old ledger legible. If you want a run with no roles
+      refused outright at the door, that is still a decision waiting.
+
+
+      2. Your open question 2 is answered "yes" by what I built, and you may
+      disagree. The dialog offers every role the blueprint knows and lets you
+      sign any of them as yourself, whether or not your config grants it.
+      Constraining that would mean the config is a permission rather than a
+      default, which is a different claim than the one identity.js currently
+      makes.
+
+
+      3. `status.acceptance.roles-recorded-on-the-run` still describes the older
+      shape. It is not wrong - that shape is still accepted and still read - so
+      I left the statement alone rather than reword it and un-sign a rule for no
+      behaviour change. Worth a look when you next touch that group.
+
+
+      Not built, and still open from this thread: the same proxy on thread
+      `verified` (your point 4), and the run-id collision two people can hit
+      finishing in the same second in separate checkouts.
+  - author: agent
+    created: 2026-09-20T17:15:22Z
+    body: "Signatures shipped: a run carries one per role, each naming its signer,
+      and a signer who is not the actor is the record of a proxy. The three
+      decisions this left open are re-asked one at a time, with choices: q-0312,
+      q-0313, q-0314. Closed here as Topher's own thinking, refiled."

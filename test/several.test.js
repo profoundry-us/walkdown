@@ -87,7 +87,7 @@ test('blueprints new <id> gives a project a second blueprint in its own numbered
   assert.deepEqual(m.homes(), ['0001-proj', '0002-b'], 'and nothing claimed');
 
   // Named for its id, not for the project.
-  assert.match(readFileSync(join(m.home, 'blueprints', '0002-b', 'blueprint', 'walkdown.yml'), 'utf8'), /^blueprint: b$/m);
+  assert.match(readFileSync(join(m.home, 'blueprints', '0002-b', 'blueprint', 'spec.yml'), 'utf8'), /^blueprint: b$/m);
 
   // Both claim one page: claims reports both, and serve's list holds both.
   for (const h of ['0001-proj', '0002-b'])

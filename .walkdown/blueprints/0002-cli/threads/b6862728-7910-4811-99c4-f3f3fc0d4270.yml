@@ -1,0 +1,28 @@
+id: n-0322
+uuid: b6862728-7910-4811-99c4-f3f3fc0d4270
+kind: note
+reason: request
+author: topher
+via: agent
+created: 2026-09-21T01:00:38.866Z
+anchor:
+  rule: locations.answer.registry-is-the-only-door
+status: verified
+body: The Because block of "What a spelling can fool..." does not make a lot of
+  sense and needs to be rewritten in a better voice.
+added: Filed from Topher's list, 2026-09-21. A wording pass under ADR 0004; the
+  rewording keeps the hash as a reword since the meaning does not move.
+replies:
+  - author: agent
+    created: 2026-09-21T01:47:31Z
+    body: "Rewritten: 'A path is examined once, when it is added; every read after
+      that trusts what the add wrote, so nothing a tree grows later can open a
+      second door.' The old sentence is kept in the rule's history so the
+      rewrite is on the record."
+  - author: topher
+    via: verdict
+    created: 2026-09-21T04:53:00Z
+    body: Verified by topher's pass on locations.answer.registry-is-the-only-door
+      (2026-09-21T04-53-00Z-local-01).
+verified_by: topher
+verified_via: 2026-09-21T04-53-00Z-local-01

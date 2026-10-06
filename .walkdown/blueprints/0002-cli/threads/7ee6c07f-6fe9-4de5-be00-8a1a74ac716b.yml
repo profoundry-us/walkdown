@@ -1,0 +1,169 @@
+id: n-0125
+uuid: 7ee6c07f-6fe9-4de5-be00-8a1a74ac716b
+kind: note
+author: agent
+created: 2026-08-31T04:11:53Z
+anchor:
+  rule: threads.lifecycle.says-what-it-did
+status: verified
+body: "Agent sitting 2026-08-31: FAIL on the recorded-under clause. The
+  statement promises a mutation report says who the change was recorded under;
+  live against the scratch copy, a transition prints '✓ n-0093 open → addressed
+  · +1 reply' and a bare reply prints '✓ n-0093 still addressed · +1 reply' —
+  statuses and reply count, no actor. Only the waive path names its actor
+  (bin/commands/thread.js appends 'by <waived_by>'). The omission matters
+  because the actor defaults to the machine username when --actor is forgotten —
+  the one mistake the clause exists to surface is invisible in the output. The
+  tagged tests pass because they assert the actor only on the waive path
+  (test/thread-cli.test.js), so the check under-asserts its statement. Evidence:
+  runs/evidence/2026-08-31T03-01-00Z-sitting/headless-transcript.txt (the live
+  transcript, tail section)."
+replies:
+  - author: agent
+    created: 2026-08-31T20:38:08Z
+    body: "Re-judged in run 2026-08-31T20-33-31Z-local-01: still FAIL, but not for
+      the recorded-under clause — that is fixed by 6601f4a. Live against a
+      scratch copy, every mutation now names its actor: a transition prints '✓
+      n-0113 open → addressed · by agent · +1 reply', a bare reply prints '✓
+      n-0117 still open · by agent · +1 reply', and with --actor forgotten and
+      WALKDOWN_ACTOR unset the report reads 'by topherfangio' — the
+      silently-defaulted machine username is finally visible (evidence:
+      runs/evidence/2026-08-31T20-33-31Z/cli-mutations.txt). The checks now
+      assert the actor on non-waive paths too. The remaining fail is narrower: a
+      combined --reply with a --status that gets refused lands the reply on disk
+      BEFORE the transition validates (bin/commands/thread.js applies
+      replyToThread, then transitionThread throws), so the command prints only
+      the refusal and exits 2 — expected: a command that changes a thread
+      reports the change, including how many replies landed; actual: '\"waived\"
+      requires a named human actor' on stderr, nothing else, while the reply
+      sits in the thread — output identical to a run where nothing happened, and
+      re-running after fixing the mistake lands a duplicate reply (evidence:
+      runs/evidence/2026-08-31T20-33-31Z/cli-mixed-refusal.txt). Fix could be
+      either atomicity (validate the transition before applying the reply,
+      making the refusal truthful) or reporting the partial landing;
+      validate-first seems truer to the statement."
+  - author: agent
+    created: 2026-08-31T20:46:47Z
+    body: "Re-judged in run 2026-08-31T20-40-35Z-local-01: still FAIL, narrower
+      again. Both prior findings held up under live probing against a scratch
+      copy: every mutation names its actor, including the defaulted machine
+      username when --actor is forgotten
+      (runs/evidence/2026-08-31T20-40-35Z/cli-actor-default.txt), and a combined
+      --reply with a refused --status now writes nothing — n-0126.yml
+      byte-identical by sha256 across three refused attempts, no duplicate on
+      retry (runs/evidence/2026-08-31T20-40-35Z/cli-refusal-atomicity.txt). The
+      remaining fail is the empty-string reply: bin/commands/thread.js line 42
+      computes mutating as Boolean(values.reply || status), so --reply '' — the
+      shape --reply \"$MSG\" takes when the variable is empty, in exactly the
+      loop the statement's refusal clause protects — is treated as no reply
+      given at all. Expected: 'reply body required' on stderr and a non-zero
+      exit, which --reply '   ' (whitespace) already produces. Actual, alone:
+      the whole conversation printed back and exit 0 — a mutation ask answered
+      with read output that looks the same whether or not anything happened.
+      Actual, combined with a valid --status: the transition applies, the reply
+      is silently dropped, and the report reads clean success with no reply
+      count — omitting that zero of the one requested reply landed
+      (runs/evidence/2026-08-31T20-40-35Z/cli-empty-reply.txt). Fix is one gate:
+      treat a present-but-empty --reply as a refusable ask routed to the
+      existing 'reply body required' refusal, rather than as absent."
+  - author: agent
+    created: 2026-08-31T20:59:54Z
+    body: "Re-judged in run 2026-08-31T20-52-34Z-local-01: still FAIL, narrower
+      again, and the pattern held - all three prior fixes survived live
+      re-probing against a scratch copy (actor named on every path including the
+      defaulted username and WALKDOWN_ACTOR, refusals atomic and byte-identical
+      across retries, empty/whitespace --reply refused whole;
+      runs/evidence/2026-08-31T20-52-34Z/cli-prior-modes.txt,
+      cli-refusal-atomicity.txt, cli-empty-reply.txt) and two new edges
+      appeared. One: --json combined with a mutation prints the thread back -
+      the mutation applies, then bin/commands/thread.js takes the json branch
+      before the mutation report, so stdout is byte-identical by diff to a plain
+      --json read run afterwards, and a transition-only --json call with --actor
+      forgotten shows the defaulted username nowhere (grep 0 matches) - round
+      one's invisibility, resurrected on the machine-readable path; expected: a
+      mutation reports both ends and its actor whatever the format (a small JSON
+      change report, or refusing the combination), actual: the thread read back
+      (runs/evidence/2026-08-31T20-52-34Z/cli-json-mutation.txt). Two: a
+      present-but-empty actor - the --actor \"$WHO\" shape with an unset
+      variable, or WALKDOWN_ACTOR set but empty - passes every non-human-only
+      gate and the report reads 'by ' naming nobody; for a reply the disk
+      records author 'unknown' while the report names the empty string, so the
+      report disagrees with the ledger it just wrote, and '--actor \"   \"' is
+      recorded verbatim as whitespace; expected: refuse a present-but-empty
+      actor the way round three's fix refuses an empty reply, or report what was
+      actually recorded
+      (runs/evidence/2026-08-31T20-52-34Z/cli-empty-actor.txt). All seven tagged
+      checks pass - neither edge is covered by one. Smaller, truthfully-reported
+      but silent: --reason without a status is dropped without a word, and
+      --waive beside --status prefers the waive without acknowledging the
+      ignored flag (cli-misc-edges.txt)."
+  - author: agent
+    created: 2026-08-31T21:10:24Z
+    body: "Re-judged in run 2026-08-31T21-01-55Z-local-01: still FAIL, narrower
+      again, and every prior fix held under live re-probing against a scratch
+      copy - actor named on all paths including the defaulted username and an
+      env actor (runs/evidence/2026-08-31T21-01-55Z/cli-prior-modes.txt),
+      refusals atomic and byte-identical across three retries with why on stderr
+      and exit 2 (cli-refusal-atomicity.txt), empty/whitespace --reply refused
+      whole even beside a valid --status (cli-empty-reply.txt), --json mutations
+      now printing a change report with both ends, the actor and the count while
+      refused --json keeps stdout empty (cli-json-mutation.txt), and a
+      present-but-empty --actor falling through to the next source with report
+      matching disk on every combination (cli-empty-actor.txt). The remaining
+      fail is the recorded-under clause on the only mutation a terminal thread
+      still accepts: a reply to a waived or verified thread lands on disk under
+      the invocation's actor, but the report's 'by' names waived_by/verified_by
+      instead. Expected: the report says who the change it made was recorded
+      under. Actual: '--actor agent --reply ...' on a waived thread prints
+      'still waived · by Probe Human · +1 reply' while the disk records author
+      'agent'; a verified thread behaves the same; the JSON change report reads
+      by 'Probe Human' beside replies_added 1, naming someone who did not make
+      the change; and with --actor forgotten the reply lands under
+      'topherfangio' while the report still says 'by Probe Human' - round one's
+      invisible default resurrected, with another person's name standing where
+      it should be (cli-reply-to-terminal.txt). Cause: the status-gated 'under'
+      preference in bin/commands/thread.js, whose comment claims the actor is
+      what this invocation ran under either way - false exactly on
+      reply-to-terminal, and none of the nine passing tagged checks replies to a
+      terminal thread (tagged-checks.txt). Fix either way satisfies the
+      statement: report the reply's actor separately from the status-holder, or
+      refuse replies to terminal threads. Round four's two uncounted edges
+      re-examined and upheld as truthful: an orphan --reason lands nowhere and
+      claims nothing, and --waive beside --status reports the move that actually
+      happened (cli-misc-edges.txt)."
+  - author: agent
+    created: 2026-08-31T21:17:38Z
+    body: "Re-judged in run 2026-08-31T21-12-08Z-local-01: PASS - round six found
+      nothing left to narrow. Every prior round's failure mode was re-probed
+      live against a scratch copy and held: mutations name their actor on every
+      path including the defaulted machine username and an env actor, report
+      matching disk (runs/evidence/2026-08-31T21-12-08Z/cli-prior-modes.txt);
+      refusals are atomic - a combined reply with a refused waive left
+      n-0096.yml byte-identical by sha256 across three attempts, why on stderr,
+      exit 2, stdout empty (cli-refusal-atomicity.txt); empty and whitespace
+      --reply refuse whole even beside a valid --status or a valid human waive
+      (cli-empty-reply.txt); --json mutations print a change report with both
+      ends, actor and replies_added while refused --json keeps stdout empty, and
+      a present-but-empty --actor falls through with report agreeing with the
+      ledger (cli-json-mutation.txt); and round five's fix in 3dc2b0b holds - a
+      reply to a waived or verified thread reports its own actor, agent or the
+      visibly-defaulted username, never the status holder, in text and JSON,
+      while the bare read keeps 'waived by Probe Human' as the record
+      (cli-reply-to-terminal.txt). New round-six probes stayed clean: combined
+      reply+transition reports one line with both ends and count,
+      waive-with-reason counts +2 replies, question flows report identically,
+      flagless read prints the whole conversation, a mutation on a missing
+      thread refuses on stderr exit 2, and a set -e loop stops at the first
+      refusal with the refused thread untouched (cli-round6-probes.txt). All ten
+      tagged checks pass and the terminal-reply gap is now itself tagged
+      (tagged-checks.txt). The two truthful-but-silent flag edges from round
+      four remain and I concur they do not violate the statement. Marking
+      addressed; verification is a human's call."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on threads.lifecycle.says-what-it-did
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

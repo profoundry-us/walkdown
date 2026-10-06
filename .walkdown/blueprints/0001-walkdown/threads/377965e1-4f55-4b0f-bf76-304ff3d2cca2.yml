@@ -1,0 +1,96 @@
+id: q-0268
+uuid: 377965e1-4f55-4b0f-bf76-304ff3d2cca2
+kind: question
+author: topher
+via: agent
+created: 2026-09-09T15:31:59.850Z
+anchor:
+  rule: panel.start.unclaimed-page-says-so
+  screen: unclaimed-page
+status: incorporated
+body: >-
+  "Nothing claims the page, but you've picked a blueprint on this site before."
+  - I don't like this state. If we "pick" a blueprint for a site, that action
+  should claim it. The "remembers" should be the claiming so we only have a
+  single way to "remember" things.
+
+
+  "Nothing claims the page, and you've never picked one here." - I guess this is
+  where I expected the "Pick a Blueprint" page to appear. Can we show the
+  blueprints and let you click one to claim it for that URL?
+
+
+  Yes, the first one - open the question and draft the proposal
+added: >-
+  Design request: the blueprint list on this screen should CLAIM, not merely
+  open.
+
+
+  Topher's call today. As promoted, unclaimed-page.html ends with 'Open one
+  anyway' - a deliberate act that changes nothing on disk, after which the
+  browser quietly remembers what you picked. That leaves two kinds of memory
+  about one fact: what the project says, and what this browser recalls. They
+  disagree the moment you use another machine, and the board can see neither.
+  Pressing a blueprint should write the claim down in the project instead, so
+  there is one answer wherever the question is asked.
+
+
+  Sketched at proposals/claim-this-page.html. What changed from the promoted
+  screen, and why:
+
+
+  - 'Open one anyway' becomes 'Claim this page', because that is what pressing
+  it now does. The old words describe a choice with no consequence; the new ones
+  describe a write.
+
+  - A sentence under the list saying what the press will do before it is
+  pressed, naming the ORIGIN rather than the page - claiming is per site, so
+  every page on it is reviewed against that blueprint from then on.
+
+  - Two blueprints drawn rather than one. The offer has to read the same at any
+  count, since a count is never what decides.
+
+  - The undo is on the screen, as a line and not a button. A claim made in one
+  press should be unmade in one, and saying so is what makes the press safe to
+  make.
+
+  - 'walkdown init' stays, demoted to 'Or it belongs to nothing yet', and
+  'walkdown claims --url' moves into that block as the way to ask rather than a
+  thing to do.
+
+
+  The sketch is a sketch: the words and the shape are yours to change or
+  replace, and I have built none of it. It also depends on q-0267 - a claim
+  written from the browser is a specification write, which
+  ownership.writes.spec-never-implementation currently forbids - so this screen
+  cannot be built until that question is settled, whichever way.
+replies:
+  - author: agent
+    created: 2026-09-09T15:33:02Z
+    body: "One omission worth naming, since it is a whole block gone rather than a
+      rewording: the promoted screen's 'To review this page' paragraph - add the
+      address to a screen's app path or a target's base_url - is not in the
+      sketch. Claiming does that for you, so keeping instructions for doing it
+      by hand beside a button that does it reads as two competing offers. If you
+      would rather it stayed as the manual road for people who want to write it
+      themselves, it is one paragraph and I have no argument against it."
+  - author: agent
+    created: 2026-09-10T03:38:52Z
+    body: >-
+      Superseded by ADR 0001 (2026-09-09). The screen this asks design to change
+      is retired: unclaimed-page folds into project-modal, and the list on it is
+      a list of PROJECTS rather than blueprints.
+
+
+      The reasoning survived - two kinds of memory about one fact is the thing
+      to abolish - but it was abolished from the other end. Instead of a pick
+      writing a claim, nothing is remembered at all (§9): ambiguity asks every
+      time, and a claim is the only durable answer to "could this page belong
+      here". proposals/claim-this-page.html is the sketch of the road not taken;
+      proposals/project-modal.html is the one shipped, and n-0271 is the design
+      request for it.
+  - author: agent
+    created: 2026-09-20T17:15:21Z
+    body: "Superseded by ADR 0001: the screen this asked design to change is retired
+      into project-modal, and nothing is remembered (§9). Closed as incorporated
+      - the reasoning survived, the request did not."

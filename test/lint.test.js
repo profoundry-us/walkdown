@@ -22,7 +22,7 @@ after(() => rmSync(root, { recursive: true, force: true }));
 function writeFixture(dir, { goodHash = true, badScreen = false, threads = [] } = {}) {
   const h = declaredHome(dir);
   mkdirSync(join(h.spec, 'features'), { recursive: true });
-  writeFileSync(join(h.spec, 'walkdown.yml'), 'blueprint: fixture\n');
+  writeFileSync(join(h.spec, 'spec.yml'), 'blueprint: fixture\n');
   writeFileSync(
     join(h.spec, 'storyboard.yml'),
     [
@@ -72,7 +72,7 @@ test('clean fixture lints with no findings', () => {
  */
 test('with no list command, coverage reads the rule tags in the authoring files, and a rule: key in JavaScript is not one', () => {
   const h = writeFixture(join(root, 'coverage'));
-  writeFileSync(join(h.spec, 'walkdown.yml'), 'blueprint: fixture\nauthoring:\n  location: tests/\n');
+  writeFileSync(join(h.spec, 'spec.yml'), 'blueprint: fixture\nauthoring:\n  location: tests/\n');
   writeFileSync(
     join(h.spec, 'features', 'cov.yml'),
     ['tagged', 'untagged']
@@ -126,7 +126,7 @@ test('a symlink out of the home is named; one pointing inside it is not', () => 
   mkdirSync(outside, { recursive: true });
   writeFileSync(join(outside, 'conventions.md'), 'somebody else owns this\n');
   symlinkSync(join(outside, 'conventions.md'), join(h.spec, 'AGENTS.md'));
-  symlinkSync(join(h.spec, 'walkdown.yml'), join(h.evidence, 'spec.yml'));
+  symlinkSync(join(h.spec, 'spec.yml'), join(h.evidence, 'spec.yml'));
 
   const { findings } = lint(load(h), { checks: false });
   const links = findings.filter((f) => f.message.startsWith('symlink to'));
@@ -392,9 +392,9 @@ test('the in-repo example blueprint lints clean (without runner)', () => {
   // The example is a project of its own, declared by its own .walkdown - so it
   // is read as if standing in example/, where that .walkdown answers.
   const example = new URL('../example', import.meta.url).pathname.replace(/\/$/, '');
-  const bp = join(example, '.walkdown', 'blueprints', '0001-example', 'blueprint');
+  const bp = join(example, '.walkdown', 'blueprints', '0001-example');
   // Registered in this suite's home, as `walkdown import example` would.
-  register({ id: 'example', project: example, homeDir: dirname(bp) });
+  register({ id: 'example', project: example, homeDir: bp });
   const { findings, exitCode } = lint(loadBlueprint(bp, { cwd: example }), { checks: false });
   /*
    * One warning stands on purpose. waitlist-confirm and waitlist-already are
@@ -442,7 +442,7 @@ const FIXTURE_STEPS = [
 function ruleHome(dir, body, { steps = true } = {}) {
   const h = declaredHome(dir);
   mkdirSync(join(h.spec, 'features'), { recursive: true });
-  writeFileSync(join(h.spec, 'walkdown.yml'), 'blueprint: fixture\n');
+  writeFileSync(join(h.spec, 'spec.yml'), 'blueprint: fixture\n');
   writeFileSync(
     join(h.spec, 'features', 'demo.yml'),
     [
@@ -759,9 +759,9 @@ test('an open thread on a retired rule warns; an addressed one waits on its pers
 
 test('design.by is person or agent, and anything else is an error naming both @rule:ownership.design.declared-per-blueprint', () => {
   const h = writeFixture(join(root, 'design-by'));
-  const cfg = readFileSync(join(h.spec, 'walkdown.yml'), 'utf8');
+  const cfg = readFileSync(join(h.spec, 'spec.yml'), 'utf8');
   const errors = (by) => {
-    writeFileSync(join(h.spec, 'walkdown.yml'), by === undefined ? cfg : `${cfg}\ndesign:\n  by: ${by}\n`);
+    writeFileSync(join(h.spec, 'spec.yml'), by === undefined ? cfg : `${cfg}\ndesign:\n  by: ${by}\n`);
     return lint(load(h), { checks: false }).findings.filter((f) => f.subject === 'design.by');
   };
   assert.deepEqual(errors(undefined), [], 'saying nothing is allowed: a person draws');

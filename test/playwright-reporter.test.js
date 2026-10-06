@@ -23,7 +23,7 @@ const prevHome = process.env.WALKDOWN_HOME;
 process.env.WALKDOWN_HOME = home;
 
 const root = mkdtempSync(join(tmpdir(), 'wd-reporter-'));
-const bp = join(root, 'blueprint');
+const bp = join(root);
 mkdirSync(join(bp, 'features'), { recursive: true });
 /*
  * Registered in the pinned home (ADR 0003). The reporter resolves where a
@@ -32,7 +32,7 @@ mkdirSync(join(bp, 'features'), { recursive: true });
  * no longer opens. The home is the fixture root: `blueprint/` with the four
  * record directories beside it.
  */
-writeFileSync(join(home, 'config.yml'), 'identity:\n  username: A Person\n');
+writeFileSync(join(home, 'profile.yml'), 'identity:\n  username: A Person\n');
 writeFileSync(
   join(home, 'registry.yml'),
   [
@@ -44,7 +44,7 @@ writeFileSync(
     '',
   ].join('\n'),
 );
-writeFileSync(join(bp, 'walkdown.yml'), 'blueprint: reporter-fixture\n');
+writeFileSync(join(bp, 'spec.yml'), 'blueprint: reporter-fixture\n');
 writeFileSync(
   join(bp, 'features', 'd.yml'),
   'feature: d\nstories:\n  - id: d.s\n    rules:\n      - id: d.s.thing\n        statement: The thing.\n        verify: [checks]\n',

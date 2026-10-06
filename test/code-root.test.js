@@ -59,10 +59,10 @@ function apart({ runner = {}, withEntry = true } = {}) {
     ["it 'does the thing', " + "rule: 'd.s.thing' do", '  expect(1).to eq(1)', 'end', ''].join('\n'),
   );
 
-  const spec = join(home, 'blueprints', '0001-apart', 'blueprint');
+  const spec = join(home, 'blueprints', '0001-apart');
   mkdirSync(join(spec, 'features'), { recursive: true });
   writeFileSync(
-    join(spec, 'walkdown.yml'),
+    join(spec, 'spec.yml'),
     ['blueprint: apart', 'authoring:', '  location: [spec/workflows/]', 'runner:', ...runner.lines]
       .join('\n')
       .concat('\n'),

@@ -57,7 +57,7 @@ notes), and the runs ledger. The blueprint is the single source of truth for
 ## Building
 
 - Carry anchors **verbatim** from prototype to implementation. The attribute is
-  `embed.anchor_attribute` in the blueprint's `walkdown.yml` (default
+  `embed.anchor_attribute` in the blueprint's `spec.yml` (default
   `data-testid`). Every element the spec references keeps its anchor.
 - Reference screens and anchors by id — never URLs, never CSS selectors.
 - Rules don't require screens: headless rules (API, CLI, jobs, policies) get the

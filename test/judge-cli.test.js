@@ -35,14 +35,14 @@ const RULE = {
 };
 
 function fixture(name, governance = []) {
-  const bp = join(root, name, 'blueprint');
+  const bp = join(root, name);
   // Beside the spec, not inside it: the home's layout is the only one
   // walkdown answers for, and `declareProject` writes the entry to match.
   const runs = join(root, name, 'runs');
   mkdirSync(join(bp, 'features'), { recursive: true });
   mkdirSync(runs, { recursive: true });
   writeFileSync(
-    join(bp, 'walkdown.yml'),
+    join(bp, 'spec.yml'),
     [
       'blueprint: judge-fixture',
       'runner:',

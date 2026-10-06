@@ -3,7 +3,7 @@
  * ran it (n-0137).
  *
  * Several suites build fixture blueprints and then serve them, or spawn the
- * CLI at them. Locations resolve from `~/.walkdown/config.yml`, so an
+ * CLI at them. Locations resolve from `~/.walkdown/registry.yml`, so an
  * unpinned run files their drafts, their evidence and - since the config
  * became the only list - their PROJECT ENTRIES into the developer's own home.
  * Thirteen dead entries accumulated there on 2026-09-01 from three runs.
@@ -19,9 +19,9 @@
  * `tmp/test-home` keeps working, and a suite that pins its own scratch
  * home per case (locations.test.js) is unaffected either way.
  */
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { basename, dirname, join } from 'node:path';
+import { basename, join } from 'node:path';
 import { parse, stringify } from '../vendor/yaml.js';
 
 /*
@@ -56,105 +56,16 @@ process.on('exit', () => rmSync(own, { recursive: true, force: true }));
 process.env.WALKDOWN_SKILLS_DIR ??= join(process.env.WALKDOWN_HOME, 'skills');
 
 /*
- * Declare a fixture blueprint, and hand back the id to reach it by.
+ * A registry row, written the way `import` writes one (ADR 0014 §2): an ID
+ * `NNNN-pc-name` from the registry's own counter, the project's label and
+ * code, the checkout it belongs to - null for an ephemeral copy, reached by
+ * its ID only. A second fixture in a checkout already listed joins its
+ * project; a new checkout gets a label and code no other project has.
  *
- * `--dir <path>` is gone: everything walkdown answers for is written down,
- * because a blueprint reachable without an entry was a blueprint with no home
- * of its own, which is where six collisions came from (n-0156). Fixtures are
- * no exception - a test that reached a blueprint no config knew about was
- * testing a door that no longer exists.
+ * The ID comes back. Inside its checkout `name` reaches it too, the way a
+ * person types `--blueprint cli` for `0002-wd-cli`.
  */
-export function declareProject(home, spec, id = 'fixture') {
-  /*
-   * The home passed in, and it must be THIS suite's own.
-   *
-   * `node --test` runs files in parallel processes, so two suites declaring
-   * into one config.yml are a read-modify-write race: the last writer wins and
-   * the other's entry vanishes, which fails a suite only when another suite
-   * happens to be running beside it. `suiteHome()` is how a file gets one of
-   * its own; the shared pinned home is for reading, not for declaring into.
-   *
-   * And the spec must be the `blueprint/` of a home. Every blueprint walkdown
-   * answers for lives in one - threads, runs, evidence and drafts BESIDE the
-   * spec, never inside it - and a fixture is no exception: the entry written
-   * here names the home's paths the way `project add --ephemeral` does, and
-   * the siblings are created so a suite can write into them.
-   */
-  if (basename(spec) !== 'blueprint')
-    throw new Error(`declareProject: ${spec} is not a home's blueprint/ — fixtures are laid out as homes now`);
-  const homeDir = dirname(spec);
-  for (const kind of ['threads', 'runs', 'evidence', 'drafts']) mkdirSync(join(homeDir, kind), { recursive: true });
-  /*
-   * Into the registry (ADR 0003), the way `import` would write it: a fixture
-   * is a blueprint this test's machine knows about, and a row in config.yml
-   * is a hand-written one, which is the shape that stops being read.
-   */
-  mkdirSync(home, { recursive: true });
-  const path = join(home, 'registry.yml');
-  const doc = existsSync(path) ? (parse(readFileSync(path, 'utf8')) ?? {}) : {};
-  const listed = doc.blueprints ?? [];
-  const already = listed.find((p) => p?.home === homeDir);
-  if (already) return already.id;
-  const taken = new Set(listed.map((p) => p?.id).filter(Boolean));
-  let pick = id;
-  for (let n = 2; taken.has(pick); n++) pick = `${id}-${n}`;
-  listed.push({
-    id: pick,
-    project: homeDir,
-    home: homeDir,
-    registered: { by: 'import', at: new Date().toISOString() },
-  });
-  doc.blueprints = listed;
-  writeFileSync(path, stringify(doc));
-  return pick;
-}
-
-/**
- * A declared, home-shaped blueprint inside its own repository-style root:
- * `<root>/.walkdown/config.yml` lists it, and its home is
- * `<root>/.walkdown/blueprints/0001-<id>/` with the five siblings laid out.
- * Hands back every path, so a suite writes `h.runs` and loads with
- * `loadBlueprint(h.spec, { cwd: h.root })` - the same door a person's
- * checkout goes through, and no personal config touched at all.
- *
- * A second call with a new id lists a second home beside the first
- * (`0002-<id>`), for suites that need two blueprints in one tree.
- */
-export function declaredHome(root, id = 'fixture') {
-  const wd = join(root, '.walkdown');
-  const path = join(wd, 'config.yml');
-  const doc = existsSync(path) ? (parse(readFileSync(path, 'utf8')) ?? {}) : {};
-  const listed = doc.blueprints ?? [];
-  const n = String(listed.length + 1).padStart(4, '0');
-  const home = `${n}-${id}`;
-  const homeDir = join(wd, 'blueprints', home);
-  const kinds = { spec: 'blueprint', threads: 'threads', runs: 'runs', evidence: 'evidence', drafts: 'drafts' };
-  const paths = Object.fromEntries(Object.entries(kinds).map(([k, d]) => [k, join(homeDir, d)]));
-  for (const p of Object.values(paths)) mkdirSync(p, { recursive: true });
-  listed.push({
-    id,
-    roots: ['.'],
-    home,
-    ...Object.fromEntries(Object.entries(kinds).map(([k, d]) => [k, join('.walkdown', 'blueprints', home, d)])),
-  });
-  doc.blueprints = listed;
-  writeFileSync(path, stringify(doc));
-  /*
-   * And registered, the way `walkdown blueprints import <root>` would: the manifest
-   * above is what a checkout declares, and the registry is the only door
-   * a reader goes through (ADR 0003). This process's home is its own, so
-   * the row races with nobody.
-   */
-  const rid = register({ id, project: root, homeDir });
-  return { root, wd, id: rid, home, homeDir, ...paths };
-}
-
-/**
- * A registry row, written the way `import` writes one. `project` is what
- * standing somewhere reaches; null (an ephemeral copy) is reached by name
- * only. The id comes back, de-duplicated within the registry.
- */
-export function register({ id, project, homeDir, ephemeral = null }) {
+export function register({ id: name, project: checkout, homeDir, ephemeral = null, label = null, code = null }) {
   const home = process.env.WALKDOWN_HOME;
   mkdirSync(home, { recursive: true });
   const path = join(home, 'registry.yml');
@@ -162,31 +73,124 @@ export function register({ id, project, homeDir, ephemeral = null }) {
   const listed = doc.blueprints ?? [];
   const already = listed.find((p) => p?.home === homeDir);
   if (already) return already.id;
-  const taken = new Set(listed.map((p) => p?.id).filter(Boolean));
-  let pick = id;
-  for (let n = 2; taken.has(pick); n++) pick = `${id}-${n}`;
+  const top = Math.max(0, ...listed.map((r) => Number(String(r?.id).match(/^(\d{4})-/)?.[1] ?? 0)));
+  const n = Math.max(Number(doc.next) || 1, top + 1);
+  const mine = checkout && !ephemeral ? listed.find((r) => r?.checkout === checkout && !r.ephemeral) : null;
+  let pl = mine?.project ?? label;
+  let pc = mine?.code ?? code;
+  if (ephemeral) {
+    pl = null;
+    pc = 'tmp';
+  } else if (!mine) {
+    const labels = new Set(listed.map((r) => r?.project).filter(Boolean));
+    const codes = new Set(listed.map((r) => r?.code).filter(Boolean));
+    const base = pl ?? (checkout ? basename(checkout) : 'personal');
+    pl = base;
+    for (let k = 2; labels.has(pl); k++) pl = `${base}-${k}`;
+    if (!pc) {
+      pc = 'fx';
+      for (let k = 0; codes.has(pc); k++) pc = `f${k.toString(36).padStart(2, '0')}`.slice(0, 3);
+    }
+  }
+  const slug = String(name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'blueprint';
+  const id = `${String(n).padStart(4, '0')}-${pc}-${slug}`;
   listed.push({
-    id: pick,
-    project: project ?? null,
+    id,
+    project: pl,
+    code: pc,
+    checkout: ephemeral ? null : (checkout ?? null),
     home: homeDir,
     registered: { by: 'import', at: new Date().toISOString() },
     ...(ephemeral ? { ephemeral } : {}),
   });
+  doc.next = n + 1;
   doc.blueprints = listed;
   writeFileSync(path, stringify(doc));
-  return pick;
+  return id;
+}
+
+/*
+ * Register a fixture blueprint into a given personal home, and hand back its
+ * ID. The home passed in must be THIS suite's own: `node --test` runs files
+ * in parallel processes, and two suites registering into one registry are a
+ * read-modify-write race. `suiteHome()` is how a file gets one of its own.
+ *
+ * `spec` is the home itself now (ADR 0014 §5): spec.yml, storyboard.yml and
+ * features/ with threads, runs, evidence and drafts beside them. A fixture
+ * standing under some `<root>/.walkdown/blueprints/` belongs to that root;
+ * one standing anywhere else is registered with no checkout, the way a
+ * person's own blueprint is.
+ */
+export function declareProject(home, spec, id = 'fixture') {
+  if (basename(spec) === 'blueprint')
+    throw new Error(`declareProject: ${spec} is a blueprint/ folder — homes are flat now, with spec.yml in the home itself`);
+  const homeDir = spec;
+  for (const kind of ['threads', 'runs', 'evidence', 'drafts']) mkdirSync(join(homeDir, kind), { recursive: true });
+  const m = homeDir.match(/^(.*)\/\.walkdown\/blueprints\/[^/]+$/);
+  const was = process.env.WALKDOWN_HOME;
+  process.env.WALKDOWN_HOME = home;
+  try {
+    return register({ id, project: m ? m[1] : null, homeDir });
+  } finally {
+    process.env.WALKDOWN_HOME = was;
+  }
 }
 
 /**
- * A personal home for one test file, so declaring into it races with nobody.
- * Carries an identity, because writes are recorded under one and a machine
- * with only a guess is refused anything a person must sign (n-0143).
+ * A registered blueprint inside its own repository-style root: its home is
+ * `<root>/.walkdown/blueprints/0001-<id>/`, flat, with the four kinds of
+ * record laid out beside the spec. Hands back every path, so a suite writes
+ * `h.runs` and loads with `loadBlueprint(h.spec, { cwd: h.root })` - the
+ * same door a person's checkout goes through.
+ *
+ * A second call with a new id makes a second home beside the first
+ * (`0002-<id>`), in the same project, for suites that need two blueprints in
+ * one tree.
+ */
+export function declaredHome(root, id = 'fixture') {
+  const wd = join(root, '.walkdown');
+  const blueprints = join(wd, 'blueprints');
+  mkdirSync(blueprints, { recursive: true });
+  const n = String(readdirSync(blueprints).length + 1).padStart(4, '0');
+  const home = `${n}-${id}`;
+  const homeDir = join(blueprints, home);
+  const kinds = { spec: '.', threads: 'threads', runs: 'runs', evidence: 'evidence', drafts: 'drafts' };
+  const paths = Object.fromEntries(Object.entries(kinds).map(([k, d]) => [k, d === '.' ? homeDir : join(homeDir, d)]));
+  for (const p of Object.values(paths)) mkdirSync(p, { recursive: true });
+  const rid = register({ id, project: root, homeDir });
+  return { root, wd, id: rid, name: id, home, homeDir, ...paths };
+}
+
+/**
+ * A personal home for one test file, so registering into it races with
+ * nobody. Carries an identity in its profile, because writes are recorded
+ * under one and a machine with only a guess is refused anything a person
+ * must sign (n-0143).
  */
 export function suiteHome(name, username = 'A Test Person') {
   const home = mkdtempSync(join(tmpdir(), `walkdown-${name}-`));
   writeFileSync(
-    join(home, 'config.yml'),
+    join(home, 'profile.yml'),
     `identity:\n  username: ${username}\n  name: ${username}\n`,
   );
   return home;
+}
+
+/**
+ * The file holding a thread, by its label or its UUID (ADR 0014 §9). A
+ * thread's file is named by its UUID now, so a suite that knows `n-0001`
+ * finds it by what the file says; an older fixture's `n-0001.yml` is found
+ * by its name. The path before the name is joined, as `join` would.
+ */
+export function threadAt(...parts) {
+  const name = parts.pop();
+  const dir = join(...parts);
+  if (existsSync(dir))
+    for (const f of readdirSync(dir)) {
+      if (!/\.ya?ml$/.test(f)) continue;
+      if (f === `${name}.yml`) return join(dir, f);
+      const text = readFileSync(join(dir, f), 'utf8');
+      if (new RegExp(`^(id|uuid): ['"]?${String(name).replace(/[.]/g, '\\.')}['"]?$`, 'm').test(text)) return join(dir, f);
+    }
+  return join(dir, `${name}.yml`);
 }

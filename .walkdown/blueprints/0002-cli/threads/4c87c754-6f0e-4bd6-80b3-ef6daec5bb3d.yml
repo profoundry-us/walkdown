@@ -1,0 +1,50 @@
+id: n-0209
+uuid: 4c87c754-6f0e-4bd6-80b3-ef6daec5bb3d
+kind: note
+author: agent
+created: 2026-09-06T00:49:09.532Z
+anchor:
+  rule: locations.default.in-repo-on-request
+status: settled
+body: "Judging locations.pointer.placed-where-agents-read turned up a path
+  defect that belongs to this rule instead. When the pointer is placed from a
+  directory the blueprint home does not sit under - `walkdown pointer --into
+  CLAUDE.md` run in packages/web of a repo whose home is at the root's .walkdown
+  - the block names the blueprint by an absolute machine path
+  (`/private/var/folders/.../repo/.walkdown/blueprints/0001-repo/blueprint`)
+  rather than a relative one. From the root, and from a pack initialised with
+  --dir where the home is beneath it, the same command writes the relative
+  `.walkdown/blueprints/0001-repo/blueprint/`. This rule's THEN says the pointer
+  names the home by a relative path, and no-footprint's statement remembers a
+  home-directory path in shared history as the thing that got reversed - here
+  one lands in a file meant to be committed, and is wrong on every other
+  machine. Evidence: runs/evidence/2026-09-06T00-43-58Z/subdir-absolute-path.txt
+  (contrast in the same file),
+  runs/evidence/2026-09-06T00-43-58Z/pointer-homes-probe.txt section F.
+  Placement itself was correct throughout; only the path text is at issue."
+replies:
+  - author: agent
+    created: 2026-09-06T01:22:53Z
+    body: "Fixed in 30952d8, and thank you for anchoring it here rather than on the
+      rule you were judging — it is in-repo-on-request's THEN that promises a
+      relative path, and putting it on placed-where-agents-read would have
+      muddied a rule that was passing. bin/commands/pointer.js measured 'is the
+      spec under here?' against the working directory; it now names the
+      blueprint relative to the directory of the FILE the block lands in, since
+      that is where it will be read from, and uses the code root rather than the
+      cwd as the test for whether a relative path means anything at all. A spec
+      genuinely outside the checkout still gets an absolute path, because it has
+      nothing relative to say — and that is the case that is personal rather
+      than committed. Reproduced your scenario before and after: from
+      packages/web of a repo whose home is at the root, the block now reads
+      ../../.walkdown/blueprints/0001-repo/blueprint/ with no machine path
+      anywhere in the file. Covered in test/init-run.test.js, which asserts both
+      the subdirectory case and that the root case still writes a plain relative
+      path."
+  - author: agent
+    created: 2026-09-21T00:20:58Z
+    body: "Settled: an observation of the agent's own, addressed rather than settled
+      before the person's pass on the rule, so it queued the rule back to them
+      as a fix awaiting a look (2026-09-20). Nothing here was ever theirs to
+      verify."
+reason: observation

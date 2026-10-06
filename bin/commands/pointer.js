@@ -1,4 +1,4 @@
-import { dirname, relative, resolve } from 'node:path';
+import { resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { resolveLocations } from '../../lib/locations.js';
 import { dim } from '../../lib/report/tty.js';
@@ -18,33 +18,20 @@ export async function run(args) {
     args,
     options: { dir: { type: 'string' }, into: { type: 'string' } },
   });
-  const { pointerBlock, pointerHomes, placePointer, pointerTargets } = await import('../../lib/init.js');
+  const { POINTER_TEXT, pointerHomes, placePointer } = await import('../../lib/init.js');
   const root = resolve(values.dir ?? process.cwd());
   const loc = resolveLocations({ cwd: root });
-  // Several blueprints in the project is not none: the block names them all.
+  // Several blueprints in the project is not none: the paragraph names none of them.
   if (!loc.spec?.path && !loc.ambiguous) noBlueprintHere(loc);
   /*
-   * How the block should NAME the blueprint, from wherever it is being read.
-   *
-   * This measured "is the spec under here?" against the working directory and
-   * fell back to the absolute path when it was not. Run from a subdirectory
-   * the home does not sit under - `packages/web` of a repo whose home is at
-   * the root - the block therefore named `/Users/somebody/...`, a machine
-   * path written into a file that gets committed and is wrong for everyone
-   * else (n-0209).
-   *
-   * The path is read from beside the FILE it lands in, so that is what it is
-   * relative to; and both being inside the same checkout is what makes a
-   * relative path meaningful, so the code root is the test, not the cwd. Only
-   * a spec genuinely outside the checkout has nothing relative to say, and
-   * that one is absolute because it has to be - it is also the one that is
-   * personal rather than committed.
+   * The paragraph is fixed (ADR 0014 §7): it names no blueprint, because a
+   * blueprint's ID differs from machine to machine, so there is nothing in
+   * it to work out from where it is read.
    */
-  const nameFrom = (base) => pointerTargets(root, base);
 
   if (values.into) {
     const file = resolve(root, values.into);
-    const action = placePointer(file, pointerBlock(nameFrom(dirname(file))));
+    const action = placePointer(file, POINTER_TEXT);
     const say = {
       created: 'written to',
       'pointer-appended': 'added to',
@@ -56,7 +43,7 @@ export async function run(args) {
     return;
   }
 
-  process.stdout.write(pointerBlock(nameFrom(root)));
+  process.stdout.write(POINTER_TEXT);
   const homes = pointerHomes(root);
   console.error(
     homes.length

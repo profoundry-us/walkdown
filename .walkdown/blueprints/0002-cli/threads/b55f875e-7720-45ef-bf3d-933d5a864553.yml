@@ -1,0 +1,129 @@
+id: n-0202
+uuid: b55f875e-7720-45ef-bf3d-933d5a864553
+kind: note
+author: agent
+created: 2026-09-05T23:47:10.859Z
+anchor:
+  rule: status.evidence.agent-assumed
+status: settled
+body: >-
+  Two judges driven in parallel on 2026-09-05 landed on each other's servers,
+  and one read the wrong board before noticing.
+
+
+  Reported by the judge re-earning locations.travel.evidence-by-key: its
+  `navigate` to localhost:4801 resolved, through the browser pane's proxied
+  origin, to a scratch copy belonging to a DIFFERENT session (judge-frw-0905).
+  It read that panel and clicked a rule row before checking. It recovered by
+  opening 127.0.0.1:4801 in a fresh tab and confirming /api/blueprint named its
+  own copy before drawing any conclusion, and it clicked no Pass/Fail/pin
+  control on the other server — but it could have.
+
+
+  The governance rails did their job at the ledger: each copy declares only
+  itself, so nothing could have been written to the real blueprint. What they do
+  not cover is a judge reading, and reporting on, a board that is not the one it
+  was asked about. A verdict earned against the wrong copy is indistinguishable
+  in the record from one earned against the right one.
+
+
+  Worth deciding, since prompt-driven judging plus mandatory scratch copies
+  means concurrent judges each serving their own port is now the ordinary case,
+  not an unusual one:
+
+
+  Whether the judge prompt should hand out a port rather than leaving each agent
+  to pick one, so two cannot collide.
+
+
+  Whether a served panel should say which copy it is in a way an agent must read
+  — `/api/blueprint` already names it, but nothing in the procedure says to
+  check it before trusting the page.
+
+
+  Whether the browser pane's origin reuse is something walkdown can defend
+  against at all, or whether the answer is simply 127.0.0.1 and a confirmed
+  identity as the first step of any judging session.
+
+
+  Filed rather than fixed because all three are decisions about the procedure,
+  and the procedure is the product now.
+replies:
+  - author: agent
+    created: 2026-09-06T02:03:38Z
+    body: >-
+      Fresh evidence tonight, from a judge that was not looking for it. Three
+      agent judges ran concurrently on separate ports (4831/4832/4833), each
+      with its own scratch copy and its own WALKDOWN_HOME — every isolation this
+      repo currently offers — and they still collided, because the BROWSER is
+      shared and its tabs are not scoped to a session.
+
+
+      What the default-actor judge reported: its tab was navigated out from
+      under it twice onto localhost:4831, another judge's scratch server. It
+      caught both by checking location.href against an origin marker before
+      trusting any observation, so no reading in its verdict came from the wrong
+      server — but it only caught them because it was checking. Two side effects
+      landed before it noticed: it ran
+      localStorage.removeItem('walkdown:identity') against the 4831 origin
+      (browser-side only, nothing on disk), and it closed another session's tab
+      to free a slot.
+
+
+      So the port and the scratch copy isolate the SERVER, and nothing isolates
+      the client. A judge that trusts the page in front of it — which is the
+      ordinary thing to do — can photograph another judge's blueprint and record
+      the verdict against its own rule, and the run record would look completely
+      normal. That is the failure this thread is about, now observed rather than
+      predicted.
+
+
+      Filed for the record, not fixed: what to do about it is a decision about
+      how the agent tier runs, which is yours.
+  - author: agent
+    created: 2026-09-06T02:06:44Z
+    body: >-
+      And the mirror image, from the other side of the same collision. The
+      claim-never-accept judge, driving the panel on :4831, had its tab jump on
+      its own to :4833 — the default-actor judge's scratch server — and it
+      STARTED A WALKDOWN RECORDING there before noticing and navigating back.
+      The other judge reported being pulled the opposite way, onto :4831, and
+      clearing a localStorage key there.
+
+
+      So it is not one agent losing track of its tab. Two independent judges,
+      each isolated by port, scratch copy and WALKDOWN_HOME, each got pulled
+      onto the other's server, and one of them began writing on it. Both copies
+      were disposable and no real ledger was touched — this time. The same
+      wander with the real blueprint served is a recording filed against a spec
+      nobody was judging.
+
+
+      Worth noting for whatever the fix turns out to be: the isolation that
+      failed was not the weak kind. It was every isolation this repo currently
+      has.
+  - author: agent
+    created: 2026-09-15T02:37:12Z
+    body: "One of the three landed: the judge prompt now tells every judge to GET
+      /api/blueprint on the origin it is driving and confirm the project it
+      names is its copy before trusting any page (bin/commands/judge.js). The
+      other two - whether the prompt hands out a port, and whether the shared
+      browser pane can be defended against at all - are still yours; left open
+      for that."
+  - author: agent
+    created: 2026-09-17T00:11:22Z
+    body: "One of the three landed on 2026-09-14 (every judge prompt says to confirm
+      /api/blueprint names its copy before trusting a page). The other two were
+      decisions of yours buried in this note, where nothing offered you a way to
+      answer - so they are questions now, one each: q-0300 (should the prompt
+      hand out a port) and q-0301 (can the shared browser pane be defended
+      against at all). Nothing else here is owed."
+  - author: agent
+    created: 2026-09-21T02:23:13Z
+    body: Settled. Two of the three asks have landed. Every judge prompt says to
+      confirm /api/blueprint names its copy before trusting a page (2026-09-14).
+      The prompt now hands each judge a port of its own, given with --port or
+      derived from the rule id, so two judges no longer share one (48bb807,
+      2026-09-20). The third, whether the browser pane should refuse a foreign
+      origin, was filed as a question of yours and stands there.
+reason: observation

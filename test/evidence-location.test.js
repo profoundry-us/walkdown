@@ -41,7 +41,7 @@ function fixture() {
   process.env.WALKDOWN_HOME = home;
   const h = declaredHome(root, 'ev-fixture');
   mkdirSync(join(h.spec, 'features'), { recursive: true });
-  writeFileSync(join(h.spec, 'walkdown.yml'), 'blueprint: ev-fixture\n');
+  writeFileSync(join(h.spec, 'spec.yml'), 'blueprint: ev-fixture\n');
   writeFileSync(join(h.spec, 'storyboard.yml'), 'screens: []\n');
   return { root, bp: h.spec, h, home, cleanup: () => rmSync(root, { recursive: true, force: true }) };
 }
@@ -107,7 +107,7 @@ test('with evidence moved out, the same recorded key finds it at the new root @r
 test('evidence serving still refuses anything outside the evidence key space @rule:locations.travel.evidence-by-key', async () => {
   const f = fixture();
   try {
-    writeFileSync(join(f.bp, 'walkdown.yml'), 'blueprint: ev-fixture\n');
+    writeFileSync(join(f.bp, 'spec.yml'), 'blueprint: ev-fixture\n');
     await withServer(f, async (base) => {
       for (const path of [
         '/evidence/walkdown.yml',

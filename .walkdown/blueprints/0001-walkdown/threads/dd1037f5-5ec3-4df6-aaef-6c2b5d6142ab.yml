@@ -1,0 +1,49 @@
+id: n-0058
+uuid: dd1037f5-5ec3-4df6-aaef-6c2b5d6142ab
+kind: note
+author: Topher Fangio
+created: 2026-08-24T17:22:26Z
+anchor:
+  rule: panel.dock.one-pin-mode
+status: verified
+body: We don't really have a badge anymore, so the THEN condition feels a bit off.
+replies:
+  - author: agent
+    created: 2026-08-24T17:34:06Z
+    body: "The badge does still exist - but only on pages carrying just the embed
+      tag with no panel, where it is the only way into pin mode (it is the small
+      'W pin' pill you can see bottom-right on any bare mockup page). With the
+      panel up it hides, which is why you never meet it. The THEN steps now say
+      where it lives instead of assuming you know it: 'With the panel up, pin
+      mode has exactly one control - the bar's; the embed's own floating badge
+      stays hidden rather than echoing it' and 'On a page carrying only the
+      embed tag and no panel, that badge appears, because there it is the only
+      way into pin mode.'"
+  - author: Topher Fangio
+    created: 2026-08-26T03:05:57Z
+    body: Why would we ever have a page that has the embed but no panel? I don't
+      think we need this part of the rule.
+  - author: agent
+    created: 2026-08-27T04:09:36Z
+    body: "You are right, and the badge is already gone from the build - embed.js
+      carries a comment recording that it was removed under this very note,
+      because the only page that could reach it was one nobody opens, and it had
+      been leaking onto panelled pages besides. The rule was the last place
+      still describing it. Rewritten against what the code actually does today.
+      Statement: 'There is one control for pin mode - the bar's Pin mode button
+      - and one state behind it, so whatever turns pin mode on or off, the whole
+      review agrees about whether it is on.' The THEN steps now name what you
+      can actually see: the bar's Pin mode button is lit while pin mode is on
+      and plain while it is off; the page under review takes a crosshair cursor
+      while pin mode is on and drops it when pin mode ends; Escape ends pin mode
+      and the button and cursor both follow; and the bar's button is the only
+      way in, so there is no second control to fall out of step. Both badge
+      steps are deleted. Statement rehashed; verdict awaits your re-judgement."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.dock.one-pin-mode
+      (2026-09-07T19-15-43Z-local-01).
+reason: feedback
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

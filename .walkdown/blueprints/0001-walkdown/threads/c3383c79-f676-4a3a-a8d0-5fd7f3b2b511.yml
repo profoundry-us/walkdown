@@ -1,0 +1,52 @@
+id: q-0266
+uuid: c3383c79-f676-4a3a-a8d0-5fd7f3b2b511
+kind: question
+author: agent
+created: 2026-09-09T14:01:18.569Z
+anchor:
+  rule: panel.start.open-a-folder
+status: incorporated
+body: >-
+  The start screen's words and the drawing's words are not the same, and I do
+  not know which of them is right.
+
+
+  An independent judge reported it while passing the rule (run
+  2026-09-09T13-43-55Z-local-01): the statement is satisfied by either wording,
+  so this is not a fail, but somebody should say which text wins.
+
+
+  The drawing, prototype/screens/start.html:
+    "No blueprints are open yet."
+    footnote: "A first step, not an error - the browser cannot open a folder; the server holds one open for it."
+
+  The build:
+    "No blueprints open"
+    then a longer paragraph folding that idea in - a browser tab cannot read your filesystem, walkdown reads blueprints and writes threads and runs back to them, so it works through a small local server. Connect sits inline rather than full-width.
+
+  Design owns the screen, so the drawing is the authority and the honest reading
+  is that the build has drifted. I have not changed it, because the longer
+  paragraph reads like somebody's deliberate second thought rather than an
+  accident, and because the rule is accepted by eng and product with these words
+  on screen - quietly rewriting accepted copy is not mine to do.
+
+
+  Three ways, and I have no view: bring the build back to the drawing; keep the
+  build's words and have the drawing catch up (a design request, not an edit by
+  me); or say the drawing is a sketch of intent here and the two are allowed to
+  differ in length.
+replies:
+  - author: topher
+    created: 2026-09-19T04:53:07Z
+    body: The built wording is closer to correct so we should use it, but we
+      recently changed things so people no longer `walkdown serve` in a
+      directory. We should update this wording / command note to show how to
+      init / add a blueprint and then serve from any directory (since everything
+      is now registered in their home directory).
+  - author: agent
+    created: 2026-09-21T01:47:29Z
+    body: "The build's words stay and are brought up to date with ADR 0003: the
+      start screen now says the server answers for every blueprint registered on
+      this machine, shows walkdown init (new) or walkdown import <path>
+      (existing) once from the project, then walkdown serve from anywhere. The
+      check for panel.start.open-a-folder is recorded against it."

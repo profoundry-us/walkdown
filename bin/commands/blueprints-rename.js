@@ -1,143 +1,125 @@
-import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
-import { basename, dirname, join } from 'node:path';
-import { canon, expand, readRegistry, registryPath, tilde, writeRegistry } from '../../lib/locations.js';
+import { existsSync, renameSync } from 'node:fs';
+import { dirname, isAbsolute, join, relative } from 'node:path';
+import { parseArgs } from 'node:util';
+import {
+  canon,
+  codeOf,
+  expand,
+  nameOf,
+  numberOf,
+  readRegistry,
+  registryPath,
+  registryPick,
+  tilde,
+  writeRegistry,
+} from '../../lib/locations.js';
 import { dim, green, red } from '../../lib/report/tty.js';
-import { parseDocument } from '../../vendor/yaml.js';
 import { end } from './context.js';
 
 /*
- * `walkdown blueprints rename <id> <new-id>` (ADR 0012 §2).
+ * `walkdown blueprints rename <id> <new-name> [--folder <folder>]` (ADR 0012
+ * §2, ADR 0014 §2).
  *
- * An id chosen badly - by a person, or by an agent guessing - is put right
- * without starting over. The id lives in four places, and all four move
- * together: the registry row, the numbered folder's name (its number stays,
- * since the number is what keeps two homes apart), the blueprint's own
- * walkdown.yml, and, for a committed blueprint, the repository's
- * .walkdown/config.yml. Nothing a blueprint recorded is touched: rules,
- * threads and run records do not carry the id, and a run copied from it says
- * where it came from as history.
+ * An ID chosen badly - by a person, or by an agent guessing - is put right
+ * without starting over. The ID is written only in the registry, so renaming
+ * one changes the name at its end there and nowhere else: its number and its
+ * project's code stay, and the repository does not change at all. `--folder`
+ * renames the folder too, in place, and that is then the one change the
+ * repository sees. Nothing a blueprint recorded is touched: rules, threads
+ * and run records do not carry the ID.
  */
 
-const ID = /^[a-z0-9][a-z0-9._-]*$/i;
-
-/* Written back as written: no folding, no padding (rules-move.js says why). */
-const emit = (doc) => doc.toString({ lineWidth: 0, flowCollectionPadding: false });
+const NAME = /^[a-z0-9][a-z0-9-]*$/;
 
 export async function run(args) {
-  const [id, next, ...extra] = args;
-  if (!id || !next || extra.length) {
-    console.error('Usage: walkdown blueprints rename <id> <new-id>');
+  const { values, positionals } = parseArgs({
+    args,
+    allowPositionals: true,
+    options: { folder: { type: 'string' } },
+  });
+  const [want, next, ...extra] = positionals;
+  if (!want || !next || extra.length) {
+    console.error('Usage: walkdown blueprints rename <id> <new-name> [--folder <folder>]');
     return end(2);
   }
-  if (!ID.test(next)) {
-    console.error(red(`\`${next}\` is not an id — letters, digits, dots, dashes and underscores, starting with a letter or digit.`));
+  if (!NAME.test(next)) {
+    console.error(red(`\`${next}\` is not a name — lowercase letters, digits and dashes, starting with a letter or digit.`));
     console.error(dim('Nothing was renamed.'));
     return end(2);
   }
-  const { rows, error } = readRegistry();
+  const { rows, next: counter, error } = readRegistry();
   if (error) {
     console.error(red(`${registryPath()} does not parse — ${error}`));
     return end(2);
   }
-  const row = rows.find((r) => String(r.id) === id && !r.ephemeral);
+  const pick = registryPick(process.cwd(), rows, want);
+  const row = pick.picked && !pick.picked.ephemeral ? pick.picked : null;
   if (!row) {
-    console.error(red(`No blueprint \`${id}\` in ${registryPath()}. \`walkdown blueprints\` lists them.`));
+    console.error(
+      red(pick.candidates.length > 1 ? pick.why : `No blueprint \`${want}\` in ${tilde(registryPath())}. \`walkdown blueprints\` lists them.`),
+    );
     return end(2);
   }
-  if (next === id) {
+  const id = String(row.id);
+  const homeDir = row.home ? canon(expand(String(row.home))) : null;
+  if (!homeDir || !existsSync(homeDir)) {
+    console.error(red(`\`${id}\` names no folder on disk${homeDir ? ` (${tilde(homeDir)})` : ''}.`));
+    return end(2);
+  }
+  /*
+   * A name is what a person types inside a project, so two in one project
+   * cannot share one. The ID would still be unique - its number sees to
+   * that - but `--blueprint search` would stop meaning anything.
+   */
+  const project = row.project ?? null;
+  const sibling = rows.find((r) => r !== row && !r.ephemeral && (r.project ?? null) === project && nameOf(r.id) === next);
+  if (sibling) {
+    console.error(red(`\`${next}\` is already a blueprint in project \`${project}\` (\`${sibling.id}\`) — choose another name.`));
+    console.error(dim('Nothing was renamed.'));
+    return end(2);
+  }
+  const num = numberOf(id);
+  const code = codeOf(id) ?? row.code;
+  const nextId = num !== null && code ? `${String(num).padStart(4, '0')}-${code}-${next}` : next;
+
+  // ---- the folder, only when asked ------------------------------------------
+  let nextDir = homeDir;
+  if (values.folder) {
+    const f = values.folder;
+    if (isAbsolute(f) || f.split('/').some((p) => !p || p === '.' || p === '..')) {
+      console.error(red(`\`${f}\` is not a folder name — give a name, or a path below where this one stands.`));
+      console.error(dim('Nothing was renamed.'));
+      return end(2);
+    }
+    nextDir = join(dirname(homeDir), f);
+    if (canon(nextDir) !== homeDir && existsSync(nextDir)) {
+      console.error(red(`${tilde(nextDir)} already exists — nothing was renamed.`));
+      return end(2);
+    }
+  }
+  if (nextId === id && nextDir === homeDir) {
     console.log(dim(`\`${id}\` is already called that. Nothing was renamed.`));
     return end(0);
   }
-  if (rows.some((r) => String(r.id) === next)) {
-    console.error(red(`\`${next}\` is already a blueprint on this machine — choose another id.`));
-    console.error(dim('Nothing was renamed.'));
-    return end(2);
-  }
 
-  const homeDir = row.home ? expand(String(row.home)) : null;
-  if (!homeDir || !existsSync(homeDir)) {
-    console.error(red(`\`${id}\` names no home on disk${homeDir ? ` (${homeDir})` : ''} — there is no folder to rename.`));
-    return end(2);
-  }
-  const project = row.project ? expand(String(row.project)) : null;
-  const repoConfig = project ? join(project, '.walkdown', 'config.yml') : null;
-  const repoDoc = repoConfig && existsSync(repoConfig) ? parseDocument(readFileSync(repoConfig, 'utf8')) : null;
-  const repoRows = /** @type {any} */ (repoDoc?.get('blueprints'))?.items ?? [];
-  const repoRow = repoRows.find((n) => String(n.get?.('id')) === id) ?? null;
-  if (repoRows.some((n) => String(n.get?.('id')) === next)) {
-    console.error(red(`\`${next}\` is already declared in ${repoConfig} — choose another id.`));
-    console.error(dim('Nothing was renamed.'));
-    return end(2);
-  }
-
-  // ---- the folder: same number, new name ------------------------------------
-  const was = basename(homeDir);
-  const numbered = was.match(/^(\d{4})-/);
-  const name = numbered ? `${numbered[1]}-${next}` : was;
-  const nextDir = join(dirname(homeDir), name);
-  if (name !== was && existsSync(nextDir)) {
-    console.error(red(`${nextDir} already exists — nothing was renamed.`));
-    return end(2);
-  }
   const said = [];
-  if (name !== was) {
+  if (nextDir !== homeDir) {
     renameSync(homeDir, nextDir);
-    said.push([green('~ folder'), `${tilde(homeDir)}`, `now ${name}, keeping its number`]);
+    said.push([green('~ folder'), tilde(homeDir), `now ${relative(dirname(homeDir), nextDir)}`]);
   }
+  const renamed = rows.map((r) => (r === row ? { ...r, id: nextId, ...(nextDir !== homeDir ? { home: tilde(nextDir) } : {}) } : r));
+  writeRegistry(renamed, counter);
+  if (nextId !== id) said.push([green('~ registry'), tilde(registryPath()), `\`${id}\` is \`${nextId}\``]);
 
-  // ---- every path that named the folder, and the id ---------------------------
-  const swap = (v) =>
-    typeof v === 'string'
-      ? [homeDir, tilde(homeDir)].reduce((s, from) => s.split(from).join(from === homeDir ? nextDir : tilde(nextDir)), v)
-      : Array.isArray(v)
-        ? v.map(swap)
-        : v && typeof v === 'object'
-          ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, swap(x)]))
-          : v;
-  const renamed = rows.map((r) => (r === row ? { ...swap(r), id: next } : r));
-  writeRegistry(renamed);
-  said.push([green('~ registry'), tilde(registryPath()), `\`${id}\` is \`${next}\``]);
-
-  const yml = join(nextDir, 'blueprint', 'walkdown.yml');
-  if (existsSync(yml)) {
-    const text = readFileSync(yml, 'utf8');
-    const named = text.replace(new RegExp(`^blueprint:\\s*${id.replace(/[.]/g, '\\.')}\\s*$`, 'm'), `blueprint: ${next}`);
-    if (named !== text) {
-      writeFileSync(yml, named);
-      said.push([green('~ named'), tilde(yml), `blueprint: ${next}`]);
-    }
-  }
-
-  if (repoRow) {
-    repoRow.set('id', next);
-    for (const pair of repoRow.items) {
-      const v = pair.value?.value;
-      if (typeof v === 'string' && v.includes(was)) pair.value.value = v.split(`/${was}/`).join(`/${name}/`).replace(new RegExp(`(^|/)${was}$`), `$1${name}`);
-    }
-    writeFileSync(repoConfig, emit(repoDoc));
-    said.push([green('~ declared'), repoConfig, `as \`${next}\``]);
-  }
-
-  // ---- the pointer names it by its new id ------------------------------------
-  if (project) {
-    const { placePointer, pointerBlock, pointerHomes, pointerTargets, POINTER_BEGIN } = await import('../../lib/init.js');
-    for (const rel of pointerHomes(project)) {
-      const file = join(project, rel);
-      if (!readFileSync(file, 'utf8').includes(POINTER_BEGIN)) continue;
-      const action = placePointer(file, pointerBlock(pointerTargets(project, dirname(file))));
-      if (action === 'pointer-updated') said.push([green('~ pointer'), rel, `names \`${next}\``]);
-    }
-    try {
-      const { refreshIndex } = await import('../../lib/registry.js');
-      refreshIndex({ cwd: project });
-    } catch {
-      /* the claims index is a cache; the next import rebuilds it */
-    }
+  try {
+    const { refreshIndex } = await import('../../lib/registry.js');
+    refreshIndex();
+  } catch {
+    /* the claims index is a cache; the next import rebuilds it */
   }
 
   for (const [mark, at, what] of said) console.log(`  ${mark}  ${at}  ${dim(what)}`);
-  console.log(`\n✓ \`${id}\` is now \`${next}\`. Its rules, threads and runs are as they were.`);
-  if (canon(process.cwd()).startsWith(canon(project ?? '/nowhere')))
-    console.log(dim(`  \`--blueprint ${next}\` names it from here on.`));
+  console.log(`\n✓ \`${id}\` is now \`${nextId}\`. Its rules, threads and runs are as they were.`);
+  console.log(dim(`  \`--blueprint ${next}\` names it inside its project, \`--blueprint ${nextId}\` anywhere.`));
   return end(0);
 }

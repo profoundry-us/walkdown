@@ -15,19 +15,19 @@ import { loadBlueprint } from '../lib/blueprint.js';
 import { createWalkdownServer } from '../lib/serve.js';
 import { closeByVerdict, settleByAgentPass } from '../lib/threads.js';
 import { finishWalkdown, mutateThread, openThread } from '../lib/writes.js';
-import { declaredHome } from '../tools/test-home.mjs';
+import { declaredHome, threadAt } from '../tools/test-home.mjs';
 import { parse } from '../vendor/yaml.js';
 
 function project() {
   const root = mkdtempSync(join(tmpdir(), 'walkdown-reasons-'));
   const home = join(root, 'home');
   mkdirSync(home, { recursive: true });
-  writeFileSync(join(home, 'config.yml'), 'identity:\n  username: reasons-person\n');
+  writeFileSync(join(home, 'profile.yml'), 'identity:\n  username: reasons-person\n');
   process.env.WALKDOWN_HOME = home;
   const h = declaredHome(join(root, 'proj'), 'reasons-fixture');
   const bp = h.spec;
   mkdirSync(join(bp, 'features'), { recursive: true });
-  writeFileSync(join(bp, 'walkdown.yml'), 'blueprint: reasons-fixture\n');
+  writeFileSync(join(bp, 'spec.yml'), 'blueprint: reasons-fixture\n');
   writeFileSync(join(bp, 'storyboard.yml'), 'screens: []\n');
   writeFileSync(
     join(bp, 'features', 'demo.yml'),
@@ -46,7 +46,7 @@ function project() {
     ].join('\n'),
   );
   const load = () => loadBlueprint(bp, { cwd: h.root });
-  const onDisk = (id) => parse(readFileSync(join(load().at.threads.path, `${id}.yml`), 'utf8'));
+  const onDisk = (id) => parse(readFileSync(threadAt(load().at.threads.path, id), 'utf8'));
   return { root, h, bp, load, onDisk, cleanup: () => rmSync(root, { recursive: true, force: true }) };
 }
 

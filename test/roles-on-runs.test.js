@@ -48,12 +48,12 @@ let server;
 
 before(async () => {
   mkdirSync(HOME, { recursive: true });
-  writeFileSync(join(HOME, 'config.yml'), 'identity:\n  username: roles-person\n');
+  writeFileSync(join(HOME, 'profile.yml'), 'identity:\n  username: roles-person\n');
   process.env.WALKDOWN_HOME = HOME;
   h = declaredHome(join(root, 'proj'), 'roles-fixture');
   bp = h.spec;
   mkdirSync(join(bp, 'features'), { recursive: true });
-  writeFileSync(join(bp, 'walkdown.yml'), 'blueprint: roles-fixture\n');
+  writeFileSync(join(bp, 'spec.yml'), 'blueprint: roles-fixture\n');
   writeFileSync(
     join(bp, 'features', 'demo.yml'),
     [

@@ -16,7 +16,7 @@ after(() => rmSync(root, { recursive: true, force: true }));
 test('a relative prototype root beside the spec answers before the code, and the code answers otherwise (#17) @rule:locations.default.prototype-beside-the-spec', () => {
   const code = join(root, 'app');
   const home = join(root, 'home', '0001-app');
-  const spec = join(home, 'blueprint');
+  const spec = join(home);
   mkdirSync(join(code, 'prototype'), { recursive: true });
   mkdirSync(spec, { recursive: true });
   const bp = { dir: spec, codeRoot: code, config: { prototype: { root: 'prototype/' } } };
@@ -42,7 +42,7 @@ test('the design pages, the stand-ins and the storyboard picture all read the on
 
 test('proposals are found the way the prototype is: beside the spec first, then the code @rule:locations.default.prototype-beside-the-spec', async () => {
   const code = join(root, 'sketches-app');
-  const spec = join(root, 'sketches-home', '0001-app', 'blueprint');
+  const spec = join(root, 'sketches-home', '0001-app');
   mkdirSync(join(code, 'proposals'), { recursive: true });
   mkdirSync(spec, { recursive: true });
   const bp = { dir: spec, codeRoot: code };

@@ -1,0 +1,7 @@
+# Where this blueprint's records usually live, relative to this folder.
+# A machine may keep them elsewhere: `walkdown records move` writes that on
+# its own registry and leaves this file as it is.
+runs: runs/
+threads: threads/
+evidence: evidence/
+drafts: drafts/

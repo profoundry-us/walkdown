@@ -12,6 +12,7 @@ import { mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
+import { threadAt } from '../tools/test-home.mjs';
 
 const CLI = new URL('../bin/walkdown.js', import.meta.url).pathname;
 const roots = [];
@@ -27,7 +28,7 @@ function fixture() {
   mkdirSync(shop, { recursive: true });
   mkdirSync(home, { recursive: true });
   spawnSync('git', ['init', '-q'], { cwd: shop });
-  writeFileSync(join(home, 'config.yml'), 'identity:\n  username: topher\n');
+  writeFileSync(join(home, 'profile.yml'), 'identity:\n  username: topher\n');
   writeFileSync(join(home, 'profile.yml'), 'identity:\n  username: topher\n');
   const env = { ...process.env, WALKDOWN_HOME: home, WALKDOWN_SKILLS_DIR: join(home, 'skills'), NO_COLOR: '1' };
   delete env.WALKDOWN_SPEC;
@@ -78,7 +79,7 @@ function fixture() {
   });
   mkdirSync(at.threads.path, { recursive: true });
   writeFileSync(
-    join(at.threads.path, 'n-0001.yml'),
+    threadAt(at.threads.path, 'n-0001'),
     'id: n-0001\nkind: note\nreason: feedback\nauthor: topher\ncreated: 2026-10-01T12:30:00Z\nanchor:\n  rule: shop.cart.init-adds\nstatus: open\nbody: The id says init.\n',
   );
   // A test, in the code, still tagged with the old id.
@@ -122,7 +123,7 @@ test('a renamed rule keeps its verdicts, its threads follow it, and its old tag 
   for (const [f, body] of Object.entries(runsBefore)) assert.equal(readFileSync(join(at.runs.path, f), 'utf8'), body, f);
 
   // The thread is anchored to the new id.
-  assert.match(readFileSync(join(at.threads.path, 'n-0001.yml'), 'utf8'), /rule: shop\.cart\.add\n/);
+  assert.match(readFileSync(threadAt(at.threads.path, 'n-0001'), 'utf8'), /rule: shop\.cart\.add\n/);
 
   // The old tag counts, and lint names it with the id to use.
   const lint = wd(['lint']);

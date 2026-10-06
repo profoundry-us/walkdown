@@ -1,0 +1,16 @@
+id: n-0342
+uuid: 5de35793-568e-4a46-935f-8aab9e3d1615
+kind: note
+reason: request
+author: topher
+via: agent
+created: 2026-10-03T00:52:00.680Z
+anchor:
+  screen: where-one-kind
+status: open
+body: "Same as our other new solution: use a separate agent to design."
+added: "Draw what `walkdown where spec` prints with two blueprints
+  (locations.several.reads-cover-all): one line per blueprint, its id then the
+  path. Anchors: cli.prompt, cli.where.row, cli.exit. The frame is the terminal
+  frame tools/cli-captures.mjs --frame prints, so the design and the as-built
+  line up under the fade."

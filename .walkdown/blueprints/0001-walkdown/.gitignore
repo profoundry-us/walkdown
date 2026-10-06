@@ -1,0 +1,5 @@
+# This blueprint's commit choice, carried over from the repository's old
+# .walkdown/.gitignore by `walkdown upgrade`: these stay out of git, and
+# everything else in this folder is committed.
+evidence/
+drafts/

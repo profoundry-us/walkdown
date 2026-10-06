@@ -24,13 +24,13 @@ function scratch() {
   mkdirSync(home, { recursive: true });
   process.env.WALKDOWN_HOME = home;
   process.env.WALKDOWN_SKILLS_DIR = join(root, 'skills');
-  writeFileSync(join(home, 'config.yml'), 'identity:\n  username: std-person\n');
+  writeFileSync(join(home, 'profile.yml'), 'identity:\n  username: std-person\n');
   return { root, home, cleanup: () => rmSync(root, { recursive: true, force: true }) };
 }
 
 function blueprint(at, project = 'demo') {
   mkdirSync(join(at, 'features'), { recursive: true });
-  writeFileSync(join(at, 'walkdown.yml'), `blueprint: ${project}\n`);
+  writeFileSync(join(at, 'spec.yml'), `blueprint: ${project}\n`);
   writeFileSync(join(at, 'storyboard.yml'), 'screens: []\n');
   writeFileSync(
     join(at, 'features', 'a.yml'),
@@ -91,13 +91,13 @@ test('an ephemeral copy taking a registered id is a different row, not an overri
     const repo = join(s.root, 'repo');
     mkdirSync(join(repo, '.git'), { recursive: true });
     walkdown(s.home, ['blueprints', 'new', '--commit', 'spec'], repo);
-    const copy = blueprint(join(s.root, 'elsewhere', 'blueprint'), 'copy');
+    const copy = blueprint(join(s.root, 'elsewhere'), 'copy');
     // An ephemeral copy that asks for the same id, and gets the next one.
     const said = walkdown(s.home, ['blueprints', 'import', copy, '--id', 'repo', '--ephemeral', '--why', 'a sitting'], s.root).stdout;
     assert.match(said, /as `repo-2`/);
 
     const loc = resolveLocations({ cwd: repo });
-    assert.equal(loc.spec.path, join(repo, '.walkdown', 'blueprints', '0001-repo', 'blueprint'));
+    assert.equal(loc.spec.path, join(repo, '.walkdown', 'blueprints', '0001-repo'));
     assert.equal(loc.config.registry.matched, true);
     assert.equal(resolveLocations({ cwd: repo, blueprint: 'repo-2' }).spec.path, copy);
   } finally {
@@ -118,7 +118,7 @@ test('a blueprints row in config.yml is set aside and named; the registry row ca
     mkdirSync(join(repo, '.git'), { recursive: true });
     walkdown(s.home, ['blueprints', 'new', '--commit', 'spec'], repo);
     writeFileSync(
-      join(s.home, 'config.yml'),
+      join(s.home, 'profile.yml'),
       `identity:\n  username: std-person\nblueprints:\n  - id: repo\n    evidence: ${join(s.root, 'ev')}\n`,
     );
     const loc = resolveLocations({ cwd: repo });
@@ -211,12 +211,12 @@ test('the folder a server says it serves is the place its list came from @rule:p
     // The spec in a numbered home, which is where `init` puts it, and a
     // second blueprint elsewhere in the project so the list has two.
     const home = join(proj, '.walkdown', 'blueprints', '0001-proj');
-    blueprint(join(home, 'blueprint'), 'proj');
-    blueprint(join(proj, 'other', 'blueprint'), 'other');
+    blueprint(join(home), 'proj');
+    blueprint(join(proj, 'other'), 'other');
     walkdown(s.home, ['blueprints', 'import', home], s.root);
     walkdown(s.home, ['blueprints', 'import', join(proj, 'other'), '--ephemeral', '--why', 'a second on the list'], s.root);
 
-    const server = createWalkdownServer(join(home, 'blueprint'), { cwd: proj });
+    const server = createWalkdownServer(join(home), { cwd: proj });
     await new Promise((r) => server.listen(0, '127.0.0.1', r));
     const base = `http://127.0.0.1:${server.address().port}`;
     try {

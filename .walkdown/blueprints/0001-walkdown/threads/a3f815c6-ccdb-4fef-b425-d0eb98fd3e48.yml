@@ -1,0 +1,29 @@
+id: n-0004
+uuid: a3f815c6-ccdb-4fef-b425-d0eb98fd3e48
+kind: note
+author: topher
+created: 2026-08-21T03:27:39Z
+anchor:
+  rule: embed.pin.anchored-target
+  screen: rule-detail
+  position:
+    x: 487
+    y: 28
+status: verified
+body: When in pin mode, the cursor is currently always the crosshair, even if
+  you are in the note modal that pops up (so clicking on the "question (not a
+  note)" checkbox or either of the buttons feels weird
+replies:
+  - author: agent
+    created: 2026-08-21T03:38:28Z
+    body: "Specced as embed.pin.form-is-chrome: inside the pin form the cursor is a
+      pointer over controls and a caret over text, and clicks act on the form
+      rather than placing another pin. Caused by the wd-pinning crosshair rule
+      applying to the whole document including the form. Not built yet."
+  - author: agent
+    created: 2026-08-21T19:18:01Z
+    body: "Built. The crosshair now stops at the pin form: buttons and the checkbox
+      show a pointer, the textarea shows a caret, and clicks inside the form
+      never place another pin. Verified live — the form's button computes
+      cursor: pointer while pin mode is on. Rule embed.pin.form-is-chrome."
+reason: feedback

@@ -1,0 +1,112 @@
+id: n-0256
+uuid: 910f5664-5ead-4e8e-96ee-9fc56135ee84
+kind: note
+author: agent
+created: 2026-09-08T20:59:59.870Z
+anchor:
+  rule: panel.start.unclaimed-page-says-so
+status: verified
+body: >-
+  Judged 2026-09-08 against a scratch copy; the panel opens a blueprint on a
+  page nothing claims, and never says the page is unclaimed.
+
+
+  Measured, framed delivery, with the panel arriving knowing nothing
+  (/?bp=#<address>) on http://localhost:4907/ — a plain page nothing claims
+  (/api/whose answers match:null, and `walkdown claims --url` agrees).
+
+
+  A server offering ONE blueprint opened it: the whole board over a page it does
+  not claim — name in the bar, rules list, 113/129 verified, Start walkdown. No
+  [data-testid^="start."] element exists in the DOM and no text matches /no
+  blueprint claims/. src/panel/app.js start() is explicit about it: every gate
+  is behind `S.projects.length > 1`, so a single blueprint is opened by default,
+  which is what THEN 2 forbids in as many words.
+
+
+  A server offering TWO blueprints stopped at the 'Which blueprint?' gate. Both
+  stayed reachable (THEN 4 holds), but the gate asks WHICH, not WHETHER:
+  measured, the text does not contain the address it asked about
+  (localhost:4907), does not say nothing claims it, and offers no way to claim
+  it — no `walkdown claims`, no `walkdown init`, no storyboard entry or target
+  base_url. What it does name is the panel's own origin as what the choice is
+  remembered for.
+
+
+  So THEN 1, 2 and 3 are unmet and only 4 holds. This is unbuilt rather than
+  broken: q-0243 is the open design request saying the choose-blueprint screen
+  has no drawing for this state, with a sketch at
+  proposals/choose-blueprint-unclaimed.html. The verdict was recorded as a fail
+  rather than blocked because the behaviour is plainly observable without any
+  drawing — the panel opens someone else's board on your page and says nothing.
+
+
+  Evidence: runs/evidence/2026-09-08T20-52-38Z/ (01-nobody-claims-the-page.txt,
+  02-one-blueprint-opens-unasked.png,
+  03-two-blueprints-asks-which-not-whether.png, 04-measured.txt). No console
+  errors in either case.
+replies:
+  - author: agent
+    created: 2026-09-08T21:03:01Z
+    body: >-
+      Not taking this one, and the reason is worth writing down rather than
+      leaving as silence.
+
+
+      The finding is right: with one blueprint the panel opens it over a page
+      nothing claims, and only the two-blueprint case stops at a gate - which
+      asks WHICH, never WHETHER. That is the comparison the rule forbids, and
+      start() in src/panel/app.js puts every gate behind projects.length > 1, so
+      it is unbuilt rather than regressed.
+
+
+      Building it means drawing a state on choose-blueprint, and that screen has
+      no drawing for this: q-0243 is the open design request saying so, and
+      n-0244 already says to fold its note in when the state is built. Design
+      owns prototype/, so an agent inventing this screen would be answering a
+      design request by writing the design - which is the one shape of help
+      nobody asked for.
+
+
+      So this waits on q-0243 rather than on engineering. Recording it here so a
+      later reader does not mistake an unbuilt rule for a neglected one.
+  - author: agent
+    created: 2026-09-08T22:35:22Z
+    body: >-
+      Built, against the screen promoted from q-0243.
+
+
+      The question is now asked at EVERY count. `/api/whose` was only consulted
+      behind projects.length > 1, which is why one blueprint opened without
+      asking - the count was standing in for evidence it never was. Now: a page
+      that declares its own blueprint short-circuits before anything is asked;
+      otherwise the panel asks whose page this is, and only a real match opens
+      anything.
+
+
+      When the server answers and nothing claims the page, the panel draws the
+      promoted screen in its own skin: start.unclaimed names the fact AND the
+      address (a port or a fragment is what makes a claim miss, and the old gate
+      named the panel own origin instead), start.claim gives both ways to claim
+      it plus `walkdown claims --url <address>`, start.new gives `walkdown
+      init`, and start.options lists what the server does hold - one click to
+      open one, never opened for you, whatever the count.
+
+
+      One case deliberately left with the old picker: a server too old to answer
+      /api/whose, or a request that fails. Nothing is then known about the page,
+      so "which of these is this site" is still the honest question. That keeps
+      panel.start.choose-a-blueprint meaningful rather than retiring a drawn
+      screen on my own initiative - see the question I am filing beside this.
+
+
+      Two checks in checks/panel.spec.js, both failing on the build before this
+      one: a page nothing claims gets the gate, names its address, opens no
+      board, and its list is one click from opening a blueprint; and a page a
+      blueprint claims - or one that declares its own - is never asked at all.
+
+
+      Not claiming a verdict for it. An independent judge is being sent at the
+      rule now.
+reason: finding
+verified_by: topher

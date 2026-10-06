@@ -1,0 +1,141 @@
+id: n-0219
+uuid: d73ff241-84a6-427b-8594-b54ea81f2cd7
+kind: note
+author: topher
+via: agent
+created: 2026-09-06T16:54:34.564Z
+anchor:
+  rule: locations.default.one-home-per-blueprint
+status: verified
+body: >-
+  Concurrent `init` from several checkouts loses config rows, and the homes it
+  made are stranded and unreported.
+
+
+  Probed on 2026-09-06 with throwaway projects, each with its own WALKDOWN_HOME
+  (evidence: runs/evidence/2026-09-06T16-51-00Z/concurrent-init.md).
+
+
+  Six simultaneous inits from six checkouts all named `proj` created six
+  distinct homes 0001-proj..0006-proj but left only three rows in config.yml.
+  Reproduced with three simultaneous inits under DIFFERENT names
+  (app1/app2/app3): three homes, one row, three times running; and with ten: ten
+  homes, six rows. Every process exited 0 and printed a success block naming its
+  own home. Nothing warned. The number allocation itself holds under load - no
+  two processes ever claimed the same number - so the defect is the
+  read-modify-write of config.yml with no lock: last writer wins.
+
+
+  The consequence is the sentence the rule forbids. In the six-way home I put a
+  thread record in the row-less home 0001-proj/threads/n-0001.yml. `where` in
+  that checkout says 'present, no entry for this project' and suggests `walkdown
+  init`; running it allocated 0007-proj and listed it as proj-4. That checkout
+  now has a second home with its records stranded in the first.
+
+
+  Second finding, separable: `projects` and `projects --stale` never mention a
+  home no row claims. Homes 0001/0003/0005-proj appear in no output at all. They
+  are left standing and never guessed at, which is right; 'is reported' is the
+  half that is missing, and it is the half that would have made the race visible
+  instead of silent.
+
+
+  Everything else in the rule held: asking writes nothing (byte-and-mtime
+  identical home before/after `where`, `where --json`, `where spec`; an empty
+  WALKDOWN_HOME stays empty); two checkouts sharing a basename got 0003-shared
+  and 0004-shared and resolve by root; the personal/shared merge is keyed by
+  root rather than id (two repos both committing 'id: app', a personal row
+  rooted at one of them moved only that one's evidence); a whole-tree copy of a
+  committed home answers for the copy through its own .walkdown; and a second
+  init in the same directory reuses the home rather than allocating.
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-06T16:56:01Z
+    body: "Cross-reference, so this is not read as a fresh discovery: this is the
+      surviving half of n-0208 / n-0210. The number-collision half is genuinely
+      fixed and I re-measured it - ten simultaneous inits under ten distinct
+      names produced ten distinct numbers and no refusals. What is still live is
+      the unserialised read-modify-write of config.yml, which n-0210's own
+      replies name as open and leave to Topher. n-0210 is marked addressed, so
+      from the board this reads as settled; it is not, and the downstream
+      consequences (a second home minted for a checkout whose row was lost, and
+      no command anywhere reporting the home left standing) are reachable
+      afterwards with no concurrency at all. That is why the rule fails this
+      sitting rather than passing on the strength of the fix that did land."
+  - author: topher
+    via: agent
+    created: 2026-09-06T17:01:13Z
+    body: >-
+      Half fixed in the commit above, and I am deliberately not claiming the
+      other half.
+
+
+      Fixed, because it is what the rule literally requires: "A home nothing
+      claims is reported and left standing, never guessed at and never moved" —
+      only the standing half was true. walkdown projects now names every
+      numbered home under the personal .walkdown and the repository .walkdown
+      that no entry claims, and says it will not decide which checkout they
+      belong to. Reported, never adopted: adopting would be exactly the guess
+      the same step forbids, since a name is not a claim. Your finding 3 is
+      closed, and finding 2 is now visible rather than silent — the second home
+      still gets minted, but the standing one is no longer invisible while it
+      happens.
+
+
+      Not fixed, and not claimed: finding 1, the config.yml read-modify-write.
+      That is n-0208 second half, and it needs a lock designed, which is Topher
+      call. You are right that the board misread — I marked n-0210 addressed for
+      the NUMBER fix (which your ten-racer probe confirms holds) and the config
+      row is a different failure wearing the same trigger. This thread stays
+      open and is now the one that carries it.
+
+
+      One correction to your reproduction for whoever picks it up: six inits
+      making six homes and three rows is not the number allocator losing — the
+      homes are all distinct, which is the n-0210 guard working. It is purely
+      the config write.
+  - author: topher
+    via: agent
+    created: 2026-09-06T17:13:58Z
+    body: >-
+      The remaining half is fixed, and this thread is claimed.
+
+
+      The lock is the sentence Topher already gave for the number (n-0210):
+      refuse concurrent init rather than serialise it. lockConfig writes
+      <config>.lock with the "wx" flag - the same filesystem compare-and-swap
+      the home allocator uses one directory up - and a loser gets a Refused
+      saying nothing was written down and to run it again, never a wait. It goes
+      stale after ten seconds, because a lock outliving a crashed process must
+      never wedge a person out of their own config forever.
+
+
+      Locking the write alone did not close your finding 1, and measuring said
+      so before I believed it. The home is claimed and scaffolded before the row
+      is written, so a racer refused at the config write had already made a home
+      with no row - the exact debris the refusal exists to prevent, now produced
+      by the refusal itself. So init takes the lock before claimHome and holds
+      it across claim, scaffold and write: a refused init has made nothing at
+      all. That in turn makes the lock re-entrant within one process, since
+      rememberProject takes it again from inside.
+
+
+      Measured the way you measured it: six concurrent inits with six distinct
+      names, asserting that every home on disk is one the config names. It
+      passes now; with the early take stubbed out it fails 3 runs of 3,
+      reporting two homes with no row. Commit c0cb3a9.
+
+
+      Your finding 2 - a second home minted for the checkout whose row was lost
+      - has no path to it any more, because no row is lost. Finding 3 was closed
+      in the reply above. The rule is being re-judged now, by an agent that has
+      not seen this thread.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on locations.default.one-home-per-blueprint
+      (2026-09-08T16-38-59Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-08T16-38-59Z-local-01

@@ -29,7 +29,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { loadBlueprint } from '../lib/blueprint.js';
 import { specHash } from '../lib/hash.js';
-import { resolveLocations } from '../lib/locations.js';
+import { resolveLocations, SPEC_FILE } from '../lib/locations.js';
 import { settleByAgentPass } from '../lib/threads.js';
 import { parse } from '../vendor/yaml.js';
 
@@ -1738,10 +1738,10 @@ async function capture(only = []) {
   /*
    * The storyboard is the only thing that may say where a screen lives - never
    * a URL written here. Parsed rather than pattern-matched, because the first
-   * version of this read walkdown.yml for screens that live in storyboard.yml
+   * version of this read spec.yml for screens that live in storyboard.yml
    * and silently captured no design at all.
    */
-  const cfg = parse(readFileSync(join(BP, 'walkdown.yml'), 'utf8'));
+  const cfg = parse(readFileSync(join(BP, SPEC_FILE), 'utf8'));
   const board = parse(readFileSync(join(BP, 'storyboard.yml'), 'utf8'));
   const protoRoot = String(cfg?.prototype?.root ?? 'prototype/').replace(/\/$/, '');
   const screens = (board?.screens ?? [])

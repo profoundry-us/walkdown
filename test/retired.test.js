@@ -26,7 +26,7 @@ function fixture(label) {
   const h = declaredHome(join(root, label), 'retired-fixture');
   const bp = h.spec;
   mkdirSync(join(bp, 'features'), { recursive: true });
-  writeFileSync(join(bp, 'walkdown.yml'), 'blueprint: retired-fixture\n');
+  writeFileSync(join(bp, 'spec.yml'), 'blueprint: retired-fixture\n');
   const live = 'The visitor can do the thing.';
   const gone = 'The visitor could do the old thing.';
   writeFileSync(

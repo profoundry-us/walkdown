@@ -1,4 +1,4 @@
-import { declareProject } from '../tools/test-home.mjs';
+import { declareProject, threadAt } from '../tools/test-home.mjs';
 /*
  * What `walkdown thread` SAYS, as opposed to what it does. The mutations
  * themselves are covered next door in thread-mutations.test.js; this is about
@@ -24,15 +24,15 @@ const CLI = new URL('../bin/walkdown.js', import.meta.url).pathname;
  * entry - every blueprint walkdown answers for is one somebody declared, and
  * a ledger kept inside the spec is the layout from before homes.
  */
-const threadsOf = (bp) => join(dirname(bp), 'threads');
+const threadsOf = (bp) => join(bp, 'threads');
 
 function fixture(name, thread) {
-  const bp = join(root, name, 'blueprint');
+  const bp = join(root, name);
   mkdirSync(bp, { recursive: true });
   mkdirSync(threadsOf(bp), { recursive: true });
-  writeFileSync(join(bp, 'walkdown.yml'), 'blueprint: thread-cli-fixture\n');
+  writeFileSync(join(bp, 'spec.yml'), 'blueprint: thread-cli-fixture\n');
   writeFileSync(
-    join(threadsOf(bp), `${thread.id}.yml`),
+    threadAt(threadsOf(bp), thread.id),
     [
       `id: ${thread.id}`,
       'kind: note',
@@ -58,7 +58,7 @@ let homes = 0;
 function identity(username) {
   const home = join(root, `home-${++homes}`);
   mkdirSync(home, { recursive: true });
-  if (username) writeFileSync(join(home, 'config.yml'), `identity:\n  username: ${username}\n`);
+  if (username) writeFileSync(join(home, 'profile.yml'), `identity:\n  username: ${username}\n`);
   return home;
 }
 const SAID = identity('A Person');
@@ -66,7 +66,7 @@ const GUESSING = identity(null);
 /** A person who has said where they are. The stamps on disk stay UTC. */
 const IN_TOKYO = (() => {
   const home = identity('A Person');
-  writeFileSync(join(home, 'config.yml'), 'identity:\n  username: A Person\n  timezone: Asia/Tokyo\n');
+  writeFileSync(join(home, 'profile.yml'), 'identity:\n  username: A Person\n  timezone: Asia/Tokyo\n');
   return home;
 })();
 
@@ -109,7 +109,7 @@ test('a reply with no transition says the status did not move @rule:threads.life
   const relayed = run(['n-0002', '--as-agent', '--said', 'the label reads wrong', '--added', 'seen at 375 too'], bp);
   assert.match(relayed, /by A Person/);
   assert.match(relayed, /via agent/, 'a machine typing a person\'s words is said beside the name, not instead');
-  const disk = readFileSync(join(threadsOf(bp), 'n-0002.yml'), 'utf8');
+  const disk = readFileSync(threadAt(threadsOf(bp), 'n-0002'), 'utf8');
   assert.match(disk, /author: A Person\n\s+via: agent\n[^]*body: the label reads wrong\n\s+added: seen at 375 too/);
   const read = run(['n-0002'], bp);
   assert.match(read, /the label reads wrong\n[^]*agent added:[^]*seen at 375 too/, 'the read path draws the addition apart');
@@ -140,7 +140,7 @@ test('a refused transition refuses the whole mutation - the reply never lands @r
   // reply used to be written BEFORE the transition validated, so the output
   // denied a change that had happened, and a retry duplicated the reply.
   const bp = fixture('mixed', { id: 'n-0006', status: 'open' });
-  const file = join(threadsOf(bp), 'n-0006.yml');
+  const file = threadAt(threadsOf(bp), 'n-0006');
   const before = readFileSync(file, 'utf8');
   assert.throws(
     () => run(['n-0006', '--reply', 'and verified', '--verify'], bp),
@@ -154,7 +154,7 @@ test('an empty reply is refused, not read back - and drops no status change @rul
   // treated as no reply at all - alone it printed the conversation, and with
   // a status it applied the transition while silently dropping the reply.
   const bp = fixture('empty', { id: 'n-0007', status: 'open' });
-  const file = join(threadsOf(bp), 'n-0007.yml');
+  const file = threadAt(threadsOf(bp), 'n-0007');
   const before = readFileSync(file, 'utf8');
   for (const args of [
     ['n-0007', '--reply', ''],
@@ -190,7 +190,7 @@ test('the report names the same person the disk records @rule:threads.lifecycle.
   const bp = fixture('noactor', { id: 'n-0009', status: 'open' });
   const out = run(['n-0009', '--reply', 'noted'], bp);
   assert.match(out, /by A Person/, 'the configured identity, named out loud');
-  const disk = readFileSync(join(threadsOf(bp), 'n-0009.yml'), 'utf8');
+  const disk = readFileSync(threadAt(threadsOf(bp), 'n-0009'), 'utf8');
   assert.match(disk, /author: A Person/, 'the ledger records the same name the report gave');
   assert.doesNotMatch(disk, /via:/, 'a person typing is the ordinary case and needs no annotation');
 });
@@ -203,7 +203,7 @@ test("a reply to a terminal thread is recorded under its own actor, not the stat
   assert.match(out, /still waived/);
   assert.match(out, /by A Person/, "the reply's author is who the change was recorded under");
   assert.doesNotMatch(out, /by Probe Human/, 'the status holder did not make this change');
-  const disk = readFileSync(join(threadsOf(bp), 'n-0010.yml'), 'utf8');
+  const disk = readFileSync(threadAt(threadsOf(bp), 'n-0010'), 'utf8');
   assert.match(disk, /author: A Person/, 'and the disk agrees');
   assert.match(disk, /via: agent/, 'with the provenance beside the author');
 
@@ -237,10 +237,10 @@ test('a refused transition says so and exits non-zero @rule:threads.lifecycle.sa
  * happened and under whom, never the thread read back.
  */
 function ruleFixture(name) {
-  const bp = join(root, name, 'blueprint');
+  const bp = join(root, name);
   mkdirSync(join(bp, 'features'), { recursive: true });
   mkdirSync(threadsOf(bp), { recursive: true });
-  writeFileSync(join(bp, 'walkdown.yml'), 'blueprint: thread-cli-fixture\n');
+  writeFileSync(join(bp, 'spec.yml'), 'blueprint: thread-cli-fixture\n');
   writeFileSync(
     join(bp, 'features', 'f.yml'),
     [
@@ -267,7 +267,7 @@ test('thread new opens an anchored thread and reports under whom @rule:threads.l
   assert.match(out, /n-0001 opened · note · by A Person/);
   assert.match(out, /via agent/, 'a note an agent typed for a person says so');
   assert.doesNotMatch(out, /Seen: a thing/, 'a report, not the thread read back');
-  const disk = readFileSync(join(threadsOf(bp), 'n-0001.yml'), 'utf8');
+  const disk = readFileSync(threadAt(threadsOf(bp), 'n-0001'), 'utf8');
   assert.match(disk, /author: A Person/);
   assert.match(disk, /via: agent/);
   assert.match(disk, /rule: f\.s\.rule/);
@@ -281,12 +281,12 @@ test('thread new records an anchor as the element id, never the selector for it'
   // Judges wrote the selector they had been driving, and every such thread
   // read as anchored to something the storyboard never declared.
   run(['new', '--rule', 'f.s.rule', '--body', 'x', '--element', '[data-testid="start.connect"]'], bp);
-  const disk = readFileSync(join(threadsOf(bp), 'n-0001.yml'), 'utf8');
+  const disk = readFileSync(threadAt(threadsOf(bp), 'n-0001'), 'utf8');
   assert.match(disk, /element: start\.connect$/m);
   assert.doesNotMatch(disk, /data-testid/);
   // Anything that is not that one form is kept as typed.
   run(['new', '--rule', 'f.s.rule', '--body', 'x', '--element', '#by-css > .path'], bp);
-  assert.match(readFileSync(join(threadsOf(bp), 'n-0002.yml'), 'utf8'), /element: "#by-css > \.path"/);
+  assert.match(readFileSync(threadAt(threadsOf(bp), 'n-0002'), 'utf8'), /element: "#by-css > \.path"/);
 });
 
 test('thread new refuses the machine\'s words that miss the voice in words, and files nothing @rule:ownership.authoring.machine-words-pass-the-voice', () => {
@@ -296,7 +296,7 @@ test('thread new refuses the machine\'s words that miss the voice in words, and 
     () => run(['new', '--rule', 'f.s.rule', '--body', `${long}.`, '--as-agent'], bp),
     (err) => err.status === 2 && /long-sentence/.test(String(err.stderr)) && !/at .*writes\.js/.test(String(err.stderr)),
   );
-  assert.throws(() => readFileSync(join(threadsOf(bp), 'n-0001.yml')), 'no refusal filed anything');
+  assert.throws(() => readFileSync(threadAt(threadsOf(bp), 'n-0001')), 'no refusal filed anything');
 });
 
 test('thread new refuses an unknown rule, an empty body, and a strange kind', () => {
@@ -312,7 +312,7 @@ test('thread new refuses an unknown rule, an empty body, and a strange kind', ()
       (err) => err.status === 2 && err.stdout === '',
     );
   }
-  assert.throws(() => readFileSync(join(threadsOf(bp), 'n-0001.yml')), 'no refusal filed anything');
+  assert.throws(() => readFileSync(threadAt(threadsOf(bp), 'n-0001')), 'no refusal filed anything');
 });
 
 test('thread new is creation only - mutation flags on it are refused', () => {
@@ -332,7 +332,7 @@ test('thread new is creation only - mutation flags on it are refused', () => {
  */
 test('a verify on a machine that only has a guess is refused @rule:threads.lifecycle.claim-never-accept', () => {
   const bp = fixture('noactor-verify', { id: 'n-0011', status: 'addressed' });
-  const before = readFileSync(join(threadsOf(bp), 'n-0011.yml'), 'utf8');
+  const before = readFileSync(threadAt(threadsOf(bp), 'n-0011'), 'utf8');
   assert.throws(
     () => run(['n-0011', '--verify'], bp, GUESSING),
     (err) => {
@@ -341,7 +341,7 @@ test('a verify on a machine that only has a guess is refused @rule:threads.lifec
       return true;
     },
   );
-  assert.equal(readFileSync(join(threadsOf(bp), 'n-0011.yml'), 'utf8'), before, 'disk untouched');
+  assert.equal(readFileSync(threadAt(threadsOf(bp), 'n-0011'), 'utf8'), before, 'disk untouched');
 });
 
 test('a waive on a guess is refused the same way @rule:threads.lifecycle.claim-never-accept', () => {
@@ -350,7 +350,7 @@ test('a waive on a guess is refused the same way @rule:threads.lifecycle.claim-n
     () => run(['n-0012', '--waive', '--reason', 'x'], bp, GUESSING),
     (err) => err.status === 2 && /a login name is not a decision/.test(String(err.stderr)),
   );
-  const disk = readFileSync(join(threadsOf(bp), 'n-0012.yml'), 'utf8');
+  const disk = readFileSync(threadAt(threadsOf(bp), 'n-0012'), 'utf8');
   assert.match(disk, /status: open/, 'the thread never moved');
 });
 
@@ -370,7 +370,7 @@ test('--as-agent may claim, and may never accept @rule:threads.lifecycle.claim-n
       () => run(args, bp),
       (err) => err.status === 2 && /never accept it/.test(String(err.stderr)),
     );
-  const disk = readFileSync(join(threadsOf(bp), 'n-0013.yml'), 'utf8');
+  const disk = readFileSync(threadAt(threadsOf(bp), 'n-0013'), 'utf8');
   assert.doesNotMatch(disk, /verified_by|waived_by/, 'no agent stood as accepter');
   assert.match(disk, /status: addressed/);
 });
@@ -388,7 +388,7 @@ test('the machine\'s words are refused when they miss the voice; --as-is files t
     () => run(['n-0014', '--as-agent', '--reply', chained], bp),
     (err) => err.status === 2 && /do not pass the voice/.test(String(err.stderr)) && /dash-clause/.test(String(err.stderr)) && /--as-is/.test(String(err.stderr)),
   );
-  let disk = readFileSync(join(threadsOf(bp), 'n-0014.yml'), 'utf8');
+  let disk = readFileSync(threadAt(threadsOf(bp), 'n-0014'), 'utf8');
   assert.doesNotMatch(disk, /Looked at it/, 'a refused reply never lands');
   // What the machine adds beside a person's words is its own, and gated the same.
   assert.throws(
@@ -397,7 +397,7 @@ test('the machine\'s words are refused when they miss the voice; --as-is files t
   );
   assert.match(run(['n-0014', '--as-agent', '--reply', chained, '--as-is'], bp), /\+1 reply/);
   assert.match(run(['n-0014', '--reply', 'Probably fine - I looked - and it is - honestly.'], bp), /\+1 reply/);
-  disk = readFileSync(join(threadsOf(bp), 'n-0014.yml'), 'utf8');
+  disk = readFileSync(threadAt(threadsOf(bp), 'n-0014'), 'utf8');
   assert.match(disk, /Looked at it/);
   assert.match(disk, /Probably fine/);
 });
@@ -412,7 +412,7 @@ test('an identity literally called agent is refused too, in any spelling @rule:t
       (err) => err.status === 2 && /named human actor/.test(String(err.stderr)),
     );
   assert.doesNotMatch(
-    readFileSync(join(threadsOf(bp), 'n-0015.yml'), 'utf8'),
+    readFileSync(threadAt(threadsOf(bp), 'n-0015'), 'utf8'),
     /verified_by/,
     'no spelling stood as accepter',
   );
@@ -422,7 +422,7 @@ test('a declared identity satisfies the accept gate @rule:threads.lifecycle.clai
   const bp = fixture('env-actor', { id: 'n-0014', status: 'addressed' });
   const out = run(['n-0014', '--verify'], bp);
   assert.match(out, /by A Person/);
-  const disk = readFileSync(join(threadsOf(bp), 'n-0014.yml'), 'utf8');
+  const disk = readFileSync(threadAt(threadsOf(bp), 'n-0014'), 'utf8');
   assert.match(disk, /verified_by: A Person/);
 });
 
@@ -470,12 +470,12 @@ test('a thread is read in the zone the person declared, and the file still says 
   const out = run(['n-0009'], bp, IN_TOKYO);
   assert.match(out, /Jan 1, 2026, 9:00 AM GMT\+9/, 'midnight UTC is nine in the morning in Tokyo');
   assert.doesNotMatch(out, /2026-01-01T00:00:00Z/, 'the raw UTC string is what the file says, not what a person reads');
-  assert.match(readFileSync(join(threadsOf(bp), 'n-0009.yml'), 'utf8'), /created: 2026-01-01T00:00:00Z/);
+  assert.match(readFileSync(threadAt(threadsOf(bp), 'n-0009'), 'utf8'), /created: 2026-01-01T00:00:00Z/);
 });
 
 test('a zone the machine does not know falls back to its own and says so @rule:time.records.read-in-your-zone', () => {
   const home = identity('A Person');
-  writeFileSync(join(home, 'config.yml'), 'identity:\n  username: A Person\n  timezone: Mars/Olympus_Mons\n');
+  writeFileSync(join(home, 'profile.yml'), 'identity:\n  username: A Person\n  timezone: Mars/Olympus_Mons\n');
   const bp = fixture('unzoned', { id: 'n-0010', status: 'open' });
   // Reads rather than throws - a typo in the personal config must never take
   // a command down (n-0148) - and the stamp is still a clock, not a raw Z.
@@ -510,7 +510,7 @@ test('a note filed on a screen alone is a design request, and answers for that s
 
   const out = run(['new', '--screen', 'undrawn', '--body', 'This screen needs drawing.'], bp);
   assert.match(out, /n-0001 opened · note/);
-  const disk = readFileSync(join(threadsOf(bp), 'n-0001.yml'), 'utf8');
+  const disk = readFileSync(threadAt(threadsOf(bp), 'n-0001'), 'utf8');
   assert.match(disk, /screen: undrawn/);
   assert.doesNotMatch(disk, /rule:/, 'no rule was named, so none is recorded');
   assert.match(disk, /reason: request/);
@@ -518,7 +518,7 @@ test('a note filed on a screen alone is a design request, and answers for that s
 
   // A reason given is the reason kept.
   run(['new', '--screen', 'undrawn', '--body', 'An odd screen.', '--reason', 'feedback'], bp);
-  assert.match(readFileSync(join(threadsOf(bp), 'n-0002.yml'), 'utf8'), /reason: feedback/);
+  assert.match(readFileSync(threadAt(threadsOf(bp), 'n-0002'), 'utf8'), /reason: feedback/);
 });
 
 test('a thread with neither a rule nor a screen is refused, and so is a screen that does not exist @rule:ownership.design.request-on-a-screen', () => {

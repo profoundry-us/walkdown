@@ -1,0 +1,31 @@
+id: n-0224
+uuid: 4e5f7207-811a-487a-bc7b-68c75227d82b
+kind: note
+author: topher
+created: 2026-09-07T14:17:04.168Z
+anchor:
+  rule: panel.rules.lifecycle-legible
+status: verified
+body: >-
+  Looks good, but remove this sentence from the rule, it is extraneous history
+  that can be read in the relevant thread.
+
+
+  " - because a lifecycle drawn in its own vocabulary put a lone mark where
+  every neighbouring row had three, and a rule whose only fault was not being
+  built yet read as an alarm."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-08T17:49:59Z
+    body: "panel.rules.lifecycle-legible: the trailing clause arguing why a
+      lifecycle drawn in its own vocabulary matters is gone. The history stays
+      readable in this thread, which is where it belongs."
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.rules.lifecycle-legible
+      (2026-09-14T19-03-44Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-14T19-03-44Z-local-01

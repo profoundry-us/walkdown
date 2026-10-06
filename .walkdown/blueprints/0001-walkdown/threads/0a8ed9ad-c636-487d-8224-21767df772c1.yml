@@ -1,0 +1,56 @@
+id: n-0288
+uuid: 0a8ed9ad-c636-487d-8224-21767df772c1
+kind: note
+author: topher
+via: agent
+created: 2026-09-13T22:51:35.309Z
+anchor:
+  rule: threads.conversation.one-stream
+status: settled
+body: >-
+  Investigate what it would take to add markdown support to the threads and to
+  go back and update all existing threads to add formatting that makes them
+  easier to read.
+
+
+  Hold the renderer, but use a vendored library so we don’t rebuild it.
+added: "Markdown in thread bodies - investigated 2026-09-13, held. What the 664
+  messages use today: paragraphs (248), backticks (162), dash and numbered lists
+  (52), thread refs (176), rule ids (241), file paths (238), evidence keys
+  (123); no headings, bold or italic. All of it renders through one function,
+  MSG.body in lib/message-stream.js (escape, then link refs, pre-wrap).
+  Decision, Topher: hold the renderer for now; when it is built, use a VENDORED
+  library bundled through Rollup the way lit and yaml are - not a hand-written
+  subset - with sanitising in front of it, since bodies arrive from the browser.
+  And the existing threads are not rewritten: threads.conversation.append-only
+  makes editing 664 bodies an edit of the record, and render-time formatting
+  (lists, code spans, autolinked paths and evidence keys) gives the old bodies
+  the same reading without a byte on disk changing."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-13T23:00:23Z
+    body: Sorry, that was supposed to say “build the renderer”; autocorrect screwed
+      me.
+    added: 'Built (Topher: "build the renderer" - the hold was autocorrect).
+      vendor/markdown.js bundles marked + DOMPurify from
+      src/vendor-entries/markdown.js (rollup.markdown.mjs, build:markdown /
+      check:markdown, Highball check, licences and README beside lit and yaml).
+      MSG.body in lib/message-stream.js parses the body as GFM with line breaks
+      kept, sanitises to a closed list (p, br, em, strong, code, pre, lists,
+      blockquote, a with http(s) only, del, hr - no headings), then links thread
+      ids, rule ids and evidence keys on text nodes only, so an id inside a code
+      span stays as typed; an evidence key opens the file the way the detail
+      rows do. Node gets escaped text back, since there is no document there.
+      Rule threads.conversation.written-in-markdown with a check that files a
+      hostile body through the API and reads it back rendered. The embed grew
+      from 68K to 257K carrying the bundle - the cost of vendoring, said out
+      loud. Existing threads untouched; they read better because their lists and
+      backticks now render.'
+  - author: agent
+    created: 2026-09-21T00:21:02Z
+    body: "Settled: an observation of the agent's own, addressed rather than settled
+      before the person's pass on the rule, so it queued the rule back to them
+      as a fix awaiting a look (2026-09-20). Nothing here was ever theirs to
+      verify."
+reason: observation

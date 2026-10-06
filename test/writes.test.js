@@ -42,7 +42,7 @@ function project({ movedThreads = false } = {}) {
    * `defaults:` would not do it: the home implies where threads live, and a
    * named key on the row outranks a blanket one.
    */
-  writeFileSync(join(home, 'config.yml'), 'identity:\n  username: writes-person\n');
+  writeFileSync(join(home, 'profile.yml'), 'identity:\n  username: writes-person\n');
   process.env.WALKDOWN_HOME = home;
   const h = declaredHome(join(root, 'proj'), 'writes-fixture');
   if (movedThreads) {
@@ -53,7 +53,7 @@ function project({ movedThreads = false } = {}) {
   }
   const bp = h.spec;
   mkdirSync(join(bp, 'features'), { recursive: true });
-  writeFileSync(join(bp, 'walkdown.yml'), 'blueprint: writes-fixture\n');
+  writeFileSync(join(bp, 'spec.yml'), 'blueprint: writes-fixture\n');
   writeFileSync(join(bp, 'storyboard.yml'), 'screens: []\n');
   writeFileSync(
     join(bp, 'features', 'demo.yml'),
@@ -111,7 +111,7 @@ test('a pin filed with the ledger moved lands where readers read @rule:locations
       assert.match(data.id, /^n-\d{4}$/);
 
       // On disk where the config says, not beside the spec.
-      assert.deepEqual(readdirSync(p.threadsDir), [`${data.id}.yml`]);
+      assert.deepEqual(readdirSync(p.threadsDir), [`${data.uuid}.yml`]);
 
       // And - the actual claim - a fresh read of the blueprint SEES it.
       const seen = loadBlueprint(p.bp, { cwd: p.h.root }).threads.map((t) => t.data?.id);

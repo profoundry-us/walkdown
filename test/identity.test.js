@@ -80,7 +80,7 @@ test('a username that is not a string counts as nobody and names its file @rule:
   const { tmpdir } = await import('node:os');
   const { join } = await import('node:path');
   const home = mkdtempSync(join(tmpdir(), 'walkdown-identity-'));
-  writeFileSync(join(home, 'config.yml'), 'identity:\n  username: [agent]\n  name: 7\n');
+  writeFileSync(join(home, 'profile.yml'), 'identity:\n  username: [agent]\n  name: 7\n');
   const was = process.env.WALKDOWN_HOME;
   process.env.WALKDOWN_HOME = home;
   try {
@@ -90,7 +90,7 @@ test('a username that is not a string counts as nobody and names its file @rule:
     assert.ok(who.username, 'the guess is still a name, so the report still boots');
     assert.match(who.problem, /identity\.username.*config\.yml.*a list/);
     assert.notEqual(who.name, 7, 'a number is not a display name either');
-    writeFileSync(join(home, 'config.yml'), 'identity:\n  username: " person "\n');
+    writeFileSync(join(home, 'profile.yml'), 'identity:\n  username: " person "\n');
     const fine = defaultActor(process.cwd());
     assert.equal(fine.problem, null);
     assert.equal(fine.username, 'person');

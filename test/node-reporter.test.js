@@ -12,11 +12,11 @@ after(() => rmSync(root, { recursive: true, force: true }));
 
 test('node:test reporter records tagged tests as a hash-stamped run', () => {
   mkdirSync(home, { recursive: true });
-  writeFileSync(join(home, 'config.yml'), 'identity:\n  username: A Person\n');
-  mkdirSync(join(root, 'blueprint', 'features'), { recursive: true });
-  writeFileSync(join(root, 'blueprint', 'walkdown.yml'), 'blueprint: node-fixture\n');
+  writeFileSync(join(home, 'profile.yml'), 'identity:\n  username: A Person\n');
+  mkdirSync(join(root, 'features'), { recursive: true });
+  writeFileSync(join(root, 'spec.yml'), 'blueprint: node-fixture\n');
   writeFileSync(
-    join(root, 'blueprint', 'features', 'demo.yml'),
+    join(root, 'features', 'demo.yml'),
     [
       'feature: demo',
       'stories:',

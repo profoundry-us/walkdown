@@ -1,0 +1,26 @@
+id: q-0001
+uuid: 8271dd36-83df-42b6-b659-d46872fd5945
+kind: question
+author: agent
+created: 2026-08-20T20:12:30Z
+anchor:
+  rule: waitlist.join.confirmation
+  screen: waitlist-join
+  element: waitlist.submit
+status: incorporated
+body: >
+  The prototype doesn't show what happens when an email that is already on the
+  waitlist is submitted again. Should re-submission show the same confirmation,
+  or a distinct "you're already on the list" state? If the latter, it needs a
+  screen (or state) in the storyboard and likely a new rule.
+replies:
+  - author: topherfangio
+    created: 2026-08-20T23:45:50Z
+    body: make it say, "you're already on the list"
+  - author: agent
+    created: 2026-08-20T23:56:31Z
+    body: "Incorporated: new rule waitlist.join.already-joined ('you're already on
+      the list' message per your answer), new screen waitlist-already in the
+      storyboard, prototype screens/waitlist-already.html, app implementation
+      (localStorage-backed), and a tagged check — passing in run
+      2026-08-20T23-56-21Z-local-01."

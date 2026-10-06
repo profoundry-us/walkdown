@@ -5,7 +5,7 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadBlueprint } from '../../lib/blueprint.js';
-import { resolveLocations, tilde } from '../../lib/locations.js';
+import { resolveLocations, SPEC_FILE, tilde, upgradeDue } from '../../lib/locations.js';
 
 /*
  * How a command finishes. process.exit() tears the process down before Node
@@ -26,14 +26,30 @@ const end = (code) => {
  * so there is one place to look and one thing to say when it is empty.
  */
 export function loadOrExit(blueprintId) {
+  upgradeOrExit();
   const loc = resolveLocations({ blueprint: blueprintId });
   if (loc.ambiguous) severalHere(loc);
   // The file is the test, not the declaration: an entry can name a spec that
   // has been deleted, and a directory nothing declares is not a project at
   // all. Both are "no blueprint" and both should say so the same way.
-  const there = loc.spec?.path && existsSync(join(loc.spec.path, 'walkdown.yml'));
+  const there = loc.spec?.path && existsSync(join(loc.spec.path, SPEC_FILE));
   if (!there) noBlueprintHere(loc, blueprintId);
   return loadBlueprint(loc.spec.path);
+}
+
+/*
+ * AN UPGRADE DUE IS SAID, NEVER DONE (ADR 0014 §11). A layout from before
+ * ADR 0014 is moved once, by `walkdown upgrade`, when a person runs it; any
+ * other command that finds one says so and stops, having changed nothing,
+ * rather than reading half of an old layout and writing into the new one.
+ */
+export function upgradeOrExit() {
+  const due = upgradeDue();
+  if (!due.length) return;
+  console.error('An upgrade is due — walkdown keeps its files differently now (ADR 0014):');
+  for (const d of due) console.error(`  · ${d}`);
+  console.error('Run `walkdown upgrade` to move them, once. Nothing was changed.');
+  process.exit(2);
 }
 
 /*
@@ -47,6 +63,7 @@ export function loadOrExit(blueprintId) {
  * @returns {{ id: string, blueprint: any }[]}
  */
 export function eachOrExit(blueprintId) {
+  upgradeOrExit();
   const loc = resolveLocations({ blueprint: blueprintId });
   if (!loc.ambiguous) return [{ id: loc.id, blueprint: loadOrExit(blueprintId), several: false }];
   return loc.config.registry.candidates.map((id) => ({ id, blueprint: loadOrExit(id), several: true }));

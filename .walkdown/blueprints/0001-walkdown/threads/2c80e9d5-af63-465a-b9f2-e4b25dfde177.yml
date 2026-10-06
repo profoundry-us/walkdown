@@ -1,0 +1,67 @@
+id: n-0226
+uuid: 2c80e9d5-af63-465a-b9f2-e4b25dfde177
+kind: note
+author: topher
+via: agent
+created: 2026-09-07T17:29:59.910Z
+anchor:
+  rule: panel.walkdown.records-to-ledger
+status: settled
+body: >-
+  I just did one more walkdown with the new setup judging a single item. But it
+  doesn't look like it signed the product one. What happened?
+
+
+  Yes, file both and build them
+added: >-
+  Finishing a walkdown says how many verdicts landed, and never says what was
+  actually recorded on them.
+
+
+  The response already carries the answer. POST /api/walkdowns returns { run_id,
+  roles, signatures }, and lib/api.js says in a comment why: "The roles come
+  back so the panel can say what it actually filed rather than what it hoped to
+  - an emptied list files none." The panel throws that away and toasts "Recorded
+  1 verdict as <run_id>".
+
+
+  Measured cost: three sittings recorded something nobody chose, and each was
+  found later by reading JSON on disk rather than by anything on screen.
+
+  - 2026-09-06, 29 rules: settings roles ticked, panel sent no roles field at
+  all, ledger read engineering.
+
+  - 2026-09-07 16:07, 1 rule: same.
+
+  - 2026-09-07 17:14, 1 rule: panel sent signatures to a server started before
+  signatures existed; the door dropped them.
+
+
+  Every one of those would have been a second's work to notice if the toast had
+  read "Recorded 1 verdict - eng (topher), product (sam)" from the response,
+  because the missing half would have been missing from the sentence.
+
+
+  This is not the same defect as the server being stale (see the note beside
+  this one); it is the panel declining to report what it was told. Fix: read
+  out.signatures and say who signed, and say plainly when the answer is nobody
+  in particular.
+replies:
+  - author: agent
+    created: 2026-09-07T17:35:35Z
+    body: 'Built in f310783. The toast reads the door answer instead of counting:
+      "Recorded 1 verdict as <run_id> — eng (topher), product (sam)". Signatures
+      first, the older flat roles if that is what came back, and "no role stated
+      — the ledger reads it as engineering" when the answer is nothing, because
+      that is the sentence that would have caught all three cases. Covered by a
+      test asserting the endpoint answers with what it filed and answers null
+      for nothing stated, and the rule gained a step saying finishing reports
+      what was recorded rather than how many. The statement is untouched, so
+      nothing is un-signed.'
+  - author: agent
+    created: 2026-09-21T00:21:01Z
+    body: "Settled: an observation of the agent's own, addressed rather than settled
+      before the person's pass on the rule, so it queued the rule back to them
+      as a fix awaiting a look (2026-09-20). Nothing here was ever theirs to
+      verify."
+reason: observation

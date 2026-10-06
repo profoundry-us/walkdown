@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 import { listedBlueprints } from '../../lib/blueprint.js';
-import { resolveLocations } from '../../lib/locations.js';
+import { resolveLocations, SPEC_FILE } from '../../lib/locations.js';
 import { dim } from '../../lib/report/tty.js';
 import { loadOrExit } from './context.js';
 
@@ -21,7 +21,7 @@ export async function run(args) {
   });
   // Named, it must exist: a typo should say so, not serve without it.
   const here = resolveLocations({ blueprint: values.blueprint });
-  const standing = here.spec?.path && existsSync(join(here.spec.path, 'walkdown.yml'));
+  const standing = here.spec?.path && existsSync(join(here.spec.path, SPEC_FILE));
   const blueprint = values.blueprint || standing ? loadOrExit(values.blueprint) : null;
   const { startServe } = await import('../../lib/serve.js');
   const { port } = await startServe(blueprint?.dir ?? null, {

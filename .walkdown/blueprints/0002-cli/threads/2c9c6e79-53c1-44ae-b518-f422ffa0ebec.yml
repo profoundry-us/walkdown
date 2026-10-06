@@ -1,0 +1,18 @@
+id: n-0348
+uuid: 2c9c6e79-53c1-44ae-b518-f422ffa0ebec
+kind: note
+reason: request
+author: topher
+via: agent
+created: 2026-10-05T02:27:27.325Z
+anchor:
+  screen: init-missing-git
+status: open
+body: ADR 0012 accepted, rules approved, build it
+added: "Draw what `walkdown init` prints on a machine with no git on its PATH
+  (commands.init.names-what-is-missing): git named as missing with where to get
+  it, everything else still set up, exit 1. Anchors: cli.prompt, cli.init.home,
+  cli.init.needs, cli.init.next, cli.exit. The frame is the terminal frame
+  tools/cli-captures.mjs --frame prints, so the design and the as-built line up
+  under the fade; /as-built/cli/init-missing-git.html shows what the build
+  prints today."

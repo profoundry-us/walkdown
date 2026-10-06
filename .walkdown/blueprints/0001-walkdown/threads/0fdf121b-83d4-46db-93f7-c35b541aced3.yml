@@ -1,0 +1,152 @@
+id: n-0071
+uuid: 0fdf121b-83d4-46db-93f7-c35b541aced3
+kind: note
+author: topher
+created: 2026-08-25T22:20:00Z
+anchor:
+  rule: panel.rules.takes-you-there
+  screen: review
+  element: panel.app-frame
+status: verified
+body: "When the app viewer changes its URL, the frame needs to show that it is
+  doing something - some kind of loading indicator. Right now the old screen
+  stays on display until the new one has finished loading, so a slow app looks
+  like a walkdown that went to the wrong place rather than one still on its way.
+  The app I am working on at work takes a long time to load, and that is exactly
+  where this bites: I ask for a screen, nothing appears to happen, and the
+  screen I am looking at is the one I just left."
+replies:
+  - author: agent
+    created: 2026-08-25T23:40:00Z
+    body: "Built. When the frame is sent somewhere it now carries a veil naming the
+      screen it is fetching - 'Loading Rule detail…' - over a dimmed copy of
+      whatever was there, so a slow page reads as one still on its way rather
+      than as a walkdown that went somewhere wrong. Held back 180ms, because a
+      veil that flashes on every quick load is its own kind of noise, and
+      cleared by the frame's own load event, so it lifts whether walkdown sent
+      the page there or the app navigated itself. It follows the frame's box, so
+      a viewport preset or a window resize does not leave it stranded. A frame
+      that never arrives keeps the veil, which is the honest report. Covered by
+      a browser check that holds a screen's response open and watches the veil
+      appear and then lift when it is released. Framed delivery only: docked, a
+      real navigation unloads the panel itself, so there is nothing left to draw
+      the veil - which is the same reason that trip is offered rather than taken
+      unless the extension is carrying us."
+  - author: agent
+    created: 2026-08-26T04:35:00Z
+    body: "Follow-up from Topher: crossing between the app and the prototype was
+      breaking his ability to scroll the rules list, and he wondered whether the
+      loading veil was the cause. It is not - the veil is pointer-events none
+      and never draws in the docked delivery at all. The cause is next door to
+      it: render() photographed each pane's scroll position at the top and put
+      it back at the bottom, and with a ghost up renders arrive in bursts as the
+      copy loads, its reach repaints and pin mode mirrors. A wheel scroll
+      landing between the photograph and the restore was overwritten by the
+      older value, which reads exactly as a list that refuses to scroll - and
+      only just after a crossing, which is when those bursts happen. Panes now
+      record where they are as they are scrolled, and a repaint restores the
+      place the reader is actually at. I could not confirm the fix end to end: a
+      CDP wheel does not drive this shadow-root scroller in the harness, with or
+      without a ghost, so the control test is inconclusive rather than green.
+      The race is real and the reasoning holds; it wants his eyes on the actual
+      gesture."
+  - author: agent
+    created: 2026-08-26T05:10:00Z
+    body: >-
+      Correction: the diagnosis above is wrong and the change it justified has
+      been reverted. Topher asked how the ghost was blocking a scroll, which it
+      never was - it is pointer-events none and inset clear of the sidebar - and
+      pressing on that exposed the rest. I claimed renders arrive in bursts when
+      a ghost comes up; measured, a swap produces ONE pane replacement. And
+      render() is synchronous between photographing each pane's scroll position
+      and putting it back - no await, no timeout, no rAF - so on a single thread
+      a wheel event cannot land in between. There was no race. Worse, the record
+      I replaced it with was fed by scroll events, which fire AFTER the position
+      has already moved, so it could hand back the staler of the two values -
+      the very bug I said I was fixing. Reverted to reading live.
+
+      What is actually known about the report: the ghost cannot block the
+      sidebar, the panes are overflow-auto and hit-testable with a ghost up
+      (piercing the shadow root at the pane's centre lands on a rule row), and
+      scroll position survives the one repaint a swap causes. What is not known
+      is what Topher saw. The harness cannot settle it: a CDP wheel does not
+      drive this shadow-root scroller with the ghost up OR down, so every result
+      I got was the harness failing, not the panel. It needs the real gesture,
+      and ideally which delivery he was in - the extension over his work app
+      behaves differently from either fixture here.
+  - author: Topher Fangio
+    created: 2026-08-27T15:07:26Z
+    body: I still have never seen this actually working; let's put together a test
+      in the walkdown-example that forces this to appear, and I need some way to
+      see what it would look like. Do we have any screens that show this?
+  - author: agent
+    created: 2026-08-27T15:59:31Z
+    body: >-
+      No — nothing in the storyboard draws it. I looked: no prototype screen, no
+      state, no proposal sketch mentions a loading veil anywhere, and the veil
+      has no anchor in any screen's anchor list. It was built straight from your
+      note and has never had a drawn state. That is a real design gap and I have
+      deliberately not closed it by drawing one myself; it wants design's hand,
+      not mine.
+
+
+      What it does have now is a place to be watched. The example project gained
+      a screen that is genuinely slow: 'waitlist-export'
+      (example/app/export.html), reached by the Export button on the admin
+      screen, holding its own load event open for about three seconds. The rule
+      waitlist.export.says-why-it-waits takes you to it, so opening that rule is
+      the trip that shows the veil. The page says on arrival that it is slow on
+      purpose, so nobody reads it as a broken example.
+
+
+      One thing worth knowing, because it nearly wrecked this: the obvious way
+      to make a static page slow — a blocking inline script that busy-waits —
+      destroys the very thing it is meant to show. localhost:4310 and
+      localhost:4700 are the same SITE (ports do not separate sites), so the
+      framed app and the panel framing it share one renderer main thread.
+      Measured: with a busy-wait the veil's 180ms timer did not fire until
+      2518ms, two milliseconds AFTER the load event that dismisses it — the veil
+      never appeared at all. The wait has to be one the main thread sits out, so
+      the page holds a same-origin about:blank child document open instead.
+      Measured the same way: veil at 183ms, load at 2511ms. That is also the
+      honest shape of a slow app.
+
+
+      On checks: there was already one, in checks/panel.spec.js under this rule,
+      holding a screen's response open and watching the veil appear and lift. A
+      second one there would have been the same trick twice, so I extended it
+      instead — it now asserts the veil NAMES the screen ('Rule detail'), not
+      merely that something is loading, since a veil that only said 'Loading…'
+      leaves the same doubt the old screen did. The example side gained its own
+      check for the slow page itself: the note readable while loading, the
+      report arriving only with the load event, and the wait over 1.5s. All
+      green.
+
+
+      To see it yourself, thirty seconds, from the repo root — two terminals:
+
+          python3 -m http.server 4310 --directory example/app
+          node bin/walkdown.js serve --dir example/blueprint --port 4700
+
+      Open http://localhost:4700/, Rules tab, click
+      'waitlist.export.says-why-it-waits'. Watch the middle of the frame: a
+      spinner and 'Loading Waitlist export…' over the dimmed old page, held
+      about three seconds, then it lifts and the export report is there.
+      Clicking Export on the waitlist admin screen takes the same trip the way
+      an operator would. (I drove exactly this and captured it; it reads as
+      intended.) Note 4700 was already occupied on this machine when I checked,
+      so use another port if serve refuses to start — any port works, the review
+      page is just http://localhost:<port>/.
+
+
+      Filed alongside: n-0004 in the example blueprint, a design request for the
+      undrawn export screen. And the same gap in the MAIN blueprint — the veil
+      with no drawn state — is what I am flagging above rather than fixing.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.rules.takes-you-there
+      (2026-09-07T19-15-43Z-local-01).
+reason: feedback
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

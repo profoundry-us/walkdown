@@ -1,0 +1,69 @@
+id: n-0122
+uuid: 184fb224-5d4d-43f3-a562-86b07d03b791
+kind: note
+author: agent
+created: 2026-08-29T18:35:06Z
+anchor:
+  rule: panel.rules.legend-on-demand
+  screen: review
+  element: panel.legend
+status: verified
+body: >-
+  Agent walkdown 2026-08-29: the legend does not list every state an evidence
+  mark can take.
+
+
+  The rule says "Every state the evidence marks can take is listed with the mark
+  that draws it". The legend lists pass, fail, stale, never, blocked, unbuilt
+  and na - seven of the eight. `skipped` is missing, and it is a real state:
+  TIER_MARK.skipped draws an en dash at opacity-40, and checksTier returns it
+  whenever a target reports skipped for a rule.
+
+
+  It matters more than a missing row, because `skipped` and `na` draw the SAME
+  glyph. A reader who meets a dash on the rail and consults the legend is told
+  it means "not applicable - this rule does not ask for it", which for a skipped
+  run is the wrong answer, not merely an incomplete one.
+
+
+  Two honest fixes. Either add skipped to LEGEND_TIERS so the dash is explained
+  both ways, or give skipped a mark of its own. The second is the better answer
+  if a dash is meant to mean one thing.
+
+
+  Seen at http://localhost:4700 on the Rules tab, hovering Legend beside the
+  counts.
+replies:
+  - author: agent
+    created: 2026-08-29T19:03:25Z
+    body: >-
+      Fixed, and re-verified by walkdown run 2026-08-29T19-02-11Z-local-01.
+
+
+      Took the second of the two options in the note rather than the first.
+      Adding skipped to the list would have left one glyph explained two ways;
+      instead skipped has a mark of its own now - a midline ellipsis, 'skipped -
+      a run went past this rule' - so the dash means one thing and the legend's
+      line about it is true for every row that wears it. A run that went past a
+      rule is not the same as a rule that never asked for the tier; the first
+      might run tomorrow.
+
+
+      The list is also derived from the mark map now instead of being spelled
+      out beside it: the known states in worst-news-first order, then anything
+      the map holds that the order has not named. That is what stopped a
+      hand-written list from silently going out of date, and it is closer to
+      what the rule's last clause was asking for - built from the same
+      vocabulary the rail draws from, rather than a second description of it.
+
+
+      Re-judged against a disposable copy: eight evidence rows where there were
+      seven, every other row unchanged.
+  - author: topher
+    via: verdict
+    created: 2026-09-14T23:37:30Z
+    body: Verified by topher's pass on panel.rules.legend-on-demand
+      (2026-09-07T19-15-43Z-local-01).
+reason: finding
+verified_by: topher
+verified_via: 2026-09-07T19-15-43Z-local-01

@@ -17,6 +17,7 @@ import {
 import { tmpdir } from 'node:os';
 import { dirname, join, basename } from 'node:path';
 import test from 'node:test';
+import { threadAt } from '../tools/test-home.mjs';
 import { parse } from '../vendor/yaml.js';
 import { loadBlueprint } from '../lib/blueprint.js';
 import { formatHash, specFiles, specHash } from '../lib/hash.js';
@@ -49,7 +50,7 @@ function scratch() {
 
 function blueprint(at, { name = 'demo', dirs = [] } = {}) {
   mkdirSync(join(at, 'features'), { recursive: true });
-  writeFileSync(join(at, 'walkdown.yml'), `blueprint: ${name}\n`);
+  writeFileSync(join(at, 'spec.yml'), `blueprint: ${name}\n`);
   writeFileSync(join(at, 'storyboard.yml'), 'screens: []\n');
   writeFileSync(join(at, 'features', 'a.yml'), 'feature: a\nstories: []\n');
   for (const d of dirs) mkdirSync(join(at, d), { recursive: true });
@@ -87,7 +88,7 @@ const register = (home, rows) =>
     ].join('\n'),
   );
 
-const configure = (home, yaml) => writeFileSync(join(home, 'config.yml'), yaml);
+const configure = (home, yaml) => writeFileSync(join(home, 'profile.yml'), yaml);
 
 /*
   * This test used to be called "with no config, a blueprint in the tree wins".
@@ -368,7 +369,7 @@ test('the spec hash covers the spec and nothing the spec produces @rule:location
     const bp = blueprint(join(s.root, 'bp'), { dirs: ['runs', 'threads'] });
     const before = specHash(bp);
     assert.match(before, /^sha256:[0-9a-f]{12}$/);
-    assert.deepEqual(specFiles(bp), ['features/a.yml', 'storyboard.yml', 'walkdown.yml']);
+    assert.deepEqual(specFiles(bp), ['features/a.yml', 'storyboard.yml', 'spec.yml']);
 
     // A run, a thread and a draft are what the spec PRODUCES.
     writeFileSync(join(bp, 'runs', 'r.json'), '{"run_id":"x"}');
@@ -447,13 +448,13 @@ test('a directory that happens to be named .yml is not a spec file @rule:locatio
     const bp = blueprint(join(s.root, 'bp'));
     const before = specHash(bp);
     mkdirSync(join(bp, 'features', 'thing.yml'), { recursive: true });
-    assert.deepEqual(specFiles(bp), ['features/a.yml', 'storyboard.yml', 'walkdown.yml']);
+    assert.deepEqual(specFiles(bp), ['features/a.yml', 'storyboard.yml', 'spec.yml']);
     assert.equal(specHash(bp), before, 'a directory is not part of the spec');
 
     // And at the top level, where the same mistake reaches the two named files.
     rmSync(join(bp, 'storyboard.yml'));
     mkdirSync(join(bp, 'storyboard.yml'));
-    assert.deepEqual(specFiles(bp), ['features/a.yml', 'walkdown.yml']);
+    assert.deepEqual(specFiles(bp), ['features/a.yml', 'spec.yml']);
     assert.match(specHash(bp), /^sha256:[0-9a-f]{12}$/);
 
     /*
@@ -463,7 +464,7 @@ test('a directory that happens to be named .yml is not a spec file @rule:locatio
      * promise that anything is there.
      */
     symlinkSync(join(bp, 'features', 'gone.yml'), join(bp, 'features', 'dangling.yml'));
-    assert.deepEqual(specFiles(bp), ['features/a.yml', 'walkdown.yml']);
+    assert.deepEqual(specFiles(bp), ['features/a.yml', 'spec.yml']);
     assert.match(specHash(bp), /^sha256:[0-9a-f]{12}$/);
     // The loader's half of the same question is exercised through lint, in
     // test/lint.test.js, where a blueprint is declared and can be loaded.
@@ -617,7 +618,7 @@ test('--commit spec and --commit all are one .gitignore apart, and changing your
     assert.ok(existsSync(join(home, 'runs', 'r.json')));
     assert.equal(existsSync(personal), false, 'and not left behind');
     assert.equal(loc().standard.name, 'spec');
-    const personalConfig = join(s.home, 'config.yml');
+    const personalConfig = join(s.home, 'profile.yml');
     assert.equal(
       ((existsSync(personalConfig) && parse(readFileSync(personalConfig, 'utf8'))?.blueprints) || []).length,
       0,
@@ -651,7 +652,7 @@ test('the spec standard is a file git can see @rule:locations.default.in-repo-on
       writeFileSync(join(home, kind, 'x'), 'x');
     }
     mkdirSync(join(home, 'threads'), { recursive: true });
-    writeFileSync(join(home, 'threads', 'n-0001.yml'), 'id: n-0001\n');
+    writeFileSync(threadAt(home, 'threads', 'n-0001'), 'id: n-0001\n');
     if (!git) return;
     const staged = execFileSync('git', ['add', '-A', '--dry-run'], { cwd: repo, encoding: 'utf8' })
       .split('\n')
@@ -820,8 +821,8 @@ test('a nested directory sharing the name is its own project, never a merge into
       'feature: a\nstories:\n  - id: a.s\n    rules:\n      - id: a.s.one\n        statement: One.\n        verify: [checks]\n',
     );
     walkdown(s.home, ['threads', 'new', '--rule', 'a.s.one', '--body', 'at the top'], repo);
-    assert.ok(existsSync(join(repo, '.walkdown', 'blueprints', '0001-app', 'threads', 'n-0001.yml')));
-    assert.ok(!existsSync(join(inner.threads.path, 'n-0001.yml')));
+    assert.ok(existsSync(threadAt(repo, '.walkdown', 'blueprints', '0001-app', 'threads', 'n-0001')));
+    assert.ok(!existsSync(threadAt(inner.threads.path, 'n-0001')));
   } finally {
     s.cleanup();
   }
@@ -1084,7 +1085,7 @@ test('a home nothing claims is reported, and never guessed at @rule:locations.de
     // config write leaves behind.
     const stranded = join(s.home, 'blueprints', '0009-stranded');
     mkdirSync(join(stranded, 'threads'), { recursive: true });
-    writeFileSync(join(stranded, 'threads', 'n-0001.yml'), 'id: n-0001\nstatus: open\n');
+    writeFileSync(threadAt(stranded, 'threads', 'n-0001'), 'id: n-0001\nstatus: open\n');
 
     const after = walkdown(s.home, ['blueprints'], repo);
     assert.match(after, /no entry names/, after);
@@ -1180,7 +1181,7 @@ test('a config.yml row about a checkout folds into its registry row the first ti
     const rows = () => parse(readFileSync(join(s.home, 'registry.yml'), 'utf8')).blueprints.filter((p) => p.id === 'repo');
     assert.equal(rows().length, 1, JSON.stringify(rows()));
     assert.ok(rows()[0].evidence.endsWith('/ev'), 'the override came along');
-    assert.doesNotMatch(readFileSync(join(s.home, 'config.yml'), 'utf8'), /id: repo/, 'and left config.yml');
+    assert.doesNotMatch(readFileSync(join(s.home, 'profile.yml'), 'utf8'), /id: repo/, 'and left config.yml');
     assert.equal(resolveLocations({ cwd: repo }).evidence.path, join(s.root, 'ev'));
 
     walkdown(s.home, ['records', 'move', 'drafts', '--to', join(s.root, 'drafts')], repo);
@@ -1443,7 +1444,7 @@ test('two repositories with one basename never share a home or a ledger @rule:lo
     const locA = resolveLocations({ cwd: a });
     const locB = resolveLocations({ cwd: b });
     assert.notEqual(locA.spec.path, locB.spec.path, 'the second did not adopt the first’s blueprint');
-    for (const l of [locA, locB]) assert.ok(existsSync(join(l.spec.path, 'walkdown.yml')));
+    for (const l of [locA, locB]) assert.ok(existsSync(join(l.spec.path, 'spec.yml')));
     for (const kind of KINDS) assert.notEqual(locA[kind].path, locB[kind].path);
   } finally {
     s.cleanup();
@@ -1857,7 +1858,7 @@ test('leaving the repository with a port override kept writes the home back into
     const again = walkdown(s.home, ['blueprints', 'new', '--commit', 'spec'], repo);
     assert.doesNotMatch(again, /did not land/);
     assert.ok(!existsSync(join(repo, 'blueprint')), 'nothing scaffolded at <repo>/blueprint');
-    assert.ok(existsSync(join(repo, '.walkdown', 'blueprints', '0001-beta', 'blueprint', 'walkdown.yml')));
+    assert.ok(existsSync(join(repo, '.walkdown', 'blueprints', '0001-beta', 'blueprint', 'spec.yml')));
   } finally {
     s.cleanup();
   }
@@ -1881,7 +1882,7 @@ test('init folds a config.yml row holding only overrides into the row it writes 
     const rows = parse(readFileSync(join(s.home, 'registry.yml'), 'utf8')).blueprints.filter((p) => p.id === 'repo');
     assert.equal(rows.length, 1, JSON.stringify(rows));
     assert.equal(rows[0].targets.local.base_url, 'http://localhost:4998', 'the override came along');
-    assert.doesNotMatch(readFileSync(join(s.home, 'config.yml'), 'utf8'), /id: repo/, 'and left config.yml');
+    assert.doesNotMatch(readFileSync(join(s.home, 'profile.yml'), 'utf8'), /id: repo/, 'and left config.yml');
     assert.equal(resolveLocations({ cwd: repo }).blueprint.targets.local.base_url, 'http://localhost:4998');
   } finally {
     s.cleanup();
@@ -1903,7 +1904,7 @@ test('an unreadable personal config stops init before anything is claimed or mov
     assert.equal(r.status, 2, r.stdout + r.stderr);
     assert.match(r.stderr, /does not parse/);
     assert.ok(!existsSync(join(repo, '.walkdown')), 'no second home minted in the repository');
-    assert.ok(existsSync(join(s.home, 'blueprints', '0001-theta', 'blueprint', 'walkdown.yml')), 'the real home is where it was');
+    assert.ok(existsSync(join(s.home, 'blueprints', '0001-theta', 'blueprint', 'spec.yml')), 'the real home is where it was');
   } finally {
     s.cleanup();
   }
@@ -1932,8 +1933,8 @@ test('a nested same-named pack takes the next free id, and naming either id reac
     assert.ok(root.spec.path.includes('/app/.walkdown/blueprints/0001-app/'), 'and the other name is the other row');
     rule(bare.spec.path);
     walkdown(s.home, ['threads', 'new', '--blueprint', 'app-2', '--rule', 'a.s.one', '--body', 'in the pack'], pack);
-    assert.ok(existsSync(join(bare.threads.path, 'n-0001.yml')));
-    assert.ok(!existsSync(join(repo, '.walkdown', 'blueprints', '0001-app', 'threads', 'n-0001.yml')));
+    assert.ok(existsSync(threadAt(bare.threads.path, 'n-0001')));
+    assert.ok(!existsSync(threadAt(repo, '.walkdown', 'blueprints', '0001-app', 'threads', 'n-0001')));
     const listed = walkdown(s.home, ['blueprints'], pack);
     assert.doesNotMatch(listed, /shadowed/);
     assert.match(listed, /\bapp-2\b/);
@@ -2019,7 +2020,7 @@ test('a config.yml row restating a registered blueprint is set aside whole, and 
     assert.match(walkdown(s.home, ['where'], repo), /ignores `blueprints: gamma`.*registers nothing/);
     rule(spec);
     walkdown(s.home, ['threads', 'new', '--rule', 'a.s.one', '--body', 'one ledger'], repo);
-    assert.ok(existsSync(join(repo, '.walkdown', 'blueprints', '0001-gamma', 'threads', 'n-0001.yml')));
+    assert.ok(existsSync(threadAt(repo, '.walkdown', 'blueprints', '0001-gamma', 'threads', 'n-0001')));
     assert.ok(!existsSync(join(s.home, 'blueprints', '0001-gamma')), 'no second ledger under ~/.walkdown');
   } finally {
     s.cleanup();
@@ -2159,7 +2160,7 @@ test('the ignore file beside a .walkdown does not answer for a blueprint standin
     const pack = join(repo, 'packs', 'x');
     const spec = join(pack, 'blueprint');
     mkdirSync(join(spec, 'runs'), { recursive: true });
-    writeFileSync(join(spec, 'walkdown.yml'), 'blueprint: x\n');
+    writeFileSync(join(spec, 'spec.yml'), 'blueprint: x\n');
     writeFileSync(join(spec, 'runs', 'r.json'), '{}');
     // Registered with its records inside the blueprint, the legacy shape.
     declare(s.home, {
@@ -2220,7 +2221,7 @@ test('a pre-registry config is folded in and named, and a default that lands bes
     );
     const said = walkdown(s.home, ['blueprints', 'new'], repo);
     assert.match(said, /~ folded.*took `hireart` out of `projects:` and kept its targets/, said);
-    assert.doesNotMatch(readFileSync(join(s.home, 'config.yml'), 'utf8'), /projects:/, 'the block left config.yml');
+    assert.doesNotMatch(readFileSync(join(s.home, 'profile.yml'), 'utf8'), /projects:/, 'the block left config.yml');
     const row = parse(readFileSync(join(s.home, 'registry.yml'), 'utf8')).blueprints.find((b) => b.project?.endsWith('hireart_main'));
     assert.equal(row.targets.local.base_url, 'http://localhost:3000', 'its targets reached the registry row');
 

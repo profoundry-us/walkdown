@@ -71,7 +71,7 @@ export function run(args) {
 
   const baseUrl = config?.runner?.targets?.[values.target]?.base_url ?? null;
   /*
-   * The project's own governance (walkdown.yml `governance:`), carried into
+   * The project's own governance (spec.yml `governance:`), carried into
    * every prompt verbatim. The built-in lines below cover what is true of any
    * blueprint; these cover what only the project knows - walkdown's own
    * blueprint, for instance, is written to by the very panel under review.

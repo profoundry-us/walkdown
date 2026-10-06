@@ -1,0 +1,44 @@
+id: n-0293
+uuid: e9810858-0f59-4cf2-99aa-c63ffaabf009
+kind: note
+author: topher
+via: agent
+created: 2026-09-14T19:53:25.952Z
+anchor:
+  rule: panel.start.choose-a-blueprint
+  screen: choose-blueprint
+status: verified
+body: 'Observed while re-judging on the scratch copy sitting-0914 (:4730), run
+  2026-09-14T19-08-59Z-local-01: crossing into a project that holds two
+  blueprints of which exactly ONE claims the page, the chooser says "1
+  blueprints in this project claim this page. Nothing is remembered - walkdown
+  asks each time rather than choosing for you"
+  (runs/evidence/2026-09-14T19-08-59Z/04-project-picked-chooser-with-notice.png,
+  probe-panel-states-and-pick-writes-nothing.txt sections 04b and 05b). That is
+  not the reason the question is being asked: one claimant is never a reason
+  (the panel had just opened that very blueprint unasked at start,
+  01-one-claimant-of-two-opens-unasked.png), and "rather than choosing for you"
+  is false in this state because it did choose. The honest sentence for this
+  case - "This project holds more than one blueprint. Pick the one you are
+  reviewing against." - exists in src/panel/app.js renderGate() but is only used
+  when the in-project claim count is zero (n-0273 fixed the zero case; one is
+  the same shape). Also "1 blueprints" wants a singular. Not a fail of the steps
+  as written, which ask for the count and the not-remembered line and get both,
+  so recorded as a note.'
+reason: finding
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-15T02:37:12Z
+    body: 'The chooser now gives the count as the reason only when it is more than
+      one; a lone claimant among several gets "This project holds more than one
+      blueprint. Pick the one you are reviewing against." (src/panel/app.js
+      renderGate). checks/panel.spec.js covers it: a project with one claimant
+      among several, picked from the switcher.'
+  - author: topher
+    via: verdict
+    created: 2026-09-16T23:00:25Z
+    body: Verified by topher's pass on panel.start.choose-a-blueprint
+      (2026-09-16T23-00-25Z-local-01).
+verified_by: topher
+verified_via: 2026-09-16T23-00-25Z-local-01

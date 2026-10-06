@@ -23,7 +23,7 @@ const hasRspec = spawnSync('rspec', ['--version'], { encoding: 'utf8' }).status 
 const root = realpathSync(mkdtempSync(join(tmpdir(), 'walkdown-rspec-')));
 const code = join(root, 'app');
 const homeDir = join(process.env.WALKDOWN_HOME, 'blueprints', '0001-app');
-const spec = join(homeDir, 'blueprint');
+const spec = join(homeDir);
 const runs = join(homeDir, 'runs');
 const command = `rspec -I ${LIB} -r walkdown/formatter --format progress --format Walkdown::Formatter spec`;
 // The child must hear nothing this process was told: only what each case hands it.
@@ -43,7 +43,7 @@ before(() => {
   );
   mkdirSync(join(spec, 'features'), { recursive: true });
   mkdirSync(runs, { recursive: true });
-  writeFileSync(join(spec, 'walkdown.yml'), 'blueprint: app\n');
+  writeFileSync(join(spec, 'spec.yml'), 'blueprint: app\n');
   writeFileSync(join(spec, 'storyboard.yml'), 'screens: []\n');
   writeFileSync(
     join(spec, 'features', 'main.yml'),
@@ -84,9 +84,9 @@ test('a spec committed in the repository is still found by looking up from the c
   // No registry row answers here, and no clone is asked: the walk is the fallback.
   const repo = join(root, 'inrepo');
   mkdirSync(join(repo, 'spec'), { recursive: true });
-  mkdirSync(join(repo, 'blueprint', 'features'), { recursive: true });
+  mkdirSync(join(repo, 'features'), { recursive: true });
   writeFileSync(join(repo, 'spec', 'thing_spec.rb'), readFileSync(join(code, 'spec', 'thing_spec.rb')));
-  writeFileSync(join(repo, 'blueprint', 'walkdown.yml'), 'blueprint: inrepo\n');
+  writeFileSync(join(repo, 'spec.yml'), 'blueprint: inrepo\n');
   const lonely = join(root, 'lonely-home');
   mkdirSync(lonely, { recursive: true });
   const res = spawnSync('sh', ['-c', command], { cwd: repo, env: env({ WALKDOWN_HOME: lonely }), encoding: 'utf8' });

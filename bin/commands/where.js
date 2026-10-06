@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 import { proposalsDir, prototypeDir } from '../../lib/blueprint.js';
-import { KINDS, resolveLocations } from '../../lib/locations.js';
+import { KINDS, resolveLocations, SPEC_FILE } from '../../lib/locations.js';
 import { dim, green, red, yellow } from '../../lib/report/tty.js';
 import { tracking } from '../../lib/standard.js';
 import { parse } from '../../vendor/yaml.js';
@@ -181,9 +181,9 @@ function designRows(loc) {
   if (!loc.spec?.path) return [];
   let config = {};
   try {
-    config = parse(readFileSync(join(loc.spec.path, 'walkdown.yml'), 'utf8')) ?? {};
+    config = parse(readFileSync(join(loc.spec.path, SPEC_FILE), 'utf8')) ?? {};
   } catch {
-    // An unreadable walkdown.yml is lint's to report; here it declares nothing.
+    // An unreadable spec.yml is lint's to report; here it declares nothing.
   }
   const bp = { dir: loc.spec.path, codeRoot: loc.codeRoot ?? loc.code?.path, config };
   const cell = (path) => ({
@@ -197,7 +197,7 @@ function designRows(loc) {
       'prototype',
       proto
         ? { ...cell(proto), why: `\`prototype.root: ${config.prototype.root}\`, ${cell(proto).why}` }
-        : { path: null, why: 'walkdown.yml declares no `prototype.root`' },
+        : { path: null, why: 'spec.yml declares no `prototype.root`' },
     ],
     ['proposals', cell(proposalsDir(bp))],
   ];

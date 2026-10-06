@@ -1,0 +1,15 @@
+id: n-0064
+uuid: 69556e9c-31f8-4cda-9c7d-758273cdbf9c
+kind: note
+author: topherfangio
+created: 2026-08-24T19:18:25Z
+anchor:
+  screen: review
+  element: panel.tabs
+  surface: prototype
+  viewport:
+    name: mobile
+    width: 390
+status: verified
+body: This is just a test to see if the pinning works at a specific viewpoert.
+reason: request

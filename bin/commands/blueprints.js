@@ -15,30 +15,46 @@ export const VERBS = {
     run: async (args) => (await import('./blueprint.js')).list(args),
   },
   new: {
-    usage: 'walkdown blueprints new [<id>] [--dir <project-root>] [--commit none|spec|all] [--force]',
+    usage: 'walkdown blueprints new [<name>] [--folder <folder>] [--dir <project-root>] [--commit none|spec|all] [--project <label>] [--code <pc>] [--force]',
     about:
-      "Make a blueprint for the project where you stand: a numbered home holding the spec,\nits threads, runs, evidence and drafts. The id defaults to the project directory's\nname. By default the home is in ~/.walkdown and the repository gets nothing; --commit\nspec puts it in .walkdown/ with a .gitignore keeping runs, evidence and drafts out,\nand --commit all the same with none. Run again, it changes nothing.",
+      "Make a blueprint for the project where you stand: a home folder holding the spec, its\nthreads, runs, evidence and drafts, and an ID on this machine. The name defaults to the\nproject directory's; the folder to this month and the name (202610-search), or --folder.\nBy default the home is in ~/.walkdown and the repository gets nothing; --commit spec puts\nit in .walkdown/blueprints/ with its own .gitignore keeping runs, evidence and drafts out,\nand --commit all the same with none. Run again, it changes nothing.",
     run: async (args) => {
       const { values, positionals } = parseArgs({
         args,
         allowPositionals: true,
-        options: { dir: { type: 'string' }, commit: { type: 'string' }, force: { type: 'boolean', default: false } },
+        options: {
+          dir: { type: 'string' },
+          commit: { type: 'string' },
+          folder: { type: 'string' },
+          project: { type: 'string' },
+          code: { type: 'string' },
+          force: { type: 'boolean', default: false },
+        },
       });
       if (positionals.length > 1) return usage('new');
       const { make } = await import('./blueprints-new.js');
-      return make({ verb: 'new', id: positionals[0] ?? null, dir: values.dir, commit: values.commit, force: values.force });
+      return make({
+        verb: 'new',
+        id: positionals[0] ?? null,
+        dir: values.dir,
+        commit: values.commit,
+        force: values.force,
+        folder: values.folder ?? null,
+        project: values.project ?? null,
+        code: values.code ?? null,
+      });
     },
   },
   import: {
-    usage: 'walkdown blueprints import <path> [--all|--only <ids>] [--id <name>] [--ephemeral] [--why <reason>] [--json]',
+    usage: 'walkdown blueprints import <path> [--all|--only <folders>] [--ephemeral] [--why <reason>] [--json]',
     about:
-      "The one way a blueprint joins this machine's registry (ADR 0003). Name a project and\nit shows what its .walkdown/config.yml declares; you say which to take. Name a bare\nhome and that one is registered; --ephemeral marks it a throwaway copy.",
+      "The one way a blueprint joins this machine's registry (ADR 0003). Name one blueprint's\nfolder and that one is registered. Name a repository and it lists every blueprint folder\nunder .walkdown/blueprints/ and asks which to take. --ephemeral marks a throwaway copy.",
     run: async (args) => (await import('./import.js')).run(args),
   },
   rename: {
-    usage: 'walkdown blueprints rename <id> <new-id>',
+    usage: 'walkdown blueprints rename <id> <new-name> [--folder <folder>]',
     about:
-      "Change a blueprint's id: in the registry, its numbered folder (the number stays), its\nwalkdown.yml and, when committed, the repository's .walkdown/config.yml. Its rules,\nthreads and runs are left as they were.",
+      "Change the name at the end of a blueprint's ID (cli in 0002-wd-cli); its number and\nproject code stay. --folder renames its folder too. Its rules, threads and runs are\nleft as they were.",
     run: async (args) => (await import('./blueprints-rename.js')).run(args),
   },
   commit: {
@@ -58,7 +74,7 @@ export const VERBS = {
   },
   forget: {
     usage: 'walkdown blueprints forget <id>',
-    about: 'Take a blueprint off this machine\'s list. Its records are untouched.',
+    about: "Take a blueprint off this machine's list. None of its files are touched.",
     run: async (args) => (await import('./blueprint.js')).forget(args),
   },
 };

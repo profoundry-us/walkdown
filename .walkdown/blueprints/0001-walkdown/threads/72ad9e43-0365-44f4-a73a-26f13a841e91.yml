@@ -1,0 +1,38 @@
+id: n-0061
+uuid: 72ad9e43-0365-44f4-a73a-26f13a841e91
+kind: note
+author: topher
+created: 2026-08-24T18:12:44Z
+anchor:
+  rule: panel.rules.takes-you-there
+  screen: rule-detail
+  element: detail.statement
+status: verified
+body: For rules that have no UI screen, the panel should say so instead of
+  silently staying on the existing screen - otherwise the reviewer cannot tell
+  whether they are on the correct screen or on one that has none.
+replies:
+  - author: agent
+    created: 2026-08-24T18:13:48Z
+    body: "Built. The detail pane's elsewhere() helper - which already said 'this
+      rule is on X, you are on Y' - gained its missing branch: a rule with no
+      screens and no flow now renders, under its statement, 'Headless — no
+      screen belongs to this rule, so what is on the desk is beside the point.
+      It is judged by its checks and recorded behavior, not by looking.' The
+      surface stays put (there is nowhere to take it) and the notice clears when
+      a screened rule opens. Specified as panel.rules.headless-says-so (verify
+      agent+human), probed live both ways, and the agent pass is on the ledger
+      with a screenshot."
+  - author: agent
+    created: 2026-08-24T18:35:45Z
+    body: "Clarified ask built: the note alone was not enough - the surface itself
+      now changes. Opening a headless rule covers the app pane edge to edge with
+      an opaque card in walkdown's own colors ('No screen belongs to this
+      rule... The page you were reviewing is untouched underneath'), so the
+      previous screen can no longer masquerade as the rule's. It covers rather
+      than navigates - the application keeps its state - and lifts on returning
+      to the list or opening a screened rule. Rule statement reworded to say so
+      (which staled the earlier agent pass, as it should); fresh agent pass
+      recorded with a screenshot. Reload the extension once more to pick it up -
+      the new staleness banner will remind you from now on."
+reason: feedback

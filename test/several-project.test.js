@@ -13,6 +13,7 @@ import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpath
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
+import { threadAt } from '../tools/test-home.mjs';
 
 const CLI = new URL('../bin/walkdown.js', import.meta.url).pathname;
 const REPO = new URL('..', import.meta.url).pathname;
@@ -57,7 +58,7 @@ function project({ commit = 'none' } = {}) {
       join(specOf(id), 'features', `${id}.yml`),
       `feature: ${id}\nstories:\n  - id: ${id}.s\n    title: ${id}\n    statement: As a shopper I use ${id}.\n    rules:\n      - id: ${id}.s.works\n        statement: The ${id} page works.\n        verify: [checks]\n        steps:\n          then: [It works]\n`,
     );
-    const cfg = join(specOf(id), 'walkdown.yml');
+    const cfg = join(specOf(id), 'spec.yml');
     writeFileSync(
       cfg,
       readFileSync(cfg, 'utf8')
@@ -177,7 +178,7 @@ test('lint accepts a sibling blueprint\'s rule and thread, and still flags what 
   );
   const onScreen = p.wd(['threads', 'new', '--blueprint', 'a', '--rule', 'a.s.works', '--body', 'seen on the cart', '--json']);
   const sid = JSON.parse(onScreen.stdout).id;
-  const tf = join(p.homeOf('a'), 'threads', `${sid}.yml`);
+  const tf = threadAt(p.homeOf('a'), 'threads', sid);
   writeFileSync(tf, readFileSync(tf, 'utf8').replace('  rule: a.s.works', '  rule: a.s.works\n  screen: cart'));
   const withSiblings = JSON.parse(p.wd(['lint', '--blueprint', 'a', '--json']).stdout).findings;
   assert.deepEqual(withSiblings.filter((f) => /unknown rule "b\.s\.works"|unknown screen "cart"/.test(f.message)), [], 'the project knows them');
@@ -264,7 +265,7 @@ test('a framed screen is served without ?bp= when its file is one file, and refu
   mkdirSync(join(p.shop, 'as-built'), { recursive: true });
   writeFileSync(join(p.shop, 'as-built', 'home.html'), '<p>as built</p>');
   for (const id of ['a', 'b']) {
-    const cfg = join(p.specOf(id), 'walkdown.yml');
+    const cfg = join(p.specOf(id), 'spec.yml');
     writeFileSync(cfg, `${readFileSync(cfg, 'utf8').replace(/^prototype:[\s\S]*?(?=^\S)/m, '')}\nprototype:\n  root: proto-${id}/\n`);
     mkdirSync(join(p.shop, `proto-${id}`, 'screens'), { recursive: true });
     writeFileSync(join(p.shop, `proto-${id}`, 'screens', 'both.html'), `<p>${id}</p>`);

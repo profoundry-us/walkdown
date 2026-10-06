@@ -147,7 +147,7 @@ test('init readies the machine, makes no blueprint, and the second run creates n
     const said = steady(first.stdout, m);
     assert.match(said, /\+ created {2}~\/\.walkdown$/m);
     assert.match(said, /\+ created {2}~\/\.walkdown\/registry\.yml$/m);
-    assert.match(readFileSync(join(m.home, 'config.yml'), 'utf8'), /username: sam/, 'the identity git knows');
+    assert.match(readFileSync(join(m.home, 'profile.yml'), 'utf8'), /username: sam/, 'the identity git knows');
     assert.deepEqual(registry(m), [], 'no blueprint registered');
     assert.deepEqual(snapshot(m.shop), shop, 'nothing written in the project');
     assert.match(said, /`walkdown blueprints new` starts a spec\.\s*$/);
@@ -215,7 +215,7 @@ test('blueprints new makes one outside the repository, again changes nothing, an
     const first = m.wd(['blueprints', 'new']);
     assert.equal(first.status, 0, first.stderr);
     assert.deepEqual(registry(m).map((r) => r.id), ['shop'], 'named for the directory');
-    assert.ok(existsSync(join(m.home, 'blueprints', '0001-shop', 'blueprint', 'walkdown.yml')));
+    assert.ok(existsSync(join(m.home, 'blueprints', '0001-shop', 'blueprint', 'spec.yml')));
     assert.deepEqual(snapshot(m.shop), shop, 'nothing added to the repository');
 
     const again = m.wd(['blueprints', 'new']);
@@ -285,7 +285,7 @@ test('blueprints rename changes the id everywhere it lives and nothing it holds 
     const now = join(m.shop, '.walkdown', 'blueprints', `${basename(home).slice(0, 4)}-search`);
     assert.ok(existsSync(now), `the folder keeps its number: ${readdirSync(join(m.shop, '.walkdown', 'blueprints'))}`);
     assert.ok(registry(m).some((row) => row.id === 'search') && !registry(m).some((row) => row.id === 'b'));
-    assert.match(readFileSync(join(now, 'blueprint', 'walkdown.yml'), 'utf8'), /^blueprint: search$/m);
+    assert.match(readFileSync(join(now, 'blueprint', 'spec.yml'), 'utf8'), /^blueprint: search$/m);
     assert.match(readFileSync(join(m.shop, '.walkdown', 'config.yml'), 'utf8'), /id: search/);
     assert.doesNotMatch(readFileSync(join(m.shop, '.walkdown', 'config.yml'), 'utf8'), /id: b\b/);
     const after = snapshot(now);

@@ -1,4 +1,4 @@
-import { declaredHome } from '../tools/test-home.mjs';
+import { declaredHome, threadAt } from '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -24,7 +24,7 @@ beforeEach(() => {
   rmSync(h.threads, { recursive: true, force: true });
   mkdirSync(h.threads, { recursive: true });
   mkdirSync(join(bp, 'features'), { recursive: true });
-  writeFileSync(join(bp, 'walkdown.yml'), 'blueprint: ask\n');
+  writeFileSync(join(bp, 'spec.yml'), 'blueprint: ask\n');
   writeFileSync(
     join(bp, 'features', 'demo.yml'),
     'feature: demo\nstories:\n  - id: demo.main\n    rules:\n      - id: demo.main.thing\n        statement: It works.\n        verify: [checks]\n',
@@ -32,7 +32,7 @@ beforeEach(() => {
 });
 
 const load = () => loadBlueprint(bp, { cwd: h.root });
-const onDisk = (id) => parse(readFileSync(join(h.threads, `${id}.yml`), 'utf8'));
+const onDisk = (id) => parse(readFileSync(threadAt(h.threads, id), 'utf8'));
 const ask = (options) =>
   openThread(load(), {
     kind: 'question',

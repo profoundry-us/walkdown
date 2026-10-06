@@ -1,0 +1,33 @@
+id: n-0306
+uuid: 65345676-0c88-457c-93ef-8b0ce11f3e74
+kind: note
+reason: feedback
+author: topher
+created: 2026-09-19T03:37:05.618Z
+anchor:
+  rule: embed.pin.tooltip-says-what-it-is
+status: verified
+body: If faded fully to the prototype, the prototype should accept interactions
+  including any pins that were attached to the prototype. If faded all the way
+  to the app, it should get interactions including pins. If faded part-way
+  between, neither app should accept actions including hovering pins.
+replies:
+  - author: agent
+    created: 2026-09-21T01:19:43Z
+    body: "Built. The sheet in front takes the pointer whether or not pin mode is
+      armed: faded all the way to the design, the design's pins answer a hover
+      and a click; pin mode now only decides whether a click PLACES one.
+      Part-way between, neither the ghost nor the app frame takes the pointer,
+      so nothing under the fade can be hovered by accident. In src/panel/app.js:
+      ghostHasReach dropped its pin-mode condition, and paintGhostReach now also
+      sets the app frame's pointer-events to none mid-fade. Two steps added to
+      embed.pin.tooltip-says-what-it-is and a check that measures what the
+      document says is under the pointer at 0, 50 and 100. This also answers
+      q-0285 with its first option."
+  - author: topher
+    via: verdict
+    created: 2026-09-21T04:53:00Z
+    body: Verified by topher's pass on embed.pin.tooltip-says-what-it-is
+      (2026-09-21T04-53-00Z-local-01).
+verified_by: topher
+verified_via: 2026-09-21T04-53-00Z-local-01

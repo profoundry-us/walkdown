@@ -105,7 +105,7 @@ export function blueprintsPane({ server = true, notice = null } = {}) {
           }
         </span>
         <span class="mt-0.5 block pl-5.5 text-[12px] leading-snug opacity-60">${
-          pr.description ?? 'No description \u2014 add one to this blueprint\u2019s walkdown.yml.'
+          pr.description ?? 'No description \u2014 add one to this blueprint\u2019s spec.yml.'
         }</span>
         <span class="mt-0.5 block pl-5.5 font-mono text-[10.5px] opacity-35">${pr.id}</span>
       </button>`;

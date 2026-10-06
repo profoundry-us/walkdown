@@ -22,12 +22,12 @@ const CLI = new URL('../bin/walkdown.js', import.meta.url).pathname;
 function project() {
   const root = mkdtempSync(join(tmpdir(), 'wd-move-'));
   const home = join(root, 'home');
-  const bp = join(root, 'repo', 'blueprint');
+  const bp = join(root, 'repo');
   const runs = join(root, 'repo', 'runs');
   mkdirSync(join(bp, 'features'), { recursive: true });
   mkdirSync(runs, { recursive: true });
   mkdirSync(home, { recursive: true });
-  writeFileSync(join(bp, 'walkdown.yml'), 'blueprint: movable\n');
+  writeFileSync(join(bp, 'spec.yml'), 'blueprint: movable\n');
   writeFileSync(join(bp, 'storyboard.yml'), 'screens: []\n');
   writeFileSync(join(runs, 'a.json'), '{"run_id":"a"}');
   return { root, home, bp, runs, cleanup: () => rmSync(root, { recursive: true, force: true }) };
@@ -270,7 +270,7 @@ test('a config that will not write back is refused before anything moves @rule:l
         ...opts,
       });
     cli(['blueprints', 'new', '--commit', 'spec']);
-    const cfg = join(home, 'config.yml');
+    const cfg = join(home, 'profile.yml');
     // A key said twice: the parser collects the error and hands back a
     // document, and only stringifying it refuses.
     writeFileSync(

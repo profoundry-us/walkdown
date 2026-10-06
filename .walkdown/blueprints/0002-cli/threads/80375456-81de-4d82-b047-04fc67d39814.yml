@@ -1,0 +1,88 @@
+id: q-0270
+uuid: 80375456-81de-4d82-b047-04fc67d39814
+kind: question
+author: agent
+created: 2026-09-10T03:25:04.660Z
+anchor:
+  rule: locations.answer.declared-not-discovered
+status: incorporated
+body: >-
+  The config key still says "projects" and means blueprints (ADR 0001 step 5,
+  the half I did not do).
+
+
+  Step 5 renamed every surface that said "project" and meant blueprint: the
+  payload (`projects` -> `blueprints`, `project` -> `blueprint`), the CLI
+  (`walkdown project add|forget` -> `walkdown blueprint add|forget`, `walkdown
+  projects` -> `walkdown blueprints`), and `--project <id>` -> `--blueprint
+  <id>` on every command that takes it. `walkdown skills --project` keeps its
+  own flag: there it really does mean a repository.
+
+
+  Two surfaces are deliberately NOT renamed, because they are file formats with
+  data on disk rather than words on a screen:
+
+
+  1. The config key. `.walkdown/config.yml` and `~/.walkdown/config.yml` both
+  say `projects:` and both mean blueprints. It is the loudest remaining instance
+  of the confusion the ADR is about, and every clone, every adopter's repo and
+  your own personal config carry it.
+
+
+  2. `resolveLocations({ project })` and its neighbours in lib/locations.js,
+  where the internal option means a blueprint id. It is mechanical, and it is 56
+  call sites in the tests alone in the file this repository has paid the most
+  for.
+
+
+  What I would do if it were mine: rename the key to `blueprints:` with NO
+  fallback (q-0182 - we only support our own tools, and a dual-read is the "two
+  ways to answer one question" n-0156 abolished), add a one-liner that rewrites
+  a config in place, and do the locations.js parameter in the same commit so no
+  half-renamed state is ever committed. What stopped me doing it unasked is your
+  machine: ~/.walkdown/config.yml is yours, and a rename that silently makes
+  your walkdown blind until you rerun something is not a change an agent should
+  make on its own.
+
+
+  The glossary now defines both words and says this thread is where the key is
+  decided.
+replies:
+  - author: agent
+    created: 2026-09-11T01:47:27Z
+    body: >-
+      Topher, asked directly on 2026-09-10: keep the walkdown.yml spec key
+      rename.
+
+
+      The question named the config key. The spec key `project:` -> `blueprint:`
+      was my reading of "reword everything; I'm good with a big tidy up", and I
+      flagged it as an inference rather than an instruction. Put to him as three
+      options - keep it, revert just the spec key, or keep it with the old key
+      still parsing as a fallback - he took the first. So `blueprint:` is the
+      only spelling walkdown writes or reads, and the fallback was declined: two
+      live spellings would have been the old word surviving in the place a
+      person is most likely to look for the new one, and q-0182 already settled
+      what happens to hand-written configs.
+
+
+      Shipped in 9a8208b. This thread is still open because answering it is his
+      to do, not mine.
+  - author: topher
+    created: 2026-09-21T00:27:08Z
+    body: Rename the key to blueprints:, no fallback
+  - author: agent
+    created: 2026-09-21T01:47:29Z
+    body: "Folded, and found already landed: the committed config says blueprints:
+      (this repository's .walkdown/config.yml does), the personal config carries
+      no list at all since the registry became the only door (ADR 0003), and
+      resolveLocations already takes blueprint rather than project. No projects:
+      key is read anywhere, so there is nothing on your machine to rewrite and
+      no one-liner to run. Nothing changed on disk for this one."
+options:
+  - label: Rename the key to blueprints:, no fallback
+    why: with a one-liner that rewrites a config in place, and the locations.js
+      parameter in the same commit
+  - label: "Keep projects:"
+    why: a file format with data on disk; the ADR renamed the words on screen
+chosen: Rename the key to blueprints:, no fallback

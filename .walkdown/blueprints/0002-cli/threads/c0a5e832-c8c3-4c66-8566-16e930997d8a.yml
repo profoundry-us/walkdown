@@ -1,0 +1,17 @@
+id: n-0339
+uuid: c0a5e832-c8c3-4c66-8566-16e930997d8a
+kind: note
+reason: request
+author: topher
+via: agent
+created: 2026-10-03T00:52:00.236Z
+anchor:
+  screen: status-two-blueprints
+status: open
+body: "Same as our other new solution: use a separate agent to design."
+added: "Draw what `walkdown status` prints in a project with two blueprints,
+  checkout and search (locations.several.reads-cover-all): one section per
+  blueprint, headed by its id, in the order they were registered. Anchors:
+  cli.prompt, cli.status.section, cli.status.header, cli.status.summary,
+  cli.exit. The frame is the terminal frame tools/cli-captures.mjs --frame
+  prints, so the design and the as-built line up under the fade."

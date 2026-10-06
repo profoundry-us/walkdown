@@ -1,0 +1,69 @@
+id: n-0096
+uuid: caaf7224-102c-4a5d-ad0f-d41da0062112
+kind: note
+author: Topher Fangio
+via: agent
+created: 2026-08-27T00:15:09Z
+anchor:
+  rule: embed.threads.note-first
+  screen: thread-panel
+status: verified
+body: Also, we probably need a way to attach screenshots to a pin or thread;
+  let's add that as a new thread somewhere relevant
+added: >-
+  A pin should be able to carry a screenshot. Some feedback is a picture: this
+  overlaps awkwardly, this is cut off, this is the wrong shade — and describing
+  it in a sentence is slower and less exact than showing it. n-0072 is the case
+  in point; the geometry bug in it was obvious in one image and would have taken
+  a paragraph to write down.
+
+
+  Two halves worth separating. A person pinning on a page should be able to
+  attach an image, probably by paste from the clipboard, since that is where a
+  screenshot already is. And an agent walkdown already captures evidence images
+  into runs/evidence/ — those should be reachable from the thread they belong to
+  rather than only from the run record.
+
+
+  Open: where the bytes live (runs/evidence/ is the only precedent), whether a
+  thread references an image or embeds it, and what the panel shows in the
+  stream — a thumbnail that opens, most likely. Not designed.
+reason: feedback
+replies:
+  - author: agent
+    created: 2026-09-17T15:10:03Z
+    body: "Not built, and reclassified as a request rather than feedback so a pass
+      on embed.threads.note-first cannot close it silently while nothing exists.
+      The three open questions in it are design's and still open: where the
+      bytes live (runs/evidence/ is the only precedent), reference versus embed,
+      and what the stream shows. Yours to waive or to draw."
+  - author: agent
+    created: 2026-09-17T15:10:03Z
+    body: request
+  - author: agent
+    created: 2026-09-17T15:10:44Z
+    body: "Reopened on purpose: this is filed as feedback, and feedback closes on
+      your next pass of embed.threads.note-first - which would mark
+      screenshots-on-pins verified while nothing is built. A note's reason
+      cannot be changed after filing, so it stays open here rather than in the
+      walk queue. Yours to waive (it is an idea, not a defect) or to keep as the
+      reminder it is."
+  - author: agent
+    created: 2026-09-21T02:57:16Z
+    body: Built. A screenshot pasted into the pin form, or into a thread's composer
+      on its own screen, goes on the message. The bytes live in attachments/
+      under the threads directory, beside the records, so a moved ledger takes
+      them along. The record names the file and the name it was pasted with. The
+      stream draws the picture under the words as a thumbnail that opens full
+      size over the desk. The CLI takes --attach <file> on thread new and on a
+      reply, and lists the pictures when it reads a thread. Pictures only, four
+      at most, under five megabytes each; anything else is refused in words.
+      Rule embed.threads.picture-on-a-pin holds the checks (recorded
+      2026-09-21T02-56-48Z).
+  - author: topher
+    via: verdict
+    created: 2026-09-21T04:53:00Z
+    body: Verified by topher's pass on embed.threads.note-first
+      (2026-09-21T04-53-00Z-local-01).
+verified_by: topher
+verified_via: 2026-09-21T04-53-00Z-local-01

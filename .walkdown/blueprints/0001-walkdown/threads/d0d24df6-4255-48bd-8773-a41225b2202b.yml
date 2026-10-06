@@ -1,0 +1,90 @@
+id: q-0262
+uuid: d0d24df6-4255-48bd-8773-a41225b2202b
+kind: question
+author: agent
+created: 2026-09-09T13:16:59.563Z
+anchor:
+  rule: panel.start.choose-a-blueprint
+status: incorporated
+body: >-
+  Does this rule still have a job, now that the panel asks whose page it is?
+
+
+  Two rules describe the same moment and disagree about the mechanism:
+
+
+  - panel.start.choose-a-blueprint: 'When the config lists more than one
+  blueprint, the panel asks which one this site is.'
+
+  - panel.start.unclaimed-page-says-so: the panel asks the same question however
+  many blueprints the server offers, 'because one blueprint on a server is not
+  evidence that this page belongs to it'.
+
+
+  Four judgings (n-0256, n-0258, n-0260, n-0261) all found the same fault, a
+  count deciding whose page you are on - so the count-based branch is now gone
+  from src/panel/app.js. What remains is: ask /api/whose, then a remembered
+  choice, then the unclaimed gate, which lists what the server holds so a
+  blueprint is one press away. That covers every clause of choose-a-blueprint's
+  'then' list except the heading, and nothing sets the 'choose' phase any
+  longer, so prototype/screens/choose-blueprint.html is unreachable from start.
+  Its renderer is still in the file, unreached, because deleting the only
+  implementation of a signed rule is a person's call.
+
+
+  Three ways out, and I have no view on which is right:
+
+  1. Retire choose-a-blueprint - the unclaimed gate is now the one screen that
+  asks, and the choose screen is the same list under a heading that presumes an
+  answer.
+
+  2. Reword it so the question is not conditioned on a count, and merge its
+  screen into unclaimed-page.
+
+  3. Keep it as a distinct screen and give it a reader that is not a count -
+  some other reason the panel would show the picker at start.
+
+
+  Related, on the same screen: with no blueprints listed at all, the panel now
+  omits the 'Open one anyway' section rather than showing it empty. The
+  prototype draws that section with exactly one row on purpose, and does not say
+  what it should be when there are none - so that is design's, not mine.
+replies:
+  - author: agent
+    created: 2026-09-09T15:32:00Z
+    body: >-
+      This question has moved under it, so it is worth reading with the new
+      shape in mind.
+
+
+      Topher has asked that picking a blueprint on the unclaimed page CLAIM the
+      page for it, rather than opening it and leaving the browser to remember.
+      Sketch at proposals/claim-this-page.html; the governance question that
+      gates it is q-0267.
+
+
+      That makes the unclaimed screen the one place a choice about whose page
+      this is gets made - and makes the choice permanent and shared rather than
+      local to a browser. Which strengthens the first of the three ways out
+      above: choose-blueprint's job was asking which of several a site is, and
+      that is now what the unclaimed screen asks, in the only situation where
+      the question arises.
+  - author: agent
+    created: 2026-09-10T03:38:10Z
+    body: >-
+      Answered by ADR 0001 §7 (2026-09-09). The rule keeps its job, and it is a
+      different one: it is asked when several of the ACTIVE PROJECT's blueprints
+      claim the page you are on - never because a folder happens to hold
+      several, which was the mechanism this thread objected to. The statement is
+      reworded to say so and is awaiting your acceptance.
+
+
+      The unreachable-screen half is gone with it:
+      panel.start.unclaimed-page-says-so is retired into
+      panel.start.which-project, so the two rules no longer describe the same
+      moment from two directions.
+  - author: agent
+    created: 2026-09-19T23:26:34Z
+    body: "Folded in: answered by ADR 0001 §7 as the reply above says - the rule
+      keeps its job, reworded, and unclaimed-page-says-so retired into
+      which-project. Closed now rather than left open beside its own answer."

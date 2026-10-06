@@ -1,0 +1,53 @@
+id: q-0285
+uuid: 2d86375f-b806-4897-a7c6-44c2e2ff4234
+kind: question
+author: agent
+created: 2026-09-13T20:15:31.194Z
+anchor:
+  rule: embed.pin.tooltip-says-what-it-is
+  screen: review
+status: incorporated
+body: "Observed while re-judging embed.pin.follows-the-visible-surface (run
+  2026-09-13T20-02-35Z, pass): with the fade all the way to the prototype and
+  pin mode OFF, the ghost stays pointer-events: none (ghostHasReach() in
+  src/panel/app.js requires PIN.isOn()), so the prototype's pin markers cannot
+  be hovered or clicked - the pointer falls through to the app underneath. The
+  tooltip and the click-to-open in this rule work on the prototype only while
+  pin mode is on. The design reason is sound (the ghost must not swallow the
+  app's pointer while you are using the app), but a reviewer looking at the
+  prototype at full fade and resting on a pin gets nothing, and the pins are
+  visible. Options: (a) the ghost takes the pointer at fade 1 whether or not pin
+  mode is on - at full fade the app is invisible anyway and cannot be used; (b)
+  leave it and have this rule's given say \"pin mode on\" for the prototype
+  surface. Which?"
+options:
+  - label: Reach the prototype's pins whenever it is the visible surface
+    why: hover and click work with pin mode off; pin mode only decides whether a
+      click PLACES one
+  - label: Leave it - pin mode is the door
+    why: markers are reachable only while placing
+replies:
+  - author: agent
+    created: 2026-09-21T01:19:43Z
+    body: "Answered by Topher in n-0306: reach the pins whenever the surface is in
+      front, pin mode on or off; mid-fade neither surface answers. Built
+      alongside n-0306."
+  - author: agent
+    created: 2026-09-21T01:20:06Z
+    body: Folded into embed.pin.tooltip-says-what-it-is as two steps, built and
+      checked (run 2026-09-21T01-19-43Z).
+  - author: topher
+    created: 2026-09-21T03:22:50Z
+    body: When faded, neither app should have pointer events enabled. When fully to
+      the app side, pointer events on the app should be on the app surface. When
+      fully to the prototype, pointer events should be on for that surface. If
+      we need to make the "active" surface z-index higher than the other when we
+      switch so pins work on that surface, we should do that.
+  - author: agent
+    created: 2026-09-21T03:52:25Z
+    body: "Already built this way: part-way through the fade neither surface takes
+      the pointer, fully to the app the app does, fully to the design the design
+      does, pin mode on or off. The design overlay sits above the app frame, so
+      no z-index swap is needed. The two steps on
+      embed.pin.tooltip-says-what-it-is say it, the check passed in run
+      2026-09-21T02-44-23Z, and the rule waits on your verdict."

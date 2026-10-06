@@ -1,0 +1,78 @@
+id: n-0186
+uuid: 18b9bd19-774e-4808-9ce9-9726bafa506b
+kind: note
+author: topher
+via: agent
+created: 2026-09-04T21:02:11.989Z
+anchor:
+  rule: locations.travel.evidence-by-key
+status: verified
+body: "An evidence key that names a DIRECTORY kills the server process.
+  lib/serve.js serveFile() writes 200 + content-type, then readFileSync(dir)
+  throws EISDIR; the request handler's catch calls sendJson, which throws
+  ERR_HTTP_HEADERS_SENT, and nothing catches that — node exits, the panel goes
+  dead for everyone using it. This is not a hypothetical key shape:
+  bin/commands/judge.js:114 builds evidenceKey = `runs/evidence/<stamp>/` and
+  prints it to every judge as the key to file evidence under, and
+  src/panel/shots.js:39 renders each cited key verbatim as <img
+  src=api('/evidence/'+p)>. So one run record citing the prefix it was handed
+  takes the local server down when someone opens its screenshots. Reproduced on
+  a scratch copy served on :4757 — evidence
+  runs/evidence/2026-09-04T20-48-24Z/06-directory-key-crash.txt (stack trace and
+  the dead port), first seen in 03-symlink.txt. The rule's three THENs
+  themselves held (see 01/02/04/05 in that key); this is the same resolver
+  refusing badly rather than crashing. Same file also follows symlinks planted
+  inside the evidence root (03-symlink.txt) — lower stakes, needs local write
+  access there."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-09-05T02:52:02Z
+    body: >-
+      Fixed in the commit that carries this reply. `serveFile` now requires a
+      regular file — `statSync(path, { throwIfNoEntry: false })` and `isFile()`
+      — instead of `existsSync`, so a directory is a plain 404 rather than a 200
+      followed by EISDIR, ERR_HTTP_HEADERS_SENT and a dead process.
+
+
+      The invitation is closed at the other end too: the record skeleton
+      `walkdown judge` prints now shows the evidence key as
+      `runs/evidence/<stamp>/<file>` rather than the bare prefix (568e55c).
+
+
+      The test asks for both the prefix with a trailing slash and without, then
+      fetches a real screenshot afterwards and asserts it arrives — a 404 from a
+      dead server would look identical on one request, so the half worth
+      asserting is that the server is still there. It fails against the old code
+      with exactly ERR_HTTP_HEADERS_SENT.
+
+
+      Not fixed, and left as you filed it: a symlink planted inside the evidence
+      root is still followed out of it. That is a door in a directory its owner
+      nominated rather than a key climbing out, and it wants a decision about
+      whether an evidence root is trusted, rather than a patch.
+  - author: topher
+    created: 2026-09-05T04:36:38Z
+    body: >-
+      The symlink half is closed too, in the commit before this reply.
+
+
+      Not by refusing to serve through a link — that would have broken the
+      working case (the panel showing a linked screenshot, a scratch copy
+      sharing the real evidence directory) and left the one that costs something
+      open. Reading through a link is fine. WRITING through one is the hazard:
+      `init --force` rewrote blueprint/AGENTS.md and truncated
+      lib/templates/AGENTS.md, the file it was linked to, while every check in
+      the repo stayed green.
+
+
+      So: `walkdown lint` now warns on a symlink under the home whose target
+      resolves outside it, and both blueprints carry AGENTS.md as a copy with a
+      Highball check keeping it identical to the shipped template — the drift
+      protection the link was buying, without the door.
+
+
+      The check earned itself immediately: the example blueprint had the same
+      link, and nobody had noticed it.
+verified_by: topher
+reason: finding

@@ -1,98 +1,81 @@
 /*
- * `walkdown blueprints import <path>` — take a project's blueprints into this machine's
- * registry.
+ * `walkdown blueprints import <path>` — take blueprints into this machine's
+ * registry (ADR 0003, ADR 0014 §8).
  *
- * WHY THIS IS NOT `project add` (ADR 0001). `add` lists a blueprint that lives
- * in a home under the `.walkdown` answering where you are standing; it refuses
- * to reach into another checkout, because a server inferring a neighbour's
- * blueprints from the tree is how one pack's board came to serve and write to
- * another's (n-0159). That refusal is about INFERENCE, and this command is the
- * opposite: you name a directory, you are shown what it declares, and you say
- * which of them you want. Nothing arrives by walking anywhere.
+ * Import takes what it is pointed at. A path to one blueprint's folder - a
+ * home, holding a spec.yml - registers that one. A path to a repository
+ * lists every home under its `.walkdown/blueprints/`, at any depth, and asks
+ * which to take; with no terminal to ask it prints the list and needs
+ * `--all` or `--only`. Nothing arrives by walking anywhere else, and a clone
+ * of a repository that uses walkdown shows you nothing until you import it.
  *
- * The consequence is the point: a clone of a repository that happens to use
- * walkdown shows you nothing until you import it. You never see blueprints you
- * did not ask for.
- *
- * It writes to the personal config, never a repository's - what this machine
- * has imported is a fact about this machine - and the entries carry no
- * `roots`, so an imported blueprint is reachable by name and by the server and
- * never shadows the `.walkdown` that answers where you stand.
+ * `--ephemeral` is for a copy not meant to outlive the afternoon - a scratch
+ * blueprint a judging agent works against. It is registered like anything
+ * else, because an unregistered one is exactly the ghost the registry exists
+ * to abolish, and it is marked and belongs to no project, so it is reachable
+ * by its ID and never by standing somewhere.
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { createInterface } from 'node:readline/promises';
-import { basename, join, resolve } from 'node:path';
+import { basename, dirname, join, relative } from 'node:path';
 import { parseArgs } from 'node:util';
 import {
   canon,
+  checkoutFor,
+  describeFolder,
   expand,
-  HOME_LAYOUT,
-  readUserConfig,
-  rememberBlueprint,
+  findHomes,
+  gitRoot,
+  isHome,
+  isOldHome,
+  readRegistry,
+  register,
+  SPEC_FILE,
   tilde,
 } from '../../lib/locations.js';
 import { refreshIndex } from '../../lib/registry.js';
 import { dim, green, red, yellow } from '../../lib/report/tty.js';
 import { parse } from '../../vendor/yaml.js';
-import { add as addHome } from './blueprint.js';
 import { end } from './context.js';
 
-const HELP = `walkdown blueprints import <path> [--all] [--only <ids>] [--id <name>] [--ephemeral] [--why <reason>] [--json]
+const HELP = `walkdown blueprints import <path> [--all] [--only <folders>] [--ephemeral] [--why <reason>] [--json]
 
-  <path>       a project directory holding a .walkdown that declares blueprints,
-               or one bare home (blueprint/ with threads, runs, evidence, drafts beside it)
-  --all        take every blueprint the project declares, without asking
-  --only       take these ids only, comma separated
-  --id         the id to register a bare home under (default: its directory's name)
-  --ephemeral  a throwaway copy of a home: reachable by name, never by standing somewhere
+  <path>       one blueprint's folder (it holds a spec.yml), or a repository whose
+               .walkdown/blueprints/ holds some
+  --all        take every blueprint the repository holds, without asking
+  --only       take these folders only, comma separated
+  --project    the project label, where this checkout is new to this machine
+  --code       its two- or three-letter code
+  --ephemeral  a throwaway copy of a home: reachable by its ID, never by standing somewhere
   --why        what the copy is for, kept beside it`;
 
-/**
- * What a directory declares: its own `.walkdown/config.yml`, and only that.
- * A row names its home (`home: 0001-x`, the numbered directory under
- * `.walkdown/blueprints/`) or, from before homes were the whole story, its
- * spec; either spelling is read, and the spec is what comes back.
- */
-export function declaredIn(dir) {
-  const config = join(dir, '.walkdown', 'config.yml');
-  if (!existsSync(config)) return null;
-  let parsed;
+/** What a home says about itself, from its spec.yml. */
+function describe(dir) {
   try {
-    parsed = parse(readFileSync(config, 'utf8'));
-  } catch (e) {
-    throw new Error(`${config} cannot be read (${e.message}). Fix that file and import again.`);
+    const cfg = parse(readFileSync(join(dir, SPEC_FILE), 'utf8')) ?? {};
+    return { name: cfg.blueprint ?? null, description: cfg.description ?? '' };
+  } catch {
+    return { name: null, description: '' };
   }
-  const out = [];
-  for (const entry of parsed?.blueprints ?? []) {
-    if (!entry?.id || !(entry?.spec || entry?.home)) continue;
-    const spec = canon(
-      entry.spec
-        ? expand(String(entry.spec), dir)
-        : join(dir, '.walkdown', 'blueprints', String(entry.home), HOME_LAYOUT.spec),
-    );
-    if (!existsSync(join(spec, 'walkdown.yml'))) continue;
-    let name = entry.id;
-    let description = '';
-    try {
-      const cfg = parse(readFileSync(join(spec, 'walkdown.yml'), 'utf8'));
-      name = cfg?.blueprint ?? entry.id;
-      description = cfg?.description ?? '';
-    } catch {
-      /* unnamed, which is a lint problem there and not an import problem here */
-    }
-    out.push({ id: String(entry.id), spec, name, description });
-  }
-  return out;
 }
 
-/** Ids already in the personal registry, and the specs behind them. */
-function alreadyHere() {
-  const rows = readUserConfig().config.blueprints ?? [];
-  return {
-    ids: new Set(rows.map((p) => p?.id).filter(Boolean)),
-    specs: new Set(rows.filter((p) => p?.spec).map((p) => canon(expand(String(p.spec))))),
-  };
+/*
+ * The checkout a home belongs to: the repository whose `.walkdown/blueprints/`
+ * it stands under, or null for one standing anywhere else.
+ */
+function checkoutOf(homeDir) {
+  let d = dirname(homeDir);
+  for (let i = 0; i < 16 && d !== dirname(d); i++, d = dirname(d))
+    if (basename(d) === 'blueprints' && basename(dirname(d)) === '.walkdown') return dirname(dirname(d));
+  return null;
 }
+
+const listedHomes = () =>
+  new Map(
+    readRegistry()
+      .rows.filter((r) => r?.registered && r.home)
+      .map((r) => [canon(expand(String(r.home))), String(r.id)]),
+  );
 
 export async function run(args) {
   const { values, positionals } = parseArgs({
@@ -102,14 +85,15 @@ export async function run(args) {
       all: { type: 'boolean', default: false },
       only: { type: 'string' },
       json: { type: 'boolean', default: false },
-      id: { type: 'string' },
+      project: { type: 'string' },
+      code: { type: 'string' },
       ephemeral: { type: 'boolean', default: false },
       why: { type: 'string' },
     },
   });
   const at = positionals[0];
   if (!at) {
-    console.error('walkdown blueprints import needs a path to a project.');
+    console.error('walkdown blueprints import needs a path to a blueprint folder or a repository.');
     console.error(HELP);
     return end(2);
   }
@@ -118,78 +102,113 @@ export async function run(args) {
     console.error(red(`${at} does not exist.`));
     return end(2);
   }
-  let found;
-  try {
-    found = declaredIn(dir);
-  } catch (e) {
-    console.error(red(e.message));
+  if (isOldHome(dir) && !isHome(dir)) {
+    console.error(red(`${tilde(dir)} is laid out the way walkdown laid homes out before ADR 0014 (blueprint/walkdown.yml).`));
+    console.error(dim('  `walkdown upgrade` flattens it; import it after.'));
     return end(2);
   }
-  /*
-   * ONE ADD (ADR 0003 §3). A directory with no manifest that is itself a home
-   * - `blueprint/walkdown.yml` inside it, or the blueprint directory named
-   * outright - is the case `blueprint add` used to take: a clone, a copy, a
-   * scratch copy with --ephemeral. Same refusals, same writer, one door.
-   */
-  const bareHome =
-    existsSync(join(dir, HOME_LAYOUT.spec, 'walkdown.yml')) || existsSync(join(dir, 'walkdown.yml'));
-  if ((found === null || values.ephemeral) && bareHome) {
-    return addHome([
-      at,
-      ...(values.id ? ['--id', values.id] : []),
-      ...(values.ephemeral ? ['--ephemeral'] : []),
-      ...(values.why ? ['--why', values.why] : []),
-    ]);
+
+  // ---- one blueprint's folder ----------------------------------------------
+  if (isHome(dir)) {
+    let homeDir = dir;
+    let checkout = checkoutOf(homeDir);
+    /*
+     * A home in a worktree is the project's, at the checkout's own copy
+     * (ADR 0014 §10): a worktree is never registered.
+     */
+    if (checkout) {
+      const wt = checkoutFor(checkout, readRegistry().rows);
+      if (wt?.worktree) {
+        const there = join(wt.checkout, relative(wt.worktree, homeDir));
+        if (isHome(there)) {
+          homeDir = canon(there);
+          checkout = wt.checkout;
+        }
+      }
+    }
+    /*
+     * A COPY MEANS A COPY (q-0176). A project's own home under --ephemeral is
+     * refused; a home standing where no project owns it, such as a copy under
+     * `.walkdown/tmp/`, is what the flag is for.
+     */
+    if (checkout && values.ephemeral) {
+      console.error(
+        red(
+          `${tilde(homeDir)} is ${tilde(checkout)}'s own blueprint — an ephemeral entry is for a throwaway COPY, and this is the original. Copy it somewhere no project owns (${tilde(join(checkout, '.walkdown', 'tmp', '<label>'))}, say) and import the copy.`,
+        ),
+      );
+      return end(2);
+    }
+    if (!checkout && !values.ephemeral) {
+      console.error(
+        red(
+          `${tilde(homeDir)} is not under any repository's .walkdown/blueprints/ — a registered blueprint belongs to one (\`walkdown blueprints new\` makes one). A copy standing elsewhere is imported with --ephemeral.`,
+        ),
+      );
+      return end(2);
+    }
+    const already = listedHomes().get(canon(homeDir));
+    if (already) {
+      console.log(`  ${dim('· already listed')} ${tilde(homeDir)}  ${dim(`as \`${already}\``)}`);
+      return end(0);
+    }
+    return finish([{ dir: homeDir, folder: basename(homeDir) }], checkout, values);
   }
-  if (found === null) {
-    console.error(
-      red(`Nothing at ${at} declares a blueprint — there is no .walkdown/config.yml there, and it is not a home.`),
-    );
+
+  // ---- a repository ----------------------------------------------------------
+  const top = (gitRoot(dir) && canon(gitRoot(dir)) === dir) || existsSync(join(dir, '.walkdown')) ? dir : null;
+  const { homes, nested } = top ? findHomes(top) : { homes: [], nested: [] };
+  for (const n of nested)
+    console.error(red(`✗ ${tilde(n.inner)} is a blueprint inside ${tilde(n.outer)} — a home inside a home is refused, and not offered.`));
+  if (!homes.length) {
+    console.error(red(`Nothing at ${at} is a blueprint — no spec.yml there, and no .walkdown/blueprints/ holding one.`));
     console.error(dim('  `walkdown blueprints new` inside that project starts one.'));
     return end(2);
   }
-  if (!found.length) {
-    console.error(red(`${at} has a .walkdown, but it declares no blueprint walkdown can read.`));
-    return end(2);
-  }
-
-  const here = alreadyHere();
-  const fresh = found.filter((b) => !here.specs.has(b.spec));
-  const known = found.filter((b) => here.specs.has(b.spec));
-
+  /*
+   * A worktree's homes are imported as the checkout's (ADR 0014 §10): the
+   * project is the checkout, and the worktree is never registered.
+   */
+  const wt = checkoutFor(top, readRegistry().rows);
+  const checkout = wt?.worktree ? wt.checkout : top;
+  const at_ = (h) => {
+    if (!wt?.worktree) return h;
+    const there = canon(join(wt.checkout, relative(wt.worktree, h.dir)));
+    return isHome(there) ? { ...h, dir: there } : h;
+  };
+  const listed = listedHomes();
+  const isListed = (h) => listed.has(canon(at_(h).dir));
+  const fresh = homes.filter((h) => !isListed(h));
+  const known = homes.filter(isListed);
+  const show = (h, i) => {
+    const d = describe(h.dir).description;
+    const mark = isListed(h) ? dim(`  · already listed as \`${listed.get(canon(at_(h).dir))}\``) : '';
+    return `  ${i === null ? '' : `${i + 1}. `}${h.folder}${d ? dim(` — ${d}`) : ''}${mark}`;
+  };
   if (!fresh.length) {
-    console.log(`${dim('· already imported')} ${found.length} blueprint(s) from ${tilde(dir)}`);
+    console.log(`${dim('· already listed')} every blueprint in ${tilde(top)}:`);
+    for (const h of homes) console.log(show(h, null));
     return end(0);
   }
 
-  /*
-   * Which of them. A project holding one is not a question worth asking; two
-   * or more is the person's call, and an import that took everything by
-   * default is exactly the "I did not ask for these" the registry exists to
-   * prevent. Non-interactive and unasked, it prints what it found and stops -
-   * a script that meant `--all` can say so.
-   */
   let chosen = fresh;
+  const named = (h, w) => w === h.folder || w === basename(h.folder) || w === describeFolder(h.folder);
   if (values.only) {
-    const want = new Set(values.only.split(',').map((s) => s.trim()).filter(Boolean));
-    chosen = fresh.filter((b) => want.has(b.id));
-    const missing = [...want].filter((id) => !fresh.some((b) => b.id === id));
+    const want = [...new Set(values.only.split(',').map((s) => s.trim()).filter(Boolean))];
+    chosen = fresh.filter((h) => want.some((w) => named(h, w)));
+    const missing = want.filter((w) => !fresh.some((h) => named(h, w)));
     if (missing.length) {
-      console.error(red(`${tilde(dir)} declares no blueprint called ${missing.join(', ')}.`));
-      console.error(dim(`  it declares: ${fresh.map((b) => b.id).join(', ')}`));
+      console.error(red(`${tilde(top)} holds no unlisted blueprint folder called ${missing.join(', ')}.`));
+      console.error(dim(`  it holds: ${homes.map((h) => h.folder).join(', ')}`));
       return end(2);
     }
-  } else if (!values.all && fresh.length > 1) {
+  } else if (!values.all) {
+    console.log(`${tilde(top)} holds ${homes.length} blueprint${homes.length === 1 ? '' : 's'}:`);
+    homes.forEach((h, i) => console.log(show(h, i)));
     if (!process.stdin.isTTY) {
-      console.log(`${tilde(dir)} declares ${fresh.length} blueprints:`);
-      for (const b of fresh) console.log(`  ${b.id}${b.description ? dim(` — ${b.description}`) : ''}`);
-      console.error(yellow('\nSay which: --all, or --only <ids>.'));
+      console.error(yellow('\nSay which: --all, or --only <folders>. Nothing was imported.'));
       return end(2);
     }
-    console.log(`${tilde(dir)} declares ${fresh.length} blueprints:`);
-    fresh.forEach((b, i) => {
-      console.log(`  ${i + 1}. ${b.id}${b.description ? dim(` — ${b.description}`) : ''}`);
-    });
     const rl = createInterface({ input: process.stdin, output: process.stdout });
     const said = (await rl.question('\nImport which? (numbers, or "all") ')).trim();
     rl.close();
@@ -203,71 +222,74 @@ export async function run(args) {
         said
           .split(/[\s,]+/)
           .map((n) => Number.parseInt(n, 10))
-          .filter((n) => n >= 1 && n <= fresh.length),
+          .filter((n) => n >= 1 && n <= homes.length),
       );
-      chosen = fresh.filter((_, i) => picked.has(i + 1));
+      chosen = homes.filter((h, i) => picked.has(i + 1) && !isListed(h));
     }
     if (!chosen.length) {
       console.log(dim('nothing imported'));
       return end(0);
     }
   }
+  return finish(chosen.map(at_), checkout, values, known);
+}
 
-  const taken = new Set(here.ids);
+function finish(chosen, checkout, values, known = []) {
   const written = [];
-  for (const bp of chosen) {
-    const homeDir = resolve(bp.spec, '..');
-    if (basename(bp.spec) !== HOME_LAYOUT.spec) {
+  for (const h of chosen) {
+    const row = register({
+      checkout: values.ephemeral ? null : checkout,
+      homeDir: h.dir,
+      by: 'import',
+      project: values.project ?? null,
+      code: values.code ?? null,
+      ephemeral: values.ephemeral ? { why: values.why ?? '' } : null,
+    });
+    if (row.action === 'label-taken' || row.action === 'code-taken') {
       console.error(
-        red(`${bp.spec} is not a home's ${HOME_LAYOUT.spec}/ — walkdown reads a home, not a bare spec directory.`),
+        red(`✗ the project ${row.action === 'label-taken' ? 'label' : 'code'} \`${row.taken}\` is another project's on this machine. Nothing more was imported.`),
       );
+      console.error(dim('  Choose another with `--project <label>` and `--code <two or three letters>`.'));
       return end(2);
     }
-    /*
-     * The blueprint's own id first, since that is what its people call it.
-     * Where this machine already has that name, the project's directory
-     * disambiguates before a number does: `acme-shop-checkout` says where it
-     * came from and `checkout-2` says nothing at all.
-     */
-    let id = bp.id;
-    if (taken.has(id)) id = `${basename(dir)}-${bp.id}`;
-    for (let n = 2; taken.has(id); n++) id = `${basename(dir)}-${bp.id}-${n}`;
-    taken.add(id);
-    try {
-      const row = rememberBlueprint({
-        id,
-        root: dir, // the project it came from: what the working directory is compared against
-        homeDir,
-        home: null,
-        inRepo: false,
-        by: 'import',
-      });
-      written.push({ ...bp, id: row.id, path: row.path });
-    } catch (e) {
-      console.error(red(e.message));
-      return end(2);
-    }
+    written.push({ ...h, id: row.id, project: row.project, path: row.path, beside: row.beside ?? [], kept: row.action === 'kept' });
   }
-
-  // Claims are indexed at import, so routing never has to load a spec (ADR
-  // 0001 §5). `serve` rebuilds it; this is what makes the first serve cheap.
-  const index = refreshIndex();
-
+  /*
+   * Claims are indexed at import, so routing never has to load a spec (ADR
+   * 0001 §5). `serve` rebuilds it; this is what makes the first serve cheap.
+   */
+  let indexed = null;
+  try {
+    indexed = refreshIndex().blueprints.length;
+  } catch {
+    /* the claims index is a cache; the next serve rebuilds it */
+  }
   if (values.json) {
     console.log(
       JSON.stringify(
-        { project: tilde(dir), imported: written.map((w) => ({ id: w.id, spec: w.spec })), indexed: index.blueprints.length },
+        {
+          checkout: checkout ? tilde(checkout) : null,
+          imported: written.map((w) => ({ id: w.id, project: w.project, home: tilde(w.dir) })),
+          indexed,
+        },
         null,
         2,
       ),
     );
     return end(0);
   }
-  console.log(`${green('imported')} from ${tilde(dir)}`);
-  for (const w of written) console.log(`  ${green('+')} ${w.id}  ${dim(w.spec)}`);
-  for (const k of known) console.log(`  ${dim(`· already listed  ${k.id}`)}`);
-  const skipped = fresh.filter((b) => !written.some((w) => w.spec === b.spec));
-  for (const s of skipped) console.log(`  ${dim(`· not imported    ${s.id}`)}`);
-  console.log(dim(`\n  ${index.blueprints.length} blueprint(s) indexed · walkdown blueprints lists them`));
+  for (const w of written) {
+    console.log(`  ${w.kept ? dim('· already listed') : green('+ listed')}   ${tilde(w.dir)}  ${dim(`as \`${w.id}\``)}`);
+    if (!w.kept)
+      console.log(
+        `  ${''.padEnd(10)} ${dim(
+          values.ephemeral
+            ? `a throwaway copy${values.why ? `: "${values.why}"` : ''}`
+            : `in project \`${w.project}\`${w.beside.length ? `, beside ${w.beside.map((b) => `\`${b}\``).join(', ')}` : ''}`,
+        )}`,
+      );
+  }
+  for (const k of known) console.log(`  ${dim(`· already listed  ${k.folder}`)}`);
+  if (indexed !== null) console.log(dim(`\n  ${indexed} blueprint(s) indexed · \`walkdown blueprints\` lists them`));
   return end(0);
 }

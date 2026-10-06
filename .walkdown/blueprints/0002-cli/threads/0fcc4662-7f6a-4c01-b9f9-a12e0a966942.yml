@@ -1,0 +1,18 @@
+id: n-0347
+uuid: 0fcc4662-7f6a-4c01-b9f9-a12e0a966942
+kind: note
+reason: request
+author: topher
+via: agent
+created: 2026-10-05T02:27:27.174Z
+anchor:
+  screen: init-again
+status: open
+body: ADR 0012 accepted, rules approved, build it
+added: "Draw what `walkdown init` prints the second time
+  (commands.init.this-machine-only): everything already in place, nothing
+  created. Anchors: cli.prompt, cli.init.home, cli.init.you, cli.init.skills,
+  cli.init.needs, cli.init.next, cli.exit. The frame is the terminal frame
+  tools/cli-captures.mjs --frame prints, so the design and the as-built line up
+  under the fade; /as-built/cli/init-again.html shows what the build prints
+  today."

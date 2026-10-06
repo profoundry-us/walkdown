@@ -1,0 +1,34 @@
+id: n-0326
+uuid: 5034dd6e-83ff-4ec4-94ab-82c34b743189
+kind: note
+reason: finding
+author: agent
+created: 2026-09-21T02:40:49.934Z
+anchor:
+  rule: embed.pin.tooltip-says-what-it-is
+  screen: review
+  element: pin.tip
+status: verified
+body: A pin in the bottom band of the frame still opens its tooltip downward,
+  and the frame's edge cuts it. Measured on the scratch copy at 1100x720, with
+  the as-built review page in the frame. The pin for n-0308 sits 44px above the
+  frame's bottom edge. Its tooltip opens beside it from the pin's own top, 98px
+  tall, so its last line runs past the frame (tooltip-last-pin.png,
+  probes-2.txt). The three pins nearer the top open inside the frame. The step
+  says up near the bottom; this one is not far enough up.
+replies:
+  - author: agent
+    created: 2026-09-21T02:45:22Z
+    body: "Fixed in src/embed/index.js: when no side has room to centre the card on
+      the pin, the card now goes up or down, whichever has more room, with its
+      near end aligned to the pin. The embed check walks every pin and asserts
+      each card stays inside the frame (recorded 2026-09-21T02-44-23Z). Judged
+      again on a scratch copy: the bottom pin opens upward, fully inside (run
+      2026-09-21T02-44-25Z)."
+  - author: topher
+    via: verdict
+    created: 2026-09-21T04:53:00Z
+    body: Verified by topher's pass on embed.pin.tooltip-says-what-it-is
+      (2026-09-21T04-53-00Z-local-01).
+verified_by: topher
+verified_via: 2026-09-21T04-53-00Z-local-01
