@@ -1,6 +1,6 @@
 # ADR 0014 — Where walkdown keeps its files
 
-- **Status:** proposed 2026-10-05
+- **Status:** accepted 2026-10-05
 - **Date:** 2026-10-05
 - **Deciders:** Topher (product, eng)
 - **Builds on:** ADR 0003 (the registry is the only door), ADR 0011 (a project holds

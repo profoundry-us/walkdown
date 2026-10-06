@@ -29,7 +29,7 @@ stories:
       - id: ownership.design.declared-per-blueprint
         origin: walkdown
         created_at: 2026-10-01
-        statement: A blueprint names who draws its design in its `walkdown.yml`, with `design.by` set to `person` or `agent`. When a blueprint says nothing, a person draws.
+        statement: A blueprint names who draws its design in its `spec.yml`, with `design.by` set to `person` or `agent`. When a blueprint says nothing, a person draws.
         because: Who designs differs between projects. What holds on every one is that the builder does not draw.
         history: Decided in ADR 0009 on 2026-10-01 (GitHub issue #2). On Topher's own projects an agent designs; at work a designer does.
         verify: [checks]
@@ -43,7 +43,11 @@ stories:
             - With "person", or with nothing said, the request is queued for the designer, shown the way a person's queue is
             - With "agent", it is queued for the design agent, never for the agent building the app
             - Any other value is a lint error that names "person" and "agent" as the values allowed
-          statement_hash: sha256:e1ce6c441f53
+          statement_hash: sha256:95fef80f3517
+          reworded:
+            - hash: sha256:e1ce6c441f53
+              at: 2026-10-06T00:47:54Z
+              why: ADR 0014 renamed the files it names; what it asks of the build is unchanged
 
       - id: ownership.design.request-on-a-screen
         origin: walkdown

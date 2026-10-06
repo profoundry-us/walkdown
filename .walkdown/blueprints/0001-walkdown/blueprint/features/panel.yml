@@ -700,12 +700,12 @@ stories:
             - The switcher pressed inside a loaded project leaves the frame and the panel exactly as they were, blurred, and Escape or the backdrop gives them back unchanged
             - It names the address it asked about, because a claim misses on a port or a fragment and "no blueprint" without the address leaves you guessing which one was asked
             - How to make this page reviewable, and how to bring a project in, sit above the list - `walkdown claims --url`, `walkdown blueprints import`, `walkdown blueprints new`, named rather than described
-            - Neither of those ever runs from the browser - they write to a person's disk and to their personal config, and a button here would be walkdown adopting a directory on the strength of a click in a web page
+            - Neither of those ever runs from the browser - they write to a person's disk and to their registry, and a button here would be walkdown adopting a directory on the strength of a click in a web page
             - Projects claiming this page come first and name the blueprint that matched
             - Nothing is opened by default, at any count - a machine holding exactly one blueprint is answered the same way as one holding six
             - Choosing a project with one blueprint opens it; choosing one with several asks which, on the Blueprints tab - and several blueprints inside a single project never reach this modal at all, because the project is not in question there
             - A server that lists nothing offers no list at all rather than an empty one, and still says what to do about it
-          statement_hash: sha256:ca7408adbab5
+          statement_hash: sha256:7241796d7522
           reworded:
             - hash: sha256:fb4343377bab
               at: 2026-09-13
@@ -719,6 +719,9 @@ stories:
             - hash: sha256:8927716089a7
               at: 2026-10-05T02:28:57Z
               why: ADR 0012 renamed the commands it quotes; what it asks of the build is unchanged
+            - hash: sha256:ca7408adbab5
+              at: 2026-10-06T00:47:54Z
+              why: "ADR 0014: the registry, not a personal config, is what an import writes"
 
       - id: panel.start.address-opens-what-it-names
         origin: thread:n-0297

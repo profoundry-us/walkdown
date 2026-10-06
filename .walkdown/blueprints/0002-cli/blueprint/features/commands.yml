@@ -77,11 +77,15 @@ stories:
           when:
             - "`walkdown init` is run, then run again"
           then:
-            - "The first creates `~/.walkdown`, its registry, and an identity in its config.yml if git knows one, and says what it created"
+            - "The first creates `~/.walkdown`, its registry, and an identity in `profile.yml` if git knows one, and says what it created"
             - "It registers no blueprint and writes nothing in the project"
             - "The second reports everything already in place and creates nothing"
             - "It ends by saying `walkdown blueprints new` starts a spec"
-          statement_hash: sha256:9551966dc330
+          statement_hash: sha256:af678ac1a152
+          reworded:
+            - hash: sha256:9551966dc330
+              at: 2026-10-06T00:47:54Z
+              why: ADR 0014 renamed the files it names; what it asks of the build is unchanged
       - id: commands.init.one-skill-installer
         statement: "`walkdown init` installs the skills by doing what `walkdown skills` does, with the same messages."
         because: "Two installers drift apart, and a person who saw one set of messages should never meet another."
@@ -121,7 +125,7 @@ stories:
     statement: As a person starting or reshaping a spec, every change to a blueprint is a blueprints command.
     rules:
       - id: commands.blueprints.new-makes-one
-        statement: "`walkdown blueprints new [<id>]` makes a blueprint for the project where it is run, with the id defaulting to the project directory's name, and running it again changes nothing."
+        statement: "`walkdown blueprints new [<name>]` makes a blueprint for the project where it is run, named after the project's directory unless a name is given. Running it again changes nothing."
         because: "Starting a spec is its own decision, and it carries every rule a blueprint is made by today."
         origin: walkdown
         created_at: 2026-10-04
@@ -130,17 +134,17 @@ stories:
         screens: [blueprints-new, init-another]
         steps:
           given:
-            - "A git project `shop` with no blueprint, on a machine that has run `walkdown init`"
+            - A git project `shop` with no blueprint, on a machine that has run `walkdown init`
           when:
             - "`walkdown blueprints new` is run, then again, then `walkdown blueprints new search`"
           then:
-            - "The first makes and registers `shop` in a numbered home outside the repository, and adds nothing to the repository"
-            - "The second reports everything up to date"
-            - "The third makes `search`, beside `shop`, and says commands that write now take `--blueprint`"
+            - The first makes and registers `shop` in `~/.walkdown/projects/shop/blueprints/`, in a folder named for this month, and adds nothing to the repository
+            - The second reports everything up to date
+            - The third makes `search` beside `shop`, and says that commands which write now take `--blueprint`
             - "`--commit spec|all` and `--dir` act as they did on `init`"
-          statement_hash: sha256:68b77720e43d
+          statement_hash: sha256:20c77e403ea3
       - id: commands.blueprints.commit-moves-the-home
-        statement: "`walkdown blueprints commit <none|spec|all>` moves a blueprint's whole home into the repository or out of it, and with several blueprints it needs `--blueprint`."
+        statement: "`walkdown blueprints commit <none|spec|all>` moves a blueprint's home between `~/.walkdown/projects/<project>/blueprints/` and the repository's `.walkdown/blueprints/`, keeping its folder name and its ID."
         because: "Whether a spec is committed is decided per blueprint, sometimes long after it was made."
         origin: walkdown
         created_at: 2026-10-04
@@ -148,15 +152,18 @@ stories:
         signoff: [eng]
         steps:
           given:
-            - "A project with a blueprint kept outside the repository"
+            - A project with two blueprints kept outside the repository, and a committed folder that has the same name as one of them
           when:
-            - "`walkdown blueprints commit spec` is run, then `walkdown blueprints commit none`"
+            - "`walkdown blueprints commit spec` is run for the other one, then `walkdown blueprints commit none`, then `commit spec` for the one whose folder name is taken"
           then:
-            - "The home moves into `.walkdown/` with the spec standard's ignore file, then back out, records and all"
-            - "A `.gitignore` other blueprints share is left as it is"
-          statement_hash: sha256:c5e229e499ef
+            - The home moves into `.walkdown/blueprints/` with its own `.gitignore`, then back out, records and all
+            - The ID on its row is the same throughout
+            - No other blueprint's files change
+            - The one whose folder name is already committed is refused, naming the folder, and nothing moves
+            - Lint warns about that clash before anyone tries to commit
+          statement_hash: sha256:7170e620ca41
       - id: commands.blueprints.rename
-        statement: "`walkdown blueprints rename <id> <new-id>` changes a blueprint's id and leaves its rules, threads and runs as they were."
+        statement: "`walkdown blueprints rename <id> <new-name>` changes the name at the end of a blueprint's ID, such as `cli` in `0002-wd-cli`, and with `--folder` its folder too. Its rules, threads and runs stay as they were."
         because: "An id chosen badly, by a person or an agent, should be put right without starting over."
         origin: walkdown
         created_at: 2026-10-04
@@ -165,16 +172,17 @@ stories:
         screens: [blueprints-rename]
         steps:
           given:
-            - "A project with blueprints `a` and `b`, b committed in the repository"
+            - A project with blueprints `a` and `b`, with `b` committed in the repository
           when:
-            - "`walkdown blueprints rename b search` is run, then `walkdown blueprints rename a search`, then `walkdown blueprints rename a Not An Id`"
+            - '`walkdown blueprints rename b search` is run, then the same with `--folder 202610-search`, then `rename a search`, then `rename a "Not An Id"`'
           then:
-            - "b is now `search` in the registry, in its walkdown.yml and in the repository's `.walkdown/config.yml`, and its folder is renamed keeping its number"
-            - "Its rules, threads and run records are byte for byte what they were, and `walkdown status --blueprint search` reads as b did"
-            - "The pointer names it by its new id"
-            - "Renaming a to an id the project already has, or to something that is not an id, is refused and changes nothing"
-          statement_hash: sha256:0f7cfe575ce5
+            - "`b`'s ID now ends in `search`, keeping its number and its project code, and its folder is unchanged"
+            - With `--folder`, the folder is renamed, and that rename is the only change in the repository
+            - Its rules, threads and run records are byte for byte what they were, and `walkdown status --blueprint search` reads as `b` did
+            - Renaming `a` to a name the project already has, or to something that is not a name, is refused and changes nothing
+          statement_hash: sha256:8877c6d6eba1
       - id: commands.blueprints.import-and-forget-moved
+        retired: Replaced by commands.blueprints.import-takes-what-it-is-pointed-at and commands.blueprints.forget-keeps-the-files (ADR 0014 (2026-10-05)). Its given named the repository's `.walkdown/config.yml`, which is gone.
         statement: "`walkdown blueprints import` and `walkdown blueprints forget` do what `walkdown import` and `walkdown blueprint forget` did."
         because: "Registering and unregistering a blueprint act on a blueprint, so they belong under its noun."
         origin: walkdown
@@ -189,6 +197,73 @@ stories:
           then:
             - "The import registers it exactly as `walkdown import` did, and the forget takes it off the list and touches no records"
           statement_hash: sha256:baaf4c96fd25
+      - origin: walkdown
+        created_at: 2026-10-05
+        verify:
+          - checks
+        signoff:
+          - eng
+          - product
+        id: commands.blueprints.import-takes-what-it-is-pointed-at
+        statement: "`walkdown blueprints import <path>` registers the blueprint whose folder the path names. Pointed at a repository, it lists every blueprint folder in it and asks which to register."
+        because: Pointing at one blueprint should get that one, and pointing at a repository should not quietly register everything in it.
+        steps:
+          given:
+            - A repository with three committed homes, one of them already registered here
+          when:
+            - It is imported by one home's path, then by the repository's path in a terminal, then by the repository's path with no terminal
+          then:
+            - The home's path registers that blueprint alone, and says its ID and its project
+            - The repository's path lists each home by its folder, marks the one already listed, and registers the ones chosen
+            - With no terminal, it prints the list and registers nothing until `--all` or `--only <folder>` is given
+            - A home already registered is reported as already listed, and its row is unchanged
+            - A path holding no home says so and registers nothing
+          statement_hash: sha256:84224634448c
+      - origin: walkdown
+        created_at: 2026-10-05
+        verify:
+          - checks
+        signoff:
+          - eng
+        id: commands.blueprints.forget-keeps-the-files
+        statement: "`walkdown blueprints forget <id>` takes a blueprint off this machine's list and touches none of its files."
+        because: Forgetting is a choice about what this person sees, not about what exists.
+        steps:
+          given:
+            - A committed blueprint and a personal one, each with runs and threads
+          when:
+            - Each is forgotten
+          then:
+            - Neither is served or listed afterwards
+            - Every file in both homes is as it was
+            - The personal home's folder is named, with how to delete it, because nothing else will
+          statement_hash: sha256:ba872b7a43cd
+  - id: commands.rules
+    title: Rules can be put right
+    statement: As someone keeping a spec, I can rename a rule whose id no longer fits it, without judging it all again.
+    rules:
+      - origin: walkdown
+        created_at: 2026-10-05
+        verify:
+          - checks
+        signoff:
+          - eng
+        id: commands.rules.rename
+        statement: "`walkdown rules rename <rule> <new-id>` gives a rule a new id and keeps every verdict it had."
+        because: An id that misnames its rule should be put right without judging it all again.
+        history: Asked for by n-0355, whose rule was named for `init` and is about `blueprints new` (ADR 0014).
+        steps:
+          given:
+            - A rule with checks, agent verdicts, a signature and an anchored thread
+          when:
+            - It is renamed, then `walkdown status` and `walkdown lint` are run
+          then:
+            - The rule carries its old id in a list of former ids, and its statement hash is unchanged
+            - "`walkdown status <new-id>` shows every verdict it had, from run records that were not edited"
+            - Its threads are anchored to the new id
+            - A test still tagged with the old id counts for the rule, and lint warns with the new id to use
+            - An id the blueprint already has, or a former id of another rule, is refused, and nothing changes
+          statement_hash: sha256:baa430aa4d1f
 
   - id: commands.records
     title: Records move under their own noun
