@@ -108,8 +108,9 @@ export const sectionHead = (id) => `━━ ${id} ━━`;
  */
 export function noBlueprintHere(loc, blueprintId) {
   const where = loc.config.registry?.path ?? loc.config.path;
-  // A home standing here, or called that, that nothing has imported.
-  if (/has not imported/.test(loc.spec?.why ?? '')) {
+  // A home standing here, or called that, or in this checkout, that nothing
+  // has imported: the reason names its folder and the import that registers it.
+  if (/has not imported|`walkdown blueprints import /.test(loc.spec?.why ?? '')) {
     console.error(`No blueprint ${blueprintId ? `for \`${blueprintId}\`` : 'here'}: ${loc.spec.why}.`);
     process.exit(2);
   }

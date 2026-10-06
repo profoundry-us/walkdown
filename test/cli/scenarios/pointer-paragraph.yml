@@ -1,0 +1,13 @@
+# The paragraph walkdown keeps in the repository's agent file, two blueprints in.
+screen: pointer-paragraph
+title: The pointer says where the specs are and names no blueprint
+rule: locations.pointer.names-no-blueprint
+fixture: two-committed
+cat: shop/CLAUDE.md
+exit: 0
+expect:
+  - '^This repository''s specs are walkdown blueprints, under `\.walkdown/blueprints/`\.$'
+  - '^folder of the blueprint you are working on\. `walkdown blueprints` lists them$'
+  - '^with their IDs; commands that write take `--blueprint <id>`\.$'
+anchors:
+  - { id: cli.pointer.block, match: '^(<!-- walkdown|## walkdown|This repository|Before building|folder of|with their|$)' }

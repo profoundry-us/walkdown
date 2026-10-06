@@ -1,0 +1,16 @@
+id: n-0428
+uuid: dcef3a2e-6fe4-45dd-8a93-5547f49e9e11
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T20:35:52.715Z
+anchor:
+  screen: blueprints-new-outside-the-tree
+status: open
+body: "Draw what `walkdown blueprints new checkout` prints in a git repository:
+  everything created under ~/.walkdown, nothing added to the repository, and git
+  tracking nothing (locations.default.nothing-in-the-tree). Anchors: cli.prompt,
+  cli.tree.created, cli.tree.nothing, cli.exit.
+  as-built/cli/blueprints-new-outside-the-tree.html is the build, from
+  test/cli/scenarios/blueprints-new-outside-the-tree.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

@@ -1,0 +1,11 @@
+# A home a teammate committed, which this machine never imported.
+screen: status-unimported
+title: An unimported home is no blueprint, and the refusal names it
+rule: locations.answer.declared-not-discovered
+fixture: unimported-home
+command: [status]
+exit: 2
+expect:
+  - '^No blueprint here: nothing registered contains this directory — ~/shop holds 1 blueprint folder\(s\) \(202610-search\); `walkdown blueprints import ~/shop` registers them\.$'
+anchors:
+  - { id: cli.refusal, match: '^No blueprint here' }

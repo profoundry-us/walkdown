@@ -1,21 +1,21 @@
 <!doctype html>
 <!--
-  AS-BUILT: threads-relabel
+  AS-BUILT: status-unimported
 
-  What `walkdown threads relabel n-0001` printed, run by tools/cli-captures.mjs
-  from test/cli/scenarios/threads-relabel.yml - the same run test/cli.test.js
-  checks against locations.threads.clashing-labels-ask. Paths, times and hashes are made steady so
+  What `walkdown status` printed, run by tools/cli-captures.mjs
+  from test/cli/scenarios/status-unimported.yml - the same run test/cli.test.js
+  checks against locations.answer.declared-not-discovered. Paths, times and hashes are made steady so
   the fade shows what changed and nothing else. Regenerated, never edited: the
-  redlines live in as-built/redlines.json under "cli/threads-relabel".
+  redlines live in as-built/redlines.json under "cli/status-unimported".
 
-  The design is prototype-cli/screens/threads-relabel.html. Nothing here is
+  The design is prototype-cli/screens/status-unimported.html. Nothing here is
   evidence; a verdict given against this page is a verdict about a drawing of
   the build.
 -->
 <html lang="en" data-theme="redline">
 <head>
   <meta charset="utf-8">
-  <title>As-built &mdash; threads relabel says what it would do and asks first</title>
+  <title>As-built &mdash; An unimported home is no blueprint, and the refusal names it</title>
   <style>
   :root { color-scheme: dark; }
   html, body { margin: 0; height: 100%; background: #14161a; }
@@ -50,15 +50,9 @@
 <body>
   <div class="term">
     <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
-    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown threads relabel n-0001</div>
-      <div data-testid="cli.relabel.plan">
-      <div class="ln">n-0001 labels 2 threads. The newer one would be relabelled:</div>
-      <div class="ln">  00000000-0000-4000-8000-000000000001  2026-10-02T00:00:00Z  The receipt shows the wrong total.</div>
-      <div class="ln">  n-0001 → n-0002, keeping n-0001 as its alias; 00000000-0000-4000-8000-000000000002 keeps n-0001</div>
-      </div>
-      <div class="ln"></div>
-      <div data-testid="cli.relabel.ask">
-      <div class="ln">Nothing was changed. `walkdown threads relabel 00000000-0000-4000-8000-000000000001 --yes` does it.</div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown status</div>
+      <div data-testid="cli.refusal">
+      <div class="ln">No blueprint here: nothing registered contains this directory — ~/shop holds 1 blueprint folder(s) (202610-search); `walkdown blueprints import ~/shop` registers them.</div>
       </div>
     <div class="ln exit bad" data-testid="cli.exit">[exit 2]</div>
   </div>

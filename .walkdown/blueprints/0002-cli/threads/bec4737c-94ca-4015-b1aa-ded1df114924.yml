@@ -1,0 +1,17 @@
+id: n-0427
+uuid: bec4737c-94ca-4015-b1aa-ded1df114924
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T20:35:52.527Z
+anchor:
+  screen: where-hand-written-row
+status: open
+body: "Draw what `walkdown where` prints when the registry holds a row somebody
+  wrote by hand, with no registered: line: the row set aside and said to be
+  written by hand, and nothing answering for the directory
+  (locations.answer.registry-is-the-only-door). Anchors: cli.prompt,
+  cli.door.ignored, cli.door.answers, cli.exit.
+  as-built/cli/where-hand-written-row.html is the build, from
+  test/cli/scenarios/where-hand-written-row.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

@@ -1,0 +1,16 @@
+id: n-0431
+uuid: 2fc773b5-2472-46f4-ae73-63f8f942b171
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T20:35:53.288Z
+anchor:
+  screen: pointer-paragraph
+status: open
+body: "Draw the paragraph walkdown writes into CLAUDE.md, as cat prints it, with
+  two blueprints committed: where the specs are, to read the AGENTS.md of the
+  blueprint worked on, that `walkdown blueprints` lists their IDs, and no
+  blueprint named (locations.pointer.names-no-blueprint). Anchors: cli.prompt,
+  cli.pointer.block, cli.exit. as-built/cli/pointer-paragraph.html is the build,
+  from test/cli/scenarios/pointer-paragraph.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

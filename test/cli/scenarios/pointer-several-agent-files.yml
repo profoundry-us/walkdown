@@ -1,0 +1,11 @@
+# A first blueprint committed where CLAUDE.md and AGENTS.md both exist.
+screen: pointer-several-agent-files
+title: With several agent files, the pointer waits to be told which
+rule: locations.pointer.placed-where-agents-read
+fixture: two-agent-files
+command: [blueprints, new, checkout, --commit, spec, --folder, checkout]
+exit: 0
+expect:
+  - '^  \? several agent files — `walkdown pointer --into <file>`  CLAUDE\.md, AGENTS\.md$'
+anchors:
+  - { id: cli.pointer.several, match: '^  \? several agent files' }

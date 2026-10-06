@@ -1,0 +1,13 @@
+# A CLAUDE.md the team writes in, above and below walkdown's block, after a second commit.
+screen: pointer-own-words
+title: walkdown owns its block in the agent file and nothing else
+rule: locations.pointer.owns-only-its-block
+fixture: own-words
+cat: shop/CLAUDE.md
+exit: 0
+expect:
+  - '^# shop\n\nRun the tests before you push\.\n\n<!-- walkdown:begin -->$'
+  - '^<!-- walkdown:end -->\n\n## Deploys\n\nOnly from main\.$'
+anchors:
+  - { id: cli.pointer.above, match: '^(# shop|Run the tests|)$' }
+  - { id: cli.pointer.block, match: '^(<!-- walkdown:begin|## walkdown|This repository|Before building|folder of|with their|<!-- walkdown:end)' }

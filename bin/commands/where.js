@@ -115,7 +115,7 @@ function report(loc) {
           : reg.matched
             ? green(`the registry — names this project, registered by ${reg.registeredBy ?? 'walkdown'}`)
             : dim(`the registry — what this machine knows about; ${loc.config.registry.why ?? 'no row answers here'}`)
-        : dim('the registry — not present; `walkdown import` or `walkdown init` starts it')
+        : dim('the registry — not present; `walkdown blueprints new` or `walkdown blueprints import` starts it')
     }`,
   );
   // A row in the registry nothing wrote (ADR 0003 §5): set aside, and said

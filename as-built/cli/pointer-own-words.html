@@ -1,21 +1,21 @@
 <!doctype html>
 <!--
-  AS-BUILT: threads-relabel
+  AS-BUILT: pointer-own-words
 
-  What `walkdown threads relabel n-0001` printed, run by tools/cli-captures.mjs
-  from test/cli/scenarios/threads-relabel.yml - the same run test/cli.test.js
-  checks against locations.threads.clashing-labels-ask. Paths, times and hashes are made steady so
+  What `cat CLAUDE.md` printed, run by tools/cli-captures.mjs
+  from test/cli/scenarios/pointer-own-words.yml - the same run test/cli.test.js
+  checks against locations.pointer.owns-only-its-block. Paths, times and hashes are made steady so
   the fade shows what changed and nothing else. Regenerated, never edited: the
-  redlines live in as-built/redlines.json under "cli/threads-relabel".
+  redlines live in as-built/redlines.json under "cli/pointer-own-words".
 
-  The design is prototype-cli/screens/threads-relabel.html. Nothing here is
+  The design is prototype-cli/screens/pointer-own-words.html. Nothing here is
   evidence; a verdict given against this page is a verdict about a drawing of
   the build.
 -->
 <html lang="en" data-theme="redline">
 <head>
   <meta charset="utf-8">
-  <title>As-built &mdash; threads relabel says what it would do and asks first</title>
+  <title>As-built &mdash; walkdown owns its block in the agent file and nothing else</title>
   <style>
   :root { color-scheme: dark; }
   html, body { margin: 0; height: 100%; background: #14161a; }
@@ -50,17 +50,28 @@
 <body>
   <div class="term">
     <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
-    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown threads relabel n-0001</div>
-      <div data-testid="cli.relabel.plan">
-      <div class="ln">n-0001 labels 2 threads. The newer one would be relabelled:</div>
-      <div class="ln">  00000000-0000-4000-8000-000000000001  2026-10-02T00:00:00Z  The receipt shows the wrong total.</div>
-      <div class="ln">  n-0001 → n-0002, keeping n-0001 as its alias; 00000000-0000-4000-8000-000000000002 keeps n-0001</div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> cat CLAUDE.md</div>
+      <div data-testid="cli.pointer.above">
+      <div class="ln"># shop</div>
+      <div class="ln"></div>
+      </div>
+      <div class="ln">Run the tests before you push.</div>
+      <div class="ln"></div>
+      <div data-testid="cli.pointer.block">
+      <div class="ln">&lt;!-- walkdown:begin --&gt;</div>
+      <div class="ln">## walkdown</div>
       </div>
       <div class="ln"></div>
-      <div data-testid="cli.relabel.ask">
-      <div class="ln">Nothing was changed. `walkdown threads relabel 00000000-0000-4000-8000-000000000001 --yes` does it.</div>
-      </div>
-    <div class="ln exit bad" data-testid="cli.exit">[exit 2]</div>
+      <div class="ln">This repository's specs are walkdown blueprints, under `.walkdown/blueprints/`.</div>
+      <div class="ln">Before building, testing, or reviewing, read and follow the `AGENTS.md` in the</div>
+      <div class="ln">folder of the blueprint you are working on. `walkdown blueprints` lists them</div>
+      <div class="ln">with their IDs; commands that write take `--blueprint &lt;id&gt;`.</div>
+      <div class="ln">&lt;!-- walkdown:end --&gt;</div>
+      <div class="ln"></div>
+      <div class="ln">## Deploys</div>
+      <div class="ln"></div>
+      <div class="ln">Only from main.</div>
+    <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
   </div>
   <div class="as-built-ring"></div>
   <div class="as-built-label">As-built</div>

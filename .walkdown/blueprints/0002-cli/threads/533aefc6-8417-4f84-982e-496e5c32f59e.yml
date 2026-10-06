@@ -1,0 +1,16 @@
+id: n-0432
+uuid: 533aefc6-8417-4f84-982e-496e5c32f59e
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T20:35:53.479Z
+anchor:
+  screen: pointer-own-words
+status: open
+body: "Draw a CLAUDE.md the team writes in, as cat prints it, after a second
+  blueprint is committed: their words above and below, and walkdown's fenced
+  block between them (locations.pointer.owns-only-its-block). Anchors:
+  cli.prompt, cli.pointer.above, cli.pointer.block, cli.exit.
+  as-built/cli/pointer-own-words.html is the build, from
+  test/cli/scenarios/pointer-own-words.yml, in the frame tools/cli-captures.mjs
+  --frame prints."

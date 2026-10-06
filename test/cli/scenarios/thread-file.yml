@@ -1,0 +1,12 @@
+# A thread as it is kept: a file named by its UUID, its label inside.
+screen: thread-file
+title: A thread's file is named by its UUID, and its label is inside
+rule: locations.threads.uuid-is-the-identity
+fixture: committed-note
+cat: shop/.walkdown/blueprints/checkout/threads/*.yml
+exit: 0
+expect:
+  - '^id: n-0001$'
+  - '^uuid: 00000000-0000-4000-8000-000000000001$'
+anchors:
+  - { id: cli.thread.ids, match: '^(id|uuid): ' }

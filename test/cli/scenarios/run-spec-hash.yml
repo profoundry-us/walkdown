@@ -1,0 +1,12 @@
+# A run record, as the ledger keeps it: the spec it was judged against, by hash.
+screen: run-spec-hash
+title: A run records the hash of the spec it was judged against
+rule: locations.travel.judged-against-a-spec
+fixture: lived-in-home
+cat: shop/.walkdown/blueprints/checkout/runs/*.json
+exit: 0
+expect:
+  - '^  "run_id": "2026-10-02T00-00-00Z-local-01",$'
+  - '^  "spec_hash": "sha256:000000000000",$'
+anchors:
+  - { id: cli.run.spec-hash, match: '"spec_hash"' }

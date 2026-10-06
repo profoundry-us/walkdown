@@ -1,0 +1,15 @@
+id: n-0426
+uuid: 2c2d23b2-47fa-40a5-8270-0b48bc1a1776
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T20:35:52.339Z
+anchor:
+  screen: status-unimported
+status: open
+body: "Draw what `walkdown status` prints in a repository holding a home this
+  machine never imported: no blueprint here, the folder named, and the import
+  that registers it (locations.answer.declared-not-discovered). Anchors:
+  cli.prompt, cli.refusal, cli.exit. as-built/cli/status-unimported.html is the
+  build, from test/cli/scenarios/status-unimported.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

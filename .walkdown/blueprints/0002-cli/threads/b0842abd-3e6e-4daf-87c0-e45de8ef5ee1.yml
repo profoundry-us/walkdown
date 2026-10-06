@@ -1,0 +1,15 @@
+id: n-0429
+uuid: b0842abd-3e6e-4daf-87c0-e45de8ef5ee1
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T20:35:52.903Z
+anchor:
+  screen: run-spec-hash
+status: open
+body: "Draw a run record as the ledger keeps it, as cat prints it: its run id,
+  who made it, and the spec_hash of the spec it was judged against
+  (locations.travel.judged-against-a-spec). Anchors: cli.prompt,
+  cli.run.spec-hash, cli.exit. as-built/cli/run-spec-hash.html is the build,
+  from test/cli/scenarios/run-spec-hash.yml, in the frame tools/cli-captures.mjs
+  --frame prints."

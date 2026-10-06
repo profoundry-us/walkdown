@@ -1,0 +1,14 @@
+# A blueprint made in a git repository, and nothing added to it.
+screen: blueprints-new-outside-the-tree
+title: A new blueprint adds nothing to the repository
+rule: locations.default.nothing-in-the-tree
+fixture: git-repo
+command: [blueprints, new, checkout]
+exit: 0
+expect:
+  - '^  \+ created  ~/\.walkdown/projects/shop/blueprints/202610-checkout/spec\.yml$'
+  - '^  In ~/\.walkdown, which git never sees\. Nothing was added to this repository\.$'
+  - '^  tracked: nothing  every path is outside the repository, where git never looks$'
+anchors:
+  - { id: cli.tree.created, match: '^  \+ (created|listed|project) ' }
+  - { id: cli.tree.nothing, match: '^  (In ~/\.walkdown|Prefer it committed|tracked: nothing)' }

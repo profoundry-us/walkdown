@@ -1,0 +1,13 @@
+# A registry row written by hand, with no `registered:`: set aside, and said.
+screen: where-hand-written-row
+title: A row written by hand is set aside, and where says so
+rule: locations.answer.registry-is-the-only-door
+fixture: hand-written-row
+command: [where]
+exit: 0
+expect:
+  - 'ignores `registry: 0001-sp-search` in entry `0001-sp-search` — written by hand — no `registered:` says how it arrived; `walkdown blueprints import <home>` registers it, and this row can go$'
+  - '^  answers   —$'
+anchors:
+  - { id: cli.door.ignored, match: '^            ignores ' }
+  - { id: cli.door.answers, match: '^  answers  |^            nothing is registered for this directory' }

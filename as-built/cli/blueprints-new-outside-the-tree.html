@@ -1,21 +1,21 @@
 <!doctype html>
 <!--
-  AS-BUILT: threads-relabel
+  AS-BUILT: blueprints-new-outside-the-tree
 
-  What `walkdown threads relabel n-0001` printed, run by tools/cli-captures.mjs
-  from test/cli/scenarios/threads-relabel.yml - the same run test/cli.test.js
-  checks against locations.threads.clashing-labels-ask. Paths, times and hashes are made steady so
+  What `walkdown blueprints new checkout` printed, run by tools/cli-captures.mjs
+  from test/cli/scenarios/blueprints-new-outside-the-tree.yml - the same run test/cli.test.js
+  checks against locations.default.nothing-in-the-tree. Paths, times and hashes are made steady so
   the fade shows what changed and nothing else. Regenerated, never edited: the
-  redlines live in as-built/redlines.json under "cli/threads-relabel".
+  redlines live in as-built/redlines.json under "cli/blueprints-new-outside-the-tree".
 
-  The design is prototype-cli/screens/threads-relabel.html. Nothing here is
+  The design is prototype-cli/screens/blueprints-new-outside-the-tree.html. Nothing here is
   evidence; a verdict given against this page is a verdict about a drawing of
   the build.
 -->
 <html lang="en" data-theme="redline">
 <head>
   <meta charset="utf-8">
-  <title>As-built &mdash; threads relabel says what it would do and asks first</title>
+  <title>As-built &mdash; A new blueprint adds nothing to the repository</title>
   <style>
   :root { color-scheme: dark; }
   html, body { margin: 0; height: 100%; background: #14161a; }
@@ -50,17 +50,28 @@
 <body>
   <div class="term">
     <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
-    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown threads relabel n-0001</div>
-      <div data-testid="cli.relabel.plan">
-      <div class="ln">n-0001 labels 2 threads. The newer one would be relabelled:</div>
-      <div class="ln">  00000000-0000-4000-8000-000000000001  2026-10-02T00:00:00Z  The receipt shows the wrong total.</div>
-      <div class="ln">  n-0001 → n-0002, keeping n-0001 as its alias; 00000000-0000-4000-8000-000000000002 keeps n-0001</div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown blueprints new checkout</div>
+      <div data-testid="cli.tree.created">
+      <div class="ln">  + created  ~/.walkdown/projects/shop/blueprints/202610-checkout/spec.yml</div>
+      <div class="ln">  + created  ~/.walkdown/projects/shop/blueprints/202610-checkout/storyboard.yml</div>
+      <div class="ln">  + created  ~/.walkdown/projects/shop/blueprints/202610-checkout/records.yml</div>
+      <div class="ln">  + created  ~/.walkdown/projects/shop/blueprints/202610-checkout/features/_template.yml</div>
+      <div class="ln">  + created  ~/.walkdown/projects/shop/blueprints/202610-checkout/AGENTS.md</div>
+      <div class="ln">  + listed   ~/.walkdown/registry.yml  as `0001-sp-checkout`</div>
+      <div class="ln">  + project  `shop`, a new project on this machine, code `sp`</div>
       </div>
       <div class="ln"></div>
-      <div data-testid="cli.relabel.ask">
-      <div class="ln">Nothing was changed. `walkdown threads relabel 00000000-0000-4000-8000-000000000001 --yes` does it.</div>
+      <div class="ln">  spec: ~/.walkdown/projects/shop/blueprints/202610-checkout</div>
+      <div data-testid="cli.tree.nothing">
+      <div class="ln">  In ~/.walkdown, which git never sees. Nothing was added to this repository.</div>
+      <div class="ln">  Prefer it committed? `walkdown blueprints commit spec` moves the home into the repository.</div>
+      <div class="ln">  tracked: nothing  every path is outside the repository, where git never looks</div>
       </div>
-    <div class="ln exit bad" data-testid="cli.exit">[exit 2]</div>
+      <div class="ln"></div>
+      <div class="ln">Next: fill in ~/.walkdown/projects/shop/blueprints/202610-checkout/spec.yml (runner commands, targets), sketch your</div>
+      <div class="ln">first feature from its features/_template.yml, then `walkdown lint`.</div>
+      <div class="ln">`walkdown where` shows every path this project uses.</div>
+    <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
   </div>
   <div class="as-built-ring"></div>
   <div class="as-built-label">As-built</div>

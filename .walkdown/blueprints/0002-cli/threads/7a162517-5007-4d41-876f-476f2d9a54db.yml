@@ -1,0 +1,21 @@
+id: n-0434
+uuid: 7a162517-5007-4d41-876f-476f2d9a54db
+kind: note
+reason: observation
+author: agent
+created: 2026-10-06T20:36:35.359Z
+anchor:
+  rule: locations.answer.declared-not-discovered
+status: addressed
+body: "Found while drawing its screen: status, run in a repository whose only
+  home this machine never imported, refused with No blueprint here and did not
+  name the folder, though where did. The rule says the answer names the folder
+  and says walkdown blueprints import. where also still told a machine with no
+  registry that walkdown import starts it, the form before ADR 0012."
+replies:
+  - author: agent
+    created: 2026-10-06T20:36:35Z
+    body: The refusal now prints the location's reason whenever it names a
+      blueprints import, so status names the folder and the command, from the
+      repository or from inside the home. where says walkdown blueprints new or
+      walkdown blueprints import. The status-unimported screen checks it.

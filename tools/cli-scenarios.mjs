@@ -190,6 +190,48 @@ export const FIXTURES = {
     realRepo(m);
     m.ok(['blueprints', 'new', 'checkout', '--commit', 'spec', '--folder', 'checkout']);
   },
+  /* A home a teammate committed to `shop` that this machine has not imported. */
+  'unimported-home'(m) {
+    committedHome(m, '202610-search', 'search');
+  },
+  /* A registry row somebody wrote by hand, with no `registered:`, naming a home. */
+  'hand-written-row'(m) {
+    const home = committedHome(m, '202610-search', 'search');
+    writeFileSync(
+      join(m.home, 'registry.yml'),
+      `next: 2\nblueprints:\n  - id: 0001-sp-search\n    project: shop\n    code: sp\n    checkout: ${m.shop}\n    home: ${home}\n`,
+    );
+  },
+  /* `shop`, a real repository that already keeps agent instructions in both CLAUDE.md and AGENTS.md. */
+  'two-agent-files'(m) {
+    realRepo(m);
+    writeFileSync(join(m.shop, 'CLAUDE.md'), '# shop\n\nRun the tests before you push.\n');
+    writeFileSync(join(m.shop, 'AGENTS.md'), '# shop\n\nRun the tests before you push.\n');
+  },
+  /* `checkout` and `search`, both committed. */
+  'two-committed'(m) {
+    realRepo(m);
+    m.ok(['blueprints', 'new', 'checkout', '--commit', 'spec', '--folder', 'checkout']);
+    m.ok(['blueprints', 'new', 'search', '--commit', 'spec', '--folder', 'search']);
+  },
+  /* A CLAUDE.md with the team's own words above and below walkdown's block, and two blueprints committed. */
+  'own-words'(m) {
+    realRepo(m);
+    writeFileSync(join(m.shop, 'CLAUDE.md'), '# shop\n\nRun the tests before you push.\n');
+    m.ok(['blueprints', 'new', 'checkout', '--commit', 'spec', '--folder', 'checkout']);
+    // The team writes below walkdown's block, then a second blueprint is committed.
+    writeFileSync(join(m.shop, 'CLAUDE.md'), `${readFileSync(join(m.shop, 'CLAUDE.md'), 'utf8')}\n## Deploys\n\nOnly from main.\n`);
+    m.ok(['blueprints', 'new', 'search', '--commit', 'spec', '--folder', 'search']);
+  },
+  /* `checkout`, committed, with one note filed on it. */
+  'committed-note'(m) {
+    realRepo(m);
+    m.ok(['blueprints', 'new', 'checkout', '--commit', 'spec', '--folder', 'checkout']);
+    const home = m.specOf('checkout');
+    for (const f of readdirSync(join(home, 'features'))) rmSync(join(home, 'features', f));
+    feature(m, 'checkout', 'checkout', [['pays', 'A card payment goes through.']]);
+    m.ok(['threads', 'new', '--rule', 'checkout.basics.pays', '--body', 'The pay button does nothing on a declined card.']);
+  },
   /* `shop` a real git repository with an origin, and one commit. */
   'git-repo'(m) {
     realRepo(m);
@@ -290,10 +332,22 @@ export function steady(text, m, uuids = new Map()) {
     })
     // The day a row was registered.
     .replace(/\bon \d{4}-\d\d-\d\d\b/g, 'on 2026-10-02')
-    .replace(/\d{4}-\d\d-\d\dT\d\d[-:]\d\d[-:]\d\d(\.\d+)?Z/g, '2026-10-02T00-00-00Z')
+    // Written as it was: dashes in a file name or run id, colons in a record.
+    .replace(/\d{4}-\d\d-\d\dT\d\d([-:])\d\d[-:]\d\d(\.\d+)?Z/g, (_, sep) => `2026-10-02T00${sep}00${sep}00Z`)
+    .replace(/("git_sha": ")[0-9a-f]{7,40}(-dirty)?"/g, '$11a2b3c4"')
     .replace(/sha256:[0-9a-f]{12}/g, 'sha256:000000000000')
     // A folder `blueprints new` names for this month reads as October 2026.
     .replace(/\b20\d{2}(0[1-9]|1[0-2])-(?=[a-z])/g, '202610-');
+}
+
+/* The one file a path names, where its last part may be a `*` pattern. */
+function one(path) {
+  const base = path.split('/').pop();
+  if (!base.includes('*')) return path;
+  const re = new RegExp(`^${base.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*')}$`);
+  const hits = readdirSync(dirname(path)).filter((f) => re.test(f));
+  if (hits.length !== 1) throw new Error(`cat ${path}: ${hits.length} files match, a screen shows one`);
+  return join(dirname(path), hits[0]);
 }
 
 /* A folder as `tree -a --dirsfirst` prints it: its path, then every entry below it. */
@@ -331,7 +385,7 @@ export function run(scenario) {
     }
     // A file printed as `cat` prints it, where a screen is about what one says.
     if (scenario.cat) {
-      const text = steady(readFileSync(join(m.root, scenario.cat), 'utf8'), m);
+      const text = steady(readFileSync(one(join(m.root, scenario.cat)), 'utf8'), m);
       return { status: 0, stdout: text, stderr: '', text: text.replace(/\n+$/, '') };
     }
     // A folder drawn as `tree` draws it, where a screen is about a layout.

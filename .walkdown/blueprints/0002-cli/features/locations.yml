@@ -10,6 +10,7 @@ stories:
         because: Trying the tool should commit a project to nothing, and abandoning it should mean deleting one directory.
         history: "A `.walkdown/` beside the code was tried and reversed: however well ignored, it was still a thing git had to be told about, and the pointer it needed carried a home-directory path into shared history."
         verify: [checks]
+        screens: [blueprints-new-outside-the-tree]
         signoff: [eng, product]
         steps:
           given:
@@ -186,6 +187,7 @@ stories:
         statement: "Every path walkdown reports says why it was chosen: a flag on the command line, this machine's registry, the blueprint's own `records.yml`, a worktree of a registered checkout, or the built-in default."
         because: A person who disagrees with where something is needs to know which decision to argue with.
         verify: [checks]
+        screens: [where-says-why]
         steps:
           given:
             - A project with some paths defaulted and some configured
@@ -270,6 +272,7 @@ stories:
         statement: walkdown answers only for blueprints somebody registered on this machine; it never goes looking for one.
         because: A repository may hold several blueprints without them bleeding into each other.
         verify: [checks]
+        screens: [status-unimported]
         signoff: [eng, product]
         steps:
           given:
@@ -288,6 +291,7 @@ stories:
         because: A path is examined once, when it is added; every read after that trusts what the add wrote, so nothing a tree grows later can open a second door.
         history: A symlink created outside a pack, pointing at the pack's home, was followed on the read side while the writer refused the same path - so a second board listed, served and wrote to the pack's ledger with nobody having imported anything (n-0275, ADR 0003). The `because` was rewritten on 2026-09-21 (n-0322); the first draft said the same thing in a voice nobody could hear.
         verify: [checks]
+        screens: [where-hand-written-row]
         signoff: [eng, product]
         steps:
           given:
@@ -526,6 +530,7 @@ stories:
         statement: "Every run records a content hash of the spec it was judged against: `spec.yml`, `storyboard.yml` and `features/`, and no other file. Recording a verdict never changes that hash."
         because: A verdict has to say what it was measured against even when the project has no repository. A run is the spec's output, not part of it, so recording one cannot change the hash.
         verify: [checks]
+        screens: [run-spec-hash]
         steps:
           given:
             - A blueprint and a run recorded against it
@@ -572,6 +577,7 @@ stories:
         statement: Committing a repository's first blueprint adds one paragraph, saying where the specs are, to the file that repository already keeps its agent instructions in. If several files could be that one, walkdown writes nothing and names them.
         because: A project keeping conventions in several files has made a choice walkdown cannot read, and guessing puts the sentence where nobody reads it.
         verify: [checks]
+        screens: [pointer-several-agent-files]
         signoff: [eng, product]
         steps:
           given:
@@ -589,6 +595,7 @@ stories:
         statement: "walkdown owns one fenced paragraph in the repository's agent-instruction file, and nothing else in that file. It writes the paragraph once, and removes it when the last blueprint is moved back out of the repository."
         because: A paragraph that never names a blueprint never goes stale, so there is nothing to keep up to date.
         verify: [checks]
+        screens: [pointer-own-words]
         steps:
           given:
             - An agent-instruction file with a person's own words above and below a walkdown block
@@ -623,6 +630,7 @@ stories:
         created_at: 2026-10-05
         verify:
           - checks
+        screens: [pointer-paragraph]
         signoff:
           - eng
         id: locations.pointer.names-no-blueprint
@@ -826,6 +834,7 @@ stories:
         created_at: 2026-10-05
         verify:
           - checks
+        screens: [thread-file]
         signoff:
           - eng
           - product
@@ -898,6 +907,7 @@ stories:
         created_at: 2026-10-05
         verify:
           - checks
+        screens: [where-worktree]
         signoff:
           - eng
           - product

@@ -1,0 +1,14 @@
+id: n-0433
+uuid: 99cc103a-6ec7-4371-a30a-a2d8c55aa900
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T20:35:53.672Z
+anchor:
+  screen: thread-file
+status: open
+body: "Draw a thread's file as cat prints it: its label in id, its uuid, and the
+  rest of what was filed (locations.threads.uuid-is-the-identity). Anchors:
+  cli.prompt, cli.thread.ids, cli.exit. as-built/cli/thread-file.html is the
+  build, from test/cli/scenarios/thread-file.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

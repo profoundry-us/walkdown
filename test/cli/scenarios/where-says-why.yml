@@ -1,0 +1,15 @@
+# `walkdown where` for a blueprint kept on this machine: every path, and why.
+screen: where-says-why
+title: where says why each path was chosen
+rule: locations.answer.says-why
+fixture: one-blueprint
+command: [where]
+exit: 0
+expect:
+  - '^  spec      ~/\.walkdown/projects/shop/blueprints/202610-checkout$'
+  - '^            this machine''s registry \(0001-sp-checkout\)$'
+  - '^            the blueprint''s own records\.yml \(0001-sp-checkout\)$'
+  - '^            this machine''s registry, which says which checkout the blueprint belongs to$'
+anchors:
+  - { id: cli.why.spec, match: '^  spec  |^            this machine''s registry \(' }
+  - { id: cli.why.records, match: '^  (runs|threads|evidence|drafts)  |^            the blueprint''s own records\.yml' }

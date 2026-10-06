@@ -318,3 +318,88 @@ screens:
       - cli.gitignore.why
       - cli.gitignore.rules
       - cli.exit
+
+  - id: where-says-why
+    title: where says why each path was chosen
+    prototype: null
+    app: { path: /as-built/cli/where-says-why.html }
+    anchors:
+      - cli.prompt
+      - cli.why.spec
+      - cli.why.records
+      - cli.exit
+
+  - id: status-unimported
+    title: An unimported home is no blueprint, and the refusal names it
+    prototype: null
+    app: { path: /as-built/cli/status-unimported.html }
+    anchors:
+      - cli.prompt
+      - cli.refusal
+      - cli.exit
+
+  - id: where-hand-written-row
+    title: A row written by hand is set aside, and where says so
+    prototype: null
+    app: { path: /as-built/cli/where-hand-written-row.html }
+    anchors:
+      - cli.prompt
+      - cli.door.ignored
+      - cli.door.answers
+      - cli.exit
+
+  - id: blueprints-new-outside-the-tree
+    title: A new blueprint adds nothing to the repository
+    prototype: null
+    app: { path: /as-built/cli/blueprints-new-outside-the-tree.html }
+    anchors:
+      - cli.prompt
+      - cli.tree.created
+      - cli.tree.nothing
+      - cli.exit
+
+  - id: run-spec-hash
+    title: A run records the hash of the spec it was judged against
+    prototype: null
+    app: { path: /as-built/cli/run-spec-hash.html }
+    anchors:
+      - cli.prompt
+      - cli.run.spec-hash
+      - cli.exit
+
+  - id: pointer-several-agent-files
+    title: With several agent files, the pointer waits to be told which
+    prototype: null
+    app: { path: /as-built/cli/pointer-several-agent-files.html }
+    anchors:
+      - cli.prompt
+      - cli.pointer.several
+      - cli.exit
+
+  - id: pointer-paragraph
+    title: The pointer says where the specs are and names no blueprint
+    prototype: null
+    app: { path: /as-built/cli/pointer-paragraph.html }
+    anchors:
+      - cli.prompt
+      - cli.pointer.block
+      - cli.exit
+
+  - id: pointer-own-words
+    title: walkdown owns its block in the agent file and nothing else
+    prototype: null
+    app: { path: /as-built/cli/pointer-own-words.html }
+    anchors:
+      - cli.prompt
+      - cli.pointer.above
+      - cli.pointer.block
+      - cli.exit
+
+  - id: thread-file
+    title: A thread's file is named by its UUID, and its label is inside
+    prototype: null
+    app: { path: /as-built/cli/thread-file.html }
+    anchors:
+      - cli.prompt
+      - cli.thread.ids
+      - cli.exit

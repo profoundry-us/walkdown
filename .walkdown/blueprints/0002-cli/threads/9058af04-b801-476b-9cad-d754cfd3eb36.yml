@@ -1,0 +1,16 @@
+id: n-0430
+uuid: 9058af04-b801-476b-9cad-d754cfd3eb36
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T20:35:53.097Z
+anchor:
+  screen: pointer-several-agent-files
+status: open
+body: "Draw what `walkdown blueprints new checkout --commit spec` prints in a
+  repository that keeps agent instructions in both CLAUDE.md and AGENTS.md: the
+  pointer not written, both files named, and `walkdown pointer --into <file>` to
+  choose (locations.pointer.placed-where-agents-read). Anchors: cli.prompt,
+  cli.pointer.several, cli.exit. as-built/cli/pointer-several-agent-files.html
+  is the build, from test/cli/scenarios/pointer-several-agent-files.yml, in the
+  frame tools/cli-captures.mjs --frame prints."
