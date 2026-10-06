@@ -1,0 +1,106 @@
+{
+  "run_id": "2026-10-06T04-59-57Z-local-01",
+  "created": "2026-10-06T04:59:57Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "d1c696a-dirty",
+  "tree_hash": "sha256:461a0f1bd82b",
+  "spec_hash": "sha256:242f4e9d8408",
+  "results": [
+    {
+      "rule": "commands.blueprints.import-takes-what-it-is-pointed-at",
+      "status": "pass",
+      "statement_hash": "sha256:84224634448c",
+      "duration_ms": 715,
+      "checks": [
+        "test/import.test.js:173",
+        "test/import.test.js:223"
+      ]
+    },
+    {
+      "rule": "commands.blueprints.forget-keeps-the-files",
+      "status": "pass",
+      "statement_hash": "sha256:ba872b7a43cd",
+      "duration_ms": 927,
+      "checks": [
+        "test/import.test.js:371"
+      ]
+    },
+    {
+      "rule": "commands.blueprints.commit-moves-the-home",
+      "status": "pass",
+      "statement_hash": "sha256:7170e620ca41",
+      "duration_ms": 894,
+      "checks": [
+        "test/judged-edges.test.js:42",
+        "test/judged-edges.test.js:62"
+      ]
+    },
+    {
+      "rule": "locations.answer.declared-not-discovered",
+      "status": "pass",
+      "statement_hash": "sha256:e6a814857fe7",
+      "duration_ms": 701,
+      "checks": [
+        "test/judged-edges.test.js:72"
+      ]
+    },
+    {
+      "rule": "locations.default.in-repo-on-request",
+      "status": "pass",
+      "statement_hash": "sha256:b55ca34f14f7",
+      "duration_ms": 1257,
+      "checks": [
+        "test/judged-edges.test.js:93",
+        "test/judged-edges.test.js:209"
+      ]
+    },
+    {
+      "rule": "locations.pointer.owns-only-its-block",
+      "status": "pass",
+      "statement_hash": "sha256:fd33259c4a4e",
+      "duration_ms": 1937,
+      "checks": [
+        "test/judged-edges.test.js:105",
+        "test/judged-edges.test.js:224"
+      ]
+    },
+    {
+      "rule": "locations.registry.ids-stay-here",
+      "status": "pass",
+      "statement_hash": "sha256:f561ad6f21be",
+      "duration_ms": 7339,
+      "checks": [
+        "test/judged-edges.test.js:132",
+        "test/judged-edges.test.js:236",
+        "test/judged-edges.test.js:253",
+        "test/judged-edges.test.js:270",
+        "test/judged-edges.test.js:298",
+        "test/judged-edges.test.js:319",
+        "test/judged-edges.test.js:375",
+        "test/judged-edges.test.js:406",
+        "test/judged-edges.test.js:438"
+      ]
+    },
+    {
+      "rule": "locations.answer.says-why",
+      "status": "pass",
+      "statement_hash": "sha256:b31372ab894d",
+      "duration_ms": 1416,
+      "checks": [
+        "test/judged-edges.test.js:154",
+        "test/judged-edges.test.js:195"
+      ]
+    },
+    {
+      "rule": "locations.threads.uuid-is-the-identity",
+      "status": "pass",
+      "statement_hash": "sha256:945e5cd8fc01",
+      "duration_ms": 429,
+      "checks": [
+        "test/judged-edges.test.js:172"
+      ]
+    }
+  ]
+}

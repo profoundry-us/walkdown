@@ -434,3 +434,19 @@ test('a moved checkout whose only records are a draft, or whose runs were moved,
     assert.equal(m.rows()[0].checkout.replace(/^~/, process.env.HOME), old, variant);
   }
 });
+
+test('a checkout moved with its runs moved into a folder inside it keeps its ledger @rule:locations.registry.ids-stay-here', () => {
+  const m = machine();
+  const inn = m.repo('inn');
+  ok(m.cli(inn, 'blueprints', 'new', 'web', '--folder', 'web', '--commit', 'spec'));
+  ok(m.cli(inn, 'records', 'move', 'runs', '--to', join(inn, 'wd-runs')));
+  writeFileSync(join(inn, 'wd-runs', '2026-10-01T00-00-00Z-local-01.json'), '{}');
+  const [row] = m.rows();
+  const old = join(root, `m${n}`, 'inn-old');
+  renameSync(inn, old);
+  const r = ok(m.cli(old, 'blueprints', 'import', '.', '--all'));
+  assert.match(r.stdout, new RegExp(`~ moved .*\`${row.id}\``));
+  const [after_] = m.rows();
+  assert.equal(after_.runs.replace(/^~/, process.env.HOME), join(old, 'wd-runs'), 'the runs folder came along');
+  assert.equal(JSON.parse(ok(m.cli(old, 'where', '--json')).stdout).runs.path, join(old, 'wd-runs'));
+});

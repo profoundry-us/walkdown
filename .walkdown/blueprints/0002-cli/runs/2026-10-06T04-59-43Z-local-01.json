@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-10-06T04-59-43Z-local-01",
+  "created": "2026-10-06T04:59:43Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "d1c696a-dirty",
+  "note": "Eighth sitting at d1c696a: n-0399 fixed; fails because a row's records-move path inside the checkout is not re-pointed when the checkout moves.",
+  "spec_hash": "sha256:242f4e9d8408",
+  "results": [
+    {
+      "rule": "locations.registry.ids-stay-here",
+      "status": "fail",
+      "statement_hash": "sha256:f561ad6f21be",
+      "evidence": [
+        "runs/evidence/2026-10-06T04-57-38Z/ids-stay-here-eighth.txt"
+      ],
+      "reasoning": "Drove bin/walkdown.js at d1c696a in a fresh /tmp tree with WALKDOWN_HOME=$S/home (profile sam), bare origins and real clones. All serves used --port 0. Both leads are fixed. drf held only a draft, was pushed, mv'd to drf-old and re-cloned at drf. Import said '~ moved', the row names drf-old with 0001-dr-ui, and GET /api/draft returns the sitting from either tree. rec had its runs moved outside the repo and a draft at home. Import said '~ moved', the runs stay at rec-runs with eng accepted, and the draft is served. ev, with runs moved and only evidence at home, followed as well. When every kind had been moved with records move, the row stays on the fresh clone, but nothing is orphaned because all records live outside both trees. With --commit all and an extra run after the push, the moved tree stays a branch copy that reads its own committed runs. The earlier cases hold: the pub verdict repro, unpushed reclone, different-origin repo at the old path, personal no-remote rename named back with --project, and a pushed mix of committed and personal homes. THEN 1, 2, 3 and 5 hold. 0013-hm-search and 0014-sp-search were given. --blueprint and ?bp= take the ID anywhere and 'search' inside each project, including a subfolder; outside a project the name is refused, or answered 409. The only ID outside registry.yml is in home/cache/claims.json (q-0384). After a forget, the next blueprint got 0015. THEN 4 fails in a new way that needs no clone at all. In inn, 'records move runs --to $S/inn/wd-runs' put the runs in a gitignored folder inside the checkout, and a walkdown signed eng. Then a plain 'mv inn inn-old'. Import said '~ moved' and re-pointed checkout and home, but the row keeps 'runs: $S/inn/wd-runs', a path that no longer exists. Eng acceptance drops from yes to no, and 'records move runs --to inn-old/wd-runs' is refused because that folder already holds records. No command reconnects the ledger and keeps the ID. Softer: when a person adds threads/ to the home's .gitignore, the moved tree's thread is unread after a push and reclone. reclaimFromClone counts only runs, evidence and drafts, and does not ask git what it ignores.",
+      "threads": [
+        "af68e2be-cd7e-4229-9ced-bf715eb132a6"
+      ]
+    }
+  ]
+}

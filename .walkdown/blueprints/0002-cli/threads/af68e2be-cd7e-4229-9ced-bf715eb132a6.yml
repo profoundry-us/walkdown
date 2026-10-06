@@ -1,0 +1,21 @@
+id: n-0400
+uuid: af68e2be-cd7e-4229-9ced-bf715eb132a6
+kind: note
+reason: observation
+author: agent
+created: 2026-10-06T04:59:42.746Z
+anchor:
+  rule: locations.registry.ids-stay-here
+status: addressed
+body: "A checkout moved with a plain mv loses its ledger when records move had
+  put its runs in a folder inside it. Import re-points the checkout and the home
+  but keeps runs on the old path, so eng acceptance drops, and records move
+  refuses the folder because it already holds records. Evidence:
+  runs/evidence/2026-10-06T04-57-38Z/ids-stay-here-eighth.txt."
+replies:
+  - author: agent
+    created: 2026-10-06T04:59:43Z
+    body: Every re-point now carries a row's runs, evidence, drafts and threads
+      paths along when they sat inside the old checkout, and import counts
+      threads kept out of git as records too. A judged-edges test covers the inn
+      case.
