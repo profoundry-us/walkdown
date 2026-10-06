@@ -1,0 +1,16 @@
+# `walkdown upgrade` on a machine still in the layout before ADR 0014.
+screen: upgrade
+title: walkdown upgrade moves the old layout once
+rule: locations.keeping.upgrade-moves-once
+fixture: old-layout
+command: [upgrade]
+exit: 0
+expect:
+  - '^  ✓ ~/\.walkdown/config\.yml becomes profile\.yml$'
+  - '^  ✓ ~/\.walkdown/blueprints/0001-checkout is flattened: blueprint/walkdown\.yml becomes spec\.yml$'
+  - '^  ✓ registry rows get IDs and project labels, and personal homes move under projects/$'
+  - 'thread\(s\) in .* get a UUID, and their files are renamed to it$'
+  - '^✓ Upgraded\. Every folder kept its name, and every verdict is where it was\.$'
+anchors:
+  - { id: cli.upgrade.steps, match: '^  ✓ ' }
+  - { id: cli.upgrade.done, match: '^✓ Upgraded' }

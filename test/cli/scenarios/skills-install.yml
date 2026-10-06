@@ -1,0 +1,12 @@
+# `walkdown skills --into`: the same link, and the same lines, init prints.
+screen: skills-install
+title: skills installs the plugin the way init does
+rule: commands.init.one-skill-installer
+fixture: fresh-machine
+command: [skills, --into, ../claude/skills]
+exit: 0
+expect:
+  - '^  \+ linked  ~/\.claude/skills/walkdown → ~/src/walkdown$'
+  - '^  Claude Code loads the walkdown plugin from here'
+anchors:
+  - { id: cli.init.skills, match: '^  ([+·!~] |~/\.claude)|^  (Claude Code|Updating|Copies)' }

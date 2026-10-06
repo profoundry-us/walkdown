@@ -92,6 +92,7 @@ stories:
         origin: walkdown
         created_at: 2026-10-04
         verify: [checks]
+        screens: [skills-install]
         signoff: [eng]
         steps:
           given:
@@ -149,6 +150,7 @@ stories:
         origin: walkdown
         created_at: 2026-10-04
         verify: [checks]
+        screens: [blueprints-commit]
         signoff: [eng]
         steps:
           given:
@@ -201,6 +203,7 @@ stories:
         created_at: 2026-10-05
         verify:
           - checks
+        screens: [blueprints-import]
         signoff:
           - eng
           - product
@@ -223,6 +226,7 @@ stories:
         created_at: 2026-10-05
         verify:
           - checks
+        screens: [blueprints-forget]
         signoff:
           - eng
         id: commands.blueprints.forget-keeps-the-files
@@ -246,6 +250,7 @@ stories:
         created_at: 2026-10-05
         verify:
           - checks
+        screens: [rules-rename]
         signoff:
           - eng
         id: commands.rules.rename
@@ -275,6 +280,7 @@ stories:
         origin: walkdown
         created_at: 2026-10-04
         verify: [checks]
+        screens: [records-move]
         signoff: [eng]
         steps:
           given:

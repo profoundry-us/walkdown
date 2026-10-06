@@ -1,0 +1,18 @@
+# `walkdown blueprints import` pointed at a repository: it lists what is there
+# and asks, and with no terminal to ask it imports nothing.
+screen: blueprints-import
+title: blueprints import lists a repository's homes and asks which
+rule: commands.blueprints.import-takes-what-it-is-pointed-at
+fixture: committed-homes
+command: [blueprints, import, .]
+exit: 2
+expect:
+  - '^~/shop holds 3 blueprints:$'
+  - '^  1\. 202610-checkout  · already listed as `0001-sp-checkout`$'
+  - '^  2\. 202610-search$'
+  - '^  3\. billing$'
+  - '^Say which: --all, or --only <folders>\. Nothing was imported\.$'
+anchors:
+  - { id: cli.import.list, match: '^(~/shop holds|  \d\. )' }
+  - { id: cli.import.listed, match: 'already listed as' }
+  - { id: cli.import.ask, match: '^Say which' }

@@ -1,0 +1,16 @@
+id: n-0417
+uuid: f210f072-6147-44bb-963c-579d00594ca5
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T19:43:21.212Z
+anchor:
+  screen: blueprints-commit
+status: open
+body: "Draw what `walkdown blueprints commit spec --blueprint search` prints:
+  the whole home moved into the repository, the ID kept, and the home's own
+  .gitignore written (commands.blueprints.commit-moves-the-home). Anchors:
+  cli.prompt, cli.commit.moved, cli.commit.gitignore, cli.exit.
+  as-built/cli/blueprints-commit.html is the build, from
+  test/cli/scenarios/blueprints-commit.yml, in the frame tools/cli-captures.mjs
+  --frame prints."

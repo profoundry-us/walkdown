@@ -1,0 +1,15 @@
+id: n-0410
+uuid: cc9d5c59-4d1c-4f83-af56-a70eeba07f75
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T19:43:19.903Z
+anchor:
+  screen: upgrade
+status: open
+body: "Draw what `walkdown upgrade` prints on a machine still in the layout
+  before ADR 0014: each step as it lands, then that every folder kept its name
+  and every verdict is where it was (locations.keeping.upgrade-moves-once).
+  Anchors: cli.prompt, cli.upgrade.steps, cli.upgrade.done, cli.exit.
+  as-built/cli/upgrade.html is the build, from test/cli/scenarios/upgrade.yml,
+  in the frame tools/cli-captures.mjs --frame prints."

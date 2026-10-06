@@ -1,0 +1,17 @@
+id: n-0412
+uuid: 74e90068-008c-4d1b-8470-d9ff079c4351
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T19:43:20.275Z
+anchor:
+  screen: import-any-folder
+status: open
+body: "Draw what `walkdown blueprints import .` prints in a repository whose
+  homes sit under any folder names (0002-search, 202610-search,
+  billing/api/invoices), with one home inside another refused and both folders
+  named (locations.default.folder-names-are-yours). Anchors: cli.prompt,
+  cli.folders.list, cli.folders.nested, cli.exit.
+  as-built/cli/import-any-folder.html is the build, from
+  test/cli/scenarios/import-any-folder.yml, in the frame tools/cli-captures.mjs
+  --frame prints."

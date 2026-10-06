@@ -1,0 +1,13 @@
+# A committed home whose records.yml sends evidence to ../evidence.
+screen: where-records-yml
+title: where reads each kind from records.yml, and says so
+rule: locations.default.records-yml-informs
+fixture: records-yml
+command: [where]
+exit: 0
+expect:
+  - '^  evidence  ~/shop/\.walkdown/blueprints/evidence'
+  - 'records\.yml'
+anchors:
+  - { id: cli.where.evidence, match: '^  evidence  ' }
+  - { id: cli.where.kinds, match: '^  (runs|threads|drafts)  ' }

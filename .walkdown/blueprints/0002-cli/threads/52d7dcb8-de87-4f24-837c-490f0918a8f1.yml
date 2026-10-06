@@ -1,0 +1,15 @@
+id: n-0414
+uuid: 52d7dcb8-de87-4f24-837c-490f0918a8f1
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T19:43:20.653Z
+anchor:
+  screen: import-moved-checkout
+status: open
+body: "Draw what `walkdown blueprints import . --all` prints in a checkout moved
+  from ~/shop to ~/shop-moved: the row moved, still under its ID
+  (locations.registry.ids-stay-here). Anchors: cli.prompt, cli.moved.row,
+  cli.moved.done, cli.exit. as-built/cli/import-moved-checkout.html is the
+  build, from test/cli/scenarios/import-moved-checkout.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

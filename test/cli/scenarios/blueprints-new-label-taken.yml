@@ -1,0 +1,14 @@
+# A second checkout also called shop: its label and code are another's.
+screen: blueprints-new-label-taken
+title: A project label already taken is refused, saying how to choose another
+rule: locations.registry.projects-are-labels
+fixture: second-shop
+cwd: work/shop
+command: [blueprints, new, search]
+exit: 2
+expect:
+  - '^✗ the project label `shop` is another checkout''s \(~/shop\)\. Nothing was made\.$'
+  - '^  Choose another with `--project <label>` and `--code <two or three letters>`\.$'
+anchors:
+  - { id: cli.label.refused, match: '^✗ the project label' }
+  - { id: cli.label.choose, match: '^  Choose another' }

@@ -1,0 +1,16 @@
+id: n-0413
+uuid: b4805b0b-f952-4cfe-8548-709b44885e8c
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T19:43:20.465Z
+anchor:
+  screen: where-records-yml
+status: open
+body: "Draw what `walkdown where` prints for a committed home whose records.yml
+  sends evidence to ../evidence: each kind with its path and the reason,
+  records.yml named where it decided (locations.default.records-yml-informs).
+  Anchors: cli.prompt, cli.where.evidence, cli.where.kinds, cli.exit.
+  as-built/cli/where-records-yml.html is the build, from
+  test/cli/scenarios/where-records-yml.yml, in the frame tools/cli-captures.mjs
+  --frame prints."

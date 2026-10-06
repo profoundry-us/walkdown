@@ -1,0 +1,15 @@
+# Homes under whatever folder names a team chose, and one inside another.
+screen: import-any-folder
+title: Any folder holding a spec.yml is a home, whatever it is called
+rule: locations.default.folder-names-are-yours
+fixture: odd-folders
+command: [blueprints, import, .]
+exit: 2
+expect:
+  - '^  1\. 0002-search$'
+  - '^  2\. 202610-search$'
+  - '^  3\. billing/api/invoices$'
+  - '^✗ ~/shop/\.walkdown/blueprints/202610-search/inner is a blueprint inside ~/shop/\.walkdown/blueprints/202610-search — a home inside a home is refused, and not offered\.$'
+anchors:
+  - { id: cli.folders.list, match: '^(~/shop holds|  \d\. )' }
+  - { id: cli.folders.nested, match: '^✗ .* is a blueprint inside' }

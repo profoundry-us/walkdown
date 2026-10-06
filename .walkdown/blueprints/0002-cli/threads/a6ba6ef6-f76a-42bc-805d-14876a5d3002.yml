@@ -1,0 +1,16 @@
+id: n-0416
+uuid: a6ba6ef6-f76a-42bc-805d-14876a5d3002
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T19:43:21.022Z
+anchor:
+  screen: where-worktree
+status: open
+body: "Draw what `walkdown where` prints in a git worktree of a registered
+  checkout: the branch's own spec, the records read from the registered home,
+  and how the worktree was matched (locations.worktree.same-project). Anchors:
+  cli.prompt, cli.worktree.spec, cli.worktree.code, cli.exit.
+  as-built/cli/where-worktree.html is the build, from
+  test/cli/scenarios/where-worktree.yml, in the frame tools/cli-captures.mjs
+  --frame prints."

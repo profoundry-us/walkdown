@@ -1,0 +1,13 @@
+# `shop` was moved to ~/shop-moved; importing it there keeps the ID.
+screen: import-moved-checkout
+title: A moved checkout keeps its blueprint's ID
+rule: locations.registry.ids-stay-here
+fixture: moved-checkout
+cwd: shop-moved
+command: [blueprints, import, ., --all]
+exit: 0
+expect:
+  - '^  ~ moved    ~/shop-moved/\.walkdown/blueprints/202610-checkout  as `0001-sp-checkout`, still — the row named ~/shop, which is gone$'
+anchors:
+  - { id: cli.moved.row, match: '^  ~ moved' }
+  - { id: cli.moved.done, match: 'indexed' }

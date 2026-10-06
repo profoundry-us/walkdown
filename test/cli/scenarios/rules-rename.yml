@@ -1,0 +1,14 @@
+# `walkdown rules rename`: a new id for a rule, and every verdict it had.
+screen: rules-rename
+title: rules rename gives a rule a new id and keeps its verdicts
+rule: commands.rules.rename
+fixture: two-blueprints
+command: [rules, rename, checkout.basics.pays, checkout.basics.charges, --blueprint, checkout]
+exit: 0
+expect:
+  - '^✓ renamed `checkout\.basics\.pays` → `checkout\.basics\.charges` in 0001-sp-checkout, keeping `checkout\.basics\.pays` under `formerly:`$'
+  - '^  0 thread\(s\) anchored to the new id$'
+  - '^No run record was edited; they still say `checkout\.basics\.pays` and count for `checkout\.basics\.charges`\.'
+anchors:
+  - { id: cli.rules-rename.done, match: '^(✓ renamed|  \d+ thread)' }
+  - { id: cli.rules-rename.records, match: '^No run record was edited' }

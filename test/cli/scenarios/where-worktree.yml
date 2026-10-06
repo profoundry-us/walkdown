@@ -1,0 +1,16 @@
+# `walkdown where` in a git worktree of a registered checkout.
+screen: where-worktree
+title: A worktree answers as its checkout's project
+rule: locations.worktree.same-project
+fixture: worktree
+cwd: shop-wt
+command: [where]
+exit: 0
+expect:
+  - '^walkdown where — 0001-sp-checkout$'
+  - '^  spec      ~/shop-wt/\.walkdown/blueprints/202610-checkout$'
+  - '^            this branch''s copy, a git worktree of ~/shop \(0001-sp-checkout\)$'
+  - '^            a git worktree of ~/shop, on reword$'
+anchors:
+  - { id: cli.worktree.spec, match: '^  spec  |this branch''s copy' }
+  - { id: cli.worktree.code, match: '^  code  |a git worktree of ~/shop, on' }

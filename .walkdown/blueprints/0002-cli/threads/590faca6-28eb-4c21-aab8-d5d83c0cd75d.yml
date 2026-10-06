@@ -1,0 +1,16 @@
+id: n-0409
+uuid: 590faca6-28eb-4c21-aab8-d5d83c0cd75d
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T19:43:19.722Z
+anchor:
+  screen: rules-rename
+status: open
+body: "Draw what `walkdown rules rename checkout.basics.pays
+  checkout.basics.charges` prints: the rename and the former id kept, the
+  threads re-anchored, and that no run record was edited
+  (commands.rules.rename). Anchors: cli.prompt, cli.rules-rename.done,
+  cli.rules-rename.records, cli.exit. as-built/cli/rules-rename.html is the
+  build, from test/cli/scenarios/rules-rename.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

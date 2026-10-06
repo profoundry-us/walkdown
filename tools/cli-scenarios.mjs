@@ -17,7 +17,7 @@
  * and nothing else. Expected lines are matched against the steady text.
  */
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir, userInfo } from 'node:os';
 import { dirname, join } from 'node:path';
 import { parse } from '../vendor/yaml.js';
@@ -103,6 +103,29 @@ function feature(m, id, name, rules) {
   m.ok(['hash', '--write', '--blueprint', id]);
 }
 
+/* A real repository where the fake `.git` stood: some moments need git's answers. */
+function git(m, cwd, ...args) {
+  const r = spawnSync('git', ['-c', 'init.defaultBranch=main', ...args], { cwd, encoding: 'utf8', env: m.env });
+  if (r.status !== 0) throw new Error(`fixture: git ${args.join(' ')} exited ${r.status}\n${r.stderr}`);
+  return r.stdout;
+}
+function realRepo(m, dir = m.shop) {
+  rmSync(join(dir, '.git'), { recursive: true, force: true });
+  mkdirSync(dir, { recursive: true });
+  git(m, dir, 'init', '-q');
+  git(m, dir, 'remote', 'add', 'origin', 'https://github.com/acme/shop.git');
+  writeFileSync(join(dir, 'README.md'), '# shop\n');
+  git(m, dir, 'add', '-A');
+  git(m, dir, 'commit', '-q', '-m', 'shop');
+}
+/* A home written straight into the repository, as a teammate's commit leaves it. */
+function committedHome(m, folder, name) {
+  const dir = join(m.shop, '.walkdown', 'blueprints', folder);
+  mkdirSync(join(dir, 'features'), { recursive: true });
+  writeFileSync(join(dir, 'spec.yml'), `blueprint: ${name}\n`);
+  return dir;
+}
+
 /**
  * The fixtures a scenario may name. Each takes a fresh machine and leaves it
  * where the scenario's command starts.
@@ -139,6 +162,82 @@ export const FIXTURES = {
     ]);
     feature(m, 'search', 'search', [['finds', 'A search for a product finds it.']]);
   },
+  /* `shop` with `checkout`, and a second checkout called shop at ~/work/shop, whose label and code are both taken. */
+  'second-shop'(m) {
+    m.ok(['blueprints', 'new', 'checkout']);
+    mkdirSync(join(m.root, 'work', 'shop', '.git'), { recursive: true });
+  },
+  /* `shop` a real git repository with an origin, and one commit. */
+  'git-repo'(m) {
+    realRepo(m);
+  },
+  /* Three homes a teammate committed to `shop`; this machine has imported one. */
+  'committed-homes'(m) {
+    for (const [folder, name] of [['202610-checkout', 'checkout'], ['202610-search', 'search'], ['billing', 'billing']]) committedHome(m, folder, name);
+    m.ok(['blueprints', 'import', '.walkdown/blueprints/202610-checkout']);
+  },
+  /* Homes under any folder names, and one inside another (ADR 0014 §4). */
+  'odd-folders'(m) {
+    for (const [folder, name] of [
+      ['202610-search', 'search'],
+      ['0002-search', 'search-old'],
+      ['billing/api/invoices', 'invoices'],
+      ['202610-search/inner', 'inner'],
+    ])
+      committedHome(m, folder, name);
+  },
+  /* `checkout`, committed, in a real repository that has since moved to ~/shop-moved. */
+  'moved-checkout'(m) {
+    realRepo(m);
+    m.ok(['blueprints', 'new', 'checkout', '--commit', 'spec']);
+    git(m, m.shop, 'add', '-A');
+    git(m, m.shop, 'commit', '-q', '-m', 'checkout');
+    renameSync(m.shop, join(m.root, 'shop-moved'));
+  },
+  /* `checkout`, committed, and a git worktree of `shop` at ~/shop-wt. */
+  worktree(m) {
+    realRepo(m);
+    m.ok(['blueprints', 'new', 'checkout', '--commit', 'spec']);
+    git(m, m.shop, 'add', '-A');
+    git(m, m.shop, 'commit', '-q', '-m', 'checkout');
+    git(m, m.shop, 'worktree', 'add', '-q', join(m.root, 'shop-wt'), '-b', 'reword');
+  },
+  /* `checkout`, committed, its records.yml sending evidence to ../evidence. */
+  'records-yml'(m) {
+    realRepo(m);
+    m.ok(['blueprints', 'new', 'checkout', '--commit', 'spec', '--folder', 'checkout']);
+    const f = join(m.shop, '.walkdown', 'blueprints', 'checkout', 'records.yml');
+    writeFileSync(f, readFileSync(f, 'utf8').replace(/^evidence: .*$/m, 'evidence: ../evidence'));
+  },
+  /* `checkout` where a merge left two threads labelled n-0001. */
+  'clashing-labels'(m) {
+    FIXTURES['a-note'](m);
+    m.ok(['threads', 'new', '--rule', 'checkout.basics.pays', '--body', 'The receipt shows the wrong total.']);
+    const dir = join(m.specOf('checkout'), 'threads');
+    for (const f of readdirSync(dir)) {
+      const p = join(dir, f);
+      const t = readFileSync(p, 'utf8');
+      if (/^id: n-0002$/m.test(t)) writeFileSync(p, t.replace(/^id: n-0002$/m, 'id: n-0001'));
+    }
+  },
+  /* The layout walkdown kept before ADR 0014: config.yml, a blueprint/ folder, threads named by label. */
+  'old-layout'(m) {
+    const home = join(m.home, 'blueprints', '0001-checkout');
+    writeFileSync(join(m.home, 'config.yml'), 'identity:\n  username: topher\n');
+    rmSync(join(m.home, 'profile.yml'));
+    mkdirSync(join(home, 'blueprint', 'features'), { recursive: true });
+    mkdirSync(join(home, 'threads'), { recursive: true });
+    writeFileSync(join(home, 'blueprint', 'walkdown.yml'), 'blueprint: checkout\n');
+    writeFileSync(join(home, 'blueprint', 'storyboard.yml'), 'screens: []\n');
+    writeFileSync(
+      join(home, 'threads', 'n-0001.yml'),
+      'id: n-0001\nkind: note\nauthor: topher\ncreated: 2026-09-01T00:00:00Z\nanchor: { rule: checkout.basics.pays }\nstatus: open\nbody: Seen.\n',
+    );
+    writeFileSync(
+      join(m.home, 'registry.yml'),
+      `blueprints:\n  - id: checkout\n    project: ${m.shop}\n    home: ${home}\n    registered: { by: init, at: '2026-09-01T00:00:00Z' }\n`,
+    );
+  },
 };
 
 /**
@@ -147,7 +246,7 @@ export const FIXTURES = {
  * @param {string} text
  * @param {{ root?: string, home: string, shop: string }} m
  */
-export function steady(text, m) {
+export function steady(text, m, uuids = new Map()) {
   return (m.root ? text.replaceAll(join(m.root, 'claude'), '~/.claude') : text)
     .replaceAll(REPO, '~/src/walkdown')
     // HOME is the machine's root, so a path walkdown shortens itself reads
@@ -159,6 +258,15 @@ export function steady(text, m) {
     .replace(/\b[A-Z][a-z]{2} \d{1,2}, \d{4}, \d{1,2}:\d\d [AP]M [A-Z]{3,4}\b/g, 'Oct 2, 2026, 9:00 AM CDT')
     .replaceAll(m.shop, '~/shop')
     .replaceAll(m.home, '~/.walkdown')
+    // Anything else on the machine is under HOME, which is its root.
+    .replaceAll(m.root ?? '\0', '~')
+    // A thread's UUID is new on every run: numbered in the order they appear.
+    .replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/g, (u) => {
+      if (!uuids.has(u)) uuids.set(u, `00000000-0000-4000-8000-${String(uuids.size + 1).padStart(12, '0')}`);
+      return uuids.get(u);
+    })
+    // The day a row was registered.
+    .replace(/\bon \d{4}-\d\d-\d\d\b/g, 'on 2026-10-02')
     .replace(/\d{4}-\d\d-\d\dT\d\d[-:]\d\d[-:]\d\d(\.\d+)?Z/g, '2026-10-02T00-00-00Z')
     .replace(/sha256:[0-9a-f]{12}/g, 'sha256:000000000000')
     // A folder `blueprints new` names for this month reads as October 2026.
@@ -178,9 +286,11 @@ export function run(scenario) {
       if (!FIXTURES[name]) throw new Error(`${scenario.file}: no fixture "${name}"`);
       FIXTURES[name](m);
     }
-    const r = m.wd(scenario.command);
-    const stdout = steady(r.stdout, m);
-    const stderr = steady(r.stderr, m);
+    // Where the command is typed: ~/shop, or a path under the machine's root.
+    const r = m.wd(scenario.command, scenario.cwd ? join(m.root, scenario.cwd) : m.shop);
+    const uuids = new Map();
+    const stdout = steady(r.stdout, m, uuids);
+    const stderr = steady(r.stderr, m, uuids);
     return { status: r.status, stdout, stderr, text: `${stdout}${stderr}`.replace(/\n+$/, '') };
   } finally {
     m.done();

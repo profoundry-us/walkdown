@@ -1,0 +1,15 @@
+# `walkdown records move`: one kind of record moved, and the registry says where.
+screen: records-move
+title: records move moves one kind and the registry says where
+rule: commands.records.move
+fixture: one-blueprint
+command: [records, move, evidence, --to, ../evidence-kept]
+exit: 0
+expect:
+  - '^moved evidence$'
+  - '^  from ~/\.walkdown/projects/shop/blueprints/202610-checkout/evidence$'
+  - '^  to   ~/evidence-kept$'
+  - '^  recorded in ~/\.walkdown/registry\.yml$'
+anchors:
+  - { id: cli.records-move.paths, match: '^(moved |  from |  to |  recorded)' }
+  - { id: cli.records-move.done, match: '^No record was edited' }

@@ -1,0 +1,16 @@
+id: n-0418
+uuid: 289fad8e-304b-40aa-97d0-cc1b034dc1e2
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T19:43:21.400Z
+anchor:
+  screen: records-move
+status: open
+body: "Draw what `walkdown records move evidence --to ../evidence-kept` prints:
+  the kind moved, from and to, the registry row that records it, and that no
+  record was edited (commands.records.move). Anchors: cli.prompt,
+  cli.records-move.paths, cli.records-move.done, cli.exit.
+  as-built/cli/records-move.html is the build, from
+  test/cli/scenarios/records-move.yml, in the frame tools/cli-captures.mjs
+  --frame prints."

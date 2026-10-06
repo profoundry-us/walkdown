@@ -1,0 +1,16 @@
+id: n-0408
+uuid: f30f5896-363c-4c7a-835f-ae7be427ea54
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T19:43:19.541Z
+anchor:
+  screen: blueprints-forget
+status: open
+body: "Draw what `walkdown blueprints forget search` prints: the row taken off
+  the list, that no file was touched, and the personal folder named with the
+  command that deletes it (commands.blueprints.forget-keeps-the-files). Anchors:
+  cli.prompt, cli.forget.row, cli.forget.files, cli.exit.
+  as-built/cli/blueprints-forget.html is the build, from
+  test/cli/scenarios/blueprints-forget.yml, in the frame tools/cli-captures.mjs
+  --frame prints."

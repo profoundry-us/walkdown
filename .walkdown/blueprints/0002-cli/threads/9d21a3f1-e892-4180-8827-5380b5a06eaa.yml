@@ -1,0 +1,16 @@
+id: n-0411
+uuid: 9d21a3f1-e892-4180-8827-5380b5a06eaa
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T19:43:20.090Z
+anchor:
+  screen: threads-relabel
+status: open
+body: "Draw what `walkdown threads relabel n-0001` prints with no terminal,
+  where a merge left two threads labelled n-0001: the newer one by UUID, the
+  label it would take, and the command that does it
+  (locations.threads.clashing-labels-ask). Anchors: cli.prompt,
+  cli.relabel.plan, cli.relabel.ask, cli.exit. as-built/cli/threads-relabel.html
+  is the build, from test/cli/scenarios/threads-relabel.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

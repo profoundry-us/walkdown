@@ -1,0 +1,12 @@
+id: n-0406
+uuid: 9e78d4a3-4195-4d95-939b-d14480f06f02
+kind: note
+reason: feedback
+author: topher
+created: 2026-10-06T19:29:09.899Z
+anchor:
+  rule: commands.threads.one-verb-per-change
+status: open
+body: Does this command need the blueprint passed? We might have multiple
+  blueprints with `n-0001` notes on them. Or is it figuring out the blueprint
+  based on the current directory?

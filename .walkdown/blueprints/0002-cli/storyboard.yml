@@ -168,3 +168,133 @@ screens:
       - cli.refusal
       - cli.unchanged
       - cli.exit
+
+  - id: blueprints-import
+    title: blueprints import lists a repository's homes and asks which
+    prototype: null
+    app: { path: /as-built/cli/blueprints-import.html }
+    anchors:
+      - cli.prompt
+      - cli.import.list
+      - cli.import.listed
+      - cli.import.ask
+      - cli.exit
+
+  - id: blueprints-forget
+    title: blueprints forget takes a blueprint off the list and keeps its files
+    prototype: null
+    app: { path: /as-built/cli/blueprints-forget.html }
+    anchors:
+      - cli.prompt
+      - cli.forget.row
+      - cli.forget.files
+      - cli.exit
+
+  - id: rules-rename
+    title: rules rename gives a rule a new id and keeps its verdicts
+    prototype: null
+    app: { path: /as-built/cli/rules-rename.html }
+    anchors:
+      - cli.prompt
+      - cli.rules-rename.done
+      - cli.rules-rename.records
+      - cli.exit
+
+  - id: upgrade
+    title: walkdown upgrade moves the old layout once
+    prototype: null
+    app: { path: /as-built/cli/upgrade.html }
+    anchors:
+      - cli.prompt
+      - cli.upgrade.steps
+      - cli.upgrade.done
+      - cli.exit
+
+  - id: threads-relabel
+    title: threads relabel says what it would do and asks first
+    prototype: null
+    app: { path: /as-built/cli/threads-relabel.html }
+    anchors:
+      - cli.prompt
+      - cli.relabel.plan
+      - cli.relabel.ask
+      - cli.exit
+
+  - id: import-any-folder
+    title: Any folder holding a spec.yml is a home, whatever it is called
+    prototype: null
+    app: { path: /as-built/cli/import-any-folder.html }
+    anchors:
+      - cli.prompt
+      - cli.folders.list
+      - cli.folders.nested
+      - cli.exit
+
+  - id: where-records-yml
+    title: where reads each kind from records.yml, and says so
+    prototype: null
+    app: { path: /as-built/cli/where-records-yml.html }
+    anchors:
+      - cli.prompt
+      - cli.where.evidence
+      - cli.where.kinds
+      - cli.exit
+
+  - id: import-moved-checkout
+    title: A moved checkout keeps its blueprint's ID
+    prototype: null
+    app: { path: /as-built/cli/import-moved-checkout.html }
+    anchors:
+      - cli.prompt
+      - cli.moved.row
+      - cli.moved.done
+      - cli.exit
+
+  - id: blueprints-new-label-taken
+    title: A project label already taken is refused, saying how to choose another
+    prototype: null
+    app: { path: /as-built/cli/blueprints-new-label-taken.html }
+    anchors:
+      - cli.prompt
+      - cli.label.refused
+      - cli.label.choose
+      - cli.exit
+
+  - id: where-worktree
+    title: A worktree answers as its checkout's project
+    prototype: null
+    app: { path: /as-built/cli/where-worktree.html }
+    anchors:
+      - cli.prompt
+      - cli.worktree.spec
+      - cli.worktree.code
+      - cli.exit
+
+  - id: blueprints-commit
+    title: blueprints commit moves the whole home in, keeping its ID
+    prototype: null
+    app: { path: /as-built/cli/blueprints-commit.html }
+    anchors:
+      - cli.prompt
+      - cli.commit.moved
+      - cli.commit.gitignore
+      - cli.exit
+
+  - id: records-move
+    title: records move moves one kind and the registry says where
+    prototype: null
+    app: { path: /as-built/cli/records-move.html }
+    anchors:
+      - cli.prompt
+      - cli.records-move.paths
+      - cli.records-move.done
+      - cli.exit
+
+  - id: skills-install
+    title: skills installs the plugin the way init does
+    prototype: null
+    app: { path: /as-built/cli/skills-install.html }
+    anchors:
+      - cli.prompt
+      - cli.init.skills
+      - cli.exit

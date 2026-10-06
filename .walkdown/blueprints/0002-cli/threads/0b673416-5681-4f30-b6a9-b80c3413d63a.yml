@@ -1,0 +1,15 @@
+id: n-0419
+uuid: 0b673416-5681-4f30-b6a9-b80c3413d63a
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T19:43:21.585Z
+anchor:
+  screen: skills-install
+status: open
+body: "Draw what `walkdown skills --into ~/.claude/skills` prints: the plugin
+  linked to this clone, in the same lines `walkdown init` prints for it
+  (commands.init.one-skill-installer). Anchors: cli.prompt, cli.init.skills,
+  cli.exit. as-built/cli/skills-install.html is the build, from
+  test/cli/scenarios/skills-install.yml, in the frame tools/cli-captures.mjs
+  --frame prints."
