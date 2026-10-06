@@ -5,7 +5,7 @@ author: agent
 created: 2026-10-06T02:50:48.442Z
 anchor:
   rule: locations.registry.ids-stay-here
-status: open
+status: answered
 body: The statement says no file walkdown writes outside
   ~/.walkdown/registry.yml holds an ID, and ~/.walkdown/cache/claims.json does.
   It is a machine-local cache that serve rebuilds, never committed. Is the rule
@@ -15,3 +15,9 @@ options:
     why: Say no file outside ~/.walkdown holds an ID; the cache is the machine's own
   - label: Key the cache by home
     why: Keep the wording, and stop the cache holding IDs
+replies:
+  - author: topher
+    created: 2026-10-06T20:00:40Z
+    body: Reword the rule
+    answer: true
+chosen: Reword the rule

@@ -298,3 +298,13 @@ screens:
       - cli.prompt
       - cli.init.skills
       - cli.exit
+
+  - id: home-one-folder
+    title: A blueprint's home is one folder
+    prototype: null
+    app: { path: /as-built/cli/home-one-folder.html }
+    anchors:
+      - cli.prompt
+      - cli.home.tree
+      - cli.home.count
+      - cli.exit

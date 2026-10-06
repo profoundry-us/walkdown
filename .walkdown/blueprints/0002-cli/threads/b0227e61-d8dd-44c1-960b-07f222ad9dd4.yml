@@ -1,0 +1,11 @@
+id: n-0420
+uuid: b0227e61-d8dd-44c1-960b-07f222ad9dd4
+kind: note
+reason: feedback
+author: topher
+created: 2026-10-06T19:58:07.554Z
+anchor:
+  rule: locations.default.folder-names-are-yours
+status: open
+body: We should add the full paths to the list of available blueprints so that a
+  user can see where the actually live.

@@ -11,3 +11,9 @@ body: "Found in the third sitting: `blueprints new` run from
   <repo>/.claude/worktrees/w of a repository with nothing registered registers
   the worktree as its own checkout and project (label `w`). A worktree is never
   a project, so it should be the repository's checkout, or refused."
+replies:
+  - author: topher
+    created: 2026-10-06T20:11:37Z
+    body: Good, but needs some rewording "That is so when" doesn't make a lot of
+      sense to me. "This is true when" would be better, but there might still be
+      a better phrasing.

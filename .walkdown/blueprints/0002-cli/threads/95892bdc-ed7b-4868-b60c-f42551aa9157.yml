@@ -1,0 +1,16 @@
+id: n-0423
+uuid: 95892bdc-ed7b-4868-b60c-f42551aa9157
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T20:17:21.678Z
+anchor:
+  screen: home-one-folder
+status: open
+body: "Draw a committed blueprint's home once it has been used, as tree -a
+  prints it (locations.default.home-is-one-folder): drafts, evidence, features,
+  runs and threads beside .gitignore, AGENTS.md, records.yml, spec.yml and
+  storyboard.yml in one folder, with no folder between. Anchors: cli.prompt,
+  cli.home.tree, cli.home.count, cli.exit. as-built/cli/home-one-folder.html is
+  the build, from test/cli/scenarios/home-one-folder.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

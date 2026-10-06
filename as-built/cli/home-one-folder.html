@@ -1,21 +1,21 @@
 <!doctype html>
 <!--
-  AS-BUILT: threads-set-refused
+  AS-BUILT: home-one-folder
 
-  What `walkdown threads set n-0001 --status verified --as-agent --reply "fixed in 1a2b3c"` printed, run by tools/cli-captures.mjs
-  from test/cli/scenarios/threads-set-refused.yml - the same run test/cli.test.js
-  checks against commands.threads.one-verb-per-change. Paths, times and hashes are made steady so
+  What `tree -a .walkdown/blueprints/checkout` printed, run by tools/cli-captures.mjs
+  from test/cli/scenarios/home-one-folder.yml - the same run test/cli.test.js
+  checks against locations.default.home-is-one-folder. Paths, times and hashes are made steady so
   the fade shows what changed and nothing else. Regenerated, never edited: the
-  redlines live in as-built/redlines.json under "cli/threads-set-refused".
+  redlines live in as-built/redlines.json under "cli/home-one-folder".
 
-  The design is prototype-cli/screens/threads-set-refused.html. Nothing here is
+  The design is prototype-cli/screens/home-one-folder.html. Nothing here is
   evidence; a verdict given against this page is a verdict about a drawing of
   the build.
 -->
 <html lang="en" data-theme="redline">
 <head>
   <meta charset="utf-8">
-  <title>As-built &mdash; A refused status change lands no reply either</title>
+  <title>As-built &mdash; A blueprint's home is one folder</title>
   <style>
   :root { color-scheme: dark; }
   html, body { margin: 0; height: 100%; background: #14161a; }
@@ -50,14 +50,31 @@
 <body>
   <div class="term">
     <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
-    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown threads set n-0001 --status verified --as-agent --reply "fixed in 1a2b3c"</div>
-      <div data-testid="cli.refusal">
-      <div class="ln">illegal transition open → verified for a note</div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> tree -a .walkdown/blueprints/checkout</div>
+      <div class="ln">.walkdown/blueprints/checkout</div>
+      <div data-testid="cli.home.tree">
+      <div class="ln">├── drafts</div>
+      <div class="ln">│   └── local.json</div>
+      <div class="ln">├── evidence</div>
+      <div class="ln">│   └── 2026-10-02T00-00-00Z</div>
+      <div class="ln">│       └── app-checkout.png</div>
+      <div class="ln">├── features</div>
+      <div class="ln">│   └── checkout.yml</div>
+      <div class="ln">├── runs</div>
+      <div class="ln">│   └── 2026-10-02T00-00-00Z-local-01.json</div>
+      <div class="ln">├── threads</div>
+      <div class="ln">│   └── 00000000-0000-4000-8000-000000000001.yml</div>
+      <div class="ln">├── .gitignore</div>
+      <div class="ln">├── AGENTS.md</div>
+      <div class="ln">├── records.yml</div>
+      <div class="ln">├── spec.yml</div>
+      <div class="ln">└── storyboard.yml</div>
       </div>
-      <div data-testid="cli.unchanged">
-      <div class="ln">Nothing was changed, and the reply did not land.</div>
+      <div class="ln"></div>
+      <div data-testid="cli.home.count">
+      <div class="ln">6 directories, 10 files</div>
       </div>
-    <div class="ln exit bad" data-testid="cli.exit">[exit 2]</div>
+    <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
   </div>
   <div class="as-built-ring"></div>
   <div class="as-built-label">As-built</div>

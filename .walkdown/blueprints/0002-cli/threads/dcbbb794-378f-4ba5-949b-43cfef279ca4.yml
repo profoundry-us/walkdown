@@ -1,0 +1,13 @@
+id: n-0421
+uuid: dcbbb794-378f-4ba5-949b-43cfef279ca4
+kind: note
+reason: feedback
+author: topher
+created: 2026-10-06T20:01:30.497Z
+anchor:
+  rule: locations.registry.ids-stay-here
+status: open
+body: The screen for this one doesn't make a lot of sense to me. It's talking
+  about import? And it says "still - the row named ~/shop, which is gone". That
+  is practically meaningless in this context; I have no idea what it's about or
+  wh it's there.

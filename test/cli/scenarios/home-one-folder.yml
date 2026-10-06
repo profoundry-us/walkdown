@@ -1,0 +1,23 @@
+# A committed home once it has been used: the spec, its records and every
+# kind of record side by side in one folder, with no folder between.
+screen: home-one-folder
+title: A blueprint's home is one folder
+rule: locations.default.home-is-one-folder
+fixture: lived-in-home
+tree: shop/.walkdown/blueprints/checkout
+exit: 0
+expect:
+  - '^\.walkdown/blueprints/checkout$'
+  - '^├── drafts$'
+  - '^├── evidence$'
+  - '^├── features$'
+  - '^├── runs$'
+  - '^├── threads$'
+  - '^├── \.gitignore$'
+  - '^├── AGENTS\.md$'
+  - '^├── records\.yml$'
+  - '^├── spec\.yml$'
+  - '^└── storyboard\.yml$'
+anchors:
+  - { id: cli.home.tree, match: '^[├└│ ]' }
+  - { id: cli.home.count, match: '^\d+ directories, \d+ files$' }

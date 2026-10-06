@@ -36,7 +36,7 @@ export function scenarios() {
     .sort()
     .map((file) => {
       const s = parse(readFileSync(join(SCENARIOS, file), 'utf8'));
-      return { file, ...s, command: s.command.map(String), expect: (s.expect ?? []).map((e) => new RegExp(e, 'm')) };
+      return { file, ...s, command: (s.command ?? []).map(String), expect: (s.expect ?? []).map((e) => new RegExp(e, 'm')) };
     });
 }
 
@@ -167,6 +167,24 @@ export const FIXTURES = {
     m.ok(['blueprints', 'new', 'checkout']);
     mkdirSync(join(m.root, 'work', 'shop', '.git'), { recursive: true });
   },
+  /*
+   * `checkout`, committed at .walkdown/blueprints/checkout, as a home looks
+   * once it has been used: a rule, a thread on it, a sweep's run, a picture
+   * a judge filed as evidence and a sitting saved as a draft.
+   */
+  'lived-in-home'(m) {
+    realRepo(m);
+    m.ok(['blueprints', 'new', 'checkout', '--commit', 'spec', '--folder', 'checkout']);
+    const home = m.specOf('checkout');
+    for (const f of readdirSync(join(home, 'features'))) rmSync(join(home, 'features', f));
+    feature(m, 'checkout', 'checkout', [['pays', 'A card payment goes through.']]);
+    m.ok(['threads', 'new', '--rule', 'checkout.basics.pays', '--body', 'The pay button does nothing on a declined card.']);
+    m.ok(['sweep', '--why', 'every check again']);
+    mkdirSync(join(home, 'evidence', '2026-10-02T00-00-00Z'), { recursive: true });
+    writeFileSync(join(home, 'evidence', '2026-10-02T00-00-00Z', 'app-checkout.png'), '');
+    mkdirSync(join(home, 'drafts'), { recursive: true });
+    writeFileSync(join(home, 'drafts', 'local.json'), '{}\n');
+  },
   /* `shop` a real git repository with an origin, and one commit. */
   'git-repo'(m) {
     realRepo(m);
@@ -273,6 +291,26 @@ export function steady(text, m, uuids = new Map()) {
     .replace(/\b20\d{2}(0[1-9]|1[0-2])-(?=[a-z])/g, '202610-');
 }
 
+/* A folder as `tree -a --dirsfirst` prints it: its path, then every entry below it. */
+function tree(dir, label = dir) {
+  const out = [label];
+  let dirs = 0;
+  let files = 0;
+  const walk = (d, pad) => {
+    const names = readdirSync(d, { withFileTypes: true })
+      .filter((e) => e.name !== '.git')
+      .sort((a, b) => b.isDirectory() - a.isDirectory() || a.name.localeCompare(b.name));
+    names.forEach((e, i) => {
+      const last = i === names.length - 1;
+      out.push(`${pad}${last ? '└── ' : '├── '}${e.name}`);
+      if (e.isDirectory()) dirs++, walk(join(d, e.name), pad + (last ? '    ' : '│   '));
+      else files++;
+    });
+  };
+  walk(dir, '');
+  return `${out.join('\n')}\n\n${dirs} directories, ${files} files\n`;
+}
+
 /**
  * Run one scenario on a machine of its own, and give back what it printed,
  * steadied: stdout then stderr, as a terminal shows them.
@@ -285,6 +323,11 @@ export function run(scenario) {
     for (const name of [scenario.fixture ?? []].flat()) {
       if (!FIXTURES[name]) throw new Error(`${scenario.file}: no fixture "${name}"`);
       FIXTURES[name](m);
+    }
+    // A folder drawn as `tree` draws it, where a screen is about a layout.
+    if (scenario.tree) {
+      const text = steady(tree(join(m.root, scenario.tree), scenario.tree.replace(/^shop\//, '')), m);
+      return { status: 0, stdout: text, stderr: '', text: text.replace(/\n+$/, '') };
     }
     // Where the command is typed: ~/shop, or a path under the machine's root.
     const r = m.wd(scenario.command, scenario.cwd ? join(m.root, scenario.cwd) : m.shop);

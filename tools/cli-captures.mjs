@@ -69,6 +69,10 @@ const AS_BUILT_CSS = `
 const esc = (s) => s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 const shellWord = (w) => (/^[\w./:@=+-]+$/.test(w) ? w : `"${w.replaceAll('"', '\\"')}"`);
 
+/* What is typed at the prompt: the walkdown command, or `tree` for a screen that draws a folder. */
+const typed = (scenario) =>
+  scenario.tree ? `tree -a ${scenario.tree.replace(/^shop\//, '')}` : `walkdown ${scenario.command.map(shellWord).join(' ')}`;
+
 /** The terminal's body: prompt, the output with its anchors, the exit code. */
 function terminal(scenario, out) {
   const lines = out.text ? out.text.split('\n') : [];
@@ -83,7 +87,7 @@ function terminal(scenario, out) {
   });
   return [
     `    <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>`,
-    `    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown ${esc(scenario.command.map(shellWord).join(' '))}</div>`,
+    `    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> ${esc(typed(scenario))}</div>`,
     ...body,
     `    <div class="ln exit${out.status ? ' bad' : ''}" data-testid="cli.exit">[exit ${out.status}]</div>`,
   ].join('\n');
@@ -97,7 +101,7 @@ function page(scenario, out, redlines) {
 <!--
   AS-BUILT: ${scenario.screen}
 
-  What \`walkdown ${scenario.command.join(' ')}\` printed, run by tools/cli-captures.mjs
+  What \`${typed(scenario)}\` printed, run by tools/cli-captures.mjs
   from test/cli/scenarios/${scenario.file} - the same run test/cli.test.js
   checks against ${scenario.rule}. Paths, times and hashes are made steady so
   the fade shows what changed and nothing else. Regenerated, never edited: the
