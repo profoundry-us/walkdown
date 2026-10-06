@@ -22,6 +22,7 @@ import { parseArgs } from 'node:util';
 import {
   canon,
   checkoutFor,
+  reclaimFromClone,
   describeFolder,
   expand,
   findHomes,
@@ -187,7 +188,17 @@ export async function run(args) {
    * A worktree's homes are imported as the checkout's (ADR 0014 §10): the
    * project is the checkout, and the worktree is never registered.
    */
-  const wt = checkoutFor(top, readRegistry().rows);
+  let wt = checkoutFor(top, readRegistry().rows);
+  if (wt?.clone) {
+    const moved = reclaimFromClone(top, wt.checkout);
+    if (moved) {
+      for (const id of moved.ids)
+        console.log(
+          `  ${green('~ moved')}    ${dim(`\`${id}\` belongs to ${tilde(top)} now, still as \`${id}\` — its records are here, and ${tilde(moved.from)} is a fresh clone without them`)}`,
+        );
+      wt = checkoutFor(top, readRegistry().rows);
+    }
+  }
   const checkout = wt?.worktree ? wt.checkout : top;
   /*
    * A home the checkout has a copy of is the checkout's. One it has no copy

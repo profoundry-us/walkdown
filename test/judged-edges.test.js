@@ -371,3 +371,34 @@ test('check source keeps a check whose opener spans lines, and an rspec example 
   writeFileSync(join(dir, 'spec', 'a_spec.rb'), "  it 'works' do\n    expect(1).to eq 1\n  end\n\n  it 'next' do\n  end\n");
   assert.equal(checkSnippet(dir, 'spec/a_spec.rb:1').source, "  it 'works' do\n    expect(1).to eq 1\n  end");
 });
+
+test('a pushed home keeps its ID when its checkout moves and the origin is cloned at the old path @rule:locations.registry.ids-stay-here', () => {
+  const m = machine();
+  const base = join(root, `m${n}`);
+  const origin = join(base, 'origin.git');
+  mkdirSync(base, { recursive: true });
+  git(base, 'init', '-q', '--bare', origin);
+  const pub = join(base, 'pub');
+  git(base, 'clone', '-q', origin, pub);
+  ok(m.cli(pub, 'blueprints', 'new', 'site', '--folder', 'site', '--commit', 'spec'));
+  const [row] = m.rows();
+  // A run, which git ignores, so only this tree has it.
+  const runs = join(pub, '.walkdown', 'blueprints', 'site', 'runs');
+  mkdirSync(runs, { recursive: true });
+  writeFileSync(join(runs, '2026-10-01T00-00-00Z-local-01.json'), '{}');
+  git(pub, 'add', '-A');
+  git(pub, 'commit', '-q', '-m', 'site');
+  git(pub, 'push', '-q', 'origin', 'HEAD');
+  const old = join(base, 'pub-old');
+  renameSync(pub, old);
+  git(base, 'clone', '-q', origin, pub);
+  const r = ok(m.cli(old, 'blueprints', 'import', '.', '--all'));
+  assert.match(r.stdout, new RegExp(`~ moved .*\`${row.id}\``));
+  const [after_, ...more] = m.rows();
+  assert.equal(more.length, 0, 'no second row');
+  assert.equal(after_.checkout.replace(/^~/, process.env.HOME), old);
+  assert.equal(after_.home.replace(/^~/, process.env.HOME), join(old, '.walkdown', 'blueprints', 'site'));
+  // The fresh clone is the moved checkout's copy now, and reads its runs.
+  const w = JSON.parse(ok(m.cli(pub, 'where', '--json')).stdout);
+  assert.equal(w.runs.path, runs.replace(pub, old));
+});
