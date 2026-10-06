@@ -131,7 +131,7 @@ test('a declared blueprint answers from its home; an undeclared one is nothing a
  * makes together - so they go where it goes. Evidence and drafts are not, so
  * they never do. That is what makes opting in one decision instead of four.
  */
-test('a home holds the spec and its four records as siblings @rule:locations.default.records-follow-the-spec', () => {
+test('a home holds the spec and its four records as siblings @rule:locations.default.home-is-one-folder', () => {
   const s = scratch();
   try {
     const repo = join(s.root, 'repo');
@@ -153,7 +153,7 @@ test('a home holds the spec and its four records as siblings @rule:locations.def
   }
 });
 
-test('a spec kept outside the repository takes its runs and threads with it @rule:locations.default.records-follow-the-spec', () => {
+test('a spec kept outside the repository takes its runs and threads with it @rule:locations.default.home-is-one-folder', () => {
   const s = scratch();
   try {
     const repo = join(s.root, 'repo');
@@ -722,7 +722,7 @@ test('tightening to spec says what git still tracks, and leaving takes the skill
   }
 });
 
-test('import registers a home the registry does not yet name, and refuses what is not a home @rule:locations.default.records-follow-the-spec', () => {
+test('import registers a home the registry does not yet name, and refuses what is not a home @rule:locations.default.home-is-one-folder', () => {
   /*
    * n-0169: from inside a pack, `project add` wrote absolute paths into the
    * committed config - wrong on every other machine - and sent runs and

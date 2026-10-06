@@ -2,6 +2,7 @@ import { parseArgs } from 'node:util';
 import { resolveLocations } from '../../lib/locations.js';
 import { dim, green, red } from '../../lib/report/tty.js';
 import { applyMove, planMove } from '../../lib/rules-move.js';
+import { applyRename, planRename } from '../../lib/rules-rename.js';
 import { end } from './context.js';
 import { dispatch } from './noun.js';
 
@@ -80,12 +81,78 @@ function move(args) {
   return end(0);
 }
 
+/*
+ * `walkdown rules rename <rule> <new-id>` (ADR 0014). The old id stays on the
+ * rule as `formerly:`, so every verdict, thread and tag that names it still
+ * means this rule.
+ */
+function rename(args) {
+  const { values, positionals } = parseArgs({
+    args,
+    allowPositionals: true,
+    options: { blueprint: { type: 'string' }, 'dry-run': { type: 'boolean', default: false } },
+  });
+  const [from, to] = positionals;
+  if (!from || !to || positionals.length !== 2) {
+    console.error('walkdown rules rename <rule> <new-id> [--dry-run] [--blueprint <id>]');
+    return end(2);
+  }
+  const here = resolveLocations({ blueprint: values.blueprint ?? null });
+  const project = values.blueprint
+    ? here.spec?.path ? [{ id: here.id, dir: here.spec.path }] : []
+    : (here.ambiguous ? here.config.registry.candidates : here.spec?.path ? [here.id] : [])
+        .map((id) => ({ id, dir: resolveLocations({ blueprint: id }).spec?.path }))
+        .filter((b) => b.dir);
+  if (!project.length) {
+    console.error(red(`✗ ${here.spec?.why ?? 'no blueprint here'}`));
+    return end(2);
+  }
+  const plans = project.map((b) => ({ b, plan: planRename({ specDir: b.dir, from, to }) }));
+  const holders = plans.filter((p) => p.plan.hit);
+  if (holders.length !== 1) {
+    console.error(
+      red(
+        holders.length
+          ? `✗ \`${from}\` is in ${holders.map((p) => `\`${p.b.id}\``).join(' and ')} — choose one with \`--blueprint <id>\` (e.g. \`--blueprint ${holders[0].b.id}\`).`
+          : `✗ no rule \`${from}\` in ${project.map((b) => `\`${b.id}\``).join(', ')}`,
+      ),
+    );
+    console.error(dim('Nothing was renamed.'));
+    return end(2);
+  }
+  const { plan, b } = holders[0];
+  if (plan.refusals.length) {
+    for (const r of plan.refusals) console.error(red(`✗ ${r}`));
+    console.error(dim('Nothing was renamed.'));
+    return end(2);
+  }
+  const lines = [
+    `\`${from}\` → \`${to}\` in ${b.id}, keeping \`${from}\` under \`formerly:\``,
+    `${plan.threads.length} thread(s) anchored to the new id${plan.threads.length ? `: ${plan.threads.map((t) => t.id).join(', ')}` : ''}`,
+  ];
+  if (values['dry-run']) {
+    console.log(`Would rename:\n  ${lines.join('\n  ')}`);
+    console.log(dim('\nNothing was changed.'));
+    return end(0);
+  }
+  applyRename(plan);
+  console.log(`${green('✓ renamed')} ${lines.join('\n  ')}`);
+  console.log(dim(`\nNo run record was edited; they still say \`${from}\` and count for \`${to}\`. Tests tagged \`${from}\` still count, and lint names them so the tag can be updated.`));
+  return end(0);
+}
+
 export const VERBS = {
   move: {
     usage: 'walkdown rules move <rule|story|feature>... --to <blueprint> [--dry-run] [--blueprint <from>]',
     about:
       "Move rules to another blueprint of the same project, with their threads. The run\nrecords and evidence behind their verdicts are copied, so nothing is judged or signed\nagain, and the source's records are never edited. --dry-run says what would move.",
     run: move,
+  },
+  rename: {
+    usage: 'walkdown rules rename <rule> <new-id> [--dry-run] [--blueprint <id>]',
+    about:
+      "Give a rule a new id. The old id stays on the rule under `formerly:`, so the run\nrecords, threads and tests that name it still count for it, and no verdict is lost.\nIts threads are anchored to the new id. --dry-run says what would change.",
+    run: rename,
   },
 };
 

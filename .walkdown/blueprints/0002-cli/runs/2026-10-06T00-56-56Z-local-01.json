@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-10-06T00-56-56Z-local-01",
+  "created": "2026-10-06T00:56:56Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "b14417b-dirty",
+  "tree_hash": "sha256:b243121c52ed",
+  "spec_hash": "sha256:2ec433031d3c",
+  "results": [
+    {
+      "rule": "commands.rules.rename",
+      "status": "pass",
+      "statement_hash": "sha256:baa430aa4d1f",
+      "duration_ms": 1116,
+      "checks": [
+        "test/rules-rename.test.js:96",
+        "test/rules-rename.test.js:134"
+      ]
+    }
+  ]
+}

@@ -45,7 +45,7 @@ function twoBlueprints() {
 }
 
 
-test('blueprints new <id> gives a project a second blueprint in its own numbered folder, and again changes nothing @rule:locations.several.init-makes-another', () => {
+test('blueprints new <id> gives a project a second blueprint in its own numbered folder, and again changes nothing @rule:locations.several.new-makes-another', () => {
   const m = machine();
   assert.equal(m.wd(['blueprints', 'new']).status, 0);
   assert.deepEqual(m.homes(), ['0001-proj']);
@@ -101,7 +101,7 @@ test('blueprints new <id> gives a project a second blueprint in its own numbered
   assert.match(listed.stdout, /\bb\b/);
 });
 
-test('a bare blueprints new refuses where several blueprints stand and none has the default id @rule:locations.several.init-makes-another', () => {
+test('a bare blueprints new refuses where several blueprints stand and none has the default id @rule:locations.several.new-makes-another', () => {
   const m = machine();
   assert.equal(m.wd(['blueprints', 'new', 'a']).status, 0);
   assert.equal(m.wd(['blueprints', 'new', 'b']).status, 0);
@@ -111,7 +111,7 @@ test('a bare blueprints new refuses where several blueprints stand and none has 
   assert.deepEqual(m.homes(), ['0001-a', '0002-b']);
 });
 
-test('a second blueprint committed beside the first leaves the .gitignore they share as it is @rule:locations.several.init-makes-another', () => {
+test('a second blueprint committed beside the first leaves the .gitignore they share as it is @rule:locations.several.new-makes-another', () => {
   const m = machine();
   assert.equal(m.wd(['blueprints', 'new', 'a', '--commit', 'spec']).status, 0);
   const ignore = join(m.proj, '.walkdown', '.gitignore');

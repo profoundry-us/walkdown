@@ -1,7 +1,7 @@
 # `walkdown blueprints new <id>` giving a project that has a blueprint a second one.
 screen: init-another
 title: blueprints new gives the project another blueprint
-rule: locations.several.init-makes-another
+rule: locations.several.new-makes-another
 fixture: one-blueprint
 command: [blueprints, new, search]
 exit: 0

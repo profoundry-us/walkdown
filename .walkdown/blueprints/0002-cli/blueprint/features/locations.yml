@@ -23,7 +23,8 @@ stories:
             - Asked what is tracked, walkdown answers nothing, and says why
           statement_hash: sha256:f06360e3e6e5
 
-      - id: locations.default.records-follow-the-spec
+      - id: locations.default.home-is-one-folder
+        formerly: [locations.default.records-follow-the-spec]
         origin: prd
         statement: A blueprint's home is one folder. The spec (`spec.yml`, `storyboard.yml`, `features/`), its `AGENTS.md`, `records.yml` and `.gitignore`, and the four kinds of record (`threads/`, `runs/`, `evidence/`, `drafts/`) sit side by side in it, with no folder between.
         because: A home moves as one directory, and nothing inside it needs rewriting when it does.
@@ -635,7 +636,8 @@ stories:
     title: A project holds several blueprints
     statement: As someone keeping two features' specs apart in one project, I can give each its own blueprint outside the repository, and still read them all from the project without naming one.
     rules:
-      - id: locations.several.init-makes-another
+      - id: locations.several.new-makes-another
+        formerly: [locations.several.init-makes-another]
         statement: "`walkdown blueprints new <name>` gives a project that already has a blueprint a second one, in a home of its own. Running the same command again changes nothing."
         because: Two unrelated features in one project each want their own rules, threads and runs, kept out of the repository like the first.
         history: "On 2026-10-02 a project on Topher's work machine could not get a second blueprint without committing it to the repository (issue #20, ADR 0011). The id changed from init-makes-another, because the rule is about `blueprints new`, not `init` (n-0355)." #20, ADR 0011).

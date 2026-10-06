@@ -46,6 +46,7 @@ Rules and verdicts
   walkdown judge <rule-id> [--target <name>] [--serve <origin>] [--blueprint <id>] [--json]
   walkdown sweep --why <reason> [--tiers checks,agent] [--blueprint <id>] [--target <name>]
   walkdown rules move <rule|story|feature>... --to <blueprint> [--dry-run]
+  walkdown rules rename <rule> <new-id> [--dry-run]
 
 The panel
   walkdown serve [--blueprint <id>] [--port <n>]
