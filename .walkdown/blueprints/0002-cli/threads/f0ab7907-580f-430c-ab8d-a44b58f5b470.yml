@@ -1,0 +1,21 @@
+id: n-0401
+uuid: f0ab7907-580f-430c-ab8d-a44b58f5b470
+kind: note
+reason: observation
+author: agent
+created: 2026-10-06T05:06:02.404Z
+anchor:
+  rule: locations.registry.ids-stay-here
+status: addressed
+body: "Two moves still lose the ledger. Runs moved into a folder inside the
+  checkout are not followed past a fresh clone at the old path, because import
+  skips any kind the row moved. And a runs path spelled through the /tmp
+  symlink, or in other letter case, stays on the old folder after a plain mv.
+  Evidence: runs/evidence/2026-10-06T05-03-39Z/ids-stay-here-ninth.txt."
+replies:
+  - author: agent
+    created: 2026-10-06T05:06:03Z
+    body: Import now asks each kind where the row keeps it, a moved folder inside
+      the checkout included. Paths are compared by real name, ignoring case
+      where the disk does, so a /tmp or other-case spelling follows a move. A
+      judged-edges test covers the re-clone and the case spelling.

@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-10-06T05-06-02Z-local-01",
+  "created": "2026-10-06T05:06:02Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "edb8b6a-dirty",
+  "note": "Ninth sitting at edb8b6a: n-0400's plain-mv case and gitignored threads fixed; fails on runs moved inside the checkout plus a re-clone, and on records-move paths spelled differently from the checkout.",
+  "spec_hash": "sha256:242f4e9d8408",
+  "results": [
+    {
+      "rule": "locations.registry.ids-stay-here",
+      "status": "fail",
+      "statement_hash": "sha256:f561ad6f21be",
+      "evidence": [
+        "runs/evidence/2026-10-06T05-03-39Z/ids-stay-here-ninth.txt"
+      ],
+      "reasoning": "Drove bin/walkdown.js at edb8b6a in a fresh /tmp tree with WALKDOWN_HOME=$S/home (profile sam), bare origins and real clones. All serves used --port 0. The n-0400 plain-mv case is fixed. In inn, runs were moved to a gitignored inn/wd-runs and a walkdown signed eng. After mv inn inn-old, import said '~ moved', the row reads 'runs: $S/inn-old/wd-runs', and eng stays accepted. With runs, evidence, drafts and threads all moved into the checkout (sev), all four paths followed the move, and the verdict, the thread and the draft are still read. A personal no-remote home with its runs moved into the checkout, renamed and named back with --project, followed too. The threads-gitignored variant is fixed: after a push, mv and re-clone, import said '~ moved' and the thread is listed. The earlier cases hold: the pub verdict, the drf draft, unpushed re-clone, different-origin repo at the old path, deli --project, a pushed mix of committed and personal homes, and both trees holding runs staying a branch copy. THEN 1, 2, 3 and 5 hold. 0018-hm-search and 0019-sp-search were given. --blueprint and ?bp= take the ID anywhere and 'search' inside each project, including a subfolder; outside a project the name is refused, or answered 409. The only ID outside registry.yml is in home/cache/claims.json (q-0384). After a forget, the next blueprint got 0020. THEN 4 still fails in two ways. First, a re-clone. In ric, runs were moved into ric/wd-runs, a walkdown signed eng, the repo was pushed, then 'mv ric ric-old' and the origin was cloned at ric. Import in ric-old answers 'already listed as 0009-rc-web'. The row keeps checkout, home and 'runs: $S/ric/wd-runs' on the fresh clone, and eng drops from accepted to not, while the run sits in ric-old/wd-runs. reclaimFromClone skips any kind the row moved, even one the row moved into the old checkout, so nothing tells the trees apart. Second, rebaseRow compares spellings, not folders. A records-move path written through the /tmp symlink (/tmp/... for a checkout under /private/tmp), or in different letter case ($S/caps/wd-runs for the checkout $S/Caps on a case-insensitive disk), is a folder inside the checkout that records move accepted. After a plain mv, home and checkout follow, but runs still names the old folder and eng drops from accepted to not.",
+      "threads": [
+        "f0ab7907-580f-430c-ab8d-a44b58f5b470"
+      ]
+    }
+  ]
+}

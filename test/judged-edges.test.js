@@ -450,3 +450,42 @@ test('a checkout moved with its runs moved into a folder inside it keeps its led
   assert.equal(after_.runs.replace(/^~/, process.env.HOME), join(old, 'wd-runs'), 'the runs folder came along');
   assert.equal(JSON.parse(ok(m.cli(old, 'where', '--json')).stdout).runs.path, join(old, 'wd-runs'));
 });
+
+test('runs moved inside the checkout follow a move past a fresh clone, and a path spelled another way still follows @rule:locations.registry.ids-stay-here', () => {
+  // Re-cloned at the old path, with the runs in a folder inside the checkout.
+  {
+    const m = machine();
+    const base = join(root, `m${n}`);
+    mkdirSync(base, { recursive: true });
+    const origin = join(base, 'origin.git');
+    git(base, 'init', '-q', '--bare', origin);
+    const ric = join(base, 'ric');
+    git(base, 'clone', '-q', origin, ric);
+    writeFileSync(join(ric, '.gitignore'), 'wd-runs/\n');
+    ok(m.cli(ric, 'blueprints', 'new', 'web', '--folder', 'web', '--commit', 'spec'));
+    ok(m.cli(ric, 'records', 'move', 'runs', '--to', join(ric, 'wd-runs')));
+    writeFileSync(join(ric, 'wd-runs', '2026-10-01T00-00-00Z-local-01.json'), '{}');
+    git(ric, 'add', '-A');
+    git(ric, 'commit', '-q', '-m', 'web');
+    git(ric, 'push', '-q', 'origin', 'HEAD');
+    const [row] = m.rows();
+    const old = join(base, 'ric-old');
+    renameSync(ric, old);
+    git(base, 'clone', '-q', origin, ric);
+    const r = ok(m.cli(old, 'blueprints', 'import', '.', '--all'));
+    assert.match(r.stdout, new RegExp(`~ moved .*\`${row.id}\``));
+    assert.equal(m.rows()[0].runs.replace(/^~/, process.env.HOME), join(old, 'wd-runs'));
+  }
+  // A runs path through another spelling of the same folder: case, where the disk folds it.
+  if (process.platform === 'darwin') {
+    const m = machine();
+    const caps = m.repo('Caps');
+    ok(m.cli(caps, 'blueprints', 'new', 'web', '--folder', 'web', '--commit', 'spec'));
+    const lower = join(root, `m${n}`, 'caps', 'wd-runs');
+    ok(m.cli(caps, 'records', 'move', 'runs', '--to', lower));
+    const old = join(root, `m${n}`, 'Caps-old');
+    renameSync(caps, old);
+    ok(m.cli(old, 'blueprints', 'import', '.', '--all'));
+    assert.equal(m.rows()[0].runs.replace(/^~/, process.env.HOME), join(old, 'wd-runs'));
+  }
+});
