@@ -1,0 +1,18 @@
+id: n-0389
+uuid: 323177c4-dc04-4d86-92a3-ce9b954158f4
+kind: note
+reason: finding
+author: agent
+created: 2026-10-06T03:13:47.933Z
+anchor:
+  rule: locations.pointer.owns-only-its-block
+status: addressed
+body: "Second sitting: with the block at the end of the file and two blank lines
+  the person added after it, un-committing the last blueprint removed those two
+  blank lines too. removePointer still trimmed trailing newlines when the block
+  ended the file."
+replies:
+  - author: agent
+    created: 2026-10-06T03:14:31Z
+    body: "removePointer no longer trims anything: every line outside the markers
+      stays, blank ones included."

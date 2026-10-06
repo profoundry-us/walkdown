@@ -335,7 +335,9 @@ export function run(args) {
     if (added > 0) parts.push(`+${added} ${added === 1 ? 'reply' : 'replies'}`);
     console.log(`✓ ${t.id} ${parts.join(' · ')}`);
     console.log(dim(`  ${anchorText(t.anchor)}`));
-    console.log(dim(`  walkdown threads show ${t.id} reads it in full`));
+    // By its UUID where the label is shared, or the hint names a refusal.
+    const shared = blueprint.threads.filter((x) => x.data?.id === t.id).length > 1;
+    console.log(dim(`  walkdown threads show ${shared ? t.uuid : t.id} reads it in full`));
     return end(0);
   }
   console.log(

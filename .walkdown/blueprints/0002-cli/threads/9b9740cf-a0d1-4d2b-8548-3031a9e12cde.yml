@@ -1,0 +1,18 @@
+id: n-0388
+uuid: 9b9740cf-a0d1-4d2b-8548-3031a9e12cde
+kind: note
+reason: finding
+author: agent
+created: 2026-10-06T03:13:47.656Z
+anchor:
+  rule: locations.default.in-repo-on-request
+status: addressed
+body: "Second sitting: `blueprints commit spec` run from
+  <repo>/.claude/worktrees/w moved the home into the checkout and wrote its
+  .gitignore. It then reported 'tracked: everything', asking git in the
+  worktree, where git keeps runs out by that very file."
+replies:
+  - author: agent
+    created: 2026-10-06T03:14:30Z
+    body: "`blueprints new` and `blueprints commit` resolve the home from the
+      registered checkout, so the tracking report asks git where the home is."

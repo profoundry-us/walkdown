@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T02:43:12.029Z
 anchor:
   rule: locations.worktree.same-project
-status: addressed
+status: settled
 body: "Agent judging found a worktree kept inside its checkout is read as the
   checkout itself. Claude Code makes them at <repo>/.claude/worktrees/<name>.
   There, `where --json` shows worktree: null and points spec and threads at the
@@ -20,3 +20,8 @@ replies:
       is deeper than the checkout and shares its repository.
       test/worktree.test.js covers <repo>/.claude/worktrees/<name> beside the
       sibling layout."
+  - author: agent
+    via: verdict
+    created: 2026-10-06T03:14:04Z
+    body: Settled by the agent's pass on locations.worktree.same-project
+      (2026-10-06T03-14-03Z-local-01).

@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T02:42:58.969Z
 anchor:
   rule: locations.worktree.branch-spec-shared-records
-status: addressed
+status: settled
 body: "Agent judging found, for a worktree at <repo>/.claude/worktrees/reword:
   status read main's wording, the thread landed in the checkout, the run carried
   the checkout's commit and no branch, a commit-all run landed in the checkout,
@@ -16,3 +16,9 @@ replies:
     created: 2026-10-06T02:51:18Z
     body: Same fix as n-0374. The branch-spec test now runs in both layouts, the
       Claude Code one inside the checkout included.
+  - author: agent
+    via: verdict
+    created: 2026-10-06T03:14:04Z
+    body: Settled by the agent's pass on
+      locations.worktree.branch-spec-shared-records
+      (2026-10-06T03-14-03Z-local-01).

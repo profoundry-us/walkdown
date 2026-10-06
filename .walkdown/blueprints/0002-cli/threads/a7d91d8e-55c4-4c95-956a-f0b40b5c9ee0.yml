@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T02:42:58.474Z
 anchor:
   rule: locations.threads.clashing-labels-ask
-status: addressed
+status: settled
 body: Agent judging found `walkdown threads relabel <older-uuid>` relabels the
   OLDER of two threads sharing a label, though it printed 'The newer one would
   be relabelled'. planRelabel targeted whichever thread the UUID named.
@@ -16,3 +16,8 @@ replies:
     body: planRelabel now moves the newer of the threads sharing the label,
       whichever one it was named by. test/thread-labels.test.js names the older
       UUID and checks the newer would move.
+  - author: agent
+    via: verdict
+    created: 2026-10-06T03:14:04Z
+    body: Settled by the agent's pass on locations.threads.clashing-labels-ask
+      (2026-10-06T03-14-03Z-local-01).

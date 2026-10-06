@@ -30,6 +30,7 @@ import {
   isOldHome,
   readRegistry,
   register,
+  repointMovedCheckout,
   SPEC_FILE,
   tilde,
 } from '../../lib/locations.js';
@@ -161,6 +162,13 @@ export async function run(args) {
   for (const n of nested)
     console.error(red(`✗ ${tilde(n.inner)} is a blueprint inside ${tilde(n.outer)} — a home inside a home is refused, and not offered.`));
   if (!homes.length) {
+    // A checkout that moved, whose blueprints are all kept on this machine.
+    const moved = top ? repointMovedCheckout(top) : null;
+    if (moved) {
+      for (const id of moved.ids)
+        console.log(`  ${green('~ moved')}    ${dim(`\`${id}\` belongs to ${tilde(top)} now, still as \`${id}\` — the row named ${tilde(moved.from)}, which is gone`)}`);
+      return end(0);
+    }
     console.error(red(`Nothing at ${at} is a blueprint — no spec.yml there, and no .walkdown/blueprints/ holding one.`));
     console.error(dim('  `walkdown blueprints new` inside that project starts one.'));
     return end(2);

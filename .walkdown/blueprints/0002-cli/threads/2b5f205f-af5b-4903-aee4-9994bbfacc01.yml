@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T02:42:57.969Z
 anchor:
   rule: commands.blueprints.commit-moves-the-home
-status: addressed
+status: settled
 body: "Agent judging found lint silent about a folder-name clash: a personal
   home whose folder a teammate has committed under .walkdown/blueprints/ is
   refused by `blueprints commit`, but `walkdown lint` said 0 warnings before and
@@ -21,3 +21,8 @@ replies:
       refusal releases the registry lock on exit, wherever it exits from. A home
       moved out drops the .gitignore walkdown wrote. Covered in
       test/judged-edges.test.js.
+  - author: agent
+    via: verdict
+    created: 2026-10-06T03:14:04Z
+    body: Settled by the agent's pass on commands.blueprints.commit-moves-the-home
+      (2026-10-06T03-14-03Z-local-01).

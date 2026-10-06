@@ -2060,7 +2060,13 @@ function record(file) {
   const outs = [...byHolder].map(([id, results]) => {
     const spec = specOf(id);
     // A thread named by its label is written as its UUID (ADR 0014 §9).
-    const named = byUuid(results, () => [resolveLocations({ spec }).threads.path, ...siblingsOf(spec).map((x) => x.threads)]);
+    let named;
+    try {
+      named = byUuid(results, () => [resolveLocations({ spec }).threads.path, ...siblingsOf(spec).map((x) => x.threads)]);
+    } catch (e) {
+      console.error(`refusing to record: ${e.message}`);
+      process.exit(1);
+    }
     return { id, spec, run: { ...base, spec_hash: specHash(spec), results: named }, out: join(resolveLocations({ spec }).runs.path, `${base.run_id}.json`) };
   });
   /*

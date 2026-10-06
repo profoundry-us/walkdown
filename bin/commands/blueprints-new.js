@@ -209,7 +209,7 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
         return process.exit(2);
       }
     }
-    let loc = listed ? resolveLocations({ cwd: root, blueprint: String(listed.id) }) : null;
+    let loc = listed ? resolveLocations({ cwd: checkout, blueprint: String(listed.id) }) : null;
     const siblings = listed ? [] : mine().map((r) => nameOf(r.id));
     const current = loc?.standard?.name ?? (found ? (isHome(found) && existsSync(join(found, '.gitignore')) ? 'spec' : 'all') : null);
     const commit = asked ?? current ?? 'none';
@@ -228,7 +228,7 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
         return process.exit(2);
       }
       listed = exact();
-      loc = resolveLocations({ cwd: root, blueprint: String(listed.id) });
+      loc = resolveLocations({ cwd: checkout, blueprint: String(listed.id) });
     }
     /*
      * What git tracked under what just left. "Nothing was added to this
@@ -368,7 +368,7 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
      * What git tracks NOW, asked of git rather than asserted from the file
      * just written (n-0164, n-0180).
      */
-    const after = resolveLocations({ cwd: root, blueprint: entry.id });
+    const after = resolveLocations({ cwd: checkout, blueprint: entry.id });
     const t = tracking(after);
     console.log(`  tracked: ${t.words}  ${dim(t.why)}`);
     for (const f of t.findings) console.log(`  ${f.level === 'error' ? red(`✗ ${f.message}`) : yellow(`! ${f.message}`)}`);

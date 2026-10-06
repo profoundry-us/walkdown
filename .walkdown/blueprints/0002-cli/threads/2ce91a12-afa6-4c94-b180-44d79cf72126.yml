@@ -1,0 +1,20 @@
+id: n-0390
+uuid: 2ce91a12-afa6-4c94-b180-44d79cf72126
+kind: note
+reason: finding
+author: agent
+created: 2026-10-06T03:13:48.202Z
+anchor:
+  rule: locations.registry.ids-stay-here
+status: addressed
+body: "Second sitting: a moved checkout whose blueprints are all personal cannot
+  keep its IDs. Import there says 'Nothing at … is a blueprint', importing the
+  personal home is refused, and `blueprints new --project shop` says the label
+  is another checkout's. Only forget gets back, and it loses the ID."
+replies:
+  - author: agent
+    created: 2026-10-06T03:14:31Z
+    body: "`blueprints import <checkout>` on a moved checkout holding only personal
+      homes now re-points the rows whose checkout is gone. It matches by the
+      label the new place would get, and only when those rows name one old
+      checkout. IDs, labels, codes and homes are kept."

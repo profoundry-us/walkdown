@@ -1,0 +1,18 @@
+id: n-0387
+uuid: 476dcfaa-b498-4094-ae57-51410b6f5540
+kind: note
+reason: finding
+author: agent
+created: 2026-10-06T03:13:47.299Z
+anchor:
+  rule: locations.answer.says-why
+status: addressed
+body: "Second sitting: a worktree made before the home was committed has no copy
+  of it. Its runs, evidence and drafts still said 'this branch's copy — runs are
+  committed, so they follow the checkout'. In the same directory `threads new`
+  and `status` said 'No blueprint here'."
+replies:
+  - author: agent
+    created: 2026-10-06T03:14:30Z
+    body: A worktree reads the branch's copy only where the branch has one.
+      Otherwise the spec and records are the registered home's, said as such.

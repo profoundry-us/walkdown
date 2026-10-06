@@ -5,7 +5,7 @@
  */
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, renameSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
@@ -165,4 +165,87 @@ test('in a worktree, records.yml\'s answer says the worktree shares the register
   assert.match(where.threads.why, /records\.yml/);
   assert.doesNotMatch(where.threads.why, /shares them/, 'threads are committed, and follow the branch');
   assert.match(ok(m.cli(shop, 'where')).stdout, /registered by blueprints new/);
+});
+
+/* ---- the second sitting (rejudge of n-0369 to n-0378) -------------------- */
+
+test('a record citing a label two threads share is refused, not written with the label @rule:locations.threads.uuid-is-the-identity', async () => {
+  const m = machine();
+  const shop = m.repo('shop');
+  ok(m.cli(shop, 'blueprints', 'new', 'a', '--commit', 'spec', '--folder', 'a'));
+  const home = join(shop, '.walkdown', 'blueprints', 'a');
+  mkdirSync(join(home, 'threads'), { recursive: true });
+  for (const [uuid, at] of [['11111111-1111-4111-8111-111111111111', '01'], ['22222222-2222-4222-8222-222222222222', '02']])
+    writeFileSync(join(home, 'threads', `${uuid}.yml`), `id: n-0006\nuuid: ${uuid}\nkind: note\nauthor: sam\ncreated: 2026-10-${at}T00:00:00Z\nanchor: {}\nstatus: open\nbody: Seen.\n`);
+  const r = spawnSync(
+    process.execPath,
+    [
+      '--input-type=module',
+      '-e',
+      `import { writeRunRecord } from ${JSON.stringify(new URL('../lib/run-record.js', import.meta.url).pathname)};
+       writeRunRecord({ blueprintDir: ${JSON.stringify(home)}, cwd: process.cwd(), target: 'local', actor: 'sam', kind: 'walkdown', results: [{ rule: 'x', status: 'fail', threads: ['n-0006'] }] });`,
+    ],
+    { cwd: shop, encoding: 'utf8', env: m.env },
+  );
+  assert.notEqual(r.status, 0);
+  assert.match(r.stderr, /n-0006 labels 2 threads .* cite the one you mean by its UUID; nothing was recorded/);
+  assert.ok(!existsSync(join(home, 'runs')) || !readdirSync(join(home, 'runs')).some((f) => f.endsWith('.json')), 'and nothing was');
+});
+
+test('a worktree made before its home was committed reads the registered home, and says so @rule:locations.answer.says-why', () => {
+  const m = machine();
+  const shop = m.repo('shop');
+  writeFileSync(join(shop, 'README.md'), 'shop\n');
+  git(shop, 'add', '-A');
+  git(shop, 'commit', '-q', '-m', 'first');
+  const wt = join(shop, '.claude', 'worktrees', 'early');
+  git(shop, 'worktree', 'add', '-q', '-b', 'early', wt);
+  ok(m.cli(shop, 'blueprints', 'new', 'x2', '--commit', 'spec', '--folder', 'x2'));
+  const where = JSON.parse(ok(m.cli(wt, 'where', '--json')).stdout);
+  assert.equal(where.spec.path, join(shop, '.walkdown', 'blueprints', 'x2'), 'the branch has no copy, so the registered one');
+  assert.doesNotMatch(where.runs.why, /this branch's copy/);
+});
+
+test('blueprints new in a worktree says what git keeps out where the home is @rule:locations.default.in-repo-on-request', () => {
+  const m = machine();
+  const shop = m.repo('shop');
+  writeFileSync(join(shop, 'README.md'), 'shop\n');
+  git(shop, 'add', '-A');
+  git(shop, 'commit', '-q', '-m', 'first');
+  ok(m.cli(shop, 'blueprints', 'new', 'one'));
+  const wt = join(shop, '.claude', 'worktrees', 'w');
+  git(shop, 'worktree', 'add', '-q', '-b', 'w', wt);
+  const made = ok(m.cli(wt, 'blueprints', 'new', 'z3', '--commit', 'spec', '--folder', 'z3'));
+  assert.ok(existsSync(join(shop, '.walkdown', 'blueprints', 'z3', '.gitignore')));
+  assert.match(made.stdout, /tracked: the spec and its threads/);
+  assert.doesNotMatch(made.stdout, /tracked: everything/);
+});
+
+test('blank lines the person put after the block at the end of the file are theirs @rule:locations.pointer.owns-only-its-block', () => {
+  const m = machine();
+  const repo = m.repo('pt2');
+  const claude = join(repo, 'CLAUDE.md');
+  writeFileSync(claude, '# Ours\n\nabove.\n');
+  ok(m.cli(repo, 'blueprints', 'new', 'a', '--commit', 'spec', '--folder', 'a'));
+  writeFileSync(claude, `${readFileSync(claude, 'utf8')}\n\n`);
+  const before = readFileSync(claude, 'utf8');
+  ok(m.cli(repo, 'blueprints', 'commit', 'none', '--blueprint', 'a'));
+  assert.equal(readFileSync(claude, 'utf8'), before.replace(/<!-- walkdown:begin -->[\s\S]*<!-- walkdown:end -->\n/, ''));
+});
+
+test('a moved checkout whose blueprints are all kept on this machine keeps their IDs on import @rule:locations.registry.ids-stay-here', () => {
+  const m = machine();
+  const shop = m.repo('shop');
+  ok(m.cli(shop, 'blueprints', 'new', 'search', '--folder', 'search'));
+  const before = m.rows();
+  const moved = join(root, `m${n}`, 'elsewhere', 'shop');
+  mkdirSync(join(moved, '..'), { recursive: true });
+  renameSync(shop, moved);
+  const r = ok(m.cli(moved, 'blueprints', 'import', moved));
+  assert.match(r.stdout, new RegExp(`~ moved .*\`${before[0].id}\``));
+  const after_ = m.rows();
+  assert.equal(after_[0].id, before[0].id);
+  assert.equal(after_[0].checkout.replace(/^~/, process.env.HOME), moved);
+  assert.equal(after_[0].home, before[0].home);
+  ok(m.cli(moved, 'status'));
 });
