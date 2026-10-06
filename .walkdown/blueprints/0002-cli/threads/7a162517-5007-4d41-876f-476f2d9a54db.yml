@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T20:36:35.359Z
 anchor:
   rule: locations.answer.declared-not-discovered
-status: addressed
+status: settled
 body: "Found while drawing its screen: status, run in a repository whose only
   home this machine never imported, refused with No blueprint here and did not
   name the folder, though where did. The rule says the answer names the folder
@@ -19,3 +19,8 @@ replies:
       blueprints import, so status names the folder and the command, from the
       repository or from inside the home. where says walkdown blueprints new or
       walkdown blueprints import. The status-unimported screen checks it.
+  - author: agent
+    via: verdict
+    created: 2026-10-06T20:51:42Z
+    body: Settled by the agent's pass on locations.answer.declared-not-discovered
+      (2026-10-06T20-51-42Z-local-01).

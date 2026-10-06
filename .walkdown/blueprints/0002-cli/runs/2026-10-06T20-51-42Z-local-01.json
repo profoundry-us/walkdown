@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-10-06T20-51-42Z-local-01",
+  "created": "2026-10-06T20:51:42Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "e2951af-dirty",
+  "note": "Agent-tier re-judgment of locations.answer.declared-not-discovered (cli) at e2951af-dirty, after n-0435 and n-0436 were addressed in lib/locations.js (checkoutFor, unimported() in registryPick). Driven headless in fresh mktemp trees with scratch WALKDOWN_HOMEs and real git repos.",
+  "spec_hash": "sha256:66a604ba66d8",
+  "results": [
+    {
+      "rule": "locations.answer.declared-not-discovered",
+      "status": "pass",
+      "statement_hash": "sha256:e6a814857fe7",
+      "evidence": [
+        "runs/evidence/2026-10-06T20-50-39Z/declared-not-discovered.txt"
+      ],
+      "reasoning": "Both findings re-driven exactly now hold. n-0435: standing in an unimported home inside a separate repo nested in a registered checkout, status, where and threads new all refuse, name ~/store/vendor/pack/.walkdown/blueprints/202610-pack and its import, and file nothing in checkout's ledger. Even naming a checkout rule no longer lands a thread there. n-0436: --blueprint by spec name (orders, search) or by folder, with a registry or with none at all, now names the folder and the import in status, the full where and threads new. The given holds in full. Two registered homes in one repo each answer with their own runs and threads, from inside and by folder, id or spec name. The third answers for nothing, and where names the registry row and how it got there. The break attempts hold too. A submodule with an unimported home is refused and points to its import. A registered nested repo answers for itself and never as the outer one, in either direction. A .claude/worktrees/x worktree still answers as its checkout, and a home that exists only on that worktree's branch is named as unimported. A spec name held by both a registered home and an unregistered copy picks the registered one, and the copy stays refused by folder and from inside. The same name registered in another checkout is not borrowed: shop names its own unimported home. Outside the THEN lines: from outside every checkout, `where spec --blueprint checkout` prints an empty line and exits 1 with no reason, while the full where gives the reason. `where spec --blueprint orders` for an unimported home does the same. A nested repo or submodule with no home now refuses with 'nothing registered contains this directory', though it sits inside a registered checkout's folder. That is consistent with the rule, but the wording is not quite true and it changes behaviour."
+    }
+  ]
+}

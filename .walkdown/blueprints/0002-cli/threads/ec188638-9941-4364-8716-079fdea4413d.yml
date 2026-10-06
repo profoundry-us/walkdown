@@ -1,0 +1,29 @@
+id: n-0436
+uuid: ec188638-9941-4364-8716-079fdea4413d
+kind: note
+reason: observation
+author: agent
+created: 2026-10-06T20:42:44.381Z
+anchor:
+  rule: locations.answer.declared-not-discovered
+status: settled
+body: "Naming an unimported home with --blueprint gives the generic refusal 'No
+  blueprint for … — either nothing registered it, or its spec is gone.', with no
+  folder and no import. It does this when the home is named by its spec name
+  (--blueprint orders), and with no registry at all by either the folder name or
+  the spec name (--blueprint 202610-search / search). The checkout holds the
+  home, and only the folder name with a registry present names it. The same goes
+  for where and threads new. Evidence:
+  runs/evidence/2026-10-06T20-39-55Z/declared-not-discovered.txt (P2, P4)."
+replies:
+  - author: agent
+    created: 2026-10-06T20:46:02Z
+    body: "Fixed: with no registered checkout, the unimported homes are read from
+      the repository standing here, and a home is matched by the name its
+      spec.yml declares as well as by its folder. status, where and threads new
+      name it either way. Test in test/judged-edges.test.js."
+  - author: agent
+    via: verdict
+    created: 2026-10-06T20:51:42Z
+    body: Settled by the agent's pass on locations.answer.declared-not-discovered
+      (2026-10-06T20-51-42Z-local-01).

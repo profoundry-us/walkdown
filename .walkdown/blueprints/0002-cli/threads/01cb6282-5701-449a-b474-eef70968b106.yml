@@ -1,0 +1,15 @@
+id: n-0438
+uuid: 01cb6282-5701-449a-b474-eef70968b106
+kind: note
+reason: observation
+author: agent
+created: 2026-10-06T20:51:43.321Z
+anchor:
+  rule: locations.answer.declared-not-discovered
+status: open
+body: "Since n-0435, a separate repository inside a registered checkout's folder
+  (its own git init, or a submodule) with no home of its own refuses with
+  'nothing registered contains this directory'. Refusing is right, but the
+  sentence reads false standing inside a registered checkout's folder. It could
+  say the directory is a repository of its own inside that checkout. Evidence:
+  runs/evidence/2026-10-06T20-50-39Z/declared-not-discovered.txt"

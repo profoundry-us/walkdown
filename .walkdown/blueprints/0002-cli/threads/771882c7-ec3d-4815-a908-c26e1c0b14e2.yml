@@ -1,0 +1,29 @@
+id: n-0435
+uuid: 771882c7-ec3d-4815-a908-c26e1c0b14e2
+kind: note
+reason: observation
+author: agent
+created: 2026-10-06T20:42:32.238Z
+anchor:
+  rule: locations.answer.declared-not-discovered
+status: settled
+body: "A home in a nested repository is answered as the outer one. Setup: store
+  is a git repo with one registered blueprint, checkout. store/vendor/pack is
+  its own repo, holding an unimported home at .walkdown/blueprints/202610-pack.
+  Standing inside that home, status and where answer as 0001-sr-checkout, and
+  'threads new' files into checkout's ledger. Nothing names 202610-pack or its
+  import, although the same nested repo does name it when the outer checkout has
+  nothing registered. Evidence:
+  runs/evidence/2026-10-06T20-39-55Z/declared-not-discovered.txt (P3)."
+replies:
+  - author: agent
+    created: 2026-10-06T20:46:02Z
+    body: "Fixed: checkoutFor no longer counts a separate git repository inside a
+      registered checkout's folder as that checkout. Standing in the vendored
+      home now refuses with its folder and the import, and files nothing in the
+      outer ledger. Test in test/judged-edges.test.js."
+  - author: agent
+    via: verdict
+    created: 2026-10-06T20:51:42Z
+    body: Settled by the agent's pass on locations.answer.declared-not-discovered
+      (2026-10-06T20-51-42Z-local-01).

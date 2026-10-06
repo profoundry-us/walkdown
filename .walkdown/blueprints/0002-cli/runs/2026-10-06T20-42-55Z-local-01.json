@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-10-06T20-42-55Z-local-01",
+  "created": "2026-10-06T20:42:55Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "e2951af-dirty",
+  "note": "Agent-tier judgment of locations.answer.declared-not-discovered at HEAD e2951af, after n-0434.",
+  "spec_hash": "sha256:66a604ba66d8",
+  "results": [
+    {
+      "rule": "locations.answer.declared-not-discovered",
+      "status": "fail",
+      "statement_hash": "sha256:e6a814857fe7",
+      "evidence": [
+        "runs/evidence/2026-10-06T20-39-55Z/declared-not-discovered.txt"
+      ],
+      "reasoning": "Driven in fresh scratch trees with real git repos. The n-0434 case holds. In a repository whose only home was never imported, status, threads new and lint refuse from the repository root, from inside the home and from its features folder. Each refusal names ~/shop, the folder 202610-search and `walkdown blueprints import ~/shop`. where says the same, and offers `walkdown blueprints new` or `walkdown blueprints import`, never the bare `walkdown import`. The given holds too. With two registered homes and a third committed beside them, each registered home answers for itself from inside it with its own threads: n-0001 in checkout and n-0002 in billing, each file in its own threads folder. where names the registry row and says `registered by blueprints new`. Standing inside the unregistered home refuses status, threads, threads new and lint, and the refusal names the folder and its import. A registered blueprint named outright by id or by name answers, even from inside the other home. The import that the refusal names registers the home, and the home then answers. THEN 2 breaks in two places. (1) A nested git repository at store/vendor/pack holds its own unimported home, inside a checkout with one registered blueprint. Standing inside that home, status and where answer as 0001-sr-checkout, and where code says ~/store. threads new --rule checkout.basics.works files n-0001 into the checkout ledger, and nothing names 202610-pack or its import. The same nested repository inside a checkout with nothing registered does name it (P5), so a registered outer checkout hides the inner home. (2) An unimported home named outright with --blueprint is named only when the folder name is given and a registry exists (status --blueprint orphan-orders). In two other cases the refusal says `either nothing registered it, or its spec is gone` and names neither the folder nor the import, although the checkout holds the home. The first case is naming the home by its spec name (--blueprint orders). The second is naming it by either name on a machine with no registry: the n-0434 fixture with --blueprint 202610-search or --blueprint search. A smaller defect lies outside the THEN lines. When a registered blueprint is named by its name from outside its checkout, where spec --blueprint prints an empty line and exits 1 with no reason, while the same command with its id works.",
+      "threads": [
+        "771882c7-ec3d-4815-a908-c26e1c0b14e2",
+        "ec188638-9941-4364-8716-079fdea4413d"
+      ]
+    }
+  ]
+}

@@ -90,6 +90,50 @@ test('an unimported home standing in a partly imported checkout is named, with t
   assert.match(m.cli(join(repo, '.walkdown', 'blueprints', '202610-one'), 'where').stdout, /0001-rp-one/);
 });
 
+test('a repository of its own inside a registered checkout is not that checkout (n-0435) @rule:locations.answer.declared-not-discovered', () => {
+  const m = machine();
+  const store = m.repo('store');
+  git(store, 'commit', '-q', '--allow-empty', '-m', 'i');
+  ok(m.cli(store, 'blueprints', 'new', 'checkout', '--commit', 'spec', '--folder', 'checkout'));
+  const pack = join(store, 'vendor', 'pack');
+  mkdirSync(pack, { recursive: true });
+  git(pack, 'init', '-q');
+  const home = join(pack, '.walkdown', 'blueprints', '202610-pack');
+  mkdirSync(home, { recursive: true });
+  writeFileSync(join(home, 'spec.yml'), 'blueprint: pack\n');
+
+  const status = m.cli(home, 'status');
+  assert.equal(status.status, 2, status.stdout);
+  assert.match(status.stderr, /202610-pack is a blueprint this machine has not imported — `walkdown blueprints import /);
+  const filed = m.cli(home, 'threads', 'new', '--rule', 'checkout.basics.works', '--body', 'x');
+  assert.equal(filed.status, 2, 'nothing is filed in the outer blueprint\'s ledger');
+  assert.ok(!existsSync(join(store, '.walkdown', 'blueprints', 'checkout', 'threads')) || !readdirSync(join(store, '.walkdown', 'blueprints', 'checkout', 'threads')).length);
+  // The outer checkout still answers for itself.
+  assert.match(m.cli(store, 'where').stdout, /0001-st-checkout|checkout/);
+});
+
+test('an unimported home named outright is named, by folder or spec name, with or without a registry (n-0436) @rule:locations.answer.declared-not-discovered', () => {
+  const m = machine();
+  const shop = m.repo('shop');
+  const home = join(shop, '.walkdown', 'blueprints', '202610-search');
+  mkdirSync(home, { recursive: true });
+  writeFileSync(join(home, 'spec.yml'), 'blueprint: search\n');
+  for (const name of ['202610-search', 'search']) {
+    const r = m.cli(shop, 'status', '--blueprint', name);
+    assert.equal(r.status, 2);
+    assert.match(r.stderr, /202610-search is a blueprint this machine has not imported — `walkdown blueprints import /, name);
+  }
+  // A spec name that is not the folder's, with a registry present.
+  const orders = join(shop, '.walkdown', 'blueprints', 'orphan-orders');
+  mkdirSync(orders, { recursive: true });
+  writeFileSync(join(orders, 'spec.yml'), 'blueprint: orders\n');
+  ok(m.cli(shop, 'blueprints', 'import', shop, '--only', '202610-search'));
+  for (const args of [['status'], ['where'], ['threads', 'new', '--rule', 'a.b.c', '--body', 'x']]) {
+    const r = m.cli(shop, ...args, '--blueprint', 'orders');
+    assert.match(r.stdout + r.stderr, /orphan-orders is a blueprint this machine has not imported/, args[0]);
+  }
+});
+
 test('a draft saved in a home committed whole stays committed @rule:locations.default.in-repo-on-request', async () => {
   const m = machine();
   const repo = m.repo('all');
