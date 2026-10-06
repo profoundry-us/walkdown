@@ -50,7 +50,7 @@ function move(args) {
     console.error(
       red(
         holders.length
-          ? `\`${what.join(' ')}\` is in ${holders.map((b) => `\`${b.id}\``).join(' and ')} — \`--blueprint <from>\` says which to move it out of.`
+          ? `\`${what.join(' ')}\` is in ${holders.map((b) => `\`${b.id}\``).join(' and ')} — choose the one to move it out of with \`--blueprint <from>\` (e.g. \`--blueprint ${holders[0].id}\`).`
           : `No one blueprint in this project holds all of ${what.map((w) => `\`${w}\``).join(', ')}.`,
       ),
     );

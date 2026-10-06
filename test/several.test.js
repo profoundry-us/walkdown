@@ -181,7 +181,7 @@ test('writes refuse until --blueprint names one, and the refusal lists the ids @
     const r = m.wd(cmd);
     assert.equal(r.status, 2, `${cmd[0]} exits 2`);
     assert.match(r.stderr, /Several blueprints are registered for .*: proj, b\./, `${cmd[0]} names them`);
-    assert.match(r.stderr, /`--blueprint <id>` says which/);
+    assert.match(r.stderr, /Choose one with `--blueprint <id>` \(e\.g\. `--blueprint \w+`\)/);
     assert.doesNotMatch(r.stderr, /No blueprint here/);
   }
 

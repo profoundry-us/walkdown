@@ -8,6 +8,6 @@ exit: 2
 expect:
   - 'Several blueprints are registered'
   - 'checkout, search'
-  - '--blueprint <id>'
+  - '^Choose one with `--blueprint <id>` \(e\.g\. `--blueprint checkout`\)\.$'
 anchors:
-  - { id: cli.refusal, match: '^(Several blueprints|This command acts)' }
+  - { id: cli.refusal, match: '^(Several blueprints|Choose one)' }

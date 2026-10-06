@@ -118,7 +118,7 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
         console.error(
           dim(
             verb === 'commit'
-              ? '  `--blueprint <id>` says which one to move.'
+              ? `  Choose one with \`--blueprint <id>\` (e.g. \`--blueprint ${ids[0]}\`).`
               : '  `walkdown blueprints new <id>` names a new one.',
           ),
         );
@@ -126,7 +126,7 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
       }
       if (values.commit) {
         console.error(red(`This project holds several blueprints (${ids.join(', ')}); \`blueprints commit\` moves one.`));
-        console.error(dim('  `--blueprint <id>` says which.'));
+        console.error(dim(`  Choose one with \`--blueprint <id>\` (e.g. \`--blueprint ${ids[0]}\`).`));
         return process.exit(2);
       }
     }

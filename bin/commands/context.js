@@ -71,7 +71,7 @@ export function severalHere(loc) {
   const ids = loc.config.registry.candidates;
   const project = loc.code?.path ? ` for ${tilde(loc.code.path)}` : '';
   console.error(`Several blueprints are registered${project}: ${ids.join(', ')}.`);
-  console.error(`This command acts on one — \`--blueprint <id>\` says which (e.g. \`--blueprint ${ids[0]}\`).`);
+  console.error(`Choose one with \`--blueprint <id>\` (e.g. \`--blueprint ${ids[0]}\`).`);
   process.exit(2);
 }
 

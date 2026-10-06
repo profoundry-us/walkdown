@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-10-06T00-21-13Z-local-01",
+  "created": "2026-10-06T00:21:13Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "d118b52-dirty",
+  "note": "locations.several.writes-name-one after n-0356's rewording of the refusal (Topher, 2026-10-05).",
+  "spec_hash": "sha256:3a9fed05d6cc",
+  "results": [
+    {
+      "rule": "locations.several.writes-name-one",
+      "status": "pass",
+      "statement_hash": "sha256:f0c27cd71949",
+      "evidence": [
+        "runs/evidence/2026-10-06T00-21-00Z/writes-name-one.txt",
+        "runs/evidence/2026-10-06T00-21-00Z/steps/writes-name-one.zsh",
+        "runs/evidence/2026-10-06T00-21-00Z/drive.sh"
+      ],
+      "reasoning": "On a throwaway machine, project shop held blueprints a and b. `sweep`, `hash --write`, `threads new` and `records move`, each run with no --blueprint, exited 2. Each said 'Several blueprints are registered for ~/shop: a, b.' and then, in n-0356's words, 'Choose one with `--blueprint <id>` (e.g. `--blueprint a`).' The example names a real blueprint of the project. `blueprints commit spec` refused the same way. The same sweep with --blueprint b acted on b alone and wrote its marker into b's runs. The rule's own wording did not change; only the refusal's sentence, and the sibling refusals in `blueprints new`, `rules move` and `where` now say it the same way.",
+      "threads": []
+    }
+  ]
+}
