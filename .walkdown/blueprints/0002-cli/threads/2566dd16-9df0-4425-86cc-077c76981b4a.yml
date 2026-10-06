@@ -1,0 +1,16 @@
+id: n-0424
+uuid: 2566dd16-9df0-4425-86cc-077c76981b4a
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T20:28:21.326Z
+anchor:
+  screen: gitignore-commit-spec
+status: open
+body: "Draw the .gitignore that walkdown blueprints commit spec writes into a
+  home, as cat prints it (locations.default.in-repo-on-request): the comment
+  saying what is committed and why the rest is not, how to change the choice,
+  then runs/, evidence/ and drafts/. Anchors: cli.prompt, cli.gitignore.why,
+  cli.gitignore.rules, cli.exit. as-built/cli/gitignore-commit-spec.html is the
+  build, from test/cli/scenarios/gitignore-commit-spec.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

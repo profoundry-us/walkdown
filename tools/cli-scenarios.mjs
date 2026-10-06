@@ -185,6 +185,11 @@ export const FIXTURES = {
     mkdirSync(join(home, 'drafts'), { recursive: true });
     writeFileSync(join(home, 'drafts', 'local.json'), '{}\n');
   },
+  /* `checkout`, committed with `--commit spec` at .walkdown/blueprints/checkout. */
+  'committed-spec'(m) {
+    realRepo(m);
+    m.ok(['blueprints', 'new', 'checkout', '--commit', 'spec', '--folder', 'checkout']);
+  },
   /* `shop` a real git repository with an origin, and one commit. */
   'git-repo'(m) {
     realRepo(m);
@@ -323,6 +328,11 @@ export function run(scenario) {
     for (const name of [scenario.fixture ?? []].flat()) {
       if (!FIXTURES[name]) throw new Error(`${scenario.file}: no fixture "${name}"`);
       FIXTURES[name](m);
+    }
+    // A file printed as `cat` prints it, where a screen is about what one says.
+    if (scenario.cat) {
+      const text = steady(readFileSync(join(m.root, scenario.cat), 'utf8'), m);
+      return { status: 0, stdout: text, stderr: '', text: text.replace(/\n+$/, '') };
     }
     // A folder drawn as `tree` draws it, where a screen is about a layout.
     if (scenario.tree) {

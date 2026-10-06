@@ -1,0 +1,15 @@
+# The .gitignore `blueprints commit spec` writes into the home: the choice,
+# where anyone can read it, and how to change it.
+screen: gitignore-commit-spec
+title: A committed spec's own .gitignore says what stays out
+rule: locations.default.in-repo-on-request
+fixture: committed-spec
+cat: shop/.walkdown/blueprints/checkout/.gitignore
+exit: 0
+expect:
+  - '^# This blueprint''s commit choice: the spec and its conversations are committed;$'
+  - '^# Delete this file to commit everything\. `walkdown blueprints commit spec` writes$'
+  - '^runs/\nevidence/\ndrafts/$'
+anchors:
+  - { id: cli.gitignore.why, match: '^# ' }
+  - { id: cli.gitignore.rules, match: '^(runs|evidence|drafts)/$' }

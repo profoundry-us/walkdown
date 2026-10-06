@@ -308,3 +308,13 @@ screens:
       - cli.home.tree
       - cli.home.count
       - cli.exit
+
+  - id: gitignore-commit-spec
+    title: A committed spec's own .gitignore says what stays out
+    prototype: null
+    app: { path: /as-built/cli/gitignore-commit-spec.html }
+    anchors:
+      - cli.prompt
+      - cli.gitignore.why
+      - cli.gitignore.rules
+      - cli.exit

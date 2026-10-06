@@ -47,6 +47,7 @@ stories:
         statement: A blueprint stays out of version control unless asked. Asking is one choice for the spec and its threads, and another for everything, made per blueprint and visible in that blueprint's own `.gitignore`.
         because: The tree is the only place the answer cannot drift from the truth, and the command reports what git actually holds rather than what walkdown meant to arrange.
         verify: [checks]
+        screens: [gitignore-commit-spec]
         signoff: [eng, product]
         steps:
           given:

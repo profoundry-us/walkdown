@@ -69,9 +69,13 @@ const AS_BUILT_CSS = `
 const esc = (s) => s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 const shellWord = (w) => (/^[\w./:@=+-]+$/.test(w) ? w : `"${w.replaceAll('"', '\\"')}"`);
 
-/* What is typed at the prompt: the walkdown command, or `tree` for a screen that draws a folder. */
+/* What is typed at the prompt: the walkdown command, or `tree` or `cat` for a screen that shows a folder or a file. */
 const typed = (scenario) =>
-  scenario.tree ? `tree -a ${scenario.tree.replace(/^shop\//, '')}` : `walkdown ${scenario.command.map(shellWord).join(' ')}`;
+  scenario.cat
+    ? `cat ${scenario.cat.replace(/^shop\//, '')}`
+    : scenario.tree
+      ? `tree -a ${scenario.tree.replace(/^shop\//, '')}`
+      : `walkdown ${scenario.command.map(shellWord).join(' ')}`;
 
 /** The terminal's body: prompt, the output with its anchors, the exit code. */
 function terminal(scenario, out) {
